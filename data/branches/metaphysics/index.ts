@@ -1,13 +1,14 @@
 import type { Branch } from '@/data/types';
+import beingAndNonBeingPath from './paths/being-and-non-being';
 
 const metaphysicsBranch: Branch = {
   id: 'metaphysics',
   slug: 'metaphysics',
   name: 'Metaphysics',
-  description: 'Study of reality, existence, and the nature of being.',
+  description: 'Study of existence, reality, and the fundamental nature of being.',
   icon: '🌌',
-  color: '#4A9D7B',
-  paths: [],
+  color: '#6B4A9D',
+  paths: [beingAndNonBeingPath],
 };
 
 export default metaphysicsBranch;
