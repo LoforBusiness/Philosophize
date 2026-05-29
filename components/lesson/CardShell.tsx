@@ -1,7 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/Colors';
 
 interface Props {
   progress: number;
@@ -13,19 +12,31 @@ interface Props {
 
 export default function CardShell({ cardCount, currentIndex, onExit, children }: Props) {
   return (
-    <SafeAreaView className="flex-1 bg-midnight">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFAF7' }}>
       {/* Progress bar + exit */}
-      <View className="flex-row items-center gap-2 px-4 pt-2 pb-4">
-        <Pressable onPress={onExit} className="p-1 active:opacity-60">
-          <Ionicons name="close" size={24} color={Colors.gray500} />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 16,
+          paddingTop: 8,
+          paddingBottom: 12,
+          gap: 10,
+        }}
+      >
+        <Pressable onPress={onExit} style={{ padding: 4, opacity: 1 }} hitSlop={8}>
+          <Ionicons name="close" size={22} color="#6B6B6B" />
         </Pressable>
-        <View className="flex-1 flex-row gap-1">
+
+        <View style={{ flex: 1, flexDirection: 'row', gap: 3 }}>
           {Array.from({ length: cardCount }).map((_, i) => (
             <View
               key={i}
-              className="h-1.5 rounded-full flex-1"
               style={{
-                backgroundColor: i <= currentIndex ? Colors.gold : Colors.navyLight,
+                flex: 1,
+                height: 4,
+                borderRadius: 2,
+                backgroundColor: i <= currentIndex ? '#1A1A1A' : '#E8E8E3',
               }}
             />
           ))}
@@ -33,7 +44,7 @@ export default function CardShell({ cardCount, currentIndex, onExit, children }:
       </View>
 
       {/* Card content */}
-      <View className="flex-1">{children}</View>
+      <View style={{ flex: 1, backgroundColor: '#FAFAF7' }}>{children}</View>
     </SafeAreaView>
   );
 }

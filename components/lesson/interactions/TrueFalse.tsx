@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import type { TrueFalseInteraction } from '@/data/types';
-import { Colors } from '@/constants/Colors';
 import CorrectFeedback from '../feedback/CorrectFeedback';
 import IncorrectFeedback from '../feedback/IncorrectFeedback';
 
@@ -23,25 +22,87 @@ export default function TrueFalse({ interaction, xpValue, onComplete }: Props) {
     setAnswered(true);
   }
 
-  function buttonStyle(value: boolean) {
-    if (!answered) return { backgroundColor: Colors.navy, borderColor: Colors.navyLight };
-    if (value === interaction.answer) return { backgroundColor: Colors.sage + '33', borderColor: Colors.sage };
-    if (value === selected) return { backgroundColor: Colors.crimson + '33', borderColor: Colors.crimson };
-    return { backgroundColor: Colors.navy, borderColor: Colors.navyLight, opacity: 0.5 };
+  function buttonStyle(value: boolean): object {
+    if (!answered) {
+      return {
+        flex: 1,
+        height: 140,
+        borderWidth: 2,
+        borderColor: '#E8E8E3',
+        borderRadius: 14,
+        backgroundColor: '#FAFAF7',
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+      };
+    }
+    if (value === interaction.answer) {
+      return {
+        flex: 1,
+        height: 140,
+        borderWidth: 2,
+        borderColor: '#3D7A55',
+        borderRadius: 14,
+        backgroundColor: '#EAF3EE',
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+      };
+    }
+    if (value === selected) {
+      return {
+        flex: 1,
+        height: 140,
+        borderWidth: 2,
+        borderColor: '#A83232',
+        borderRadius: 14,
+        backgroundColor: '#F7EAEA',
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+      };
+    }
+    // The other option — dimmed
+    return {
+      flex: 1,
+      height: 140,
+      borderWidth: 2,
+      borderColor: '#E8E8E3',
+      borderRadius: 14,
+      backgroundColor: '#FAFAF7',
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      opacity: 0.4,
+    };
   }
 
   return (
-    <View className="flex-1">
-      <View className="flex-1 px-5 pt-4 flex-row gap-4">
-        {[true, false].map((val) => (
+    <View style={{ flex: 1 }}>
+      <View
+        style={{
+          flex: 1,
+          paddingHorizontal: 20,
+          paddingTop: 16,
+          flexDirection: 'row',
+          gap: 12,
+        }}
+      >
+        {([true, false] as const).map((val) => (
           <Pressable
             key={String(val)}
             onPress={() => handleSelect(val)}
-            className="flex-1 rounded-2xl border py-8 items-center active:opacity-80"
-            style={buttonStyle(val)}
+            style={({ pressed }) => ({
+              ...buttonStyle(val),
+              opacity:
+                pressed && !answered
+                  ? 0.7
+                  : (buttonStyle(val) as any).opacity ?? 1,
+            })}
           >
-            <Text className="text-4xl mb-3">{val ? '✅' : '❌'}</Text>
-            <Text style={{ fontFamily: 'Inter_700Bold' }} className="text-parchment text-lg">
+            <Text
+              style={{
+                fontFamily: 'Caveat_700Bold',
+                fontSize: 28,
+                color: '#1A1A1A',
+              }}
+            >
               {val ? 'True' : 'False'}
             </Text>
           </Pressable>

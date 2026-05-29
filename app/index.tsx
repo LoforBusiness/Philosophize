@@ -1,52 +1,107 @@
 import { View, Text, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/Colors';
 
 export default function LandingScreen() {
   return (
-    <LinearGradient
-      colors={[Colors.midnight, Colors.navy]}
-      className="flex-1 items-center justify-center px-8"
-    >
-      <Text className="text-gold text-6xl mb-4">∞</Text>
-      <Text
-        style={{ fontFamily: 'PlayfairDisplay_700Bold' }}
-        className="text-parchment text-4xl text-center mb-3"
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.paper }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingHorizontal: 32,
+        }}
       >
-        Philosophize
-      </Text>
-      <Text
-        style={{ fontFamily: 'Inter_400Regular' }}
-        className="text-gray-300 text-lg text-center mb-16 leading-7"
-      >
-        Philosophy doesn't have to be hard.{'\n'}
-        Learn to think better — 5 minutes at a time.
-      </Text>
-
-      <Pressable
-        onPress={() => router.push('/(auth)/signup')}
-        className="bg-gold w-full py-4 rounded-2xl items-center mb-4 active:opacity-80"
-      >
+        {/* Infinity symbol */}
         <Text
-          style={{ fontFamily: 'Inter_700Bold' }}
-          className="text-midnight text-lg"
+          style={{
+            fontSize: 72,
+            color: Colors.ink,
+            marginBottom: 8,
+            lineHeight: 84,
+          }}
         >
-          Get Started
+          ∞
         </Text>
-      </Pressable>
 
-      <Pressable
-        onPress={() => router.push('/(auth)/login')}
-        className="border border-gold w-full py-4 rounded-2xl items-center active:opacity-80"
-      >
+        {/* App name */}
         <Text
-          style={{ fontFamily: 'Inter_500Medium' }}
-          className="text-gold text-lg"
+          style={{
+            fontFamily: 'Caveat_700Bold',
+            fontSize: 52,
+            color: Colors.ink,
+            textAlign: 'center',
+            marginBottom: 16,
+          }}
         >
-          I already have an account
+          Philosophize
         </Text>
-      </Pressable>
-    </LinearGradient>
+
+        {/* Tagline */}
+        <Text
+          style={{
+            fontFamily: 'Inter_400Regular',
+            fontSize: 16,
+            color: Colors.inkSoft,
+            textAlign: 'center',
+            lineHeight: 24,
+            marginBottom: 64,
+          }}
+        >
+          Philosophy doesn't have to be hard.{'\n'}
+          Learn to think better — 5 minutes at a time.
+        </Text>
+
+        {/* Get Started button */}
+        <Pressable
+          onPress={() => router.push('/(auth)/signup')}
+          style={({ pressed }) => ({
+            backgroundColor: Colors.ink,
+            borderRadius: 14,
+            paddingVertical: 18,
+            width: '100%',
+            alignItems: 'center',
+            marginBottom: 16,
+            opacity: pressed ? 0.75 : 1,
+          })}
+        >
+          <Text
+            style={{
+              fontFamily: 'Inter_700Bold',
+              fontSize: 18,
+              color: Colors.paper,
+            }}
+          >
+            Get Started
+          </Text>
+        </Pressable>
+
+        {/* Sign In button */}
+        <Pressable
+          onPress={() => router.push('/(auth)/login')}
+          style={({ pressed }) => ({
+            borderWidth: 2,
+            borderColor: Colors.ink,
+            borderRadius: 14,
+            paddingVertical: 18,
+            width: '100%',
+            alignItems: 'center',
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <Text
+            style={{
+              fontFamily: 'Inter_500Medium',
+              fontSize: 18,
+              color: Colors.ink,
+            }}
+          >
+            Sign In
+          </Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }

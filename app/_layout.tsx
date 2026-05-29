@@ -8,6 +8,10 @@ import {
   PlayfairDisplay_400Regular,
   PlayfairDisplay_700Bold,
 } from '@expo-google-fonts/playfair-display';
+import {
+  Caveat_400Regular,
+  Caveat_700Bold,
+} from '@expo-google-fonts/caveat';
 import { useFonts } from 'expo-font';
 import { Stack, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -28,6 +32,8 @@ export default function RootLayout() {
     Inter_700Bold,
     PlayfairDisplay_400Regular,
     PlayfairDisplay_700Bold,
+    Caveat_400Regular,
+    Caveat_700Bold,
   });
   const [authChecked, setAuthChecked] = useState(false);
 
@@ -54,8 +60,8 @@ export default function RootLayout() {
 
   if (!fontsLoaded) {
     return (
-      <View className="flex-1 bg-midnight items-center justify-center">
-        <ActivityIndicator color="#C9A84C" />
+      <View className="flex-1 bg-paper items-center justify-center">
+        <ActivityIndicator color="#1A1A1A" />
       </View>
     );
   }

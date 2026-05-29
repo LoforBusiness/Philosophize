@@ -1,6 +1,5 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/Colors';
 
 export default function AppLayout() {
   return (
@@ -8,14 +7,14 @@ export default function AppLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: Colors.midnight,
-          borderTopColor: Colors.navy,
+          backgroundColor: '#FAFAF7',
+          borderTopColor: '#E8E8E3',
           borderTopWidth: 1,
-          height: 60,
-          paddingBottom: 8,
+          height: 64,
+          paddingBottom: 10,
         },
-        tabBarActiveTintColor: Colors.gold,
-        tabBarInactiveTintColor: Colors.gray500,
+        tabBarActiveTintColor: '#1A1A1A',
+        tabBarInactiveTintColor: '#AAAAAA',
         tabBarLabelStyle: { fontFamily: 'Inter_500Medium', fontSize: 11 },
       }}
     >
@@ -24,7 +23,7 @@ export default function AppLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
       />
@@ -33,7 +32,7 @@ export default function AppLayout() {
         options={{
           title: 'Branches',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="git-branch" size={size} color={color} />
+            <Ionicons name="git-branch-outline" size={size} color={color} />
           ),
         }}
       />
@@ -42,7 +41,7 @@ export default function AppLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+            <Ionicons name="person-outline" size={size} color={color} />
           ),
         }}
       />

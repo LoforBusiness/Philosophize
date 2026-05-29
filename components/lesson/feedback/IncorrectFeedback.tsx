@@ -1,6 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
 import { MotiView } from 'moti';
-import { Colors } from '@/constants/Colors';
 
 interface Props {
   explanation: string;
@@ -18,28 +17,77 @@ export default function IncorrectFeedback({ explanation, onContinue }: Props) {
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: Colors.crimson,
+        backgroundColor: '#F7EAEA',
+        borderTopWidth: 2,
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
+        borderColor: '#A83232',
         padding: 24,
         paddingBottom: 40,
       }}
     >
-      <View className="flex-row items-center gap-3 mb-3">
-        <Text className="text-3xl">❌</Text>
-        <Text style={{ fontFamily: 'Inter_700Bold' }} className="text-white text-lg">
+      {/* Header row */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 10,
+          marginBottom: 8,
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: 'Caveat_700Bold',
+            fontSize: 32,
+            color: '#A83232',
+            lineHeight: 36,
+          }}
+        >
+          ✗
+        </Text>
+        <Text
+          style={{
+            fontFamily: 'Inter_700Bold',
+            fontSize: 20,
+            color: '#1A1A1A',
+          }}
+        >
           Not quite.
         </Text>
       </View>
-      <Text style={{ fontFamily: 'Inter_400Regular' }} className="text-white text-base leading-6 mb-5">
+
+      {/* Explanation */}
+      <Text
+        style={{
+          fontFamily: 'Inter_400Regular',
+          fontSize: 16,
+          color: '#1A1A1A',
+          lineHeight: 24,
+          marginBottom: 20,
+        }}
+      >
         {explanation}
       </Text>
+
+      {/* Continue button */}
       <Pressable
         onPress={onContinue}
-        className="bg-white rounded-2xl py-4 items-center active:opacity-80"
+        style={({ pressed }) => ({
+          backgroundColor: '#1A1A1A',
+          borderRadius: 14,
+          paddingVertical: 16,
+          alignItems: 'center',
+          opacity: pressed ? 0.75 : 1,
+        })}
       >
-        <Text style={{ fontFamily: 'Inter_700Bold' }} className="text-crimson text-lg">
-          Got It →
+        <Text
+          style={{
+            fontFamily: 'Inter_700Bold',
+            fontSize: 17,
+            color: '#FAFAF7',
+          }}
+        >
+          Continue →
         </Text>
       </Pressable>
     </MotiView>

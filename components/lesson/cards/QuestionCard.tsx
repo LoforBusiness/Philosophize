@@ -1,6 +1,5 @@
 import { View, Text } from 'react-native';
 import type { QuestionCard as QuestionCardType, AnswerResult } from '@/data/types';
-import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import MultipleChoice from '../interactions/MultipleChoice';
 import TrueFalse from '../interactions/TrueFalse';
 
@@ -19,22 +18,42 @@ export default function QuestionCard({ card, onComplete }: Props) {
   }
 
   return (
-    <View className="flex-1 bg-midnight">
-      {/* Prompt */}
-      <View className="px-6 pt-4 pb-4">
+    <View style={{ flex: 1, backgroundColor: '#FAFAF7' }}>
+      {/* Question header */}
+      <View style={{ paddingHorizontal: 24, paddingTop: 20, marginBottom: 8 }}>
         <Text
-          style={{ fontFamily: 'Inter_500Medium' }}
-          className="text-gold text-xs uppercase tracking-widest mb-3"
+          style={{
+            fontFamily: 'Inter_500Medium',
+            fontSize: 11,
+            color: '#6B6B6B',
+            textTransform: 'uppercase',
+            letterSpacing: 2,
+            marginBottom: 8,
+          }}
         >
           Question
         </Text>
         <Text
-          style={{ fontFamily: 'PlayfairDisplay_700Bold' }}
-          className="text-parchment text-xl leading-8"
+          style={{
+            fontFamily: 'PlayfairDisplay_700Bold',
+            fontSize: 22,
+            color: '#1A1A1A',
+            lineHeight: 32,
+          }}
         >
           {card.prompt}
         </Text>
       </View>
+
+      {/* Divider */}
+      <View
+        style={{
+          height: 1,
+          backgroundColor: '#E8E8E3',
+          marginTop: 16,
+          marginBottom: 4,
+        }}
+      />
 
       {/* Interaction */}
       {card.interaction.type === 'multiple-choice' && (

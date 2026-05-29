@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import type { MultipleChoiceInteraction } from '@/data/types';
-import { Colors } from '@/constants/Colors';
 import CorrectFeedback from '../feedback/CorrectFeedback';
 import IncorrectFeedback from '../feedback/IncorrectFeedback';
 
@@ -24,26 +23,70 @@ export default function MultipleChoice({ interaction, xpValue, onComplete }: Pro
     setAnswered(true);
   }
 
-  function getOptionStyle(optionId: string) {
-    if (!answered) return { backgroundColor: Colors.navy, borderColor: Colors.navyLight };
-    if (optionId === correctOption?.id) return { backgroundColor: Colors.sage + '33', borderColor: Colors.sage };
-    if (optionId === selectedId) return { backgroundColor: Colors.crimson + '33', borderColor: Colors.crimson };
-    return { backgroundColor: Colors.navy, borderColor: Colors.navyLight, opacity: 0.5 };
+  function getOptionStyle(optionId: string): object {
+    if (!answered) {
+      return {
+        borderWidth: 2,
+        borderColor: '#E8E8E3',
+        borderRadius: 14,
+        backgroundColor: '#FAFAF7',
+        padding: 18,
+        marginBottom: 12,
+      };
+    }
+    if (optionId === correctOption?.id) {
+      return {
+        borderWidth: 2,
+        borderColor: '#3D7A55',
+        borderRadius: 14,
+        backgroundColor: '#EAF3EE',
+        padding: 18,
+        marginBottom: 12,
+      };
+    }
+    if (optionId === selectedId) {
+      return {
+        borderWidth: 2,
+        borderColor: '#A83232',
+        borderRadius: 14,
+        backgroundColor: '#F7EAEA',
+        padding: 18,
+        marginBottom: 12,
+      };
+    }
+    // Other options after answer — dimmed
+    return {
+      borderWidth: 2,
+      borderColor: '#E8E8E3',
+      borderRadius: 14,
+      backgroundColor: '#FAFAF7',
+      padding: 18,
+      marginBottom: 12,
+      opacity: 0.4,
+    };
   }
 
   return (
-    <View className="flex-1">
-      <View className="flex-1 px-5 pt-4">
+    <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 16 }}>
         {interaction.options.map((option) => (
           <Pressable
             key={option.id}
             onPress={() => handleSelect(option.id)}
-            className="rounded-2xl border p-4 mb-3 active:opacity-80"
-            style={getOptionStyle(option.id)}
+            style={({ pressed }) => ({
+              ...getOptionStyle(option.id),
+              opacity:
+                pressed && !answered
+                  ? 0.7
+                  : (getOptionStyle(option.id) as any).opacity ?? 1,
+            })}
           >
             <Text
-              style={{ fontFamily: 'Inter_500Medium' }}
-              className="text-parchment text-base"
+              style={{
+                fontFamily: 'Inter_500Medium',
+                fontSize: 17,
+                color: '#1A1A1A',
+              }}
             >
               {option.text}
             </Text>

@@ -1,9 +1,7 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import type { SummaryCard as SummaryCardType, AnswerResult } from '@/data/types';
 import { useLessonStore } from '@/stores/lessonStore';
-import { Colors } from '@/constants/Colors';
 
 interface Props {
   card: SummaryCardType;
@@ -23,83 +21,201 @@ export default function SummaryCard({ card }: Props) {
   }
 
   return (
-    <LinearGradient
-      colors={[Colors.midnight, Colors.midnightSoft]}
-      className="flex-1 px-6 justify-between pb-8"
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: '#FAFAF7',
+        paddingHorizontal: 24,
+        justifyContent: 'space-between',
+        paddingBottom: 32,
+      }}
     >
-      <View className="flex-1 justify-center items-center">
-        <Text className="text-7xl mb-6">🏅</Text>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        {/* Lesson Complete label */}
         <Text
-          style={{ fontFamily: 'Inter_500Medium' }}
-          className="text-gold text-xs uppercase tracking-widest mb-3"
+          style={{
+            fontFamily: 'Inter_500Medium',
+            fontSize: 11,
+            color: '#6B6B6B',
+            textTransform: 'uppercase',
+            letterSpacing: 2,
+            textAlign: 'center',
+            marginTop: 32,
+            marginBottom: 16,
+          }}
         >
           Lesson Complete
         </Text>
+
+        {/* Title */}
         <Text
-          style={{ fontFamily: 'PlayfairDisplay_700Bold' }}
-          className="text-parchment text-3xl text-center mb-8"
+          style={{
+            fontFamily: 'Caveat_700Bold',
+            fontSize: 36,
+            color: '#1A1A1A',
+            textAlign: 'center',
+            marginBottom: 24,
+          }}
         >
           {card.title}
         </Text>
 
-        {/* XP earned */}
-        <View className="bg-navy rounded-2xl w-full p-5 mb-6">
-          <View className="flex-row justify-between items-center mb-3">
-            <Text style={{ fontFamily: 'Inter_500Medium' }} className="text-gray-300 text-sm">
+        {/* Stats box */}
+        <View
+          style={{
+            borderWidth: 2,
+            borderColor: '#E8E8E3',
+            borderRadius: 14,
+            padding: 20,
+            marginBottom: 20,
+          }}
+        >
+          {/* XP row */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: totalQuestions > 0 ? 12 : 0,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: 'Inter_400Regular',
+                fontSize: 15,
+                color: '#6B6B6B',
+              }}
+            >
               XP Earned
             </Text>
-            <Text style={{ fontFamily: 'Inter_700Bold' }} className="text-gold text-xl">
-              +{xpEarned} ⚡
+            <Text
+              style={{
+                fontFamily: 'Inter_700Bold',
+                fontSize: 22,
+                color: '#1A1A1A',
+              }}
+            >
+              +{xpEarned}
             </Text>
           </View>
+
+          {/* Correct answers row */}
           {totalQuestions > 0 && (
-            <View className="flex-row justify-between items-center">
-              <Text style={{ fontFamily: 'Inter_500Medium' }} className="text-gray-300 text-sm">
-                Correct Answers
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: 'Inter_400Regular',
+                  fontSize: 15,
+                  color: '#6B6B6B',
+                }}
+              >
+                Correct
               </Text>
-              <Text style={{ fontFamily: 'Inter_700Bold' }} className="text-parchment text-base">
+              <Text
+                style={{
+                  fontFamily: 'Inter_700Bold',
+                  fontSize: 16,
+                  color: '#1A1A1A',
+                }}
+              >
                 {correctAnswers}/{totalQuestions}
               </Text>
             </View>
           )}
         </View>
 
-        {/* Key points */}
-        <View className="w-full mb-4">
-          <Text style={{ fontFamily: 'Inter_700Bold' }} className="text-parchment text-sm mb-3">
-            What you learned:
-          </Text>
-          {card.keyPoints.map((point, i) => (
-            <View key={i} className="flex-row items-start gap-3 mb-2">
-              <Text className="text-gold mt-0.5">✓</Text>
-              <Text
-                style={{ fontFamily: 'Inter_400Regular' }}
-                className="text-parchment text-sm leading-5 flex-1"
-              >
-                {point}
-              </Text>
-            </View>
-          ))}
-        </View>
+        {/* What you learned */}
+        <Text
+          style={{
+            fontFamily: 'Inter_700Bold',
+            fontSize: 15,
+            color: '#1A1A1A',
+            marginBottom: 12,
+          }}
+        >
+          What you learned:
+        </Text>
 
+        {card.keyPoints.map((point, i) => (
+          <View
+            key={i}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'flex-start',
+              marginBottom: 10,
+              gap: 10,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: 'Inter_700Bold',
+                color: '#1A1A1A',
+                fontSize: 15,
+                lineHeight: 24,
+              }}
+            >
+              ✓
+            </Text>
+            <Text
+              style={{
+                fontFamily: 'Inter_400Regular',
+                fontSize: 16,
+                color: '#1A1A1A',
+                lineHeight: 24,
+                flex: 1,
+              }}
+            >
+              {point}
+            </Text>
+          </View>
+        ))}
+
+        {/* Closing thought */}
         {card.closingThought && (
           <Text
-            style={{ fontFamily: 'PlayfairDisplay_400Regular' }}
-            className="text-gray-300 text-base text-center italic"
+            style={{
+              fontFamily: 'PlayfairDisplay_400Regular',
+              fontSize: 17,
+              color: '#6B6B6B',
+              fontStyle: 'italic',
+              textAlign: 'center',
+              marginTop: 16,
+              marginBottom: 8,
+            }}
           >
             "{card.closingThought}"
           </Text>
         )}
-      </View>
+      </ScrollView>
 
+      {/* Finish button */}
       <Pressable
         onPress={handleFinish}
-        className="bg-gold rounded-2xl py-4 items-center active:opacity-80"
+        style={({ pressed }) => ({
+          backgroundColor: '#1A1A1A',
+          borderRadius: 14,
+          paddingVertical: 18,
+          alignItems: 'center',
+          marginTop: 16,
+          opacity: pressed ? 0.75 : 1,
+        })}
       >
-        <Text style={{ fontFamily: 'Inter_700Bold' }} className="text-midnight text-lg">
-          Finish Lesson
+        <Text
+          style={{
+            fontFamily: 'Inter_700Bold',
+            fontSize: 18,
+            color: '#FAFAF7',
+          }}
+        >
+          Finish Lesson →
         </Text>
       </Pressable>
-    </LinearGradient>
+    </View>
   );
 }

@@ -1,6 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
 import type { ReinforcementCard as ReinforcementCardType, AnswerResult } from '@/data/types';
-import { Colors } from '@/constants/Colors';
 
 interface Props {
   card: ReinforcementCardType;
@@ -9,36 +8,84 @@ interface Props {
 
 export default function ReinforcementCard({ card, onComplete }: Props) {
   return (
-    <View className="flex-1 px-6 justify-between pb-8">
-      <View className="flex-1 justify-center">
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: '#FAFAF7',
+        paddingHorizontal: 24,
+        justifyContent: 'space-between',
+        paddingBottom: 32,
+      }}
+    >
+      {/* Center content */}
+      <View style={{ flex: 1, justifyContent: 'center' }}>
         {card.emoji && (
-          <Text className="text-5xl text-center mb-6">{card.emoji}</Text>
+          <Text
+            style={{
+              fontSize: 56,
+              textAlign: 'center',
+              marginBottom: 24,
+            }}
+          >
+            {card.emoji}
+          </Text>
         )}
 
-        <View
-          className="rounded-2xl p-5 mb-6 border"
-          style={{ borderColor: Colors.gold, backgroundColor: Colors.gold + '15' }}
-        >
+        {/* Callout label */}
+        {card.callout && (
           <Text
-            style={{ fontFamily: 'Inter_500Medium' }}
-            className="text-gold text-sm mb-3"
+            style={{
+              fontFamily: 'Inter_500Medium',
+              fontSize: 13,
+              color: '#3B6FE8',
+              marginBottom: 8,
+            }}
           >
             {card.callout}
           </Text>
+        )}
+
+        {/* Main box */}
+        <View
+          style={{
+            borderWidth: 2,
+            borderColor: '#1A1A1A',
+            borderRadius: 14,
+            padding: 20,
+            backgroundColor: '#F8F7F2',
+          }}
+        >
           <Text
-            style={{ fontFamily: 'PlayfairDisplay_400Regular' }}
-            className="text-parchment text-lg leading-8"
+            style={{
+              fontFamily: 'PlayfairDisplay_400Regular',
+              fontSize: 19,
+              color: '#1A1A1A',
+              lineHeight: 30,
+            }}
           >
             {card.body}
           </Text>
         </View>
       </View>
 
+      {/* Continue button */}
       <Pressable
         onPress={() => onComplete()}
-        className="bg-gold rounded-2xl py-4 items-center active:opacity-80"
+        style={({ pressed }) => ({
+          backgroundColor: '#1A1A1A',
+          borderRadius: 14,
+          paddingVertical: 18,
+          alignItems: 'center',
+          opacity: pressed ? 0.75 : 1,
+        })}
       >
-        <Text style={{ fontFamily: 'Inter_700Bold' }} className="text-midnight text-lg">
+        <Text
+          style={{
+            fontFamily: 'Inter_700Bold',
+            fontSize: 18,
+            color: '#FAFAF7',
+          }}
+        >
           Continue →
         </Text>
       </Pressable>

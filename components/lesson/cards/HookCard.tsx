@@ -1,7 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import type { HookCard as HookCardType, AnswerResult } from '@/data/types';
-import { Colors } from '@/constants/Colors';
 
 interface Props {
   card: HookCardType;
@@ -10,38 +8,70 @@ interface Props {
 
 export default function HookCard({ card, onComplete }: Props) {
   return (
-    <LinearGradient
-      colors={[Colors.midnight, Colors.navy]}
-      className="flex-1 px-6 justify-between pb-8"
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: '#FAFAF7',
+        paddingHorizontal: 24,
+        justifyContent: 'space-between',
+        paddingBottom: 32,
+      }}
     >
-      <View className="flex-1 items-center justify-center">
+      {/* Center content */}
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         {card.emoji && (
-          <Text className="text-7xl mb-8">{card.emoji}</Text>
+          <Text style={{ fontSize: 72, textAlign: 'center', marginBottom: 24 }}>
+            {card.emoji}
+          </Text>
         )}
         <Text
-          style={{ fontFamily: 'PlayfairDisplay_700Bold' }}
-          className="text-parchment text-3xl text-center leading-tight mb-4"
+          style={{
+            fontFamily: 'Caveat_700Bold',
+            fontSize: 38,
+            color: '#1A1A1A',
+            textAlign: 'center',
+            lineHeight: 46,
+          }}
         >
           {card.headline}
         </Text>
         {card.subtext && (
           <Text
-            style={{ fontFamily: 'Inter_400Regular' }}
-            className="text-gray-300 text-lg text-center leading-7"
+            style={{
+              fontFamily: 'Inter_400Regular',
+              fontSize: 17,
+              color: '#6B6B6B',
+              textAlign: 'center',
+              lineHeight: 26,
+              marginTop: 16,
+            }}
           >
             {card.subtext}
           </Text>
         )}
       </View>
 
+      {/* Continue button */}
       <Pressable
         onPress={() => onComplete()}
-        className="bg-gold rounded-2xl py-4 items-center active:opacity-80"
+        style={({ pressed }) => ({
+          backgroundColor: '#1A1A1A',
+          borderRadius: 14,
+          paddingVertical: 18,
+          alignItems: 'center',
+          opacity: pressed ? 0.75 : 1,
+        })}
       >
-        <Text style={{ fontFamily: 'Inter_700Bold' }} className="text-midnight text-lg">
-          Let's Go →
+        <Text
+          style={{
+            fontFamily: 'Inter_700Bold',
+            fontSize: 18,
+            color: '#FAFAF7',
+          }}
+        >
+          Let's Explore →
         </Text>
       </Pressable>
-    </LinearGradient>
+    </View>
   );
 }

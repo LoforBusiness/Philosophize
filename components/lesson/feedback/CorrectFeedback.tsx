@@ -1,6 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
 import { MotiView } from 'moti';
-import { Colors } from '@/constants/Colors';
 
 interface Props {
   explanation: string;
@@ -19,32 +18,86 @@ export default function CorrectFeedback({ explanation, xpEarned, onContinue }: P
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: Colors.sage,
+        backgroundColor: '#EAF3EE',
+        borderTopWidth: 2,
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
+        borderColor: '#3D7A55',
         padding: 24,
         paddingBottom: 40,
       }}
     >
-      <View className="flex-row items-center gap-3 mb-3">
-        <Text className="text-3xl">✅</Text>
-        <View>
-          <Text style={{ fontFamily: 'Inter_700Bold' }} className="text-white text-lg">
-            Correct!
-          </Text>
-          <Text style={{ fontFamily: 'Inter_500Medium' }} className="text-white text-sm opacity-80">
-            +{xpEarned} XP
-          </Text>
-        </View>
+      {/* Header row */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 10,
+          marginBottom: 8,
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: 'Caveat_700Bold',
+            fontSize: 32,
+            color: '#3D7A55',
+            lineHeight: 36,
+          }}
+        >
+          ✓
+        </Text>
+        <Text
+          style={{
+            fontFamily: 'Inter_700Bold',
+            fontSize: 20,
+            color: '#1A1A1A',
+            flex: 1,
+          }}
+        >
+          Correct!
+        </Text>
+        <Text
+          style={{
+            fontFamily: 'Inter_500Medium',
+            fontSize: 14,
+            color: '#3D7A55',
+          }}
+        >
+          +{xpEarned} XP
+        </Text>
       </View>
-      <Text style={{ fontFamily: 'Inter_400Regular' }} className="text-white text-base leading-6 mb-5">
+
+      {/* Explanation */}
+      <Text
+        style={{
+          fontFamily: 'Inter_400Regular',
+          fontSize: 16,
+          color: '#1A1A1A',
+          lineHeight: 24,
+          marginBottom: 20,
+        }}
+      >
         {explanation}
       </Text>
+
+      {/* Continue button */}
       <Pressable
         onPress={onContinue}
-        className="bg-white rounded-2xl py-4 items-center active:opacity-80"
+        style={({ pressed }) => ({
+          backgroundColor: '#1A1A1A',
+          borderRadius: 14,
+          paddingVertical: 16,
+          alignItems: 'center',
+          opacity: pressed ? 0.75 : 1,
+        })}
       >
-        <Text style={{ fontFamily: 'Inter_700Bold' }} className="text-sage text-lg">
+        <Text
+          style={{
+            fontFamily: 'Inter_700Bold',
+            fontSize: 17,
+            color: '#FAFAF7',
+          }}
+        >
           Continue →
         </Text>
       </Pressable>

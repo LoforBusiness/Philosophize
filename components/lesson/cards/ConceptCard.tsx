@@ -1,6 +1,5 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import type { ConceptCard as ConceptCardType, AnswerResult } from '@/data/types';
-import { Colors } from '@/constants/Colors';
 
 interface Props {
   card: ConceptCardType;
@@ -9,28 +8,75 @@ interface Props {
 
 export default function ConceptCard({ card, onComplete }: Props) {
   return (
-    <View className="flex-1 px-6 justify-between pb-8">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <View className="items-center mt-6 mb-6">
-          {card.visual && <Text className="text-6xl mb-4">{card.visual}</Text>}
-          <Text
-            style={{ fontFamily: 'Inter_500Medium' }}
-            className="text-gold text-xs uppercase tracking-widest mb-3"
-          >
-            Concept
-          </Text>
-          <Text
-            style={{ fontFamily: 'PlayfairDisplay_700Bold' }}
-            className="text-parchment text-2xl text-center mb-6"
-          >
-            {card.title}
-          </Text>
-        </View>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: '#FAFAF7',
+        paddingHorizontal: 24,
+        justifyContent: 'space-between',
+        paddingBottom: 32,
+      }}
+    >
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        {/* Label */}
+        <Text
+          style={{
+            fontFamily: 'Inter_500Medium',
+            fontSize: 11,
+            color: '#6B6B6B',
+            textTransform: 'uppercase',
+            letterSpacing: 2,
+            marginTop: 24,
+            marginBottom: 8,
+          }}
+        >
+          Concept
+        </Text>
 
-        <View className="bg-navy rounded-2xl p-5 mb-6">
+        {/* Title */}
+        <Text
+          style={{
+            fontFamily: 'PlayfairDisplay_700Bold',
+            fontSize: 26,
+            color: '#1A1A1A',
+            textAlign: 'center',
+            marginBottom: 20,
+          }}
+        >
+          {card.title}
+        </Text>
+
+        {/* Optional visual emoji */}
+        {card.visual && (
           <Text
-            style={{ fontFamily: 'Inter_400Regular' }}
-            className="text-parchment text-lg leading-8"
+            style={{
+              fontSize: 48,
+              textAlign: 'center',
+              marginBottom: 16,
+            }}
+          >
+            {card.visual}
+          </Text>
+        )}
+
+        {/* Body text box */}
+        <View
+          style={{
+            borderWidth: 2,
+            borderColor: '#E8E8E3',
+            borderRadius: 14,
+            backgroundColor: '#F5F5F0',
+            padding: 20,
+            marginBottom: 20,
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: 'Inter_400Regular',
+              fontSize: 17,
+              color: '#1A1A1A',
+              lineHeight: 28,
+            }}
           >
             {card.body
               .split(card.highlight || '___NONE___')
@@ -40,8 +86,7 @@ export default function ConceptCard({ card, onComplete }: Props) {
                       <Text key={`p${i}`}>{part}</Text>,
                       <Text
                         key={`h${i}`}
-                        style={{ fontFamily: 'Inter_700Bold' }}
-                        className="text-gold"
+                        style={{ fontFamily: 'Inter_700Bold', color: '#1A1A1A' }}
                       >
                         {card.highlight}
                       </Text>,
@@ -52,11 +97,25 @@ export default function ConceptCard({ card, onComplete }: Props) {
         </View>
       </ScrollView>
 
+      {/* Got It button */}
       <Pressable
         onPress={() => onComplete()}
-        className="bg-gold rounded-2xl py-4 items-center active:opacity-80 mt-4"
+        style={({ pressed }) => ({
+          backgroundColor: '#1A1A1A',
+          borderRadius: 14,
+          paddingVertical: 18,
+          alignItems: 'center',
+          marginTop: 4,
+          opacity: pressed ? 0.75 : 1,
+        })}
       >
-        <Text style={{ fontFamily: 'Inter_700Bold' }} className="text-midnight text-lg">
+        <Text
+          style={{
+            fontFamily: 'Inter_700Bold',
+            fontSize: 18,
+            color: '#FAFAF7',
+          }}
+        >
           Got It →
         </Text>
       </Pressable>
