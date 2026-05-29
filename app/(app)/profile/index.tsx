@@ -1,23 +1,24 @@
 import { View, Text, Pressable, ScrollView, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import SketchIcon from '@/components/shared/SketchIcon';
 import { signOut } from '@/lib/supabase/auth';
 import { ALL_BRANCHES } from '@/data';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
 const InkFaint = '#E8E8E3';
 const Crimson = '#A83232';
-const Blue = '#3B6FE8';
 
 export default function ProfileScreen() {
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const removeQuote = useUserDataStore((s) => s.removeQuote);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
   const completedLessons = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
+  const openPhilosopher = useUIStore((s) => s.openPhilosopher);
 
   async function handleSignOut() {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
@@ -99,10 +100,7 @@ export default function ProfileScreen() {
             <View key={q.id} style={[styles.sketchBox, styles.quoteBox]}>
               <View style={styles.quoteContent}>
                 <Text style={styles.quoteText}>"{q.text}"</Text>
-                <Pressable
-                  onPress={() => router.push(`/(app)/philosophers/${q.philosopherId}`)}
-                  hitSlop={6}
-                >
+                <Pressable onPress={() => openPhilosopher(q.philosopherId)} hitSlop={6}>
                   <Text style={styles.quoteAuthor}>— {q.author}</Text>
                 </Pressable>
               </View>
@@ -111,7 +109,7 @@ export default function ProfileScreen() {
                 hitSlop={10}
                 style={styles.removeBtn}
               >
-                <Ionicons name="bookmark" size={20} color={Blue} />
+                <SketchIcon name="bookmark-filled" size={20} color={Ink} />
               </Pressable>
             </View>
           ))
@@ -318,7 +316,7 @@ const styles = StyleSheet.create({
   quoteAuthor: {
     fontFamily: 'Inter_500Medium',
     fontSize: 13,
-    color: Blue,
+    color: InkSoft,
   },
   removeBtn: { padding: 2 },
   signOutBtn: {

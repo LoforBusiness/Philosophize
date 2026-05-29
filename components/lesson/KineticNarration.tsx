@@ -61,6 +61,27 @@ function rnd(seed: number): number {
 }
 
 const INK = '#1A1A1A';
+const MIN_BEAT_MS = 480; // every beat stays on screen at least this long — no flashing
+
+const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
+
+// Vary tone + speed per sentence so the narrator isn't monotone. Questions rise
+// and slow slightly; each sentence gets a small deterministic pitch/rate offset.
+function prosodyFor(i: number, text: string, base: number) {
+  const q = /\?\s*$/.test(text);
+  const ex = /!\s*$/.test(text);
+  let rate = base - 0.04 + rnd(i * 13 + 1) * 0.12;
+  let pitch = 0.8 + rnd(i * 7 + 5) * 0.16;
+  if (q) {
+    pitch += 0.07;
+    rate -= 0.03;
+  }
+  if (ex) {
+    pitch += 0.04;
+    rate += 0.03;
+  }
+  return { rate: clamp(rate, 0.75, 1.05), pitch: clamp(pitch, 0.7, 1.1) };
+}
 
 interface Props {
   text: string;
@@ -88,7 +109,6 @@ export default function KineticNarration({
   const mounted = useRef(true);
   const doneRef = useRef(onDone);
   doneRef.current = onDone;
-  const boundarySeen = useRef(false);
 
   useEffect(() => {
     getBritishVoice(); // warm up voice resolution early
@@ -124,7 +144,10 @@ export default function KineticNarration({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Speak one sentence per effect run; advance visual beats within it.
+  // Speak one sentence per effect run. Beats are paced EVENLY across the
+  // sentence's spoken duration with a minimum dwell, so a word is never on
+  // screen for "almost no time," and the sentence only advances once the audio
+  // has finished AND every beat has had its time on screen.
   useEffect(() => {
     if (!enabled) {
       setFinished(true);
@@ -142,20 +165,23 @@ export default function KineticNarration({
 
     let cancelled = false;
     let started = false;
+    let audioDone = false;
+    let visualDone = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
     const sentence = sentences[sIdx];
     const isLast = sIdx >= sentences.length - 1;
-    boundarySeen.current = false;
+    const lastBeat = sentence.beats.length - 1;
     setBIdx(0);
 
     const clearTimers = () => {
       timers.forEach(clearTimeout);
       timers.length = 0;
     };
-    const advanceSentence = () => {
+    const finishSentence = () => {
       if (cancelled || !mounted.current) return;
       cancelled = true;
       clearTimers();
+      Speech.stop();
       if (isLast) {
         setFinished(true);
         doneRef.current?.();
@@ -163,64 +189,74 @@ export default function KineticNarration({
         setSIdx((i) => i + 1);
       }
     };
+    const maybeFinish = () => {
+      if (audioDone && visualDone) finishSentence();
+    };
 
+    const { rate: r, pitch } = prosodyFor(sIdx, sentence.text, rate);
     const len = Math.max(1, sentence.text.length);
-    const estMs = Math.min(9000, Math.max(900, len * (62 / rate)));
+    const estMs = Math.min(9000, Math.max(900, len * (64 / r)));
+    const perBeat = Math.max(MIN_BEAT_MS, Math.round(estMs / sentence.beats.length));
 
-    // Visual beat timers — used when boundary events aren't available (Android).
-    sentence.beats.forEach((b, i) => {
-      if (i === 0) return;
-      const at = (b.charStart / len) * estMs;
+    // Evenly-paced beat reveals.
+    for (let i = 1; i <= lastBeat; i++) {
       timers.push(
         setTimeout(() => {
-          if (cancelled || boundarySeen.current) return;
-          setBIdx((prev) => Math.max(prev, i));
-        }, at)
+          if (!cancelled) setBIdx(i);
+        }, i * perBeat)
       );
-    });
+    }
+    // Mark visuals complete a touch after the last beat appears.
+    timers.push(
+      setTimeout(() => {
+        visualDone = true;
+        maybeFinish();
+      }, lastBeat * perBeat + 200)
+    );
 
-    // If audio never starts (e.g. browser blocks autoplay), still progress.
-    const fallback = setTimeout(() => {
-      if (!started) advanceSentence();
-    }, estMs + 500);
-    timers.push(fallback);
-
-    const startT = setTimeout(() => {
-      if (cancelled) return;
-      getBritishVoice().then((voice) => {
-        if (cancelled) return;
-        try {
-          Speech.stop();
-          Speech.speak(sentence.text, {
-            voice: voice ?? undefined,
-            rate,
-            pitch: 0.85,
-            language: 'en-GB',
-            onStart: () => {
-              started = true;
-              clearTimeout(fallback);
-            },
-            onBoundary: (e: any) => {
-              const ci = e?.charIndex;
-              if (typeof ci !== 'number') return;
-              boundarySeen.current = true;
-              let target = 0;
-              for (let i = 0; i < sentence.beats.length; i++) {
-                if (sentence.beats[i].charStart <= ci) target = i;
-                else break;
-              }
-              setBIdx((prev) => Math.max(prev, target));
-            },
-            onDone: advanceSentence,
-            onStopped: () => {},
-            onError: () => {},
-          });
-        } catch {
-          /* timers cover progress */
+    // If audio never starts (browser blocks autoplay), don't stall.
+    timers.push(
+      setTimeout(() => {
+        if (!started) {
+          audioDone = true;
+          maybeFinish();
         }
-      });
-    }, 160);
-    timers.push(startT);
+      }, estMs + 500)
+    );
+
+    // Speak the sentence with its own pitch/rate.
+    timers.push(
+      setTimeout(() => {
+        if (cancelled) return;
+        getBritishVoice().then((voice) => {
+          if (cancelled) return;
+          try {
+            Speech.stop();
+            Speech.speak(sentence.text, {
+              voice: voice ?? undefined,
+              rate: r,
+              pitch,
+              language: 'en-GB',
+              onStart: () => {
+                started = true;
+              },
+              onDone: () => {
+                audioDone = true;
+                maybeFinish();
+              },
+              onStopped: () => {},
+              onError: () => {
+                audioDone = true;
+                maybeFinish();
+              },
+            });
+          } catch {
+            audioDone = true;
+            maybeFinish();
+          }
+        });
+      }, 160)
+    );
 
     return () => {
       cancelled = true;
@@ -275,10 +311,10 @@ export default function KineticNarration({
                   animate={{ opacity: 1, translateY: ty, scale: 1, rotate: `${rot}deg` }}
                   transition={{
                     type: 'spring',
-                    delay: i * (isPrompt ? 60 : 90),
-                    damping: isPrompt ? 14 : 9,
-                    stiffness: isPrompt ? 150 : 130,
-                    mass: 0.8,
+                    delay: i * (isPrompt ? 55 : 70),
+                    damping: isPrompt ? 14 : 10,
+                    stiffness: isPrompt ? 150 : 140,
+                    mass: 0.7,
                   }}
                   style={{ marginHorizontal: 6, marginVertical: 2 }}
                 >

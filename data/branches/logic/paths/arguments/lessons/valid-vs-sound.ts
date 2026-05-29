@@ -30,6 +30,22 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
+      prompt: 'Build the classic argument in logical order.',
+      xpValue: 5,
+      interaction: {
+        type: 'sort',
+        items: [
+          { id: 'p1', text: 'All humans are mortal.' },
+          { id: 'p2', text: 'Socrates is a human.' },
+          { id: 'c', text: 'Therefore, Socrates is mortal.' },
+        ],
+        correctOrder: ['p1', 'p2', 'c'],
+        explanation:
+          'Two premises set up the reasoning, and the conclusion follows from them. Premises first, conclusion last — that is the shape of every deductive argument.',
+      },
+    },
+    {
+      type: 'question',
       prompt: 'If premises are true and the reasoning is correct, what MUST be true?',
       xpValue: 5,
       interaction: {

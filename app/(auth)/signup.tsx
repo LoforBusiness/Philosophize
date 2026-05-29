@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import SketchIcon from '@/components/shared/SketchIcon';
 import { Colors } from '@/constants/Colors';
 import { signUp } from '@/lib/supabase/auth';
 
@@ -55,7 +55,7 @@ export default function SignupScreen() {
               opacity: pressed ? 0.5 : 1,
             })}
           >
-            <Ionicons name="arrow-back" size={24} color={Colors.ink} />
+            <SketchIcon name="back" size={24} color={Colors.ink} />
           </Pressable>
 
           {/* Content */}

@@ -92,13 +92,36 @@ export interface SummaryCard {
   closingThought?: string; // Optional inspiring closer
 }
 
+// "Choose Your Belief" — a moral/philosophical scenario with no single right
+// answer. The user picks, then sees what different thinkers would say and why.
+export interface DilemmaChoice {
+  id: string;
+  label: string;         // a concrete option, max 12 words
+}
+
+export interface DilemmaView {
+  thinker: string;       // philosopher / school name
+  stance: string;        // their position in a phrase, max 12 words
+  why: string;           // the reasoning, max 40 words
+}
+
+export interface DilemmaCard {
+  type: 'dilemma';
+  scenario: string;      // the situation, max 80 words
+  prompt: string;        // the question, max 16 words
+  choices: DilemmaChoice[];
+  views: DilemmaView[];  // 2-4 philosophers' takes, revealed after choosing
+  xpValue: number;
+}
+
 export type CardData =
   | HookCard
   | ConceptCard
   | ExampleCard
   | QuestionCard
   | ReinforcementCard
-  | SummaryCard;
+  | SummaryCard
+  | DilemmaCard;
 
 // ─── Curriculum hierarchy ────────────────────────────────────────────────────
 

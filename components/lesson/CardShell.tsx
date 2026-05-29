@@ -1,7 +1,7 @@
 import { View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import SketchWallpaper from '@/components/shared/SketchWallpaper';
+import SketchIcon from '@/components/shared/SketchIcon';
 import { useNarration } from './NarrationContext';
 
 interface Props {
@@ -31,7 +31,7 @@ export default function CardShell({ cardCount, currentIndex, onExit, children }:
         }}
       >
         <Pressable onPress={onExit} style={{ padding: 4, opacity: 1 }} hitSlop={8}>
-          <Ionicons name="close" size={22} color="#6B6B6B" />
+          <SketchIcon name="close" size={22} color="#6B6B6B" />
         </Pressable>
 
         <View style={{ flex: 1, flexDirection: 'row', gap: 3 }}>
@@ -51,12 +51,12 @@ export default function CardShell({ cardCount, currentIndex, onExit, children }:
         {/* Narration controls */}
         {enabled && (
           <Pressable onPress={replay} style={{ padding: 4 }} hitSlop={8}>
-            <Ionicons name="reload" size={18} color="#6B6B6B" />
+            <SketchIcon name="reload" size={18} color="#6B6B6B" />
           </Pressable>
         )}
         <Pressable onPress={() => setEnabled(!enabled)} style={{ padding: 4 }} hitSlop={8}>
-          <Ionicons
-            name={enabled ? 'volume-high' : 'volume-mute'}
+          <SketchIcon
+            name={enabled ? 'volume-on' : 'volume-off'}
             size={20}
             color={enabled ? '#1A1A1A' : '#AAAAAA'}
           />

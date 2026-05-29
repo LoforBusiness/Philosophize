@@ -4,6 +4,7 @@ import { MotiView } from 'moti';
 import type { QuestionCard as QuestionCardType, AnswerResult } from '@/data/types';
 import MultipleChoice from '../interactions/MultipleChoice';
 import TrueFalse from '../interactions/TrueFalse';
+import SortItems from '../interactions/SortItems';
 import KineticNarration from '../KineticNarration';
 
 interface Props {
@@ -50,6 +51,13 @@ export default function QuestionCard({ card, onComplete }: Props) {
           )}
           {card.interaction.type === 'true-false' && (
             <TrueFalse
+              interaction={card.interaction}
+              xpValue={card.xpValue}
+              onComplete={handleInteractionComplete}
+            />
+          )}
+          {card.interaction.type === 'sort' && (
+            <SortItems
               interaction={card.interaction}
               xpValue={card.xpValue}
               onComplete={handleInteractionComplete}

@@ -28,7 +28,7 @@ export default function AppLayout() {
     >
       <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: tab('home') }} />
       <Tabs.Screen name="branches" options={{ title: 'Branches', tabBarIcon: tab('cloud') }} />
-      <Tabs.Screen name="philosophers" options={{ title: 'Thinkers', tabBarIcon: tab('mic') }} />
+      <Tabs.Screen name="philosophers" options={{ title: 'Thinkers', tabBarIcon: tab('hat') }} />
       <Tabs.Screen name="stats" options={{ title: 'Stats', tabBarIcon: tab('frame') }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: tab('person') }} />
     </Tabs>

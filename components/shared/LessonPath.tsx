@@ -16,7 +16,6 @@ interface Props {
 
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
-const Blue = '#3B6FE8';
 
 const SLOT = 132; // vertical space per node
 const TOP = 40;
@@ -54,8 +53,8 @@ export default function LessonPath({ nodes, width }: Props) {
             cx={p.x}
             cy={p.y}
             r={7}
-            fill={nodes[i].active ? Blue : '#FAFAF7'}
-            stroke={nodes[i].active ? Blue : Ink}
+            fill={nodes[i].active ? Ink : '#FAFAF7'}
+            stroke={Ink}
             strokeWidth={2}
           />
         ))}
@@ -79,7 +78,7 @@ export default function LessonPath({ nodes, width }: Props) {
             ]}
           >
             <Text
-              style={[styles.label, { textAlign: left ? 'right' : 'left' }, n.active && { color: Blue }]}
+              style={[styles.label, { textAlign: left ? 'right' : 'left' }, n.active && { opacity: 0.5 }]}
             >
               {n.label}
             </Text>

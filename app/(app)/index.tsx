@@ -1,16 +1,16 @@
 import { View, Text, ScrollView, Pressable, StyleSheet, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path, Line } from 'react-native-svg';
+import SketchIcon from '@/components/shared/SketchIcon';
 import { ALL_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
-const Blue = '#3B6FE8';
 
 const SW = Dimensions.get('window').width;
 const W = SW - 40;
@@ -54,6 +54,7 @@ function meanderPath(): string {
 export default function DiscoverScreen() {
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
+  const openPhilosopher = useUIStore((s) => s.openPhilosopher);
 
   const dayNumber = Math.floor(Date.now() / 86_400_000);
   const quote = QUOTE_POOL[dayNumber % QUOTE_POOL.length];
@@ -76,7 +77,7 @@ export default function DiscoverScreen() {
     insight: goInsight,
     learn: () => router.push('/(app)/branches'),
     philosophers: () => router.push('/(app)/philosophers'),
-    quote: () => router.push(`/(app)/philosophers/${quote.philosopherId}`),
+    quote: () => openPhilosopher(quote.philosopherId),
   };
 
   return (
@@ -90,7 +91,7 @@ export default function DiscoverScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>Discover</Text>
           <Pressable hitSlop={8} onPress={() => router.push('/(app)/profile')}>
-            <Ionicons name="settings-outline" size={24} color={InkSoft} />
+            <SketchIcon name="settings" size={24} color={InkSoft} />
           </Pressable>
         </View>
 
@@ -131,7 +132,7 @@ export default function DiscoverScreen() {
         {/* Quote of the day text */}
         <View style={styles.quoteBlock}>
           <Pressable
-            onPress={() => router.push(`/(app)/philosophers/${quote.philosopherId}`)}
+            onPress={() => openPhilosopher(quote.philosopherId)}
             style={{ flex: 1 }}
           >
             <Text style={styles.quoteText}>"{quote.text}"</Text>
@@ -142,10 +143,10 @@ export default function DiscoverScreen() {
             hitSlop={10}
             style={styles.bookmark}
           >
-            <Ionicons
-              name={quoteSaved ? 'bookmark' : 'bookmark-outline'}
+            <SketchIcon
+              name={quoteSaved ? 'bookmark-filled' : 'bookmark'}
               size={20}
-              color={quoteSaved ? Blue : InkSoft}
+              color={quoteSaved ? Ink : InkSoft}
             />
           </Pressable>
         </View>

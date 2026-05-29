@@ -15,6 +15,35 @@ const lesson: Lesson = {
       emoji: '🔥',
     },
     {
+      type: 'dilemma',
+      scenario:
+        'A runaway trolley is about to kill five people tied to the track. You stand beside a lever. Pull it, and the trolley switches to a side track — where it will kill one person instead.',
+      prompt: 'What do you do?',
+      choices: [
+        { id: 'pull', label: 'Pull the lever' },
+        { id: 'nothing', label: 'Do nothing' },
+        { id: 'other', label: 'Find another way' },
+      ],
+      views: [
+        {
+          thinker: 'John Stuart Mill',
+          stance: 'would pull the lever',
+          why: 'A consequentialist counts outcomes: five lives saved outweigh one lost. The greatest good for the greatest number makes pulling the lever the right choice.',
+        },
+        {
+          thinker: 'Immanuel Kant',
+          stance: 'would refuse to use the one as a means',
+          why: 'For Kant, deliberately sacrificing a person treats them as a mere tool, not an end in themselves. Some duties hold no matter the outcome.',
+        },
+        {
+          thinker: 'Aristotle',
+          stance: 'would ask what a good person does',
+          why: 'Virtue ethics shifts the question from the act to the agent: what would a wise, courageous, compassionate person do — and who do you become by choosing it?',
+        },
+      ],
+      xpValue: 5,
+    },
+    {
       type: 'concept',
       title: 'Three Ways to Judge an Action',
       body: 'Philosophers have proposed three main answers to "what makes an action good?" The first looks at outcomes: did it produce good results? The second looks at rules: did you follow the right duties? The third looks at character: is this what a good person would do? Each theory captures something true — and each has limits.',

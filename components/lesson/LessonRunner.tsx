@@ -1,11 +1,13 @@
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { MotiView, AnimatePresence } from 'moti';
 import * as Speech from 'expo-speech';
 import type { Lesson, CardData, AnswerResult } from '@/data/types';
 import { useLessonStore } from '@/stores/lessonStore';
+import { getLessonById } from '@/data';
 import { NarrationProvider } from './NarrationContext';
+import LessonReward from './LessonReward';
 import CardShell from './CardShell';
 import HookCard from './cards/HookCard';
 import ConceptCard from './cards/ConceptCard';
@@ -13,6 +15,7 @@ import ExampleCard from './cards/ExampleCard';
 import QuestionCard from './cards/QuestionCard';
 import ReinforcementCard from './cards/ReinforcementCard';
 import SummaryCard from './cards/SummaryCard';
+import DilemmaCard from './cards/DilemmaCard';
 
 interface Props {
   lesson: Lesson;
@@ -26,12 +29,22 @@ function renderCard(card: CardData, onComplete: (result?: AnswerResult) => void)
     case 'question': return <QuestionCard card={card} onComplete={onComplete} />;
     case 'reinforcement': return <ReinforcementCard card={card} onComplete={onComplete} />;
     case 'summary': return <SummaryCard card={card} onComplete={onComplete} />;
+    case 'dilemma': return <DilemmaCard card={card} onComplete={onComplete} />;
   }
+}
+
+interface FinalStats {
+  xp: number;
+  correct: number;
+  total: number;
+  branchSlug: string | null;
 }
 
 export default function LessonRunner({ lesson }: Props) {
   const { session, startSession, advance, recordAnswer, endSession } = useLessonStore();
   const completingRef = useRef(false);
+  const [finished, setFinished] = useState(false);
+  const [stats, setStats] = useState<FinalStats | null>(null);
 
   useEffect(() => {
     startSession(lesson);
@@ -50,15 +63,26 @@ export default function LessonRunner({ lesson }: Props) {
 
       setTimeout(() => {
         completingRef.current = false;
-        if (!session) return;
-        if (session.currentIndex >= lesson.cards.length - 1) {
-          // Lesson done — handled by SummaryCard's own button
+        const s = useLessonStore.getState().session;
+        if (!s) return;
+        if (s.currentIndex >= lesson.cards.length - 1) {
+          // Lesson finished — go to the reward screen.
+          Speech.stop();
+          const found = getLessonById(lesson.id);
+          setStats({
+            xp: s.sessionXP,
+            correct: s.answers.filter((a) => a.correct).length,
+            total: s.answers.length,
+            branchSlug: found?.branch.slug ?? null,
+          });
+          setFinished(true);
+          endSession();
           return;
         }
         advance();
       }, 150);
     },
-    [session, lesson.cards.length, advance, recordAnswer]
+    [lesson, advance, recordAnswer, endSession]
   );
 
   const handleExit = useCallback(() => {
@@ -66,6 +90,10 @@ export default function LessonRunner({ lesson }: Props) {
     endSession();
     router.back();
   }, [endSession]);
+
+  if (finished && stats) {
+    return <LessonReward {...stats} onDone={() => router.back()} />;
+  }
 
   if (!session) return null;
 

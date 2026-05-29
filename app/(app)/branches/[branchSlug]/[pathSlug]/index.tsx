@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { getBranchBySlug } from '@/data';
 import LessonPath, { type PathNode } from '@/components/shared/LessonPath';
+import SketchIcon from '@/components/shared/SketchIcon';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -54,7 +54,7 @@ export default function PathDetailScreen() {
         {/* Back + breadcrumb */}
         <View style={styles.backRow}>
           <Pressable onPress={() => router.back()} hitSlop={8}>
-            <Ionicons name="arrow-back" size={24} color={Ink} />
+            <SketchIcon name="back" size={24} color={Ink} />
           </Pressable>
           <Text style={styles.breadcrumb}>{branch.name}</Text>
         </View>

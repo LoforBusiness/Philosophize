@@ -20,6 +20,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase/client';
+import PhilosopherSheet from '@/components/shared/PhilosopherSheet';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -69,6 +70,8 @@ export default function RootLayout() {
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(app)" />
         </Stack>
+        {/* Global philosopher bottom sheet — opened from anywhere via uiStore */}
+        <PhilosopherSheet />
       </QueryClientProvider>
     </GestureHandlerRootView>
   );

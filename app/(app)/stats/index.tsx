@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import SketchIcon from '@/components/shared/SketchIcon';
 import { ALL_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -51,7 +51,7 @@ export default function StatsScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.title}>Your Mind</Text>
-          <Ionicons name="settings-outline" size={24} color={InkSoft} />
+          <SketchIcon name="settings" size={24} color={InkSoft} />
         </View>
 
         {!hasData ? (

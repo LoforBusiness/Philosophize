@@ -18,6 +18,9 @@ interface UserDataState {
   philosopherViews: Record<string, number>; // philosopherId -> times profile opened
   lessonsByBranch: Record<string, number>;   // branchSlug -> lessons completed
   voiceEnabled: boolean;                      // narrate lessons aloud + reveal words
+  beliefResultId: string | null;             // philosopher id from the "What Would You Believe?" quiz
+  streak: number;                             // consecutive-day streak
+  lastLessonDate: string | null;             // YYYY-MM-DD of last completed lesson
   _hasHydrated: boolean;
 
   saveQuote: (q: SavedQuote) => void;
@@ -27,6 +30,11 @@ interface UserDataState {
   recordPhilosopherView: (philosopherId: string) => void;
   recordLessonComplete: (branchSlug: string) => void;
   setVoiceEnabled: (v: boolean) => void;
+  setBeliefResult: (id: string | null) => void;
+  registerDailyActivity: (
+    today: string,
+    yesterday: string
+  ) => { firstOfDay: boolean; streak: number; prevStreak: number };
   setHasHydrated: (v: boolean) => void;
 }
 
@@ -37,6 +45,9 @@ export const useUserDataStore = create<UserDataState>()(
       philosopherViews: {},
       lessonsByBranch: {},
       voiceEnabled: true,
+      beliefResultId: null,
+      streak: 0,
+      lastLessonDate: null,
       _hasHydrated: false,
 
       saveQuote: (q) =>
@@ -80,6 +91,19 @@ export const useUserDataStore = create<UserDataState>()(
 
       setVoiceEnabled: (v) => set({ voiceEnabled: v }),
 
+      setBeliefResult: (id) => set({ beliefResultId: id }),
+
+      registerDailyActivity: (today, yesterday) => {
+        const { lastLessonDate, streak } = get();
+        if (lastLessonDate === today) {
+          return { firstOfDay: false, streak, prevStreak: streak };
+        }
+        const prevStreak = streak;
+        const newStreak = lastLessonDate === yesterday ? streak + 1 : 1;
+        set({ streak: newStreak, lastLessonDate: today });
+        return { firstOfDay: true, streak: newStreak, prevStreak };
+      },
+
       setHasHydrated: (v) => set({ _hasHydrated: v }),
     }),
     {
@@ -90,6 +114,9 @@ export const useUserDataStore = create<UserDataState>()(
         philosopherViews: state.philosopherViews,
         lessonsByBranch: state.lessonsByBranch,
         voiceEnabled: state.voiceEnabled,
+        beliefResultId: state.beliefResultId,
+        streak: state.streak,
+        lastLessonDate: state.lastLessonDate,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
