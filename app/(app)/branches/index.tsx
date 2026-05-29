@@ -152,10 +152,10 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   title: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 44,
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 36,
     color: Ink,
-    lineHeight: 50,
+    lineHeight: 44,
   },
   subtitle: {
     fontFamily: 'Inter_400Regular',

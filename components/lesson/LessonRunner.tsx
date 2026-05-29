@@ -2,8 +2,10 @@ import { useRef, useCallback, useEffect } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { MotiView, AnimatePresence } from 'moti';
+import * as Speech from 'expo-speech';
 import type { Lesson, CardData, AnswerResult } from '@/data/types';
 import { useLessonStore } from '@/stores/lessonStore';
+import { NarrationProvider } from './NarrationContext';
 import CardShell from './CardShell';
 import HookCard from './cards/HookCard';
 import ConceptCard from './cards/ConceptCard';
@@ -33,7 +35,10 @@ export default function LessonRunner({ lesson }: Props) {
 
   useEffect(() => {
     startSession(lesson);
-    return () => endSession();
+    return () => {
+      Speech.stop();
+      endSession();
+    };
   }, [lesson.id]);
 
   const handleCardComplete = useCallback(
@@ -57,6 +62,7 @@ export default function LessonRunner({ lesson }: Props) {
   );
 
   const handleExit = useCallback(() => {
+    Speech.stop();
     endSession();
     router.back();
   }, [endSession]);
@@ -67,26 +73,28 @@ export default function LessonRunner({ lesson }: Props) {
   const progress = (session.currentIndex + 1) / lesson.cards.length;
 
   return (
-    <View className="flex-1 bg-midnight">
-      <CardShell
-        progress={progress}
-        cardCount={lesson.cards.length}
-        currentIndex={session.currentIndex}
-        onExit={handleExit}
-      >
-        <AnimatePresence exitBeforeEnter>
-          <MotiView
-            key={`${lesson.id}-${session.currentIndex}`}
-            from={{ opacity: 0, translateX: session.direction > 0 ? 40 : -40 }}
-            animate={{ opacity: 1, translateX: 0 }}
-            exit={{ opacity: 0, translateX: session.direction > 0 ? -40 : 40 }}
-            transition={{ type: 'timing', duration: 220 }}
-            style={{ flex: 1 }}
-          >
-            {renderCard(currentCard, handleCardComplete)}
-          </MotiView>
-        </AnimatePresence>
-      </CardShell>
-    </View>
+    <NarrationProvider>
+      <View className="flex-1 bg-midnight">
+        <CardShell
+          progress={progress}
+          cardCount={lesson.cards.length}
+          currentIndex={session.currentIndex}
+          onExit={handleExit}
+        >
+          <AnimatePresence exitBeforeEnter>
+            <MotiView
+              key={`${lesson.id}-${session.currentIndex}`}
+              from={{ opacity: 0, translateX: session.direction > 0 ? 40 : -40 }}
+              animate={{ opacity: 1, translateX: 0 }}
+              exit={{ opacity: 0, translateX: session.direction > 0 ? -40 : 40 }}
+              transition={{ type: 'timing', duration: 220 }}
+              style={{ flex: 1 }}
+            >
+              {renderCard(currentCard, handleCardComplete)}
+            </MotiView>
+          </AnimatePresence>
+        </CardShell>
+      </View>
+    </NarrationProvider>
   );
 }

@@ -1,15 +1,24 @@
 import { View, Text, Pressable, ScrollView, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { signOut } from '@/lib/supabase/auth';
 import { ALL_BRANCHES } from '@/data';
+import { useUserDataStore } from '@/stores/userDataStore';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
 const InkFaint = '#E8E8E3';
 const Crimson = '#A83232';
+const Blue = '#3B6FE8';
 
 export default function ProfileScreen() {
+  const savedQuotes = useUserDataStore((s) => s.savedQuotes);
+  const removeQuote = useUserDataStore((s) => s.removeQuote);
+  const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
+  const completedLessons = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
+
   async function handleSignOut() {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
@@ -56,8 +65,8 @@ export default function ProfileScreen() {
         <View style={styles.statsRow}>
           {[
             { label: 'Streak', value: '0 days' },
-            { label: 'Lessons', value: `0 / ${totalLessons}` },
-            { label: 'Level', value: '1' },
+            { label: 'Lessons', value: `${completedLessons} / ${totalLessons}` },
+            { label: 'Saved', value: `${savedQuotes.length}` },
           ].map((stat) => (
             <View key={stat.label} style={[styles.sketchBox, styles.statBox]}>
               <Text style={styles.statValue}>{stat.value}</Text>
@@ -66,8 +75,50 @@ export default function ProfileScreen() {
           ))}
         </View>
 
-        {/* Progress section */}
+        {/* Saved Quotes section */}
         <View style={styles.sectionRow}>
+          <Text style={styles.sectionHeading}>Saved Quotes</Text>
+          <View style={styles.sectionLine} />
+        </View>
+
+        {savedQuotes.length === 0 ? (
+          <View style={[styles.sketchBox, styles.emptyQuotesBox]}>
+            <Text style={styles.emptyQuotesText}>
+              No saved quotes yet. Open a thinker and tap the bookmark to keep
+              their words here.
+            </Text>
+            <Pressable
+              onPress={() => router.push('/(app)/philosophers')}
+              style={({ pressed }) => [styles.browseBtn, pressed && { opacity: 0.7 }]}
+            >
+              <Text style={styles.browseBtnText}>Browse Thinkers →</Text>
+            </Pressable>
+          </View>
+        ) : (
+          savedQuotes.map((q) => (
+            <View key={q.id} style={[styles.sketchBox, styles.quoteBox]}>
+              <View style={styles.quoteContent}>
+                <Text style={styles.quoteText}>"{q.text}"</Text>
+                <Pressable
+                  onPress={() => router.push(`/(app)/philosophers/${q.philosopherId}`)}
+                  hitSlop={6}
+                >
+                  <Text style={styles.quoteAuthor}>— {q.author}</Text>
+                </Pressable>
+              </View>
+              <Pressable
+                onPress={() => removeQuote(q.id)}
+                hitSlop={10}
+                style={styles.removeBtn}
+              >
+                <Ionicons name="bookmark" size={20} color={Blue} />
+              </Pressable>
+            </View>
+          ))
+        )}
+
+        {/* Progress section */}
+        <View style={[styles.sectionRow, { marginTop: 24 }]}>
           <Text style={styles.sectionHeading}>Progress</Text>
           <View style={styles.sectionLine} />
         </View>
@@ -225,6 +276,51 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: InkSoft,
   },
+  emptyQuotesBox: {
+    padding: 18,
+    marginBottom: 4,
+    borderColor: InkFaint,
+  },
+  emptyQuotesText: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 14,
+    color: InkSoft,
+    lineHeight: 21,
+    marginBottom: 14,
+  },
+  browseBtn: {
+    backgroundColor: Ink,
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  browseBtnText: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 14,
+    color: Paper,
+  },
+  quoteBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 16,
+    marginBottom: 10,
+    gap: 12,
+  },
+  quoteContent: { flex: 1 },
+  quoteText: {
+    fontFamily: 'PlayfairDisplay_400Regular',
+    fontSize: 16,
+    fontStyle: 'italic',
+    color: Ink,
+    lineHeight: 25,
+    marginBottom: 8,
+  },
+  quoteAuthor: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 13,
+    color: Blue,
+  },
+  removeBtn: { padding: 2 },
   signOutBtn: {
     borderWidth: 2,
     borderColor: Crimson,

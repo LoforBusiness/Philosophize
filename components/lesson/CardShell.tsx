@@ -1,6 +1,8 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import SketchWallpaper from '@/components/shared/SketchWallpaper';
+import { useNarration } from './NarrationContext';
 
 interface Props {
   progress: number;
@@ -11,8 +13,12 @@ interface Props {
 }
 
 export default function CardShell({ cardCount, currentIndex, onExit, children }: Props) {
+  const { enabled, setEnabled, replay } = useNarration();
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFAF7' }}>
+      {/* Hand-drawn animated background — shifts on every new card */}
+      <SketchWallpaper variant={currentIndex} />
+
       {/* Progress bar + exit */}
       <View
         style={{
@@ -41,10 +47,24 @@ export default function CardShell({ cardCount, currentIndex, onExit, children }:
             />
           ))}
         </View>
+
+        {/* Narration controls */}
+        {enabled && (
+          <Pressable onPress={replay} style={{ padding: 4 }} hitSlop={8}>
+            <Ionicons name="reload" size={18} color="#6B6B6B" />
+          </Pressable>
+        )}
+        <Pressable onPress={() => setEnabled(!enabled)} style={{ padding: 4 }} hitSlop={8}>
+          <Ionicons
+            name={enabled ? 'volume-high' : 'volume-mute'}
+            size={20}
+            color={enabled ? '#1A1A1A' : '#AAAAAA'}
+          />
+        </Pressable>
       </View>
 
       {/* Card content */}
-      <View style={{ flex: 1, backgroundColor: '#FAFAF7' }}>{children}</View>
+      <View style={{ flex: 1, backgroundColor: 'transparent' }}>{children}</View>
     </SafeAreaView>
   );
 }

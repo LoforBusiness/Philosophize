@@ -1,106 +1,153 @@
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Svg, { Path, Line } from 'react-native-svg';
 import { ALL_BRANCHES } from '@/data';
+import { ALL_PHILOSOPHERS } from '@/data/philosophers';
+import { useUserDataStore } from '@/stores/userDataStore';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
-const InkFaint = '#E8E8E3';
+const Blue = '#3B6FE8';
 
-const QUOTES = [
-  { text: 'The unexamined life is not worth living.', author: 'Socrates' },
-  { text: 'I think, therefore I am.', author: 'René Descartes' },
-  { text: 'One cannot step into the same river twice.', author: 'Heraclitus' },
+const SW = Dimensions.get('window').width;
+const W = SW - 40;
+
+// Daily quote pool from the philosophers.
+const QUOTE_POOL = ALL_PHILOSOPHERS.flatMap((p) =>
+  p.quotes.map((q) => ({
+    id: q.id,
+    text: q.text,
+    author: p.name,
+    philosopherId: p.id,
+    branchSlugs: p.branchSlugs,
+  }))
+);
+
+// Meander menu items: y position, label indent, and where the line sits at that y.
+const ITEMS = [
+  { key: 'insight', label: 'Insight', y: 34, indent: 86, lineX: 40 },
+  { key: 'learn', label: 'Learn', y: 116, indent: 52, lineX: 24 },
+  { key: 'philosophers', label: 'Philosophers', y: 198, indent: 94, lineX: 48 },
+  { key: 'quote', label: 'Quote of the Day', y: 272, indent: 52, lineX: 24 },
 ];
+const MEANDER_H = 300;
 
-export default function DashboardScreen() {
-  const quote = QUOTES[new Date().getDay() % 3];
-  const firstLesson = ALL_BRANCHES[0]?.paths[0]?.lessons[0];
+function meanderPath(): string {
+  const pts = [
+    { x: 40, y: 0 },
+    ...ITEMS.map((it) => ({ x: it.lineX, y: it.y })),
+    { x: 34, y: MEANDER_H },
+  ];
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 1; i < pts.length; i++) {
+    const prev = pts[i - 1];
+    const cur = pts[i];
+    const midY = (prev.y + cur.y) / 2;
+    d += ` C ${prev.x} ${midY}, ${cur.x} ${midY}, ${cur.x} ${cur.y}`;
+  }
+  return d;
+}
+
+export default function DiscoverScreen() {
+  const savedQuotes = useUserDataStore((s) => s.savedQuotes);
+  const toggleQuote = useUserDataStore((s) => s.toggleQuote);
+
+  const dayNumber = Math.floor(Date.now() / 86_400_000);
+  const quote = QUOTE_POOL[dayNumber % QUOTE_POOL.length];
+  const quoteSaved = savedQuotes.some((q) => q.id === quote.id);
+
+  // First lesson = "Insight" jump-in target.
   const firstBranch = ALL_BRANCHES[0];
   const firstPath = firstBranch?.paths[0];
+  const firstLesson = firstPath?.lessons[0];
+
+  function goInsight() {
+    if (firstBranch && firstPath && firstLesson) {
+      router.push(
+        `/(app)/branches/${firstBranch.slug}/${firstPath.slug}/lesson/${firstLesson.id}`
+      );
+    }
+  }
+
+  const onPressFor: Record<string, () => void> = {
+    insight: goInsight,
+    learn: () => router.push('/(app)/branches'),
+    philosophers: () => router.push('/(app)/philosophers'),
+    quote: () => router.push(`/(app)/philosophers/${quote.philosopherId}`),
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Discover</Text>
-        <Pressable hitSlop={8}>
-          <Ionicons name="settings-outline" size={24} color={InkSoft} />
-        </Pressable>
-      </View>
-
-      {/* Divider */}
-      <View style={styles.divider} />
-
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Quote of the Day */}
-        <View style={styles.sketchBox}>
-          <Text style={styles.sectionLabel}>QUOTE OF THE DAY</Text>
-          <Text style={styles.quoteText}>"{quote.text}"</Text>
-          <Text style={styles.quoteAttrib}>— {quote.author}</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Discover</Text>
+          <Pressable hitSlop={8} onPress={() => router.push('/(app)/profile')}>
+            <Ionicons name="settings-outline" size={24} color={InkSoft} />
+          </Pressable>
         </View>
 
-        {/* Continue Learning */}
-        <View style={styles.sectionRow}>
-          <Text style={styles.sectionHeading}>Continue Learning</Text>
-          <View style={styles.sectionHeadingLine} />
-        </View>
+        {/* Meandering menu */}
+        <View style={{ width: W, height: MEANDER_H }}>
+          <Svg width={W} height={MEANDER_H} style={StyleSheet.absoluteFill}>
+            <Path d={meanderPath()} fill="none" stroke={Ink} strokeWidth={2} strokeLinecap="round" />
+            {ITEMS.map((it) => (
+              <Line
+                key={it.key}
+                x1={it.lineX}
+                y1={it.y}
+                x2={it.indent - 10}
+                y2={it.y}
+                stroke={Ink}
+                strokeWidth={1.5}
+                strokeLinecap="round"
+              />
+            ))}
+          </Svg>
 
-        {firstLesson && firstBranch && firstPath ? (
-          <View style={styles.sketchBox}>
-            <View style={styles.lessonMeta}>
-              <Text style={styles.xpBadge}>25 XP</Text>
-            </View>
-            <Text style={styles.lessonTitle}>{firstLesson.title}</Text>
-            <Text style={styles.lessonDesc}>{firstLesson.description}</Text>
+          {ITEMS.map((it) => (
             <Pressable
-              style={({ pressed }) => [styles.startBtn, pressed && { opacity: 0.8 }]}
-              onPress={() =>
-                router.push(
-                  `/(app)/branches/${firstBranch.slug}/${firstPath.slug}/lesson/${firstLesson.id}`
-                )
-              }
-            >
-              <Text style={styles.startBtnText}>Start Lesson →</Text>
-            </Pressable>
-          </View>
-        ) : (
-          <View style={[styles.sketchBox, styles.emptyBox]}>
-            <Text style={styles.emptyText}>No lessons yet — check back soon.</Text>
-          </View>
-        )}
-
-        {/* Philosophy Branches */}
-        <View style={[styles.sectionRow, { marginTop: 24 }]}>
-          <Text style={styles.sectionHeading}>Philosophy Branches</Text>
-          <View style={styles.sectionHeadingLine} />
-        </View>
-
-        <View style={styles.branchGrid}>
-          {ALL_BRANCHES.map((branch) => (
-            <Pressable
-              key={branch.id}
-              onPress={() => router.push(`/(app)/branches/${branch.slug}`)}
+              key={it.key}
+              onPress={onPressFor[it.key]}
+              hitSlop={8}
               style={({ pressed }) => [
-                styles.branchBox,
-                pressed && { backgroundColor: '#F0EFEA' },
+                styles.menuItem,
+                { left: it.indent, top: it.y - 18 },
+                pressed && { opacity: 0.55 },
               ]}
             >
-              <Text style={styles.branchIcon}>{branch.icon}</Text>
-              <Text style={styles.branchName} numberOfLines={1}>
-                {branch.name}
-              </Text>
-              <Text style={styles.branchPaths}>
-                {branch.paths.length} path{branch.paths.length !== 1 ? 's' : ''}
-              </Text>
+              <Text style={styles.menuLabel}>{it.label}</Text>
             </Pressable>
           ))}
+        </View>
+
+        {/* Quote of the day text */}
+        <View style={styles.quoteBlock}>
+          <Pressable
+            onPress={() => router.push(`/(app)/philosophers/${quote.philosopherId}`)}
+            style={{ flex: 1 }}
+          >
+            <Text style={styles.quoteText}>"{quote.text}"</Text>
+            <Text style={styles.quoteAuthor}>— {quote.author}</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => toggleQuote({ ...quote, savedAt: Date.now() })}
+            hitSlop={10}
+            style={styles.bookmark}
+          >
+            <Ionicons
+              name={quoteSaved ? 'bookmark' : 'bookmark-outline'}
+              size={20}
+              color={quoteSaved ? Blue : InkSoft}
+            />
+          </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -108,155 +155,47 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: Paper,
-  },
+  safe: { flex: 1, backgroundColor: Paper },
+  scroll: { flex: 1 },
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 32 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 12,
-  },
-  title: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 40,
-    color: Ink,
-    lineHeight: 46,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: InkFaint,
-    marginHorizontal: 20,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 32,
-  },
-  sketchBox: {
-    borderWidth: 2,
-    borderColor: Ink,
-    borderRadius: 14,
-    padding: 20,
-    backgroundColor: Paper,
+    marginTop: 8,
     marginBottom: 8,
   },
-  sectionLabel: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 11,
-    color: InkSoft,
-    letterSpacing: 1.2,
-    marginBottom: 10,
+  title: {
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 38,
+    color: Ink,
+  },
+  menuItem: { position: 'absolute' },
+  menuLabel: {
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontStyle: 'italic',
+    fontSize: 20,
+    color: Ink,
+  },
+  quoteBlock: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 8,
+    paddingLeft: 52,
+    gap: 10,
   },
   quoteText: {
-    fontFamily: 'Caveat_400Regular',
-    fontSize: 22,
-    color: Ink,
+    fontFamily: 'PlayfairDisplay_400Regular',
     fontStyle: 'italic',
-    lineHeight: 30,
-    marginBottom: 10,
+    fontSize: 17,
+    color: Ink,
+    lineHeight: 26,
   },
-  quoteAttrib: {
+  quoteAuthor: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
     color: InkSoft,
+    marginTop: 8,
   },
-  sectionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    marginTop: 4,
-  },
-  sectionHeading: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 16,
-    color: Ink,
-    marginRight: 12,
-  },
-  sectionHeadingLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: InkFaint,
-  },
-  lessonMeta: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: 6,
-  },
-  xpBadge: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 13,
-    color: InkSoft,
-  },
-  lessonTitle: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 24,
-    color: Ink,
-    marginBottom: 6,
-  },
-  lessonDesc: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: InkSoft,
-    lineHeight: 21,
-    marginBottom: 16,
-  },
-  startBtn: {
-    backgroundColor: Ink,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  startBtnText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 15,
-    color: '#FFFFFF',
-  },
-  emptyBox: {
-    alignItems: 'center',
-    paddingVertical: 28,
-  },
-  emptyText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: InkSoft,
-  },
-  branchGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  branchBox: {
-    width: '47%',
-    borderWidth: 2,
-    borderColor: Ink,
-    borderRadius: 14,
-    padding: 16,
-    backgroundColor: Paper,
-    minHeight: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  branchIcon: {
-    fontSize: 28,
-    marginBottom: 6,
-  },
-  branchName: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 18,
-    color: Ink,
-    textAlign: 'center',
-    marginBottom: 2,
-  },
-  branchPaths: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: InkSoft,
-  },
+  bookmark: { paddingTop: 2 },
 });

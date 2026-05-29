@@ -1,5 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
 import { MotiView } from 'moti';
+import { useNarrateOnMount } from '../useNarrateOnMount';
 
 interface Props {
   explanation: string;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export default function IncorrectFeedback({ explanation, onContinue }: Props) {
+  useNarrateOnMount(`Not quite. ${explanation}`);
   return (
     <MotiView
       from={{ translateY: 120, opacity: 0 }}

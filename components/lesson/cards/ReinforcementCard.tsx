@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import type { ReinforcementCard as ReinforcementCardType, AnswerResult } from '@/data/types';
+import KineticNarration from '../KineticNarration';
 
 interface Props {
   card: ReinforcementCardType;
@@ -7,88 +9,37 @@ interface Props {
 }
 
 export default function ReinforcementCard({ card, onComplete }: Props) {
+  const [finished, setFinished] = useState(false);
+  const text = card.callout ? `${card.callout}. ${card.body}` : card.body;
+
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: '#FAFAF7',
-        paddingHorizontal: 24,
-        justifyContent: 'space-between',
-        paddingBottom: 32,
-      }}
-    >
-      {/* Center content */}
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        {card.emoji && (
-          <Text
-            style={{
-              fontSize: 56,
-              textAlign: 'center',
-              marginBottom: 24,
-            }}
-          >
-            {card.emoji}
-          </Text>
-        )}
+    <View style={{ flex: 1, backgroundColor: 'transparent', paddingBottom: 28 }}>
+      {card.emoji ? (
+        <Text style={{ fontSize: 40, textAlign: 'center', marginTop: 8 }}>{card.emoji}</Text>
+      ) : null}
 
-        {/* Callout label */}
-        {card.callout && (
-          <Text
-            style={{
-              fontFamily: 'Inter_500Medium',
-              fontSize: 13,
-              color: '#3B6FE8',
-              marginBottom: 8,
-            }}
-          >
-            {card.callout}
-          </Text>
-        )}
-
-        {/* Main box */}
-        <View
-          style={{
-            borderWidth: 2,
-            borderColor: '#1A1A1A',
-            borderRadius: 14,
-            padding: 20,
-            backgroundColor: '#F8F7F2',
-          }}
-        >
-          <Text
-            style={{
-              fontFamily: 'PlayfairDisplay_400Regular',
-              fontSize: 19,
-              color: '#1A1A1A',
-              lineHeight: 30,
-            }}
-          >
-            {card.body}
-          </Text>
-        </View>
+      <View style={{ flex: 1 }}>
+        <KineticNarration text={text} onDone={() => setFinished(true)} />
       </View>
 
-      {/* Continue button */}
-      <Pressable
-        onPress={() => onComplete()}
-        style={({ pressed }) => ({
-          backgroundColor: '#1A1A1A',
-          borderRadius: 14,
-          paddingVertical: 18,
-          alignItems: 'center',
-          opacity: pressed ? 0.75 : 1,
-        })}
-      >
-        <Text
-          style={{
-            fontFamily: 'Inter_700Bold',
-            fontSize: 18,
-            color: '#FAFAF7',
-          }}
-        >
-          Continue →
-        </Text>
-      </Pressable>
+      <View style={{ minHeight: 64, justifyContent: 'flex-end', paddingHorizontal: 24 }}>
+        {finished && (
+          <Pressable
+            onPress={() => onComplete()}
+            style={({ pressed }) => ({
+              backgroundColor: '#1A1A1A',
+              borderRadius: 14,
+              paddingVertical: 18,
+              alignItems: 'center',
+              opacity: pressed ? 0.75 : 1,
+            })}
+          >
+            <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 18, color: '#FAFAF7' }}>
+              Continue →
+            </Text>
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 }

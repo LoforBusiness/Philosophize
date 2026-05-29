@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Philosophize — Live Preview</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #111;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 24px 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .label {
+      color: #888;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* Phone shell */
+    .phone {
+      width: 320px;
+      height: 693px;
+      background: #1a1a1a;
+      border-radius: 46px;
+      padding: 14px;
+      box-shadow:
+        0 0 0 1px #333,
+        0 0 0 3px #1a1a1a,
+        0 0 0 4px #444,
+        0 30px 80px rgba(0,0,0,0.9);
+      position: relative;
+    }
+
+    /* Dynamic island notch */
+    .phone::before {
+      content: '';
+      position: absolute;
+      top: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 26px;
+      background: #1a1a1a;
+      border-radius: 14px;
+      z-index: 10;
+    }
+
+    /* Side buttons */
+    .phone::after {
+      content: '';
+      position: absolute;
+      right: -4px;
+      top: 120px;
+      width: 4px;
+      height: 64px;
+      background: #333;
+      border-radius: 0 3px 3px 0;
+      box-shadow: 0 80px 0 #333;
+    }
+
+    .phone .vol-btn {
+      position: absolute;
+      left: -4px;
+      top: 100px;
+      width: 4px;
+      height: 38px;
+      background: #333;
+      border-radius: 3px 0 0 3px;
+      box-shadow: 0 50px 0 #333, 0 100px 0 #333;
+    }
+
+    /* Screen area */
+    .screen {
+      width: 100%;
+      height: 100%;
+      border-radius: 34px;
+      overflow: hidden;
+      background: #fafaf7;
+      position: relative;
+    }
+
+    .screen iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Overlay shown when server is not running */
+    .offline {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: #fafaf7;
+      border-radius: 34px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: #6b6b6b;
+      font-size: 13px;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .offline .icon { font-size: 32px; }
+    .offline strong { color: #1a1a1a; font-size: 15px; }
+
+    .hint {
+      color: #555;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+
+    .refresh-btn {
+      margin-top: 6px;
+      background: none;
+      border: 1px solid #444;
+      color: #888;
+      padding: 6px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+
+    .refresh-btn:hover { border-color: #888; color: #ccc; }
+  </style>
+</head>
+<body>
+
+  <div class="label">Philosophize — Live Preview</div>
+
+  <div class="phone">
+    <div class="vol-btn"></div>
+    <div class="screen">
+      <iframe
+        id="appFrame"
+        src="http://localhost:8081"
+        title="App Preview"
+        allow="same-origin"
+      ></iframe>
+      <div class="offline" id="offline">
+        <div class="icon">📱</div>
+        <strong>Server not running</strong>
+        <span>Start the dev server first:</span>
+        <code style="background:#eee;padding:4px 8px;border-radius:6px;font-size:12px;color:#333;">npm run web</code>
+        <button class="refresh-btn" onclick="location.reload()">Reload preview</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint">Changes to code auto-refresh · port 8081</div>
+
+  <script>
+    const frame = document.getElementById('appFrame');
+    const offline = document.getElementById('offline');
+
+    frame.addEventListener('error', () => {
+      frame.style.display = 'none';
+      offline.style.display = 'flex';
+    });
+
+    // Try to detect if server is reachable
+    fetch('http://localhost:8081', { mode: 'no-cors' })
+      .catch(() => {
+        frame.style.display = 'none';
+        offline.style.display = 'flex';
+      });
+  </script>
+</body>
+</html>

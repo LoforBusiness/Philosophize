@@ -1,7 +1,10 @@
-import { View, Text } from 'react-native';
+import { useState } from 'react';
+import { View } from 'react-native';
+import { MotiView } from 'moti';
 import type { QuestionCard as QuestionCardType, AnswerResult } from '@/data/types';
 import MultipleChoice from '../interactions/MultipleChoice';
 import TrueFalse from '../interactions/TrueFalse';
+import KineticNarration from '../KineticNarration';
 
 interface Props {
   card: QuestionCardType;
@@ -9,6 +12,8 @@ interface Props {
 }
 
 export default function QuestionCard({ card, onComplete }: Props) {
+  const [promptDone, setPromptDone] = useState(false);
+
   function handleInteractionComplete(correct: boolean) {
     onComplete({
       cardIndex: 0,
@@ -18,57 +23,39 @@ export default function QuestionCard({ card, onComplete }: Props) {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#FAFAF7' }}>
-      {/* Question header */}
-      <View style={{ paddingHorizontal: 24, paddingTop: 20, marginBottom: 8 }}>
-        <Text
-          style={{
-            fontFamily: 'Inter_500Medium',
-            fontSize: 11,
-            color: '#6B6B6B',
-            textTransform: 'uppercase',
-            letterSpacing: 2,
-            marginBottom: 8,
-          }}
-        >
-          Question
-        </Text>
-        <Text
-          style={{
-            fontFamily: 'PlayfairDisplay_700Bold',
-            fontSize: 22,
-            color: '#1A1A1A',
-            lineHeight: 32,
-          }}
-        >
-          {card.prompt}
-        </Text>
+    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+      {/* Spoken, kinetic prompt */}
+      <View style={{ height: 190 }}>
+        <KineticNarration
+          text={card.prompt}
+          variant="prompt"
+          onDone={() => setPromptDone(true)}
+        />
       </View>
 
-      {/* Divider */}
-      <View
-        style={{
-          height: 1,
-          backgroundColor: '#E8E8E3',
-          marginTop: 16,
-          marginBottom: 4,
-        }}
-      />
-
-      {/* Interaction */}
-      {card.interaction.type === 'multiple-choice' && (
-        <MultipleChoice
-          interaction={card.interaction}
-          xpValue={card.xpValue}
-          onComplete={handleInteractionComplete}
-        />
-      )}
-      {card.interaction.type === 'true-false' && (
-        <TrueFalse
-          interaction={card.interaction}
-          xpValue={card.xpValue}
-          onComplete={handleInteractionComplete}
-        />
+      {/* Answer choices — never narrated, appear once the prompt has been read */}
+      {promptDone && (
+        <MotiView
+          from={{ opacity: 0, translateY: 16 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 240 }}
+          style={{ flex: 1 }}
+        >
+          {card.interaction.type === 'multiple-choice' && (
+            <MultipleChoice
+              interaction={card.interaction}
+              xpValue={card.xpValue}
+              onComplete={handleInteractionComplete}
+            />
+          )}
+          {card.interaction.type === 'true-false' && (
+            <TrueFalse
+              interaction={card.interaction}
+              xpValue={card.xpValue}
+              onComplete={handleInteractionComplete}
+            />
+          )}
+        </MotiView>
       )}
     </View>
   );
