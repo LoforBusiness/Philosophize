@@ -26,7 +26,15 @@ export type SketchIconName =
   | 'palette'
   | 'building'
   | 'book'
-  | 'chevron-down';
+  | 'chevron-down'
+  | 'bell'
+  | 'grad'
+  | 'lock'
+  | 'globe'
+  | 'clock'
+  | 'database'
+  | 'warning'
+  | 'pencil';
 
 interface Props {
   name: SketchIconName;
@@ -270,6 +278,74 @@ export default function SketchIcon({ name, color = '#1A1A1A', size = 28 }: Props
       )}
 
       {name === 'chevron-down' && <Path d="M8 12 L16 21 L24 12" {...s} />}
+
+      {name === 'bell' && (
+        <>
+          <Path d="M16 4 L16 6" {...s} />
+          <Path d="M16 6 C11.5 6 9.5 9.5 9.5 14 C9.5 20 6.5 21 6.5 23 L25.5 23 C25.5 21 22.5 20 22.5 14 C22.5 9.5 20.5 6 16 6 Z" {...s} />
+          <Path d="M13 23 C13 25.5 19 25.5 19 23" {...s} />
+        </>
+      )}
+
+      {name === 'grad' && (
+        <>
+          <Path d="M16 8 L29 13 L16 18 L3 13 Z" {...s} />
+          <Path d="M9 15.2 L9 21 C9 23.2 23 23.2 23 21 L23 15.2" {...s} />
+          <Path d="M27 13 L27 20.5" {...s} />
+          <Circle cx="27" cy="21.5" r="1.3" {...s} fill={color} />
+        </>
+      )}
+
+      {name === 'lock' && (
+        <>
+          <Path d="M8 14 L24 14 L24 27 L8 27 Z" {...s} />
+          <Path d="M11 14 L11 11 C11 6.5 21 6.5 21 11 L21 14" {...s} />
+          <Path d="M16 19 L16 22" {...s} />
+        </>
+      )}
+
+      {name === 'globe' && (
+        <>
+          <Circle cx="16" cy="16" r="11" {...s} />
+          <Path d="M16 5 C10 9 10 23 16 27" {...s} />
+          <Path d="M16 5 C22 9 22 23 16 27" {...s} />
+          <Path d="M5 16 L27 16" {...s} />
+          <Path d="M7.5 11 L24.5 11" {...s} />
+          <Path d="M7.5 21 L24.5 21" {...s} />
+        </>
+      )}
+
+      {name === 'clock' && (
+        <>
+          <Circle cx="16" cy="16" r="11" {...s} />
+          <Path d="M16 16 L16 9" {...s} />
+          <Path d="M16 16 L21 18.5" {...s} />
+        </>
+      )}
+
+      {name === 'database' && (
+        <>
+          <Path d="M6 8.5 C6 6 26 6 26 8.5 C26 11 6 11 6 8.5 Z" {...s} />
+          <Path d="M6 8.5 L6 23 C6 25.5 26 25.5 26 23 L26 8.5" {...s} />
+          <Path d="M6 16 C6 18.4 26 18.4 26 16" {...s} />
+        </>
+      )}
+
+      {name === 'warning' && (
+        <>
+          <Path d="M16 5 L28 26 L4 26 Z" {...s} />
+          <Path d="M16 13 L16 20" {...s} />
+          <Circle cx="16" cy="23" r="1" fill={color} />
+        </>
+      )}
+
+      {name === 'pencil' && (
+        <>
+          <Path d="M5 27 L7 20 L20 7 L25 12 L12 25 Z" {...s} />
+          <Path d="M18 9 L23 14" {...s} />
+          <Path d="M5 27 L7 20" {...s} />
+        </>
+      )}
     </Svg>
   );
 }

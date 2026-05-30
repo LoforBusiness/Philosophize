@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
 import { View, Text, Pressable, ScrollView, Alert, StyleSheet, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
+import Glyph from '@/components/shared/Glyph';
 import { signOut } from '@/lib/supabase/auth';
 import { ALL_BRANCHES } from '@/data';
 import { rankForXP } from '@/data/ranks';
+import { BADGES } from '@/data/badges';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 
@@ -101,6 +104,8 @@ export default function ProfileScreen() {
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
   const joinedAt = useUserDataStore((s) => s.joinedAt);
   const ensureJoinDate = useUserDataStore((s) => s.ensureJoinDate);
+  const displayName = useUserDataStore((s) => s.displayName);
+  const earnedBadges = useUserDataStore((s) => s.earnedBadges);
   const openRanksBadges = useUIStore((s) => s.openRanksBadges);
 
   useEffect(() => {
@@ -119,7 +124,6 @@ export default function ProfileScreen() {
     return { slug: b.slug, name: SHORT[b.slug] ?? b.name.toUpperCase(), icon: BICON[b.slug] ?? 'frame', pct };
   }).sort((a, b) => b.pct - a.pct);
 
-  const logicPct = mastery.find((m) => m.slug === 'logic')?.pct ?? 0;
   const topBranch = (mastery[0]?.pct ?? 0) > 0 ? mastery[0].slug : null;
   const descriptor = topBranch ? TITLE[topBranch] ?? 'SEEKER' : 'SEEKER';
 
@@ -132,16 +136,13 @@ export default function ProfileScreen() {
 
   const chips = weekChips(streak, lastLessonDate);
 
-  const badges: { label: string; icon: SketchIconName; earned: boolean }[] = [
-    { label: 'First Flame', icon: 'flame', earned: lessonsDone >= 1 },
-    { label: 'Deep Gaze', icon: 'eye', earned: distinctViewed >= 3 },
-    { label: 'Strategist', icon: 'spark', earned: (lessonsByBranch['logic'] ?? 0) >= 1 },
-    { label: 'Metaphysician', icon: 'spiral', earned: (lessonsByBranch['metaphysics'] ?? 0) >= 1 },
-    { label: 'Logician', icon: 'logic', earned: logicPct >= 50 },
-    { label: 'The Oracle', icon: 'star', earned: totalXP >= 5000 },
-    { label: 'League Top 5', icon: 'hat', earned: totalXP >= 1200 },
-    { label: '30-Day Streak', icon: 'star-filled', earned: streak >= 30 },
-  ];
+  // First eight of the shared badge set, earned-state from the persisted store.
+  const badges = BADGES.slice(0, 8).map((b) => ({
+    id: b.id,
+    name: b.name,
+    glyph: b.glyph,
+    earned: earnedBadges.includes(b.id),
+  }));
 
   function handleSignOut() {
     Alert.alert('Account', 'Sign out of Philosophize?', [
@@ -167,18 +168,18 @@ export default function ProfileScreen() {
       >
         {/* Dark header */}
         <View style={[styles.header, { paddingTop: insets.top + 18 }]}>
-          <Pressable style={styles.settingsBtn} hitSlop={10} onPress={handleSignOut}>
+          <Pressable style={styles.settingsBtn} hitSlop={10} onPress={() => router.push('/(app)/settings')}>
             <SketchIcon name="settings" size={22} color={Paper} />
           </Pressable>
 
           <View style={styles.avatar}>
-            <Text style={styles.avatarLetter}>P</Text>
+            <Text style={styles.avatarLetter}>{displayName.charAt(0).toUpperCase()}</Text>
             <View style={styles.avatarBadge}>
               <SketchIcon name="hat" size={14} color={Ink} />
             </View>
           </View>
 
-          <Text style={styles.name}>PHILOSOPHER</Text>
+          <Text style={styles.name}>{displayName.toUpperCase()}</Text>
           <Text style={styles.subtitle}>
             {descriptor} · {joinedLabel}
           </Text>
@@ -274,15 +275,15 @@ export default function ProfileScreen() {
           <Pressable style={styles.badgeGrid} onPress={() => openRanksBadges('badges')}>
             {badges.map((b) => (
               <View
-                key={b.label}
+                key={b.id}
                 style={[styles.badge, !b.earned && styles.badgeLocked]}
               >
-                <SketchIcon name={b.icon} size={22} color={b.earned ? Ink : InkFaint} />
+                <Glyph name={b.glyph} size={22} color={b.earned ? Ink : InkFaint} />
                 <Text
                   style={[styles.badgeLabel, !b.earned && { color: InkFaint }]}
                   numberOfLines={2}
                 >
-                  {b.label.toUpperCase()}
+                  {b.name.toUpperCase()}
                 </Text>
               </View>
             ))}

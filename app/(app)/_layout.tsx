@@ -31,6 +31,8 @@ export default function AppLayout() {
       <Tabs.Screen name="philosophers" options={{ title: 'Thinkers', tabBarIcon: tab('hat') }} />
       <Tabs.Screen name="stats" options={{ title: 'Stats', tabBarIcon: tab('frame') }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: tab('person') }} />
+      {/* Reachable via router.push from the profile, hidden from the tab bar */}
+      <Tabs.Screen name="settings" options={{ href: null }} />
     </Tabs>
   );
 }
