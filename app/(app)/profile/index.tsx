@@ -1,27 +1,150 @@
-import { View, Text, Pressable, ScrollView, Alert, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import SketchIcon from '@/components/shared/SketchIcon';
+import { useEffect } from 'react';
+import { View, Text, Pressable, ScrollView, Alert, StyleSheet, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import { signOut } from '@/lib/supabase/auth';
 import { ALL_BRANCHES } from '@/data';
+import { rankForXP } from '@/data/ranks';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
-const InkFaint = '#E8E8E3';
-const Crimson = '#A83232';
+const InkFaint = '#E2E0D8';
+const Gold = '#C9A86A';
+const PaperMute = '#9C9A93';
+const Track = '#E6E4DC';
+
+const SW = Dimensions.get('window').width;
+const BADGE_W = (SW - 40 - 30) / 4; // 20px page padding, three 10px gaps
+
+const SHORT: Record<string, string> = {
+  logic: 'LOGIC',
+  ethics: 'ETHICS',
+  epistemology: 'EPISTEMOLOGY',
+  metaphysics: 'METAPHYSICS',
+  aesthetics: 'AESTHETICS',
+  'political-philosophy': 'POLITICS',
+};
+const BICON: Record<string, SketchIconName> = {
+  logic: 'logic',
+  ethics: 'scales',
+  epistemology: 'eye',
+  metaphysics: 'spiral',
+  aesthetics: 'palette',
+  'political-philosophy': 'building',
+};
+const TITLE: Record<string, string> = {
+  logic: 'LOGICIAN',
+  ethics: 'ETHICIST',
+  epistemology: 'EPISTEMOLOGIST',
+  metaphysics: 'METAPHYSICIAN',
+  aesthetics: 'AESTHETE',
+  'political-philosophy': 'THEORIST',
+};
+
+const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+
+const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+
+// Mon–Sun chips for the current week, marking which days are inside the streak.
+function weekChips(streak: number, lastLessonDate: string | null) {
+  const labels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dow = (today.getDay() + 6) % 7; // Monday = 0
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - dow);
+  const todayKey = dayKey(today);
+
+  let last = today;
+  if (lastLessonDate) {
+    const [y, m, d] = lastLessonDate.split('-').map(Number);
+    if (y && m && d) {
+      const ld = new Date(y, m - 1, d);
+      ld.setHours(0, 0, 0, 0);
+      if (!isNaN(ld.getTime())) last = ld;
+    }
+  }
+  const active = new Set<string>();
+  for (let k = 0; k < streak; k++) {
+    const d = new Date(last);
+    d.setDate(last.getDate() - k);
+    active.add(dayKey(d));
+  }
+
+  return labels.map((label, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const key = dayKey(d);
+    const state = active.has(key) ? 'filled' : key === todayKey ? 'today' : 'faint';
+    return { label, state };
+  });
+}
+
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <View style={styles.sectionRow}>
+      <Text style={styles.sectionLabel}>{children}</Text>
+      <View style={styles.sectionLine} />
+    </View>
+  );
+}
 
 export default function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
-  const removeQuote = useUserDataStore((s) => s.removeQuote);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
-  const completedLessons = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
-  const openPhilosopher = useUIStore((s) => s.openPhilosopher);
+  const philosopherViews = useUserDataStore((s) => s.philosopherViews);
+  const streak = useUserDataStore((s) => s.streak);
+  const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
+  const joinedAt = useUserDataStore((s) => s.joinedAt);
+  const ensureJoinDate = useUserDataStore((s) => s.ensureJoinDate);
+  const openRanksBadges = useUIStore((s) => s.openRanksBadges);
 
-  async function handleSignOut() {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+  useEffect(() => {
+    ensureJoinDate();
+  }, [ensureJoinDate]);
+
+  const lessonsDone = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
+  const quotesSaved = savedQuotes.length;
+  const distinctViewed = Object.keys(philosopherViews).length;
+  const totalXP = lessonsDone * 25 + quotesSaved * 10 + distinctViewed * 5;
+
+  const mastery = ALL_BRANCHES.map((b) => {
+    const total = b.paths.reduce((acc, p) => acc + p.lessons.length, 0);
+    const done = lessonsByBranch[b.slug] ?? 0;
+    const pct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
+    return { slug: b.slug, name: SHORT[b.slug] ?? b.name.toUpperCase(), icon: BICON[b.slug] ?? 'frame', pct };
+  }).sort((a, b) => b.pct - a.pct);
+
+  const logicPct = mastery.find((m) => m.slug === 'logic')?.pct ?? 0;
+  const topBranch = (mastery[0]?.pct ?? 0) > 0 ? mastery[0].slug : null;
+  const descriptor = topBranch ? TITLE[topBranch] ?? 'SEEKER' : 'SEEKER';
+
+  const { current: cur, next } = rankForXP(totalXP);
+  const nextThreshold = next?.xp ?? cur.xp;
+  const rankPct = next ? Math.min(1, totalXP / next.xp) : 1;
+
+  const join = joinedAt ? new Date(joinedAt) : new Date();
+  const joinedLabel = `JOINED ${MONTHS[join.getMonth()]} ${join.getFullYear()}`;
+
+  const chips = weekChips(streak, lastLessonDate);
+
+  const badges: { label: string; icon: SketchIconName; earned: boolean }[] = [
+    { label: 'First Flame', icon: 'flame', earned: lessonsDone >= 1 },
+    { label: 'Deep Gaze', icon: 'eye', earned: distinctViewed >= 3 },
+    { label: 'Strategist', icon: 'spark', earned: (lessonsByBranch['logic'] ?? 0) >= 1 },
+    { label: 'Metaphysician', icon: 'spiral', earned: (lessonsByBranch['metaphysics'] ?? 0) >= 1 },
+    { label: 'Logician', icon: 'logic', earned: logicPct >= 50 },
+    { label: 'The Oracle', icon: 'star', earned: totalXP >= 5000 },
+    { label: 'League Top 5', icon: 'hat', earned: totalXP >= 1200 },
+    { label: '30-Day Streak', icon: 'star-filled', earned: streak >= 30 },
+  ];
+
+  function handleSignOut() {
+    Alert.alert('Account', 'Sign out of Philosophize?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Sign Out',
@@ -35,302 +158,281 @@ export default function ProfileScreen() {
     ]);
   }
 
-  const totalLessons = ALL_BRANCHES.reduce(
-    (acc, b) => acc + b.paths.reduce((pa, p) => pa + p.lessons.length, 0),
-    0
-  );
-
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={styles.root}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Page title */}
-        <Text style={styles.pageTitle}>Profile</Text>
+        {/* Dark header */}
+        <View style={[styles.header, { paddingTop: insets.top + 18 }]}>
+          <Pressable style={styles.settingsBtn} hitSlop={10} onPress={handleSignOut}>
+            <SketchIcon name="settings" size={22} color={Paper} />
+          </Pressable>
 
-        {/* Divider */}
-        <View style={styles.divider} />
-
-        {/* Avatar card */}
-        <View style={[styles.sketchBox, styles.avatarBox]}>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarSymbol}>∞</Text>
-          </View>
-          <Text style={styles.userName}>Philosopher</Text>
-          <Text style={styles.userLevel}>Level 1 · 0 XP</Text>
-        </View>
-
-        {/* Stats row */}
-        <View style={styles.statsRow}>
-          {[
-            { label: 'Streak', value: '0 days' },
-            { label: 'Lessons', value: `${completedLessons} / ${totalLessons}` },
-            { label: 'Saved', value: `${savedQuotes.length}` },
-          ].map((stat) => (
-            <View key={stat.label} style={[styles.sketchBox, styles.statBox]}>
-              <Text style={styles.statValue}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarLetter}>P</Text>
+            <View style={styles.avatarBadge}>
+              <SketchIcon name="hat" size={14} color={Ink} />
             </View>
-          ))}
+          </View>
+
+          <Text style={styles.name}>PHILOSOPHER</Text>
+          <Text style={styles.subtitle}>
+            {descriptor} · {joinedLabel}
+          </Text>
+
+          <Pressable
+            style={({ pressed }) => [styles.rankChip, pressed && { opacity: 0.7 }]}
+            onPress={() => openRanksBadges('ranks')}
+          >
+            <SketchIcon name="star" size={13} color={Paper} />
+            <Text style={styles.rankChipText}>RANK: {cur.name.toUpperCase()}</Text>
+          </Pressable>
         </View>
 
-        {/* Saved Quotes section */}
-        <View style={styles.sectionRow}>
-          <Text style={styles.sectionHeading}>Saved Quotes</Text>
-          <View style={styles.sectionLine} />
-        </View>
+        {/* Body */}
+        <View style={styles.body}>
+          <SectionLabel>AT A GLANCE</SectionLabel>
+          <View style={styles.glanceRow}>
+            <View style={styles.glanceBox}>
+              <SketchIcon name="book" size={20} color={Ink} />
+              <Text style={styles.glanceValue}>{lessonsDone}</Text>
+              <Text style={styles.glanceLabel}>LESSONS DONE</Text>
+            </View>
+            <View style={styles.glanceBox}>
+              <SketchIcon name="star" size={20} color={Ink} />
+              <Text style={styles.glanceValue}>{totalXP.toLocaleString()}</Text>
+              <Text style={styles.glanceLabel}>TOTAL XP</Text>
+            </View>
+          </View>
 
-        {savedQuotes.length === 0 ? (
-          <View style={[styles.sketchBox, styles.emptyQuotesBox]}>
-            <Text style={styles.emptyQuotesText}>
-              No saved quotes yet. Open a thinker and tap the bookmark to keep
-              their words here.
+          <SectionLabel>DAILY STREAK</SectionLabel>
+          <View style={styles.streakBox}>
+            <View style={styles.streakLeft}>
+              <Text style={styles.streakNum}>{streak}</Text>
+              <Text style={styles.streakWord}>DAY STREAK</Text>
+            </View>
+            <View style={styles.chipsRow}>
+              {chips.map((c, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.dayChip,
+                    c.state === 'filled' && styles.dayChipFilled,
+                    c.state === 'today' && styles.dayChipToday,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.dayChipText,
+                      c.state === 'filled' && { color: Paper },
+                      c.state === 'faint' && { color: InkFaint },
+                    ]}
+                  >
+                    {c.label}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <SectionLabel>PROGRESS TO NEXT RANK</SectionLabel>
+          <View style={styles.rankBox}>
+            <View style={styles.rankBoxTop}>
+              <Text style={styles.rankName}>{cur.name}</Text>
+              <Text style={styles.rankXp}>
+                {totalXP.toLocaleString()} / {nextThreshold.toLocaleString()} XP
+              </Text>
+            </View>
+            <View style={styles.bigTrack}>
+              <View style={[styles.bigFill, { width: `${Math.round(rankPct * 100)}%` }]} />
+            </View>
+            <Text style={styles.rankUntil}>
+              {next
+                ? `${(nextThreshold - totalXP).toLocaleString()} XP UNTIL ${next.name.toUpperCase()}`
+                : 'HIGHEST RANK ACHIEVED'}
             </Text>
-            <Pressable
-              onPress={() => router.push('/(app)/philosophers')}
-              style={({ pressed }) => [styles.browseBtn, pressed && { opacity: 0.7 }]}
-            >
-              <Text style={styles.browseBtnText}>Browse Thinkers →</Text>
-            </Pressable>
           </View>
-        ) : (
-          savedQuotes.map((q) => (
-            <View key={q.id} style={[styles.sketchBox, styles.quoteBox]}>
-              <View style={styles.quoteContent}>
-                <Text style={styles.quoteText}>"{q.text}"</Text>
-                <Pressable onPress={() => openPhilosopher(q.philosopherId)} hitSlop={6}>
-                  <Text style={styles.quoteAuthor}>— {q.author}</Text>
-                </Pressable>
+
+          <SectionLabel>BRANCH MASTERY</SectionLabel>
+          <View style={styles.masteryBox}>
+            {mastery.map((m) => (
+              <View key={m.slug} style={styles.masteryRow}>
+                <SketchIcon name={m.icon} size={18} color={Ink} />
+                <Text style={styles.masteryName}>{m.name}</Text>
+                <View style={styles.masteryTrack}>
+                  <View style={[styles.masteryFill, { width: `${m.pct}%` }]} />
+                </View>
+                <Text style={styles.masteryPct}>{m.pct}%</Text>
               </View>
-              <Pressable
-                onPress={() => removeQuote(q.id)}
-                hitSlop={10}
-                style={styles.removeBtn}
+            ))}
+          </View>
+
+          <SectionLabel>BADGES EARNED</SectionLabel>
+          <Pressable style={styles.badgeGrid} onPress={() => openRanksBadges('badges')}>
+            {badges.map((b) => (
+              <View
+                key={b.label}
+                style={[styles.badge, !b.earned && styles.badgeLocked]}
               >
-                <SketchIcon name="bookmark-filled" size={20} color={Ink} />
-              </Pressable>
-            </View>
-          ))
-        )}
-
-        {/* Progress section */}
-        <View style={[styles.sectionRow, { marginTop: 24 }]}>
-          <Text style={styles.sectionHeading}>Progress</Text>
-          <View style={styles.sectionLine} />
-        </View>
-
-        {ALL_BRANCHES.map((branch) => (
-          <View key={branch.id} style={[styles.sketchBox, styles.progressBox]}>
-            <View style={styles.progressRow}>
-              <Text style={styles.branchIcon}>{branch.icon}</Text>
-              <View style={styles.progressInfo}>
-                <Text style={styles.branchName}>{branch.name}</Text>
-                <Text style={styles.branchMeta}>
-                  {branch.paths.length > 0
-                    ? `${branch.paths.length} path${branch.paths.length !== 1 ? 's' : ''} available`
-                    : 'Coming soon'}
+                <SketchIcon name={b.icon} size={22} color={b.earned ? Ink : InkFaint} />
+                <Text
+                  style={[styles.badgeLabel, !b.earned && { color: InkFaint }]}
+                  numberOfLines={2}
+                >
+                  {b.label.toUpperCase()}
                 </Text>
               </View>
-            </View>
-          </View>
-        ))}
+            ))}
+          </Pressable>
 
-        {/* Sign out */}
-        <Pressable
-          onPress={handleSignOut}
-          style={({ pressed }) => [styles.signOutBtn, pressed && { opacity: 0.7 }]}
-        >
-          <Text style={styles.signOutText}>Sign Out</Text>
-        </Pressable>
+          <Pressable onPress={handleSignOut} style={styles.signOut} hitSlop={8}>
+            <Text style={styles.signOutText}>Sign Out</Text>
+          </Pressable>
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: Paper,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  pageTitle: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 40,
-    color: Ink,
-    paddingTop: 16,
-    paddingBottom: 12,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: InkFaint,
-    marginBottom: 20,
-  },
-  sketchBox: {
-    borderWidth: 2,
-    borderColor: Ink,
-    borderRadius: 14,
-    backgroundColor: Paper,
-  },
-  avatarBox: {
+  root: { flex: 1, backgroundColor: Ink },
+  scroll: { flex: 1, backgroundColor: Paper },
+
+  header: {
+    backgroundColor: Ink,
     alignItems: 'center',
-    padding: 28,
-    marginBottom: 16,
+    paddingBottom: 26,
+    paddingHorizontal: 20,
   },
-  avatarCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  settingsBtn: { position: 'absolute', right: 16, top: 0, padding: 8 },
+  avatar: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     borderWidth: 2,
+    borderColor: Paper,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarLetter: { fontFamily: 'Caveat_700Bold', fontSize: 44, color: Paper, lineHeight: 50 },
+  avatarBadge: {
+    position: 'absolute',
+    right: -4,
+    bottom: -4,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: Paper,
+    borderWidth: 1.5,
     borderColor: Ink,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
-    backgroundColor: Paper,
   },
-  avatarSymbol: {
-    fontSize: 32,
-    color: Ink,
-    fontFamily: 'Caveat_700Bold',
-  },
-  userName: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 24,
-    color: Ink,
-    marginBottom: 4,
-  },
-  userLevel: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: InkSoft,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 24,
-  },
-  statBox: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 14,
-  },
-  statValue: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 22,
-    color: Ink,
-    marginBottom: 2,
-  },
-  statLabel: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 11,
-    color: InkSoft,
-  },
-  sectionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionHeading: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 16,
-    color: Ink,
-    marginRight: 12,
-  },
-  sectionLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: InkFaint,
-  },
-  progressBox: {
-    padding: 16,
-    marginBottom: 10,
-  },
-  progressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  branchIcon: {
-    fontSize: 24,
-    marginRight: 12,
-  },
-  progressInfo: {
-    flex: 1,
-  },
-  branchName: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 15,
-    color: Ink,
-    marginBottom: 2,
-  },
-  branchMeta: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: InkSoft,
-  },
-  emptyQuotesBox: {
-    padding: 18,
-    marginBottom: 4,
-    borderColor: InkFaint,
-  },
-  emptyQuotesText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: InkSoft,
-    lineHeight: 21,
-    marginBottom: 14,
-  },
-  browseBtn: {
-    backgroundColor: Ink,
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  browseBtnText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 14,
+  name: {
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 26,
     color: Paper,
+    letterSpacing: 2,
+    marginTop: 14,
   },
-  quoteBox: {
+  subtitle: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 10,
+    color: Gold,
+    letterSpacing: 2,
+    marginTop: 6,
+  },
+  rankChip: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    padding: 16,
-    marginBottom: 10,
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1.5,
+    borderColor: Paper,
+    borderRadius: 3,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    marginTop: 14,
+  },
+  rankChipText: { fontFamily: 'Inter_700Bold', fontSize: 11, color: Paper, letterSpacing: 1 },
+
+  body: { paddingHorizontal: 20, paddingTop: 20 },
+
+  sectionRow: { flexDirection: 'row', alignItems: 'center', marginTop: 24, marginBottom: 12 },
+  sectionLabel: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, letterSpacing: 3, marginRight: 12 },
+  sectionLine: { flex: 1, height: 1, backgroundColor: InkFaint },
+
+  glanceRow: { flexDirection: 'row', gap: 12 },
+  glanceBox: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 3,
+    paddingVertical: 18,
+    alignItems: 'center',
+  },
+  glanceValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: Ink, marginTop: 8 },
+  glanceLabel: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft, letterSpacing: 1.5, marginTop: 2 },
+
+  streakBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 3,
+    padding: 14,
     gap: 12,
   },
-  quoteContent: { flex: 1 },
-  quoteText: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontSize: 16,
-    fontStyle: 'italic',
-    color: Ink,
-    lineHeight: 25,
-    marginBottom: 8,
-  },
-  quoteAuthor: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 13,
-    color: InkSoft,
-  },
-  removeBtn: { padding: 2 },
-  signOutBtn: {
-    borderWidth: 2,
-    borderColor: Crimson,
-    borderRadius: 14,
-    padding: 16,
+  streakLeft: { alignItems: 'center', width: 60 },
+  streakNum: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 30, color: Ink, lineHeight: 34 },
+  streakWord: { fontFamily: 'Inter_500Medium', fontSize: 8, color: InkSoft, letterSpacing: 1 },
+  chipsRow: { flexDirection: 'row', flex: 1, justifyContent: 'space-between' },
+  dayChip: {
+    width: 30,
+    height: 30,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: InkFaint,
     alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 8,
+    justifyContent: 'center',
   },
-  signOutText: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 15,
-    color: Crimson,
+  dayChipFilled: { backgroundColor: Ink, borderColor: Ink },
+  dayChipToday: { borderColor: Ink },
+  dayChipText: { fontFamily: 'Inter_700Bold', fontSize: 10, color: Ink },
+
+  rankBox: { borderWidth: 1.5, borderColor: Ink, borderRadius: 3, padding: 16 },
+  rankBoxTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 },
+  rankName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 20, color: Ink },
+  rankXp: { fontFamily: 'Inter_400Regular', fontSize: 13, color: InkSoft },
+  bigTrack: { height: 8, borderRadius: 4, backgroundColor: Track, overflow: 'hidden' },
+  bigFill: { height: 8, borderRadius: 4, backgroundColor: Ink },
+  rankUntil: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft, letterSpacing: 1, textAlign: 'right', marginTop: 10 },
+
+  masteryBox: { gap: 16 },
+  masteryRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  masteryName: { fontFamily: 'Inter_700Bold', fontSize: 11, color: Ink, letterSpacing: 0.5, width: 96 },
+  masteryTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: Track, overflow: 'hidden' },
+  masteryFill: { height: 6, borderRadius: 3, backgroundColor: Ink },
+  masteryPct: { fontFamily: 'Inter_500Medium', fontSize: 12, color: InkSoft, width: 38, textAlign: 'right' },
+
+  badgeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  badge: {
+    width: BADGE_W,
+    minHeight: 70,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    gap: 8,
   },
+  badgeLocked: { borderColor: InkFaint, opacity: 0.7 },
+  badgeLabel: { fontFamily: 'Inter_700Bold', fontSize: 8, color: Ink, letterSpacing: 0.5, textAlign: 'center' },
+
+  signOut: { alignSelf: 'center', marginTop: 30, padding: 10 },
+  signOutText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: InkSoft },
 });

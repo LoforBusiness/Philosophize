@@ -21,6 +21,7 @@ interface UserDataState {
   beliefResultId: string | null;             // philosopher id from the "What Would You Believe?" quiz
   streak: number;                             // consecutive-day streak
   lastLessonDate: string | null;             // YYYY-MM-DD of last completed lesson
+  joinedAt: number | null;                    // epoch ms of first app open
   _hasHydrated: boolean;
 
   saveQuote: (q: SavedQuote) => void;
@@ -31,6 +32,7 @@ interface UserDataState {
   recordLessonComplete: (branchSlug: string) => void;
   setVoiceEnabled: (v: boolean) => void;
   setBeliefResult: (id: string | null) => void;
+  ensureJoinDate: () => void;
   registerDailyActivity: (
     today: string,
     yesterday: string
@@ -48,6 +50,7 @@ export const useUserDataStore = create<UserDataState>()(
       beliefResultId: null,
       streak: 0,
       lastLessonDate: null,
+      joinedAt: null,
       _hasHydrated: false,
 
       saveQuote: (q) =>
@@ -93,6 +96,10 @@ export const useUserDataStore = create<UserDataState>()(
 
       setBeliefResult: (id) => set({ beliefResultId: id }),
 
+      ensureJoinDate: () => {
+        if (get().joinedAt == null) set({ joinedAt: Date.now() });
+      },
+
       registerDailyActivity: (today, yesterday) => {
         const { lastLessonDate, streak } = get();
         if (lastLessonDate === today) {
@@ -117,6 +124,7 @@ export const useUserDataStore = create<UserDataState>()(
         beliefResultId: state.beliefResultId,
         streak: state.streak,
         lastLessonDate: state.lastLessonDate,
+        joinedAt: state.joinedAt,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);

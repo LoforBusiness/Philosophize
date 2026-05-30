@@ -1,9 +1,8 @@
 import { View, Text, ScrollView, Pressable, StyleSheet, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path, Line } from 'react-native-svg';
-import SketchIcon from '@/components/shared/SketchIcon';
-import { ALL_BRANCHES } from '@/data';
+import Svg, { Line } from 'react-native-svg';
+import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -11,9 +10,13 @@ import { useUIStore } from '@/stores/uiStore';
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
+const InkFaint = '#CFCDC6';
+const Rule = '#ECEAE2';
 
 const SW = Dimensions.get('window').width;
-const W = SW - 40;
+const SH = Dimensions.get('window').height;
+
+const STREAK_GOAL = 7;
 
 // Daily quote pool from the philosophers.
 const QUOTE_POOL = ALL_PHILOSOPHERS.flatMap((p) =>
@@ -26,129 +29,146 @@ const QUOTE_POOL = ALL_PHILOSOPHERS.flatMap((p) =>
   }))
 );
 
-// Meander menu items: y position, label indent, and where the line sits at that y.
-const ITEMS = [
-  { key: 'insight', label: 'Insight', y: 34, indent: 86, lineX: 40 },
-  { key: 'learn', label: 'Learn', y: 116, indent: 52, lineX: 24 },
-  { key: 'philosophers', label: 'Philosophers', y: 198, indent: 94, lineX: 48 },
-  { key: 'quote', label: 'Quote of the Day', y: 272, indent: 52, lineX: 24 },
-];
-const MEANDER_H = 300;
-
-function meanderPath(): string {
-  const pts = [
-    { x: 40, y: 0 },
-    ...ITEMS.map((it) => ({ x: it.lineX, y: it.y })),
-    { x: 34, y: MEANDER_H },
-  ];
-  let d = `M ${pts[0].x} ${pts[0].y}`;
-  for (let i = 1; i < pts.length; i++) {
-    const prev = pts[i - 1];
-    const cur = pts[i];
-    const midY = (prev.y + cur.y) / 2;
-    d += ` C ${prev.x} ${midY}, ${cur.x} ${midY}, ${cur.x} ${cur.y}`;
-  }
-  return d;
+// Faint ruled-paper texture behind the whole page (fixed, non-scrolling).
+function RuledPaper() {
+  const lines: number[] = [];
+  for (let y = 70; y < SH; y += 34) lines.push(y);
+  return (
+    <Svg
+      width={SW}
+      height={SH}
+      style={StyleSheet.absoluteFill}
+      pointerEvents="none"
+    >
+      {lines.map((y) => (
+        <Line key={y} x1={0} y1={y} x2={SW} y2={y} stroke={Rule} strokeWidth={1} />
+      ))}
+    </Svg>
+  );
 }
 
-export default function DiscoverScreen() {
+function ActionCard({
+  icon,
+  label,
+  sub,
+  filled,
+  onPress,
+}: {
+  icon: SketchIconName;
+  label: string;
+  sub: string;
+  filled?: boolean;
+  onPress: () => void;
+}) {
+  const fg = filled ? Paper : Ink;
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.action,
+        filled && styles.actionFilled,
+        pressed && { opacity: 0.85 },
+      ]}
+    >
+      <View style={[styles.actionIconBox, { borderColor: fg }]}>
+        <SketchIcon name={icon} size={18} color={fg} />
+      </View>
+      <Text style={[styles.actionLabel, { color: fg }]}>{label}</Text>
+      <Text style={[styles.actionSub, { color: filled ? '#CBC9C2' : InkSoft }]}>{sub}</Text>
+    </Pressable>
+  );
+}
+
+export default function HomeScreen() {
+  const openPhilosopher = useUIStore((s) => s.openPhilosopher);
+  const streak = useUserDataStore((s) => s.streak);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
-  const openPhilosopher = useUIStore((s) => s.openPhilosopher);
 
   const dayNumber = Math.floor(Date.now() / 86_400_000);
   const quote = QUOTE_POOL[dayNumber % QUOTE_POOL.length];
   const quoteSaved = savedQuotes.some((q) => q.id === quote.id);
 
-  // First lesson = "Insight" jump-in target.
-  const firstBranch = ALL_BRANCHES[0];
-  const firstPath = firstBranch?.paths[0];
-  const firstLesson = firstPath?.lessons[0];
-
-  function goInsight() {
-    if (firstBranch && firstPath && firstLesson) {
-      router.push(
-        `/(app)/branches/${firstBranch.slug}/${firstPath.slug}/lesson/${firstLesson.id}`
-      );
-    }
-  }
-
-  const onPressFor: Record<string, () => void> = {
-    insight: goInsight,
-    learn: () => router.push('/(app)/branches'),
-    philosophers: () => router.push('/(app)/philosophers'),
-    quote: () => openPhilosopher(quote.philosopherId),
-  };
+  const filledStars = Math.min(Math.max(streak, 0), STREAK_GOAL);
 
   return (
     <SafeAreaView style={styles.safe}>
+      <RuledPaper />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Discover</Text>
-          <Pressable hitSlop={8} onPress={() => router.push('/(app)/profile')}>
-            <SketchIcon name="settings" size={24} color={InkSoft} />
-          </Pressable>
-        </View>
+        {/* Masthead */}
+        <Text style={styles.kicker}>EST. ANTIQUITY  ·  VOL. I</Text>
+        <Text style={styles.wordmark}>PHILOSOPHIZE</Text>
+        <View style={styles.rule} />
+        <Text style={styles.tagline}>the art of thinking deeply</Text>
+        <Text style={styles.diamonds}>◇   ◆   ◇</Text>
 
-        {/* Meandering menu */}
-        <View style={{ width: W, height: MEANDER_H }}>
-          <Svg width={W} height={MEANDER_H} style={StyleSheet.absoluteFill}>
-            <Path d={meanderPath()} fill="none" stroke={Ink} strokeWidth={2} strokeLinecap="round" />
-            {ITEMS.map((it) => (
-              <Line
-                key={it.key}
-                x1={it.lineX}
-                y1={it.y}
-                x2={it.indent - 10}
-                y2={it.y}
-                stroke={Ink}
-                strokeWidth={1.5}
-                strokeLinecap="round"
-              />
-            ))}
-          </Svg>
-
-          {ITEMS.map((it) => (
-            <Pressable
-              key={it.key}
-              onPress={onPressFor[it.key]}
-              hitSlop={8}
-              style={({ pressed }) => [
-                styles.menuItem,
-                { left: it.indent, top: it.y - 18 },
-                pressed && { opacity: 0.55 },
-              ]}
-            >
-              <Text style={styles.menuLabel}>{it.label}</Text>
+        {/* Daily reflection */}
+        <View style={styles.reflectionWrap}>
+          <View style={styles.reflectionCard}>
+            <Text style={styles.qmark}>“</Text>
+            <Pressable onPress={() => openPhilosopher(quote.philosopherId)}>
+              <Text style={styles.reflectionText}>{quote.text}</Text>
             </Pressable>
-          ))}
+            <View style={styles.reflectionFooter}>
+              <Pressable
+                hitSlop={10}
+                onPress={() => toggleQuote({ ...quote, savedAt: Date.now() })}
+              >
+                <SketchIcon
+                  name={quoteSaved ? 'bookmark-filled' : 'bookmark'}
+                  size={18}
+                  color={quoteSaved ? Ink : InkSoft}
+                />
+              </Pressable>
+              <Pressable style={{ flex: 1 }} onPress={() => openPhilosopher(quote.philosopherId)}>
+                <Text style={styles.reflectionAuthor}>— {quote.author.toUpperCase()}</Text>
+              </Pressable>
+            </View>
+          </View>
+          <View style={styles.reflectionTab}>
+            <Text style={styles.reflectionTabText}>DAILY REFLECTION</Text>
+          </View>
         </View>
 
-        {/* Quote of the day text */}
-        <View style={styles.quoteBlock}>
-          <Pressable
-            onPress={() => openPhilosopher(quote.philosopherId)}
-            style={{ flex: 1 }}
-          >
-            <Text style={styles.quoteText}>"{quote.text}"</Text>
-            <Text style={styles.quoteAuthor}>— {quote.author}</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => toggleQuote({ ...quote, savedAt: Date.now() })}
-            hitSlop={10}
-            style={styles.bookmark}
-          >
+        {/* Actions */}
+        <View style={styles.actionsRow}>
+          <ActionCard
+            icon="flame"
+            label="LEARN"
+            sub="Guided paths"
+            onPress={() => router.push('/(app)/branches')}
+          />
+          <ActionCard
+            icon="person"
+            label="PHILOSOPHERS"
+            sub="Great thinkers"
+            onPress={() => router.push('/(app)/philosophers')}
+          />
+          <ActionCard
+            icon="spark"
+            label="INSIGHTS"
+            sub="Deep ideas"
+            onPress={() => router.push('/(app)/stats')}
+          />
+        </View>
+
+        {/* Streak */}
+        <View style={styles.streakRow}>
+          {Array.from({ length: STREAK_GOAL }).map((_, i) => (
             <SketchIcon
-              name={quoteSaved ? 'bookmark-filled' : 'bookmark'}
-              size={20}
-              color={quoteSaved ? Ink : InkSoft}
+              key={i}
+              name={i < filledStars ? 'star-filled' : 'star'}
+              size={16}
+              color={i < filledStars ? Ink : InkFaint}
             />
-          </Pressable>
+          ))}
+          <Text style={styles.streakLabel}>
+            {streak} DAY STREAK
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -158,45 +178,152 @@ export default function DiscoverScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Paper },
   scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 32 },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  scrollContent: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 40 },
+
+  kicker: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 10,
+    color: InkSoft,
+    letterSpacing: 3,
+    textAlign: 'center',
     marginTop: 8,
-    marginBottom: 8,
   },
-  title: {
+  wordmark: {
     fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 38,
+    fontSize: 42,
     color: Ink,
+    letterSpacing: 3,
+    textAlign: 'center',
+    marginTop: 10,
   },
-  menuItem: { position: 'absolute' },
-  menuLabel: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontStyle: 'italic',
-    fontSize: 20,
-    color: Ink,
-  },
-  quoteBlock: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+  rule: {
+    alignSelf: 'center',
+    width: '66%',
+    height: 1.5,
+    backgroundColor: Ink,
     marginTop: 8,
-    paddingLeft: 52,
-    gap: 10,
+    marginBottom: 12,
   },
-  quoteText: {
+  tagline: {
     fontFamily: 'PlayfairDisplay_400Regular',
     fontStyle: 'italic',
-    fontSize: 17,
-    color: Ink,
-    lineHeight: 26,
-  },
-  quoteAuthor: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
+    fontSize: 15,
     color: InkSoft,
-    marginTop: 8,
+    textAlign: 'center',
   },
-  bookmark: { paddingTop: 2 },
+  diamonds: {
+    fontSize: 13,
+    color: Ink,
+    letterSpacing: 4,
+    textAlign: 'center',
+    marginTop: 16,
+  },
+
+  reflectionWrap: { marginTop: 26, position: 'relative' },
+  reflectionCard: {
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 3,
+    backgroundColor: Paper,
+    paddingTop: 14,
+    paddingHorizontal: 22,
+    paddingBottom: 18,
+  },
+  qmark: {
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 46,
+    color: Ink,
+    lineHeight: 40,
+    height: 30,
+  },
+  reflectionText: {
+    fontFamily: 'PlayfairDisplay_400Regular',
+    fontStyle: 'italic',
+    fontSize: 19,
+    color: Ink,
+    lineHeight: 29,
+    marginTop: 6,
+  },
+  reflectionFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 18,
+    gap: 12,
+  },
+  reflectionAuthor: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 12,
+    color: InkSoft,
+    letterSpacing: 2,
+    textAlign: 'right',
+  },
+  reflectionTab: {
+    position: 'absolute',
+    top: -11,
+    right: 16,
+    backgroundColor: Ink,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  reflectionTabText: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 9,
+    letterSpacing: 1.5,
+    color: Paper,
+  },
+
+  actionsRow: { flexDirection: 'row', gap: 10, marginTop: 28 },
+  action: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 6,
+    backgroundColor: Paper,
+    paddingVertical: 18,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 0,
+    shadowOffset: { width: 2, height: 3 },
+    elevation: 2,
+  },
+  actionFilled: { backgroundColor: Ink, borderColor: Ink },
+  actionIconBox: {
+    width: 38,
+    height: 38,
+    borderWidth: 1.5,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionLabel: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 11,
+    letterSpacing: 1,
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  actionSub: {
+    fontFamily: 'PlayfairDisplay_400Regular',
+    fontStyle: 'italic',
+    fontSize: 11,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+
+  streakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    marginTop: 30,
+  },
+  streakLabel: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 11,
+    color: InkSoft,
+    letterSpacing: 1.5,
+    marginLeft: 10,
+  },
 });

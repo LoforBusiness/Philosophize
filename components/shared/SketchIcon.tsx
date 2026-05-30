@@ -15,7 +15,18 @@ export type SketchIconName =
   | 'volume-on'
   | 'volume-off'
   | 'reload'
-  | 'flame';
+  | 'flame'
+  | 'spark'
+  | 'star'
+  | 'star-filled'
+  | 'spiral'
+  | 'eye'
+  | 'scales'
+  | 'logic'
+  | 'palette'
+  | 'building'
+  | 'book'
+  | 'chevron-down';
 
 interface Props {
   name: SketchIconName;
@@ -152,6 +163,113 @@ export default function SketchIcon({ name, color = '#1A1A1A', size = 28 }: Props
           {...s}
         />
       )}
+
+      {name === 'spark' && (
+        <Path
+          d="M16 4 C17 12 20 15 28 16 C20 17 17 20 16 28 C15 20 12 17 4 16 C12 15 15 12 16 4 Z"
+          {...s}
+        />
+      )}
+
+      {name === 'star' && (
+        <Path
+          d="M16 3 L18.9 11.9 L28.4 12 L20.8 17.6 L23.6 26.5 L16 21 L8.4 26.5 L11.2 17.6 L3.6 12 L13.1 11.9 Z"
+          {...s}
+        />
+      )}
+
+      {name === 'star-filled' && (
+        <Path
+          d="M16 3 L18.9 11.9 L28.4 12 L20.8 17.6 L23.6 26.5 L16 21 L8.4 26.5 L11.2 17.6 L3.6 12 L13.1 11.9 Z"
+          {...s}
+          fill={color}
+        />
+      )}
+
+      {/* Metaphysics — inward swirl / spiral */}
+      {name === 'spiral' && (
+        <Path
+          d="M16 5 C22 5 27 10 27 16 C27 21 23 25 18 25 C14 25 11 22 11 18 C11 15 13 13 16 13 C18 13 20 15 20 17 C20 18.5 19 19.5 17.5 19.5"
+          {...s}
+        />
+      )}
+
+      {/* Epistemology — eye */}
+      {name === 'eye' && (
+        <>
+          <Path d="M4 16 C9 9 23 9 28 16 C23 23 9 23 4 16 Z" {...s} />
+          <Circle cx="16" cy="16" r="3.6" {...s} />
+          <Circle cx="16" cy="16" r="1" fill={color} />
+        </>
+      )}
+
+      {/* Ethics — balance scales */}
+      {name === 'scales' && (
+        <>
+          <Path d="M16 6 L16 24" {...s} />
+          <Circle cx="16" cy="6" r="1.4" {...s} />
+          <Path d="M6 10 L26 10" {...s} />
+          <Path d="M11 25 L21 25" {...s} />
+          {/* left pan */}
+          <Path d="M6 10 L3 16" {...s} />
+          <Path d="M6 10 L9 16" {...s} />
+          <Path d="M2.5 16 C2.5 19.5 9.5 19.5 9.5 16" {...s} />
+          {/* right pan */}
+          <Path d="M26 10 L23 16" {...s} />
+          <Path d="M26 10 L29 16" {...s} />
+          <Path d="M22.5 16 C22.5 19.5 29.5 19.5 29.5 16" {...s} />
+        </>
+      )}
+
+      {/* Logic — inference node (premise → conclusion) */}
+      {name === 'logic' && (
+        <>
+          <Path d="M11 11 L17 11 L21 16 L17 21 L11 21 Z" {...s} />
+          <Path d="M21 16 L28 16" {...s} />
+          <Path d="M25.5 13.5 L28 16 L25.5 18.5" {...s} />
+          <Path d="M4 16 L11 16" {...s} />
+        </>
+      )}
+
+      {/* Aesthetics — artist's palette */}
+      {name === 'palette' && (
+        <>
+          <Path
+            d="M16 6 C23 6 28 10 28 15 C28 18.5 24.5 19.5 21.5 19.5 C19.5 19.5 18.5 20.5 18.5 22 C18.5 24.5 17 26 14 26 C8 26 4 21 4 15.5 C4 10 9 6 16 6 Z"
+            {...s}
+          />
+          <Circle cx="10" cy="13" r="1.2" fill={color} />
+          <Circle cx="15" cy="10.5" r="1.2" fill={color} />
+          <Circle cx="21" cy="12.5" r="1.2" fill={color} />
+          <Circle cx="22" cy="22" r="1.6" {...s} />
+        </>
+      )}
+
+      {/* Politics — classical institution */}
+      {name === 'building' && (
+        <>
+          <Path d="M4 12 L16 5 L28 12 Z" {...s} />
+          <Path d="M5 15 L27 15" {...s} />
+          <Path d="M8 15 L8 25" {...s} />
+          <Path d="M13 15 L13 25" {...s} />
+          <Path d="M19 15 L19 25" {...s} />
+          <Path d="M24 15 L24 25" {...s} />
+          <Path d="M4 27 L28 27" {...s} />
+        </>
+      )}
+
+      {/* Lessons — open book */}
+      {name === 'book' && (
+        <>
+          <Path
+            d="M16 9 C13 7 7 7 5 8 L5 24 C7 23 13 23 16 25 C19 23 25 23 27 24 L27 8 C25 7 19 7 16 9 Z"
+            {...s}
+          />
+          <Path d="M16 9 L16 25" {...s} />
+        </>
+      )}
+
+      {name === 'chevron-down' && <Path d="M8 12 L16 21 L24 12" {...s} />}
     </Svg>
   );
 }

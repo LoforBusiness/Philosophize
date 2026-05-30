@@ -10,6 +10,10 @@ interface UIStore {
   philosopherSheetId: string | null;
   openPhilosopher: (id: string) => void;
   closePhilosopher: () => void;
+  // Ranks & Badges sheet — which tab to open it on, or null when dismissed.
+  ranksBadgesTab: 'ranks' | 'badges' | null;
+  openRanksBadges: (tab: 'ranks' | 'badges') => void;
+  closeRanksBadges: () => void;
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -22,4 +26,7 @@ export const useUIStore = create<UIStore>((set) => ({
   philosopherSheetId: null,
   openPhilosopher: (id) => set({ philosopherSheetId: id }),
   closePhilosopher: () => set({ philosopherSheetId: null }),
+  ranksBadgesTab: null,
+  openRanksBadges: (tab) => set({ ranksBadgesTab: tab }),
+  closeRanksBadges: () => set({ ranksBadgesTab: null }),
 }));

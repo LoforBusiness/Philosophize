@@ -14,10 +14,6 @@ export default function ReinforcementCard({ card, onComplete }: Props) {
 
   return (
     <View style={{ flex: 1, backgroundColor: 'transparent', paddingBottom: 28 }}>
-      {card.emoji ? (
-        <Text style={{ fontSize: 40, textAlign: 'center', marginTop: 8 }}>{card.emoji}</Text>
-      ) : null}
-
       <View style={{ flex: 1 }}>
         <KineticNarration text={text} onDone={() => setFinished(true)} />
       </View>

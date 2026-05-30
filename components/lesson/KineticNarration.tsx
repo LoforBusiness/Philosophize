@@ -65,22 +65,23 @@ const MIN_BEAT_MS = 480; // every beat stays on screen at least this long — no
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
-// Vary tone + speed per sentence so the narrator isn't monotone. Questions rise
-// and slow slightly; each sentence gets a small deterministic pitch/rate offset.
+// A natural, conversational narrator — normal pitch, brisk pace. Small
+// per-sentence offsets keep it from sounding robotic. Questions lift and slow a
+// touch; exclamations quicken slightly.
 function prosodyFor(i: number, text: string, base: number) {
   const q = /\?\s*$/.test(text);
   const ex = /!\s*$/.test(text);
-  let rate = base - 0.04 + rnd(i * 13 + 1) * 0.12;
-  let pitch = 0.8 + rnd(i * 7 + 5) * 0.16;
+  let rate = base + rnd(i * 13 + 1) * 0.1; // brisk, around normal speaking speed
+  let pitch = 0.96 + rnd(i * 7 + 5) * 0.12; // natural register
   if (q) {
-    pitch += 0.07;
-    rate -= 0.03;
+    pitch += 0.05;
+    rate -= 0.05;
   }
   if (ex) {
-    pitch += 0.04;
+    pitch += 0.05;
     rate += 0.03;
   }
-  return { rate: clamp(rate, 0.75, 1.05), pitch: clamp(pitch, 0.7, 1.1) };
+  return { rate: clamp(rate, 0.9, 1.2), pitch: clamp(pitch, 0.9, 1.18) };
 }
 
 interface Props {
@@ -95,7 +96,7 @@ export default function KineticNarration({
   text,
   active = true,
   onDone,
-  rate = 0.9,
+  rate = 1.0,
   variant = 'play',
 }: Props) {
   const { enabled, registerPlayer } = useNarration();
@@ -198,19 +199,40 @@ export default function KineticNarration({
     const estMs = Math.min(9000, Math.max(900, len * (64 / r)));
     const perBeat = Math.max(MIN_BEAT_MS, Math.round(estMs / sentence.beats.length));
 
-    // Evenly-paced beat reveals.
+    // Map a character offset (from a speech word-boundary event) to the beat
+    // that contains that word, so on-screen words track what's actually spoken.
+    const beatForChar = (ci: number) => {
+      let idx = 0;
+      for (let k = 0; k < sentence.beats.length; k++) {
+        if (sentence.beats[k].charStart <= ci) idx = k;
+        else break;
+      }
+      return idx;
+    };
+
+    // Boundary events (where supported) drive the reveal for true word-sync.
+    // Until/unless they fire, fall back to evenly-paced timers so nothing stalls.
+    let boundaryDriven = false;
+    const revealTimers: ReturnType<typeof setTimeout>[] = [];
+    const clearReveal = () => {
+      revealTimers.forEach(clearTimeout);
+      revealTimers.length = 0;
+    };
+
     for (let i = 1; i <= lastBeat; i++) {
-      timers.push(
-        setTimeout(() => {
-          if (!cancelled) setBIdx(i);
-        }, i * perBeat)
-      );
+      const t = setTimeout(() => {
+        if (!cancelled && !boundaryDriven) setBIdx(i);
+      }, i * perBeat);
+      timers.push(t);
+      revealTimers.push(t);
     }
-    // Mark visuals complete a touch after the last beat appears.
+    // Fallback visual-complete marker (only matters if boundaries never fire).
     timers.push(
       setTimeout(() => {
-        visualDone = true;
-        maybeFinish();
+        if (!boundaryDriven) {
+          visualDone = true;
+          maybeFinish();
+        }
       }, lastBeat * perBeat + 200)
     );
 
@@ -240,8 +262,24 @@ export default function KineticNarration({
               onStart: () => {
                 started = true;
               },
+              onBoundary: (ev: { charIndex?: number; charLength?: number }) => {
+                if (cancelled) return;
+                const ci = typeof ev?.charIndex === 'number' ? ev.charIndex : 0;
+                boundaryDriven = true;
+                clearReveal();
+                const bi = beatForChar(ci);
+                setBIdx((cur) => (bi > cur ? bi : cur));
+                if (bi >= lastBeat) {
+                  visualDone = true;
+                  maybeFinish();
+                }
+              },
               onDone: () => {
                 audioDone = true;
+                if (boundaryDriven) {
+                  setBIdx(lastBeat);
+                  visualDone = true;
+                }
                 maybeFinish();
               },
               onStopped: () => {},

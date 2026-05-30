@@ -1,207 +1,233 @@
-import { useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Dimensions,
-} from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
-import Animated, {
-  useSharedValue,
-  useAnimatedProps,
-  withTiming,
-  runOnJS,
-} from 'react-native-reanimated';
-import { ALL_BRANCHES } from '@/data';
-import type { Branch } from '@/data/types';
-
-const AnimatedPath = Animated.createAnimatedComponent(Path);
-
-const { width: SW } = Dimensions.get('window');
-// 2 columns, 12px gap, 20px horizontal padding on each side
-const BOX_W = (SW - 52) / 2;
+import Svg, { Path, Line } from 'react-native-svg';
+import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
+import { getBranchBySlug } from '@/data';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
-const InkFaint = '#E8E8E3';
+const Rule = '#ECEAE2';
+const Tag = '#EAE7DF';
 
-export default function BranchesScreen() {
-  const titleRef = useRef<View>(null);
-  const boxRefs = useRef<(View | null)[]>([]);
+const SW = Dimensions.get('window').width;
+const SH = Dimensions.get('window').height;
+const CARD_W = (SW - 40 - 24) / 3; // 20px page padding each side, two 12px gaps
 
-  const [animating, setAnimating] = useState(false);
-  const [svgPath, setSvgPath] = useState('');
-  const [svgLen, setSvgLen] = useState(300);
-  const dashOffset = useSharedValue(300);
+interface BranchCardInfo {
+  slug: string;
+  name: string;
+  desc: string;
+  tag: string;
+  icon: SketchIconName;
+}
 
-  const animProps = useAnimatedProps(() => ({
-    strokeDashoffset: dashOffset.value,
-  }));
+// Presentation order + copy taken from the Learn mockup. Each maps to a real
+// branch slug for navigation.
+const BRANCHES: BranchCardInfo[] = [
+  { slug: 'metaphysics', name: 'METAPHYSICS', desc: 'The nature of reality & existence', tag: 'REALITY', icon: 'spiral' },
+  { slug: 'epistemology', name: 'EPISTEMOLOGY', desc: 'The study of knowledge & truth', tag: 'KNOWLEDGE', icon: 'eye' },
+  { slug: 'ethics', name: 'ETHICS', desc: 'Morality, virtue & right action', tag: 'MORALITY', icon: 'scales' },
+  { slug: 'logic', name: 'LOGIC', desc: 'Reason, argument & inference', tag: 'REASONING', icon: 'logic' },
+  { slug: 'aesthetics', name: 'AESTHETICS', desc: 'Beauty, art & perception', tag: 'BEAUTY', icon: 'palette' },
+  { slug: 'political-philosophy', name: 'POLITICS', desc: 'Power, justice & society', tag: 'SOCIETY', icon: 'building' },
+];
 
-  function doNavigate(slug: string) {
-    setAnimating(false);
-    router.push(`/(app)/branches/${slug}`);
-  }
+// Faint ruled paper + corner brackets framing the page (fixed, non-scrolling).
+function PageFrame() {
+  const lines: number[] = [];
+  for (let y = 70; y < SH; y += 34) lines.push(y);
+  const inset = 9;
+  const leg = 30;
+  return (
+    <Svg width={SW} height={SH} style={StyleSheet.absoluteFill} pointerEvents="none">
+      {lines.map((y) => (
+        <Line key={y} x1={0} y1={y} x2={SW} y2={y} stroke={Rule} strokeWidth={1} />
+      ))}
+      <Path d={`M ${inset} ${inset + leg} L ${inset} ${inset} L ${inset + leg} ${inset}`} {...frameStroke} />
+      <Path d={`M ${SW - inset - leg} ${inset} L ${SW - inset} ${inset} L ${SW - inset} ${inset + leg}`} {...frameStroke} />
+      <Path d={`M ${inset} ${SH - inset - leg} L ${inset} ${SH - inset} L ${inset + leg} ${SH - inset}`} {...frameStroke} />
+      <Path
+        d={`M ${SW - inset - leg} ${SH - inset} L ${SW - inset} ${SH - inset} L ${SW - inset} ${SH - inset - leg}`}
+        {...frameStroke}
+      />
+    </Svg>
+  );
+}
+const frameStroke = {
+  stroke: Ink,
+  strokeWidth: 2.5,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+  fill: 'none',
+};
 
-  function handleSelect(branch: Branch, index: number) {
-    titleRef.current?.measure((_fx, _fy, tw, th, tpx, tpy) => {
-      boxRefs.current[index]?.measure((_bfx, _bfy, bw, bh, bpx, bpy) => {
-        const startX = tpx + tw / 2;
-        const startY = tpy + th;
-        const endX = bpx + bw / 2;
-        const endY = bpy + bh / 2;
-        const cpY = (startY + endY) / 2;
-        const path = `M ${startX} ${startY} C ${startX} ${cpY}, ${endX} ${cpY}, ${endX} ${endY}`;
-        const dx = endX - startX;
-        const dy = endY - startY;
-        const len = Math.sqrt(dx * dx + dy * dy) * 1.3;
-
-        setSvgPath(path);
-        setSvgLen(len);
-        dashOffset.value = len;
-        setAnimating(true);
-
-        dashOffset.value = withTiming(0, { duration: 450 }, (finished) => {
-          if (finished) runOnJS(doNavigate)(branch.slug);
-        });
-      });
-    });
+export default function LearnScreen() {
+  function open(slug: string) {
+    if (getBranchBySlug(slug)) router.push(`/(app)/branches/${slug}`);
   }
 
   return (
     <SafeAreaView style={styles.safe}>
+      <PageFrame />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Title block — measured as the animation start point */}
-        <View ref={titleRef} collapsable={false} style={styles.titleBlock}>
-          <Text style={styles.title}>Philosophy</Text>
-          <Text style={styles.subtitle}>Six branches. Thousands of ideas.</Text>
-        </View>
+        {/* Masthead */}
+        <Text style={styles.kicker}>THE STUDY OF WISDOM</Text>
+        <Text style={styles.title}>LEARN</Text>
+        <View style={styles.underline} />
 
-        {/* Divider */}
-        <View style={styles.divider} />
+        <View style={styles.divider}>
+          <View style={styles.divLine} />
+          <Text style={styles.diamonds}>◇   ◦   ◇</Text>
+          <View style={styles.divLine} />
+        </View>
 
         {/* Branch grid */}
         <View style={styles.grid}>
-          {ALL_BRANCHES.map((branch, i) => (
+          {BRANCHES.map((b) => (
             <Pressable
-              key={branch.id}
-              ref={(r) => {
-                boxRefs.current[i] = r;
-              }}
-              collapsable={false}
-              onPress={() => !animating && handleSelect(branch, i)}
-              style={({ pressed }) => [
-                styles.branchBox,
-                pressed && styles.branchBoxPressed,
-              ]}
+              key={b.slug}
+              onPress={() => open(b.slug)}
+              style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
             >
-              <Text style={styles.branchIcon}>{branch.icon}</Text>
-              <Text style={styles.branchName}>{branch.name}</Text>
-              <Text style={styles.branchMeta}>
-                {branch.paths.length} path{branch.paths.length !== 1 ? 's' : ''}
+              <View style={styles.iconBox}>
+                <SketchIcon name={b.icon} size={22} color={Ink} />
+              </View>
+              <Text style={styles.name} numberOfLines={1}>
+                {b.name}
               </Text>
+              <Text style={styles.desc} numberOfLines={2}>
+                {b.desc}
+              </Text>
+              <View style={styles.tag}>
+                <Text style={styles.tagText}>{b.tag}</Text>
+              </View>
             </Pressable>
           ))}
         </View>
-      </ScrollView>
 
-      {/* SVG ink-line overlay — covers full screen, pointer events none */}
-      {animating && (
-        <Svg
-          style={StyleSheet.absoluteFill}
-          pointerEvents="none"
-        >
-          <AnimatedPath
-            d={svgPath}
-            fill="none"
-            stroke={Ink}
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeDasharray={svgLen}
-            animatedProps={animProps}
-          />
-        </Svg>
-      )}
+        <Text style={styles.footer}>Choose a branch to begin your inquiry</Text>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: Paper,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  titleBlock: {
-    paddingTop: 12,
-    paddingBottom: 16,
+  safe: { flex: 1, backgroundColor: Paper },
+  scroll: { flex: 1 },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 40 },
+
+  kicker: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 11,
+    color: InkSoft,
+    letterSpacing: 4,
+    textAlign: 'center',
+    marginTop: 8,
   },
   title: {
     fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 36,
+    fontSize: 40,
     color: Ink,
-    lineHeight: 44,
+    letterSpacing: 2,
+    textAlign: 'center',
+    marginTop: 8,
   },
-  subtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 15,
-    color: InkSoft,
-    marginTop: 2,
+  underline: {
+    alignSelf: 'center',
+    width: 64,
+    height: 2,
+    backgroundColor: Ink,
+    marginTop: 8,
   },
   divider: {
-    height: 1,
-    backgroundColor: InkFaint,
-    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 18,
+    marginBottom: 24,
   },
+  divLine: { width: 56, height: 1, backgroundColor: InkSoft },
+  diamonds: {
+    fontSize: 12,
+    color: Ink,
+    letterSpacing: 3,
+    marginHorizontal: 12,
+  },
+
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
+    justifyContent: 'center',
   },
-  branchBox: {
-    width: BOX_W,
-    height: 120,
-    borderWidth: 2,
+  card: {
+    width: CARD_W,
+    minHeight: 162,
+    borderWidth: 1.5,
     borderColor: Ink,
-    borderRadius: 14,
+    borderRadius: 2,
     backgroundColor: Paper,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 0,
+    shadowOffset: { width: 2, height: 3 },
+    elevation: 2,
+  },
+  cardPressed: { backgroundColor: '#F0EFEA' },
+  iconBox: {
+    width: 46,
+    height: 46,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 3,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 10,
+    marginBottom: 12,
   },
-  branchBoxPressed: {
-    backgroundColor: '#F0EFEA',
-  },
-  branchIcon: {
-    fontSize: 28,
-    marginBottom: 6,
-  },
-  branchName: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 22,
+  name: {
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 13,
     color: Ink,
+    letterSpacing: 0.5,
     textAlign: 'center',
-    lineHeight: 26,
   },
-  branchMeta: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
+  desc: {
+    fontFamily: 'PlayfairDisplay_400Regular',
+    fontStyle: 'italic',
+    fontSize: 11.5,
     color: InkSoft,
-    marginTop: 2,
+    textAlign: 'center',
+    lineHeight: 16,
+    marginTop: 6,
+  },
+  tag: {
+    marginTop: 'auto',
+    backgroundColor: Tag,
+    borderRadius: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  tagText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 8.5,
+    color: InkSoft,
+    letterSpacing: 1,
+  },
+  footer: {
+    fontFamily: 'PlayfairDisplay_400Regular',
+    fontStyle: 'italic',
+    fontSize: 14,
+    color: InkSoft,
+    textAlign: 'center',
+    marginTop: 26,
   },
 });
