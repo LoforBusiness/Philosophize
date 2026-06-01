@@ -13,6 +13,8 @@ const InkFaint = '#E2E0D8';
 
 const SW = Dimensions.get('window').width;
 const STAT_W = (SW - 40 - 30) / 4;
+// On a phone the two pies can't sit side-by-side without overflowing — stack them.
+const STACK_PIES = SW < 600;
 
 // Fixed display order + names for the area charts (matches the mockup).
 const AREA_ORDER = ['ethics', 'metaphysics', 'epistemology', 'aesthetics', 'logic', 'political-philosophy'];
@@ -112,7 +114,7 @@ export default function StatsScreen() {
           <>
             {/* Pies */}
             {(philPie.length > 0 || areaPie.length > 0) && (
-              <View style={styles.pieRow}>
+              <View style={[styles.pieRow, STACK_PIES && { flexDirection: 'column' }]}>
                 {philPie.length > 0 && (
                   <SketchPieChart
                     title="Top Philosophers"

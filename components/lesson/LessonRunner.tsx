@@ -100,13 +100,20 @@ export default function LessonRunner({ lesson }: Props) {
   const currentCard = lesson.cards[session.currentIndex];
   const progress = (session.currentIndex + 1) / lesson.cards.length;
 
+  const found = getLessonById(lesson.id);
+  const lessonNum = found ? found.path.lessons.findIndex((l) => l.id === lesson.id) + 1 : 1;
+  const label = `${(found?.branch.name ?? 'PHILOSOPHIZE').toUpperCase()} · LESSON ${lessonNum > 0 ? lessonNum : 1}`;
+  const xp = lesson.xpReward ?? 25;
+
   return (
     <NarrationProvider>
-      <View className="flex-1 bg-midnight">
+      <View style={{ flex: 1, backgroundColor: '#1A1A1A' }}>
         <CardShell
           progress={progress}
           cardCount={lesson.cards.length}
           currentIndex={session.currentIndex}
+          label={label}
+          xp={xp}
           onExit={handleExit}
         >
           <AnimatePresence exitBeforeEnter>

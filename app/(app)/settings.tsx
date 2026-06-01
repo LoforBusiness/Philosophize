@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
+import Portrait, { PORTRAITS, type PortraitName } from '@/components/shared/Portrait';
 import { signOut } from '@/lib/supabase/auth';
 import { rankForXP } from '@/data/ranks';
 import { useUserDataStore, type AppSettings } from '@/stores/userDataStore';
@@ -44,6 +45,8 @@ const SECTIONS: { key: SectionKey; label: string; icon: SketchIconName }[] = [
 export default function SettingsScreen() {
   const [section, setSection] = useState<SectionKey>('profile');
   const [saved, setSaved] = useState(false);
+  const { width } = useWindowDimensions();
+  const compact = width < 600;
 
   function onSave() {
     setSaved(true);
@@ -53,16 +56,16 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       {/* Top bar */}
-      <View style={styles.topBar}>
-        <Text style={styles.topTitle}>Settings</Text>
+      <View style={[styles.topBar, compact && { paddingHorizontal: 14 }]}>
+        <Text style={[styles.topTitle, compact && { fontSize: 26 }]}>Settings</Text>
         <Pressable onPress={onSave} style={({ pressed }) => [styles.saveBtn, pressed && { opacity: 0.85 }]}>
           <Text style={styles.saveBtnText}>{saved ? 'Saved ✓' : 'Save Changes'}</Text>
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={[styles.layout, styles.layoutRow]}>
-          <Sidebar section={section} onSelect={setSection} />
+      <ScrollView contentContainerStyle={[styles.scroll, compact && { paddingHorizontal: 12 }]} showsVerticalScrollIndicator={false}>
+        <View style={[styles.layout, styles.layoutRow, { gap: compact ? 10 : 16 }]}>
+          <Sidebar section={section} onSelect={setSection} compact={compact} />
           <View style={styles.contentWrap}>
             <Section section={section} />
           </View>
@@ -74,10 +77,32 @@ export default function SettingsScreen() {
 
 /* ---------------- Sidebar ---------------- */
 
-function Sidebar({ section, onSelect }: { section: SectionKey; onSelect: (s: SectionKey) => void }) {
+function Sidebar({ section, onSelect, compact }: { section: SectionKey; onSelect: (s: SectionKey) => void; compact: boolean }) {
   const { width } = useWindowDimensions();
-  // Always on the side; narrows on small screens so it still fits beside content.
-  const w = Math.min(210, Math.max(130, Math.round(width * 0.36)));
+
+  // Phone: a compact icon-only rail on the side, so the content keeps its width.
+  if (compact) {
+    return (
+      <View style={styles.rail}>
+        {SECTIONS.map((s) => {
+          const on = s.key === section;
+          return (
+            <Pressable
+              key={s.key}
+              onPress={() => onSelect(s.key)}
+              accessibilityLabel={s.label}
+              style={[styles.railItem, on && styles.railItemOn]}
+            >
+              <SketchIcon name={s.icon} size={20} color={on ? Paper : InkSoft} />
+            </Pressable>
+          );
+        })}
+      </View>
+    );
+  }
+
+  // Wide: full labeled sidebar.
+  const w = Math.min(210, Math.max(150, Math.round(width * 0.32)));
   return (
     <View style={[styles.sidebar, { width: w }]}>
       <Text style={styles.sidebarHead}>SECTIONS</Text>
@@ -102,7 +127,9 @@ function Sidebar({ section, onSelect }: { section: SectionKey; onSelect: (s: Sec
 /* ---------------- Shared controls ---------------- */
 
 function Card({ children }: { children: React.ReactNode }) {
-  return <View style={styles.card}>{children}</View>;
+  const { width } = useWindowDimensions();
+  const pad = width < 600 ? 16 : 22;
+  return <View style={[styles.card, { padding: pad }]}>{children}</View>;
 }
 
 function Header({ title, sub, icon }: { title: string; sub?: string; icon?: SketchIconName }) {
@@ -245,7 +272,9 @@ function ProfileSection() {
   const displayName = useUserDataStore((s) => s.displayName);
   const email = useUserDataStore((s) => s.email);
   const bio = useUserDataStore((s) => s.bio);
+  const portrait = useUserDataStore((s) => s.portrait);
   const setProfile = useUserDataStore((s) => s.setProfile);
+  const setPortrait = useUserDataStore((s) => s.setPortrait);
   const joinedAt = useUserDataStore((s) => s.joinedAt);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
@@ -253,6 +282,7 @@ function ProfileSection() {
   const streak = useUserDataStore((s) => s.streak);
 
   const [edit, setEdit] = useState(false);
+  const [picker, setPicker] = useState(false);
 
   const lessons = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
   const totalXP = lessons * 25 + savedQuotes.length * 10 + Object.keys(philosopherViews).length * 5;
@@ -264,25 +294,34 @@ function ProfileSection() {
     <Card>
       <View style={styles.profileHeadRow}>
         <Text style={styles.headerTitle}>Profile</Text>
-        <Pressable onPress={() => setEdit((e) => !e)} style={styles.editBtn} hitSlop={8}>
-          <SketchIcon name="pencil" size={15} color={Ink} />
-          <Text style={styles.editText}>{edit ? 'Done' : 'Edit'}</Text>
+        <Pressable
+          onPress={() => setEdit((e) => !e)}
+          style={({ pressed }) => [styles.editBtn, pressed && { backgroundColor: '#F0EFEA' }]}
+          hitSlop={6}
+        >
+          <SketchIcon name="pencil" size={14} color={Ink} />
+          <Text style={styles.editText}>{edit ? 'Done editing' : 'Edit profile'}</Text>
         </Pressable>
       </View>
       <View style={styles.hr} />
 
       <View style={styles.identity}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarLetter}>{(displayName || 'P').charAt(0).toUpperCase()}</Text>
+          <Portrait name={portrait as PortraitName} size={64} color={Ink} />
         </View>
-        <View style={{ flex: 1, marginLeft: 16 }}>
+        <View style={{ flex: 1, marginLeft: 18 }}>
           <Text style={styles.idName}>{displayName || 'Philosopher'}</Text>
           <Text style={styles.idRank}>
             {current.name} · Rank {current.id}
           </Text>
           <Text style={styles.idMeta}>{memberSince}</Text>
+          <Pressable onPress={() => setPicker(true)} hitSlop={6} style={{ alignSelf: 'flex-start', marginTop: 8 }}>
+            <Text style={styles.changeLink}>Change portrait</Text>
+          </Pressable>
         </View>
       </View>
+
+      <View style={styles.hr} />
 
       <Text style={styles.fieldLabel}>DISPLAY NAME</Text>
       {edit ? (
@@ -313,6 +352,16 @@ function ProfileSection() {
         <View style={styles.miniDiv} />
         <MiniStat value={streak} label="Day Streak" />
       </View>
+
+      <PortraitPicker
+        visible={picker}
+        selected={portrait}
+        onSelect={(id) => {
+          setPortrait(id);
+          setPicker(false);
+        }}
+        onClose={() => setPicker(false)}
+      />
     </Card>
   );
 }
@@ -323,6 +372,69 @@ function MiniStat({ value, label }: { value: number; label: string }) {
       <Text style={styles.miniValue}>{value}</Text>
       <Text style={styles.miniLabel}>{label}</Text>
     </View>
+  );
+}
+
+/* ---------------- Portrait picker ---------------- */
+
+function PortraitPicker({
+  visible,
+  selected,
+  onSelect,
+  onClose,
+}: {
+  visible: boolean;
+  selected: string;
+  onSelect: (id: string) => void;
+  onClose: () => void;
+}) {
+  const { width } = useWindowDimensions();
+  const cardW = Math.min(640, width - 28);
+  const inner = cardW - 44; // minus card horizontal padding
+  const cols = inner >= 480 ? 5 : inner >= 300 ? 3 : 2;
+  const gap = 10;
+  const tileW = Math.floor((inner - gap * (cols - 1)) / cols);
+  const art = Math.round(tileW * 0.62);
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+      <View style={styles.modalBackdrop}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+        <View style={[styles.pickerCard, { width: cardW }]}>
+          <View style={styles.pickerHead}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.pickerTitle}>Choose your portrait</Text>
+              <Text style={styles.pickerSub}>25 hand-drawn characters</Text>
+            </View>
+            <Pressable onPress={onClose} hitSlop={10} style={styles.pickerClose}>
+              <Text style={styles.pickerCloseText}>X</Text>
+            </Pressable>
+          </View>
+
+          <ScrollView style={{ maxHeight: 460 }} contentContainerStyle={{ paddingTop: 4, paddingBottom: 4 }} showsVerticalScrollIndicator={false}>
+            <View style={[styles.pickerGrid, { gap }]}>
+              {PORTRAITS.map((p) => {
+                const on = p.id === selected;
+                return (
+                  <Pressable
+                    key={p.id}
+                    onPress={() => onSelect(p.id)}
+                    style={[styles.tile, { width: tileW }, on && styles.tileOn]}
+                  >
+                    <Portrait name={p.id} size={art} color={on ? Paper : Ink} />
+                    <Text style={[styles.tileName, on && { color: Paper, fontFamily: 'Inter_700Bold' }]} numberOfLines={1}>
+                      {p.name}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </ScrollView>
+
+          <Text style={styles.pickerFoot}>Click any portrait to select it.</Text>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -706,6 +818,20 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   sidebarHead: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft, letterSpacing: 2, marginBottom: 10 },
+
+  // Compact icon rail (phone)
+  rail: {
+    width: 52,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 4,
+    backgroundColor: Paper,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    gap: 4,
+  },
+  railItem: { width: 40, height: 40, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
+  railItemOn: { backgroundColor: Ink },
   navItem: { flexDirection: 'row', alignItems: 'center', gap: 9, paddingVertical: 11, paddingHorizontal: 7, borderRadius: 4, borderWidth: 1.5, borderColor: 'transparent' },
   navItemOn: { borderColor: Ink, borderStyle: 'dashed' },
   navText: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 13, color: InkSoft },
@@ -782,14 +908,14 @@ const styles = StyleSheet.create({
 
   // Profile
   profileHeadRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 7, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, paddingHorizontal: 14, paddingVertical: 9, backgroundColor: Paper },
   editText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: Ink },
-  identity: { flexDirection: 'row', alignItems: 'center', marginBottom: 18 },
-  avatar: { width: 72, height: 72, borderRadius: 6, borderWidth: 1.5, borderColor: Ink, alignItems: 'center', justifyContent: 'center' },
-  avatarLetter: { fontFamily: 'Caveat_700Bold', fontSize: 40, color: Ink, lineHeight: 46 },
+  identity: { flexDirection: 'row', alignItems: 'center' },
+  avatar: { width: 84, height: 84, borderRadius: 6, borderWidth: 1.5, borderColor: Ink, alignItems: 'center', justifyContent: 'center' },
   idName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: Ink },
-  idRank: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: InkSoft, marginTop: 2 },
-  idMeta: { fontFamily: 'Inter_400Regular', fontSize: 12, color: InkSoft, marginTop: 4 },
+  idRank: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: Gold, marginTop: 3 },
+  idMeta: { fontFamily: 'Inter_400Regular', fontSize: 12, color: Gold, marginTop: 5 },
+  changeLink: { fontFamily: 'Inter_400Regular', fontSize: 12, color: InkSoft, textDecorationLine: 'underline' },
   fieldLabel: { fontFamily: 'Inter_700Bold', fontSize: 10, color: InkSoft, letterSpacing: 1.5, marginTop: 16, marginBottom: 6 },
   fieldValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 16, color: Ink },
   bioValue: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 15, color: Ink },
@@ -834,4 +960,17 @@ const styles = StyleSheet.create({
   modalCancelText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: Ink },
   modalConfirm: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 4, borderWidth: 1.5, borderColor: Ink, backgroundColor: Ink },
   modalConfirmText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Paper },
+
+  // Portrait picker
+  pickerCard: { backgroundColor: Paper, borderWidth: 2, borderColor: Ink, borderRadius: 8, paddingHorizontal: 22, paddingTop: 20, paddingBottom: 18 },
+  pickerHead: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 14 },
+  pickerTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, color: Ink },
+  pickerSub: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: InkSoft, marginTop: 3 },
+  pickerClose: { paddingHorizontal: 4, paddingVertical: 2 },
+  pickerCloseText: { fontFamily: 'Inter_400Regular', fontSize: 18, color: Ink },
+  pickerGrid: { flexDirection: 'row', flexWrap: 'wrap' },
+  tile: { aspectRatio: 1, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, backgroundColor: Paper, alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 8 },
+  tileOn: { backgroundColor: Ink },
+  tileName: { fontFamily: 'Inter_500Medium', fontSize: 11, color: Ink, textAlign: 'center', paddingHorizontal: 2 },
+  pickerFoot: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12, color: InkSoft, marginTop: 14 },
 });

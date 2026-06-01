@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { MotiView, AnimatePresence } from 'moti';
+import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { MotiView } from 'moti';
 import * as Speech from 'expo-speech';
 import { useNarration } from './NarrationContext';
 import { getBritishVoice } from '@/lib/voice';
+import { T } from './theme';
 
 interface VBeat {
   display: string;
@@ -32,11 +33,7 @@ function buildSentences(text: string): Sentence[] {
 
       const flush = () => {
         if (group.length === 0) return;
-        const display = group
-          .map((x) => x.w)
-          .join(' ')
-          .replace(/^["'\s]+|[.,;:"'\s]+$/g, '');
-        if (display) beats.push({ display, charStart: group[0].start });
+        beats.push({ display: group.map((x) => x.w).join(' '), charStart: group[0].start });
         group = [];
       };
 
@@ -48,31 +45,26 @@ function buildSentences(text: string): Sentence[] {
         if (group.length >= 4 || endsClause) flush();
       }
       flush();
-      if (beats.length === 0) beats.push({ display: s.replace(/[.!?]+$/, ''), charStart: 0 });
+      if (beats.length === 0) beats.push({ display: s, charStart: 0 });
       return { text: s, beats };
     });
 }
 
-// Deterministic pseudo-random in [0,1) so a word's size/angle/position is stable
-// across re-renders but varies per word.
+// Deterministic pseudo-random in [0,1) so prosody varies per sentence but is stable.
 function rnd(seed: number): number {
   const x = Math.sin(seed * 999.13) * 43758.5453;
   return x - Math.floor(x);
 }
 
-const INK = '#1A1A1A';
-const MIN_BEAT_MS = 480; // every beat stays on screen at least this long — no flashing
-
+const MIN_BEAT_MS = 360;
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
-// A natural, conversational narrator — normal pitch, brisk pace. Small
-// per-sentence offsets keep it from sounding robotic. Questions lift and slow a
-// touch; exclamations quicken slightly.
+// A natural, conversational narrator — normal pitch, brisk pace.
 function prosodyFor(i: number, text: string, base: number) {
   const q = /\?\s*$/.test(text);
   const ex = /!\s*$/.test(text);
-  let rate = base + rnd(i * 13 + 1) * 0.1; // brisk, around normal speaking speed
-  let pitch = 0.96 + rnd(i * 7 + 5) * 0.12; // natural register
+  let rate = base + rnd(i * 13 + 1) * 0.08;
+  let pitch = 0.97 + rnd(i * 7 + 5) * 0.1;
   if (q) {
     pitch += 0.05;
     rate -= 0.05;
@@ -90,17 +82,45 @@ interface Props {
   onDone?: () => void;
   rate?: number;
   variant?: 'play' | 'prompt';
+  size?: number;
+  align?: 'left' | 'center';
 }
 
+// Renders a passage as ONE clean, left-aligned block of serif text. As the
+// narrator reads, each word brightens from dim to full in reading order — the
+// words stay exactly where they belong on the page (no scattering). The speech
+// engine (sentence-by-sentence, word-boundary synced) is unchanged.
 export default function KineticNarration({
   text,
   active = true,
   onDone,
   rate = 1.0,
   variant = 'play',
+  size,
+  align = 'left',
 }: Props) {
   const { enabled, registerPlayer } = useNarration();
   const sentences = useMemo(() => buildSentences(text), [text]);
+
+  // Flat list of words, each tagged with the (sentence, beat) it belongs to so
+  // we can brighten them in step with the narration.
+  const tokens = useMemo(() => {
+    const out: { w: string; si: number; bi: number; s0: boolean }[] = [];
+    sentences.forEach((s, si) => {
+      let from = 0;
+      s.text.split(' ').filter(Boolean).forEach((w) => {
+        const at = s.text.indexOf(w, from);
+        from = at + w.length;
+        let bi = 0;
+        for (let k = 0; k < s.beats.length; k++) {
+          if (s.beats[k].charStart <= at) bi = k;
+          else break;
+        }
+        out.push({ w, si, bi, s0: si === 0 });
+      });
+    });
+    return out;
+  }, [sentences]);
 
   const [sIdx, setSIdx] = useState(0);
   const [bIdx, setBIdx] = useState(0);
@@ -112,7 +132,7 @@ export default function KineticNarration({
   doneRef.current = onDone;
 
   useEffect(() => {
-    getBritishVoice(); // warm up voice resolution early
+    getBritishVoice();
     mounted.current = true;
     return () => {
       mounted.current = false;
@@ -120,13 +140,10 @@ export default function KineticNarration({
     };
   }, []);
 
-  const lastBeatOf = (si: number) => Math.max(0, (sentences[si]?.beats.length ?? 1) - 1);
-
   const skip = useCallback(() => {
     Speech.stop();
-    const last = Math.max(0, sentences.length - 1);
-    setSIdx(last);
-    setBIdx(lastBeatOf(last));
+    setSIdx(Math.max(0, sentences.length - 1));
+    setBIdx(Math.max(0, (sentences[sentences.length - 1]?.beats.length ?? 1) - 1));
     setFinished(true);
     doneRef.current?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -145,10 +162,7 @@ export default function KineticNarration({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Speak one sentence per effect run. Beats are paced EVENLY across the
-  // sentence's spoken duration with a minimum dwell, so a word is never on
-  // screen for "almost no time," and the sentence only advances once the audio
-  // has finished AND every beat has had its time on screen.
+  // Speak one sentence per effect run; brighten beats in time with the audio.
   useEffect(() => {
     if (!enabled) {
       setFinished(true);
@@ -199,8 +213,6 @@ export default function KineticNarration({
     const estMs = Math.min(9000, Math.max(900, len * (64 / r)));
     const perBeat = Math.max(MIN_BEAT_MS, Math.round(estMs / sentence.beats.length));
 
-    // Map a character offset (from a speech word-boundary event) to the beat
-    // that contains that word, so on-screen words track what's actually spoken.
     const beatForChar = (ci: number) => {
       let idx = 0;
       for (let k = 0; k < sentence.beats.length; k++) {
@@ -210,23 +222,14 @@ export default function KineticNarration({
       return idx;
     };
 
-    // Boundary events (where supported) drive the reveal for true word-sync.
-    // Until/unless they fire, fall back to evenly-paced timers so nothing stalls.
     let boundaryDriven = false;
-    const revealTimers: ReturnType<typeof setTimeout>[] = [];
-    const clearReveal = () => {
-      revealTimers.forEach(clearTimeout);
-      revealTimers.length = 0;
-    };
-
     for (let i = 1; i <= lastBeat; i++) {
-      const t = setTimeout(() => {
-        if (!cancelled && !boundaryDriven) setBIdx(i);
-      }, i * perBeat);
-      timers.push(t);
-      revealTimers.push(t);
+      timers.push(
+        setTimeout(() => {
+          if (!cancelled && !boundaryDriven) setBIdx(i);
+        }, i * perBeat)
+      );
     }
-    // Fallback visual-complete marker (only matters if boundaries never fire).
     timers.push(
       setTimeout(() => {
         if (!boundaryDriven) {
@@ -235,8 +238,6 @@ export default function KineticNarration({
         }
       }, lastBeat * perBeat + 200)
     );
-
-    // If audio never starts (browser blocks autoplay), don't stall.
     timers.push(
       setTimeout(() => {
         if (!started) {
@@ -246,7 +247,6 @@ export default function KineticNarration({
       }, estMs + 500)
     );
 
-    // Speak the sentence with its own pitch/rate.
     timers.push(
       setTimeout(() => {
         if (cancelled) return;
@@ -266,7 +266,6 @@ export default function KineticNarration({
                 if (cancelled) return;
                 const ci = typeof ev?.charIndex === 'number' ? ev.charIndex : 0;
                 boundaryDriven = true;
-                clearReveal();
                 const bi = beatForChar(ci);
                 setBIdx((cur) => (bi > cur ? bi : cur));
                 if (bi >= lastBeat) {
@@ -293,7 +292,7 @@ export default function KineticNarration({
             maybeFinish();
           }
         });
-      }, 160)
+      }, 140)
     );
 
     return () => {
@@ -304,113 +303,48 @@ export default function KineticNarration({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sIdx, enabled, active, sentences, nonce, finished, rate]);
 
-  // Muted: show the whole passage statically so the lesson stays readable.
-  if (!enabled) {
-    return (
-      <View style={styles.center}>
-        <Text style={variant === 'prompt' ? styles.staticPrompt : styles.staticText}>
-          {sentences.map((s) => s.beats.map((b) => b.display).join(' ')).join(' ')}
-        </Text>
-      </View>
-    );
-  }
+  const baseSize = size ?? (variant === 'prompt' ? 22 : 27);
+  const lineHeight = Math.round(baseSize * 1.42);
+  const showAll = !enabled || finished;
 
-  const beat = sentences[sIdx]?.beats[bIdx];
-  const isPrompt = variant === 'prompt';
-  const seedBase = sIdx * 131 + bIdx * 17 + nonce * 911;
+  const revealed = (si: number, bi: number) => showAll || si < sIdx || (si === sIdx && bi <= bIdx);
 
   return (
     <Pressable style={{ flex: 1 }} onPress={finished ? undefined : skip}>
-      <AnimatePresence exitBeforeEnter>
-        {beat && (
-          <MotiView
-            key={`beat-${sIdx}-${bIdx}-${nonce}`}
-            from={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.85 }}
-            transition={{ type: 'timing', duration: 170 }}
-            style={[
-              StyleSheet.absoluteFill,
-              styles.beat,
-              isPrompt ? styles.promptLayout : layoutForBeat(sIdx + bIdx),
-            ]}
-          >
-            {beat.display.split(' ').map((w, i) => {
-              const seed = seedBase + i * 7;
-              const size = isPrompt
-                ? 26 + Math.round(rnd(seed) * 8)
-                : 34 + Math.round(rnd(seed) * 22);
-              const rot = isPrompt ? (rnd(seed + 1) - 0.5) * 5 : (rnd(seed + 1) - 0.5) * 12;
-              const ty = isPrompt ? 0 : (rnd(seed + 2) - 0.5) * 16;
-              return (
-                <MotiView
-                  key={i}
-                  from={entranceFrom(seed, ty, isPrompt)}
-                  animate={{ opacity: 1, translateY: ty, scale: 1, rotate: `${rot}deg` }}
-                  transition={{
-                    type: 'spring',
-                    delay: i * (isPrompt ? 55 : 70),
-                    damping: isPrompt ? 14 : 10,
-                    stiffness: isPrompt ? 150 : 140,
-                    mass: 0.7,
+      <ScrollView
+        contentContainerStyle={[styles.scroll, align === 'center' && { alignItems: 'center' }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={[styles.flow, align === 'center' && { justifyContent: 'center' }]}>
+          {tokens.map((t, i) => {
+            const on = revealed(t.si, t.bi);
+            return (
+              <MotiView
+                key={`${nonce}-${i}`}
+                animate={{ opacity: on ? 1 : 0.16 }}
+                transition={{ type: 'timing', duration: 220 }}
+              >
+                <Text
+                  style={{
+                    fontFamily: t.s0 ? 'PlayfairDisplay_700Bold' : 'PlayfairDisplay_400Regular',
+                    fontSize: baseSize,
+                    lineHeight,
+                    color: T.cream,
+                    marginRight: 8,
                   }}
-                  style={{ marginHorizontal: 6, marginVertical: 2 }}
                 >
-                  <Text
-                    style={{
-                      fontFamily: 'Caveat_700Bold',
-                      fontSize: size,
-                      color: INK,
-                      lineHeight: size * 1.04,
-                    }}
-                  >
-                    {w}
-                  </Text>
-                </MotiView>
-              );
-            })}
-          </MotiView>
-        )}
-      </AnimatePresence>
+                  {t.w}
+                </Text>
+              </MotiView>
+            );
+          })}
+        </View>
+      </ScrollView>
     </Pressable>
   );
 }
 
-function entranceFrom(seed: number, ty: number, isPrompt: boolean) {
-  if (isPrompt) return { opacity: 0, scale: 0.6, translateY: ty + 14, rotate: '0deg' };
-  const v = Math.floor(rnd(seed + 3) * 3);
-  if (v === 0) return { opacity: 0, scale: 0.3, translateY: ty + 32, rotate: '0deg' };
-  if (v === 1) return { opacity: 0, scale: 1.7, translateY: ty, rotate: '0deg' };
-  return { opacity: 0, scale: 0.6, translateY: ty - 28, rotate: '-12deg' };
-}
-
-function layoutForBeat(i: number) {
-  const presets = [
-    { justifyContent: 'center', alignItems: 'center' },
-    { justifyContent: 'center', alignItems: 'flex-start', paddingLeft: 18 },
-    { justifyContent: 'flex-start', alignItems: 'center', paddingTop: 90 },
-    { justifyContent: 'flex-end', alignItems: 'flex-end', paddingRight: 18, paddingBottom: 90 },
-    { justifyContent: 'center', alignItems: 'flex-end', paddingRight: 18 },
-  ] as const;
-  return presets[i % presets.length];
-}
-
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
-  beat: { paddingHorizontal: 24, flexDirection: 'row', flexWrap: 'wrap' },
-  promptLayout: { justifyContent: 'center', alignItems: 'center' },
-  staticText: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 40,
-    color: INK,
-    textAlign: 'center',
-    lineHeight: 46,
-  },
-  staticPrompt: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 32,
-    color: INK,
-    textAlign: 'center',
-    lineHeight: 38,
-  },
+  scroll: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 26, paddingVertical: 20 },
+  flow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-end' },
 });

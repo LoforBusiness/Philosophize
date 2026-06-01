@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { MotiView } from 'moti';
 import type { TrueFalseInteraction } from '@/data/types';
-import CorrectFeedback from '../feedback/CorrectFeedback';
-import IncorrectFeedback from '../feedback/IncorrectFeedback';
+import { T } from '../theme';
 
 interface Props {
   interaction: TrueFalseInteraction;
@@ -10,10 +10,9 @@ interface Props {
   onComplete: (correct: boolean) => void;
 }
 
-export default function TrueFalse({ interaction, xpValue, onComplete }: Props) {
+export default function TrueFalse({ interaction, onComplete }: Props) {
   const [selected, setSelected] = useState<boolean | null>(null);
   const [answered, setAnswered] = useState(false);
-
   const isCorrect = answered && selected === interaction.answer;
 
   function handleSelect(value: boolean) {
@@ -22,106 +21,78 @@ export default function TrueFalse({ interaction, xpValue, onComplete }: Props) {
     setAnswered(true);
   }
 
-  function buttonStyle(value: boolean): object {
-    if (!answered) {
-      return {
-        flex: 1,
-        height: 140,
-        borderWidth: 2,
-        borderColor: '#E8E8E3',
-        borderRadius: 14,
-        backgroundColor: '#FAFAF7',
-        alignItems: 'center' as const,
-        justifyContent: 'center' as const,
-      };
-    }
-    if (value === interaction.answer) {
-      return {
-        flex: 1,
-        height: 140,
-        borderWidth: 2,
-        borderColor: '#3D7A55',
-        borderRadius: 14,
-        backgroundColor: '#EAF3EE',
-        alignItems: 'center' as const,
-        justifyContent: 'center' as const,
-      };
-    }
-    if (value === selected) {
-      return {
-        flex: 1,
-        height: 140,
-        borderWidth: 2,
-        borderColor: '#A83232',
-        borderRadius: 14,
-        backgroundColor: '#F7EAEA',
-        alignItems: 'center' as const,
-        justifyContent: 'center' as const,
-      };
-    }
-    // The other option — dimmed
-    return {
-      flex: 1,
-      height: 140,
-      borderWidth: 2,
-      borderColor: '#E8E8E3',
-      borderRadius: 14,
-      backgroundColor: '#FAFAF7',
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-      opacity: 0.4,
-    };
-  }
-
   return (
-    <View style={{ flex: 1 }}>
-      <View
-        style={{
-          flex: 1,
-          paddingHorizontal: 20,
-          paddingTop: 16,
-          flexDirection: 'row',
-          gap: 12,
-        }}
-      >
-        {([true, false] as const).map((val) => (
-          <Pressable
-            key={String(val)}
-            onPress={() => handleSelect(val)}
-            style={({ pressed }) => ({
-              ...buttonStyle(val),
-              opacity:
-                pressed && !answered
-                  ? 0.7
-                  : (buttonStyle(val) as any).opacity ?? 1,
-            })}
-          >
-            <Text
-              style={{
-                fontFamily: 'Caveat_700Bold',
-                fontSize: 28,
-                color: '#1A1A1A',
-              }}
+    <View style={{ marginTop: 18 }}>
+      <View style={styles.row}>
+        {([true, false] as const).map((val) => {
+          const correct = answered && val === interaction.answer;
+          const wrong = answered && val === selected && !correct;
+          const dim = answered && !correct && !wrong;
+          return (
+            <Pressable
+              key={String(val)}
+              onPress={() => handleSelect(val)}
+              disabled={answered}
+              style={({ pressed }) => [
+                styles.box,
+                correct && styles.boxCorrect,
+                wrong && styles.boxWrong,
+                dim && { opacity: 0.4 },
+                pressed && !answered && { backgroundColor: '#2C2A26' },
+              ]}
             >
-              {val ? 'True' : 'False'}
-            </Text>
-          </Pressable>
-        ))}
+              <Text style={styles.boxText}>{val ? 'True' : 'False'}</Text>
+            </Pressable>
+          );
+        })}
       </View>
 
-      {answered && isCorrect && (
-        <CorrectFeedback
-          explanation={interaction.explanation}
-          xpEarned={xpValue}
-          onContinue={() => onComplete(true)}
-        />
+      {answered && (
+        <MotiView
+          from={{ opacity: 0, translateY: 8 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 240 }}
+          style={styles.explain}
+        >
+          <Text style={[styles.explainLabel, { color: isCorrect ? T.green : T.red }]}>
+            {isCorrect ? '✓ CORRECT' : '✕ NOT QUITE'}
+          </Text>
+          <Text style={styles.explainText}>{interaction.explanation}</Text>
+        </MotiView>
       )}
-      {answered && !isCorrect && (
-        <IncorrectFeedback
-          explanation={interaction.explanation}
-          onContinue={() => onComplete(false)}
-        />
-      )}
+
+      <Pressable
+        onPress={() => answered && onComplete(isCorrect)}
+        disabled={!answered}
+        style={({ pressed }) => [styles.btn, !answered ? styles.btnDisabled : null, pressed && answered && { opacity: 0.85 }]}
+      >
+        <Text style={[styles.btnText, !answered && { color: T.dim }]}>CONTINUE →</Text>
+      </Pressable>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  row: { flexDirection: 'row', gap: 12 },
+  box: {
+    flex: 1,
+    height: 120,
+    backgroundColor: T.panel,
+    borderWidth: 1.5,
+    borderColor: T.border,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  boxCorrect: { borderColor: T.green, backgroundColor: T.greenBg },
+  boxWrong: { borderColor: T.red, backgroundColor: T.redBg },
+  boxText: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, color: T.cream },
+
+  explain: { borderLeftWidth: 2, borderLeftColor: T.border, paddingLeft: 14, marginTop: 16, marginBottom: 16 },
+  explainLabel: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.5, marginBottom: 6 },
+  explainText: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 14, color: T.creamSoft, lineHeight: 21 },
+
+  btn: { backgroundColor: T.cream, borderRadius: 8, paddingVertical: 15, alignItems: 'center', marginTop: 6 },
+  btnDisabled: { backgroundColor: T.panel, borderWidth: 1.5, borderColor: T.border },
+  btnText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: T.ink, letterSpacing: 1 },
+});

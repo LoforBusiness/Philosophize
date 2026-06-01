@@ -1,11 +1,10 @@
-import { useState } from 'react';
-import { View } from 'react-native';
-import { MotiView } from 'moti';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import type { QuestionCard as QuestionCardType, AnswerResult } from '@/data/types';
 import MultipleChoice from '../interactions/MultipleChoice';
 import TrueFalse from '../interactions/TrueFalse';
 import SortItems from '../interactions/SortItems';
-import KineticNarration from '../KineticNarration';
+import { useNarrateOnMount } from '../useNarrateOnMount';
+import { T } from '../theme';
 
 interface Props {
   card: QuestionCardType;
@@ -13,58 +12,43 @@ interface Props {
 }
 
 export default function QuestionCard({ card, onComplete }: Props) {
-  const [promptDone, setPromptDone] = useState(false);
+  // Read the question aloud — the narrator stays, but the text is fully shown
+  // (you can't answer a question that's still revealing word-by-word).
+  useNarrateOnMount(card.prompt);
 
-  function handleInteractionComplete(correct: boolean) {
-    onComplete({
-      cardIndex: 0,
-      correct,
-      xpEarned: correct ? card.xpValue : 0,
-    });
-  }
+  const complete = (correct: boolean) =>
+    onComplete({ cardIndex: 0, correct, xpEarned: correct ? card.xpValue : 0 });
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-      {/* Spoken, kinetic prompt */}
-      <View style={{ height: 190 }}>
-        <KineticNarration
-          text={card.prompt}
-          variant="prompt"
-          onDone={() => setPromptDone(true)}
-        />
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <Text style={styles.kicker}>KNOWLEDGE CHECK</Text>
+      <Text style={styles.title}>Quick Check</Text>
+      <Text style={styles.subtitle}>Let's see what stayed with you</Text>
+
+      <View style={styles.qCard}>
+        <Text style={styles.qLabel}>QUESTION</Text>
+        <Text style={styles.qText}>{card.prompt}</Text>
       </View>
 
-      {/* Answer choices — never narrated, appear once the prompt has been read */}
-      {promptDone && (
-        <MotiView
-          from={{ opacity: 0, translateY: 16 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: 'timing', duration: 240 }}
-          style={{ flex: 1 }}
-        >
-          {card.interaction.type === 'multiple-choice' && (
-            <MultipleChoice
-              interaction={card.interaction}
-              xpValue={card.xpValue}
-              onComplete={handleInteractionComplete}
-            />
-          )}
-          {card.interaction.type === 'true-false' && (
-            <TrueFalse
-              interaction={card.interaction}
-              xpValue={card.xpValue}
-              onComplete={handleInteractionComplete}
-            />
-          )}
-          {card.interaction.type === 'sort' && (
-            <SortItems
-              interaction={card.interaction}
-              xpValue={card.xpValue}
-              onComplete={handleInteractionComplete}
-            />
-          )}
-        </MotiView>
+      {card.interaction.type === 'multiple-choice' && (
+        <MultipleChoice interaction={card.interaction} xpValue={card.xpValue} onComplete={complete} />
       )}
-    </View>
+      {card.interaction.type === 'true-false' && (
+        <TrueFalse interaction={card.interaction} xpValue={card.xpValue} onComplete={complete} />
+      )}
+      {card.interaction.type === 'sort' && (
+        <SortItems interaction={card.interaction} xpValue={card.xpValue} onComplete={complete} />
+      )}
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  content: { paddingHorizontal: 22, paddingTop: 6, paddingBottom: 28 },
+  kicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: T.gold, letterSpacing: 3 },
+  title: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: T.cream, marginTop: 6 },
+  subtitle: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: T.creamSoft, marginTop: 3 },
+  qCard: { backgroundColor: T.cardCream, borderRadius: 8, padding: 18, marginTop: 18 },
+  qLabel: { fontFamily: 'Inter_700Bold', fontSize: 9, color: T.gold, letterSpacing: 2 },
+  qText: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 18, color: T.ink, lineHeight: 26, marginTop: 8 },
+});

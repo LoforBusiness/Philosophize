@@ -1,7 +1,5 @@
-import { useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
 import type { ReinforcementCard as ReinforcementCardType, AnswerResult } from '@/data/types';
-import KineticNarration from '../KineticNarration';
+import StatementScreen from '../StatementScreen';
 
 interface Props {
   card: ReinforcementCardType;
@@ -9,33 +7,15 @@ interface Props {
 }
 
 export default function ReinforcementCard({ card, onComplete }: Props) {
-  const [finished, setFinished] = useState(false);
   const text = card.callout ? `${card.callout}. ${card.body}` : card.body;
-
   return (
-    <View style={{ flex: 1, backgroundColor: 'transparent', paddingBottom: 28 }}>
-      <View style={{ flex: 1 }}>
-        <KineticNarration text={text} onDone={() => setFinished(true)} />
-      </View>
-
-      <View style={{ minHeight: 64, justifyContent: 'flex-end', paddingHorizontal: 24 }}>
-        {finished && (
-          <Pressable
-            onPress={() => onComplete()}
-            style={({ pressed }) => ({
-              backgroundColor: '#1A1A1A',
-              borderRadius: 14,
-              paddingVertical: 18,
-              alignItems: 'center',
-              opacity: pressed ? 0.75 : 1,
-            })}
-          >
-            <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 18, color: '#FAFAF7' }}>
-              Continue →
-            </Text>
-          </Pressable>
-        )}
-      </View>
-    </View>
+    <StatementScreen
+      text={text}
+      size={26}
+      kicker="REMEMBER"
+      hint="CONTINUE"
+      button="CONTINUE →"
+      onContinue={() => onComplete()}
+    />
   );
 }

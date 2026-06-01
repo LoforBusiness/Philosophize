@@ -70,6 +70,7 @@ interface UserDataState {
   displayName: string;
   email: string;
   bio: string;
+  portrait: string;                           // selected hand-drawn portrait id
   settings: AppSettings;
   _hasHydrated: boolean;
 
@@ -88,6 +89,7 @@ interface UserDataState {
   ) => { firstOfDay: boolean; streak: number; prevStreak: number };
   recomputeBadges: () => void;
   setProfile: (patch: Partial<{ displayName: string; email: string; bio: string }>) => void;
+  setPortrait: (id: string) => void;
   setSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void;
   resetProgress: () => void;
   clearSavedQuotes: () => void;
@@ -132,6 +134,7 @@ export const useUserDataStore = create<UserDataState>()(
       displayName: 'Philosopher',
       email: '',
       bio: '',
+      portrait: 'overthinker',
       settings: DEFAULT_SETTINGS,
       _hasHydrated: false,
 
@@ -216,6 +219,8 @@ export const useUserDataStore = create<UserDataState>()(
 
       setProfile: (patch) => set(patch),
 
+      setPortrait: (id) => set({ portrait: id }),
+
       setSetting: (key, value) =>
         set((state) => ({ settings: { ...state.settings, [key]: value } })),
 
@@ -241,6 +246,7 @@ export const useUserDataStore = create<UserDataState>()(
           displayName: 'Philosopher',
           email: '',
           bio: '',
+          portrait: 'overthinker',
           settings: DEFAULT_SETTINGS,
         }),
 
@@ -263,6 +269,7 @@ export const useUserDataStore = create<UserDataState>()(
         displayName: state.displayName,
         email: state.email,
         bio: state.bio,
+        portrait: state.portrait,
         settings: state.settings,
       }),
       // Merge persisted settings over defaults so newly-added keys are present.

@@ -16,6 +16,11 @@ const Rule = '#ECEAE2';
 const SW = Dimensions.get('window').width;
 const SH = Dimensions.get('window').height;
 
+// Keep the "PHILOSOPHIZE" wordmark on a single line at any width — scale the
+// font + letter-spacing down on narrow phones so the trailing "E" never wraps.
+const WORDMARK_SIZE = Math.min(42, Math.floor((SW - 56) / 8.6));
+const WORDMARK_LS = SW < 400 ? 2 : 3;
+
 const STREAK_GOAL = 7;
 
 // Daily quote pool from the philosophers.
@@ -101,7 +106,13 @@ export default function HomeScreen() {
       >
         {/* Masthead */}
         <Text style={styles.kicker}>EST. ANTIQUITY  ·  VOL. I</Text>
-        <Text style={styles.wordmark}>PHILOSOPHIZE</Text>
+        <Text
+          style={[styles.wordmark, { fontSize: WORDMARK_SIZE, letterSpacing: WORDMARK_LS }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        >
+          PHILOSOPHIZE
+        </Text>
         <View style={styles.rule} />
         <Text style={styles.tagline}>the art of thinking deeply</Text>
         <Text style={styles.diamonds}>◇   ◆   ◇</Text>
