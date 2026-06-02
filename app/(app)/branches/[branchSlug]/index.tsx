@@ -5,6 +5,7 @@ import { getBranchBySlug } from '@/data';
 import type { Path as Unit, Lesson } from '@/data/types';
 import Glyph, { type GlyphName } from '@/components/shared/Glyph';
 import SketchIcon from '@/components/shared/SketchIcon';
+import ScreenTransition from '@/components/shared/ScreenTransition';
 import { useUserDataStore } from '@/stores/userDataStore';
 
 const Page = '#F1EEE7';
@@ -88,6 +89,7 @@ export default function BranchDetailScreen() {
         : `BEGIN: ${next.lesson.title.toUpperCase()}`;
 
   return (
+    <ScreenTransition bg={Page}>
     <SafeAreaView style={styles.safe} edges={['top']}>
       {/* Top bar */}
       <View style={styles.topBar}>
@@ -174,6 +176,7 @@ export default function BranchDetailScreen() {
         )}
       </ScrollView>
     </SafeAreaView>
+    </ScreenTransition>
   );
 }
 

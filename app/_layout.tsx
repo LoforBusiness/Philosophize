@@ -40,12 +40,13 @@ export default function RootLayout() {
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange((event, _session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!authChecked) {
         setAuthChecked(true);
+        // Returning (signed-in) users go straight in; otherwise show onboarding.
+        if (session) router.replace('/(app)');
+      } else if (event === 'SIGNED_IN') {
         router.replace('/(app)');
-      } else {
-        if (event === 'SIGNED_IN') router.replace('/(app)');
       }
     });
     return () => listener.subscription.unsubscribe();

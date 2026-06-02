@@ -1,10 +1,16 @@
 import type { ColorValue } from 'react-native';
 import { Tabs } from 'expo-router';
+import { MotiView } from 'moti';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 
 function tab(name: SketchIconName) {
-  return ({ color }: { color: ColorValue }) => (
-    <SketchIcon name={name} color={color as string} size={28} />
+  return ({ color, focused }: { color: ColorValue; focused: boolean }) => (
+    <MotiView
+      animate={{ scale: focused ? 1.16 : 1, translateY: focused ? -2 : 0 }}
+      transition={{ type: 'spring', damping: 13, stiffness: 220, mass: 0.6 }}
+    >
+      <SketchIcon name={name} color={color as string} size={26} />
+    </MotiView>
   );
 }
 

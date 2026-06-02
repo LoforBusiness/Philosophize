@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Svg, { Path, Circle, Line, Rect, Defs, Pattern, G } from 'react-native-svg';
+import Svg, { Path, Circle, Line, Rect, Defs, Pattern, G, Text as SvgText } from 'react-native-svg';
 
 export interface PiePoint {
   label: string;
@@ -78,10 +78,14 @@ export default function SketchPieChart({ title, subtitle, data, valueMode = 'per
   const total = points.reduce((a, b) => a + b.value, 0) || 1;
   const uid = 'pie-' + title.replace(/[^a-z0-9]/gi, '').toLowerCase();
 
-  const size = 150;
-  const cx = size / 2;
-  const cy = size / 2;
-  const r = size / 2 - 4;
+  const R = 50;            // pie radius
+  const PAD = 40;          // room for the outside percentage labels
+  const C = R + PAD;       // center
+  const BOX = C * 2;       // square svg canvas
+  const cx = C;
+  const cy = C;
+  const r = R;
+  const rLabel = R + 14;   // % label distance from center (just outside the pie)
 
   // Build slice geometry.
   let acc = 0;
@@ -99,8 +103,8 @@ export default function SketchPieChart({ title, subtitle, data, valueMode = 'per
       <Text style={styles.title}>{title}</Text>
       {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
 
-      <View style={styles.pieWrap}>
-        <Svg width={size} height={size}>
+      <View style={[styles.pieWrap, { height: BOX }]}>
+        <Svg width={BOX} height={BOX}>
           <Defs>
             {STYLES.map((st) => (
               <PatternTile key={st} id={`${uid}-${st}`} style={st} />
@@ -118,23 +122,36 @@ export default function SketchPieChart({ title, subtitle, data, valueMode = 'per
               return <Path key={i} d={d} fill={`url(#${uid}-${sl.style})`} stroke={Ink} strokeWidth={1.5} />;
             })
           )}
-        </Svg>
 
-        {/* percent labels over slices */}
-        {slices.length > 1 &&
-          slices
-            .filter((sl) => sl.frac >= 0.06)
-            .map((sl, i) => {
-              const pos = polar(cx, cy, r * 0.62, sl.mid);
-              return (
-                <Text
-                  key={i}
-                  style={[styles.sliceLabel, { left: pos.x - 16, top: pos.y - 8 }]}
-                >
-                  {Math.round(sl.frac * 100)}%
-                </Text>
-              );
-            })}
+          {/* Percentages OUTSIDE the pie, anchored on each slice's mid-angle with
+              a short leader tick. Drawn in SVG space so they sit correctly
+              regardless of how the chart is centered in its card. */}
+          {slices.length > 1 &&
+            slices
+              .filter((sl) => sl.frac >= 0.04)
+              .map((sl, i) => {
+                const edge = polar(cx, cy, r, sl.mid);
+                const tick = polar(cx, cy, r + 8, sl.mid);
+                const lp = polar(cx, cy, rLabel, sl.mid);
+                const anchor = lp.x > cx + 3 ? 'start' : lp.x < cx - 3 ? 'end' : 'middle';
+                return (
+                  <G key={`lbl-${i}`}>
+                    <Line x1={edge.x} y1={edge.y} x2={tick.x} y2={tick.y} stroke={Ink} strokeWidth={1} />
+                    <SvgText
+                      x={lp.x}
+                      y={lp.y}
+                      fontSize={10.5}
+                      fontFamily="Inter_700Bold"
+                      fill={Ink}
+                      textAnchor={anchor}
+                      alignmentBaseline="middle"
+                    >
+                      {Math.round(sl.frac * 100)}%
+                    </SvgText>
+                  </G>
+                );
+              })}
+        </Svg>
       </View>
 
       {/* legend */}

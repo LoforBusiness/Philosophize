@@ -10,21 +10,21 @@ const lesson: Lesson = {
   cards: [
     {
       type: 'hook',
-      headline: 'The hardest problems dissolve when you take one step at a time.',
-      subtext: 'Step-by-step reasoning is how philosophers conquer the impossible.',
+      headline: 'The hardest problems soften when you take a single step at a time.',
+      subtext: 'Step by patient step is how philosophers walk into the seemingly impossible.',
       emoji: '🪜',
     },
     {
       type: 'concept',
       title: 'Why Order Matters',
-      body: 'In a well-built argument, each step earns the next one. You can\'t jump to step four before step two is solid. Skipping steps is how arguments secretly fall apart — the conclusion seems to appear from nowhere. Ordered reasoning leaves no hiding places for errors.',
+      body: 'In a well-made argument, each step earns the one that follows. You cannot leap to the fourth before the second stands firm. Skipping is how arguments quietly betray us — the conclusion seems to rise out of nowhere. Ordered reasoning leaves error no shadow to hide in.',
       visual: '📐',
       highlight: 'each step earns the next',
     },
     {
       type: 'example',
-      title: 'Descartes Builds from Zero',
-      scenario: 'Descartes doubted everything — his senses, the world, even mathematics. But he couldn\'t doubt that he was doubting. Step 1: I am doubting. Step 2: Doubting is thinking. Step 3: Thinking requires a thinker. Conclusion: I exist. Each step is tiny. Together they\'re unshakeable.',
+      title: 'Descartes Builds from Nothing',
+      scenario: 'Descartes doubted all of it — his senses, the world, even mathematics. Yet he could not doubt that he was doubting. Step 1: I am doubting. Step 2: To doubt is to think. Step 3: Thinking needs a thinker. Conclusion: I exist. Each step is small; together they cannot be shaken.',
       source: 'René Descartes, Meditations on First Philosophy',
       emoji: '🧠',
     },
@@ -35,13 +35,13 @@ const lesson: Lesson = {
       interaction: {
         type: 'true-false',
         answer: false,
-        explanation: 'Skipping steps creates hidden gaps where errors can hide. A strong argument shows every link in the chain so each one can be checked and verified.',
+        explanation: 'Each step you skip becomes a hollow where error can settle unseen. A strong argument shows every link in the chain, so each one may be examined and tested.',
       },
     },
     {
       type: 'reinforcement',
-      callout: 'You\'ve seen that strong arguments have no logical gaps.',
-      body: 'Step-by-step thinking is how you eliminate gaps on purpose. Each step you make explicit is one less place a hidden flaw can lurk. Philosophers who think this way don\'t just find better answers — they find answers that last.',
+      callout: 'You have seen that strong arguments leave no logical gaps.',
+      body: 'Step-by-step thinking is how you close those gaps on purpose. Every step made explicit is one fewer corner where a flaw can lurk unseen. Philosophers who reason this way do not merely find better answers — they find answers that endure.',
       emoji: '🔗',
     },
     {
@@ -49,11 +49,11 @@ const lesson: Lesson = {
       title: 'Step-by-Step Thinking Mastered',
       keyPoints: [
         'Each step in an argument must earn the next',
-        'Skipping steps hides errors and weakens reasoning',
-        'Descartes built certainty one tiny step at a time',
-        'Explicit steps leave no room for hidden flaws',
+        'Skipping steps hides error and weakens reasoning',
+        'Descartes built certainty one small step at a time',
+        'Steps made explicit leave no room for hidden flaws',
       ],
-      closingThought: 'Take the next big problem in your life and break it into steps — that\'s philosophy in action.',
+      closingThought: 'Take the next great problem in your life and break it into steps — that is philosophy at work.',
     },
   ],
 };

@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import Glyph from '@/components/shared/Glyph';
+import ScreenTransition from '@/components/shared/ScreenTransition';
 import { signOut } from '@/lib/supabase/auth';
 import { ALL_BRANCHES } from '@/data';
 import { rankForXP } from '@/data/ranks';
@@ -160,6 +161,7 @@ export default function ProfileScreen() {
   }
 
   return (
+    <ScreenTransition bg={Ink}>
     <View style={styles.root}>
       <ScrollView
         style={styles.scroll}
@@ -295,6 +297,7 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
     </View>
+    </ScreenTransition>
   );
 }
 

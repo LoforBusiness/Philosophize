@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SketchIcon from '@/components/shared/SketchIcon';
+import ScreenTransition from '@/components/shared/ScreenTransition';
 import { ALL_PHILOSOPHERS, type Philosopher } from '@/data/philosophers';
 import { useUIStore } from '@/stores/uiStore';
 
@@ -100,6 +101,7 @@ export default function ThinkersScreen() {
   const grid = matched.filter((p) => !(showFeatured && p.id === featured.id));
 
   return (
+    <ScreenTransition bg={Ink}>
     <View style={styles.root}>
       <ScrollView
         style={styles.scroll}
@@ -223,6 +225,7 @@ export default function ThinkersScreen() {
         </View>
       </ScrollView>
     </View>
+    </ScreenTransition>
   );
 }
 

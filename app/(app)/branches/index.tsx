@@ -1,7 +1,9 @@
-import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Glyph, { type GlyphName } from '@/components/shared/Glyph';
+import ScreenTransition from '@/components/shared/ScreenTransition';
+import PressableScale from '@/components/shared/PressableScale';
 import { ALL_BRANCHES, getBranchBySlug } from '@/data';
 import { useUserDataStore } from '@/stores/userDataStore';
 
@@ -49,6 +51,7 @@ export default function LearnScreen() {
   const totLessons = cards.reduce((a, c) => a + c.totalLessons, 0);
 
   return (
+    <ScreenTransition bg={Page}>
     <SafeAreaView style={styles.safe} edges={['top']}>
       {/* Top bar */}
       <View style={styles.topBar}>
@@ -84,10 +87,10 @@ export default function LearnScreen() {
           const unitNames = c.units.map((u) => u.name.toUpperCase()).join(' · ');
           const pct = c.totalLessons > 0 ? c.done / c.totalLessons : 0;
           return (
-            <Pressable
+            <PressableScale
               key={c.slug}
               onPress={() => router.push(`/(app)/branches/${c.slug}`)}
-              style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+              style={styles.card}
             >
               <View style={styles.cardTop}>
                 <View style={styles.iconBox}>
@@ -112,13 +115,14 @@ export default function LearnScreen() {
                   {c.done} / {c.totalLessons}
                 </Text>
               </View>
-            </Pressable>
+            </PressableScale>
           );
         })}
 
         <Text style={styles.footer}>Choose a branch to begin your inquiry</Text>
       </ScrollView>
     </SafeAreaView>
+    </ScreenTransition>
   );
 }
 

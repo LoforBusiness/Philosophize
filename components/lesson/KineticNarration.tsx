@@ -59,21 +59,22 @@ function rnd(seed: number): number {
 const MIN_BEAT_MS = 360;
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
-// A natural, conversational narrator — normal pitch, brisk pace.
+// A measured, human narrator — an unhurried, reflective register with only a
+// gentle natural lilt between sentences (heavy jitter is what reads as robotic).
 function prosodyFor(i: number, text: string, base: number) {
   const q = /\?\s*$/.test(text);
   const ex = /!\s*$/.test(text);
-  let rate = base + rnd(i * 13 + 1) * 0.08;
-  let pitch = 0.97 + rnd(i * 7 + 5) * 0.1;
+  let rate = base + (rnd(i * 13 + 1) - 0.5) * 0.05;
+  let pitch = 1.0 + (rnd(i * 7 + 5) - 0.5) * 0.07;
   if (q) {
-    pitch += 0.05;
-    rate -= 0.05;
+    pitch += 0.04;
+    rate -= 0.04;
   }
   if (ex) {
-    pitch += 0.05;
-    rate += 0.03;
+    pitch += 0.04;
+    rate += 0.02;
   }
-  return { rate: clamp(rate, 0.9, 1.2), pitch: clamp(pitch, 0.9, 1.18) };
+  return { rate: clamp(rate, 0.84, 1.06), pitch: clamp(pitch, 0.92, 1.1) };
 }
 
 interface Props {
@@ -94,7 +95,7 @@ export default function KineticNarration({
   text,
   active = true,
   onDone,
-  rate = 1.0,
+  rate = 0.95,
   variant = 'play',
   size,
   align = 'left',
@@ -321,7 +322,7 @@ export default function KineticNarration({
             return (
               <MotiView
                 key={`${nonce}-${i}`}
-                animate={{ opacity: on ? 1 : 0.16 }}
+                animate={{ opacity: on ? 1 : 0 }}
                 transition={{ type: 'timing', duration: 220 }}
               >
                 <Text

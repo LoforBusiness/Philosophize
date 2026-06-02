@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,11 +12,37 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import * as Speech from 'expo-speech';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import Portrait, { PORTRAITS, type PortraitName } from '@/components/shared/Portrait';
+import ScreenTransition from '@/components/shared/ScreenTransition';
 import { signOut } from '@/lib/supabase/auth';
+import { getBritishVoice } from '@/lib/voice';
 import { rankForXP } from '@/data/ranks';
 import { useUserDataStore, type AppSettings } from '@/stores/userDataStore';
+
+const VOICE_SAMPLE = 'Philosophy begins in wonder. Let us think this through together.';
+
+// English voices, best-sounding first (en-GB and enhanced/neural engines on top).
+function englishVoices(all: Speech.Voice[]): Speech.Voice[] {
+  const rank = (v: Speech.Voice) => {
+    const n = (v.name || '').toLowerCase();
+    const l = (v.language || '').toLowerCase();
+    let s = 0;
+    if (l.startsWith('en-gb')) s += 100;
+    else if (l.startsWith('en')) s += 10;
+    if (/enhanced|premium|neural|natural|siri/.test(n)) s += 50;
+    return s;
+  };
+  return all
+    .filter((v) => (v.language || '').toLowerCase().startsWith('en'))
+    .sort((a, b) => rank(b) - rank(a) || (a.name || '').localeCompare(b.name || ''));
+}
+
+function isEnhanced(v: Speech.Voice) {
+  const n = (v.name || '').toLowerCase();
+  return /enhanced|premium|neural|natural|siri/.test(n) || (v.quality && v.quality !== Speech.VoiceQuality.Default);
+}
 
 const Page = '#F1EEE7';
 const Paper = '#FFFFFF';
@@ -54,6 +80,7 @@ export default function SettingsScreen() {
   }
 
   return (
+    <ScreenTransition bg={Page}>
     <SafeAreaView style={styles.safe} edges={['top']}>
       {/* Top bar */}
       <View style={[styles.topBar, compact && { paddingHorizontal: 14 }]}>
@@ -72,6 +99,7 @@ export default function SettingsScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </ScreenTransition>
   );
 }
 
@@ -483,6 +511,34 @@ function LearningSection() {
   const setSetting = useUserDataStore((s) => s.setSetting);
   const goal = settings.dailyGoalMinutes;
   const goalLabel = goal >= 60 ? `${Math.round((goal / 60) * 10) / 10} hr` : `${goal} min`;
+
+  const [voices, setVoices] = useState<Speech.Voice[]>([]);
+  const [voiceOpen, setVoiceOpen] = useState(false);
+
+  // Voices can be empty until the engine fires `voiceschanged` on web; retry.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      for (let i = 0; i < 6; i++) {
+        try {
+          const vs = await Speech.getAvailableVoicesAsync();
+          if (vs && vs.length) {
+            if (alive) setVoices(englishVoices(vs));
+            return;
+          }
+        } catch {}
+        await new Promise((r) => setTimeout(r, 300));
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const currentVoiceLabel = settings.voiceId
+    ? voices.find((v) => v.identifier === settings.voiceId)?.name ?? 'Selected voice'
+    : 'Automatic';
+
   return (
     <Card>
       <Header title="Learning" sub="Calibrate the pace of your practice." />
@@ -500,10 +556,115 @@ function LearningSection() {
         <Text style={styles.endLabel}>2 hrs</Text>
       </View>
       <View style={[styles.hr, { marginTop: 18 }]} />
-      <Row title="Auto-advance" sub="Move to next lesson when one is complete" last>
+      <Row title="Auto-advance" sub="Move to next lesson when one is complete">
         <Toggle value={settings.autoAdvance} onChange={(v) => setSetting('autoAdvance', v)} />
       </Row>
+      <Row title="Narration Voice" sub="The voice that reads lessons aloud" last>
+        <Pressable onPress={() => setVoiceOpen(true)} style={styles.dropdown}>
+          <SketchIcon name="volume-on" size={15} color={Ink} />
+          <Text style={[styles.dropdownText, { maxWidth: 104 }]} numberOfLines={1}>
+            {currentVoiceLabel}
+          </Text>
+          <SketchIcon name="chevron-down" size={16} color={Ink} />
+        </Pressable>
+      </Row>
+
+      <VoicePicker
+        visible={voiceOpen}
+        voices={voices}
+        selected={settings.voiceId ?? null}
+        onSelect={(id) => setSetting('voiceId', id)}
+        onClose={() => {
+          Speech.stop();
+          setVoiceOpen(false);
+        }}
+      />
     </Card>
+  );
+}
+
+/* ---------------- Narration voice picker ---------------- */
+
+function VoicePicker({
+  visible,
+  voices,
+  selected,
+  onSelect,
+  onClose,
+}: {
+  visible: boolean;
+  voices: Speech.Voice[];
+  selected: string | null;
+  onSelect: (id: string | null) => void;
+  onClose: () => void;
+}) {
+  const preview = (id: string | null) => {
+    Speech.stop();
+    const speak = (voice?: string) => {
+      try {
+        Speech.speak(VOICE_SAMPLE, { voice, language: 'en-GB', rate: 0.95, pitch: 1.0 });
+      } catch {}
+    };
+    if (id) speak(id);
+    else getBritishVoice().then((v) => speak(v ?? undefined));
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+      <View style={styles.modalBackdrop}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+        <View style={styles.voiceCard}>
+          <View style={styles.voiceHead}>
+            <Text style={styles.modalTitle}>Narration Voice</Text>
+            <Pressable onPress={onClose} hitSlop={10}>
+              <Text style={styles.pickerCloseText}>X</Text>
+            </Pressable>
+          </View>
+          <Text style={styles.voiceHint}>Tap a voice to hear a sample and choose it.</Text>
+
+          <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+            <VoiceRow
+              label="Automatic"
+              sub="Best available voice · recommended"
+              on={selected == null}
+              onPress={() => {
+                onSelect(null);
+                preview(null);
+              }}
+            />
+            {voices.map((v) => (
+              <VoiceRow
+                key={v.identifier}
+                label={v.name || v.identifier}
+                sub={`${v.language}${isEnhanced(v) ? ' · Enhanced' : ''}`}
+                on={selected === v.identifier}
+                onPress={() => {
+                  onSelect(v.identifier);
+                  preview(v.identifier);
+                }}
+              />
+            ))}
+            {voices.length === 0 && (
+              <Text style={styles.voiceEmpty}>No voices detected on this device yet — reopen in a moment.</Text>
+            )}
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function VoiceRow({ label, sub, on, onPress }: { label: string; sub?: string; on: boolean; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.voiceRow, on && styles.voiceRowOn, pressed && { backgroundColor: '#F0EFEA' }]}>
+      <View style={{ flex: 1, paddingRight: 10 }}>
+        <Text style={[styles.voiceName, on && { fontFamily: 'Inter_700Bold' }]} numberOfLines={1}>
+          {label}
+        </Text>
+        {sub ? <Text style={styles.voiceSub} numberOfLines={1}>{sub}</Text> : null}
+      </View>
+      {on && <Text style={styles.voiceCheck}>✓</Text>}
+    </Pressable>
   );
 }
 
@@ -960,6 +1121,17 @@ const styles = StyleSheet.create({
   modalCancelText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: Ink },
   modalConfirm: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 4, borderWidth: 1.5, borderColor: Ink, backgroundColor: Ink },
   modalConfirmText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Paper },
+
+  // Narration voice picker
+  voiceCard: { width: '100%', maxWidth: 420, backgroundColor: Paper, borderWidth: 2, borderColor: Ink, borderRadius: 8, paddingHorizontal: 20, paddingTop: 18, paddingBottom: 16 },
+  voiceHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  voiceHint: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12.5, color: InkSoft, marginTop: 4, marginBottom: 12 },
+  voiceRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderColor: InkFaint, borderRadius: 6, paddingHorizontal: 14, paddingVertical: 12, marginBottom: 8 },
+  voiceRowOn: { borderColor: Ink, borderStyle: 'dashed', backgroundColor: '#F4F2EC' },
+  voiceName: { fontFamily: 'Inter_500Medium', fontSize: 14, color: Ink },
+  voiceSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: InkSoft, marginTop: 2 },
+  voiceCheck: { fontFamily: 'Inter_700Bold', fontSize: 16, color: Ink },
+  voiceEmpty: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: InkSoft, textAlign: 'center', paddingVertical: 20 },
 
   // Portrait picker
   pickerCard: { backgroundColor: Paper, borderWidth: 2, borderColor: Ink, borderRadius: 8, paddingHorizontal: 22, paddingTop: 20, paddingBottom: 18 },

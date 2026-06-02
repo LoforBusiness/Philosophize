@@ -3,7 +3,6 @@ import type { QuestionCard as QuestionCardType, AnswerResult } from '@/data/type
 import MultipleChoice from '../interactions/MultipleChoice';
 import TrueFalse from '../interactions/TrueFalse';
 import SortItems from '../interactions/SortItems';
-import { useNarrateOnMount } from '../useNarrateOnMount';
 import { T } from '../theme';
 
 interface Props {
@@ -12,10 +11,8 @@ interface Props {
 }
 
 export default function QuestionCard({ card, onComplete }: Props) {
-  // Read the question aloud — the narrator stays, but the text is fully shown
-  // (you can't answer a question that's still revealing word-by-word).
-  useNarrateOnMount(card.prompt);
-
+  // Questions are never read aloud — they are shown in full, in silence, so you
+  // read and answer them yourself.
   const complete = (correct: boolean) =>
     onComplete({ cardIndex: 0, correct, xpEarned: correct ? card.xpValue : 0 });
 

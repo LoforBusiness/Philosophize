@@ -3,6 +3,8 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
+import ScreenTransition from '@/components/shared/ScreenTransition';
+import PressableScale from '@/components/shared/PressableScale';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -67,20 +69,13 @@ function ActionCard({
 }) {
   const fg = filled ? Paper : Ink;
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.action,
-        filled && styles.actionFilled,
-        pressed && { opacity: 0.85 },
-      ]}
-    >
+    <PressableScale onPress={onPress} style={[styles.action, filled && styles.actionFilled]}>
       <View style={[styles.actionIconBox, { borderColor: fg }]}>
         <SketchIcon name={icon} size={18} color={fg} />
       </View>
       <Text style={[styles.actionLabel, { color: fg }]}>{label}</Text>
       <Text style={[styles.actionSub, { color: filled ? '#CBC9C2' : InkSoft }]}>{sub}</Text>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -97,6 +92,7 @@ export default function HomeScreen() {
   const filledStars = Math.min(Math.max(streak, 0), STREAK_GOAL);
 
   return (
+    <ScreenTransition bg="#FAFAF7">
     <SafeAreaView style={styles.safe}>
       <RuledPaper />
       <ScrollView
@@ -183,6 +179,7 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </ScreenTransition>
   );
 }
 

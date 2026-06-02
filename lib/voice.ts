@@ -1,7 +1,9 @@
 import * as Speech from 'expo-speech';
+import { useUserDataStore } from '@/stores/userDataStore';
 
-// Resolves the best available "deep British male" voice from the device/browser
-// TTS engine. Free, no API key. Falls back gracefully when none is installed.
+// Resolves the voice used for narration. A voice the user picked by hand in
+// Settings always wins; otherwise we auto-select the best available "deep
+// British male" voice from the device/browser TTS engine.
 
 let cached: string | null | undefined; // undefined = unresolved, null = use default
 let pending: Promise<string | null> | null = null;
@@ -18,6 +20,11 @@ function score(v: Speech.Voice): number {
   if (lang.startsWith('en-gb')) s += 100;
   else if (lang.startsWith('en')) s += 10;
   else s -= 60;
+
+  // Strongly prefer high-quality, natural-sounding engines — these are what
+  // make narration sound human rather than robotic.
+  if (/enhanced|premium|neural|natural/.test(name)) s += 85;
+  if (name.includes('siri')) s += 70;
 
   if (name.includes('google uk english male')) s += 90;
   if (MALE_NAMES.some((n) => name.includes(n))) s += 60;
@@ -54,6 +61,9 @@ async function resolve(): Promise<string | null> {
 }
 
 export async function getBritishVoice(): Promise<string | null> {
+  // A hand-picked voice (Settings → Learning → Narration Voice) overrides auto.
+  const manual = useUserDataStore.getState().settings?.voiceId;
+  if (manual) return manual;
   if (cached !== undefined) return cached;
   if (!pending) {
     pending = resolve()

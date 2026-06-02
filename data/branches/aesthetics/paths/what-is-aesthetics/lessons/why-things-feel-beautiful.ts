@@ -10,28 +10,28 @@ const lesson: Lesson = {
   cards: [
     {
       type: 'hook',
-      headline: 'Why does a sunset stop you in your tracks?',
-      subtext: 'Beauty feels personal — yet strangers share it across centuries.',
+      headline: 'Why does a sunset hush you, mid-sentence?',
+      subtext: 'Beauty feels like your secret — yet strangers have felt it for centuries.',
       emoji: '🌅',
     },
     {
       type: 'concept',
       title: 'What Is Aesthetic Pleasure?',
-      body: 'Kant argued that beauty triggers a special kind of pleasure — one that is disinterested. You are not enjoying the sunset because it feeds you or makes you money. You simply delight in how it appears. This pleasure feels free, untangled from need or desire.',
+      body: 'Kant called the pleasure of beauty disinterested. You do not love the sunset because it feeds you or earns you anything — you simply delight in how it appears. The wanting falls away. What remains is a quieter, freer joy: pleasure with no hunger underneath it.',
       visual: '✨',
       highlight: 'disinterested pleasure',
     },
     {
       type: 'concept',
       title: 'Beauty vs. Taste',
-      body: 'Liking chocolate is taste — it satisfies a personal preference. But calling a painting beautiful feels like more than preference. When you say "this is beautiful," you seem to be claiming something others should agree with, not just reporting your own appetite.',
+      body: 'Loving chocolate is taste — a private appetite, yours alone. But calling a painting beautiful reaches further. To say "this is beautiful" is not merely to report what pleases you; it is, somehow, to speak for others too, as if you had glimpsed something they ought to see as well.',
       visual: '🎭',
       highlight: 'universal validity',
     },
     {
       type: 'example',
       title: 'Kant at the Museum',
-      scenario: 'Kant noticed that people argue about art differently from food. No one says "you\'re wrong to dislike olives" — that is just preference. But we do say "you\'re missing something" when someone dismisses a Beethoven symphony as noise. Kant called this the peculiar demand beauty makes: agreement from everyone.',
+      scenario: 'Kant saw that we quarrel over art unlike how we quarrel over food. No one says "you are wrong to dislike olives" — mere appetite owes no defense. Yet we do say "you are missing something" when a Beethoven symphony is waved off as noise. Beauty, Kant noticed, makes a stranger demand: it asks everyone to agree.',
       source: 'Immanuel Kant, Critique of Judgment (1790)',
       emoji: '🏛️',
     },
@@ -42,18 +42,18 @@ const lesson: Lesson = {
       interaction: {
         type: 'multiple-choice',
         options: [
-          { id: 'a', text: 'It is disinterested — not tied to personal need', isCorrect: true },
-          { id: 'b', text: 'It lasts longer than physical pleasure', isCorrect: false },
-          { id: 'c', text: 'It only applies to visual art', isCorrect: false },
-          { id: 'd', text: 'It requires training to experience', isCorrect: false },
+          { id: 'a', text: 'It is disinterested — unbound from any personal need', isCorrect: true },
+          { id: 'b', text: 'It lingers longer than bodily pleasure', isCorrect: false },
+          { id: 'c', text: 'It belongs to visual art alone', isCorrect: false },
+          { id: 'd', text: 'It can only be felt after training', isCorrect: false },
         ],
-        explanation: 'Kant\'s key insight is that aesthetic pleasure is disinterested — you are not enjoying beauty because it satisfies hunger, desire, or self-interest. That freedom from need is what makes it feel special.',
+        explanation: 'Kant\'s insight is that aesthetic pleasure is disinterested. You do not delight in beauty because it answers hunger, desire, or advantage. That very freedom from need is what gives the pleasure its strange purity.',
       },
     },
     {
       type: 'reinforcement',
-      callout: 'Earlier you learned beauty demands universal agreement.',
-      body: 'This is the paradox at the heart of aesthetics: beauty feels personal yet it reaches outward. You do not just say "I enjoy this" — you say "this is beautiful," inviting others to see what you see. Philosophy asks why that invitation feels so natural.',
+      callout: 'Earlier you saw that beauty quietly demands agreement.',
+      body: 'Here lies the paradox at the heart of aesthetics: beauty feels intimate, yet it always reaches outward. You rarely stop at "I enjoy this." You say "this is beautiful" — and in saying it, you beckon others to see what you see. Philosophy asks why that gesture feels so natural.',
       emoji: '🔭',
     },
     {
@@ -63,18 +63,18 @@ const lesson: Lesson = {
       interaction: {
         type: 'true-false',
         answer: true,
-        explanation: 'Kant argued that judgments of beauty carry what he called "universal validity" — unlike taste preferences, they implicitly demand agreement from everyone, even though they are not based on logic.',
+        explanation: 'Kant held that judgments of beauty carry what he called universal validity. Unlike mere taste, they quietly demand the assent of everyone — even though no argument or logic can compel it. The claim is felt, not proven.',
       },
     },
     {
       type: 'summary',
       title: 'Beauty: Personal Yet Universal',
       keyPoints: [
-        'Aesthetic pleasure is disinterested — free from need',
-        'Beauty judgments claim universal agreement, unlike taste',
-        'This paradox is the starting point of aesthetics',
+        'Aesthetic pleasure is disinterested — free of all need',
+        'Beauty quietly claims agreement; mere taste does not',
+        'This paradox is where aesthetics begins',
       ],
-      closingThought: 'Every time you call something beautiful, you are doing philosophy.',
+      closingThought: 'Each time you call something beautiful, you are already a philosopher.',
     },
   ],
 };

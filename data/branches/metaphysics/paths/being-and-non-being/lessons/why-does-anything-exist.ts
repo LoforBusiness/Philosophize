@@ -10,27 +10,27 @@ const lesson: Lesson = {
   cards: [
     {
       type: 'hook',
-      headline: 'The universe exists. But why does it exist at all?',
-      subtext: 'This question stopped history\'s greatest minds cold.',
+      headline: 'A universe is here. Why is there anything at all?',
+      subtext: 'The simplest question, and the one that has unsettled the greatest minds.',
       emoji: '🌌',
     },
     {
       type: 'concept',
-      title: 'Leibniz\'s Big Question',
-      body: 'In 1714, Gottfried Leibniz asked: "Why is there something rather than nothing?" It sounds simple, but it\'s explosive. We take existence for granted — but why should anything exist at all? Nothing existing seems just as possible as something existing. The fact that there\'s a universe is genuinely strange.',
+      title: 'Leibniz\'s Question',
+      body: 'In 1714, Gottfried Leibniz asked: "Why is there something rather than nothing?" It sounds almost childlike, yet it detonates on contact. We treat existence as a given, never asking why it bothered to happen. An empty universe seems no less possible than a full one. That ours is full at all is quietly astonishing.',
       visual: '🤔',
       highlight: 'why is there something rather than nothing',
     },
     {
       type: 'example',
       title: 'Imagine Absolute Nothingness',
-      scenario: 'Picture erasing everything — not just objects, but space, time, energy, even the laws of physics. No darkness (darkness is something). No emptiness (emptiness is something). Pure, total nothing. Now ask: why didn\'t it stay that way? Why did anything pop into existence? This gut-punch of a question is where metaphysics begins.',
+      scenario: 'Erase everything — not only objects, but space, time, energy, even the laws that govern them. No darkness, for darkness is something. No emptiness, for emptiness is something. Only sheer, unbroken nothing. Now ask: why did it not simply remain so? Why did being stir at all? Sit with that question, and you have arrived at metaphysics.',
       emoji: '🕳️',
     },
     {
       type: 'concept',
-      title: 'Why This Question Matters',
-      body: 'Leibniz\'s question isn\'t just cosmic trivia. It forces us to examine what "existence" even means. Every scientific explanation assumes things already exist — it can\'t explain why anything exists in the first place. This is a question science hands off to philosophy. The answer (if there is one) would explain everything.',
+      title: 'Why It Refuses to Go Away',
+      body: 'This is no cosmic riddle for idle afternoons. It presses us to ask what we even mean by "existence." Every scientific account begins with things already in hand — particles, fields, laws — and so can never reach beneath them. Here science falls silent and hands the torch to philosophy. An answer, if one exists, would illuminate everything.',
       visual: '🔭',
       highlight: 'existence',
     },
@@ -46,7 +46,7 @@ const lesson: Lesson = {
           { id: 'c', text: 'Immanuel Kant', isCorrect: false },
           { id: 'd', text: 'René Descartes', isCorrect: false },
         ],
-        explanation: 'Leibniz posed this question in his 1714 essay "Principles of Nature and Grace." It became one of the most celebrated questions in all of philosophy.',
+        explanation: 'Leibniz raised it in his 1714 essay "Principles of Nature and Grace." Few questions in the whole history of thought have proven so haunting, or so durable.',
       },
     },
     {
@@ -56,12 +56,12 @@ const lesson: Lesson = {
       interaction: {
         type: 'multiple-choice',
         options: [
-          { id: 'a', text: 'Science already answered it with the Big Bang', isCorrect: false },
-          { id: 'b', text: 'Science assumes things exist — it can\'t explain existence itself', isCorrect: true },
-          { id: 'c', text: 'Scientists are not smart enough yet', isCorrect: false },
-          { id: 'd', text: 'The question is too short to be scientific', isCorrect: false },
+          { id: 'a', text: 'The Big Bang has already settled the matter', isCorrect: false },
+          { id: 'b', text: 'Science presumes things exist; it cannot account for existence itself', isCorrect: true },
+          { id: 'c', text: 'Scientists simply aren\'t clever enough yet', isCorrect: false },
+          { id: 'd', text: 'The question is too brief to be scientific', isCorrect: false },
         ],
-        explanation: 'Every scientific explanation starts with something already existing (particles, energy, laws). Science explains how things work and change — not why there is anything at all.',
+        explanation: 'Every scientific account opens with something already on the table — particles, energy, laws. Science can tell us how things behave and change, never why there is anything to begin with.',
       },
     },
     {
@@ -69,11 +69,11 @@ const lesson: Lesson = {
       title: 'Why Existence Is a Mystery',
       keyPoints: [
         'Leibniz asked: why something rather than nothing?',
-        'Nothingness seems as possible as existence',
-        'Science can\'t answer why anything exists at all',
-        'This question is the starting point of metaphysics',
+        'Nothing seems every bit as possible as being',
+        'Science explains how, never why there is anything',
+        'Here is where metaphysics first draws breath',
       ],
-      closingThought: 'The fact that you exist and can wonder about existence is already astonishing.',
+      closingThought: 'That you exist, and can pause to wonder at it, is already a small miracle.',
     },
   ],
 };

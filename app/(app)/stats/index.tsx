@@ -2,6 +2,7 @@ import { View, Text, ScrollView, StyleSheet, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Rect, Line, Defs, Pattern } from 'react-native-svg';
 import SketchPieChart, { type PiePoint } from '@/components/shared/SketchPieChart';
+import ScreenTransition from '@/components/shared/ScreenTransition';
 import { ALL_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -94,6 +95,7 @@ export default function StatsScreen() {
   const hasAny = lessonsDone + quotesSaved + philosophersViewed > 0;
 
   return (
+    <ScreenTransition bg={Paper}>
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Masthead */}
@@ -157,6 +159,7 @@ export default function StatsScreen() {
         <Text style={styles.footerQuote}>“The unexamined life is not worth living.” — Socrates</Text>
       </ScrollView>
     </SafeAreaView>
+    </ScreenTransition>
   );
 }
 

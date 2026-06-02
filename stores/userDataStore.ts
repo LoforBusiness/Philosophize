@@ -34,6 +34,8 @@ export interface AppSettings {
   // Language
   appLanguage: string;
   quoteDisplay: 'original' | 'translated' | 'both';
+  // Narration
+  voiceId: string | null; // manually chosen TTS voice; null = automatic
   // Data
   autoBackup: boolean;
 }
@@ -53,6 +55,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   usageAnalytics: true,
   appLanguage: 'English',
   quoteDisplay: 'original',
+  voiceId: null,
   autoBackup: true,
 };
 
