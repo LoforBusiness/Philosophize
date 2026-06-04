@@ -21,7 +21,7 @@ const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
 const InkFaint = '#D9D7CE';
 const Track = '#E6E4DC';
-const Gold = '#9A7B33';
+const Gold = '#1A1A1A';
 const Lock = '#5B6B86';
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));

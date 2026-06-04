@@ -67,9 +67,9 @@ export default function StatsScreen() {
     .filter((p) => p.score > 0)
     .sort((a, b) => b.score - a.score);
 
-  const philPie: PiePoint[] = philScores.slice(0, 4).map((p) => ({ label: p.surname, value: p.score }));
-  const othersScore = philScores.slice(4).reduce((a, p) => a + p.score, 0);
-  if (othersScore > 0) philPie.push({ label: 'Others', value: othersScore });
+  // Only the leading philosophers — no catch-all "Others" slice. Percentages are
+  // computed across just these top thinkers.
+  const philPie: PiePoint[] = philScores.slice(0, 5).map((p) => ({ label: p.surname, value: p.score }));
 
   const areaPie: PiePoint[] = AREA_ORDER.map((slug) => ({
     label: AREA_NAME[slug],

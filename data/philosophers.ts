@@ -1,3 +1,9 @@
+import { ANCIENT_EXTRA } from './extra-philosophers/ancient';
+import { EASTERN_EXTRA } from './extra-philosophers/eastern';
+import { MEDIEVAL_EXTRA } from './extra-philosophers/medieval';
+import { MODERN_EXTRA } from './extra-philosophers/modern';
+import { CONTEMPORARY_EXTRA } from './extra-philosophers/contemporary';
+
 export interface PhilosopherQuote {
   id: string; // unique, kebab style like 'socrates-1', 'socrates-2'
   text: string; // the quote, no surrounding quotation marks
@@ -14,9 +20,13 @@ export interface Philosopher {
   areas: string[]; // 2–4 human-readable areas of thought
   branchSlugs: string[]; // subset of the 6 allowed slugs
   quotes: PhilosopherQuote[]; // 4–6 well-known, reliably attributed quotes
+  // Optional grouping metadata used by the Thinkers list. Existing entries fall
+  // back to the maps in the screen; all newer entries set these directly.
+  category?: 'ANCIENT' | 'MEDIEVAL' | 'MODERN' | 'CONTEMPORARY' | 'EASTERN';
+  country?: string; // short modern/historical place, e.g. 'Greece', 'Persia'
 }
 
-export const ALL_PHILOSOPHERS: Philosopher[] = [
+const BASE_PHILOSOPHERS: Philosopher[] = [
   {
     id: 'socrates',
     name: 'Socrates',
@@ -377,6 +387,17 @@ export const ALL_PHILOSOPHERS: Philosopher[] = [
       { id: 'simone-de-beauvoir-5', text: 'To will oneself free is also to will others free.' },
     ],
   },
+];
+
+// Base thinkers plus the broader canon (ancient, eastern, medieval, modern,
+// contemporary) — ~120 philosophers in total.
+export const ALL_PHILOSOPHERS: Philosopher[] = [
+  ...BASE_PHILOSOPHERS,
+  ...ANCIENT_EXTRA,
+  ...EASTERN_EXTRA,
+  ...MEDIEVAL_EXTRA,
+  ...MODERN_EXTRA,
+  ...CONTEMPORARY_EXTRA,
 ];
 
 export function getPhilosopherById(id: string): Philosopher | undefined {

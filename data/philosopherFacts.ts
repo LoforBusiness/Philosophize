@@ -1,7 +1,12 @@
 // "Did you know?" facts shown on each philosopher's profile.
 // Exactly 3 short, surprising, well-attested facts per philosopher.
+import { ANCIENT_FACTS } from './extra-philosophers/ancient-facts';
+import { EASTERN_FACTS } from './extra-philosophers/eastern-facts';
+import { MEDIEVAL_FACTS } from './extra-philosophers/medieval-facts';
+import { MODERN_FACTS } from './extra-philosophers/modern-facts';
+import { CONTEMPORARY_FACTS } from './extra-philosophers/contemporary-facts';
 
-export const PHILOSOPHER_FACTS: Record<string, string[]> = {
+const BASE_FACTS: Record<string, string[]> = {
   'socrates': [
     'Socrates never wrote a single word — everything we know comes from his students.',
     'He was sentenced to death and drank poison hemlock rather than flee into exile.',
@@ -102,4 +107,14 @@ export const PHILOSOPHER_FACTS: Record<string, string[]> = {
     'Her book "The Second Sex" was banned by the Vatican yet helped launch modern feminism.',
     'She and Sartre were lifelong partners who never married and never lived in the same home.',
   ],
+};
+
+// The full canon — original 20 plus all extended thinkers.
+export const PHILOSOPHER_FACTS: Record<string, string[]> = {
+  ...BASE_FACTS,
+  ...ANCIENT_FACTS,
+  ...EASTERN_FACTS,
+  ...MEDIEVAL_FACTS,
+  ...MODERN_FACTS,
+  ...CONTEMPORARY_FACTS,
 };

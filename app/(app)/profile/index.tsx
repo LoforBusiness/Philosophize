@@ -16,7 +16,7 @@ const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
 const InkFaint = '#E2E0D8';
-const Gold = '#C9A86A';
+const Gold = '#9C9A93';
 const PaperMute = '#9C9A93';
 const Track = '#E6E4DC';
 

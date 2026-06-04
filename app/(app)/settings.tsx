@@ -24,7 +24,7 @@ const Paper = '#FFFFFF';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
 const InkFaint = '#E2E0D8';
-const Gold = '#9A7B33';
+const Gold = '#6B6B6B';
 const Crimson = '#A83232';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];

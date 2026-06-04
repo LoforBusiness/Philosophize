@@ -15,7 +15,7 @@ const InkSoft = '#6B6B6B';
 const Faint = '#9A968C';
 const Rule = '#E4E1D9';
 const Cream = '#F4F1EA';
-const Gold = '#C6A24C';
+const Gold = '#A8A49A';
 const LockGray = '#B7B3A9';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
@@ -107,15 +107,6 @@ export default function BranchDetailScreen() {
               ))}
             </View>
           )}
-        </View>
-
-        {/* Open entry note */}
-        <View style={styles.noteCard}>
-          <Text style={styles.noteDiamond}>◆</Text>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.noteTitle}>OPEN ENTRY · START LESSON 1 OF ANY UNIT</Text>
-            <Text style={styles.noteBody}>Complete a unit's lessons in order. Jump between units freely.</Text>
-          </View>
         </View>
 
         {/* One continuous path: unit markers + lessons */}
@@ -302,7 +293,7 @@ const styles = StyleSheet.create({
   unitCard: { flex: 1, borderWidth: 1.5, borderColor: Ink, borderRadius: 5, backgroundColor: Paper, padding: 15, marginBottom: 18 },
   unitTop: { flexDirection: 'row', alignItems: 'center' },
   unitIcon: { width: 42, height: 42, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
-  unitKicker: { fontFamily: 'Inter_700Bold', fontSize: 9, color: Gold, letterSpacing: 1.5 },
+  unitKicker: { fontFamily: 'Inter_700Bold', fontSize: 9, color: InkSoft, letterSpacing: 1.5 },
   unitName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: Ink, marginTop: 2 },
   unitDesc: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12.5, color: InkSoft, marginTop: 10, lineHeight: 18 },
   progRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 },

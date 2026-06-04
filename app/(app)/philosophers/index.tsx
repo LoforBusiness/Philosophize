@@ -18,7 +18,6 @@ const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
 const InkFaint = '#E2E0D8';
-const Gold = '#C9A86A';
 const PaperMute = '#9C9A93';
 const Tag = '#EAE7DF';
 const DarkField = '#262626';
@@ -79,6 +78,11 @@ const shortestQuote = (p: Philosopher) =>
   p.quotes.reduce((a, b) => (b.text.length < a.text.length ? b : a), p.quotes[0]).text;
 const tagsOf = (p: Philosopher) => p.areas.slice(0, 3).map((a) => a.toUpperCase());
 
+// Prefer the data on each philosopher; fall back to the legacy maps for the
+// original entries that predate those fields.
+const groupOf = (p: Philosopher) => p.category ?? GROUP[p.id] ?? 'MODERN';
+const countryOf = (p: Philosopher) => p.country ?? COUNTRY[p.id] ?? '';
+
 export default function ThinkersScreen() {
   const insets = useSafeAreaInsets();
   const openPhilosopher = useUIStore((s) => s.openPhilosopher);
@@ -95,7 +99,7 @@ export default function ThinkersScreen() {
 
   const matched = ALL_PHILOSOPHERS.filter(
     (p) =>
-      (filter === 'ALL' || GROUP[p.id] === filter) &&
+      (filter === 'ALL' || groupOf(p) === filter) &&
       (q === '' || p.name.toLowerCase().includes(q))
   );
   const grid = matched.filter((p) => !(showFeatured && p.id === featured.id));
@@ -152,7 +156,7 @@ export default function ThinkersScreen() {
                   </View>
                   <View style={{ flex: 1, marginLeft: 14 }}>
                     <Text style={styles.featKicker}>
-                      FEATURED · {GROUP[featured.id]} · {COUNTRY[featured.id]?.toUpperCase()}
+                      FEATURED · {groupOf(featured)} · {countryOf(featured).toUpperCase()}
                     </Text>
                     <Text style={styles.featName}>{featured.name}</Text>
                     <Text style={styles.featLife}>{formatLife(featured.lifespan)}</Text>
@@ -173,7 +177,7 @@ export default function ThinkersScreen() {
 
           {/* Grouped grid */}
           {ORDER.map((group) => {
-            const list = grid.filter((p) => GROUP[p.id] === group);
+            const list = grid.filter((p) => groupOf(p) === group);
             if (list.length === 0) return null;
             return (
               <View key={group}>
@@ -194,7 +198,7 @@ export default function ThinkersScreen() {
                             {p.name}
                           </Text>
                           <Text style={styles.cardMeta} numberOfLines={1}>
-                            {formatLife(p.lifespan)} · {COUNTRY[p.id]}
+                            {formatLife(p.lifespan)} · {countryOf(p)}
                           </Text>
                         </View>
                       </View>
@@ -244,7 +248,7 @@ const styles = StyleSheet.create({
 
   header: { backgroundColor: Ink, paddingHorizontal: 20, paddingBottom: 22, alignItems: 'center' },
   kicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: PaperMute, letterSpacing: 4 },
-  title: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 34, color: Gold, letterSpacing: 1.5, marginTop: 6 },
+  title: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 34, color: Paper, letterSpacing: 1.5, marginTop: 6 },
   subtitle: {
     fontFamily: 'PlayfairDisplay_400Regular',
     fontStyle: 'italic',
@@ -295,8 +299,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  featAvatarLetter: { fontFamily: 'Caveat_700Bold', fontSize: 26, color: Paper, lineHeight: 30 },
-  featKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: Gold, letterSpacing: 1.5 },
+  featAvatarLetter: {
+    fontFamily: 'Caveat_700Bold',
+    fontSize: 26,
+    color: Paper,
+    width: 46,
+    lineHeight: 46,
+    textAlign: 'center',
+    includeFontPadding: false,
+  },
+  featKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: PaperMute, letterSpacing: 1.5 },
   featName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: Paper, marginTop: 3 },
   featLife: { fontFamily: 'Inter_400Regular', fontSize: 12, color: PaperMute, marginTop: 1 },
   featArrow: { fontFamily: 'Inter_400Regular', fontSize: 22, color: Paper, marginLeft: 8 },
@@ -331,7 +343,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardAvatarLetter: { fontFamily: 'Caveat_700Bold', fontSize: 20, color: Ink, lineHeight: 24 },
+  cardAvatarLetter: {
+    fontFamily: 'Caveat_700Bold',
+    fontSize: 20,
+    color: Ink,
+    width: 34,
+    lineHeight: 34,
+    textAlign: 'center',
+    includeFontPadding: false,
+  },
   cardName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: Ink },
   cardMeta: { fontFamily: 'Inter_400Regular', fontSize: 10.5, color: InkSoft, marginTop: 1 },
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 10 },

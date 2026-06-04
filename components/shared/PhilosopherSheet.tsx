@@ -211,7 +211,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
   },
-  avatarLetter: { fontFamily: 'Caveat_700Bold', fontSize: 52, color: Ink, lineHeight: 60 },
+  avatarLetter: {
+    fontFamily: 'Caveat_700Bold',
+    fontSize: 52,
+    color: Ink,
+    width: 84,
+    lineHeight: 84,
+    textAlign: 'center',
+    includeFontPadding: false,
+  },
   name: {
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 32,

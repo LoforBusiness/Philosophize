@@ -14,7 +14,7 @@ const InkSoft = '#6B6B6B';
 const Faint = '#9A968C';
 const Rule = '#E4E1D9';
 const Cream = '#F4F1EA';
-const Gold = '#C6A24C';
+const Gold = '#A8A49A';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 
@@ -69,15 +69,6 @@ export default function LearnScreen() {
             <Stat value={totBranches} label="BRANCHES" />
             <Stat value={totUnits} label="UNITS" />
             <Stat value={totLessons} label="LESSONS" />
-          </View>
-        </View>
-
-        {/* Open curriculum note */}
-        <View style={styles.noteCard}>
-          <Text style={styles.noteDiamond}>◆</Text>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.noteTitle}>OPEN CURRICULUM</Text>
-            <Text style={styles.noteBody}>Begin any branch. Each unit unlocks in sequence within a branch.</Text>
           </View>
         </View>
 

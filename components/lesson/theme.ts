@@ -8,7 +8,7 @@ export const T = {
   cream: '#F4F0E7',     // primary text
   creamSoft: '#B7B2A6', // secondary text
   dim: '#54514A',       // unspoken / not-yet-read words
-  gold: '#C9A24C',      // accent (kickers, ★, emphasis)
+  gold: '#B7B2A6',      // muted accent (kickers, ★, emphasis) — kept B&W, no gold
   cardCream: '#F1ECE2', // light question card
   ink: '#1A1A1A',       // text on cream
   inkSoft: '#6B6B6B',
