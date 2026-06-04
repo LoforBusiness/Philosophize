@@ -69,12 +69,21 @@ function ActionCard({
 }) {
   const fg = filled ? Paper : Ink;
   return (
-    <PressableScale onPress={onPress} style={[styles.action, filled && styles.actionFilled]}>
+    <PressableScale onPress={onPress} containerStyle={styles.actionWrap} style={[styles.action, filled && styles.actionFilled]}>
       <View style={[styles.actionIconBox, { borderColor: fg }]}>
         <SketchIcon name={icon} size={18} color={fg} />
       </View>
-      <Text style={[styles.actionLabel, { color: fg }]}>{label}</Text>
-      <Text style={[styles.actionSub, { color: filled ? '#CBC9C2' : InkSoft }]}>{sub}</Text>
+      <Text
+        style={[styles.actionLabel, { color: fg }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.7}
+      >
+        {label}
+      </Text>
+      <Text style={[styles.actionSub, { color: filled ? '#CBC9C2' : InkSoft }]} numberOfLines={1}>
+        {sub}
+      </Text>
     </PressableScale>
   );
 }
@@ -281,6 +290,7 @@ const styles = StyleSheet.create({
   },
 
   actionsRow: { flexDirection: 'row', gap: 10, marginTop: 28 },
+  actionWrap: { flex: 1 },
   action: {
     flex: 1,
     borderWidth: 1.5,
@@ -307,8 +317,8 @@ const styles = StyleSheet.create({
   },
   actionLabel: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 11,
-    letterSpacing: 1,
+    fontSize: 10.5,
+    letterSpacing: 0.5,
     marginTop: 12,
     textAlign: 'center',
   },

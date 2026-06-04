@@ -16,20 +16,21 @@ import QuestionCard from './cards/QuestionCard';
 import ReinforcementCard from './cards/ReinforcementCard';
 import SummaryCard from './cards/SummaryCard';
 import DilemmaCard from './cards/DilemmaCard';
+import { sceneForLesson, type SceneKey } from './scenes/LessonScene';
 
 interface Props {
   lesson: Lesson;
 }
 
-function renderCard(card: CardData, onComplete: (result?: AnswerResult) => void) {
+function renderCard(card: CardData, onComplete: (result?: AnswerResult) => void, scene: SceneKey) {
   switch (card.type) {
-    case 'hook': return <HookCard card={card} onComplete={onComplete} />;
-    case 'concept': return <ConceptCard card={card} onComplete={onComplete} />;
-    case 'example': return <ExampleCard card={card} onComplete={onComplete} />;
-    case 'question': return <QuestionCard card={card} onComplete={onComplete} />;
-    case 'reinforcement': return <ReinforcementCard card={card} onComplete={onComplete} />;
-    case 'summary': return <SummaryCard card={card} onComplete={onComplete} />;
-    case 'dilemma': return <DilemmaCard card={card} onComplete={onComplete} />;
+    case 'hook': return <HookCard card={card} onComplete={onComplete} scene={scene} />;
+    case 'concept': return <ConceptCard card={card} onComplete={onComplete} scene={scene} />;
+    case 'example': return <ExampleCard card={card} onComplete={onComplete} scene={scene} />;
+    case 'question': return <QuestionCard card={card} onComplete={onComplete} scene={scene} />;
+    case 'reinforcement': return <ReinforcementCard card={card} onComplete={onComplete} scene={scene} />;
+    case 'summary': return <SummaryCard card={card} onComplete={onComplete} scene={scene} />;
+    case 'dilemma': return <DilemmaCard card={card} onComplete={onComplete} scene={scene} />;
   }
 }
 
@@ -104,6 +105,7 @@ export default function LessonRunner({ lesson }: Props) {
   const lessonNum = found ? found.path.lessons.findIndex((l) => l.id === lesson.id) + 1 : 1;
   const label = `${(found?.branch.name ?? 'PHILOSOPHIZE').toUpperCase()} · LESSON ${lessonNum > 0 ? lessonNum : 1}`;
   const xp = lesson.xpReward ?? 25;
+  const scene = sceneForLesson(found?.branch.slug, Math.max(0, lessonNum - 1));
 
   return (
     <NarrationProvider>
@@ -125,7 +127,7 @@ export default function LessonRunner({ lesson }: Props) {
               transition={{ type: 'timing', duration: 220 }}
               style={{ flex: 1 }}
             >
-              {renderCard(currentCard, handleCardComplete)}
+              {renderCard(currentCard, handleCardComplete, scene)}
             </MotiView>
           </AnimatePresence>
         </CardShell>

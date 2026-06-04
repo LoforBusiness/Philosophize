@@ -79,13 +79,14 @@ export default function SketchPieChart({ title, subtitle, data, valueMode = 'per
   const uid = 'pie-' + title.replace(/[^a-z0-9]/gi, '').toLowerCase();
 
   const R = 50;            // pie radius
-  const PAD = 40;          // room for the outside percentage labels
+  const PAD = 46;          // room for the outside percentage labels
   const C = R + PAD;       // center
   const BOX = C * 2;       // square svg canvas
   const cx = C;
   const cy = C;
   const r = R;
-  const rLabel = R + 14;   // % label distance from center (just outside the pie)
+  const rLabel = R + 12;   // % label distance from center (just outside the pie)
+  const LABEL_FS = 10.5;
 
   // Build slice geometry.
   let acc = 0;
@@ -139,12 +140,14 @@ export default function SketchPieChart({ title, subtitle, data, valueMode = 'per
                     <Line x1={edge.x} y1={edge.y} x2={tick.x} y2={tick.y} stroke={Ink} strokeWidth={1} />
                     <SvgText
                       x={lp.x}
-                      y={lp.y}
-                      fontSize={10.5}
+                      // Center vertically on lp.y manually — `alignmentBaseline`
+                      // is ignored by react-native-svg on web, which pushed the
+                      // bottom labels out of the chart box.
+                      y={lp.y + LABEL_FS * 0.34}
+                      fontSize={LABEL_FS}
                       fontFamily="Inter_700Bold"
                       fill={Ink}
                       textAnchor={anchor}
-                      alignmentBaseline="middle"
                     >
                       {Math.round(sl.frac * 100)}%
                     </SvgText>

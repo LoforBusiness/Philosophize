@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -12,37 +12,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import * as Speech from 'expo-speech';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import Portrait, { PORTRAITS, type PortraitName } from '@/components/shared/Portrait';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { signOut } from '@/lib/supabase/auth';
-import { getBritishVoice } from '@/lib/voice';
 import { rankForXP } from '@/data/ranks';
 import { useUserDataStore, type AppSettings } from '@/stores/userDataStore';
-
-const VOICE_SAMPLE = 'Philosophy begins in wonder. Let us think this through together.';
-
-// English voices, best-sounding first (en-GB and enhanced/neural engines on top).
-function englishVoices(all: Speech.Voice[]): Speech.Voice[] {
-  const rank = (v: Speech.Voice) => {
-    const n = (v.name || '').toLowerCase();
-    const l = (v.language || '').toLowerCase();
-    let s = 0;
-    if (l.startsWith('en-gb')) s += 100;
-    else if (l.startsWith('en')) s += 10;
-    if (/enhanced|premium|neural|natural|siri/.test(n)) s += 50;
-    return s;
-  };
-  return all
-    .filter((v) => (v.language || '').toLowerCase().startsWith('en'))
-    .sort((a, b) => rank(b) - rank(a) || (a.name || '').localeCompare(b.name || ''));
-}
-
-function isEnhanced(v: Speech.Voice) {
-  const n = (v.name || '').toLowerCase();
-  return /enhanced|premium|neural|natural|siri/.test(n) || (v.quality && v.quality !== Speech.VoiceQuality.Default);
-}
 
 const Page = '#F1EEE7';
 const Paper = '#FFFFFF';
@@ -172,14 +147,18 @@ function Header({ title, sub, icon }: { title: string; sub?: string; icon?: Sket
   );
 }
 
-function Row({ title, sub, children, last }: { title: string; sub?: string; children?: React.ReactNode; last?: boolean }) {
+function Row({ title, sub, children, last, stack }: { title: string; sub?: string; children?: React.ReactNode; last?: boolean; stack?: boolean }) {
+  const { width } = useWindowDimensions();
+  const stacked = !!stack && width < 600;
   return (
-    <View style={[styles.row, last && { borderBottomWidth: 0 }]}>
-      <View style={{ flex: 1, paddingRight: 12 }}>
+    <View style={[styles.row, stacked && styles.rowStacked, last && { borderBottomWidth: 0 }]}>
+      <View style={stacked ? { width: '100%' } : { flex: 1, paddingRight: 12 }}>
         <Text style={styles.rowTitle}>{title}</Text>
         {sub ? <Text style={styles.rowSub}>{sub}</Text> : null}
       </View>
-      {children}
+      <View style={stacked ? { width: '100%', marginTop: 12, alignItems: 'flex-start' } : undefined}>
+        {children}
+      </View>
     </View>
   );
 }
@@ -512,33 +491,6 @@ function LearningSection() {
   const goal = settings.dailyGoalMinutes;
   const goalLabel = goal >= 60 ? `${Math.round((goal / 60) * 10) / 10} hr` : `${goal} min`;
 
-  const [voices, setVoices] = useState<Speech.Voice[]>([]);
-  const [voiceOpen, setVoiceOpen] = useState(false);
-
-  // Voices can be empty until the engine fires `voiceschanged` on web; retry.
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      for (let i = 0; i < 6; i++) {
-        try {
-          const vs = await Speech.getAvailableVoicesAsync();
-          if (vs && vs.length) {
-            if (alive) setVoices(englishVoices(vs));
-            return;
-          }
-        } catch {}
-        await new Promise((r) => setTimeout(r, 300));
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  const currentVoiceLabel = settings.voiceId
-    ? voices.find((v) => v.identifier === settings.voiceId)?.name ?? 'Selected voice'
-    : 'Automatic';
-
   return (
     <Card>
       <Header title="Learning" sub="Calibrate the pace of your practice." />
@@ -556,115 +508,10 @@ function LearningSection() {
         <Text style={styles.endLabel}>2 hrs</Text>
       </View>
       <View style={[styles.hr, { marginTop: 18 }]} />
-      <Row title="Auto-advance" sub="Move to next lesson when one is complete">
+      <Row title="Auto-advance" sub="Move to next lesson when one is complete" last>
         <Toggle value={settings.autoAdvance} onChange={(v) => setSetting('autoAdvance', v)} />
       </Row>
-      <Row title="Narration Voice" sub="The voice that reads lessons aloud" last>
-        <Pressable onPress={() => setVoiceOpen(true)} style={styles.dropdown}>
-          <SketchIcon name="volume-on" size={15} color={Ink} />
-          <Text style={[styles.dropdownText, { maxWidth: 104 }]} numberOfLines={1}>
-            {currentVoiceLabel}
-          </Text>
-          <SketchIcon name="chevron-down" size={16} color={Ink} />
-        </Pressable>
-      </Row>
-
-      <VoicePicker
-        visible={voiceOpen}
-        voices={voices}
-        selected={settings.voiceId ?? null}
-        onSelect={(id) => setSetting('voiceId', id)}
-        onClose={() => {
-          Speech.stop();
-          setVoiceOpen(false);
-        }}
-      />
     </Card>
-  );
-}
-
-/* ---------------- Narration voice picker ---------------- */
-
-function VoicePicker({
-  visible,
-  voices,
-  selected,
-  onSelect,
-  onClose,
-}: {
-  visible: boolean;
-  voices: Speech.Voice[];
-  selected: string | null;
-  onSelect: (id: string | null) => void;
-  onClose: () => void;
-}) {
-  const preview = (id: string | null) => {
-    Speech.stop();
-    const speak = (voice?: string) => {
-      try {
-        Speech.speak(VOICE_SAMPLE, { voice, language: 'en-GB', rate: 0.95, pitch: 1.0 });
-      } catch {}
-    };
-    if (id) speak(id);
-    else getBritishVoice().then((v) => speak(v ?? undefined));
-  };
-
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <View style={styles.modalBackdrop}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-        <View style={styles.voiceCard}>
-          <View style={styles.voiceHead}>
-            <Text style={styles.modalTitle}>Narration Voice</Text>
-            <Pressable onPress={onClose} hitSlop={10}>
-              <Text style={styles.pickerCloseText}>X</Text>
-            </Pressable>
-          </View>
-          <Text style={styles.voiceHint}>Tap a voice to hear a sample and choose it.</Text>
-
-          <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
-            <VoiceRow
-              label="Automatic"
-              sub="Best available voice · recommended"
-              on={selected == null}
-              onPress={() => {
-                onSelect(null);
-                preview(null);
-              }}
-            />
-            {voices.map((v) => (
-              <VoiceRow
-                key={v.identifier}
-                label={v.name || v.identifier}
-                sub={`${v.language}${isEnhanced(v) ? ' · Enhanced' : ''}`}
-                on={selected === v.identifier}
-                onPress={() => {
-                  onSelect(v.identifier);
-                  preview(v.identifier);
-                }}
-              />
-            ))}
-            {voices.length === 0 && (
-              <Text style={styles.voiceEmpty}>No voices detected on this device yet — reopen in a moment.</Text>
-            )}
-          </ScrollView>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
-function VoiceRow({ label, sub, on, onPress }: { label: string; sub?: string; on: boolean; onPress: () => void }) {
-  return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.voiceRow, on && styles.voiceRowOn, pressed && { backgroundColor: '#F0EFEA' }]}>
-      <View style={{ flex: 1, paddingRight: 10 }}>
-        <Text style={[styles.voiceName, on && { fontFamily: 'Inter_700Bold' }]} numberOfLines={1}>
-          {label}
-        </Text>
-        {sub ? <Text style={styles.voiceSub} numberOfLines={1}>{sub}</Text> : null}
-      </View>
-      {on && <Text style={styles.voiceCheck}>✓</Text>}
-    </Pressable>
   );
 }
 
@@ -705,10 +552,10 @@ function LanguageSection() {
     <Card>
       <Header title="Language" sub="The tongue in which philosophy speaks to you." />
       <View style={styles.hr} />
-      <Row title="App Language" sub="The language used throughout the interface">
+      <Row title="App Language" sub="The language used throughout the interface" stack>
         <Dropdown value={settings.appLanguage} options={LANGS} onChange={(v) => setSetting('appLanguage', v)} />
       </Row>
-      <Row title="Quote Display" sub="How philosopher quotes appear" last>
+      <Row title="Quote Display" sub="How philosopher quotes appear" last stack>
         <Segmented
           value={settings.quoteDisplay}
           onChange={(k) => setSetting('quoteDisplay', k as AppSettings['quoteDisplay'])}
@@ -1023,6 +870,7 @@ const styles = StyleSheet.create({
   hr: { height: 1, backgroundColor: InkFaint, marginVertical: 16 },
 
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: InkFaint },
+  rowStacked: { flexDirection: 'column', alignItems: 'stretch' },
   rowTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: Ink },
   rowSub: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12, color: InkSoft, marginTop: 3 },
 

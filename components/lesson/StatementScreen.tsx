@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { MotiView } from 'moti';
 import KineticNarration from './KineticNarration';
+import LessonScene, { type SceneKey } from './scenes/LessonScene';
 import { T } from './theme';
 
 interface Props {
@@ -12,15 +13,19 @@ interface Props {
   size?: number;
   source?: string;       // optional attribution (example cards)
   kicker?: string;       // optional small gold label above the passage
+  scene?: SceneKey;      // themed isometric backdrop for this lesson
 }
 
-// The shared scaffold for every "reading" card: a narrated passage that reveals
-// in place, a contextual hint, and an always-available continue button.
-export default function StatementScreen({ text, hint, button, onContinue, size, source, kicker }: Props) {
+// The shared scaffold for every "reading" card: a themed isometric scene up top
+// (the visual hero), then a narrated passage that reveals in place below it, a
+// contextual hint, and an always-available continue button.
+export default function StatementScreen({ text, hint, button, onContinue, size, source, kicker, scene }: Props) {
   const [done, setDone] = useState(false);
 
   return (
     <View style={styles.root}>
+      <LessonScene scene={scene} />
+
       {kicker ? (
         <Text style={styles.kicker}>{kicker}</Text>
       ) : null}

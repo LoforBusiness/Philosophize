@@ -3,14 +3,16 @@ import type { QuestionCard as QuestionCardType, AnswerResult } from '@/data/type
 import MultipleChoice from '../interactions/MultipleChoice';
 import TrueFalse from '../interactions/TrueFalse';
 import SortItems from '../interactions/SortItems';
+import LessonScene, { type SceneKey } from '../scenes/LessonScene';
 import { T } from '../theme';
 
 interface Props {
   card: QuestionCardType;
   onComplete: (result?: AnswerResult) => void;
+  scene?: SceneKey;
 }
 
-export default function QuestionCard({ card, onComplete }: Props) {
+export default function QuestionCard({ card, onComplete, scene }: Props) {
   // Questions are never read aloud — they are shown in full, in silence, so you
   // read and answer them yourself.
   const complete = (correct: boolean) =>
@@ -18,6 +20,7 @@ export default function QuestionCard({ card, onComplete }: Props) {
 
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <LessonScene scene={scene} compact />
       <Text style={styles.kicker}>KNOWLEDGE CHECK</Text>
       <Text style={styles.title}>Quick Check</Text>
       <Text style={styles.subtitle}>Let's see what stayed with you</Text>

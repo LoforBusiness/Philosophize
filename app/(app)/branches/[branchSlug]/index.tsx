@@ -80,14 +80,6 @@ export default function BranchDetailScreen() {
   const openLesson = (unit: Unit, lesson: Lesson) =>
     router.push(`/(app)/branches/${branch.slug}/${unit.slug}/lesson/${lesson.id}`);
 
-  const next = flat[Math.min(done, total - 1)];
-  const beginLabel =
-    total === 0
-      ? 'NO LESSONS YET'
-      : done >= total
-        ? `REVIEW: ${flat[0].lesson.title.toUpperCase()}`
-        : `BEGIN: ${next.lesson.title.toUpperCase()}`;
-
   return (
     <ScreenTransition bg={Page}>
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -164,16 +156,6 @@ export default function BranchDetailScreen() {
             );
           })}
         </View>
-
-        {/* Bottom begin button */}
-        {total > 0 && (
-          <Pressable
-            onPress={() => openLesson(next.unit, next.lesson)}
-            style={({ pressed }) => [styles.beginBtn, pressed && { opacity: 0.88 }]}
-          >
-            <Text style={styles.beginText}>{beginLabel}  →</Text>
-          </Pressable>
-        )}
       </ScrollView>
     </SafeAreaView>
     </ScreenTransition>
