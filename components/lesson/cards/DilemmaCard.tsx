@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { MotiView } from 'moti';
 import type { DilemmaCard as DilemmaCardType, DilemmaView, AnswerResult } from '@/data/types';
 import KineticNarration from '../KineticNarration';
-import LessonScene, { type SceneKey } from '../scenes/LessonScene';
+import { type SceneKey } from '../scenes/LessonScene';
 import { useNarrateOnMount } from '../useNarrateOnMount';
 import { T } from '../theme';
 
@@ -22,14 +22,10 @@ export default function DilemmaCard({ card, onComplete, scene }: Props) {
     <View style={{ flex: 1, backgroundColor: 'transparent' }}>
       {!scenarioDone ? (
         <View style={{ flex: 1 }}>
-          <LessonScene scene={scene} />
-          <View style={{ flex: 1 }}>
-            <KineticNarration text={card.scenario} size={26} onDone={() => setScenarioDone(true)} />
-          </View>
+          <KineticNarration text={card.scenario} size={26} onDone={() => setScenarioDone(true)} />
         </View>
       ) : (
         <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <LessonScene scene={scene} compact />
           <Text style={styles.kicker}>YOUR TURN</Text>
           <Text style={styles.scenario}>{card.scenario}</Text>
           <Text style={styles.prompt}>{card.prompt}</Text>

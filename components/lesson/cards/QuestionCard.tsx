@@ -3,7 +3,7 @@ import type { QuestionCard as QuestionCardType, AnswerResult } from '@/data/type
 import MultipleChoice from '../interactions/MultipleChoice';
 import TrueFalse from '../interactions/TrueFalse';
 import SortItems from '../interactions/SortItems';
-import LessonScene, { type SceneKey } from '../scenes/LessonScene';
+import { type SceneKey } from '../scenes/LessonScene';
 import { T } from '../theme';
 
 interface Props {
@@ -20,7 +20,6 @@ export default function QuestionCard({ card, onComplete, scene }: Props) {
 
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <LessonScene scene={scene} compact />
       <Text style={styles.kicker}>KNOWLEDGE CHECK</Text>
       <Text style={styles.title}>Quick Check</Text>
       <Text style={styles.subtitle}>Let's see what stayed with you</Text>

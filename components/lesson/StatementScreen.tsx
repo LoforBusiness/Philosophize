@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { MotiView } from 'moti';
 import KineticNarration from './KineticNarration';
-import LessonScene, { type SceneKey } from './scenes/LessonScene';
+import { type SceneKey } from './scenes/LessonScene';
 import { T } from './theme';
 
 interface Props {
@@ -24,8 +24,6 @@ export default function StatementScreen({ text, hint, button, onContinue, size, 
 
   return (
     <View style={styles.root}>
-      <LessonScene scene={scene} />
-
       {kicker ? (
         <Text style={styles.kicker}>{kicker}</Text>
       ) : null}

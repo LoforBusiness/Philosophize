@@ -6,7 +6,7 @@
 
 ## 1. Project Overview
 
-**Philosophize** is a Duolingo-style mobile philosophy learning app for iOS and Android. It makes philosophy interactive, visual, and gamified — using micro-lesson cards, XP systems, streaks, and curiosity-driven progression instead of walls of text.
+**Philosophize** is a mobile philosophy learning app for iOS and Android. It makes philosophy interactive, visual, and gamified — using micro-lesson cards, XP systems, streaks, and curiosity-driven progression instead of walls of text.
 
 **Target audience:** Ages 16–35, curious beginners with no prior philosophy background.
 
@@ -122,10 +122,10 @@ Every lesson MUST:
 | Card Type | Max Words |
 |---|---|
 | HookCard headline | 12 words |
-| ConceptCard body | 60 words |
-| ExampleCard scenario | 80 words |
+| ConceptCard body | 30 words |
+| ExampleCard scenario | 55 words |
 | QuestionCard prompt | 25 words |
-| ReinforcementCard body | 50 words |
+| ReinforcementCard body | 35 words |
 | SummaryCard key point | 12 words each |
 
 ---
@@ -199,12 +199,6 @@ Index on (user_id, lesson_id).
 ```bash
 # Start dev server (shows QR code for Expo Go)
 npm start
-
-# Start on Android emulator
-npm run android
-
-# Start on iOS simulator (macOS only)
-npm run ios
 
 # TypeScript check
 npx tsc --noEmit

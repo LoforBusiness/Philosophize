@@ -16,8 +16,8 @@ export function useNarrateOnMount(text: string) {
       try {
         Speech.speak(text, {
           voice: voice ?? undefined,
-          rate: 0.98,
-          pitch: 0.95,
+          rate: 0.9,
+          pitch: 0.8,
           language: 'en-GB',
         });
       } catch {

@@ -13,6 +13,9 @@ const MALE_NAMES = [
   'thomas', 'james', 'jamie', 'rishi', 'mark', 'guy',
 ];
 
+// Voices that read as deep / mature — a "middle-aged philosopher" timbre.
+const DEEP_NAMES = ['daniel', 'arthur', 'george', 'brian', 'thomas', 'rishi', 'davis'];
+
 function score(v: Speech.Voice): number {
   const name = (v.name || '').toLowerCase();
   const lang = (v.language || '').toLowerCase().replace('_', '-');
@@ -27,9 +30,10 @@ function score(v: Speech.Voice): number {
   if (name.includes('siri')) s += 70;
 
   if (name.includes('google uk english male')) s += 90;
-  if (MALE_NAMES.some((n) => name.includes(n))) s += 60;
-  if (/\bmale\b/.test(name)) s += 40; // \bmale\b does NOT match "female"
-  if (name.includes('female')) s -= 60;
+  if (MALE_NAMES.some((n) => name.includes(n))) s += 80;
+  if (DEEP_NAMES.some((n) => name.includes(n))) s += 35; // prefer a deeper timbre
+  if (/\bmale\b/.test(name)) s += 50; // \bmale\b does NOT match "female"
+  if (name.includes('female')) s -= 80;
   if (
     name.includes('uk') ||
     name.includes('british') ||
@@ -83,4 +87,53 @@ export async function getBritishVoice(): Promise<string | null> {
 
 export function getCachedBritishVoice(): string | null {
   return cached ?? null;
+}
+
+// ─── Two distinct voices (for the two-character story lesson) ────────────────
+let cachedPair: [string | null, string | null] | undefined;
+let pendingPair: Promise<[string | null, string | null]> | null = null;
+
+async function resolvePair(): Promise<[string | null, string | null]> {
+  for (let attempt = 0; attempt < 8; attempt++) {
+    try {
+      const voices = await Speech.getAvailableVoicesAsync();
+      if (voices && voices.length > 0) {
+        const ranked = [...voices]
+          .map((v) => ({ v, s: score(v) }))
+          .filter((x) => x.s > -50)
+          .sort((a, b) => b.s - a.s);
+        if (ranked.length === 0) return [null, null];
+        const a = ranked[0];
+        // Prefer a second voice with a different name (a genuinely different timbre).
+        const second =
+          ranked.find((x) => x.v.identifier !== a.v.identifier && (x.v.name || '') !== (a.v.name || '')) ??
+          ranked.find((x) => x.v.identifier !== a.v.identifier);
+        return [a.v.identifier, second ? second.v.identifier : a.v.identifier];
+      }
+    } catch {
+      /* retry */
+    }
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  return [null, null];
+}
+
+// Two best British male voices for a two-character reading. Falls back to the
+// same voice twice (differentiated by pitch at the call site) if only one exists.
+export async function getTwoBritishVoices(): Promise<[string | null, string | null]> {
+  if (cachedPair !== undefined) return cachedPair;
+  if (!pendingPair) {
+    pendingPair = resolvePair()
+      .then((p) => {
+        cachedPair = p;
+        pendingPair = null;
+        return p;
+      })
+      .catch(() => {
+        cachedPair = [null, null];
+        pendingPair = null;
+        return [null, null] as [string | null, string | null];
+      });
+  }
+  return pendingPair;
 }

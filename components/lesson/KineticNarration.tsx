@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { MotiView } from 'moti';
+import { MotiView, AnimatePresence } from 'moti';
 import * as Speech from 'expo-speech';
 import { useNarration } from './NarrationContext';
 import { getBritishVoice } from '@/lib/voice';
@@ -59,22 +59,23 @@ function rnd(seed: number): number {
 const MIN_BEAT_MS = 360;
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
-// A measured, human narrator — an unhurried, reflective register with only a
-// gentle natural lilt between sentences (heavy jitter is what reads as robotic).
+// A deep, unhurried narrator — the register of a thoughtful, middle-aged
+// philosopher. Low pitch for gravitas, a measured pace, and only a gentle
+// natural lilt between sentences (heavy jitter is what reads as robotic).
 function prosodyFor(i: number, text: string, base: number) {
   const q = /\?\s*$/.test(text);
   const ex = /!\s*$/.test(text);
-  let rate = base + (rnd(i * 13 + 1) - 0.5) * 0.05;
-  let pitch = 1.0 + (rnd(i * 7 + 5) - 0.5) * 0.07;
+  let rate = base + (rnd(i * 13 + 1) - 0.5) * 0.04;
+  let pitch = 0.8 + (rnd(i * 7 + 5) - 0.5) * 0.05;
   if (q) {
-    pitch += 0.04;
-    rate -= 0.04;
+    pitch += 0.03;
+    rate -= 0.03;
   }
   if (ex) {
-    pitch += 0.04;
+    pitch += 0.03;
     rate += 0.02;
   }
-  return { rate: clamp(rate, 0.84, 1.06), pitch: clamp(pitch, 0.92, 1.1) };
+  return { rate: clamp(rate, 0.8, 1.0), pitch: clamp(pitch, 0.7, 0.9) };
 }
 
 interface Props {
@@ -95,7 +96,7 @@ export default function KineticNarration({
   text,
   active = true,
   onDone,
-  rate = 0.95,
+  rate = 0.9,
   variant = 'play',
   size,
   align = 'left',
@@ -304,48 +305,104 @@ export default function KineticNarration({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sIdx, enabled, active, sentences, nonce, finished, rate]);
 
-  const baseSize = size ?? (variant === 'prompt' ? 22 : 27);
-  const lineHeight = Math.round(baseSize * 1.42);
-  const showAll = !enabled || finished;
+  const baseSize = size ?? (variant === 'prompt' ? 27 : 31);
+  const lineHeight = Math.round(baseSize * 1.34);
+  const PAGE = 9; // ~10 words on screen at once
 
-  const revealed = (si: number, bi: number) => showAll || si < sIdx || (si === sIdx && bi <= bIdx);
+  const wordStyle = (s0: boolean) => ({
+    fontFamily: s0 ? 'PlayfairDisplay_700Bold' : 'PlayfairDisplay_400Regular',
+    fontSize: baseSize,
+    lineHeight,
+    color: T.cream,
+    marginHorizontal: 5,
+    marginVertical: 3,
+  });
+
+  // How many words the narrator has reached so far.
+  let revealedCount = 0;
+  for (const t of tokens) {
+    if (t.si < sIdx || (t.si === sIdx && t.bi <= bIdx)) revealedCount++;
+  }
+  if (finished) revealedCount = tokens.length;
+
+  // Narration off: show the whole passage so it can be read in silence.
+  if (!enabled) {
+    return (
+      <ScrollView contentContainerStyle={styles.readAll} showsVerticalScrollIndicator={false}>
+        {tokens.map((t, i) => (
+          <Text key={i} style={wordStyle(t.s0)}>
+            {t.w}
+          </Text>
+        ))}
+      </ScrollView>
+    );
+  }
+
+  // A rolling window of ~PAGE words. Words pop in as the narrator speaks them;
+  // once a page fills, it falls away and the next page bounces in.
+  const lastPage = Math.max(0, Math.floor((tokens.length - 1) / PAGE));
+  const currentPage = finished
+    ? lastPage
+    : Math.min(lastPage, Math.floor(Math.max(0, revealedCount - 1) / PAGE));
+  const start = currentPage * PAGE;
+  const pageTokens = tokens.slice(start, start + PAGE);
 
   return (
-    <Pressable style={{ flex: 1 }} onPress={finished ? undefined : skip}>
-      <ScrollView
-        contentContainerStyle={[styles.scroll, align === 'center' && { alignItems: 'center' }]}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={[styles.flow, align === 'center' && { justifyContent: 'center' }]}>
-          {tokens.map((t, i) => {
-            const on = revealed(t.si, t.bi);
+    <Pressable style={styles.stage} onPress={finished ? undefined : skip}>
+      <AnimatePresence>
+        <MotiView
+          key={`${nonce}-${currentPage}`}
+          style={styles.page}
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, translateY: 38, scale: 0.92 }}
+          transition={{ type: 'timing', duration: 260 }}
+        >
+          {pageTokens.map((t, idx) => {
+            const gi = start + idx;
+            const on = finished || gi < revealedCount;
             return (
               <MotiView
-                key={`${nonce}-${i}`}
-                animate={{ opacity: on ? 1 : 0 }}
-                transition={{ type: 'timing', duration: 220 }}
+                key={`${nonce}-${gi}`}
+                from={{ opacity: 0, scale: 0.5, translateY: 22 }}
+                animate={
+                  on
+                    ? { opacity: 1, scale: 1, translateY: 0 }
+                    : { opacity: 0, scale: 0.5, translateY: 22 }
+                }
+                transition={{ type: 'spring', damping: 11, stiffness: 210, mass: 0.7 }}
               >
-                <Text
-                  style={{
-                    fontFamily: t.s0 ? 'PlayfairDisplay_700Bold' : 'PlayfairDisplay_400Regular',
-                    fontSize: baseSize,
-                    lineHeight,
-                    color: T.cream,
-                    marginRight: 8,
-                  }}
-                >
-                  {t.w}
-                </Text>
+                <Text style={wordStyle(t.s0)}>{t.w}</Text>
               </MotiView>
             );
           })}
-        </View>
-      </ScrollView>
+        </MotiView>
+      </AnimatePresence>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 26, paddingVertical: 20 },
-  flow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-end' },
+  stage: { flex: 1 },
+  page: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 26,
+  },
+  readAll: {
+    flexGrow: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 26,
+    paddingVertical: 20,
+  },
 });
