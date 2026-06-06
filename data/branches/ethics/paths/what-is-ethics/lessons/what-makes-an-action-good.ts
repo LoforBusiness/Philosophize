@@ -4,20 +4,20 @@ const lesson: Lesson = {
   id: 'ethics-ethics-3',
   slug: 'what-makes-an-action-good',
   title: 'What Makes an Action Good?',
-  description: 'There are three main theories of ethics: outcomes, duties, and character. This lesson explains each and shows how they disagree.',
+  description: 'Meet the three great theories of ethics — outcomes, duty, and character — and watch them clash over a single life-or-death choice.',
   estimatedMinutes: 6,
   xpReward: 25,
   cards: [
     {
       type: 'hook',
-      headline: 'Three philosophers face the same hard choice.',
-      subtext: 'Each one decides differently, and each is trying to do the right thing.',
+      headline: 'One choice. Three philosophers. Three verdicts.',
+      subtext: 'Same dilemma, same goal — do right — yet they split. Why?',
       emoji: '🔥',
     },
     {
       type: 'dilemma',
       scenario:
-        'A runaway trolley is heading toward five people tied to the track. Your hand is on a lever. If you pull it, the trolley switches to a side track where one person is standing, who will die instead.',
+        'A runaway trolley hurtles toward five people tied to the track. Your hand rests on a lever. Pull it, and the trolley swerves onto a side track — where one person stands, who dies instead. Philippa Foot dreamed this up in 1967.',
       prompt: 'What do you do?',
       choices: [
         { id: 'pull', label: 'Pull the lever' },
@@ -28,17 +28,17 @@ const lesson: Lesson = {
         {
           thinker: 'John Stuart Mill',
           stance: 'would pull the lever',
-          why: 'Mill judged actions by their outcomes. Five lives saved outweigh one lost, so the choice that produces the most good is to pull the lever.',
+          why: 'Mill scored actions by results. Five lives saved beat one lost. Pick the act that yields the greatest happiness — so pull.',
         },
         {
           thinker: 'Immanuel Kant',
           stance: 'would not sacrifice the one',
-          why: 'Kant said we must never use a person merely as a tool. Deliberately sacrificing someone does exactly that. Some duties hold no matter the outcome.',
+          why: 'Kant forbade using a person merely as a means. Killing one to spare five does exactly that. Duty binds, whatever follows.',
         },
         {
           thinker: 'Aristotle',
           stance: 'asks what a good person does',
-          why: 'Aristotle focused on character, not the act alone. He would ask what a wise and compassionate person would do here, and who you become by choosing it.',
+          why: 'Aristotle eyed character, not the act alone. What would a wise, courageous soul do — and who do you become by choosing it?',
         },
       ],
       xpValue: 5,
@@ -46,28 +46,28 @@ const lesson: Lesson = {
     {
       type: 'concept',
       title: 'Three Ways to Judge an Action',
-      body: 'When asking what makes an action good, philosophers give three main answers. One looks at outcomes: did it lead to good results? One looks at rules: did it follow the right duties? One looks at character: is this what a good person would do? Each captures something real, and each has weak spots.',
+      body: 'Ask what makes an act good and philosophy hands you three answers. Consequentialism looks forward, to outcomes: did good result? Deontology looks to duty: was a moral rule honored? Virtue ethics looks inward, to character: is this what an excellent person would do? Three lenses, three rival traditions — each catching something real, each with a blind spot.',
       visual: '⚖️',
       highlight: 'consequentialism, deontology, virtue ethics',
     },
     {
       type: 'example',
-      title: 'Theory 1: It\'s All About Outcomes',
-      scenario: 'Consequentialism judges an action by its results. Jeremy Bentham and John Stuart Mill said we should increase happiness and reduce suffering. So is lying allowed? Only if the lie leads to more good than telling the truth would. On this view the result is what matters most, not the intention behind it.',
+      title: 'Theory 1: Judge by the Outcome',
+      scenario: 'Consequentialism weighs an act by what it brings about. Jeremy Bentham and John Stuart Mill founded utilitarianism on the greatest-happiness principle: choose whatever maximizes pleasure and shrinks suffering, for everyone counted equally. Is lying wrong? Only if its results harm. The deed is judged by its ripples, not the motive behind it.',
       source: 'Jeremy Bentham, Introduction to the Principles of Morals and Legislation (1789)',
       emoji: '📊',
     },
     {
       type: 'example',
-      title: 'Theory 2: Some Rules Cannot Be Broken',
-      scenario: 'Deontology says some actions are right or wrong in themselves, regardless of results. Immanuel Kant said we should act only on rules we could want everyone to follow. Lying stays wrong even when it helps, because a world where everyone lies when convenient falls apart. For Kant, duty comes first.',
+      title: 'Theory 2: Honor the Duty',
+      scenario: 'Deontology says some acts are right or wrong in themselves, outcomes be damned. Kant\'s categorical imperative: act only on a rule you could will into a universal law. Lying fails the test — a world where everyone lies when handy collapses, since no one could trust a word. Duty first; consequences come second.',
       source: 'Immanuel Kant, Groundwork of the Metaphysics of Morals (1785)',
       emoji: '📜',
     },
     {
       type: 'example',
-      title: 'Theory 3: Be a Good Person',
-      scenario: 'Virtue ethics asks not what should I do, but what kind of person should I be? Aristotle thought a person with good character, such as being honest, brave, and fair, naturally tends to act well. Instead of calculating outcomes or checking rules, you build good character through habit and practice, and good actions follow.',
+      title: 'Theory 3: Become the Good Person',
+      scenario: 'Virtue ethics flips the question: not "what should I do?" but "who should I be?" Aristotle prized eudaimonia — flourishing — built from virtues like courage and honesty. Each virtue sits as a golden mean between extremes: courage between cowardice and recklessness. Forge good character through habit, and right action flows from it.',
       source: 'Aristotle, Nicomachean Ethics (c. 350 BCE)',
       emoji: '🌟',
     },
@@ -83,7 +83,7 @@ const lesson: Lesson = {
           { id: 'c', text: 'Consequentialism', isCorrect: true },
           { id: 'd', text: 'Moral relativism', isCorrect: false },
         ],
-        explanation: 'For consequentialism, the value of an action depends entirely on its results, especially whether it produces good outcomes like more happiness.',
+        explanation: 'Consequentialism — and its famous form, utilitarianism — pins an action\'s worth entirely on its results, above all how much happiness it produces.',
       },
     },
     {
@@ -93,13 +93,13 @@ const lesson: Lesson = {
       interaction: {
         type: 'true-false',
         answer: true,
-        explanation: 'Kant held that lying is always wrong because it breaks a universal duty: you could not want a world where everyone lies when convenient. This is one of deontology\'s most debated conclusions.',
+        explanation: 'Kant insisted lying always fails the categorical imperative — you cannot will universal lying without wrecking trust itself. It is deontology\'s most fiercely debated verdict.',
       },
     },
     {
       type: 'reinforcement',
-      callout: 'Three ethical frameworks, one toolkit.',
-      body: 'Most of us use all three without realizing it. You weigh consequences when deciding whether to call in sick. You follow a duty when returning a stranger\'s lost wallet. You ask what a good person would do when you are unsure. Ethics is not one theory but a set of tools.',
+      callout: 'Three theories, one normative ethics.',
+      body: 'Consequentialism, deontology, virtue ethics — these are the three pillars of normative ethics, the branch asking how we ought to act. They sit apart from metaethics (what does "good" even mean?) and applied ethics (war, lying, the trolley). Three rival answers to one ancient question: what makes an action good?',
       emoji: '🧰',
     },
     {
@@ -107,11 +107,11 @@ const lesson: Lesson = {
       title: 'Three Lenses on Moral Action',
       keyPoints: [
         'Consequentialism: judge actions by their outcomes',
-        'Deontology: some duties hold whatever the outcome',
-        'Virtue ethics: good actions come from good character',
-        'Most moral thinking uses all three',
+        'Deontology: duty binds whatever the outcome',
+        'Virtue ethics: good acts flow from good character',
+        'These three pillars form normative ethics',
       ],
-      closingThought: 'Next time you face a hard choice, try all three lenses and compare the answers.',
+      closingThought: 'Next hard choice, run all three lenses — outcome, duty, character — and watch where they agree and clash.',
     },
   ],
 };
