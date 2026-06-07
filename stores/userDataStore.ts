@@ -15,6 +15,8 @@ export interface SavedQuote {
   savedAt: number;
 }
 
+export type WidgetPlacement = 'home' | 'profile' | 'insights';
+
 export interface AppSettings {
   // Notifications
   dailyReminder: boolean;
@@ -23,6 +25,9 @@ export interface AppSettings {
   badgeEarned: boolean;
   weeklySummary: boolean;
   quoteOfDay: boolean;
+  // Daily quote widget (in-app, shown on a chosen screen)
+  widgetEnabled: boolean;
+  widgetPlacement: WidgetPlacement;
   // Learning
   dailyGoalMinutes: number; // 5–120
   autoAdvance: boolean;
@@ -47,6 +52,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   badgeEarned: true,
   weeklySummary: false,
   quoteOfDay: true,
+  widgetEnabled: false,
+  widgetPlacement: 'home',
   dailyGoalMinutes: 20,
   autoAdvance: true,
   publicProfile: false,

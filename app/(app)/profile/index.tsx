@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import Glyph from '@/components/shared/Glyph';
+import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { signOut } from '@/lib/supabase/auth';
 import { ALL_BRANCHES } from '@/data';
@@ -107,6 +108,8 @@ export default function ProfileScreen() {
   const ensureJoinDate = useUserDataStore((s) => s.ensureJoinDate);
   const displayName = useUserDataStore((s) => s.displayName);
   const earnedBadges = useUserDataStore((s) => s.earnedBadges);
+  const settings = useUserDataStore((s) => s.settings);
+  const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'profile';
   const openRanksBadges = useUIStore((s) => s.openRanksBadges);
 
   useEffect(() => {
@@ -197,6 +200,7 @@ export default function ProfileScreen() {
 
         {/* Body */}
         <View style={styles.body}>
+          {showWidget ? <DailyQuoteWidget style={{ marginBottom: 22 }} /> : null}
           <SectionLabel>AT A GLANCE</SectionLabel>
           <View style={styles.glanceRow}>
             <View style={styles.glanceBox}>

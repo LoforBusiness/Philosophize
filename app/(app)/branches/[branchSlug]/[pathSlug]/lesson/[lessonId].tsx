@@ -1,15 +1,21 @@
-import { useState } from 'react';
-import { View, Text } from 'react-native';
+import { useState, type ComponentType } from 'react';
+import { Text } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getLessonById } from '@/data';
 import LessonRunner from '@/components/lesson/LessonRunner';
 import LessonLoader from '@/components/lesson/LessonLoader';
 import SnowWalkStory from '@/components/lesson/story/SnowWalkStory';
+import ExistenceStory from '@/components/lesson/story/ExistenceStory';
 import ScreenTransition from '@/components/shared/ScreenTransition';
+import type { Lesson } from '@/data/types';
 
 // Lessons that play as a fully bespoke story instead of the card runner.
-const STORY_LESSONS = new Set(['logic-arguments-1']);
+// Each maps to its own component + the loader's background colour.
+const STORY_LESSONS: Record<string, { Component: ComponentType<{ lesson: Lesson }>; bg: string }> = {
+  'logic-arguments-1': { Component: SnowWalkStory, bg: '#D7DAE0' },
+  'metaphysics-being-1': { Component: ExistenceStory, bg: '#000000' },
+};
 
 export default function LessonScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
@@ -24,14 +30,15 @@ export default function LessonScreen() {
     );
   }
 
-  const isStory = STORY_LESSONS.has(result.lesson.id);
+  const story = STORY_LESSONS[result.lesson.id];
+  const Story = story?.Component;
 
   return (
-    <ScreenTransition bg={loading ? '#F1EEE7' : isStory ? '#D7DAE0' : '#1A1A1A'}>
+    <ScreenTransition bg={loading ? '#F1EEE7' : story ? story.bg : '#1A1A1A'}>
       {loading ? (
         <LessonLoader onDone={() => setLoading(false)} />
-      ) : isStory ? (
-        <SnowWalkStory lesson={result.lesson} />
+      ) : Story ? (
+        <Story lesson={result.lesson} />
       ) : (
         <LessonRunner lesson={result.lesson} />
       )}

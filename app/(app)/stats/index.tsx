@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Rect, Line, Defs, Pattern } from 'react-native-svg';
 import SketchPieChart, { type PiePoint } from '@/components/shared/SketchPieChart';
 import ScreenTransition from '@/components/shared/ScreenTransition';
+import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import { ALL_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -32,6 +33,8 @@ export default function StatsScreen() {
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const philosopherViews = useUserDataStore((s) => s.philosopherViews);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
+  const settings = useUserDataStore((s) => s.settings);
+  const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'insights';
 
   const lessonsDone = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
   const quotesSaved = savedQuotes.length;
@@ -103,6 +106,8 @@ export default function StatsScreen() {
         <Text style={styles.title}>Philosophy</Text>
         <Text style={styles.titleItalic}>Statistics</Text>
         <View style={styles.rule} />
+
+        {showWidget ? <DailyQuoteWidget style={{ marginBottom: 20 }} /> : null}
 
         {/* Stat boxes */}
         <View style={styles.statRow}>

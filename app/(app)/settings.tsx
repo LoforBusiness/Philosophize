@@ -476,9 +476,25 @@ function NotificationsSection() {
       <Row title="Weekly Summary" sub="A digest of your week's progress">
         <Toggle value={settings.weeklySummary} onChange={(v) => setSetting('weeklySummary', v)} />
       </Row>
-      <Row title="Quote of the Day" sub="One quote, delivered each morning" last>
+      <Row title="Quote of the Day" sub="One quote, delivered each morning">
         <Toggle value={settings.quoteOfDay} onChange={(v) => setSetting('quoteOfDay', v)} />
       </Row>
+      <Row title="Daily Quote Widget" sub="Show a fresh quote inside the app each day" last={!settings.widgetEnabled}>
+        <Toggle value={settings.widgetEnabled} onChange={(v) => setSetting('widgetEnabled', v)} />
+      </Row>
+      {settings.widgetEnabled ? (
+        <Row title="Widget Placement" sub="Where the widget appears in the app" last stack>
+          <Segmented
+            value={settings.widgetPlacement}
+            onChange={(k) => setSetting('widgetPlacement', k as AppSettings['widgetPlacement'])}
+            options={[
+              { key: 'home', label: 'Home' },
+              { key: 'profile', label: 'Profile' },
+              { key: 'insights', label: 'Insights' },
+            ]}
+          />
+        </Row>
+      ) : null}
     </Card>
   );
 }

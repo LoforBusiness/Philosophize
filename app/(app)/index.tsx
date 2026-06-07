@@ -5,6 +5,7 @@ import Svg, { Line } from 'react-native-svg';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import PressableScale from '@/components/shared/PressableScale';
+import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -93,6 +94,8 @@ export default function HomeScreen() {
   const streak = useUserDataStore((s) => s.streak);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
+  const settings = useUserDataStore((s) => s.settings);
+  const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'home';
 
   const dayNumber = Math.floor(Date.now() / 86_400_000);
   const quote = QUOTE_POOL[dayNumber % QUOTE_POOL.length];
@@ -186,6 +189,9 @@ export default function HomeScreen() {
             {streak} DAY STREAK
           </Text>
         </View>
+
+        {/* Daily quote widget (opt-in, Settings → Notifications) */}
+        {showWidget ? <DailyQuoteWidget style={{ marginTop: 30 }} /> : null}
       </ScrollView>
     </SafeAreaView>
     </ScreenTransition>

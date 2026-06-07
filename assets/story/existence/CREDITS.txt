@@ -1,0 +1,11 @@
+Background imagery for the metaphysics opening lesson.
+Sourced via Openverse (https://openverse.org), filtered to CC0 (public-domain-equivalent).
+
+01-lone-tree.jpg  <-  "two and a half tree" (CC0)  https://www.flickr.com/photos/55128416@N05/36602574621
+02-clouds.jpg  <-  "Clouds" (CC0)  https://www.flickr.com/photos/49976053@N00/2768391365
+04-foggy-mountains.jpg  <-  "Free foggy mountain landscape image" (CC0)  https://www.rawpixel.com/image/5916790/image-cloud-public-domain-tree
+05-starry-sky.jpg  <-  "Starry night sky milky way" (CC0)  https://www.rawpixel.com/image/3299151/free-photo-image-abies-astronomy-cc0
+06-figure.jpg  <-  "Girls head silhouette at sunset" (CC0)  https://www.flickr.com/photos/135396164@N05/30281989666
+07-misty-forest.jpg  <-  "Free dark misty woods image" (CC0)  https://www.rawpixel.com/image/5906149/photo-image-public-domain-leaves-woods
+03-winter-trees.jpg  <-  "Hereford drone photo" (cc0,pdm)  https://commons.wikimedia.org/w/index.php?curid=160818222
+08-sea-horizon.jpg  <-  "Three Creeks Metro Park" (cc0,pdm)  https://www.flickr.com/photos/140641142@N05/43882328701

@@ -12,6 +12,10 @@ import {
   Caveat_400Regular,
   Caveat_700Bold,
 } from '@expo-google-fonts/caveat';
+import {
+  IMFellEnglish_400Regular,
+  IMFellEnglish_400Regular_Italic,
+} from '@expo-google-fonts/im-fell-english';
 import { useFonts } from 'expo-font';
 import { Stack, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -36,6 +40,8 @@ export default function RootLayout() {
     PlayfairDisplay_700Bold,
     Caveat_400Regular,
     Caveat_700Bold,
+    IMFellEnglish_400Regular,
+    IMFellEnglish_400Regular_Italic,
   });
   const [authChecked, setAuthChecked] = useState(false);
 
