@@ -19,6 +19,7 @@ export default function TrueFalse({ interaction, onComplete }: Props) {
     if (answered) return;
     setSelected(value);
     setAnswered(true);
+    onComplete(value === interaction.answer);
   }
 
   return (
@@ -38,7 +39,7 @@ export default function TrueFalse({ interaction, onComplete }: Props) {
                 correct && styles.boxCorrect,
                 wrong && styles.boxWrong,
                 dim && { opacity: 0.4 },
-                pressed && !answered && { backgroundColor: '#2C2A26' },
+                pressed && !answered && { backgroundColor: T.press },
               ]}
             >
               <Text style={styles.boxText}>{val ? 'True' : 'False'}</Text>
@@ -58,16 +59,9 @@ export default function TrueFalse({ interaction, onComplete }: Props) {
             {isCorrect ? '✓ CORRECT' : '✕ NOT QUITE'}
           </Text>
           <Text style={styles.explainText}>{interaction.explanation}</Text>
+          <Text style={styles.swipeHint}>SWIPE TO CONTINUE →</Text>
         </MotiView>
       )}
-
-      <Pressable
-        onPress={() => answered && onComplete(isCorrect)}
-        disabled={!answered}
-        style={({ pressed }) => [styles.btn, !answered ? styles.btnDisabled : null, pressed && answered && { opacity: 0.85 }]}
-      >
-        <Text style={[styles.btnText, !answered && { color: T.dim }]}>CONTINUE →</Text>
-      </Pressable>
     </View>
   );
 }
@@ -88,11 +82,8 @@ const styles = StyleSheet.create({
   boxWrong: { borderColor: T.red, backgroundColor: T.redBg },
   boxText: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, color: T.cream },
 
-  explain: { borderLeftWidth: 2, borderLeftColor: T.border, paddingLeft: 14, marginTop: 16, marginBottom: 16 },
+  explain: { borderLeftWidth: 2, borderLeftColor: T.border, paddingLeft: 14, marginTop: 16, marginBottom: 8 },
   explainLabel: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.5, marginBottom: 6 },
   explainText: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 14, color: T.creamSoft, lineHeight: 21 },
-
-  btn: { backgroundColor: T.cream, borderRadius: 8, paddingVertical: 15, alignItems: 'center', marginTop: 6 },
-  btnDisabled: { backgroundColor: T.panel, borderWidth: 1.5, borderColor: T.border },
-  btnText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: T.ink, letterSpacing: 1 },
+  swipeHint: { fontFamily: 'Inter_700Bold', fontSize: 10, color: T.inkSoft, letterSpacing: 2, marginTop: 14 },
 });

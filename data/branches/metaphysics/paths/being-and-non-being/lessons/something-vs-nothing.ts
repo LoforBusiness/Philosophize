@@ -4,35 +4,35 @@ const lesson: Lesson = {
   id: 'metaphysics-being-2',
   slug: 'something-vs-nothing',
   title: 'Something vs. Nothing',
-  description: 'Why is there something rather than nothing? Meet the oldest, deepest question in metaphysics.',
+  description: 'Why is there something rather than nothing? Trace the question from Parmenides to Leibniz.',
   estimatedMinutes: 5,
   xpReward: 25,
   cards: [
     {
       type: 'hook',
       headline: 'Why is there something rather than nothing?',
-      subtext: 'Leibniz asked it. Three centuries on, nobody has truly closed the case.',
+      subtext: 'Leibniz gave it its classic form in 1714. Three centuries on, the case stays open.',
       emoji: '⬛',
     },
     {
       type: 'concept',
       title: 'The Question Behind Every Question',
-      body: 'The philosopher Gottfried Leibniz pressed the boldest question there is: why is there something rather than nothing? Existence itself demands no explanation, yet here it all is. Philosophers call this the riddle of being. Nothing would have been simpler. So why anything at all?',
+      body: 'Leibniz held that nothing is so without a sufficient reason. Apply that rule to existence itself, and the first thing you may ask is: why is there something rather than nothing? "Nothing," he noted, is simpler and easier. So why anything at all?',
       visual: '🕳️',
-      highlight: 'the riddle of being',
+      highlight: 'sufficient reason',
     },
     {
       type: 'concept',
       title: 'Can Nothing Even Be?',
-      body: 'The ancient Greek thinker Parmenides struck first. To speak of nothing, he argued, you must think it. But to think it is to make it a something. So "nothing" cancels itself: what is not, cannot be. For Parmenides, only being exists. Pure non-being is unthinkable.',
+      body: 'Parmenides struck first. To speak of "what is not," he argued, you must think it — yet you can neither know nor utter what is not. So non-being gives reason nothing to grip. What-is can have no rival, because "nothing" cannot be thought at all.',
       visual: '🧠',
       highlight: 'non-being',
     },
     {
       type: 'example',
       title: 'Parmenides Draws the Line',
-      scenario: 'Around 500 BCE, Parmenides wrote a poem in which a goddess hands him one iron rule: "what is, is; what is not, cannot be." Reason, not the eyes, reveals truth. Change and absence are illusions. Heraclitus disagreed fiercely, insisting all is flux. That clash launched Western metaphysics.',
-      source: 'Parmenides, On Nature (c. 500 BCE)',
+      scenario: 'In the early 5th century BCE, Parmenides wrote a poem in which a goddess sets out two ways: that it is, and that it is not. The second is rejected — what is not can never be apprehended. Judge by reason, she says, not by aimless eye and echoing ear. Tradition pairs him against Heraclitus, who saw all things flowing.',
+      source: 'Parmenides, fragments of his poem (early 5th c. BCE)',
       emoji: '🏛️',
     },
     {
@@ -47,7 +47,7 @@ const lesson: Lesson = {
           { id: 'c', text: 'Nothingness is far too small to detect', isCorrect: false },
           { id: 'd', text: 'The gods forbade it in his poem', isCorrect: false },
         ],
-        explanation: 'Parmenides held that "what is not, cannot be." The moment you think or speak of nothing, you treat it as a thing — so genuine non-being escapes us. Only being remains.',
+        explanation: 'For Parmenides, "what is not" can be neither known nor spoken. The moment you try to think nothing, you treat it as a thing — so genuine non-being slips away, and what-is is left without a rival.',
       },
     },
     {
@@ -57,13 +57,13 @@ const lesson: Lesson = {
       interaction: {
         type: 'true-false',
         answer: true,
-        explanation: 'Leibniz framed this as the deepest question in metaphysics. He thought a full answer required a necessary being to ground all the contingent things that might just as easily not have existed.',
+        explanation: 'In his Principles of Nature and Grace (1714), Leibniz derives the question from the principle of sufficient reason. His own answer: contingent things might not have existed, so they need a ground outside the whole series — a necessary being.',
       },
     },
     {
       type: 'reinforcement',
       callout: '"Nothing" keeps dissolving the harder you grip it.',
-      body: 'Leibniz asks why anything exists; Parmenides answers that non-being is unthinkable, so being had no alternative. Heraclitus pushes back, calling reality pure flux. These rival moves are metaphysics itself — reasoning, not measuring, our way toward what it means to be.',
+      body: 'Two kinds of answer. Leibniz wants a reason — a necessary being grounding all that might not have been. Parmenides says there was never an alternative, since "nothing" is unthinkable. Either way, the work is done by reasoning, not measuring.',
       emoji: '💡',
     },
     {
@@ -71,11 +71,11 @@ const lesson: Lesson = {
       title: 'The Riddle of Being',
       keyPoints: [
         'Leibniz: why something rather than nothing?',
+        'His ground: a necessary being',
         'Parmenides: what is not cannot be',
-        'Heraclitus: all reality is flux',
         'Metaphysics reasons toward being itself',
       ],
-      closingThought: 'If non-being is truly unthinkable, perhaps being never needed permission to exist.',
+      closingThought: 'If non-being truly cannot be thought, perhaps being never needed permission to exist.',
     },
   ],
 };

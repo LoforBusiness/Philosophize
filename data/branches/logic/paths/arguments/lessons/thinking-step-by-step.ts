@@ -4,7 +4,7 @@ const lesson: Lesson = {
   id: 'logic-arguments-5',
   slug: 'thinking-step-by-step',
   title: 'Thinking Step by Step',
-  description: 'How an argument links premises to a conclusion one inference at a time — and why every link must hold.',
+  description: 'How a deductive proof links premises to a conclusion one inference at a time — and why every link must hold.',
   estimatedMinutes: 5,
   xpReward: 25,
   cards: [
@@ -17,16 +17,16 @@ const lesson: Lesson = {
     {
       type: 'concept',
       title: 'Premises, Then Conclusion',
-      body: 'An argument moves from premises (claims you grant) to a conclusion (what they force). Each move is an inference. In a valid deduction, the form alone guarantees that true premises make a true conclusion. Skip a step and the link snaps — the conclusion no longer follows.',
+      body: 'An argument moves from premises (claims you grant) to a conclusion (what they force). Each move is an inference. In a valid deduction the conclusion, as Aristotle put it, "follows of necessity": if the premises are true, it cannot be false. Skip a link and the chain snaps.',
       visual: '📐',
       highlight: 'the conclusion must follow',
     },
     {
       type: 'example',
-      title: 'Descartes Hunts for Bedrock',
-      scenario: 'In the Meditations, Descartes doubts everything — the senses, the world, even mathematics. Yet one thing resists: he cannot doubt that he is doubting. Doubting is thinking. Thinking needs a thinker. Therefore he must exist — his famous cogito. Tiny inferences, locked in sequence, yielding one unshakable foundation.',
-      source: 'René Descartes, Meditations on First Philosophy (1641)',
-      emoji: '🧠',
+      title: 'Euclid Builds a Triangle',
+      scenario: 'To build an equilateral triangle on a line AB, Euclid draws a circle around A through B, and another around B through A. They cross at C. AB equals AC (same circle); AB equals BC (same circle). So AC equals BC — things equal to the same thing are equal to each other. Triangle proved, link by link.',
+      source: 'Euclid, Elements, Book I, Proposition 1 (c. 300 BCE)',
+      emoji: '📐',
     },
     {
       type: 'question',
@@ -35,13 +35,13 @@ const lesson: Lesson = {
       interaction: {
         type: 'true-false',
         answer: false,
-        explanation: 'Every missing step is a gap where a faulty inference can hide. A strong deduction exposes each link, so anyone can test whether the conclusion truly follows.',
+        explanation: 'Every missing step is a gap where a faulty inference can hide. A good deduction, like Euclid\'s, exposes each link, so anyone can check that the conclusion truly follows.',
       },
     },
     {
       type: 'reinforcement',
       callout: 'Validity lives in the form, not the vibe.',
-      body: 'A valid argument is one whose form guarantees the conclusion when the premises hold. Spelling out each inference is how you check that form. Hide a step and you hide where the chain might break — and a single broken link sinks the whole proof.',
+      body: 'A valid argument is one whose form guarantees the conclusion when the premises hold. Descartes\' advice in the Discourse on the Method: split a hard problem into its smallest parts and work from the simplest upward. Spell out each inference, and you can see exactly where the chain might break.',
       emoji: '🔗',
     },
     {
@@ -49,11 +49,11 @@ const lesson: Lesson = {
       title: 'Step-by-Step Thinking Mastered',
       keyPoints: [
         'Arguments run from premises to conclusion by inference',
-        'Each inference must make the conclusion follow',
-        'Descartes reached "I think, therefore I am" step by step',
+        'In a valid deduction, the conclusion follows of necessity',
+        'Euclid proved his theorems one explicit link at a time',
         'Skipping steps hides where the chain breaks',
       ],
-      closingThought: 'Face a huge problem? Break it into premises and let each inference earn the next.',
+      closingThought: 'Face a huge problem? Do as Descartes urged: divide it into parts and climb from the simplest step up.',
     },
   ],
 };

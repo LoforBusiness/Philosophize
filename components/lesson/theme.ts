@@ -1,19 +1,23 @@
-// Shared palette for the dark, editorial lesson experience.
+// Shared palette for the light, Blinkist-style reading experience.
+// Keys are kept stable so every consumer maps cleanly; only the values flipped
+// from the old dark editorial theme to a paper-and-ink light theme.
 export const T = {
-  bg: '#1A1A1A',        // page background (near-black)
-  panel: '#232220',     // lifted panels / answer rows
-  panelSoft: '#1E1D1A',
-  border: '#3A382F',    // subtle hairline border on dark
-  borderSoft: '#2D2B25',
-  cream: '#F4F0E7',     // primary text
-  creamSoft: '#B7B2A6', // secondary text
-  dim: '#54514A',       // unspoken / not-yet-read words
-  gold: '#B7B2A6',      // muted accent (kickers, ★, emphasis) — kept B&W, no gold
-  cardCream: '#F1ECE2', // light question card
-  ink: '#1A1A1A',       // text on cream
+  bg: '#FAFAF7',        // page background (paper)
+  panel: '#FFFFFF',     // lifted panels / answer rows
+  panelSoft: '#F5F2EB',
+  border: '#D9D5CB',    // hairline border on paper
+  borderSoft: '#E7E3DA',
+  cream: '#1A1A1A',     // primary text (ink)
+  creamSoft: '#5F5C55', // secondary text
+  dim: '#B3AEA3',       // faint / disabled
+  gold: '#8A857A',      // muted accent (kickers) — B&W, no gold
+  cardCream: '#FFFFFF', // inner question card
+  ink: '#1A1A1A',       // text on white cards
   inkSoft: '#6B6B6B',
-  green: '#8BA585',     // correct accent
-  greenBg: '#20271E',
-  red: '#C77F72',       // incorrect accent
-  redBg: '#2A1E1B',
+  green: '#4F7A4A',     // correct accent (darkened for light bg)
+  greenBg: '#EAF1E6',
+  red: '#A8513F',       // incorrect accent
+  redBg: '#F5E7E2',
+  press: '#EFEBE2',     // pressed-row highlight on light bg
+  segOff: '#E2DED4',    // inactive progress segment
 } as const;

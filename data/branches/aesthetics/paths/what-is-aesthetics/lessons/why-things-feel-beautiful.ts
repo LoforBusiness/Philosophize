@@ -4,7 +4,7 @@ const lesson: Lesson = {
   id: 'aesthetics-aesthetics-1',
   slug: 'why-things-feel-beautiful',
   title: 'Why Things Feel Beautiful',
-  description: 'Beauty hits instantly — yet we demand others feel it too. Why?',
+  description: 'Beauty hits as a feeling — yet we demand others feel it too. Why?',
   estimatedMinutes: 5,
   xpReward: 25,
   cards: [
@@ -17,21 +17,21 @@ const lesson: Lesson = {
     {
       type: 'concept',
       title: 'Disinterested Pleasure',
-      body: 'Aesthetics is the philosophy of beauty and art. Immanuel Kant spotted something strange: beauty pleases without wanting anything from you. You crave food because you are hungry. But the sunset feeds no hunger and earns no profit — you simply savor how it looks. Kant called this "disinterested" pleasure: delight free of every desire.',
+      body: 'Aesthetics is the philosophy of beauty and art. In his Critique of the Power of Judgment, Immanuel Kant found beauty strange: it pleases without you wanting anything from the object. You crave food because hunger drives you. The sunset feeds no hunger — you simply savor its look. Kant calls this "disinterested" pleasure: not bored, but indifferent to the object\'s use or even its existence.',
       visual: '✨',
       highlight: 'disinterested pleasure',
     },
     {
       type: 'concept',
       title: 'The Riddle of Taste',
-      body: 'David Hume noticed a paradox. Beauty lives in the eye of the beholder — yet we still rank a master painter above a clumsy one and feel we are right. So is taste pure opinion, or is there a real standard? Hume hunted for one in skilled, practiced critics whose verdicts converge over time.',
+      body: 'David Hume raised a paradox to wrestle it down. He admits beauty "exists merely in the mind" — yet we still rank a master above a clumsy hack and feel we are right. His answer was not pure opinion: a standard set by true critics whose verdicts, refined by practice and surviving the test of time, slowly converge.',
       visual: '🎭',
       highlight: 'standard of taste',
     },
     {
       type: 'example',
       title: 'The Antinomy of Taste',
-      scenario: 'Kant caught beauty in a contradiction he named the "antinomy of taste." Side one: there is no arguing about taste, since beauty is just a feeling. Side two: we argue about it constantly, insisting a great symphony truly is beautiful. Kant says both are true — beauty is felt, yet it speaks as if it binds everyone.',
+      scenario: 'Kant named a contradiction the "antinomy of taste." Side one: there is no disputing taste, since beauty rests on feeling, not proof. Side two: we contend about it constantly, insisting a great symphony truly is beautiful. Both hold, Kant says — a judgment of taste is felt, never provable by rules, yet it speaks "with a universal voice," as if binding everyone.',
       source: 'Immanuel Kant, Critique of the Power of Judgment (1790)',
       emoji: '🏛️',
     },
@@ -42,18 +42,18 @@ const lesson: Lesson = {
       interaction: {
         type: 'multiple-choice',
         options: [
-          { id: 'a', text: 'It is disinterested — it springs from no desire or need', isCorrect: true },
+          { id: 'a', text: 'It is disinterested — indifferent to the object\'s use or existence', isCorrect: true },
           { id: 'b', text: 'It lasts longer than bodily pleasure', isCorrect: false },
           { id: 'c', text: 'It applies only to visual art', isCorrect: false },
           { id: 'd', text: 'It can only be felt after formal training', isCorrect: false },
         ],
-        explanation: 'For Kant, aesthetic pleasure is "disinterested." Beauty satisfies no hunger and serves no purpose for you — you enjoy the thing for its own sake. That freedom from desire is exactly what separates it from eating or any bodily pleasure.',
+        explanation: 'For Kant, aesthetic pleasure is "disinterested" — it does not depend on any desire for the object and is indifferent to its usefulness or existence. That freedom from interest is exactly what separates beauty from the pleasure of eating, which gratifies the senses and feeds a need.',
       },
     },
     {
       type: 'reinforcement',
       callout: 'Beauty speaks as if it commands.',
-      body: 'Here is the engine of aesthetics. You rarely stop at "I like this." You say "this is beautiful" — a claim that sounds like it is about the thing, not just you. Kant called this its "universal validity": beauty quietly demands that everyone agree, even when no proof can settle it.',
+      body: 'Here is the engine of aesthetics. You rarely stop at "I like this." You say "this is beautiful" — as if beauty were a property of the thing, not just your mood. Kant called this "subjective universal validity": rooted in feeling, yet quietly demanding that everyone agree, even though no concept or proof can settle it.',
       emoji: '🔭',
     },
     {
@@ -63,18 +63,18 @@ const lesson: Lesson = {
       interaction: {
         type: 'true-false',
         answer: true,
-        explanation: 'Kant held that judgments of beauty carry "universal validity." Unlike private taste, they reach out and ask everyone to agree — yet no argument can force the agreement. We feel the claim binding us rather than prove it.',
+        explanation: 'Kant held that judgments of taste claim "universal validity": you judge not just for yourself but as if for everyone. Unlike private liking, they reach out and ask all to agree — yet, resting on feeling rather than concepts, no argument can force that agreement.',
       },
     },
     {
       type: 'summary',
       title: 'Beauty: Personal Yet Universal',
       keyPoints: [
-        'Kant: aesthetic pleasure is disinterested, free of need',
-        'Hume hunted a real standard of taste',
-        'Beauty is felt, yet demands agreement',
+        'Kant: aesthetic pleasure is disinterested, free of desire',
+        'Hume: a standard of taste set by true critics over time',
+        'Beauty is felt, yet claims to speak for everyone',
       ],
-      closingThought: 'Aesthetics asks what beauty is — and why it dares to speak for us all.',
+      closingThought: 'Aesthetics asks what beauty is — and why a feeling dares to speak for us all.',
     },
   ],
 };

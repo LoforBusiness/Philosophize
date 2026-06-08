@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { MotiView } from 'moti';
 import type { SortItemsInteraction } from '@/data/types';
-import CorrectFeedback from '../feedback/CorrectFeedback';
-import IncorrectFeedback from '../feedback/IncorrectFeedback';
 import { T } from '../theme';
 
 interface Props {
@@ -59,7 +57,7 @@ export default function SortItems({ interaction, xpValue, onComplete }: Props) {
             <Pressable
               key={item.id}
               onPress={() => setPlaced((p) => [...p, item.id])}
-              style={({ pressed }) => [styles.chip, pressed && { backgroundColor: '#2C2A26' }]}
+              style={({ pressed }) => [styles.chip, pressed && { backgroundColor: T.press }]}
             >
               <Text style={styles.chipText}>{item.text}</Text>
             </Pressable>
@@ -70,7 +68,13 @@ export default function SortItems({ interaction, xpValue, onComplete }: Props) {
       {ready && !answered && (
         <MotiView from={{ opacity: 0, translateY: 10 }} animate={{ opacity: 1, translateY: 0 }} transition={{ type: 'timing', duration: 200 }}>
           <Pressable
-            onPress={() => setAnswered(true)}
+            onPress={() => {
+              const correct =
+                placed.length === interaction.correctOrder.length &&
+                placed.every((id, i) => id === interaction.correctOrder[i]);
+              setAnswered(true);
+              onComplete(correct);
+            }}
             style={({ pressed }) => [styles.btn, pressed && { opacity: 0.85 }]}
           >
             <Text style={styles.btnText}>CHECK →</Text>
@@ -78,11 +82,19 @@ export default function SortItems({ interaction, xpValue, onComplete }: Props) {
         </MotiView>
       )}
 
-      {answered && isCorrect && (
-        <CorrectFeedback explanation={interaction.explanation} xpEarned={xpValue} onContinue={() => onComplete(true)} />
-      )}
-      {answered && !isCorrect && (
-        <IncorrectFeedback explanation={interaction.explanation} onContinue={() => onComplete(false)} />
+      {answered && (
+        <MotiView
+          from={{ opacity: 0, translateY: 8 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 240 }}
+          style={styles.explain}
+        >
+          <Text style={[styles.explainLabel, { color: isCorrect ? T.green : T.red }]}>
+            {isCorrect ? '✓ CORRECT' : '✕ NOT QUITE'}
+          </Text>
+          <Text style={styles.explainText}>{interaction.explanation}</Text>
+          <Text style={styles.swipeHint}>SWIPE TO CONTINUE →</Text>
+        </MotiView>
       )}
     </View>
   );
@@ -117,6 +129,10 @@ const styles = StyleSheet.create({
   pool: { gap: 10, marginBottom: 8 },
   chip: { borderWidth: 1.5, borderColor: T.border, borderRadius: 8, paddingVertical: 14, paddingHorizontal: 14, backgroundColor: T.panel },
   chipText: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 15, color: T.cream, lineHeight: 21 },
-  btn: { backgroundColor: T.cream, borderRadius: 8, paddingVertical: 15, alignItems: 'center', marginTop: 8 },
-  btnText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: T.ink, letterSpacing: 1 },
+  btn: { backgroundColor: T.ink, borderRadius: 8, paddingVertical: 15, alignItems: 'center', marginTop: 8 },
+  btnText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: T.bg, letterSpacing: 1 },
+  explain: { borderLeftWidth: 2, borderLeftColor: T.border, paddingLeft: 14, marginTop: 8 },
+  explainLabel: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.5, marginBottom: 6 },
+  explainText: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 14, color: T.creamSoft, lineHeight: 21 },
+  swipeHint: { fontFamily: 'Inter_700Bold', fontSize: 10, color: T.inkSoft, letterSpacing: 2, marginTop: 14 },
 });

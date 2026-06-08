@@ -23,6 +23,7 @@ export default function MultipleChoice({ interaction, onComplete }: Props) {
     if (answered) return;
     setSelectedId(id);
     setAnswered(true);
+    onComplete(id === correctOption?.id);
   }
 
   return (
@@ -41,7 +42,7 @@ export default function MultipleChoice({ interaction, onComplete }: Props) {
               correct && styles.rowCorrect,
               wrong && styles.rowWrong,
               dim && { opacity: 0.4 },
-              pressed && !answered && { backgroundColor: '#2C2A26' },
+              pressed && !answered && { backgroundColor: T.press },
             ]}
           >
             <View style={[styles.letter, correct && styles.letterCorrect, wrong && styles.letterWrong]}>
@@ -63,16 +64,9 @@ export default function MultipleChoice({ interaction, onComplete }: Props) {
             {isCorrect ? '✓ CORRECT' : '✕ NOT QUITE'}
           </Text>
           <Text style={styles.explainText}>{interaction.explanation}</Text>
+          <Text style={styles.swipeHint}>SWIPE TO CONTINUE →</Text>
         </MotiView>
       )}
-
-      <Pressable
-        onPress={() => answered && onComplete(isCorrect)}
-        disabled={!answered}
-        style={({ pressed }) => [styles.btn, !answered ? styles.btnDisabled : null, pressed && answered && { opacity: 0.85 }]}
-      >
-        <Text style={[styles.btnText, !answered && { color: T.dim }]}>CONTINUE →</Text>
-      </Pressable>
     </View>
   );
 }
@@ -105,11 +99,8 @@ const styles = StyleSheet.create({
   letterText: { fontFamily: 'Inter_700Bold', fontSize: 12, color: T.creamSoft },
   optText: { flex: 1, fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: T.cream, lineHeight: 22 },
 
-  explain: { borderLeftWidth: 2, borderLeftColor: T.border, paddingLeft: 14, marginTop: 4, marginBottom: 16 },
+  explain: { borderLeftWidth: 2, borderLeftColor: T.border, paddingLeft: 14, marginTop: 4, marginBottom: 8 },
   explainLabel: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.5, marginBottom: 6 },
   explainText: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 14, color: T.creamSoft, lineHeight: 21 },
-
-  btn: { backgroundColor: T.cream, borderRadius: 8, paddingVertical: 15, alignItems: 'center', marginTop: 6 },
-  btnDisabled: { backgroundColor: T.panel, borderWidth: 1.5, borderColor: T.border },
-  btnText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: T.ink, letterSpacing: 1 },
+  swipeHint: { fontFamily: 'Inter_700Bold', fontSize: 10, color: T.inkSoft, letterSpacing: 2, marginTop: 14 },
 });

@@ -12,11 +12,10 @@ interface Props {
   onDone: () => void;
 }
 
-// Dark reward screen: cream text/marks on a near-black field; the cream button
-// keeps dark text. (Names kept so the existing style references map cleanly.)
-const Ink = '#F4F0E7';
-const InkSoft = '#B7B2A6';
-const Paper = '#1A1A1A';
+// Light reward screen: ink text/marks on paper; the ink button keeps paper text.
+const Ink = '#1A1A1A';
+const InkSoft = '#6B6B6B';
+const Paper = '#FAFAF7';
 
 function dateStr(d: Date) {
   const p = (n: number) => String(n).padStart(2, '0');

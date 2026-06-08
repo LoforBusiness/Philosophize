@@ -1,87 +1,71 @@
-import { useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { MotiView } from 'moti';
-import KineticNarration from './KineticNarration';
-import { type SceneKey } from './scenes/LessonScene';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { T } from './theme';
 
 interface Props {
   text: string;
-  hint: string;          // small caps label, bottom-left
-  button: string;        // button label, bottom-right
-  onContinue: () => void;
-  size?: number;
+  kicker?: string;       // small caps label above the passage
+  size?: number;         // body font size
   source?: string;       // optional attribution (example cards)
-  kicker?: string;       // optional small gold label above the passage
-  scene?: SceneKey;      // themed isometric backdrop for this lesson
 }
 
-// The shared scaffold for every "reading" card: a themed isometric scene up top
-// (the visual hero), then a narrated passage that reveals in place below it, a
-// contextual hint, and an always-available continue button.
-export default function StatementScreen({ text, hint, button, onContinue, size, source, kicker, scene }: Props) {
-  const [done, setDone] = useState(false);
-
+// A single Blinkist-style reading card: a bordered paper card, centred on the
+// page, holding a short kicker label and a few lines of text. Fully static —
+// no narration, no reveal animation. Navigation is handled by the runner
+// (swipe / Back / Next), so this card carries no buttons of its own.
+export default function StatementScreen({ text, kicker, size = 23, source }: Props) {
   return (
     <View style={styles.root}>
-      {kicker ? (
-        <Text style={styles.kicker}>{kicker}</Text>
-      ) : null}
-
-      <View style={{ flex: 1 }}>
-        <KineticNarration text={text} size={size} onDone={() => setDone(true)} />
-      </View>
-
-      {source && done ? (
-        <MotiView from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 300 }}>
-          <Text style={styles.source}>— {source}</Text>
-        </MotiView>
-      ) : null}
-
-      <View style={styles.footer}>
-        <Text style={styles.hint}>{done ? hint : 'TAP TO REVEAL'}</Text>
-        <Pressable onPress={onContinue} style={({ pressed }) => [styles.btn, pressed && { opacity: 0.7 }]}>
-          <Text style={styles.btnText}>{button}</Text>
-        </Pressable>
-      </View>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.card}>
+          {kicker ? <Text style={styles.kicker}>{kicker}</Text> : null}
+          <Text style={[styles.body, { fontSize: size, lineHeight: Math.round(size * 1.46) }]}>
+            {text}
+          </Text>
+          {source ? <Text style={styles.source}>— {source}</Text> : null}
+        </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: 'transparent' },
+  scroll: { flex: 1 },
+  scrollContent: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 22, paddingVertical: 18 },
+  card: {
+    backgroundColor: T.panel,
+    borderWidth: 1.5,
+    borderColor: T.ink,
+    borderRadius: 26,
+    paddingHorizontal: 26,
+    paddingVertical: 32,
+    // soft rounded-card shadow
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+  },
   kicker: {
     fontFamily: 'Inter_500Medium',
     fontSize: 10,
     color: T.gold,
     letterSpacing: 3,
-    paddingHorizontal: 26,
-    marginTop: 4,
-    marginBottom: 2,
+    marginBottom: 14,
+  },
+  body: {
+    fontFamily: 'PlayfairDisplay_400Regular',
+    color: T.ink,
   },
   source: {
     fontFamily: 'PlayfairDisplay_400Regular',
     fontStyle: 'italic',
     fontSize: 13,
-    color: T.creamSoft,
-    paddingHorizontal: 26,
-    marginBottom: 6,
+    color: T.inkSoft,
+    marginTop: 16,
   },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingTop: 10,
-    paddingBottom: 6,
-  },
-  hint: { fontFamily: 'Inter_500Medium', fontSize: 10, color: T.dim, letterSpacing: 2 },
-  btn: {
-    borderWidth: 1.5,
-    borderColor: T.cream,
-    borderRadius: 6,
-    paddingHorizontal: 18,
-    paddingVertical: 11,
-  },
-  btnText: { fontFamily: 'Inter_700Bold', fontSize: 12, color: T.cream, letterSpacing: 1 },
 });

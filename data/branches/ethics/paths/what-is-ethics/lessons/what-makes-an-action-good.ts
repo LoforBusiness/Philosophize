@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'dilemma',
       scenario:
-        'A runaway trolley hurtles toward five people tied to the track. Your hand rests on a lever. Pull it, and the trolley swerves onto a side track — where one person stands, who dies instead. Philippa Foot dreamed this up in 1967.',
+        'A runaway trolley hurtles toward five people tied to the track. Your hand rests on a lever. Pull it, and the trolley swerves onto a side track — where one person stands, who dies instead. Philippa Foot first posed this kind of dilemma in 1967; Judith Jarvis Thomson added the bystander-at-the-lever version you see here.',
       prompt: 'What do you do?',
       choices: [
         { id: 'pull', label: 'Pull the lever' },
@@ -28,17 +28,17 @@ const lesson: Lesson = {
         {
           thinker: 'John Stuart Mill',
           stance: 'would pull the lever',
-          why: 'Mill scored actions by results. Five lives saved beat one lost. Pick the act that yields the greatest happiness — so pull.',
+          why: 'For Mill, the right act is the one that promotes the most happiness, counting each person equally. Five lives saved outweigh one lost — so pull.',
         },
         {
           thinker: 'Immanuel Kant',
           stance: 'would not sacrifice the one',
-          why: 'Kant forbade using a person merely as a means. Killing one to spare five does exactly that. Duty binds, whatever follows.',
+          why: 'Kant forbade treating a person merely as a means. Killing one to spare five does exactly that. Duty binds, whatever follows.',
         },
         {
           thinker: 'Aristotle',
           stance: 'asks what a good person does',
-          why: 'Aristotle eyed character, not the act alone. What would a wise, courageous soul do — and who do you become by choosing it?',
+          why: 'Aristotle eyed character, not the act alone. What would a person of practical wisdom do here — and who do you become by choosing it?',
         },
       ],
       xpValue: 5,
@@ -53,21 +53,21 @@ const lesson: Lesson = {
     {
       type: 'example',
       title: 'Theory 1: Judge by the Outcome',
-      scenario: 'Consequentialism weighs an act by what it brings about. Jeremy Bentham and John Stuart Mill founded utilitarianism on the greatest-happiness principle: choose whatever maximizes pleasure and shrinks suffering, for everyone counted equally. Is lying wrong? Only if its results harm. The deed is judged by its ripples, not the motive behind it.',
-      source: 'Jeremy Bentham, Introduction to the Principles of Morals and Legislation (1789)',
+      scenario: 'Consequentialism weighs an act by what it brings about. Bentham built utilitarianism on the principle of utility — approve acts that increase happiness, the only thing good in itself. Mill refined it: some pleasures (thought, art) rank higher than others. Everyone\'s happiness counts equally, and the deed is judged by its ripples, not the motive behind it.',
+      source: 'Jeremy Bentham, An Introduction to the Principles of Morals and Legislation (1789); John Stuart Mill, Utilitarianism (1863)',
       emoji: '📊',
     },
     {
       type: 'example',
       title: 'Theory 2: Honor the Duty',
-      scenario: 'Deontology says some acts are right or wrong in themselves, outcomes be damned. Kant\'s categorical imperative: act only on a rule you could will into a universal law. Lying fails the test — a world where everyone lies when handy collapses, since no one could trust a word. Duty first; consequences come second.',
+      scenario: 'Deontology says some acts are right or wrong in themselves, outcomes be damned. Kant\'s categorical imperative: act only on a maxim you could will to become a universal law. His own test case is the false promise — if everyone broke promises when handy, promising itself would self-destruct, since no one could trust a word. Duty first.',
       source: 'Immanuel Kant, Groundwork of the Metaphysics of Morals (1785)',
       emoji: '📜',
     },
     {
       type: 'example',
       title: 'Theory 3: Become the Good Person',
-      scenario: 'Virtue ethics flips the question: not "what should I do?" but "who should I be?" Aristotle prized eudaimonia — flourishing — built from virtues like courage and honesty. Each virtue sits as a golden mean between extremes: courage between cowardice and recklessness. Forge good character through habit, and right action flows from it.',
+      scenario: 'Virtue ethics flips the question: not "what should I do?" but "who should I be?" Aristotle prized eudaimonia — flourishing, not mere good feeling — built from virtues like courage. A virtue is a mean between extremes: courage sits between cowardice and recklessness. But not everything has a mean — some acts, like murder, are simply wrong. Forge character through habit, and right action follows.',
       source: 'Aristotle, Nicomachean Ethics (c. 350 BCE)',
       emoji: '🌟',
     },
@@ -93,7 +93,7 @@ const lesson: Lesson = {
       interaction: {
         type: 'true-false',
         answer: true,
-        explanation: 'Kant insisted lying always fails the categorical imperative — you cannot will universal lying without wrecking trust itself. It is deontology\'s most fiercely debated verdict.',
+        explanation: 'In "On a Supposed Right to Lie from Philanthropy" (1797), Kant argued you may not lie even to a murderer asking where your friend hides. It is his most criticized verdict — few defend it today.',
       },
     },
     {
