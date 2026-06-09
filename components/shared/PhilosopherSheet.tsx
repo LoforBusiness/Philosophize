@@ -9,6 +9,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { MotiView, AnimatePresence } from 'moti';
+import { Easing } from 'react-native-reanimated';
 import { getPhilosopherById, type Philosopher } from '@/data/philosophers';
 import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
 import { useUIStore } from '@/stores/uiStore';
@@ -75,7 +76,7 @@ export default function PhilosopherSheet() {
             from={{ translateY: H }}
             animate={{ translateY: 0 }}
             exit={{ translateY: H }}
-            transition={{ type: 'timing', duration: 340 }}
+            transition={{ type: 'timing', duration: 500, easing: Easing.out(Easing.cubic) }}
             style={[styles.sheet, { height: H }]}
           >
             <View style={styles.handle} />
@@ -215,7 +216,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Caveat_700Bold',
     fontSize: 52,
     color: Ink,
-    width: 84,
     lineHeight: 84,
     textAlign: 'center',
     includeFontPadding: false,

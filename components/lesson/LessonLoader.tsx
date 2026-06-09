@@ -78,10 +78,31 @@ export default function LessonLoader({ onDone }: { onDone?: () => void }) {
     const pr = p.value * SEGS;
     const k = Math.min(SEGS - 1, Math.floor(pr));
     const t = pr - k;
-    const ax = WPX[k] + (WPX[k + 1] - WPX[k]) * t;
-    const ayBase = WPY[k] + (WPY[k + 1] - WPY[k]) * t;
-    const ay = ayBase - Math.sin(t * Math.PI) * HOP;
-    return { transform: [{ translateX: ax - FALL_CX }, { translateY: ay - FALL_CY }] };
+    let ax: number;
+    let ay: number;
+    if (k < SEGS - 1) {
+      // Clean parabolic hop down the upper steps.
+      ax = WPX[k] + (WPX[k + 1] - WPX[k]) * t;
+      ay = WPY[k] + (WPY[k + 1] - WPY[k]) * t - Math.sin(t * Math.PI) * HOP;
+    } else {
+      // Final move: at the second-to-last step the block stops hopping and just
+      // keeps going in a straight line, in the same downward direction it was
+      // already travelling, accelerating until it hits the ground below.
+      const x0 = WPX[k];
+      const y0 = WPY[k]; // second-to-last step (centre)
+      const gx = x0 + 54; // continue along the same staircase diagonal...
+      const gy = y0 + 54; // ...straight down to the floor
+      const e = t * t; // ease-in: a real, accelerating fall
+      ax = x0 + (gx - x0) * e;
+      ay = y0 + (gy - y0) * e;
+      if (t > 0.9) ay -= Math.sin(((t - 0.9) / 0.1) * Math.PI) * 2; // tiny settle on impact
+    }
+    return {
+      transform: [
+        { translateX: ax - FALL_CX },
+        { translateY: ay - FALL_CY },
+      ],
+    };
   });
 
   return (

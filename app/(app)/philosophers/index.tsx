@@ -93,9 +93,9 @@ export default function ThinkersScreen() {
   const q = query.trim().toLowerCase();
   const showFeatured = q === '' && filter === 'ALL';
 
-  // Deterministic "thinker of the week".
-  const weekIdx = Math.floor(Date.now() / (7 * 86_400_000)) % ALL_PHILOSOPHERS.length;
-  const featured = ALL_PHILOSOPHERS[weekIdx];
+  // Deterministic "thinker of the day".
+  const dayIdx = Math.floor(Date.now() / 86_400_000) % ALL_PHILOSOPHERS.length;
+  const featured = ALL_PHILOSOPHERS[dayIdx];
 
   const matched = ALL_PHILOSOPHERS.filter(
     (p) =>
@@ -148,7 +148,7 @@ export default function ThinkersScreen() {
           {/* Thinker of the week */}
           {showFeatured && (
             <>
-              <SectionHead>THINKER OF THE WEEK</SectionHead>
+              <SectionHead>THINKER OF THE DAY</SectionHead>
               <Pressable style={styles.featured} onPress={() => openPhilosopher(featured.id)}>
                 <View style={styles.featTop}>
                   <View style={styles.featAvatar}>
@@ -303,7 +303,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Caveat_700Bold',
     fontSize: 26,
     color: Paper,
-    width: 46,
     lineHeight: 46,
     textAlign: 'center',
     includeFontPadding: false,
@@ -347,7 +346,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Caveat_700Bold',
     fontSize: 20,
     color: Ink,
-    width: 34,
     lineHeight: 34,
     textAlign: 'center',
     includeFontPadding: false,

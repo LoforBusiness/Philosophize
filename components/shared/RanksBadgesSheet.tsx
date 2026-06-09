@@ -34,6 +34,7 @@ export default function RanksBadgesSheet() {
   const philosopherViews = useUserDataStore((s) => s.philosopherViews);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
   const streak = useUserDataStore((s) => s.streak);
+  const xp = useUserDataStore((s) => s.totalXP);
 
   const { height, width } = useWindowDimensions();
   const H = Math.round(height * 0.75);
@@ -54,7 +55,7 @@ export default function RanksBadgesSheet() {
   const lessons = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
   const quotes = savedQuotes.length;
   const philosophers = Object.keys(philosopherViews).length;
-  const totalXP = lessons * 25 + quotes * 10 + philosophers * 5;
+  const totalXP = xp + quotes * 10 + philosophers * 5;
   const mastery: Record<string, number> = {};
   for (const b of ALL_BRANCHES) {
     const total = b.paths.reduce((acc, p) => acc + p.lessons.length, 0);

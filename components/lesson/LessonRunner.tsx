@@ -2,7 +2,7 @@ import { useRef, useCallback, useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, runOnJS } from 'react-native-reanimated';
 import type { Lesson, CardData, AnswerResult } from '@/data/types';
 import { useLessonStore } from '@/stores/lessonStore';
 import { getLessonById } from '@/data';
@@ -27,6 +27,9 @@ interface FinalStats {
   total: number;
   branchSlug: string | null;
 }
+
+// 5 XP just for completing the lesson, plus 5 per correct answer.
+const COMPLETION_XP = 5;
 
 // A card "blocks" the forward swipe until the user has acted on it.
 function blocks(card: CardData) {
@@ -62,14 +65,12 @@ export default function LessonRunner({ lesson }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson.id]);
 
-  // Keep the worklet-readable values in sync with React state.
   useEffect(() => {
     indexSv.value = index;
     lockedSv.value = isLocked(index);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, answered, isLocked]);
 
-  // Reposition instantly on width changes (e.g. web resize / rotation).
   useEffect(() => {
     tx.value = -index * width;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,9 +81,10 @@ export default function LessonRunner({ lesson }: Props) {
     finishingRef.current = true;
     const s = useLessonStore.getState().session;
     const found = getLessonById(lesson.id);
+    const correct = s?.answers.filter((a) => a.correct).length ?? 0;
     setStats({
-      xp: s?.sessionXP ?? 0,
-      correct: s?.answers.filter((a) => a.correct).length ?? 0,
+      xp: COMPLETION_XP + (s?.sessionXP ?? 0), // 5 for completing + 5 per correct
+      correct,
       total: s?.answers.length ?? 0,
       branchSlug: found?.branch.slug ?? null,
     });
@@ -106,31 +108,47 @@ export default function LessonRunner({ lesson }: Props) {
     [recordAnswer]
   );
 
+  // One card per swipe, no matter how far or hard the user drags: the gesture
+  // always commits to exactly the adjacent card (or snaps back), and the drag is
+  // clamped to a single card-width so the next card never runs ahead.
   const pan = useMemo(
     () =>
       Gesture.Pan()
-        .activeOffsetX([-14, 14])
-        .failOffsetY([-12, 12])
+        .activeOffsetX([-6, 6])
         .onUpdate((e) => {
           'worklet';
           let dx = e.translationX;
+          // The card follows the finger 1:1, but only ever reveals the single
+          // adjacent card; past a card-width it softly rubber-bands.
+          if (dx > width) dx = width + (dx - width) * 0.12;
+          else if (dx < -width) dx = -width + (dx + width) * 0.12;
           const forward = dx < 0;
           const canFwd = indexSv.value < N - 1 && !lockedSv.value;
           // Rubber-band when there's nowhere to go that direction.
-          if ((forward && !canFwd) || (!forward && indexSv.value <= 0)) dx *= 0.2;
+          if ((forward && !canFwd) || (!forward && indexSv.value <= 0)) dx *= 0.25;
           tx.value = -indexSv.value * width + dx;
         })
         .onEnd((e) => {
           'worklet';
           const dx = e.translationX;
           const vx = e.velocityX;
-          const TH = width * 0.18;
+          const TH = 24; // small, easy-to-reach distance threshold (px)
+          const VH = 180; // or a gentle flick
           const i = indexSv.value;
-          // A smooth, consistent glide for every committed transition.
-          const glide = (to: number) => {
-            tx.value = withTiming(-to * width, { duration: 320, easing: Easing.out(Easing.cubic) });
-          };
-          if (dx < -TH || vx < -550) {
+          // A smooth, well-damped spring glides to the next/previous card.
+          const glide = (to: number) =>
+            (tx.value = withSpring(-to * width, {
+              damping: 18,
+              stiffness: 170,
+              mass: 0.55,
+              overshootClamping: true,
+            }));
+
+          let dir = 0;
+          if (dx < -TH || vx < -VH) dir = 1;
+          else if (dx > TH || vx > VH) dir = -1;
+
+          if (dir === 1) {
             if (i < N - 1 && !lockedSv.value) {
               glide(i + 1);
               runOnJS(setIndex)(i + 1);
@@ -141,13 +159,12 @@ export default function LessonRunner({ lesson }: Props) {
               runOnJS(finish)();
               return;
             }
-          } else if ((dx > TH || vx > 550) && i > 0) {
+          } else if (dir === -1 && i > 0) {
             glide(i - 1);
             runOnJS(setIndex)(i - 1);
             return;
           }
-          // Snap back to the current card.
-          tx.value = withTiming(-i * width, { duration: 240, easing: Easing.out(Easing.cubic) });
+          glide(i); // snap back
         }),
     [width, N, finish, tx, indexSv, lockedSv]
   );
@@ -191,8 +208,8 @@ export default function LessonRunner({ lesson }: Props) {
 
   return (
     <CardShell cardCount={N} currentIndex={index} label={label} onExit={handleExit}>
-      <GestureDetector gesture={pan}>
-        <View style={styles.viewport}>
+      <View style={styles.viewport}>
+        <GestureDetector gesture={pan}>
           <Animated.View style={[styles.row, rowStyle, { width: width * N }]}>
             {lesson.cards.map((card, i) => (
               <View key={i} style={{ width }}>
@@ -200,8 +217,8 @@ export default function LessonRunner({ lesson }: Props) {
               </View>
             ))}
           </Animated.View>
-        </View>
-      </GestureDetector>
+        </GestureDetector>
+      </View>
 
       <View style={styles.footer}>
         <Text style={styles.footerHint}>

@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
-import Portrait, { PORTRAITS, type PortraitName } from '@/components/shared/Portrait';
+import Portrait from '@/components/shared/Portrait';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { signOut } from '@/lib/supabase/auth';
 import { rankForXP } from '@/data/ranks';
@@ -278,21 +278,18 @@ function Section({ section }: { section: SectionKey }) {
 function ProfileSection() {
   const displayName = useUserDataStore((s) => s.displayName);
   const email = useUserDataStore((s) => s.email);
-  const bio = useUserDataStore((s) => s.bio);
-  const portrait = useUserDataStore((s) => s.portrait);
   const setProfile = useUserDataStore((s) => s.setProfile);
-  const setPortrait = useUserDataStore((s) => s.setPortrait);
   const joinedAt = useUserDataStore((s) => s.joinedAt);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const philosopherViews = useUserDataStore((s) => s.philosopherViews);
   const streak = useUserDataStore((s) => s.streak);
+  const xp = useUserDataStore((s) => s.totalXP);
 
   const [edit, setEdit] = useState(false);
-  const [picker, setPicker] = useState(false);
 
   const lessons = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
-  const totalXP = lessons * 25 + savedQuotes.length * 10 + Object.keys(philosopherViews).length * 5;
+  const totalXP = xp + savedQuotes.length * 10 + Object.keys(philosopherViews).length * 5;
   const { current } = rankForXP(totalXP);
   const join = joinedAt ? new Date(joinedAt) : new Date();
   const memberSince = `Member since ${MONTHS[join.getMonth()]} ${join.getFullYear()}`;
@@ -314,7 +311,7 @@ function ProfileSection() {
 
       <View style={styles.identity}>
         <View style={styles.avatar}>
-          <Portrait name={portrait as PortraitName} size={64} color={Ink} />
+          <Portrait size={64} color={Ink} />
         </View>
         <View style={{ flex: 1, marginLeft: 18 }}>
           <Text style={styles.idName}>{displayName || 'Philosopher'}</Text>
@@ -322,9 +319,6 @@ function ProfileSection() {
             {current.name} · Rank {current.id}
           </Text>
           <Text style={styles.idMeta}>{memberSince}</Text>
-          <Pressable onPress={() => setPicker(true)} hitSlop={6} style={{ alignSelf: 'flex-start', marginTop: 8 }}>
-            <Text style={styles.changeLink}>Change portrait</Text>
-          </Pressable>
         </View>
       </View>
 
@@ -344,13 +338,6 @@ function ProfileSection() {
         <Text style={styles.fieldValue}>{email || '—'}</Text>
       )}
 
-      <Text style={styles.fieldLabel}>BIO</Text>
-      {edit ? (
-        <TextInput value={bio} onChangeText={(t) => setProfile({ bio: t })} style={[styles.input, { height: 64 }]} multiline placeholder="A short line about you" placeholderTextColor={InkSoft} />
-      ) : (
-        <Text style={styles.bioValue}>{bio || '—'}</Text>
-      )}
-
       <View style={styles.hr} />
       <View style={styles.miniStats}>
         <MiniStat value={lessons} label="Lessons" />
@@ -359,16 +346,6 @@ function ProfileSection() {
         <View style={styles.miniDiv} />
         <MiniStat value={streak} label="Day Streak" />
       </View>
-
-      <PortraitPicker
-        visible={picker}
-        selected={portrait}
-        onSelect={(id) => {
-          setPortrait(id);
-          setPicker(false);
-        }}
-        onClose={() => setPicker(false)}
-      />
     </Card>
   );
 }
@@ -379,69 +356,6 @@ function MiniStat({ value, label }: { value: number; label: string }) {
       <Text style={styles.miniValue}>{value}</Text>
       <Text style={styles.miniLabel}>{label}</Text>
     </View>
-  );
-}
-
-/* ---------------- Portrait picker ---------------- */
-
-function PortraitPicker({
-  visible,
-  selected,
-  onSelect,
-  onClose,
-}: {
-  visible: boolean;
-  selected: string;
-  onSelect: (id: string) => void;
-  onClose: () => void;
-}) {
-  const { width } = useWindowDimensions();
-  const cardW = Math.min(640, width - 28);
-  const inner = cardW - 44; // minus card horizontal padding
-  const cols = inner >= 480 ? 5 : inner >= 300 ? 3 : 2;
-  const gap = 10;
-  const tileW = Math.floor((inner - gap * (cols - 1)) / cols);
-  const art = Math.round(tileW * 0.62);
-
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <View style={styles.modalBackdrop}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-        <View style={[styles.pickerCard, { width: cardW }]}>
-          <View style={styles.pickerHead}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.pickerTitle}>Choose your portrait</Text>
-              <Text style={styles.pickerSub}>25 hand-drawn characters</Text>
-            </View>
-            <Pressable onPress={onClose} hitSlop={10} style={styles.pickerClose}>
-              <Text style={styles.pickerCloseText}>X</Text>
-            </Pressable>
-          </View>
-
-          <ScrollView style={{ maxHeight: 460 }} contentContainerStyle={{ paddingTop: 4, paddingBottom: 4 }} showsVerticalScrollIndicator={false}>
-            <View style={[styles.pickerGrid, { gap }]}>
-              {PORTRAITS.map((p) => {
-                const on = p.id === selected;
-                return (
-                  <Pressable
-                    key={p.id}
-                    onPress={() => onSelect(p.id)}
-                    style={[styles.tile, { width: tileW }, on && styles.tileOn]}
-                  >
-                    <Portrait name={p.id} size={art} color={on ? Paper : Ink} />
-                    <Text style={[styles.tileName, on && { color: Paper, fontFamily: 'Inter_700Bold' }]} numberOfLines={1}>
-                      {p.name}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </ScrollView>
-
-          <Text style={styles.pickerFoot}>Click any portrait to select it.</Text>
-        </View>
-      </View>
-    </Modal>
   );
 }
 
@@ -610,7 +524,7 @@ function SubscriptionSection() {
           <Text style={styles.planNote}>Forever free</Text>
           <View style={{ marginTop: 14, gap: 10 }}>
             <Check label="1 free lesson per day" />
-            <Check label="10 saved quotes" />
+            <Check label="Unlimited saved quotes" />
             <Check label="Full rank progression" />
             <Check label="All 50 badges" />
             <Check label="Philosopher bios" />
@@ -633,12 +547,8 @@ function SubscriptionSection() {
               <View style={styles.andLine} />
             </View>
             <Check label="Unlimited lessons per day" />
-            <Check label="Unlimited saved quotes" />
-            <Check label="Advanced statistics & insights" />
-            <Check label="Offline access" />
             <Check label="Ad-free experience" />
-            <Check label="Early access to new content" />
-            <Check label="Priority support" />
+            <Check label="Streak freeze to protect your streak" />
           </View>
           <Pressable onPress={() => setNotice(true)} style={({ pressed }) => [styles.upgradeBtn, pressed && { opacity: 0.85 }]}>
             <Text style={styles.upgradeText}>Upgrade — $6.99 / mo</Text>

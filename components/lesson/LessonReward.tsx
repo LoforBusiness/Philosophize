@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
 import { MotiView } from 'moti';
+import { Easing } from 'react-native-reanimated';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 
@@ -41,27 +42,25 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
   useEffect(() => {
     if (ran.current) return;
     ran.current = true;
-    if (branchSlug) recordLessonComplete(branchSlug);
+    if (branchSlug) recordLessonComplete(branchSlug, xp);
     const today = dateStr(new Date());
     const yesterday = dateStr(new Date(Date.now() - 86_400_000));
     setInfo(registerDailyActivity(today, yesterday));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Count the XP up.
+  // Count the XP up from zero, smoothly (eased over ~1s, ~60fps).
   useEffect(() => {
-    if (xp <= 0) {
-      setXpShown(0);
-      return;
-    }
-    let cur = 0;
-    const steps = Math.min(xp, 24);
-    const inc = Math.max(1, Math.round(xp / steps));
+    setXpShown(0);
+    if (xp <= 0) return;
+    const DURATION = 1000;
+    const t0 = Date.now();
     const id = setInterval(() => {
-      cur = Math.min(xp, cur + inc);
-      setXpShown(cur);
-      if (cur >= xp) clearInterval(id);
-    }, 45);
+      const t = Math.min(1, (Date.now() - t0) / DURATION);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic — decelerates as it lands
+      setXpShown(Math.round(eased * xp));
+      if (t >= 1) clearInterval(id);
+    }, 16);
     return () => clearInterval(id);
   }, [xp]);
 
@@ -95,7 +94,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
             transition={{ type: 'spring', delay: 200, damping: 11, stiffness: 130 }}
             style={styles.xpBlock}
           >
-            <Text style={styles.xpNumber}>+{xpShown}</Text>
+            <Text style={styles.xpNumber}>{xpShown}</Text>
             <Text style={styles.xpLabel}>XP EARNED</Text>
           </MotiView>
 
@@ -121,9 +120,9 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
                   <SketchIcon name="flame" size={44} color={Ink} />
                   <MotiView
                     key={streakShown ?? info.prevStreak}
-                    from={{ scale: 0.4, translateY: -6 }}
-                    animate={{ scale: 1, translateY: 0 }}
-                    transition={{ type: 'spring', damping: 9, stiffness: 160 }}
+                    from={{ translateY: 16, opacity: 0 }}
+                    animate={{ translateY: 0, opacity: 1 }}
+                    transition={{ type: 'timing', duration: 440, easing: Easing.out(Easing.cubic) }}
                   >
                     <Text style={styles.streakNumber}>{streakShown ?? info.prevStreak}</Text>
                   </MotiView>

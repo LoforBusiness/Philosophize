@@ -3,6 +3,7 @@ import { EASTERN_EXTRA } from './extra-philosophers/eastern';
 import { MEDIEVAL_EXTRA } from './extra-philosophers/medieval';
 import { MODERN_EXTRA } from './extra-philosophers/modern';
 import { CONTEMPORARY_EXTRA } from './extra-philosophers/contemporary';
+import { EXPANSION_EXTRA } from './extra-philosophers/expansion';
 
 export interface PhilosopherQuote {
   id: string; // unique, kebab style like 'socrates-1', 'socrates-2'
@@ -390,7 +391,7 @@ const BASE_PHILOSOPHERS: Philosopher[] = [
 ];
 
 // Base thinkers plus the broader canon (ancient, eastern, medieval, modern,
-// contemporary) — ~120 philosophers in total.
+// contemporary) and a 100-strong expansion — ~220 philosophers in total.
 export const ALL_PHILOSOPHERS: Philosopher[] = [
   ...BASE_PHILOSOPHERS,
   ...ANCIENT_EXTRA,
@@ -398,6 +399,7 @@ export const ALL_PHILOSOPHERS: Philosopher[] = [
   ...MEDIEVAL_EXTRA,
   ...MODERN_EXTRA,
   ...CONTEMPORARY_EXTRA,
+  ...EXPANSION_EXTRA,
 ];
 
 export function getPhilosopherById(id: string): Philosopher | undefined {

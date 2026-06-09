@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
@@ -107,11 +107,7 @@ export default function HomeScreen() {
     <ScreenTransition bg="#FAFAF7">
     <SafeAreaView style={styles.safe}>
       <RuledPaper />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={styles.page}>
         {/* Masthead */}
         <Text style={styles.kicker}>EST. ANTIQUITY  ·  VOL. I</Text>
         <Text
@@ -130,7 +126,7 @@ export default function HomeScreen() {
           <View style={styles.reflectionCard}>
             <Text style={styles.qmark}>“</Text>
             <Pressable onPress={() => openPhilosopher(quote.philosopherId)}>
-              <Text style={styles.reflectionText}>{quote.text}</Text>
+              <Text style={styles.reflectionText} numberOfLines={4}>{quote.text}</Text>
             </Pressable>
             <View style={styles.reflectionFooter}>
               <Pressable
@@ -170,7 +166,7 @@ export default function HomeScreen() {
           <ActionCard
             icon="spark"
             label="INSIGHTS"
-            sub="Deep ideas"
+            sub="Your interests"
             onPress={() => router.push('/(app)/stats')}
           />
         </View>
@@ -191,8 +187,8 @@ export default function HomeScreen() {
         </View>
 
         {/* Daily quote widget (opt-in, Settings → Notifications) */}
-        {showWidget ? <DailyQuoteWidget style={{ marginTop: 30 }} /> : null}
-      </ScrollView>
+        {showWidget ? <DailyQuoteWidget style={{ marginTop: 18 }} /> : null}
+      </View>
     </SafeAreaView>
     </ScreenTransition>
   );
@@ -200,8 +196,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Paper },
-  scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 40 },
+  page: { flex: 1, paddingHorizontal: 24, paddingTop: 6 },
 
   kicker: {
     fontFamily: 'Inter_500Medium',
@@ -209,7 +204,7 @@ const styles = StyleSheet.create({
     color: InkSoft,
     letterSpacing: 3,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: 4,
   },
   wordmark: {
     fontFamily: 'PlayfairDisplay_700Bold',
@@ -217,15 +212,15 @@ const styles = StyleSheet.create({
     color: Ink,
     letterSpacing: 3,
     textAlign: 'center',
-    marginTop: 10,
+    marginTop: 6,
   },
   rule: {
     alignSelf: 'center',
     width: '66%',
     height: 1.5,
     backgroundColor: Ink,
-    marginTop: 8,
-    marginBottom: 12,
+    marginTop: 6,
+    marginBottom: 10,
   },
   tagline: {
     fontFamily: 'PlayfairDisplay_400Regular',
@@ -239,10 +234,10 @@ const styles = StyleSheet.create({
     color: Ink,
     letterSpacing: 4,
     textAlign: 'center',
-    marginTop: 16,
+    marginTop: 10,
   },
 
-  reflectionWrap: { marginTop: 26, position: 'relative' },
+  reflectionWrap: { marginTop: 18, position: 'relative' },
   reflectionCard: {
     borderWidth: 1.5,
     borderColor: Ink,
@@ -295,7 +290,7 @@ const styles = StyleSheet.create({
     color: Paper,
   },
 
-  actionsRow: { flexDirection: 'row', gap: 10, marginTop: 28 },
+  actionsRow: { flexDirection: 'row', gap: 10, marginTop: 18 },
   actionWrap: { flex: 1 },
   action: {
     flex: 1,
@@ -341,7 +336,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 5,
-    marginTop: 30,
+    marginTop: 18,
   },
   streakLabel: {
     fontFamily: 'Inter_500Medium',

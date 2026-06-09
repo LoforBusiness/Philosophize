@@ -8,6 +8,7 @@ import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { signOut } from '@/lib/supabase/auth';
 import { ALL_BRANCHES } from '@/data';
+import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { rankForXP } from '@/data/ranks';
 import { BADGES } from '@/data/badges';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -107,6 +108,7 @@ export default function ProfileScreen() {
   const joinedAt = useUserDataStore((s) => s.joinedAt);
   const ensureJoinDate = useUserDataStore((s) => s.ensureJoinDate);
   const displayName = useUserDataStore((s) => s.displayName);
+  const xp = useUserDataStore((s) => s.totalXP);
   const earnedBadges = useUserDataStore((s) => s.earnedBadges);
   const settings = useUserDataStore((s) => s.settings);
   const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'profile';
@@ -119,7 +121,7 @@ export default function ProfileScreen() {
   const lessonsDone = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
   const quotesSaved = savedQuotes.length;
   const distinctViewed = Object.keys(philosopherViews).length;
-  const totalXP = lessonsDone * 25 + quotesSaved * 10 + distinctViewed * 5;
+  const totalXP = xp + quotesSaved * 10 + distinctViewed * 5;
 
   const mastery = ALL_BRANCHES.map((b) => {
     const total = b.paths.reduce((acc, p) => acc + p.lessons.length, 0);
@@ -130,6 +132,29 @@ export default function ProfileScreen() {
 
   const topBranch = (mastery[0]?.pct ?? 0) > 0 ? mastery[0].slug : null;
   const descriptor = topBranch ? TITLE[topBranch] ?? 'SEEKER' : 'SEEKER';
+
+  // "From your insights" — the user's top philosopher and top area of interest,
+  // scored the same way the Insights screen does.
+  const philScores = ALL_PHILOSOPHERS.map((p) => {
+    const views = philosopherViews[p.id] ?? 0;
+    const quotes = savedQuotes.filter((q) => q.philosopherId === p.id).length;
+    const learn = p.branchSlugs.reduce((a, s) => a + (lessonsByBranch[s] ?? 0), 0);
+    return { name: p.name, score: views * 3 + quotes * 5 + learn };
+  })
+    .filter((p) => p.score > 0)
+    .sort((a, b) => b.score - a.score);
+  const topPhilosopher = philScores[0] ?? null;
+
+  const branchInterest = ALL_BRANCHES.map((b) => {
+    const lessons = lessonsByBranch[b.slug] ?? 0;
+    const quotes = savedQuotes.filter((q) => q.branchSlugs.includes(b.slug)).length;
+    const views = ALL_PHILOSOPHERS.filter((p) => p.branchSlugs.includes(b.slug)).reduce(
+      (a, p) => a + (philosopherViews[p.id] ?? 0),
+      0
+    );
+    return { slug: b.slug, name: b.name, interactions: lessons + quotes + views };
+  }).sort((a, b) => b.interactions - a.interactions);
+  const topInterest = (branchInterest[0]?.interactions ?? 0) > 0 ? branchInterest[0] : null;
 
   const { current: cur, next } = rankForXP(totalXP);
   const nextThreshold = next?.xp ?? cur.xp;
@@ -201,6 +226,34 @@ export default function ProfileScreen() {
         {/* Body */}
         <View style={styles.body}>
           {showWidget ? <DailyQuoteWidget style={{ marginBottom: 22 }} /> : null}
+
+          <SectionLabel>FROM YOUR INSIGHTS</SectionLabel>
+          <View style={styles.insightsCard}>
+            <View style={styles.insightRow}>
+              <View style={styles.insightIcon}>
+                <SketchIcon name="person" size={18} color={Ink} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.insightLabel}>TOP PHILOSOPHER</Text>
+                <Text style={styles.insightValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+                  {topPhilosopher ? topPhilosopher.name : 'Keep exploring'}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.insightDivider} />
+            <View style={styles.insightRow}>
+              <View style={styles.insightIcon}>
+                <SketchIcon name={topInterest ? BICON[topInterest.slug] ?? 'spiral' : 'spiral'} size={18} color={Ink} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.insightLabel}>TOP AREA OF INTEREST</Text>
+                <Text style={styles.insightValue} numberOfLines={1}>
+                  {topInterest ? topInterest.name : 'Keep learning'}
+                </Text>
+              </View>
+            </View>
+          </View>
+
           <SectionLabel>AT A GLANCE</SectionLabel>
           <View style={styles.glanceRow}>
             <View style={styles.glanceBox}>
@@ -383,6 +436,21 @@ const styles = StyleSheet.create({
   },
   glanceValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: Ink, marginTop: 8 },
   glanceLabel: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft, letterSpacing: 1.5, marginTop: 2 },
+
+  insightsCard: { borderWidth: 1.5, borderColor: Ink, borderRadius: 3, padding: 16 },
+  insightRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  insightIcon: {
+    width: 38,
+    height: 38,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  insightLabel: { fontFamily: 'Inter_500Medium', fontSize: 9, color: InkSoft, letterSpacing: 1.5 },
+  insightValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 18, color: Ink, marginTop: 3 },
+  insightDivider: { height: 1, backgroundColor: InkFaint, marginVertical: 14 },
 
   streakBox: {
     flexDirection: 'row',

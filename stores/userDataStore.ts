@@ -73,6 +73,7 @@ interface UserDataState {
   voiceEnabled: boolean;                      // narrate lessons aloud + reveal words
   beliefResultId: string | null;             // legacy (belief quiz removed)
   streak: number;                             // consecutive-day streak
+  totalXP: number;                            // accumulated lesson XP (5 per completion + 5 per correct)
   lastLessonDate: string | null;             // YYYY-MM-DD of last completed lesson
   joinedAt: number | null;                    // epoch ms of first app open
   earnedBadges: string[];                     // badge ids the user has earned (persists)
@@ -89,7 +90,7 @@ interface UserDataState {
   toggleQuote: (q: SavedQuote) => void;
   isQuoteSaved: (id: string) => boolean;
   recordPhilosopherView: (philosopherId: string) => void;
-  recordLessonComplete: (branchSlug: string) => void;
+  recordLessonComplete: (branchSlug: string, xpEarned?: number) => void;
   setVoiceEnabled: (v: boolean) => void;
   setBeliefResult: (id: string | null) => void;
   ensureJoinDate: () => void;
@@ -114,11 +115,12 @@ function computeStats(s: {
   savedQuotes: SavedQuote[];
   philosopherViews: Record<string, number>;
   streak: number;
+  totalXP: number;
 }): ProgressStats {
   const lessons = Object.values(s.lessonsByBranch).reduce((a, b) => a + b, 0);
   const quotes = s.savedQuotes.length;
   const philosophers = Object.keys(s.philosopherViews).length;
-  const totalXP = lessons * 25 + quotes * 10 + philosophers * 5;
+  const totalXP = s.totalXP + quotes * 10 + philosophers * 5;
   const mastery: Record<string, number> = {};
   for (const b of ALL_BRANCHES) {
     const total = b.paths.reduce((acc, p) => acc + p.lessons.length, 0);
@@ -137,6 +139,7 @@ export const useUserDataStore = create<UserDataState>()(
       voiceEnabled: true,
       beliefResultId: null,
       streak: 0,
+      totalXP: 0,
       lastLessonDate: null,
       joinedAt: null,
       earnedBadges: [],
@@ -185,12 +188,13 @@ export const useUserDataStore = create<UserDataState>()(
         get().recomputeBadges();
       },
 
-      recordLessonComplete: (branchSlug) => {
+      recordLessonComplete: (branchSlug, xpEarned = 0) => {
         set((state) => ({
           lessonsByBranch: {
             ...state.lessonsByBranch,
             [branchSlug]: (state.lessonsByBranch[branchSlug] ?? 0) + 1,
           },
+          totalXP: state.totalXP + xpEarned,
         }));
         get().recomputeBadges();
       },
@@ -235,7 +239,7 @@ export const useUserDataStore = create<UserDataState>()(
         set((state) => ({ settings: { ...state.settings, [key]: value } })),
 
       resetProgress: () =>
-        set({ lessonsByBranch: {}, streak: 0, lastLessonDate: null }),
+        set({ lessonsByBranch: {}, streak: 0, totalXP: 0, lastLessonDate: null }),
 
       clearSavedQuotes: () => set({ savedQuotes: [] }),
 
@@ -249,6 +253,7 @@ export const useUserDataStore = create<UserDataState>()(
           voiceEnabled: true,
           beliefResultId: null,
           streak: 0,
+          totalXP: 0,
           lastLessonDate: null,
           joinedAt: null,
           earnedBadges: [],
@@ -272,6 +277,7 @@ export const useUserDataStore = create<UserDataState>()(
         voiceEnabled: state.voiceEnabled,
         beliefResultId: state.beliefResultId,
         streak: state.streak,
+        totalXP: state.totalXP,
         lastLessonDate: state.lastLessonDate,
         joinedAt: state.joinedAt,
         earnedBadges: state.earnedBadges,
@@ -285,9 +291,14 @@ export const useUserDataStore = create<UserDataState>()(
       // Merge persisted settings over defaults so newly-added keys are present.
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<UserDataState>;
+        // Backfill accumulated XP for users who predate the totalXP field, using
+        // the previous flat 25-per-lesson value so their rank doesn't drop.
+        const priorLessons = Object.values(p.lessonsByBranch ?? {}).reduce((a, b) => a + b, 0);
+        const totalXP = p.totalXP ?? priorLessons * 25;
         return {
           ...current,
           ...p,
+          totalXP,
           settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) },
         };
       },
