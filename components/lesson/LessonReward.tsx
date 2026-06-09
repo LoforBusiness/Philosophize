@@ -168,10 +168,10 @@ const styles = StyleSheet.create({
   },
   xpBlock: { alignItems: 'center', marginBottom: 16 },
   xpNumber: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 96,
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 84,
     color: Ink,
-    lineHeight: 104,
+    lineHeight: 92,
   },
   xpLabel: {
     fontFamily: 'Inter_500Medium',
@@ -205,10 +205,10 @@ const styles = StyleSheet.create({
   },
   streakRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   streakNumber: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 64,
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 52,
     color: Ink,
-    lineHeight: 70,
+    lineHeight: 60,
   },
   streakLabel: {
     fontFamily: 'Inter_400Regular',

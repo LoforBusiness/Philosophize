@@ -1,4 +1,5 @@
-import { Text, ScrollView, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import type { QuestionCard as QuestionCardType, AnswerResult } from '@/data/types';
 import MultipleChoice from '../interactions/MultipleChoice';
 import TrueFalse from '../interactions/TrueFalse';

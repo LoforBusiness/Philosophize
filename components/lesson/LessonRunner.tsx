@@ -2,7 +2,7 @@ import { useRef, useCallback, useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, runOnJS } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, runOnJS } from 'react-native-reanimated';
 import type { Lesson, CardData, AnswerResult } from '@/data/types';
 import { useLessonStore } from '@/stores/lessonStore';
 import { getLessonById } from '@/data';
@@ -15,6 +15,7 @@ import QuestionCard from './cards/QuestionCard';
 import ReinforcementCard from './cards/ReinforcementCard';
 import SummaryCard from './cards/SummaryCard';
 import DilemmaCard from './cards/DilemmaCard';
+import QuoteCard from './cards/QuoteCard';
 import { T } from './theme';
 
 interface Props {
@@ -45,6 +46,9 @@ export default function LessonRunner({ lesson }: Props) {
   const [answered, setAnswered] = useState<Set<number>>(new Set());
   const [finished, setFinished] = useState(false);
   const [stats, setStats] = useState<FinalStats | null>(null);
+
+  // The branch a saved quote belongs to (so quote cards file under the right area).
+  const branchSlug = useMemo(() => getLessonById(lesson.id)?.branch.slug ?? null, [lesson.id]);
 
   const recordedRef = useRef<Set<number>>(new Set());
   const finishingRef = useRef(false);
@@ -114,7 +118,10 @@ export default function LessonRunner({ lesson }: Props) {
   const pan = useMemo(
     () =>
       Gesture.Pan()
-        .activeOffsetX([-6, 6])
+        // Grab the horizontal swipe quickly (small activation distance). Inner
+        // card ScrollViews are gesture-handler ScrollViews, so vertical scroll
+        // and this horizontal pan coordinate cleanly instead of fighting.
+        .activeOffsetX([-8, 8])
         .onUpdate((e) => {
           'worklet';
           let dx = e.translationX;
@@ -132,16 +139,14 @@ export default function LessonRunner({ lesson }: Props) {
           'worklet';
           const dx = e.translationX;
           const vx = e.velocityX;
-          const TH = 24; // small, easy-to-reach distance threshold (px)
-          const VH = 180; // or a gentle flick
+          const TH = 14; // tiny distance threshold — a small nudge advances
+          const VH = 90; // …or the gentlest flick
           const i = indexSv.value;
-          // A smooth, well-damped spring glides to the next/previous card.
+          // A smooth, eased slide from side to side — never an instant jump.
           const glide = (to: number) =>
-            (tx.value = withSpring(-to * width, {
-              damping: 18,
-              stiffness: 170,
-              mass: 0.55,
-              overshootClamping: true,
+            (tx.value = withTiming(-to * width, {
+              duration: 360,
+              easing: Easing.out(Easing.cubic),
             }));
 
           let dir = 0;
@@ -183,6 +188,8 @@ export default function LessonRunner({ lesson }: Props) {
         return <ReinforcementCard card={card} />;
       case 'summary':
         return <SummaryCard card={card} />;
+      case 'quote':
+        return <QuoteCard card={card} branchSlug={branchSlug} />;
       case 'question':
         return <QuestionCard card={card} onComplete={(r) => r && onAnswer(i, r)} />;
       case 'dilemma':

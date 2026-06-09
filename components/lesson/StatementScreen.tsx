@@ -1,4 +1,8 @@
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+// gesture-handler's ScrollView cooperates with the lesson pager's horizontal
+// Pan: vertical scrolls stay here, horizontal swipes go to the pager. The core
+// RN ScrollView sits outside the gesture system and made swiping feel "stuck".
+import { ScrollView } from 'react-native-gesture-handler';
 import { T } from './theme';
 
 interface Props {

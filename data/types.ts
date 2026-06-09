@@ -114,6 +114,18 @@ export interface DilemmaCard {
   xpValue: number;
 }
 
+// A philosopher's quote the user can sit with — and save. Shows the quotation,
+// who wrote it, and when. The Save button bookmarks it into the user's quotes.
+export interface QuoteCard {
+  type: 'quote';
+  id: string;            // stable unique id for saving, e.g. 'lq-ethics-1'
+  quote: string;         // the quotation itself, max ~28 words
+  author: string;        // who said or wrote it
+  era: string;           // when it was written, e.g. 'c. 340 BCE' or '1785'
+  work?: string;         // optional source text, e.g. 'Nicomachean Ethics'
+  philosopherId?: string; // optional link to a philosopher in our database
+}
+
 export type CardData =
   | HookCard
   | ConceptCard
@@ -121,7 +133,8 @@ export type CardData =
   | QuestionCard
   | ReinforcementCard
   | SummaryCard
-  | DilemmaCard;
+  | DilemmaCard
+  | QuoteCard;
 
 // ─── Curriculum hierarchy ────────────────────────────────────────────────────
 

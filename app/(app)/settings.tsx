@@ -147,11 +147,13 @@ function Header({ title, sub, icon }: { title: string; sub?: string; icon?: Sket
   );
 }
 
-function Row({ title, sub, children, last, stack }: { title: string; sub?: string; children?: React.ReactNode; last?: boolean; stack?: boolean }) {
+function Row({ title, sub, children, last, stack, z }: { title: string; sub?: string; children?: React.ReactNode; last?: boolean; stack?: boolean; z?: number }) {
   const { width } = useWindowDimensions();
   const stacked = !!stack && width < 600;
   return (
-    <View style={[styles.row, stacked && styles.rowStacked, last && { borderBottomWidth: 0 }]}>
+    // `z` lifts a row (and any open dropdown inside it) above the rows below,
+    // so dropdown options stay tappable instead of hiding behind the next row.
+    <View style={[styles.row, stacked && styles.rowStacked, last && { borderBottomWidth: 0 }, z ? { zIndex: z } : null]}>
       <View style={stacked ? { width: '100%' } : { flex: 1, paddingRight: 12 }}>
         <Text style={styles.rowTitle}>{title}</Text>
         {sub ? <Text style={styles.rowSub}>{sub}</Text> : null}
@@ -482,7 +484,7 @@ function LanguageSection() {
     <Card>
       <Header title="Language" sub="The tongue in which philosophy speaks to you." />
       <View style={styles.hr} />
-      <Row title="App Language" sub="The language used throughout the interface" stack>
+      <Row title="App Language" sub="The language used throughout the interface" stack z={20}>
         <Dropdown value={settings.appLanguage} options={LANGS} onChange={(v) => setSetting('appLanguage', v)} />
       </Row>
       <Row title="Quote Display" sub="How philosopher quotes appear" last stack>

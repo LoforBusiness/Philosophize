@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { MotiView } from 'moti';
 import type { DilemmaCard as DilemmaCardType, DilemmaView, AnswerResult } from '@/data/types';
 import { T } from '../theme';
