@@ -550,7 +550,6 @@ function SubscriptionSection() {
             </View>
             <Check label="Unlimited lessons per day" />
             <Check label="Ad-free experience" />
-            <Check label="Streak freeze to protect your streak" />
           </View>
           <Pressable onPress={() => setNotice(true)} style={({ pressed }) => [styles.upgradeBtn, pressed && { opacity: 0.85 }]}>
             <Text style={styles.upgradeText}>Upgrade — $6.99 / mo</Text>

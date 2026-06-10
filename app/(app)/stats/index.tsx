@@ -14,7 +14,6 @@ const InkSoft = '#6B6B6B';
 const InkFaint = '#E2E0D8';
 
 const SW = Dimensions.get('window').width;
-const STAT_W = (SW - 40 - 30) / 4;
 // On a phone the two pies can't sit side-by-side without overflowing — stack them.
 const STACK_PIES = SW < 600;
 
@@ -39,7 +38,6 @@ export default function StatsScreen() {
   const lessonsDone = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
   const quotesSaved = savedQuotes.length;
   const philosophersViewed = Object.keys(philosopherViews).length;
-  const streak = useUserDataStore((s) => s.streak);
 
   // Per-branch metrics.
   const branchMetrics = ALL_BRANCHES.map((b) => {
@@ -109,14 +107,6 @@ export default function StatsScreen() {
 
         {showWidget ? <DailyQuoteWidget style={{ marginBottom: 20 }} /> : null}
 
-        {/* Stat boxes */}
-        <View style={styles.statRow}>
-          <StatBox symbol="◼" value={lessonsDone} label="Lessons" />
-          <StatBox symbol="“" value={quotesSaved} label="Quotes Saved" />
-          <StatBox symbol="◈" value={philosophersViewed} label="Philosophers" />
-          <StatBox symbol="◆" value={streak} label="Day Streak" />
-        </View>
-
         {hasAny ? (
           <>
             {/* Pies */}
@@ -165,16 +155,6 @@ export default function StatsScreen() {
       </ScrollView>
     </SafeAreaView>
     </ScreenTransition>
-  );
-}
-
-function StatBox({ symbol, value, label }: { symbol: string; value: number; label: string }) {
-  return (
-    <View style={styles.statBox}>
-      <Text style={styles.statSymbol}>{symbol}</Text>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
   );
 }
 
@@ -258,19 +238,6 @@ const styles = StyleSheet.create({
   title: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 34, color: Ink, marginTop: 6 },
   titleItalic: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 30, color: Ink, marginTop: -2 },
   rule: { height: 1.5, backgroundColor: Ink, marginTop: 14, marginBottom: 22 },
-
-  statRow: { flexDirection: 'row', gap: 10 },
-  statBox: {
-    width: STAT_W,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 3,
-    alignItems: 'center',
-    paddingVertical: 16,
-  },
-  statSymbol: { fontSize: 15, color: Ink, marginBottom: 8 },
-  statValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, color: Ink },
-  statLabel: { fontFamily: 'Inter_400Regular', fontSize: 9, color: InkSoft, marginTop: 3, textAlign: 'center' },
 
   pieRow: { flexDirection: 'row', gap: 14, marginTop: 28 },
 

@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   tabTextOn: { color: Paper },
   earnedLine: { fontFamily: 'Inter_400Regular', fontSize: 11, color: InkSoft, letterSpacing: 1, marginBottom: 12 },
 
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingBottom: 30 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10, paddingBottom: 30 },
 
   rankCard: {
     minHeight: 104,

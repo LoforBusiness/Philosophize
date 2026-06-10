@@ -2,7 +2,15 @@ import { useRef, useCallback, useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, runOnJS } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  interpolate,
+  Extrapolation,
+  runOnJS,
+  type SharedValue,
+} from 'react-native-reanimated';
 import type { Lesson, CardData, AnswerResult } from '@/data/types';
 import { useLessonStore } from '@/stores/lessonStore';
 import { getLessonById } from '@/data';
@@ -142,11 +150,15 @@ export default function LessonRunner({ lesson }: Props) {
           const TH = 14; // tiny distance threshold — a small nudge advances
           const VH = 90; // …or the gentlest flick
           const i = indexSv.value;
-          // A smooth, eased slide from side to side — never an instant jump.
+          // The snap inherits the finger's release velocity, so the motion feels
+          // physically continuous (Apple's "fluid interface" principle), settling
+          // with a quick, barely-there give — the premium card-pager feel.
           const glide = (to: number) =>
-            (tx.value = withTiming(-to * width, {
-              duration: 360,
-              easing: Easing.out(Easing.cubic),
+            (tx.value = withSpring(-to * width, {
+              velocity: vx,
+              damping: 21,
+              stiffness: 210,
+              mass: 0.7,
             }));
 
           let dir = 0;
@@ -219,9 +231,9 @@ export default function LessonRunner({ lesson }: Props) {
         <GestureDetector gesture={pan}>
           <Animated.View style={[styles.row, rowStyle, { width: width * N }]}>
             {lesson.cards.map((card, i) => (
-              <View key={i} style={{ width }}>
+              <PagerCard key={i} index={i} width={width} tx={tx}>
                 {renderCard(card, i)}
-              </View>
+              </PagerCard>
             ))}
           </Animated.View>
         </GestureDetector>
@@ -234,6 +246,31 @@ export default function LessonRunner({ lesson }: Props) {
       </View>
     </CardShell>
   );
+}
+
+// Each card carries depth: it sits at full scale/opacity when centred, and gently
+// shrinks + fades as it moves off — so the incoming card rises into focus while the
+// outgoing one recedes. This parallax of scale/opacity is what gives premium card
+// pagers (App Store, Quibi) their sense of weight, paired with the velocity spring.
+function PagerCard({
+  index: i,
+  width,
+  tx,
+  children,
+}: {
+  index: number;
+  width: number;
+  tx: SharedValue<number>;
+  children: React.ReactNode;
+}) {
+  const style = useAnimatedStyle(() => {
+    const p = i + tx.value / width; // 0 at centre, ±1 one card away
+    const dist = Math.abs(p);
+    const scale = interpolate(dist, [0, 1], [1, 0.9], Extrapolation.CLAMP);
+    const opacity = interpolate(dist, [0, 1], [1, 0.6], Extrapolation.CLAMP);
+    return { transform: [{ scale }], opacity };
+  });
+  return <Animated.View style={[{ width }, style]}>{children}</Animated.View>;
 }
 
 const styles = StyleSheet.create({

@@ -1,5 +1,4 @@
-import { Text, StyleSheet } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { View, Text, StyleSheet } from 'react-native';
 import type { QuestionCard as QuestionCardType, AnswerResult } from '@/data/types';
 import MultipleChoice from '../interactions/MultipleChoice';
 import TrueFalse from '../interactions/TrueFalse';
@@ -17,8 +16,10 @@ export default function QuestionCard({ card, onComplete }: Props) {
   const complete = (correct: boolean) =>
     onComplete({ cardIndex: 0, correct, xpEarned: correct ? card.xpValue : 0 });
 
+  // Plain View (no inner scroll) so the pager's horizontal swipe stays buttery —
+  // matching the quote card. Content is short enough to fit without scrolling.
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <View style={styles.content}>
       <Text style={styles.kicker}>KNOWLEDGE CHECK</Text>
       <Text style={styles.title}>Quick Check</Text>
 
@@ -33,12 +34,12 @@ export default function QuestionCard({ card, onComplete }: Props) {
       {card.interaction.type === 'sort' && (
         <SortItems interaction={card.interaction} xpValue={card.xpValue} onComplete={complete} />
       )}
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { paddingHorizontal: 22, paddingTop: 8, paddingBottom: 28 },
+  content: { flex: 1, justifyContent: 'center', paddingHorizontal: 22, paddingVertical: 12 },
   kicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: T.gold, letterSpacing: 3 },
   title: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, color: T.ink, marginTop: 6 },
   qText: {

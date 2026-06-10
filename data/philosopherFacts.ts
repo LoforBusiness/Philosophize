@@ -6,6 +6,8 @@ import { MEDIEVAL_FACTS } from './extra-philosophers/medieval-facts';
 import { MODERN_FACTS } from './extra-philosophers/modern-facts';
 import { CONTEMPORARY_FACTS } from './extra-philosophers/contemporary-facts';
 import { EXPANSION_FACTS } from './extra-philosophers/expansion-facts';
+import { EXPANSION2A_FACTS } from './extra-philosophers/expansion2a-facts';
+import { EXPANSION2B_FACTS } from './extra-philosophers/expansion2b-facts';
 
 const BASE_FACTS: Record<string, string[]> = {
   'socrates': [
@@ -119,4 +121,6 @@ export const PHILOSOPHER_FACTS: Record<string, string[]> = {
   ...MODERN_FACTS,
   ...CONTEMPORARY_FACTS,
   ...EXPANSION_FACTS,
+  ...EXPANSION2A_FACTS,
+  ...EXPANSION2B_FACTS,
 };

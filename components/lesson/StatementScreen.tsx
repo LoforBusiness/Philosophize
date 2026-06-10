@@ -1,8 +1,4 @@
 import { View, Text, StyleSheet } from 'react-native';
-// gesture-handler's ScrollView cooperates with the lesson pager's horizontal
-// Pan: vertical scrolls stay here, horizontal swipes go to the pager. The core
-// RN ScrollView sits outside the gesture system and made swiping feel "stuck".
-import { ScrollView } from 'react-native-gesture-handler';
 import { T } from './theme';
 
 interface Props {
@@ -17,29 +13,24 @@ interface Props {
 // no narration, no reveal animation. Navigation is handled by the runner
 // (swipe / Back / Next), so this card carries no buttons of its own.
 export default function StatementScreen({ text, kicker, size = 23, source }: Props) {
+  // A plain (non-scrolling) View so the lesson pager's horizontal swipe owns the
+  // gesture completely — the same buttery, follow-the-finger feel as the quote
+  // card. The content is short by design, so no inner scroll is needed.
   return (
     <View style={styles.root}>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.card}>
-          {kicker ? <Text style={styles.kicker}>{kicker}</Text> : null}
-          <Text style={[styles.body, { fontSize: size, lineHeight: Math.round(size * 1.46) }]}>
-            {text}
-          </Text>
-          {source ? <Text style={styles.source}>— {source}</Text> : null}
-        </View>
-      </ScrollView>
+      <View style={styles.card}>
+        {kicker ? <Text style={styles.kicker}>{kicker}</Text> : null}
+        <Text style={[styles.body, { fontSize: size, lineHeight: Math.round(size * 1.46) }]}>
+          {text}
+        </Text>
+        {source ? <Text style={styles.source}>— {source}</Text> : null}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: 'transparent' },
-  scroll: { flex: 1 },
-  scrollContent: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 22, paddingVertical: 18 },
+  root: { flex: 1, justifyContent: 'center', paddingHorizontal: 22, paddingVertical: 18 },
   card: {
     backgroundColor: T.panel,
     borderWidth: 1.5,
