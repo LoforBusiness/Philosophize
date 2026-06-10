@@ -6,6 +6,8 @@ import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon'
 import Glyph from '@/components/shared/Glyph';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
+import StreakFlame from '@/components/gamification/StreakFlame';
+import StreakWeek from '@/components/gamification/StreakWeek';
 import { signOut } from '@/lib/supabase/auth';
 import { ALL_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
@@ -51,43 +53,6 @@ const TITLE: Record<string, string> = {
 };
 
 const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
-
-const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-
-// Mon–Sun chips for the current week, marking which days are inside the streak.
-function weekChips(streak: number, lastLessonDate: string | null) {
-  const labels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const dow = (today.getDay() + 6) % 7; // Monday = 0
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - dow);
-  const todayKey = dayKey(today);
-
-  let last = today;
-  if (lastLessonDate) {
-    const [y, m, d] = lastLessonDate.split('-').map(Number);
-    if (y && m && d) {
-      const ld = new Date(y, m - 1, d);
-      ld.setHours(0, 0, 0, 0);
-      if (!isNaN(ld.getTime())) last = ld;
-    }
-  }
-  const active = new Set<string>();
-  for (let k = 0; k < streak; k++) {
-    const d = new Date(last);
-    d.setDate(last.getDate() - k);
-    active.add(dayKey(d));
-  }
-
-  return labels.map((label, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    const key = dayKey(d);
-    const state = active.has(key) ? 'filled' : key === todayKey ? 'today' : 'faint';
-    return { label, state };
-  });
-}
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -162,8 +127,6 @@ export default function ProfileScreen() {
 
   const join = joinedAt ? new Date(joinedAt) : new Date();
   const joinedLabel = `JOINED ${MONTHS[join.getMonth()]} ${join.getFullYear()}`;
-
-  const chips = weekChips(streak, lastLessonDate);
 
   // First eight of the shared badge set, earned-state from the persisted store.
   const badges = BADGES.slice(0, 8).map((b) => ({
@@ -271,30 +234,11 @@ export default function ProfileScreen() {
           <SectionLabel>DAILY STREAK</SectionLabel>
           <View style={styles.streakBox}>
             <View style={styles.streakLeft}>
-              <Text style={styles.streakNum}>{streak}</Text>
+              <StreakFlame value={streak} size={54} />
               <Text style={styles.streakWord}>DAY STREAK</Text>
             </View>
             <View style={styles.chipsRow}>
-              {chips.map((c, i) => (
-                <View
-                  key={i}
-                  style={[
-                    styles.dayChip,
-                    c.state === 'filled' && styles.dayChipFilled,
-                    c.state === 'today' && styles.dayChipToday,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.dayChipText,
-                      c.state === 'filled' && { color: Paper },
-                      c.state === 'faint' && { color: InkFaint },
-                    ]}
-                  >
-                    {c.label}
-                  </Text>
-                </View>
-              ))}
+              <StreakWeek streak={streak} lastLessonDate={lastLessonDate} size={30} />
             </View>
           </View>
 
@@ -464,7 +408,7 @@ const styles = StyleSheet.create({
   streakLeft: { alignItems: 'center', width: 60 },
   streakNum: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 30, color: Ink, lineHeight: 34 },
   streakWord: { fontFamily: 'Inter_500Medium', fontSize: 8, color: InkSoft, letterSpacing: 1 },
-  chipsRow: { flexDirection: 'row', flex: 1, justifyContent: 'space-between' },
+  chipsRow: { flex: 1, justifyContent: 'center' },
   dayChip: {
     width: 30,
     height: 30,

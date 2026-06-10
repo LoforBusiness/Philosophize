@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
 import { MotiView } from 'moti';
-import { Easing } from 'react-native-reanimated';
-import SketchIcon from '@/components/shared/SketchIcon';
+import StreakFlame from '@/components/gamification/StreakFlame';
+import StreakWeek from '@/components/gamification/StreakWeek';
 import { useUserDataStore } from '@/stores/userDataStore';
 
 interface Props {
@@ -32,11 +32,11 @@ interface DayInfo {
 export default function LessonReward({ xp, correct, total, branchSlug, onDone }: Props) {
   const recordLessonComplete = useUserDataStore((s) => s.recordLessonComplete);
   const registerDailyActivity = useUserDataStore((s) => s.registerDailyActivity);
+  const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
 
   const ran = useRef(false);
   const [info, setInfo] = useState<DayInfo | null>(null);
   const [xpShown, setXpShown] = useState(0);
-  const [streakShown, setStreakShown] = useState<number | null>(null);
 
   // Record completion + update streak exactly once.
   useEffect(() => {
@@ -63,17 +63,6 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
     }, 16);
     return () => clearInterval(id);
   }, [xp]);
-
-  // Tick the streak number up if this is the first lesson of the day.
-  useEffect(() => {
-    if (!info) return;
-    if (info.firstOfDay && info.streak > info.prevStreak) {
-      setStreakShown(info.prevStreak);
-      const t = setTimeout(() => setStreakShown(info.streak), 950);
-      return () => clearTimeout(t);
-    }
-    setStreakShown(info.streak);
-  }, [info]);
 
   return (
     <Modal visible animationType="fade" transparent={false} onRequestClose={onDone}>
@@ -110,30 +99,21 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
               <MotiView
                 from={{ opacity: 0, scale: 0.7 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', delay: 500, damping: 12, stiffness: 130 }}
+                transition={{ type: 'spring', delay: 450, damping: 13, stiffness: 130 }}
                 style={styles.streakBox}
               >
                 <Text style={styles.streakHeading}>
                   {info.prevStreak === 0 ? 'Streak started!' : 'Streak extended!'}
                 </Text>
-                <View style={styles.streakRow}>
-                  <SketchIcon name="flame" size={44} color={Ink} />
-                  <MotiView
-                    key={streakShown ?? info.prevStreak}
-                    from={{ translateY: 16, opacity: 0 }}
-                    animate={{ translateY: 0, opacity: 1 }}
-                    transition={{ type: 'timing', duration: 440, easing: Easing.out(Easing.cubic) }}
-                  >
-                    <Text style={styles.streakNumber}>{streakShown ?? info.prevStreak}</Text>
-                  </MotiView>
+                <StreakFlame value={info.streak} from={info.prevStreak} animate size={132} />
+                <View style={styles.weekWrap}>
+                  <StreakWeek streak={info.streak} lastLessonDate={lastLessonDate} size={32} />
                 </View>
-                <Text style={styles.streakLabel}>
-                  day{(streakShown ?? info.streak) === 1 ? '' : 's'} in a row
-                </Text>
+                <Text style={styles.streakSub}>Build a streak, one day at a time</Text>
               </MotiView>
             ) : (
               <View style={styles.streakSmallRow}>
-                <SketchIcon name="flame" size={22} color={InkSoft} />
+                <StreakFlame value={info.streak} size={46} />
                 <Text style={styles.streakSmall}>{info.streak}-day streak</Text>
               </View>
             ))}
@@ -187,44 +167,36 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   streakBox: {
+    alignSelf: 'stretch',
     alignItems: 'center',
-    marginTop: 40,
-    borderWidth: 2,
-    borderColor: Ink,
-    borderRadius: 18,
-    paddingVertical: 22,
-    paddingHorizontal: 40,
+    marginTop: 26,
   },
   streakHeading: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_700Bold',
     fontSize: 12,
     color: InkSoft,
-    letterSpacing: 2,
+    letterSpacing: 2.5,
     textTransform: 'uppercase',
-    marginBottom: 10,
+    marginBottom: 2,
   },
-  streakRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  streakNumber: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 52,
-    color: Ink,
-    lineHeight: 60,
-  },
-  streakLabel: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
+  weekWrap: { alignSelf: 'stretch', paddingHorizontal: 8, marginTop: 6 },
+  streakSub: {
+    fontFamily: 'PlayfairDisplay_400Regular',
+    fontStyle: 'italic',
+    fontSize: 15,
     color: InkSoft,
-    marginTop: 4,
+    marginTop: 20,
+    textAlign: 'center',
   },
   streakSmallRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 36,
+    gap: 10,
+    marginTop: 26,
   },
   streakSmall: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 15,
+    fontSize: 16,
     color: InkSoft,
   },
   btn: {

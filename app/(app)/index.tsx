@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
+import StreakFlame from '@/components/gamification/StreakFlame';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import PressableScale from '@/components/shared/PressableScale';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
@@ -13,7 +14,6 @@ import { useUIStore } from '@/stores/uiStore';
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
-const InkFaint = '#CFCDC6';
 const Rule = '#ECEAE2';
 
 const SW = Dimensions.get('window').width;
@@ -23,8 +23,6 @@ const SH = Dimensions.get('window').height;
 // font + letter-spacing down on narrow phones so the trailing "E" never wraps.
 const WORDMARK_SIZE = Math.min(42, Math.floor((SW - 56) / 8.6));
 const WORDMARK_LS = SW < 400 ? 2 : 3;
-
-const STREAK_GOAL = 7;
 
 // Daily quote pool from the philosophers.
 const QUOTE_POOL = ALL_PHILOSOPHERS.flatMap((p) =>
@@ -101,8 +99,6 @@ export default function HomeScreen() {
   const quote = QUOTE_POOL[dayNumber % QUOTE_POOL.length];
   const quoteSaved = savedQuotes.some((q) => q.id === quote.id);
 
-  const filledStars = Math.min(Math.max(streak, 0), STREAK_GOAL);
-
   return (
     <ScreenTransition bg="#FAFAF7">
     <SafeAreaView style={styles.safe}>
@@ -173,17 +169,8 @@ export default function HomeScreen() {
 
         {/* Streak */}
         <View style={styles.streakRow}>
-          {Array.from({ length: STREAK_GOAL }).map((_, i) => (
-            <SketchIcon
-              key={i}
-              name={i < filledStars ? 'star-filled' : 'star'}
-              size={16}
-              color={i < filledStars ? Ink : InkFaint}
-            />
-          ))}
-          <Text style={styles.streakLabel}>
-            {streak} DAY STREAK
-          </Text>
+          <StreakFlame value={streak} size={40} />
+          <Text style={styles.streakLabel}>{streak} DAY STREAK</Text>
         </View>
 
         {/* Daily quote widget (opt-in, Settings → Notifications) */}

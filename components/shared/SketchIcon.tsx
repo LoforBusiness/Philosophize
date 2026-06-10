@@ -34,7 +34,8 @@ export type SketchIconName =
   | 'clock'
   | 'database'
   | 'warning'
-  | 'pencil';
+  | 'pencil'
+  | 'check';
 
 interface Props {
   name: SketchIconName;
@@ -346,6 +347,8 @@ export default function SketchIcon({ name, color = '#1A1A1A', size = 28 }: Props
           <Path d="M5 27 L7 20" {...s} />
         </>
       )}
+
+      {name === 'check' && <Path d="M6 17 L13 24 L26 9" {...s} />}
     </Svg>
   );
 }
