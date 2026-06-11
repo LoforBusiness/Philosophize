@@ -17,19 +17,33 @@ import {
   IMFellEnglish_400Regular_Italic,
 } from '@expo-google-fonts/im-fell-english';
 import { useFonts } from 'expo-font';
-import { Stack, router } from 'expo-router';
+import { Stack, router, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { PostHogProvider } from 'posthog-react-native';
 import { supabase } from '@/lib/supabase/client';
+import { useUserDataStore } from '@/stores/userDataStore';
+import { posthog, setAnalyticsConsent, track } from '@/lib/posthog';
+import { useCloudSync } from '@/lib/supabase/useCloudSync';
 import PhilosopherSheet from '@/components/shared/PhilosopherSheet';
 import RanksBadgesSheet from '@/components/shared/RanksBadgesSheet';
 
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
+
+// Expo Router (React Navigation v7) is not supported by PostHog's screen
+// autocapture, so we send a `$screen` event manually on every route change.
+function ScreenTracker() {
+  const pathname = usePathname();
+  useEffect(() => {
+    track('$screen', { $screen_name: pathname });
+  }, [pathname]);
+  return null;
+}
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -44,6 +58,17 @@ export default function RootLayout() {
     IMFellEnglish_400Regular_Italic,
   });
   const [authChecked, setAuthChecked] = useState(false);
+
+  // Gate analytics on the user's saved preference, but only once the store has
+  // hydrated so we never capture before we know their real choice.
+  const usageAnalytics = useUserDataStore((s) => s.settings.usageAnalytics);
+  const hasHydrated = useUserDataStore((s) => s._hasHydrated);
+  useEffect(() => {
+    if (hasHydrated) setAnalyticsConsent(usageAnalytics);
+  }, [hasHydrated, usageAnalytics]);
+
+  // Local-first cloud sync: pull/merge/push progress while signed in.
+  useCloudSync();
 
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -70,17 +95,30 @@ export default function RootLayout() {
     );
   }
 
+  const tree = (
+    <>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(app)" />
+      </Stack>
+      {/* Global bottom sheets — opened from anywhere via uiStore */}
+      <PhilosopherSheet />
+      <RanksBadgesSheet />
+    </>
+  );
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(auth)" />
-          <Stack.Screen name="(app)" />
-        </Stack>
-        {/* Global bottom sheets — opened from anywhere via uiStore */}
-        <PhilosopherSheet />
-        <RanksBadgesSheet />
+        {posthog ? (
+          <PostHogProvider client={posthog} autocapture={{ captureScreens: false, captureTouches: true }}>
+            <ScreenTracker />
+            {tree}
+          </PostHogProvider>
+        ) : (
+          tree
+        )}
       </QueryClientProvider>
     </GestureHandlerRootView>
   );

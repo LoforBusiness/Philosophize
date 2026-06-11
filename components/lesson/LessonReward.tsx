@@ -4,6 +4,7 @@ import { MotiView } from 'moti';
 import StreakFlame from '@/components/gamification/StreakFlame';
 import StreakWeek from '@/components/gamification/StreakWeek';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { track } from '@/lib/posthog';
 
 interface Props {
   xp: number;
@@ -45,7 +46,16 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
     if (branchSlug) recordLessonComplete(branchSlug, xp);
     const today = dateStr(new Date());
     const yesterday = dateStr(new Date(Date.now() - 86_400_000));
-    setInfo(registerDailyActivity(today, yesterday));
+    const dayInfo = registerDailyActivity(today, yesterday);
+    setInfo(dayInfo);
+    track('lesson_completed', {
+      branch_slug: branchSlug,
+      xp,
+      correct,
+      total,
+      new_streak: dayInfo.streak,
+      streak_increased: dayInfo.firstOfDay,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

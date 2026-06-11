@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon'
 import Portrait from '@/components/shared/Portrait';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { signOut } from '@/lib/supabase/auth';
+import { track } from '@/lib/posthog';
 import { rankForXP } from '@/data/ranks';
 import { useUserDataStore, type AppSettings } from '@/stores/userDataStore';
 
@@ -511,6 +512,9 @@ function SubscriptionSection() {
   const { width } = useWindowDimensions();
   const wide = width >= 720;
   const [notice, setNotice] = useState(false);
+  useEffect(() => {
+    track('paywall_viewed', { source: 'settings' });
+  }, []);
   return (
     <Card>
       <Header title="Subscription" sub="You are on the Free plan." />
@@ -551,7 +555,13 @@ function SubscriptionSection() {
             <Check label="Unlimited lessons per day" />
             <Check label="Ad-free experience" />
           </View>
-          <Pressable onPress={() => setNotice(true)} style={({ pressed }) => [styles.upgradeBtn, pressed && { opacity: 0.85 }]}>
+          <Pressable
+            onPress={() => {
+              track('subscribe_clicked', { plan: 'scholars_pass', price: 6.99, currency: 'USD', billing: 'monthly' });
+              setNotice(true);
+            }}
+            style={({ pressed }) => [styles.upgradeBtn, pressed && { opacity: 0.85 }]}
+          >
             <Text style={styles.upgradeText}>Upgrade — $6.99 / mo</Text>
           </Pressable>
         </View>

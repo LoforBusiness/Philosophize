@@ -24,6 +24,7 @@ import ReinforcementCard from './cards/ReinforcementCard';
 import SummaryCard from './cards/SummaryCard';
 import DilemmaCard from './cards/DilemmaCard';
 import QuoteCard from './cards/QuoteCard';
+import { track } from '@/lib/posthog';
 import { T } from './theme';
 
 interface Props {
@@ -73,6 +74,11 @@ export default function LessonRunner({ lesson }: Props) {
 
   useEffect(() => {
     startSession(lesson);
+    track('lesson_started', {
+      lesson_id: lesson.id,
+      branch_slug: branchSlug,
+      total_cards: N,
+    });
     return () => endSession();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson.id]);
@@ -109,6 +115,11 @@ export default function LessonRunner({ lesson }: Props) {
       if (!recordedRef.current.has(cardIndex)) {
         recordedRef.current.add(cardIndex);
         recordAnswer({ ...result, cardIndex });
+        track('question_answered', {
+          lesson_id: lesson.id,
+          card_type: lesson.cards[cardIndex]?.type,
+          correct: result.correct,
+        });
       }
       setAnswered((prev) => {
         if (prev.has(cardIndex)) return prev;

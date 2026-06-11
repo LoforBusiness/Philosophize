@@ -3,6 +3,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BADGES, type ProgressStats } from '@/data/badges';
 import { ALL_BRANCHES } from '@/data';
+import { rankForXP } from '@/data/ranks';
+import { track } from '@/lib/posthog';
 
 // A quote the user has bookmarked. Self-contained so the profile/stats
 // screens never need to look the philosopher back up.
@@ -165,13 +167,19 @@ export const useUserDataStore = create<UserDataState>()(
         })),
 
       toggleQuote: (q) => {
+        let nowSaved = false;
         set((state) => {
           const exists = state.savedQuotes.some((x) => x.id === q.id);
+          nowSaved = !exists;
           return {
             savedQuotes: exists
               ? state.savedQuotes.filter((x) => x.id !== q.id)
               : [q, ...state.savedQuotes],
           };
+        });
+        track(nowSaved ? 'quote_saved' : 'quote_removed', {
+          quote_id: q.id,
+          philosopher_id: q.philosopherId,
         });
         get().recomputeBadges();
       },
@@ -185,10 +193,12 @@ export const useUserDataStore = create<UserDataState>()(
             [philosopherId]: (state.philosopherViews[philosopherId] ?? 0) + 1,
           },
         }));
+        track('philosopher_viewed', { philosopher_id: philosopherId });
         get().recomputeBadges();
       },
 
       recordLessonComplete: (branchSlug, xpEarned = 0) => {
+        const beforeRank = rankForXP(get().totalXP).index;
         set((state) => ({
           lessonsByBranch: {
             ...state.lessonsByBranch,
@@ -196,6 +206,14 @@ export const useUserDataStore = create<UserDataState>()(
           },
           totalXP: state.totalXP + xpEarned,
         }));
+        const after = rankForXP(get().totalXP);
+        if (after.index > beforeRank) {
+          track('rank_up', {
+            rank: after.current.name,
+            rank_id: after.current.id,
+            total_xp: get().totalXP,
+          });
+        }
         get().recomputeBadges();
       },
 
@@ -223,13 +241,22 @@ export const useUserDataStore = create<UserDataState>()(
       // badges stick (until explicitly revoked). Only called at progress points
       // and as a one-time backfill — never on every render — so a revoke holds
       // until the user makes new progress.
-      recomputeBadges: () =>
-        set((state) => {
-          const stats = computeStats(state);
-          const now = BADGES.filter((b) => b.earned(stats)).map((b) => b.id);
-          const merged = Array.from(new Set([...state.earnedBadges, ...now]));
-          return { earnedBadges: merged, badgesInitialized: true };
-        }),
+      recomputeBadges: () => {
+        const state = get();
+        const stats = computeStats(state);
+        const now = BADGES.filter((b) => b.earned(stats)).map((b) => b.id);
+        // Only emit for badges earned through real progress — never the one-time
+        // backfill that runs on first hydrate (badgesInitialized still false).
+        const newlyEarned = state.badgesInitialized
+          ? now.filter((id) => !state.earnedBadges.includes(id))
+          : [];
+        const merged = Array.from(new Set([...state.earnedBadges, ...now]));
+        set({ earnedBadges: merged, badgesInitialized: true });
+        for (const id of newlyEarned) {
+          const b = BADGES.find((x) => x.id === id);
+          track('badge_earned', { badge_id: id, badge_name: b?.name });
+        }
+      },
 
       setProfile: (patch) => set(patch),
 
