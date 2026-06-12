@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
 import { MotiView } from 'moti';
-import StreakFlame from '@/components/gamification/StreakFlame';
+import StreakBook from '@/components/gamification/StreakBook';
 import StreakWeek from '@/components/gamification/StreakWeek';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { track } from '@/lib/posthog';
@@ -115,7 +115,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
                 <Text style={styles.streakHeading}>
                   {info.prevStreak === 0 ? 'Streak started!' : 'Streak extended!'}
                 </Text>
-                <StreakFlame value={info.streak} from={info.prevStreak} animate size={132} />
+                <StreakBook value={info.streak} from={info.prevStreak} animate size={150} />
                 <View style={styles.weekWrap}>
                   <StreakWeek streak={info.streak} lastLessonDate={lastLessonDate} size={32} />
                 </View>
@@ -123,7 +123,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
               </MotiView>
             ) : (
               <View style={styles.streakSmallRow}>
-                <StreakFlame value={info.streak} size={46} />
+                <StreakBook value={info.streak} size={58} />
                 <Text style={styles.streakSmall}>{info.streak}-day streak</Text>
               </View>
             ))}

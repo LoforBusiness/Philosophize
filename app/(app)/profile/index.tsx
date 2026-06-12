@@ -6,7 +6,7 @@ import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon'
 import Glyph from '@/components/shared/Glyph';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
-import StreakFlame from '@/components/gamification/StreakFlame';
+import StreakBook from '@/components/gamification/StreakBook';
 import StreakWeek from '@/components/gamification/StreakWeek';
 import { signOut } from '@/lib/supabase/auth';
 import { ALL_BRANCHES } from '@/data';
@@ -234,7 +234,7 @@ export default function ProfileScreen() {
           <SectionLabel>DAILY STREAK</SectionLabel>
           <View style={styles.streakBox}>
             <View style={styles.streakLeft}>
-              <StreakFlame value={streak} size={54} />
+              <StreakBook value={streak} size={66} />
               <Text style={styles.streakWord}>DAY STREAK</Text>
             </View>
             <View style={styles.chipsRow}>

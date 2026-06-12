@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SketchIcon from '@/components/shared/SketchIcon';
+import LessonBackground from './LessonBackground';
 import { T } from './theme';
 
 interface Props {
@@ -8,14 +9,17 @@ interface Props {
   currentIndex: number;
   label: string;
   onExit: () => void;
+  bgVariant?: number;
   children: React.ReactNode;
 }
 
-// Light reading-shell: a close button and a segmented progress bar. No narration
-// controls, no XP pill — clean, Blinkist-style.
-export default function CardShell({ cardCount, currentIndex, label, onExit, children }: Props) {
+// Reading-shell: a close button and a segmented progress bar over a full-bleed
+// parchment background; the lesson cards float centred on top.
+export default function CardShell({ cardCount, currentIndex, label, onExit, bgVariant = 0, children }: Props) {
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <View style={styles.root}>
+      <LessonBackground variant={bgVariant} />
+      <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.bar}>
         <Pressable onPress={onExit} style={styles.xBtn} hitSlop={8}>
           <SketchIcon name="close" size={16} color={T.inkSoft} />
@@ -39,12 +43,14 @@ export default function CardShell({ cardCount, currentIndex, label, onExit, chil
       </View>
 
       <View style={{ flex: 1 }}>{children}</View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: T.bg },
+  root: { flex: 1, backgroundColor: T.bg },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   bar: {
     flexDirection: 'row',
     alignItems: 'center',

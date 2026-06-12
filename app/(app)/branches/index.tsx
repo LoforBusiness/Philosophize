@@ -46,10 +46,6 @@ export default function LearnScreen() {
     return { ...p, branch, units, totalLessons, done };
   });
 
-  const totBranches = cards.length;
-  const totUnits = cards.reduce((a, c) => a + c.units.length, 0);
-  const totLessons = cards.reduce((a, c) => a + c.totalLessons, 0);
-
   return (
     <ScreenTransition bg={Page}>
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -64,12 +60,7 @@ export default function LearnScreen() {
         <View style={styles.masthead}>
           <Text style={styles.mastKicker}>YOUR LEARNING PATH</Text>
           <Text style={styles.mastTitle}>LEARN</Text>
-          <Text style={styles.mastSub}>Six branches of philosophy · Start anywhere</Text>
-          <View style={styles.statRow}>
-            <Stat value={totBranches} label="BRANCHES" />
-            <Stat value={totUnits} label="UNITS" />
-            <Stat value={totLessons} label="LESSONS" />
-          </View>
+          <Text style={styles.mastSub}>The branches of philosophy · Start anywhere</Text>
         </View>
 
         {/* Branch cards */}
@@ -117,15 +108,6 @@ export default function LearnScreen() {
   );
 }
 
-function Stat({ value, label }: { value: number; label: string }) {
-  return (
-    <View style={styles.stat}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Page },
   topBar: {
@@ -152,10 +134,6 @@ const styles = StyleSheet.create({
   mastKicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: Gold, letterSpacing: 4 },
   mastTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 44, color: Cream, letterSpacing: 1, marginTop: 8 },
   mastSub: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: '#A8A49A', marginTop: 8 },
-  statRow: { flexDirection: 'row', marginTop: 22, gap: 30 },
-  stat: { alignItems: 'center' },
-  statValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, color: Cream },
-  statLabel: { fontFamily: 'Inter_500Medium', fontSize: 9, color: Faint, letterSpacing: 2, marginTop: 3 },
 
   // Open-curriculum note
   noteCard: {

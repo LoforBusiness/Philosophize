@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
-import StreakFlame from '@/components/gamification/StreakFlame';
+import StreakBook from '@/components/gamification/StreakBook';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import PressableScale from '@/components/shared/PressableScale';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
@@ -169,7 +169,7 @@ export default function HomeScreen() {
 
         {/* Streak */}
         <View style={styles.streakRow}>
-          <StreakFlame value={streak} size={40} />
+          <StreakBook value={streak} size={52} />
           <Text style={styles.streakLabel}>{streak} DAY STREAK</Text>
         </View>
 

@@ -59,6 +59,13 @@ export default function LessonRunner({ lesson }: Props) {
   // The branch a saved quote belongs to (so quote cards file under the right area).
   const branchSlug = useMemo(() => getLessonById(lesson.id)?.branch.slug ?? null, [lesson.id]);
 
+  // Deterministic background pick per lesson (used when bg images are registered).
+  const bgVariant = useMemo(() => {
+    let h = 0;
+    for (let i = 0; i < lesson.id.length; i++) h = (h * 31 + lesson.id.charCodeAt(i)) >>> 0;
+    return h;
+  }, [lesson.id]);
+
   const recordedRef = useRef<Set<number>>(new Set());
   const finishingRef = useRef(false);
 
@@ -237,7 +244,7 @@ export default function LessonRunner({ lesson }: Props) {
   const isLast = index === N - 1;
 
   return (
-    <CardShell cardCount={N} currentIndex={index} label={label} onExit={handleExit}>
+    <CardShell cardCount={N} currentIndex={index} label={label} onExit={handleExit} bgVariant={bgVariant}>
       <View style={styles.viewport}>
         <GestureDetector gesture={pan}>
           <Animated.View style={[styles.row, rowStyle, { width: width * N }]}>
