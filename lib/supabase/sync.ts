@@ -28,11 +28,21 @@ const SYNC_FIELDS: (keyof CloudState)[] = [
   'displayName', 'email', 'bio', 'portrait', 'settings',
 ];
 
-// Read the current syncable slice out of the live store.
+const capStr = (v: unknown, n: number) => (typeof v === 'string' ? v.slice(0, n) : v);
+
+// Read the current syncable slice out of the live store, bounding string/array
+// sizes so a corrupt or malicious local store can't push an oversized blob to
+// its own user_state row (self-inflicted storage/cost bloat).
 export function snapshotLocal(): CloudState {
   const s = useUserDataStore.getState() as any;
   const out: any = {};
   for (const k of SYNC_FIELDS) out[k] = s[k];
+  out.displayName = capStr(out.displayName, 60);
+  out.bio = capStr(out.bio, 600);
+  out.email = capStr(out.email, 254);
+  if (Array.isArray(out.savedQuotes) && out.savedQuotes.length > 5000) {
+    out.savedQuotes = out.savedQuotes.slice(0, 5000);
+  }
   return out as CloudState;
 }
 
@@ -61,6 +71,17 @@ export async function pushCloudState(userId: string, data: CloudState): Promise<
         { user_id: userId, data, updated_at: new Date().toISOString() },
         { onConflict: 'user_id' }
       );
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+// Delete the user's cloud snapshot (right-to-erasure). Requires the "delete own"
+// RLS policy from migration 0002; best-effort and never throws.
+export async function deleteCloudState(userId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('user_state').delete().eq('user_id', userId);
     return !error;
   } catch {
     return false;

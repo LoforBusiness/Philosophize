@@ -61,7 +61,9 @@ const DEFAULT_SETTINGS: AppSettings = {
   publicProfile: false,
   showStreak: true,
   showRankBadges: true,
-  usageAnalytics: true,
+  // Privacy-by-default: analytics stay OFF until the user explicitly opts in
+  // (matches PostHog's defaultOptIn:false). Toggle in Settings → Usage Analytics.
+  usageAnalytics: false,
   appLanguage: 'English',
   quoteDisplay: 'original',
   voiceId: null,
@@ -258,7 +260,16 @@ export const useUserDataStore = create<UserDataState>()(
         }
       },
 
-      setProfile: (patch) => set(patch),
+      // Trim + bound profile fields at the source so nothing oversized can enter
+      // the store (and therefore the cloud snapshot in user_state.data).
+      setProfile: (patch) =>
+        set(() => {
+          const next: Partial<UserDataState> = {};
+          if (patch.displayName !== undefined) next.displayName = patch.displayName.trim().slice(0, 60);
+          if (patch.bio !== undefined) next.bio = patch.bio.slice(0, 600);
+          if (patch.email !== undefined) next.email = patch.email.trim().slice(0, 254);
+          return next;
+        }),
 
       setPortrait: (id) => set({ portrait: id }),
 

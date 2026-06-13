@@ -21,6 +21,13 @@ const PII_KEYS = ['email', 'name', 'displayName', 'bio', 'text', 'quote', 'note'
 function stripPII(event: any) {
   if (event && event.properties) {
     for (const k of PII_KEYS) delete event.properties[k];
+    // Touch-autocapture copies on-screen element text (quote bodies, names) into
+    // these nested structures, which the flat scrub above misses — drop them
+    // wholesale so no rendered user content can ride out on a tap event.
+    delete event.properties.$elements;
+    delete event.properties.elements;
+    delete event.properties.$elements_chain;
+    delete event.properties.elements_chain;
   }
   return event;
 }

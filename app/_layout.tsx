@@ -112,7 +112,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
         {posthog ? (
-          <PostHogProvider client={posthog} autocapture={{ captureScreens: false, captureTouches: true }}>
+          <PostHogProvider client={posthog} autocapture={{ captureScreens: false, captureTouches: false }}>
             <ScreenTracker />
             {tree}
           </PostHogProvider>

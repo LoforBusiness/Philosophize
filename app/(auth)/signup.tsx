@@ -25,12 +25,23 @@ export default function SignupScreen() {
   const [passwordFocused, setPasswordFocused] = useState(false);
 
   async function handleSignup() {
-    if (!email || !password || !username) return;
+    const e = email.trim();
+    const u = username.trim();
+    if (!e || !password || !u) return;
+    // Fail fast on the client (Supabase also enforces its own rules server-side).
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) {
+      Alert.alert('Invalid email', 'Please enter a valid email address.');
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert('Password too short', 'Use at least 6 characters.');
+      return;
+    }
     setLoading(true);
     try {
-      await signUp(email, password, username);
-    } catch (e: any) {
-      Alert.alert('Sign up failed', e.message);
+      await signUp(e, password, u);
+    } catch (err: any) {
+      Alert.alert('Sign up failed', err.message);
     } finally {
       setLoading(false);
     }

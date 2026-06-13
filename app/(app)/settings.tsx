@@ -15,7 +15,7 @@ import { router } from 'expo-router';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import Portrait from '@/components/shared/Portrait';
 import ScreenTransition from '@/components/shared/ScreenTransition';
-import { signOut } from '@/lib/supabase/auth';
+import { signOut, deleteAccountCloud } from '@/lib/supabase/auth';
 import { track } from '@/lib/posthog';
 import { rankForXP } from '@/data/ranks';
 import { useUserDataStore, type AppSettings } from '@/stores/userDataStore';
@@ -642,11 +642,16 @@ function DangerSection() {
         last
         onPress={() =>
           ask('Delete Account', 'This permanently deletes your account and all associated data. This cannot be undone.', 'Delete Account', async () => {
+            // Erase the cloud copy FIRST (row + auth user), then wipe locally and
+            // sign out, so nothing can resurrect the account on next login.
+            try {
+              await deleteAccountCloud();
+            } catch {}
             deleteAccount();
             try {
               await signOut();
             } catch {}
-            router.replace('/(app)');
+            router.replace('/');
           })
         }
       />

@@ -30,11 +30,17 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# local env files (keep the committed template, ignore everything else)
+.env
+.env.*
+!.env.example
 
 # typescript
 *.tsbuildinfo
+
+# local tooling / scratch output (never commit)
+.playwright-mcp/
+*.log
 
 # generated native folders
 /ios
