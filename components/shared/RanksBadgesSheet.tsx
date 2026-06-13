@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Modal,
   View,
@@ -10,7 +10,9 @@ import {
 } from 'react-native';
 import { MotiView, AnimatePresence } from 'moti';
 import Glyph from './Glyph';
-import { RANKS, rankForXP } from '@/data/ranks';
+import RankSeal, { type SealState } from './RankSeal';
+import { RANKS, rankForXP, type RankDef } from '@/data/ranks';
+import { tierForRank, circleForRank, RANK_EPITHETS, toRoman } from '@/data/rankLore';
 import { BADGES, type ProgressStats } from '@/data/badges';
 import { ALL_BRANCHES } from '@/data';
 import { useUIStore } from '@/stores/uiStore';
@@ -21,10 +23,19 @@ const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
 const InkFaint = '#D9D7CE';
 const Track = '#E6E4DC';
-const Gold = '#1A1A1A';
-const Lock = '#5B6B86';
+const Lock = '#8A93A0';
+const RowTint = '#F1EFE7';
+
+const ROW_H = 78;
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
+
+// rank position i (0-based) vs the current rank index → its seal state
+function stateFor(i: number, currentIndex: number): SealState {
+  if (i === currentIndex) return 'current';
+  if (i < currentIndex) return 'earned';
+  return 'locked';
+}
 
 export default function RanksBadgesSheet() {
   const tabReq = useUIStore((s) => s.ranksBadgesTab);
@@ -37,15 +48,18 @@ export default function RanksBadgesSheet() {
   const xp = useUserDataStore((s) => s.totalXP);
 
   const { height, width } = useWindowDimensions();
-  const H = Math.round(height * 0.75);
+  const H = Math.round(height * 0.82);
 
   const [visible, setVisible] = useState(false);
   const [tab, setTab] = useState<'ranks' | 'badges'>('ranks');
+  const [selected, setSelected] = useState<RankDef | null>(null);
+  const spineRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     if (tabReq) {
       setTab(tabReq);
       setVisible(true);
+      setSelected(null);
     }
   }, [tabReq]);
 
@@ -65,13 +79,21 @@ export default function RanksBadgesSheet() {
   const stats: ProgressStats = { totalXP, lessons, quotes, philosophers, streak, mastery };
 
   const { current, next, index } = rankForXP(totalXP);
-  const rankPct = next ? clamp(totalXP / next.xp, 0, 1) : 1;
+  const prevXP = current.xp;
+  const span = next ? next.xp - prevXP : 1;
+  const rankPct = next ? clamp((totalXP - prevXP) / span, 0, 1) : 1;
+  const toNext = next ? Math.max(0, next.xp - totalXP) : 0;
   const earnedCount = BADGES.filter((b) => b.earned(stats)).length;
 
-  const rankCols = clamp(Math.floor((width - 32) / 112), 3, 6);
-  const rankW = (width - 32 - (rankCols - 1) * 10) / rankCols;
   const badgeCols = clamp(Math.floor((width - 32) / 96), 4, 7);
   const badgeW = (width - 32 - (badgeCols - 1) * 8) / badgeCols;
+
+  // Centre the spine on the current rank shortly after opening.
+  const onSpineLayout = () => {
+    requestAnimationFrame(() => {
+      spineRef.current?.scrollTo({ y: Math.max(0, index * ROW_H - 90), animated: false });
+    });
+  };
 
   return (
     <Modal visible transparent animationType="none" statusBarTranslucent onRequestClose={close}>
@@ -100,109 +122,184 @@ export default function RanksBadgesSheet() {
                 Ranks & <Text style={styles.titleItalic}>Badges</Text>
               </Text>
 
-              {/* Current rank banner */}
-              <View style={styles.banner}>
-                <Glyph name={current.glyph} size={30} color={Ink} />
-                <View style={{ flex: 1, marginLeft: 14 }}>
-                  <Text style={styles.bannerKicker}>CURRENT RANK</Text>
-                  <Text style={styles.bannerName}>
-                    {current.name} <Text style={styles.bannerRank}>· Rank {current.id}</Text>
-                  </Text>
-                  <View style={styles.bannerBarRow}>
-                    <View style={styles.bannerTrack}>
-                      <View style={[styles.bannerFill, { width: `${Math.round(rankPct * 100)}%` }]} />
-                    </View>
-                    <Text style={styles.bannerXp}>
-                      {totalXP.toLocaleString()} / {(next?.xp ?? current.xp).toLocaleString()} XP
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
               {/* Tabs */}
               <View style={styles.tabs}>
                 <Pressable onPress={() => setTab('ranks')} style={[styles.tab, tab === 'ranks' && styles.tabOn]}>
-                  <Text style={[styles.tabText, tab === 'ranks' && styles.tabTextOn]}>All Ranks ({RANKS.length})</Text>
+                  <Text style={[styles.tabText, tab === 'ranks' && styles.tabTextOn]}>Ascent</Text>
                 </Pressable>
                 <Pressable onPress={() => setTab('badges')} style={[styles.tab, tab === 'badges' && styles.tabOn]}>
                   <Text style={[styles.tabText, tab === 'badges' && styles.tabTextOn]}>Badges ({BADGES.length})</Text>
                 </Pressable>
               </View>
 
-              {tab === 'badges' && (
-                <Text style={styles.earnedLine}>
-                  {earnedCount} of {BADGES.length} badges earned
-                </Text>
-              )}
-
-              <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.grid} showsVerticalScrollIndicator={false}>
-                {tab === 'ranks'
-                  ? RANKS.map((r, i) => {
-                      const state = i === index ? 'current' : i < index ? 'done' : 'locked';
-                      return (
-                        <View
-                          key={r.id}
-                          style={[
-                            styles.rankCard,
-                            { width: rankW },
-                            state === 'current' && styles.rankCurrent,
-                            state === 'locked' && styles.rankLocked,
-                          ]}
-                        >
-                          <Text style={[styles.num, state === 'current' && { color: Paper }]}>#{r.id}</Text>
-                          <Glyph
-                            name={r.glyph}
-                            size={24}
-                            color={state === 'current' ? Paper : state === 'locked' ? Lock : Ink}
-                          />
-                          <Text
-                            style={[
-                              styles.rankName,
-                              state === 'current' && { color: Paper },
-                              state === 'locked' && { color: Lock },
-                            ]}
-                            numberOfLines={1}
-                          >
-                            {r.name}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.rankXp,
-                              state === 'current' && { color: '#CFCABF' },
-                              state === 'locked' && { color: Lock },
-                            ]}
-                          >
-                            {r.xp.toLocaleString()} XP
-                          </Text>
-                          {state === 'done' && <Text style={styles.statusDone}>✓ ACHIEVED</Text>}
-                          {state === 'current' && <Text style={styles.statusCurrent}>CURRENT</Text>}
+              {tab === 'ranks' ? (
+                <>
+                  {/* HERO — the current rank as a credential */}
+                  <View style={styles.hero}>
+                    <RankSeal glyph={current.glyph} tier={tierForRank(current.id)} state="current" size={104} progress={rankPct} />
+                    <View style={styles.heroText}>
+                      <Text style={styles.heroKicker}>RANK {current.id} · {toRoman(current.id)}</Text>
+                      <Text style={styles.heroName}>{current.name}</Text>
+                      <Text style={styles.heroCircle}>{circleForRank(current.id).name}</Text>
+                      <View style={styles.heroBarRow}>
+                        <View style={styles.heroTrack}>
+                          <View style={[styles.heroFill, { width: `${Math.round(rankPct * 100)}%` }]} />
                         </View>
+                      </View>
+                      <Text style={styles.heroToNext}>
+                        {next ? `${toNext.toLocaleString()} XP to ${next.name}` : 'Highest rank attained'}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Text style={styles.spineHint}>YOUR ASCENT · TAP A SEAL</Text>
+
+                  {/* SPINE — all 25 seals, connected, climbed below → locked above */}
+                  <ScrollView
+                    ref={spineRef}
+                    style={{ flex: 1 }}
+                    contentContainerStyle={styles.spine}
+                    showsVerticalScrollIndicator={false}
+                    onLayout={onSpineLayout}
+                  >
+                    {RANKS.map((r, i) => {
+                      const st = stateFor(i, index);
+                      const isNext = i === index + 1;
+                      return (
+                        <Pressable key={r.id} onPress={() => setSelected(r)} style={styles.row}>
+                          {/* connector rule */}
+                          <View style={styles.gutter}>
+                            {i > 0 && (
+                              <View style={[styles.connector, styles.connTop, { backgroundColor: i <= index ? Ink : InkFaint }]} />
+                            )}
+                            {i < RANKS.length - 1 && (
+                              <View style={[styles.connector, styles.connBot, { backgroundColor: i < index ? Ink : InkFaint }]} />
+                            )}
+                            <RankSeal glyph={r.glyph} tier={tierForRank(r.id)} state={st} size={54} />
+                          </View>
+
+                          <View style={styles.rowText}>
+                            <Text style={[styles.rowName, st === 'locked' && { color: Lock }]} numberOfLines={1}>
+                              {r.name}
+                            </Text>
+                            <Text style={[styles.rowXp, st === 'locked' && { color: Lock }]}>
+                              {r.xp.toLocaleString()} XP
+                            </Text>
+                          </View>
+
+                          {st === 'current' && <Text style={styles.tagCurrent}>YOU ARE HERE</Text>}
+                          {st === 'earned' && <Text style={styles.tagDone}>✓ ACHIEVED</Text>}
+                          {isNext && <Text style={styles.tagNext}>NEXT</Text>}
+                        </Pressable>
                       );
-                    })
-                  : BADGES.map((b) => {
+                    })}
+                  </ScrollView>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.earnedLine}>{earnedCount} of {BADGES.length} badges earned</Text>
+                  <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.grid} showsVerticalScrollIndicator={false}>
+                    {BADGES.map((b) => {
                       const earned = b.earned(stats);
                       return (
-                        <View
-                          key={b.id}
-                          style={[styles.badgeCard, { width: badgeW }, !earned && styles.badgeLocked]}
-                        >
+                        <View key={b.id} style={[styles.badgeCard, { width: badgeW }, !earned && styles.badgeLocked]}>
                           {earned && <Text style={styles.check}>✓</Text>}
                           <Glyph name={b.glyph} size={22} color={earned ? Ink : InkFaint} />
-                          <Text
-                            style={[styles.badgeName, earned ? { color: Gold } : { color: InkFaint }]}
-                            numberOfLines={2}
-                          >
+                          <Text style={[styles.badgeName, { color: earned ? Ink : InkFaint }]} numberOfLines={2}>
                             {b.name}
                           </Text>
                         </View>
                       );
                     })}
-              </ScrollView>
+                  </ScrollView>
+                </>
+              )}
             </View>
+
+            {/* DETAIL — a single rank treated as a moment */}
+            <AnimatePresence>
+              {selected && (
+                <MotiView
+                  key="detail"
+                  from={{ opacity: 0, translateY: 24 }}
+                  animate={{ opacity: 1, translateY: 0 }}
+                  exit={{ opacity: 0, translateY: 24 }}
+                  transition={{ type: 'timing', duration: 240 }}
+                  style={styles.detail}
+                >
+                  <RankDetail rank={selected} currentIndex={index} totalXP={totalXP} onBack={() => setSelected(null)} />
+                </MotiView>
+              )}
+            </AnimatePresence>
           </MotiView>
         )}
       </AnimatePresence>
     </Modal>
+  );
+}
+
+function RankDetail({
+  rank,
+  currentIndex,
+  totalXP,
+  onBack,
+}: {
+  rank: RankDef;
+  currentIndex: number;
+  totalXP: number;
+  onBack: () => void;
+}) {
+  const i = rank.id - 1;
+  const st = stateFor(i, currentIndex);
+  const circle = circleForRank(rank.id);
+  const nextRank = RANKS[i + 1] ?? null;
+
+  let progress: number | null = null;
+  let statusLine = '';
+  if (st === 'current') {
+    const prevXP = rank.xp;
+    const span = nextRank ? nextRank.xp - prevXP : 1;
+    progress = nextRank ? clamp((totalXP - prevXP) / span, 0, 1) : 1;
+    statusLine = nextRank
+      ? `${Math.max(0, nextRank.xp - totalXP).toLocaleString()} XP to ${nextRank.name}`
+      : 'Highest rank attained';
+  } else if (st === 'earned') {
+    statusLine = 'Achieved';
+  } else {
+    statusLine = `${Math.max(0, rank.xp - totalXP).toLocaleString()} XP to unlock`;
+  }
+
+  return (
+    <View style={styles.detailInner}>
+      <Pressable onPress={onBack} hitSlop={10} style={styles.detailBack}>
+        <Text style={styles.detailBackText}>← All ranks</Text>
+      </Pressable>
+
+      <View style={styles.detailSealWrap}>
+        <RankSeal glyph={rank.glyph} tier={tierForRank(rank.id)} state={st} size={168} progress={progress} />
+      </View>
+
+      <Text style={styles.detailKicker}>RANK {rank.id} · {toRoman(rank.id)} · {circle.name.toUpperCase()}</Text>
+      <Text style={styles.detailName}>{rank.name}</Text>
+      <Text style={styles.detailEpithet}>“{RANK_EPITHETS[rank.id]}”</Text>
+
+      <View style={styles.detailDivider} />
+
+      <View style={styles.detailRowItem}>
+        <Text style={styles.detailLabel}>CRITERION</Text>
+        <Text style={styles.detailValue}>Reach {rank.xp.toLocaleString()} XP</Text>
+      </View>
+      <View style={styles.detailRowItem}>
+        <Text style={styles.detailLabel}>STATUS</Text>
+        <Text style={[styles.detailValue, st === 'earned' && { color: Ink }, st === 'locked' && { color: Lock }]}>
+          {st === 'earned' ? '✓ ' : ''}{statusLine}
+        </Text>
+      </View>
+      <View style={styles.detailRowItem}>
+        <Text style={styles.detailLabel}>CIRCLE</Text>
+        <Text style={styles.detailValue}>{circle.subtitle} · Tier {circle.tier} of 5</Text>
+      </View>
+    </View>
   );
 }
 
@@ -223,54 +320,52 @@ const styles = StyleSheet.create({
   handle: { width: 44, height: 5, borderRadius: 3, backgroundColor: InkFaint, alignSelf: 'center', marginTop: 10, marginBottom: 6 },
   inner: { flex: 1, paddingHorizontal: 16, paddingBottom: 12 },
 
-  title: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: Ink, marginTop: 4, marginBottom: 14 },
+  title: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: Ink, marginTop: 4, marginBottom: 12 },
   titleItalic: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic' },
 
-  banner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: Ink,
-    borderRadius: 6,
-    padding: 14,
-  },
-  bannerKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: InkSoft, letterSpacing: 2 },
-  bannerName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 18, color: Ink, marginTop: 2 },
-  bannerRank: { fontFamily: 'Inter_400Regular', fontSize: 12, color: InkSoft },
-  bannerBarRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8 },
-  bannerTrack: { flex: 1, height: 7, borderRadius: 4, backgroundColor: Track, overflow: 'hidden' },
-  bannerFill: { height: 7, borderRadius: 4, backgroundColor: Ink },
-  bannerXp: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft },
-
-  tabs: { flexDirection: 'row', gap: 8, marginTop: 16, marginBottom: 14 },
+  tabs: { flexDirection: 'row', gap: 8, marginBottom: 14 },
   tab: { borderWidth: 1.5, borderColor: Ink, borderRadius: 6, paddingHorizontal: 14, paddingVertical: 8 },
   tabOn: { backgroundColor: Ink },
   tabText: { fontFamily: 'Inter_700Bold', fontSize: 12, color: Ink },
   tabTextOn: { color: Paper },
-  earnedLine: { fontFamily: 'Inter_400Regular', fontSize: 11, color: InkSoft, letterSpacing: 1, marginBottom: 12 },
 
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10, paddingBottom: 30 },
-
-  rankCard: {
-    minHeight: 104,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 4,
-    backgroundColor: Paper,
+  // hero
+  hero: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 4,
-    gap: 5,
+    borderWidth: 2,
+    borderColor: Ink,
+    borderRadius: 8,
+    padding: 14,
+    backgroundColor: Paper,
   },
-  rankCurrent: { backgroundColor: Ink, borderColor: Ink },
-  rankLocked: { borderColor: InkFaint },
-  num: { position: 'absolute', top: 6, right: 7, fontFamily: 'Inter_500Medium', fontSize: 9, color: InkFaint },
-  rankName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 12.5, color: Ink, textAlign: 'center', marginTop: 2 },
-  rankXp: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft },
-  statusDone: { fontFamily: 'Inter_700Bold', fontSize: 8, color: Gold, letterSpacing: 0.5, marginTop: 2 },
-  statusCurrent: { fontFamily: 'Inter_700Bold', fontSize: 8, color: '#D7B765', letterSpacing: 1, marginTop: 2 },
+  heroText: { flex: 1, marginLeft: 14 },
+  heroKicker: { fontFamily: 'Inter_700Bold', fontSize: 9, color: InkSoft, letterSpacing: 1.6 },
+  heroName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, color: Ink, marginTop: 1 },
+  heroCircle: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12, color: InkSoft, marginTop: 1 },
+  heroBarRow: { marginTop: 9 },
+  heroTrack: { height: 7, borderRadius: 4, backgroundColor: Track, overflow: 'hidden' },
+  heroFill: { height: 7, borderRadius: 4, backgroundColor: Ink },
+  heroToNext: { fontFamily: 'Inter_500Medium', fontSize: 10.5, color: InkSoft, marginTop: 6 },
 
+  spineHint: { fontFamily: 'Inter_700Bold', fontSize: 9, color: InkSoft, letterSpacing: 2, marginTop: 18, marginBottom: 4 },
+
+  // spine
+  spine: { paddingBottom: 36 },
+  row: { flexDirection: 'row', alignItems: 'center', height: ROW_H },
+  gutter: { width: 64, height: ROW_H, alignItems: 'center', justifyContent: 'center' },
+  connector: { position: 'absolute', left: 31, width: 2 },
+  connTop: { top: 0, height: ROW_H / 2 },
+  connBot: { bottom: 0, height: ROW_H / 2 },
+  rowText: { flex: 1, marginLeft: 6 },
+  rowName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: Ink },
+  rowXp: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, marginTop: 1 },
+  tagCurrent: { fontFamily: 'Inter_700Bold', fontSize: 9, color: Paper, letterSpacing: 1, backgroundColor: Ink, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4, overflow: 'hidden' },
+  tagDone: { fontFamily: 'Inter_700Bold', fontSize: 8.5, color: InkSoft, letterSpacing: 0.5 },
+  tagNext: { fontFamily: 'Inter_700Bold', fontSize: 9, color: Ink, letterSpacing: 1, borderWidth: 1.5, borderColor: Ink, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
+
+  earnedLine: { fontFamily: 'Inter_400Regular', fontSize: 11, color: InkSoft, letterSpacing: 1, marginBottom: 12 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10, paddingBottom: 30 },
   badgeCard: {
     minHeight: 92,
     borderWidth: 1.5,
@@ -284,6 +379,20 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   badgeLocked: { borderColor: InkFaint, opacity: 0.7 },
-  check: { position: 'absolute', top: 5, right: 7, fontFamily: 'Inter_700Bold', fontSize: 10, color: Gold },
+  check: { position: 'absolute', top: 5, right: 7, fontFamily: 'Inter_700Bold', fontSize: 10, color: Ink },
   badgeName: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.3, textAlign: 'center' },
+
+  // detail overlay
+  detail: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: Paper, borderTopLeftRadius: 28, borderTopRightRadius: 28 },
+  detailInner: { flex: 1, paddingHorizontal: 22, paddingTop: 22 },
+  detailBack: { alignSelf: 'flex-start', paddingVertical: 6 },
+  detailBackText: { fontFamily: 'Inter_700Bold', fontSize: 12, color: Ink, letterSpacing: 0.5 },
+  detailSealWrap: { alignItems: 'center', marginTop: 8, marginBottom: 14 },
+  detailKicker: { fontFamily: 'Inter_700Bold', fontSize: 9, color: InkSoft, letterSpacing: 1.6, textAlign: 'center' },
+  detailName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 32, color: Ink, textAlign: 'center', marginTop: 4 },
+  detailEpithet: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 15, color: InkSoft, textAlign: 'center', marginTop: 6 },
+  detailDivider: { height: 1.5, backgroundColor: InkFaint, marginVertical: 22 },
+  detailRowItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: '#EFEDE4' },
+  detailLabel: { fontFamily: 'Inter_700Bold', fontSize: 10, color: InkSoft, letterSpacing: 1.4 },
+  detailValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: Ink },
 });
