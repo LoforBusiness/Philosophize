@@ -12,19 +12,21 @@ import Svg, {
   Line,
 } from 'react-native-svg';
 
-// Procedural "antique parchment" lesson backgrounds — an etched/engraved take on
-// the classical collage references (columns, a temple, a bust, the reaching
-// hands, a compass, books, ink, florals). Everything is drawn in sepia ink on
-// aged paper, kept to the EDGES so the centred lesson card stays the focus.
+// Procedural "antique engraving" lesson backgrounds — an etched/engraved take on
+// the classical collage references (columns, a temple, a bust, a compass, books,
+// ink, florals). Drawn like an old steel engraving: near-black iron-gall ink on
+// cool aged paper with a faint slate-blue cast — black-and-white first, gold
+// gone. Kept to the EDGES so the centred lesson card stays the focus.
 
 const VB_W = 380;
 const VB_H = 800;
 
-// sepia ink tiers — low contrast so the card always dominates
-const INK = '#5b4a30';
-const INK_SOFT = '#6d5c40';
-const LINE = '#473717';
-const FAINT = '#7c6c4d';
+// near-black engraving ink with a cool (payne's-grey) cast — low contrast so the
+// card always dominates, but read as B&W rather than sepia.
+const INK = '#272b31';
+const INK_SOFT = '#3b4046';
+const LINE = '#20242b';
+const FAINT = '#565d68';
 
 const fill = (o: number) => ({ fill: INK, fillOpacity: o });
 const stroke = (o: number, w = 2) => ({
@@ -42,21 +44,21 @@ function Parchment({ k }: { k: string }) {
     <>
       <Defs>
         <RadialGradient id={`pg-${k}`} cx="50%" cy="40%" rx="86%" ry="82%">
-          <Stop offset="0%" stopColor="#F4ECD8" />
-          <Stop offset="52%" stopColor="#EADEC6" />
-          <Stop offset="100%" stopColor="#D2BF9C" />
+          <Stop offset="0%" stopColor="#F1F1EE" />
+          <Stop offset="52%" stopColor="#E2E4E3" />
+          <Stop offset="100%" stopColor="#BAC1C8" />
         </RadialGradient>
       </Defs>
-      <Rect x={0} y={0} width={VB_W} height={VB_H} fill="#EADEC6" />
+      <Rect x={0} y={0} width={VB_W} height={VB_H} fill="#E4E4DF" />
       <Rect x={0} y={0} width={VB_W} height={VB_H} fill={`url(#pg-${k})`} />
-      {/* faint age stains */}
-      <Ellipse cx={60} cy={150} rx={70} ry={48} fill="#C8B488" fillOpacity={0.14} />
-      <Ellipse cx={300} cy={120} rx={64} ry={44} fill="#C8B488" fillOpacity={0.16} />
-      <Ellipse cx={70} cy={640} rx={80} ry={56} fill="#C8B488" fillOpacity={0.14} />
-      <Ellipse cx={320} cy={700} rx={70} ry={50} fill="#C8B488" fillOpacity={0.16} />
-      <Circle cx={210} cy={300} r={2.2} fill="#9c8a63" fillOpacity={0.25} />
-      <Circle cx={150} cy={470} r={1.8} fill="#9c8a63" fillOpacity={0.22} />
-      <Circle cx={290} cy={430} r={1.6} fill="#9c8a63" fillOpacity={0.2} />
+      {/* faint cool age stains (slate-grey, not sepia) */}
+      <Ellipse cx={60} cy={150} rx={70} ry={48} fill="#A9AEB4" fillOpacity={0.13} />
+      <Ellipse cx={300} cy={120} rx={64} ry={44} fill="#A9AEB4" fillOpacity={0.15} />
+      <Ellipse cx={70} cy={640} rx={80} ry={56} fill="#9aa3ad" fillOpacity={0.13} />
+      <Ellipse cx={320} cy={700} rx={70} ry={50} fill="#9aa3ad" fillOpacity={0.15} />
+      <Circle cx={210} cy={300} r={2.2} fill="#5b636d" fillOpacity={0.22} />
+      <Circle cx={150} cy={470} r={1.8} fill="#5b636d" fillOpacity={0.2} />
+      <Circle cx={290} cy={430} r={1.6} fill="#5b636d" fillOpacity={0.18} />
     </>
   );
 }

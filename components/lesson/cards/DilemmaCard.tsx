@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { MotiView } from 'moti';
 import type { DilemmaCard as DilemmaCardType, DilemmaView, AnswerResult } from '@/data/types';
+import { useSceneMeta } from '../sceneContext';
 import { T } from '../theme';
 
 interface Props {
@@ -13,6 +14,9 @@ interface Props {
 export default function DilemmaCard({ card, onComplete }: Props) {
   const [chosenId, setChosenId] = useState<string | null>(null);
   const chosen = card.choices.find((c) => c.id === chosenId) ?? null;
+  // On the dark night scenes the loose ink text would disappear, so the whole
+  // dilemma floats on a translucent paper panel instead.
+  const dark = useSceneMeta().mode === 'dark';
 
   function choose(id: string) {
     if (chosenId) return;
@@ -23,6 +27,7 @@ export default function DilemmaCard({ card, onComplete }: Props) {
 
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <View style={dark ? styles.paperPanel : undefined}>
       <Text style={styles.kicker}>YOUR TURN</Text>
       <Text style={styles.scenario}>{card.scenario}</Text>
       <Text style={styles.prompt}>{card.prompt}</Text>
@@ -46,6 +51,7 @@ export default function DilemmaCard({ card, onComplete }: Props) {
       })}
 
       {chosen && <Reveal views={card.views} chosenLabel={chosen.label} />}
+      </View>
     </ScrollView>
   );
 }
@@ -69,6 +75,13 @@ function Reveal({ views }: { views: DilemmaView[]; chosenLabel: string }) {
 
 const styles = StyleSheet.create({
   content: { paddingHorizontal: 22, paddingTop: 8, paddingBottom: 28 },
+  paperPanel: {
+    backgroundColor: 'rgba(246,245,240,0.96)',
+    borderRadius: 22,
+    paddingVertical: 22,
+    paddingHorizontal: 18,
+    marginHorizontal: -6,
+  },
   kicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: T.gold, letterSpacing: 3 },
   scenario: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 18, color: T.ink, lineHeight: 28, marginTop: 10, marginBottom: 16 },
   prompt: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: T.ink, marginBottom: 16 },

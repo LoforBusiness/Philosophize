@@ -1,4 +1,8 @@
+import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { MotiView } from 'moti';
+import FadeInWords, { wordTiming } from './FadeInWords';
+import { useSceneMeta, useCardActive } from './sceneContext';
 import { T } from './theme';
 
 interface Props {
@@ -8,59 +12,82 @@ interface Props {
   source?: string;       // optional attribution (example cards)
 }
 
-// A single Blinkist-style reading card: a bordered paper card, centred on the
-// page, holding a short kicker label and a few lines of text. Fully static —
-// no narration, no reveal animation. Navigation is handled by the runner
-// (swipe / Back / Next), so this card carries no buttons of its own.
+// A reading card whose words live directly in the illustrated scene — no panel.
+// The passage sits in the scene's deliberately blank region (sky, fog, open
+// field) and fades in word by word the moment the reader arrives on the card.
+// Ink text on the paper scenes, paper text on the night scenes.
 export default function StatementScreen({ text, kicker, size = 23, source }: Props) {
-  // A plain (non-scrolling) View so the lesson pager's horizontal swipe owns the
-  // gesture completely — the same buttery, follow-the-finger feel as the quote
-  // card. The content is short by design, so no inner scroll is needed.
+  const scene = useSceneMeta();
+  const isCurrent = useCardActive();
+  // Latch: the reveal begins on first arrival and never rewinds when swiping back.
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    if (isCurrent && !active) setActive(true);
+  }, [isCurrent, active]);
+  const dark = scene.mode === 'dark';
+
+  const body = dark ? '#F4F3EE' : T.ink;
+  const faint = dark ? 'rgba(244,243,238,0.6)' : T.gold;
+  const { total } = wordTiming(text);
+
+  const justify =
+    scene.zone === 'top' ? 'flex-start' : scene.zone === 'bottom' ? 'flex-end' : 'center';
+
   return (
-    <View style={styles.root}>
-      <View style={styles.card}>
-        {kicker ? <Text style={styles.kicker}>{kicker}</Text> : null}
-        <Text style={[styles.body, { fontSize: size, lineHeight: Math.round(size * 1.46) }]}>
-          {text}
-        </Text>
-        {source ? <Text style={styles.source}>— {source}</Text> : null}
-      </View>
+    <View
+      style={[
+        styles.root,
+        {
+          justifyContent: justify,
+          paddingHorizontal: scene.padH ?? 32,
+          paddingTop: scene.zone === 'top' ? 46 : 18,
+          // The scenes keep their art low in the frame, so centred text is
+          // biased upward to stay inside the blank sky.
+          paddingBottom: scene.zone === 'bottom' ? 56 : scene.zone === 'middle' ? 130 : 18,
+        },
+      ]}
+    >
+      {kicker ? (
+        <MotiView
+          from={{ opacity: 0 }}
+          animate={{ opacity: active ? 1 : 0 }}
+          transition={{ type: 'timing', duration: 600 }}
+          style={styles.kickerWrap}
+        >
+          <Text style={[styles.kicker, { color: faint }]}>{kicker}</Text>
+        </MotiView>
+      ) : null}
+
+      <FadeInWords text={text} size={size} color={body} active={active} />
+
+      {source ? (
+        <MotiView
+          from={{ opacity: 0 }}
+          animate={{ opacity: active ? 1 : 0 }}
+          transition={{ type: 'timing', duration: 700, delay: active ? total : 0 }}
+          style={styles.sourceWrap}
+        >
+          <Text style={[styles.source, { color: dark ? 'rgba(244,243,238,0.7)' : T.inkSoft }]}>
+            — {source}
+          </Text>
+        </MotiView>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, justifyContent: 'center', paddingHorizontal: 22, paddingVertical: 18 },
-  card: {
-    backgroundColor: T.panel,
-    borderWidth: 1.5,
-    borderColor: T.ink,
-    borderRadius: 26,
-    paddingHorizontal: 26,
-    paddingVertical: 32,
-    // soft rounded-card shadow
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
-  },
+  root: { flex: 1 },
+  kickerWrap: { alignItems: 'center', marginBottom: 16 },
   kicker: {
     fontFamily: 'Inter_500Medium',
     fontSize: 10,
-    color: T.gold,
     letterSpacing: 3,
-    marginBottom: 14,
   },
-  body: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    color: T.ink,
-  },
+  sourceWrap: { alignItems: 'center', marginTop: 18 },
   source: {
     fontFamily: 'PlayfairDisplay_400Regular',
     fontStyle: 'italic',
     fontSize: 13,
-    color: T.inkSoft,
-    marginTop: 16,
   },
 });

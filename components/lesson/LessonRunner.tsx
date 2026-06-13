@@ -26,6 +26,8 @@ import DilemmaCard from './cards/DilemmaCard';
 import QuoteCard from './cards/QuoteCard';
 import { track } from '@/lib/posthog';
 import { T } from './theme';
+import { sceneForVariant } from './inkScenes';
+import { SceneMetaContext, CardActiveContext } from './sceneContext';
 
 interface Props {
   lesson: Lesson;
@@ -59,12 +61,18 @@ export default function LessonRunner({ lesson }: Props) {
   // The branch a saved quote belongs to (so quote cards file under the right area).
   const branchSlug = useMemo(() => getLessonById(lesson.id)?.branch.slug ?? null, [lesson.id]);
 
-  // Deterministic background pick per lesson (used when bg images are registered).
+  // Deterministic scene pick per lesson. Seeded by the branch and offset by the
+  // lesson's position in its path, so consecutive lessons always step to a
+  // DIFFERENT scene — the same picture never appears two lessons in a row.
   const bgVariant = useMemo(() => {
+    const found = getLessonById(lesson.id);
+    const key = found?.branch.slug ?? lesson.id;
     let h = 0;
-    for (let i = 0; i < lesson.id.length; i++) h = (h * 31 + lesson.id.charCodeAt(i)) >>> 0;
-    return h;
+    for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+    const li = found ? found.path.lessons.findIndex((l) => l.id === lesson.id) : 0;
+    return (h % 997) + Math.max(0, li);
   }, [lesson.id]);
+  const sceneMeta = useMemo(() => sceneForVariant(bgVariant).meta, [bgVariant]);
 
   const recordedRef = useRef<Set<number>>(new Set());
   const finishingRef = useRef(false);
@@ -244,25 +252,34 @@ export default function LessonRunner({ lesson }: Props) {
   const isLast = index === N - 1;
 
   return (
-    <CardShell cardCount={N} currentIndex={index} label={label} onExit={handleExit} bgVariant={bgVariant}>
-      <View style={styles.viewport}>
-        <GestureDetector gesture={pan}>
-          <Animated.View style={[styles.row, rowStyle, { width: width * N }]}>
-            {lesson.cards.map((card, i) => (
-              <PagerCard key={i} index={i} width={width} tx={tx}>
-                {renderCard(card, i)}
-              </PagerCard>
-            ))}
-          </Animated.View>
-        </GestureDetector>
-      </View>
+    <SceneMetaContext.Provider value={sceneMeta}>
+      <CardShell cardCount={N} currentIndex={index} label={label} onExit={handleExit} bgVariant={bgVariant}>
+        <View style={styles.viewport}>
+          <GestureDetector gesture={pan}>
+            <Animated.View style={[styles.row, rowStyle, { width: width * N }]}>
+              {lesson.cards.map((card, i) => (
+                <PagerCard key={i} index={i} width={width} tx={tx}>
+                  <CardActiveContext.Provider value={i === index}>
+                    {renderCard(card, i)}
+                  </CardActiveContext.Provider>
+                </PagerCard>
+              ))}
+            </Animated.View>
+          </GestureDetector>
+        </View>
 
-      <View style={styles.footer}>
-        <Text style={styles.footerHint}>
-          {lock ? 'ANSWER TO CONTINUE' : isLast ? 'SWIPE TO FINISH  →' : index === 0 ? 'SWIPE  →' : '←  SWIPE  →'}
-        </Text>
-      </View>
-    </CardShell>
+        <View style={styles.footer}>
+          <Text
+            style={[
+              styles.footerHint,
+              sceneMeta.mode === 'dark' && { color: 'rgba(244,243,238,0.5)' },
+            ]}
+          >
+            {lock ? 'ANSWER TO CONTINUE' : isLast ? 'SWIPE TO FINISH  →' : index === 0 ? 'SWIPE  →' : '←  SWIPE  →'}
+          </Text>
+        </View>
+      </CardShell>
+    </SceneMetaContext.Provider>
   );
 }
 
