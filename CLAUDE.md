@@ -360,3 +360,23 @@ The Scholar's Pass paywall UI already exists; this is the value model it should 
 **P2 — Content depth & growth loops.** Add more **paths per branch** (e.g. Logic → Fallacies, Critical Thinking; Ethics → Applied Ethics, Metaethics). Add **path-mastery quizzes** (use `XP_PER_PATH_MASTERY`). Add **shareable B&W quote/streak cards** for a growth loop.
 
 **P3 — Foundations.** Reconcile the XP model (§7); add a **lesson-contract validation script** (enforce hook-first / summary-last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer); revisit Supabase for multi-device sync.
+
+---
+
+## 16. Collaboration Protocol — Grill Me First
+
+**Before implementing any non-trivial plan or design, grill the user to a shared understanding first.** This is a default working habit here, not a special request the user must remember to ask for.
+
+**Grill proactively when:**
+- About to build a feature, design a component, or make a multi-step / architectural change.
+- The request has unresolved branches, ambiguous scope, or decisions with real trade-offs.
+- The user says "grill me" or invokes the grill-me skill.
+
+**Skip it for** trivial or mechanical work — typo fixes, renames, one-line changes, pure read-only questions, or anything the user has already fully specified. When the change is small and the intent is clear, just act (see the "act when you have enough information" principle).
+
+**How to grill:**
+- Interview relentlessly about every aspect of the plan until you and the user share the same picture. Walk down each branch of the design tree, resolving dependencies between decisions one by one.
+- **Ask one question at a time** (use the AskUserQuestion tool).
+- **For every question, give your recommended answer** with brief reasoning.
+- **If a question can be answered by exploring the codebase, explore it instead of asking.**
+- Continue until the decision tree is resolved — then implement (or, in plan mode, write the plan and exit plan mode).
