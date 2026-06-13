@@ -56,6 +56,10 @@ export default function StreakBook({
 
   useEffect(() => {
     if (!willAnimate) {
+      // No animation (Home / Profile): just reflect the current streak. Without
+      // this the digit stays frozen at whatever it was when the book first
+      // mounted, so a fresh streak never shows up on these screens.
+      setDisplay(value);
       numOpacity.value = 1;
       numScale.value = 1;
       handOpacity.value = 0;
