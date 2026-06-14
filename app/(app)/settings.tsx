@@ -16,6 +16,8 @@ import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon'
 import Portrait from '@/components/shared/Portrait';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { signOut, deleteAccountCloud } from '@/lib/supabase/auth';
+import { beginAccountDeletion } from '@/lib/supabase/sync';
+import { addTombstone } from '@/lib/supabase/tombstone';
 import { track } from '@/lib/posthog';
 import { rankForXP } from '@/data/ranks';
 import { useUserDataStore, type AppSettings } from '@/stores/userDataStore';
@@ -642,11 +644,24 @@ function DangerSection() {
         last
         onPress={() =>
           ask('Delete Account', 'This permanently deletes your account and all associated data. This cannot be undone.', 'Delete Account', async () => {
-            // Erase the cloud copy FIRST (row + auth user), then wipe locally and
-            // sign out, so nothing can resurrect the account on next login.
+            // Suppress further cloud pushes so a debounced/in-flight snapshot
+            // can't re-create the row mid-deletion.
+            beginAccountDeletion();
+            // Erase the cloud copy (row + auth user). If the row deletion can't
+            // be confirmed (offline / policy not deployed), drop a tombstone so
+            // the data is never resurrected and erasure is retried next login —
+            // the user still gets to delete + sign out immediately.
+            let result: { ok: boolean; userId: string | null } = { ok: true, userId: null };
             try {
-              await deleteAccountCloud();
-            } catch {}
+              result = await deleteAccountCloud();
+            } catch {
+              result = { ok: false, userId: null };
+            }
+            if (result.userId && !result.ok) {
+              try {
+                await addTombstone(result.userId);
+              } catch {}
+            }
             deleteAccount();
             try {
               await signOut();

@@ -25,6 +25,9 @@ const json = (body: unknown, status = 200) =>
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+  // Destructive action — only POST (matches Access-Control-Allow-Methods); a
+  // stray token-bearing GET/HEAD must never trigger a self-delete.
+  if (req.method !== 'POST') return json({ error: 'method not allowed' }, 405);
 
   try {
     const jwt = (req.headers.get('Authorization') ?? '').replace('Bearer ', '').trim();

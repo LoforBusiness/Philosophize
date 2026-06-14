@@ -62,8 +62,20 @@ export async function pullCloudState(userId: string): Promise<Partial<CloudState
   }
 }
 
+// While an account deletion is in flight, all pushes are suppressed so a
+// debounced/in-flight snapshot can't re-create the row we're deleting. Reset
+// when a fresh session starts syncing (useCloudSync.start).
+let deleting = false;
+export function beginAccountDeletion() {
+  deleting = true;
+}
+export function resetAccountDeletion() {
+  deleting = false;
+}
+
 // Upsert the user's full snapshot. Returns whether it succeeded.
 export async function pushCloudState(userId: string, data: CloudState): Promise<boolean> {
+  if (deleting) return false;
   try {
     const { error } = await supabase
       .from('user_state')

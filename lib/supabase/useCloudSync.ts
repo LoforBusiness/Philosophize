@@ -1,7 +1,15 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from './client';
 import { useUserDataStore } from '@/stores/userDataStore';
-import { pullCloudState, pushCloudState, mergeStates, snapshotLocal } from './sync';
+import {
+  pullCloudState,
+  pushCloudState,
+  mergeStates,
+  snapshotLocal,
+  resetAccountDeletion,
+  deleteCloudState,
+} from './sync';
+import { hasTombstone, removeTombstone } from './tombstone';
 
 // Local-first cloud sync. When a user is signed in and the local store has
 // hydrated, it pulls the cloud snapshot, merges it in (never losing progress),
@@ -30,8 +38,27 @@ export function useCloudSync() {
     };
 
     const start = async (userId: string) => {
+      resetAccountDeletion(); // a real session is active again — allow pushes
       userIdRef.current = userId;
       syncedRef.current = false;
+
+      // If this account has a pending deletion tombstone, do NOT adopt its
+      // surviving cloud snapshot (that would resurrect "deleted" data). Finish
+      // the erasure instead: only resume normal sync once the row is confirmed
+      // gone, so we never push it back while a deletion is still pending.
+      if (await hasTombstone(userId)) {
+        const removed = await deleteCloudState(userId);
+        if (cancelled || userIdRef.current !== userId) return;
+        if (removed) {
+          await removeTombstone(userId);
+          syncedRef.current = true;
+          if (!unsubStore) unsubStore = useUserDataStore.subscribe(flushSoon);
+        }
+        // If the row couldn't be removed (offline / RLS delete policy not yet
+        // deployed), keep the tombstone and stay un-synced so nothing is pushed.
+        return;
+      }
+
       const remote = await pullCloudState(userId);
       if (cancelled || userIdRef.current !== userId) return;
       // Merge cloud into local, apply, then push the merged result up.

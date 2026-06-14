@@ -16,9 +16,50 @@ import * as SecureStore from 'expo-secure-store';
 // as before. (A web build should additionally use HttpOnly cookies + a strict CSP.)
 
 const isWeb = Platform.OS === 'web';
-const CHUNK = 1800; // bytes; under SecureStore's ~2KB limit (session JSON is ASCII)
+const CHUNK = 1800; // max UTF-8 BYTES per SecureStore value (under its ~2KB limit)
 const META = '__chunked__:'; // marks a chunked value; followed by the chunk count
 const okKey = (k: string) => /^[A-Za-z0-9._-]+$/.test(k); // SecureStore key charset
+
+// UTF-8 byte length of a string (falls back to code-unit length if TextEncoder
+// is unavailable). SecureStore's limit is in bytes, not JS characters.
+function byteLen(s: string): number {
+  try {
+    return new TextEncoder().encode(s).length;
+  } catch {
+    return s.length;
+  }
+}
+
+// Split a string into pieces each <= maxBytes UTF-8 bytes, never cutting a
+// multi-byte character (so plain concatenation reassembles the original).
+function splitByBytes(value: string, maxBytes: number): string[] {
+  let enc: TextEncoder | null = null;
+  try {
+    enc = new TextEncoder();
+  } catch {
+    enc = null;
+  }
+  if (!enc) {
+    const out: string[] = [];
+    for (let i = 0; i < value.length; i += maxBytes) out.push(value.slice(i, i + maxBytes));
+    return out;
+  }
+  const out: string[] = [];
+  let cur = '';
+  let curBytes = 0;
+  for (const ch of value) {
+    const b = enc.encode(ch).length;
+    if (cur && curBytes + b > maxBytes) {
+      out.push(cur);
+      cur = '';
+      curBytes = 0;
+    }
+    cur += ch;
+    curBytes += b;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
 
 async function deleteAll(key: string) {
   let head: string | null = null;
@@ -76,15 +117,15 @@ export const supabaseSecureStorage = {
       } catch {
         /* ignore */
       }
-      if (value.length <= CHUNK) {
+      if (byteLen(value) <= CHUNK) {
         await SecureStore.setItemAsync(key, value);
         return;
       }
-      const n = Math.ceil(value.length / CHUNK);
-      for (let i = 0; i < n; i++) {
-        await SecureStore.setItemAsync(`${key}.${i}`, value.slice(i * CHUNK, (i + 1) * CHUNK));
+      const parts = splitByBytes(value, CHUNK);
+      for (let i = 0; i < parts.length; i++) {
+        await SecureStore.setItemAsync(`${key}.${i}`, parts[i]);
       }
-      await SecureStore.setItemAsync(key, `${META}${n}`);
+      await SecureStore.setItemAsync(key, `${META}${parts.length}`);
     } catch {
       // Never lock the user out: fall back to AsyncStorage if SecureStore fails.
       try {

@@ -33,19 +33,25 @@ export async function getSession() {
   return data.session;
 }
 
-// Erase the signed-in user's data from the cloud before a local wipe + sign-out.
-// Deletes the user_state row directly via the RLS "delete own" policy (migration
-// 0002), and also invokes the optional `delete-account` Edge Function to remove
-// the auth.users record entirely. Both are best-effort so a not-yet-deployed
-// backend never blocks the user from deleting locally.
-export async function deleteAccountCloud(): Promise<void> {
+// Erase the signed-in user's data from the cloud. Deletes the user_state row via
+// the RLS "delete own" policy (migration 0002) and invokes the optional
+// `delete-account` Edge Function to remove the auth.users record too.
+//
+// Returns { ok, userId } where ok === true means the cloud row is confirmed gone
+// (so the user's data CANNOT be resurrected on next login). The caller uses a
+// false `ok` to drop a deletion tombstone, so erasure is retried next login
+// rather than silently leaving the data behind.
+export async function deleteAccountCloud(): Promise<{ ok: boolean; userId: string | null }> {
   const { data } = await supabase.auth.getSession();
-  const uid = data.session?.user?.id;
-  if (!uid) return;
-  await deleteCloudState(uid);
+  const uid = data.session?.user?.id ?? null;
+  if (!uid) return { ok: true, userId: null }; // anonymous/local-only user: nothing in the cloud
+  const rowDeleted = await deleteCloudState(uid);
+  // Best-effort: also delete the auth.users record (no-op if the function isn't
+  // deployed). Erasure of the data row is what `ok` tracks.
   try {
     await supabase.functions.invoke('delete-account');
   } catch {
-    /* function not deployed / offline — the row delete above still ran */
+    /* function not deployed / offline */
   }
+  return { ok: rowDeleted, userId: uid };
 }
