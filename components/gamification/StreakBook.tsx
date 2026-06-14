@@ -181,7 +181,11 @@ export default function StreakBook({
             { transform: [{ translateX: size * NUM_DX }, { translateY: size * NUM_DY }, { rotate: `${NUM_ROT}deg` }] },
           ]}
         >
-          <Animated.Text style={[styles.num, { fontSize: numSize, color }, numStyle]} numberOfLines={1}>
+          {/* No numberOfLines: it forces overflow:hidden/nowrap, which clips the
+              right ink of the Caveat script glyph. A 1–2 digit number never
+              wraps in this auto-width centred box anyway. Padding gives the
+              script's right side-bearing room so the whole number always shows. */}
+          <Animated.Text style={[styles.num, { fontSize: numSize, paddingHorizontal: Math.round(numSize * 0.22), color }, numStyle]}>
             {display}
           </Animated.Text>
         </View>
