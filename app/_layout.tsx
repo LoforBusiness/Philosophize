@@ -30,6 +30,7 @@ import { posthog, setAnalyticsConsent, track } from '@/lib/posthog';
 import { useCloudSync } from '@/lib/supabase/useCloudSync';
 import PhilosopherSheet from '@/components/shared/PhilosopherSheet';
 import RanksBadgesSheet from '@/components/shared/RanksBadgesSheet';
+import SavedQuotesSheet from '@/components/shared/SavedQuotesSheet';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -103,6 +104,7 @@ export default function RootLayout() {
         <Stack.Screen name="(app)" />
       </Stack>
       {/* Global bottom sheets — opened from anywhere via uiStore */}
+      <SavedQuotesSheet />
       <PhilosopherSheet />
       <RanksBadgesSheet />
     </>

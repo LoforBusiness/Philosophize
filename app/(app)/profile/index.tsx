@@ -78,6 +78,7 @@ export default function ProfileScreen() {
   const settings = useUserDataStore((s) => s.settings);
   const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'profile';
   const openRanksBadges = useUIStore((s) => s.openRanksBadges);
+  const openSavedQuotes = useUIStore((s) => s.openSavedQuotes);
 
   useEffect(() => {
     ensureJoinDate();
@@ -274,6 +275,30 @@ export default function ProfileScreen() {
             ))}
           </View>
 
+          <SectionLabel>SAVED QUOTES</SectionLabel>
+          <Pressable
+            style={({ pressed }) => [styles.quotesCard, pressed && { opacity: 0.7 }]}
+            onPress={openSavedQuotes}
+          >
+            <View style={styles.quotesIcon}>
+              <SketchIcon name={quotesSaved > 0 ? 'bookmark-filled' : 'bookmark'} size={20} color={Ink} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.quotesCount}>
+                {quotesSaved > 0 ? `${quotesSaved} SAVED` : 'NONE YET'}
+              </Text>
+              <Text style={styles.quotesTeaser} numberOfLines={1}>
+                {quotesSaved > 0
+                  ? `“${savedQuotes[0].text}”`
+                  : 'Save quotes from lessons to collect them here'}
+              </Text>
+            </View>
+            {/* mirrored "back" chevron → forward chevron */}
+            <View style={styles.quotesChev}>
+              <SketchIcon name="back" size={14} color={InkSoft} />
+            </View>
+          </Pressable>
+
           <SectionLabel>BADGES EARNED</SectionLabel>
           <Pressable style={styles.badgeGrid} onPress={() => openRanksBadges('badges')}>
             {badges.map((b) => (
@@ -436,6 +461,29 @@ const styles = StyleSheet.create({
   masteryTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: Track, overflow: 'hidden' },
   masteryFill: { height: 6, borderRadius: 3, backgroundColor: Ink },
   masteryPct: { fontFamily: 'Inter_500Medium', fontSize: 12, color: InkSoft, width: 38, textAlign: 'right' },
+
+  quotesCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 3,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+  },
+  quotesIcon: {
+    width: 38,
+    height: 38,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quotesCount: { fontFamily: 'Inter_700Bold', fontSize: 11, color: Ink, letterSpacing: 1.5 },
+  quotesTeaser: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: InkSoft, marginTop: 3 },
+  quotesChev: { transform: [{ scaleX: -1 }], opacity: 0.7 },
 
   badgeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   badge: {
