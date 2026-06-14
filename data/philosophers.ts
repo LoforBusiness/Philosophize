@@ -6,6 +6,7 @@ import { CONTEMPORARY_EXTRA } from './extra-philosophers/contemporary';
 import { EXPANSION_EXTRA } from './extra-philosophers/expansion';
 import { EXPANSION2A_EXTRA } from './extra-philosophers/expansion2a';
 import { EXPANSION2B_EXTRA } from './extra-philosophers/expansion2b';
+import { EXPANSION3_EXTRA } from './extra-philosophers/expansion3';
 
 export interface PhilosopherQuote {
   id: string; // unique, kebab style like 'socrates-1', 'socrates-2'
@@ -404,6 +405,7 @@ export const ALL_PHILOSOPHERS: Philosopher[] = [
   ...EXPANSION_EXTRA,
   ...EXPANSION2A_EXTRA,
   ...EXPANSION2B_EXTRA,
+  ...EXPANSION3_EXTRA,
 ];
 
 export function getPhilosopherById(id: string): Philosopher | undefined {
