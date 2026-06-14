@@ -9,13 +9,23 @@ import lesson7 from './lessons/taste-and-disagreement';
 import lesson8 from './lessons/form-versus-expression';
 import lesson9 from './lessons/beauty-versus-meaning';
 import lesson10 from './lessons/art-and-morality';
+import lesson11 from './lessons/defining-art-institutional-theory';
+import lesson12 from './lessons/intentional-fallacy-interpretation';
+import lesson13 from './lessons/forgery-and-authenticity';
+import lesson14 from './lessons/humes-standard-of-taste';
+import lesson15 from './lessons/kant-on-disinterested-beauty';
+import lesson16 from './lessons/expression-theory-tolstoy-collingwood';
+import lesson17 from './lessons/paradox-of-tragedy-and-horror';
+import lesson18 from './lessons/how-can-music-be-sad';
+import lesson19 from './lessons/everyday-and-environmental-aesthetics';
+import lesson20 from './lessons/why-art-matters-the-value-of-art';
 
 const whatIsAestheticsPath: Path = {
   id: 'aesthetics-aesthetics',
   slug: 'what-is-aesthetics',
   name: 'What Is Aesthetics?',
   description: 'Explore beauty, art, and why humans are moved by what they experience.',
-  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10],
+  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10, lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20],
 };
 
 export default whatIsAestheticsPath;

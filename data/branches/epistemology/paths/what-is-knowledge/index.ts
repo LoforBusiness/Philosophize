@@ -9,13 +9,26 @@ import lesson7 from './lessons/why-trust-the-future';
 import lesson8 from './lessons/what-makes-a-belief-justified';
 import lesson9 from './lessons/what-is-truth';
 import lesson10 from './lessons/living-without-certainty';
+import lesson11 from './lessons/the-gettier-problem';
+import lesson12 from './lessons/sources-of-knowledge';
+import lesson13 from './lessons/descartes-method-of-doubt';
+import lesson14 from './lessons/the-external-world';
+import lesson15 from './lessons/a-priori-and-a-posteriori';
+import lesson16 from './lessons/science-and-falsification';
+import lesson17 from './lessons/paradigm-shifts';
+import lesson18 from './lessons/updating-beliefs-with-evidence';
+import lesson19 from './lessons/whom-to-trust';
+import lesson20 from './lessons/social-epistemology';
 
 const whatIsKnowledgePath: Path = {
   id: 'epistemology-knowledge',
   slug: 'what-is-knowledge',
   name: 'What Is Knowledge?',
   description: 'Discover what separates genuine knowledge from lucky guesses.',
-  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10],
+  lessons: [
+    lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10,
+    lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20,
+  ],
 };
 
 export default whatIsKnowledgePath;
