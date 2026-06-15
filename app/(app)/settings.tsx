@@ -21,6 +21,9 @@ import { addTombstone } from '@/lib/supabase/tombstone';
 import { track } from '@/lib/posthog';
 import { rankForXP } from '@/data/ranks';
 import { useUserDataStore, type AppSettings } from '@/stores/userDataStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { purchases } from '@/lib/purchases';
+import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
 
 const Page = '#F1EEE7';
 const Paper = '#FFFFFF';
@@ -513,35 +516,42 @@ function LanguageSection() {
 function SubscriptionSection() {
   const { width } = useWindowDimensions();
   const wide = width >= 720;
-  const [notice, setNotice] = useState(false);
+  const isPro = useSubscriptionStore((s) => s.isPro);
   useEffect(() => {
     track('paywall_viewed', { source: 'settings' });
   }, []);
   return (
     <Card>
-      <Header title="Subscription" sub="You are on the Free plan." />
+      <Header title="Subscription" sub={isPro ? 'You have Scholar’s Pass.' : 'You are on the Free plan.'} />
       <View style={styles.hr} />
       <View style={[styles.planRow, !wide && { flexDirection: 'column' }]}>
         {/* Free */}
-        <View style={[styles.planCard, styles.planCurrent]}>
-          <View style={styles.currentTag}>
-            <Text style={styles.currentTagText}>CURRENT</Text>
-          </View>
+        <View style={[styles.planCard, !isPro && styles.planCurrent]}>
+          {!isPro && (
+            <View style={styles.currentTag}>
+              <Text style={styles.currentTagText}>CURRENT</Text>
+            </View>
+          )}
           <Text style={styles.planName}>FREE</Text>
           <Text style={styles.planPrice}>$0</Text>
           <Text style={styles.planNote}>Forever free</Text>
           <View style={{ marginTop: 14, gap: 10 }}>
-            <Check label="1 free lesson per day" />
+            <Check label={`${FREE_DAILY_LESSON_LIMIT} free ${lessonsWord(FREE_DAILY_LESSON_LIMIT)} per day`} />
             <Check label="Unlimited saved quotes" />
             <Check label="Full rank progression" />
             <Check label="All 50 badges" />
             <Check label="Philosopher bios" />
           </View>
-          <Text style={styles.planFoot}>Your current plan</Text>
+          {!isPro && <Text style={styles.planFoot}>Your current plan</Text>}
         </View>
 
         {/* Scholar's Pass */}
         <View style={[styles.planCard, styles.planPro]}>
+          {isPro && (
+            <View style={styles.currentTag}>
+              <Text style={styles.currentTagText}>CURRENT</Text>
+            </View>
+          )}
           <Text style={styles.proKicker}>SCHOLAR'S PASS</Text>
           <Text style={styles.planPrice}>
             $6.99 <Text style={styles.perMo}>/month</Text>
@@ -557,30 +567,21 @@ function SubscriptionSection() {
             <Check label="Unlimited lessons per day" />
             <Check label="Ad-free experience" />
           </View>
-          <Pressable
-            onPress={() => {
-              track('subscribe_clicked', { plan: 'scholars_pass', price: 6.99, currency: 'USD', billing: 'monthly' });
-              setNotice(true);
-            }}
-            style={({ pressed }) => [styles.upgradeBtn, pressed && { opacity: 0.85 }]}
-          >
-            <Text style={styles.upgradeText}>Upgrade — $6.99 / mo</Text>
-          </Pressable>
+          {isPro ? (
+            <Text style={styles.planFoot}>Active — thank you for your support</Text>
+          ) : (
+            <Pressable
+              onPress={() => router.push('/(app)/paywall')}
+              style={({ pressed }) => [styles.upgradeBtn, pressed && { opacity: 0.85 }]}
+            >
+              <Text style={styles.upgradeText}>Upgrade — $6.99 / mo</Text>
+            </Pressable>
+          )}
         </View>
       </View>
       <Text style={styles.footNote}>
-        Subscriptions renew monthly. You may cancel at any time from this page. Access continues until the end of the billing period.
+        Subscriptions renew monthly. You may cancel at any time from your App Store or Google Play account settings. Access continues until the end of the billing period.
       </Text>
-
-      <ConfirmModal
-        visible={notice}
-        title="Coming soon"
-        message="Paid plans aren't available yet — every feature is free during development. Thank you for the support!"
-        confirmLabel="Got it"
-        single
-        onConfirm={() => setNotice(false)}
-        onCancel={() => setNotice(false)}
-      />
     </Card>
   );
 }
@@ -665,6 +666,11 @@ function DangerSection() {
             deleteAccount();
             try {
               await signOut();
+            } catch {}
+            // Detach the purchaser identity so the next (anonymous) user doesn't
+            // inherit this account's RevenueCat customer.
+            try {
+              await purchases.logOut();
             } catch {}
             router.replace('/');
           })

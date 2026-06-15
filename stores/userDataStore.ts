@@ -79,6 +79,8 @@ interface UserDataState {
   streak: number;                             // consecutive-day streak
   totalXP: number;                            // accumulated lesson XP (5 per completion + 5 per correct)
   lastLessonDate: string | null;             // YYYY-MM-DD of last completed lesson
+  dailyLessonCount: number;                   // lessons completed on dailyLessonDate (free-tier gate)
+  dailyLessonDate: string | null;            // YYYY-MM-DD the daily count belongs to
   joinedAt: number | null;                    // epoch ms of first app open
   earnedBadges: string[];                     // badge ids the user has earned (persists)
   badgesInitialized: boolean;                 // one-time backfill guard
@@ -95,6 +97,7 @@ interface UserDataState {
   isQuoteSaved: (id: string) => boolean;
   recordPhilosopherView: (philosopherId: string) => void;
   recordLessonComplete: (branchSlug: string, xpEarned?: number) => void;
+  bumpDailyLessons: (today: string) => void;
   setVoiceEnabled: (v: boolean) => void;
   setBeliefResult: (id: string | null) => void;
   ensureJoinDate: () => void;
@@ -145,6 +148,8 @@ export const useUserDataStore = create<UserDataState>()(
       streak: 0,
       totalXP: 0,
       lastLessonDate: null,
+      dailyLessonCount: 0,
+      dailyLessonDate: null,
       joinedAt: null,
       earnedBadges: [],
       badgesInitialized: false,
@@ -219,6 +224,14 @@ export const useUserDataStore = create<UserDataState>()(
         get().recomputeBadges();
       },
 
+      // Count one completed lesson toward today's free-tier allowance, rolling
+      // the counter over when the calendar day changes.
+      bumpDailyLessons: (today) =>
+        set((state) => ({
+          dailyLessonCount: state.dailyLessonDate === today ? state.dailyLessonCount + 1 : 1,
+          dailyLessonDate: today,
+        })),
+
       setVoiceEnabled: (v) => set({ voiceEnabled: v }),
 
       setBeliefResult: (id) => set({ beliefResultId: id }),
@@ -277,7 +290,7 @@ export const useUserDataStore = create<UserDataState>()(
         set((state) => ({ settings: { ...state.settings, [key]: value } })),
 
       resetProgress: () =>
-        set({ lessonsByBranch: {}, streak: 0, totalXP: 0, lastLessonDate: null }),
+        set({ lessonsByBranch: {}, streak: 0, totalXP: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
 
       clearSavedQuotes: () => set({ savedQuotes: [] }),
 
@@ -293,6 +306,8 @@ export const useUserDataStore = create<UserDataState>()(
           streak: 0,
           totalXP: 0,
           lastLessonDate: null,
+          dailyLessonCount: 0,
+          dailyLessonDate: null,
           joinedAt: null,
           earnedBadges: [],
           badgesInitialized: true,
@@ -317,6 +332,8 @@ export const useUserDataStore = create<UserDataState>()(
         streak: state.streak,
         totalXP: state.totalXP,
         lastLessonDate: state.lastLessonDate,
+        dailyLessonCount: state.dailyLessonCount,
+        dailyLessonDate: state.dailyLessonDate,
         joinedAt: state.joinedAt,
         earnedBadges: state.earnedBadges,
         badgesInitialized: state.badgesInitialized,

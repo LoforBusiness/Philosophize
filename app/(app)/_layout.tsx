@@ -39,6 +39,8 @@ export default function AppLayout() {
       <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: tab('person') }} />
       {/* Reachable via router.push from the profile, hidden from the tab bar */}
       <Tabs.Screen name="settings" options={{ href: null }} />
+      {/* Paywall — pushed from Settings and the daily-limit gate, hidden from tabs */}
+      <Tabs.Screen name="paywall" options={{ href: null }} />
     </Tabs>
   );
 }

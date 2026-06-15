@@ -28,6 +28,8 @@ import { supabase } from '@/lib/supabase/client';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { posthog, setAnalyticsConsent, track } from '@/lib/posthog';
 import { useCloudSync } from '@/lib/supabase/useCloudSync';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { ads } from '@/lib/ads';
 import PhilosopherSheet from '@/components/shared/PhilosopherSheet';
 import RanksBadgesSheet from '@/components/shared/RanksBadgesSheet';
 import SavedQuotesSheet from '@/components/shared/SavedQuotesSheet';
@@ -71,14 +73,30 @@ export default function RootLayout() {
   // Local-first cloud sync: pull/merge/push progress while signed in.
   useCloudSync();
 
+  // Initialize ads (consent + preload an interstitial) only for FREE users —
+  // subscribers never see ads, so we don't even gather consent for them. No-op
+  // stub on web/Expo Go. initialize() is idempotent.
+  const subReady = useSubscriptionStore((s) => s.ready);
+  const isPro = useSubscriptionStore((s) => s.isPro);
+  useEffect(() => {
+    if (subReady && !isPro) ads.initialize();
+  }, [subReady, isPro]);
+
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      const sub = useSubscriptionStore.getState();
       if (!authChecked) {
         setAuthChecked(true);
+        // Configure RevenueCat once, tied to the current user (no-op stub on
+        // web/Expo Go). init() is internally guarded against double-calls.
+        sub.init(session?.user?.id ?? null);
         // Returning (signed-in) users go straight in; otherwise show onboarding.
         if (session) router.replace('/(app)');
       } else if (event === 'SIGNED_IN') {
+        sub.setUser(session?.user?.id ?? null);
         router.replace('/(app)');
+      } else if (event === 'SIGNED_OUT') {
+        sub.setUser(null);
       }
     });
     return () => listener.subscription.unsubscribe();

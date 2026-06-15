@@ -4,6 +4,8 @@ import { MotiView } from 'moti';
 import StreakBook from '@/components/gamification/StreakBook';
 import StreakWeek from '@/components/gamification/StreakWeek';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { ads } from '@/lib/ads';
 import { track } from '@/lib/posthog';
 
 interface Props {
@@ -33,11 +35,31 @@ interface DayInfo {
 export default function LessonReward({ xp, correct, total, branchSlug, onDone }: Props) {
   const recordLessonComplete = useUserDataStore((s) => s.recordLessonComplete);
   const registerDailyActivity = useUserDataStore((s) => s.registerDailyActivity);
+  const bumpDailyLessons = useUserDataStore((s) => s.bumpDailyLessons);
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
+
+  const isPro = useSubscriptionStore((s) => s.isPro);
 
   const ran = useRef(false);
   const [info, setInfo] = useState<DayInfo | null>(null);
   const [xpShown, setXpShown] = useState(0);
+  const [advancing, setAdvancing] = useState(false);
+
+  // Free users see one interstitial right after the reward screen, on Continue.
+  // Subscribers go straight through. showInterstitial never throws and resolves
+  // even if no ad is ready, so navigation is never blocked.
+  const handleContinue = async () => {
+    if (advancing) return;
+    if (isPro) {
+      onDone();
+      return;
+    }
+    setAdvancing(true);
+    try {
+      await ads.showInterstitial();
+    } catch {}
+    onDone();
+  };
 
   // Record completion + update streak exactly once.
   useEffect(() => {
@@ -46,6 +68,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
     if (branchSlug) recordLessonComplete(branchSlug, xp);
     const today = dateStr(new Date());
     const yesterday = dateStr(new Date(Date.now() - 86_400_000));
+    bumpDailyLessons(today); // count this completion toward the free daily allowance
     const dayInfo = registerDailyActivity(today, yesterday);
     setInfo(dayInfo);
     track('lesson_completed', {
@@ -130,8 +153,9 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
         </View>
 
         <Pressable
-          onPress={onDone}
-          style={({ pressed }) => [styles.btn, pressed && { opacity: 0.8 }]}
+          onPress={handleContinue}
+          disabled={advancing}
+          style={({ pressed }) => [styles.btn, (pressed || advancing) && { opacity: 0.8 }]}
         >
           <Text style={styles.btnText}>Continue →</Text>
         </Pressable>
