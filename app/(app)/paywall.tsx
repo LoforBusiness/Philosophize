@@ -29,8 +29,6 @@ const PRIVACY_URL = 'https://philosophize.app/privacy';
 const BENEFITS = [
   'Unlimited lessons every day',
   'No ads, ever',
-  'Never lose a streak to the daily cap',
-  'Support an independent project',
 ];
 
 export default function PaywallScreen() {

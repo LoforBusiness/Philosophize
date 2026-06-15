@@ -115,18 +115,6 @@ export default function LandingScreen() {
           Bite-size philosophy that turns life's biggest questions into a daily habit.
         </Text>
 
-        {/* Stats strip with a laurel-framed rating */}
-        <View style={styles.statsRow}>
-          <Stat value="30+" label="lessons" />
-          <View style={styles.divider} />
-          <View style={styles.laurelStat}>
-            <Laurel />
-            <Text style={styles.laurelValue}>4.9</Text>
-          </View>
-          <View style={styles.divider} />
-          <Stat value="6" label="branches" />
-        </View>
-
         <View style={{ flex: 1 }} />
 
         {/* Primary CTA + secondary link */}
