@@ -19,13 +19,23 @@ import lesson17 from './lessons/why-obey-the-state';
 import lesson18 from './lessons/equality-of-what';
 import lesson19 from './lessons/global-justice';
 import lesson20 from './lessons/toleration-and-pluralism';
+import lesson21 from './lessons/philosophical-anarchism';
+import lesson22 from './lessons/republican-liberty';
+import lesson23 from './lessons/communitarianism-vs-liberalism';
+import lesson24 from './lessons/recognition-and-multiculturalism';
+import lesson25 from './lessons/feminist-political-philosophy';
+import lesson26 from './lessons/deliberative-democracy';
+import lesson27 from './lessons/just-war-theory';
+import lesson28 from './lessons/punishment-and-prisons';
+import lesson29 from './lessons/borders-and-immigration';
+import lesson30 from './lessons/ideal-vs-non-ideal-theory';
 
 const whatIsPoliticalPhilosophyPath: Path = {
   id: 'political-political',
   slug: 'what-is-political-philosophy',
   name: 'What Is Political Philosophy?',
   description: 'Explore the big questions about power, justice, and how societies should be organized.',
-  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10, lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20],
+  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10, lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20, lesson21, lesson22, lesson23, lesson24, lesson25, lesson26, lesson27, lesson28, lesson29, lesson30],
 };
 
 export default whatIsPoliticalPhilosophyPath;

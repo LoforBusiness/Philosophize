@@ -19,13 +19,23 @@ import lesson17 from './lessons/lying-and-promises';
 import lesson18 from './lessons/animal-ethics';
 import lesson19 from './lessons/life-and-death';
 import lesson20 from './lessons/future-generations-and-the-environment';
+import lesson21 from './lessons/the-doctrine-of-double-effect';
+import lesson22 from './lessons/the-experience-machine';
+import lesson23 from './lessons/effective-altruism-and-the-drowning-child';
+import lesson24 from './lessons/the-ethics-of-punishment';
+import lesson25 from './lessons/autonomy-and-paternalism';
+import lesson26 from './lessons/moral-status-and-personhood';
+import lesson27 from './lessons/metaethics-where-morals-live';
+import lesson28 from './lessons/reflective-equilibrium';
+import lesson29 from './lessons/supererogation-beyond-duty';
+import lesson30 from './lessons/how-to-live-an-ethical-life';
 
 const whatIsEthicsPath: Path = {
   id: 'ethics-ethics',
   slug: 'what-is-ethics',
   name: 'What Is Ethics?',
   description: 'Explore why humans care about right and wrong — and how ethics began.',
-  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10, lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20],
+  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10, lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20, lesson21, lesson22, lesson23, lesson24, lesson25, lesson26, lesson27, lesson28, lesson29, lesson30],
 };
 
 export default whatIsEthicsPath;

@@ -19,6 +19,16 @@ import lesson17 from './lessons/paradigm-shifts';
 import lesson18 from './lessons/updating-beliefs-with-evidence';
 import lesson19 from './lessons/whom-to-trust';
 import lesson20 from './lessons/social-epistemology';
+import lesson21 from './lessons/the-regress-problem';
+import lesson22 from './lessons/reliabilism-and-the-value-of-knowledge';
+import lesson23 from './lessons/virtue-epistemology';
+import lesson24 from './lessons/answering-the-skeptic';
+import lesson25 from './lessons/the-problem-of-the-criterion';
+import lesson26 from './lessons/peer-disagreement';
+import lesson27 from './lessons/epistemic-injustice';
+import lesson28 from './lessons/motivated-reasoning';
+import lesson29 from './lessons/knowledge-versus-understanding';
+import lesson30 from './lessons/becoming-a-wise-knower';
 
 const whatIsKnowledgePath: Path = {
   id: 'epistemology-knowledge',
@@ -28,6 +38,7 @@ const whatIsKnowledgePath: Path = {
   lessons: [
     lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10,
     lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20,
+    lesson21, lesson22, lesson23, lesson24, lesson25, lesson26, lesson27, lesson28, lesson29, lesson30,
   ],
 };
 

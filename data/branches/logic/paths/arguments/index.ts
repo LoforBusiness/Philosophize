@@ -19,13 +19,23 @@ import lesson17 from './lessons/appeal-to-authority';
 import lesson18 from './lessons/appeal-to-emotion-and-bandwagon';
 import lesson19 from './lessons/confirmation-bias';
 import lesson20 from './lessons/charity-and-steelmanning';
+import lesson21 from './lessons/necessary-and-sufficient-conditions';
+import lesson22 from './lessons/categorical-logic-all-some-none';
+import lesson23 from './lessons/truth-tables-and-connectives';
+import lesson24 from './lessons/deduction-induction-abduction';
+import lesson25 from './lessons/base-rates-and-probability';
+import lesson26 from './lessons/reductio-ad-absurdum';
+import lesson27 from './lessons/the-liar-paradox';
+import lesson28 from './lessons/arguing-by-analogy';
+import lesson29 from './lessons/burden-of-proof';
+import lesson30 from './lessons/building-a-strong-argument';
 
 const argumentsPath: Path = {
   id: 'logic-arguments',
   slug: 'arguments',
   name: 'What Is an Argument?',
   description: 'Learn the anatomy of every philosophical argument ever made.',
-  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10, lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20],
+  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10, lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20, lesson21, lesson22, lesson23, lesson24, lesson25, lesson26, lesson27, lesson28, lesson29, lesson30],
 };
 
 export default argumentsPath;

@@ -19,13 +19,23 @@ import lesson17 from './lessons/hard-problem-consciousness-qualia';
 import lesson18 from './lessons/abstract-objects-platonism';
 import lesson19 from './lessons/substance-and-properties';
 import lesson20 from './lessons/simulation-argument-what-is-real';
+import lesson21 from './lessons/presentism-vs-eternalism';
+import lesson22 from './lessons/libertarian-free-will';
+import lesson23 from './lessons/persistence-and-composition';
+import lesson24 from './lessons/vagueness-and-the-sorites';
+import lesson25 from './lessons/possible-worlds';
+import lesson26 from './lessons/emergence-and-reduction';
+import lesson27 from './lessons/laws-of-nature';
+import lesson28 from './lessons/panpsychism';
+import lesson29 from './lessons/realism-vs-anti-realism';
+import lesson30 from './lessons/does-metaphysics-make-progress';
 
 const beingAndNonBeingPath: Path = {
   id: 'metaphysics-being',
   slug: 'being-and-non-being',
   name: 'Being and Non-Being',
   description: 'Explore the deepest question: why does anything exist at all?',
-  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10, lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20],
+  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10, lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20, lesson21, lesson22, lesson23, lesson24, lesson25, lesson26, lesson27, lesson28, lesson29, lesson30],
 };
 
 export default beingAndNonBeingPath;
