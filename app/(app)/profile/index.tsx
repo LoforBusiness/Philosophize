@@ -76,6 +76,7 @@ export default function ProfileScreen() {
   const displayName = useUserDataStore((s) => s.displayName);
   const xp = useUserDataStore((s) => s.totalXP);
   const earnedBadges = useUserDataStore((s) => s.earnedBadges);
+  const bioSeed = useUserDataStore((s) => s.bioSeed);
   const settings = useUserDataStore((s) => s.settings);
   const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'profile';
   const openRanksBadges = useUIStore((s) => s.openRanksBadges);
@@ -125,15 +126,18 @@ export default function ProfileScreen() {
 
   // A fun, auto-written character sketch assembled from what the user actually
   // does — lessons taken, quotes saved, thinkers they keep opening.
-  const bio = generateUserBio({
-    lessonsDone,
-    streak,
-    quotesSaved,
-    distinctViewed,
-    topPhilosopher: topPhilosopher?.name ?? null,
-    topInterestName: topInterest?.name ?? null,
-    topInterestSlug: topInterest?.slug ?? null,
-  });
+  const bio = generateUserBio(
+    {
+      lessonsDone,
+      streak,
+      quotesSaved,
+      distinctViewed,
+      topPhilosopher: topPhilosopher?.name ?? null,
+      topInterestName: topInterest?.name ?? null,
+      topInterestSlug: topInterest?.slug ?? null,
+    },
+    bioSeed
+  );
 
   const { current: cur, next } = rankForXP(totalXP);
   const nextThreshold = next?.xp ?? cur.xp;

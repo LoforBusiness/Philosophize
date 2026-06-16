@@ -99,6 +99,7 @@ interface UserDataState {
   displayName: string;
   email: string;
   bio: string;
+  bioSeed: number;                            // bumped each lesson + app launch to refresh the auto-bio
   portrait: string;                           // selected hand-drawn portrait id
   settings: AppSettings;
   _hasHydrated: boolean;
@@ -121,6 +122,7 @@ interface UserDataState {
   ) => { firstOfDay: boolean; streak: number; prevStreak: number };
   recomputeBadges: () => void;
   setProfile: (patch: Partial<{ displayName: string; email: string; bio: string }>) => void;
+  bumpBioSeed: () => void;
   setPortrait: (id: string) => void;
   setSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void;
   resetProgress: () => void;
@@ -172,6 +174,7 @@ export const useUserDataStore = create<UserDataState>()(
       displayName: 'Philosopher',
       email: '',
       bio: '',
+      bioSeed: 0,
       portrait: 'overthinker',
       settings: DEFAULT_SETTINGS,
       _hasHydrated: false,
@@ -283,6 +286,8 @@ export const useUserDataStore = create<UserDataState>()(
             total_xp: get().totalXP,
           });
         }
+        // Refresh the profile's "who you're becoming" bio after each lesson.
+        get().bumpBioSeed();
         get().recomputeBadges();
       },
 
@@ -346,6 +351,9 @@ export const useUserDataStore = create<UserDataState>()(
           return next;
         }),
 
+      // Reshuffle the auto-generated profile bio (a fresh variant next render).
+      bumpBioSeed: () => set((state) => ({ bioSeed: (state.bioSeed + 1) % 1_000_000 })),
+
       setPortrait: (id) => set({ portrait: id }),
 
       setSetting: (key, value) =>
@@ -382,6 +390,7 @@ export const useUserDataStore = create<UserDataState>()(
           displayName: 'Philosopher',
           email: '',
           bio: '',
+          bioSeed: 0,
           portrait: 'overthinker',
           settings: DEFAULT_SETTINGS,
         });
@@ -411,6 +420,7 @@ export const useUserDataStore = create<UserDataState>()(
         displayName: state.displayName,
         email: state.email,
         bio: state.bio,
+        bioSeed: state.bioSeed,
         portrait: state.portrait,
         settings: state.settings,
       }),
@@ -430,6 +440,8 @@ export const useUserDataStore = create<UserDataState>()(
       },
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
+        // Each app launch = a fresh "who you're becoming" bio.
+        state?.bumpBioSeed();
         if (state && !state.badgesInitialized) state.recomputeBadges();
       },
     }
