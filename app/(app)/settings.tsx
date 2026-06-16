@@ -7,6 +7,7 @@ import {
   TextInput,
   Modal,
   PanResponder,
+  Linking,
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
@@ -35,15 +36,17 @@ const Crimson = '#A83232';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const TIMES = ['06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '12:00 PM', '06:00 PM', '09:00 PM'];
-const LANGS = ['English', 'Español', 'Français', 'Deutsch', 'Italiano', 'Português', 'Latina'];
 
-type SectionKey = 'profile' | 'notifications' | 'learning' | 'privacy' | 'language' | 'subscription' | 'data' | 'danger';
+// Where user feedback is sent (opens the user's mail app pre-addressed here).
+const FEEDBACK_EMAIL = 'philosophizelearn@gmail.com';
+
+type SectionKey = 'profile' | 'notifications' | 'learning' | 'privacy' | 'feedback' | 'subscription' | 'data' | 'danger';
 const SECTIONS: { key: SectionKey; label: string; icon: SketchIconName }[] = [
   { key: 'profile', label: 'Profile', icon: 'person' },
   { key: 'notifications', label: 'Notifications', icon: 'bell' },
   { key: 'learning', label: 'Learning', icon: 'grad' },
   { key: 'privacy', label: 'Privacy', icon: 'lock' },
-  { key: 'language', label: 'Language', icon: 'globe' },
+  { key: 'feedback', label: 'Feedback', icon: 'pencil' },
   { key: 'subscription', label: 'Subscription', icon: 'clock' },
   { key: 'data', label: 'Data', icon: 'database' },
   { key: 'danger', label: 'Danger Zone', icon: 'warning' },
@@ -219,34 +222,6 @@ function Segmented({ value, options, onChange }: { value: string; options: { key
   );
 }
 
-function Dropdown({ value, options, onChange }: { value: string; options: string[]; onChange: (v: string) => void }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <View style={{ position: 'relative', zIndex: 20 }}>
-      <Pressable onPress={() => setOpen((o) => !o)} style={styles.dropdown}>
-        <Text style={styles.dropdownText}>{value}</Text>
-        <SketchIcon name="chevron-down" size={16} color={Ink} />
-      </Pressable>
-      {open && (
-        <View style={styles.dropdownList}>
-          {options.map((opt) => (
-            <Pressable
-              key={opt}
-              onPress={() => {
-                onChange(opt);
-                setOpen(false);
-              }}
-              style={({ pressed }) => [styles.dropdownItem, pressed && { backgroundColor: '#F0EFEA' }]}
-            >
-              <Text style={[styles.dropdownItemText, opt === value && { fontFamily: 'Inter_700Bold' }]}>{opt}</Text>
-            </Pressable>
-          ))}
-        </View>
-      )}
-    </View>
-  );
-}
-
 function Check({ label }: { label: string }) {
   return (
     <View style={styles.checkRow}>
@@ -270,8 +245,8 @@ function Section({ section }: { section: SectionKey }) {
       return <LearningSection />;
     case 'privacy':
       return <PrivacySection />;
-    case 'language':
-      return <LanguageSection />;
+    case 'feedback':
+      return <FeedbackSection />;
     case 'subscription':
       return <SubscriptionSection />;
     case 'data':
@@ -481,31 +456,26 @@ function PrivacySection() {
   );
 }
 
-/* ---------------- Language ---------------- */
+/* ---------------- Feedback ---------------- */
 
-function LanguageSection() {
-  const settings = useUserDataStore((s) => s.settings);
-  const setSetting = useUserDataStore((s) => s.setSetting);
+function FeedbackSection() {
+  const openMail = () => {
+    const subject = encodeURIComponent('Philosophize feedback');
+    const body = encodeURIComponent("Hi — here's my feedback on Philosophize:\n\n");
+    Linking.openURL(`mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${body}`).catch(() => {});
+  };
   return (
     <Card>
-      <Header title="Language" sub="The tongue in which philosophy speaks to you." />
+      <Header title="Feedback" sub="Found a bug, or have an idea? We'd love to hear from you." />
       <View style={styles.hr} />
-      <Row title="App Language" sub="The language used throughout the interface" stack z={20}>
-        <Dropdown value={settings.appLanguage} options={LANGS} onChange={(v) => setSetting('appLanguage', v)} />
-      </Row>
-      <Row title="Quote Display" sub="How philosopher quotes appear" last stack>
-        <Segmented
-          value={settings.quoteDisplay}
-          onChange={(k) => setSetting('quoteDisplay', k as AppSettings['quoteDisplay'])}
-          options={[
-            { key: 'original', label: 'Original' },
-            { key: 'translated', label: 'Translated' },
-            { key: 'both', label: 'Both' },
-          ]}
-        />
+      <Row title="Send feedback" sub="Opens your mail app, addressed to our team" last stack>
+        <Pressable onPress={openMail} style={({ pressed }) => [styles.feedbackBtn, pressed && { opacity: 0.85 }]}>
+          <SketchIcon name="pencil" size={15} color={Paper} />
+          <Text style={styles.feedbackBtnText}>Email us</Text>
+        </Pressable>
       </Row>
       <Text style={styles.footNote}>
-        Translations are community-reviewed. Original Greek and Latin texts are always preserved in source lessons.
+        Or write to us directly at {FEEDBACK_EMAIL}. Every message is read by a real person.
       </Text>
     </Card>
   );
@@ -917,6 +887,10 @@ const styles = StyleSheet.create({
   andMoreText: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 11, color: InkSoft },
   upgradeBtn: { backgroundColor: Ink, borderRadius: 4, paddingVertical: 13, alignItems: 'center', marginTop: 18 },
   upgradeText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: Paper },
+
+  // Feedback
+  feedbackBtn: { flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: Ink, borderRadius: 4, paddingHorizontal: 20, paddingVertical: 12 },
+  feedbackBtnText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: Paper },
 
   // Danger
   dangerBtn: { borderWidth: 1.5, borderColor: Crimson, borderRadius: 4, paddingHorizontal: 16, paddingVertical: 10 },
