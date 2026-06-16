@@ -12,9 +12,11 @@ import { MotiView, AnimatePresence } from 'moti';
 import { Easing } from 'react-native-reanimated';
 import { getPhilosopherById, type Philosopher } from '@/data/philosophers';
 import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
+import { hasQuiz } from '@/data/philosopherQuizzes';
 import { useUIStore } from '@/stores/uiStore';
 import { useUserDataStore } from '@/stores/userDataStore';
 import SketchIcon from './SketchIcon';
+import PhilosopherQuiz from './PhilosopherQuiz';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -30,12 +32,14 @@ export default function PhilosopherSheet() {
   const recordView = useUserDataStore((s) => s.recordPhilosopherView);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
+  const quizScores = useUserDataStore((s) => s.quizScores);
 
   const { height } = useWindowDimensions();
   const H = Math.round(height * 0.8);
 
   const [visible, setVisible] = useState(false);
   const [phil, setPhil] = useState<Philosopher | null>(null);
+  const [quizOpen, setQuizOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -53,8 +57,12 @@ export default function PhilosopherSheet() {
 
   const savedIds = new Set(savedQuotes.map((q) => q.id));
   const facts = phil ? PHILOSOPHER_FACTS[phil.id] ?? [] : [];
+  const quizAvailable = phil ? hasQuiz(phil.id) : false;
+  const score = phil ? quizScores[phil.id] : undefined;
+  const mastered = !!score && score.total > 0 && score.best >= score.total;
 
   return (
+    <>
     <Modal visible transparent animationType="none" statusBarTranslucent onRequestClose={close}>
       <MotiView
         animate={{ opacity: id ? 1 : 0 }}
@@ -105,6 +113,29 @@ export default function PhilosopherSheet() {
                   </View>
                 ))}
               </View>
+
+              {/* Quiz CTA — only for thinkers with an authored quiz */}
+              {quizAvailable && (
+                <Pressable
+                  onPress={() => setQuizOpen(true)}
+                  style={({ pressed }) => [styles.quizCta, pressed && { opacity: 0.9 }]}
+                >
+                  <View style={styles.quizIcon}>
+                    <SketchIcon name={mastered ? 'star-filled' : 'grad'} size={20} color={Paper} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.quizTitle}>{mastered ? 'Quiz mastered' : 'Test yourself'}</Text>
+                    <Text style={styles.quizSub}>
+                      {mastered
+                        ? `Best ${score!.best}/${score!.total} · play again`
+                        : `A 30-second quiz on ${phil.name.split(' ')[0]}`}
+                    </Text>
+                  </View>
+                  <View style={styles.quizChev}>
+                    <SketchIcon name="back" size={14} color={Paper} />
+                  </View>
+                </Pressable>
+              )}
 
               {/* Bio */}
               <SectionHeading label="Biography" />
@@ -158,6 +189,15 @@ export default function PhilosopherSheet() {
         )}
       </AnimatePresence>
     </Modal>
+    {phil && (
+      <PhilosopherQuiz
+        open={quizOpen}
+        philosopherId={phil.id}
+        philosopherName={phil.name}
+        onClose={() => setQuizOpen(false)}
+      />
+    )}
+    </>
   );
 }
 
@@ -247,6 +287,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   chipText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: Ink },
+  quizCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: Ink,
+    borderRadius: 16,
+    paddingVertical: 15,
+    paddingHorizontal: 16,
+    marginTop: 18,
+  },
+  quizIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: Paper,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quizTitle: { fontFamily: 'Inter_700Bold', fontSize: 15, color: Paper, letterSpacing: 0.3 },
+  quizSub: { fontFamily: 'Inter_400Regular', fontSize: 12.5, color: 'rgba(250,250,247,0.7)', marginTop: 2 },
+  quizChev: { transform: [{ scaleX: -1 }], opacity: 0.85 },
   sectionRow: { flexDirection: 'row', alignItems: 'center', marginTop: 26, marginBottom: 12 },
   sectionHeading: { fontFamily: 'Inter_700Bold', fontSize: 16, color: Ink, marginRight: 12 },
   sectionLine: { flex: 1, height: 1, backgroundColor: InkFaint },
