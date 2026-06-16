@@ -5,7 +5,9 @@ import StreakBook from '@/components/gamification/StreakBook';
 import StreakWeek from '@/components/gamification/StreakWeek';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { useUIStore } from '@/stores/uiStore';
 import { ads } from '@/lib/ads';
+import { FREE_DAILY_LESSON_LIMIT } from '@/constants/subscription';
 import { track } from '@/lib/posthog';
 
 interface Props {
@@ -37,17 +39,27 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
   const registerDailyActivity = useUserDataStore((s) => s.registerDailyActivity);
   const bumpDailyLessons = useUserDataStore((s) => s.bumpDailyLessons);
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
+  const dailyLessonCount = useUserDataStore((s) => s.dailyLessonCount);
+  const dailyLessonDate = useUserDataStore((s) => s.dailyLessonDate);
 
   const isPro = useSubscriptionStore((s) => s.isPro);
+  const openPaywall = useUIStore((s) => s.openPaywall);
 
   const ran = useRef(false);
   const [info, setInfo] = useState<DayInfo | null>(null);
   const [xpShown, setXpShown] = useState(0);
   const [advancing, setAdvancing] = useState(false);
 
-  // Free users see one interstitial right after the reward screen, on Continue.
-  // Subscribers go straight through. showInterstitial never throws and resolves
-  // even if no ad is ready, so navigation is never blocked.
+  // Has this free user now used up today's lesson allowance? (bumpDailyLessons
+  // runs on mount, so the count already reflects the just-finished lesson.)
+  const usedToday = dailyLessonDate === dateStr(new Date()) ? dailyLessonCount : 0;
+  const atLimit = !isPro && usedToday >= FREE_DAILY_LESSON_LIMIT;
+
+  // Continue order for FREE users: reward screen → interstitial ad → then, if
+  // they've hit the daily cap, the Scholar's Pass slides up as a dismissible
+  // option over the lesson list (never a blocking gate). Subscribers and free
+  // users with lessons left just return. showInterstitial never throws and
+  // resolves even with no ad ready, so navigation is never blocked.
   const handleContinue = async () => {
     if (advancing) return;
     if (isPro) {
@@ -58,7 +70,8 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
     try {
       await ads.showInterstitial();
     } catch {}
-    onDone();
+    onDone(); // close the reward + leave the lesson, back to the lesson list
+    if (atLimit) openPaywall(); // …then float the optional paywall up over it
   };
 
   // Record completion + update streak exactly once.

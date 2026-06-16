@@ -18,6 +18,11 @@ interface UIStore {
   savedQuotesOpen: boolean;
   openSavedQuotes: () => void;
   closeSavedQuotes: () => void;
+  // Paywall sheet — slides the Scholar's Pass offer up as a dismissible option
+  // (after a lesson, or from the daily-limit gate).
+  paywallOpen: boolean;
+  openPaywall: () => void;
+  closePaywall: () => void;
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -36,4 +41,7 @@ export const useUIStore = create<UIStore>((set) => ({
   savedQuotesOpen: false,
   openSavedQuotes: () => set({ savedQuotesOpen: true }),
   closeSavedQuotes: () => set({ savedQuotesOpen: false }),
+  paywallOpen: false,
+  openPaywall: () => set({ paywallOpen: true }),
+  closePaywall: () => set({ paywallOpen: false }),
 }));

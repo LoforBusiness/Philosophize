@@ -9,6 +9,7 @@ import ScreenTransition from '@/components/shared/ScreenTransition';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { useUIStore } from '@/stores/uiStore';
 import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
 
 const Page = '#FAFAF7';
@@ -29,6 +30,7 @@ export default function LessonScreen() {
   const isPro = useSubscriptionStore((s) => s.isPro);
   const dailyLessonCount = useUserDataStore((s) => s.dailyLessonCount);
   const dailyLessonDate = useUserDataStore((s) => s.dailyLessonDate);
+  const openPaywall = useUIStore((s) => s.openPaywall);
 
   if (!result) {
     return (
@@ -58,7 +60,7 @@ export default function LessonScreen() {
             tomorrow — or unlock unlimited, ad-free lessons with Scholar’s Pass and keep the momentum going.
           </Text>
           <Pressable
-            onPress={() => router.replace('/(app)/paywall')}
+            onPress={openPaywall}
             style={({ pressed }) => [styles.primaryBtn, pressed && { opacity: 0.85 }]}
           >
             <Text style={styles.primaryText}>Unlock Scholar’s Pass</Text>

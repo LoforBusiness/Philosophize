@@ -33,6 +33,7 @@ import { ads } from '@/lib/ads';
 import PhilosopherSheet from '@/components/shared/PhilosopherSheet';
 import RanksBadgesSheet from '@/components/shared/RanksBadgesSheet';
 import SavedQuotesSheet from '@/components/shared/SavedQuotesSheet';
+import PaywallSheet from '@/components/shared/PaywallSheet';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -120,11 +121,13 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(app)" />
+        <Stack.Screen name="thinker/[id]" />
       </Stack>
       {/* Global bottom sheets — opened from anywhere via uiStore */}
       <SavedQuotesSheet />
       <PhilosopherSheet />
       <RanksBadgesSheet />
+      <PaywallSheet />
     </>
   );
 
