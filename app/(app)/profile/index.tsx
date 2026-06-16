@@ -15,6 +15,7 @@ import { rankForXP } from '@/data/ranks';
 import { BADGES } from '@/data/badges';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
+import { generateUserBio } from '@/lib/utils/userBio';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -122,6 +123,18 @@ export default function ProfileScreen() {
   }).sort((a, b) => b.interactions - a.interactions);
   const topInterest = (branchInterest[0]?.interactions ?? 0) > 0 ? branchInterest[0] : null;
 
+  // A fun, auto-written character sketch assembled from what the user actually
+  // does — lessons taken, quotes saved, thinkers they keep opening.
+  const bio = generateUserBio({
+    lessonsDone,
+    streak,
+    quotesSaved,
+    distinctViewed,
+    topPhilosopher: topPhilosopher?.name ?? null,
+    topInterestName: topInterest?.name ?? null,
+    topInterestSlug: topInterest?.slug ?? null,
+  });
+
   const { current: cur, next } = rankForXP(totalXP);
   const nextThreshold = next?.xp ?? cur.xp;
   const rankPct = next ? Math.min(1, totalXP / next.xp) : 1;
@@ -216,6 +229,14 @@ export default function ProfileScreen() {
                 </Text>
               </View>
             </View>
+          </View>
+
+          <SectionLabel>WHO YOU'RE BECOMING</SectionLabel>
+          <View style={styles.bioCard}>
+            <View style={styles.bioQuill}>
+              <SketchIcon name="pencil" size={16} color={Ink} />
+            </View>
+            <Text style={styles.bioText}>{bio}</Text>
           </View>
 
           <SectionLabel>AT A GLANCE</SectionLabel>
@@ -405,6 +426,34 @@ const styles = StyleSheet.create({
   },
   glanceValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: Ink, marginTop: 8 },
   glanceLabel: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft, letterSpacing: 1.5, marginTop: 2 },
+
+  bioCard: {
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 3,
+    paddingTop: 22,
+    paddingBottom: 20,
+    paddingHorizontal: 18,
+    alignItems: 'center',
+  },
+  bioQuill: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  bioText: {
+    fontFamily: 'PlayfairDisplay_400Regular',
+    fontStyle: 'italic',
+    fontSize: 16,
+    lineHeight: 25,
+    color: Ink,
+    textAlign: 'center',
+  },
 
   insightsCard: { borderWidth: 1.5, borderColor: Ink, borderRadius: 3, padding: 16 },
   insightRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
