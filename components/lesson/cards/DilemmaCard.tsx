@@ -14,8 +14,8 @@ interface Props {
 export default function DilemmaCard({ card, onComplete }: Props) {
   const [chosenId, setChosenId] = useState<string | null>(null);
   const chosen = card.choices.find((c) => c.id === chosenId) ?? null;
-  // On the dark night scenes the loose ink text would disappear, so the whole
-  // dilemma floats on a translucent paper panel instead.
+  // The dilemma always floats on a translucent paper panel so the scenario,
+  // choices and revealed voices stay legible over any scene, light or dark.
   const dark = useSceneMeta().mode === 'dark';
 
   function choose(id: string) {
@@ -27,7 +27,7 @@ export default function DilemmaCard({ card, onComplete }: Props) {
 
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <View style={dark ? styles.paperPanel : undefined}>
+      <View style={[styles.paperPanel, dark && styles.paperPanelDark]}>
       <Text style={styles.kicker}>YOUR TURN</Text>
       <Text style={styles.scenario}>{card.scenario}</Text>
       <Text style={styles.prompt}>{card.prompt}</Text>
@@ -76,11 +76,22 @@ function Reveal({ views }: { views: DilemmaView[]; chosenLabel: string }) {
 const styles = StyleSheet.create({
   content: { paddingHorizontal: 22, paddingTop: 8, paddingBottom: 28 },
   paperPanel: {
-    backgroundColor: 'rgba(246,245,240,0.96)',
+    backgroundColor: 'rgba(250,250,247,0.94)',
     borderRadius: 22,
     paddingVertical: 22,
     paddingHorizontal: 18,
     marginHorizontal: -6,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.06)',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
+  },
+  paperPanelDark: {
+    backgroundColor: 'rgba(246,245,240,0.97)',
+    borderColor: 'rgba(0,0,0,0.04)',
   },
   kicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: T.gold, letterSpacing: 3 },
   scenario: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 18, color: T.ink, lineHeight: 28, marginTop: 10, marginBottom: 16 },

@@ -12,8 +12,8 @@ interface Props {
 }
 
 export default function QuestionCard({ card, onComplete }: Props) {
-  // On the dark night scenes the loose ink text would disappear, so the whole
-  // check floats on a translucent paper panel instead.
+  // The interactive check always floats on a translucent paper panel so the
+  // prompt and answer rows stay crisp over any scene, light or dark.
   const dark = useSceneMeta().mode === 'dark';
 
   // Selecting an answer reports the result up so the runner can record it and
@@ -25,7 +25,7 @@ export default function QuestionCard({ card, onComplete }: Props) {
   // matching the quote card. Content is short enough to fit without scrolling.
   return (
     <View style={styles.content}>
-      <View style={dark ? styles.paperPanel : undefined}>
+      <View style={[styles.paperPanel, dark && styles.paperPanelDark]}>
         <Text style={styles.kicker}>KNOWLEDGE CHECK</Text>
         <Text style={styles.title}>Quick Check</Text>
 
@@ -48,11 +48,22 @@ export default function QuestionCard({ card, onComplete }: Props) {
 const styles = StyleSheet.create({
   content: { flex: 1, justifyContent: 'center', paddingHorizontal: 22, paddingVertical: 12 },
   paperPanel: {
-    backgroundColor: 'rgba(246,245,240,0.96)',
+    backgroundColor: 'rgba(250,250,247,0.94)',
     borderRadius: 22,
     paddingVertical: 24,
     paddingHorizontal: 18,
     marginHorizontal: -6,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.06)',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
+  },
+  paperPanelDark: {
+    backgroundColor: 'rgba(246,245,240,0.97)',
+    borderColor: 'rgba(0,0,0,0.04)',
   },
   kicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: T.gold, letterSpacing: 3 },
   title: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, color: T.ink, marginTop: 6 },

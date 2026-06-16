@@ -28,9 +28,10 @@ function Scrim() {
   return (
     <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
       <Defs>
-        <RadialGradient id="lb-glow" cx="50%" cy="47%" rx="78%" ry="66%">
-          <Stop offset="0%" stopColor="#F8F8F6" stopOpacity={0.22} />
-          <Stop offset="62%" stopColor="#F8F8F6" stopOpacity={0.06} />
+        <RadialGradient id="lb-glow" cx="50%" cy="47%" rx="85%" ry="72%">
+          <Stop offset="0%" stopColor="#FAFAF7" stopOpacity={0.55} />
+          <Stop offset="45%" stopColor="#FAFAF7" stopOpacity={0.34} />
+          <Stop offset="74%" stopColor="#FAFAF7" stopOpacity={0.12} />
           <Stop offset="100%" stopColor="#26313F" stopOpacity={0.12} />
         </RadialGradient>
       </Defs>

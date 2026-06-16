@@ -18,12 +18,15 @@ interface Props {
   color: string;
   active: boolean; // begins the reveal; once begun it never resets
   align?: 'center' | 'left';
+  // Soft glow drawn behind each word so the passage always reads against busy
+  // artwork — paper-coloured behind ink text, ink-coloured behind paper text.
+  haloColor?: string;
 }
 
 // Renders a passage as wrapped words that each fade in one after another —
 // invisible at first, then surfacing softly in reading order, like ink settling
 // onto the page. The first sentence is set in bold for hierarchy.
-export default function FadeInWords({ text, size = 23, color, active, align = 'center' }: Props) {
+export default function FadeInWords({ text, size = 23, color, active, align = 'center', haloColor }: Props) {
   const { words, per, lead } = useMemo(() => wordTiming(text), [text]);
 
   // Index of the last word of the first sentence (bolded headline).
@@ -56,6 +59,13 @@ export default function FadeInWords({ text, size = 23, color, active, align = 'c
               color,
               marginHorizontal: 4,
               marginVertical: 2,
+              ...(haloColor
+                ? {
+                    textShadowColor: haloColor,
+                    textShadowOffset: { width: 0, height: 0 },
+                    textShadowRadius: 7,
+                  }
+                : null),
             }}
           >
             {w}

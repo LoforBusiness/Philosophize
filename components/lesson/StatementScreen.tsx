@@ -28,6 +28,14 @@ export default function StatementScreen({ text, kicker, size = 23, source }: Pro
 
   const body = dark ? '#F4F3EE' : T.ink;
   const faint = dark ? 'rgba(244,243,238,0.6)' : T.gold;
+  // A soft halo the colour of the page sits behind every glyph so the words
+  // stay legible even where the artwork drifts into the text zone.
+  const halo = dark ? 'rgba(14,14,14,0.92)' : 'rgba(250,250,247,0.95)';
+  const haloShadow = {
+    textShadowColor: halo,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
+  } as const;
   const { total } = wordTiming(text);
 
   const justify =
@@ -54,11 +62,11 @@ export default function StatementScreen({ text, kicker, size = 23, source }: Pro
           transition={{ type: 'timing', duration: 600 }}
           style={styles.kickerWrap}
         >
-          <Text style={[styles.kicker, { color: faint }]}>{kicker}</Text>
+          <Text style={[styles.kicker, { color: faint }, haloShadow]}>{kicker}</Text>
         </MotiView>
       ) : null}
 
-      <FadeInWords text={text} size={size} color={body} active={active} />
+      <FadeInWords text={text} size={size} color={body} active={active} haloColor={halo} />
 
       {source ? (
         <MotiView
@@ -67,7 +75,7 @@ export default function StatementScreen({ text, kicker, size = 23, source }: Pro
           transition={{ type: 'timing', duration: 700, delay: active ? total : 0 }}
           style={styles.sourceWrap}
         >
-          <Text style={[styles.source, { color: dark ? 'rgba(244,243,238,0.7)' : T.inkSoft }]}>
+          <Text style={[styles.source, { color: dark ? 'rgba(244,243,238,0.7)' : T.inkSoft }, haloShadow]}>
             — {source}
           </Text>
         </MotiView>
