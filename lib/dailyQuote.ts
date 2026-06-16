@@ -49,3 +49,20 @@ export function getDailyQuote(): DailyQuote {
 export function quotePoolSize(): number {
   return POOL.length;
 }
+
+// ─── Home-screen widget rotation ─────────────────────────────────────────────
+// The Android home-screen widget shows a different quote every 3 hours. It's
+// computed from the current time bucket (not stored), so the widget's headless
+// task can recompute it on each OS update without the app running.
+const ROTATION_MS = 3 * 60 * 60 * 1000; // 3 hours
+
+export function rotationBucket(now: number = Date.now()): number {
+  return Math.floor(now / ROTATION_MS);
+}
+
+/** The quote for the current 3-hour window. A prime stride scatters picks. */
+export function getRotatingQuote(now: number = Date.now()): DailyQuote {
+  const len = POOL.length || 1;
+  const idx = ((rotationBucket(now) * 7919) % len + len) % len;
+  return POOL[idx];
+}

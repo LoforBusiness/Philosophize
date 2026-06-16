@@ -1,6 +1,6 @@
 {
   "name": "philosophize",
-  "main": "expo-router/entry",
+  "main": "index.js",
   "version": "1.0.0",
   "dependencies": {
     "@expo-google-fonts/caveat": "^0.4.2",
@@ -35,6 +35,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.85.3",
+    "react-native-android-widget": "^0.20.3",
     "react-native-google-mobile-ads": "^16.3.3",
     "react-native-purchases": "^10.3.0",
     "react-native-reanimated": "4.3.1",

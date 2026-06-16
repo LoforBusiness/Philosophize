@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, View, Text, Pressable, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { Modal, View, Text, Pressable, ScrollView, StyleSheet, useWindowDimensions, Platform } from 'react-native';
 import { MotiView, AnimatePresence } from 'moti';
 import SketchIcon from './SketchIcon';
 import { useUIStore } from '@/stores/uiStore';
@@ -22,6 +22,10 @@ export default function SavedQuotesSheet() {
   const openPhilosopher = useUIStore((s) => s.openPhilosopher);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const removeQuote = useUserDataStore((s) => s.removeQuote);
+  const pinnedQuoteId = useUserDataStore((s) => s.pinnedQuoteId);
+  const setPinnedQuote = useUserDataStore((s) => s.setPinnedQuote);
+  // The home-screen widget is Android-only, so the pin control only appears there.
+  const canPin = Platform.OS === 'android';
 
   const { height } = useWindowDimensions();
   const H = Math.round(height * 0.82);
@@ -96,6 +100,9 @@ export default function SavedQuotesSheet() {
                       era={eraFor(q.philosopherId)}
                       onOpen={() => openThinker(q)}
                       onRemove={() => removeQuote(q.id)}
+                      canPin={canPin}
+                      pinned={pinnedQuoteId === q.id}
+                      onTogglePin={() => setPinnedQuote(pinnedQuoteId === q.id ? null : q.id)}
                     />
                   ))}
                 </ScrollView>
@@ -113,11 +120,17 @@ function QuoteCard({
   era,
   onOpen,
   onRemove,
+  canPin,
+  pinned,
+  onTogglePin,
 }: {
   q: SavedQuote;
   era: string | null;
   onOpen: () => void;
   onRemove: () => void;
+  canPin: boolean;
+  pinned: boolean;
+  onTogglePin: () => void;
 }) {
   return (
     <View style={styles.card}>
@@ -140,6 +153,18 @@ function QuoteCard({
       <Pressable onPress={onRemove} hitSlop={10} style={({ pressed }) => [styles.unsave, pressed && { opacity: 0.6 }]}>
         <SketchIcon name="bookmark-filled" size={17} color={Ink} />
       </Pressable>
+
+      {canPin ? (
+        <Pressable
+          onPress={onTogglePin}
+          style={({ pressed }) => [styles.pinRow, pinned && styles.pinRowOn, pressed && { opacity: 0.7 }]}
+        >
+          <SketchIcon name="home" size={13} color={pinned ? Paper : Ink} />
+          <Text style={[styles.pinText, pinned && { color: Paper }]}>
+            {pinned ? 'PINNED TO HOME SCREEN' : 'PIN TO HOME SCREEN'}
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -206,6 +231,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+
+  pinRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 11,
+    borderTopWidth: 1.5,
+    borderTopColor: InkFaint,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  pinRowOn: { backgroundColor: Ink },
+  pinText: { fontFamily: 'Inter_700Bold', fontSize: 10, color: Ink, letterSpacing: 1.5 },
 
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 60 },
   emptyIcon: {

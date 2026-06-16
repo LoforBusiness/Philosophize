@@ -5,6 +5,7 @@ import { BADGES, type ProgressStats } from '@/data/badges';
 import { ALL_BRANCHES } from '@/data';
 import { rankForXP } from '@/data/ranks';
 import { track } from '@/lib/posthog';
+import { writePinnedQuote } from '@/lib/widget/pin';
 
 // A quote the user has bookmarked. Self-contained so the profile/stats
 // screens never need to look the philosopher back up.
@@ -15,6 +16,15 @@ export interface SavedQuote {
   philosopherId: string;
   branchSlugs: string[]; // areas this quote contributes to (copied from philosopher)
   savedAt: number;
+}
+
+// Best result on a philosopher's quiz. `best === total` (and total > 0) means
+// the user has "mastered" that thinker's quiz at least once.
+export interface QuizScore {
+  best: number;
+  total: number;
+  plays: number;
+  lastPlayedAt: number;
 }
 
 export type WidgetPlacement = 'home' | 'profile' | 'insights';
@@ -72,6 +82,8 @@ const DEFAULT_SETTINGS: AppSettings = {
 
 interface UserDataState {
   savedQuotes: SavedQuote[];
+  pinnedQuoteId: string | null;               // saved-quote id pinned to the home-screen widget
+  quizScores: Record<string, QuizScore>;      // philosopherId -> best quiz result
   philosopherViews: Record<string, number>; // philosopherId -> times profile opened
   lessonsByBranch: Record<string, number>;   // branchSlug -> lessons completed
   voiceEnabled: boolean;                      // narrate lessons aloud + reveal words
@@ -95,7 +107,9 @@ interface UserDataState {
   removeQuote: (id: string) => void;
   toggleQuote: (q: SavedQuote) => void;
   isQuoteSaved: (id: string) => boolean;
+  setPinnedQuote: (id: string | null) => void;
   recordPhilosopherView: (philosopherId: string) => void;
+  recordQuizResult: (philosopherId: string, correct: number, total: number) => number;
   recordLessonComplete: (branchSlug: string, xpEarned?: number) => void;
   bumpDailyLessons: (today: string) => void;
   setVoiceEnabled: (v: boolean) => void;
@@ -141,6 +155,8 @@ export const useUserDataStore = create<UserDataState>()(
   persist(
     (set, get) => ({
       savedQuotes: [],
+      pinnedQuoteId: null,
+      quizScores: {},
       philosopherViews: {},
       lessonsByBranch: {},
       voiceEnabled: true,
@@ -168,10 +184,13 @@ export const useUserDataStore = create<UserDataState>()(
         get().recomputeBadges();
       },
 
-      removeQuote: (id) =>
+      removeQuote: (id) => {
         set((state) => ({
           savedQuotes: state.savedQuotes.filter((x) => x.id !== id),
-        })),
+        }));
+        // A quote can't stay pinned to the widget once it's no longer saved.
+        if (get().pinnedQuoteId === id) get().setPinnedQuote(null);
+      },
 
       toggleQuote: (q) => {
         let nowSaved = false;
@@ -184,6 +203,7 @@ export const useUserDataStore = create<UserDataState>()(
               : [q, ...state.savedQuotes],
           };
         });
+        if (!nowSaved && get().pinnedQuoteId === q.id) get().setPinnedQuote(null);
         track(nowSaved ? 'quote_saved' : 'quote_removed', {
           quote_id: q.id,
           philosopher_id: q.philosopherId,
@@ -192,6 +212,16 @@ export const useUserDataStore = create<UserDataState>()(
       },
 
       isQuoteSaved: (id) => get().savedQuotes.some((x) => x.id === id),
+
+      // Pin (or clear) the home-screen widget quote. Mirrors the chosen quote to
+      // the widget's own storage key and triggers an immediate refresh on Android.
+      setPinnedQuote: (id) => {
+        set({ pinnedQuoteId: id });
+        const q = id ? get().savedQuotes.find((x) => x.id === id) ?? null : null;
+        writePinnedQuote(
+          q ? { text: q.text, author: q.author, philosopherId: q.philosopherId } : null
+        );
+      },
 
       recordPhilosopherView: (philosopherId) => {
         set((state) => ({
@@ -202,6 +232,38 @@ export const useUserDataStore = create<UserDataState>()(
         }));
         track('philosopher_viewed', { philosopher_id: philosopherId });
         get().recomputeBadges();
+      },
+
+      // Record a finished philosopher quiz. Keeps the best score, and awards a
+      // one-time +15 XP the first time the user aces it (perfect), or +5 XP for
+      // any other completion / replay. Returns the XP awarded so the results
+      // screen can show it.
+      recordQuizResult: (philosopherId, correct, total) => {
+        const prev = get().quizScores[philosopherId];
+        const wasPerfect = !!prev && prev.total > 0 && prev.best >= prev.total;
+        const isPerfect = total > 0 && correct >= total;
+        const bonus = isPerfect && !wasPerfect ? 15 : 5;
+        set((state) => ({
+          quizScores: {
+            ...state.quizScores,
+            [philosopherId]: {
+              best: Math.max(prev?.best ?? 0, correct),
+              total,
+              plays: (prev?.plays ?? 0) + 1,
+              lastPlayedAt: Date.now(),
+            },
+          },
+          totalXP: state.totalXP + bonus,
+        }));
+        track('philosopher_quiz_completed', {
+          philosopher_id: philosopherId,
+          correct,
+          total,
+          perfect: isPerfect,
+          xp: bonus,
+        });
+        get().recomputeBadges();
+        return bonus;
       },
 
       recordLessonComplete: (branchSlug, xpEarned = 0) => {
@@ -290,15 +352,21 @@ export const useUserDataStore = create<UserDataState>()(
         set((state) => ({ settings: { ...state.settings, [key]: value } })),
 
       resetProgress: () =>
-        set({ lessonsByBranch: {}, streak: 0, totalXP: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
+        set({ lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
 
-      clearSavedQuotes: () => set({ savedQuotes: [] }),
+      clearSavedQuotes: () => {
+        set({ savedQuotes: [] });
+        if (get().pinnedQuoteId) get().setPinnedQuote(null);
+      },
 
       revokeBadges: () => set({ earnedBadges: [] }),
 
-      deleteAccount: () =>
+      deleteAccount: () => {
+        if (get().pinnedQuoteId) writePinnedQuote(null);
         set({
           savedQuotes: [],
+          pinnedQuoteId: null,
+          quizScores: {},
           philosopherViews: {},
           lessonsByBranch: {},
           voiceEnabled: true,
@@ -316,7 +384,8 @@ export const useUserDataStore = create<UserDataState>()(
           bio: '',
           portrait: 'overthinker',
           settings: DEFAULT_SETTINGS,
-        }),
+        });
+      },
 
       setHasHydrated: (v) => set({ _hasHydrated: v }),
     }),
@@ -325,6 +394,8 @@ export const useUserDataStore = create<UserDataState>()(
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         savedQuotes: state.savedQuotes,
+        pinnedQuoteId: state.pinnedQuoteId,
+        quizScores: state.quizScores,
         philosopherViews: state.philosopherViews,
         lessonsByBranch: state.lessonsByBranch,
         voiceEnabled: state.voiceEnabled,

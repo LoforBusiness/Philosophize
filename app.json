@@ -44,6 +44,26 @@
           "iosAppId": "ca-app-pub-3940256099942544~1458002511",
           "userTrackingUsageDescription": "This lets us show ads relevant to you and keep Philosophize free. You can decline and still use the app."
         }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "QuoteOfTheDay",
+              "label": "Philosophize — Quote",
+              "description": "A philosophy quote that changes through the day.",
+              "minWidth": "180dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "maxResizeWidth": "360dp",
+              "maxResizeHeight": "300dp",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 10800000
+            }
+          ]
+        }
       ]
     ],
     "experiments": {
