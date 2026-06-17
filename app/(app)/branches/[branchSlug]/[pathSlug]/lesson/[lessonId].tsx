@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -32,6 +32,17 @@ export default function LessonScreen() {
   const dailyLessonDate = useUserDataStore((s) => s.dailyLessonDate);
   const openPaywall = useUIStore((s) => s.openPaywall);
 
+  // Decide the free-tier daily-limit gate ONCE, when the lesson opens. Finishing
+  // the lesson bumps the daily count (in LessonReward) — but that must never flip
+  // this screen to the lock screen mid-celebration and steal the XP + streak
+  // reward. The gate only ever blocks OPENING a lesson, so we freeze it here.
+  const gateRef = useRef<boolean | null>(null);
+  if (gateRef.current === null) {
+    const used = dailyLessonDate === todayStr() ? dailyLessonCount : 0;
+    gateRef.current = !isPro && used >= FREE_DAILY_LESSON_LIMIT;
+  }
+  const atLimit = gateRef.current;
+
   if (!result) {
     return (
       <SafeAreaView className="flex-1 bg-paper items-center justify-center">
@@ -39,11 +50,6 @@ export default function LessonScreen() {
       </SafeAreaView>
     );
   }
-
-  // Free-tier daily cap: block opening a new lesson once the day's allowance is
-  // spent. Subscribers are never gated; the count rolls over each calendar day.
-  const usedToday = dailyLessonDate === todayStr() ? dailyLessonCount : 0;
-  const atLimit = !isPro && usedToday >= FREE_DAILY_LESSON_LIMIT;
 
   if (atLimit) {
     return (
