@@ -19,13 +19,14 @@ interface Props {
   open: boolean;
   philosopherId: string;
   philosopherName: string;
+  pronoun?: 'he' | 'she' | 'they';
   onClose: () => void;
 }
 
 // A short (~5-question), 30–45-second quiz about a single philosopher, slid up
 // over their profile. Mixes "did they say this?", multiple-choice facts, and
 // fill-in-the-quote. Light paper/ink styling to match the profile sheet.
-export default function PhilosopherQuiz({ open, philosopherId, philosopherName, onClose }: Props) {
+export default function PhilosopherQuiz({ open, philosopherId, philosopherName, pronoun = 'he', onClose }: Props) {
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const H = Math.round(height * 0.92);
@@ -176,12 +177,12 @@ export default function PhilosopherQuiz({ open, philosopherId, philosopherName, 
                   {isAttribution ? (
                     <View style={styles.yesNoRow}>
                       <AttribButton
-                        label="Yes, they did"
+                        label={`Yes, ${pronoun} did`}
                         state={optionState(0, picked, correctIndex)}
                         onPress={() => choose(0)}
                       />
                       <AttribButton
-                        label="No, they didn't"
+                        label={`No, ${pronoun} didn't`}
                         state={optionState(1, picked, correctIndex)}
                         onPress={() => choose(1)}
                       />

@@ -1,3 +1,5 @@
+import { ALL_PHILOSOPHERS, getPhilosopherById, type Philosopher } from './philosophers';
+
 // Short, fun, fact-checked quizzes for the most iconic thinkers — surfaced from a
 // philosopher's profile. Each is ~5 questions, sized to finish in 30–45 seconds,
 // mixing three kinds:
@@ -567,10 +569,176 @@ export const PHILOSOPHER_QUIZZES: Record<string, QuizQuestion[]> = {
   ],
 };
 
+// ─── Pronouns ────────────────────────────────────────────────────────────────
+// Subject pronoun for the attribution buttons ("Yes, ___ did"). Everyone defaults
+// to "he"; only the women and the (one) they/them thinker are listed, so the
+// buttons read correctly for the whole ~322-thinker catalog.
+const NON_HE: Record<string, 'she' | 'they'> = {
+  'simone-de-beauvoir': 'she', hypatia: 'she', 'hildegard-of-bingen': 'she', 'mary-wollstonecraft': 'she',
+  'hannah-arendt': 'she', 'simone-weil': 'she', 'hipparchia-of-maroneia': 'she', 'sor-juana-ines-de-la-cruz': 'she',
+  'christine-de-pizan': 'she', 'margaret-cavendish': 'she', 'edith-stein': 'she', 'susanne-langer': 'she',
+  'elizabeth-anscombe': 'she', 'iris-murdoch': 'she', 'philippa-foot': 'she', 'mary-midgley': 'she',
+  'iris-marion-young': 'she', 'donna-haraway': 'she', 'sylvia-wynter': 'she', 'gloria-anzaldua': 'she',
+  'maria-lugones': 'she', 'silvia-rivera-cusicanqui': 'she', 'akka-mahadevi': 'she', 'mary-astell': 'she',
+  'catharine-macaulay': 'she', 'harriet-taylor-mill': 'she', 'anna-julia-cooper': 'she', 'angela-davis': 'she',
+  'patricia-hill-collins': 'she', 'ruth-millikan': 'she', 'judith-jarvis-thomson': 'she', 'onora-oneill': 'she',
+  'nel-noddings': 'she', 'carol-gilligan': 'she', 'seyla-benhabib': 'she', 'nancy-fraser': 'she',
+  'catherine-of-siena': 'she', 'anne-conway': 'she', 'emilie-du-chatelet': 'she', 'christine-korsgaard': 'she',
+  'julia-kristeva': 'she', 'martha-nussbaum': 'she', 'bell-hooks': 'she',
+  'judith-butler': 'they',
+};
+
+export function getQuizPronoun(philosopherId: string): 'he' | 'she' | 'they' {
+  return NON_HE[philosopherId] ?? 'he';
+}
+
+// ─── Data-grounded generator ─────────────────────────────────────────────────
+// For every thinker without a hand-crafted quiz, build 5 accurate questions from
+// their own in-app data — quotes, lifespan, era and areas — plus decoys drawn
+// from the rest of the catalog. Deterministic per id (seeded), so a thinker's
+// quiz is stable across plays. Nothing is invented: every answer is verifiable
+// against what the app already shows on that philosopher's profile.
+
+function hashId(s: string): number {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function mulberry32(a: number) {
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function buildQuizFor(p: Philosopher): QuizQuestion[] {
+  const rng = mulberry32(hashId(p.id));
+  const pick = <T,>(a: T[]): T => a[Math.floor(rng() * a.length)];
+  const sample = <T,>(a: T[], n: number): T[] => {
+    const c = a.slice();
+    for (let i = c.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [c[i], c[j]] = [c[j], c[i]];
+    }
+    return c.slice(0, n);
+  };
+  const uniq = (a: string[]) => Array.from(new Set(a.filter(Boolean)));
+
+  const others = ALL_PHILOSOPHERS.filter((o) => o.id !== p.id);
+  const myQuotes = p.quotes ?? [];
+  const myTexts = new Set(myQuotes.map((q) => q.text));
+  const candidates: QuizQuestion[] = [];
+
+  // 1 — attribution TRUE: one of their own lines.
+  if (myQuotes.length) {
+    candidates.push({
+      kind: 'attribution',
+      prompt: `Did ${p.name} say this?`,
+      quote: pick(myQuotes).text,
+      isReal: true,
+      realAuthor: p.name,
+      difficulty: 'easy',
+      explain: `Yes — this is one of ${p.name}'s own lines.`,
+    });
+  }
+
+  // 2 — lifespan.
+  const lifespans = uniq(others.map((o) => o.lifespan)).filter((l) => l !== p.lifespan);
+  if (p.lifespan && lifespans.length >= 3) {
+    const opts = sample([p.lifespan, ...sample(lifespans, 3)], 4);
+    candidates.push({
+      kind: 'mc',
+      prompt: `When did ${p.name} live?`,
+      options: opts,
+      correctIndex: opts.indexOf(p.lifespan),
+      difficulty: 'easy',
+      explain: `${p.name} lived ${p.lifespan}${p.era ? ` (${p.era})` : ''}.`,
+    });
+  }
+
+  // 3 — area of focus.
+  const myAreas = p.areas ?? [];
+  const allAreas = uniq(ALL_PHILOSOPHERS.flatMap((o) => o.areas ?? []));
+  const otherAreas = allAreas.filter((a) => !myAreas.includes(a));
+  if (myAreas.length && otherAreas.length >= 3) {
+    const correct = pick(myAreas);
+    const opts = sample([correct, ...sample(otherAreas, 3)], 4);
+    candidates.push({
+      kind: 'mc',
+      prompt: `Which field is ${p.name} best known for?`,
+      options: opts,
+      correctIndex: opts.indexOf(correct),
+      difficulty: 'medium',
+      explain: `${p.name}: ${myAreas.join(', ')}.`,
+    });
+  }
+
+  // 4 — attribution FALSE: a real line by a DIFFERENT thinker.
+  const decoyPool = others.filter((o) => (o.quotes?.length ?? 0) > 0);
+  if (decoyPool.length) {
+    const decoy = pick(decoyPool);
+    const dq = decoy.quotes.find((q) => !myTexts.has(q.text)) ?? decoy.quotes[0];
+    candidates.push({
+      kind: 'attribution',
+      prompt: `Did ${p.name} say this?`,
+      quote: dq.text,
+      isReal: false,
+      realAuthor: decoy.name,
+      difficulty: 'medium',
+      explain: `No — that line is ${decoy.name}'s.`,
+    });
+  }
+
+  // 5 — era.
+  const eras = uniq(others.map((o) => o.era)).filter((e) => e !== p.era);
+  if (p.era && eras.length >= 3) {
+    const opts = sample([p.era, ...sample(eras, 3)], 4);
+    candidates.push({
+      kind: 'mc',
+      prompt: `Which era is ${p.name} part of?`,
+      options: opts,
+      correctIndex: opts.indexOf(p.era),
+      difficulty: 'niche',
+      explain: `${p.name}'s era: ${p.era} (${p.lifespan}).`,
+    });
+  }
+
+  // Headroom — "who said this?" — guarantees five questions even if a field above
+  // was too sparse, and ties the quiz back to the Thinkers catalog.
+  const secondQuote = myQuotes.find((q) => q.text !== (candidates[0] as { quote?: string })?.quote) ?? myQuotes[0];
+  if (secondQuote && others.length >= 3) {
+    const names = sample([p.name, ...sample(others.map((o) => o.name), 3)], 4);
+    candidates.push({
+      kind: 'mc',
+      prompt: `Who said this?\n\n"${secondQuote.text}"`,
+      options: names,
+      correctIndex: names.indexOf(p.name),
+      difficulty: 'niche',
+      explain: `That line is ${p.name}'s.`,
+    });
+  }
+
+  return candidates.slice(0, 5);
+}
+
 export function hasQuiz(philosopherId: string): boolean {
-  return (PHILOSOPHER_QUIZZES[philosopherId]?.length ?? 0) > 0;
+  if ((PHILOSOPHER_QUIZZES[philosopherId]?.length ?? 0) > 0) return true;
+  const p = getPhilosopherById(philosopherId);
+  return !!p && (p.quotes?.length ?? 0) >= 1;
 }
 
 export function getQuiz(philosopherId: string): QuizQuestion[] | null {
-  return PHILOSOPHER_QUIZZES[philosopherId] ?? null;
+  const curated = PHILOSOPHER_QUIZZES[philosopherId];
+  if (curated?.length) return curated;
+  const p = getPhilosopherById(philosopherId);
+  if (!p) return null;
+  const generated = buildQuizFor(p);
+  return generated.length >= 3 ? generated : null;
 }

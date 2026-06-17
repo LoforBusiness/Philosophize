@@ -12,7 +12,7 @@ import { MotiView, AnimatePresence } from 'moti';
 import { Easing } from 'react-native-reanimated';
 import { getPhilosopherById, type Philosopher } from '@/data/philosophers';
 import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
-import { hasQuiz } from '@/data/philosopherQuizzes';
+import { hasQuiz, getQuizPronoun } from '@/data/philosopherQuizzes';
 import { useUIStore } from '@/stores/uiStore';
 import { useUserDataStore } from '@/stores/userDataStore';
 import SketchIcon from './SketchIcon';
@@ -194,6 +194,7 @@ export default function PhilosopherSheet() {
         open={quizOpen}
         philosopherId={phil.id}
         philosopherName={phil.name}
+        pronoun={getQuizPronoun(phil.id)}
         onClose={() => setQuizOpen(false)}
       />
     )}
