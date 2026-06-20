@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Modal,
   View,
@@ -27,6 +27,7 @@ const InkFaint = '#E8E8E3';
 // grab handle, showing a philosopher's bio, facts, and saveable quotes.
 export default function PhilosopherSheet() {
   const id = useUIStore((s) => s.philosopherSheetId);
+  const openSeq = useUIStore((s) => s.philosopherSheetSeq);
   const close = useUIStore((s) => s.closePhilosopher);
 
   const recordView = useUserDataStore((s) => s.recordPhilosopherView);
@@ -40,6 +41,7 @@ export default function PhilosopherSheet() {
   const [visible, setVisible] = useState(false);
   const [phil, setPhil] = useState<Philosopher | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     if (id) {
@@ -52,6 +54,26 @@ export default function PhilosopherSheet() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  // Snap to the top every time the sheet is raised. `openSeq` bumps on each
+  // openPhilosopher call (even for the same thinker, so tapping a saved quote
+  // for the philosopher you just viewed still resets). Keying the scroll view
+  // on it remounts a fresh instance, and the imperative scrollTo guards against
+  // the browser focus-scrolling down to a tappable quote. Without this the sheet
+  // can reuse a previous instance left scrolled to the Quotes section and open
+  // at the bottom instead of the bio.
+  useEffect(() => {
+    if (!id) return;
+    const raf = requestAnimationFrame(() =>
+      scrollRef.current?.scrollTo({ y: 0, animated: false })
+    );
+    const t = setTimeout(() => scrollRef.current?.scrollTo({ y: 0, animated: false }), 120);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openSeq]);
 
   if (!visible) return null;
 
@@ -90,6 +112,8 @@ export default function PhilosopherSheet() {
             <View style={styles.handle} />
 
             <ScrollView
+              key={openSeq}
+              ref={scrollRef}
               contentContainerStyle={styles.content}
               showsVerticalScrollIndicator={false}
             >

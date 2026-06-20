@@ -8,6 +8,9 @@ interface UIStore {
   clearAchievements: () => void;
   // Philosopher bottom sheet — set to an id to slide it up, null to dismiss.
   philosopherSheetId: string | null;
+  // Bumped on every openPhilosopher call (even for the same id) so the sheet can
+  // reset its scroll position to the top each time it is raised.
+  philosopherSheetSeq: number;
   openPhilosopher: (id: string) => void;
   closePhilosopher: () => void;
   // Ranks & Badges sheet — which tab to open it on, or null when dismissed.
@@ -33,7 +36,9 @@ export const useUIStore = create<UIStore>((set) => ({
     set((state) => ({ pendingAchievements: [...state.pendingAchievements, id] })),
   clearAchievements: () => set({ pendingAchievements: [] }),
   philosopherSheetId: null,
-  openPhilosopher: (id) => set({ philosopherSheetId: id }),
+  philosopherSheetSeq: 0,
+  openPhilosopher: (id) =>
+    set((s) => ({ philosopherSheetId: id, philosopherSheetSeq: s.philosopherSheetSeq + 1 })),
   closePhilosopher: () => set({ philosopherSheetId: null }),
   ranksBadgesTab: null,
   openRanksBadges: (tab) => set({ ranksBadgesTab: tab }),
