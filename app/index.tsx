@@ -1,47 +1,33 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  type KeyboardTypeOptions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import Svg, { Path, Circle, Ellipse, Rect, Defs, Pattern, G } from 'react-native-svg';
+import Svg, { Path, Ellipse, G } from 'react-native-svg';
+import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
+import { signIn, signUp } from '@/lib/supabase/auth';
 
-const Page = '#F1EEE7';
-const Paper = '#FFFFFF';
+const Page = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
+const InkFaint = '#E8E8E3';
+const FieldBg = '#F5F5F0';
 const FaceMid = '#E2E0D8';
+const Red = '#A83232';
 
-// One isometric box; (cx,cy) is its top-face center. a = half-width, h = a/2.
-function IsoBox({
-  cx,
-  cy,
-  a,
-  h,
-  ch,
-  top,
-  left,
-  right,
-}: {
-  cx: number;
-  cy: number;
-  a: number;
-  h: number;
-  ch: number;
-  top: string;
-  left: string;
-  right: string;
-}) {
-  const topP = `M ${cx} ${cy - h} L ${cx + a} ${cy} L ${cx} ${cy + h} L ${cx - a} ${cy} Z`;
-  const leftP = `M ${cx - a} ${cy} L ${cx} ${cy + h} L ${cx} ${cy + h + ch} L ${cx - a} ${cy + ch} Z`;
-  const rightP = `M ${cx + a} ${cy} L ${cx} ${cy + h} L ${cx} ${cy + h + ch} L ${cx + a} ${cy + ch} Z`;
-  return (
-    <>
-      <Path d={leftP} fill={left} stroke={Ink} strokeWidth={2} strokeLinejoin="round" />
-      <Path d={rightP} fill={right} stroke={Ink} strokeWidth={2} strokeLinejoin="round" />
-      <Path d={topP} fill={top} stroke={Ink} strokeWidth={2} strokeLinejoin="round" />
-    </>
-  );
-}
+type Mode = 'signin' | 'signup';
 
-// A small line-art laurel wreath; the right branch mirrors the left.
+// A small line-art laurel wreath; the right branch mirrors the left. Lifted from
+// the old landing hero so the auth screen keeps the same classical signature.
 function Laurel() {
   const leaves = [
     { x: 38, y: 50, r: -42 },
@@ -78,99 +64,375 @@ function Laurel() {
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
+interface FieldProps {
+  label: string;
+  icon?: SketchIconName;
+  value: string;
+  onChangeText: (t: string) => void;
+  placeholder: string;
+  keyboardType?: KeyboardTypeOptions;
+  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  secure?: boolean;
+  showPw?: boolean;
+  onTogglePw?: () => void;
+  fieldKey: string;
+  focus: string | null;
+  setFocus: (k: string | null) => void;
+}
+
+function Field({
+  label,
+  icon,
+  value,
+  onChangeText,
+  placeholder,
+  keyboardType,
+  autoCapitalize,
+  secure,
+  showPw,
+  onTogglePw,
+  fieldKey,
+  focus,
+  setFocus,
+}: FieldProps) {
+  const focused = focus === fieldKey;
   return (
-    <View style={styles.stat}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+    <View style={styles.fieldWrap}>
+      <Text style={styles.label}>{label}</Text>
+      <View style={[styles.inputRow, { borderColor: focused ? Ink : InkFaint }]}>
+        {icon && (
+          <View style={styles.leftIcon}>
+            <SketchIcon name={icon} size={18} color={InkSoft} />
+          </View>
+        )}
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={InkSoft}
+          keyboardType={keyboardType}
+          autoCapitalize={autoCapitalize}
+          autoCorrect={false}
+          secureTextEntry={secure && !showPw}
+          onFocus={() => setFocus(fieldKey)}
+          onBlur={() => setFocus(null)}
+          style={styles.input}
+        />
+        {secure && (
+          <Pressable onPress={onTogglePw} hitSlop={8} style={styles.eye} accessibilityLabel="Toggle password visibility">
+            <SketchIcon name="eye" size={18} color={showPw ? Ink : InkSoft} />
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 }
 
-export default function LandingScreen() {
+// First screen on launch when there's no Supabase session: a combined sign-in /
+// create-account form. The X (and the "Continue without an account" link) drop
+// the user into the app as a guest — the app is fully usable locally. A
+// successful sign-in/sign-up is routed into the app by the auth listener in
+// app/_layout.tsx, so this screen never navigates on success itself.
+export default function AuthScreen() {
+  const [mode, setMode] = useState<Mode>('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
+  const [focus, setFocus] = useState<string | null>(null);
+
+  const isSignup = mode === 'signup';
+
+  function skip() {
+    router.replace('/(app)');
+  }
+
+  function switchMode() {
+    setMode(isSignup ? 'signin' : 'signup');
+    setError(null);
+    setInfo(null);
+  }
+
+  async function handleSubmit() {
+    if (loading) return;
+    setError(null);
+    setInfo(null);
+    const e = email.trim();
+    const u = username.trim();
+    if (!e || !password || (isSignup && !u)) {
+      setError('Please fill in all the fields.');
+      return;
+    }
+    if (isSignup) {
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) {
+        setError('Please enter a valid email address.');
+        return;
+      }
+      if (password.length < 6) {
+        setError('Password must be at least 6 characters.');
+        return;
+      }
+    }
+    setLoading(true);
+    try {
+      if (isSignup) {
+        const data = await signUp(e, password, u);
+        // If email confirmation is on, no session is returned — guide them to
+        // confirm, then sign in. Otherwise the auth listener routes them in.
+        if (!data.session) {
+          setInfo(`Almost there — we sent a confirmation link to ${e}. Confirm it, then sign in.`);
+          setMode('signin');
+          setPassword('');
+        }
+      } else {
+        await signIn(e, password);
+        // The SIGNED_IN listener in app/_layout.tsx navigates into the app.
+      }
+    } catch (err: any) {
+      setError(err?.message ?? 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.body}>
-        {/* Isometric hero — a stack of books with a knowledge block on top */}
-        <View style={styles.hero}>
-          <Svg width={240} height={200}>
-            <Defs>
-              <Pattern id="hd-dots" patternUnits="userSpaceOnUse" width={6} height={6}>
-                <Rect x={0} y={0} width={6} height={6} fill={Paper} />
-                <Circle cx={3} cy={3} r={1} fill={Ink} />
-              </Pattern>
-            </Defs>
-            {/* books, largest at the bottom */}
-            <IsoBox cx={120} cy={150} a={58} h={29} ch={16} top={Paper} left={FaceMid} right="url(#hd-dots)" />
-            <IsoBox cx={120} cy={111} a={50} h={25} ch={14} top={Paper} left={FaceMid} right="url(#hd-dots)" />
-            <IsoBox cx={120} cy={78} a={42} h={21} ch={12} top={Paper} left={FaceMid} right="url(#hd-dots)" />
-            {/* the floating idea-block */}
-            <IsoBox cx={120} cy={40} a={17} h={8} ch={18} top={Ink} left="#3A3A3A" right="#555555" />
-          </Svg>
-        </View>
-
-        {/* Headline */}
-        <Text style={styles.headline}>Think more clearly,{'\n'}one idea a day</Text>
-        <Text style={styles.sub}>
-          Bite-size philosophy that turns life's biggest questions into a daily habit.
-        </Text>
-
-        <View style={{ flex: 1 }} />
-
-        {/* Primary CTA + secondary link */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        {/* Skip — continue without an account */}
         <Pressable
-          onPress={() => router.replace('/(app)')}
-          style={({ pressed }) => [styles.cta, pressed && { opacity: 0.85 }]}
+          onPress={skip}
+          hitSlop={10}
+          accessibilityLabel="Continue without an account"
+          style={({ pressed }) => [styles.close, pressed && { opacity: 0.6 }]}
         >
-          <Text style={styles.ctaText}>Begin</Text>
+          <SketchIcon name="close" size={20} color={Ink} />
         </Pressable>
-        <Pressable onPress={() => router.push('/(auth)/login')} hitSlop={8} style={styles.signin}>
-          <Text style={styles.signinText}>I already have an account</Text>
-        </Pressable>
-      </View>
+
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Masthead */}
+          <View style={styles.masthead}>
+            <Laurel />
+            <Text style={styles.overline}>EST. ANTIQUITY · VOL. I</Text>
+            <Text style={styles.wordmark}>PHILOSOPHIZE</Text>
+            <Text style={styles.flourish}>◇ ◆ ◇</Text>
+            <Text style={styles.tagline}>the art of thinking deeply</Text>
+          </View>
+
+          {/* Mode heading */}
+          <Text style={styles.heading}>{isSignup ? 'Create your account' : 'Welcome back'}</Text>
+          <Text style={styles.subhead}>
+            {isSignup
+              ? 'Save your streak, XP, and quotes — and carry them across devices.'
+              : 'Sign in to pick up right where you left off.'}
+          </Text>
+
+          {/* Fields */}
+          {isSignup && (
+            <Field
+              label="USERNAME"
+              icon="person"
+              value={username}
+              onChangeText={setUsername}
+              placeholder="Choose a username"
+              autoCapitalize="none"
+              fieldKey="username"
+              focus={focus}
+              setFocus={setFocus}
+            />
+          )}
+          <Field
+            label="EMAIL"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="you@example.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            fieldKey="email"
+            focus={focus}
+            setFocus={setFocus}
+          />
+          <Field
+            label="PASSWORD"
+            value={password}
+            onChangeText={setPassword}
+            placeholder={isSignup ? 'Min 6 characters' : '••••••••'}
+            secure
+            showPw={showPw}
+            onTogglePw={() => setShowPw((v) => !v)}
+            fieldKey="password"
+            focus={focus}
+            setFocus={setFocus}
+          />
+
+          {/* Error / info */}
+          {error && (
+            <View style={styles.msgRow}>
+              <SketchIcon name="warning" size={16} color={Red} />
+              <Text style={[styles.msg, { color: Red }]}>{error}</Text>
+            </View>
+          )}
+          {info && (
+            <View style={styles.msgRow}>
+              <SketchIcon name="check" size={16} color={Ink} />
+              <Text style={[styles.msg, { color: Ink }]}>{info}</Text>
+            </View>
+          )}
+
+          {/* Submit */}
+          <Pressable
+            onPress={handleSubmit}
+            disabled={loading}
+            style={({ pressed }) => [styles.submit, (pressed || loading) && { opacity: 0.7 }]}
+          >
+            <Text style={styles.submitText}>
+              {loading
+                ? isSignup
+                  ? 'Creating account…'
+                  : 'Signing in…'
+                : isSignup
+                  ? 'Create Account'
+                  : 'Sign In'}
+            </Text>
+          </Pressable>
+
+          {/* Mode toggle */}
+          <Pressable onPress={switchMode} hitSlop={6} style={styles.toggle}>
+            <Text style={styles.toggleText}>
+              {isSignup ? 'Already have an account? ' : 'New here? '}
+              <Text style={styles.toggleStrong}>{isSignup ? 'Sign in' : 'Create one'}</Text>
+            </Text>
+          </Pressable>
+
+          {/* Guest */}
+          <View style={styles.divider}>
+            <View style={styles.line} />
+            <Text style={styles.or}>or</Text>
+            <View style={styles.line} />
+          </View>
+          <Pressable onPress={skip} hitSlop={8} style={styles.guest}>
+            <Text style={styles.guestText}>Continue without an account</Text>
+          </Pressable>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Page },
-  body: { flex: 1, paddingHorizontal: 28, paddingTop: 12, paddingBottom: 24, alignItems: 'center' },
-  hero: { marginTop: 8, marginBottom: 8 },
+  close: {
+    position: 'absolute',
+    top: 6,
+    right: 16,
+    zIndex: 10,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1.5,
+    borderColor: InkFaint,
+    backgroundColor: Page,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scroll: { flexGrow: 1, paddingHorizontal: 28, paddingTop: 40, paddingBottom: 32 },
 
-  headline: {
+  masthead: { alignItems: 'center', marginBottom: 14 },
+  overline: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 10.5,
+    letterSpacing: 2,
+    color: InkSoft,
+    marginTop: 6,
+  },
+  wordmark: {
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 30,
-    lineHeight: 38,
+    letterSpacing: 1,
     color: Ink,
-    textAlign: 'center',
+    marginTop: 6,
   },
-  sub: {
+  flourish: { fontFamily: 'Inter_400Regular', fontSize: 12, color: InkSoft, marginTop: 8, letterSpacing: 4 },
+  tagline: {
     fontFamily: 'PlayfairDisplay_400Regular',
     fontStyle: 'italic',
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: 13,
     color: InkSoft,
-    textAlign: 'center',
-    marginTop: 12,
-    paddingHorizontal: 6,
+    marginTop: 8,
   },
 
-  statsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 26 },
-  stat: { alignItems: 'center', paddingHorizontal: 18 },
-  statValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 20, color: Ink },
-  statLabel: { fontFamily: 'Inter_400Regular', fontSize: 11, color: InkSoft, marginTop: 2 },
-  divider: { width: 1, height: 38, backgroundColor: '#CFCBC1' },
-  laurelStat: { width: 84, height: 64, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
-  laurelValue: { position: 'absolute', fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: Ink },
+  heading: {
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 23,
+    color: Ink,
+    marginTop: 24,
+    marginBottom: 6,
+  },
+  subhead: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 13.5,
+    lineHeight: 20,
+    color: InkSoft,
+    marginBottom: 22,
+  },
 
-  cta: {
-    width: '100%',
-    backgroundColor: Ink,
-    borderRadius: 30,
-    paddingVertical: 18,
+  fieldWrap: { marginBottom: 16 },
+  label: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 12,
+    letterSpacing: 1,
+    color: InkSoft,
+    marginBottom: 7,
+  },
+  inputRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1.5,
+    borderRadius: 12,
+    backgroundColor: FieldBg,
+    paddingHorizontal: 14,
   },
-  ctaText: { fontFamily: 'Inter_700Bold', fontSize: 17, color: Page, letterSpacing: 0.5 },
-  signin: { marginTop: 16 },
-  signinText: { fontFamily: 'Inter_500Medium', fontSize: 14, color: InkSoft, textDecorationLine: 'underline' },
+  leftIcon: { marginRight: 10 },
+  input: {
+    flex: 1,
+    fontFamily: 'Inter_400Regular',
+    fontSize: 16,
+    color: Ink,
+    paddingVertical: 15,
+    // RN-web focus outline is redundant with our border treatment.
+    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : null),
+  },
+  eye: { paddingVertical: 4, paddingLeft: 10 },
+
+  msgRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 2, marginBottom: 6, paddingHorizontal: 2 },
+  msg: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18 },
+
+  submit: {
+    backgroundColor: Ink,
+    borderRadius: 14,
+    paddingVertical: 17,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  submitText: { fontFamily: 'Inter_700Bold', fontSize: 16.5, color: Page, letterSpacing: 0.3 },
+
+  toggle: { alignItems: 'center', marginTop: 18 },
+  toggleText: { fontFamily: 'Inter_400Regular', fontSize: 14.5, color: InkSoft },
+  toggleStrong: { fontFamily: 'Inter_700Bold', color: Ink },
+
+  divider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 24 },
+  line: { flex: 1, height: 1, backgroundColor: InkFaint },
+  or: { fontFamily: 'Inter_400Regular', fontSize: 12, color: InkSoft },
+
+  guest: { alignItems: 'center', marginTop: 16, paddingVertical: 6 },
+  guestText: { fontFamily: 'Inter_500Medium', fontSize: 14, color: InkSoft, textDecorationLine: 'underline' },
 });
