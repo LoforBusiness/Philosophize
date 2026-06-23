@@ -51,6 +51,35 @@ If you change the entitlement/offering/product ids, change them in
    with a monthly base plan at your price.
 3. Add license testers (Setup → License testing) so test purchases don't charge.
 
+## 2b. Reviewer / tester access (paywall bypass)
+
+App-store reviewers (and internal testers) need to clear the paywall **without**
+relying on a sandbox purchase, which can be flaky during review. There is a
+code-side allow-list for this:
+
+- `REVIEWER_EMAILS` in `constants/subscription.ts` lists the accounts that are
+  treated as Pro **without a purchase**. Matching is case-insensitive on the
+  signed-in Supabase email; when it matches, `isPro` is forced on, so the
+  paywall, the daily-lesson gate, and ads are all skipped.
+- It is re-derived from the auth email on every sign-in (`subscriptionStore`
+  `init`/`setUser`, fed from `app/_layout.tsx`), and is **never** persisted.
+
+To use it for a Play review:
+
+1. Make sure the reviewer account exists in **Supabase → Authentication → Users**
+   and is **confirmed** (create it with *Auto Confirm User* checked, or confirm it).
+2. Add that exact email to `REVIEWER_EMAILS`, then **rebuild and upload a new AAB** —
+   the bypass only exists in a build that contains this code.
+3. On the Play Console **App access** page, give the reviewer those same
+   credentials, and note that subscriptions are accessed via this test login.
+
+> ⚠️ **This is a hardcoded unlock that ships in the production bundle.** Anyone who
+> signs in with a listed account (email **and** password) gets Pro for free.
+> Keep the list to throwaway tester accounts and **remove/rotate the entries after
+> review**.
+
+---
+
 ## 3. RevenueCat dashboard
 
 1. Create a **Project**, then add an **iOS app** and an **Android app**.
@@ -101,7 +130,7 @@ server copy of subscription status, add a **RevenueCat webhook → Supabase**
 
 | Piece | File |
 |---|---|
-| ids, daily limit, fallback price | `constants/subscription.ts` |
+| ids, daily limit, fallback price, reviewer allow-list | `constants/subscription.ts` |
 | provider contract + errors | `lib/purchases/types.ts` |
 | real RevenueCat wrapper | `lib/purchases/real.ts` |
 | web/Expo Go stub | `lib/purchases/stub.ts` |

@@ -89,15 +89,16 @@ export default function RootLayout() {
       if (!authChecked) {
         setAuthChecked(true);
         // Configure RevenueCat once, tied to the current user (no-op stub on
-        // web/Expo Go). init() is internally guarded against double-calls.
-        sub.init(session?.user?.id ?? null);
+        // web/Expo Go). init() is internally guarded against double-calls. The
+        // email lets reviewer/tester accounts unlock Pro without a purchase.
+        sub.init(session?.user?.id ?? null, session?.user?.email ?? null);
         // Returning (signed-in) users go straight in; otherwise show onboarding.
         if (session) router.replace('/(app)');
       } else if (event === 'SIGNED_IN') {
-        sub.setUser(session?.user?.id ?? null);
+        sub.setUser(session?.user?.id ?? null, session?.user?.email ?? null);
         router.replace('/(app)');
       } else if (event === 'SIGNED_OUT') {
-        sub.setUser(null);
+        sub.setUser(null, null);
       }
     });
     return () => listener.subscription.unsubscribe();

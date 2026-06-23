@@ -7,6 +7,7 @@ import {
   PurchasesUnavailableError,
   type SubPackage,
 } from '@/lib/purchases';
+import { isReviewerAccount } from '@/constants/subscription';
 import { track } from '@/lib/posthog';
 
 export type PurchaseOutcome = 'success' | 'cancelled' | 'unavailable' | 'error';
@@ -16,6 +17,10 @@ interface SubscriptionState {
   // Cached entitlement (persisted) so a returning subscriber isn't gated on the
   // first frame before RevenueCat responds. Reconciled by init()/refresh().
   isPro: boolean;
+  // True when the signed-in account is on the reviewer/tester allow-list. Forces
+  // isPro on without a purchase so app-store reviewers can clear the paywall.
+  // Re-derived from the auth email on every sign-in; never persisted.
+  isReviewer: boolean;
   // RevenueCat configured + first CustomerInfo loaded.
   ready: boolean;
   // Whether real IAP can run on this build (false on web / Expo Go).
@@ -23,9 +28,9 @@ interface SubscriptionState {
   // Monthly package from the current offering (null until loaded / unavailable).
   monthly: SubPackage | null;
 
-  init: (appUserId: string | null) => Promise<void>;
+  init: (appUserId: string | null, email?: string | null) => Promise<void>;
   refresh: () => Promise<void>;
-  setUser: (appUserId: string | null) => Promise<void>;
+  setUser: (appUserId: string | null, email?: string | null) => Promise<void>;
   purchaseMonthly: () => Promise<PurchaseOutcome>;
   restore: () => Promise<RestoreOutcome>;
 }
@@ -36,20 +41,24 @@ export const useSubscriptionStore = create<SubscriptionState>()(
   persist(
     (set, get) => ({
       isPro: false,
+      isReviewer: false,
       ready: false,
       available: purchases.available,
       monthly: null,
 
-      init: async (appUserId) => {
+      init: async (appUserId, email) => {
         if (initStarted) return;
         initStarted = true;
+        // Reviewer accounts are Pro from the first frame, regardless of billing.
+        const isReviewer = isReviewerAccount(email);
+        if (isReviewer) set({ isReviewer: true, isPro: true });
         try {
           await purchases.configure(appUserId);
-          const [isPro, monthly] = await Promise.all([
+          const [pro, monthly] = await Promise.all([
             purchases.isPro(),
             purchases.getMonthlyPackage(),
           ]);
-          set({ isPro, monthly, ready: true, available: purchases.available });
+          set({ isPro: pro || get().isReviewer, monthly, ready: true, available: purchases.available });
         } catch {
           // Degrade gracefully: keep the cached isPro, just mark ready so the UI
           // stops waiting. Never block the app on a billing failure.
@@ -59,19 +68,20 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
       refresh: async () => {
         try {
-          const [isPro, monthly] = await Promise.all([
+          const [pro, monthly] = await Promise.all([
             purchases.isPro(),
             purchases.getMonthlyPackage(),
           ]);
-          set({ isPro, monthly });
+          set({ isPro: pro || get().isReviewer, monthly });
         } catch {
           /* keep cached state */
         }
       },
 
       // Re-associate RevenueCat with the signed-in user (or clear on sign-out),
-      // then re-read entitlement state.
-      setUser: async (appUserId) => {
+      // refresh the reviewer flag from the new account, then re-read entitlement.
+      setUser: async (appUserId, email) => {
+        set({ isReviewer: isReviewerAccount(email) });
         try {
           if (appUserId) await purchases.logIn(appUserId);
           else await purchases.logOut();
@@ -97,7 +107,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         if (!target) return purchases.available ? 'error' : 'unavailable';
         try {
           const isPro = await purchases.purchase(target);
-          set({ isPro });
+          set({ isPro: isPro || get().isReviewer });
           if (isPro) track('subscribe_succeeded', { plan: 'scholars_pass', product_id: target.productId });
           return isPro ? 'success' : 'error';
         } catch (e) {
@@ -110,7 +120,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       restore: async () => {
         try {
           const isPro = await purchases.restore();
-          set({ isPro });
+          set({ isPro: isPro || get().isReviewer });
           return isPro ? 'restored' : 'none';
         } catch (e) {
           if (e instanceof PurchasesUnavailableError) return 'unavailable';

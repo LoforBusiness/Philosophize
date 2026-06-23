@@ -20,6 +20,19 @@ export const MONTHLY_PRODUCT_ID = {
   android: 'philosophize_scholars_pass_monthly',
 } as const;
 
+// Reviewer / tester allow-list. Accounts listed here are granted Scholar's Pass
+// WITHOUT a purchase, so app-store reviewers and internal testers can get past
+// the paywall (and the daily-lesson limit + ads) by simply signing in with one
+// of these accounts. Matching is case-insensitive on the account's email.
+// Keep this list tiny, and remove/rotate the entries once review is done.
+export const REVIEWER_EMAILS: readonly string[] = ['wordless704@gmail.com'];
+
+export function isReviewerAccount(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const e = email.trim().toLowerCase();
+  return REVIEWER_EMAILS.some((r) => r.toLowerCase() === e);
+}
+
 // Free tier: how many lessons a non-subscriber may complete per calendar day.
 // Tunable — the Settings copy, paywall, and lesson gate all read this number.
 export const FREE_DAILY_LESSON_LIMIT = 1;
