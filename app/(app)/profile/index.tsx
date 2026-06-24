@@ -9,6 +9,7 @@ import ScreenTransition from '@/components/shared/ScreenTransition';
 import StreakBook from '@/components/gamification/StreakBook';
 import StreakWeek from '@/components/gamification/StreakWeek';
 import { signOut } from '@/lib/supabase/auth';
+import { useAuthSession } from '@/lib/supabase/useSession';
 import { ALL_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { rankForXP } from '@/data/ranks';
@@ -81,6 +82,7 @@ export default function ProfileScreen() {
   const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'profile';
   const openRanksBadges = useUIStore((s) => s.openRanksBadges);
   const openSavedQuotes = useUIStore((s) => s.openSavedQuotes);
+  const isSignedIn = !!useAuthSession();
 
   useEffect(() => {
     ensureJoinDate();
@@ -342,9 +344,20 @@ export default function ProfileScreen() {
             ))}
           </Pressable>
 
-          <Pressable onPress={handleSignOut} style={styles.signOut} hitSlop={8}>
-            <Text style={styles.signOutText}>Sign Out</Text>
-          </Pressable>
+          {isSignedIn ? (
+            <Pressable onPress={handleSignOut} style={styles.signOut} hitSlop={8}>
+              <Text style={styles.signOutText}>Sign Out</Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              onPress={() => router.push('/sign-in')}
+              style={({ pressed }) => [styles.signInCta, pressed && { opacity: 0.85 }]}
+              hitSlop={8}
+            >
+              <SketchIcon name="person" size={16} color={Ink} />
+              <Text style={styles.signInCtaText}>Sign in or create an account</Text>
+            </Pressable>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -556,4 +569,17 @@ const styles = StyleSheet.create({
 
   signOut: { alignSelf: 'center', marginTop: 30, padding: 10 },
   signOutText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: InkSoft },
+  signInCta: {
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 30,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 22,
+  },
+  signInCtaText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: Ink, letterSpacing: 0.2 },
 });

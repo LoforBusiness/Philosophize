@@ -121,6 +121,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(app)" />
+        <Stack.Screen name="sign-in" options={{ presentation: 'modal' }} />
         <Stack.Screen name="thinker/[id]" />
       </Stack>
       {/* Global bottom sheets — opened from anywhere via uiStore */}
