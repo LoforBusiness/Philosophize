@@ -48,6 +48,18 @@ function blocks(card: CardData) {
   return card.type === 'question' || card.type === 'dilemma';
 }
 
+// Reading cards surface their text word-by-word; the forward swipe stays locked
+// until the whole passage has finished appearing on screen.
+function hasTimedReveal(card: CardData) {
+  return (
+    card.type === 'hook' ||
+    card.type === 'concept' ||
+    card.type === 'example' ||
+    card.type === 'reinforcement' ||
+    card.type === 'summary'
+  );
+}
+
 export default function LessonRunner({ lesson }: Props) {
   const { startSession, recordAnswer, endSession } = useLessonStore();
   const { width } = useWindowDimensions();
@@ -55,6 +67,8 @@ export default function LessonRunner({ lesson }: Props) {
 
   const [index, setIndex] = useState(0);
   const [answered, setAnswered] = useState<Set<number>>(new Set());
+  // Reading cards whose text has fully revealed (so the forward swipe can unlock).
+  const [revealed, setRevealed] = useState<Set<number>>(new Set());
   const [finished, setFinished] = useState(false);
   const [stats, setStats] = useState<FinalStats | null>(null);
 
@@ -83,9 +97,24 @@ export default function LessonRunner({ lesson }: Props) {
   const lockedSv = useSharedValue(false);
 
   const isLocked = useCallback(
-    (i: number) => blocks(lesson.cards[i]) && !answered.has(i),
-    [lesson.cards, answered]
+    (i: number) => {
+      const card = lesson.cards[i];
+      return (
+        (blocks(card) && !answered.has(i)) ||
+        (hasTimedReveal(card) && !revealed.has(i))
+      );
+    },
+    [lesson.cards, answered, revealed]
   );
+
+  const markRevealed = useCallback((i: number) => {
+    setRevealed((prev) => {
+      if (prev.has(i)) return prev;
+      const n = new Set(prev);
+      n.add(i);
+      return n;
+    });
+  }, []);
 
   useEffect(() => {
     startSession(lesson);
@@ -102,7 +131,7 @@ export default function LessonRunner({ lesson }: Props) {
     indexSv.value = index;
     lockedSv.value = isLocked(index);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, answered, isLocked]);
+  }, [index, answered, revealed, isLocked]);
 
   useEffect(() => {
     tx.value = -index * width;
@@ -217,15 +246,15 @@ export default function LessonRunner({ lesson }: Props) {
   const renderCard = (card: CardData, i: number) => {
     switch (card.type) {
       case 'hook':
-        return <HookCard card={card} />;
+        return <HookCard card={card} onRevealed={() => markRevealed(i)} />;
       case 'concept':
-        return <ConceptCard card={card} />;
+        return <ConceptCard card={card} onRevealed={() => markRevealed(i)} />;
       case 'example':
-        return <ExampleCard card={card} />;
+        return <ExampleCard card={card} onRevealed={() => markRevealed(i)} />;
       case 'reinforcement':
-        return <ReinforcementCard card={card} />;
+        return <ReinforcementCard card={card} onRevealed={() => markRevealed(i)} />;
       case 'summary':
-        return <SummaryCard card={card} />;
+        return <SummaryCard card={card} onRevealed={() => markRevealed(i)} />;
       case 'quote':
         return <QuoteCard card={card} branchSlug={branchSlug} />;
       case 'question':
@@ -248,7 +277,9 @@ export default function LessonRunner({ lesson }: Props) {
   const lessonNum = found ? found.path.lessons.findIndex((l) => l.id === lesson.id) + 1 : 1;
   const label = `${(found?.branch.name ?? 'PHILOSOPHIZE').toUpperCase()} · LESSON ${lessonNum > 0 ? lessonNum : 1}`;
 
-  const lock = isLocked(index);
+  const currentCard = lesson.cards[index];
+  const needsAnswer = blocks(currentCard) && !answered.has(index);
+  const revealing = hasTimedReveal(currentCard) && !revealed.has(index);
   const isLast = index === N - 1;
 
   return (
@@ -275,7 +306,15 @@ export default function LessonRunner({ lesson }: Props) {
               sceneMeta.mode === 'dark' && { color: 'rgba(244,243,238,0.5)' },
             ]}
           >
-            {lock ? 'ANSWER TO CONTINUE' : isLast ? 'SWIPE TO FINISH  →' : index === 0 ? 'SWIPE  →' : '←  SWIPE  →'}
+            {needsAnswer
+              ? 'ANSWER TO CONTINUE'
+              : revealing
+                ? ''
+                : isLast
+                  ? 'SWIPE TO FINISH  →'
+                  : index === 0
+                    ? 'SWIPE  →'
+                    : '←  SWIPE  →'}
           </Text>
         </View>
       </CardShell>

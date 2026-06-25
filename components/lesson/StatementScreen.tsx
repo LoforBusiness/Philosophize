@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MotiView } from 'moti';
 import FadeInWords, { wordTiming } from './FadeInWords';
@@ -10,13 +10,14 @@ interface Props {
   kicker?: string;       // small caps label above the passage
   size?: number;         // body font size
   source?: string;       // optional attribution (example cards)
+  onRevealed?: () => void; // fired once the whole passage has finished fading in
 }
 
 // A reading card whose words live directly in the illustrated scene — no panel.
 // The passage sits in the scene's deliberately blank region (sky, fog, open
 // field) and fades in word by word the moment the reader arrives on the card.
 // Ink text on the paper scenes, paper text on the night scenes.
-export default function StatementScreen({ text, kicker, size = 23, source }: Props) {
+export default function StatementScreen({ text, kicker, size = 23, source, onRevealed }: Props) {
   const scene = useSceneMeta();
   const isCurrent = useCardActive();
   // Latch: the reveal begins on first arrival and never rewinds when swiping back.
@@ -37,6 +38,21 @@ export default function StatementScreen({ text, kicker, size = 23, source }: Pro
     textShadowRadius: 6,
   } as const;
   const { total } = wordTiming(text);
+
+  // Report up the moment the whole passage (and any trailing attribution) has
+  // finished surfacing, so the runner can keep the forward swipe locked until
+  // every word is on screen. Fires once; the reveal never rewinds.
+  const revealedRef = useRef(false);
+  useEffect(() => {
+    if (!active || revealedRef.current) return;
+    const doneMs = total + (source ? 700 : 0);
+    const t = setTimeout(() => {
+      revealedRef.current = true;
+      onRevealed?.();
+    }, doneMs);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
 
   const justify =
     scene.zone === 'top' ? 'flex-start' : scene.zone === 'bottom' ? 'flex-end' : 'center';

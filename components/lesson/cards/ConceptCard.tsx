@@ -4,9 +4,10 @@ import { joinSentences } from '../joinSentences';
 
 interface Props {
   card: ConceptCardType;
+  onRevealed?: () => void;
 }
 
-export default function ConceptCard({ card }: Props) {
+export default function ConceptCard({ card, onRevealed }: Props) {
   const text = joinSentences(card.title, card.body);
-  return <StatementScreen text={text} size={23} kicker="THE IDEA" />;
+  return <StatementScreen text={text} size={23} kicker="THE IDEA" onRevealed={onRevealed} />;
 }

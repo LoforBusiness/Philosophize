@@ -4,9 +4,10 @@ import { joinSentences } from '../joinSentences';
 
 interface Props {
   card: ReinforcementCardType;
+  onRevealed?: () => void;
 }
 
-export default function ReinforcementCard({ card }: Props) {
+export default function ReinforcementCard({ card, onRevealed }: Props) {
   const text = joinSentences(card.callout, card.body);
-  return <StatementScreen text={text} size={24} kicker="REMEMBER" />;
+  return <StatementScreen text={text} size={24} kicker="REMEMBER" onRevealed={onRevealed} />;
 }
