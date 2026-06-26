@@ -102,6 +102,7 @@ interface UserDataState {
   bioSeed: number;                            // bumped each lesson + app launch to refresh the auto-bio
   portrait: string;                           // selected hand-drawn portrait id
   settings: AppSettings;
+  hasSeenWelcome: boolean;                     // first-launch intro animation already played
   _hasHydrated: boolean;
 
   saveQuote: (q: SavedQuote) => void;
@@ -125,6 +126,7 @@ interface UserDataState {
   bumpBioSeed: () => void;
   setPortrait: (id: string) => void;
   setSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void;
+  setHasSeenWelcome: (v: boolean) => void;
   resetProgress: () => void;
   clearSavedQuotes: () => void;
   revokeBadges: () => void;
@@ -177,6 +179,7 @@ export const useUserDataStore = create<UserDataState>()(
       bioSeed: 0,
       portrait: 'overthinker',
       settings: DEFAULT_SETTINGS,
+      hasSeenWelcome: false,
       _hasHydrated: false,
 
       saveQuote: (q) => {
@@ -359,6 +362,8 @@ export const useUserDataStore = create<UserDataState>()(
       setSetting: (key, value) =>
         set((state) => ({ settings: { ...state.settings, [key]: value } })),
 
+      setHasSeenWelcome: (v) => set({ hasSeenWelcome: v }),
+
       resetProgress: () =>
         set({ lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
 
@@ -423,6 +428,7 @@ export const useUserDataStore = create<UserDataState>()(
         bioSeed: state.bioSeed,
         portrait: state.portrait,
         settings: state.settings,
+        hasSeenWelcome: state.hasSeenWelcome,
       }),
       // Merge persisted settings over defaults so newly-added keys are present.
       merge: (persisted, current) => {
