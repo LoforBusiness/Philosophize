@@ -2,6 +2,7 @@
   "expo": {
     "name": "Philosophize",
     "slug": "Philosophize",
+    "owner": "lobusiness",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -76,6 +77,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "944e9d06-b89c-42c3-999a-0c35ac84ac1b"
+      }
     }
   }
 }
