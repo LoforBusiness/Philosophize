@@ -21,12 +21,17 @@ interface Props {
   // Soft glow drawn behind each word so the passage always reads against busy
   // artwork — paper-coloured behind ink text, ink-coloured behind paper text.
   haloColor?: string;
+  // A tone-matched plate painted directly behind each word. Tuned so it vanishes
+  // over the scene's blank zone (paper-on-paper / ink-on-night) yet becomes a
+  // solid backing the instant a word lands on same-tone art (a white cloud, the
+  // moon, a dark canopy) — guaranteeing every word stays completely visible.
+  plateColor?: string;
 }
 
 // Renders a passage as wrapped words that each fade in one after another —
 // invisible at first, then surfacing softly in reading order, like ink settling
 // onto the page. The first sentence is set in bold for hierarchy.
-export default function FadeInWords({ text, size = 23, color, active, align = 'center', haloColor }: Props) {
+export default function FadeInWords({ text, size = 23, color, active, align = 'center', haloColor, plateColor }: Props) {
   const { words, per, lead } = useMemo(() => wordTiming(text), [text]);
 
   // Index of the last word of the first sentence (bolded headline).
@@ -57,13 +62,17 @@ export default function FadeInWords({ text, size = 23, color, active, align = 'c
               fontSize: size,
               lineHeight,
               color,
-              marginHorizontal: 4,
+              marginHorizontal: 2,
               marginVertical: 2,
+              paddingHorizontal: 5,
+              paddingVertical: 1,
+              borderRadius: 6,
+              ...(plateColor ? { backgroundColor: plateColor } : null),
               ...(haloColor
                 ? {
                     textShadowColor: haloColor,
                     textShadowOffset: { width: 0, height: 0 },
-                    textShadowRadius: 7,
+                    textShadowRadius: 8,
                   }
                 : null),
             }}

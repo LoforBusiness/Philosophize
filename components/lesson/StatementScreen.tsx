@@ -32,10 +32,24 @@ export default function StatementScreen({ text, kicker, size = 23, source, onRev
   // A soft halo the colour of the page sits behind every glyph so the words
   // stay legible even where the artwork drifts into the text zone.
   const halo = dark ? 'rgba(14,14,14,0.92)' : 'rgba(250,250,247,0.95)';
+  // A tone-matched plate painted right behind the words. Calibrated to disappear
+  // over the scene's blank zone (it matches the page) but to fill in solidly the
+  // moment a word crosses same-tone art — a white cloud, the moon, a dark tree —
+  // so no word is ever lost in the illustration. The paper plate is keyed to the
+  // scene's mid paper tone (not pure white) so it stays invisible on light scenes
+  // yet still lifts ink text off any dark mass it crosses.
+  const plate = dark ? 'rgba(14,14,14,0.7)' : 'rgba(244,243,238,0.5)';
   const haloShadow = {
     textShadowColor: halo,
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 6,
+    textShadowRadius: 8,
+  } as const;
+  // The kicker and attribution sit on their own small plate too, for the same reason.
+  const linePlate = {
+    backgroundColor: plate,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   } as const;
   const { total } = wordTiming(text);
 
@@ -78,11 +92,11 @@ export default function StatementScreen({ text, kicker, size = 23, source, onRev
           transition={{ type: 'timing', duration: 600 }}
           style={styles.kickerWrap}
         >
-          <Text style={[styles.kicker, { color: faint }, haloShadow]}>{kicker}</Text>
+          <Text style={[styles.kicker, { color: faint }, linePlate, haloShadow]}>{kicker}</Text>
         </MotiView>
       ) : null}
 
-      <FadeInWords text={text} size={size} color={body} active={active} haloColor={halo} />
+      <FadeInWords text={text} size={size} color={body} active={active} haloColor={halo} plateColor={plate} />
 
       {source ? (
         <MotiView
@@ -91,7 +105,7 @@ export default function StatementScreen({ text, kicker, size = 23, source, onRev
           transition={{ type: 'timing', duration: 700, delay: active ? total : 0 }}
           style={styles.sourceWrap}
         >
-          <Text style={[styles.source, { color: dark ? 'rgba(244,243,238,0.7)' : T.inkSoft }, haloShadow]}>
+          <Text style={[styles.source, { color: dark ? 'rgba(244,243,238,0.7)' : T.inkSoft }, linePlate, haloShadow]}>
             — {source}
           </Text>
         </MotiView>
