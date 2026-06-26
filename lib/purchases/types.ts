@@ -39,6 +39,12 @@ export interface PurchasesProvider {
   // Identity: associate / clear the current user with RevenueCat.
   logIn(appUserId: string): Promise<void>;
   logOut(): Promise<void>;
+
+  // Subscribe to entitlement changes pushed by the store/RevenueCat — renewals,
+  // expirations, Ask-to-Buy approvals, and purchases or restores made on another
+  // device. The callback fires with the current Scholar's Pass active state.
+  // Returns an unsubscribe function. No-op on web/Expo Go.
+  addCustomerInfoListener(cb: (isPro: boolean) => void): () => void;
 }
 
 // IAP isn't available in this environment (web preview or Expo Go).

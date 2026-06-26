@@ -3,6 +3,7 @@ import Purchases, {
   LOG_LEVEL,
   PACKAGE_TYPE,
   type PurchasesPackage,
+  type CustomerInfo,
 } from 'react-native-purchases';
 import type { PurchasesProvider, SubPackage } from './types';
 import { PurchasesCancelledError } from './types';
@@ -88,5 +89,12 @@ export const realProvider: PurchasesProvider = {
     try {
       await Purchases.logOut();
     } catch {}
+  },
+
+  addCustomerInfoListener(cb) {
+    const listener = (info: CustomerInfo) =>
+      cb(info.entitlements.active[ENTITLEMENT_ID] != null);
+    Purchases.addCustomerInfoUpdateListener(listener);
+    return () => Purchases.removeCustomerInfoUpdateListener(listener);
   },
 };

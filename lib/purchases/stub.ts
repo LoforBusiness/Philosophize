@@ -23,4 +23,7 @@ export const stubProvider: PurchasesProvider = {
   },
   async logIn() {},
   async logOut() {},
+  addCustomerInfoListener() {
+    return () => {};
+  },
 };

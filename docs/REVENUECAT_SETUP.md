@@ -116,6 +116,10 @@ being charged. Verify:
 - Completing a sandbox purchase flips the user to Pro (Settings shows "CURRENT" on
   Scholar's Pass; the daily gate no longer triggers).
 - **Restore purchase** re-grants the entitlement on a fresh install.
+- Entitlement changes apply **live**: a `CustomerInfo` listener plus an
+  app-foreground refresh update `isPro` instantly on renewals, expirations,
+  Ask-to-Buy approvals, and purchases/restores made on another device — no
+  relaunch needed.
 
 ## 5. Optional, later — server-side truth
 
@@ -136,6 +140,7 @@ server copy of subscription status, add a **RevenueCat webhook → Supabase**
 | web/Expo Go stub | `lib/purchases/stub.ts` |
 | resolver (Expo Go → stub) | `lib/purchases/index.ts` / `index.web.ts` |
 | `isPro` state, purchase/restore | `stores/subscriptionStore.ts` |
+| live entitlement updates (listener + foreground refresh) | `lib/purchases/real.ts` (`addCustomerInfoListener`) · `stores/subscriptionStore.ts` (`init`) · `app/_layout.tsx` (`AppState`) |
 | configure on launch / identity | `app/_layout.tsx` |
 | paywall UI | `app/(app)/paywall.tsx` |
 | daily-limit gate + locked screen | `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` |

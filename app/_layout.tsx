@@ -29,7 +29,7 @@ import { useFonts } from 'expo-font';
 import { Stack, router, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PostHogProvider } from 'posthog-react-native';
@@ -93,6 +93,16 @@ export default function RootLayout() {
   // no-op until the Google Web client id env var is set). Idempotent.
   useEffect(() => {
     configureGoogleSignIn();
+  }, []);
+
+  // Re-check the subscription entitlement whenever the app returns to the
+  // foreground — catches a purchase that completed in the App Store / Play sheet,
+  // a renewal, or an expiry while the app was backgrounded. No-op on web/Expo Go.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (s) => {
+      if (s === 'active') useSubscriptionStore.getState().refresh();
+    });
+    return () => sub.remove();
   }, []);
 
   // Initialize ads (consent + preload an interstitial) only for FREE users —

@@ -59,6 +59,10 @@ export const useSubscriptionStore = create<SubscriptionState>()(
             purchases.getMonthlyPackage(),
           ]);
           set({ isPro: pro || get().isReviewer, monthly, ready: true, available: purchases.available });
+          // Keep isPro live: the store pushes entitlement changes (renewals,
+          // expirations, Ask-to-Buy, purchases/restores on another device).
+          // Registered once for the app's lifetime, so no unsubscribe is needed.
+          purchases.addCustomerInfoListener((pro2) => set({ isPro: pro2 || get().isReviewer }));
         } catch {
           // Degrade gracefully: keep the cached isPro, just mark ready so the UI
           // stops waiting. Never block the app on a billing failure.
