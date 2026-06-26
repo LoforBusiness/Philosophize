@@ -9,7 +9,8 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.philosophize.app"
+      "bundleIdentifier": "com.philosophize.app",
+      "usesAppleSignIn": true
     },
     "android": {
       "package": "com.philosophize.app",
@@ -63,6 +64,13 @@
               "updatePeriodMillis": 10800000
             }
           ]
+        }
+      ],
+      "expo-apple-authentication",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.YOUR_IOS_CLIENT_ID"
         }
       ]
     ],

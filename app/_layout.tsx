@@ -16,6 +16,15 @@ import {
   IMFellEnglish_400Regular,
   IMFellEnglish_400Regular_Italic,
 } from '@expo-google-fonts/im-fell-english';
+import {
+  CormorantGaramond_400Regular,
+  CormorantGaramond_500Medium,
+  CormorantGaramond_600SemiBold,
+} from '@expo-google-fonts/cormorant-garamond';
+import {
+  EBGaramond_400Regular,
+  EBGaramond_400Regular_Italic,
+} from '@expo-google-fonts/eb-garamond';
 import { useFonts } from 'expo-font';
 import { Stack, router, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -30,6 +39,7 @@ import { posthog, setAnalyticsConsent, track } from '@/lib/posthog';
 import { useCloudSync } from '@/lib/supabase/useCloudSync';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { ads } from '@/lib/ads';
+import { configureGoogleSignIn } from '@/lib/auth/social';
 import PhilosopherSheet from '@/components/shared/PhilosopherSheet';
 import RanksBadgesSheet from '@/components/shared/RanksBadgesSheet';
 import SavedQuotesSheet from '@/components/shared/SavedQuotesSheet';
@@ -60,6 +70,11 @@ export default function RootLayout() {
     Caveat_700Bold,
     IMFellEnglish_400Regular,
     IMFellEnglish_400Regular_Italic,
+    CormorantGaramond_400Regular,
+    CormorantGaramond_500Medium,
+    CormorantGaramond_600SemiBold,
+    EBGaramond_400Regular,
+    EBGaramond_400Regular_Italic,
   });
   const [authChecked, setAuthChecked] = useState(false);
 
@@ -73,6 +88,12 @@ export default function RootLayout() {
 
   // Local-first cloud sync: pull/merge/push progress while signed in.
   useCloudSync();
+
+  // Configure Google sign-in once at launch (no-op stub on web/Expo Go, and a
+  // no-op until the Google Web client id env var is set). Idempotent.
+  useEffect(() => {
+    configureGoogleSignIn();
+  }, []);
 
   // Initialize ads (consent + preload an interstitial) only for FREE users —
   // subscribers never see ads, so we don't even gather consent for them. No-op
