@@ -238,10 +238,23 @@ export default function WelcomeAnimation({ onDone }: Props) {
     const ty = 250 + bob + lockRise;
     const sway = 1.4 * Math.sin(t * 1.6) * tk;
 
-    const fig =
-      `translate(0 ${ty}) rotate(${sway} 540 900) ` +
-      `translate(540 720) scale(${figScale}) translate(-540 -720)`;
-    const head = `rotate(${headTilt} 540 508) translate(0 ${headNod})`;
+    // Transforms as RN transform ARRAYS (not SVG strings): Reanimated 4 parses a
+    // string `transform` as CSS and crashes on SVG syntax, but passes arrays
+    // straight through to react-native-svg. Each rotate/scale-about-a-point is
+    // decomposed translate→op→translate, listed in the same order as the original
+    // SVG string so the composed matrix (and the motion) is identical.
+    const fig = [
+      { translateY: ty },
+      // rotate(sway about 540,900)
+      { translateX: 540 }, { translateY: 900 }, { rotate: `${sway}deg` }, { translateX: -540 }, { translateY: -900 },
+      // translate(540,720) scale(figScale) translate(-540,-720)
+      { translateX: 540 }, { translateY: 720 }, { scale: figScale }, { translateX: -540 }, { translateY: -720 },
+    ];
+    // rotate(headTilt about 540,508) then translate(0, headNod)
+    const head = [
+      { translateX: 540 }, { translateY: 508 }, { rotate: `${headTilt}deg` }, { translateX: -540 }, { translateY: -508 },
+      { translateY: headNod },
+    ];
 
     return {
       fig,
