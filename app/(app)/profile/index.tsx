@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     paddingBottom: 26,
     paddingHorizontal: 20,
   },
-  settingsBtn: { position: 'absolute', right: 16, top: 0, padding: 8 },
+  settingsBtn: { position: 'absolute', right: 16, padding: 8 },
   avatar: {
     width: 76,
     height: 76,

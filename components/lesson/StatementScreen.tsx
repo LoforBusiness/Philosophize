@@ -43,7 +43,7 @@ export default function StatementScreen({ text, kicker, size = 23, source, onRev
     if (fitLocked.current || rootH <= 0 || bodyH <= 0) return;
     const avail = rootH - reserve;
     if (avail > 0 && bodyH > avail) {
-      const next = Math.max(15, Math.floor(size * Math.sqrt((avail - 8) / bodyH)));
+      const next = Math.max(15, Math.floor(size * Math.sqrt(Math.max(0, avail - 8) / bodyH)));
       if (next < size) setFitSize(next);
     }
     fitLocked.current = true;
