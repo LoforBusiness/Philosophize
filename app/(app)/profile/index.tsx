@@ -181,7 +181,7 @@ export default function ProfileScreen() {
       >
         {/* Dark header */}
         <View style={[styles.header, { paddingTop: insets.top + 18 }]}>
-          <Pressable style={styles.settingsBtn} hitSlop={10} onPress={() => router.push('/(app)/settings')}>
+          <Pressable style={[styles.settingsBtn, { top: insets.top + 6 }]} hitSlop={10} onPress={() => router.push('/(app)/settings')}>
             <SketchIcon name="settings" size={22} color={Paper} />
           </Pressable>
 

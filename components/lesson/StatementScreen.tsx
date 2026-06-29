@@ -27,6 +27,29 @@ export default function StatementScreen({ text, kicker, size = 23, source, onRev
   }, [isCurrent, active]);
   const dark = scene.mode === 'dark';
 
+  // Auto-fit: a long passage (a dense summary recap, an 80-word example) can run
+  // taller than the card and clip behind the footer. We measure the card's height
+  // and the passage's natural height once, and shrink the font *only* when the
+  // text would overflow — so cards that already fit are never touched. Word area
+  // scales ~ size², hence the sqrt; the 8px margin leaves a little breathing room.
+  const paddingTop = scene.zone === 'top' ? 46 : 18;
+  const paddingBottom = scene.zone === 'bottom' ? 56 : scene.zone === 'middle' ? 130 : 18;
+  const reserve = paddingTop + paddingBottom + (kicker ? 40 : 0) + (source ? 46 : 0);
+  const [rootH, setRootH] = useState(0);
+  const [bodyH, setBodyH] = useState(0);
+  const [fitSize, setFitSize] = useState(size);
+  const fitLocked = useRef(false);
+  useEffect(() => {
+    if (fitLocked.current || rootH <= 0 || bodyH <= 0) return;
+    const avail = rootH - reserve;
+    if (avail > 0 && bodyH > avail) {
+      const next = Math.max(15, Math.floor(size * Math.sqrt((avail - 8) / bodyH)));
+      if (next < size) setFitSize(next);
+    }
+    fitLocked.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rootH, bodyH]);
+
   const body = dark ? '#F4F3EE' : T.ink;
   const faint = dark ? 'rgba(244,243,238,0.6)' : T.gold;
   // A soft halo the colour of the page sits behind every glyph so the words
@@ -73,15 +96,16 @@ export default function StatementScreen({ text, kicker, size = 23, source, onRev
 
   return (
     <View
+      onLayout={(e) => setRootH(e.nativeEvent.layout.height)}
       style={[
         styles.root,
         {
           justifyContent: justify,
           paddingHorizontal: scene.padH ?? 32,
-          paddingTop: scene.zone === 'top' ? 46 : 18,
+          paddingTop,
           // The scenes keep their art low in the frame, so centred text is
           // biased upward to stay inside the blank sky.
-          paddingBottom: scene.zone === 'bottom' ? 56 : scene.zone === 'middle' ? 130 : 18,
+          paddingBottom,
         },
       ]}
     >
@@ -96,7 +120,9 @@ export default function StatementScreen({ text, kicker, size = 23, source, onRev
         </MotiView>
       ) : null}
 
-      <FadeInWords text={text} size={size} color={body} active={active} haloColor={halo} plateColor={plate} />
+      <View onLayout={(e) => setBodyH(e.nativeEvent.layout.height)}>
+        <FadeInWords text={text} size={fitSize} color={body} active={active} haloColor={halo} plateColor={plate} />
+      </View>
 
       {source ? (
         <MotiView

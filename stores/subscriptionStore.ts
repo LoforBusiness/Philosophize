@@ -71,21 +71,34 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       },
 
       refresh: async () => {
+        // Read entitlement and offering INDEPENDENTLY: a store with no offering
+        // configured yet (common before launch) makes getMonthlyPackage throw,
+        // and we must not let that clobber the entitlement — or, worse, drop a
+        // reviewer back behind the paywall.
         try {
-          const [pro, monthly] = await Promise.all([
-            purchases.isPro(),
-            purchases.getMonthlyPackage(),
-          ]);
-          set({ isPro: pro || get().isReviewer, monthly });
+          const pro = await purchases.isPro();
+          set({ isPro: pro || get().isReviewer });
         } catch {
-          /* keep cached state */
+          // Couldn't read entitlement; keep the cached value but never downgrade
+          // a reviewer (they're Pro regardless of billing).
+          if (get().isReviewer) set({ isPro: true });
+        }
+        try {
+          set({ monthly: await purchases.getMonthlyPackage() });
+        } catch {
+          /* offering not ready; keep cached package */
         }
       },
 
       // Re-associate RevenueCat with the signed-in user (or clear on sign-out),
       // refresh the reviewer flag from the new account, then re-read entitlement.
       setUser: async (appUserId, email) => {
-        set({ isReviewer: isReviewerAccount(email) });
+        // Reviewer accounts are Pro from the first frame, regardless of billing —
+        // force it on immediately (mirroring init) so a fresh sign-in clears the
+        // paywall even if RevenueCat can't be reached. The refresh() below can
+        // only ever keep it true for a reviewer, never turn it back off.
+        const isReviewer = isReviewerAccount(email);
+        set(isReviewer ? { isReviewer: true, isPro: true } : { isReviewer: false });
         try {
           if (appUserId) await purchases.logIn(appUserId);
           else await purchases.logOut();
