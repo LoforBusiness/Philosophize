@@ -41,6 +41,14 @@ const STAGE_W = 1080;
 const STAGE_H = 1920;
 const HOLD = 29.0; // play once, then freeze here on the resolved end card
 
+// Arm-rig anchors: the two shoulder sockets the upper-arm bones pivot from,
+// plus a radians→degrees factor for the worklet.
+const LSX = 496,
+  LSY = 706,
+  RSX = 584,
+  RSY = 706;
+const DEG = 180 / Math.PI;
+
 // Pose = [lE.x, lE.y, lH.x, lH.y, rE.x, rE.y, rH.x, rH.y]  (screen-left arm first)
 const POSE: Record<string, number[]> = {
   AKIMBO: [212, 915, 524, 1092, 868, 915, 556, 1092],
@@ -143,8 +151,6 @@ function capK(t: number) {
 }
 
 const AG = Animated.createAnimatedComponent(G);
-const APolyline = Animated.createAnimatedComponent(Polyline);
-const ACircle = Animated.createAnimatedComponent(Circle);
 
 interface Props {
   onDone?: () => void;
@@ -256,25 +262,50 @@ export default function WelcomeAnimation({ onDone }: Props) {
       { translateY: headNod },
     ];
 
+    // Arms as a transform-only two-bone rig. Animating SVG *geometry* props
+    // (Polyline `points`, Circle `cx`/`cy`) through useAnimatedProps does not
+    // repaint on the New Architecture, so the old polyline arms sat frozen while
+    // the transform-driven body kept moving. Instead each bone is a unit Line
+    // stretched to its length with scaleX and rotated onto the shoulder→elbow
+    // and elbow→hand vectors; round joints are filled by fixed-radius circles
+    // translated into place. Every value below is a `transform` array — which
+    // *does* animate — so the exact original poses now actually move.
+    const aUL = Math.atan2(lEy - LSY, lEx - LSX) * DEG;
+    const lUL = Math.hypot(lEx - LSX, lEy - LSY);
+    const aFL = Math.atan2(lHy - lEy, lHx - lEx) * DEG;
+    const lFL = Math.hypot(lHx - lEx, lHy - lEy);
+    const aUR = Math.atan2(rEy - RSY, rEx - RSX) * DEG;
+    const lUR = Math.hypot(rEx - RSX, rEy - RSY);
+    const aFR = Math.atan2(rHy - rEy, rHx - rEx) * DEG;
+    const lFR = Math.hypot(rHx - rEx, rHy - rEy);
+
     return {
       fig,
       head,
       op: figOp,
-      aL: `496,706 ${lEx},${lEy} ${lHx},${lHy}`,
-      aR: `584,706 ${rEx},${rEy} ${rHx},${rHy}`,
-      lhx: lHx,
-      lhy: lHy,
-      rhx: rHx,
-      rhy: rHy,
+      // upper-arm / forearm bones (translate to joint → rotate onto vector → stretch)
+      upL: [{ translateX: LSX }, { translateY: LSY }, { rotate: `${aUL}deg` }, { scaleX: lUL }],
+      foL: [{ translateX: lEx }, { translateY: lEy }, { rotate: `${aFL}deg` }, { scaleX: lFL }],
+      upR: [{ translateX: RSX }, { translateY: RSY }, { rotate: `${aUR}deg` }, { scaleX: lUR }],
+      foR: [{ translateX: rEx }, { translateY: rEy }, { rotate: `${aFR}deg` }, { scaleX: lFR }],
+      // elbow + hand joint circles
+      elL: [{ translateX: lEx }, { translateY: lEy }],
+      elR: [{ translateX: rEx }, { translateY: rEy }],
+      haL: [{ translateX: lHx }, { translateY: lHy }],
+      haR: [{ translateX: rHx }, { translateY: rHy }],
     };
   });
 
   const figProps = useAnimatedProps(() => ({ transform: D.value.fig, opacity: D.value.op }));
   const headProps = useAnimatedProps(() => ({ transform: D.value.head }));
-  const armLProps = useAnimatedProps(() => ({ points: D.value.aL }));
-  const armRProps = useAnimatedProps(() => ({ points: D.value.aR }));
-  const handLProps = useAnimatedProps(() => ({ cx: D.value.lhx, cy: D.value.lhy }));
-  const handRProps = useAnimatedProps(() => ({ cx: D.value.rhx, cy: D.value.rhy }));
+  const upLProps = useAnimatedProps(() => ({ transform: D.value.upL }));
+  const foLProps = useAnimatedProps(() => ({ transform: D.value.foL }));
+  const upRProps = useAnimatedProps(() => ({ transform: D.value.upR }));
+  const foRProps = useAnimatedProps(() => ({ transform: D.value.foR }));
+  const elLProps = useAnimatedProps(() => ({ transform: D.value.elL }));
+  const elRProps = useAnimatedProps(() => ({ transform: D.value.elR }));
+  const haLProps = useAnimatedProps(() => ({ transform: D.value.haL }));
+  const haRProps = useAnimatedProps(() => ({ transform: D.value.haR }));
 
   // drifting-terms layer fades in/out across the "schools" section (11.2→18.9)
   const termsProps = useAnimatedProps(() => {
@@ -327,24 +358,39 @@ export default function WelcomeAnimation({ onDone }: Props) {
           <AG animatedProps={headProps}>
             <Circle cx="540" cy="508" r="182" fill={INK} />
           </AG>
-          <APolyline
-            animatedProps={armLProps}
-            fill="none"
-            stroke={INK}
-            strokeWidth={94}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <APolyline
-            animatedProps={armRProps}
-            fill="none"
-            stroke={INK}
-            strokeWidth={94}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <ACircle animatedProps={handLProps} r="46" fill={INK} />
-          <ACircle animatedProps={handRProps} r="46" fill={INK} />
+          {/* Arms: two stretched-unit-line bones per side (butt caps, so the
+              non-uniform scaleX never distorts the stroke width), with circles
+              filling the shoulder / elbow / hand joints to round them — the
+              same silhouette as the old round-capped polyline, but driven by
+              transform so it animates on the New Architecture. */}
+          <AG animatedProps={upLProps}>
+            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={94} strokeLinecap="butt" />
+          </AG>
+          <AG animatedProps={foLProps}>
+            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={94} strokeLinecap="butt" />
+          </AG>
+          <AG animatedProps={upRProps}>
+            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={94} strokeLinecap="butt" />
+          </AG>
+          <AG animatedProps={foRProps}>
+            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={94} strokeLinecap="butt" />
+          </AG>
+          {/* fixed shoulder sockets */}
+          <Circle cx={LSX} cy={LSY} r={47} fill={INK} />
+          <Circle cx={RSX} cy={RSY} r={47} fill={INK} />
+          {/* elbows + hands */}
+          <AG animatedProps={elLProps}>
+            <Circle cx={0} cy={0} r={47} fill={INK} />
+          </AG>
+          <AG animatedProps={elRProps}>
+            <Circle cx={0} cy={0} r={47} fill={INK} />
+          </AG>
+          <AG animatedProps={haLProps}>
+            <Circle cx={0} cy={0} r={46} fill={INK} />
+          </AG>
+          <AG animatedProps={haRProps}>
+            <Circle cx={0} cy={0} r={46} fill={INK} />
+          </AG>
         </AG>
       </Svg>
 
