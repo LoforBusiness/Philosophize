@@ -537,7 +537,9 @@ const styles = StyleSheet.create({
 
   bubble: {
     position: 'absolute',
-    top: 120,
+    // Bottom-anchored so the downward tail stays a constant distance above the
+    // (now lower) figure's head, whether the caption is one line or two.
+    bottom: 1200,
     left: 70,
     right: 70,
     maxWidth: 800,
