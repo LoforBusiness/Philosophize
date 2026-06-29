@@ -241,7 +241,10 @@ export default function WelcomeAnimation({ onDone }: Props) {
 
     const figScale = lean * appearScale * lockScale;
     const figOp = appearOp * lockOp;
-    const ty = 250 + bob + lockRise;
+    // Sit the figure lower in the frame so less of the long torso shows (its
+    // bottom fades out below the fold) — keeps the head/arms in view without
+    // the body reading as overly elongated.
+    const ty = 480 + bob + lockRise;
     const sway = 1.4 * Math.sin(t * 1.6) * tk;
 
     // Transforms as RN transform ARRAYS (not SVG strings): Reanimated 4 parses a
