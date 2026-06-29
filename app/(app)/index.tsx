@@ -72,12 +72,7 @@ function ActionCard({
       <View style={[styles.actionIconBox, { borderColor: fg }]}>
         <SketchIcon name={icon} size={18} color={fg} />
       </View>
-      <Text
-        style={[styles.actionLabel, { color: fg }]}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.7}
-      >
+      <Text style={[styles.actionLabel, { color: fg }]} numberOfLines={1}>
         {label}
       </Text>
       <Text style={[styles.actionSub, { color: filled ? '#CBC9C2' : InkSoft }]} numberOfLines={1}>
@@ -280,7 +275,7 @@ const styles = StyleSheet.create({
   actionsRow: { flexDirection: 'row', gap: 10, marginTop: 18 },
   actionWrap: { flex: 1 },
   action: {
-    flex: 1,
+    width: '100%',
     borderWidth: 1.5,
     borderColor: Ink,
     borderRadius: 6,

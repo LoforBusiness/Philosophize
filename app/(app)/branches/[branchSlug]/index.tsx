@@ -211,7 +211,7 @@ function LessonRow({ lesson, state, onPress }: { lesson: Lesson; state: LessonSt
       disabled={locked}
       style={({ pressed }) => [styles.lessonRow, pressed && !locked && { opacity: 0.6 }]}
     >
-      <View style={{ flex: 1, paddingRight: 10 }}>
+      <View style={{ flex: 1, minWidth: 0, paddingRight: 10 }}>
         <Text style={[styles.lessonTitle, locked && { color: LockGray }]} numberOfLines={2}>
           {lesson.title}
         </Text>

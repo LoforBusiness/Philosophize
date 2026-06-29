@@ -1,6 +1,7 @@
 import type { ColorValue } from 'react-native';
 import { Tabs } from 'expo-router';
 import { MotiView } from 'moti';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 
 function tab(name: SketchIconName) {
@@ -15,6 +16,10 @@ function tab(name: SketchIconName) {
 }
 
 export default function AppLayout() {
+  // Reserve room for the Android system nav bar / iOS home indicator so the tab
+  // bar isn't hidden behind it. A fixed height with no inset put the icons
+  // underneath the 3-button nav on Android.
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       screenOptions={{
@@ -24,9 +29,9 @@ export default function AppLayout() {
           backgroundColor: '#FAFAF7',
           borderTopColor: '#1A1A1A',
           borderTopWidth: 1.5,
-          height: 70,
+          height: 70 + insets.bottom,
           paddingTop: 10,
-          paddingBottom: 12,
+          paddingBottom: 12 + insets.bottom,
         },
         tabBarActiveTintColor: '#1A1A1A',
         tabBarInactiveTintColor: '#B8B8B2',

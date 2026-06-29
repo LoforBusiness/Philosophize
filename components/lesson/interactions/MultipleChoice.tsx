@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   letterCorrect: { backgroundColor: T.green, borderColor: T.green },
   letterWrong: { backgroundColor: T.red, borderColor: T.red },
   letterText: { fontFamily: 'Inter_700Bold', fontSize: 12, color: T.creamSoft },
-  optText: { flex: 1, fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: T.cream, lineHeight: 22 },
+  optText: { flex: 1, minWidth: 0, fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: T.cream, lineHeight: 22 },
 
   explain: { borderLeftWidth: 2, borderLeftColor: T.border, paddingLeft: 14, marginTop: 4, marginBottom: 8 },
   explainLabel: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.5, marginBottom: 6 },

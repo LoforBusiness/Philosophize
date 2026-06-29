@@ -1,4 +1,3 @@
-import '../global.css';
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -141,7 +140,7 @@ export default function RootLayout() {
 
   if (!fontsLoaded) {
     return (
-      <View className="flex-1 bg-paper items-center justify-center">
+      <View style={{ flex: 1, backgroundColor: '#FAFAF7', alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator color="#1A1A1A" />
       </View>
     );

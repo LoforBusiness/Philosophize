@@ -45,8 +45,8 @@ export default function LessonScreen() {
 
   if (!result) {
     return (
-      <SafeAreaView className="flex-1 bg-paper items-center justify-center">
-        <Text className="text-ink text-lg">Lesson not found.</Text>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFAF7', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: '#1A1A1A', fontSize: 18 }}>Lesson not found.</Text>
       </SafeAreaView>
     );
   }
