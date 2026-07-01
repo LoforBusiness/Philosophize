@@ -103,7 +103,9 @@ Curriculum content lives in `data/branches/` as strongly-typed TypeScript files.
 - `lessonStore` (Zustand): card index, answers, session XP — ephemeral, reset on lesson end
 - `uiStore` (Zustand): philosopher sheet + ranks/badges sheet visibility
 - `userDataStore` (Zustand + AsyncStorage, key `philosophize-userdata`): **the live source of truth** for all progress — streak, totalXP, lessonsByBranch, earnedBadges, savedQuotes, philosopherViews, profile, settings
-- **Supabase is auth-only today.** `lib/supabase/progress.ts` (the intended XP/streak/lesson-progress sync) is written but **never called**, and the TanStack Query provider is mounted but unused for progress. Treat §6 as the *future* sync target, not current behavior.
+- **Supabase cloud sync is LIVE (local-first).** `userDataStore` is still the on-device source of truth, but its persisted slice is mirrored to Supabase and merged back on sign-in via `lib/supabase/sync.ts` + `lib/supabase/useCloudSync.ts` (table `public.user_state`, one JSON snapshot row per user). Sync is best-effort — failures never block offline play. `useCloudSync` tags the store with `_syncOwnerId` so a shared/guest device adopts the account's own snapshot instead of fusing in the previous user's data, and `resetForSignOut()` wipes local data on sign-out.
+  - The older relational sketch (`lib/supabase/progress.ts`, and the `profiles`/`user_xp`/… tables in `001_initial_schema.sql`) is **still dormant** — the app syncs the JSON `user_state` snapshot, not those per-metric tables. §6 documents that dormant relational schema; the live path is the single `user_state` row.
+  - Auth session is stored in the OS Keychain/Keystore (`expo-secure-store`), not plaintext AsyncStorage. RLS is enabled + forced on `user_state` (`auth.uid() = user_id`); see `supabase/migrations/0001_user_state.sql` + `0002_security_hardening.sql`.
 
 **Card components are static imports, not dynamic:**
 `LessonRunner` uses a `switch` on `card.type` to render the correct component. All 8 card components are statically imported. This avoids dynamic import waterfalls inside the lesson screen and ensures zero loading delay between cards.
@@ -158,9 +160,9 @@ Every lesson MUST:
 
 ---
 
-## 6. Planned Sync Schema (not yet active)
+## 6. Dormant Relational Schema (not the live sync path)
 
-> **Status: aspirational.** Today all progress lives **locally** in `userDataStore` (Zustand + AsyncStorage, key `philosophize-userdata`): `streak`, `totalXP`, `lessonsByBranch`, `earnedBadges`, `savedQuotes`, `philosopherViews`, `lastLessonDate`, `joinedAt`, profile (`displayName` / `bio` / `portrait`), and `settings`. The tables below are the **future** Supabase sync target (`lib/supabase/progress.ts` already sketches the upserts) — not current behavior.
+> **Status: dormant — NOT how sync works today.** The live cloud sync (see §4) mirrors the whole `userDataStore` slice into a single JSON `public.user_state` row (`lib/supabase/sync.ts`), **not** the per-metric relational tables below. This section documents the older relational sketch (`lib/supabase/progress.ts` + `supabase/migrations/001_initial_schema.sql`), which is written and RLS-protected but **never called** by the app. Keep it as a reference for a possible future migration to normalized tables; it is not current behavior.
 
 ### profiles
 | Column | Type | Notes |

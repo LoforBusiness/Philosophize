@@ -104,6 +104,7 @@ interface UserDataState {
   settings: AppSettings;
   hasSeenWelcome: boolean;                     // first-launch intro animation already played
   _hasHydrated: boolean;
+  _syncOwnerId: string | null;                 // user id whose data currently fills this device's store (cloud-sync guard)
 
   saveQuote: (q: SavedQuote) => void;
   removeQuote: (id: string) => void;
@@ -131,6 +132,7 @@ interface UserDataState {
   clearSavedQuotes: () => void;
   revokeBadges: () => void;
   deleteAccount: () => void;
+  resetForSignOut: () => void;
   setHasHydrated: (v: boolean) => void;
 }
 
@@ -181,6 +183,7 @@ export const useUserDataStore = create<UserDataState>()(
       settings: DEFAULT_SETTINGS,
       hasSeenWelcome: false,
       _hasHydrated: false,
+      _syncOwnerId: null,
 
       saveQuote: (q) => {
         set((state) => {
@@ -401,6 +404,39 @@ export const useUserDataStore = create<UserDataState>()(
         });
       },
 
+      // Wipe this device back to a clean guest baseline when a user signs out, so
+      // the next person to use the device (or sign in) never inherits the prior
+      // user's progress, saved quotes, or profile. Mirrors deleteAccount's field
+      // reset but is purely local; clears _syncOwnerId so the next sign-in adopts
+      // that account's own cloud snapshot rather than merging leftover data.
+      resetForSignOut: () => {
+        if (get().pinnedQuoteId) writePinnedQuote(null);
+        set({
+          savedQuotes: [],
+          pinnedQuoteId: null,
+          quizScores: {},
+          philosopherViews: {},
+          lessonsByBranch: {},
+          voiceEnabled: true,
+          beliefResultId: null,
+          streak: 0,
+          totalXP: 0,
+          lastLessonDate: null,
+          dailyLessonCount: 0,
+          dailyLessonDate: null,
+          joinedAt: null,
+          earnedBadges: [],
+          badgesInitialized: true,
+          displayName: 'Philosopher',
+          email: '',
+          bio: '',
+          bioSeed: 0,
+          portrait: 'overthinker',
+          settings: DEFAULT_SETTINGS,
+          _syncOwnerId: null,
+        });
+      },
+
       setHasHydrated: (v) => set({ _hasHydrated: v }),
     }),
     {
@@ -429,6 +465,7 @@ export const useUserDataStore = create<UserDataState>()(
         portrait: state.portrait,
         settings: state.settings,
         hasSeenWelcome: state.hasSeenWelcome,
+        _syncOwnerId: state._syncOwnerId,
       }),
       // Merge persisted settings over defaults so newly-added keys are present.
       merge: (persisted, current) => {

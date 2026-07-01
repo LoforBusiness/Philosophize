@@ -19,8 +19,23 @@ const HOST = process.env.EXPO_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com';
 const PII_KEYS = ['email', 'name', 'displayName', 'bio', 'text', 'quote', 'note', 'username', 'author'];
 
 function stripPII(event: any) {
-  if (event && event.properties) {
-    for (const k of PII_KEYS) delete event.properties[k];
+  if (!event) return event;
+  // PII can ride out on two channels: the flat `properties` bag AND the person-
+  // property channel that identify()/$set populates (event.$set / $set_once, and
+  // their nested copies under properties). Scrub PII_KEYS from every one of them
+  // so the "never ship personal text" promise holds even if a future identify()
+  // call includes profile.email or displayName.
+  const bags = [
+    event.properties,
+    event.$set,
+    event.$set_once,
+    event.properties?.$set,
+    event.properties?.$set_once,
+  ];
+  for (const bag of bags) {
+    if (bag && typeof bag === 'object') for (const k of PII_KEYS) delete bag[k];
+  }
+  if (event.properties) {
     // Touch-autocapture copies on-screen element text (quote bodies, names) into
     // these nested structures, which the flat scrub above misses — drop them
     // wholesale so no rendered user content can ride out on a tap event.

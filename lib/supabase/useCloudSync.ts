@@ -61,8 +61,27 @@ export function useCloudSync() {
 
       const remote = await pullCloudState(userId);
       if (cancelled || userIdRef.current !== userId) return;
-      // Merge cloud into local, apply, then push the merged result up.
-      useUserDataStore.setState(mergeStates(snapshotLocal(), remote ?? {}) as any);
+
+      // Shared-device guard. If this account already has a cloud snapshot AND the
+      // local store doesn't belong to this user (a guest session, or a different
+      // user who used this device), adopt the cloud snapshot wholesale instead of
+      // union-merging — otherwise the previous person's progress and saved quotes
+      // would be fused into, and then uploaded to, this account. A brand-new
+      // account (empty cloud) still adopts the local guest progress, preserving
+      // the play-then-sign-up flow; the same user's own device still merges, so
+      // offline progress is never lost.
+      const remoteHasData = !!remote && Object.keys(remote).length > 0;
+      const localBelongsToUser = useUserDataStore.getState()._syncOwnerId === userId;
+      if (remoteHasData && !localBelongsToUser) {
+        useUserDataStore.getState().resetForSignOut();
+        if (cancelled || userIdRef.current !== userId) return;
+      }
+
+      // Merge cloud into local, tag the store's owner, then push the result up.
+      useUserDataStore.setState({
+        ...(mergeStates(snapshotLocal(), remote ?? {}) as any),
+        _syncOwnerId: userId,
+      });
       await pushCloudState(userId, snapshotLocal());
       if (cancelled || userIdRef.current !== userId) return;
       syncedRef.current = true;
@@ -89,13 +108,17 @@ export function useCloudSync() {
       if (uid) void start(uid);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       const uid = session?.user?.id ?? null;
       if (uid && uid !== userIdRef.current) {
         stop();
         void start(uid);
       } else if (!uid && userIdRef.current) {
         stop();
+        // A signed-in user just signed out: wipe their data from this device so
+        // the next guest/user can't read or inherit it, and the next sign-in
+        // adopts that account's own cloud snapshot from a clean baseline.
+        if (event === 'SIGNED_OUT') useUserDataStore.getState().resetForSignOut();
       }
     });
 

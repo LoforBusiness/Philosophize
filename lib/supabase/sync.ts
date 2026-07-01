@@ -120,6 +120,21 @@ function mergeQuotes(a: SavedQuote[] = [], b: SavedQuote[] = []): SavedQuote[] {
 const DEFAULT_NAME = 'Philosopher';
 const DEFAULT_PORTRAIT = 'overthinker';
 
+// Adopt only KNOWN settings keys from a cloud snapshot, filling any missing key
+// from the local defaults and dropping unknown/legacy ones. The row is self-
+// authored under RLS, so this is robustness (not a trust boundary): it stops a
+// fresh device from inheriting a malformed/partial settings shape from a corrupt
+// or older-version cloud row.
+function sanitizeSettings(remote: Partial<AppSettings> | undefined, base: AppSettings): AppSettings {
+  if (!remote || typeof remote !== 'object') return base;
+  const out = { ...base } as Record<string, unknown>;
+  for (const k of Object.keys(base)) {
+    const rv = (remote as Record<string, unknown>)[k];
+    if (rv !== undefined) out[k] = rv;
+  }
+  return out as unknown as AppSettings;
+}
+
 // A device whose profile is still all-defaults is "fresh": it adopts the cloud
 // identity + settings wholesale on first login. A personalised device keeps its
 // own and propagates it. Progress is always merged regardless.
@@ -176,15 +191,19 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
   }
 
   // --- profile + settings: fresh device adopts cloud, else keep local ---
+  // Type-guard each adopted field so a corrupt/legacy cloud row can't seed an
+  // unexpected shape into local state on a fresh device.
   const fresh = isFresh(local);
-  const displayName = fresh && remote.displayName != null ? remote.displayName : local.displayName;
-  const bio = fresh && remote.bio != null ? remote.bio : local.bio;
-  const email = fresh && remote.email != null ? remote.email : local.email;
-  const portrait = fresh && remote.portrait != null ? remote.portrait : local.portrait;
-  const settings = fresh && remote.settings ? remote.settings : local.settings;
-  const voiceEnabled = fresh && remote.voiceEnabled != null ? remote.voiceEnabled : local.voiceEnabled;
+  const displayName = fresh && typeof remote.displayName === 'string' ? remote.displayName : local.displayName;
+  const bio = fresh && typeof remote.bio === 'string' ? remote.bio : local.bio;
+  const email = fresh && typeof remote.email === 'string' ? remote.email : local.email;
+  const portrait = fresh && typeof remote.portrait === 'string' ? remote.portrait : local.portrait;
+  const settings = fresh ? sanitizeSettings(remote.settings, local.settings) : local.settings;
+  const voiceEnabled = fresh && typeof remote.voiceEnabled === 'boolean' ? remote.voiceEnabled : local.voiceEnabled;
   const beliefResultId =
-    fresh && remote.beliefResultId !== undefined ? remote.beliefResultId : local.beliefResultId;
+    fresh && (typeof remote.beliefResultId === 'string' || remote.beliefResultId === null)
+      ? remote.beliefResultId
+      : local.beliefResultId;
 
   return {
     savedQuotes,
