@@ -385,7 +385,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarLetter: { fontFamily: 'Caveat_700Bold', fontSize: 44, color: Paper, lineHeight: 50 },
+  avatarLetter: {
+    fontFamily: 'Caveat_700Bold',
+    fontSize: 44,
+    color: Paper,
+    lineHeight: 50,
+    textAlign: 'center',
+    includeFontPadding: false,
+    // Caveat is a right-slanted handwriting font — nudge left (~12% of font
+    // size) so the initial reads centred instead of clipping the right border.
+    // A compromise: wide letters (W/M/A) still lean a little, narrow ones sit
+    // just left of centre.
+    transform: [{ translateX: -5.5 }],
+  },
   avatarBadge: {
     position: 'absolute',
     right: -4,

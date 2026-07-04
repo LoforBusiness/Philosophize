@@ -284,6 +284,8 @@ const styles = StyleSheet.create({
     lineHeight: 84,
     textAlign: 'center',
     includeFontPadding: false,
+    // See the Thinkers avatars — nudge left (~12% of font size) for Caveat's lean.
+    transform: [{ translateX: -6 }],
   },
   name: {
     fontFamily: 'PlayfairDisplay_700Bold',

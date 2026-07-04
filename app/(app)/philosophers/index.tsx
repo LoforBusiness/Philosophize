@@ -306,6 +306,12 @@ const styles = StyleSheet.create({
     lineHeight: 46,
     textAlign: 'center',
     includeFontPadding: false,
+    // Caveat is a right-slanted handwriting font, so a single capital sits
+    // right-of-centre and grazes the circle border. Nudge left (~12% of font
+    // size) — a compromise: it can't perfectly centre every glyph (wide letters
+    // like W/M/A lean far more than narrow ones), but it roughly halves the
+    // worst-case offset across the alphabet.
+    transform: [{ translateX: -3 }],
   },
   featKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: PaperMute, letterSpacing: 1.5 },
   featName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: Paper, marginTop: 3 },
@@ -349,6 +355,8 @@ const styles = StyleSheet.create({
     lineHeight: 34,
     textAlign: 'center',
     includeFontPadding: false,
+    // See featAvatarLetter — nudge left (~12% of font size) for Caveat's lean.
+    transform: [{ translateX: -2.5 }],
   },
   cardName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: Ink },
   cardMeta: { fontFamily: 'Inter_400Regular', fontSize: 10.5, color: InkSoft, marginTop: 1 },
