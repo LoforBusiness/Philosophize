@@ -8,6 +8,12 @@
     "icon": "./assets/images/icon.png",
     "scheme": "philosophize",
     "userInterfaceStyle": "light",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/944e9d06-b89c-42c3-999a-0c35ac84ac1b"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.philosophize.app",
