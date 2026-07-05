@@ -303,13 +303,14 @@ const styles = StyleSheet.create({
     fontFamily: 'Caveat_700Bold',
     fontSize: 21,
     color: Paper,
+    // Caveat's ink overhangs its glyph box on the right; Android clips text to
+    // its (tight, advance-width) layout box, cutting the right of the letter.
+    // Give the Text a width wider than the glyph so the ink has room; textAlign
+    // then centres the letter within that width.
+    width: 52,
     lineHeight: 46,
     textAlign: 'center',
     includeFontPadding: false,
-    // Caveat is a right-slanted handwriting font whose wide capitals (W/M/A)
-    // overhang their glyph box. Size the initial to leave margin inside the
-    // circle so no letter clips the border, plus a gentle left nudge so it
-    // reads centred (a handwriting font can't be nudged exact for every glyph).
     transform: [{ translateX: -1.5 }],
   },
   featKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: PaperMute, letterSpacing: 1.5 },
@@ -351,10 +352,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Caveat_700Bold',
     fontSize: 16,
     color: Ink,
+    // See featAvatarLetter — width wider than the glyph so its right side
+    // isn't clipped by Android's text bounds.
+    width: 38,
     lineHeight: 34,
     textAlign: 'center',
     includeFontPadding: false,
-    // See featAvatarLetter — sized for margin + gentle left nudge for Caveat.
     transform: [{ translateX: -1 }],
   },
   cardName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: Ink },

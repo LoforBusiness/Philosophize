@@ -389,12 +389,14 @@ const styles = StyleSheet.create({
     fontFamily: 'Caveat_700Bold',
     fontSize: 36,
     color: Paper,
+    // Caveat's ink overhangs its glyph box on the right; Android clips text to
+    // its tight advance-width box, cutting the right of the letter (e.g. the
+    // "W"). Give the Text a width wider than the glyph so the ink renders fully;
+    // textAlign centres it within that width.
+    width: 88,
     lineHeight: 50,
     textAlign: 'center',
     includeFontPadding: false,
-    // Caveat's wide capitals (like this user's "W") overhang their glyph box.
-    // Size the initial to leave margin in the circle so it never clips, plus a
-    // gentle left nudge to counter the font's right lean.
     transform: [{ translateX: -2.5 }],
   },
   avatarBadge: {

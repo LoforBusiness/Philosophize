@@ -281,10 +281,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Caveat_700Bold',
     fontSize: 42,
     color: Ink,
+    // See the Thinkers avatars — width wider than the glyph so Caveat's
+    // right-overhanging ink isn't clipped by Android's text bounds.
+    width: 98,
     lineHeight: 84,
     textAlign: 'center',
     includeFontPadding: false,
-    // See the Thinkers avatars — sized for margin + gentle left nudge for Caveat.
     transform: [{ translateX: -3 }],
   },
   name: {
