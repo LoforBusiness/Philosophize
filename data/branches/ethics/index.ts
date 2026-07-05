@@ -1,5 +1,5 @@
 import type { Branch } from '@/data/types';
-import whatIsEthicsPath from './paths/what-is-ethics';
+import units from './paths/what-is-ethics';
 
 const ethicsBranch: Branch = {
   id: 'ethics',
@@ -8,7 +8,7 @@ const ethicsBranch: Branch = {
   description: 'Study of morality, right action, and how humans should live.',
   icon: '⚖️',
   color: '#7B4A9D',
-  paths: [whatIsEthicsPath],
+  paths: units,
 };
 
 export default ethicsBranch;

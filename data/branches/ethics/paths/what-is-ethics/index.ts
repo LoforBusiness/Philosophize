@@ -1,41 +1,73 @@
 import type { Path } from '@/data/types';
-import lesson1 from './lessons/why-humans-care-about-right-and-wrong';
-import lesson2 from './lessons/everyday-moral-choices';
-import lesson3 from './lessons/what-makes-an-action-good';
-import lesson4 from './lessons/morality-across-cultures';
-import lesson5 from './lessons/beginning-of-ethical-thinking';
-import lesson6 from './lessons/trolley-problem-family';
-import lesson7 from './lessons/moral-luck';
-import lesson8 from './lessons/ethics-of-care';
-import lesson9 from './lessons/justice-and-fairness';
-import lesson10 from './lessons/ethics-in-practice';
-import lesson11 from './lessons/utilitarianism-in-depth';
-import lesson12 from './lessons/kants-categorical-imperative';
-import lesson13 from './lessons/virtue-ethics-and-eudaimonia';
-import lesson14 from './lessons/the-social-contract';
-import lesson15 from './lessons/is-morality-real';
-import lesson16 from './lessons/free-will-and-moral-responsibility';
-import lesson17 from './lessons/lying-and-promises';
-import lesson18 from './lessons/animal-ethics';
-import lesson19 from './lessons/life-and-death';
-import lesson20 from './lessons/future-generations-and-the-environment';
-import lesson21 from './lessons/the-doctrine-of-double-effect';
-import lesson22 from './lessons/the-experience-machine';
-import lesson23 from './lessons/effective-altruism-and-the-drowning-child';
-import lesson24 from './lessons/the-ethics-of-punishment';
-import lesson25 from './lessons/autonomy-and-paternalism';
-import lesson26 from './lessons/moral-status-and-personhood';
-import lesson27 from './lessons/metaethics-where-morals-live';
-import lesson28 from './lessons/reflective-equilibrium';
-import lesson29 from './lessons/supererogation-beyond-duty';
-import lesson30 from './lessons/how-to-live-an-ethical-life';
+import whyHumansCareAboutRightAndWrong from './lessons/why-humans-care-about-right-and-wrong';
+import everydayMoralChoices from './lessons/everyday-moral-choices';
+import whatMakesAnActionGood from './lessons/what-makes-an-action-good';
+import moralityAcrossCultures from './lessons/morality-across-cultures';
+import beginningOfEthicalThinking from './lessons/beginning-of-ethical-thinking';
+import trolleyProblemFamily from './lessons/trolley-problem-family';
+import moralLuck from './lessons/moral-luck';
+import ethicsOfCare from './lessons/ethics-of-care';
+import justiceAndFairness from './lessons/justice-and-fairness';
+import ethicsInPractice from './lessons/ethics-in-practice';
+import utilitarianismInDepth from './lessons/utilitarianism-in-depth';
+import kantsCategoricalImperative from './lessons/kants-categorical-imperative';
+import virtueEthicsAndEudaimonia from './lessons/virtue-ethics-and-eudaimonia';
+import theSocialContract from './lessons/the-social-contract';
+import isMoralityReal from './lessons/is-morality-real';
+import freeWillAndMoralResponsibility from './lessons/free-will-and-moral-responsibility';
+import lyingAndPromises from './lessons/lying-and-promises';
+import animalEthics from './lessons/animal-ethics';
+import lifeAndDeath from './lessons/life-and-death';
+import futureGenerationsAndTheEnvironment from './lessons/future-generations-and-the-environment';
+import theDoctrineOfDoubleEffect from './lessons/the-doctrine-of-double-effect';
+import theExperienceMachine from './lessons/the-experience-machine';
+import effectiveAltruismAndTheDrowningChild from './lessons/effective-altruism-and-the-drowning-child';
+import theEthicsOfPunishment from './lessons/the-ethics-of-punishment';
+import autonomyAndPaternalism from './lessons/autonomy-and-paternalism';
+import moralStatusAndPersonhood from './lessons/moral-status-and-personhood';
+import metaethicsWhereMoralsLive from './lessons/metaethics-where-morals-live';
+import reflectiveEquilibrium from './lessons/reflective-equilibrium';
+import supererogationBeyondDuty from './lessons/supererogation-beyond-duty';
+import howToLiveAnEthicalLife from './lessons/how-to-live-an-ethical-life';
 
-const whatIsEthicsPath: Path = {
-  id: 'ethics-ethics',
-  slug: 'what-is-ethics',
-  name: 'What Is Ethics?',
-  description: 'Explore why humans care about right and wrong — and how ethics began.',
-  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10, lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20, lesson21, lesson22, lesson23, lesson24, lesson25, lesson26, lesson27, lesson28, lesson29, lesson30],
-};
+// 5 units — split from the original single "What Is Ethics?" path.
+// Units are contiguous slices of the original lesson order, so progression is preserved.
+const units: Path[] = [
+  {
+    id: "ethics-what-is-ethics",
+    slug: "what-is-ethics",
+    name: "What Is Ethics?",
+    description: "Explore why humans care about right and wrong — and where ethical thinking first began.",
+    lessons: [whyHumansCareAboutRightAndWrong, everydayMoralChoices, whatMakesAnActionGood, moralityAcrossCultures, beginningOfEthicalThinking],
+  },
+  {
+    id: "ethics-when-intuitions-collide",
+    slug: "when-intuitions-collide",
+    name: "When Intuitions Collide",
+    description: "Trolleys, luck, care, and fairness — vivid dilemmas that expose how conflicted our moral gut can be.",
+    lessons: [trolleyProblemFamily, moralLuck, ethicsOfCare, justiceAndFairness, ethicsInPractice],
+  },
+  {
+    id: "ethics-the-great-theories",
+    slug: "the-great-theories",
+    name: "The Great Theories",
+    description: "Meet the big frameworks — outcomes, duty, character, contract — then ask whether morality is even real, and whether we're free to be blamed.",
+    lessons: [utilitarianismInDepth, kantsCategoricalImperative, virtueEthicsAndEudaimonia, theSocialContract, isMoralityReal, freeWillAndMoralResponsibility],
+  },
+  {
+    id: "ethics-ethics-in-the-wild",
+    slug: "ethics-in-the-wild",
+    name: "Ethics in the Wild",
+    description: "Take the theories into hard real terrain — lying, animals, life and death, the planet, punishment, and the question of who counts.",
+    lessons: [lyingAndPromises, animalEthics, lifeAndDeath, futureGenerationsAndTheEnvironment, theDoctrineOfDoubleEffect, theExperienceMachine, effectiveAltruismAndTheDrowningChild, theEthicsOfPunishment, autonomyAndPaternalism, moralStatusAndPersonhood],
+  },
+  {
+    id: "ethics-stepping-back",
+    slug: "stepping-back",
+    name: "Stepping Back",
+    description: "Zoom out one last time: where morals actually live, how to settle a clash of principle and gut, what lies beyond duty — and how to live.",
+    lessons: [metaethicsWhereMoralsLive, reflectiveEquilibrium, supererogationBeyondDuty, howToLiveAnEthicalLife],
+  },
+];
 
-export default whatIsEthicsPath;
+export default units;

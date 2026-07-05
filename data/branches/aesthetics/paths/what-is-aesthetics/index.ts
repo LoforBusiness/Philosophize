@@ -1,41 +1,59 @@
 import type { Path } from '@/data/types';
-import lesson1 from './lessons/why-things-feel-beautiful';
-import lesson2 from './lessons/art-beauty-and-emotion';
-import lesson3 from './lessons/why-humans-love-music-and-stories';
-import lesson4 from './lessons/can-anything-be-art';
-import lesson5 from './lessons/seeing-the-world-differently';
-import lesson6 from './lessons/the-sublime-and-the-overwhelming';
-import lesson7 from './lessons/taste-and-disagreement';
-import lesson8 from './lessons/form-versus-expression';
-import lesson9 from './lessons/beauty-versus-meaning';
-import lesson10 from './lessons/art-and-morality';
-import lesson11 from './lessons/defining-art-institutional-theory';
-import lesson12 from './lessons/intentional-fallacy-interpretation';
-import lesson13 from './lessons/forgery-and-authenticity';
-import lesson14 from './lessons/humes-standard-of-taste';
-import lesson15 from './lessons/kant-on-disinterested-beauty';
-import lesson16 from './lessons/expression-theory-tolstoy-collingwood';
-import lesson17 from './lessons/paradox-of-tragedy-and-horror';
-import lesson18 from './lessons/how-can-music-be-sad';
-import lesson19 from './lessons/everyday-and-environmental-aesthetics';
-import lesson20 from './lessons/why-art-matters-the-value-of-art';
-import lesson21 from './lessons/the-ontology-of-art';
-import lesson22 from './lessons/the-paradox-of-fiction';
-import lesson23 from './lessons/music-and-emotion';
-import lesson24 from './lessons/benjamin-aura-and-reproduction';
-import lesson25 from './lessons/bourdieu-taste-and-class';
-import lesson26 from './lessons/kitsch-and-camp';
-import lesson27 from './lessons/the-avant-garde';
-import lesson28 from './lessons/aesthetics-of-the-everyday';
-import lesson29 from './lessons/art-and-truth';
-import lesson30 from './lessons/beauty-and-the-good-life';
+import whyThingsFeelBeautiful from './lessons/why-things-feel-beautiful';
+import artBeautyAndEmotion from './lessons/art-beauty-and-emotion';
+import whyHumansLoveMusicAndStories from './lessons/why-humans-love-music-and-stories';
+import canAnythingBeArt from './lessons/can-anything-be-art';
+import seeingTheWorldDifferently from './lessons/seeing-the-world-differently';
+import theSublimeAndTheOverwhelming from './lessons/the-sublime-and-the-overwhelming';
+import tasteAndDisagreement from './lessons/taste-and-disagreement';
+import formVersusExpression from './lessons/form-versus-expression';
+import beautyVersusMeaning from './lessons/beauty-versus-meaning';
+import artAndMorality from './lessons/art-and-morality';
+import definingArtInstitutionalTheory from './lessons/defining-art-institutional-theory';
+import intentionalFallacyInterpretation from './lessons/intentional-fallacy-interpretation';
+import forgeryAndAuthenticity from './lessons/forgery-and-authenticity';
+import humesStandardOfTaste from './lessons/humes-standard-of-taste';
+import kantOnDisinterestedBeauty from './lessons/kant-on-disinterested-beauty';
+import expressionTheoryTolstoyCollingwood from './lessons/expression-theory-tolstoy-collingwood';
+import paradoxOfTragedyAndHorror from './lessons/paradox-of-tragedy-and-horror';
+import howCanMusicBeSad from './lessons/how-can-music-be-sad';
+import everydayAndEnvironmentalAesthetics from './lessons/everyday-and-environmental-aesthetics';
+import whyArtMattersTheValueOfArt from './lessons/why-art-matters-the-value-of-art';
+import theOntologyOfArt from './lessons/the-ontology-of-art';
+import theParadoxOfFiction from './lessons/the-paradox-of-fiction';
+import musicAndEmotion from './lessons/music-and-emotion';
+import benjaminAuraAndReproduction from './lessons/benjamin-aura-and-reproduction';
+import bourdieuTasteAndClass from './lessons/bourdieu-taste-and-class';
+import kitschAndCamp from './lessons/kitsch-and-camp';
+import theAvantGarde from './lessons/the-avant-garde';
+import aestheticsOfTheEveryday from './lessons/aesthetics-of-the-everyday';
+import artAndTruth from './lessons/art-and-truth';
+import beautyAndTheGoodLife from './lessons/beauty-and-the-good-life';
 
-const whatIsAestheticsPath: Path = {
-  id: 'aesthetics-aesthetics',
-  slug: 'what-is-aesthetics',
-  name: 'What Is Aesthetics?',
-  description: 'Explore beauty, art, and why humans are moved by what they experience.',
-  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10, lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20, lesson21, lesson22, lesson23, lesson24, lesson25, lesson26, lesson27, lesson28, lesson29, lesson30],
-};
+// 3 units — split from the original single "What Is Aesthetics?" path.
+// Units are contiguous slices of the original lesson order, so progression is preserved.
+const units: Path[] = [
+  {
+    id: "aesthetics-what-is-aesthetics",
+    slug: "what-is-aesthetics",
+    name: "What Is Aesthetics?",
+    description: "Explore beauty, art, and why humans are moved by what they experience.",
+    lessons: [whyThingsFeelBeautiful, artBeautyAndEmotion, whyHumansLoveMusicAndStories, canAnythingBeArt, seeingTheWorldDifferently, theSublimeAndTheOverwhelming, tasteAndDisagreement, formVersusExpression, beautyVersusMeaning, artAndMorality],
+  },
+  {
+    id: "aesthetics-theories-and-hard-cases",
+    slug: "theories-and-hard-cases",
+    name: "Theories & Hard Cases",
+    description: "Meet the great theories of art and the hard cases that test them — from what defines a work to why it moves us at all.",
+    lessons: [definingArtInstitutionalTheory, intentionalFallacyInterpretation, forgeryAndAuthenticity, humesStandardOfTaste, kantOnDisinterestedBeauty, expressionTheoryTolstoyCollingwood, paradoxOfTragedyAndHorror, howCanMusicBeSad, everydayAndEnvironmentalAesthetics, whyArtMattersTheValueOfArt],
+  },
+  {
+    id: "aesthetics-puzzles-at-the-edge",
+    slug: "puzzles-at-the-edge",
+    name: "Puzzles at the Edge",
+    description: "The deeper puzzles — where an artwork actually lives, why a perfect fake unsettles us, how taste is shaped — and what beauty is finally for.",
+    lessons: [theOntologyOfArt, theParadoxOfFiction, musicAndEmotion, benjaminAuraAndReproduction, bourdieuTasteAndClass, kitschAndCamp, theAvantGarde, aestheticsOfTheEveryday, artAndTruth, beautyAndTheGoodLife],
+  },
+];
 
-export default whatIsAestheticsPath;
+export default units;

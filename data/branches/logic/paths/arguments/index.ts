@@ -1,41 +1,73 @@
 import type { Path } from '@/data/types';
-import lesson1 from './lessons/what-is-an-argument';
-import lesson2 from './lessons/premises-and-conclusions';
-import lesson3 from './lessons/valid-vs-sound';
-import lesson4 from './lessons/strong-vs-weak-arguments';
-import lesson5 from './lessons/thinking-step-by-step';
-import lesson6 from './lessons/if-then-statements';
-import lesson7 from './lessons/two-valid-moves';
-import lesson8 from './lessons/two-tempting-traps';
-import lesson9 from './lessons/attacking-the-person';
-import lesson10 from './lessons/the-hidden-premise';
-import lesson11 from './lessons/begging-the-question';
-import lesson12 from './lessons/the-false-dilemma';
-import lesson13 from './lessons/the-slippery-slope';
-import lesson14 from './lessons/equivocation';
-import lesson15 from './lessons/hasty-generalization';
-import lesson16 from './lessons/correlation-vs-causation';
-import lesson17 from './lessons/appeal-to-authority';
-import lesson18 from './lessons/appeal-to-emotion-and-bandwagon';
-import lesson19 from './lessons/confirmation-bias';
-import lesson20 from './lessons/charity-and-steelmanning';
-import lesson21 from './lessons/necessary-and-sufficient-conditions';
-import lesson22 from './lessons/categorical-logic-all-some-none';
-import lesson23 from './lessons/truth-tables-and-connectives';
-import lesson24 from './lessons/deduction-induction-abduction';
-import lesson25 from './lessons/base-rates-and-probability';
-import lesson26 from './lessons/reductio-ad-absurdum';
-import lesson27 from './lessons/the-liar-paradox';
-import lesson28 from './lessons/arguing-by-analogy';
-import lesson29 from './lessons/burden-of-proof';
-import lesson30 from './lessons/building-a-strong-argument';
+import whatIsAnArgument from './lessons/what-is-an-argument';
+import premisesAndConclusions from './lessons/premises-and-conclusions';
+import validVsSound from './lessons/valid-vs-sound';
+import strongVsWeakArguments from './lessons/strong-vs-weak-arguments';
+import thinkingStepByStep from './lessons/thinking-step-by-step';
+import ifThenStatements from './lessons/if-then-statements';
+import twoValidMoves from './lessons/two-valid-moves';
+import twoTemptingTraps from './lessons/two-tempting-traps';
+import attackingThePerson from './lessons/attacking-the-person';
+import theHiddenPremise from './lessons/the-hidden-premise';
+import beggingTheQuestion from './lessons/begging-the-question';
+import theFalseDilemma from './lessons/the-false-dilemma';
+import theSlipperySlope from './lessons/the-slippery-slope';
+import equivocation from './lessons/equivocation';
+import hastyGeneralization from './lessons/hasty-generalization';
+import correlationVsCausation from './lessons/correlation-vs-causation';
+import appealToAuthority from './lessons/appeal-to-authority';
+import appealToEmotionAndBandwagon from './lessons/appeal-to-emotion-and-bandwagon';
+import confirmationBias from './lessons/confirmation-bias';
+import charityAndSteelmanning from './lessons/charity-and-steelmanning';
+import necessaryAndSufficientConditions from './lessons/necessary-and-sufficient-conditions';
+import categoricalLogicAllSomeNone from './lessons/categorical-logic-all-some-none';
+import truthTablesAndConnectives from './lessons/truth-tables-and-connectives';
+import deductionInductionAbduction from './lessons/deduction-induction-abduction';
+import baseRatesAndProbability from './lessons/base-rates-and-probability';
+import reductioAdAbsurdum from './lessons/reductio-ad-absurdum';
+import theLiarParadox from './lessons/the-liar-paradox';
+import arguingByAnalogy from './lessons/arguing-by-analogy';
+import burdenOfProof from './lessons/burden-of-proof';
+import buildingAStrongArgument from './lessons/building-a-strong-argument';
 
-const argumentsPath: Path = {
-  id: 'logic-arguments',
-  slug: 'arguments',
-  name: 'What Is an Argument?',
-  description: 'Learn the anatomy of every philosophical argument ever made.',
-  lessons: [lesson1, lesson2, lesson3, lesson4, lesson5, lesson6, lesson7, lesson8, lesson9, lesson10, lesson11, lesson12, lesson13, lesson14, lesson15, lesson16, lesson17, lesson18, lesson19, lesson20, lesson21, lesson22, lesson23, lesson24, lesson25, lesson26, lesson27, lesson28, lesson29, lesson30],
-};
+// 5 units — split from the original single "What Is an Argument?" path.
+// Units are contiguous slices of the original lesson order, so progression is preserved.
+const units: Path[] = [
+  {
+    id: "logic-the-anatomy-of-an-argument",
+    slug: "the-anatomy-of-an-argument",
+    name: "The Anatomy of an Argument",
+    description: "Learn the anatomy of every argument — premises, conclusions, validity, soundness, and the conditional moves that always work.",
+    lessons: [whatIsAnArgument, premisesAndConclusions, validVsSound, strongVsWeakArguments, thinkingStepByStep, ifThenStatements, twoValidMoves, twoTemptingTraps],
+  },
+  {
+    id: "logic-where-arguments-cheat",
+    slug: "where-arguments-cheat",
+    name: "Where Arguments Cheat",
+    description: "Meet the classic fallacies — the sleights of hand that make a bad argument feel airtight.",
+    lessons: [attackingThePerson, theHiddenPremise, beggingTheQuestion, theFalseDilemma, theSlipperySlope, equivocation],
+  },
+  {
+    id: "logic-evidence-bias-and-the-fair-fight",
+    slug: "evidence-bias-and-the-fair-fight",
+    name: "Evidence, Bias & the Fair Fight",
+    description: "How evidence gets misused, how our own bias fools us, and the discipline of arguing in good faith.",
+    lessons: [hastyGeneralization, correlationVsCausation, appealToAuthority, appealToEmotionAndBandwagon, confirmationBias, charityAndSteelmanning],
+  },
+  {
+    id: "logic-the-logician-s-toolkit",
+    slug: "the-logician-s-toolkit",
+    name: "The Logician's Toolkit",
+    description: "The formal machinery of logic: conditions, quantifiers, truth tables, the kinds of inference, and reasoning about probability.",
+    lessons: [necessaryAndSufficientConditions, categoricalLogicAllSomeNone, truthTablesAndConnectives, deductionInductionAbduction, baseRatesAndProbability],
+  },
+  {
+    id: "logic-advanced-moves-and-mastery",
+    slug: "advanced-moves-and-mastery",
+    name: "Advanced Moves & Mastery",
+    description: "Logic's sharpest moves — proof by contradiction, paradox, and analogy — then build and stress-test an argument of your own.",
+    lessons: [reductioAdAbsurdum, theLiarParadox, arguingByAnalogy, burdenOfProof, buildingAStrongArgument],
+  },
+];
 
-export default argumentsPath;
+export default units;

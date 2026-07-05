@@ -1,5 +1,5 @@
 import type { Branch } from '@/data/types';
-import argumentsPath from './paths/arguments';
+import units from './paths/arguments';
 
 const logicBranch: Branch = {
   id: 'logic',
@@ -8,7 +8,7 @@ const logicBranch: Branch = {
   description: 'Study of reasoning, arguments, and valid thinking.',
   icon: '⚙️',
   color: '#4A7B9D',
-  paths: [argumentsPath],
+  paths: units,
 };
 
 export default logicBranch;
