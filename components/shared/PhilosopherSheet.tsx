@@ -268,9 +268,9 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 48 },
   identity: { alignItems: 'center' },
   avatar: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
+    width: 102,
+    height: 102,
+    borderRadius: 51,
     borderWidth: 2,
     borderColor: Ink,
     alignItems: 'center',

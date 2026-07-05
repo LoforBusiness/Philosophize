@@ -377,9 +377,9 @@ const styles = StyleSheet.create({
   },
   settingsBtn: { position: 'absolute', right: 16, padding: 8 },
   avatar: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
+    width: 92,
+    height: 92,
+    borderRadius: 46,
     borderWidth: 2,
     borderColor: Paper,
     alignItems: 'center',
