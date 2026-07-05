@@ -279,13 +279,13 @@ const styles = StyleSheet.create({
   },
   avatarLetter: {
     fontFamily: 'Caveat_700Bold',
-    fontSize: 52,
+    fontSize: 42,
     color: Ink,
     lineHeight: 84,
     textAlign: 'center',
     includeFontPadding: false,
-    // See the Thinkers avatars — nudge left (~12% of font size) for Caveat's lean.
-    transform: [{ translateX: -6 }],
+    // See the Thinkers avatars — sized for margin + gentle left nudge for Caveat.
+    transform: [{ translateX: -3 }],
   },
   name: {
     fontFamily: 'PlayfairDisplay_700Bold',

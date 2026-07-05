@@ -301,17 +301,16 @@ const styles = StyleSheet.create({
   },
   featAvatarLetter: {
     fontFamily: 'Caveat_700Bold',
-    fontSize: 26,
+    fontSize: 21,
     color: Paper,
     lineHeight: 46,
     textAlign: 'center',
     includeFontPadding: false,
-    // Caveat is a right-slanted handwriting font, so a single capital sits
-    // right-of-centre and grazes the circle border. Nudge left (~12% of font
-    // size) — a compromise: it can't perfectly centre every glyph (wide letters
-    // like W/M/A lean far more than narrow ones), but it roughly halves the
-    // worst-case offset across the alphabet.
-    transform: [{ translateX: -3 }],
+    // Caveat is a right-slanted handwriting font whose wide capitals (W/M/A)
+    // overhang their glyph box. Size the initial to leave margin inside the
+    // circle so no letter clips the border, plus a gentle left nudge so it
+    // reads centred (a handwriting font can't be nudged exact for every glyph).
+    transform: [{ translateX: -1.5 }],
   },
   featKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: PaperMute, letterSpacing: 1.5 },
   featName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: Paper, marginTop: 3 },
@@ -350,13 +349,13 @@ const styles = StyleSheet.create({
   },
   cardAvatarLetter: {
     fontFamily: 'Caveat_700Bold',
-    fontSize: 20,
+    fontSize: 16,
     color: Ink,
     lineHeight: 34,
     textAlign: 'center',
     includeFontPadding: false,
-    // See featAvatarLetter — nudge left (~12% of font size) for Caveat's lean.
-    transform: [{ translateX: -2.5 }],
+    // See featAvatarLetter — sized for margin + gentle left nudge for Caveat.
+    transform: [{ translateX: -1 }],
   },
   cardName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: Ink },
   cardMeta: { fontFamily: 'Inter_400Regular', fontSize: 10.5, color: InkSoft, marginTop: 1 },

@@ -387,16 +387,15 @@ const styles = StyleSheet.create({
   },
   avatarLetter: {
     fontFamily: 'Caveat_700Bold',
-    fontSize: 44,
+    fontSize: 36,
     color: Paper,
     lineHeight: 50,
     textAlign: 'center',
     includeFontPadding: false,
-    // Caveat is a right-slanted handwriting font — nudge left (~12% of font
-    // size) so the initial reads centred instead of clipping the right border.
-    // A compromise: wide letters (W/M/A) still lean a little, narrow ones sit
-    // just left of centre.
-    transform: [{ translateX: -5.5 }],
+    // Caveat's wide capitals (like this user's "W") overhang their glyph box.
+    // Size the initial to leave margin in the circle so it never clips, plus a
+    // gentle left nudge to counter the font's right lean.
+    transform: [{ translateX: -2.5 }],
   },
   avatarBadge: {
     position: 'absolute',
