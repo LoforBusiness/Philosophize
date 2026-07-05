@@ -4,8 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Glyph, { type GlyphName } from '@/components/shared/Glyph';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import PressableScale from '@/components/shared/PressableScale';
-import { ALL_BRANCHES, getBranchBySlug } from '@/data';
-import { useUserDataStore } from '@/stores/userDataStore';
+import { getBranchBySlug } from '@/data';
 
 const Page = '#F1EEE7';
 const Paper = '#FFFFFF';
@@ -36,14 +35,10 @@ const PRES: BranchPres[] = [
 ];
 
 export default function LearnScreen() {
-  const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
-
   const cards = PRES.map((p) => {
     const branch = getBranchBySlug(p.slug);
     const units = branch?.paths ?? [];
-    const totalLessons = units.reduce((a, u) => a + u.lessons.length, 0);
-    const done = Math.min(lessonsByBranch[p.slug] ?? 0, totalLessons);
-    return { ...p, branch, units, totalLessons, done };
+    return { ...p, branch, units };
   });
 
   return (
@@ -67,7 +62,6 @@ export default function LearnScreen() {
         {cards.map((c, i) => {
           if (!c.branch) return null;
           const unitNames = c.units.map((u) => u.name.toUpperCase()).join(' · ');
-          const pct = c.totalLessons > 0 ? c.done / c.totalLessons : 0;
           return (
             <PressableScale
               key={c.slug}
@@ -89,14 +83,6 @@ export default function LearnScreen() {
               <Text style={styles.unitLine} numberOfLines={1}>
                 {c.units.length} UNIT{c.units.length !== 1 ? 'S' : ''} · {unitNames}
               </Text>
-              <View style={styles.progRow}>
-                <View style={styles.progTrack}>
-                  <View style={[styles.progFill, { width: `${Math.round(pct * 100)}%` }]} />
-                </View>
-                <Text style={styles.progText}>
-                  {c.done} / {c.totalLessons}
-                </Text>
-              </View>
             </PressableScale>
           );
         })}
@@ -182,10 +168,6 @@ const styles = StyleSheet.create({
   arrow: { fontFamily: 'Inter_400Regular', fontSize: 20, color: Ink, marginLeft: 8 },
 
   unitLine: { fontFamily: 'Inter_500Medium', fontSize: 9.5, color: Faint, letterSpacing: 1, marginTop: 16 },
-  progRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 9 },
-  progTrack: { flex: 1, height: 5, borderRadius: 3, backgroundColor: Rule, overflow: 'hidden' },
-  progFill: { height: 5, borderRadius: 3, backgroundColor: Ink },
-  progText: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft },
 
   footer: {
     fontFamily: 'PlayfairDisplay_400Regular',
