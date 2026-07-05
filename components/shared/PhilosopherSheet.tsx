@@ -268,9 +268,9 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 48 },
   identity: { alignItems: 'center' },
   avatar: {
-    width: 102,
-    height: 102,
-    borderRadius: 51,
+    width: 84,
+    height: 84,
+    borderRadius: 42,
     borderWidth: 2,
     borderColor: Ink,
     alignItems: 'center',
@@ -279,11 +279,11 @@ const styles = StyleSheet.create({
   },
   avatarLetter: {
     fontFamily: 'Caveat_700Bold',
-    fontSize: 42,
+    fontSize: 52,
     color: Ink,
     // See the Thinkers avatars — width wider than the glyph so Caveat's
     // right-overhanging ink isn't clipped by Android's text bounds.
-    width: 98,
+    width: 80,
     lineHeight: 84,
     textAlign: 'center',
     includeFontPadding: false,

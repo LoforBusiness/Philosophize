@@ -291,9 +291,9 @@ const styles = StyleSheet.create({
   featured: { backgroundColor: Ink, borderRadius: 14, padding: 18 },
   featTop: { flexDirection: 'row', alignItems: 'center' },
   featAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     borderWidth: 1.5,
     borderColor: Paper,
     alignItems: 'center',
@@ -301,13 +301,13 @@ const styles = StyleSheet.create({
   },
   featAvatarLetter: {
     fontFamily: 'Caveat_700Bold',
-    fontSize: 21,
+    fontSize: 26,
     color: Paper,
     // Caveat's ink overhangs its glyph box on the right; Android clips text to
     // its (tight, advance-width) layout box, cutting the right of the letter.
     // Give the Text a width wider than the glyph so the ink has room; textAlign
     // then centres the letter within that width.
-    width: 52,
+    width: 44,
     lineHeight: 46,
     textAlign: 'center',
     includeFontPadding: false,
@@ -340,9 +340,9 @@ const styles = StyleSheet.create({
   cardPressed: { backgroundColor: '#F0EFEA' },
   cardTop: { flexDirection: 'row', alignItems: 'center' },
   cardAvatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     borderWidth: 1.5,
     borderColor: Ink,
     alignItems: 'center',
@@ -350,11 +350,11 @@ const styles = StyleSheet.create({
   },
   cardAvatarLetter: {
     fontFamily: 'Caveat_700Bold',
-    fontSize: 16,
+    fontSize: 20,
     color: Ink,
     // See featAvatarLetter — width wider than the glyph so its right side
     // isn't clipped by Android's text bounds.
-    width: 38,
+    width: 32,
     lineHeight: 34,
     textAlign: 'center',
     includeFontPadding: false,

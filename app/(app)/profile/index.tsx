@@ -377,9 +377,9 @@ const styles = StyleSheet.create({
   },
   settingsBtn: { position: 'absolute', right: 16, padding: 8 },
   avatar: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     borderWidth: 2,
     borderColor: Paper,
     alignItems: 'center',
@@ -387,13 +387,13 @@ const styles = StyleSheet.create({
   },
   avatarLetter: {
     fontFamily: 'Caveat_700Bold',
-    fontSize: 36,
+    fontSize: 44,
     color: Paper,
     // Caveat's ink overhangs its glyph box on the right; Android clips text to
     // its tight advance-width box, cutting the right of the letter (e.g. the
     // "W"). Give the Text a width wider than the glyph so the ink renders fully;
     // textAlign centres it within that width.
-    width: 88,
+    width: 72,
     lineHeight: 50,
     textAlign: 'center',
     includeFontPadding: false,
