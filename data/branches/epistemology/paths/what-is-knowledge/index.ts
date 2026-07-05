@@ -1,6 +1,5 @@
 import type { Path } from '@/data/types';
 import whatDoesItMeanToKnow from './lessons/what-does-it-mean-to-know';
-import knowingVsGuessing from './lessons/knowing-vs-guessing';
 import canYouBeWrongAndThinkYouKnow from './lessons/can-you-be-wrong-and-think-you-know';
 import whereDoesKnowledgeComeFrom from './lessons/where-does-knowledge-come-from';
 import whyHumansSeekKnowledge from './lessons/why-humans-seek-knowledge';
@@ -11,7 +10,6 @@ import whatIsTruth from './lessons/what-is-truth';
 import livingWithoutCertainty from './lessons/living-without-certainty';
 import theGettierProblem from './lessons/the-gettier-problem';
 import sourcesOfKnowledge from './lessons/sources-of-knowledge';
-import descartesMethodOfDoubt from './lessons/descartes-method-of-doubt';
 import theExternalWorld from './lessons/the-external-world';
 import aPrioriAndAPosteriori from './lessons/a-priori-and-a-posteriori';
 import scienceAndFalsification from './lessons/science-and-falsification';
@@ -19,7 +17,6 @@ import paradigmShifts from './lessons/paradigm-shifts';
 import updatingBeliefsWithEvidence from './lessons/updating-beliefs-with-evidence';
 import whomToTrust from './lessons/whom-to-trust';
 import socialEpistemology from './lessons/social-epistemology';
-import theRegressProblem from './lessons/the-regress-problem';
 import reliabilismAndTheValueOfKnowledge from './lessons/reliabilism-and-the-value-of-knowledge';
 import virtueEpistemology from './lessons/virtue-epistemology';
 import answeringTheSkeptic from './lessons/answering-the-skeptic';
@@ -38,14 +35,14 @@ const units: Path[] = [
     slug: "what-is-knowledge",
     name: "What Is Knowledge?",
     description: "Discover what separates genuine knowledge from lucky guesses — and the first doubts that put it to the test.",
-    lessons: [whatDoesItMeanToKnow, knowingVsGuessing, canYouBeWrongAndThinkYouKnow, whereDoesKnowledgeComeFrom, whyHumansSeekKnowledge, canWeKnowAnythingAtAll, whyTrustTheFuture, whatMakesABeliefJustified, whatIsTruth, livingWithoutCertainty],
+    lessons: [whatDoesItMeanToKnow, canYouBeWrongAndThinkYouKnow, whereDoesKnowledgeComeFrom, whyHumansSeekKnowledge, canWeKnowAnythingAtAll, whyTrustTheFuture, whatMakesABeliefJustified, whatIsTruth, livingWithoutCertainty],
   },
   {
     id: "epistemology-the-classic-puzzles",
     slug: "the-classic-puzzles",
     name: "The Classic Puzzles",
     description: "Wrestle with the famous puzzles — Gettier, radical doubt, the outside world — that forced philosophers to rethink knowing itself.",
-    lessons: [theGettierProblem, sourcesOfKnowledge, descartesMethodOfDoubt, theExternalWorld, aPrioriAndAPosteriori],
+    lessons: [theGettierProblem, sourcesOfKnowledge, theExternalWorld, aPrioriAndAPosteriori],
   },
   {
     id: "epistemology-evidence-science-and-the-crowd",
@@ -59,7 +56,7 @@ const units: Path[] = [
     slug: "what-holds-belief-up",
     name: "What Holds Belief Up",
     description: "If every reason needs a reason, find what finally makes a belief stand — and whether the skeptic can be answered.",
-    lessons: [theRegressProblem, reliabilismAndTheValueOfKnowledge, virtueEpistemology, answeringTheSkeptic, theProblemOfTheCriterion],
+    lessons: [reliabilismAndTheValueOfKnowledge, virtueEpistemology, answeringTheSkeptic, theProblemOfTheCriterion],
   },
   {
     id: "epistemology-the-wise-knower",

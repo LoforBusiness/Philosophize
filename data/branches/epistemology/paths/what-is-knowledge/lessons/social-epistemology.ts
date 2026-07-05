@@ -24,7 +24,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you saw…',
-      body: 'Lesson 18 made you an updater—change your mind when evidence arrives. Lesson 19 asked whom to trust. Lesson 10 made you a fallibilist: you might be wrong. All three quietly assume corrections can still reach you.',
+      body: 'Earlier you became an updater—change your mind when evidence arrives. You asked whom to trust. You became a fallibilist: you might be wrong. All three quietly assume corrections can still reach you.',
       emoji: '🔁',
     },
     {

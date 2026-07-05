@@ -61,7 +61,7 @@ const lesson: Lesson = {
     },
     {
       type: 'reinforcement',
-      callout: 'Earlier: forgery and authenticity (Lesson 13).',
+      callout: 'Earlier: forgery and authenticity.',
       body: 'You saw that a perfect fake can be visually identical yet worth less. Benjamin explains why we care: the original carries an aura — a history of presence — that no copy inherits. Authenticity isn\'t in the pixels; it\'s in the object\'s singular existence in time.',
       emoji: '🔗',
     },

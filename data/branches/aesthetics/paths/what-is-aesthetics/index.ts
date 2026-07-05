@@ -9,12 +9,10 @@ import tasteAndDisagreement from './lessons/taste-and-disagreement';
 import formVersusExpression from './lessons/form-versus-expression';
 import beautyVersusMeaning from './lessons/beauty-versus-meaning';
 import artAndMorality from './lessons/art-and-morality';
-import definingArtInstitutionalTheory from './lessons/defining-art-institutional-theory';
 import intentionalFallacyInterpretation from './lessons/intentional-fallacy-interpretation';
 import forgeryAndAuthenticity from './lessons/forgery-and-authenticity';
 import humesStandardOfTaste from './lessons/humes-standard-of-taste';
 import kantOnDisinterestedBeauty from './lessons/kant-on-disinterested-beauty';
-import expressionTheoryTolstoyCollingwood from './lessons/expression-theory-tolstoy-collingwood';
 import paradoxOfTragedyAndHorror from './lessons/paradox-of-tragedy-and-horror';
 import howCanMusicBeSad from './lessons/how-can-music-be-sad';
 import everydayAndEnvironmentalAesthetics from './lessons/everyday-and-environmental-aesthetics';
@@ -45,7 +43,7 @@ const units: Path[] = [
     slug: "theories-and-hard-cases",
     name: "Theories & Hard Cases",
     description: "Meet the great theories of art and the hard cases that test them — from what defines a work to why it moves us at all.",
-    lessons: [definingArtInstitutionalTheory, intentionalFallacyInterpretation, forgeryAndAuthenticity, humesStandardOfTaste, kantOnDisinterestedBeauty, expressionTheoryTolstoyCollingwood, paradoxOfTragedyAndHorror, howCanMusicBeSad, everydayAndEnvironmentalAesthetics, whyArtMattersTheValueOfArt],
+    lessons: [intentionalFallacyInterpretation, forgeryAndAuthenticity, humesStandardOfTaste, kantOnDisinterestedBeauty, paradoxOfTragedyAndHorror, howCanMusicBeSad, everydayAndEnvironmentalAesthetics, whyArtMattersTheValueOfArt],
   },
   {
     id: "aesthetics-puzzles-at-the-edge",

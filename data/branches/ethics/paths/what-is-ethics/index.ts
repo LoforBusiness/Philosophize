@@ -7,7 +7,6 @@ import beginningOfEthicalThinking from './lessons/beginning-of-ethical-thinking'
 import trolleyProblemFamily from './lessons/trolley-problem-family';
 import moralLuck from './lessons/moral-luck';
 import ethicsOfCare from './lessons/ethics-of-care';
-import justiceAndFairness from './lessons/justice-and-fairness';
 import ethicsInPractice from './lessons/ethics-in-practice';
 import utilitarianismInDepth from './lessons/utilitarianism-in-depth';
 import kantsCategoricalImperative from './lessons/kants-categorical-imperative';
@@ -45,7 +44,7 @@ const units: Path[] = [
     slug: "when-intuitions-collide",
     name: "When Intuitions Collide",
     description: "Trolleys, luck, care, and fairness — vivid dilemmas that expose how conflicted our moral gut can be.",
-    lessons: [trolleyProblemFamily, moralLuck, ethicsOfCare, justiceAndFairness, ethicsInPractice],
+    lessons: [trolleyProblemFamily, moralLuck, ethicsOfCare, ethicsInPractice],
   },
   {
     id: "ethics-the-great-theories",

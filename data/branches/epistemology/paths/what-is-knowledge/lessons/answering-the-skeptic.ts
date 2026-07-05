@@ -16,7 +16,7 @@ const lesson: Lesson = {
     },
     {
       type: 'reinforcement',
-      callout: 'Lesson 14 trapped you in a vat.',
+      callout: 'Earlier you were trapped in a vat.',
       body: 'The brain-in-a-vat argument said: you cannot rule out being a brain fed fake experiences. If so, you do not know you have hands, a house, a body. The skeptic builds a tidy argument, and it is hard to escape on his terms. So maybe do not accept his terms.',
       emoji: '🧠',
     },

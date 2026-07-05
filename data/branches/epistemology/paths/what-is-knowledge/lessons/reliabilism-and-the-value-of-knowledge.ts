@@ -46,7 +46,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Remember the stopped clock from Gettier?',
-      body: 'In Lesson 11, a stopped clock showed the right time by accident. It was true and justified but not knowledge. Reliabilism explains why: a stopped clock is not a reliable process. It happened to be right once and will mislead you the rest of the day.',
+      body: 'Earlier, a stopped clock showed the right time by accident. It was true and justified but not knowledge. Reliabilism explains why: a stopped clock is not a reliable process. It happened to be right once and will mislead you the rest of the day.',
       emoji: '🕒',
     },
     {

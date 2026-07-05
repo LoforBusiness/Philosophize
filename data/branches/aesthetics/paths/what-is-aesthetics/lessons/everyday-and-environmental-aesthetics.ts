@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you trained the eye and met the sublime.',
-      body: "Lesson 5 made aesthetics a way of seeing; Lesson 6 found awe in storms and mountains. Now we widen the field: appreciation reaches past art objects into nature and ordinary life.",
+      body: "Earlier you saw aesthetics as a way of seeing; you found awe in storms and mountains. Now we widen the field: appreciation reaches past art objects into nature and ordinary life.",
       emoji: '🌾',
     },
     {
@@ -54,7 +54,7 @@ const lesson: Lesson = {
     },
     {
       type: 'reinforcement',
-      callout: 'Recall Lesson 11: defining what aesthetics covers.',
+      callout: 'Recall the question of what counts as art.',
       body: 'That definitional work asked where the aesthetic begins and ends. Carlson pushes the boundary outward: if knowledge can correct how we appreciate art, it can correct how we appreciate a forest, a fog, or a field too.',
       emoji: '🧭',
     },

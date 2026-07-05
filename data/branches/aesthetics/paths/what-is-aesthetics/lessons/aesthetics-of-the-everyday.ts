@@ -16,7 +16,7 @@ const lesson: Lesson = {
     },
     {
       type: 'reinforcement',
-      callout: 'Earlier: everyday and environmental aesthetics (Lesson 19).',
+      callout: 'Earlier: everyday and environmental aesthetics.',
       body: 'You saw that aesthetic appreciation reaches beyond art into nature and ordinary surroundings. Now we push further — into food, sport, and city life — and ask whether these "low" pleasures deserve the same serious attention philosophers gave to paintings.',
       emoji: '🔄',
     },

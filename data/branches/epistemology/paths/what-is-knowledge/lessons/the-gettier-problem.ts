@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you assembled the recipe for knowledge.',
-      body: 'Lesson 2 separated knowing from guessing. Lesson 8 asked what makes a belief justified. Stack them up and you get the classic recipe: knowledge is justified true belief. For two thousand years, that held. Then it leaked.',
+      body: 'Knowing is more than a lucky guess, and a belief needs justification. Stack them up and you get the classic recipe: knowledge is justified true belief. For two thousand years, that held. Then it leaked.',
       emoji: '🧪',
     },
     {

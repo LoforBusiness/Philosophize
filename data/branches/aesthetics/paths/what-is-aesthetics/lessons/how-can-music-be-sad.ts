@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you saw expression theory.',
-      body: 'Lesson 16 said art transmits the artist\'s feeling: a sad composer pours sadness into the work, and we catch it. Music is the hardest test of that simple "transmission" picture. Pure sound, no words — yet still drenched in mood.',
+      body: 'Earlier you saw expression theory — art transmits the artist\'s feeling: a sad composer pours sadness into the work, and we catch it. Music is the hardest test of that simple "transmission" picture. Pure sound, no words — yet still drenched in mood.',
       emoji: '📡',
     },
     {

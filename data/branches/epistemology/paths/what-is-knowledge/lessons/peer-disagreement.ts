@@ -45,7 +45,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'This is updating, person-to-person.',
-      body: 'Lesson 18 taught you to update beliefs when evidence arrives. A disagreeing peer is evidence—evidence that a mind as good as yours read the same facts and went the other way. Ignoring it is just refusing to update because the data came from a person, not a chart.',
+      body: 'Earlier you learned to update beliefs when evidence arrives. A disagreeing peer is evidence—evidence that a mind as good as yours read the same facts and went the other way. Ignoring it is just refusing to update because the data came from a person, not a chart.',
       emoji: '🔁',
     },
     {

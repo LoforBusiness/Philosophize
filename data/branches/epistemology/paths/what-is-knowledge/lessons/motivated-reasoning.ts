@@ -46,7 +46,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'This is the enemy of honest updating.',
-      body: 'Lesson 18 asked you to update on the evidence; Lesson 23 prized intellectual humility. Motivated reasoning sabotages both from the inside. It lets you feel open-minded while quietly grading the evidence by how much you like the answer.',
+      body: 'Earlier you were asked to update on the evidence; you prized intellectual humility. Motivated reasoning sabotages both from the inside. It lets you feel open-minded while quietly grading the evidence by how much you like the answer.',
       emoji: '🔁',
     },
     {

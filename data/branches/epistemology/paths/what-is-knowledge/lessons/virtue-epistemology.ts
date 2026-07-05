@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'So far the path has hunted for a recipe.',
-      body: 'Lessons 8 and 11 chased the formula for knowledge: justification, truth, no luck. Lesson 22 looked at reliable processes. All of it treated knowing like a checklist. Virtue epistemology flips the lens from the belief to the believer.',
+      body: 'Earlier you chased the formula for knowledge: justification, truth, no luck. You looked at reliable processes. All of it treated knowing like a checklist. Virtue epistemology flips the lens from the belief to the believer.',
       emoji: '🔄',
     },
     {

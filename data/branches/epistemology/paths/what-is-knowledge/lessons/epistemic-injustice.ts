@@ -16,7 +16,7 @@ const lesson: Lesson = {
     },
     {
       type: 'reinforcement',
-      callout: 'Lesson 19 asked whom to trust.',
+      callout: 'Earlier you asked whom to trust.',
       body: 'You learned that knowledge depends on testimony—on whose word we accept. But trust can go wrong in a quieter way: not by trusting a liar, but by under-trusting an honest speaker because of who they are. That bias is the subject here.',
       emoji: '🤝',
     },

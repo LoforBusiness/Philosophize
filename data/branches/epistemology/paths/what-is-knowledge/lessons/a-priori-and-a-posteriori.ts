@@ -30,7 +30,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you saw two rival camps.',
-      body: 'Lesson 4 pitted empiricists (all knowledge from experience) against rationalists (some from pure reason). Lesson 12 asked where knowledge sources lie. Kant refused to pick a side — and claimed both were half right.',
+      body: 'Earlier you pitted empiricists (all knowledge from experience) against rationalists (some from pure reason). You asked where knowledge sources lie. Kant refused to pick a side — and claimed both were half right.',
       emoji: '🤝',
     },
     {

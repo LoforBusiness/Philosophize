@@ -40,7 +40,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you saw two clues collide here.',
-      body: 'In Lesson 8 the formalist said only the visible form matters. In Lesson 12 you asked whether an artwork’s origin shapes its value. Forgery forces the question: can two identical-looking objects still differ in worth?',
+      body: 'Earlier the formalist said only the visible form matters. You also asked whether an artwork’s origin shapes its value. Forgery forces the question: can two identical-looking objects still differ in worth?',
       emoji: '🔍',
     },
     {
@@ -61,7 +61,7 @@ const lesson: Lesson = {
         {
           thinker: 'A Strict Formalist',
           stance: 'a perfect copy is just as good',
-          why: 'Echoing Lesson 8, only the visible arrangement of line and colour can carry aesthetic value. If two canvases look identical, nothing aesthetic separates them — origin is mere history.',
+          why: 'As you saw earlier, only the visible arrangement of line and colour can carry aesthetic value. If two canvases look identical, nothing aesthetic separates them — origin is mere history.',
         },
         {
           thinker: 'Alfred Lessing',
@@ -93,7 +93,7 @@ const lesson: Lesson = {
           { id: 'c', text: 'Because the forger worked harder than the original artist', isCorrect: false },
           { id: 'd', text: 'Because no expert can ever truly be fooled by a fake', isCorrect: false },
         ],
-        explanation: 'Option C tempts you to commit the genetic fallacy — judging a work by where it came from (who made it, how hard they toiled) rather than by what it is. The formalist (Lesson 8) rejects that move: if the visible form is identical, the aesthetic value is identical, and provenance is just history.',
+        explanation: 'Option C tempts you to commit the genetic fallacy — judging a work by where it came from (who made it, how hard they toiled) rather than by what it is. The formalist rejects that move: if the visible form is identical, the aesthetic value is identical, and provenance is just history.',
       },
     },
     {

@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you asked what makes something art.',
-      body: 'Lesson 11 fixed when a thing counts as art. A new question follows: once it is art, who fixes what it means — the maker, or the work itself?',
+      body: 'Earlier you fixed when a thing counts as art. A new question follows: once it is art, who fixes what it means — the maker, or the work itself?',
       emoji: '🔁',
     },
     {

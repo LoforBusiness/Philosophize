@@ -16,7 +16,7 @@ const lesson: Lesson = {
     },
     {
       type: 'reinforcement',
-      callout: 'Earlier: Hume and Kant on taste (Lessons 14–15).',
+      callout: 'Earlier: Hume and Kant on taste.',
       body: 'Hume sought a "standard of taste" in qualified critics; Kant called beautiful what pleases universally and disinterestedly. Both treated taste as something we might get right. Pierre Bourdieu turns the question sideways: not "whose taste is correct?" but "where does taste come from?"',
       emoji: '🔄',
     },

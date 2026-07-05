@@ -38,7 +38,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Echoes of the regress and the web.',
-      body: 'Lesson 21 pictured beliefs as a web held together by mutual support. Understanding is that web seen from the inside—knowing not just the nodes but how they hold each other up. It is why coherence matters: connection is the difference between a list and a grasp.',
+      body: 'Earlier you pictured beliefs as a web held together by mutual support. Understanding is that web seen from the inside—knowing not just the nodes but how they hold each other up. It is why coherence matters: connection is the difference between a list and a grasp.',
       emoji: '🧶',
     },
     {

@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier: music sounds sad by resembling grief.',
-      body: 'Lesson 18 explained why a slow adagio feels sad — it mirrors slow, drooping human movement. That was about expression: how music has a mood. This lesson asks the harder question next door: beyond feeling sad, can music mean, refer to, or represent anything at all?',
+      body: 'Earlier you saw why a slow adagio feels sad — it mirrors slow, drooping human movement. That was about expression: how music has a mood. This lesson asks the harder question next door: beyond feeling sad, can music mean, refer to, or represent anything at all?',
       emoji: '🔁',
     },
     {
