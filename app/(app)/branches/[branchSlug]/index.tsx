@@ -37,7 +37,7 @@ const ORDER = ['metaphysics', 'epistemology', 'logic', 'ethics', 'aesthetics', '
 
 type LessonState = 'done' | 'current' | 'locked';
 type Item =
-  | { kind: 'unit'; ui: number; unit: Unit; doneInUnit: number }
+  | { kind: 'unit'; ui: number; unit: Unit }
   | { kind: 'lesson'; unit: Unit; lesson: Lesson; li: number; state: LessonState };
 
 export default function BranchDetailScreen() {
@@ -68,8 +68,9 @@ export default function BranchDetailScreen() {
   let g = 0;
   branch.paths.forEach((unit, ui) => {
     const unitStart = g;
+    // Still needed below to mark each lesson done / current / locked.
     const doneInUnit = Math.max(0, Math.min(unit.lessons.length, done - unitStart));
-    items.push({ kind: 'unit', ui, unit, doneInUnit });
+    items.push({ kind: 'unit', ui, unit });
     unit.lessons.forEach((lesson, li) => {
       const state: LessonState = li < doneInUnit ? 'done' : li === doneInUnit ? 'current' : 'locked';
       items.push({ kind: 'lesson', unit, lesson, li, state });
@@ -135,7 +136,7 @@ export default function BranchDetailScreen() {
 
                 {/* Right content */}
                 {item.kind === 'unit' ? (
-                  <UnitHeader unit={item.unit} index={item.ui} done={item.doneInUnit} glyph={pres.glyph} />
+                  <UnitHeader unit={item.unit} index={item.ui} glyph={pres.glyph} />
                 ) : (
                   <LessonRow
                     lesson={item.lesson}
@@ -174,9 +175,7 @@ function LessonNode({ state }: { state: LessonState }) {
   );
 }
 
-function UnitHeader({ unit, index, done, glyph }: { unit: Unit; index: number; done: number; glyph: GlyphName }) {
-  const k = unit.lessons.length;
-  const pct = k > 0 ? done / k : 0;
+function UnitHeader({ unit, index, glyph }: { unit: Unit; index: number; glyph: GlyphName }) {
   return (
     <View style={styles.unitCard}>
       <View style={styles.unitTop}>
@@ -184,21 +183,11 @@ function UnitHeader({ unit, index, done, glyph }: { unit: Unit; index: number; d
           <Glyph name={glyph} size={22} color={Ink} />
         </View>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={styles.unitKicker}>
-            UNIT {index + 1} · {k} LESSON{k !== 1 ? 'S' : ''}
-          </Text>
+          <Text style={styles.unitKicker}>UNIT {index + 1}</Text>
           <Text style={styles.unitName}>{unit.name}</Text>
         </View>
       </View>
       <Text style={styles.unitDesc}>{unit.description}</Text>
-      <View style={styles.progRow}>
-        <View style={styles.progTrack}>
-          <View style={[styles.progFill, { width: `${Math.round(pct * 100)}%` }]} />
-        </View>
-        <Text style={styles.progText}>
-          {done} / {k}
-        </Text>
-      </View>
     </View>
   );
 }
@@ -296,10 +285,6 @@ const styles = StyleSheet.create({
   unitKicker: { fontFamily: 'Inter_700Bold', fontSize: 9, color: InkSoft, letterSpacing: 1.5 },
   unitName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: Ink, marginTop: 2 },
   unitDesc: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12.5, color: InkSoft, marginTop: 10, lineHeight: 18 },
-  progRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 },
-  progTrack: { flex: 1, height: 5, borderRadius: 3, backgroundColor: Rule, overflow: 'hidden' },
-  progFill: { height: 5, borderRadius: 3, backgroundColor: Ink },
-  progText: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft },
 
   // Lesson row
   lessonRow: { flex: 1, flexDirection: 'row', alignItems: 'center', paddingBottom: 22, paddingTop: 0, minHeight: 44 },
