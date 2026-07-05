@@ -79,13 +79,17 @@ export default function SketchPieChart({ title, subtitle, data, valueMode = 'per
   const uid = 'pie-' + title.replace(/[^a-z0-9]/gi, '').toLowerCase();
 
   const R = 50;            // pie radius
-  const PAD = 46;          // room for the outside percentage labels
+  const PAD = 50;          // room for the outside percentage labels
   const C = R + PAD;       // center
   const BOX = C * 2;       // square svg canvas
   const cx = C;
   const cy = C;
   const r = R;
-  const rLabel = R + 12;   // % label distance from center (just outside the pie)
+  // % label distance from center. Kept well clear of the leader-tick end
+  // (r + 10 below): the label is vertically centred on this point, so its
+  // ~half-height must not overlap where the tick stops, or the line pokes
+  // into the number (worst for the near-vertical top/bottom labels).
+  const rLabel = R + 18;
   const LABEL_FS = 10.5;
 
   // Build slice geometry.
@@ -132,7 +136,7 @@ export default function SketchPieChart({ title, subtitle, data, valueMode = 'per
               .filter((sl) => sl.frac >= 0.04)
               .map((sl, i) => {
                 const edge = polar(cx, cy, r, sl.mid);
-                const tick = polar(cx, cy, r + 8, sl.mid);
+                const tick = polar(cx, cy, r + 10, sl.mid);
                 const lp = polar(cx, cy, rLabel, sl.mid);
                 const anchor = lp.x > cx + 3 ? 'start' : lp.x < cx - 3 ? 'end' : 'middle';
                 return (
