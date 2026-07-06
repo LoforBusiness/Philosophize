@@ -13,6 +13,12 @@ interface UIStore {
   philosopherSheetSeq: number;
   openPhilosopher: (id: string) => void;
   closePhilosopher: () => void;
+  // A philosopher waiting to be shown once the Thinkers screen has settled —
+  // set by deep links (home-screen widget), consumed by the Thinkers screen.
+  // Decoupling the two survives cold starts, where a fixed timer would fire
+  // before the sheet host is even mounted.
+  pendingPhilosopherId: string | null;
+  setPendingPhilosopher: (id: string | null) => void;
   // Ranks & Badges sheet — which tab to open it on, or null when dismissed.
   ranksBadgesTab: 'ranks' | 'badges' | null;
   openRanksBadges: (tab: 'ranks' | 'badges') => void;
@@ -40,6 +46,8 @@ export const useUIStore = create<UIStore>((set) => ({
   openPhilosopher: (id) =>
     set((s) => ({ philosopherSheetId: id, philosopherSheetSeq: s.philosopherSheetSeq + 1 })),
   closePhilosopher: () => set({ philosopherSheetId: null }),
+  pendingPhilosopherId: null,
+  setPendingPhilosopher: (id) => set({ pendingPhilosopherId: id }),
   ranksBadgesTab: null,
   openRanksBadges: (tab) => set({ ranksBadgesTab: tab }),
   closeRanksBadges: () => set({ ranksBadgesTab: null }),

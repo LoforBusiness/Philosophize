@@ -4,20 +4,18 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { useUIStore } from '@/stores/uiStore';
 
 // Deep-link target for the home-screen widget: philosophize://thinker/<id>.
-// Lands here, drops the user on the Thinkers tab, and opens that philosopher's
-// profile sheet (mounted globally in the root layout).
+// Parks the requested thinker in the UI store, then lands on the Thinkers tab.
+// The Thinkers screen opens the profile sheet once it has actually mounted and
+// painted (see philosophers/index.tsx) — a store handoff, not a timer, so it
+// works on cold starts too and the sheet's slide-up never gets swallowed.
 export default function ThinkerDeepLink() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const openPhilosopher = useUIStore((s) => s.openPhilosopher);
+  const setPendingPhilosopher = useUIStore((s) => s.setPendingPhilosopher);
 
   useEffect(() => {
+    if (id) setPendingPhilosopher(id);
     router.replace('/(app)/philosophers');
-    if (id) {
-      // Let the navigation settle before opening the global sheet.
-      const t = setTimeout(() => openPhilosopher(id), 60);
-      return () => clearTimeout(t);
-    }
-  }, [id, openPhilosopher]);
+  }, [id, setPendingPhilosopher]);
 
   return <View style={{ flex: 1, backgroundColor: '#FAFAF7' }} />;
 }

@@ -34,6 +34,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PostHogProvider } from 'posthog-react-native';
 import { supabase } from '@/lib/supabase/client';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
 import { posthog, setAnalyticsConsent, track } from '@/lib/posthog';
 import { useCloudSync } from '@/lib/supabase/useCloudSync';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
@@ -94,6 +95,23 @@ export default function RootLayout() {
     configureGoogleSignIn();
   }, []);
 
+  // Keep the home-screen widget honest whenever the app is used: refresh it on
+  // launch and on every return to the foreground, so the streak/quote it shows
+  // never lags a session. Lazy-required, best-effort, no-op off Android.
+  useEffect(() => {
+    const refresh = () => {
+      try {
+        const { refreshQuoteWidget } = require('@/lib/widget/render');
+        refreshQuoteWidget();
+      } catch {}
+    };
+    refresh();
+    const sub = AppState.addEventListener('change', (s) => {
+      if (s === 'active') refresh();
+    });
+    return () => sub.remove();
+  }, []);
+
   // Re-check the subscription entitlement whenever the app returns to the
   // foreground — catches a purchase that completed in the App Store / Play sheet,
   // a renewal, or an expiry while the app was backgrounded. No-op on web/Expo Go.
@@ -123,7 +141,13 @@ export default function RootLayout() {
         // email lets reviewer/tester accounts unlock Pro without a purchase.
         sub.init(session?.user?.id ?? null, session?.user?.email ?? null);
         // Returning (signed-in) users go straight in; otherwise show onboarding.
-        if (session) router.replace('/(app)');
+        // If a widget deep link already parked a thinker (cold start races this
+        // redirect), land on the Thinkers tab so the profile sheet still opens —
+        // otherwise this replace would stomp the deep link back to Home.
+        if (session) {
+          const pendingThinker = useUIStore.getState().pendingPhilosopherId;
+          router.replace(pendingThinker ? '/(app)/philosophers' : '/(app)');
+        }
       } else if (event === 'SIGNED_IN') {
         sub.setUser(session?.user?.id ?? null, session?.user?.email ?? null);
         router.replace('/(app)');

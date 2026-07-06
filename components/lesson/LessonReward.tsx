@@ -9,6 +9,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { ads } from '@/lib/ads';
 import { FREE_DAILY_LESSON_LIMIT } from '@/constants/subscription';
 import { track } from '@/lib/posthog';
+import { refreshQuoteWidget } from '@/lib/widget/render';
 
 interface Props {
   xp: number;
@@ -92,6 +93,8 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
       new_streak: dayInfo.streak,
       streak_increased: dayInfo.firstOfDay,
     });
+    // The home-screen widget shows the day streak — keep it current (best-effort).
+    refreshQuoteWidget();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -32,8 +32,8 @@ export async function readPinnedQuote(): Promise<PinnedQuotePayload | null> {
 
 // Persist (or clear) the pinned quote, then ask Android to refresh the widget
 // immediately so the home screen updates now instead of at the next OS window.
-// No-op for the native refresh on web/iOS (those have no widget); the storage
-// write is harmless everywhere.
+// The refresh helper is lazy-required to avoid a static import cycle (render.tsx
+// imports readPinnedQuote from this file); it already no-ops off Android.
 export async function writePinnedQuote(p: PinnedQuotePayload | null): Promise<void> {
   try {
     if (p) await AsyncStorage.setItem(PINNED_QUOTE_KEY, JSON.stringify(p));
@@ -42,21 +42,7 @@ export async function writePinnedQuote(p: PinnedQuotePayload | null): Promise<vo
 
   if (Platform.OS !== 'android') return;
   try {
-    const { requestWidgetUpdate } = require('react-native-android-widget');
-    const React = require('react');
-    const { QuoteWidget } = require('@/components/widget/QuoteWidget');
-    const { getRotatingQuote, todayLabel } = require('@/lib/dailyQuote');
-    const q = p ?? getRotatingQuote();
-    requestWidgetUpdate({
-      widgetName: 'QuoteOfTheDay',
-      renderWidget: () =>
-        React.createElement(QuoteWidget, {
-          text: q.text,
-          author: q.author,
-          dateLabel: todayLabel(),
-          philosopherId: q.philosopherId,
-        }),
-      widgetNotFound: () => {},
-    });
+    const { refreshQuoteWidget } = require('./render');
+    await refreshQuoteWidget();
   } catch {}
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TextInput,
   StyleSheet,
   Dimensions,
+  InteractionManager,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SketchIcon from '@/components/shared/SketchIcon';
@@ -86,9 +87,29 @@ const countryOf = (p: Philosopher) => p.country ?? COUNTRY[p.id] ?? '';
 export default function ThinkersScreen() {
   const insets = useSafeAreaInsets();
   const openPhilosopher = useUIStore((s) => s.openPhilosopher);
+  const pendingPhilosopherId = useUIStore((s) => s.pendingPhilosopherId);
 
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('ALL');
+
+  // A deep link (home-screen widget) parked a thinker for us. Open their profile
+  // only after this screen has mounted and painted, plus a short beat — so the
+  // user sees the Thinkers page land, then the sheet slide up. No lost opens on
+  // cold start, no sheet popping mid-navigation.
+  useEffect(() => {
+    if (!pendingPhilosopherId) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const task = InteractionManager.runAfterInteractions(() => {
+      timer = setTimeout(() => {
+        useUIStore.getState().setPendingPhilosopher(null);
+        openPhilosopher(pendingPhilosopherId);
+      }, 260);
+    });
+    return () => {
+      task.cancel();
+      if (timer) clearTimeout(timer);
+    };
+  }, [pendingPhilosopherId, openPhilosopher]);
 
   const q = query.trim().toLowerCase();
   const showFeatured = q === '' && filter === 'ALL';
