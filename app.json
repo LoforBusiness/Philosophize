@@ -61,6 +61,7 @@
               "name": "QuoteOfTheDay",
               "label": "Philosophize — Quote",
               "description": "A philosophy quote that changes through the day.",
+              "previewImage": "./assets/images/widget-preview.png",
               "minWidth": "180dp",
               "minHeight": "110dp",
               "targetCellWidth": 4,
