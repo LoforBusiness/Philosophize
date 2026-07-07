@@ -273,6 +273,7 @@ export default function ExistenceStory({ lesson }: { lesson: Lesson }) {
         correct={correctRef.current}
         total={totalRef.current}
         branchSlug="metaphysics"
+        lessonId={lesson.id}
         onDone={() => router.back()}
       />
     );

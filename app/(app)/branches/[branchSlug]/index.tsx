@@ -7,6 +7,8 @@ import Glyph, { type GlyphName } from '@/components/shared/Glyph';
 import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { useUIStore } from '@/stores/uiStore';
 
 const Page = '#F1EEE7';
 const Paper = '#FFFFFF';
@@ -38,12 +40,17 @@ const ORDER = ['metaphysics', 'epistemology', 'logic', 'ethics', 'aesthetics', '
 type LessonState = 'done' | 'current' | 'locked';
 type Item =
   | { kind: 'unit'; ui: number; unit: Unit }
-  | { kind: 'lesson'; unit: Unit; lesson: Lesson; li: number; state: LessonState };
+  // gatedByPro: this is a unit's next lesson that's only locked because a free
+  // user hasn't finished the previous units yet — tapping it offers the Pass
+  // (which lets paid users jump straight into any unit).
+  | { kind: 'lesson'; unit: Unit; lesson: Lesson; li: number; state: LessonState; gatedByPro: boolean };
 
 export default function BranchDetailScreen() {
   const { branchSlug } = useLocalSearchParams<{ branchSlug: string }>();
   const branch = getBranchBySlug(branchSlug);
-  const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
+  const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
+  const isPro = useSubscriptionStore((s) => s.isPro);
+  const openPaywall = useUIStore((s) => s.openPaywall);
 
   if (!branch) {
     return (
@@ -58,24 +65,32 @@ export default function BranchDetailScreen() {
   const pres = PRES[branch.slug] ?? { desc: branch.description, glyph: 'book' as GlyphName, pills: [] };
   const roman = ROMAN[Math.max(0, ORDER.indexOf(branch.slug))];
 
-  const flat = branch.paths.flatMap((u) => u.lessons.map((l) => ({ unit: u, lesson: l })));
-  const total = flat.length;
-  const done = Math.min(lessonsByBranch[branch.slug] ?? 0, total);
-
   // Build a single ordered list of items (unit markers + lessons) so the spine
-  // runs as ONE continuous path through every unit.
+  // runs as ONE continuous path through every unit. Progress is per-unit now:
+  // each unit tracks its own completed count, and whether its NEXT lesson is
+  // startable depends on the plan — free users must finish the previous units
+  // first (strictly sequential), while paid users can start any unit's first
+  // lesson at will. Within a unit, everyone is sequential.
   const items: Item[] = [];
-  let g = 0;
+  let allPrevComplete = true;
   branch.paths.forEach((unit, ui) => {
-    const unitStart = g;
-    // Still needed below to mark each lesson done / current / locked.
-    const doneInUnit = Math.max(0, Math.min(unit.lessons.length, done - unitStart));
+    const unitLen = unit.lessons.length;
+    const unitDone = Math.max(0, Math.min(unitLen, lessonsByUnit[unit.id] ?? 0));
+    const unitStartable = isPro || ui === 0 || allPrevComplete;
     items.push({ kind: 'unit', ui, unit });
     unit.lessons.forEach((lesson, li) => {
-      const state: LessonState = li < doneInUnit ? 'done' : li === doneInUnit ? 'current' : 'locked';
-      items.push({ kind: 'lesson', unit, lesson, li, state });
-      g++;
+      let state: LessonState = 'locked';
+      let gatedByPro = false;
+      if (li < unitDone) {
+        state = 'done'; // completed — anyone can revisit
+      } else if (li === unitDone) {
+        // The unit's next lesson: startable if the plan allows starting this unit.
+        if (unitStartable) state = 'current';
+        else gatedByPro = true; // locked only by the free sequential rule
+      }
+      items.push({ kind: 'lesson', unit, lesson, li, state, gatedByPro });
     });
+    allPrevComplete = allPrevComplete && unitDone === unitLen;
   });
 
   const openLesson = (unit: Unit, lesson: Lesson) =>
@@ -141,7 +156,9 @@ export default function BranchDetailScreen() {
                   <LessonRow
                     lesson={item.lesson}
                     state={item.state}
+                    gatedByPro={item.gatedByPro}
                     onPress={() => openLesson(item.unit, item.lesson)}
+                    onLockedPress={openPaywall}
                   />
                 )}
               </View>
@@ -192,20 +209,36 @@ function UnitHeader({ unit, index, glyph }: { unit: Unit; index: number; glyph: 
   );
 }
 
-function LessonRow({ lesson, state, onPress }: { lesson: Lesson; state: LessonState; onPress: () => void }) {
+function LessonRow({
+  lesson,
+  state,
+  gatedByPro,
+  onPress,
+  onLockedPress,
+}: {
+  lesson: Lesson;
+  state: LessonState;
+  gatedByPro: boolean;
+  onPress: () => void;
+  onLockedPress: () => void;
+}) {
   const locked = state === 'locked';
+  // A pro-gated next lesson is tappable (offers the Pass); other locked lessons
+  // (mid-unit, not yet reached) stay inert.
+  const pressable = !locked || gatedByPro;
+  const handlePress = locked ? (gatedByPro ? onLockedPress : undefined) : onPress;
   return (
     <Pressable
-      onPress={locked ? undefined : onPress}
-      disabled={locked}
-      style={({ pressed }) => [styles.lessonRow, pressed && !locked && { opacity: 0.6 }]}
+      onPress={handlePress}
+      disabled={!pressable}
+      style={({ pressed }) => [styles.lessonRow, pressed && pressable && { opacity: 0.6 }]}
     >
       <View style={{ flex: 1, minWidth: 0, paddingRight: 10 }}>
         <Text style={[styles.lessonTitle, locked && { color: LockGray }]} numberOfLines={2}>
           {lesson.title}
         </Text>
         <Text style={[styles.lessonSub, locked && { color: '#C4C0B6' }]} numberOfLines={1}>
-          {lesson.description}
+          {gatedByPro ? 'Finish the previous unit — or jump ahead with Scholar’s Pass' : lesson.description}
         </Text>
       </View>
       {state === 'current' && (

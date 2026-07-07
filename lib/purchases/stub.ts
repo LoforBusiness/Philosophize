@@ -21,6 +21,9 @@ export const stubProvider: PurchasesProvider = {
   async restore() {
     throw new PurchasesUnavailableError();
   },
+  async getManagementURL() {
+    return null;
+  },
   async logIn() {},
   async logOut() {},
   addCustomerInfoListener() {

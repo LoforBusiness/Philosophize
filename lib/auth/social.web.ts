@@ -21,3 +21,7 @@ export async function signInWithApple(): Promise<SocialResult> {
 export async function signInWithGoogle(): Promise<SocialResult> {
   return { status: 'error', message: 'Google sign-in is only available in the mobile app.' };
 }
+
+export async function signOutSocial(): Promise<void> {
+  /* no native Google session on web */
+}

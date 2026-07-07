@@ -16,6 +16,7 @@ interface Props {
   correct: number;
   total: number;
   branchSlug: string | null;
+  lessonId: string;
   onDone: () => void;
 }
 
@@ -35,7 +36,7 @@ interface DayInfo {
   prevStreak: number;
 }
 
-export default function LessonReward({ xp, correct, total, branchSlug, onDone }: Props) {
+export default function LessonReward({ xp, correct, total, branchSlug, lessonId, onDone }: Props) {
   const recordLessonComplete = useUserDataStore((s) => s.recordLessonComplete);
   const registerDailyActivity = useUserDataStore((s) => s.registerDailyActivity);
   const bumpDailyLessons = useUserDataStore((s) => s.bumpDailyLessons);
@@ -79,7 +80,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, onDone }:
   useEffect(() => {
     if (ran.current) return;
     ran.current = true;
-    if (branchSlug) recordLessonComplete(branchSlug, xp);
+    recordLessonComplete(lessonId, xp);
     const today = dateStr(new Date());
     const yesterday = dateStr(new Date(Date.now() - 86_400_000));
     bumpDailyLessons(today); // count this completion toward the free daily allowance

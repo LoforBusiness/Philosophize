@@ -310,6 +310,7 @@ export default function SnowWalkStory({ lesson }: { lesson: Lesson }) {
         correct={correctRef.current}
         total={totalRef.current}
         branchSlug="logic"
+        lessonId={lesson.id}
         onDone={() => router.back()}
       />
     );

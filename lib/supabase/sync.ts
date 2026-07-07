@@ -1,11 +1,13 @@
 import { supabase } from './client';
 import { useUserDataStore, type SavedQuote, type AppSettings } from '@/stores/userDataStore';
+import { branchCountsFromUnits, unitsFromBranchCounts } from '@/data';
 
 // The slice of userDataStore mirrored to the cloud — matches the store's
 // `partialize`, so "what we persist locally" and "what we sync" stay identical.
 export interface CloudState {
   savedQuotes: SavedQuote[];
   philosopherViews: Record<string, number>;
+  lessonsByUnit: Record<string, number>;
   lessonsByBranch: Record<string, number>;
   voiceEnabled: boolean;
   beliefResultId: string | null;
@@ -23,7 +25,7 @@ export interface CloudState {
 }
 
 const SYNC_FIELDS: (keyof CloudState)[] = [
-  'savedQuotes', 'philosopherViews', 'lessonsByBranch', 'voiceEnabled', 'beliefResultId',
+  'savedQuotes', 'philosopherViews', 'lessonsByUnit', 'lessonsByBranch', 'voiceEnabled', 'beliefResultId',
   'streak', 'totalXP', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'badgesInitialized',
   'displayName', 'email', 'bio', 'portrait', 'settings',
 ];
@@ -154,7 +156,15 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
 
   // --- progress: never lose anything ---
   const totalXP = Math.max(local.totalXP ?? 0, remote.totalXP ?? 0);
-  const lessonsByBranch = mergeMax(local.lessonsByBranch, remote.lessonsByBranch);
+  // Per-unit progress is canonical. A legacy cloud row only has lessonsByBranch;
+  // reconstruct its per-unit shape before merging so old snapshots still count.
+  const remoteUnits =
+    remote.lessonsByUnit && Object.keys(remote.lessonsByUnit).length > 0
+      ? remote.lessonsByUnit
+      : unitsFromBranchCounts(remote.lessonsByBranch ?? {});
+  const lessonsByUnit = mergeMax(local.lessonsByUnit, remoteUnits);
+  // Derive the per-branch mirror from the merged units so the two never drift.
+  const lessonsByBranch = branchCountsFromUnits(lessonsByUnit);
   const philosopherViews = mergeMax(local.philosopherViews, remote.philosopherViews);
   const earnedBadges = Array.from(
     new Set([...(local.earnedBadges ?? []), ...(remote.earnedBadges ?? [])])
@@ -208,6 +218,7 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
   return {
     savedQuotes,
     philosopherViews,
+    lessonsByUnit,
     lessonsByBranch,
     voiceEnabled,
     beliefResultId,

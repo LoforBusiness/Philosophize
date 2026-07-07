@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getLessonById } from '@/data';
+import { getLessonById, lessonAccessibility } from '@/data';
 import LessonRunner from '@/components/lesson/LessonRunner';
 import LessonLoader from '@/components/lesson/LessonLoader';
 import ScreenTransition from '@/components/shared/ScreenTransition';
@@ -30,24 +30,75 @@ export default function LessonScreen() {
   const isPro = useSubscriptionStore((s) => s.isPro);
   const dailyLessonCount = useUserDataStore((s) => s.dailyLessonCount);
   const dailyLessonDate = useUserDataStore((s) => s.dailyLessonDate);
+  const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
+  const hasHydrated = useUserDataStore((s) => s._hasHydrated);
   const openPaywall = useUIStore((s) => s.openPaywall);
 
-  // Decide the free-tier daily-limit gate ONCE, when the lesson opens. Finishing
-  // the lesson bumps the daily count (in LessonReward) — but that must never flip
-  // this screen to the lock screen mid-celebration and steal the XP + streak
-  // reward. The gate only ever blocks OPENING a lesson, so we freeze it here.
-  const gateRef = useRef<boolean | null>(null);
-  if (gateRef.current === null) {
+  // Freeze the daily-limit gate ONCE — but only after the persisted store has
+  // hydrated, so we never freeze a pre-hydration default (which would read used=0
+  // and let a capped free user sneak an extra lesson). atLimit must be frozen
+  // because completing the lesson bumps the daily count, and that must not flip
+  // this screen to the limit lock mid-celebration and steal the XP + streak.
+  const atLimitRef = useRef<boolean | null>(null);
+  if (hasHydrated && atLimitRef.current === null) {
     const used = dailyLessonDate === todayStr() ? dailyLessonCount : 0;
-    gateRef.current = !isPro && used >= FREE_DAILY_LESSON_LIMIT;
+    atLimitRef.current = !isPro && used >= FREE_DAILY_LESSON_LIMIT;
   }
-  const atLimit = gateRef.current;
+  const atLimit = atLimitRef.current ?? false;
+
+  // Access is computed LIVE (not frozen): completing a lesson only ever advances
+  // progress, which can unlock but never lock — so there's no mid-reward flip
+  // risk — and live values avoid a stale pre-hydration {} snapshot false-locking
+  // an already-completed lesson reached via a deep link.
+  const access = lessonAccessibility(lessonId, lessonsByUnit, isPro);
+  const locked = !access.accessible;
+  const gatedByPro = access.gatedByPro;
 
   if (!result) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFAF7', alignItems: 'center', justifyContent: 'center' }}>
         <Text style={{ color: '#1A1A1A', fontSize: 18 }}>Lesson not found.</Text>
       </SafeAreaView>
+    );
+  }
+
+  // Wait for persisted progress before deciding access / the daily limit, so a
+  // cold deep-link into a lesson never evaluates the gates against an empty
+  // default store. AsyncStorage rehydration is near-instant.
+  if (!hasHydrated) {
+    return <ScreenTransition bg="#FAFAF7"><View style={{ flex: 1, backgroundColor: '#FAFAF7' }} /></ScreenTransition>;
+  }
+
+  // Locked lesson (reached via a deep link / back stack, not the list). Free
+  // users must finish the previous unit first; the Pass lets them jump ahead.
+  if (locked) {
+    return (
+      <ScreenTransition bg={Page}>
+        <SafeAreaView style={styles.lockWrap}>
+          <View style={styles.lockIcon}>
+            <SketchIcon name="lock" color={Ink} size={34} />
+          </View>
+          <Text style={styles.lockTitle}>
+            {gatedByPro ? 'This unit is a jump ahead' : 'Not yet unlocked'}
+          </Text>
+          <Text style={styles.lockBody}>
+            {gatedByPro
+              ? 'Finish the previous unit to reach this one — or unlock Scholar’s Pass to start any unit whenever you like.'
+              : 'Finish the earlier lessons in this unit first to unlock this one.'}
+          </Text>
+          {gatedByPro && (
+            <Pressable
+              onPress={openPaywall}
+              style={({ pressed }) => [styles.primaryBtn, pressed && { opacity: 0.85 }]}
+            >
+              <Text style={styles.primaryText}>Unlock Scholar’s Pass</Text>
+            </Pressable>
+          )}
+          <Pressable onPress={() => router.back()} style={styles.secondaryBtn} hitSlop={8}>
+            <Text style={styles.secondaryText}>Go back</Text>
+          </Pressable>
+        </SafeAreaView>
+      </ScreenTransition>
     );
   }
 

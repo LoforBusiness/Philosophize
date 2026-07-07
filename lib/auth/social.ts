@@ -95,6 +95,17 @@ export async function signInWithApple(): Promise<SocialResult> {
   }
 }
 
+// Clear the native Google session so the account picker shows next time (and no
+// stale Google identity lingers). Supabase's own signOut clears the app session;
+// this is just the native SDK's cached account. Best-effort, no-op if never used.
+export async function signOutSocial(): Promise<void> {
+  try {
+    await GoogleSignin.signOut();
+  } catch {
+    /* not signed in with Google / module unavailable */
+  }
+}
+
 export async function signInWithGoogle(): Promise<SocialResult> {
   try {
     configureGoogleSignIn();

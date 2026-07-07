@@ -2,7 +2,12 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BADGES, type ProgressStats } from '@/data/badges';
-import { ALL_BRANCHES } from '@/data';
+import {
+  ALL_BRANCHES,
+  getLessonUnitInfo,
+  branchCountsFromUnits,
+  unitsFromBranchCounts,
+} from '@/data';
 import { rankForXP } from '@/data/ranks';
 import { track } from '@/lib/posthog';
 import { writePinnedQuote } from '@/lib/widget/pin';
@@ -85,6 +90,11 @@ interface UserDataState {
   pinnedQuoteId: string | null;               // saved-quote id pinned to the home-screen widget
   quizScores: Record<string, QuizScore>;      // philosopherId -> best quiz result
   philosopherViews: Record<string, number>; // philosopherId -> times profile opened
+  // Canonical progression: unitId (path.id) -> lessons completed in that unit.
+  // Per-unit (not per-branch) so a paid user can advance several units at once.
+  lessonsByUnit: Record<string, number>;
+  // Derived mirror kept in lockstep (= sum of each branch's unit counts) so the
+  // stats / mastery / badge readers keep working unchanged. Never set on its own.
   lessonsByBranch: Record<string, number>;   // branchSlug -> lessons completed
   voiceEnabled: boolean;                      // narrate lessons aloud + reveal words
   beliefResultId: string | null;             // legacy (belief quiz removed)
@@ -113,7 +123,7 @@ interface UserDataState {
   setPinnedQuote: (id: string | null) => void;
   recordPhilosopherView: (philosopherId: string) => void;
   recordQuizResult: (philosopherId: string, correct: number, total: number) => number;
-  recordLessonComplete: (branchSlug: string, xpEarned?: number) => void;
+  recordLessonComplete: (lessonId: string, xpEarned?: number) => void;
   bumpDailyLessons: (today: string) => void;
   setVoiceEnabled: (v: boolean) => void;
   setBeliefResult: (id: string | null) => void;
@@ -164,6 +174,7 @@ export const useUserDataStore = create<UserDataState>()(
       pinnedQuoteId: null,
       quizScores: {},
       philosopherViews: {},
+      lessonsByUnit: {},
       lessonsByBranch: {},
       voiceEnabled: true,
       beliefResultId: null,
@@ -275,15 +286,26 @@ export const useUserDataStore = create<UserDataState>()(
         return bonus;
       },
 
-      recordLessonComplete: (branchSlug, xpEarned = 0) => {
+      recordLessonComplete: (lessonId, xpEarned = 0) => {
         const beforeRank = rankForXP(get().totalXP).index;
-        set((state) => ({
-          lessonsByBranch: {
-            ...state.lessonsByBranch,
-            [branchSlug]: (state.lessonsByBranch[branchSlug] ?? 0) + 1,
-          },
-          totalXP: state.totalXP + xpEarned,
-        }));
+        const info = getLessonUnitInfo(lessonId);
+        set((state) => {
+          // Advance the unit's completed count to at least (indexInUnit + 1).
+          // Using max() means re-doing an earlier lesson can't push the pointer
+          // forward and skip lessons — while completing the unit's next lesson
+          // advances it by one. XP is still awarded on every completion.
+          let lessonsByUnit = state.lessonsByUnit;
+          if (info) {
+            const next = Math.max(state.lessonsByUnit[info.unitId] ?? 0, info.indexInUnit + 1);
+            lessonsByUnit = { ...state.lessonsByUnit, [info.unitId]: next };
+          }
+          return {
+            lessonsByUnit,
+            // Keep the per-branch mirror consistent with the per-unit source.
+            lessonsByBranch: branchCountsFromUnits(lessonsByUnit),
+            totalXP: state.totalXP + xpEarned,
+          };
+        });
         const after = rankForXP(get().totalXP);
         if (after.index > beforeRank) {
           track('rank_up', {
@@ -368,7 +390,7 @@ export const useUserDataStore = create<UserDataState>()(
       setHasSeenWelcome: (v) => set({ hasSeenWelcome: v }),
 
       resetProgress: () =>
-        set({ lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
+        set({ lessonsByUnit: {}, lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
 
       clearSavedQuotes: () => {
         set({ savedQuotes: [] });
@@ -384,6 +406,7 @@ export const useUserDataStore = create<UserDataState>()(
           pinnedQuoteId: null,
           quizScores: {},
           philosopherViews: {},
+          lessonsByUnit: {},
           lessonsByBranch: {},
           voiceEnabled: true,
           beliefResultId: null,
@@ -416,6 +439,7 @@ export const useUserDataStore = create<UserDataState>()(
           pinnedQuoteId: null,
           quizScores: {},
           philosopherViews: {},
+          lessonsByUnit: {},
           lessonsByBranch: {},
           voiceEnabled: true,
           beliefResultId: null,
@@ -447,6 +471,7 @@ export const useUserDataStore = create<UserDataState>()(
         pinnedQuoteId: state.pinnedQuoteId,
         quizScores: state.quizScores,
         philosopherViews: state.philosopherViews,
+        lessonsByUnit: state.lessonsByUnit,
         lessonsByBranch: state.lessonsByBranch,
         voiceEnabled: state.voiceEnabled,
         beliefResultId: state.beliefResultId,
@@ -474,9 +499,19 @@ export const useUserDataStore = create<UserDataState>()(
         // the previous flat 25-per-lesson value so their rank doesn't drop.
         const priorLessons = Object.values(p.lessonsByBranch ?? {}).reduce((a, b) => a + b, 0);
         const totalXP = p.totalXP ?? priorLessons * 25;
+        // Migrate legacy per-branch progress to the per-unit model. Older stores
+        // only have lessonsByBranch; reconstruct lessonsByUnit from it, then keep
+        // lessonsByBranch as the derived mirror so both stay consistent.
+        const lessonsByUnit =
+          p.lessonsByUnit && Object.keys(p.lessonsByUnit).length > 0
+            ? p.lessonsByUnit
+            : unitsFromBranchCounts(p.lessonsByBranch ?? {});
+        const lessonsByBranch = branchCountsFromUnits(lessonsByUnit);
         return {
           ...current,
           ...p,
+          lessonsByUnit,
+          lessonsByBranch,
           totalXP,
           settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) },
         };

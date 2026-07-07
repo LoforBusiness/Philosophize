@@ -80,6 +80,15 @@ export const realProvider: PurchasesProvider = {
     return info.entitlements.active[ENTITLEMENT_ID] != null;
   },
 
+  async getManagementURL() {
+    try {
+      const info = await Purchases.getCustomerInfo();
+      return info.managementURL ?? null;
+    } catch {
+      return null;
+    }
+  },
+
   async logIn(appUserId) {
     await Purchases.logIn(appUserId);
   },

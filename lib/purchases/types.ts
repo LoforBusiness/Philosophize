@@ -36,6 +36,12 @@ export interface PurchasesProvider {
   // Restore prior purchases (App Store requirement). Resolves to entitlement state.
   restore(): Promise<boolean>;
 
+  // The store's "manage subscription" deep link for the current customer (Google
+  // Play / App Store), where the user actually cancels. null if there's no active
+  // store subscription (e.g. reviewer grant) or it can't be read. Cancellation
+  // must happen in the store — apps can't cancel a subscription themselves.
+  getManagementURL(): Promise<string | null>;
+
   // Identity: associate / clear the current user with RevenueCat.
   logIn(appUserId: string): Promise<void>;
   logOut(): Promise<void>;

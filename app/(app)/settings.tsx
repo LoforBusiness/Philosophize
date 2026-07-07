@@ -8,6 +8,7 @@ import {
   Modal,
   PanResponder,
   Linking,
+  Platform,
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
@@ -17,6 +18,7 @@ import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon'
 import Portrait from '@/components/shared/Portrait';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { signOut, deleteAccountCloud } from '@/lib/supabase/auth';
+import { signOutSocial } from '@/lib/auth/social';
 import { beginAccountDeletion } from '@/lib/supabase/sync';
 import { addTombstone } from '@/lib/supabase/tombstone';
 import { track } from '@/lib/posthog';
@@ -40,9 +42,10 @@ const TIMES = ['06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '12:00 PM', '06:0
 // Where user feedback is sent (opens the user's mail app pre-addressed here).
 const FEEDBACK_EMAIL = 'philosophizelearn@gmail.com';
 
-type SectionKey = 'profile' | 'notifications' | 'learning' | 'privacy' | 'feedback' | 'subscription' | 'data' | 'danger';
+type SectionKey = 'profile' | 'account' | 'notifications' | 'learning' | 'privacy' | 'feedback' | 'subscription' | 'data' | 'danger';
 const SECTIONS: { key: SectionKey; label: string; icon: SketchIconName }[] = [
   { key: 'profile', label: 'Profile', icon: 'person' },
+  { key: 'account', label: 'Account', icon: 'settings' },
   { key: 'notifications', label: 'Notifications', icon: 'bell' },
   { key: 'learning', label: 'Learning', icon: 'grad' },
   { key: 'privacy', label: 'Privacy', icon: 'lock' },
@@ -239,6 +242,8 @@ function Section({ section }: { section: SectionKey }) {
   switch (section) {
     case 'profile':
       return <ProfileSection />;
+    case 'account':
+      return <AccountSection />;
     case 'notifications':
       return <NotificationsSection />;
     case 'learning':
@@ -260,7 +265,6 @@ function Section({ section }: { section: SectionKey }) {
 
 function ProfileSection() {
   const displayName = useUserDataStore((s) => s.displayName);
-  const email = useUserDataStore((s) => s.email);
   const setProfile = useUserDataStore((s) => s.setProfile);
   const joinedAt = useUserDataStore((s) => s.joinedAt);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
@@ -314,13 +318,6 @@ function ProfileSection() {
         <Text style={styles.fieldValue}>{displayName || '—'}</Text>
       )}
 
-      <Text style={styles.fieldLabel}>EMAIL</Text>
-      {edit ? (
-        <TextInput value={email} onChangeText={(t) => setProfile({ email: t })} style={styles.input} placeholder="you@example.com" placeholderTextColor={InkSoft} autoCapitalize="none" keyboardType="email-address" />
-      ) : (
-        <Text style={styles.fieldValue}>{email || '—'}</Text>
-      )}
-
       <View style={styles.hr} />
       <View style={styles.miniStats}>
         <MiniStat value={lessons} label="Lessons" />
@@ -339,6 +336,65 @@ function MiniStat({ value, label }: { value: number; label: string }) {
       <Text style={styles.miniValue}>{value}</Text>
       <Text style={styles.miniLabel}>{label}</Text>
     </View>
+  );
+}
+
+/* ---------------- Account ---------------- */
+
+function AccountSection() {
+  const email = useUserDataStore((s) => s.email);
+  const [confirm, setConfirm] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+
+  const doSignOut = async () => {
+    setConfirm(false);
+    if (signingOut) return;
+    setSigningOut(true);
+    track('sign_out');
+    // Supabase signOut fires SIGNED_OUT; the app's listeners then wipe local
+    // data and detach the purchaser. We also clear the native Google session and
+    // land the user back on the entry screen.
+    try {
+      await signOut();
+    } catch {}
+    try {
+      await signOutSocial();
+    } catch {}
+    router.replace('/');
+  };
+
+  return (
+    <Card>
+      <Header title="Account" sub="The account you signed in with." />
+      <View style={styles.hr} />
+
+      <Text style={styles.fieldLabel}>SIGNED IN AS</Text>
+      <Text style={styles.fieldValue}>{email || 'Your account'}</Text>
+
+      <View style={styles.hr} />
+      <Row title="Sign Out" sub="Sign out on this device — your progress stays saved to your account." last stack>
+        <Pressable
+          onPress={() => setConfirm(true)}
+          disabled={signingOut}
+          style={({ pressed }) => [styles.signOutBtn, pressed && { opacity: 0.85 }]}
+        >
+          <SketchIcon name="back" size={15} color={Ink} />
+          <Text style={styles.signOutText}>{signingOut ? 'Signing out…' : 'Sign Out'}</Text>
+        </Pressable>
+      </Row>
+      <Text style={styles.footNote}>
+        Signing out clears your data from this device; it syncs back the next time you sign in with this account.
+      </Text>
+
+      <ConfirmModal
+        visible={confirm}
+        title="Sign Out"
+        message="You'll be signed out on this device. Your progress is saved to your account and returns when you sign back in."
+        confirmLabel="Sign Out"
+        onConfirm={doSignOut}
+        onCancel={() => setConfirm(false)}
+      />
+    </Card>
   );
 }
 
@@ -487,9 +543,31 @@ function SubscriptionSection() {
   const { width } = useWindowDimensions();
   const wide = width >= 720;
   const isPro = useSubscriptionStore((s) => s.isPro);
+  const isReviewer = useSubscriptionStore((s) => s.isReviewer);
+  const [confirmCancel, setConfirmCancel] = useState(false);
   useEffect(() => {
     track('paywall_viewed', { source: 'settings' });
   }, []);
+
+  // Google Play / the App Store owns cancellation — an app can't cancel a store
+  // subscription itself. Send the user to the store's manage-subscription page
+  // (RevenueCat's managementURL when available, else the generic account page).
+  const storeName = Platform.OS === 'ios' ? 'the App Store' : 'Google Play';
+  const openManageSubscription = async () => {
+    setConfirmCancel(false);
+    track('subscription_manage_opened', { source: 'settings' });
+    let url: string | null = null;
+    try {
+      url = await purchases.getManagementURL();
+    } catch {}
+    if (!url) {
+      url =
+        Platform.OS === 'ios'
+          ? 'https://apps.apple.com/account/subscriptions'
+          : 'https://play.google.com/store/account/subscriptions';
+    }
+    Linking.openURL(url).catch(() => {});
+  };
   return (
     <Card>
       <Header title="Subscription" sub={isPro ? 'You have Scholar’s Pass.' : 'You are on the Free plan.'} />
@@ -549,9 +627,27 @@ function SubscriptionSection() {
           )}
         </View>
       </View>
+      {isPro && !isReviewer && (
+        <Pressable
+          onPress={() => setConfirmCancel(true)}
+          style={({ pressed }) => [styles.cancelSubBtn, pressed && { backgroundColor: '#F7E9E9' }]}
+        >
+          <Text style={styles.cancelSubText}>Cancel subscription</Text>
+        </Pressable>
+      )}
+
       <Text style={styles.footNote}>
-        Subscriptions renew monthly. You may cancel at any time from your App Store or Google Play account settings. Access continues until the end of the billing period.
+        Subscriptions renew monthly. Cancelling is done through {storeName}; your Scholar’s Pass stays active until the end of the current billing period.
       </Text>
+
+      <ConfirmModal
+        visible={confirmCancel}
+        title="Cancel subscription"
+        message={`This opens ${storeName}, where you can cancel Scholar’s Pass. Your access stays active until the end of the current billing period.`}
+        confirmLabel={`Continue to ${storeName}`}
+        onConfirm={openManageSubscription}
+        onCancel={() => setConfirmCancel(false)}
+      />
     </Card>
   );
 }
@@ -891,6 +987,14 @@ const styles = StyleSheet.create({
   // Feedback
   feedbackBtn: { flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: Ink, borderRadius: 4, paddingHorizontal: 20, paddingVertical: 12 },
   feedbackBtnText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: Paper },
+
+  // Account
+  signOutBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, paddingHorizontal: 18, paddingVertical: 11, backgroundColor: Paper },
+  signOutText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Ink },
+
+  // Cancel subscription
+  cancelSubBtn: { alignSelf: 'flex-start', borderWidth: 1.5, borderColor: Crimson, borderRadius: 4, paddingHorizontal: 18, paddingVertical: 11, marginTop: 18 },
+  cancelSubText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Crimson },
 
   // Danger
   dangerBtn: { borderWidth: 1.5, borderColor: Crimson, borderRadius: 4, paddingHorizontal: 16, paddingVertical: 10 },

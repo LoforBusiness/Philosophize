@@ -38,6 +38,7 @@ interface FinalStats {
   correct: number;
   total: number;
   branchSlug: string | null;
+  lessonId: string;
 }
 
 // 5 XP just for completing the lesson, plus 5 per correct answer.
@@ -149,6 +150,7 @@ export default function LessonRunner({ lesson }: Props) {
       correct,
       total: s?.answers.length ?? 0,
       branchSlug: found?.branch.slug ?? null,
+      lessonId: lesson.id,
     });
     setFinished(true);
     endSession();
