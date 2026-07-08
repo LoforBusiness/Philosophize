@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, StyleSheet, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Rect, Line, Defs, Pattern } from 'react-native-svg';
-import SketchPieChart, { type PiePoint } from '@/components/shared/SketchPieChart';
+import Svg, { Rect, Line } from 'react-native-svg';
+import SketchPieChart, { type PiePoint, TINTS } from '@/components/shared/SketchPieChart';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import { ALL_BRANCHES } from '@/data';
@@ -27,6 +27,13 @@ const AREA_NAME: Record<string, string> = {
   logic: 'Logic',
   'political-philosophy': 'Politics',
 };
+
+// Each branch gets a fixed grayscale tint by its position in AREA_ORDER, so the
+// same colour stands for a branch in BOTH the Areas-of-Interest pie and the
+// Activity Breakdown bars (Ethics = ink black → Politics = lightest gray).
+const AREA_TINT: Record<string, string> = Object.fromEntries(
+  AREA_ORDER.map((slug, i) => [slug, TINTS[i % TINTS.length]])
+);
 
 export default function StatsScreen() {
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
@@ -75,11 +82,13 @@ export default function StatsScreen() {
   const areaPie: PiePoint[] = AREA_ORDER.map((slug) => ({
     label: AREA_NAME[slug],
     value: metricBySlug[slug]?.interest ?? 0,
+    color: AREA_TINT[slug],
   })).filter((d) => d.value > 0);
 
   const activity = AREA_ORDER.map((slug) => ({
     label: AREA_NAME[slug],
     value: metricBySlug[slug]?.interactions ?? 0,
+    color: AREA_TINT[slug],
   }));
   const hasActivity = activity.some((a) => a.value > 0);
 
@@ -158,7 +167,7 @@ export default function StatsScreen() {
   );
 }
 
-function ActivityBars({ points }: { points: { label: string; value: number }[] }) {
+function ActivityBars({ points }: { points: { label: string; value: number; color: string }[] }) {
   const innerW = SW - 40 - 32; // page padding + card padding
   const H = 200;
   const padTop = 26;
@@ -177,12 +186,6 @@ function ActivityBars({ points }: { points: { label: string; value: number }[] }
 
       <View style={{ width: innerW, height: H, marginTop: 8 }}>
         <Svg width={innerW} height={H} style={StyleSheet.absoluteFill}>
-          <Defs>
-            <Pattern id="actHatch" patternUnits="userSpaceOnUse" width={6} height={6}>
-              <Rect x={0} y={0} width={6} height={6} fill={Paper} />
-              <Line x1={0} y1={6} x2={6} y2={0} stroke={Ink} strokeWidth={1.1} />
-            </Pattern>
-          </Defs>
           <Line x1={0} y1={baseline} x2={innerW} y2={baseline} stroke={Ink} strokeWidth={1.5} />
           {points.map((p, i) => {
             const barH = Math.max(2, (p.value / max) * plotH);
@@ -196,7 +199,7 @@ function ActivityBars({ points }: { points: { label: string; value: number }[] }
                 y={y}
                 width={barW}
                 height={barH}
-                fill="url(#actHatch)"
+                fill={p.color}
                 stroke={Ink}
                 strokeWidth={1.5}
               />

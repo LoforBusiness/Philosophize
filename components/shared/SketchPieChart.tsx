@@ -4,6 +4,10 @@ import Svg, { Path, Circle, Line, Rect, G, Text as SvgText } from 'react-native-
 export interface PiePoint {
   label: string;
   value: number;
+  // Optional explicit slice fill. When set, it overrides the index-based tint —
+  // used so a branch keeps the SAME colour across charts even if slices are
+  // filtered/reordered. Omitted → falls back to the grayscale ramp by index.
+  color?: string;
 }
 
 interface Props {
@@ -21,7 +25,7 @@ const InkSoft = '#6B6B6B';
 // toward ink: even the lightest step (#BEBBB0) stays clearly darker than the
 // #FAFAF7 paper, so no slice washes out, while ~32-luminance steps keep
 // neighbouring slices distinguishable across the thin paper gap between them.
-const TINTS = ['#1A1A1A', '#3D3B38', '#5E5B55', '#7E7B72', '#9E9B90', '#BEBBB0'];
+export const TINTS = ['#1A1A1A', '#3D3B38', '#5E5B55', '#7E7B72', '#9E9B90', '#BEBBB0'];
 
 // Legend swatch: a tinted rect with a thin ink outline (mirrors the slice fill).
 function Swatch({ tint }: { tint: string }) {
@@ -66,7 +70,7 @@ export default function SketchPieChart({ title, subtitle, data, valueMode = 'per
     const end = (acc + frac) * 360;
     const mid = (start + end) / 2;
     acc += frac;
-    return { ...p, frac, start, end, mid, tint: TINTS[i % TINTS.length] };
+    return { ...p, frac, start, end, mid, tint: p.color ?? TINTS[i % TINTS.length] };
   });
 
   return (
