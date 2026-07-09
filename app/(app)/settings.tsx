@@ -543,7 +543,6 @@ function SubscriptionSection() {
   const { width } = useWindowDimensions();
   const wide = width >= 720;
   const isPro = useSubscriptionStore((s) => s.isPro);
-  const isReviewer = useSubscriptionStore((s) => s.isReviewer);
   const [confirmCancel, setConfirmCancel] = useState(false);
   useEffect(() => {
     track('paywall_viewed', { source: 'settings' });
@@ -627,7 +626,7 @@ function SubscriptionSection() {
           )}
         </View>
       </View>
-      {isPro && !isReviewer && (
+      {isPro && (
         <Pressable
           onPress={() => setConfirmCancel(true)}
           style={({ pressed }) => [styles.cancelSubBtn, pressed && { backgroundColor: '#F7E9E9' }]}
