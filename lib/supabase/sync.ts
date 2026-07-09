@@ -1,11 +1,12 @@
 import { supabase } from './client';
-import { useUserDataStore, type SavedQuote, type AppSettings } from '@/stores/userDataStore';
+import { useUserDataStore, type SavedQuote, type ProfileQuote, type AppSettings } from '@/stores/userDataStore';
 import { branchCountsFromUnits, unitsFromBranchCounts } from '@/data';
 
 // The slice of userDataStore mirrored to the cloud — matches the store's
 // `partialize`, so "what we persist locally" and "what we sync" stay identical.
 export interface CloudState {
   savedQuotes: SavedQuote[];
+  profileQuote: ProfileQuote | null;
   philosopherViews: Record<string, number>;
   lessonsByUnit: Record<string, number>;
   lessonsByBranch: Record<string, number>;
@@ -25,7 +26,7 @@ export interface CloudState {
 }
 
 const SYNC_FIELDS: (keyof CloudState)[] = [
-  'savedQuotes', 'philosopherViews', 'lessonsByUnit', 'lessonsByBranch', 'voiceEnabled', 'beliefResultId',
+  'savedQuotes', 'profileQuote', 'philosopherViews', 'lessonsByUnit', 'lessonsByBranch', 'voiceEnabled', 'beliefResultId',
   'streak', 'totalXP', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'badgesInitialized',
   'displayName', 'email', 'bio', 'portrait', 'settings',
 ];
@@ -214,9 +215,13 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
     fresh && (typeof remote.beliefResultId === 'string' || remote.beliefResultId === null)
       ? remote.beliefResultId
       : local.beliefResultId;
+  // Featured Profile quote is a personalisation: a fresh device adopts the
+  // cloud's; a personalised device keeps its own choice.
+  const profileQuote = fresh ? remote.profileQuote ?? null : local.profileQuote;
 
   return {
     savedQuotes,
+    profileQuote,
     philosopherViews,
     lessonsByUnit,
     lessonsByBranch,

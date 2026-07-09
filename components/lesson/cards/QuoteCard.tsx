@@ -19,6 +19,8 @@ function slugify(s: string) {
 export default function QuoteCard({ card, branchSlug }: Props) {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const saved = useUserDataStore((s) => s.savedQuotes.some((q) => q.id === card.id));
+  const setProfileQuote = useUserDataStore((s) => s.setProfileQuote);
+  const featured = useUserDataStore((s) => s.profileQuote?.id === card.id);
 
   const onToggle = () =>
     toggleQuote({
@@ -29,6 +31,18 @@ export default function QuoteCard({ card, branchSlug }: Props) {
       branchSlugs: branchSlug ? [branchSlug] : [],
       savedAt: Date.now(),
     });
+
+  const onFeature = () =>
+    setProfileQuote(
+      featured
+        ? null
+        : {
+            id: card.id,
+            text: card.quote,
+            author: card.author,
+            philosopherId: card.philosopherId ?? slugify(card.author),
+          }
+    );
 
   return (
     <View style={styles.root}>
@@ -41,14 +55,24 @@ export default function QuoteCard({ card, branchSlug }: Props) {
         <Text style={styles.author}>{card.author}</Text>
         <Text style={styles.meta}>{card.work ? `${card.work} · ${card.era}` : card.era}</Text>
 
-        <Pressable
-          onPress={onToggle}
-          hitSlop={8}
-          style={({ pressed }) => [styles.saveBtn, saved && styles.saveBtnOn, pressed && { opacity: 0.85 }]}
-        >
-          <SketchIcon name={saved ? 'bookmark-filled' : 'bookmark'} size={17} color={saved ? T.bg : T.ink} />
-          <Text style={[styles.saveText, saved && { color: T.bg }]}>{saved ? 'Saved' : 'Save quote'}</Text>
-        </Pressable>
+        <View style={styles.actions}>
+          <Pressable
+            onPress={onToggle}
+            hitSlop={8}
+            style={({ pressed }) => [styles.saveBtn, saved && styles.saveBtnOn, pressed && { opacity: 0.85 }]}
+          >
+            <SketchIcon name={saved ? 'bookmark-filled' : 'bookmark'} size={17} color={saved ? T.bg : T.ink} />
+            <Text style={[styles.saveText, saved && { color: T.bg }]}>{saved ? 'Saved' : 'Save quote'}</Text>
+          </Pressable>
+          <Pressable
+            onPress={onFeature}
+            hitSlop={8}
+            style={({ pressed }) => [styles.saveBtn, featured && styles.saveBtnOn, pressed && { opacity: 0.85 }]}
+          >
+            <SketchIcon name={featured ? 'star-filled' : 'star'} size={17} color={featured ? T.bg : T.ink} />
+            <Text style={[styles.saveText, featured && { color: T.bg }]}>{featured ? 'Featured' : 'Feature'}</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -89,6 +113,7 @@ const styles = StyleSheet.create({
   rule: { height: 1, backgroundColor: T.border, marginTop: 20, marginBottom: 14, width: 40 },
   author: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: T.ink },
   meta: { fontFamily: 'Inter_400Regular', fontSize: 12.5, color: T.inkSoft, marginTop: 3 },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 22 },
   saveBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -99,7 +124,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    marginTop: 22,
     backgroundColor: T.panel,
   },
   saveBtnOn: { backgroundColor: T.ink },

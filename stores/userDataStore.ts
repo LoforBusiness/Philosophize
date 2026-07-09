@@ -23,6 +23,16 @@ export interface SavedQuote {
   savedAt: number;
 }
 
+// A single quote the user has chosen to feature on their Profile header. Any
+// quote can be featured (from a lesson, the saved-quotes sheet, or a thinker's
+// page) — this is independent of whether the quote is saved/bookmarked.
+export interface ProfileQuote {
+  id: string;
+  text: string;
+  author: string;
+  philosopherId: string;
+}
+
 // Best result on a philosopher's quiz. `best === total` (and total > 0) means
 // the user has "mastered" that thinker's quiz at least once.
 export interface QuizScore {
@@ -88,6 +98,7 @@ const DEFAULT_SETTINGS: AppSettings = {
 interface UserDataState {
   savedQuotes: SavedQuote[];
   pinnedQuoteId: string | null;               // saved-quote id pinned to the home-screen widget
+  profileQuote: ProfileQuote | null;          // the quote featured on the Profile header (any quote, not just saved)
   quizScores: Record<string, QuizScore>;      // philosopherId -> best quiz result
   philosopherViews: Record<string, number>; // philosopherId -> times profile opened
   // Canonical progression: unitId (path.id) -> lessons completed in that unit.
@@ -121,6 +132,7 @@ interface UserDataState {
   toggleQuote: (q: SavedQuote) => void;
   isQuoteSaved: (id: string) => boolean;
   setPinnedQuote: (id: string | null) => void;
+  setProfileQuote: (q: ProfileQuote | null) => void;
   recordPhilosopherView: (philosopherId: string) => void;
   recordQuizResult: (philosopherId: string, correct: number, total: number) => number;
   recordLessonComplete: (lessonId: string, xpEarned?: number) => void;
@@ -172,6 +184,7 @@ export const useUserDataStore = create<UserDataState>()(
     (set, get) => ({
       savedQuotes: [],
       pinnedQuoteId: null,
+      profileQuote: null,
       quizScores: {},
       philosopherViews: {},
       lessonsByUnit: {},
@@ -241,6 +254,14 @@ export const useUserDataStore = create<UserDataState>()(
         writePinnedQuote(
           q ? { text: q.text, author: q.author, philosopherId: q.philosopherId } : null
         );
+      },
+
+      // Feature (or clear, when passed null) the single quote shown on the
+      // Profile header. Any quote can be featured — this is independent of
+      // whether it's saved/bookmarked.
+      setProfileQuote: (q) => {
+        set({ profileQuote: q });
+        if (q) track('profile_quote_set', { quote_id: q.id, philosopher_id: q.philosopherId });
       },
 
       recordPhilosopherView: (philosopherId) => {
@@ -404,6 +425,7 @@ export const useUserDataStore = create<UserDataState>()(
         set({
           savedQuotes: [],
           pinnedQuoteId: null,
+          profileQuote: null,
           quizScores: {},
           philosopherViews: {},
           lessonsByUnit: {},
@@ -437,6 +459,7 @@ export const useUserDataStore = create<UserDataState>()(
         set({
           savedQuotes: [],
           pinnedQuoteId: null,
+          profileQuote: null,
           quizScores: {},
           philosopherViews: {},
           lessonsByUnit: {},
@@ -469,6 +492,7 @@ export const useUserDataStore = create<UserDataState>()(
       partialize: (state) => ({
         savedQuotes: state.savedQuotes,
         pinnedQuoteId: state.pinnedQuoteId,
+        profileQuote: state.profileQuote,
         quizScores: state.quizScores,
         philosopherViews: state.philosopherViews,
         lessonsByUnit: state.lessonsByUnit,

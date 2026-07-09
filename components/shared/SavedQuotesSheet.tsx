@@ -24,6 +24,8 @@ export default function SavedQuotesSheet() {
   const removeQuote = useUserDataStore((s) => s.removeQuote);
   const pinnedQuoteId = useUserDataStore((s) => s.pinnedQuoteId);
   const setPinnedQuote = useUserDataStore((s) => s.setPinnedQuote);
+  const profileQuote = useUserDataStore((s) => s.profileQuote);
+  const setProfileQuote = useUserDataStore((s) => s.setProfileQuote);
   // The home-screen widget is Android-only, so the pin control only appears there.
   const canPin = Platform.OS === 'android';
 
@@ -103,6 +105,14 @@ export default function SavedQuotesSheet() {
                       canPin={canPin}
                       pinned={pinnedQuoteId === q.id}
                       onTogglePin={() => setPinnedQuote(pinnedQuoteId === q.id ? null : q.id)}
+                      featured={profileQuote?.id === q.id}
+                      onToggleFeature={() =>
+                        setProfileQuote(
+                          profileQuote?.id === q.id
+                            ? null
+                            : { id: q.id, text: q.text, author: q.author, philosopherId: q.philosopherId }
+                        )
+                      }
                     />
                   ))}
                 </ScrollView>
@@ -123,6 +133,8 @@ function QuoteCard({
   canPin,
   pinned,
   onTogglePin,
+  featured,
+  onToggleFeature,
 }: {
   q: SavedQuote;
   era: string | null;
@@ -131,6 +143,8 @@ function QuoteCard({
   canPin: boolean;
   pinned: boolean;
   onTogglePin: () => void;
+  featured: boolean;
+  onToggleFeature: () => void;
 }) {
   return (
     <View style={styles.card}>
@@ -152,6 +166,11 @@ function QuoteCard({
 
       <Pressable onPress={onRemove} hitSlop={10} style={({ pressed }) => [styles.unsave, pressed && { opacity: 0.6 }]}>
         <SketchIcon name="bookmark-filled" size={17} color={Ink} />
+      </Pressable>
+
+      {/* Feature this quote on the Profile header (star fills when it's the one). */}
+      <Pressable onPress={onToggleFeature} hitSlop={10} style={({ pressed }) => [styles.feature, pressed && { opacity: 0.6 }]}>
+        <SketchIcon name={featured ? 'star-filled' : 'star'} size={17} color={Ink} />
       </Pressable>
 
       {canPin ? (
@@ -213,7 +232,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 27,
     color: Ink,
-    paddingRight: 26, // clear of the bookmark
+    paddingRight: 64, // clear of the two corner icons (feature star + bookmark)
   },
   rule: { height: 1, backgroundColor: InkFaint, marginTop: 14, marginBottom: 12, width: 34 },
   byline: { flexDirection: 'row', alignItems: 'center', gap: 10 },
@@ -225,6 +244,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  feature: {
+    position: 'absolute',
+    top: 10,
+    right: 46,
     width: 34,
     height: 34,
     borderRadius: 17,

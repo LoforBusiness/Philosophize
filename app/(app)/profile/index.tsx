@@ -82,6 +82,8 @@ export default function ProfileScreen() {
   const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'profile';
   const openRanksBadges = useUIStore((s) => s.openRanksBadges);
   const openSavedQuotes = useUIStore((s) => s.openSavedQuotes);
+  const openPhilosopher = useUIStore((s) => s.openPhilosopher);
+  const profileQuote = useUserDataStore((s) => s.profileQuote);
   const isSignedIn = !!useAuthSession();
 
   useEffect(() => {
@@ -204,6 +206,30 @@ export default function ProfileScreen() {
             <SketchIcon name="star" size={13} color={Paper} />
             <Text style={styles.rankChipText}>RANK: {cur.name.toUpperCase()}</Text>
           </Pressable>
+
+          {/* Featured "profile quote" — set from any quote (lesson / saved / thinker).
+              Tapping it opens that thinker; empty state nudges the user to pick one. */}
+          {profileQuote ? (
+            <Pressable
+              onPress={() => openPhilosopher(profileQuote.philosopherId)}
+              style={({ pressed }) => [styles.profileQuote, pressed && { opacity: 0.7 }]}
+              hitSlop={6}
+            >
+              <Text style={styles.profileQuoteText} numberOfLines={4}>
+                “{profileQuote.text}”
+              </Text>
+              <Text style={styles.profileQuoteBy}>— {profileQuote.author.toUpperCase()}</Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              onPress={openSavedQuotes}
+              style={({ pressed }) => [styles.profileQuotePrompt, pressed && { opacity: 0.6 }]}
+              hitSlop={6}
+            >
+              <SketchIcon name="star" size={12} color={Gold} />
+              <Text style={styles.profileQuotePromptText}>Feature a favorite quote</Text>
+            </Pressable>
+          )}
         </View>
 
         {/* Body */}
@@ -438,6 +464,19 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   rankChipText: { fontFamily: 'Inter_700Bold', fontSize: 11, color: Paper, letterSpacing: 1 },
+
+  profileQuote: { alignItems: 'center', marginTop: 18, paddingHorizontal: 10, maxWidth: 340 },
+  profileQuoteText: {
+    fontFamily: 'PlayfairDisplay_400Regular',
+    fontStyle: 'italic',
+    fontSize: 15,
+    lineHeight: 22,
+    color: Paper,
+    textAlign: 'center',
+  },
+  profileQuoteBy: { fontFamily: 'Inter_500Medium', fontSize: 9.5, color: Gold, letterSpacing: 1.5, marginTop: 8 },
+  profileQuotePrompt: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 16 },
+  profileQuotePromptText: { fontFamily: 'Inter_500Medium', fontSize: 11, color: Gold, letterSpacing: 0.5 },
 
   body: { paddingHorizontal: 20, paddingTop: 20 },
 

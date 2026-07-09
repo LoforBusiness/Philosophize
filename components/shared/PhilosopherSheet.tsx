@@ -33,6 +33,8 @@ export default function PhilosopherSheet() {
   const recordView = useUserDataStore((s) => s.recordPhilosopherView);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
+  const profileQuote = useUserDataStore((s) => s.profileQuote);
+  const setProfileQuote = useUserDataStore((s) => s.setProfileQuote);
   const quizScores = useUserDataStore((s) => s.quizScores);
 
   const { height } = useWindowDimensions();
@@ -180,9 +182,10 @@ export default function PhilosopherSheet() {
 
               {/* Quotes */}
               <SectionHeading label="Quotes" />
-              <Text style={styles.quotesHint}>Tap the bookmark to save a quote.</Text>
+              <Text style={styles.quotesHint}>Bookmark to save · star to feature it on your profile.</Text>
               {phil.quotes.map((q) => {
                 const saved = savedIds.has(q.id);
+                const featured = profileQuote?.id === q.id;
                 return (
                   <View key={q.id} style={styles.quoteBox}>
                     <Text style={styles.quoteText}>"{q.text}"</Text>
@@ -203,6 +206,22 @@ export default function PhilosopherSheet() {
                         name={saved ? 'bookmark-filled' : 'bookmark'}
                         size={22}
                         color={saved ? Ink : InkSoft}
+                      />
+                    </Pressable>
+                    <Pressable
+                      hitSlop={10}
+                      onPress={() =>
+                        setProfileQuote(
+                          featured
+                            ? null
+                            : { id: q.id, text: q.text, author: phil.name, philosopherId: phil.id }
+                        )
+                      }
+                    >
+                      <SketchIcon
+                        name={featured ? 'star-filled' : 'star'}
+                        size={22}
+                        color={featured ? Ink : InkSoft}
                       />
                     </Pressable>
                   </View>
