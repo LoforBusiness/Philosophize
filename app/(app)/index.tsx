@@ -9,6 +9,7 @@ import ScreenTransition from '@/components/shared/ScreenTransition';
 import PressableScale from '@/components/shared/PressableScale';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import AddWidgetSheet from '@/components/shared/AddWidgetSheet';
+import { useWidgetPlaced } from '@/lib/widget/useWidgetPlaced';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -97,6 +98,9 @@ export default function HomeScreen() {
   const settings = useUserDataStore((s) => s.settings);
   const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'home';
   const [addWidgetOpen, setAddWidgetOpen] = useState(false);
+  // Hide the CTA once the Quote widget is on the phone's home screen; it returns
+  // if they remove it (re-checked whenever the app comes back to the foreground).
+  const widgetPlaced = useWidgetPlaced();
 
   const dayNumber = Math.floor(Date.now() / 86_400_000);
   const quote = QUOTE_POOL[dayNumber % QUOTE_POOL.length];
@@ -183,8 +187,8 @@ export default function HomeScreen() {
         <View style={{ flex: 1, minHeight: 16 }} />
 
         {/* Android home-screen widget is the only OS widget we ship, so the
-            prompt only appears there. */}
-        {Platform.OS === 'android' ? (
+            prompt only appears there — and only until the widget is placed. */}
+        {Platform.OS === 'android' && widgetPlaced === false ? (
           <Pressable
             onPress={() => setAddWidgetOpen(true)}
             style={({ pressed }) => [styles.addWidgetBtn, pressed && { opacity: 0.85 }]}
