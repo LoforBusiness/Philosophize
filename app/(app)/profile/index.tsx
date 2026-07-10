@@ -17,6 +17,8 @@ import { BADGES } from '@/data/badges';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { generateUserBio } from '@/lib/utils/userBio';
+import { effectiveStreak } from '@/lib/utils/streak';
+import { useTodayKey } from '@/lib/utils/useTodayKey';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -72,6 +74,8 @@ export default function ProfileScreen() {
   const philosopherViews = useUserDataStore((s) => s.philosopherViews);
   const streak = useUserDataStore((s) => s.streak);
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
+  useTodayKey();
+  const shownStreak = effectiveStreak(streak, lastLessonDate);
   const joinedAt = useUserDataStore((s) => s.joinedAt);
   const ensureJoinDate = useUserDataStore((s) => s.ensureJoinDate);
   const displayName = useUserDataStore((s) => s.displayName);
@@ -133,7 +137,7 @@ export default function ProfileScreen() {
   const bio = generateUserBio(
     {
       lessonsDone,
-      streak,
+      streak: shownStreak,
       quotesSaved,
       distinctViewed,
       topPhilosopher: topPhilosopher?.name ?? null,
@@ -288,11 +292,11 @@ export default function ProfileScreen() {
           <SectionLabel>DAILY STREAK</SectionLabel>
           <View style={styles.streakBox}>
             <View style={styles.streakLeft}>
-              <StreakBook value={streak} size={66} />
+              <StreakBook value={shownStreak} size={66} />
               <Text style={styles.streakWord}>DAY STREAK</Text>
             </View>
             <View style={styles.chipsRow}>
-              <StreakWeek streak={streak} lastLessonDate={lastLessonDate} size={30} />
+              <StreakWeek streak={shownStreak} lastLessonDate={lastLessonDate} size={30} />
             </View>
           </View>
 

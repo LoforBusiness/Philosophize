@@ -6,10 +6,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  interpolate,
-  Extrapolation,
   runOnJS,
-  type SharedValue,
 } from 'react-native-reanimated';
 import type { Lesson, CardData, AnswerResult } from '@/data/types';
 import { useLessonStore } from '@/stores/lessonStore';
@@ -177,6 +174,49 @@ export default function LessonRunner({ lesson }: Props) {
     [recordAnswer]
   );
 
+  // Stable per-card callbacks, so turning a page (a setIndex re-render) doesn't
+  // hand every card a fresh closure and re-render the whole deck. Combined with
+  // the memoized bodies below, only the card whose "active" state flips actually
+  // re-renders — which is what keeps the swipe buttery.
+  const revealCbs = useMemo(
+    () => lesson.cards.map((_, i) => () => markRevealed(i)),
+    [lesson.cards, markRevealed]
+  );
+  const answerCbs = useMemo(
+    () =>
+      lesson.cards.map((_, i) => (r?: AnswerResult) => {
+        if (r) onAnswer(i, r);
+      }),
+    [lesson.cards, onAnswer]
+  );
+
+  // The rendered card bodies, memoized so their element identity is stable across
+  // page turns — an index change never rebuilds them, only re-flags which is active.
+  const cardEls = useMemo(
+    () =>
+      lesson.cards.map((card, i) => {
+        switch (card.type) {
+          case 'hook':
+            return <HookCard card={card} onRevealed={revealCbs[i]} />;
+          case 'concept':
+            return <ConceptCard card={card} onRevealed={revealCbs[i]} />;
+          case 'example':
+            return <ExampleCard card={card} onRevealed={revealCbs[i]} />;
+          case 'reinforcement':
+            return <ReinforcementCard card={card} onRevealed={revealCbs[i]} />;
+          case 'summary':
+            return <SummaryCard card={card} onRevealed={revealCbs[i]} />;
+          case 'quote':
+            return <QuoteCard card={card} branchSlug={branchSlug} />;
+          case 'question':
+            return <QuestionCard card={card} onComplete={answerCbs[i]} />;
+          case 'dilemma':
+            return <DilemmaCard card={card} onComplete={answerCbs[i]} />;
+        }
+      }),
+    [lesson.cards, branchSlug, revealCbs, answerCbs]
+  );
+
   // One card per swipe, no matter how far or hard the user drags: the gesture
   // always commits to exactly the adjacent card (or snaps back), and the drag is
   // clamped to a single card-width so the next card never runs ahead.
@@ -207,15 +247,16 @@ export default function LessonRunner({ lesson }: Props) {
           const TH = 14; // tiny distance threshold — a small nudge advances
           const VH = 90; // …or the gentlest flick
           const i = indexSv.value;
-          // The snap inherits the finger's release velocity, so the motion feels
-          // physically continuous (Apple's "fluid interface" principle), settling
-          // with a quick, barely-there give — the premium card-pager feel.
+          // The snap inherits the finger's release velocity so the motion feels
+          // physically continuous (Apple's "fluid interface" principle), and lands
+          // with a crisp, near-critically-damped settle — a clean page turn, no
+          // wobble, no drag.
           const glide = (to: number) =>
             (tx.value = withSpring(-to * width, {
               velocity: vx,
-              damping: 21,
-              stiffness: 210,
-              mass: 0.7,
+              damping: 26,
+              stiffness: 320,
+              mass: 0.65,
             }));
 
           let dir = 0;
@@ -245,27 +286,6 @@ export default function LessonRunner({ lesson }: Props) {
 
   const rowStyle = useAnimatedStyle(() => ({ transform: [{ translateX: tx.value }] }));
 
-  const renderCard = (card: CardData, i: number) => {
-    switch (card.type) {
-      case 'hook':
-        return <HookCard card={card} onRevealed={() => markRevealed(i)} />;
-      case 'concept':
-        return <ConceptCard card={card} onRevealed={() => markRevealed(i)} />;
-      case 'example':
-        return <ExampleCard card={card} onRevealed={() => markRevealed(i)} />;
-      case 'reinforcement':
-        return <ReinforcementCard card={card} onRevealed={() => markRevealed(i)} />;
-      case 'summary':
-        return <SummaryCard card={card} onRevealed={() => markRevealed(i)} />;
-      case 'quote':
-        return <QuoteCard card={card} branchSlug={branchSlug} />;
-      case 'question':
-        return <QuestionCard card={card} onComplete={(r) => r && onAnswer(i, r)} />;
-      case 'dilemma':
-        return <DilemmaCard card={card} onComplete={(r) => r && onAnswer(i, r)} />;
-    }
-  };
-
   const handleExit = useCallback(() => {
     endSession();
     router.back();
@@ -290,12 +310,12 @@ export default function LessonRunner({ lesson }: Props) {
         <View style={styles.viewport}>
           <GestureDetector gesture={pan}>
             <Animated.View style={[styles.row, rowStyle, { width: width * N }]}>
-              {lesson.cards.map((card, i) => (
-                <PagerCard key={i} index={i} width={width} tx={tx}>
+              {cardEls.map((el, i) => (
+                <View key={i} style={{ width }}>
                   <CardActiveContext.Provider value={i === index}>
-                    {renderCard(card, i)}
+                    {el}
                   </CardActiveContext.Provider>
-                </PagerCard>
+                </View>
               ))}
             </Animated.View>
           </GestureDetector>
@@ -322,31 +342,6 @@ export default function LessonRunner({ lesson }: Props) {
       </CardShell>
     </SceneMetaContext.Provider>
   );
-}
-
-// Each card carries depth: it sits at full scale/opacity when centred, and gently
-// shrinks + fades as it moves off — so the incoming card rises into focus while the
-// outgoing one recedes. This parallax of scale/opacity is what gives premium card
-// pagers (App Store, Quibi) their sense of weight, paired with the velocity spring.
-function PagerCard({
-  index: i,
-  width,
-  tx,
-  children,
-}: {
-  index: number;
-  width: number;
-  tx: SharedValue<number>;
-  children: React.ReactNode;
-}) {
-  const style = useAnimatedStyle(() => {
-    const p = i + tx.value / width; // 0 at centre, ±1 one card away
-    const dist = Math.abs(p);
-    const scale = interpolate(dist, [0, 1], [1, 0.9], Extrapolation.CLAMP);
-    const opacity = interpolate(dist, [0, 1], [1, 0.6], Extrapolation.CLAMP);
-    return { transform: [{ scale }], opacity };
-  });
-  return <Animated.View style={[{ width }, style]}>{children}</Animated.View>;
 }
 
 const styles = StyleSheet.create({

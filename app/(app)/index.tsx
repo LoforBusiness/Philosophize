@@ -10,6 +10,8 @@ import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
+import { effectiveStreak } from '@/lib/utils/streak';
+import { useTodayKey } from '@/lib/utils/useTodayKey';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -84,7 +86,10 @@ function ActionCard({
 
 export default function HomeScreen() {
   const openPhilosopher = useUIStore((s) => s.openPhilosopher);
-  const streak = useUserDataStore((s) => s.streak);
+  const streakRaw = useUserDataStore((s) => s.streak);
+  const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
+  useTodayKey();
+  const streak = effectiveStreak(streakRaw, lastLessonDate);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const settings = useUserDataStore((s) => s.settings);

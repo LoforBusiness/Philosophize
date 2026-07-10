@@ -27,6 +27,8 @@ import { useUserDataStore, type AppSettings } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { purchases } from '@/lib/purchases';
 import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
+import { effectiveStreak } from '@/lib/utils/streak';
+import { useTodayKey } from '@/lib/utils/useTodayKey';
 
 const Page = '#F1EEE7';
 const Paper = '#FFFFFF';
@@ -270,7 +272,10 @@ function ProfileSection() {
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const philosopherViews = useUserDataStore((s) => s.philosopherViews);
-  const streak = useUserDataStore((s) => s.streak);
+  const streakRaw = useUserDataStore((s) => s.streak);
+  const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
+  useTodayKey();
+  const streak = effectiveStreak(streakRaw, lastLessonDate);
   const xp = useUserDataStore((s) => s.totalXP);
 
   const [edit, setEdit] = useState(false);
