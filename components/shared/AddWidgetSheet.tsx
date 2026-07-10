@@ -1,0 +1,164 @@
+import { useEffect, useState } from 'react';
+import { Modal, View, Text, Pressable, Image, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { MotiView, AnimatePresence } from 'moti';
+
+const Paper = '#FAFAF7';
+const Ink = '#1A1A1A';
+const InkSoft = '#6B6B6B';
+const InkFaint = '#D9D7CE';
+
+// The launcher's own flow for placing an app widget, spelled out. The library
+// can't summon Android's pin dialog, so this guides the user through the manual
+// long-press → Widgets → drag path instead. Same bottom-sheet pattern as the
+// saved-quotes / ranks sheets.
+const STEPS = [
+  'Touch and hold an empty area of your home screen.',
+  'Tap “Widgets”.',
+  'Find “Philosophize” in the list.',
+  'Drag the “Quote” widget where you want it.',
+];
+
+export default function AddWidgetSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { height } = useWindowDimensions();
+  const H = Math.min(Math.round(height * 0.82), 620);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    if (visible) setMounted(true);
+  }, [visible]);
+
+  if (!mounted) return null;
+
+  return (
+    <Modal visible transparent animationType="none" statusBarTranslucent onRequestClose={onClose}>
+      <MotiView
+        animate={{ opacity: visible ? 1 : 0 }}
+        transition={{ type: 'timing', duration: 240 }}
+        style={styles.backdrop}
+      >
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+      </MotiView>
+
+      <AnimatePresence onExitComplete={() => setMounted(false)}>
+        {visible && (
+          <MotiView
+            key="sheet"
+            from={{ translateY: H }}
+            animate={{ translateY: 0 }}
+            exit={{ translateY: H }}
+            transition={{ type: 'timing', duration: 340 }}
+            style={[styles.sheet, { maxHeight: H }]}
+          >
+            <View style={styles.handle} />
+
+            <ScrollView
+              contentContainerStyle={styles.inner}
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+            >
+              <Text style={styles.kicker}>HOME-SCREEN WIDGET</Text>
+              <Text style={styles.title}>
+                Keep a quote <Text style={styles.titleItalic}>close</Text>
+              </Text>
+              <Text style={styles.sub}>
+                A fresh philosophy quote on your home screen, changing through the day.
+              </Text>
+
+              <View style={styles.previewFrame}>
+                <Image
+                  source={require('../../assets/images/widget-preview.png')}
+                  style={styles.preview}
+                  resizeMode="contain"
+                />
+              </View>
+
+              <View style={styles.steps}>
+                {STEPS.map((step, i) => (
+                  <View key={i} style={styles.stepRow}>
+                    <View style={styles.stepNum}>
+                      <Text style={styles.stepNumText}>{i + 1}</Text>
+                    </View>
+                    <Text style={styles.stepText}>{step}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <Pressable
+                onPress={onClose}
+                style={({ pressed }) => [styles.cta, pressed && { opacity: 0.85 }]}
+              >
+                <Text style={styles.ctaText}>GOT IT</Text>
+              </Pressable>
+            </ScrollView>
+          </MotiView>
+        )}
+      </AnimatePresence>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  backdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)' },
+  sheet: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: Paper,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderWidth: 2,
+    borderColor: Ink,
+    overflow: 'hidden',
+  },
+  handle: { width: 44, height: 5, borderRadius: 3, backgroundColor: InkFaint, alignSelf: 'center', marginTop: 10, marginBottom: 6 },
+  inner: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 30 },
+
+  kicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft, letterSpacing: 3, textAlign: 'center' },
+  title: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 28, color: Ink, textAlign: 'center', marginTop: 6 },
+  titleItalic: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic' },
+  sub: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 13.5,
+    color: InkSoft,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginTop: 10,
+    paddingHorizontal: 6,
+  },
+
+  previewFrame: {
+    marginTop: 20,
+    borderWidth: 1.5,
+    borderColor: InkFaint,
+    borderRadius: 18,
+    backgroundColor: '#F1EFE8',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  preview: { width: '100%', height: 130 },
+
+  steps: { marginTop: 22, gap: 14 },
+  stepRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  stepNum: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepNumText: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 13, color: Ink },
+  stepText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 14, color: Ink, lineHeight: 20 },
+
+  cta: {
+    marginTop: 26,
+    borderRadius: 12,
+    backgroundColor: Ink,
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  ctaText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Paper, letterSpacing: 2 },
+});

@@ -1,4 +1,5 @@
-import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
+import { useState } from 'react';
+import { View, Text, Pressable, StyleSheet, Dimensions, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
@@ -7,6 +8,7 @@ import StreakBook from '@/components/gamification/StreakBook';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import PressableScale from '@/components/shared/PressableScale';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
+import AddWidgetSheet from '@/components/shared/AddWidgetSheet';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -94,6 +96,7 @@ export default function HomeScreen() {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const settings = useUserDataStore((s) => s.settings);
   const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'home';
+  const [addWidgetOpen, setAddWidgetOpen] = useState(false);
 
   const dayNumber = Math.floor(Date.now() / 86_400_000);
   const quote = QUOTE_POOL[dayNumber % QUOTE_POOL.length];
@@ -175,7 +178,24 @@ export default function HomeScreen() {
 
         {/* Daily quote widget (opt-in, Settings → Notifications) */}
         {showWidget ? <DailyQuoteWidget style={{ marginTop: 18 }} /> : null}
+
+        {/* Push the widget CTA to the very bottom of the page. */}
+        <View style={{ flex: 1, minHeight: 16 }} />
+
+        {/* Android home-screen widget is the only OS widget we ship, so the
+            prompt only appears there. */}
+        {Platform.OS === 'android' ? (
+          <Pressable
+            onPress={() => setAddWidgetOpen(true)}
+            style={({ pressed }) => [styles.addWidgetBtn, pressed && { opacity: 0.85 }]}
+          >
+            <SketchIcon name="home" size={16} color={Ink} />
+            <Text style={styles.addWidgetText}>ADD HOME-SCREEN WIDGET</Text>
+          </Pressable>
+        ) : null}
       </View>
+
+      <AddWidgetSheet visible={addWidgetOpen} onClose={() => setAddWidgetOpen(false)} />
     </SafeAreaView>
     </ScreenTransition>
   );
@@ -184,6 +204,25 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Paper },
   page: { flex: 1, paddingHorizontal: 24, paddingTop: 6 },
+
+  addWidgetBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 9,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 12,
+    paddingVertical: 13,
+    marginBottom: 6,
+    backgroundColor: Paper,
+  },
+  addWidgetText: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 11.5,
+    color: Ink,
+    letterSpacing: 1.5,
+  },
 
   kicker: {
     fontFamily: 'Inter_500Medium',
