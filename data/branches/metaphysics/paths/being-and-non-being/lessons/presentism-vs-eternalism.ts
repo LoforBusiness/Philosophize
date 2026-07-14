@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you met two camps about time.',
-      body: 'Lesson 7 split time into the A-theory, where it genuinely flows, and the B-theory, where every moment sits equally real. Today we name the rival pictures those theories paint — and feel how strange each one is.',
+      body: 'Earlier you split time into the A-theory, where it genuinely flows, and the B-theory, where every moment sits equally real. Today we name the rival pictures those theories paint — and feel how strange each one is.',
       emoji: '🕰️',
     },
     {

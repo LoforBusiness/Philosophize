@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you met the hard problem of consciousness.',
-      body: 'Lesson 17 showed why felt experience resists physical explanation: you can map every neuron and still not capture what red looks like. Panpsychism is one radical response — if mind cannot be built from mindless parts, maybe the parts were never wholly mindless.',
+      body: 'You have seen why felt experience resists physical explanation: you can map every neuron and still not capture what red looks like. Panpsychism is one radical response — if mind cannot be built from mindless parts, maybe the parts were never wholly mindless.',
       emoji: '🧠',
     },
     {

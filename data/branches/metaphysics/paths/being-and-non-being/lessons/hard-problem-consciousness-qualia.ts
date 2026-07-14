@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you saw the mind-body knot.',
-      body: 'Lesson 9 left physicalists confident the mind is just what the brain does. But even if every thought is brain activity, one stubborn thing seems left out: why any of it is felt at all.',
+      body: 'Earlier lessons left physicalists confident the mind is just what the brain does. But even if every thought is brain activity, one stubborn thing seems left out: why any of it is felt at all.',
       emoji: '🧠',
     },
     {

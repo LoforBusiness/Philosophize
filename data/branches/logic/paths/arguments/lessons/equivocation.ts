@@ -33,7 +33,7 @@ const lesson: Lesson = {
       type: 'reinforcement',
       callout: 'Earlier you saw hidden premises.',
       body:
-        "In Lesson 10 the gap was an unstated assumption. Here the gap is a hidden ambiguity. Validity (Lesson 3) guarantees nothing if a key term means one thing in the first premise and another in the second.",
+        "Earlier the gap was an unstated assumption. Here the gap is a hidden ambiguity. Validity guarantees nothing if a key term means one thing in the first premise and another in the second.",
       emoji: '🔍',
     },
     {

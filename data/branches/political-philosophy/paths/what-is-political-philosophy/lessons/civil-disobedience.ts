@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you saw legitimacy rest on trust, and distributions called unjust.',
-      body: 'Lesson 3 asked what gives rulers the right to be obeyed. Lesson 14 asked when an arrangement is unfair. Now the flip side: when a law is unjust, what may a citizen actually do about it?',
+      body: 'Earlier you asked what gives rulers the right to be obeyed, and when an arrangement is unfair. Now the flip side: when a law is unjust, what may a citizen actually do about it?',
       emoji: '🔁',
     },
     {

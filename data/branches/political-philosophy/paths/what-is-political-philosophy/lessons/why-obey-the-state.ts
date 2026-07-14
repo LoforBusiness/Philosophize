@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you saw when you may break the law.',
-      body: 'Lesson 15 asked when civil disobedience is justified. Lesson 11 imagined a social contract. Now flip both: not when you may disobey, but why you owe obedience at all.',
+      body: 'Earlier you asked when civil disobedience is justified, and imagined a social contract. Now flip both: not when you may disobey, but why you owe obedience at all.',
       emoji: '🔁',
     },
     {

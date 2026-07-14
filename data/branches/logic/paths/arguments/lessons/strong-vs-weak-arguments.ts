@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'concept',
       title: 'Two Families of Argument',
-      body: 'A DEDUCTIVE argument means its premises to guarantee the conclusion — we grade it valid or sound. An INDUCTIVE argument only makes the conclusion LIKELY — so we grade it strong or weak. Wrong ruler, wrong verdict.',
+      body: 'A DEDUCTIVE argument claims its premises GUARANTEE the conclusion — we grade it valid or sound. An INDUCTIVE argument only makes the conclusion LIKELY — so we grade it strong or weak. Wrong ruler, wrong verdict.',
       visual: '🎲',
       highlight: 'STRONG',
     },

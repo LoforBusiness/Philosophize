@@ -48,6 +48,7 @@ const lesson: Lesson = {
       author: 'Plato (Socrates speaking)',
       era: 'c. 369 BCE',
       work: 'Theaetetus',
+      philosopherId: 'plato',
     },
     {
       type: 'question',

@@ -55,7 +55,7 @@ const lesson: Lesson = {
           { id: 'recklessness', text: 'Recklessness: charging into needless ruin' },
         ],
         correctOrder: ['cowardice', 'courage', 'recklessness'],
-        explanation: 'Virtue is not the maximum of a trait but the well-judged middle, relative to the situation. Cowardice feels too little fear, recklessness too much; courage sits between them. Both extremes are vices.',
+        explanation: 'Virtue is not the maximum of a trait but the well-judged middle, relative to the situation. Cowardice feels too much fear, recklessness too little; courage sits between them. Both extremes are vices.',
       },
     },
     {

@@ -39,7 +39,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you asked: equality of what, and who may own?',
-      body: 'Lesson 8 weighed equal rights against equal wealth; Lesson 10 debated who may justly own. Marx digs beneath both, attacking ownership of the means of production itself, the fixed background those debates took for granted.',
+      body: 'Earlier lessons weighed equal rights against equal wealth, and debated who may justly own. Marx digs beneath both, attacking ownership of the means of production itself, the fixed background those debates took for granted.',
       emoji: '🧩',
     },
     {

@@ -34,6 +34,7 @@ const lesson: Lesson = {
       author: 'Plato (Socrates speaking)',
       era: 'c. 399 BCE',
       work: 'Apology',
+      philosopherId: 'plato',
     },
     {
       type: 'concept',

@@ -42,6 +42,7 @@ const lesson: Lesson = {
       author: 'Socrates (in Plato)',
       era: 'c. 399 BCE',
       work: 'Plato, Apology, 21d',
+      philosopherId: 'socrates',
     },
     {
       type: 'question',

@@ -28,6 +28,7 @@ const lesson: Lesson = {
       author: 'Heraclitus, reported by Plato',
       era: 'c. 500 BCE',
       work: 'Plato, Cratylus 402a',
+      philosopherId: 'heraclitus',
     },
     {
       type: 'concept',

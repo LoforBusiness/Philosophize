@@ -47,7 +47,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you saw two kinds of necessity.',
-      body: 'Lesson 14 separated logical necessity (a triangle must have three sides) from causal necessity. Hume drives a wedge: it is no contradiction to imagine the cue ball stopping dead. Causal necessity is felt habit, not proven logic — the same assumption quietly powering the determinism of Lesson 8.',
+      body: 'Earlier you separated logical necessity (a triangle must have three sides) from causal necessity. Hume drives a wedge: it is no contradiction to imagine the cue ball stopping dead. Causal necessity is felt habit, not proven logic — the same assumption quietly powering determinism.',
       emoji: '🔗',
     },
     {

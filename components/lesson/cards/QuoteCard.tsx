@@ -9,8 +9,15 @@ interface Props {
   branchSlug?: string | null;
 }
 
+// Accents are stripped to their base letters (René → rene, Jürgen → jurgen) so
+// the fallback id actually matches the philosopher DB's ascii slugs.
 function slugify(s: string) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  return s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 }
 
 // A reading card built around one philosopher's quote. The quotation sits in

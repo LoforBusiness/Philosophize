@@ -17,7 +17,16 @@ function hash(s: string): number {
 }
 
 export default function SortItems({ interaction, xpValue, onComplete }: Props) {
-  const [shuffled] = useState(() => [...interaction.items].sort((a, b) => hash(a.id) - hash(b.id)));
+  const [shuffled] = useState(() => {
+    const mixed = [...interaction.items].sort((a, b) => hash(a.id) - hash(b.id));
+    // The hash shuffle is deterministic, and for some item-id sets it lands on
+    // exactly the correct order — presenting the puzzle pre-solved. Rotate by
+    // one so the user always has real sorting to do.
+    if (mixed.every((item, i) => item.id === interaction.correctOrder[i]) && mixed.length > 1) {
+      mixed.push(mixed.shift()!);
+    }
+    return mixed;
+  });
   const [placed, setPlaced] = useState<string[]>([]);
   const [answered, setAnswered] = useState(false);
 
@@ -31,7 +40,7 @@ export default function SortItems({ interaction, xpValue, onComplete }: Props) {
     placed.every((id, i) => id === interaction.correctOrder[i]);
 
   return (
-    <View style={{ flex: 1, marginTop: 16 }}>
+    <View style={{ marginTop: 16 }}>
       <Text style={styles.hint}>Tap in order to build the argument.</Text>
 
       <View style={styles.buildArea}>

@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you watched a river change yet stay one river.',
-      body: 'Lesson 6 met Heraclitus and the puzzle of identity through change. Now we sharpen it into two questions: when does a thing survive change over time, and when do many parts add up to a single thing at all?',
+      body: 'Earlier you met Heraclitus and the puzzle of identity through change. Now we sharpen it into two questions: when does a thing survive change over time, and when do many parts add up to a single thing at all?',
       emoji: '🌊',
     },
     {

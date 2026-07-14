@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import type { QuestionCard as QuestionCardType, AnswerResult } from '@/data/types';
 import MultipleChoice from '../interactions/MultipleChoice';
 import TrueFalse from '../interactions/TrueFalse';
@@ -21,10 +22,14 @@ export default function QuestionCard({ card, onComplete }: Props) {
   const complete = (correct: boolean) =>
     onComplete({ cardIndex: 0, correct, xpEarned: correct ? card.xpValue : 0 });
 
-  // Plain View (no inner scroll) so the pager's horizontal swipe stays buttery —
-  // matching the quote card. Content is short enough to fit without scrolling.
+  // A gesture-handler ScrollView (same as DilemmaCard) so a long prompt + four
+  // options + the revealed explanation are always reachable — with no scroll,
+  // tall questions clipped at BOTH ends (centered) and the explanation could be
+  // cut off entirely. Short questions still sit centered via flexGrow. The
+  // pager's horizontal pan (activeOffsetX ±8) coordinates cleanly with the
+  // vertical scroll, so the swipe feel is unchanged.
   return (
-    <View style={styles.content}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={[styles.paperPanel, dark && styles.paperPanelDark]}>
         <Text style={styles.kicker}>KNOWLEDGE CHECK</Text>
         <Text style={styles.title}>Quick Check</Text>
@@ -41,12 +46,12 @@ export default function QuestionCard({ card, onComplete }: Props) {
           <SortItems interaction={card.interaction} xpValue={card.xpValue} onComplete={complete} />
         )}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { flex: 1, justifyContent: 'center', paddingHorizontal: 22, paddingVertical: 12 },
+  content: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 22, paddingTop: 8, paddingBottom: 28 },
   paperPanel: {
     backgroundColor: 'rgba(250,250,247,0.94)',
     borderRadius: 22,

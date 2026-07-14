@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you saw the fight between realists and nominalists.',
-      body: 'In Lesson 10, realists said universals like redness truly exist; nominalists said only particular things do. Mathematics raises the same fight at a higher pitch — about numbers, sets, and proofs.',
+      body: 'Earlier, realists said universals like redness truly exist; nominalists said only particular things do. Mathematics raises the same fight at a higher pitch — about numbers, sets, and proofs.',
       emoji: '⚖️',
     },
     {

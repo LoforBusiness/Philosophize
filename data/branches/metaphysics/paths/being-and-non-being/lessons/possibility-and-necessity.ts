@@ -64,7 +64,7 @@ const lesson: Lesson = {
         type: 'sort',
         items: [
           { id: 'triangle', text: 'A triangle has three sides' },
-          { id: 'cause', text: 'Every effect has a cause' },
+          { id: 'cause', text: 'Every effect has a cause — deniable without contradiction' },
           { id: 'water', text: 'Water is H2O' },
           { id: 'rain', text: 'It is raining in London right now' },
         ],

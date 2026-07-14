@@ -17,13 +17,13 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you asked: what makes you the same person over time?',
-      body: 'Lesson 11 used Locke\'s memory criterion to track identity across years. But that quietly assumes there is a self to track. Now we widen the question: is there any persisting self there at all?',
+      body: 'Earlier you used Locke\'s memory criterion to track identity across years. But that quietly assumes there is a self to track. Now we widen the question: is there any persisting self there at all?',
       emoji: '🧵',
     },
     {
       type: 'concept',
       title: 'Answer One: The Soul',
-      body: 'Recall Descartes from Lesson 9: behind every thought sits a single thinking thing that owns it. On this view, the self is an immaterial soul — unchanging, indivisible, the one "I" that persists no matter how your body or memories change.',
+      body: 'Recall Descartes: behind every thought sits a single thinking thing that owns it. On this view, the self is an immaterial soul — unchanging, indivisible, the one "I" that persists no matter how your body or memories change.',
       visual: '👤',
       highlight: 'a single thinking thing',
     },
@@ -97,7 +97,7 @@ const lesson: Lesson = {
         'Hume: only a bundle of perceptions',
         'Buddhist anatta: the fixed self is illusion',
       ],
-      closingThought: 'Lesson 11 asked what keeps the self the same; now you can ask whether there is a self to keep at all.',
+      closingThought: 'You once asked what keeps the self the same; now you can ask whether there is a self to keep at all.',
     },
   ],
 };

@@ -81,7 +81,7 @@ const lesson: Lesson = {
         {
           thinker: 'Strong emergentist',
           stance: 'Consciousness is new and irreducible.',
-          why: 'You can know every neuron and still not derive what the taste is like — recall the hard problem of Lesson 17. Experience arises from the brain yet has its own reality, not fixed in advance by the physical facts.',
+          why: 'You can know every neuron and still not derive what the taste is like — recall the hard problem of consciousness. Experience arises from the brain yet has its own reality, not fixed in advance by the physical facts.',
         },
         {
           thinker: 'Weak emergentist',

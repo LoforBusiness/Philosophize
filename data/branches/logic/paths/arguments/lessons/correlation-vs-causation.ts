@@ -61,9 +61,9 @@ const lesson: Lesson = {
             text: 'A randomized trial isolated the drug as the only differing variable.',
           },
         ],
-        correctOrder: ['correlation-only', 'post-hoc-single', 'controlled-trial'],
+        correctOrder: ['post-hoc-single', 'correlation-only', 'controlled-trial'],
         explanation:
-          'Pure correlation is weakest — a lurking variable (summer heat) drives both. The herb case is post hoc ergo propter hoc: one uncontrolled case where recovery merely followed treatment. The randomized trial is strongest because it holds everything else fixed, so the drug is the only thing that could have made the difference.',
+          'The herb case is weakest — post hoc ergo propter hoc: a single uncontrolled case where recovery merely followed treatment. The repeated correlation is a more reliable pattern, but a lurking variable (summer heat) could drive both. The randomized trial is strongest because it holds everything else fixed, so the drug is the only thing that could have made the difference.',
       },
     },
     {

@@ -35,6 +35,7 @@ const lesson: Lesson = {
       author: 'Plato (Socrates speaking)',
       era: 'c. 380 BCE',
       work: 'Meno',
+      philosopherId: 'plato',
     },
     {
       type: 'concept',

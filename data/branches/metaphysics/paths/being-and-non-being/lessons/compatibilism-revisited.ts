@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you saw a way out of the determinist trap.',
-      body: 'Lesson 8 offered compatibilism: free means unforced, not uncaused. Lesson 15 added that being caused need not mean being compelled. Frankfurt now asks a sharper question — not whether your wants are caused, but whether they are truly yours.',
+      body: 'Earlier you met compatibilism: free means unforced, not uncaused. And you saw that being caused need not mean being compelled. Frankfurt now asks a sharper question — not whether your wants are caused, but whether they are truly yours.',
       emoji: '🔁',
     },
     {
@@ -79,7 +79,7 @@ const lesson: Lesson = {
         type: 'multiple-choice',
         options: [
           { id: 'a', text: 'It is right — Frankfurt rejects all causes of desire', isCorrect: false },
-          { id: 'b', text: 'It confuses freedom with randomness, just as quantum chance did in Lesson 8', isCorrect: false },
+          { id: 'b', text: 'It confuses freedom with randomness, just as quantum chance did earlier', isCorrect: false },
           { id: 'c', text: 'It misreads Frankfurt: he locates freedom in endorsing your will, not in escaping causes', isCorrect: true },
           { id: 'd', text: 'It is right — second-order desires have no causes', isCorrect: false },
         ],

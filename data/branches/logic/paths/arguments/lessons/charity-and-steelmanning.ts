@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you learned the straw man.',
-      body: 'In Lesson 9 you spotted the straw man — beating a weaker fake of someone\'s view. And in Lesson 19, confirmation bias kept you cozy with only your own side. This lesson is the cure for both.',
+      body: 'Earlier you spotted the straw man — beating a weaker fake of someone\'s view. And you saw confirmation bias keep you cozy with only your own side. This lesson is the cure for both.',
       emoji: '🌾',
     },
     {

@@ -35,6 +35,7 @@ const lesson: Lesson = {
       author: 'Sextus Empiricus (paraphrase)',
       era: 'c. 200 CE',
       work: 'Outlines of Pyrrhonism',
+      philosopherId: 'sextus-empiricus',
     },
     {
       type: 'concept',

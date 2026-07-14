@@ -60,9 +60,9 @@ const lesson: Lesson = {
           { id: 'a', text: 'John Locke', isCorrect: true },
           { id: 'b', text: 'René Descartes', isCorrect: false },
           { id: 'c', text: 'Plato', isCorrect: false },
-          { id: 'd', text: 'Aristotle', isCorrect: false },
+          { id: 'd', text: 'Gottfried Leibniz', isCorrect: false },
         ],
-        explanation: 'Locke called the newborn mind "white paper," filled only through sensation and reflection. Descartes and Plato argued the reverse.',
+        explanation: 'Locke called the newborn mind "white paper," filled only through sensation and reflection. Descartes, Plato, and Leibniz argued the reverse — for them, some ideas are innate.',
       },
     },
     {

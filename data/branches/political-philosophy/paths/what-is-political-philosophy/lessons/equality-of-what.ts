@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you asked: equality of what?',
-      body: 'Lesson 8 left the question open: equal rights, opportunity, or outcome? Amartya Sen offers a fourth answer the others miss. Forget the things people hold for a moment, he says. Look at what their lives let them actually do.',
+      body: 'An earlier lesson left the question open: equal rights, opportunity, or outcome? Amartya Sen offers a fourth answer the others miss. Forget the things people hold for a moment, he says. Look at what their lives let them actually do.',
       emoji: '🧩',
     },
     {
@@ -46,7 +46,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you saw positive liberty.',
-      body: 'Lesson 12 distinguished freedom-from interference and freedom-to act. Sen lands squarely on freedom-to: capabilities are positive liberty made measurable, the real power to live a life you have reason to value, not merely being left alone.',
+      body: 'Earlier you distinguished freedom-from interference and freedom-to act. Sen lands squarely on freedom-to: capabilities are positive liberty made measurable, the real power to live a life you have reason to value, not merely being left alone.',
       emoji: '🕊️',
     },
     {
@@ -71,7 +71,7 @@ const lesson: Lesson = {
         'Sen equalizes capabilities, not just resources',
         'Resources are inputs; real freedom is the goal',
         'Equal income can still mean unequal lives',
-        'Answers Lesson 8 and deepens positive liberty',
+        'Answers "equality of what?" and deepens positive liberty',
       ],
       closingThought: 'Stop asking what people have. Ask what their lives let them become.',
     },

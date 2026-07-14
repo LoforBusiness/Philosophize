@@ -61,7 +61,7 @@ const lesson: Lesson = {
           { id: 'c', text: 'Because all kindness is really hidden cruelty', isCorrect: false },
           { id: 'd', text: 'Because the slave fails to master his own desires', isCorrect: false },
         ],
-        explanation: 'Tempting answer (c) and (d) smuggle in other concepts. The republican point is precise: unfreedom here is not actual interference (negative liberty) nor failed self-mastery (positive liberty), but living under another\'s arbitrary capacity to interfere.',
+        explanation: 'The tempting answers smuggle in other concepts — secret constant interference is negative liberty, and failed self-mastery is positive liberty. The republican point is precise: unfreedom here is neither of those, but living under another\'s arbitrary capacity to interfere.',
       },
     },
     {

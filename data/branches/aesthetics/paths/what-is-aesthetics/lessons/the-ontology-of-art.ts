@@ -52,8 +52,8 @@ const lesson: Lesson = {
     {
       type: 'quote',
       id: 'lq-aesthetics-aesthetics-21-1',
-      quote: 'A musical work is a sound-structure... It is a type whose tokens are sound-event occurrences.',
-      author: 'Jerrold Levinson',
+      quote: 'A musical work is not a pure sound-structure — it is a structure as indicated by a composer at a time. Its history of creation belongs to the work itself.',
+      author: 'Jerrold Levinson (paraphrase)',
       era: '1980',
       work: 'What a Musical Work Is',
     },

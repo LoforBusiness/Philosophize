@@ -39,7 +39,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you saw that "real" was never a simple word.',
-      body: "Lesson 3 asked what counts as real; Lesson 9 met Descartes doubting everything but his own thinking; Lesson 17 noted that from the inside, experience is undeniable. The simulation question gathers all three threads at once.",
+      body: "You have asked what counts as real; met Descartes doubting everything but his own thinking; and seen that from the inside, experience is undeniable. The simulation question gathers all three threads at once.",
       emoji: '🧵',
     },
     {
@@ -54,8 +54,8 @@ const lesson: Lesson = {
       views: [
         {
           thinker: 'Nick Bostrom',
-          stance: 'Likely simulated — but that is a separate question from real.',
-          why: 'His argument is about probability, not metaphysics. Even if we are simulated, the simulated world still has its own consistent laws and contents. How probable it is says nothing, by itself, about whether it counts as real.',
+          stance: 'One of three doors — and realness is a separate question.',
+          why: 'His trilemma is about probability, not metaphysics. Even if we are simulated, the simulated world still has its own consistent laws and contents. How probable it is says nothing, by itself, about whether it counts as real.',
         },
         {
           thinker: 'Rene Descartes',

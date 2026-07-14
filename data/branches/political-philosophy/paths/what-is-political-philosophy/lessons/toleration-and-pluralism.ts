@@ -57,13 +57,13 @@ const lesson: Lesson = {
       interaction: {
         type: 'sort',
         items: [
-          { id: 'p1', text: 'Accept reasonable pluralism: free people will permanently disagree about the good.' },
-          { id: 'p2', text: 'See the burdens of judgment make that disagreement reasonable, not mere error.' },
+          { id: 'p2', text: 'Notice the burdens of judgment: honest reasoners weighing hard questions reach different answers.' },
+          { id: 'p1', text: 'Accept reasonable pluralism: free people will therefore permanently disagree about the good.' },
           { id: 'p3', text: 'Seek fair political principles that lean on no single worldview.' },
           { id: 'p4', text: 'Reach an overlapping consensus: rival doctrines each endorse those principles for their own reasons.' },
         ],
-        correctOrder: ['p1', 'p2', 'p3', 'p4'],
-        explanation: 'The tempting shortcut, "just enforce my values," skips straight past steps two and three. But if disagreement is reasonable (not error), imposing one worldview is the very intolerance pluralism forbids. So you must first earn principles no doctrine owns, then build consensus on them.',
+        correctOrder: ['p2', 'p1', 'p3', 'p4'],
+        explanation: 'The burdens of judgment come first: they show disagreement is reasonable, not error — which is why pluralism is permanent. The tempting shortcut, "just enforce my values," skips the whole ladder. You must earn principles no doctrine owns, then build consensus on them.',
       },
     },
     {

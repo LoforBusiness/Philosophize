@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier Hume challenged the link between cause and effect.',
-      body: 'Lesson 15 showed Hume could find no power tying cause to effect — only one event reliably following another. That same suspicion now turns on laws of nature. Maybe a "law" is just a pattern that has held, with nothing making it hold.',
+      body: 'Earlier you saw Hume could find no power tying cause to effect — only one event reliably following another. That same suspicion now turns on laws of nature. Maybe a "law" is just a pattern that has held, with nothing making it hold.',
       emoji: '🔗',
     },
     {

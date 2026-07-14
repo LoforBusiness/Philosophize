@@ -17,7 +17,7 @@ const lesson: Lesson = {
     {
       type: 'reinforcement',
       callout: 'Earlier you separated must-be from might-be.',
-      body: 'Lesson 14 split necessary truths (2 + 2 = 4) from contingent ones (you read this today). Philosophers picture that difference with possible worlds: ways things could have gone. Today we ask what those worlds actually are.',
+      body: 'Earlier you split necessary truths (2 + 2 = 4) from contingent ones (you read this today). Philosophers picture that difference with possible worlds: ways things could have gone. Today we ask what those worlds actually are.',
       emoji: '🌐',
     },
     {

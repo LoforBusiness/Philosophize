@@ -33,7 +33,7 @@ const lesson: Lesson = {
         {
           thinker: 'Immanuel Kant',
           stance: 'would not sacrifice the one',
-          why: 'Kant forbade treating a person merely as a means. Killing one to spare five does exactly that. Duty binds, whatever follows.',
+          why: 'Kant refused to trade lives like sums. The one on the side track has a dignity no arithmetic outweighs. Duty binds, whatever follows.',
         },
         {
           thinker: 'Aristotle',

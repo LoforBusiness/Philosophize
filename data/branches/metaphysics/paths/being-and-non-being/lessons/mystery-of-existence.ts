@@ -50,12 +50,12 @@ const lesson: Lesson = {
       interaction: {
         type: 'multiple-choice',
         options: [
-          { id: 'a', text: 'Existential dread', isCorrect: false },
+          { id: 'a', text: 'Cartesian doubt', isCorrect: false },
           { id: 'b', text: 'Wonder at Being', isCorrect: true },
           { id: 'c', text: 'The leap of faith', isCorrect: false },
           { id: 'd', text: 'The absurd', isCorrect: false },
         ],
-        explanation: 'Wonder — astonishment that anything is at all — opens the fundamental question. (Anxiety is real Heidegger too, but belongs to "the nothing" in his 1929 lecture.)',
+        explanation: 'Wonder — astonishment that anything is at all — opens the fundamental question. Doubt is Descartes\'s method, the leap is Kierkegaard\'s, and the absurd is Camus\'s — different moves for different questions.',
       },
     },
     {

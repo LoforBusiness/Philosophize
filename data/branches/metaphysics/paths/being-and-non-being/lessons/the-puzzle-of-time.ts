@@ -28,6 +28,7 @@ const lesson: Lesson = {
       author: 'Augustine of Hippo',
       era: 'c. 398 CE',
       work: 'Confessions, Book XI',
+      philosopherId: 'augustine',
     },
     {
       type: 'example',
