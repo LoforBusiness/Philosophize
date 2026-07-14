@@ -17,6 +17,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { useUserDataStore } from '@/stores/userDataStore';
 import SketchIcon from './SketchIcon';
 import PhilosopherQuiz from './PhilosopherQuiz';
+import QuoteBook from './QuoteBook';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -43,6 +44,7 @@ export default function PhilosopherSheet() {
   const [visible, setVisible] = useState(false);
   const [phil, setPhil] = useState<Philosopher | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [bookOpen, setBookOpen] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -180,10 +182,10 @@ export default function PhilosopherSheet() {
                 </>
               )}
 
-              {/* Quotes */}
+              {/* Quotes — a 3-quote preview; the rest live in the book. */}
               <SectionHeading label="Quotes" />
               <Text style={styles.quotesHint}>Bookmark to save · star to feature it on your profile.</Text>
-              {phil.quotes.map((q) => {
+              {phil.quotes.slice(0, 3).map((q) => {
                 const saved = savedIds.has(q.id);
                 const featured = profileQuote?.id === q.id;
                 return (
@@ -227,6 +229,19 @@ export default function PhilosopherSheet() {
                   </View>
                 );
               })}
+
+              {phil.quotes.length > 3 && (
+                <Pressable
+                  onPress={() => setBookOpen(true)}
+                  style={({ pressed }) => [styles.moreQuotes, pressed && { opacity: 0.9 }]}
+                >
+                  <SketchIcon name="book" size={17} color={Paper} />
+                  <Text style={styles.moreQuotesText}>See all {phil.quotes.length} quotes</Text>
+                  <View style={styles.moreQuotesChev}>
+                    <SketchIcon name="back" size={13} color={Paper} />
+                  </View>
+                </Pressable>
+              )}
             </ScrollView>
           </MotiView>
         )}
@@ -241,6 +256,7 @@ export default function PhilosopherSheet() {
         onClose={() => setQuizOpen(false)}
       />
     )}
+    <QuoteBook visible={bookOpen} philosopher={phil} onClose={() => setBookOpen(false)} />
     </>
   );
 }
@@ -389,4 +405,16 @@ const styles = StyleSheet.create({
     color: Ink,
     lineHeight: 26,
   },
+  moreQuotes: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: Ink,
+    borderRadius: 14,
+    paddingVertical: 15,
+    paddingHorizontal: 18,
+    marginTop: 4,
+  },
+  moreQuotesText: { flex: 1, fontFamily: 'Inter_700Bold', fontSize: 14, color: Paper, letterSpacing: 0.3 },
+  moreQuotesChev: { transform: [{ scaleX: -1 }], opacity: 0.85 },
 });

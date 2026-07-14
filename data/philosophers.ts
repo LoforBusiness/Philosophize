@@ -8,6 +8,7 @@ import { EXPANSION2A_EXTRA } from './extra-philosophers/expansion2a';
 import { EXPANSION2B_EXTRA } from './extra-philosophers/expansion2b';
 import { EXPANSION3_EXTRA } from './extra-philosophers/expansion3';
 import { EXPANSION4_EXTRA } from './extra-philosophers/expansion4';
+import { PHILOSOPHER_QUOTES_EXTRA } from './philosopherQuotesExtra';
 
 export interface PhilosopherQuote {
   id: string; // unique, kebab style like 'socrates-1', 'socrates-2'
@@ -395,8 +396,8 @@ const BASE_PHILOSOPHERS: Philosopher[] = [
 ];
 
 // Base thinkers plus the broader canon (ancient, eastern, medieval, modern,
-// contemporary) and a 100-strong expansion — ~220 philosophers in total.
-export const ALL_PHILOSOPHERS: Philosopher[] = [
+// contemporary) and the expansions — ~320 philosophers in total.
+const RAW_PHILOSOPHERS: Philosopher[] = [
   ...BASE_PHILOSOPHERS,
   ...ANCIENT_EXTRA,
   ...EASTERN_EXTRA,
@@ -409,6 +410,13 @@ export const ALL_PHILOSOPHERS: Philosopher[] = [
   ...EXPANSION3_EXTRA,
   ...EXPANSION4_EXTRA,
 ];
+
+// Merge in the verified extra quotes (see philosopherQuotesExtra.ts). Appended
+// after each thinker's base quotes, so the first few stay their signature lines.
+export const ALL_PHILOSOPHERS: Philosopher[] = RAW_PHILOSOPHERS.map((p) => {
+  const extra = PHILOSOPHER_QUOTES_EXTRA[p.id];
+  return extra && extra.length ? { ...p, quotes: [...p.quotes, ...extra] } : p;
+});
 
 export function getPhilosopherById(id: string): Philosopher | undefined {
   return ALL_PHILOSOPHERS.find((p) => p.id === id);
