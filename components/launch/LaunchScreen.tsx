@@ -104,14 +104,16 @@ export default function LaunchScreen({ ready, onDone }: Props) {
   const introFade = useSharedValue(0);
   const [held, setHeld] = useState(false);
 
-  // Choreography: draw to 92 over 1.7s (fast start, gentle settle), then wait
+  // Choreography: draw to 92 over 2.7s (fast start, gentle settle), then wait
   // for `ready` — normally already true, so the finish chains straight on.
+  // With the finish + fade this puts the whole moment a little over 3s — long
+  // enough to actually read the quote at the bottom.
   useEffect(() => {
     introFade.value = withTiming(1, { duration: 420 });
-    sceneScale.value = withTiming(1.045, { duration: 2600, easing: Easing.out(Easing.quad) });
+    sceneScale.value = withTiming(1.045, { duration: 3800, easing: Easing.out(Easing.quad) });
     progress.value = withTiming(
       92,
-      { duration: 1700, easing: Easing.out(Easing.cubic) },
+      { duration: 2700, easing: Easing.out(Easing.cubic) },
       (finished) => {
         if (finished) runOnJS(setHeld)(true);
       }
