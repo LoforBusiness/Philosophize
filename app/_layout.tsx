@@ -44,6 +44,7 @@ import PhilosopherSheet from '@/components/shared/PhilosopherSheet';
 import RanksBadgesSheet from '@/components/shared/RanksBadgesSheet';
 import SavedQuotesSheet from '@/components/shared/SavedQuotesSheet';
 import PaywallSheet from '@/components/shared/PaywallSheet';
+import LaunchScreen from '@/components/launch/LaunchScreen';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -77,6 +78,10 @@ export default function RootLayout() {
     EBGaramond_400Regular_Italic,
   });
   const [authChecked, setAuthChecked] = useState(false);
+  // The animated launch screen covers the whole boot (auth check + routing);
+  // it lifts away only when the app underneath is ready AND its 0→100% ink
+  // stroke has finished drawing.
+  const [launchDone, setLaunchDone] = useState(false);
 
   // Gate analytics on the user's saved preference, but only once the store has
   // hydrated so we never capture before we know their real choice.
@@ -158,9 +163,12 @@ export default function RootLayout() {
     return () => listener.subscription.unsubscribe();
   }, [authChecked]);
 
+  // Hand off from the static native splash (the feather) to the animated launch
+  // screen as soon as fonts exist — the launch screen then covers the rest of
+  // the boot (hydration, auth check, initial route) until it counts to 100%.
   useEffect(() => {
-    if (fontsLoaded && authChecked) SplashScreen.hideAsync();
-  }, [fontsLoaded, authChecked]);
+    if (fontsLoaded) SplashScreen.hideAsync();
+  }, [fontsLoaded]);
 
   if (!fontsLoaded) {
     return (
@@ -183,6 +191,11 @@ export default function RootLayout() {
       <PhilosopherSheet />
       <RanksBadgesSheet />
       <PaywallSheet />
+      {/* Animated cold-start loading screen: ink scene + drawing stroke + quote.
+          Sits over everything until the boot is ready and the count hits 100%. */}
+      {!launchDone && (
+        <LaunchScreen ready={authChecked && hasHydrated} onDone={() => setLaunchDone(true)} />
+      )}
     </>
   );
 
