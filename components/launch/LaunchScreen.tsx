@@ -21,6 +21,15 @@ const AnimatedPath = Animated.createAnimatedComponent(Path);
 const PAPER = '#F4F3EE';
 const INK = '#1A1A1A';
 
+// The native splash's backgroundColor (app.json → expo-splash-screen). Android
+// always draws a splash window on cold start — it can't be skipped — so instead
+// it's made to show nothing but this paper: a fully transparent icon on this
+// colour. This screen then opens on the exact same colour and cross-fades to the
+// scene's own background, so the handoff has no visible seam (light scenes are
+// pixel-identical; dark ones read as the lights going down). Keep the two in
+// sync — if app.json's backgroundColor changes, change this with it.
+const SPLASH_BG = '#E4E4DF';
+
 // Quotes short enough to actually read during the ~2s the screen is up. The
 // fallback can't realistically be hit, but this screen sits on the boot path —
 // an empty pool must never be able to crash the launch.
@@ -137,7 +146,14 @@ export default function LaunchScreen({ ready, onDone }: Props) {
   }, [held, ready]);
 
   const rootStyle = useAnimatedStyle(() => ({ opacity: screenOpacity.value }));
-  const sceneStyle = useAnimatedStyle(() => ({ transform: [{ scale: sceneScale.value }] }));
+  // The scene paints its own full-bleed background (paper gradient, or NIGHT for
+  // a dark one), so it has to fade in rather than appear — otherwise it lands as
+  // a hard colour pop over the splash. Fading it over SPLASH_BG means a light
+  // scene barely registers a change and a dark one dims in like a house light.
+  const sceneStyle = useAnimatedStyle(() => ({
+    opacity: introFade.value,
+    transform: [{ scale: sceneScale.value }],
+  }));
   const fadeInStyle = useAnimatedStyle(() => ({
     opacity: introFade.value,
     transform: [{ translateY: (1 - introFade.value) * 8 }],
@@ -153,7 +169,9 @@ export default function LaunchScreen({ ready, onDone }: Props) {
   const strokeTopPct = scene.meta.zone === 'top' ? '32%' : '52%';
 
   return (
-    <Animated.View style={[StyleSheet.absoluteFill, styles.root, { backgroundColor: bg }, rootStyle]}>
+    <Animated.View
+      style={[StyleSheet.absoluteFill, styles.root, { backgroundColor: SPLASH_BG }, rootStyle]}
+    >
       <StatusBar barStyle={dark ? 'light-content' : 'dark-content'} />
       <Animated.View style={[StyleSheet.absoluteFill, sceneStyle]} pointerEvents="none">
         <scene.Scene />
