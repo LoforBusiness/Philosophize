@@ -26,6 +26,7 @@ import { rankForXP } from '@/data/ranks';
 import { useUserDataStore, type AppSettings } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { purchases } from '@/lib/purchases';
+import { ads } from '@/lib/ads';
 import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
 import { effectiveStreak } from '@/lib/utils/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
@@ -494,6 +495,14 @@ function LearningSection() {
 function PrivacySection() {
   const settings = useUserDataStore((s) => s.settings);
   const setSetting = useUserDataStore((s) => s.setSetting);
+  // Only users whose jurisdiction requires it (EEA/UK/CH) are offered a way back
+  // into the ad-consent form — everyone else was never asked in the first place,
+  // so a "manage consent" row would be a confusing dead end. Read once on mount:
+  // ads.initialize() runs at launch, long before Settings can be opened.
+  const [adPrivacy, setAdPrivacy] = useState(false);
+  useEffect(() => {
+    setAdPrivacy(ads.privacyOptionsRequired());
+  }, []);
   return (
     <Card>
       <Header title="Privacy" sub="What others can see, and what remains yours alone." />
@@ -507,9 +516,23 @@ function PrivacySection() {
       <Row title="Show Rank & Badges" sub="Let others see your earned rank and badges">
         <Toggle value={settings.showRankBadges} onChange={(v) => setSetting('showRankBadges', v)} />
       </Row>
-      <Row title="Usage Analytics" sub="Help improve the app with anonymous data" last>
+      <Row
+        title="Usage Analytics"
+        sub="Help improve the app with anonymous data"
+        last={!adPrivacy}
+      >
         <Toggle value={settings.usageAnalytics} onChange={(v) => setSetting('usageAnalytics', v)} />
       </Row>
+      {adPrivacy && (
+        <Row title="Ad Privacy Settings" sub="Change or withdraw your consent for personalised ads" last>
+          <Pressable
+            onPress={() => ads.showPrivacyOptions()}
+            style={({ pressed }) => [styles.manageBtn, pressed && { opacity: 0.85 }]}
+          >
+            <Text style={styles.manageText}>Manage</Text>
+          </Pressable>
+        </Row>
+      )}
       <Text style={styles.footNote}>
         Your reading history, saved quotes, and personal notes are always private and never shared.
       </Text>
@@ -991,6 +1014,10 @@ const styles = StyleSheet.create({
   // Feedback
   feedbackBtn: { flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: Ink, borderRadius: 4, paddingHorizontal: 20, paddingVertical: 12 },
   feedbackBtnText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: Paper },
+
+  // Privacy
+  manageBtn: { borderWidth: 1.5, borderColor: Ink, borderRadius: 4, paddingHorizontal: 16, paddingVertical: 9, backgroundColor: Paper },
+  manageText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Ink },
 
   // Account
   signOutBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, paddingHorizontal: 18, paddingVertical: 11, backgroundColor: Paper },

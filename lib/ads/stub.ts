@@ -8,4 +8,7 @@ export const stubAds: AdsProvider = {
   available: false,
   async initialize() {},
   async showInterstitial() {},
+  // No ads here, so no consent was ever gathered and there is nothing to revoke.
+  privacyOptionsRequired: () => false,
+  async showPrivacyOptions() {},
 };

@@ -1,6 +1,7 @@
 import mobileAds, {
   AdEventType,
   AdsConsent,
+  AdsConsentPrivacyOptionsRequirementStatus,
   InterstitialAd,
   MaxAdContentRating,
   TestIds,
@@ -14,6 +15,7 @@ import { interstitialUnitId } from '@/constants/ads';
 
 let started = false;
 let canRequestAds = false;
+let privacyRequired = false;
 let interstitial: InterstitialAd | null = null;
 let loaded = false;
 
@@ -57,8 +59,15 @@ export const realAds: AdsProvider = {
       // UMP consent (GDPR) + ATT on iOS; shows a form only if required.
       const info = await AdsConsent.gatherConsent();
       canRequestAds = info.canRequestAds;
+      // In the EEA/UK/CH this comes back REQUIRED, meaning we owe the user a
+      // standing way to revisit the choice they just made (Settings → Privacy).
+      privacyRequired =
+        info.privacyOptionsRequirementStatus ===
+        AdsConsentPrivacyOptionsRequirementStatus.REQUIRED;
     } catch {
-      // Fail open — serve ads (the SDK still respects any stored consent).
+      // Fail open — serve ads (the SDK still respects any stored consent) — but
+      // NOT for the privacy entry point: a form we can't prove is available is
+      // worse than no button, so leave `privacyRequired` false.
       canRequestAds = true;
     }
     try {
@@ -68,6 +77,21 @@ export const realAds: AdsProvider = {
       /* SDK init failed — showInterstitial will simply no-op */
     }
     preload();
+  },
+
+  privacyOptionsRequired: () => privacyRequired,
+
+  async showPrivacyOptions() {
+    try {
+      await AdsConsent.showPrivacyOptionsForm();
+      // The choice may have flipped either way — re-read it so the next lesson
+      // stops (or starts) requesting ads to match what the user just said.
+      const info = await AdsConsent.getConsentInfo();
+      canRequestAds = info.canRequestAds;
+      if (canRequestAds && !interstitial) preload();
+    } catch {
+      /* form unavailable — leave the existing consent state untouched */
+    }
   },
 
   async showInterstitial() {

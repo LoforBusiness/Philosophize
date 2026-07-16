@@ -17,4 +17,18 @@ export interface AdsProvider {
   // immediately (and silently) if no ad is ready or ads are unavailable, so it
   // NEVER blocks navigation. Never throws.
   showInterstitial(): Promise<void>;
+
+  // Whether this user must be offered a standing way to change their ad consent
+  // — true only where UMP says so (EEA/UK/Switzerland). Withdrawing consent has
+  // to be as easy as giving it, so Settings shows an entry point when this is
+  // true and hides it everywhere else rather than asking a US user about a
+  // choice they were never offered.
+  //
+  // Only meaningful after initialize() has resolved; false until then, and
+  // false for subscribers (who never initialize ads at all).
+  privacyOptionsRequired(): boolean;
+
+  // Reopen the UMP consent form so the user can change or withdraw consent.
+  // Resolves silently if the form can't be shown. Never throws.
+  showPrivacyOptions(): Promise<void>;
 }
