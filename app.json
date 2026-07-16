@@ -48,7 +48,7 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "androidAppId": "ca-app-pub-8916255747221090~2303226096",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511",
           "userTrackingUsageDescription": "This lets us show ads relevant to you and keep Philosophize free. You can decline and still use the app."
         }

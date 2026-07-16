@@ -24,13 +24,29 @@ export const MONTHLY_PRODUCT_ID = {
 // WITHOUT a purchase, so app-store reviewers and internal testers can get past
 // the paywall (and the daily-lesson limit + ads) by simply signing in with one
 // of these accounts. Matching is case-insensitive on the account's email.
-// Keep this list tiny, and remove/rotate the entries once review is done.
-export const REVIEWER_EMAILS: readonly string[] = ['wordless704@gmail.com'];
+//
+// Read from the environment (comma-separated) rather than hardcoded, because
+// this repo is PUBLIC — a committed address is an open invitation to anyone who
+// can register it. Set EXPO_PUBLIC_REVIEWER_EMAILS in .env.local for local work
+// and in the EAS "production" environment for builds. Unset = nobody is a
+// reviewer, which is the safe default. Keep the list tiny and rotate it once a
+// review is done.
+//
+// Note: EXPO_PUBLIC_ values are inlined into the JS bundle, so this hides the
+// address from the repo, not from someone determined to unpack the APK. It is a
+// convenience bypass, not a security boundary — never let it gate anything but
+// the paywall.
+export const REVIEWER_EMAILS: readonly string[] = (
+  process.env.EXPO_PUBLIC_REVIEWER_EMAILS ?? ''
+)
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
 
 export function isReviewerAccount(email: string | null | undefined): boolean {
   if (!email) return false;
   const e = email.trim().toLowerCase();
-  return REVIEWER_EMAILS.some((r) => r.toLowerCase() === e);
+  return REVIEWER_EMAILS.includes(e);
 }
 
 // Free tier: how many lessons a non-subscriber may complete per calendar day.

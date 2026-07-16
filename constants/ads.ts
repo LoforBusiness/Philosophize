@@ -7,11 +7,12 @@ import { Platform } from 'react-native';
 // (Scholar's Pass) never see ads. See docs/ADMOB_SETUP.md.
 
 // AdMob *App IDs* — build-time, consumed by the config plugin in app.json.
-// These are Google's official TEST app ids; replace with your real ids in
-// app.json before shipping. (Documented here for reference only.)
+// Android is the REAL id (live since the first public Play release). iOS is
+// still Google's TEST id — replace it when the App Store pass happens.
+// (Documented here for reference only; app.json is the source of truth.)
 export const ADMOB_APP_ID = {
-  android: 'ca-app-pub-3940256099942544~3347511713',
-  ios: 'ca-app-pub-3940256099942544~1458002511',
+  android: 'ca-app-pub-8916255747221090~2303226096',
+  ios: 'ca-app-pub-3940256099942544~1458002511', // TODO: real id before iOS ships
 } as const;
 
 // Interstitial ad *unit* id (runtime). In __DEV__ the provider always uses
