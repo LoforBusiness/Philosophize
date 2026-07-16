@@ -24,8 +24,7 @@
     "production": {
       "android": {
         "track": "production",
-        "releaseStatus": "inProgress",
-        "rollout": 0.2
+        "releaseStatus": "completed"
       }
     },
     "internal": {
