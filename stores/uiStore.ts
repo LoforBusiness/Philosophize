@@ -32,6 +32,12 @@ interface UIStore {
   paywallOpen: boolean;
   openPaywall: () => void;
   closePaywall: () => void;
+  // True once the animated launch screen has finished and lifted away. Lives here
+  // rather than in _layout's local state because the welcome animation needs it:
+  // the launch screen covers the whole boot (~4s), and index.tsx mounts underneath
+  // it, so a timeline started at mount would play its opening to a hidden screen.
+  launchDone: boolean;
+  setLaunchDone: (v: boolean) => void;
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -57,4 +63,6 @@ export const useUIStore = create<UIStore>((set) => ({
   paywallOpen: false,
   openPaywall: () => set({ paywallOpen: true }),
   closePaywall: () => set({ paywallOpen: false }),
+  launchDone: false,
+  setLaunchDone: (v) => set({ launchDone: v }),
 }));

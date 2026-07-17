@@ -6,6 +6,7 @@ import {
 import {
   PlayfairDisplay_400Regular,
   PlayfairDisplay_700Bold,
+  PlayfairDisplay_700Bold_Italic,
 } from '@expo-google-fonts/playfair-display';
 import {
   Caveat_400Regular,
@@ -67,6 +68,7 @@ export default function RootLayout() {
     Inter_700Bold,
     PlayfairDisplay_400Regular,
     PlayfairDisplay_700Bold,
+    PlayfairDisplay_700Bold_Italic,
     Caveat_400Regular,
     Caveat_700Bold,
     IMFellEnglish_400Regular,
@@ -80,8 +82,11 @@ export default function RootLayout() {
   const [authChecked, setAuthChecked] = useState(false);
   // The animated launch screen covers the whole boot (auth check + routing);
   // it lifts away only when the app underneath is ready AND its 0→100% ink
-  // stroke has finished drawing.
-  const [launchDone, setLaunchDone] = useState(false);
+  // stroke has finished drawing. This lives in uiStore rather than local state
+  // because index.tsx mounts *underneath* this screen and the welcome animation
+  // must not start its timeline until the launch screen has actually lifted.
+  const launchDone = useUIStore((s) => s.launchDone);
+  const setLaunchDone = useUIStore((s) => s.setLaunchDone);
 
   // Gate analytics on the user's saved preference, but only once the store has
   // hydrated so we never capture before we know their real choice.

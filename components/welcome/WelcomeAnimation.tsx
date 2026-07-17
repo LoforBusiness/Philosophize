@@ -1,162 +1,112 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, {
-  Circle,
-  Line,
-  Polyline,
-  G,
-  Rect,
-  Defs,
-  LinearGradient,
-  RadialGradient,
-  Stop,
-  Text as SvgText,
-} from 'react-native-svg';
+import Svg, { Circle, Line, Path, G, Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
 import Animated, {
   useSharedValue,
   useFrameCallback,
   useDerivedValue,
   useAnimatedProps,
   useAnimatedStyle,
+  useAnimatedReaction,
   runOnJS,
+  withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { clamp01, lerp, easeOutCubic, easeOutBack, INK, PAPER, SOFT } from './ease';
+import {
+  BEATS,
+  BEAT_T,
+  CHAPTERS,
+  T_FADE,
+  T_BEGIN,
+  T_HOLD,
+  STAGE_W,
+  STAGE_H,
+  LEN,
+  STR,
+  GB,
+  BUB,
+  PEL,
+  CHEST,
+  HEAD0,
+  SH_L,
+  SH_R,
+  HIP_L,
+  HIP_R,
+  FOOT_L,
+  FOOT_R,
+  beatIdxAt,
+  speechEnv,
+  swayAt,
+  ik,
+  handTargets,
+  tailTip,
+  type Beat,
+  type Chapter,
+} from './rig';
+import GrowthChart from './charts/GrowthChart';
+import TreeChart from './charts/TreeChart';
+import LessonChart from './charts/LessonChart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// First-launch welcome animation. A solid-black, featureless stickman "host" on
-// warm parchment waves hello and gestures through speech-bubble captions pitching
-// the app, then resolves into the wordmark + tagline + "Begin". Plays ONCE, then
-// holds on the end card; a "Skip" is available throughout. Design coordinates are
-// a fixed 1080×1920 stage, scaled to fit the device (letterbox = parchment).
-// Spec: design_handoff_philosophize_welcome/README.md
+// First-launch welcome. A featureless black stickman "host" on paper talks
+// through a speech bubble — the tail tracks his head as he sways, and the words
+// appear one at a time at his speaking pace — while he points at hand-drawn
+// charts on a board to his left. Then everything dissolves to the wordmark and
+// a Begin button. Plays ONCE and holds on the end card; Skip is always there.
+//
+// Design stage is a fixed 400×800 (the approved preview's coordinate space),
+// scaled to fit the device — letterbox is paper, so it never reads as bars.
+//
+// See ease.ts for the ONE rule this screen obeys about animated props.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const INK = '#161310';
-const PARCHMENT = '#E7DEC8';
-const MUTED = '#6F6347';
-
-const STAGE_W = 1080;
-const STAGE_H = 1920;
-const HOLD = 29.0; // play once, then freeze here on the resolved end card
-
-// Arm-rig anchors: the two shoulder sockets the upper-arm bones pivot from,
-// plus a radians→degrees factor for the worklet.
-const LSX = 496,
-  LSY = 706,
-  RSX = 584,
-  RSY = 706;
 const DEG = 180 / Math.PI;
-
-// Pose = [lE.x, lE.y, lH.x, lH.y, rE.x, rE.y, rH.x, rH.y]  (screen-left arm first)
-const POSE: Record<string, number[]> = {
-  AKIMBO: [212, 915, 524, 1092, 868, 915, 556, 1092],
-  WAVE: [212, 915, 524, 1092, 806, 772, 902, 486],
-  TALK: [318, 962, 338, 1124, 762, 962, 742, 1124],
-  OPEN: [300, 868, 186, 992, 780, 868, 894, 992],
-  PRES_R: [332, 980, 372, 1132, 792, 812, 904, 700],
-  PRES_L: [288, 812, 176, 700, 748, 980, 708, 1132],
-  RAISE: [332, 812, 296, 628, 748, 812, 784, 628],
-};
-
-// [t, poseName, lean]
-const KEYS: Array<[number, string, number]> = [
-  [0.0, 'AKIMBO', 1.0],
-  [2.8, 'AKIMBO', 1.0],
-  [3.4, 'WAVE', 1.02],
-  [6.6, 'WAVE', 1.02],
-  [7.1, 'TALK', 1.0],
-  [8.6, 'OPEN', 1.0],
-  [10.2, 'TALK', 1.0],
-  [11.6, 'PRES_R', 1.01],
-  [13.2, 'TALK', 1.0],
-  [14.4, 'PRES_L', 1.01],
-  [16.0, 'TALK', 1.0],
-  [17.6, 'OPEN', 1.0],
-  [18.9, 'TALK', 1.04],
-  [21.4, 'PRES_R', 1.08],
-  [23.6, 'TALK', 1.1],
-  [24.9, 'RAISE', 1.14],
-  [26.6, 'OPEN', 1.06],
-  [27.5, 'AKIMBO', 1.0],
-  [30.0, 'AKIMBO', 1.0],
-];
-
-// Flattened numeric keyframes for the worklets: [t, 8 pose coords…, lean]
-const KF: number[][] = KEYS.map(([t, name, lean]) => [t, ...POSE[name], lean]);
-
-const CAPS: Array<{ s: number; e: number; text: string }> = [
-  { s: 3.3, e: 7.0, text: 'Welcome to Philosophize.' },
-  { s: 7.4, e: 11.3, text: 'Your handbook for learning anything philosophy.' },
-  { s: 11.8, e: 15.4, text: 'Stoicism. Existentialism. Free will.' },
-  { s: 15.8, e: 18.9, text: 'And so much more.' },
-  { s: 19.3, e: 24.4, text: 'Hundreds of philosophers to learn from.' },
-  { s: 24.9, e: 27.0, text: 'All right here.' },
-];
-// Numeric-only copy for worklets.
-const CAPT: number[][] = CAPS.map((c) => [c.s, c.e]);
-
-const TERMS: Array<{ text: string; x: number; y: number; size: number; phase: number; op: number }> = [
-  { text: 'STOICISM', x: 150, y: 560, size: 78, phase: 0.0, op: 0.09 },
-  { text: 'EXISTENTIALISM', x: 250, y: 1180, size: 64, phase: 1.1, op: 0.08 },
-  { text: 'FREE WILL', x: 600, y: 760, size: 92, phase: 2.0, op: 0.1 },
-  { text: 'ABSURDISM', x: 120, y: 980, size: 70, phase: 0.6, op: 0.07 },
-  { text: 'ETHICS', x: 700, y: 1320, size: 84, phase: 2.6, op: 0.08 },
-  { text: 'METAPHYSICS', x: 360, y: 420, size: 56, phase: 1.7, op: 0.07 },
-  { text: 'VIRTUE', x: 760, y: 1040, size: 72, phase: 3.1, op: 0.09 },
-];
-
-// ── worklet math ─────────────────────────────────────────────────────────────
-function clamp01(x: number) {
-  'worklet';
-  return x < 0 ? 0 : x > 1 ? 1 : x;
-}
-function eoc(x: number) {
-  'worklet';
-  const u = 1 - clamp01(x);
-  return 1 - u * u * u;
-}
-function eio(x: number) {
-  'worklet';
-  const c = clamp01(x);
-  return c < 0.5 ? 4 * c * c * c : 1 - Math.pow(-2 * c + 2, 3) / 2;
-}
-// Interpolated pose+lean at time t → [lEx,lEy,lHx,lHy,rEx,rEy,rHx,rHy,lean]
-function poseAt(t: number) {
-  'worklet';
-  const n = KF.length;
-  let i = 0;
-  for (let k = 0; k < n - 1; k++) if (t >= KF[k][0]) i = k;
-  const a = KF[i];
-  const b = KF[i + 1 < n ? i + 1 : i];
-  const span = b[0] - a[0] > 0.0001 ? b[0] - a[0] : 0.0001;
-  const u = eio((t - a[0]) / span);
-  const out: number[] = [];
-  for (let j = 1; j <= 9; j++) out[j - 1] = a[j] + (b[j] - a[j]) * u;
-  return out;
-}
-// Speech intensity (max caption opacity) at t → drives "talking" motion.
-function capK(t: number) {
-  'worklet';
-  let m = 0;
-  for (let k = 0; k < CAPT.length; k++) {
-    const s = CAPT[k][0];
-    const e = CAPT[k][1];
-    if (t < s || t > e) continue;
-    const o = Math.min(clamp01((t - s) / 0.4), clamp01((e - t) / 0.35));
-    if (o > m) m = o;
-  }
-  return m;
-}
 
 const AG = Animated.createAnimatedComponent(G);
 
+/**
+ * DEV-ONLY. `?t=13.2` on the web build pins the timeline to one instant so a
+ * frame can be screenshotted and checked. This exists because a 33-second
+ * animation is otherwise unverifiable — the previous welcome shipped with
+ * frozen arms precisely because nobody could see a still of it. Inert on
+ * native (no window.location) and stripped from release bundles by __DEV__.
+ */
+const FREEZE_T =
+  __DEV__ && typeof window !== 'undefined' && window.location
+    ? parseFloat(new URLSearchParams(window.location.search).get('t') ?? '')
+    : NaN;
+
+// ── static tail path ─────────────────────────────────────────────────────────
+// Drawn ONCE in a local frame: root at the origin, tip straight down at
+// tailLen0. The component only ever translates / rotates / scaleY's it onto the
+// line between the bubble and his head — its `d` never changes.
+// The root is lifted 4px INTO the bubble so the bubble's own bottom border is
+// covered where they meet and the two read as one shape.
+const TW = BUB.tailW;
+const TL = BUB.tailLen0;
+const TAIL_FILL_D =
+  `M${-TW} ${-4} L${TW} ${-4} ` +
+  `Q${TW * 0.75} ${TL * 0.52} 0 ${TL} ` + // right side, out to the tip
+  `Q${-TW * 0.15} ${TL * 0.46} ${-TW} ${-4} Z`; // and back, hooked
+// Only the two SIDES get stroked — never the root, or a line would cut across it.
+const TAIL_EDGE_D =
+  `M${TW} ${-4} Q${TW * 0.75} ${TL * 0.52} 0 ${TL} ` +
+  `Q${-TW * 0.15} ${TL * 0.46} ${-TW} ${-4}`;
+
 interface Props {
+  /**
+   * The launch screen covers the whole boot (~4s) and this screen mounts
+   * underneath it. Hold the timeline at 0 until it has actually lifted,
+   * otherwise the opening lines play to a screen nobody can see.
+   */
+  start?: boolean;
   onDone?: () => void;
 }
 
-export default function WelcomeAnimation({ onDone }: Props) {
+export default function WelcomeAnimation({ start = true, onDone }: Props) {
   const { width: W, height: H } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const setHasSeenWelcome = useUserDataStore((s) => s.setHasSeenWelcome);
@@ -166,239 +116,371 @@ export default function WelcomeAnimation({ onDone }: Props) {
   const offY = (H - STAGE_H * scale) / 2;
 
   const clock = useSharedValue(0);
+  const started = useSharedValue(start ? 1 : 0);
+  useEffect(() => {
+    if (!isNaN(FREEZE_T)) return; // DEBUG: a pinned clock must not be restarted
+    started.value = start ? 1 : 0;
+  }, [start]);
+
+  // DEBUG: ?t=12.4 pins the timeline to one instant so it can be screenshotted.
+  useEffect(() => {
+    if (isNaN(FREEZE_T)) return;
+    // Settle the smoothed hands by simulating forward, exactly as the runtime
+    // would have — otherwise a frozen frame shows hands still at their t=0 seats.
+    let lx = 0;
+    let ly = 0;
+    let rx = 0;
+    let ry = 0;
+    let init = false;
+    const k = 1 - Math.exp(-8.5 / 60);
+    for (let t = 0; t <= FREEZE_T; t += 1 / 60) {
+      const tg = handTargets(t);
+      if (!init) {
+        lx = tg.lx;
+        ly = tg.ly;
+        rx = tg.rx;
+        ry = tg.ry;
+        init = true;
+      } else {
+        lx = lerp(lx, tg.lx, k);
+        ly = lerp(ly, tg.ly, k);
+        rx = lerp(rx, tg.rx, k);
+        ry = lerp(ry, tg.ry, k);
+      }
+    }
+    hLx.value = lx;
+    hLy.value = ly;
+    hRx.value = rx;
+    hRy.value = ry;
+    handInit.value = 1;
+    started.value = 0;
+    clock.value = FREEZE_T;
+    const idx = beatIdxAt(FREEZE_T);
+    if (idx >= 0) setBeatIdx(idx);
+    // the latch lives in the frame callback, which a pinned clock never reaches
+    if (FREEZE_T >= T_BEGIN) setEndReady(true);
+  }, []);
+
+  // Persistent, exponentially-chased hand state. The targets can jump hard when
+  // a line or a board changes; the hand itself can only ever glide there.
+  const hLx = useSharedValue(0);
+  const hLy = useSharedValue(0);
+  const hRx = useSharedValue(0);
+  const hRy = useSharedValue(0);
+  const handInit = useSharedValue(0);
+
+  // Bubble box, measured once per beat (its width is content-driven) and chased
+  // so it inflates rather than snapping when he reaches a second line.
+  const bubW = useSharedValue(200);
+  const bubH = useSharedValue(BUB.lh + 2 * BUB.padY);
+  const bubHTarget = useSharedValue(BUB.lh + 2 * BUB.padY);
+  const lineOf = useSharedValue<number[]>([]);
+
   const endLatched = useSharedValue(0);
   const [endReady, setEndReady] = useState(false);
+  const leaving = useSharedValue(0);
+
+  const [beatIdx, setBeatIdx] = useState(0);
+  const beat = BEATS[beatIdx] ?? BEATS[0];
 
   useFrameCallback((f) => {
     'worklet';
-    // Clamp the per-frame delta so a slow first mount or a backgrounded tab can
-    // never fast-forward (or skip) the intro — it just advances in real time.
+    if (!started.value) return;
     let dt = (f.timeSincePreviousFrame ?? 16) / 1000;
-    if (dt > 0.05) dt = 0.05;
+    if (dt > 0.05) dt = 0.05; // a slow mount or a backgrounded app must not fast-forward
     let nt = clock.value + dt;
-    if (nt >= HOLD) nt = HOLD; // freeze on the resolved end card
+    if (nt >= T_HOLD) nt = T_HOLD; // play ONCE, then freeze on the end card
     clock.value = nt;
-    if (nt >= 27.9 && endLatched.value === 0) {
+
+    const tgt = handTargets(nt);
+    if (!handInit.value) {
+      hLx.value = tgt.lx;
+      hLy.value = tgt.ly;
+      hRx.value = tgt.rx;
+      hRy.value = tgt.ry;
+      handInit.value = 1;
+    } else {
+      const k = 1 - Math.exp(-8.5 * dt); // ~120ms time constant
+      hLx.value = lerp(hLx.value, tgt.lx, k);
+      hLy.value = lerp(hLy.value, tgt.ly, k);
+      hRx.value = lerp(hRx.value, tgt.rx, k);
+      hRy.value = lerp(hRy.value, tgt.ry, k);
+    }
+
+    // bubble height chases the number of lines he has actually reached
+    const kb = 1 - Math.exp(-11 * dt);
+    bubH.value = lerp(bubH.value, bubHTarget.value, kb);
+
+    if (nt >= T_BEGIN && !endLatched.value) {
       endLatched.value = 1;
       runOnJS(setEndReady)(true);
     }
   });
 
+  // Which beat is on screen — drives the words (JS side); ~13 renders in 30s.
+  useAnimatedReaction(
+    () => beatIdxAt(clock.value),
+    (cur, prev) => {
+      if (cur !== prev && cur >= 0) runOnJS(setBeatIdx)(cur);
+    }
+  );
+
+  // How many lines of the current beat he has reached → the bubble's target
+  // height. lineOf is filled in by the words' onLayout (see Words below).
+  useAnimatedReaction(
+    () => {
+      const idx = beatIdxAt(clock.value);
+      if (idx < 0) return 1;
+      const lines = lineOf.value;
+      if (!lines.length) return 1;
+      const age = clock.value - BEAT_T[idx][0];
+      const s0 = 0.14;
+      const s1 = s0 + BEAT_T[idx][1];
+      let n = 1;
+      for (let i = 0; i < lines.length; i++) {
+        const at = s0 + (s1 - s0) * (i / Math.max(1, lines.length));
+        if (age >= at && lines[i] + 1 > n) n = lines[i] + 1;
+      }
+      return n;
+    },
+    (n) => {
+      bubHTarget.value = n * BUB.lh + 2 * BUB.padY;
+      // Nothing is chasing it while the clock is held, so snap instead of
+      // sitting at a stale height (this is also what makes ?t= frames honest).
+      if (!started.value) bubH.value = bubHTarget.value;
+    }
+  );
+
+  const rootOpacity = useSharedValue(1);
+  const rootStyle = useAnimatedStyle(() => ({ opacity: rootOpacity.value }));
+
+  // Flipping hasSeenWelcome unmounts this screen, so it must be the LAST thing
+  // that happens — index.tsx swaps in the auth panel the moment it goes true.
   const finish = useCallback(() => {
     setHasSeenWelcome(true);
     onDone?.();
   }, [setHasSeenWelcome, onDone]);
 
-  // Central per-frame figure state, shared by every animated SVG node.
+  // Begin/Skip dissolve this screen first, so the hand-off to the auth panel is
+  // a fade rather than a cut. `leaving` guards a double-tap from starting two
+  // fades (and calling finish twice).
+  const leave = useCallback(() => {
+    if (leaving.value) return;
+    leaving.value = 1;
+    rootOpacity.value = withTiming(0, { duration: 380 }, (done) => {
+      'worklet';
+      if (done) runOnJS(finish)();
+    });
+  }, [finish]);
+
+  // ── per-frame figure state ─────────────────────────────────────────────────
   const D = useDerivedValue(() => {
     const t = clock.value;
-    const P = poseAt(t);
-    let lEx = P[0],
-      lEy = P[1],
-      lHx = P[2],
-      lHy = P[3],
-      rEx = P[4],
-      rEy = P[5],
-      rHx = P[6],
-      rHy = P[7];
-    const lean = P[8];
-    const tk = capK(t);
+    const env = speechEnv(t);
+    const sway = swayAt(t);
+    const headTilt =
+      0.05 * Math.sin(t * 0.9 + 2.0) +
+      0.02 * Math.sin(t * 2.3) +
+      0.022 * env * Math.sin(t * 4.6 + 0.8);
+    const headBob = 2.2 * env * (0.5 + 0.5 * Math.sin(t * 9.1)); // tiny talking bob
 
-    // continuous life
-    const bob = 11 * Math.sin(t * 1.5);
-    let headTilt = 2.0 * Math.sin(t * 0.8);
-    let headNod = 0;
+    // arms: IK from the smoothed hands back to the (swayed) shoulders
+    const shLx = SH_L.x + sway;
+    const shRx = SH_R.x + sway;
+    const elL = ik(shLx, SH_L.y, hLx.value, hLy.value, LEN.uarm, LEN.farm, -1);
+    const elR = ik(shRx, SH_R.y, hRx.value, hRy.value, LEN.uarm, LEN.farm, +1);
 
-    // speech-driven beats
-    if (tk > 0) {
-      const bl = (22 * Math.sin(t * 4.7) + 20 * Math.sin(t * 3.1)) * tk;
-      const br = (22 * Math.sin(t * 4.7 + 1.7) + 20 * Math.sin(t * 3.1 + 0.9)) * tk;
-      lHy += bl;
-      lHx += 0.4 * bl;
-      rHy += br;
-      rHx -= 0.4 * br;
-      lEy += 0.4 * bl;
-      rEy += 0.4 * br;
-      headNod += 9 * Math.sin(t * 4.2) * tk;
-      headTilt += 3 * Math.sin(t * 3.3) * tk;
-    }
+    const bone = (ax: number, ay: number, bx: number, by: number) => {
+      'worklet';
+      return [
+        { translateX: ax },
+        { translateY: ay },
+        { rotate: `${Math.atan2(by - ay, bx - ax) * DEG}deg` },
+        { scaleX: Math.hypot(bx - ax, by - ay) },
+      ];
+    };
 
-    // waving hand circles
-    if (t > 3.4 && t < 6.7) {
-      rHx += Math.sin((t - 3.4) * 8.5) * 70;
-      rHy += Math.cos((t - 3.4) * 8.5) * 14;
-    }
-
-    // intro appear (0.4→2.1)
-    const appearOp = t < 0.4 ? 0 : eoc((t - 0.4) / 1.7);
-    const appearScale = 0.93 + 0.07 * (t < 0.4 ? 0 : eoc((t - 0.4) / 1.7));
-
-    // outro lockup (27.1→28.7): figure recedes behind the end card
-    const lk = eoc((t - 27.1) / 1.6);
-    const lockScale = 1 - 0.3 * lk;
-    const lockRise = -120 * lk;
-    const lockOp = 1 - 0.74 * lk;
-
-    const figScale = lean * appearScale * lockScale;
-    const figOp = appearOp * lockOp;
-    // Sit the figure lower in the frame so less of the long torso shows (its
-    // bottom fades out below the fold) — keeps the head/arms in view without
-    // the body reading as overly elongated.
-    const ty = 480 + bob + lockRise;
-    const sway = 1.4 * Math.sin(t * 1.6) * tk;
-
-    // Transforms as RN transform ARRAYS (not SVG strings): Reanimated 4 parses a
-    // string `transform` as CSS and crashes on SVG syntax, but passes arrays
-    // straight through to react-native-svg. Each rotate/scale-about-a-point is
-    // decomposed translate→op→translate, listed in the same order as the original
-    // SVG string so the composed matrix (and the motion) is identical.
-    const fig = [
-      { translateY: ty },
-      // rotate(sway about 540,900)
-      { translateX: 540 }, { translateY: 900 }, { rotate: `${sway}deg` }, { translateX: -540 }, { translateY: -900 },
-      // translate(540,720) scale(figScale) translate(-540,-720)
-      { translateX: 540 }, { translateY: 720 }, { scale: figScale }, { translateX: -540 }, { translateY: -720 },
-    ];
-    // rotate(headTilt about 540,508) then translate(0, headNod)
-    const head = [
-      { translateX: 540 }, { translateY: 508 }, { rotate: `${headTilt}deg` }, { translateX: -540 }, { translateY: -508 },
-      { translateY: headNod },
-    ];
-
-    // Arms as a transform-only two-bone rig. Animating SVG *geometry* props
-    // (Polyline `points`, Circle `cx`/`cy`) through useAnimatedProps does not
-    // repaint on the New Architecture, so the old polyline arms sat frozen while
-    // the transform-driven body kept moving. Instead each bone is a unit Line
-    // stretched to its length with scaleX and rotated onto the shoulder→elbow
-    // and elbow→hand vectors; round joints are filled by fixed-radius circles
-    // translated into place. Every value below is a `transform` array — which
-    // *does* animate — so the exact original poses now actually move.
-    const aUL = Math.atan2(lEy - LSY, lEx - LSX) * DEG;
-    const lUL = Math.hypot(lEx - LSX, lEy - LSY);
-    const aFL = Math.atan2(lHy - lEy, lHx - lEx) * DEG;
-    const lFL = Math.hypot(lHx - lEx, lHy - lEy);
-    const aUR = Math.atan2(rEy - RSY, rEx - RSX) * DEG;
-    const lUR = Math.hypot(rEx - RSX, rEy - RSY);
-    const aFR = Math.atan2(rHy - rEy, rHx - rEx) * DEG;
-    const lFR = Math.hypot(rHx - rEx, rHy - rEy);
+    const fade = 1 - easeOutCubic(clamp01((t - T_FADE) / 1.2));
 
     return {
-      fig,
-      head,
-      op: figOp,
-      // upper-arm / forearm bones (translate to joint → rotate onto vector → stretch)
-      upL: [{ translateX: LSX }, { translateY: LSY }, { rotate: `${aUL}deg` }, { scaleX: lUL }],
-      foL: [{ translateX: lEx }, { translateY: lEy }, { rotate: `${aFL}deg` }, { scaleX: lFL }],
-      upR: [{ translateX: RSX }, { translateY: RSY }, { rotate: `${aUR}deg` }, { scaleX: lUR }],
-      foR: [{ translateX: rEx }, { translateY: rEy }, { rotate: `${aFR}deg` }, { scaleX: lFR }],
-      // elbow + hand joint circles
-      elL: [{ translateX: lEx }, { translateY: lEy }],
-      elR: [{ translateX: rEx }, { translateY: rEy }],
-      haL: [{ translateX: lHx }, { translateY: lHy }],
-      haR: [{ translateX: rHx }, { translateY: rHy }],
+      figure: [{ translateX: sway }],
+      // rotate the head about the chest, with the bob applied first
+      head: [
+        { translateX: CHEST.x },
+        { translateY: CHEST.y },
+        { rotate: `${-headTilt * DEG}deg` },
+        { translateX: -CHEST.x },
+        { translateY: -CHEST.y },
+        { translateY: headBob },
+      ],
+      upL: bone(shLx, SH_L.y, elL.x, elL.y),
+      foL: bone(elL.x, elL.y, hLx.value, hLy.value),
+      upR: bone(shRx, SH_R.y, elR.x, elR.y),
+      foR: bone(elR.x, elR.y, hRx.value, hRy.value),
+      elLp: [{ translateX: elL.x }, { translateY: elL.y }],
+      elRp: [{ translateX: elR.x }, { translateY: elR.y }],
+      haLp: [{ translateX: hLx.value }, { translateY: hLy.value }],
+      haRp: [{ translateX: hRx.value }, { translateY: hRy.value }],
+      fade,
     };
   });
 
-  const figProps = useAnimatedProps(() => ({ transform: D.value.fig, opacity: D.value.op }));
+  const figProps = useAnimatedProps(() => ({ transform: D.value.figure, opacity: D.value.fade }));
   const headProps = useAnimatedProps(() => ({ transform: D.value.head }));
+  const armsProps = useAnimatedProps(() => ({ opacity: D.value.fade }));
   const upLProps = useAnimatedProps(() => ({ transform: D.value.upL }));
   const foLProps = useAnimatedProps(() => ({ transform: D.value.foL }));
   const upRProps = useAnimatedProps(() => ({ transform: D.value.upR }));
   const foRProps = useAnimatedProps(() => ({ transform: D.value.foR }));
-  const elLProps = useAnimatedProps(() => ({ transform: D.value.elL }));
-  const elRProps = useAnimatedProps(() => ({ transform: D.value.elR }));
-  const haLProps = useAnimatedProps(() => ({ transform: D.value.haL }));
-  const haRProps = useAnimatedProps(() => ({ transform: D.value.haR }));
+  const elLProps = useAnimatedProps(() => ({ transform: D.value.elLp }));
+  const elRProps = useAnimatedProps(() => ({ transform: D.value.elRp }));
+  const haLProps = useAnimatedProps(() => ({ transform: D.value.haLp }));
+  const haRProps = useAnimatedProps(() => ({ transform: D.value.haRp }));
 
-  // drifting-terms layer fades in/out across the "schools" section (11.2→18.9)
-  const termsProps = useAnimatedProps(() => {
+  // ── the tail: static shape, transformed onto the line to his head ──────────
+  const tailXf = useDerivedValue(() => {
     const t = clock.value;
-    const o = Math.min(clamp01((t - 11.2) / 1.3), clamp01((18.9 - t) / 1.3));
-    return { opacity: o < 0 ? 0 : o };
+    const sway = swayAt(t);
+    const env = speechEnv(t);
+    const headTilt =
+      0.05 * Math.sin(t * 0.9 + 2.0) +
+      0.02 * Math.sin(t * 2.3) +
+      0.022 * env * Math.sin(t * 4.6 + 0.8);
+    const headBob = 2.2 * env * (0.5 + 0.5 * Math.sin(t * 9.1));
+    const L = LEN.head - headBob;
+    const headX = CHEST.x + sway - Math.sin(headTilt) * L;
+    const headY = CHEST.y - Math.cos(headTilt) * L;
+
+    const half = bubW.value / 2;
+    const left = BUB.cx - half;
+    const right = BUB.cx + half;
+    const tbx = Math.max(
+      left + BUB.radius + TW + 4,
+      Math.min(right - BUB.radius - TW - 4, headX - 6)
+    );
+    const tip = tailTip(t, headX, headY, tbx);
+    const dx = tip.x - tbx;
+    const dy = tip.y - BUB.bottom;
+    const len = Math.max(8, Math.hypot(dx, dy));
+    return [
+      { translateX: tbx },
+      { translateY: BUB.bottom },
+      { rotate: `${Math.atan2(-dx, dy) * DEG}deg` },
+      { scaleY: len / TL },
+    ];
   });
+  const tailProps = useAnimatedProps(() => ({
+    transform: tailXf.value,
+    opacity: D.value.fade,
+  }));
+
+  const bubbleStyle = useAnimatedStyle(() => ({
+    height: bubH.value,
+    opacity: easeOutCubic(clamp01(clock.value / 0.6)) * D.value.fade,
+  }));
+
+  const onWordLines = useCallback((lines: number[]) => {
+    lineOf.value = lines;
+  }, []);
+  const onBubbleW = useCallback((w: number) => {
+    bubW.value = w;
+  }, []);
 
   return (
-    <View style={[styles.root, { backgroundColor: PARCHMENT }]}>
+    <Animated.View style={[styles.root, rootStyle]}>
+      {/* everything lives in the 400×800 design stage, scaled to the device */}
       <Svg width={W} height={H} viewBox={`0 0 ${STAGE_W} ${STAGE_H}`} preserveAspectRatio="xMidYMid meet">
         <Defs>
-          <LinearGradient id="torso" x1="0" y1="600" x2="0" y2="1760" gradientUnits="userSpaceOnUse">
-            <Stop offset="0" stopColor={INK} stopOpacity="1" />
-            <Stop offset="0.44" stopColor={INK} stopOpacity="1" />
-            <Stop offset="1" stopColor={INK} stopOpacity="0" />
+          <LinearGradient id="wa-paper" x1="0" y1="0" x2="0" y2={STAGE_H} gradientUnits="userSpaceOnUse">
+            <Stop offset="0" stopColor="#efece4" />
+            <Stop offset="0.62" stopColor="#f7f4ee" />
+            <Stop offset="1" stopColor="#e6e2d8" />
           </LinearGradient>
-          <RadialGradient id="vig" cx="50%" cy="42%" r="78%">
-            <Stop offset="0.6" stopColor="#3A2E18" stopOpacity="0" />
-            <Stop offset="1" stopColor="#3A2E18" stopOpacity="0.2" />
-          </RadialGradient>
         </Defs>
+        <Rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="url(#wa-paper)" />
 
-        {/* parchment + vignette */}
-        <Rect x="0" y="0" width={STAGE_W} height={STAGE_H} fill={PARCHMENT} />
-        <Rect x="0" y="0" width={STAGE_W} height={STAGE_H} fill="url(#vig)" />
+        {/* the board — one chapter per hand-drawn chart */}
+        {CHAPTERS.map((c) => (
+          <Board key={c.visual} chapter={c} clock={clock} />
+        ))}
 
-        {/* drifting philosophy terms (behind the figure) */}
-        <AG animatedProps={termsProps}>
-          {TERMS.map((tm, i) => (
-            <SvgText
-              key={i}
-              x={tm.x}
-              y={tm.y}
-              fill={INK}
-              fillOpacity={tm.op}
-              fontFamily="CormorantGaramond_500Medium"
-              fontSize={tm.size}
-              letterSpacing={tm.size * 0.14}
-            >
-              {tm.text}
-            </SvgText>
-          ))}
+        {/* the host. Legs are dead straight and never move, so they're static
+            geometry; only sway/tilt/bob and the arms are animated. */}
+        <AG animatedProps={figProps}>
+          <Line
+            x1={HIP_L.x}
+            y1={HIP_L.y}
+            x2={FOOT_L.x}
+            y2={FOOT_L.y}
+            stroke={INK}
+            strokeWidth={STR.limb}
+            strokeLinecap="round"
+          />
+          <Line
+            x1={HIP_R.x}
+            y1={HIP_R.y}
+            x2={FOOT_R.x}
+            y2={FOOT_R.y}
+            stroke={INK}
+            strokeWidth={STR.limb}
+            strokeLinecap="round"
+          />
+          <Line
+            x1={PEL.x}
+            y1={PEL.y}
+            x2={CHEST.x}
+            y2={CHEST.y}
+            stroke={INK}
+            strokeWidth={STR.torso}
+            strokeLinecap="round"
+          />
+          {/* welded pelvis — without this the torso's bottom shows through */}
+          <Circle cx={PEL.x} cy={PEL.y} r={STR.torso / 2 + 1} fill={INK} />
+          <Circle cx={SH_L.x} cy={SH_L.y} r={STR.limb / 2} fill={INK} />
+          <Circle cx={SH_R.x} cy={SH_R.y} r={STR.limb / 2} fill={INK} />
+          <AG animatedProps={headProps}>
+            {/* no face — he reads as talking from the bubble, the word-by-word
+                reveal and the speech bob, not from a mouth */}
+            <Circle cx={HEAD0.x} cy={HEAD0.y} r={STR.headR} fill={INK} />
+          </AG>
         </AG>
 
-        {/* the host */}
-        <AG animatedProps={figProps}>
-          <Line x1="540" y1="600" x2="540" y2="1760" stroke="url(#torso)" strokeWidth={96} strokeLinecap="round" />
-          <Line x1="540" y1="598" x2="540" y2="726" stroke={INK} strokeWidth={108} strokeLinecap="round" />
-          <AG animatedProps={headProps}>
-            <Circle cx="540" cy="508" r="182" fill={INK} />
-          </AG>
-          {/* Arms: two stretched-unit-line bones per side (butt caps, so the
-              non-uniform scaleX never distorts the stroke width), with circles
-              filling the shoulder / elbow / hand joints to round them — the
-              same silhouette as the old round-capped polyline, but driven by
-              transform so it animates on the New Architecture. */}
+        {/* Arms sit OUTSIDE the swayed group: the pointing hand aims at the
+            board's real position, so it isn't a rigid offset from the body.
+            Each bone is a unit line stretched with scaleX and rotated onto its
+            joint vector — butt caps, so the non-uniform scale can't distort the
+            stroke width; the joint circles round it back off. */}
+        <AG animatedProps={armsProps}>
           <AG animatedProps={upLProps}>
-            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={94} strokeLinecap="butt" />
+            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={STR.limb} strokeLinecap="butt" />
           </AG>
           <AG animatedProps={foLProps}>
-            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={94} strokeLinecap="butt" />
+            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={STR.limb} strokeLinecap="butt" />
           </AG>
           <AG animatedProps={upRProps}>
-            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={94} strokeLinecap="butt" />
+            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={STR.limb} strokeLinecap="butt" />
           </AG>
           <AG animatedProps={foRProps}>
-            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={94} strokeLinecap="butt" />
+            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={STR.limb} strokeLinecap="butt" />
           </AG>
-          {/* fixed shoulder sockets */}
-          <Circle cx={LSX} cy={LSY} r={47} fill={INK} />
-          <Circle cx={RSX} cy={RSY} r={47} fill={INK} />
-          {/* elbows + hands */}
           <AG animatedProps={elLProps}>
-            <Circle cx={0} cy={0} r={47} fill={INK} />
+            <Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} />
           </AG>
           <AG animatedProps={elRProps}>
-            <Circle cx={0} cy={0} r={47} fill={INK} />
+            <Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} />
           </AG>
           <AG animatedProps={haLProps}>
-            <Circle cx={0} cy={0} r={46} fill={INK} />
+            <Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} />
           </AG>
           <AG animatedProps={haRProps}>
-            <Circle cx={0} cy={0} r={46} fill={INK} />
+            <Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} />
           </AG>
         </AG>
+
       </Svg>
 
-      {/* Scaled overlay layer: captions, splash, end card (1080×1920 space) */}
-      <View pointerEvents="box-none" style={[StyleSheet.absoluteFill]}>
+      {/* Text layer, in the same 400×800 space, scaled to match the SVG. */}
+      <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
         <View
           pointerEvents="box-none"
           style={{
@@ -411,69 +493,184 @@ export default function WelcomeAnimation({ onDone }: Props) {
             transformOrigin: 'top left',
           }}
         >
-          <Splash clock={clock} />
-          {CAPS.map((c, i) => (
-            <Caption key={i} clock={clock} s={c.s} e={c.e} text={c.text} />
-          ))}
-          <EndCard clock={clock} endReady={endReady} onBegin={finish} />
+          <View pointerEvents="none" style={styles.bubbleRow}>
+            <Animated.View style={[styles.bubble, bubbleStyle]} onLayout={(e) => onBubbleW(e.nativeEvent.layout.width)}>
+              <Words key={beatIdx} beat={beat} clock={clock} onLines={onWordLines} />
+            </Animated.View>
+          </View>
+
+        </View>
+      </View>
+
+      {/* The tail gets its OWN layer, above the bubble: the bubble is a View, so
+          a tail drawn in the scene SVG would sit under it and the bubble's bottom
+          border would cut straight across the tail's root. Up here the tail's own
+          fill covers that border and the two read as one shape. */}
+      <Svg
+        pointerEvents="none"
+        style={StyleSheet.absoluteFill}
+        width={W}
+        height={H}
+        viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <AG animatedProps={tailProps}>
+          <Path d={TAIL_FILL_D} fill="#fdfbf6" />
+          <Path
+            d={TAIL_EDGE_D}
+            fill="none"
+            stroke={INK}
+            strokeWidth={2.2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <Path d={TAIL_EDGE_D} fill="none" stroke={INK} strokeWidth={1.0} strokeOpacity={0.4} />
+        </AG>
+      </Svg>
+
+      {/* End card last, so it lands over everything as they dissolve. */}
+      <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+        <View
+          pointerEvents="box-none"
+          style={{
+            position: 'absolute',
+            left: offX,
+            top: offY,
+            width: STAGE_W,
+            height: STAGE_H,
+            transform: [{ scale }],
+            transformOrigin: 'top left',
+          }}
+        >
+          <EndCard clock={clock} endReady={endReady} onBegin={leave} />
         </View>
       </View>
 
       {/* Skip — device space, clear of the notch, available the whole time */}
-      <Pressable
-        onPress={finish}
-        hitSlop={14}
-        style={[styles.skip, { top: insets.top + 10, right: 16 }]}
-      >
+      <Pressable onPress={leave} hitSlop={14} style={[styles.skip, { top: insets.top + 10, right: 16 }]}>
         <Text style={styles.skipText}>Skip</Text>
       </Pressable>
+    </Animated.View>
+  );
+}
+
+// ── board ────────────────────────────────────────────────────────────────────
+// One chart per chapter. `p` is the chart's own 0→1 draw-on progress; the chart
+// itself owns every path's (static) geometry.
+function Board({ chapter, clock }: { chapter: Chapter; clock: SharedValue<number> }) {
+  const p = useDerivedValue(() => clamp01((clock.value - chapter.t0 - 0.25) / 3.3));
+  const props = useAnimatedProps(() => {
+    const t = clock.value;
+    const inA = easeOutCubic(clamp01((t - chapter.t0 + 0.35) / 0.5));
+    const outA = 1 - easeOutCubic(clamp01((t - chapter.t1) / 0.3));
+    const fade = 1 - easeOutCubic(clamp01((t - T_FADE) / 1.2));
+    return { opacity: clamp01(inA * outA) * fade };
+  });
+  return (
+    <AG animatedProps={props}>
+      <G transform={`translate(${GB.x}, ${GB.y}) scale(${GB.w / 300})`}>
+        {chapter.visual === 'lesson' ? (
+          <LessonChart p={p} />
+        ) : chapter.visual === 'growth' ? (
+          <GrowthChart p={p} />
+        ) : (
+          <TreeChart p={p} />
+        )}
+      </G>
+    </AG>
+  );
+}
+
+// ── words ────────────────────────────────────────────────────────────────────
+// Every word of the line is laid out from the start (so the line's centring
+// never shifts as he speaks) but each fades in only when he reaches it. The
+// bubble is height-clipped to the lines he has actually got to, which is what
+// keeps a dead band from sitting under a half-finished line.
+function Words({
+  beat,
+  clock,
+  onLines,
+}: {
+  beat: Beat;
+  clock: SharedValue<number>;
+  onLines: (lines: number[]) => void;
+}) {
+  const ys = useRef<Array<number | undefined>>([]);
+  const idx = BEATS.indexOf(beat);
+
+  const report = useCallback(
+    (i: number, y: number) => {
+      ys.current[i] = y;
+      let filled = 0;
+      for (let k = 0; k < beat.words.length; k++) if (ys.current[k] !== undefined) filled++;
+      if (filled === beat.words.length) {
+        const base = Math.min(...(ys.current.filter((v) => v !== undefined) as number[]));
+        onLines(ys.current.map((y) => Math.round(((y as number) - base) / BUB.lh)));
+      }
+    },
+    [beat, onLines]
+  );
+
+  return (
+    <View style={styles.words}>
+      {beat.words.map((w, i) => (
+        <Word
+          key={`${idx}-${i}`}
+          text={w}
+          i={i}
+          n={beat.words.length}
+          t0={beat.t}
+          speak={beat.speak}
+          last={idx >= BEATS.length - 1}
+          nextT={idx + 1 < BEATS.length ? BEATS[idx + 1].t : T_FADE}
+          clock={clock}
+          onMeasure={report}
+        />
+      ))}
     </View>
   );
 }
 
-// ── overlay pieces ───────────────────────────────────────────────────────────
-
-function Splash({ clock }: { clock: SharedValue<number> }) {
-  const style = useAnimatedStyle(() => {
-    const t = clock.value;
-    const op = t < 0.15 ? t / 0.15 : t < 1.4 ? 1 : Math.max(0, 1 - (t - 1.4) / 0.25);
-    return { opacity: op };
-  });
-  return (
-    <Animated.View style={[styles.splash, style]} pointerEvents="none">
-      <Text style={styles.splashWord}>Philosophize</Text>
-      <Text style={styles.splashLoading}>LOADING</Text>
-    </Animated.View>
-  );
-}
-
-function Caption({
-  clock,
-  s,
-  e,
+function Word({
   text,
+  i,
+  n,
+  t0,
+  speak,
+  nextT,
+  last,
+  clock,
+  onMeasure,
 }: {
-  clock: SharedValue<number>;
-  s: number;
-  e: number;
   text: string;
+  i: number;
+  n: number;
+  t0: number;
+  speak: number;
+  nextT: number;
+  last: boolean;
+  clock: SharedValue<number>;
+  onMeasure: (i: number, y: number) => void;
 }) {
   const style = useAnimatedStyle(() => {
-    const t = clock.value;
-    if (t < s - 0.05 || t > e + 0.05) return { opacity: 0, transform: [{ translateY: 12 }] };
-    const inn = Math.min(1, Math.max(0, (t - s) / 0.4));
-    const out = Math.min(1, Math.max(0, (e - t) / 0.35));
-    const op = Math.min(inn, out);
-    return { opacity: op, transform: [{ translateY: 12 * (1 - inn) }] };
+    const age = clock.value - t0;
+    const s0 = 0.14;
+    const s1 = s0 + speak;
+    const at = s0 + (s1 - s0) * (i / Math.max(1, n));
+    const a = easeOutCubic(clamp01((age - at) / 0.16));
+    // hand the words off to the next line — except on the last one, where they
+    // must dissolve with the bubble or a blank balloon lingers on screen
+    const out = last ? 1 : 1 - easeOutCubic(clamp01((clock.value - (nextT - 0.3)) / 0.3));
+    return { opacity: a * out, transform: [{ translateY: (1 - a) * 3 }] };
   });
   return (
-    <Animated.View style={[styles.bubble, style]} pointerEvents="none">
-      <Text style={styles.bubbleText}>{text}</Text>
-      <View style={styles.bubbleTail} />
-    </Animated.View>
+    <Animated.Text style={[styles.word, style]} onLayout={(e) => onMeasure(i, e.nativeEvent.layout.y)}>
+      {text}
+    </Animated.Text>
   );
 }
 
+// ── end card ─────────────────────────────────────────────────────────────────
 function EndCard({
   clock,
   endReady,
@@ -483,18 +680,18 @@ function EndCard({
   endReady: boolean;
   onBegin: () => void;
 }) {
-  const card = useAnimatedStyle(() => ({ opacity: eoc((clock.value - 27.1) / 1.6) }));
   const word = useAnimatedStyle(() => {
-    const r = eoc((clock.value - 27.3) / 1.4);
-    return { opacity: r, transform: [{ translateY: 30 * (1 - r) }] };
+    const r = easeOutCubic(clamp01((clock.value - T_BEGIN) / 0.6));
+    return { opacity: r, transform: [{ translateY: 14 * (1 - r) }] };
   });
-  const begin = useAnimatedStyle(() => ({ opacity: Math.min(1, Math.max(0, (clock.value - 27.9) / 0.6)) }));
-
+  const begin = useAnimatedStyle(() => {
+    const a = easeOutCubic(clamp01((clock.value - T_BEGIN) / 0.6));
+    const s = 0.94 + 0.06 * easeOutBack(clamp01((clock.value - T_BEGIN) / 0.6));
+    return { opacity: a, transform: [{ scale: s }] };
+  });
   return (
-    <Animated.View style={[styles.endCard, card]} pointerEvents="box-none">
-      <View style={styles.divider} />
+    <View pointerEvents="box-none" style={styles.endCard}>
       <Animated.Text style={[styles.lockWord, word]}>Philosophize</Animated.Text>
-      <Text style={styles.tagline}>Your pocket philosophy handbook.</Text>
       <Animated.View style={begin}>
         <Pressable
           onPress={onBegin}
@@ -503,94 +700,57 @@ function EndCard({
           style={({ pressed }) => [styles.beginBtn, pressed && { opacity: 0.7 }]}
         >
           <Text style={styles.beginText}>Begin</Text>
-          <Svg width={34} height={20} viewBox="0 0 34 20">
-            <Line x1="2" y1="10" x2="30" y2="10" stroke={INK} strokeWidth={2.4} strokeLinecap="round" />
-            <Polyline points="22,3 31,10 22,17" fill="none" stroke={INK} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-          </Svg>
         </Pressable>
       </Animated.View>
-    </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, overflow: 'hidden' },
+  root: { flex: 1, backgroundColor: PAPER, overflow: 'hidden' },
 
   skip: { position: 'absolute', paddingHorizontal: 14, paddingVertical: 8 },
-  skipText: {
-    fontFamily: 'EBGaramond_400Regular',
-    fontSize: 18,
-    letterSpacing: 1,
-    color: MUTED,
-  },
+  skipText: { fontFamily: 'Inter_500Medium', fontSize: 14, letterSpacing: 1, color: SOFT },
 
-  // 1080×1920-space overlays
-  splash: { position: 'absolute', left: 0, right: 0, top: 800, alignItems: 'center' },
-  splashWord: { fontFamily: 'CormorantGaramond_500Medium', fontSize: 84, color: INK },
-  splashLoading: {
-    fontFamily: 'EBGaramond_400Regular',
-    fontSize: 34,
-    letterSpacing: 10,
-    color: MUTED,
-    marginTop: 8,
+  // Bottom-anchored: the bubble grows UPWARD as he reaches a second line, so the
+  // tail root stays pinned at a constant y and never drifts off his head.
+  bubbleRow: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: BUB.bottom,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
-
   bubble: {
-    position: 'absolute',
-    // Bottom-anchored so the downward tail stays a constant distance above the
-    // (now lower) figure's head, whether the caption is one line or two.
-    bottom: 1200,
-    left: 70,
-    right: 70,
-    maxWidth: 800,
-    alignSelf: 'center',
-    backgroundColor: 'rgba(238,230,212,0.82)',
-    borderWidth: 1.6,
-    borderColor: 'rgba(22,19,16,0.5)',
-    borderRadius: 30,
-    paddingVertical: 24,
-    paddingHorizontal: 40,
-    alignItems: 'center',
+    maxWidth: BUB.maxTextW + 2 * BUB.padX,
+    paddingHorizontal: BUB.padX,
+    paddingVertical: BUB.padY,
+    backgroundColor: '#fdfbf6',
+    borderWidth: 2.2,
+    borderColor: INK,
+    borderRadius: BUB.radius,
+    overflow: 'hidden',
   },
-  bubbleText: {
-    fontFamily: 'CormorantGaramond_500Medium',
-    fontSize: 56,
-    lineHeight: 56 * 1.12,
+  words: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', flexShrink: 0 },
+  word: {
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 27,
+    lineHeight: BUB.lh,
     color: INK,
-    textAlign: 'center',
-  },
-  bubbleTail: {
-    position: 'absolute',
-    bottom: -13,
-    width: 26,
-    height: 26,
-    backgroundColor: 'rgba(238,230,212,0.82)',
-    borderRightWidth: 1.6,
-    borderBottomWidth: 1.6,
-    borderColor: 'rgba(22,19,16,0.5)',
-    transform: [{ rotate: '45deg' }],
+    // symmetric, so the trailing gap can't push the centred line off-axis
+    marginHorizontal: 3.5,
   },
 
-  endCard: { position: 'absolute', left: 0, right: 0, top: 860, alignItems: 'center' },
-  divider: { width: 96, height: 2, backgroundColor: MUTED, marginBottom: 40 },
-  lockWord: { fontFamily: 'CormorantGaramond_600SemiBold', fontSize: 138, color: INK, lineHeight: 150 },
-  tagline: {
-    fontFamily: 'EBGaramond_400Regular_Italic',
-    fontStyle: 'italic',
-    fontSize: 50,
-    color: MUTED,
-    marginTop: 14,
-  },
+  endCard: { position: 'absolute', left: 0, right: 0, top: 330, alignItems: 'center' },
+  lockWord: { fontFamily: 'PlayfairDisplay_700Bold_Italic', fontSize: 46, color: INK, lineHeight: 58 },
   beginBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 18,
-    marginTop: 120,
-    borderWidth: 1.6,
-    borderColor: INK,
-    borderRadius: 999,
-    paddingVertical: 22,
-    paddingHorizontal: 56,
+    marginTop: 38,
+    backgroundColor: INK,
+    borderRadius: 25,
+    paddingVertical: 14,
+    paddingHorizontal: 44,
   },
-  beginText: { fontFamily: 'CormorantGaramond_500Medium', fontSize: 50, color: INK, letterSpacing: 2 },
+  beginText: { fontFamily: 'Inter_500Medium', fontSize: 17, color: PAPER },
 });
