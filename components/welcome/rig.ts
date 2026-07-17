@@ -20,25 +20,30 @@ export interface Beat {
 export type Visual = 'lesson' | 'growth' | 'tree';
 export type Gesture = 'point' | 'shrug' | 'open' | 'emphasize';
 
+// Beat times are absolute. `speak` below is derived from the word count but is
+// CAPPED by the beat's own length, so a line that outgrows its slot doesn't
+// throw — it just silently rushes. The opening line is 8 words, which needs
+// ~2.7s to say; every beat after it is therefore offset +0.7s from the original
+// timing to buy it that room. Lengthen a line and you must check its slot.
 const SCRIPT: Array<[number, string, Visual | null, Gesture | null]> = [
-  [0.0, 'Think philosophy is boring?', null, 'point'],
-  [2.6, "It doesn't have to be.", null, 'shrug'],
-  [5.0, 'Explore famous philosophers.', null, 'open'],
-  [7.0, 'Discover timeless ideas.', null, 'open'],
-  [9.0, 'No long lectures.', null, 'emphasize'],
-  [11.0, 'One short lesson at a time.', 'lesson', null],
-  [14.0, 'Just simple, interactive learning.', 'lesson', null],
-  [16.4, 'Learn in just a few minutes a day.', 'growth', null],
-  [19.4, 'And it adds up. Fast.', 'growth', null],
-  [21.6, 'Train yourself to think clearly.', 'tree', null],
-  [24.2, 'Ask better questions.', 'tree', null],
-  [26.4, 'Challenge your perspective.', 'tree', null],
-  [28.6, 'Ready to think differently?', null, 'open'],
+  [0.0, 'Think philosophy is boring or difficult to learn?', null, 'point'],
+  [3.3, "It doesn't have to be.", null, 'shrug'],
+  [5.7, 'Explore famous philosophers.', null, 'open'],
+  [7.7, 'Discover timeless ideas.', null, 'open'],
+  [9.7, 'No long lectures.', null, 'emphasize'],
+  [11.7, 'One short lesson at a time.', 'lesson', null],
+  [14.7, 'Just simple, interactive learning.', 'lesson', null],
+  [17.1, 'Learn in just a few minutes a day.', 'growth', null],
+  [20.1, 'And it adds up. Fast.', 'growth', null],
+  [22.3, 'Train yourself to think clearly.', 'tree', null],
+  [24.9, 'Ask better questions.', 'tree', null],
+  [27.1, 'Challenge your perspective.', 'tree', null],
+  [29.3, 'Ready to think differently?', null, 'open'],
 ];
 
-export const T_FADE = 30.8; // everything dissolves
-export const T_BEGIN = 32.2; // wordmark + Begin resolve in
-export const T_HOLD = 33.2; // freeze here — this plays ONCE, it must not loop
+export const T_FADE = 31.5; // everything dissolves
+export const T_BEGIN = 32.9; // wordmark + Begin resolve in
+export const T_HOLD = 33.9; // freeze here — this plays ONCE, it must not loop
 
 export const BEATS: Beat[] = SCRIPT.map(([t, text, visual, gesture], i) => {
   const nextT = i + 1 < SCRIPT.length ? SCRIPT[i + 1][0] : T_FADE;
