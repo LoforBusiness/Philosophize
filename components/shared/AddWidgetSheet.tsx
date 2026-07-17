@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Modal, View, Text, Pressable, Image, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { MotiView, AnimatePresence } from 'moti';
+import { canPinWidget, requestPinWidget } from '@/lib/widget/pinWidget';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
 const InkFaint = '#D9D7CE';
 
-// The launcher's own flow for placing an app widget, spelled out. The library
-// can't summon Android's pin dialog, so this guides the user through the manual
-// long-press → Widgets → drag path instead. Same bottom-sheet pattern as the
+// Fallback for launchers that don't support the system pin dialog: the manual
+// long-press → Widgets → drag path, spelled out. Same bottom-sheet pattern as the
 // saved-quotes / ranks sheets.
 const STEPS = [
   'Touch and hold an empty area of your home screen.',
@@ -22,10 +22,28 @@ export default function AddWidgetSheet({ visible, onClose }: { visible: boolean;
   const { height } = useWindowDimensions();
   const H = Math.min(Math.round(height * 0.82), 620);
   const [mounted, setMounted] = useState(false);
+  const [adding, setAdding] = useState(false);
+  // Whether we can offer the one-tap system pin dialog (native module present +
+  // launcher supports it). When false we show the manual steps instead.
+  const canAdd = useMemo(() => canPinWidget(), []);
 
   useEffect(() => {
     if (visible) setMounted(true);
   }, [visible]);
+
+  // Fire the system "add widget?" dialog. On success it takes over the screen, so
+  // we close the sheet; the home screen re-checks placement when it resumes and
+  // hides the CTA. On the rare failure we keep the sheet open so nothing is lost.
+  const handleAdd = async () => {
+    if (adding) return;
+    setAdding(true);
+    try {
+      const ok = await requestPinWidget();
+      if (ok) onClose();
+    } finally {
+      setAdding(false);
+    }
+  };
 
   if (!mounted) return null;
 
@@ -72,23 +90,40 @@ export default function AddWidgetSheet({ visible, onClose }: { visible: boolean;
                 />
               </View>
 
-              <View style={styles.steps}>
-                {STEPS.map((step, i) => (
-                  <View key={i} style={styles.stepRow}>
-                    <View style={styles.stepNum}>
-                      <Text style={styles.stepNumText}>{i + 1}</Text>
-                    </View>
-                    <Text style={styles.stepText}>{step}</Text>
+              {canAdd ? (
+                <>
+                  <Pressable
+                    onPress={handleAdd}
+                    disabled={adding}
+                    style={({ pressed }) => [styles.cta, styles.ctaAdd, pressed && { opacity: 0.85 }, adding && { opacity: 0.6 }]}
+                  >
+                    <Text style={styles.ctaText}>{adding ? 'OPENING…' : 'ADD TO HOME SCREEN'}</Text>
+                  </Pressable>
+                  <Text style={styles.addHint}>
+                    Your phone will ask you to confirm, then drop it on your home screen.
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <View style={styles.steps}>
+                    {STEPS.map((step, i) => (
+                      <View key={i} style={styles.stepRow}>
+                        <View style={styles.stepNum}>
+                          <Text style={styles.stepNumText}>{i + 1}</Text>
+                        </View>
+                        <Text style={styles.stepText}>{step}</Text>
+                      </View>
+                    ))}
                   </View>
-                ))}
-              </View>
 
-              <Pressable
-                onPress={onClose}
-                style={({ pressed }) => [styles.cta, pressed && { opacity: 0.85 }]}
-              >
-                <Text style={styles.ctaText}>GOT IT</Text>
-              </Pressable>
+                  <Pressable
+                    onPress={onClose}
+                    style={({ pressed }) => [styles.cta, pressed && { opacity: 0.85 }]}
+                  >
+                    <Text style={styles.ctaText}>GOT IT</Text>
+                  </Pressable>
+                </>
+              )}
             </ScrollView>
           </MotiView>
         )}
@@ -160,5 +195,16 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: 'center',
   },
+  // The one-tap add is the primary action, so it sits right under the preview.
+  ctaAdd: { marginTop: 22 },
   ctaText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Paper, letterSpacing: 2 },
+  addHint: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 12.5,
+    color: InkSoft,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginTop: 12,
+    paddingHorizontal: 10,
+  },
 });
