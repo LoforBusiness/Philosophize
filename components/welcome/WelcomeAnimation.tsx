@@ -1,7 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
+import { useCallback, useEffect, useRef, useState, memo } from 'react';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  type ViewStyle,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Line, Path, G, Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Path, Rect, G, Defs, LinearGradient, Stop } from 'react-native-svg';
 import Animated, {
   useSharedValue,
   useFrameCallback,
@@ -30,7 +37,6 @@ import {
   BUB,
   PEL,
   CHEST,
-  HEAD0,
   SH_L,
   SH_R,
   HIP_L,
@@ -57,27 +63,35 @@ import LessonChart from './charts/LessonChart';
 // charts on a board to his left. Then everything dissolves to the wordmark and
 // a Begin button. Plays ONCE and holds on the end card; Skip is always there.
 //
+// RENDERING NOTE — why the figure is native Views, not SVG:
+// react-native-svg 15 has no partial invalidation: any animated child re-renders
+// and re-uploads the WHOLE <Svg> surface to a GPU bitmap every frame. With the
+// figure drawn in a full-screen <Svg>, that was ~10fps on an S24 Ultra (100%
+// janky frames, all "slow bitmap uploads", GPU otherwise idle). So the figure is
+// now plain RN Views driven by Reanimated transforms — those composite on the GPU
+// with NO per-frame rasterization. The maths in rig.ts is reused verbatim, so
+// every position, angle and timing is identical to the SVG version; only the draw
+// primitive changed (a butt-capped bone is a 1×STR.limb ink View stretched by
+// scaleX; a joint/head is a borderRadius View; a round-capped leg is a stadium
+// View). What stays in SVG — the paper gradient (static, drawn once), the charts
+// (only the on-screen chapter is mounted, in a board-sized surface) and the tail
+// (a bounded surface a fraction of the screen) — no longer re-rasters the full
+// screen every frame.
+//
 // Design stage is a fixed 400×800 (the approved preview's coordinate space),
 // scaled to fit the device — letterbox is paper, so it never reads as bars.
-//
-// See ease.ts for the ONE rule this screen obeys about animated props.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DEG = 180 / Math.PI;
 
 const AG = Animated.createAnimatedComponent(G);
 
-/**
- * DEV-ONLY. `?t=13.2` on the web build pins the timeline to one instant so a
- * frame can be screenshotted and checked. This exists because a 33-second
- * animation is otherwise unverifiable — the previous welcome shipped with
- * frozen arms precisely because nobody could see a still of it. Inert on
- * native (no window.location) and stripped from release bundles by __DEV__.
- */
-const FREEZE_T =
-  __DEV__ && typeof window !== 'undefined' && window.location
-    ? parseFloat(new URLSearchParams(window.location.search).get('t') ?? '')
-    : NaN;
+// Bounded stage sub-regions (400×800 space) for the surfaces that DO stay in SVG,
+// so each re-rasters a fraction of the screen instead of the whole thing.
+// BOARD_BOX covers every chart's extent (GB + margin); TAIL_BOX covers the band
+// the tail can ever reach (bubble bottom down past his swaying head).
+const BOARD_BOX = { x: 8, y: 384, w: 244, h: 132 };
+const TAIL_BOX = { x: 30, y: 356, w: 340, h: 188 };
 
 // ── static tail path ─────────────────────────────────────────────────────────
 // Drawn ONCE in a local frame: root at the origin, tip straight down at
@@ -95,6 +109,88 @@ const TAIL_FILL_D =
 const TAIL_EDGE_D =
   `M${TW} ${-4} Q${TW * 0.75} ${TL * 0.52} 0 ${TL} ` +
   `Q${-TW * 0.15} ${TL * 0.46} ${-TW} ${-4}`;
+
+// ── static figure geometry, as View styles (rig coords, no sway) ──────────────
+// The body wrapper applies sway; these never move relative to it.
+function limbStyle(ax: number, ay: number, bx: number, by: number, s: number): ViewStyle {
+  // A round-capped line A→B: a stadium of width L+s (caps extend s/2 past each
+  // end, exactly like strokeLinecap="round"), height s, centred on the midpoint.
+  const L = Math.hypot(bx - ax, by - ay);
+  const mx = (ax + bx) / 2;
+  const my = (ay + by) / 2;
+  const ang = Math.atan2(by - ay, bx - ax) * DEG;
+  return {
+    position: 'absolute',
+    left: mx - (L + s) / 2,
+    top: my - s / 2,
+    width: L + s,
+    height: s,
+    borderRadius: s / 2,
+    backgroundColor: INK,
+    transform: [{ rotate: `${ang}deg` }],
+  };
+}
+function dotStyle(cx: number, cy: number, r: number): ViewStyle {
+  return {
+    position: 'absolute',
+    left: cx - r,
+    top: cy - r,
+    width: 2 * r,
+    height: 2 * r,
+    borderRadius: r,
+    backgroundColor: INK,
+  };
+}
+
+const LEG_L_STYLE = limbStyle(HIP_L.x, HIP_L.y, FOOT_L.x, FOOT_L.y, STR.limb);
+const LEG_R_STYLE = limbStyle(HIP_R.x, HIP_R.y, FOOT_R.x, FOOT_R.y, STR.limb);
+const TORSO_STYLE = limbStyle(PEL.x, PEL.y, CHEST.x, CHEST.y, STR.torso);
+const PELVIS_STYLE = dotStyle(PEL.x, PEL.y, STR.torso / 2 + 1); // welded pelvis
+const SH_L_STYLE = dotStyle(SH_L.x, SH_L.y, STR.limb / 2);
+const SH_R_STYLE = dotStyle(SH_R.x, SH_R.y, STR.limb / 2);
+
+// Animated bases, anchored so a Reanimated transform lands them exactly where the
+// SVG version did. Head/joints are circles centred on the origin (translate moves
+// the centre). A bone is a unit-length butt-capped bar whose LEFT-centre is the
+// origin (transformOrigin 0% 50%), so [translate, rotate, scaleX(len)] — the very
+// array the SVG <G> used — stretches it from the start joint along the bone.
+const HEAD_BASE: ViewStyle = {
+  position: 'absolute',
+  left: -STR.headR,
+  top: -STR.headR,
+  width: 2 * STR.headR,
+  height: 2 * STR.headR,
+  borderRadius: STR.headR,
+  backgroundColor: INK,
+};
+const JOINT_BASE: ViewStyle = {
+  position: 'absolute',
+  left: -STR.limb / 2,
+  top: -STR.limb / 2,
+  width: STR.limb,
+  height: STR.limb,
+  borderRadius: STR.limb / 2,
+  backgroundColor: INK,
+};
+const BONE_BASE: ViewStyle = {
+  position: 'absolute',
+  left: 0,
+  top: -STR.limb / 2,
+  width: 1,
+  height: STR.limb,
+  backgroundColor: INK,
+  transformOrigin: '0% 50%',
+};
+
+/**
+ * DEV-ONLY. `?t=13.2` on the web build pins the timeline to one instant so a
+ * frame can be screenshotted and checked. Inert on native (no window.location)
+ * and stripped from release bundles by __DEV__.
+ */
+const FREEZE_T =
+  __DEV__ && typeof window !== 'undefined' && window.location
+    ? parseFloat(new URLSearchParams(window.location.search).get('t') ?? '')
+    : NaN;
 
 interface Props {
   /**
@@ -122,11 +218,31 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
     started.value = start ? 1 : 0;
   }, [start]);
 
+  // Persistent, exponentially-chased hand state. The targets can jump hard when
+  // a line or a board changes; the hand itself can only ever glide there.
+  const hLx = useSharedValue(0);
+  const hLy = useSharedValue(0);
+  const hRx = useSharedValue(0);
+  const hRy = useSharedValue(0);
+  const handInit = useSharedValue(0);
+
+  // Bubble box, measured once per beat (its width is content-driven) and chased
+  // so it inflates rather than snapping when he reaches a second line.
+  const bubW = useSharedValue(200);
+  const bubH = useSharedValue(BUB.lh + 2 * BUB.padY);
+  const bubHTarget = useSharedValue(BUB.lh + 2 * BUB.padY);
+  const lineOf = useSharedValue<number[]>([]);
+
+  const endLatched = useSharedValue(0);
+  const [endReady, setEndReady] = useState(false);
+  const leaving = useSharedValue(0);
+
+  const [beatIdx, setBeatIdx] = useState(0);
+  const beat = BEATS[beatIdx] ?? BEATS[0];
+
   // DEBUG: ?t=12.4 pins the timeline to one instant so it can be screenshotted.
   useEffect(() => {
     if (isNaN(FREEZE_T)) return;
-    // Settle the smoothed hands by simulating forward, exactly as the runtime
-    // would have — otherwise a frozen frame shows hands still at their t=0 seats.
     let lx = 0;
     let ly = 0;
     let rx = 0;
@@ -157,31 +273,8 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
     clock.value = FREEZE_T;
     const idx = beatIdxAt(FREEZE_T);
     if (idx >= 0) setBeatIdx(idx);
-    // the latch lives in the frame callback, which a pinned clock never reaches
     if (FREEZE_T >= T_BEGIN) setEndReady(true);
   }, []);
-
-  // Persistent, exponentially-chased hand state. The targets can jump hard when
-  // a line or a board changes; the hand itself can only ever glide there.
-  const hLx = useSharedValue(0);
-  const hLy = useSharedValue(0);
-  const hRx = useSharedValue(0);
-  const hRy = useSharedValue(0);
-  const handInit = useSharedValue(0);
-
-  // Bubble box, measured once per beat (its width is content-driven) and chased
-  // so it inflates rather than snapping when he reaches a second line.
-  const bubW = useSharedValue(200);
-  const bubH = useSharedValue(BUB.lh + 2 * BUB.padY);
-  const bubHTarget = useSharedValue(BUB.lh + 2 * BUB.padY);
-  const lineOf = useSharedValue<number[]>([]);
-
-  const endLatched = useSharedValue(0);
-  const [endReady, setEndReady] = useState(false);
-  const leaving = useSharedValue(0);
-
-  const [beatIdx, setBeatIdx] = useState(0);
-  const beat = BEATS[beatIdx] ?? BEATS[0];
 
   useFrameCallback((f) => {
     'worklet';
@@ -201,15 +294,32 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
       handInit.value = 1;
     } else {
       const k = 1 - Math.exp(-8.5 * dt); // ~120ms time constant
-      hLx.value = lerp(hLx.value, tgt.lx, k);
-      hLy.value = lerp(hLy.value, tgt.ly, k);
-      hRx.value = lerp(hRx.value, tgt.rx, k);
-      hRy.value = lerp(hRy.value, tgt.ry, k);
+      // Snap each channel once it's within a sub-pixel of a (now-constant) target,
+      // so on the frozen end card the chase reaches EXACT equality and the figure
+      // stops re-committing. During playback the idle-sway terms keep the targets
+      // moving, so this threshold is never hit and the glide is unchanged.
+      const nlx = lerp(hLx.value, tgt.lx, k);
+      hLx.value = Math.abs(nlx - tgt.lx) < 0.1 ? tgt.lx : nlx;
+      const nly = lerp(hLy.value, tgt.ly, k);
+      hLy.value = Math.abs(nly - tgt.ly) < 0.1 ? tgt.ly : nly;
+      const nrx = lerp(hRx.value, tgt.rx, k);
+      hRx.value = Math.abs(nrx - tgt.rx) < 0.1 ? tgt.rx : nrx;
+      const nry = lerp(hRy.value, tgt.ry, k);
+      hRy.value = Math.abs(nry - tgt.ry) < 0.1 ? tgt.ry : nry;
     }
 
-    // bubble height chases the number of lines he has actually reached
-    const kb = 1 - Math.exp(-11 * dt);
-    bubH.value = lerp(bubH.value, bubHTarget.value, kb);
+    // Bubble height chases the number of lines he has reached. An asymptotic chase
+    // never exactly equals its target, and `height` is a LAYOUT prop — writing a
+    // sub-pixel-different value every frame relays out the bubble + wrapped Words
+    // for the whole 34s. Snap the final <0.25px and then hold a bit-exact constant,
+    // so a layout pass runs only when the target actually steps at a beat.
+    const diff = bubHTarget.value - bubH.value;
+    if (Math.abs(diff) > 0.25) {
+      const kb = 1 - Math.exp(-11 * dt);
+      bubH.value = lerp(bubH.value, bubHTarget.value, kb);
+    } else if (diff !== 0) {
+      bubH.value = bubHTarget.value;
+    }
 
     if (nt >= T_BEGIN && !endLatched.value) {
       endLatched.value = 1;
@@ -273,7 +383,7 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
     });
   }, [finish]);
 
-  // ── per-frame figure state ─────────────────────────────────────────────────
+  // ── per-frame figure state (consumed by native Views, not SVG) ──────────────
   const D = useDerivedValue(() => {
     const t = clock.value;
     const env = speechEnv(t);
@@ -290,6 +400,9 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
     const elL = ik(shLx, SH_L.y, hLx.value, hLy.value, LEN.uarm, LEN.farm, -1);
     const elR = ik(shRx, SH_R.y, hRx.value, hRy.value, LEN.uarm, LEN.farm, +1);
 
+    // A butt-capped bone as a View transform: translate to the start joint, rotate
+    // onto the joint vector, stretch a unit bar to the bone length with scaleX.
+    // Identical array to the SVG <G> the arms used before.
     const bone = (ax: number, ay: number, bx: number, by: number) => {
       'worklet';
       return [
@@ -303,16 +416,13 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
     const fade = 1 - easeOutCubic(clamp01((t - T_FADE) / 1.2));
 
     return {
+      fade,
+      // the whole body sways; the wrapper carries this, its children are static
       figure: [{ translateX: sway }],
-      // rotate the head about the chest, with the bob applied first
-      head: [
-        { translateX: CHEST.x },
-        { translateY: CHEST.y },
-        { rotate: `${-headTilt * DEG}deg` },
-        { translateX: -CHEST.x },
-        { translateY: -CHEST.y },
-        { translateY: headBob },
-      ],
+      // head centre in body-local space (no sway — the wrapper adds it), rotated
+      // about the chest by the tilt with the talking bob applied after.
+      headCx: CHEST.x - Math.sin(headTilt) * LEN.head,
+      headCy: CHEST.y - Math.cos(headTilt) * LEN.head + headBob,
       upL: bone(shLx, SH_L.y, elL.x, elL.y),
       foL: bone(elL.x, elL.y, hLx.value, hLy.value),
       upR: bone(shRx, SH_R.y, elR.x, elR.y),
@@ -321,21 +431,26 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
       elRp: [{ translateX: elR.x }, { translateY: elR.y }],
       haLp: [{ translateX: hLx.value }, { translateY: hLy.value }],
       haRp: [{ translateX: hRx.value }, { translateY: hRy.value }],
-      fade,
     };
   });
 
-  const figProps = useAnimatedProps(() => ({ transform: D.value.figure, opacity: D.value.fade }));
-  const headProps = useAnimatedProps(() => ({ transform: D.value.head }));
-  const armsProps = useAnimatedProps(() => ({ opacity: D.value.fade }));
-  const upLProps = useAnimatedProps(() => ({ transform: D.value.upL }));
-  const foLProps = useAnimatedProps(() => ({ transform: D.value.foL }));
-  const upRProps = useAnimatedProps(() => ({ transform: D.value.upR }));
-  const foRProps = useAnimatedProps(() => ({ transform: D.value.foR }));
-  const elLProps = useAnimatedProps(() => ({ transform: D.value.elLp }));
-  const elRProps = useAnimatedProps(() => ({ transform: D.value.elRp }));
-  const haLProps = useAnimatedProps(() => ({ transform: D.value.haLp }));
-  const haRProps = useAnimatedProps(() => ({ transform: D.value.haRp }));
+  // The body group (legs/torso/pelvis/shoulders/head) sways and fades as one.
+  const bodyStyle = useAnimatedStyle(() => ({ transform: D.value.figure, opacity: D.value.fade }));
+  const headStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: D.value.headCx }, { translateY: D.value.headCy }],
+  }));
+  // Arms sit OUTSIDE the swayed group (each bone's maths already carries sway, so
+  // the pointing hand aims at the board's real position). Their own fade, kept
+  // separate from the body's so overlaps composite exactly as they did in SVG.
+  const armsStyle = useAnimatedStyle(() => ({ opacity: D.value.fade }));
+  const upLStyle = useAnimatedStyle(() => ({ transform: D.value.upL }));
+  const foLStyle = useAnimatedStyle(() => ({ transform: D.value.foL }));
+  const upRStyle = useAnimatedStyle(() => ({ transform: D.value.upR }));
+  const foRStyle = useAnimatedStyle(() => ({ transform: D.value.foR }));
+  const elLStyle = useAnimatedStyle(() => ({ transform: D.value.elLp }));
+  const elRStyle = useAnimatedStyle(() => ({ transform: D.value.elRp }));
+  const haLStyle = useAnimatedStyle(() => ({ transform: D.value.haLp }));
+  const haRStyle = useAnimatedStyle(() => ({ transform: D.value.haRp }));
 
   // ── the tail: static shape, transformed onto the line to his head ──────────
   const tailXf = useDerivedValue(() => {
@@ -386,10 +501,28 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
     bubW.value = w;
   }, []);
 
+  const stageWrap: ViewStyle = {
+    position: 'absolute',
+    left: offX,
+    top: offY,
+    width: STAGE_W,
+    height: STAGE_H,
+    transform: [{ scale }],
+    transformOrigin: 'top left',
+  };
+
   return (
     <Animated.View style={[styles.root, rootStyle]}>
-      {/* everything lives in the 400×800 design stage, scaled to the device */}
-      <Svg width={W} height={H} viewBox={`0 0 ${STAGE_W} ${STAGE_H}`} preserveAspectRatio="xMidYMid meet">
+      {/* Paper — its own STATIC surface (no animated children), so it rasterizes
+          once and never re-uploads with the animation. */}
+      <Svg
+        pointerEvents="none"
+        style={StyleSheet.absoluteFill}
+        width={W}
+        height={H}
+        viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}
+        preserveAspectRatio="xMidYMid meet"
+      >
         <Defs>
           <LinearGradient id="wa-paper" x1="0" y1="0" x2="0" y2={STAGE_H} gradientUnits="userSpaceOnUse">
             <Stop offset="0" stopColor="#efece4" />
@@ -398,120 +531,79 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
           </LinearGradient>
         </Defs>
         <Rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="url(#wa-paper)" />
-
-        {/* the board — one chapter per hand-drawn chart */}
-        {CHAPTERS.map((c) => (
-          <Board key={c.visual} chapter={c} clock={clock} />
-        ))}
-
-        {/* the host. Legs are dead straight and never move, so they're static
-            geometry; only sway/tilt/bob and the arms are animated. */}
-        <AG animatedProps={figProps}>
-          <Line
-            x1={HIP_L.x}
-            y1={HIP_L.y}
-            x2={FOOT_L.x}
-            y2={FOOT_L.y}
-            stroke={INK}
-            strokeWidth={STR.limb}
-            strokeLinecap="round"
-          />
-          <Line
-            x1={HIP_R.x}
-            y1={HIP_R.y}
-            x2={FOOT_R.x}
-            y2={FOOT_R.y}
-            stroke={INK}
-            strokeWidth={STR.limb}
-            strokeLinecap="round"
-          />
-          <Line
-            x1={PEL.x}
-            y1={PEL.y}
-            x2={CHEST.x}
-            y2={CHEST.y}
-            stroke={INK}
-            strokeWidth={STR.torso}
-            strokeLinecap="round"
-          />
-          {/* welded pelvis — without this the torso's bottom shows through */}
-          <Circle cx={PEL.x} cy={PEL.y} r={STR.torso / 2 + 1} fill={INK} />
-          <Circle cx={SH_L.x} cy={SH_L.y} r={STR.limb / 2} fill={INK} />
-          <Circle cx={SH_R.x} cy={SH_R.y} r={STR.limb / 2} fill={INK} />
-          <AG animatedProps={headProps}>
-            {/* no face — he reads as talking from the bubble, the word-by-word
-                reveal and the speech bob, not from a mouth */}
-            <Circle cx={HEAD0.x} cy={HEAD0.y} r={STR.headR} fill={INK} />
-          </AG>
-        </AG>
-
-        {/* Arms sit OUTSIDE the swayed group: the pointing hand aims at the
-            board's real position, so it isn't a rigid offset from the body.
-            Each bone is a unit line stretched with scaleX and rotated onto its
-            joint vector — butt caps, so the non-uniform scale can't distort the
-            stroke width; the joint circles round it back off. */}
-        <AG animatedProps={armsProps}>
-          <AG animatedProps={upLProps}>
-            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={STR.limb} strokeLinecap="butt" />
-          </AG>
-          <AG animatedProps={foLProps}>
-            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={STR.limb} strokeLinecap="butt" />
-          </AG>
-          <AG animatedProps={upRProps}>
-            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={STR.limb} strokeLinecap="butt" />
-          </AG>
-          <AG animatedProps={foRProps}>
-            <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={STR.limb} strokeLinecap="butt" />
-          </AG>
-          <AG animatedProps={elLProps}>
-            <Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} />
-          </AG>
-          <AG animatedProps={elRProps}>
-            <Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} />
-          </AG>
-          <AG animatedProps={haLProps}>
-            <Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} />
-          </AG>
-          <AG animatedProps={haRProps}>
-            <Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} />
-          </AG>
-        </AG>
-
       </Svg>
 
-      {/* Text layer, in the same 400×800 space, scaled to match the SVG. */}
+      {/* The board — one chapter per hand-drawn chart. Only the on-screen chapter
+          is mounted, in a board-sized surface, so the other two cost nothing. */}
+      {CHAPTERS.map((c) => (
+        <Board key={c.visual} chapter={c} clock={clock} scale={scale} offX={offX} offY={offY} />
+      ))}
+
+      {/* The host — native Views (GPU-composited transforms, no per-frame raster).
+          Legs are dead straight and never move, so they're static geometry; only
+          sway/tilt/bob and the arms animate. */}
+      <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+        <View style={stageWrap}>
+          {/* body: sways + fades as one group. needsOffscreenAlphaCompositing so
+              the dissolve composites the whole body ONCE then applies alpha —
+              matching SVG group opacity, where overlapping parts (shoulders/head/
+              torso) don't double-darken. Only allocates the offscreen buffer while
+              opacity < 1 (the ~1.4s dissolve), so the main animation is unaffected. */}
+          <Animated.View needsOffscreenAlphaCompositing style={[StyleSheet.absoluteFill, bodyStyle]}>
+            <View style={LEG_L_STYLE} />
+            <View style={LEG_R_STYLE} />
+            <View style={TORSO_STYLE} />
+            <View style={PELVIS_STYLE} />
+            <View style={SH_L_STYLE} />
+            <View style={SH_R_STYLE} />
+            {/* no face — he reads as talking from the bubble, the word-by-word
+                reveal and the speech bob, not from a mouth */}
+            <Animated.View style={[HEAD_BASE, headStyle]} />
+          </Animated.View>
+
+          {/* arms: each bone is a unit bar stretched with scaleX and rotated onto
+              its joint vector; butt-capped, with the joint circles rounding the
+              ends off — exactly the SVG construction, now as Views. */}
+          <Animated.View needsOffscreenAlphaCompositing style={[StyleSheet.absoluteFill, armsStyle]}>
+            <Animated.View style={[BONE_BASE, upLStyle]} />
+            <Animated.View style={[BONE_BASE, foLStyle]} />
+            <Animated.View style={[BONE_BASE, upRStyle]} />
+            <Animated.View style={[BONE_BASE, foRStyle]} />
+            <Animated.View style={[JOINT_BASE, elLStyle]} />
+            <Animated.View style={[JOINT_BASE, elRStyle]} />
+            <Animated.View style={[JOINT_BASE, haLStyle]} />
+            <Animated.View style={[JOINT_BASE, haRStyle]} />
+          </Animated.View>
+        </View>
+      </View>
+
+      {/* Text layer, in the same 400×800 space, scaled to match. */}
       <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
-        <View
-          pointerEvents="box-none"
-          style={{
-            position: 'absolute',
-            left: offX,
-            top: offY,
-            width: STAGE_W,
-            height: STAGE_H,
-            transform: [{ scale }],
-            transformOrigin: 'top left',
-          }}
-        >
+        <View pointerEvents="box-none" style={stageWrap}>
           <View pointerEvents="none" style={styles.bubbleRow}>
             <Animated.View style={[styles.bubble, bubbleStyle]} onLayout={(e) => onBubbleW(e.nativeEvent.layout.width)}>
               <Words key={beatIdx} beat={beat} clock={clock} onLines={onWordLines} />
             </Animated.View>
           </View>
-
         </View>
       </View>
 
-      {/* The tail gets its OWN layer, above the bubble: the bubble is a View, so
-          a tail drawn in the scene SVG would sit under it and the bubble's bottom
-          border would cut straight across the tail's root. Up here the tail's own
-          fill covers that border and the two read as one shape. */}
+      {/* The tail gets its OWN layer, above the bubble, in a surface bounded to the
+          band it can reach: the bubble is a View, so a tail under it would have the
+          bubble's bottom border cut across its root. Up here the tail's own fill
+          covers that border and the two read as one shape. */}
       <Svg
         pointerEvents="none"
-        style={StyleSheet.absoluteFill}
-        width={W}
-        height={H}
-        viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}
+        style={{
+          position: 'absolute',
+          left: offX + TAIL_BOX.x * scale,
+          top: offY + TAIL_BOX.y * scale,
+          width: TAIL_BOX.w * scale,
+          height: TAIL_BOX.h * scale,
+        }}
+        width={TAIL_BOX.w * scale}
+        height={TAIL_BOX.h * scale}
+        viewBox={`${TAIL_BOX.x} ${TAIL_BOX.y} ${TAIL_BOX.w} ${TAIL_BOX.h}`}
         preserveAspectRatio="xMidYMid meet"
       >
         <AG animatedProps={tailProps}>
@@ -530,18 +622,7 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
 
       {/* End card last, so it lands over everything as they dissolve. */}
       <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
-        <View
-          pointerEvents="box-none"
-          style={{
-            position: 'absolute',
-            left: offX,
-            top: offY,
-            width: STAGE_W,
-            height: STAGE_H,
-            transform: [{ scale }],
-            transformOrigin: 'top left',
-          }}
-        >
+        <View pointerEvents="box-none" style={stageWrap}>
           <EndCard clock={clock} endReady={endReady} onBegin={leave} />
         </View>
       </View>
@@ -555,31 +636,76 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
 }
 
 // ── board ────────────────────────────────────────────────────────────────────
-// One chart per chapter. `p` is the chart's own 0→1 draw-on progress; the chart
-// itself owns every path's (static) geometry.
-function Board({ chapter, clock }: { chapter: Chapter; clock: SharedValue<number> }) {
+// One chart per chapter. Mounted ONLY while its chapter can be seen (so the other
+// two never run their worklets or allocate a surface), inside a board-sized <Svg>
+// so it rasterizes a fraction of the screen. The crossfade opacity rides a wrapper
+// View (GPU), leaving the chart's own draw-on (strokeDashoffset) as the only SVG
+// work — and that only during the ~3s a chart is drawing itself in.
+const Board = memo(function Board({
+  chapter,
+  clock,
+  scale,
+  offX,
+  offY,
+}: {
+  chapter: Chapter;
+  clock: SharedValue<number>;
+  scale: number;
+  offX: number;
+  offY: number;
+}) {
+  const [active, setActive] = useState(false);
+  useAnimatedReaction(
+    () => clock.value >= chapter.t0 - 0.6 && clock.value <= chapter.t1 + 0.4,
+    (cur, prev) => {
+      if (cur !== prev) runOnJS(setActive)(cur);
+    }
+  );
+
   const p = useDerivedValue(() => clamp01((clock.value - chapter.t0 - 0.25) / 3.3));
-  const props = useAnimatedProps(() => {
+  const wrapStyle = useAnimatedStyle(() => {
     const t = clock.value;
     const inA = easeOutCubic(clamp01((t - chapter.t0 + 0.35) / 0.5));
     const outA = 1 - easeOutCubic(clamp01((t - chapter.t1) / 0.3));
     const fade = 1 - easeOutCubic(clamp01((t - T_FADE) / 1.2));
     return { opacity: clamp01(inA * outA) * fade };
   });
+
+  if (!active) return null;
+
   return (
-    <AG animatedProps={props}>
-      <G transform={`translate(${GB.x}, ${GB.y}) scale(${GB.w / 300})`}>
-        {chapter.visual === 'lesson' ? (
-          <LessonChart p={p} />
-        ) : chapter.visual === 'growth' ? (
-          <GrowthChart p={p} />
-        ) : (
-          <TreeChart p={p} />
-        )}
-      </G>
-    </AG>
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        {
+          position: 'absolute',
+          left: offX + BOARD_BOX.x * scale,
+          top: offY + BOARD_BOX.y * scale,
+          width: BOARD_BOX.w * scale,
+          height: BOARD_BOX.h * scale,
+        },
+        wrapStyle,
+      ]}
+    >
+      <Svg
+        width="100%"
+        height="100%"
+        viewBox={`${BOARD_BOX.x} ${BOARD_BOX.y} ${BOARD_BOX.w} ${BOARD_BOX.h}`}
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <G transform={`translate(${GB.x}, ${GB.y}) scale(${GB.w / 300})`}>
+          {chapter.visual === 'lesson' ? (
+            <LessonChart p={p} />
+          ) : chapter.visual === 'growth' ? (
+            <GrowthChart p={p} />
+          ) : (
+            <TreeChart p={p} />
+          )}
+        </G>
+      </Svg>
+    </Animated.View>
   );
-}
+});
 
 // ── words ────────────────────────────────────────────────────────────────────
 // Every word of the line is laid out from the start (so the line's centring
