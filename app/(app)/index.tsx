@@ -9,6 +9,7 @@ import ScreenTransition from '@/components/shared/ScreenTransition';
 import PressableScale from '@/components/shared/PressableScale';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import AddWidgetSheet from '@/components/shared/AddWidgetSheet';
+import StickmanStroll from '@/components/home/StickmanStroll';
 import { useWidgetPlaced } from '@/lib/widget/useWidgetPlaced';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -183,8 +184,10 @@ export default function HomeScreen() {
         {/* Daily quote widget (opt-in, Settings → Notifications) */}
         {showWidget ? <DailyQuoteWidget style={{ marginTop: 18 }} /> : null}
 
-        {/* Push the widget CTA to the very bottom of the page. */}
-        <View style={{ flex: 1, minHeight: 16 }} />
+        {/* The leftover space, which also doubles as the stickman's stage: he
+            strolls across it once per visit and hides himself when it's too
+            short. Claims exactly the space the plain spacer used to. */}
+        <StickmanStroll />
 
         {/* Android home-screen widget is the only OS widget we ship, so the
             prompt only appears there — and only until the widget is placed. */}
