@@ -38,6 +38,12 @@ interface UIStore {
   // it, so a timeline started at mount would play its opening to a hidden screen.
   launchDone: boolean;
   setLaunchDone: (v: boolean) => void;
+  // True once the home-screen stickman has had his one outing this app session.
+  // Deliberately NOT persisted: it resets on every cold start, which is exactly
+  // the "once per app open" cadence we want — he must not replay every time the
+  // user taps back onto the Home tab.
+  strollPlayed: boolean;
+  markStrollPlayed: () => void;
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -65,4 +71,6 @@ export const useUIStore = create<UIStore>((set) => ({
   closePaywall: () => set({ paywallOpen: false }),
   launchDone: false,
   setLaunchDone: (v) => set({ launchDone: v }),
+  strollPlayed: false,
+  markStrollPlayed: () => set({ strollPlayed: true }),
 }));
