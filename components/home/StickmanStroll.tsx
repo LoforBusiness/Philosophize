@@ -90,10 +90,17 @@ const IN_F = 0.13, OUT_F = 0.87, FADE_F = 0.07;
 // double-support, a run is highest during the flight phase. `tilt` leans the
 // torso — NEGATIVE is forward, because the spine is built off Math.PI, so a
 // positive angle rocks him onto his heels. `lean` is a separate, smaller thing:
-// the rest angle the arms hang from.
+// the shoulder/hip axis; `armBase` is the angle the arms swing about.
+//
+// The run's elbow is held near a right angle (`elBend` ~90°, barely modulated) and
+// `armBase` sits slightly BEHIND vertical, so the whole bent lever sweeps from
+// hand-behind-the-hip to hand-in-front-of-the-chest. An earlier run cranked the
+// elbow only 63° forward with the swing centred ahead of the body, which left the
+// forearm's angle positive right through the cycle — his hands never once passed
+// behind him, so he pumped in front of his chest instead of running.
 const GAITS = [
-  { S: 34 * K, lift: 13 * K, stance: 0.62, bob: 3.0 * K, bobSign: -1, tilt: 0.09, lean: 0.09, armSwing: 0.42, elBend: 0.18, standH: 34.0 * K },
-  { S: 40 * K, lift: 24 * K, stance: 0.40, bob: 5.5 * K, bobSign: 1, tilt: -0.28, lean: 0.30, armSwing: 0.80, elBend: 1.10, standH: 30.5 * K },
+  { S: 34 * K, lift: 13 * K, stance: 0.62, bob: 3.0 * K, bobSign: -1, tilt: 0.09, lean: 0.09, armBase: 0.09, armSwing: 0.42, elBend: 0.18, elMod: 0.18, standH: 34.0 * K },
+  { S: 40 * K, lift: 24 * K, stance: 0.40, bob: 5.5 * K, bobSign: 1, tilt: -0.28, lean: 0.30, armBase: -0.25, armSwing: 1.15, elBend: 1.25, elMod: 0.12, standH: 30.5 * K },
 ];
 const WALK = 0, RUN = 1;
 
@@ -200,10 +207,10 @@ function figure(o: FigArgs): Bundle {
   const fRx = lerp(fR.fx, 6 * K, st), fRy = lerp(fR.fy, 0, st);
   const fLx = lerp(fL.fx, -5 * K, st), fLy = lerp(fL.fy, 0, st);
 
-  let aRu = lerp(g.lean + g.armSwing * Math.cos(ph + Math.PI), -0.30, st);
-  let aRe = lerp(g.elBend + 0.18 * Math.max(0, Math.sin(ph + Math.PI)), 0.34, st);
-  const aLu = lerp(g.lean + g.armSwing * Math.cos(ph), 0.30, st);
-  const aLe = lerp(g.elBend + 0.18 * Math.max(0, Math.sin(ph)), 0.34, st);
+  let aRu = lerp(g.armBase + g.armSwing * Math.cos(ph + Math.PI), -0.30, st);
+  let aRe = lerp(g.elBend + g.elMod * Math.max(0, Math.sin(ph + Math.PI)), 0.34, st);
+  const aLu = lerp(g.armBase + g.armSwing * Math.cos(ph), 0.30, st);
+  const aLe = lerp(g.elBend + g.elMod * Math.max(0, Math.sin(ph)), 0.34, st);
   aRu = lerp(aRu, o.armRu, o.armMix);
   aRe = lerp(aRe, o.armRe, o.armMix);
 
