@@ -57,20 +57,30 @@ const STR = { torso: 12 * K, limb: 11 * K, headR: 20 * K };
 // his head used to poke out of the top of the viewBox and get clipped.
 const FIG_H = (34 + 33 + 16 + 20) * K;
 
-// He is drawn in a fixed DESIGN space that the SVG viewBox maps onto whatever band
-// actually exists. This matters: a desktop browser leaves ~214dp here, but a real
-// 450dpi phone leaves only ~24dp once the masthead, quote, cards, streak, tab bar
-// and safe areas have taken their share. Scaling to fit is the only thing that
-// works on both — a fixed pixel size gets sliced off on a phone.
+// He is drawn in a design space that the SVG viewBox maps onto the real band, and
+// the SCALE between the two is pinned to his intended physical height. Getting
+// this wrong is subtle: an earlier version simply stretched a fixed design space
+// to fill the band, which tied both his size AND his pace to whatever room was
+// left over. The band is ~24dp when the add-widget button is showing but ~70dp
+// once it goes away, so he silently swung between 20dp and 57dp tall, and the run
+// finished in 2.9s on one and 8.4s on the other.
 //
-// DESIGN_H is deliberately taller than FIG_H + FLOOR: the surplus is headroom that
-// drops his crown clear of the ruled-paper line that runs across the top of the
-// band. Without it he stands at the very top of the viewBox and the rule cuts
-// straight through his head.
+// Pinning the scale instead makes design-units-per-second a constant number of
+// dp per second, so every routine plays at the same pace everywhere, and he only
+// shrinks below TARGET_H on a band genuinely too short to hold him.
+const TARGET_H = 30;                                // dp — his intended height
+const FILL = 0.82;                                  // …of a band too short for that,
+                                                    // leaving the rest as headroom so
+                                                    // the ruled line never crosses his head
 const FLOOR = 3.5;                                  // ground sits this far off the bottom
-const HEADROOM = 8;                                 // clear air above his crown
-const DESIGN_H = FIG_H + FLOOR + HEADROOM;          // ≈ 57.3
 const MIN_BAND = 14;                                // below this there's genuinely no room
+
+/** dp per design unit, and the design-space size of a given band. */
+function frame_(bw: number, bh: number) {
+  'worklet';
+  const scale = Math.min(TARGET_H, bh * FILL) / FIG_H;
+  return { scale, dw: bw / scale, dh: bh / scale };
+}
 
 // Where he becomes visible / vanishes, as a fraction of the band width. He fades
 // up well inside the frame rather than sliding in from off-screen.
@@ -323,6 +333,7 @@ export default function StickmanStroll({ style }: Props) {
   const [done, setDone] = useState(false);
 
   const w = useSharedValue(0);
+  const dh = useSharedValue(0);
   const clock = useSharedValue(0);
   const variant = useSharedValue(0);
   const frameRef = useRef<{ setActive: (v: boolean) => void } | null>(null);
@@ -433,12 +444,12 @@ export default function StickmanStroll({ style }: Props) {
     return {
       total,
       a: {
-        x: inX + dist, dir: 1, groundY: DESIGN_H - FLOOR, gait, dist, t,
+        x: inX + dist, dir: 1, groundY: dh.value - FLOOR, gait, dist, t,
         stand, neck, spineAdd, armRu, armRe, armMix,
         alpha: W > 0 ? fadeAt(dist, T, F) : 0,
       } as FigArgs,
       b: {
-        x: outX - bDist, dir: -1, groundY: DESIGN_H - FLOOR, gait: WALK, dist: bDist, t,
+        x: outX - bDist, dir: -1, groundY: dh.value - FLOOR, gait: WALK, dist: bDist, t,
         stand: bStand, neck: 0, spineAdd: 0, armRu: bArmRu, armRe: bArmRe, armMix: bArmMix,
         alpha: bOn && W > 0 ? fadeAt(bDist, T, F) : 0,
       } as FigArgs,
@@ -507,14 +518,16 @@ export default function StickmanStroll({ style }: Props) {
 
   const onLayout = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
-    // Work in DESIGN units: the viewBox maps DESIGN_H onto the real band height, so
-    // the same rig fits a 24dp phone band and a 200dp tall one without changing.
-    w.value = height > 0 ? width * (DESIGN_H / height) : 0;
+    // Work in DESIGN units; frame_ pins the scale to his physical height so the
+    // same rig — and the same pace — fits a 24dp phone band and a 200dp one.
+    const f = height > 0 ? frame_(width, height) : { dw: 0, dh: 0 };
+    w.value = f.dw;
+    dh.value = f.dh;
     setBand((b) => (Math.abs(b.w - width) < 1 && Math.abs(b.h - height) < 1 ? b : { w: width, h: height }));
   }, []);
 
   const show = started && !done && band.w > 0 && band.h >= MIN_BAND;
-  const designW = band.h > 0 ? band.w * (DESIGN_H / band.h) : band.w;
+  const vb = band.h > 0 ? frame_(band.w, band.h) : { dw: band.w, dh: 1 };
 
   return (
     <View style={[styles.band, style]} onLayout={onLayout} pointerEvents="none">
@@ -522,7 +535,7 @@ export default function StickmanStroll({ style }: Props) {
         <Svg
           width={band.w}
           height={band.h}
-          viewBox={`0 0 ${designW} ${DESIGN_H}`}
+          viewBox={`0 0 ${vb.dw} ${vb.dh}`}
           preserveAspectRatio="xMidYMax meet"
           pointerEvents="none"
         >
