@@ -3,8 +3,10 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getLessonById, lessonAccessibility } from '@/data';
+import type { Lesson } from '@/data/types';
 import LessonRunner from '@/components/lesson/LessonRunner';
 import LessonLoader from '@/components/lesson/LessonLoader';
+import ArgumentFightLesson from '@/components/lesson/cinematic/ArgumentFightLesson';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -15,6 +17,16 @@ import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
 const Page = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
+
+// Lessons that play as a continuous animated scene instead of the card pager.
+// A cinematic component takes the same `{ lesson }` prop and renders LessonReward
+// itself when it finishes, so XP, the streak, badges and the daily counter all
+// still run through exactly one path. Everything above this line — hydration, the
+// unlock gate, the daily limit — applies to both kinds of lesson unchanged.
+// Removing an entry here is a complete, safe rollback to the normal card runner.
+const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
+  'logic-arguments-1': ArgumentFightLesson,
+};
 
 function todayStr() {
   const d = new Date();
@@ -130,12 +142,14 @@ export default function LessonScreen() {
     );
   }
 
+  const Runner = CINEMATIC[lessonId] ?? LessonRunner;
+
   return (
     <ScreenTransition bg="#FAFAF7">
       {loading ? (
         <LessonLoader onDone={() => setLoading(false)} />
       ) : (
-        <LessonRunner lesson={result.lesson} />
+        <Runner lesson={result.lesson} />
       )}
     </ScreenTransition>
   );
