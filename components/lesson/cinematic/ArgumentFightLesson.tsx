@@ -1,4 +1,4 @@
-﻿import { useCallback, useMemo, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View, Text, Pressable, StyleSheet, type LayoutChangeEvent,
 } from 'react-native';
@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Animated, {
   useSharedValue, useDerivedValue, useAnimatedStyle, useFrameCallback,
-  type SharedValue,
+  withTiming, Easing, type SharedValue,
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import { getLessonById } from '@/data';
@@ -410,8 +410,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
 
       {/* narration + interaction */}
       <View style={[styles.deck, beat.act === 5 && styles.deckTall]}>
-        {beat.cite ? <Cite bt={bt} text={beat.cite} /> : null}
-        {beat.text ? <Narration key={i} bt={bt} text={beat.text} /> : null}
+        <CrossText cite={beat.cite} text={beat.text} />
 
         {beat.quote ? (
           <QuoteCard
@@ -465,32 +464,57 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   );
 }
 
-// ── narration, revealed word by word ─────────────────────────────────────────
+// ── narration, cross-dissolved between beats ─────────────────────────────────
+// The text used to reveal word by word off the beat clock, keyed by beat index,
+// so every tap remounted it and it started from BLANK — a visible empty flash
+// that read as a glitch. Now two layers hold the current and previous lines and
+// cross-fade on their OWN timer (withTiming, not the beat clock, so it can't race
+// the beat reset): the outgoing line fades out exactly as the incoming fades and
+// rises in, and the text is never empty. The previous layer is absolute so only
+// the current line drives the deck's height.
 
-function Word({ bt, w, idx, n }: { bt: SharedValue<number>; w: string; idx: number; n: number }) {
-  const st = useAnimatedStyle(() => {
-    // Whole line lands in ~0.9s regardless of length, so long lines don't crawl.
-    const t0 = 0.12 + (idx / Math.max(1, n)) * 0.9;
-    const u = ease01(seg(bt.value, t0, t0 + 0.34));
-    return { opacity: u, transform: [{ translateY: (1 - u) * 7 }] };
-  });
-  return <Animated.Text style={[styles.word, st]}>{w} </Animated.Text>;
-}
+interface Slot { c?: string; t?: string }
 
-function Narration({ bt, text }: { bt: SharedValue<number>; text: string }) {
-  const words = useMemo(() => text.split(' '), [text]);
+function CrossText({ cite, text }: { cite?: string; text?: string }) {
+  const [cur, setCur] = useState<Slot>({ c: cite, t: text });
+  const [prev, setPrev] = useState<Slot | null>(null);
+  const prog = useSharedValue(1);
+  const ref = useRef<Slot>({ c: cite, t: text });
+
+  useEffect(() => {
+    if (ref.current.t === text && ref.current.c === cite) return;
+    setPrev(ref.current);
+    setCur({ c: cite, t: text });
+    ref.current = { c: cite, t: text };
+    prog.value = 0;
+    prog.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
+  }, [text, cite]);
+
+  const curStyle = useAnimatedStyle(() => ({
+    opacity: prog.value,
+    transform: [{ translateY: (1 - prog.value) * 8 }],
+  }));
+  const prevStyle = useAnimatedStyle(() => ({ opacity: 1 - prog.value }));
+
+  const Body = ({ s }: { s: Slot }) => (
+    <>
+      {s.c ? <Text style={styles.cite}>{s.c.toUpperCase()}</Text> : null}
+      {s.t ? <Text style={styles.narr}>{s.t}</Text> : null}
+    </>
+  );
+
   return (
-    <View style={styles.line}>
-      {words.map((w, k) => (
-        <Word key={`${k}-${w}`} bt={bt} w={w} idx={k} n={words.length} />
-      ))}
+    <View style={styles.textArea}>
+      {prev ? (
+        <Animated.View style={[StyleSheet.absoluteFill, prevStyle]} pointerEvents="none">
+          <Body s={prev} />
+        </Animated.View>
+      ) : null}
+      <Animated.View style={curStyle}>
+        <Body s={cur} />
+      </Animated.View>
     </View>
   );
-}
-
-function Cite({ bt, text }: { bt: SharedValue<number>; text: string }) {
-  const st = useAnimatedStyle(() => ({ opacity: ease01(seg(bt.value, 0.5, 1.3)) }));
-  return <Animated.Text style={[styles.cite, st]}>{text.toUpperCase()}</Animated.Text>;
 }
 
 // ── speech bubbles ───────────────────────────────────────────────────────────
@@ -644,8 +668,8 @@ const styles = StyleSheet.create({
   tail: { width: 10, height: 10, backgroundColor: INK, transform: [{ rotate: '45deg' }], marginTop: -5 },
 
   deck: { paddingHorizontal: 24, paddingBottom: 4, minHeight: 108, justifyContent: 'flex-start' },
-  line: { flexDirection: 'row', flexWrap: 'wrap' },
-  word: {
+  textArea: { position: 'relative' },
+  narr: {
     fontFamily: 'PlayfairDisplay_400Regular', fontSize: 18, lineHeight: 27, color: INK,
   },
   cite: {
