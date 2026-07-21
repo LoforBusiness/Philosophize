@@ -20,8 +20,8 @@ import LoudnessChart from './illustrations/LoudnessChart';
 import TwoRoadsChart from './illustrations/TwoRoadsChart';
 import { BEATS, gates, type Beat, type BoardKey } from './argumentScript';
 import {
-  BLANK, WALK, clamp01, ease01, guard, lerp, mixStance, phaseFor, pose,
-  present, punch, recoil, seg, stand, walk, type Bundle,
+  BLANK, WALK, boxMove, clamp01, ease01, lerp, mixStance, narrator, pose,
+  seg, stand, walk, type Bundle, type Stance,
 } from './rig';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -55,8 +55,58 @@ const BOARD = { x: 60, y: 40, w: 280, h: 160 };
 const K_FIG = 1.35;                       // stage units per rig unit
 
 const COMPLETION_XP = 5;                  // matches LessonRunner
-const FIGHT_CYCLE = 2.6;                  // seconds for one full punch exchange
-const LUNGE = 16;                         // stage units the body drives forward on a punch
+
+// ── the fight choreography ───────────────────────────────────────────────────
+// A real spar is call-and-response, not two people shadow-boxing side by side, so
+// the boxers are coupled: each row is one exchange [redMove, blueMove, seconds],
+// timed so a block or a duck lands right as the punch it answers arrives. Move
+// codes: 0 guard·1 jab·2 cross·3 hook·4 uppercut·5 block·6 duck·7 slip·8 backstep·
+// 9 hit. Every move returns to the guard at its ends, so exchanges chain cleanly.
+//
+// Roughly 14s of distinct action. When it loops, the aggressor is swapped (see
+// fightAt), which flips who is pressing and doubles the apparent length to ~28s —
+// and the non-periodic idle underneath means even a lap-2 repeat isn't frame
+// identical. A viewer reading a single beat never sees an obvious cycle.
+const FIGHT: [number, number, number][] = [
+  [0, 0, 0.7],  // circle, feel each other out
+  [1, 5, 0.55], // red jab — blue blocks
+  [1, 7, 0.55], // red jab — blue slips it
+  [2, 5, 1.0],  // red cross — blue blocks, rocked
+  [0, 0, 0.6],  // reset
+  [5, 1, 0.85], // blue takes over: jab — red blocks
+  [6, 3, 1.0],  // blue hooks — red ducks under
+  [2, 9, 0.9],  // red counters clean — blue eats it
+  [0, 8, 0.8],  // blue backs off to recover
+  [0, 0, 0.6],
+  [4, 7, 1.05], // red uppercut — blue slips out
+  [1, 1, 0.55], // both jab at once
+  [9, 2, 1.0],  // blue lands a cross — red's head goes back
+  [8, 0, 0.8],  // red resets the distance
+  [3, 5, 0.85], // red hook — blue blocks
+  [0, 0, 0.75], // breathe, circle
+];
+const FIGHT_DUR = FIGHT.reduce((a, e) => a + e[2], 0);
+const FIGHT_START: number[] = (() => {
+  let a = 0;
+  return FIGHT.map((e) => { const s = a; a += e[2]; return s; });
+})();
+
+/** Resolve the coupled fight pose at time t, swapping the aggressor each lap. */
+function fightAt(t: number): { red: Stance; blue: Stance } {
+  'worklet';
+  const lap = Math.floor(t / FIGHT_DUR);
+  const swap = lap - Math.floor(lap / 2) * 2 === 1;   // odd laps flip who presses
+  const tc = t - lap * FIGHT_DUR;
+  let idx = 0;
+  for (let i = 0; i < FIGHT.length; i++) {
+    if (tc < FIGHT_START[i] + FIGHT[i][2]) { idx = i; break; }
+  }
+  const ex = FIGHT[idx];
+  const u = clamp01((tc - FIGHT_START[idx]) / ex[2]);
+  const rc = swap ? ex[1] : ex[0];
+  const bc = swap ? ex[0] : ex[1];
+  return { red: boxMove(rc, t, u), blue: boxMove(bc, t, u) };
+}
 
 // ── shots ────────────────────────────────────────────────────────────────────
 // One per beat, precomputed at module scope so the worklet can index it.
@@ -123,12 +173,12 @@ const BOARDS: Record<BoardKey, React.ComponentType<{ p: SharedValue<number>; w?:
   tworoads: TwoRoadsChart,
 };
 
-// ── the fight exchange ───────────────────────────────────────────────────────
-/** Rises across [a,b], falls across [c,d]. A punch, or the recoil from one. */
-function swell(t: number, a: number, b: number, c: number, d: number) {
-  'worklet';
-  return clamp01(seg(t, a, b) - seg(t, c, d));
-}
+// Which narrator gesture each beat uses (indexed by beat), and who is speaking in
+// the act-4 rematch so the speaker gestures while the other just stands. These are
+// plain arrays so the worklet can index them by beat number.
+const NARR_G: number[] = BEATS.map((b) => b.narr ?? 0);
+const RED_TALK: boolean[] = BEATS.map((b) => !!b.say?.some((s) => s.who === 'red'));
+const BLUE_TALK: boolean[] = BEATS.map((b) => !!b.say?.some((s) => s.who === 'blue'));
 
 export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
@@ -185,52 +235,43 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
 
     const t = clock.value;
-    const ct = t % FIGHT_CYCLE;
-    // Red leads, blue answers — offset by half a cycle so they alternate.
-    const rReach = swell(ct, 0.50, 0.78, 0.82, 1.15);
-    const bHit = swell(ct, 0.62, 0.86, 0.90, 1.24);
-    const bReach = swell(ct, 1.80, 2.08, 2.12, 2.45);
-    const rHit = swell(ct, 1.92, 2.16, 2.20, 2.54);
 
-    const fight = (reach: number, hit: number) => {
-      'worklet';
-      // Both reduce to a guard at 0, so switching between them at the crossover
-      // (where both are ~0) is seamless.
-      return hit > reach ? recoil(t, hit) : punch(t, reach);
-    };
-    const modeStance = (m: number, reach: number, hit: number, x: number, x0: number) => {
-      'worklet';
-      if (m === 0) return fight(reach, hit);
-      if (m === 2) return present(t, tr);
-      if (m === 3) {
-        // Walk-in: phase from DISTANCE travelled, so the feet stay locked no
-        // matter how the transition eases, then settle into a stand on arrival.
-        const w = walk(x - x0, WALK);
-        return tr > 0.985 ? stand(t) : mixStance(w, stand(t), clamp01((tr - 0.86) / 0.14));
-      }
-      return stand(t);
-    };
+    // Red and blue. When both are in fight mode they're coupled through fightAt
+    // (one attacks, the other answers); otherwise they stand (the rematch), with
+    // the speaker gesturing so the pair looks like it's actually talking.
+    let redS: Stance, blueS: Stance;
+    if (cur.rMode === 0 && cur.bMode === 0) {
+      const F = fightAt(t);
+      redS = F.red; blueS = F.blue;
+    } else {
+      redS = RED_TALK[n] ? narrator(0, t, bt.value) : stand(t);
+      blueS = BLUE_TALK[n] ? narrator(0, t, bt.value) : stand(t);
+    }
 
-    // A punch carries the whole body forward. Without the lunge the arm alone
-    // can only cross ~49 units, which at a readable separation looks like
-    // shadow-boxing rather than two people going at each other.
-    const rx = L(prv.rx, cur.rx) + rReach * LUNGE;
-    const bx = L(prv.bx, cur.bx) - bReach * LUNGE;
+    // The narrator: a walk-in on his first beat, then a gesture matched to the
+    // line — driven by bt so it plays once and by t so it stays alive after.
+    let narrS: Stance;
+    if (cur.nMode === 3) {
+      const nx0 = L(prv.nx, cur.nx);
+      const w = walk(nx0 - prv.nx, WALK);        // phase from distance → feet stay locked
+      narrS = tr > 0.985 ? stand(t) : mixStance(w, stand(t), clamp01((tr - 0.86) / 0.14));
+    } else {
+      narrS = narrator(NARR_G[n], t, bt.value);
+    }
+
+    // Root motion: a lunge or step carries the whole body, so a punch reads as
+    // aimed at someone rather than as shadow-boxing. `adv` is toward the opponent.
+    const rx = L(prv.rx, cur.rx) + redS.adv;
+    const bx = L(prv.bx, cur.bx) - blueS.adv;
     const nx = L(prv.nx, cur.nx);
     const rOn = L(prv.rOn, cur.rOn), bOn = L(prv.bOn, cur.bOn), nOn = L(prv.nOn, cur.nOn);
 
     return {
       cam: { s: L(prv.s, cur.s), cx: L(prv.cx, cur.cx), cy: L(prv.cy, cur.cy) },
       ring: L(prv.ring, cur.ring),
-      red: rOn > 0.002
-        ? pose(modeStance(cur.rMode, rReach, rHit, rx, prv.rx), rx, GROUND, K_FIG, 1, rOn)
-        : BLANK,
-      blue: bOn > 0.002
-        ? pose(modeStance(cur.bMode, bReach, bHit, bx, prv.bx), bx, GROUND, K_FIG, -1, bOn)
-        : BLANK,
-      narr: nOn > 0.002
-        ? pose(modeStance(cur.nMode, 0, 0, nx, prv.nx), nx, GROUND, K_FIG, 1, nOn)
-        : BLANK,
+      red: rOn > 0.002 ? pose(redS, rx, GROUND, K_FIG, 1, rOn) : BLANK,
+      blue: bOn > 0.002 ? pose(blueS, bx, GROUND, K_FIG, -1, bOn) : BLANK,
+      narr: nOn > 0.002 ? pose(narrS, nx, GROUND, K_FIG, 1, nOn) : BLANK,
     };
   });
 

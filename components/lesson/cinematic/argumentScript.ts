@@ -36,6 +36,9 @@ export interface Beat {
   say?: { who: Who; text: string }[];
   /** Which illustration is on the board this beat. */
   board?: BoardKey;
+  /** Narrator gesture code for this beat (see rig `narrator`): 0 open · 1 emphatic
+   *  · 2 board · 3 count · 4 chin · 5 sweep · 6 point-up. Matched to the line. */
+  narr?: number;
   /** A saveable quote card. */
   quote?: { id: string; text: string; author: string; work: string; era: string };
   /** Teaching tap — no XP, immediate feedback. */
@@ -80,23 +83,27 @@ export const BEATS: Beat[] = [
   // ── ACT 2 — THE NARRATOR ───────────────────────────────────────────────────
   {
     act: 2,
+    narr: 0,                                       // open hand, back toward the fight
     text: 'This is what most people picture when they hear the word "argument".',
     dur: 3.4,
   },
   {
     act: 2,
+    narr: 1,                                       // emphatic — "no way to end"
     text: 'It is a quarrel. And a quarrel has no way to end — only a way to get louder.',
     dur: 3.0,
   },
   {
     act: 2,
     board: 'anatomy',
+    narr: 2,                                       // present the board
     text: 'Philosophy means something completely different by the word. An argument is a machine with parts.',
     dur: 4.2,
   },
   {
     act: 2,
     board: 'anatomy',
+    narr: 3,                                       // count off the parts
     text: 'Reasons — called premises — offered in support of a conclusion. That is the whole machine.',
     dur: 3.0,
   },
@@ -118,12 +125,14 @@ export const BEATS: Beat[] = [
   {
     act: 3,
     board: 'syllogism',
+    narr: 2,                                       // present the board
     text: 'Aristotle was the first to write the machine down, around 350 BCE.',
     dur: 4.4,
   },
   {
     act: 3,
     board: 'syllogism',
+    narr: 3,                                       // count off premises → conclusion
     text: 'Grant him the two premises and the conclusion follows whether you like it or not. No volume required.',
     cite: 'Aristotle, Prior Analytics',
     dur: 3.0,
@@ -147,6 +156,7 @@ export const BEATS: Beat[] = [
   {
     act: 3,
     board: 'loudness',
+    narr: 0,                                       // open hand — the plain point
     text: 'Which is worth saying plainly, because almost everyone behaves as though the opposite were true.',
     dur: 4.6,
   },
@@ -169,23 +179,27 @@ export const BEATS: Beat[] = [
   {
     act: 3,
     board: 'tworoads',
+    narr: 5,                                       // sweep across the fork
     text: 'Schopenhauer noticed that people argue for two completely different reasons.',
     dur: 4.4,
   },
   {
     act: 3,
     board: 'tworoads',
+    narr: 2,                                       // present the board
     text: 'To find out what is true — or simply to win. He was so struck by the second that he catalogued 38 tricks for winning when you are in the wrong.',
     cite: 'Schopenhauer, The Art of Being Right, 1831',
     dur: 3.2,
   },
   {
     act: 3,
+    narr: 4,                                       // hand to chin — questioning
     text: 'Socrates went the other way. On trial for his life, he answered his accuser with nothing but questions.',
     dur: 4.0,
   },
   {
     act: 3,
+    narr: 1,                                       // emphatic — the contradiction lands
     text: 'He asked Meletus who improves the young, and kept asking until Meletus contradicted himself in front of the whole court. Socrates never raised his voice — he did not need to.',
     cite: 'Plato, Apology, c. 399 BCE',
     dur: 3.6,

@@ -223,88 +223,210 @@ export function solve(c: Cfg): Joints {
 export interface Stance {
   tilt: number; neck: number; bob: number;
   footL: P2; footR: P2; fistL: P2; fistR: P2;
+  /** Root motion toward the opponent, in stage units (a lunge or step). */
+  adv: number;
 }
 
-/** Hands up by the chin, weight low, feet staggered — a boxer's guard. */
+// Two sines whose frequencies are not simple multiples never realign, so their
+// sum has no visible period. This is the single most useful anti-loop trick in
+// the file: every idle here — bounce, sway, breath, hand-drift — rides one of
+// these instead of a bare sin(t), so a figure a viewer stares at for 20 seconds
+// never reads as a repeating cycle.
+function life2(t: number, f1: number, f2: number, ph: number) {
+  'worklet';
+  return Math.sin(t * f1) * 0.62 + Math.sin(t * f2 + ph) * 0.38;
+}
+
+/** Snap out to a peak then recover to guard — a punch's tempo. Earlier peak = snappier. */
+function jabEnv(u: number, peak: number) {
+  'worklet';
+  if (u <= peak) return easeOutCubic(u / peak);
+  return 1 - ease01((u - peak) / (1 - peak));
+}
+/** Rise, hold briefly, fall — a block / duck / slip that returns to guard. */
+function holdEnv(u: number) {
+  'worklet';
+  return Math.sin(Math.PI * ease01(u));
+}
+
+// ── the guard, and the ten boxing moves ──────────────────────────────────────
+// Every move takes (t, u): u is 0→1 progress through the move, t drives the idle
+// underneath. Each move is the GUARD at u=0 and u=1, so consecutive moves meet at
+// the guard and chain with no snap — the choreography never has to cross-fade.
+
+/** Hands up by the chin, weight low, feet shifting — a boxer's guard. */
 export function guard(t: number, load = 0): Stance {
   'worklet';
-  const b = Math.sin(t * 5.0) * 1.4;            // light on the toes
-  const sway = Math.sin(t * 2.5) * 1.2;
+  const b = life2(t, 5.0, 3.1, 1.3) * 1.6;      // bounce, never on a fixed beat
+  const sway = life2(t, 2.3, 1.37, 0.4) * 1.3;  // weight drifting side to side
   return {
-    // Only a slight lean. Two heads this size are 40% of the figure's height, so
-    // a deep forward lean closes the gap between opponents faster than the
-    // spacing can open it and the pair reads as one blob.
+    // Only a slight lean — a deep one closes the gap faster than the spacing can
+    // hold, and the pair reads as one blob.
     tilt: -0.10, neck: -0.05, bob: b - 2,
     footL: { x: -15 + sway * 0.3, y: 0 },
     footR: { x: 13 + sway * 0.3, y: 0 },
-    // Fists held clear of the HEAD CIRCLE, not merely clear of the torso. The
-    // head is 40% of figure height, so an anatomically tight guard puts both
-    // gloves inside it. These sit just outside its radius — a slightly extended
-    // guard, but the only one that reads as two hands and a head at this size.
+    // Fists clear of the HEAD CIRCLE (40% of figure height), so both gloves and
+    // the head read as three shapes rather than one mass.
     fistL: { x: 27 + sway * 0.4 - load * 5, y: -34 + b * 0.4 },
     fistR: { x: 33 + sway * 0.4 - load * 7, y: -29 + b * 0.4 },
+    adv: 0,
   };
 }
 
-/** A thrown punch. `reach` 0→1 extends the lead fist; the rear stays guarding. */
-export function punch(t: number, reach: number, lead: 'L' | 'R' = 'R'): Stance {
+/** Quick straight lead — snappy, little commitment. */
+export function jab(t: number, u: number): Stance {
+  'worklet';
+  const g = guard(t), e = jabEnv(u, 0.26);
+  return {
+    ...g, tilt: g.tilt - 0.04 * e, adv: 8 * e,
+    fistR: { x: lerp(g.fistR.x, 55, e), y: lerp(g.fistR.y, -31, e) },
+    fistL: { x: lerp(g.fistL.x, 24, e), y: g.fistL.y },
+  };
+}
+/** Power straight — bigger lunge, more rotation into it. */
+export function cross(t: number, u: number): Stance {
+  'worklet';
+  const g = guard(t), e = jabEnv(u, 0.40);
+  return {
+    ...g, tilt: g.tilt - 0.16 * e, neck: g.neck - 0.04 * e, adv: 18 * e,
+    fistR: { x: lerp(g.fistR.x, 60, e), y: lerp(g.fistR.y, -29, e) },
+    fistL: { x: lerp(g.fistL.x, 20, e), y: lerp(g.fistL.y, -33, e) },
+  };
+}
+/** Comes around the side at head height, fist bowing up mid-swing. */
+export function hook(t: number, u: number): Stance {
+  'worklet';
+  const g = guard(t), e = jabEnv(u, 0.42);
+  return {
+    ...g, tilt: g.tilt - 0.08 * e, adv: 12 * e,
+    fistR: { x: lerp(g.fistR.x, 50, e), y: lerp(g.fistR.y, -41, e) - Math.sin(Math.PI * e) * 6 },
+    fistL: { x: lerp(g.fistL.x, 22, e), y: lerp(g.fistL.y, -37, e) },
+  };
+}
+/** Rises from the guard to above the head. */
+export function uppercut(t: number, u: number): Stance {
+  'worklet';
+  const g = guard(t), e = jabEnv(u, 0.46);
+  return {
+    ...g, tilt: g.tilt - 0.06 * e, bob: g.bob - Math.sin(Math.PI * u) * 2.5, adv: 11 * e,
+    fistR: { x: lerp(g.fistR.x, 40, e), y: lerp(g.fistR.y, -49, e) },
+    fistL: { x: lerp(g.fistL.x, 22, e), y: lerp(g.fistL.y, -35, e) },
+  };
+}
+/** Both gloves up and tight, weight giving a touch — absorbing a shot. */
+export function block(t: number, u: number): Stance {
+  'worklet';
+  const g = guard(t), e = holdEnv(u);
+  return {
+    ...g, tilt: g.tilt + 0.06 * e, neck: g.neck + 0.10 * e, adv: -3 * e,
+    fistL: { x: lerp(g.fistL.x, 18, e), y: lerp(g.fistL.y, -42, e) },
+    fistR: { x: lerp(g.fistR.x, 25, e), y: lerp(g.fistR.y, -40, e) },
+  };
+}
+/** Drops under a punch — pelvis sinks, chin tucks. */
+export function duck(t: number, u: number): Stance {
+  'worklet';
+  const g = guard(t), e = holdEnv(u);
+  return { ...g, bob: g.bob - 13 * e, tilt: g.tilt - 0.06 * e, neck: g.neck - 0.20 * e, adv: 2 * e };
+}
+/** Leans off the line of fire without moving the feet. */
+export function slip(t: number, u: number): Stance {
+  'worklet';
+  const g = guard(t), e = holdEnv(u);
+  return { ...g, tilt: g.tilt + 0.20 * e, neck: g.neck + 0.12 * e, adv: -4 * e };
+}
+/** A quick step back to reset the distance, feet shuffling. */
+export function backstep(t: number, u: number): Stance {
+  'worklet';
+  const g = guard(t), e = holdEnv(u);
+  const sh = Math.sin(Math.PI * u * 2);
+  return {
+    ...g, adv: -15 * e,
+    footL: { x: -15 - 5 * Math.max(0, sh), y: -3 * Math.max(0, sh) },
+    footR: { x: 13 - 4 * Math.max(0, -sh), y: -3 * Math.max(0, -sh) },
+  };
+}
+/** Takes a clean shot — head snaps back, weight rocks onto the heels. */
+export function hitReact(t: number, u: number): Stance {
   'worklet';
   const g = guard(t);
-  const e = easeOutCubic(reach);
-  // The extended fist is clamped to arm's length by solve(), so `out` can aim
-  // past it without the glove ever leaving the wrist.
-  const out = { x: lerp(30, 48, e), y: lerp(-31, -30, e) };
-  const tuck = { x: lerp(29, 33, e), y: lerp(-34, -36, e) };
+  const e = Math.sin(Math.PI * Math.pow(ease01(u), 0.55));   // fast snap, slow recover
   return {
-    tilt: -0.10 - 0.13 * e,                      // drives forward off the back foot
-    neck: -0.05,
-    bob: g.bob,
-    footL: { x: -15 - 3 * e, y: 0 },
-    footR: { x: 13 + 7 * e, y: 0 },
-    fistL: lead === 'L' ? out : tuck,
-    fistR: lead === 'R' ? out : tuck,
+    ...g, tilt: g.tilt + 0.34 * e, neck: g.neck + 0.34 * e, bob: g.bob - 2 * e, adv: -7 * e,
+    footL: { x: -15 - 6 * e, y: 0 }, footR: { x: 13 - 3 * e, y: 0 },
+    fistL: { x: lerp(g.fistL.x, 12, e), y: lerp(g.fistL.y, -30, e) },
+    fistR: { x: lerp(g.fistR.x, 18, e), y: lerp(g.fistR.y, -26, e) },
   };
 }
 
-/** Head snapped back, weight rocked onto the heels. `hit` 0→1. */
-export function recoil(t: number, hit: number): Stance {
+/** Dispatch a boxing move by numeric code, so the choreography is plain data. */
+export function boxMove(code: number, t: number, u: number): Stance {
   'worklet';
-  const g = guard(t);
-  const e = easeOutCubic(hit);
-  return {
-    tilt: lerp(-0.10, 0.32, e),                  // positive rocks him BACKWARD
-    neck: lerp(-0.05, 0.36, e),
-    bob: g.bob - 2 * e,
-    footL: { x: -15 - 6 * e, y: 0 },
-    footR: { x: 13 - 4 * e, y: 0 },
-    fistL: { x: lerp(27, 14, e), y: lerp(-34, -28, e) },
-    fistR: { x: lerp(33, 20, e), y: lerp(-29, -24, e) },
-  };
+  if (code === 1) return jab(t, u);
+  if (code === 2) return cross(t, u);
+  if (code === 3) return hook(t, u);
+  if (code === 4) return uppercut(t, u);
+  if (code === 5) return block(t, u);
+  if (code === 6) return duck(t, u);
+  if (code === 7) return slip(t, u);
+  if (code === 8) return backstep(t, u);
+  if (code === 9) return hitReact(t, u);
+  return guard(t);
 }
 
-/** Relaxed standing, arms down, with a slow breath. */
+/** Relaxed standing, arms down, breathing — non-periodic so it never ticks. */
 export function stand(t: number): Stance {
   'worklet';
-  const br = 0.9 * (0.5 - 0.5 * Math.cos(t * 2.0));
+  const br = 0.6 * (0.5 - 0.5 * Math.cos(t * 1.7)) + 0.3 * (0.5 - 0.5 * Math.cos(t * 1.06));
+  const sway = life2(t, 0.9, 0.55, 0.6) * 0.5;
   return {
-    tilt: 0.05, neck: 0, bob: br,
-    footL: { x: -5, y: 0 }, footR: { x: 6, y: 0 },
-    fistL: { x: -4, y: -2 }, fistR: { x: 5, y: -2 },
+    tilt: 0.05, neck: 0.01 * sway, bob: br,
+    footL: { x: -6 + sway, y: 0 }, footR: { x: 6 + sway, y: 0 },
+    fistL: { x: -4, y: -2 }, fistR: { x: 5, y: -2 }, adv: 0,
   };
 }
 
-/** Standing but gesturing at the board — the narrator's default. */
-export function present(t: number, amt: number): Stance {
+// ── narrator gestures ────────────────────────────────────────────────────────
+// Driven by BOTH clocks: `bt` (resets each beat) plays the gesture once on entry;
+// `t` (continuous) keeps the landed pose alive with a non-periodic hand drift, so
+// a long dwell never freezes and never ticks. Each beat picks a gesture matched
+// to what is being said, so the narrator never repeats the same motion twice.
+
+function gestureTo(t: number, bt: number, tx: number, ty: number, tneck: number): Stance {
   'worklet';
-  const s = stand(t);
-  const e = ease01(amt);
-  const lift = Math.sin(t * 1.6) * 2;
+  const base = stand(t);
+  const raise = ease01(bt / 0.5);               // one-shot: hand rises into the gesture
+  const dx = life2(t, 1.3, 0.83, 0.7) * 1.4;    // …then keeps drifting, never still
+  const dy = life2(t, 1.05, 0.61, 1.9) * 1.2;
   return {
-    ...s,
-    tilt: lerp(0.05, -0.04, e),
-    neck: lerp(0, -0.16, e),                     // glances up at the board
-    fistR: { x: lerp(5, 30, e), y: lerp(-2, -46 + lift, e) },
+    ...base,
+    tilt: lerp(base.tilt, -0.03, raise),
+    neck: lerp(base.neck, tneck, raise),
+    fistR: { x: lerp(base.fistR.x, tx + dx, raise), y: lerp(base.fistR.y, ty + dy, raise) },
   };
+}
+
+/** Dispatch a narrator gesture by code. 0 open · 1 emphatic · 2 board · 3 count · 4 chin · 5 sweep · 6 up. */
+export function narrator(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code === 1) {                              // emphatic — one downward punctuating dip
+    const s = gestureTo(t, bt, 30, -30, -0.04);
+    const dip = Math.sin(Math.min(bt, 0.6) / 0.6 * Math.PI) * 6;
+    return { ...s, fistR: { x: s.fistR.x, y: s.fistR.y + dip } };
+  }
+  if (code === 2) return gestureTo(t, bt, 26, -48, -0.15);   // present the board (up-forward)
+  if (code === 3) {                              // count — a few stepped chops, then hold
+    const s = gestureTo(t, bt, 30, -34, -0.06);
+    const step = Math.sin(bt * 7.5) * Math.max(0, 1 - bt / 1.6) * 3;
+    return { ...s, fistR: { x: s.fistR.x, y: s.fistR.y + step } };
+  }
+  if (code === 4) return gestureTo(t, bt, 9, -50, 0.10);     // hand to chin, head down — thinking
+  if (code === 5) {                              // sweep across over ~1s
+    const p = ease01(bt / 1.0);
+    return gestureTo(t, bt, lerp(-6, 40, p), -40, -0.10);
+  }
+  if (code === 6) return gestureTo(t, bt, 12, -56, -0.20);   // point up (at the quote)
+  return gestureTo(t, bt, 36, -22, -0.03);                   // 0 open hand, explaining
 }
 
 /** Mid-stride, driven by distance so the feet stay locked. */
@@ -321,6 +443,7 @@ export function walk(dist: number, g: Gait = WALK): Stance {
     // Hands swing opposite the legs, hanging near the hips.
     fistL: { x: 4 + Math.cos(ph) * swing * 22, y: -4 - Math.abs(Math.cos(ph)) * 3 },
     fistR: { x: 4 + Math.cos(ph + Math.PI) * swing * 22, y: -4 - Math.abs(Math.cos(ph + Math.PI)) * 3 },
+    adv: 0,
   };
 }
 
@@ -334,6 +457,7 @@ export function mixStance(a: Stance, b: Stance, t: number): Stance {
     bob: lerp(a.bob, b.bob, t),
     footL: m(a.footL, b.footL), footR: m(a.footR, b.footR),
     fistL: m(a.fistL, b.fistL), fistR: m(a.fistR, b.fistR),
+    adv: lerp(a.adv, b.adv, t),
   };
 }
 
