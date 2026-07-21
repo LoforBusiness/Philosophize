@@ -20,7 +20,7 @@
 
 import React from 'react';
 import Animated, { useAnimatedProps, type SharedValue } from 'react-native-reanimated';
-import Svg, { G, Path, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
 import {
   clamp01,
   seg,
@@ -28,7 +28,6 @@ import {
   easeOutCubic,
   easeOutBack,
   INK,
-  PAPER,
   SOFT,
 } from '@/components/welcome/ease';
 
@@ -190,9 +189,10 @@ export default function SyllogismChart({
   });
 
   return (
+    // No background rect: the board sits on the lesson's own paper, and a filled
+    // rect here is a different off-white (the welcome-screen paper) that reads as
+    // a grey box against it. Transparent lets the real paper show through.
     <Svg width={w} height={h} viewBox={`0 0 ${VB_W} ${VB_H}`}>
-      <Rect x={0} y={0} width={VB_W} height={VB_H} fill={PAPER} />
-
       {/* caption */}
       <AG animatedProps={captionProps}>
         <SvgText
