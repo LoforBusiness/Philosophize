@@ -40,8 +40,12 @@ export const U = {
   uarm: 17, farm: 16, hipW: 1, shW: 3, shDrop: 7, standH: 34,
 };
 
-/** Stroke weights in rig units. `glove` is the fist radius when boxing. */
-export const STR = { torso: 12, limb: 11, headR: 20, glove: 15 };
+/**
+ * Stroke weights in rig units. `glove` is the fist radius when boxing — kept to
+ * under half the head radius, because at 15 it was 75% of the head and the two
+ * gloves plus the head fused into one unreadable mass.
+ */
+export const STR = { torso: 12, limb: 11, headR: 20, glove: 9 };
 
 /**
  * Feet-to-crown in rig units: hip + spine + neck + the head's full DIAMETER.
@@ -233,10 +237,12 @@ export function guard(t: number, load = 0): Stance {
     tilt: -0.10, neck: -0.05, bob: b - 2,
     footL: { x: -15 + sway * 0.3, y: 0 },
     footR: { x: 13 + sway * 0.3, y: 0 },
-    // Fists up by the chin but held OFF the body — tucked any tighter and the
-    // folded arm disappears into the torso and head at this size.
-    fistL: { x: 11 + sway * 0.4 - load * 5, y: -43 + b * 0.4 },
-    fistR: { x: 17 + sway * 0.4 - load * 7, y: -39 + b * 0.4 },
+    // Fists held clear of the HEAD CIRCLE, not merely clear of the torso. The
+    // head is 40% of figure height, so an anatomically tight guard puts both
+    // gloves inside it. These sit just outside its radius — a slightly extended
+    // guard, but the only one that reads as two hands and a head at this size.
+    fistL: { x: 27 + sway * 0.4 - load * 5, y: -34 + b * 0.4 },
+    fistR: { x: 33 + sway * 0.4 - load * 7, y: -29 + b * 0.4 },
   };
 }
 
@@ -247,8 +253,8 @@ export function punch(t: number, reach: number, lead: 'L' | 'R' = 'R'): Stance {
   const e = easeOutCubic(reach);
   // The extended fist is clamped to arm's length by solve(), so `out` can aim
   // past it without the glove ever leaving the wrist.
-  const out = { x: lerp(14, 44, e), y: lerp(-40, -31, e) };
-  const tuck = { x: lerp(13, 18, e), y: lerp(-43, -45, e) };
+  const out = { x: lerp(30, 48, e), y: lerp(-31, -30, e) };
+  const tuck = { x: lerp(29, 33, e), y: lerp(-34, -36, e) };
   return {
     tilt: -0.10 - 0.13 * e,                      // drives forward off the back foot
     neck: -0.05,
@@ -271,8 +277,8 @@ export function recoil(t: number, hit: number): Stance {
     bob: g.bob - 2 * e,
     footL: { x: -15 - 6 * e, y: 0 },
     footR: { x: 13 - 4 * e, y: 0 },
-    fistL: { x: lerp(11, 2, e), y: lerp(-43, -36, e) },
-    fistR: { x: lerp(17, 7, e), y: lerp(-39, -32, e) },
+    fistL: { x: lerp(27, 14, e), y: lerp(-34, -28, e) },
+    fistR: { x: lerp(33, 20, e), y: lerp(-29, -24, e) },
   };
 }
 

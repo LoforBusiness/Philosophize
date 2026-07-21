@@ -24,24 +24,24 @@ import {
   present, punch, recoil, seg, stand, walk, type Bundle,
 } from './rig';
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 // The cinematic runner for logic-arguments-1.
 //
 // One continuous scene, advanced by TAP. Two clocks drive everything:
-//   clock â€” never resets. Idle life: breathing, bobbing, the boxing exchange.
-//   bt    â€” beat-local, resets on every advance. Transitions and text reveals.
+//   clock — never resets. Idle life: breathing, bobbing, the boxing exchange.
+//   bt    — beat-local, resets on every advance. Transitions and text reveals.
 // Keeping them separate is what stops the fight restarting every time the reader
 // taps, while still letting each beat stage its own entrance.
 //
-// LAYOUT. The animated stage is a fixed 400Ã—560 design space scaled to whatever
+// LAYOUT. The animated stage is a fixed 400×560 design space scaled to whatever
 // room is left between the header and the narration block. Narration and the
 // interaction panels deliberately live OUTSIDE that scaled stage, in normal RN
-// layout â€” scaled text goes soft and scaled tap targets shrink.
+// layout — scaled text goes soft and scaled tap targets shrink.
 //
 // PERFORMANCE. Figures are native Views (see Stickman.tsx); the only SVG is the
-// 280Ã—160 illustration board, which is bounded and mounted only while its beat
+// 280×160 illustration board, which is bounded and mounted only while its beat
 // is on screen. A full-screen animated <Svg> measured ~10fps on an S24 Ultra.
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 
 const INK = '#1A1A1A';
 const PAPER = '#FAFAF7';
@@ -51,17 +51,17 @@ const RULE = '#E4E1D8';
 const STAGE_W = 400;
 const STAGE_H = 560;
 const GROUND = 500;
-const BOARD = { x: 60, y: 26, w: 280, h: 160 };
+const BOARD = { x: 60, y: 40, w: 280, h: 160 };
 const K_FIG = 1.35;                       // stage units per rig unit
 
 const COMPLETION_XP = 5;                  // matches LessonRunner
 const FIGHT_CYCLE = 2.6;                  // seconds for one full punch exchange
 const LUNGE = 16;                         // stage units the body drives forward on a punch
 
-// â”€â”€ shots â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── shots ────────────────────────────────────────────────────────────────────
 // One per beat, precomputed at module scope so the worklet can index it.
 // Camera: scale `s` about stage point (cx, cy), which is mapped to the stage
-// centre. Modes: 0 fight Â· 1 stand Â· 2 present Â· 3 walk-in.
+// centre. Modes: 0 fight · 1 stand · 2 present · 3 walk-in.
 interface Shot {
   s: number; cx: number; cy: number; tr: number;
   rx: number; rOn: number; rMode: number;
@@ -82,8 +82,9 @@ function shotFor(b: Beat, i: number): Shot {
     // Close on the ring. 130 units apart: the heads are 40% of figure height, so
     // anything tighter and the pair reads as a single dark shape.
     // cy is chosen so their crowns land below the speech bubbles, which sit at a
-    // fixed stage position OUTSIDE the camera and so don't move when it zooms.
-    return { ...base, s: 1.34, cx: 200, cy: 385, rOn: 1, bOn: 1, ring: 1 };
+    // fixed stage position OUTSIDE the camera and so don't move when it zooms,
+    // while still filling the lower stage rather than floating in its middle.
+    return { ...base, s: 1.34, cx: 200, cy: 345, rOn: 1, bOn: 1, ring: 1 };
   }
   if (b.act === 2) {
     // First beat: camera pulls back while the fight carries on, and the narrator
@@ -91,7 +92,7 @@ function shotFor(b: Beat, i: number): Shot {
     const first = BEATS.findIndex((x) => x.act === 2) === i;
     return {
       ...base,
-      s: first ? 1 : 1.15, cx: 200, cy: first ? STAGE_H / 2 : 430,
+      s: first ? 1 : 1.35, cx: 200, cy: first ? STAGE_H / 2 : 395,
       tr: first ? 2.4 : 0.75,                 // long enough for a believable walk
       rOn: first ? 1 : 0, bOn: first ? 1 : 0, ring: first ? 1 : 0,
       nx: first ? 38 : b.board ? 132 : 200, nOn: 1, nMode: first ? 3 : b.board ? 2 : 1,
@@ -99,9 +100,10 @@ function shotFor(b: Beat, i: number): Shot {
   }
   if (b.act === 3) {
     // Pushed in so the narrator sits close under the board rather than leaving a
-    // dead band between his head and the illustration.
+    // dead band between his head and the illustration — and so the pair together
+    // fill the stage instead of floating in its upper half.
     return {
-      ...base, s: 1.15, cx: 200, cy: 430,
+      ...base, s: 1.35, cx: 200, cy: 395,
       nOn: 1, nMode: b.board ? 2 : 1, nx: b.board ? 132 : 200,
     };
   }
@@ -109,7 +111,7 @@ function shotFor(b: Beat, i: number): Shot {
     // The rematch: same two figures, standing, calm.
     return { ...base, s: 1.12, cx: 200, cy: 450, rx: 148, bx: 252, rOn: 1, bOn: 1, rMode: 1, bMode: 1 };
   }
-  return base;                                 // act 5 â€” nobody on stage
+  return base;                                 // act 5 — nobody on stage
 }
 
 const SHOTS: Shot[] = BEATS.map(shotFor);
@@ -121,7 +123,7 @@ const BOARDS: Record<BoardKey, React.ComponentType<{ p: SharedValue<number>; w?:
   tworoads: TwoRoadsChart,
 };
 
-// â”€â”€ the fight exchange â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── the fight exchange ───────────────────────────────────────────────────────
 /** Rises across [a,b], falls across [c,d]. A punch, or the recoil from one. */
 function swell(t: number, a: number, b: number, c: number, d: number) {
   'worklet';
@@ -174,7 +176,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     if (bp.value < 1) bp.value = Math.min(1, bp.value + dt / 3.2);
   }, true);
 
-  // â”€â”€ scene solve â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── scene solve ────────────────────────────────────────────────────────────
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const cur = SHOTS[n];
@@ -184,7 +186,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
 
     const t = clock.value;
     const ct = t % FIGHT_CYCLE;
-    // Red leads, blue answers â€” offset by half a cycle so they alternate.
+    // Red leads, blue answers — offset by half a cycle so they alternate.
     const rReach = swell(ct, 0.50, 0.78, 0.82, 1.15);
     const bHit = swell(ct, 0.62, 0.86, 0.90, 1.24);
     const bReach = swell(ct, 1.80, 2.08, 2.12, 2.45);
@@ -248,7 +250,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   });
   const ringStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ring }));
 
-  // â”€â”€ advance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── advance ────────────────────────────────────────────────────────────────
   const locked = gates(beat) && picked === null;
   const last = i === BEATS.length - 1;
 
@@ -305,9 +307,18 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
         <Text style={styles.count}>{i + 1}/{BEATS.length}</Text>
       </View>
 
-      {/* the animated stage */}
-      <View style={styles.stageWrap} onLayout={onStage}>
-        {fit > 0 ? (
+      {/* Tap ANYWHERE to advance. This has to be an ancestor of the content, not
+          a sibling layer: a plain View never becomes a touch responder, so taps
+          on the scene and the narration bubble up to here, while the choice
+          buttons and the bookmark below handle their own. An earlier version put
+          the Pressable around the hint text alone, which made most of the screen
+          dead — tapping the scene simply did nothing. */}
+      <Pressable style={styles.body} onPress={advance} disabled={locked}>
+      {/* The animated stage. Act 5 has nobody on it and no board, so it collapses
+          and lets the quote and summary take the whole screen rather than sitting
+          under 560 units of empty paper. */}
+      <View style={[styles.stageWrap, beat.act === 5 && styles.stageGone]} onLayout={onStage}>
+        {fit > 0 && beat.act !== 5 ? (
           <View style={{ width: STAGE_W * fit, height: STAGE_H * fit, overflow: 'hidden' }}>
             <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
               {/* everything inside here moves with the camera */}
@@ -336,7 +347,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
       </View>
 
       {/* narration + interaction */}
-      <View style={styles.deck}>
+      <View style={[styles.deck, beat.act === 5 && styles.deckTall]}>
         {beat.cite ? <Cite bt={bt} text={beat.cite} /> : null}
         {beat.text ? <Narration key={i} bt={bt} text={beat.text} /> : null}
 
@@ -381,19 +392,18 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
         ) : null}
       </View>
 
-      {/* tap anywhere to continue â€” never over a pending question */}
-      <Pressable
-        style={styles.tapLayer}
-        pointerEvents={locked ? 'none' : 'auto'}
-        onPress={advance}
-      >
-        <Text style={styles.hint}>{last ? 'Finish' : 'Tap to continue'}</Text>
+      {/* tap anywhere to continue — never over a pending question */}
+      <View style={styles.tapLayer}>
+        <Text style={styles.hint}>
+          {locked ? 'Choose an answer' : last ? 'Finish' : 'Tap to continue'}
+        </Text>
+      </View>
       </Pressable>
     </SafeAreaView>
   );
 }
 
-// â”€â”€ narration, revealed word by word â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── narration, revealed word by word ─────────────────────────────────────────
 
 function Word({ bt, w, idx, n }: { bt: SharedValue<number>; w: string; idx: number; n: number }) {
   const st = useAnimatedStyle(() => {
@@ -421,7 +431,7 @@ function Cite({ bt, text }: { bt: SharedValue<number>; text: string }) {
   return <Animated.Text style={[styles.cite, st]}>{text.toUpperCase()}</Animated.Text>;
 }
 
-// â”€â”€ speech bubbles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── speech bubbles ───────────────────────────────────────────────────────────
 
 function Bubble({
   bt, text, who, act,
@@ -450,7 +460,7 @@ function Bubble({
   );
 }
 
-// â”€â”€ choices (both the teaching taps and the graded questions) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── choices (both the teaching taps and the graded questions) ────────────────
 
 function Choices({
   prompt, options, explain, picked, graded, onPick,
@@ -489,7 +499,7 @@ function Choices({
       {answered ? (
         <View style={styles.explain}>
           <Text style={styles.explainHead}>
-            {gotIt ? (graded ? 'Correct  Â·  +5 XP' : 'Thatâ€™s the one') : 'Not quite'}
+            {gotIt ? (graded ? 'Correct  ·  +5 XP' : 'That’s the one') : 'Not quite'}
           </Text>
           <Text style={styles.explainText}>{explain}</Text>
         </View>
@@ -498,7 +508,7 @@ function Choices({
   );
 }
 
-// â”€â”€ act 5 cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── act 5 cards ──────────────────────────────────────────────────────────────
 
 function QuoteCard({
   q, saved, onToggle,
@@ -509,14 +519,14 @@ function QuoteCard({
 }) {
   return (
     <View style={styles.quoteCard}>
-      <Text style={styles.quoteMark}>â€œ</Text>
+      <Text style={styles.quoteMark}>“</Text>
       <Text style={styles.quoteText}>{q.text}</Text>
       <View style={styles.quoteFoot}>
         <Pressable onPress={onToggle} hitSlop={12}>
           <SketchIcon name={saved ? 'bookmark-filled' : 'bookmark'} size={18} color={saved ? INK : SOFT} />
         </Pressable>
         <Text style={styles.quoteBy}>
-          {q.author.toUpperCase()}  Â·  {q.work}, {q.era}
+          {q.author.toUpperCase()}  ·  {q.work}, {q.era}
         </Text>
       </View>
     </View>
@@ -540,6 +550,7 @@ function SummaryCard({ s }: { s: { title: string; points: string[]; closing: str
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: PAPER },
+  body: { flex: 1 },
 
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingTop: 4, gap: 12 },
   close: { padding: 4 },
@@ -548,11 +559,16 @@ const styles = StyleSheet.create({
   count: { fontFamily: 'Inter_500Medium', fontSize: 11, color: SOFT, letterSpacing: 1 },
 
   stageWrap: { flex: 1, alignItems: 'center', justifyContent: 'flex-end' },
+  stageGone: { flex: 0, height: 0 },
+  deckTall: { flex: 1, justifyContent: 'center' },
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 40, right: 40, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // The mat edge, BELOW the ground line. An earlier version drew a rope across
+  // the ring at head height, which on a real screen read as a line ruled straight
+  // through both boxers' heads rather than as a rope behind them.
   ring: {
-    position: 'absolute', left: 46, right: 46, top: GROUND - 96, height: 96,
-    borderTopWidth: 1.5, borderBottomWidth: 0, borderColor: RULE,
+    position: 'absolute', left: 74, right: 74, top: GROUND + 11, height: 1.5,
+    backgroundColor: RULE,
   },
 
   bubble: { position: 'absolute', maxWidth: 190 },
