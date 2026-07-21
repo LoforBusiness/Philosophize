@@ -1,4 +1,4 @@
-﻿import { useCallback, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View, Text, Pressable, StyleSheet, type LayoutChangeEvent,
 } from 'react-native';
@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Animated, {
   useSharedValue, useDerivedValue, useAnimatedStyle, useFrameCallback,
-  withTiming, Easing, FadeInDown, LinearTransition, type SharedValue,
+  withTiming, Easing, FadeInDown, LinearTransition, runOnJS, type SharedValue,
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import { getLessonById } from '@/data';
@@ -394,56 +394,62 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
         ) : null}
       </View>
 
-      {/* Narration + interaction, cross-faded as a whole. Fade keys on the beat
-          index, so any deck content — text, quote, summary, a question — dissolves
-          smoothly into the next instead of the old snapping out and the new
-          popping in. Answering a question does NOT change the index, so the
-          explanation appears within the same layer (it plays its own entrance). */}
+      {/* Narration + interaction. Fade sequences the whole deck between beats:
+          it fades fully out, swaps content while invisible, then fades back in —
+          so two paragraphs never overlap. `revision` (the current pick) lets an
+          answer update in place, without a fade, so its explanation still lands. */}
       <View style={[styles.deck, beat.act === 5 && styles.deckTall]}>
-        <Fade trigger={i} duration={XFADE}>
-          <CiteText cite={beat.cite} />
-          {beat.text ? <Text style={styles.narr}>{beat.text}</Text> : null}
+        <Fade
+          trigger={i}
+          revision={picked ?? '—'}
+          duration={XFADE}
+          render={() => (
+            <>
+              {beat.cite ? <Text style={styles.cite}>{beat.cite.toUpperCase()}</Text> : null}
+              {beat.text ? <Text style={styles.narr}>{beat.text}</Text> : null}
 
-          {beat.quote ? (
-            <QuoteCard
-              q={beat.quote}
-              saved={quoteSaved}
-              onToggle={() =>
-                toggleQuote({
-                  id: beat.quote!.id,
-                  text: beat.quote!.text,
-                  author: beat.quote!.author,
-                  philosopherId: 'aristotle',
-                  branchSlugs: ['logic'],
-                  savedAt: Date.now(),
-                })
-              }
-            />
-          ) : null}
+              {beat.quote ? (
+                <QuoteCard
+                  q={beat.quote}
+                  saved={quoteSaved}
+                  onToggle={() =>
+                    toggleQuote({
+                      id: beat.quote!.id,
+                      text: beat.quote!.text,
+                      author: beat.quote!.author,
+                      philosopherId: 'aristotle',
+                      branchSlugs: ['logic'],
+                      savedAt: Date.now(),
+                    })
+                  }
+                />
+              ) : null}
 
-          {beat.summary ? <SummaryCard s={beat.summary} /> : null}
+              {beat.summary ? <SummaryCard s={beat.summary} /> : null}
 
-          {beat.tap ? (
-            <Choices
-              prompt={beat.tap.prompt}
-              options={beat.tap.options}
-              explain={beat.tap.explain}
-              picked={picked}
-              onPick={(id, ok) => choose(id, ok, false)}
-            />
-          ) : null}
+              {beat.tap ? (
+                <Choices
+                  prompt={beat.tap.prompt}
+                  options={beat.tap.options}
+                  explain={beat.tap.explain}
+                  picked={picked}
+                  onPick={(id, ok) => choose(id, ok, false)}
+                />
+              ) : null}
 
-          {beat.mc ? (
-            <Choices
-              prompt={beat.mc.prompt}
-              options={beat.mc.options}
-              explain={beat.mc.explain}
-              picked={picked}
-              graded
-              onPick={(id, ok) => choose(id, ok, true)}
-            />
-          ) : null}
-        </Fade>
+              {beat.mc ? (
+                <Choices
+                  prompt={beat.mc.prompt}
+                  options={beat.mc.options}
+                  explain={beat.mc.explain}
+                  picked={picked}
+                  graded
+                  onPick={(id, ok) => choose(id, ok, true)}
+                />
+              ) : null}
+            </>
+          )}
+        />
       </View>
 
       {/* tap anywhere to continue — never over a pending question */}
@@ -457,53 +463,62 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   );
 }
 
-// ── cross-fade between beats ─────────────────────────────────────────────────
-// One transition for the whole deck. Every tap used to hard-swap each region —
-// the text remounted from blank, a question popped in, the illustration board
-// vanished and the next one drew from nothing. Now a beat change dissolves the
-// old content out as the new fades and rises in.
+// ── beat-to-beat transition ──────────────────────────────────────────────────
+// SEQUENTIAL, not a cross-fade. An earlier version overlapped the outgoing and
+// incoming content at partial opacity — which for two different paragraphs is a
+// muddy double-exposure, barely visible on the short opening lines but obvious on
+// the long later ones (which is exactly where it read as "glitchy"). Now the deck
+// fades fully OUT, swaps its content while invisible, then fades back IN. Only one
+// thing is ever on screen, so there is never any ghosting.
 //
-// The trick that keeps it glitch-free: the fade starts DURING RENDER, not in an
-// effect. An effect runs after the first frame is already on screen, so the new
-// content would flash at full opacity for one frame before snapping to 0 to begin
-// the fade. Starting it in render means the very first frame of the new beat is
-// already at opacity 0 (new) over 1 (old) — a clean cross-fade from frame one.
+// `render` is called (not `children`) so the content is produced only when it
+// actually changes: on a beat change (`trigger`) it fades; on a same-beat change
+// like answering a question (`revision`) it swaps live with no fade, so the
+// explanation still appears instantly with its own entrance.
 
-function Fade({ trigger, duration, children }: { trigger: number; duration: number; children: React.ReactNode }) {
-  const prog = useSharedValue(1);
-  const prevNode = useRef<React.ReactNode>(null);
+function Fade({
+  trigger, revision, duration, render,
+}: { trigger: number; revision: string; duration: number; render: () => React.ReactNode }) {
+  const OUT = Math.round(duration * 0.4);
+  const IN = Math.round(duration * 0.6);
+  const vis = useSharedValue(1);
+  const renderRef = useRef(render);
+  renderRef.current = render;
+  const [content, setContent] = useState<React.ReactNode>(() => render());
   const lastTrigger = useRef(trigger);
-  const lastChildren = useRef<React.ReactNode>(children);
+  const lastRev = useRef(revision);
+  const mounted = useRef(false);
 
-  if (trigger !== lastTrigger.current) {
-    prevNode.current = lastChildren.current;      // freeze the outgoing beat's content
-    lastTrigger.current = trigger;
-    prog.value = 0;
-    prog.value = withTiming(1, { duration, easing: Easing.inOut(Easing.cubic) });
-  }
-  lastChildren.current = children;
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      lastTrigger.current = trigger;
+      lastRev.current = revision;
+      return;
+    }
+    if (trigger !== lastTrigger.current) {
+      lastTrigger.current = trigger;
+      lastRev.current = revision;
+      vis.value = withTiming(0, { duration: OUT, easing: Easing.in(Easing.quad) }, (fin) => {
+        if (fin) runOnJS(setContent)(renderRef.current());   // swap while invisible
+      });
+    } else if (revision !== lastRev.current) {
+      lastRev.current = revision;
+      setContent(renderRef.current());                        // same beat — live, no fade
+    }
+  }, [trigger, revision]);
 
-  const curStyle = useAnimatedStyle(() => ({
-    opacity: prog.value,
-    transform: [{ translateY: (1 - prog.value) * 9 }],
+  useEffect(() => {
+    if (!mounted.current) return;
+    vis.value = withTiming(1, { duration: IN, easing: Easing.out(Easing.cubic) });
+  }, [content]);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: vis.value,
+    transform: [{ translateY: (1 - vis.value) * 6 }],
   }));
-  const prevStyle = useAnimatedStyle(() => ({ opacity: 1 - prog.value }));
 
-  return (
-    <View style={styles.fadeWrap}>
-      {prevNode.current ? (
-        <Animated.View style={[StyleSheet.absoluteFill, prevStyle]} pointerEvents="none">
-          {prevNode.current}
-        </Animated.View>
-      ) : null}
-      <Animated.View style={curStyle}>{children}</Animated.View>
-    </View>
-  );
-}
-
-function CiteText({ cite }: { cite?: string }) {
-  if (!cite) return null;
-  return <Text style={styles.cite}>{cite.toUpperCase()}</Text>;
+  return <Animated.View style={[styles.fadeWrap, style]}>{content}</Animated.View>;
 }
 
 // ── illustration board, cross-faded like the deck ────────────────────────────
@@ -567,7 +582,9 @@ function Bubble({
       style={[
         styles.bubble,
         left ? { left: 18, alignItems: 'flex-start' } : { right: 18, alignItems: 'flex-end' },
-        { top: act === 1 ? 176 : 208 },
+        // Above the heads, not over them. Act 4's camera sits lower (cy 450), so
+        // the figures ride higher on screen and the bubble has to clear them.
+        { top: act === 1 ? 176 : 96 },
         st,
       ]}
     >
@@ -662,7 +679,7 @@ function SummaryCard({ s }: { s: { title: string; points: string[]; closing: str
       <Text style={styles.sumTitle}>{s.title}</Text>
       {s.points.map((p) => (
         <View key={p} style={styles.sumRow}>
-          <Text style={styles.sumDot}>â—†</Text>
+          <Text style={styles.sumDot}>•</Text>
           <Text style={styles.sumPoint}>{p}</Text>
         </View>
       ))}
@@ -740,7 +757,7 @@ const styles = StyleSheet.create({
   sumWrap: { marginTop: 2 },
   sumTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: INK, marginBottom: 12 },
   sumRow: { flexDirection: 'row', gap: 10, marginBottom: 7 },
-  sumDot: { fontSize: 9, color: INK, marginTop: 5 },
+  sumDot: { fontSize: 16, lineHeight: 21, color: INK },
   sumPoint: { fontFamily: 'Inter_400Regular', fontSize: 14.5, color: INK, lineHeight: 21, flex: 1 },
   sumClose: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
