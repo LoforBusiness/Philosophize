@@ -374,59 +374,84 @@ export function boxMove(code: number, t: number, u: number): Stance {
   return guard(t);
 }
 
-/** Relaxed standing, arms down, breathing — non-periodic so it never ticks. */
+/**
+ * Relaxed standing, but never a scarecrow. Real people at rest are in constant
+ * small motion, so this layers four non-periodic channels: a visible breath, a
+ * slow weight rock that shifts the stance and leans the torso, a head that drifts
+ * and glances, and hands that never sit perfectly still. All on `life2`, so none
+ * of it repeats.
+ */
 export function stand(t: number): Stance {
   'worklet';
-  const br = 0.6 * (0.5 - 0.5 * Math.cos(t * 1.7)) + 0.3 * (0.5 - 0.5 * Math.cos(t * 1.06));
-  const sway = life2(t, 0.9, 0.55, 0.6) * 0.5;
+  const breath = 0.7 * (0.5 - 0.5 * Math.cos(t * 1.6)) + 0.4 * (0.5 - 0.5 * Math.cos(t * 1.02));
+  const ws = life2(t, 0.33, 0.19, 0.7);         // slow weight rock, foot to foot
+  const hd = life2(t, 0.5, 0.31, 1.1);          // head drift / glance
   return {
-    tilt: 0.05, neck: 0.01 * sway, bob: br,
-    footL: { x: -6 + sway, y: 0 }, footR: { x: 6 + sway, y: 0 },
-    fistL: { x: -4, y: -2 }, fistR: { x: 5, y: -2 }, adv: 0,
+    tilt: 0.05 + ws * 0.02,
+    neck: -0.02 + hd * 0.05,
+    bob: breath,
+    footL: { x: -6 + ws * 2.5, y: 0 }, footR: { x: 6 + ws * 2.5, y: 0 },
+    fistL: { x: -5 + ws * 1.2, y: -2 + hd }, fistR: { x: 5 + ws * 1.2, y: -2 - hd }, adv: 0,
   };
 }
 
 // ── narrator gestures ────────────────────────────────────────────────────────
-// Driven by BOTH clocks: `bt` (resets each beat) plays the gesture once on entry;
-// `t` (continuous) keeps the landed pose alive with a non-periodic hand drift, so
-// a long dwell never freezes and never ticks. Each beat picks a gesture matched
-// to what is being said, so the narrator never repeats the same motion twice.
+// A gesture is a SETTLED pose (`narratorHold`) plus a living overlay
+// (`narratorLive`). The one-shot raise that used to live here is GONE: it read
+// the beat clock, which resets to 0 on every tap, so the arm snapped back to the
+// neutral stand and re-raised on each advance — the glitch. Now the scene blends
+// the previous beat's hold into the new beat's live pose over the same smooth
+// transition the camera uses, so the hand travels from wherever it was straight
+// into the next gesture. It never snaps home.
+//
+// `narratorLive` adds the life the settled pose can't: while the line is being
+// read the free hand beats with the speech and the head nods; some gestures have
+// their own accent (an emphatic dip, counted chops, a sweep landing into place).
+// Everything additive is 0 at bt=0, so entering a beat is still seamless.
 
-function gestureTo(t: number, bt: number, tx: number, ty: number, tneck: number): Stance {
+function gestureHold(t: number, tx: number, ty: number, tneck: number): Stance {
   'worklet';
-  const base = stand(t);
-  const raise = ease01(bt / 0.5);               // one-shot: hand rises into the gesture
-  const dx = life2(t, 1.3, 0.83, 0.7) * 1.4;    // …then keeps drifting, never still
-  const dy = life2(t, 1.05, 0.61, 1.9) * 1.2;
+  const base = stand(t);                        // inherit breath + weight rock + head drift
+  const dx = life2(t, 1.3, 0.83, 0.7) * 1.3;    // the gesturing hand keeps drifting
+  const dy = life2(t, 1.05, 0.61, 1.9) * 1.1;
+  const hd = life2(t, 0.5, 0.31, 1.1);
   return {
     ...base,
-    tilt: lerp(base.tilt, -0.03, raise),
-    neck: lerp(base.neck, tneck, raise),
-    fistR: { x: lerp(base.fistR.x, tx + dx, raise), y: lerp(base.fistR.y, ty + dy, raise) },
+    tilt: -0.03 + (base.tilt - 0.05),           // gesture lean, keeping the weight rock
+    neck: tneck + hd * 0.03,
+    fistR: { x: tx + dx, y: ty + dy },
+    fistL: { x: base.fistL.x + 2, y: base.fistL.y },
   };
 }
 
-/** Dispatch a narrator gesture by code. 0 open · 1 emphatic · 2 board · 3 count · 4 chin · 5 sweep · 6 up. */
-export function narrator(code: number, t: number, bt: number): Stance {
+/** The settled target pose for a gesture. 0 open · 1 emphatic · 2 board · 3 count · 4 chin · 5 sweep · 6 up. */
+export function narratorHold(code: number, t: number): Stance {
   'worklet';
-  if (code === 1) {                              // emphatic — one downward punctuating dip
-    const s = gestureTo(t, bt, 30, -30, -0.04);
-    const dip = Math.sin(Math.min(bt, 0.6) / 0.6 * Math.PI) * 6;
-    return { ...s, fistR: { x: s.fistR.x, y: s.fistR.y + dip } };
-  }
-  if (code === 2) return gestureTo(t, bt, 26, -48, -0.15);   // present the board (up-forward)
-  if (code === 3) {                              // count — a few stepped chops, then hold
-    const s = gestureTo(t, bt, 30, -34, -0.06);
-    const step = Math.sin(bt * 7.5) * Math.max(0, 1 - bt / 1.6) * 3;
-    return { ...s, fistR: { x: s.fistR.x, y: s.fistR.y + step } };
-  }
-  if (code === 4) return gestureTo(t, bt, 9, -50, 0.10);     // hand to chin, head down — thinking
-  if (code === 5) {                              // sweep across over ~1s
-    const p = ease01(bt / 1.0);
-    return gestureTo(t, bt, lerp(-6, 40, p), -40, -0.10);
-  }
-  if (code === 6) return gestureTo(t, bt, 12, -56, -0.20);   // point up (at the quote)
-  return gestureTo(t, bt, 36, -22, -0.03);                   // 0 open hand, explaining
+  if (code === 1) return gestureHold(t, 30, -30, -0.04);   // emphatic
+  if (code === 2) return gestureHold(t, 26, -48, -0.15);   // present the board (up-forward)
+  if (code === 3) return gestureHold(t, 30, -34, -0.06);   // count off
+  if (code === 4) return gestureHold(t, 9, -50, 0.10);     // hand to chin — thinking
+  if (code === 5) return gestureHold(t, 34, -40, -0.10);   // sweep, resolved to hand-out
+  if (code === 6) return gestureHold(t, 12, -56, -0.20);   // point up (at the quote)
+  return gestureHold(t, 36, -22, -0.03);                   // 0 open hand, explaining
+}
+
+/** The settled pose plus the beat's living overlay: speech beats, head nods, per-gesture accents. */
+export function narratorLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  const s = narratorHold(code, t);
+  const speech = clamp01(1 - bt / 2.4);          // energetic while the line reveals, then eases off
+  const talk = Math.sin(bt * 8.5) * speech * 2.4;
+  const nod = Math.sin(bt * 8.5 + 0.4) * speech * 0.018;
+  let dy = 0, dx = 0;
+  if (code === 1) dy = Math.sin(Math.min(bt, 0.6) / 0.6 * Math.PI) * 6;        // one emphatic dip
+  if (code === 3) dy = Math.sin(bt * 7.2) * Math.max(0, 1 - bt / 1.6) * 3;     // counted chops
+  if (code === 5) dx = lerp(-30, 0, ease01(bt / 1.0));                         // sweep into place
+  return {
+    ...s,
+    neck: s.neck + nod,
+    fistR: { x: s.fistR.x + dx, y: s.fistR.y + talk + dy },
+  };
 }
 
 /** Mid-stride, driven by distance so the feet stay locked. */

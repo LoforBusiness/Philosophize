@@ -20,8 +20,8 @@ import LoudnessChart from './illustrations/LoudnessChart';
 import TwoRoadsChart from './illustrations/TwoRoadsChart';
 import { BEATS, gates, type Beat, type BoardKey } from './argumentScript';
 import {
-  BLANK, WALK, boxMove, clamp01, ease01, lerp, mixStance, narrator, pose,
-  seg, stand, walk, type Bundle, type Stance,
+  BLANK, WALK, boxMove, clamp01, ease01, lerp, mixStance, narratorHold,
+  narratorLive, pose, seg, stand, walk, type Bundle, type Stance,
 } from './rig';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -236,27 +236,44 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
 
     const t = clock.value;
 
-    // Red and blue. When both are in fight mode they're coupled through fightAt
-    // (one attacks, the other answers); otherwise they stand (the rematch), with
-    // the speaker gesturing so the pair looks like it's actually talking.
+    const pIdx = n > 0 ? n - 1 : 0;
+
+    // Red and blue. In fight mode they're coupled through fightAt (one attacks,
+    // the other answers). Otherwise they stand (the rematch), the speaker
+    // gesturing — and, like the narrator, they BLEND from their previous-beat
+    // pose over `tr` so tapping between beats never snaps a hand.
     let redS: Stance, blueS: Stance;
     if (cur.rMode === 0 && cur.bMode === 0) {
       const F = fightAt(t);
       redS = F.red; blueS = F.blue;
     } else {
-      redS = RED_TALK[n] ? narrator(0, t, bt.value) : stand(t);
-      blueS = BLUE_TALK[n] ? narrator(0, t, bt.value) : stand(t);
+      const rFrom = RED_TALK[pIdx] ? narratorHold(0, t) : stand(t);
+      const bFrom = BLUE_TALK[pIdx] ? narratorHold(0, t) : stand(t);
+      const rTo = RED_TALK[n] ? narratorLive(0, t, bt.value) : stand(t);
+      const bTo = BLUE_TALK[n] ? narratorLive(0, t, bt.value) : stand(t);
+      redS = mixStance(rFrom, rTo, tr);
+      blueS = mixStance(bFrom, bTo, tr);
     }
 
-    // The narrator: a walk-in on his first beat, then a gesture matched to the
-    // line — driven by bt so it plays once and by t so it stays alive after.
+    // The narrator. On his first beat he walks in; after that he holds a gesture
+    // matched to the line. The gesture is NOT re-raised from neutral each tap —
+    // that was the glitch. Instead the scene blends the previous beat's settled
+    // pose straight into this beat's live pose over the same `tr` the camera
+    // rides, so the hand travels smoothly from wherever it was into the next
+    // gesture. The live pose adds speech beats and per-gesture accents on top.
     let narrS: Stance;
     if (cur.nMode === 3) {
       const nx0 = L(prv.nx, cur.nx);
       const w = walk(nx0 - prv.nx, WALK);        // phase from distance → feet stay locked
       narrS = tr > 0.985 ? stand(t) : mixStance(w, stand(t), clamp01((tr - 0.86) / 0.14));
     } else {
-      narrS = narrator(NARR_G[n], t, bt.value);
+      // If the previous beat was the walk-in (or the narrator was off), start
+      // from a plain stand so there's no phantom gesture to blend out of.
+      const from = SHOTS[pIdx].nMode === 3 || SHOTS[pIdx].nOn < 0.5
+        ? stand(t)
+        : narratorHold(NARR_G[pIdx], t);
+      const to = narratorLive(NARR_G[n], t, bt.value);
+      narrS = mixStance(from, to, tr);
     }
 
     // Root motion: a lunge or step carries the whole body, so a punch reads as
@@ -290,6 +307,10 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     };
   });
   const ringStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ring }));
+  // Fade the board up as its draw-on begins, so a newly-mounted illustration
+  // eases in instead of popping. bp only resets to 0 when the board actually
+  // changes, so consecutive beats sharing one board don't re-fade on each tap.
+  const boardStyle = useAnimatedStyle(() => ({ opacity: clamp01(bp.value * 8) }));
 
   // ── advance ────────────────────────────────────────────────────────────────
   const locked = gates(beat) && picked === null;
@@ -373,9 +394,9 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
 
               {/* the board sits OUTSIDE the camera so illustrations stay crisp */}
               {Board ? (
-                <View style={{ position: 'absolute', left: BOARD.x, top: BOARD.y }}>
+                <Animated.View style={[{ position: 'absolute', left: BOARD.x, top: BOARD.y }, boardStyle]}>
                   <Board p={bp} w={BOARD.w} h={BOARD.h} />
-                </View>
+                </Animated.View>
               ) : null}
 
               {/* speech bubbles ride the camera with their speaker */}
