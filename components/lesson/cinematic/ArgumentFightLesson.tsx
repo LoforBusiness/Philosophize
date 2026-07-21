@@ -489,6 +489,11 @@ function Fade({
   const lastRev = useRef(revision);
   const mounted = useRef(false);
 
+  // Builds the new content ON THE JS THREAD. The withTiming completion callback is
+  // a worklet (UI thread), and you cannot build React elements there — doing so
+  // crashes the whole screen — so the callback only ever runOnJS()es back to here.
+  const swap = useCallback(() => setContent(renderRef.current()), []);
+
   useEffect(() => {
     if (!mounted.current) {
       mounted.current = true;
@@ -500,11 +505,11 @@ function Fade({
       lastTrigger.current = trigger;
       lastRev.current = revision;
       vis.value = withTiming(0, { duration: OUT, easing: Easing.in(Easing.quad) }, (fin) => {
-        if (fin) runOnJS(setContent)(renderRef.current());   // swap while invisible
+        if (fin) runOnJS(swap)();                              // swap while invisible
       });
     } else if (revision !== lastRev.current) {
       lastRev.current = revision;
-      setContent(renderRef.current());                        // same beat — live, no fade
+      swap();                                                 // same beat — live, no fade
     }
   }, [trigger, revision]);
 
