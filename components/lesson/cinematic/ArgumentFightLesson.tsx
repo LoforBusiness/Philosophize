@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useRef, useState } from 'react';
+﻿import { useCallback, useRef, useState } from 'react';
 import {
   View, Text, Pressable, StyleSheet, type LayoutChangeEvent,
 } from 'react-native';
@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Animated, {
   useSharedValue, useDerivedValue, useAnimatedStyle, useFrameCallback,
-  withTiming, Easing, type SharedValue,
+  withTiming, Easing, FadeInDown, LinearTransition, type SharedValue,
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import { getLessonById } from '@/data';
@@ -55,6 +55,7 @@ const BOARD = { x: 60, y: 40, w: 280, h: 160 };
 const K_FIG = 1.35;                       // stage units per rig unit
 
 const COMPLETION_XP = 5;                  // matches LessonRunner
+const XFADE = 420;                        // ms — the beat-to-beat cross-fade (deliberately unhurried)
 
 // ── the fight choreography ───────────────────────────────────────────────────
 // A real spar is call-and-response, not two people shadow-boxing side by side, so
@@ -194,7 +195,6 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   const beat = BEATS[i];
   const clock = useSharedValue(0);
   const bt = useSharedValue(0);
-  const bp = useSharedValue(0);
   const bi = useSharedValue(0);
 
   // Both clocks are rewound DURING RENDER, not in an effect. An effect runs after
@@ -208,14 +208,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     bt.value = 0;
     bi.value = i;
   }
-  // The board keeps drawing across consecutive beats that share it, and only
-  // restarts when the illustration actually changes.
   const boardKey = beat.board ?? null;
-  const prevBoard = useRef<BoardKey | null | undefined>(undefined);
-  if (prevBoard.current !== boardKey) {
-    prevBoard.current = boardKey;
-    bp.value = 0;
-  }
 
   useFrameCallback((f) => {
     'worklet';
@@ -223,7 +216,6 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     if (dt > 0.05) dt = 0.05;                 // a stall must not fast-forward the scene
     clock.value += dt;
     bt.value += dt;
-    if (bp.value < 1) bp.value = Math.min(1, bp.value + dt / 3.2);
   }, true);
 
   // ── scene solve ────────────────────────────────────────────────────────────
@@ -307,10 +299,6 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     };
   });
   const ringStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ring }));
-  // Fade the board up as its draw-on begins, so a newly-mounted illustration
-  // eases in instead of popping. bp only resets to 0 when the board actually
-  // changes, so consecutive beats sharing one board don't re-fade on each tap.
-  const boardStyle = useAnimatedStyle(() => ({ opacity: clamp01(bp.value * 8) }));
 
   // ── advance ────────────────────────────────────────────────────────────────
   const locked = gates(beat) && picked === null;
@@ -352,7 +340,6 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   }
 
   const fit = box.w > 0 ? Math.min(box.w / STAGE_W, box.h / STAGE_H) : 0;
-  const Board = boardKey ? BOARDS[boardKey] : null;
   const shot = SHOTS[i];
   const quoteSaved = beat.quote ? savedQuotes.some((q) => q.id === beat.quote!.id) : false;
 
@@ -392,12 +379,11 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
                 {shot.nOn > 0 ? <Stickman D={DN} k={K_FIG} /> : null}
               </Animated.View>
 
-              {/* the board sits OUTSIDE the camera so illustrations stay crisp */}
-              {Board ? (
-                <Animated.View style={[{ position: 'absolute', left: BOARD.x, top: BOARD.y }, boardStyle]}>
-                  <Board p={bp} w={BOARD.w} h={BOARD.h} />
-                </Animated.View>
-              ) : null}
+              {/* the board sits OUTSIDE the camera so illustrations stay crisp;
+                  BoardStage cross-fades one illustration into the next */}
+              <View style={{ position: 'absolute', left: BOARD.x, top: BOARD.y }}>
+                <BoardStage boardKey={boardKey} />
+              </View>
 
               {/* speech bubbles ride the camera with their speaker */}
               {beat.say?.map((s) => (
@@ -408,49 +394,56 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
         ) : null}
       </View>
 
-      {/* narration + interaction */}
+      {/* Narration + interaction, cross-faded as a whole. Fade keys on the beat
+          index, so any deck content — text, quote, summary, a question — dissolves
+          smoothly into the next instead of the old snapping out and the new
+          popping in. Answering a question does NOT change the index, so the
+          explanation appears within the same layer (it plays its own entrance). */}
       <View style={[styles.deck, beat.act === 5 && styles.deckTall]}>
-        <CrossText cite={beat.cite} text={beat.text} />
+        <Fade trigger={i} duration={XFADE}>
+          <CiteText cite={beat.cite} />
+          {beat.text ? <Text style={styles.narr}>{beat.text}</Text> : null}
 
-        {beat.quote ? (
-          <QuoteCard
-            q={beat.quote}
-            saved={quoteSaved}
-            onToggle={() =>
-              toggleQuote({
-                id: beat.quote!.id,
-                text: beat.quote!.text,
-                author: beat.quote!.author,
-                philosopherId: 'aristotle',
-                branchSlugs: ['logic'],
-                savedAt: Date.now(),
-              })
-            }
-          />
-        ) : null}
+          {beat.quote ? (
+            <QuoteCard
+              q={beat.quote}
+              saved={quoteSaved}
+              onToggle={() =>
+                toggleQuote({
+                  id: beat.quote!.id,
+                  text: beat.quote!.text,
+                  author: beat.quote!.author,
+                  philosopherId: 'aristotle',
+                  branchSlugs: ['logic'],
+                  savedAt: Date.now(),
+                })
+              }
+            />
+          ) : null}
 
-        {beat.summary ? <SummaryCard s={beat.summary} /> : null}
+          {beat.summary ? <SummaryCard s={beat.summary} /> : null}
 
-        {beat.tap ? (
-          <Choices
-            prompt={beat.tap.prompt}
-            options={beat.tap.options}
-            explain={beat.tap.explain}
-            picked={picked}
-            onPick={(id, ok) => choose(id, ok, false)}
-          />
-        ) : null}
+          {beat.tap ? (
+            <Choices
+              prompt={beat.tap.prompt}
+              options={beat.tap.options}
+              explain={beat.tap.explain}
+              picked={picked}
+              onPick={(id, ok) => choose(id, ok, false)}
+            />
+          ) : null}
 
-        {beat.mc ? (
-          <Choices
-            prompt={beat.mc.prompt}
-            options={beat.mc.options}
-            explain={beat.mc.explain}
-            picked={picked}
-            graded
-            onPick={(id, ok) => choose(id, ok, true)}
-          />
-        ) : null}
+          {beat.mc ? (
+            <Choices
+              prompt={beat.mc.prompt}
+              options={beat.mc.options}
+              explain={beat.mc.explain}
+              picked={picked}
+              graded
+              onPick={(id, ok) => choose(id, ok, true)}
+            />
+          ) : null}
+        </Fade>
       </View>
 
       {/* tap anywhere to continue — never over a pending question */}
@@ -464,55 +457,95 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   );
 }
 
-// ── narration, cross-dissolved between beats ─────────────────────────────────
-// The text used to reveal word by word off the beat clock, keyed by beat index,
-// so every tap remounted it and it started from BLANK — a visible empty flash
-// that read as a glitch. Now two layers hold the current and previous lines and
-// cross-fade on their OWN timer (withTiming, not the beat clock, so it can't race
-// the beat reset): the outgoing line fades out exactly as the incoming fades and
-// rises in, and the text is never empty. The previous layer is absolute so only
-// the current line drives the deck's height.
+// ── cross-fade between beats ─────────────────────────────────────────────────
+// One transition for the whole deck. Every tap used to hard-swap each region —
+// the text remounted from blank, a question popped in, the illustration board
+// vanished and the next one drew from nothing. Now a beat change dissolves the
+// old content out as the new fades and rises in.
+//
+// The trick that keeps it glitch-free: the fade starts DURING RENDER, not in an
+// effect. An effect runs after the first frame is already on screen, so the new
+// content would flash at full opacity for one frame before snapping to 0 to begin
+// the fade. Starting it in render means the very first frame of the new beat is
+// already at opacity 0 (new) over 1 (old) — a clean cross-fade from frame one.
 
-interface Slot { c?: string; t?: string }
-
-function CrossText({ cite, text }: { cite?: string; text?: string }) {
-  const [cur, setCur] = useState<Slot>({ c: cite, t: text });
-  const [prev, setPrev] = useState<Slot | null>(null);
+function Fade({ trigger, duration, children }: { trigger: number; duration: number; children: React.ReactNode }) {
   const prog = useSharedValue(1);
-  const ref = useRef<Slot>({ c: cite, t: text });
+  const prevNode = useRef<React.ReactNode>(null);
+  const lastTrigger = useRef(trigger);
+  const lastChildren = useRef<React.ReactNode>(children);
 
-  useEffect(() => {
-    if (ref.current.t === text && ref.current.c === cite) return;
-    setPrev(ref.current);
-    setCur({ c: cite, t: text });
-    ref.current = { c: cite, t: text };
+  if (trigger !== lastTrigger.current) {
+    prevNode.current = lastChildren.current;      // freeze the outgoing beat's content
+    lastTrigger.current = trigger;
     prog.value = 0;
-    prog.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
-  }, [text, cite]);
+    prog.value = withTiming(1, { duration, easing: Easing.inOut(Easing.cubic) });
+  }
+  lastChildren.current = children;
 
   const curStyle = useAnimatedStyle(() => ({
     opacity: prog.value,
-    transform: [{ translateY: (1 - prog.value) * 8 }],
+    transform: [{ translateY: (1 - prog.value) * 9 }],
   }));
   const prevStyle = useAnimatedStyle(() => ({ opacity: 1 - prog.value }));
 
-  const Body = ({ s }: { s: Slot }) => (
-    <>
-      {s.c ? <Text style={styles.cite}>{s.c.toUpperCase()}</Text> : null}
-      {s.t ? <Text style={styles.narr}>{s.t}</Text> : null}
-    </>
-  );
-
   return (
-    <View style={styles.textArea}>
-      {prev ? (
+    <View style={styles.fadeWrap}>
+      {prevNode.current ? (
         <Animated.View style={[StyleSheet.absoluteFill, prevStyle]} pointerEvents="none">
-          <Body s={prev} />
+          {prevNode.current}
         </Animated.View>
       ) : null}
-      <Animated.View style={curStyle}>
-        <Body s={cur} />
-      </Animated.View>
+      <Animated.View style={curStyle}>{children}</Animated.View>
+    </View>
+  );
+}
+
+function CiteText({ cite }: { cite?: string }) {
+  if (!cite) return null;
+  return <Text style={styles.cite}>{cite.toUpperCase()}</Text>;
+}
+
+// ── illustration board, cross-faded like the deck ────────────────────────────
+// Boards change constantly in act 3 (anatomy → syllogism → loudness → tworoads).
+// Each has its OWN draw-on progress so the incoming board draws itself on while
+// the outgoing holds its finished state and fades out — two separate progress
+// values, which is why this can't reuse the generic Fade (that would share one).
+
+function BoardStage({ boardKey }: { boardKey: BoardKey | null }) {
+  const fade = useSharedValue(1);                 // 1 = cur fully in / prev fully out
+  const curP = useSharedValue(1);                 // incoming draw-on progress
+  const prevP = useSharedValue(1);                // outgoing holds its finished draw
+  const lastKey = useRef<BoardKey | null>(boardKey);
+  const prevKey = useRef<BoardKey | null>(null);
+
+  if (boardKey !== lastKey.current) {
+    prevKey.current = lastKey.current;            // outgoing board
+    lastKey.current = boardKey;
+    prevP.value = 1;
+    fade.value = 0;
+    fade.value = withTiming(1, { duration: XFADE, easing: Easing.inOut(Easing.cubic) });
+    curP.value = 0;                               // incoming draws itself on
+    curP.value = withTiming(1, { duration: 2600, easing: Easing.out(Easing.cubic) });
+  }
+
+  const curStyle = useAnimatedStyle(() => ({ opacity: fade.value }));
+  const prevStyle = useAnimatedStyle(() => ({ opacity: 1 - fade.value }));
+
+  const Cur = boardKey ? BOARDS[boardKey] : null;
+  const Prev = prevKey.current ? BOARDS[prevKey.current] : null;
+  return (
+    <View>
+      {Prev ? (
+        <Animated.View style={[StyleSheet.absoluteFill, prevStyle]} pointerEvents="none">
+          <Prev p={prevP} w={BOARD.w} h={BOARD.h} />
+        </Animated.View>
+      ) : null}
+      {Cur ? (
+        <Animated.View style={curStyle} pointerEvents="none">
+          <Cur p={curP} w={BOARD.w} h={BOARD.h} />
+        </Animated.View>
+      ) : null}
     </View>
   );
 }
@@ -561,7 +594,10 @@ function Choices({
   const answered = picked !== null;
   const gotIt = answered && options.find((o) => o.id === picked)?.correct;
   return (
-    <View style={styles.qWrap}>
+    // `layout` animates the container's height when the explanation appears, so
+    // the block grows smoothly and the "Tap to continue" below slides down rather
+    // than jumping.
+    <Animated.View style={styles.qWrap} layout={LinearTransition.duration(300)}>
       <Text style={styles.prompt}>{prompt}</Text>
       {options.map((o) => {
         const chosen = picked === o.id;
@@ -575,6 +611,7 @@ function Choices({
               styles.opt,
               reveal && styles.optRight,
               chosen && !o.correct && styles.optWrong,
+              answered && !reveal && !chosen && styles.optFade,
               pressed && !answered && { opacity: 0.75 },
             ]}
           >
@@ -583,14 +620,14 @@ function Choices({
         );
       })}
       {answered ? (
-        <View style={styles.explain}>
+        <Animated.View style={styles.explain} entering={FadeInDown.duration(300)}>
           <Text style={styles.explainHead}>
             {gotIt ? (graded ? 'Correct  ·  +5 XP' : 'That’s the one') : 'Not quite'}
           </Text>
           <Text style={styles.explainText}>{explain}</Text>
-        </View>
+        </Animated.View>
       ) : null}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -668,7 +705,7 @@ const styles = StyleSheet.create({
   tail: { width: 10, height: 10, backgroundColor: INK, transform: [{ rotate: '45deg' }], marginTop: -5 },
 
   deck: { paddingHorizontal: 24, paddingBottom: 4, minHeight: 108, justifyContent: 'flex-start' },
-  textArea: { position: 'relative' },
+  fadeWrap: { position: 'relative' },
   narr: {
     fontFamily: 'PlayfairDisplay_400Regular', fontSize: 18, lineHeight: 27, color: INK,
   },
@@ -685,6 +722,7 @@ const styles = StyleSheet.create({
   optRight: { borderColor: INK, backgroundColor: INK },
   optRightText: { color: PAPER, fontFamily: 'Inter_700Bold' },
   optWrong: { borderColor: SOFT, opacity: 0.55 },
+  optFade: { opacity: 0.4 },                    // the un-picked, un-correct options recede
   optText: { fontFamily: 'Inter_400Regular', fontSize: 14.5, color: INK, lineHeight: 20 },
   explain: { marginTop: 4, borderLeftWidth: 2, borderLeftColor: INK, paddingLeft: 12, paddingVertical: 2 },
   explainHead: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.2, color: INK, marginBottom: 4 },
