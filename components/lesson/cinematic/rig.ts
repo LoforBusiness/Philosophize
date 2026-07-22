@@ -458,6 +458,81 @@ export function narratorLive(code: number, t: number, bt: number): Stance {
   };
 }
 
+// ── the wide expressive gesture library ──────────────────────────────────────
+// A much larger movement vocabulary than the 7 narrator gestures, so a scene can
+// rotate through many distinct poses and never read as a loop. Each code is a
+// SETTLED pose (emoteHold) plus a living overlay (emoteLive) that gives it its own
+// secondary motion. All built on stand(), so breath / weight-rock / head-drift
+// come for free. Fist targets are pelvis-relative (y negative = raised); keep |x|
+// under ~34 so the arm never over-reaches its IK clamp.
+
+/** Set both fists on a base stance. */
+function hands(base: Stance, lx: number, ly: number, rx: number, ry: number): Stance {
+  'worklet';
+  return { ...base, fistL: { x: lx, y: ly }, fistR: { x: rx, y: ry } };
+}
+
+/**
+ * The settled pose for gesture `code`. 0 neutral · 1 explain · 2 present-up ·
+ * 3 count · 4 think · 5 sweep · 6 point-up · 7 both-wide · 8 shrug · 9 hand-on-hip ·
+ * 10 arms-crossed · 11 forehead · 12 scratch-head · 13 point-forward · 14 reach-out ·
+ * 15 recoil · 16 celebrate · 17 bow · 18 cower · 19 adore · 20 hold-up · 21 weigh ·
+ * 22 clutch-chest · 23 wave.
+ */
+export function emoteHold(code: number, t: number): Stance {
+  'worklet';
+  const s = stand(t);
+  const g = life2(t, 1.25, 0.8, 0.6) * 1.3;     // active-hand drift so a hold never freezes
+  if (code === 1) return hands(s, -6, -4, 32 + g, -22);
+  if (code === 2) return { ...hands(s, -6, -4, 26 + g, -46), neck: -0.14 };
+  if (code === 3) return { ...hands(s, -6, -4, 30 + g, -34), neck: -0.05 };
+  if (code === 4) return { ...hands(s, -6, -6, 8, -50 + g), neck: 0.12 };
+  if (code === 5) return hands(s, -28, -16, 32 + g, -38);
+  if (code === 6) return { ...hands(s, -8, -8, 12, -58 + g), neck: -0.20 };
+  if (code === 7) return hands(s, -32 - g, -18, 32 + g, -18);
+  if (code === 8) return { ...hands(s, -26, -6, 26, -6), tilt: s.tilt + 0.03, bob: s.bob + 3, neck: 0.05 };
+  if (code === 9) return { ...hands(s, -6, -2, 9, -8), tilt: s.tilt + 0.02 };
+  if (code === 10) return hands(s, 9, -24, -9, -24);
+  if (code === 11) return { ...hands(s, -6, -4, 6, -52), neck: 0.16, tilt: s.tilt + 0.03 };
+  if (code === 12) return { ...hands(s, -6, -4, 4, -56), neck: 0.06 };
+  if (code === 13) return { ...hands(s, -6, -4, 34, -16), tilt: s.tilt - 0.05 };
+  if (code === 14) return { ...hands(s, -24, -16, 24, -16), tilt: s.tilt - 0.04 };
+  if (code === 15) return { ...hands(s, -22, -34, 22, -34), tilt: s.tilt + 0.16, neck: 0.06, footL: { x: -9, y: 0 }, footR: { x: 9, y: 0 } };
+  if (code === 16) return { ...hands(s, -18, -56, 18, -56), neck: -0.14, tilt: s.tilt - 0.03 };
+  if (code === 17) return { ...hands(s, -3, 6, 5, 6), tilt: s.tilt - 0.30, neck: 0.22, bob: s.bob - 3 };
+  if (code === 18) return { ...hands(s, -12, -46, 12, -46), bob: s.bob - 14, tilt: s.tilt + 0.06, neck: 0.10, footL: { x: -11, y: 0 }, footR: { x: 11, y: 0 } };
+  if (code === 19) return { ...hands(s, -16, -50, 18, -50), neck: -0.12, tilt: s.tilt - 0.06 };
+  if (code === 20) return { ...hands(s, -6, -4, 18, -52 + g) };
+  if (code === 21) return hands(s, -26, -8, 26, -8);
+  if (code === 22) return { ...hands(s, -6, -6, 4, -30), neck: 0.02 };
+  if (code === 23) return { ...hands(s, -6, -4, 30, -46) };
+  return s;                                       // 0 neutral
+}
+
+/** emoteHold plus its living overlay: speech beats, head nods, and a per-gesture accent. */
+export function emoteLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  const s = emoteHold(code, t);
+  const speech = clamp01(1 - bt / 2.6);
+  const talk = Math.sin(bt * 8.2) * speech * 2.6;      // the gesturing hand beats with the line
+  const nod = Math.sin(bt * 8.2 + 0.4) * speech * 0.02;
+  let dx = 0, dy = 0, db = 0, dn = 0;
+  if (code === 2 || code === 6 || code === 20 || code === 23) dy = Math.sin(Math.min(bt, 0.7) / 0.7 * Math.PI) * -6; // lift accent
+  if (code === 3) dy = Math.sin(bt * 7.0) * Math.max(0, 1 - bt / 1.7) * 3;                     // counted chops
+  if (code === 5) dx = lerp(-30, 0, ease01(bt / 1.0));                                          // sweep into place
+  if (code === 8) db = Math.sin(Math.min(bt, 0.6) / 0.6 * Math.PI) * 2.5;                       // shrug lifts once
+  if (code === 15) { dn = 0.10 * Math.max(0, 1 - bt / 0.5); dx = 6 * Math.max(0, 1 - bt / 0.4); } // recoil snaps back
+  if (code === 16) db = Math.abs(Math.sin(bt * 6)) * Math.max(0, 1 - bt / 1.5) * 4;             // celebrate bounce
+  if (code === 18) { dx = Math.sin(bt * 22) * Math.max(0, 1 - bt / 1.2) * 1.2; }                // cower tremble
+  if (code === 23) dx = Math.sin(bt * 9) * speech * 5;                                          // wave oscillation
+  return {
+    ...s,
+    neck: s.neck + nod + dn,
+    bob: s.bob + db,
+    fistR: { x: s.fistR.x + dx, y: s.fistR.y + talk + dy },
+  };
+}
+
 // ── the builder (lesson 2) ────────────────────────────────────────────────────
 // A mason at work: leans into the job, drops a little lower, and rests the lead
 // hand out-forward and low where the next brick lands. `builderLive` adds the
@@ -537,6 +612,22 @@ export function mixStance(a: Stance, b: Stance, t: number): Stance {
     fistL: m(a.fistL, b.fistL), fistR: m(a.fistR, b.fistR),
     adv: lerp(a.adv, b.adv, t),
   };
+}
+
+/**
+ * Locomotion: a stance that WALKS from x0 to x1 as `tr` goes 0→1, easing into the
+ * `settled` gesture on arrival. The scene interpolates the x-position itself; this
+ * supplies the stride (feet driven by distance, so they never skate) and the settle.
+ * Facing is the scene's job (mirror via `dir`). Defined AFTER walk + mixStance: a
+ * worklet that calls a forward-declared worklet captures it as `undefined` and
+ * crashes the UI runtime, so order matters here.
+ */
+export function strideStance(x0: number, x1: number, settled: Stance, tr: number, g: Gait = WALK): Stance {
+  'worklet';
+  const traveled = Math.abs(x1 - x0) * ease01(tr);
+  const w = walk(traveled, g);
+  const arrive = clamp01((tr - 0.8) / 0.2);
+  return mixStance(w, settled, arrive);
 }
 
 // ── transform bundles for the View renderer ──────────────────────────────────

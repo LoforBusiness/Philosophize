@@ -13,6 +13,11 @@ import { EpistemologyLesson } from '@/components/lesson/cinematic/epistemologySc
 import { MetaphysicsLesson } from '@/components/lesson/cinematic/metaphysicsScene';
 import { AestheticsLesson } from '@/components/lesson/cinematic/aestheticsScene';
 import { PoliticalLesson } from '@/components/lesson/cinematic/politicalScene';
+import { Ethics2Lesson } from '@/components/lesson/cinematic/ethics2Scene';
+import { Epistemology2Lesson } from '@/components/lesson/cinematic/epistemology2Scene';
+import { Metaphysics2Lesson } from '@/components/lesson/cinematic/metaphysics2Scene';
+import { Aesthetics2Lesson } from '@/components/lesson/cinematic/aesthetics2Scene';
+import { Political2Lesson } from '@/components/lesson/cinematic/political2Scene';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -38,6 +43,11 @@ const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   'metaphysics-being-1': MetaphysicsLesson,
   'aesthetics-aesthetics-1': AestheticsLesson,
   'political-political-1': PoliticalLesson,
+  'ethics-ethics-2': Ethics2Lesson,
+  'epistemology-knowledge-3': Epistemology2Lesson,
+  'metaphysics-being-2': Metaphysics2Lesson,
+  'aesthetics-aesthetics-2': Aesthetics2Lesson,
+  'political-political-2': Political2Lesson,
 };
 
 function todayStr() {
