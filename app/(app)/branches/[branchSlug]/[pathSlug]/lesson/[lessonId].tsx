@@ -8,6 +8,11 @@ import LessonRunner from '@/components/lesson/LessonRunner';
 import LessonLoader from '@/components/lesson/LessonLoader';
 import ArgumentFightLesson from '@/components/lesson/cinematic/ArgumentFightLesson';
 import PremisesBuilderLesson from '@/components/lesson/cinematic/PremisesBuilderLesson';
+import { EthicsLesson } from '@/components/lesson/cinematic/ethicsScene';
+import { EpistemologyLesson } from '@/components/lesson/cinematic/epistemologyScene';
+import { MetaphysicsLesson } from '@/components/lesson/cinematic/metaphysicsScene';
+import { AestheticsLesson } from '@/components/lesson/cinematic/aestheticsScene';
+import { PoliticalLesson } from '@/components/lesson/cinematic/politicalScene';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -28,6 +33,11 @@ const InkSoft = '#6B6B6B';
 const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   'logic-arguments-1': ArgumentFightLesson,
   'logic-arguments-2': PremisesBuilderLesson,
+  'ethics-ethics-1': EthicsLesson,
+  'epistemology-knowledge-1': EpistemologyLesson,
+  'metaphysics-being-1': MetaphysicsLesson,
+  'aesthetics-aesthetics-1': AestheticsLesson,
+  'political-political-1': PoliticalLesson,
 };
 
 function todayStr() {
