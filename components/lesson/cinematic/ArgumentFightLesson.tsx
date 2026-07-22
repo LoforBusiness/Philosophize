@@ -401,7 +401,10 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
       <View style={[styles.deck, beat.act === 5 && styles.deckTall]}>
         <Fade
           trigger={i}
-          revision={picked ?? '—'}
+          // Any in-beat state that changes the deck must be in `revision` so the
+          // content re-renders live (no fade): the answer AND whether the quote is
+          // bookmarked — otherwise the saved snapshot froze the bookmark icon.
+          revision={`${picked ?? ''}|${quoteSaved ? 1 : 0}`}
           duration={XFADE}
           render={() => (
             <>
@@ -703,9 +706,13 @@ const styles = StyleSheet.create({
   fill: { height: 2, backgroundColor: INK },
   count: { fontFamily: 'Inter_500Medium', fontSize: 11, color: SOFT, letterSpacing: 1 },
 
-  stageWrap: { flex: 1, alignItems: 'center', justifyContent: 'flex-end' },
+  // FIXED proportions, not flex:1. When the stage was flex:1 it grew on short
+  // beats and shrank when the deck grew (a question, an explanation), so the
+  // figures resized on every tap — the "glitch at the top". A fixed 46/46/8 split
+  // is content-independent, so the stage never resizes and the figures hold still.
+  stageWrap: { flex: 46, alignItems: 'center', justifyContent: 'flex-end' },
   stageGone: { flex: 0, height: 0 },
-  deckTall: { flex: 1, justifyContent: 'center' },
+  deckTall: { flex: 92, justifyContent: 'center' },
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 40, right: 40, top: GROUND, height: 1.5, backgroundColor: RULE },
   // The mat edge, BELOW the ground line. An earlier version drew a rope across
@@ -726,7 +733,7 @@ const styles = StyleSheet.create({
   bubbleShoutText: { fontFamily: 'Inter_700Bold', color: PAPER, letterSpacing: 0.4 },
   tail: { width: 10, height: 10, backgroundColor: INK, transform: [{ rotate: '45deg' }], marginTop: -5 },
 
-  deck: { paddingHorizontal: 24, paddingBottom: 4, minHeight: 108, justifyContent: 'flex-start' },
+  deck: { flex: 46, paddingHorizontal: 24, justifyContent: 'flex-start', overflow: 'hidden' },
   fadeWrap: { position: 'relative' },
   narr: {
     fontFamily: 'PlayfairDisplay_400Regular', fontSize: 18, lineHeight: 27, color: INK,
@@ -736,10 +743,10 @@ const styles = StyleSheet.create({
   },
 
   qWrap: { marginTop: 2 },
-  prompt: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: INK, marginBottom: 12, lineHeight: 24 },
+  prompt: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: INK, marginBottom: 10, lineHeight: 23 },
   opt: {
     borderWidth: 1.5, borderColor: RULE, borderRadius: 5,
-    paddingVertical: 12, paddingHorizontal: 14, marginBottom: 8, backgroundColor: PAPER,
+    paddingVertical: 10, paddingHorizontal: 14, marginBottom: 7, backgroundColor: PAPER,
   },
   optRight: { borderColor: INK, backgroundColor: INK },
   optRightText: { color: PAPER, fontFamily: 'Inter_700Bold' },
@@ -769,6 +776,6 @@ const styles = StyleSheet.create({
     fontSize: 16, color: SOFT, lineHeight: 24, marginTop: 12,
   },
 
-  tapLayer: { paddingVertical: 12, alignItems: 'center' },
+  tapLayer: { flex: 8, alignItems: 'center', justifyContent: 'center' },
   hint: { fontFamily: 'Inter_500Medium', fontSize: 11, letterSpacing: 2, color: SOFT },
 });

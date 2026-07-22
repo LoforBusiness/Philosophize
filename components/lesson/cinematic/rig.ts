@@ -384,13 +384,17 @@ export function boxMove(code: number, t: number, u: number): Stance {
 export function stand(t: number): Stance {
   'worklet';
   const breath = 0.7 * (0.5 - 0.5 * Math.cos(t * 1.6)) + 0.4 * (0.5 - 0.5 * Math.cos(t * 1.02));
-  const ws = life2(t, 0.33, 0.19, 0.7);         // slow weight rock, foot to foot
+  const ws = life2(t, 0.33, 0.19, 0.7);         // slow weight rock, in the torso only
   const hd = life2(t, 0.5, 0.31, 1.1);          // head drift / glance
   return {
     tilt: 0.05 + ws * 0.02,
     neck: -0.02 + hd * 0.05,
     bob: breath,
-    footL: { x: -6 + ws * 2.5, y: 0 }, footR: { x: 6 + ws * 2.5, y: 0 },
+    // Feet PLANTED and close, so the legs are near-vertical and read as two solid
+    // bars. The wide, sliding stance made the near-straight legs look segmented and
+    // opened a paper gap between them; the boxing stance only hid it by being deep
+    // and bent. Life now comes from the torso/head/arms, not the feet.
+    footL: { x: -4, y: 0 }, footR: { x: 4, y: 0 },
     fistL: { x: -5 + ws * 1.2, y: -2 + hd }, fistR: { x: 5 + ws * 1.2, y: -2 - hd }, adv: 0,
   };
 }
