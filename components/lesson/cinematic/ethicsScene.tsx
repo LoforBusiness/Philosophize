@@ -5,7 +5,7 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './ethicsScript';
 import {
-  BLANK, clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand,
+  clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand,
   type Bundle, type Stance,
 } from './rig';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
@@ -15,7 +15,6 @@ import type { SceneApi } from './CinematicPlayer';
 // beside an animal that shares the instincts but never judges itself.
 
 const HUMAN_X = 250;
-const CON_DX = 30;              // the conscience self rises up-and-behind
 const CRIT_X = 86;
 const PIVOT_X = 158;
 const PIVOT_Y = 452;
@@ -37,11 +36,6 @@ function actPose(t: number): Stance {
   'worklet';
   const s = stand(t);
   return { ...s, tilt: s.tilt - 0.11, neck: 0.10, fistR: { x: 30, y: 9 }, fistL: { x: -4, y: -3 } };
-}
-function gaze(t: number): Stance {
-  'worklet';
-  const s = stand(t);
-  return { ...s, tilt: 0.02, neck: 0.24, fistR: { x: 7, y: -7 }, fistL: { x: -7, y: -7 } };
 }
 function hHold(code: number, t: number): Stance {
   'worklet';
@@ -70,15 +64,12 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
     const conOn = L(JUDGE[p], JUDGE[n]);
     const critOn = L(CRITTER[p], CRITTER[n]);
 
-    // On Q2 the animal ambles off while the human's conscience holds — the point
-    // that only the human steps out to judge.
+    // On Q2 the animal ambles off — the point that only the human stops to judge.
     const critX = CRIT_X - (Q2[n] ? q * 70 : 0);
-    const rise = 46 * conOn + (n === 6 ? q * 16 : 0);       // beat 6 (index) = Q1
 
     return {
       cam: { s: L(prv.s, cur.s), cx: L(prv.cx, cur.cx), cy: L(prv.cy, cur.cy) },
       human: pose(humanS, HUMAN_X, GROUND, K_FIG, -1, 1),
-      con: conOn > 0.01 ? pose(gaze(t), HUMAN_X + CON_DX, GROUND - rise, K_FIG, -1, conOn * 0.4) : BLANK,
       scaleOn: conOn,
       tip: Math.sin(t * 1.2) * 4 * conOn * (1 - (n === 6 ? q : 0)),  // settles level on a considered Q1
       critOn,
@@ -87,7 +78,6 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
   });
 
   const DH = useDerivedValue<Bundle>(() => SCENE.value.human);
-  const DC = useDerivedValue<Bundle>(() => SCENE.value.con);
   const camStyle = useAnimatedStyle(() => {
     const c = SCENE.value.cam;
     return { transform: [{ translateX: STAGE_W / 2 - c.cx * c.s }, { translateY: STAGE_H / 2 - c.cy * c.s }, { scale: c.s }] };
@@ -98,7 +88,6 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
       <Animated.View style={[StyleSheet.absoluteFill, camStyle]}>
         <View style={styles.ground} />
         <Critter S={SCENE} />
-        <Stickman D={DC} k={K_FIG} />
         <Stickman D={DH} k={K_FIG} />
         <Scale S={SCENE} />
       </Animated.View>

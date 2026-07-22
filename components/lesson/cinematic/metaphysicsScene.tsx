@@ -64,7 +64,7 @@ export default function MetaphysicsScene({ clock, bt, bi, qv }: SceneApi) {
     const c = SCENE.value.cam;
     return { transform: [{ translateX: STAGE_W / 2 - c.cx * c.s }, { translateY: STAGE_H / 2 - c.cy * c.s }, { scale: c.s }] };
   });
-  const voidStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.erase * 0.14 }));
+  const voidStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.erase * 0.6 }));
 
   return (
     <Animated.View style={styles.scene}>

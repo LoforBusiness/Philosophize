@@ -41,13 +41,13 @@ export const BEATS: EthicsBeat[] = [
   {
     hpose: 4,
     judge: true,
-    text: 'What you add is this: you step back, out of yourself, and judge the deed. You ask "was that right?" — and you answer in reasons.',
+    text: 'What you add is this: you stop and weigh the deed. You ask "was that right?" — and you answer in reasons, on a balance no animal sets up.',
     dur: 4.0,
   },
   {
     hpose: 4,
     judge: true,
-    text: 'That second self is your conscience — the sense something is wrong even when no one is watching. Darwin traced it to instinct, Freud to society turned inward, Kant to reason itself.',
+    text: 'That inward weighing is your conscience — the sense something is wrong even when no one is watching. Darwin traced it to instinct, Freud to society turned inward, Kant to reason itself.',
     cite: 'Darwin · Freud · Kant',
     dur: 4.6,
   },
