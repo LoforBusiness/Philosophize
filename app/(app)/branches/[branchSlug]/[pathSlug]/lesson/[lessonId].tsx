@@ -7,6 +7,7 @@ import type { Lesson } from '@/data/types';
 import LessonRunner from '@/components/lesson/LessonRunner';
 import LessonLoader from '@/components/lesson/LessonLoader';
 import ArgumentFightLesson from '@/components/lesson/cinematic/ArgumentFightLesson';
+import PremisesBuilderLesson from '@/components/lesson/cinematic/PremisesBuilderLesson';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -26,6 +27,7 @@ const InkSoft = '#6B6B6B';
 // Removing an entry here is a complete, safe rollback to the normal card runner.
 const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   'logic-arguments-1': ArgumentFightLesson,
+  'logic-arguments-2': PremisesBuilderLesson,
 };
 
 function todayStr() {

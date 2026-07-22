@@ -458,6 +458,55 @@ export function narratorLive(code: number, t: number, bt: number): Stance {
   };
 }
 
+// ── the builder (lesson 2) ────────────────────────────────────────────────────
+// A mason at work: leans into the job, drops a little lower, and rests the lead
+// hand out-forward and low where the next brick lands. `builderLive` adds the
+// single crouch-and-set dip that plays as the beat opens, in sync with the brick
+// drawing itself on. Same hold/live split as the narrator, so the scene can blend
+// the previous beat's settled pose straight into it without a snap.
+
+function builderHold(t: number): Stance {
+  'worklet';
+  const base = stand(t);
+  const dy = life2(t, 1.1, 0.7, 0.5) * 1.0;      // the working hand never sits still
+  return {
+    ...base,
+    tilt: base.tilt - 0.11,                       // lean toward the work
+    neck: 0.05,                                   // eyes down on the bricks
+    bob: base.bob - 6,                            // settle a touch lower
+    fistR: { x: 34, y: 6 + dy },                  // lead hand out-forward, low
+    fistL: { x: -2, y: -6 },                      // trailing hand tucked in
+    adv: 0,
+  };
+}
+
+function builderLive(t: number, bt: number): Stance {
+  'worklet';
+  const s = builderHold(t);
+  // One place-a-brick dip over the first ~0.9s: reach down, set it, rise back.
+  const place = Math.sin(Math.min(bt, 0.9) / 0.9 * Math.PI);
+  return {
+    ...s,
+    bob: s.bob - place * 6,                        // crouch deeper as he sets it
+    tilt: s.tilt - place * 0.06,
+    fistR: { x: s.fistR.x + place * 8, y: s.fistR.y + place * 16 },
+  };
+}
+
+/** Master's settled pose. Code 7 lays a brick; every other code is a narrator gesture. */
+export function masterHold(code: number, t: number): Stance {
+  'worklet';
+  if (code === 7) return builderHold(t);
+  return narratorHold(code, t);
+}
+
+/** Master's living pose. Code 7 is the crouch-and-set; the rest are narrator gestures. */
+export function masterLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code === 7) return builderLive(t, bt);
+  return narratorLive(code, t, bt);
+}
+
 /** Mid-stride, driven by distance so the feet stay locked. */
 export function walk(dist: number, g: Gait = WALK): Stance {
   'worklet';
