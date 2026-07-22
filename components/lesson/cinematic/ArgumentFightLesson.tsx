@@ -196,6 +196,8 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   const clock = useSharedValue(0);
   const bt = useSharedValue(0);
   const bi = useSharedValue(0);
+  const progress = useSharedValue((i + 1) / BEATS.length);
+  const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: progress.value }] }));
 
   // Both clocks are rewound DURING RENDER, not in an effect. An effect runs after
   // the frame has already been composed, so the first frame of a new beat would
@@ -217,6 +219,11 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     clock.value += dt;
     bt.value += dt;
   }, true);
+
+  // Progress bar eases toward the next mark instead of jumping on each tap.
+  useEffect(() => {
+    progress.value = withTiming((i + 1) / BEATS.length, { duration: 500, easing: Easing.out(Easing.cubic) });
+  }, [i]);
 
   // ── scene solve ────────────────────────────────────────────────────────────
   const SCENE = useDerivedValue(() => {
@@ -351,9 +358,8 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
           <SketchIcon name="close" size={20} color={INK} />
         </Pressable>
         <View style={styles.track}>
-          <View style={[styles.fill, { width: `${((i + 1) / BEATS.length) * 100}%` }]} />
+          <Animated.View style={[styles.fill, fillStyle]} />
         </View>
-        <Text style={styles.count}>{i + 1}/{BEATS.length}</Text>
       </View>
 
       {/* Tap ANYWHERE to advance. This has to be an ancestor of the content, not
@@ -702,9 +708,8 @@ const styles = StyleSheet.create({
 
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingTop: 4, gap: 12 },
   close: { padding: 4 },
-  track: { flex: 1, height: 2, backgroundColor: RULE },
-  fill: { height: 2, backgroundColor: INK },
-  count: { fontFamily: 'Inter_500Medium', fontSize: 11, color: SOFT, letterSpacing: 1 },
+  track: { flex: 1, height: 2, backgroundColor: RULE, overflow: 'hidden' },
+  fill: { position: 'absolute', left: 0, top: 0, height: 2, width: '100%', backgroundColor: INK, transformOrigin: '0% 50%' },
 
   // FIXED proportions, not flex:1. When the stage was flex:1 it grew on short
   // beats and shrank when the deck grew (a question, an explanation), so the

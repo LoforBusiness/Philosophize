@@ -108,6 +108,8 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
   const bt = useSharedValue(0);
   const bi = useSharedValue(0);
   const qv = useSharedValue(0);          // 0→1 answer progress (collapse / fly-up)
+  const progress = useSharedValue((i + 1) / BEATS.length);
+  const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: progress.value }] }));
 
   // Rewind the beat clock DURING RENDER (not in an effect): an effect paints one
   // frame of the previous beat's finished state first, which reads as a pop.
@@ -126,6 +128,11 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
     clock.value += dt;
     bt.value += dt;
   }, true);
+
+  // Progress bar eases toward the next mark instead of jumping on each tap.
+  useEffect(() => {
+    progress.value = withTiming((i + 1) / BEATS.length, { duration: 500, easing: Easing.out(Easing.cubic) });
+  }, [i]);
 
   // Drive the collapse / fly-up once the graded answer lands. Collapse falls under
   // gravity (ease-in); the fly-up settles into place (ease-out).
@@ -280,9 +287,8 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
           <SketchIcon name="close" size={20} color={INK} />
         </Pressable>
         <View style={styles.track}>
-          <View style={[styles.fill, { width: `${((i + 1) / BEATS.length) * 100}%` }]} />
+          <Animated.View style={[styles.fill, fillStyle]} />
         </View>
-        <Text style={styles.count}>{i + 1}/{BEATS.length}</Text>
       </View>
 
       {/* Tap anywhere to advance (an ancestor of the content, so scene taps bubble
@@ -552,9 +558,8 @@ const styles = StyleSheet.create({
 
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingTop: 4, gap: 12 },
   close: { padding: 4 },
-  track: { flex: 1, height: 2, backgroundColor: RULE },
-  fill: { height: 2, backgroundColor: INK },
-  count: { fontFamily: 'Inter_500Medium', fontSize: 11, color: SOFT, letterSpacing: 1 },
+  track: { flex: 1, height: 2, backgroundColor: RULE, overflow: 'hidden' },
+  fill: { position: 'absolute', left: 0, top: 0, height: 2, width: '100%', backgroundColor: INK, transformOrigin: '0% 50%' },
 
   // Fixed proportions, not flex:1 — a content-independent split so the stage never
   // resizes on a tap (the "glitch at the top" from lesson 1).

@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState, type ComponentType } from 're
 import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import {
-  useSharedValue, useFrameCallback, withTiming, Easing, type SharedValue,
+import Animated, {
+  useSharedValue, useFrameCallback, useAnimatedStyle, withTiming, Easing, type SharedValue,
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import { getLessonById } from '@/data';
@@ -62,6 +62,9 @@ export default function CinematicPlayer({
   const bt = useSharedValue(0);
   const bi = useSharedValue(0);
   const qv = useSharedValue(0);
+  // Progress fills SMOOTHLY toward the next mark rather than jumping on each tap.
+  const progress = useSharedValue((i + 1) / beats.length);
+  const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: progress.value }] }));
 
   // Rewind the beat clock DURING RENDER (not in an effect): an effect paints one
   // frame of the previous beat's finished state first, which reads as a pop.
@@ -88,6 +91,10 @@ export default function CinematicPlayer({
       qv.value = withTiming(1, { duration: 780, easing: Easing.linear });
     }
   }, [picked, i]);
+
+  useEffect(() => {
+    progress.value = withTiming((i + 1) / beats.length, { duration: 500, easing: Easing.out(Easing.cubic) });
+  }, [i]);
 
   const locked = gates(beat) && picked === null;
   const last = i === beats.length - 1;
@@ -138,9 +145,8 @@ export default function CinematicPlayer({
           <SketchIcon name="close" size={20} color={INK} />
         </Pressable>
         <View style={styles.track}>
-          <View style={[styles.fill, { width: `${((i + 1) / beats.length) * 100}%` }]} />
+          <Animated.View style={[styles.fill, fillStyle]} />
         </View>
-        <Text style={styles.count}>{i + 1}/{beats.length}</Text>
       </View>
 
       <Pressable style={styles.body} onPress={advance} disabled={locked}>

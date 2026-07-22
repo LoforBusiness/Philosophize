@@ -229,9 +229,10 @@ export const styles = StyleSheet.create({
 
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingTop: 4, gap: 12 },
   close: { padding: 4 },
-  track: { flex: 1, height: 2, backgroundColor: RULE },
-  fill: { height: 2, backgroundColor: INK },
-  count: { fontFamily: 'Inter_500Medium', fontSize: 11, color: SOFT, letterSpacing: 1 },
+  track: { flex: 1, height: 2, backgroundColor: RULE, overflow: 'hidden' },
+  // Full-width bar scaled from the left, so a smooth scaleX reads as the fill
+  // advancing (a percentage-width jump on each tap is what we're replacing).
+  fill: { position: 'absolute', left: 0, top: 0, height: 2, width: '100%', backgroundColor: INK, transformOrigin: '0% 50%' },
 
   // Fixed proportions (content-independent) so the stage never resizes on a tap.
   // A slightly shorter stage than 46/46 so the deck holds a 3-line prompt + four
