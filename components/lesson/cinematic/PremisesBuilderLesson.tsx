@@ -46,8 +46,8 @@ const STAGE_H = 560;
 const GROUND = 500;
 const K_FIG = 1.35;                 // stage units per rig unit
 
-const MASTER_X = 300;               // right, faces left toward the work
-const APP_X = 84;                   // left, watches
+const MASTER_X = 330;               // right, faces left — stands beside the work, not behind it
+const APP_X = 62;                   // left, watches — clear of the base bricks
 const APP_K = K_FIG * 0.88;         // the apprentice reads a touch shorter than the master
 const LAY = 0.7;                    // seconds for a brick to drop into place
 

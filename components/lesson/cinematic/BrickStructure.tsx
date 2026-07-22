@@ -26,11 +26,14 @@ const RULE = '#E4E1D8';
 
 // Brick geometry, in STAGE units (the same 400×560 space the figures live in — the
 // structure sits inside the camera container, so it pans and zooms with them).
-export const BW = 116;          // brick width
+// The base is kept narrow and centred (a compact column) so the two builders stand
+// clearly BESIDE it rather than buried behind it — only their reaching arms cross
+// over, and those tuck behind since the structure draws on top.
+export const BW = 106;          // brick width
 export const BH = 38;           // brick height
 export const CENTER_X = 200;    // structure centre
-export const BASE_LX = 138;     // base-left brick centre
-export const BASE_RX = 262;     // base-right brick centre
+export const BASE_LX = 148;     // base-left brick centre
+export const BASE_RX = 252;     // base-right brick centre
 export const BASE_Y = 452;      // base row centre (a bench height, not the floor)
 export const KEY_X = CENTER_X;  // keystone centre
 export const KEY_Y = BASE_Y - BH - 3;   // keystone centre, resting on the base
@@ -128,7 +131,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   plinth: {
-    position: 'absolute', left: CENTER_X - 92, width: 184, height: 2,
+    position: 'absolute', left: CENTER_X - 104, width: 208, height: 2,
     backgroundColor: RULE,
   },
   tagConc: {
