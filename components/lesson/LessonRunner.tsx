@@ -11,7 +11,7 @@ import Animated, {
 import type { Lesson, CardData, AnswerResult } from '@/data/types';
 import { useLessonStore } from '@/stores/lessonStore';
 import { getLessonById } from '@/data';
-import LessonReward from './LessonReward';
+import { useUIStore } from '@/stores/uiStore';
 import CardShell from './CardShell';
 import HookCard from './cards/HookCard';
 import ConceptCard from './cards/ConceptCard';
@@ -28,14 +28,6 @@ import { SceneMetaContext, CardActiveContext } from './sceneContext';
 
 interface Props {
   lesson: Lesson;
-}
-
-interface FinalStats {
-  xp: number;
-  correct: number;
-  total: number;
-  branchSlug: string | null;
-  lessonId: string;
 }
 
 // 5 XP just for completing the lesson, plus 5 per correct answer.
@@ -60,6 +52,7 @@ function hasTimedReveal(card: CardData) {
 
 export default function LessonRunner({ lesson }: Props) {
   const { startSession, recordAnswer, endSession } = useLessonStore();
+  const showReward = useUIStore((s) => s.showReward);
   const { width } = useWindowDimensions();
   const N = lesson.cards.length;
 
@@ -67,8 +60,6 @@ export default function LessonRunner({ lesson }: Props) {
   const [answered, setAnswered] = useState<Set<number>>(new Set());
   // Reading cards whose text has fully revealed (so the forward swipe can unlock).
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
-  const [finished, setFinished] = useState(false);
-  const [stats, setStats] = useState<FinalStats | null>(null);
 
   // The branch a saved quote belongs to (so quote cards file under the right area).
   const branchSlug = useMemo(() => getLessonById(lesson.id)?.branch.slug ?? null, [lesson.id]);
@@ -142,16 +133,18 @@ export default function LessonRunner({ lesson }: Props) {
     const s = useLessonStore.getState().session;
     const found = getLessonById(lesson.id);
     const correct = s?.answers.filter((a) => a.correct).length ?? 0;
-    setStats({
+    // Hand off to the GLOBAL reward overlay, then leave the lesson screen so it
+    // doesn't linger on the tab's stack and re-show the reward.
+    showReward({
       xp: COMPLETION_XP + (s?.sessionXP ?? 0), // 5 for completing + 5 per correct
       correct,
       total: s?.answers.length ?? 0,
       branchSlug: found?.branch.slug ?? null,
       lessonId: lesson.id,
     });
-    setFinished(true);
     endSession();
-  }, [lesson.id, endSession]);
+    router.back();
+  }, [lesson.id, endSession, showReward]);
 
   const onAnswer = useCallback(
     (cardIndex: number, result: AnswerResult) => {
@@ -290,10 +283,6 @@ export default function LessonRunner({ lesson }: Props) {
     endSession();
     router.back();
   }, [endSession]);
-
-  if (finished && stats) {
-    return <LessonReward {...stats} onDone={() => router.back()} />;
-  }
 
   const found = getLessonById(lesson.id);
   const lessonNum = found ? found.path.lessons.findIndex((l) => l.id === lesson.id) + 1 : 1;

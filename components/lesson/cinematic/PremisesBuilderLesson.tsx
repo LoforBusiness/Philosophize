@@ -10,9 +10,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import { getLessonById } from '@/data';
-import LessonReward from '@/components/lesson/LessonReward';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
 import Stickman from './Stickman';
 import BrickStructure, {
   BASE_LX, BASE_RX, BASE_Y, CENTER_X, KEY_X, KEY_Y, type StructState,
@@ -95,6 +95,7 @@ const SHOTS: Shot[] = BEATS.map(shotFor);
 export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
+  const showReward = useUIStore((s) => s.showReward);
 
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
@@ -133,6 +134,21 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
   useEffect(() => {
     progress.value = withTiming((i + 1) / BEATS.length, { duration: 500, easing: Easing.out(Easing.cubic) });
   }, [i]);
+
+  // On completion, hand the result to the global reward overlay and pop this screen.
+  useEffect(() => {
+    if (!done) return;
+    const found = getLessonById(lesson.id);
+    showReward({
+      xp: COMPLETION_XP + correct * 5,
+      correct,
+      total: asked,
+      branchSlug: found?.branch.slug ?? null,
+      lessonId: lesson.id,
+    });
+    router.back();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
 
   // Drive the collapse / fly-up once the graded answer lands. Collapse falls under
   // gravity (ease-in); the fly-up settles into place (ease-out).
@@ -258,19 +274,7 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
     setBoxSize((b) => (Math.abs(b.w - width) < 1 && Math.abs(b.h - height) < 1 ? b : { w: width, h: height }));
   }, []);
 
-  if (done) {
-    const found = getLessonById(lesson.id);
-    return (
-      <LessonReward
-        xp={COMPLETION_XP + correct * 5}
-        correct={correct}
-        total={asked}
-        branchSlug={found?.branch.slug ?? null}
-        lessonId={lesson.id}
-        onDone={() => router.back()}
-      />
-    );
-  }
+  if (done) return null;   // the effect above shows the reward and pops this screen
 
   const fit = boxSize.w > 0 ? Math.min(boxSize.w / STAGE_W, boxSize.h / STAGE_H) : 0;
   const stageGone = !!beat.summary;

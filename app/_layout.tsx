@@ -46,10 +46,23 @@ import RanksBadgesSheet from '@/components/shared/RanksBadgesSheet';
 import SavedQuotesSheet from '@/components/shared/SavedQuotesSheet';
 import PaywallSheet from '@/components/shared/PaywallSheet';
 import LaunchScreen from '@/components/launch/LaunchScreen';
+import LessonReward from '@/components/lesson/LessonReward';
 
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
+
+// The lesson-complete reward, hosted GLOBALLY (not by the lesson screen) so that
+// finishing a lesson pops its screen off the tab stack right away. A finished
+// lesson screen that stayed on the Learn stack used to re-show this reward on
+// every return to the tab and block the branches list.
+function LessonRewardHost() {
+  const reward = useUIStore((s) => s.reward);
+  const seq = useUIStore((s) => s.rewardSeq);
+  const dismiss = useUIStore((s) => s.dismissReward);
+  if (!reward) return null;
+  return <LessonReward key={seq} {...reward} onDone={dismiss} />;
+}
 
 // Expo Router (React Navigation v7) is not supported by PostHog's screen
 // autocapture, so we send a `$screen` event manually on every route change.
@@ -196,6 +209,7 @@ export default function RootLayout() {
       <PhilosopherSheet />
       <RanksBadgesSheet />
       <PaywallSheet />
+      <LessonRewardHost />
       {/* Animated cold-start loading screen: ink scene + drawing stroke + quote.
           Sits over everything until the boot is ready and the count hits 100%. */}
       {!launchDone && (

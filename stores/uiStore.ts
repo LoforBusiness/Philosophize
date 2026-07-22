@@ -1,5 +1,17 @@
 import { create } from 'zustand';
 
+// The result of a finished lesson, handed to the GLOBAL reward overlay. The reward
+// is shown at the app root (not by the lesson screen) so completing a lesson can
+// pop its screen off the tab's stack immediately — otherwise the finished screen
+// lingered on the Learn stack and re-showed the reward on every return to the tab.
+export interface RewardInfo {
+  xp: number;
+  correct: number;
+  total: number;
+  branchSlug: string | null;
+  lessonId: string;
+}
+
 interface UIStore {
   showExitConfirm: boolean;
   setShowExitConfirm: (val: boolean) => void;
@@ -32,6 +44,12 @@ interface UIStore {
   paywallOpen: boolean;
   openPaywall: () => void;
   closePaywall: () => void;
+  // Lesson-complete reward, shown globally over everything. Set on completion,
+  // cleared on "Continue". `rewardSeq` forces a fresh mount per completion.
+  reward: RewardInfo | null;
+  rewardSeq: number;
+  showReward: (r: RewardInfo) => void;
+  dismissReward: () => void;
   // True once the animated launch screen has finished and lifted away. Lives here
   // rather than in _layout's local state because the welcome animation needs it:
   // the launch screen covers the whole boot (~4s), and index.tsx mounts underneath
@@ -69,6 +87,10 @@ export const useUIStore = create<UIStore>((set) => ({
   paywallOpen: false,
   openPaywall: () => set({ paywallOpen: true }),
   closePaywall: () => set({ paywallOpen: false }),
+  reward: null,
+  rewardSeq: 0,
+  showReward: (r) => set((s) => ({ reward: r, rewardSeq: s.rewardSeq + 1 })),
+  dismissReward: () => set({ reward: null }),
   launchDone: false,
   setLaunchDone: (v) => set({ launchDone: v }),
   strollPlayed: false,
