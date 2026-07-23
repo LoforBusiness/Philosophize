@@ -18,6 +18,18 @@ import { Epistemology2Lesson } from '@/components/lesson/cinematic/epistemology2
 import { Metaphysics2Lesson } from '@/components/lesson/cinematic/metaphysics2Scene';
 import { Aesthetics2Lesson } from '@/components/lesson/cinematic/aesthetics2Scene';
 import { Political2Lesson } from '@/components/lesson/cinematic/political2Scene';
+import { Valid3Lesson } from '@/components/lesson/cinematic/valid3Scene';
+import { Strong4Lesson } from '@/components/lesson/cinematic/strong4Scene';
+import { Ethics3Lesson } from '@/components/lesson/cinematic/ethics3Scene';
+import { Ethics4Lesson } from '@/components/lesson/cinematic/ethics4Scene';
+import { Epistemology4Lesson } from '@/components/lesson/cinematic/epistemology4Scene';
+import { Epistemology5Lesson } from '@/components/lesson/cinematic/epistemology5Scene';
+import { Metaphysics3Lesson } from '@/components/lesson/cinematic/metaphysics3Scene';
+import { Metaphysics4Lesson } from '@/components/lesson/cinematic/metaphysics4Scene';
+import { Aesthetics3Lesson } from '@/components/lesson/cinematic/aesthetics3Scene';
+import { Aesthetics4Lesson } from '@/components/lesson/cinematic/aesthetics4Scene';
+import { Political3Lesson } from '@/components/lesson/cinematic/political3Scene';
+import { Political4Lesson } from '@/components/lesson/cinematic/political4Scene';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -48,6 +60,19 @@ const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   'metaphysics-being-2': Metaphysics2Lesson,
   'aesthetics-aesthetics-2': Aesthetics2Lesson,
   'political-political-2': Political2Lesson,
+  // second wave — lessons 3 & 4 of each branch's first unit
+  'logic-arguments-3': Valid3Lesson,
+  'logic-arguments-4': Strong4Lesson,
+  'ethics-ethics-3': Ethics3Lesson,
+  'ethics-ethics-4': Ethics4Lesson,
+  'epistemology-knowledge-4': Epistemology4Lesson,
+  'epistemology-knowledge-5': Epistemology5Lesson,
+  'metaphysics-being-3': Metaphysics3Lesson,
+  'metaphysics-being-4': Metaphysics4Lesson,
+  'aesthetics-aesthetics-3': Aesthetics3Lesson,
+  'aesthetics-aesthetics-4': Aesthetics4Lesson,
+  'political-political-3': Political3Lesson,
+  'political-political-4': Political4Lesson,
 };
 
 function todayStr() {

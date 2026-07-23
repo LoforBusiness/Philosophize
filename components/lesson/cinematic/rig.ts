@@ -477,7 +477,12 @@ function hands(base: Stance, lx: number, ly: number, rx: number, ry: number): St
  * 3 count · 4 think · 5 sweep · 6 point-up · 7 both-wide · 8 shrug · 9 hand-on-hip ·
  * 10 arms-crossed · 11 forehead · 12 scratch-head · 13 point-forward · 14 reach-out ·
  * 15 recoil · 16 celebrate · 17 bow · 18 cower · 19 adore · 20 hold-up · 21 weigh ·
- * 22 clutch-chest · 23 wave.
+ * 22 clutch-chest · 23 wave ·
+ * — the second wave (24–39), added for the branch-3/4 lessons —
+ * 24 reach-up-high · 25 gaze-up-wonder · 26 stamp · 27 pull-lever · 28 power-pose ·
+ * 29 push-out · 30 offer-up · 31 receive · 32 sway-conduct · 33 release-open ·
+ * 34 shield-eyes · 35 proclaim · 36 sign-write · 37 grasp-pull · 38 gesture-down ·
+ * 39 clasp-forward.
  */
 export function emoteHold(code: number, t: number): Stance {
   'worklet';
@@ -506,6 +511,23 @@ export function emoteHold(code: number, t: number): Stance {
   if (code === 21) return hands(s, -26, -8, 26, -8);
   if (code === 22) return { ...hands(s, -6, -6, 4, -30), neck: 0.02 };
   if (code === 23) return { ...hands(s, -6, -4, 30, -46) };
+  // ── the second wave ─────────────────────────────────────────────────────────
+  if (code === 24) return { ...hands(s, -18, -56 + g, 18, -58 + g), neck: -0.24, tilt: s.tilt - 0.04 };     // reach up, both hands, head back
+  if (code === 25) return { ...hands(s, -8, -10, 16 + g, -50 + g), neck: -0.22, tilt: s.tilt - 0.03 };       // gaze up in wonder, one hand rising
+  if (code === 26) return { ...hands(s, -6, -4, 24, -46), neck: -0.04, tilt: s.tilt - 0.03 };                // stamp poised (down-strike is a live accent)
+  if (code === 27) return { ...hands(s, 18, 4, 26, 8), tilt: s.tilt - 0.10, neck: 0.06 };                    // grip the lever, both hands low-forward
+  if (code === 28) return { ...hands(s, -9, -6, 9, -6), tilt: s.tilt - 0.05, bob: s.bob + 2, neck: -0.06 };  // power pose, both hands on hips, chest up
+  if (code === 29) return { ...hands(s, -30 - g, -14, 30 + g, -14), tilt: s.tilt + 0.02 };                   // press outward against the walls
+  if (code === 30) return { ...hands(s, 12, -18, 22, -24), tilt: s.tilt - 0.06, neck: -0.08 };               // offer up with both hands
+  if (code === 31) return { ...hands(s, 14, -2, 24, -6), tilt: s.tilt - 0.03, neck: 0.04 };                  // receive, hands cupped forward
+  if (code === 32) return { ...hands(s, -24, -22, 24, -22), tilt: s.tilt };                                  // conduct / sway (live oscillates both hands)
+  if (code === 33) return { ...hands(s, -30, -30, 30, -30), neck: -0.18, tilt: s.tilt - 0.05 };              // open release, arms wide and up, head back
+  if (code === 34) return { ...hands(s, -8, -6, 4, -48), neck: 0.08, tilt: s.tilt + 0.06 };                  // shield eyes from a bright light
+  if (code === 35) return { ...hands(s, -6, -2, 26, -52 + g), neck: -0.14, tilt: s.tilt - 0.05 };            // proclaim, one arm raised out-and-up
+  if (code === 36) return { ...hands(s, -6, -4, 26, -2), tilt: s.tilt - 0.06, neck: 0.10 };                  // sign / write on a surface
+  if (code === 37) return { ...hands(s, -6, -6, 24, -14), tilt: s.tilt - 0.04 };                             // grasp then pull in (live pulls)
+  if (code === 38) return { ...hands(s, -6, -2, 22, 6), neck: 0.16, tilt: s.tilt + 0.03 };                   // gesture down at the ground / shared floor
+  if (code === 39) return { ...hands(s, -6, -4, 28, -8), tilt: s.tilt - 0.05, neck: 0.02 };                  // reach forward to clasp / covenant
   return s;                                       // 0 neutral
 }
 
@@ -516,7 +538,7 @@ export function emoteLive(code: number, t: number, bt: number): Stance {
   const speech = clamp01(1 - bt / 2.6);
   const talk = Math.sin(bt * 8.2) * speech * 2.6;      // the gesturing hand beats with the line
   const nod = Math.sin(bt * 8.2 + 0.4) * speech * 0.02;
-  let dx = 0, dy = 0, db = 0, dn = 0;
+  let dx = 0, dy = 0, db = 0, dn = 0, dxl = 0, dyl = 0;
   if (code === 2 || code === 6 || code === 20 || code === 23) dy = Math.sin(Math.min(bt, 0.7) / 0.7 * Math.PI) * -6; // lift accent
   if (code === 3) dy = Math.sin(bt * 7.0) * Math.max(0, 1 - bt / 1.7) * 3;                     // counted chops
   if (code === 5) dx = lerp(-30, 0, ease01(bt / 1.0));                                          // sweep into place
@@ -525,10 +547,20 @@ export function emoteLive(code: number, t: number, bt: number): Stance {
   if (code === 16) db = Math.abs(Math.sin(bt * 6)) * Math.max(0, 1 - bt / 1.5) * 4;             // celebrate bounce
   if (code === 18) { dx = Math.sin(bt * 22) * Math.max(0, 1 - bt / 1.2) * 1.2; }                // cower tremble
   if (code === 23) dx = Math.sin(bt * 9) * speech * 5;                                          // wave oscillation
+  // ── the second wave's accents ────────────────────────────────────────────────
+  if (code === 24 || code === 33) dy = Math.sin(Math.min(bt, 0.8) / 0.8 * Math.PI) * -5;        // reach / release rises
+  if (code === 25 || code === 35) dy = Math.sin(Math.min(bt, 0.7) / 0.7 * Math.PI) * -5;        // wonder / proclaim lift
+  if (code === 26) dy = Math.sin(Math.min(bt, 0.45) / 0.45 * Math.PI) * 22;                     // stamp strikes down and recovers
+  if (code === 27) { const p = Math.sin(Math.min(bt, 0.5) / 0.5 * Math.PI); dy = p * 14; dyl = p * 14; db = -p * 3; } // both hands yank the lever down, body dips
+  if (code === 29) { const p = Math.sin(bt * 5) * Math.max(0, 1 - bt / 1.4) * 2; dx = p; dxl = -p; }            // straining push tremble
+  if (code === 32) { dx = Math.sin(bt * 3.0) * 6; dxl = Math.sin(bt * 3.0 + Math.PI) * 6; }                     // conduct: hands sway in opposition
+  if (code === 36) dx = Math.sin(bt * 12) * Math.max(0, 1 - bt / 1.6) * 4;                      // signing strokes
+  if (code === 37) dx = lerp(0, -14, ease01(bt / 0.9));                                          // grasp pulls the catch inward
   return {
     ...s,
     neck: s.neck + nod + dn,
     bob: s.bob + db,
+    fistL: { x: s.fistL.x + dxl, y: s.fistL.y + dyl },
     fistR: { x: s.fistR.x + dx, y: s.fistR.y + talk + dy },
   };
 }
