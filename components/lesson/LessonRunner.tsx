@@ -1,6 +1,5 @@
 import { useRef, useCallback, useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
-import { router } from 'expo-router';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -12,6 +11,7 @@ import type { Lesson, CardData, AnswerResult } from '@/data/types';
 import { useLessonStore } from '@/stores/lessonStore';
 import { getLessonById } from '@/data';
 import { useUIStore } from '@/stores/uiStore';
+import { exitLesson } from './exitLesson';
 import CardShell from './CardShell';
 import HookCard from './cards/HookCard';
 import ConceptCard from './cards/ConceptCard';
@@ -143,7 +143,7 @@ export default function LessonRunner({ lesson }: Props) {
       lessonId: lesson.id,
     });
     endSession();
-    router.back();
+    exitLesson();
   }, [lesson.id, endSession, showReward]);
 
   const onAnswer = useCallback(
@@ -281,7 +281,7 @@ export default function LessonRunner({ lesson }: Props) {
 
   const handleExit = useCallback(() => {
     endSession();
-    router.back();
+    exitLesson();
   }, [endSession]);
 
   const found = getLessonById(lesson.id);

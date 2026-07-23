@@ -1,11 +1,12 @@
 import { useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getLessonById, lessonAccessibility } from '@/data';
 import type { Lesson } from '@/data/types';
 import LessonRunner from '@/components/lesson/LessonRunner';
 import LessonLoader from '@/components/lesson/LessonLoader';
+import { exitLesson } from '@/components/lesson/exitLesson';
 import ArgumentFightLesson from '@/components/lesson/cinematic/ArgumentFightLesson';
 import PremisesBuilderLesson from '@/components/lesson/cinematic/PremisesBuilderLesson';
 import { EthicsLesson } from '@/components/lesson/cinematic/ethicsScene';
@@ -153,7 +154,7 @@ export default function LessonScreen() {
               <Text style={styles.primaryText}>Unlock Scholar’s Pass</Text>
             </Pressable>
           )}
-          <Pressable onPress={() => router.back()} style={styles.secondaryBtn} hitSlop={8}>
+          <Pressable onPress={exitLesson} style={styles.secondaryBtn} hitSlop={8}>
             <Text style={styles.secondaryText}>Go back</Text>
           </Pressable>
         </SafeAreaView>
@@ -181,7 +182,7 @@ export default function LessonScreen() {
           >
             <Text style={styles.primaryText}>Unlock Scholar’s Pass</Text>
           </Pressable>
-          <Pressable onPress={() => router.back()} style={styles.secondaryBtn} hitSlop={8}>
+          <Pressable onPress={exitLesson} style={styles.secondaryBtn} hitSlop={8}>
             <Text style={styles.secondaryText}>Maybe tomorrow</Text>
           </Pressable>
         </SafeAreaView>

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type ComponentType } from 'react';
 import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
 import Animated, {
   useSharedValue, useFrameCallback, useAnimatedStyle, withTiming, Easing, type SharedValue,
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import { getLessonById } from '@/data';
+import { exitLesson } from '../exitLesson';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -109,7 +109,7 @@ export default function CinematicPlayer({
       branchSlug: found?.branch.slug ?? null,
       lessonId: lesson.id,
     });
-    router.back();
+    exitLesson();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
@@ -146,7 +146,7 @@ export default function CinematicPlayer({
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.close}>
+        <Pressable onPress={exitLesson} hitSlop={12} style={styles.close}>
           <SketchIcon name="close" size={20} color={INK} />
         </Pressable>
         <View style={styles.track}>
