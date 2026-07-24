@@ -12,8 +12,14 @@ import type { SceneApi } from './CinematicPlayer';
 // figure itself glows (Dasein). Stars fill the top, figure at the bottom-centre.
 
 const FIG_X = 200;
-const STARS = Array.from({ length: 40 }, (_, k) => ({
-  x: 40 + (k * 137) % 320, y: 210 + (k * 89) % 210, r: 1 + (k % 3), ph: (k * 0.13) % 1,
+// Decorrelated sin-hash so stars scatter across the sky instead of marching in a
+// diagonal line (a plain `k*137 % 320` steps x and y together — a visible streak).
+const hash = (n: number) => { const v = Math.sin(n) * 43758.5453; return v - Math.floor(v); };
+const STARS = Array.from({ length: 48 }, (_, k) => ({
+  x: 26 + hash(k * 1.7 + 0.3) * 348,
+  y: 150 + hash(k * 2.9 + 1.1) * 250,
+  r: 0.8 + hash(k * 3.7 + 0.5) * 1.8,
+  ph: hash(k * 0.7 + 2.2),
 }));
 
 const P_CODE = BEATS.map((b) => b.p ?? 0);
