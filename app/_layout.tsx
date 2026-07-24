@@ -28,7 +28,7 @@ import {
 import { useFonts } from 'expo-font';
 import { Stack, router, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View, ActivityIndicator, AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -154,11 +154,20 @@ export default function RootLayout() {
     if (subReady && !isPro) ads.initialize();
   }, [subReady, isPro]);
 
+  // The user id we last routed on. Supabase re-fires SIGNED_IN not only on a real
+  // sign-in but on app resume / token refresh / re-subscription — and blindly
+  // `router.replace('/(app)')` on every one of those teleports an active user to
+  // Home mid-lesson (leaving the finished lesson stranded on the Learn stack as a
+  // blank screen). So we only redirect when the user *actually changes*, mirroring
+  // the same guard already used in useCloudSync.
+  const routedUidRef = useRef<string | null>(null);
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       const sub = useSubscriptionStore.getState();
+      const uid = session?.user?.id ?? null;
       if (!authChecked) {
         setAuthChecked(true);
+        routedUidRef.current = uid;
         // Configure RevenueCat once, tied to the current user (no-op stub on
         // web/Expo Go). init() is internally guarded against double-calls. The
         // email lets reviewer/tester accounts unlock Pro without a purchase.
@@ -172,9 +181,17 @@ export default function RootLayout() {
           router.replace(pendingThinker ? '/(app)/philosophers' : '/(app)');
         }
       } else if (event === 'SIGNED_IN') {
+        // Keep RevenueCat in sync every time (idempotent), but only route into the
+        // app on a genuine new sign-in — never on a spurious same-user re-fire.
+        const changedUser = uid !== routedUidRef.current;
+        routedUidRef.current = uid;
         sub.setUser(session?.user?.id ?? null, session?.user?.email ?? null);
-        router.replace('/(app)');
+        // Only a genuinely new user gets routed into the app; a spurious same-user
+        // SIGNED_IN (app resume / session recovery / token reissue) is ignored so it
+        // can't teleport an active player to Home.
+        if (changedUser) router.replace('/(app)');
       } else if (event === 'SIGNED_OUT') {
+        routedUidRef.current = null;
         sub.setUser(null, null);
       }
     });
