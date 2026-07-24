@@ -56,7 +56,7 @@ export const BEATS: Logic5Beat[] = [
   {
     p: 4, chain: 1,
     interact: {
-      prompt: 'This proof skips a step — one link is only assumed. Tap the weak link where a hidden flaw could slip in.',
+      prompt: 'This chain of reasoning skips a step. Tap the missing link — the gap where a hidden flaw could hide.',
       explain: 'Every missing step is a gap where a faulty inference hides. A good deduction spells out each link so anyone can check it — so leaving steps out never makes it stronger.',
       xp: 5,
     },

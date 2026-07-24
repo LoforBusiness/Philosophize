@@ -13,7 +13,7 @@ import type { SceneApi } from './CinematicPlayer';
 // virtue grows) and a balance scale (proven fact vs interpretive thesis) are the
 // two scene-driven answers. Identity-scale camera so the tap targets sit under the art.
 
-const GAP = 100;                   // spacing between the two walkers
+const GAP = 118;                   // spacing between the two walkers
 const COLUMNS = [64, 150, 250, 336];
 
 const SX = BEATS.map((b) => b.sx ?? 200);
@@ -177,7 +177,7 @@ function Pan({ pn, S, answered, picked, onPick }: {
   const chosen = picked === pn.id;
   const st = useAnimatedStyle(() => ({ transform: [{ translateY: S.value.tilt * pn.side * 14 }] }));
   return (
-    <Animated.View style={[styles.panHit, { left: 200 + pn.side * 56 - 34 }, st]}>
+    <Animated.View style={[styles.panHit, { left: 200 + pn.side * 60 - 48 }, st]}>
       <Pressable disabled={answered} onPress={() => onPick(pn.id, pn.correct)} style={styles.panPress}>
         <View style={[styles.pan, answered && pn.correct && styles.panRight, answered && chosen && !pn.correct && styles.panWrong]}>
           <Text style={[styles.panT, answered && pn.correct && styles.panTOn]}>{pn.label}</Text>
@@ -209,12 +209,12 @@ const styles = StyleSheet.create({
   balPost: { position: 'absolute', left: 199, top: 272, width: 3, height: 92, backgroundColor: INK },
   balBeam: { position: 'absolute', left: 200 - 60, top: 270, width: 120, height: 3, backgroundColor: INK, transformOrigin: '50% 50%' },
   balHang: { position: 'absolute', top: 0, width: 2, height: 24, backgroundColor: SOFT },
-  panHit: { position: 'absolute', top: 292, width: 68, alignItems: 'center' },
+  panHit: { position: 'absolute', top: 288, width: 96, alignItems: 'center' },
   panPress: { alignItems: 'center' },
-  pan: { width: 68, height: 26, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center' },
+  pan: { width: 96, height: 40, borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center' },
   panRight: { backgroundColor: INK, borderColor: INK },
   panWrong: { borderColor: SOFT, opacity: 0.5 },
-  panT: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.5, color: INK },
+  panT: { fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.5, color: INK },
   panTOn: { color: PAPER },
 });
 

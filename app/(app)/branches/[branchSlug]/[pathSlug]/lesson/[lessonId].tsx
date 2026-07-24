@@ -33,6 +33,16 @@ import { Political3Lesson } from '@/components/lesson/cinematic/political3Scene'
 import { Political4Lesson } from '@/components/lesson/cinematic/political4Scene';
 import { Logic5Lesson } from '@/components/lesson/cinematic/logic5Scene';
 import { Ethics5Lesson } from '@/components/lesson/cinematic/ethics5Scene';
+import { Logic6Lesson } from '@/components/lesson/cinematic/logic6Scene';
+import { Metaphysics6Lesson } from '@/components/lesson/cinematic/metaphysics6Scene';
+import { Aesthetics6Lesson } from '@/components/lesson/cinematic/aesthetics6Scene';
+import { Ethics6Lesson } from '@/components/lesson/cinematic/ethics6Scene';
+import { Epistemology6Lesson } from '@/components/lesson/cinematic/epistemology6Scene';
+import { Epistemology7Lesson } from '@/components/lesson/cinematic/epistemology7Scene';
+import { Metaphysics5Lesson } from '@/components/lesson/cinematic/metaphysics5Scene';
+import { Aesthetics5Lesson } from '@/components/lesson/cinematic/aesthetics5Scene';
+import { Political5Lesson } from '@/components/lesson/cinematic/political5Scene';
+import { Political6Lesson } from '@/components/lesson/cinematic/political6Scene';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -79,6 +89,16 @@ const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   // showcase — richer scenes + scene-driven answers
   'logic-arguments-5': Logic5Lesson,
   'ethics-ethics-5': Ethics5Lesson,
+  'logic-arguments-6': Logic6Lesson,
+  'metaphysics-being-6': Metaphysics6Lesson,
+  'aesthetics-aesthetics-6': Aesthetics6Lesson,
+  'ethics-ethics-6': Ethics6Lesson,
+  'epistemology-knowledge-6': Epistemology6Lesson,
+  'epistemology-knowledge-7': Epistemology7Lesson,
+  'metaphysics-being-5': Metaphysics5Lesson,
+  'aesthetics-aesthetics-5': Aesthetics5Lesson,
+  'political-political-5': Political5Lesson,
+  'political-political-6': Political6Lesson,
 };
 
 function todayStr() {
