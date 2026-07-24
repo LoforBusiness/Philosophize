@@ -31,6 +31,8 @@ import { Aesthetics3Lesson } from '@/components/lesson/cinematic/aesthetics3Scen
 import { Aesthetics4Lesson } from '@/components/lesson/cinematic/aesthetics4Scene';
 import { Political3Lesson } from '@/components/lesson/cinematic/political3Scene';
 import { Political4Lesson } from '@/components/lesson/cinematic/political4Scene';
+import { Logic5Lesson } from '@/components/lesson/cinematic/logic5Scene';
+import { Ethics5Lesson } from '@/components/lesson/cinematic/ethics5Scene';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -74,6 +76,9 @@ const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   'aesthetics-aesthetics-4': Aesthetics4Lesson,
   'political-political-3': Political3Lesson,
   'political-political-4': Political4Lesson,
+  // showcase — richer scenes + scene-driven answers
+  'logic-arguments-5': Logic5Lesson,
+  'ethics-ethics-5': Ethics5Lesson,
 };
 
 function todayStr() {

@@ -11,7 +11,7 @@ import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import {
-  Fade, Choices, QuoteCard, SummaryCard, gates, styles,
+  Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
   COMPLETION_XP, XFADE, STAGE_W, STAGE_H, INK,
   type BaseBeat,
 } from './cinematicKit';
@@ -35,6 +35,8 @@ export interface SceneApi {
   qv: SharedValue<number>;      // 0→1 answer progress on the current question beat
   i: number;                    // current beat index (JS)
   beat: BaseBeat;               // current beat (for bubbles etc.)
+  picked: string | null;        // which scene target is chosen (null until answered)
+  onPick: (id: string, correct: boolean) => void;  // scene reports a scene-driven answer
 }
 export type SceneComponent = ComponentType<SceneApi>;
 
@@ -53,6 +55,7 @@ export default function CinematicPlayer({
 
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
+  const [pickedOk, setPickedOk] = useState(false);
   const [correct, setCorrect] = useState(0);
   const [asked, setAsked] = useState(0);
   const [done, setDone] = useState(false);
@@ -120,12 +123,14 @@ export default function CinematicPlayer({
     if (locked) return;
     if (last) { setDone(true); return; }
     setPicked(null);
+    setPickedOk(false);
     setI((n) => n + 1);
   }, [locked, last]);
 
   const choose = useCallback((id: string, isCorrect: boolean, graded: boolean) => {
     if (picked !== null) return;
     setPicked(id);
+    setPickedOk(isCorrect);
     if (graded) {
       setAsked((n) => n + 1);
       if (isCorrect) setCorrect((n) => n + 1);
@@ -159,7 +164,7 @@ export default function CinematicPlayer({
           {fit > 0 && !gone ? (
             <View style={{ width: STAGE_W * fit, height: STAGE_H * fit, overflow: 'hidden' }}>
               <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
-                <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} />
+                <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} onPick={(id, ok) => choose(id, ok, true)} />
               </View>
             </View>
           ) : null}
@@ -212,6 +217,15 @@ export default function CinematicPlayer({
                     picked={picked}
                     graded
                     onPick={(id, ok) => choose(id, ok, true)}
+                  />
+                ) : null}
+
+                {beat.interact ? (
+                  <InteractPanel
+                    prompt={beat.interact.prompt}
+                    explain={beat.interact.explain}
+                    answered={picked !== null}
+                    correct={pickedOk}
                   />
                 ) : null}
               </>

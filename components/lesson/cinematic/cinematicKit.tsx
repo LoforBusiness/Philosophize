@@ -38,6 +38,13 @@ export interface QuoteBlock {
 }
 export interface QBlock { prompt: string; options: Choice[]; explain: string; xp?: number }
 export interface SummaryBlock { title: string; points: string[]; closing: string }
+/**
+ * A SCENE-DRIVEN graded question: the answer UI lives IN the animated stage (tap an
+ * object, choose a path, tip a balance, feed a machine) rather than as a text list.
+ * The scene renders its own targets and calls `onPick(id, correct)`; the deck shows
+ * only this prompt and, once answered, the explanation. Scored exactly like `mc`.
+ */
+export interface InteractBlock { prompt: string; explain: string; xp?: number }
 
 /** Every lesson's Beat extends this; the shell reads only these common fields. */
 export interface BaseBeat {
@@ -46,13 +53,14 @@ export interface BaseBeat {
   say?: Say[];
   quote?: QuoteBlock;
   tap?: QBlock;                            // ungraded teaching tap
-  mc?: QBlock;                             // graded question
+  mc?: QBlock;                             // graded question (A/B/C/D in the deck)
+  interact?: InteractBlock;                // graded question answered IN the scene
   summary?: SummaryBlock;
   dur: number;
 }
 
 /** Beats that hold the reader until they answer, rather than until they tap. */
-export function gates(b: BaseBeat) { return Boolean(b.tap || b.mc); }
+export function gates(b: BaseBeat) { return Boolean(b.tap || b.mc || b.interact); }
 
 // ── beat-to-beat transition (SEQUENTIAL) ──────────────────────────────────────
 // Fade the deck fully out, swap content while invisible, fade back in. `render`
@@ -184,6 +192,28 @@ export function Choices({
   );
 }
 
+// ── scene-driven question (answered in the stage, not the deck) ───────────────
+// The deck shows the prompt and, once answered, the Correct/Not-quite reveal. The
+// tappable targets live in the SCENE, which calls onPick — so this panel has no
+// buttons of its own. `answered`/`correct` are owned by the player.
+export function InteractPanel({
+  prompt, explain, answered, correct,
+}: { prompt: string; explain: string; answered: boolean; correct: boolean }) {
+  return (
+    <Animated.View style={styles.qWrap} layout={LinearTransition.duration(300)}>
+      <Text style={styles.prompt}>{prompt}</Text>
+      {!answered ? (
+        <Text style={styles.interactHint}>Answer in the scene above ↑</Text>
+      ) : (
+        <Animated.View style={styles.explain} entering={FadeInDown.duration(300)}>
+          <Text style={styles.explainHead}>{correct ? 'Correct  ·  +5 XP' : 'Not quite'}</Text>
+          <Text style={styles.explainText}>{explain}</Text>
+        </Animated.View>
+      )}
+    </Animated.View>
+  );
+}
+
 // ── quote + summary ───────────────────────────────────────────────────────────
 export function QuoteCard({
   q, saved, onToggle,
@@ -260,6 +290,7 @@ export const styles = StyleSheet.create({
 
   qWrap: { marginTop: 2 },
   prompt: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 16, color: INK, marginBottom: 8, lineHeight: 21 },
+  interactHint: { fontFamily: 'Inter_500Medium', fontSize: 12, letterSpacing: 0.5, color: SOFT, fontStyle: 'italic' },
   opt: {
     borderWidth: 1.5, borderColor: RULE, borderRadius: 5,
     paddingVertical: 8, paddingHorizontal: 14, marginBottom: 6, backgroundColor: PAPER,

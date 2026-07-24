@@ -662,6 +662,28 @@ export function strideStance(x0: number, x1: number, settled: Stance, tr: number
   return mixStance(w, settled, arrive);
 }
 
+/**
+ * Climbing a ladder: hands reach up to grab rungs and feet step up, opposite limbs
+ * moving together (left hand with right foot). `u` is a continuous phase (radians);
+ * the SCENE raises the figure's groundY as it climbs so the body actually ascends.
+ * Feet sit FORWARD on the rungs (x positive toward the ladder), hands reach forward
+ * and high — never behind the head, so both stay visible.
+ */
+export function climb(u: number): Stance {
+  'worklet';
+  const s = Math.sin(u);
+  const lHand = Math.max(0, s);           // left hand reaching to the high rung
+  const rHand = Math.max(0, -s);          // right hand reaching on the opposite half
+  return {
+    tilt: -0.10, neck: -0.16, bob: 2,
+    footL: { x: 6, y: -3 - 11 * rHand },  // left foot lifts with the right hand
+    footR: { x: 6, y: -3 - 11 * lHand },
+    fistL: { x: 11, y: -24 - 18 * lHand }, // hands forward + up, alternating high
+    fistR: { x: 13, y: -24 - 18 * rHand },
+    adv: 0,
+  };
+}
+
 // ── transform bundles for the View renderer ──────────────────────────────────
 
 export type XF = any[];
