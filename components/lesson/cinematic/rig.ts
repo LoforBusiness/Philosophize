@@ -482,7 +482,12 @@ function hands(base: Stance, lx: number, ly: number, rx: number, ry: number): St
  * 24 reach-up-high · 25 gaze-up-wonder · 26 stamp · 27 pull-lever · 28 power-pose ·
  * 29 push-out · 30 offer-up · 31 receive · 32 sway-conduct · 33 release-open ·
  * 34 shield-eyes · 35 proclaim · 36 sign-write · 37 grasp-pull · 38 gesture-down ·
- * 39 clasp-forward.
+ * 39 clasp-forward ·
+ * — the third wave (40–47), for the lessons where the figure WALKS to a prop and
+ *   works at it (a whiteboard, an easel, a chart, a fence) —
+ * 40 write-on-board · 41 tap-high-on-board · 42 carry-load · 43 set-it-down ·
+ * 44 hands-behind-back (contemplative stroll) · 45 double-take · 46 slump ·
+ * 47 frame-it-up (both hands sizing something).
  */
 export function emoteHold(code: number, t: number): Stance {
   'worklet';
@@ -528,6 +533,18 @@ export function emoteHold(code: number, t: number): Stance {
   if (code === 37) return { ...hands(s, -6, -6, 24, -14), tilt: s.tilt - 0.04 };                             // grasp then pull in (live pulls)
   if (code === 38) return { ...hands(s, -6, -2, 22, 6), neck: 0.16, tilt: s.tilt + 0.03 };                   // gesture down at the ground / shared floor
   if (code === 39) return { ...hands(s, -6, -4, 28, -8), tilt: s.tilt - 0.05, neck: 0.02 };                  // reach forward to clasp / covenant
+  // ── the third wave: working at a prop ───────────────────────────────────────
+  // These assume the prop is just in FRONT of the figure (the scene walks them to
+  // it and turns them to face it), so the working hand stays forward and visible —
+  // never tucked behind the head or crossing the face.
+  if (code === 40) return { ...hands(s, -7, -2, 30 + g, -40), neck: -0.10, tilt: s.tilt - 0.05 };  // write on a board
+  if (code === 41) return { ...hands(s, -7, -2, 31, -54), neck: -0.18, tilt: s.tilt - 0.05 };      // tap high on the board
+  if (code === 42) return { ...hands(s, 18, 2, 26, 2), tilt: s.tilt + 0.04, bob: s.bob - 2 };      // carry a load, both hands forward-low
+  if (code === 43) return { ...hands(s, 16, 10, 24, 12), tilt: s.tilt - 0.14, bob: s.bob - 9, neck: 0.14 }; // set it down
+  if (code === 44) return { ...hands(s, -12, 2, -15, 4), neck: -0.06, tilt: s.tilt - 0.02 };       // hands clasped behind the back
+  if (code === 45) return { ...hands(s, -7, -3, 14, -20), neck: 0.02 };                            // double-take (the live pass snaps the head)
+  if (code === 46) return { ...hands(s, -8, 4, 8, 4), tilt: s.tilt + 0.10, neck: 0.20, bob: s.bob - 6 }; // slump, defeated
+  if (code === 47) return { ...hands(s, -20, -34, 20, -34), neck: -0.04, tilt: s.tilt - 0.02 };    // frame it up, both hands sizing
   return s;                                       // 0 neutral
 }
 
@@ -556,6 +573,17 @@ export function emoteLive(code: number, t: number, bt: number): Stance {
   if (code === 32) { dx = Math.sin(bt * 3.0) * 6; dxl = Math.sin(bt * 3.0 + Math.PI) * 6; }                     // conduct: hands sway in opposition
   if (code === 36) dx = Math.sin(bt * 12) * Math.max(0, 1 - bt / 1.6) * 4;                      // signing strokes
   if (code === 37) dx = lerp(0, -14, ease01(bt / 0.9));                                          // grasp pulls the catch inward
+  // ── the third wave's accents ────────────────────────────────────────────────
+  if (code === 40) {                                                                             // writing: small looping strokes that fade out
+    const w = Math.max(0, 1 - bt / 2.2);
+    dx = Math.sin(bt * 11) * w * 5;
+    dy = Math.cos(bt * 8.5) * w * 3;
+  }
+  if (code === 41) dx = Math.sin(Math.min(bt, 0.5) / 0.5 * Math.PI) * 7;                         // one deliberate tap at the board
+  if (code === 43) { const p = Math.sin(Math.min(bt, 0.8) / 0.8 * Math.PI); db = -p * 5; dy = p * 9; dyl = p * 9; } // crouch and set it down
+  if (code === 45) dn = Math.sin(Math.min(bt, 0.45) / 0.45 * Math.PI) * -0.28;                   // the head snaps round
+  if (code === 46) db = -Math.sin(Math.min(bt, 0.9) / 0.9 * Math.PI) * 2.5;                      // the slump settles heavier
+  if (code === 47) { const p = Math.sin(bt * 2.4) * Math.max(0, 1 - bt / 1.8) * 3; dx = p; dxl = -p; } // framing hands adjust the crop
   return {
     ...s,
     neck: s.neck + nod + dn,
@@ -660,6 +688,51 @@ export function strideStance(x0: number, x1: number, settled: Stance, tr: number
   const w = walk(traveled, g);
   const arrive = clamp01((tr - 0.8) / 0.2);
   return mixStance(w, settled, arrive);
+}
+
+/**
+ * THE canonical beat-to-beat body motion for a figure that moves around the stage.
+ *
+ * If the beat moves the figure (x changed), they WALK there — feet driven by
+ * distance so they never skate — and ease into the new beat's settled gesture over
+ * the last 20% of the transition, so arriving at a whiteboard flows straight into
+ * writing on it. If the beat doesn't move them, the previous beat's settled pose
+ * blends into the new beat's living gesture, so the hands travel from wherever they
+ * were into the next gesture and never snap home.
+ *
+ * The scene still owns the x-interpolation and the facing (`dirsFrom` → `pose`'s
+ * `dir`). Pass `WALK` explicitly — a Gait left to a default parameter is NOT
+ * captured into the worklet runtime and throws "Property 'WALK' doesn't exist".
+ * Defined after strideStance/mixStance: a worklet that calls a worklet declared
+ * later captures it as undefined and crashes the UI thread.
+ */
+export function travelStance(
+  x0: number, x1: number, holdPrev: Stance, holdNext: Stance, liveNext: Stance, tr: number, g: Gait
+): Stance {
+  'worklet';
+  if (Math.abs(x1 - x0) > 1) return strideStance(x0, x1, holdNext, tr, g);
+  return mixStance(holdPrev, liveNext, tr);
+}
+
+/**
+ * Facing direction per beat, precomputed on the JS thread from the beats' x track:
+ * +1 walking right, -1 walking left, and HOLD the last direction while standing
+ * still — so a figure that walks left to a chart keeps facing the chart while it
+ * talks about it, instead of snapping back to face right.
+ *
+ * Plain JS (not a worklet): call it once at module scope next to the x array.
+ */
+export function dirsFrom(xs: number[], start = 1): number[] {
+  const out: number[] = [];
+  let d = start;
+  for (let i = 0; i < xs.length; i++) {
+    if (i > 0) {
+      if (xs[i] > xs[i - 1] + 1) d = 1;
+      else if (xs[i] < xs[i - 1] - 1) d = -1;
+    }
+    out.push(d);
+  }
+  return out;
 }
 
 /**
