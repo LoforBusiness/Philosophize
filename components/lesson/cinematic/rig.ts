@@ -675,6 +675,40 @@ export function mixStance(a: Stance, b: Stance, t: number): Stance {
 }
 
 /**
+ * Give a walk its own HABIT.
+ *
+ * One shared Gait meant every journey in every lesson used the identical stride,
+ * bounce and arm swing — the figure read as the same loop pacing back and forth.
+ * This deals each walk a deterministic variation from its own start/end position:
+ * a longer or shorter stride, feet that clear the ground more or less, a heavier
+ * or lighter bob, arms that swing freely or stay close, a touch more or less lean.
+ * Same journey always walks the same way (so it never flickers between beats), but
+ * two different journeys never look alike.
+ *
+ * Defined BEFORE strideStance — a worklet that calls one declared later captures it
+ * as undefined and crashes the UI thread.
+ */
+export function gaitVary(g: Gait, seed: number): Gait {
+  'worklet';
+  const frac = (v: number) => { 'worklet'; return v - Math.floor(v); };
+  const r1 = frac(Math.sin(seed * 12.9898) * 43758.5453);
+  const r2 = frac(Math.sin(seed * 78.233 + 1.7) * 43758.5453);
+  const r3 = frac(Math.sin(seed * 39.425 + 3.1) * 43758.5453);
+  const st = g.stance + (r1 - 0.5) * 0.06;
+  return {
+    S: g.S * (0.84 + r1 * 0.34),            // stride length: short and busy → long and loping
+    lift: g.lift * (0.76 + r2 * 0.54),      // how far the feet clear the ground
+    stance: st < 0.55 ? 0.55 : st > 0.70 ? 0.70 : st,
+    bob: g.bob * (0.78 + r3 * 0.6),         // heavy tread → light tread
+    bobSign: g.bobSign,
+    tilt: g.tilt * (0.84 + r3 * 0.42),      // how much they lean into the walk
+    armBase: g.armBase,
+    armSwing: g.armSwing * (0.70 + r2 * 0.66),
+    standH: g.standH,
+  };
+}
+
+/**
  * Locomotion: a stance that WALKS from x0 to x1 as `tr` goes 0→1, easing into the
  * `settled` gesture on arrival. The scene interpolates the x-position itself; this
  * supplies the stride (feet driven by distance, so they never skate) and the settle.
@@ -684,8 +718,12 @@ export function mixStance(a: Stance, b: Stance, t: number): Stance {
  */
 export function strideStance(x0: number, x1: number, settled: Stance, tr: number, g: Gait = WALK): Stance {
   'worklet';
+  // Every walk gets its own habit, dealt from where it starts and ends, so the
+  // figure never paces the stage in one identical repeating motion. This lives
+  // here rather than at the call sites so EVERY lesson gets it for free.
+  const vg = gaitVary(g, x0 * 0.37 + x1 * 0.11);
   const traveled = Math.abs(x1 - x0) * ease01(tr);
-  const w = walk(traveled, g);
+  const w = walk(traveled, vg);
   const arrive = clamp01((tr - 0.8) / 0.2);
   return mixStance(w, settled, arrive);
 }

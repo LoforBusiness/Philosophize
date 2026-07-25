@@ -25,6 +25,24 @@ export const RULE = '#E4E1D8';
 export const STAGE_W = 400;
 export const STAGE_H = 560;
 export const GROUND = 500;
+
+// WHY LESSONS SHOULD DECLARE A BAND.
+//
+// The stage REGION on a phone is wide and short (roughly 923×647 device px) while
+// this design space is tall and narrow (400×560). Fitting all 560 in letterboxes
+// the scene to about 1.15× and throws away half the available width — which is
+// exactly why the animations read small. Most scenes leave the top third as empty
+// sky, so cropping to the slice that actually holds art and scaling THAT up is free
+// size: a lesson whose art lives in y 180..510 fits at ~1.96× instead of 1.15×,
+// nearly doubling everything on screen.
+//
+// The default below is the whole space, so a lesson that declares nothing is never
+// silently clipped. Every lesson should pass its own measured [top, bottom] to
+// CinematicPlayer — it must contain EVERY prop the scene draws (remember a figure
+// standing on GROUND=500 has its crown at about y=361), and if the scene applies a
+// camera translation, measure the band AFTER that shift.
+export const BAND_T = 0;
+export const BAND_B = STAGE_H;
 export const K_FIG = 1.35;                 // stage units per rig unit
 export const XFADE = 420;                  // beat-to-beat deck fade (ms)
 export const COMPLETION_XP = 5;            // matches LessonRunner

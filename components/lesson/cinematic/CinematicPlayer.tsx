@@ -12,7 +12,7 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
-  COMPLETION_XP, XFADE, STAGE_W, STAGE_H, INK,
+  COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, INK,
   type BaseBeat,
 } from './cinematicKit';
 
@@ -41,13 +41,19 @@ export interface SceneApi {
 export type SceneComponent = ComponentType<SceneApi>;
 
 export default function CinematicPlayer({
-  lesson, beats, Scene, stageGone = (b) => !!b.summary,
+  lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B],
 }: {
   lesson: Lesson;
   beats: BaseBeat[];
   Scene: SceneComponent;
   /** Hide the animated stage on some beats (default: the summary). */
   stageGone?: (b: BaseBeat) => boolean;
+  /**
+   * The [top, bottom] slice of the 400×560 design space this lesson's art occupies.
+   * The player crops to it and scales up, so a tighter band means a bigger picture.
+   * Must contain every prop the scene draws, or the top/bottom will be clipped.
+   */
+  band?: [number, number];
 }) {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
@@ -144,7 +150,10 @@ export default function CinematicPlayer({
 
   if (done) return null;   // the effect above shows the reward and pops this screen
 
-  const fit = boxSize.w > 0 ? Math.min(boxSize.w / STAGE_W, boxSize.h / STAGE_H) : 0;
+  // Fit the BAND, not the whole design space — see BAND_T/BAND_B in cinematicKit.
+  const bandT = band[0];
+  const bandH = band[1] - band[0];
+  const fit = boxSize.w > 0 ? Math.min(boxSize.w / STAGE_W, boxSize.h / bandH) : 0;
   const gone = stageGone(beat);
   const quoteSaved = beat.quote ? savedQuotes.some((q) => q.id === beat.quote!.id) : false;
 
@@ -162,9 +171,11 @@ export default function CinematicPlayer({
       <Pressable style={styles.body} onPress={advance} disabled={locked}>
         <View style={[styles.stageWrap, gone && styles.stageGone]} onLayout={onStage}>
           {fit > 0 && !gone ? (
-            <View style={{ width: STAGE_W * fit, height: STAGE_H * fit, overflow: 'hidden' }}>
-              <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
-                <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} onPick={(id, ok) => choose(id, ok, true)} />
+            <View style={{ width: STAGE_W * fit, height: bandH * fit, overflow: 'hidden' }}>
+              <View style={{ position: 'absolute', left: 0, top: -bandT * fit, width: STAGE_W * fit, height: STAGE_H * fit }}>
+                <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
+                  <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} onPick={(id, ok) => choose(id, ok, true)} />
+                </View>
               </View>
             </View>
           ) : null}
