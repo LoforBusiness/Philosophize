@@ -40,13 +40,13 @@ export const BEATS: Ethics8Beat[] = [
     dur: 4.4,
   },
   {
-    p: 43, x: 208, grid: 1, oth: 1,
+    p: 43, x: 182, grid: 1, oth: 1,
     text: 'You cross the room and get down beside them. No theory has said a word yet. Something else is already telling you what to do.',
     cite: 'Getting closer',
     dur: 4.2,
   },
   {
-    p: 30, x: 208, grid: 0.85, oth: 1, pick: 1,
+    p: 30, x: 182, grid: 0.85, oth: 1, pick: 1,
     interact: {
       prompt: 'You are down on the floor beside them. Tap the question this way of thinking asks FIRST.',
       explain: 'It starts with the person, not the rulebook. Notice who needs you and what they actually need — and only then work out what to do. Attention comes before judgement.',
@@ -55,13 +55,13 @@ export const BEATS: Ethics8Beat[] = [
     dur: 1.0,
   },
   {
-    p: 39, x: 208, grid: 0.5, oth: 1, thread: 1,
+    p: 39, x: 182, grid: 0.5, oth: 1, thread: 1,
     text: 'That move has a name. Carol Gilligan kept hearing people reason exactly like this — through bonds and responsibility — while the textbooks had no word for it. She called it a different voice.',
     cite: 'Carol Gilligan · 1982',
     dur: 5.2,
   },
   {
-    p: 44, x: 208, grid: 0.4, oth: 1, thread: 1,
+    p: 44, x: 182, grid: 0.4, oth: 1, thread: 1,
     quote: {
       id: 'lq-ethics-ethics-8-1',
       text: 'The moral problem arises from conflicting responsibilities rather than from competing rights.',
@@ -94,13 +94,13 @@ export const BEATS: Ethics8Beat[] = [
     dur: 5.0,
   },
   {
-    p: 21, x: 190, grid: 0.28, oth: 1, thread: 1,
+    p: 21, x: 172, grid: 0.28, oth: 1, thread: 1,
     text: 'Critics feared care would trap people in endless self-sacrifice. Gilligan’s answer: care and justice are two lenses, not rivals. Rules stop you being cruel. Care notices the person the rules never mention.',
     cite: 'Two voices, not rivals',
     dur: 4.8,
   },
   {
-    p: 0, x: 190, grid: 0.28, oth: 1, thread: 1,
+    p: 0, x: 172, grid: 0.28, oth: 1, thread: 1,
     summary: {
       title: 'Morality as Relationship',
       points: [

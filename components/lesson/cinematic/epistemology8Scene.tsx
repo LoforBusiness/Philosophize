@@ -35,7 +35,9 @@ const PILE_TOPS = [484, 468, 452];      // bottom-up; index 2 is the block taken
 const TOWER_L = 248;
 const TOWER_W = 130;
 const ROW_TOP = 190;
-const ROW_H = 48;
+// 58, not 48: a two-line reason ("the timetable says so") plus its label needs the
+// room once Android's default font padding is counted, or the second line clips.
+const ROW_H = 58;
 const ROW_GAP = 7;
 
 const ROWS = [
@@ -321,9 +323,9 @@ const styles = StyleSheet.create({
   },
   rowClaim: { backgroundColor: INK, borderColor: INK },
   rowGhost: { borderColor: SOFT, backgroundColor: PAPER },
-  rowLab: { fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.3, color: SOFT, marginBottom: 2 },
+  rowLab: { fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.3, color: SOFT, marginBottom: 2, includeFontPadding: false },
   rowLabOn: { color: PAPER, opacity: 0.75 },
-  rowTxt: { fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 14, color: INK },
+  rowTxt: { fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 14, color: INK, includeFontPadding: false },
   rowTxtOn: { color: PAPER },
   rowSoft: { color: SOFT },
 
