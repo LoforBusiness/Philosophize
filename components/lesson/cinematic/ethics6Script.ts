@@ -9,23 +9,29 @@ export interface Ethics6Beat extends BaseBeat {
   /** Decider gesture. */ d?: number;
   /** The large stranger's gesture. */ str?: number;
   /** Trolley position along the track. */ tx?: number;
-  /** The shove tension 0..1 (decider reaches for the stranger). */ shove?: number;
+  /** The shove tension 0..1 — draws the fall line off the bridge. */ shove?: number;
+  /**
+   * Rows written into the verdict card, 0..2: the switch, then the footbridge.
+   * Both rows carry the SAME arithmetic and opposite verdicts — the lesson, as a
+   * side-by-side you can read at a glance.
+   */
+  card?: number;
 }
 
 export const BEATS: Ethics6Beat[] = [
   {
-    d: 2, str: 0, tx: 70,
+    d: 2, str: 0, tx: 70, card: 0,
     text: 'Five lives saved. So why does this one feel wrong? Same numbers, different hands — your gut splits where the math does not.',
     dur: 3.6,
   },
   {
-    d: 1, str: 0, tx: 110,
+    d: 1, str: 0, tx: 110, card: 1,
     text: 'Earlier you met the lever: divert the trolley, one dies instead of five. Philosophers then twisted it — each version keeps the five-for-one math but changes how the one dies.',
     cite: 'One dilemma, many versions',
     dur: 5.0,
   },
   {
-    d: 13, str: 15, tx: 150, shove: 0.5,
+    d: 13, str: 15, tx: 150, shove: 1, card: 2,
     text: 'Thomson’s 1985 twist: you stand on a bridge beside a large stranger. Shove him onto the track and his body stops the trolley, saving five. Most who would pull the lever refuse to push.',
     cite: 'The footbridge twist',
     dur: 5.2,

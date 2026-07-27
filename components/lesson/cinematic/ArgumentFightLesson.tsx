@@ -20,7 +20,7 @@ import LoudnessChart from './illustrations/LoudnessChart';
 import TwoRoadsChart from './illustrations/TwoRoadsChart';
 import { BEATS, gates, type Beat, type BoardKey } from './argumentScript';
 import {
-  BLANK, WALK, boxMove, clamp01, ease01, lerp, mixStance, narratorHold,
+  BLANK, WALK, boxMove, clamp01, ease01, easeOutBack, lerp, mixStance, narratorHold,
   narratorLive, pose, seg, stand, walk, type Bundle, type Stance,
 } from './rig';
 
@@ -51,8 +51,52 @@ const RULE = '#E4E1D8';
 const STAGE_W = 400;
 const STAGE_H = 560;
 const GROUND = 500;
-const BOARD = { x: 60, y: 40, w: 280, h: 160 };
 const K_FIG = 1.35;                       // stage units per rig unit
+
+// ── THE BAND ────────────────────────────────────────────────────────────────
+// The stage REGION on a phone is wide and short (roughly 923×647 device px) while
+// this design space is tall and narrow (400×560). Fitting all 560 letterboxes the
+// scene to about 1.15× and throws away half the width — which is why everything
+// read small on a real device. So the stage CROPS to the slice that actually holds
+// art and scales that up instead, roughly 1.9× — nearly double.
+//
+// Making that pay off needs one discipline in the camera: the GROUND LINE is
+// pinned to the same place on screen in every shot AND all the way through every
+// transition. `cy` is therefore NOT interpolated between shots — it is DERIVED
+// from the interpolated scale as  cy = GROUND − 216/s,  which collapses the camera
+// map to
+//     y' = 496 + s · (y − 500)
+// exactly, at every instant. (Lerping cy independently let the product s·(500−cy)
+// bulge ~5 units mid-transition, so the floor sagged on every tap and the band had
+// to carry slack for it.) With the pin exact, the extremes are bounded by the
+// endpoint scales alone — nothing to measure but the six shots:
+//   board frame    (outside the camera, literal)   144 … 320
+//   scoreboard     (outside the camera, literal)   144 … 198
+//   Socratic stack (outside the camera, literal)   148 … 275  (incl. the stamp)
+//   speech bubbles (outside the camera, literal)   208 … 272
+//   solo crown           y 359, s 1.58             → 273
+//   ring crown           y 359, s 1.54             → 279
+//   stack crown          y 359, s 1.46             → 290
+//   board-beat crown     y 359, s 1.21             → 325
+//   ground rule          y 501                     → 497.5
+//   the mat edge         y 506, s 1.54             → 505
+//   ankle joints         y 507, s 1.58             → 508
+// so [136, 516] holds every pixel any beat can draw, with ~8 units at each end.
+const BAND_T = 136;
+const BAND_B = 516;
+const BAND_H = BAND_B - BAND_T;
+
+// The illustration board, and the framed easel it now hangs in. Every board keeps
+// the 280×160 aspect its viewBox is drawn at — a different aspect just letterboxes
+// inside the <Svg> and wastes the room. Frame outer 144…320, inner 146…318; the
+// illustration fills 148…296 and the tray + title plate take the last 22.
+const FRAME = { x: 56, y: 144, w: 288, h: 176 };
+const BOARD = { x: 70, y: 148, w: 259, h: 148 };
+const TRAY_Y = 152;                       // both relative to the frame's inner box
+const PLATE_Y = 156;
+
+/** Where the ground line lands on screen — the same for every shot, by design. */
+const GROUND_Y = 496;
 
 const COMPLETION_XP = 5;                  // matches LessonRunner
 const XFADE = 420;                        // ms — the beat-to-beat cross-fade (deliberately unhurried)
@@ -111,19 +155,37 @@ function fightAt(t: number): { red: Stance; blue: Stance } {
 
 // ── shots ────────────────────────────────────────────────────────────────────
 // One per beat, precomputed at module scope so the worklet can index it.
-// Camera: scale `s` about stage point (cx, cy), which is mapped to the stage
-// centre. Modes: 0 fight · 1 stand · 2 present · 3 walk-in.
+// Camera: scale `s` about stage point (cx, cy), where cy is derived from s by the
+// ground pin (see THE BAND) rather than stored per shot.
+// Modes: 0 fight · 1 stand · 2 present · 3 walk-in.
 interface Shot {
-  s: number; cx: number; cy: number; tr: number;
+  s: number; cx: number; tr: number;
   rx: number; rOn: number; rMode: number;
   bx: number; bOn: number; bMode: number;
   nx: number; nOn: number; nMode: number;
   ring: number;
 }
 
+// Every scale here is measured against what else is on stage that beat, not
+// chosen by eye. The ground is pinned, so a crown lands at 496 − 141·s and the
+// only question is what sits above it:
+//   · a BOARD beat must clear the framed easel, which ends at screen 320  → 1.21
+//   · a RING beat must clear the shout bubbles, which end at ~254        → ≤1.65
+//   · a STACK beat must clear the CONTRADICTION stamp, which ends at 275 → ≤1.49
+//   · a SOLO beat has only the 54-tall scoreboard above it, ending at 198→ ≤2.0
+// Every non-board shot used to sit around 1.36–1.42, which threw that headroom
+// away and is why the figures read small on a phone. They now run right up to
+// their real limits, leaving ~15 units of air.
+const S_FIGHT = 1.54;      // the ring
+const S_WALK = 1.22;       // pulling back while the narrator walks in (x-clipping bound)
+const S_BOARD = 1.21;      // narrator under the easel
+const S_SOLO = 1.58;       // narrator alone
+const S_STACK = 1.46;      // narrator under the Socratic exchange
+const S_REMATCH = 1.55;    // two figures, standing, close
+
 function shotFor(b: Beat, i: number): Shot {
   const base: Shot = {
-    s: 1, cx: STAGE_W / 2, cy: STAGE_H / 2, tr: 0.75,
+    s: 1, cx: 200, tr: 0.75,
     rx: 135, rOn: 0, rMode: 0,
     bx: 265, bOn: 0, bMode: 0,
     nx: -50, nOn: 0, nMode: 2,                // parked off-stage left until needed
@@ -131,36 +193,45 @@ function shotFor(b: Beat, i: number): Shot {
   };
   if (b.act === 1) {
     // Close on the ring. 130 units apart: the heads are 40% of figure height, so
-    // anything tighter and the pair reads as a single dark shape.
-    // cy is chosen so their crowns land below the speech bubbles, which sit at a
-    // fixed stage position OUTSIDE the camera and so don't move when it zooms,
-    // while still filling the lower stage rather than floating in its middle.
-    return { ...base, s: 1.34, cx: 200, cy: 345, rOn: 1, bOn: 1, ring: 1 };
+    // anything tighter and the pair reads as a single dark shape. The crowns land
+    // at 279, comfortably below the shout bubbles (which sit at a fixed stage
+    // position OUTSIDE the camera and so don't move when it zooms).
+    return { ...base, s: S_FIGHT, rOn: 1, bOn: 1, ring: 1 };
   }
   if (b.act === 2) {
     // First beat: camera pulls back while the fight carries on, and the narrator
     // walks in from off-stage. After that the boxers fade and he takes the floor.
     const first = BEATS.findIndex((x) => x.act === 2) === i;
+    const s = first ? S_WALK : b.board ? S_BOARD : S_SOLO;
     return {
       ...base,
-      s: first ? 1 : 1.35, cx: 200, cy: first ? STAGE_H / 2 : 395,
+      s,
       tr: first ? 2.4 : 0.75,                 // long enough for a believable walk
       rOn: first ? 1 : 0, bOn: first ? 1 : 0, ring: first ? 1 : 0,
-      nx: first ? 38 : b.board ? 132 : 200, nOn: 1, nMode: first ? 3 : b.board ? 2 : 1,
+      // He arrives at screen x 40 — head fully on stage and a clear gap to red's,
+      // whose head at this scale runs 88…154. (screen x = 200 + s·(nx − 200).)
+      // S_WALK cannot go past 1.22: his head's left edge leaves the frame.
+      nx: first ? 69 : b.board ? 132 : 200, nOn: 1, nMode: first ? 3 : b.board ? 2 : 1,
     };
   }
   if (b.act === 3) {
-    // Pushed in so the narrator sits close under the board rather than leaving a
-    // dead band between his head and the illustration — and so the pair together
-    // fill the stage instead of floating in its upper half.
+    // Under the board he stands left of centre so his working hand reaches the
+    // frame without his head ever covering the illustration; alone, he takes the
+    // middle and the camera pushes in on him — hardest of all on the two beats
+    // where the only thing above him is the Socratic exchange.
+    const s = b.board ? S_BOARD : b.stack ? S_STACK : S_SOLO;
     return {
-      ...base, s: 1.35, cx: 200, cy: 395,
+      ...base, s,
       nOn: 1, nMode: b.board ? 2 : 1, nx: b.board ? 132 : 200,
     };
   }
   if (b.act === 4) {
-    // The rematch: same two figures, standing, calm.
-    return { ...base, s: 1.12, cx: 200, cy: 450, rx: 148, bx: 252, rOn: 1, bOn: 1, rMode: 1, bMode: 1 };
+    // The rematch: same two figures, standing, calm — and the closest shot in the
+    // lesson, because nothing else is on stage to make room for.
+    return {
+      ...base, s: S_REMATCH,
+      rx: 148, bx: 252, rOn: 1, bOn: 1, rMode: 1, bMode: 1,
+    };
   }
   return base;                                 // act 5 — nobody on stage
 }
@@ -173,6 +244,26 @@ const BOARDS: Record<BoardKey, React.ComponentType<{ p: SharedValue<number>; w?:
   loudness: LoudnessChart,
   tworoads: TwoRoadsChart,
 };
+
+// Every diagram now hangs in a framed easel with its own plate, so it reads as an
+// object the narrator is teaching from rather than as strokes floating on paper.
+const BOARD_TITLE: Record<BoardKey, string> = {
+  anatomy: 'ANATOMY OF AN ARGUMENT',
+  syllogism: 'ARISTOTLE’S SYLLOGISM',
+  loudness: 'VOLUME IS NOT A REASON',
+  tworoads: 'TWO REASONS TO ARGUE',
+};
+
+// ── the scoreboard + the Socratic stack (see argumentScript's `vol` / `stack`) ──
+const VOL: number[] = BEATS.map((b) => b.vol ?? -1);
+const REA: number[] = BEATS.map((b) => b.reasons ?? -1);
+const STACK: number[] = BEATS.map((b) => b.stack ?? 0);
+
+const STACK_ROWS = [
+  { text: 'WHO IMPROVES THE YOUNG?', ask: true },
+  { text: 'EVERYONE BUT YOU.', ask: false },
+  { text: 'AND WITH HORSES — EVERYONE?', ask: true },
+] as const;
 
 // Which narrator gesture each beat uses (indexed by beat), and who is speaking in
 // the act-4 rematch so the speaker gestures while the other just stands. These are
@@ -298,8 +389,12 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     const nx = L(prv.nx, cur.nx);
     const rOn = L(prv.rOn, cur.rOn), bOn = L(prv.bOn, cur.bOn), nOn = L(prv.nOn, cur.nOn);
 
+    // Interpolate the SCALE and derive the centre from it, so the ground pin
+    // holds exactly at every instant of the move (see THE BAND). Lerping cy
+    // independently made the floor sag a few units in the middle of every tap.
+    const cs = L(prv.s, cur.s);
     return {
-      cam: { s: L(prv.s, cur.s), cx: L(prv.cx, cur.cx), cy: L(prv.cy, cur.cy) },
+      cam: { s: cs, cx: L(prv.cx, cur.cx), cy: GROUND - (GROUND_Y - STAGE_H / 2) / cs },
       ring: L(prv.ring, cur.ring),
       red: rOn > 0.002 ? pose(redS, rx, GROUND, K_FIG, 1, rOn) : BLANK,
       blue: bOn > 0.002 ? pose(blueS, bx, GROUND, K_FIG, -1, bOn) : BLANK,
@@ -322,6 +417,39 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     };
   });
   const ringStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ring }));
+
+  // ── the two stage graphics that live outside the camera ────────────────────
+  // Both fade BETWEEN beats and fill in WITHIN a beat (a stagger driven by `bt`),
+  // so a meter climbing or a row of the exchange landing is animation the reader
+  // watches, not a jump.
+  const GRAPH = useDerivedValue(() => {
+    const n = bi.value;
+    const p = n > 0 ? n - 1 : 0;
+    // Asymmetric: a card LEAVES quickly (0.25s) and ARRIVES unhurried (0.7s), so a
+    // graphic on its way out is gone before the illustration board that replaces it
+    // has drawn anything — the two never sit on top of each other at half opacity.
+    const away = 1 - ease01(bt.value / 0.25);
+    const here = ease01(bt.value / 0.7);
+    const swap = (was: boolean, now: boolean) => {
+      'worklet';
+      return now ? (was ? 1 : here) : was ? away : 0;
+    };
+    const rise = ease01(bt.value / 0.55);
+    // On the way OUT the rows hold their last state while the card fades, rather
+    // than emptying a frame before it disappears.
+    const cnt = STACK[n] > 0 ? STACK[n] : STACK[p];
+    const stackRow = (k: number) => {
+      'worklet';
+      return k < STACK[p] ? 1 : k < cnt ? rise : 0;
+    };
+    return {
+      scoreOn: swap(VOL[p] >= 0, VOL[n] >= 0),
+      stackOn: swap(STACK[p] > 0, STACK[n] > 0),
+      s0: stackRow(0), s1: stackRow(1), s2: stackRow(2),
+      // 0 → 1 progress of the CONTRADICTION stamp coming down on the exchange.
+      stampU: cnt >= 3 ? (STACK[p] >= 3 ? 1 : clamp01((bt.value - 0.45) / 0.4)) : 0,
+    };
+  });
 
   // ── advance ────────────────────────────────────────────────────────────────
   const locked = gates(beat) && picked === null;
@@ -350,9 +478,15 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
 
   if (done) return null;   // the effect above shows the reward and pops this screen
 
-  const fit = box.w > 0 ? Math.min(box.w / STAGE_W, box.h / STAGE_H) : 0;
+  // Fit the BAND, not the whole design space — see THE BAND block up top.
+  const fit = box.w > 0 ? Math.min(box.w / STAGE_W, box.h / BAND_H) : 0;
   const shot = SHOTS[i];
   const quoteSaved = beat.quote ? savedQuotes.some((q) => q.id === beat.quote!.id) : false;
+  // The meters keep the previous beat's reading while the card is fading out, so
+  // the bars never blink empty on the frame before they leave.
+  const priorBeat = i > 0 ? BEATS[i - 1] : undefined;
+  const volLevel = beat.vol ?? priorBeat?.vol ?? 0;
+  const reaLevel = beat.reasons ?? priorBeat?.reasons ?? 0;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -378,27 +512,34 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
           under 560 units of empty paper. */}
       <View style={[styles.stageWrap, beat.act === 5 && styles.stageGone]} onLayout={onStage}>
         {fit > 0 && beat.act !== 5 ? (
-          <View style={{ width: STAGE_W * fit, height: STAGE_H * fit, overflow: 'hidden' }}>
-            <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
-              {/* everything inside here moves with the camera */}
-              <Animated.View style={[styles.scene, camStyle]}>
-                <Animated.View style={[styles.ring, ringStyle]} />
-                <View style={styles.ground} />
-                {shot.rOn > 0 ? <Stickman D={DR} k={K_FIG} gloves={beat.act === 1} /> : null}
-                {shot.bOn > 0 ? <Stickman D={DB} k={K_FIG} gloves={beat.act === 1} /> : null}
-                {shot.nOn > 0 ? <Stickman D={DN} k={K_FIG} /> : null}
-              </Animated.View>
+          <View style={{ width: STAGE_W * fit, height: BAND_H * fit, overflow: 'hidden' }}>
+            <View style={{ position: 'absolute', left: 0, top: -BAND_T * fit, width: STAGE_W * fit, height: STAGE_H * fit }}>
+              <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
+                {/* everything inside here moves with the camera */}
+                <Animated.View style={[styles.scene, camStyle]}>
+                  <Animated.View style={[styles.ring, ringStyle]} />
+                  <View style={styles.ground} />
+                  {shot.rOn > 0 ? <Stickman D={DR} k={K_FIG} gloves={beat.act === 1} /> : null}
+                  {shot.bOn > 0 ? <Stickman D={DB} k={K_FIG} gloves={beat.act === 1} /> : null}
+                  {shot.nOn > 0 ? <Stickman D={DN} k={K_FIG} /> : null}
+                </Animated.View>
 
-              {/* the board sits OUTSIDE the camera so illustrations stay crisp;
-                  BoardStage cross-fades one illustration into the next */}
-              <View style={{ position: 'absolute', left: BOARD.x, top: BOARD.y }}>
+                {/* The board sits OUTSIDE the camera so illustrations stay crisp;
+                    BoardStage cross-fades one framed easel — plate and all — into
+                    the next. */}
                 <BoardStage boardKey={boardKey} />
-              </View>
 
-              {/* speech bubbles ride the camera with their speaker */}
-              {beat.say?.map((s) => (
-                <Bubble key={s.who + s.text} bt={bt} text={s.text} who={s.who} act={beat.act} />
-              ))}
+                {/* the running count of volume vs reasons — the lesson's own thesis */}
+                <Scoreboard bt={bt} G={GRAPH} vol={volLevel} reasons={reaLevel} />
+
+                {/* Socrates' three lines, and the stamp that lands on them */}
+                <SocraticStack G={GRAPH} />
+
+                {/* speech bubbles ride the camera with their speaker */}
+                {beat.say?.map((s) => (
+                  <Bubble key={s.who + s.text} bt={bt} text={s.text} who={s.who} act={beat.act} />
+                ))}
+              </View>
             </View>
           </View>
         ) : null}
@@ -544,6 +685,12 @@ function Fade({
 // Each has its OWN draw-on progress so the incoming board draws itself on while
 // the outgoing holds its finished state and fades out — two separate progress
 // values, which is why this can't reuse the generic Fade (that would share one).
+//
+// The FRAME travels with its illustration. It used to be mounted separately, on a
+// bare `boardKey ? … : null`, so leaving a board beat snapped the easel out of
+// existence while the drawing inside it went on fading for another 420ms — the
+// picture hung frameless in mid-air. Frame, tray, title plate and illustration now
+// live in one faded layer each, so the whole object arrives and leaves together.
 
 function BoardStage({ boardKey }: { boardKey: BoardKey | null }) {
   const fade = useSharedValue(1);                 // 1 = cur fully in / prev fully out
@@ -565,21 +712,141 @@ function BoardStage({ boardKey }: { boardKey: BoardKey | null }) {
   const curStyle = useAnimatedStyle(() => ({ opacity: fade.value }));
   const prevStyle = useAnimatedStyle(() => ({ opacity: 1 - fade.value }));
 
-  const Cur = boardKey ? BOARDS[boardKey] : null;
-  const Prev = prevKey.current ? BOARDS[prevKey.current] : null;
+  const curK = boardKey;
+  const prevK = prevKey.current;
+  const Cur = curK ? BOARDS[curK] : null;
+  const Prev = prevK ? BOARDS[prevK] : null;
   return (
-    <View>
-      {Prev ? (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {Prev && prevK ? (
         <Animated.View style={[StyleSheet.absoluteFill, prevStyle]} pointerEvents="none">
-          <Prev p={prevP} w={BOARD.w} h={BOARD.h} />
+          <BoardFrame title={BOARD_TITLE[prevK]} />
+          <View style={{ position: 'absolute', left: BOARD.x, top: BOARD.y }}>
+            <Prev p={prevP} w={BOARD.w} h={BOARD.h} />
+          </View>
         </Animated.View>
       ) : null}
-      {Cur ? (
-        <Animated.View style={curStyle} pointerEvents="none">
-          <Cur p={curP} w={BOARD.w} h={BOARD.h} />
+      {Cur && curK ? (
+        <Animated.View style={[StyleSheet.absoluteFill, curStyle]} pointerEvents="none">
+          <BoardFrame title={BOARD_TITLE[curK]} />
+          <View style={{ position: 'absolute', left: BOARD.x, top: BOARD.y }}>
+            <Cur p={curP} w={BOARD.w} h={BOARD.h} />
+          </View>
         </Animated.View>
       ) : null}
     </View>
+  );
+}
+
+// ── the framed easel the diagrams hang in ────────────────────────────────────
+// Rendered BEFORE the illustration so the board's paper sits behind the strokes,
+// with a tray rule and a title plate along the bottom — the difference between
+// "some lines on the page" and "a thing the narrator is teaching from".
+function BoardFrame({ title }: { title: string }) {
+  return (
+    <View pointerEvents="none" style={styles.frame}>
+      <View style={styles.tray} />
+      <Text style={styles.frameTitle} numberOfLines={1}>{title}</Text>
+    </View>
+  );
+}
+
+// ── the scoreboard ───────────────────────────────────────────────────────────
+// Two ten-cell meters keeping the count the whole lesson turns on: how loud it
+// has got, and how many reasons have actually been given. Act 1 drives VOLUME to
+// full with REASONS flat on zero; act 4 replays the same disagreement with the
+// numbers the other way round. Identical cells on both rows, so the comparison is
+// quantitative at a glance rather than a figure of speech.
+const CELLS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+function Cell({ bt, k, on }: { bt: SharedValue<number>; k: number; on: boolean }) {
+  // Staggered by index, so the bar sweeps in rather than snapping on.
+  const st = useAnimatedStyle(() => ({ opacity: on ? clamp01((bt.value - k * 0.045) / 0.2) : 0 }));
+  return (
+    <View style={styles.cell}>
+      <Animated.View style={[styles.cellFill, st]} />
+    </View>
+  );
+}
+
+function MeterRow({
+  bt, label, level, top,
+}: { bt: SharedValue<number>; label: string; level: number; top: number }) {
+  return (
+    <View style={[styles.meterRow, { top }]}>
+      <Text style={styles.meterLabel} numberOfLines={1}>{label}</Text>
+      <View style={styles.cells}>
+        {CELLS.map((k) => <Cell key={k} bt={bt} k={k} on={k < level} />)}
+      </View>
+    </View>
+  );
+}
+
+function Scoreboard({
+  bt, G, vol, reasons,
+}: {
+  bt: SharedValue<number>;
+  G: SharedValue<any>;
+  vol: number;
+  reasons: number;
+}) {
+  const card = useAnimatedStyle(() => ({ opacity: G.value.scoreOn }));
+  return (
+    <Animated.View style={[styles.score, card]} pointerEvents="none">
+      <MeterRow bt={bt} label="VOLUME" level={vol} top={8} />
+      <MeterRow bt={bt} label="REASONS" level={reasons} top={28} />
+    </Animated.View>
+  );
+}
+
+// ── the Socratic exchange ────────────────────────────────────────────────────
+// Three lines of the Apology's cross-examination, laid out as a stack: question,
+// answer, the question that broke it — then CONTRADICTION comes down across the
+// whole exchange like a stamp. Questions are inked boxes; the answer is dashed,
+// because it is the thing that turns out not to hold.
+const STACK_TOP = 148;
+const STACK_ROW_H = 34;
+const STACK_GAP = 8;
+
+function SocraticStack({ G }: { G: SharedValue<any> }) {
+  const wrap = useAnimatedStyle(() => ({ opacity: G.value.stackOn }));
+  const rows = [
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: G.value.s0, transform: [{ translateX: (1 - G.value.s0) * -14 }] })),
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: G.value.s1, transform: [{ translateX: (1 - G.value.s1) * 14 }] })),
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: G.value.s2, transform: [{ translateX: (1 - G.value.s2) * -14 }] })),
+  ];
+  const stamp = useAnimatedStyle(() => {
+    const u = G.value.stampU;
+    return {
+      opacity: clamp01(u / 0.35),
+      transform: [{ rotate: '-7deg' }, { scale: lerp(1.3, 1, easeOutBack(u)) }],
+    };
+  });
+
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, wrap]} pointerEvents="none">
+      {STACK_ROWS.map((r, k) => (
+        <Animated.View
+          key={r.text}
+          style={[
+            styles.stackRow,
+            r.ask ? styles.stackAsk : styles.stackAns,
+            { top: STACK_TOP + k * (STACK_ROW_H + STACK_GAP) },
+            rows[k],
+          ]}
+        >
+          <Text style={[styles.stackText, !r.ask && styles.stackTextSoft]} numberOfLines={1}>
+            {r.text}
+          </Text>
+        </Animated.View>
+      ))}
+      <Animated.View style={[styles.stamp, stamp]}>
+        <Text style={styles.stampText} numberOfLines={1}>CONTRADICTION</Text>
+      </Animated.View>
+    </Animated.View>
   );
 }
 
@@ -600,9 +867,11 @@ function Bubble({
       style={[
         styles.bubble,
         left ? { left: 18, alignItems: 'flex-start' } : { right: 18, alignItems: 'flex-end' },
-        // Above the heads, not over them. Act 4's camera sits lower (cy 450), so
-        // the figures ride higher on screen and the bubble has to clear them.
-        { top: act === 1 ? 176 : 96 },
+        // Above the heads, not over them, and below the scoreboard — which is why
+        // this is now ONE number for every act: the shots all pin the ground line
+        // to the same place, so the crowns land at 278 (rematch) or 296 (ring) and
+        // a two-line bubble starting at 208 clears both.
+        { top: 208 },
         st,
       ]}
     >
@@ -727,12 +996,16 @@ const styles = StyleSheet.create({
   // The mat edge, BELOW the ground line. An earlier version drew a rope across
   // the ring at head height, which on a real screen read as a line ruled straight
   // through both boxers' heads rather than as a rope behind them.
+  // Only 6 units below the ground line now, not 11: at the ring's 1.42× that is
+  // the last thing the band has to hold, and 11 pushed it past the crop.
   ring: {
-    position: 'absolute', left: 74, right: 74, top: GROUND + 11, height: 1.5,
+    position: 'absolute', left: 74, right: 74, top: GROUND + 6, height: 1.5,
     backgroundColor: RULE,
   },
 
-  bubble: { position: 'absolute', maxWidth: 190 },
+  // Wide enough that the longest counter in the rematch wraps to two lines rather
+  // than three — a three-line bubble ran into the figures' heads.
+  bubble: { position: 'absolute', maxWidth: 210 },
   bubbleBox: {
     borderWidth: 1.5, borderColor: INK, borderRadius: 4,
     backgroundColor: PAPER, paddingHorizontal: 12, paddingVertical: 8,
@@ -741,6 +1014,57 @@ const styles = StyleSheet.create({
   bubbleText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: INK, lineHeight: 18 },
   bubbleShoutText: { fontFamily: 'Inter_700Bold', color: PAPER, letterSpacing: 0.4 },
   tail: { width: 10, height: 10, backgroundColor: INK, transform: [{ rotate: '45deg' }], marginTop: -5 },
+
+  // ── the framed easel ───────────────────────────────────────────────────────
+  frame: {
+    position: 'absolute', left: FRAME.x, top: FRAME.y, width: FRAME.w, height: FRAME.h,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+  },
+  tray: {
+    position: 'absolute', left: 10, right: 10, top: TRAY_Y, height: 1,
+    backgroundColor: RULE,
+  },
+  frameTitle: {
+    position: 'absolute', left: 8, right: 8, top: PLATE_Y, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.5, color: SOFT,
+    includeFontPadding: false,
+  },
+
+  // ── the scoreboard ─────────────────────────────────────────────────────────
+  score: {
+    position: 'absolute', left: 42, top: 144, width: 320, height: 54,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+  },
+  meterRow: { position: 'absolute', left: 10, right: 10, height: 14, flexDirection: 'row', alignItems: 'center' },
+  meterLabel: {
+    width: 84, fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.8,
+    color: INK, includeFontPadding: false,
+  },
+  cells: { flexDirection: 'row', gap: 2.2 },
+  cell: { width: 18, height: 14, borderWidth: 1.5, borderColor: SOFT, borderRadius: 1.5 },
+  cellFill: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: INK },
+
+  // ── the Socratic exchange ──────────────────────────────────────────────────
+  stackRow: {
+    position: 'absolute', left: 62, right: 62, height: STACK_ROW_H,
+    borderWidth: 2, borderRadius: 3, backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12,
+  },
+  stackAsk: { borderColor: INK },
+  stackAns: { borderColor: SOFT, borderStyle: 'dashed' },
+  stackText: {
+    fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 0.3, color: INK,
+    textAlign: 'center', includeFontPadding: false,
+  },
+  stackTextSoft: { color: SOFT },
+  stamp: {
+    position: 'absolute', left: 116, top: 232, width: 168, height: 26,
+    backgroundColor: INK, borderRadius: 2, alignItems: 'center', justifyContent: 'center',
+  },
+  stampText: {
+    fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 1.6, color: PAPER,
+    includeFontPadding: false,
+  },
 
   deck: { flex: 46, paddingHorizontal: 24, justifyContent: 'flex-start', overflow: 'hidden' },
   fadeWrap: { position: 'relative' },

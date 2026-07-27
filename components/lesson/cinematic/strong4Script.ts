@@ -2,48 +2,58 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic logic-arguments-4, "Strong vs Weak".
-// One probability meter tells the whole story. For a DEDUCTION it fills to 100%
-// and a lock snaps shut — the conclusion is guaranteed. For an INDUCTION it drops
-// to "likely" and a pair of dice appear and wobble — only probable. The presenter
-// rotates through fresh gestures (present · explain · point-up · shrug · weigh ·
-// think) so it never repeats the logic-3 inspector.
+//
+// The stage is an instrument panel. A CERTAINTY GAUGE with a needle and a 0–100%
+// scale reads the argument: for a DEDUCTION the needle pins at 100%, a lock snaps
+// shut and the banner stamps GUARANTEED; for an INDUCTION the needle falls back
+// off certainty, dice roll out and the banner reads LIKELY. Underneath, two
+// labelled RULER CARDS spell out the two yardsticks side by side —
+//   DEDUCTIVE · guarantee · valid/invalid · sound
+//   INDUCTIVE · likely    · strong/weak   · cogent
+// — and the active one inks up as the presenter talks about it. That card pair is
+// the lesson's whole point ("wrong ruler, wrong verdict") as a diagram.
+//
+// The first graded question is answered IN the scene: the cards clear and four
+// verdict chips take their place. The second stays a deck question.
 //
 // Graded questions are the two from data/.../strong-vs-weak-arguments.ts.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Strong4Beat extends BaseBeat {
   /** Presenter gesture (emote code). */ p?: number;
-  /** Meter fill 0..1. */ fill?: number;
+  /** Gauge needle 0..1. */ fill?: number;
   /** Lock snapped shut — guaranteed (0/1). */ lock?: number;
   /** Dice shown and wobbling — probable (0/1). */ dice?: number;
+  /** Banner: 0 blank · 1 LIKELY · 2 GUARANTEED. */ verdict?: number;
+  /** Which ruler card is inked: 0 neither · 1 deductive · 2 inductive. */ lens?: number;
 }
 
 export const BEATS: Strong4Beat[] = [
   {
-    p: 2, fill: 0.55, lock: 0, dice: 0,
+    p: 2, fill: 0.55, lock: 0, dice: 0, verdict: 0, lens: 0,
     text: 'Some arguments prove. Others only bet the odds. Deduction aims to guarantee its conclusion; induction only makes it probable.',
     dur: 3.8,
   },
   {
-    p: 1, fill: 0.55,
+    p: 1, fill: 0.55, verdict: 0, lens: 0,
     text: 'A DEDUCTIVE argument claims its premises guarantee the conclusion — we grade it valid or sound. An INDUCTIVE one only makes the conclusion likely — so we grade it strong or weak. Wrong ruler, wrong verdict.',
     cite: 'Two families of argument',
     dur: 5.2,
   },
   {
-    p: 6, fill: 1, lock: 1, dice: 0,
-    text: '"All men are mortal; Socrates is a man; so he is mortal." It cannot be false. The meter pins at 100% and the guarantee locks shut.',
+    p: 6, fill: 1, lock: 1, dice: 0, verdict: 2, lens: 1,
+    text: '"All men are mortal; Socrates is a man; so he is mortal." It cannot be false. The needle pins at 100% and the guarantee locks shut.',
     cite: 'Deduction — guaranteed',
     dur: 4.6,
   },
   {
-    p: 8, fill: 0.78, lock: 0, dice: 1,
-    text: '"Most Greeks eat olives; Socrates is Greek; so he eats olives." Only probable — he might hate them. The meter slips off certainty and the dice come out.',
+    p: 8, fill: 0.78, lock: 0, dice: 1, verdict: 1, lens: 2,
+    text: '"Most Greeks eat olives; Socrates is Greek; so he eats olives." Only probable — he might hate them. The needle slips off certainty and the dice come out.',
     cite: 'Induction — likely',
     dur: 4.8,
   },
   {
-    p: 0, fill: 0.78, dice: 1,
+    p: 0, fill: 0.78, dice: 1, verdict: 1, lens: 2,
     quote: {
       id: 'lq-logic-arguments-4',
       text: 'Custom, then, is the great guide of human life.',
@@ -55,15 +65,11 @@ export const BEATS: Strong4Beat[] = [
     dur: 3.0,
   },
   {
-    p: 21, fill: 0.78, dice: 1,
-    mc: {
+    p: 21, fill: 0.78, dice: 1, verdict: 1, lens: 2,
+    // Answered ON the panel: the ruler cards clear and four verdict chips take
+    // their place, so the reader grades the argument instead of reading a list.
+    interact: {
       prompt: 'An inductive argument’s premises make its conclusion likely. What is it?',
-      options: [
-        { id: 'a', text: 'Strong — induction’s version of valid', correct: true },
-        { id: 'b', text: 'Sound, since the premises support it', correct: false },
-        { id: 'c', text: 'Invalid, since it could still be false', correct: false },
-        { id: 'd', text: 'Weak, because nothing is guaranteed', correct: false },
-      ],
       explain:
         'For induction the yardstick is strength, not validity. Strong premises make the conclusion likely; add true premises and it becomes cogent.',
       xp: 5,
@@ -71,7 +77,7 @@ export const BEATS: Strong4Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, fill: 0.78, dice: 1,
+    p: 4, fill: 0.78, dice: 1, verdict: 1, lens: 2,
     mc: {
       prompt: 'You call a strong inductive argument "invalid" because its conclusion isn’t guaranteed. Right?',
       options: [

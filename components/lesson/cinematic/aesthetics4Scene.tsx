@@ -1,23 +1,52 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle } from './rig';
+import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle } from './rig';
 import { BEATS } from './aesthetics4Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 
-// A readymade on a gallery plinth, flanked by the artist (who signs it) and a
-// viewer (who recoils, then thinks). The plinth sits centre and low; the figures
-// stand to either side, so nobody covers the object.
+// A gallery that is also a scorecard.
+//
+// TOP — THREE TESTS FOR ART, pinned up as cards: MIMESIS, EXPRESSION, ARTWORLD.
+// Two of them are the old answers; the third arrives with Danto and Dickie. When
+// the verdict lands, an ink cross is struck through the two the urinal defeats
+// and a tick is drawn on the one that explains it. That row of marks IS the
+// lesson, drawn rather than told.
+//
+// BOTTOM — the readymade on its plinth, signed R. Mutt, with the artworld's ART
+// placard conferred on the plinth face.
+//
+// COMPOSITION / OCCLUSION CONTRACT
+//   · Artist at x = 104 (spans ~56–152), viewer at x = 334 (spans ~286–382), both
+//     on GROUND = 500 with crowns near y 353. The artist's signing hand reaches
+//     the plinth's left edge without ever crossing in front of it.
+//   · The plinth column owns x 148–252 — the clear gap between the two figures.
+//   · The three cards sit at y 240–310, entirely ABOVE both crowns, so a figure
+//     can never cover a verdict.
+//   · Nothing is drawn above y 222 or below the ground line: band [214, 508].
 
-const A_X = 108;
-const V_X = 292;
+const A_X = 104;
+const V_X = 334;
 const PED_X = 200;
+
+const CARD_W = 118;
+const CARD_H = 70;
+const CARD_T = 240;
+const CARD_L = [14, 141, 268];
+
+const TESTS = [
+  { id: 'mimesis', name: 'MIMESIS', sub: 'skilled imitation', pass: false },
+  { id: 'express', name: 'EXPRESSION', sub: 'feeling conveyed', pass: false },
+  { id: 'world', name: 'ARTWORLD', sub: 'institutions confer', pass: true },
+];
 
 const A_CODE = BEATS.map((b) => b.a ?? 0);
 const V_CODE = BEATS.map((b) => b.v ?? 0);
+const TEST = BEATS.map((b) => b.test ?? 0);
+const VERD = BEATS.map((b) => b.verdict ?? 0);
 const SIGNED = BEATS.map((b) => b.signed ?? 0);
 const ART = BEATS.map((b) => b.art ?? 0);
 
@@ -26,48 +55,96 @@ export default function Aesthetics4Scene({ clock, bt, bi }: SceneApi) {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
-    const isSummary = !!BEATS[n].summary;
 
     const a = mixStance(emoteHold(A_CODE[p], t), emoteLive(A_CODE[n], t, bt.value), tr);
     const v = mixStance(emoteHold(V_CODE[p], t), emoteLive(V_CODE[n], t, bt.value), tr);
     return {
-      cam: { s: isSummary ? 1 : 0.98, cx: 200, cy: 418 },
       a: pose(a, A_X, GROUND, K_FIG, 1, 1),
       v: pose(v, V_X, GROUND, K_FIG, -1, 1),
-      signed: L(SIGNED[p], SIGNED[n]),
-      art: L(ART[p], ART[n]),
+      test: lerp(TEST[p], TEST[n], tr),
+      verdict: lerp(VERD[p], VERD[n], tr),
+      signed: lerp(SIGNED[p], SIGNED[n], tr),
+      art: lerp(ART[p], ART[n], tr),
     };
   });
 
   const DA = useDerivedValue<Bundle>(() => SCENE.value.a);
   const DV = useDerivedValue<Bundle>(() => SCENE.value.v);
-  const camStyle = useAnimatedStyle(() => {
-    const c = SCENE.value.cam;
-    return { transform: [{ translateX: STAGE_W / 2 - c.cx * c.s }, { translateY: STAGE_H / 2 - c.cy * c.s }, { scale: c.s }] };
-  });
+
+  const titleStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.test * 2) }));
   const sigStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.signed }));
-  const artStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.art, transform: [{ translateY: (1 - SCENE.value.art) * 6 }] }));
+  const artStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.art,
+    transform: [{ scale: 0.8 + 0.2 * ease01(SCENE.value.art) }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
-      <Animated.View style={[StyleSheet.absoluteFill, camStyle]}>
-        <View style={styles.ground} />
+      {/* ── the three tests, pinned above the gallery floor ──────────────────── */}
+      <Animated.Text style={[styles.title, titleStyle]}>THREE TESTS FOR ART</Animated.Text>
+      {TESTS.map((tst, k) => (
+        <Card key={tst.id} S={SCENE} k={k} name={tst.name} sub={tst.sub} pass={tst.pass} />
+      ))}
 
-        {/* the plinth */}
-        <View style={styles.plinth} />
-        <View style={styles.plinthTop} />
+      {/* ── the readymade, its plinth and the status conferred on it ─────────── */}
+      <View style={styles.readymade} pointerEvents="none">
+        <View style={styles.basin} />
+      </View>
+      <Animated.Text style={[styles.sig, sigStyle]}>R. Mutt 1917</Animated.Text>
+      <View style={styles.plinthTop} pointerEvents="none" />
+      <View style={styles.plinth} pointerEvents="none" />
+      <Animated.View style={[styles.placard, artStyle]} pointerEvents="none">
+        <Text style={styles.placardT}>ART</Text>
+        <Text style={styles.placardS}>CONFERRED</Text>
+      </Animated.View>
 
-        {/* the readymade + its signature */}
-        <View style={styles.readymade} />
-        <Animated.Text style={[styles.sig, sigStyle]}>R. Mutt 1917</Animated.Text>
+      <View style={styles.ground} pointerEvents="none" />
+      <Stickman D={DA} k={K_FIG} />
+      <Stickman D={DV} k={K_FIG} />
+    </Animated.View>
+  );
+}
 
-        {/* the artworld's placard */}
-        <Animated.View style={[styles.placard, artStyle]}><Text style={styles.placardT}>ART</Text></Animated.View>
-
-        <Stickman D={DA} k={K_FIG} />
-        <Stickman D={DV} k={K_FIG} />
+/**
+ * One theory card. It fades up when its beat pins it to the wall, then takes its
+ * mark: a struck cross if Fountain defeats it, a drawn tick if it survives.
+ */
+function Card({
+  S, k, name, sub, pass,
+}: { S: SharedValue<any>; k: number; name: string; sub: string; pass: boolean }) {
+  const wrap = useAnimatedStyle(() => {
+    const on = ease01(clamp01(S.value.test - k));
+    // Once the verdict is in, the failing tests recede and the surviving one stays
+    // full strength — the row reads as an answer, not three equal options.
+    const fade = pass ? 1 : 1 - 0.42 * ease01(S.value.verdict);
+    return { opacity: on * fade, transform: [{ translateY: (1 - on) * -8 }] };
+  });
+  const box = useAnimatedStyle(() => ({
+    borderColor: pass && S.value.verdict > 0.5 ? INK : SOFT,
+  }));
+  const mark = useAnimatedStyle(() => {
+    const on = ease01(clamp01(S.value.verdict * 1.6 - k * 0.28));
+    return { opacity: on, transform: [{ scale: 0.55 + 0.45 * on }] };
+  });
+  return (
+    <Animated.View style={[styles.cardWrap, { left: CARD_L[k] }, wrap]} pointerEvents="none">
+      <Animated.View style={[styles.card, box]}>
+        <Text style={styles.cardName}>{name}</Text>
+        <Text style={styles.cardSub}>{sub}</Text>
+        <Animated.View style={[styles.mark, mark]}>
+          {pass ? (
+            <>
+              <View style={styles.tickShort} />
+              <View style={styles.tickLong} />
+            </>
+          ) : (
+            <>
+              <View style={[styles.crossBar, { transform: [{ rotate: '45deg' }] }]} />
+              <View style={[styles.crossBar, { transform: [{ rotate: '-45deg' }] }]} />
+            </>
+          )}
+        </Animated.View>
       </Animated.View>
     </Animated.View>
   );
@@ -75,18 +152,81 @@ export default function Aesthetics4Scene({ clock, bt, bi }: SceneApi) {
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 40, right: 40, top: GROUND, height: 1.5, backgroundColor: RULE },
-  plinth: { position: 'absolute', left: PED_X - 26, top: GROUND - 84, width: 52, height: 84, borderWidth: 2, borderColor: INK, backgroundColor: PAPER },
-  plinthTop: { position: 'absolute', left: PED_X - 32, top: GROUND - 90, width: 64, height: 8, borderWidth: 2, borderColor: INK, backgroundColor: PAPER },
-  readymade: {
-    position: 'absolute', left: PED_X - 18, top: GROUND - 126, width: 36, height: 34,
-    borderWidth: 2, borderColor: INK, backgroundColor: PAPER, borderTopLeftRadius: 18, borderTopRightRadius: 18, borderBottomLeftRadius: 6, borderBottomRightRadius: 6,
+  ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
+
+  title: {
+    position: 'absolute', left: 0, top: 222, width: STAGE_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
   },
-  sig: { position: 'absolute', left: PED_X - 26, top: GROUND - 96, width: 52, textAlign: 'center', fontFamily: 'Inter_500Medium', fontStyle: 'italic', fontSize: 8, color: INK },
-  placard: { position: 'absolute', left: PED_X - 18, top: GROUND - 20, width: 36, borderWidth: 1.5, borderColor: INK, backgroundColor: INK, paddingVertical: 1, alignItems: 'center', borderRadius: 2 },
-  placardT: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 2, color: PAPER },
+  cardWrap: { position: 'absolute', top: CARD_T, width: CARD_W, height: CARD_H },
+  card: {
+    width: CARD_W, height: CARD_H,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: PAPER,
+  },
+  cardName: {
+    position: 'absolute', left: 0, top: 8, width: CARD_W - 4, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+  cardSub: {
+    position: 'absolute', left: 0, top: 25, width: CARD_W - 4, textAlign: 'center',
+    fontFamily: 'Inter_400Regular', fontSize: 8.5, letterSpacing: 0.3, color: SOFT,
+    includeFontPadding: false,
+  },
+  mark: {
+    position: 'absolute', left: (CARD_W - 4) / 2 - 13, top: 38, width: 26, height: 26,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  crossBar: { position: 'absolute', width: 26, height: 3.5, backgroundColor: INK, borderRadius: 2 },
+  // Two strokes anchored end-to-end: a short down-right, then a long up-right.
+  tickShort: {
+    position: 'absolute', left: 3, top: 12, width: 12, height: 3.5,
+    backgroundColor: INK, borderRadius: 2, transformOrigin: '0% 50%',
+    transform: [{ rotate: '45deg' }],
+  },
+  tickLong: {
+    position: 'absolute', left: 11.5, top: 20.5, width: 20, height: 3.5,
+    backgroundColor: INK, borderRadius: 2, transformOrigin: '0% 50%',
+    transform: [{ rotate: '-50deg' }],
+  },
+
+  readymade: {
+    position: 'absolute', left: PED_X - 42, top: 316, width: 84, height: 64,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+    borderTopLeftRadius: 42, borderTopRightRadius: 42,
+    borderBottomLeftRadius: 10, borderBottomRightRadius: 10,
+    alignItems: 'center',
+  },
+  basin: {
+    marginTop: 12, width: 46, height: 26, borderRadius: 13,
+    borderWidth: 1.5, borderColor: SOFT, backgroundColor: PAPER,
+  },
+  sig: {
+    position: 'absolute', left: PED_X - 42, top: 360, width: 84, textAlign: 'center',
+    fontFamily: 'Inter_500Medium', fontStyle: 'italic', fontSize: 10, color: INK,
+    includeFontPadding: false,
+  },
+  plinthTop: {
+    position: 'absolute', left: PED_X - 52, top: 380, width: 104, height: 12,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+  },
+  plinth: {
+    position: 'absolute', left: PED_X - 40, top: 392, width: 80, height: GROUND - 392,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+  },
+  placard: {
+    position: 'absolute', left: PED_X - 34, top: 424, width: 68, height: 34,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  placardT: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 2.4, color: PAPER, includeFontPadding: false },
+  placardS: { fontFamily: 'Inter_500Medium', fontSize: 7, letterSpacing: 1.2, color: RULE, marginTop: 2, includeFontPadding: false },
 });
 
+// Art runs from the pinned title at y 222 to the ground line at y 501.5 — every
+// card, the plinth and both figures live inside that slice, so the player crops
+// to it and renders the scene ~2.2× instead of the letterboxed 1.15×.
 export function Aesthetics4Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics4Scene} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics4Scene} band={[214, 508]} />;
 }

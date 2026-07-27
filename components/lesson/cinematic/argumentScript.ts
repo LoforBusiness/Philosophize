@@ -39,6 +39,21 @@ export interface Beat {
   /** Narrator gesture code for this beat (see rig `narrator`): 0 open · 1 emphatic
    *  · 2 board · 3 count · 4 chin · 5 sweep · 6 point-up. Matched to the line. */
   narr?: number;
+  /**
+   * THE SCOREBOARD, in tenths. Two meters at the top of the stage keep the running
+   * count the lesson is actually about: how LOUD it has got, and how many REASONS
+   * have been given. Act 1 drives volume to full with reasons stuck on zero; act 4
+   * is the same quarrel with the numbers the other way round. Both undefined means
+   * the scoreboard is not on stage this beat.
+   */
+  vol?: number;
+  reasons?: number;
+  /**
+   * Rows of the Socratic exchange shown on stage (0–3): the question Socrates put
+   * to Meletus, the answer, and the question that broke it. 3 also slams the
+   * CONTRADICTION stamp across the exchange.
+   */
+  stack?: number;
   /** A saveable quote card. */
   quote?: { id: string; text: string; author: string; work: string; era: string };
   /** Teaching tap — no XP, immediate feedback. */
@@ -55,23 +70,27 @@ export const BEATS: Beat[] = [
   // ── ACT 1 — THE FIGHT ──────────────────────────────────────────────────────
   {
     act: 1,
+    vol: 3, reasons: 0,
     text: 'Two people. One disagreement.',
     dur: 2.2,
   },
   {
     act: 1,
+    vol: 6, reasons: 0,
     say: [{ who: 'red', text: "YOU'RE WRONG!" }],
     text: 'Watch closely — not how loud they are. What they actually say.',
     dur: 2.6,
   },
   {
     act: 1,
+    vol: 8, reasons: 0,
     say: [{ who: 'blue', text: "NO — YOU'RE WRONG!" }],
     text: 'That is not a counter-argument. It is the same noise, pointed back.',
     dur: 2.6,
   },
   {
     act: 1,
+    vol: 10, reasons: 0,
     say: [
       { who: 'red', text: 'IDIOT!' },
       { who: 'blue', text: 'MORON!' },
@@ -84,12 +103,14 @@ export const BEATS: Beat[] = [
   {
     act: 2,
     narr: 0,                                       // open hand, back toward the fight
+    vol: 10, reasons: 0,
     text: 'This is what most people picture when they hear the word "argument".',
     dur: 3.4,
   },
   {
     act: 2,
     narr: 1,                                       // emphatic — "no way to end"
+    vol: 10, reasons: 0,
     text: 'It is a quarrel. And a quarrel has no way to end — only a way to get louder.',
     dur: 3.0,
   },
@@ -109,6 +130,7 @@ export const BEATS: Beat[] = [
   },
   {
     act: 2,
+    vol: 10, reasons: 0,
     tap: {
       prompt: 'One of these gives a reason. Tap it.',
       options: [
@@ -162,6 +184,7 @@ export const BEATS: Beat[] = [
   },
   {
     act: 3,
+    vol: 10, reasons: 0,
     mc: {
       prompt: 'Your friend shouts "Pineapple belongs on pizza!" louder each time. Is that an argument?',
       options: [
@@ -194,12 +217,14 @@ export const BEATS: Beat[] = [
   {
     act: 3,
     narr: 4,                                       // hand to chin — questioning
+    stack: 2,
     text: 'Socrates went the other way. On trial for his life, he answered his accuser with nothing but questions.',
     dur: 4.0,
   },
   {
     act: 3,
     narr: 1,                                       // emphatic — the contradiction lands
+    stack: 3,
     text: 'He asked Meletus who improves the young, and kept asking until Meletus contradicted himself in front of the whole court. Socrates never raised his voice — he did not need to.',
     cite: 'Plato, Apology, c. 399 BCE',
     dur: 3.6,
@@ -208,28 +233,33 @@ export const BEATS: Beat[] = [
   // ── ACT 4 — THE REMATCH ────────────────────────────────────────────────────
   {
     act: 4,
+    vol: 3, reasons: 0,
     text: 'So let us give our two fighters the same disagreement — and reasons this time.',
     dur: 3.6,
   },
   {
     act: 4,
+    vol: 3, reasons: 1,
     say: [{ who: 'red', text: 'Rents rose 40%. Wages did not.' }],
     text: 'A premise. Something that can be checked.',
     dur: 3.0,
   },
   {
     act: 4,
+    vol: 3, reasons: 2,
     say: [{ who: 'blue', text: 'Then why did rents fall where we built more?' }],
     text: 'And a real counter — it engages the reason instead of the person.',
     dur: 3.2,
   },
   {
     act: 4,
+    vol: 3, reasons: 2,
     text: 'Same two people. Same disagreement. Nobody threw a punch, and for the first time it can actually go somewhere.',
     dur: 3.4,
   },
   {
     act: 4,
+    vol: 2, reasons: 2,
     text: 'Mill went further: you do not really understand your own position until you understand theirs.',
     cite: 'J.S. Mill, On Liberty, 1859',
     dur: 3.4,

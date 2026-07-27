@@ -11,29 +11,60 @@ import {
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 
-// A seeker at the door of KNOWLEDGE, held by three locks: true, belief, reasons.
+// ─────────────────────────────────────────────────────────────────────────────
+// THE GATE OF KNOWING, held by three locks: TRUE · BELIEF · REASONS.
+//
+// The seeker stands stage right with a key; the gate fills the left half and
+// carries the three locks as a readable labelled diagram. Stage right, above the
+// figure's crown, a VERDICT panel reads the locks back as a tally (n of 3) and a
+// stamped word — UNTESTED / KNOWLEDGE / JUST LUCK — so the abstract claim of the
+// lesson is on screen as information, not just narration.
+//
+// CAMERA: none. The old scene shifted everything with a fixed camera transform,
+// which made the band impossible to measure; design space is now final space, so
+// the figure stands on GROUND=500 with its crown at ~361 exactly as the shared
+// player documents. All art lives inside y 246..508 → band [234, 514].
+// ─────────────────────────────────────────────────────────────────────────────
 
-const SEEKER_X = 264;
-const DOOR_X = 150;
-const DOOR_TOP = 338;
-const DOOR_W = 98;
-const DOOR_H = 156;
-const LOCK_X = DOOR_X - 22;
-const LOCK_Y = [376, 416, 456];
-const LOCK_LABEL = ['TRUE', 'BELIEF', 'REASONS'];
+const TR = 0.8;                              // beat-to-beat blend, seconds
+
+// the gate
+const GATE_L = 30;
+const GATE_W = 164;
+const GATE_T = 268;
+const GATE_B = 500;
+const GATE_H = GATE_B - GATE_T;
+const ARCH = GATE_W / 2;
+
+// the three bolts, positioned INSIDE the gate (so the rattle carries them)
+const BOLT_X = 14;
+const BOLT_W = 122;
+const BOLT_H = 38;
+const BOLT_Y = [68, 116, 164];               // → stage y 336 / 384 / 432
+const BOLT_LABEL = ['TRUE', 'BELIEF', 'REASONS'];
+
+// the verdict readout, clear of the gate and above the seeker's crown (361)
+const VP_L = 214;
+const VP_W = 166;
+const VP_T = 246;
+const VP_H = 84;
+
+const SEEKER_X = 300;
 
 const HPOSE = BEATS.map((b) => b.hpose ?? 0);
 const LOCKS = BEATS.map((b) => b.locks ?? [0, 0, 0]);
+// Which beats actually CHANGE the verdict — only those re-stamp the word, so it
+// doesn't punch itself again on every forward tap.
+const VKEY = LOCKS.map((l) => l.map((v) => (v >= 0.9 ? 1 : 0)).join(''));
+const RESTAMP = VKEY.map((k, n) => (n === 0 || k !== VKEY[n - 1] ? 1 : 0));
 const Q1 = BEATS.map((b) => (b.qkey === 'q1' ? 1 : 0));
 const Q2 = BEATS.map((b) => (b.qkey === 'q2' ? 1 : 0));
-
-interface Shot { s: number; cx: number; cy: number; tr: number }
-const SHOTS: Shot[] = BEATS.map((b) => ({ s: b.summary ? 1 : 1.13, cx: 196, cy: 424, tr: 0.8 }));
+const KEYED = BEATS.map((b) => ((b.hpose ?? 0) === 5 ? 1 : 0));
 
 function reachKey(t: number): Stance {
   'worklet';
   const s = stand(t);
-  return { ...s, tilt: s.tilt - 0.06, neck: 0.04, fistR: { x: 34, y: -8 }, fistL: { x: -4, y: -4 } };
+  return { ...s, tilt: s.tilt - 0.06, neck: 0.04, fistR: { x: 33, y: -8 }, fistL: { x: -4, y: -4 } };
 }
 function hHold(code: number, t: number): Stance {
   'worklet';
@@ -48,109 +79,239 @@ function hLive(code: number, t: number, bt: number): Stance {
   return narratorLive(code, t, bt);
 }
 
-export default function EpistemologyScene({ clock, bt, bi, qv }: SceneApi) {
+export default function EpistemologyScene({ clock, bt, bi, qv, i, picked }: SceneApi) {
+  const cur = BEATS[i];
+  // Only the RIGHT answer turns the third bolt. A door that swings open on a wrong
+  // pick would tell the reader "you know" at the exact moment they showed they
+  // don't — the whole point of the lesson.
+  const rightPick = picked !== null && !!cur.mc?.options.find((o) => o.id === picked)?.correct;
+  const turns = Q1[i] === 1 && rightPick ? 1 : 0;
+
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const cur = SHOTS[n], prv = SHOTS[p];
-    const tr = ease01(bt.value / cur.tr);
+    const tr = ease01(bt.value / TR);
     const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const q = clamp01(qv.value);
 
     const seekerS = mixStance(hHold(HPOSE[p], t), hLive(HPOSE[n], t, bt.value), tr);
 
-    let l1 = L(LOCKS[p][0], LOCKS[n][0]);
-    let l2 = L(LOCKS[p][1], LOCKS[n][1]);
+    const l1 = L(LOCKS[p][0], LOCKS[n][0]);
+    const l2 = L(LOCKS[p][1], LOCKS[n][1]);
     let l3 = L(LOCKS[p][2], LOCKS[n][2]);
-    if (Q1[n]) l3 = lerp(l3, 1, ease01(q));           // the reasons key turns → door opens
-    const min3 = Math.min(l1, l2, l3);
-    const open = clamp01((min3 - 0.72) / 0.28);
-    const shake = Q2[n] ? Math.sin(q * 40) * (1 - q) * 3 : 0;   // rattles but holds
+    if (turns === 1) l3 = lerp(l3, 1, ease01(q));
+
+    // Stepped so a half-lit bolt never renders as a muddy grey plate.
+    const k1 = clamp01((l1 - 0.55) / 0.35);
+    const k2 = clamp01((l2 - 0.55) / 0.35);
+    const k3 = clamp01((l3 - 0.55) / 0.35);
+
+    const know = k1 * k2 * k3;               // all three → the gate opens
+    const luck = k1 * k2 * (1 - k3);         // true + believed, no reasons
+    const untested = clamp01(1 - know - luck);
 
     return {
-      cam: { s: L(prv.s, cur.s), cx: L(prv.cx, cur.cx), cy: L(prv.cy, cur.cy) },
       seeker: pose(seekerS, SEEKER_X, GROUND, K_FIG, -1, 1),
-      l1, l2, l3, open, shake,
+      k1, k2, k3, know, luck, untested,
+      shake: Q2[n] === 1 ? Math.sin(q * 40) * (1 - q) * 3.4 : 0,
+      stamp: RESTAMP[n] === 1 ? ease01(bt.value / 0.42) : 1,
+      keyed: L(KEYED[p], KEYED[n]),
     };
   });
 
   const DS = useDerivedValue<Bundle>(() => SCENE.value.seeker);
-  const camStyle = useAnimatedStyle(() => {
-    const c = SCENE.value.cam;
-    return { transform: [{ translateX: STAGE_W / 2 - c.cx * c.s }, { translateY: STAGE_H / 2 - c.cy * c.s }, { scale: c.s }] };
+  const keyStyle = useAnimatedStyle(() => {
+    const w = DS.value.wrR;
+    return {
+      opacity: SCENE.value.keyed,
+      transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }],
+    };
   });
 
   return (
-    <Animated.View style={styles.scene}>
-      <Animated.View style={[StyleSheet.absoluteFill, camStyle]}>
-        <View style={styles.ground} />
-        <Door S={SCENE} />
-        <Stickman D={DS} k={K_FIG} />
+    <View style={styles.scene}>
+      <View style={styles.ground} pointerEvents="none" />
+      <Gate S={SCENE} />
+      <Verdict S={SCENE} />
+      <Stickman D={DS} k={K_FIG} />
+      {/* the key in the seeker's hand, riding the wrist joint */}
+      <Animated.View style={[styles.keyWrap, keyStyle]} pointerEvents="none">
+        <View style={styles.keyBow} />
+        <View style={styles.keyShaft} />
+        <View style={[styles.keyTooth, { left: -25 }]} />
+        <View style={[styles.keyTooth, { left: -18 }]} />
       </Animated.View>
-    </Animated.View>
-  );
-}
-
-function Lock({ S, idx }: { S: SharedValue<any>; idx: number }) {
-  const fill = useAnimatedStyle(() => ({ opacity: idx === 0 ? S.value.l1 : idx === 1 ? S.value.l2 : S.value.l3 }));
-  return (
-    <View style={{ position: 'absolute', left: LOCK_X - 11, top: LOCK_Y[idx] - 11, flexDirection: 'row', alignItems: 'center' }}>
-      <View style={styles.lockRing}>
-        <Animated.View style={[styles.lockFill, fill]} />
-      </View>
-      <Text style={styles.lockLabel}>{LOCK_LABEL[idx]}</Text>
     </View>
   );
 }
 
-function Door({ S }: { S: SharedValue<any> }) {
+// ── the gate ──────────────────────────────────────────────────────────────────
+
+function Bolt({ S, idx }: { S: SharedValue<any>; idx: number }) {
+  const on = useAnimatedStyle(() => ({
+    opacity: idx === 0 ? S.value.k1 : idx === 1 ? S.value.k2 : S.value.k3,
+  }));
+  const off = useAnimatedStyle(() => ({
+    opacity: 1 - (idx === 0 ? S.value.k1 : idx === 1 ? S.value.k2 : S.value.k3),
+  }));
+  return (
+    <View style={[styles.bolt, { top: BOLT_Y[idx] }]} pointerEvents="none">
+      <Animated.View style={[StyleSheet.absoluteFill, styles.boltFill, on]} />
+      <Animated.View style={[styles.stud, off]} />
+      <Animated.View style={[styles.studOn, on]} />
+      <Animated.View style={[styles.boltLabel, off]}>
+        <Text style={styles.boltText}>{BOLT_LABEL[idx]}</Text>
+      </Animated.View>
+      <Animated.View style={[styles.boltLabel, on]}>
+        <Text style={[styles.boltText, styles.boltTextOn]}>{BOLT_LABEL[idx]}</Text>
+      </Animated.View>
+    </View>
+  );
+}
+
+function Gate({ S }: { S: SharedValue<any> }) {
   const body = useAnimatedStyle(() => ({ transform: [{ translateX: S.value.shake }] }));
-  const glow = useAnimatedStyle(() => ({ opacity: S.value.open * 0.5 }));
-  const light = useAnimatedStyle(() => ({ opacity: S.value.open }));
+  const halo = useAnimatedStyle(() => ({ opacity: S.value.know * 0.3 }));
+  const light = useAnimatedStyle(() => ({ opacity: S.value.know }));
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      {/* glow behind the door once every lock has turned */}
-      <Animated.View style={[{ position: 'absolute', left: DOOR_X - DOOR_W / 2 - 12, top: DOOR_TOP - 12, width: DOOR_W + 24, height: DOOR_H + 12, borderRadius: DOOR_W / 2 + 12, backgroundColor: INK }, glow]} />
-      <Animated.View style={[{ position: 'absolute', left: DOOR_X - DOOR_W / 2, top: DOOR_TOP, width: DOOR_W, height: DOOR_H }, body]}>
-        {/* door slab */}
-        <View style={styles.doorSlab} />
-        {/* light spilling from the opening edge */}
-        <Animated.View style={[styles.doorLight, light]} />
-        <Text style={styles.doorLabel}>KNOWLEDGE</Text>
+      <Animated.View style={[styles.halo, halo]} />
+      <Animated.View style={[styles.gateWrap, body]}>
+        <View style={styles.gateSlab} />
+        <Text style={styles.gateLabel}>KNOWLEDGE</Text>
+        <Animated.View style={[styles.gateLight, light]} />
+        <Bolt S={S} idx={0} />
+        <Bolt S={S} idx={1} />
+        <Bolt S={S} idx={2} />
       </Animated.View>
-      <Lock S={S} idx={0} />
-      <Lock S={S} idx={1} />
-      <Lock S={S} idx={2} />
+    </View>
+  );
+}
+
+// ── the verdict readout: a tally of turned locks + the stamped word ──────────
+
+function Pip({ S, idx }: { S: SharedValue<any>; idx: number }) {
+  const fill = useAnimatedStyle(() => ({
+    opacity: idx === 0 ? S.value.k1 : idx === 1 ? S.value.k2 : S.value.k3,
+  }));
+  return (
+    <View style={styles.pip}>
+      <Animated.View style={[StyleSheet.absoluteFill, styles.pipFill, fill]} />
+    </View>
+  );
+}
+
+function Verdict({ S }: { S: SharedValue<any> }) {
+  const stamp = useAnimatedStyle(() => ({ transform: [{ scale: lerp(1.16, 1, S.value.stamp) }] }));
+  const wUntested = useAnimatedStyle(() => ({ opacity: S.value.untested }));
+  const wKnow = useAnimatedStyle(() => ({ opacity: S.value.know }));
+  const wLuck = useAnimatedStyle(() => ({ opacity: S.value.luck }));
+  return (
+    <View style={styles.vp} pointerEvents="none">
+      <Text style={styles.vpCap}>VERDICT</Text>
+      <Animated.View style={[styles.vpWord, stamp]}>
+        <Animated.View style={[StyleSheet.absoluteFill, styles.vpCenter, wUntested]}>
+          <Text style={styles.vpText}>UNTESTED</Text>
+        </Animated.View>
+        <Animated.View style={[StyleSheet.absoluteFill, styles.vpCenter, wKnow]}>
+          <Text style={styles.vpText}>KNOWLEDGE</Text>
+        </Animated.View>
+        <Animated.View style={[StyleSheet.absoluteFill, styles.vpCenter, wLuck]}>
+          <Text style={styles.vpText}>JUST LUCK</Text>
+        </Animated.View>
+      </Animated.View>
+      <View style={styles.vpTally}>
+        <Text style={styles.vpTallyText}>LOCKS TURNED</Text>
+        <Pip S={S} idx={0} />
+        <Pip S={S} idx={1} />
+        <Pip S={S} idx={2} />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 40, right: 40, top: GROUND, height: 1.5, backgroundColor: RULE },
-  doorSlab: {
-    position: 'absolute', left: 0, top: 0, width: DOOR_W, height: DOOR_H,
-    borderTopLeftRadius: DOOR_W / 2, borderTopRightRadius: DOOR_W / 2,
+  ground: { position: 'absolute', left: 24, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+
+  halo: {
+    position: 'absolute', left: GATE_L - 14, top: GATE_T - 14,
+    width: GATE_W + 28, height: GATE_H + 14,
+    borderTopLeftRadius: ARCH + 14, borderTopRightRadius: ARCH + 14, backgroundColor: INK,
+  },
+  gateWrap: { position: 'absolute', left: GATE_L, top: GATE_T, width: GATE_W, height: GATE_H },
+  gateSlab: {
+    position: 'absolute', left: 0, top: 0, width: GATE_W, height: GATE_H,
+    borderTopLeftRadius: ARCH, borderTopRightRadius: ARCH,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+  },
+  gateLabel: {
+    position: 'absolute', top: 30, left: 0, right: 0, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 2.2, color: SOFT, includeFontPadding: false,
+  },
+  gateLight: {
+    position: 'absolute', right: 10, top: 44, width: 7, bottom: 18, backgroundColor: INK, borderRadius: 3.5,
+  },
+
+  bolt: {
+    position: 'absolute', left: BOLT_X, width: BOLT_W, height: BOLT_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER, overflow: 'hidden',
+  },
+  boltFill: { backgroundColor: INK },
+  stud: {
+    position: 'absolute', left: 10, top: 8, width: 18, height: 18, borderRadius: 4,
     borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
   },
-  doorLight: {
-    position: 'absolute', right: 6, top: 14, width: 4, bottom: 8, backgroundColor: INK, borderRadius: 2,
+  studOn: {
+    position: 'absolute', left: 10, top: 8, width: 18, height: 18, borderRadius: 4, backgroundColor: PAPER,
   },
-  doorLabel: {
-    position: 'absolute', top: 16, left: 0, right: 0, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.4, color: SOFT,
+  boltLabel: { position: 'absolute', left: 38, top: 0, bottom: 0, justifyContent: 'center' },
+  boltText: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 1.2, color: INK, includeFontPadding: false,
   },
-  lockRing: {
-    width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: INK,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+  boltTextOn: { color: PAPER },
+
+  vp: {
+    position: 'absolute', left: VP_L, top: VP_T, width: VP_W, height: VP_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
   },
-  lockFill: { width: 12, height: 12, borderRadius: 6, backgroundColor: INK },
-  lockLabel: {
-    marginLeft: 6, fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: INK,
+  vpCap: {
+    position: 'absolute', top: 8, left: 0, right: 0, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.8, color: SOFT, includeFontPadding: false,
   },
+  vpWord: { position: 'absolute', top: 24, left: 0, right: 0, height: 28 },
+  vpCenter: { alignItems: 'center', justifyContent: 'center' },
+  vpText: {
+    fontFamily: 'Inter_700Bold', fontSize: 17, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  },
+  vpTally: {
+    position: 'absolute', top: 58, left: 0, right: 0,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+  },
+  vpTallyText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.1, color: SOFT,
+    marginRight: 4, includeFontPadding: false,
+  },
+  pip: {
+    width: 16, height: 16, borderRadius: 3, borderWidth: 2, borderColor: INK,
+    backgroundColor: PAPER, marginLeft: 7,
+  },
+  pipFill: { backgroundColor: INK, borderRadius: 1 },
+
+  keyWrap: { position: 'absolute', left: 0, top: 0 },
+  keyBow: {
+    position: 'absolute', left: -6, top: -6, width: 12, height: 12, borderRadius: 6,
+    borderWidth: 2.5, borderColor: INK,
+  },
+  keyShaft: { position: 'absolute', left: -26, top: -1.5, width: 22, height: 3, backgroundColor: INK },
+  keyTooth: { position: 'absolute', top: 1.5, width: 3, height: 7, backgroundColor: INK },
 });
 
+// Every pixel this scene can draw lives between the verdict panel's top edge (246)
+// and the seeker's ankle joints (~507): the gate halo starts at 254, the gate at
+// 268, the ground rule at 500. Cropping to that renders the stage at the player's
+// width-capped maximum instead of the letterboxed ~1.15×.
 export function EpistemologyLesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={EpistemologyScene} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={EpistemologyScene} band={[234, 514]} />;
 }

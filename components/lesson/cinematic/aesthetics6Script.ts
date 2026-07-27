@@ -9,28 +9,30 @@ export interface Aes6Beat extends BaseBeat {
   /** Figure gesture. */ p?: number;
   /** The vast mountain's presence 0..1. */ vast?: number;
   /** The little flower (beauty) shown 0..1. */ flower?: number;
+  /** Rows of Burke's two-column table written up, 0..3. */ split?: number;
+  /** Kant's card — reason holding the infinite — shown 0..1. */ mind?: number;
 }
 
 export const BEATS: Aes6Beat[] = [
   {
-    p: 25, vast: 1, flower: 0,
+    p: 25, vast: 1, flower: 0, split: 0, mind: 0,
     text: 'A storm at sea is terrifying — so why do we stop to watch it? Some experiences thrill us precisely because they dwarf us.',
     dur: 3.6,
   },
   {
-    p: 34, vast: 1, flower: 1,
+    p: 34, vast: 1, flower: 1, split: 3,
     text: 'Burke split our reactions in two. A flower is beautiful: small, smooth, pleasing. A storm, or a vast mountain, is sublime — it overwhelms, mixing terror with a strange delight.',
     cite: 'Beyond beauty',
     dur: 5.0,
   },
   {
-    p: 15, vast: 1, flower: 0,
+    p: 15, vast: 1, flower: 0, split: 3,
     text: 'Stand on a cliff in a gale. The drop could kill you — yet you are safe. Real danger, held at a distance, leaves a delight tinged with terror, unlike any gentle pleasure.',
     cite: 'Terror at a safe distance',
     dur: 5.0,
   },
   {
-    p: 0, vast: 1,
+    p: 0, vast: 1, split: 3,
     quote: {
       id: 'lq-aesthetics-aesthetics-6-1',
       text: 'Infinity has a tendency to fill the mind with that sort of delightful horror, which is the most genuine effect and truest test of the sublime.',
@@ -42,7 +44,7 @@ export const BEATS: Aes6Beat[] = [
     dur: 3.6,
   },
   {
-    p: 25, vast: 1,
+    p: 25, vast: 1, split: 3,
     mc: {
       prompt: 'For Burke, what feeling marks the sublime apart from the merely beautiful?',
       options: [
@@ -57,13 +59,13 @@ export const BEATS: Aes6Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, vast: 1,
+    p: 4, vast: 1, split: 3, mind: 1,
     text: 'Kant moved the awe inward. The sublime overwhelms the senses, yes — but the true awe, he said, is reason discovering it can grasp infinity in thought. The mind, not the mountain, is sublime.',
     cite: 'Kant — awe in the mind',
     dur: 5.0,
   },
   {
-    p: 15, vast: 1,
+    p: 15, vast: 1, split: 3, mind: 1,
     mc: {
       prompt: '"The sublime just means something extremely beautiful." Accurate?',
       options: [

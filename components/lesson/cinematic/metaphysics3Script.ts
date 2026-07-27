@@ -2,12 +2,14 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic metaphysics-being-3, "What Counts as Real?" — Plato's Cave & the Forms.
-// A prisoner faces a wall of flickering shadows (Becoming). Overhead hangs a perfect,
-// steady Form (Being) — and beside the figure a real apple wobbles and decays,
-// a deficient copy. The figure shields its eyes from the light, then reaches up for
-// the Form. Shadows on the wall, Form overhead, apple to the side — three clean bands.
+// Stage right stands Plato's ladder of reality drawn as a labelled three-tier chart,
+// split by one heavy rule: BEING above (the Forms — steady, knowable), BECOMING below
+// (the apple you can hold, which wobbles; the shadows on the wall, which flicker).
+// Stage left is the literal cave wall the prisoner has been staring at. The figure
+// keeps the middle, so nothing ever overlaps it.
 //
-// Graded questions are the two from data/.../what-counts-as-real.ts.
+// Q1 is answered IN THE SCENE — the tiers give way to four cards and the reader taps
+// the most real thing. Graded questions are the two from data/.../what-counts-as-real.ts.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Meta3Beat extends BaseBeat {
@@ -55,14 +57,8 @@ export const BEATS: Meta3Beat[] = [
   },
   {
     p: 6, shadow: 0.15, form: 1, apple: 1,
-    mc: {
-      prompt: 'According to Plato, which of these is MOST fully real?',
-      options: [
-        { id: 'a', text: 'A particular apple you can hold in your hand', correct: false },
-        { id: 'b', text: 'The eternal, unchanging Form the apple imitates', correct: true },
-        { id: 'c', text: 'The shade of red the apple happens to wear', correct: false },
-        { id: 'd', text: 'A painting of the apple', correct: false },
-      ],
+    interact: {
+      prompt: 'According to Plato, which of these is MOST fully real? Tap it.',
       explain:
         'For Plato the Forms enjoy the fullest being because they never change. A real apple bruises and rots; the Form it imitates never flinches.',
       xp: 5,

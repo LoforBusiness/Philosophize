@@ -7,6 +7,7 @@ import type { BaseBeat } from './cinematicKit';
 export interface Pol6Beat extends BaseBeat {
   /** Figure gesture. */ p?: number;
   /** The two bar-chart societies shown 0..1. */ bars?: number;
+  /** 1 = the ranked ladder (1 LIBERTY → 2 DIFFERENCE) is up. */ prin?: number;
   /** Q1: the two societies are tappable this beat. */ pick?: number;
 }
 
@@ -23,13 +24,13 @@ export const BEATS: Pol6Beat[] = [
     dur: 4.8,
   },
   {
-    p: 3, bars: 1,
+    p: 3, bars: 1, prin: 1,
     text: 'First: each person gets the same basic liberties, and these come first. Second: inequalities are allowed only if they help the least advantaged and attach to jobs open to all.',
     cite: 'Liberty first, then difference',
     dur: 5.0,
   },
   {
-    p: 0, bars: 1,
+    p: 0, bars: 1, prin: 1,
     quote: {
       id: 'lq-political-political-6-1',
       text: 'Justice is the first virtue of social institutions, as truth is of systems of thought.',
@@ -41,22 +42,22 @@ export const BEATS: Pol6Beat[] = [
     dur: 3.4,
   },
   {
-    p: 13, bars: 1,
+    p: 13, bars: 1, prin: 1,
     text: 'A surgeon earns far more than a clerk. Unfair? Not necessarily. If the higher pay draws talent that makes even the worst-off better than under equal pay, the gap is just. The test is the bottom, not the top.',
     cite: 'The difference principle',
     dur: 5.2,
   },
   {
-    p: 13, bars: 1, pick: 1,
+    p: 13, bars: 1, prin: 1, pick: 1,
     interact: {
-      prompt: 'Rawls allows an inequality only if it LIFTS the worst-off. Which society does he permit? Tap it.',
+      prompt: 'Rawls allows an inequality only if it LIFTS the worst-off. Check each dark bar against the equality line, then tap the society he permits.',
       explain: 'Rawls permits gaps only if they raise the worst-off above what equality would give them. The yardstick is the least advantaged — not effort, not the top.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
-    p: 4, bars: 1,
+    p: 4, bars: 1, prin: 1,
     mc: {
       prompt: 'Rawls protects the worst-off — so surely his liberty principle can be traded away to boost their wealth. Right?',
       options: [

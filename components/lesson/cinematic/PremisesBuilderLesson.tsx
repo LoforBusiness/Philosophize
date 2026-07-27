@@ -46,6 +46,35 @@ const STAGE_H = 560;
 const GROUND = 500;
 const K_FIG = 1.35;                 // stage units per rig unit
 
+// ── THE BAND ────────────────────────────────────────────────────────────────
+// The stage REGION on a phone is wide and short while this design space is tall
+// and narrow, so fitting all 560 letterboxes the scene to ~1.15× and throws away
+// half the width — which is exactly why the animation read small. This lesson's
+// art only ever occupies a slice of the height, so the stage crops to that slice
+// and scales THAT up (~2.0× — nearly double everything on screen).
+//
+// The band is measured AFTER the camera. Every shot below shares cx = 200 and
+// scales 1.08…1.22 about cy 432…442, so a design y maps to  y' = 280 + s·(y − cy).
+// Extremes across every beat:
+//   legend card       (outside the camera, literal)   118 … 180
+//   speech bubble     (outside the camera, literal)   120 … 180
+//   master's crown            y 359, s 1.16           → 188
+//   keystone mid drop-in      y 361, s 1.16           → 191
+//   CONCLUSION tag            y 372, s 1.16           → 204
+//   ground rule               y 501, s 1.16           → 353
+//   ankle joints              y 507, s 1.22           → 372
+//   the COLLAPSED keystone    y 549, s 1.22           → 423   ← the low-water mark
+// so [110, 434] holds every pixel the scene can draw, with ~10 units of margin at
+// each end. Anything new must be re-measured against it.
+const BAND_T = 110;
+const BAND_B = 434;
+const BAND_H = BAND_B - BAND_T;
+
+// How far the keystone falls when its premise is pulled. Tuned to the band: the
+// brick still tumbles two of its own heights and lands well clear of the ground
+// line, but the rotated corner stays inside the crop.
+const FALL = 88;
+
 const MASTER_X = 330;               // right, faces left — stands beside the work, not behind it
 const APP_X = 62;                   // left, watches — clear of the base bricks
 const APP_K = K_FIG * 0.88;         // the apprentice reads a touch shorter than the master
@@ -81,6 +110,25 @@ const KEY_FRESH = BEATS.map((_, i) => (wasFlyup(i) ? 0 : fresh(i, 'key', KEY_ON)
 
 const M_GEST = BEATS.map((b) => b.gest ?? 0);
 const APP_TALK = BEATS.map((b) => !!b.say?.some((s) => s.who === 'app'));
+
+// ── the signpost legend ──────────────────────────────────────────────────────
+// The single most portable thing this lesson teaches is which little words flag a
+// premise and which flag a conclusion — and it is exactly what the tap question
+// tests. So it gets a real reference card at the top of the stage: the words on
+// the left, an arrow, the role they mark on the right. Row 1 lands with the
+// premise line, row 2 with the conclusion line, and both stay up while the reader
+// is tested. It steps aside (fades out) on any beat that raises a speech bubble,
+// because both live in the same strip of stage.
+const LEG_ROWS = [
+  { words: 'BECAUSE · SINCE · AS', tag: 'PREMISE' },
+  { words: 'THEREFORE · SO · THUS', tag: 'CONCLUSION' },
+] as const;
+
+const FIRST_A2 = BEATS.findIndex((b) => b.act === 2);
+const LEGEND = BEATS.map((b, i) => {
+  if (FIRST_A2 < 0 || i < FIRST_A2 || b.say || b.summary) return 0;
+  return i === FIRST_A2 ? 1 : 2;
+});
 
 // ── camera ─────────────────────────────────────────────────────────────────
 interface Shot { s: number; cx: number; cy: number; tr: number }
@@ -233,7 +281,7 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
       const gk = seg(q, 0.3, 1);
       const g = gk * gk;                            // gravity
       key.tx += -26 * g;
-      key.ty += 96 * g;
+      key.ty += FALL * g;
       key.rot += -42 * g;
     } else if (code === 2) {
       // Fly-up: the conclusion rises into the keystone slot; the premise slides
@@ -247,6 +295,22 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
 
     const tagOp = TAGS_ON[n] ? clamp01(bp / 0.6) : 0;
     return { p1, p2, key, slotOp, tagOp };
+  });
+
+  // ── the signpost legend ────────────────────────────────────────────────────
+  // Cross-beat fade for the card, plus a per-row write-on so a row that this beat
+  // ADDS slides in while rows already written stay solid.
+  const LEG = useDerivedValue(() => {
+    const n = bi.value;
+    const p = n > 0 ? n - 1 : 0;
+    // Asymmetric, like a card being taken off the table: it LEAVES in 0.25s (well
+    // before the speech bubble that displaced it lands) and ARRIVES in 0.7s.
+    const away = 1 - ease01(bt.value / 0.25);
+    const here = ease01(bt.value / 0.7);
+    const grow = ease01(bt.value / 0.7);
+    const cnt = LEGEND[n], was = LEGEND[p];
+    const row = (k: number) => { 'worklet'; return k < was ? 1 : k < cnt ? grow : 0; };
+    return { on: cnt > 0 ? (was > 0 ? 1 : here) : was > 0 ? away : 0, r0: row(0), r1: row(1) };
   });
 
   // ── advance / answer ─────────────────────────────────────────────────────────
@@ -276,7 +340,8 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
 
   if (done) return null;   // the effect above shows the reward and pops this screen
 
-  const fit = boxSize.w > 0 ? Math.min(boxSize.w / STAGE_W, boxSize.h / STAGE_H) : 0;
+  // Fit the BAND, not the whole design space — see the BAND block up top.
+  const fit = boxSize.w > 0 ? Math.min(boxSize.w / STAGE_W, boxSize.h / BAND_H) : 0;
   const stageGone = !!beat.summary;
   const quoteSaved = beat.quote ? savedQuotes.some((q) => q.id === beat.quote!.id) : false;
   const bd = beat.build ?? {};
@@ -300,23 +365,28 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
       <Pressable style={styles.body} onPress={advance} disabled={locked}>
         <View style={[styles.stageWrap, stageGone && styles.stageGone]} onLayout={onStage}>
           {fit > 0 && !stageGone ? (
-            <View style={{ width: STAGE_W * fit, height: STAGE_H * fit, overflow: 'hidden' }}>
-              <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
-                <Animated.View style={[styles.scene, camStyle]}>
-                  <View style={styles.ground} />
-                  {/* Structure IN FRONT of the figures: the builders stand behind
-                      their work (waist-high), which keeps the brick labels — the
-                      teaching content — always readable instead of hidden behind a
-                      gesturing arm. */}
-                  <Stickman D={DA} k={APP_K} />
-                  <Stickman D={DM} k={K_FIG} />
-                  <BrickStructure S={STRUCT} p1Label={p1Label} p2Label={p2Label} keyLabel={keyLabel} />
-                </Animated.View>
+            <View style={{ width: STAGE_W * fit, height: BAND_H * fit, overflow: 'hidden' }}>
+              <View style={{ position: 'absolute', left: 0, top: -BAND_T * fit, width: STAGE_W * fit, height: STAGE_H * fit }}>
+                <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
+                  <Animated.View style={[styles.scene, camStyle]}>
+                    <View style={styles.ground} />
+                    {/* Structure IN FRONT of the figures: the builders stand behind
+                        their work (waist-high), which keeps the brick labels — the
+                        teaching content — always readable instead of hidden behind a
+                        gesturing arm. */}
+                    <Stickman D={DA} k={APP_K} />
+                    <Stickman D={DM} k={K_FIG} />
+                    <BrickStructure S={STRUCT} p1Label={p1Label} p2Label={p2Label} keyLabel={keyLabel} />
+                  </Animated.View>
 
-                {/* speech bubbles at fixed stage spots, above the figures */}
-                {beat.say?.map((s) => (
-                  <Bubble key={s.who + s.text} bt={bt} text={s.text} who={s.who} />
-                ))}
+                  {/* the signpost reference card, outside the camera so it stays crisp */}
+                  <Legend S={LEG} />
+
+                  {/* speech bubbles at fixed stage spots, above the figures */}
+                  {beat.say?.map((s) => (
+                    <Bubble key={s.who + s.text} bt={bt} text={s.text} who={s.who} />
+                  ))}
+                </View>
               </View>
             </View>
           ) : null}
@@ -440,6 +510,33 @@ function Fade({
   return <Animated.View style={[styles.fadeWrap, style]}>{content}</Animated.View>;
 }
 
+// ── the signpost legend ───────────────────────────────────────────────────────
+// A flat reference card — words on the left, the role they flag on the right —
+// drawn OUTSIDE the camera so it never zooms or softens, and pointerEvents="none"
+// so it can't swallow the tap that advances the beat.
+function Legend({ S }: { S: SharedValue<any> }) {
+  const card = useAnimatedStyle(() => ({ opacity: S.value.on }));
+  const rows = [
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: S.value.r0, transform: [{ translateX: (1 - S.value.r0) * -12 }] })),
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: S.value.r1, transform: [{ translateX: (1 - S.value.r1) * -12 }] })),
+  ];
+  return (
+    <Animated.View style={[styles.legend, card]} pointerEvents="none">
+      {LEG_ROWS.map((r, k) => (
+        <Animated.View key={r.tag} style={[styles.legRow, { top: 3 + k * 27 }, rows[k]]}>
+          <Text style={styles.legWords} numberOfLines={1}>{r.words}</Text>
+          <Text style={styles.legArrow}>→</Text>
+          <View style={styles.legTag}>
+            <Text style={styles.legTagText} numberOfLines={1}>{r.tag}</Text>
+          </View>
+        </Animated.View>
+      ))}
+    </Animated.View>
+  );
+}
+
 // ── speech bubbles ────────────────────────────────────────────────────────────
 function Bubble({ bt, text, who }: { bt: SharedValue<number>; text: string; who: 'master' | 'app' }) {
   const left = who === 'app';
@@ -453,7 +550,9 @@ function Bubble({ bt, text, who }: { bt: SharedValue<number>; text: string; who:
       style={[
         styles.bubble,
         left ? { left: 14, alignItems: 'flex-start' } : { right: 14, alignItems: 'flex-end' },
-        { top: 108 },
+        // Sits in the same strip as the legend (which fades out on any beat with a
+        // bubble) and clears the master's crown, which lands at ~188 on screen.
+        { top: 120 },
         st,
       ]}
     >
@@ -583,6 +682,20 @@ const styles = StyleSheet.create({
   },
   bubbleText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: INK, lineHeight: 18 },
   tail: { width: 10, height: 10, backgroundColor: INK, transform: [{ rotate: '45deg' }], marginTop: -5 },
+
+  // ── signpost legend ────────────────────────────────────────────────────────
+  legend: {
+    position: 'absolute', left: 36, top: 118, width: 328, height: 62,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+  },
+  legRow: { position: 'absolute', left: 12, right: 8, height: 25, flexDirection: 'row', alignItems: 'center' },
+  legWords: {
+    flex: 1, fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 0.4,
+    color: INK, includeFontPadding: false,
+  },
+  legArrow: { fontFamily: 'Inter_700Bold', fontSize: 13, color: SOFT, marginHorizontal: 8, includeFontPadding: false },
+  legTag: { width: 86, height: 20, borderRadius: 3, backgroundColor: INK, alignItems: 'center', justifyContent: 'center' },
+  legTagText: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.1, color: PAPER, includeFontPadding: false },
 
   deck: { flex: 50, paddingHorizontal: 24, justifyContent: 'flex-start', overflow: 'hidden' },
   fadeWrap: { position: 'relative' },

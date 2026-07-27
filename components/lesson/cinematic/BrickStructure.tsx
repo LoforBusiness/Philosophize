@@ -29,11 +29,11 @@ const RULE = '#E4E1D8';
 // The base is kept narrow and centred (a compact column) so the two builders stand
 // clearly BESIDE it rather than buried behind it — only their reaching arms cross
 // over, and those tuck behind since the structure draws on top.
-export const BW = 106;          // brick width
-export const BH = 38;           // brick height
+export const BW = 114;          // brick width
+export const BH = 41;           // brick height
 export const CENTER_X = 200;    // structure centre
-export const BASE_LX = 148;     // base-left brick centre
-export const BASE_RX = 252;     // base-right brick centre
+export const BASE_LX = 142;     // base-left brick centre
+export const BASE_RX = 258;     // base-right brick centre
 export const BASE_Y = 452;      // base row centre (a bench height, not the floor)
 export const KEY_X = CENTER_X;  // keystone centre
 export const KEY_Y = BASE_Y - BH - 3;   // keystone centre, resting on the base
@@ -93,8 +93,12 @@ export default function BrickStructure({ S, p1Label, p2Label, keyLabel }: Props)
       {/* plinth the structure is built on */}
       <View style={[styles.plinth, { top: PLINTH_Y }]} />
 
-      {/* empty dashed keystone slot — shown only for the fly-up question */}
-      <Animated.View style={[box, slotStyle]}>
+      {/* Empty dashed keystone slot — shown only for the fly-up question. It has to
+          carry its own translate to the keystone spot: `box` only re-centres the
+          brick on its origin, and every other brick is placed by the animated
+          transform the parent supplies. Without this the slot rendered at the
+          scene's top-left corner, far off stage, and was never once seen. */}
+      <Animated.View style={[box, styles.slotAt, slotStyle]}>
         <View style={styles.slot} />
       </Animated.View>
 
@@ -123,24 +127,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
   },
   brickText: {
-    fontFamily: 'Inter_500Medium', fontSize: 11, lineHeight: 13.5, color: INK, textAlign: 'center',
+    fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 14.5, color: INK, textAlign: 'center',
+    includeFontPadding: false,
   },
+  slotAt: { transform: [{ translateX: KEY_X }, { translateY: KEY_Y }] },
   slot: {
     width: BW, height: BH, borderRadius: 3,
-    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed',
+    borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
     backgroundColor: 'transparent',
   },
   plinth: {
-    position: 'absolute', left: CENTER_X - 104, width: 208, height: 2,
+    position: 'absolute', left: CENTER_X - 122, width: 244, height: 2,
     backgroundColor: RULE,
   },
   tagConc: {
-    position: 'absolute', left: 0, right: 0, top: KEY_Y - BH / 2 - 15, alignItems: 'center',
+    position: 'absolute', left: 0, right: 0, top: KEY_Y - BH / 2 - 16, alignItems: 'center',
   },
   tagPrem: {
     position: 'absolute', left: 0, right: 0, top: PLINTH_Y + 8, alignItems: 'center',
   },
   tagText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.6, color: SOFT,
   },
 });

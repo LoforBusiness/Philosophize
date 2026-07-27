@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -8,110 +8,298 @@ import { BEATS } from './valid3Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 
-// An inspector reads an argument on the board — premises, a conclusion, a validity
-// link. A VALID stamp lands on the form; a ✗ strikes the premises when they are
-// false. The figure sits well to the right of the board, so nothing overlaps.
+// The argument pinned up as a FORM the inspector reads, stage right.
+//
+//   · three fixed boxes — premise, premise, ∴ conclusion — whose WORDS swap from
+//     the abstract skeleton to the toaster argument without the boxes moving, so
+//     "same form, different content" is something you watch rather than are told;
+//   · a two-box CHECKLIST beneath — FORM VALID? · PREMISES TRUE? — each cycling
+//     from "?" to ✓ or ✗. That checklist is the lesson: two tests, never confused;
+//   · a rubber VALID stamp that lands on the form, and strike-throughs plus a
+//     FALSE tag when the premises turn out untrue.
+//
+// On the graded beat the form clears and four VERDICT CARDS take the board — the
+// question is answered by tapping one of them, not by reading a list.
+//
+// No camera transform: everything is authored straight into stage space, so the
+// band below is exact. The inspector's widest reach ends at x ≈ 118, the board
+// frame starts at x = 126 and the ballot at x = 130, so the figure can never
+// cover a card.
 
-const FIG_X = 288;
-const BX = 116;                       // board column x
+const K = K_FIG * 1.08;            // stage units per rig unit (figure ≈ 150 tall)
+const FIG_X = 60;                  // widest reach lands at x ≈ 118
+
+// ── the form ─────────────────────────────────────────────────────────────────
+const FR_L = 126;                  // frame 126..302
+const FR_W = 176;
+const BX = 136;                    // rows 136..300
+const BW = 164;
+const P1_Y = 266;
+const P2_Y = 312;
+const ROW_H = 42;
+const DIV_Y = 362;
+const C_Y = 374;
+const C_H = 44;
+
+// ── the checklist ────────────────────────────────────────────────────────────
+const CK1_Y = 436;
+const CK2_Y = 468;
+const CK_BOX = 28;
+
+// ── the verdict ballot (the scene-answered question) ─────────────────────────
+const BAL_L = 130;
+const BAL_W = 258;
+const BAL_TOP = 296;
+const BAL_H = 44;
+const BAL_STEP = 50;               // 296 · 346 · 396 · 446 → ends at 490
+
+const FORMS = [
+  ['All A are B', 'All B are C', 'So all A are C'],
+  ['All toasters are gold', 'All gold things are time machines', 'So all toasters are time machines'],
+];
+
+const CARDS = [
+  { id: 'a', title: 'SOUND', sub: 'the conclusion is guaranteed', correct: true },
+  { id: 'b', title: 'VALID ONLY', sub: 'conclusion could still be false', correct: false },
+  { id: 'c', title: 'PROBABLE', sub: 'only likely, like a guess', correct: false },
+  { id: 'd', title: 'INCOMPLETE', sub: 'still missing evidence', correct: false },
+];
 
 const P_CODE = BEATS.map((b) => b.p ?? 0);
 const LINK = BEATS.map((b) => b.link ?? 0);
 const STAMP = BEATS.map((b) => b.stamp ?? 0);
 const FLAW = BEATS.map((b) => b.flaw ?? 0);
+const TR = 0.85;
 
-interface Shot { s: number; cx: number; cy: number; tr: number }
-const SHOTS: Shot[] = BEATS.map((b) => ({ s: b.summary ? 1 : 1.04, cx: 196, cy: 392, tr: 0.85 }));
+export default function Valid3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const showPick = !!cur.interact;
+  const leaving = !!prev?.interact && !cur.interact;
+  const answered = picked !== null;
 
-export default function Valid3Scene({ clock, bt, bi }: SceneApi) {
+  // The words only re-animate on the beat that CHANGES them, so the form does not
+  // flicker every time the reader taps forward.
+  const swapped = (cur.form ?? 0) !== (prev?.form ?? 0);
+  const lines = FORMS[cur.form ?? 0];
+
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const cur = SHOTS[n], prv = SHOTS[p];
-    const tr = ease01(bt.value / cur.tr);
+    const tr = ease01(bt.value / TR);
     const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const insp = mixStance(emoteHold(P_CODE[p], t), emoteLive(P_CODE[n], t, bt.value), tr);
     return {
-      cam: { s: L(prv.s, cur.s), cx: L(prv.cx, cur.cx), cy: L(prv.cy, cur.cy) },
-      fig: pose(insp, FIG_X, GROUND, K_FIG, -1, 1),
+      fig: pose(insp, FIG_X, GROUND, K, 1, 1),
       link: L(LINK[p], LINK[n]),
       stamp: L(STAMP[p], STAMP[n]),
       flaw: L(FLAW[p], FLAW[n]),
+      words: swapped ? grow : 1,
+      // The form and the ballot cross-fade: the form dissolves as the cards land,
+      // and fades back in on the beat after, so neither ever pops.
+      board: showPick ? 1 - grow : leaving ? grow : 1,
+      ballot: showPick ? grow : 0,
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
-  const camStyle = useAnimatedStyle(() => {
-    const c = SCENE.value.cam;
-    return { transform: [{ translateX: STAGE_W / 2 - c.cx * c.s }, { translateY: STAGE_H / 2 - c.cy * c.s }, { scale: c.s }] };
-  });
-  const linkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.link }));
-  const stampStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.stamp, transform: [{ rotate: '-13deg' }, { scale: 0.7 + 0.3 * SCENE.value.stamp }] }));
-  const flawStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.flaw }));
+  const boardStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.board }));
+  const linkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.link * SCENE.value.board }));
+  const wordStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.words,
+    transform: [{ translateX: (1 - SCENE.value.words) * -8 }],
+  }));
+  const stampStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.stamp * SCENE.value.board,
+    transform: [{ rotate: '-13deg' }, { scale: 0.72 + 0.28 * SCENE.value.stamp }],
+  }));
+  const flawStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.flaw * SCENE.value.board }));
+  const okStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.stamp }));
+  const okQStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.stamp }));
+  const badStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.flaw }));
+  const badQStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.flaw }));
+  const ballotStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.ballot,
+    transform: [{ translateY: (1 - SCENE.value.ballot) * 10 }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
-      <Animated.View style={[StyleSheet.absoluteFill, camStyle]}>
-        <View style={styles.ground} />
+      <View style={styles.ground} pointerEvents="none" />
 
-        {/* the argument on the board */}
-        <View style={[styles.chip, { top: 286 }]}><Text style={styles.chipT}>All P are Q</Text></View>
-        <View style={[styles.chip, { top: 324 }]}><Text style={styles.chipT}>All Q are R</Text></View>
-        <Text style={styles.tf}>∴</Text>
-        <View style={[styles.chip, styles.concl, { top: 392 }]}><Text style={styles.chipT}>All P are R</Text></View>
+      {/* ── the argument, pinned up as a form ───────────────────────────────── */}
+      <Animated.View style={[styles.board, boardStyle]} pointerEvents="none">
+        <View style={styles.frame} />
+        <Text style={styles.frameLab}>THE ARGUMENT</Text>
 
-        {/* validity link: premises → conclusion */}
-        <Animated.View style={[styles.link, linkStyle]} />
-        <Animated.View style={[styles.arrow, linkStyle]} />
+        <View style={[styles.row, { top: P1_Y }]}>
+          <Animated.Text style={[styles.rowT, wordStyle]}>{lines[0]}</Animated.Text>
+        </View>
+        <View style={[styles.row, { top: P2_Y }]}>
+          <Animated.Text style={[styles.rowT, wordStyle]}>{lines[1]}</Animated.Text>
+        </View>
 
-        {/* the false-premise strike */}
-        <Animated.View style={[styles.strike, flawStyle]} pointerEvents="none" />
-        <Animated.View style={[styles.falseTag, flawStyle]}><Text style={styles.falseTagT}>FALSE</Text></Animated.View>
+        <Animated.View style={[styles.divider, linkStyle]} />
+        <Animated.Text style={[styles.therefore, linkStyle]}>∴</Animated.Text>
+        <Animated.View style={[styles.row, styles.concl, { top: C_Y, height: C_H }, linkStyle]}>
+          <Animated.Text style={[styles.rowT, styles.conclT, wordStyle]}>{lines[2]}</Animated.Text>
+        </Animated.View>
 
-        {/* the VALID stamp on the form */}
-        <Animated.View style={[styles.stamp, stampStyle]}><Text style={styles.stampT}>VALID</Text></Animated.View>
-
-        <Stickman D={DF} k={K_FIG} />
+        {/* the false-premise strikes and their tag */}
+        <Animated.View style={[styles.strike, { top: P1_Y + ROW_H / 2 }, flawStyle]} />
+        <Animated.View style={[styles.strike, { top: P2_Y + ROW_H / 2 }, flawStyle]} />
+        <Animated.View style={[styles.falseTag, flawStyle]}>
+          <Text style={styles.falseTagT}>FALSE</Text>
+        </Animated.View>
       </Animated.View>
+
+      {/* the rubber stamp on the form */}
+      <Animated.View style={[styles.stamp, stampStyle]} pointerEvents="none">
+        <Text style={styles.stampT}>VALID</Text>
+      </Animated.View>
+
+      {/* ── the two tests, as a checklist ───────────────────────────────────── */}
+      <Animated.View style={[styles.check, boardStyle]} pointerEvents="none">
+        <View style={[styles.ckBox, { top: CK1_Y }]}>
+          <Animated.Text style={[styles.ckMark, okQStyle]}>?</Animated.Text>
+          <Animated.Text style={[styles.ckMark, styles.ckOn, okStyle]}>✓</Animated.Text>
+        </View>
+        <Text style={[styles.ckLab, { top: CK1_Y + 5 }]}>FORM VALID?</Text>
+
+        <View style={[styles.ckBox, { top: CK2_Y }]}>
+          <Animated.Text style={[styles.ckMark, badQStyle]}>?</Animated.Text>
+          <Animated.Text style={[styles.ckMark, styles.ckOn, badStyle]}>✗</Animated.Text>
+        </View>
+        <Text style={[styles.ckLab, { top: CK2_Y + 5 }]}>PREMISES TRUE?</Text>
+      </Animated.View>
+
+      <Stickman D={DF} k={K} />
+
+      {/* ── the verdict ballot: the question is answered here ───────────────── */}
+      {showPick ? (
+        <Animated.View style={[styles.ballot, ballotStyle]} pointerEvents="box-none">
+          <View style={styles.given} pointerEvents="none">
+            <Text style={styles.givenT}>VALID FORM  ✓   TRUE PREMISES  ✓</Text>
+          </View>
+          <Text style={styles.ballotHdr}>TAP THE VERDICT</Text>
+
+          {CARDS.map((c, k) => {
+            const chosen = picked === c.id;
+            return (
+              <Pressable
+                key={c.id}
+                style={[styles.balSlot, { top: BAL_TOP - 236 + k * BAL_STEP }]}
+                disabled={answered}
+                onPress={() => onPick(c.id, c.correct)}
+              >
+                <View
+                  style={[
+                    styles.balCard,
+                    answered && c.correct && styles.balRight,
+                    answered && chosen && !c.correct && styles.balWrong,
+                  ]}
+                >
+                  <Text style={[styles.balTitle, answered && c.correct && styles.balTitleOn]}>{c.title}</Text>
+                  <Text style={[styles.balSub, answered && c.correct && styles.balSubOn]}>{c.sub}</Text>
+                </View>
+              </Pressable>
+            );
+          })}
+        </Animated.View>
+      ) : null}
     </Animated.View>
   );
 }
 
-const CW = 88;
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 40, right: 40, top: GROUND, height: 1.5, backgroundColor: RULE },
-  chip: {
-    position: 'absolute', left: BX - CW / 2, width: CW, height: 30, borderWidth: 1.5, borderColor: INK,
-    borderRadius: 4, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+  ground: { position: 'absolute', left: 12, right: 12, top: GROUND, height: 2, backgroundColor: RULE },
+
+  board: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  frame: {
+    position: 'absolute', left: FR_L, top: 236, width: FR_W, height: 190,
+    borderWidth: 1.5, borderColor: RULE, borderRadius: 5,
   },
-  concl: { borderWidth: 2 },
-  chipT: { fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, letterSpacing: 0.2 },
-  tf: { position: 'absolute', left: BX - 42, top: 356, fontFamily: 'PlayfairDisplay_700Bold', fontSize: 20, color: SOFT },
-  link: { position: 'absolute', left: BX - 0.75, top: 356, width: 1.5, height: 34, backgroundColor: INK },
-  arrow: {
-    position: 'absolute', left: BX - 4, top: 386, width: 0, height: 0,
-    borderLeftWidth: 4, borderRightWidth: 4, borderTopWidth: 6,
-    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: INK,
+  frameLab: {
+    position: 'absolute', left: BX, top: 245,
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
   },
-  strike: {
-    position: 'absolute', left: BX - 52, top: 322, width: 104, height: 2.5, backgroundColor: INK,
-    transform: [{ rotate: '-24deg' }],
+
+  row: {
+    position: 'absolute', left: BX, width: BW, height: ROW_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    justifyContent: 'center', paddingHorizontal: 10,
   },
+  concl: { borderWidth: 2.5 },
+  rowT: { fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 16, color: INK, includeFontPadding: false },
+  conclT: { fontSize: 13 },
+
+  divider: { position: 'absolute', left: BX + 18, top: DIV_Y, width: BW - 18, height: 2, backgroundColor: INK },
+  therefore: {
+    position: 'absolute', left: BX, top: DIV_Y - 12,
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: INK, includeFontPadding: false,
+  },
+
+  strike: { position: 'absolute', left: BX - 4, width: BW + 8, height: 2.5, backgroundColor: INK, transform: [{ rotate: '-4deg' }] },
   falseTag: {
-    position: 'absolute', left: BX + 40, top: 296, borderWidth: 1.5, borderColor: INK, backgroundColor: INK,
-    paddingHorizontal: 5, paddingVertical: 1, borderRadius: 3, transform: [{ rotate: '-8deg' }],
+    position: 'absolute', left: 240, top: 240, borderWidth: 2, borderColor: INK, backgroundColor: INK,
+    paddingHorizontal: 7, paddingVertical: 2, borderRadius: 3, transform: [{ rotate: '-7deg' }],
   },
-  falseTagT: { fontFamily: 'Inter_700Bold', fontSize: 9, color: PAPER, letterSpacing: 1 },
+  falseTagT: { fontFamily: 'Inter_700Bold', fontSize: 10, color: PAPER, letterSpacing: 1.4, includeFontPadding: false },
+
+  // 300..388 × 344..388 unrotated; the -13° tilt widens that to 296..392 × 335..397
   stamp: {
-    position: 'absolute', left: BX + 44, top: 356, borderWidth: 2.5, borderColor: INK, borderRadius: 4,
-    paddingHorizontal: 8, paddingVertical: 3, transformOrigin: '50% 50%',
+    position: 'absolute', left: 300, top: 344, width: 88, height: 44,
+    borderWidth: 3, borderColor: INK, borderRadius: 5,
+    alignItems: 'center', justifyContent: 'center', transformOrigin: '50% 50%',
   },
-  stampT: { fontFamily: 'Inter_700Bold', fontSize: 15, color: INK, letterSpacing: 2 },
+  stampT: { fontFamily: 'Inter_700Bold', fontSize: 18, color: INK, letterSpacing: 2.5, includeFontPadding: false },
+
+  check: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  ckBox: {
+    position: 'absolute', left: FR_L, width: CK_BOX, height: CK_BOX,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  ckMark: {
+    position: 'absolute', fontFamily: 'Inter_700Bold', fontSize: 17, lineHeight: 22, color: SOFT, includeFontPadding: false,
+  },
+  ckOn: { color: INK },
+  ckLab: {
+    position: 'absolute', left: FR_L + CK_BOX + 12,
+    fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 18, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  },
+
+  // ── ballot ────────────────────────────────────────────────────────────────
+  ballot: { position: 'absolute', left: BAL_L, top: 236, width: BAL_W, height: 258 },
+  given: {
+    position: 'absolute', left: 0, top: 0, width: BAL_W, height: 32,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 4, alignItems: 'center', justifyContent: 'center',
+  },
+  givenT: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.6, color: INK, includeFontPadding: false },
+  ballotHdr: {
+    position: 'absolute', left: 0, top: 42, width: BAL_W,
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+  },
+  balSlot: { position: 'absolute', left: 0, width: BAL_W, height: BAL_H },
+  balCard: {
+    width: BAL_W, height: BAL_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
+    backgroundColor: PAPER, justifyContent: 'center', paddingHorizontal: 12,
+  },
+  balRight: { backgroundColor: INK, borderColor: INK },
+  balWrong: { borderColor: SOFT, opacity: 0.45 },
+  balTitle: { fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 17, letterSpacing: 0.4, color: INK, includeFontPadding: false },
+  balTitleOn: { color: PAPER },
+  balSub: { fontFamily: 'Inter_500Medium', fontSize: 10.5, lineHeight: 13, color: SOFT, includeFontPadding: false },
+  balSubOn: { color: RULE },
 });
 
+// Art runs from the form's frame (236) down to the ground line (500) — the ballot
+// and the checklist both finish above it — so the player crops to [228, 512] and
+// the scene renders about twice the size of the letterboxed full-height fit.
 export function Valid3Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Valid3Scene} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Valid3Scene} band={[228, 512]} />;
 }

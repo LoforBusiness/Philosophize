@@ -2,11 +2,20 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic political-political-3, "What Makes a Government Legitimate?".
-// A subject offers up a scroll of consent; a crowned ruler receives it and holds
-// power in trust — a bond stretches between them. Locke: break the trust and the
-// crown forfeits its right. Rousseau: the bond must serve the general will, not a
-// mere majority. Distinct from the power-and-people lesson: here it is the CONTRACT
-// that carries the drama. Subject left, ruler right, scroll in the gap, crown above.
+//
+// The stage is a CIRCUIT between the ruled and the ruler. A scroll of consent
+// travels up the top arrow; power flows back down the bottom one as protected
+// rights; and on the Locke beat the whole exchange is stamped HELD IN TRUST.
+// Above them a two-panel comparison does the conceptual work — first POWER vs
+// LEGITIMACY (obey vs owe), then Rousseau's split between the will of all and
+// the general will, drawn as scattered arrows against aligned ones.
+//
+// Distinct from the power-and-people lesson: here it is the CONTRACT that
+// carries the drama.
+//
+// Prop channels the scene reads: `pair` (which comparison is up: 0 none, 1
+// power/legitimacy, 2 will-of-all/general-will), `flow` (the consent circuit),
+// `scroll` (0 = in the subject's hands, 1 = in the ruler's) and `seal`.
 //
 // Graded questions are the two from data/.../what-makes-government-legitimate.ts.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -15,29 +24,31 @@ export interface Pol3Beat extends BaseBeat {
   /** Subject gesture. */ sub?: number;
   /** Ruler gesture. */ r?: number;
   /** Scroll position: 0 = in the subject's hands, 1 = in the ruler's. */ scroll?: number;
-  /** Trust bond between them (0/1). */ bond?: number;
+  /** Which comparison panel is up: 0 none, 1 power vs legitimacy, 2 Rousseau's split. */ pair?: number;
+  /** The consent / protection circuit between them (0/1). */ flow?: number;
+  /** The HELD IN TRUST stamp struck across the circuit (0/1). */ seal?: number;
 }
 
 export const BEATS: Pol3Beat[] = [
   {
-    sub: 2, r: 28, scroll: 0, bond: 0,
+    sub: 2, r: 28, scroll: 0, pair: 1, flow: 0, seal: 0,
     text: 'A gun makes you obey. What makes you owe obedience? Power compels; legitimacy commands. Philosophers fought over the gap.',
     dur: 3.8,
   },
   {
-    sub: 30, r: 31, scroll: 1, bond: 1,
+    sub: 30, r: 31, scroll: 1, pair: 0, flow: 1, seal: 0,
     text: 'Imagine no state at all — people free and unruled. Hobbes warned that with no common judge, this "state of nature" slides into war. So people covenant to set up a ruler who keeps the peace.',
     cite: 'The social contract',
     dur: 5.2,
   },
   {
-    sub: 0, r: 35, scroll: 1, bond: 1,
+    sub: 0, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
     text: 'Locke said we set up government to guard our rights, holding power only in trust. Break that trust and it forfeits its rule. America’s founders drew on these Lockean ideas in 1776.',
     cite: 'Locke, 1689',
     dur: 5.0,
   },
   {
-    sub: 0, r: 0, scroll: 1, bond: 1,
+    sub: 0, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1,
     quote: {
       id: 'lq-political-political-3-1',
       text: 'Men being by nature all free, equal and independent, no one can be subjected to the political power of another without his own consent.',
@@ -49,13 +60,13 @@ export const BEATS: Pol3Beat[] = [
     dur: 3.6,
   },
   {
-    sub: 38, r: 38, scroll: 1, bond: 1,
+    sub: 38, r: 38, scroll: 1, pair: 2, flow: 1, seal: 1,
     text: 'Rousseau pushed further. Legitimacy flows from the "general will" — what truly serves the whole people, not the sum of private wants. Real freedom is living under rules you give yourself.',
     cite: 'Rousseau — the general will',
     dur: 5.0,
   },
   {
-    sub: 21, r: 0, scroll: 1, bond: 1,
+    sub: 21, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1,
     mc: {
       prompt: 'According to Locke, what causes a government to lose its legitimacy?',
       options: [
@@ -71,7 +82,7 @@ export const BEATS: Pol3Beat[] = [
     dur: 1.0,
   },
   {
-    sub: 4, r: 0, scroll: 1, bond: 1,
+    sub: 4, r: 0, scroll: 1, pair: 2, flow: 1, seal: 1,
     mc: {
       prompt: 'Rousseau prized the general will, so a 51% majority vote must always equal it. Correct?',
       options: [

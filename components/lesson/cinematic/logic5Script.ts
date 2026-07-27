@@ -2,24 +2,26 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic logic-arguments-5, "Thinking Step by Step" — the SHOWCASE lesson for
-// the richer visual language: a word-machine that swallows premise-boxes, turns its
-// gears, and rides a conclusion out on a conveyor belt; a chain of inference links;
-// and a ladder of steps the figure climbs ("divide it into parts and climb from the
-// simplest step up" — Descartes).
+// the richer visual language. The stage is an INFERENCE PIPELINE drawn as a proper
+// flow diagram: two premise cards feed a geared inference box, a token travels the
+// arrows, and the conclusion drops out below. Then a ladder + a four-step staircase
+// chart for "divide it into parts and climb from the simplest step up" (Descartes).
 //
-// New scene-driven answers (no A/B/C/D):
-//   Q1  TAP-THE-SCENE  — tap the weak (dashed) link in the chain.
-//   Q2  FEED-A-MACHINE — send the machine's output down the right chute.
+// Scene-driven answers (no A/B/C/D):
+//   Q1  TAP-THE-SCENE  — a four-card proof of Euclid I.1 with one step left blank;
+//                        tap the gap, and the missing common notion writes itself in.
+//   Q2  FEED-A-MACHINE — send a proof that "feels obviously right" down the right chute.
 // Both are the graded questions from data/.../thinking-step-by-step.ts, reframed.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Logic5Beat extends BaseBeat {
   /** Figure gesture (emote code). Ignored while climbing. */ p?: number;
   /** Figure is climbing the ladder (0/1). */ climb?: number;
-  /** Machine + conveyor on stage (0/1). */ machine?: number;
-  /** Machine running — gears turn, boxes flow (0/1). */ run?: number;
-  /** The inference chain on stage, tappable (0/1). */ chain?: number;
+  /** The premise → inference → conclusion pipeline on stage (0/1). */ machine?: number;
+  /** Pipeline running — gears turn, a token rides the arrows (0/1). */ run?: number;
+  /** The four-card proof chain on stage, tappable (0/1). */ chain?: number;
   /** The ladder of steps on stage (0/1). */ ladder?: number;
+  /** The staircase chart beside the ladder (0/1). */ steps?: number;
   /** The two output chutes on stage, tappable (0/1). */ chute?: number;
 }
 
@@ -56,20 +58,21 @@ export const BEATS: Logic5Beat[] = [
   {
     p: 4, chain: 1,
     interact: {
-      prompt: 'This chain of reasoning skips a step. Tap the missing link — the gap where a hidden flaw could hide.',
-      explain: 'Every missing step is a gap where a faulty inference hides. A good deduction spells out each link so anyone can check it — so leaving steps out never makes it stronger.',
+      prompt: 'Euclid’s proof is written out below, but one step is missing. Tap the gap — the place a hidden flaw could hide.',
+      explain:
+        'The gap sits between the two equalities and the conclusion. Euclid never leaves it out: things equal to the same thing are equal to each other. Every unwritten step is a place a faulty inference can hide, so skipping steps never makes a proof stronger.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
-    climb: 1, ladder: 1,
+    climb: 1, ladder: 1, steps: 1,
     text: 'Validity lives in the form, not the vibe. Spell out every inference and you can see exactly where the chain might break — then climb it, from the simplest step up.',
     cite: 'One rung at a time',
     dur: 4.4,
   },
   {
-    p: 13, machine: 1, run: 1, chute: 1,
+    p: 13, chute: 1,
     interact: {
       prompt: 'A proof "feels obviously right" but skips three steps. Which chute do you send it down?',
       explain: 'Feeling obvious isn’t a check. Unstated steps are exactly where a hidden flaw can slip past you — so send it to be checked, not waved through.',

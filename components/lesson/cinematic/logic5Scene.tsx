@@ -8,15 +8,76 @@ import { BEATS } from './logic5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 
-// The figure stays on the LEFT and faces right (dir +1) the whole lesson, so it
-// never has to slide or flip; every prop — machine, chain, ladder, chutes — lives
-// to its right where there's room to make them BIG. Identity-scale camera so the
-// tap targets sit exactly under their art.
+// The figure stands on the LEFT (and climbs a ladder in the same spot) so the whole
+// right-hand column — x 150…386 — is free for information design that is drawn BIG:
+//
+//   · THE PIPELINE   PREMISE → PREMISE → [gears: INFERENCE] → ∴ CONCLUSION, a proper
+//                    top-to-bottom flow diagram with a token riding the arrows.
+//   · Q1 THE PROOF   Euclid I.1 written out as four stacked cards with one left blank.
+//                    Tap the gap and the missing common notion writes itself in.
+//   · THE STAIRCASE  a four-bar step chart beside the ladder — divide, then climb.
+//   · Q2 THE CHUTES  two full-width bins; the proof card slides into whichever you tap.
+//
+// Camera is IDENTITY, so these constants ARE the final stage coordinates and the band
+// at the bottom of this file can be read straight off them.
 
-const FIG_X = 96;
-const MACH_X = 196;                 // machine centre, to the figure's right
-const LADDER_X = 122;               // the figure climbs a ladder just to its right
+const FIG_X = 76;
+const LADDER_X = 76;
 const RUNG_SP = 30;
+const LADDER_T = 300;
+const LADDER_H = GROUND - LADDER_T;        // 200
+
+// the right-hand column every diagram is laid out in
+const COL_L = 150;
+const COL_W = 236;
+const MID = COL_L + COL_W / 2;             // 268
+
+// ── the pipeline ─────────────────────────────────────────────────────────────
+const P1_T = 238;
+const P2_T = 288;
+const PIPE_BOX_H = 44;
+const A1_T = 334;                          // arrow 1: shaft 334–342, head 342–354
+const GEAR_T = 354;
+const GEAR_H = 66;                         // 354–420
+const GEAR_L = 196;
+const GEAR_W = 144;
+const GEAR_CY = 396;
+const A2_T = 422;                          // arrow 2: shaft 422–430, head 430–442
+const CONCL_T = 444;                       // 444–488
+
+// ── Q1: the four-card proof ──────────────────────────────────────────────────
+const CHAIN_HDR_T = 232;
+const CARD_T = 254;
+const CARD_H = 44;
+const CARD_GAP = 14;
+const STEPS_TEXT = [
+  { id: 's1', text: 'AB = AC', gap: false },
+  { id: 's2', text: 'AB = BC', gap: false },
+  { id: 'gap', text: '?   ?   ?', gap: true },
+  { id: 's4', text: 'SO  AC = BC', gap: false },
+];
+const MISSING = 'EQUALS OF EQUALS ARE EQUAL';
+
+// ── the staircase chart ──────────────────────────────────────────────────────
+const STAIR_BASE = 494;
+const STAIRS = [
+  { n: '1', left: 168, h: 34 },
+  { n: '2', left: 222, h: 68 },
+  { n: '3', left: 276, h: 102 },
+  { n: '4', left: 330, h: 136 },
+];
+const STAIR_W = 54;
+
+// ── Q2: the two chutes ───────────────────────────────────────────────────────
+const CHUTE_HDR_T = 232;
+const PROOF_T = 256;
+const PROOF_H = 46;
+const BIN_H = 54;
+const BINS = [
+  { id: 'trust', label: 'TRUST IT', top: 328, correct: false },
+  { id: 'check', label: 'CHECK IT', top: 398, correct: true },
+];
+const PROOF_CY = PROOF_T + PROOF_H / 2;    // 279
 
 const P_CODE = BEATS.map((b) => b.p ?? 0);
 const CLIMB = BEATS.map((b) => b.climb ?? 0);
@@ -24,22 +85,8 @@ const MACHINE = BEATS.map((b) => b.machine ?? 0);
 const RUN = BEATS.map((b) => b.run ?? 0);
 const CHAIN = BEATS.map((b) => b.chain ?? 0);
 const LADDER = BEATS.map((b) => b.ladder ?? 0);
+const STAIRV = BEATS.map((b) => b.steps ?? 0);
 const CHUTE = BEATS.map((b) => b.chute ?? 0);
-
-// Q1 — four big links; one is a dashed GHOST (the skipped step). Tap the gap.
-const LINKS = [
-  { id: 'a', x: 150, gap: false },
-  { id: 'b', x: 212, gap: false },
-  { id: 'gap', x: 274, gap: true },
-  { id: 'd', x: 336, gap: false },
-];
-const CHAIN_Y = 312;
-// Q2 — two big bins.
-const CHUTES = [
-  { id: 'trust', x: 198, label: 'TRUST IT' },
-  { id: 'check', x: 322, label: 'CHECK IT' },
-];
-const CHUTE_Y = 402;
 
 export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -47,7 +94,6 @@ export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick }: Sc
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const climbNow = CLIMB[n] > 0.5, climbPrev = CLIMB[p] > 0.5;
@@ -57,94 +103,137 @@ export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick }: Sc
       return useLive ? emoteLive(P_CODE[idx], t, bt.value) : emoteHold(P_CODE[idx], t);
     };
     const s = mixStance(stanceOf(p, climbPrev, false), stanceOf(n, climbNow, true), tr);
-    const fx = L(climbPrev ? LADDER_X : FIG_X, climbNow ? LADDER_X : FIG_X);
 
     return {
-      cam: { s: 1, cx: 200, cy: 330 },
-      fig: pose(s, fx, GROUND, K_FIG, 1, 1),
-      machine: L(MACHINE[p], MACHINE[n]),
-      run: L(RUN[p], RUN[n]),
-      chain: L(CHAIN[p], CHAIN[n]),
-      ladder: L(LADDER[p], LADDER[n]),
-      chute: L(CHUTE[p], CHUTE[n]),
-      gear: t * 90,
+      fig: pose(s, lerp(climbPrev ? LADDER_X : FIG_X, climbNow ? LADDER_X : FIG_X, tr), GROUND, K_FIG, 1, 1),
+      machine: lerp(MACHINE[p], MACHINE[n], tr),
+      run: lerp(RUN[p], RUN[n], tr),
+      chain: lerp(CHAIN[p], CHAIN[n], tr),
+      ladder: lerp(LADDER[p], LADDER[n], tr),
+      stairs: lerp(STAIRV[p], STAIRV[n], tr),
+      chute: lerp(CHUTE[p], CHUTE[n], tr),
+      gear: t * 80,
       feed: (t * 0.55) % 1,
-      belt: (t * 0.5) % 1,
-      scroll: (t * 46) % RUNG_SP,   // rungs scroll DOWN so the climber ascends
+      scroll: (t * 46) % RUNG_SP,          // rungs scroll DOWN so the climber ascends
       qv: qv.value,
       t,
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
-  const camStyle = useAnimatedStyle(() => {
-    const c = SCENE.value.cam;
-    return { transform: [{ translateX: STAGE_W / 2 - c.cx * c.s }, { translateY: STAGE_H / 2 - c.cy * c.s }, { scale: c.s }] };
-  });
   const machineStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.machine }));
   const gearA = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.gear}deg` }] }));
   const gearB = useAnimatedStyle(() => ({ transform: [{ rotate: `${-SCENE.value.gear}deg` }] }));
-  const dropStyle = useAnimatedStyle(() => {
-    const f = SCENE.value.feed;
-    return { opacity: SCENE.value.run * (f < 0.55 ? 1 : 0), transform: [{ translateY: lerp(-46, 6, Math.min(1, f / 0.55)) }] };
+  const tokAStyle = useAnimatedStyle(() => {
+    const u = Math.min(1, SCENE.value.feed / 0.5);
+    return { opacity: SCENE.value.run * Math.sin(Math.PI * u), transform: [{ translateY: u * 18 }] };
   });
-  const beltBoxStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.run, transform: [{ translateX: SCENE.value.belt * 62 }] }));
+  const tokBStyle = useAnimatedStyle(() => {
+    const u = Math.max(0, (SCENE.value.feed - 0.5) / 0.5);
+    return { opacity: SCENE.value.run * Math.sin(Math.PI * u), transform: [{ translateY: u * 18 }] };
+  });
   const ladderStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ladder }));
   const rungsStyle = useAnimatedStyle(() => ({ transform: [{ translateY: SCENE.value.scroll }] }));
+  const stairStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.stairs }));
   const chainStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.chain }));
+  const chuteStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.chute }));
 
   const answered = picked !== null;
   const showChain = (cur.chain ?? 0) > 0 && !!cur.interact;
   const showChutes = (cur.chute ?? 0) > 0 && !!cur.interact;
 
   return (
-    <Animated.View style={styles.scene}>
-      <Animated.View style={[StyleSheet.absoluteFill, camStyle]}>
-        <View style={styles.ground} />
+    <View style={styles.scene}>
+      <View style={styles.ground} pointerEvents="none" />
 
-        {/* ── the ladder (rungs scroll down → the figure climbs upward) ─── */}
-        <Animated.View style={[styles.ladderWrap, ladderStyle]} pointerEvents="none">
-          <View style={[styles.rail, { left: LADDER_X - 17 }]} />
-          <View style={[styles.rail, { left: LADDER_X + 13 }]} />
-          <View style={styles.rungClip}>
-            <Animated.View style={[styles.rungInner, rungsStyle]}>
-              {[-1, 0, 1, 2, 3, 4, 5, 6, 7].map((r) => (
-                <View key={r} style={[styles.rung, { top: r * RUNG_SP }]} />
-              ))}
-            </Animated.View>
-          </View>
-        </Animated.View>
-
-        {/* ── the word machine + conveyor ─────────────────────────────── */}
-        <Animated.View style={machineStyle}>
-          <View style={styles.hopper} />
-          <Animated.View style={[styles.wordBox, { left: MACH_X - 17, top: 296 }, dropStyle]}><Text style={styles.wbT}>P</Text></Animated.View>
-          <View style={styles.machineBody} />
-          <Animated.View style={[styles.gear, { left: MACH_X - 34 }, gearA]}><Gear /></Animated.View>
-          <Animated.View style={[styles.gear, { left: MACH_X + 2 }, gearB]}><Gear /></Animated.View>
-          {/* a bold conveyor belt out the right */}
-          <View style={styles.beltFrame} />
-          <View style={[styles.roller, { left: MACH_X + 46 }]} />
-          <View style={[styles.roller, { left: MACH_X + 120 }]} />
-          <Animated.View style={[styles.outBox, { left: MACH_X + 42, top: 420 }, beltBoxStyle]}><Text style={styles.wbTOn}>∴C</Text></Animated.View>
-        </Animated.View>
-
-        {/* the figure */}
-        <Stickman D={DF} k={K_FIG} />
-
-        {/* ── Q1: the chain — tap the missing (dashed) link ───────────── */}
-        <Animated.View style={[styles.chainLine, chainStyle]} pointerEvents="none" />
-        {showChain && LINKS.map((lk) => (
-          <ChainLink key={lk.id} lk={lk} S={SCENE} answered={answered} picked={picked} onPick={onPick} />
-        ))}
-
-        {/* ── Q2: the two big chutes ──────────────────────────────────── */}
-        {showChutes && CHUTES.map((ch) => (
-          <Chute key={ch.id} ch={ch} S={SCENE} answered={answered} picked={picked} onPick={onPick} />
-        ))}
-        {showChutes && answered && <ChuteBox S={SCENE} picked={picked} />}
+      {/* ── the ladder (rungs scroll down → the figure climbs upward) ──────── */}
+      <Animated.View style={[styles.fill, ladderStyle]} pointerEvents="none">
+        <View style={[styles.rail, { left: LADDER_X - 18 }]} />
+        <View style={[styles.rail, { left: LADDER_X + 13 }]} />
+        <View style={styles.rungClip}>
+          <Animated.View style={[styles.rungInner, rungsStyle]}>
+            {[-1, 0, 1, 2, 3, 4, 5, 6, 7].map((r) => (
+              <View key={r} style={[styles.rung, { top: r * RUNG_SP }]} />
+            ))}
+          </Animated.View>
+        </View>
       </Animated.View>
-    </Animated.View>
+
+      {/* ── the staircase chart: divide it, then climb it ──────────────────── */}
+      <Animated.View style={[styles.fill, stairStyle]} pointerEvents="none">
+        <Text style={styles.stairHdr}>ONE STEP AT A TIME</Text>
+        {STAIRS.map((s) => (
+          <View key={s.n} style={[styles.stair, { left: s.left, top: STAIR_BASE - s.h, height: s.h }]}>
+            <Text style={styles.stairNum}>{s.n}</Text>
+          </View>
+        ))}
+      </Animated.View>
+
+      {/* ── the pipeline: premises → inference → conclusion ────────────────── */}
+      <Animated.View style={[styles.fill, machineStyle]} pointerEvents="none">
+        <View style={[styles.pipeBox, { top: P1_T }]}>
+          <Text style={styles.pipeTag}>PREMISE</Text>
+          <Text style={styles.pipeVal}>AB = AC</Text>
+        </View>
+        <View style={[styles.pipeBox, { top: P2_T }]}>
+          <Text style={styles.pipeTag}>PREMISE</Text>
+          <Text style={styles.pipeVal}>AB = BC</Text>
+        </View>
+
+        <View style={[styles.shaft, { top: A1_T }]} />
+        <View style={[styles.head, { top: A1_T + 8 }]} />
+        <Animated.View style={[styles.token, { top: A1_T }, tokAStyle]} />
+
+        <View style={styles.gearBox}>
+          <Text style={styles.gearLabel}>INFERENCE</Text>
+        </View>
+        <Animated.View style={[styles.gear, { left: 240 - 23 }, gearA]}><Gear /></Animated.View>
+        <Animated.View style={[styles.gear, { left: 296 - 23 }, gearB]}><Gear /></Animated.View>
+
+        <View style={[styles.shaft, { top: A2_T }]} />
+        <View style={[styles.head, { top: A2_T + 8 }]} />
+        <Animated.View style={[styles.token, { top: A2_T }, tokBStyle]} />
+
+        <View style={[styles.pipeBox, styles.pipeOut, { top: CONCL_T }]}>
+          <Text style={[styles.pipeTag, styles.onPaper]}>CONCLUSION</Text>
+          <Text style={[styles.pipeVal, styles.onPaper]}>∴  AC = BC</Text>
+        </View>
+      </Animated.View>
+
+      {/* the figure */}
+      <Stickman D={DF} k={K_FIG} />
+
+      {/* ── Q1: Euclid's proof with one step left blank ────────────────────── */}
+      {showChain && (
+        <>
+          <Animated.View style={[styles.fill, chainStyle]} pointerEvents="none">
+            <Text style={styles.qHdr}>TAP THE MISSING STEP</Text>
+            {[0, 1, 2].map((g) => (
+              <View key={g} style={[styles.chev, { top: CARD_T + (g + 1) * CARD_H + g * CARD_GAP + 3 }]} />
+            ))}
+          </Animated.View>
+          {STEPS_TEXT.map((st, k) => (
+            <ProofCard
+              key={st.id} st={st} top={CARD_T + k * (CARD_H + CARD_GAP)}
+              S={SCENE} answered={answered} picked={picked} onPick={onPick}
+            />
+          ))}
+        </>
+      )}
+
+      {/* ── Q2: send the proof down a chute ────────────────────────────────── */}
+      {showChutes && (
+        <>
+          <Animated.View style={[styles.fill, chuteStyle]} pointerEvents="none">
+            <Text style={styles.qHdr}>TAP THE RIGHT CHUTE</Text>
+          </Animated.View>
+          {BINS.map((b) => (
+            <Bin key={b.id} b={b} answered={answered} picked={picked} onPick={onPick} />
+          ))}
+          <ProofSlip S={SCENE} picked={picked} />
+        </>
+      )}
+    </View>
   );
 }
 
@@ -156,104 +245,169 @@ function Gear() {
   );
 }
 
-function ChainLink({ lk, S, answered, picked, onPick }: {
-  lk: { id: string; x: number; gap: boolean };
+/** One line of the proof. The blank one fills with ink and writes its missing step in. */
+function ProofCard({ st, top, S, answered, picked, onPick }: {
+  st: { id: string; text: string; gap: boolean }; top: number;
   S: SharedValue<any>; answered: boolean; picked: string | null;
   onPick: (id: string, correct: boolean) => void;
 }) {
-  const st = useAnimatedStyle(() => {
-    const chosen = picked === lk.id;
-    const q = answered ? S.value.qv : 0;
-    return {
-      opacity: S.value.chain,
-      transform: [{ scale: chosen ? 1.15 : 1 }, { rotate: lk.gap ? `${q * 16}deg` : '0deg' }, { translateY: lk.gap ? q * 8 : 0 }],
-    };
-  });
+  const chosen = picked === st.id;
+  const wrap = useAnimatedStyle(() => ({ opacity: S.value.chain }));
+  const fill = useAnimatedStyle(() => ({ opacity: st.gap ? S.value.qv : 0 }));
+  const before = useAnimatedStyle(() => ({ opacity: st.gap ? 1 - S.value.qv : 1 }));
+  const after = useAnimatedStyle(() => ({ opacity: st.gap ? S.value.qv : 0 }));
   return (
-    <Pressable
-      style={[styles.linkHit, { left: lk.x - 34, top: CHAIN_Y - 34 }]}
-      disabled={answered}
-      onPress={() => onPick(lk.id, lk.gap)}
-    >
-      <Animated.View style={[styles.link, lk.gap && styles.linkGap, st]}>
-        {lk.gap ? <Text style={styles.gapQ}>?</Text> : null}
-      </Animated.View>
-    </Pressable>
+    <Animated.View style={[styles.cardHit, { top }, wrap]}>
+      <Pressable disabled={answered} onPress={() => onPick(st.id, st.gap)} style={styles.press}>
+        <View style={[styles.card, answered && chosen && !st.gap && styles.cardWrong]}>
+          <Animated.View style={[styles.cardFill, fill]} pointerEvents="none" />
+          <Animated.View style={[styles.cardText, before]}>
+            <Text style={st.gap ? styles.cardGapT : styles.cardT}>{st.text}</Text>
+          </Animated.View>
+          {st.gap ? (
+            <Animated.View style={[styles.cardText, after]}>
+              <Text style={styles.cardRevealT}>{MISSING}</Text>
+            </Animated.View>
+          ) : null}
+        </View>
+      </Pressable>
+    </Animated.View>
   );
 }
 
-function Chute({ ch, S, answered, picked, onPick }: {
-  ch: { id: string; x: number; label: string };
-  S: SharedValue<any>; answered: boolean; picked: string | null;
-  onPick: (id: string, correct: boolean) => void;
+function Bin({ b, answered, picked, onPick }: {
+  b: { id: string; label: string; top: number; correct: boolean };
+  answered: boolean; picked: string | null; onPick: (id: string, correct: boolean) => void;
 }) {
-  const chosen = picked === ch.id;
-  const correct = ch.id === 'check';
+  const chosen = picked === b.id;
   return (
     <Pressable
-      style={[styles.chuteHit, { left: ch.x - 60 }]}
+      style={[styles.binHit, { top: b.top }]}
       disabled={answered}
-      onPress={() => onPick(ch.id, correct)}
+      onPress={() => onPick(b.id, b.correct)}
     >
-      <View style={[styles.chuteBin, answered && correct && styles.binRight, answered && chosen && !correct && styles.binWrong]}>
-        <Text style={[styles.chuteT, answered && correct && styles.chuteTOn]}>{ch.label}</Text>
+      <View style={[styles.bin, answered && b.correct && styles.binRight, answered && chosen && !b.correct && styles.binWrong]}>
+        <Text style={[styles.binT, answered && b.correct && styles.onPaper]}>{b.label}</Text>
       </View>
     </Pressable>
   );
 }
 
-function ChuteBox({ S, picked }: { S: SharedValue<any>; picked: string | null }) {
-  const target = CHUTES.find((c) => c.id === picked) ?? CHUTES[0];
-  const st = useAnimatedStyle(() => {
-    const q = S.value.qv;
-    return { transform: [{ translateX: lerp(200, target.x, q) - 200 }, { translateY: q * 40 }], opacity: 1 - q * 0.2 };
-  });
+/** The proof being judged — it slides into whichever bin was tapped. */
+function ProofSlip({ S, picked }: { S: SharedValue<any>; picked: string | null }) {
+  const target = BINS.find((b) => b.id === picked);
+  const dy = target ? target.top + BIN_H / 2 - PROOF_CY : 0;
+  const st = useAnimatedStyle(() => ({
+    opacity: S.value.chute,
+    transform: [{ translateY: dy * S.value.qv }],
+  }));
   return (
-    <Animated.View style={[styles.dropBox, { left: 200 - 17, top: CHUTE_Y - 54 }, st]} pointerEvents="none"><Text style={styles.wbTOn}>∴?</Text></Animated.View>
+    <Animated.View style={[styles.proof, st]} pointerEvents="none">
+      <Text style={styles.proofTag}>THE PROOF</Text>
+      <Text style={styles.proofT}>SKIPS 3 STEPS</Text>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 40, right: 40, top: GROUND, height: 1.5, backgroundColor: RULE },
+  fill: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
+  ground: { position: 'absolute', left: 24, right: 20, top: GROUND, height: 1.5, backgroundColor: RULE },
+  onPaper: { color: PAPER },
 
-  // machine
-  hopper: { position: 'absolute', left: MACH_X - 24, top: 328, width: 48, height: 24, backgroundColor: PAPER, borderWidth: 2.5, borderColor: INK, borderBottomWidth: 0 },
-  machineBody: { position: 'absolute', left: MACH_X - 44, top: 352, width: 88, height: 82, borderWidth: 3, borderColor: INK, borderRadius: 8, backgroundColor: PAPER },
-  gear: { position: 'absolute', top: 374, width: 30, height: 30, alignItems: 'center', justifyContent: 'center', transformOrigin: '50% 50%' },
-  gearInner: { width: 26, height: 26, borderRadius: 13, borderWidth: 3, borderColor: INK, alignItems: 'center', justifyContent: 'center' },
-  tooth: { position: 'absolute', width: 34, height: 5, backgroundColor: INK, borderRadius: 1 },
-  beltFrame: { position: 'absolute', left: MACH_X + 40, top: 434, width: 92, height: 8, backgroundColor: INK, borderRadius: 4 },
-  roller: { position: 'absolute', top: 430, width: 16, height: 16, borderRadius: 8, borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER },
-  wordBox: { position: 'absolute', width: 34, height: 24, borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center' },
-  outBox: { position: 'absolute', width: 36, height: 26, borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: INK, alignItems: 'center', justifyContent: 'center' },
-  dropBox: { position: 'absolute', width: 34, height: 26, borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: INK, alignItems: 'center', justifyContent: 'center' },
-  wbT: { fontFamily: 'Inter_700Bold', fontSize: 13, color: INK },
-  wbTOn: { fontFamily: 'Inter_700Bold', fontSize: 12, color: PAPER },
+  // ── ladder ─────────────────────────────────────────────────────────────────
+  rail: { position: 'absolute', top: LADDER_T, width: 5, height: LADDER_H, backgroundColor: INK, borderRadius: 3 },
+  rungClip: { position: 'absolute', left: LADDER_X - 18, top: LADDER_T, width: 36, height: LADDER_H, overflow: 'hidden' },
+  rungInner: { position: 'absolute', left: 0, top: 0, width: 36, height: LADDER_H },
+  rung: { position: 'absolute', left: 0, width: 36, height: 5, backgroundColor: INK, borderRadius: 3 },
 
-  // ladder
-  ladderWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
-  rail: { position: 'absolute', top: 292, width: 5, height: 210, backgroundColor: INK, borderRadius: 3 },
-  rungClip: { position: 'absolute', left: LADDER_X - 17, top: 292, width: 34, height: 210, overflow: 'hidden' },
-  rungInner: { position: 'absolute', left: 0, top: 0, width: 34, height: 210 },
-  rung: { position: 'absolute', left: 0, width: 34, height: 5, backgroundColor: INK, borderRadius: 3 },
+  // ── staircase chart ────────────────────────────────────────────────────────
+  stairHdr: {
+    position: 'absolute', left: COL_L, top: 336, width: COL_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+  },
+  stair: {
+    position: 'absolute', width: STAIR_W, borderWidth: 2.5, borderColor: INK,
+    backgroundColor: PAPER, alignItems: 'center', paddingTop: 5,
+  },
+  stairNum: { fontFamily: 'Inter_700Bold', fontSize: 14, color: INK, includeFontPadding: false },
 
-  // chain (Q1) — big links
-  chainLine: { position: 'absolute', left: 130, top: CHAIN_Y - 3, width: 226, height: 4, backgroundColor: SOFT },
-  linkHit: { position: 'absolute', width: 68, height: 68, alignItems: 'center', justifyContent: 'center' },
-  link: { width: 52, height: 52, borderRadius: 26, borderWidth: 6, borderColor: INK, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center' },
-  linkGap: { borderStyle: 'dashed', borderWidth: 4, borderColor: SOFT, backgroundColor: 'transparent' },
-  gapQ: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: SOFT },
+  // ── pipeline ───────────────────────────────────────────────────────────────
+  pipeBox: {
+    position: 'absolute', left: COL_L, width: COL_W, height: PIPE_BOX_H,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  pipeOut: { backgroundColor: INK },
+  pipeTag: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT, includeFontPadding: false },
+  pipeVal: { fontFamily: 'Inter_700Bold', fontSize: 16, letterSpacing: 0.6, color: INK, marginTop: 1, includeFontPadding: false },
 
-  // chutes (Q2) — big bins
-  chuteHit: { position: 'absolute', top: CHUTE_Y - 6, width: 120, alignItems: 'center' },
-  chuteBin: { width: 116, height: 54, borderWidth: 3, borderColor: INK, borderRadius: 8, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center' },
+  shaft: { position: 'absolute', left: MID - 3, width: 6, height: 8, backgroundColor: INK },
+  head: {
+    position: 'absolute', left: MID - 9, width: 0, height: 0,
+    borderLeftWidth: 9, borderRightWidth: 9, borderTopWidth: 12,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: INK,
+  },
+  token: { position: 'absolute', left: MID - 5, width: 10, height: 10, backgroundColor: INK, borderRadius: 2 },
+
+  gearBox: {
+    position: 'absolute', left: GEAR_L, top: GEAR_T, width: GEAR_W, height: GEAR_H,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PAPER, alignItems: 'center', paddingTop: 5,
+  },
+  gearLabel: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: SOFT, includeFontPadding: false },
+  gear: {
+    position: 'absolute', top: GEAR_CY - 23, width: 46, height: 46,
+    alignItems: 'center', justifyContent: 'center', transformOrigin: '50% 50%',
+  },
+  gearInner: { width: 32, height: 32, borderRadius: 16, borderWidth: 3.5, borderColor: INK, alignItems: 'center', justifyContent: 'center' },
+  tooth: { position: 'absolute', width: 46, height: 6, backgroundColor: INK, borderRadius: 1 },
+
+  // ── Q1: proof cards ────────────────────────────────────────────────────────
+  qHdr: {
+    position: 'absolute', left: COL_L, top: CHAIN_HDR_T, width: COL_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+  },
+  chev: {
+    position: 'absolute', left: MID - 6, width: 0, height: 0,
+    borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 8,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: SOFT,
+  },
+  cardHit: { position: 'absolute', left: COL_L, width: COL_W },
+  press: { width: '100%' },
+  card: {
+    width: COL_W, height: CARD_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6,
+    backgroundColor: PAPER, overflow: 'hidden',
+  },
+  cardWrong: { borderColor: SOFT, opacity: 0.45 },
+  cardFill: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: INK },
+  cardText: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
+  cardT: { fontFamily: 'Inter_700Bold', fontSize: 16, letterSpacing: 0.6, color: INK, includeFontPadding: false },
+  cardGapT: { fontFamily: 'Inter_700Bold', fontSize: 18, letterSpacing: 2, color: SOFT, includeFontPadding: false },
+  cardRevealT: { fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 0.4, color: PAPER, includeFontPadding: false },
+
+  // ── Q2: chutes ─────────────────────────────────────────────────────────────
+  binHit: { position: 'absolute', left: COL_L, width: COL_W },
+  bin: {
+    width: COL_W, height: BIN_H, borderWidth: 3, borderColor: INK, borderRadius: 8,
+    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+  },
   binRight: { backgroundColor: INK, borderColor: INK },
   binWrong: { borderColor: SOFT, opacity: 0.45 },
-  chuteT: { fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 0.5, color: INK },
-  chuteTOn: { color: PAPER },
+  binT: { fontFamily: 'Inter_700Bold', fontSize: 17, letterSpacing: 1, color: INK, includeFontPadding: false },
+
+  proof: {
+    position: 'absolute', left: MID - 90, top: PROOF_T, width: 180, height: PROOF_H,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  proofTag: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT, includeFontPadding: false },
+  proofT: { fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 0.4, color: INK, marginTop: 1, includeFontPadding: false },
 });
 
+// Extremes across every beat: the Q headers at y 232, the pipeline 238–488, the proof
+// cards 254–472, the ladder 300–500, the staircase 336–494, the chutes 232–452, the
+// figure's crown ≈358 down to its feet at 500, and the ground rule at 501.5. Nothing is
+// drawn above 232 or below 501.5, so [224, 510] renders the stage at ~2.26×.
 export function Logic5Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic5Scene} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic5Scene} band={[224, 510]} />;
 }

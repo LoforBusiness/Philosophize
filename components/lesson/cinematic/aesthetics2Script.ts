@@ -14,28 +14,29 @@ export interface Aes2Beat extends BaseBeat {
   /** Viewer gesture (emote code). */ v?: number;
   /** A feeling-pulse crosses from artist to viewer this beat. */ wave?: boolean;
   /** The viewer's chest glows (they feel it too), 0/1. */ felt?: boolean;
+  /** How many links of the infection chain are filled in, 1→3. */ chain?: number;
 }
 
 export const BEATS: Aes2Beat[] = [
   {
-    a: 22, v: 4,
+    a: 22, v: 4, chain: 1,
     text: 'A dead painter is making you feel something right now. How does one mind’s feeling cross paint and centuries to reach yours?',
     dur: 3.6,
   },
   {
-    a: 7, v: 0, wave: true, felt: true,
+    a: 7, v: 0, wave: true, felt: true, chain: 3,
     text: 'Forget beauty and skill. Tolstoy says art is "infection": the maker relives a feeling and transmits it, so you feel the very same. Collingwood adds that real art clarifies a feeling not yet understood.',
     cite: 'Expression theory',
     dur: 5.0,
   },
   {
-    a: 15, v: 15, wave: true, felt: true,
+    a: 15, v: 15, wave: true, felt: true, chain: 3,
     text: 'A boy who once met a wolf retells his terror so vividly his listeners feel it too. That transfer of a real feeling, Tolstoy wrote, is art — and sincerity matters most of all.',
     cite: 'Tolstoy, What Is Art?, 1897',
     dur: 4.8,
   },
   {
-    a: 1, v: 22, felt: true,
+    a: 1, v: 22, felt: true, chain: 3,
     quote: {
       id: 'lq-aesthetics-aesthetics-2-1',
       text: 'Art is a human activity consisting in this, that one man hands on to others feelings he has lived through.',
@@ -47,7 +48,7 @@ export const BEATS: Aes2Beat[] = [
     dur: 3.2,
   },
   {
-    a: 14, v: 8,
+    a: 14, v: 8, chain: 3,
     mc: {
       prompt: 'What did Tolstoy believe was the primary purpose of art?',
       options: [
@@ -63,13 +64,13 @@ export const BEATS: Aes2Beat[] = [
     dur: 1.0,
   },
   {
-    a: 20, v: 17, wave: true, felt: true,
+    a: 20, v: 17, wave: true, felt: true, chain: 3,
     text: 'If the expression theorists are right, emotion can be carried in lines, sounds, and words — and survive death, language, and centuries. Almost nothing else we build does that.',
     cite: 'Feeling made portable',
     dur: 4.4,
   },
   {
-    a: 0, v: 22, felt: true,
+    a: 0, v: 22, felt: true, chain: 3,
     mc: {
       prompt: 'Crying at a film about people you know never existed — what does this show?',
       options: [

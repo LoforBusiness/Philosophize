@@ -2,10 +2,16 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic aesthetics-aesthetics-4, "Can Anything Be Art?" — Duchamp's Fountain.
-// A plain readymade sits on a gallery plinth. The artist signs it "R. Mutt 1917";
-// a viewer recoils, then falls into thought; an ART placard is conferred by the
-// artworld. Plinth centre (below head height), artist left, viewer right — the
-// figures flank the pedestal and never cover it.
+//
+// The stage is a gallery AND a scorecard. A readymade sits on a plinth between
+// the artist (who signs it) and a viewer (who recoils, then thinks). Above them,
+// THREE TESTS FOR ART are pinned up as cards: mimesis, expression, artworld. As
+// the lesson lands, each card is marked — a cross for the two old theories the
+// urinal defeats, a tick for the one that explains it.
+//
+// Prop channels the scene reads: `test` (how many theory cards are pinned up),
+// `verdict` (the marks against them), `signed` (R. Mutt on the readymade) and
+// `art` (the placard the artworld confers).
 //
 // Graded questions are the two from data/.../can-anything-be-art.ts.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -13,30 +19,32 @@ import type { BaseBeat } from './cinematicKit';
 export interface Aes4Beat extends BaseBeat {
   /** Artist gesture. */ a?: number;
   /** Viewer gesture. */ v?: number;
+  /** How many theory cards are pinned up (0..3). */ test?: number;
+  /** The cross/cross/tick marks are struck onto the cards (0/1). */ verdict?: number;
   /** Signature on the readymade (0/1). */ signed?: number;
   /** The artworld's ART placard (0/1). */ art?: number;
 }
 
 export const BEATS: Aes4Beat[] = [
   {
-    a: 2, v: 0, signed: 0, art: 0,
+    a: 2, v: 0, test: 0, verdict: 0, signed: 0, art: 0,
     text: 'In 1917, a plain urinal was entered as art. No carving, no painting — just a choice. So what makes something art?',
     dur: 3.6,
   },
   {
-    a: 1, v: 10,
+    a: 1, v: 10, test: 2,
     text: 'For ages, two ideas ruled. Plato and Aristotle: art is mimesis, skilled imitation. Later Tolstoy and Collingwood: art is the expression of feeling. Both assume a maker’s craft.',
     cite: 'Two old answers',
     dur: 5.0,
   },
   {
-    a: 36, v: 15, signed: 1,
+    a: 36, v: 15, test: 2, signed: 1,
     text: 'Duchamp laid a urinal on its back, signed it "R. Mutt 1917," and submitted it. The committee suppressed it. An anonymous defense replied: it does not matter who made it — "He CHOSE it."',
     cite: 'The Richard Mutt Case, 1917',
     dur: 5.2,
   },
   {
-    a: 0, v: 4, signed: 1,
+    a: 0, v: 4, test: 2, signed: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-4-1',
       text: 'To see something as art requires something the eye cannot descry — an atmosphere of artistic theory, a knowledge of the history of art: an artworld.',
@@ -48,13 +56,13 @@ export const BEATS: Aes4Beat[] = [
     dur: 3.6,
   },
   {
-    a: 13, v: 4, signed: 1, art: 1,
+    a: 13, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
     text: 'Fountain defies mimesis and expression alike — it stirs a question more than a feeling. Asking "but is this art?" is itself philosophy: it drags your hidden definition into the open.',
     cite: 'The artworld confers',
     dur: 5.0,
   },
   {
-    a: 21, v: 4, signed: 1, art: 1,
+    a: 21, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
     mc: {
       prompt: 'On Dickie’s institutional theory, what makes something count as art?',
       options: [
@@ -70,7 +78,7 @@ export const BEATS: Aes4Beat[] = [
     dur: 1.0,
   },
   {
-    a: 0, v: 8, signed: 1, art: 1,
+    a: 0, v: 8, test: 3, verdict: 1, signed: 1, art: 1,
     mc: {
       prompt: 'A urinal becomes art in a gallery. So does that prove "anything is art if you call it art"?',
       options: [

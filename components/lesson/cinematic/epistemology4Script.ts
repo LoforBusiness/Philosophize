@@ -2,12 +2,13 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic epistemology-knowledge-4, "Where Does Knowledge Come From?".
-// Left, an empiricist beside a blank slate that fills as sensations rain down from
-// an eye (Locke's white paper). Right, a rationalist whose head glows with innate,
-// a-priori ideas (Descartes, Plato). At the end a bridge lights between them — Kant's
-// truce. Each figure rotates through its own gestures; the props sit above and
-// beside the figures so nothing is covered.
+// The stage is a labelled flow diagram over the two arguers. LEFT panel: an eye,
+// sensations travelling along an arrow, and a slate that gets written on — Locke's
+// white paper. RIGHT panel: a mind already holding its a-priori furniture (2+2=4,
+// A=A, no square circles), glowing. At the end both panels feed DOWN into one box —
+// Kant's truce: sense data plus the mind's forms equals experience.
 //
+// Q1 is answered IN THE SCENE (tap the blank-slate thinker); Q2 stays in the deck.
 // Graded questions are the two from data/.../where-does-knowledge-come-from.ts.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -63,14 +64,8 @@ export const BEATS: Epi4Beat[] = [
   },
   {
     e: 2, r: 11, fill: 0.85, glow: 1,
-    mc: {
-      prompt: 'Which philosopher held the mind begins as a blank slate, with no innate principles?',
-      options: [
-        { id: 'a', text: 'John Locke', correct: true },
-        { id: 'b', text: 'René Descartes', correct: false },
-        { id: 'c', text: 'Plato', correct: false },
-        { id: 'd', text: 'Gottfried Leibniz', correct: false },
-      ],
+    interact: {
+      prompt: 'Which thinker held the mind begins as a blank slate, with no innate principles? Tap the name.',
       explain:
         'Locke called the newborn mind "white paper," filled only through sensation and reflection. Descartes, Plato, and Leibniz argued the reverse — some ideas are innate.',
       xp: 5,

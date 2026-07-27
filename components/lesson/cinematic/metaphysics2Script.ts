@@ -13,6 +13,8 @@ export interface Meta2Beat extends BaseBeat {
   /** Traveller gesture (emote code). */ e?: number;
   /** Traveller x (walks along the road between beats). */ x?: number;
   /** How dissolved the IT-IS-NOT road is this beat, 0→1. */ gone?: number;
+  /** Leibniz's principle strip has slid into place (0/1). */ pr?: number;
+  /** How many rows of the two-ways test table are filled in, 0→3. */ mx?: number;
 }
 
 export const BEATS: Meta2Beat[] = [
@@ -22,19 +24,19 @@ export const BEATS: Meta2Beat[] = [
     dur: 3.6,
   },
   {
-    e: 1, x: 150, gone: 0.35,
+    e: 1, x: 148, gone: 0.35, pr: 1,
     text: 'Leibniz held that nothing is so without a sufficient reason. Turn that on existence itself: why something rather than nothing? Nothing, he noted, would be simpler and easier.',
     cite: 'Leibniz, sufficient reason',
     dur: 4.6,
   },
   {
-    e: 13, x: 206, gone: 0.4,
+    e: 13, x: 196, gone: 0.4, pr: 1, mx: 2,
     text: 'Parmenides had struck first, and here is his fork. To speak of "what is not," you must think it — yet you can neither know nor utter what is not. Non-being gives reason nothing to grip.',
     cite: 'Parmenides, On Nature',
     dur: 4.8,
   },
   {
-    e: 4, x: 206, gone: 0.4,
+    e: 4, x: 196, gone: 0.4, pr: 1, mx: 3,
     quote: {
       id: 'lq-metaphysics-being-2-1',
       text: 'The same thing is there for thinking and for being.',
@@ -46,13 +48,13 @@ export const BEATS: Meta2Beat[] = [
     dur: 3.0,
   },
   {
-    e: 15, x: 250, gone: 0.95,
+    e: 15, x: 220, gone: 0.95, pr: 1, mx: 3,
     text: 'A goddess in his poem sets out two ways: that it is, and that it is not. Step toward the second and it dissolves — what is not can never be grasped. Judge by reason, she says, not by eye and ear.',
     cite: 'Parmenides, On Nature',
     dur: 5.0,
   },
   {
-    e: 7, x: 208, gone: 0.5,
+    e: 7, x: 198, gone: 0.5, pr: 1, mx: 3,
     mc: {
       prompt: 'On Parmenides’s view, why can pure nothingness never truly exist?',
       options: [
@@ -68,7 +70,7 @@ export const BEATS: Meta2Beat[] = [
     dur: 1.0,
   },
   {
-    e: 9, x: 208, gone: 0.5,
+    e: 9, x: 198, gone: 0.5, pr: 1, mx: 3,
     mc: {
       prompt: 'Leibniz and Parmenides both reasoned about being. So they reached the same conclusion, right?',
       options: [

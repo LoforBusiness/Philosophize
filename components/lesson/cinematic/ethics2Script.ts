@@ -15,6 +15,8 @@ export interface Ethics2Beat extends BaseBeat {
   /** Finder x position (steps between beats). */ px?: number;
   /** Guide gesture (emote code), -1 = off stage. */ g?: number;
   /** Guide x (walks between beats). */ gx?: number;
+  /** Verdict-board rows carry their lens name + question yet (0/1). */ named?: number;
+  /** How many of the three lenses have stamped their verdict, 0→3. */ lens?: number;
 }
 
 export const BEATS: Ethics2Beat[] = [
@@ -24,19 +26,19 @@ export const BEATS: Ethics2Beat[] = [
     dur: 3.4,
   },
   {
-    p: 7, px: 262, g: -1, gx: 48,
+    p: 7, px: 262, g: -1, gx: 48, named: 1,
     text: 'Ethics hands you three lenses, not three religions. Consequentialism weighs results. Deontology asks about duty. Virtue ethics asks who the act makes you. Most of us quietly blend all three.',
     cite: 'Three lenses',
     dur: 5.0,
   },
   {
-    p: 4, px: 262, g: 21, gx: 108,
+    p: 4, px: 262, g: 21, gx: 108, named: 1, lens: 1,
     text: 'Mill points the first lens at the wallet: did returning it make life go better? Acts are right, he says, as they tend to promote happiness — everyone weighed equally.',
     cite: 'J.S. Mill, Utilitarianism, 1863',
     dur: 4.8,
   },
   {
-    p: 0, px: 262, g: 1, gx: 108,
+    p: 0, px: 262, g: 1, gx: 108, named: 1, lens: 1,
     quote: {
       id: 'lq-ethics-ethics-2-1',
       text: 'Actions are right in proportion as they tend to promote happiness, wrong as they tend to produce the reverse of happiness.',
@@ -48,19 +50,19 @@ export const BEATS: Ethics2Beat[] = [
     dur: 3.0,
   },
   {
-    p: 14, px: 262, g: 6, gx: 108,
+    p: 14, px: 262, g: 6, gx: 108, named: 1, lens: 2,
     text: 'Kant ignores the happy ending. Act only on a rule you could will everyone to follow — and "keep wallets you find" self-destructs, because trust in returning things would collapse.',
     cite: 'Kant, Groundwork, 1785',
     dur: 4.8,
   },
   {
-    p: 13, px: 262, g: 22, gx: 108,
+    p: 13, px: 262, g: 22, gx: 108, named: 1, lens: 3,
     text: 'Aristotle asks a third question — not "what do I do?" but "who am I becoming?" Each honest act, done as habit, makes the next one easier. That is the road to a flourishing life.',
     cite: 'Aristotle, Nicomachean Ethics',
     dur: 4.8,
   },
   {
-    p: 21, px: 262, g: -1,
+    p: 21, px: 262, g: -1, named: 1, lens: 3,
     mc: {
       prompt: 'Returning the found wallet, which question does a consequentialist ask first?',
       options: [
@@ -76,7 +78,7 @@ export const BEATS: Ethics2Beat[] = [
     dur: 1.0,
   },
   {
-    p: 8, px: 262, g: -1,
+    p: 8, px: 262, g: -1, named: 1, lens: 3,
     mc: {
       prompt: 'Almost everyone keeps small change they find, so keeping the wallet must be morally fine. Sound reasoning?',
       options: [

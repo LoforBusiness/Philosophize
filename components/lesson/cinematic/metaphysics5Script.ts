@@ -7,9 +7,10 @@ import type { BaseBeat } from './cinematicKit';
 
 export interface Meta5Beat extends BaseBeat {
   /** Figure gesture. */ p?: number;
-  /** Starfield brightness 0..1. */ stars?: number;
-  /** The great "?" in the sky 0..1. */ q?: number;
-  /** The figure glows — Dasein 0..1. */ dasein?: number;
+  /** Starfield brightness inside the SOMETHING panel 0..1. */ stars?: number;
+  /** The great "?" standing between NOTHING and SOMETHING 0..1. */ q?: number;
+  /** The figure glows and the DASEIN tag stamps in 0..1. */ dasein?: number;
+  /** Leibniz's principle of sufficient reason, ruled under the panels 0..1. */ psr?: number;
 }
 
 export const BEATS: Meta5Beat[] = [
@@ -25,13 +26,13 @@ export const BEATS: Meta5Beat[] = [
     dur: 5.2,
   },
   {
-    p: 19, stars: 1, q: 1,
+    p: 19, stars: 1, q: 1, psr: 1,
     text: 'In 1714 Leibniz pressed it sharpest, and answered with his Principle of Sufficient Reason: every fact needs a reason — so existence itself must demand one.',
     cite: 'Leibniz, 1714',
     dur: 4.8,
   },
   {
-    p: 0, stars: 1, q: 1,
+    p: 0, stars: 1, q: 1, psr: 1,
     quote: {
       id: 'lq-metaphysics-being-5-1',
       text: 'Why are there beings at all instead of nothing? That is the question.',
@@ -43,13 +44,13 @@ export const BEATS: Meta5Beat[] = [
     dur: 3.4,
   },
   {
-    p: 20, stars: 1, q: 0.4, dasein: 1,
+    p: 20, stars: 1, q: 0.4, psr: 1, dasein: 1,
     text: 'And here is what is strangest about us: we are the beings whose own being is at issue. Heidegger calls this "Dasein." Through you, existence turns around and questions itself.',
     cite: 'Dasein — being-there',
     dur: 5.0,
   },
   {
-    p: 4, stars: 1, dasein: 1,
+    p: 4, stars: 1, q: 0.4, psr: 1, dasein: 1,
     mc: {
       prompt: 'For Heidegger, which mood throws open the question of why anything exists at all?',
       options: [
@@ -64,7 +65,7 @@ export const BEATS: Meta5Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, stars: 1, dasein: 1,
+    p: 4, stars: 1, q: 0.4, psr: 1, dasein: 1,
     mc: {
       prompt: '"Dasein" is German. Which translation is the one Heidegger actually means?',
       options: [
