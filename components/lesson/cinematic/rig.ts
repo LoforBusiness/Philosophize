@@ -395,7 +395,7 @@ export function stand(t: number): Stance {
     // opened a paper gap between them; the boxing stance only hid it by being deep
     // and bent. Life now comes from the torso/head/arms, not the feet.
     footL: { x: -4, y: 0 }, footR: { x: 4, y: 0 },
-    fistL: { x: -5 + ws * 1.2, y: -2 + hd }, fistR: { x: 5 + ws * 1.2, y: -2 - hd }, adv: 0,
+    fistL: { x: -5 + ws * 1.2, y: 6 + hd }, fistR: { x: 5 + ws * 1.2, y: 6 - hd }, adv: 0,
   };
 }
 
@@ -493,33 +493,33 @@ export function emoteHold(code: number, t: number): Stance {
   'worklet';
   const s = stand(t);
   const g = life2(t, 1.25, 0.8, 0.6) * 1.3;     // active-hand drift so a hold never freezes
-  if (code === 1) return hands(s, -6, -4, 32 + g, -22);
-  if (code === 2) return { ...hands(s, -6, -4, 26 + g, -46), neck: -0.14 };
-  if (code === 3) return { ...hands(s, -6, -4, 30 + g, -34), neck: -0.05 };
-  if (code === 4) return { ...hands(s, -6, -6, 8, -50 + g), neck: 0.12 };
+  if (code === 1) return hands(s, -6, 6, 32 + g, -22);
+  if (code === 2) return { ...hands(s, -6, 6, 26 + g, -46), neck: -0.14 };
+  if (code === 3) return { ...hands(s, -6, 6, 30 + g, -34), neck: -0.05 };
+  if (code === 4) return { ...hands(s, -6, 5, 8, -50 + g), neck: 0.12 };
   if (code === 5) return hands(s, -28, -16, 32 + g, -38);
-  if (code === 6) return { ...hands(s, -8, -8, 12, -58 + g), neck: -0.20 };
+  if (code === 6) return { ...hands(s, -8, 4, 12, -58 + g), neck: -0.20 };
   if (code === 7) return hands(s, -32 - g, -18, 32 + g, -18);
   if (code === 8) return { ...hands(s, -26, -6, 26, -6), tilt: s.tilt + 0.03, bob: s.bob + 3, neck: 0.05 };
-  if (code === 9) return { ...hands(s, -6, -2, 9, -8), tilt: s.tilt + 0.02 };
+  if (code === 9) return { ...hands(s, -6, 6, 9, -8), tilt: s.tilt + 0.02 };
   if (code === 10) return hands(s, 9, -24, -9, -24);
-  if (code === 11) return { ...hands(s, -6, -4, 6, -52), neck: 0.16, tilt: s.tilt + 0.03 };
-  if (code === 12) return { ...hands(s, -6, -4, 4, -56), neck: 0.06 };
-  if (code === 13) return { ...hands(s, -6, -4, 34, -16), tilt: s.tilt - 0.05 };
+  if (code === 11) return { ...hands(s, -6, 6, 6, -52), neck: 0.16, tilt: s.tilt + 0.03 };
+  if (code === 12) return { ...hands(s, -6, 6, 4, -56), neck: 0.06 };
+  if (code === 13) return { ...hands(s, -6, 6, 34, -16), tilt: s.tilt - 0.05 };
   if (code === 14) return { ...hands(s, -24, -16, 24, -16), tilt: s.tilt - 0.04 };
   if (code === 15) return { ...hands(s, -22, -34, 22, -34), tilt: s.tilt + 0.16, neck: 0.06, footL: { x: -9, y: 0 }, footR: { x: 9, y: 0 } };
   if (code === 16) return { ...hands(s, -18, -56, 18, -56), neck: -0.14, tilt: s.tilt - 0.03 };
   if (code === 17) return { ...hands(s, -3, 6, 5, 6), tilt: s.tilt - 0.30, neck: 0.22, bob: s.bob - 3 };
   if (code === 18) return { ...hands(s, -12, -46, 12, -46), bob: s.bob - 14, tilt: s.tilt + 0.06, neck: 0.10, footL: { x: -11, y: 0 }, footR: { x: 11, y: 0 } };
   if (code === 19) return { ...hands(s, -16, -50, 18, -50), neck: -0.12, tilt: s.tilt - 0.06 };
-  if (code === 20) return { ...hands(s, -6, -4, 18, -52 + g) };
+  if (code === 20) return { ...hands(s, -6, 6, 18, -52 + g) };
   if (code === 21) return hands(s, -26, -8, 26, -8);
-  if (code === 22) return { ...hands(s, -6, -6, 4, -30), neck: 0.02 };
-  if (code === 23) return { ...hands(s, -6, -4, 30, -46) };
+  if (code === 22) return { ...hands(s, -6, 5, 4, -30), neck: 0.02 };
+  if (code === 23) return { ...hands(s, -6, 6, 30, -46) };
   // ── the second wave ─────────────────────────────────────────────────────────
   if (code === 24) return { ...hands(s, -18, -56 + g, 18, -58 + g), neck: -0.24, tilt: s.tilt - 0.04 };     // reach up, both hands, head back
   if (code === 25) return { ...hands(s, -8, -10, 16 + g, -50 + g), neck: -0.22, tilt: s.tilt - 0.03 };       // gaze up in wonder, one hand rising
-  if (code === 26) return { ...hands(s, -6, -4, 24, -46), neck: -0.04, tilt: s.tilt - 0.03 };                // stamp poised (down-strike is a live accent)
+  if (code === 26) return { ...hands(s, -6, 6, 24, -46), neck: -0.04, tilt: s.tilt - 0.03 };                // stamp poised (down-strike is a live accent)
   if (code === 27) return { ...hands(s, 18, 4, 26, 8), tilt: s.tilt - 0.10, neck: 0.06 };                    // grip the lever, both hands low-forward
   if (code === 28) return { ...hands(s, -9, -6, 9, -6), tilt: s.tilt - 0.05, bob: s.bob + 2, neck: -0.06 };  // power pose, both hands on hips, chest up
   if (code === 29) return { ...hands(s, -30 - g, -14, 30 + g, -14), tilt: s.tilt + 0.02 };                   // press outward against the walls
@@ -527,22 +527,22 @@ export function emoteHold(code: number, t: number): Stance {
   if (code === 31) return { ...hands(s, 14, -2, 24, -6), tilt: s.tilt - 0.03, neck: 0.04 };                  // receive, hands cupped forward
   if (code === 32) return { ...hands(s, -24, -22, 24, -22), tilt: s.tilt };                                  // conduct / sway (live oscillates both hands)
   if (code === 33) return { ...hands(s, -30, -30, 30, -30), neck: -0.18, tilt: s.tilt - 0.05 };              // open release, arms wide and up, head back
-  if (code === 34) return { ...hands(s, -8, -6, 4, -48), neck: 0.08, tilt: s.tilt + 0.06 };                  // shield eyes from a bright light
-  if (code === 35) return { ...hands(s, -6, -2, 26, -52 + g), neck: -0.14, tilt: s.tilt - 0.05 };            // proclaim, one arm raised out-and-up
-  if (code === 36) return { ...hands(s, -6, -4, 26, -2), tilt: s.tilt - 0.06, neck: 0.10 };                  // sign / write on a surface
-  if (code === 37) return { ...hands(s, -6, -6, 24, -14), tilt: s.tilt - 0.04 };                             // grasp then pull in (live pulls)
-  if (code === 38) return { ...hands(s, -6, -2, 22, 6), neck: 0.16, tilt: s.tilt + 0.03 };                   // gesture down at the ground / shared floor
-  if (code === 39) return { ...hands(s, -6, -4, 28, -8), tilt: s.tilt - 0.05, neck: 0.02 };                  // reach forward to clasp / covenant
+  if (code === 34) return { ...hands(s, -8, 5, 4, -48), neck: 0.08, tilt: s.tilt + 0.06 };                  // shield eyes from a bright light
+  if (code === 35) return { ...hands(s, -6, 6, 26, -52 + g), neck: -0.14, tilt: s.tilt - 0.05 };            // proclaim, one arm raised out-and-up
+  if (code === 36) return { ...hands(s, -6, 6, 26, -2), tilt: s.tilt - 0.06, neck: 0.10 };                  // sign / write on a surface
+  if (code === 37) return { ...hands(s, -6, 5, 24, -14), tilt: s.tilt - 0.04 };                             // grasp then pull in (live pulls)
+  if (code === 38) return { ...hands(s, -6, 6, 22, 6), neck: 0.16, tilt: s.tilt + 0.03 };                   // gesture down at the ground / shared floor
+  if (code === 39) return { ...hands(s, -6, 6, 28, -8), tilt: s.tilt - 0.05, neck: 0.02 };                  // reach forward to clasp / covenant
   // ── the third wave: working at a prop ───────────────────────────────────────
   // These assume the prop is just in FRONT of the figure (the scene walks them to
   // it and turns them to face it), so the working hand stays forward and visible —
   // never tucked behind the head or crossing the face.
-  if (code === 40) return { ...hands(s, -7, -2, 30 + g, -40), neck: -0.10, tilt: s.tilt - 0.05 };  // write on a board
-  if (code === 41) return { ...hands(s, -7, -2, 31, -54), neck: -0.18, tilt: s.tilt - 0.05 };      // tap high on the board
+  if (code === 40) return { ...hands(s, -7, 6, 30 + g, -40), neck: -0.10, tilt: s.tilt - 0.05 };  // write on a board
+  if (code === 41) return { ...hands(s, -7, 6, 31, -54), neck: -0.18, tilt: s.tilt - 0.05 };      // tap high on the board
   if (code === 42) return { ...hands(s, 18, 2, 26, 2), tilt: s.tilt + 0.04, bob: s.bob - 2 };      // carry a load, both hands forward-low
   if (code === 43) return { ...hands(s, 16, 10, 24, 12), tilt: s.tilt - 0.14, bob: s.bob - 9, neck: 0.14 }; // set it down
   if (code === 44) return { ...hands(s, -12, 2, -15, 4), neck: -0.06, tilt: s.tilt - 0.02 };       // hands clasped behind the back
-  if (code === 45) return { ...hands(s, -7, -3, 14, -20), neck: 0.02 };                            // double-take (the live pass snaps the head)
+  if (code === 45) return { ...hands(s, -7, 6, 14, -20), neck: 0.02 };                            // double-take (the live pass snaps the head)
   if (code === 46) return { ...hands(s, -8, 4, 8, 4), tilt: s.tilt + 0.10, neck: 0.20, bob: s.bob - 6 }; // slump, defeated
   if (code === 47) return { ...hands(s, -20, -34, 20, -34), neck: -0.04, tilt: s.tilt - 0.02 };    // frame it up, both hands sizing
   return s;                                       // 0 neutral

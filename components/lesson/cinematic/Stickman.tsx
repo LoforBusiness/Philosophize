@@ -71,15 +71,19 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
     // it plain. `weld` is the overlap that closes it — small enough to be invisible
     // as a bulge, large enough that no joint can ever come apart.
     //
-    // The pelvis gets a bigger weld than the rest because three thick bones meet
-    // there at varying angles; it is the one junction that must read as solid mass.
+    // The pelvis needs slightly more than the rest, but only slightly. A dot at the
+    // torso's half-width (6) leaves the thigh corners poking out, because the thighs
+    // hang off hips at ±1 with a half-width of 5.5 and so reach ±6.5 — those exposed
+    // corners are the notch. 0.9 covers them and no more. It is tempting to weld the
+    // pelvis hard, but anything near 1.7 renders as a ball at the hip and the figure
+    // reads pot-bellied once the stage is scaled up.
     const weld = 0.6 * k;
     return {
       limbBone: boneBase(limb),
       torsoBone: boneBase(torso),
       joint: dotBase(limb / 2 + weld),
       torsoJoint: dotBase(torso / 2 + weld),
-      pelvis: dotBase(torso / 2 + 1.7 * k),
+      pelvis: dotBase(torso / 2 + 0.9 * k),
       head: dotBase(headR),
       fist: dotBase(gloves ? gloveR : limb / 2 + weld),
     };
