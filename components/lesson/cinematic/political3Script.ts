@@ -13,9 +13,15 @@ import type { BaseBeat } from './cinematicKit';
 // Distinct from the power-and-people lesson: here it is the CONTRACT that
 // carries the drama.
 //
+// The hook beat shows the OTHER diagram in that same corridor: bare force, drawn
+// as a single heavy arrow pushing down on the ruled with a struck-out return arrow
+// beneath it — power compels, and nothing is owed back. The consent circuit then
+// takes its place, so the swap itself carries the lesson's central distinction.
+//
 // Prop channels the scene reads: `pair` (which comparison is up: 0 none, 1
-// power/legitimacy, 2 will-of-all/general-will), `flow` (the consent circuit),
-// `scroll` (0 = in the subject's hands, 1 = in the ruler's) and `seal`.
+// power/legitimacy, 2 will-of-all/general-will), `force` (the bare-power diagram
+// on the hook), `flow` (the consent circuit that replaces it), `scroll` (0 = in
+// the subject's hands, 1 = in the ruler's) and `seal`.
 //
 // Graded questions are the two from data/.../what-makes-government-legitimate.ts.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -25,13 +31,14 @@ export interface Pol3Beat extends BaseBeat {
   /** Ruler gesture. */ r?: number;
   /** Scroll position: 0 = in the subject's hands, 1 = in the ruler's. */ scroll?: number;
   /** Which comparison panel is up: 0 none, 1 power vs legitimacy, 2 Rousseau's split. */ pair?: number;
+  /** Bare power: one heavy arrow down, nothing owed back (0/1). Shares the corridor with `flow`. */ force?: number;
   /** The consent / protection circuit between them (0/1). */ flow?: number;
   /** The HELD IN TRUST stamp struck across the circuit (0/1). */ seal?: number;
 }
 
 export const BEATS: Pol3Beat[] = [
   {
-    sub: 2, r: 28, scroll: 0, pair: 1, flow: 0, seal: 0,
+    sub: 2, r: 28, scroll: 0, pair: 1, force: 1, flow: 0, seal: 0,
     text: 'A gun makes you obey. What makes you owe obedience? Power compels; legitimacy commands. Philosophers fought over the gap.',
     dur: 3.8,
   },

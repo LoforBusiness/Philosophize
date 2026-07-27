@@ -11,11 +11,16 @@ export interface Ethics6Beat extends BaseBeat {
   /** Trolley position along the track. */ tx?: number;
   /** The shove tension 0..1 — draws the fall line off the bridge. */ shove?: number;
   /**
-   * Rows written into the verdict card, 0..2: the switch, then the footbridge.
-   * Both rows carry the SAME arithmetic and opposite verdicts — the lesson, as a
-   * side-by-side you can read at a glance.
+   * Bars drawn into the WOULD YOU DO IT? chart, 0..2: the switch, then the
+   * footbridge. Both bars sit over the same "SAME MATH — 1 FOR 5" footing and land
+   * at opposite heights — the lesson, as a side-by-side you can read at a glance.
    */
   card?: number;
+  /**
+   * The USED AS A MEANS stamp, 0..1 — the crux Foot and the doctrine of double
+   * effect both point at. It lands on the doing-vs-using beat and stays up.
+   */
+  stamp?: number;
 }
 
 export const BEATS: Ethics6Beat[] = [
@@ -37,13 +42,13 @@ export const BEATS: Ethics6Beat[] = [
     dur: 5.2,
   },
   {
-    d: 22, str: 18, tx: 180,
+    d: 22, str: 18, tx: 180, card: 2, stamp: 1,
     text: 'The arithmetic is identical — five lives for one. Yet the switch and the shove split us. Foot: diverting redirects a threat; shoving makes a person your instrument.',
     cite: 'Doing vs using',
     dur: 4.8,
   },
   {
-    d: 0, str: 0, tx: 180,
+    d: 0, str: 0, tx: 180, card: 2, stamp: 1,
     quote: {
       id: 'lq-ethics-ethics-6-1',
       text: 'It takes more to justify an interference than to justify the withholding of goods and service.',
@@ -55,7 +60,7 @@ export const BEATS: Ethics6Beat[] = [
     dur: 3.4,
   },
   {
-    d: 4, str: 0, tx: 180,
+    d: 4, str: 0, tx: 180, card: 2, stamp: 1,
     mc: {
       prompt: 'Why do most people permit the switch but refuse the footbridge shove?',
       options: [
@@ -70,7 +75,7 @@ export const BEATS: Ethics6Beat[] = [
     dur: 1.0,
   },
   {
-    d: 21, str: 0, tx: 180,
+    d: 21, str: 0, tx: 180, card: 2, stamp: 1,
     mc: {
       prompt: 'A strict utilitarian must judge the lever and footbridge cases exactly alike. True?',
       options: [

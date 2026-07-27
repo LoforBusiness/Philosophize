@@ -408,7 +408,7 @@ function PremiseBox({ p, premise }: { p: SharedValue<number>; premise: Premise }
           y={LABEL_Y}
           fill={INK}
           fontFamily="Inter_700Bold"
-          fontSize={9}
+          fontSize={11}
           letterSpacing={1.6}
           textAnchor="middle"
         >
@@ -518,10 +518,10 @@ function ConclusionBox({ p }: { p: SharedValue<number> }) {
       <AG animatedProps={labelProps}>
         <SvgText
           x={CONC_CX}
-          y={CONC_CY + 3.4}
+          y={CONC_CY + 4}
           fill={PAPER}
           fontFamily="Inter_700Bold"
-          fontSize={9}
+          fontSize={11}
           letterSpacing={1.8}
           textAnchor="middle"
         >

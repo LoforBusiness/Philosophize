@@ -3,16 +3,18 @@ import type { BaseBeat } from './cinematicKit';
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic aesthetics-aesthetics-3, "Why Humans Love Music and Stories".
 //
-// The stage carries two pieces of real information design. Aristotle's half is a
-// LINE GRAPH of a tragedy: pity and fear climbing to the recognition, then the
+// The stage carries three pieces of real information design. Aristotle's half is
+// a LINE GRAPH of a tragedy: pity and fear climbing to the recognition, then the
 // long fall that is katharsis — it draws itself as the beats advance. Music's
 // half is a live BAR METER of the Greek modes; on the Plato beat the three soft
 // modes drop out and are stamped away while Dorian and Phrygian keep playing —
-// regulated, not banned.
+// regulated, not banned. When the graph steps aside for the music beats, its slot
+// is taken by Schopenhauer's LADDER: the other arts copy the Ideas, music copies
+// the will itself — the one claim the quote card turns on.
 //
 // Prop channels the scene reads: `arc` (how much of the tragic curve is drawn),
-// `mask` (the tragic mask), `modes` (the meter's intensity) and `cut` (Plato's
-// regulation of the soft modes).
+// `mask` (the tragic mask), `modes` (the meter's intensity), `cut` (Plato's
+// regulation of the soft modes) and `will` (Schopenhauer's ladder).
 //
 // Graded questions are the two from data/.../why-humans-love-music-and-stories.ts.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -21,13 +23,16 @@ export interface Aes3Beat extends BaseBeat {
   /** Figure gesture. */ p?: number;
   /** How much of the tragic arc is drawn, 0..1. */ arc?: number;
   /** Theatre mask present (0/1). */ mask?: number;
-  /** Mode-meter intensity 0..1. */ modes?: number;
+  /** The mode meter is up (0/1) — it shares the lower-left slot with the mask. */ modes?: number;
   /** Plato's regulation: the soft modes fall away (0/1). */ cut?: number;
+  /** Schopenhauer's ladder — other arts copy Ideas, music copies the will (0/1). */ will?: number;
 }
 
 export const BEATS: Aes3Beat[] = [
   {
-    p: 32, modes: 0.9,
+    // Both halves alive at once: a story arc beginning to climb while the modes
+    // play — "song or story", drawn rather than asserted.
+    p: 32, arc: 0.3, modes: 1,
     text: 'No culture has ever lived without song or story. Not coincidence — a puzzle philosophers have chased for millennia.',
     dur: 3.6,
   },
@@ -60,13 +65,13 @@ export const BEATS: Aes3Beat[] = [
     dur: 1.0,
   },
   {
-    p: 33, modes: 1,
+    p: 33, modes: 1, will: 1,
     text: 'A minor key floods you with sadness, no argument offered. Schopenhauer said music alone copies the will itself — our restless inner drive. Plato thought that same direct power a danger.',
     cite: 'Music slips past reason',
     dur: 5.0,
   },
   {
-    p: 0, modes: 1,
+    p: 0, modes: 1, will: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-3-1',
       text: 'Music is not, like the other arts, a copy of the Ideas, but a copy of the will itself.',
@@ -78,7 +83,7 @@ export const BEATS: Aes3Beat[] = [
     dur: 3.4,
   },
   {
-    p: 3, modes: 1, cut: 1,
+    p: 3, modes: 1, cut: 1, will: 1,
     mc: {
       prompt: 'In the Republic, why did Plato want to control music — and what did he actually do?',
       options: [

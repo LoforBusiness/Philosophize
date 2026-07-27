@@ -15,6 +15,12 @@ export interface Meta6Beat extends BaseBeat {
    * Monotonically falling, so the graph only ever draws forward.
    */
   orig?: number;
+  /**
+   * Turns the chart onto the READER 0..1: a tag slides in beneath the plot saying
+   * the same curve describes their own cells. Only the "you are the living proof"
+   * beat sets it, so the annotation lands exactly when the line is read.
+   */
+  you?: number;
 }
 
 export const BEATS: Meta6Beat[] = [
@@ -48,7 +54,7 @@ export const BEATS: Meta6Beat[] = [
     dur: 5.2,
   },
   {
-    p: 22, swap: 1, orig: 0,
+    p: 22, swap: 1, orig: 0, you: 1,
     text: 'And you are the living proof. Almost every cell in your body has been replaced since childhood — the toddler in old photos shares barely any matter with you. Yet you call that child yourself.',
     cite: 'Your own riddle',
     dur: 5.0,

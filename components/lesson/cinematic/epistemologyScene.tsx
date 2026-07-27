@@ -20,6 +20,13 @@ import type { SceneApi } from './CinematicPlayer';
 // stamped word — UNTESTED / KNOWLEDGE / JUST LUCK — so the abstract claim of the
 // lesson is on screen as information, not just narration.
 //
+// THE DOOR ITSELF is drawn: an outlined leaf with a knob, hung in the gate beside
+// the bolts. It used to be a 7-unit sliver of "light" that nobody could read, so
+// the lesson's whole payoff — turn three locks and it OPENS — happened at the size
+// of a pencil line. Now the leaf inks in from its hinge as `know` rises (INK = on,
+// the same language the bolts and the tally already speak), so the beat where all
+// three locks turn actually lands.
+//
 // CAMERA: none. The old scene shifted everything with a fixed camera transform,
 // which made the band impossible to measure; design space is now final space, so
 // the figure stands on GROUND=500 with its crown at ~361 exactly as the shared
@@ -30,21 +37,32 @@ const TR = 0.8;                              // beat-to-beat blend, seconds
 
 // the gate
 const GATE_L = 30;
-const GATE_W = 164;
+const GATE_W = 182;
 const GATE_T = 268;
 const GATE_B = 500;
 const GATE_H = GATE_B - GATE_T;
 const ARCH = GATE_W / 2;
 
 // the three bolts, positioned INSIDE the gate (so the rattle carries them)
-const BOLT_X = 14;
-const BOLT_W = 122;
+const BOLT_X = 10;
+const BOLT_W = 124;
 const BOLT_H = 38;
 const BOLT_Y = [68, 116, 164];               // → stage y 336 / 384 / 432
 const BOLT_LABEL = ['TRUE', 'BELIEF', 'REASONS'];
 
+// The door leaf, hung between the bolts (which end at 134) and the right jamb.
+// Its top edge is set at 60 rather than higher because the arch is a semicircle of
+// radius 91 centred at (91, 91): at y = 60 the slab's inner face has curved in to
+// x ≈ 174, so a leaf ending at 170 clears it, while a taller one would poke out
+// through the curve. It runs down to the slab's inner floor (229), so it reads as
+// a full-height door and not a window.
+const DOOR_X = 138;
+const DOOR_W = 32;
+const DOOR_T = 60;
+const DOOR_H = 169;                          // 60 + 169 = 229, the inner floor
+
 // the verdict readout, clear of the gate and above the seeker's crown (361)
-const VP_L = 214;
+const VP_L = 220;
 const VP_W = 166;
 const VP_T = 246;
 const VP_H = 84;
@@ -108,12 +126,22 @@ export default function EpistemologyScene({ clock, bt, bi, qv, i, picked }: Scen
     const k3 = clamp01((l3 - 0.55) / 0.35);
 
     const know = k1 * k2 * k3;               // all three → the gate opens
-    const luck = k1 * k2 * (1 - k3);         // true + believed, no reasons
-    const untested = clamp01(1 - know - luck);
+
+    // The stamped WORD swaps; it must never cross-dissolve. Two 17px words each
+    // holding 50% opacity on top of each other read as a smudge for a quarter of
+    // a second on every verdict change. Hardening the two SELECTORS collapses
+    // that to a couple of frames — and only the selectors: the gate's own `know`
+    // stays smooth, because the door has to swing open, not snap. The three
+    // still sum to exactly 1, so the panel is never blank and never double.
+    const both = clamp01((k1 * k2 - 0.5) * 6 + 0.5);   // true + belief turned
+    const w3 = clamp01((k3 - 0.5) * 6 + 0.5);          // reasons turned
 
     return {
       seeker: pose(seekerS, SEEKER_X, GROUND, K_FIG, -1, 1),
-      k1, k2, k3, know, luck, untested,
+      k1, k2, k3, know,
+      wKnow: both * w3,                      // justified true belief
+      wLuck: both * (1 - w3),                // true + believed, no reasons
+      wUntested: 1 - both,
       shake: Q2[n] === 1 ? Math.sin(q * 40) * (1 - q) * 3.4 : 0,
       stamp: RESTAMP[n] === 1 ? ease01(bt.value / 0.42) : 1,
       keyed: L(KEYED[p], KEYED[n]),
@@ -173,14 +201,23 @@ function Bolt({ S, idx }: { S: SharedValue<any>; idx: number }) {
 function Gate({ S }: { S: SharedValue<any> }) {
   const body = useAnimatedStyle(() => ({ transform: [{ translateX: S.value.shake }] }));
   const halo = useAnimatedStyle(() => ({ opacity: S.value.know * 0.3 }));
-  const light = useAnimatedStyle(() => ({ opacity: S.value.know }));
+  // The leaf swings from its RIGHT edge (the hinge), so the opening grows out of
+  // the jamb rather than inflating from the middle. Opacity outruns the scale so a
+  // barely-cracked door is still solid ink instead of a grey smear.
+  const door = useAnimatedStyle(() => ({
+    opacity: clamp01(S.value.know * 4),
+    transform: [{ scaleX: S.value.know }],
+  }));
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       <Animated.View style={[styles.halo, halo]} />
       <Animated.View style={[styles.gateWrap, body]}>
         <View style={styles.gateSlab} />
         <Text style={styles.gateLabel}>KNOWLEDGE</Text>
-        <Animated.View style={[styles.gateLight, light]} />
+        <View style={styles.gateDoor}>
+          <View style={styles.gateKnob} />
+          <Animated.View style={[StyleSheet.absoluteFill, styles.gateOpen, door]} />
+        </View>
         <Bolt S={S} idx={0} />
         <Bolt S={S} idx={1} />
         <Bolt S={S} idx={2} />
@@ -204,9 +241,9 @@ function Pip({ S, idx }: { S: SharedValue<any>; idx: number }) {
 
 function Verdict({ S }: { S: SharedValue<any> }) {
   const stamp = useAnimatedStyle(() => ({ transform: [{ scale: lerp(1.16, 1, S.value.stamp) }] }));
-  const wUntested = useAnimatedStyle(() => ({ opacity: S.value.untested }));
-  const wKnow = useAnimatedStyle(() => ({ opacity: S.value.know }));
-  const wLuck = useAnimatedStyle(() => ({ opacity: S.value.luck }));
+  const wUntested = useAnimatedStyle(() => ({ opacity: S.value.wUntested }));
+  const wKnow = useAnimatedStyle(() => ({ opacity: S.value.wKnow }));
+  const wLuck = useAnimatedStyle(() => ({ opacity: S.value.wLuck }));
   return (
     <View style={styles.vp} pointerEvents="none">
       <Text style={styles.vpCap}>VERDICT</Text>
@@ -250,9 +287,15 @@ const styles = StyleSheet.create({
     position: 'absolute', top: 30, left: 0, right: 0, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 2.2, color: SOFT, includeFontPadding: false,
   },
-  gateLight: {
-    position: 'absolute', right: 10, top: 44, width: 7, bottom: 18, backgroundColor: INK, borderRadius: 3.5,
+  gateDoor: {
+    position: 'absolute', left: DOOR_X, top: DOOR_T, width: DOOR_W, height: DOOR_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER, overflow: 'hidden',
   },
+  gateKnob: {
+    position: 'absolute', left: 5, top: 78, width: 8, height: 8, borderRadius: 4,
+    borderWidth: 2, borderColor: INK,
+  },
+  gateOpen: { backgroundColor: INK, transformOrigin: '100% 50%' },
 
   bolt: {
     position: 'absolute', left: BOLT_X, width: BOLT_W, height: BOLT_H,
@@ -260,15 +303,15 @@ const styles = StyleSheet.create({
   },
   boltFill: { backgroundColor: INK },
   stud: {
-    position: 'absolute', left: 10, top: 8, width: 18, height: 18, borderRadius: 4,
+    position: 'absolute', left: 10, top: 10, width: 18, height: 18, borderRadius: 4,
     borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
   },
   studOn: {
-    position: 'absolute', left: 10, top: 8, width: 18, height: 18, borderRadius: 4, backgroundColor: PAPER,
+    position: 'absolute', left: 10, top: 10, width: 18, height: 18, borderRadius: 4, backgroundColor: PAPER,
   },
-  boltLabel: { position: 'absolute', left: 38, top: 0, bottom: 0, justifyContent: 'center' },
+  boltLabel: { position: 'absolute', left: 36, top: 0, bottom: 0, justifyContent: 'center' },
   boltText: {
-    fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 1.2, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 1.2, color: INK, includeFontPadding: false,
   },
   boltTextOn: { color: PAPER },
 
@@ -283,7 +326,7 @@ const styles = StyleSheet.create({
   vpWord: { position: 'absolute', top: 24, left: 0, right: 0, height: 28 },
   vpCenter: { alignItems: 'center', justifyContent: 'center' },
   vpText: {
-    fontFamily: 'Inter_700Bold', fontSize: 17, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 18, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
   vpTally: {
     position: 'absolute', top: 58, left: 0, right: 0,
@@ -310,8 +353,10 @@ const styles = StyleSheet.create({
 
 // Every pixel this scene can draw lives between the verdict panel's top edge (246)
 // and the seeker's ankle joints (~507): the gate halo starts at 254, the gate at
-// 268, the ground rule at 500. Cropping to that renders the stage at the player's
-// width-capped maximum instead of the letterboxed ~1.15×.
+// 268, the door leaf at 328..497, the ground rule at 500, and the key rides the seeker's
+// wrist no higher than ~389. A 280-unit band is also the tightest crop that still
+// pays: the stage region is ~923×647 device px, so 647/280 ≈ 923/400 — anything
+// narrower is capped by the width and gains nothing while risking a clipped crown.
 export function EpistemologyLesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={EpistemologyScene} band={[234, 514]} />;
 }

@@ -42,7 +42,11 @@ const SLEEPERS = [24, 50, 76, 102, 128, 154, 180, 206, 232, 258, 284, 310, 336, 
 // ── the verdict board ────────────────────────────────────────────────────────
 const CARD_TOP = 232;
 const CARD_W = 118;
-const CARD_H = 76;
+// 8 pad + 17 name + 15 lens + 6 gap + 24 ruling chip = 70, plus a 2 border top and
+// bottom = 74. At 76 that left one unit of slack inside an `overflow: hidden` box —
+// one stray unit of Android font padding and the ruling chip loses its bottom edge.
+// 80 gives 6, and the column still ends at 312, well clear of the crown at 348.
+const CARD_H = 80;
 const CARD_X = [12, 145, 278];
 
 const LENSES = [
@@ -149,11 +153,16 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick }: Scene
         {LENSES.map((v, k) => (
           <View key={v.who} style={[styles.card, { left: CARD_X[k] }]}>
             <Animated.View style={[styles.cardOn, lensStyles[k]]} />
-            <Text style={styles.who}>{v.who}</Text>
-            <Text style={styles.lens}>{v.lens}</Text>
+            {/* Both pinned to one line: a wrap here would push the ruling chip out
+                of the card's clipped box and the verdict would vanish. */}
+            <Text style={styles.who} numberOfLines={1}>{v.who}</Text>
+            <Text style={styles.lens} numberOfLines={1}>{v.lens}</Text>
+            {/* the speaking philosopher's RULING stamps solid, the word reversed out
+                in paper — a grey wash read as "greyed out" rather than "this one" */}
             <View style={styles.rule}>
               <Animated.View style={[styles.ruleOn, lensStyles[k]]} />
               <Text style={styles.ruleT}>{v.rule}</Text>
+              <Animated.Text style={[styles.ruleT, styles.ruleTOn, lensStyles[k]]}>{v.rule}</Animated.Text>
             </View>
           </View>
         ))}
@@ -230,12 +239,12 @@ const styles = StyleSheet.create({
   pegLeg: { position: 'absolute', bottom: 0, width: 3, height: 11, backgroundColor: INK, borderRadius: 2, transformOrigin: '50% 0%' },
 
   fiveLab: {
-    position: 'absolute', left: 309, top: 432, width: 78, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
+    position: 'absolute', left: 309, top: 431, width: 78, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
   },
   oneLab: {
-    position: 'absolute', left: 276, top: 400, width: 56, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
+    position: 'absolute', left: 276, top: 399, width: 56, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
   },
 
   trolley: { position: 'absolute', left: 0, top: GROUND - 48, width: 54, height: 48 },
@@ -259,24 +268,35 @@ const styles = StyleSheet.create({
   card: {
     position: 'absolute', top: CARD_TOP, width: CARD_W, height: CARD_H,
     borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
-    paddingHorizontal: 9, paddingTop: 8, overflow: 'hidden',
+    paddingHorizontal: 7, paddingTop: 8, overflow: 'hidden',
   },
   cardOn: { position: 'absolute', left: 0, top: 0, right: 0, height: 4, backgroundColor: INK },
-  who: { fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 17, letterSpacing: 0.4, color: INK, includeFontPadding: false },
-  lens: { fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 14, letterSpacing: 1.2, color: SOFT, includeFontPadding: false },
+  who: { fontFamily: 'Inter_700Bold', fontSize: 14.5, lineHeight: 17, letterSpacing: 0.4, color: INK, includeFontPadding: false },
+  // CONSEQUENCES is the longest word on the board. At 9 of padding and 1.2 of
+  // tracking it measured within a unit of the 96 of inner width — a coin-flip wrap.
+  // 7 of padding and 0.8 of tracking put it at ~88 in 100, which nothing can wrap.
+  lens: { fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 15, letterSpacing: 0.8, color: SOFT, includeFontPadding: false },
   rule: {
     marginTop: 6, height: 24, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
     alignItems: 'center', justifyContent: 'center', backgroundColor: PAPER, overflow: 'hidden',
   },
-  ruleOn: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: RULE },
-  ruleT: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1, color: INK, includeFontPadding: false },
+  ruleOn: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: INK },
+  ruleT: {
+    fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 15, letterSpacing: 1,
+    color: INK, textAlign: 'center', includeFontPadding: false,
+  },
+  // The chip is 24 tall with a 1.5 border inside it, so a 15-tall line centres at
+  // (24 − 3 − 15) / 2 = 3 — the reversed copy must land exactly on the base word.
+  ruleTOn: { position: 'absolute', left: 0, right: 0, top: 3, color: PAPER },
 
   // ── plates ────────────────────────────────────────────────────────────────
   ballot: { position: 'absolute', left: BAL_L, top: CARD_TOP, width: BAL_W, height: 148 },
   ballotHdr: {
     position: 'absolute', left: 0, top: 0, width: BAL_W,
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
+  // Tap target: 260 × 54 stage units carrying one 20px word — the biggest plate in
+  // any of these lessons, because a true/false call should be unmissable.
   plateSlot: { position: 'absolute', left: 0, width: BAL_W, height: BAL_H },
   plate: {
     width: BAL_W, height: BAL_H, borderWidth: 2.5, borderColor: INK, borderRadius: 5,
@@ -288,10 +308,12 @@ const styles = StyleSheet.create({
   plateTOn: { color: PAPER },
 });
 
-// Art runs from the verdict board (232) down to the sleepers under the rail (510);
-// the trolley's wheels bottom out at 504 and nothing is drawn above the board, so
-// the player crops to [224, 518] and the scene renders about 90% larger than the
-// letterboxed full-height fit.
+// BAND. Topmost ink is the verdict board at 232 (its columns now end at 312); the lowest is the sleeper row under
+// the rail, 500 + 3 (rail) + 7 (sleeper) = 510. Everything else sits inside that: the
+// TRUE/FALSE plates finish at 368, the branch line climbs to 444, the ONE peg's label
+// to 399, the lever knob to ~446, the trolley's wheels to 504, the figure's crown to
+// 350. So [224, 518] holds every extreme with 8 units of margin at each end, and the
+// scene renders about 90% larger than the letterboxed full-height fit.
 export function Ethics3Lesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics3Scene} band={[224, 518]} />;
 }

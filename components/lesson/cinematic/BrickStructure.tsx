@@ -55,13 +55,31 @@ interface Props {
   keyLabel: string;
 }
 
-function Brick({ style, label, wide }: { style: any; label: string; wide?: boolean }) {
+// Ruled writing lines for an UNLETTERED stone. Act 1 shows three blank bricks for
+// three straight beats, and a bare rectangle there read as unfinished art rather
+// than as "a stone waiting for a sentence". Two ruled lines say the second thing.
+const RULED_LONG = [0, 1, 2, 3, 4, 5, 6];
+const RULED_SHORT = [0, 1, 2, 3];
+
+function Brick({ label }: { label: string }) {
+  if (!label) {
+    return (
+      <View style={styles.brick}>
+        <View style={styles.ruledRow}>
+          {RULED_LONG.map((k) => <View key={k} style={styles.ruledDash} />)}
+        </View>
+        <View style={[styles.ruledRow, { marginTop: 7 }]}>
+          {RULED_SHORT.map((k) => <View key={k} style={styles.ruledDash} />)}
+        </View>
+      </View>
+    );
+  }
   return (
-    <Animated.View style={[styles.brick, style]}>
+    <View style={styles.brick}>
       <Text style={styles.brickText} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.8}>
         {label}
       </Text>
-    </Animated.View>
+    </View>
   );
 }
 
@@ -99,21 +117,31 @@ export default function BrickStructure({ S, p1Label, p2Label, keyLabel }: Props)
           transform the parent supplies. Without this the slot rendered at the
           scene's top-left corner, far off stage, and was never once seen. */}
       <Animated.View style={[box, styles.slotAt, slotStyle]}>
-        <View style={styles.slot} />
+        <View style={styles.slot}>
+          {/* the gap states the question the fly-up answers */}
+          <Text style={styles.slotMark}>?</Text>
+        </View>
       </Animated.View>
 
       {/* the three bricks. Far-to-near order is irrelevant (no overlap when whole);
           the keystone is drawn last so a collapse tumbles it over the base. */}
-      <Animated.View style={[box, s1]}><Brick style={null} label={p1Label} /></Animated.View>
-      <Animated.View style={[box, s2]}><Brick style={null} label={p2Label} /></Animated.View>
-      <Animated.View style={[box, sk]}><Brick style={null} label={keyLabel} /></Animated.View>
+      <Animated.View style={[box, s1]}><Brick label={p1Label} /></Animated.View>
+      <Animated.View style={[box, s2]}><Brick label={p2Label} /></Animated.View>
+      <Animated.View style={[box, sk]}><Brick label={keyLabel} /></Animated.View>
 
-      {/* role captions */}
+      {/* ROLE CALL-OUTS. These used to be 9.5px grey captions floating near the
+          structure, which on a phone read as specks. They are now plaques with a
+          leader rule running to the part they name, so the build reads as a
+          LABELLED DIAGRAM — the annotation points at its subject instead of
+          hovering near it. Both are horizontally centred on the column (x 200),
+          which is clear of both builders (x 62 and 330) at every camera scale. */}
       <Animated.View style={[styles.tagConc, tagStyle]}>
-        <Text style={styles.tagText}>CONCLUSION</Text>
+        <View style={styles.plaque}><Text style={styles.plaqueText}>CONCLUSION</Text></View>
+        <View style={styles.leader} />
       </Animated.View>
       <Animated.View style={[styles.tagPrem, tagStyle]}>
-        <Text style={styles.tagText}>PREMISES</Text>
+        <View style={styles.leader} />
+        <View style={styles.plaque}><Text style={styles.plaqueText}>PREMISES</Text></View>
       </Animated.View>
     </View>
   );
@@ -130,23 +158,47 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 14.5, color: INK, textAlign: 'center',
     includeFontPadding: false,
   },
+  // SOFT, not RULE: a RULE-weight hairline on PAPER is a structural tick that all
+  // but disappears at the stage's scale, and these have to READ as "a face waiting
+  // for a sentence" from arm's length.
+  ruledRow: { flexDirection: 'row', gap: 5 },
+  ruledDash: { width: 7, height: 1.5, backgroundColor: SOFT, borderRadius: 1 },
+
   slotAt: { transform: [{ translateX: KEY_X }, { translateY: KEY_Y }] },
   slot: {
     width: BW, height: BH, borderRadius: 3,
     borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
-    backgroundColor: 'transparent',
+    backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'center',
+  },
+  slotMark: {
+    fontFamily: 'Inter_700Bold', fontSize: 22, color: SOFT, includeFontPadding: false,
   },
   plinth: {
     position: 'absolute', left: CENTER_X - 122, width: 244, height: 2,
     backgroundColor: RULE,
   },
+
+  // ── the role call-outs ──────────────────────────────────────────────────────
+  // Geometry, so the leaders actually touch what they name:
+  //   CONCLUSION  plaque 16 + leader 5 = 21 tall, sitting on the keystone's top
+  //               edge (KEY_Y − BH/2 = 387.5) → top 365.5.
+  //   PREMISES    leader 5 + plaque 16 = 21 tall, starting just under the plinth
+  //               (477.5) → bottom 498.5, which still clears the ground line (500).
+  // Both are comfortably inside the lesson's [110, 434] band at every camera scale
+  // (CONCLUSION lands at screen ~196–199, PREMISES at ~355–360).
   tagConc: {
-    position: 'absolute', left: 0, right: 0, top: KEY_Y - BH / 2 - 16, alignItems: 'center',
+    position: 'absolute', left: 0, right: 0, top: KEY_Y - BH / 2 - 22, alignItems: 'center',
   },
   tagPrem: {
-    position: 'absolute', left: 0, right: 0, top: PLINTH_Y + 8, alignItems: 'center',
+    position: 'absolute', left: 0, right: 0, top: PLINTH_Y + 2, alignItems: 'center',
   },
-  tagText: {
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.6, color: SOFT,
+  plaque: {
+    height: 16, paddingHorizontal: 9, borderRadius: 3, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
   },
+  plaqueText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 1.5, color: PAPER,
+    includeFontPadding: false,
+  },
+  leader: { width: 1.5, height: 5, backgroundColor: INK },
 });

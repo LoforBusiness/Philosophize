@@ -13,7 +13,7 @@ import type { SceneApi } from './CinematicPlayer';
 //
 //   LEFT PANEL  (y 196–278)   [eye] ──•••──▸ [slate]      experience writes it in
 //   RIGHT PANEL (y 196–278)   a mind that already holds 2+2=4, A=A, no square circles
-//   KANT BOX    (y 286–340)   both panels feed down into one: DATA + FORMS = EXPERIENCE
+//   KANT BOX    (y 286–342)   both panels feed down into one: DATA + FORMS = EXPERIENCE
 //   THE ARGUERS (y 354–500)   empiricist facing right, rationalist facing left
 //
 // On the question beat the panels give way to four big name plates, so Q1 is answered
@@ -111,8 +111,8 @@ export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick }:
           <View style={[styles.panel, { left: PAN_R }]}>
             <Text style={styles.panHdr}>REASON ALONE GETS THERE</Text>
           </View>
-          <Animated.View style={[styles.aura, { left: PAN_R + 6, top: 212 }, auraStyle]} />
-          <View style={[styles.mind, { left: PAN_R + 12, top: 218 }]}>
+          <Animated.View style={[styles.aura, { left: PAN_R + 6, top: 216 }, auraStyle]} />
+          <View style={[styles.mind, { left: PAN_R + 12, top: 219 }]}>
             {AXIOMS.map((a, k) => <Axiom key={a} S={SCENE} text={a} k={k} />)}
           </View>
 
@@ -191,7 +191,7 @@ function Axiom({ S, text, k }: { S: SharedValue<any>; text: string; k: number })
     return { opacity: on, transform: [{ translateY: (1 - on) * 6 }] };
   });
   return (
-    <Animated.View style={[styles.axRow, { top: 6 + k * 15 }, st]}>
+    <Animated.View style={[styles.axRow, { top: 3 + k * 14 }, st]}>
       <Text style={styles.axT}>{text}</Text>
     </Animated.View>
   );
@@ -205,9 +205,12 @@ const styles = StyleSheet.create({
     position: 'absolute', top: PAN_T, width: PAN_W, height: PAN_H,
     borderWidth: 1.5, borderColor: RULE, borderRadius: 5, backgroundColor: PAPER,
   },
+  // Sits at 201–214. The rationalist's aura ring starts at 216, so the ring no longer
+  // slices through the header the way it did at top 212.
   panHdr: {
-    marginTop: 6, textAlign: 'center',
+    marginTop: 5, textAlign: 'center', lineHeight: 13,
     fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.2, color: SOFT,
+    includeFontPadding: false,
   },
   tiny: {
     position: 'absolute', textAlign: 'center',
@@ -234,24 +237,30 @@ const styles = StyleSheet.create({
   mark: { position: 'absolute', left: 8, width: SLATE.w - 20, height: 3, backgroundColor: INK, borderRadius: 2, transformOrigin: '0% 50%' },
 
   aura: {
-    position: 'absolute', width: PAN_W - 12, height: 64,
-    borderWidth: 2, borderColor: INK, borderRadius: 34,
+    position: 'absolute', width: PAN_W - 12, height: 58,
+    borderWidth: 2, borderColor: INK, borderRadius: 30,
   },
   mind: {
     position: 'absolute', width: PAN_W - 24, height: 52,
     borderWidth: 2, borderColor: INK, borderRadius: 26, backgroundColor: PAPER,
   },
   axRow: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
-  axT: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.6, color: INK, includeFontPadding: false },
+  // 3 / 17 / 31 with a 14-unit line: the last axiom ends at 45, inside the pill's
+  // 48 units of interior, so nothing is clipped off the bottom.
+  axT: { fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 0.6, color: INK, includeFontPadding: false },
 
   feeder: { position: 'absolute', top: 278, width: 2, height: 10, backgroundColor: INK },
+  // Three stacked lines in a fixed-height box, so every one carries an explicit
+  // lineHeight and includeFontPadding:false — Android's hidden font padding is what
+  // silently eats the last line of a box like this. 4+11+3+13+3+15 = 49, inside the
+  // 51 units of interior.
   kant: {
-    position: 'absolute', left: 100, top: 286, width: 200, height: 54,
+    position: 'absolute', left: 100, top: 286, width: 200, height: 56,
     borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER, alignItems: 'center',
   },
-  kantTag: { marginTop: 4, fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.6, color: SOFT },
-  kantA: { marginTop: 3, fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.4, color: INK, includeFontPadding: false },
-  kantB: { marginTop: 2, fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.6, color: INK, includeFontPadding: false },
+  kantTag: { marginTop: 4, fontFamily: 'Inter_700Bold', fontSize: 8, lineHeight: 11, letterSpacing: 1.6, color: SOFT, includeFontPadding: false },
+  kantA: { marginTop: 3, fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 0.4, color: INK, includeFontPadding: false },
+  kantB: { marginTop: 3, fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 15, letterSpacing: 0.6, color: INK, includeFontPadding: false },
 
   askLabel: {
     position: 'absolute', left: 0, right: 0, top: 198, textAlign: 'center',
@@ -269,9 +278,10 @@ const styles = StyleSheet.create({
 });
 
 // The band. Highest ink: the question label at y 198 and the panels at 196. Lowest:
-// the ground rule at 500 plus the figures' ankle joints, which reach ≈ 507. The
-// arguers' crowns sit at y ≈ 354 even on their bounciest gesture, so the Kant box
-// (bottom 340) never meets them. 328 units instead of 560 renders everything at ~2×.
+// the ground rule at 500 plus the figures' ankle joints, whose 7.4-unit radius reaches
+// ≈ 507. The arguers' crowns sit at y ≈ 354 even on their bounciest gesture (the shrug
+// on beat 1), so the Kant box (bottom 342) never meets them. The four name plates run
+// 220–318. 328 units instead of 560 renders everything at ~2×.
 export function Epistemology4Lesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology4Scene} band={[186, 514]} />;
 }

@@ -12,7 +12,8 @@ import type { SceneApi } from './CinematicPlayer';
 // A TWO-LAYER DIAGRAM with the argument happening inside it.
 //
 //   the SURFACE (y 206–276)   two culture tablets, side by side, whose rows are
-//                             written in one at a time — codes that plainly differ
+//                             written in one at a time — codes that plainly differ,
+//                             with a ≠ standing in the gutter between them
 //   the ARGUERS  (y 287–434)  two figures under their own emblems, facing off
 //   the FLOOR   (y 444–510)   Brown's human universals as a bar chart: four traits,
 //                             four bars, every one of them running the full track
@@ -92,6 +93,14 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick }: Scene
           <Text style={styles.layerLabel}>THE SURFACE — THESE CODES DIFFER</Text>
           <Tablet left={TAB_L} name="CULTURE A" emblem="tri" rows={CODE_A} S={SCENE} />
           <Tablet left={TAB_R} name="CULTURE B" emblem="dia" rows={CODE_B} S={SCENE} />
+          {/* ≠ in the 20-unit gutter between the tablets: the surface does not match.
+              It answers the four ALLs on the floor chart — differ up here, identical
+              down there — so the two layers read as one argument. */}
+          <View style={styles.neq}>
+            <View style={[styles.neqBar, { top: 8 }]} />
+            <View style={[styles.neqBar, { top: 16 }]} />
+            <View style={styles.neqSlash} />
+          </View>
         </View>
       )}
 
@@ -203,6 +212,13 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: INK,
   },
   diamond: { width: 12, height: 12, borderWidth: 2.5, borderColor: INK, transform: [{ rotate: '45deg' }] },
+
+  neq: { position: 'absolute', left: 189, top: 228, width: 22, height: 26 },
+  neqBar: { position: 'absolute', left: 3.5, width: 15, height: 2.5, backgroundColor: INK, borderRadius: 1 },
+  neqSlash: {
+    position: 'absolute', left: 0, top: 11, width: 22, height: 2.5,
+    backgroundColor: INK, borderRadius: 1, transform: [{ rotate: '-62deg' }],
+  },
 
   codeRow: { position: 'absolute', left: 10, right: 8, flexDirection: 'row', alignItems: 'center', gap: 6 },
   codeDash: { fontFamily: 'Inter_700Bold', fontSize: 11, color: SOFT },

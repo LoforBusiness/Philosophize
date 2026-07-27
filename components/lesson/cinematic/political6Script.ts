@@ -50,8 +50,8 @@ export const BEATS: Pol6Beat[] = [
   {
     p: 13, bars: 1, prin: 1, pick: 1,
     interact: {
-      prompt: 'Rawls allows an inequality only if it LIFTS the worst-off. Check each dark bar against the equality line, then tap the society he permits.',
-      explain: 'Rawls permits gaps only if they raise the worst-off above what equality would give them. The yardstick is the least advantaged — not effort, not the top.',
+      prompt: 'Rawls ranks societies by how the WORST-OFF fare — the dark bar. Compare each dark bar with the equality line, then tap the society he would choose.',
+      explain: 'Under the unequal rules the worst-off finish ABOVE the equality line, so that gap earns its keep. Rawls allows a difference only when it lifts the least advantaged — the yardstick is the bottom, never the top.',
       xp: 5,
     },
     dur: 1.0,

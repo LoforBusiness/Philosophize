@@ -161,6 +161,11 @@ export const BEATS: Beat[] = [
   },
   {
     act: 3,
+    // The scoreboard stays up while this is answered. It was the one beat in the
+    // lesson with an empty stage — a lone figure on bare paper — and the running
+    // count is the honest thing to leave on screen here: it states the quarrel's
+    // tally (all volume, no reasons) without giving the answer away.
+    vol: 10, reasons: 0,
     mc: {
       prompt: 'Which best describes a philosophical argument?',
       options: [

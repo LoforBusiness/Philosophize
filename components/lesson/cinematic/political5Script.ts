@@ -1,13 +1,17 @@
 import type { BaseBeat } from './cinematicKit';
 
 // Cinematic political-political-5, "The Big Questions of Society". Plato's just city
-// (each part doing its work) and Rawls's veil of ignorance — a curtain drops over the
-// figure, hiding who they'll be, so the rules they choose stay fair. Questions A/B/C/D.
+// is drawn as the three-tier diagram it actually is — RULERS · GUARDIANS · PRODUCERS,
+// each part doing its own work. Rawls's veil then drops over the figure and strikes
+// out who they happen to be (CLASS · TALENT · WEALTH · LUCK). A timeline rules the
+// whole conversation together, Hobbes to Rawls. The second question is answered IN the
+// scene: four definition cards take the stage.
 
 export interface Pol5Beat extends BaseBeat {
   /** Figure gesture. */ p?: number;
-  /** Plato's ordered city (columns/tiers) 0..1. */ city?: number;
+  /** Plato's three-tier city 0..1. */ city?: number;
   /** The veil of ignorance drawn over the figure 0..1. */ veil?: number;
+  /** The timeline that links the thinkers 0..1. */ link?: number;
 }
 
 export const BEATS: Pol5Beat[] = [
@@ -56,21 +60,17 @@ export const BEATS: Pol5Beat[] = [
     dur: 1.0,
   },
   {
-    p: 5, veil: 0.3, city: 0.6,
+    p: 5, veil: 0.3, city: 0.6, link: 1,
     text: 'Watch the big questions link up. Hobbes asks why we build societies. Locke and Rousseau ask what makes them legitimate. Mill asks how far they may bind you. Plato and Rawls ask what justice demands.',
     cite: 'One long conversation',
     dur: 5.0,
   },
   {
     p: 4, city: 1,
-    mc: {
-      prompt: 'Plato’s just city sounds fair — so surely "justice" meant splitting wealth equally. Right?',
-      options: [
-        { id: 'a', text: 'Yes, Plato demanded equal wealth for everyone', correct: false },
-        { id: 'b', text: 'No — justice is each part doing its proper job in harmony', correct: true },
-        { id: 'c', text: 'Yes, Plato wanted a majority vote to share resources', correct: false },
-        { id: 'd', text: 'No — Plato meant total freedom from any government', correct: false },
-      ],
+    // Answered ON the stage: the four cards are Plato's candidate definitions, so the
+    // reader picks what "justice" meant instead of reading four sentences.
+    interact: {
+      prompt: 'Plato’s just city sounds fair — so what did he mean by "justice"?',
       explain: 'The trap: "fair" tempts us toward equal wealth. But for Plato justice is harmony — each class doing its own work — not equal shares or majority rule.',
       xp: 5,
     },

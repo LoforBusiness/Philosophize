@@ -20,8 +20,11 @@ import type { SceneApi } from './CinematicPlayer';
 //     SHIP TWO (rebuilt from the hoarded old planks, last question only) at x = 330.
 //     Each hull is 112 wide; the gap between them holds the "?" that is the whole
 //     second question.
-//   · Nothing is drawn above y = 238 or below the ground line at 501.5, which is
-//     what lets the player crop to band [232, 510] and render ~2.3× instead of 1.15×.
+//   · The "SO DO YOUR CELLS" tag (x 124–240, y 331–349) turns the chart on the
+//     reader for one beat; it sits in the tick row's gap and under the plot, so it
+//     never touches the axis labels or the masts (which start at y 356).
+//   · Nothing is drawn above y = 238 or below the ankle joints at 507.4, which is
+//     what lets the player crop to band [232, 512] and render ~2.3× instead of 1.15×.
 
 const FIG_X = 60;
 const SHIP_X = 186;                 // the repaired ship — never stopped sailing
@@ -50,6 +53,7 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const SWAP = BEATS.map((b) => b.swap ?? 0);
 const TWO = BEATS.map((b) => b.two ?? 0);
 const ORIG = BEATS.map((b) => b.orig ?? 0);
+const YOU = BEATS.map((b) => b.you ?? 0);
 
 export default function Metaphysics6Scene({ clock, bt, bi, i }: SceneApi) {
   const orig = ORIG[i];
@@ -68,6 +72,7 @@ export default function Metaphysics6Scene({ clock, bt, bi, i }: SceneApi) {
       prog: 1 - remaining,                 // how much of the hull is new wood
       swap: L(SWAP[p], SWAP[n]),
       two: L(TWO[p], TWO[n]),
+      you: L(YOU[p], YOU[n]),
       worked: clamp01((1 - remaining) * 3),
       t,
     };
@@ -83,6 +88,11 @@ export default function Metaphysics6Scene({ clock, bt, bi, i }: SceneApi) {
     return { opacity: u, transform: [{ scale: 0.55 + 0.45 * u }, { rotate: `${(1 - u) * -14}deg` }] };
   });
   const labelStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.worked }));
+  // The reader's own curve: the tag writes itself in from the left under the plot.
+  const youStyle = useAnimatedStyle(() => {
+    const u = ease01(SCENE.value.you);
+    return { opacity: u, transform: [{ translateX: (1 - u) * -16 }] };
+  });
   // The readout pops once, only on the beat whose number actually changed.
   const readStyle = useAnimatedStyle(() => {
     if (!changed) return { transform: [{ scale: 1 }] };
@@ -122,6 +132,11 @@ export default function Metaphysics6Scene({ clock, bt, bi, i }: SceneApi) {
 
       <Animated.View style={[styles.nowLine, nowStyle]} pointerEvents="none" />
       <Animated.View style={[styles.mark, markStyle]} pointerEvents="none" />
+
+      {/* the same curve, turned on the reader */}
+      <Animated.View style={[styles.youTag, youStyle]} pointerEvents="none">
+        <Text style={styles.youT}>SO DO YOUR CELLS</Text>
+      </Animated.View>
 
       {/* ── the ship that kept sailing ────────────────────────────────────────── */}
       <Ship S={SCENE} x={SHIP_X} live />
@@ -309,17 +324,39 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
   },
 
+  // The whole second question in one mark, so it reads at a glance between the two
+  // hulls. Sits at y 364–404: clear of the plot's tick row above (ends 349) and of
+  // ship one's prow / ship two's stern post below (both start at 406).
   ask: {
-    position: 'absolute', left: 245, top: 369, width: 34, height: 34, borderRadius: 17,
+    position: 'absolute', left: 243, top: 364, width: 40, height: 40, borderRadius: 20,
     borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
   },
-  askT: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 20, lineHeight: 24, color: INK, includeFontPadding: false },
+  askT: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, lineHeight: 29, color: INK, includeFontPadding: false },
+
+  // Slides in under the plot on the "you are the living proof" beat — the one beat
+  // whose stage was otherwise inert, and the moment the chart stops being about
+  // a boat. x 124–240 keeps it clear of the LAUNCHED tick (ends ≈ 110) and of the
+  // right-aligned 300-YEARS-ON tick (whose glyphs start ≈ 300).
+  youTag: {
+    position: 'absolute', left: 124, top: 331, width: 116, height: 18,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  youT: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.8, color: INK, includeFontPadding: false },
 });
 
-// Art runs from the chart readout at y 238 down to the ground line at 501.5. The
-// masts top out at 356, the ship labels bottom at 495, and the "?" between the two
-// hulls lives at 369–403 — so this band holds every extreme with 6 units of margin
-// at the top and 8 at the bottom.
+// BAND. No camera transform here, so design y IS screen y. Measured extremes across
+// every beat, top to bottom:
+//   chart readout      238   (the highest thing drawn; chart title 243)
+//   figure crown       361   (x 60 on GROUND 500 → 500 − 103·1.35)
+//   "?" disc           364 … 404
+//   the two ship labels     482 … 494
+//   ground rule        500 … 501.5
+//   ankle joints       507.4 (the ankle CIRCLE hangs limb/2·k ≈ 7.4 below GROUND)
+// so [232, 512] holds every pixel with 6 units of margin above and 4.6 below. The
+// band is 280 tall, which is still WIDTH-limited on a phone stage (923/400 = 2.31 <
+// 647/280 = 2.31), so the extra bottom margin costs nothing and the scene renders
+// about 2.3× instead of the 1.15× a full-height fit would give.
 export function Metaphysics6Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics6Scene} band={[232, 510]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics6Scene} band={[232, 512]} />;
 }

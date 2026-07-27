@@ -21,9 +21,14 @@ import type { SceneApi } from './CinematicPlayer';
 // than as a font glyph that may not exist on the device.
 //
 // Above the table, the riddle itself in a boxed headline, and Leibniz's principle
-// sliding into place under it on his beat. Below, the traveller still walks the
-// road to the fork — a solid IT IS post and a dashed IT IS NOT post that flickers
-// and dissolves as `gone` rises.
+// sliding into place under it on his beat.
+//
+// Below, the ROAD ITSELF now carries the argument. It is drawn solid out to the
+// fork at x 306 — the IT IS way, with the solid post standing on it — and beyond
+// that it is only a row of dashes, flickering and thinning away with the IT IS NOT
+// post and sign as `gone` rises. The way that "is not" is literally a way that
+// isn't there: you can see there is nothing to walk on. That is the whole of
+// Parmenides' second way in one picture, and it costs no vertical room.
 //
 // Composition rule: the table stops at y 336; the traveller's crown never rises
 // above ~355 (his walk bob is the highest it gets) and he never walks past x 220,
@@ -48,7 +53,13 @@ const ROW_T = [264, 288, 312];
 const ROW_H = 24;
 
 const TESTS = ['CAN THINK IT', 'CAN SAY IT', 'CAN KNOW IT'];
-const TICKS = [40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340];
+
+// The road forks at x 306. Everything left of it is solid ground the traveller can
+// actually walk; everything right of it is drawn only as dashes, and dissolves.
+const FORK_X = 306;
+const TICKS = [40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300];
+const DASHES = [312, 326, 340, 354, 368];
+const GHOST_TICKS = [318, 344, 370];
 
 export default function Metaphysics2Scene({ clock, bt, bi }: SceneApi) {
   const SCENE = useDerivedValue(() => {
@@ -105,11 +116,16 @@ export default function Metaphysics2Scene({ clock, bt, bi }: SceneApi) {
       {/* ── the road, the fork and the two posts ──────────────────────────── */}
       <View style={styles.ground} />
       {TICKS.map((x) => <View key={x} style={[styles.roadTick, { left: x }]} />)}
+      <View style={styles.forkMark} />
 
       <View style={styles.postIs} />
       <View style={styles.signIs}><Text style={styles.signIsText}>IT IS</Text></View>
 
-      <Animated.View style={[StyleSheet.absoluteFill, notSign]}>
+      {/* everything past the fork — the road as well as the post — is only ever
+          dashes, and thins to nothing as the second way dissolves */}
+      <Animated.View style={[StyleSheet.absoluteFill, notSign]} pointerEvents="none">
+        {DASHES.map((x) => <View key={x} style={[styles.roadDash, { left: x }]} />)}
+        {GHOST_TICKS.map((x) => <View key={x} style={[styles.ghostTick, { left: x }]} />)}
         <View style={styles.postNot} />
         <View style={styles.signNot}><Text style={styles.signNotText}>IT IS NOT</Text></View>
       </Animated.View>
@@ -142,20 +158,31 @@ function TestRow({ S, k, label }: { S: SharedValue<any>; k: number; label: strin
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 24, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  ground: { position: 'absolute', left: 24, width: FORK_X - 24, top: GROUND, height: 1.5, backgroundColor: RULE },
   roadTick: { position: 'absolute', top: GROUND + 2, width: 1.5, height: 5, backgroundColor: RULE },
+  // the fork: a short kerb mark where solid ground stops
+  forkMark: { position: 'absolute', left: FORK_X, top: GROUND - 7, width: 1.5, height: 9, backgroundColor: RULE },
+  // the second way, drawn only as dashes — a road you can see there is none of
+  roadDash: { position: 'absolute', top: GROUND, width: 10, height: 1.5, backgroundColor: SOFT },
+  ghostTick: { position: 'absolute', top: GROUND + 2, width: 1.5, height: 5, backgroundColor: RULE },
 
   qBox: {
     position: 'absolute', left: 40, top: 178, width: 320, height: 28,
     borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
     alignItems: 'center', justifyContent: 'center',
   },
-  qText: { fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 0.4, color: INK },
+  qText: {
+    fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 16, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
   prStrip: {
-    position: 'absolute', left: 56, top: 212, width: 288, height: 18,
+    position: 'absolute', left: 40, top: 212, width: 320, height: 20,
     borderLeftWidth: 3, borderLeftColor: INK, paddingLeft: 9, justifyContent: 'center',
   },
-  prText: { fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 12, letterSpacing: 0.8, color: SOFT },
+  prText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 0.8, color: SOFT,
+    includeFontPadding: false,
+  },
 
   mtx: {
     position: 'absolute', left: MTX_L, top: HEAD_T, width: 340, height: 100,
@@ -168,17 +195,24 @@ const styles = StyleSheet.create({
     position: 'absolute', left: COL_A + 8, top: HEAD_T + 2, width: 108, height: 24,
     backgroundColor: INK, borderRadius: 3, alignItems: 'center', justifyContent: 'center',
   },
-  headIsText: { fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 16, letterSpacing: 1, color: PAPER },
+  headIsText: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 17, letterSpacing: 1, color: PAPER,
+    includeFontPadding: false,
+  },
   headNot: {
     position: 'absolute', left: COL_B + 8, top: HEAD_T + 2, width: 108, height: 24,
     borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 3,
     alignItems: 'center', justifyContent: 'center',
   },
-  headNotText: { fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 0.6, color: SOFT },
+  headNotText: {
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 0.6, color: SOFT,
+    includeFontPadding: false,
+  },
 
   testLabel: {
-    position: 'absolute', left: MTX_L, width: 84, textAlign: 'right',
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 0.3, color: INK,
+    position: 'absolute', left: MTX_L, width: 88, textAlign: 'right',
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, color: INK,
+    includeFontPadding: false,
   },
   markBox: { position: 'absolute', width: 22, height: 22 },
   strokeInk: { position: 'absolute', height: 2.4, borderRadius: 1.2, backgroundColor: INK },
@@ -190,7 +224,10 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
     alignItems: 'center', justifyContent: 'center',
   },
-  signIsText: { fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 16, letterSpacing: 1, color: INK },
+  signIsText: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 17, letterSpacing: 1, color: INK,
+    includeFontPadding: false,
+  },
 
   postNot: { position: 'absolute', left: SIGN_NOT_X - 1, top: 436, width: 2, height: GROUND - 436, backgroundColor: SOFT },
   signNot: {
@@ -198,7 +235,13 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 3,
     alignItems: 'center', justifyContent: 'center',
   },
-  signNotText: { fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 0.6, color: SOFT },
+  // 11 / 0.4, not 11.5 / 0.6: "IT IS NOT" measures ~62 units at the larger setting
+  // inside a 65-unit interior, and a wrap would put a second line outside the
+  // 26-tall plate. This keeps one comfortable line with room to spare.
+  signNotText: {
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14.5, letterSpacing: 0.4, color: SOFT,
+    includeFontPadding: false,
+  },
 });
 
 // BAND. Topmost ink is the riddle box at y 178; the lowest is the road's distance

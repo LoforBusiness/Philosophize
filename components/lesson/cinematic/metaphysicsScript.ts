@@ -17,6 +17,8 @@ export interface MetaBeat extends BaseBeat {
   hpose?: number;
   /** How much of the sky is erased, 0 (full) → 1 (void). */
   erase?: number;
+  /** Leibniz's principle of sufficient reason, carded over the question it forces. */
+  rule?: boolean;
   /** The causal chain of "because ←" links is on stage. */
   chain?: boolean;
   /** This beat's answer pushes the regress further. */
@@ -31,12 +33,14 @@ export const BEATS: MetaBeat[] = [
   },
   {
     hpose: 2,
+    rule: true,
     text: 'In 1714, Leibniz argued nothing is true without a sufficient reason. Apply that to everything at once: why this crowded universe instead of an empty one? Nothing, he said, would have been simpler.',
     cite: 'Leibniz, Principles of Nature and Grace §7',
     dur: 4.8,
   },
   {
     hpose: 0,
+    rule: true,
     quote: {
       id: 'lq-metaphysics-being-1-1',
       text: 'Why is there something rather than nothing? For nothing is simpler and easier than something.',

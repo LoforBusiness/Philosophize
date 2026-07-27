@@ -18,6 +18,7 @@ export interface Pol4Beat extends BaseBeat {
   /** How close/present the walls are 0..1 (1 = pressing in). */ walls?: number;
   /** Harm-principle boundary + the other person (0/1). */ harm?: number;
   /** Which comparison card is stamped: 0 none · 1 negative · 2 positive. */ panel?: number;
+  /** Mill's-test tally — four acts, three yours and one that harms (0/1). */ test?: number;
 }
 
 export const BEATS: Pol4Beat[] = [
@@ -33,13 +34,13 @@ export const BEATS: Pol4Beat[] = [
     dur: 5.0,
   },
   {
-    p: 13, walls: 0.25, harm: 1, panel: 1,
+    p: 13, walls: 0.25, harm: 1, panel: 1, test: 1,
     text: 'Eat badly, take wild risks, preach unpopular views? Mill says that is your business. But poison a well, defraud a buyer, throw a punch? Now you harm others — and only then may power step in.',
     cite: 'Mill’s harm principle',
     dur: 5.2,
   },
   {
-    p: 0, walls: 0.25, harm: 1, panel: 1,
+    p: 0, walls: 0.25, harm: 1, panel: 1, test: 1,
     quote: {
       id: 'lq-political-political-4-1',
       text: 'Over himself, over his own body and mind, the individual is sovereign.',

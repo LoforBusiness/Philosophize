@@ -22,6 +22,12 @@ export interface EthicsBeat extends BaseBeat {
   critter?: boolean;
   /** A sprout — Aristotle's flourishing. */
   plant?: boolean;
+  /**
+   * The three-source card: where conscience is said to come from. A pure scene cue
+   * for the beat that names Darwin, Freud and Kant — their three answers are a
+   * three-row table, so the stage draws one instead of repeating the beat before it.
+   */
+  origins?: boolean;
   /** This beat's answer drives the scene: q1 raises the conscience, q2 parts them. */
   weigh?: 'q1' | 'q2';
 }
@@ -47,6 +53,7 @@ export const BEATS: EthicsBeat[] = [
   {
     hpose: 4,
     judge: true,
+    origins: true,
     text: 'That inward weighing is your conscience — the sense something is wrong even when no one is watching. Darwin traced it to instinct, Freud to society turned inward, Kant to reason itself.',
     cite: 'Darwin · Freud · Kant',
     dur: 4.6,

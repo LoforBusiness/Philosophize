@@ -3,7 +3,7 @@ import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'r
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle } from './rig';
+import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle } from './rig';
 import { BEATS } from './political4Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -17,6 +17,9 @@ import type { SceneApi } from './CinematicPlayer';
 //   · A DIMENSION LINE between the walls, capped and captioned "ROOM TO MOVE", which
 //     literally measures negative liberty: it is invisible when the walls press in and
 //     grows to full width as they retreat.
+//   · MILL'S TEST — a four-cell tally that occupies the same strip as the dimension
+//     line and cross-fades with it: three acts marked YOUR CALL, one stamped in solid
+//     ink as the case where POWER MAY ACT. That is the harm principle, tallied.
 //   · The HARM LINE — a dashed boundary with another person standing beyond it — the
 //     single line Mill says power may cross.
 //
@@ -27,13 +30,26 @@ import type { SceneApi } from './CinematicPlayer';
 const FIG_X = 196;
 
 // ── the walls of interference ────────────────────────────────────────────────
-const WALL_W = 10;
-const WALL_L = 150;                       // left wall's left edge  (inner face 160)
+// 16 units wide, not 10: at 10 they read as bars rather than masonry. They grow
+// OUTWARD from the same inner faces, so the gap the figure stands in is unchanged.
+const WALL_W = 16;
+const WALL_L = 144;                       // left wall's left edge  (inner face 160)
 const WALL_R = 242;                       // right wall's left edge (inner face 242)
 const WALL_T = 336;
 const WALL_H = GROUND - WALL_T;           // 164 — taller than the figure, so it looms
 const WALL_OUT = 44;                      // how far each wall retreats at walls = 0
 const COURSES = [26, 52, 78, 104, 130, 156];
+const JOINTS = [0, 26, 52, 78, 104, 130, 156];   // staggered vertical brick joints
+
+// ── Mill's test: the tally that shares the dimension line's strip ────────────
+const TEST_T = 298;
+const TEST_H = 36;
+const TESTS = [
+  { act: 'EAT BADLY', verdict: 'YOUR CALL', left: 20, w: 78, harm: false },
+  { act: 'TAKE RISKS', verdict: 'YOUR CALL', left: 104, w: 78, harm: false },
+  { act: 'SPEAK OUT', verdict: 'YOUR CALL', left: 188, w: 78, harm: false },
+  { act: 'THROW A PUNCH', verdict: 'POWER MAY ACT', left: 272, w: 108, harm: true },
+];
 
 // ── the comparison cards ─────────────────────────────────────────────────────
 const CARD_T = 222;
@@ -51,11 +67,13 @@ const MEAS_MAX = MEAS_W + WALL_OUT * 2;            // 170 once both walls retrea
 
 // ── the harm boundary ────────────────────────────────────────────────────────
 const HARM_X = 326;
+const DASH_T = WALL_T;                    // the boundary runs the walls' full height
 const DASHES = [0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 152];
 
 const P_CODE = BEATS.map((b) => b.p ?? 0);
 const WALLS = BEATS.map((b) => b.walls ?? 0);
 const HARM = BEATS.map((b) => b.harm ?? 0);
+const TEST = BEATS.map((b) => b.test ?? 0);
 const NEG = BEATS.map((b) => ((b.panel ?? 0) === 1 ? 1 : 0));
 const POS = BEATS.map((b) => ((b.panel ?? 0) === 2 ? 1 : 0));
 
@@ -71,6 +89,7 @@ export default function Political4Scene({ clock, bt, bi }: SceneApi) {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       walls: lerp(WALLS[p], WALLS[n], tr),
       harm: lerp(HARM[p], HARM[n], tr),
+      test: lerp(TEST[p], TEST[n], tr),
       neg: lerp(NEG[p], NEG[n], tr),
       pos: lerp(POS[p], POS[n], tr),
     };
@@ -89,8 +108,9 @@ export default function Political4Scene({ clock, bt, bi }: SceneApi) {
     transform: [{ translateX: (1 - SCENE.value.walls) * WALL_OUT }],
   }));
 
-  // The measure: zero when the walls press in, full when they are gone.
-  const measStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.walls }));
+  // The measure: zero when the walls press in, full when they are gone — and it
+  // yields the strip entirely to Mill's tally on the beats that tally.
+  const measStyle = useAnimatedStyle(() => ({ opacity: (1 - SCENE.value.walls) * (1 - SCENE.value.test) }));
   const measBarStyle = useAnimatedStyle(() => ({
     transform: [{ scaleX: (MEAS_W + (1 - SCENE.value.walls) * WALL_OUT * 2) / MEAS_W }],
   }));
@@ -113,23 +133,29 @@ export default function Political4Scene({ clock, bt, bi }: SceneApi) {
         <Animated.View style={[styles.measCap, { left: WALL_R - 1 }, capRStyle]} />
       </Animated.View>
 
+      {/* ── Mill's test, tallied in the same strip as the measure ──────────── */}
+      {TESTS.map((c, k) => <TestCell key={c.act} c={c} k={k} S={SCENE} />)}
+
       {/* ── the walls of interference, coursed like brick ──────────────────── */}
       <Animated.View style={[styles.wall, { left: WALL_L }, wallLStyle]} pointerEvents="none">
-        {COURSES.map((c) => <View key={c} style={[styles.course, { top: c }]} />)}
+        {COURSES.map((c) => <View key={`c${c}`} style={[styles.course, { top: c }]} />)}
+        {JOINTS.map((j, k) => <View key={`j${j}`} style={[styles.joint, { top: j, left: k % 2 ? 4 : 10 }]} />)}
       </Animated.View>
       <Animated.View style={[styles.wall, { left: WALL_R }, wallRStyle]} pointerEvents="none">
-        {COURSES.map((c) => <View key={c} style={[styles.course, { top: c }]} />)}
+        {COURSES.map((c) => <View key={`c${c}`} style={[styles.course, { top: c }]} />)}
+        {JOINTS.map((j, k) => <View key={`j${j}`} style={[styles.joint, { top: j, left: k % 2 ? 10 : 4 }]} />)}
       </Animated.View>
 
       {/* ── the harm boundary + the person it protects ─────────────────────── */}
       <Animated.View style={[styles.harmWrap, harmStyle]} pointerEvents="none">
-        {DASHES.map((d) => <View key={d} style={[styles.dash, { top: WALL_T + d }]} />)}
+        {DASHES.map((d) => <View key={d} style={[styles.dash, { top: DASH_T + d }]} />)}
         <Text style={styles.harmLabel}>HARM LINE</Text>
         <View style={styles.otherHead} />
         <View style={styles.otherSpine} />
-        <View style={styles.otherArms} />
-        <View style={[styles.otherLeg, { left: 348 }]} />
-        <View style={[styles.otherLeg, { left: 361 }]} />
+        <View style={[styles.otherArm, styles.otherArmL]} />
+        <View style={[styles.otherArm, styles.otherArmR]} />
+        <View style={[styles.otherLeg, styles.otherLegL]} />
+        <View style={[styles.otherLeg, styles.otherLegR]} />
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
@@ -166,6 +192,31 @@ function Card({
   );
 }
 
+/**
+ * One cell of Mill's test. The four deal in one after another (a staggered fade and
+ * rise) so the tally reads as being counted out rather than appearing at once.
+ */
+function TestCell({
+  c, k, S,
+}: {
+  c: { act: string; verdict: string; left: number; w: number; harm: boolean };
+  k: number; S: SharedValue<any>;
+}) {
+  const st = useAnimatedStyle(() => {
+    const u = clamp01(S.value.test * 1.6 - k * 0.16);
+    return { opacity: u, transform: [{ translateY: (1 - u) * 9 }] };
+  });
+  return (
+    <Animated.View
+      style={[styles.testCell, c.harm && styles.testHarm, { left: c.left, width: c.w }, st]}
+      pointerEvents="none"
+    >
+      <Text style={[styles.testAct, c.harm && styles.onPaper]}>{c.act}</Text>
+      <Text style={[styles.testVerdict, c.harm && styles.onPaper]}>{c.verdict}</Text>
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 24, right: 24, top: GROUND, height: 1.5, backgroundColor: RULE },
@@ -193,12 +244,26 @@ const styles = StyleSheet.create({
   },
   measCap: { position: 'absolute', top: MEAS_Y - 8, width: 2, height: 18, backgroundColor: INK },
 
+  // ── Mill's test ────────────────────────────────────────────────────────────
+  testCell: {
+    position: 'absolute', top: TEST_T, height: TEST_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  testHarm: { backgroundColor: INK },
+  testAct: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.2, color: INK, includeFontPadding: false },
+  testVerdict: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1, color: SOFT,
+    marginTop: 3, includeFontPadding: false,
+  },
+
   // ── the walls ──────────────────────────────────────────────────────────────
   wall: {
     position: 'absolute', top: WALL_T, width: WALL_W, height: WALL_H,
     backgroundColor: INK, borderRadius: 2, overflow: 'hidden',
   },
   course: { position: 'absolute', left: 0, width: WALL_W, height: 1.5, backgroundColor: PAPER, opacity: 0.55 },
+  joint: { position: 'absolute', width: 1.5, height: 26, backgroundColor: PAPER, opacity: 0.4 },
 
   // ── the harm boundary + the other person ───────────────────────────────────
   harmWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
@@ -207,16 +272,25 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 296, top: 340, width: 108, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
   },
-  otherHead: { position: 'absolute', left: 346, top: 422, width: 20, height: 20, borderRadius: 10, backgroundColor: INK },
-  otherSpine: { position: 'absolute', left: 354, top: 444, width: 4, height: 34, backgroundColor: INK, borderRadius: 2 },
-  otherArms: { position: 'absolute', left: 341, top: 452, width: 30, height: 3.5, backgroundColor: INK, borderRadius: 2 },
-  otherLeg: { position: 'absolute', top: 476, width: 4, height: 24, backgroundColor: INK, borderRadius: 2 },
+  // Drawn at roughly three-quarters of the main figure's height with the same
+  // limb weight, so the person beyond the line reads as a PERSON rather than the
+  // lollipop of head-plus-sticks it was.
+  otherHead: { position: 'absolute', left: 346, top: 396, width: 25, height: 25, borderRadius: 13, backgroundColor: INK },
+  otherSpine: { position: 'absolute', left: 356, top: 420, width: 5, height: 44, backgroundColor: INK, borderRadius: 3 },
+  otherArm: { position: 'absolute', top: 430, width: 22, height: 4.5, backgroundColor: INK, borderRadius: 3 },
+  otherArmL: { left: 336, transformOrigin: '100% 50%', transform: [{ rotate: '-20deg' }] },
+  otherArmR: { left: 359, transformOrigin: '0% 50%', transform: [{ rotate: '20deg' }] },
+  otherLeg: { position: 'absolute', top: 462, width: 5, height: 38, backgroundColor: INK, borderRadius: 3 },
+  otherLegL: { left: 352, transformOrigin: '50% 0%', transform: [{ rotate: '6deg' }] },
+  otherLegR: { left: 361, transformOrigin: '50% 0%', transform: [{ rotate: '-6deg' }] },
 });
 
-// Everything this scene can draw sits between the card tops (222) and the ground
-// rule (501.5): cards 222–286, measure 298–332, walls 336–500, harm line 336–500,
-// the other person 422–500, the figure's crown ≈358 down to its feet at 500. Cropping
-// to [214, 510] renders the stage at ~2.19× instead of the letterboxed 1.15×.
+// Everything this scene can draw sits between the card tops (222) and the ground rule
+// (501.5): cards 222–286, the measure / Mill's tally sharing the strip at 298–334,
+// walls 336–500, the harm dashes 336–497, the person beyond the line 396–500, and the
+// figure's crown ≈357 down to its feet at 500. Nothing moves vertically — the walls
+// and the tally only translate sideways or fade — so those are the true extremes, and
+// cropping to [214, 510] renders the stage at ~2.19× instead of the letterboxed 1.15×.
 export function Political4Lesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political4Scene} band={[214, 510]} />;
 }

@@ -60,7 +60,7 @@ export const BEATS: Meta3Beat[] = [
     interact: {
       prompt: 'According to Plato, which of these is MOST fully real? Tap it.',
       explain:
-        'For Plato the Forms enjoy the fullest being because they never change. A real apple bruises and rots; the Form it imitates never flinches.',
+        'For Plato the Forms enjoy the fullest being because they never change. The apple bruises and rots; its shadow and its portrait are fainter still — images of a copy.',
       xp: 5,
     },
     dur: 1.0,

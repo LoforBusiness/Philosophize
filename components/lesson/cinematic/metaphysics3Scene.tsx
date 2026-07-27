@@ -12,21 +12,33 @@ import type { SceneApi } from './CinematicPlayer';
 // PLATO'S LADDER OF REALITY, drawn as a labelled three-tier chart, stage right.
 //
 //   BEING · you can know it        (caption, y 250)
-//   ┌ THE FORMS ─────────┐          tier 1, y 268–320   a steady disc that never moves
+//   ┌ THE FORMS ─────────┐          tier 1, y 268–320   a steady disc, meter FULL
 //   ══════════════════════          THE LINE, y 328     one heavy rule: the split
-//   ┌ THINGS YOU SENSE ──┐          tier 2, y 340–392   the apple, breathing and listing
-//   ┌ SHADOWS ───────────┐          tier 3, y 396–448   two blobs, flickering
+//   ┌ THINGS YOU SENSE ──┐          tier 2, y 340–392   the apple wobbles, meter HALF
+//   ┌ SHADOWS ───────────┐          tier 3, y 396–448   blobs flicker, meter FAINT
 //   BECOMING · you can only guess   (caption, y 454)
 //
-// Stage left (x 20–76) is the literal cave wall, still flickering behind the prisoner
-// now that he has turned from it toward the chart. The figure holds the middle
-// (x 90–185) and never touches either side. On Q1 the three tiers
-// give way to four tap cards in the same column. Identity camera, so these constants
-// ARE the final stage coordinates the band is measured in.
+// Each tier carries a HOW-REAL meter, because the lesson's first line is that the
+// apple is "only half-real" — degrees of being are the idea, so the chart measures
+// them instead of merely naming them.
+//
+// Stage left (x 18–88) is the literal cave wall, drawn as a framed surface with the
+// shadows flickering ON it, still going behind the prisoner now that he has turned
+// away toward the chart. The figure holds the middle (x 100–183) and never touches
+// either side. On Q1 the three tiers give way to four tap cards in the same column.
+// Identity camera, so these constants ARE the final stage coordinates the band is
+// measured in.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const FIG_X = 132;
-const WALL_X = 22;
+
+// ── stage left: the cave wall, framed so the shadows read as ON it ──────────
+// Kept to x ≤ 88: the figure's furthest-left reach across every beat is its raised
+// left elbow at x ≈ 98, so the wall and the prisoner never touch.
+const CAVE_L = 18;
+const CAVE_T = 336;
+const CAVE_W = 70;
+const CAVE_H = 160;
 
 const COL_L = 200;
 const COL_W = 184;
@@ -35,10 +47,13 @@ const TIER = { form: 268, thing: 340, shade: 396 };
 const LINE_Y = 328;
 
 // ── the scene-answered question (Q1): four cards, 184 × 40 each ─────────────
+// Each card names one rung of the chart above (Form · thing · shadow) plus the
+// painting, Plato's stock example of an image at a third remove. Only the Form is
+// unchanging, so exactly one card can be the answer.
 const CARDS = [
   { id: 'form', label: 'THE ETERNAL FORM', y: 268, correct: true },
   { id: 'apple', label: 'THE APPLE ITSELF', y: 314, correct: false },
-  { id: 'red', label: 'ITS SHADE OF RED', y: 360, correct: false },
+  { id: 'shadow', label: 'ITS SHADOW', y: 360, correct: false },
   { id: 'paint', label: 'A PAINTING OF IT', y: 406, correct: false },
 ];
 
@@ -103,9 +118,16 @@ export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick }: 
   return (
     <Animated.View style={styles.scene}>
       {/* ── stage left: the cave wall he has been staring at ──────────────── */}
-      <View style={styles.wall} pointerEvents="none" />
-      <Animated.View style={[styles.wallShade, { top: 356 }, wall1]} pointerEvents="none" />
-      <Animated.View style={[styles.wallShade, { top: 408, width: 34, height: 36 }, wall2]} pointerEvents="none" />
+      <Text style={styles.caveCap}>THE CAVE WALL</Text>
+      <View style={styles.cave} pointerEvents="none" />
+      <Animated.View
+        style={[styles.wallShade, { left: CAVE_L + 11, top: 366, width: 44, height: 52 }, wall1]}
+        pointerEvents="none"
+      />
+      <Animated.View
+        style={[styles.wallShade, { left: CAVE_L + 20, top: 428, width: 30, height: 40 }, wall2]}
+        pointerEvents="none"
+      />
 
       {/* ── stage right: the ladder of reality ────────────────────────────── */}
       {!asking && (
@@ -119,7 +141,8 @@ export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick }: 
             </View>
             <View style={styles.tierText}>
               <Text style={styles.tierT}>THE FORMS</Text>
-              <Text style={styles.tierSub}>never change · fully real</Text>
+              <Text style={styles.tierSub}>never change</Text>
+              <Meter frac={1} word="FULL" />
             </View>
           </Animated.View>
 
@@ -132,6 +155,7 @@ export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick }: 
             <View style={styles.tierText}>
               <Text style={styles.tierT}>THINGS YOU SENSE</Text>
               <Text style={styles.tierSub}>they bruise and rot</Text>
+              <Meter frac={0.5} word="HALF" />
             </View>
           </Animated.View>
 
@@ -143,6 +167,7 @@ export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick }: 
             <View style={styles.tierText}>
               <Text style={styles.tierT}>SHADOWS</Text>
               <Text style={styles.tierSub}>images of copies</Text>
+              <Meter frac={0.14} word="FAINT" />
             </View>
           </Animated.View>
 
@@ -181,12 +206,38 @@ export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick }: 
   );
 }
 
+/**
+ * How much BEING a tier has, drawn rather than asserted: a track that fills to the
+ * tier's share and the word for it. Static geometry — the tier's own opacity is what
+ * animates — so the meter never relayouts.
+ */
+function Meter({ frac, word }: { frac: number; word: string }) {
+  return (
+    <View style={styles.meterRow}>
+      <View style={styles.meterTrack}>
+        <View style={[styles.meterFill, { transform: [{ scaleX: frac }] }]} />
+      </View>
+      <Text style={styles.meterWord}>{word}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 16, top: 500, height: 1.5, backgroundColor: RULE },
 
-  wall: { position: 'absolute', left: WALL_X, top: 320, width: 7, height: 180, backgroundColor: INK, borderRadius: 2 },
-  wallShade: { position: 'absolute', left: WALL_X + 12, width: 40, height: 44, borderRadius: 10, backgroundColor: SOFT },
+  // The wall is a FRAMED surface, not a bare slab: the shadows fall inside it, so
+  // they read as cast ON the wall instead of floating beside it.
+  cave: {
+    position: 'absolute', left: CAVE_L, top: CAVE_T, width: CAVE_W, height: CAVE_H,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+  },
+  caveCap: {
+    position: 'absolute', left: CAVE_L - 6, top: 310, width: CAVE_W + 12, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.5, lineHeight: 11, letterSpacing: 1.1,
+    color: SOFT, includeFontPadding: false,
+  },
+  wallShade: { position: 'absolute', borderRadius: 12, backgroundColor: SOFT },
 
   capTop: {
     position: 'absolute', left: COL_L, top: 250, width: COL_W, textAlign: 'center',
@@ -206,6 +257,20 @@ const styles = StyleSheet.create({
   tierText: { flex: 1 },
   tierT: { fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 14, letterSpacing: 0.5, color: INK, includeFontPadding: false },
   tierSub: { fontFamily: 'Inter_400Regular', fontSize: 8.5, lineHeight: 11, letterSpacing: 0.2, color: SOFT, includeFontPadding: false },
+
+  meterRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
+  meterTrack: {
+    width: 56, height: 6, borderWidth: 1, borderColor: RULE,
+    backgroundColor: PAPER, overflow: 'hidden',
+  },
+  meterFill: {
+    position: 'absolute', left: 0, top: 0, width: '100%', height: '100%',
+    backgroundColor: INK, transformOrigin: '0% 50%',
+  },
+  meterWord: {
+    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.8,
+    color: SOFT, includeFontPadding: false,
+  },
 
   formDisc: { position: 'absolute', width: 26, height: 26, borderRadius: 13, backgroundColor: INK },
   formRing: { position: 'absolute', width: 38, height: 38, borderRadius: 19, borderWidth: 2, borderColor: INK },
@@ -232,11 +297,12 @@ const styles = StyleSheet.create({
   cardTOn: { color: PAPER },
 });
 
-// The band. Highest ink is the BEING caption at y 248; lowest is the ground rule at
-// 500 plus the figure's ankle joints, which reach ≈ 507. The tier column runs 268–448,
-// the four tap cards 268–446, the cave wall 320–500, and the figure's crown sits at
-// y ≈ 354 — all inside. 274 units instead of 560 puts the scene at the stage's WIDTH
-// limit, about 2.3×: double the letterboxed fit, and the old 0.92 camera is gone too.
+// The band. Highest ink is the ask label at y 248 (the BEING caption sits at 250);
+// lowest is the ground rule at 500 plus the figure's ankle joints, whose 7.4-unit
+// radius reaches ≈ 507. The tier column runs 268–448, the four tap cards 268–446, the
+// cave caption + framed wall 310–496, and the figure's crown sits at y ≈ 355 — all
+// inside. 274 units instead of 560 puts the scene at the stage's WIDTH limit, about
+// 2.3×: double the letterboxed fit, and the old 0.92 camera is gone too.
 export function Metaphysics3Lesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics3Scene} band={[240, 514]} />;
 }

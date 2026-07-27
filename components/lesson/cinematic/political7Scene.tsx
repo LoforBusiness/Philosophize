@@ -314,5 +314,5 @@ const styles = StyleSheet.create({
 });
 
 export function Political7Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political7Scene} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political7Scene} band={[96, 516]} />;
 }

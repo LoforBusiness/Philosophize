@@ -17,8 +17,11 @@ import type { SceneApi } from './CinematicPlayer';
 // grows out of the ground beneath a fifth figure — crowned, sword aloft — and the
 // fighting settles into a calm stand.
 //
-// Three pieces of information design carry Hobbes's argument above the action:
+// Four pieces of information design carry Hobbes's argument above the action:
 //   · the headline WAR OF ALL AGAINST ALL, struck through as authority arrives;
+//   · under it a LEDGER of what life is worth, word-swapping on the same cue:
+//     SOLITARY · POOR · NASTY · BRUTISH · SHORT becomes INDUSTRY · ARTS · LETTERS
+//     · SOCIETY. Leviathan xiii lists both; the swap is what the sovereign buys;
 //   · a flow, MULTITUDE → SOVEREIGN → PEACE, whose last two boxes ink in;
 //   · two opposed meters, FEAR and PEACE, that trade places as `auth` rises.
 //
@@ -124,6 +127,7 @@ export default function PoliticalScene({ clock, bt, bi, qv }: SceneApi) {
   return (
     <View style={styles.scene}>
       <Headline S={SCENE} />
+      <Ledger S={SCENE} />
       <Flow S={SCENE} />
       <Meter S={SCENE} side="left" label="FEAR" invert />
       <Meter S={SCENE} side="right" label="PEACE" />
@@ -165,6 +169,31 @@ function Headline({ S }: { S: SharedValue<any> }) {
         <Text style={styles.headText}>WAR OF ALL AGAINST ALL</Text>
         <Animated.View style={[styles.strike, strike]} />
       </View>
+    </View>
+  );
+}
+
+// ── the ledger under the headline: what life is worth, before and after ──────
+// Two lines of Hobbes's own vocabulary occupying one strip. They must NEVER
+// cross-dissolve — two bold lines each at half opacity on the same baseline read
+// as a printing fault — so the selectors are hardened around auth = 0.5: the swap
+// collapses to a couple of frames, and the two weights always sum to 1, so the
+// strip is never blank and never doubled.
+
+function Ledger({ S }: { S: SharedValue<any> }) {
+  const war = useAnimatedStyle(() => ({ opacity: clamp01((0.5 - S.value.auth) * 6 + 0.5) }));
+  const civil = useAnimatedStyle(() => ({ opacity: clamp01((S.value.auth - 0.5) * 6 + 0.5) }));
+  return (
+    <View style={styles.ledger} pointerEvents="none">
+      {/* numberOfLines guards the 12-unit strip: the widest line measures ~281 of
+          the 400 available, but a device with fatter metrics must never be allowed
+          to wrap a second line down over the flow boxes at 274. */}
+      <Animated.Text numberOfLines={1} style={[styles.ledgerText, war]}>
+        SOLITARY · POOR · NASTY · BRUTISH · SHORT
+      </Animated.Text>
+      <Animated.Text numberOfLines={1} style={[styles.ledgerText, civil]}>
+        INDUSTRY · ARTS · LETTERS · SOCIETY
+      </Animated.Text>
     </View>
   );
 }
@@ -228,6 +257,11 @@ function Meter({
       <Text style={[styles.meterLabel, { left: x - 12, width: MTR_W + 24 }]}>{label}</Text>
       <View style={[styles.meterTrack, { left: x }]}>
         <Animated.View style={[styles.meterFill, fill]} />
+        {/* Quarter rules ON TOP of the fill, so a full meter still reads as a
+            graduated gauge rather than a solid black domino. */}
+        <View style={[styles.meterTick, { top: MTR_H * 0.25 }]} />
+        <View style={[styles.meterTick, { top: MTR_H * 0.5 }]} />
+        <View style={[styles.meterTick, { top: MTR_H * 0.75 }]} />
       </View>
     </View>
   );
@@ -267,6 +301,15 @@ const styles = StyleSheet.create({
   strike: {
     position: 'absolute', left: -5, right: -5, top: 8, height: 2.5,
     backgroundColor: INK, transformOrigin: '0% 50%',
+  },
+
+  // 262..273 — under the headline's descender line (261) and one unit clear of
+  // the flow boxes' top edge (274).
+  ledger: { position: 'absolute', left: 0, right: 0, top: 262, height: 12 },
+  ledgerText: {
+    position: 'absolute', left: 0, right: 0, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.2, lineHeight: 11,
+    color: SOFT, includeFontPadding: false,
   },
 
   flowBox: { position: 'absolute', top: FLOW_T, width: FLOW_W, height: FLOW_H },
@@ -310,6 +353,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
     backgroundColor: INK, transformOrigin: '50% 100%',
   },
+  meterTick: { position: 'absolute', left: 0, right: 0, height: 1.5, backgroundColor: RULE },
 
   sparkWrap: { position: 'absolute', top: 353, width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
   sparkBar: { position: 'absolute', width: 2.5, height: 22, backgroundColor: INK, borderRadius: 1 },
@@ -327,8 +371,14 @@ const styles = StyleSheet.create({
 });
 
 // Extremes: the headline's cap-line (244) down to the citizens' ankle joints
-// (~507) on the ground rule at 500. The sovereign's crown and sword tip top out
-// at y ≈ 320, twelve units clear of the flow boxes above them.
+// (~506, on the ground rule at 500 with the smaller CIT_K). Between them: the
+// ledger strip 262..273, the flow 274..308, the clash marks 353..375, the meter
+// labels 364..375 and the meter tracks 382..494. The sovereign's crown points and
+// his sword tip both top out at y ≈ 320, twelve units clear of the flow above.
+//
+// 280 units is also the tightest band that still pays: the stage region is about
+// 923×647 device px, so 647/280 ≈ 923/400. Any narrower and the WIDTH caps the
+// scale — the art stops growing while the clipping risk keeps climbing.
 export function PoliticalLesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={PoliticalScene} band={[234, 514]} />;
 }

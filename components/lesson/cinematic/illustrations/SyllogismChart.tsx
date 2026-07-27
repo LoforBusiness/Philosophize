@@ -200,7 +200,7 @@ export default function SyllogismChart({
           y={CAPTION_Y}
           fill={SOFT}
           fontFamily="Inter_700Bold"
-          fontSize={8}
+          fontSize={10}
           letterSpacing={1.5}
           textAnchor="start"
         >

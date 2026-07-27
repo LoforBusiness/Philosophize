@@ -8,31 +8,80 @@ import { BEATS } from './ethics5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 
-// Socrates + a student walk and talk through snowy Athens: fluted columns behind,
-// snow drifting down, the pair striding across. A fork of two paths (choose where
-// virtue grows) and a balance scale (proven fact vs interpretive thesis) are the
-// two scene-driven answers. Identity-scale camera so the tap targets sit under the art.
+// Socrates and a student walk and talk through snowy Athens — a colonnade behind
+// them, snow drifting past — while the lesson's spine hangs overhead as a piece of
+// information design:
+//
+//   · THE AXIAL TIMELINE  a three-lane chart (GREECE / INDIA / CHINA) drawn against
+//     one 900→100 BCE axis, with the axial window 800–200 BCE marked by two guides.
+//     Each thinker drops into their lane as the narration names them, and the three
+//     ink pills land in the SAME slice of the axis — which is the whole claim.
+//   · Q1 THE FORK         two full signposts planted above the walkers' heads; tap
+//     one and the pair steps toward it.
+//   · Q2 THE BALANCE      a wide beam with two big pans; tap a pan and it sinks.
+//
+// The camera is IDENTITY (no wrapper transform at all), so every constant here is a
+// FINAL stage coordinate and the band at the bottom of the file reads straight off
+// them. Composition rule: nothing but snow is ever drawn below y = 348 in the middle
+// of the stage, so no chart, sign or pan can ever cover a walker (crown ≈ 357).
 
-const GAP = 118;                   // spacing between the two walkers
-const COLUMNS = [64, 150, 250, 336];
+const GAP = 118;                            // spacing between the two walkers
+
+// ── the colonnade ────────────────────────────────────────────────────────────
+const COL_T = 348;
+const COL_H = GROUND - COL_T;               // 152
+const COLUMNS = [48, 132, 268, 352];
+const STYLO_T = 494;                        // the step the colonnade stands on
+
+// ── the axial timeline ───────────────────────────────────────────────────────
+const AXIS_L = 100;
+const AXIS_R = 380;
+const YEAR_L = 900;                         // the year sitting at AXIS_L
+const YEAR_R = 100;                         // the year sitting at AXIS_R
+/** Where a BCE year falls on the axis. Plain JS — resolved once, at module scope. */
+const atYear = (y: number) => AXIS_L + ((YEAR_L - y) * (AXIS_R - AXIS_L)) / (YEAR_L - YEAR_R);
+
+const TITLE_T = 214;
+const YEARS_T = 233;
+const GUIDE_T = 248;
+const GUIDE_B = 342;
+const PILL_H = 26;
+const LANES = [
+  { id: 'greece', name: 'GREECE', row: 268, label: 'SOCRATES', year: 399, w: 100, step: 2 },
+  { id: 'india', name: 'INDIA', row: 300, label: 'DHARMA', year: 600, w: 88, step: 3 },
+  { id: 'china', name: 'CHINA', row: 332, label: 'CONFUCIUS', year: 500, w: 108, step: 3 },
+];
+
+// ── Q1: the fork of two paths ────────────────────────────────────────────────
+const FORK_HDR_T = 226;
+const SIGN_T = 252;
+const SIGN_W = 152;
+const SIGN_H = 52;
+const POST_T = SIGN_T + SIGN_H;             // 304
+const FORKS = [
+  { id: 'solitude', label: 'IN SOLITUDE', left: 30, correct: false },
+  { id: 'among', label: 'AMONG OTHERS', left: 218, correct: true },
+];
+
+// ── Q2: the balance ──────────────────────────────────────────────────────────
+const BAL_HDR_T = 216;
+const BEAM_Y = 250;                         // the beam's own top edge
+const BEAM_W = 180;
+const BEAM_L = 200 - BEAM_W / 2;            // 110
+const PAN_T = 274;
+const PAN_W = 148;
+const PAN_H = 52;
+const PANS = [
+  { id: 'fact', title: 'PROVEN FACT', sub: 'settled history', side: -1, correct: false },
+  { id: 'thesis', title: 'A THESIS', sub: 'an interpretation', side: 1, correct: true },
+];
 
 const SX = BEATS.map((b) => b.sx ?? 200);
 const SOC = BEATS.map((b) => b.soc ?? 0);
 const STU = BEATS.map((b) => b.stu ?? 0);
 const FORK = BEATS.map((b) => b.fork ?? 0);
 const BAL = BEATS.map((b) => b.balance ?? 0);
-
-// The two choices sit as boards in a clear band ABOVE the walkers' heads, so they
-// never overlap the figures regardless of where the pair stands.
-const CHOICE_Y = 292;
-const FORKS = [
-  { id: 'solitude', label: 'IN SOLITUDE', x: 138, correct: false },
-  { id: 'among', label: 'AMONG OTHERS', x: 286, correct: true },
-];
-const PANS = [
-  { id: 'fact', label: 'PROVEN FACT', side: -1, correct: false },
-  { id: 'thesis', label: 'A THESIS', side: 1, correct: true },
-];
+const CHART = BEATS.map((b) => b.chart ?? 0);
 
 export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -41,14 +90,13 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: S
   // worklet, which itself calls walk/mixStance, hard-crashes the runtime).
   const forkAnswered = (cur.fork ?? 0) > 0 && picked !== null;
   const balAnswered = (cur.balance ?? 0) > 0 && picked !== null;
-  const driftDir = picked === 'solitude' ? 1 : 0;            // the solitude path drifts the pair down
+  const stepX = picked === 'solitude' ? -22 : picked === 'among' ? 22 : 0;
   const tiltDir = picked === 'thesis' ? 1 : picked === 'fact' ? -1 : 0;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const moving = Math.abs(SX[n] - SX[p]) > 1;
 
@@ -59,32 +107,28 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: S
       ? strideStance(SX[p], SX[n], emoteHold(STU[n], t), tr, WALK)
       : mixStance(emoteHold(STU[p], t), emoteLive(STU[n], t, bt.value), tr);
 
-    const bx = L(SX[p], SX[n]);
-    const drift = forkAnswered ? qv.value : 0;
-    const dx = drift * 30;
-    const dy = drift * driftDir * 22;
+    // The pair only ever shifts SIDEWAYS on an answer — never up or down, so the
+    // band below can be measured once and stays true on every beat.
+    const dx = (forkAnswered ? qv.value : 0) * stepX;
+    const bx = lerp(SX[p], SX[n], tr) + dx;
 
     return {
-      cam: { s: 1, cx: 200, cy: 340 },
-      soc: pose(socS, bx + dx, GROUND + dy, K_FIG, 1, 1),
-      stu: pose(stuS, bx + GAP + dx, GROUND + dy, K_FIG, 1, 1),
-      fork: L(FORK[p], FORK[n]),
-      balance: L(BAL[p], BAL[n]),
+      soc: pose(socS, bx, GROUND, K_FIG, 1, 1),
+      stu: pose(stuS, bx + GAP, GROUND, K_FIG, 1, 1),
+      fork: lerp(FORK[p], FORK[n], tr),
+      balance: lerp(BAL[p], BAL[n], tr),
+      chart: lerp(CHART[p], CHART[n], tr),
       tilt: balAnswered ? qv.value * tiltDir : 0,
-      qv: qv.value,
       t,
     };
   });
 
   const DSoc = useDerivedValue<Bundle>(() => SCENE.value.soc);
   const DStu = useDerivedValue<Bundle>(() => SCENE.value.stu);
-  const camStyle = useAnimatedStyle(() => {
-    const c = SCENE.value.cam;
-    return { transform: [{ translateX: STAGE_W / 2 - c.cx * c.s }, { translateY: STAGE_H / 2 - c.cy * c.s }, { scale: c.s }] };
-  });
+  const axisStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.chart) }));
   const forkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.fork }));
   const balStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.balance }));
-  const beamStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.tilt * 16}deg` }] }));
+  const beamStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.tilt * 10}deg` }] }));
 
   const answered = picked !== null;
   const showFork = (cur.fork ?? 0) > 0 && !!cur.interact;
@@ -92,95 +136,143 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: S
 
   return (
     <Animated.View style={styles.scene}>
-      <Animated.View style={[StyleSheet.absoluteFill, camStyle]}>
-        {/* columns behind */}
-        {COLUMNS.map((x) => <Column key={x} x={x} />)}
-        <View style={styles.ground} />
-
-        {/* snow */}
-        {SNOW.map((s, k) => <Flake key={k} S={SCENE} s={s} k={k} />)}
-
-        {/* the two walkers */}
-        <Stickman D={DSoc} k={K_FIG} />
-        <Stickman D={DStu} k={K_FIG} />
-
-        {/* ── Q1: two choices in a band above the walkers' heads ──────── */}
-        {showFork && (
-          <Animated.View style={[StyleSheet.absoluteFill, forkStyle]}>
-            <Text style={styles.choiceHdr}>WHERE DOES VIRTUE GROW?</Text>
-            {FORKS.map((f) => (
-              <Signpost key={f.id} f={f} answered={answered} picked={picked} onPick={onPick} />
-            ))}
-          </Animated.View>
-        )}
-
-        {/* ── Q2: the balance (decorative frame — must NOT eat the fork's taps) */}
-        <Animated.View style={[styles.balanceWrap, balStyle]} pointerEvents="none">
-          <View style={styles.balPost} />
-          <Animated.View style={[styles.balBeam, beamStyle]}>
-            <View style={[styles.balHang, { left: 2 }]} />
-            <View style={[styles.balHang, { right: 2 }]} />
-          </Animated.View>
-        </Animated.View>
-        {showBal && PANS.map((pn) => (
-          <Pan key={pn.id} pn={pn} S={SCENE} answered={answered} picked={picked} onPick={onPick} />
+      {/* ── the Axial-Age timeline, hung above the walkers ─────────────────── */}
+      <Animated.View style={[styles.fill, axisStyle]} pointerEvents="none">
+        <Text style={styles.chartTitle}>THE AXIAL AGE</Text>
+        <Text style={[styles.yearMark, { left: atYear(800) - 32 }]}>800 BCE</Text>
+        <Text style={[styles.yearMark, { left: atYear(200) - 32 }]}>200 BCE</Text>
+        <View style={[styles.guide, { left: atYear(800) - 0.75 }]} />
+        <View style={[styles.guide, { left: atYear(200) - 0.75 }]} />
+        {LANES.map((l) => (
+          <View key={`r${l.id}`} style={[styles.laneRule, { top: l.row - 0.75 }]} />
+        ))}
+        {LANES.map((l) => (
+          <Text key={`n${l.id}`} style={[styles.laneName, { top: l.row - 6 }]}>{l.name}</Text>
         ))}
       </Animated.View>
+      {LANES.map((l) => <Pill key={l.id} l={l} S={SCENE} />)}
+
+      {/* ── the colonnade + the ground it stands on ────────────────────────── */}
+      {COLUMNS.map((x) => <Column key={x} x={x} />)}
+      <View style={styles.stylobate} pointerEvents="none" />
+      <View style={styles.ground} pointerEvents="none" />
+
+      {/* snow */}
+      {SNOW.map((s, k) => <Flake key={k} S={SCENE} s={s} k={k} />)}
+
+      {/* the two walkers */}
+      <Stickman D={DSoc} k={K_FIG} />
+      <Stickman D={DStu} k={K_FIG} />
+
+      {/* ── Q1: two signposts planted above the walkers' heads ─────────────── */}
+      {showFork && (
+        <Animated.View style={[styles.fill, forkStyle]}>
+          <Text style={styles.sceneHdr} pointerEvents="none">TAP WHERE VIRTUE GROWS</Text>
+          {FORKS.map((f) => (
+            <View key={`p${f.id}`} style={[styles.postWrap, { left: f.left }]} pointerEvents="none">
+              <View style={styles.post} />
+              <View style={styles.postFoot} />
+            </View>
+          ))}
+          {FORKS.map((f) => (
+            <Signpost key={f.id} f={f} answered={answered} picked={picked} onPick={onPick} />
+          ))}
+        </Animated.View>
+      )}
+
+      {/* ── Q2: the balance. The frame is decoration and must NEVER eat a tap ─ */}
+      <Animated.View style={[styles.fill, balStyle]} pointerEvents="none">
+        <Text style={styles.balHdr}>TAP A PAN TO TIP THE SCALE</Text>
+        <View style={styles.balPost} />
+        <View style={styles.balFoot} />
+        <Animated.View style={[styles.balBeam, beamStyle]}>
+          <View style={[styles.balHang, { left: 2 }]} />
+          <View style={[styles.balHang, { right: 2 }]} />
+        </Animated.View>
+      </Animated.View>
+      {showBal && PANS.map((pn) => (
+        <Pan key={pn.id} pn={pn} S={SCENE} answered={answered} picked={picked} onPick={onPick} />
+      ))}
     </Animated.View>
   );
 }
 
-const SNOW = Array.from({ length: 16 }, (_, k) => ({ x: 40 + (k * 337) % 320, ph: (k * 0.137) % 1, sp: 0.18 + (k % 5) * 0.03 }));
+// 137 and 330 share no factor, so the flakes walk right across the stage instead of
+// bunching into one narrow column the way a small multiplier does.
+const SNOW = Array.from({ length: 18 }, (_, k) => ({ x: 34 + (k * 137) % 330, ph: (k * 0.137) % 1, sp: 0.18 + (k % 5) * 0.03 }));
+const SNOW_T = 348;
+const SNOW_B = GROUND - 6;
 
 function Flake({ S, s, k }: { S: SharedValue<any>; s: { x: number; ph: number; sp: number }; k: number }) {
   const st = useAnimatedStyle(() => {
     const f = ((S.value.t * s.sp + s.ph) % 1 + 1) % 1;
-    const y = lerp(290, GROUND - 4, f);
+    const y = lerp(SNOW_T, SNOW_B, f);
     const sway = Math.sin(S.value.t * 1.3 + k) * 10;
-    return { opacity: 0.5 + 0.4 * Math.sin(f * Math.PI), transform: [{ translateX: sway }, { translateY: y - 290 }] };
+    return { opacity: 0.5 + 0.4 * Math.sin(f * Math.PI), transform: [{ translateX: sway }, { translateY: y - SNOW_T }] };
   });
-  return <Animated.View style={[styles.flake, { left: s.x, top: 290 }, st]} />;
+  return <Animated.View style={[styles.flake, { left: s.x, top: SNOW_T }, st]} />;
 }
 
+/** A fluted column: capital, fluted shaft, base — kept faint so it reads behind. */
 function Column({ x }: { x: number }) {
   return (
-    <View style={[styles.colWrap, { left: x - 15 }]} pointerEvents="none">
+    <View style={[styles.colWrap, { left: x - 20 }]} pointerEvents="none">
       <View style={styles.colCap} />
-      <View style={styles.colShaft} />
+      <View style={styles.colShaft}>
+        <View style={[styles.flute, { left: 9 }]} />
+        <View style={[styles.flute, { left: 19 }]} />
+      </View>
       <View style={styles.colBase} />
     </View>
   );
 }
 
+/** One thinker, dropping into their lane on the beat that names them. */
+function Pill({ l, S }: { l: typeof LANES[number]; S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => {
+    const u = clamp01(S.value.chart - (l.step - 1));
+    return { opacity: u, transform: [{ translateY: (1 - u) * -12 }] };
+  });
+  return (
+    <Animated.View
+      style={[styles.pill, { left: atYear(l.year) - l.w / 2, top: l.row - PILL_H / 2, width: l.w }, st]}
+      pointerEvents="none"
+    >
+      <Text style={styles.pillT}>{l.label}</Text>
+    </Animated.View>
+  );
+}
+
 function Signpost({ f, answered, picked, onPick }: {
-  f: { id: string; label: string; x: number; correct: boolean };
+  f: { id: string; label: string; left: number; correct: boolean };
   answered: boolean; picked: string | null; onPick: (id: string, correct: boolean) => void;
 }) {
   const chosen = picked === f.id;
   return (
     <Pressable
-      style={[styles.signHit, { left: f.x - 66, top: CHOICE_Y }]}
+      style={[styles.signHit, { left: f.left }]}
       disabled={answered}
       onPress={() => onPick(f.id, f.correct)}
     >
       <View style={[styles.sign, answered && f.correct && styles.signRight, answered && chosen && !f.correct && styles.signWrong]}>
-        <Text style={[styles.signT, answered && f.correct && styles.signTOn]}>{f.label}</Text>
+        <Text style={[styles.signT, answered && f.correct && styles.onPaper]}>{f.label}</Text>
       </View>
     </Pressable>
   );
 }
 
 function Pan({ pn, S, answered, picked, onPick }: {
-  pn: { id: string; label: string; side: number; correct: boolean };
+  pn: { id: string; title: string; sub: string; side: number; correct: boolean };
   S: SharedValue<any>; answered: boolean; picked: string | null; onPick: (id: string, correct: boolean) => void;
 }) {
   const chosen = picked === pn.id;
-  const st = useAnimatedStyle(() => ({ transform: [{ translateY: S.value.tilt * pn.side * 14 }] }));
+  const st = useAnimatedStyle(() => ({ transform: [{ translateY: S.value.tilt * pn.side * 16 }] }));
   return (
-    <Animated.View style={[styles.panHit, { left: 200 + pn.side * 60 - 48 }, st]}>
-      <Pressable disabled={answered} onPress={() => onPick(pn.id, pn.correct)} style={styles.panPress}>
+    <Animated.View style={[styles.panHit, { left: 200 + pn.side * (BEAM_W / 2) - PAN_W / 2 }, st]}>
+      <Pressable disabled={answered} onPress={() => onPick(pn.id, pn.correct)}>
         <View style={[styles.pan, answered && pn.correct && styles.panRight, answered && chosen && !pn.correct && styles.panWrong]}>
-          <Text style={[styles.panT, answered && pn.correct && styles.panTOn]}>{pn.label}</Text>
+          <Text style={[styles.panT, answered && pn.correct && styles.onPaper]}>{pn.title}</Text>
+          <Text style={[styles.panSub, answered && pn.correct && styles.onPaper]}>{pn.sub}</Text>
         </View>
       </Pressable>
     </Animated.View>
@@ -189,35 +281,89 @@ function Pan({ pn, S, answered, picked, onPick }: {
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
+  fill: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
   ground: { position: 'absolute', left: 24, right: 24, top: GROUND, height: 1.5, backgroundColor: RULE },
+  stylobate: { position: 'absolute', left: 20, right: 20, top: STYLO_T, height: 1.5, backgroundColor: RULE },
   flake: { position: 'absolute', width: 5, height: 5, borderRadius: 3, backgroundColor: SOFT },
+  onPaper: { color: PAPER },
 
-  colWrap: { position: 'absolute', top: 300, width: 30, height: 200 },
-  colCap: { width: 30, height: 8, backgroundColor: PAPER, borderWidth: 2, borderColor: RULE },
-  colShaft: { width: 24, height: 184, marginLeft: 3, borderLeftWidth: 2, borderRightWidth: 2, borderColor: RULE, backgroundColor: 'transparent' },
-  colBase: { width: 30, height: 8, marginTop: -8, backgroundColor: PAPER, borderWidth: 2, borderColor: RULE },
+  // ── the colonnade ──────────────────────────────────────────────────────────
+  colWrap: { position: 'absolute', top: COL_T, width: 40, height: COL_H },
+  colCap: { width: 40, height: 9, borderWidth: 2, borderColor: RULE, backgroundColor: PAPER },
+  colShaft: { width: 30, height: COL_H - 18, marginLeft: 5, borderLeftWidth: 2, borderRightWidth: 2, borderColor: RULE },
+  flute: { position: 'absolute', top: 6, bottom: 6, width: 1.5, backgroundColor: RULE },
+  colBase: { width: 40, height: 9, borderWidth: 2, borderColor: RULE, backgroundColor: PAPER },
 
-  choiceHdr: { position: 'absolute', top: CHOICE_Y - 24, left: 0, right: 0, textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.5, color: SOFT },
-  signHit: { position: 'absolute', width: 132, alignItems: 'center' },
-  sign: { borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER, paddingHorizontal: 10, paddingVertical: 9 },
+  // ── the axial timeline ─────────────────────────────────────────────────────
+  chartTitle: {
+    position: 'absolute', left: 0, right: 0, top: TITLE_T, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 2.6, color: INK, includeFontPadding: false,
+  },
+  yearMark: {
+    position: 'absolute', top: YEARS_T, width: 64, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+  },
+  guide: { position: 'absolute', top: GUIDE_T, width: 1.5, height: GUIDE_B - GUIDE_T, backgroundColor: RULE },
+  laneRule: { position: 'absolute', left: AXIS_L, width: AXIS_R - AXIS_L, height: 1.5, backgroundColor: RULE },
+  laneName: {
+    position: 'absolute', left: 8, width: 84, textAlign: 'right',
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+  },
+  pill: {
+    position: 'absolute', height: PILL_H, borderRadius: 5, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  pillT: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.6, color: PAPER, includeFontPadding: false },
+
+  // ── shared scene instruction ───────────────────────────────────────────────
+  sceneHdr: {
+    position: 'absolute', left: 0, right: 0, top: FORK_HDR_T, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+  },
+
+  // ── Q1: the signposts ──────────────────────────────────────────────────────
+  signHit: { position: 'absolute', top: SIGN_T, width: SIGN_W },
+  sign: {
+    width: SIGN_W, height: SIGN_H, borderWidth: 2.5, borderColor: INK, borderRadius: 5,
+    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+  },
   signRight: { backgroundColor: INK, borderColor: INK },
-  signWrong: { borderColor: SOFT, opacity: 0.5 },
-  signT: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.5, color: INK },
-  signTOn: { color: PAPER },
+  signWrong: { borderColor: SOFT, opacity: 0.45 },
+  signT: { fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 0.4, color: INK, includeFontPadding: false },
+  postWrap: { position: 'absolute', top: POST_T, width: SIGN_W, alignItems: 'center' },
+  post: { width: 5, height: 22, backgroundColor: INK, borderRadius: 2 },
+  postFoot: { width: 34, height: 4, backgroundColor: INK, borderRadius: 2 },
 
-  balanceWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
-  balPost: { position: 'absolute', left: 199, top: 272, width: 3, height: 92, backgroundColor: INK },
-  balBeam: { position: 'absolute', left: 200 - 60, top: 270, width: 120, height: 3, backgroundColor: INK, transformOrigin: '50% 50%' },
-  balHang: { position: 'absolute', top: 0, width: 2, height: 24, backgroundColor: SOFT },
-  panHit: { position: 'absolute', top: 288, width: 96, alignItems: 'center' },
-  panPress: { alignItems: 'center' },
-  pan: { width: 96, height: 40, borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center' },
+  // ── Q2: the balance ────────────────────────────────────────────────────────
+  balHdr: {
+    position: 'absolute', left: 0, right: 0, top: BAL_HDR_T, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+  },
+  balPost: { position: 'absolute', left: 197.5, top: BEAM_Y, width: 5, height: 94, backgroundColor: INK, borderRadius: 2 },
+  balFoot: { position: 'absolute', left: 172, top: BEAM_Y + 94, width: 56, height: 5, backgroundColor: INK, borderRadius: 2 },
+  balBeam: {
+    position: 'absolute', left: BEAM_L, top: BEAM_Y, width: BEAM_W, height: 4,
+    backgroundColor: INK, borderRadius: 2, transformOrigin: '50% 50%',
+  },
+  balHang: { position: 'absolute', top: 0, width: 2.5, height: 18, backgroundColor: SOFT },
+  panHit: { position: 'absolute', top: PAN_T, width: PAN_W },
+  pan: {
+    width: PAN_W, height: PAN_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6,
+    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+  },
   panRight: { backgroundColor: INK, borderColor: INK },
-  panWrong: { borderColor: SOFT, opacity: 0.5 },
-  panT: { fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.5, color: INK },
-  panTOn: { color: PAPER },
+  panWrong: { borderColor: SOFT, opacity: 0.45 },
+  panT: { fontFamily: 'Inter_700Bold', fontSize: 14.5, letterSpacing: 0.5, color: INK, includeFontPadding: false },
+  panSub: { fontFamily: 'Inter_400Regular', fontSize: 10.5, color: SOFT, marginTop: 3, includeFontPadding: false },
 });
 
+// The band, measured with the camera GONE (design coordinates are final coordinates):
+// the chart title tops out at 214 and the balance caption at 216; the timeline runs
+// down to the China pill's base at 345; the signposts 252–330; the balance beam swings
+// 234–268 at ±10°, its pans 258–342 and its foot to 349; the colonnade 348–500; snow
+// 348–499; the walkers' crowns ≈357 down to feet planted at 500 (the fork answer moves
+// them SIDEWAYS only); and the ground rule ends at 501.5. Cropping to [206, 508]
+// renders the stage at ~2.14× instead of the letterboxed 1.15×.
 export function Ethics5Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics5Scene} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics5Scene} band={[206, 508]} />;
 }

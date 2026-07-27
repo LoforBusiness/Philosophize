@@ -11,9 +11,11 @@ import type { SceneApi } from './CinematicPlayer';
 // A ruler and a subject play out power vs authority, under two pieces of ink
 // information design:
 //
-//   · THE MATRIX (top) — a two-row, two-column bar chart. POWER fills the BODIES
-//     column and leaves MINDS empty; AUTHORITY fills both. That is beat 1's line
-//     ("power bends bodies; authority wins minds") drawn instead of asserted.
+//   · THE MATRIX (top) — a two-row, two-column bar chart headed REACHES · BODIES ·
+//     MINDS. POWER fills the BODIES cell (ALL) and leaves MINDS empty (NONE);
+//     AUTHORITY fills both. That is beat 1's line ("power bends bodies; authority
+//     wins minds") drawn instead of asserted, with every cell reading its own value
+//     so the chart needs no legend.
 //   · THE LEDGER (right) — Weber's four answers to "why do they obey?", stacked as
 //     full-width rows. From beat 4 the subject steps out of frame and the ledger
 //     takes that half of the stage; on the question beat the same rows ARE the
@@ -122,6 +124,7 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick }: Sc
 
       {/* ── the BODIES / MINDS matrix ───────────────────────────────────────── */}
       <Animated.View style={[styles.colHdrRow, hdrStyle]} pointerEvents="none">
+        <Text style={styles.rowHdr}>REACHES</Text>
         <Text style={[styles.colHdr, { left: BAR_X1 }]}>BODIES</Text>
         <Text style={[styles.colHdr, { left: BAR_X2 }]}>MINDS</Text>
       </Animated.View>
@@ -131,9 +134,12 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick }: Sc
         <View style={[styles.barTrack, { left: BAR_X1 }]}>
           <View style={[styles.tick, { left: BAR_W * 0.5 }]} />
           <Animated.View style={[styles.barFill, fillP]} />
+          <Text style={styles.barOn}>ALL</Text>
         </View>
+        {/* the cell that stays empty — the whole point of the row, so it says so */}
         <View style={[styles.barTrack, { left: BAR_X2 }]}>
           <View style={[styles.tick, { left: BAR_W * 0.5 }]} />
+          <Text style={styles.barOff}>NONE</Text>
         </View>
       </Animated.View>
 
@@ -142,10 +148,12 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick }: Sc
         <View style={[styles.barTrack, { left: BAR_X1 }]}>
           <View style={[styles.tick, { left: BAR_W * 0.5 }]} />
           <Animated.View style={[styles.barFill, fillA]} />
+          <Text style={styles.barOn}>ALL</Text>
         </View>
         <View style={[styles.barTrack, { left: BAR_X2 }]}>
           <View style={[styles.tick, { left: BAR_W * 0.5 }]} />
           <Animated.View style={[styles.barFill, fillA]} />
+          <Text style={styles.barOn}>ALL</Text>
         </View>
       </Animated.View>
 
@@ -198,10 +206,15 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 16, right: 14, top: GROUND, height: 2, backgroundColor: RULE },
 
   // ── matrix ────────────────────────────────────────────────────────────────
-  colHdrRow: { position: 'absolute', left: 0, top: HDR_Y, width: STAGE_W, height: 14 },
+  colHdrRow: { position: 'absolute', left: 0, top: HDR_Y, width: STAGE_W, height: 15 },
+  rowHdr: {
+    position: 'absolute', left: LAB_L, top: 0, width: LAB_W, textAlign: 'right',
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
+  },
   colHdr: {
     position: 'absolute', top: 0, width: BAR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },
   mRow: { position: 'absolute', left: 0, width: STAGE_W, height: BAR_H },
@@ -218,6 +231,18 @@ const styles = StyleSheet.create({
   barFill: {
     position: 'absolute', left: 0, top: 0, bottom: 0, width: '100%',
     backgroundColor: INK, transformOrigin: '0% 50%',
+  },
+  // Reading a bar shouldn't need a legend: the inked cells say ALL, the empty one
+  // says NONE, so "power bends bodies but never wins minds" is literally spelled out.
+  barOn: {
+    position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 16, letterSpacing: 1.8,
+    color: PAPER, includeFontPadding: false,
+  },
+  barOff: {
+    position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 16, letterSpacing: 1.8,
+    color: SOFT, includeFontPadding: false,
   },
 
   // ── podium ────────────────────────────────────────────────────────────────
@@ -239,8 +264,10 @@ const styles = StyleSheet.create({
   ledger: { position: 'absolute', left: LG_L, top: LG_HDR_Y, width: LG_W, height: 200 },
   ledHdr: {
     position: 'absolute', left: 0, top: 0, width: LG_W,
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
+  // Tap target: 192 × 40 stage units, two lines of ≥12px — comfortably readable and
+  // hittable at the band's ~2.2× on-device scale.
   ledSlot: { position: 'absolute', left: 0, width: LG_W, height: LG_H },
   ledRow: {
     width: LG_W, height: LG_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
@@ -248,15 +275,19 @@ const styles = StyleSheet.create({
   },
   ledRight: { backgroundColor: INK, borderColor: INK },
   ledWrong: { borderColor: SOFT, opacity: 0.45 },
-  ledTitle: { fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 16, color: INK, letterSpacing: 0.3, includeFontPadding: false },
+  ledTitle: { fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 17, color: INK, letterSpacing: 0.3, includeFontPadding: false },
   ledTitleOn: { color: PAPER },
-  ledSub: { fontFamily: 'Inter_500Medium', fontSize: 10.5, lineHeight: 13, color: SOFT, includeFontPadding: false },
+  ledSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 15, color: SOFT, includeFontPadding: false },
   ledSubOn: { color: RULE },
 });
 
-// Art runs from the matrix headers (224) down to the ground line (500); nothing is
-// drawn above or below, so the player crops to [216, 512] and the whole scene
-// renders about 90% larger than the letterboxed full-height fit.
+// BAND. Topmost ink is the matrix's column header row at 224; the lowest is the
+// ground line at 500 + 2 thick. Every extreme in between is inside that: the matrix
+// rows end at 288, the ledger's last row at 488, the podium spans 474..500, and the
+// tallest the figures ever get is the ruler standing ON the podium — crown at
+// 474 − 103 rig × 1.458 ≈ 324, or ~318 with the celebrate gesture's bob. So
+// [216, 512] holds the lot with 8 units of margin at the top and 10 at the bottom,
+// and the whole scene renders about 90% larger than the letterboxed full-height fit.
 export function Political2Lesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political2Scene} band={[216, 512]} />;
 }

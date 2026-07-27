@@ -22,6 +22,10 @@ import type { SceneApi } from './CinematicPlayer';
 // verdict STAMPS on at a tilt. Below it, a properly drawn wallet with notes and a
 // card poking out of it.
 //
+// The title is a WORD ANIMATION: it opens as "ONE CHOICE · THREE VERDICTS" and,
+// once the third stamp lands, cross-fades to "THREE LENSES · ONE VERDICT" — the
+// punchline of the lesson, delivered by the board rather than by the narration.
+//
 // Composition rule: the board lives entirely above y = 340 and the figures stand
 // on GROUND = 500 with their crowns at ~353 at the highest (the beat-7 shrug), so
 // the table never touches a head. The camera transform is gone — it was static on
@@ -36,7 +40,13 @@ const G_ON = BEATS.map((b) => ((b.g ?? -1) >= 0 ? 1 : 0));
 const NAMED = BEATS.map((b) => b.named ?? 0);
 const LENS = BEATS.map((b) => b.lens ?? 0);
 
-const WALLET_X = 176;
+// The wallet sits in the corridor BETWEEN the two figures. The guide stands at
+// x 108 and the finder at x 262, and an arm reaches 34 rig units ≈ 46 stage units,
+// so x 154…216 is the only strip neither of them can ever sweep. Centring the
+// wallet at 190 keeps a 74-wide prop clear of both hands at every gesture.
+const WALLET_X = 190;
+const STITCH = [8, 21, 34, 47, 60];
+const PAVE = [58, 122, 186, 250, 314];
 
 const BOARD_L = 14;
 const BOARD_W = 372;
@@ -45,9 +55,9 @@ const ROW_H = 44;
 const ROW_T = [200, 248, 296];
 
 const LENSES = [
-  { n: '1', name: 'OUTCOMES', who: 'MILL · 1863', q: 'Does it make life go better?' },
-  { n: '2', name: 'DUTY', who: 'KANT · 1785', q: 'Could everyone follow this rule?' },
-  { n: '3', name: 'CHARACTER', who: 'ARISTOTLE', q: 'Who does this act make me?' },
+  { n: '1', name: 'OUTCOMES', who: 'MILL · 1863', q: 'Did it make life better?' },
+  { n: '2', name: 'DUTY', who: 'KANT · 1785', q: 'Could all follow this rule?' },
+  { n: '3', name: 'CHARACTER', who: 'ARISTOTLE', q: 'Who does it make me?' },
 ];
 
 export default function Ethics2Scene({ clock, bt, bi }: SceneApi) {
@@ -82,18 +92,27 @@ export default function Ethics2Scene({ clock, bt, bi }: SceneApi) {
   const DF = useDerivedValue<Bundle>(() => SCENE.value.finder);
   const DG = useDerivedValue<Bundle>(() => SCENE.value.guide);
 
+  // The headline swaps once the third verdict stamps: the board states the setup
+  // first, then states the finding. Both sit at the same spot, so it costs no room.
+  const titleAsk = useAnimatedStyle(() => ({ opacity: 1 - clamp01(SCENE.value.lens - 2) }));
+  const titleAns = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.lens - 2) }));
+
   return (
     <Animated.View style={styles.scene} pointerEvents="none">
       {/* ── the verdict board ─────────────────────────────────────────────── */}
-      <Text style={styles.boardTitle}>ONE CHOICE  ·  THREE VERDICTS</Text>
+      <Animated.Text style={[styles.boardTitle, titleAsk]}>ONE CHOICE  ·  THREE VERDICTS</Animated.Text>
+      <Animated.Text style={[styles.boardTitle, titleAns]}>THREE LENSES  ·  ONE VERDICT</Animated.Text>
       {LENSES.map((L, k) => <LensRow key={L.name} S={SCENE} k={k} />)}
 
       {/* ── the pavement, and the wallet lying on it ──────────────────────── */}
       <View style={styles.ground} />
+      {PAVE.map((x) => <View key={x} style={[styles.pave, { left: x }]} />)}
+
       <View style={styles.walletShadow} />
       <View style={styles.noteBack} />
       <View style={styles.noteFront} />
       <View style={styles.wallet}>
+        {STITCH.map((sx) => <View key={sx} style={[styles.stitch, { left: sx }]} />)}
         <View style={styles.walletFold} />
         <View style={styles.walletClasp} />
       </View>
@@ -145,7 +164,8 @@ const styles = StyleSheet.create({
 
   boardTitle: {
     position: 'absolute', left: BOARD_L, top: TITLE_T, width: BOARD_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
   },
 
   row: {
@@ -162,65 +182,84 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 12, top: (ROW_H - 26) / 2, width: 26, height: 26, borderRadius: 13,
     borderWidth: 1.5, borderColor: SOFT, alignItems: 'center', justifyContent: 'center',
   },
-  badgeText: { fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 15, color: SOFT },
+  badgeText: { fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 16, color: SOFT, includeFontPadding: false },
   badgeOn: {
     position: 'absolute', left: 12, top: (ROW_H - 26) / 2, width: 26, height: 26, borderRadius: 13,
     backgroundColor: INK, alignItems: 'center', justifyContent: 'center',
   },
-  badgeTextOn: { fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 15, color: PAPER },
+  badgeTextOn: { fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 16, color: PAPER, includeFontPadding: false },
 
-  nameCol: { position: 'absolute', left: 48, top: 8, width: 104 },
-  lensName: { fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 16, letterSpacing: 0.3, color: INK },
-  lensWho: { fontFamily: 'Inter_700Bold', fontSize: 8.5, lineHeight: 11, letterSpacing: 1, color: SOFT },
+  nameCol: { position: 'absolute', left: 46, top: 7, width: 102 },
+  lensName: {
+    fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 17, letterSpacing: 0.3, color: INK,
+    includeFontPadding: false,
+  },
+  lensWho: {
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1, color: SOFT,
+    includeFontPadding: false,
+  },
   lensQ: {
-    position: 'absolute', left: 158, top: 9, width: 112,
-    fontFamily: 'Inter_500Medium', fontSize: 10.5, lineHeight: 13, color: SOFT, includeFontPadding: false,
+    position: 'absolute', left: 152, top: 8, width: 116,
+    fontFamily: 'Inter_500Medium', fontSize: 11.5, lineHeight: 14.5, color: SOFT, includeFontPadding: false,
   },
 
   slot: {
-    position: 'absolute', left: 278, top: 8, width: 84, height: 28,
+    position: 'absolute', left: 274, top: 7, width: 92, height: 30,
     borderWidth: 1.5, borderColor: RULE, borderStyle: 'dashed', borderRadius: 4,
     alignItems: 'center', justifyContent: 'center',
   },
-  slotText: { fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 18, color: SOFT },
+  slotText: { fontFamily: 'Inter_700Bold', fontSize: 16, lineHeight: 20, color: SOFT, includeFontPadding: false },
   stamp: {
-    position: 'absolute', left: 278, top: 8, width: 84, height: 28,
+    position: 'absolute', left: 274, top: 7, width: 92, height: 30,
     backgroundColor: INK, borderRadius: 4, alignItems: 'center', justifyContent: 'center',
   },
-  stampText: { fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 0.6, color: PAPER },
+  stampText: {
+    fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 16, letterSpacing: 0.6, color: PAPER,
+    includeFontPadding: false,
+  },
 
-  // ── the wallet: a body with a fold and clasp, two notes and a card ────────
+  // ── the pavement, drawn as slabs rather than one bare rule ────────────────
+  pave: { position: 'absolute', top: GROUND + 2, width: 1.5, height: 5, backgroundColor: RULE },
+
+  // ── the wallet: a stitched body with a fold and clasp, two notes and a card ─
   walletShadow: {
-    position: 'absolute', left: WALLET_X - 35, top: GROUND - 2, width: 70, height: 5,
+    position: 'absolute', left: WALLET_X - 42, top: GROUND - 2, width: 84, height: 5,
     borderRadius: 3, backgroundColor: RULE,
   },
   wallet: {
-    position: 'absolute', left: WALLET_X - 31, top: GROUND - 38, width: 62, height: 36, borderRadius: 4,
+    position: 'absolute', left: WALLET_X - 37, top: GROUND - 40, width: 74, height: 40, borderRadius: 4,
     borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
   },
-  walletFold: { position: 'absolute', left: 0, right: 0, top: 14, height: 1.5, backgroundColor: SOFT },
+  stitch: { position: 'absolute', top: 5, width: 6, height: 1.5, backgroundColor: RULE },
+  walletFold: { position: 'absolute', left: 0, right: 0, top: 16, height: 1.5, backgroundColor: SOFT },
   walletClasp: {
-    position: 'absolute', left: 22, top: 18, width: 14, height: 9, borderRadius: 2,
+    position: 'absolute', left: 28, top: 21, width: 16, height: 10, borderRadius: 2,
     borderWidth: 1.5, borderColor: SOFT,
   },
   noteBack: {
-    position: 'absolute', left: WALLET_X - 16, top: GROUND - 51, width: 26, height: 9,
+    position: 'absolute', left: WALLET_X - 14, top: GROUND - 54, width: 30, height: 10,
     borderWidth: 1.2, borderColor: RULE, borderRadius: 1.5, backgroundColor: PAPER,
   },
   noteFront: {
-    position: 'absolute', left: WALLET_X - 22, top: GROUND - 46, width: 28, height: 10,
+    position: 'absolute', left: WALLET_X - 22, top: GROUND - 49, width: 32, height: 11,
     borderWidth: 1.5, borderColor: SOFT, borderRadius: 1.5, backgroundColor: PAPER,
   },
   walletCard: {
-    position: 'absolute', left: WALLET_X + 10, top: GROUND - 44, width: 20, height: 13,
+    position: 'absolute', left: WALLET_X + 8, top: GROUND - 44, width: 24, height: 15,
     borderWidth: 1.2, borderColor: SOFT, borderRadius: 1.5, backgroundColor: PAPER,
   },
 });
 
-// BAND. Topmost ink is the board title at y 182; the lowest is the wallet shadow,
-// which ends at GROUND + 3 = 503. The figures' crowns sit at ~353 at their highest
-// (the beat-7 shrug lifts the pelvis ~3 rig units), well clear of the table's last
-// row at 340. [176, 512] leaves 6 above and 9 below.
+// BAND. Measured against every beat, not just the first.
+//   top    · the board title at 182 (the row borders start at 198.5, the stamps
+//            never scale above 202), so 176 leaves 6 units of air.
+//   bottom · the ankle JOINT is a circle of radius STR.limb/2 × K_FIG = 7.4 drawn
+//            centred on GROUND, so a planted foot actually inks to 507.4 — lower
+//            than the pavement slabs (507), the wallet shadow (503) or the ground
+//            rule (501.5). 512 clears the true lowest pixel by 4.6.
+// Figures: crown = GROUND − FIG_H × K_FIG ≈ 361, and the highest lift in this
+// lesson is the beat-7 shrug (bob +3, live accent +2.5 → crown ~353.6), still
+// 13 units below the table's last row at 340. Nothing is clipped, nothing collides.
 export function Ethics2Lesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics2Scene} band={[176, 512]} />;
 }

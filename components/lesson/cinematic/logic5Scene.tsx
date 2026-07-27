@@ -59,14 +59,18 @@ const STEPS_TEXT = [
 const MISSING = 'EQUALS OF EQUALS ARE EQUAL';
 
 // ── the staircase chart ──────────────────────────────────────────────────────
+// Four rising bars, each capped with the move it stands for, so the staircase is
+// the PIPELINE again — premise, premise, inference, conclusion — but climbed.
 const STAIR_BASE = 494;
+const STAIR_HDR_T = 318;
 const STAIRS = [
-  { n: '1', left: 168, h: 34 },
-  { n: '2', left: 222, h: 68 },
-  { n: '3', left: 276, h: 102 },
-  { n: '4', left: 330, h: 136 },
+  { n: '1', tag: 'PREMISE', left: 168, h: 34 },
+  { n: '2', tag: 'PREMISE', left: 222, h: 68 },
+  { n: '3', tag: 'INFER', left: 276, h: 102 },
+  { n: '4', tag: 'CONCLUDE', left: 330, h: 136 },
 ];
 const STAIR_W = 54;
+const STAIR_TAG_H = 15;
 
 // ── Q2: the two chutes ───────────────────────────────────────────────────────
 const CHUTE_HDR_T = 232;
@@ -162,6 +166,11 @@ export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick }: Sc
       {/* ── the staircase chart: divide it, then climb it ──────────────────── */}
       <Animated.View style={[styles.fill, stairStyle]} pointerEvents="none">
         <Text style={styles.stairHdr}>ONE STEP AT A TIME</Text>
+        {STAIRS.map((s) => (
+          <Text key={`t${s.n}`} style={[styles.stairTag, { left: s.left, top: STAIR_BASE - s.h - STAIR_TAG_H }]}>
+            {s.tag}
+          </Text>
+        ))}
         {STAIRS.map((s) => (
           <View key={s.n} style={[styles.stair, { left: s.left, top: STAIR_BASE - s.h, height: s.h }]}>
             <Text style={styles.stairNum}>{s.n}</Text>
@@ -323,8 +332,12 @@ const styles = StyleSheet.create({
 
   // ── staircase chart ────────────────────────────────────────────────────────
   stairHdr: {
-    position: 'absolute', left: COL_L, top: 336, width: COL_W, textAlign: 'center',
+    position: 'absolute', left: COL_L, top: STAIR_HDR_T, width: COL_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+  },
+  stairTag: {
+    position: 'absolute', width: STAIR_W, height: STAIR_TAG_H, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.4, color: SOFT, includeFontPadding: false,
   },
   stair: {
     position: 'absolute', width: STAIR_W, borderWidth: 2.5, borderColor: INK,
@@ -405,9 +418,10 @@ const styles = StyleSheet.create({
 });
 
 // Extremes across every beat: the Q headers at y 232, the pipeline 238–488, the proof
-// cards 254–472, the ladder 300–500, the staircase 336–494, the chutes 232–452, the
-// figure's crown ≈358 down to its feet at 500, and the ground rule at 501.5. Nothing is
-// drawn above 232 or below 501.5, so [224, 510] renders the stage at ~2.26×.
+// cards 254–472, the ladder 300–500, the staircase (header 318, tallest step's cap at
+// 343) down to its base at 494, the chutes 232–452, the figure's crown ≈358 down to its
+// feet at 500, and the ground rule at 501.5. Nothing is drawn above 232 or below 501.5,
+// so [224, 510] renders the stage at ~2.26×.
 export function Logic5Lesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic5Scene} band={[224, 510]} />;
 }

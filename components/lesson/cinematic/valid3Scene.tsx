@@ -16,7 +16,11 @@ import type { SceneApi } from './CinematicPlayer';
 //   · a two-box CHECKLIST beneath — FORM VALID? · PREMISES TRUE? — each cycling
 //     from "?" to ✓ or ✗. That checklist is the lesson: two tests, never confused;
 //   · a rubber VALID stamp that lands on the form, and strike-throughs plus a
-//     FALSE tag when the premises turn out untrue.
+//     FALSE tag when the premises turn out untrue;
+//   · stage left, THE FORBIDDEN PAIRING — "premises true / conclusion false" in a
+//     box that gets struck out with a drawn-on ✗ and stamped IMPOSSIBLE. That is
+//     the definition of validity as a picture, and it fills the column beside the
+//     inspector that used to be blank paper.
 //
 // On the graded beat the form clears and four VERDICT CARDS take the board — the
 // question is answered by tapping one of them, not by reading a list.
@@ -45,6 +49,22 @@ const C_H = 44;
 const CK1_Y = 436;
 const CK2_Y = 468;
 const CK_BOX = 28;
+
+// ── the "what VALID forbids" block, stage left ───────────────────────────────
+// Validity's definition, drawn: the ONE pairing a valid form can never produce —
+// all premises true and the conclusion false — struck through as impossible. It
+// fills the empty column beside the inspector and is the picture of beat 2's
+// sentence. It occupies 236..341, and the figure's crown sits at 350, so it can
+// never collide with the body; it is clear of the ballot (x ≥ 130) too.
+const VD_L = 8;
+const VD_W = 116;
+const VD_TOP = 236;
+const VD_BOX_T = 15;
+const VD_BOX_H = 72;
+// The strike bars run corner to corner: hypot(116, 72) = 136.5, trimmed to 136 so
+// the PAINTED diagonal (136·cos31.8° = 115.6 wide) stays inside the 116-wide block
+// and no platform's child-clipping can ever bite off its tip.
+const VD_DIAG = 136;
 
 // ── the verdict ballot (the scene-answered question) ─────────────────────────
 const BAL_L = 130;
@@ -125,6 +145,18 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     opacity: SCENE.value.ballot,
     transform: [{ translateY: (1 - SCENE.value.ballot) * 10 }],
   }));
+  // The forbidden-pairing block rides `link` alone (not `board`), so it stays on
+  // stage through the question beat and keeps that column from going empty.
+  const vdStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.link }));
+  // Rotation and scale must live in the SAME animated transform array — an
+  // animated `transform` replaces the static one rather than merging with it, so a
+  // rotate left in StyleSheet would simply be dropped.
+  const cross1Style = useAnimatedStyle(() => ({
+    transform: [{ rotate: '31.8deg' }, { scaleX: Math.max(0.001, SCENE.value.link) }],
+  }));
+  const cross2Style = useAnimatedStyle(() => ({
+    transform: [{ rotate: '-31.8deg' }, { scaleX: Math.max(0.001, SCENE.value.link) }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -156,6 +188,19 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
         </Animated.View>
       </Animated.View>
 
+      {/* ── what "VALID" forbids, struck out as it is stated ────────────────── */}
+      <Animated.View style={[styles.vd, vdStyle]} pointerEvents="none">
+        <Text style={styles.vdCap}>VALID MEANS</Text>
+        <View style={styles.vdBox}>
+          <Text style={styles.vdLine}>PREMISES TRUE</Text>
+          <View style={styles.vdRule} />
+          <Text style={styles.vdLine}>{'CONCLUSION\nFALSE'}</Text>
+        </View>
+        <Animated.View style={[styles.vdCross, { top: VD_BOX_T }, cross1Style]} />
+        <Animated.View style={[styles.vdCross, { top: VD_BOX_T + VD_BOX_H }, cross2Style]} />
+        <Text style={styles.vdVerdict}>IMPOSSIBLE</Text>
+      </Animated.View>
+
       {/* the rubber stamp on the form */}
       <Animated.View style={[styles.stamp, stampStyle]} pointerEvents="none">
         <Text style={styles.stampT}>VALID</Text>
@@ -182,7 +227,7 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       {showPick ? (
         <Animated.View style={[styles.ballot, ballotStyle]} pointerEvents="box-none">
           <View style={styles.given} pointerEvents="none">
-            <Text style={styles.givenT}>VALID FORM  ✓   TRUE PREMISES  ✓</Text>
+            <Text style={styles.givenT}>VALID FORM ✓   PREMISES TRUE ✓</Text>
           </View>
           <Text style={styles.ballotHdr}>TAP THE VERDICT</Text>
 
@@ -243,6 +288,30 @@ const styles = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: INK, includeFontPadding: false,
   },
 
+  // ── the forbidden pairing ─────────────────────────────────────────────────
+  vd: { position: 'absolute', left: VD_L, top: VD_TOP, width: VD_W, overflow: 'visible' },
+  vdCap: {
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 1.4,
+    color: SOFT, textAlign: 'center', includeFontPadding: false,
+  },
+  vdBox: {
+    marginTop: 1, height: VD_BOX_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
+    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
+  },
+  vdLine: {
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 15, color: INK,
+    textAlign: 'center', includeFontPadding: false,
+  },
+  vdRule: { width: 84, height: 1.5, backgroundColor: RULE, marginVertical: 5 },
+  vdCross: {
+    position: 'absolute', left: 0, width: VD_DIAG, height: 2,
+    backgroundColor: INK, transformOrigin: '0% 50%',
+  },
+  vdVerdict: {
+    marginTop: 4, fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 14, letterSpacing: 1.6,
+    color: INK, textAlign: 'center', includeFontPadding: false,
+  },
+
   strike: { position: 'absolute', left: BX - 4, width: BW + 8, height: 2.5, backgroundColor: INK, transform: [{ rotate: '-4deg' }] },
   falseTag: {
     position: 'absolute', left: 240, top: 240, borderWidth: 2, borderColor: INK, backgroundColor: INK,
@@ -270,20 +339,25 @@ const styles = StyleSheet.create({
   ckOn: { color: INK },
   ckLab: {
     position: 'absolute', left: FR_L + CK_BOX + 12,
-    fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 18, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 18, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
 
   // ── ballot ────────────────────────────────────────────────────────────────
   ballot: { position: 'absolute', left: BAL_L, top: 236, width: BAL_W, height: 258 },
+  // 38, not 32: the givens line measures ~228 of the 254 of inner width, so a wide
+  // ✓ glyph from a fallback font could tip it onto a second 16-tall line. At 32 that
+  // second line was clipped; at 38 it simply wraps, and the header below still
+  // starts at 42. Sits above the cards, never over them.
   given: {
-    position: 'absolute', left: 0, top: 0, width: BAL_W, height: 32,
+    position: 'absolute', left: 0, top: 0, width: BAL_W, height: 38,
     borderWidth: 2, borderColor: SOFT, borderRadius: 4, alignItems: 'center', justifyContent: 'center',
   },
-  givenT: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.6, color: INK, includeFontPadding: false },
+  givenT: { fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 16, letterSpacing: 0.6, color: INK, includeFontPadding: false },
   ballotHdr: {
     position: 'absolute', left: 0, top: 42, width: BAL_W,
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
+  // Tap target: 258 × 44 stage units, a 14px title over a 12px gloss.
   balSlot: { position: 'absolute', left: 0, width: BAL_W, height: BAL_H },
   balCard: {
     width: BAL_W, height: BAL_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
@@ -291,15 +365,18 @@ const styles = StyleSheet.create({
   },
   balRight: { backgroundColor: INK, borderColor: INK },
   balWrong: { borderColor: SOFT, opacity: 0.45 },
-  balTitle: { fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 17, letterSpacing: 0.4, color: INK, includeFontPadding: false },
+  balTitle: { fontFamily: 'Inter_700Bold', fontSize: 14.5, lineHeight: 17, letterSpacing: 0.4, color: INK, includeFontPadding: false },
   balTitleOn: { color: PAPER },
-  balSub: { fontFamily: 'Inter_500Medium', fontSize: 10.5, lineHeight: 13, color: SOFT, includeFontPadding: false },
+  balSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 15, color: SOFT, includeFontPadding: false },
   balSubOn: { color: RULE },
 });
 
-// Art runs from the form's frame (236) down to the ground line (500) — the ballot
-// and the checklist both finish above it — so the player crops to [228, 512] and
-// the scene renders about twice the size of the letterboxed full-height fit.
+// BAND. Topmost ink is the form's frame and the forbidden-pairing caption, both at
+// 236 (the tilted FALSE tag reaches 236.6); the lowest is the ground line at 500 +
+// 2 thick. Everything else finishes above it: the ballot's last card at 490, the
+// checklist at 496, the tilted VALID stamp at 397, the figure's crown at 350. So
+// [228, 512] holds every extreme with 8 units of margin top and 10 bottom, and the
+// scene renders about twice the size of the letterboxed full-height fit.
 export function Valid3Lesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Valid3Scene} band={[228, 512]} />;
 }

@@ -227,7 +227,7 @@ function RoadLabel({
         y={y}
         fill={fill}
         fontFamily="Inter_700Bold"
-        fontSize={8}
+        fontSize={10}
         letterSpacing={1.2}
         textAnchor={anchor}
       >

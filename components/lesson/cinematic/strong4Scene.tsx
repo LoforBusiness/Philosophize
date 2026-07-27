@@ -16,10 +16,12 @@ import type { SceneApi } from './CinematicPlayer';
 //     stamps GUARANTEED or LIKELY.
 //   · THE TWO RULER CARDS — deductive vs inductive, each listing what it aims at,
 //     how it is graded, and what it becomes with true premises. The card being
-//     discussed inks its title strip. This pair IS "wrong ruler, wrong verdict".
+//     discussed inks its title strip SOLID and reverses the word out in paper, so
+//     which yardstick is in play reads at a glance. This pair IS "wrong ruler,
+//     wrong verdict".
 //
-// On the graded beat the cards clear and four VERDICT CHIPS take the column, so
-// the question is answered by tapping in the scene.
+// On the graded beat the cards clear and four one-word VERDICT CHIPS take the
+// column, so the question is answered by tapping in the scene.
 //
 // No camera transform: the art is authored straight into stage space, so the band
 // below is exact. The presenter's widest reach ends at x ≈ 134 and the card
@@ -38,15 +40,22 @@ const G_H = 26;
 const COL_L = 152;
 const COL_W = 234;
 const COL_TOP = 324;
-const CARD_H = 78;                 // 324..402 and 406..484
+// The card holds a 23-tall title strip over THREE 17.5-tall lines = 75.5, plus a
+// 2 border top and bottom = 79.5. At 78 that overflowed its own `overflow: hidden`
+// box and Android shaved the bottom off the third line; 84 leaves 4.5 of slack.
+const CARD_H = 84;                 // 324..408 and 412..496
 const CHIP_H = 40;
 const CHIP_STEP = 43;              // 324 · 367 · 410 · 453 → ends at 493
 
+// One word per chip, deliberately. A gloss line under each ("induction's version of
+// valid") handed the answer straight to the reader; a bare verdict makes them read
+// the two ruler cards they were just shown, which is the point of the lesson. It
+// also buys the type room to sit at 16px instead of 10.
 const CHIPS = [
-  { id: 'a', title: 'STRONG', sub: 'induction’s version of valid', correct: true },
-  { id: 'b', title: 'SOUND', sub: 'the premises support it', correct: false },
-  { id: 'c', title: 'INVALID', sub: 'it could still be false', correct: false },
-  { id: 'd', title: 'WEAK', sub: 'nothing is guaranteed', correct: false },
+  { id: 'a', title: 'STRONG', correct: true },
+  { id: 'b', title: 'SOUND', correct: false },
+  { id: 'c', title: 'INVALID', correct: false },
+  { id: 'd', title: 'WEAK', correct: false },
 ];
 
 const P_CODE = BEATS.map((b) => b.p ?? 0);
@@ -159,9 +168,12 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick }: Scene
       {/* ── the two ruler cards ─────────────────────────────────────────────── */}
       <Animated.View style={[styles.cards, cardsStyle]} pointerEvents="none">
         <View style={[styles.card, { top: COL_TOP }]}>
+          {/* the active ruler's title strip inks SOLID, with the word reversed out —
+              a RULE-grey wash was too quiet to say "this is the one in play" */}
           <View style={styles.cardHead}>
             <Animated.View style={[styles.cardHeadOn, dedStyle]} />
             <Text style={styles.cardHeadT}>DEDUCTIVE</Text>
+            <Animated.Text style={[styles.cardHeadT, styles.cardHeadTOn, dedStyle]}>DEDUCTIVE</Animated.Text>
           </View>
           <Text style={styles.cardLine}>aims to  GUARANTEE</Text>
           <Text style={styles.cardLine}>graded  VALID / INVALID</Text>
@@ -171,6 +183,7 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick }: Scene
           <View style={styles.cardHead}>
             <Animated.View style={[styles.cardHeadOn, indStyle]} />
             <Text style={styles.cardHeadT}>INDUCTIVE</Text>
+            <Animated.Text style={[styles.cardHeadT, styles.cardHeadTOn, indStyle]}>INDUCTIVE</Animated.Text>
           </View>
           <Text style={styles.cardLine}>aims to make  LIKELY</Text>
           <Text style={styles.cardLine}>graded  STRONG / WEAK</Text>
@@ -199,7 +212,6 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick }: Scene
                   ]}
                 >
                   <Text style={[styles.chipT, answered && c.correct && styles.chipTOn]}>{c.title}</Text>
-                  <Text style={[styles.chipSub, answered && c.correct && styles.chipSubOn]}>{c.sub}</Text>
                 </View>
               </Pressable>
             );
@@ -259,38 +271,42 @@ const styles = StyleSheet.create({
     position: 'absolute', left: COL_L, width: COL_W, height: CARD_H,
     borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER, overflow: 'hidden',
   },
-  cardHead: { height: 21, justifyContent: 'center', paddingHorizontal: 10, borderBottomWidth: 1.5, borderBottomColor: RULE },
-  cardHeadOn: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: RULE },
+  cardHead: { height: 23, justifyContent: 'center', paddingHorizontal: 10, borderBottomWidth: 1.5, borderBottomColor: RULE },
+  cardHeadOn: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: INK },
   cardHeadT: {
-    fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 16, letterSpacing: 1.2, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 17, letterSpacing: 1.2, color: INK, includeFontPadding: false,
   },
+  // The head box is 23 tall with a 1.5 border inside it, so a 17-tall line centres
+  // at (23 − 1.5 − 17) / 2 = 2.25 — the reversed copy must sit exactly on the base.
+  cardHeadTOn: { position: 'absolute', left: 10, top: 2.25, color: PAPER },
   cardLine: {
-    fontFamily: 'Inter_500Medium', fontSize: 11, lineHeight: 17, color: SOFT, paddingHorizontal: 10, includeFontPadding: false,
+    fontFamily: 'Inter_500Medium', fontSize: 11.5, lineHeight: 17.5, color: SOFT, paddingHorizontal: 10, includeFontPadding: false,
   },
 
   // ── ballot ────────────────────────────────────────────────────────────────
   ballot: { position: 'absolute', left: COL_L, top: 306, width: COL_W, height: 200 },
   ballotHdr: {
     position: 'absolute', left: 0, top: 0, width: COL_W,
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
+  // Tap target: 234 × 40 stage units carrying one 16px word — a verdict plate.
   chipSlot: { position: 'absolute', left: 0, width: COL_W, height: CHIP_H },
   chip: {
     width: COL_W, height: CHIP_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: PAPER, justifyContent: 'center', paddingHorizontal: 12,
+    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12,
   },
   chipRight: { backgroundColor: INK, borderColor: INK },
   chipWrong: { borderColor: SOFT, opacity: 0.45 },
-  chipT: { fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 17, letterSpacing: 0.6, color: INK, includeFontPadding: false },
+  chipT: { fontFamily: 'Inter_700Bold', fontSize: 16, lineHeight: 21, letterSpacing: 2.2, color: INK, includeFontPadding: false },
   chipTOn: { color: PAPER },
-  chipSub: { fontFamily: 'Inter_500Medium', fontSize: 10, lineHeight: 12, color: SOFT, includeFontPadding: false },
-  chipSubOn: { color: RULE },
 });
 
-// Art runs from the gauge caption (210) down to the ground line (500, 2 thick) —
-// the lowest chip ends at 493 and the lower ruler card at 484 — so the player
-// crops to [202, 510] and the scene renders roughly twice the size of the
-// letterboxed full-height fit.
+// BAND. Topmost ink is the gauge caption at 210 (the needle starts at 220, the lock
+// at 222); the lowest is the ground line at 500 + 2 thick. In between, every extreme
+// is accounted for: the scale labels end at 270, the wobbling dice at 305, the lower
+// ruler card at 496, the last verdict chip at 493, the figure's crown at 350. So
+// [202, 510] holds the lot with 8 units of margin at each end — and since the art
+// genuinely spans 292 units there is no tighter honest crop.
 export function Strong4Lesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Strong4Scene} band={[202, 510]} />;
 }

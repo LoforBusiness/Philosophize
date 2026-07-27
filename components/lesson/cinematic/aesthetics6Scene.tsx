@@ -21,11 +21,16 @@ import type { SceneApi } from './CinematicPlayer';
 //     x ≈ 107 — so it sits under the table and left of every card.
 //   · The flower (beauty, the foil) blooms at x ≈ 172 with its tag box at y 414–436,
 //     clear of the figure's widest gesture.
-//   · KANT'S CARD is pinned over the peak's right flank at x 244–384, y 302–366.
+//   · KANT'S CARD is pinned over the peak's right flank at x 236–384, y 294–370.
 //   · Snow falls from y 250 to 496 and is drawn BEHIND every card, so nothing ever
 //     drifts across a label.
-//   · Nothing is drawn above y = 244 or below the ground line, which is what lets
-//     the player crop to band [238, 510] and render ~2.3× instead of 1.15×.
+//   · Nothing is drawn above y = 244 or below the ankle joints at 507.4, which is
+//     what lets the player crop to band [238, 512] and render ~2.3× instead of 1.15×.
+//
+// THE RANGE is built from flat border-triangles, so it earns its scale from LAYERS
+// rather than from one grey wedge: three receding ridges in RULE behind the main
+// mass, facet lines raked down the near face, snow on the two highest caps, and a
+// scree line where the rock meets the ground. All of it sits behind the cards.
 
 const FIG_X = 70;
 const PEAK_X = 250;
@@ -51,6 +56,16 @@ const MIND = BEATS.map((b) => b.mind ?? 0);
 const FLAKES = Array.from({ length: 16 }, (_, k) => ({
   x: 78 + (k * 311) % 300, ph: (k * 0.17) % 1, sp: 0.14 + (k % 4) * 0.03,
 }));
+
+// Boulders at the foot of the range, in INK so they read as FOREGROUND against the
+// SOFT rock behind them. Placed in the gaps: right of the figure (which ends at
+// x ≈ 112) and clear of the flower (x 154–190).
+const SCREE = [
+  { x: 116, w: 11, h: 14 },
+  { x: 204, w: 9, h: 11 },
+  { x: 296, w: 13, h: 16 },
+  { x: 348, w: 8, h: 10 },
+];
 
 export default function Aesthetics6Scene({ clock, bt, bi }: SceneApi) {
   const SCENE = useDerivedValue(() => {
@@ -93,12 +108,30 @@ export default function Aesthetics6Scene({ clock, bt, bi }: SceneApi) {
     <Animated.View style={styles.scene}>
       {/* ── the range ─────────────────────────────────────────────────────────── */}
       <Animated.View style={[StyleSheet.absoluteFill, vastStyle]} pointerEvents="none">
+        {/* the far ridges, palest and drawn first */}
         <View style={styles.peakFarL} />
         <View style={styles.peakFarR} />
+        {/* the near mass — main summit plus the shoulder that breaks its outline */}
         <View style={styles.peakMain} />
+        <View style={styles.shoulder} />
+        {/* four facets raked down the face, so the mass is not one flat wedge */}
         <View style={styles.ridgeA} />
         <View style={styles.ridgeB} />
+        <View style={styles.facetA} />
+        <View style={styles.facetB} />
+        {/* snow where the rock is highest */}
         <View style={styles.snowCap} />
+        <View style={styles.shoulderCap} />
+        {/* boulders at the foot, the only near-black thing besides the figure */}
+        {SCREE.map((r) => (
+          <View
+            key={r.x}
+            style={[
+              styles.rock,
+              { left: r.x, top: GROUND - r.h, borderLeftWidth: r.w, borderRightWidth: r.w, borderBottomWidth: r.h },
+            ]}
+          />
+        ))}
         <View style={[styles.mist, { top: 372, left: 128, width: 250 }]} />
         <View style={[styles.mist, { top: 408, left: 96, width: 300 }]} />
       </Animated.View>
@@ -133,8 +166,9 @@ export default function Aesthetics6Scene({ clock, bt, bi }: SceneApi) {
 
       {/* ── Kant: the awe moves inside ────────────────────────────────────────── */}
       <Animated.View style={[styles.mindCard, mindStyle]} pointerEvents="none">
-        <Animated.View style={[styles.ring, { left: 48 }, ringA]} />
-        <Animated.View style={[styles.ring, { left: 66 }, ringB]} />
+        <Text style={styles.mindWho}>KANT</Text>
+        <Animated.View style={[styles.ring, { left: 43 }, ringA]} />
+        <Animated.View style={[styles.ring, { left: 71 }, ringB]} />
         <Text style={styles.mindT}>REASON HOLDS IT</Text>
       </Animated.View>
 
@@ -190,12 +224,28 @@ const styles = StyleSheet.create({
     borderLeftWidth: 68, borderRightWidth: 68, borderBottomWidth: 128,
     borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: RULE,
   },
+  // The left shoulder: same SOFT as the main mass, so it fuses with it, but its
+  // apex at (162, 356) and its left slope (which runs ~16–26 units OUTSIDE the main
+  // silhouette all the way down) break the perfect isoceles into a real summit and
+  // a secondary one. It clears the table above (which ends at y 346).
+  shoulder: {
+    position: 'absolute', left: 70, top: 356, width: 0, height: 0,
+    borderLeftWidth: 92, borderRightWidth: 92, borderBottomWidth: 144,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: SOFT,
+  },
   snowCap: {
     position: 'absolute', left: PEAK_X - 22, top: PEAK_T, width: 0, height: 0,
     borderLeftWidth: 22, borderRightWidth: 22, borderBottomWidth: 38,
     borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: PAPER,
   },
-  // two crevasses cut down the face, so the mass is not one flat grey wedge
+  shoulderCap: {
+    position: 'absolute', left: 147, top: 356, width: 0, height: 0,
+    borderLeftWidth: 15, borderRightWidth: 15, borderBottomWidth: 26,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: PAPER,
+  },
+  // four crevasses cut down the face, so the mass is not one flat grey wedge.
+  // Each is rotated about its TOP (transformOrigin '50% 0%'), and each start and
+  // end point was checked to sit inside the silhouette at that height.
   ridgeA: {
     position: 'absolute', left: 236, top: 300, width: 2, height: 170,
     backgroundColor: RULE, transformOrigin: '50% 0%', transform: [{ rotate: '13deg' }],
@@ -204,17 +254,32 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 268, top: 314, width: 2, height: 150,
     backgroundColor: RULE, transformOrigin: '50% 0%', transform: [{ rotate: '-11deg' }],
   },
+  facetA: {
+    position: 'absolute', left: 232, top: 282, width: 2, height: 150,
+    backgroundColor: RULE, transformOrigin: '50% 0%', transform: [{ rotate: '-18deg' }],
+  },
+  facetB: {
+    position: 'absolute', left: 222, top: 320, width: 2, height: 130,
+    backgroundColor: RULE, transformOrigin: '50% 0%', transform: [{ rotate: '-26deg' }],
+  },
+  rock: {
+    position: 'absolute', width: 0, height: 0,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: INK,
+  },
   mist: { position: 'absolute', height: 2, backgroundColor: PAPER, opacity: 0.55, borderRadius: 1 },
   flake: {
     position: 'absolute', width: 5.5, height: 5.5, borderRadius: 3,
     backgroundColor: PAPER, borderWidth: 1, borderColor: SOFT,
   },
 
+  // The flower stands ON the mountain's SOFT flank, so its stem and leaf are INK,
+  // not SOFT — in SOFT they were the same value as the rock behind them and the
+  // whole "merely beautiful" foil vanished into the mass.
   flower: { position: 'absolute', left: 154, top: 434, width: 36, height: 66, alignItems: 'center' },
-  stem: { position: 'absolute', bottom: 0, width: 2.5, height: 34, backgroundColor: SOFT },
+  stem: { position: 'absolute', bottom: 0, width: 2.5, height: 34, backgroundColor: INK },
   leaf: {
     position: 'absolute', bottom: 10, left: 20, width: 12, height: 6, borderRadius: 6,
-    backgroundColor: SOFT, transform: [{ rotate: '-18deg' }],
+    backgroundColor: INK, transform: [{ rotate: '-18deg' }],
   },
   petal: { position: 'absolute', top: 12, width: 12, height: 12, borderRadius: 6, borderWidth: 1.5, borderColor: INK, backgroundColor: PAPER },
   flowerCore: { position: 'absolute', top: 14, width: 8, height: 8, borderRadius: 4, backgroundColor: INK },
@@ -245,21 +310,38 @@ const styles = StyleSheet.create({
   },
   cellSoft: { color: SOFT },
 
+  // Kant's card. The two rings overlap by 6 units, so the pair reads as a lemniscate
+  // — the infinite — held inside a single ruled frame: the mind, not the mountain.
+  // They were 24 across, which at this crop was a pair of dots; at 34 the figure
+  // reads at a glance. Card x 236–384, y 294–372, clear of the table (ends x 186).
   mindCard: {
-    position: 'absolute', left: 244, top: 302, width: 140, height: 64,
+    position: 'absolute', left: 236, top: 294, width: 148, height: 78,
     borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
   },
-  ring: { position: 'absolute', top: 8, width: 24, height: 24, borderRadius: 12, borderWidth: 2.5, borderColor: INK },
+  mindWho: {
+    position: 'absolute', left: 0, top: 7, width: 148, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT, includeFontPadding: false,
+  },
+  ring: { position: 'absolute', top: 19, width: 34, height: 34, borderRadius: 17, borderWidth: 2.5, borderColor: INK },
   mindT: {
-    position: 'absolute', left: 0, top: 40, width: 140, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+    position: 'absolute', left: 0, top: 55, width: 148, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.2, color: INK, includeFontPadding: false,
   },
 });
 
-// Art runs from the peak's apex and the table title at y 244 down to the ground
-// line at 501.5. Snow falls between 250 and 496, the flower's tag box tops out at
-// 414 and Kant's card bottoms at 366, so this band holds every extreme with 6
-// units of margin at the top and 8 at the bottom.
+// BAND. No camera transform here, so design y IS screen y. Measured extremes across
+// every beat, top to bottom:
+//   table title        244   (the highest thing drawn)
+//   peak apex / cap    246
+//   Kant's card        294 … 372
+//   figure crown       361   (x 70 on GROUND 500 → 500 − 103·1.35)
+//   tag box / flower   400 … 500
+//   snow               250 … 501.5 (a flake lands at GROUND − 4 and is 5.5 tall)
+//   ground rule        500 … 501.5
+//   ankle joints       507.4 (the ankle CIRCLE hangs limb/2·k ≈ 7.4 below GROUND)
+// so [238, 512] holds every pixel with 6 units of margin above and 4.6 below (the
+// old 510 clipped to within 2.6 of the ankles). The band is 274 tall, still
+// WIDTH-limited on a phone stage, so the scene renders about 2.3× instead of 1.15×.
 export function Aesthetics6Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics6Scene} band={[238, 510]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics6Scene} band={[238, 512]} />;
 }

@@ -9,6 +9,7 @@ export interface Epi7Beat extends BaseBeat {
   /** Farmer gesture. */ p?: number;
   /** How many past "fed" days are shown (0..4). */ days?: number;
   /** The ? / twist day is revealed 0..1. */ twist?: number;
+  /** The circular-reasoning loop drawn stage left 0..1. */ circle?: number;
 }
 
 export const BEATS: Epi7Beat[] = [
@@ -24,13 +25,13 @@ export const BEATS: Epi7Beat[] = [
     dur: 5.0,
   },
   {
-    p: 4, days: 4,
+    p: 4, days: 4, circle: 1,
     text: 'Why expect the future to match the past? Only because it always has. But that uses the past to justify trusting the past — circular. Induction cannot be proven by logic.',
     cite: 'Hume’s problem',
     dur: 5.0,
   },
   {
-    p: 0, days: 4,
+    p: 0, days: 4, circle: 1,
     quote: {
       id: 'lq-epistemology-knowledge-7-1',
       text: 'Custom, then, is the great guide of human life.',

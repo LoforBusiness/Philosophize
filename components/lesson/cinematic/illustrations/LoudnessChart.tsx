@@ -225,7 +225,7 @@ export default function LoudnessChart({
           x={151}
           y={148}
           fill={SOFT}
-          fontSize={8}
+          fontSize={10}
           fontFamily="Inter_700Bold"
           letterSpacing={1.5}
           textAnchor="middle"
@@ -252,7 +252,7 @@ export default function LoudnessChart({
             x={16}
             y={76}
             fill={SOFT}
-            fontSize={8}
+            fontSize={10}
             fontFamily="Inter_700Bold"
             letterSpacing={1.5}
             textAnchor="middle"
@@ -268,7 +268,7 @@ export default function LoudnessChart({
           x={151}
           y={90}
           fill={SOFT}
-          fontSize={10}
+          fontSize={11.5}
           fontFamily="PlayfairDisplay_400Regular"
           fontStyle="italic"
           textAnchor="middle"

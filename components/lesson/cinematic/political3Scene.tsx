@@ -10,10 +10,15 @@ import type { SceneApi } from './CinematicPlayer';
 
 // The right to rule, drawn as a CIRCUIT and a COMPARISON.
 //
-// MIDDLE — the circuit. A scroll of consent travels the top arrow from the ruled
-// to the ruler; protected rights flow back along the bottom one. On the Locke
-// beat the whole exchange is stamped HELD IN TRUST, struck on at an angle like a
-// clerk's seal — the single idea the lesson turns on.
+// MIDDLE — one corridor that holds two opposite diagrams, on exactly the same two
+// rails. On the hook it is BARE FORCE: a heavy arrow driven DOWN the top rail from
+// ruler to ruled, and on the bottom rail a struck-out return arrow — nothing is
+// owed back. From the contract beat that is replaced, rail for rail, by the
+// CIRCUIT: a scroll of consent travels UP the top rail from the ruled to the
+// ruler, and protected rights flow back along the bottom one. Because the two
+// diagrams share their geometry, the swap itself teaches the beat's distinction —
+// power compels, legitimacy is owed. On the Locke beat the whole exchange is then
+// stamped HELD IN TRUST, struck on at an angle like a clerk's seal.
 //
 // TOP — the comparison, two panels either side of a VS divider. It first holds
 // POWER (makes you obey) against LEGITIMACY (makes you owe), then swaps to
@@ -22,12 +27,15 @@ import type { SceneApi } from './CinematicPlayer';
 //
 // COMPOSITION / OCCLUSION CONTRACT
 //   · Subject at x = 66 (spans ~18–114), ruler at x = 334 (spans ~286–382), both
-//     on GROUND = 500 with crowns near y 353.
-//   · Every circuit part lives in the corridor x 122–278 between them, and every
-//     panel sits at y 240–322, above both crowns.
+//     on GROUND = 500 with crowns near y 361.
+//   · Every corridor part — both diagrams — lives in x 122–278 between them, and
+//     every panel sits at y 240–322, above both crowns.
 //   · The ruler's crown is the one prop that sits over a figure, at y 326–346 —
-//     deliberately, and still 7 units clear of the head.
-//   · Nothing is drawn above y 222 or below the ground line: band [214, 508].
+//     deliberately, and still 15 units clear of the head.
+//   · The force diagram and the circuit hand over with a STAGGERED gate rather
+//     than a cross-fade, so the corridor never shows both at half opacity.
+//   · Nothing is drawn above y 222 or below the ankle joints at y ≈ 507.4, hence
+//     band [214, 512].
 
 const SUB_X = 66;
 const R_X = 334;
@@ -72,6 +80,7 @@ const ALIGNED = ['0deg', '0deg', '0deg', '0deg', '0deg', '0deg'];
 const SUB_CODE = BEATS.map((b) => b.sub ?? 0);
 const R_CODE = BEATS.map((b) => b.r ?? 0);
 const SCROLL = BEATS.map((b) => b.scroll ?? 0);
+const FORCE = BEATS.map((b) => b.force ?? 0);
 const FLOW = BEATS.map((b) => b.flow ?? 0);
 const SEAL = BEATS.map((b) => b.seal ?? 0);
 const PAIR_ON = BEATS.map((b) => ((b.pair ?? 0) > 0 ? 1 : 0));
@@ -98,14 +107,21 @@ export default function Political3Scene({ clock, bt, bi, i }: SceneApi) {
 
     const sub = mixStance(emoteHold(SUB_CODE[p], t), emoteLive(SUB_CODE[n], t, bt.value), tr);
     const r = mixStance(emoteHold(R_CODE[p], t), emoteLive(R_CODE[n], t, bt.value), tr);
-    const scroll = lerp(SCROLL[p], SCROLL[n], tr);
     return {
       sub: pose(sub, SUB_X, GROUND, K_FIG, 1, 1),
       ruler: pose(r, R_X, GROUND, K_FIG, -1, 1),
-      scroll,
-      flow: lerp(FLOW[p], FLOW[n], tr),
+      // The scroll's journey is DELAYED into the back half of the transition, so it
+      // is still near the subject's end of the rail at the moment the circuit
+      // becomes visible — otherwise it would pop into view already delivered.
+      scroll: ease01(clamp01((lerp(SCROLL[p], SCROLL[n], tr) - 0.45) / 0.55)),
       seal: lerp(SEAL[p], SEAL[n], tr),
       pair: lerp(PAIR_ON[p], PAIR_ON[n], tr),
+      // The corridor's two diagrams hand over in stages: force is off the rails by
+      // 45% of the transition, the circuit goes up from 55%, and the corridor is
+      // briefly — deliberately — empty between them. Cross-fading them left both at
+      // half opacity on top of each other, which on a phone reads as a smudge.
+      force: ease01(clamp01((lerp(FORCE[p], FORCE[n], tr) - 0.55) / 0.45)),
+      flow: ease01(clamp01((lerp(FLOW[p], FLOW[n], tr) - 0.55) / 0.45)),
       t,
     };
   });
@@ -113,9 +129,10 @@ export default function Political3Scene({ clock, bt, bi, i }: SceneApi) {
   const DS = useDerivedValue<Bundle>(() => SCENE.value.sub);
   const DR = useDerivedValue<Bundle>(() => SCENE.value.ruler);
 
-  const flowStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.flow * 1.6) }));
+  const forceStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.force }));
+  const flowStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.flow }));
   const scrollStyle = useAnimatedStyle(() => ({
-    opacity: clamp01(SCENE.value.flow * 1.6),
+    opacity: SCENE.value.flow,
     transform: [{ translateX: lerp(0, COR_W - SCROLL_W - 18, SCENE.value.scroll) }],
   }));
   // The seal lands like a stamp: oversized, then driven down onto the page.
@@ -157,6 +174,20 @@ export default function Political3Scene({ clock, bt, bi, i }: SceneApi) {
         <View style={[styles.crownPt, { left: 27 }]} />
         <View style={styles.crownBand} />
       </View>
+
+      {/* ── bare force: one heavy arrow down, and nothing owed back ──────────── */}
+      <Animated.View style={[StyleSheet.absoluteFill, forceStyle]} pointerEvents="none">
+        <Text style={styles.forceLabel}>FORCE</Text>
+        <View style={styles.forceShaft} />
+        <View style={styles.forceHead} />
+        <View style={styles.oweShaft} />
+        <View style={styles.oweHead} />
+        <View style={styles.oweCross}>
+          <View style={[styles.oweCrossBar, { transform: [{ rotate: '45deg' }] }]} />
+          <View style={[styles.oweCrossBar, { transform: [{ rotate: '-45deg' }] }]} />
+        </View>
+        <Text style={styles.oweLabel}>NOTHING OWED</Text>
+      </Animated.View>
 
       {/* ── the circuit: consent up, protected rights back down ──────────────── */}
       <Animated.View style={[StyleSheet.absoluteFill, flowStyle]} pointerEvents="none">
@@ -207,7 +238,7 @@ const styles = StyleSheet.create({
 
   title: {
     position: 'absolute', left: 0, top: 222, width: STAGE_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13.5, letterSpacing: 1.6, color: SOFT,
     includeFontPadding: false,
   },
   box: {
@@ -221,16 +252,16 @@ const styles = StyleSheet.create({
   },
   boxSub: {
     position: 'absolute', left: 8, top: 29, width: BOX_W - 20, textAlign: 'center',
-    fontFamily: 'Inter_400Regular', fontSize: 9.5, lineHeight: 12.5, letterSpacing: 0.2, color: SOFT,
+    fontFamily: 'Inter_400Regular', fontSize: 10, lineHeight: 13, letterSpacing: 0.2, color: SOFT,
     includeFontPadding: false,
   },
   divider: { position: 'absolute', left: 199.25, top: 250, width: 1.5, height: 62, backgroundColor: RULE },
   chip: {
-    position: 'absolute', left: 187, top: 272, width: 26, height: 18, borderRadius: 3,
+    position: 'absolute', left: 185, top: 271, width: 30, height: 20, borderRadius: 3,
     borderWidth: 1.5, borderColor: SOFT, backgroundColor: PAPER,
     alignItems: 'center', justifyContent: 'center',
   },
-  chipText: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1, color: SOFT, includeFontPadding: false },
+  chipText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1, color: SOFT, includeFontPadding: false },
 
   arrowRow: { position: 'absolute', left: 9, top: 56, width: BOX_W - 22, height: 18 },
   arrow: { position: 'absolute', top: 3, width: 21, height: 12 },
@@ -249,9 +280,42 @@ const styles = StyleSheet.create({
   },
   crownBand: { position: 'absolute', top: 10, width: 36, height: 8, backgroundColor: INK, borderRadius: 2 },
 
+  // ── bare force: the same two rails, run the other way ───────────────────────
+  // Deliberately heavier than the consent arrow (5 units of shaft against 2.5, a
+  // 13-unit head against 11): power is the loud one, and it points DOWN at the
+  // ruled rather than up from them.
+  forceLabel: {
+    position: 'absolute', left: COR_L, top: 362, width: COR_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.6, color: INK,
+    includeFontPadding: false,
+  },
+  forceShaft: { position: 'absolute', left: COR_L + 12, top: UP_Y - 1.25, width: COR_W - 12, height: 5, backgroundColor: INK },
+  forceHead: {
+    position: 'absolute', left: COR_L, top: UP_Y - 6.75, width: 0, height: 0,
+    borderTopWidth: 8, borderBottomWidth: 8, borderRightWidth: 13,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+  },
+  oweShaft: { position: 'absolute', left: COR_L, top: DOWN_Y, width: COR_W - 12, height: 2.5, backgroundColor: SOFT },
+  oweHead: {
+    position: 'absolute', left: COR_L + COR_W - 12, top: DOWN_Y - 4.75, width: 0, height: 0,
+    borderTopWidth: 6, borderBottomWidth: 6, borderLeftWidth: 11,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: SOFT,
+  },
+  // Struck across the return arrow: obedience is taken, nothing flows back.
+  oweCross: {
+    position: 'absolute', left: COR_L + COR_W / 2 - 17, top: DOWN_Y - 15.75, width: 34, height: 34,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  oweCrossBar: { position: 'absolute', width: 34, height: 3.5, backgroundColor: INK, borderRadius: 2 },
+  oweLabel: {
+    position: 'absolute', left: COR_L, top: 476, width: COR_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
+  },
+
   upLabel: {
     position: 'absolute', left: COR_L, top: 362, width: COR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 1.6, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.6, color: INK,
     includeFontPadding: false,
   },
   upShaft: { position: 'absolute', left: COR_L, top: UP_Y, width: COR_W - 10, height: 2.5, backgroundColor: INK },
@@ -268,7 +332,7 @@ const styles = StyleSheet.create({
   },
   downLabel: {
     position: 'absolute', left: COR_L, top: 468, width: COR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -277,16 +341,25 @@ const styles = StyleSheet.create({
   scrollCap: { position: 'absolute', top: -1.5, width: 6, height: 16, borderRadius: 3, borderWidth: 1.5, borderColor: INK, backgroundColor: PAPER },
 
   seal: {
-    position: 'absolute', left: 148, top: 406, width: 104, height: 38,
+    position: 'absolute', left: 142, top: 406, width: 116, height: 40,
     borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
     alignItems: 'center', justifyContent: 'center',
   },
-  sealText: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1, color: INK, includeFontPadding: false },
+  sealText: { fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 1, color: INK, includeFontPadding: false },
 });
 
-// Art runs from the panel title at y 222 to the ground line at y 501.5 — the
-// stamp, both arrows, the crown and both figures all sit inside that slice, so
-// the player crops to it and renders ~2.2× instead of the letterboxed 1.15×.
+// MEASURED BAND, top and bottom.
+//   TOP    the panel title at y 222. The ruler's crown prop tops out at 326 and
+//          both crowns sit near 361, so nothing on any beat is drawn higher.
+//   BOTTOM the ground line is at 501.5, but the true extreme is the ankle JOINTS:
+//          circles of radius STR.limb·K_FIG/2 = 7.43 centred exactly on GROUND, so
+//          ink reaches y = 507.4. The lowest prop is the force diagram's NOTHING
+//          OWED caption at 489.
+// [214, 512] therefore holds the stamp, both diagrams, the crown and both figures
+// on every beat with 8 units of margin at the top and 4.6 at the foot, and renders
+// the scene ~2.17× instead of the letterboxed 1.15×. The seal is scaled up to 1.55×
+// as it lands, but it grows about its own CENTRE (406→446 becomes 395→457), so the
+// stamp is comfortably inside the band at its largest.
 export function Political3Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political3Scene} band={[214, 508]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political3Scene} band={[214, 512]} />;
 }

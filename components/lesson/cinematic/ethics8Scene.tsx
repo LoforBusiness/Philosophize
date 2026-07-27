@@ -257,5 +257,5 @@ const styles = StyleSheet.create({
 });
 
 export function Ethics8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics8Scene} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics8Scene} band={[56, 516]} />;
 }

@@ -23,14 +23,16 @@ import type { SceneApi } from './CinematicPlayer';
 // (196, 430), transform-origin CENTRE), so design y maps to screen y as
 //   y' = 1.14·y − 249.4      and     x' = 1.14·x − 51.4.
 // Measured extremes across every beat, top to bottom:
-//   ledger top      y 260  →  47
+//   ledger top      y 260  →  47   (the opening headline shares this exact box)
 //   ledger bottom   y 348  → 147
 //   figure crown    y 359  → 160
+//   ORIGIN? card    y 366  → 168   … bottom y 486 → 305
 //   ask caption     y 398  → 205
 //   balance beam    y 424  → 234
 //   ground rule     y 501  → 322
 //   ankle joints    y 507  → 329   (the ankle CIRCLE hangs ~7 below GROUND)
 // so the band below is [40, 338] — everything the scene can draw, with margin.
+// Anything added later must be re-measured through the same map before it ships.
 
 const HUMAN_X = 250;
 const CRIT_X = 86;
@@ -56,12 +58,34 @@ const ROWS = [
   { label: 'JUDGES ITSELF', animal: false },
 ] as const;
 
+// ── the opening headline ──────────────────────────────────────────────────────
+// The first beat is a lone figure on bare paper — the thinnest shot in the lesson —
+// and the line it carries ("a question arrives on its own") is a word animation
+// waiting to happen. The three words assemble one at a time, then a rule sweeps in
+// under them. It occupies the LEDGER'S EXACT FOOTPRINT and retires the moment the
+// ledger is first written, so it costs the band nothing and can never overlap.
+const ASK_WORDS = ['WAS', 'THAT', 'RIGHT?'] as const;
+
+// ── where conscience comes from ───────────────────────────────────────────────
+// The Darwin/Freud/Kant beat used to be pixel-for-pixel the beat before it. Their
+// three answers are a three-row table, so it gets one, filled in a row at a time.
+// It stands in the clear column right of the figure: design x 298…390 (screen
+// 288…393) and y 366…486 (screen 168…305), clear of the ledger above (which ends at
+// design 348), the ground below, and the figure, whose gestures all swing LEFT
+// because it faces left.
+const ORIGIN_ROWS = [
+  { who: 'DARWIN', from: 'INSTINCT' },
+  { who: 'FREUD', from: 'SOCIETY' },
+  { who: 'KANT', from: 'REASON' },
+] as const;
+
 // ── per-beat cues, precomputed for the worklet ────────────────────────────────
 const HPOSE = BEATS.map((b) => b.hpose ?? 0);
 const JUDGE = BEATS.map((b) => (b.judge ? 1 : 0));
 const CRITTER = BEATS.map((b) => (b.critter ? 1 : 0));
 const PLANT = BEATS.map((b) => (b.plant ? 1 : 0));
 const Q2 = BEATS.map((b) => (b.weigh === 'q2' ? 1 : 0));
+const ORIGINS = BEATS.map((b) => (b.origins ? 1 : 0));
 
 // How many ledger rows are written by each beat. Derived from the script's own
 // cues rather than hard beat numbers: the shared instincts appear with the animal,
@@ -119,6 +143,13 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
     const cnt = LEDGER[n], was = LEDGER[p];
     const row = (k: number) => { 'worklet'; return k < was ? 1 : k < cnt ? write : 0; };
 
+    // Cards that come and go between beats: a card LEAVES quickly (0.25s, so it is
+    // gone before whatever replaces it has drawn anything) and ARRIVES unhurried.
+    const away = 1 - ease01(bt.value / 0.25);
+    const here = ease01(bt.value / 0.6);
+    const askHere = cnt === 0 ? 1 : 0;      // the headline lives where the ledger will
+    const askWas = was === 0 ? 1 : 0;
+
     return {
       cam: { s: L(prv.s, cur.s), cx: L(prv.cx, cur.cx), cy: L(prv.cy, cur.cy) },
       human: pose(humanS, HUMAN_X, GROUND, K_FIG, -1, 1),
@@ -130,6 +161,17 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
       r0: row(0), r1: row(1), r2: row(2),
       plant: L(PLANT[p], PLANT[n]),
       grow: ease01(bt.value / 1.1),
+      // the opening headline, assembling word by word
+      askOn: askHere ? (askWas ? 1 : here) : askWas ? away : 0,
+      w0: ease01((bt.value - 0.15) / 0.4),
+      w1: ease01((bt.value - 0.45) / 0.4),
+      w2: ease01((bt.value - 0.75) / 0.4),
+      wRule: ease01((bt.value - 1.15) / 0.5),
+      // the three-source card, one row at a time
+      origOn: ORIGINS[n] ? (ORIGINS[p] ? 1 : here) : ORIGINS[p] ? away : 0,
+      o0: ease01((bt.value - 0.25) / 0.45),
+      o1: ease01((bt.value - 0.6) / 0.45),
+      o2: ease01((bt.value - 0.95) / 0.45),
     };
   });
 
@@ -144,6 +186,8 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
       <Animated.View style={[StyleSheet.absoluteFill, camStyle]}>
         <View style={styles.ground} />
         <Ledger S={SCENE} />
+        <AskBanner S={SCENE} />
+        <Origins S={SCENE} />
         <Sprout S={SCENE} />
         <Critter S={SCENE} />
         <Stickman D={DH} k={K_FIG} />
@@ -186,6 +230,63 @@ function Ledger({ S }: { S: SharedValue<any> }) {
           <View style={[styles.mark, { left: COL_Y + COL_W / 2 - 7 }]}>
             <View style={styles.dotOn} />
           </View>
+        </Animated.View>
+      ))}
+    </Animated.View>
+  );
+}
+
+// ── the opening headline ──────────────────────────────────────────────────────
+// Three words that assemble, then a rule that sweeps under them. Nothing here is
+// tappable (pointerEvents="none"), so the tap that advances the beat still lands.
+function AskBanner({ S }: { S: SharedValue<any> }) {
+  const card = useAnimatedStyle(() => ({ opacity: S.value.askOn }));
+  const words = [
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: S.value.w0, transform: [{ translateY: (1 - S.value.w0) * 12 }] })),
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: S.value.w1, transform: [{ translateY: (1 - S.value.w1) * 12 }] })),
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: S.value.w2, transform: [{ translateY: (1 - S.value.w2) * 12 }] })),
+  ];
+  const rule = useAnimatedStyle(() => ({
+    opacity: S.value.wRule, transform: [{ scaleX: S.value.wRule }],
+  }));
+  return (
+    <Animated.View style={[styles.ask, card]} pointerEvents="none">
+      <View style={styles.askTopRule} />
+      <Text style={styles.askEyebrow} numberOfLines={1}>AND THEN, UNASKED —</Text>
+      <View style={styles.askRow}>
+        {ASK_WORDS.map((w, k) => (
+          <Animated.View key={w} style={words[k]}>
+            <Text style={styles.askWord}>{w}</Text>
+          </Animated.View>
+        ))}
+      </View>
+      <Animated.View style={[styles.askUnder, rule]} />
+    </Animated.View>
+  );
+}
+
+// ── where conscience comes from ───────────────────────────────────────────────
+function Origins({ S }: { S: SharedValue<any> }) {
+  const card = useAnimatedStyle(() => ({ opacity: S.value.origOn }));
+  const rows = [
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: S.value.o0, transform: [{ translateX: (1 - S.value.o0) * 10 }] })),
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: S.value.o1, transform: [{ translateX: (1 - S.value.o1) * 10 }] })),
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: S.value.o2, transform: [{ translateX: (1 - S.value.o2) * 10 }] })),
+  ];
+  return (
+    <Animated.View style={[styles.orig, card]} pointerEvents="none">
+      <Text style={styles.origHead} numberOfLines={1}>ORIGIN?</Text>
+      <View style={styles.origRule} />
+      {ORIGIN_ROWS.map((r, k) => (
+        <Animated.View key={r.who} style={[styles.origRow, { top: 20 + k * 33 }, rows[k]]}>
+          <Text style={styles.origWho} numberOfLines={1}>{r.who}</Text>
+          <Text style={styles.origFrom} numberOfLines={1}>{r.from}</Text>
         </Animated.View>
       ))}
     </Animated.View>
@@ -303,6 +404,50 @@ const styles = StyleSheet.create({
   mark: { position: 'absolute', top: LED_ROW_H / 2 - 7, width: 14, height: 14, alignItems: 'center', justifyContent: 'center' },
   dotOn: { width: 13, height: 13, borderRadius: 7, backgroundColor: INK },
   dotOff: { width: 13, height: 13, borderRadius: 7, borderWidth: 2, borderColor: SOFT },
+
+  // ── the opening headline ────────────────────────────────────────────────────
+  // Exactly the ledger's box (58…352 × 260…348), so the band is unchanged and the
+  // two can never be on stage together — the headline leaves as the ledger arrives.
+  ask: { position: 'absolute', left: LED_X, top: LED_T, width: LED_W, height: LED_H },
+  askTopRule: { position: 'absolute', left: 0, right: 0, top: 0, height: 1.5, backgroundColor: RULE },
+  askEyebrow: {
+    position: 'absolute', left: 0, right: 0, top: 10, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
+  },
+  askRow: {
+    position: 'absolute', left: 0, right: 0, top: 28,
+    flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', gap: 10,
+  },
+  askWord: {
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 23, lineHeight: 30, color: INK,
+    includeFontPadding: false,
+  },
+  askUnder: {
+    position: 'absolute', left: (LED_W - 180) / 2, top: 68, width: 180, height: 2,
+    backgroundColor: INK,
+  },
+
+  // ── where conscience comes from ─────────────────────────────────────────────
+  orig: {
+    position: 'absolute', left: 298, top: 366, width: 92, height: 120,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+  },
+  origHead: {
+    position: 'absolute', left: 0, right: 0, top: 5, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.3, color: SOFT,
+    includeFontPadding: false,
+  },
+  origRule: { position: 'absolute', left: 0, right: 0, top: 19, height: 1, backgroundColor: RULE },
+  origRow: { position: 'absolute', left: 0, right: 0, height: 33, alignItems: 'center', justifyContent: 'center' },
+  origWho: {
+    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: SOFT,
+    includeFontPadding: false,
+  },
+  origFrom: {
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.3, color: INK,
+    includeFontPadding: false, marginTop: 2,
+  },
 
   // ── sprout ──────────────────────────────────────────────────────────────────
   stem: {

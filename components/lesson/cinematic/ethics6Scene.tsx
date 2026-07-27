@@ -1,28 +1,66 @@
-import { View, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle } from './rig';
+import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle } from './rig';
 import { BEATS } from './ethics6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 
-// The footbridge: a trolley on the ground track bears down on five; on a bridge above
-// stand the decider and a larger stranger. Two levels — bridge figures at BRIDGE_Y,
-// trolley + the five on the ground.
+// The footbridge — and, written up beside it, the SPLIT drawn as a chart: two bars
+// for the same trade, landing at opposite heights over one shared footing that
+// reads "SAME MATH — 1 FOR 5". That single panel is the whole lesson: the numbers
+// do not move, our verdict does.
+//
+// NO CAMERA. The old version wrapped everything in a 0.9× camera about (222, 452),
+// which SHRANK the stage by 10% before the player letterboxed it — the two effects
+// together rendered this scene at ~1.04×. Design y is now screen y, and the band
+// below crops to the slice that actually holds art, so it renders at ~2.3×.
+//
+// COMPOSITION / OCCLUSION CONTRACT
+//   · The CHART owns the right column, x 264–392, y 240–426. Nothing else is ever
+//     drawn there: the stranger's rightmost pixel is his head circle at x ≈ 247.
+//   · The STAMP owns the left column, x 12–104, y 292–352. The decider stands at
+//     x = 150 facing right; its head circle reaches x ≈ 117 and its widest far-side
+//     hand (the "weigh it up" gesture) x ≈ 107.5, so the box is never brushed.
+//   · The BRIDGE spans x 104–262 with its deck at y 411; the decider stands at
+//     x = 150 (crown ≈ 271) and the larger stranger at x = 216 (crown ≈ 247).
+//   · The TRACK runs the full width at y 500; the five stand on it at x 300–380 and
+//     the trolley bears down from the left, its wheels reaching y 502.
+//   · Nothing is drawn above y = 240 or below y = 506.
 
 const BRIDGE_Y = 410;
 const DEC_X = 150;
 const STR_X = 216;
-const MAIN5 = [300, 318, 336, 354, 372];
+const MAIN5 = [300, 320, 340, 360, 380];
+
+// ── the WOULD YOU DO IT? chart ────────────────────────────────────────────────
+// A two-bar comparison is the most honest picture of "most who would pull the lever
+// refuse to push": the axis is labelled MOST / FEW rather than with invented survey
+// percentages, so the shape carries the claim without fabricating a statistic.
+const CH_L = 264;
+const CH_W = 128;
+const BASE_Y = 380;                 // the bars' baseline
+const BAR_W = 40;
+const BAR_A = 280;                  // SWITCH
+const BAR_B = 336;                  // SHOVE
+const BAR_A_H = 110;
+const BAR_B_H = 20;
 
 const D_CODE = BEATS.map((b) => b.d ?? 0);
 const S_CODE = BEATS.map((b) => b.str ?? 0);
 const TX = BEATS.map((b) => b.tx ?? 60);
+const SHOVE = BEATS.map((b) => b.shove ?? 0);
+const CARD = BEATS.map((b) => b.card ?? 0);
+const STAMP = BEATS.map((b) => b.stamp ?? 0);
 
-export default function Ethics6Scene({ clock, bt, bi, i }: SceneApi) {
-  const isSummary = !!BEATS[i].summary;
+// Sleepers under the rail: cheap, and the difference between "a line" and "a track".
+const SLEEPERS = Array.from({ length: 14 }, (_, k) => 34 + k * 26);
+// Rail-side balusters, so the handrail reads as a footbridge and not a floating bar.
+const BALUSTERS = [110, 138, 166, 194, 222, 250];
+
+export default function Ethics6Scene({ clock, bt, bi }: SceneApi) {
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -32,55 +70,122 @@ export default function Ethics6Scene({ clock, bt, bi, i }: SceneApi) {
     const d = mixStance(emoteHold(D_CODE[p], t), emoteLive(D_CODE[n], t, bt.value), tr);
     const str = mixStance(emoteHold(S_CODE[p], t), emoteLive(S_CODE[n], t, bt.value), tr);
     return {
-      cam: { s: isSummary ? 1 : 0.9, cx: 222, cy: 452 },
       dec: pose(d, DEC_X, BRIDGE_Y, K_FIG, 1, 1),
       str: pose(str, STR_X, BRIDGE_Y, K_FIG * 1.16, -1, 1),
       tx: L(TX[p], TX[n]),
+      shove: L(SHOVE[p], SHOVE[n]),
+      card: L(CARD[p], CARD[n]),
+      stamp: L(STAMP[p], STAMP[n]),
       wheel: (t * 220) % 360,
+      t,
     };
   });
 
   const DD = useDerivedValue<Bundle>(() => SCENE.value.dec);
   const DS = useDerivedValue<Bundle>(() => SCENE.value.str);
-  const camStyle = useAnimatedStyle(() => {
-    const c = SCENE.value.cam;
-    return { transform: [{ translateX: STAGE_W / 2 - c.cx * c.s }, { translateY: STAGE_H / 2 - c.cy * c.s }, { scale: c.s }] };
-  });
   const trolleyStyle = useAnimatedStyle(() => ({ transform: [{ translateX: SCENE.value.tx }] }));
   const wheelStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.wheel}deg` }] }));
+  const chartStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.card) }));
+  // The stamp lands: it drops the last few units and settles slightly off-square,
+  // the way a rubber stamp does — one beat, then it just stays up.
+  const stampStyle = useAnimatedStyle(() => {
+    const u = ease01(SCENE.value.stamp);
+    return {
+      opacity: u,
+      transform: [{ translateY: (1 - u) * -14 }, { scale: 0.82 + 0.18 * u }, { rotate: `${-5 * u}deg` }],
+    };
+  });
+  const shoveStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.shove }));
+  const fallStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.shove,
+    transform: [{ scaleY: ease01(SCENE.value.shove) }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
-      <Animated.View style={[StyleSheet.absoluteFill, camStyle]}>
-        {/* ground track */}
-        <View style={styles.track} />
-        {MAIN5.map((x) => <Peg key={x} x={x} />)}
+      {/* ── the track: a rail on sleepers, the full width of the stage ────────── */}
+      {SLEEPERS.map((x) => <View key={x} style={[styles.sleeper, { left: x }]} pointerEvents="none" />)}
+      <View style={styles.rail} pointerEvents="none" />
 
-        {/* trolley bearing down under the bridge */}
-        <Animated.View style={[styles.trolleyWrap, trolleyStyle]}>
-          <View style={styles.car} />
-          <View style={styles.carRoof} />
-          <Animated.View style={[styles.wheel, { left: 4 }, wheelStyle]}><View style={styles.spoke} /></Animated.View>
-          <Animated.View style={[styles.wheel, { right: 4 }, wheelStyle]}><View style={styles.spoke} /></Animated.View>
-        </Animated.View>
+      {/* the five, with the tally that says how many */}
+      <View style={styles.fiveBar} pointerEvents="none" />
+      <View style={[styles.fiveTick, { left: 298 }]} pointerEvents="none" />
+      <View style={[styles.fiveTick, { left: 382 }]} pointerEvents="none" />
+      <Text style={styles.fiveT}>THE FIVE</Text>
+      {MAIN5.map((x) => <Peg key={x} x={x} />)}
 
-        {/* the bridge */}
-        <View style={styles.bridgePost1} />
-        <View style={styles.bridgePost2} />
-        <View style={styles.bridgeDeck} />
-        <View style={styles.bridgeRail} />
-
-        {/* the decider + the large stranger, on the bridge */}
-        <Stickman D={DD} k={K_FIG} />
-        <Stickman D={DS} k={K_FIG * 1.16} />
+      {/* ── the trolley bearing down, streaks trailing behind it ──────────────── */}
+      <Animated.View style={[styles.trolleyWrap, trolleyStyle]} pointerEvents="none">
+        <View style={[styles.streak, { top: 8, left: -32, width: 24 }]} />
+        <View style={[styles.streak, { top: 17, left: -26, width: 18 }]} />
+        <View style={[styles.streak, { top: 26, left: -30, width: 22 }]} />
+        <View style={styles.car} />
+        <View style={styles.carRoof} />
+        <View style={[styles.window, { left: 9 }]} />
+        <View style={[styles.window, { left: 27 }]} />
+        <View style={[styles.window, { left: 45 }]} />
+        <Animated.View style={[styles.wheel, { left: 8 }, wheelStyle]}><View style={styles.spoke} /></Animated.View>
+        <Animated.View style={[styles.wheel, { left: 40 }, wheelStyle]}><View style={styles.spoke} /></Animated.View>
       </Animated.View>
+
+      {/* ── the bridge ────────────────────────────────────────────────────────── */}
+      <View style={styles.bridgePost1} pointerEvents="none" />
+      <View style={styles.bridgePost2} pointerEvents="none" />
+      {BALUSTERS.map((x) => <View key={x} style={[styles.baluster, { left: x }]} pointerEvents="none" />)}
+      <View style={styles.bridgeRail} pointerEvents="none" />
+      <View style={styles.bridgeDeck} pointerEvents="none" />
+
+      {/* the fall line the shove would draw, and where it lands */}
+      <Animated.View style={[styles.fallLine, fallStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.fallHead, shoveStyle]} pointerEvents="none" />
+
+      {/* ── the crux, stamped into the clear column stage left ────────────────── */}
+      <Animated.View style={[styles.stamp, stampStyle]} pointerEvents="none">
+        <Text style={styles.stampT}>USED AS</Text>
+        <Text style={styles.stampT}>A MEANS</Text>
+      </Animated.View>
+
+      {/* ── the split, drawn as two bars over one shared footing ──────────────── */}
+      <Animated.View style={[styles.chart, chartStyle]} pointerEvents="none">
+        <Text style={styles.chTitle}>WOULD YOU?</Text>
+        <View style={styles.chAxis} />
+        <Bar S={SCENE} at={1} left={BAR_A} h={BAR_A_H} cap="MOST" label="SWITCH" />
+        <Bar S={SCENE} at={2} left={BAR_B} h={BAR_B_H} cap="FEW" label="SHOVE" />
+        <View style={styles.chFoot}>
+          <Text style={styles.chFootT}>SAME MATH: 1 FOR 5</Text>
+        </View>
+      </Animated.View>
+
+      {/* the decider + the larger stranger, on the bridge */}
+      <Stickman D={DD} k={K_FIG} />
+      <Stickman D={DS} k={K_FIG * 1.16} />
     </Animated.View>
+  );
+}
+
+/** One column of the chart: it grows out of the baseline when its row is reached. */
+function Bar({
+  S, at, left, h, cap, label,
+}: { S: SharedValue<any>; at: number; left: number; h: number; cap: string; label: string }) {
+  const grow = useAnimatedStyle(() => ({ transform: [{ scaleY: ease01(clamp01(S.value.card - at + 1)) }] }));
+  const capStyle = useAnimatedStyle(() => ({ opacity: ease01(clamp01((S.value.card - at + 1) * 2 - 1)) }));
+  return (
+    <>
+      <Animated.View
+        style={[styles.bar, { left, width: BAR_W, top: BASE_Y - h, height: h }, grow]}
+        pointerEvents="none"
+      />
+      <Animated.View style={[capStyle, { position: 'absolute', left: left - 8, top: BASE_Y - h - 15, width: BAR_W + 16 }]} pointerEvents="none">
+        <Text style={styles.barCap}>{cap}</Text>
+      </Animated.View>
+      <Text style={[styles.barLabel, { left: left - 8, width: BAR_W + 16 }]}>{label}</Text>
+    </>
   );
 }
 
 function Peg({ x }: { x: number }) {
   return (
-    <View style={[styles.peg, { left: x - 3, top: GROUND - 26 }]}>
+    <View style={[styles.peg, { left: x - 5 }]} pointerEvents="none">
       <View style={styles.pegHead} />
       <View style={styles.pegBody} />
     </View>
@@ -89,23 +194,120 @@ function Peg({ x }: { x: number }) {
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  track: { position: 'absolute', left: 30, right: 20, top: GROUND, height: 2, backgroundColor: INK },
-  peg: { position: 'absolute', width: 6, alignItems: 'center' },
-  pegHead: { width: 8, height: 8, borderRadius: 4, backgroundColor: INK },
-  pegBody: { width: 4, height: 18, backgroundColor: INK, marginTop: -1, borderRadius: 2 },
 
-  trolleyWrap: { position: 'absolute', left: 0, top: GROUND - 30, width: 46, height: 30 },
-  car: { position: 'absolute', left: 0, top: 4, width: 46, height: 22, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER },
-  carRoof: { position: 'absolute', left: 6, top: 0, width: 34, height: 5, backgroundColor: INK, borderRadius: 2 },
-  wheel: { position: 'absolute', bottom: -3, width: 12, height: 12, borderRadius: 6, borderWidth: 2, borderColor: INK, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center' },
-  spoke: { width: 2, height: 8, backgroundColor: INK },
+  // ── track ───────────────────────────────────────────────────────────────────
+  rail: { position: 'absolute', left: 20, right: 8, top: GROUND, height: 2.5, backgroundColor: INK },
+  sleeper: { position: 'absolute', top: 502, width: 3, height: 4, backgroundColor: SOFT },
 
-  bridgePost1: { position: 'absolute', left: 116, top: BRIDGE_Y + 6, width: 5, height: GROUND - BRIDGE_Y - 6, backgroundColor: SOFT },
-  bridgePost2: { position: 'absolute', left: 250, top: BRIDGE_Y + 6, width: 5, height: GROUND - BRIDGE_Y - 6, backgroundColor: SOFT },
-  bridgeDeck: { position: 'absolute', left: 104, top: BRIDGE_Y + 4, width: 158, height: 7, backgroundColor: INK, borderRadius: 2 },
-  bridgeRail: { position: 'absolute', left: 104, top: BRIDGE_Y - 26, width: 158, height: 3, backgroundColor: SOFT, borderRadius: 2 },
+  // ── the five ────────────────────────────────────────────────────────────────
+  peg: { position: 'absolute', top: GROUND - 30, width: 10, alignItems: 'center' },
+  pegHead: { width: 10, height: 10, borderRadius: 5, backgroundColor: INK },
+  pegBody: { width: 5, height: 21, backgroundColor: INK, marginTop: -1, borderRadius: 2.5 },
+  fiveBar: { position: 'absolute', left: 298, top: 460, width: 86, height: 1.5, backgroundColor: SOFT },
+  fiveTick: { position: 'absolute', top: 460, width: 1.5, height: 7, backgroundColor: SOFT },
+  fiveT: {
+    position: 'absolute', left: 288, top: 444, width: 106, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
+  },
+
+  // ── the trolley ─────────────────────────────────────────────────────────────
+  // 62×40 rather than the old 46×30: at this crop the small car read as a crate,
+  // and the thing bearing down on five people should be the second-biggest object
+  // on the stage after the bridge.
+  trolleyWrap: { position: 'absolute', left: 0, top: GROUND - 40, width: 62, height: 40 },
+  car: {
+    position: 'absolute', left: 0, top: 6, width: 62, height: 26,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+  },
+  carRoof: { position: 'absolute', left: 8, top: 0, width: 46, height: 6, backgroundColor: INK, borderRadius: 2 },
+  window: { position: 'absolute', top: 11, width: 8, height: 9, backgroundColor: INK, borderRadius: 1 },
+  wheel: {
+    position: 'absolute', top: 28, width: 14, height: 14, borderRadius: 7,
+    borderWidth: 2, borderColor: INK, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+  },
+  spoke: { width: 2, height: 9, backgroundColor: INK },
+  streak: { position: 'absolute', height: 1.5, backgroundColor: SOFT, borderRadius: 1 },
+
+  // ── the bridge ──────────────────────────────────────────────────────────────
+  bridgePost1: { position: 'absolute', left: 116, top: BRIDGE_Y + 8, width: 6, height: GROUND - BRIDGE_Y - 8, backgroundColor: SOFT },
+  bridgePost2: { position: 'absolute', left: 250, top: BRIDGE_Y + 8, width: 6, height: GROUND - BRIDGE_Y - 8, backgroundColor: SOFT },
+  bridgeDeck: { position: 'absolute', left: 104, top: BRIDGE_Y + 1, width: 158, height: 7, backgroundColor: INK, borderRadius: 2 },
+  bridgeRail: { position: 'absolute', left: 104, top: BRIDGE_Y - 30, width: 158, height: 3.5, backgroundColor: SOFT, borderRadius: 2 },
+  baluster: { position: 'absolute', top: BRIDGE_Y - 27, width: 2, height: 28, backgroundColor: RULE },
+
+  // ── the shove, as a drawn consequence rather than an animation of a body ────
+  fallLine: {
+    position: 'absolute', left: STR_X - 1, top: 424, width: 2, height: 58,
+    backgroundColor: SOFT, transformOrigin: '50% 0%',
+  },
+  fallHead: {
+    position: 'absolute', left: STR_X - 6, top: 482, width: 0, height: 0,
+    borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 11,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: INK,
+  },
+
+  // ── the crux, stamped ───────────────────────────────────────────────────────
+  // Width 92 at x 12 is measured, not chosen: the decider's far-side fist on the
+  // "weigh it up" gesture (code 21, fistL x = −26 rig) reaches x ≈ 107.5, so a
+  // wider box would be brushed by a hand on the last question beat.
+  stamp: {
+    position: 'absolute', left: 12, top: 292, width: 92, height: 60,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  stampT: {
+    fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 17, letterSpacing: 0.8,
+    color: INK, includeFontPadding: false,
+  },
+
+  // ── the chart ───────────────────────────────────────────────────────────────
+  chart: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  // Centred in a 128-wide column, "WOULD YOU?" renders about 80 wide, so its first
+  // glyph starts near x 288 — well clear of the stranger's head circle, whose right
+  // edge reaches x ≈ 266 on his most-leaning beat.
+  chTitle: {
+    position: 'absolute', left: CH_L, top: 240, width: CH_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+  },
+  chAxis: { position: 'absolute', left: CH_L + 4, top: BASE_Y, width: CH_W - 8, height: 1.5, backgroundColor: RULE },
+  bar: { position: 'absolute', backgroundColor: INK, borderRadius: 2, transformOrigin: '50% 100%' },
+  barCap: {
+    textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+  },
+  barLabel: {
+    position: 'absolute', top: 385, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  },
+  chFoot: {
+    position: 'absolute', left: CH_L, top: 404, width: CH_W, height: 22,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  chFootT: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.6, color: INK, includeFontPadding: false },
 });
 
+// BAND. There is no camera any more, so design y IS screen y. Measured extremes
+// across every beat, top to bottom:
+//   chart title            240 … 253
+//   "MOST" bar cap         255 … 268
+//   stranger's crown       247   (x 216 on BRIDGE_Y 410 → 410 − 103·1.566)
+//   decider's crown        271   (x 150 on BRIDGE_Y 410 → 410 − 103·1.35)
+//   stamp                  292 … 352
+//   bridge handrail        380
+//   chart footing          404 … 426
+//   bridge deck            411 … 418
+//   bridge figures' ankle joints  417   (they stand ON the deck, not the ground)
+//   THE FIVE tally         444 … 467
+//   fall arrowhead         482 … 493
+//   the five               470 … 500
+//   trolley wheels         438+ … 502
+//   rail                   500 … 502.5
+//   sleepers               502 … 506
+// so [234, 512] holds every pixel with 6 units of margin above and 6 below. The
+// band is 278 tall, which is still WIDTH-limited on a phone stage (923/400 = 2.31 <
+// 647/278 = 2.33), so the scene renders about 2.3× — against roughly 1.04× before,
+// where a full-height letterbox (1.15×) was multiplied by a 0.9× camera.
 export function Ethics6Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics6Scene} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics6Scene} band={[234, 512]} />;
 }

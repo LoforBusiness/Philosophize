@@ -383,5 +383,5 @@ const styles = StyleSheet.create({
 });
 
 export function Epistemology8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology8Scene} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology8Scene} band={[96, 516]} />;
 }

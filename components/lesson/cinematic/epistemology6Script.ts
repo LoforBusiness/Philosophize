@@ -9,28 +9,34 @@ export interface Epi6Beat extends BaseBeat {
   /** Figure gesture. */ p?: number;
   /** The balance of arguments present 0..1. */ bal?: number;
   /** The self-refuting claim block, cracking 0..1. */ crack?: number;
+  /**
+   * Boxes drawn into the route across the top of the stage, 0..3:
+   * EQUAL REASONS → EPOCHE → ATARAXIA. It is the skeptic's whole method as a flow,
+   * written one box at a time as the narration reaches each step.
+   */
+  route?: number;
 }
 
 export const BEATS: Epi6Beat[] = [
   {
-    p: 8, bal: 1, crack: 0,
+    p: 8, bal: 1, crack: 0, route: 0,
     text: 'What if every belief can be doubted? The ancient skeptics took that idea further than Descartes ever did.',
     dur: 3.4,
   },
   {
-    p: 21, bal: 1,
+    p: 21, bal: 1, route: 1,
     text: 'Skepticism asks whether knowledge is possible at all. For every reason to believe something, the skeptic finds an equal reason to doubt it. If the reasons cancel out, how can any belief be secure?',
     cite: 'The skeptic’s challenge',
     dur: 5.2,
   },
   {
-    p: 0, bal: 1,
+    p: 0, bal: 1, route: 3,
     text: 'Pyrrho of Elis met each claim with its opposite, found them equally strong, and refused to decide — epoche, suspension. The result was not despair but ataraxia: peace of mind.',
     cite: 'Pyrrho suspends judgment',
     dur: 5.0,
   },
   {
-    p: 0, bal: 1,
+    p: 0, bal: 1, route: 3,
     quote: {
       id: 'lq-epistemology-knowledge-6-1',
       text: 'To every argument an equal argument is opposed.',
@@ -42,7 +48,7 @@ export const BEATS: Epi6Beat[] = [
     dur: 3.2,
   },
   {
-    p: 22, bal: 1,
+    p: 22, bal: 1, route: 3,
     mc: {
       prompt: 'What did the Pyrrhonist skeptics say suspending judgment leads to?',
       options: [
@@ -57,13 +63,13 @@ export const BEATS: Epi6Beat[] = [
     dur: 1.0,
   },
   {
-    p: 12, bal: 0.3, crack: 1,
+    p: 12, bal: 0.3, crack: 1, route: 3,
     text: 'But total doubt eats itself. If you claim "nothing can be known," is THAT known? The boast seems to refute itself. So most skeptics doubt softly — questioning confidence, not the very possibility of inquiry.',
     cite: 'Doubt that eats itself',
     dur: 5.0,
   },
   {
-    p: 4, crack: 1,
+    p: 4, crack: 1, route: 3,
     mc: {
       prompt: 'A skeptic insists: "I know for certain that nobody can know anything." What’s wrong?',
       options: [

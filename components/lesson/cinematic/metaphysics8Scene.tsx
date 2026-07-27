@@ -252,5 +252,5 @@ const styles = StyleSheet.create({
 });
 
 export function Metaphysics8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics8Scene} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics8Scene} band={[96, 516]} />;
 }

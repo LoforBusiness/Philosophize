@@ -14,18 +14,25 @@ import type { SceneApi } from './CinematicPlayer';
 // COMPOSITION / OCCLUSION CONTRACT
 //   · The figure stands at x = 344 on GROUND = 500, so it spans about x 296–392
 //     and y 353–500 (crown ≈ 361, a little higher on a bobbing gesture).
-//   · The VOID hangs directly ABOVE that figure — centre (344, 292), rim ø84 —
+//   · The VOID hangs directly ABOVE that figure — centre (338, 288), rim ø106 —
 //     so the reaching gestures (24, 35) read as grabbing INTO it, and it never
-//     covers the body.
+//     covers the body (its rim bottoms out at y 343 on its breath, the crown sits
+//     at 361+). At 106 units across it is the one object that must read instantly,
+//     so it is drawn well past the ~90-unit "reads at a glance" floor.
 //   · The LEDGER owns x 14–238, well left of the figure. Its rows are the whole
-//     lesson: what you SAID, and the something it BECAME.
-//   · Nothing is drawn above y = 224 or below the ground line, which is what lets
-//     the player crop to band [218, 508] and render ~2.23× instead of 1.15×.
+//     lesson: what you SAID, and the something it BECAME — closed off by a TALLY
+//     that keeps the score of the trap: every grab counted, no escapes. Three
+//     EMPTY row frames are ruled in from the first beat, so the table reads as a
+//     ledger before anything is written in it and each grab lands in a waiting
+//     slot rather than materialising out of blank paper.
+//   · Nothing is drawn above y = 224 or below the ankle joints at y ≈ 507, which
+//     is what lets the player crop to band [216, 512] and render ~2.19× instead
+//     of the letterboxed 1.15×.
 
 const FIG_X = 344;
-const VOID = { x: 344, y: 292 };
-const VOID_CORE = 66;
-const VOID_RIM = 84;
+const VOID = { x: 338, y: 288 };
+const VOID_CORE = 84;
+const VOID_RIM = 106;
 
 const LED_L = 14;
 const LED_W = 224;
@@ -54,7 +61,9 @@ const TOK = BEATS.map((b) => b.tokens ?? 0);
 const BAR = BEATS.map((b) => b.barred ?? 0);
 const FRZ = BEATS.map((b) => b.frozen ?? 0);
 
-export default function Metaphysics4Scene({ clock, bt, bi }: SceneApi) {
+export default function Metaphysics4Scene({ clock, bt, bi, i }: SceneApi) {
+  const cur = BEATS[i];
+
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -105,7 +114,12 @@ export default function Metaphysics4Scene({ clock, bt, bi }: SceneApi) {
       <Text style={[styles.colHead, { left: CELL_B_L, width: CELL_B_W }]}>IT BECOMES</Text>
       <View style={styles.ledRule} pointerEvents="none" />
 
+      {/* the empty frames first, so a written row always lands INTO a ruled slot */}
+      {ROWS.map((r, k) => <GhostRow key={`g-${r.say}`} S={SCENE} k={k} />)}
       {ROWS.map((r, k) => <Row key={r.say} S={SCENE} k={k} say={r.say} became={r.became} />)}
+
+      {/* the running score: the trap has never once been beaten */}
+      <Text style={styles.ledFoot}>{`${cur.tokens ?? 0} GRABS  ·  0 ESCAPES`}</Text>
 
       {/* the tokens the void keeps handing over */}
       {TOKENS.map((tk, k) => <Token key={k} S={SCENE} tk={tk} k={k} />)}
@@ -130,6 +144,21 @@ export default function Metaphysics4Scene({ clock, bt, bi }: SceneApi) {
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
+    </Animated.View>
+  );
+}
+
+/**
+ * The empty slot a row will be written into. Ruled in from the first beat so the
+ * ledger reads as a real table on the hook, then fades as its row lands in it.
+ */
+function GhostRow({ S, k }: { S: SharedValue<any>; k: number }) {
+  const st = useAnimatedStyle(() => ({ opacity: 1 - ease01(clamp01(S.value.rows - k)) }));
+  return (
+    <Animated.View style={[styles.row, { top: ROW_T[k] }, st]} pointerEvents="none">
+      <View style={styles.ghostA} />
+      <View style={styles.ghostDots} />
+      <View style={styles.ghostB} />
     </Animated.View>
   );
 }
@@ -171,15 +200,36 @@ const styles = StyleSheet.create({
 
   ledTitle: {
     position: 'absolute', left: LED_L, top: 224, width: LED_W,
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
   },
   colHead: {
-    position: 'absolute', top: 244, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.2, color: SOFT,
+    position: 'absolute', top: 243, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12.5, letterSpacing: 1.2, color: SOFT,
+    includeFontPadding: false,
   },
   ledRule: { position: 'absolute', left: LED_L, top: 258, width: LED_W, height: 1.5, backgroundColor: RULE },
+  // Closes the table off like a real ledger's total line.
+  ledFoot: {
+    position: 'absolute', left: LED_L, top: 384, width: LED_W,
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12.5, letterSpacing: 1.2, color: SOFT,
+    includeFontPadding: false,
+  },
 
   row: { position: 'absolute', left: 0, width: STAGE_W, height: ROW_H },
+  // The waiting slot: the same geometry as a written row, ruled rather than inked.
+  ghostA: {
+    position: 'absolute', left: LED_L, top: 0, width: CELL_A_W, height: ROW_H,
+    borderWidth: 1.5, borderColor: RULE, borderRadius: 4,
+  },
+  ghostB: {
+    position: 'absolute', left: CELL_B_L, top: 0, width: CELL_B_W, height: ROW_H,
+    borderWidth: 1.5, borderColor: RULE, borderRadius: 4,
+  },
+  ghostDots: {
+    position: 'absolute', left: ARROW_L, top: ROW_H / 2 - 1, width: ARROW_W - 2, height: 2,
+    backgroundColor: RULE,
+  },
   cellA: {
     position: 'absolute', left: LED_L, top: 0, width: CELL_A_W, height: ROW_H,
     borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: INK,
@@ -220,24 +270,36 @@ const styles = StyleSheet.create({
   },
 
   voidLabel: {
-    position: 'absolute', left: 288, top: 228, width: 112, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    position: 'absolute', left: 282, top: 224, width: 112, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
   },
   voidCore: { position: 'absolute', width: VOID_CORE, height: VOID_CORE, borderRadius: VOID_CORE / 2, backgroundColor: INK },
   voidRim: { position: 'absolute', width: VOID_RIM, height: VOID_RIM, borderRadius: VOID_RIM / 2, borderWidth: 1.5, borderColor: SOFT },
   // Anchored at its LEFT end so the rotate and the scaleX share an origin and the
   // slash draws itself ACROSS the void instead of growing out of its middle. Its
   // length is the core's diameter and its colour is PAPER, so it reads as a stroke
-  // cut through the black disc — the second way, barred.
+  // cut through the black disc — the second way, barred. Left end solved from the
+  // centre: left = 338 − 42·cos24° = 299.63, top = 288 + 42·sin24° − 3 = 302.08.
   slash: {
-    position: 'absolute', left: 315.7, top: 302.1, width: 62, height: 5,
-    backgroundColor: PAPER, borderRadius: 2.5, transformOrigin: '0% 50%',
+    position: 'absolute', left: 299.63, top: 302.08, width: VOID_CORE, height: 6,
+    backgroundColor: PAPER, borderRadius: 3, transformOrigin: '0% 50%',
   },
 });
 
-// Art spans y 224 (the ledger title / void label) to the ground line at 501.5; the
-// void's rim never rises past 248 and the struck claim bottoms out at 440, so this
-// band holds every extreme with 6 units of margin at each end.
+// MEASURED BAND, top and bottom.
+//   TOP    the ledger title and the void label, both at y 224. The void's rim tops
+//          out at 288 − 53×1.05 = 232.4 at the peak of its breath, and the figure's
+//          crown never rises above ~358 even on the reaching gestures (the raised
+//          fists clamp to the arm's reach at y ≈ 367).
+//   BOTTOM the ground line at 501.5, and — the true extreme — the ankle JOINTS,
+//          circles of radius STR.limb·K_FIG/2 = 7.43 centred exactly on GROUND, so
+//          ink reaches y = 507.4. The struck claim bottoms out at 448 mid-entry and
+//          the tokens at 404 on their bob.
+// [216, 512] therefore holds every extreme on every beat with 8 units of margin at
+// the top and 4.6 at the foot, and renders the scene ~2.19× instead of the
+// letterboxed 1.15×. (The stage is only ~5% off the width-limited ceiling of 2.31×,
+// so there is nothing left to win by cropping harder.)
 export function Metaphysics4Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics4Scene} band={[218, 508]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics4Scene} band={[216, 512]} />;
 }

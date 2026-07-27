@@ -52,7 +52,8 @@ const SKY = [
   { x: 166, y: 256 }, { x: 206, y: 298 }, { x: 246, y: 266 },
 ];
 
-// ── the scene-answered question (Q2): four name plates, 232 × 38 each ──────
+// ── the scene-answered question (Q2): four name plates, 232 × 42 each ──────
+// 46 apart, so each plate has a 4-unit gutter and no two borders ever fuse.
 const PLATE_X = 148;
 const PLATE_W = 232;
 const PLATES = [
@@ -238,7 +239,7 @@ const styles = StyleSheet.create({
   },
   plateHit: { position: 'absolute', left: PLATE_X, width: PLATE_W },
   plate: {
-    height: 38, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    height: 42, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },
@@ -251,7 +252,7 @@ const styles = StyleSheet.create({
 // bars, at their largest scale (0.98), reach 33 units out — y 243. The sky dots
 // start at 245. Lowest is the ground rule at 500 plus the figure's ankle joints,
 // which reach ≈ 507. The ladder (316–464), Bacon's line and box (344–500) and the
-// four name plates (318–494) all live inside. Cropping to 280 units instead of 560
+// four name plates (318–498) all live inside. Cropping to 280 units instead of 560
 // puts the scene at the stage's WIDTH limit — about 2.3×, double the letterboxed fit.
 export function Epistemology5Lesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology5Scene} band={[234, 514]} />;

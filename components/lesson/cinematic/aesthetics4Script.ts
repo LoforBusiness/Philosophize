@@ -9,9 +9,10 @@ import type { BaseBeat } from './cinematicKit';
 // the lesson lands, each card is marked — a cross for the two old theories the
 // urinal defeats, a tick for the one that explains it.
 //
-// Prop channels the scene reads: `test` (how many theory cards are pinned up),
-// `verdict` (the marks against them), `signed` (R. Mutt on the readymade) and
-// `art` (the placard the artworld confers).
+// Prop channels the scene reads: `ask` (the wall card that poses the question on
+// the hook, in the slot the theory cards then take), `test` (how many theory cards
+// are pinned up), `verdict` (the marks against them), `signed` (R. Mutt on the
+// readymade) and `art` (the placard the artworld confers).
 //
 // Graded questions are the two from data/.../can-anything-be-art.ts.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -19,6 +20,7 @@ import type { BaseBeat } from './cinematicKit';
 export interface Aes4Beat extends BaseBeat {
   /** Artist gesture. */ a?: number;
   /** Viewer gesture. */ v?: number;
+  /** The "IS THIS ART?" wall card, which the theory cards replace (0/1). */ ask?: number;
   /** How many theory cards are pinned up (0..3). */ test?: number;
   /** The cross/cross/tick marks are struck onto the cards (0/1). */ verdict?: number;
   /** Signature on the readymade (0/1). */ signed?: number;
@@ -27,7 +29,7 @@ export interface Aes4Beat extends BaseBeat {
 
 export const BEATS: Aes4Beat[] = [
   {
-    a: 2, v: 0, test: 0, verdict: 0, signed: 0, art: 0,
+    a: 2, v: 0, ask: 1, test: 0, verdict: 0, signed: 0, art: 0,
     text: 'In 1917, a plain urinal was entered as art. No carving, no painting — just a choice. So what makes something art?',
     dur: 3.6,
   },

@@ -20,8 +20,17 @@ import type { SceneApi } from './CinematicPlayer';
 // halfway through the lesson:
 //   · WHAT IT ASKS OF YOU — two bars: APPLE full, SUNSET empty (disinterest).
 //   · WHO MUST AGREE — one pip for "I like it", eight for "It is beautiful"
-//     (the judgement of taste reaching out for universal assent).
+//     (the judgement of taste reaching out for universal assent). The eight count
+//     THEMSELVES IN, left to right, so assent is watched being gathered.
 // A ripple travels from the figure to a small crowd as the second half opens.
+//
+// Hume gets his own chart in the empty lower-left quarter: a HACK↔MASTER axis
+// with five scattered critics' verdicts that slide together into one tight band
+// near the master end. That convergence IS his standard of taste — taste is
+// personal, yet trained judges keep landing in the same place — and it plays as
+// motion rather than as another sentence in the deck. Once raised it STAYS up for
+// the rest of the lesson: nothing else ever occupies that quarter, and without it
+// the bottom-left third of the stage was blank for the last four beats.
 //
 // CAMERA: none — design space is final space, so the figure stands on GROUND=500
 // with its crown at ~361. Art occupies y 244..508 → band [234, 514].
@@ -56,15 +65,37 @@ const APPLE_CX = 228;
 const APPLE_CY = 440;
 const APPLE_R = 15;
 
+// Hume's standard of taste, in the quarter under the framed sunset that nothing
+// else uses. Clear of the glow rings above (they bottom out at 375) and of the
+// apple's stand to the right (x ≥ 213).
+const CR_L = 26;
+const CR_T = 386;
+const CR_W = 176;
+const CR_H = 66;
+const AX_L = 14;                              // axis, card-relative
+const AX_W = 146;
+const CRIT_FROM = [16, 50, 80, 110, 140];     // five verdicts, all over the scale
+const CRIT_TO = [116, 123, 130, 137, 144];    // …converging on one narrow band
+
+// The ripple is centred just off the SPEAKER, not in the middle of the crowd, so
+// it reads as the claim travelling outward from him to them. Radius 52 keeps its
+// widest ring inside y 400..504 — the band's floor is 514.
 const CROWD_X = [302, 328, 354, 380];
 const RIPPLE_R = 52;
-const RIPPLE_CX = 336;
+const RIPPLE_CX = 272;
 const RIPPLE_CY = 452;
 
 const HPOSE = BEATS.map((b) => b.hpose ?? 0);
 const GLOW = BEATS.map((b) => (b.glow ? 1 : 0));
 const APPLE = BEATS.map((b) => (b.apple ? 1 : 0));
 const CROWD = BEATS.map((b) => (b.crowd ? 1 : 0));
+const CRIT = BEATS.map((b) => (b.critics ? 1 : 0));
+// Only the beat that RAISES the chart runs the convergence; on any later beat it
+// holds converged, so the verdicts never scatter and re-gather on a forward tap.
+const CRITIN = CRIT.map((v, k) => (v === 1 && (k === 0 || CRIT[k - 1] === 0) ? 1 : 0));
+// Same discipline for the assent row: the eight pips only count themselves in on
+// the beat the crowd first appears.
+const CROWDIN = CROWD.map((v, k) => (v === 1 && (k === 0 || CROWD[k - 1] === 0) ? 1 : 0));
 const Q1 = BEATS.map((b) => (b.weigh === 'q1' ? 1 : 0));
 
 function reachApple(t: number): Stance {
@@ -103,6 +134,14 @@ export default function AestheticsScene({ clock, bt, bi, qv }: SceneApi) {
       fig: pose(figS, FIG_X, GROUND, K_FIG, -1, 1),
       appleOn, glowOn, t,
       crowdOn: L(CROWD[p], CROWD[n]),
+      criticsOn: L(CRIT[p], CRIT[n]),
+      // The verdicts slide together once the card has settled, and STAY together
+      // while it fades out — a chart that un-converges on its way off stage would
+      // undo the very point it just made.
+      converge: CRITIN[n] === 1 ? ease01((bt.value - 0.45) / 1.15) : 1,
+      // Seconds since the crowd rose (or a large number if it was already up), so
+      // the eight assent pips can count themselves in one at a time.
+      pipT: CROWDIN[n] === 1 ? bt.value : 9,
     };
   });
 
@@ -116,6 +155,7 @@ export default function AestheticsScene({ clock, bt, bi, qv }: SceneApi) {
       <Glow S={SCENE} off={0.66} />
       <SunsetFrame />
       <Panel S={SCENE} />
+      <Critics S={SCENE} />
       <Crowd S={SCENE} />
       <View style={styles.ground} pointerEvents="none" />
 
@@ -125,6 +165,7 @@ export default function AestheticsScene({ clock, bt, bi, qv }: SceneApi) {
         <View style={styles.appleStem} />
         <View style={styles.apple} />
         <Text style={styles.appleLabel}>APPETITE</Text>
+        <View style={styles.appleLead} />
       </Animated.View>
 
       <Stickman D={DF} k={K_FIG} />
@@ -194,6 +235,28 @@ function Crowd({ S }: { S: SharedValue<any> }) {
   );
 }
 
+// ── Hume: five critics' verdicts converging into a standard ──────────────────
+
+function CriticTick({ S, from, to }: { S: SharedValue<any>; from: number; to: number }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: lerp(from, to, S.value.converge) }] }));
+  return <Animated.View style={[styles.critTick, st]} />;
+}
+
+function Critics({ S }: { S: SharedValue<any> }) {
+  const wrap = useAnimatedStyle(() => ({ opacity: S.value.criticsOn }));
+  return (
+    <Animated.View style={[styles.critCard, wrap]} pointerEvents="none">
+      <Text style={styles.critCap}>STANDARD OF TASTE</Text>
+      {CRIT_FROM.map((f, k) => <CriticTick key={f} S={S} from={f} to={CRIT_TO[k]} />)}
+      <View style={styles.critAxis} />
+      <View style={[styles.critEnd, { left: AX_L }]} />
+      <View style={[styles.critEnd, { left: AX_L + AX_W - 2 }]} />
+      <Text style={[styles.critEndLabel, { left: 12 }]}>HACK</Text>
+      <Text style={[styles.critEndLabel, { right: 12 }]}>MASTER</Text>
+    </Animated.View>
+  );
+}
+
 // ── the panel: two charts, swapped by the lesson's second half ───────────────
 
 function Bar({ top, label, fill, note }: { top: number; label: string; fill: number; note?: string }) {
@@ -208,12 +271,24 @@ function Bar({ top, label, fill, note }: { top: number; label: string; fill: num
   );
 }
 
-function Pips({ top, n }: { top: number; n: number }) {
+// One pip = one person the claim reaches for. The eight-pip row counts itself in
+// left to right on the beat the crowd arrives, so "it is beautiful" is SEEN
+// gathering assent rather than just being labelled with a number.
+function Pip({ S, k, stagger }: { S: SharedValue<any>; k: number; stagger: boolean }) {
+  const st = useAnimatedStyle(() => {
+    if (!stagger) return { opacity: 1, transform: [{ scale: 1 }] };
+    const u = ease01((S.value.pipT - 0.55 - k * 0.085) / 0.24);
+    return { opacity: u, transform: [{ scale: 0.5 + 0.5 * u }] };
+  });
+  return <Animated.View style={[styles.pip, st]} />;
+}
+
+function Pips({ S, top, n, stagger }: { S: SharedValue<any>; top: number; n: number; stagger?: boolean }) {
   const out: number[] = [];
   for (let k = 0; k < n; k++) out.push(k);
   return (
     <View style={{ position: 'absolute', left: 12, top, flexDirection: 'row' }}>
-      {out.map((k) => <View key={k} style={styles.pip} />)}
+      {out.map((k) => <Pip key={k} S={S} k={k} stagger={!!stagger} />)}
     </View>
   );
 }
@@ -233,9 +308,9 @@ function Panel({ S }: { S: SharedValue<any> }) {
       <Animated.View style={[StyleSheet.absoluteFill, second]}>
         <Text style={styles.panelCap}>WHO MUST AGREE?</Text>
         <Text style={[styles.rowLabel, { top: 26 }]}>“I LIKE IT”</Text>
-        <Pips top={42} n={1} />
+        <Pips S={S} top={42} n={1} />
         <Text style={[styles.rowLabel, { top: 62 }]}>“IT IS BEAUTIFUL”</Text>
-        <Pips top={78} n={8} />
+        <Pips S={S} top={78} n={8} stagger />
       </Animated.View>
     </View>
   );
@@ -278,11 +353,32 @@ const styles = StyleSheet.create({
     position: 'absolute', left: APPLE_CX - 2, top: APPLE_CY + APPLE_R - 2, width: 4, height: GROUND - APPLE_CY - APPLE_R + 2,
     backgroundColor: SOFT,
   },
-  // Callout to the LEFT of the stand: anything centred under the apple would run
-  // into the figure's shins, which occupy x 248..276 all the way to the ground.
+  // Callout LOW and to the LEFT of the stand, with a leader line running into the
+  // post so it still reads as a label rather than a floating word. It cannot sit
+  // centred under the apple (the figure's shins occupy x 248..276 all the way to
+  // the ground) nor beside it (that band belongs to Hume's chart, y 386..452).
   appleLabel: {
-    position: 'absolute', left: 138, top: 431, width: 72, textAlign: 'right',
+    position: 'absolute', left: 128, top: 468, width: 78, textAlign: 'right',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.8, color: SOFT, includeFontPadding: false,
+  },
+  appleLead: { position: 'absolute', left: 210, top: 473, width: 16, height: 1.5, backgroundColor: SOFT },
+
+  critCard: {
+    position: 'absolute', left: CR_L, top: CR_T, width: CR_W, height: CR_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+  },
+  critCap: {
+    position: 'absolute', left: 12, top: 7,
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+  },
+  // Verdict marks stand ON the axis, so their spread reads as disagreement and
+  // their huddle reads as a verdict.
+  critTick: { position: 'absolute', left: 0, top: 22, width: 2.5, height: 18, backgroundColor: INK, borderRadius: 1 },
+  critAxis: { position: 'absolute', left: AX_L, top: 40, width: AX_W, height: 2, backgroundColor: INK },
+  critEnd: { position: 'absolute', top: 35, width: 2, height: 8, backgroundColor: INK },
+  critEndLabel: {
+    position: 'absolute', top: 46,
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
 
   ripple: {
@@ -325,8 +421,14 @@ const styles = StyleSheet.create({
 });
 
 // Extremes: the chart panel's top edge (244) and the frame at 246 down to the
-// figure's ankle joints (~507). The glow rings reach y 255..375 at full scale and
-// the ripple rings y 400..504, both inside the slice.
+// figure's ankle joints (~507). The glow rings reach y 255..375 at full scale,
+// the ripple rings y 400..504, Hume's chart y 386..452, the crowd y 440..500 and
+// the apple's callout y 468..480 — all inside the slice, with the figure's crown
+// at ~361 sitting in the gap between the panel's floor (348) and Hume's card.
+//
+// 280 units is also the tightest band that still pays: the stage region is about
+// 923×647 device px, so 647/280 ≈ 923/400. Crop harder and the WIDTH becomes the
+// limit — the art stops growing while the risk of clipping keeps rising.
 export function AestheticsLesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={AestheticsScene} band={[234, 514]} />;
 }

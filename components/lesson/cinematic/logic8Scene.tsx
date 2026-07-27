@@ -346,5 +346,5 @@ const styles = StyleSheet.create({
 });
 
 export function Logic8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic8Scene} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic8Scene} band={[96, 516]} />;
 }

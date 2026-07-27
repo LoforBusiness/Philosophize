@@ -130,6 +130,18 @@ const LEGEND = BEATS.map((b, i) => {
   return i === FIRST_A2 ? 1 : 2;
 });
 
+// ── the builder's plan ────────────────────────────────────────────────────────
+// Act 1 was the thinnest picture in the lesson: two figures and up to three BLANK
+// bricks on bare paper. The master now works to a plan pinned up above the site —
+// a dashed schematic of the finished shape whose outlines INK IN as each real stone
+// is laid, so the opening beats carry a small progress diagram (where this is going,
+// and how far along it is) instead of empty space.
+//
+// It lives in the strip the legend will later occupy (the legend does not exist yet
+// in act 1) and, exactly like the legend, steps aside on any beat that raises a
+// speech bubble, because a bubble is drawn in the same strip.
+const PLAN = BEATS.map((b) => (b.act === 1 && !b.say ? 1 : 0));
+
 // ── camera ─────────────────────────────────────────────────────────────────
 interface Shot { s: number; cx: number; cy: number; tr: number }
 function shotFor(b: Beat): Shot {
@@ -310,7 +322,18 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
     const grow = ease01(bt.value / 0.7);
     const cnt = LEGEND[n], was = LEGEND[p];
     const row = (k: number) => { 'worklet'; return k < was ? 1 : k < cnt ? grow : 0; };
-    return { on: cnt > 0 ? (was > 0 ? 1 : here) : was > 0 ? away : 0, r0: row(0), r1: row(1) };
+    // The plan's three outlines ink in one at a time: a stone already laid on the
+    // PREVIOUS beat is solid from frame one, the one laid on THIS beat draws on.
+    const inked = (on: number[]) => {
+      'worklet';
+      return n > 0 && on[n - 1] ? 1 : on[n] ? grow : 0;
+    };
+    return {
+      on: cnt > 0 ? (was > 0 ? 1 : here) : was > 0 ? away : 0,
+      r0: row(0), r1: row(1),
+      planOn: PLAN[n] ? (PLAN[p] ? 1 : here) : PLAN[p] ? away : 0,
+      ink0: inked(P1_ON), ink1: inked(P2_ON), ink2: inked(KEY_ON),
+    };
   });
 
   // ── advance / answer ─────────────────────────────────────────────────────────
@@ -381,6 +404,9 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
 
                   {/* the signpost reference card, outside the camera so it stays crisp */}
                   <Legend S={LEG} />
+
+                  {/* act 1's pinned-up plan, in the same strip and the same style */}
+                  <Plan S={LEG} />
 
                   {/* speech bubbles at fixed stage spots, above the figures */}
                   {beat.say?.map((s) => (
@@ -533,6 +559,33 @@ function Legend({ S }: { S: SharedValue<any> }) {
           </View>
         </Animated.View>
       ))}
+    </Animated.View>
+  );
+}
+
+// ── the builder's plan ────────────────────────────────────────────────────────
+// A dashed schematic of the finished shape — two base stones and the one they hold
+// up — with a solid outline fading in over each ghost as the real stone is laid. It
+// occupies exactly the legend's footprint (left 116 … 284, top 118 … 180), which is
+// literal, un-zoomed stage space well inside the [110, 434] band, and it carries
+// pointerEvents="none" so it can never swallow the tap that advances the beat.
+function Plan({ S }: { S: SharedValue<any> }) {
+  const card = useAnimatedStyle(() => ({ opacity: S.value.planOn }));
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const k0 = useAnimatedStyle(() => ({ opacity: S.value.ink0 }));
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const k1 = useAnimatedStyle(() => ({ opacity: S.value.ink1 }));
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const k2 = useAnimatedStyle(() => ({ opacity: S.value.ink2 }));
+  return (
+    <Animated.View style={[styles.plan, card]} pointerEvents="none">
+      <Text style={styles.planLabel} numberOfLines={1}>THE PLAN</Text>
+      <View style={[styles.planGhost, styles.planKey]} />
+      <Animated.View style={[styles.planInk, styles.planKey, k2]} />
+      <View style={[styles.planGhost, styles.planBaseL]} />
+      <Animated.View style={[styles.planInk, styles.planBaseL, k0]} />
+      <View style={[styles.planGhost, styles.planBaseR]} />
+      <Animated.View style={[styles.planInk, styles.planBaseR, k1]} />
     </Animated.View>
   );
 }
@@ -696,6 +749,25 @@ const styles = StyleSheet.create({
   legArrow: { fontFamily: 'Inter_700Bold', fontSize: 13, color: SOFT, marginHorizontal: 8, includeFontPadding: false },
   legTag: { width: 86, height: 20, borderRadius: 3, backgroundColor: INK, alignItems: 'center', justifyContent: 'center' },
   legTagText: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.1, color: PAPER, includeFontPadding: false },
+
+  // ── the builder's plan (act 1 only) ────────────────────────────────────────
+  // Same top edge and height as the legend, so the two cards hand over in place.
+  // Inner box is 164 wide; the base pair (46 + 4 + 46 = 96) is centred at 84 and
+  // the keystone sits centred above it.
+  plan: {
+    position: 'absolute', left: 116, top: 118, width: 168, height: 62,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+  },
+  planLabel: {
+    position: 'absolute', left: 0, right: 0, top: 5, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.5, color: SOFT,
+    includeFontPadding: false,
+  },
+  planGhost: { position: 'absolute', borderWidth: 1.5, borderColor: RULE, borderRadius: 2, borderStyle: 'dashed' },
+  planInk: { position: 'absolute', borderWidth: 1.5, borderColor: INK, borderRadius: 2 },
+  planKey: { left: 61, top: 20, width: 46, height: 13 },
+  planBaseL: { left: 36, top: 36, width: 46, height: 13 },
+  planBaseR: { left: 86, top: 36, width: 46, height: 13 },
 
   deck: { flex: 50, paddingHorizontal: 24, justifyContent: 'flex-start', overflow: 'hidden' },
   fadeWrap: { position: 'relative' },

@@ -20,6 +20,8 @@ export interface AestheticsBeat extends BaseBeat {
   apple?: boolean;
   /** A crowd the judgement of taste reaches out to. */
   crowd?: boolean;
+  /** Hume's true critics, converging on a standard of taste. */
+  critics?: boolean;
   /** This beat's answer drives the scene. */
   weigh?: 'q1' | 'q2';
 }
@@ -41,6 +43,7 @@ export const BEATS: AestheticsBeat[] = [
   {
     hpose: 4,
     glow: true,
+    critics: true,
     text: 'Hume admitted beauty lives "merely in the mind." Yet we still rank a master above a hack and feel right. His fix: a standard set by true critics, refined over time.',
     cite: 'Hume, Of the Standard of Taste, 1757',
     dur: 4.6,
@@ -48,6 +51,11 @@ export const BEATS: AestheticsBeat[] = [
   {
     hpose: 0,
     glow: true,
+    // Hume's chart, once raised, STAYS raised for the rest of the lesson. It sits
+    // in the lower-left quarter, which nothing else ever uses, and leaving it up
+    // both keeps the summary's second bullet on screen and stops that quarter of
+    // the stage going blank for the last four beats.
+    critics: true,
     quote: {
       id: 'lq-aesthetics-aesthetics-1-1',
       text: 'The beautiful is that which pleases universally without a concept.',
@@ -62,6 +70,7 @@ export const BEATS: AestheticsBeat[] = [
     hpose: 7,
     glow: true,
     apple: true,
+    critics: true,
     weigh: 'q1',
     mc: {
       prompt: 'For Kant, what makes aesthetic pleasure differ from the pleasure of eating?',
@@ -80,12 +89,14 @@ export const BEATS: AestheticsBeat[] = [
   {
     hpose: 1,
     crowd: true,
+    critics: true,
     text: 'And you rarely stop at "I like this." You say "this is beautiful" — as if it were a fact about the thing. Kant: a feeling that quietly demands everyone agree.',
     dur: 4.4,
   },
   {
     hpose: 1,
     crowd: true,
+    critics: true,
     weigh: 'q2',
     mc: {
       prompt: '"Beauty is just personal taste, so calling a sunset beautiful asks nothing of anyone else." Pick the best response.',

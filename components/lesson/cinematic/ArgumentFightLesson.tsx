@@ -78,10 +78,15 @@ const K_FIG = 1.35;                       // stage units per rig unit
 //   ring crown           y 359, s 1.54             → 279
 //   stack crown          y 359, s 1.46             → 290
 //   board-beat crown     y 359, s 1.21             → 325
+//   ring turnbuckles     y 418, s 1.54             → 370
 //   ground rule          y 501                     → 497.5
-//   the mat edge         y 506, s 1.54             → 505
+//   mat edge + caps      y 507.5, s 1.54           → 507.6
+//   ring post feet       y 507.5, s 1.54           → 507.6
 //   ankle joints         y 507, s 1.58             → 508
 // so [136, 516] holds every pixel any beat can draw, with ~8 units at each end.
+// The band cannot usefully be tighter: 144 is a literal, un-zoomed graphic edge
+// (frame / scoreboard) and 508 is the ankle joint under the closest shot, so the
+// art genuinely spans 364 of the 380.
 const BAND_T = 136;
 const BAND_B = 516;
 const BAND_H = BAND_B - BAND_T;
@@ -97,6 +102,15 @@ const PLATE_Y = 156;
 
 /** Where the ground line lands on screen — the same for every shot, by design. */
 const GROUND_Y = 496;
+
+// The ring: the mat runs RING_L…RING_R and a corner post stands on each end. Both
+// ends are pulled in from the old 74/326 so that at the ring's 1.54× the posts and
+// their turnbuckles land at screen x 15 and 385 — framing the fight instead of
+// being sliced in half by the edge of the stage.
+const RING_L = 80;
+const RING_R = 320;
+/** Post top. Waist-high on the boxers (their crowns land at 279), so it frames without crowding. */
+const POST_T = 420;
 
 const COMPLETION_XP = 5;                  // matches LessonRunner
 const XFADE = 420;                        // ms — the beat-to-beat cross-fade (deliberately unhurried)
@@ -517,7 +531,22 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
               <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
                 {/* everything inside here moves with the camera */}
                 <Animated.View style={[styles.scene, camStyle]}>
-                  <Animated.View style={[styles.ring, ringStyle]} />
+                  {/* THE RING. Act 1 used to be two figures on a bare rule, which read
+                      as "nowhere". It is now a raised canvas: a front edge with an end
+                      cap at each side (so the mat has thickness) and a corner post
+                      standing on each end. Everything is RULE weight and sits behind
+                      the boxers, so it builds the place without competing with them —
+                      and no rope, because a rope at head height rules a line straight
+                      through both faces (that was the earlier version's mistake). */}
+                  <Animated.View style={[StyleSheet.absoluteFill, ringStyle]} pointerEvents="none">
+                    <View style={styles.matEdge} />
+                    <View style={[styles.matCap, { left: RING_L }]} />
+                    <View style={[styles.matCap, { left: RING_R }]} />
+                    <View style={[styles.post, { left: RING_L - 1.5 }]} />
+                    <View style={[styles.post, { left: RING_R - 1.5 }]} />
+                    <View style={[styles.turnbuckle, { left: RING_L - 6.5 }]} />
+                    <View style={[styles.turnbuckle, { left: RING_R - 6.5 }]} />
+                  </Animated.View>
                   <View style={styles.ground} />
                   {shot.rOn > 0 ? <Stickman D={DR} k={K_FIG} gloves={beat.act === 1} /> : null}
                   {shot.bOn > 0 ? <Stickman D={DB} k={K_FIG} gloves={beat.act === 1} /> : null}
@@ -906,6 +935,13 @@ function Choices({
       {options.map((o) => {
         const chosen = picked === o.id;
         const reveal = answered && o.correct;
+        // Once answered, drop the options that are neither the pick nor the answer.
+        // The deck is a FIXED 46% of the body (so the stage can never resize on a
+        // tap), and a three-line prompt + four options + a four-line explanation
+        // overruns it — the explanation was being clipped off the bottom on the
+        // longer questions. Collapsing to "what you chose" + "the right answer"
+        // always fits, and keeps the takeaway on screen. Same rule as lesson 2.
+        if (answered && !chosen && !o.correct) return null;
         return (
           <Pressable
             key={o.id}
@@ -915,7 +951,6 @@ function Choices({
               styles.opt,
               reveal && styles.optRight,
               chosen && !o.correct && styles.optWrong,
-              answered && !reveal && !chosen && styles.optFade,
               pressed && !answered && { opacity: 0.75 },
             ]}
           >
@@ -993,13 +1028,17 @@ const styles = StyleSheet.create({
   deckTall: { flex: 92, justifyContent: 'center' },
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 40, right: 40, top: GROUND, height: 1.5, backgroundColor: RULE },
-  // The mat edge, BELOW the ground line. An earlier version drew a rope across
-  // the ring at head height, which on a real screen read as a line ruled straight
-  // through both boxers' heads rather than as a rope behind them.
-  // Only 6 units below the ground line now, not 11: at the ring's 1.42× that is
-  // the last thing the band has to hold, and 11 pushed it past the crop.
-  ring: {
-    position: 'absolute', left: 74, right: 74, top: GROUND + 6, height: 1.5,
+  // The mat's FRONT edge, 6 units below the ground line (not 11: at the ring's
+  // 1.54× that is the last thing the band has to hold, and 11 pushed it past the
+  // crop). The two caps close it into a slab; the posts stand on the ends.
+  matEdge: {
+    position: 'absolute', left: RING_L, width: RING_R - RING_L, top: GROUND + 6, height: 1.5,
+    backgroundColor: RULE,
+  },
+  matCap: { position: 'absolute', width: 1.5, top: GROUND, height: 7.5, backgroundColor: RULE },
+  post: { position: 'absolute', width: 3, top: POST_T, height: GROUND + 7.5 - POST_T, backgroundColor: RULE },
+  turnbuckle: {
+    position: 'absolute', width: 13, top: POST_T - 2, height: 6, borderRadius: 2,
     backgroundColor: RULE,
   },
 
@@ -1084,7 +1123,6 @@ const styles = StyleSheet.create({
   optRight: { borderColor: INK, backgroundColor: INK },
   optRightText: { color: PAPER, fontFamily: 'Inter_700Bold' },
   optWrong: { borderColor: SOFT, opacity: 0.55 },
-  optFade: { opacity: 0.4 },                    // the un-picked, un-correct options recede
   optText: { fontFamily: 'Inter_400Regular', fontSize: 14.5, color: INK, lineHeight: 20 },
   explain: { marginTop: 4, borderLeftWidth: 2, borderLeftColor: INK, paddingLeft: 12, paddingVertical: 2 },
   explainHead: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.2, color: INK, marginBottom: 4 },

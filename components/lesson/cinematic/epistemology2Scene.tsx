@@ -26,9 +26,16 @@ import type { SceneApi } from './CinematicPlayer';
 // audit, the horned demon (now with a tail) and the doubter, whose head carries
 // the surviving-self halo.
 //
+// Between them, on the floor, the RUIN: beat 1 says Descartes "rebuilt knowledge
+// from the rubble", so the rubble is drawn. Fallen slabs ink in as the doubt meter
+// rises — the wreckage of everything the demon counterfeited — around one plinth
+// that never falls and, when the surviving self lights, is inscribed I AM.
+//
 // Composition rule: the audit ends at y 335; the demon's horn tips reach ~353 and
-// the doubter's halo ~345, so nothing above ever collides with a figure. The old
-// static camera transform is gone — the band does the zooming now.
+// the doubter's halo ~345, so nothing above ever collides with a figure. On the
+// floor, the ruin lives in x 138…248 at y ≥ 452, while the lowest hand either
+// figure ever throws is ~450 — so no hand can ever cross it. The old static camera
+// transform is gone — the band does the zooming now.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DOUBT_X = 272;
@@ -53,9 +60,19 @@ const ROW_T = [214, 245, 276, 307];
 // where the narration says every sight, every memory and even 2 + 3 = 5 could be
 // a planted lie. "I EXIST" has no threshold: nothing can strike it.
 const BELIEFS = [
-  { text: 'EVERYTHING I SEE', th: 0.28, strike: 124 },
-  { text: 'MY MEMORIES', th: 0.40, strike: 96 },
-  { text: '2 + 3 = 5', th: 0.52, strike: 64 },
+  { text: 'EVERYTHING I SEE', th: 0.28, strike: 132 },
+  { text: 'MY MEMORIES', th: 0.40, strike: 100 },
+  { text: '2 + 3 = 5', th: 0.52, strike: 70 },
+];
+
+// The rubble field. Each slab is authored where it LANDED, tilted, so the heap
+// reads as masonry that has already come down rather than as tidy boxes. They ink
+// in together as the meter climbs past 0.15 → 0.5.
+const RUBBLE = [
+  { left: 138, top: 486, w: 34, h: 12, rot: '-6deg' },
+  { left: 146, top: 473, w: 22, h: 10, rot: '8deg' },
+  { left: 218, top: 485, w: 30, h: 12, rot: '5deg' },
+  { left: 224, top: 472, w: 16, h: 9, rot: '-13deg' },
 ];
 
 export default function Epistemology2Scene({ clock, bt, bi }: SceneApi) {
@@ -105,6 +122,10 @@ export default function Epistemology2Scene({ clock, bt, bi }: SceneApi) {
     };
   });
   const survive = useAnimatedStyle(() => ({ opacity: SCENE.value.glow }));
+  // The rubble inks in as the meter climbs — the wreckage of the faked beliefs.
+  const fallen = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.doubt - 0.15) / 0.35) }));
+  // The one plinth left standing is inscribed only when the surviving self lights.
+  const inscribed = useAnimatedStyle(() => ({ opacity: SCENE.value.glow }));
 
   return (
     <Animated.View style={styles.scene} pointerEvents="none">
@@ -131,6 +152,24 @@ export default function Epistemology2Scene({ clock, bt, bi }: SceneApi) {
 
       {/* ── the stage floor and the two figures ───────────────────────────── */}
       <View style={styles.ground} />
+
+      {/* the ruin: what the demon brought down, and the one thing it could not */}
+      <Animated.View style={[StyleSheet.absoluteFill, fallen]} pointerEvents="none">
+        {RUBBLE.map((r) => (
+          <View
+            key={r.left}
+            style={[
+              styles.slab,
+              { left: r.left, top: r.top, width: r.w, height: r.h, transform: [{ rotate: r.rot }] },
+            ]}
+          />
+        ))}
+      </Animated.View>
+      <View style={styles.plinthCap} />
+      <View style={styles.plinth} />
+      <Animated.View style={[styles.plinthOn, inscribed]}>
+        <Text style={styles.plinthText}>I AM</Text>
+      </Animated.View>
 
       <Animated.View style={[styles.anchor, halo]}>
         <View style={styles.haloOuter} />
@@ -195,11 +234,13 @@ const styles = StyleSheet.create({
 
   eyeL: {
     position: 'absolute', left: LIST_L, top: EYE_T,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.2, color: SOFT,
+    includeFontPadding: false,
   },
   eyeR: {
     position: 'absolute', left: LIST_L, top: EYE_T, width: LIST_W, textAlign: 'right',
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.2, color: SOFT,
+    includeFontPadding: false,
   },
   meter: {
     position: 'absolute', left: LIST_L, top: METER_T, width: LIST_W, height: METER_H,
@@ -217,15 +258,19 @@ const styles = StyleSheet.create({
   },
   belief: {
     position: 'absolute', left: 14, top: 4,
-    fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 17, letterSpacing: 0.3, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 18, letterSpacing: 0.3, color: INK,
+    includeFontPadding: false,
   },
-  cut: { position: 'absolute', left: 12, height: 2, backgroundColor: INK, transformOrigin: '0% 50%' },
-  cutFaint: { position: 'absolute', left: 14, height: 1.4, backgroundColor: SOFT, transformOrigin: '0% 50%' },
+  cut: { position: 'absolute', left: 12, height: 2.2, backgroundColor: INK, transformOrigin: '0% 50%' },
+  cutFaint: { position: 'absolute', left: 14, height: 1.5, backgroundColor: SOFT, transformOrigin: '0% 50%' },
   chip: {
-    position: 'absolute', left: LIST_L + LIST_W - 95, width: 76, height: 18,
+    position: 'absolute', left: LIST_L + LIST_W - 100, width: 84, height: 20,
     backgroundColor: INK, borderRadius: 2, alignItems: 'center', justifyContent: 'center',
   },
-  chipText: { fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 12, letterSpacing: 1.2, color: PAPER },
+  chipText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 1.2, color: PAPER,
+    includeFontPadding: false,
+  },
 
   surviveRow: {
     position: 'absolute', left: -1.5, top: -1.5, right: -1.5, bottom: -1.5,
@@ -233,13 +278,36 @@ const styles = StyleSheet.create({
   },
   beliefOn: {
     position: 'absolute', left: 15.5, top: 5.5,
-    fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 17, letterSpacing: 0.3, color: PAPER,
+    fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 18, letterSpacing: 0.3, color: PAPER,
+    includeFontPadding: false,
   },
   chipOut: {
-    position: 'absolute', left: LIST_W - 93.5, top: 5.5, width: 76, height: 18,
+    position: 'absolute', left: LIST_W - 98.5, top: 5.5, width: 84, height: 20,
     borderWidth: 1.2, borderColor: PAPER, borderRadius: 2, alignItems: 'center', justifyContent: 'center',
   },
-  chipOutText: { fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 12, letterSpacing: 1.2, color: PAPER },
+  chipOutText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 1.2, color: PAPER,
+    includeFontPadding: false,
+  },
+
+  // ── the ruin on the floor ────────────────────────────────────────────────
+  slab: { position: 'absolute', borderWidth: 1.5, borderColor: SOFT, borderRadius: 1.5, backgroundColor: PAPER },
+  plinthCap: {
+    position: 'absolute', left: 172, top: 452, width: 46, height: 6, borderRadius: 1.5,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PAPER,
+  },
+  plinth: {
+    position: 'absolute', left: 176, top: 458, width: 38, height: 42,
+    borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
+  },
+  plinthOn: {
+    position: 'absolute', left: 176, top: 458, width: 38, height: 42,
+    backgroundColor: INK, alignItems: 'center', justifyContent: 'center',
+  },
+  plinthText: {
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 0.8, color: PAPER,
+    includeFontPadding: false,
+  },
 
   haloOuter: { position: 'absolute', left: -34, top: -34, width: 68, height: 68, borderRadius: 34, borderWidth: 2, borderColor: INK },
   haloInner: { position: 'absolute', left: -22, top: -22, width: 44, height: 44, borderRadius: 22, borderWidth: 1.2, borderColor: SOFT },
@@ -253,9 +321,15 @@ const styles = StyleSheet.create({
   tailFork: { position: 'absolute', width: 9, height: 2, backgroundColor: INK, transformOrigin: '0% 50%' },
 });
 
-// BAND. Topmost ink is the meter's eyebrow at y 178; the lowest is the ground line
-// at 501.5. The audit stops at 335, the demon's horn tips reach ~353 and the
-// doubter's halo ~345 at their highest, so nothing is clipped and nothing collides.
+// BAND. Measured against every beat, not just the first.
+//   top    · the meter's eyebrow at 178 (the FAKED chips pop from scale 1.3 but at
+//            opacity 0, and never rise above 216), so 172 leaves 6 units of air.
+//   bottom · the ankle JOINT is a circle of radius STR.limb/2 × K_FIG = 7.4 drawn
+//            centred on GROUND, so a planted foot inks to 507.4 — lower than the
+//            fallen slabs (~500) or the ground rule (501.5). 512 clears it by 4.6.
+// The audit stops at 335; the demon's horn tips reach ~353 (head centre − 32) and
+// the doubter's halo ~345 at their highest, both clear of the last row. The ruin
+// occupies x 138…248 on the floor, inside the corridor neither figure can reach.
 export function Epistemology2Lesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology2Scene} band={[172, 512]} />;
 }
