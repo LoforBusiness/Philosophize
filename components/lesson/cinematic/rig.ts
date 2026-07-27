@@ -861,6 +861,22 @@ export function climb(u: number): Stance {
 
 // ── transform bundles for the View renderer ──────────────────────────────────
 
+/**
+ * The LAYOUT width of a bone View, before `scaleX` stretches it to length.
+ *
+ * It used to be 1, and that single pixel is why the figure's joints were visible.
+ * A 1×thick View scaled up by 150 is rasterised from a one-pixel-wide source, and
+ * the resulting edges do not land where the maths says they should — by a pixel or
+ * two, which is enough to open a sharp white nick between a bone's squared-off end
+ * and the round joint that is supposed to cap it. Every elbow, knee, wrist and
+ * ankle had one, and a nick in a silhouette is exactly what the eye reads as "a
+ * joint". Starting from a wide source means the scale factor is near 1 and the
+ * edges land true, so the bone and its cap fuse into one smooth shape.
+ *
+ * `Stickman.tsx` must use this as its bone width; the two are a matched pair.
+ */
+export const BONE_SRC = 100;
+
 export type XF = any[];
 export interface Bundle {
   opacity: number;
@@ -899,7 +915,9 @@ export function bundle(j: Joints, k: number, opacity: number): Bundle {
     return [
       { translateX: a.x }, { translateY: a.y },
       { rotate: `${Math.atan2(b.y - a.y, b.x - a.x) * DEG}deg` },
-      { scaleX: Math.hypot(b.x - a.x, b.y - a.y) },
+      // Divided by the bone's source width — see BONE_SRC. Stretching a
+      // one-pixel-wide View is what put a visible nick at every joint.
+      { scaleX: Math.hypot(b.x - a.x, b.y - a.y) / BONE_SRC },
     ];
   };
   const at = (p: P2): XF => { 'worklet'; return [{ translateX: p.x }, { translateY: p.y }]; };

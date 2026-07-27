@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { View, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
-import { STR, type Bundle } from './rig';
+import { BONE_SRC, STR, type Bundle } from './rig';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Draws one figure from a Bundle of transform arrays, as native RN Views.
@@ -46,7 +46,11 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
       position: 'absolute',
       left: 0,
       top: -thick / 2,
-      width: 1,
+      // BONE_SRC wide, not 1 — and `bundle` divides its scaleX by the same
+      // constant, so the drawn length is unchanged. See the note on BONE_SRC in
+      // rig.ts: stretching a one-pixel-wide View is what left a nick at every
+      // joint. The two must be changed together.
+      width: BONE_SRC,
       height: thick,
       backgroundColor: color,
       transformOrigin: '0% 50%',
@@ -60,32 +64,32 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
       borderRadius: r,
       backgroundColor: color,
     });
-    // JOINTS MUST OVERLAP THEIR BONES, NOT SIT TANGENT TO THEM.
+    // A JOINT IS EXACTLY AS WIDE AS THE BONE IT CAPS. NOT ONE UNIT MORE.
     //
-    // A bone is a butt-capped rectangle and a joint dot was drawn at exactly half
-    // the bone's thickness, so the circle only touched the rectangle's edges — it
-    // never covered them. Every junction was therefore a hairline seam waiting for
-    // a rounding error, and at the pelvis, where a 12-wide torso meets two 11-wide
-    // thighs fanning out from ±1, it opened into a visible notch: the figure read
-    // as a torso and a pair of legs rather than one body. Enlarging the stages made
-    // it plain. `weld` is the overlap that closes it — small enough to be invisible
-    // as a bulge, large enough that no joint can ever come apart.
+    // A bone is a squared-off rectangle of half-thickness r, so its end corners sit
+    // exactly r from the joint. A circle of radius r centred there is tangent to
+    // both bones' outer edges, and the union is a true capsule — a smooth limb with
+    // a rounded bend and no seam. Any radius LARGER than r stops being a cap and
+    // becomes a bead threaded onto the limb: a step in the silhouette at every
+    // elbow, knee, wrist and ankle. That is what "you can see the joints" means,
+    // and a previous attempt to insure against hairline seams by widening these to
+    // r + 0.6 is precisely what caused it. The seams it was insuring against were
+    // never a geometry problem — they were the one-pixel bone source, fixed at
+    // BONE_SRC in rig.ts.
     //
-    // The pelvis needs slightly more than the rest, but only slightly. A dot at the
-    // torso's half-width (6) leaves the thigh corners poking out, because the thighs
-    // hang off hips at ±1 with a half-width of 5.5 and so reach ±6.5 — those exposed
-    // corners are the notch. 0.9 covers them and no more. It is tempting to weld the
-    // pelvis hard, but anything near 1.7 renders as a ball at the hip and the figure
-    // reads pot-bellied once the stage is scaled up.
-    const weld = 0.6 * k;
+    // The pelvis is the torso's own half-width for the same reason. The thighs hang
+    // off hips at ±1 with a half-width of 5.5, so their corners reach ±6.5 against
+    // the torso's 6 and overhang it by half a unit — well under a pixel on a phone,
+    // and a slightly wider hip reads as anatomy rather than as a defect. Bulging the
+    // dot to cover them puts a ball on the hip and the figure reads pot-bellied.
     return {
       limbBone: boneBase(limb),
       torsoBone: boneBase(torso),
-      joint: dotBase(limb / 2 + weld),
-      torsoJoint: dotBase(torso / 2 + weld),
-      pelvis: dotBase(torso / 2 + 0.9 * k),
+      joint: dotBase(limb / 2),
+      torsoJoint: dotBase(torso / 2),
+      pelvis: dotBase(torso / 2),
       head: dotBase(headR),
-      fist: dotBase(gloves ? gloveR : limb / 2 + weld),
+      fist: dotBase(gloves ? gloveR : limb / 2),
     };
   }, [k, color, gloves]);
 
