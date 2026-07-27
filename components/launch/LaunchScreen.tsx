@@ -13,24 +13,31 @@ import Animated, {
   runOnJS,
   type SharedValue,
 } from 'react-native-reanimated';
-import { INK_SCENES } from '@/components/lesson/inkScenes';
+import { STAGE_W, STAGE_H } from '@/components/lesson/cinematic/rig';
+import { LAUNCH_SCENES, SceneArt } from './launchScenes';
+import LaunchFigure from './LaunchFigure';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
+// The launch screen is now always DAYLIGHT: ink line art on paper, one palette,
+// no per-scene light/dark mode.
+//
+// That is a readability fix, not a style preference. The old scenes each painted
+// their own full-bleed background and declared a "mode", and the quote took its
+// colour from that mode — so a pale quote could land on pale art and disappear.
+// With every scene light and every scene's bottom band kept clear (see
+// launchScenes.tsx), the quote is dark ink on opaque paper by construction and
+// cannot come out unreadable.
 const PAPER = '#F4F3EE';
 const INK = '#1A1A1A';
+const SOFT = 'rgba(26,26,26,0.5)';
 
-// The native splash's backgroundColor (app.json → expo-splash-screen). Android
-// always draws a splash window on cold start — it can't be skipped — so instead
-// it's made to show nothing but this paper: a fully transparent icon on this
-// colour. This screen then opens on the exact same colour and cross-fades to the
-// scene's own background, so the handoff has no visible seam (light scenes are
-// pixel-identical; dark ones read as the lights going down). Keep the two in
-// sync — if app.json's backgroundColor changes, change this with it.
-const SPLASH_BG = '#E4E4DF';
+// The stage y the progress stroke sits on — up in the sky, well clear of both
+// the figure below it and the masthead above.
+const STROKE_STAGE_Y = 258;
 
-// Quotes short enough to actually read during the ~2s the screen is up. The
+// Quotes short enough to actually read during the ~3.4s the screen is up. The
 // fallback can't realistically be hit, but this screen sits on the boot path —
 // an empty pool must never be able to crash the launch.
 const SHORT_QUOTES = ALL_PHILOSOPHERS.flatMap((p) =>
@@ -64,7 +71,7 @@ function makeStroke(width: number, seed: number) {
 }
 
 // The percentage readout. Isolated so the tick-by-tick re-render touches this
-// tiny Text only — the scene SVG above it never re-renders during the count.
+// tiny Text only — the scene above it never re-renders during the count.
 const Pct = memo(function Pct({
   progress,
   color,
@@ -83,26 +90,28 @@ const Pct = memo(function Pct({
 });
 
 interface Props {
-  // True once the app is genuinely ready underneath (fonts, hydration, auth
-  // routing). The counter climbs to 92 on its own, holds there until ready,
-  // then finishes to 100 and fades the whole screen away.
   ready: boolean;
   onDone: () => void;
 }
 
-// The cold-start loading moment: one of the hand-drawn ink scenes (a different
-// one each launch, slowly breathing), an ink stroke that draws itself across
-// the screen as a progress line with a counting percentage, and a short quote
-// resting at the bottom. At 100% the screen lifts away onto Home.
+// The cold-start loading moment: one of six hand-drawn outdoor scenes (a
+// different one each launch), the figure living in it, an ink stroke that draws
+// itself across the sky as a progress line with a counting percentage, and a
+// short quote resting on paper at the bottom. At 100% the screen lifts away.
 export default function LaunchScreen({ ready, onDone }: Props) {
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
   // One scene + one quote per launch.
   const seed = useMemo(() => Math.floor(Math.random() * 233280), []);
-  const scene = INK_SCENES[seed % INK_SCENES.length];
+  const scene = LAUNCH_SCENES[seed % LAUNCH_SCENES.length];
   const quote = SHORT_QUOTES.length > 0 ? SHORT_QUOTES[seed % SHORT_QUOTES.length] : FALLBACK_QUOTE;
-  const dark = scene.meta.mode === 'dark';
+
+  // Cover-fit the 400×800 stage. The art and the figure both live inside it, so
+  // sharing this one mapping is what guarantees the feet meet the hill.
+  const fit = Math.max(width / STAGE_W, height / STAGE_H);
+  const offX = (width - STAGE_W * fit) / 2;
+  const offY = (height - STAGE_H * fit) / 2;
 
   const strokeW = Math.round(width * 0.68);
   const { d, len } = useMemo(() => makeStroke(strokeW, seed + 7), [strokeW, seed]);
@@ -119,7 +128,7 @@ export default function LaunchScreen({ ready, onDone }: Props) {
   // enough to actually read the quote at the bottom.
   useEffect(() => {
     introFade.value = withTiming(1, { duration: 420 });
-    sceneScale.value = withTiming(1.045, { duration: 3800, easing: Easing.out(Easing.quad) });
+    sceneScale.value = withTiming(1.04, { duration: 3800, easing: Easing.out(Easing.quad) });
     progress.value = withTiming(
       92,
       { duration: 2700, easing: Easing.out(Easing.cubic) },
@@ -146,11 +155,9 @@ export default function LaunchScreen({ ready, onDone }: Props) {
   }, [held, ready]);
 
   const rootStyle = useAnimatedStyle(() => ({ opacity: screenOpacity.value }));
-  // The scene paints its own full-bleed background (paper gradient, or NIGHT for
-  // a dark one), so it has to fade in rather than appear — otherwise it lands as
-  // a hard colour pop over the splash. Fading it over SPLASH_BG means a light
-  // scene barely registers a change and a dark one dims in like a house light.
-  const sceneStyle = useAnimatedStyle(() => ({
+  // The scene breathes very slightly as it loads. Scaled about its centre, so the
+  // picture grows into the frame instead of creeping off one corner.
+  const stageStyle = useAnimatedStyle(() => ({
     opacity: introFade.value,
     transform: [{ scale: sceneScale.value }],
   }));
@@ -162,27 +169,39 @@ export default function LaunchScreen({ ready, onDone }: Props) {
     strokeDashoffset: len * (1 - progress.value / 100),
   }));
 
-  const inkColor = dark ? PAPER : INK;
-  const softColor = dark ? 'rgba(244,243,238,0.55)' : 'rgba(26,26,26,0.5)';
-  const bg = dark ? '#0E0E0E' : '#E4E4DF';
-  // The words sit where the scene leaves blank room (same contract as lessons).
-  const strokeTopPct = scene.meta.zone === 'top' ? '32%' : '52%';
-
   return (
     <Animated.View
-      style={[StyleSheet.absoluteFill, styles.root, { backgroundColor: SPLASH_BG }, rootStyle]}
+      style={[StyleSheet.absoluteFill, styles.root, { backgroundColor: PAPER }, rootStyle]}
     >
-      <StatusBar barStyle={dark ? 'light-content' : 'dark-content'} />
-      <Animated.View style={[StyleSheet.absoluteFill, sceneStyle]} pointerEvents="none">
-        <scene.Scene />
+      <StatusBar barStyle="dark-content" />
+
+      {/* The scene: inert SVG art with the figure moving on top of it, both in
+          stage coordinates. needsOffscreenAlphaCompositing so the intro fade
+          composites the figure ONCE — otherwise overlapping limbs double-darken
+          on the way in, the way they did on the welcome screen. */}
+      <Animated.View
+        needsOffscreenAlphaCompositing
+        style={[
+          styles.stageBox,
+          { left: offX, top: offY, width: STAGE_W * fit, height: STAGE_H * fit },
+          stageStyle,
+        ]}
+        pointerEvents="none"
+      >
+        <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
+          <SceneArt scene={scene} />
+          <LaunchFigure scene={scene} />
+        </View>
       </Animated.View>
 
-      {/* Soft fade behind the bottom quote so it reads over any ground art. */}
-      <Svg width="100%" height="30%" style={styles.scrim} pointerEvents="none">
+      {/* Paper wash under the quote. It reaches FULL paper at the bottom, so the
+          words always sit on a clean sheet no matter what the scene does. */}
+      <Svg width="100%" height="34%" style={styles.scrim} pointerEvents="none">
         <Defs>
           <LinearGradient id="ls-fade" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor={bg} stopOpacity={0} />
-            <Stop offset="1" stopColor={bg} stopOpacity={0.88} />
+            <Stop offset="0" stopColor={PAPER} stopOpacity={0} />
+            <Stop offset="0.55" stopColor={PAPER} stopOpacity={0.92} />
+            <Stop offset="1" stopColor={PAPER} stopOpacity={1} />
           </LinearGradient>
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#ls-fade)" />
@@ -190,15 +209,15 @@ export default function LaunchScreen({ ready, onDone }: Props) {
 
       {/* Masthead */}
       <Animated.View style={[styles.mast, { top: insets.top + 18 }, fadeInStyle]}>
-        <Text style={[styles.mastText, { color: softColor }]}>P H I L O S O P H I Z E</Text>
+        <Text style={[styles.mastText, { color: SOFT }]}>P H I L O S O P H I Z E</Text>
       </Animated.View>
 
-      {/* The ink stroke drawing itself + percentage */}
-      <Animated.View style={[styles.strokeWrap, { top: strokeTopPct as `${number}%` }, fadeInStyle]}>
+      {/* The ink stroke drawing itself + percentage, pinned to the sky */}
+      <Animated.View style={[styles.strokeWrap, { top: offY + STROKE_STAGE_Y * fit }, fadeInStyle]}>
         <Svg width={strokeW} height={14} viewBox={`0 -7 ${strokeW} 14`}>
           <AnimatedPath
             d={d}
-            stroke={inkColor}
+            stroke={INK}
             strokeWidth={3}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -207,15 +226,15 @@ export default function LaunchScreen({ ready, onDone }: Props) {
             animatedProps={strokeProps}
           />
         </Svg>
-        <Pct progress={progress} color={softColor} />
+        <Pct progress={progress} color={SOFT} />
       </Animated.View>
 
       {/* Quote */}
       <Animated.View style={[styles.quoteWrap, { paddingBottom: insets.bottom + 34 }, fadeInStyle]}>
-        <Text style={[styles.quoteText, { color: inkColor }]} numberOfLines={3}>
+        <Text style={[styles.quoteText, { color: INK }]} numberOfLines={3}>
           “{quote.text}”
         </Text>
-        <Text style={[styles.quoteBy, { color: softColor }]}>— {quote.author.toUpperCase()}</Text>
+        <Text style={[styles.quoteBy, { color: SOFT }]}>— {quote.author.toUpperCase()}</Text>
       </Animated.View>
     </Animated.View>
   );
@@ -223,6 +242,7 @@ export default function LaunchScreen({ ready, onDone }: Props) {
 
 const styles = StyleSheet.create({
   root: { zIndex: 1000, elevation: 1000 },
+  stageBox: { position: 'absolute', overflow: 'hidden' },
   scrim: { position: 'absolute', left: 0, right: 0, bottom: 0 },
   mast: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
   mastText: { fontFamily: 'Inter_500Medium', fontSize: 10, letterSpacing: 4 },

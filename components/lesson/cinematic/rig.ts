@@ -863,3 +863,184 @@ export function pose(
     k, opacity
   );
 }
+
+// ── outdoor / leisure poses ──────────────────────────────────────────────────
+// The launch screen puts the same figure outdoors on a hill: sitting, swinging,
+// flying a kite, picnicking, reading. These are additive to the fight/narrator
+// vocabulary above and are just as usable inside a lesson.
+//
+// Everything here rides `life2`, so a figure a viewer stares at through a whole
+// cold start never reads as a loop.
+//
+// SEATING. `bob` moves the pelvis: pelUp = standH + bob, so a seat at height h
+// is bob = h - standH. Feet stay ground-relative (y = 0 is the ground), and the
+// knee falls out of the existing IK — a low pelvis with the feet forward folds
+// the leg on its own. That is the whole trick; there is no separate "sit" solve.
+
+/** Pelvis height for a seat, as a `bob`. */
+export function seatBob(seatH: number) {
+  'worklet';
+  return seatH - U.standH;
+}
+
+/**
+ * Base seated pose: pelvis dropped to `seatH`, feet planted forward, hands
+ * resting on the lap. Breathes and shifts weight like `stand` does.
+ */
+export function seated(seatH: number, t: number, reach = 18): Stance {
+  'worklet';
+  const breath = 0.55 * (0.5 - 0.5 * Math.cos(t * 1.5)) + 0.3 * (0.5 - 0.5 * Math.cos(t * 0.97));
+  const ws = life2(t, 0.29, 0.17, 0.9);
+  const hd = life2(t, 0.47, 0.29, 1.4);
+  return {
+    tilt: 0.06 + ws * 0.02,
+    neck: -0.03 + hd * 0.04,
+    bob: seatBob(seatH) + breath,
+    // Slight left/right asymmetry so the legs never read as one mirrored bar.
+    footL: { x: reach - 2, y: 0 },
+    footR: { x: reach + 4, y: 0 },
+    // Hands out on the knees, NOT tucked at the hip. A fist near the body buries
+    // the whole forearm inside the torso silhouette at this stroke weight and the
+    // figure loses an arm — the same "read as separate shapes" rule the boxing
+    // guard is built around.
+    fistL: { x: reach - 6 + ws, y: -2 + hd * 0.5 },
+    fistR: { x: reach + 1 + ws, y: 0 - hd * 0.5 },
+    adv: 0,
+  };
+}
+
+/**
+ * Seated on a chair with a cup: every few seconds the near hand carries the cup
+ * up to the mouth, holds, and comes back down to the lap. `u` is 0→1 across one
+ * sip; hold it at 0 to just sit.
+ */
+export function sipStance(t: number, u: number, seatH = 21): Stance {
+  'worklet';
+  const base = seated(seatH, t, 19);
+  // Rise, dwell at the lip, lower — a drink's tempo, not a punch's.
+  const e = u <= 0 ? 0 : u < 0.34 ? easeOutCubic(u / 0.34) : u < 0.66 ? 1 : 1 - ease01((u - 0.66) / 0.34);
+  return {
+    ...base,
+    // The head dips to meet the cup rather than the arm doing all the travel.
+    neck: base.neck - 0.16 * e,
+    tilt: base.tilt - 0.05 * e,
+    // Held OUT in front of the chin, not against it — a cup drawn on top of the
+    // torso silhouette just looks like a lump on the chest.
+    fistR: { x: lerp(base.fistR.x, 17, e), y: lerp(base.fistR.y, -39, e) },
+  };
+}
+
+/**
+ * Sitting on a tire swing: legs out front and lifted clear of the ground, both
+ * hands gripping the rope above. The ARC belongs to the scene (rotate the whole
+ * figure about the branch), not here — this is only what the body does while it
+ * swings: legs pumping, torso leaning against the direction of travel.
+ *
+ * `sw` is the swing's signed phase, -1..1, so the pose leans into the arc.
+ */
+export function swingStance(t: number, sw: number): Stance {
+  'worklet';
+  const breath = 0.4 * (0.5 - 0.5 * Math.cos(t * 1.7));
+  const pump = Math.sin(t * 1.9) * 0.5 + Math.sin(t * 1.17 + 0.6) * 0.3;
+  return {
+    // Leaning back at the top of the forward arc is what sells a swing.
+    tilt: 0.18 - sw * 0.16,
+    neck: -0.08 - sw * 0.05,
+    bob: seatBob(20) + breath,
+    // Legs straight out front, rising and falling with the pump; never touching down.
+    footL: { x: 33 + pump * 3, y: -15 - pump * 5 },
+    footR: { x: 38 + pump * 3, y: -10 - pump * 5 },
+    // Both hands reach UP AND BACK to the rope, which hangs behind the rider (the
+    // scene seats the figure forward of the pivot so the rope clears the head
+    // instead of cutting straight down through the face).
+    fistL: { x: -15, y: -40 },
+    fistR: { x: -9, y: -34 },
+    adv: 0,
+  };
+}
+
+/**
+ * Flying a kite: standing, string hand held high, spool hand at the waist, head
+ * tipped back to watch. `tug` (0..1) is the line pulling — it travels up the arm
+ * into the shoulder and chest, which is what makes the kite feel attached.
+ */
+export function kiteStance(t: number, tug: number): Stance {
+  'worklet';
+  const base = stand(t);
+  const drift = life2(t, 0.9, 0.53, 0.4);
+  return {
+    ...base,
+    tilt: base.tilt - 0.04 - tug * 0.05,
+    // Chin up — reading the sky. Without this the figure is just a raised arm.
+    neck: -0.26 + drift * 0.03,
+    footL: { x: -7, y: 0 },
+    footR: { x: 6, y: 0 },
+    // The string hand goes up AND WELL FORWARD. Straight overhead it lay along
+    // the torso and the arm vanished into the body — there was no visible arm at
+    // all, just a hunch. Out at x≈26 the whole limb reads against open paper.
+    fistL: { x: -13 + drift, y: 5 },
+    fistR: { x: 26 + drift * 1.4 - tug * 2, y: -56 - tug * 3 },
+    adv: 0,
+  };
+}
+
+/**
+ * Picnic: sitting low on a blanket, one hand travelling to the basket and back
+ * to the mouth. The pelvis is nearly on the ground, so the knees ride high and
+ * the figure reads cross-legged.
+ */
+export function picnicStance(t: number, u: number): Stance {
+  'worklet';
+  const breath = 0.5 * (0.5 - 0.5 * Math.cos(t * 1.4));
+  const ws = life2(t, 0.31, 0.19, 0.5);
+  const hd = life2(t, 0.44, 0.27, 1.7);
+  // Out to the basket, back to the mouth, rest — one unhurried round trip.
+  const outE = u < 0.3 ? easeOutCubic(u / 0.3) : u < 0.45 ? 1 : 1 - ease01((u - 0.45) / 0.2);
+  const eatE = u > 0.5 && u < 0.9 ? Math.sin(Math.PI * ease01((u - 0.5) / 0.4)) : 0;
+  return {
+    // Reclined onto the propping arm — that lean is most of what says "on the grass".
+    tilt: 0.20 + ws * 0.02 - eatE * 0.05,
+    neck: -0.04 + hd * 0.04 - eatE * 0.12,
+    bob: seatBob(7) + breath,
+    // Legs stretched out along the ground, nearly straight. Tucking the feet in
+    // close threw both knees up and the whole figure read as a squat, not as
+    // someone sitting on a blanket — in side view, extended legs are the only
+    // unambiguous "sitting on the ground".
+    footL: { x: 34, y: 0 },
+    footR: { x: 40, y: 1 },
+    // One hand planted behind for support, the other doing the eating.
+    fistL: { x: -15 + ws, y: 5 },
+    fistR: {
+      x: lerp(lerp(15, 31, outE), 15, eatE),
+      y: lerp(lerp(-2, 3, outE), -34, eatE),
+    },
+    adv: 0,
+  };
+}
+
+/**
+ * Reading outdoors: sitting with a book held up in both hands, head down on the
+ * page. Every so often the far hand flicks a page over (`turn`, 0..1).
+ */
+export function readStance(t: number, turn: number): Stance {
+  'worklet';
+  const breath = 0.45 * (0.5 - 0.5 * Math.cos(t * 1.45));
+  const ws = life2(t, 0.27, 0.16, 1.1);
+  // The eyes tracking down the page, then flicking back up to the next line.
+  const scan = (Math.sin(t * 0.8) * 0.5 + 0.5) * 0.06;
+  const e = turn <= 0 ? 0 : Math.sin(Math.PI * ease01(turn));
+  return {
+    tilt: 0.14 + ws * 0.02,
+    neck: 0.20 + scan,                    // chin tucked toward the page
+    bob: seatBob(9) + breath,
+    // Legs out along the ground, same reason as the picnic: folded legs read as
+    // a crouch at this stroke weight.
+    footL: { x: 32, y: 0 },
+    footR: { x: 38, y: 1 },
+    // The book is held out and up, clear of the chest, so both forearms and the
+    // book itself sit against open paper instead of on the torso.
+    fistL: { x: 17 + ws * 0.5, y: -24 - e * 9 },
+    fistR: { x: 27 + ws * 0.5 + e * 5, y: -19 - e * 13 },
+    adv: 0,
+  };
+}
