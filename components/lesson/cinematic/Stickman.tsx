@@ -60,13 +60,28 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
       borderRadius: r,
       backgroundColor: color,
     });
+    // JOINTS MUST OVERLAP THEIR BONES, NOT SIT TANGENT TO THEM.
+    //
+    // A bone is a butt-capped rectangle and a joint dot was drawn at exactly half
+    // the bone's thickness, so the circle only touched the rectangle's edges — it
+    // never covered them. Every junction was therefore a hairline seam waiting for
+    // a rounding error, and at the pelvis, where a 12-wide torso meets two 11-wide
+    // thighs fanning out from ±1, it opened into a visible notch: the figure read
+    // as a torso and a pair of legs rather than one body. Enlarging the stages made
+    // it plain. `weld` is the overlap that closes it — small enough to be invisible
+    // as a bulge, large enough that no joint can ever come apart.
+    //
+    // The pelvis gets a bigger weld than the rest because three thick bones meet
+    // there at varying angles; it is the one junction that must read as solid mass.
+    const weld = 0.6 * k;
     return {
       limbBone: boneBase(limb),
       torsoBone: boneBase(torso),
-      joint: dotBase(limb / 2),
-      torsoJoint: dotBase(torso / 2),
+      joint: dotBase(limb / 2 + weld),
+      torsoJoint: dotBase(torso / 2 + weld),
+      pelvis: dotBase(torso / 2 + 1.7 * k),
       head: dotBase(headR),
-      fist: dotBase(gloves ? gloveR : limb / 2),
+      fist: dotBase(gloves ? gloveR : limb / 2 + weld),
     };
   }, [k, color, gloves]);
 
@@ -119,7 +134,7 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
       <Animated.View style={[S.fist, a.wrL]} />
 
       <Animated.View style={[S.torsoBone, a.torso]} />
-      <Animated.View style={[S.torsoJoint, a.pel]} />
+      <Animated.View style={[S.pelvis, a.pel]} />
       <Animated.View style={[S.torsoJoint, a.shB]} />
 
       <Animated.View style={[S.limbBone, a.thighR]} />
