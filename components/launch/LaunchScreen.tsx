@@ -20,18 +20,24 @@ import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-// The launch screen is now always DAYLIGHT: ink line art on paper, one palette,
-// no per-scene light/dark mode.
+// Every scene shares ONE fixed vertical palette: a dark sky at the top washing
+// to paper at the horizon (see launchScenes.tsx).
 //
-// That is a readability fix, not a style preference. The old scenes each painted
-// their own full-bleed background and declared a "mode", and the quote took its
+// That is what makes the quote safe. The old scenes each painted their own
+// full-bleed background and declared a light/dark "mode", and the quote took its
 // colour from that mode — so a pale quote could land on pale art and disappear.
-// With every scene light and every scene's bottom band kept clear (see
-// launchScenes.tsx), the quote is dark ink on opaque paper by construction and
-// cannot come out unreadable.
+// Now the zones are fixed for every scene, so each element's background is known
+// in advance: chrome at the top is light, the quote at the bottom is ink on
+// paper. Nothing is chosen per scene, so nothing can come out unreadable.
 const PAPER = '#F4F3EE';
 const INK = '#1A1A1A';
 const SOFT = 'rgba(26,26,26,0.5)';
+// The sky is dark at the top, so the masthead, the progress stroke and the count
+// are drawn LIGHT. This is not a per-scene guess: launchScenes.tsx fixes the dark
+// zone to the top third and washes to paper by the horizon, so what sits behind
+// each of these is known by construction — the quote below stays ink on paper.
+const SKY_INK = '#F2F1EC';
+const SKY_SOFT = 'rgba(242,241,236,0.66)';
 
 // The stage y the progress stroke sits on — up in the sky, well clear of both
 // the figure below it and the masthead above.
@@ -173,7 +179,7 @@ export default function LaunchScreen({ ready, onDone }: Props) {
     <Animated.View
       style={[StyleSheet.absoluteFill, styles.root, { backgroundColor: PAPER }, rootStyle]}
     >
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
 
       {/* The scene: inert SVG art with the figure moving on top of it, both in
           stage coordinates. needsOffscreenAlphaCompositing so the intro fade
@@ -209,7 +215,7 @@ export default function LaunchScreen({ ready, onDone }: Props) {
 
       {/* Masthead */}
       <Animated.View style={[styles.mast, { top: insets.top + 18 }, fadeInStyle]}>
-        <Text style={[styles.mastText, { color: SOFT }]}>P H I L O S O P H I Z E</Text>
+        <Text style={[styles.mastText, { color: SKY_SOFT }]}>P H I L O S O P H I Z E</Text>
       </Animated.View>
 
       {/* The ink stroke drawing itself + percentage, pinned to the sky */}
@@ -217,7 +223,7 @@ export default function LaunchScreen({ ready, onDone }: Props) {
         <Svg width={strokeW} height={14} viewBox={`0 -7 ${strokeW} 14`}>
           <AnimatedPath
             d={d}
-            stroke={INK}
+            stroke={SKY_INK}
             strokeWidth={3}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -226,7 +232,7 @@ export default function LaunchScreen({ ready, onDone }: Props) {
             animatedProps={strokeProps}
           />
         </Svg>
-        <Pct progress={progress} color={SOFT} />
+        <Pct progress={progress} color={SKY_SOFT} />
       </Animated.View>
 
       {/* Quote */}

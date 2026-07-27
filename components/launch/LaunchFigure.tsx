@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -29,17 +30,33 @@ import type { LaunchScene } from './launchScenes';
 
 const INK = '#1A1A1A';
 
-/** Rig units per second for the hill walk — an unhurried pace. */
-const WALK_SPEED = 25;
-/** After this long the walker eases to a halt, so a slow launch can't march it off-stage. */
-const WALK_FOR = 4.6;
+/** Rig units per second for the hill walk — an unhurried pace at this distance. */
+const WALK_SPEED = 22;
 
 interface Props {
   scene: LaunchScene;
 }
 
 export default function LaunchFigure({ scene }: Props) {
-  const { activity, k, dir, x: x0, groundY: gy0, pivot, kite, groundWave } = scene;
+  const { activity, k, dir, x: x0, groundY: gy0, pivot, kite, groundWave, walkSpan } = scene;
+
+  // Everything the figure holds is sized in the SAME rig units as the figure, so
+  // shrinking the figure into the distance shrinks its props with it. Fixed pixel
+  // sizes would leave a distant walker carrying a comically oversized book.
+  const P = useMemo(() => {
+    const u = k / 1.3;                       // the scale these props were drawn at
+    const pelvisY = gy0 - 20 * k;            // where a seated rider's hips land
+    const tireR = Math.max(9, 30 * u);
+    return {
+      cupW: 13 * u, cupH: 14 * u, cupB: Math.max(1, 2.2 * u),
+      bookW: 40 * u, bookH: 27 * u, bookB: Math.max(1, 2.4 * u),
+      kiteS: Math.max(15, 30 * u), kiteB: Math.max(1.4, 2.4 * u),
+      tireR, tireB: Math.max(3, 7 * u),
+      ropeW: Math.max(1.6, 2.4 * u),
+      // The rope must END at the top of the tire, which hangs at the rider's hips.
+      ropeLen: pivot ? Math.max(20, pelvisY - tireR - pivot.y) : 0,
+    };
+  }, [k, gy0, pivot]);
 
   const clock = useSharedValue(0);
   useFrameCallback((f) => {
@@ -63,8 +80,18 @@ export default function LaunchFigure({ scene }: Props) {
     let groundY = gy0;
 
     if (activity === 'walk') {
-      const dist = Math.min(t, WALK_FOR) * WALK_SPEED;
-      x = x0 + dist * k * dir;
+      // `dist` only ever increases, so the gait is continuous no matter how long
+      // the screen is up — the step phase comes from distance, so it can never
+      // snap back to a start pose. Only the POSITION wraps, and it wraps across a
+      // span that begins and ends off-screen, so the reset is never seen.
+      const dist = t * WALK_SPEED;
+      if (walkSpan) {
+        const span = walkSpan.to - walkSpan.from;
+        const travelled = dist * k * dir;
+        x = walkSpan.from + (((travelled % span) + span) % span);
+      } else {
+        x = x0 + dist * k * dir;
+      }
       // Feet track the hill instead of a flat line. The contour is evaluated
       // from NUMBERS here rather than by calling a function off the scene: a
       // plain JS closure is not callable on the UI runtime, and doing so threw
@@ -72,8 +99,7 @@ export default function LaunchFigure({ scene }: Props) {
       if (groundWave) {
         groundY = groundWave.base - Math.sin((x - groundWave.off) / groundWave.per) * groundWave.amp;
       }
-      const settle = clamp01((t - WALK_FOR) / 0.9);
-      s = settle > 0 ? mixStance(walk(dist, WALK), stand(t), settle) : walk(dist, WALK);
+      s = walk(dist, WALK);
     } else if (activity === 'kite') {
       // Irregular tugs — a kite pulls when the wind decides to, not on a beat.
       const g = Math.sin(t * 1.7) * 0.5 + Math.sin(t * 1.06 + 0.9) * 0.5;
@@ -114,7 +140,7 @@ export default function LaunchFigure({ scene }: Props) {
   // ── held props ─────────────────────────────────────────────────────────────
 
   const cupStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: J.value.wrR.x - 6 }, { translateY: J.value.wrR.y - 12 }],
+    transform: [{ translateX: J.value.wrR.x - P.cupW / 2 }, { translateY: J.value.wrR.y - P.cupH }],
   }));
 
   // The book spans wrist to wrist and tips with them.
@@ -170,14 +196,12 @@ export default function LaunchFigure({ scene }: Props) {
       <Stickman D={D} k={k} color={INK} />
       {activity === 'sip' ? (
         <Animated.View style={[styles.prop, cupStyle]}>
-          <View style={styles.cup} />
-          <View style={styles.cupHandle} />
+          <View style={[styles.cup, { width: P.cupW, height: P.cupH, borderWidth: P.cupB }]} />
         </Animated.View>
       ) : null}
       {activity === 'read' ? (
         <Animated.View style={[styles.prop, bookStyle]}>
-          <View style={styles.book} />
-          <View style={styles.bookSpine} />
+          <View style={[styles.book, { width: P.bookW, height: P.bookH, borderWidth: P.bookB, marginLeft: -P.bookW / 2, marginTop: -P.bookH * 0.8 }]} />
         </Animated.View>
       ) : null}
     </>
@@ -189,7 +213,7 @@ export default function LaunchFigure({ scene }: Props) {
         <>
           <Animated.View style={[styles.prop, styles.stringWrap, stringStyle]} />
           <Animated.View style={[styles.prop, kiteStyle]}>
-            <View style={styles.kite} />
+            <View style={[styles.kite, { width: P.kiteS, height: P.kiteS, borderWidth: P.kiteB, marginLeft: -P.kiteS / 2, marginTop: -P.kiteS / 2 }]} />
           </Animated.View>
         </>
       ) : null}
@@ -203,8 +227,8 @@ export default function LaunchFigure({ scene }: Props) {
           ]}
         >
           {/* rope, then the tire it carries — both hang straight down from the bough */}
-          <View style={[styles.rope, { left: pivot.x - 1.2, top: pivot.y, height: 150 }]} />
-          <View style={[styles.tire, { left: pivot.x - 30, top: pivot.y + 146 }]} />
+          <View style={[styles.rope, { left: pivot.x - P.ropeW / 2, top: pivot.y, width: P.ropeW, height: P.ropeLen }]} />
+          <View style={[styles.tire, { left: pivot.x - P.tireR, top: pivot.y + P.ropeLen, width: P.tireR * 2, height: P.tireR * 2, borderRadius: P.tireR, borderWidth: P.tireB }]} />
           {figure}
         </Animated.View>
       ) : (
@@ -220,7 +244,7 @@ const styles = StyleSheet.create({
   prop: { position: 'absolute', left: 0, top: 0 },
 
   cup: {
-    width: 13, height: 14, borderWidth: 2.2, borderColor: INK,
+    borderColor: INK,
     borderBottomLeftRadius: 4, borderBottomRightRadius: 4, backgroundColor: 'transparent',
   },
   cupHandle: {
@@ -229,25 +253,15 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
   },
 
-  book: {
-    width: 40, height: 27, borderWidth: 2.4, borderColor: INK,
-    borderRadius: 2, backgroundColor: '#F7F5F0',
-    marginLeft: -20, marginTop: -22,
-  },
+  book: { borderColor: INK, borderRadius: 2, backgroundColor: '#F7F5F0' },
   bookSpine: {
     position: 'absolute', left: -1.2, top: -22,
     width: 2.4, height: 27, backgroundColor: INK,
   },
 
   stringWrap: { height: 1.4, backgroundColor: INK, opacity: 0.5, transformOrigin: '0% 50%' },
-  kite: {
-    width: 30, height: 30, borderWidth: 2.4, borderColor: INK,
-    backgroundColor: 'transparent', marginLeft: -15, marginTop: -15,
-  },
+  kite: { borderColor: INK, backgroundColor: 'transparent' },
 
-  rope: { position: 'absolute', width: 2.4, backgroundColor: INK, opacity: 0.85 },
-  tire: {
-    position: 'absolute', width: 60, height: 60,
-    borderWidth: 7, borderColor: INK, borderRadius: 30, backgroundColor: 'transparent',
-  },
+  rope: { position: 'absolute', backgroundColor: INK, opacity: 0.85 },
+  tire: { position: 'absolute', borderColor: INK, backgroundColor: 'transparent' },
 });
