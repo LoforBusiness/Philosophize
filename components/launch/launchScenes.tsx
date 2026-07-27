@@ -271,12 +271,22 @@ export interface LaunchScene {
   pivot?: { x: number; y: number };
   /** Kite only: where the kite rides. */
   kite?: { x: number; y: number };
-  /** Walk only: the hill contour, so the feet track the slope instead of a flat line. */
-  groundAt?: (x: number) => number;
+  /**
+   * Walk only: the hill contour the feet track, as PLAIN NUMBERS —
+   * y = base - sin((x - off) / per) * amp.
+   *
+   * Deliberately not a function. The figure's pose is solved inside a Reanimated
+   * worklet on the UI runtime, and a plain JS closure captured by a worklet is
+   * not callable there: it throws "Object is not a function" and takes the whole
+   * app down. Numbers cross the runtime boundary safely; functions must carry
+   * their own 'worklet' directive, and an inline arrow in a data table never will.
+   */
+  groundWave?: { base: number; amp: number; off: number; per: number };
 }
 
 // 1 · A long walk over the hills.
-const walkYAt = (x: number) => 528 - Math.sin((x - 40) / 150) * 22;
+const WALK_WAVE = { base: 528, amp: 22, off: 40, per: 150 };
+const walkYAt = (x: number) => WALK_WAVE.base - Math.sin((x - WALK_WAVE.off) / WALK_WAVE.per) * WALK_WAVE.amp;
 const WalkArt = () => (
   <>
     <Sun x={318} y={168} r={19} seed={31} />
@@ -422,13 +432,13 @@ const ReadArt = () => (
 export const SWING_PIVOT = { x: 196, y: 296 };
 
 export const LAUNCH_SCENES: LaunchScene[] = [
-  { key: 'walk', Art: WalkArt, activity: 'walk', x: 150, groundY: walkYAt(150), k: 1.32, dir: 1, groundAt: walkYAt },
+  { key: 'walk', Art: WalkArt, activity: 'walk', x: 150, groundY: walkYAt(150), k: 1.32, dir: 1, groundWave: WALK_WAVE },
   // The kite rides ABOVE the progress stroke's line (stage y 258) so the two
   // never sit on top of each other.
   { key: 'kite', Art: KiteArt, activity: 'kite', x: 168, groundY: kiteYAt(168), k: 1.32, dir: 1, kite: { x: 306, y: 186 } },
-  // Seated FORWARD of the rope (+18) so the rope hangs behind the rider's back
-  // instead of dropping straight through the head.
-  { key: 'swing', Art: SwingArt, activity: 'swing', x: SWING_PIVOT.x + 18, groundY: 497, k: 1.24, dir: 1, pivot: SWING_PIVOT },
+  // Seated ON the rope's line, centred in the tire. The rope is drawn beneath the
+  // figure, so it reads as passing behind the rider's back.
+  { key: 'swing', Art: SwingArt, activity: 'swing', x: SWING_PIVOT.x, groundY: 497, k: 1.24, dir: 1, pivot: SWING_PIVOT },
   { key: 'sip', Art: SipArt, activity: 'sip', x: 196, groundY: sipYAt(196), k: 1.3, dir: 1 },
   { key: 'picnic', Art: PicnicArt, activity: 'picnic', x: 178, groundY: picnicYAt(178), k: 1.3, dir: 1 },
   { key: 'read', Art: ReadArt, activity: 'read', x: 208, groundY: readYAt(208), k: 1.3, dir: 1 },

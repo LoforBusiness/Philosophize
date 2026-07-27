@@ -39,7 +39,7 @@ interface Props {
 }
 
 export default function LaunchFigure({ scene }: Props) {
-  const { activity, k, dir, x: x0, groundY: gy0, pivot, kite, groundAt } = scene;
+  const { activity, k, dir, x: x0, groundY: gy0, pivot, kite, groundWave } = scene;
 
   const clock = useSharedValue(0);
   useFrameCallback((f) => {
@@ -65,8 +65,13 @@ export default function LaunchFigure({ scene }: Props) {
     if (activity === 'walk') {
       const dist = Math.min(t, WALK_FOR) * WALK_SPEED;
       x = x0 + dist * k * dir;
-      // Feet track the hill instead of a flat line.
-      if (groundAt) groundY = groundAt(x);
+      // Feet track the hill instead of a flat line. The contour is evaluated
+      // from NUMBERS here rather than by calling a function off the scene: a
+      // plain JS closure is not callable on the UI runtime, and doing so threw
+      // "Object is not a function" and crashed the app on every walk scene.
+      if (groundWave) {
+        groundY = groundWave.base - Math.sin((x - groundWave.off) / groundWave.per) * groundWave.amp;
+      }
       const settle = clamp01((t - WALK_FOR) / 0.9);
       s = settle > 0 ? mixStance(walk(dist, WALK), stand(t), settle) : walk(dist, WALK);
     } else if (activity === 'kite') {

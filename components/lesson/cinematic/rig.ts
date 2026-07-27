@@ -232,19 +232,19 @@ export interface Stance {
 // the file: every idle here — bounce, sway, breath, hand-drift — rides one of
 // these instead of a bare sin(t), so a figure a viewer stares at for 20 seconds
 // never reads as a repeating cycle.
-function life2(t: number, f1: number, f2: number, ph: number) {
+export function life2(t: number, f1: number, f2: number, ph: number) {
   'worklet';
   return Math.sin(t * f1) * 0.62 + Math.sin(t * f2 + ph) * 0.38;
 }
 
 /** Snap out to a peak then recover to guard — a punch's tempo. Earlier peak = snappier. */
-function jabEnv(u: number, peak: number) {
+export function jabEnv(u: number, peak: number) {
   'worklet';
   if (u <= peak) return easeOutCubic(u / peak);
   return 1 - ease01((u - peak) / (1 - peak));
 }
 /** Rise, hold briefly, fall — a block / duck / slip that returns to guard. */
-function holdEnv(u: number) {
+export function holdEnv(u: number) {
   'worklet';
   return Math.sin(Math.PI * ease01(u));
 }
@@ -386,16 +386,33 @@ export function stand(t: number): Stance {
   const breath = 0.7 * (0.5 - 0.5 * Math.cos(t * 1.6)) + 0.4 * (0.5 - 0.5 * Math.cos(t * 1.02));
   const ws = life2(t, 0.33, 0.19, 0.7);         // slow weight rock, in the torso only
   const hd = life2(t, 0.5, 0.31, 1.1);          // head drift / glance
+  // WEIGHT TRANSFER. Nobody stands evenly on both legs for long — they settle onto
+  // one, then drift onto the other. The pelvis can't be moved sideways directly (x
+  // is defined as the point between the feet), so sliding BOTH foot targets the
+  // other way is the same thing: the body rides out over the loaded foot and sinks
+  // a little onto it. Kept under two units deliberately. A wide, sliding stance is
+  // exactly what once made these near-straight legs read as segmented bars with a
+  // gap between them, and that is a far worse defect than a stiff stance.
+  const wt = life2(t, 0.21, 0.13, 2.3);
+  // And every so often they RE-PLANT: the unloaded foot lifts a little and sets
+  // back down. A narrow pulse raised off a slow sine, so it lands about every
+  // fifteen seconds and never on the same beat as anything else.
+  const sp = Math.sin(t * 0.37 + 1.2);
+  const adj = sp > 0 ? Math.pow(sp, 26) * 2.4 : 0;
   return {
-    tilt: 0.05 + ws * 0.02,
+    tilt: 0.05 + ws * 0.02 + wt * 0.012,
     neck: -0.02 + hd * 0.05,
-    bob: breath,
+    bob: breath - Math.abs(wt) * 0.5,
     // Feet PLANTED and close, so the legs are near-vertical and read as two solid
     // bars. The wide, sliding stance made the near-straight legs look segmented and
     // opened a paper gap between them; the boxing stance only hid it by being deep
-    // and bent. Life now comes from the torso/head/arms, not the feet.
-    footL: { x: -4, y: 0 }, footR: { x: 4, y: 0 },
-    fistL: { x: -5 + ws * 1.2, y: 6 + hd }, fistR: { x: 5 + ws * 1.2, y: 6 - hd }, adv: 0,
+    // and bent. Life comes from the torso/head/arms and the small weight transfer
+    // above, never from a big stride-width slide.
+    footL: { x: -4 - wt * 1.7, y: wt > 0 ? -adj : 0 },
+    footR: { x: 4 - wt * 1.7, y: wt > 0 ? 0 : -adj },
+    fistL: { x: -5 + ws * 1.2 - wt * 1.2, y: 6 + hd },
+    fistR: { x: 5 + ws * 1.2 - wt * 1.2, y: 6 - hd },
+    adv: 0,
   };
 }
 
@@ -610,7 +627,10 @@ function builderHold(t: number): Stance {
     neck: 0.05,                                   // eyes down on the bricks
     bob: base.bob - 6,                            // settle a touch lower
     fistR: { x: 34, y: 6 + dy },                  // lead hand out-forward, low
-    fistL: { x: -2, y: -6 },                      // trailing hand tucked in
+    // Trailing hand HANGS. At y −6 it sat only ~20 units below a shoulder on a
+    // 33-unit arm, so the elbow bowed out and enclosed a triangle of paper against
+    // the torso — the hole-in-the-body defect, still here after the gesture sweep.
+    fistL: { x: -4, y: 6 },
     adv: 0,
   };
 }
@@ -649,13 +669,23 @@ export function walk(dist: number, g: Gait = WALK): Stance {
   const fR = footTarget(ph, g);
   const fL = footTarget(ph + Math.PI, g);
   const swing = g.armSwing;
+  // The torso rocks and the head counter-nods twice per stride. Tiny numbers, but
+  // a walk with a perfectly rigid spine is the main thing that reads as "animated"
+  // rather than "walking".
+  const rock = Math.sin(2 * ph);
   return {
-    tilt: g.tilt, neck: 0,
+    tilt: g.tilt + rock * 0.014,
+    neck: -0.04 - rock * 0.012,                   // eyes up the road, not at the floor
     bob: g.bob * (0.5 + 0.5 * g.bobSign * Math.cos(2 * ph)),
     footL: fL, footR: fR,
-    // Hands swing opposite the legs, hanging near the hips.
-    fistL: { x: 4 + Math.cos(ph) * swing * 22, y: -4 - Math.abs(Math.cos(ph)) * 3 },
-    fistR: { x: 4 + Math.cos(ph + Math.PI) * swing * 22, y: -4 - Math.abs(Math.cos(ph + Math.PI)) * 3 },
+    // Hands swing opposite the legs, HANGING AT ARM'S LENGTH — about y +6 below a
+    // shoulder that sits at y −26, on a 33-unit arm. They used to swing at y −4,
+    // barely 22 below the shoulder, which forced the elbow to bow outward and
+    // enclosed a triangle of paper against the torso: the hole-in-the-body defect,
+    // present in every walking figure in every lesson until now. A hanging hand
+    // belongs at mid-thigh; anything higher must be a deliberately bent arm.
+    fistL: { x: 3 + Math.cos(ph) * swing * 24, y: 7 - Math.abs(Math.cos(ph)) * 2 },
+    fistR: { x: 3 + Math.cos(ph + Math.PI) * swing * 24, y: 7 - Math.abs(Math.cos(ph + Math.PI)) * 2 },
     adv: 0,
   };
 }
@@ -722,10 +752,28 @@ export function strideStance(x0: number, x1: number, settled: Stance, tr: number
   // figure never paces the stage in one identical repeating motion. This lives
   // here rather than at the call sites so EVERY lesson gets it for free.
   const vg = gaitVary(g, x0 * 0.37 + x1 * 0.11);
-  const traveled = Math.abs(x1 - x0) * ease01(tr);
+  const span = Math.abs(x1 - x0);
+  const traveled = span * ease01(tr);
   const w = walk(traveled, vg);
-  const arrive = clamp01((tr - 0.8) / 0.2);
-  return mixStance(w, settled, arrive);
+  // A departure has a PRELOAD and an arrival has a LANDING. Without them the figure
+  // simply switches on mid-stride, which is most of why a walk that also flips the
+  // figure's facing looks like a teleport into a mirrored copy: nothing physical
+  // happens at the moment of turning. Here the body rocks back and dips before the
+  // first step, and soaks up the last one before the gesture settles.
+  //
+  // Both scale with the DISTANCE. A four-unit nudge should not perform a whole
+  // push-off; only a real journey gets the full weight shift.
+  const far = clamp01(span / 40);
+  const push = ease01(clamp01(1 - tr / 0.13)) * far;
+  const land = Math.sin(Math.PI * clamp01((tr - 0.66) / 0.28)) * far;
+  const moving: Stance = {
+    ...w,
+    tilt: w.tilt + push * 0.07,
+    neck: w.neck - push * 0.05,
+    bob: w.bob - push * 2.4 - land * 1.7,
+  };
+  const arrive = clamp01((tr - 0.78) / 0.22);
+  return mixStance(moving, settled, arrive);
 }
 
 /**
@@ -876,6 +924,18 @@ export function pose(
 // is bob = h - standH. Feet stay ground-relative (y = 0 is the ground), and the
 // knee falls out of the existing IK — a low pelvis with the feet forward folds
 // the leg on its own. That is the whole trick; there is no separate "sit" solve.
+//
+// HEAD CLEARANCE — the constraint that decides every fist target here. The head
+// is drawn at radius STR.headR (20) about roughly (0,-49), and the arm only
+// reaches U.uarm+U.farm = 33 from a shoulder at about (2,-40). Two consequences:
+//   · a fist within ~26 of the head centre is SWALLOWED — the hand, and the whole
+//     forearm behind it, disappear into the head circle. On device the kite figure
+//     read as a string growing out of its skull, and the swinger's grip and the
+//     picnicker's food vanished entirely.
+//   · the figure CANNOT raise a hand above its own crown (-69): that needs ~35 of
+//     vertical reach and it has 33. Anything "overhead" must instead be held out
+//     in front at an angle, which is why the kite line is carried forward-up.
+// Check a new target with hypot(fist-head) - 20 > ~6, and hypot(fist-shoulder) < 33.
 
 /** Pelvis height for a seat, as a `bob`. */
 export function seatBob(seatH: number) {
@@ -899,12 +959,14 @@ export function seated(seatH: number, t: number, reach = 18): Stance {
     // Slight left/right asymmetry so the legs never read as one mirrored bar.
     footL: { x: reach - 2, y: 0 },
     footR: { x: reach + 4, y: 0 },
-    // Hands out on the knees, NOT tucked at the hip. A fist near the body buries
+    // Hands DOWN on the knees, NOT tucked at the hip. A fist near the body buries
     // the whole forearm inside the torso silhouette at this stroke weight and the
     // figure loses an arm — the same "read as separate shapes" rule the boxing
-    // guard is built around.
-    fistL: { x: reach - 6 + ws, y: -2 + hd * 0.5 },
-    fistR: { x: reach + 1 + ws, y: 0 - hd * 0.5 },
+    // guard is built around. They also have to sit low enough to keep the arm
+    // near-straight: at y −2 the hand was 28 units from a 33-unit arm's shoulder,
+    // enough slack for the elbow to bow out and cut a hole against the torso.
+    fistL: { x: reach - 6 + ws, y: 4 + hd * 0.5 },
+    fistR: { x: reach + 1 + ws, y: 6 - hd * 0.5 },
     adv: 0,
   };
 }
@@ -926,7 +988,7 @@ export function sipStance(t: number, u: number, seatH = 21): Stance {
     tilt: base.tilt - 0.05 * e,
     // Held OUT in front of the chin, not against it — a cup drawn on top of the
     // torso silhouette just looks like a lump on the chest.
-    fistR: { x: lerp(base.fistR.x, 17, e), y: lerp(base.fistR.y, -39, e) },
+    fistR: { x: lerp(base.fistR.x, 27, e), y: lerp(base.fistR.y, -40, e) },
   };
 }
 
@@ -950,11 +1012,13 @@ export function swingStance(t: number, sw: number): Stance {
     // Legs straight out front, rising and falling with the pump; never touching down.
     footL: { x: 33 + pump * 3, y: -15 - pump * 5 },
     footR: { x: 38 + pump * 3, y: -10 - pump * 5 },
-    // Both hands reach UP AND BACK to the rope, which hangs behind the rider (the
-    // scene seats the figure forward of the pivot so the rope clears the head
-    // instead of cutting straight down through the face).
-    fistL: { x: -15, y: -40 },
-    fistR: { x: -9, y: -34 },
+    // Hands on the TIRE RIM at hip height, not up on the rope. The rider sits at
+    // the rope's x so the rope passes BEHIND the body (it is drawn under the
+    // figure) and only shows above the head — which is how a tire swing looks.
+    // Reaching up the rope instead put both fists inside the head circle, and a
+    // grip high enough to clear it is past the arm's 33-unit reach.
+    fistL: { x: -16, y: -14 },
+    fistR: { x: 14, y: -16 },
     adv: 0,
   };
 }
@@ -979,7 +1043,7 @@ export function kiteStance(t: number, tug: number): Stance {
     // the torso and the arm vanished into the body — there was no visible arm at
     // all, just a hunch. Out at x≈26 the whole limb reads against open paper.
     fistL: { x: -13 + drift, y: 5 },
-    fistR: { x: 26 + drift * 1.4 - tug * 2, y: -56 - tug * 3 },
+    fistR: { x: 32 + drift * 1.4 - tug * 2, y: -47 - tug * 3 },
     adv: 0,
   };
 }
@@ -1011,8 +1075,8 @@ export function picnicStance(t: number, u: number): Stance {
     // One hand planted behind for support, the other doing the eating.
     fistL: { x: -15 + ws, y: 5 },
     fistR: {
-      x: lerp(lerp(15, 31, outE), 15, eatE),
-      y: lerp(lerp(-2, 3, outE), -34, eatE),
+      x: lerp(lerp(15, 31, outE), 24, eatE),
+      y: lerp(lerp(-2, 3, outE), -32, eatE),
     },
     adv: 0,
   };
