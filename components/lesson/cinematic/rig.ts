@@ -884,6 +884,8 @@ export interface Bundle {
   uarmL: XF; farmL: XF; uarmR: XF; farmR: XF;
   kneeL: XF; kneeR: XF; ankL: XF; ankR: XF;
   elL: XF; elR: XF; wrL: XF; wrR: XF;
+  /** Caps for the tops of the arms. The arms hang off shL/shR, not off shB. */
+  shLd: XF; shRd: XF;
   pel: XF; shB: XF; head: XF; scale: number;
 }
 
@@ -896,6 +898,7 @@ export const BLANK: Bundle = (() => {
     uarmL: off, farmL: off, uarmR: off, farmR: off,
     kneeL: off, kneeR: off, ankL: off, ankR: off,
     elL: off, elR: off, wrL: off, wrR: off,
+    shLd: off, shRd: off,
     pel: off, shB: off, head: off,
   };
 })();
@@ -930,6 +933,12 @@ export function bundle(j: Joints, k: number, opacity: number): Bundle {
     uarmR: bone(j.shR, j.elR), farmR: bone(j.elR, j.wrR),
     kneeL: at(j.kneeL), kneeR: at(j.kneeR), ankL: at(j.ankL), ankR: at(j.ankR),
     elL: at(j.elL), elR: at(j.elR), wrL: at(j.wrL), wrR: at(j.wrR),
+    // The arms hang off shL/shR, which sit ±3 either side of the spine — NOT off
+    // shB, where the only shoulder dot used to be. So the top of each upper arm was
+    // an uncapped square end, and wherever the arm swung wide enough to clear the
+    // torso's edge that corner showed as a step at the shoulder: the last visible
+    // joint on the figure once the elbows, knees, wrists and ankles were fixed.
+    shLd: at(j.shL), shRd: at(j.shR),
     pel: at(j.pel), shB: at(j.shB), head: at(j.head),
   };
 }

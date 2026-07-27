@@ -119,6 +119,8 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
     elR: useAnimatedStyle(() => ({ transform: D.value.elR })),
     wrL: useAnimatedStyle(() => ({ transform: D.value.wrL })),
     wrR: useAnimatedStyle(() => ({ transform: D.value.wrR })),
+    shLd: useAnimatedStyle(() => ({ transform: D.value.shLd })),
+    shRd: useAnimatedStyle(() => ({ transform: D.value.shRd })),
     pel: useAnimatedStyle(() => ({ transform: D.value.pel })),
     shB: useAnimatedStyle(() => ({ transform: D.value.shB })),
     head: useAnimatedStyle(() => ({ transform: D.value.head })),
@@ -136,6 +138,7 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
       <Animated.View style={[S.limbBone, a.shinL]} />
       <Animated.View style={[S.limbBone, a.uarmL]} />
       <Animated.View style={[S.limbBone, a.farmL]} />
+      <Animated.View style={[S.joint, a.shLd]} />
       <Animated.View style={[S.joint, a.kneeL]} />
       <Animated.View style={[S.joint, a.ankL]} />
       <Animated.View style={[S.joint, a.elL]} />
@@ -154,6 +157,7 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
 
       <Animated.View style={[S.limbBone, a.uarmR]} />
       <Animated.View style={[S.limbBone, a.farmR]} />
+      <Animated.View style={[S.joint, a.shRd]} />
       <Animated.View style={[S.joint, a.elR]} />
       <Animated.View style={[S.fist, a.wrR]} />
     </Animated.View>
