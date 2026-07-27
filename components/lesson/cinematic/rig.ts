@@ -144,14 +144,19 @@ export interface Cfg {
   fistR: P2;
 }
 
+/** Pulls a target back onto a limb's reach circle if it sits outside it. */
+export function reachTo(from: P2, target: P2, max: number): P2 {
+  'worklet';
+  const dx = target.x - from.x, dy = target.y - from.y;
+  const d = Math.hypot(dx, dy);
+  if (d <= max || d === 0) return target;
+  return { x: from.x + (dx / d) * max, y: from.y + (dy / d) * max };
+}
+
 /** Pulls a target back onto the arm's reach circle if it sits outside it. */
 export function reachable(sh: P2, target: P2): P2 {
   'worklet';
-  const max = U.uarm + U.farm - 0.02;
-  const dx = target.x - sh.x, dy = target.y - sh.y;
-  const d = Math.hypot(dx, dy);
-  if (d <= max || d === 0) return target;
-  return { x: sh.x + (dx / d) * max, y: sh.y + (dy / d) * max };
+  return reachTo(sh, target, U.uarm + U.farm - 0.02);
 }
 
 export interface Joints {
@@ -184,8 +189,19 @@ export function solve(c: Cfg): Joints {
   const hipR = { x: U.hipW * ax.x, y: U.hipW * ax.y };
 
   // Feet arrive ground-relative; lift them into the pelvis frame.
-  const ankL = { x: c.footL.x, y: pelUp + c.footL.y };
-  const ankR = { x: c.footR.x, y: pelUp + c.footR.y };
+  //
+  // CLAMPED TO THE LEG'S LENGTH, for exactly the reason fists are clamped to the
+  // arm's — and this half was missing. The IK quietly gives up on an out-of-range
+  // target and returns the best knee it can, but the shin is then DRAWN from that
+  // knee to the target, so a foot the leg cannot reach STRETCHES the lower leg
+  // like rubber rather than failing visibly. Two things hit it: a jump whose
+  // pelvis rises further than the feet lift (the legs became two long straight
+  // bars and the figure read as a lollipop), and a seated pose with the legs
+  // stretched too far forward. Clamping puts the foot where the leg can actually
+  // put it, which for an airborne figure is exactly right — the feet come up.
+  const legMax = U.thigh + U.shin - 0.02;
+  const ankL = reachTo(hipL, { x: c.footL.x, y: pelUp + c.footL.y }, legMax);
+  const ankR = reachTo(hipR, { x: c.footR.x, y: pelUp + c.footR.y }, legMax);
   const kneeL = ik(hipL.x, hipL.y, ankL.x, ankL.y, U.thigh, U.shin, -1);
   const kneeR = ik(hipR.x, hipR.y, ankR.x, ankR.y, U.thigh, U.shin, -1);
 
