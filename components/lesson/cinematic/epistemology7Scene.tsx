@@ -193,9 +193,12 @@ const styles = StyleSheet.create({
     position: 'absolute', left: AX_L, top: 234, width: 174,
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: SOFT,
   },
+  // Tracking 0.3, not 1: "TOMORROW" is eight wide capitals (two of them M and W) and
+  // at 1 it measured a hair over the 68-unit box, so it wrapped and left the final
+  // "W" stranded on a line of its own.
   futTitle: {
     position: 'absolute', left: DIV_X, top: 234, width: 68, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.3, color: SOFT,
   },
   pastTitle: {
     position: 'absolute', left: 168, top: 426, width: 156, textAlign: 'center',

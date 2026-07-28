@@ -86,7 +86,7 @@ export const BEATS: Epi8Beat[] = [
         { id: 'd', text: 'No — every argument is secretly circular anyway', correct: false },
       ],
       explain:
-        'The trap: "circular reasoning" is a famous insult, so "always worthless" sounds obviously right. A two-step loop really is empty — but coherentists argue a huge, tightly knit web holds itself up. The sharper objection is this: a web can be perfectly consistent and still be completely false.',
+        'The trap: "circular reasoning" is a famous insult, so "always worthless" sounds obviously right. A two-step loop really is empty — but coherentists argue a huge, tightly knit web holds itself up. The sharper objection: a consistent web can still be false.',
       xp: 5,
     },
     dur: 1.0,

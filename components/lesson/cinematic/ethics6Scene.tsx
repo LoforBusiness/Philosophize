@@ -41,7 +41,13 @@ const MAIN5 = [300, 320, 340, 360, 380];
 // percentages, so the shape carries the claim without fabricating a statistic.
 const CH_L = 264;
 const CH_W = 128;
-const BASE_Y = 380;                 // the bars' baseline
+// The chart sits 34 units higher than it first did. Its footing ("SAME MATH: 1 FOR
+// 5") used to land at 404 … 426, straight on top of the five's tally at 396 … 423 —
+// so "THE FIVE" was sliced in half by the footing's border and the tally bracket was
+// hidden behind it completely. The column between the bars' baseline and the five's
+// heads (434) has to hold four things in order: bar labels, the footing, the tally
+// label and the tally bracket. At 380 it could not; at 346 it can.
+const BASE_Y = 346;                 // the bars' baseline
 const BAR_W = 40;
 const BAR_A = 280;                  // SWITCH
 const BAR_B = 336;                  // SHOVE
@@ -273,7 +279,7 @@ const styles = StyleSheet.create({
   // glyph starts near x 288 — well clear of the stranger's head circle, whose right
   // edge reaches x ≈ 266 on his most-leaning beat.
   chTitle: {
-    position: 'absolute', left: CH_L, top: 240, width: CH_W, textAlign: 'center',
+    position: 'absolute', left: CH_L, top: 206, width: CH_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
   chAxis: { position: 'absolute', left: CH_L + 4, top: BASE_Y, width: CH_W - 8, height: 1.5, backgroundColor: RULE },
@@ -283,11 +289,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
   barLabel: {
-    position: 'absolute', top: 385, textAlign: 'center',
+    position: 'absolute', top: 351, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
   chFoot: {
-    position: 'absolute', left: CH_L, top: 404, width: CH_W, height: 22,
+    position: 'absolute', left: CH_L, top: 370, width: CH_W, height: 22,
     borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
     alignItems: 'center', justifyContent: 'center',
   },
@@ -297,12 +303,13 @@ const styles = StyleSheet.create({
 // BAND. There is no camera any more, so design y IS screen y. Measured extremes
 // across every beat, top to bottom:
 //   chart title            240 … 253
-//   "MOST" bar cap         255 … 268
+//   chart title            206 … 219  (the chart moved up 34 — see BASE_Y)
+//   "MOST" bar cap         221 … 234
 //   stranger's crown       247   (x 216 on BRIDGE_Y 410 → 410 − 103·1.566)
 //   decider's crown        271   (x 150 on BRIDGE_Y 410 → 410 − 103·1.35)
 //   stamp                  292 … 352
 //   bridge handrail        380
-//   chart footing          404 … 426
+//   chart footing          370 … 392
 //   bridge deck            411 … 418
 //   bridge figures' ankle joints  417   (they stand ON the deck, not the ground)
 //   THE FIVE tally         396 … 423
@@ -311,10 +318,10 @@ const styles = StyleSheet.create({
 //   trolley roof           422 … 500  (roof must clear the deck at 411 … 418)
 //   rail                   500 … 502.5
 //   sleepers               502 … 506
-// so [234, 512] holds every pixel with 6 units of margin above and 6 below. The
-// band is 278 tall, which is still WIDTH-limited on a phone stage (923/400 = 2.31 <
-// 647/278 = 2.33), so the scene renders about 2.3× — against roughly 1.04× before,
-// where a full-height letterbox (1.15×) was multiplied by a 0.9× camera.
+// so [200, 512] holds every pixel with 6 units of margin above and 6 below. Raising
+// the top from 234 to 200 to take in the lifted chart title costs NOTHING on screen:
+// at 312 tall the band is still WIDTH-limited on a phone stage (360/400 = 0.90 <
+// 314/312 = 1.01), so the scene renders at exactly the same 0.90 it did at 278 tall.
 export function Ethics6Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics6Scene} band={[234, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics6Scene} band={[200, 512]} />;
 }

@@ -14,11 +14,12 @@ import type { SceneApi } from './CinematicPlayer';
 //
 // COMPOSITION / OCCLUSION CONTRACT
 //   · The figure walks the ground line at GROUND=500, standing at x = 70 (under
-//     PAST), 200 (under NOW) and 330 (under FUTURE). At K_FIG=1.35 that figure is
-//     ~139 units tall (crown near y=361) and spans about x±48.
-//   · EVERY prop lives ABOVE y = 350: the rule line at y=150, the three slices at
-//     y=168–232, the travelling spotlight at y=160–250, and the ALL THREE target
-//     at y=278–322. Nothing the reader must read or tap is ever behind the walker.
+//     PAST), 200 (under NOW) and 330 (under FUTURE). At K_FIG=1.0 that figure is
+//     103 units tall (crown at y=397) and spans about x±36.
+//   · EVERY prop lives ABOVE y = 390: the question label at y=140, the rule line at
+//     y=190, the three slices at y=208–272, the travelling spotlight at y=200–290,
+//     and the ALL THREE target at y=318–362. Nothing the reader must read or tap is
+//     ever behind the walker.
 //
 // Only the beat that CHANGES a prop animates it (the `lineFade` pattern), so the
 // timeline does not redraw itself every time the reader taps forward.
@@ -28,13 +29,22 @@ const BOX_W = 120;                         // ≥ 120 wide / 64 tall: a real tap
 const BOX_H = 64;
 const BOX_L = SLOT_X.map((c) => c - BOX_W / 2);   // 10 · 140 · 270
 
-const RULE_T = 150;                        // the horizontal arrow of time
-const STEM_T = 152;
-const BOX_T = 168;
+// The whole timeline sits 40 units lower than it first did. It was laid out against
+// a K_FIG=1.35 figure whose crown reached y=361; at 1.0 the crown drops to 397, so
+// the gap between the ALL THREE target and the walker's head had grown to 75 empty
+// rows — a measured 71-row band of nothing through the middle of the picture. That
+// dead height was also charged to the crop: the band had to be 420 tall, which made
+// this lesson HEIGHT-limited and rendered it at 0.75 with a side letterbox while its
+// siblings ran at 0.90. Dropping the diagram lets the band close to 378 and the
+// scene render at 0.83. 40 (not 60) keeps the ALL THREE box's underside at 362,
+// leaving 35 units of clearance so a pointing hand never reaches it.
+const RULE_T = 190;                        // the horizontal arrow of time
+const STEM_T = 192;
+const BOX_T = 208;
 const RING_W = 136;
 const RING_H = 84;
-const RING_T = 160;                        // 8 units of air around the slice it lights
-const ALL_T = 278;
+const RING_T = 200;                        // 8 units of air around the slice it lights
+const ALL_T = 318;
 const ALL_W = 240;
 const ALL_L = (STAGE_W - ALL_W) / 2;
 
@@ -205,8 +215,8 @@ const styles = StyleSheet.create({
     borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
   },
   stem: { position: 'absolute', top: STEM_T, width: 2, height: 16, backgroundColor: SOFT },
-  edgeL: { position: 'absolute', left: 12, top: 128 },
-  edgeR: { position: 'absolute', right: 12, top: 128 },
+  edgeL: { position: 'absolute', left: 12, top: 168 },
+  edgeR: { position: 'absolute', right: 12, top: 168 },
   edgeText: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.6, color: SOFT },
 
   sliceWrap: { position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H },
@@ -236,7 +246,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.6, color: SOFT,
   },
 
-  pickLabelWrap: { position: 'absolute', left: 0, top: 100, width: STAGE_W },
+  pickLabelWrap: { position: 'absolute', left: 0, top: 140, width: STAGE_W },
   pickLabel: {
     width: STAGE_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.5, color: INK,
@@ -254,5 +264,5 @@ const styles = StyleSheet.create({
 });
 
 export function Metaphysics7Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics7Scene} band={[96, 516]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics7Scene} band={[134, 512]} />;
 }

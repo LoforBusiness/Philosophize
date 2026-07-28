@@ -52,9 +52,12 @@ const FR_B = 216;                 // right frame 216 → 348
 const COMP_X = 340;               // the companion, fixed, never walks
 
 // ── the four marks of a trained eye ──────────────────────────────────────────
-const MK_L = 16;
-const MK_W = 86;
-const MK_GAP = 8;                 // 4 × 86 + 3 × 8 = 368, so 16 … 384
+// 90 wide, not 86: the chip reads "✓ COMPARISON", and at 86 the inner width came to
+// 76 — about three units short — so three of the four chips broke the tick onto its
+// own line and the row read as a ragged mix of one- and two-line labels.
+const MK_L = 11;
+const MK_W = 90;
+const MK_GAP = 6;                 // 4 × 90 + 3 × 6 = 378, so 11 … 389, centred
 const MK_T = 128;
 const MK_H = 32;
 const MARKS = ['PRACTICE', 'COMPARISON', 'NO GRUDGES', 'GOOD SENSE'];
@@ -338,7 +341,7 @@ const styles = StyleSheet.create({
   mkChip: {
     position: 'absolute', top: MK_T, width: MK_W, height: MK_H,
     borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
-    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2,
   },
   mkText: {
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.1, color: INK,

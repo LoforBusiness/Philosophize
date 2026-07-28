@@ -81,7 +81,7 @@ export const BEATS: Political7Beat[] = [
         { id: 'c', text: 'Laws are always unjust, so writing rights down is pointless', correct: false },
         { id: 'd', text: 'Only the oldest rights count, because they were written first', correct: false },
       ],
-      explain: 'The trap: "no law, no right" sounds hard-headed and grown-up, and it is exactly what Bentham argued. But follow it all the way. If a right is only ever whatever the law happens to say, then a law that strips one is unjust by no standard at all — there is nothing left to measure it against. Supplying that standard is the whole job of a natural right.',
+      explain: 'The trap: "no law, no right" sounds hard-headed, and it is what Bentham argued. But if a right is only whatever the law says, then a law that strips one is unjust by no standard at all — which is exactly what a natural right supplies.',
       xp: 5,
     },
     dur: 1.0,

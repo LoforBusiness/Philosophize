@@ -382,6 +382,12 @@ const styles = StyleSheet.create({
   carryText: { fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.1, color: INK },
 });
 
+// Measured across every beat: the highest ink is the tower/escape heading at y = 170
+// (which rises 12 units under its fade-in, so 158 at its most extreme) and the lowest
+// is the figure's shadow at 506. The old [96, 516] reserved 74 empty rows above the
+// heading, which cost real size: at 420 tall the band was HEIGHT-limited and the
+// whole lesson rendered at 0.75 with a side letterbox. At 360 tall it renders at
+// 0.87 — about 17% bigger — and still clears the fade-in's rise by 6 units.
 export function Epistemology8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology8Scene} band={[96, 516]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology8Scene} band={[152, 512]} />;
 }

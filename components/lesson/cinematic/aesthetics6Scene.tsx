@@ -304,9 +304,12 @@ const styles = StyleSheet.create({
   colRule: { position: 'absolute', left: TB_L + COL_W + 4, top: 262, width: 1.5, height: 84, backgroundColor: RULE },
 
   row: { position: 'absolute', left: 0, width: STAGE_W, height: 18 },
+  // 10/0.3, not 11/0.4: "OVERWHELMS" set at 11 measures just over the 82-unit
+  // column, so it wrapped and the 18-tall row clipped the orphaned "S" clean off.
+  // The longest word in the table has to fit its column on one line.
   cell: {
     position: 'absolute', top: 0, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.4, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.3, color: INK, includeFontPadding: false,
   },
   cellSoft: { color: SOFT },
 
@@ -318,13 +321,16 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 236, top: 294, width: 148, height: 78,
     borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
   },
+  // 143, not 148: an absolutely-positioned child sits inside the border box, so a
+  // child given the card's OUTER width overhangs it by the two 2.5-unit borders —
+  // which also threw the centred text 2.5 units right of true centre.
   mindWho: {
-    position: 'absolute', left: 0, top: 7, width: 148, textAlign: 'center',
+    position: 'absolute', left: 0, top: 7, width: 143, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT, includeFontPadding: false,
   },
   ring: { position: 'absolute', top: 19, width: 34, height: 34, borderRadius: 17, borderWidth: 2.5, borderColor: INK },
   mindT: {
-    position: 'absolute', left: 0, top: 55, width: 148, textAlign: 'center',
+    position: 'absolute', left: 0, top: 55, width: 143, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.2, color: INK, includeFontPadding: false,
   },
 });

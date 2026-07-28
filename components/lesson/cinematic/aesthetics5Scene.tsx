@@ -62,9 +62,13 @@ const WORD_L = 236, WORD_T = 356, WORD_W = 136, WORD_H = 62;   // 356 … 418
 const EGO_L = 8, EGO_T = 286, EGO_W = 116, EGO_H = 70;         // bubble 46 + two tails
 
 // ── the three goals (the scene-answered question) ────────────────────────────
-// 152 × 42 stage units per target, two lines of 14 / 12 px — comfortably over the
-// readable minimum once the band scales the stage by ~2.26×.
-const CARD_L = 226, CARD_W = 152, CARD_H = 42, CARD_STEP = 45, CARD_T = 336;
+// 152 × 48 stage units per target, two lines of 14 / 12 px — comfortably over the
+// readable minimum once the band scales the stage.
+// 48, not 42: every one of the three subtitles is a shade too long for the 130 units
+// of inner width, so each wrapped onto a second line and the card clipped its own
+// last line by 5 units — "a picture worth framing" lost "framing". The card has to
+// be tall enough for the two-line case, and the step has to clear the taller card.
+const CARD_L = 226, CARD_W = 152, CARD_H = 48, CARD_STEP = 52, CARD_T = 336;
 const GOALS = [
   { id: 'a', title: 'A FINE DRAWING', sub: 'a picture worth framing', correct: false },
   { id: 'b', title: 'RETRAIN THE EYE', sub: 'see colour, not the idea', correct: true },

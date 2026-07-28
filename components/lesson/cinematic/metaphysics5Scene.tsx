@@ -22,6 +22,9 @@ import type { SceneApi } from './CinematicPlayer';
 //   · the DASEIN tag sits at x 4…118, y 296…340 — above the crown, left of panel A.
 
 const FIG_X = 62;
+// The head's own radius is 20·K_FIG; 26 leaves a ring of air around it rather than
+// tracing the skull exactly.
+const AURA_R = 26;
 
 const PAN_T = 254;
 const PAN_H = 166;
@@ -220,9 +223,17 @@ const styles = StyleSheet.create({
   tagWord: { fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 2, color: INK, includeFontPadding: false },
   tagSub: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1, color: SOFT, marginTop: 3, includeFontPadding: false },
 
+  // Derived from the figure, not hand-placed: the head's centre sits (standH 34 +
+  // 49) rig units above the ground and its radius is 20, both scaled by K_FIG. The
+  // old literals (a 34-radius ring at GROUND − 150) were measured against the 1.35
+  // figure; at 1.0 the head dropped to y 417 while the ring stayed at 384, so the
+  // halo floated above the skull instead of around it. Writing it in terms of
+  // K_FIG means it tracks the figure the next time that number moves.
   aura: {
-    position: 'absolute', left: FIG_X - 34, top: GROUND - 150, width: 68, height: 68,
-    borderRadius: 34, borderWidth: 2, borderColor: INK,
+    position: 'absolute',
+    left: FIG_X - AURA_R, top: GROUND - 83 * K_FIG - AURA_R,
+    width: AURA_R * 2, height: AURA_R * 2,
+    borderRadius: AURA_R, borderWidth: 2, borderColor: INK,
   },
 });
 

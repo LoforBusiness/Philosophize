@@ -256,6 +256,9 @@ const styles = StyleSheet.create({
   bedLegR: { position: 'absolute', left: 386, top: 464, width: 3, height: 36, backgroundColor: SOFT },
 });
 
+// The section header "RULES · RIGHTS · TOTALS" sits at y = 46, above the old band
+// top of 56, so it was 91% clipped — the row of boxes had no title. Lowest ink is
+// the figure's shadow at 506.
 export function Ethics8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics8Scene} band={[56, 516]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics8Scene} band={[42, 512]} />;
 }

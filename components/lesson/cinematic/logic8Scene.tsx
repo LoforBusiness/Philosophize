@@ -345,6 +345,12 @@ const styles = StyleSheet.create({
   pickTextOn: { color: PAPER },
 });
 
+// Measured, not guessed: the highest ink is the rule card's border at y = 32 (its
+// "THE RULE" label sits at 42) and the lowest is the puddle's stray droplet at 517.
+// The old [96, 516] started BELOW the rule card, so the whole IF/THEN card — the
+// thing the lesson is about — was sliced off at the top and only "THEN streets wet"
+// showed, half cut. The scene really is this tall: the card column runs 32 → 338 and
+// the figure occupies 361 → 500, so there is no slack to shift art into.
 export function Logic8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic8Scene} band={[96, 516]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic8Scene} band={[28, 521]} />;
 }
