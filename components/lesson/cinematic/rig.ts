@@ -542,7 +542,10 @@ function lift(bt: number): number {
  *   works at it (a whiteboard, an easel, a chart, a fence) —
  * 40 write-on-board · 41 tap-high-on-board · 42 carry-load · 43 set-it-down ·
  * 44 hands-behind-back (contemplative stroll) · 45 double-take · 46 slump ·
- * 47 frame-it-up (both hands sizing something).
+ * 47 frame-it-up (both hands sizing something) ·
+ * — floor level (48–49). 46 "slump" is a STANDING slump; if the script says
+ *   someone is down, it has to be one of these —
+ * 48 sitting on the floor · 49 down on one knee beside someone.
  */
 export function emoteHold(code: number, t: number): Stance {
   'worklet';
@@ -604,6 +607,27 @@ export function emoteHold(code: number, t: number): Stance {
   if (code === 45) return { ...hands(s, -7, 6, 14, -20), neck: 0.02 };                            // double-take (the live pass snaps the head)
   if (code === 46) return { ...hands(s, -8, 4, 8, 4), tilt: s.tilt + 0.10, neck: 0.20, bob: s.bob - 6 }; // slump, defeated
   if (code === 47) return { ...hands(s, -18, -20, 18, -20), neck: -0.02, tilt: s.tilt - 0.02 };    // framed it, hands lowered
+  // ── floor level ─────────────────────────────────────────────────────────────
+  // Until these existed the vocabulary could not say "on the floor" at all, so a
+  // script that said someone was on the floor beside their bed got the nearest
+  // available pose — a STANDING slump — and the picture contradicted the sentence.
+  // `bob` drops the pelvis (34 + bob is its height above the ground) and the feet
+  // go FORWARD, because a leg folded straight down under a low pelvis throws the
+  // knee out sideways.
+  if (code === 48) return {                                                                        // sitting on the floor, slumped
+    ...hands(s, 11, 12, 17, 10),
+    tilt: s.tilt + 0.08,                      // leaning back against whatever is behind
+    neck: 0.18,                               // head down
+    bob: s.bob - 26,                          // pelvis 8 above the ground
+    footL: { x: 26, y: 0 }, footR: { x: 32, y: 0 },   // legs out along the floor
+  };
+  if (code === 49) return {                                                                        // down on one knee beside someone
+    ...hands(s, 20, 4, 27, 0),
+    tilt: s.tilt - 0.08,
+    neck: 0.12,
+    bob: s.bob - 18,                          // pelvis 16 above the ground
+    footL: { x: 15, y: 0 }, footR: { x: -11, y: 0 },  // one knee forward, one tucked back
+  };
   return s;                                       // 0 neutral
 }
 

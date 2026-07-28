@@ -58,7 +58,8 @@ export const BEATS: Metaphysics8Beat[] = [
     dur: 4.8,
   },
   {
-    p: 4, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
+    // 8 (shrug), not 4 (think): the line opens "A third camp shrugs".
+    p: 8, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
     text: 'A third camp shrugs at the whole fight. Both sides picked the wrong test, they think. Freedom was never about escaping causes. So what else could a free choice be?',
     cite: 'A third way',
     dur: 4.8,

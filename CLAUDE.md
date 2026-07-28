@@ -295,6 +295,8 @@ To add a new branch: create an `index.ts` in the branch directory, export a `Bra
 
 **Validation:** there is **no runtime lesson-contract check yet** — `tsc` verifies types, not the hook-first/summary-last/≥1-question rules. A validation script is a P3 roadmap item; follow the contract by hand until then.
 
+**Cinematic lessons have their own rule book:** [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md) — figure scale and proportion, reach and joint rules, motion and end-poses, band/deck/box/wrap clipping, and the text-must-match-the-picture rule. Read it before authoring a cinematic lesson and run its Part 3 checks before calling one done.
+
 ---
 
 ## 12. Current Status
@@ -318,6 +320,14 @@ To add a new branch: create an `index.ts` in the branch directory, export a `Bra
 ---
 
 ## 13. Lesson Design Principles (north star)
+
+> ⚠️ **Before writing or changing any cinematic lesson, read [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md).**
+> That is the binding rule book — 25 numbered rules, an authoring checklist, and the
+> four exact verification checks. Every rule in it exists because a real lesson broke
+> it and it was caught on a real phone. This section is the *why*; that file is the *how*.
+>
+> Rule A1 above all: **what the text says, the picture must do.** A lesson that says
+> someone is on the floor and draws them standing is not acceptable at any polish level.
 
 Lessons are the product. They must *look*, *feel*, and *teach* well enough that a curious beginner would pay to keep going. Every lesson should honor:
 

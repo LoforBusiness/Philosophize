@@ -21,10 +21,10 @@ import type { SceneApi } from './CinematicPlayer';
 //   · the slumped figure is FIXED at x = 284 (head centre 298, so it reaches
 //     x ≈ 271 … 325). At least 76 units of clear paper between the two figures.
 //   · the bed lives at x = 328 … 394 — right of everything either figure occupies.
-//   · EVERY other prop (the rule grid at y 46–114, the three question cards at
-//     y 176–308, the thread and its label at y 312–349) sits entirely ABOVE
-//     y = 350. A standing crown is at y = 361 and a WALKING crown rides to 357 —
-//     so nothing the reader must read is ever behind a body.
+//   · the rule grid (y 46–114) and the three question cards (y 176–308) sit well
+//     above every body: a standing crown is at y = 397, kneeling 415, and the
+//     friend seated on the floor 423. The thread at y 384 is the one thing that
+//     deliberately meets a head, which is the whole point of it.
 
 const OTH_X = 284;          // the slumped figure, fixed
 const OTH_HEAD = 298;       // where their head centre lands (thread anchor)
@@ -42,7 +42,14 @@ const CARD_GAP = 46;
 // Everything the reader must READ lives above y = 350. A walking figure's crown
 // rides up to y ≈ 357 on the gait's bob, so the thread and its stems are cut off
 // well short of that — at rest the crown sits at 361, but the bob is what bites.
-const THREAD_Y = 336;
+// 384, not 336. The thread is a bond drawn between the two HEADS, tethered down to
+// each by a short stem — so it has to sit just above them. 336 was measured against
+// the old K_FIG 1.35 figure whose crown reached 361; at 1.0 the standing crown is
+// 397 and the seated friend's is 423, which left the thread hanging in clear paper
+// 60 units above anyone. The near stem now meets the narrator's crown and the far
+// stem runs further down to the friend on the floor, so the drop reads as the
+// height difference between someone standing and someone sitting.
+const THREAD_Y = 384;
 
 const CARDS = [
   { id: 'rule', label: 'WHICH RULE APPLIES?', correct: false },
@@ -82,7 +89,10 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick }: Scene
       fig: pose(s, fx, GROUND, K_FIG, DIR[n], 1),
       // The cared-for figure never moves and never re-animates: a settled slump
       // with only stand()'s breath under it, so they read as present, not busy.
-      other: pose(emoteHold(46, t), OTH_X, GROUND, K_FIG, -1, oth),
+      // 48, not 46: the script says they are ON THE FLOOR by their bed. 46 is a
+      // standing slump, which put them upright on the ground line — the picture
+      // flatly contradicting the sentence.
+      other: pose(emoteHold(48, t), OTH_X, GROUND, K_FIG, -1, oth),
       fx,
       oth,
       thread,
@@ -217,11 +227,11 @@ const styles = StyleSheet.create({
   // Both anchors are real 9-wide boxes centred on the thread's end point, so no
   // child is ever drawn outside its parent's bounds.
   anchor: { position: 'absolute', left: -4.5, top: THREAD_Y - 4.5, width: 9, height: 16 },
-  farAnchor: { position: 'absolute', left: OTH_HEAD - 4.5, top: THREAD_Y - 4.5, width: 9, height: 18 },
+  farAnchor: { position: 'absolute', left: OTH_HEAD - 4.5, top: THREAD_Y - 4.5, width: 9, height: 44 },
   dot: { position: 'absolute', left: 0, top: 0, width: 9, height: 9, borderRadius: 4.5, backgroundColor: INK },
   stem: { position: 'absolute', left: 3.5, top: 7.5, width: 2, height: 8, backgroundColor: INK, borderRadius: 1 },
-  stemFar: { position: 'absolute', left: 3.5, top: 7.5, width: 2, height: 10, backgroundColor: INK, borderRadius: 1 },
-  threadLabelWrap: { position: 'absolute', left: 150, top: 312, width: 200 },
+  stemFar: { position: 'absolute', left: 3.5, top: 7.5, width: 2, height: 36, backgroundColor: INK, borderRadius: 1 },
+  threadLabelWrap: { position: 'absolute', left: 150, top: 352, width: 200 },
   threadLabel: {
     textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT,
   },

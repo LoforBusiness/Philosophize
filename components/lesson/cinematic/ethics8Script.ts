@@ -40,13 +40,18 @@ export const BEATS: Ethics8Beat[] = [
     dur: 4.4,
   },
   {
-    p: 43, x: 182, grid: 1, oth: 1,
+    // 49 (down on one knee), not 43 (setting a load down while standing): the line
+    // is "get down beside them", so the figure has to actually get down.
+    p: 49, x: 182, grid: 1, oth: 1,
     text: 'You cross the room and get down beside them. No theory has said a word yet. Something else is already telling you what to do.',
     cite: 'Getting closer',
     dur: 4.2,
   },
   {
-    p: 30, x: 182, grid: 0.85, oth: 1, pick: 1,
+    // Stays 49: the prompt says "You are down on the floor beside them", so the
+    // figure must still BE down. It was 30 (offer-up), which stood them back up
+    // in the same breath as the sentence saying they were down.
+    p: 49, x: 182, grid: 0.85, oth: 1, pick: 1,
     interact: {
       prompt: 'You are down on the floor beside them. Tap the question this way of thinking asks FIRST.',
       explain: 'It starts with the person, not the rulebook. Notice who needs you and what they actually need — and only then work out what to do. Attention comes before judgement.',
