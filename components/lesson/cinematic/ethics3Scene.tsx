@@ -148,8 +148,8 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick }: Scene
       <Animated.View style={[styles.trolley, trolleyStyle]} pointerEvents="none">
         <View style={styles.roof} />
         <View style={styles.car} />
-        <View style={[styles.window, { left: 8 }]} />
-        <View style={[styles.window, { left: 33 }]} />
+        <View style={[styles.window, { left: 12 }]} />
+        <View style={[styles.window, { left: 51 }]} />
         <Animated.View style={[styles.wheel, { left: 7 }, wheelStyle]}><View style={styles.spoke} /></Animated.View>
         <Animated.View style={[styles.wheel, { right: 7 }, wheelStyle]}><View style={styles.spoke} /></Animated.View>
       </Animated.View>
@@ -259,21 +259,27 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
   },
 
-  trolley: { position: 'absolute', left: 0, top: GROUND - 48, width: 54, height: 48 },
-  roof: { position: 'absolute', left: 6, top: 4, width: 42, height: 6, backgroundColor: INK, borderRadius: 2 },
+  // A TRAM IS TALLER THAN THE PEOPLE IT IS ABOUT TO HIT. It was 54×48, which left it
+  // shorter than the five once they were drawn at a readable 72 — a runaway tram you
+  // could step over. The ordering that has to hold is people (72) < tram (74) <
+  // decider (111), so the thing bearing down reads as heavy without upstaging him.
+  // It can afford the room now: `left` is only the base, and `translateX` parks it at
+  // x 118 and up, well clear of the decider's x 20–96.
+  trolley: { position: 'absolute', left: 0, top: GROUND - 74, width: 84, height: 74 },
+  roof: { position: 'absolute', left: 9, top: 6, width: 65, height: 9, backgroundColor: INK, borderRadius: 3 },
   car: {
-    position: 'absolute', left: 0, top: 10, width: 54, height: 30,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    position: 'absolute', left: 0, top: 16, width: 84, height: 47,
+    borderWidth: 3, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
   },
   window: {
-    position: 'absolute', top: 16, width: 13, height: 11,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
+    position: 'absolute', top: 25, width: 20, height: 17,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
   },
   wheel: {
-    position: 'absolute', bottom: -4, width: 16, height: 16, borderRadius: 8,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+    position: 'absolute', bottom: -5, width: 25, height: 25, borderRadius: 13,
+    borderWidth: 3.5, borderColor: INK, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
   },
-  spoke: { width: 2.5, height: 10, backgroundColor: INK },
+  spoke: { width: 3.5, height: 15, backgroundColor: INK },
 
   // ── verdict board ─────────────────────────────────────────────────────────
   board: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
