@@ -44,7 +44,19 @@ const RULE = '#E4E1D8';
 const STAGE_W = 400;
 const STAGE_H = 560;
 const GROUND = 500;
-const K_FIG = 1.35;                 // stage units per rig unit
+// Stage units per rig unit — the SAME 1.0 every other lesson uses (cinematicKit's
+// K_FIG). This file used to carry its own 1.35, shadowing the shared constant, so
+// it never got the size correction and drew figures 35% larger than the other 46.
+// 103 units tall, crown at y 397.
+//
+// MASTER_X and APP_X deliberately do NOT move. Both figures are placed against the
+// brick structure, which is a prop at a fixed size — the master stands beside the
+// work, the apprentice clear of the base row. A figure-to-PROP distance stays put
+// when the figure shrinks; that is exactly what puts them back in proportion with
+// the stones. (Contrast lesson 1, where the two boxers are placed against EACH
+// OTHER, so their separation had to scale with them.) Nothing here is carried by
+// hand — bricks drop into place on their own — so there is no contact to re-tune.
+const K_FIG = 1.0;
 
 // ── THE BAND ────────────────────────────────────────────────────────────────
 // The stage REGION on a phone is wide and short while this design space is tall
@@ -58,7 +70,7 @@ const K_FIG = 1.35;                 // stage units per rig unit
 // Extremes across every beat:
 //   legend card       (outside the camera, literal)   118 … 180
 //   speech bubble     (outside the camera, literal)   120 … 180
-//   master's crown            y 359, s 1.16           → 188
+//   master's crown            y 397, s 1.16           → 232   (was 359 → 188)
 //   keystone mid drop-in      y 361, s 1.16           → 191
 //   CONCLUSION tag            y 372, s 1.16           → 204
 //   ground rule               y 501, s 1.16           → 353
@@ -604,8 +616,10 @@ function Bubble({ bt, text, who }: { bt: SharedValue<number>; text: string; who:
         styles.bubble,
         left ? { left: 14, alignItems: 'flex-start' } : { right: 14, alignItems: 'flex-end' },
         // Sits in the same strip as the legend (which fades out on any beat with a
-        // bubble) and clears the master's crown, which lands at ~188 on screen.
-        { top: 120 },
+        // bubble) and clears the master's crown, which lands at ~232 on screen.
+        // It was 120, pinned to the old 1.35 figure's crown at ~188; left there it
+        // would hang 50 units above the head it belongs to.
+        { top: 150 },
         st,
       ]}
     >

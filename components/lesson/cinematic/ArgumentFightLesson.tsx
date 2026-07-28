@@ -51,7 +51,22 @@ const RULE = '#E4E1D8';
 const STAGE_W = 400;
 const STAGE_H = 560;
 const GROUND = 500;
-const K_FIG = 1.35;                       // stage units per rig unit
+// Stage units per rig unit — the SAME 1.0 every other lesson uses (cinematicKit's
+// K_FIG). This file used to carry its own 1.35, which is why the first two lessons
+// drew figures 35% larger than the other 46: a local constant shadowing the shared
+// one never got the size correction. 103 units tall, crown at y 397.
+//
+// Two things had to move with it. The boxers' 130-unit separation was DERIVED from
+// their own head size ("anything tighter and the pair reads as a single dark
+// shape"), so it is a figure-to-figure distance and scales with them — otherwise
+// smaller boxers just drift apart and the squaring-off reads limp. The speech
+// bubbles sit at literal stage positions OUTSIDE the camera and were pinned just
+// above the old crowns, so they had to come down to the new ones or they float.
+// The ring, the board and the scoreboard are props at fixed sizes and do NOT move:
+// the figure shrinking against them is the whole point of the change.
+const K_FIG = 1.0;
+/** Figure-to-figure distances were tuned at 1.35; scale them with the body. */
+const FIG_SPACING = K_FIG / 1.35;
 
 // ── THE BAND ────────────────────────────────────────────────────────────────
 // The stage REGION on a phone is wide and short (roughly 923×647 device px) while
@@ -74,10 +89,12 @@ const K_FIG = 1.35;                       // stage units per rig unit
 //   scoreboard     (outside the camera, literal)   144 … 198
 //   Socratic stack (outside the camera, literal)   148 … 275  (incl. the stamp)
 //   speech bubbles (outside the camera, literal)   208 … 272
-//   solo crown           y 359, s 1.58             → 273
-//   ring crown           y 359, s 1.54             → 279
-//   stack crown          y 359, s 1.46             → 290
-//   board-beat crown     y 359, s 1.21             → 325
+//   solo crown           y 397, s 1.58             → 333
+//   ring crown           y 397, s 1.54             → 337
+//   stack crown          y 397, s 1.46             → 346
+//   board-beat crown     y 397, s 1.21             → 371
+// (crowns are at 397, not the old 359: see K_FIG. They sit LOWER now, so the band
+// top is still set by the un-zoomed literals above and nothing new can clip.)
 //   ring turnbuckles     y 418, s 1.54             → 370
 //   ground rule          y 501                     → 497.5
 //   mat edge + caps      y 507.5, s 1.54           → 507.6
@@ -109,7 +126,7 @@ const GROUND_Y = 496;
 // being sliced in half by the edge of the stage.
 const RING_L = 80;
 const RING_R = 320;
-/** Post top. Waist-high on the boxers (their crowns land at 279), so it frames without crowding. */
+/** Post top. Chest-high on the boxers (their crowns land at 337), so it frames without crowding. */
 const POST_T = 420;
 
 const COMPLETION_XP = 5;                  // matches LessonRunner
@@ -200,16 +217,17 @@ const S_REMATCH = 1.55;    // two figures, standing, close
 function shotFor(b: Beat, i: number): Shot {
   const base: Shot = {
     s: 1, cx: 200, tr: 0.75,
-    rx: 135, rOn: 0, rMode: 0,
-    bx: 265, bOn: 0, bMode: 0,
+    rx: 200 - 65 * FIG_SPACING, rOn: 0, rMode: 0,   // 135 at 1.35 → 152 at 1.0
+    bx: 200 + 65 * FIG_SPACING, bOn: 0, bMode: 0,   // 265 at 1.35 → 248 at 1.0
     nx: -50, nOn: 0, nMode: 2,                // parked off-stage left until needed
     ring: 0,
   };
   if (b.act === 1) {
-    // Close on the ring. 130 units apart: the heads are 40% of figure height, so
-    // anything tighter and the pair reads as a single dark shape. The crowns land
-    // at 279, comfortably below the shout bubbles (which sit at a fixed stage
-    // position OUTSIDE the camera and so don't move when it zooms).
+    // Close on the ring. 96 units apart (130 × FIG_SPACING): the heads are 40% of
+    // figure height, so anything tighter and the pair reads as a single dark shape
+    // — which is why this distance scales with the body rather than staying put.
+    // The crowns land at 337, comfortably below the shout bubbles (which sit at a
+    // fixed stage position OUTSIDE the camera and so don't move when it zooms).
     return { ...base, s: S_FIGHT, rOn: 1, bOn: 1, ring: 1 };
   }
   if (b.act === 2) {
@@ -244,7 +262,8 @@ function shotFor(b: Beat, i: number): Shot {
     // lesson, because nothing else is on stage to make room for.
     return {
       ...base, s: S_REMATCH,
-      rx: 148, bx: 252, rOn: 1, bOn: 1, rMode: 1, bMode: 1,
+      rx: 200 - 52 * FIG_SPACING, bx: 200 + 52 * FIG_SPACING,   // 148/252 → 162/238
+      rOn: 1, bOn: 1, rMode: 1, bMode: 1,
     };
   }
   return base;                                 // act 5 — nobody on stage
@@ -898,9 +917,10 @@ function Bubble({
         left ? { left: 18, alignItems: 'flex-start' } : { right: 18, alignItems: 'flex-end' },
         // Above the heads, not over them, and below the scoreboard — which is why
         // this is now ONE number for every act: the shots all pin the ground line
-        // to the same place, so the crowns land at 278 (rematch) or 296 (ring) and
-        // a two-line bubble starting at 208 clears both.
-        { top: 208 },
+        // to the same place, so the crowns land at 336 (rematch) or 337 (ring) and
+        // a bubble starting at 250 clears both. It was 208, pinned to the crowns of
+        // the old 1.35 figure at 278/296; left there it would hang in clear air.
+        { top: 250 },
         st,
       ]}
     >
