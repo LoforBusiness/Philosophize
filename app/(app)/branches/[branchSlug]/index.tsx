@@ -2,7 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
+  interpolateColor,
+  Easing,
+  Extrapolation,
+} from 'react-native-reanimated';
 import { getBranchBySlug } from '@/data';
 import type { Path as Unit, Lesson } from '@/data/types';
 import Glyph, { type GlyphName } from '@/components/shared/Glyph';
@@ -21,6 +29,18 @@ const Cream = '#F4F1EA';
 const Gold = '#A8A49A';
 const LockGray = '#B7B3A9';
 const FaintLine = '#D8D4CB';
+const DimBorder = '#DCD8CF';
+const DimPaper = '#FBFAF7';
+
+/** How long a unit takes to open or close. Long enough to read as a movement
+ *  rather than a redraw; the scroll that follows the unit runs on the same clock. */
+const OPEN_MS = 360;
+const EASE = Easing.inOut(Easing.cubic);
+
+// The left slot holds the state mark when closed and the branch glyph when open,
+// and grows between the two — so the header morphs instead of being swapped out.
+const MARK = 22;
+const TILE = 42;
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 
@@ -71,12 +91,11 @@ export default function BranchDetailScreen() {
   // Which unit the user has explicitly opened. null = follow their progress.
   const [pinned, setPinned] = useState<string | null>(null);
   const scroller = useRef<ScrollView | null>(null);
-  // The unit a tap asked us to bring into view. The scroll can't be done from the
-  // tap handler: opening a unit also collapses whichever was open, and if that one
-  // sat ABOVE this one every recorded y is stale by hundreds of pixels (reading it
-  // a beat later landed on the BOTTOM of the unit). So we wait for this unit's own
-  // onLayout — the first y that reflects the finished accordion — and scroll then.
-  const pendingScroll = useRef<string | null>(null);
+  // Live geometry, kept by onLayout: where each unit sits in the list, how tall
+  // each unit's expanding body is, and where the list starts in the scroll
+  // content (scrollTo wants a content offset; onLayout gives parent-relative).
+  const unitY = useRef<Record<string, number>>({});
+  const bodyH = useRef<Record<string, number>>({});
   const listY = useRef(0);
 
   // Progress is per-unit: each unit tracks its own completed count, and whether
@@ -129,21 +148,25 @@ export default function BranchDetailScreen() {
 
   const toggleUnit = useCallback(
     (id: string) => {
-      setPinned((prev) => {
-        const currentlyOpen = prev ?? firstIncomplete;
-        return currentlyOpen === id ? '' : id; // '' = everything closed
-      });
-      pendingScroll.current = id;
-    },
-    [firstIncomplete]
-  );
+      const wasOpen = pinned ?? firstIncomplete;
+      const closing = wasOpen === id;
+      setPinned(closing ? '' : id); // '' = everything closed
 
-  /** Called on every unit's layout; scrolls only the one a tap is waiting on. */
-  const handleUnitLayout = useCallback((id: string, y: number) => {
-    if (pendingScroll.current !== id) return;
-    pendingScroll.current = null;
-    scroller.current?.scrollTo({ y: Math.max(0, listY.current + y - 10), animated: true });
-  }, []);
+      if (closing) return;
+
+      // Scroll the opened unit to the top of the screen ON THE SAME CLOCK as the
+      // expansion, rather than waiting for it to settle. Its final y can't be read
+      // from layout yet, but it can be COMPUTED: the only thing moving above it is
+      // the unit that's closing, and that unit's body height is already measured.
+      const idx = units.findIndex((u) => u.unit.id === id);
+      const closingIdx = units.findIndex((u) => u.unit.id === wasOpen);
+      const shift = wasOpen && closingIdx > -1 && closingIdx < idx ? (bodyH.current[wasOpen] ?? 0) : 0;
+      const y = unitY.current[id];
+      if (y == null) return;
+      scroller.current?.scrollTo({ y: Math.max(0, listY.current + y - shift - 10), animated: true });
+    },
+    [pinned, firstIncomplete, units]
+  );
 
   if (!branch) {
     return (
@@ -190,8 +213,8 @@ export default function BranchDetailScreen() {
             )}
           </View>
 
-          {/* One unit open at a time. The rest sit as compact bars, so a 29-lesson
-              branch reads as five lines plus the one road you're actually on. */}
+          {/* One unit open at a time. The rest sit closed, so a 29-lesson branch
+              reads as five lines plus the one road you're actually on. */}
           <View
             style={styles.unitList}
             onLayout={(e) => {
@@ -199,22 +222,19 @@ export default function BranchDetailScreen() {
             }}
           >
             {units.map((u) => (
-              <View
+              <UnitCard
                 key={u.unit.id}
-                onLayout={(e) => handleUnitLayout(u.unit.id, e.nativeEvent.layout.y)}
-              >
-                {openId === u.unit.id ? (
-                  <OpenUnit
-                    model={u}
-                    glyph={pres.glyph}
-                    onToggle={() => toggleUnit(u.unit.id)}
-                    onOpenLesson={(lesson) => openLesson(u.unit, lesson)}
-                    onLockedPress={openPaywall}
-                  />
-                ) : (
-                  <UnitBar model={u} onPress={() => toggleUnit(u.unit.id)} />
-                )}
-              </View>
+                model={u}
+                glyph={pres.glyph}
+                open={openId === u.unit.id}
+                onToggle={() => toggleUnit(u.unit.id)}
+                onOpenLesson={(lesson) => openLesson(u.unit, lesson)}
+                onLockedPress={openPaywall}
+                onMeasure={(y, h) => {
+                  if (y != null) unitY.current[u.unit.id] = y;
+                  if (h != null) bodyH.current[u.unit.id] = h;
+                }}
+              />
             ))}
           </View>
         </ScrollView>
@@ -223,17 +243,164 @@ export default function BranchDetailScreen() {
   );
 }
 
-/* ---------------- Unit chrome ---------------- */
+/* ---------------- The unit card ---------------- */
 
-function Chevron({ open }: { open: boolean }) {
+/** One unit, open or closed. It is the SAME card in both states — the header
+ *  morphs and the body expands, which is what lets the accordion be animated at
+ *  all. Swapping a compact bar for a different card can only ever cut. */
+function UnitCard({
+  model,
+  glyph,
+  open,
+  onToggle,
+  onOpenLesson,
+  onLockedPress,
+  onMeasure,
+}: {
+  model: UnitModel;
+  glyph: GlyphName;
+  open: boolean;
+  onToggle: () => void;
+  onOpenLesson: (lesson: Lesson) => void;
+  onLockedPress: () => void;
+  onMeasure: (y: number | null, h: number | null) => void;
+}) {
+  const p = useSharedValue(open ? 1 : 0);
+  // Natural height of the body, measured once. The body is absolutely
+  // positioned so that clipping its parent to an animated height never squeezes
+  // it — otherwise measuring it would depend on the animation measuring it.
+  const bodyHeight = useSharedValue(0);
+  const dim = model.state === 'locked';
+
+  useEffect(() => {
+    p.value = withTiming(open ? 1 : 0, { duration: OPEN_MS, easing: EASE });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // A locked unit is quiet while closed and comes up to full ink as it opens.
+  // For every other unit both ends are identical, so nothing appears to change.
+  const c0Border = model.state === 'locked' ? DimBorder : Ink;
+  const c0Paper = model.state === 'locked' ? DimPaper : Paper;
+  const c0Text = model.state === 'locked' ? LockGray : Ink;
+  const c0Kicker = model.state === 'locked' ? LockGray : Faint;
+
+  const cardStyle = useAnimatedStyle(() => ({
+    borderColor: interpolateColor(p.value, [0, 1], [c0Border, Ink]),
+    backgroundColor: interpolateColor(p.value, [0, 1], [c0Paper, Paper]),
+  }));
+
+  const slotStyle = useAnimatedStyle(() => {
+    const size = interpolate(p.value, [0, 1], [MARK, TILE]);
+    return { width: size, height: size };
+  });
+
+  // The two occupants of the left slot cross over rather than cutting: the mark
+  // is gone before the glyph tile is really there, so they never both read at
+  // once and the slot looks like one thing growing.
+  const markStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(p.value, [0, 0.42], [1, 0], Extrapolation.CLAMP),
+  }));
+  const tileStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(p.value, [0.38, 1], [0, 1], Extrapolation.CLAMP),
+  }));
+  const countStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(p.value, [0, 0.5], [1, 0], Extrapolation.CLAMP),
+  }));
+  const chevStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${interpolate(p.value, [0, 1], [-90, 0])}deg` }],
+  }));
+  const titleStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(p.value, [0, 1], [c0Text, Ink]),
+  }));
+  const kickerStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(p.value, [0, 1], [c0Kicker, InkSoft]),
+  }));
+
+  // The body's height IS the animation. Its contents fade in over the back half
+  // so the text isn't legible while it's still sliding.
+  const bodyStyle = useAnimatedStyle(() => ({
+    height: p.value * bodyHeight.value,
+    opacity: interpolate(p.value, [0, 0.4, 1], [0, 0, 1], Extrapolation.CLAMP),
+  }));
+
   return (
-    <View style={{ transform: [{ rotate: open ? '0deg' : '-90deg' }] }}>
-      <SketchIcon name="chevron-down" size={16} color={Faint} />
-    </View>
+    <Animated.View
+      style={[styles.card, cardStyle]}
+      onLayout={(e) => onMeasure(e.nativeEvent.layout.y, null)}
+    >
+      <Pressable onPress={onToggle} style={({ pressed }) => [styles.head, pressed && { opacity: 0.68 }]}>
+        <Animated.View style={[styles.slot, slotStyle]}>
+          <Animated.View style={[styles.slotItem, markStyle]}>
+            <UnitMark state={model.state} />
+          </Animated.View>
+          <Animated.View style={[styles.slotItem, tileStyle]}>
+            <View style={styles.tile}>
+              <Glyph name={glyph} size={22} color={Ink} />
+            </View>
+          </Animated.View>
+        </Animated.View>
+
+        <View style={styles.headText}>
+          <Animated.Text style={[styles.kicker, kickerStyle]}>UNIT {model.index + 1}</Animated.Text>
+          <Animated.Text style={[styles.name, titleStyle]} numberOfLines={2}>
+            {model.unit.name}
+          </Animated.Text>
+        </View>
+
+        <Animated.Text style={[styles.count, countStyle, dim && { color: LockGray }]}>
+          {model.done}/{model.total}
+        </Animated.Text>
+        <Animated.View style={chevStyle}>
+          <SketchIcon name="chevron-down" size={16} color={Faint} />
+        </Animated.View>
+      </Pressable>
+
+      <Animated.View style={[styles.bodyClip, bodyStyle]} pointerEvents={open ? 'auto' : 'none'}>
+        <View
+          style={styles.body}
+          onLayout={(e) => {
+            const h = e.nativeEvent.layout.height;
+            bodyHeight.value = h;
+            onMeasure(null, h);
+          }}
+        >
+          <Text style={styles.desc}>{model.unit.description}</Text>
+
+          <View style={styles.metaRow}>
+            {model.state === 'locked' ? (
+              <>
+                <SketchIcon name="lock" size={12} color={LockGray} />
+                <Text style={styles.metaLocked}>
+                  Finish Unit {model.index} — or open this one now with Scholar’s Pass
+                </Text>
+              </>
+            ) : (
+              <Text style={styles.metaCount}>
+                {model.done} of {model.total} complete
+              </Text>
+            )}
+          </View>
+
+          <View style={styles.timeline}>
+            {model.lessons.map((L, i) => (
+              <LessonNode
+                key={L.lesson.id}
+                model={L}
+                first={i === 0}
+                /* the line INTO this node is inked once the one before it is done */
+                reached={i > 0 && model.lessons[i - 1].state === 'done'}
+                onPress={() => onOpenLesson(L.lesson)}
+                onLockedPress={onLockedPress}
+              />
+            ))}
+          </View>
+        </View>
+      </Animated.View>
+    </Animated.View>
   );
 }
 
-/** The state mark that leads a collapsed unit bar. */
+/** The state mark the header carries while the unit is closed. */
 function UnitMark({ state }: { state: UnitModel['state'] }) {
   if (state === 'done') {
     return (
@@ -244,7 +411,7 @@ function UnitMark({ state }: { state: UnitModel['state'] }) {
   }
   if (state === 'locked') {
     return (
-      <View style={styles.markLocked}>
+      <View style={styles.markPlain}>
         <SketchIcon name="lock" size={13} color={LockGray} />
       </View>
     );
@@ -257,90 +424,6 @@ function UnitMark({ state }: { state: UnitModel['state'] }) {
     );
   }
   return <View style={styles.markOpen} />;
-}
-
-/** A collapsed unit: one tight line — mark, number, name, count, chevron. */
-function UnitBar({ model, onPress }: { model: UnitModel; onPress: () => void }) {
-  const dim = model.state === 'locked';
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.bar, dim && styles.barDim, pressed && { opacity: 0.62 }]}
-    >
-      <UnitMark state={model.state} />
-      <View style={styles.barText}>
-        <Text style={[styles.barKicker, dim && { color: LockGray }]}>UNIT {model.index + 1}</Text>
-        <Text style={[styles.barName, dim && { color: LockGray }]} numberOfLines={2}>
-          {model.unit.name}
-        </Text>
-      </View>
-      <Text style={[styles.barCount, dim && { color: LockGray }]}>
-        {model.done}/{model.total}
-      </Text>
-      <Chevron open={false} />
-    </Pressable>
-  );
-}
-
-/** The open unit: full card — glyph, name, description — above its timeline. */
-function OpenUnit({
-  model,
-  glyph,
-  onToggle,
-  onOpenLesson,
-  onLockedPress,
-}: {
-  model: UnitModel;
-  glyph: GlyphName;
-  onToggle: () => void;
-  onOpenLesson: (lesson: Lesson) => void;
-  onLockedPress: () => void;
-}) {
-  return (
-    <View style={styles.openCard}>
-      <Pressable onPress={onToggle} style={({ pressed }) => [styles.openHead, pressed && { opacity: 0.7 }]}>
-        <View style={styles.unitIcon}>
-          <Glyph name={glyph} size={22} color={Ink} />
-        </View>
-        <View style={styles.openHeadText}>
-          <Text style={styles.unitKicker}>UNIT {model.index + 1}</Text>
-          <Text style={styles.unitName}>{model.unit.name}</Text>
-        </View>
-        <Chevron open />
-      </Pressable>
-
-      <Text style={styles.unitDesc}>{model.unit.description}</Text>
-
-      <View style={styles.metaRow}>
-        {model.state === 'locked' ? (
-          <>
-            <SketchIcon name="lock" size={12} color={LockGray} />
-            <Text style={styles.metaLocked}>
-              Finish Unit {model.index} — or open this one now with Scholar’s Pass
-            </Text>
-          </>
-        ) : (
-          <Text style={styles.metaCount}>
-            {model.done} of {model.total} complete
-          </Text>
-        )}
-      </View>
-
-      <Animated.View entering={FadeIn.duration(200)} style={styles.timeline}>
-        {model.lessons.map((L, i) => (
-          <LessonNode
-            key={L.lesson.id}
-            model={L}
-            first={i === 0}
-            /* the line INTO this node is inked once the one before it is done */
-            reached={i > 0 && model.lessons[i - 1].state === 'done'}
-            onPress={() => onOpenLesson(L.lesson)}
-            onLockedPress={onLockedPress}
-          />
-        ))}
-      </Animated.View>
-    </View>
-  );
 }
 
 /* ---------------- The timeline ---------------- */
@@ -464,41 +547,30 @@ const styles = StyleSheet.create({
 
   unitList: { marginTop: 20, gap: 10 },
 
-  // Collapsed unit bar
-  bar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 5,
-    backgroundColor: Paper,
-    paddingVertical: 13,
-    paddingHorizontal: 14,
-  },
-  barDim: { borderColor: '#DCD8CF', backgroundColor: '#FBFAF7' },
-  barText: { flex: 1, minWidth: 0 },
-  barKicker: { fontFamily: 'Inter_700Bold', fontSize: 8.5, color: Faint, letterSpacing: 1.5 },
-  barName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 16, color: Ink, marginTop: 2, lineHeight: 21 },
-  barCount: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, letterSpacing: 0.5 },
+  // The card — one shape for both states
+  card: { borderWidth: 1.5, borderRadius: 5, overflow: 'hidden' },
+  head: { flexDirection: 'row', alignItems: 'center', paddingVertical: 13, paddingHorizontal: 14 },
+  slot: { alignItems: 'center', justifyContent: 'center' },
+  slotItem: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
+  tile: { width: TILE, height: TILE, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
+  headText: { flex: 1, minWidth: 0, marginLeft: 12, marginRight: 8 },
+  kicker: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.5 },
+  name: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, marginTop: 2, lineHeight: 22 },
+  count: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, letterSpacing: 0.5, marginRight: 10 },
 
-  markDone: { width: 22, height: 22, borderRadius: 11, backgroundColor: Ink, alignItems: 'center', justifyContent: 'center' },
-  markLocked: { width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
+  markDone: { width: MARK, height: MARK, borderRadius: MARK / 2, backgroundColor: Ink, alignItems: 'center', justifyContent: 'center' },
+  markPlain: { width: MARK, height: MARK, alignItems: 'center', justifyContent: 'center' },
   markCurrent: {
-    width: 22, height: 22, borderRadius: 11, borderWidth: 2.5, borderColor: Ink,
+    width: MARK, height: MARK, borderRadius: MARK / 2, borderWidth: 2.5, borderColor: Ink,
     alignItems: 'center', justifyContent: 'center',
   },
   markCurrentPip: { width: 8, height: 8, borderRadius: 4, backgroundColor: Ink },
-  markOpen: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.8, borderColor: Faint },
+  markOpen: { width: MARK, height: MARK, borderRadius: MARK / 2, borderWidth: 1.8, borderColor: Faint },
 
-  // Open unit card
-  openCard: { borderWidth: 1.5, borderColor: Ink, borderRadius: 5, backgroundColor: Paper, padding: 15 },
-  openHead: { flexDirection: 'row', alignItems: 'center' },
-  openHeadText: { flex: 1, minWidth: 0, marginLeft: 12, marginRight: 8 },
-  unitIcon: { width: 42, height: 42, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
-  unitKicker: { fontFamily: 'Inter_700Bold', fontSize: 9, color: InkSoft, letterSpacing: 1.5 },
-  unitName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: Ink, marginTop: 2 },
-  unitDesc: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12.5, color: InkSoft, marginTop: 10, lineHeight: 18 },
+  // The expanding body
+  bodyClip: { overflow: 'hidden' },
+  body: { position: 'absolute', left: 0, right: 0, top: 0, paddingHorizontal: 14, paddingBottom: 15 },
+  desc: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12.5, color: InkSoft, lineHeight: 18 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 12 },
   metaCount: { fontFamily: 'Inter_500Medium', fontSize: 9.5, color: Faint, letterSpacing: 1.2 },
   metaLocked: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 9.5, color: LockGray, letterSpacing: 0.6, lineHeight: 14 },

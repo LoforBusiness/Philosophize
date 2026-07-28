@@ -1,4 +1,4 @@
-import type { ColorValue } from 'react-native';
+import { Easing, type ColorValue } from 'react-native';
 import { Tabs } from 'expo-router';
 import { MotiView } from 'moti';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,6 +25,16 @@ export default function AppLayout() {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
+        // Tab switches used to be `none` — the default. The outgoing screen was
+        // cut instantly and the new one appeared over the bare background, which
+        // reads as a blink no matter how gently the new screen fades in. A real
+        // cross-dissolve keeps BOTH screens on the glass for the whole handover,
+        // so there is never an empty frame.
+        animation: 'fade',
+        transitionSpec: {
+          animation: 'timing',
+          config: { duration: 340, easing: Easing.out(Easing.cubic) },
+        },
         tabBarStyle: {
           backgroundColor: '#FAFAF7',
           borderTopColor: '#1A1A1A',
