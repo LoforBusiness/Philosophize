@@ -33,9 +33,17 @@ const LEVER_X = 112;
 // ── the line ─────────────────────────────────────────────────────────────────
 const JUNCTION = 256;
 const BR_LEN = 88;                 // branch, 40° up-right → ends at (323, 443)
-const PEG_W = 13;
-const PEG_H = 40;
-const FIVE = [316, 332, 348, 364, 380];
+// THE PEOPLE ON THE TRACK ARE PEOPLE, AND HAVE TO READ AS PEOPLE.
+//
+// They were 40 units tall beside a 150-unit decider — barely a quarter his height,
+// which reads as a row of bollards, not as five human beings whose lives are the
+// entire moral weight of the lesson. 72 is as large as the composition allows: the
+// five have to fit between the junction and the right edge, and five figures at the
+// decider's true scale would need roughly 500 stage units of width where only 90
+// exist. So the row stays a SCHEMATIC of five people — but a legible one.
+const PEG_W = 19;
+const PEG_H = 72;
+const FIVE = [298, 320, 342, 364, 386];
 const ONE = { x: 303.5, y: 460 };  // stands ON the branch line
 const SLEEPERS = [24, 50, 76, 102, 128, 154, 180, 206, 232, 258, 284, 310, 336, 362, 388];
 
@@ -205,8 +213,8 @@ function Peg({ x, y }: { x: number; y: number }) {
     <View style={[styles.peg, { left: x - PEG_W / 2, top: y - PEG_H }]} pointerEvents="none">
       <View style={styles.pegHead} />
       <View style={styles.pegBody} />
-      <View style={[styles.pegLeg, { left: 3.5, transform: [{ rotate: '7deg' }] }]} />
-      <View style={[styles.pegLeg, { left: 6.5, transform: [{ rotate: '-7deg' }] }]} />
+      <View style={[styles.pegLeg, { left: 5, transform: [{ rotate: '7deg' }] }]} />
+      <View style={[styles.pegLeg, { left: 10, transform: [{ rotate: '-7deg' }] }]} />
     </View>
   );
 }
@@ -233,17 +241,21 @@ const styles = StyleSheet.create({
   },
   leverKnob: { position: 'absolute', top: -6, width: 11, height: 11, borderRadius: 6, backgroundColor: INK },
 
+  // head + body − 1 overlap + legs must equal PEG_H exactly, or the figure floats
+  // off the rail: 19 + 33 − 1 + 21 = 72.
   peg: { position: 'absolute', width: PEG_W, height: PEG_H, alignItems: 'center' },
-  pegHead: { width: 13, height: 13, borderRadius: 7, backgroundColor: INK },
-  pegBody: { width: 5, height: 17, backgroundColor: INK, marginTop: -1, borderRadius: 2 },
-  pegLeg: { position: 'absolute', bottom: 0, width: 3, height: 11, backgroundColor: INK, borderRadius: 2, transformOrigin: '50% 0%' },
+  pegHead: { width: 19, height: 19, borderRadius: 10, backgroundColor: INK },
+  pegBody: { width: 7, height: 33, backgroundColor: INK, marginTop: -1, borderRadius: 3 },
+  pegLeg: { position: 'absolute', bottom: 0, width: 4.5, height: 21, backgroundColor: INK, borderRadius: 2, transformOrigin: '50% 0%' },
 
+  // Both labels moved UP clear of the taller figures: the five now reach y 428 and
+  // the one on the branch reaches 388, so the old positions sat on top of them.
   fiveLab: {
-    position: 'absolute', left: 309, top: 431, width: 78, textAlign: 'center',
+    position: 'absolute', left: 316, top: 392, width: 72, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
   },
   oneLab: {
-    position: 'absolute', left: 276, top: 399, width: 56, textAlign: 'center',
+    position: 'absolute', left: 276, top: 348, width: 56, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
   },
 
@@ -310,8 +322,9 @@ const styles = StyleSheet.create({
 
 // BAND. Topmost ink is the verdict board at 232 (its columns now end at 312); the lowest is the sleeper row under
 // the rail, 500 + 3 (rail) + 7 (sleeper) = 510. Everything else sits inside that: the
-// TRUE/FALSE plates finish at 368, the branch line climbs to 444, the ONE peg's label
-// to 399, the lever knob to ~446, the trolley's wheels to 504, the figure's crown to
+// TRUE/FALSE plates finish at 368, the branch line climbs to 444, the ONE peg reaches
+// 388 and its label 348, the five reach 428 and their label 392, the lever knob to
+// ~446, the trolley's wheels to 504, the figure's crown to
 // 350. So [224, 518] holds every extreme with 8 units of margin at each end, and the
 // scene renders about 90% larger than the letterboxed full-height fit.
 export function Ethics3Lesson({ lesson }: { lesson: Lesson }) {

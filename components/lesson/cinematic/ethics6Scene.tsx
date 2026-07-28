@@ -116,16 +116,16 @@ export default function Ethics6Scene({ clock, bt, bi }: SceneApi) {
 
       {/* ── the trolley bearing down, streaks trailing behind it ──────────────── */}
       <Animated.View style={[styles.trolleyWrap, trolleyStyle]} pointerEvents="none">
-        <View style={[styles.streak, { top: 8, left: -32, width: 24 }]} />
-        <View style={[styles.streak, { top: 17, left: -26, width: 18 }]} />
-        <View style={[styles.streak, { top: 26, left: -30, width: 22 }]} />
+        <View style={[styles.streak, { top: 16, left: -40, width: 32 }]} />
+        <View style={[styles.streak, { top: 32, left: -32, width: 24 }]} />
+        <View style={[styles.streak, { top: 48, left: -37, width: 29 }]} />
         <View style={styles.car} />
         <View style={styles.carRoof} />
-        <View style={[styles.window, { left: 9 }]} />
-        <View style={[styles.window, { left: 27 }]} />
+        <View style={[styles.window, { left: 15 }]} />
         <View style={[styles.window, { left: 45 }]} />
-        <Animated.View style={[styles.wheel, { left: 8 }, wheelStyle]}><View style={styles.spoke} /></Animated.View>
-        <Animated.View style={[styles.wheel, { left: 40 }, wheelStyle]}><View style={styles.spoke} /></Animated.View>
+        <View style={[styles.window, { left: 75 }]} />
+        <Animated.View style={[styles.wheel, { left: 13 }, wheelStyle]}><View style={styles.spoke} /></Animated.View>
+        <Animated.View style={[styles.wheel, { left: 67 }, wheelStyle]}><View style={styles.spoke} /></Animated.View>
       </Animated.View>
 
       {/* ── the bridge ────────────────────────────────────────────────────────── */}
@@ -200,32 +200,39 @@ const styles = StyleSheet.create({
   sleeper: { position: 'absolute', top: 502, width: 3, height: 4, backgroundColor: SOFT },
 
   // ── the five ────────────────────────────────────────────────────────────────
-  peg: { position: 'absolute', top: GROUND - 30, width: 10, alignItems: 'center' },
-  pegHead: { width: 10, height: 10, borderRadius: 5, backgroundColor: INK },
-  pegBody: { width: 5, height: 21, backgroundColor: INK, marginTop: -1, borderRadius: 2.5 },
-  fiveBar: { position: 'absolute', left: 298, top: 460, width: 86, height: 1.5, backgroundColor: SOFT },
-  fiveTick: { position: 'absolute', top: 460, width: 1.5, height: 7, backgroundColor: SOFT },
+  // 66 tall, not 30. Against figures of 139 and 161 on the bridge these were a fifth
+  // of a person — specks, when they are the five lives the whole dilemma weighs.
+  // 18 + 49 − 1 = 66. Five at true scale cannot fit (they would need ~500 units of
+  // width and have 90), so this stays a schematic — but one that reads as people.
+  peg: { position: 'absolute', top: GROUND - 66, width: 18, alignItems: 'center' },
+  pegHead: { width: 18, height: 18, borderRadius: 9, backgroundColor: INK },
+  pegBody: { width: 8, height: 49, backgroundColor: INK, marginTop: -1, borderRadius: 4 },
+  // The tally moves up clear of the taller figures, which now reach y 434.
+  fiveBar: { position: 'absolute', left: 298, top: 416, width: 86, height: 1.5, backgroundColor: SOFT },
+  fiveTick: { position: 'absolute', top: 416, width: 1.5, height: 7, backgroundColor: SOFT },
   fiveT: {
-    position: 'absolute', left: 288, top: 444, width: 106, textAlign: 'center',
+    position: 'absolute', left: 288, top: 396, width: 106, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
   },
 
   // ── the trolley ─────────────────────────────────────────────────────────────
-  // 62×40 rather than the old 46×30: at this crop the small car read as a crate,
-  // and the thing bearing down on five people should be the second-biggest object
-  // on the stage after the bridge.
-  trolleyWrap: { position: 'absolute', left: 0, top: GROUND - 40, width: 62, height: 40 },
+  // 104×78. It was 62×40, which made the tram SHORTER than a person — and once the
+  // five were drawn at a readable 66 it would have been shorter than its victims,
+  // which is both wrong and unreadable. A tram is taller than the people it bears
+  // down on. The ceiling is the bridge: at 78 its roof sits at y 422, four units
+  // under the deck it has to pass beneath.
+  trolleyWrap: { position: 'absolute', left: 0, top: GROUND - 78, width: 104, height: 78 },
   car: {
-    position: 'absolute', left: 0, top: 6, width: 62, height: 26,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    position: 'absolute', left: 0, top: 12, width: 104, height: 50,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
   },
-  carRoof: { position: 'absolute', left: 8, top: 0, width: 46, height: 6, backgroundColor: INK, borderRadius: 2 },
-  window: { position: 'absolute', top: 11, width: 8, height: 9, backgroundColor: INK, borderRadius: 1 },
+  carRoof: { position: 'absolute', left: 13, top: 0, width: 78, height: 10, backgroundColor: INK, borderRadius: 3 },
+  window: { position: 'absolute', top: 22, width: 14, height: 16, backgroundColor: INK, borderRadius: 2 },
   wheel: {
-    position: 'absolute', top: 28, width: 14, height: 14, borderRadius: 7,
-    borderWidth: 2, borderColor: INK, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+    position: 'absolute', top: 54, width: 24, height: 24, borderRadius: 12,
+    borderWidth: 3, borderColor: INK, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
   },
-  spoke: { width: 2, height: 9, backgroundColor: INK },
+  spoke: { width: 3, height: 16, backgroundColor: INK },
   streak: { position: 'absolute', height: 1.5, backgroundColor: SOFT, borderRadius: 1 },
 
   // ── the bridge ──────────────────────────────────────────────────────────────
@@ -298,10 +305,10 @@ const styles = StyleSheet.create({
 //   chart footing          404 … 426
 //   bridge deck            411 … 418
 //   bridge figures' ankle joints  417   (they stand ON the deck, not the ground)
-//   THE FIVE tally         444 … 467
+//   THE FIVE tally         396 … 423
 //   fall arrowhead         482 … 493
-//   the five               470 … 500
-//   trolley wheels         438+ … 502
+//   the five               434 … 500
+//   trolley roof           422 … 500  (roof must clear the deck at 411 … 418)
 //   rail                   500 … 502.5
 //   sleepers               502 … 506
 // so [234, 512] holds every pixel with 6 units of margin above and 6 below. The
