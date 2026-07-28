@@ -175,6 +175,7 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
   const [asked, setAsked] = useState(0);
   const [done, setDone] = useState(false);
   const [boxSize, setBoxSize] = useState({ w: 0, h: 0 });
+  const [shown, setShown] = useState(0);          // the beat the DECK is showing
 
   const beat = BEATS[i];
   const clock = useSharedValue(0);
@@ -377,7 +378,20 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
 
   // Fit the BAND, not the whole design space — see the BAND block up top.
   const fit = boxSize.w > 0 ? Math.min(boxSize.w / STAGE_W, boxSize.h / BAND_H) : 0;
-  const stageGone = !!beat.summary;
+  // See CinematicPlayer for the full note: the layout follows `shown`, which only
+  // advances when the deck swaps content at zero opacity, so the summary's re-layout
+  // is never seen happening under the outgoing beat's text. The stage fades out on
+  // the incoming beat instead of blinking away.
+  const stageGone = !!(BEATS[shown] ?? beat).summary;
+  const hiding = !!beat.summary;
+  const stageVis = useSharedValue(1);
+  useEffect(() => {
+    stageVis.value = withTiming(hiding ? 0 : 1, {
+      duration: Math.round(XFADE * (hiding ? 0.4 : 0.6)),
+      easing: hiding ? Easing.in(Easing.quad) : Easing.out(Easing.cubic),
+    });
+  }, [hiding]);
+  const stageStyle = useAnimatedStyle(() => ({ opacity: stageVis.value }));
   const quoteSaved = beat.quote ? savedQuotes.some((q) => q.id === beat.quote!.id) : false;
   const bd = beat.build ?? {};
   const p1Label = bd.p1 ?? '';
@@ -398,7 +412,7 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
       {/* Tap anywhere to advance (an ancestor of the content, so scene taps bubble
           up while the choice buttons and bookmark handle their own). */}
       <Pressable style={styles.body} onPress={advance} disabled={locked}>
-        <View style={[styles.stageWrap, stageGone && styles.stageGone]} onLayout={onStage}>
+        <Animated.View style={[styles.stageWrap, stageGone && styles.stageGone, stageStyle]} onLayout={onStage}>
           {fit > 0 && !stageGone ? (
             <View style={{ width: STAGE_W * fit, height: BAND_H * fit, overflow: 'hidden' }}>
               <View style={{ position: 'absolute', left: 0, top: -BAND_T * fit, width: STAGE_W * fit, height: STAGE_H * fit }}>
@@ -428,12 +442,13 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
               </View>
             </View>
           ) : null}
-        </View>
+        </Animated.View>
 
         {/* Narration + interaction. Fade sequences the whole deck between beats. */}
         <View style={[styles.deck, stageGone && styles.deckTall]}>
           <Fade
             trigger={i}
+            onSwap={() => setShown(i)}
             revision={`${picked ?? ''}|${quoteSaved ? 1 : 0}`}
             duration={XFADE}
             render={() => (
@@ -500,8 +515,13 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
 // (not children) produces content only when it changes: a beat change fades; an
 // in-beat change (answering, saving a quote) swaps live via `revision`, no fade.
 function Fade({
-  trigger, revision, duration, render,
-}: { trigger: number; revision: string; duration: number; render: () => React.ReactNode }) {
+  trigger, revision, duration, render, onSwap,
+}: {
+  trigger: number; revision: string; duration: number; render: () => React.ReactNode;
+  /** Fired when the content is exchanged — the one instant the deck is invisible,
+   *  and so the only safe moment to change the layout around it. */
+  onSwap?: () => void;
+}) {
   const OUT = Math.round(duration * 0.4);
   const IN = Math.round(duration * 0.6);
   const vis = useSharedValue(1);
@@ -514,7 +534,12 @@ function Fade({
 
   // Build the new content ON THE JS THREAD — the withTiming completion callback is
   // a worklet, and building React elements there crashes the screen. Always runOnJS.
-  const swap = useCallback(() => setContent(renderRef.current()), []);
+  const onSwapRef = useRef(onSwap);
+  onSwapRef.current = onSwap;
+  const swap = useCallback(() => {
+    setContent(renderRef.current());
+    onSwapRef.current?.();
+  }, []);
 
   useEffect(() => {
     if (!mounted.current) {

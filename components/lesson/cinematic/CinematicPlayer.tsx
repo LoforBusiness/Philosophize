@@ -66,6 +66,10 @@ export default function CinematicPlayer({
   const [asked, setAsked] = useState(0);
   const [done, setDone] = useState(false);
   const [boxSize, setBoxSize] = useState({ w: 0, h: 0 });
+  // Which beat's content the DECK is currently showing. It lags `i` by the fade-out,
+  // because the deck keeps the outgoing beat on screen until it has faded to nothing
+  // — see `gone` below.
+  const [shown, setShown] = useState(0);
 
   const beat = beats[i];
   const clock = useSharedValue(0);
@@ -154,7 +158,28 @@ export default function CinematicPlayer({
   const bandT = band[0];
   const bandH = band[1] - band[0];
   const fit = boxSize.w > 0 ? Math.min(boxSize.w / STAGE_W, boxSize.h / bandH) : 0;
-  const gone = stageGone(beat);
+
+  // THE SUMMARY HAND-OFF. The last beat hides the stage and gives its whole height
+  // to the deck. Keying that off `beat` collapsed the stage and re-centred the deck
+  // in the very frame the index changed — while the deck was still showing the
+  // PREVIOUS beat's text for another 168ms. The outgoing question visibly leapt from
+  // the lower deck up into the summary's slot, sat there, and only then faded: a
+  // flash of the old screen in the new screen's position.
+  //
+  // So the LAYOUT follows `shown`, which only advances when the deck swaps its
+  // content — the one instant it is at zero opacity, where a re-layout cannot be
+  // seen. The stage meanwhile fades out on the incoming beat (`hiding`) so it
+  // dissolves alongside the text instead of blinking out from under it.
+  const gone = stageGone(beats[shown] ?? beat);
+  const hiding = stageGone(beat);
+  const stageVis = useSharedValue(1);
+  useEffect(() => {
+    stageVis.value = withTiming(hiding ? 0 : 1, {
+      duration: Math.round(XFADE * (hiding ? 0.4 : 0.6)),
+      easing: hiding ? Easing.in(Easing.quad) : Easing.out(Easing.cubic),
+    });
+  }, [hiding]);
+  const stageStyle = useAnimatedStyle(() => ({ opacity: stageVis.value }));
   const quoteSaved = beat.quote ? savedQuotes.some((q) => q.id === beat.quote!.id) : false;
 
   return (
@@ -169,7 +194,7 @@ export default function CinematicPlayer({
       </View>
 
       <Pressable style={styles.body} onPress={advance} disabled={locked}>
-        <View style={[styles.stageWrap, gone && styles.stageGone]} onLayout={onStage}>
+        <Animated.View style={[styles.stageWrap, gone && styles.stageGone, stageStyle]} onLayout={onStage}>
           {fit > 0 && !gone ? (
             <View style={{ width: STAGE_W * fit, height: bandH * fit, overflow: 'hidden' }}>
               <View style={{ position: 'absolute', left: 0, top: -bandT * fit, width: STAGE_W * fit, height: STAGE_H * fit }}>
@@ -179,11 +204,12 @@ export default function CinematicPlayer({
               </View>
             </View>
           ) : null}
-        </View>
+        </Animated.View>
 
         <View style={[styles.deck, gone && styles.deckTall]}>
           <Fade
             trigger={i}
+            onSwap={() => setShown(i)}
             revision={`${picked ?? ''}|${quoteSaved ? 1 : 0}`}
             duration={XFADE}
             render={() => (

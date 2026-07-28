@@ -107,8 +107,16 @@ export function gates(b: BaseBeat) { return Boolean(b.tap || b.mc || b.interact)
 // (not children) produces content only when it changes: a beat change (`trigger`)
 // fades; an in-beat change (answering, saving a quote) swaps live via `revision`.
 export function Fade({
-  trigger, revision, duration, render,
-}: { trigger: number; revision: string; duration: number; render: () => React.ReactNode }) {
+  trigger, revision, duration, render, onSwap,
+}: {
+  trigger: number; revision: string; duration: number; render: () => React.ReactNode;
+  /**
+   * Fired at the instant the content is exchanged — which is the one moment the
+   * deck is fully invisible. Anything that changes the LAYOUT around the deck has
+   * to happen here, or it happens while the old content is still on screen.
+   */
+  onSwap?: () => void;
+}) {
   const OUT = Math.round(duration * 0.4);
   const IN = Math.round(duration * 0.6);
   const vis = useSharedValue(1);
@@ -121,7 +129,12 @@ export function Fade({
 
   // Build the new content ON THE JS THREAD — a withTiming completion callback is a
   // worklet, and building React elements there crashes the screen. Always runOnJS.
-  const swap = useCallback(() => setContent(renderRef.current()), []);
+  const onSwapRef = useRef(onSwap);
+  onSwapRef.current = onSwap;
+  const swap = useCallback(() => {
+    setContent(renderRef.current());
+    onSwapRef.current?.();
+  }, []);
 
   useEffect(() => {
     if (!mounted.current) {

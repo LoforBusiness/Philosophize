@@ -316,6 +316,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   const [asked, setAsked] = useState(0);
   const [done, setDone] = useState(false);
   const [box, setBox] = useState({ w: 0, h: 0 });
+  const [shown, setShown] = useState(0);          // the beat the DECK is showing
 
   const beat = BEATS[i];
   const clock = useSharedValue(0);
@@ -515,6 +516,22 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   const fit = box.w > 0 ? Math.min(box.w / STAGE_W, box.h / BAND_H) : 0;
   const shot = SHOTS[i];
   const quoteSaved = beat.quote ? savedQuotes.some((q) => q.id === beat.quote!.id) : false;
+  // See CinematicPlayer for the full note: act 5 hands the stage's height to the
+  // deck, and keying that off `beat` re-laid the deck out while it was still showing
+  // the PREVIOUS beat's text — the old screen visibly jumped into the new screen's
+  // slot and sat there for the length of the fade-out. The layout follows `shown`,
+  // which advances only when the deck swaps at zero opacity; the stage meanwhile
+  // fades out on the incoming beat rather than blinking away under the text.
+  const stageGone = (BEATS[shown] ?? beat).act === 5;
+  const hiding = beat.act === 5;
+  const stageVis = useSharedValue(1);
+  useEffect(() => {
+    stageVis.value = withTiming(hiding ? 0 : 1, {
+      duration: Math.round(XFADE * (hiding ? 0.4 : 0.6)),
+      easing: hiding ? Easing.in(Easing.quad) : Easing.out(Easing.cubic),
+    });
+  }, [hiding]);
+  const stageStyle = useAnimatedStyle(() => ({ opacity: stageVis.value }));
   // The meters keep the previous beat's reading while the card is fading out, so
   // the bars never blink empty on the frame before they leave.
   const priorBeat = i > 0 ? BEATS[i - 1] : undefined;
@@ -543,7 +560,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
       {/* The animated stage. Act 5 has nobody on it and no board, so it collapses
           and lets the quote and summary take the whole screen rather than sitting
           under 560 units of empty paper. */}
-      <View style={[styles.stageWrap, beat.act === 5 && styles.stageGone]} onLayout={onStage}>
+      <Animated.View style={[styles.stageWrap, stageGone && styles.stageGone, stageStyle]} onLayout={onStage}>
         {fit > 0 && beat.act !== 5 ? (
           <View style={{ width: STAGE_W * fit, height: BAND_H * fit, overflow: 'hidden' }}>
             <View style={{ position: 'absolute', left: 0, top: -BAND_T * fit, width: STAGE_W * fit, height: STAGE_H * fit }}>
@@ -591,15 +608,16 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
             </View>
           </View>
         ) : null}
-      </View>
+      </Animated.View>
 
       {/* Narration + interaction. Fade sequences the whole deck between beats:
           it fades fully out, swaps content while invisible, then fades back in —
           so two paragraphs never overlap. `revision` (the current pick) lets an
           answer update in place, without a fade, so its explanation still lands. */}
-      <View style={[styles.deck, beat.act === 5 && styles.deckTall]}>
+      <View style={[styles.deck, stageGone && styles.deckTall]}>
         <Fade
           trigger={i}
+          onSwap={() => setShown(i)}
           // Any in-beat state that changes the deck must be in `revision` so the
           // content re-renders live (no fade): the answer AND whether the quote is
           // bookmarked — otherwise the saved snapshot froze the bookmark icon.
@@ -679,8 +697,13 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
 // explanation still appears instantly with its own entrance.
 
 function Fade({
-  trigger, revision, duration, render,
-}: { trigger: number; revision: string; duration: number; render: () => React.ReactNode }) {
+  trigger, revision, duration, render, onSwap,
+}: {
+  trigger: number; revision: string; duration: number; render: () => React.ReactNode;
+  /** Fired when the content is exchanged — the one instant the deck is invisible,
+   *  and so the only safe moment to change the layout around it. */
+  onSwap?: () => void;
+}) {
   const OUT = Math.round(duration * 0.4);
   const IN = Math.round(duration * 0.6);
   const vis = useSharedValue(1);
@@ -694,7 +717,12 @@ function Fade({
   // Builds the new content ON THE JS THREAD. The withTiming completion callback is
   // a worklet (UI thread), and you cannot build React elements there — doing so
   // crashes the whole screen — so the callback only ever runOnJS()es back to here.
-  const swap = useCallback(() => setContent(renderRef.current()), []);
+  const onSwapRef = useRef(onSwap);
+  onSwapRef.current = onSwap;
+  const swap = useCallback(() => {
+    setContent(renderRef.current());
+    onSwapRef.current?.();
+  }, []);
 
   useEffect(() => {
     if (!mounted.current) {
