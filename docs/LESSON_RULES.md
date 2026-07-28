@@ -1,7 +1,8 @@
 # The Lesson Rule Book
 
 Every rule here exists because a real lesson broke it and it was caught on a real
-phone. They are not style preferences — each one is a defect that shipped.
+phone. They are not style preferences — each one is a defect that shipped, or a
+direction the product owner gave after looking at one.
 
 Read this **before** writing a new cinematic lesson, and run the checks in Part 3
 **before** calling one finished. The point is that a new lesson comes out right the
@@ -24,244 +25,393 @@ If a beat says *"someone is on the floor by their bed"*, the figure is **on the
 floor**. If it says *"you cross the room and get down beside them"*, the figure
 **gets down**. If it says *"a third camp shrugs"*, the figure **shrugs**.
 
-> How it actually broke: ethics-8 said someone was on the floor by their bed three
-> separate times — in the narration, in the scene's own header comment, and in the
-> question prompt ("You are down on the floor beside them") — and drew them
-> **standing up**, hunched, on the ground line.
+> *"What the text says and what the stickman is doing must correlate. If the text
+> says someone is on the floor by their bed and the stickman is not on the floor by
+> their bed, then that doesn't make sense."*
 
 **A2. If the vocabulary can't say it, extend the vocabulary — never substitute the
 nearest wrong pose.** The floor bug happened because `rig.ts` had no floor-level
-pose at all. The author reached for `46 slump`, which is a *standing* slump, and the
-sentence and the picture parted company. Adding codes `48 sit-on-floor` and
-`49 kneel-beside` cost twenty lines. Guessing cost a shipped lesson.
+pose at all, so the author reached for `46 slump`, which is a *standing* slump.
+Adding `48 sit-on-floor` and `49 kneel-beside` cost twenty lines. Guessing cost a
+shipped lesson.
 
-**A3. Secondary figures count.** The narrator's pose comes from the script's `p`
-field and is easy to eyeball. A second figure — the friend, the opponent, the
-apprentice, the crowd — is often posed from a **hard-coded** code inside the scene,
-where nobody looks. That is exactly where the floor bug lived. Check every figure on
-the stage, not just the one that talks.
+**A3. Secondary figures count.** The narrator's pose comes from the script and is
+easy to eyeball. A second figure — the friend, the opponent, the apprentice — is
+often posed from a **hard-coded** code inside the scene, where nobody looks. That is
+exactly where the floor bug lived.
 
 **A4. Metaphors are not stage directions.** "The gap **sits** between the premises",
 "trust would **collapse**", "beauty **sitting** in the object", "whose verdict should
-**carry** more weight" — these are figures of speech. Do not stage them literally.
-The rule is about *concrete physical claims about a figure on screen*.
+**carry** more weight" — figures of speech. Do not stage them literally. The rule is
+about *concrete physical claims about a figure on screen*.
+
+**A5. Record deliberate exceptions in the scene's header comment.** Some things look
+wrong by the numbers and are right on purpose: aesthetics-6's mountain dwarfs the
+figure — that *is* the sublime lesson; logic-7's board is oversized because the text
+on it must be readable; ethics-6's bridge parapet is knee-height because a real one
+would hide the figures. Write down *why*, or the next audit "fixes" them.
 
 ### B. The figure
 
-**B5. One figure scale for the whole app.** The shared `K_FIG` in `cinematicKit.tsx`
+**B6. One figure scale for the whole app.** The shared `K_FIG` in `cinematicKit.tsx`
 is the single source of truth (currently `1.0` → a 103-unit figure, crown at y 397).
-**Never declare a local `K_FIG`.** Two lessons did, at `1.35`, which shadowed the
-shared constant — so when the app-wide size correction landed, the first two lessons
-every new user plays kept drawing figures 35% larger than the other 46. Relative
-sizes are fine and should be *derived*: `K_FIG * 0.88` for a shorter apprentice,
-`K_FIG * 1.16` for a nearer figure in perspective.
+**Never declare a local `K_FIG`.** Two lessons did, at `1.35`, shadowing the shared
+constant — so when the app-wide size correction landed, the first two lessons every
+new user plays kept drawing figures 35% larger than the other 46. Relative sizes are
+fine and must be **derived**: `K_FIG * 0.88` (apprentice), `K_FIG * 1.16` (a nearer
+figure), `K_FIG * 0.82` (background citizens).
 
-**B6. The figure must be in proportion to the objects around it.** The test is not
+**B7. The figure must be in proportion to the objects around it.** The test is not
 "does the figure look nice alone" but "does it look right next to the prop". Sanity
-numbers: a boxing ring's corner post is about **0.8×** a boxer; a stone arch that a
-person is building tops them at about **1.1×**. Before the correction the boxer stood
-head and shoulders over his own corner post (0.58×) and the builder towered over the
-arch (0.81×).
+numbers: a ring's corner post ≈ **0.8×** a boxer; a stone arch a person is building
+≈ **1.1×** them. Before correction the boxer stood head and shoulders over his own
+corner post (0.58×).
 
-**B7. Figure-to-PROP distances stay; figure-to-FIGURE distances scale.** When the
-figure's size changes, this is the distinction that decides what moves:
+> *"I dont want the stickman larger than they should be or smaller than they should
+> be based on the surrounding elements."*
 
-- A figure placed against a **prop** (a builder beside a fixed brick stack, a
-  narrator beside an easel) **stays where it is** — that is precisely what puts it
-  back in proportion with the prop.
-- A figure placed against **another figure** (two boxers squaring off) must have the
-  gap **scaled with the body**. Their 130-unit separation was derived from their own
-  head size; left alone, smaller boxers just drift apart and the confrontation goes
-  limp.
+**B8. Figure-to-PROP distances stay; figure-to-FIGURE distances scale.** When the
+figure's size changes, this decides what moves:
 
-**B8. Anything pinned to the figure must be derived from the figure, not hand-placed.**
-A halo, a speech bubble, a thread between two heads — write it in terms of `K_FIG`
-and the rig's landmarks so it tracks when the figure changes. Hand-placed literals
-rot silently:
+- Against a **prop** (a builder beside a fixed brick stack) the figure **stays put** —
+  that is precisely what puts it back in proportion.
+- Against **another figure** (two boxers squaring off) the gap **scales with the
+  body**. Their separation was derived from their own head size; left alone, smaller
+  boxers drift apart and the confrontation goes limp.
 
-- metaphysics-5's aura ring was a literal at `GROUND − 150`; when the figure shrank,
-  it floated 33 units above the head it was meant to encircle.
-- ethics-8's connecting thread sat at y 336, measured against the old crown at 361;
-  at the new crown of 397 it hung in clear paper 60 units above everyone.
+**B9. Two figures need ≥ ~100 stage units between them.** Below that the two heads
+read as one black mass on a phone long before the bodies touch — heads are ~40% of
+figure height. It forced the boxers apart in lesson 1 and bit again in ethics-8 at 76
+units. ~104–112 reads cleanly. **Check the gap at the CLOSEST beat, not the average.**
 
-Useful landmarks (rig units, multiply by `K_FIG`): pelvis **34** above ground;
-head centre **83** above ground (49 above the pelvis); head radius **20**; crown
-**103** above ground; shoulder at (±3, −26) from the pelvis; arm reach **33**; leg
-reach **37**.
+**B10. Anything pinned to the figure must be derived from the figure.** A halo, a
+speech bubble, a thread between two heads — write it in terms of `K_FIG` and the
+rig's landmarks so it tracks. Hand-placed literals rot silently: metaphysics-5's aura
+was a literal at `GROUND − 150` and ended up floating 33 units above the head it
+encircled; ethics-8's thread hung 60 units above everyone.
 
-**B9. Reach rules.** From `moves.ts`, and they are load-bearing:
+Landmarks (rig units × `K_FIG`): pelvis **34** above ground; head centre **83** above
+ground (49 above the pelvis); head radius **20**; crown **103**; shoulder (±3, −26)
+from the pelvis; arm reach **33**; leg reach **37**; body+arms span about **x ± 36**.
 
+**B11. Reach rules.**
 - A **hanging** hand belongs at about **y +6**, near arm's length below the shoulder.
-  Park it at y −4 and the solver folds the elbow, the arm bows outward, and it
-  encloses a triangle of paper that reads as a hole punched through the body.
-- A **raised** hand must clear the head disc. Anything within ~24 units of (0, −49)
-  fuses into the skull and the figure loses both its hand and the shape of its head.
-  Hands overhead belong at |x| ≈ 26, not |x| ≈ 14. The exceptions are poses where
-  touching the face *is* the gesture — a facepalm, a hand at the chin, shielded eyes.
+  At y −4 the solver folds the elbow, the arm bows outward, and it encloses a paper
+  triangle that reads as **a hole punched through the body**. This defect has been
+  fixed in four separate places; when auditing, grep for hanging-arm fist targets
+  with y between −10 and +2.
+- A **raised** hand must clear the head disc — anything within ~24 units of (0, −49)
+  fuses into the skull. Hands overhead belong at |x| ≈ 26, not 14. Exceptions are
+  poses where touching the face *is* the gesture.
 - The **pelvis cannot outrun the legs**: a planted foot needs `34 + bob − footLift ≤ 36`.
 - Going **low** is fine (knees bend), but a low pelvis needs the feet moved
-  **forward**, or the leg folds straight down and throws the knee out sideways. This
-  is why `48 sit-on-floor` puts the feet at x 26–32.
+  **forward**, or the leg folds straight down and throws the knee out sideways.
 
-**B10. Feet stay narrow and near-vertical when standing.** A wide sliding stance makes
-near-straight legs read as two segmented bars with a gap between them. Deep crouches
-and kneels are exempt — bent legs read fine.
+**B12. Feet stay narrow and near-vertical when standing** — a wide sliding stance
+makes near-straight legs read as two segmented bars with a gap between them. And
+**deep crouch/kneel/squat feet must be STAGGERED, never mirrored**: two 11-thick legs
+folded to the same angle merge into one black mass and the figure loses its legs.
 
-**B11. No two figures in lockstep.** Two figures running the same gait from the same
-clock move like a mirror and look mechanical. Give each its own seed/habit. (One
-lesson also simply had a vestigial duplicate walker nobody noticed.)
+**B13. Accessories must not fuse with the body.** A glove's radius must be **under
+half** the head radius (9 vs 20) or head and gloves read as one mass. Crowns, horns
+and swords attach by reading the figure bundle's `head` / `wrR` transform in a
+`useAnimatedStyle` — that works well; guessing a fixed offset does not.
 
-**B12. Joints must not show.** The figure is one smooth silhouette. Three separate
-causes have produced visible beads at the elbow, knee, wrist and ankle:
-- a joint circle drawn **wider** than the bone it caps;
+**B14. No two figures in lockstep.** Two figures running the same gait from the same
+clock move like a mirror. `strideStance`/`travelStance` take a trailing `seed` —
+give any companion a non-zero one. The tell when auditing: two `pose()` calls whose x
+comes from the same expression (`bx` and `bx + GAP`).
+
+**B15. Every figure on stage must have a reason to be there.** ethics-5 carried a
+second walker left over from an earlier draft of the script; the narration no longer
+referred to either figure and the two moved identically.
+
+> *"There are 2 stickman doing the same action, I dont know why there are 2, and why
+> they are both moving the same way."*
+
+**B16. Joints must not show.** The figure is one smooth silhouette. Three separate
+causes have produced visible beads at elbow, knee, wrist and ankle:
+- a joint circle drawn **wider** than the bone it caps (a cap at exactly half the
+  bone thickness is already a perfect capsule; anything wider is a bead on a stick);
 - a **1px-wide** bone stretched by `scaleX`, which rasterises imprecisely and leaves
-  white nicks — fixed by drawing bones at `BONE_SRC = 100` and scaling by `len / 100`;
+  white nicks — hence `BONE_SRC = 100` with `scaleX: len / 100`. **The two are a
+  matched pair; never change one alone.**
 - a **missing** cap where two bones meet (the shoulders had none).
+
 Never "fix" a seam by making a cap bigger. Find which of the three it is.
 
-### C. Motion
+> *"I want the segment character to be more smooth, and you can't see the joints."*
 
-**C13. Movement takes the time it actually needs.** A walk's duration comes from its
+### C. Motion and life
+
+**C17. Movement takes the time it actually needs.** A walk's duration comes from its
 distance (`moveTr`, ~74 units/second), never a flat crossfade. Every scene ran its
-beat transition over a fixed 0.85s no matter how far the figure walked, so a short
+transition over a fixed 0.85s no matter how far the figure walked, so a short
 sidestep looked fine and a hundred-unit crossing was sprinted. The feet never
-skated — the gait is distance-driven — it was purely a timing bug, the right number
-of steps crammed into a third of the time.
+skated — it was purely a timing bug.
 
-**C14. Every movement must END in a pose a person would still be in.** A beat holds
-until the reader taps, which can be ten seconds, so the settled pose is what they
-actually stare at. Fourteen gestures used to rest with a hand in the air —
-`celebrate` and `reach-up-high` with both arms locked overhead, `wave` frozen
-mid-wave. The rule: **`emoteHold` is the arm-down version**; the raised instant lives
-in `emoteLive`'s `lift`, which must return to exactly zero (by 1.5s), because the
-next beat's transition blends out of `emoteHold` and a lift still up when the reader
-taps would snap the arm down in a single frame.
+> *"I dont want 'fast walking' … I always want this movements to look natural."*
 
-Poses that are exempt — because a person *can* hold them, or the hand is doing a job:
-hands on hips, arms folded, hands behind the back, a hand at the brow or chin, a
-slump, and anything anchored to a prop (a lever, a board, a carried load).
+**C18. A walk must be ≥ 60 stage units** (~1.5 strides) or it reads as a shuffle. If
+the beat doesn't need the distance, don't move the figure at all.
 
-**C15. The lesson must never flash.** Layout changes only while the thing being
+**C19. Vary the movement. Every beat a different gesture, no loops.** Figures should
+move around the stage rather than stand and semaphore. This is why the gesture
+library and the travel modes exist — use them.
+
+> *"Create a larger movement library … more options for movement and being unique and
+> also to look more and more like a real moving person with everything it interacts
+> with and everything it does."*
+>
+> *"Make the character have different walking habits so it doesnt just look like the
+> stickman is walking back and forth in the exact same motion."*
+
+Every walk already gets its own habit from `gaitVary` (stride length, clearance,
+bob, lean, arm swing) seeded from its own journey — same journey walks the same way,
+different journeys never match. Don't defeat it by reusing one x-pair everywhere.
+
+**C20. Every movement must END in a pose a person would still be in.** A beat holds
+until the reader taps — up to ten seconds — so the settled pose is what they actually
+stare at. **`emoteHold` is the arm-down version**; the raised instant lives in
+`emoteLive`'s `lift`, which must return to exactly zero (by 1.5s), because the next
+beat's transition blends out of `emoteHold` and a lift still up when the reader taps
+would snap the arm down in one frame. Exempt: poses a person *can* hold (hands on
+hips, arms folded, hands behind the back, a hand at brow or chin, a slump) and
+anything anchored to a prop.
+
+> *"Sometimes the end movement is his hands up in the air or something awkward with
+> his hands … I want it to be fixed so the end movements never look strange."*
+
+**C21. The lesson must never flash.** Layout changes only while the thing being
 re-laid-out is invisible. The summary beat hides the stage and gives its height to
 the text panel; keyed off the current beat, that collapse happened in the same frame
-the index changed — while the panel still showed the **previous** beat's text for
-another 168ms, so the old screen visibly leapt into the new screen's slot. Layout
-follows the beat the deck is *showing*, which advances on the crossfade's swap.
+the index changed — while the panel still showed the **previous** beat's text, so the
+old screen visibly leapt into the new screen's slot.
+
+**C22. The stage must never resize, and text never cross-fades.** Stage/deck/hint are
+fixed proportions (42/50/8) so the figures don't jump every time the deck grows —
+that reflow was the original "glitch at the top". And overlapping two paragraphs at
+partial opacity is a muddy double-exposure: fade the deck fully **out**, swap while
+invisible, fade **in**. Only one thing on screen, ever.
 
 ### D. Nothing is hidden, cut, or covered
 
-**D16. The band must contain every pixel the scene can draw.** The crop shows
+**D23. Props must never cover the figure, and the figure must never cover the props.**
+Both halves matter. Rendering teaching labels *in front* fixed an arm cutting through
+"Socrates is a m[an]" — but then buried the builders behind the bricks, and the next
+note back was *"make sure the stickmen aren't completely behind the bricks"*. The
+resolution is layout, not z-order.
+
+**D24. A prop the figure interacts with must sit BESIDE or ABOVE it, in its own
+band — never a wide slab the figure stands inside.** Make it a narrow column the
+figures **flank**. Confirmed twice: the brick structure and the ship's hull both had
+to be reshaped after the first device look.
+
+**D25. The band must contain every pixel the scene can draw.** The crop shows
 *exactly* the declared `[top, bottom]` on every device, so ink outside it is clipped
-for **everyone** — this is never a device quirk. Measure the band against every beat,
-including elements that animate in, and don't trust a comment: logic-8 declared a
-band starting at 96 while its rule card — the thing the lesson is about — started at
-32, so only "THEN streets wet" showed, half cut.
+for **everyone** — never a device quirk. Measure against every beat, include every
+prop at its extreme position, and if the scene has a camera, measure **after** it.
+Don't trust a comment: logic-8 declared a band starting at 96 while its rule card —
+the thing the lesson is about — started at 32.
 
-**D17. Don't reserve empty band either.** A band much taller than its art makes the
+**D26. Don't reserve empty band either.** A band much taller than its art makes the
 lesson height-limited, so it renders smaller *and* letterboxed for nothing.
-epistemology-8 reserved 74 empty rows above its heading and rendered at 0.75 while
-its siblings ran at 0.90.
+epistemology-8 reserved 74 empty rows and rendered at 0.75 while its siblings ran at
+0.90.
 
-**D18. Deck text must fit the deck.** The deck is `overflow: hidden` and exactly half
-the body height, so a line whose bottom passes the deck bottom is simply unreadable.
-Check the **answered** state of question beats — prompt + pick + answer + explanation
-is the tallest the deck ever gets, and it is where two lessons cut an explanation off
-mid-sentence.
+> *"Make sure especially where the user will be watching the animations happen that
+> they are large enough so they are easy to see."*
 
-**D19. Text must fit its own box.** Two ways a word gets lost that the band and deck
-checks cannot see: the card **clips** it (`scrollHeight > clientHeight`), or the text
-**spills** past the card's border onto whatever is underneath. aesthetics-5's three
-answer cards were 5 units too short for their own subtitles, so "a picture worth
-framing" lost "framing".
+**D27. Deck text must fit the deck.** The deck is `overflow: hidden` and exactly half
+the body height, so a line past its bottom is unreadable. Check the **answered**
+state of question beats — prompt + pick + answer + explanation is the tallest the
+deck ever gets.
 
-**D20. No orphaned line breaks.** A short label that wraps strands a fragment on a
-line of its own — "OVERWHELM / S", "TOMORRO / W", a tick separated from its word.
-The box just grows, so nothing clips and no overflow check fires. A label of ≤26
-characters should occupy one line; if it doesn't, the column is too narrow or the
-tracking too wide.
+**D28. Text must fit its own box.** Two ways a word gets lost that the band and deck
+checks cannot see: the card **clips** it (`scrollHeight > clientHeight`), or it
+**spills** past the border onto whatever is underneath.
 
-**D21. Nothing opaque may cover text.** ethics-6's chart footing landed on the
-tally below it: "THE FIVE" was sliced in half by the footing's border and the tally
-bracket was hidden behind it entirely. When two props share a column, order them
-top-to-bottom explicitly and check the gaps.
+**D29. Budget for Android font padding.** RN Android `<Text>` defaults to
+`includeFontPadding: true`, ~2–4px extra top *and* bottom **per Text**. A card sized
+by arithmetic to fit two lines still clipped on device. Set
+`includeFontPadding: false` on label/body styles **and** add ~10px of slack to any
+card with wrapping text.
 
-**D22. Legibility can outrank literal scale.** A whiteboard drawn larger than life so
-its writing is readable, or a mountain that dwarfs the figure on purpose, is correct.
-Rule B6 is about *ground-sharing* props. Most scene furniture — charts, cards,
-timelines — sits above the figure's crown and is an information surface, not an
-object in the room.
+**D30. No orphaned line breaks.** A short label that wraps strands a fragment on its
+own line — "OVERWHELM / S", "TOMORRO / W", a tick split from its word. The box just
+grows, so nothing clips and no overflow check fires. A label of ≤26 characters should
+occupy one line.
 
-### E. House style
+**D31. Nothing opaque may cover text, and props sharing a column must be ordered.**
+ethics-6's chart footing landed on the tally below it: "THE FIVE" was sliced in half
+and its bracket hidden entirely.
 
-**E23. Figures are native Views driven by Reanimated transforms.** SVG is only for
-small, bounded illustration. A full-screen animated `<Svg>` measured ~10fps on an
-S24 Ultra.
+> *"Every word that shows up, every object on screen, and every animation … make sure
+> nothing is covered up … dont unnecessarily cover or look not apealing to the user."*
 
-**E24. Worklet footguns.** A default parameter that references a module constant is
-**not** captured into the worklet runtime — pass gaits explicitly. A worklet calling
-a worklet defined later captures `undefined`. Numeric-literal defaults are safe.
+**D32. Legibility can outrank literal scale.** A board drawn larger than life so its
+writing is readable is correct. B7 is about *ground-sharing* props; most scene
+furniture sits above the figure's crown and is an information surface, not an object
+in the room.
 
-**E25. Don't cross-reference lessons by number.** "As we saw in Lesson 4" breaks
-silently the moment anything is reordered, and `tsc` will never tell you. Write
+### E. Questions and interaction
+
+**E33. Vary how the reader answers.** Not every question is A/B/C/D under a picture.
+Scenes can own their answer UI (`InteractBlock` + `InteractPanel`): tap the weak link,
+feed a chute, choose a path, tip a balance, tap the true map.
+
+> *"Different ways to answer questions"* — and illustrations with machines,
+> conveyors, charts, backgrounds and activities, *"not just A/B/C/D + a circle."*
+
+**E34. Scene-taps for the OBVIOUS choice; A/B/C/D for the NUANCED one.** A subtle
+trade-off hidden in a small tap target is what reads as *"confusing and very small"*.
+If the answer needs weighing, put it in the deck where the options can be read.
+
+**E35. The whole body is the tap target.** Wrapping only the "Tap to continue" text
+left most of the screen dead and a reader stuck on beat 1. One `Pressable` around the
+body; choice buttons and the bookmark handle their own.
+
+**E36. Decorative full-bleed wrappers need `pointerEvents="none"`.** An
+`absoluteFill` overlay **eats taps even at opacity 0** — opacity is not
+`pointerEvents`. A decorative balance frame silently blocked a fork's signpost taps
+and cost an OTA. Keep it OFF the wrapper that contains the interactive Pressables.
+
+**E37. Beats advance on TAP, never auto-play.** That was a deliberate product choice;
+pacing belongs to the reader.
+
+### F. Writing the lesson
+
+**F38. Reuse the engine; invent the story.** The design system does **not** get
+reinvented per lesson — reuse the rig, the transitions, the layout, the deck. What
+must be new every time is the **content and the in-lesson metaphor/beats/interaction**,
+*"so it's new for the users."* Copy the closest exemplar scene and vary the story.
+
+**F39. Tell philosophy like a story.** Entertaining first, informative second,
+interactive throughout, and premium enough that someone would pay to keep going.
+
+**F40. Give it an arc.** Hook (provocation) → build → productive struggle → a "what
+you now know" payoff on the summary. One idea per beat; concrete example **before**
+the abstract term; never a wall of text.
+
+**F41. Name the trap.** Every graded question earns its payoff by being tempting for
+a *nameable* reason. The explanation must name the bias or fallacy and say why the
+tempting choice fails — "The trap: …" is the house pattern.
+
+**F42. Ground it in a real thinker.** Pair the concept with a primary-source `quote`
+card — a real sentence someone actually wrote, with author, work and era. Authenticity
+is what makes it feel worth paying for, not gamified trivia.
+
+**F43. Rotate the interaction.** Don't let two consecutive lessons feel identical;
+vary the beat mix and the question type.
+
+**F44. Respect the content limits.** Hook headline ≤ 12 words · concept body ≤ 60 ·
+example ≤ 80 · question prompt ≤ 25 · reinforcement ≤ 50 · summary point ≤ 12 each ·
+dilemma scenario ≤ 80 · quote ≈ 28. A beat that needs more words needs to be two
+beats.
+
+**F45. Never cross-reference a lesson by number.** "As we saw in Lesson 4" breaks
+silently the moment anything is reordered and `tsc` will never tell you. Write
 "earlier you saw…".
+
+### G. Engine and tooling
+
+**G46. Figures are native Views driven by Reanimated transforms.** SVG is only for
+small, bounded illustration — react-native-svg has no partial invalidation, so any
+animated child re-uploads the whole `<Svg>` every frame (~10fps full-screen on an
+S24 Ultra).
+
+**G47. Worklet footguns.** A default parameter referencing a module constant is **not**
+captured into the worklet runtime — pass gaits explicitly (`strideStance(…, WALK)`).
+A worklet calling a worklet defined **later** in the file captures `undefined` and
+blanks the screen — define a worklet after everything it calls. Numeric-literal
+defaults are safe. And never build React elements inside a `withTiming` completion
+callback — that is a worklet; `runOnJS` first.
+
+**G48. Scatter fields need a decorrelated hash.** `x: a + (k*137)%W, y: b + (k*89)%H`
+steps both axes together and the points march in a diagonal streak. Use
+`hash(n) = frac(sin(n) * 43758.5453)` with a different seed per axis.
+
+**G49. Don't rely on a ghosted duplicate figure.** A translucent second Stickman
+(opacity 0.5–0.85) would not render legibly on device even at 0.85. Use a prop
+instead. A *full* figure at partial opacity does work.
+
+**G50. Edit source with the Edit/Write tools, never PowerShell string-replace** —
+it mojibakes em-dashes and `·` straight into user-visible narration. `sed` in Bash is
+byte-safe for these UTF-8 files. `StyleSheet.absoluteFillObject` does not type-check
+in this project; use the longhand.
+
+**G51. Production OTAs reach real users.** `eas update --branch production` goes to
+everyone on the Play Store — keep every production push clean and shippable, and
+**never** bump `FREE_DAILY_LESSON_LIMIT` (the account already has Scholar's Pass, so
+testing does not need it).
 
 ---
 
 ## Part 2 — Authoring checklist
 
-Work top to bottom. Every line is a rule above.
-
-**Script**
-- [ ] Every beat's text and its pose agree (A1). Concrete claims only, not metaphors (A4).
-- [ ] Any physical claim the pose vocabulary can't express → add a pose (A2).
-- [ ] Secondary figures posed deliberately, not left on a hard-coded default (A3).
-- [ ] Explanations are short enough for the answered deck (D18).
-- [ ] No "Lesson N" cross-references (E25).
+**Story and script**
+- [ ] New metaphor and beats; engine reused, not reinvented (F38).
+- [ ] Hook → build → struggle → payoff, one idea per beat (F40).
+- [ ] Every graded question names its trap (F41); a real primary-source quote (F42).
+- [ ] Word limits respected (F44); no "Lesson N" references (F45).
+- [ ] Every beat's text and pose agree — concrete claims only (A1, A4).
+- [ ] A different gesture each beat; no loops (C19).
+- [ ] Any physical claim the vocabulary can't express → add a pose (A2).
+- [ ] Secondary figures posed deliberately (A3).
+- [ ] Explanations fit the answered deck (D27).
 
 **Scene**
-- [ ] Uses the shared `K_FIG`; relative sizes derived from it (B5).
-- [ ] Figure reads in proportion to the props it shares ground with (B6, D22).
-- [ ] Anything pinned to the figure is written in terms of `K_FIG` + landmarks (B8).
-- [ ] Walks use `moveTr`, not a flat duration (C13).
-- [ ] Two figures don't share a gait phase (B11).
-- [ ] Every prop's y-range written down in a comment, and the band measured to hold
-      all of it with a few units of air — no more (D16, D17).
-- [ ] Labels fit their columns on one line (D20); cards fit their own text (D19).
-- [ ] Props sharing a column are ordered and gapped (D21).
+- [ ] Shared `K_FIG`; relative sizes derived (B6); in proportion to ground props (B7).
+- [ ] Two figures ≥ ~100 units apart at their closest beat (B9).
+- [ ] Anything pinned to the figure derived from `K_FIG` + landmarks (B10).
+- [ ] Companion figures given a non-zero seed (B14); every figure has a reason (B15).
+- [ ] Interactive props beside/above the figure, never a slab it stands in (D24).
+- [ ] Neither props nor figure occlude the other (D23).
+- [ ] Walks ≥ 60 units and driven by `moveTr` (C17, C18).
+- [ ] Every prop's y-range in a comment; band measured to hold it with a few units of
+      air — no more (D25, D26).
+- [ ] Labels fit their columns on one line (D30); cards have font-padding slack (D29).
+- [ ] Decorative overlays have `pointerEvents="none"` (E36).
+- [ ] Deliberate exceptions written down (A5).
 
-**Then run the checks in Part 3. Do not skip them because it "looks fine".**
+**Then run Part 3. Do not skip it because it "looks fine".**
 
 ---
 
 ## Part 3 — How to verify
 
-**Measure, don't squint.** A 48-lesson visual review by eye misses exactly the
-defects that matter, because clipped text and covered labels look plausible in a
-thumbnail. The harness renders each lesson under react-native-web, walks every beat,
-and records the exact rectangle of everything drawn. Rebuild it from
-`memory/lesson-layout-audit-harness.md` — it has the full recipe, the DOM hooks, and
-the two gotchas (Metro's bundling overlay renders *on top of* a mounted player;
-`CI=1` disables file watching, so restart after editing).
+**Measure, don't squint.** A 48-lesson review by eye misses exactly the defects that
+matter, because clipped text and covered labels look plausible in a thumbnail. The
+harness renders each lesson under react-native-web, walks every beat, and records the
+exact rectangle of everything drawn. Rebuild it from
+`memory/lesson-layout-audit-harness.md` — full recipe, DOM hooks, and the two gotchas
+(Metro's bundling overlay renders *on top of* a mounted player; `CI=1` disables file
+watching, so restart after editing).
 
-Four checks are exact rather than matters of taste:
+Five checks are exact rather than matters of taste:
 
 | Check | What it proves |
 |---|---|
-| **BAND** | Ink outside the declared crop is clipped on every device (D16) |
-| **DECK** | Text past the deck's bottom is unreadable (D18) |
-| **BOX** | A card clipping or spilling its own text (D19) |
-| **WRAP** | A short label broken onto two lines (D20) |
+| **BAND** | Ink outside the declared crop is clipped on every device (D25) |
+| **DECK** | Text past the deck's bottom is unreadable (D27) |
+| **BOX** | A card clipping or spilling its own text (D28) |
+| **WRAP** | A short label broken onto two lines (D30) |
+| **POSE** | A beat's copy makes a physical claim its pose contradicts (A1, A3) |
 
-Plus a text/pose scan (A1) that reads every beat's copy for concrete physical claims
-and compares them against the pose code — including secondary figures (A3).
+Then a **device pass**, because some truths only appear there: framing and scale, two
+heads merging, a translucent figure failing to render, Android font padding. Deep-link
+with `philosophize://branches/<b>/<anything>/lesson/<id>` — send it **twice**, the
+first intent after a cold launch lands on Home. The package is **`com.philosophize.app`**
+(not the EAS account name — getting this wrong makes `force-stop` fail silently and
+every screenshot come from a stale process). **Never blind-tap inside a lesson**: a
+tap at a guessed coordinate once bookmarked a quote into the real user's collection.
 
 **Known false positives — verify before "fixing":**
 - Elements masked by an ancestor `overflow: hidden` — `getBoundingClientRect` ignores
-  ancestor clipping, so a ladder rung scrolled out of its own window still reports.
+  ancestor clipping.
 - PAPER-on-PAPER shapes, which are invisible anyway.
 - A centred `Text` whose *box* overhangs while its glyphs don't.
 - Intentional exits: a car looping off-stage, a dog walking out of frame.
-- Overflows of **2–3 units are line-box rounding**, everywhere, and benign. Set the
-  bar at ≥4.
+- Overflows of **2–3 units are line-box rounding**, everywhere, and benign. Bar at ≥4.
 - Never call a collision from a low-resolution contact sheet — zoom the raw capture
-  first. One "collision" turned out to have clear air around it.
+  first.

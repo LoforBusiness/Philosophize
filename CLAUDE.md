@@ -322,9 +322,11 @@ To add a new branch: create an `index.ts` in the branch directory, export a `Bra
 ## 13. Lesson Design Principles (north star)
 
 > ⚠️ **Before writing or changing any cinematic lesson, read [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md).**
-> That is the binding rule book — 25 numbered rules, an authoring checklist, and the
-> four exact verification checks. Every rule in it exists because a real lesson broke
-> it and it was caught on a real phone. This section is the *why*; that file is the *how*.
+> That is the binding rule book — 51 numbered rules in seven groups (truth of the
+> picture · the figure · motion · nothing hidden · questions · writing · engine), an
+> authoring checklist, and the five exact verification checks. Every rule in it exists
+> because a real lesson broke it and it was caught on a real phone. This section is the
+> *why*; that file is the *how*, with the numbers.
 >
 > Rule A1 above all: **what the text says, the picture must do.** A lesson that says
 > someone is on the floor and draws them standing is not acceptable at any polish level.
