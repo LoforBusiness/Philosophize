@@ -506,6 +506,28 @@ function hands(base: Stance, lx: number, ly: number, rx: number, ry: number): St
 }
 
 /**
+ * A GESTURE'S TRANSIENT RISE, and why every raised arm has to come back down.
+ *
+ * A beat holds until the reader taps, which can be ten seconds. Whatever pose the
+ * figure is left in is what they stare at — so the settled pose has to be one a
+ * person would actually still be in. It wasn't: `celebrate` and `reach-up-high`
+ * rested with both arms locked straight overhead, `wave` rested mid-wave, `proclaim`
+ * and `point-up` rested with an arm aloft. Fourteen of the forty-eight gestures
+ * ended with a hand in the air and simply froze there.
+ *
+ * So the raised instant now lives HERE instead of in the resting pose: emoteHold is
+ * the arm-down version, and emoteLive adds this rise on top. It must return to
+ * exactly zero, and quickly — the next beat's transition blends out of emoteHold
+ * (`mixStance(holdPrev, liveNext, tr)`), so any lift still up when the reader taps
+ * would snap the arm down in one frame. 1.5s is long enough to read as a deliberate
+ * gesture and short enough that it is always finished before a tap.
+ */
+function lift(bt: number): number {
+  'worklet';
+  return Math.sin(Math.min(bt, 1.5) / 1.5 * Math.PI);
+}
+
+/**
  * The settled pose for gesture `code`. 0 neutral · 1 explain · 2 present-up ·
  * 3 count · 4 think · 5 sweep · 6 point-up · 7 both-wide · 8 shrug · 9 hand-on-hip ·
  * 10 arms-crossed · 11 forehead · 12 scratch-head · 13 point-forward · 14 reach-out ·
@@ -527,11 +549,15 @@ export function emoteHold(code: number, t: number): Stance {
   const s = stand(t);
   const g = life2(t, 1.25, 0.8, 0.6) * 1.3;     // active-hand drift so a hold never freezes
   if (code === 1) return hands(s, -6, 6, 32 + g, -22);
-  if (code === 2) return { ...hands(s, -6, 6, 26 + g, -46), neck: -0.14 };
-  if (code === 3) return { ...hands(s, -6, 6, 30 + g, -34), neck: -0.05 };
-  if (code === 4) return { ...hands(s, -6, 5, 8, -50 + g), neck: 0.12 };
-  if (code === 5) return hands(s, -28, -16, 32 + g, -38);
-  if (code === 6) return { ...hands(s, -8, 4, 12, -58 + g), neck: -0.20 };
+  if (code === 2) return { ...hands(s, -6, 6, 30 + g, -12), neck: -0.04 };
+  if (code === 3) return { ...hands(s, -6, 6, 30 + g, -16), neck: -0.05 };
+  // The hand rests AT THE CHIN — the head is a 20-radius disc centred on (0, −49),
+  // so its underside is about y −29. At −50 the fist sat dead in the middle of the
+  // skull and vanished, which read as a forearm ending in the face rather than a
+  // thinker. This is the most-used gesture in the app, so it is worth the two units.
+  if (code === 4) return { ...hands(s, -6, 5, 9, -32 + g), neck: 0.12 };
+  if (code === 5) return hands(s, -24, 0, 31 + g, -18);
+  if (code === 6) return { ...hands(s, -8, 4, 20, -28), neck: -0.08 };
   if (code === 7) return hands(s, -32 - g, -18, 32 + g, -18);
   if (code === 8) return { ...hands(s, -26, -6, 26, -6), tilt: s.tilt + 0.03, bob: s.bob + 3, neck: 0.05 };
   if (code === 9) return { ...hands(s, -6, 6, 9, -8), tilt: s.tilt + 0.02 };
@@ -540,30 +566,30 @@ export function emoteHold(code: number, t: number): Stance {
   if (code === 12) return { ...hands(s, -6, 6, 4, -56), neck: 0.06 };
   if (code === 13) return { ...hands(s, -6, 6, 34, -16), tilt: s.tilt - 0.05 };
   if (code === 14) return { ...hands(s, -24, -16, 24, -16), tilt: s.tilt - 0.04 };
-  if (code === 15) return { ...hands(s, -22, -34, 22, -34), tilt: s.tilt + 0.16, neck: 0.06, footL: { x: -9, y: 0 }, footR: { x: 9, y: 0 } };
-  if (code === 16) return { ...hands(s, -18, -56, 18, -56), neck: -0.14, tilt: s.tilt - 0.03 };
+  if (code === 15) return { ...hands(s, -16, -6, 16, -6), tilt: s.tilt + 0.10, neck: 0.04, footL: { x: -9, y: 0 }, footR: { x: 9, y: 0 } };
+  if (code === 16) return { ...hands(s, -16, -4, 16, -4), neck: -0.04 };
   if (code === 17) return { ...hands(s, -3, 6, 5, 6), tilt: s.tilt - 0.30, neck: 0.22, bob: s.bob - 3 };
-  if (code === 18) return { ...hands(s, -12, -46, 12, -46), bob: s.bob - 14, tilt: s.tilt + 0.06, neck: 0.10, footL: { x: -11, y: 0 }, footR: { x: 11, y: 0 } };
-  if (code === 19) return { ...hands(s, -16, -50, 18, -50), neck: -0.12, tilt: s.tilt - 0.06 };
-  if (code === 20) return { ...hands(s, -6, 6, 18, -52 + g) };
+  if (code === 18) return { ...hands(s, -12, -16, 12, -16), bob: s.bob - 14, tilt: s.tilt + 0.06, neck: 0.10, footL: { x: -11, y: 0 }, footR: { x: 11, y: 0 } };
+  if (code === 19) return { ...hands(s, -12, -10, 14, -10), neck: -0.04 };
+  if (code === 20) return { ...hands(s, -6, 6, 20, -18 + g) };
   if (code === 21) return hands(s, -26, -8, 26, -8);
   if (code === 22) return { ...hands(s, -6, 5, 4, -30), neck: 0.02 };
-  if (code === 23) return { ...hands(s, -6, 6, 30, -46) };
+  if (code === 23) return { ...hands(s, -6, 6, 28, -14) };
   // ── the second wave ─────────────────────────────────────────────────────────
-  if (code === 24) return { ...hands(s, -18, -56 + g, 18, -58 + g), neck: -0.24, tilt: s.tilt - 0.04 };     // reach up, both hands, head back
-  if (code === 25) return { ...hands(s, -8, -10, 16 + g, -50 + g), neck: -0.22, tilt: s.tilt - 0.03 };       // gaze up in wonder, one hand rising
-  if (code === 26) return { ...hands(s, -6, 6, 24, -46), neck: -0.04, tilt: s.tilt - 0.03 };                // stamp poised (down-strike is a live accent)
+  if (code === 24) return { ...hands(s, -16, -4 + g, 16, -6 + g), neck: -0.06, tilt: s.tilt - 0.02 };       // reached up, arms now down
+  if (code === 25) return { ...hands(s, -8, 2, 18 + g, -16), neck: -0.10, tilt: s.tilt - 0.02 };            // still looking up, hand lowered
+  if (code === 26) return { ...hands(s, -6, 6, 24, -12), neck: -0.04, tilt: s.tilt - 0.03 };                // stamp done, arm back down
   if (code === 27) return { ...hands(s, 18, 4, 26, 8), tilt: s.tilt - 0.10, neck: 0.06 };                    // grip the lever, both hands low-forward
   if (code === 28) return { ...hands(s, -9, -6, 9, -6), tilt: s.tilt - 0.05, bob: s.bob + 2, neck: -0.06 };  // power pose, both hands on hips, chest up
   if (code === 29) return { ...hands(s, -30 - g, -14, 30 + g, -14), tilt: s.tilt + 0.02 };                   // press outward against the walls
   if (code === 30) return { ...hands(s, 12, -18, 22, -24), tilt: s.tilt - 0.06, neck: -0.08 };               // offer up with both hands
   if (code === 31) return { ...hands(s, 14, -2, 24, -6), tilt: s.tilt - 0.03, neck: 0.04 };                  // receive, hands cupped forward
   if (code === 32) return { ...hands(s, -24, -22, 24, -22), tilt: s.tilt };                                  // conduct / sway (live oscillates both hands)
-  if (code === 33) return { ...hands(s, -30, -30, 30, -30), neck: -0.18, tilt: s.tilt - 0.05 };              // open release, arms wide and up, head back
+  if (code === 33) return { ...hands(s, -26, -4, 26, -4), neck: -0.06, tilt: s.tilt - 0.03 };                // released, arms open but down
   if (code === 34) return { ...hands(s, -8, 5, 4, -48), neck: 0.08, tilt: s.tilt + 0.06 };                  // shield eyes from a bright light
-  if (code === 35) return { ...hands(s, -6, 6, 26, -52 + g), neck: -0.14, tilt: s.tilt - 0.05 };            // proclaim, one arm raised out-and-up
+  if (code === 35) return { ...hands(s, -6, 6, 28, -18 + g), neck: -0.05, tilt: s.tilt - 0.03 };            // proclaimed, arm back down
   if (code === 36) return { ...hands(s, -6, 6, 26, -2), tilt: s.tilt - 0.06, neck: 0.10 };                  // sign / write on a surface
-  if (code === 37) return { ...hands(s, -6, 5, 24, -14), tilt: s.tilt - 0.04 };                             // grasp then pull in (live pulls)
+  if (code === 37) return { ...hands(s, -6, 5, 10, -14), tilt: s.tilt - 0.04 };                             // the catch, already pulled in
   if (code === 38) return { ...hands(s, -6, 6, 22, 6), neck: 0.16, tilt: s.tilt + 0.03 };                   // gesture down at the ground / shared floor
   if (code === 39) return { ...hands(s, -6, 6, 28, -8), tilt: s.tilt - 0.05, neck: 0.02 };                  // reach forward to clasp / covenant
   // ── the third wave: working at a prop ───────────────────────────────────────
@@ -577,7 +603,7 @@ export function emoteHold(code: number, t: number): Stance {
   if (code === 44) return { ...hands(s, -12, 2, -15, 4), neck: -0.06, tilt: s.tilt - 0.02 };       // hands clasped behind the back
   if (code === 45) return { ...hands(s, -7, 6, 14, -20), neck: 0.02 };                            // double-take (the live pass snaps the head)
   if (code === 46) return { ...hands(s, -8, 4, 8, 4), tilt: s.tilt + 0.10, neck: 0.20, bob: s.bob - 6 }; // slump, defeated
-  if (code === 47) return { ...hands(s, -20, -34, 20, -34), neck: -0.04, tilt: s.tilt - 0.02 };    // frame it up, both hands sizing
+  if (code === 47) return { ...hands(s, -18, -20, 18, -20), neck: -0.02, tilt: s.tilt - 0.02 };    // framed it, hands lowered
   return s;                                       // 0 neutral
 }
 
@@ -589,7 +615,7 @@ export function emoteLive(code: number, t: number, bt: number): Stance {
   const talk = Math.sin(bt * 8.2) * speech * 2.6;      // the gesturing hand beats with the line
   const nod = Math.sin(bt * 8.2 + 0.4) * speech * 0.02;
   let dx = 0, dy = 0, db = 0, dn = 0, dxl = 0, dyl = 0;
-  if (code === 2 || code === 6 || code === 20 || code === 23) dy = Math.sin(Math.min(bt, 0.7) / 0.7 * Math.PI) * -6; // lift accent
+  // (the lift accents for 2 / 6 / 20 / 23 now live in the LIFT block below)
   if (code === 3) dy = Math.sin(bt * 7.0) * Math.max(0, 1 - bt / 1.7) * 3;                     // counted chops
   if (code === 5) dx = lerp(-30, 0, ease01(bt / 1.0));                                          // sweep into place
   if (code === 8) db = Math.sin(Math.min(bt, 0.6) / 0.6 * Math.PI) * 2.5;                       // shrug lifts once
@@ -598,14 +624,18 @@ export function emoteLive(code: number, t: number, bt: number): Stance {
   if (code === 18) { dx = Math.sin(bt * 22) * Math.max(0, 1 - bt / 1.2) * 1.2; }                // cower tremble
   if (code === 23) dx = Math.sin(bt * 9) * speech * 5;                                          // wave oscillation
   // ── the second wave's accents ────────────────────────────────────────────────
-  if (code === 24 || code === 33) dy = Math.sin(Math.min(bt, 0.8) / 0.8 * Math.PI) * -5;        // reach / release rises
-  if (code === 25 || code === 35) dy = Math.sin(Math.min(bt, 0.7) / 0.7 * Math.PI) * -5;        // wonder / proclaim lift
-  if (code === 26) dy = Math.sin(Math.min(bt, 0.45) / 0.45 * Math.PI) * 22;                     // stamp strikes down and recovers
+  // (24 / 33 / 25 / 35 rise in the LIFT block below)
+  // The stamp raises first and strikes DOWN after, so its blow is offset past the
+  // rise rather than fighting it.
+  if (code === 26) dy = Math.sin(Math.min(Math.max(bt - 0.55, 0), 0.4) / 0.4 * Math.PI) * 24;
   if (code === 27) { const p = Math.sin(Math.min(bt, 0.5) / 0.5 * Math.PI); dy = p * 14; dyl = p * 14; db = -p * 3; } // both hands yank the lever down, body dips
   if (code === 29) { const p = Math.sin(bt * 5) * Math.max(0, 1 - bt / 1.4) * 2; dx = p; dxl = -p; }            // straining push tremble
   if (code === 32) { dx = Math.sin(bt * 3.0) * 6; dxl = Math.sin(bt * 3.0 + Math.PI) * 6; }                     // conduct: hands sway in opposition
   if (code === 36) dx = Math.sin(bt * 12) * Math.max(0, 1 - bt / 1.6) * 4;                      // signing strokes
-  if (code === 37) dx = lerp(0, -14, ease01(bt / 0.9));                                          // grasp pulls the catch inward
+  // Reach OUT to the catch, then draw it in to where the hold already sits. It used
+  // to end 14 units inboard of its own hold pose, so the hand jumped back out the
+  // moment the reader tapped.
+  if (code === 37) dx = lerp(14, 0, ease01(bt / 0.9));
   // ── the third wave's accents ────────────────────────────────────────────────
   if (code === 40) {                                                                             // writing: small looping strokes that fade out
     const w = Math.max(0, 1 - bt / 2.2);
@@ -617,6 +647,29 @@ export function emoteLive(code: number, t: number, bt: number): Stance {
   if (code === 45) dn = Math.sin(Math.min(bt, 0.45) / 0.45 * Math.PI) * -0.28;                   // the head snaps round
   if (code === 46) db = -Math.sin(Math.min(bt, 0.9) / 0.9 * Math.PI) * 2.5;                      // the slump settles heavier
   if (code === 47) { const p = Math.sin(bt * 2.4) * Math.max(0, 1 - bt / 1.8) * 3; dx = p; dxl = -p; } // framing hands adjust the crop
+
+  // ── LIFT: the raised instant of a gesture ───────────────────────────────────
+  // Each of these RESTS with the arm down (see emoteHold) and rises only here, so
+  // the reader sees the gesture made and then the arm come back down instead of a
+  // figure frozen with a hand in the air. `lift` is zero by 1.5s, which keeps
+  // emoteLive converging on emoteHold — the pose the next transition blends out of.
+  const L = lift(bt);
+  if (code === 2) { dy -= 34 * L; dn -= 0.10 * L; }
+  if (code === 3) dy -= 18 * L;
+  if (code === 5) { dy -= 20 * L; dyl -= 16 * L; }
+  if (code === 6) { dy -= 30 * L; dn -= 0.12 * L; }
+  if (code === 15) { dy -= 28 * L; dyl -= 28 * L; }
+  if (code === 16) { dy -= 52 * L; dyl -= 52 * L; dn -= 0.10 * L; }
+  if (code === 18) { dy -= 30 * L; dyl -= 30 * L; }
+  if (code === 19) { dy -= 40 * L; dyl -= 40 * L; dn -= 0.08 * L; }
+  if (code === 20) dy -= 34 * L;
+  if (code === 23) dy -= 32 * L;
+  if (code === 24) { dy -= 52 * L; dyl -= 52 * L; dn -= 0.18 * L; }
+  if (code === 25) { dy -= 34 * L; dn -= 0.12 * L; }
+  if (code === 26) dy -= 34 * L;
+  if (code === 33) { dy -= 26 * L; dyl -= 26 * L; dn -= 0.12 * L; }
+  if (code === 35) { dy -= 34 * L; dn -= 0.09 * L; }
+  if (code === 47) { dy -= 14 * L; dyl -= 14 * L; }
   return {
     ...s,
     neck: s.neck + nod + dn,
