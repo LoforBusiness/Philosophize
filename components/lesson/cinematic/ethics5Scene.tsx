@@ -8,16 +8,26 @@ import { BEATS } from './ethics5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 
-// Socrates and a student walk and talk through snowy Athens — a colonnade behind
-// them, snow drifting past — while the lesson's spine hangs overhead as a piece of
+// A lone traveller walks through snowy Athens — a colonnade behind them, snow
+// drifting past — while the lesson's spine hangs overhead as a piece of
 // information design:
+//
+// THERE USED TO BE TWO WALKERS HERE AND THAT WAS A BUG. This scene began as a
+// Socrates-and-student dialogue; the script was later rewritten into the Axial Age
+// (Greece / India / China), and neither figure is named or referred to anywhere in
+// the narration any more. The second walker had no role, was the same size, faced
+// the same way, and — because both were handed the SAME x0/x1 — drew the same gait
+// habit and the same footfall from `strideStance`, so the two marched in perfect
+// lockstep and read as one figure duplicated. A companion has to earn its place in
+// the story first; if one is ever added back, give it a `seed` so it walks like
+// somebody else.
 //
 //   · THE AXIAL TIMELINE  a three-lane chart (GREECE / INDIA / CHINA) drawn against
 //     one 900→100 BCE axis, with the axial window 800–200 BCE marked by two guides.
 //     Each thinker drops into their lane as the narration names them, and the three
 //     ink pills land in the SAME slice of the axis — which is the whole claim.
 //   · Q1 THE FORK         two full signposts planted above the walkers' heads; tap
-//     one and the pair steps toward it.
+//     one and the walker steps toward it.
 //   · Q2 THE BALANCE      a wide beam with two big pans; tap a pan and it sinks.
 //
 // The camera is IDENTITY (no wrapper transform at all), so every constant here is a
@@ -25,7 +35,11 @@ import type { SceneApi } from './CinematicPlayer';
 // them. Composition rule: nothing but snow is ever drawn below y = 348 in the middle
 // of the stage, so no chart, sign or pan can ever cover a walker (crown ≈ 357).
 
-const GAP = 118;                            // spacing between the two walkers
+// The pair used to span bx .. bx+118, so their visual centre sat 59 to the right of
+// the scripted `sx`. The lone walker stands on that centre instead, which keeps the
+// composition — and the beat-by-beat framing against the colonnade and the chart —
+// exactly as it was measured, without editing every `sx` in the script.
+const CENTRE = 59;
 
 // ── the colonnade ────────────────────────────────────────────────────────────
 const COL_T = 348;
@@ -78,7 +92,6 @@ const PANS = [
 
 const SX = BEATS.map((b) => b.sx ?? 200);
 const SOC = BEATS.map((b) => b.soc ?? 0);
-const STU = BEATS.map((b) => b.stu ?? 0);
 const FORK = BEATS.map((b) => b.fork ?? 0);
 const BAL = BEATS.map((b) => b.balance ?? 0);
 const CHART = BEATS.map((b) => b.chart ?? 0);
@@ -103,18 +116,14 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: S
     const socS = moving
       ? strideStance(SX[p], SX[n], emoteHold(SOC[n], t), tr, WALK)
       : mixStance(emoteHold(SOC[p], t), emoteLive(SOC[n], t, bt.value), tr);
-    const stuS = moving
-      ? strideStance(SX[p], SX[n], emoteHold(STU[n], t), tr, WALK)
-      : mixStance(emoteHold(STU[p], t), emoteLive(STU[n], t, bt.value), tr);
 
-    // The pair only ever shifts SIDEWAYS on an answer — never up or down, so the
+    // The walker only ever shifts SIDEWAYS on an answer — never up or down, so the
     // band below can be measured once and stays true on every beat.
     const dx = (forkAnswered ? qv.value : 0) * stepX;
-    const bx = lerp(SX[p], SX[n], tr) + dx;
+    const bx = lerp(SX[p], SX[n], tr) + dx + CENTRE;
 
     return {
       soc: pose(socS, bx, GROUND, K_FIG, 1, 1),
-      stu: pose(stuS, bx + GAP, GROUND, K_FIG, 1, 1),
       fork: lerp(FORK[p], FORK[n], tr),
       balance: lerp(BAL[p], BAL[n], tr),
       chart: lerp(CHART[p], CHART[n], tr),
@@ -124,7 +133,6 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: S
   });
 
   const DSoc = useDerivedValue<Bundle>(() => SCENE.value.soc);
-  const DStu = useDerivedValue<Bundle>(() => SCENE.value.stu);
   const axisStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.chart) }));
   const forkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.fork }));
   const balStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.balance }));
@@ -160,9 +168,8 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: S
       {/* snow */}
       {SNOW.map((s, k) => <Flake key={k} S={SCENE} s={s} k={k} />)}
 
-      {/* the two walkers */}
+      {/* the walker */}
       <Stickman D={DSoc} k={K_FIG} />
-      <Stickman D={DStu} k={K_FIG} />
 
       {/* ── Q1: two signposts planted above the walkers' heads ─────────────── */}
       {showFork && (

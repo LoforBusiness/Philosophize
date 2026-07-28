@@ -261,11 +261,15 @@ export function moveStance(mode: number, dist: number): Stance {
  * pointing at whatever they are retreating FROM, rather than letting `dirsFrom`
  * flip them, or they will simply be walking normally in the other direction.
  */
-export function strideMode(x0: number, x1: number, settled: Stance, tr: number, mode: number): Stance {
+export function strideMode(
+  x0: number, x1: number, settled: Stance, tr: number, mode: number, seed = 0
+): Stance {
   'worklet';
-  const g = gaitVary(gaitFor(mode), x0 * 0.37 + x1 * 0.11);
+  // See `strideStance` in rig.ts: `seed` gives a companion on the same journey its
+  // own gait habit and its own footfall, so a pair never marches in lockstep.
+  const g = gaitVary(gaitFor(mode), x0 * 0.37 + x1 * 0.11 + seed * 3.7);
   const span = Math.abs(x1 - x0);
-  const w = moveBody(mode, span * ease01(tr), g);
+  const w = moveBody(mode, span * ease01(tr) + seed * 11, g);
   const far = clamp01(span / 40);
   const push = ease01(clamp01(1 - tr / 0.13)) * far;
   const land = Math.sin(Math.PI * clamp01((tr - 0.66) / 0.28)) * far;
@@ -280,10 +284,11 @@ export function strideMode(x0: number, x1: number, settled: Stance, tr: number, 
 
 /** `travelStance` for a travel mode: walk there in `mode`, or blend poses in place. */
 export function travelMode(
-  x0: number, x1: number, holdPrev: Stance, holdNext: Stance, liveNext: Stance, tr: number, mode: number
+  x0: number, x1: number, holdPrev: Stance, holdNext: Stance, liveNext: Stance, tr: number,
+  mode: number, seed = 0
 ): Stance {
   'worklet';
-  if (Math.abs(x1 - x0) > 1) return strideMode(x0, x1, holdNext, tr, mode);
+  if (Math.abs(x1 - x0) > 1) return strideMode(x0, x1, holdNext, tr, mode, seed);
   return mixStance(holdPrev, liveNext, tr);
 }
 

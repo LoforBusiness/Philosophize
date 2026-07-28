@@ -762,14 +762,26 @@ export function gaitVary(g: Gait, seed: number): Gait {
  * worklet that calls a forward-declared worklet captures it as `undefined` and
  * crashes the UI runtime, so order matters here.
  */
-export function strideStance(x0: number, x1: number, settled: Stance, tr: number, g: Gait = WALK): Stance {
+export function strideStance(
+  x0: number, x1: number, settled: Stance, tr: number, g: Gait = WALK, seed = 0
+): Stance {
   'worklet';
   // Every walk gets its own habit, dealt from where it starts and ends, so the
   // figure never paces the stage in one identical repeating motion. This lives
   // here rather than at the call sites so EVERY lesson gets it for free.
-  const vg = gaitVary(g, x0 * 0.37 + x1 * 0.11);
+  //
+  // `seed` is what stops TWO FIGURES WALKING THE SAME JOURNEY from being clones.
+  // The habit is dealt from the journey's endpoints, so a companion handed the same
+  // x0/x1 gets the same stride, the same bob, the same arm swing — and because the
+  // step phase comes from distance travelled, the same foot on the ground at the
+  // same instant. Two people in perfect lockstep read as one figure duplicated, not
+  // as two people. Give the second walker any non-zero seed and they get their own
+  // habit and their own footfall. Defaults to 0, so every existing caller is
+  // untouched. (A numeric literal default is safe in a worklet; a default that
+  // references a module const — like `g = WALK` — is not, and crashes the runtime.)
+  const vg = gaitVary(g, x0 * 0.37 + x1 * 0.11 + seed * 3.7);
   const span = Math.abs(x1 - x0);
-  const traveled = span * ease01(tr);
+  const traveled = span * ease01(tr) + seed * 11;
   const w = walk(traveled, vg);
   // A departure has a PRELOAD and an arrival has a LANDING. Without them the figure
   // simply switches on mid-stride, which is most of why a walk that also flips the
@@ -809,10 +821,11 @@ export function strideStance(x0: number, x1: number, settled: Stance, tr: number
  * later captures it as undefined and crashes the UI thread.
  */
 export function travelStance(
-  x0: number, x1: number, holdPrev: Stance, holdNext: Stance, liveNext: Stance, tr: number, g: Gait
+  x0: number, x1: number, holdPrev: Stance, holdNext: Stance, liveNext: Stance, tr: number,
+  g: Gait, seed = 0
 ): Stance {
   'worklet';
-  if (Math.abs(x1 - x0) > 1) return strideStance(x0, x1, holdNext, tr, g);
+  if (Math.abs(x1 - x0) > 1) return strideStance(x0, x1, holdNext, tr, g, seed);
   return mixStance(holdPrev, liveNext, tr);
 }
 
