@@ -152,13 +152,6 @@ export default function CinematicPlayer({
     setBoxSize((b) => (Math.abs(b.w - width) < 1 && Math.abs(b.h - height) < 1 ? b : { w: width, h: height }));
   }, []);
 
-  if (done) return null;   // the effect above shows the reward and pops this screen
-
-  // Fit the BAND, not the whole design space — see BAND_T/BAND_B in cinematicKit.
-  const bandT = band[0];
-  const bandH = band[1] - band[0];
-  const fit = boxSize.w > 0 ? Math.min(boxSize.w / STAGE_W, boxSize.h / bandH) : 0;
-
   // THE SUMMARY HAND-OFF. The last beat hides the stage and gives its whole height
   // to the deck. Keying that off `beat` collapsed the stage and re-centred the deck
   // in the very frame the index changed — while the deck was still showing the
@@ -180,6 +173,19 @@ export default function CinematicPlayer({
     });
   }, [hiding]);
   const stageStyle = useAnimatedStyle(() => ({ opacity: stageVis.value }));
+
+  // EVERY HOOK MUST BE ABOVE THIS LINE. `done` flips on the last tap, so anything
+  // below here is skipped on that render — and three hooks used to live below it.
+  // React counted fewer hooks than the render before, threw, and took the whole
+  // tree down with it, INCLUDING the reward Modal that had just been mounted: the
+  // lesson ended on a blank screen with no way forward. A hook after this return
+  // is not a style mistake, it breaks finishing a lesson.
+  if (done) return null;   // the effect above shows the reward and pops this screen
+
+  // Fit the BAND, not the whole design space — see BAND_T/BAND_B in cinematicKit.
+  const bandT = band[0];
+  const bandH = band[1] - band[0];
+  const fit = boxSize.w > 0 ? Math.min(boxSize.w / STAGE_W, boxSize.h / bandH) : 0;
   const quoteSaved = beat.quote ? savedQuotes.some((q) => q.id === beat.quote!.id) : false;
 
   return (

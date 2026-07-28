@@ -510,12 +510,6 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     setBox((b) => (Math.abs(b.w - width) < 1 && Math.abs(b.h - height) < 1 ? b : { w: width, h: height }));
   }, []);
 
-  if (done) return null;   // the effect above shows the reward and pops this screen
-
-  // Fit the BAND, not the whole design space — see THE BAND block up top.
-  const fit = box.w > 0 ? Math.min(box.w / STAGE_W, box.h / BAND_H) : 0;
-  const shot = SHOTS[i];
-  const quoteSaved = beat.quote ? savedQuotes.some((q) => q.id === beat.quote!.id) : false;
   // See CinematicPlayer for the full note: act 5 hands the stage's height to the
   // deck, and keying that off `beat` re-laid the deck out while it was still showing
   // the PREVIOUS beat's text — the old screen visibly jumped into the new screen's
@@ -532,6 +526,17 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     });
   }, [hiding]);
   const stageStyle = useAnimatedStyle(() => ({ opacity: stageVis.value }));
+
+  // EVERY HOOK MUST BE ABOVE THIS LINE — see the same note in CinematicPlayer.
+  // `done` flips on the last tap; hooks below here get skipped on that render,
+  // React counts fewer than before and throws, taking down the reward Modal with
+  // the rest of the tree. The lesson then ends on a blank screen.
+  if (done) return null;   // the effect above shows the reward and pops this screen
+
+  // Fit the BAND, not the whole design space — see THE BAND block up top.
+  const fit = box.w > 0 ? Math.min(box.w / STAGE_W, box.h / BAND_H) : 0;
+  const shot = SHOTS[i];
+  const quoteSaved = beat.quote ? savedQuotes.some((q) => q.id === beat.quote!.id) : false;
   // The meters keep the previous beat's reading while the card is fading out, so
   // the bars never blink empty on the frame before they leave.
   const priorBeat = i > 0 ? BEATS[i - 1] : undefined;

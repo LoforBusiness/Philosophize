@@ -374,10 +374,6 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
     setBoxSize((b) => (Math.abs(b.w - width) < 1 && Math.abs(b.h - height) < 1 ? b : { w: width, h: height }));
   }, []);
 
-  if (done) return null;   // the effect above shows the reward and pops this screen
-
-  // Fit the BAND, not the whole design space — see the BAND block up top.
-  const fit = boxSize.w > 0 ? Math.min(boxSize.w / STAGE_W, boxSize.h / BAND_H) : 0;
   // See CinematicPlayer for the full note: the layout follows `shown`, which only
   // advances when the deck swaps content at zero opacity, so the summary's re-layout
   // is never seen happening under the outgoing beat's text. The stage fades out on
@@ -392,6 +388,15 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
     });
   }, [hiding]);
   const stageStyle = useAnimatedStyle(() => ({ opacity: stageVis.value }));
+
+  // EVERY HOOK MUST BE ABOVE THIS LINE — see the same note in CinematicPlayer.
+  // `done` flips on the last tap; hooks below here get skipped on that render,
+  // React counts fewer than before and throws, taking down the reward Modal with
+  // the rest of the tree. The lesson then ends on a blank screen.
+  if (done) return null;   // the effect above shows the reward and pops this screen
+
+  // Fit the BAND, not the whole design space — see the BAND block up top.
+  const fit = boxSize.w > 0 ? Math.min(boxSize.w / STAGE_W, boxSize.h / BAND_H) : 0;
   const quoteSaved = beat.quote ? savedQuotes.some((q) => q.id === beat.quote!.id) : false;
   const bd = beat.build ?? {};
   const p1Label = bd.p1 ?? '';
