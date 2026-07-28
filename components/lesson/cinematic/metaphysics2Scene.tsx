@@ -5,7 +5,7 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './metaphysics2Script';
 import {
-  WALK, clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, strideStance, type Bundle,
+  WALK, clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, moveTr, pose, strideStance, type Bundle,
 } from './rig';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -65,7 +65,7 @@ export default function Metaphysics2Scene({ clock, bt, bi }: SceneApi) {
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / 0.9);
+    const tr = ease01(bt.value / moveTr(X[p], X[n], 0.9));
     const t = clock.value;
 
     const moving = Math.abs(X[n] - X[p]) > 10;   // he only ever walks toward the fork

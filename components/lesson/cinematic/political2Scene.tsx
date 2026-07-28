@@ -27,7 +27,7 @@ import type { SceneApi } from './CinematicPlayer';
 // Composition rule: the ruler never stands past x = 150 and the ledger starts at
 // x = 194, so the figure can never cover a tap target.
 
-const K = K_FIG * 1.08;            // stage units per rig unit (figure ≈ 150 tall)
+const K = K_FIG * 1.08;            // stage units per rig unit (figure ≈ 111 tall)
 
 const RULER_X = 96;
 const SUBJECT_X = 252;

@@ -5,8 +5,7 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './ethics2Script';
 import {
-  BLANK, WALK, clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, strideStance,
-  type Bundle,
+  BLANK, WALK, clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, moveTr, pose, strideStance, type Bundle,
 } from './rig';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -64,7 +63,7 @@ export default function Ethics2Scene({ clock, bt, bi }: SceneApi) {
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / 0.85);
+    const tr = ease01(bt.value / moveTr(GX[p], GX[n], 0.85));
     const t = clock.value;
 
     // Finder — gesture blend, small steps.

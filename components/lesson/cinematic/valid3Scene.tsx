@@ -30,7 +30,7 @@ import type { SceneApi } from './CinematicPlayer';
 // frame starts at x = 126 and the ballot at x = 130, so the figure can never
 // cover a card.
 
-const K = K_FIG * 1.08;            // stage units per rig unit (figure ≈ 150 tall)
+const K = K_FIG * 1.08;            // stage units per rig unit (figure ≈ 111 tall)
 const FIG_X = 60;                  // widest reach lands at x ≈ 118
 
 // ── the form ─────────────────────────────────────────────────────────────────

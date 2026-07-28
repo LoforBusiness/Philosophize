@@ -43,7 +43,29 @@ export const GROUND = 500;
 // camera translation, measure the band AFTER that shift.
 export const BAND_T = 0;
 export const BAND_B = STAGE_H;
-export const K_FIG = 1.35;                 // stage units per rig unit
+// HOW BIG THE FIGURE SHOULD BE.
+//
+// It was 1.35 — 103 rig units × 1.35 = 139 stage units. Against a typical declared
+// band of 280–330 that is HALF the visible height, and on a phone it came out at
+// 42–47% of the stage region: one character filling the frame while the props it is
+// meant to be talking about sat around it like furniture in a doll's house. The
+// figure was never wrong in isolation; it was wrong relative to everything else,
+// which is exactly the complaint.
+//
+// The band crop is what surfaced it. Cropping to the art doubled the on-screen size
+// of the whole scene, and the figure — already the tallest thing in most scenes —
+// grew with it.
+//
+// 1.0 puts the figure at 103 units: about a THIRD of a typical band (31–35% of the
+// stage region on a phone), which is where a character sits in an illustrated scene
+// without dominating it. It is still ~230px tall on the device, so nothing is lost
+// in legibility. Its crown drops from y 361 to y 397, so every band measured to
+// hold the old crown still holds this one — a shorter figure cannot clip.
+//
+// What this DOES affect is reach: a hand that just touched a board or a lever at
+// 1.35 now falls about a quarter shorter, so any scene where the figure makes
+// contact with a prop needs its x (or the prop) nudged to meet again.
+export const K_FIG = 1.0;                  // stage units per rig unit
 export const XFADE = 420;                  // beat-to-beat deck fade (ms)
 export const COMPLETION_XP = 5;            // matches LessonRunner
 

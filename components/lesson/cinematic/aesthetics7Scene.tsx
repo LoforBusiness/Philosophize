@@ -4,7 +4,7 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, emoteHold, emoteLive, lerp, mixStance, pose, travelStance, type Bundle,
+  WALK, dirsFrom, ease01, emoteHold, emoteLive, lerp, mixStance, moveTr, pose, travelStance, type Bundle,
 } from './rig';
 import { BEATS } from './aesthetics7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
@@ -115,7 +115,7 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick }: S
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / 0.85);
+    const tr = ease01(bt.value / moveTr(X[p], X[n], 0.85));
     const t = clock.value;
     const grow = ease01(bt.value / 0.55);
 

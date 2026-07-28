@@ -26,7 +26,7 @@ import type { SceneApi } from './CinematicPlayer';
 // below is exact. The decider's widest reach ends at x ≈ 116 and the plates start
 // at x = 128, so the figure can never cover a target.
 
-const K = K_FIG * 1.08;            // stage units per rig unit (figure ≈ 150 tall)
+const K = K_FIG * 1.08;            // stage units per rig unit (figure ≈ 111 tall)
 const FIG_X = 58;
 const LEVER_X = 112;
 

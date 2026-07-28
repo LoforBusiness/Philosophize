@@ -27,7 +27,7 @@ import type { SceneApi } from './CinematicPlayer';
 // below is exact. The presenter's widest reach ends at x ≈ 134 and the card
 // column starts at x = 152, so the figure can never cover a chip.
 
-const K = K_FIG * 1.08;            // stage units per rig unit (figure ≈ 150 tall)
+const K = K_FIG * 1.08;            // stage units per rig unit (figure ≈ 111 tall)
 const FIG_X = 76;
 
 // ── gauge ────────────────────────────────────────────────────────────────────

@@ -830,6 +830,35 @@ export function travelStance(
 }
 
 /**
+ * Stage units a figure covers in one second at an unhurried pace.
+ *
+ * Everything in these scenes crossfades over a fixed 0.85s, and a walk was being
+ * crammed into that same 0.85s NO MATTER HOW FAR IT WENT. A short shuffle looked
+ * fine; a hundred-unit journey across the stage was sprinted, which is what reads
+ * as "the stickman walks over way too fast". The feet never skated — the gait is
+ * distance-driven — so it wasn't a stride problem. It was a TIME problem: the same
+ * number of steps, played in a third of the time they need.
+ */
+export const WALK_SPEED = 74;
+
+/**
+ * How long this beat's transition should take.
+ *
+ * A beat that doesn't move the figure keeps the plain crossfade. A beat that walks
+ * takes as long as the walk actually needs, so the pace is the same whether the
+ * figure crosses the stage or steps aside. Because the scene drives BOTH the
+ * x-interpolation and the gait from this one number, stretching it slows the body
+ * and the position together and the feet stay planted.
+ */
+export function moveTr(x0: number, x1: number, base = 0.85): number {
+  'worklet';
+  const d = Math.abs(x1 - x0);
+  if (d < 1) return base;
+  const t = d / WALK_SPEED;
+  return t > base ? t : base;
+}
+
+/**
  * Facing direction per beat, precomputed on the JS thread from the beats' x track:
  * +1 walking right, -1 walking left, and HOLD the last direction while standing
  * still — so a figure that walks left to a chart keeps facing the chart while it
