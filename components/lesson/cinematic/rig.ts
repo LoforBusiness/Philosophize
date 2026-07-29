@@ -269,6 +269,34 @@ export function jabEnv(u: number, peak: number) {
   if (u <= peak) return easeOutCubic(u / peak);
   return 1 - ease01((u - peak) / (1 - peak));
 }
+
+/**
+ * A PUNCH, with the wind-up that stops it reading as a machine part.
+ *
+ * `jabEnv` fires the fist from a standing start and eases it back — technically a
+ * snap, but with no anticipation and no follow-through, which is most of what reads
+ * as "blocky, obviously fake". Real strikes load first: the fist draws back a little,
+ * *then* goes. The return also has to overshoot slightly past the guard and settle,
+ * because an arm that stops dead exactly where it started looks keyframed.
+ *
+ * Returns slightly NEGATIVE during the load (the pose lerps away from the target,
+ * i.e. the fist pulls back) and dips just under zero on the recovery.
+ */
+export function punchEnv(u: number, peak: number) {
+  'worklet';
+  const w = peak * 0.36;                          // the load
+  if (u < w) return -0.2 * Math.sin(Math.PI * (u / w));
+  if (u <= peak) return easeOutCubic((u - w) / (peak - w));
+  const r = (u - peak) / (1 - peak);
+  // settle: back past the guard by a hair, then in
+  return (1 - ease01(r)) - 0.06 * Math.sin(Math.PI * ease01(r));
+}
+
+/** A smooth one-shot pulse, 0 → 1 → 0, with no corners. For footfalls and shuffles. */
+export function pulse(u: number) {
+  'worklet';
+  return Math.sin(Math.PI * ease01(clamp01(u)));
+}
 /** Rise, hold briefly, fall — a block / duck / slip that returns to guard. */
 export function holdEnv(u: number) {
   'worklet';
@@ -330,10 +358,16 @@ export function guard(t: number, load = 0, seed = 0): Stance {
     tilt: -0.10, neck: -0.05, bob: b - 2,
     footL: { x: -15 + w - 1 + sway * 0.3, y: 0 },
     footR: { x: 13 + w + sway * 0.3, y: 0 },
-    // Fists clear of the HEAD CIRCLE (40% of figure height), so both gloves and
-    // the head read as three shapes rather than one mass.
-    fistL: { x: 27 + sway * 0.4 - load * 5, y: -34 + b * 0.4 },
-    fistR: { x: 33 + sway * 0.4 - load * 7, y: -29 + b * 0.4 },
+    // HANDS AT THE JAW, NOT OUT IN FRONT OF IT. They used to sit at x 27 and 33 —
+    // twenty-odd units ahead of a head whose centre is at x 6 — which is not a guard,
+    // it is holding your arms out. Two figures doing that at punching range put four
+    // 9-radius gloves in the same few units of paper, and the pair fused into one
+    // black bridge between two heads at exactly the moments the fight was busiest.
+    // Pulled back under the chin (the head's underside is about y −29) they stay
+    // clear of the head disc, leave the middle of the ring empty for whatever is
+    // actually being thrown, and give every punch a longer, more visible extension.
+    fistL: { x: 17 + sway * 0.4 - load * 5, y: -30 + b * 0.4 },
+    fistR: { x: 22 + sway * 0.4 - load * 7, y: -26 + b * 0.4 },
     adv: 0,
   };
 }
@@ -359,7 +393,7 @@ export function guard(t: number, load = 0, seed = 0): Stance {
 /** Quick straight lead — snappy, little commitment. */
 export function jab(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t, 0, seed), e = jabEnv(u, 0.26);
+  const g = guard(t, 0, seed), e = punchEnv(u, 0.30);
   return {
     ...g, tilt: g.tilt - 0.04 * e, adv: 8 * e,
     fistR: { x: lerp(g.fistR.x, 35, e), y: lerp(g.fistR.y, -30, e) },
@@ -369,7 +403,7 @@ export function jab(t: number, u: number, seed = 0): Stance {
 /** Power straight — bigger lunge, more rotation into it, and a flatter line. */
 export function cross(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t, 0, seed), e = jabEnv(u, 0.40);
+  const g = guard(t, 0, seed), e = punchEnv(u, 0.42);
   return {
     ...g, tilt: g.tilt - 0.16 * e, neck: g.neck - 0.04 * e, adv: 18 * e,
     fistR: { x: lerp(g.fistR.x, 38, e), y: lerp(g.fistR.y, -25, e) },
@@ -379,7 +413,7 @@ export function cross(t: number, u: number, seed = 0): Stance {
 /** Comes around the side at head height, fist bowing up mid-swing. */
 export function hook(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t, 0, seed), e = jabEnv(u, 0.42);
+  const g = guard(t, 0, seed), e = punchEnv(u, 0.44);
   return {
     ...g, tilt: g.tilt - 0.08 * e, adv: 12 * e,
     fistR: { x: lerp(g.fistR.x, 29, e), y: lerp(g.fistR.y, -41, e) - Math.sin(Math.PI * e) * 6 },
@@ -389,7 +423,7 @@ export function hook(t: number, u: number, seed = 0): Stance {
 /** Rises from underneath, close in. */
 export function uppercut(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t, 0, seed), e = jabEnv(u, 0.46);
+  const g = guard(t, 0, seed), e = punchEnv(u, 0.46);
   return {
     ...g, tilt: g.tilt - 0.06 * e, bob: g.bob - Math.sin(Math.PI * u) * 2.5, adv: 11 * e,
     fistR: { x: lerp(g.fistR.x, 30, e), y: lerp(g.fistR.y, -47, e) },
@@ -438,18 +472,27 @@ export function slip(t: number, u: number, seed = 0): Stance {
 export function backstep(t: number, u: number, seed = 0): Stance {
   'worklet';
   const g = guard(t, 0, seed), e = holdEnv(u);
-  const sh = Math.sin(Math.PI * u * 2);
+  // Two overlapping footfalls rather than max(0, sin), which has a corner at every
+  // zero crossing and reads as a foot snapping off the floor.
+  const a = pulse(u / 0.5), b = pulse((u - 0.45) / 0.5);
   return {
     ...g, adv: -15 * e,
-    footL: { x: g.footL.x - 5 * Math.max(0, sh), y: -3 * Math.max(0, sh) },
-    footR: { x: g.footR.x - 4 * Math.max(0, -sh), y: -3 * Math.max(0, -sh) },
+    footL: { x: g.footL.x - 6 * a, y: -3.5 * a },
+    footR: { x: g.footR.x - 5 * b, y: -3.5 * b },
   };
 }
 /** Takes a clean shot — head snaps back, weight rocks onto the heels. */
 export function hitReact(t: number, u: number, seed = 0): Stance {
   'worklet';
   const g = guard(t, 0, seed);
-  const e = Math.sin(Math.PI * Math.pow(ease01(u), 0.55));   // fast snap, slow recover
+  // DELAYED, so the glove gets there first. Punches peak at u ≈ 0.42; a reaction on
+  // the same clock means the head has already left by the time the fist arrives, and
+  // the shot visibly misses a man who is recoiling from nothing. Starting at 0.30
+  // leaves a beat where the glove is ON the head, which is the whole picture.
+  // A plain sine ramp, because smoothstep-then-pow rises far too fast at small d:
+  // it had the head 70% of the way back by the time the fist arrived. This puts it
+  // under 40% at the punch's peak (u 0.42) and peaks at u 0.65, after contact.
+  const e = Math.sin(Math.PI * clamp01((u - 0.34) / 0.62));
   return {
     ...g, tilt: g.tilt + 0.34 * e, neck: g.neck + 0.34 * e, bob: g.bob - 2 * e, adv: -7 * e,
     footL: { x: g.footL.x - 6 * e, y: 0 }, footR: { x: g.footR.x - 3 * e, y: 0 },
@@ -469,7 +512,7 @@ export function hitReact(t: number, u: number, seed = 0): Stance {
 /** The lead hand finally throws: a short hook from the front. */
 export function leadHook(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t, 0, seed), e = jabEnv(u, 0.36);
+  const g = guard(t, 0, seed), e = punchEnv(u, 0.38);
   return {
     ...g, tilt: g.tilt - 0.07 * e, adv: 10 * e,
     fistL: { x: lerp(g.fistL.x, 28, e), y: lerp(g.fistL.y, -40, e) - Math.sin(Math.PI * e) * 5 },
@@ -479,7 +522,7 @@ export function leadHook(t: number, u: number, seed = 0): Stance {
 /** A dig to the body — the one punch that travels DOWN, so the fight isn't all head height. */
 export function bodyShot(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t, 0, seed), e = jabEnv(u, 0.34);
+  const g = guard(t, 0, seed), e = punchEnv(u, 0.38);
   return {
     ...g, tilt: g.tilt - 0.20 * e, neck: g.neck + 0.10 * e, bob: g.bob - 6 * e, adv: 14 * e,
     fistR: { x: lerp(g.fistR.x, 32, e), y: lerp(g.fistR.y, -8, e) },
@@ -525,11 +568,11 @@ export function circleStep(t: number, u: number, seed = 0): Stance {
   'worklet';
   const g = guard(t, 0, seed);
   const e = holdEnv(u);
-  const step = Math.sin(2 * Math.PI * ease01(u));
+  const a = pulse(u / 0.45), b = pulse((u - 0.5) / 0.45);
   return {
     ...g, adv: -6 * e,
-    footL: { x: g.footL.x - 7 * Math.max(0, step), y: -4 * Math.max(0, step) },
-    footR: { x: g.footR.x - 6 * Math.max(0, -step), y: -4 * Math.max(0, -step) },
+    footL: { x: g.footL.x - 7 * a, y: -4 * a },
+    footR: { x: g.footR.x - 6 * b, y: -4 * b },
   };
 }
 /** Arms in, leaning together — the exchange stalls and nothing happens. */
@@ -553,6 +596,144 @@ export function taunt(t: number, u: number, seed = 0): Stance {
   };
 }
 
+// ── the third wave, so an exchange can actually resolve ──────────────────────
+// Everything above either throws or answers a single punch. A round also needs the
+// things that happen BETWEEN punches and AFTER one lands, or the fight is a list of
+// attacks with no consequences: a shot that loops over the top of a guard, a
+// deflection made with the body instead of the hands, a shove to make room, and a
+// stagger — the one thing that says a punch actually hurt.
+
+/** Loops over the top of a high guard. The one punch that comes DOWN onto the target. */
+export function overhand(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed), e = punchEnv(u, 0.46);
+  const arc = Math.sin(Math.PI * clamp01(e));      // rises on the way out, drops in
+  return {
+    ...g, tilt: g.tilt - 0.14 * e, neck: g.neck - 0.05 * e, adv: 15 * e,
+    fistR: { x: lerp(g.fistR.x, 34, e), y: lerp(g.fistR.y, -33, e) - arc * 14 },
+    fistL: { x: lerp(g.fistL.x, 22, e), y: lerp(g.fistL.y, -36, e) },
+  };
+}
+/** Turns the lead shoulder in so the punch slides off it — a defence made with the body. */
+export function shoulderRoll(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed), e = holdEnv(u);
+  return {
+    ...g, tilt: g.tilt + 0.13 * e, neck: g.neck + 0.20 * e, bob: g.bob - 4 * e, adv: -5 * e,
+    fistL: { x: lerp(g.fistL.x, 20, e), y: lerp(g.fistL.y, -30, e) },
+    fistR: { x: lerp(g.fistR.x, 24, e), y: lerp(g.fistR.y, -22, e) },
+  };
+}
+/** A shove into the chest to make room. Both hands, and the other man goes back. */
+export function pushOff(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed), e = punchEnv(u, 0.34);
+  return {
+    ...g, tilt: g.tilt - 0.08 * e, adv: 9 * e,
+    fistL: { x: lerp(g.fistL.x, 31, e), y: lerp(g.fistL.y, -24, e) },
+    fistR: { x: lerp(g.fistR.x, 33, e), y: lerp(g.fistR.y, -20, e) },
+  };
+}
+/**
+ * Hurt. Not `hitReact` — that is a head snapping back and recovering on the spot.
+ * This is balance actually lost: the feet cross behind, the body goes with them, and
+ * it takes the whole exchange to get back. It is what makes a landed shot mean
+ * something instead of being a pose the other man happens to be in.
+ */
+export function stagger(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed);
+  const e = Math.sin(Math.PI * clamp01((u - 0.34) / 0.62));  // the punch lands first
+  const step = pulse((u - 0.42) / 0.52);
+  return {
+    ...g,
+    tilt: g.tilt + 0.30 * e, neck: g.neck + 0.26 * e, bob: g.bob - 5 * e, adv: -16 * e,
+    footL: { x: g.footL.x - 13 * step, y: -4 * step },
+    footR: { x: g.footR.x - 7 * e, y: 0 },
+    fistL: { x: lerp(g.fistL.x, 22, e), y: lerp(g.fistL.y, -22, e) },
+    fistR: { x: lerp(g.fistR.x, 27, e), y: lerp(g.fistR.y, -18, e) },
+  };
+}
+/** Light on the toes, in and out — the resting state of a fighter who is not tired. */
+export function bounce(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed);
+  const hop = pulse(u / 0.5) + pulse((u - 0.5) / 0.5);
+  return {
+    ...g, bob: g.bob + hop * 1.6, adv: 4 * Math.sin(2 * Math.PI * ease01(u)),
+    footL: { x: g.footL.x, y: -3.5 * pulse(u / 0.5) },
+    footR: { x: g.footR.x, y: -3.5 * pulse((u - 0.5) / 0.5) },
+  };
+}
+/** Pulls the head straight back off the end of a punch, feet planted. */
+export function leanBack(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed), e = holdEnv(u);
+  return {
+    ...g, tilt: g.tilt + 0.26 * e, neck: g.neck + 0.06 * e, bob: g.bob - 2 * e, adv: -8 * e,
+    fistL: { x: g.fistL.x - 3 * e, y: g.fistL.y - 2 * e },
+  };
+}
+/** Two of the lead hand, quick — the rhythm the single jab cannot make. */
+export function doubleJab(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed);
+  const e = u < 0.5 ? punchEnv(u / 0.5, 0.30) : punchEnv((u - 0.5) / 0.5, 0.30) * 0.86;
+  return {
+    ...g, tilt: g.tilt - 0.04 * e, adv: 9 * e,
+    fistL: { x: lerp(g.fistL.x, 30, e), y: lerp(g.fistL.y, -32, e) },
+    fistR: { x: lerp(g.fistR.x, 28, e), y: g.fistR.y },
+  };
+}
+/** A glove brushed across the nose. Nothing happens; that is the point of it. */
+export function wipe(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed), e = holdEnv(u);
+  return {
+    ...g, neck: g.neck + 0.04 * e,
+    fistL: { x: lerp(g.fistL.x, 26, e) + Math.sin(u * 18) * 2 * e, y: lerp(g.fistL.y, -37, e) },
+  };
+}
+
+/**
+ * PEAK ROOT MOTION PER CODE, so a scene can work out how far apart to stand.
+ *
+ * `adv` is how far a move carries the whole body toward the opponent at its peak.
+ * A scene that wants a punch to actually ARRIVE has to know it: the separation the
+ * reader sees at the moment of contact is `base − MOVE_ADV[attacker] −
+ * MOVE_ADV[defender]`, and if that is not near 64 the glove lands in open paper
+ * (too far) or inside the other man's head (too close). Kept next to the moves so
+ * it cannot drift away from them.
+ */
+export const MOVE_ADV: number[] = [
+  0,    // 0 guard
+  8,    // 1 jab
+  18,   // 2 cross
+  12,   // 3 hook
+  11,   // 4 uppercut
+  -3,   // 5 block
+  2,    // 6 duck
+  -4,   // 7 slip
+  -15,  // 8 backstep
+  -7,   // 9 hit
+  10,   // 10 lead hook
+  14,   // 11 body shot
+  -2,   // 12 parry
+  4,    // 13 roll
+  5,    // 14 feint
+  -6,   // 15 circle
+  16,   // 16 clinch
+  3,    // 17 taunt
+  15,   // 18 overhand
+  -5,   // 19 shoulder roll
+  9,    // 20 push off
+  -16,  // 21 stagger
+  0,    // 22 bounce
+  -8,   // 23 lean back
+  9,    // 24 double jab
+  0,    // 25 wipe
+];
+
 // ── THE GLOVE-OUT-OF-THE-HEAD GUARD RAIL ─────────────────────────────────────
 // Fixing the individual targets above is necessary but NOT sufficient, because the
 // head does not stay still: `neck` tips it forward, and a duck (−0.25) or an
@@ -571,8 +752,14 @@ export function taunt(t: number, u: number, seed = 0): Stance {
 // 25 from the head centre in the worst case (a full uppercut), still clear.
 const GLOVE_CLEAR = 26;
 
-/** Head centre in the pelvis frame, from a stance's tilt and neck. */
-function headAt(tilt: number, neck: number): P2 {
+/**
+ * Head centre in the pelvis frame, from a stance's tilt and neck. Exported because
+ * anything that has to POINT at a figure — a speech bubble's tail, a thread, a label
+ * — needs the head, not the feet: a leaning figure's head sits several units ahead of
+ * its x, and two figures leaning toward each other are noticeably closer at the head
+ * than at the ground.
+ */
+export function headAt(tilt: number, neck: number): P2 {
   'worklet';
   const up = Math.PI + tilt;
   const cx = Math.sin(up) * U.spine, cy = Math.cos(up) * U.spine;
@@ -611,6 +798,14 @@ function boxPose(code: number, t: number, u: number, seed: number): Stance {
   if (code === 15) return circleStep(t, u, seed);
   if (code === 16) return clinch(t, u, seed);
   if (code === 17) return taunt(t, u, seed);
+  if (code === 18) return overhand(t, u, seed);
+  if (code === 19) return shoulderRoll(t, u, seed);
+  if (code === 20) return pushOff(t, u, seed);
+  if (code === 21) return stagger(t, u, seed);
+  if (code === 22) return bounce(t, u, seed);
+  if (code === 23) return leanBack(t, u, seed);
+  if (code === 24) return doubleJab(t, u, seed);
+  if (code === 25) return wipe(t, u, seed);
   return guard(t, 0, seed);
 }
 
@@ -618,7 +813,8 @@ function boxPose(code: number, t: number, u: number, seed: number): Stance {
  * Dispatch a boxing move by numeric code, so the choreography is plain data.
  *  0 guard · 1 jab · 2 cross · 3 hook · 4 uppercut · 5 block · 6 duck · 7 slip ·
  *  8 backstep · 9 hit · 10 lead hook · 11 body shot · 12 parry · 13 roll ·
- * 14 feint · 15 circle · 16 clinch · 17 taunt.
+ * 14 feint · 15 circle · 16 clinch · 17 taunt · 18 overhand · 19 shoulder roll ·
+ * 20 push off · 21 stagger · 22 bounce · 23 lean back · 24 double jab · 25 wipe.
  *
  * `seed` separates one fighter's idle from another's — always pass a different one
  * per figure, or they move as a single mirrored body. Every pose leaves here with

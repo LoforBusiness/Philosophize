@@ -186,20 +186,25 @@ export function Fade({
 //
 // It also LEAVES now. Every other stage graphic fades out over 0.25s; the bubbles
 // alone were cut dead on the tap, which is the one inconsistency you could see.
-const TAIL_C = 29;          // tail centre, in from the anchored edge (24 margin + 5 half-width)
-// ...and UP from the wrapper's bottom edge. The wrapper lays out as box + (−5 margin
-// + 10 tail) = boxH + 5, and the tail's centre lands at boxH — five short of the
-// bottom. Treating the bottom edge as the anchor left 0.9px of vertical creep.
-const TAIL_UP = 5;
+// ...and how far the tail's centre sits UP from the wrapper's bottom edge. The
+// wrapper lays out as box + (−6 margin + 12 tail) + 20 leader, and treating the
+// bottom edge as the anchor left visible vertical creep.
+const TAIL_UP = 26;
+const LEADER_H = 20;        // the line that runs from the tail down toward the head
+const EDGE = 10;            // keep the box this far inside the stage
 
 export function Bubble({
-  bt, text, side, top, shout, leaving,
+  bt, text, x, top, shout, leaving,
 }: {
-  bt: SharedValue<number>; text: string; side: 'left' | 'right'; top: number; shout?: boolean;
+  bt: SharedValue<number>;
+  text: string;
+  /** SCREEN x of the speaker, in stage units — the bubble centres over it. */
+  x: SharedValue<number>;
+  top: number;
+  shout?: boolean;
   /** Rendered for the beat that just ended — holds still and fades out. */
   leaving?: boolean;
 }) {
-  const left = side === 'left';
   const w = useSharedValue(0);
   const h = useSharedValue(0);
   const onLayout = useCallback((e: LayoutChangeEvent) => {
@@ -207,19 +212,39 @@ export function Bubble({
     h.value = e.nativeEvent.layout.height;
   }, []);
 
+  // WHERE IT SITS. Over the speaker's head, not at a fixed stage edge — which is the
+  // whole point: with two figures talking in turn, a box pinned to the left margin
+  // says nothing about who said it. It tracks the figure (the speakers move: the
+  // boxers close and open range all round), and clamps so a long line never walks
+  // off the stage.
+  const wrap = useAnimatedStyle(() => {
+    const half = w.value / 2;
+    const lo = half + EDGE, hi = STAGE_W - half - EDGE;
+    const cx = Math.max(lo, Math.min(hi, x.value));
+    return { transform: [{ translateX: cx - STAGE_W / 2 }] };
+  });
+
+  // The pointer leans back toward the speaker when the box has been clamped, so it
+  // still says "this one" even when the box could not sit directly overhead.
+  const point = useAnimatedStyle(() => {
+    const half = w.value / 2;
+    const lo = half + EDGE, hi = STAGE_W - half - EDGE;
+    const cx = Math.max(lo, Math.min(hi, x.value));
+    const off = Math.max(-(half - 20), Math.min(half - 20, x.value - cx));
+    return { transform: [{ translateX: off }] };
+  });
+
   const st = useAnimatedStyle(() => {
-    if (leaving) return { opacity: 1 - ease01(seg(bt.value, 0, 0.22)), transform: [{ scale: 1 }] };
-    const e = ease01(seg(bt.value, 0.12, 0.46));
-    // Lands with a real settle: past 1 and back, rather than the old curve that
-    // only ever eased up to 1 (its "overshoot" term never took the scale over 1).
-    const s = 0.78 + 0.22 * e + Math.sin(Math.PI * e) * 0.05;
-    const ax = left ? TAIL_C : w.value - TAIL_C;
+    if (leaving) {
+      // Out FIRST, and fully, before the next one starts at 0.22 — the two used to
+      // overlap for a tenth of a second and the swap read as a flicker.
+      return { opacity: 1 - ease01(seg(bt.value, 0, 0.18)), transform: [{ scale: 1 }] };
+    }
+    const e = ease01(seg(bt.value, 0.22, 0.52));
+    const s = 0.86 + 0.14 * e + Math.sin(Math.PI * e) * 0.035;
     return {
-      // Opaque well before it stops growing — a long semi-transparent inflate is
-      // what makes a pop read as a smear.
-      opacity: ease01(seg(bt.value, 0.12, 0.30)),
+      opacity: ease01(seg(bt.value, 0.22, 0.38)),
       transform: [
-        { translateX: (ax - w.value / 2) * (1 - s) },
         { translateY: (h.value / 2 - TAIL_UP) * (1 - s) },
         { scale: s },
       ],
@@ -227,19 +252,16 @@ export function Bubble({
   });
 
   return (
-    <Animated.View
-      onLayout={onLayout}
-      style={[
-        styles.bubble,
-        left ? { left: 14, alignItems: 'flex-start' } : { right: 14, alignItems: 'flex-end' },
-        { top },
-        st,
-      ]}
-    >
-      <View style={[styles.bubbleBox, shout && styles.bubbleShout]}>
-        <Text style={[styles.bubbleText, shout && styles.bubbleShoutText]}>{text}</Text>
-      </View>
-      <View style={[styles.tail, shout && { backgroundColor: INK }, left ? { marginLeft: 24 } : { marginRight: 24 }]} />
+    <Animated.View style={[styles.bubbleWrap, { top }, wrap]} pointerEvents="none">
+      <Animated.View onLayout={onLayout} style={[styles.bubble, st]}>
+        <View style={[styles.bubbleBox, shout && styles.bubbleShout]}>
+          <Text style={[styles.bubbleText, shout && styles.bubbleShoutText]}>{text}</Text>
+        </View>
+        <Animated.View style={[styles.point, point]}>
+          <View style={[styles.tail, shout && styles.tailShout]} />
+          <View style={styles.leader} />
+        </Animated.View>
+      </Animated.View>
     </Animated.View>
   );
 }
@@ -375,15 +397,26 @@ export const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 40, right: 40, top: GROUND, height: 1.5, backgroundColor: RULE },
 
-  bubble: { position: 'absolute', maxWidth: 210 },
+  // A full-stage-width strip the bubble is centred in, so one translateX puts it
+  // over whichever figure is speaking.
+  bubbleWrap: { position: 'absolute', left: 0, width: STAGE_W, alignItems: 'center' },
+  bubble: { maxWidth: 216, alignItems: 'center' },
   bubbleBox: {
-    borderWidth: 1.5, borderColor: INK, borderRadius: 4,
-    backgroundColor: PAPER, paddingHorizontal: 12, paddingVertical: 8,
+    borderWidth: 2, borderColor: INK, borderRadius: 5,
+    backgroundColor: PAPER, paddingHorizontal: 13, paddingVertical: 9,
   },
   bubbleShout: { backgroundColor: INK },
-  bubbleText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: INK, lineHeight: 18 },
-  bubbleShoutText: { fontFamily: 'Inter_700Bold', color: PAPER, letterSpacing: 0.4 },
-  tail: { width: 10, height: 10, backgroundColor: INK, transform: [{ rotate: '45deg' }], marginTop: -5 },
+  bubbleText: {
+    fontFamily: 'Inter_500Medium', fontSize: 13.5, color: INK, lineHeight: 18.5,
+    textAlign: 'center',
+  },
+  bubbleShoutText: { fontFamily: 'Inter_700Bold', color: PAPER, letterSpacing: 0.5 },
+  // The pointer: a triangle that reads as part of the box, then a line running on
+  // down toward the head, so there is no doubt which figure is speaking.
+  point: { alignItems: 'center', marginTop: -6 },
+  tail: { width: 12, height: 12, backgroundColor: INK, transform: [{ rotate: '45deg' }] },
+  tailShout: { backgroundColor: INK },
+  leader: { width: 2, height: LEADER_H, backgroundColor: INK, marginTop: -2, opacity: 0.55 },
 
   deck: { flex: 50, paddingHorizontal: 24, justifyContent: 'flex-start', overflow: 'hidden' },
   fadeWrap: { position: 'relative' },

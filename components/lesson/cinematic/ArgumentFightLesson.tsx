@@ -21,8 +21,8 @@ import TwoRoadsChart from './illustrations/TwoRoadsChart';
 import { BEATS, gates, type Beat, type BoardKey } from './argumentScript';
 import { Bubble } from './cinematicKit';
 import {
-  BLANK, WALK, boxMove, clamp01, dirsFrom, ease01, easeOutBack, life2, lerp, mixStance,
-  moveTr, narratorHold, narratorLive, pose, stand, travelStance, walk,
+  BLANK, MOVE_ADV, WALK, boxMove, clamp01, dirsFrom, ease01, easeOutBack, headAt, life2, lerp,
+  mixStance, moveTr, narratorHold, narratorLive, pose, stand, travelStance,
   type Bundle, type Stance,
 } from './rig';
 
@@ -163,40 +163,87 @@ const XFADE = 420;                        // ms — the beat-to-beat cross-fade 
 // fightAt), flipping who presses and doubling the apparent length to ~34s — and the
 // non-periodic idle underneath means even a lap-2 repeat isn't frame identical. A
 // viewer reading a single beat never sees an obvious cycle.
-const FIGHT: [number, number, number][] = [
-  [15, 15, 0.95], // circling, sizing each other up
-  [14, 12, 0.50], // red feints — blue parries at nothing
-  [1, 5, 0.50],   // red jab — blocked
-  [1, 7, 0.45],   // red jabs again — slipped this time
-  [2, 5, 0.95],   // red cross — blue blocks and gives ground
-  [0, 0, 0.50],   // breathe
-  [11, 5, 0.80],  // red digs to the body — blue covers up
-  [5, 10, 0.70],  // blue's lead hook — red blocks
-  [6, 3, 0.90],   // blue hooks over the top — red ducks under it
-  [2, 9, 0.85],   // red counters clean — blue eats it
-  [0, 8, 0.75],   // blue backs off to clear his head
-  [15, 15, 0.70], // both circle, resetting
-  [4, 13, 1.00],  // red uppercut — blue rolls away from it
-  [12, 1, 0.50],  // blue jabs — red parries
-  [1, 1, 0.50],   // both jab at once, both miss
-  [9, 2, 0.95],   // blue lands the cross — red's head goes back
-  [8, 17, 0.85],  // red resets the distance; blue drops his hands and taunts
-  [10, 5, 0.65],  // red's lead hook — blocked
-  [16, 16, 0.90], // they fall into a clinch and nothing happens at all
-  [0, 0, 0.45],   // break
-  [3, 12, 0.70],  // red hook — parried
-  [14, 6, 0.60],  // red feints; blue ducks at air
-  [11, 5, 0.75],  // the body again
-  [0, 0, 0.70],   // circling, breathing
+// ── AND THE FOURTH NUMBER: RANGE ─────────────────────────────────────────────
+// The reason the punches landed in open paper. The pair stood on two fixed marks
+// 108 apart and only `adv` moved them, so a cross closed to about 90 — but a fist
+// at full extension only reaches x ≈ 38 from its own origin, and the far man's head
+// starts 25 short of his, so CONTACT NEEDS ABOUT 64. Every punch in the lesson fell
+// roughly 25 units short of the head it was aimed at, all the time, and no amount of
+// smoothing fixes a fight where nothing can connect.
+//
+// So each exchange now declares the separation IT happens at, and the pair close and
+// open across the round instead of trading from two marks. Out of range while they
+// circle (~100), inside it to trade (~66), tight in a clinch, long again on a reset.
+// That swing is the "back and forth" — a fight is a distance being negotiated, and a
+// constant distance is the single biggest tell that it is fake.
+//
+// The fourth number is the exchange's INTENT, and the separation is derived from it
+// rather than typed in — because typing it in is how the clinch ended up as a single
+// black heart-shaped blob. Every move carries its own lunge, two of them stack, and
+// hand-authored distances have to remember all of it. `FIGHT_BASE` does the sum.
+//
+// The four distances, measured against a figure whose punching fist reaches x ≈ 38,
+// whose guard glove sits at x ≈ 22, whose head centre is at x ≈ 6 with radius 20,
+// and whose glove has radius 9. Two shapes touch when the separation equals the sum
+// of how far each reaches plus both radii:
+//
+//   0 OUT       112 — circling, feinting, or both falling short. Nothing can reach.
+//   1 TRADING    80 — 35 (jab) + 26 (his raised block) + 18 = 79. The punch is
+//                     stopped BY the guard, which is what a blocked shot looks like.
+//   2 LANDING    62 — tighter than the geometry suggests, and deliberately. By the
+//                     instant the fist arrives the defender has ALREADY begun to go:
+//                     he is ~8 units further away and his head has leaned back off
+//                     the line, which is 20-odd units of extra distance that a static
+//                     calculation does not see. 62 is what makes the glove and the
+//                     head actually meet on screen. It only works at all because the
+//                     reaction is delayed (see `hitReact`) — on a shared clock the
+//                     head was 70% of the way gone before the punch got there, and
+//                     the man was recoiling from nothing.
+//   3 CLINCH     76 — close enough to read as leaning together, far enough that two
+//                     20-radius heads still show as two.
+const RANGE_E = [112, 80, 62, 76];
+const FIGHT: [number, number, number, number][] = [
+  [15, 15, 0.95, 0],  // circling, sizing each other up — nothing can reach
+  [14, 12, 0.50, 1],  // red feints — blue parries at nothing
+  [24, 5, 0.70, 1],   // red doubles the jab — blue blocks both
+  [1, 7, 0.45, 1],    // red jabs — slipped, and it goes past the ear
+  [2, 5, 0.95, 1],    // red cross — blue blocks and gives ground
+  [22, 22, 0.55, 0],  // both bounce out, breathing
+  [11, 5, 0.80, 1],   // red digs to the body — blue covers
+  [5, 10, 0.70, 1],   // blue's lead hook — red blocks
+  [6, 3, 0.90, 1],    // blue hooks over the top — red ducks under it
+  [2, 21, 0.95, 2],   // RED LANDS THE CROSS — blue's balance goes
+  [0, 8, 0.75, 0],    // blue backs off to clear his head
+  [15, 25, 0.70, 0],  // red circles; blue wipes his nose
+  [4, 13, 1.00, 1],   // red uppercut — blue rolls away from it
+  [12, 1, 0.50, 1],   // blue jabs — red parries
+  [1, 1, 0.50, 0],    // both jab at once, both fall short
+  [18, 19, 0.85, 1],  // red loops one over the top — blue rolls the shoulder
+  [21, 2, 0.95, 2],   // BLUE LANDS THE CROSS — red is hurt and gives ground
+  [8, 17, 0.85, 0],   // red resets the distance; blue drops his hands
+  [10, 23, 0.65, 1],  // red's lead hook — blue pulls straight back off it
+  [16, 16, 0.90, 3],  // they fall into a clinch and nothing happens at all
+  [20, 8, 0.55, 1],   // red shoves off to make room
+  [3, 12, 0.70, 1],   // red hook — parried
+  [14, 6, 0.60, 0],   // red feints; blue ducks at air
+  [11, 5, 0.75, 1],   // the body again
+  [22, 22, 0.70, 0],  // bouncing, breathing, back out of range
 ];
 const FIGHT_DUR = FIGHT.reduce((a, e) => a + e[2], 0);
 const FIGHT_START: number[] = (() => {
   let a = 0;
   return FIGHT.map((e) => { const s = a; a += e[2]; return s; });
 })();
+// Stand far enough back that the LUNGES bring them to the intended distance. Only
+// the advancing move counts: a defender's `adv` is negative (he is giving ground) and
+// on a landing exchange his reaction is delayed anyway, so he has not moved yet at
+// the instant the punch arrives — which is exactly the instant this has to be right.
+const FIGHT_BASE: number[] = FIGHT.map(
+  (e) => RANGE_E[e[3]] + Math.max(0, MOVE_ADV[e[0]]) + Math.max(0, MOVE_ADV[e[1]]),
+);
 
-/** Resolve the coupled fight pose at time t, swapping the aggressor each lap. */
-function fightAt(t: number): { red: Stance; blue: Stance } {
+/** Resolve the coupled fight pose AND the pair's separation at time t. */
+function fightAt(t: number): { red: Stance; blue: Stance; gap: number } {
   'worklet';
   const lap = Math.floor(t / FIGHT_DUR);
   const swap = lap - Math.floor(lap / 2) * 2 === 1;   // odd laps flip who presses
@@ -216,14 +263,16 @@ function fightAt(t: number): { red: Stance; blue: Stance } {
   // give them different tempos, phases and stance widths (see rig `guard`).
   const R = boxMove(rc, t, u, 1);
   const B = boxMove(bc, t, u, 2);
-  // And a slow non-periodic drift in and out, so the pair keeps changing distance
-  // across a round instead of trading from two fixed marks all night. Kept to ±2.5
-  // each: this rides ON TOP of lunges that already close 18 units a side, and the
-  // separation has to survive the worst case, not the average one.
-  return {
-    red: { ...R, adv: R.adv + life2(t, 0.29, 0.17, 0.6) * 2.5 },
-    blue: { ...B, adv: B.adv + life2(t, 0.23, 0.13, 2.7) * 2.5 },
-  };
+  // The separation they STAND at, eased from the last exchange's into this one's over
+  // the first third — which is the closing (or the breaking) itself, and it has to be
+  // finished before the punch peaks at ~0.42. Because every move's `adv` is zero at
+  // u=0 and u=1, matching the bases at the boundary makes the whole track continuous:
+  // no step in the distance anywhere in the round.
+  const pi = idx > 0 ? idx - 1 : FIGHT.length - 1;
+  const gap = lerp(FIGHT_BASE[pi], FIGHT_BASE[idx], ease01(u / 0.34))
+    // and a slow non-periodic breath on top, so even a held range is never static
+    + life2(t, 0.29, 0.17, 0.6) * 2.5;
+  return { red: R, blue: B, gap };
 }
 
 // ── shots ────────────────────────────────────────────────────────────────────
@@ -472,9 +521,10 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     // gesturing — and, like the narrator, they BLEND from their previous-beat
     // pose over `tr` so tapping between beats never snaps a hand.
     let redS: Stance, blueS: Stance;
+    let fightGap = -1;
     if (cur.rMode === 0 && cur.bMode === 0) {
       const F = fightAt(t);
-      redS = F.red; blueS = F.blue;
+      redS = F.red; blueS = F.blue; fightGap = F.gap;
     } else {
       const rFrom = RED_TALK[pIdx] ? narratorHold(0, t) : stand(t);
       const bFrom = BLUE_TALK[pIdx] ? narratorHold(0, t) : stand(t);
@@ -511,8 +561,12 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
 
     // Root motion: a lunge or step carries the whole body, so a punch reads as
     // aimed at someone rather than as shadow-boxing. `adv` is toward the opponent.
-    const rx = L(prv.rx, cur.rx) + redS.adv;
-    const bx = L(prv.bx, cur.bx) - blueS.adv;
+    //
+    // IN THE FIGHT the pair are placed from the choreography's own range track — they
+    // close to trade and open to circle — rather than from two fixed marks in the
+    // shot. Everywhere else (the act-4 rematch) the shot still owns their positions.
+    const rx = fightGap > 0 ? 200 - fightGap / 2 + redS.adv : L(prv.rx, cur.rx) + redS.adv;
+    const bx = fightGap > 0 ? 200 + fightGap / 2 - blueS.adv : L(prv.bx, cur.bx) - blueS.adv;
     const nx = L(prv.nx, cur.nx);
     const rOn = L(prv.rOn, cur.rOn), bOn = L(prv.bOn, cur.bOn);
     // He is SOLID before he is visible. Fading him up across the whole entrance
@@ -527,9 +581,18 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     // holds exactly at every instant of the move (see THE BAND). Lerping cy
     // independently made the floor sag a few units in the middle of every tap.
     const cs = L(prv.s, cur.s);
+    const ccx = L(prv.cx, cur.cx);
     return {
-      cam: { s: cs, cx: L(prv.cx, cur.cx), cy: GROUND - (GROUND_Y - STAGE_H / 2) / cs },
+      cam: { s: cs, cx: ccx, cy: GROUND - (GROUND_Y - STAGE_H / 2) / cs },
       ring: L(prv.ring, cur.ring),
+      // Where each speaker's HEAD actually is on screen, so a speech bubble can sit
+      // over it. The figures ride the camera and the bubbles do not, so this is the
+      // one number that keeps the two attached. Pointing at `rx` — the spot between
+      // the feet — put every tail a head's width wide, because a boxer leans in and
+      // his head is six units ahead of his stance; two of them leaning toward each
+      // other are much closer at the head than on the floor.
+      rxs: 200 + cs * (rx + headAt(redS.tilt, redS.neck).x - ccx),
+      bxs: 200 + cs * (bx - headAt(blueS.tilt, blueS.neck).x - ccx),
       red: rOn > 0.002 ? pose(redS, rx, GROUND, K_FIG, 1, rOn) : BLANK,
       blue: bOn > 0.002 ? pose(blueS, bx, GROUND, K_FIG, -1, bOn) : BLANK,
       narr: nOn > 0.002 ? pose(narrS, nx, GROUND, K_FIG, NARR_DIR[n], nOn) : BLANK,
@@ -539,6 +602,8 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   const DR = useDerivedValue<Bundle>(() => SCENE.value.red);
   const DB = useDerivedValue<Bundle>(() => SCENE.value.blue);
   const DN = useDerivedValue<Bundle>(() => SCENE.value.narr);
+  const RXS = useDerivedValue<number>(() => SCENE.value.rxs);
+  const BXS = useDerivedValue<number>(() => SCENE.value.bxs);
 
   const camStyle = useAnimatedStyle(() => {
     const c = SCENE.value.cam;
@@ -642,6 +707,11 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   const priorBeat = i > 0 ? BEATS[i - 1] : undefined;
   const volLevel = beat.vol ?? priorBeat?.vol ?? 0;
   const reaLevel = beat.reasons ?? priorBeat?.reasons ?? 0;
+  // Where each meter is coming FROM, so only the cells that actually changed animate.
+  // On a beat that doesn't state a reading the card is on its way out and holds — so
+  // `from` equals `to` and the meter is completely still while it fades.
+  const volFrom = beat.vol === undefined ? volLevel : (priorBeat?.vol ?? 0);
+  const reaFrom = beat.reasons === undefined ? reaLevel : (priorBeat?.reasons ?? 0);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -700,7 +770,11 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
                 <BoardStage boardKey={boardKey} />
 
                 {/* the running count of volume vs reasons — the lesson's own thesis */}
-                <Scoreboard bt={bt} G={GRAPH} vol={volLevel} reasons={reaLevel} />
+                <Scoreboard
+                  bt={bt} G={GRAPH}
+                  vol={volLevel} reasons={reaLevel}
+                  volFrom={volFrom} reasonsFrom={reaFrom}
+                />
 
                 {/* Socrates' three lines, and the stamp that lands on them */}
                 <SocraticStack G={GRAPH} />
@@ -714,7 +788,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
                   <Bubble
                     key={`out-${s.who}-${s.text}`}
                     bt={bt} text={s.text} top={BUBBLE_TOP} leaving
-                    side={s.who === 'red' ? 'left' : 'right'}
+                    x={s.who === 'red' ? RXS : BXS}
                     shout={BEATS[i - 1].act === 1}
                   />
                 )) : null}
@@ -722,7 +796,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
                   <Bubble
                     key={`${s.who}-${s.text}`}
                     bt={bt} text={s.text} top={BUBBLE_TOP}
-                    side={s.who === 'red' ? 'left' : 'right'}
+                    x={s.who === 'red' ? RXS : BXS}
                     shout={beat.act === 1}
                   />
                 ))}
@@ -957,9 +1031,27 @@ function BoardFrame({ title }: { title: string }) {
 // quantitative at a glance rather than a figure of speech.
 const CELLS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-function Cell({ bt, k, on }: { bt: SharedValue<number>; k: number; on: boolean }) {
-  // Staggered by index, so the bar sweeps in rather than snapping on.
-  const st = useAnimatedStyle(() => ({ opacity: on ? clamp01((bt.value - k * 0.045) / 0.2) : 0 }));
+// ONLY THE CELLS THAT CHANGED MAY ANIMATE.
+//
+// This was "the box above the stage glitches on every tap", and it is a `bt` bug:
+// the cell opacity was `(bt − k·0.045) / 0.2`, and `bt` resets to zero on every beat
+// change, so all ten cells of a meter that was ALREADY full dropped to nothing and
+// swept back in — a black bar blinking and re-filling behind the reader every single
+// time they advanced. Nothing about the scoreboard had changed; only the clock had.
+//
+// A cell now knows whether it was lit LAST beat as well as this one: lit-and-still-lit
+// holds solid, newly lit sweeps in (staggered from the first new one, so a rise of two
+// takes two cells' worth of time and not ten), and a cell going out fades. On a beat
+// where the reading doesn't move, nothing on the meter moves at all.
+function Cell({
+  bt, k, from, was, now,
+}: { bt: SharedValue<number>; k: number; from: number; was: boolean; now: boolean }) {
+  const st = useAnimatedStyle(() => {
+    if (was && now) return { opacity: 1 };
+    if (now) return { opacity: clamp01((bt.value - 0.22 - (k - from) * 0.05) / 0.22) };
+    if (was) return { opacity: 1 - clamp01(bt.value / 0.22) };
+    return { opacity: 0 };
+  });
   return (
     <View style={styles.cell}>
       <Animated.View style={[styles.cellFill, st]} />
@@ -968,31 +1060,35 @@ function Cell({ bt, k, on }: { bt: SharedValue<number>; k: number; on: boolean }
 }
 
 function MeterRow({
-  bt, label, level, top,
-}: { bt: SharedValue<number>; label: string; level: number; top: number }) {
+  bt, label, from, to, top,
+}: { bt: SharedValue<number>; label: string; from: number; to: number; top: number }) {
   return (
     <View style={[styles.meterRow, { top }]}>
       <Text style={styles.meterLabel} numberOfLines={1}>{label}</Text>
       <View style={styles.cells}>
-        {CELLS.map((k) => <Cell key={k} bt={bt} k={k} on={k < level} />)}
+        {CELLS.map((k) => (
+          <Cell key={k} bt={bt} k={k} from={from} was={k < from} now={k < to} />
+        ))}
       </View>
     </View>
   );
 }
 
 function Scoreboard({
-  bt, G, vol, reasons,
+  bt, G, vol, reasons, volFrom, reasonsFrom,
 }: {
   bt: SharedValue<number>;
   G: SharedValue<any>;
   vol: number;
   reasons: number;
+  volFrom: number;
+  reasonsFrom: number;
 }) {
   const card = useAnimatedStyle(() => ({ opacity: G.value.scoreOn }));
   return (
     <Animated.View style={[styles.score, card]} pointerEvents="none">
-      <MeterRow bt={bt} label="VOLUME" level={vol} top={8} />
-      <MeterRow bt={bt} label="REASONS" level={reasons} top={28} />
+      <MeterRow bt={bt} label="VOLUME" from={volFrom} to={vol} top={8} />
+      <MeterRow bt={bt} label="REASONS" from={reasonsFrom} to={reasons} top={28} />
     </Animated.View>
   );
 }

@@ -20,7 +20,7 @@ import BrickStructure, {
 import { BEATS, gates, type Beat } from './builderScript';
 import { Bubble } from './cinematicKit';
 import {
-  BLANK, clamp01, ease01, easeOutBack, easeOutCubic, lerp, masterHold, masterLive,
+  BLANK, clamp01, ease01, easeOutBack, easeOutCubic, headAt, lerp, masterHold, masterLive,
   mixStance, narratorHold, narratorLive, pose, seg, stand, type Bundle, type Stance,
 } from './rig';
 
@@ -260,14 +260,25 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
     const aTo = APP_TALK[n] ? narratorLive(0, t, bt.value) : stand(t);
     const appS = mixStance(aFrom, aTo, tr);
 
+    const cs = L(prv.s, cur.s);
+    const ccx = L(prv.cx, cur.cx);
     return {
-      cam: { s: L(prv.s, cur.s), cx: L(prv.cx, cur.cx), cy: L(prv.cy, cur.cy) },
+      cam: { s: cs, cx: ccx, cy: L(prv.cy, cur.cy) },
       master: pose(masterS, MASTER_X, GROUND, K_FIG, -1, 1),
       app: pose(appS, APP_X, GROUND, APP_K, 1, 1),
+      // Screen x of each speaker's HEAD, so a bubble can sit over whoever is talking.
+      // The figures ride the camera and the bubbles do not. It has to be the head and
+      // not the mark they stand on: the master leans into his work, so his head is
+      // several units to the left of his feet (and the apprentice is drawn at APP_K,
+      // so his offset scales with him).
+      mxs: 200 + cs * (MASTER_X - headAt(masterS.tilt, masterS.neck).x * K_FIG - ccx),
+      axs: 200 + cs * (APP_X + headAt(appS.tilt, appS.neck).x * APP_K - ccx),
     };
   });
   const DM = useDerivedValue<Bundle>(() => SCENE.value.master);
   const DA = useDerivedValue<Bundle>(() => SCENE.value.app);
+  const MXS = useDerivedValue<number>(() => SCENE.value.mxs);
+  const AXS = useDerivedValue<number>(() => SCENE.value.axs);
 
   const camStyle = useAnimatedStyle(() => {
     const c = SCENE.value.cam;
@@ -454,14 +465,14 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
                     <Bubble
                       key={`out-${s.who}-${s.text}`}
                       bt={bt} text={s.text} top={BUBBLE_TOP} leaving
-                      side={s.who === 'app' ? 'left' : 'right'}
+                      x={s.who === 'app' ? AXS : MXS}
                     />
                   )) : null}
                   {beat.say?.map((s) => (
                     <Bubble
                       key={`${s.who}-${s.text}`}
                       bt={bt} text={s.text} top={BUBBLE_TOP}
-                      side={s.who === 'app' ? 'left' : 'right'}
+                      x={s.who === 'app' ? AXS : MXS}
                     />
                   ))}
                 </View>

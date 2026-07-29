@@ -101,6 +101,23 @@ read as one black mass on a phone long before the bodies touch — heads are ~40
 figure height. It forced the boxers apart in lesson 1 and bit again in ethics-8 at 76
 units. ~104–112 reads cleanly. **Check the gap at the CLOSEST beat, not the average.**
 
+**Where two figures INTERACT, author the distance from intent, not by hand.** A fight
+needs four distances and each is a sum of reaches and radii, not a taste call: OUT
+(~112, nothing can reach), TRADING (~80 = 35 punch + 26 his raised glove + 18 radii),
+LANDING (~62, closer than the static sum because the defender is already moving away
+by the time the fist arrives), CLINCH (~76). Lesson 1 derives the standing distance
+from the exchange's declared intent plus each move's own lunge (`MOVE_ADV`), because
+hand-typed distances forget the lunges — a clinch at "74" closed another 32 and the
+two men became one black heart-shaped blob.
+
+**A GUARD'S HANDS BELONG AT THE JAW, NOT IN FRONT OF IT.** This is a two-figure rule
+even though it looks like a pose rule. Hands parked 27–33 units ahead of a head whose
+centre is at x 6 are not a guard, and two figures doing it at punching range put four
+9-radius gloves in the same few units of paper: the pair fused into a single dark
+bridge at exactly the moments the fight was busiest. Pulled back under the chin they
+clear the head disc, leave the middle empty for whatever is actually being thrown, and
+give every punch a longer and more visible extension.
+
 **And "closest" includes root motion, not just the resting marks.** Lesson 1's boxers
 sat at a comfortable 96 and still fused, because a cross carries `adv: 18` and the
 answer carries its own — a real exchange closed them to about 60. Separation is set by
@@ -108,6 +125,13 @@ answer carries its own — a real exchange closed them to about 60. Separation i
 has to clear 100. The same arithmetic gives the upper bound: a punch reaches x ≈ 38,
 so if the closed distance drops much under ~65 the fist is drawn **through** the other
 figure's head instead of arriving at it.
+
+**B9b. Anything that POINTS at a figure must point at the HEAD, not at its x.** A
+figure's x is the spot between its feet, and a leaning one carries its head several
+units ahead of that — two boxers leaning toward each other are much closer at the
+head than on the floor. Every speech-bubble tail in lesson 1 sat a head's width wide
+until it used `headAt(tilt, neck)` instead. Applies to threads, labels and leader
+lines as much as to bubbles.
 
 **B10. Anything pinned to the figure must be derived from the figure.** A halo, a
 speech bubble, a thread between two heads — write it in terms of `K_FIG` and the
@@ -268,6 +292,24 @@ condensing out of the paper about two-thirds of the way in, standing beside a fi
 which reads as a ghost appearing rather than a person walking on. Park them well off
 the edge (screen x −185, in that case) and finish the fade inside the first fifth of
 the move, while they are still in the wing. Same for exits.
+
+**C20c. A beat clock resets on every tap, so only animate what actually CHANGED.**
+`bt` goes back to zero each time the reader advances. Anything whose opacity or
+position is a function of `bt` therefore replays from nothing on every single tap,
+whether or not it has anything new to say — and a graphic replaying identically is
+not a transition, it is a flicker the reader cannot account for. Lesson 1's
+scoreboard was `(bt − k·0.045) / 0.2` per cell, so a meter that was already full
+dropped to empty and swept back in behind the reader every time they moved on.
+The fix is always the same shape: give the element its PREVIOUS beat's state as well
+as its current one, hold what is unchanged, animate only the difference.
+
+**C20d. A reaction must be DELAYED past the action that causes it.** Two figures
+driven by the same `u` peak together, so a punch and the head that answers it arrive
+at the same instant — the head has already gone by the time the fist gets there and
+the shot lands on empty paper. `hitReact` and `stagger` start at u 0.34 and peak at
+0.65, after the punch's 0.42, which leaves a frame where the glove is actually on the
+head. Anything caused by something else — a recoil, a splash, a shadow, a domino —
+needs the same offset, and it must be small enough that both still finish together.
 
 **C21. The lesson must never flash.** Layout changes only while the thing being
 re-laid-out is invisible. The summary beat hides the stage and gives its height to
@@ -471,6 +513,10 @@ testing does not need it).
       custom loop) as well as the walk (B14); every figure has a reason (B15).
 - [ ] Every x change routed through `travelStance`, never lerped under a stand, and
       the track monotonic so nobody flips facing in one frame (C18).
+- [ ] Nothing driven by `bt` replays on a beat where it did not change (C20c); any
+      reaction offset past the action that causes it (C20d).
+- [ ] Two-figure distances derived from intent + `MOVE_ADV`, not hand-typed (B9);
+      anything pointing at a figure aimed via `headAt` (B9b).
 - [ ] Figures arrive at full opacity from off-stage, never fade up on screen (C20b).
 - [ ] No overlay's `top` within a row-height of a text row's `top` (D31).
 - [ ] Interactive props beside/above the figure, never a slab it stands in (D24).
