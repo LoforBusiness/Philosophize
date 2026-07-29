@@ -95,9 +95,11 @@ export default function Glyph({ name, size = 28, color = '#1A1A1A' }: GlyphProps
       case 'scroll':
         return (
           <>
-            <Rect {...s} x={9} y={11} width={14} height={10} />
-            <Path {...s} d="M9 11 C5 11 5 21 9 21 C7 21 7 11 9 11 Z" />
-            <Path {...s} d="M23 11 C27 11 27 21 23 21 C25 21 25 11 23 11 Z" />
+            {/* Body widened from 14×10: at a 54px seal the 2px stroke closed the
+                interior up and the scroll read as a solid pill. */}
+            <Rect {...s} x={9} y={9} width={14} height={14} />
+            <Path {...s} d="M9 9 C5 9 5 23 9 23 C7 23 7 9 9 9 Z" />
+            <Path {...s} d="M23 9 C27 9 27 23 23 23 C25 23 25 9 23 9 Z" />
           </>
         );
       case 'cap':

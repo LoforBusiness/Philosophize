@@ -3,6 +3,8 @@ import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
 import { MotiView } from 'moti';
 import StreakBook from '@/components/gamification/StreakBook';
 import StreakWeek from '@/components/gamification/StreakWeek';
+import RankUpScreen from '@/components/gamification/RankUpScreen';
+import { rankForXP, type RankDef } from '@/data/ranks';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -51,6 +53,12 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   const [info, setInfo] = useState<DayInfo | null>(null);
   const [xpShown, setXpShown] = useState(0);
   const [advancing, setAdvancing] = useState(false);
+  // A rank-up takes the screen FIRST, before XP and the streak — it is the rarest
+  // thing that can happen on a completion and it used to pass in total silence.
+  // `null` until the completion effect has run, so the reward never paints for a
+  // frame before we know whether it has been pre-empted.
+  const [phase, setPhase] = useState<'pending' | 'rankup' | 'reward'>('pending');
+  const [rankUp, setRankUp] = useState<{ from: RankDef; to: RankDef; next: RankDef | null; totalXP: number } | null>(null);
 
   // Has this free user now used up today's lesson allowance? (bumpDailyLessons
   // runs on mount, so the count already reflects the just-finished lesson.)
@@ -80,7 +88,19 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   useEffect(() => {
     if (ran.current) return;
     ran.current = true;
+    // Straddle the XP award: recordLessonComplete is what moves totalXP, so the
+    // rank either side of it is the whole question. Read the store directly —
+    // subscribing to totalXP here would re-render this screen mid-count-up.
+    const before = rankForXP(useUserDataStore.getState().totalXP);
     recordLessonComplete(lessonId, xp);
+    const afterXP = useUserDataStore.getState().totalXP;
+    const after = rankForXP(afterXP);
+    if (after.index > before.index) {
+      setRankUp({ from: before.current, to: after.current, next: after.next, totalXP: afterXP });
+      setPhase('rankup');
+    } else {
+      setPhase('reward');
+    }
     const today = dateStr(new Date());
     const yesterday = dateStr(new Date(Date.now() - 86_400_000));
     bumpDailyLessons(today); // count this completion toward the free daily allowance
@@ -113,6 +133,30 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     }, 16);
     return () => clearInterval(id);
   }, [xp]);
+
+  // One frame of bare paper while the completion effect decides which screen this
+  // is. Painting the reward first would flash XP behind a rank-up.
+  if (phase === 'pending') {
+    return (
+      <Modal visible animationType="fade" transparent={false} onRequestClose={onDone}>
+        <View style={styles.root} />
+      </Modal>
+    );
+  }
+
+  if (phase === 'rankup' && rankUp) {
+    return (
+      <Modal visible animationType="fade" transparent={false} onRequestClose={onDone}>
+        <RankUpScreen
+          from={rankUp.from}
+          to={rankUp.to}
+          next={rankUp.next}
+          totalXP={rankUp.totalXP}
+          onDone={() => setPhase('reward')}
+        />
+      </Modal>
+    );
+  }
 
   return (
     <Modal visible animationType="fade" transparent={false} onRequestClose={onDone}>

@@ -12,7 +12,7 @@ import { MotiView, AnimatePresence } from 'moti';
 import Glyph from './Glyph';
 import RankSeal, { type SealState } from './RankSeal';
 import { RANKS, rankForXP, type RankDef } from '@/data/ranks';
-import { tierForRank, circleForRank, RANK_EPITHETS, toRoman } from '@/data/rankLore';
+import { circleForRank, RANK_EPITHETS, toRoman } from '@/data/rankLore';
 import { BADGES, type ProgressStats } from '@/data/badges';
 import { ALL_BRANCHES } from '@/data';
 import { useUIStore } from '@/stores/uiStore';
@@ -136,7 +136,7 @@ export default function RanksBadgesSheet() {
                 <>
                   {/* HERO — the current rank as a credential */}
                   <View style={styles.hero}>
-                    <RankSeal glyph={current.glyph} tier={tierForRank(current.id)} state="current" size={104} progress={rankPct} />
+                    <RankSeal glyph={current.glyph} state="current" size={104} progress={rankPct} />
                     <View style={styles.heroText}>
                       <Text style={styles.heroKicker}>RANK {current.id} · {toRoman(current.id)}</Text>
                       <Text style={styles.heroName}>{current.name}</Text>
@@ -175,7 +175,7 @@ export default function RanksBadgesSheet() {
                             {i < RANKS.length - 1 && (
                               <View style={[styles.connector, styles.connBot, { backgroundColor: i < index ? Ink : InkFaint }]} />
                             )}
-                            <RankSeal glyph={r.glyph} tier={tierForRank(r.id)} state={st} size={54} />
+                            <RankSeal glyph={r.glyph} state={st} size={54} />
                           </View>
 
                           <View style={styles.rowText}>
@@ -276,7 +276,7 @@ function RankDetail({
       </Pressable>
 
       <View style={styles.detailSealWrap}>
-        <RankSeal glyph={rank.glyph} tier={tierForRank(rank.id)} state={st} size={168} progress={progress} />
+        <RankSeal glyph={rank.glyph} state={st} size={168} progress={progress} />
       </View>
 
       <Text style={styles.detailKicker}>RANK {rank.id} · {toRoman(rank.id)} · {circle.name.toUpperCase()}</Text>
