@@ -18,6 +18,7 @@ import BrickStructure, {
   BASE_LX, BASE_RX, BASE_Y, CENTER_X, KEY_X, KEY_Y, type StructState,
 } from './BrickStructure';
 import { BEATS, gates, type Beat } from './builderScript';
+import { Bubble } from './cinematicKit';
 import {
   BLANK, clamp01, ease01, easeOutBack, easeOutCubic, lerp, masterHold, masterLive,
   mixStance, narratorHold, narratorLive, pose, seg, stand, type Bundle, type Stance,
@@ -91,6 +92,12 @@ const MASTER_X = 330;               // right, faces left — stands beside the w
 const APP_X = 62;                   // left, watches — clear of the base bricks
 const APP_K = K_FIG * 0.88;         // the apprentice reads a touch shorter than the master
 const LAY = 0.7;                    // seconds for a brick to drop into place
+
+// Sits in the same strip as the legend (which fades out on any beat with a bubble)
+// and clears the master's crown, which lands at ~232 on screen. It was 120, pinned
+// to the old 1.35 figure's crown at ~188; left there it would hang 50 units above
+// the head it belongs to.
+const BUBBLE_TOP = 150;
 
 const COMPLETION_XP = 5;            // matches LessonRunner
 const XFADE = 420;                  // beat-to-beat deck fade
@@ -439,9 +446,23 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
                   {/* act 1's pinned-up plan, in the same strip and the same style */}
                   <Plan S={LEG} />
 
-                  {/* speech bubbles at fixed stage spots, above the figures */}
+                  {/* Speech bubbles at fixed stage spots, above the figures. They
+                      sit in the same strip as the legend (which fades out on any
+                      beat with a bubble) and clear the master's crown. The previous
+                      beat's are held for a moment so they fade rather than cut. */}
+                  {i > 0 ? BEATS[i - 1].say?.map((s) => (
+                    <Bubble
+                      key={`out-${s.who}-${s.text}`}
+                      bt={bt} text={s.text} top={BUBBLE_TOP} leaving
+                      side={s.who === 'app' ? 'left' : 'right'}
+                    />
+                  )) : null}
                   {beat.say?.map((s) => (
-                    <Bubble key={s.who + s.text} bt={bt} text={s.text} who={s.who} />
+                    <Bubble
+                      key={`${s.who}-${s.text}`}
+                      bt={bt} text={s.text} top={BUBBLE_TOP}
+                      side={s.who === 'app' ? 'left' : 'right'}
+                    />
                   ))}
                 </View>
               </View>
@@ -632,35 +653,6 @@ function Plan({ S }: { S: SharedValue<any> }) {
   );
 }
 
-// ── speech bubbles ────────────────────────────────────────────────────────────
-function Bubble({ bt, text, who }: { bt: SharedValue<number>; text: string; who: 'master' | 'app' }) {
-  const left = who === 'app';
-  const st = useAnimatedStyle(() => {
-    const u = seg(bt.value, 0.1, 0.5);
-    const s = 0.6 + 0.4 * ease01(u) + Math.sin(Math.PI * ease01(u)) * 0.08;
-    return { opacity: ease01(u), transform: [{ scale: s }] };
-  });
-  return (
-    <Animated.View
-      style={[
-        styles.bubble,
-        left ? { left: 14, alignItems: 'flex-start' } : { right: 14, alignItems: 'flex-end' },
-        // Sits in the same strip as the legend (which fades out on any beat with a
-        // bubble) and clears the master's crown, which lands at ~232 on screen.
-        // It was 120, pinned to the old 1.35 figure's crown at ~188; left there it
-        // would hang 50 units above the head it belongs to.
-        { top: 150 },
-        st,
-      ]}
-    >
-      <View style={styles.bubbleBox}>
-        <Text style={styles.bubbleText}>{text}</Text>
-      </View>
-      <View style={[styles.tail, left ? { marginLeft: 24 } : { marginRight: 24 }]} />
-    </Animated.View>
-  );
-}
-
 // ── choices (teaching taps + graded questions) ────────────────────────────────
 function Choices({
   prompt, options, explain, picked, graded, onPick,
@@ -772,13 +764,6 @@ const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 40, right: 40, top: GROUND, height: 1.5, backgroundColor: RULE },
 
-  bubble: { position: 'absolute', maxWidth: 210 },
-  bubbleBox: {
-    borderWidth: 1.5, borderColor: INK, borderRadius: 4,
-    backgroundColor: PAPER, paddingHorizontal: 12, paddingVertical: 8,
-  },
-  bubbleText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: INK, lineHeight: 18 },
-  tail: { width: 10, height: 10, backgroundColor: INK, transform: [{ rotate: '45deg' }], marginTop: -5 },
 
   // ── signpost legend ────────────────────────────────────────────────────────
   legend: {

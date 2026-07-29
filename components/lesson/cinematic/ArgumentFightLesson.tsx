@@ -19,9 +19,11 @@ import SyllogismChart from './illustrations/SyllogismChart';
 import LoudnessChart from './illustrations/LoudnessChart';
 import TwoRoadsChart from './illustrations/TwoRoadsChart';
 import { BEATS, gates, type Beat, type BoardKey } from './argumentScript';
+import { Bubble } from './cinematicKit';
 import {
-  BLANK, WALK, boxMove, clamp01, ease01, easeOutBack, lerp, mixStance, narratorHold,
-  narratorLive, pose, seg, stand, walk, type Bundle, type Stance,
+  BLANK, WALK, boxMove, clamp01, dirsFrom, ease01, easeOutBack, life2, lerp, mixStance,
+  moveTr, narratorHold, narratorLive, pose, stand, travelStance, walk,
+  type Bundle, type Stance,
 } from './rig';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -87,7 +89,7 @@ const FIG_SPACING = K_FIG / 1.35;
 // endpoint scales alone — nothing to measure but the six shots:
 //   board frame    (outside the camera, literal)   144 … 320
 //   scoreboard     (outside the camera, literal)   144 … 198
-//   Socratic stack (outside the camera, literal)   148 … 275  (incl. the stamp)
+//   Socratic stack (outside the camera, literal)   148 … 300  (incl. the stamp)
 //   speech bubbles (outside the camera, literal)   208 … 272
 //   solo crown           y 397, s 1.58             → 333
 //   ring crown           y 397, s 1.54             → 337
@@ -129,37 +131,63 @@ const RING_R = 320;
 /** Post top. Chest-high on the boxers (their crowns land at 337), so it frames without crowding. */
 const POST_T = 420;
 
+// Above the heads, not over them, and below the scoreboard — ONE number for every
+// act, because the shots all pin the ground line to the same place, so the crowns
+// land at 336 (rematch) or 337 (ring) and a bubble starting here clears both. It was
+// 208, pinned to the crowns of the old 1.35 figure; left there it would hang in
+// clear air.
+const BUBBLE_TOP = 250;
+
 const COMPLETION_XP = 5;                  // matches LessonRunner
 const XFADE = 420;                        // ms — the beat-to-beat cross-fade (deliberately unhurried)
 
 // ── the fight choreography ───────────────────────────────────────────────────
 // A real spar is call-and-response, not two people shadow-boxing side by side, so
 // the boxers are coupled: each row is one exchange [redMove, blueMove, seconds],
-// timed so a block or a duck lands right as the punch it answers arrives. Move
-// codes: 0 guard·1 jab·2 cross·3 hook·4 uppercut·5 block·6 duck·7 slip·8 backstep·
-// 9 hit. Every move returns to the guard at its ends, so exchanges chain cleanly.
+// timed so a block or a duck lands right as the punch it answers arrives. Every
+// move returns to the guard at its ends, so exchanges chain cleanly. Move codes:
+//   0 guard  1 jab      2 cross   3 hook   4 uppercut  5 block  6 duck   7 slip
+//   8 back   9 hit     10 lead-hook (the FRONT hand)  11 body shot (goes DOWN)
+//  12 parry 13 roll    14 feint  15 circle           16 clinch           17 taunt
 //
-// Roughly 14s of distinct action. When it loops, the aggressor is swapped (see
-// fightAt), which flips who is pressing and doubles the apparent length to ~28s —
-// and the non-periodic idle underneath means even a lap-2 repeat isn't frame
-// identical. A viewer reading a single beat never sees an obvious cycle.
+// WHAT WAS WRONG WITH THE OLD ROUND. Sixteen exchanges built from ten moves, all of
+// them thrown with the same hand at the same height, and half the rows were one of
+// {jab, cross, hook} against one of {block, slip, duck}. It read as a loop because
+// it nearly was one. The round below is twice as long and, more importantly, has
+// things in it that are not punches: a feint that draws a parry at nothing, a
+// circle that changes the distance instead of trading through it, a clinch where
+// the whole exchange stalls, a taunt with the hands down. That is what gives a
+// fight a rhythm rather than a metronome.
+//
+// Roughly 17s of distinct action. When it loops the aggressor is swapped (see
+// fightAt), flipping who presses and doubling the apparent length to ~34s — and the
+// non-periodic idle underneath means even a lap-2 repeat isn't frame identical. A
+// viewer reading a single beat never sees an obvious cycle.
 const FIGHT: [number, number, number][] = [
-  [0, 0, 0.7],  // circle, feel each other out
-  [1, 5, 0.55], // red jab — blue blocks
-  [1, 7, 0.55], // red jab — blue slips it
-  [2, 5, 1.0],  // red cross — blue blocks, rocked
-  [0, 0, 0.6],  // reset
-  [5, 1, 0.85], // blue takes over: jab — red blocks
-  [6, 3, 1.0],  // blue hooks — red ducks under
-  [2, 9, 0.9],  // red counters clean — blue eats it
-  [0, 8, 0.8],  // blue backs off to recover
-  [0, 0, 0.6],
-  [4, 7, 1.05], // red uppercut — blue slips out
-  [1, 1, 0.55], // both jab at once
-  [9, 2, 1.0],  // blue lands a cross — red's head goes back
-  [8, 0, 0.8],  // red resets the distance
-  [3, 5, 0.85], // red hook — blue blocks
-  [0, 0, 0.75], // breathe, circle
+  [15, 15, 0.95], // circling, sizing each other up
+  [14, 12, 0.50], // red feints — blue parries at nothing
+  [1, 5, 0.50],   // red jab — blocked
+  [1, 7, 0.45],   // red jabs again — slipped this time
+  [2, 5, 0.95],   // red cross — blue blocks and gives ground
+  [0, 0, 0.50],   // breathe
+  [11, 5, 0.80],  // red digs to the body — blue covers up
+  [5, 10, 0.70],  // blue's lead hook — red blocks
+  [6, 3, 0.90],   // blue hooks over the top — red ducks under it
+  [2, 9, 0.85],   // red counters clean — blue eats it
+  [0, 8, 0.75],   // blue backs off to clear his head
+  [15, 15, 0.70], // both circle, resetting
+  [4, 13, 1.00],  // red uppercut — blue rolls away from it
+  [12, 1, 0.50],  // blue jabs — red parries
+  [1, 1, 0.50],   // both jab at once, both miss
+  [9, 2, 0.95],   // blue lands the cross — red's head goes back
+  [8, 17, 0.85],  // red resets the distance; blue drops his hands and taunts
+  [10, 5, 0.65],  // red's lead hook — blocked
+  [16, 16, 0.90], // they fall into a clinch and nothing happens at all
+  [0, 0, 0.45],   // break
+  [3, 12, 0.70],  // red hook — parried
+  [14, 6, 0.60],  // red feints; blue ducks at air
+  [11, 5, 0.75],  // the body again
+  [0, 0, 0.70],   // circling, breathing
 ];
 const FIGHT_DUR = FIGHT.reduce((a, e) => a + e[2], 0);
 const FIGHT_START: number[] = (() => {
@@ -181,7 +209,21 @@ function fightAt(t: number): { red: Stance; blue: Stance } {
   const u = clamp01((tc - FIGHT_START[idx]) / ex[2]);
   const rc = swap ? ex[1] : ex[0];
   const bc = swap ? ex[0] : ex[1];
-  return { red: boxMove(rc, t, u), blue: boxMove(bc, t, u) };
+  // SEEDS 1 AND 2, and they matter more than any single move in the table. Both
+  // fighters used to call guard(t) with the same clock and the same frequencies, so
+  // they bounced, swayed and breathed on identical frames — two bodies moving as one
+  // mirrored object, which is most of why the fight read as cheap. Different seeds
+  // give them different tempos, phases and stance widths (see rig `guard`).
+  const R = boxMove(rc, t, u, 1);
+  const B = boxMove(bc, t, u, 2);
+  // And a slow non-periodic drift in and out, so the pair keeps changing distance
+  // across a round instead of trading from two fixed marks all night. Kept to ±2.5
+  // each: this rides ON TOP of lunges that already close 18 units a side, and the
+  // separation has to survive the worst case, not the average one.
+  return {
+    red: { ...R, adv: R.adv + life2(t, 0.29, 0.17, 0.6) * 2.5 },
+    blue: { ...B, adv: B.adv + life2(t, 0.23, 0.13, 2.7) * 2.5 },
+  };
 }
 
 // ── shots ────────────────────────────────────────────────────────────────────
@@ -202,7 +244,7 @@ interface Shot {
 // only question is what sits above it:
 //   · a BOARD beat must clear the framed easel, which ends at screen 320  → 1.21
 //   · a RING beat must clear the shout bubbles, which end at ~254        → ≤1.65
-//   · a STACK beat must clear the CONTRADICTION stamp, which ends at 275 → ≤1.49
+//   · a STACK beat must clear the CONTRADICTION stamp, which ends at 300 → ≤1.83
 //   · a SOLO beat has only the 54-tall scoreboard above it, ending at 198→ ≤2.0
 // Every non-board shot used to sit around 1.36–1.42, which threw that headroom
 // away and is why the figures read small on a phone. They now run right up to
@@ -214,20 +256,54 @@ const S_SOLO = 1.58;       // narrator alone
 const S_STACK = 1.46;      // narrator under the Socratic exchange
 const S_REMATCH = 1.55;    // two figures, standing, close
 
+// ── THE NARRATOR'S TRACK ─────────────────────────────────────────────────────
+// One x per beat, written down rather than derived, and it only ever moves RIGHT.
+//
+// SKATING is why it exists. His position used to be a rule — 132 under the board,
+// 200 alone — so he SLID between the two: 131 units the instant he arrived, then 68
+// units back and forth on every board beat and every question in act 3, four times,
+// standing bolt upright with his feet planted. `travelStance` turns any x change
+// into a real distance-driven walk, but only if the distance is a walk's worth, so
+// the track keeps each step to something a person would actually take.
+//
+// TURNING is why it is monotonic. `dir` is ±1 and flips in a single frame, so a
+// figure that walks left and then right snaps between mirrored copies of itself.
+// Never walking left means he never turns — he works steadily across the stage as
+// the lesson advances, which is what a lecturer does anyway.
+//
+// Each value is bounded on the left by its own shot's scale: screen x is
+// 200 + s·(nx − 200) and his head is 20·s wide, so at S_SOLO 1.58 anything below
+// about nx 100 puts his head off the left edge of the stage.
+const NARR_X: number[] = [
+  -50, -50, -50, -50,                          // act 1 — off-stage left, waiting
+  46, 128, 146, 146, 168,                      // act 2 — walks on, then to the easel
+  168, 168, 186, 186, 196, 196, 196, 206, 206, // act 3 — a few steps, never back
+  206, 206, 206, 206, 206,                     // act 4 — gone, but parked where he left
+  206, 206,                                    // act 5
+];
+/** All +1 while the track is monotonic — kept honest in case it ever isn't. */
+const NARR_DIR = dirsFrom(NARR_X, 1);
+
 function shotFor(b: Beat, i: number): Shot {
   const base: Shot = {
     s: 1, cx: 200, tr: 0.75,
-    rx: 200 - 65 * FIG_SPACING, rOn: 0, rMode: 0,   // 135 at 1.35 → 152 at 1.0
-    bx: 200 + 65 * FIG_SPACING, bOn: 0, bMode: 0,   // 265 at 1.35 → 248 at 1.0
-    nx: -50, nOn: 0, nMode: 2,                // parked off-stage left until needed
+    rx: 200 - 73 * FIG_SPACING, rOn: 0, rMode: 0,   // 146 apart at 1.35 → 108 at 1.0
+    bx: 200 + 73 * FIG_SPACING, bOn: 0, bMode: 0,
+    nx: NARR_X[i], nOn: 0, nMode: 2,
     ring: 0,
   };
   if (b.act === 1) {
-    // Close on the ring. 96 units apart (130 × FIG_SPACING): the heads are 40% of
-    // figure height, so anything tighter and the pair reads as a single dark shape
-    // — which is why this distance scales with the body rather than staying put.
-    // The crowns land at 337, comfortably below the shout bubbles (which sit at a
-    // fixed stage position OUTSIDE the camera and so don't move when it zooms).
+    // Close on the ring. 108 units apart, and the number is set by the LUNGES, not
+    // by the resting stance — which is what the old 96 got wrong. The head is a
+    // 40-unit disc sitting ~6 units forward of the figure's x, so two resting boxers
+    // had 45 units of clear paper between their heads and looked fine. Then a cross
+    // carries 18 units of root motion and the answer carries its own, so a real
+    // exchange closed them to about 60 apart — heads 15 from touching, and the
+    // punching fist (which reaches x≈38, past the opponent's head edge) landed
+    // INSIDE the other figure. The pair fused into one dark shape at exactly the
+    // moments the fight was supposed to read best. At 108 the same exchange settles
+    // near 67, which is where a full-reach punch arrives at the head rather than
+    // through it. The crowns land at 337, comfortably below the shout bubbles.
     return { ...base, s: S_FIGHT, rOn: 1, bOn: 1, ring: 1 };
   }
   if (b.act === 2) {
@@ -238,24 +314,28 @@ function shotFor(b: Beat, i: number): Shot {
     return {
       ...base,
       s,
-      tr: first ? 2.4 : 0.75,                 // long enough for a believable walk
+      // Tied to the SCREEN distance, not the stage one. He covers 96 stage units
+      // while the camera pulls back from 1.54 to 1.22, which is 226 units of screen
+      // travel; at 2.2s that lands at about 100 screen units a second, the same pace
+      // a walk reads at when the camera is still.
+      tr: first ? 2.2 : 0.75,
+      // The camera sits LEFT of centre for the entrance, purely to buy paper between
+      // him and the fight. He lands at screen 41 and red's head starts at 146 — 80
+      // units of clear air. Centred (the old framing) that gap was 52, and arriving
+      // at the very edge of frame with two men swinging at each other beside him is
+      // what made him read as walking into the ring rather than in front of it.
+      cx: first ? 176 : 200,
       rOn: first ? 1 : 0, bOn: first ? 1 : 0, ring: first ? 1 : 0,
-      // He arrives at screen x 40 — head fully on stage and a clear gap to red's,
-      // whose head at this scale runs 88…154. (screen x = 200 + s·(nx − 200).)
-      // S_WALK cannot go past 1.22: his head's left edge leaves the frame.
-      nx: first ? 69 : b.board ? 132 : 200, nOn: 1, nMode: first ? 3 : b.board ? 2 : 1,
+      nOn: 1, nMode: first ? 3 : b.board ? 2 : 1,
     };
   }
   if (b.act === 3) {
-    // Under the board he stands left of centre so his working hand reaches the
-    // frame without his head ever covering the illustration; alone, he takes the
-    // middle and the camera pushes in on him — hardest of all on the two beats
-    // where the only thing above him is the Socratic exchange.
+    // He holds a mark and the CAMERA does the reframing — closest on the two beats
+    // where the only thing above him is the Socratic exchange. The board never
+    // constrains him: its frame ends at y 320 and his crown lands at 346 or lower,
+    // so he is always below it whatever his x.
     const s = b.board ? S_BOARD : b.stack ? S_STACK : S_SOLO;
-    return {
-      ...base, s,
-      nOn: 1, nMode: b.board ? 2 : 1, nx: b.board ? 132 : 200,
-    };
+    return { ...base, s, nOn: 1, nMode: b.board ? 2 : 1 };
   }
   if (b.act === 4) {
     // The rematch: same two figures, standing, calm — and the closest shot in the
@@ -270,6 +350,15 @@ function shotFor(b: Beat, i: number): Shot {
 }
 
 const SHOTS: Shot[] = BEATS.map(shotFor);
+
+// A beat that MOVES the narrator needs a transition as long as the walk actually
+// takes. Left at the flat 0.75s, the same number of strides gets crammed into
+// whatever time the crossfade happens to be — which is the documented reason a
+// walk reads as a sprint (see rig `moveTr` / WALK_SPEED). The entrance sets its own.
+for (let i = 1; i < SHOTS.length; i++) {
+  if (SHOTS[i].nMode === 3) continue;
+  SHOTS[i].tr = moveTr(SHOTS[i - 1].nx, SHOTS[i].nx, SHOTS[i].tr);
+}
 
 const BOARDS: Record<BoardKey, React.ComponentType<{ p: SharedValue<number>; w?: number; h?: number }>> = {
   anatomy: AnatomyDiagram,
@@ -395,33 +484,44 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
       blueS = mixStance(bFrom, bTo, tr);
     }
 
-    // The narrator. On his first beat he walks in; after that he holds a gesture
-    // matched to the line. The gesture is NOT re-raised from neutral each tap —
-    // that was the glitch. Instead the scene blends the previous beat's settled
-    // pose straight into this beat's live pose over the same `tr` the camera
-    // rides, so the hand travels smoothly from wherever it was into the next
-    // gesture. The live pose adds speech beats and per-gesture accents on top.
-    let narrS: Stance;
-    if (cur.nMode === 3) {
-      const nx0 = L(prv.nx, cur.nx);
-      const w = walk(nx0 - prv.nx, WALK);        // phase from distance → feet stay locked
-      narrS = tr > 0.985 ? stand(t) : mixStance(w, stand(t), clamp01((tr - 0.86) / 0.14));
-    } else {
-      // If the previous beat was the walk-in (or the narrator was off), start
-      // from a plain stand so there's no phantom gesture to blend out of.
-      const from = SHOTS[pIdx].nMode === 3 || SHOTS[pIdx].nOn < 0.5
-        ? stand(t)
-        : narratorHold(NARR_G[pIdx], t);
-      const to = narratorLive(NARR_G[n], t, bt.value);
-      narrS = mixStance(from, to, tr);
-    }
+    // The narrator, through the ONE canonical body motion every other lesson uses.
+    //
+    // `travelStance` picks: if the beat moves him he WALKS there, feet driven by
+    // distance so they never skate, easing into this beat's gesture as he arrives;
+    // if it doesn't, the previous beat's settled pose blends into this beat's living
+    // one, so the hand travels from wherever it was instead of snapping home.
+    //
+    // This lesson used to do neither properly. It walked on exactly one beat — the
+    // flagged walk-in — and every other x change was a STAND that slid: 131 units
+    // the moment he arrived, then 68 units back and forth on every board beat in
+    // act 3, feet planted the whole way. Four visible skates per run.
+    //
+    // If the previous beat was the entrance (or he was off stage) the blend starts
+    // from a plain stand, so there is no phantom gesture to come out of.
+    const fromHold = SHOTS[pIdx].nMode === 3 || SHOTS[pIdx].nOn < 0.5
+      ? stand(t)
+      : narratorHold(NARR_G[pIdx], t);
+    const narrS = travelStance(
+      prv.nx, cur.nx,
+      fromHold,
+      narratorHold(NARR_G[n], t),
+      narratorLive(NARR_G[n], t, bt.value),
+      tr, WALK, 0,
+    );
 
     // Root motion: a lunge or step carries the whole body, so a punch reads as
     // aimed at someone rather than as shadow-boxing. `adv` is toward the opponent.
     const rx = L(prv.rx, cur.rx) + redS.adv;
     const bx = L(prv.bx, cur.bx) - blueS.adv;
     const nx = L(prv.nx, cur.nx);
-    const rOn = L(prv.rOn, cur.rOn), bOn = L(prv.bOn, cur.bOn), nOn = L(prv.nOn, cur.nOn);
+    const rOn = L(prv.rOn, cur.rOn), bOn = L(prv.bOn, cur.bOn);
+    // He is SOLID before he is visible. Fading him up across the whole entrance
+    // made him materialise out of the paper about two-thirds of the way in — a
+    // ghost condensing beside the fight rather than someone walking on from the
+    // wing. He starts at stage x −50, which is screen −185, so ramping the opacity
+    // over the first fifth of the move finishes it while he is still off-stage and
+    // the reader only ever sees a solid figure walk in.
+    const nOn = cur.nMode === 3 ? ease01(clamp01(tr / 0.2)) : L(prv.nOn, cur.nOn);
 
     // Interpolate the SCALE and derive the centre from it, so the ground pin
     // holds exactly at every instant of the move (see THE BAND). Lerping cy
@@ -432,7 +532,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
       ring: L(prv.ring, cur.ring),
       red: rOn > 0.002 ? pose(redS, rx, GROUND, K_FIG, 1, rOn) : BLANK,
       blue: bOn > 0.002 ? pose(blueS, bx, GROUND, K_FIG, -1, bOn) : BLANK,
-      narr: nOn > 0.002 ? pose(narrS, nx, GROUND, K_FIG, 1, nOn) : BLANK,
+      narr: nOn > 0.002 ? pose(narrS, nx, GROUND, K_FIG, NARR_DIR[n], nOn) : BLANK,
     };
   });
 
@@ -605,9 +705,26 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
                 {/* Socrates' three lines, and the stamp that lands on them */}
                 <SocraticStack G={GRAPH} />
 
-                {/* speech bubbles ride the camera with their speaker */}
+                {/* Speech bubbles sit at a fixed stage position OUTSIDE the camera
+                    (every shot pins the ground line, so one `top` clears every
+                    crown). The PREVIOUS beat's bubbles are kept mounted for a
+                    moment so they fade out with everything else, instead of being
+                    the one graphic on stage that is cut dead on the tap. */}
+                {i > 0 ? BEATS[i - 1].say?.map((s) => (
+                  <Bubble
+                    key={`out-${s.who}-${s.text}`}
+                    bt={bt} text={s.text} top={BUBBLE_TOP} leaving
+                    side={s.who === 'red' ? 'left' : 'right'}
+                    shout={BEATS[i - 1].act === 1}
+                  />
+                )) : null}
                 {beat.say?.map((s) => (
-                  <Bubble key={s.who + s.text} bt={bt} text={s.text} who={s.who} act={beat.act} />
+                  <Bubble
+                    key={`${s.who}-${s.text}`}
+                    bt={bt} text={s.text} top={BUBBLE_TOP}
+                    side={s.who === 'red' ? 'left' : 'right'}
+                    shout={beat.act === 1}
+                  />
                 ))}
               </View>
             </View>
@@ -931,40 +1048,6 @@ function SocraticStack({ G }: { G: SharedValue<any> }) {
   );
 }
 
-// ── speech bubbles ───────────────────────────────────────────────────────────
-
-function Bubble({
-  bt, text, who, act,
-}: { bt: SharedValue<number>; text: string; who: 'red' | 'blue'; act: number }) {
-  const left = who === 'red';
-  const st = useAnimatedStyle(() => {
-    const u = seg(bt.value, left ? 0.15 : 0.45, left ? 0.55 : 0.85);
-    // A little overshoot so it lands like speech, not a fade.
-    const s = 0.6 + 0.4 * ease01(u) + Math.sin(Math.PI * ease01(u)) * 0.08;
-    return { opacity: ease01(u), transform: [{ scale: s }] };
-  });
-  return (
-    <Animated.View
-      style={[
-        styles.bubble,
-        left ? { left: 18, alignItems: 'flex-start' } : { right: 18, alignItems: 'flex-end' },
-        // Above the heads, not over them, and below the scoreboard — which is why
-        // this is now ONE number for every act: the shots all pin the ground line
-        // to the same place, so the crowns land at 336 (rematch) or 337 (ring) and
-        // a bubble starting at 250 clears both. It was 208, pinned to the crowns of
-        // the old 1.35 figure at 278/296; left there it would hang in clear air.
-        { top: 250 },
-        st,
-      ]}
-    >
-      <View style={[styles.bubbleBox, act === 1 && styles.bubbleShout]}>
-        <Text style={[styles.bubbleText, act === 1 && styles.bubbleShoutText]}>{text}</Text>
-      </View>
-      <View style={[styles.tail, left ? { marginLeft: 26 } : { marginRight: 26 }]} />
-    </Animated.View>
-  );
-}
-
 // ── choices (both the teaching taps and the graded questions) ────────────────
 
 function Choices({
@@ -1095,18 +1178,6 @@ const styles = StyleSheet.create({
     backgroundColor: RULE,
   },
 
-  // Wide enough that the longest counter in the rematch wraps to two lines rather
-  // than three — a three-line bubble ran into the figures' heads.
-  bubble: { position: 'absolute', maxWidth: 210 },
-  bubbleBox: {
-    borderWidth: 1.5, borderColor: INK, borderRadius: 4,
-    backgroundColor: PAPER, paddingHorizontal: 12, paddingVertical: 8,
-  },
-  bubbleShout: { backgroundColor: INK },
-  bubbleText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: INK, lineHeight: 18 },
-  bubbleShoutText: { fontFamily: 'Inter_700Bold', color: PAPER, letterSpacing: 0.4 },
-  tail: { width: 10, height: 10, backgroundColor: INK, transform: [{ rotate: '45deg' }], marginTop: -5 },
-
   // ── the framed easel ───────────────────────────────────────────────────────
   frame: {
     position: 'absolute', left: FRAME.x, top: FRAME.y, width: FRAME.w, height: FRAME.h,
@@ -1149,8 +1220,14 @@ const styles = StyleSheet.create({
     textAlign: 'center', includeFontPadding: false,
   },
   stackTextSoft: { color: SOFT },
+  // BELOW the exchange, not across it. At top 232 the stamp landed on exactly the
+  // same y as the third row (STACK_TOP + 2 × (34 + 8) = 232) and, being 168 wide
+  // against the row's 276, sat squarely over its words — so "AND WITH HORSES —
+  // EVERYONE?", the question that actually breaks Meletus and the whole point of
+  // the beat, was unreadable behind a black slab. The rows end at 266; this clears
+  // them and still reads as stamped onto the exchange.
   stamp: {
-    position: 'absolute', left: 116, top: 232, width: 168, height: 26,
+    position: 'absolute', left: 116, top: 274, width: 168, height: 26,
     backgroundColor: INK, borderRadius: 2, alignItems: 'center', justifyContent: 'center',
   },
   stampText: {

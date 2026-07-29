@@ -253,6 +253,16 @@ export function life2(t: number, f1: number, f2: number, ph: number) {
   return Math.sin(t * f1) * 0.62 + Math.sin(t * f2 + ph) * 0.38;
 }
 
+/**
+ * Deterministic 0..1 from a seed — the same hash `gaitVary` deals its habits from,
+ * pulled out so anything that needs to tell two identical figures apart can use it.
+ */
+export function rand01(seed: number, salt: number) {
+  'worklet';
+  const v = Math.sin(seed * 12.9898 + salt * 78.233) * 43758.5453;
+  return v - Math.floor(v);
+}
+
 /** Snap out to a peak then recover to guard — a punch's tempo. Earlier peak = snappier. */
 export function jabEnv(u: number, peak: number) {
   'worklet';
@@ -265,22 +275,61 @@ export function holdEnv(u: number) {
   return Math.sin(Math.PI * ease01(u));
 }
 
+/**
+ * A GESTURE'S TRANSIENT RISE, and why every raised arm has to come back down.
+ *
+ * A beat holds until the reader taps, which can be ten seconds. Whatever pose the
+ * figure is left in is what they stare at — so the settled pose has to be one a
+ * person would actually still be in. It wasn't: `celebrate` and `reach-up-high`
+ * rested with both arms locked straight overhead, `wave` rested mid-wave, `proclaim`
+ * and `point-up` rested with an arm aloft. Fourteen of the forty-eight gestures
+ * ended with a hand in the air and simply froze there.
+ *
+ * So the raised instant lives HERE instead of in the resting pose: the *Hold pose is
+ * the arm-down version, and the *Live pose adds this rise on top. It must return to
+ * exactly zero, and quickly — the next beat's transition blends out of the hold
+ * (`mixStance(holdPrev, liveNext, tr)`), so any lift still up when the reader taps
+ * would snap the arm down in one frame. 1.5s is long enough to read as a deliberate
+ * gesture and short enough that it is always finished before a tap.
+ *
+ * Declared up here with the other envelopes because BOTH gesture libraries use it,
+ * and a worklet that calls one declared later captures it as undefined.
+ */
+export function lift(bt: number): number {
+  'worklet';
+  return Math.sin(Math.min(bt, 1.5) / 1.5 * Math.PI);
+}
+
 // ── the guard, and the ten boxing moves ──────────────────────────────────────
 // Every move takes (t, u): u is 0→1 progress through the move, t drives the idle
 // underneath. Each move is the GUARD at u=0 and u=1, so consecutive moves meet at
 // the guard and chain with no snap — the choreography never has to cross-fade.
 
-/** Hands up by the chin, weight low, feet shifting — a boxer's guard. */
-export function guard(t: number, load = 0): Stance {
+/**
+ * Hands up by the chin, weight low, feet shifting — a boxer's guard.
+ *
+ * `seed` IS NOT OPTIONAL DECORATION. Two fighters used to share one clock and one
+ * set of frequencies, so they bounced, swayed and breathed on exactly the same
+ * frame — and two figures moving in perfect sync read as one figure and its mirror
+ * image, not as two people. It is the same defect `strideStance` learned to avoid
+ * for walking, and the fight never got the lesson. Each fighter now gets its own
+ * tempo, phase, bounce depth and stance width, dealt deterministically from `seed`
+ * so it is stable across frames.
+ */
+export function guard(t: number, load = 0, seed = 0): Stance {
   'worklet';
-  const b = life2(t, 5.0, 3.1, 1.3) * 1.6;      // bounce, never on a fixed beat
-  const sway = life2(t, 2.3, 1.37, 0.4) * 1.3;  // weight drifting side to side
+  const r1 = rand01(seed, 1), r2 = rand01(seed, 2), r3 = rand01(seed, 3);
+  const ph = r1 * 6.283;                        // this fighter's own place in the cycle
+  const rate = 0.88 + r2 * 0.26;                // and their own tempo
+  const b = life2(t * rate + ph, 5.0, 3.1, 1.3) * (1.35 + r3 * 0.55);
+  const sway = life2(t * rate + ph * 0.6, 2.3, 1.37, 0.4) * (1.1 + r1 * 0.5);
+  const w = r2 * 2 - 1;                         // slightly wider or narrower stance
   return {
     // Only a slight lean — a deep one closes the gap faster than the spacing can
     // hold, and the pair reads as one blob.
     tilt: -0.10, neck: -0.05, bob: b - 2,
-    footL: { x: -15 + sway * 0.3, y: 0 },
-    footR: { x: 13 + sway * 0.3, y: 0 },
+    footL: { x: -15 + w - 1 + sway * 0.3, y: 0 },
+    footR: { x: 13 + w + sway * 0.3, y: 0 },
     // Fists clear of the HEAD CIRCLE (40% of figure height), so both gloves and
     // the head read as three shapes rather than one mass.
     fistL: { x: 27 + sway * 0.4 - load * 5, y: -34 + b * 0.4 },
@@ -289,105 +338,297 @@ export function guard(t: number, load = 0): Stance {
   };
 }
 
+// ── WHY THE PUNCH TARGETS ARE ALL INSIDE 33 ──────────────────────────────────
+// The arm reaches U.uarm + U.farm = 33 from the shoulder, and `solve` CLAMPS any
+// fist target past that back onto the reach circle. Deliberately — an unclamped
+// target floats the glove off the end of the forearm. But it means every target
+// beyond 33 collapses onto the same circle, and the old jab (55, −31) and cross
+// (60, −29) both did: they landed 1.5 units apart, so two of the four punches were
+// the SAME PICTURE and only the body behind them differed. Targets now sit inside
+// the reach so each punch keeps its own line and height:
+//     jab      straight, chin height, quick        (35, −30)
+//     cross    committed, flatter, deeper lunge    (38, −25)
+//     hook     around the side, higher, shorter    (29, −41)
+//     uppercut rises from underneath, close in     (28, −49)
+//     leadHook the FRONT hand, which never threw   (28, −40) from the left shoulder
+//     bodyShot the only one that goes down         (32,  −8)
+// Check a new one with hypot(target − shoulder) < 33, shoulders at about
+// (5.6, −26) right and (−0.4, −26) left, and keep it clear of the head disc
+// (centre ≈ (5.7, −48.6), radius 20) or the glove is swallowed.
+
 /** Quick straight lead — snappy, little commitment. */
-export function jab(t: number, u: number): Stance {
+export function jab(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t), e = jabEnv(u, 0.26);
+  const g = guard(t, 0, seed), e = jabEnv(u, 0.26);
   return {
     ...g, tilt: g.tilt - 0.04 * e, adv: 8 * e,
-    fistR: { x: lerp(g.fistR.x, 55, e), y: lerp(g.fistR.y, -31, e) },
+    fistR: { x: lerp(g.fistR.x, 35, e), y: lerp(g.fistR.y, -30, e) },
     fistL: { x: lerp(g.fistL.x, 24, e), y: g.fistL.y },
   };
 }
-/** Power straight — bigger lunge, more rotation into it. */
-export function cross(t: number, u: number): Stance {
+/** Power straight — bigger lunge, more rotation into it, and a flatter line. */
+export function cross(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t), e = jabEnv(u, 0.40);
+  const g = guard(t, 0, seed), e = jabEnv(u, 0.40);
   return {
     ...g, tilt: g.tilt - 0.16 * e, neck: g.neck - 0.04 * e, adv: 18 * e,
-    fistR: { x: lerp(g.fistR.x, 60, e), y: lerp(g.fistR.y, -29, e) },
+    fistR: { x: lerp(g.fistR.x, 38, e), y: lerp(g.fistR.y, -25, e) },
     fistL: { x: lerp(g.fistL.x, 20, e), y: lerp(g.fistL.y, -33, e) },
   };
 }
 /** Comes around the side at head height, fist bowing up mid-swing. */
-export function hook(t: number, u: number): Stance {
+export function hook(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t), e = jabEnv(u, 0.42);
+  const g = guard(t, 0, seed), e = jabEnv(u, 0.42);
   return {
     ...g, tilt: g.tilt - 0.08 * e, adv: 12 * e,
-    fistR: { x: lerp(g.fistR.x, 50, e), y: lerp(g.fistR.y, -41, e) - Math.sin(Math.PI * e) * 6 },
+    fistR: { x: lerp(g.fistR.x, 29, e), y: lerp(g.fistR.y, -41, e) - Math.sin(Math.PI * e) * 6 },
     fistL: { x: lerp(g.fistL.x, 22, e), y: lerp(g.fistL.y, -37, e) },
   };
 }
-/** Rises from the guard to above the head. */
-export function uppercut(t: number, u: number): Stance {
+/** Rises from underneath, close in. */
+export function uppercut(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t), e = jabEnv(u, 0.46);
+  const g = guard(t, 0, seed), e = jabEnv(u, 0.46);
   return {
     ...g, tilt: g.tilt - 0.06 * e, bob: g.bob - Math.sin(Math.PI * u) * 2.5, adv: 11 * e,
-    fistR: { x: lerp(g.fistR.x, 40, e), y: lerp(g.fistR.y, -49, e) },
-    fistL: { x: lerp(g.fistL.x, 22, e), y: lerp(g.fistL.y, -35, e) },
+    fistR: { x: lerp(g.fistR.x, 30, e), y: lerp(g.fistR.y, -47, e) },
+    fistL: { x: lerp(g.fistL.x, 24, e), y: lerp(g.fistL.y, -34, e) },
   };
 }
+// ── AND WHY EVERY DEFENSIVE TARGET IS PUSHED OUT ─────────────────────────────
+// The glove is a filled disc of radius STR.glove = 9 and the head is a disc of
+// radius 20 centred near (2, −49). A fist within 20 of that centre does not read as
+// a hand held by the face — it is DRAWN INSIDE THE HEAD and disappears, and the
+// forearm behind it disappears with it. The old block put its lead fist at
+// (18, −42), which is 14 from the head centre: the glove vanished, the arm vanished,
+// and the figure became a lump with a bump on it. `hitReact` did the same at
+// (12, −30). Both are used constantly, which is most of why the fight read as two
+// blobs rather than two boxers.
+//
+// A guard genuinely IS hands-by-the-chin, so a little overlap is correct and the
+// arm can't reach far enough to clear the head disc entirely at head height anyway.
+// The rule is therefore the weaker one that actually matters: keep the fist CENTRE
+// outside the head circle — hypot(fist − headCentre) > ~23 — so a lobe of glove
+// always shows and the forearm stays visible against paper.
+
 /** Both gloves up and tight, weight giving a touch — absorbing a shot. */
-export function block(t: number, u: number): Stance {
+export function block(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t), e = holdEnv(u);
+  const g = guard(t, 0, seed), e = holdEnv(u);
   return {
     ...g, tilt: g.tilt + 0.06 * e, neck: g.neck + 0.10 * e, adv: -3 * e,
-    fistL: { x: lerp(g.fistL.x, 18, e), y: lerp(g.fistL.y, -42, e) },
-    fistR: { x: lerp(g.fistR.x, 25, e), y: lerp(g.fistR.y, -40, e) },
+    fistL: { x: lerp(g.fistL.x, 26, e), y: lerp(g.fistL.y, -40, e) },
+    fistR: { x: lerp(g.fistR.x, 31, e), y: lerp(g.fistR.y, -37, e) },
   };
 }
 /** Drops under a punch — pelvis sinks, chin tucks. */
-export function duck(t: number, u: number): Stance {
+export function duck(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t), e = holdEnv(u);
+  const g = guard(t, 0, seed), e = holdEnv(u);
   return { ...g, bob: g.bob - 13 * e, tilt: g.tilt - 0.06 * e, neck: g.neck - 0.20 * e, adv: 2 * e };
 }
 /** Leans off the line of fire without moving the feet. */
-export function slip(t: number, u: number): Stance {
+export function slip(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t), e = holdEnv(u);
+  const g = guard(t, 0, seed), e = holdEnv(u);
   return { ...g, tilt: g.tilt + 0.20 * e, neck: g.neck + 0.12 * e, adv: -4 * e };
 }
 /** A quick step back to reset the distance, feet shuffling. */
-export function backstep(t: number, u: number): Stance {
+export function backstep(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t), e = holdEnv(u);
+  const g = guard(t, 0, seed), e = holdEnv(u);
   const sh = Math.sin(Math.PI * u * 2);
   return {
     ...g, adv: -15 * e,
-    footL: { x: -15 - 5 * Math.max(0, sh), y: -3 * Math.max(0, sh) },
-    footR: { x: 13 - 4 * Math.max(0, -sh), y: -3 * Math.max(0, -sh) },
+    footL: { x: g.footL.x - 5 * Math.max(0, sh), y: -3 * Math.max(0, sh) },
+    footR: { x: g.footR.x - 4 * Math.max(0, -sh), y: -3 * Math.max(0, -sh) },
   };
 }
 /** Takes a clean shot — head snaps back, weight rocks onto the heels. */
-export function hitReact(t: number, u: number): Stance {
+export function hitReact(t: number, u: number, seed = 0): Stance {
   'worklet';
-  const g = guard(t);
+  const g = guard(t, 0, seed);
   const e = Math.sin(Math.PI * Math.pow(ease01(u), 0.55));   // fast snap, slow recover
   return {
     ...g, tilt: g.tilt + 0.34 * e, neck: g.neck + 0.34 * e, bob: g.bob - 2 * e, adv: -7 * e,
-    footL: { x: -15 - 6 * e, y: 0 }, footR: { x: 13 - 3 * e, y: 0 },
-    fistL: { x: lerp(g.fistL.x, 12, e), y: lerp(g.fistL.y, -30, e) },
-    fistR: { x: lerp(g.fistR.x, 18, e), y: lerp(g.fistR.y, -26, e) },
+    footL: { x: g.footL.x - 6 * e, y: 0 }, footR: { x: g.footR.x - 3 * e, y: 0 },
+    fistL: { x: lerp(g.fistL.x, 21, e), y: lerp(g.fistL.y, -29, e) },
+    fistR: { x: lerp(g.fistR.x, 27, e), y: lerp(g.fistR.y, -25, e) },
   };
 }
 
-/** Dispatch a boxing move by numeric code, so the choreography is plain data. */
-export function boxMove(code: number, t: number, u: number): Stance {
+// ── the second wave of boxing, so a round stops being four punches on a loop ──
+// Ten moves could only ever produce ten pictures, all thrown with the same hand at
+// the same height, and a viewer watching a beat for ten seconds sees the cycle. The
+// eight below add the things a real exchange has and this one did not: the FRONT
+// hand throwing, a punch that goes DOWNWARD, defences lighter than a full block,
+// movement that changes the SPACING rather than trading, and two beats of nothing
+// happening — a feint and a stall — which is what gives a fight its rhythm.
+
+/** The lead hand finally throws: a short hook from the front. */
+export function leadHook(t: number, u: number, seed = 0): Stance {
   'worklet';
-  if (code === 1) return jab(t, u);
-  if (code === 2) return cross(t, u);
-  if (code === 3) return hook(t, u);
-  if (code === 4) return uppercut(t, u);
-  if (code === 5) return block(t, u);
-  if (code === 6) return duck(t, u);
-  if (code === 7) return slip(t, u);
-  if (code === 8) return backstep(t, u);
-  if (code === 9) return hitReact(t, u);
-  return guard(t);
+  const g = guard(t, 0, seed), e = jabEnv(u, 0.36);
+  return {
+    ...g, tilt: g.tilt - 0.07 * e, adv: 10 * e,
+    fistL: { x: lerp(g.fistL.x, 28, e), y: lerp(g.fistL.y, -40, e) - Math.sin(Math.PI * e) * 5 },
+    fistR: { x: lerp(g.fistR.x, 27, e), y: lerp(g.fistR.y, -32, e) },
+  };
+}
+/** A dig to the body — the one punch that travels DOWN, so the fight isn't all head height. */
+export function bodyShot(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed), e = jabEnv(u, 0.34);
+  return {
+    ...g, tilt: g.tilt - 0.20 * e, neck: g.neck + 0.10 * e, bob: g.bob - 6 * e, adv: 14 * e,
+    fistR: { x: lerp(g.fistR.x, 32, e), y: lerp(g.fistR.y, -8, e) },
+    fistL: { x: lerp(g.fistL.x, 22, e), y: lerp(g.fistL.y, -36, e) },
+  };
+}
+/** A flick of the lead hand that turns a punch aside — quicker and lighter than a block. */
+export function parry(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed), e = holdEnv(u);
+  return {
+    ...g, tilt: g.tilt + 0.03 * e, neck: g.neck + 0.04 * e, adv: -2 * e,
+    fistL: { x: lerp(g.fistL.x, 30, e), y: lerp(g.fistL.y, -33, e) },
+  };
+}
+/** Rolls under the shot and comes up the other side — a weave, not a straight drop. */
+export function roll(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed);
+  const e = holdEnv(u);
+  const across = Math.sin(2 * Math.PI * ease01(u));   // down, through, up
+  return {
+    ...g,
+    bob: g.bob - 15 * e,
+    tilt: g.tilt + across * 0.16,
+    neck: g.neck - 0.10 * e,
+    adv: 4 * e,
+    fistL: { x: g.fistL.x + 1 * e, y: g.fistL.y + 5 * e },
+    fistR: { x: g.fistR.x, y: g.fistR.y + 3 * e },
+  };
+}
+/** A fake: the lead shoulder and hand twitch out and pull straight back. Nothing lands. */
+export function feint(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed), e = jabEnv(u, 0.20);
+  return {
+    ...g, tilt: g.tilt - 0.05 * e, adv: 5 * e,
+    fistL: { x: lerp(g.fistL.x, 30, e), y: g.fistL.y + 2 * e },
+  };
+}
+/** Circling — the only move that changes the DISTANCE rather than trading through it. */
+export function circleStep(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed);
+  const e = holdEnv(u);
+  const step = Math.sin(2 * Math.PI * ease01(u));
+  return {
+    ...g, adv: -6 * e,
+    footL: { x: g.footL.x - 7 * Math.max(0, step), y: -4 * Math.max(0, step) },
+    footR: { x: g.footR.x - 6 * Math.max(0, -step), y: -4 * Math.max(0, -step) },
+  };
+}
+/** Arms in, leaning together — the exchange stalls and nothing happens. */
+export function clinch(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed), e = holdEnv(u);
+  return {
+    ...g, tilt: g.tilt - 0.14 * e, neck: g.neck + 0.06 * e, adv: 16 * e,
+    fistL: { x: lerp(g.fistL.x, 25, e), y: lerp(g.fistL.y, -22, e) },
+    fistR: { x: lerp(g.fistR.x, 29, e), y: lerp(g.fistR.y, -18, e) },
+  };
+}
+/** Hands drop, chin comes up — the "come on then" that is this whole lesson's point. */
+export function taunt(t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const g = guard(t, 0, seed), e = holdEnv(u);
+  return {
+    ...g, tilt: g.tilt + 0.06 * e, neck: g.neck + 0.14 * e, adv: 3 * e,
+    fistL: { x: lerp(g.fistL.x, -14, e), y: lerp(g.fistL.y, 2, e) },
+    fistR: { x: lerp(g.fistR.x, 26, e), y: lerp(g.fistR.y, -6, e) },
+  };
+}
+
+// ── THE GLOVE-OUT-OF-THE-HEAD GUARD RAIL ─────────────────────────────────────
+// Fixing the individual targets above is necessary but NOT sufficient, because the
+// head does not stay still: `neck` tips it forward, and a duck (−0.25) or an
+// uppercut swings the 20-radius head disc straight onto hands that were perfectly
+// clear in the upright guard. Every such combination is a separate bug waiting to
+// be found by eye on a phone, and one was — a boxer whose head, glove and arm had
+// fused into a single lump with a bump on it.
+//
+// So the clearance is enforced HERE, once, for every boxing pose that exists or
+// ever will. The head centre is re-derived from the pose's own tilt and neck (the
+// same maths `solve` uses), and any fist inside GLOVE_CLEAR of it is pushed back
+// out along the line between them. 26 puts the glove centre 6 units outside the
+// head's edge, so a 9-radius glove overlaps by only 3 and still reads as its own
+// shape. Where that push would take a fist past the arm's 33-unit reach, `solve`
+// clamps it back — but only as far as the reach circle, which measurement puts at
+// 25 from the head centre in the worst case (a full uppercut), still clear.
+const GLOVE_CLEAR = 26;
+
+/** Head centre in the pelvis frame, from a stance's tilt and neck. */
+function headAt(tilt: number, neck: number): P2 {
+  'worklet';
+  const up = Math.PI + tilt;
+  const cx = Math.sin(up) * U.spine, cy = Math.cos(up) * U.spine;
+  const ha = up + neck;
+  return { x: cx + Math.sin(ha) * U.head, y: cy + Math.cos(ha) * U.head };
+}
+
+/** Push a glove out of the head disc so the two always read as separate shapes. */
+function clearHead(f: P2, h: P2): P2 {
+  'worklet';
+  const dx = f.x - h.x, dy = f.y - h.y;
+  const d = Math.hypot(dx, dy);
+  if (d >= GLOVE_CLEAR) return f;
+  if (d < 1e-3) return { x: h.x + GLOVE_CLEAR, y: h.y };
+  return { x: h.x + (dx / d) * GLOVE_CLEAR, y: h.y + (dy / d) * GLOVE_CLEAR };
+}
+
+/** The raw pose for a code. Declared BEFORE boxMove: a worklet that calls a worklet
+ *  declared later captures it as undefined and takes down the UI thread. */
+function boxPose(code: number, t: number, u: number, seed: number): Stance {
+  'worklet';
+  if (code === 1) return jab(t, u, seed);
+  if (code === 2) return cross(t, u, seed);
+  if (code === 3) return hook(t, u, seed);
+  if (code === 4) return uppercut(t, u, seed);
+  if (code === 5) return block(t, u, seed);
+  if (code === 6) return duck(t, u, seed);
+  if (code === 7) return slip(t, u, seed);
+  if (code === 8) return backstep(t, u, seed);
+  if (code === 9) return hitReact(t, u, seed);
+  if (code === 10) return leadHook(t, u, seed);
+  if (code === 11) return bodyShot(t, u, seed);
+  if (code === 12) return parry(t, u, seed);
+  if (code === 13) return roll(t, u, seed);
+  if (code === 14) return feint(t, u, seed);
+  if (code === 15) return circleStep(t, u, seed);
+  if (code === 16) return clinch(t, u, seed);
+  if (code === 17) return taunt(t, u, seed);
+  return guard(t, 0, seed);
+}
+
+/**
+ * Dispatch a boxing move by numeric code, so the choreography is plain data.
+ *  0 guard · 1 jab · 2 cross · 3 hook · 4 uppercut · 5 block · 6 duck · 7 slip ·
+ *  8 backstep · 9 hit · 10 lead hook · 11 body shot · 12 parry · 13 roll ·
+ * 14 feint · 15 circle · 16 clinch · 17 taunt.
+ *
+ * `seed` separates one fighter's idle from another's — always pass a different one
+ * per figure, or they move as a single mirrored body. Every pose leaves here with
+ * its gloves pushed clear of the head (see the guard rail above).
+ */
+export function boxMove(code: number, t: number, u: number, seed = 0): Stance {
+  'worklet';
+  const s = boxPose(code, t, u, seed);
+  const h = headAt(s.tilt, s.neck);
+  return { ...s, fistL: clearHead(s.fistL, h), fistR: clearHead(s.fistR, h) };
 }
 
 /**
@@ -446,31 +687,58 @@ export function stand(t: number): Stance {
 // their own accent (an emphatic dip, counted chops, a sweep landing into place).
 // Everything additive is 0 at bt=0, so entering a beat is still seamless.
 
-function gestureHold(t: number, tx: number, ty: number, tneck: number): Stance {
+/**
+ * BOTH hands, because one is not enough to tell gestures apart.
+ *
+ * This used to take only the working hand's target and pin the other one at the
+ * figure's side. That was survivable while the gestures rested in their raised
+ * positions — a hand at −48 and a hand at −30 are obviously different pictures —
+ * but once every gesture correctly rests with its arm DOWN, the only thing left
+ * distinguishing them was a few units of height on one wrist, and all seven
+ * settled into what looked like the same pose. A silhouette is what reads at a
+ * glance, so the left hand and the lean have to carry their share of it.
+ */
+function gestureHold(
+  t: number, lx: number, ly: number, rx: number, ry: number, tneck: number, tilt = 0,
+): Stance {
   'worklet';
   const base = stand(t);                        // inherit breath + weight rock + head drift
   const dx = life2(t, 1.3, 0.83, 0.7) * 1.3;    // the gesturing hand keeps drifting
   const dy = life2(t, 1.05, 0.61, 1.9) * 1.1;
+  const dl = life2(t, 0.97, 0.59, 2.6) * 0.9;   // and the other one is never quite still
   const hd = life2(t, 0.5, 0.31, 1.1);
   return {
     ...base,
-    tilt: -0.03 + (base.tilt - 0.05),           // gesture lean, keeping the weight rock
+    tilt: -0.03 + tilt + (base.tilt - 0.05),    // gesture lean, keeping the weight rock
     neck: tneck + hd * 0.03,
-    fistR: { x: tx + dx, y: ty + dy },
-    fistL: { x: base.fistL.x + 2, y: base.fistL.y },
+    fistR: { x: rx + dx, y: ry + dy },
+    fistL: { x: lx + dl, y: ly },
   };
 }
 
-/** The settled target pose for a gesture. 0 open · 1 emphatic · 2 board · 3 count · 4 chin · 5 sweep · 6 up. */
+/**
+ * The settled target pose for a gesture. 0 open · 1 emphatic · 2 board · 3 count ·
+ * 4 chin · 5 sweep · 6 up.
+ *
+ * THESE ARE THE ARM-DOWN VERSIONS. They used to be the raised ones, which meant a
+ * beat that waits for a tap froze the narrator with his hand in the air for as long
+ * as the reader took to read — and this library, unlike `emoteHold`, never got the
+ * fix. Two of them were worse than frozen: code 4 rested its fist at (9, −50) and
+ * code 6 at (12, −56), and the head is a 20-radius disc centred near (0, −49), so
+ * BOTH hands sat inside the skull and the forearm behind them vanished with it. The
+ * thinking pose — the one the Socrates beat uses — had no visible hand at all.
+ * The raise now lives in `narratorLive`'s LIFT block and comes back down.
+ */
 export function narratorHold(code: number, t: number): Stance {
   'worklet';
-  if (code === 1) return gestureHold(t, 30, -30, -0.04);   // emphatic
-  if (code === 2) return gestureHold(t, 26, -48, -0.15);   // present the board (up-forward)
-  if (code === 3) return gestureHold(t, 30, -34, -0.06);   // count off
-  if (code === 4) return gestureHold(t, 9, -50, 0.10);     // hand to chin — thinking
-  if (code === 5) return gestureHold(t, 34, -40, -0.10);   // sweep, resolved to hand-out
-  if (code === 6) return gestureHold(t, 12, -56, -0.20);   // point up (at the quote)
-  return gestureHold(t, 36, -22, -0.03);                   // 0 open hand, explaining
+  //                          left hand      right hand    neck    lean
+  if (code === 1) return gestureHold(t, -16, -12, 27, -17, -0.04, -0.03); // emphatic: both hands in, leaning at you
+  if (code === 2) return gestureHold(t, -7, 5, 31, -13, -0.15, 0);        // toward the easel, other arm hanging
+  if (code === 3) return gestureHold(t, 14, -14, 28, -20, -0.06, 0);      // counting onto the flat of one hand
+  if (code === 4) return gestureHold(t, -4, 5, 9, -32, 0.12, 0.02);       // hand AT THE CHIN — thinking
+  if (code === 5) return gestureHold(t, -20, 0, 33, -19, -0.10, 0);       // arms opposed, wide — the sweep
+  if (code === 6) return gestureHold(t, -9, -8, 26, -18, -0.14, -0.02);   // hand on hip, other about to rise
+  return gestureHold(t, -6, 6, 32, -20, -0.03, 0);                        // 0 open hand, explaining
 }
 
 /** The settled pose plus the beat's living overlay: speech beats, head nods, per-gesture accents. */
@@ -480,13 +748,23 @@ export function narratorLive(code: number, t: number, bt: number): Stance {
   const speech = clamp01(1 - bt / 2.4);          // energetic while the line reveals, then eases off
   const talk = Math.sin(bt * 8.5) * speech * 2.4;
   const nod = Math.sin(bt * 8.5 + 0.4) * speech * 0.018;
-  let dy = 0, dx = 0;
-  if (code === 1) dy = Math.sin(Math.min(bt, 0.6) / 0.6 * Math.PI) * 6;        // one emphatic dip
+  let dy = 0, dx = 0, dn = 0;
   if (code === 3) dy = Math.sin(bt * 7.2) * Math.max(0, 1 - bt / 1.6) * 3;     // counted chops
   if (code === 5) dx = lerp(-30, 0, ease01(bt / 1.0));                         // sweep into place
+
+  // ── LIFT: the raised instant, which then comes back down ───────────────────
+  // Peaks are the poses these gestures used to REST in, chosen to clear the head
+  // disc: presenting tops out at (28, −48) and pointing up at (26, −50), both just
+  // outside the 20-radius head and just inside the arm's 33-unit reach.
+  const L = lift(bt);
+  if (code === 1) dy -= 20 * L;                                                // emphatic
+  if (code === 2) { dy -= 32 * L; dn -= 0.08 * L; }                            // up at the board
+  if (code === 3) dy -= 16 * L;                                                // up to count
+  if (code === 5) dy -= 20 * L;                                                // sweeps at head height
+  if (code === 6) { dy -= 32 * L; dn -= 0.12 * L; }                            // point up
   return {
     ...s,
-    neck: s.neck + nod,
+    neck: s.neck + nod + dn,
     fistR: { x: s.fistR.x + dx, y: s.fistR.y + talk + dy },
   };
 }
@@ -503,28 +781,6 @@ export function narratorLive(code: number, t: number, bt: number): Stance {
 function hands(base: Stance, lx: number, ly: number, rx: number, ry: number): Stance {
   'worklet';
   return { ...base, fistL: { x: lx, y: ly }, fistR: { x: rx, y: ry } };
-}
-
-/**
- * A GESTURE'S TRANSIENT RISE, and why every raised arm has to come back down.
- *
- * A beat holds until the reader taps, which can be ten seconds. Whatever pose the
- * figure is left in is what they stare at — so the settled pose has to be one a
- * person would actually still be in. It wasn't: `celebrate` and `reach-up-high`
- * rested with both arms locked straight overhead, `wave` rested mid-wave, `proclaim`
- * and `point-up` rested with an arm aloft. Fourteen of the forty-eight gestures
- * ended with a hand in the air and simply froze there.
- *
- * So the raised instant now lives HERE instead of in the resting pose: emoteHold is
- * the arm-down version, and emoteLive adds this rise on top. It must return to
- * exactly zero, and quickly — the next beat's transition blends out of emoteHold
- * (`mixStance(holdPrev, liveNext, tr)`), so any lift still up when the reader taps
- * would snap the arm down in one frame. 1.5s is long enough to read as a deliberate
- * gesture and short enough that it is always finished before a tap.
- */
-function lift(bt: number): number {
-  'worklet';
-  return Math.sin(Math.min(bt, 1.5) / 1.5 * Math.PI);
 }
 
 /**

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withTiming, Easing, FadeInDown,
   LinearTransition, runOnJS, type SharedValue,
@@ -169,17 +169,66 @@ export function Fade({
 }
 
 // ── speech bubble (positioned by the scene) ───────────────────────────────────
+//
+// WHY THIS GROWS FROM ITS TAIL.
+//
+// A View scales about its CENTRE. This bubble is anchored by one corner (left/right
+// + top) and its width is whatever the text makes it — so scaling it from 0.6 walked
+// the whole box diagonally into place: on a 150-wide bubble the left edge started 30
+// units inboard and slid outward as it inflated, and the top edge rose 8 at the same
+// time. That diagonal slide, not the scale itself, is the "glitchy" motion — a
+// speech bubble that swims into position instead of popping out of the mouth.
+//
+// The fix is to pin the TAIL. Scaling about the centre maps a point p (measured from
+// the centre) to s·p, so translating by p·(1−s) holds p exactly still. The tail's
+// offset needs the measured width, hence onLayout — the alternative, transformOrigin,
+// cannot express "29 from the right edge" when the width is unknown.
+//
+// It also LEAVES now. Every other stage graphic fades out over 0.25s; the bubbles
+// alone were cut dead on the tap, which is the one inconsistency you could see.
+const TAIL_C = 29;          // tail centre, in from the anchored edge (24 margin + 5 half-width)
+// ...and UP from the wrapper's bottom edge. The wrapper lays out as box + (−5 margin
+// + 10 tail) = boxH + 5, and the tail's centre lands at boxH — five short of the
+// bottom. Treating the bottom edge as the anchor left 0.9px of vertical creep.
+const TAIL_UP = 5;
+
 export function Bubble({
-  bt, text, side, top, shout,
-}: { bt: SharedValue<number>; text: string; side: 'left' | 'right'; top: number; shout?: boolean }) {
+  bt, text, side, top, shout, leaving,
+}: {
+  bt: SharedValue<number>; text: string; side: 'left' | 'right'; top: number; shout?: boolean;
+  /** Rendered for the beat that just ended — holds still and fades out. */
+  leaving?: boolean;
+}) {
   const left = side === 'left';
+  const w = useSharedValue(0);
+  const h = useSharedValue(0);
+  const onLayout = useCallback((e: LayoutChangeEvent) => {
+    w.value = e.nativeEvent.layout.width;
+    h.value = e.nativeEvent.layout.height;
+  }, []);
+
   const st = useAnimatedStyle(() => {
-    const u = seg(bt.value, 0.1, 0.5);
-    const s = 0.6 + 0.4 * ease01(u) + Math.sin(Math.PI * ease01(u)) * 0.08;
-    return { opacity: ease01(u), transform: [{ scale: s }] };
+    if (leaving) return { opacity: 1 - ease01(seg(bt.value, 0, 0.22)), transform: [{ scale: 1 }] };
+    const e = ease01(seg(bt.value, 0.12, 0.46));
+    // Lands with a real settle: past 1 and back, rather than the old curve that
+    // only ever eased up to 1 (its "overshoot" term never took the scale over 1).
+    const s = 0.78 + 0.22 * e + Math.sin(Math.PI * e) * 0.05;
+    const ax = left ? TAIL_C : w.value - TAIL_C;
+    return {
+      // Opaque well before it stops growing — a long semi-transparent inflate is
+      // what makes a pop read as a smear.
+      opacity: ease01(seg(bt.value, 0.12, 0.30)),
+      transform: [
+        { translateX: (ax - w.value / 2) * (1 - s) },
+        { translateY: (h.value / 2 - TAIL_UP) * (1 - s) },
+        { scale: s },
+      ],
+    };
   });
+
   return (
     <Animated.View
+      onLayout={onLayout}
       style={[
         styles.bubble,
         left ? { left: 14, alignItems: 'flex-start' } : { right: 14, alignItems: 'flex-end' },

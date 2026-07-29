@@ -59,14 +59,23 @@ const AUTH = BEATS.map((b) => b.auth ?? 0);
 const Q1 = BEATS.map((b) => (b.weigh === 'q1' ? 1 : 0));
 
 // Each citizen runs an out-of-phase loop of blows — no two in sync, the brawl.
+// Each also runs a DIFFERENT loop and carries its own `seed`, so their idle bounce
+// and stance differ too: offsetting only the blows still left four bodies breathing
+// on the same frame, which reads as one figure copied four times.
+const MELEE: number[][] = [
+  [1, 3, 2, 0, 5, 1, 6],                     // jab hook cross guard block jab duck
+  [14, 1, 12, 2, 0, 10, 5],                  // feint jab parry cross guard lead-hook block
+  [5, 11, 0, 13, 1, 3, 12],                  // block body-shot guard roll jab hook parry
+  [15, 2, 6, 1, 16, 0, 4],                   // circle cross duck jab clinch guard uppercut
+];
 function melee(t: number, k: number): Stance {
   'worklet';
-  const codes = [1, 3, 2, 0, 5, 1, 6];       // jab hook cross guard block jab duck
-  const period = 0.72;
+  const codes = MELEE[k % MELEE.length];
+  const period = 0.66 + (k % 3) * 0.07;      // and their own tempo
   const local = t * 1.1 + k * 1.9;
   const idx = Math.floor(local / period) % codes.length;
   const u = (local / period) % 1;
-  return boxMove(codes[idx], t, u);
+  return boxMove(codes[idx], t, u, k + 1);
 }
 function sovereignPose(t: number): Stance {
   'worklet';
