@@ -14,6 +14,7 @@ export interface CloudState {
   beliefResultId: string | null;
   streak: number;
   totalXP: number;
+  rankIndex: number;
   lastLessonDate: string | null;
   joinedAt: number | null;
   earnedBadges: string[];
@@ -27,7 +28,7 @@ export interface CloudState {
 
 const SYNC_FIELDS: (keyof CloudState)[] = [
   'savedQuotes', 'profileQuote', 'philosopherViews', 'lessonsByUnit', 'lessonsByBranch', 'voiceEnabled', 'beliefResultId',
-  'streak', 'totalXP', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'badgesInitialized',
+  'streak', 'totalXP', 'rankIndex', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'badgesInitialized',
   'displayName', 'email', 'bio', 'portrait', 'settings',
 ];
 
@@ -157,6 +158,9 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
 
   // --- progress: never lose anything ---
   const totalXP = Math.max(local.totalXP ?? 0, remote.totalXP ?? 0);
+  // Same rule as XP: keep the higher, so a device that is behind can never demote
+  // a rank the user has already been awarded on another one.
+  const rankIndex = Math.max(local.rankIndex ?? 0, remote.rankIndex ?? 0);
   // Per-unit progress is canonical. A legacy cloud row only has lessonsByBranch;
   // reconstruct its per-unit shape before merging so old snapshots still count.
   const remoteUnits =
@@ -229,6 +233,7 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
     beliefResultId,
     streak,
     totalXP,
+    rankIndex,
     lastLessonDate,
     joinedAt,
     earnedBadges,

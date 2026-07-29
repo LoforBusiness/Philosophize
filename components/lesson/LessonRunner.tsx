@@ -10,6 +10,7 @@ import Animated, {
 import type { Lesson, CardData, AnswerResult } from '@/data/types';
 import { useLessonStore } from '@/stores/lessonStore';
 import { getLessonById } from '@/data';
+import { lessonXP } from '@/constants/xp';
 import { useUIStore } from '@/stores/uiStore';
 import { exitLesson } from './exitLesson';
 import CardShell from './CardShell';
@@ -136,7 +137,7 @@ export default function LessonRunner({ lesson }: Props) {
     // Hand off to the GLOBAL reward overlay, then leave the lesson screen so it
     // doesn't linger on the tab's stack and re-show the reward.
     showReward({
-      xp: COMPLETION_XP + (s?.sessionXP ?? 0), // 5 for completing + 5 per correct
+      xp: lessonXP(correct, s?.answers.length ?? 0),
       correct,
       total: s?.answers.length ?? 0,
       branchSlug: found?.branch.slug ?? null,

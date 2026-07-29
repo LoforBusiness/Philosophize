@@ -11,7 +11,7 @@ import {
 import { MotiView, AnimatePresence } from 'moti';
 import Glyph from './Glyph';
 import RankSeal, { type SealState } from './RankSeal';
-import { RANKS, rankForXP, type RankDef } from '@/data/ranks';
+import { RANKS, awardedRank, type RankDef } from '@/data/ranks';
 import { circleForRank, RANK_EPITHETS, toRoman } from '@/data/rankLore';
 import { BADGES, type ProgressStats } from '@/data/badges';
 import { ALL_BRANCHES } from '@/data';
@@ -46,6 +46,7 @@ export default function RanksBadgesSheet() {
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
   const streak = useUserDataStore((s) => s.streak);
   const xp = useUserDataStore((s) => s.totalXP);
+  const rankIndex = useUserDataStore((s) => s.rankIndex);
 
   const { height, width } = useWindowDimensions();
   const H = Math.round(height * 0.82);
@@ -69,7 +70,9 @@ export default function RanksBadgesSheet() {
   const lessons = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
   const quotes = savedQuotes.length;
   const philosophers = Object.keys(philosopherViews).length;
-  const totalXP = xp + quotes * 10 + philosophers * 5;
+  // Just the store's total: saving a quote and meeting a thinker grant real XP now,
+  // so adding them again here paid for the same bookmark twice.
+  const totalXP = xp;
   const mastery: Record<string, number> = {};
   for (const b of ALL_BRANCHES) {
     const total = b.paths.reduce((acc, p) => acc + p.lessons.length, 0);
@@ -78,7 +81,7 @@ export default function RanksBadgesSheet() {
   }
   const stats: ProgressStats = { totalXP, lessons, quotes, philosophers, streak, mastery };
 
-  const { current, next, index } = rankForXP(totalXP);
+  const { current, next, index, pending } = awardedRank(rankIndex, totalXP);
   const prevXP = current.xp;
   const span = next ? next.xp - prevXP : 1;
   const rankPct = next ? clamp((totalXP - prevXP) / span, 0, 1) : 1;
@@ -147,7 +150,11 @@ export default function RanksBadgesSheet() {
                         </View>
                       </View>
                       <Text style={styles.heroToNext}>
-                        {next ? `${toNext.toLocaleString()} XP to ${next.name}` : 'Highest rank attained'}
+                        {pending
+                          ? `Finish a lesson to reach ${next?.name ?? 'the next rank'}`
+                          : next
+                            ? `${toNext.toLocaleString()} XP to ${next.name}`
+                            : 'Highest rank attained'}
                       </Text>
                     </View>
                   </View>

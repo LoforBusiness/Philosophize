@@ -6,6 +6,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import { getLessonById } from '@/data';
+import { lessonXP } from '@/constants/xp';
 import { exitLesson } from '../exitLesson';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -116,7 +117,7 @@ export default function CinematicPlayer({
     if (!done) return;
     const found = getLessonById(lesson.id);
     showReward({
-      xp: COMPLETION_XP + correct * 5,
+      xp: lessonXP(correct, asked),
       correct,
       total: asked,
       branchSlug: found?.branch.slug ?? null,

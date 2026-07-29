@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import { getLessonById } from '@/data';
+import { lessonXP } from '@/constants/xp';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -494,7 +495,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     if (!done) return;
     const found = getLessonById(lesson.id);
     showReward({
-      xp: COMPLETION_XP + correct * 5,
+      xp: lessonXP(correct, asked),
       correct,
       total: asked,
       branchSlug: found?.branch.slug ?? null,

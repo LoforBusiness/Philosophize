@@ -1,15 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
-import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
-import { MotiView } from 'moti';
+import { Modal, View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
+import Animated, {
+  useSharedValue, useAnimatedStyle, withDelay, withTiming, Easing,
+} from 'react-native-reanimated';
 import StreakBook from '@/components/gamification/StreakBook';
 import StreakWeek from '@/components/gamification/StreakWeek';
 import RankUpScreen from '@/components/gamification/RankUpScreen';
-import { rankForXP, type RankDef } from '@/data/ranks';
+import RewardLoafer, { pickLine } from '@/components/gamification/RewardLoafer';
+import { RANKS, type RankDef } from '@/data/ranks';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { ads } from '@/lib/ads';
 import { FREE_DAILY_LESSON_LIMIT } from '@/constants/subscription';
+import {
+  XP_PER_LESSON_COMPLETION, XP_PER_CORRECT_ANSWER, XP_PER_PERFECT_LESSON,
+} from '@/constants/xp';
 import { track } from '@/lib/posthog';
 import { refreshQuoteWidget } from '@/lib/widget/render';
 
@@ -25,6 +31,7 @@ interface Props {
 // Light reward screen: ink text/marks on paper; the ink button keeps paper text.
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
+const Rule = '#E4E1D8';
 const Paper = '#FAFAF7';
 
 function dateStr(d: Date) {
@@ -36,6 +43,85 @@ interface DayInfo {
   firstOfDay: boolean;
   streak: number;
   prevStreak: number;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE NUMBER, INKED ON.
+//
+// It used to arrive on a spring — scale 0.6 → 1 at damping 11, which overshoots and
+// wobbles, and a wobbling number reads as a cheap toy rather than as a result. This
+// draws it instead: a paper-coloured cover slides off left-to-right, so the digits
+// appear the way a stroke appears under a nib, while the value counts up underneath.
+// No bounce anywhere in it.
+//
+// The box is sized by a hidden copy of the FINAL value, so the reveal cannot judder
+// as the counter widens from one digit to two.
+// ─────────────────────────────────────────────────────────────────────────────
+function InkedNumber({ value, delay }: { value: number; delay: number }) {
+  const [shown, setShown] = useState(0);
+  const [w, setW] = useState(0);
+  const wipe = useSharedValue(0);
+
+  useEffect(() => {
+    wipe.value = withDelay(delay, withTiming(1, { duration: 700, easing: Easing.out(Easing.cubic) }));
+    if (value <= 0) return;
+    const DURATION = 980;
+    const t0 = Date.now() + delay;
+    const id = setInterval(() => {
+      const t = Math.min(1, (Date.now() - t0) / DURATION);
+      if (t < 0) return;
+      const eased = 1 - Math.pow(1 - t, 3);
+      setShown(Math.round(eased * value));
+      if (t >= 1) clearInterval(id);
+    }, 16);
+    return () => clearInterval(id);
+  }, [value]);
+
+  const cover = useAnimatedStyle(() => ({
+    transform: [{ translateX: wipe.value * (w + 10) }],
+    opacity: w > 0 ? 1 : 0,
+  }));
+
+  const onLayout = (e: LayoutChangeEvent) => setW(e.nativeEvent.layout.width);
+
+  return (
+    <View style={styles.xpNumWrap} onLayout={onLayout}>
+      <Text style={[styles.xpNumber, styles.xpSizer]}>{value}</Text>
+      <Text style={[styles.xpNumber, StyleSheet.absoluteFill as any]} numberOfLines={1}>
+        {shown}
+      </Text>
+      <Animated.View style={[styles.wipeCover, cover]} pointerEvents="none" />
+    </View>
+  );
+}
+
+/** A rule that draws itself on, left to right. */
+function DrawnRule({ delay, width = '100%' as const }: { delay: number; width?: any }) {
+  const v = useSharedValue(0);
+  useEffect(() => {
+    v.value = withDelay(delay, withTiming(1, { duration: 520, easing: Easing.out(Easing.cubic) }));
+  }, []);
+  const st = useAnimatedStyle(() => ({ transform: [{ scaleX: v.value }] }));
+  return <Animated.View style={[styles.drawnRule, { width }, st]} />;
+}
+
+/** One line of the tally, sliding up as it lands. */
+function TallyRow({ label, amount, delay }: { label: string; amount: number; delay: number }) {
+  const v = useSharedValue(0);
+  useEffect(() => {
+    v.value = withDelay(delay, withTiming(1, { duration: 340, easing: Easing.out(Easing.cubic) }));
+  }, []);
+  const st = useAnimatedStyle(() => ({
+    opacity: v.value,
+    transform: [{ translateY: (1 - v.value) * 7 }],
+  }));
+  return (
+    <Animated.View style={[styles.tallyRow, st]}>
+      <Text style={styles.tallyLabel}>{label}</Text>
+      <View style={styles.tallyLead} />
+      <Text style={styles.tallyAmount}>+{amount}</Text>
+    </Animated.View>
+  );
 }
 
 export default function LessonReward({ xp, correct, total, branchSlug, lessonId, onDone }: Props) {
@@ -51,7 +137,6 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
 
   const ran = useRef(false);
   const [info, setInfo] = useState<DayInfo | null>(null);
-  const [xpShown, setXpShown] = useState(0);
   const [advancing, setAdvancing] = useState(false);
   // A rank-up takes the screen FIRST, before XP and the streak — it is the rarest
   // thing that can happen on a completion and it used to pass in total silence.
@@ -88,15 +173,19 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   useEffect(() => {
     if (ran.current) return;
     ran.current = true;
-    // Straddle the XP award: recordLessonComplete is what moves totalXP, so the
-    // rank either side of it is the whole question. Read the store directly —
-    // subscribing to totalXP here would re-render this screen mid-count-up.
-    const before = rankForXP(useUserDataStore.getState().totalXP);
+    // Straddle the award. The rank is NO LONGER derived from XP — `rankIndex` is
+    // what the user holds, it moves only inside recordLessonComplete, and by one
+    // step — so the question is simply whether that index moved.
+    const before = useUserDataStore.getState().rankIndex;
     recordLessonComplete(lessonId, xp);
-    const afterXP = useUserDataStore.getState().totalXP;
-    const after = rankForXP(afterXP);
-    if (after.index > before.index) {
-      setRankUp({ from: before.current, to: after.current, next: after.next, totalXP: afterXP });
+    const st = useUserDataStore.getState();
+    if (st.rankIndex > before) {
+      setRankUp({
+        from: RANKS[before],
+        to: RANKS[st.rankIndex],
+        next: RANKS[st.rankIndex + 1] ?? null,
+        totalXP: st.totalXP,
+      });
       setPhase('rankup');
     } else {
       setPhase('reward');
@@ -119,20 +208,18 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Count the XP up from zero, smoothly (eased over ~1s, ~60fps).
-  useEffect(() => {
-    setXpShown(0);
-    if (xp <= 0) return;
-    const DURATION = 1000;
-    const t0 = Date.now();
-    const id = setInterval(() => {
-      const t = Math.min(1, (Date.now() - t0) / DURATION);
-      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic — decelerates as it lands
-      setXpShown(Math.round(eased * xp));
-      if (t >= 1) clearInterval(id);
-    }, 16);
-    return () => clearInterval(id);
-  }, [xp]);
+  // The tally, rebuilt from the same constants the runners award from. Shown only
+  // when the parts actually add up to what was awarded — a breakdown that doesn't
+  // reconcile is worse than no breakdown.
+  const perfect = total > 0 && correct >= total;
+  const parts: { label: string; amount: number }[] = [
+    { label: 'LESSON COMPLETE', amount: XP_PER_LESSON_COMPLETION },
+    ...(correct > 0
+      ? [{ label: `${correct} ANSWERED RIGHT`, amount: correct * XP_PER_CORRECT_ANSWER }]
+      : []),
+    ...(perfect ? [{ label: 'NOTHING MISSED', amount: XP_PER_PERFECT_LESSON }] : []),
+  ];
+  const tallyAdds = parts.reduce((a, p) => a + p.amount, 0) === xp;
 
   // One frame of bare paper while the completion effect decides which screen this
   // is. Painting the reward first would flash XP behind a rank-up.
@@ -162,26 +249,25 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     <Modal visible animationType="fade" transparent={false} onRequestClose={onDone}>
       <View style={styles.root}>
         <View style={styles.center}>
-          <MotiView
-            from={{ opacity: 0, translateY: 16 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 300 }}
-          >
-            <Text style={styles.title}>Lesson Complete!</Text>
-          </MotiView>
+          <Text style={styles.eyebrow}>LESSON COMPLETE</Text>
+          <DrawnRule delay={120} width={54} />
 
-          {/* XP */}
-          <MotiView
-            from={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring', delay: 200, damping: 11, stiffness: 130 }}
-            style={styles.xpBlock}
-          >
-            <Text style={styles.xpNumber}>{xpShown}</Text>
+          {/* the number, drawn on */}
+          <View style={styles.xpBlock}>
+            <InkedNumber value={xp} delay={260} />
             <Text style={styles.xpLabel}>XP EARNED</Text>
-          </MotiView>
+          </View>
 
-          {total > 0 && (
+          {/* …and where it came from */}
+          {tallyAdds && (
+            <View style={styles.tally}>
+              {parts.map((p, k) => (
+                <TallyRow key={p.label} label={p.label} amount={p.amount} delay={1000 + k * 190} />
+              ))}
+            </View>
+          )}
+
+          {total > 0 && !tallyAdds && (
             <Text style={styles.correct}>
               {correct} / {total} correct
             </Text>
@@ -190,27 +276,27 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
           {/* Streak */}
           {info &&
             (info.firstOfDay ? (
-              <MotiView
-                from={{ opacity: 0, scale: 0.7 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', delay: 450, damping: 13, stiffness: 130 }}
-                style={styles.streakBox}
-              >
+              <View style={styles.streakBox}>
+                <DrawnRule delay={1500} width={54} />
                 <Text style={styles.streakHeading}>
-                  {info.prevStreak === 0 ? 'Streak started!' : 'Streak extended!'}
+                  {info.prevStreak === 0 ? 'Streak started' : 'Streak extended'}
                 </Text>
-                <StreakBook value={info.streak} from={info.prevStreak} animate size={150} />
+                <StreakBook value={info.streak} from={info.prevStreak} animate size={100} />
                 <View style={styles.weekWrap}>
-                  <StreakWeek streak={info.streak} lastLessonDate={lastLessonDate} size={32} />
+                  <StreakWeek streak={info.streak} lastLessonDate={lastLessonDate} size={30} />
                 </View>
-                <Text style={styles.streakSub}>Build a streak, one day at a time</Text>
-              </MotiView>
+              </View>
             ) : (
               <View style={styles.streakSmallRow}>
-                <StreakBook value={info.streak} size={58} />
+                <StreakBook value={info.streak} size={52} />
                 <Text style={styles.streakSmall}>{info.streak}-day streak</Text>
               </View>
             ))}
+        </View>
+
+        {/* Someone is waiting for you to finish reading. */}
+        <View style={styles.loaferRow}>
+          <RewardLoafer line={pickLine(`${lessonId}:${info?.streak ?? 0}`)} delay={1700} />
         </View>
 
         <Pressable
@@ -231,69 +317,72 @@ const styles = StyleSheet.create({
     backgroundColor: Paper,
     paddingHorizontal: 28,
     paddingBottom: 40,
-    paddingTop: 60,
+    paddingTop: 56,
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  title: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 32,
-    color: Ink,
-    textAlign: 'center',
-    marginBottom: 28,
+
+  eyebrow: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 11,
+    letterSpacing: 3.4,
+    color: InkSoft,
+    marginBottom: 10,
   },
-  xpBlock: { alignItems: 'center', marginBottom: 16 },
+  drawnRule: { height: 2, backgroundColor: Ink, transformOrigin: '0% 50%' },
+
+  xpBlock: { alignItems: 'center', marginTop: 10 },
+  xpNumWrap: { position: 'relative', overflow: 'hidden' },
   xpNumber: {
     fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 84,
+    fontSize: 88,
     color: Ink,
-    lineHeight: 92,
+    lineHeight: 96,
+    textAlign: 'center',
+    fontVariant: ['tabular-nums'],
   },
+  // An invisible copy of the FINAL value that gives the box its width, so the
+  // counter widening from 0 to 70 cannot shift the reveal underneath it.
+  xpSizer: { opacity: 0 },
+  wipeCover: { position: 'absolute', left: -2, top: 0, bottom: 0, right: -6, backgroundColor: Paper },
   xpLabel: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 13,
-    color: InkSoft,
-    letterSpacing: 3,
-    marginTop: -6,
-  },
-  correct: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 16,
-    color: Ink,
-    marginTop: 4,
+    fontSize: 11,
+    color: InkSoft,
+    letterSpacing: 3.4,
+    marginTop: -4,
   },
-  streakBox: {
-    alignSelf: 'stretch',
-    alignItems: 'center',
-    marginTop: 26,
+
+  // The tally: a printed receipt for the number above it.
+  tally: { alignSelf: 'stretch', marginTop: 16, paddingHorizontal: 10, gap: 8 },
+  tallyRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  tallyLabel: {
+    fontFamily: 'Inter_500Medium', fontSize: 10.5, letterSpacing: 1.6, color: InkSoft,
   },
+  tallyLead: { flex: 1, height: 1, backgroundColor: Rule },
+  tallyAmount: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, color: Ink, fontVariant: ['tabular-nums'],
+  },
+
+  correct: { fontFamily: 'Inter_700Bold', fontSize: 15, color: Ink, marginTop: 14 },
+
+  streakBox: { alignSelf: 'stretch', alignItems: 'center', marginTop: 18 },
   streakHeading: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 12,
+    fontSize: 11,
     color: InkSoft,
     letterSpacing: 2.5,
     textTransform: 'uppercase',
+    marginTop: 10,
     marginBottom: 2,
   },
   weekWrap: { alignSelf: 'stretch', paddingHorizontal: 8, marginTop: 6 },
-  streakSub: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontStyle: 'italic',
-    fontSize: 15,
-    color: InkSoft,
-    marginTop: 20,
-    textAlign: 'center',
-  },
-  streakSmallRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 26,
-  },
-  streakSmall: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 16,
-    color: InkSoft,
-  },
+  streakSmallRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 24 },
+  streakSmall: { fontFamily: 'Inter_500Medium', fontSize: 15, color: InkSoft },
+
+  // He leans on the right-hand edge, standing on the line above the button.
+  // Room above him so the thought never lands on the streak week beneath it.
+  loaferRow: { alignSelf: 'stretch', marginTop: 10, marginBottom: 4 },
+
   btn: {
     backgroundColor: Ink,
     borderRadius: 14,

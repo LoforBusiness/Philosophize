@@ -22,7 +22,7 @@ import { signOutSocial } from '@/lib/auth/social';
 import { beginAccountDeletion } from '@/lib/supabase/sync';
 import { addTombstone } from '@/lib/supabase/tombstone';
 import { track } from '@/lib/posthog';
-import { rankForXP } from '@/data/ranks';
+import { awardedRank } from '@/data/ranks';
 import { useUserDataStore, type AppSettings } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { purchases } from '@/lib/purchases';
@@ -278,12 +278,13 @@ function ProfileSection() {
   useTodayKey();
   const streak = effectiveStreak(streakRaw, lastLessonDate);
   const xp = useUserDataStore((s) => s.totalXP);
+  const rankIndex = useUserDataStore((s) => s.rankIndex);
 
   const [edit, setEdit] = useState(false);
 
   const lessons = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
-  const totalXP = xp + savedQuotes.length * 10 + Object.keys(philosopherViews).length * 5;
-  const { current } = rankForXP(totalXP);
+  const totalXP = xp;
+  const { current } = awardedRank(rankIndex, totalXP);
   const join = joinedAt ? new Date(joinedAt) : new Date();
   const memberSince = `Member since ${MONTHS[join.getMonth()]} ${join.getFullYear()}`;
 

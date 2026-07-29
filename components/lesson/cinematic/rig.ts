@@ -1697,6 +1697,75 @@ export function picnicStance(t: number, u: number): Stance {
 }
 
 /**
+ * PROPPED AGAINST A WALL, doing nothing in particular.
+ *
+ * For the end-of-lesson screen, where the figure is not teaching anything — he is
+ * loitering while the reader reads their score. Which means the pose has to survive
+ * being stared at: weight on the back foot, the other crossed over in front,
+ * shoulder against whatever is behind him, and enough breath and drift that he never
+ * freezes. The wall is the SCENE's job; this only leans on it.
+ *
+ * Author him facing the content (the caller passes dir −1 for a wall on his right),
+ * so +x local is away from the wall: the feet sit forward of the shoulders, which is
+ * what stops a lean reading as a fall.
+ */
+export function leanHold(t: number): Stance {
+  'worklet';
+  const breath = 0.55 * (0.5 - 0.5 * Math.cos(t * 1.45));
+  const drift = life2(t, 0.4, 0.23, 1.4);
+  const shift = life2(t, 0.19, 0.11, 2.2);      // weight easing from hip to hip
+  return {
+    tilt: 0.17 + drift * 0.012,                 // leaning back into the wall
+    neck: -0.05 + drift * 0.05,
+    bob: breath - 1.5 - Math.abs(shift) * 0.6,
+    // Feet forward of the pelvis, staggered — one leg carrying, the other crossed
+    // over it. Only just forward, though: at 15 and 24 the legs raked 40° off
+    // vertical and the whole figure read as a plank propped against the wall rather
+    // than a person standing at it.
+    footL: { x: 7 + shift * 1.0, y: 0 },
+    footR: { x: 14 + shift * 1.0, y: 0 },
+    // ARMS FOLDED, which solves a real problem as well as being the right pose.
+    // A hanging arm on a leaning figure runs straight down the torso, and at this
+    // stroke weight (limb 11 against a torso of 12) the two merge into one lump with
+    // no arm in it. Folded, the forearms lie ACROSS the body: two horizontals over a
+    // vertical, which reads instantly at any size.
+    fistL: { x: 10 + drift * 0.6, y: -22 },
+    fistR: { x: -8, y: -22 - drift * 0.6 },
+    adv: 0,
+  };
+}
+
+/**
+ * ...and the business he does while he waits. Three bits on a long loop: a look
+ * around the room, a bored inspection of his nails, and a small wave at whoever is
+ * reading. Blended through `pulse` windows rather than switched, so there is never a
+ * frame where a hand jumps, and every window returns to the resting pose — which is
+ * the same rule every gesture in this file obeys (C20).
+ */
+export function leanLive(t: number): Stance {
+  'worklet';
+  const s = leanHold(t);
+  const P = 13;                                  // one full round of business
+  const u = (((t % P) + P) % P) / P;
+  const look = pulse(clamp01((u - 0.02) / 0.26));
+  const nails = pulse(clamp01((u - 0.36) / 0.24));
+  const wave = pulse(clamp01((u - 0.70) / 0.24));
+  return {
+    ...s,
+    // Head turns while looking, dips toward the hand while inspecting it.
+    neck: s.neck + look * 0.20 * Math.sin(t * 1.5) + nails * 0.16,
+    tilt: s.tilt - wave * 0.03,
+    // The near hand unfolds to do the work and folds back. Targets measured to clear
+    // the head disc (centre ≈ (−7.5, −48), radius 20) and stay inside the arm's 33.
+    fistR: {
+      x: s.fistR.x + nails * 22 + wave * 28,
+      y: s.fistR.y - nails * 6 - wave * 22 + wave * Math.sin(t * 9) * 3,
+    },
+    fistL: { x: s.fistL.x + nails * 2, y: s.fistL.y + nails * 3 },
+  };
+}
+
+/**
  * Reading outdoors: sitting with a book held up in both hands, head down on the
  * page. Every so often the far hand flicks a page over (`turn`, 0..1).
  */

@@ -12,7 +12,7 @@ import { signOut } from '@/lib/supabase/auth';
 import { useAuthSession } from '@/lib/supabase/useSession';
 import { ALL_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
-import { rankForXP } from '@/data/ranks';
+import { awardedRank } from '@/data/ranks';
 import { BADGES } from '@/data/badges';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -80,6 +80,7 @@ export default function ProfileScreen() {
   const ensureJoinDate = useUserDataStore((s) => s.ensureJoinDate);
   const displayName = useUserDataStore((s) => s.displayName);
   const xp = useUserDataStore((s) => s.totalXP);
+  const rankIndex = useUserDataStore((s) => s.rankIndex);
   const earnedBadges = useUserDataStore((s) => s.earnedBadges);
   const bioSeed = useUserDataStore((s) => s.bioSeed);
   const settings = useUserDataStore((s) => s.settings);
@@ -147,7 +148,7 @@ export default function ProfileScreen() {
     bioSeed
   );
 
-  const { current: cur, next } = rankForXP(totalXP);
+  const { current: cur, next, pending } = awardedRank(rankIndex, totalXP);
   const nextThreshold = next?.xp ?? cur.xp;
   const rankPct = next ? Math.min(1, totalXP / next.xp) : 1;
 
@@ -312,9 +313,11 @@ export default function ProfileScreen() {
               <View style={[styles.bigFill, { width: `${Math.round(rankPct * 100)}%` }]} />
             </View>
             <Text style={styles.rankUntil}>
-              {next
-                ? `${(nextThreshold - totalXP).toLocaleString()} XP UNTIL ${next.name.toUpperCase()}`
-                : 'HIGHEST RANK ACHIEVED'}
+              {pending
+                ? `FINISH A LESSON TO REACH ${(next?.name ?? '').toUpperCase()}`
+                : next
+                  ? `${(nextThreshold - totalXP).toLocaleString()} XP UNTIL ${next.name.toUpperCase()}`
+                  : 'HIGHEST RANK ACHIEVED'}
             </Text>
           </View>
 

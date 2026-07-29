@@ -8,7 +8,8 @@ import {
   branchCountsFromUnits,
   unitsFromBranchCounts,
 } from '@/data';
-import { rankForXP } from '@/data/ranks';
+import { awardedRank, rankForXP } from '@/data/ranks';
+import { XP_PER_PHILOSOPHER_MET, XP_PER_QUIZ, XP_PER_QUIZ_PERFECT, XP_PER_SAVED_QUOTE } from '@/constants/xp';
 import { track } from '@/lib/posthog';
 import { writePinnedQuote } from '@/lib/widget/pin';
 
@@ -110,7 +111,13 @@ interface UserDataState {
   voiceEnabled: boolean;                      // narrate lessons aloud + reveal words
   beliefResultId: string | null;             // legacy (belief quiz removed)
   streak: number;                             // consecutive-day streak
-  totalXP: number;                            // accumulated lesson XP (5 per completion + 5 per correct)
+  totalXP: number;                            // all XP: lessons, saved quotes, thinkers met, quizzes
+  // THE RANK THE USER ACTUALLY HOLDS. Not derived from totalXP, because XP can be
+  // earned by browsing (a saved quote, a thinker opened) and a promotion is meant to
+  // be earned by work. This only ever moves inside recordLessonComplete, and by one
+  // step, so a reader who bookmarks past a threshold collects the promotion on their
+  // next finished lesson instead of in the Thinkers tab. See `awardedRank`.
+  rankIndex: number;
   lastLessonDate: string | null;             // YYYY-MM-DD of last completed lesson
   dailyLessonCount: number;                   // lessons completed on dailyLessonDate (free-tier gate)
   dailyLessonDate: string | null;            // YYYY-MM-DD the daily count belongs to
@@ -169,7 +176,11 @@ function computeStats(s: {
   const lessons = Object.values(s.lessonsByBranch).reduce((a, b) => a + b, 0);
   const quotes = s.savedQuotes.length;
   const philosophers = Object.keys(s.philosopherViews).length;
-  const totalXP = s.totalXP + quotes * 10 + philosophers * 5;
+  // Just the real total now. This used to add `quotes * 10 + philosophers * 5` on
+  // top, because saving a quote earned nothing and the badge conditions wanted to
+  // count it for something. Those actions grant real XP into `totalXP` today, so
+  // adding it again here would pay for the same bookmark twice.
+  const totalXP = s.totalXP;
   const mastery: Record<string, number> = {};
   for (const b of ALL_BRANCHES) {
     const total = b.paths.reduce((acc, p) => acc + p.lessons.length, 0);
@@ -193,6 +204,7 @@ export const useUserDataStore = create<UserDataState>()(
       beliefResultId: null,
       streak: 0,
       totalXP: 0,
+      rankIndex: 0,
       lastLessonDate: null,
       dailyLessonCount: 0,
       dailyLessonDate: null,
@@ -209,18 +221,30 @@ export const useUserDataStore = create<UserDataState>()(
       _hasHydrated: false,
       _syncOwnerId: null,
 
+      // KEEPING a quote is what pays, not the act of tapping the bookmark: the XP
+      // goes on when it enters the collection and comes back off when it leaves, so
+      // the total always reflects what is actually saved and tapping a bookmark on
+      // and off nets zero. It cannot promote anyone either way — rank is gated on
+      // lessons (see rankIndex).
       saveQuote: (q) => {
         set((state) => {
           if (state.savedQuotes.some((x) => x.id === q.id)) return state;
-          return { savedQuotes: [q, ...state.savedQuotes] };
+          return {
+            savedQuotes: [q, ...state.savedQuotes],
+            totalXP: state.totalXP + XP_PER_SAVED_QUOTE,
+          };
         });
         get().recomputeBadges();
       },
 
       removeQuote: (id) => {
-        set((state) => ({
-          savedQuotes: state.savedQuotes.filter((x) => x.id !== id),
-        }));
+        set((state) => {
+          if (!state.savedQuotes.some((x) => x.id === id)) return state;
+          return {
+            savedQuotes: state.savedQuotes.filter((x) => x.id !== id),
+            totalXP: Math.max(0, state.totalXP - XP_PER_SAVED_QUOTE),
+          };
+        });
         // A quote can't stay pinned to the widget once it's no longer saved.
         if (get().pinnedQuoteId === id) get().setPinnedQuote(null);
       },
@@ -234,6 +258,9 @@ export const useUserDataStore = create<UserDataState>()(
             savedQuotes: exists
               ? state.savedQuotes.filter((x) => x.id !== q.id)
               : [q, ...state.savedQuotes],
+            totalXP: exists
+              ? Math.max(0, state.totalXP - XP_PER_SAVED_QUOTE)
+              : state.totalXP + XP_PER_SAVED_QUOTE,
           };
         });
         if (!nowSaved && get().pinnedQuoteId === q.id) get().setPinnedQuote(null);
@@ -264,13 +291,19 @@ export const useUserDataStore = create<UserDataState>()(
         if (q) track('profile_quote_set', { quote_id: q.id, philosopher_id: q.philosopherId });
       },
 
+      // Meeting a thinker pays once. Re-opening the same profile does not — the XP
+      // is for the breadth of who you have read, not for how often you tap.
       recordPhilosopherView: (philosopherId) => {
-        set((state) => ({
-          philosopherViews: {
-            ...state.philosopherViews,
-            [philosopherId]: (state.philosopherViews[philosopherId] ?? 0) + 1,
-          },
-        }));
+        set((state) => {
+          const seen = (state.philosopherViews[philosopherId] ?? 0) > 0;
+          return {
+            philosopherViews: {
+              ...state.philosopherViews,
+              [philosopherId]: (state.philosopherViews[philosopherId] ?? 0) + 1,
+            },
+            totalXP: seen ? state.totalXP : state.totalXP + XP_PER_PHILOSOPHER_MET,
+          };
+        });
         track('philosopher_viewed', { philosopher_id: philosopherId });
         get().recomputeBadges();
       },
@@ -283,7 +316,7 @@ export const useUserDataStore = create<UserDataState>()(
         const prev = get().quizScores[philosopherId];
         const wasPerfect = !!prev && prev.total > 0 && prev.best >= prev.total;
         const isPerfect = total > 0 && correct >= total;
-        const bonus = isPerfect && !wasPerfect ? 15 : 5;
+        const bonus = isPerfect && !wasPerfect ? XP_PER_QUIZ_PERFECT : XP_PER_QUIZ;
         set((state) => ({
           quizScores: {
             ...state.quizScores,
@@ -308,7 +341,7 @@ export const useUserDataStore = create<UserDataState>()(
       },
 
       recordLessonComplete: (lessonId, xpEarned = 0) => {
-        const beforeRank = rankForXP(get().totalXP).index;
+        const beforeRank = get().rankIndex;
         const info = getLessonUnitInfo(lessonId);
         set((state) => {
           // Advance the unit's completed count to at least (indexInUnit + 1).
@@ -327,7 +360,15 @@ export const useUserDataStore = create<UserDataState>()(
             totalXP: state.totalXP + xpEarned,
           };
         });
-        const after = rankForXP(get().totalXP);
+        // THE ONLY PLACE A RANK EVER MOVES, and by ONE step. Everything else that
+        // grants XP — a saved quote, a thinker met, a quiz — leaves the rank alone,
+        // so the promotion is always collected here, on a finished lesson. Advancing
+        // a single step also means the rank-up screen always shows one clean
+        // before→after; a reader who banked a lot of XP browsing walks up the ladder
+        // a rung per lesson instead of teleporting several and seeing none of them.
+        const earned = rankForXP(get().totalXP).index;
+        if (earned > beforeRank) set({ rankIndex: beforeRank + 1 });
+        const after = awardedRank(get().rankIndex, get().totalXP);
         if (after.index > beforeRank) {
           track('rank_up', {
             rank: after.current.name,
@@ -411,7 +452,7 @@ export const useUserDataStore = create<UserDataState>()(
       setHasSeenWelcome: (v) => set({ hasSeenWelcome: v }),
 
       resetProgress: () =>
-        set({ lessonsByUnit: {}, lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
+        set({ lessonsByUnit: {}, lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, rankIndex: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
 
       clearSavedQuotes: () => {
         set({ savedQuotes: [] });
@@ -434,6 +475,7 @@ export const useUserDataStore = create<UserDataState>()(
           beliefResultId: null,
           streak: 0,
           totalXP: 0,
+          rankIndex: 0,
           lastLessonDate: null,
           dailyLessonCount: 0,
           dailyLessonDate: null,
@@ -468,6 +510,7 @@ export const useUserDataStore = create<UserDataState>()(
           beliefResultId: null,
           streak: 0,
           totalXP: 0,
+          rankIndex: 0,
           lastLessonDate: null,
           dailyLessonCount: 0,
           dailyLessonDate: null,
@@ -501,6 +544,7 @@ export const useUserDataStore = create<UserDataState>()(
         beliefResultId: state.beliefResultId,
         streak: state.streak,
         totalXP: state.totalXP,
+        rankIndex: state.rankIndex,
         lastLessonDate: state.lastLessonDate,
         dailyLessonCount: state.dailyLessonCount,
         dailyLessonDate: state.dailyLessonDate,
@@ -531,12 +575,17 @@ export const useUserDataStore = create<UserDataState>()(
             ? p.lessonsByUnit
             : unitsFromBranchCounts(p.lessonsByBranch ?? {});
         const lessonsByBranch = branchCountsFromUnits(lessonsByUnit);
+        // Anyone who predates the rank gate keeps the rank they were already being
+        // shown. Defaulting this to 0 would demote every existing user to Novice on
+        // the update that introduced it.
+        const rankIndex = p.rankIndex ?? rankForXP(totalXP).index;
         return {
           ...current,
           ...p,
           lessonsByUnit,
           lessonsByBranch,
           totalXP,
+          rankIndex,
           settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) },
         };
       },

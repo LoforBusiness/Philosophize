@@ -36,6 +36,10 @@ export const RANKS: RankDef[] = [
   { id: 25, name: 'Grand Philosopher', xp: 52000, glyph: 'bookrays' },
 ];
 
+/**
+ * The rank a given amount of XP has EARNED. Not necessarily the rank the user
+ * holds — see `awardedRank`.
+ */
 export function rankForXP(xp: number): {
   current: RankDef;
   next: RankDef | null;
@@ -46,4 +50,31 @@ export function rankForXP(xp: number): {
     if (xp >= RANKS[i].xp) index = i;
   }
   return { current: RANKS[index], next: RANKS[index + 1] ?? null, index };
+}
+
+/**
+ * THE RANK THE USER ACTUALLY HOLDS, which is not the same thing.
+ *
+ * XP comes from several places — lessons, saved quotes, thinkers met, quizzes —
+ * but a promotion is meant to be earned by WORK, so `rankIndex` (in userDataStore)
+ * only ever advances inside `recordLessonComplete`, and by one step at a time. A
+ * reader who bookmarks their way past a threshold keeps the XP and keeps the rank
+ * they had, and collects the promotion the next time they finish a lesson.
+ *
+ * `pending` says exactly that has happened, so the UI can promise it rather than
+ * leaving a full progress bar looking broken.
+ */
+export function awardedRank(rankIndex: number, totalXP: number): {
+  current: RankDef;
+  next: RankDef | null;
+  index: number;
+  pending: boolean;
+} {
+  const i = Math.max(0, Math.min(RANKS.length - 1, Math.floor(rankIndex) || 0));
+  return {
+    current: RANKS[i],
+    next: RANKS[i + 1] ?? null,
+    index: i,
+    pending: rankForXP(totalXP).index > i,
+  };
 }
