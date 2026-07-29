@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Dimensions, Platform } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Dimensions, Platform, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
@@ -10,6 +10,7 @@ import PressableScale from '@/components/shared/PressableScale';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import AddWidgetSheet from '@/components/shared/AddWidgetSheet';
 import StickmanStroll from '@/components/home/StickmanStroll';
+import QuickStartCard from '@/components/home/QuickStartCard';
 import { useWidgetPlaced } from '@/lib/widget/useWidgetPlaced';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -111,7 +112,17 @@ export default function HomeScreen() {
     <ScreenTransition bg="#FAFAF7">
     <SafeAreaView style={styles.safe}>
       <RuledPaper />
-      <View style={styles.page}>
+      {/* flexGrow (not flex) is the whole trick: on a tall phone the content
+          container still stretches to fill, so the stickman's flexible band
+          claims the leftover exactly as before and nothing moves. On a short one
+          — or when the Add-Widget prompt is showing — it simply scrolls instead
+          of pushing the streak row under the tab bar. The quick-start card added
+          ~215dp, which was more than a 360x780 screen had spare. */}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.page}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Masthead */}
         <Text style={styles.kicker}>EST. ANTIQUITY  ·  VOL. I</Text>
         <Text
@@ -152,6 +163,12 @@ export default function HomeScreen() {
             <Text style={styles.reflectionTabText}>DAILY REFLECTION</Text>
           </View>
         </View>
+
+        {/* The next lesson this learner can open, on a different branch each day.
+            Sits between the reflection and the three small actions on purpose:
+            the quote is what greets them, this is what they came to do, and
+            Learn / Philosophers / Insights are where they go instead. */}
+        <QuickStartCard style={styles.quickStart} />
 
         {/* Actions */}
         <View style={styles.actionsRow}>
@@ -200,7 +217,7 @@ export default function HomeScreen() {
             <Text style={styles.addWidgetText}>ADD HOME-SCREEN WIDGET</Text>
           </Pressable>
         ) : null}
-      </View>
+      </ScrollView>
 
       <AddWidgetSheet visible={addWidgetOpen} onClose={() => setAddWidgetOpen(false)} />
     </SafeAreaView>
@@ -210,7 +227,10 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Paper },
-  page: { flex: 1, paddingHorizontal: 24, paddingTop: 6 },
+  scroll: { flex: 1 },
+  // flexGrow, NOT flex — `flex: 1` on a scroll content container pins it to the
+  // viewport height and the view can never scroll.
+  page: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 6, paddingBottom: 10 },
 
   addWidgetBtn: {
     flexDirection: 'row',
@@ -323,6 +343,7 @@ const styles = StyleSheet.create({
     color: Paper,
   },
 
+  quickStart: { marginTop: 18 },
   actionsRow: { flexDirection: 'row', gap: 10, marginTop: 18 },
   actionWrap: { flex: 1 },
   action: {
