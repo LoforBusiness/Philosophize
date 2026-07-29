@@ -322,7 +322,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a `Bra
 ## 13. Lesson Design Principles (north star)
 
 > ⚠️ **Before writing or changing any cinematic lesson, read [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md).**
-> That is the binding rule book — 51 numbered rules in seven groups (truth of the
+> That is the binding rule book — 52 numbered rules in seven groups (truth of the
 > picture · the figure · motion · nothing hidden · questions · writing · engine), an
 > authoring checklist, and the five exact verification checks. Every rule in it exists
 > because a real lesson broke it and it was caught on a real phone. This section is the

@@ -17,6 +17,23 @@ units with the ground line at y = 500.
 
 ## Part 1 — The rules
 
+> **A rule that can be arithmetic belongs in the rig, not in this file.**
+>
+> Everything here is something I can forget on a busy lesson. Where a rule is a
+> number, it should instead be enforced somewhere every scene has to pass through,
+> so no future lesson can break it even by accident. Four are already enforced that
+> way, and each of them was written down here *first* and broken anyway:
+>
+> | Rule | Enforced by |
+> |---|---|
+> | a hand is never drawn inside the head disc (B11/B13) | `boxMove` → `clearHead`, `GLOVE_CLEAR` |
+> | a walk takes the time its distance needs (C17) | `moveTr` / `WALK_SPEED` |
+> | a moved figure walks rather than slides (C18) | `travelStance` |
+> | two figures never move as one (B14) | the `seed` on `guard` / `strideStance` |
+>
+> When a new defect turns out to be a number, add the guard rail and then point the
+> rule at it — don't just write a sterner sentence.
+
 ### A. The picture must tell the truth
 
 **A1. What the text says, the picture must do.** This is the first rule because
@@ -84,6 +101,14 @@ read as one black mass on a phone long before the bodies touch — heads are ~40
 figure height. It forced the boxers apart in lesson 1 and bit again in ethics-8 at 76
 units. ~104–112 reads cleanly. **Check the gap at the CLOSEST beat, not the average.**
 
+**And "closest" includes root motion, not just the resting marks.** Lesson 1's boxers
+sat at a comfortable 96 and still fused, because a cross carries `adv: 18` and the
+answer carries its own — a real exchange closed them to about 60. Separation is set by
+`base − (max adv of A) − (max adv of B) − any idle drift`, and *that* number is what
+has to clear 100. The same arithmetic gives the upper bound: a punch reaches x ≈ 38,
+so if the closed distance drops much under ~65 the fist is drawn **through** the other
+figure's head instead of arriving at it.
+
 **B10. Anything pinned to the figure must be derived from the figure.** A halo, a
 speech bubble, a thread between two heads — write it in terms of `K_FIG` and the
 rig's landmarks so it tracks. Hand-placed literals rot silently: metaphysics-5's aura
@@ -103,6 +128,19 @@ from the pelvis; arm reach **33**; leg reach **37**; body+arms span about **x ±
 - A **raised** hand must clear the head disc — anything within ~24 units of (0, −49)
   fuses into the skull. Hands overhead belong at |x| ≈ 26, not 14. Exceptions are
   poses where touching the face *is* the gesture.
+  **The head does not stay still, so checking the target alone is not enough.** `neck`
+  tips the head forward — a duck is −0.25 — and swings the disc onto hands that were
+  perfectly clear standing upright. Every combination of pose and neck angle is a
+  separate latent bug, which is why boxing now enforces it instead of listing it:
+  `boxMove` re-derives the head from the pose's own tilt/neck and pushes any fist
+  inside `GLOVE_CLEAR` back out. Gesture libraries are still checked by hand — so when
+  adding one, check the target against the head position *that pose* produces.
+- **A clamp makes distinct inputs identical.** `solve` pulls any fist past the arm's
+  33-unit reach back onto the reach circle, so two different over-reaching targets
+  land in the same place. The jab (55, −31) and the cross (60, −29) both did: 1.5
+  units apart on screen, two of the four punches the same picture, for months. Keep
+  punch targets *inside* the reach so each keeps its own line, and whenever a value
+  passes through a clamp, verify the things that should differ still do.
 - The **pelvis cannot outrun the legs**: a planted foot needs `34 + bob − footLift ≤ 36`.
 - Going **low** is fine (knees bend), but a low pelvis needs the feet moved
   **forward**, or the leg folds straight down and throws the knee out sideways.
@@ -117,10 +155,18 @@ half** the head radius (9 vs 20) or head and gloves read as one mass. Crowns, ho
 and swords attach by reading the figure bundle's `head` / `wrR` transform in a
 `useAnimatedStyle` — that works well; guessing a fixed offset does not.
 
-**B14. No two figures in lockstep.** Two figures running the same gait from the same
-clock move like a mirror. `strideStance`/`travelStance` take a trailing `seed` —
-give any companion a non-zero one. The tell when auditing: two `pose()` calls whose x
-comes from the same expression (`bx` and `bx + GAP`).
+**B14. No two figures in lockstep — and that includes standing still.** Two figures
+running the same gait from the same clock move like a mirror. `strideStance`/
+`travelStance` take a trailing `seed` — give any companion a non-zero one. The tell
+when auditing: two `pose()` calls whose x comes from the same expression (`bx` and
+`bx + GAP`).
+
+**The idle counts too, and it is the easier one to miss**, because nothing in the
+choreography looks wrong. Lesson 1's boxers threw different punches on different
+beats and still read as one body, since both called `guard(t)` with the same clock and
+the same frequencies: they bounced, swayed and breathed on identical frames between
+the punches. `guard` now takes the same `seed` for its own tempo, phase, bounce depth
+and stance width. Any shared idle — `guard`, `stand`, a custom loop — needs one.
 
 **B15. Every figure on stage must have a reason to be there.** ethics-5 carried a
 second walker left over from an earlier draft of the script; the narration no longer
@@ -155,6 +201,22 @@ skated — it was purely a timing bug.
 **C18. A walk must be ≥ 60 stage units** (~1.5 strides) or it reads as a shuffle. If
 the beat doesn't need the distance, don't move the figure at all.
 
+**And if it does move them, route it through `travelStance` — never interpolate x
+under a standing pose.** A stand whose x is lerped is a figure sliding across the
+floor with its feet planted, and it is invisible in the source because nothing says
+"walk" anywhere. Lesson 1 shipped four of them per run: the narrator slid 131 units
+the moment he arrived, then 68 units back and forth between his easel mark and his
+centre mark on every board beat in act 3. `travelStance` picks correctly on its own —
+walk if x changed, blend the gesture if it didn't — so the rule is simply that figure
+motion has exactly one route and this is it.
+
+**Keep a figure's x-track monotonic unless you are deliberately staging a turn.**
+`dir` is ±1 and flips in a single frame, so a figure that walks left and then right
+snaps between mirrored copies of itself; there is no in-between to animate, because
+interpolating `dir` squashes the body flat through zero. A track that only ever
+advances one way never has to turn — and a narrator working steadily across the stage
+as the lesson progresses is better staging than one pacing back and forth anyway.
+
 **C19. Vary the movement. Every beat a different gesture, no loops.** Figures should
 move around the stage rather than stand and semaphore. This is why the gesture
 library and the travel modes exist — use them.
@@ -170,17 +232,42 @@ Every walk already gets its own habit from `gaitVary` (stride length, clearance,
 bob, lean, arm swing) seeded from its own journey — same journey walks the same way,
 different journeys never match. Don't defeat it by reusing one x-pair everywhere.
 
+**Two gestures must differ in SILHOUETTE, not in one wrist's height.** A gesture
+library that only ever moves the working hand produces poses that are technically
+distinct and visually identical — and the problem hides until the arms come down,
+because a hand at −48 and a hand at −30 *are* obviously different pictures, while the
+same two lowered to −16 and −18 are not. `narratorHold` had exactly this shape and all
+seven of its gestures settled into the same figure. Pose **both** hands and the lean;
+the left hand and the torso are what make a pose readable at a glance.
+
 **C20. Every movement must END in a pose a person would still be in.** A beat holds
 until the reader taps — up to ten seconds — so the settled pose is what they actually
-stare at. **`emoteHold` is the arm-down version**; the raised instant lives in
-`emoteLive`'s `lift`, which must return to exactly zero (by 1.5s), because the next
-beat's transition blends out of `emoteHold` and a lift still up when the reader taps
-would snap the arm down in one frame. Exempt: poses a person *can* hold (hands on
+stare at. **A `*Hold` pose is the arm-down version**; the raised instant lives in the
+matching `*Live` pose's `lift`, which must return to exactly zero (by 1.5s), because
+the next beat's transition blends out of the hold and a lift still up when the reader
+taps would snap the arm down in one frame. Exempt: poses a person *can* hold (hands on
 hips, arms folded, hands behind the back, a hand at brow or chin, a slump) and
 anything anchored to a prop.
 
+**This applies to EVERY gesture library, and checking one is not checking them all.**
+The rule was written after fixing `emoteHold`, and `narratorHold` — the library
+lessons 1 and 2 actually use, via `masterHold` — kept its raised rest poses for months
+afterwards, because nothing connected the two. Two of its seven were worse than
+frozen: codes 4 and 6 rested their fist at (9, −50) and (12, −56), *inside* a
+20-radius head centred near (0, −49), so the thinking gesture had no visible hand or
+forearm at all. When a rule turns out to be about a shared helper, grep for every
+helper of that shape before calling it fixed.
+
 > *"Sometimes the end movement is his hands up in the air or something awkward with
 > his hands … I want it to be fixed so the end movements never look strange."*
+
+**C20b. Nobody materialises on stage.** A figure arriving from off-stage must be at
+full opacity *before* they are visible, not faded up where the reader can see it.
+Lesson 1 ramped the narrator's opacity across his whole 2.2s entrance, so he finished
+condensing out of the paper about two-thirds of the way in, standing beside a fight —
+which reads as a ghost appearing rather than a person walking on. Park them well off
+the edge (screen x −185, in that case) and finish the fade inside the first fifth of
+the move, while they are still in the wing. Same for exits.
 
 **C21. The lesson must never flash.** Layout changes only while the thing being
 re-laid-out is invisible. The summary beat hides the stage and gives its height to
@@ -245,6 +332,15 @@ occupy one line.
 **D31. Nothing opaque may cover text, and props sharing a column must be ordered.**
 ethics-6's chart footing landed on the tally below it: "THE FIVE" was sliced in half
 and its bracket hidden entirely.
+
+**A stamp, badge or seal drawn "across" something is the same defect wearing a costume.**
+Lesson 1's CONTRADICTION stamp sat at `top: 232`, which is exactly
+`STACK_TOP + 2 × (ROW_H + GAP)` — the y of the third Socratic line. Being narrower than
+the row, it covered the middle of it, so the question that actually breaks Meletus, and
+the entire point of the beat, was unreadable behind a black slab. The intent ("it comes
+down across the exchange") is not a licence: put it below, or in a gap, and let it
+overlap a border rather than a word. When any overlay's `top` is within a row-height of
+a text row's computed `top`, that is a collision, not a design.
 
 > *"Every word that shows up, every object on screen, and every animation … make sure
 > nothing is covered up … dont unnecessarily cover or look not apealing to the user."*
@@ -324,7 +420,10 @@ S24 Ultra).
 captured into the worklet runtime — pass gaits explicitly (`strideStance(…, WALK)`).
 A worklet calling a worklet defined **later** in the file captures `undefined` and
 blanks the screen — define a worklet after everything it calls. Numeric-literal
-defaults are safe. And never build React elements inside a `withTiming` completion
+defaults are safe. (Hit again this pass, extracting a dispatch behind a wrapper: the
+symptom is `ReferenceError: Cannot access 'X' before initialization` in the page/device
+log and a lesson that never mounts at all, so it fails loudly — but only if something
+is watching the log. Splitting one worklet into two is the usual way to introduce it.) And never build React elements inside a `withTiming` completion
 callback — that is a worklet; `runOnJS` first.
 
 **G48. Scatter fields need a decorrelated hash.** `x: a + (k*137)%W, y: b + (k*89)%H`
@@ -355,16 +454,25 @@ testing does not need it).
 - [ ] Every graded question names its trap (F41); a real primary-source quote (F42).
 - [ ] Word limits respected (F44); no "Lesson N" references (F45).
 - [ ] Every beat's text and pose agree — concrete claims only (A1, A4).
-- [ ] A different gesture each beat; no loops (C19).
+- [ ] A different gesture each beat; no loops (C19), differing in SILHOUETTE rather
+      than in one wrist's height — pose both hands (C19).
+- [ ] Every `*Hold` in the library you are using rests arm-down, not just `emoteHold`
+      (C20).
 - [ ] Any physical claim the vocabulary can't express → add a pose (A2).
 - [ ] Secondary figures posed deliberately (A3).
 - [ ] Explanations fit the answered deck (D27).
 
 **Scene**
 - [ ] Shared `K_FIG`; relative sizes derived (B6); in proportion to ground props (B7).
-- [ ] Two figures ≥ ~100 units apart at their closest beat (B9).
+- [ ] Two figures ≥ ~100 units apart at their closest beat — computed WITH root
+      motion (`base − advA − advB − drift`), not from the resting marks (B9).
 - [ ] Anything pinned to the figure derived from `K_FIG` + landmarks (B10).
-- [ ] Companion figures given a non-zero seed (B14); every figure has a reason (B15).
+- [ ] Companion figures given a non-zero seed — the shared IDLE (`guard`, `stand`, a
+      custom loop) as well as the walk (B14); every figure has a reason (B15).
+- [ ] Every x change routed through `travelStance`, never lerped under a stand, and
+      the track monotonic so nobody flips facing in one frame (C18).
+- [ ] Figures arrive at full opacity from off-stage, never fade up on screen (C20b).
+- [ ] No overlay's `top` within a row-height of a text row's `top` (D31).
 - [ ] Interactive props beside/above the figure, never a slab it stands in (D24).
 - [ ] Neither props nor figure occlude the other (D23).
 - [ ] Walks ≥ 60 units and driven by `moveTr` (C17, C18).
