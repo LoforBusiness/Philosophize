@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, ImageBackground } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -19,6 +20,7 @@ import ScreenTransition from '@/components/shared/ScreenTransition';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
+import { BRANCH_ART, MAST_SCRIM, ArtCream, ArtSoft, ArtGold } from '@/constants/branchArt';
 
 const Page = '#F1EEE7';
 const Paper = '#FFFFFF';
@@ -197,8 +199,18 @@ export default function BranchDetailScreen() {
         </View>
 
         <ScrollView ref={scroller} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-          {/* Dark masthead */}
-          <View style={styles.masthead}>
+          {/* Masthead — the same picture the branch carries on its Learn card, so
+              arriving here confirms you opened what you tapped. The ink over it is
+              heavier and more even than on the card: this text is centred in the
+              box rather than stacked along the bottom, so there is no low band to
+              hide it in and the whole area has to be safe to read on. */}
+          <ImageBackground
+            source={BRANCH_ART[branch.slug]}
+            style={styles.masthead}
+            imageStyle={styles.mastImg}
+            resizeMode="cover"
+          >
+            <LinearGradient colors={MAST_SCRIM} style={StyleSheet.absoluteFill} />
             <Text style={styles.mastKicker}>BRANCH {roman}</Text>
             <Text style={styles.mastTitle}>{branch.name.toUpperCase()}</Text>
             <Text style={styles.mastSub}>{pres.desc}</Text>
@@ -211,7 +223,7 @@ export default function BranchDetailScreen() {
                 ))}
               </View>
             )}
-          </View>
+          </ImageBackground>
 
           {/* One unit open at a time. The rest sit closed, so a 29-lesson branch
               reads as five lines plus the one road you're actually on. */}
@@ -537,13 +549,40 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 20, paddingBottom: 48 },
 
   // Masthead
-  masthead: { backgroundColor: Ink, borderRadius: 6, paddingVertical: 24, paddingHorizontal: 20, alignItems: 'center' },
-  mastKicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: Gold, letterSpacing: 4 },
-  mastTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 34, color: Cream, letterSpacing: 1, marginTop: 8, textAlign: 'center' },
-  mastSub: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: '#A8A49A', marginTop: 8, textAlign: 'center' },
+  masthead: {
+    backgroundColor: Ink, // holds the frame before the image decodes
+    borderRadius: 6,
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    // stated for the same reason as the card: an ImageBackground with no width
+    // falls back to the picture's own, not the space it was given.
+    width: '100%',
+    // Tall enough that a cover-crop of a portrait picture is a view of something
+    // rather than a horizontal sliver of it.
+    minHeight: 232,
+  },
+  mastImg: { borderRadius: 6 },
+  mastKicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: ArtGold, letterSpacing: 4 },
+  mastTitle: {
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 34, color: ArtCream, letterSpacing: 1,
+    marginTop: 8, textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.55)', textShadowRadius: 9,
+  },
+  mastSub: {
+    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: ArtSoft,
+    marginTop: 8, textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 7,
+  },
   pillRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 18 },
-  pill: { borderWidth: 1, borderColor: '#4A463D', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5 },
-  pillText: { fontFamily: 'Inter_500Medium', fontSize: 9, color: '#CFCABF', letterSpacing: 1.5 },
+  // Lifted off the old near-black border, which vanished against the art.
+  pill: {
+    borderWidth: 1, borderColor: 'rgba(244,241,234,0.42)', borderRadius: 20,
+    paddingHorizontal: 12, paddingVertical: 5, backgroundColor: 'rgba(16,15,13,0.35)',
+  },
+  pillText: { fontFamily: 'Inter_500Medium', fontSize: 9, color: ArtCream, letterSpacing: 1.5 },
 
   unitList: { marginTop: 20, gap: 10 },
 

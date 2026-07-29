@@ -1,16 +1,19 @@
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ImageBackground } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Glyph, { type GlyphName } from '@/components/shared/Glyph';
+import { LinearGradient } from 'expo-linear-gradient';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import PressableScale from '@/components/shared/PressableScale';
 import { getBranchBySlug } from '@/data';
+import {
+  BRANCH_ART, SCRIM_TOP, SCRIM_MID, SCRIM_DEEP,
+  ArtCream, ArtSoft, ArtFaint,
+} from '@/constants/branchArt';
 
 const Page = '#F1EEE7';
 const Paper = '#FFFFFF';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
-const Faint = '#9A968C';
 const Rule = '#E4E1D9';
 const Cream = '#F4F1EA';
 const Gold = '#A8A49A';
@@ -20,18 +23,19 @@ const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 interface BranchPres {
   slug: string;
   desc: string;
-  glyph: GlyphName;
 }
 
 // Display order + short italic descriptions from the Learn mockup. Counts,
-// names, and unit lists are pulled from the real curriculum data.
+// names, and unit lists are pulled from the real curriculum data. The glyph
+// tiles that used to lead each card are gone — the branch's picture identifies
+// it now, and a small ink icon on top of a photograph read as clutter.
 const PRES: BranchPres[] = [
-  { slug: 'metaphysics', desc: 'Reality, existence & the nature of being', glyph: 'infinity' },
-  { slug: 'epistemology', desc: 'Knowledge, belief, truth & justification', glyph: 'eye' },
-  { slug: 'logic', desc: 'Reasoning, arguments & valid thinking', glyph: 'dottarget' },
-  { slug: 'ethics', desc: 'Morality, right action & how humans should live', glyph: 'scales' },
-  { slug: 'aesthetics', desc: 'Beauty, art, creativity & aesthetic experience', glyph: 'gem' },
-  { slug: 'political-philosophy', desc: 'Society, power, justice & political systems', glyph: 'flag' },
+  { slug: 'metaphysics', desc: 'Reality, existence & the nature of being' },
+  { slug: 'epistemology', desc: 'Knowledge, belief, truth & justification' },
+  { slug: 'logic', desc: 'Reasoning, arguments & valid thinking' },
+  { slug: 'ethics', desc: 'Morality, right action & how humans should live' },
+  { slug: 'aesthetics', desc: 'Beauty, art, creativity & aesthetic experience' },
+  { slug: 'political-philosophy', desc: 'Society, power, justice & political systems' },
 ];
 
 export default function LearnScreen() {
@@ -68,21 +72,36 @@ export default function LearnScreen() {
               onPress={() => router.push(`/(app)/branches/${c.slug}`)}
               style={styles.card}
             >
-              <View style={styles.cardTop}>
-                <View style={styles.iconBox}>
-                  <Glyph name={c.glyph} size={26} color={Ink} />
-                </View>
-                <View style={{ flex: 1, marginLeft: 14 }}>
+              <ImageBackground
+                source={BRANCH_ART[c.slug]}
+                style={styles.cardBg}
+                imageStyle={styles.cardImg}
+                resizeMode="cover"
+              >
+                {/* Near-clear at the top so the picture reads, near-solid ink by
+                    the bottom where every word sits. The words never take their
+                    contrast from the art, so a pale picture can't wash them out. */}
+                <LinearGradient
+                  colors={[SCRIM_TOP, SCRIM_MID, SCRIM_DEEP]}
+                  locations={[0, 0.48, 1]}
+                  style={StyleSheet.absoluteFill}
+                />
+                <View style={styles.cardBody}>
                   <Text style={styles.branchKicker}>BRANCH {ROMAN[i]}</Text>
-                  <Text style={styles.branchName}>{c.branch.name}</Text>
-                  <Text style={styles.branchDesc}>{c.desc}</Text>
+                  <View style={styles.nameRow}>
+                    <Text style={styles.branchName} numberOfLines={1}>
+                      {c.branch.name}
+                    </Text>
+                    <Text style={styles.arrow}>→</Text>
+                  </View>
+                  <Text style={styles.branchDesc} numberOfLines={2}>
+                    {c.desc}
+                  </Text>
+                  <Text style={styles.unitLine} numberOfLines={1}>
+                    {c.units.length} UNIT{c.units.length !== 1 ? 'S' : ''} · {unitNames}
+                  </Text>
                 </View>
-                <Text style={styles.arrow}>→</Text>
-              </View>
-
-              <Text style={styles.unitLine} numberOfLines={1}>
-                {c.units.length} UNIT{c.units.length !== 1 ? 'S' : ''} · {unitNames}
-              </Text>
+              </ImageBackground>
             </PressableScale>
           );
         })}
@@ -137,37 +156,51 @@ const styles = StyleSheet.create({
   noteTitle: { fontFamily: 'Inter_700Bold', fontSize: 11, color: Ink, letterSpacing: 2 },
   noteBody: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: InkSoft, marginTop: 5, lineHeight: 19 },
 
-  // Branch card
+  // Branch card — the picture IS the card now. Tall enough that a real part of
+  // each portrait shows rather than a thin band of sky.
   card: {
     borderWidth: 1.5,
     borderColor: Ink,
     borderRadius: 5,
-    backgroundColor: Paper,
-    padding: 16,
+    backgroundColor: Ink, // shows for the frame before the image decodes
     marginTop: 14,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOpacity: 0.08,
     shadowRadius: 0,
     shadowOffset: { width: 2, height: 3 },
     elevation: 2,
   },
-  cardPressed: { backgroundColor: '#F4F2EC' },
-  cardTop: { flexDirection: 'row', alignItems: 'center' },
-  iconBox: {
-    width: 48,
-    height: 48,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  branchKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: Faint, letterSpacing: 2 },
-  branchName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 21, color: Ink, marginTop: 2 },
-  branchDesc: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12.5, color: InkSoft, marginTop: 3, lineHeight: 17 },
-  arrow: { fontFamily: 'Inter_400Regular', fontSize: 20, color: Ink, marginLeft: 8 },
+  // width must be stated: an ImageBackground with no width takes the image's own
+  // intrinsic width, so the narrow pictures left a bare strip of card down the
+  // right-hand side and the wide ones overhung it.
+  cardBg: { width: '100%', height: 152, justifyContent: 'flex-end' },
+  cardImg: { borderRadius: 3.5 },
+  cardBody: { paddingHorizontal: 16, paddingBottom: 14 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
 
-  unitLine: { fontFamily: 'Inter_500Medium', fontSize: 9.5, color: Faint, letterSpacing: 1, marginTop: 16 },
+  branchKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: ArtFaint, letterSpacing: 2 },
+  branchName: {
+    flex: 1,
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 22,
+    color: ArtCream,
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowRadius: 7,
+  },
+  branchDesc: {
+    fontFamily: 'PlayfairDisplay_400Regular',
+    fontStyle: 'italic',
+    fontSize: 12.5,
+    color: ArtSoft,
+    marginTop: 3,
+    lineHeight: 17,
+    textShadowColor: 'rgba(0,0,0,0.45)',
+    textShadowRadius: 6,
+  },
+  arrow: { fontFamily: 'Inter_400Regular', fontSize: 20, color: ArtCream, marginLeft: 8 },
+
+  unitLine: { fontFamily: 'Inter_500Medium', fontSize: 9.5, color: ArtFaint, letterSpacing: 1, marginTop: 10 },
 
   footer: {
     fontFamily: 'PlayfairDisplay_400Regular',
