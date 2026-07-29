@@ -46,6 +46,7 @@ import RanksBadgesSheet from '@/components/shared/RanksBadgesSheet';
 import SavedQuotesSheet from '@/components/shared/SavedQuotesSheet';
 import PaywallSheet from '@/components/shared/PaywallSheet';
 import LaunchScreen from '@/components/launch/LaunchScreen';
+import UpdateGate from '@/components/shared/UpdateGate';
 import LessonReward from '@/components/lesson/LessonReward';
 
 SplashScreen.preventAutoHideAsync();
@@ -232,6 +233,9 @@ export default function RootLayout() {
       {!launchDone && (
         <LaunchScreen ready={authChecked && hasHydrated} onDone={() => setLaunchDone(true)} />
       )}
+      {/* Last in the tree, so it sits above the launch screen and every sheet:
+          a build too old to run has nothing else worth showing. */}
+      <UpdateGate />
     </>
   );
 
