@@ -1747,18 +1747,31 @@ export function leanHold(t: number): Stance {
     // than a person standing at it.
     footL: { x: 7 + shift * 1.0, y: 0 },
     footR: { x: 14 + shift * 1.0, y: 0 },
-    // ARMS FOLDED, which solves a real problem as well as being the right pose.
-    // A hanging arm on a leaning figure runs straight down the torso, and at this
-    // stroke weight (limb 11 against a torso of 12) the two merge into one lump with
-    // no arm in it. Folded, the forearms lie ACROSS the body: two horizontals over a
-    // vertical, which reads instantly at any size.
-    // …at y −17, not −22. The head is a 20-radius disc centred at (−7.3, −48.4), so its
-    // underside is at −28.4, and a fist of radius 5.5 parked at −22 had its top edge at
-    // −27.5: nine tenths of a unit INSIDE the skull, on the arm that draws in front of
-    // it. Folded arms sit across the chest, not under the chin. Five units lower reads
-    // the same and leaves 6 units of paper.
-    fistL: { x: 10 + drift * 0.6, y: -17 },
-    fistR: { x: -8, y: -17 - drift * 0.6 },
+    // HANDS LOW AND FORWARD, one resting over the other.
+    //
+    // These were FOLDED, with the near fist tucked back at x −8, and that is the
+    // pose the reader complained about. Measured against this rig, a near fist at
+    // (−8, −17) puts its ELBOW at (−18, −30) — 4.1 units INSIDE the 20-radius head
+    // disc, on the arm that draws in FRONT of the head. Being the resting pose, it
+    // is also where he spends most of a thirteen-second loop, so the result was an
+    // arm parked up behind his head for seconds at a time. The complaint was
+    // exactly right and it was never the wave, which clears the head by 8–13 units.
+    //
+    // Anything at x ≤ −4 does it: the fist folding back past the shoulder is what
+    // throws the elbow up and behind. At x 4 the elbow drops to (−11, −11) and
+    // clears the head by 11.6, and the hands end up in front of the body where they
+    // can actually be seen rather than tucked behind the torso.
+    //
+    // Forward hands also solve what folding was there for (B16b): the forearms come
+    // away from the torso, so there is paper between arm and body and the two never
+    // merge into one lump. Verified with scripts — see the sweep in the commit.
+    // …and LOW, at the hip rather than the chest. Held up at −16 the forearm made a
+    // bent wing across the ribs: clear of the head, but stiff, and not what a person
+    // propped against a wall does with their hands. Dropped to the hip the upper arm
+    // hangs, the forearm comes forward, and the elbow sits just behind the back where
+    // a relaxed elbow belongs.
+    fistL: { x: 14 + drift * 0.6, y: -9 },
+    fistR: { x: 8, y: -8 - drift * 0.6 },
     adv: 0,
   };
 }
@@ -1779,34 +1792,51 @@ export function leanLive(t: number): Stance {
   // anything shaped by the monotonic `t` inside a windowed gesture has a phase nobody
   // chose: the old wave wobbled on `sin(t·9)`, so the hand could be travelling down
   // while the arm was going up. Everything below is a function of its own window.
-  const lu = clamp01((u - 0.02) / 0.26);
-  const nu = clamp01((u - 0.34) / 0.22);
+  const lu = clamp01((u - 0.02) / 0.18);
+  const nu = clamp01((u - 0.24) / 0.18);
+  // A nod at what they just scored: the near hand comes OUT AND FORWARD, toward
+  // the number he is standing next to. Added because "move his hands in ways the
+  // user can see" is half the point of him — a figure whose only business happens
+  // against his own chest may as well be still.
+  const pu = clamp01((u - 0.46) / 0.20);
   // The wave gets a THIRD of the loop, and it needs it. Squeezed into 0.28 the hand
   // peaked at 2.89 units/frame — at 103 units to a human body that is about 2.9 m/s,
   // a hand being thrown rather than raised. The window must also close before u = 1 or
   // the gesture is still up when the loop restarts and the arm drops in one frame.
-  const wu = clamp01((u - 0.6) / 0.34);
+  const wu = clamp01((u - 0.70) / 0.28);
   const look = pulse(lu);
   const nails = pulse(nu);
+  // Rise, a short hold, fall. `pulse`/`holdEnv` arrive and leave in the same
+  // instant, so a gesture built on them only ever travels and never reads as a
+  // gesture — but the hold here is about 0.8s, out in front of him. That is the
+  // whole distinction the reader drew: a hand doing something visible for a moment
+  // is fine, a hand parked behind his head is not.
+  const point =
+    pu <= 0 || pu >= 1
+      ? 0
+      : pu < 0.34
+        ? ease01(pu / 0.34)
+        : pu > 0.6
+          ? ease01((1 - pu) / 0.4)
+          : 1;
 
-  // THE WAVE — three problems, all of them geometry.
+  // THE WAVE — two problems, both of them geometry.
   //
-  // ONE: it has to DROP out of the fold before it rises. Folded, the near hand rests
-  // at (−8, −22) and its own shoulder is at (−1.45, −25.1) — three units above it and
-  // six across. Sweeping the hand up and out therefore drags it straight THROUGH the
-  // shoulder: on the old straight path the two came within 0.67 units, so the arm
-  // collapsed to nothing and re-extended, and the elbow — still out at 17 — whipped
-  // round the singularity at 4.92 units/frame against a hand doing 0.80. Six times the
-  // speed of the thing it was following. That is what "not a natural movement" is.
-  // `dip` swings the hand down and out first, so it passes UNDER the shoulder with
-  // ~20 units of extension in hand. It is also exactly what a person does unfolding
-  // their arms.
+  // (There were three. The first was that the hand had to DROP out of the fold before
+  // it could rise: from the old folded rest at (−8, −22) the path up and out passed
+  // within 0.67 units of its own shoulder, so the arm collapsed to nothing and the
+  // elbow whipped round the singularity at six times the speed of the hand it was
+  // following. A `dip` term swung the hand down and out first to avoid it. The rest
+  // pose now starts forward and BELOW the shoulder, and the path from there to the
+  // raised hand never comes closer than 10.9 units to it — so the dip was correcting
+  // for a problem that no longer exists, and dropping it removes a downward dive the
+  // gesture had no reason to make.)
   //
-  // TWO: it needs to stop at the top. `pulse` is a triangle — it arrives and leaves in
+  // ONE: it needs to stop at the top. `pulse` is a triangle — it arrives and leaves in
   // the same instant, so there was never a moment of waving, only of travelling.
   // Rise 1.2s · hold 1.3s · fall 1.2s, and the sweeps live in the hold.
   //
-  // THREE: a wave is LATERAL. The old one wobbled the hand vertically on `sin(t·9)` —
+  // TWO: a wave is LATERAL. The old one wobbled the hand vertically on `sin(t·9)` —
   // 0 sideways reversals against 2 vertical, i.e. a twitch — and being a function of
   // the free clock rather than of its own window, its phase was nobody's decision: the
   // hand could be dropping while the arm was still going up.
@@ -1815,10 +1845,6 @@ export function leanLive(t: number): Stance {
   const raise = wu < 0.28 ? ease01(wu / 0.28) : wu < 0.62 ? 1 : 1 - ease01((wu - 0.62) / 0.38);
   const outE = ease01(clamp01(raise / 0.45));            // out of the fold, early
   const upE = ease01(clamp01((raise - 0.3) / 0.7));      // and only then upward
-  // `pulse`, not a raw sine: sin(π·x) leaves x = 1 at slope −π, and clamping there put
-  // a step in the hand's velocity. `pulse` smoothsteps its argument first, so the dip
-  // arrives and leaves at rest.
-  const dip = pulse(clamp01(raise / 0.45));              // under the shoulder on the way
   const fu = clamp01((wu - 0.26) / 0.38);                // the hold, where the waving is
   const flick = Math.sin(fu * Math.PI * 6) * Math.sin(Math.PI * fu);
 
@@ -1851,13 +1877,22 @@ export function leanLive(t: number): Stance {
     // "looking around" is up, down and back to level every time instead of stopping
     // wherever the sine happened to be. A touch of positive neck as the hand comes up
     // carries the head back, away from it.
-    neck: s.neck + look * 0.2 * Math.sin(lu * Math.PI * 2) + nails * 0.16 + upE * 0.08,
+    neck: s.neck + look * 0.2 * Math.sin(lu * Math.PI * 2) + nails * 0.16 - point * 0.05 + upE * 0.08,
     tilt: s.tilt - raise * 0.03,
+    // Each bit of business moves the near hand OUT from the rest, never back past
+    // it. The windows do not overlap, so only one of these is ever non-zero.
     fistR: {
-      x: lerp(s.fistR.x + nails * 22, wx, outE),
-      y: lerp(s.fistR.y - nails * 6, wy, upE) + dip * 12,
+      // +16, not +25. At +25 the point target sits (33, −12), which is 36.8 from a
+      // shoulder at (−1.4, −25.1) — 3.8 units BEYOND the 33-unit arm, so `solve`
+      // clamped it back onto the reach circle and the elbow snapped along it at 1.81
+      // units/frame against a hand doing 0.72. Measured, not guessed: 100% of reach,
+      // the extended end of the same singularity the dip was removed for at the
+      // folded end. +16 lands at 87%, which still reads as a full arm out in front
+      // and leaves the elbow somewhere to travel (B11).
+      x: lerp(lerp(s.fistR.x + nails * 10, s.fistR.x + 16, point), wx, outE),
+      y: lerp(lerp(s.fistR.y - nails * 9, s.fistR.y - 4, point), wy, upE),
     },
-    fistL: { x: s.fistL.x + nails * 2, y: s.fistL.y + nails * 3 },
+    fistL: { x: s.fistL.x + nails * 2 + point * 2, y: s.fistL.y + nails * 3 },
   };
 }
 
