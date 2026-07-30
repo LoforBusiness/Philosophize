@@ -5,6 +5,7 @@ import Animated, {
   LinearTransition, runOnJS, type SharedValue,
 } from 'react-native-reanimated';
 import SketchIcon from '@/components/shared/SketchIcon';
+import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import { ease01, seg } from './rig';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -68,6 +69,11 @@ export const BAND_B = STAGE_H;
 export const K_FIG = 1.0;                  // stage units per rig unit
 export const XFADE = 420;                  // beat-to-beat deck fade (ms)
 export const COMPLETION_XP = 5;            // matches LessonRunner
+
+// What the reader is TOLD a right answer is worth. Derived, never typed: this line
+// read "+5 XP" for a while after the model went to 10 per correct answer, so every
+// cinematic lesson quietly promised the reader less than half of what it paid.
+export const CORRECT_LABEL = `Correct  ·  +${XP_PER_CORRECT_ANSWER} XP`;
 
 // ── shared beat vocabulary ─────────────────────────────────────────────────────
 export interface Choice { id: string; text: string; correct: boolean }
@@ -307,7 +313,7 @@ export function Choices({
       {answered ? (
         <Animated.View style={styles.explain} entering={FadeInDown.duration(300)}>
           <Text style={styles.explainHead}>
-            {gotIt ? (graded ? 'Correct  ·  +5 XP' : 'That’s the one') : 'Not quite'}
+            {gotIt ? (graded ? CORRECT_LABEL : 'That’s the one') : 'Not quite'}
           </Text>
           <Text style={styles.explainText}>{explain}</Text>
         </Animated.View>
@@ -330,7 +336,7 @@ export function InteractPanel({
         <Text style={styles.interactHint}>Answer in the scene above ↑</Text>
       ) : (
         <Animated.View style={styles.explain} entering={FadeInDown.duration(300)}>
-          <Text style={styles.explainHead}>{correct ? 'Correct  ·  +5 XP' : 'Not quite'}</Text>
+          <Text style={styles.explainHead}>{correct ? CORRECT_LABEL : 'Not quite'}</Text>
           <Text style={styles.explainText}>{explain}</Text>
         </Animated.View>
       )}

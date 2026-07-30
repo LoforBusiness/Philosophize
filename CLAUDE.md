@@ -203,7 +203,9 @@ Every lesson MUST:
 - Have at least one `QuestionCard` **or** `DilemmaCard`
 - Have exactly one correct answer in every `MultipleChoiceInteraction`
 
-> No script enforces this yet — `tsc` checks types only. A validation script is a P3 roadmap item; follow the contract by hand until then.
+> `tsc` checks types only, so these are enforced by `npm run check:cards`
+> (`scripts/validate-lessons.mjs`) — 174/174 clean. Cinematic lessons have their own
+> shape check, `npm run check:cinematic` (§17). `npm run check` runs tsc plus both.
 
 ### Content Limits
 (Authoritative source is the comments in `data/types.ts`.)
@@ -376,7 +378,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** there is **no runtime lesson-contract check yet** — `tsc` verifies types, not the hook-first/summary-last/≥1-question rules. A validation script is a P3 roadmap item; follow the contract by hand until then.
+**Validation:** `npm run check` = `tsc` + both structural validators. `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 174 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across all 48. Both are clean today, so anything they print is yours.
 
 **Cinematic lessons have their own rule book:** [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md) — figure scale and proportion, reach and joint rules, motion and end-poses, band/deck/box/wrap clipping, and the text-must-match-the-picture rule. Read it before authoring a cinematic lesson and run its Part 3 checks before calling one done.
 
@@ -422,11 +424,13 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 ## 13. Lesson Design Principles (north star)
 
 > ⚠️ **Before writing or changing any cinematic lesson, read [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md).**
-> That is the binding rule book — 69 numbered rules in seven groups (truth of the
-> picture · the figure · motion · nothing hidden · questions · writing · engine), an
-> authoring checklist, and the five exact verification checks. Every rule in it exists
-> because a real lesson broke it and it was caught on a real phone. This section is the
-> *why*; that file is the *how*, with the numbers.
+> That is the binding rule book — 81 numbered rules in eight groups (truth of the
+> picture · the figure · motion · nothing hidden · questions · writing · engine · the
+> house shape), an authoring checklist, and the six exact verification checks. Groups
+> A–G each exist because a real lesson broke that rule and it was caught on a real
+> phone; group **H** is the reverse — the conventions all 48 built lessons already
+> share, counted out of the source, so a new one comes out a sibling rather than an odd
+> note. This section is the *why*; that file is the *how*, with the numbers.
 >
 > Rule A1 above all: **what the text says, the picture must do.** A lesson that says
 > someone is on the floor and draws them standing is not acceptable at any polish level.
@@ -475,10 +479,9 @@ The Scholar's Pass paywall UI already exists; this is the value model it should 
 defined and unused). Add **shareable B&W quote/streak cards**. Aesthetics has 3
 units where every other branch has 5 — level it up.
 
-**P3 — Foundations.** Add a **lesson-contract validation script** (enforce
-hook-first / summary-last, 4–10 cards, ≥1 question/dilemma, exactly one correct
-MC answer). Delete the legacy `lib/utils/progress.ts` and
-`constants/achievements.ts` once nothing imports them.
+**P3 — Foundations.** Delete the legacy `lib/utils/progress.ts` and
+`constants/achievements.ts` once nothing imports them. (The **lesson-contract
+validation script** that used to head this item is done — `npm run check`, see §11.)
 
 **Done since this list was written** — kept so nobody re-plans them: content grew
 from 60 lessons to 174 across 28 units; Supabase cloud sync went live; 48
@@ -520,6 +523,13 @@ lesson.
 A cinematic lesson = a **script** (beats) + a **scene** component, played by
 `CinematicPlayer`. Two lessons predate the shared player and carry their own
 copies of it: `ArgumentFightLesson` and `PremisesBuilderLesson`.
+
+**They all have the same shape, and `npm run check:cinematic` enforces it**: 7–11
+beats (8 is the mode), **exactly two graded questions**, one saveable quote on a rest
+beat, one summary and it is last, a declared band whose bottom sits on the ground line,
+no scene-declared colours, no XP figure typed into a string. That is group **H** of the
+rule book — the conventions the 48 already share, as opposed to groups A–G, which are
+defects they already made. Read H before laying out a new lesson's beats.
 
 **The figure.** `components/lesson/cinematic/rig.ts` is pure maths with **zero
 imports** — which is what lets it run in plain Node for verification. Pelvis

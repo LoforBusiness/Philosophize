@@ -20,7 +20,7 @@ import SyllogismChart from './illustrations/SyllogismChart';
 import LoudnessChart from './illustrations/LoudnessChart';
 import TwoRoadsChart from './illustrations/TwoRoadsChart';
 import { BEATS, gates, type Beat, type BoardKey } from './argumentScript';
-import { Bubble } from './cinematicKit';
+import { Bubble, CORRECT_LABEL } from './cinematicKit';
 import {
   BLANK, MOVE_ADV, WALK, boxMove, clamp01, dirsFrom, ease01, easeOutBack, headAt, life2, lerp,
   mixStance, moveTr, narratorHold, narratorLive, pose, stand, travelStance,
@@ -1194,7 +1194,7 @@ function Choices({
       {answered ? (
         <Animated.View style={styles.explain} entering={FadeInDown.duration(300)}>
           <Text style={styles.explainHead}>
-            {gotIt ? (graded ? 'Correct  ·  +5 XP' : 'That’s the one') : 'Not quite'}
+            {gotIt ? (graded ? CORRECT_LABEL : 'That’s the one') : 'Not quite'}
           </Text>
           <Text style={styles.explainText}>{explain}</Text>
         </Animated.View>

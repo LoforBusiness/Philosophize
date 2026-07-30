@@ -1,8 +1,14 @@
 # The Lesson Rule Book
 
-Every rule here exists because a real lesson broke it and it was caught on a real
-phone. They are not style preferences — each one is a defect that shipped, or a
+Every rule in groups **A–G** exists because a real lesson broke it and it was caught on
+a real phone. They are not style preferences — each one is a defect that shipped, or a
 direction the product owner gave after looking at one.
+
+Group **H** is the opposite and was written later: the conventions the 48 finished
+lessons already share, counted out of the source rather than chosen. Nothing in it is a
+bug report. It is there so lesson 49 comes out a sibling of the other 48 instead of an
+odd note, and so the next author does not have to reverse-engineer the house style from
+twenty thousand lines of scene code.
 
 Read this **before** writing a new cinematic lesson, and run the checks in Part 3
 **before** calling one finished. The point is that a new lesson comes out right the
@@ -30,6 +36,7 @@ units with the ground line at y = 500.
 > | a walk takes the time its distance needs (C17) | `moveTr` / `WALK_SPEED` |
 > | a moved figure walks rather than slides (C18) | `travelStance` |
 > | two figures never move as one (B14) | the `seed` on `guard` / `strideStance` |
+> | a reader-facing XP figure matches the model (H63) | `CORRECT_LABEL` ← `XP_PER_CORRECT_ANSWER` |
 >
 > When a new defect turns out to be a number, add the guard rail and then point the
 > rule at it — don't just write a sterner sentence.
@@ -634,12 +641,164 @@ built, and `tsc` is perfectly happy. The same line is the rollback: deleting one
 restores that lesson's card version instantly and touches nothing else, which is why
 the map is the only shared file a lesson should need to modify.
 
+### H. The house shape — what the 48 built lessons agree on
+
+> Everything above is a defect. **This group is the reverse: patterns the existing
+> lessons already follow, measured out of the source.** They are not bugs waiting to
+> happen — they are what makes 48 separately-authored lessons feel like one product.
+> Every number below was counted, not chosen, and a new lesson that departs from one
+> should do it on purpose.
+
+**H52. The spine is eight beats.** Across the 46 lessons on the shared player: 7–11
+beats, and **8 is the mode** (22 of 46). All 48 carry **exactly two graded questions,
+exactly one saveable quote, and exactly one summary — always the last beat.** As a
+fraction of the way through, the first graded question lands at **0.62**, the second at
+**0.83**, the quote at **0.53**. The canonical eight:
+
+| # | beat |
+|---|---|
+| 0 | **hook** — the provocation. No teaching yet |
+| 1–2 | **build** — the concrete example, then the name for it |
+| 3 | **the quote** — a rest, and where the lesson gets its authority |
+| 4 | **the turn** — the complication, objection or second camp |
+| 5 | **Q1** |
+| 6 | **Q2** |
+| 7 | **summary** |
+
+Ten- and eleven-beat lessons stretch the build and move the quote to the **penultimate**
+beat, where it reads as a benediction before the summary. Both placements are in use and
+both work. What no lesson does is put the quote on the hook, on a question beat, or last.
+
+**H53. Two graded questions is an economy, not a preference.** `lessonXP` is
+`25 + 10 × correct + 15 if perfect`, so a clean two-question lesson pays **60**. A third
+graded question would make that one lesson pay **70** — 17% more than its 47 siblings
+for the same work — and a single question pays 50. If a lesson genuinely needs a third
+interaction, make it a **`tap`**: it gates the reader and shows an explanation exactly
+like `mc`, but scores nothing. That is what `tap` is for.
+
+**H54. Staging lives in the SCRIPT, beside the words it has to match.** Every script
+declares its own beat type, one doc-commented field per channel:
+
+```ts
+export interface Aes2Beat extends BaseBeat {
+  /** Artist gesture (emote code). */ a?: number;
+  /** Viewer gesture (emote code). */ v?: number;
+  /** A feeling-pulse crosses from artist to viewer this beat. */ wave?: boolean;
+}
+```
+
+and the scene lifts each channel into a module-level array **once**
+(`const P = BEATS.map((b) => b.p ?? 0)`) rather than reaching into `BEATS` per frame.
+
+This is what makes A1 auditable. The sentence and the pose that has to illustrate it sit
+in the same object four lines apart, so *"he is on the floor"* and *`p: 48`* get read
+together. A scene that hard-codes its poses hides them from that check — which is
+precisely where the floor bug lived (A3). The doc comment on each channel is the only
+documentation the next author gets; write it.
+
+**H55. `dur` is inert — the reader sets the pace.** Every beat carries one and **nothing
+reads it anywhere in the app**; it is left over from before beats advanced on tap (E37),
+and 94 of them are just `1.0`. Keep filling it in, because the type demands it, but
+never reach for it to fix pacing. Pacing is beat count and word count, and nothing else.
+
+**H56. The scene's header comment states the composition in NUMBERS.** The good scenes
+open with a sentence of what the picture is, then an occlusion block of real
+coordinates — this is `ethics8Scene`:
+
+> · the narrator WALKS x = 80 → 146 → 208, then back to 112. Widest body span x ≈ 32…256
+> · the slumped figure is FIXED at x = 284 → at least 76 units of clear paper between them
+> · the bed lives at x = 328…394 — right of everything either figure occupies
+> · the grid (y 46–114) and the cards (y 176–308) sit above every body: a standing crown
+>   is y 397, kneeling 415, seated on the floor 423
+
+That block is what lets B9, D23 and D25 be checked by *reading* the file instead of
+rendering it, and it is the first thing to update when a mark moves. `ethics8Scene` and
+`logic7Scene` are the models to copy.
+
+**H57. One derived value per scene, not one per prop.** A single `useDerivedValue`
+worklet computes the whole frame and returns an object; every `useAnimatedStyle` reads a
+field off it. All 46 are built this way. It buys one clock read per frame, one place
+where the beat blend `tr` is defined, and one place to look when a frame comes out wrong.
+
+**H58. Interpolate previous → current, and animate only what CHANGED.** The house
+pattern in full:
+
+```ts
+const n = bi.value, p = n > 0 ? n - 1 : 0;
+const tr = ease01(bt.value / moveTr(X[p], X[n], 0.85));
+const ruleFade = (cur.rule ?? 0) !== (prev?.rule ?? 0);   // computed in JS, from the beats
+…
+rule: lerp(RULEV[p], RULEV[n], tr) * (ruleFade ? grow : 1),
+```
+
+Three things at once: nothing cuts, because every value blends out of the beat before
+it; a prop whose value is identical on both beats **holds** instead of re-revealing
+itself (C20c, stated positively); and the transition's length comes from `moveTr`, so a
+beat where the figure walks further simply takes longer (C17).
+
+**H59. The band is arithmetic, and it has a floor.** The bottom is the ground line plus
+a little — every lesson lands in **508–518** (GROUND is 500). The top is wherever the
+highest ink is. Heights currently run 274–493, median **298**.
+
+The number worth knowing: **cropping tighter than ~280 units buys nothing.** The stage
+region is roughly 923×647 device px, the fit is `min(923/400, 647/h)`, and the width
+caps it at **2.31** as soon as `h ≤ 280`. Above that it costs real size:
+
+| band height | on-screen scale |
+|---|---|
+| ≤ 280 | 2.31 (width-limited — free) |
+| 300 | 2.16 |
+| 400 | 1.62 |
+| 490 | 1.31 |
+
+So **a scene that puts art in the top third is choosing to draw everything a third
+smaller.** Ask whether that art earns its rows before adding it — D26 is this same fact
+from the other side.
+
+**H60. Four colours, and all four come from the kit.** `INK #1A1A1A`, `PAPER #FAFAF7`,
+`SOFT #6B6B6B`, `RULE #E4E1D8`. **Not one of the 46 scenes declares a hex value of its
+own**, and that is most of why they read as a single product. Emphasis comes from weight
+and from fill — a card filled INK with PAPER text is the "this one" state everywhere —
+never from a hue.
+
+**H61. A scene-owned answer target looks like the deck's option.** Pressable → inner
+View, 2px INK border, radius 4; once answered the correct one fills INK with PAPER text,
+the wrong pick drops to a SOFT border at 0.45 opacity, and every target is `disabled`
+from that moment. `logic7Scene`'s `pickCard` / `pickRight` / `pickWrong` is the shape.
+E33 asks for variety in **what gets tapped** — a chute, a balance, a signpost, a card on
+a board — not in what a right answer looks like. The reader should never have to learn a
+new answer UI.
+
+**H62. Every non-interactive element on the stage carries `pointerEvents="none"`.** All
+46 scenes do this on **every element**, not only on the full-bleed wrappers E36 is about.
+The body is one big Pressable (E35), so an absolutely-positioned child that forgets is a
+dead patch in the middle of the tap target — and a dead patch is indistinguishable, to
+the reader, from a lesson that has frozen.
+
+**H63. A number shown to the reader is DERIVED from the model, never typed.** All four
+runners told the reader `Correct · +5 XP` while `lessonXP` was paying 10 — every
+cinematic lesson under-promised by half from the day the XP model was rebalanced, and
+`tsc` had nothing to say about it. It is now `CORRECT_LABEL` in `cinematicKit`, built
+from `XP_PER_CORRECT_ANSWER`. Any streak, rank, level or XP figure a lesson ever prints:
+import the constant.
+
 ---
 
 ## Part 2 — Authoring checklist
 
+**Shape** — before writing a word, lay the beats out and count them (H52, H53).
+- [ ] 7–11 beats; 8 unless there is a reason.
+- [ ] Exactly two graded questions (`mc` and/or `interact`); a third interaction is an
+      ungraded `tap`, so the lesson still pays 60 like its siblings (H53).
+- [ ] Exactly one saveable quote, on a rest beat — never the hook, a question, or last
+      (H52).
+- [ ] Exactly one summary, and it is the final beat (H52).
+
 **Story and script**
 - [ ] New metaphor and beats; engine reused, not reinvented (F38).
+- [ ] A per-lesson `Beat extends BaseBeat` with a doc comment on every staging channel,
+      so the pose sits beside the sentence it illustrates (H54).
+- [ ] `dur` filled in and not used to fix pacing — nothing reads it (H55).
 - [ ] Hook → build → struggle → payoff, one idea per beat (F40).
 - [ ] Every graded question names its trap (F41); a real primary-source quote (F42).
 - [ ] Word limits respected (F44); no "Lesson N" references (F45).
@@ -656,6 +815,16 @@ the map is the only shared file a lesson should need to modify.
 - [ ] The lesson id confirmed by grepping `id:`, never counted within a unit (F45b).
 
 **Scene**
+- [ ] Header comment states the composition as coordinates — every figure's x-track,
+      every prop's x and y range, and the clearance between them (H56).
+- [ ] One `useDerivedValue` for the whole frame; styles read fields off it (H57).
+- [ ] Everything blends `[p] → [n]` with `tr` from `moveTr`, and anything unchanged
+      between the two beats holds rather than replaying (H58, C20c).
+- [ ] Channels lifted from `BEATS` once at module level, not read per frame (H54).
+- [ ] Only INK / PAPER / SOFT / RULE — no scene declares a colour (H60).
+- [ ] `pointerEvents="none"` on every non-interactive element, not just wrappers (H62).
+- [ ] Scene-owned answer targets use the standard card states and go `disabled` on
+      answer (H61).
 - [ ] Shared `K_FIG`; relative sizes derived (B6); in proportion to ground props (B7).
 - [ ] Two figures ≥ ~100 units apart at their closest beat — computed WITH root
       motion (`base − advA − advB − drift`), not from the resting marks (B9).
@@ -674,7 +843,8 @@ the map is the only shared file a lesson should need to modify.
 - [ ] Neither props nor figure occlude the other (D23).
 - [ ] Walks ≥ 60 units and driven by `moveTr` (C17, C18).
 - [ ] Every prop's y-range in a comment; band measured to hold it with a few units of
-      air — no more (D25, D26).
+      air — no more (D25, D26). Bottom in 508–518; height near 280–300, and any art
+      that pushes it past 300 has earned the size the whole scene loses (H59).
 - [ ] Labels fit their columns on one line (D30); cards have font-padding slack (D29).
 - [ ] Decorative overlays have `pointerEvents="none"` (E36), and every tap target sits
       in the same coordinate space as its art (E37b).
@@ -690,6 +860,7 @@ the map is the only shared file a lesson should need to modify.
 - [ ] Completion calls `showReward(…)` then `exitLesson()` and renders `null`; XP comes
       from `lessonXP()`; `LessonReward` is never rendered by the lesson (G51b).
 - [ ] Anything that changes within a beat is in the `Fade` `revision` (G51c).
+- [ ] Every XP / streak / rank figure shown to the reader comes from a constant (H63).
 - [ ] The lesson is registered in the `CINEMATIC` map (G51d).
 
 **Then run Part 3. Do not skip it because it "looks fine".**
@@ -697,6 +868,22 @@ the map is the only shared file a lesson should need to modify.
 ---
 
 ## Part 3 — How to verify
+
+**Run the shape check first — it costs a second and needs no browser.**
+
+```
+npm run check          # tsc + both validators
+npm run check:cinematic
+```
+
+`scripts/validate-cinematic.mjs` enforces the group-H rules that are arithmetic — beat
+count, exactly two graded questions, one quote placed legally, the summary last, a
+declared band whose bottom is on the ground line, no scene-declared colours, no XP
+figure typed into a string. Its sibling `validate-lessons.mjs` does the same for the
+card decks. The baseline is clean, so **anything it prints is yours**; it also reports
+the band budget so a new lesson can see what its crop is costing against the other 46.
+
+It cannot see anything about the picture. That is what the rest of this part is for.
 
 **Measure, don't squint.** A 48-lesson review by eye misses exactly the defects that
 matter, because clipped text and covered labels look plausible in a thumbnail. The
@@ -706,7 +893,7 @@ exact rectangle of everything drawn. Rebuild it from
 (Metro's bundling overlay renders *on top of* a mounted player; `CI=1` disables file
 watching, so restart after editing).
 
-Five checks are exact rather than matters of taste:
+Six checks are exact rather than matters of taste:
 
 | Check | What it proves |
 |---|---|
@@ -715,6 +902,7 @@ Five checks are exact rather than matters of taste:
 | **BOX** | A card clipping or spilling its own text (D28) |
 | **WRAP** | A short label broken onto two lines (D30) |
 | **POSE** | A beat's copy makes a physical claim its pose contradicts (A1, A3) |
+| **SHAPE** | `npm run check:cinematic` — the group-H rules, statically (H52–H63) |
 
 Then a **device pass**, because some truths only appear there: framing and scale, two
 heads merging, a translucent figure failing to render, Android font padding. Deep-link

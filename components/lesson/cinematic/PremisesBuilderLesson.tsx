@@ -19,7 +19,7 @@ import BrickStructure, {
   BASE_LX, BASE_RX, BASE_Y, CENTER_X, KEY_X, KEY_Y, type StructState,
 } from './BrickStructure';
 import { BEATS, gates, type Beat } from './builderScript';
-import { Bubble } from './cinematicKit';
+import { Bubble, CORRECT_LABEL } from './cinematicKit';
 import {
   BLANK, clamp01, ease01, easeOutBack, easeOutCubic, headAt, lerp, masterHold, masterLive,
   mixStance, narratorHold, narratorLive, pose, seg, stand, type Bundle, type Stance,
@@ -708,7 +708,7 @@ function Choices({
       {answered ? (
         <Animated.View style={styles.explain} entering={FadeInDown.duration(300)}>
           <Text style={styles.explainHead}>
-            {gotIt ? (graded ? 'Correct  ·  +5 XP' : 'That’s the one') : 'Not quite'}
+            {gotIt ? (graded ? CORRECT_LABEL : 'That’s the one') : 'Not quite'}
           </Text>
           <Text style={styles.explainText}>{explain}</Text>
         </Animated.View>
