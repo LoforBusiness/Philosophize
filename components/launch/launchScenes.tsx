@@ -410,14 +410,27 @@ const SipArt = () => (
     <Ridge yAt={SIP_G} w={2.4} seed={369} />
     <BareTree x={54} groundY={SIP_G(54) + 3} h={150} seed={370} />
     <Path d={tufts(90, 380, SIP_G, 24, 371)} {...S(1.2, 0.4)} />
-    {/* deck chair: back rail BEHIND the sitter (who faces +x), seat running forward */}
+    {/* The chair, drawn to the SITTER, not to the ground. The seat has to meet the
+        hips: the figure's pelvis lands at y 519 and the ground is at 532, so a
+        seat drawn at 531-535 left him hovering 13px above it with the chair
+        reading as a stool behind his knees. Seat at 520, legs down to the grass,
+        back rising behind his spine. Measured, not eyeballed. */}
     <G>
-      <Path d={hand([[190, 534], [182, 502]], 1.1, 372)} {...S(2.2)} />
-      <Path d={hand([[190, 535], [220, 531]], 1.1, 373)} {...S(2)} />
-      <Path d={hand([[191, 535], [186, 553]], 1, 374)} {...S(1.8)} />
-      <Path d={hand([[218, 531], [224, 551]], 1, 375)} {...S(1.8)} />
-      <Path d={hand([[184, 510], [194, 508]], 0.8, 376)} {...S(1.5, 0.7)} />
-      <Path d={hand([[185, 520], [195, 518]], 0.8, 377)} {...S(1.5, 0.7)} />
+      {/* seat plank, front edge a touch lower so it reads as a surface */}
+      <Path d={hand([[184, 521], [214, 519]], 1.1, 372)} {...S(2.4)} />
+      <Path d={hand([[185, 524], [214, 522]], 1.1, 379)} {...S(1.4, 0.5)} />
+      {/* back uprights + slats, behind the spine */}
+      <Path d={hand([[186, 521], [180, 486]], 1.1, 373)} {...S(2.2)} />
+      <Path d={hand([[190, 521], [185, 488]], 1, 380)} {...S(1.6, 0.55)} />
+      <Path d={hand([[181, 496], [187, 495]], 0.7, 376)} {...S(1.6, 0.75)} />
+      <Path d={hand([[182, 505], [188, 504]], 0.7, 377)} {...S(1.6, 0.75)} />
+      {/* near legs to the grass, far legs faint for depth */}
+      <Path d={hand([[188, 522], [186, 533]], 0.8, 374)} {...S(2)} />
+      <Path d={hand([[211, 520], [214, 532]], 0.8, 375)} {...S(2)} />
+      <Path d={hand([[193, 523], [192, 533]], 0.8, 381)} {...S(1.5, 0.45)} />
+      <Path d={hand([[207, 521], [209, 532]], 0.8, 382)} {...S(1.5, 0.45)} />
+      {/* stretcher between the near legs */}
+      <Path d={hand([[187, 528], [213, 527]], 0.8, 383)} {...S(1.3, 0.5)} />
     </G>
   </>
 );
@@ -437,13 +450,29 @@ const PicnicArt = () => (
     <Ridge yAt={PIC_G} w={2.4} seed={388} />
     <LeafyTree x={336} groundY={PIC_G(336) + 2} h={190} seed={389} />
     <Path d={tufts(20, 250, PIC_G, 16, 390)} {...S(1.2, 0.4)} />
-    {/* blanket + basket, both within the seated figure's reach */}
-    <Path d={hand([[146, 550], [190, 545], [236, 551]], 1.2, 391)} {...S(2)} />
-    <Path d={hand([[147, 550], [156, 558], [230, 558], [236, 551]], 1.2, 392)} {...S(1.5, 0.6)} />
-    <Path d={`M168 547 L171 557 M190 545 L191 557 M212 546 L212 557`} {...S(1.1, 0.26)} />
+    {/* The blanket has to be UNDER him. Drawn at 545-558 its whole top edge sat
+        below the ground line at 537 — he was sitting on the grass behind it with
+        a rug laid out in front. It now starts just behind his hips (533) and runs
+        forward past his feet, wide enough that a reclining figure and the basket
+        both sit on the cloth. */}
+    <Path d={hand([[138, 537], [190, 533], [242, 537]], 1.2, 391)} {...S(2)} />
+    {/* the near edge sags between its corners the way cloth does — drawn as a
+        straight run it read as the gunwale of a boat */}
+    <Path d={hand([[139, 537], [150, 552], [190, 556], [232, 552], [242, 537]], 1.2, 392)} {...S(1.7)} />
+    {/* woven checks, following the cloth rather than the screen */}
+    <Path
+      d={`M160 535 L165 552 M186 533 L189 555 M212 534 L214 553
+          M144 542 L238 542 M149 549 L233 549`}
+      {...S(1.1, 0.24)}
+    />
+    {/* fringe, following the sag rather than a flat line */}
+    <Path d={`M152 553 L151 557 M170 555 L169 559 M190 556 L190 560 M212 555 L213 559 M230 552 L231 556`} {...S(1.1, 0.4)} />
+    {/* the basket, sitting ON the cloth with a lid and a handle over the top */}
     <G>
-      <Path d={hand([[212, 538], [234, 538], [231, 551], [215, 551], [212, 538]], 1, 393)} {...S(1.9)} />
-      <Path d={hand([[215, 538], [223, 529], [231, 538]], 1, 394)} {...S(1.6)} />
+      <Path d={hand([[210, 536], [234, 536], [231, 549], [213, 549], [210, 536]], 1, 393)} {...S(1.9)} />
+      <Path d={hand([[209, 536], [235, 536]], 0.8, 395)} {...S(2.1)} />
+      <Path d={hand([[216, 536], [222, 527], [228, 536]], 1, 394)} {...S(1.6)} />
+      <Path d={`M216 540 L215 547 M222 540 L222 547 M228 540 L229 547`} {...S(1.1, 0.35)} />
     </G>
   </>
 );

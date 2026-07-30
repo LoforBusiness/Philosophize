@@ -50,7 +50,10 @@ export default memo(function LaunchFigure({ scene }: Props) {
     return {
       cupW: 13 * u, cupH: 14 * u, cupB: Math.max(1, 2.2 * u),
       bookW: 40 * u, bookH: 27 * u, bookB: Math.max(1, 2.4 * u),
-      kiteS: Math.max(15, 30 * u), kiteB: Math.max(1.4, 2.4 * u),
+      // The kite is the one prop that ISN'T held against the body, so it doesn't
+      // shrink with the figure the way a cup does — it has to hold its own
+      // against a whole sky. At 30*u it came out 15 units and read as a speck.
+      kiteS: Math.max(24, 44 * u), kiteB: Math.max(1.4, 2.4 * u),
       tireR, tireB: Math.max(3, 7 * u),
       ropeW: Math.max(1.6, 2.4 * u),
       // The rope must END at the top of the tire, which hangs at the rider's hips.
@@ -177,12 +180,33 @@ export default memo(function LaunchFigure({ scene }: Props) {
       <Stickman D={D} k={k} color={INK} />
       {activity === 'sip' ? (
         <Animated.View style={[styles.prop, cupStyle]}>
-          <View style={[styles.cup, { width: P.cupW, height: P.cupH, borderWidth: P.cupB }]} />
+          {/* a mug, not a box: tapered body, a handle on the trailing side and a
+              rim line across the top so it reads as something open */}
+          <View style={[styles.cup, { width: P.cupW, height: P.cupH, borderWidth: P.cupB }]}>
+            <View style={[styles.cupRim, { height: Math.max(1, P.cupB) }]} />
+          </View>
+          <View
+            style={[
+              styles.cupHandle,
+              {
+                left: -P.cupW * 0.42, top: P.cupH * 0.24,
+                width: P.cupW * 0.44, height: P.cupH * 0.44,
+                borderWidth: Math.max(1, P.cupB * 0.85),
+                borderRadius: P.cupH * 0.3,
+              },
+            ]}
+          />
         </Animated.View>
       ) : null}
       {activity === 'read' ? (
         <Animated.View style={[styles.prop, bookStyle]}>
-          <View style={[styles.book, { width: P.bookW, height: P.bookH, borderWidth: P.bookB, marginLeft: -P.bookW / 2, marginTop: -P.bookH * 0.8 }]} />
+          {/* two leaves meeting at a spine, so it reads as an open book rather
+              than a card: each half tilts away from the centre line */}
+          <View style={[styles.bookWrap, { marginLeft: -P.bookW / 2, marginTop: -P.bookH * 0.8 }]}>
+            <View style={[styles.leaf, { width: P.bookW / 2, height: P.bookH, borderWidth: P.bookB, transform: [{ rotate: '-7deg' }] }]} />
+            <View style={[styles.leaf, { width: P.bookW / 2, height: P.bookH, borderWidth: P.bookB, transform: [{ rotate: '7deg' }] }]} />
+            <View style={[styles.bookSpine, { height: P.bookH * 0.96, width: Math.max(1.2, P.bookB) }]} />
+          </View>
         </Animated.View>
       ) : null}
     </>
@@ -194,7 +218,30 @@ export default memo(function LaunchFigure({ scene }: Props) {
         <>
           <Animated.View style={[styles.prop, styles.stringWrap, stringStyle]} />
           <Animated.View style={[styles.prop, kiteStyle]}>
-            <View style={[styles.kite, { width: P.kiteS, height: P.kiteS, borderWidth: P.kiteB, marginLeft: -P.kiteS / 2, marginTop: -P.kiteS / 2 }]} />
+            {/* A diamond with its two spars, and a tail of bows streaming off the
+                bottom point — an empty outline read as a floating rhombus. The
+                wrapper carries the 45° so the spars land as a cross, not an X. */}
+            <View style={{ marginLeft: -P.kiteS / 2, marginTop: -P.kiteS / 2 }}>
+              <View style={[styles.kite, { width: P.kiteS, height: P.kiteS, borderWidth: P.kiteB }]}>
+                <View style={[styles.spar, { top: P.kiteS / 2 - P.kiteB / 4, left: 0, right: 0, height: Math.max(1, P.kiteB * 0.55) }]} />
+                <View style={[styles.spar, { left: P.kiteS / 2 - P.kiteB / 4, top: 0, bottom: 0, width: Math.max(1, P.kiteB * 0.55) }]} />
+              </View>
+              {[0, 1, 2].map((i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.bow,
+                    {
+                      width: Math.max(2.5, P.kiteS * 0.2),
+                      height: Math.max(1.2, P.kiteS * 0.075),
+                      borderRadius: P.kiteS * 0.05,
+                      left: P.kiteS * (0.96 + i * 0.2),
+                      top: P.kiteS * (0.96 + i * 0.2),
+                    },
+                  ]}
+                />
+              ))}
+            </View>
           </Animated.View>
         </>
       ) : null}
@@ -226,22 +273,24 @@ const styles = StyleSheet.create({
 
   cup: {
     borderColor: INK,
-    borderBottomLeftRadius: 4, borderBottomRightRadius: 4, backgroundColor: 'transparent',
+    borderBottomLeftRadius: 4, borderBottomRightRadius: 4, backgroundColor: '#F7F5F0',
   },
+  cupRim: { position: 'absolute', left: 0, right: 0, top: 0, backgroundColor: INK },
+  // The handle sits on the TRAILING side (the figure faces +x), so it isn't hidden
+  // behind the fist. borderLeftColor transparent leaves a C rather than an O.
   cupHandle: {
-    position: 'absolute', left: 12, top: 3,
-    width: 7, height: 8, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    borderLeftColor: 'transparent',
+    position: 'absolute',
+    borderColor: INK, borderRightColor: 'transparent', backgroundColor: 'transparent',
   },
 
-  book: { borderColor: INK, borderRadius: 2, backgroundColor: '#F7F5F0' },
-  bookSpine: {
-    position: 'absolute', left: -1.2, top: -22,
-    width: 2.4, height: 27, backgroundColor: INK,
-  },
+  bookWrap: { flexDirection: 'row', alignItems: 'flex-start' },
+  leaf: { borderColor: INK, backgroundColor: '#F7F5F0' },
+  bookSpine: { position: 'absolute', left: '50%', top: 0, backgroundColor: INK },
 
   stringWrap: { height: 1.4, backgroundColor: INK, opacity: 0.5, transformOrigin: '0% 50%' },
-  kite: { borderColor: INK, backgroundColor: 'transparent' },
+  kite: { borderColor: INK, backgroundColor: '#F7F5F0' },
+  spar: { position: 'absolute', backgroundColor: INK, opacity: 0.55 },
+  bow: { position: 'absolute', backgroundColor: INK, opacity: 0.75 },
 
   rope: { position: 'absolute', backgroundColor: INK, opacity: 0.85 },
   tire: { position: 'absolute', borderColor: INK, backgroundColor: 'transparent' },
