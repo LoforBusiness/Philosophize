@@ -610,10 +610,18 @@ Otherwise pin it explicitly, which is always safe:
 Repeat for each runtime. **Always** verify `git status` is clean afterwards; a
 left-behind pin will silently mis-target the next publish.
 
-> Earlier this file claimed the local fingerprint could *never* match because of
-> an autolinked widget-pin module. That was true at one point and is not now — as
-> of build 16 the local fingerprint is exactly `bd0c0637…`. Verify, don't trust
-> either claim.
+> This file has now claimed three different things about the local fingerprint, which
+> is the point: **it is a moving value and the only safe move is to generate it.**
+> First it said the fingerprint could never match because of an autolinked widget-pin
+> module. Then, at build 16, it matched exactly (`bd0c0637…`). As of 2026-07-30 it has
+> moved again, to `285fd93f…`, because a few pure-JS font packages were added — the
+> fingerprint hashes `package.json` and the lockfile, so **adding a dependency moves it
+> even when that dependency has no native code at all.**
+>
+> So the pinned-publish path in the steps above is not the exception, it is the normal
+> case. That publish went out pinned to `bd0c0637…` (build 16) and `7655f410…`
+> (builds 15/14); left on the fingerprint policy it would have gone to `285fd93f…`,
+> which no build has, and reached nobody without erroring.
 
 ### Builds
 
