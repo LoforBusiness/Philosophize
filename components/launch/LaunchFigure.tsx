@@ -8,11 +8,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import Stickman from '@/components/lesson/cinematic/Stickman';
 import {
-  solve, bundle, stand, walk, mixStance, clamp01,
-  sipStance, swingStance, kiteStance, picnicStance, readStance,
-  WALK, DEG, STAGE_W, STAGE_H,
-  type Joints, type Bundle, type Stance,
+  solve, bundle, DEG, STAGE_W, STAGE_H,
+  type Joints, type Bundle,
 } from '@/components/lesson/cinematic/rig';
+import { launchStance, swingPhaseAt, walkPlacement } from './launchMotion';
 import type { LaunchScene } from './launchScenes';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -29,9 +28,6 @@ import type { LaunchScene } from './launchScenes';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const INK = '#1A1A1A';
-
-/** Rig units per second for the hill walk — an unhurried pace at this distance. */
-const WALK_SPEED = 22;
 
 interface Props {
   scene: LaunchScene;
@@ -68,56 +64,22 @@ export default function LaunchFigure({ scene }: Props) {
   // it AND the body leans into it — one source, two consumers.
   const swingPhase = useDerivedValue(() => {
     'worklet';
-    return activity === 'swing' ? Math.sin(clock.value * 1.35) : 0;
+    return activity === 'swing' ? swingPhaseAt(clock.value) : 0;
   });
 
-  // Stance + placement for this activity, every frame.
+  // Stance + placement for this activity, every frame. The maths lives in
+  // launchMotion.ts so it can be sampled frame by frame outside the app — a loop
+  // that jumps once every forty seconds is not something eyes find.
   const J = useDerivedValue<Joints>(() => {
     'worklet';
     const t = clock.value;
-    let s: Stance;
+    const s = launchStance(activity, t);
     let x = x0;
     let groundY = gy0;
-
-    if (activity === 'walk') {
-      // `dist` only ever increases, so the gait is continuous no matter how long
-      // the screen is up — the step phase comes from distance, so it can never
-      // snap back to a start pose. Only the POSITION wraps, and it wraps across a
-      // span that begins and ends off-screen, so the reset is never seen.
-      const dist = t * WALK_SPEED;
-      if (walkSpan) {
-        const span = walkSpan.to - walkSpan.from;
-        const travelled = dist * k * dir;
-        x = walkSpan.from + (((travelled % span) + span) % span);
-      } else {
-        x = x0 + dist * k * dir;
-      }
-      // Feet track the hill instead of a flat line. The contour is evaluated
-      // from NUMBERS here rather than by calling a function off the scene: a
-      // plain JS closure is not callable on the UI runtime, and doing so threw
-      // "Object is not a function" and crashed the app on every walk scene.
-      if (groundWave) {
-        groundY = groundWave.base - Math.sin((x - groundWave.off) / groundWave.per) * groundWave.amp;
-      }
-      s = walk(dist, WALK);
-    } else if (activity === 'kite') {
-      // Irregular tugs — a kite pulls when the wind decides to, not on a beat.
-      const g = Math.sin(t * 1.7) * 0.5 + Math.sin(t * 1.06 + 0.9) * 0.5;
-      s = kiteStance(t, clamp01(g * 0.9 + 0.25));
-    } else if (activity === 'swing') {
-      s = swingStance(t, swingPhase.value);
-    } else if (activity === 'sip') {
-      const p = t % 7.4;
-      const u = p > 1.5 && p < 4.7 ? (p - 1.5) / 3.2 : 0;
-      s = sipStance(t, u);
-    } else if (activity === 'picnic') {
-      const p = t % 6.8;
-      const u = p > 1.2 && p < 5.2 ? (p - 1.2) / 4 : 0;
-      s = picnicStance(t, u);
-    } else {
-      const p = t % 5.6;
-      const turn = p > 3.9 && p < 4.7 ? (p - 3.9) / 0.8 : 0;
-      s = readStance(t, turn);
+    if (activity === 'walk' && walkSpan) {
+      const p = walkPlacement(t, k, dir, walkSpan, groundWave, gy0);
+      x = p.x;
+      groundY = p.groundY;
     }
 
     return solve({

@@ -1579,8 +1579,18 @@ export function seated(seatH: number, t: number, reach = 18): Stance {
     // guard is built around. They also have to sit low enough to keep the arm
     // near-straight: at y −2 the hand was 28 units from a 33-unit arm's shoulder,
     // enough slack for the elbow to bow out and cut a hole against the torso.
-    fistL: { x: reach - 6 + ws, y: 4 + hd * 0.5 },
-    fistR: { x: reach + 1 + ws, y: 6 - hd * 0.5 },
+    // …but NOT so low that the arm is asking for a point it cannot reach. At
+    // y 4/6 the hand sat 33+ units from a 33-unit arm, so the IK clamped: the
+    // elbow was pinned 0.4 units off dead straight for 82% of the cycle, and any
+    // move that brought the hand back inside range made it spring out in a single
+    // frame. These sit at ~92% extension — still visibly a straight arm, but with
+    // a real elbow that travels instead of snapping.
+    // The two arms are NOT symmetric here: the far shoulder sits across the body,
+    // so the same local point is a longer reach for the left hand than the right.
+    // Measured, not assumed — at (13, 0.5) the left arm ran at 32.2 of 33 for the
+    // whole cycle while the right was a comfortable 30.3.
+    fistL: { x: reach - 8 + ws, y: -3 + hd * 0.5 },
+    fistR: { x: reach + 1 + ws, y: -2 - hd * 0.5 },
     adv: 0,
   };
 }
@@ -1594,7 +1604,14 @@ export function sipStance(t: number, u: number, seatH = 21): Stance {
   'worklet';
   const base = seated(seatH, t, 19);
   // Rise, dwell at the lip, lower — a drink's tempo, not a punch's.
-  const e = u <= 0 ? 0 : u < 0.34 ? easeOutCubic(u / 0.34) : u < 0.66 ? 1 : 1 - ease01((u - 0.66) / 0.34);
+  //
+  // ease01 (smoothstep) on the rise, NOT easeOutCubic. easeOutCubic has slope 3
+  // at zero, so the arm left rest at full speed: measured at 60fps the elbow
+  // moved 2.1 units in the first frame of the lift against a 0.004 median — a
+  // visible flick out of stillness. Smoothstep leaves and arrives at zero speed,
+  // which is what the page-turn in readStance already did and why that one
+  // sampled clean.
+  const e = u <= 0 ? 0 : u < 0.34 ? ease01(u / 0.34) : u < 0.66 ? 1 : 1 - ease01((u - 0.66) / 0.34);
   return {
     ...base,
     // The head dips to meet the cup rather than the arm doing all the travel.
@@ -1673,7 +1690,9 @@ export function picnicStance(t: number, u: number): Stance {
   const ws = life2(t, 0.31, 0.19, 0.5);
   const hd = life2(t, 0.44, 0.27, 1.7);
   // Out to the basket, back to the mouth, rest — one unhurried round trip.
-  const outE = u < 0.3 ? easeOutCubic(u / 0.3) : u < 0.45 ? 1 : 1 - ease01((u - 0.45) / 0.2);
+  // ease01 on the reach for the same reason as sipStance: easeOutCubic starts at
+  // full speed and the hand snapped off the lap.
+  const outE = u < 0.3 ? ease01(u / 0.3) : u < 0.45 ? 1 : 1 - ease01((u - 0.45) / 0.2);
   const eatE = u > 0.5 && u < 0.9 ? Math.sin(Math.PI * ease01((u - 0.5) / 0.4)) : 0;
   return {
     // Reclined onto the propping arm — that lean is most of what says "on the grass".
@@ -1688,9 +1707,13 @@ export function picnicStance(t: number, u: number): Stance {
     footR: { x: 40, y: 1 },
     // One hand planted behind for support, the other doing the eating.
     fistL: { x: -15 + ws, y: 5 },
+    // The reach to the basket is OUT and slightly UP, not out and down. A hand
+    // both far forward and near the ground is outside the arm's envelope from a
+    // seated shoulder — (31, 3) was 41 units from a 33-unit arm — so the IK
+    // clamped for a quarter of the cycle and the elbow snapped coming off it.
     fistR: {
-      x: lerp(lerp(15, 31, outE), 24, eatE),
-      y: lerp(lerp(-2, 3, outE), -32, eatE),
+      x: lerp(lerp(15, 22, outE), 24, eatE),
+      y: lerp(lerp(-2, -6, outE), -32, eatE),
     },
     adv: 0,
   };
@@ -1786,8 +1809,11 @@ export function readStance(t: number, turn: number): Stance {
     footR: { x: 38, y: 1 },
     // The book is held out and up, clear of the chest, so both forearms and the
     // book itself sit against open paper instead of on the torso.
+    // The turning hand rises far more than it travels forward. At e*5 it ended up
+    // at x 32, which put it 33 units from the shoulder — dead against the arm's
+    // limit, so the elbow pinned at the top of every page turn.
     fistL: { x: 17 + ws * 0.5, y: -24 - e * 9 },
-    fistR: { x: 27 + ws * 0.5 + e * 5, y: -19 - e * 13 },
+    fistR: { x: 27 + ws * 0.5 + e * 2, y: -19 - e * 13 },
     adv: 0,
   };
 }
