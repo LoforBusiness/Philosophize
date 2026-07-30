@@ -25,6 +25,13 @@ import {
   EBGaramond_400Regular,
   EBGaramond_400Regular_Italic,
 } from '@expo-google-fonts/eb-garamond';
+// Display faces offered for the profile name only (see data/profileFonts.ts).
+// Nothing else in the app uses these, so they exist purely to let someone make
+// their own name look like theirs.
+import { Cinzel_700Bold } from '@expo-google-fonts/cinzel';
+import { UnifrakturMaguntia_400Regular } from '@expo-google-fonts/unifrakturmaguntia';
+import { SpecialElite_400Regular } from '@expo-google-fonts/special-elite';
+import { AbrilFatface_400Regular } from '@expo-google-fonts/abril-fatface';
 import { useFonts } from 'expo-font';
 import { Stack, router, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -92,6 +99,10 @@ export default function RootLayout() {
     CormorantGaramond_600SemiBold,
     EBGaramond_400Regular,
     EBGaramond_400Regular_Italic,
+    Cinzel_700Bold,
+    UnifrakturMaguntia_400Regular,
+    SpecialElite_400Regular,
+    AbrilFatface_400Regular,
   });
   const [authChecked, setAuthChecked] = useState(false);
   // The animated launch screen covers the whole boot (auth check + routing);

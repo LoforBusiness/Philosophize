@@ -23,13 +23,15 @@ export interface CloudState {
   email: string;
   bio: string;
   portrait: string;
+  profileBackground: string;
+  nameFont: string;
   settings: AppSettings;
 }
 
 const SYNC_FIELDS: (keyof CloudState)[] = [
   'savedQuotes', 'profileQuote', 'philosopherViews', 'lessonsByUnit', 'lessonsByBranch', 'voiceEnabled', 'beliefResultId',
   'streak', 'totalXP', 'rankIndex', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'badgesInitialized',
-  'displayName', 'email', 'bio', 'portrait', 'settings',
+  'displayName', 'email', 'bio', 'portrait', 'profileBackground', 'nameFont', 'settings',
 ];
 
 const capStr = (v: unknown, n: number) => (typeof v === 'string' ? v.slice(0, n) : v);
@@ -213,6 +215,11 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
   const bio = fresh && typeof remote.bio === 'string' ? remote.bio : local.bio;
   const email = fresh && typeof remote.email === 'string' ? remote.email : local.email;
   const portrait = fresh && typeof remote.portrait === 'string' ? remote.portrait : local.portrait;
+  // The chosen art and name face travel with the account, on the same
+  // fresh-device rule as the rest of the identity.
+  const profileBackground =
+    fresh && typeof remote.profileBackground === 'string' ? remote.profileBackground : local.profileBackground;
+  const nameFont = fresh && typeof remote.nameFont === 'string' ? remote.nameFont : local.nameFont;
   const settings = fresh ? sanitizeSettings(remote.settings, local.settings) : local.settings;
   const voiceEnabled = fresh && typeof remote.voiceEnabled === 'boolean' ? remote.voiceEnabled : local.voiceEnabled;
   const beliefResultId =
@@ -242,6 +249,8 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
     email,
     bio,
     portrait,
+    profileBackground,
+    nameFont,
     settings,
   };
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -15,8 +15,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
-import Portrait from '@/components/shared/Portrait';
 import ScreenTransition from '@/components/shared/ScreenTransition';
+import { ProfileArtFill, ProfileAvatar } from '@/components/shared/ProfileArt';
+import ProfileArtSheet from '@/components/shared/ProfileArtSheet';
+import { backgroundById } from '@/data/profileBackgrounds';
+import { PROFILE_FONTS, profileNameStyle, profileNameText } from '@/data/profileFonts';
 import { signOut, deleteAccountCloud } from '@/lib/supabase/auth';
 import { signOutSocial } from '@/lib/auth/social';
 import { beginAccountDeletion } from '@/lib/supabase/sync';
@@ -75,9 +78,16 @@ export default function SettingsScreen() {
       {/* Top bar */}
       <View style={[styles.topBar, compact && { paddingHorizontal: 14 }]}>
         <Text style={[styles.topTitle, compact && { fontSize: 26 }]}>Settings</Text>
-        <Pressable onPress={onSave} style={({ pressed }) => [styles.saveBtn, pressed && { opacity: 0.85 }]}>
-          <Text style={styles.saveBtnText}>{saved ? 'Saved ✓' : 'Save Changes'}</Text>
-        </Pressable>
+        {/* Every other section writes to the store the moment you touch it, so
+            this button is reassurance rather than a commit. The Profile section
+            is the one place with a real draft and its own real Save changes —
+            two buttons saying the same words, one of which does nothing, is
+            worse than one. */}
+        {section === 'profile' ? null : (
+          <Pressable onPress={onSave} style={({ pressed }) => [styles.saveBtn, pressed && { opacity: 0.85 }]}>
+            <Text style={styles.saveBtnText}>{saved ? 'Saved ✓' : 'Save Changes'}</Text>
+          </Pressable>
+        )}
       </View>
 
       <ScrollView contentContainerStyle={[styles.scroll, compact && { paddingHorizontal: 12 }]} showsVerticalScrollIndicator={false}>
@@ -280,35 +290,66 @@ function ProfileSection() {
   const xp = useUserDataStore((s) => s.totalXP);
   const rankIndex = useUserDataStore((s) => s.rankIndex);
 
-  const [edit, setEdit] = useState(false);
+  const nameFont = useUserDataStore((s) => s.nameFont);
+  const profileBackground = useUserDataStore((s) => s.profileBackground);
+  const setNameFont = useUserDataStore((s) => s.setNameFont);
+  const setProfileBackground = useUserDataStore((s) => s.setProfileBackground);
+
+  // Everything is editable the moment the screen opens — there is no "edit
+  // profile" mode to enter and no "done editing" to leave. Changes are held as a
+  // DRAFT and only reach the store when Save changes is pressed, which is what
+  // makes an always-on editor safe: nothing is committed by accident.
+  const [draftName, setDraftName] = useState(displayName);
+  const [draftFont, setDraftFont] = useState(nameFont);
+  const [draftBg, setDraftBg] = useState(profileBackground);
+  const [picker, setPicker] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
+
+  const dirty =
+    draftName.trim() !== displayName.trim() || draftFont !== nameFont || draftBg !== profileBackground;
+
+  // A cloud sync can land while this screen is open. Adopt what it brought, but
+  // never on top of unsaved edits — that would silently delete what was typed.
+  const dirtyRef = useRef(dirty);
+  dirtyRef.current = dirty;
+  useEffect(() => {
+    if (dirtyRef.current) return;
+    setDraftName(displayName);
+    setDraftFont(nameFont);
+    setDraftBg(profileBackground);
+  }, [displayName, nameFont, profileBackground]);
+
+  function save() {
+    const name = draftName.trim();
+    if (name && name !== displayName) setProfile({ displayName: name });
+    if (draftFont !== nameFont) setNameFont(draftFont);
+    if (draftBg !== profileBackground) setProfileBackground(draftBg);
+    if (!name) setDraftName(displayName); // an empty name is not a name
+    setJustSaved(true);
+  }
+
+  useEffect(() => {
+    if (!justSaved) return;
+    const t = setTimeout(() => setJustSaved(false), 1800);
+    return () => clearTimeout(t);
+  }, [justSaved]);
 
   const lessons = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
   const totalXP = xp;
   const { current } = awardedRank(rankIndex, totalXP);
   const join = joinedAt ? new Date(joinedAt) : new Date();
   const memberSince = `Member since ${MONTHS[join.getMonth()]} ${join.getFullYear()}`;
+  const shownName = draftName.trim() || 'Philosopher';
 
   return (
     <Card>
-      <View style={styles.profileHeadRow}>
-        <Text style={styles.headerTitle}>Profile</Text>
-        <Pressable
-          onPress={() => setEdit((e) => !e)}
-          style={({ pressed }) => [styles.editBtn, pressed && { backgroundColor: '#F0EFEA' }]}
-          hitSlop={6}
-        >
-          <SketchIcon name="pencil" size={14} color={Ink} />
-          <Text style={styles.editText}>{edit ? 'Done editing' : 'Edit profile'}</Text>
-        </Pressable>
-      </View>
+      <Text style={styles.headerTitle}>Profile</Text>
       <View style={styles.hr} />
 
       <View style={styles.identity}>
-        <View style={styles.avatar}>
-          <Portrait size={64} color={Ink} />
-        </View>
+        <ProfileAvatar size={84} backgroundId={draftBg} letter={shownName.charAt(0)} />
         <View style={{ flex: 1, marginLeft: 18 }}>
-          <Text style={styles.idName}>{displayName || 'Philosopher'}</Text>
+          <Text style={styles.idName} numberOfLines={1}>{shownName}</Text>
           <Text style={styles.idRank}>
             {current.name} · Rank {current.id}
           </Text>
@@ -316,14 +357,91 @@ function ProfileSection() {
         </View>
       </View>
 
-      <View style={styles.hr} />
+      {/* THE THING THEY CAME HERE FOR. A live preview of the actual header, not a
+          settings row with a chevron — it shows the art, the name in the chosen
+          face, and the readability of one on the other, all at once. */}
+      <Text style={styles.fieldLabel}>PICTURE &amp; BACKGROUND</Text>
+      <Pressable
+        onPress={() => setPicker(true)}
+        style={({ pressed }) => [styles.artPreview, pressed && { opacity: 0.9 }]}
+      >
+        <ProfileArtFill backgroundId={draftBg} />
+        <View style={styles.artPreviewInner}>
+          <Text
+            numberOfLines={1}
+            style={[
+              profileNameStyle(draftFont, 20),
+              { color: backgroundById(draftBg).tone === 'dark' ? Paper : Ink },
+            ]}
+          >
+            {profileNameText(draftFont, shownName)}
+          </Text>
+          <Text
+            style={[
+              styles.artPreviewName,
+              { color: backgroundById(draftBg).tone === 'dark' ? '#C9C6BD' : '#5A574E' },
+            ]}
+          >
+            {backgroundById(draftBg).name.toUpperCase()}
+          </Text>
+        </View>
+        <View style={styles.artChange}>
+          <SketchIcon name="pencil" size={13} color={Paper} />
+          <Text style={styles.artChangeText}>CHANGE</Text>
+        </View>
+      </Pressable>
 
       <Text style={styles.fieldLabel}>DISPLAY NAME</Text>
-      {edit ? (
-        <TextInput value={displayName} onChangeText={(t) => setProfile({ displayName: t })} style={styles.input} placeholder="Your name" placeholderTextColor={InkSoft} />
-      ) : (
-        <Text style={styles.fieldValue}>{displayName || '—'}</Text>
-      )}
+      <TextInput
+        value={draftName}
+        onChangeText={setDraftName}
+        style={styles.input}
+        placeholder="Your name"
+        placeholderTextColor={InkSoft}
+        maxLength={60}
+      />
+
+      <Text style={styles.fieldLabel}>NAME FONT</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 8, paddingVertical: 2, paddingRight: 4 }}
+      >
+        {PROFILE_FONTS.map((f) => {
+          const on = f.id === draftFont;
+          return (
+            <Pressable
+              key={f.id}
+              onPress={() => setDraftFont(f.id)}
+              style={({ pressed }) => [styles.fontChip, on && styles.fontChipOn, pressed && { opacity: 0.8 }]}
+            >
+              <Text
+                numberOfLines={1}
+                style={[profileNameStyle(f.id, 17), { color: on ? Paper : Ink }]}
+              >
+                {profileNameText(f.id, shownName)}
+              </Text>
+              <Text style={[styles.fontChipName, { color: on ? '#C9C6BD' : InkSoft }]}>
+                {f.name.toUpperCase()}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      <Pressable
+        onPress={save}
+        disabled={!dirty}
+        style={({ pressed }) => [
+          styles.profileSaveBtn,
+          !dirty && styles.profileSaveBtnOff,
+          pressed && dirty && { opacity: 0.85 },
+        ]}
+      >
+        <Text style={[styles.profileSaveText, !dirty && { color: InkSoft }]}>
+          {justSaved && !dirty ? 'SAVED' : 'SAVE CHANGES'}
+        </Text>
+      </Pressable>
 
       <View style={styles.hr} />
       <View style={styles.miniStats}>
@@ -333,6 +451,15 @@ function ProfileSection() {
         <View style={styles.miniDiv} />
         <MiniStat value={streak} label="Day Streak" />
       </View>
+
+      <ProfileArtSheet
+        visible={picker}
+        value={draftBg}
+        fontId={draftFont}
+        name={shownName}
+        onPick={setDraftBg}
+        onClose={() => setPicker(false)}
+      />
     </Card>
   );
 }
@@ -974,10 +1101,56 @@ const styles = StyleSheet.create({
 
   // Profile
   profileHeadRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 7, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, paddingHorizontal: 14, paddingVertical: 9, backgroundColor: Paper },
-  editText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: Ink },
   identity: { flexDirection: 'row', alignItems: 'center' },
-  avatar: { width: 84, height: 84, borderRadius: 6, borderWidth: 1.5, borderColor: Ink, alignItems: 'center', justifyContent: 'center' },
+
+  // The picture-and-background control: a live miniature of the real header.
+  artPreview: {
+    height: 112,
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: Ink,
+    justifyContent: 'flex-end',
+  },
+  artPreviewInner: { padding: 12 },
+  artPreviewName: {
+    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.6, marginTop: 4,
+    includeFontPadding: false,
+  },
+  artChange: {
+    position: 'absolute', top: 10, right: 10,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: Ink, borderRadius: 4, paddingHorizontal: 10, paddingVertical: 6,
+  },
+  artChangeText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, color: Paper, letterSpacing: 1.4 },
+
+  fontChip: {
+    minWidth: 96,
+    maxWidth: 190,
+    borderWidth: 1.5,
+    borderColor: InkFaint,
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    backgroundColor: Paper,
+    alignItems: 'center',
+  },
+  fontChipOn: { backgroundColor: Ink, borderColor: Ink },
+  fontChipName: {
+    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.3, marginTop: 5,
+    includeFontPadding: false,
+  },
+
+  profileSaveBtn: {
+    marginTop: 18,
+    height: 48,
+    borderRadius: 6,
+    backgroundColor: Ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileSaveBtnOff: { backgroundColor: '#EFEEE9' },
+  profileSaveText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Paper, letterSpacing: 2 },
   idName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: Ink },
   idRank: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: Gold, marginTop: 3 },
   idMeta: { fontFamily: 'Inter_400Regular', fontSize: 12, color: Gold, marginTop: 5 },

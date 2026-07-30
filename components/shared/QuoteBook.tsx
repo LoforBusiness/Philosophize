@@ -50,15 +50,13 @@ export default function QuoteBook({
 
   const [mounted, setMounted] = useState(false);
   const [index, setIndex] = useState(0);
-  // While a page is turning we render two leaves; null when at rest.
+  // Non-null ONLY while a page is turning, and it is what decides whether the
+  // animated leaves exist at all. At rest the book is a single static page.
   const [anim, setAnim] = useState<{ from: number; to: number; dir: 1 | -1 } | null>(null);
   const animatingRef = useRef(false);
 
   const flip = useSharedValue(0);
   const dirSV = useSharedValue<1 | -1>(1);
-  // 0 while the book is at rest. The rotation is read ONLY when this is 1, which
-  // is what keeps a resting page flat — see the note on `leafStyle`.
-  const turning = useSharedValue(0);
 
   const quotes: PhilosopherQuote[] = philosopher?.quotes ?? [];
   const N = quotes.length;
@@ -70,44 +68,49 @@ export default function QuoteBook({
       setAnim(null);
       animatingRef.current = false;
       flip.value = 0;
-      turning.value = 0;
       dirSV.value = 1;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, philosopher?.id]);
 
-  const commit = useCallback(
-    (to: number) => {
-      setIndex(to);
-      setAnim(null);
-      animatingRef.current = false;
-      turning.value = 0;
-      flip.value = 0;
-      dirSV.value = 1;
-    },
-    [flip, turning, dirSV]
-  );
+  // THE RULE THAT KEEPS THIS SEAMLESS: a shared-value write lands on the UI
+  // thread immediately, while a `setState` does not render for another frame.
+  // So the two must never be used to describe the same moment — every React
+  // swap here happens at an instant where the before and after look identical,
+  // and the shared values are only touched while nothing animated is mounted.
+  //
+  // Getting this wrong is what caused the flash: commit() used to reset the
+  // rotation at the same time it set the new index, so for ~20ms the leaf was
+  // forced flat while still rendering the OUTGOING page — the page you had just
+  // turned away lay face-up on top of the new one.
+  const commit = useCallback((to: number) => {
+    // React state only. The rotation is deliberately left where the turn ended:
+    // forward it finishes edge-on and hidden, backward it finishes flat showing
+    // the destination page — either way, dropping the leaf changes nothing.
+    setIndex(to);
+    setAnim(null);
+    animatingRef.current = false;
+  }, []);
 
-  // `go` only records the intent. Starting the animation here too would begin
-  // rotating the leaf a frame BEFORE React has swapped in the leaf's new content
-  // — on a backward turn that flashed the current page rotated hard away. The
-  // effect below starts the turn once the new leaf is actually on screen.
   const go = useCallback(
     (d: 1 | -1) => {
       if (animatingRef.current) return;
       const to = index + d;
       if (to < 0 || to >= N) return;
       animatingRef.current = true;
+      // Park the leaf at the START of its arc BEFORE it is mounted. At rest no
+      // element reads these, so this is invisible; setting them in the effect
+      // below instead would leave one frame of the PREVIOUS turn's rotation.
+      dirSV.value = d;
+      flip.value = 0;
       setAnim({ from: index, to, dir: d });
     },
-    [index, N]
+    [index, N, dirSV, flip]
   );
 
+  // Start the turn only once the leaves are actually on screen.
   useEffect(() => {
     if (!anim) return;
-    dirSV.value = anim.dir;
-    turning.value = 1;
-    flip.value = 0;
     flip.value = withTiming(1, { duration: TURN_MS, easing: Easing.inOut(Easing.cubic) }, (fin) => {
       if (fin) runOnJS(commit)(anim.to);
     });
@@ -126,13 +129,9 @@ export default function QuoteBook({
   // The moving leaf. Forward it is the outgoing page (0 → -168); backward it is
   // the arriving page (-168 → 0). It pivots on its left edge — the spine.
   //
-  // At rest the rotation is forced flat instead of being read from `flip`. The
-  // backward mapping puts flip=0 at -168deg, so when the turn finished and flip
-  // was reset to 0 the page snapped edge-on and vanished. That was the glitch.
+  // No at-rest branch is needed: this style is only ever mounted while a turn is
+  // running, so it can read `flip` unconditionally.
   const leafStyle = useAnimatedStyle(() => {
-    if (turning.value === 0) {
-      return { transform: [{ perspective: 1200 }, { rotateY: '0deg' }, { translateX: 0 }] };
-    }
     const rot =
       dirSV.value === 1
         ? interpolate(flip.value, [0, 1], [0, -168])
@@ -147,20 +146,22 @@ export default function QuoteBook({
 
   // The turning leaf darkens as it swings edge-on to the light.
   const leafShadeStyle = useAnimatedStyle(() => ({
-    opacity: turning.value === 0 ? 0 : interpolate(flip.value, [0, 0.45, 1], [0, 0.5, 0.06]),
+    opacity: interpolate(flip.value, [0, 0.45, 1], [0, 0.5, 0.06]),
   }));
 
   // The page underneath is in shadow while the leaf is still over it, brightening
   // as the leaf clears — this is what gives the turn its sense of depth.
   const underShadeStyle = useAnimatedStyle(() => ({
-    opacity: turning.value === 0 ? 0 : interpolate(flip.value, [0, 0.55, 1], [0.34, 0.16, 0]),
+    opacity: interpolate(flip.value, [0, 0.55, 1], [0.34, 0.16, 0]),
   }));
 
   if (!mounted || !philosopher) return null;
 
-  // `under` is the page that stays put through the turn, `over` the one that moves.
-  const overIdx = anim ? (anim.dir === 1 ? anim.from : anim.to) : index;
+  // During a turn: `under` stays put, `leaf` moves. Forward, the leaf is the page
+  // being turned away and the new one waits beneath it; backward, the leaf is the
+  // page arriving over the one you were reading.
   const underIdx = anim ? (anim.dir === 1 ? anim.to : anim.from) : null;
+  const leafIdx = anim ? (anim.dir === 1 ? anim.from : anim.to) : null;
   const atFirst = index <= 0;
   const atLast = index >= N - 1;
 
@@ -234,23 +235,32 @@ export default function QuoteBook({
                       {/* pages rotate here; clipped so a turning leaf cannot cross
                           the spine or escape the block */}
                       <View style={styles.pageArea}>
-                        {underIdx != null && (
-                          <View style={[StyleSheet.absoluteFill, styles.underLeaf]}>
-                            <QuotePage quote={quotes[underIdx]} philosopher={philosopher} />
-                            <Animated.View
-                              pointerEvents="none"
-                              style={[StyleSheet.absoluteFill, styles.shade, underShadeStyle]}
-                            />
+                        {anim && underIdx != null && leafIdx != null ? (
+                          <>
+                            <View style={[StyleSheet.absoluteFill, styles.underLeaf]}>
+                              <QuotePage quote={quotes[underIdx]} philosopher={philosopher} />
+                              <Animated.View
+                                pointerEvents="none"
+                                style={[StyleSheet.absoluteFill, styles.shade, underShadeStyle]}
+                              />
+                            </View>
+
+                            <Animated.View style={[StyleSheet.absoluteFill, styles.leaf, leafStyle]}>
+                              <QuotePage quote={quotes[leafIdx]} philosopher={philosopher} />
+                              <Animated.View
+                                pointerEvents="none"
+                                style={[StyleSheet.absoluteFill, styles.shade, leafShadeStyle]}
+                              />
+                            </Animated.View>
+                          </>
+                        ) : (
+                          /* At rest: one plain page, no transform and nothing reading
+                             the turn's shared values. This is what makes the swap at
+                             the end of a turn invisible — see the note on `commit`. */
+                          <View style={[StyleSheet.absoluteFill, styles.restPage]}>
+                            <QuotePage quote={quotes[index]} philosopher={philosopher} />
                           </View>
                         )}
-
-                        <Animated.View style={[StyleSheet.absoluteFill, styles.leaf, leafStyle]}>
-                          <QuotePage quote={quotes[overIdx]} philosopher={philosopher} />
-                          <Animated.View
-                            pointerEvents="none"
-                            style={[StyleSheet.absoluteFill, styles.shade, leafShadeStyle]}
-                          />
-                        </Animated.View>
 
                         {/* the gutter: paper curving down into the binding. Stacked
                             translucent bars rather than a gradient, which keeps it
@@ -459,6 +469,8 @@ const styles = StyleSheet.create({
   },
 
   underLeaf: { backgroundColor: Page2, ...PAGE_CORNERS },
+  // The book at rest. Same paper as the leaf, but never transformed.
+  restPage: { backgroundColor: Page1, ...PAGE_CORNERS },
   leaf: {
     transformOrigin: 'left',
     backfaceVisibility: 'hidden',

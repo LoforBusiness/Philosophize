@@ -6,6 +6,8 @@ import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon'
 import Glyph from '@/components/shared/Glyph';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
+import { ProfileArtFill, ProfileAvatar, useProfileArt } from '@/components/shared/ProfileArt';
+import { profileNameStyle, profileNameText } from '@/data/profileFonts';
 import StreakBook from '@/components/gamification/StreakBook';
 import StreakWeek from '@/components/gamification/StreakWeek';
 import { signOut } from '@/lib/supabase/auth';
@@ -81,6 +83,8 @@ export default function ProfileScreen() {
   const displayName = useUserDataStore((s) => s.displayName);
   const xp = useUserDataStore((s) => s.totalXP);
   const rankIndex = useUserDataStore((s) => s.rankIndex);
+  const nameFont = useUserDataStore((s) => s.nameFont);
+  const { palette } = useProfileArt();
   const earnedBadges = useUserDataStore((s) => s.earnedBadges);
   const bioSeed = useUserDataStore((s) => s.bioSeed);
   const settings = useUserDataStore((s) => s.settings);
@@ -179,37 +183,43 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ScreenTransition bg={Ink}>
+    <ScreenTransition bg={palette.base}>
     <View style={styles.root}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Dark header */}
+        {/* The header wears the user's chosen artwork. Every colour in it comes
+            from that art's tone palette, so a light engraving gets ink text and a
+            dark one gets paper text — the words stay readable either way. */}
         <View style={[styles.header, { paddingTop: insets.top + 18 }]}>
+          <ProfileArtFill />
+
           <Pressable style={[styles.settingsBtn, { top: insets.top + 6 }]} hitSlop={10} onPress={() => router.push('/(app)/settings')}>
-            <SketchIcon name="settings" size={22} color={Paper} />
+            <SketchIcon name="settings" size={22} color={palette.text} />
           </Pressable>
 
-          <View style={styles.avatar}>
-            <Text style={styles.avatarLetter}>{displayName.charAt(0).toUpperCase()}</Text>
-            <View style={styles.avatarBadge}>
-              <SketchIcon name="hat" size={14} color={Ink} />
+          <View>
+            <ProfileAvatar size={76} letter={displayName.charAt(0)} />
+            <View style={[styles.avatarBadge, { backgroundColor: palette.text, borderColor: palette.base }]}>
+              <SketchIcon name="hat" size={14} color={palette.base} />
             </View>
           </View>
 
-          <Text style={styles.name}>{displayName.toUpperCase()}</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.name, profileNameStyle(nameFont, 26), { color: palette.text }]}>
+            {profileNameText(nameFont, displayName)}
+          </Text>
+          <Text style={[styles.subtitle, { color: palette.muted }]}>
             {descriptor} · {joinedLabel}
           </Text>
 
           <Pressable
-            style={({ pressed }) => [styles.rankChip, pressed && { opacity: 0.7 }]}
+            style={({ pressed }) => [styles.rankChip, { borderColor: palette.line }, pressed && { opacity: 0.7 }]}
             onPress={() => openRanksBadges('ranks')}
           >
-            <SketchIcon name="star" size={13} color={Paper} />
-            <Text style={styles.rankChipText}>RANK: {cur.name.toUpperCase()}</Text>
+            <SketchIcon name="star" size={13} color={palette.text} />
+            <Text style={[styles.rankChipText, { color: palette.text }]}>RANK: {cur.name.toUpperCase()}</Text>
           </Pressable>
 
           {/* Featured "profile quote" — set from any quote (lesson / saved / thinker).
@@ -220,10 +230,12 @@ export default function ProfileScreen() {
               style={({ pressed }) => [styles.profileQuote, pressed && { opacity: 0.7 }]}
               hitSlop={6}
             >
-              <Text style={styles.profileQuoteText} numberOfLines={4}>
+              <Text style={[styles.profileQuoteText, { color: palette.text }]} numberOfLines={4}>
                 “{profileQuote.text}”
               </Text>
-              <Text style={styles.profileQuoteBy}>— {profileQuote.author.toUpperCase()}</Text>
+              <Text style={[styles.profileQuoteBy, { color: palette.muted }]}>
+                — {profileQuote.author.toUpperCase()}
+              </Text>
             </Pressable>
           ) : (
             <Pressable
@@ -231,8 +243,10 @@ export default function ProfileScreen() {
               style={({ pressed }) => [styles.profileQuotePrompt, pressed && { opacity: 0.6 }]}
               hitSlop={6}
             >
-              <SketchIcon name="star" size={12} color={Gold} />
-              <Text style={styles.profileQuotePromptText}>Feature a favorite quote</Text>
+              <SketchIcon name="star" size={12} color={palette.muted} />
+              <Text style={[styles.profileQuotePromptText, { color: palette.muted }]}>
+                Feature a favorite quote
+              </Text>
             </Pressable>
           )}
         </View>
@@ -403,35 +417,15 @@ const styles = StyleSheet.create({
   scroll: { flex: 1, backgroundColor: Paper },
 
   header: {
-    backgroundColor: Ink,
+    // No background colour: ProfileArtFill paints it. `overflow: hidden` keeps
+    // the art inside the header, and it must stay above the art in z-order,
+    // which it is by being rendered after it.
     alignItems: 'center',
     paddingBottom: 26,
     paddingHorizontal: 20,
+    overflow: 'hidden',
   },
-  settingsBtn: { position: 'absolute', right: 16, padding: 8 },
-  avatar: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    borderWidth: 2,
-    borderColor: Paper,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarLetter: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 44,
-    color: Paper,
-    // Caveat's ink overhangs its glyph box on the right; Android clips text to
-    // its tight advance-width box, cutting the right of the letter (e.g. the
-    // "W"). Give the Text a width wider than the glyph so the ink renders fully;
-    // textAlign centres it within that width.
-    width: 72,
-    lineHeight: 50,
-    textAlign: 'center',
-    includeFontPadding: false,
-    transform: [{ translateX: -2.5 }],
-  },
+  settingsBtn: { position: 'absolute', right: 16, padding: 8, zIndex: 2 },
   avatarBadge: {
     position: 'absolute',
     right: -4,
@@ -439,23 +433,18 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: Paper,
     borderWidth: 1.5,
-    borderColor: Ink,
     alignItems: 'center',
     justifyContent: 'center',
   },
   name: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 26,
-    color: Paper,
-    letterSpacing: 2,
+    // family / size / tracking come from the chosen face (profileNameStyle).
     marginTop: 14,
+    textAlign: 'center',
   },
   subtitle: {
     fontFamily: 'Inter_500Medium',
     fontSize: 10,
-    color: Gold,
     letterSpacing: 2,
     marginTop: 6,
   },
@@ -464,13 +453,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     borderWidth: 1.5,
-    borderColor: Paper,
     borderRadius: 3,
     paddingHorizontal: 14,
     paddingVertical: 7,
     marginTop: 14,
   },
-  rankChipText: { fontFamily: 'Inter_700Bold', fontSize: 11, color: Paper, letterSpacing: 1 },
+  rankChipText: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1 },
 
   profileQuote: { alignItems: 'center', marginTop: 18, paddingHorizontal: 10, maxWidth: 340 },
   profileQuoteText: {
@@ -478,12 +466,11 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     fontSize: 15,
     lineHeight: 22,
-    color: Paper,
     textAlign: 'center',
   },
-  profileQuoteBy: { fontFamily: 'Inter_500Medium', fontSize: 9.5, color: Gold, letterSpacing: 1.5, marginTop: 8 },
+  profileQuoteBy: { fontFamily: 'Inter_500Medium', fontSize: 9.5, letterSpacing: 1.5, marginTop: 8 },
   profileQuotePrompt: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 16 },
-  profileQuotePromptText: { fontFamily: 'Inter_500Medium', fontSize: 11, color: Gold, letterSpacing: 0.5 },
+  profileQuotePromptText: { fontFamily: 'Inter_500Medium', fontSize: 11, letterSpacing: 0.5 },
 
   body: { paddingHorizontal: 20, paddingTop: 20 },
 

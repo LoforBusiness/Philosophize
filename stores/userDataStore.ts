@@ -9,6 +9,8 @@ import {
   unitsFromBranchCounts,
 } from '@/data';
 import { awardedRank, rankForXP } from '@/data/ranks';
+import { DEFAULT_BACKGROUND_ID } from '@/data/profileBackgrounds';
+import { DEFAULT_PROFILE_FONT } from '@/data/profileFonts';
 import { XP_PER_PHILOSOPHER_MET, XP_PER_QUIZ, XP_PER_QUIZ_PERFECT, XP_PER_SAVED_QUOTE } from '@/constants/xp';
 import { track } from '@/lib/posthog';
 import { writePinnedQuote } from '@/lib/widget/pin';
@@ -129,6 +131,8 @@ interface UserDataState {
   bio: string;
   bioSeed: number;                            // bumped each lesson + app launch to refresh the auto-bio
   portrait: string;                           // selected hand-drawn portrait id
+  profileBackground: string;                  // id from data/profileBackgrounds — picture AND header art
+  nameFont: string;                           // id from data/profileFonts — the face the name is set in
   settings: AppSettings;
   hasSeenWelcome: boolean;                     // first-launch intro animation already played
   _hasHydrated: boolean;
@@ -155,6 +159,8 @@ interface UserDataState {
   setProfile: (patch: Partial<{ displayName: string; email: string; bio: string }>) => void;
   bumpBioSeed: () => void;
   setPortrait: (id: string) => void;
+  setProfileBackground: (id: string) => void;
+  setNameFont: (id: string) => void;
   setSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void;
   setHasSeenWelcome: (v: boolean) => void;
   resetProgress: () => void;
@@ -216,6 +222,8 @@ export const useUserDataStore = create<UserDataState>()(
       bio: '',
       bioSeed: 0,
       portrait: 'overthinker',
+      profileBackground: DEFAULT_BACKGROUND_ID,
+      nameFont: DEFAULT_PROFILE_FONT,
       settings: DEFAULT_SETTINGS,
       hasSeenWelcome: false,
       _hasHydrated: false,
@@ -446,6 +454,16 @@ export const useUserDataStore = create<UserDataState>()(
 
       setPortrait: (id) => set({ portrait: id }),
 
+      setProfileBackground: (id) => {
+        set({ profileBackground: id });
+        track('profile_background_set', { background_id: id });
+      },
+
+      setNameFont: (id) => {
+        set({ nameFont: id });
+        track('profile_font_set', { font_id: id });
+      },
+
       setSetting: (key, value) =>
         set((state) => ({ settings: { ...state.settings, [key]: value } })),
 
@@ -487,6 +505,8 @@ export const useUserDataStore = create<UserDataState>()(
           bio: '',
           bioSeed: 0,
           portrait: 'overthinker',
+          profileBackground: DEFAULT_BACKGROUND_ID,
+          nameFont: DEFAULT_PROFILE_FONT,
           settings: DEFAULT_SETTINGS,
         });
       },
@@ -522,6 +542,8 @@ export const useUserDataStore = create<UserDataState>()(
           bio: '',
           bioSeed: 0,
           portrait: 'overthinker',
+          profileBackground: DEFAULT_BACKGROUND_ID,
+          nameFont: DEFAULT_PROFILE_FONT,
           settings: DEFAULT_SETTINGS,
           _syncOwnerId: null,
         });
@@ -556,6 +578,8 @@ export const useUserDataStore = create<UserDataState>()(
         bio: state.bio,
         bioSeed: state.bioSeed,
         portrait: state.portrait,
+        profileBackground: state.profileBackground,
+        nameFont: state.nameFont,
         settings: state.settings,
         hasSeenWelcome: state.hasSeenWelcome,
         _syncOwnerId: state._syncOwnerId,
@@ -579,6 +603,13 @@ export const useUserDataStore = create<UserDataState>()(
         // shown. Defaulting this to 0 would demote every existing user to Novice on
         // the update that introduced it.
         const rankIndex = p.rankIndex ?? rankForXP(totalXP).index;
+        // Anyone who predates the profile-art picker gets the default look
+        // rather than an empty id, which would render as a missing image.
+        // `?? DEFAULT` is not enough on its own — a persisted id whose entry was
+        // later renamed or removed must also fall back, which backgroundById and
+        // profileFontById both do at read time.
+        const profileBackground = p.profileBackground ?? DEFAULT_BACKGROUND_ID;
+        const nameFont = p.nameFont ?? DEFAULT_PROFILE_FONT;
         return {
           ...current,
           ...p,
@@ -586,6 +617,8 @@ export const useUserDataStore = create<UserDataState>()(
           lessonsByBranch,
           totalXP,
           rankIndex,
+          profileBackground,
+          nameFont,
           settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) },
         };
       },
