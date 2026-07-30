@@ -1,0 +1,201 @@
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import type { Lesson } from '@/data/types';
+import Stickman from './Stickman';
+import CinematicPlayer from './CinematicPlayer';
+import {
+  WALK, clamp01, dirsFrom, ease01, emoteHold, emoteLive, lerp, moveTr, pose, stand,
+  travelStance, type Bundle,
+} from './rig';
+import { BEATS } from './ethics10Script';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import type { SceneApi } from './CinematicPlayer';
+
+// A pond stage right with a child in it, and the same child again far off to the
+// left — smaller, standing higher up the picture at the end of a dotted line, which
+// is how a flat side-on stage says "further away".
+//
+// THE WATER IS RIPPLE LINES, NOT A FILL. A filled pond would have to be drawn over
+// the figure's shins to read as water he is standing in, and a prop drawn over the
+// figure is the defect D23 exists to stop. Three horizontal rules at y 474/484/494
+// pass BEHIND him and say the same thing: he is in it, and nothing covers him.
+//
+// COMPOSITION / OCCLUSION —
+//   · the narrator WALKS x = 88 → 168 → 268, monotonically rightward, so he never
+//     flips facing. Widest body span x ≈ 52 … 304.
+//   · the POND is x 232 … 376, y 470 … 500. He ends up standing in it at x 268.
+//   · the NEAR child is fixed at x 336 at 0.55 scale — 57 units tall, crown y 443,
+//     so he is a child beside an adult whose crown is 397, and the ripples cross
+//     him at the chest. He is 68 from the narrator's mark, which is close for two
+//     figures (B9) and deliberately so: they are in the same pond, and at 0.55 his
+//     head is 11 units across, so the two heads cannot merge into one mass.
+//   · the FAR child stands on a line at y 452 at 0.30 scale — 31 tall, crown 421.
+//     Higher up the picture and smaller than the near one, which is the whole
+//     grammar of distance here. The dotted line and its label run x 24 … 150.
+//   · the three factor cards sit x 40 … 360, y 300 … 386 — above every crown.
+// Nothing is drawn above y 300 or below the ground line, hence band [292, 512] —
+// 220 tall, inside the width-limited crop, so this renders as large as the stage
+// allows (H59).
+
+const POND_L = 232;
+const POND_R = 376;
+const RIPPLES = [474, 484, 494];
+
+const NEAR_X = 336;
+const NEAR_K = K_FIG * 0.55;
+
+const FAR_X = 52;
+const FAR_G = 452;
+const FAR_K = K_FIG * 0.3;
+
+const CARD_L = 40;
+const CARD_W = 320;
+const CARD_T = 300;
+const CARD_H = 27;
+const CARD_GAP = 30;
+
+const FACTORS = [
+  { id: 'distance', text: 'How far away the child is', correct: true },
+  { id: 'able', text: 'Whether you are actually able to help', correct: false },
+  { id: 'cost', text: 'What helping would cost you', correct: false },
+];
+
+const P = BEATS.map((b) => b.p ?? 0);
+const X = BEATS.map((b) => b.x ?? 88);
+const DIR = dirsFrom(X, 1);
+
+export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+
+  const farOn = !!cur.far;
+  const farFade = farOn !== !!prev?.far;
+  const cardsOn = !!cur.factors;
+  const cardsFade = cardsOn !== !!prev?.factors;
+  const answered = picked !== null;
+
+  const SCENE = useDerivedValue(() => {
+    const n = bi.value;
+    const p = n > 0 ? n - 1 : 0;
+    const tr = ease01(bt.value / moveTr(X[p], X[n], 0.85));
+    const t = clock.value;
+    const grow = ease01(bt.value / 0.6);
+
+    const s = travelStance(
+      X[p], X[n],
+      emoteHold(P[p], t), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
+      tr, WALK,
+    );
+
+    // Both children idle on clocks offset from the narrator's and from each other,
+    // so three figures on one stage never breathe on the same frame (B14). They use
+    // the settled HOLD rather than a live pose: `emoteHold` already carries its own
+    // drift, and a `lift` driven by anything other than a real beat clock would be
+    // a raised arm that never comes down (C20).
+    const nearS = emoteHold(24, t + 2.1);
+    const farS = stand(t + 5.6);
+
+    return {
+      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, DIR[n], 1),
+      near: pose(nearS, NEAR_X, GROUND, NEAR_K, -1, 1),
+      far: pose(farS, FAR_X, FAR_G, FAR_K, 1, farOn ? (farFade ? grow : 1) : 0),
+      farOn: farOn ? (farFade ? grow : 1) : 0,
+      t,
+    };
+  });
+
+  const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  const NF = useDerivedValue<Bundle>(() => SCENE.value.near);
+  const FF = useDerivedValue<Bundle>(() => SCENE.value.far);
+  const farStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.farOn }));
+  const cardStyle = useAnimatedStyle(() => ({
+    opacity: cardsOn ? (cardsFade ? ease01(bt.value / 0.6) : 1) : 0,
+  }));
+
+  return (
+    <Animated.View style={styles.scene}>
+      {/* ── how far away the second child is ────────────────────────────────── */}
+      <Animated.View style={farStyle} pointerEvents="none">
+        <View style={styles.farLine} />
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((k) => (
+          <View key={k} style={[styles.dash, { left: 88 + k * 22 }]} />
+        ))}
+        <Text style={styles.farLabel}>9,000 KM</Text>
+      </Animated.View>
+
+      {/* ── the pond: three rules, nothing filled ───────────────────────────── */}
+      {RIPPLES.map((y, k) => (
+        <View
+          key={y}
+          style={[styles.ripple, { top: y, left: POND_L + k * 9, width: POND_R - POND_L - k * 18 }]}
+          pointerEvents="none"
+        />
+      ))}
+
+      {/* ── Q1: which difference carries no moral weight? ───────────────────── */}
+      {cardsOn &&
+        FACTORS.map((f, k) => {
+          const chosen = picked === f.id;
+          return (
+            <Animated.View key={f.id} style={[styles.cardSlot, { top: CARD_T + k * CARD_GAP }, cardStyle]}>
+              <Pressable disabled={answered} onPress={() => onPick(f.id, f.correct)}>
+                <View
+                  style={[
+                    styles.card,
+                    answered && f.correct && styles.cardRight,
+                    answered && chosen && !f.correct && styles.cardWrong,
+                  ]}
+                >
+                  <Text style={[styles.cardText, answered && f.correct && styles.cardTextOn]}>
+                    {f.text}
+                  </Text>
+                </View>
+              </Pressable>
+            </Animated.View>
+          );
+        })}
+
+      <View style={styles.ground} pointerEvents="none" />
+      <Stickman D={FF} k={FAR_K} />
+      <Stickman D={NF} k={NEAR_K} />
+      <Stickman D={DF} k={K_FIG} />
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
+  // The ground rule stops short of the pond on the right — the bank is where the
+  // solid line ends, so the water needs no outline of its own.
+  ground: { position: 'absolute', left: 20, width: POND_L - 26, top: GROUND, height: 1.5, backgroundColor: RULE },
+
+  ripple: { position: 'absolute', height: 1.5, backgroundColor: SOFT, opacity: 0.75, borderRadius: 1 },
+
+  // The far bank: a short line the small figure stands on, higher up the picture.
+  farLine: { position: 'absolute', left: 24, top: FAR_G, width: 62, height: 1.5, backgroundColor: RULE },
+  dash: { position: 'absolute', top: FAR_G - 1, width: 10, height: 1.5, backgroundColor: RULE },
+  farLabel: {
+    position: 'absolute', left: 88, top: FAR_G + 8, width: 120,
+    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
+  },
+
+  cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W },
+  card: {
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
+  },
+  cardRight: { backgroundColor: INK, borderColor: INK },
+  cardWrong: { borderColor: SOFT, opacity: 0.45 },
+  cardText: {
+    fontFamily: 'Inter_500Medium', fontSize: 12, color: INK, includeFontPadding: false,
+  },
+  cardTextOn: { color: PAPER, fontFamily: 'Inter_700Bold' },
+});
+
+// Art runs from the factor cards (300) to the ground line (500). The pond, both
+// children and the dotted distance all sit inside that, so the crop is as tight as
+// it can be and the scene renders at the stage's full width-limited size.
+export function Ethics10Lesson({ lesson }: { lesson: Lesson }) {
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics10Scene} band={[292, 512]} />;
+}

@@ -153,6 +153,15 @@ has to clear 100. The same arithmetic gives the upper bound: a punch reaches x �
 so if the closed distance drops much under ~65 the fist is drawn **through** the other
 figure's head instead of arriving at it.
 
+**B9a. The span to check is the one the POSE makes, not the one the body makes.** A
+resting figure spans about x ± 36, and that number is the one that ends up in the
+composition comment. Then a beat holds gesture `47 frame-it-up`, which sizes something
+with both hands, and the same figure spans ± 40 — and the answer card laid out to the
+old number is drawn 2 units into his hand. This was caught by measuring rather than by
+looking, on a lesson that had already been "checked". **Take the extent from the rig at
+the pose the beat actually holds**, and take it across the whole transition, because a
+walk's arm swing is wider than either end of it.
+
 **B9b. Anything that POINTS at a figure must point at the HEAD, not at its x.** A
 figure's x is the spot between its feet, and a leaning one carries its head several
 units ahead of that — two boxers leaning toward each other are much closer at the
@@ -279,6 +288,32 @@ and at this stroke weight the two merge into a single lump with no arm in it. Th
 completion screen's waiting figure leans on the rule, so his arms are **folded**; a
 hand resting on the prop he leans against works too. Whenever the lean is more than
 slight, give the arms somewhere to be.
+
+**B16b-2. A fist tucked BACK past its own shoulder puts the ELBOW behind the head —
+and the pose to check first is the one the figure is doing when nothing is happening.**
+Both halves of this were found the same day, on the reward screen's leaning figure.
+
+The geometry: fold a hand back to x −8 at chest height and the arm has to double
+over, which swings the elbow up and back to (−18, −30) — **4.1 units inside a
+20-radius head disc**, on the arm that draws in *front* of the head. Anything at
+x ≤ −4 in that y-band does it; bringing the hand forward to x ≈ 4 drops the elbow to
+(−11, −11) and clears by 11.6. A hand tucked back and **low** (y ≥ +4) is fine — it is
+the combination of back *and* raised that folds the arm. Hands low and forward also
+read better on a leaning figure than folded arms, which is what this pose had been.
+
+The process half matters more. That figure's gesture library had been through three
+separate documented fixes — the wave alone carries notes on a shoulder singularity, a
+missing hold and a wave that was vertical instead of lateral — and the wave measured
+**clear of the head by 8–13 units**. The defect was in the pose it returns to between
+gestures, which nobody had measured, and which it holds for **54% of a 13-second
+loop**. Effort had gone entirely into the 46% that moves.
+
+So: an idle figure's RESTING pose is the one the reader actually stares at. Measure it
+first, and measure it for the whole loop rather than at the peak of each gesture — the
+question is not "does this gesture clear the head" but "how many seconds out of every
+thirteen is an arm inside it". Sweep the resting fist across a grid and read the elbow
+clearance off the rig; do not judge a folded arm by eye, because the elbow is the part
+that fails and the elbow is derived, not authored.
 
 **B16c. An outline closes up at small sizes.** A shape drawn as a stroked outline is
 only legible while its interior is wider than its stroke. The `scroll` glyph carried a
@@ -421,6 +456,21 @@ counted up. A paper cover sliding off left-to-right while the digits count up un
 is the house move. Springy overshoot belongs to a different product, and there is none
 left anywhere on the reward screen.
 
+**C22e. Smoothness is not a finishing pass, it is the acceptance criterion.** The
+product owner has said this in some form after nearly every build, and it is worth
+having written down as its own line rather than distributed across C17, C21 and C22:
+
+> *"Transitions are always very smooth … It always must be incredibly smooth."*
+
+What that has meant in practice, every time it has been raised: something arrived at
+full speed out of stillness (an `easeOutCubic` where a smoothstep belonged), something
+overshot and came back (a spring), something replayed that had not changed (`bt`),
+something moved without taking the time its distance needed (a flat crossfade), or two
+things that should have been sequential overlapped for a tenth of a second. Before
+calling a scene done, sample it: **frame-to-frame velocity should have no steps in it,
+and every motion should start and end at zero speed.** A `sin(π·x)` envelope does not —
+its slope at the ends is π. `pulse` smoothsteps first, which is what it is for.
+
 **C22c. A multi-part reveal plays in order, and a tap runs it out.** Two rules in one,
 both from the rank-up sequence. **Order:** each step starts as the one before it lands
 and nothing overlaps — mark, then burst, then the old name out and the new name in,
@@ -507,6 +557,22 @@ a text row's computed `top`, that is a collision, not a design.
 writing is readable is correct. B7 is about *ground-sharing* props; most scene
 furniture sits above the figure's crown and is an information surface, not an object
 in the room.
+
+**D31b. A speech bubble must be unmistakably HIS.** Not a caption at the top of the
+stage, not a box parked at the left margin: a box centred over the speaker's head, with
+a tail and a **leader line running down toward him**, that tracks him if he moves and
+leans its pointer back at him when the box has to be clamped inside the stage. With two
+figures talking in turn, a box pinned to a fixed corner says nothing about who spoke,
+and the reader has to work it out from the words — which is exactly the note that
+produced this rule.
+
+> *"I need it to be more obvious that they're saying those words, so more like a
+> talking box above them that is more distinct and a line slightly coming out towards
+> them so you know it's them talking."*
+
+One at a time, too: the outgoing bubble fades fully out before the incoming one starts
+(0→0.18, then 0.22→0.52 in `Bubble`). Overlapping them for even a tenth of a second
+reads as a flicker rather than as a reply.
 
 **D32b. Hand-break short text to a MEASURED width.** D30 says a stranded fragment is a
 defect; this is how to stop writing them. For any text in a narrow container — a
@@ -830,11 +896,71 @@ cinematic lesson under-promised by half from the day the XP model was rebalanced
 from `XP_PER_CORRECT_ANSWER`. Any streak, rank, level or XP figure a lesson ever prints:
 import the constant.
 
+**H64. One picture that IS the lesson, and build the stage around it.** This is the
+single strongest predictor of whether a cinematic lesson lands, and it is what the good
+ones all have: not a set of illustrations for the beats, but **one image whose change
+over the lesson is the argument**. A gap between two panels that a thought sets out
+across and cannot finish. A gauge where knowledge is allowed to live, and the moment
+the shaded band moves off the far end. Two boxes drawn identically on purpose, so the
+only difference on the whole stage is what they are standing on. A majority walking at
+one person and stopping at a line.
+
+Write that sentence *before* the beats. If it cannot be said in one — "the picture is X,
+and over the lesson X does Y" — the scene will come out as decoration with narration
+over it, which is what the card runner already does more cheaply. The test after
+building: cover the deck and see whether someone could still tell you roughly what the
+lesson claimed.
+
+**H65. The second graded question is answered ON THE STAGE.** Two questions, and they
+should not both be four sentences in a list. The house pattern is one `mc` in the deck
+for the question that needs weighing, and one `interact` in the scene for the one the
+picture can put directly: tap the claim the cogito actually gets you, plant the flag
+where knowledge begins, tap the reply that goes at the man, tap the difference that
+carries no moral weight, hang the label under the plinth, tap what stops the majority.
+
+E34 is the rule for which goes where — the *nuanced* one belongs in the deck where the
+options can be read, the one with an obvious shape belongs on the stage. E33 asks for
+variety in **what gets tapped**; H61 says a right answer must still look the same
+everywhere. A lesson with two deck questions is not wrong, but it has left the best
+thing this format can do on the table.
+
+**H66. The wrong answers are the real rival positions, not filler.** A distractor
+nobody would pick teaches nothing and makes the question feel like a formality. The
+ones that work are the arguments an actual person actually makes: for "which reply is
+the ad hominem", the decoy is a *straw man* — also a dodge, also wrong, and wrong in a
+different way that the explanation then gets to name. For "where does knowledge begin",
+the decoy is the demand for certainty, which is the position the whole lesson is
+against. Then F41's "the trap is…" writes itself, because the trap is a real view held
+by real people rather than a joke option.
+
+**H67. A figure at rest still has business.** The completion screen's loafer is on a
+13-second loop — he looks around, checks his nails, waves — and he is the most
+commented-on thing on that screen. The general rule: wherever a figure is on screen and
+not doing anything, give it a slow loop of small human business rather than a breathing
+idle. Idle is not the same as still, and still reads as broken.
+
+> *"have a stickman … that is leaning against something … pretending he's looking at
+> its nails or waving or just looking around, being funny."*
+
+**H68. When the app speaks in its own voice, it is at the reader's expense.** The
+thought-bubble lines are all gentle digs — *"Descartes doubted everything. You doubted
+B."* — and never compliments, for a specific reason: the screen is already telling the
+reader they did well, so praise on top of praise reads as a machine flattering them. A
+joke at their expense reads as somebody being in the room. Keep it fond, keep it short,
+and keep it pointed at **them** rather than at philosophy in general.
+
+> *"Make it funny comments towards the user … get funny comments that are directly
+> toward the user."*
+
 ---
 
 ## Part 2 — Authoring checklist
 
 **Shape** — before writing a word, lay the beats out and count them (H52, H53).
+- [ ] **The one-sentence picture written down first**: "the picture is X, and over the
+      lesson X does Y" (H64). If it won't fit in a sentence, the scene isn't found yet.
+- [ ] One question in the deck, one answered on the stage (H65); the distractors are
+      real rival positions, not filler (H66).
 - [ ] 7–11 beats; 8 unless there is a reason.
 - [ ] Exactly two graded questions (`mc` and/or `interact`); a third interaction is an
       ungraded `tap`, so the lesson still pays 60 like its siblings (H53).
@@ -879,7 +1005,11 @@ import the constant.
 - [ ] Shared `K_FIG`; relative sizes derived (B6); in proportion to ground props (B7).
 - [ ] Two figures ≥ ~100 units apart at their closest beat — computed WITH root
       motion (`base − advA − advB − drift`), not from the resting marks (B9).
-- [ ] Anything pinned to the figure derived from `K_FIG` + landmarks (B10).
+- [ ] Anything pinned to the figure derived from `K_FIG` + landmarks (B10); a speech
+      bubble centred on the speaker with its tail and leader aimed at him (D31b).
+- [ ] Every prop rectangle checked against the figure's extent AT THE POSE THAT BEAT
+      HOLDS, across the whole transition — not against ±36 (B9a).
+- [ ] Any figure standing around has a slow loop of business, not a bare idle (H67).
 - [ ] Companion figures given a non-zero seed — the shared IDLE (`guard`, `stand`, a
       custom loop) as well as the walk (B14); every figure has a reason (B15).
 - [ ] Every x change routed through `travelStance`, never lerped under a stand, and
@@ -944,13 +1074,28 @@ filmstrip of one gesture costs nothing and answers questions no number can — t
 loafer's wave measured "clear of the head" three times running and the first sheet
 showed the fist sitting on his jaw.
 
-Two things will make the sheet lie to you, and both did:
+**And the occlusion sheet is computable too, which is the cheapest real check there
+is.** Every prop in a scene is an absolutely-positioned rectangle built from top-level
+constants, and every figure's extent comes out of `solve()`. So: `eval` the scene's own
+constants for the prop rects, take each figure's bounding box from the rig at the pose
+each beat holds, and intersect them. Six new lessons went through this in one run and
+it found a card drawn 2 units into a figure's hand — on a lesson whose composition
+comment already claimed the columns were clear, because the comment had been written
+against ±36 instead of against the pose (B9a). It also prints each figure's y-extent
+against the declared band, which is the BAND check for free.
+
+Three things will make these sheets lie to you, and all three did:
 - **`dotBase(r)` in `Stickman` takes a RADIUS** (`width: 2r`) while a line-drawing
   helper usually takes a WIDTH. Halving either draws a figure that is not the one that
   ships: a head of radius 10 against the real 20 made a touching fist look comfortable.
 - **A probe that keeps its own copy of the component's constants** will pass while the
   component is broken. Read them out of the source and `eval` them, so the check cannot
   drift from the thing it is checking.
+- **Merging two props into one bounding box invents collisions.** The rights rail and
+  its caption are one prop in the source and two rectangles on the paper — a rail down
+  at y 330–500 and a word up at 312–330. Boxed together they "overlapped" a figure that
+  neither of them comes near. When a probe reports a collision, check the rectangle
+  before changing the scene.
 
 **Measure, don't squint.** A 48-lesson review by eye misses exactly the defects that
 matter, because clipped text and covered labels look plausible in a thumbnail. The

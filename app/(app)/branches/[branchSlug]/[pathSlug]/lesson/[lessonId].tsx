@@ -55,6 +55,12 @@ import { Aesthetics7Lesson } from '@/components/lesson/cinematic/aesthetics7Scen
 import { Aesthetics8Lesson } from '@/components/lesson/cinematic/aesthetics8Scene';
 import { Political7Lesson } from '@/components/lesson/cinematic/political7Scene';
 import { Political8Lesson } from '@/components/lesson/cinematic/political8Scene';
+import { Metaphysics9Lesson } from '@/components/lesson/cinematic/metaphysics9Scene';
+import { Epistemology10Lesson } from '@/components/lesson/cinematic/epistemology10Scene';
+import { Logic9Lesson } from '@/components/lesson/cinematic/logic9Scene';
+import { Ethics10Lesson } from '@/components/lesson/cinematic/ethics10Scene';
+import { Aesthetics9Lesson } from '@/components/lesson/cinematic/aesthetics9Scene';
+import { Political9Lesson } from '@/components/lesson/cinematic/political9Scene';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -125,6 +131,21 @@ const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   'aesthetics-aesthetics-8': Aesthetics8Lesson,
   'political-political-7': Political7Lesson,
   'political-political-8': Political8Lesson,
+  // fifth wave — one more per branch, each answering its second question ON the
+  // stage: a gap a thought cannot cross, a flag planted on a gauge, the reply that
+  // goes at the man, the difference that carries no moral weight, the label under
+  // the plinth, the line a majority cannot pass.
+  //
+  // NOTE THE IDS. Ethics has no lesson 9 and epistemology has no lesson 2 — both
+  // branches skip numbers — so "the ninth lesson" is `ethics-ethics-10` there and
+  // `epistemology-knowledge-10` next door. These were read out of the data, not
+  // counted (F45b).
+  'metaphysics-being-9': Metaphysics9Lesson,
+  'epistemology-knowledge-10': Epistemology10Lesson,
+  'logic-arguments-9': Logic9Lesson,
+  'ethics-ethics-10': Ethics10Lesson,
+  'aesthetics-aesthetics-9': Aesthetics9Lesson,
+  'political-political-9': Political9Lesson,
 };
 
 function todayStr() {

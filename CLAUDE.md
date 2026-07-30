@@ -84,7 +84,7 @@ Philosophize/
 │   ├── lesson/                  # LessonRunner, CardShell, LessonReward, LessonLoader
 │   │   ├── cards/               # 8 card components (incl. DilemmaCard, QuoteCard)
 │   │   ├── interactions/        # MultipleChoice, TrueFalse, SortItems (3 live)
-│   │   ├── cinematic/           # THE BIG ONE — 48 wired cinematic lessons, the
+│   │   ├── cinematic/           # THE BIG ONE — 54 wired cinematic lessons, the
 │   │   │                        #   shared rig.ts, Stickman.tsx, CinematicPlayer,
 │   │   │                        #   per-lesson *Scene.tsx + *Script.ts (§17)
 │   │   ├── feedback/            # CorrectFeedback, IncorrectFeedback (built, unwired)
@@ -391,7 +391,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 - **Content:** 6 branches · **28 units** · **174 lessons**. **~223 philosophers**
   with bios, eras, 4–6 quotes and three "Did you know?" facts apiece.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
-  gating; **48 cinematic lessons** (animated stickman scenes, §17); animated
+  gating; **54 cinematic lessons** (animated stickman scenes, §17); animated
   `LessonReward` with XP count-up, streak and rank-up.
 - **Gamification:** 50 badges, 25 ranks with a conferred-rank ceremony, XP +
   level curve, daily streak.
@@ -424,7 +424,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 ## 13. Lesson Design Principles (north star)
 
 > ⚠️ **Before writing or changing any cinematic lesson, read [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md).**
-> That is the binding rule book — 81 numbered rules in eight groups (truth of the
+> That is the binding rule book — 89 numbered rules in eight groups (truth of the
 > picture · the figure · motion · nothing hidden · questions · writing · engine · the
 > house shape), an authoring checklist, and the six exact verification checks. Groups
 > A–G each exist because a real lesson broke that rule and it was caught on a real
@@ -514,7 +514,7 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**48 lessons** are not card decks at all: they are tap-advanced animated scenes.
+**54 lessons** are not card decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
 `CINEMATIC` map from lesson id → component; anything absent falls through to the
 normal `LessonRunner`. **Removing an entry is a complete, safe rollback** for one

@@ -1,0 +1,220 @@
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import type { Lesson } from '@/data/types';
+import Stickman from './Stickman';
+import CinematicPlayer from './CinematicPlayer';
+import {
+  WALK, clamp01, dirsFrom, ease01, emoteHold, emoteLive, lerp, moveTr, pose, travelStance,
+  type Bundle,
+} from './rig';
+import { BEATS } from './metaphysics9Script';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import type { SceneApi } from './CinematicPlayer';
+
+// Two panels stand over the stage — MIND on the left, BODY on the right — with a
+// strip of bare paper between them that is the whole lesson. A thought sets out
+// across it, stops in the middle under a question mark, and later the panels slide
+// together until the strip is gone.
+//
+// COMPOSITION / OCCLUSION —
+//   · the narrator WALKS x = 96 → 160 → 232, in moves of 64 and 72.
+//   · MIND panel y 206–286, resting at x 44–184; BODY panel x 216–356, fixed.
+//     The GAP is the 32 units between them, centred on x 200. On the fused beats
+//     MIND slides right by 32 so the two meet, and the gap is simply not there.
+//   · the thought crossing it is a 14-unit disc travelling x 176 → 200 at y 242.
+//   · the three claim cards live x 20–178, y 306–408.
+//   · HIS LAST MARK IS SET BY THOSE CARDS. On the tap beat he holds gesture 47,
+//     which sizes something with both hands and is the widest pose in the lesson:
+//     measured off the rig he spans x 199…265 there, not the ±36 a resting figure
+//     spans. At the first layout the cards ran to x 200 and he stood at 240, and
+//     the bottom card was drawn 2 units into his hand. Twenty-one units of clear
+//     paper now — and the lesson is that the span to check is the one the POSE
+//     makes, not the one the body makes.
+//   · everything else is above the crown: a standing crown is y 397 and the panels
+//     stop at 286, so the figure passes under them all lesson (D23).
+// Nothing is drawn above y 206 or below the ground line, hence band [196, 512].
+
+const PANEL_T = 206;
+const PANEL_B = 286;
+const MIND_X = 44;
+const BODY_X = 216;
+const PANEL_W = 140;
+const GAP_MID = 200;
+const CLOSE = 32;          // how far MIND travels to shut the gap
+
+const CARD_L = 20;
+const CARD_W = 158;
+const CARD_T = 306;
+const CARD_H = 30;
+const CARD_GAP = 36;
+
+const CARDS = [
+  { id: 'thinks', label: 'SOMETHING IS THINKING', correct: true },
+  { id: 'sub', label: 'A SEPARATE SUBSTANCE', correct: false },
+  { id: 'nobody', label: 'MY BODY DOES NOT EXIST', correct: false },
+];
+
+const P = BEATS.map((b) => b.p ?? 0);
+const X = BEATS.map((b) => b.x ?? 96);
+const DIR = dirsFrom(X, 1);
+const PANELS = BEATS.map((b) => b.panels ?? 0);
+const CROSS = BEATS.map((b) => (b.cross ?? 0));
+
+export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+
+  // A panel only animates on the beat that CHANGES it; otherwise it holds, so the
+  // board does not re-draw itself behind the reader on every tap (C20c).
+  const litFade = (cur.panels ?? 0) > 0 !== ((prev?.panels ?? 0) > 0);
+  const puzzleOn = !!cur.puzzle;
+  const puzzleFade = puzzleOn !== !!prev?.puzzle;
+  const cardsOn = !!cur.cards;
+  const cardsFade = cardsOn !== !!prev?.cards;
+  const answered = picked !== null;
+
+  const SCENE = useDerivedValue(() => {
+    const n = bi.value;
+    const p = n > 0 ? n - 1 : 0;
+    const tr = ease01(bt.value / moveTr(X[p], X[n], 0.85));
+    const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
+
+    const s = travelStance(
+      X[p], X[n],
+      emoteHold(P[p], t), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
+      tr, WALK,
+    );
+
+    // The thought sets out and STOPS. It eases toward the far panel and arrives at
+    // 0.86 of the way — close enough to be trying, short enough that the strip of
+    // paper it cannot cross is the thing you actually look at.
+    const reach = lerp(CROSS[p], CROSS[n], tr) * ease01(clamp01(bt.value / 1.5)) * 0.86;
+
+    return {
+      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, DIR[n], 1),
+      lit: lerp(PANELS[p] > 0 ? 1 : 0, PANELS[n] > 0 ? 1 : 0, tr) * (litFade ? grow : 1),
+      shut: lerp(PANELS[p] === 2 ? 1 : 0, PANELS[n] === 2 ? 1 : 0, tr),
+      reach,
+      t,
+    };
+  });
+
+  const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  const litStyle = useAnimatedStyle(() => ({ opacity: 0.25 + 0.75 * SCENE.value.lit }));
+  // MIND slides right to meet BODY; that closing move IS the physicalist reply, so
+  // it is the one thing on the stage allowed to move under its own text.
+  const mindStyle = useAnimatedStyle(() => ({
+    opacity: 0.25 + 0.75 * SCENE.value.lit,
+    transform: [{ translateX: SCENE.value.shut * CLOSE }],
+  }));
+  const thoughtStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.reach > 0.02 ? 1 : 0,
+    transform: [{ translateX: SCENE.value.reach * (GAP_MID - (MIND_X + PANEL_W - 8)) }],
+  }));
+  const puzzleStyle = useAnimatedStyle(() => ({
+    opacity: puzzleOn ? (puzzleFade ? ease01(clamp01((bt.value - 1.1) / 0.5)) : 1) : 0,
+  }));
+  const cardStyle = useAnimatedStyle(() => ({
+    opacity: cardsOn ? (cardsFade ? ease01(bt.value / 0.6) : 1) : 0,
+  }));
+
+  return (
+    <Animated.View style={styles.scene}>
+      {/* ── the two substances ─────────────────────────────────────────────── */}
+      <Animated.View style={[styles.panel, styles.mind, mindStyle]} pointerEvents="none">
+        <Text style={styles.panelName}>MIND</Text>
+        <Text style={styles.panelSub}>thinks{'\n'}takes up no space</Text>
+      </Animated.View>
+
+      <Animated.View style={[styles.panel, styles.body, litStyle]} pointerEvents="none">
+        <Text style={styles.panelName}>BODY</Text>
+        <Text style={styles.panelSub}>takes up space{'\n'}does not think</Text>
+      </Animated.View>
+
+      {/* the thought that sets out to lift an arm, and gets as far as it gets */}
+      <Animated.View style={[styles.thought, thoughtStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.puzzleWrap, puzzleStyle]} pointerEvents="none">
+        <Text style={styles.puzzle}>?</Text>
+      </Animated.View>
+
+      {/* ── Q2: tap what the cogito actually gets you ──────────────────────── */}
+      {cardsOn &&
+        CARDS.map((c, k) => {
+          const chosen = picked === c.id;
+          return (
+            <Animated.View key={c.id} style={[styles.cardSlot, { top: CARD_T + k * CARD_GAP }, cardStyle]}>
+              <Pressable disabled={answered} onPress={() => onPick(c.id, c.correct)}>
+                <View
+                  style={[
+                    styles.card,
+                    answered && c.correct && styles.cardRight,
+                    answered && chosen && !c.correct && styles.cardWrong,
+                  ]}
+                >
+                  <Text style={[styles.cardText, answered && c.correct && styles.cardTextOn]}>
+                    {c.label}
+                  </Text>
+                </View>
+              </Pressable>
+            </Animated.View>
+          );
+        })}
+
+      <View style={styles.ground} pointerEvents="none" />
+      <Stickman D={DF} k={K_FIG} />
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
+  ground: { position: 'absolute', left: 24, right: 24, top: GROUND, height: 1.5, backgroundColor: RULE },
+
+  panel: {
+    position: 'absolute', top: PANEL_T, width: PANEL_W, height: PANEL_B - PANEL_T,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  mind: { left: MIND_X },
+  body: { left: BODY_X },
+  panelName: {
+    fontFamily: 'Inter_700Bold', fontSize: 17, letterSpacing: 2.4, color: INK,
+    includeFontPadding: false,
+  },
+  panelSub: {
+    fontFamily: 'Inter_400Regular', fontSize: 10.5, lineHeight: 15, color: SOFT,
+    textAlign: 'center', marginTop: 6, includeFontPadding: false,
+  },
+
+  // The thought is a small filled disc — the only round thing on the stage, so it
+  // reads as a separate object crossing rather than as part of either panel.
+  thought: {
+    position: 'absolute', left: MIND_X + PANEL_W - 8, top: 242,
+    width: 14, height: 14, borderRadius: 7, backgroundColor: INK,
+  },
+  puzzleWrap: { position: 'absolute', left: GAP_MID - 20, top: 196, width: 40, alignItems: 'center' },
+  puzzle: {
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 30, color: INK, includeFontPadding: false,
+  },
+
+  cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W },
+  card: {
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
+  },
+  cardRight: { backgroundColor: INK, borderColor: INK },
+  cardWrong: { borderColor: SOFT, opacity: 0.45 },
+  cardText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.3, color: INK,
+    textAlign: 'center', includeFontPadding: false,
+  },
+  cardTextOn: { color: PAPER },
+});
+
+// Art runs from the panels' top edge (206) down to the ground line (500), and the
+// tap cards stop at 408 — nothing is drawn above or below, so the player crops to
+// that slice and the whole scene renders about 80% larger than a full-height fit.
+export function Metaphysics9Lesson({ lesson }: { lesson: Lesson }) {
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics9Scene} band={[196, 512]} />;
+}
