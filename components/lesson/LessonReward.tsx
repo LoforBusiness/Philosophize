@@ -54,16 +54,32 @@ interface DayInfo {
 // appear the way a stroke appears under a nib, while the value counts up underneath.
 // No bounce anywhere in it.
 //
-// The box is sized by a hidden copy of the FINAL value, so the reveal cannot judder
-// as the counter widens from one digit to two.
+// IT IS SET IN CAVEAT, WHICH IS WHY THE DIGITS GET THEIR OWN CELLS.
+//
+// Playfair is the app's headline face and it was wrong here — a high-contrast Didone
+// number is the most PRINTED thing on a screen whose whole identity is a pen. Caveat
+// is the hand, and the moment the number is handwritten the count-up has to change
+// too: a script face has no tabular figures at all, its 1 is less than half the width
+// of its 6, so a value climbing 0 → 7 → 43 → 60 re-centres itself on almost every
+// frame. The count wasn't "quick", it was sliding around underneath itself.
+//
+// So each digit gets a fixed cell, right-aligned, as many cells as the FINAL value
+// needs and blank ones to the left until it reaches them. Nothing moves horizontally
+// for the whole count — the digits just change, which is what a counter should do.
 // ─────────────────────────────────────────────────────────────────────────────
+const XP_SIZE = 104;
+// Caveat's digits run about 0.5em; the cell is a shade wider so the widest of them
+// has room to centre without touching its neighbour or the wipe's clip edge.
+const XP_CELL = Math.round(XP_SIZE * 0.54);
+
 function InkedNumber({ value, delay }: { value: number; delay: number }) {
   const [shown, setShown] = useState(0);
-  const [w, setW] = useState(0);
   const wipe = useSharedValue(0);
+  const cells = Math.max(1, String(Math.max(0, value)).length);
+  const w = cells * XP_CELL;
 
   useEffect(() => {
-    wipe.value = withDelay(delay, withTiming(1, { duration: 700, easing: Easing.out(Easing.cubic) }));
+    wipe.value = withDelay(delay, withTiming(1, { duration: 760, easing: Easing.out(Easing.cubic) }));
     if (value <= 0) return;
     const DURATION = 980;
     const t0 = Date.now() + delay;
@@ -77,19 +93,19 @@ function InkedNumber({ value, delay }: { value: number; delay: number }) {
     return () => clearInterval(id);
   }, [value]);
 
-  const cover = useAnimatedStyle(() => ({
-    transform: [{ translateX: wipe.value * (w + 10) }],
-    opacity: w > 0 ? 1 : 0,
-  }));
+  const cover = useAnimatedStyle(() => ({ transform: [{ translateX: wipe.value * (w + 12) }] }));
 
-  const onLayout = (e: LayoutChangeEvent) => setW(e.nativeEvent.layout.width);
+  // Right-aligned into the fixed cells: 7 is [ ][7], 60 is [6][0], and the 6 lands in
+  // the cell the blank was holding rather than shoving the 7 sideways.
+  const digits = String(shown).padStart(cells, ' ').split('');
 
   return (
-    <View style={styles.xpNumWrap} onLayout={onLayout}>
-      <Text style={[styles.xpNumber, styles.xpSizer]}>{value}</Text>
-      <Text style={[styles.xpNumber, StyleSheet.absoluteFill as any]} numberOfLines={1}>
-        {shown}
-      </Text>
+    <View style={[styles.xpNumWrap, { width: w, height: Math.round(XP_SIZE * 1.02) }]}>
+      {digits.map((d, k) => (
+        <Text key={k} style={[styles.xpNumber, { left: k * XP_CELL, width: XP_CELL }]}>
+          {d === ' ' ? '' : d}
+        </Text>
+      ))}
       <Animated.View style={[styles.wipeCover, cover]} pointerEvents="none" />
     </View>
   );
@@ -333,23 +349,25 @@ const styles = StyleSheet.create({
   xpBlock: { alignItems: 'center', marginTop: 10 },
   xpNumWrap: { position: 'relative', overflow: 'hidden' },
   xpNumber: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 88,
+    position: 'absolute',
+    top: 0,
+    fontFamily: 'Caveat_700Bold',
+    fontSize: XP_SIZE,
     color: Ink,
-    lineHeight: 96,
+    lineHeight: Math.round(XP_SIZE * 1.02),
     textAlign: 'center',
-    fontVariant: ['tabular-nums'],
+    // Caveat has no tabular figures — the fixed cells above are what hold the count
+    // still. Android's default font padding would also shove the baseline down inside
+    // a box sized by arithmetic (D29).
+    includeFontPadding: false,
   },
-  // An invisible copy of the FINAL value that gives the box its width, so the
-  // counter widening from 0 to 70 cannot shift the reveal underneath it.
-  xpSizer: { opacity: 0 },
-  wipeCover: { position: 'absolute', left: -2, top: 0, bottom: 0, right: -6, backgroundColor: Paper },
+  wipeCover: { position: 'absolute', left: -3, top: 0, bottom: 0, right: -8, backgroundColor: Paper },
   xpLabel: {
     fontFamily: 'Inter_700Bold',
     fontSize: 11,
     color: InkSoft,
     letterSpacing: 3.4,
-    marginTop: -4,
+    marginTop: 2,
   },
 
   // The tally: a printed receipt for the number above it.

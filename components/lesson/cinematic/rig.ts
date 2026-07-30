@@ -1752,8 +1752,13 @@ export function leanHold(t: number): Stance {
     // stroke weight (limb 11 against a torso of 12) the two merge into one lump with
     // no arm in it. Folded, the forearms lie ACROSS the body: two horizontals over a
     // vertical, which reads instantly at any size.
-    fistL: { x: 10 + drift * 0.6, y: -22 },
-    fistR: { x: -8, y: -22 - drift * 0.6 },
+    // …at y −17, not −22. The head is a 20-radius disc centred at (−7.3, −48.4), so its
+    // underside is at −28.4, and a fist of radius 5.5 parked at −22 had its top edge at
+    // −27.5: nine tenths of a unit INSIDE the skull, on the arm that draws in front of
+    // it. Folded arms sit across the chest, not under the chin. Five units lower reads
+    // the same and leaves 6 units of paper.
+    fistL: { x: 10 + drift * 0.6, y: -17 },
+    fistR: { x: -8, y: -17 - drift * 0.6 },
     adv: 0,
   };
 }
@@ -1770,19 +1775,77 @@ export function leanLive(t: number): Stance {
   const s = leanHold(t);
   const P = 13;                                  // one full round of business
   const u = (((t % P) + P) % P) / P;
-  const look = pulse(clamp01((u - 0.02) / 0.26));
-  const nails = pulse(clamp01((u - 0.36) / 0.24));
-  const wave = pulse(clamp01((u - 0.70) / 0.24));
+  // Each bit of business gets its OWN progress value as well as its envelope, because
+  // anything shaped by the monotonic `t` inside a windowed gesture has a phase nobody
+  // chose: the old wave wobbled on `sin(t·9)`, so the hand could be travelling down
+  // while the arm was going up. Everything below is a function of its own window.
+  const lu = clamp01((u - 0.02) / 0.26);
+  const nu = clamp01((u - 0.34) / 0.22);
+  // The wave gets a THIRD of the loop, and it needs it. Squeezed into 0.28 the hand
+  // peaked at 2.89 units/frame — at 103 units to a human body that is about 2.9 m/s,
+  // a hand being thrown rather than raised. The window must also close before u = 1 or
+  // the gesture is still up when the loop restarts and the arm drops in one frame.
+  const wu = clamp01((u - 0.6) / 0.34);
+  const look = pulse(lu);
+  const nails = pulse(nu);
+
+  // THE WAVE — three problems, all of them geometry.
+  //
+  // ONE: it has to DROP out of the fold before it rises. Folded, the near hand rests
+  // at (−8, −22) and its own shoulder is at (−1.45, −25.1) — three units above it and
+  // six across. Sweeping the hand up and out therefore drags it straight THROUGH the
+  // shoulder: on the old straight path the two came within 0.67 units, so the arm
+  // collapsed to nothing and re-extended, and the elbow — still out at 17 — whipped
+  // round the singularity at 4.92 units/frame against a hand doing 0.80. Six times the
+  // speed of the thing it was following. That is what "not a natural movement" is.
+  // `dip` swings the hand down and out first, so it passes UNDER the shoulder with
+  // ~20 units of extension in hand. It is also exactly what a person does unfolding
+  // their arms.
+  //
+  // TWO: it needs to stop at the top. `pulse` is a triangle — it arrives and leaves in
+  // the same instant, so there was never a moment of waving, only of travelling.
+  // Rise 1.2s · hold 1.3s · fall 1.2s, and the sweeps live in the hold.
+  //
+  // THREE: a wave is LATERAL. The old one wobbled the hand vertically on `sin(t·9)` —
+  // 0 sideways reversals against 2 vertical, i.e. a twitch — and being a function of
+  // the free clock rather than of its own window, its phase was nobody's decision: the
+  // hand could be dropping while the arm was still going up.
+  // Up briskly, hold, down lazily — a hand goes up to wave with intent and comes back
+  // down because it is finished, and the asymmetry is most of what makes it read.
+  const raise = wu < 0.28 ? ease01(wu / 0.28) : wu < 0.62 ? 1 : 1 - ease01((wu - 0.62) / 0.38);
+  const outE = ease01(clamp01(raise / 0.45));            // out of the fold, early
+  const upE = ease01(clamp01((raise - 0.3) / 0.7));      // and only then upward
+  // `pulse`, not a raw sine: sin(π·x) leaves x = 1 at slope −π, and clamping there put
+  // a step in the hand's velocity. `pulse` smoothsteps its argument first, so the dip
+  // arrives and leaves at rest.
+  const dip = pulse(clamp01(raise / 0.45));              // under the shoulder on the way
+  const fu = clamp01((wu - 0.26) / 0.38);                // the hold, where the waving is
+  const flick = Math.sin(fu * Math.PI * 4) * Math.sin(Math.PI * fu);
+
+  // THE SWEEP IS A ROTATION, NOT A SLIDE. Waving by adding ±4 to the hand's x drags it
+  // toward the head on every inward stroke and changes the arm's extension on every
+  // stroke as well. Swinging it round the shoulder at a FIXED radius does neither: the
+  // arm stays at 82% for the whole wave, and the hand traces the arc a forearm actually
+  // traces. 27 units at 0.34 rad above horizontal puts the fist 34 from the head centre
+  // — and it is the FIST EDGE that has to clear, not its centre. At the old peak the
+  // centre was 23.9 out from a head of radius 20, so the fist's own 5.5 radius put its
+  // edge at 18.4: inside the skull, on the near arm, which draws in front of the head.
+  const WSH_X = -1.4, WSH_Y = -25.1;                     // the near shoulder in this pose
+  const wa = 0.34 + flick * 0.16;                        // ±9°, an unhurried wave
+  const wx = WSH_X + 27 * Math.cos(wa);
+  const wy = WSH_Y - 27 * Math.sin(wa);
+
   return {
     ...s,
-    // Head turns while looking, dips toward the hand while inspecting it.
-    neck: s.neck + look * 0.20 * Math.sin(t * 1.5) + nails * 0.16,
-    tilt: s.tilt - wave * 0.03,
-    // The near hand unfolds to do the work and folds back. Targets measured to clear
-    // the head disc (centre ≈ (−7.5, −48), radius 20) and stay inside the arm's 33.
+    // The head tips through its own window rather than on the free-running clock, so
+    // "looking around" is up, down and back to level every time instead of stopping
+    // wherever the sine happened to be. A touch of positive neck as the hand comes up
+    // carries the head back, away from it.
+    neck: s.neck + look * 0.2 * Math.sin(lu * Math.PI * 2) + nails * 0.16 + upE * 0.08,
+    tilt: s.tilt - raise * 0.03,
     fistR: {
-      x: s.fistR.x + nails * 22 + wave * 28,
-      y: s.fistR.y - nails * 6 - wave * 22 + wave * Math.sin(t * 9) * 3,
+      x: lerp(s.fistR.x + nails * 22, wx, outE),
+      y: lerp(s.fistR.y - nails * 6, wy, upE) + dip * 12,
     },
     fistL: { x: s.fistL.x + nails * 2, y: s.fistL.y + nails * 3 },
   };

@@ -186,6 +186,30 @@ from the pelvis; arm reach **33**; leg reach **37**; body+arms span about **x ±
   `boxMove` re-derives the head from the pose's own tilt/neck and pushes any fist
   inside `GLOVE_CLEAR` back out. Gesture libraries are still checked by hand — so when
   adding one, check the target against the head position *that pose* produces.
+- **A hand near EITHER end of the arm's range makes the elbow whip, and a hand crossing
+  its own shoulder is the worst case.** The IK puts the elbow from the direction of the
+  shoulder→wrist vector, so when that vector is short its direction swings wildly for a
+  hand that is barely moving. The loafer's folded hand rested 7 units from a 33-unit
+  arm and its path to the wave took it within **0.67 units of the shoulder itself** —
+  the arm collapsed to nothing and re-extended, and the elbow travelled at **4.92
+  units/frame against a hand doing 0.80**. Six times the speed of the thing it is
+  following is exactly what "that doesn't move like an arm" looks like.
+  The far end does the same in reverse: at 95%+ the elbow pins dead straight and snaps
+  the moment the hand comes back in range. **Keep working hands between roughly 30% and
+  90% of reach**, and where a gesture starts from a fold, take the hand OUT before UP so
+  the vector lengthens before it rotates — which is also just what a person does
+  unfolding their arms. When auditing, measure the elbow's speed against the hand's; if
+  the elbow is faster, the hand is in a singularity.
+- **A hand's clearance is measured from its EDGE, not its centre.** The fist is a disc
+  of radius `limb/2` = 5.5, so a wrist 24 units from a head of radius 20 has its fist
+  1.5 units *inside* the skull. The wave was cleared at 23.9 and still drew across his
+  own face. The bar is `headR + 5.5 + margin` ≈ **29 to the wrist**, and it applies to
+  the whole sweep of a gesture, not just its peak — an oscillation that swings back
+  toward the head is checked at its inner extreme.
+- **Swing a hand by ROTATING it about the shoulder, not by adding to its x.** Adding
+  ±4 to x drags the hand toward the head on every inward stroke and changes the arm's
+  extension on every stroke. Holding the radius and moving the angle does neither, and
+  it is the arc a forearm actually traces.
 - **A clamp makes distinct inputs identical.** `solve` pulls any fist past the arm's
   33-unit reach back onto the reach circle, so two different over-reaching targets
   land in the same place. The jab (55, −31) and the cross (60, −29) both did: 1.5
@@ -327,6 +351,21 @@ helper of that shape before calling it fixed.
 
 > *"Sometimes the end movement is his hands up in the air or something awkward with
 > his hands … I want it to be fixed so the end movements never look strange."*
+
+**C20e. Anything inside a windowed gesture must be a function of THAT WINDOW, not of
+the free-running clock.** A gesture fades in and out over its own slice of the loop, so
+a wobble written as `sin(t · 9)` has a phase nobody chose: it is wherever the monotonic
+clock happens to be when the window opens. The loafer's wave wobbled that way and the
+hand could be travelling *down* while the arm was still going up. Give the window a
+progress value and shape everything off it — `sin(wu · π · 4)` is zero at both ends by
+construction, so the gesture starts and finishes dead still without needing an envelope
+to hide it.
+
+**And a gesture needs somewhere to STOP.** `pulse` is a triangle: it arrives and leaves
+in the same instant, so a wave built on one is never actually waving, only travelling
+out and back. Rise, **hold**, fall — with the repeated part living in the hold — and
+make the fall longer than the rise, because a hand goes up with intent and comes down
+because it is finished.
 
 **C20b. Nobody materialises on stage.** A figure arriving from off-stage must be at
 full opacity *before* they are visible, not faded up where the reader can see it.
@@ -806,7 +845,10 @@ import the constant.
 - [ ] A different gesture each beat; no loops (C19), differing in SILHOUETTE rather
       than in one wrist's height — pose both hands (C19).
 - [ ] Every `*Hold` in the library you are using rests arm-down, not just `emoteHold`
-      (C20).
+      (C20); every gesture shaped by its own window rather than the free clock, and
+      given a hold to happen in (C20e).
+- [ ] Working hands between ~30% and ~90% of reach, never crossing their own shoulder;
+      elbow speed measured against hand speed (B11).
 - [ ] Any physical claim the vocabulary can't express → add a pose (A2).
 - [ ] Secondary figures posed deliberately (A3).
 - [ ] Explanations fit the answered deck (D27).
@@ -884,6 +926,22 @@ card decks. The baseline is clean, so **anything it prints is yours**; it also r
 the band budget so a new lesson can see what its crop is costing against the other 46.
 
 It cannot see anything about the picture. That is what the rest of this part is for.
+
+**For the FIGURE, draw it in Node — no Metro, no browser, about two seconds a sheet.**
+`rig.ts` has zero imports precisely so it can be run outside the app: `sucrase` strips
+the types, `solve()` gives the joints, and `jimp-compact` (both already in
+`node_modules`) draws bones as thick lines and joints as discs. A twenty-frame
+filmstrip of one gesture costs nothing and answers questions no number can — the
+loafer's wave measured "clear of the head" three times running and the first sheet
+showed the fist sitting on his jaw.
+
+Two things will make the sheet lie to you, and both did:
+- **`dotBase(r)` in `Stickman` takes a RADIUS** (`width: 2r`) while a line-drawing
+  helper usually takes a WIDTH. Halving either draws a figure that is not the one that
+  ships: a head of radius 10 against the real 20 made a touching fist look comfortable.
+- **A probe that keeps its own copy of the component's constants** will pass while the
+  component is broken. Read them out of the source and `eval` them, so the check cannot
+  drift from the thing it is checking.
 
 **Measure, don't squint.** A 48-lesson review by eye misses exactly the defects that
 matter, because clipped text and covered labels look plausible in a thumbnail. The
