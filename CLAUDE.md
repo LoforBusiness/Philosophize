@@ -422,7 +422,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 ## 13. Lesson Design Principles (north star)
 
 > ⚠️ **Before writing or changing any cinematic lesson, read [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md).**
-> That is the binding rule book — 55 numbered rules in seven groups (truth of the
+> That is the binding rule book — 69 numbered rules in seven groups (truth of the
 > picture · the figure · motion · nothing hidden · questions · writing · engine), an
 > authoring checklist, and the five exact verification checks. Every rule in it exists
 > because a real lesson broke it and it was caught on a real phone. This section is the
@@ -571,20 +571,39 @@ the failure is completely silent.
 > **Publish to every runtime still in the wild**, newest first. Drop an old one
 > only once nobody is left on that binary.
 
-### The local fingerprint never matches
+### The fingerprint tracks your working tree, not the build
 
-`runtimeVersion` is `{ "policy": "fingerprint" }` in `app.json`, but the
-fingerprint computed **on this machine cannot match the one EAS computed** — the
-EAS builder autolinks a native widget-pin module that isn't resolvable locally.
-So every publish is a three-step dance:
+`runtimeVersion` is `{ "policy": "fingerprint" }`, and the fingerprint is
+computed from the **current working tree** — `eas.json`, `app.json` and the icon
+/ splash assets are all inputs. So it equals a build's runtime only while the
+tree still matches what that build was made from. Change an icon and it moves.
 
-1. Temporarily pin the target runtime in `app.json`, e.g.
-   `"runtimeVersion": "bd0c0637f7e636eef9e8ddbbe61db9c9c9ae513c",`
+That is how an update gets published to a runtime **no build has**, and it has
+already happened here: an update sits on `8ca4a96872a65829c561c9cdaf2929c66bbc9018`,
+which belongs to no build in `eas build:list`. It reached zero devices and gave
+no error. (It was superseded, so no harm done — but nothing would have told us.)
+
+**So check before every publish, don't assume:**
+
+```
+npx expo-updates fingerprint:generate --platform android   # last hash in the JSON
+eas build:list --limit 5 --json                            # runtimeVersion per build
+```
+
+If the local fingerprint matches the runtime you're targeting, publish as-is.
+Otherwise pin it explicitly, which is always safe:
+
+1. Set `"runtimeVersion": "<the build's runtime>",` in `app.json`
 2. `$env:CI=1; eas update --branch production --environment production --message "..." --non-interactive`
-3. **Revert** `app.json` to `{ "policy": "fingerprint" }` and confirm a clean tree.
+3. **Revert** to `{ "policy": "fingerprint" }` and confirm a clean tree.
 
 Repeat for each runtime. **Always** verify `git status` is clean afterwards; a
 left-behind pin will silently mis-target the next publish.
+
+> Earlier this file claimed the local fingerprint could *never* match because of
+> an autolinked widget-pin module. That was true at one point and is not now — as
+> of build 16 the local fingerprint is exactly `bd0c0637…`. Verify, don't trust
+> either claim.
 
 ### Builds
 
