@@ -68,6 +68,26 @@ figure — that *is* the sublime lesson; logic-7's board is oversized because th
 on it must be readable; ethics-6's bridge parapet is knee-height because a real one
 would hide the figures. Write down *why*, or the next audit "fixes" them.
 
+**A5b. A defect is never one lesson's.** A problem is reported on the lesson where it
+was *noticed*, which is almost never the same as where it *lives*. The hole in the
+figure's body was reported on the trolley lessons and was in the rig — so every figure
+in every lesson had it, and it had already been there for months; the enlarged stages
+merely made it visible. It then took **four** separate fixes across three passes,
+because each pass repaired the sites it happened to be looking at: 23 gesture codes and
+`stand()` first, then `walk()` — which meant *every walking figure in the app* still
+had it after the "fix" — then `builderHold` and `seated()`.
+
+So the order is: find whether the defect lives in this lesson or in shared code; if it
+is shared, it is in all 48 and the lesson that reported it is a sample, not the scope.
+Then build the cheapest thing that can find **every** instance before declaring it
+fixed — a grep for the numeric shape (hanging fist targets with y between −10 and +2),
+a harness sheet rendering all 48 gestures at once, a script that scrapes every scene's
+constants. Reasoning about where else it might be is exactly how the three misses
+happened.
+
+> *"Make sure no other stickmen in other lessons are like this … find an easy way to
+> find this problem then fix."*
+
 ### B. The figure
 
 **B6. One figure scale for the whole app.** The shared `K_FIG` in `cinematicKit.tsx`
@@ -212,6 +232,22 @@ Never "fix" a seam by making a cap bigger. Find which of the three it is.
 
 > *"I want the segment character to be more smooth, and you can't see the joints."*
 
+**B16b. A leaning figure's hanging arm vanishes into its own torso.** B11 puts a
+resting hand at about y +6, and that is right for an **upright** body — but on a figure
+that leans, the arm runs down the length of the torso instead of hanging clear of it,
+and at this stroke weight the two merge into a single lump with no arm in it. The
+completion screen's waiting figure leans on the rule, so his arms are **folded**; a
+hand resting on the prop he leans against works too. Whenever the lean is more than
+slight, give the arms somewhere to be.
+
+**B16c. An outline closes up at small sizes.** A shape drawn as a stroked outline is
+only legible while its interior is wider than its stroke. The `scroll` glyph carried a
+2px stroke that was fine at authoring size and, at the 54px it actually renders in the
+ranks list, closed its own interior into a featureless dark pill. Judge every shape at
+the size it will really be drawn — then either fill the body so the silhouette reads,
+or thin the stroke in proportion. This applies to any small prop, icon or token in a
+scene, not just to glyphs.
+
 ### C. Motion and life
 
 **C17. Movement takes the time it actually needs.** A walk's duration comes from its
@@ -323,6 +359,31 @@ that reflow was the original "glitch at the top". And overlapping two paragraphs
 partial opacity is a muddy double-exposure: fade the deck fully **out**, swap while
 invisible, fade **in**. Only one thing on screen, ever.
 
+**C22b. Nothing bounces.** The XP total on the completion screen arrived on a spring at
+damping 11, so it overshot its own value and wobbled back — and a wobbling number reads
+as a toy. The identity is ink on paper: things are **drawn on**, wiped on, uncovered, or
+counted up. A paper cover sliding off left-to-right while the digits count up under it
+is the house move. Springy overshoot belongs to a different product, and there is none
+left anywhere on the reward screen.
+
+**C22c. A multi-part reveal plays in order, and a tap runs it out.** Two rules in one,
+both from the rank-up sequence. **Order:** each step starts as the one before it lands
+and nothing overlaps — mark, then burst, then the old name out and the new name in,
+then the bar, then the button. A reveal where everything happens at once has no reading
+order and registers as a flash. **Escape:** anybody who has seen it before must be able
+to tap anywhere to jump straight to the end state, because a celebration that cannot be
+skipped becomes a toll on the tenth viewing. Any control involved stays inert until it
+is actually visible, or the skip-tap presses it.
+
+**C22d. To move a figure UP, move the world down past it.** Raising the figure up a
+static ladder does not read as climbing — it reads as a figure sliding up a picture of
+a ladder, and it was rejected on sight. What works is the reverse: put the rungs in an
+`overflow: hidden` clip and **scroll them downward** past a figure running the `climb`
+cycle on the spot. Rungs must be laid out **0-based inside the clip** (`top: r * RUNG_SP`);
+the first attempt used `top: 300 + r * RUNG_SP`, which pushed every rung out of the clip
+so none of them showed at all. The same inversion is the answer for descending, falling
+and any other vertical travel.
+
 ### D. Nothing is hidden, cut, or covered
 
 **D23. Props must never cover the figure, and the figure must never cover the props.**
@@ -392,6 +453,15 @@ writing is readable is correct. B7 is about *ground-sharing* props; most scene
 furniture sits above the figure's crown and is an information surface, not an object
 in the room.
 
+**D32b. Hand-break short text to a MEASURED width.** D30 says a stranded fragment is a
+defect; this is how to stop writing them. For any text in a narrow container — a
+speech bubble, a thought cloud, a card label — render it once, measure how many
+characters the container actually fits, then break every line by hand to that number.
+The completion screen's thought lines are broken at **nineteen** characters, measured
+off a real render, and that number was only discovered because "Descartes doubted all."
+stranded "all." on a line of its own. Counting characters in the editor is guessing;
+the font, the padding and the device width all get a vote.
+
 ### E. Questions and interaction
 
 **E33. Vary how the reader answers.** Not every question is A/B/C/D under a picture.
@@ -416,6 +486,26 @@ and cost an OTA. Keep it OFF the wrapper that contains the interactive Pressable
 
 **E37. Beats advance on TAP, never auto-play.** That was a deliberate product choice;
 pacing belongs to the reader.
+
+**E37b. A tap target must live in the same coordinate space as the art it belongs to.**
+When a scene owns its answer UI, the Pressable and the picture it sits on have to be
+transformed by the same thing, or the reader taps a fork's signpost and hits paper an
+inch away. The exemplar (`logic7Scene`) avoids the problem entirely by having **no
+scene-wide camera at all** — props are laid out directly in stage coordinates, so a
+Pressable is exactly where its art is. If a scene does need a camera, then figures,
+props and Pressables all go **inside** it; never place interactive elements outside a
+transform that moves the thing they represent. Pair this with E36 — a decorative
+full-bleed wrapper above them eats the taps regardless.
+
+**E37c. The scene's graded questions must agree with the lesson's data file.** The
+`Lesson` in `data/branches/…` is the curriculum contract, and it still drives the card
+runner for every lesson that has no scene — so the two must teach and score the same
+thing. Re-cutting the *wording* to fit the staging is expected and good: logic-7's data
+asks *"If it rains, the streets are wet. It is raining." What follows?* while the scene
+asks the reader to tap the card that must be true. What may **not** drift is the
+substance — the number of graded questions, the concept each one tests, and which
+answer is correct. If the scene needs a question the data doesn't have, add it to the
+data too.
 
 ### F. Writing the lesson
 
@@ -450,6 +540,29 @@ beats.
 **F45. Never cross-reference a lesson by number.** "As we saw in Lesson 4" breaks
 silently the moment anything is reordered and `tsc` will never tell you. Write
 "earlier you saw…".
+
+**F45b. Confirm a lesson's id by grepping `id:` — never by counting.** A lesson's id
+number is its position in its branch's **original single-path order**, and the units are
+contiguous slices of *different lengths* — epistemology's first unit holds 9 lessons
+where the others hold 8, so "the seventh lesson" is `epistemology-knowledge-8` there and
+`logic-arguments-7` next door. Nor does a scene component's name settle it. Counting
+within a unit has mislabeled work more than once; grep the data for `id:` and read it.
+
+**F45c. Build a batch from one verified exemplar.** The method that produced 11 lessons
+in a single pass with zero errors and a clean `tsc` on the first try: write **one**
+gold-standard lesson yourself and verify it on a real device, then give every
+subsequent author (a) that exemplar to read first, (b) the exact API surface they may
+import, (c) the full footgun list, (d) a per-lesson design brief — metaphor, walk
+choreography, interaction type — and (e) a self-check list. State the occlusion
+geometry as **numbers**, not prose: the figure is 103 stage units tall with its crown at
+y 397 on GROUND 500 and spans about x ± 36, so props belong in an x-range the figure
+never enters, or entirely above its crown.
+
+Keep every author inside their own two files. Wire the `CINEMATIC` map yourself, at the
+end, so no two of them touch a shared file — and if a pass is interrupted, run
+`npx tsc --noEmit` **first**: an author stopped mid-edit leaves references to components
+it never wrote, and the fastest repair for a half-designed file is `git checkout --` on
+it rather than guessing at somebody's unfinished intent.
 
 ### G. Engine and tooling
 
@@ -486,6 +599,41 @@ everyone on the Play Store — keep every production push clean and shippable, a
 **never** bump `FREE_DAILY_LESSON_LIMIT` (the account already has Scholar's Pass, so
 testing does not need it).
 
+**G51b. Finish by handing off to the GLOBAL reward — never render `LessonReward`
+inline.** A player that renders the reward itself reproduces a bug that reached the
+user twice. The reward is a fullscreen `Modal`, and the finished lesson screen never
+left the Branches tab's stack: its `router.back()` returned to Home through *tab*
+history instead of popping the lesson, so every later visit to the Learn tab
+re-rendered the finished screen and re-showed the reward, blocking the branches list
+outright. The inline Modal also failed to cover the tab bar, so the reader could tab
+away mid-reward.
+
+The shape every player uses, and every new one must: on completion call
+`showReward({ xp: lessonXP(correct, asked), correct, total, branchSlug, lessonId })`,
+then `exitLesson()` immediately — which pops cleanly, because no tab switch has
+happened yet — and render `null` while done. A single `LessonRewardHost` above the tabs
+in `app/_layout.tsx` draws it. That host owns **every** completion side effect —
+progress, streak, badges, the daily counter, ads, the widget — so scoring runs exactly
+once and is decoupled from the screen being popped. Never award XP yourself, and never
+compute the number by hand: `lessonXP()` in `constants/xp.ts` is the only place the
+model is written down, and the four runners each carrying their own `COMPLETION_XP`
+is precisely the discrepancy it was created to end.
+
+**G51c. `Fade` snapshots its content — anything that can change WITHIN a beat must be
+in `revision`.** The render-prop takes a picture of what it renders and holds it until
+the trigger changes, which is what makes the sequential fade clean. The cost is that
+mid-beat state freezes: the answer the reader just picked, a quote's bookmark filling
+on save. Both were real — the bookmark would not fill until `quoteSaved` was added to
+the revision string. Beat changes fade; same-beat changes swap live, but only if you
+declared them.
+
+**G51d. A lesson is not shipped until it is in the `CINEMATIC` map.** The route resolves
+`const Runner = CINEMATIC[lessonId] ?? LessonRunner`, so a finished scene that was never
+mapped silently plays as plain cards — which looks exactly like the lesson was never
+built, and `tsc` is perfectly happy. The same line is the rollback: deleting one entry
+restores that lesson's card version instantly and touches nothing else, which is why
+the map is the only shared file a lesson should need to modify.
+
 ---
 
 ## Part 2 — Authoring checklist
@@ -503,6 +651,9 @@ testing does not need it).
 - [ ] Any physical claim the vocabulary can't express → add a pose (A2).
 - [ ] Secondary figures posed deliberately (A3).
 - [ ] Explanations fit the answered deck (D27).
+- [ ] Graded questions agree with the lesson's data file in count, concept and correct
+      answer — wording may be re-cut for the staging (E37c).
+- [ ] The lesson id confirmed by grepping `id:`, never counted within a unit (F45b).
 
 **Scene**
 - [ ] Shared `K_FIG`; relative sizes derived (B6); in proportion to ground props (B7).
@@ -525,8 +676,21 @@ testing does not need it).
 - [ ] Every prop's y-range in a comment; band measured to hold it with a few units of
       air — no more (D25, D26).
 - [ ] Labels fit their columns on one line (D30); cards have font-padding slack (D29).
-- [ ] Decorative overlays have `pointerEvents="none"` (E36).
+- [ ] Decorative overlays have `pointerEvents="none"` (E36), and every tap target sits
+      in the same coordinate space as its art (E37b).
+- [ ] Nothing springs or overshoots (C22b); any multi-part reveal is ordered and can be
+      tapped to its end state (C22c); vertical travel moves the world, not the figure
+      (C22d).
+- [ ] Leaning figures fold or place their arms (B16b); every small shape is legible at
+      the size it actually renders (B16c).
+- [ ] Text in narrow containers hand-broken to a measured width (D32b).
 - [ ] Deliberate exceptions written down (A5).
+
+**Wiring**
+- [ ] Completion calls `showReward(…)` then `exitLesson()` and renders `null`; XP comes
+      from `lessonXP()`; `LessonReward` is never rendered by the lesson (G51b).
+- [ ] Anything that changes within a beat is in the `Fade` `revision` (G51c).
+- [ ] The lesson is registered in the `CINEMATIC` map (G51d).
 
 **Then run Part 3. Do not skip it because it "looks fine".**
 
@@ -559,6 +723,34 @@ first intent after a cold launch lands on Home. The package is **`com.philosophi
 (not the EAS account name — getting this wrong makes `force-stop` fail silently and
 every screenshot come from a stale process). **Never blind-tap inside a lesson**: a
 tap at a guessed coordinate once bookmarked a quote into the real user's collection.
+
+**Read the screenshot's byte size before opening it.** It answers the first question
+faster than looking does, and it distinguishes the three failures that look alike:
+
+| Size | Meaning |
+|---|---|
+| ~32 KB, all dark | a worklet crash — check the log for `undefined is not a function` or a `ReferenceError` (G47) |
+| very small | a blank render — the lesson mounted and drew nothing |
+| ~83 KB | the **"not yet unlocked"** gate, not a defect — see below |
+| ~90–140 KB | a real lesson frame |
+
+A **burst** of 5–8 captures whose sizes all differ is proof the scene is animating;
+sizes that are identical across a burst mean it is frozen, finished, or stuck on a
+gated beat. This is also how transitions get checked — capture straight through a tap,
+because a blank frame mid-swap is tiny and a double-exposure is *larger* than the
+settled frame.
+
+**A locked lesson is not a bug.** Progression is sequential within a unit, so a lesson
+can only be reached on the device once its earlier siblings are complete there — four
+of a twelve-lesson batch showed the gate rather than the lesson, with identical byte
+sizes, which is the tell. Complete the siblings on that device, or review through the
+web harness, which bypasses the gate.
+
+**A white Learn tab after deep-link testing is a test artefact.** Deep-linking puts the
+lesson on the Branches tab as a foreign stack entry, so finishing it pops across to
+Home and leaves the finished screen — which renders `null` — behind on that tab. No
+in-app path deep-links into a lesson, so a real reader cannot reach this. Relaunch;
+don't chase it as a regression.
 
 **Known false positives — verify before "fixing":**
 - Elements masked by an ancestor `overflow: hidden` — `getBoundingClientRect` ignores
