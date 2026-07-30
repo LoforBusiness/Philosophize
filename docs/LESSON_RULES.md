@@ -206,10 +206,19 @@ from the pelvis; arm reach **33**; leg reach **37**; body+arms span about **x ±
   own face. The bar is `headR + 5.5 + margin` ≈ **29 to the wrist**, and it applies to
   the whole sweep of a gesture, not just its peak — an oscillation that swings back
   toward the head is checked at its inner extreme.
-- **Swing a hand by ROTATING it about the shoulder, not by adding to its x.** Adding
-  ±4 to x drags the hand toward the head on every inward stroke and changes the arm's
-  extension on every stroke. Holding the radius and moving the angle does neither, and
-  it is the arc a forearm actually traces.
+- **Oscillate a hand in POLAR terms about the shoulder, never by adding to its x** —
+  and for a figure in profile, oscillate the RADIUS. Adding ±4 to x drags the hand
+  toward the head on every inward stroke and changes the arm's extension on every
+  stroke, so both the clearance and the singularity checks have to be redone per frame.
+  Polar fixes that. But which polar term matters: the figure is drawn side-on, so a
+  real wave — a hand rocking left and right — happens straight through the screen and
+  cannot be drawn at all. What reads in profile is the forearm rocking **fore and aft**,
+  which is the reach. Swinging the ANGLE looks like the same fix and is not: at 19°
+  above horizontal, rotating the arm moves the hand almost entirely up and down, and it
+  measured 0 lateral reversals against 2.7 units of x-range — the vertical twitch it was
+  meant to replace, in a costume. Reach ±5.5 gives 9.5 units of x against 4.7 of y and
+  6 reversals. **State the axis you expect the motion on, then measure that it happened
+  on that axis.**
 - **A clamp makes distinct inputs identical.** `solve` pulls any fist past the arm's
   33-unit reach back onto the reach circle, so two different over-reaching targets
   land in the same place. The jab (55, −31) and the cross (60, −29) both did: 1.5

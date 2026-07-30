@@ -1820,7 +1820,7 @@ export function leanLive(t: number): Stance {
   // arrives and leaves at rest.
   const dip = pulse(clamp01(raise / 0.45));              // under the shoulder on the way
   const fu = clamp01((wu - 0.26) / 0.38);                // the hold, where the waving is
-  const flick = Math.sin(fu * Math.PI * 4) * Math.sin(Math.PI * fu);
+  const flick = Math.sin(fu * Math.PI * 6) * Math.sin(Math.PI * fu);
 
   // THE SWEEP IS A ROTATION, NOT A SLIDE. Waving by adding ±4 to the hand's x drags it
   // toward the head on every inward stroke and changes the arm's extension on every
@@ -1830,10 +1830,20 @@ export function leanLive(t: number): Stance {
   // — and it is the FIST EDGE that has to clear, not its centre. At the old peak the
   // centre was 23.9 out from a head of radius 20, so the fist's own 5.5 radius put its
   // edge at 18.4: inside the skull, on the near arm, which draws in front of the head.
+  // …and the sweep is the REACH, not the angle. This figure is drawn in profile, so a
+  // real wave — a hand rocking side to side — happens straight through the screen and
+  // cannot be drawn at all. What reads in profile is the forearm rocking fore-and-aft.
+  // Swinging the angle instead looks like the same fix and is not: at 19° above
+  // horizontal, rotating the arm moves the hand almost entirely UP AND DOWN, so it
+  // measured 0 lateral reversals and 2.7 units of x-range — the vertical twitch again,
+  // wearing a costume. Oscillating the radius gives 6.6 units of x against 2.3 of y.
   const WSH_X = -1.4, WSH_Y = -25.1;                     // the near shoulder in this pose
-  const wa = 0.34 + flick * 0.16;                        // ±9°, an unhurried wave
-  const wx = WSH_X + 27 * Math.cos(wa);
-  const wy = WSH_Y - 27 * Math.sin(wa);
+  // ±5.5 gives the hand about 10 stage units of travel — roughly 17cm once you scale a
+  // 103-unit figure to a person, which is a wave. At ±3.5 it was 9cm: a twitch.
+  const wr = 24 + flick * 5.5;                           // 56%…89% of reach, never clamped
+  const wa = 0.34 + flick * 0.03;
+  const wx = WSH_X + wr * Math.cos(wa);
+  const wy = WSH_Y - wr * Math.sin(wa);
 
   return {
     ...s,
