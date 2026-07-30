@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -33,7 +33,11 @@ interface Props {
   scene: LaunchScene;
 }
 
-export default function LaunchFigure({ scene }: Props) {
+// memo, so LaunchScreen's own state changes (the progress hold at 2.7s, the
+// finish) never reach this component. The clock above survives a re-render
+// anyway; this stops one being asked for in the first place, and keeps the
+// figure's frame budget away from the screen's bookkeeping.
+export default memo(function LaunchFigure({ scene }: Props) {
   const { activity, k, dir, x: x0, groundY: gy0, pivot, kite, groundWave, walkSpan } = scene;
 
   // Everything the figure holds is sized in the SAME rig units as the figure, so
@@ -54,10 +58,25 @@ export default function LaunchFigure({ scene }: Props) {
     };
   }, [k, gy0, pivot]);
 
+  // ACCUMULATE the clock; never read timeSinceFirstFrame.
+  //
+  // useFrameCallback's effect depends on [callback, autostart], and the callback
+  // closure is a new function on every render — so each re-render unregisters and
+  // re-registers it, and registerFrameCallback starts a fresh entry with
+  // startTime null. The very next frame then reports timeSinceFirstFrame: 0.
+  //
+  // LaunchScreen calls setHeld(true) at exactly 2.7s, which re-renders this
+  // component. Reading timeSinceFirstFrame therefore sent the clock back to zero
+  // and the figure snapped to its opening pose, ~0.7s before the screen lifted —
+  // every single launch. Adding up timeSincePreviousFrame keeps the elapsed time
+  // in a shared value, which survives any number of re-registrations. It is the
+  // same pattern CinematicPlayer uses, which is why lessons never had this.
   const clock = useSharedValue(0);
   useFrameCallback((f) => {
     'worklet';
-    clock.value = (f.timeSinceFirstFrame ?? 0) / 1000;
+    let dt = (f.timeSincePreviousFrame ?? 16) / 1000;   // null on a re-registered first frame
+    if (dt > 0.05) dt = 0.05;                           // a stall must not fast-forward the scene
+    clock.value += dt;
   }, true);
 
   // Swing phase, -1..1. Kept separate because the scene rotates the whole rig by
@@ -198,7 +217,7 @@ export default function LaunchFigure({ scene }: Props) {
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   stage: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
