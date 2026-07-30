@@ -65,7 +65,7 @@ export const BEATS: E10Beat[] = [
     interact: {
       prompt: 'Fallibilism draws the line somewhere on this gauge. Tap where knowledge begins.',
       explain:
-        'Well short of certainty, and well past a guess. The trap is the flag on the right: "know it only when you could not be wrong" feels like the rigorous answer, and it is exactly the demand fallibilism rejects — hold to it and you know nothing at all. The flag on the left is the opposite error: evidence that thin is a hunch, whatever you call it.',
+        'Well short of certainty, well past a guess. The trap is the right-hand flag: "know it only when you cannot be wrong" sounds like the rigorous answer, and it is the demand fallibilism rejects. Hold to it and you know nothing at all.',
     },
     dur: 4.6,
   },
@@ -80,7 +80,7 @@ export const BEATS: E10Beat[] = [
         { id: 'd', text: 'No — because fallibilists never actually believe anything', correct: false },
       ],
       explain:
-        'The trap is reading "I might be wrong" as hedging. It is not a doubt about the claim; it is a standing invitation to evidence. You can commit fully, act on it, stake something on it — and still leave the door open. That is the whole trick, and it is how anyone sane lives.',
+        'The trap is reading "I might be wrong" as hedging. It is not doubt about the claim, it is a standing invitation to evidence. You can commit fully, act on it, and still leave the door open.',
     },
     dur: 4.4,
   },

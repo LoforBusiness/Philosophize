@@ -64,7 +64,7 @@ export const BEATS: Et10Beat[] = [
     interact: {
       prompt: 'Two children, one at your feet and one far away. Tap the difference Singer says carries no moral weight.',
       explain:
-        'Distance. It changes how the case feels and nothing about what is at stake. The other two are not decoys — Singer’s principle depends on them: it only asks for help you can actually give, and only where the cost to you is not itself comparably serious. Strip those out and you have a demand, not an argument.',
+        'Distance. It changes how the case feels and nothing about what is at stake. The other two are not decoys — Singer’s principle needs both: help you can actually give, at a cost that is not itself serious.',
     },
     dur: 4.8,
   },
@@ -79,7 +79,7 @@ export const BEATS: Et10Beat[] = [
         { id: 'd', text: 'False — because Singer was not himself a utilitarian', correct: false },
       ],
       explain:
-        'The trap is knowing that Singer IS a utilitarian and assuming the argument must be too. It is built to need far less: prevent something terrible at small cost to yourself. You do not have to be a utilitarian to agree with that — which is exactly why the argument is so hard to put down. Bernard Williams pushed back elsewhere, arguing a livable ethics has to leave room for your own projects and people.',
+        'The trap is knowing Singer IS a utilitarian and assuming the argument must be too. It needs far less: prevent something terrible at small cost to yourself. You need not be a utilitarian to agree — which is why it is so hard to put down.',
     },
     dur: 4.8,
   },

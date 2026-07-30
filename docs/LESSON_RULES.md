@@ -37,6 +37,7 @@ units with the ground line at y = 500.
 > | a moved figure walks rather than slides (C18) | `travelStance` |
 > | two figures never move as one (B14) | the `seed` on `guard` / `strideStance` |
 > | a reader-facing XP figure matches the model (H63) | `CORRECT_LABEL` ← `XP_PER_CORRECT_ANSWER` |
+> | an explanation fits the deck (D27) | `check:cinematic`, 290 characters |
 >
 > When a new defect turns out to be a number, add the guard rail and then point the
 > rule at it — don't just write a sterner sentence.
@@ -521,6 +522,16 @@ epistemology-8 reserved 74 empty rows and rendered at 0.75 while its siblings ra
 the body height, so a line past its bottom is unreadable. Check the **answered**
 state of question beats — prompt + pick + answer + explanation is the tallest the
 deck ever gets.
+
+**And there is a number for it: ~290 characters of explanation.** That is the longest
+one among the lessons that have actually been seen on a phone, so anything at or under
+it fits by precedent. This is worth having as a figure because explanations drift long
+without anyone noticing — a batch of six new lessons came in at a **median of 327 and a
+max of 403, with nine of twelve longer than any of the 97 that existed**, purely from
+wanting to explain the trap properly. They read fine in the editor. They would have
+been cut off mid-sentence on the device, on the one beat the reader most needs to read.
+`npm run check:cinematic` now bars anything over 290. Prompts and options were inside
+the envelope on the same batch, so it is the explanation specifically to watch.
 
 **D28. Text must fit its own box.** Two ways a word gets lost that the band and deck
 checks cannot see: the card **clips** it (`scrollHeight > clientHeight`), or it

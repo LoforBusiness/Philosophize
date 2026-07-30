@@ -70,7 +70,7 @@ export const BEATS: M9Beat[] = [
         { id: 'd', text: 'Mind and body are one and the same thing', correct: false },
       ],
       explain:
-        'Dualism is the claim that mind (thinking, unextended) and body (extended, unthinking) are two fundamentally different substances rather than one. The trap is answer A: "the mind is part of the brain" sounds like a modest version of the same idea, but it is the view Descartes was arguing against.',
+        'Two different substances, not one. The trap is A: "the mind is part of the brain" sounds like a modest version of the same claim, and it is the view Descartes was arguing against.',
     },
     dur: 4.4,
   },
@@ -79,7 +79,7 @@ export const BEATS: M9Beat[] = [
     interact: {
       prompt: '"I think, therefore I am." Tap the one thing that sentence actually establishes.',
       explain:
-        'The cogito gets you a thinker, and no more: something is doing this thinking, so something exists. The trap is the second card — the leap from "a thinking thing exists" to "and it is made of different stuff from my body" is a further argument, and it is the one nearly everybody has disputed since. The phrase is not even from the Meditations; it is from the Discourse.',
+        'A thinker, and no more: something is doing this thinking, so something exists. The trap is the second card. The leap from there to "and it is made of different stuff" is a further argument, and the one everybody has disputed since.',
     },
     dur: 4.6,
   },

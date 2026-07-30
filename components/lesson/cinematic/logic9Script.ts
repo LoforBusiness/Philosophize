@@ -66,7 +66,7 @@ export const BEATS: L9Beat[] = [
     interact: {
       prompt: 'Three replies to that budget plan. Tap the one that attacks the arguer instead of the argument.',
       explain:
-        'Ad hominem goes at the person: his old school report cannot make a column of figures add up or fail to. The trap is the third reply — it is also a dodge, but a different one. "So you want everyone poor" is a straw man: it distorts the position and then argues with the distortion. Only the middle reply actually opens the plan.',
+        'Ad hominem goes at the person: a school report cannot make a column of figures add up. The trap is the third reply — also a dodge, but a straw man. It distorts the position, then argues with the distortion.',
     },
     dur: 4.8,
   },
@@ -81,7 +81,7 @@ export const BEATS: L9Beat[] = [
         { id: 'd', text: 'Only when the fallacy is an ad hominem', correct: false },
       ],
       explain:
-        'A fallacy tells you the reasoning does not support the conclusion — it tells you nothing about whether the conclusion is true. Someone can give you a terrible argument that the sun will rise tomorrow. Assuming the conclusion must be false because the argument was bad has its own name: the fallacy fallacy.',
+        'A fallacy tells you the reasoning does not support the conclusion, not that the conclusion is false. Someone can give you a terrible argument that the sun will rise. Assuming otherwise has its own name: the fallacy fallacy.',
     },
     dur: 4.6,
   },

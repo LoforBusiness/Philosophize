@@ -74,7 +74,7 @@ export const BEATS: P9Beat[] = [
         { id: 'd', text: 'A foreign power interfering in an election', correct: false },
       ],
       explain:
-        'The danger is internal, which is what makes it hard to see. The trap is A: a tyrant is the picture the word brings up, and this tyrant is the electorate. No coup, no usurper — just a majority, by law or by sheer social pressure, closing in on the few.',
+        'The danger is internal, which is what makes it hard to see. The trap is A: a tyrant is the picture the word brings up, and this tyrant is the electorate. No coup — just a majority closing in on the few.',
     },
     dur: 4.6,
   },
@@ -83,7 +83,7 @@ export const BEATS: P9Beat[] = [
     interact: {
       prompt: 'The four voted fairly and they still cannot pass this line. Tap what is actually holding them.',
       explain:
-        'A right, which is a limit on what any vote may do. The trap is the first card — Mill loved liberty, so it sounds right that he would let the crowd decide everything. He argued the reverse: precisely because he loved liberty he carved out a sphere no majority may enter, however large or however sincere. Counting more carefully would not help here; nothing about the count is wrong.',
+        'A right is a limit on what any vote may do. The trap is the first card: Mill loved liberty, so it sounds right that he would let the crowd decide. He argued the reverse — a sphere no majority may enter, however large.',
     },
     dur: 4.8,
   },

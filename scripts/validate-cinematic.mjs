@@ -77,6 +77,20 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Script.ts')).sort(
   const durless = beats.filter((b) => !/^\s{4}dur:/m.test(b)).length;
   if (durless) errs.push(`${durless} beat(s) with no \`dur\` (the type requires one; H55)`);
 
+  // D27 — THE DECK IS overflow:hidden AND FIXED. The answered state (prompt + pick +
+  // explanation) is the tallest it ever gets, and an explanation past the bottom is
+  // simply not readable. 290 is not a taste call: it is the longest explanation among
+  // the 48 lessons that have been seen on a real phone, so anything at or under it is
+  // safe by precedent. Six new lessons came in at a median of 327 and a max of 403 —
+  // nine of twelve longer than ANY existing one — which is exactly the sort of drift
+  // nobody notices while writing.
+  for (const m of src.matchAll(/^\s*explain:\s*$\n\s*'(.*)',$/gm)) {
+    if (m[1].length > 290) errs.push(`an explanation is ${m[1].length} chars; the deck holds ~290 (D27)`);
+  }
+  for (const m of src.matchAll(/^\s*explain: '(.*)',$/gm)) {
+    if (m[1].length > 290) errs.push(`an explanation is ${m[1].length} chars; the deck holds ~290 (D27)`);
+  }
+
   if (errs.length) problems.push([f, errs]);
   else ok++;
   if (warns.length) warnings.push([f, warns]);

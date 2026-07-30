@@ -69,7 +69,7 @@ export const BEATS: A9Beat[] = [
         { id: 'd', text: 'Art can no longer be beautiful at all', correct: false },
       ],
       explain:
-        'An option, not a condition. The trap is D — hearing "beauty was dethroned" as "beauty was banned." Danto’s claim is smaller and stranger than that: a work can still be beautiful, it just no longer has to be, because what makes it art was never the beauty.',
+        'An option, not a condition. The trap is D — hearing "dethroned" as "banned." A work can still be beautiful, it just no longer has to be, because what made it art was never the beauty.',
     },
     dur: 4.6,
   },
@@ -78,7 +78,7 @@ export const BEATS: A9Beat[] = [
     interact: {
       prompt: 'Someone says: “It isn’t beautiful, so it can’t really be art.” Tap the label that belongs under the plinth.',
       explain:
-        'The trap is the first label, and it is the oldest assumption in the subject: art equals beauty. Warhol’s boxes are not beautiful and nobody claims they are — they are art because of what they mean and when they said it. The third label is the opposite mistake, smuggling beauty back in by insisting it must be there somewhere, invisibly.',
+        'The trap is the first label — the oldest assumption in the subject: art equals beauty. Warhol’s boxes are not beautiful and nobody says they are. The third smuggles beauty back in by insisting it must be there invisibly.',
     },
     dur: 4.8,
   },
