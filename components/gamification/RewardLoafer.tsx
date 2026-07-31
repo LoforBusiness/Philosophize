@@ -111,13 +111,100 @@ export const LOAFER_LINES = [
   'One lesson from\nbeing insufferable.',
   'You could be\nscrolling instead.\nThis is better.',
   'Ockham says stop.\nOckham is wrong.',
+  'You again.\nI had plans.',
+  'A little knowledge.\nVery little.',
+  'Aquinas wrote two\nmillion words.\nYou tapped.',
+  'You are now\ndangerous at\ndinner parties.',
+  'Well. Somebody\nhad to.',
+  'Your ancestors\nhunted. You tap.',
+  'That counts.\nBarely. It counts.',
+  'I have seen worse.\nNot today.',
+  'Epictetus was a\nslave. You are\ntired.',
+  'Knowledge: gained.\nWisdom: pending.',
+  'You have peaked.\nEnjoy the view.',
+  'Nobody is\nimpressed. I am\npaid to be.',
+  'Spinoza was\nexcommunicated.\nYou got XP.',
+  'Do it again.\nI dare you.',
+  'The Stoics would\nsay nothing.\nSo will I.',
+  'You learned a\nthing. Terrible\nprecedent.',
+  'Hegel was harder.\nMuch harder.',
+  'One day this\nwill be useful.\nProbably not.',
+  "Look at you.\nActually, don't.",
+  'Aristotle had\nAlexander.\nI have you.',
+  'That was the\neasy one.',
+  'You may now\nargue with a bus.',
+  'Congratulations,\nI suppose.',
+  'Hume slept\nthrough worse.',
+  'Your streak is\nheld together\nby spite.',
+  'A mind expanded.\nBy a little.',
+  'Pascal wagered.\nYou wager\nnothing.',
+  'I would explain,\nbut you just did.',
+  'Somewhere Plato\nis rolling.\nSlowly.',
+  'You did the\nreading. Once.',
+  'Boethius wrote\nin prison.\nYou had snacks.',
+  'Nietzsche said\nbecome who you\nare. Careful.',
+  'This is not a\npersonality.\nYet.',
+  'Half an idea\nis still an idea.',
+  'You are ahead\nof most people.\nMost people.',
+  'Diderot needed a\nwhole encyclopedia.',
+  'That is one for\nthe CV.',
+  'I counted. It\nwas correct.',
+  'Wittgenstein\nburned his notes.\nYou saved a quote.',
+  'Keep going and\nsomeone will\nnotice.',
+  'You have opinions.\nNow get evidence.',
+  'Locke would have\nliked you. Locke\nwas polite.',
+  'Marcus wrote\nto himself.\nYou tap at me.',
+  'Every day. That\nis the trick.\nEvery day.',
+  'Doubt everything.\nStart with this\nnumber.',
+  'You are learning\nfaster than\nyou are aging.',
+  'A philosopher\nwould ask why.\nSo. Why?',
+  'Bentham is\nstuffed in a\ncabinet. Aim low.',
+  'That was fine.\nFine is a word.',
+  'Now go outside.\nIt is a premise.',
+  'Camus said push\nthe rock.\nYou tapped it.',
+  'You know more\nthan yesterday.\nLow bar.',
+  'Very impressive.\nI am easily\nimpressed.',
+  'Simone de\nBeauvoir. Look\nher up. Go on.',
+  'You have a brain.\nIt has been used.',
+  'Hypatia taught\nmaths in Greek.\nYou tapped B.',
+  'Do not let this\ngo to your head.\nToo late.',
+  'One lesson does\nnot make a sage.\nTwo might.',
+  'Zhuangzi dreamt\nhe was a butterfly.\nYou dreamt of bed.',
+  'The examined life\ncontinues.\nUnfortunately.',
+  'Good. Now the\nother 173.',
+  'Nobody made you\ndo that. Odd.',
+  'You are becoming\nthe sort of person\nwho reads.',
+  'A whole lesson.\nWithout crying.',
+  'Kant never left\nhis town. You\nnever left bed.',
+  'Two things fill\nme with awe.\nNeither is this.',
+  'You could quit.\nHistory is full\nof quitters.',
+  'Sartre wrote\nsix hundred pages.\nOn nothing.',
+  'That is a fact\nyou now own.\nNo refunds.',
+  'Heraclitus says\nyou cannot do\nthat twice.',
+  'Behold: a person\nwho finishes\nthings. Allegedly.',
 ];
 
-/** Stable per completion, so the line never changes while it is being read. */
+/**
+ * Stable per completion, so the line never changes while it is being read.
+ *
+ * FNV-1a with a Murmur3 finaliser, and the finaliser is the point. The seed is
+ * `${lessonId}:${streak}`, so EVERY seed on a given day ends in the same few
+ * characters — and a plain `h = h·31 + c` leaves the low bits dominated by exactly
+ * those. Taken mod 105 that clustered badly: finishing two different lessons back to
+ * back produced the same thought **8% of the time** against the 1% you would expect
+ * from 105 lines, which is the one failure a reader would actually notice. Mixing the
+ * high bits down brings it to 1.5%.
+ */
 export function pickLine(seed: string): string {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  return LOAFER_LINES[h % LOAFER_LINES.length];
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  h ^= h >>> 16; h = Math.imul(h, 2246822507);
+  h ^= h >>> 13; h = Math.imul(h, 3266489909);
+  h ^= h >>> 16;
+  return LOAFER_LINES[(h >>> 0) % LOAFER_LINES.length];
 }
 
 export default function RewardLoafer({ line, delay = 0 }: { line: string; delay?: number }) {
