@@ -196,6 +196,26 @@ from the pelvis; arm reach **33**; leg reach **37**; body+arms span about **x ±
   `boxMove` re-derives the head from the pose's own tilt/neck and pushes any fist
   inside `GLOVE_CLEAR` back out. Gesture libraries are still checked by hand — so when
   adding one, check the target against the head position *that pose* produces.
+- **A hand inside the head is not "close to the head" — it is GONE, and so is the
+  gesture.** The fist is a disc of radius 5.5 and the head is 20, so a wrist within
+  14.5 of the head centre is *entirely* swallowed and the pose renders as a figure
+  standing still. Three shipped gestures did this: `11 forehead` aimed at (6, −52),
+  `12 scratch-head` at (4, −56) and `34 shield-eyes` at (4, −48), against a head
+  centred near (0, −49). Fourteen beats across the app said someone was thinking hard
+  or shielding their eyes and drew nobody doing anything.
+  **And the fix is never "reach higher."** The arm is 33 from a shoulder 23 below the
+  head centre, so the crown is out of range entirely — the only part of the head the
+  hand can reach is its FRONT rim, about eye level. Aim the fist AT the rim (centre
+  ~20–25 out) so it half-overlaps: that reads as a hand at the temple, and it is the
+  most this figure can do. Tell such gestures apart by the head angle and the other
+  hand, not by the working fist.
+- **An ink limb on an ink torso is invisible, wherever you put it.** `10 arms-crossed`
+  parked both hands 9 units either side of the spine, so both forearms lay along a
+  12-thick torso in the same colour and the pose drew a figure with no arms. Moving one
+  hand *behind* does not help — nothing on the torso reads. A pose that has to be seen
+  must put the limb against open paper: folded IN FRONT, the two forearms are two
+  horizontals against nothing, which is also what folded arms look like in profile.
+  Same rule, same cause as B16b on a leaning figure.
 - **A hand near EITHER end of the arm's range makes the elbow whip, and a hand crossing
   its own shoulder is the worst case.** The IK puts the elbow from the direction of the
   shoulder→wrist vector, so when that vector is short its direction swings wildly for a
@@ -481,6 +501,29 @@ to tap anywhere to jump straight to the end state, because a celebration that ca
 skipped becomes a toll on the tenth viewing. Any control involved stays inert until it
 is actually visible, or the skip-tap presses it.
 
+**C22d2. A locomotion cycle and the world it moves through must run at the SAME RATE,
+and the prop must be placed off the POSE.** Two separate ways the ladder climb was
+wrong, and both are general:
+
+- **Rate.** The rungs scrolled at 46 units a second while `climb(t · 3.4)` takes 1.85s
+  per sine — two steps, so 0.92s a step. One rung should pass per step: 22 ÷ 0.92 = 24
+  units a second. At 46 the ladder ran past him at twice his stride, and the figure
+  read as being winched up a rope rather than climbing it. Whenever a cycle drives
+  against a scrolling world, **derive the scroll from the cycle's period**, never
+  set both by eye.
+- **Placement.** The rails were centred on his mark, which is where his FEET are. His
+  hands are 21–26 units in front of that, so the near rail sat three units behind the
+  nearest hand: a man climbing the air just beside a ladder. A prop the figure GRIPS is
+  positioned from the hand the pose actually produces (B9a), not from the x he stands
+  on. Hang the prop off the pose, or move the mark — but measure which one you did.
+
+And the honest half: this figure **cannot** put a hand on a rung above its own head,
+for the reach reasons in B11. The climb had been written as though it could, so the
+hands stayed at chest height, the arms stayed tucked, and it read as a hunched bob on
+the spot. What carries a climb here is the LEGS — a knee driving up *and forward* onto
+the next rung — plus the lean, the pelvis pump, and hands working the rail. Write the
+cycle for the body you have.
+
 **C22d. To move a figure UP, move the world down past it.** Raising the figure up a
 static ladder does not read as climbing — it reads as a figure sliding up a picture of
 a ladder, and it was rejected on sight. What works is the reverse: put the rungs in an
@@ -628,6 +671,30 @@ Pressable is exactly where its art is. If a scene does need a camera, then figur
 props and Pressables all go **inside** it; never place interactive elements outside a
 transform that moves the thing they represent. Pair this with E36 — a decorative
 full-bleed wrapper above them eats the taps regardless.
+
+**E37b-2. A scene tap target is measured in DP, and the number that matters is the
+PITCH.** Scene targets are authored in design units and then multiplied by `fit`, so
+the same card is a different size in every lesson — and `fit` is often well under 1.
+logic-8's band is 493 of 560 units, so it renders height-constrained at **fit ≈ 0.60**
+on a 360dp phone and its 40-unit answer cards came out **24dp tall with 3.6dp between
+them**. Android asks 48dp of a touch target and a fingertip covers about 45dp, so a tap
+aimed at one card physically overlapped its neighbours. That produces BOTH reported
+symptoms at once — "it didn't register" and "it picked a different one" — from one
+cause, and neither is an event-handling bug: hit-testing was verified correct
+(`elementFromPoint` returned the right card every time).
+
+- **Enlarging a card does not fix mis-taps; increasing the PITCH does.** Two 48dp cards
+  4dp apart still can't be told apart by a finger. Author the centre-to-centre distance
+  first, then fill it.
+- **`hitSlop` is a finisher, never the fix.** It can only claim the gap that is already
+  there — and slop wider than HALF the gap makes neighbouring targets overlap, at which
+  point the topmost silently wins and the wrong-answer problem gets *worse*. Cap it at
+  `(pitch − height) / 2`.
+- **Check it at the smallest fit the lesson can render at**, not in the design space.
+  A number that looks generous at 400×560 is the thing the reader cannot hit.
+
+Measure with the harness in Part 3: step to the interact beat, read every target's
+`getBoundingClientRect()`, and report height, gap and pitch **in dp**.
 
 **E37c. The scene's graded questions must agree with the lesson's data file.** The
 `Lesson` in `data/branches/…` is the curriculum contract, and it still drives the card
@@ -995,6 +1062,11 @@ and keep it pointed at **them** rather than at philosophy in general.
       given a hold to happen in (C20e).
 - [ ] Working hands between ~30% and ~90% of reach, never crossing their own shoulder;
       elbow speed measured against hand speed (B11).
+- [ ] Every pose the beat calls for actually SHOWS the limb doing it — wrist ≥ 14.5
+      from the head centre and clear of the torso, or the gesture renders as nothing
+      (B11).
+- [ ] Any cycle running against a scrolling world derived from the cycle's period, and
+      any prop the figure grips placed off the pose's hand (C22d2).
 - [ ] Any physical claim the vocabulary can't express → add a pose (A2).
 - [ ] Secondary figures posed deliberately (A3).
 - [ ] Explanations fit the answered deck (D27).
@@ -1076,6 +1148,21 @@ card decks. The baseline is clean, so **anything it prints is yours**; it also r
 the band budget so a new lesson can see what its crop is costing against the other 46.
 
 It cannot see anything about the picture. That is what the rest of this part is for.
+
+**Sheet the WHOLE vocabulary before trusting any of it.** Rendering all 50 gestures
+into one grid takes seconds and is the only thing that finds a pose which is *valid*
+and *meaningless* — `arms-crossed` drew a figure with no arms, `scratch-head` drew one
+doing nothing, and both passed every numeric check because nothing was out of range.
+Numbers find geometry; only the sheet finds "that does not look like the thing it is
+called". Do the same for a locomotion cycle **in its scene**: a climb cycle on its own
+tells you the figure is moving, and the figure against its own scrolling ladder tells
+you whether it is climbing.
+
+Beware the reverse error just as much. A first pass of this sweep flagged 99 of 100
+poses, which meant the probe was wrong, not the app: it counted a naturally hanging arm
+(94% of reach) as "clamped", a heel lifting 2 units in a weight shift as "floating", and
+a hand deliberately at the chin as "inside the head". **A check that fires on almost
+everything has told you nothing** — fix the check.
 
 **For the FIGURE, draw it in Node — no Metro, no browser, about two seconds a sheet.**
 `rig.ts` has zero imports precisely so it can be run outside the app: `sucrase` strips

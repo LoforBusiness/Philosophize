@@ -23,7 +23,22 @@ import type { SceneApi } from './CinematicPlayer';
 
 const FIG_X = 76;
 const LADDER_X = 76;
-const RUNG_SP = 30;
+// THE RAILS ARE HUNG OFF THE CLIMBER'S HANDS, not centred on his feet.
+//
+// The climb pose reaches out in front — it has to, because this figure cannot raise a
+// hand to head height without the fist being drawn inside its own skull, so the grip
+// works the rail at chest height and well forward. Its hands land at local x 21…26,
+// which is stage x 97…102 from a mark of 76. Centred rails (58…63 and 89…94) put the
+// near rail three units BEHIND the nearest hand: a man climbing the air just in front
+// of a ladder. Offset, the near rail sits under the grip and the rungs run under the
+// feet, which travel local x 7…23 → stage 83…99.
+const RAIL_NEAR = LADDER_X + 19;           // 95…100, under the hands
+const RAIL_FAR = LADDER_X - 14;            // 62…67
+const RUNG_L = RAIL_FAR;
+const RUNG_W = RAIL_NEAR + 5 - RAIL_FAR;   // 38
+// Rung spacing against a 103-unit figure. At 30 the gaps read like half a metre — a
+// person is about 5.5 rungs tall on a real ladder and was 3.4 on this one.
+const RUNG_SP = 22;
 const LADDER_T = 300;
 const LADDER_H = GROUND - LADDER_T;        // 200
 
@@ -118,7 +133,12 @@ export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick }: Sc
       chute: lerp(CHUTE[p], CHUTE[n], tr),
       gear: t * 80,
       feed: (t * 0.55) % 1,
-      scroll: (t * 46) % RUNG_SP,          // rungs scroll DOWN so the climber ascends
+      // Rungs scroll DOWN so the climber ascends — at the speed HIS LEGS ARE GOING.
+      // `climb(t·3.4)` is a 1.85s sine, which is two steps, so a step takes 0.92s and
+      // one rung must pass in that time: 22 units ÷ 0.92 = 24 units a second. It was
+      // 46, so the ladder ran past him at twice his stride and he read as being
+      // winched up a rope rather than climbing.
+      scroll: (t * 23.8) % RUNG_SP,
       qv: qv.value,
       t,
     };
@@ -152,15 +172,17 @@ export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick }: Sc
 
       {/* ── the ladder (rungs scroll down → the figure climbs upward) ──────── */}
       <Animated.View style={[styles.fill, ladderStyle]} pointerEvents="none">
-        <View style={[styles.rail, { left: LADDER_X - 18 }]} />
-        <View style={[styles.rail, { left: LADDER_X + 13 }]} />
+        <View style={[styles.rail, { left: RAIL_FAR }]} />
         <View style={styles.rungClip}>
           <Animated.View style={[styles.rungInner, rungsStyle]}>
-            {[-1, 0, 1, 2, 3, 4, 5, 6, 7].map((r) => (
+            {[-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((r) => (
               <View key={r} style={[styles.rung, { top: r * RUNG_SP }]} />
             ))}
           </Animated.View>
         </View>
+        {/* The NEAR rail is drawn after the rungs and before the figure, so the rungs
+            run behind it the way they would on a real ladder seen from the side. */}
+        <View style={[styles.rail, { left: RAIL_NEAR }]} />
       </Animated.View>
 
       {/* ── the staircase chart: divide it, then climb it ──────────────────── */}
@@ -326,9 +348,9 @@ const styles = StyleSheet.create({
 
   // ── ladder ─────────────────────────────────────────────────────────────────
   rail: { position: 'absolute', top: LADDER_T, width: 5, height: LADDER_H, backgroundColor: INK, borderRadius: 3 },
-  rungClip: { position: 'absolute', left: LADDER_X - 18, top: LADDER_T, width: 36, height: LADDER_H, overflow: 'hidden' },
-  rungInner: { position: 'absolute', left: 0, top: 0, width: 36, height: LADDER_H },
-  rung: { position: 'absolute', left: 0, width: 36, height: 5, backgroundColor: INK, borderRadius: 3 },
+  rungClip: { position: 'absolute', left: RUNG_L, top: LADDER_T, width: RUNG_W, height: LADDER_H, overflow: 'hidden' },
+  rungInner: { position: 'absolute', left: 0, top: 0, width: RUNG_W, height: LADDER_H },
+  rung: { position: 'absolute', left: 0, width: RUNG_W, height: 4, backgroundColor: INK, borderRadius: 2 },
 
   // ── staircase chart ────────────────────────────────────────────────────────
   stairHdr: {

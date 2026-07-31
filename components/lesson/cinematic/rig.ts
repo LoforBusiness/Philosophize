@@ -1016,9 +1016,28 @@ export function emoteHold(code: number, t: number): Stance {
   if (code === 7) return hands(s, -32 - g, -18, 32 + g, -18);
   if (code === 8) return { ...hands(s, -26, -6, 26, -6), tilt: s.tilt + 0.03, bob: s.bob + 3, neck: 0.05 };
   if (code === 9) return { ...hands(s, -6, 6, 9, -8), tilt: s.tilt + 0.02 };
-  if (code === 10) return hands(s, 9, -24, -9, -24);
-  if (code === 11) return { ...hands(s, -6, 6, 6, -52), neck: 0.16, tilt: s.tilt + 0.03 };
-  if (code === 12) return { ...hands(s, -6, 6, 4, -56), neck: 0.06 };
+  // ARMS CROSSED, and BOTH forearms have to sit forward of the torso to exist at all.
+  // At (9, −24) / (−9, −24) the hands were almost on the spine, so both forearms lay
+  // along a 12-thick torso in the same ink and the pose rendered as a figure with no
+  // arms — the defect the leaning figure on the completion screen had (B16b). Moving
+  // one hand behind does not help either: an ink forearm on an ink torso is invisible
+  // wherever it is. Folded IN FRONT, the two forearms are two horizontals against open
+  // paper, one slightly below the other, which is what folded arms look like in profile.
+  if (code === 10) return { ...hands(s, 18, -22, 13, -17), tilt: s.tilt + 0.02 };
+  // HAND TO THE HEAD — AT THE TEMPLE, NOT THROUGH IT.
+  //
+  // These targeted (6, −52) and (4, −56) against a head centred near (0, −49) with a
+  // radius of 20, so a fist of radius 5.5 sat 13 and 10 units INSIDE the skull: not
+  // "a hand on the forehead", but no hand at all. Nine beats across the app play
+  // `scratch-head` and the reader sees a figure standing perfectly still.
+  //
+  // The arm cannot fix this by reaching higher. It is 33 units from a shoulder 23
+  // below the head centre, so the crown is simply out of range — the reachable part
+  // of the head's rim is its FRONT, about eye level. A fist centred on the rim half
+  // overlaps and half shows, which is exactly how "touching my own head" should read.
+  // The two are told apart by the head and the far hand, not by the near fist.
+  if (code === 11) return { ...hands(s, -6, 6, 17, -47), neck: 0.2, tilt: s.tilt + 0.03 };
+  if (code === 12) return { ...hands(s, -14, -6, 21, -47), neck: -0.07 };
   if (code === 13) return { ...hands(s, -6, 6, 34, -16), tilt: s.tilt - 0.05 };
   if (code === 14) return { ...hands(s, -24, -16, 24, -16), tilt: s.tilt - 0.04 };
   if (code === 15) return { ...hands(s, -16, -6, 16, -6), tilt: s.tilt + 0.10, neck: 0.04, footL: { x: -9, y: 0 }, footR: { x: 9, y: 0 } };
@@ -1041,7 +1060,9 @@ export function emoteHold(code: number, t: number): Stance {
   if (code === 31) return { ...hands(s, 14, -2, 24, -6), tilt: s.tilt - 0.03, neck: 0.04 };                  // receive, hands cupped forward
   if (code === 32) return { ...hands(s, -24, -22, 24, -22), tilt: s.tilt };                                  // conduct / sway (live oscillates both hands)
   if (code === 33) return { ...hands(s, -26, -4, 26, -4), neck: -0.06, tilt: s.tilt - 0.03 };                // released, arms open but down
-  if (code === 34) return { ...hands(s, -8, 5, 4, -48), neck: 0.08, tilt: s.tilt + 0.06 };                  // shield eyes from a bright light
+  // A shielding hand goes IN FRONT of the eyes, not on them: (4, −48) was dead centre
+  // of the head disc and the hand vanished (three beats use this).
+  if (code === 34) return { ...hands(s, -8, 5, 23, -41), neck: 0.08, tilt: s.tilt + 0.06 };                 // shield eyes from a bright light
   if (code === 35) return { ...hands(s, -6, 6, 28, -18 + g), neck: -0.05, tilt: s.tilt - 0.03 };            // proclaimed, arm back down
   if (code === 36) return { ...hands(s, -6, 6, 26, -2), tilt: s.tilt - 0.06, neck: 0.10 };                  // sign / write on a surface
   if (code === 37) return { ...hands(s, -6, 5, 10, -14), tilt: s.tilt - 0.04 };                             // the catch, already pulled in
@@ -1415,17 +1436,42 @@ export function dirsFrom(xs: number[], start = 1): number[] {
  * Feet sit FORWARD on the rungs (x positive toward the ladder), hands reach forward
  * and high — never behind the head, so both stay visible.
  */
+/**
+ * CLIMBING, and why it does not look the way you would draw it.
+ *
+ * The obvious climb puts a hand on a rung above the head. This figure cannot do that
+ * and never will: the arm is 33 units from a shoulder that sits 23 below a head
+ * centre of radius 20, so everything above the crown is out of range, and any hand
+ * raised to head height is drawn INSIDE the skull (B11). The first version tried
+ * anyway — hands travelling y −24 → −42 while the head centre sat at −49 — so the
+ * hands never cleared the chest, the arms stayed tucked, and the whole thing read as
+ * a hunched crouch bobbing on the spot. Which is exactly what it was.
+ *
+ * So the climb is carried by the parts that CAN do it:
+ *   · the LEGS. A climbing knee drives up and FORWARD onto the next rung — 26 up and
+ *     14 across, against the old 11 straight up. This is most of the read.
+ *   · the LEAN. Into the ladder, chin up toward the next rung, not upright.
+ *   · the PUMP. The pelvis rises on the drive and settles on the reach.
+ *   · the HANDS working the rail at chest-to-shoulder height, alternating, clear of
+ *     the head disc and clear of the torso so both forearms are actually visible.
+ * The figure still stays put and the rungs scroll down past it (C22d).
+ */
 export function climb(u: number): Stance {
   'worklet';
   const s = Math.sin(u);
-  const lHand = Math.max(0, s);           // left hand reaching to the high rung
-  const rHand = Math.max(0, -s);          // right hand reaching on the opposite half
+  const l = Math.max(0, s);               // left side reaching, right side driving
+  const r = Math.max(0, -s);
   return {
-    tilt: -0.10, neck: -0.16, bob: 2,
-    footL: { x: 6, y: -3 - 11 * rHand },  // left foot lifts with the right hand
-    footR: { x: 6, y: -3 - 11 * lHand },
-    fistL: { x: 11, y: -24 - 18 * lHand }, // hands forward + up, alternating high
-    fistR: { x: 13, y: -24 - 18 * rHand },
+    tilt: -0.15,                          // leaning into the ladder
+    neck: 0.14,                           // looking up at the next rung
+    bob: -2 + 3 * Math.abs(s),            // rises on the drive, settles on the reach
+    // The lifting knee comes up AND forward to find the rung; the planted leg
+    // straightens under the weight.
+    footL: { x: 7 + 14 * r, y: -1 - 26 * r },
+    footR: { x: 9 + 14 * l, y: -1 - 26 * l },
+    // Hands on the rail, alternating, out in front where they can be seen.
+    fistL: { x: 21 + 3 * l, y: -14 - 18 * l },
+    fistR: { x: 23 + 3 * r, y: -16 - 18 * r },
     adv: 0,
   };
 }
