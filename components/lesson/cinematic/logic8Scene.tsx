@@ -59,9 +59,27 @@ const DASHES = [0, 1, 2, 3, 4, 5, 6, 7];
 // ── the answer cards (Q1), in a band above the figure ─────────────────────────
 const CARD_L = 26;
 const CARD_W = 196;
-const CARD_H = 40;
+// SIZED FOR A FINGER, not for the paper it sits on.
+//
+// These were 40 tall on a 46 pitch. This lesson's band is 493 units of a 560-unit
+// design space, so it renders height-constrained at fit ≈ 0.60 on a 360dp phone —
+// which turned 40 units into a 24dp card with 3.6dp between it and the next one.
+// Android asks 48dp of any touch target and a fingertip covers about 45dp, so a
+// tap aimed at one card physically overlapped its neighbours: it either missed or
+// scored the wrong answer, both of which were reported.
+//
+// The pitch is the number that matters — enlarging a card without moving its
+// neighbours away does nothing for mis-taps. The cards run from 206 down to 394,
+// stopping at the figure's crown (GROUND 500 − 103), which is all the room this
+// composition has. 56 on a 66 pitch = 34dp cards on a 40dp pitch.
+const CARD_H = 56;
 const CARD_T = 206;
-const CARD_GAP = 46;
+const CARD_GAP = 66;
+// Half the 10-unit gap, so every pixel between two cards belongs to one of them
+// and NEITHER can steal from the other. Slop bigger than half the gap would make
+// the targets overlap, and the topmost would win — which is the mis-registration
+// this is here to remove, not to introduce.
+const CARD_SLOP = (CARD_GAP - CARD_H) / 2;
 
 const STARS: number[][] = [[236, 44], [286, 96], [382, 116], [252, 130], [306, 38]];
 
@@ -212,6 +230,7 @@ export default function Logic8Scene({ clock, bt, bi, i, picked, onPick }: SceneA
             <Pressable
               key={c.id}
               style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]}
+              hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
               disabled={answered}
               onPress={() => onPick(c.id, c.correct)}
             >

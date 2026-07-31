@@ -51,9 +51,14 @@ const EYE_X = Array.from({ length: 16 }, (_, k) => 236 + k * 10);
 
 const CARD_L = 50;
 const CARD_W = 300;
-const CARD_H = 34;
+// SIZED FOR A FINGER. Band 460 units → fit 0.65, so a 34-unit card rendered at
+// 22dp on a 27dp pitch: the smallest touch target in the app, less than half the
+// 48dp minimum. The stack now runs 208 → 348, clear of the crown at 397.
+const CARD_H = 48;
 const CARD_T = 208;
-const CARD_GAP = 42;
+const CARD_GAP = 70;
+/** Half the gap — more would overlap the neighbour, and the topmost would win. */
+const CARD_SLOP = (CARD_GAP - CARD_H) / 2;
 
 // TALLEST / MIDDLE / SHORTEST — the bar is a little height glyph that ties each
 // card back to the onlooker it stands for.
@@ -249,6 +254,7 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
               <Pressable
                 key={c.id}
                 style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]}
+                hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
                 disabled={answered}
                 onPress={() => onPick(c.id, c.correct)}
               >

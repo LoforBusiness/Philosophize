@@ -46,9 +46,15 @@ const TALLY_T = 210;
 
 const CARD_L = 30;
 const CARD_W = 220;
-const CARD_T = 300;
-const CARD_H = 27;
-const CARD_GAP = 32;
+// SIZED FOR A FINGER: 27 tall on a 32 pitch rendered as a 24dp card every 29dp,
+// against a fingertip covering ~45dp — so a tap overlapped its neighbours and
+// often scored the wrong one. The stack now runs from 205 down to 389, stopping
+// 8 units clear of the figure's crown at 397, entirely inside the existing band.
+const CARD_T = 205;
+const CARD_H = 44;
+const CARD_GAP = 70;
+/** Half the gap — any more and neighbouring targets overlap, and the topmost wins. */
+const CARD_SLOP = (CARD_GAP - CARD_H) / 2;
 
 const CARDS = [
   { id: 'count', text: 'A more careful count', correct: false },
@@ -157,7 +163,11 @@ export default function Political9Scene({ clock, bt, bi, i, picked, onPick }: Sc
           const chosen = picked === c.id;
           return (
             <Animated.View key={c.id} style={[styles.cardSlot, { top: CARD_T + k * CARD_GAP }, cardStyle]}>
-              <Pressable disabled={answered} onPress={() => onPick(c.id, c.correct)}>
+              <Pressable
+                disabled={answered}
+                hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
+                onPress={() => onPick(c.id, c.correct)}
+              >
                 <View
                   style={[
                     styles.card,

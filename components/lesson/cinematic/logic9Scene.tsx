@@ -26,9 +26,13 @@ import type { SceneApi } from './CinematicPlayer';
 //   · the smear label hangs over the ARGUER at x 26 … 150, y 292 … 328; the straw
 //     copy stands over the DODGER at x 206 … 330, y 292 … 336 and tips 16° when it
 //     is knocked. Each sits above its own man and over nobody else.
-//   · the three replies replace both of those on the tap beat: x 40 … 360,
-//     y 288 … 375, still 22 clear of a crown.
-// Nothing is drawn above y 226 or below the ground line, hence band [216, 512].
+//   · the three replies replace both of those on the tap beat — and the CLAIM board
+//     too, which that beat does not set — so the whole upper half is theirs:
+//     x 40 … 360, y 205 … 389, stopping 8 clear of a crown. They were 27 tall on a
+//     30 pitch, which is a 24dp target every 27dp against a ~45dp fingertip; they
+//     are now 44 on a 70 pitch (E37b-2).
+// Nothing is drawn above y 205 or below the ground line, hence band [200, 512] —
+// still under the 330 units at which `fit` would fall below 0.90.
 
 const BOARD_L = 116;
 const BOARD_W = 168;
@@ -45,9 +49,16 @@ const STRAW_T = 292;
 
 const REPLY_L = 40;
 const REPLY_W = 320;
-const REPLY_T = 288;
-const REPLY_H = 27;
-const REPLY_GAP = 30;
+// SIZED FOR A FINGER: 27 tall on a 30 pitch is a 24dp card every 27dp, against a
+// fingertip covering ~45dp. The room came from ABOVE — the band started at 216, so
+// everything higher was empty paper. The stack runs 205 → 389 now, stopping clear
+// of the figure's crown at 397, and the band grows to 312 units, still under the
+// 330 at which `fit` would drop below 0.90.
+const REPLY_T = 205;
+const REPLY_H = 44;
+const REPLY_GAP = 70;
+/** Half the gap — more would overlap the neighbour, and the topmost would win. */
+const REPLY_SLOP = (REPLY_GAP - REPLY_H) / 2;
 
 const REPLIES = [
   { id: 'person', text: '“He failed maths at school.”', correct: true },
@@ -165,7 +176,7 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick }: SceneA
           const chosen = picked === r.id;
           return (
             <Animated.View key={r.id} style={[styles.replySlot, { top: REPLY_T + k * REPLY_GAP }, replyStyle]}>
-              <Pressable disabled={answered} onPress={() => onPick(r.id, r.correct)}>
+              <Pressable hitSlop={{ top: REPLY_SLOP, bottom: REPLY_SLOP, left: REPLY_SLOP, right: REPLY_SLOP }} disabled={answered} onPress={() => onPick(r.id, r.correct)}>
                 <View
                   style={[
                     styles.reply,
@@ -242,5 +253,5 @@ const styles = StyleSheet.create({
 // from x 420, which is off the 400-wide stage and therefore outside the crop — that
 // is the point of parking him there, and it costs the band nothing.
 export function Logic9Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic9Scene} band={[216, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic9Scene} band={[200, 512]} />;
 }

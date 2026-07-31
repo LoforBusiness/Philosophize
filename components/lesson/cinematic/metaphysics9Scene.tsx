@@ -44,9 +44,14 @@ const CLOSE = 32;          // how far MIND travels to shut the gap
 
 const CARD_L = 20;
 const CARD_W = 158;
-const CARD_T = 306;
-const CARD_H = 30;
-const CARD_GAP = 36;
+// SIZED FOR A FINGER: 30 tall on a 36 pitch is a 27dp card every 32dp, well under
+// the ~45dp a fingertip covers. The old stack also ran to 408, eleven units PAST
+// the figure's crown at 397. It now runs 205 → 389 and stops clear of him.
+const CARD_T = 205;
+const CARD_H = 44;
+const CARD_GAP = 70;
+/** Half the gap — any more and neighbouring targets overlap, and the topmost wins. */
+const CARD_SLOP = (CARD_GAP - CARD_H) / 2;
 
 const CARDS = [
   { id: 'thinks', label: 'SOMETHING IS THINKING', correct: true },
@@ -144,7 +149,11 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: 
           const chosen = picked === c.id;
           return (
             <Animated.View key={c.id} style={[styles.cardSlot, { top: CARD_T + k * CARD_GAP }, cardStyle]}>
-              <Pressable disabled={answered} onPress={() => onPick(c.id, c.correct)}>
+              <Pressable
+                disabled={answered}
+                hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
+                onPress={() => onPick(c.id, c.correct)}
+              >
                 <View
                   style={[
                     styles.card,

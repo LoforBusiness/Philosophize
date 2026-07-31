@@ -35,9 +35,14 @@ const GRID_X = [94, 150, 206, 262];
 
 const CARD_L = 44;
 const CARD_W = 312;
-const CARD_H = 40;
+// SIZED FOR A FINGER. This lesson's band is 470 units, so it renders at fit 0.63
+// and a 40-unit card became 25dp on a 29dp pitch — barely half a fingertip. The
+// stack now runs 176 → 386, stopping clear of the figure's crown at 397.
+const CARD_H = 50;
 const CARD_T = 176;
-const CARD_GAP = 46;
+const CARD_GAP = 80;
+/** Half the gap — more would overlap the neighbour, and the topmost would win. */
+const CARD_SLOP = (CARD_GAP - CARD_H) / 2;
 
 // Everything the reader must READ lives above y = 350. A walking figure's crown
 // rides up to y ≈ 357 on the gait's bob, so the thread and its stems are cut off
@@ -162,6 +167,7 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick }: Scene
               <Pressable
                 key={c.id}
                 style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]}
+                hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
                 disabled={answered}
                 onPress={() => onPick(c.id, c.correct)}
               >

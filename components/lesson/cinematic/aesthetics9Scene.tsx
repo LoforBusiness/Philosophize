@@ -25,7 +25,7 @@ import type { SceneApi } from './CinematicPlayer';
 //   · the two captions sit ABOVE their boxes at y 214 … 228, not below them, because
 //     below them is where the figure's head is.
 //   · the three labels lean against the plinth on the tap beat: x 254 … 394,
-//     y 396 … 477. THIS IS THE CONSTRAINT THAT SET HIS LAST MARK. Laid out centred
+//     y 388 … 496. THIS IS THE CONSTRAINT THAT SET HIS LAST MARK. Laid out centred
 //     under the plinth they ran from x 214, and his body reaches 244 — the bottom
 //     label would have been drawn across his skull. Ten units of clear paper now.
 //   · the BEAUTY crown occupies y 200 … 230 and is gone after beat 0.
@@ -40,9 +40,18 @@ const STAND_B = 386;
 
 const LABEL_L = 254;
 const LABEL_W = 140;
-const LABEL_T = 396;
-const LABEL_H = 25;
-const LABEL_GAP = 28;
+// SIZED FOR A FINGER, as far as this composition allows. 25 tall on a 28 pitch was
+// a 22dp target every 25dp — the smallest in the app against a ~45dp fingertip.
+// Unlike the other stacks there is nowhere to grow: the plinth's stand comes down
+// to 386 above, the ground line is at 500 below, and the labels cannot move LEFT
+// without being drawn across the figure's head (see the note above). 30 on a 39
+// pitch fills 388 → 496 exactly, which is 35dp — better, still short of 45, and
+// short for a reason worth writing down rather than quietly leaving.
+const LABEL_T = 388;
+const LABEL_H = 30;
+const LABEL_GAP = 39;
+/** Half the gap — more would overlap the neighbour, and the topmost would win. */
+const LABEL_SLOP = (LABEL_GAP - LABEL_H) / 2;
 
 // Short enough to hold one line at 8.5px in a 140-wide box — a label that wrapped
 // would strand a fragment on its own line, which is the defect D30 names.
@@ -143,7 +152,7 @@ export default function Aesthetics9Scene({ clock, bt, bi, i, picked, onPick }: S
           const chosen = picked === l.id;
           return (
             <Animated.View key={l.id} style={[styles.labelSlot, { top: LABEL_T + k * LABEL_GAP }, labelStyle]}>
-              <Pressable disabled={answered} onPress={() => onPick(l.id, l.correct)}>
+              <Pressable hitSlop={{ top: LABEL_SLOP, bottom: LABEL_SLOP, left: LABEL_SLOP, right: LABEL_SLOP }} disabled={answered} onPress={() => onPick(l.id, l.correct)}>
                 <View
                   style={[
                     styles.label,

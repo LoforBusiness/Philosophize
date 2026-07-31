@@ -50,9 +50,22 @@ const FAR_K = K_FIG * 0.3;
 
 const CARD_L = 40;
 const CARD_W = 320;
-const CARD_T = 300;
-const CARD_H = 27;
-const CARD_GAP = 30;
+// SIZED FOR A FINGER. These were 27 tall on a 30 pitch, which at this lesson's
+// fit of 0.90 is a 24dp card every 27dp — against a fingertip that covers about
+// 45dp. A tap aimed at one card overlapped both its neighbours, so it either fell
+// in the 2.7dp dead gap or scored the wrong answer.
+//
+// The room came from ABOVE: the declared band started at 292, so everything higher
+// was empty paper. Lifting the stack to 205 costs nothing (the band grows to 312
+// units, still under the 330 at which `fit` would start dropping below 0.90) and
+// buys 95 units. Downward there is none — the figure's crown is at 397.
+const CARD_T = 205;
+const CARD_H = 46;
+const CARD_GAP = 68;
+// Half the 22-unit gap, so the space between two cards belongs to one of them and
+// neither can steal from the other. More than half would overlap, and the topmost
+// would silently win — which is the mis-tap this is here to remove.
+const CARD_SLOP = (CARD_GAP - CARD_H) / 2;
 
 const FACTORS = [
   { id: 'distance', text: 'How far away the child is', correct: true },
@@ -138,7 +151,11 @@ export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: Scen
           const chosen = picked === f.id;
           return (
             <Animated.View key={f.id} style={[styles.cardSlot, { top: CARD_T + k * CARD_GAP }, cardStyle]}>
-              <Pressable disabled={answered} onPress={() => onPick(f.id, f.correct)}>
+              <Pressable
+                disabled={answered}
+                hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
+                onPress={() => onPick(f.id, f.correct)}
+              >
                 <View
                   style={[
                     styles.card,
@@ -197,5 +214,5 @@ const styles = StyleSheet.create({
 // children and the dotted distance all sit inside that, so the crop is as tight as
 // it can be and the scene renders at the stage's full width-limited size.
 export function Ethics10Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics10Scene} band={[292, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics10Scene} band={[200, 512]} />;
 }

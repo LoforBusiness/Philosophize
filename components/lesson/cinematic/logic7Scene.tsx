@@ -28,9 +28,17 @@ const CARD_W = BOARD_W - PADX * 2;
 const RULE_T = 222;
 const FACT_T = 292;
 const CONCL_T = 334;
+// These three sit ON the whiteboard, between the rule above them and the board's
+// bottom edge at 452, so unlike the other stacks they cannot simply be spread —
+// there is nowhere for them to go without redrawing the board. 35 on a 41 pitch is
+// 32dp on a 37dp pitch, short of the ~45dp a fingertip covers; the slop below at
+// least makes the 6-unit gutter between them live, so a tap can no longer land in
+// dead space. Widening the board is the real fix and is a composition change.
 const PICK_T = 332;
 const ROW_H = 35;
 const PICK_GAP = 41;
+/** Half the gap — more would overlap the neighbour, and the topmost would win. */
+const PICK_SLOP = (PICK_GAP - ROW_H) / 2;
 
 const FACTS = ['', 'IT IS RAINING', 'STREETS ARE DRY'];
 const CONCLS = ['', 'SO: STREETS ARE WET', 'SO: NO RAIN'];
@@ -129,6 +137,7 @@ export default function Logic7Scene({ clock, bt, bi, i, picked, onPick }: SceneA
             <Pressable
               key={c.id}
               style={[styles.pickCard, { top: PICK_T + k * PICK_GAP }]}
+              hitSlop={{ top: PICK_SLOP, bottom: PICK_SLOP, left: PICK_SLOP, right: PICK_SLOP }}
               disabled={answered}
               onPress={() => onPick(c.id, c.correct)}
             >

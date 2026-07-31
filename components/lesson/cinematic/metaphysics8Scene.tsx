@@ -42,9 +42,13 @@ const MARK_X = DOM_X0 + MARK_I * DOM_GAP;   // 122
 
 const CARD_L = 44;
 const CARD_W = 312;
-const CARD_H = 42;
+// SIZED FOR A FINGER. Band 420 units → fit 0.71, which turned a 42-unit card into
+// 30dp on a 33dp pitch. The stack now runs 160 → 368, clear of the crown at 397.
+const CARD_H = 52;
 const CARD_T = 160;
-const CARD_GAP = 46;
+const CARD_GAP = 78;
+/** Half the gap — more would overlap the neighbour, and the topmost would win. */
+const CARD_SLOP = (CARD_GAP - CARD_H) / 2;
 
 const CARDS = [
   { id: 'broke', label: 'THE CHAIN BROKE', correct: false },
@@ -170,6 +174,7 @@ export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick }: 
               <Pressable
                 key={c.id}
                 style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]}
+                hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
                 disabled={answered}
                 onPress={() => onPick(c.id, c.correct)}
               >
