@@ -259,6 +259,48 @@ from the pelvis; arm reach **33**; leg reach **37**; body+arms span about **x ±
 - Going **low** is fine (knees bend), but a low pelvis needs the feet moved
   **forward**, or the leg folds straight down and throws the knee out sideways.
 
+**B11b. What this figure can actually reach — the table, so you stop designing poses
+it cannot hold.** Measured off `stand()` at 88% of reach, which is inside both the
+folded and the stretched singularity. Shoulder (1.2, −25.7); head centre (−3.8, −48.8),
+radius 20; arm 33; fist radius 5.5.
+
+| hand at y | furthest forward x | against the head |
+|---|---|---|
+| 0 (hip) | 15 | 27 clear |
+| −10 | 26 | 23 clear |
+| −20 | **30** | 19 clear |
+| −30 | **30** | 13 clear |
+| −40 | 26 | 6 clear |
+| −45 | 23 | grazes it (1.5) |
+| −50 | 17 | **fist inside the head** |
+| −55 | — | the ceiling: nothing higher is reachable at all |
+
+Three things fall straight out of it, and each has cost a defect already:
+
+- **The hand cannot go above the head. Ever.** It tops out at y −55 and the crown is
+  at −69 — fourteen units short. Every pose written as "reaches up to…" is really
+  "reaches forward and a bit up", so a ladder rung, a high shelf or a raised trophy has
+  to come to the hand rather than the other way round (C22d2).
+- **The working band is y −10 to −40.** That is where the hand is both far from the
+  body and clear of the head; the widest point is x 30 at chest height. Props the
+  figure touches belong there.
+- **Above y −45 the head is in the way**, and it gets worse as the figure leans, since
+  a lean carries the head forward into exactly the space the hand wants (§B9a).
+
+**B11c. A gesture that blends OUT of a base pose must be written relative to that
+base — and changing a base means re-measuring everything downstream of it.** The
+completion-screen wave carried a `dip` of a fixed 12 units, tuned when the resting hand
+sat at y −17. The rest pose later moved to −8, entirely reasonably and for its own good
+reasons, and the same fixed 12 then pushed the hand to (24, +4): **99% of reach**, where
+the IK clamps and the elbow snaps. Nothing about the wave had changed; nothing about the
+rest pose was wrong; the two were just measured against different worlds.
+
+Write the offset as a function of the base — *"carry the hand to at least y −6, and by
+zero if it is already lower"* — not as a magnitude that happens to work today. And when
+a `*Hold` moves, sweep every `*Live`, every gesture and every scene that blends from it
+before calling the change done. This is A5b in miniature: the defect was not in the
+thing that was edited.
+
 **B12. Feet stay narrow and near-vertical when standing** — a wide sliding stance
 makes near-straight legs read as two segmented bars with a gap between them. And
 **deep crouch/kneel/squat feet must be STAGGERED, never mirrored**: two 11-thick legs
@@ -281,6 +323,17 @@ beats and still read as one body, since both called `guard(t)` with the same clo
 the same frequencies: they bounced, swayed and breathed on identical frames between
 the punches. `guard` now takes the same `seed` for its own tempo, phase, bounce depth
 and stance width. Any shared idle — `guard`, `stand`, a custom loop — needs one.
+
+**But `stand()` has no seed, so for standing figures the lever is the CLOCK.** This
+rule used to say "give the companion a non-zero seed" and then send you to a function
+that does not take one: `strideStance`, `travelStance` and `guard` accept a seed,
+`stand` and therefore `emoteHold`/`emoteLive` do not. For two or more figures idling
+side by side, pass each a **shifted clock** — `emoteHold(code, t + 4.3)` — which
+desynchronises the breathing, the weight rock and the head drift just as well. Use both
+when a figure does both: a seed on its walk, an offset on its stand. Five figures share
+one stage in political-9 and each gets `t + k · 1.63`; three share ethics-10 at 0, +2.1
+and +5.6. Pick offsets that are not multiples of each other, or two of them will come
+back into phase on the slow terms.
 
 **B15. Every figure on stage must have a reason to be there.** ethics-5 carried a
 second walker left over from an earlier draft of the script; the narration no longer
@@ -798,6 +851,17 @@ everyone on the Play Store — keep every production push clean and shippable, a
 **never** bump `FREE_DAILY_LESSON_LIMIT` (the account already has Scholar's Pass, so
 testing does not need it).
 
+**And an OTA bundles the WORKING TREE, so check whose work is in it.** More than one
+session edits this repo at a time, and `git status` before a publish is not a
+formality: on the last one the tree carried another session's brand-new gesture whose
+hand target sat 3.8 units beyond the arm, so `solve` clamped it and the elbow snapped —
+it would have shipped inside a release that had nothing to do with it. Read the diff of
+anything you did not write, measure it if it is a pose, and either fix it or wait. The
+mirror of that rule: **never `git add` a file you did not change.** Stage paths
+explicitly, never `-A`; if one file genuinely holds both sessions' work and cannot be
+split, commit it and say so in the message rather than quietly taking credit or quietly
+reverting someone.
+
 **G51b. Finish by handing off to the GLOBAL reward — never render `LessonReward`
 inline.** A player that renders the reward itself reproduces a bug that reached the
 user twice. The reward is a fullscreen `Modal`, and the finished lesson screen never
@@ -1065,6 +1129,12 @@ and keep it pointed at **them** rather than at philosophy in general.
 - [ ] Every pose the beat calls for actually SHOWS the limb doing it — wrist ≥ 14.5
       from the head centre and clear of the torso, or the gesture renders as nothing
       (B11).
+- [ ] Props the figure touches placed in the reachable band, y −10…−40, widest x 30 —
+      and nothing asked for above the head, which it cannot reach (B11b).
+- [ ] Any gesture blending out of a base written relative to that base; any base pose
+      you changed re-measured against everything downstream (B11c).
+- [ ] Companion figures desynchronised — a seed on the walk, a shifted CLOCK on the
+      stand, since `stand()` takes no seed (B14).
 - [ ] Any cycle running against a scrolling world derived from the cycle's period, and
       any prop the figure grips placed off the pose's hand (C22d2).
 - [ ] Any physical claim the vocabulary can't express → add a pose (A2).
