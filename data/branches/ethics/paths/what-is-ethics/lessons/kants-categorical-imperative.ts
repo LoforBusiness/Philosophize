@@ -67,12 +67,19 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: "True or false: Kant's rule says break a promise whenever the results are good.",
+      prompt: 'Who is speaking — the man who tests the rule, or the man who counts the results?',
       xpValue: 5,
       interaction: {
-        type: 'true-false',
-        answer: false,
-        explanation: 'False. That smuggles in consequentialist thinking — judging by outcomes — which is exactly what Kant rejects. He tests the maxim, not the results. A universal license to break promises when convenient self-destructs: if all could break promises, promising would mean nothing.',
+        type: 'two-camps',
+        leftLabel: 'Kant',
+        rightLabel: 'Mill',
+        items: [
+          { id: 'i1', text: 'Break the promise: more people end up happy.', side: 'right' },
+          { id: 'i2', text: 'Ask what happens if everyone did it.', side: 'left' },
+          { id: 'i3', text: 'Never use a person merely as a means.', side: 'left' },
+          { id: 'i4', text: 'The right act is the one with the best outcome.', side: 'right' },
+        ],
+        explanation: 'Kant tests the maxim, not the results — a universal licence to break promises destroys itself, because if everyone could break them, promising would mean nothing. Mill asks only what the act produces. The first item is the trap: it sounds like ordinary decency, and it is pure consequentialism.',
       },
     },
     {

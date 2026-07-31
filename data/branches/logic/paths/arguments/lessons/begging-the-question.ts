@@ -45,17 +45,18 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: '"The Bible is true because it\'s God\'s word, and we know God exists because the Bible says so." What\'s wrong?',
+      prompt: 'Tap the step that assumes what it is meant to prove.',
       xpValue: 5,
       interaction: {
-        type: 'multiple-choice',
-        options: [
-          { id: 'a', text: 'It begs the question — each claim assumes the other', isCorrect: true },
-          { id: 'b', text: 'Nothing — the two statements support each other', isCorrect: false },
-          { id: 'c', text: 'It attacks the person instead of the claim', isCorrect: false },
-          { id: 'd', text: 'It uses a premise that is simply false', isCorrect: false },
+        type: 'tap-flaw',
+        steps: [
+          { id: 's1', text: 'This book is the word of God.' },
+          { id: 's2', text: 'Whatever God says is true.' },
+          { id: 's3', text: 'We know God exists because the book says so.' },
+          { id: 's4', text: 'So everything in the book is true.' },
         ],
-        explanation: 'This begs the question (circular reasoning). "Each supports the other" is tempting, but mutual support is still a closed loop: each claim presupposes the other, so no independent evidence ever enters.',
+        flawedId: 's3',
+        explanation: 'Step 3 closes the circle. It leans on the book to establish God, while step 1 leaned on God to establish the book. Each half looks like support for the other, which is exactly why circularity is hard to see — but a closed loop lets no evidence in from outside it.',
       },
     },
     {

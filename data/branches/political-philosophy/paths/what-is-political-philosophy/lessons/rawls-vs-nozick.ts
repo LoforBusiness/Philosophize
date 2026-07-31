@@ -74,17 +74,19 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: 'Nozick\'s Wilt Chamberlain case mainly argues that any patterned ideal of justice must do what?',
+      prompt: 'Whose argument is each of these?',
       xpValue: 5,
       interaction: {
-        type: 'multiple-choice',
-        options: [
-          { id: 'a', text: 'Continually interfere with people\'s free choices to survive', isCorrect: true },
-          { id: 'b', text: 'Make everyone\'s wealth exactly equal forever', isCorrect: false },
-          { id: 'c', text: 'Ban professional sports and ticket sales', isCorrect: false },
-          { id: 'd', text: 'Prove the rich always work harder than the poor', isCorrect: false },
+        type: 'two-camps',
+        leftLabel: 'Rawls',
+        rightLabel: 'Nozick',
+        items: [
+          { id: 'i1', text: 'Choose the rules without knowing who you will be.', side: 'left' },
+          { id: 'i2', text: 'If the holdings were acquired justly, the result is just.', side: 'right' },
+          { id: 'i3', text: 'Inequality is allowed only if it helps the worst off.', side: 'left' },
+          { id: 'i4', text: 'Keeping any fixed pattern means blocking free exchanges.', side: 'right' },
         ],
-        explanation: 'The tempting answer "make everyone equal" is a strawman: it caricatures patterns as crude equality. Nozick\'s real claim is subtler, any fixed pattern, equal or not, can only be preserved by repeatedly blocking voluntary transfers. Liberty upsets patterns.',
+        explanation: 'Rawls builds from a fair starting position — the veil of ignorance — and judges the pattern that results. Nozick judges the history instead: how the holdings came about. His Wilt Chamberlain case is not the claim that patterns mean crude equality; it is that ANY fixed pattern, equal or not, survives only by repeatedly interrupting voluntary transfers.',
       },
     },
     {

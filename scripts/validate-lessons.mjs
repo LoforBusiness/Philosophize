@@ -48,6 +48,28 @@ for (const f of files) {
     if (opts >= 2 && trues !== 1) errs.push(`an MC block has ${trues} correct options (need exactly 1)`);
   }
 
+  // tap-flaw: the flawed step has to BE one of the steps. A typo'd id renders a
+  // question with no right answer, and nothing else would catch it — the type
+  // system only knows flawedId is a string.
+  for (const m of s.matchAll(/type:\s*['"]tap-flaw['"]/g)) {
+    const block = s.slice(m.index, s.indexOf('explanation', m.index));
+    const ids = [...block.matchAll(/id:\s*['"]([^'"]+)['"]/g)].map((x) => x[1]);
+    const flawed = block.match(/flawedId:\s*['"]([^'"]+)['"]/);
+    if (!flawed) errs.push('a tap-flaw block has no flawedId');
+    else if (!ids.includes(flawed[1])) errs.push(`tap-flaw flawedId '${flawed[1]}' matches no step id`);
+    if (ids.length < 3 || ids.length > 5) errs.push(`a tap-flaw block has ${ids.length} steps (need 3–5)`);
+  }
+
+  // two-camps: both camps must actually be used, or the answer is "everything
+  // goes left" and the reader learns nothing.
+  for (const m of s.matchAll(/type:\s*['"]two-camps['"]/g)) {
+    const block = s.slice(m.index, s.indexOf('explanation', m.index));
+    const left = (block.match(/side:\s*['"]left['"]/g) || []).length;
+    const right = (block.match(/side:\s*['"]right['"]/g) || []).length;
+    if (left + right < 3 || left + right > 5) errs.push(`a two-camps block has ${left + right} items (need 3–5)`);
+    if (left === 0 || right === 0) errs.push(`a two-camps block puts every item in one camp (${left} left, ${right} right)`);
+  }
+
   if (errs.length) problems.push(`✗ ${rel}\n    - ${errs.join('\n    - ')}`);
   else ok++;
 }

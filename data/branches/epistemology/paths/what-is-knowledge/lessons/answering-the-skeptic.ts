@@ -53,18 +53,17 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: 'A skeptic insists you don’t know you’re reading, since you can’t rule out a dream. What’s Moore’s strategy?',
+      prompt: 'Here is the skeptic’s argument. Which step would Moore refuse?',
       xpValue: 5,
       interaction: {
-        type: 'multiple-choice',
-        options: [
-          { id: 'a', text: 'Trust the obvious fact more than the skeptic’s slippery premise', isCorrect: true },
-          { id: 'b', text: 'Prove from scratch that dreams are impossible', isCorrect: false },
-          { id: 'c', text: 'Agree he knows nothing and give up on certainty', isCorrect: false },
-          { id: 'd', text: 'Argue that dreaming and waking feel exactly the same', isCorrect: false },
+        type: 'tap-flaw',
+        steps: [
+          { id: 's1', text: 'You cannot rule out that you are dreaming.' },
+          { id: 's2', text: 'If you cannot rule that out, you do not know you have hands.' },
+          { id: 's3', text: 'So you do not know you have hands.' },
         ],
-        explanation:
-          'Option (b) is the tempting trap—it accepts the skeptic’s demand to win on his terms by defeating the dream scenario head-on. Moore refuses that game. His move is comparative: which is more certain, "here is a hand" or the abstract premise that I can’t rule out a dream? He keeps the obvious and lets the fancy premise fall.',
+        flawedId: 's2',
+        explanation: 'Step 2 — and notice that Moore never disputes step 1. He does not try to prove dreams impossible; that would be fighting on the skeptic’s ground. He asks instead which is more certain: "here is a hand," or an abstract premise about ruling things out. He keeps the obvious and lets the clever premise fall.',
       },
     },
     {

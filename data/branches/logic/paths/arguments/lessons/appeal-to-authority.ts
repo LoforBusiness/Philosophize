@@ -43,34 +43,17 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: "A famous actor endorses a heart medication in an ad. Should that move you?",
+      prompt: 'Tap the step that does not earn its keep.',
       xpValue: 5,
       interaction: {
-        type: 'multiple-choice',
-        options: [
-          {
-            id: 'a',
-            text: 'No — the actor has no relevant medical expertise',
-            isCorrect: true,
-          },
-          {
-            id: 'b',
-            text: "Yes — they're respected and trustworthy, so it's strong evidence",
-            isCorrect: false,
-          },
-          {
-            id: 'c',
-            text: 'No — all appeals to authority are fallacies',
-            isCorrect: false,
-          },
-          {
-            id: 'd',
-            text: 'Yes — a paid endorsement proves the drug works',
-            isCorrect: false,
-          },
+        type: 'tap-flaw',
+        steps: [
+          { id: 's1', text: 'A famous actor endorses this heart medication.' },
+          { id: 's2', text: 'He is admired and widely trusted.' },
+          { id: 's3', text: 'So his word is good evidence the drug works.' },
         ],
-        explanation:
-          "This is the illegitimate appeal to authority (argument from authority). Option B is tempting because fame feels like credibility — but the actor has no cardiology expertise and is paid, so their fame is irrelevant to the medical claim. Option C overcorrects: a relevant, unbiased expert really is good inductive evidence.",
+        flawedId: 's3',
+        explanation: 'Step 3. Careful here — the lesson is NOT that appeals to authority are always fallacies; a relevant, unbiased expert is genuinely good inductive evidence. The break is that being admired is not being a cardiologist, and he is paid. Fame feels like credibility, which is exactly what the advertisement is buying.',
       },
     },
     {

@@ -38,17 +38,17 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: '"Don\'t trust his budget plan — he failed math in school." Which fallacy?',
+      prompt: 'Tap the step that stops being about the budget.',
       xpValue: 5,
       interaction: {
-        type: 'multiple-choice',
-        options: [
-          { id: 'a', text: 'Ad hominem — it attacks him, not the plan', isCorrect: true },
-          { id: 'b', text: 'Straw man — it distorts his plan', isCorrect: false },
-          { id: 'c', text: 'No fallacy — past grades are relevant', isCorrect: false },
-          { id: 'd', text: 'Affirming the consequent', isCorrect: false },
+        type: 'tap-flaw',
+        steps: [
+          { id: 's1', text: 'He has proposed a budget plan.' },
+          { id: 's2', text: 'He failed maths at school.' },
+          { id: 's3', text: 'So the plan does not add up.' },
         ],
-        explanation: 'It smears the person rather than examining the plan\'s numbers — a textbook ad hominem.',
+        flawedId: 's3',
+        explanation: 'Step 3 — an ad hominem. Note that step 2 may be perfectly true; the fallacy is not lying about him, it is treating a fact about the man as a fact about his arithmetic. The only way to know whether the plan adds up is to add it up.',
       },
     },
     {

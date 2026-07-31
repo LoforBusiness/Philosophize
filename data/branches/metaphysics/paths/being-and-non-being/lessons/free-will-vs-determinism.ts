@@ -45,17 +45,19 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: 'What does the determinist claim about your decisions?',
+      prompt: 'Place each claim with the camp that makes it.',
       xpValue: 5,
       interaction: {
-        type: 'multiple-choice',
-        options: [
-          { id: 'a', text: 'They are random and unpredictable', isCorrect: false },
-          { id: 'b', text: 'They follow inevitably from prior causes and natural laws', isCorrect: true },
-          { id: 'c', text: 'They are made by a soul outside nature', isCorrect: false },
-          { id: 'd', text: 'They prove the future is unknowable', isCorrect: false },
+        type: 'two-camps',
+        leftLabel: 'Determinist',
+        rightLabel: 'Free will',
+        items: [
+          { id: 'i1', text: 'Given the past, only one outcome was ever possible.', side: 'left' },
+          { id: 'i2', text: 'You could genuinely have chosen otherwise.', side: 'right' },
+          { id: 'i3', text: 'Every choice is the effect of earlier causes.', side: 'left' },
+          { id: 'i4', text: 'Something in you starts a new causal chain.', side: 'right' },
         ],
-        explanation: 'Determinism says each choice is the inevitable effect of earlier causes plus the laws of nature, so given the past, only one outcome was ever possible.',
+        explanation: 'Determinism says each choice is the inevitable effect of earlier causes plus the laws of nature. The free-will side insists on a real branching — that you could have done otherwise. Randomness is neither: an undetermined twitch is not a choice you own, which is why quantum indeterminacy rescues nobody.',
       },
     },
     {

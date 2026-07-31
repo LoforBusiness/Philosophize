@@ -52,17 +52,19 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: 'Some say negative and positive liberty are just two names for one thing, so more of one means more of the other. True?',
+      prompt: 'Which kind of freedom is each complaint about?',
       xpValue: 5,
       interaction: {
-        type: 'multiple-choice',
-        options: [
-          { id: 'a', text: 'Yes, they are the same freedom, so they always rise and fall together', isCorrect: false },
-          { id: 'b', text: 'No, they are distinct, and expanding one can shrink the other', isCorrect: true },
-          { id: 'c', text: 'Yes, since both use the word liberty, they cannot conflict', isCorrect: false },
-          { id: 'd', text: 'No, because positive liberty is simply a stronger dose of negative liberty', isCorrect: false },
+        type: 'two-camps',
+        leftLabel: 'Negative',
+        rightLabel: 'Positive',
+        items: [
+          { id: 'i1', text: 'No law stops me, but I cannot afford to go.', side: 'right' },
+          { id: 'i2', text: 'A guard turns me back at the gate.', side: 'left' },
+          { id: 'i3', text: 'I am free to choose, but too addicted to choose well.', side: 'right' },
+          { id: 'i4', text: 'The law forbids me from saying it.', side: 'left' },
         ],
-        explanation: 'This is the conflation fallacy: treating two different concepts as identical because they share a name. Berlin\'s whole point is that they can clash. A state can expand "positive" self-mastery (acting in your supposed true interests) while crushing negative liberty (your actual choices).',
+        explanation: 'Negative liberty asks who is standing in your way; positive liberty asks whether you are actually master of yourself. That is why they can pull apart — and why Berlin worried. A state can expand your "true" self-mastery while removing the choices you would have made.',
       },
     },
     {

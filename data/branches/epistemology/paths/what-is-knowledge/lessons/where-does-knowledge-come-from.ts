@@ -52,17 +52,19 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: 'Which philosopher held that the mind begins as a blank slate, with no innate principles?',
+      prompt: 'Sort each claim into the camp that would make it.',
       xpValue: 5,
       interaction: {
-        type: 'multiple-choice',
-        options: [
-          { id: 'a', text: 'John Locke', isCorrect: true },
-          { id: 'b', text: 'René Descartes', isCorrect: false },
-          { id: 'c', text: 'Plato', isCorrect: false },
-          { id: 'd', text: 'Gottfried Leibniz', isCorrect: false },
+        type: 'two-camps',
+        leftLabel: 'Rationalist',
+        rightLabel: 'Empiricist',
+        items: [
+          { id: 'i1', text: 'The newborn mind is white paper.', side: 'right' },
+          { id: 'i2', text: 'Some truths can be reached by reason alone.', side: 'left' },
+          { id: 'i3', text: 'Nothing is in the mind that was not first in the senses.', side: 'right' },
+          { id: 'i4', text: 'We are born already knowing certain ideas.', side: 'left' },
         ],
-        explanation: 'Locke called the newborn mind "white paper," filled only through sensation and reflection. Descartes, Plato, and Leibniz argued the reverse — for them, some ideas are innate.',
+        explanation: 'Locke called the newborn mind "white paper," filled only by sensation and reflection; Descartes, Plato and Leibniz all argued the reverse. Note that no rationalist denies the senses matter — the claim is only that SOME truths, mathematics above all, do not wait on them.',
       },
     },
     {

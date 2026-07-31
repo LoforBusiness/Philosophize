@@ -52,12 +52,18 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: 'True or false: For Mill, the fact that speech deeply offends many people is itself enough harm to justify banning it.',
+      prompt: 'Tap the step Mill would not grant.',
       xpValue: 5,
       interaction: {
-        type: 'true-false',
-        answer: false,
-        explanation: 'False. This conflates offense with harm. For Mill, harm is a setback to others\' interests or rights; mere offense or distaste is not. Many being upset never licenses coercion, or the majority could silence anything it disliked.',
+        type: 'tap-flaw',
+        steps: [
+          { id: 's1', text: 'This speech deeply offends a great many people.' },
+          { id: 's2', text: 'Causing that much distress is a harm to them.' },
+          { id: 's3', text: 'The state may prevent harm to others.' },
+          { id: 's4', text: 'So the state may ban this speech.' },
+        ],
+        flawedId: 's2',
+        explanation: 'Step 2 quietly swaps offence for harm. Mill grants step 3 — that is his own principle. But harm means a setback to someone’s interests or rights, and being upset is not one. If sheer numbers of the offended counted, a majority could silence anything it disliked, which is the outcome the principle exists to prevent.',
       },
     },
     {

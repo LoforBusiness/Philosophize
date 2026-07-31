@@ -38,17 +38,19 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: 'What was Oscar Wilde\'s position on art and morality?',
+      prompt: 'Which camp does each line belong to?',
       xpValue: 5,
       interaction: {
-        type: 'multiple-choice',
-        options: [
-          { id: 'a', text: 'Art should be judged as art, separately from morality', isCorrect: true },
-          { id: 'b', text: 'Art exists mainly to teach clear moral lessons', isCorrect: false },
-          { id: 'c', text: 'Immoral art should be banned by the state', isCorrect: false },
-          { id: 'd', text: 'Beauty and goodness are always the same thing', isCorrect: false },
+        type: 'two-camps',
+        leftLabel: 'Wilde',
+        rightLabel: 'Moralist',
+        items: [
+          { id: 'i1', text: 'A book is well or badly written, never moral or immoral.', side: 'left' },
+          { id: 'i2', text: 'A work that glamorises cruelty is worse AS art.', side: 'right' },
+          { id: 'i3', text: 'Judge the craft; leave the sermon out of it.', side: 'left' },
+          { id: 'i4', text: 'What art teaches us to feel is part of its worth.', side: 'right' },
         ],
-        explanation: 'Wilde, an aesthete, held that books are well or badly written, not moral or immoral — art is to be judged as art, not as ethics.',
+        explanation: 'Wilde the aesthete separates the two questions entirely: art is judged as art. The moralist answers that a work asks us to feel something, and that what it asks for can itself be a flaw in the work. Both agree the art is skilful — they disagree about whether skill is the end of the matter.',
       },
     },
     {

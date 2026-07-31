@@ -53,33 +53,18 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: 'On Locke’s view, what makes the 70-year-old the same person as the 7-year-old?',
+      prompt: 'Which account of "same person" does each line appeal to?',
       interaction: {
-        type: 'multiple-choice',
-        options: [
-          {
-            id: 'a',
-            text: 'Continuity of consciousness — the later self can remember the earlier life.',
-            isCorrect: true,
-          },
-          {
-            id: 'b',
-            text: 'They have the same physical body throughout their whole life.',
-            isCorrect: false,
-          },
-          {
-            id: 'c',
-            text: 'They were given the same name and birth certificate at birth.',
-            isCorrect: false,
-          },
-          {
-            id: 'd',
-            text: 'They keep the same personality and never change their beliefs.',
-            isCorrect: false,
-          },
+        type: 'two-camps',
+        leftLabel: 'Memory',
+        rightLabel: 'Body',
+        items: [
+          { id: 'i1', text: 'She can remember being that child.', side: 'left' },
+          { id: 'i2', text: 'It is the same organism, alive the whole time.', side: 'right' },
+          { id: 'i3', text: 'The chain of consciousness was never broken.', side: 'left' },
+          { id: 'i4', text: 'Trace the flesh backwards and you arrive at her.', side: 'right' },
         ],
-        explanation:
-          'Locke grounds identity in continuity of consciousness and memory (A). Option B is the tempting bodily-continuity assumption — and it begs the question: the body replaces nearly all its matter (the Ship of Theseus problem), so "same body" cannot do the work without an argument it never gives. D fails too, since beliefs and personality openly change.',
+        explanation: 'Locke grounds identity in continuity of consciousness, not matter. The bodily answer feels like the safe, common-sense one — which is what makes it worth pressing: the body replaces nearly all its material over a lifetime, so "the same body" is doing work it has not earned. That is the Ship of Theseus, wearing your face.',
       },
       xpValue: 5,
     },

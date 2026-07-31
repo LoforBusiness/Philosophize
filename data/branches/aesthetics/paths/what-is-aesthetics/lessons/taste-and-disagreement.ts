@@ -59,17 +59,17 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: '"Hume said beauty is in the mind, so he must believe every opinion about art is equally correct."',
+      prompt: 'A reader sums Hume up like this. Tap the step he would reject.',
       xpValue: 5,
       interaction: {
-        type: 'multiple-choice',
-        options: [
-          { id: 'a', text: 'True — subjectivism means all tastes are equally valid', isCorrect: false },
-          { id: 'b', text: 'False — he kept a standard, ranking trained critics above the careless', isCorrect: true },
-          { id: 'c', text: 'True — he denied that any critic could be more reliable', isCorrect: false },
-          { id: 'd', text: 'False — he thought beauty was measurable in the object', isCorrect: false },
+        type: 'tap-flaw',
+        steps: [
+          { id: 's1', text: 'Hume says beauty exists in the mind, not the object.' },
+          { id: 's2', text: 'So no judgement of art is better than another.' },
+          { id: 's3', text: 'So a trained critic is worth no more than anyone.' },
         ],
-        explanation: 'The trap: "in the mind" sounds like "anything goes." Hume held both — beauty is subjective, yet the trained verdict of true critics sets a real standard.',
+        flawedId: 's2',
+        explanation: 'Step 2. "In the mind" sounds like "anything goes," and that slide is the whole trap — Hume holds both halves at once. Beauty is a response, not a property of the canvas; yet responses can be better or worse informed, and the settled verdict of experienced, unprejudiced critics is a real standard.',
       },
     },
     {

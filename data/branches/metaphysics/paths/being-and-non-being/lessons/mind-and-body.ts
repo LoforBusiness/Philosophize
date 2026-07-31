@@ -44,17 +44,19 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: 'What is the core claim of Descartes\'s dualism?',
+      prompt: 'Whose side would each claim be arguing for?',
       xpValue: 5,
       interaction: {
-        type: 'multiple-choice',
-        options: [
-          { id: 'a', text: 'The mind is simply a part of the brain', isCorrect: false },
-          { id: 'b', text: 'Mind and body are two distinct kinds of substance', isCorrect: true },
-          { id: 'c', text: 'Only the body is real; the mind is illusion', isCorrect: false },
-          { id: 'd', text: 'Mind and body are the same single thing', isCorrect: false },
+        type: 'two-camps',
+        leftLabel: 'Dualist',
+        rightLabel: 'Physicalist',
+        items: [
+          { id: 'i1', text: 'Thinking and matter are two different kinds of stuff.', side: 'left' },
+          { id: 'i2', text: 'Damage the brain and you damage the mind.', side: 'right' },
+          { id: 'i3', text: 'I can doubt I have a body, but not that I think.', side: 'left' },
+          { id: 'i4', text: 'Every mental event is some physical event.', side: 'right' },
         ],
-        explanation: 'Dualism holds that mind (thinking, unextended) and body (extended, unthinking) are two fundamentally different substances rather than one.',
+        explanation: 'Dualism says mind and body are two fundamentally different substances — thinking and unextended on one side, extended and unthinking on the other. Physicalism says there is only the one kind of stuff. Notice that both camps can accept the brain-damage evidence; they disagree about what it shows.',
       },
     },
     {

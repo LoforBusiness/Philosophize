@@ -44,17 +44,18 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: '"Let students retake one quiz, and soon we abolish grades entirely." What is the flaw?',
+      prompt: 'Tap the first step that has not been earned.',
       xpValue: 5,
       interaction: {
-        type: 'multiple-choice',
-        options: [
-          { id: 'a', text: 'Slippery slope — no link in the chain is justified', isCorrect: true },
-          { id: 'b', text: 'No flaw — it traces the logical consequences', isCorrect: false },
-          { id: 'c', text: 'It attacks the student instead of the idea', isCorrect: false },
-          { id: 'd', text: 'It denies the antecedent of a conditional', isCorrect: false },
+        type: 'tap-flaw',
+        steps: [
+          { id: 's1', text: 'Suppose we let students retake one quiz.' },
+          { id: 's2', text: 'Then they will expect to retake every test.' },
+          { id: 's3', text: 'Then grades will stop meaning anything.' },
+          { id: 's4', text: 'So we must not allow the retake.' },
         ],
-        explanation: 'This is the slippery slope fallacy. The tempting "no flaw" answer mistakes a string of asserted if-thens for a proven chain — but each step needs its own evidence, and none is given. A bare row of dominoes is not an argument that they fall.',
+        flawedId: 's2',
+        explanation: 'Step 2 — the very first link, and that is the point. A slippery slope is not wrong because the ending is far-fetched; it is wrong at the first join that was asserted rather than shown. Nothing here gives a reason why one retake produces the next. Once step 2 is free, the rest costs nothing.',
       },
     },
     {

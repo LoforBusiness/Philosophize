@@ -45,12 +45,17 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
-      prompt: '"I met two rude tourists from that country, so people there are rude." Firsthand evidence — so the conclusion is well supported. True or false?',
+      prompt: 'Every line here is true. Where does the reasoning still break?',
       xpValue: 5,
       interaction: {
-        type: 'true-false',
-        answer: false,
-        explanation: 'False — this is a hasty generalization. Two cases is a sample far too small and unrepresentative to support a claim about millions, and firsthand experience does not fix the sample size. The inductive leap outruns the evidence beneath it.',
+        type: 'tap-flaw',
+        steps: [
+          { id: 's1', text: 'I met two tourists from that country.' },
+          { id: 's2', text: 'Both of them were rude to me.' },
+          { id: 's3', text: 'So people from that country are rude.' },
+        ],
+        flawedId: 's3',
+        explanation: 'Step 3 — a hasty generalization. Steps 1 and 2 are true, and that is what makes it tempting: firsthand evidence feels like strong evidence. But two people cannot speak for millions, and seeing it yourself does nothing to fix the sample size. The leap, not the observation, is where it fails.',
       },
     },
     {

@@ -39,12 +39,50 @@ export interface MatchInteraction {
   explanation: string;
 }
 
+// "Where does this go wrong?" — an argument laid out as numbered steps, one of
+// which is the broken one. The home for trick questions: the flawed step should
+// read as perfectly reasonable until it's named, and `explanation` must NAME the
+// move (hasty generalisation, affirming the consequent, appeal to popularity)
+// rather than just saying it's wrong. Max 3-5 steps, each under 16 words —
+// beyond that the reader is doing comprehension, not spotting.
+export interface TapFlawStep {
+  id: string;
+  text: string;
+}
+
+export interface TapFlawInteraction {
+  type: 'tap-flaw';
+  steps: TapFlawStep[];      // 3-5, in argument order
+  flawedId: string;          // exactly one
+  /** Names the fallacy and says why the step is tempting. */
+  explanation: string;
+}
+
+// Two named camps and a small stack of statements to flick into one or the
+// other. Good for "who would say this" and for premise/conclusion drills; the
+// reader commits with a gesture rather than reading four boxes.
+export interface TwoCampsItem {
+  id: string;
+  text: string;              // max ~14 words — it has to fit a card mid-swipe
+  side: 'left' | 'right';
+}
+
+export interface TwoCampsInteraction {
+  type: 'two-camps';
+  leftLabel: string;         // 1-2 words; it sits in a corner of the screen
+  rightLabel: string;
+  items: TwoCampsItem[];     // 3-5; longer outstays the format
+  explanation: string;
+}
+
 export type InteractionData =
   | MultipleChoiceInteraction
   | TrueFalseInteraction
   | SortItemsInteraction
   | FillBlankInteraction
-  | MatchInteraction;
+  | MatchInteraction
+  | TapFlawInteraction
+  | TwoCampsInteraction;
 
 // ─── Card types (top-level discriminated union) ──────────────────────────────
 

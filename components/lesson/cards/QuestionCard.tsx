@@ -4,6 +4,8 @@ import type { QuestionCard as QuestionCardType, AnswerResult } from '@/data/type
 import MultipleChoice from '../interactions/MultipleChoice';
 import TrueFalse from '../interactions/TrueFalse';
 import SortItems from '../interactions/SortItems';
+import TapFlaw from '../interactions/TapFlaw';
+import TwoCamps from '../interactions/TwoCamps';
 import { useSceneMeta } from '../sceneContext';
 import { T } from '../theme';
 
@@ -44,6 +46,12 @@ export default function QuestionCard({ card, onComplete }: Props) {
         )}
         {card.interaction.type === 'sort' && (
           <SortItems interaction={card.interaction} xpValue={card.xpValue} onComplete={complete} />
+        )}
+        {card.interaction.type === 'tap-flaw' && (
+          <TapFlaw interaction={card.interaction} xpValue={card.xpValue} onComplete={complete} />
+        )}
+        {card.interaction.type === 'two-camps' && (
+          <TwoCamps interaction={card.interaction} xpValue={card.xpValue} onComplete={complete} />
         )}
       </View>
     </ScrollView>
