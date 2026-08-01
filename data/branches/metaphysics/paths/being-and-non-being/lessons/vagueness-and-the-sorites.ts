@@ -93,6 +93,24 @@ const lesson: Lesson = {
       emoji: '🔍',
     },
     {
+      // Added when this lesson became cinematic: the scene's second graded question
+      // is answered on the pile, and E37c requires the data to carry the same two
+      // questions with the same correct answers.
+      type: 'question',
+      prompt: 'Which single grain\'s removal is the one that ends the heap?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'None of them — and that absence is the paradox', isCorrect: true },
+          { id: 'b', text: 'The one that takes it below a hundred grains', isCorrect: false },
+          { id: 'c', text: 'The very last grain to be removed', isCorrect: false },
+          { id: 'd', text: 'It differs per pile, so there is no general answer', isCorrect: false },
+        ],
+        explanation: 'Every removal is harmless taken alone, so no single one can be blamed. The puzzle is not that the grain is hard to find — it is that harmless steps add up to a conclusion nobody accepts.',
+      },
+    },
+    {
       type: 'summary',
       title: 'Living on the Blurry Edge',
       keyPoints: [

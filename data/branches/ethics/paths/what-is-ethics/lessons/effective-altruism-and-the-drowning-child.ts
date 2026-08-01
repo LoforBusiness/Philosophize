@@ -87,6 +87,24 @@ const lesson: Lesson = {
       xpValue: 5,
     },
     {
+      // Added when this lesson became cinematic: the scene's second graded question
+      // is answered on the two gauges, and E37c requires the data to carry the same
+      // two questions with the same correct answers.
+      type: 'question',
+      prompt: 'Between the child in the pond and the child far away, what actually differs?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Only the distance between you and them', isCorrect: true },
+          { id: 'b', text: 'The cost to you, which is far higher far away', isCorrect: false },
+          { id: 'c', text: 'Your power to help, which fades with distance', isCorrect: false },
+          { id: 'd', text: 'How certain it is that your help arrives', isCorrect: false },
+        ],
+        explanation: 'Same cost, same certainty, same power to act. Singer\'s challenge is to name a reason distance should carry moral weight, and the honest answer is that nobody has produced one.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

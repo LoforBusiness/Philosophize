@@ -66,6 +66,24 @@ const lesson: Lesson = {
       },
     },
     {
+      // Added when this lesson became cinematic: the scene's second graded question
+      // is answered on the stage, and E37c requires the data to carry the same two
+      // questions with the same correct answers.
+      type: 'question',
+      prompt: 'On Hume\'s account, where does the felt connection between cause and effect live?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'In the observer, as a habit of expectation', isCorrect: true },
+          { id: 'b', text: 'In the gap between the two events', isCorrect: false },
+          { id: 'c', text: 'In the second object, which receives the force', isCorrect: false },
+          { id: 'd', text: 'Nowhere at all — Hume denies that causes exist', isCorrect: false },
+        ],
+        explanation: 'Constant conjunction trains an expectation, and the felt push of that expectation is what we then report as having seen. Hume keeps the events; he relocates the necessity.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

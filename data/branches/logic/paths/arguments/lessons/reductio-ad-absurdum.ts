@@ -51,6 +51,24 @@ const lesson: Lesson = {
       },
     },
     {
+      // Added when this lesson became cinematic: the scene's second graded question
+      // is answered on the chain itself, and E37c requires the data to carry the
+      // same two questions with the same correct answers.
+      type: 'question',
+      prompt: 'The chain of reasoning ends in an absurdity. What does that break?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'The assumption at the top of the chain', isCorrect: true },
+          { id: 'b', text: 'One of the middle steps, which must be flawed', isCorrect: false },
+          { id: 'c', text: 'The rules of logic themselves', isCorrect: false },
+          { id: 'd', text: 'Nothing — a contradiction just ends the attempt', isCorrect: false },
+        ],
+        explanation: 'Not the logic, and not a middle step — those were valid moves you would make again tomorrow. The only thing in the chain that was ever optional is the thing you assumed at the start.',
+      },
+    },
+    {
       type: 'reinforcement',
       callout: 'Earlier you met modus tollens.',
       body: 'Reductio is modus tollens in spirit: if assuming P forces a falsehood, then not-P. The Stoics\' "deny the consequent" and the mathematician\'s "prove by contradiction" are two faces of the same move — push a claim until it breaks.',

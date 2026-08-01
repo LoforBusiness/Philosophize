@@ -48,6 +48,18 @@ import { Logic8Lesson } from '@/components/lesson/cinematic/logic8Scene';
 import { Ethics7Lesson } from '@/components/lesson/cinematic/ethics7Scene';
 import { Ethics8Lesson } from '@/components/lesson/cinematic/ethics8Scene';
 import { Ethics9Lesson } from '@/components/lesson/cinematic/ethics9Scene';
+import { Aesthetics19Lesson } from '@/components/lesson/cinematic/aesthetics19Scene';
+import { Political12Lesson } from '@/components/lesson/cinematic/political12Scene';
+import { Political13Lesson } from '@/components/lesson/cinematic/political13Scene';
+import { Political15Lesson } from '@/components/lesson/cinematic/political15Scene';
+import { Metaphysics13Lesson } from '@/components/lesson/cinematic/metaphysics13Scene';
+import { Metaphysics15Lesson } from '@/components/lesson/cinematic/metaphysics15Scene';
+import { Metaphysics24Lesson } from '@/components/lesson/cinematic/metaphysics24Scene';
+import { Ethics18Lesson } from '@/components/lesson/cinematic/ethics18Scene';
+import { Ethics23Lesson } from '@/components/lesson/cinematic/ethics23Scene';
+import { Logic22Lesson } from '@/components/lesson/cinematic/logic22Scene';
+import { Logic25Lesson } from '@/components/lesson/cinematic/logic25Scene';
+import { Logic26Lesson } from '@/components/lesson/cinematic/logic26Scene';
 import { Aesthetics11Lesson } from '@/components/lesson/cinematic/aesthetics11Scene';
 import { Aesthetics16Lesson } from '@/components/lesson/cinematic/aesthetics16Scene';
 import { KnowHowLesson } from '@/components/lesson/cinematic/knowHowScene';
@@ -142,6 +154,20 @@ const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   'ethics-ethics-7': Ethics7Lesson,
   'ethics-ethics-8': Ethics8Lesson,
   'ethics-ethics-9': Ethics9Lesson,
+  // Levelling every branch at 14 cinematic — these are EXISTING lessons given a
+  // scene, not new ones, so the 30-per-branch total below is untouched.
+  'logic-arguments-22': Logic22Lesson,
+  'ethics-ethics-18': Ethics18Lesson,
+  'metaphysics-being-13': Metaphysics13Lesson,
+  'metaphysics-being-15': Metaphysics15Lesson,
+  'metaphysics-being-24': Metaphysics24Lesson,
+  'aesthetics-aesthetics-19': Aesthetics19Lesson,
+  'political-political-12': Political12Lesson,
+  'political-political-13': Political13Lesson,
+  'political-political-15': Political15Lesson,
+  'ethics-ethics-23': Ethics23Lesson,
+  'logic-arguments-25': Logic25Lesson,
+  'logic-arguments-26': Logic26Lesson,
   // The six that levelled every branch at 30 lessons.
   'aesthetics-aesthetics-11': Aesthetics11Lesson,
   'aesthetics-aesthetics-16': Aesthetics16Lesson,

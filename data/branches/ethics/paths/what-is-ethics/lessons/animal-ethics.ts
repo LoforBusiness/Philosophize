@@ -65,6 +65,24 @@ const lesson: Lesson = {
       },
     },
     {
+      // Added when this lesson became cinematic: the scene's second graded question
+      // is answered at the boundary line, and E37c requires the data to carry the
+      // same two questions with the same correct answers.
+      type: 'question',
+      prompt: 'Excluding a being just for the group it belongs to has a name. What is it?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Speciesism', isCorrect: true },
+          { id: 'b', text: 'Relativism', isCorrect: false },
+          { id: 'c', text: 'Utilitarianism', isCorrect: false },
+          { id: 'd', text: 'Consequentialism', isCorrect: false },
+        ],
+        explanation: 'Singer coins it by analogy with racism and sexism: giving identical suffering less weight because of the body it happens in. Naming it matters — an unnamed bias just feels like common sense.',
+      },
+    },
+    {
       type: 'summary',
       title: 'The Circle Widens Again',
       keyPoints: [

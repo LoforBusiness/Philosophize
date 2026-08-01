@@ -69,6 +69,24 @@ const lesson: Lesson = {
       philosopherId: 'derek-parfit',
     },
     {
+      // Added when this lesson became cinematic: the scene's second graded question
+      // is answered at the fork, and E37c requires the data to carry the same two
+      // questions with the same correct answers.
+      type: 'question',
+      prompt: 'Continuity went two ways at the fork. What is it that could not?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Identity — a thing can only be identical to one thing', isCorrect: true },
+          { id: 'b', text: 'Continuity, which is why only one survivor is really you', isCorrect: false },
+          { id: 'c', text: 'Memory, since only one of them holds the originals', isCorrect: false },
+          { id: 'd', text: 'Nothing — both branches are simply you, twice over', isCorrect: false },
+        ],
+        explanation: 'Continuity survived twice over, which is precisely the trouble. Identity is the relation that cannot branch, and that mismatch is what makes "which one is really me?" unanswerable.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

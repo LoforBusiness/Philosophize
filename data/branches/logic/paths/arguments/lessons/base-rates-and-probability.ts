@@ -50,6 +50,24 @@ const lesson: Lesson = {
       },
     },
     {
+      // Added when this lesson became cinematic: the scene's second graded question
+      // is answered on the chart, and E37c requires the data to carry the same two
+      // questions, testing the same concepts, with the same correct answers.
+      type: 'question',
+      prompt: 'Of everyone this test calls positive, how many are actually ill?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'About 1 in 101 — under one percent of them', isCorrect: true },
+          { id: 'b', text: '99 in 100, because the test is 99% accurate', isCorrect: false },
+          { id: 'c', text: 'About half — the test and the base rate cancel out', isCorrect: false },
+          { id: 'd', text: 'All of them; a positive is a positive', isCorrect: false },
+        ],
+        explanation: 'One true case against a hundred false alarms. The test really is 99% accurate — it is the disease being rare that does this. A very good test aimed at a very rare thing still produces mostly false alarms.',
+      },
+    },
+    {
       type: 'reinforcement',
       callout: 'Earlier: correlation isn\'t causation.',
       body: 'Both errors come from trusting a vivid signal over the boring background. There, an eye-catching link hid a hidden cause. Here, an eye-catching test result hides the base rate. Good reasoning always asks: how common was this to begin with?',

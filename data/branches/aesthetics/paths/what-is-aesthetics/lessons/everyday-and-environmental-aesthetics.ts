@@ -59,6 +59,24 @@ const lesson: Lesson = {
       emoji: '🧭',
     },
     {
+      // Added when this lesson became cinematic: the scene's second graded question
+      // is answered on the stage, and E37c requires the data to carry the same two
+      // questions with the same correct answers.
+      type: 'question',
+      prompt: 'The frame never moved and neither did the marsh. What changed the verdict?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Knowing what it actually is', isCorrect: true },
+          { id: 'b', text: 'Finding a better vantage point', isCorrect: false },
+          { id: 'c', text: 'Framing it, which makes anything art', isCorrect: false },
+          { id: 'd', text: 'Nothing real — the second reading is sentimental', isCorrect: false },
+        ],
+        explanation: 'A frame decides where you point; it cannot tell you what you are looking at. On Carlson\'s view natural history is the part appreciation was waiting on, exactly as art history is for a painting.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

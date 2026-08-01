@@ -67,6 +67,24 @@ const lesson: Lesson = {
       },
     },
     {
+      // Added when this lesson became cinematic: the scene answers "which step would
+      // Mill refuse" on the argument itself, so the deck takes the definitional half.
+      // E37c requires the data to carry the same two questions.
+      type: 'question',
+      prompt: 'On Mill\'s view, what makes something harm rather than mere offence?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'It sets back another person\'s interests or rights', isCorrect: true },
+          { id: 'b', text: 'Enough people are upset by it', isCorrect: false },
+          { id: 'c', text: 'It is deeply disrespectful of what others hold sacred', isCorrect: false },
+          { id: 'd', text: 'It damages the speaker\'s own character', isCorrect: false },
+        ],
+        explanation: 'The trap is B, because it sounds democratic. Offence scales with how many people object and harm does not — which is exactly why Mill will not let a headcount do the work of an injury.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

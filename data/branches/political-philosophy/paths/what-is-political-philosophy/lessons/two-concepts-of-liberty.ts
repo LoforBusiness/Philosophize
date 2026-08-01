@@ -68,6 +68,24 @@ const lesson: Lesson = {
       },
     },
     {
+      // Added when this lesson became cinematic: the scene's second graded question
+      // is answered under the doorway, and E37c requires the data to carry the same
+      // two questions with the same correct answers.
+      type: 'question',
+      prompt: 'The door is wide open and you still cannot choose. Which claim to freedom is false?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'That you are master of yourself', isCorrect: true },
+          { id: 'b', text: 'That nobody is blocking your way', isCorrect: false },
+          { id: 'c', text: 'Both of them are false here', isCorrect: false },
+          { id: 'd', text: 'Neither — an open door is all freedom requires', isCorrect: false },
+        ],
+        explanation: 'Negative liberty is honestly satisfied: the doorway is clear. Self-mastery is the one being claimed on your behalf, and that is exactly what Berlin warns cannot be switched on for you by someone else.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

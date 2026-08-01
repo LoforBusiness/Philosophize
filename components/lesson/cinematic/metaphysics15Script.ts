@@ -1,0 +1,96 @@
+import type { BaseBeat } from './cinematicKit';
+
+// Cinematic metaphysics-being-15, "Does Cause Really Connect?"
+//
+// THE PICTURE: two balls with a gap between them, and a search running over that
+// gap for the connection. The search comes back empty — and then the same search,
+// run over the observer instead, finds it immediately. Where the connection turns
+// up is the lesson.
+//
+// Q1 is A/B/C/D (Hume's diagnosis has to be told apart from "causes are not real",
+// which is the overshoot); Q2 is answered on the stage (E34, H65).
+
+export interface Meta15Beat extends BaseBeat {
+  /** Figure gesture (emote code). */ p?: number;
+  /** Where the figure stands (stage x). */ x?: number;
+  /** The two balls are drawn, 0..1. */ balls?: number;
+  /** 1 = the gap between them is marked and being searched. */ gap?: number;
+  /** Search verdict: 0 none · 1 NOT FOUND out there · 2 FOUND, in the observer. */ found?: number;
+  /** 1 = the three answer cards are live (Q2). */ pick?: number;
+}
+
+export const BEATS: Meta15Beat[] = [
+  {
+    p: 25, x: 70,
+    text: 'One ball rolls up and strikes another, and the second rolls away. You have watched that ten thousand times. Hume asks what exactly you saw.',
+    dur: 4.6,
+  },
+  {
+    p: 41, x: 168, balls: 1,
+    text: 'You saw the first ball move. You saw it touch. You saw the second move. Three things, all of them plain, none of them the thing we actually care about.',
+    cite: 'What you saw',
+    dur: 4.8,
+  },
+  {
+    p: 13, x: 124, balls: 1, gap: 1,
+    text: 'Between the touch and the movement is where the causing is supposed to live. Slow the film to a single frame and look straight at it.',
+    cite: 'The gap',
+    dur: 4.4,
+  },
+  {
+    p: 44, x: 124, balls: 1, gap: 1,
+    quote: {
+      id: 'lq-metaphysics-being-15-1',
+      text: 'All inferences from experience suppose, as their foundation, that the future will resemble the past.',
+      author: 'David Hume',
+      work: 'An Enquiry Concerning Human Understanding',
+      era: '1748',
+      philosopherId: 'david-hume',
+      branchSlugs: ['metaphysics'],
+    },
+    dur: 3.8,
+  },
+  {
+    p: 34, x: 168, balls: 1, gap: 1, found: 1,
+    text: 'Nothing. Succession, and constant conjunction, and no glue anywhere. Hume\'s answer is that the glue is real, and that it is not out there.',
+    cite: 'Not found',
+    dur: 4.6,
+  },
+  {
+    p: 4, x: 124, balls: 1, gap: 1, found: 2,
+    mc: {
+      prompt: 'A friend insists: "We plainly observe the force that makes the effect follow." Where does Hume say they err?',
+      options: [
+        { id: 'a', text: 'They project a felt expectation and mistake it for something seen', correct: true },
+        { id: 'b', text: 'They are right — we perceive the connecting force directly', correct: false },
+        { id: 'c', text: 'Causes and effects do not really happen at all', correct: false },
+        { id: 'd', text: 'Science has not yet found the link, but instruments will', correct: false },
+      ],
+      explain: 'The trap is C, which overshoots: Hume keeps the events, he only denies the visible necessity. Repeated pairing builds a habit of expectation, and we read that inner push back onto the world.',
+      xp: 5,
+    },
+    dur: 1.0,
+  },
+  {
+    p: 6, x: 124, balls: 1, gap: 1, found: 2, pick: 1,
+    interact: {
+      prompt: 'The search found it on the second pass. Tap where.',
+      explain: 'In the observer. Constant conjunction trains an expectation, and the felt push of that expectation is what we then report as seeing one thing make another happen.',
+      xp: 5,
+    },
+    dur: 1.0,
+  },
+  {
+    summary: {
+      title: 'What You Now Know',
+      points: [
+        'We observe succession, never the connection itself',
+        'Constant conjunction trains the mind to expect',
+        'Causal power is projected habit, not perception',
+        'Causal necessity is not logical necessity',
+      ],
+      closing: 'The glue is real enough. It is just on your side of the glass.',
+    },
+    dur: 3.0,
+  },
+];

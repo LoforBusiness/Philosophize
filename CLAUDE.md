@@ -162,21 +162,27 @@ Curriculum content lives in `data/branches/` as strongly-typed TypeScript files.
 
 ### Shape today
 
-**Every branch holds exactly 30 lessons**, and that is now a deliberate invariant
-rather than where the counts happened to land. It was 27–30 (epistemology short by
-three, aesthetics by two, ethics by one) and the gaps were visible in the branch
-cards. `node scripts/…` is not needed to check it — the counts are below and any
-new lesson has to keep them equal.
+**Every branch holds exactly 30 lessons, of which exactly 14 are cinematic.** Both
+numbers are deliberate invariants rather than where the counts happened to land —
+the totals were 27–30 and the cinematic share was 11–14, and both showed on the
+Learn cards.
+
+They also constrain each other, which is the part worth remembering: **the way to
+raise the cinematic count is to give an EXISTING card lesson a scene, not to write
+a new one.** Twelve new cinematic lessons would have taken the totals to 33/32/30/
+33/31/33 and undone the first invariant to satisfy the second. Converting costs a
+`*Script.ts` + `*Scene.tsx` + a `CINEMATIC` entry, and usually a second graded
+question added to the data file (E37c), and it moves nothing else.
 
 | Branch | Units | Lessons | of which cinematic |
 |---|---|---|---|
-| Metaphysics | 5 | 30 | 11 |
+| Metaphysics | 5 | 30 | 14 |
 | Epistemology | 5 | 30 | 14 |
-| Logic | 5 | 30 | 11 |
-| Ethics | 5 | 30 | 12 |
-| Aesthetics | 3 | 30 | 13 |
-| Political Philosophy | 5 | 30 | 11 |
-| **Total** | **28** | **180** | **72** |
+| Logic | 5 | 30 | 14 |
+| Ethics | 5 | 30 | 14 |
+| Aesthetics | 3 | 30 | 14 |
+| Political Philosophy | 5 | 30 | 14 |
+| **Total** | **28** | **180** | **84** |
 
 > **`Path` IS a unit.** The type is still called `Path` in `data/types.ts`, but
 > every screen calls it a *unit* and `branch.paths` is the unit list
@@ -539,7 +545,7 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**72 lessons** are not card decks at all: they are tap-advanced animated scenes.
+**84 lessons** are not card decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
 `CINEMATIC` map from lesson id → component; anything absent falls through to the
 normal `LessonRunner`. **Removing an entry is a complete, safe rollback** for one
