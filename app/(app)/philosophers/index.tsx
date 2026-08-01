@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   View,
   Text,
+  Image,
   Pressable,
   ScrollView,
   TextInput,
@@ -10,9 +11,11 @@ import {
   InteractionManager,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient as Scrim } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { ALL_PHILOSOPHERS, type Philosopher } from '@/data/philosophers';
+import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
 import { useUIStore } from '@/stores/uiStore';
 
 const Paper = '#FAFAF7';
@@ -22,9 +25,44 @@ const InkFaint = '#E2E0D8';
 const PaperMute = '#9C9A93';
 const Tag = '#EAE7DF';
 const DarkField = '#262626';
+// PaperMute was chosen against SOLID ink, where it gives about 4.9:1. Over the rain
+// drawing it measures 3.2:1 — under the 4.5 that 9px and 12px type needs. The fix is
+// the text, not more scrim: darkening the wash far enough to rescue a muted grey would
+// bury the picture, which is the reason the picture is there.
+const PaperMuteOnArt = '#C4C2BB';
 
 const SW = Dimensions.get('window').width;
-const CARD_W = (SW - 40 - 12) / 2;
+// The hard shadow is offset out to the right, so it has to come out of the card's
+// own width or the second column runs off the screen.
+const SHADOW_X = 4;
+const SHADOW_Y = 5;
+const CARD_W = (SW - 40 - 12) / 2 - SHADOW_X;
+const FEAT_W = SW - 40;
+const TAB_H = 13;
+
+// ── the file-tab card, in five monochrome treatments ─────────────────────────
+//
+// The reference for this layout separates its cards by COLOUR, which this app does
+// not have. Tone is the substitute, and it has to carry the same job: enough rhythm
+// down a long scroll that the grid reads as a set of distinct things rather than one
+// repeating cell. Each era gets its own tab fill and badge treatment — solid, ruled,
+// tinted, doubled — so scrolling past Ancient into Modern actually looks like
+// crossing a boundary. The initial stays, because with 223 thinkers it is the only
+// per-card mark that is genuinely theirs.
+type Treatment = {
+  tab: string;
+  badge: { bg: string; border: string; width: number };
+  letter: string;
+  inner?: boolean;   // a second rule inside the badge
+};
+const TREATMENT: Record<string, Treatment> = {
+  ANCIENT: { tab: Ink, badge: { bg: Ink, border: Ink, width: 1.5 }, letter: Paper },
+  MEDIEVAL: { tab: InkSoft, badge: { bg: Paper, border: Ink, width: 1.5 }, letter: Ink, inner: true },
+  MODERN: { tab: Ink, badge: { bg: Tag, border: Ink, width: 1.5 }, letter: Ink },
+  CONTEMPORARY: { tab: InkSoft, badge: { bg: Ink, border: Ink, width: 1.5 }, letter: Paper },
+  EASTERN: { tab: Ink, badge: { bg: Paper, border: Ink, width: 2.5 }, letter: Ink },
+};
+const treatmentOf = (group: string) => TREATMENT[group] ?? TREATMENT.MODERN;
 
 const GROUP: Record<string, string> = {
   socrates: 'ANCIENT',
@@ -171,6 +209,29 @@ export default function ThinkersScreen() {
             <>
               <SectionHead>THINKER OF THE DAY</SectionHead>
               <Pressable style={styles.featured} onPress={() => openPhilosopher(featured.id)}>
+                {/* THE RAIN DRAWING, and the scrim that makes it usable.
+                    Every word on this card is PAPER on a dark ground, and the drawing
+                    is pen on white paper — mean tone 139–160 of 255, i.e. LIGHTER than
+                    the text. Dropped in raw it would erase the card. The wash is ink,
+                    heaviest at the bottom where the quote runs and lightest at the top
+                    right where the window and the cat are, so the picture reads and the
+                    type never takes its contrast from it (§19).
+                    Explicit width: an Image given none takes its own intrinsic 601 and
+                    overhangs the card. */}
+                <Image
+                  source={require('@/assets/images/thinkers/rain.jpg')}
+                  style={styles.featImg}
+                  resizeMode="cover"
+                />
+                <Scrim
+                  style={StyleSheet.absoluteFill}
+                  colors={[
+                    'rgba(20,20,19,0.70)',
+                    'rgba(20,20,19,0.78)',
+                    'rgba(20,20,19,0.90)',
+                  ]}
+                  locations={[0, 0.45, 1]}
+                />
                 <View style={styles.featTop}>
                   <View style={styles.featAvatar}>
                     <Text style={styles.featAvatarLetter}>{featured.name.charAt(0)}</Text>
@@ -205,35 +266,7 @@ export default function ThinkersScreen() {
                 <SectionHead>{group}</SectionHead>
                 <View style={styles.grid}>
                   {list.map((p) => (
-                    <Pressable
-                      key={p.id}
-                      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-                      onPress={() => openPhilosopher(p.id)}
-                    >
-                      <View style={styles.cardTop}>
-                        <View style={styles.cardAvatar}>
-                          <Text style={styles.cardAvatarLetter}>{p.name.charAt(0)}</Text>
-                        </View>
-                        <View style={{ flex: 1, marginLeft: 10 }}>
-                          <Text style={styles.cardName} numberOfLines={1}>
-                            {p.name}
-                          </Text>
-                          <Text style={styles.cardMeta} numberOfLines={1}>
-                            {formatLife(p.lifespan)} · {countryOf(p)}
-                          </Text>
-                        </View>
-                      </View>
-                      <View style={styles.tagRow}>
-                        {tagsOf(p).map((t) => (
-                          <View key={t} style={styles.tag}>
-                            <Text style={styles.tagText}>{t}</Text>
-                          </View>
-                        ))}
-                      </View>
-                      <Text style={styles.cardQuote} numberOfLines={2}>
-                        “{shortestQuote(p)}”
-                      </Text>
-                    </Pressable>
+                    <ThinkerCard key={p.id} p={p} onPress={() => openPhilosopher(p.id)} />
                   ))}
                 </View>
               </View>
@@ -251,6 +284,58 @@ export default function ThinkersScreen() {
       </ScrollView>
     </View>
     </ScreenTransition>
+  );
+}
+
+/**
+ * One thinker, as a file tab.
+ *
+ * Three pieces stacked back to front: a hard offset SHADOW (solid, no blur — a soft
+ * shadow would be a grey smudge in a two-tone app and would not survive on paper),
+ * the TAB, and the body. The shadow is drawn for the tab as well as the card, because
+ * a silhouette that casts a shadow everywhere except one corner reads as a mistake.
+ *
+ * The quote came off. The reference layout is legible because it holds four things —
+ * a mark, a count, a name and nothing else — and a two-line italic quote at 12px was
+ * the thing making these cells hard to scan. It is one tap away on the profile.
+ */
+function ThinkerCard({ p, onPress }: { p: Philosopher; onPress: () => void }) {
+  const t = treatmentOf(groupOf(p));
+  const facts = (PHILOSOPHER_FACTS[p.id] ?? []).length;
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.cardWrap, pressed && styles.cardPressed]}
+    >
+      <View style={styles.tabShadow} pointerEvents="none" />
+      <View style={styles.bodyShadow} pointerEvents="none" />
+      <View style={[styles.tab, { backgroundColor: t.tab }]} />
+      <View style={styles.cardBody}>
+        <View style={styles.cardRow}>
+          <View
+            style={[
+              styles.badge,
+              { backgroundColor: t.badge.bg, borderColor: t.badge.border, borderWidth: t.badge.width },
+            ]}
+          >
+            {t.inner ? <View style={styles.badgeInner} pointerEvents="none" /> : null}
+            <Text style={[styles.badgeLetter, { color: t.letter }]}>{p.name.charAt(0)}</Text>
+          </View>
+          <View style={styles.countCol}>
+            <Text style={styles.countText}>{p.quotes.length} quotes</Text>
+            <Text style={styles.countText}>{facts} facts</Text>
+          </View>
+        </View>
+
+        <Text style={styles.cardName} numberOfLines={2}>
+          {p.name}
+        </Text>
+        <Text style={styles.cardMeta} numberOfLines={1}>
+          {formatLife(p.lifespan)}
+          {countryOf(p) ? ` · ${countryOf(p)}` : ''}
+        </Text>
+      </View>
+    </Pressable>
   );
 }
 
@@ -309,7 +394,12 @@ const styles = StyleSheet.create({
   sectionLabel: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, letterSpacing: 3, marginRight: 12 },
   sectionLine: { flex: 1, height: 1, backgroundColor: InkFaint },
 
-  featured: { backgroundColor: Ink, borderRadius: 14, padding: 18 },
+  featured: { backgroundColor: Ink, borderRadius: 14, padding: 18, overflow: 'hidden' },
+  // Explicit width, and pinned top AND bottom so the height is the card's rather than
+  // a number guessed here. An Image given neither takes its own intrinsic 601×562 and
+  // overhangs (§19); a fixed height instead would crop from the top and cut the cat —
+  // the one thing in the drawing worth showing — off the bottom of a short card.
+  featImg: { position: 'absolute', left: 0, top: 0, bottom: 0, width: FEAT_W },
   featTop: { flexDirection: 'row', alignItems: 'center' },
   featAvatar: {
     width: 46,
@@ -334,9 +424,9 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     transform: [{ translateX: -1.5 }],
   },
-  featKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: PaperMute, letterSpacing: 1.5 },
+  featKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: PaperMuteOnArt, letterSpacing: 1.5 },
   featName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: Paper, marginTop: 3 },
-  featLife: { fontFamily: 'Inter_400Regular', fontSize: 12, color: PaperMute, marginTop: 1 },
+  featLife: { fontFamily: 'Inter_400Regular', fontSize: 12, color: PaperMuteOnArt, marginTop: 1 },
   featArrow: { fontFamily: 'Inter_400Regular', fontSize: 22, color: Paper, marginLeft: 8 },
   darkTag: { backgroundColor: '#2E2E2C', borderRadius: 3, paddingHorizontal: 8, paddingVertical: 3 },
   darkTagText: { fontFamily: 'Inter_500Medium', fontSize: 8.5, color: '#CFCDC4', letterSpacing: 1 },
@@ -350,50 +440,103 @@ const styles = StyleSheet.create({
   },
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  card: {
-    width: CARD_W,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 4,
-    backgroundColor: Paper,
-    padding: 12,
+
+  // ── the file-tab card ──────────────────────────────────────────────────────
+  // The wrapper carries the tab's height as padding so the body still starts at a
+  // predictable y, and the shadow layers sit inside it, offset.
+  cardWrap: { width: CARD_W + SHADOW_X, paddingTop: TAB_H },
+  cardPressed: { opacity: 0.82 },
+  tab: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: CARD_W * 0.44,
+    height: TAB_H + 8,          // runs under the body's top edge so the two are one shape
+    borderTopLeftRadius: 7,
+    borderTopRightRadius: 7,
   },
-  cardPressed: { backgroundColor: '#F0EFEA' },
-  cardTop: { flexDirection: 'row', alignItems: 'center' },
-  cardAvatar: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 1.5,
+  cardBody: {
+    width: CARD_W,
+    minHeight: 118,
+    borderWidth: 2,
     borderColor: Ink,
+    borderRadius: 12,
+    backgroundColor: Paper,
+    padding: 11,
+    justifyContent: 'space-between',
+  },
+  // SOLID, NOT BLURRED. A soft shadow is a grey smudge in a two-tone app and does not
+  // survive the paper-and-ink identity; a hard offset one is how a sticker or a cut
+  // card behaves, and it is what gives this layout its depth. Both pieces of the
+  // silhouette get one, because a shape that casts a shadow everywhere except its top
+  // corner reads as a bug rather than as a tab.
+  // Spanned by top AND bottom rather than given a height. `height: '100%'` resolves
+  // against the WRAPPER, which is taller than the body by the tab's padding, so the
+  // shadow hung TAB_H + SHADOW_Y below the card as a stray bar of ink. Pinning both
+  // edges makes it exactly the body's height whatever the name wraps to.
+  bodyShadow: {
+    position: 'absolute',
+    left: SHADOW_X,
+    top: TAB_H + SHADOW_Y,
+    bottom: -SHADOW_Y,
+    width: CARD_W,
+    borderRadius: 12,
+    backgroundColor: Ink,
+  },
+  tabShadow: {
+    position: 'absolute',
+    left: SHADOW_X,
+    top: SHADOW_Y,
+    width: CARD_W * 0.44,
+    height: TAB_H + 8,
+    borderTopLeftRadius: 7,
+    borderTopRightRadius: 7,
+    backgroundColor: Ink,
+  },
+
+  cardRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  badge: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardAvatarLetter: {
+  badgeInner: {
+    position: 'absolute',
+    left: 3,
+    top: 3,
+    right: 3,
+    bottom: 3,
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: Ink,
+  },
+  badgeLetter: {
     fontFamily: 'Caveat_700Bold',
-    fontSize: 20,
-    color: Ink,
-    // See featAvatarLetter — width wider than the glyph so its right side
-    // isn't clipped by Android's text bounds.
-    width: 32,
-    lineHeight: 34,
+    fontSize: 23,
+    // Caveat's ink overhangs its glyph box on the right and Android clips text to its
+    // tight advance-width box, cutting the letter. A width wider than the glyph gives
+    // the ink room; textAlign then centres it back.
+    width: 34,
+    lineHeight: 38,
     textAlign: 'center',
     includeFontPadding: false,
     transform: [{ translateX: -1 }],
   },
-  cardName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: Ink },
-  cardMeta: { fontFamily: 'Inter_400Regular', fontSize: 10.5, color: InkSoft, marginTop: 1 },
-  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 10 },
-  tag: { backgroundColor: Tag, borderRadius: 3, paddingHorizontal: 7, paddingVertical: 2.5 },
-  tagText: { fontFamily: 'Inter_500Medium', fontSize: 8, color: InkSoft, letterSpacing: 0.5 },
-  cardQuote: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontStyle: 'italic',
-    fontSize: 12,
+  countCol: { alignItems: 'flex-end' },
+  countText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 9.5,
     color: InkSoft,
-    lineHeight: 17,
-    marginTop: 10,
+    letterSpacing: 0.3,
+    includeFontPadding: false,
+    lineHeight: 13,
   },
+
+  cardName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: Ink, marginTop: 12 },
+  cardMeta: { fontFamily: 'Inter_400Regular', fontSize: 10, color: InkSoft, marginTop: 2 },
+  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 10 },
 
   empty: { fontFamily: 'Inter_400Regular', fontSize: 14, color: InkSoft, textAlign: 'center', marginTop: 30 },
 
