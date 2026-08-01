@@ -24,6 +24,18 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { clamp01, lerp, easeOutCubic, easeOutBack, INK, PAPER, SOFT } from './ease';
+
+/**
+ * Bump this whenever the intro changes enough to be worth showing again, and every
+ * reader whose stored `welcomeVersion` is lower gets it once more. It exists because
+ * the old boolean gate made the intro unreachable by over-the-air update: a fresh
+ * install plays it from the bundle inside the APK on launch one and latches the flag,
+ * and the download only takes effect on launch two.
+ *
+ * 1 → the original.
+ * 2 → the sky behind the end card.
+ */
+export const WELCOME_VERSION = 2;
 import {
   BEATS,
   BEAT_T,
@@ -207,7 +219,7 @@ interface Props {
 export default function WelcomeAnimation({ start = true, onDone }: Props) {
   const { width: W, height: H } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const setHasSeenWelcome = useUserDataStore((s) => s.setHasSeenWelcome);
+  const setWelcomeVersion = useUserDataStore((s) => s.setWelcomeVersion);
 
   const scale = Math.min(W / STAGE_W, H / STAGE_H);
   const offX = (W - STAGE_W * scale) / 2;
@@ -376,12 +388,14 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
     return { opacity: a, display: a <= 0 ? ('none' as const) : ('flex' as const) };
   });
 
-  // Flipping hasSeenWelcome unmounts this screen, so it must be the LAST thing
-  // that happens — index.tsx swaps in the auth panel the moment it goes true.
+  // Recording the version unmounts this screen, so it must be the LAST thing that
+  // happens — index.tsx swaps in the auth panel the moment the stored number
+  // reaches WELCOME_VERSION. (It sets `hasSeenWelcome` as well, so rolling back to
+  // a bundle that still reads the boolean does not replay the intro.)
   const finish = useCallback(() => {
-    setHasSeenWelcome(true);
+    setWelcomeVersion(WELCOME_VERSION);
     onDone?.();
-  }, [setHasSeenWelcome, onDone]);
+  }, [setWelcomeVersion, onDone]);
 
   // Begin/Skip dissolve this screen first, so the hand-off to the auth panel is
   // a fade rather than a cut. `leaving` guards a double-tap from starting two

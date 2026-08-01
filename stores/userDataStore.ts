@@ -135,6 +135,19 @@ interface UserDataState {
   nameFont: string;                           // id from data/profileFonts — the face the name is set in
   settings: AppSettings;
   hasSeenWelcome: boolean;                     // first-launch intro animation already played
+  /**
+   * WHICH welcome they have seen, not merely whether they have seen one.
+   *
+   * `hasSeenWelcome` is a one-way latch, so a change to the intro could never reach
+   * anybody: an existing reader has it set and a fresh install sets it on launch one,
+   * from the bundle baked into the APK, before an over-the-air update has had a
+   * chance to land (expo-updates launches on the embedded bundle and applies the
+   * download on the NEXT start). Versioning the gate is what lets the intro be
+   * changed without shipping a binary — bump WELCOME_VERSION and everyone whose
+   * stored number is lower is shown it once more. Absent on an existing store, so
+   * it defaults to 0 and the next bump catches everyone.
+   */
+  welcomeVersion: number;
   _hasHydrated: boolean;
   _syncOwnerId: string | null;                 // user id whose data currently fills this device's store (cloud-sync guard)
 
@@ -163,6 +176,9 @@ interface UserDataState {
   setNameFont: (id: string) => void;
   setSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void;
   setHasSeenWelcome: (v: boolean) => void;
+  /** Records the intro they just finished. Sets `hasSeenWelcome` too, so a rollback
+   *  to a build that still reads the boolean does not replay it. */
+  setWelcomeVersion: (v: number) => void;
   resetProgress: () => void;
   clearSavedQuotes: () => void;
   revokeBadges: () => void;
@@ -172,6 +188,37 @@ interface UserDataState {
 }
 
 // Build a progress snapshot used to evaluate badge conditions.
+export interface DayInfo {
+  firstOfDay: boolean;
+  streak: number;
+  prevStreak: number;
+}
+
+/**
+ * What finishing a lesson WOULD do to the streak, worked out without writing
+ * anything.
+ *
+ * The reward screen has to show the new streak BEFORE the reader has committed to
+ * finishing — nothing is recorded until they press the button, because a completion
+ * that records itself on mount can be banked by killing the app and skips the ad
+ * that pays for the free tier. So the number has to be knowable without being
+ * true yet. `registerDailyActivity` is implemented in terms of this, so what is
+ * shown and what is later committed cannot drift apart.
+ */
+export function previewDailyActivity(
+  lastLessonDate: string | null,
+  streak: number,
+  today: string,
+  yesterday: string,
+): DayInfo {
+  if (lastLessonDate === today) return { firstOfDay: false, streak, prevStreak: streak };
+  return {
+    firstOfDay: true,
+    streak: lastLessonDate === yesterday ? streak + 1 : 1,
+    prevStreak: streak,
+  };
+}
+
 function computeStats(s: {
   lessonsByBranch: Record<string, number>;
   savedQuotes: SavedQuote[];
@@ -226,6 +273,7 @@ export const useUserDataStore = create<UserDataState>()(
       nameFont: DEFAULT_PROFILE_FONT,
       settings: DEFAULT_SETTINGS,
       hasSeenWelcome: false,
+      welcomeVersion: 0,
       _hasHydrated: false,
       _syncOwnerId: null,
 
@@ -407,14 +455,11 @@ export const useUserDataStore = create<UserDataState>()(
 
       registerDailyActivity: (today, yesterday) => {
         const { lastLessonDate, streak } = get();
-        if (lastLessonDate === today) {
-          return { firstOfDay: false, streak, prevStreak: streak };
-        }
-        const prevStreak = streak;
-        const newStreak = lastLessonDate === yesterday ? streak + 1 : 1;
-        set({ streak: newStreak, lastLessonDate: today });
+        const info = previewDailyActivity(lastLessonDate, streak, today, yesterday);
+        if (!info.firstOfDay) return info;
+        set({ streak: info.streak, lastLessonDate: today });
         get().recomputeBadges();
-        return { firstOfDay: true, streak: newStreak, prevStreak };
+        return info;
       },
 
       // Union the currently-qualifying badges into the persisted set so earned
@@ -468,6 +513,8 @@ export const useUserDataStore = create<UserDataState>()(
         set((state) => ({ settings: { ...state.settings, [key]: value } })),
 
       setHasSeenWelcome: (v) => set({ hasSeenWelcome: v }),
+
+      setWelcomeVersion: (v) => set({ welcomeVersion: v, hasSeenWelcome: true }),
 
       resetProgress: () =>
         set({ lessonsByUnit: {}, lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, rankIndex: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
@@ -582,6 +629,7 @@ export const useUserDataStore = create<UserDataState>()(
         nameFont: state.nameFont,
         settings: state.settings,
         hasSeenWelcome: state.hasSeenWelcome,
+        welcomeVersion: state.welcomeVersion,
         _syncOwnerId: state._syncOwnerId,
       }),
       // Merge persisted settings over defaults so newly-added keys are present.
@@ -610,6 +658,13 @@ export const useUserDataStore = create<UserDataState>()(
         // profileFontById both do at read time.
         const profileBackground = p.profileBackground ?? DEFAULT_BACKGROUND_ID;
         const nameFont = p.nameFont ?? DEFAULT_PROFILE_FONT;
+        // Which intro they have seen. Coalesced explicitly rather than left to the
+        // spread: `...p` with the key merely ABSENT falls through to the default, but
+        // with the key present and undefined it overwrites the default with undefined,
+        // and `undefined < 2` is false — every reader would silently skip the intro
+        // and nothing would report it. Nothing writes that shape today; this makes it
+        // impossible to introduce one.
+        const welcomeVersion = p.welcomeVersion ?? 0;
         return {
           ...current,
           ...p,
@@ -619,6 +674,7 @@ export const useUserDataStore = create<UserDataState>()(
           rankIndex,
           profileBackground,
           nameFont,
+          welcomeVersion,
           settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) },
         };
       },
