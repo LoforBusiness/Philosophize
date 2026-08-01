@@ -2,11 +2,13 @@ import { useCallback, useEffect, useRef, useState, memo } from 'react';
 import {
   View,
   Text,
+  Image,
   Pressable,
   StyleSheet,
   useWindowDimensions,
   type ViewStyle,
 } from 'react-native';
+import { LinearGradient as Scrim } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Rect, G, Defs, LinearGradient, Stop } from 'react-native-svg';
 import Animated, {
@@ -364,6 +366,16 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
   const rootOpacity = useSharedValue(1);
   const rootStyle = useAnimatedStyle(() => ({ opacity: rootOpacity.value }));
 
+  // The sky arrives with the wordmark and on the same curve — a shade slower, so the
+  // ground settles under the word rather than racing it. Before T_BEGIN it is not
+  // merely transparent, it is `display: none`: a full-screen image left mounted at
+  // opacity 0 behind thirty seconds of animation is a composited layer the GPU pays
+  // for on every frame of a screen that never shows it.
+  const skyStyle = useAnimatedStyle(() => {
+    const a = easeOutCubic(clamp01((clock.value - T_BEGIN) / 0.85));
+    return { opacity: a, display: a <= 0 ? ('none' as const) : ('flex' as const) };
+  });
+
   // Flipping hasSeenWelcome unmounts this screen, so it must be the LAST thing
   // that happens — index.tsx swaps in the auth panel the moment it goes true.
   const finish = useCallback(() => {
@@ -532,6 +544,43 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
         </Defs>
         <Rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="url(#wa-paper)" />
       </Svg>
+
+      {/* ── THE SKY, and only for the end card ──────────────────────────────────
+          It fades in on the SAME T_BEGIN ramp as the wordmark, so it belongs to the
+          "Philosophize / Begin" screen and never appears behind the host while he is
+          talking — which is what was asked for, and also what keeps the earlier
+          chapters legible.
+
+          THE SCRIM IS NOT OPTIONAL (§19). The wordmark is INK at 46px and the sky is
+          hand-hatched with near-black cloud lines, so dark type straight onto it has
+          no reliable contrast — worst at the left and right edges, where the drawing
+          runs almost solid. A PAPER wash, heaviest through the middle third where the
+          word and the button actually sit and lightest top and bottom so the drawing
+          still reads, fixes the contrast by CONSTRUCTION rather than by hoping the
+          crop lands somewhere pale.
+
+          Explicit width and height, not `absoluteFill` on the Image: given neither,
+          an image takes its own intrinsic size and this one is 318 wide, which would
+          leave bare paper down the side of any real phone (§19). */}
+      <Animated.View style={[StyleSheet.absoluteFill, skyStyle]} pointerEvents="none">
+        <Image
+          source={require('@/assets/images/welcome/sky.jpg')}
+          style={{ width: W, height: H }}
+          resizeMode="cover"
+        />
+        <Scrim
+          style={StyleSheet.absoluteFill}
+          colors={[
+            'rgba(247,244,238,0.22)',
+            'rgba(247,244,238,0.28)',
+            'rgba(247,244,238,0.72)',
+            'rgba(247,244,238,0.72)',
+            'rgba(247,244,238,0.30)',
+            'rgba(247,244,238,0.22)',
+          ]}
+          locations={[0, 0.28, 0.4, 0.62, 0.78, 1]}
+        />
+      </Animated.View>
 
       {/* The board — one chapter per hand-drawn chart. Only the on-screen chapter
           is mounted, in a board-sized surface, so the other two cost nothing. */}

@@ -49,12 +49,19 @@ const lesson: Lesson = {
       philosopherId: 'thomas-hobbes',
     },
     {
-      type: 'concept',
-      title: 'Diagnosis Shapes the Cure',
-      body:
-        'Each diagnosis built a different contract. Hobbes: trade nearly all freedom to one absolute sovereign for safety. Locke: form only a limited government to protect natural rights. Rousseau: bind ourselves to the "general will" so the contract restores the freedom society took away.',
-      visual: '📜',
-      highlight: 'social contract',
+      type: 'question',
+      prompt: 'Hobbes says life without a state is a war of all against all. What government does that diagnosis demand?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'One absolute sovereign, strong enough to overawe everyone', isCorrect: true },
+          { id: 'b', text: 'A limited government that protects rights we already hold', isCorrect: false },
+          { id: 'c', text: 'No government — people are better left alone', isCorrect: false },
+          { id: 'd', text: 'A community bound to the general will of all', isCorrect: false },
+        ],
+        explanation: 'The cure has to fit the disease. If the problem is that nobody can be trusted, only a power above everyone can hold the peace — so Hobbes trades nearly all freedom for safety. Option (b) is Locke\'s cure and (d) is Rousseau\'s: same experiment, different diagnosis, different state.',
+      },
     },
     {
       type: 'dilemma',

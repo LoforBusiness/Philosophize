@@ -60,6 +60,21 @@ const lesson: Lesson = {
       },
     },
     {
+      type: 'question',
+      prompt: 'Of everything you personally know, which source has delivered the largest share of it?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Testimony — almost all of it came from someone else', isCorrect: true },
+          { id: 'b', text: 'Perception — you trust what you have seen yourself', isCorrect: false },
+          { id: 'c', text: 'Memory — knowledge is what you have retained', isCorrect: false },
+          { id: 'd', text: 'Reason — you worked most of it out unaided', isCorrect: false },
+        ],
+        explanation: 'Perception feels like the main channel because it is the one you notice working. But count what you actually know — atoms, Antarctica, your own date of birth — and nearly all of it arrived on somebody else\'s word. The quietest source carries the heaviest load.',
+      },
+    },
+    {
       type: 'summary',
       title: 'The Pipelines of Belief',
       keyPoints: [

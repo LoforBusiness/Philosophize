@@ -61,6 +61,18 @@ import { Logic9Lesson } from '@/components/lesson/cinematic/logic9Scene';
 import { Ethics10Lesson } from '@/components/lesson/cinematic/ethics10Scene';
 import { Aesthetics9Lesson } from '@/components/lesson/cinematic/aesthetics9Scene';
 import { Political9Lesson } from '@/components/lesson/cinematic/political9Scene';
+import { Logic10Lesson } from '@/components/lesson/cinematic/logic10Scene';
+import { Logic11Lesson } from '@/components/lesson/cinematic/logic11Scene';
+import { Ethics11Lesson } from '@/components/lesson/cinematic/ethics11Scene';
+import { Ethics12Lesson } from '@/components/lesson/cinematic/ethics12Scene';
+import { Epistemology11Lesson } from '@/components/lesson/cinematic/epistemology11Scene';
+import { Epistemology12Lesson } from '@/components/lesson/cinematic/epistemology12Scene';
+import { Metaphysics10Lesson } from '@/components/lesson/cinematic/metaphysics10Scene';
+import { Metaphysics11Lesson } from '@/components/lesson/cinematic/metaphysics11Scene';
+import { Aesthetics10Lesson } from '@/components/lesson/cinematic/aesthetics10Scene';
+import { Aesthetics12Lesson } from '@/components/lesson/cinematic/aesthetics12Scene';
+import { Political10Lesson } from '@/components/lesson/cinematic/political10Scene';
+import { Political11Lesson } from '@/components/lesson/cinematic/political11Scene';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -146,6 +158,31 @@ const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   'ethics-ethics-10': Ethics10Lesson,
   'aesthetics-aesthetics-9': Aesthetics9Lesson,
   'political-political-9': Political9Lesson,
+  // sixth wave — two more per branch, each built around ONE picture whose change is
+  // the argument (H64): a premise hauled up through the line marked SAID, a proof
+  // that lifts off the ground when its circle closes, a second shelf that quantity
+  // cannot reach, a maxim copied until the word on it is gone, two clock hands that
+  // agree once by accident, three pipes and the one that actually fills the tank,
+  // a card looking for a home, name plates that follow the memories rather than the
+  // bodies, a shutter over what a work asks you to feel, a sealed box that never
+  // opens, a stack read once by its history and once by its shape, and a dial that
+  // rebuilds the state under it.
+  //
+  // NOTE THE IDS, again (F45b). Aesthetics has no lesson 11, so its pair is 10 and
+  // 12; ethics still has no 9 and epistemology no 2. Every id here was grepped out
+  // of `data/branches`, not counted along a unit.
+  'logic-arguments-10': Logic10Lesson,
+  'logic-arguments-11': Logic11Lesson,
+  'ethics-ethics-11': Ethics11Lesson,
+  'ethics-ethics-12': Ethics12Lesson,
+  'epistemology-knowledge-11': Epistemology11Lesson,
+  'epistemology-knowledge-12': Epistemology12Lesson,
+  'metaphysics-being-10': Metaphysics10Lesson,
+  'metaphysics-being-11': Metaphysics11Lesson,
+  'aesthetics-aesthetics-10': Aesthetics10Lesson,
+  'aesthetics-aesthetics-12': Aesthetics12Lesson,
+  'political-political-10': Political10Lesson,
+  'political-political-11': Political11Lesson,
 };
 
 function todayStr() {

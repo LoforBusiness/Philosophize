@@ -69,6 +69,21 @@ const lesson: Lesson = {
       xpValue: 5,
     },
     {
+      type: 'question',
+      prompt: 'The prince’s memories wake up in the cobbler’s body. Who is standing there?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'The prince — the consciousness went with the memories', isCorrect: true },
+          { id: 'b', text: 'The cobbler — it is his body, and bodies do not change hands', isCorrect: false },
+          { id: 'c', text: 'Neither — the swap destroys both people', isCorrect: false },
+          { id: 'd', text: 'Both at once — two people now share one body', isCorrect: false },
+        ],
+        explanation: 'Locke bets everyone answers the prince, and that our answer reveals the rule we were using all along. Option (b) is the honest rival, not a joke — it is what you would tell a court. But follow it and the person who remembers nothing of the crime is still the criminal.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What you now know',
       keyPoints: [

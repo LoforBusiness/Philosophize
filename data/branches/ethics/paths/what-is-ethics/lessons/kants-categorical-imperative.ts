@@ -60,10 +60,19 @@ const lesson: Lesson = {
       philosopherId: 'immanuel-kant',
     },
     {
-      type: 'reinforcement',
-      callout: 'Earlier you weighed outcomes; Kant refuses to.',
-      body: 'Last lesson, the utilitarian judged acts by their consequences. Kant judges the maxim itself. A good result cannot rescue a rule that contradicts itself when everyone follows it. Watch for results-reasoning sneaking back in.',
-      emoji: '🔁',
+      type: 'question',
+      prompt: 'Three maxims go into the test. Which one survives being made a law everyone follows?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Break a promise when it suits me', isCorrect: false },
+          { id: 'b', text: 'Keep the promises you make', isCorrect: true },
+          { id: 'c', text: 'Lie whenever the truth is inconvenient', isCorrect: false },
+          { id: 'd', text: 'Take what you need if nobody is watching', isCorrect: false },
+        ],
+        explanation: 'A maxim fails when universalizing it destroys the very thing it relies on: universal promise-breaking leaves nobody trusting a promise, so there is no promise left to break. Only (b) still works when everyone does it. Note what the test never asks — whether the results are good.',
+      },
     },
     {
       type: 'question',

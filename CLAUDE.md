@@ -121,6 +121,7 @@ Philosophize/
 ├── constants/                   # Colors, xp, subscription, branchArt, achievements (legacy)
 ├── assets/images/branches/      # 6 branch photographs (§19)
 ├── assets/images/quickstart/    # 5 Quick Start backgrounds (§19)
+├── assets/images/welcome/       # sky.jpg — the welcome END CARD only (§19)
 └── supabase/migrations/         # 0001_user_state, 0002_security_hardening,
                                  #   001_initial_schema (the dormant relational one, §6)
 └── global.css                   # Tailwind base/components/utilities import
@@ -676,6 +677,21 @@ Hard-won specifics:
 - Source images are only ~330–500px wide, so they upscale softly on a full-width
   card. Replacing them with higher-resolution files needs no code change — same
   filenames in `assets/images/branches/` and `assets/images/quickstart/`.
+
+**The welcome end card** (`assets/images/welcome/sky.jpg`) is the one background
+that is a *drawing* rather than a photograph, and it follows the same rule for the
+same reason: the ink hatching runs to near-black in places, so the wordmark's
+contrast is set by the scrim, not by the crop. Its scrim is shaped rather than flat
+— 72% through the band the type occupies (y 0.40–0.62) and 22% elsewhere, so the sky
+is plainly visible and the type still measures **8.7:1**. A flat 90% wash was tried
+first and erased the drawing, which defeated the point of having it.
+
+> **It only reaches new users in a NEW BINARY.** `hasSeenWelcome` persists and gates
+> this screen to one showing per install, and a fresh install runs the *embedded*
+> bundle on its first launch (there is no `fallbackToCacheTimeout`, so the OTA lands
+> on the second). By then the flag is already set. Anything that changes the welcome
+> animation therefore needs an EAS build + Play upload to be seen by anybody; an OTA
+> carries it but shows it to no one.
 
 ---
 

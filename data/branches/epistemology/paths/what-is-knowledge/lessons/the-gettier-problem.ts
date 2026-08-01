@@ -52,6 +52,21 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
+      prompt: 'Which of the three conditions — belief, truth, justification — does the stopped-clock case actually fail?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'None of them — the case passes all three', isCorrect: true },
+          { id: 'b', text: 'Truth — the clock was broken, so the belief was false', isCorrect: false },
+          { id: 'c', text: 'Justification — a stopped clock is no reason at all', isCorrect: false },
+          { id: 'd', text: 'Belief — nobody really believes a hallway clock', isCorrect: false },
+        ],
+        explanation: 'That is the whole shock of it. You believed it, it was true, and a working-looking clock is a perfectly good reason. Every condition is met and it is still not knowledge — which is why one three-page paper unsettled a definition that had stood for two thousand years.',
+      },
+    },
+    {
+      type: 'question',
       prompt: 'In the stopped-clock case, why is the justified, true belief still not knowledge?',
       xpValue: 5,
       interaction: {
