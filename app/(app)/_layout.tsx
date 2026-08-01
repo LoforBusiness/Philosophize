@@ -35,6 +35,22 @@ export default function AppLayout() {
           animation: 'timing',
           config: { duration: 340, easing: Easing.out(Easing.cubic) },
         },
+        // BUILD EVERY TAB UP FRONT, BEHIND THE LAUNCH SCREEN.
+        //
+        // Tabs lazy-mount by default, so the first visit to each one paid for its
+        // whole tree right as the reader arrived — which is exactly the "first time I
+        // switch tabs it's slow" complaint. The work never went away, it just landed
+        // at the worst possible moment.
+        //
+        // There is already a launch animation sitting over the app for a couple of
+        // seconds while auth and hydration finish, and it runs on the UI thread, so
+        // JS mounting screens underneath does not stutter it. Move the cost there and
+        // every tab is already built by the time the reader can press anything.
+        //
+        // This is only affordable because the Thinkers grid is virtualised — it used
+        // to build ~3,100 views on mount, and eagerly paying that at startup would
+        // have traded one stall for a worse one.
+        lazy: false,
         tabBarStyle: {
           backgroundColor: '#FAFAF7',
           borderTopColor: '#1A1A1A',

@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import {
   View,
   Text,
   Image,
   Pressable,
-  ScrollView,
+  FlatList,
   TextInput,
   StyleSheet,
   Dimensions,
   InteractionManager,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient as Scrim } from 'expo-linear-gradient';
@@ -112,6 +114,15 @@ const COUNTRY: Record<string, string> = {
 const ORDER = ['ANCIENT', 'MEDIEVAL', 'MODERN', 'CONTEMPORARY', 'EASTERN'];
 const FILTERS = ['ALL', ...ORDER];
 
+/** One row of the flattened list: a section head, a pair of cards, or a tail piece. */
+type Row =
+  | { k: string; type: 'head'; group: string }
+  | { k: string; type: 'row'; items: Philosopher[] }
+  | { k: string; type: 'empty' }
+  | { k: string; type: 'hint' };
+
+const rowKey = (r: Row) => r.k;
+
 const formatLife = (s: string) => s.replace('BCE', 'BC').replace('CE', 'AD');
 const shortestQuote = (p: Philosopher) =>
   p.quotes.reduce((a, b) => (b.text.length < a.text.length ? b : a), p.quotes[0]).text;
@@ -131,47 +142,135 @@ export default function ThinkersScreen() {
   const [filter, setFilter] = useState('ALL');
 
   // A deep link (home-screen widget) parked a thinker for us. Open their profile
-  // only after this screen has mounted and painted, plus a short beat — so the
-  // user sees the Thinkers page land, then the sheet slide up. No lost opens on
-  // cold start, no sheet popping mid-navigation.
-  useEffect(() => {
-    if (!pendingPhilosopherId) return;
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const task = InteractionManager.runAfterInteractions(() => {
-      timer = setTimeout(() => {
-        useUIStore.getState().setPendingPhilosopher(null);
-        openPhilosopher(pendingPhilosopherId);
-      }, 260);
-    });
-    return () => {
-      task.cancel();
-      if (timer) clearTimeout(timer);
-    };
-  }, [pendingPhilosopherId, openPhilosopher]);
+  // only after this screen has painted, plus a short beat — so the user sees the
+  // Thinkers page land, then the sheet slide up. No lost opens on cold start, no
+  // sheet popping mid-navigation.
+  //
+  // KEYED ON FOCUS, NOT ON MOUNT. It used to be a plain effect, which was the same
+  // thing back when tabs mounted lazily — this screen did not exist until you
+  // navigated to it. Now every tab is built at startup so it can be switched to
+  // instantly, and a mount-keyed effect would fire while the reader is still looking
+  // at Home, sliding a philosopher sheet over a screen they never asked to leave.
+  // Focus restores exactly what the comment above always claimed.
+  useFocusEffect(
+    useCallback(() => {
+      if (!pendingPhilosopherId) return;
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      const task = InteractionManager.runAfterInteractions(() => {
+        timer = setTimeout(() => {
+          useUIStore.getState().setPendingPhilosopher(null);
+          openPhilosopher(pendingPhilosopherId);
+        }, 260);
+      });
+      return () => {
+        task.cancel();
+        if (timer) clearTimeout(timer);
+      };
+    }, [pendingPhilosopherId, openPhilosopher]),
+  );
 
   const q = query.trim().toLowerCase();
   const showFeatured = q === '' && filter === 'ALL';
 
-  // Deterministic "thinker of the day".
-  const dayIdx = Math.floor(Date.now() / 86_400_000) % ALL_PHILOSOPHERS.length;
-  const featured = ALL_PHILOSOPHERS[dayIdx];
-
-  const matched = ALL_PHILOSOPHERS.filter(
-    (p) =>
-      (filter === 'ALL' || groupOf(p) === filter) &&
-      (q === '' || p.name.toLowerCase().includes(q))
+  // Deterministic "thinker of the day". Memoised on the DAY, not on Date.now() —
+  // read raw it recomputed on every keystroke and every re-render.
+  const featured = useMemo(
+    () => ALL_PHILOSOPHERS[Math.floor(Date.now() / 86_400_000) % ALL_PHILOSOPHERS.length],
+    [],
   );
-  const grid = matched.filter((p) => !(showFeatured && p.id === featured.id));
+
+  // A stable handler, so a memoised card is not re-rendered by a fresh closure on
+  // every parent render — `onPress={() => open(p.id)}` allocated 222 new functions
+  // per keystroke and defeated memo() entirely.
+  const openById = useCallback((id: string) => openPhilosopher(id), [openPhilosopher]);
+
+  // THE LIST IS FLATTENED INTO ROWS, and this is what makes the tab cheap.
+  //
+  // It used to render every match at once inside a plain ScrollView: 222 cards of 14
+  // elements each, about 3,100 native views built in one pass on the first visit to
+  // this tab. That is the stall — the screen cannot paint until all of them exist,
+  // and nothing about them is reusable on the way back down.
+  //
+  // FlatList needs one flat array, so the section heads and the two-up rows become
+  // items in the same list. A row of two carries the same `styles.grid` the wrap
+  // layout used, so the picture is identical — same width, same 12 gap, and a
+  // trailing odd card sits left exactly as flex-wrap left it.
+  const rows = useMemo(() => {
+    const matched = ALL_PHILOSOPHERS.filter(
+      (p) =>
+        (filter === 'ALL' || groupOf(p) === filter) &&
+        (q === '' || p.name.toLowerCase().includes(q)),
+    );
+    const grid = matched.filter((p) => !(showFeatured && p.id === featured.id));
+
+    const out: Row[] = [];
+    for (const group of ORDER) {
+      const list = grid.filter((p) => groupOf(p) === group);
+      if (list.length === 0) continue;
+      out.push({ k: `h-${group}`, type: 'head', group });
+      for (let i = 0; i < list.length; i += 2) {
+        out.push({ k: `r-${group}-${i}`, type: 'row', items: list.slice(i, i + 2) });
+      }
+    }
+    if (out.length === 0 && !showFeatured) out.push({ k: 'empty', type: 'empty' });
+    out.push({ k: 'hint', type: 'hint' });
+    return out;
+  }, [filter, q, showFeatured, featured.id]);
+
+  const renderRow = useCallback(
+    ({ item }: { item: Row }) => {
+      if (item.type === 'head') {
+        return (
+          <View style={styles.rowPad}>
+            <SectionHead>{item.group}</SectionHead>
+          </View>
+        );
+      }
+      if (item.type === 'row') {
+        return (
+          <View style={[styles.rowPad, styles.grid]}>
+            {item.items.map((p) => (
+              <ThinkerCard key={p.id} p={p} onOpen={openById} />
+            ))}
+          </View>
+        );
+      }
+      if (item.type === 'empty') {
+        return <Text style={styles.empty}>No thinkers found.</Text>;
+      }
+      return (
+        <View style={styles.scrollHint}>
+          <SketchIcon name="chevron-down" size={20} color={InkSoft} />
+        </View>
+      );
+    },
+    [openById],
+  );
 
   return (
     <ScreenTransition bg={Ink}>
     <View style={styles.root}>
-      <ScrollView
+      <FlatList
         style={styles.scroll}
+        data={rows}
+        keyExtractor={rowKey}
+        renderItem={renderRow}
         contentContainerStyle={{ paddingBottom: 30 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-      >
+        // Tuned DOWN from the defaults (windowSize 21, batches of 10). The cards are
+        // individually cheap; what cost was building every one of them before the
+        // screen could paint. Seven screens of buffer is more than a thumb can
+        // outrun and it keeps the first frame short.
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        windowSize={7}
+        updateCellsBatchingPeriod={40}
+        // Android only. iOS already detaches offscreen cells, and this flag has a
+        // long history of blanking them there during a fast fling.
+        removeClippedSubviews={Platform.OS === 'android'}
+        ListHeaderComponent={
+          <>
         {/* Dark header */}
         <View style={[styles.header, { paddingTop: insets.top + 18 }]}>
           <Text style={styles.kicker}>THE GREAT MINDS</Text>
@@ -187,7 +286,7 @@ export default function ThinkersScreen() {
           />
         </View>
 
-        <View style={styles.body}>
+        <View style={styles.headerPad}>
           {/* Filters */}
           <View style={styles.filterRow}>
             {FILTERS.map((f) => {
@@ -257,31 +356,10 @@ export default function ThinkersScreen() {
             </>
           )}
 
-          {/* Grouped grid */}
-          {ORDER.map((group) => {
-            const list = grid.filter((p) => groupOf(p) === group);
-            if (list.length === 0) return null;
-            return (
-              <View key={group}>
-                <SectionHead>{group}</SectionHead>
-                <View style={styles.grid}>
-                  {list.map((p) => (
-                    <ThinkerCard key={p.id} p={p} onPress={() => openPhilosopher(p.id)} />
-                  ))}
-                </View>
-              </View>
-            );
-          })}
-
-          {grid.length === 0 && !showFeatured && (
-            <Text style={styles.empty}>No thinkers found.</Text>
-          )}
-
-          <View style={styles.scrollHint}>
-            <SketchIcon name="chevron-down" size={20} color={InkSoft} />
-          </View>
         </View>
-      </ScrollView>
+          </>
+        }
+      />
     </View>
     </ScreenTransition>
   );
@@ -299,12 +377,15 @@ export default function ThinkersScreen() {
  * a mark, a count, a name and nothing else — and a two-line italic quote at 12px was
  * the thing making these cells hard to scan. It is one tap away on the profile.
  */
-function ThinkerCard({ p, onPress }: { p: Philosopher; onPress: () => void }) {
+const ThinkerCard = memo(function ThinkerCard({
+  p, onOpen,
+}: { p: Philosopher; onOpen: (id: string) => void }) {
   const t = treatmentOf(groupOf(p));
   const facts = (PHILOSOPHER_FACTS[p.id] ?? []).length;
+  const press = useCallback(() => onOpen(p.id), [onOpen, p.id]);
   return (
     <Pressable
-      onPress={onPress}
+      onPress={press}
       style={({ pressed }) => [styles.cardWrap, pressed && styles.cardPressed]}
     >
       <View style={styles.tabShadow} pointerEvents="none" />
@@ -337,7 +418,7 @@ function ThinkerCard({ p, onPress }: { p: Philosopher; onPress: () => void }) {
       </View>
     </Pressable>
   );
-}
+});
 
 function SectionHead({ children }: { children: string }) {
   return (
@@ -377,7 +458,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  body: { paddingHorizontal: 20, paddingTop: 18 },
+  // The old `body` wrapped everything below the dark header and carried the page's
+  // 20 of horizontal padding. With the grid virtualised there is no single wrapper
+  // any more — the list header keeps the padding AND the 18 of top air, and each row
+  // carries the same 20 so nothing shifts sideways.
+  headerPad: { paddingHorizontal: 20, paddingTop: 18 },
+  rowPad: { paddingHorizontal: 20 },
 
   filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
   filter: {

@@ -45,6 +45,7 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { posthog, setAnalyticsConsent, track } from '@/lib/posthog';
 import { useCloudSync } from '@/lib/supabase/useCloudSync';
+import { useReminders } from '@/lib/notifications/useReminders';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { ads } from '@/lib/ads';
 import { configureGoogleSignIn } from '@/lib/auth/social';
@@ -83,13 +84,29 @@ function ScreenTracker() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  // FONTS LOAD IN TWO STAGES, AND ONLY THE FIRST ONE HOLDS THE APP UP.
+  //
+  // All nineteen faces used to sit in one `useFonts`, and the render below returned a
+  // bare spinner until every one of them had registered. So the first thing on screen
+  // after the native splash was a grey spinner, and the launch animation could not
+  // even begin until the last decorative face — a blackletter used on one screen —
+  // was ready. Nothing on that spinner needed any of them.
+  //
+  // Stage one is the two families the whole app is set in. It gates the render,
+  // because text in the wrong face and then reflowing is worse than waiting.
+  const [coreFonts] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_700Bold,
     PlayfairDisplay_400Regular,
     PlayfairDisplay_700Bold,
     PlayfairDisplay_700Bold_Italic,
+  });
+  // Stage two is every accent face. It gates NOTHING — it loads while the launch
+  // animation plays, and the launch screen simply will not hand over until it is
+  // done (see `ready` below). So the reader never sees a fallback face pop, and the
+  // wait happens behind an animation instead of behind a spinner.
+  const [accentFonts] = useFonts({
     Caveat_400Regular,
     Caveat_700Bold,
     IMFellEnglish_400Regular,
@@ -104,6 +121,7 @@ export default function RootLayout() {
     SpecialElite_400Regular,
     AbrilFatface_400Regular,
   });
+  const fontsLoaded = coreFonts;
   const [authChecked, setAuthChecked] = useState(false);
   // The animated launch screen covers the whole boot (auth check + routing);
   // it lifts away only when the app underneath is ready AND its 0→100% ink
@@ -123,6 +141,10 @@ export default function RootLayout() {
 
   // Local-first cloud sync: pull/merge/push progress while signed in.
   useCloudSync();
+
+  // Keep the scheduled reminders in step with the settings and the streak. No-op
+  // on web, in Expo Go, and in any binary without the notifications module.
+  useReminders();
 
   // Configure Google sign-in once at launch (no-op stub on web/Expo Go, and a
   // no-op until the Google Web client id env var is set). Idempotent.
@@ -242,7 +264,10 @@ export default function RootLayout() {
       {/* Animated cold-start loading screen: ink scene + drawing stroke + quote.
           Sits over everything until the boot is ready and the count hits 100%. */}
       {!launchDone && (
-        <LaunchScreen ready={authChecked && hasHydrated} onDone={() => setLaunchDone(true)} />
+        <LaunchScreen
+          ready={authChecked && hasHydrated && accentFonts}
+          onDone={() => setLaunchDone(true)}
+        />
       )}
       {/* Last in the tree, so it sits above the launch screen and every sheet:
           a build too old to run has nothing else worth showing. */}

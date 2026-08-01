@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, Text, Pressable, ScrollView, Alert, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Pressable, ScrollView, Alert, StyleSheet, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
@@ -189,6 +189,11 @@ export default function ProfileScreen() {
         style={styles.scroll}
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
+        // Fifty-one badges plus the ranks strip make this the longest fixed page in
+        // the app. It is not worth virtualising — the content is a handful of
+        // distinct sections rather than one repeating cell — but detaching the parts
+        // that are scrolled off keeps the fling cheap on Android.
+        removeClippedSubviews={Platform.OS === 'android'}
       >
         {/* The header wears the user's chosen artwork. Every colour in it comes
             from that art's tone palette, so a light engraving gets ink text and a
