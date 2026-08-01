@@ -47,28 +47,33 @@ export interface QuizScore {
 
 export type WidgetPlacement = 'home' | 'profile' | 'insights';
 
+/**
+ * EVERY KEY IN HERE IS READ BY SOMETHING.
+ *
+ * This used to hold eighteen, of which twelve were read by nothing but the switch
+ * that set them — a daily goal in minutes when no screen has ever timed a
+ * session, three "who can see my profile" toggles in an app with no other users,
+ * an auto-backup flag the sync layer never consulted. They looked like settings
+ * and behaved like decoration.
+ *
+ * So the rule now: a key earns its place by having a reader outside Settings. If
+ * you add one, wire it up in the same commit or leave it out.
+ */
 export interface AppSettings {
-  // Notifications
+  // Notifications — scheduled locally by lib/notifications; needs a binary that
+  // contains expo-notifications, which is why Settings hides them when it doesn't.
   dailyReminder: boolean;
   reminderTime: string; // e.g. '08:00 AM'
   streakAlerts: boolean;
-  badgeEarned: boolean;
-  weeklySummary: boolean;
   quoteOfDay: boolean;
   // Daily quote widget (in-app, shown on a chosen screen)
   widgetEnabled: boolean;
   widgetPlacement: WidgetPlacement;
   // Learning
-  dailyGoalMinutes: number; // 5–120
+  dailyGoalLessons: number; // 1–10, counted against dailyLessonCount
   autoAdvance: boolean;
   // Privacy
-  publicProfile: boolean;
-  showStreak: boolean;
-  showRankBadges: boolean;
   usageAnalytics: boolean;
-  // Language
-  appLanguage: string;
-  quoteDisplay: 'original' | 'translated' | 'both';
   // Narration
   voiceId: string | null; // manually chosen TTS voice; null = automatic
   // Data
@@ -79,24 +84,41 @@ const DEFAULT_SETTINGS: AppSettings = {
   dailyReminder: true,
   reminderTime: '08:00 AM',
   streakAlerts: true,
-  badgeEarned: true,
-  weeklySummary: false,
   quoteOfDay: true,
   widgetEnabled: false,
   widgetPlacement: 'home',
-  dailyGoalMinutes: 20,
+  dailyGoalLessons: 2,
   autoAdvance: true,
-  publicProfile: false,
-  showStreak: true,
-  showRankBadges: true,
   // Privacy-by-default: analytics stay OFF until the user explicitly opts in
   // (matches PostHog's defaultOptIn:false). Toggle in Settings → Usage Analytics.
   usageAnalytics: false,
-  appLanguage: 'English',
-  quoteDisplay: 'original',
   voiceId: null,
   autoBackup: true,
 };
+
+const SETTING_KEYS = Object.keys(DEFAULT_SETTINGS) as (keyof AppSettings)[];
+
+/**
+ * Defaults, overlaid with whatever of the stored blob is still a real setting.
+ *
+ * Plain spreading would carry the retired keys forever: they are in every
+ * existing device's AsyncStorage and in every cloud snapshot, so `{...defaults,
+ * ...stored}` re-adopts `dailyGoalMinutes` on each load and pushes it straight
+ * back up. Dropping unknown keys here is the only place the pruning can happen
+ * once and apply to both.
+ */
+function sanitizeSettings(stored: unknown): AppSettings {
+  const p = (stored ?? {}) as Record<string, unknown>;
+  const out = { ...DEFAULT_SETTINGS };
+  for (const k of SETTING_KEYS) {
+    const v = p[k as string];
+    if (v !== undefined && typeof v === typeof DEFAULT_SETTINGS[k]) (out as any)[k] = v;
+  }
+  // voiceId is `string | null`, so `typeof null === 'object'` fails the check above.
+  if (p.voiceId === null || typeof p.voiceId === 'string') out.voiceId = p.voiceId as string | null;
+  out.dailyGoalLessons = Math.min(10, Math.max(1, Math.round(out.dailyGoalLessons)));
+  return out;
+}
 
 interface UserDataState {
   savedQuotes: SavedQuote[];
@@ -675,7 +697,7 @@ export const useUserDataStore = create<UserDataState>()(
           profileBackground,
           nameFont,
           welcomeVersion,
-          settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) },
+          settings: sanitizeSettings(p.settings),
         };
       },
       onRehydrateStorage: () => (state) => {

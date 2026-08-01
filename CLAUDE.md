@@ -42,6 +42,7 @@ splash, or anything else baked into the APK.
 | Subscriptions | react-native-purchases | 10.x | RevenueCat; entitlement `scholars_pass` |
 | Ads | react-native-google-mobile-ads | 16.x | AdMob interstitial for free users only |
 | Analytics | posthog-react-native | 4.x | Manual `$screen` events; consent-gated |
+| Reminders | expo-notifications | ~56 | **LOCAL only** — no server, no push token. Added after build 16, so it is absent from every shipped binary (§22) |
 | Widget | react-native-android-widget | 0.20 | Android home-screen "Quote of the Day" |
 | Validation | Zod | 4.x | API boundary validation only |
 | Date math | date-fns | 4.x | Streak calculation |
@@ -78,7 +79,11 @@ Philosophize/
 │       ├── philosophers/        # "Thinkers" directory (+ its own stack _layout)
 │       ├── stats/               # Insights (sketch charts)
 │       ├── profile/             # Rank, badges, streak, saved quotes
-│       ├── settings.tsx         # Hidden route (multi-section settings)
+│       ├── settings.tsx         # Hidden route. 9 sections down a LABELLED rail:
+│       │                        #   Profile · Account · Notifications · Learning ·
+│       │                        #   Display · Privacy · Feedback · Subscription ·
+│       │                        #   Danger Zone. Notifications only when §22 says
+│       │                        #   the binary can schedule one
 │       └── paywall.tsx          # Hidden route (Scholar's Pass)
 ├── components/
 │   ├── lesson/                  # LessonRunner, CardShell, LessonReward, LessonLoader
@@ -115,6 +120,7 @@ Philosophize/
 │   ├── supabase/                # client, auth, secureStorage, sync, useCloudSync,
 │   │                            #   tombstone, useSession
 │   ├── ads/ purchases/ auth/    # each: types + real + stub + index.web (native-safe)
+│   ├── notifications/           # same pattern + useReminders (§22)
 │   ├── widget/                  # render.tsx, pin.ts, pinWidget.ts
 │   └── utils/                   # streak, week, progress, xp, quickStart,
 │                                #   useTodayKey, userBio
@@ -748,3 +754,77 @@ browser at it; the first transform can take longer than a navigation timeout.
 **On device**, `adb` lives in the session scratchpad. Applying an OTA takes two
 launches: force-stop → launch (downloads) → force-stop → launch (applies).
 Crashes: `adb logcat -d -b crash`.
+
+---
+
+## 22. Settings Must Do Something
+
+Settings held **eighteen** controls that wrote to a store key nothing else read.
+A daily goal in minutes when no screen has ever timed a session; three
+"who can see my profile" switches in an app with no other users; an auto-backup
+flag the sync layer never consulted; six notification toggles with no
+notification library installed. Plus a **Save Changes** button that flashed
+"Saved ✓" and wrote nothing. They looked like settings and behaved like
+decoration.
+
+**The rule now: a settings key earns its place by having a reader outside
+Settings.** Wire it in the same commit or leave it out. `AppSettings` in
+`stores/userDataStore.ts` carries the rule in a comment; `sanitizeSettings()`
+right beneath it is the enforcement — it keeps only the keys still in
+`DEFAULT_SETTINGS`, which is the one place that can prune both AsyncStorage and
+the cloud snapshot at once. Plain `{...defaults, ...persisted}` would re-adopt
+`dailyGoalMinutes` on every load and push it straight back up forever.
+
+Where the live ones are read: **daily goal** → the dot row under the streak on
+Home; **auto-advance** → `LessonReward.handleContinue` via `nextLessonInUnit()`;
+**auto-backup** → `useCloudSync` gates the upload (never the pull-and-merge, so
+signing in on a new phone still restores); **usage analytics** → the root layout;
+**quote card + placement** → Home / Profile / Insights.
+
+Two decisions worth not re-litigating:
+
+- **Auto-advance stops at the unit boundary.** Running on would skip the unit
+  list — the one screen that shows a unit was just finished — and on a free
+  account the next unit is usually locked, so the reader would be auto-advanced
+  into a paywall. It also goes through `lessonAccessibility()`, so it can never
+  be a side door into a lesson that has not been earned or paid for.
+- **The goal counts lessons, not minutes.** Nothing in this app has ever
+  recorded a duration. `dailyLessonCount` already exists for the free-tier gate,
+  so a lesson goal is one the app can actually measure you against.
+
+### Notifications need a binary, and the section knows it
+
+Everything scheduled is **local** — `expo-notifications`, no server, no push
+token — so reminders work with the app closed and the phone offline. The cost is
+that nothing can be composed at send time: whatever a notification will say is
+decided while the app is open. Hence the shapes in `lib/notifications/real.ts`:
+the daily nudge is the one *repeating* trigger (fixed copy, never runs out); the
+streak warning is **seven one-shot evenings** re-laid on every foreground, so
+tonight's is dropped once a lesson is done and only tonight's quotes the real
+streak number; the quote of the day is written days ahead from
+`getQuoteForDay(day)` so the lock screen and the app agree.
+
+> **`expo-notifications` was added AFTER build 16, so no shipped APK contains it,
+> and an OTA cannot add a native module to a binary that lacks one.**
+
+That is why `notifications.isSupported()` exists and why the Settings entry is
+built from it — on an old binary the section is *absent*, not disabled, because
+six switches that cannot possibly work is the exact thing this section removed.
+It is also why `lib/notifications/index.ts` requires `./real` inside a
+`try`/`catch`: `real.ts` imports the native module at module scope and **throws**
+on the way in when it is missing. Catching that is the difference between "the
+reminders section is hidden until they update" and "the app crashes on launch for
+everyone still on the old build". **Never turn that into a static import**, and
+never reference `expo-notifications` from anywhere else.
+
+Consequences to remember:
+
+1. Adding the dependency **moved the fingerprint** — see §18, and generate it
+   rather than assuming.
+2. Reminders reach nobody until a new binary is built and rolled out. The JS is
+   safe to ship over the air in the meantime; it simply hides the section.
+3. When that build happens, decide whether `app.json` wants an
+   `expo-notifications` plugin entry for the small Android status-bar icon.
+   Without one Android silhouettes the launcher icon, which for a feather on
+   white may come out as a blob. Changing `app.json` moves the fingerprint again,
+   so do it *with* the build, never just before an OTA.

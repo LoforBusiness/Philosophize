@@ -105,6 +105,33 @@ export function lessonAccessibility(
   return startable ? { accessible: true, gatedByPro: false } : { accessible: false, gatedByPro: true };
 }
 
+/**
+ * The lesson Auto-advance goes to next, or null if there isn't one.
+ *
+ * Deliberately confined to the SAME UNIT. Running on past the end of a unit would
+ * skip the unit list — the one screen that shows a unit was just finished — and
+ * on a free account the next unit is usually locked anyway, so the reader would
+ * be auto-advanced straight into a paywall. Stopping at the unit boundary makes
+ * the setting describable in one line: it goes to the next lesson in the unit.
+ *
+ * Accessibility is still checked, because the same gate the Learn screen applies
+ * has to apply here — this must never be a side door into a locked lesson.
+ */
+export function nextLessonInUnit(
+  lessonId: string,
+  lessonsByUnit: Record<string, number>,
+  isPro: boolean
+): { branchSlug: string; pathSlug: string; lessonId: string } | null {
+  const found = getLessonById(lessonId);
+  if (!found) return null;
+  const { branch, path } = found;
+  const li = path.lessons.findIndex((l) => l.id === lessonId);
+  const next = li >= 0 ? path.lessons[li + 1] : undefined;
+  if (!next) return null;
+  if (!lessonAccessibility(next.id, lessonsByUnit, isPro).accessible) return null;
+  return { branchSlug: branch.slug, pathSlug: path.slug, lessonId: next.id };
+}
+
 // Rebuild per-unit counts from the legacy per-branch totals. The old model was a
 // single continuous count per branch (unit 1's lessons, then unit 2's, …), so we
 // fill each branch's units in order — a faithful reconstruction of where the

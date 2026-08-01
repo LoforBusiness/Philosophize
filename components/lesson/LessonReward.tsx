@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal, View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
+import { router } from 'expo-router';
 import Animated, {
   useSharedValue, useAnimatedStyle, withDelay, withTiming, Easing,
 } from 'react-native-reanimated';
@@ -7,8 +8,9 @@ import StreakBook from '@/components/gamification/StreakBook';
 import StreakWeek from '@/components/gamification/StreakWeek';
 import RankUpScreen from '@/components/gamification/RankUpScreen';
 import RewardLoafer, { pickLine } from '@/components/gamification/RewardLoafer';
-import { RANKS, type RankDef } from '@/data/ranks';
-import { useUserDataStore } from '@/stores/userDataStore';
+import { RANKS, rankForXP, type RankDef } from '@/data/ranks';
+import { nextLessonInUnit } from '@/data';
+import { useUserDataStore, previewDailyActivity } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { ads } from '@/lib/ads';
@@ -161,56 +163,43 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   const [phase, setPhase] = useState<'pending' | 'rankup' | 'reward'>('pending');
   const [rankUp, setRankUp] = useState<{ from: RankDef; to: RankDef; next: RankDef | null; totalXP: number } | null>(null);
 
-  // Has this free user now used up today's lesson allowance? (bumpDailyLessons
-  // runs on mount, so the count already reflects the just-finished lesson.)
+  // Has this free user used up today's allowance? The daily count is NOT bumped
+  // until they press the button, so this lesson is not in it yet — hence the + 1.
   const usedToday = dailyLessonDate === dateStr(new Date()) ? dailyLessonCount : 0;
-  const atLimit = !isPro && usedToday >= FREE_DAILY_LESSON_LIMIT;
+  const atLimit = !isPro && usedToday + 1 >= FREE_DAILY_LESSON_LIMIT;
 
   // Continue order for FREE users: reward screen → interstitial ad → then, if
   // they've hit the daily cap, the Scholar's Pass slides up as a dismissible
   // option over the lesson list (never a blocking gate). Subscribers and free
   // users with lessons left just return. showInterstitial never throws and
   // resolves even with no ad ready, so navigation is never blocked.
-  const handleContinue = async () => {
-    if (advancing) return;
-    if (isPro) {
-      onDone();
-      return;
-    }
-    setAdvancing(true);
-    try {
-      await ads.showInterstitial();
-    } catch {}
-    onDone(); // close the reward + leave the lesson, back to the lesson list
-    if (atLimit) openPaywall(); // …then float the optional paywall up over it
-  };
-
-  // Record completion + update streak exactly once.
-  useEffect(() => {
+  // ───────────────────────────────────────────────────────────────────────────
+  // THE COMPLETION IS COMMITTED HERE, NOT ON MOUNT.
+  //
+  // It used to run in an effect the moment this screen appeared, which meant a
+  // reader could reach the reward, kill the app, reopen it, and find the lesson
+  // marked complete — progress, XP, streak and the day's allowance all banked —
+  // without ever seeing the interstitial that pays for the free tier. Pressing the
+  // button was optional, and skipping it was strictly better for them.
+  //
+  // So nothing is written until this runs. Everything above is a PREVIEW computed
+  // from the store without touching it. Leave before pressing the button and the
+  // lesson simply was not finished: no XP, no streak, no unlock, and the lesson is
+  // still there to be played again.
+  //
+  // Order matters. The award is committed FIRST and the ad shown after, so a
+  // failed, slow or unavailable ad can never cost someone the lesson they earned —
+  // `showInterstitial` already resolves rather than throwing, and this way even a
+  // crash mid-ad leaves the progress banked.
+  // ───────────────────────────────────────────────────────────────────────────
+  const commit = () => {
     if (ran.current) return;
     ran.current = true;
-    // Straddle the award. The rank is NO LONGER derived from XP — `rankIndex` is
-    // what the user holds, it moves only inside recordLessonComplete, and by one
-    // step — so the question is simply whether that index moved.
-    const before = useUserDataStore.getState().rankIndex;
     recordLessonComplete(lessonId, xp);
-    const st = useUserDataStore.getState();
-    if (st.rankIndex > before) {
-      setRankUp({
-        from: RANKS[before],
-        to: RANKS[st.rankIndex],
-        next: RANKS[st.rankIndex + 1] ?? null,
-        totalXP: st.totalXP,
-      });
-      setPhase('rankup');
-    } else {
-      setPhase('reward');
-    }
     const today = dateStr(new Date());
     const yesterday = dateStr(new Date(Date.now() - 86_400_000));
     bumpDailyLessons(today); // count this completion toward the free daily allowance
     const dayInfo = registerDailyActivity(today, yesterday);
-    setInfo(dayInfo);
     track('lesson_completed', {
       branch_slug: branchSlug,
       xp,
@@ -221,6 +210,67 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     });
     // The home-screen widget shows the day streak — keep it current (best-effort).
     refreshQuoteWidget();
+  };
+
+  // AUTO-ADVANCE (Settings → Learning). Worked out AFTER `commit()` has run, not
+  // before: the lesson just finished is what unlocks the next one, so asking
+  // beforehand would always find it locked. Same-unit only, and it goes through
+  // the same accessibility gate the Learn screen uses, so it can never be a side
+  // door into a lesson the reader has not earned or paid for.
+  const goNextIfWanted = () => {
+    if (!useUserDataStore.getState().settings.autoAdvance) return false;
+    const s = useUserDataStore.getState();
+    const next = nextLessonInUnit(lessonId, s.lessonsByUnit, isPro);
+    if (!next) return false;
+    router.push(`/(app)/branches/${next.branchSlug}/${next.pathSlug}/lesson/${next.lessonId}`);
+    return true;
+  };
+
+  const handleContinue = async () => {
+    if (advancing) return;
+    setAdvancing(true);
+    commit();
+    if (isPro) {
+      onDone();
+      goNextIfWanted();
+      return;
+    }
+    try {
+      await ads.showInterstitial();
+    } catch {}
+    onDone(); // close the reward + leave the lesson, back to the lesson list
+    // A free reader who has just used their last lesson of the day gets the
+    // paywall, never an auto-advance into a lesson they cannot start.
+    if (atLimit) openPaywall();
+    else goNextIfWanted();
+  };
+
+  // What finishing WOULD do, worked out without writing any of it. Both halves
+  // mirror the store exactly: the streak via the shared `previewDailyActivity`,
+  // and the rank by the same rule `recordLessonComplete` uses — it advances at
+  // most ONE tier, and only when the XP has earned at least one.
+  useEffect(() => {
+    const st = useUserDataStore.getState();
+    const earned = rankForXP(st.totalXP + xp).index;
+    if (earned > st.rankIndex) {
+      setRankUp({
+        from: RANKS[st.rankIndex],
+        to: RANKS[st.rankIndex + 1],
+        next: RANKS[st.rankIndex + 2] ?? null,
+        totalXP: st.totalXP + xp,
+      });
+      setPhase('rankup');
+    } else {
+      setPhase('reward');
+    }
+    setInfo(
+      previewDailyActivity(
+        st.lastLessonDate,
+        st.streak,
+        dateStr(new Date()),
+        dateStr(new Date(Date.now() - 86_400_000)),
+      ),
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -241,7 +291,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   // is. Painting the reward first would flash XP behind a rank-up.
   if (phase === 'pending') {
     return (
-      <Modal visible animationType="fade" transparent={false} onRequestClose={onDone}>
+      <Modal visible animationType="fade" transparent={false} onRequestClose={handleContinue}>
         <View style={styles.root} />
       </Modal>
     );
@@ -249,7 +299,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
 
   if (phase === 'rankup' && rankUp) {
     return (
-      <Modal visible animationType="fade" transparent={false} onRequestClose={onDone}>
+      <Modal visible animationType="fade" transparent={false} onRequestClose={handleContinue}>
         <RankUpScreen
           from={rankUp.from}
           to={rankUp.to}
@@ -262,7 +312,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   }
 
   return (
-    <Modal visible animationType="fade" transparent={false} onRequestClose={onDone}>
+    <Modal visible animationType="fade" transparent={false} onRequestClose={handleContinue}>
       <View style={styles.root}>
         <View style={styles.center}>
           <Text style={styles.eyebrow}>LESSON COMPLETE</Text>

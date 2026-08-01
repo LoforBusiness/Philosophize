@@ -10,6 +10,7 @@ import {
   Linking,
   Platform,
   StyleSheet,
+  AppState,
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -30,6 +31,7 @@ import { useUserDataStore, type AppSettings } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { purchases } from '@/lib/purchases';
 import { ads } from '@/lib/ads';
+import { notifications } from '@/lib/notifications';
 import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
 import { effectiveStreak } from '@/lib/utils/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
@@ -48,46 +50,52 @@ const TIMES = ['06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '12:00 PM', '06:0
 // Where user feedback is sent (opens the user's mail app pre-addressed here).
 const FEEDBACK_EMAIL = 'philosophizelearn@gmail.com';
 
-type SectionKey = 'profile' | 'account' | 'notifications' | 'learning' | 'privacy' | 'feedback' | 'subscription' | 'data' | 'danger';
+// The padded local day key the store writes to dailyLessonDate / lastLessonDate.
+function todayStamp(d = new Date()): string {
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+type SectionKey = 'profile' | 'account' | 'notifications' | 'learning' | 'display' | 'privacy' | 'feedback' | 'subscription' | 'danger';
+
+/**
+ * The Notifications entry is present only in a binary that can actually schedule
+ * one. `isSupported()` is false on web, in Expo Go, and in every APK built before
+ * expo-notifications became a dependency — and an over-the-air update cannot add
+ * a native module to an APK that shipped without one. Showing the section there
+ * would put six switches on screen that could not possibly do anything, which is
+ * the exact thing this rewrite exists to remove.
+ */
 const SECTIONS: { key: SectionKey; label: string; icon: SketchIconName }[] = [
   { key: 'profile', label: 'Profile', icon: 'person' },
   { key: 'account', label: 'Account', icon: 'settings' },
-  { key: 'notifications', label: 'Notifications', icon: 'bell' },
+  ...(notifications.isSupported()
+    ? [{ key: 'notifications' as const, label: 'Notifications', icon: 'bell' as const }]
+    : []),
   { key: 'learning', label: 'Learning', icon: 'grad' },
+  { key: 'display', label: 'Display', icon: 'book' },
   { key: 'privacy', label: 'Privacy', icon: 'lock' },
   { key: 'feedback', label: 'Feedback', icon: 'pencil' },
   { key: 'subscription', label: 'Subscription', icon: 'clock' },
-  { key: 'data', label: 'Data', icon: 'database' },
   { key: 'danger', label: 'Danger Zone', icon: 'warning' },
 ];
 
 export default function SettingsScreen() {
   const [section, setSection] = useState<SectionKey>('profile');
-  const [saved, setSaved] = useState(false);
   const { width } = useWindowDimensions();
   const compact = width < 600;
-
-  function onSave() {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1500);
-  }
 
   return (
     <ScreenTransition bg={Page}>
     <SafeAreaView style={styles.safe} edges={['top']}>
-      {/* Top bar */}
+      {/* Top bar. There is no Save button: every control on every section writes
+          to the store the moment it is touched. The one that used to sit here
+          flashed "Saved ✓" and wrote nothing — it was reassurance about a commit
+          that had already happened, which is indistinguishable from a button that
+          does nothing. Profile keeps its own real Save, because Profile is the
+          one section that holds a draft. */}
       <View style={[styles.topBar, compact && { paddingHorizontal: 14 }]}>
         <Text style={[styles.topTitle, compact && { fontSize: 26 }]}>Settings</Text>
-        {/* Every other section writes to the store the moment you touch it, so
-            this button is reassurance rather than a commit. The Profile section
-            is the one place with a real draft and its own real Save changes —
-            two buttons saying the same words, one of which does nothing, is
-            worse than one. */}
-        {section === 'profile' ? null : (
-          <Pressable onPress={onSave} style={({ pressed }) => [styles.saveBtn, pressed && { opacity: 0.85 }]}>
-            <Text style={styles.saveBtnText}>{saved ? 'Saved ✓' : 'Save Changes'}</Text>
-          </Pressable>
-        )}
       </View>
 
       <ScrollView contentContainerStyle={[styles.scroll, compact && { paddingHorizontal: 12 }]} showsVerticalScrollIndicator={false}>
@@ -108,7 +116,13 @@ export default function SettingsScreen() {
 function Sidebar({ section, onSelect, compact }: { section: SectionKey; onSelect: (s: SectionKey) => void; compact: boolean }) {
   const { width } = useWindowDimensions();
 
-  // Phone: a compact icon-only rail on the side, so the content keeps its width.
+  // Phone: a labelled rail down the side.
+  //
+  // This was icon-only, 52pt wide, and nine hand-drawn glyphs is far too fine a
+  // distinction to navigate by — a bell, a mortarboard, a padlock and a clock all
+  // read as "a small sketch", so finding Subscription meant tapping until it
+  // appeared. The words cost 24pt of the content's width and remove the guessing
+  // entirely, which is the right trade on a screen that is mostly rows of text.
   if (compact) {
     return (
       <View style={styles.rail}>
@@ -121,7 +135,13 @@ function Sidebar({ section, onSelect, compact }: { section: SectionKey; onSelect
               accessibilityLabel={s.label}
               style={[styles.railItem, on && styles.railItemOn]}
             >
-              <SketchIcon name={s.icon} size={20} color={on ? Paper : InkSoft} />
+              <SketchIcon name={s.icon} size={17} color={on ? Paper : InkSoft} />
+              <Text
+                numberOfLines={2}
+                style={[styles.railLabel, on && { color: Paper, fontFamily: 'Inter_700Bold' }]}
+              >
+                {s.label}
+              </Text>
             </Pressable>
           );
         })}
@@ -261,14 +281,14 @@ function Section({ section }: { section: SectionKey }) {
       return <NotificationsSection />;
     case 'learning':
       return <LearningSection />;
+    case 'display':
+      return <DisplaySection />;
     case 'privacy':
       return <PrivacySection />;
     case 'feedback':
       return <FeedbackSection />;
     case 'subscription':
       return <SubscriptionSection />;
-    case 'data':
-      return <DataSection />;
     case 'danger':
       return <DangerSection />;
   }
@@ -477,6 +497,8 @@ function MiniStat({ value, label }: { value: number; label: string }) {
 
 function AccountSection() {
   const email = useUserDataStore((s) => s.email);
+  const settings = useUserDataStore((s) => s.settings);
+  const setSetting = useUserDataStore((s) => s.setSetting);
   const [confirm, setConfirm] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -506,6 +528,21 @@ function AccountSection() {
       <Text style={styles.fieldValue}>{email || 'Your account'}</Text>
 
       <View style={styles.hr} />
+      {/* Moved here from a "Data" section of its own, and made real: the sync
+          layer now actually reads this before it uploads anything. It sits beside
+          Sign Out because that is the pairing that matters — this is what decides
+          whether signing out is safe. */}
+      <Row title="Back Up Progress" sub="Keep this device's progress saved to your account">
+        <Toggle value={settings.autoBackup} onChange={(v) => setSetting('autoBackup', v)} />
+      </Row>
+      {!settings.autoBackup ? (
+        <View style={styles.notice}>
+          <Text style={styles.noticeText}>
+            Backup is off. Progress made from now on stays on this phone — it won't reach your other devices,
+            and signing out will lose it.
+          </Text>
+        </View>
+      ) : null}
       <Row title="Sign Out" sub="Sign out on this device — your progress stays saved to your account." last stack>
         <Pressable
           onPress={() => setConfirm(true)}
@@ -537,40 +574,99 @@ function AccountSection() {
 function NotificationsSection() {
   const settings = useUserDataStore((s) => s.settings);
   const setSetting = useUserDataStore((s) => s.setSetting);
+  // Whether the OS will let us through. Everything in this section depends on it,
+  // and it can change while the app is backgrounded (the reader revoking it in
+  // system settings), so it is re-read on every return to the foreground.
+  const [granted, setGranted] = useState<boolean | null>(null);
+  const [asking, setAsking] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    const read = () => {
+      void notifications.hasPermission().then((g) => { if (alive) setGranted(g); });
+    };
+    read();
+    const sub = AppState.addEventListener('change', (s) => { if (s === 'active') read(); });
+    return () => { alive = false; sub.remove(); };
+  }, []);
+
   const cycleTime = () => {
     const i = TIMES.indexOf(settings.reminderTime);
     setSetting('reminderTime', TIMES[(i + 1) % TIMES.length]);
   };
+
+  // Turning one ON is the moment to ask — nobody wants a permission prompt for
+  // reminders they have not asked for. If it is refused the switch stays off,
+  // because a switch that is on while the OS silently drops every notification is
+  // the same lie in a new costume.
+  const enable = async (key: 'dailyReminder' | 'streakAlerts' | 'quoteOfDay', v: boolean) => {
+    if (!v) { setSetting(key, false); return; }
+    if (granted) { setSetting(key, true); return; }
+    setAsking(true);
+    const ok = await notifications.requestPermission();
+    setAsking(false);
+    setGranted(ok);
+    if (ok) setSetting(key, true);
+  };
+
+  const blocked = granted === false;
   return (
     <Card>
       <Header title="Notifications" sub="Choose what interrupts your contemplation." />
       <View style={styles.hr} />
+
+      {blocked ? (
+        <View style={styles.notice}>
+          <Text style={styles.noticeText}>
+            {asking
+              ? 'Waiting for permission…'
+              : 'Notifications are switched off for Philosophize in your phone’s settings. Nothing below can be delivered until they are allowed.'}
+          </Text>
+          <Pressable
+            onPress={() => Linking.openSettings().catch(() => {})}
+            style={({ pressed }) => [styles.manageBtn, { alignSelf: 'flex-start', marginTop: 12 }, pressed && { opacity: 0.85 }]}
+          >
+            <Text style={styles.manageText}>Open phone settings</Text>
+          </Pressable>
+        </View>
+      ) : null}
+
       <Row title="Daily Reminder" sub="A gentle nudge to return to your studies">
-        <Toggle value={settings.dailyReminder} onChange={(v) => setSetting('dailyReminder', v)} />
+        <Toggle value={settings.dailyReminder && !blocked} onChange={(v) => void enable('dailyReminder', v)} />
       </Row>
-      <Row title="Reminder Time" sub="When to receive your daily prompt">
+      <Row title="Reminder Time" sub="When the daily nudge arrives">
         <Pressable onPress={cycleTime} style={styles.timePill}>
           <Text style={styles.timeText}>{settings.reminderTime}</Text>
           <SketchIcon name="clock" size={15} color={Ink} />
         </Pressable>
       </Row>
-      <Row title="Streak Alerts" sub="Warn me before my streak breaks">
-        <Toggle value={settings.streakAlerts} onChange={(v) => setSetting('streakAlerts', v)} />
+      <Row title="Streak Alerts" sub="A warning at 8pm on a day you haven't studied">
+        <Toggle value={settings.streakAlerts && !blocked} onChange={(v) => void enable('streakAlerts', v)} />
       </Row>
-      <Row title="Badge Earned" sub="Notify when a new badge is unlocked">
-        <Toggle value={settings.badgeEarned} onChange={(v) => setSetting('badgeEarned', v)} />
+      <Row title="Quote of the Day" sub="One quote each morning at 9am" last>
+        <Toggle value={settings.quoteOfDay && !blocked} onChange={(v) => void enable('quoteOfDay', v)} />
       </Row>
-      <Row title="Weekly Summary" sub="A digest of your week's progress">
-        <Toggle value={settings.weeklySummary} onChange={(v) => setSetting('weeklySummary', v)} />
-      </Row>
-      <Row title="Quote of the Day" sub="One quote, delivered each morning">
-        <Toggle value={settings.quoteOfDay} onChange={(v) => setSetting('quoteOfDay', v)} />
-      </Row>
-      <Row title="Daily Quote Widget" sub="Show a fresh quote inside the app each day" last={!settings.widgetEnabled}>
+      <Text style={styles.footNote}>
+        These are scheduled on this phone, not sent from a server — they arrive whether or not you have a
+        connection, and nothing about your studies leaves the device.
+      </Text>
+    </Card>
+  );
+}
+
+/* ---------------- Display ---------------- */
+
+function DisplaySection() {
+  const settings = useUserDataStore((s) => s.settings);
+  const setSetting = useUserDataStore((s) => s.setSetting);
+  return (
+    <Card>
+      <Header title="Display" sub="What the app shows you, and where." />
+      <View style={styles.hr} />
+      <Row title="Daily Quote Card" sub="A fresh quote inside the app each day" last={!settings.widgetEnabled}>
         <Toggle value={settings.widgetEnabled} onChange={(v) => setSetting('widgetEnabled', v)} />
       </Row>
       {settings.widgetEnabled ? (
-        <Row title="Widget Placement" sub="Where the widget appears in the app" last stack>
+        <Row title="Where It Appears" sub="The screen the card is shown on" last stack>
           <Segmented
             value={settings.widgetPlacement}
             onChange={(k) => setSetting('widgetPlacement', k as AppSettings['widgetPlacement'])}
@@ -582,6 +678,10 @@ function NotificationsSection() {
           />
         </Row>
       ) : null}
+      <Text style={styles.footNote}>
+        This is the card inside the app. The Android home-screen widget is added from your home screen and
+        keeps its own quote.
+      </Text>
     </Card>
   );
 }
@@ -591,8 +691,23 @@ function NotificationsSection() {
 function LearningSection() {
   const settings = useUserDataStore((s) => s.settings);
   const setSetting = useUserDataStore((s) => s.setSetting);
-  const goal = settings.dailyGoalMinutes;
-  const goalLabel = goal >= 60 ? `${Math.round((goal / 60) * 10) / 10} hr` : `${goal} min`;
+  const dailyLessonCount = useUserDataStore((s) => s.dailyLessonCount);
+  const dailyLessonDate = useUserDataStore((s) => s.dailyLessonDate);
+  // useTodayKey's return value is a re-render key in a DIFFERENT format
+  // ('2026-7-1', zero-based month) from the padded 'YYYY-MM-DD' the store writes.
+  // Call it for the midnight re-render, then build the real key to compare.
+  useTodayKey();
+  const today = todayStamp();
+  // THE GOAL IS IN LESSONS, NOT MINUTES.
+  //
+  // It was a 5-to-120-minute slider, and no screen in this app has ever timed a
+  // session — there is no clock on a lesson, nothing writes a duration, and there
+  // is nothing a minutes figure could have been compared against. Lessons are
+  // already counted, every day, by the free-tier gate (`dailyLessonCount`), so a
+  // goal expressed in lessons is one the app can actually measure you against.
+  const goal = settings.dailyGoalLessons;
+  const doneToday = dailyLessonDate === today ? dailyLessonCount : 0;
+  const met = doneToday >= goal;
 
   return (
     <Card>
@@ -601,17 +716,21 @@ function LearningSection() {
       <View style={styles.goalRow}>
         <View style={{ flex: 1 }}>
           <Text style={styles.rowTitle}>Daily Goal</Text>
-          <Text style={styles.rowSub}>{goal} minutes per day</Text>
+          <Text style={styles.rowSub}>
+            {goal} {lessonsWord(goal)} a day
+          </Text>
         </View>
-        <Text style={styles.goalValue}>{goalLabel}</Text>
+        <Text style={[styles.goalValue, met && { color: Ink, fontFamily: 'Inter_700Bold' }]}>
+          {met ? `${doneToday} / ${goal} ✓` : `${doneToday} / ${goal} today`}
+        </Text>
       </View>
-      <Slider value={goal} onChange={(v) => setSetting('dailyGoalMinutes', v)} min={5} max={120} step={5} />
+      <Slider value={goal} onChange={(v) => setSetting('dailyGoalLessons', v)} min={1} max={10} step={1} />
       <View style={styles.sliderEnds}>
-        <Text style={styles.endLabel}>5 min</Text>
-        <Text style={styles.endLabel}>2 hrs</Text>
+        <Text style={styles.endLabel}>1 lesson</Text>
+        <Text style={styles.endLabel}>10 lessons</Text>
       </View>
       <View style={[styles.hr, { marginTop: 18 }]} />
-      <Row title="Auto-advance" sub="Move to next lesson when one is complete" last>
+      <Row title="Auto-advance" sub="Straight on to the next lesson in the unit" last>
         <Toggle value={settings.autoAdvance} onChange={(v) => setSetting('autoAdvance', v)} />
       </Row>
     </Card>
@@ -635,15 +754,11 @@ function PrivacySection() {
     <Card>
       <Header title="Privacy" sub="What others can see, and what remains yours alone." />
       <View style={styles.hr} />
-      <Row title="Public Profile" sub="Allow others to discover your philosopher journey">
-        <Toggle value={settings.publicProfile} onChange={(v) => setSetting('publicProfile', v)} />
-      </Row>
-      <Row title="Show Streak Count" sub="Display your current streak on your profile">
-        <Toggle value={settings.showStreak} onChange={(v) => setSetting('showStreak', v)} />
-      </Row>
-      <Row title="Show Rank & Badges" sub="Let others see your earned rank and badges">
-        <Toggle value={settings.showRankBadges} onChange={(v) => setSetting('showRankBadges', v)} />
-      </Row>
+      {/* "Public Profile", "Show Streak Count" and "Show Rank & Badges" used to
+          head this section. Nothing in the app can see another person's profile —
+          there is no directory, no friends list, no sharing — so those three
+          switches guarded a door that does not exist, and no amount of wiring
+          could have made them true. They are gone rather than implemented. */}
       <Row
         title="Usage Analytics"
         sub="Help improve the app with anonymous data"
@@ -662,7 +777,8 @@ function PrivacySection() {
         </Row>
       )}
       <Text style={styles.footNote}>
-        Your reading history, saved quotes, and personal notes are always private and never shared.
+        Your reading history, saved quotes, and personal notes are yours alone — no one else can see your
+        profile, and nothing here is shared with other readers.
       </Text>
     </Card>
   );
@@ -803,22 +919,6 @@ function SubscriptionSection() {
         onConfirm={openManageSubscription}
         onCancel={() => setConfirmCancel(false)}
       />
-    </Card>
-  );
-}
-
-/* ---------------- Data ---------------- */
-
-function DataSection() {
-  const settings = useUserDataStore((s) => s.settings);
-  const setSetting = useUserDataStore((s) => s.setSetting);
-  return (
-    <Card>
-      <Header title="Data & Storage" sub="Your progress, exports, and backups." />
-      <View style={styles.hr} />
-      <Row title="Auto Backup" sub="Automatically back up progress to the cloud" last>
-        <Toggle value={settings.autoBackup} onChange={(v) => setSetting('autoBackup', v)} />
-      </Row>
     </Card>
   );
 }
@@ -1011,19 +1111,28 @@ const styles = StyleSheet.create({
   },
   sidebarHead: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft, letterSpacing: 2, marginBottom: 10 },
 
-  // Compact icon rail (phone)
+  // Labelled rail (phone). 78 wide, and the number is measured rather than
+  // judged: 'Notifications' is the longest word with nowhere to wrap, and in
+  // Inter 700 at 9.5 it is 59.7pt. After the 1.5 borders, 4 of rail padding and
+  // 2 of item padding on each side, 63pt is left — so it clears by 3.3pt. It is
+  // BOLD that has to fit, because the selected label switches weight. An earlier
+  // 76 with wider padding left 59pt and would have clipped it by half a point.
   rail: {
-    width: 52,
+    width: 78,
     borderWidth: 1.5,
     borderColor: Ink,
     borderRadius: 4,
     backgroundColor: Paper,
-    paddingVertical: 8,
-    paddingHorizontal: 6,
-    gap: 4,
+    paddingVertical: 7,
+    paddingHorizontal: 4,
+    gap: 3,
   },
-  railItem: { width: 40, height: 40, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
+  railItem: { borderRadius: 4, alignItems: 'center', justifyContent: 'center', paddingVertical: 8, paddingHorizontal: 2, gap: 4 },
   railItemOn: { backgroundColor: Ink },
+  railLabel: {
+    fontFamily: 'Inter_500Medium', fontSize: 9.5, lineHeight: 12, color: InkSoft,
+    textAlign: 'center', includeFontPadding: false,
+  },
   navItem: { flexDirection: 'row', alignItems: 'center', gap: 9, paddingVertical: 11, paddingHorizontal: 7, borderRadius: 4, borderWidth: 1.5, borderColor: 'transparent' },
   navItemOn: { borderColor: Ink, borderStyle: 'dashed' },
   navText: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 13, color: InkSoft },
@@ -1188,6 +1297,12 @@ const styles = StyleSheet.create({
   // Feedback
   feedbackBtn: { flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: Ink, borderRadius: 4, paddingHorizontal: 20, paddingVertical: 12 },
   feedbackBtnText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: Paper },
+
+  // An inline note that a control is currently unable to do its job (permission
+  // refused, backup switched off). Ink on a tinted panel, not red — it is a state
+  // of affairs, not an error.
+  notice: { backgroundColor: '#F4F2EC', borderLeftWidth: 3, borderLeftColor: Ink, padding: 14, marginTop: 14 },
+  noticeText: { fontFamily: 'Inter_400Regular', fontSize: 12.5, lineHeight: 19, color: Ink },
 
   // Privacy
   manageBtn: { borderWidth: 1.5, borderColor: Ink, borderRadius: 4, paddingHorizontal: 16, paddingVertical: 9, backgroundColor: Paper },

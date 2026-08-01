@@ -27,13 +27,25 @@ export function useCloudSync() {
     let cancelled = false;
     let unsubStore: (() => void) | null = null;
 
+    // THE ONE SWITCH THAT DECIDES WHETHER ANYTHING LEAVES THIS DEVICE.
+    //
+    // Settings → Account → Back Up Progress. It gates only the UPLOAD, never the
+    // pull-and-merge: someone who turns backup off still gets their existing
+    // account data when they sign in on a new phone, they just stop adding to it.
+    //
+    // Turning it back on needs no special handling — `autoBackup` lives in the
+    // same store this is subscribed to, so flipping it is itself a change that
+    // fires flushSoon, and the first thing that then passes this check is the
+    // snapshot of everything that accumulated while it was off.
+    const backupOn = () => useUserDataStore.getState().settings.autoBackup;
+
     // Push the latest snapshot ~3s after the last change (coalesces bursts).
     const flushSoon = () => {
       if (!syncedRef.current || !userIdRef.current) return;
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
         const uid = userIdRef.current;
-        if (uid) void pushCloudState(uid, snapshotLocal());
+        if (uid && backupOn()) void pushCloudState(uid, snapshotLocal());
       }, 3000);
     };
 
@@ -82,7 +94,7 @@ export function useCloudSync() {
         ...(mergeStates(snapshotLocal(), remote ?? {}) as any),
         _syncOwnerId: userId,
       });
-      await pushCloudState(userId, snapshotLocal());
+      if (backupOn()) await pushCloudState(userId, snapshotLocal());
       if (cancelled || userIdRef.current !== userId) return;
       syncedRef.current = true;
       if (!unsubStore) unsubStore = useUserDataStore.subscribe(flushSoon);

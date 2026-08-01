@@ -36,14 +36,24 @@ export function todayLabel(): string {
 }
 
 /**
- * Today's quote. A prime stride scatters the pick across the pool so
- * consecutive days feel varied (and differ from the home "Daily Reflection",
- * which steps through the pool sequentially).
+ * The quote belonging to a given day number. A prime stride scatters the pick
+ * across the pool so consecutive days feel varied (and differ from the home
+ * "Daily Reflection", which steps through the pool sequentially).
+ *
+ * Parameterised by day rather than reading the clock, because the notification
+ * scheduler has to know what TOMORROW's quote will be — it writes the text into
+ * a notification days ahead of time, and the one the reader taps has to be the
+ * same one the app shows them when they open it.
  */
-export function getDailyQuote(): DailyQuote {
+export function getQuoteForDay(day: number): DailyQuote {
   const len = POOL.length || 1;
-  const idx = ((dayNumber() * 7919) % len + len) % len;
+  const idx = ((day * 7919) % len + len) % len;
   return POOL[idx];
+}
+
+/** Today's quote. */
+export function getDailyQuote(): DailyQuote {
+  return getQuoteForDay(dayNumber());
 }
 
 export function quotePoolSize(): number {
