@@ -47,6 +47,12 @@ import { Logic7Lesson } from '@/components/lesson/cinematic/logic7Scene';
 import { Logic8Lesson } from '@/components/lesson/cinematic/logic8Scene';
 import { Ethics7Lesson } from '@/components/lesson/cinematic/ethics7Scene';
 import { Ethics8Lesson } from '@/components/lesson/cinematic/ethics8Scene';
+import { Ethics9Lesson } from '@/components/lesson/cinematic/ethics9Scene';
+import { Aesthetics11Lesson } from '@/components/lesson/cinematic/aesthetics11Scene';
+import { Aesthetics16Lesson } from '@/components/lesson/cinematic/aesthetics16Scene';
+import { KnowHowLesson } from '@/components/lesson/cinematic/knowHowScene';
+import { Epistemology13Lesson } from '@/components/lesson/cinematic/epistemology13Scene';
+import { Epistemology21Lesson } from '@/components/lesson/cinematic/epistemology21Scene';
 import { Epistemology8Lesson } from '@/components/lesson/cinematic/epistemology8Scene';
 import { Epistemology9Lesson } from '@/components/lesson/cinematic/epistemology9Scene';
 import { Metaphysics7Lesson } from '@/components/lesson/cinematic/metaphysics7Scene';
@@ -135,6 +141,13 @@ const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   'logic-arguments-8': Logic8Lesson,
   'ethics-ethics-7': Ethics7Lesson,
   'ethics-ethics-8': Ethics8Lesson,
+  'ethics-ethics-9': Ethics9Lesson,
+  // The six that levelled every branch at 30 lessons.
+  'aesthetics-aesthetics-11': Aesthetics11Lesson,
+  'aesthetics-aesthetics-16': Aesthetics16Lesson,
+  'epistemology-knowledge-2': KnowHowLesson,
+  'epistemology-knowledge-13': Epistemology13Lesson,
+  'epistemology-knowledge-21': Epistemology21Lesson,
   'epistemology-knowledge-8': Epistemology8Lesson,
   'epistemology-knowledge-9': Epistemology9Lesson,
   'metaphysics-being-7': Metaphysics7Lesson,

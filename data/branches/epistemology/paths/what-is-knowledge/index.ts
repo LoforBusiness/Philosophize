@@ -26,6 +26,9 @@ import epistemicInjustice from './lessons/epistemic-injustice';
 import motivatedReasoning from './lessons/motivated-reasoning';
 import knowledgeVersusUnderstanding from './lessons/knowledge-versus-understanding';
 import becomingAWiseKnower from './lessons/becoming-a-wise-knower';
+import knowingHowAndKnowingThat from './lessons/knowing-how-and-knowing-that';
+import theTicketThatLoses from './lessons/the-ticket-that-loses';
+import canYouChooseABelief from './lessons/can-you-choose-a-belief';
 
 // 5 units — split from the original single "What Is Knowledge?" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
@@ -35,14 +38,17 @@ const units: Path[] = [
     slug: "what-is-knowledge",
     name: "What Is Knowledge?",
     description: "Discover what separates genuine knowledge from lucky guesses — and the first doubts that put it to the test.",
-    lessons: [whatDoesItMeanToKnow, canYouBeWrongAndThinkYouKnow, whereDoesKnowledgeComeFrom, whyHumansSeekKnowledge, canWeKnowAnythingAtAll, whyTrustTheFuture, whatMakesABeliefJustified, whatIsTruth, livingWithoutCertainty],
+    // Appended, never inserted: `lessonsByUnit` counts completions BY POSITION, so
+    // slotting a lesson mid-unit would silently re-point every later slot for
+    // anyone part-way through (CLAUDE.md §11).
+    lessons: [whatDoesItMeanToKnow, canYouBeWrongAndThinkYouKnow, whereDoesKnowledgeComeFrom, whyHumansSeekKnowledge, canWeKnowAnythingAtAll, whyTrustTheFuture, whatMakesABeliefJustified, whatIsTruth, livingWithoutCertainty, knowingHowAndKnowingThat],
   },
   {
     id: "epistemology-the-classic-puzzles",
     slug: "the-classic-puzzles",
     name: "The Classic Puzzles",
     description: "Wrestle with the famous puzzles — Gettier, radical doubt, the outside world — that forced philosophers to rethink knowing itself.",
-    lessons: [theGettierProblem, sourcesOfKnowledge, theExternalWorld, aPrioriAndAPosteriori],
+    lessons: [theGettierProblem, sourcesOfKnowledge, theExternalWorld, aPrioriAndAPosteriori, theTicketThatLoses],
   },
   {
     id: "epistemology-evidence-science-and-the-crowd",
@@ -56,7 +62,7 @@ const units: Path[] = [
     slug: "what-holds-belief-up",
     name: "What Holds Belief Up",
     description: "If every reason needs a reason, find what finally makes a belief stand — and whether the skeptic can be answered.",
-    lessons: [reliabilismAndTheValueOfKnowledge, virtueEpistemology, answeringTheSkeptic, theProblemOfTheCriterion],
+    lessons: [reliabilismAndTheValueOfKnowledge, virtueEpistemology, answeringTheSkeptic, theProblemOfTheCriterion, canYouChooseABelief],
   },
   {
     id: "epistemology-the-wise-knower",

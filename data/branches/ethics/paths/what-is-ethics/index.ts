@@ -8,6 +8,7 @@ import trolleyProblemFamily from './lessons/trolley-problem-family';
 import moralLuck from './lessons/moral-luck';
 import ethicsOfCare from './lessons/ethics-of-care';
 import ethicsInPractice from './lessons/ethics-in-practice';
+import whenBothChoicesAreWrong from './lessons/when-both-choices-are-wrong';
 import utilitarianismInDepth from './lessons/utilitarianism-in-depth';
 import kantsCategoricalImperative from './lessons/kants-categorical-imperative';
 import virtueEthicsAndEudaimonia from './lessons/virtue-ethics-and-eudaimonia';
@@ -44,7 +45,10 @@ const units: Path[] = [
     slug: "when-intuitions-collide",
     name: "When Intuitions Collide",
     description: "Trolleys, luck, care, and fairness — vivid dilemmas that expose how conflicted our moral gut can be.",
-    lessons: [trolleyProblemFamily, moralLuck, ethicsOfCare, ethicsInPractice],
+    // Appended, never inserted: `lessonsByUnit` counts completions BY POSITION, so
+    // slotting a lesson mid-unit would silently re-point every later slot for
+    // everyone who is part-way through (see CLAUDE.md §11).
+    lessons: [trolleyProblemFamily, moralLuck, ethicsOfCare, ethicsInPractice, whenBothChoicesAreWrong],
   },
   {
     id: "ethics-the-great-theories",

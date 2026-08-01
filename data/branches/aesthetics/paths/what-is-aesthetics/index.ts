@@ -17,6 +17,8 @@ import paradoxOfTragedyAndHorror from './lessons/paradox-of-tragedy-and-horror';
 import howCanMusicBeSad from './lessons/how-can-music-be-sad';
 import everydayAndEnvironmentalAesthetics from './lessons/everyday-and-environmental-aesthetics';
 import whyArtMattersTheValueOfArt from './lessons/why-art-matters-the-value-of-art';
+import canAMachineMakeArt from './lessons/can-a-machine-make-art';
+import theArtistsLife from './lessons/the-artists-life';
 import theOntologyOfArt from './lessons/the-ontology-of-art';
 import theParadoxOfFiction from './lessons/the-paradox-of-fiction';
 import musicAndEmotion from './lessons/music-and-emotion';
@@ -43,7 +45,11 @@ const units: Path[] = [
     slug: "theories-and-hard-cases",
     name: "Theories & Hard Cases",
     description: "Meet the great theories of art and the hard cases that test them — from what defines a work to why it moves us at all.",
-    lessons: [intentionalFallacyInterpretation, forgeryAndAuthenticity, humesStandardOfTaste, kantOnDisinterestedBeauty, paradoxOfTragedyAndHorror, howCanMusicBeSad, everydayAndEnvironmentalAesthetics, whyArtMattersTheValueOfArt],
+    // Appended, never inserted: `lessonsByUnit` counts completions BY POSITION, so
+    // slotting these mid-unit would silently re-point every later slot for anyone
+    // part-way through (CLAUDE.md §11). It also levels the branch's three units at
+    // ten lessons each.
+    lessons: [intentionalFallacyInterpretation, forgeryAndAuthenticity, humesStandardOfTaste, kantOnDisinterestedBeauty, paradoxOfTragedyAndHorror, howCanMusicBeSad, everydayAndEnvironmentalAesthetics, whyArtMattersTheValueOfArt, canAMachineMakeArt, theArtistsLife],
   },
   {
     id: "aesthetics-puzzles-at-the-edge",
