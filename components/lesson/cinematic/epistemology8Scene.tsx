@@ -193,7 +193,7 @@ export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick }:
 
       {/* Drawn AFTER the figure, so the block reads as held in front of the body. */}
       <Animated.View style={[styles.carry, carryStyle]} pointerEvents="none">
-        <Text style={styles.carryText}>BECAUSE</Text>
+        <Text numberOfLines={1} style={styles.carryText}>BECAUSE</Text>
       </Animated.View>
     </Animated.View>
   );
@@ -305,6 +305,7 @@ const styles = StyleSheet.create({
   pileLabel: {
     position: 'absolute', left: PILE_L - 1, top: 434, width: PILE_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 1.1, color: SOFT,
+    includeFontPadding: false,
   },
   pileBlock: {
     position: 'absolute', left: PILE_L, width: PILE_W, height: 15,
@@ -315,6 +316,7 @@ const styles = StyleSheet.create({
   towerLabel: {
     position: 'absolute', left: TOWER_L, top: 170, width: TOWER_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
   },
   row: {
     position: 'absolute', left: TOWER_L, width: TOWER_W, height: ROW_H,
@@ -339,6 +341,7 @@ const styles = StyleSheet.create({
   escHead: {
     position: 'absolute', left: ESC_L, top: 170, width: ESC_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
   },
   escWrap: { position: 'absolute', left: ESC_L, width: ESC_W },
   escCard: {
@@ -351,6 +354,7 @@ const styles = StyleSheet.create({
   escLabel: {
     flex: 1, marginLeft: 8,
     fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 15, letterSpacing: 0.3, color: INK,
+    includeFontPadding: false,
   },
   escLabelOn: { color: PAPER },
 
@@ -379,7 +383,18 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
     alignItems: 'center', justifyContent: 'center',
   },
-  carryText: { fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.1, color: INK },
+  // D30 — letterSpacing 0, where the house style for a caps label is 1.2–1.6 and the
+  // tower's own rowLab is 1.3. This block is the exception because it is the narrowest
+  // box in the lesson: 44 wide less two 2-unit borders leaves 40, and "BECAUSE" at 1.1
+  // of tracking measured 43 — it OVERFLOWED by 3, and with no numberOfLines the word
+  // was broken rather than clipped, so the carried block read BECAUS / E on two lines.
+  // The glyphs alone are only 35.3; the seven characters of tracking were the entire
+  // overflow. At 7.5px the difference between 0 and 1.1 is invisible, and 0 leaves
+  // 11.8% margin — where 0.2 would leave 8.3%, which is too thin to absorb whatever
+  // Android's metrics do to it. The tower labels keep their tracking; they have room.
+  carryText: { fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0, color: INK,
+    includeFontPadding: false,
+  },
 });
 
 // Measured across every beat: the highest ink is the tower/escape heading at y = 170

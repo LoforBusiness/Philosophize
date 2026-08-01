@@ -639,10 +639,63 @@ by arithmetic to fit two lines still clipped on device. Set
 `includeFontPadding: false` on label/body styles **and** add ~10px of slack to any
 card with wrapping text.
 
-**D30. No orphaned line breaks.** A short label that wraps strands a fragment on its
-own line — "OVERWHELM / S", "TOMORRO / W", a tick split from its word. The box just
-grows, so nothing clips and no overflow check fires. A label of ≤26 characters should
-occupy one line.
+**D30. No orphaned line breaks. A word needs MARGIN in its box, not a fit — 8%, and
+`numberOfLines={1}` so it cannot break at all.** A short label that wraps strands a
+fragment on its own line — "OVERWHELM / S", "TOMORRO / W", "SYMPHON / Y". The box just
+grows, so nothing clips and no overflow check fires.
+
+This rule existed as the sentence "a label of ≤26 characters should occupy one line"
+and a word was split anyway, so here is the number and the check instead.
+
+- **"It fits" is not a measurement.** ethics-11's `SYMPHONY` measured **55.39 units
+  inside 56** — it fitted by six tenths of a unit. That is not a fit, it is a
+  coincidence, and Android's metrics run a shade wider than the browser's, so on a
+  real phone it broke in half. Anything under **8% margin** is one font away from
+  splitting on somebody's device. Measure the LONGEST WORD against the box's inner
+  width (minus border AND padding), in design units.
+- **Tracking is charged per CHARACTER, including after the last one.** `letterSpacing:
+  0.2` on an eight-letter word buys 1.6 units of width for almost nothing optically at
+  9px — more than the entire margin that label had left. Treat tracking as width you
+  are spending. ethics-3's card carries a comment putting `CONSEQUENCES` at "~88 in
+  100"; it actually measures **98**, and the missing 9.6 is exactly its twelve
+  characters of 0.8 tracking. An estimate that forgets tracking under-counts by the
+  whole of it, which is usually the whole of the margin.
+- **`numberOfLines={1}` is the structural half.** Room makes a split unlikely; a single
+  line makes it impossible. Use both on any label that is one word, because the font is
+  not something this repo controls.
+- **A label that is MEANT to wrap has only the margin.** political-11's plates read
+  "ONE SOVEREIGN" over two lines by design, so `numberOfLines={1}` is not available and
+  nothing structural stops the long word breaking — 8% is the whole of the protection,
+  and it must be measured against the longest WORD, never the whole string.
+- **When the margin is short, spend tracking before geometry.** Three of the four real
+  cases sat in rows whose PITCH is tuned for tap targets (`TOK_PITCH`, `PLOT_PITCH`),
+  where widening the box eats the gutter that makes the answer reliably tappable — you
+  would fix D30 by breaking E37b. Tracking is free to give back: it costs nothing
+  optically at 8–9px and it is usually the entire overflow.
+- **Three ways to measure this wrong**, all of which produced confident nonsense before
+  the real defect turned up:
+  - Comparing a box measured INSIDE the `scale(fit)` stage against text measured
+    outside it. Every word in a fit-0.9 lesson came back at exactly −11.1% — forty
+    "defects" that were one division. **A constant error across unrelated lessons is
+    arithmetic announcing itself, never a real finding.**
+  - Measuring the `<Text>` rather than the box. A shrink-wrapping Text reports its own
+    content width, so every word "exactly fits itself" at 0%. Walk up to the first
+    ancestor that actually bounds it.
+  - **Measuring the on-screen rectangle of a box that is mid-animation.** Most of these
+    boxes pop in under a `scale`, and one lands under `rotate: -13deg`, for which the
+    browser reports the axis-aligned box AROUND the tilted one. **A transform never
+    re-wraps text** — lines are decided at layout size and the result is then scaled —
+    so the screen rectangle is not the width the text was laid out in. Sampling mid-pop
+    made one `VALID` stamp read −5.3% and +5.3% in the same lesson, and made
+    aesthetics-4's `CONFERRED`, which has 14% clear at rest, look 8.9% overflowed.
+    Measure `clientWidth`, which is layout and ignores transforms entirely.
+- **Known false positive: a box with no `width` at all.** A speech bubble, or any
+  absolutely-positioned tag carrying only `paddingHorizontal`, grows to whatever the
+  text needs, so it reads ~0% and can never split. Before changing anything, check the
+  style for an explicit width — `bubbleBox` and valid3's `falseTag` both have none, and
+  all four of their "findings" were nothing. Note that "is the parent wider?" does NOT
+  settle it: a shrink-wrap box usually sits inside a shrink-wrap parent, so both report
+  the same width. The style is the answer.
 
 **D31. Nothing opaque may cover text, and props sharing a column must be ordered.**
 ethics-6's chart footing landed on the tally below it: "THE FIVE" was sliced in half
@@ -680,6 +733,35 @@ produced this rule.
 One at a time, too: the outgoing bubble fades fully out before the incoming one starts
 (0→0.18, then 0.22→0.52 in `Bubble`). Overlapping them for even a tenth of a second
 reads as a flicker rather than as a reply.
+
+**D31b. Words must not sit on the rule that boxes them: 4dp of clearance, measured
+in DP and measured at the GLYPHS.** D28 catches text that clips or spills; this is
+the near-miss that still looks wrong — a label hard against its own border, which
+reads as cramped even when every character is technically inside.
+
+- **Clearance is a DP number, not a padding value.** Scene boxes are authored in
+  design units and multiplied by `fit`, so `paddingHorizontal: 8` is 7.2dp at fit
+  0.9 and **4.8dp at fit 0.6** — and the box's own 2-unit border eats into that.
+  The same source value therefore looks fine in one lesson and cramped in another.
+  Audited across all 54, scene padding ran from **2 to 12 units** with no
+  convention at all; the deck's own boxes use 13–18 and never have this problem.
+- **The vertical failures are WRAPPING, not padding.** Text is centred in a
+  fixed-height box, so clearance is `(boxH − textH) / 2` — and a caption that turns
+  out to be two lines rather than one blows straight through it. aesthetics-5 fits
+  a 17-unit title plus a 15-unit caption in a 48-unit box, which works right up
+  until "a picture worth framing" wraps. Adding padding cannot fix this; the box
+  has to be taller or the words fewer.
+- **Android is 2–4px tighter than anything you measure on web**, because
+  `includeFontPadding` defaults to true and adds height above AND below every
+  `<Text>` (D29). Set `includeFontPadding: false` on every scene text style — 88
+  were missing it, concentrated in one authoring batch, and those lessons are
+  exactly the ones that measured worst.
+- **Measure the glyphs, not the element.** A centred `<Text>` is laid out at the
+  full inner width of its box, so its element rect touches both borders while the
+  words sit comfortably centred. Measuring element rects reported 145 collisions;
+  measuring a `Range` over the text node reported 106, and the 39 difference were
+  all fiction. Part 3 already warns about this — it is easy to "fix" 39 boxes that
+  were never broken, and shrinking their text is what finally makes them wrap.
 
 **D32b. Hand-break short text to a MEASURED width.** D30 says a stranded fragment is a
 defect; this is how to stop writing them. For any text in a narrow container — a

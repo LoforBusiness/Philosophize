@@ -245,7 +245,9 @@ const styles = StyleSheet.create({
 
   // ── what to tap ─────────────────────────────────────────────────────────────
   tapWrap: { position: 'absolute', left: CH_L, top: TAP_T, width: CH_W, alignItems: 'center' },
-  tapLabel: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.4, color: SOFT },
+  tapLabel: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
+  },
 });
 
 // Art runs from the principle ladder (238) down to the figure's planted foot dot

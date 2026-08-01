@@ -237,6 +237,7 @@ const styles = StyleSheet.create({
   measLabel: {
     position: 'absolute', left: 0, right: 0, top: MEAS_LABEL_T, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
   },
   measBar: {
     position: 'absolute', left: MEAS_L, top: MEAS_Y, width: MEAS_W, height: 2,
@@ -271,6 +272,7 @@ const styles = StyleSheet.create({
   harmLabel: {
     position: 'absolute', left: 296, top: 340, width: 108, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
   },
   // Drawn at roughly three-quarters of the main figure's height with the same
   // limb weight, so the person beyond the line reads as a PERSON rather than the

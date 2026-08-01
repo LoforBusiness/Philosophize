@@ -290,10 +290,18 @@ const styles = StyleSheet.create({
   },
   cardOn: { position: 'absolute', left: 0, top: 0, right: 0, height: 4, backgroundColor: INK },
   who: { fontFamily: 'Inter_700Bold', fontSize: 14.5, lineHeight: 17, letterSpacing: 0.4, color: INK, includeFontPadding: false },
-  // CONSEQUENCES is the longest word on the board. At 9 of padding and 1.2 of
-  // tracking it measured within a unit of the 96 of inner width — a coin-flip wrap.
-  // 7 of padding and 0.8 of tracking put it at ~88 in 100, which nothing can wrap.
-  lens: { fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 15, letterSpacing: 0.8, color: SOFT, includeFontPadding: false },
+  // D30 — CONSEQUENCES is the longest word on the board, in 100 units of inner width
+  // (CARD_W 118, less two 2-unit borders and two 7 of padding).
+  //
+  // The previous note here put it at "~88 in 100, which nothing can wrap". It actually
+  // measured 98 — a 2% margin. The missing 9.6 is exactly its twelve characters of 0.8
+  // tracking: TRACKING IS CHARGED PER CHARACTER, including after the last one, and an
+  // estimate that forgets it under-counts by the whole of it, which here was the whole
+  // of the margin. 88.4 is the glyphs alone.
+  //
+  // At 0.2 the word measures 90.8 in 100 — 9.2% — and numberOfLines={1} on the label
+  // means it cannot break even if Android's metrics run wider than the browser's.
+  lens: { fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 15, letterSpacing: 0.2, color: SOFT, includeFontPadding: false },
   rule: {
     marginTop: 6, height: 24, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
     alignItems: 'center', justifyContent: 'center', backgroundColor: PAPER, overflow: 'hidden',

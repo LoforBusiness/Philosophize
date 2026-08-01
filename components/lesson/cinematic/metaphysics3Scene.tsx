@@ -285,6 +285,7 @@ const styles = StyleSheet.create({
   askLabel: {
     position: 'absolute', left: COL_L, top: 248, width: COL_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
   },
   cardHit: { position: 'absolute', left: COL_L, width: COL_W },
   card: {

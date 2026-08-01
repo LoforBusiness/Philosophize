@@ -216,6 +216,7 @@ const styles = StyleSheet.create({
   gridLabel: {
     position: 'absolute', left: 0, top: 46, width: STAGE_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT,
+    includeFontPadding: false,
   },
   gridBox: {
     position: 'absolute', top: GRID_T, width: GRID_S, height: GRID_S,
@@ -240,12 +241,14 @@ const styles = StyleSheet.create({
   threadLabelWrap: { position: 'absolute', left: 150, top: 352, width: 200 },
   threadLabel: {
     textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT,
+    includeFontPadding: false,
   },
 
   // ── Q1 cards ────────────────────────────────────────────────────────────────
   pickLabelWrap: { position: 'absolute', left: 0, top: 152, width: STAGE_W },
   pickLabel: {
     textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 2, color: SOFT,
+    includeFontPadding: false,
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
@@ -254,7 +257,9 @@ const styles = StyleSheet.create({
   },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT, opacity: 0.45 },
-  pickText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.4, color: INK },
+  pickText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
   pickTextOn: { color: PAPER },
 
   // ── the bed ─────────────────────────────────────────────────────────────────

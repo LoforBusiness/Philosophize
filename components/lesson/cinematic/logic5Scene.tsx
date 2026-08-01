@@ -356,6 +356,7 @@ const styles = StyleSheet.create({
   stairHdr: {
     position: 'absolute', left: COL_L, top: STAIR_HDR_T, width: COL_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
   },
   stairTag: {
     position: 'absolute', width: STAIR_W, height: STAIR_TAG_H, textAlign: 'center',
@@ -401,6 +402,7 @@ const styles = StyleSheet.create({
   qHdr: {
     position: 'absolute', left: COL_L, top: CHAIN_HDR_T, width: COL_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
   },
   chev: {
     position: 'absolute', left: MID - 6, width: 0, height: 0,

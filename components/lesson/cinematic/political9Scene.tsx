@@ -232,7 +232,9 @@ const styles = StyleSheet.create({
   cardText: {
     fontFamily: 'Inter_500Medium', fontSize: 11.5, color: INK, includeFontPadding: false,
   },
-  cardTextOn: { color: PAPER, fontFamily: 'Inter_700Bold' },
+  cardTextOn: { color: PAPER, fontFamily: 'Inter_700Bold',
+    includeFontPadding: false,
+  },
 });
 
 // Art runs from the tally board (210) to the ground line (500). Five figures at

@@ -217,7 +217,9 @@ const styles = StyleSheet.create({
   stem: { position: 'absolute', top: STEM_T, width: 2, height: 16, backgroundColor: SOFT },
   edgeL: { position: 'absolute', left: 12, top: 168 },
   edgeR: { position: 'absolute', right: 12, top: 168 },
-  edgeText: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.6, color: SOFT },
+  edgeText: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
+  },
 
   sliceWrap: { position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H },
   slice: {
@@ -231,10 +233,18 @@ const styles = StyleSheet.create({
     borderRadius: 5, backgroundColor: INK,
     alignItems: 'center', justifyContent: 'center',
   },
-  sliceLabel: { fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 1.2, color: SOFT },
-  sliceSub: { fontFamily: 'Inter_400Regular', fontSize: 9.5, letterSpacing: 0.4, color: SOFT, marginTop: 3 },
-  sliceLabelOn: { fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 1.2, color: PAPER },
-  sliceSubOn: { fontFamily: 'Inter_400Regular', fontSize: 9.5, letterSpacing: 0.4, color: RULE, marginTop: 3 },
+  sliceLabel: { fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 1.2, color: SOFT,
+    includeFontPadding: false,
+  },
+  sliceSub: { fontFamily: 'Inter_400Regular', fontSize: 9.5, letterSpacing: 0.4, color: SOFT, marginTop: 3,
+    includeFontPadding: false,
+  },
+  sliceLabelOn: { fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 1.2, color: PAPER,
+    includeFontPadding: false,
+  },
+  sliceSubOn: { fontFamily: 'Inter_400Regular', fontSize: 9.5, letterSpacing: 0.4, color: RULE, marginTop: 3,
+    includeFontPadding: false,
+  },
 
   ringWrap: { position: 'absolute', left: 0, top: RING_T, width: RING_W, height: RING_H + 26 },
   ring: {
@@ -244,12 +254,14 @@ const styles = StyleSheet.create({
   ringLabel: {
     position: 'absolute', left: 0, top: RING_H + 6, width: RING_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
   },
 
   pickLabelWrap: { position: 'absolute', left: 0, top: 140, width: STAGE_W },
   pickLabel: {
     width: STAGE_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.5, color: INK,
+    includeFontPadding: false,
   },
   allWrap: { position: 'absolute', left: ALL_L, top: ALL_T, width: ALL_W },
   allBox: {
@@ -257,9 +269,13 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   allRight: { backgroundColor: INK, borderColor: INK },
-  allText: { fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 1.2, color: INK },
+  allText: { fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 1.2, color: INK,
+    includeFontPadding: false,
+  },
   allTextOn: { color: PAPER },
-  allSub: { fontFamily: 'Inter_400Regular', fontSize: 9.5, letterSpacing: 0.4, color: SOFT, marginTop: 2 },
+  allSub: { fontFamily: 'Inter_400Regular', fontSize: 9.5, letterSpacing: 0.4, color: SOFT, marginTop: 2,
+    includeFontPadding: false,
+  },
   allSubOn: { color: RULE },
 });
 

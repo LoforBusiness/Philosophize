@@ -215,6 +215,7 @@ const styles = StyleSheet.create({
   tiny: {
     position: 'absolute', textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: SOFT,
+    includeFontPadding: false,
   },
 
   eye: {
@@ -265,6 +266,7 @@ const styles = StyleSheet.create({
   askLabel: {
     position: 'absolute', left: 0, right: 0, top: 198, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
   },
   plateHit: { position: 'absolute', width: PAN_W },
   plate: {

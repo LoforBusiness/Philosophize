@@ -165,6 +165,7 @@ const styles = StyleSheet.create({
   panLabel: {
     position: 'absolute', top: 236, width: PAN_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 2, color: SOFT,
+    includeFontPadding: false,
   },
   // borderRadius stays 0 on the dashed frame: Android silently falls back to a
   // SOLID border when a dashed one is rounded, and the dashes are the whole point.
@@ -200,12 +201,15 @@ const styles = StyleSheet.create({
     position: 'absolute', left: GAP_L, top: PAN_T + 46, width: GAP_W, height: 74,
     alignItems: 'center', justifyContent: 'center',
   },
-  qGlyph: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 58, color: INK },
+  qGlyph: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 58, color: INK,
+    includeFontPadding: false,
+  },
 
   // ── Leibniz's principle ─────────────────────────────────────────────────────
   psrLabel: {
     position: 'absolute', left: PSR_L, top: 430, width: PSR_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.4, color: INK,
+    includeFontPadding: false,
   },
   psrRule: { position: 'absolute', left: PSR_L, top: 452, width: PSR_W - 12, height: 2, backgroundColor: INK },
   psrHead: {

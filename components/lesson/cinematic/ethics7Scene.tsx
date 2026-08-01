@@ -241,6 +241,7 @@ const styles = StyleSheet.create({
   laneTag: {
     position: 'absolute', left: 16,
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
   },
 
   // ── the car (56 × 59, bottom of the wheels sits on the road line) ───────────
@@ -300,8 +301,12 @@ const styles = StyleSheet.create({
 
   // ── Q1: the verdict row ────────────────────────────────────────────────────
   vHead: { position: 'absolute', left: 0, top: 228, width: STAGE_W, alignItems: 'center' },
-  vTag: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 2, color: INK },
-  vSub: { fontFamily: 'Inter_500Medium', fontSize: 9, letterSpacing: 1.2, color: SOFT, marginTop: 3 },
+  vTag: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 2, color: INK,
+    includeFontPadding: false,
+  },
+  vSub: { fontFamily: 'Inter_500Medium', fontSize: 9, letterSpacing: 1.2, color: SOFT, marginTop: 3,
+    includeFontPadding: false,
+  },
   vCard: { position: 'absolute', top: V_TOP, width: V_W },
   vInner: {
     height: V_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
@@ -312,6 +317,7 @@ const styles = StyleSheet.create({
   vText: {
     fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.3, color: INK,
     textAlign: 'center', lineHeight: 16,
+    includeFontPadding: false,
   },
   vTextOn: { color: PAPER },
 });

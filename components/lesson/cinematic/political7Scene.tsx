@@ -233,9 +233,13 @@ const styles = StyleSheet.create({
     backgroundColor: RULE, alignItems: 'center', paddingTop: 12,
   },
   slabOn: { backgroundColor: INK, borderColor: INK },
-  stoneCap: { fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 2.4, color: INK },
+  stoneCap: { fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 2.4, color: INK,
+    includeFontPadding: false,
+  },
   capRule: { width: 46, height: 1.5, backgroundColor: SOFT, marginTop: 7 },
-  carve: { fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 1, lineHeight: 20, color: INK, marginTop: 6 },
+  carve: { fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 1, lineHeight: 20, color: INK, marginTop: 6,
+    includeFontPadding: false,
+  },
   hatch: { height: 2.5, backgroundColor: SOFT, marginTop: 8, borderRadius: 1 },
   onText: { color: PAPER },
   onLine: { backgroundColor: RULE },
@@ -267,12 +271,17 @@ const styles = StyleSheet.create({
   faceR: { left: -CH_HALF },
   faceDim: { borderColor: SOFT, opacity: 0.45 },
 
-  chCap: { fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 1, color: INK },
+  chCap: { fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 1, color: INK,
+    includeFontPadding: false,
+  },
   chRule: { width: 124, height: 1, backgroundColor: RULE, marginTop: 6 },
-  chArticle: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 2, color: SOFT, marginTop: 8 },
+  chArticle: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 2, color: SOFT, marginTop: 8,
+    includeFontPadding: false,
+  },
   chBody: {
     fontFamily: 'Inter_700Bold', fontSize: 14.5, lineHeight: 19, color: INK,
     textAlign: 'center', marginTop: 5,
+    includeFontPadding: false,
   },
   chLine: { height: 2.5, backgroundColor: RULE, marginTop: 9, borderRadius: 1 },
 
@@ -282,6 +291,7 @@ const styles = StyleSheet.create({
   sigLabel: {
     position: 'absolute', left: 0, top: 20, fontFamily: 'Inter_700Bold',
     fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    includeFontPadding: false,
   },
   seal: {
     position: 'absolute', right: 9, bottom: 6, width: 28, height: 28, borderRadius: 14,
@@ -307,6 +317,7 @@ const styles = StyleSheet.create({
   askLabel: {
     width: STAGE_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 1.8, color: INK,
+    includeFontPadding: false,
   },
   // Big targets, sitting directly over their own art: 126×158 and 156×168.
   stoneHit: { position: 'absolute', left: 4, top: 344, width: 126, height: 158 },

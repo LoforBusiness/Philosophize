@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
   axisTitle: {
     position: 'absolute', left: AX_L, top: 234, width: 174,
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
   },
   // Tracking 0.3, not 1: "TOMORROW" is eight wide capitals (two of them M and W) and
   // at 1 it measured a hair over the 68-unit box, so it wrapped and left the final
@@ -199,10 +200,12 @@ const styles = StyleSheet.create({
   futTitle: {
     position: 'absolute', left: DIV_X, top: 234, width: 68, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.3, color: SOFT,
+    includeFontPadding: false,
   },
   pastTitle: {
     position: 'absolute', left: 168, top: 426, width: 156, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
   },
   divDash: { position: 'absolute', left: DIV_X, width: 2, height: 8, backgroundColor: SOFT },
 
@@ -231,7 +234,9 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, borderStyle: 'dashed', borderRadius: 0,
     alignItems: 'center', justifyContent: 'center',
   },
-  futureQ: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 38, color: INK },
+  futureQ: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 38, color: INK,
+    includeFontPadding: false,
+  },
 
   // ── the yard ────────────────────────────────────────────────────────────────
   feed: { position: 'absolute', top: GROUND - 4, width: 4, height: 4, borderRadius: 2, backgroundColor: SOFT },

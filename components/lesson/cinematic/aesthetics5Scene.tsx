@@ -68,7 +68,15 @@ const EGO_L = 8, EGO_T = 286, EGO_W = 116, EGO_H = 70;         // bubble 46 + tw
 // of inner width, so each wrapped onto a second line and the card clipped its own
 // last line by 5 units — "a picture worth framing" lost "framing". The card has to
 // be tall enough for the two-line case, and the step has to clear the taller card.
-const CARD_L = 226, CARD_W = 152, CARD_H = 48, CARD_STEP = 52, CARD_T = 336;
+// The card holds a title AND a caption, and the caption wraps: "a picture worth
+// framing" is two lines at 152 wide, so 17 + 30 = 47 units of text sat in a 48-unit
+// box and the words touched the rule top and bottom (measured −1.6dp). Padding
+// cannot fix a box that is shorter than its own contents.
+//
+// Taller, and lifted rather than extended — the stack already ended 12 units below
+// the frame it sits in, so growing downward would have doubled that. Starting at
+// 318 instead of 336 keeps the bottom exactly where it was.
+const CARD_L = 226, CARD_W = 152, CARD_H = 54, CARD_STEP = 58, CARD_T = 318;
 const GOALS = [
   { id: 'a', title: 'A FINE DRAWING', sub: 'a picture worth framing', correct: false },
   { id: 'b', title: 'RETRAIN THE EYE', sub: 'see colour, not the idea', correct: true },
@@ -373,7 +381,10 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   cardTitleOn: { color: PAPER },
-  cardSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 15, color: SOFT, includeFontPadding: false },
+  // lineHeight 14, not 15: the caption is two lines in this width, so every unit
+  // of leading is doubled. 17 (title) + 28 (caption) = 45 in a 54-unit box leaves
+  // 4.5 units — about 4dp — clear of the rule top and bottom.
+  cardSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 14, color: SOFT, includeFontPadding: false },
   cardSubOn: { color: RULE },
 });
 

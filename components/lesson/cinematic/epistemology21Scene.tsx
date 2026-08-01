@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   // margin, which under numberOfLines={1} ellipsises rather than wraps. D30 says
   // spend tracking before geometry, and tracking alone only got it to 6%.
   ansText: {
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
   onInk: { color: PAPER },

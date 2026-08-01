@@ -208,10 +208,20 @@ export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick }: 
                   showPick && answered && chosen && !tk.correct && styles.tokenWrong,
                 ]}
               >
-                <Text style={[styles.tokenName, showPick && answered && tk.correct && styles.tokenOn]}>
+                {/* numberOfLines={1} is the structural half of the fix: with room
+                    made above these now fit comfortably, but a single line is what
+                    makes splitting a word IMPOSSIBLE rather than merely unlikely on
+                    a font whose metrics we do not control (D30). */}
+                <Text
+                  numberOfLines={1}
+                  style={[styles.tokenName, showPick && answered && tk.correct && styles.tokenOn]}
+                >
                   {tk.name}
                 </Text>
-                <Text style={[styles.tokenSub, showPick && answered && tk.correct && styles.tokenOn]}>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.tokenSub, showPick && answered && tk.correct && styles.tokenOn]}
+                >
                   {tk.sub}
                 </Text>
               </View>
@@ -243,15 +253,27 @@ const styles = StyleSheet.create({
   tokenSlot: { position: 'absolute', top: TOK_T, width: TOK_W },
   tokenInner: {
     height: TOK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
-    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2,
+    // paddingHorizontal 1, not 2. At 2 of padding and 0.2 of tracking "SYMPHONY"
+    // measured 55.4 units in 56 — it fitted by six tenths of a unit, which is not a
+    // fit, it is a coincidence. Android's metrics are a shade wider than the
+    // browser's, so on a real phone the word was broken in half: SYMPHON / Y.
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 1,
   },
   tokenRight: { backgroundColor: INK, borderColor: INK },
   tokenWrong: { borderColor: SOFT, opacity: 0.45 },
   // D30 — an eight-character word must not break. Content width here is
-  // 64 − 2×2 border − 2×2 padding = 56, and "SYMPHONY" at 9/0.2 measures ~47, so
-  // there is 9 units of slack for whatever Android's metrics do to it.
+  // 64 − 2×2 border − 2×1 padding = 58, and "SYMPHONY" measures 51.4, leaving 11.4%
+  // for whatever Android's metrics do to it.
+  //
+  // The row's PITCH is tuned for tap targets (see TOK_PITCH), so the box cannot be
+  // widened to buy margin without eating the gutter — the size of the type is the
+  // only free variable, hence 8.6 rather than 9. It still sits clearly above the
+  // 7px sub-label, which is what carries the hierarchy.
   tokenName: {
-    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 12, letterSpacing: 0.2,
+    // letterSpacing 0, not 0.2. Tracking is charged PER CHARACTER, so on an
+    // eight-letter word it was buying 1.6 units of width for almost no optical
+    // benefit at this size — more than the entire margin the label had left.
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 12, letterSpacing: 0,
     color: INK, includeFontPadding: false,
   },
   tokenSub: {

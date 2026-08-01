@@ -197,6 +197,7 @@ const styles = StyleSheet.create({
   layerLabel: {
     position: 'absolute', left: 0, right: 0, top: 190, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
   },
 
   tablet: {
@@ -204,7 +205,9 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
   },
   tabHead: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 10, paddingTop: 6 },
-  tabName: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT },
+  tabName: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
+  },
   tabRule: { marginTop: 5, marginHorizontal: 8, height: 1, backgroundColor: RULE },
   triangle: {
     width: 0, height: 0,
@@ -221,12 +224,15 @@ const styles = StyleSheet.create({
   },
 
   codeRow: { position: 'absolute', left: 10, right: 8, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  codeDash: { fontFamily: 'Inter_700Bold', fontSize: 11, color: SOFT },
+  codeDash: { fontFamily: 'Inter_700Bold', fontSize: 11, color: SOFT,
+    includeFontPadding: false,
+  },
   codeT: { fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 0.3, color: INK, includeFontPadding: false },
 
   chartHdr: {
     position: 'absolute', left: 0, right: 0, top: 444, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
   },
   traitT: {
     position: 'absolute', left: 20, width: 124, textAlign: 'right', height: BAR_H, lineHeight: BAR_H,
@@ -248,6 +254,7 @@ const styles = StyleSheet.create({
   askLabel: {
     position: 'absolute', left: 0, right: 0, top: 200, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
   },
   vHit: { position: 'absolute', width: TAB_W },
   vBox: {

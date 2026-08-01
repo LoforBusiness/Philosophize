@@ -382,7 +382,9 @@ const styles = StyleSheet.create({
   },
 
   askWrap: { position: 'absolute', left: 96, top: 398, width: 116, alignItems: 'center' },
-  askText: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT },
+  askText: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
+  },
 
   // ── ledger ──────────────────────────────────────────────────────────────────
   ledger: {
@@ -394,6 +396,7 @@ const styles = StyleSheet.create({
   colHead: {
     position: 'absolute', top: 6, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.3, color: SOFT,
+    includeFontPadding: false,
   },
   row: { position: 'absolute', left: 0, right: 0, height: LED_ROW_H, justifyContent: 'center' },
   rowLabel: {
@@ -461,5 +464,6 @@ const styles = StyleSheet.create({
   sproutLabel: {
     position: 'absolute', left: 288, top: 430, width: 96, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.3, color: SOFT,
+    includeFontPadding: false,
   },
 });

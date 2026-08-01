@@ -319,6 +319,7 @@ const styles = StyleSheet.create({
   landLabel: {
     position: 'absolute', left: 100, top: 108, width: 100, textAlign: 'right',
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
   },
 
   // ── easel ──────────────────────────────────────────────────────────────────
@@ -332,6 +333,7 @@ const styles = StyleSheet.create({
   boardLabel: {
     position: 'absolute', left: 0, right: 0, top: 9, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
   },
   mapArea: { position: 'absolute', left: 9, top: 30, width: 110, height: 90 },
 
@@ -353,7 +355,9 @@ const styles = StyleSheet.create({
     borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
     alignItems: 'center', justifyContent: 'center',
   },
-  badgeMark: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: INK, lineHeight: 32 },
+  badgeMark: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: INK, lineHeight: 32,
+    includeFontPadding: false,
+  },
 
   // ── rival theories ─────────────────────────────────────────────────────────
   placard: {
@@ -361,8 +365,12 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
     justifyContent: 'center', paddingHorizontal: 9,
   },
-  placardHead: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: SOFT },
-  placardBody: { fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, marginTop: 2 },
+  placardHead: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
+  },
+  placardBody: { fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, marginTop: 2,
+    includeFontPadding: false,
+  },
 
   // ── Q1 cards ───────────────────────────────────────────────────────────────
   cardLayer: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
@@ -375,11 +383,13 @@ const styles = StyleSheet.create({
   cardLabel: {
     position: 'absolute', left: 0, right: 0, top: 8, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 1.4, color: INK,
+    includeFontPadding: false,
   },
   cardLabelOn: { color: PAPER },
   tapLabel: {
     position: 'absolute', left: CARD_A_L, top: 334, width: CARD_B_L + CARD_W - CARD_A_L, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.6, color: INK,
+    includeFontPadding: false,
   },
 });
 

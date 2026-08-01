@@ -11,8 +11,8 @@ import type { SceneApi } from './CinematicPlayer';
 // ─────────────────────────────────────────────────────────────────────────────
 // ARISTOTLE'S LADDER, drawn as a stepped bar chart and climbed by the eye.
 //
-//   the star   (y 242–310)   understanding, burning over the top rung
-//   the ladder (y 316–464)   SENSATION → MEMORY → EXPERIENCE → SCIENCE → WISDOM,
+//   the star   (y 212–280)   understanding, burning over the top rung
+//   the ladder (y 286–464)   SENSATION → MEMORY → EXPERIENCE → SCIENCE → WISDOM,
 //                            each rung indented further right, built bottom-up
 //   Bacon      (y 344–500)   a line dropped off the WISDOM rung into one box:
 //                            KNOWLEDGE → POWER. Same ladder, redirected.
@@ -23,15 +23,27 @@ import type { SceneApi } from './CinematicPlayer';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const FIG_X = 76;
-const STAR = { x: 303, y: 276 };
+const STAR = { x: 303, y: 246 };   // lifted 30 to make room for taller rungs (D31b)
 
-// ladder geometry: five rungs, each 150 wide, stepping 22 right and 30 up
+// ladder geometry: five rungs, each 150 wide, stepping 22 right and 36 up
 const RUNG_W = 150;
-const RUNG_H = 28;
+// 34, not 28. A rung holds a title over a caption, and at the old line heights that
+// is exactly 24 units — inside a 28-unit box whose 2-unit border leaves exactly 24.
+// The clearance was ZERO by construction, top and bottom, on all five rungs: the
+// words WERE the border.
+//
+// THE LADDER EXACTLY FILLED ITS SLOT, which is why this needed more than a bigger
+// number. Five rungs at 28/30 span 148 units and there are only 150 between the
+// star's underside and Bacon's box — so every extra unit of rung had to be bought
+// from somewhere. 34/36 spans 178, so the star moved up 30 (and the band with it,
+// to 308 units, still inside the 330 at which `fit` would fall below 0.90).
+const RUNG_H = 34;
 const RUNG_STEP = 22;
-const RUNG_PITCH = 30;
+/** Must exceed RUNG_H or consecutive rungs overlap; 2 units of gutter, as before. */
+const RUNG_PITCH = 36;
 const RUNG_BASE_X = 140;
-const RUNG_BASE_Y = 436;
+/** Chosen so the BOTTOM rung still ends at 464 and Bacon's box at 466 is untouched. */
+const RUNG_BASE_Y = 430;
 const RUNGS = [
   { label: 'SENSATION', sub: 'every animal has it' },
   { label: 'MEMORY', sub: 'a few animals' },
@@ -211,8 +223,8 @@ const styles = StyleSheet.create({
   },
   rungNumT: { fontFamily: 'Inter_700Bold', fontSize: 9, color: PAPER, includeFontPadding: false },
   rungTextWrap: { flex: 1 },
-  rungT: { fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 14, letterSpacing: 0.6, color: INK, includeFontPadding: false },
-  rungSub: { fontFamily: 'Inter_400Regular', fontSize: 8, lineHeight: 10, letterSpacing: 0.3, color: SOFT, includeFontPadding: false },
+  rungT: { fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 13, letterSpacing: 0.6, color: INK, includeFontPadding: false },
+  rungSub: { fontFamily: 'Inter_400Regular', fontSize: 8, lineHeight: 9, letterSpacing: 0.3, color: SOFT, includeFontPadding: false },
   // Parked in the empty wedge left of the staircase — clear of the rungs (x ≥ 140),
   // clear of Bacon's box, and well above the figure's crown at y ≈ 354.
   ladderTag: {
@@ -236,6 +248,7 @@ const styles = StyleSheet.create({
   askLabel: {
     position: 'absolute', left: PLATE_X, top: 300, width: PLATE_W, textAlign: 'left',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
   },
   plateHit: { position: 'absolute', left: PLATE_X, width: PLATE_W },
   plate: {
@@ -255,5 +268,5 @@ const styles = StyleSheet.create({
 // four name plates (318–498) all live inside. Cropping to 280 units instead of 560
 // puts the scene at the stage's WIDTH limit — about 2.3×, double the letterboxed fit.
 export function Epistemology5Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology5Scene} band={[234, 514]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology5Scene} band={[206, 514]} />;
 }

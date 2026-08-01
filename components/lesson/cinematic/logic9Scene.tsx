@@ -246,7 +246,9 @@ const styles = StyleSheet.create({
   replyText: {
     fontFamily: 'Inter_500Medium', fontSize: 11.5, color: INK, includeFontPadding: false,
   },
-  replyTextOn: { color: PAPER, fontFamily: 'Inter_700Bold' },
+  replyTextOn: { color: PAPER, fontFamily: 'Inter_700Bold',
+    includeFontPadding: false,
+  },
 });
 
 // Art runs from the claim board (226) to the ground line (500). The dodger walks in

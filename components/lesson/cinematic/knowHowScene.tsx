@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   // so the whole string must fit, not its longest word. The house size for a
   // three-across answer row (D30).
   ansText: {
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
   onInk: { color: PAPER },

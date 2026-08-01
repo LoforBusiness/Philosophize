@@ -265,6 +265,7 @@ const styles = StyleSheet.create({
   chTitle: {
     position: 'absolute', left: 20, top: 243, width: 218,
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+    includeFontPadding: false,
   },
   readWrap: { position: 'absolute', left: 244, top: 238, width: 136, alignItems: 'flex-end' },
   readNum: {

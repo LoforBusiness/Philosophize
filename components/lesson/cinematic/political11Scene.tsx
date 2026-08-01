@@ -295,8 +295,16 @@ const styles = StyleSheet.create({
   },
   plateRight: { backgroundColor: INK, borderColor: INK },
   plateWrong: { borderColor: SOFT, opacity: 0.45 },
+  // D30 — letterSpacing 0. "SOVEREIGN" is the longest word on any plate and the inner
+  // width is 52 (PLOT_W 64, less two 2-unit borders and two 4 of padding); at 0.2 of
+  // tracking it measured 48.2, a 7.3% margin. These labels are deliberately two words
+  // over two lines, so numberOfLines={1} is NOT available as the structural guarantee
+  // it is elsewhere — a word that outgrows the line here has nothing to stop it
+  // breaking, and margin is the only protection. Dropping the tracking costs nine
+  // characters × 0.2 = 1.8 units and takes it to 10.8%. Widening the plate is not an
+  // option: PLOT_PITCH leaves a 4-unit gutter that is tap-target slop (PLOT_SLOP).
   plateText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.2, color: INK, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0, color: INK, textAlign: 'center',
     includeFontPadding: false,
   },
   plateTextOn: { color: PAPER },

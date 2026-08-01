@@ -304,6 +304,7 @@ const styles = StyleSheet.create({
   matchLabel: {
     position: 'absolute', left: 236, top: 62, width: 160, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT,
+    includeFontPadding: false,
   },
   crossbar: { position: 'absolute', left: 288, top: 86, width: 84, height: 4, backgroundColor: INK, borderRadius: 2 },
   postL: { position: 'absolute', left: 288, top: 86, width: 4, height: 52, backgroundColor: INK, borderRadius: 2 },
@@ -326,6 +327,7 @@ const styles = StyleSheet.create({
   eyeLabel: {
     position: 'absolute', left: 236, top: 372, width: 160, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT,
+    includeFontPadding: false,
   },
 
   // ── crates ──────────────────────────────────────────────────────────────────
@@ -349,7 +351,9 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   badgeOn: { borderColor: INK, backgroundColor: INK },
-  badgeText: { fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.8, color: SOFT },
+  badgeText: { fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.8, color: SOFT,
+    includeFontPadding: false,
+  },
   badgeTextOn: { color: PAPER },
   folkHead: {
     position: 'absolute', left: 19, top: 32, width: 22, height: 22, borderRadius: 11,
@@ -365,6 +369,7 @@ const styles = StyleSheet.create({
   pickLabelWrap: { position: 'absolute', left: 0, top: 184, width: STAGE_W },
   pickLabel: {
     textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 2, color: SOFT,
+    includeFontPadding: false,
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
@@ -375,7 +380,9 @@ const styles = StyleSheet.create({
   pickBarOn: { backgroundColor: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT, opacity: 0.45 },
-  pickText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.4, color: INK },
+  pickText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
   pickTextOn: { color: PAPER },
 });
 

@@ -207,7 +207,9 @@ const styles = StyleSheet.create({
   cardText: {
     fontFamily: 'Inter_500Medium', fontSize: 12, color: INK, includeFontPadding: false,
   },
-  cardTextOn: { color: PAPER, fontFamily: 'Inter_700Bold' },
+  cardTextOn: { color: PAPER, fontFamily: 'Inter_700Bold',
+    includeFontPadding: false,
+  },
 });
 
 // Art runs from the factor cards (300) to the ground line (500). The pond, both

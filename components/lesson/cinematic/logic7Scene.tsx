@@ -174,28 +174,37 @@ const styles = StyleSheet.create({
   boardLabel: {
     position: 'absolute', left: BOARD_L, top: BOARD_T + 8, width: BOARD_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT,
+    includeFontPadding: false,
   },
 
   ruleBox: {
     position: 'absolute', left: BOARD_L + PADX, top: RULE_T, width: CARD_W,
     borderWidth: 2, borderColor: INK, borderRadius: 4, paddingVertical: 6, alignItems: 'center',
   },
-  ruleLine: { fontFamily: 'Inter_700Bold', fontSize: 12.5, color: INK },
-  ruleArrow: { fontFamily: 'Inter_700Bold', fontSize: 13, color: INK, lineHeight: 15 },
+  ruleLine: { fontFamily: 'Inter_700Bold', fontSize: 12.5, color: INK,
+    includeFontPadding: false,
+  },
+  ruleArrow: { fontFamily: 'Inter_700Bold', fontSize: 13, color: INK, lineHeight: 15,
+    includeFontPadding: false,
+  },
 
   factCard: {
     position: 'absolute', left: BOARD_L + PADX, top: FACT_T, width: CARD_W, height: ROW_H,
     borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: INK,
     alignItems: 'center', justifyContent: 'center',
   },
-  factText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.3, color: PAPER },
+  factText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.3, color: PAPER,
+    includeFontPadding: false,
+  },
 
   conclCard: {
     position: 'absolute', left: BOARD_L + PADX, top: CONCL_T, width: CARD_W, height: ROW_H,
     borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
     alignItems: 'center', justifyContent: 'center',
   },
-  conclText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.3, color: INK },
+  conclText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.3, color: INK,
+    includeFontPadding: false,
+  },
 
   pickCard: { position: 'absolute', left: BOARD_L + PADX, width: CARD_W },
   pickInner: {
@@ -204,7 +213,9 @@ const styles = StyleSheet.create({
   },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT, opacity: 0.45 },
-  pickText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.3, color: INK },
+  pickText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.3, color: INK,
+    includeFontPadding: false,
+  },
   pickTextOn: { color: PAPER },
 });
 
