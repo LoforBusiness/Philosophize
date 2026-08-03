@@ -69,9 +69,6 @@ export interface AppSettings {
   // Daily quote widget (in-app, shown on a chosen screen)
   widgetEnabled: boolean;
   widgetPlacement: WidgetPlacement;
-  // Learning
-  dailyGoalLessons: number; // 1–10, counted against dailyLessonCount
-  autoAdvance: boolean;
   // Privacy
   usageAnalytics: boolean;
   // Narration
@@ -87,8 +84,11 @@ const DEFAULT_SETTINGS: AppSettings = {
   quoteOfDay: true,
   widgetEnabled: false,
   widgetPlacement: 'home',
-  dailyGoalLessons: 2,
-  autoAdvance: true,
+  // `autoAdvance` was here and defaulted to TRUE, which is why finishing a lesson
+  // threw the reader into the next one. Its behaviour is replaced by the advance
+  // animation on the branch screen; the key is removed rather than defaulted off,
+  // so sanitizeSettings() prunes it from AsyncStorage and the cloud snapshot
+  // instead of syncing a dead flag forever.
   // Privacy-by-default: analytics stay OFF until the user explicitly opts in
   // (matches PostHog's defaultOptIn:false). Toggle in Settings → Usage Analytics.
   usageAnalytics: false,
@@ -106,6 +106,11 @@ const SETTING_KEYS = Object.keys(DEFAULT_SETTINGS) as (keyof AppSettings)[];
  * ...stored}` re-adopts `dailyGoalMinutes` on each load and pushes it straight
  * back up. Dropping unknown keys here is the only place the pruning can happen
  * once and apply to both.
+ *
+ * The daily goal has now been retired twice over — `dailyGoalMinutes` measured
+ * something the app never recorded, and `dailyGoalLessons` outlived the only
+ * screen that displayed it. Both are pruned by the same mechanism: a key stops
+ * existing the moment it leaves DEFAULT_SETTINGS.
  */
 function sanitizeSettings(stored: unknown): AppSettings {
   const p = (stored ?? {}) as Record<string, unknown>;
@@ -116,7 +121,6 @@ function sanitizeSettings(stored: unknown): AppSettings {
   }
   // voiceId is `string | null`, so `typeof null === 'object'` fails the check above.
   if (p.voiceId === null || typeof p.voiceId === 'string') out.voiceId = p.voiceId as string | null;
-  out.dailyGoalLessons = Math.min(10, Math.max(1, Math.round(out.dailyGoalLessons)));
   return out;
 }
 

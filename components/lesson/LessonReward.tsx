@@ -9,7 +9,7 @@ import StreakWeek from '@/components/gamification/StreakWeek';
 import RankUpScreen from '@/components/gamification/RankUpScreen';
 import RewardLoafer, { pickLine } from '@/components/gamification/RewardLoafer';
 import { RANKS, rankForXP, type RankDef } from '@/data/ranks';
-import { nextLessonInUnit } from '@/data';
+import { getLessonUnitInfo } from '@/data';
 import { useUserDataStore, previewDailyActivity } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -152,6 +152,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
 
   const isPro = useSubscriptionStore((s) => s.isPro);
   const openPaywall = useUIStore((s) => s.openPaywall);
+  const markLessonFinished = useUIStore((s) => s.markLessonFinished);
 
   const ran = useRef(false);
   const [info, setInfo] = useState<DayInfo | null>(null);
@@ -212,18 +213,27 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     refreshQuoteWidget();
   };
 
-  // AUTO-ADVANCE (Settings → Learning). Worked out AFTER `commit()` has run, not
-  // before: the lesson just finished is what unlocks the next one, so asking
-  // beforehand would always find it locked. Same-unit only, and it goes through
-  // the same accessibility gate the Learn screen uses, so it can never be a side
-  // door into a lesson the reader has not earned or paid for.
-  const goNextIfWanted = () => {
-    if (!useUserDataStore.getState().settings.autoAdvance) return false;
-    const s = useUserDataStore.getState();
-    const next = nextLessonInUnit(lessonId, s.lessonsByUnit, isPro);
-    if (!next) return false;
-    router.push(`/(app)/branches/${next.branchSlug}/${next.pathSlug}/lesson/${next.lessonId}`);
-    return true;
+  // LAND THEM ON THE BRANCH, AND HAND THE MOMENT OVER TO IT.
+  //
+  // This replaces auto-advance, which pushed straight into the next lesson and was
+  // ON by default — so finishing one lesson threw you into another before you had
+  // seen anything happen. The work still happened, it just happened off-screen: the
+  // dot filling, the line reaching the next lesson, that lesson coming alive. Now
+  // the reader is put in front of it.
+  //
+  // Worked out AFTER `commit()`, not before: the lesson just finished is what moves
+  // the count, so a unit read beforehand would be one lesson behind.
+  //
+  // `router.replace`, not push: the lesson screen is already being popped by
+  // `onDone`, and pushing a branch screen on top of a stack that is mid-pop leaves
+  // a back button that returns to a finished lesson.
+  const goToBranch = () => {
+    const info = getLessonUnitInfo(lessonId);
+    const slug = branchSlug ?? info?.branchSlug;
+    if (!info || !slug) return;
+    // The branch screen reads this once, plays the advance, and clears it.
+    markLessonFinished({ lessonId, unitId: info.unitId, branchSlug: slug });
+    router.replace(`/(app)/branches/${slug}`);
   };
 
   const handleContinue = async () => {
@@ -232,17 +242,18 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     commit();
     if (isPro) {
       onDone();
-      goNextIfWanted();
+      goToBranch();
       return;
     }
     try {
       await ads.showInterstitial();
     } catch {}
-    onDone(); // close the reward + leave the lesson, back to the lesson list
-    // A free reader who has just used their last lesson of the day gets the
-    // paywall, never an auto-advance into a lesson they cannot start.
+    onDone(); // close the reward + leave the lesson
+    // The branch screen first either way, so the celebration is never the thing
+    // that gets skipped. A free reader who has just spent their last lesson of the
+    // day still sees their progress advance, and the Pass slides up over it.
+    goToBranch();
     if (atLimit) openPaywall();
-    else goNextIfWanted();
   };
 
   // What finishing WOULD do, worked out without writing any of it. Both halves

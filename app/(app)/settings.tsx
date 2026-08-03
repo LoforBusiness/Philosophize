@@ -6,7 +6,6 @@ import {
   ScrollView,
   TextInput,
   Modal,
-  PanResponder,
   Linking,
   Platform,
   StyleSheet,
@@ -50,13 +49,7 @@ const TIMES = ['06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '12:00 PM', '06:0
 // Where user feedback is sent (opens the user's mail app pre-addressed here).
 const FEEDBACK_EMAIL = 'philosophizelearn@gmail.com';
 
-// The padded local day key the store writes to dailyLessonDate / lastLessonDate.
-function todayStamp(d = new Date()): string {
-  const p = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
-
-type SectionKey = 'profile' | 'account' | 'notifications' | 'learning' | 'display' | 'privacy' | 'feedback' | 'subscription' | 'danger';
+type SectionKey = 'profile' | 'account' | 'notifications' | 'display' | 'privacy' | 'feedback' | 'subscription' | 'danger';
 
 /**
  * The Notifications entry is present only in a binary that can actually schedule
@@ -72,7 +65,8 @@ const SECTIONS: { key: SectionKey; label: string; icon: SketchIconName }[] = [
   ...(notifications.isSupported()
     ? [{ key: 'notifications' as const, label: 'Notifications', icon: 'bell' as const }]
     : []),
-  { key: 'learning', label: 'Learning', icon: 'grad' },
+  // No 'learning' rail entry: its last control (auto-advance) is gone, and a rail
+  // tab that opens an empty card is the same defect as a switch that does nothing.
   { key: 'display', label: 'Display', icon: 'book' },
   { key: 'privacy', label: 'Privacy', icon: 'lock' },
   { key: 'feedback', label: 'Feedback', icon: 'pencil' },
@@ -218,31 +212,6 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
   );
 }
 
-function Slider({ value, onChange, min, max, step }: { value: number; onChange: (v: number) => void; min: number; max: number; step: number }) {
-  const [w, setW] = useState(0);
-  const set = (locationX: number) => {
-    if (w <= 0) return;
-    const ratio = Math.max(0, Math.min(1, locationX / w));
-    const raw = min + ratio * (max - min);
-    const snapped = Math.round(raw / step) * step;
-    onChange(Math.max(min, Math.min(max, snapped)));
-  };
-  const pan = PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onMoveShouldSetPanResponder: () => true,
-    onPanResponderGrant: (e) => set(e.nativeEvent.locationX),
-    onPanResponderMove: (e) => set(e.nativeEvent.locationX),
-  });
-  const pct = ((value - min) / (max - min)) * 100;
-  return (
-    <View style={styles.sliderArea} onLayout={(e) => setW(e.nativeEvent.layout.width)} {...pan.panHandlers}>
-      <View style={styles.sliderTrack} />
-      <View style={[styles.sliderFill, { width: `${pct}%` }]} />
-      <View style={[styles.sliderKnob, { left: `${pct}%` }]} />
-    </View>
-  );
-}
-
 function Segmented({ value, options, onChange }: { value: string; options: { key: string; label: string }[]; onChange: (k: string) => void }) {
   return (
     <View style={styles.segmented}>
@@ -279,8 +248,6 @@ function Section({ section }: { section: SectionKey }) {
       return <AccountSection />;
     case 'notifications':
       return <NotificationsSection />;
-    case 'learning':
-      return <LearningSection />;
     case 'display':
       return <DisplaySection />;
     case 'privacy':
@@ -686,56 +653,22 @@ function DisplaySection() {
   );
 }
 
-/* ---------------- Learning ---------------- */
+/* ---------------- Learning — the whole section is gone ---------------- */
 
-function LearningSection() {
-  const settings = useUserDataStore((s) => s.settings);
-  const setSetting = useUserDataStore((s) => s.setSetting);
-  const dailyLessonCount = useUserDataStore((s) => s.dailyLessonCount);
-  const dailyLessonDate = useUserDataStore((s) => s.dailyLessonDate);
-  // useTodayKey's return value is a re-render key in a DIFFERENT format
-  // ('2026-7-1', zero-based month) from the padded 'YYYY-MM-DD' the store writes.
-  // Call it for the midnight re-render, then build the real key to compare.
-  useTodayKey();
-  const today = todayStamp();
-  // THE GOAL IS IN LESSONS, NOT MINUTES.
-  //
-  // It was a 5-to-120-minute slider, and no screen in this app has ever timed a
-  // session — there is no clock on a lesson, nothing writes a duration, and there
-  // is nothing a minutes figure could have been compared against. Lessons are
-  // already counted, every day, by the free-tier gate (`dailyLessonCount`), so a
-  // goal expressed in lessons is one the app can actually measure you against.
-  const goal = settings.dailyGoalLessons;
-  const doneToday = dailyLessonDate === today ? dailyLessonCount : 0;
-  const met = doneToday >= goal;
-
-  return (
-    <Card>
-      <Header title="Learning" sub="Calibrate the pace of your practice." />
-      <View style={styles.hr} />
-      <View style={styles.goalRow}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.rowTitle}>Daily Goal</Text>
-          <Text style={styles.rowSub}>
-            {goal} {lessonsWord(goal)} a day
-          </Text>
-        </View>
-        <Text style={[styles.goalValue, met && { color: Ink, fontFamily: 'Inter_700Bold' }]}>
-          {met ? `${doneToday} / ${goal} ✓` : `${doneToday} / ${goal} today`}
-        </Text>
-      </View>
-      <Slider value={goal} onChange={(v) => setSetting('dailyGoalLessons', v)} min={1} max={10} step={1} />
-      <View style={styles.sliderEnds}>
-        <Text style={styles.endLabel}>1 lesson</Text>
-        <Text style={styles.endLabel}>10 lessons</Text>
-      </View>
-      <View style={[styles.hr, { marginTop: 18 }]} />
-      <Row title="Auto-advance" sub="Straight on to the next lesson in the unit" last>
-        <Toggle value={settings.autoAdvance} onChange={(v) => setSetting('autoAdvance', v)} />
-      </Row>
-    </Card>
-  );
-}
+// THE DAILY GOAL WENT FIRST, then auto-advance, and with it the section.
+//
+// The goal's one reader outside this screen was the dot row under the streak on
+// Home; that row was removed, which by §22 left a control writing a number nothing
+// displayed. Auto-advance went for a different reason: it was not decoration — it
+// worked, it was ON by default, and what it did was throw the reader into the next
+// lesson the instant they finished one, so the moment they had just earned went by
+// off-screen. Finishing a lesson now lands on the branch and plays the advance
+// instead, which is the thing the toggle was standing in front of.
+//
+// Both keys are removed from DEFAULT_SETTINGS as well, not just from this screen.
+// That is what lets sanitizeSettings() prune them from AsyncStorage and the cloud
+// snapshot — a key left behind in the defaults is re-adopted on every load and
+// pushed back up forever.
 
 /* ---------------- Privacy ---------------- */
 
@@ -1179,15 +1112,6 @@ const styles = StyleSheet.create({
   timePill: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, paddingHorizontal: 12, paddingVertical: 8 },
   timeText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: Ink },
 
-  // Slider
-  goalRow: { flexDirection: 'row', alignItems: 'center' },
-  goalValue: { fontFamily: 'Inter_500Medium', fontSize: 13, color: InkSoft },
-  sliderArea: { height: 28, justifyContent: 'center', marginTop: 14 },
-  sliderTrack: { position: 'absolute', left: 0, right: 0, height: 3, backgroundColor: InkFaint, borderRadius: 2 },
-  sliderFill: { position: 'absolute', left: 0, height: 3, backgroundColor: Ink, borderRadius: 2 },
-  sliderKnob: { position: 'absolute', width: 18, height: 18, marginLeft: -9, borderRadius: 3, backgroundColor: Ink },
-  sliderEnds: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
-  endLabel: { fontFamily: 'Inter_400Regular', fontSize: 11, color: InkSoft },
 
   // Segmented
   segmented: { flexDirection: 'row', borderWidth: 1.5, borderColor: Ink, borderRadius: 4, overflow: 'hidden' },

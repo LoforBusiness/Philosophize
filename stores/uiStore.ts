@@ -62,6 +62,22 @@ interface UIStore {
   // user taps back onto the Home tab.
   strollPlayed: boolean;
   markStrollPlayed: () => void;
+  // THE LESSON THAT WAS JUST FINISHED, handed to the branch screen so it can play
+  // the advance rather than simply appearing in its new state.
+  //
+  // It carries `unitId` and `seq` for reasons that are not obvious. `unitId`,
+  // because the branch screen must open the right unit and a lesson id alone does
+  // not say which unit holds it without a lookup the screen would have to repeat.
+  // `seq`, because finishing the SAME lesson twice (a replay, or a re-completion
+  // after the store was restored) is otherwise indistinguishable from the object
+  // it already has, and the animation would not re-arm.
+  //
+  // NOT persisted, deliberately: it describes one moment, and a celebration that
+  // survived a cold start would play to somebody who finished that lesson
+  // yesterday and has no idea what it is congratulating them for.
+  justFinished: { lessonId: string; unitId: string; branchSlug: string; seq: number } | null;
+  markLessonFinished: (v: { lessonId: string; unitId: string; branchSlug: string }) => void;
+  clearLessonFinished: () => void;
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -95,4 +111,8 @@ export const useUIStore = create<UIStore>((set) => ({
   setLaunchDone: (v) => set({ launchDone: v }),
   strollPlayed: false,
   markStrollPlayed: () => set({ strollPlayed: true }),
+  justFinished: null,
+  markLessonFinished: (v) =>
+    set((s) => ({ justFinished: { ...v, seq: (s.justFinished?.seq ?? 0) + 1 } })),
+  clearLessonFinished: () => set({ justFinished: null }),
 }));

@@ -6,11 +6,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  withDelay,
   withTiming,
   interpolate,
   interpolateColor,
   Easing,
   Extrapolation,
+  type SharedValue,
 } from 'react-native-reanimated';
 import { getBranchBySlug } from '@/data';
 import type { Path as Unit, Lesson } from '@/data/types';
@@ -21,6 +23,23 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { BRANCH_ART, MAST_SCRIM, ArtCream, ArtSoft, ArtGold } from '@/constants/branchArt';
+
+// ── THE ADVANCE, the thing you see after finishing a lesson ──────────────────
+//
+// Three beats, strictly in order and never overlapping (C22c): the dot you just
+// earned fills and takes its tick, the line runs down from it to the next lesson,
+// and the next lesson's title comes up out of grey into solid ink. That order is
+// the whole point — it reads as cause and effect rather than as a screen that
+// simply arrived already changed, which is what it used to do.
+//
+// It is expressed as one 0→1 value with three windows rather than three chained
+// timings, so there is exactly one clock to reason about and the phases cannot
+// drift apart.
+const CEL_MS = 1500;
+const CEL_DELAY = 380;          // let the push settle and the unit finish opening
+const CEL_DOT: [number, number] = [0.0, 0.28];
+const CEL_LINE: [number, number] = [0.3, 0.62];
+const CEL_WORD: [number, number] = [0.64, 1.0];
 
 const Page = '#F1EEE7';
 const Paper = '#FFFFFF';
@@ -148,6 +167,45 @@ export default function BranchDetailScreen() {
     setPinned(null);
   }, [firstIncomplete]);
 
+  // ── the advance ────────────────────────────────────────────────────────────
+  //
+  // `justFinished` is set by the reward screen the moment the reader presses
+  // Continue, and read here exactly once. The store is cleared straight away and
+  // the target kept in local state, so the animation is armed by an EVENT rather
+  // than by a value that lingers — otherwise a tab away and back would replay a
+  // celebration for a lesson finished ten minutes ago.
+  const justFinished = useUIStore((s) => s.justFinished);
+  const clearLessonFinished = useUIStore((s) => s.clearLessonFinished);
+  const cel = useSharedValue(0);
+  const [celTarget, setCelTarget] = useState<{ unitId: string; doneIndex: number } | null>(null);
+
+  useEffect(() => {
+    if (!justFinished || justFinished.branchSlug !== branchSlug) return;
+    const u = allUnits.find((x) => x.id === justFinished.unitId);
+    const idx = u ? u.lessons.findIndex((l) => l.id === justFinished.lessonId) : -1;
+    clearLessonFinished();
+    if (!u || idx < 0) return;
+
+    // Pin the unit they just worked in. Without this a lesson that COMPLETED its
+    // unit would slide the accordion to the next one before they saw the tick
+    // land — `firstIncomplete` has already moved by the time we get here.
+    setPinned(u.id);
+    setCelTarget({ unitId: u.id, doneIndex: idx });
+    cel.value = 0;
+    cel.value = withDelay(CEL_DELAY, withTiming(1, { duration: CEL_MS, easing: Easing.linear }));
+
+    // Bring the row into view on the same beat. The unit's y is not laid out yet
+    // on this pass, so this waits a frame rather than reading a stale zero.
+    const t = setTimeout(() => {
+      const y = unitY.current[u.id];
+      if (y != null) {
+        scroller.current?.scrollTo({ y: Math.max(0, listY.current + y - 10), animated: true });
+      }
+    }, 90);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [justFinished?.seq]);
+
   const toggleUnit = useCallback(
     (id: string) => {
       const wasOpen = pinned ?? firstIncomplete;
@@ -239,6 +297,8 @@ export default function BranchDetailScreen() {
                 model={u}
                 glyph={pres.glyph}
                 open={openId === u.unit.id}
+                cel={cel}
+                celDoneIndex={celTarget?.unitId === u.unit.id ? celTarget.doneIndex : null}
                 onToggle={() => toggleUnit(u.unit.id)}
                 onOpenLesson={(lesson) => openLesson(u.unit, lesson)}
                 onLockedPress={openPaywall}
@@ -264,6 +324,8 @@ function UnitCard({
   model,
   glyph,
   open,
+  cel,
+  celDoneIndex,
   onToggle,
   onOpenLesson,
   onLockedPress,
@@ -272,6 +334,10 @@ function UnitCard({
   model: UnitModel;
   glyph: GlyphName;
   open: boolean;
+  /** 0→1 advance clock, shared by the whole screen. */
+  cel: SharedValue<number>;
+  /** Index within THIS unit of the lesson just finished, or null if not this one. */
+  celDoneIndex: number | null;
   onToggle: () => void;
   onOpenLesson: (lesson: Lesson) => void;
   onLockedPress: () => void;
@@ -401,6 +467,18 @@ function UnitCard({
                 first={i === 0}
                 /* the line INTO this node is inked once the one before it is done */
                 reached={i > 0 && model.lessons[i - 1].state === 'done'}
+                cel={cel}
+                /* The finished lesson takes the tick; the one after it owns the
+                   line (a node's connector is the one ABOVE it) and the words. */
+                celRole={
+                  celDoneIndex == null
+                    ? null
+                    : i === celDoneIndex
+                      ? 'done'
+                      : i === celDoneIndex + 1
+                        ? 'next'
+                        : null
+                }
                 onPress={() => onOpenLesson(L.lesson)}
                 onLockedPress={onLockedPress}
               />
@@ -447,12 +525,17 @@ function LessonNode({
   model,
   first,
   reached,
+  cel,
+  celRole,
   onPress,
   onLockedPress,
 }: {
   model: LessonModel;
   first: boolean;
   reached: boolean;
+  cel: SharedValue<number>;
+  /** 'done' = the lesson just finished · 'next' = the one it just unlocked. */
+  celRole: 'done' | 'next' | null;
   onPress: () => void;
   onLockedPress: () => void;
 }) {
@@ -466,29 +549,86 @@ function LessonNode({
   // treatment as a real current lesson — just with the Pass behind it.
   const expanded = state === 'current' || gatedByPro;
 
+  // THE NODE IS ALREADY IN ITS FINISHED STATE when this screen mounts, because the
+  // completion was written before we navigated. So the animation does not change
+  // the layout — it only reveals what is already laid out. That matters: growing a
+  // node mid-flight would shove every row under it and the "line" would be chasing
+  // a moving target. Height is settled; only ink moves.
+  const dotStyle = useAnimatedStyle(() => {
+    if (celRole !== 'done') return {};
+    const e = interpolate(cel.value, CEL_DOT, [0, 1], Extrapolation.CLAMP);
+    return { opacity: e, transform: [{ scale: 0.72 + 0.28 * e }] };
+  });
+  // The OLD look of the finished node — the hollow current ring — held underneath
+  // and wiped out as the filled one arrives, so the change is a swap rather than a
+  // pop from nothing.
+  const ghostStyle = useAnimatedStyle(() => {
+    if (celRole !== 'done') return { opacity: 0 };
+    return { opacity: 1 - interpolate(cel.value, CEL_DOT, [0, 1], Extrapolation.CLAMP) };
+  });
+  // The line runs DOWNWARD out of the dot above it: scaled from its top edge, so
+  // it grows toward the next lesson rather than out of its own middle.
+  const connStyle = useAnimatedStyle(() => {
+    if (celRole !== 'next') return {};
+    return { transform: [{ scaleY: interpolate(cel.value, CEL_LINE, [0, 1], Extrapolation.CLAMP) }] };
+  });
+  const titleStyle = useAnimatedStyle(() => {
+    if (celRole !== 'next') return {};
+    const e = interpolate(cel.value, CEL_WORD, [0, 1], Extrapolation.CLAMP);
+    return { color: interpolateColor(e, [0, 1], [LockGray, Ink]) };
+  });
+  const bodyStyle = useAnimatedStyle(() => {
+    if (celRole !== 'next') return {};
+    return { opacity: interpolate(cel.value, CEL_WORD, [0, 1], Extrapolation.CLAMP) };
+  });
+
   return (
     <View style={styles.nodeBlock}>
-      {!first && <View style={[styles.conn, reached ? styles.connInk : styles.connFaint]} />}
+      {!first && (
+        <Animated.View
+          style={[
+            styles.conn,
+            reached ? styles.connInk : styles.connFaint,
+            celRole === 'next' && styles.connGrow,
+            connStyle,
+          ]}
+        />
+      )}
       <Pressable
         onPress={handlePress}
         disabled={!pressable}
         hitSlop={6}
         style={({ pressed }) => [styles.nodeTap, pressed && pressable && { opacity: 0.6 }]}
       >
-        <LessonDot state={state} gatedByPro={gatedByPro} />
-        <Text
+        {celRole === 'done' ? (
+          <View style={styles.dotSwap}>
+            <Animated.View style={[styles.dotSwapLayer, ghostStyle]}>
+              <View style={styles.dotCurrent}>
+                <View style={styles.dotCurrentPip} />
+              </View>
+            </Animated.View>
+            <Animated.View style={dotStyle}>
+              <LessonDot state={state} gatedByPro={gatedByPro} />
+            </Animated.View>
+          </View>
+        ) : (
+          <LessonDot state={state} gatedByPro={gatedByPro} />
+        )}
+
+        <Animated.Text
           style={[
             styles.nodeTitle,
             expanded && styles.nodeTitleCurrent,
             locked && !gatedByPro && { color: LockGray },
+            titleStyle,
           ]}
           numberOfLines={2}
         >
           {lesson.title}
-        </Text>
+        </Animated.Text>
 
         {expanded && (
-          <>
+          <Animated.View style={[styles.nodeExpand, bodyStyle]}>
             <Text style={styles.nodeDesc} numberOfLines={2}>
               {gatedByPro ? 'Locked until the earlier units are done' : lesson.description}
             </Text>
@@ -497,7 +637,7 @@ function LessonNode({
                 {gatedByPro ? 'UNLOCK' : '▶ START'}
               </Text>
             </View>
-          </>
+          </Animated.View>
         )}
       </Pressable>
     </View>
@@ -620,6 +760,17 @@ const styles = StyleSheet.create({
   conn: { width: 2, height: 26, borderRadius: 1 },
   connInk: { backgroundColor: Ink },
   connFaint: { backgroundColor: FaintLine },
+  // Grow from the TOP edge, so the line runs down out of the dot above it toward
+  // the lesson it is unlocking. Scaled about its centre it would open from the
+  // middle in both directions, which reads as a shutter rather than a path.
+  connGrow: { transformOrigin: '50% 0%' },
+  // The two dot looks are stacked so the old one can wipe out under the new one.
+  // The layer is absolute and centred, so swapping them cannot nudge the row.
+  dotSwap: { alignItems: 'center', justifyContent: 'center' },
+  dotSwapLayer: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
+  // The expanded half of a current node, wrapped so the advance can fade it in as
+  // one piece rather than animating the description and the button separately.
+  nodeExpand: { alignSelf: 'stretch', alignItems: 'center' },
   // paddingBottom is what keeps the line from starting flush against the last
   // line of the title — without it the two touch and the road looks like it is
   // struck through the words.
