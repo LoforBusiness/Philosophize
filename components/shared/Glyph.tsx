@@ -48,7 +48,15 @@ export type GlyphName =
   | 'drop'
   | 'amphora'
   | 'gate'
-  | 'dome';
+  | 'dome'
+  // Added for the badge set: five marks that had no stand-in worth reaching for.
+  // Every badge carries a DISTINCT glyph, so a near-miss ('mountain' for a ladder,
+  // 'ring' for a chain) would have been the one place two badges looked alike.
+  | 'ladder'
+  | 'ship'
+  | 'chain'
+  | 'owl'
+  | 'flower';
 
 interface GlyphProps {
   name: GlyphName;
@@ -460,6 +468,59 @@ export default function Glyph({ name, size = 28, color = '#1A1A1A' }: GlyphProps
           <>
             <Path {...s} d="M5 22 A11 11 0 0 1 27 22" />
             <Line {...s} x1={4} y1={22} x2={28} y2={22} />
+          </>
+        );
+      case 'ladder':
+        return (
+          <>
+            <Line {...s} x1={10} y1={4} x2={10} y2={28} />
+            <Line {...s} x1={22} y1={4} x2={22} y2={28} />
+            <Line {...s} x1={10} y1={9} x2={22} y2={9} />
+            <Line {...s} x1={10} y1={16} x2={22} y2={16} />
+            <Line {...s} x1={10} y1={23} x2={22} y2={23} />
+          </>
+        );
+      case 'ship':
+        return (
+          <>
+            <Path {...s} d="M4 19 L28 19 L24 26 L8 26 Z" />
+            <Line {...s} x1={16} y1={19} x2={16} y2={4} />
+            <Path {...s} d="M16 6 L25 17 L16 17 Z" />
+            <Path {...s} d="M16 9 L9 17 L16 17 Z" />
+          </>
+        );
+      case 'chain':
+        // Two links, descending — the great chain reads better on the diagonal
+        // than as two rings side by side, which just looks like a Venn diagram.
+        return (
+          <>
+            <Rect {...s} x={6} y={3} width={11} height={16} rx={5.5} />
+            <Rect {...s} x={15} y={13} width={11} height={16} rx={5.5} />
+          </>
+        );
+      case 'owl':
+        return (
+          <>
+            <Path {...s} d="M6 14 C6 6 26 6 26 14 C26 24 21 28.5 16 28.5 C11 28.5 6 24 6 14 Z" />
+            <Line {...s} x1={8} y1={10} x2={5.5} y2={5} />
+            <Line {...s} x1={24} y1={10} x2={26.5} y2={5} />
+            <Circle {...s} cx={12} cy={14} r={3.6} />
+            <Circle {...s} cx={20} cy={14} r={3.6} />
+            <Circle {...s} cx={12} cy={14} r={1.2} fill={color} />
+            <Circle {...s} cx={20} cy={14} r={1.2} fill={color} />
+            <Path {...s} d="M16 17.5 L14 20.5 L18 20.5 Z" />
+          </>
+        );
+      case 'flower':
+        return (
+          <>
+            <Circle {...s} cx={16} cy={7.7} r={4.2} />
+            <Circle {...s} cx={22.5} cy={12.4} r={4.2} />
+            <Circle {...s} cx={20} cy={20} r={4.2} />
+            <Circle {...s} cx={12} cy={20} r={4.2} />
+            <Circle {...s} cx={9.5} cy={12.4} r={4.2} />
+            <Circle {...s} cx={16} cy={14.5} r={2.4} fill={color} />
+            <Line {...s} x1={16} y1={24.6} x2={16} y2={29} />
           </>
         );
       default:

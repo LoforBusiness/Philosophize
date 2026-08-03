@@ -421,3 +421,48 @@ export const ALL_PHILOSOPHERS: Philosopher[] = RAW_PHILOSOPHERS.map((p) => {
 export function getPhilosopherById(id: string): Philosopher | undefined {
   return ALL_PHILOSOPHERS.find((p) => p.id === id);
 }
+
+// ─── Era grouping ────────────────────────────────────────────────────────────
+//
+// The twenty original thinkers predate the optional `category` field, so they
+// need this fallback map. It used to live inside the Thinkers screen, which was
+// fine while the screen was the only reader — but the badge that asks "have you
+// met someone from all five eras" has to group them exactly the way the screen
+// does, and a second copy of a lookup is a second copy that can drift. One map,
+// one function, both callers.
+
+export const ERA_GROUPS = ['ANCIENT', 'MEDIEVAL', 'MODERN', 'CONTEMPORARY', 'EASTERN'] as const;
+export type EraGroup = (typeof ERA_GROUPS)[number];
+
+const LEGACY_GROUP: Record<string, EraGroup> = {
+  socrates: 'ANCIENT',
+  plato: 'ANCIENT',
+  aristotle: 'ANCIENT',
+  epicurus: 'ANCIENT',
+  'marcus-aurelius': 'ANCIENT',
+  confucius: 'EASTERN',
+  'thomas-aquinas': 'MEDIEVAL',
+  'rene-descartes': 'MODERN',
+  'baruch-spinoza': 'MODERN',
+  'john-locke': 'MODERN',
+  'david-hume': 'MODERN',
+  'immanuel-kant': 'MODERN',
+  'jean-jacques-rousseau': 'MODERN',
+  'georg-hegel': 'MODERN',
+  'john-stuart-mill': 'MODERN',
+  'karl-marx': 'MODERN',
+  'friedrich-nietzsche': 'MODERN',
+  'ludwig-wittgenstein': 'CONTEMPORARY',
+  'jean-paul-sartre': 'CONTEMPORARY',
+  'simone-de-beauvoir': 'CONTEMPORARY',
+};
+
+/** Prefer the thinker's own `category`; fall back to the legacy map. */
+export const eraGroupOf = (p: Philosopher): EraGroup =>
+  (p.category as EraGroup | undefined) ?? LEGACY_GROUP[p.id] ?? 'MODERN';
+
+/** Same answer, by id — for callers that only hold the id (the badge stats). */
+export function eraGroupOfId(id: string): EraGroup | null {
+  const p = getPhilosopherById(id);
+  return p ? eraGroupOf(p) : null;
+}

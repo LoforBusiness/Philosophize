@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient as Scrim } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
-import { ALL_PHILOSOPHERS, type Philosopher } from '@/data/philosophers';
+import { ALL_PHILOSOPHERS, ERA_GROUPS, eraGroupOf, type Philosopher } from '@/data/philosophers';
 import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
 import { useUIStore } from '@/stores/uiStore';
 
@@ -66,28 +66,6 @@ const TREATMENT: Record<string, Treatment> = {
 };
 const treatmentOf = (group: string) => TREATMENT[group] ?? TREATMENT.MODERN;
 
-const GROUP: Record<string, string> = {
-  socrates: 'ANCIENT',
-  plato: 'ANCIENT',
-  aristotle: 'ANCIENT',
-  epicurus: 'ANCIENT',
-  'marcus-aurelius': 'ANCIENT',
-  confucius: 'EASTERN',
-  'thomas-aquinas': 'MEDIEVAL',
-  'rene-descartes': 'MODERN',
-  'baruch-spinoza': 'MODERN',
-  'john-locke': 'MODERN',
-  'david-hume': 'MODERN',
-  'immanuel-kant': 'MODERN',
-  'jean-jacques-rousseau': 'MODERN',
-  'georg-hegel': 'MODERN',
-  'john-stuart-mill': 'MODERN',
-  'karl-marx': 'MODERN',
-  'friedrich-nietzsche': 'MODERN',
-  'ludwig-wittgenstein': 'CONTEMPORARY',
-  'jean-paul-sartre': 'CONTEMPORARY',
-  'simone-de-beauvoir': 'CONTEMPORARY',
-};
 const COUNTRY: Record<string, string> = {
   socrates: 'Greece',
   plato: 'Greece',
@@ -111,7 +89,7 @@ const COUNTRY: Record<string, string> = {
   'simone-de-beauvoir': 'France',
 };
 
-const ORDER = ['ANCIENT', 'MEDIEVAL', 'MODERN', 'CONTEMPORARY', 'EASTERN'];
+const ORDER = [...ERA_GROUPS];
 const FILTERS = ['ALL', ...ORDER];
 
 /** One row of the flattened list: a section head, a pair of cards, or a tail piece. */
@@ -129,8 +107,9 @@ const shortestQuote = (p: Philosopher) =>
 const tagsOf = (p: Philosopher) => p.areas.slice(0, 3).map((a) => a.toUpperCase());
 
 // Prefer the data on each philosopher; fall back to the legacy maps for the
-// original entries that predate those fields.
-const groupOf = (p: Philosopher) => p.category ?? GROUP[p.id] ?? 'MODERN';
+// original entries that predate those fields. `eraGroupOf` lives in the data
+// layer now — the "all five eras" badge has to group them the same way.
+const groupOf = eraGroupOf;
 const countryOf = (p: Philosopher) => p.country ?? COUNTRY[p.id] ?? '';
 
 export default function ThinkersScreen() {

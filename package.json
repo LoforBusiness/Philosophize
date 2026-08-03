@@ -68,9 +68,10 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "check": "npx tsc --noEmit && node scripts/validate-lessons.mjs && node scripts/validate-cinematic.mjs",
+    "check": "npx tsc --noEmit && node scripts/validate-lessons.mjs && node scripts/validate-cinematic.mjs && node scripts/validate-badges.mjs",
     "check:cards": "node scripts/validate-lessons.mjs",
-    "check:cinematic": "node scripts/validate-cinematic.mjs"
+    "check:cinematic": "node scripts/validate-cinematic.mjs",
+    "check:badges": "node scripts/validate-badges.mjs"
   },
   "private": true
 }

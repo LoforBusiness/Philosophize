@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BADGES, type ProgressStats } from '@/data/badges';
+import { BADGES, isEarned, type BadgeDef, type ProgressStats } from '@/data/badges';
+import { eraGroupOfId } from '@/data/philosophers';
 import {
   ALL_BRANCHES,
   getLessonUnitInfo,
@@ -276,13 +277,27 @@ export function previewDailyActivity(
   };
 }
 
-function computeStats(s: {
+/** The slice of the store a badge can be judged from. */
+export interface StatSource {
   lessonsByBranch: Record<string, number>;
+  lessonsByUnit: Record<string, number>;
   savedQuotes: SavedQuote[];
   philosopherViews: Record<string, number>;
+  quizScores: Record<string, QuizScore>;
   streak: number;
   totalXP: number;
-}): ProgressStats {
+}
+
+/**
+ * THE ONE PLACE BADGE CONDITIONS ARE MEASURED.
+ *
+ * Exported because three callers need the same numbers and used to each build
+ * their own: the store (to award), the Ranks & Badges sheet (to display), and
+ * the reward screen (to preview what finishing WOULD earn). Three copies of one
+ * calculation is three chances for the grid to disagree with the pop-up about
+ * whether you have a badge.
+ */
+export function progressStats(s: StatSource): ProgressStats {
   const lessons = Object.values(s.lessonsByBranch).reduce((a, b) => a + b, 0);
   const quotes = s.savedQuotes.length;
   const philosophers = Object.keys(s.philosopherViews).length;
@@ -297,7 +312,80 @@ function computeStats(s: {
     const done = s.lessonsByBranch[b.slug] ?? 0;
     mastery[b.slug] = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
   }
-  return { totalXP, lessons, quotes, philosophers, streak: s.streak, mastery };
+
+  // Aced at least once. `best`/`total` are the RECORD, not the last attempt, so
+  // this cannot be lost by replaying a quiz badly.
+  const quizAces = Object.values(s.quizScores).filter(
+    (q) => q.total > 0 && q.best >= q.total,
+  ).length;
+
+  // Distinct eras among the thinkers actually opened. Grouped by the same
+  // function the Thinkers tab groups by — see data/philosophers.
+  const eras = new Set<string>();
+  for (const id of Object.keys(s.philosopherViews)) {
+    const g = eraGroupOfId(id);
+    if (g) eras.add(g);
+  }
+
+  // A quote carries the branches of the thinker it came from, so a single
+  // saved line can cover two.
+  const quoteBranches = new Set<string>();
+  for (const q of s.savedQuotes) for (const slug of q.branchSlugs ?? []) quoteBranches.add(slug);
+
+  const branchesTouched = Object.values(mastery).filter((v) => v > 0).length;
+  const branchesHalf = Object.values(mastery).filter((v) => v >= 50).length;
+
+  // A unit is finished when its completed count reaches its lesson count.
+  let unitsComplete = 0;
+  for (const b of ALL_BRANCHES) {
+    for (const p of b.paths) {
+      if (p.lessons.length > 0 && (s.lessonsByUnit[p.id] ?? 0) >= p.lessons.length) unitsComplete++;
+    }
+  }
+
+  return {
+    totalXP, lessons, quotes, philosophers, streak: s.streak, mastery,
+    quizAces, eras: eras.size, quoteBranches: quoteBranches.size,
+    branchesTouched, branchesHalf, unitsComplete,
+  };
+}
+
+/**
+ * WHICH BADGES FINISHING THIS LESSON WOULD EARN, without earning them.
+ *
+ * The reward screen shows the badge before the reader has pressed Continue, and
+ * nothing is written until they do (see `commit` there — a completion that banks
+ * itself on mount can be collected by killing the app, skipping the ad that pays
+ * for the free tier). So this builds the state the commit WOULD produce and asks
+ * the same question of it.
+ *
+ * It mirrors `recordLessonComplete` + `registerDailyActivity` exactly: the unit
+ * pointer moves by max(), the branch mirror is rebuilt from it, XP goes on, and
+ * the streak comes from `previewDailyActivity`. Anything that drifts here shows
+ * the reader a badge they do not get, or hides one they do.
+ */
+export function previewNewBadges(
+  s: UserDataState,
+  lessonId: string,
+  xpEarned: number,
+  streak: number,
+): BadgeDef[] {
+  // The one-time backfill has not run yet — everything would look "new".
+  if (!s.badgesInitialized) return [];
+  const info = getLessonUnitInfo(lessonId);
+  const lessonsByUnit = info
+    ? { ...s.lessonsByUnit, [info.unitId]: Math.max(s.lessonsByUnit[info.unitId] ?? 0, info.indexInUnit + 1) }
+    : s.lessonsByUnit;
+  const after = progressStats({
+    lessonsByUnit,
+    lessonsByBranch: branchCountsFromUnits(lessonsByUnit),
+    savedQuotes: s.savedQuotes,
+    philosopherViews: s.philosopherViews,
+    quizScores: s.quizScores,
+    streak,
+    totalXP: s.totalXP + xpEarned,
+  });
+  return BADGES.filter((b) => isEarned(b, after) && !s.earnedBadges.includes(b.id));
 }
 
 export const useUserDataStore = create<UserDataState>()(
@@ -533,8 +621,8 @@ export const useUserDataStore = create<UserDataState>()(
       // until the user makes new progress.
       recomputeBadges: () => {
         const state = get();
-        const stats = computeStats(state);
-        const now = BADGES.filter((b) => b.earned(stats)).map((b) => b.id);
+        const stats = progressStats(state);
+        const now = BADGES.filter((b) => isEarned(b, stats)).map((b) => b.id);
         // Only emit for badges earned through real progress — never the one-time
         // backfill that runs on first hydrate (badgesInitialized still false).
         const newlyEarned = state.badgesInitialized

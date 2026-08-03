@@ -1,23 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Modal,
   View,
   Text,
   Pressable,
   ScrollView,
+  FlatList,
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
 import { MotiView, AnimatePresence } from 'moti';
-import Glyph from './Glyph';
+import BadgeMedal from './BadgeMedal';
 import RankSeal, { type SealState } from './RankSeal';
 import RankClimbChart from './RankClimbChart';
 import { RANKS, awardedRank, rankProgress, rankRequirement, type RankDef } from '@/data/ranks';
 import { circleForRank, RANK_EPITHETS, toRoman } from '@/data/rankLore';
-import { BADGES, type ProgressStats } from '@/data/badges';
-import { ALL_BRANCHES } from '@/data';
+import {
+  BADGES, FAMILY_LABEL, FAMILY_ORDER, badgeCriterion, badgeProgress, badgeProgressLabel,
+  isEarned, type BadgeDef, type BadgeFamily, type ProgressStats,
+} from '@/data/badges';
 import { useUIStore } from '@/stores/uiStore';
-import { useUserDataStore } from '@/stores/userDataStore';
+import { useUserDataStore, progressStats } from '@/stores/userDataStore';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -28,8 +31,127 @@ const Lock = '#8A93A0';
 const RowTint = '#F1EFE7';
 
 const ROW_H = 78;
+const BADGE_GAP = 10;
+const MEDAL = 66;
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
+
+// ─── The badge case ──────────────────────────────────────────────────────────
+
+type BadgeRow =
+  | { k: string; type: 'head'; family: BadgeFamily; done: number; total: number }
+  | { k: string; type: 'row'; items: BadgeDef[] };
+
+/**
+ * Flatten the fifty into headers and three-across rows.
+ *
+ * Grouped by family rather than run together in one wall, because the families
+ * are what the six silhouettes are FOR — a grid that mixes them shows the reader
+ * six shapes with no key, and a grid that groups them is the key.
+ *
+ * Within a family the order is the authored one (easiest first), NOT
+ * earned-first: the next one to go after should be visible right where you left
+ * off, and a list that reshuffles itself as you earn things loses that.
+ */
+function buildBadgeRows(stats: ProgressStats): BadgeRow[] {
+  const out: BadgeRow[] = [];
+  for (const family of FAMILY_ORDER) {
+    const list = BADGES.filter((b) => b.family === family);
+    if (!list.length) continue;
+    out.push({
+      k: `h-${family}`,
+      type: 'head',
+      family,
+      done: list.filter((b) => isEarned(b, stats)).length,
+      total: list.length,
+    });
+    for (let i = 0; i < list.length; i += 3) {
+      out.push({ k: `r-${family}-${i}`, type: 'row', items: list.slice(i, i + 3) });
+    }
+  }
+  return out;
+}
+
+/** One medal in the case: the mark, its name, and — if locked — how far off. */
+function BadgeCell({
+  badge, stats, width, onPress,
+}: {
+  badge: BadgeDef;
+  stats: ProgressStats;
+  width: number;
+  onPress: () => void;
+}) {
+  const earned = isEarned(badge, stats);
+  const pct = badgeProgress(badge, stats);
+  return (
+    <Pressable onPress={onPress} style={[styles.cell, { width }]} hitSlop={4}>
+      <BadgeMedal
+        family={badge.family}
+        tier={badge.tier}
+        glyph={badge.glyph}
+        earned={earned}
+        size={MEDAL}
+      />
+      <Text style={[styles.cellName, !earned && styles.cellNameLocked]} numberOfLines={2}>
+        {badge.name}
+      </Text>
+      {/* Only the locked ones carry a bar. An earned badge showing "50 / 50" is
+          noise, and it is the unearned ones that the reader is deciding about. */}
+      {!earned && (
+        <View style={styles.cellTrack}>
+          <View style={[styles.cellFill, { width: `${Math.max(pct * 100, pct > 0 ? 6 : 0)}%` }]} />
+        </View>
+      )}
+    </Pressable>
+  );
+}
+
+/** A single badge, treated as a page — the same move the ranks tab makes. */
+function BadgeDetail({
+  badge, stats, onBack,
+}: {
+  badge: BadgeDef;
+  stats: ProgressStats;
+  onBack: () => void;
+}) {
+  const earned = isEarned(badge, stats);
+  return (
+    <View style={styles.detailInner}>
+      <Pressable onPress={onBack} hitSlop={10} style={styles.detailBack}>
+        <Text style={styles.detailBackText}>← All badges</Text>
+      </Pressable>
+
+      <View style={styles.detailSealWrap}>
+        <BadgeMedal
+          family={badge.family}
+          tier={badge.tier}
+          glyph={badge.glyph}
+          earned={earned}
+          size={168}
+        />
+      </View>
+
+      <Text style={styles.detailKicker}>
+        {FAMILY_LABEL[badge.family]} · TIER {toRoman(badge.tier)}
+      </Text>
+      <Text style={styles.detailName}>{badge.name}</Text>
+      <Text style={styles.detailEpithet}>{badge.caption}</Text>
+
+      <View style={styles.detailDivider} />
+
+      <View style={styles.detailRowItem}>
+        <Text style={styles.detailLabel}>CRITERION</Text>
+        <Text style={styles.detailValue}>{badgeCriterion(badge)}</Text>
+      </View>
+      <View style={styles.detailRowItem}>
+        <Text style={styles.detailLabel}>PROGRESS</Text>
+        <Text style={[styles.detailValue, !earned && { color: Lock }]}>
+          {earned ? '✓ Struck' : badgeProgressLabel(badge, stats)}
+        </Text>
+      </View>
+    </View>
+  );
+}
 
 // rank position i (0-based) vs the current rank index → its seal state
 function stateFor(i: number, currentIndex: number): SealState {
@@ -45,6 +167,8 @@ export default function RanksBadgesSheet() {
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const philosopherViews = useUserDataStore((s) => s.philosopherViews);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
+  const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
+  const quizScores = useUserDataStore((s) => s.quizScores);
   const streak = useUserDataStore((s) => s.streak);
   const xp = useUserDataStore((s) => s.totalXP);
   const rankIndex = useUserDataStore((s) => s.rankIndex);
@@ -56,6 +180,7 @@ export default function RanksBadgesSheet() {
   const [visible, setVisible] = useState(false);
   const [tab, setTab] = useState<'ranks' | 'badges'>('ranks');
   const [selected, setSelected] = useState<RankDef | null>(null);
+  const [selectedBadge, setSelectedBadge] = useState<BadgeDef | null>(null);
   const spineRef = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -63,35 +188,35 @@ export default function RanksBadgesSheet() {
       setTab(tabReq);
       setVisible(true);
       setSelected(null);
+      setSelectedBadge(null);
     }
   }, [tabReq]);
 
-  if (!visible) return null;
-
-  // Progress snapshot (same XP formula as the profile).
-  const lessons = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
-  const quotes = savedQuotes.length;
-  const philosophers = Object.keys(philosopherViews).length;
-  // Just the store's total: saving a quote and meeting a thinker grant real XP now,
-  // so adding them again here paid for the same bookmark twice.
+  // The one shared measurement. This screen used to build its own copy of the
+  // badge stats, which is how it came to be measuring `totalXP` differently from
+  // the store that awards them.
   const totalXP = xp;
-  const mastery: Record<string, number> = {};
-  for (const b of ALL_BRANCHES) {
-    const total = b.paths.reduce((acc, p) => acc + p.lessons.length, 0);
-    const done = lessonsByBranch[b.slug] ?? 0;
-    mastery[b.slug] = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
-  }
-  const stats: ProgressStats = { totalXP, lessons, quotes, philosophers, streak, mastery };
+  const stats: ProgressStats = useMemo(
+    () => progressStats({
+      lessonsByBranch, lessonsByUnit, savedQuotes, philosopherViews, quizScores, streak, totalXP,
+    }),
+    [lessonsByBranch, lessonsByUnit, savedQuotes, philosopherViews, quizScores, streak, totalXP],
+  );
+
+  // Rows for the badge grid: a header per family, then its medals three across.
+  // A FlatList, not a ScrollView — fifty medals is a hundred SVG views, and this
+  // app has already paid once for building every row before it would scroll.
+  const badgeRows = useMemo(() => buildBadgeRows(stats), [stats]);
+
+  if (!visible) return null;
 
   const { current, next, index, pending } = awardedRank(rankIndex, totalXP);
   const prevXP = current.xp;
   const span = next ? next.xp - prevXP : 1;
   const rankPct = next ? clamp((totalXP - prevXP) / span, 0, 1) : 1;
   const toNext = next ? Math.max(0, next.xp - totalXP) : 0;
-  const earnedCount = BADGES.filter((b) => b.earned(stats)).length;
-
-  const badgeCols = clamp(Math.floor((width - 32) / 96), 4, 7);
-  const badgeW = (width - 32 - (badgeCols - 1) * 8) / badgeCols;
+  const earnedCount = BADGES.filter((b) => isEarned(b, stats)).length;
+  const badgeW = (width - 32 - 2 * BADGE_GAP) / 3;
 
   // Centre the spine on the current rank shortly after opening.
   const onSpineLayout = () => {
@@ -220,21 +345,55 @@ export default function RanksBadgesSheet() {
                 </>
               ) : (
                 <>
-                  <Text style={styles.earnedLine}>{earnedCount} of {BADGES.length} badges earned</Text>
-                  <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.grid} showsVerticalScrollIndicator={false}>
-                    {BADGES.map((b) => {
-                      const earned = b.earned(stats);
-                      return (
-                        <View key={b.id} style={[styles.badgeCard, { width: badgeW }, !earned && styles.badgeLocked]}>
-                          {earned && <Text style={styles.check}>✓</Text>}
-                          <Glyph name={b.glyph} size={22} color={earned ? Ink : InkFaint} />
-                          <Text style={[styles.badgeName, { color: earned ? Ink : InkFaint }]} numberOfLines={2}>
-                            {b.name}
-                          </Text>
+                  {/* A struck count, and how much of the case is filled. */}
+                  <View style={styles.caseHead}>
+                    <Text style={styles.caseCount}>
+                      {earnedCount}
+                      <Text style={styles.caseOf}> / {BADGES.length}</Text>
+                    </Text>
+                    <View style={styles.caseBarWrap}>
+                      <Text style={styles.caseLabel}>STRUCK</Text>
+                      <View style={styles.caseTrack}>
+                        <View style={[styles.caseFill, { width: `${(earnedCount / BADGES.length) * 100}%` }]} />
+                      </View>
+                    </View>
+                  </View>
+
+                  <FlatList
+                    style={{ flex: 1 }}
+                    data={badgeRows}
+                    keyExtractor={(r) => r.k}
+                    contentContainerStyle={styles.grid}
+                    showsVerticalScrollIndicator={false}
+                    initialNumToRender={7}
+                    windowSize={7}
+                    renderItem={({ item }) =>
+                      item.type === 'head' ? (
+                        <View style={styles.famHead}>
+                          <Text style={styles.famTitle}>{FAMILY_LABEL[item.family]}</Text>
+                          <View style={styles.famRule} />
+                          <Text style={styles.famCount}>{item.done} / {item.total}</Text>
                         </View>
-                      );
-                    })}
-                  </ScrollView>
+                      ) : (
+                        <View style={styles.gridRow}>
+                          {item.items.map((b) => (
+                            <BadgeCell
+                              key={b.id}
+                              badge={b}
+                              stats={stats}
+                              width={badgeW}
+                              onPress={() => setSelectedBadge(b)}
+                            />
+                          ))}
+                          {/* Hold the last row's columns so two medals don't spread. */}
+                          {item.items.length < 3 &&
+                            Array.from({ length: 3 - item.items.length }, (_, i) => (
+                              <View key={`pad${i}`} style={{ width: badgeW }} />
+                            ))}
+                        </View>
+                      )
+                    }
+                  />
                 </>
               )}
             </View>
@@ -251,6 +410,18 @@ export default function RanksBadgesSheet() {
                   style={styles.detail}
                 >
                   <RankDetail rank={selected} currentIndex={index} totalXP={totalXP} onBack={() => setSelected(null)} />
+                </MotiView>
+              )}
+              {selectedBadge && (
+                <MotiView
+                  key="badge-detail"
+                  from={{ opacity: 0, translateY: 24 }}
+                  animate={{ opacity: 1, translateY: 0 }}
+                  exit={{ opacity: 0, translateY: 24 }}
+                  transition={{ type: 'timing', duration: 240 }}
+                  style={styles.detail}
+                >
+                  <BadgeDetail badge={selectedBadge} stats={stats} onBack={() => setSelectedBadge(null)} />
                 </MotiView>
               )}
             </AnimatePresence>
@@ -399,23 +570,32 @@ const styles = StyleSheet.create({
   tagDone: { fontFamily: 'Inter_700Bold', fontSize: 8.5, color: InkSoft, letterSpacing: 0.5 },
   tagNext: { fontFamily: 'Inter_700Bold', fontSize: 9, color: Ink, letterSpacing: 1, borderWidth: 1.5, borderColor: Ink, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
 
-  earnedLine: { fontFamily: 'Inter_400Regular', fontSize: 11, color: InkSoft, letterSpacing: 1, marginBottom: 12 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10, paddingBottom: 30 },
-  badgeCard: {
-    minHeight: 92,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 4,
-    backgroundColor: Paper,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-    gap: 8,
+  // ── the badge case ──────────────────────────────────────────────────────
+  caseHead: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 14 },
+  caseCount: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 30, color: Ink, includeFontPadding: false },
+  caseOf: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 19, color: InkSoft },
+  caseBarWrap: { flex: 1 },
+  caseLabel: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 2.2, color: InkSoft, marginBottom: 5 },
+  caseTrack: { height: 7, borderRadius: 4, backgroundColor: Track, overflow: 'hidden' },
+  caseFill: { height: 7, borderRadius: 4, backgroundColor: Ink },
+
+  grid: { paddingBottom: 34 },
+  famHead: { flexDirection: 'row', alignItems: 'center', gap: 9, marginTop: 20, marginBottom: 8 },
+  famTitle: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 2, color: Ink },
+  famRule: { flex: 1, height: 1, backgroundColor: InkFaint },
+  famCount: { fontFamily: 'Inter_500Medium', fontSize: 9.5, color: InkSoft, fontVariant: ['tabular-nums'] },
+
+  gridRow: { flexDirection: 'row', gap: BADGE_GAP, marginBottom: 4 },
+  // NO BOX AROUND THE MEDAL. The six silhouettes are the whole point, and a
+  // border round each one puts a seventh shape on top of the six.
+  cell: { alignItems: 'center', paddingTop: 6, paddingBottom: 10 },
+  cellName: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 12, letterSpacing: 0.2,
+    color: Ink, textAlign: 'center', marginTop: 7,
   },
-  badgeLocked: { borderColor: InkFaint, opacity: 0.7 },
-  check: { position: 'absolute', top: 5, right: 7, fontFamily: 'Inter_700Bold', fontSize: 10, color: Ink },
-  badgeName: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.3, textAlign: 'center' },
+  cellNameLocked: { color: Lock, fontFamily: 'Inter_500Medium' },
+  cellTrack: { width: 40, height: 3, borderRadius: 2, backgroundColor: Track, marginTop: 6, overflow: 'hidden' },
+  cellFill: { height: 3, borderRadius: 2, backgroundColor: Lock },
 
   // detail overlay
   detail: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: Paper, borderTopLeftRadius: 28, borderTopRightRadius: 28 },

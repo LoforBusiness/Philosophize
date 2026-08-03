@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import Glyph from '@/components/shared/Glyph';
+import BadgeMedal from '@/components/shared/BadgeMedal';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { ProfileArtFill, ProfileAvatar, useProfileArt } from '@/components/shared/ProfileArt';
@@ -174,13 +175,27 @@ export default function ProfileScreen() {
   const join = joinedAt ? new Date(joinedAt) : new Date();
   const joinedLabel = `JOINED ${MONTHS[join.getMonth()]} ${join.getFullYear()}`;
 
-  // First eight of the shared badge set, earned-state from the persisted store.
-  const badges = BADGES.slice(0, 8).map((b) => ({
-    id: b.id,
-    name: b.name,
-    glyph: b.glyph,
-    earned: earnedBadges.includes(b.id),
-  }));
+  // A TROPHY SHELF, NOT THE FIRST EIGHT.
+  //
+  // This used to be `BADGES.slice(0, 8)` — the same eight for everybody, mostly
+  // locked, and since the set is grouped by family now those eight would all be
+  // one shape. What belongs on a profile is what the reader has actually won, so:
+  // most recently struck first, then the next ones up.
+  //
+  // `earnedBadges` is appended to in earn order by `recomputeBadges` (it merges
+  // the existing list ahead of the newly qualifying ones), so reversing it is a
+  // good-enough "most recent". Falling back to canonical order if the store's
+  // order is ever disturbed costs nothing, since either way these are all badges
+  // they hold.
+  const earnedFirst = earnedBadges
+    .slice()
+    .reverse()
+    .map((id) => BADGES.find((b) => b.id === id))
+    .filter((b): b is (typeof BADGES)[number] => !!b);
+  const upNext = BADGES.filter((b) => !earnedBadges.includes(b.id));
+  const badges = [...earnedFirst, ...upNext]
+    .slice(0, 8)
+    .map((b) => ({ ...b, earned: earnedBadges.includes(b.id) }));
 
   function handleSignOut() {
     Alert.alert('Account', 'Sign out of Philosophize?', [
@@ -401,16 +416,19 @@ export default function ProfileScreen() {
           <SectionLabel>BADGES EARNED</SectionLabel>
           <Pressable style={styles.badgeGrid} onPress={() => openRanksBadges('badges')}>
             {badges.map((b) => (
-              <View
-                key={b.id}
-                style={[styles.badge, !b.earned && styles.badgeLocked]}
-              >
-                <Glyph name={b.glyph} size={22} color={b.earned ? Ink : InkFaint} />
+              <View key={b.id} style={styles.badge}>
+                <BadgeMedal
+                  family={b.family}
+                  tier={b.tier}
+                  glyph={b.glyph}
+                  earned={b.earned}
+                  size={BADGE_W - 12}
+                />
                 <Text
-                  style={[styles.badgeLabel, !b.earned && { color: InkFaint }]}
+                  style={[styles.badgeLabel, !b.earned && styles.badgeLabelLocked]}
                   numberOfLines={2}
                 >
-                  {b.name.toUpperCase()}
+                  {b.name}
                 </Text>
               </View>
             ))}
@@ -623,20 +641,16 @@ const styles = StyleSheet.create({
   quotesChev: { transform: [{ scaleX: -1 }], opacity: 0.7 },
 
   badgeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  badge: {
-    width: BADGE_W,
-    minHeight: 70,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-    gap: 8,
+  // No border: the medal already has an outline, and a box around it just puts a
+  // seventh shape on top of the six that carry the meaning.
+  badge: { width: BADGE_W, alignItems: 'center', paddingVertical: 4, gap: 5 },
+  badgeLabel: {
+    fontFamily: 'Inter_700Bold', fontSize: 7.5, lineHeight: 10, color: Ink,
+    letterSpacing: 0.2, textAlign: 'center',
   },
-  badgeLocked: { borderColor: InkFaint, opacity: 0.7 },
-  badgeLabel: { fontFamily: 'Inter_700Bold', fontSize: 8, color: Ink, letterSpacing: 0.5, textAlign: 'center' },
+  // The same cool slate BadgeMedal draws a locked medal in, so the name and the
+  // mark under it are unmistakably one greyed-out object.
+  badgeLabelLocked: { color: '#AAB1BC', fontFamily: 'Inter_500Medium' },
 
   signOut: { alignSelf: 'center', marginTop: 30, padding: 10 },
   signOutText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: InkSoft },

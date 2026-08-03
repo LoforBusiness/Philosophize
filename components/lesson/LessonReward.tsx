@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Modal, View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
+import { Modal, View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import Animated, {
   useSharedValue, useAnimatedStyle, withDelay, withTiming, Easing,
@@ -8,9 +8,11 @@ import StreakBook from '@/components/gamification/StreakBook';
 import StreakWeek from '@/components/gamification/StreakWeek';
 import RankUpScreen from '@/components/gamification/RankUpScreen';
 import RewardLoafer, { pickLine } from '@/components/gamification/RewardLoafer';
+import BadgeEarned, { BadgeEarnedHeading } from '@/components/gamification/BadgeEarned';
 import { RANKS, rankForXP, type RankDef } from '@/data/ranks';
+import type { BadgeDef } from '@/data/badges';
 import { getLessonUnitInfo } from '@/data';
-import { useUserDataStore, previewDailyActivity } from '@/stores/userDataStore';
+import { useUserDataStore, previewDailyActivity, previewNewBadges } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { ads } from '@/lib/ads';
@@ -163,6 +165,9 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   // frame before we know whether it has been pre-empted.
   const [phase, setPhase] = useState<'pending' | 'rankup' | 'reward'>('pending');
   const [rankUp, setRankUp] = useState<{ from: RankDef; to: RankDef; next: RankDef | null; totalXP: number } | null>(null);
+  // Badges finishing WOULD earn. Like the streak and the rank above, worked out
+  // without writing any of it — see previewNewBadges.
+  const [badges, setBadges] = useState<BadgeDef[]>([]);
 
   // Has this free user used up today's allowance? The daily count is NOT bumped
   // until they press the button, so this lesson is not in it yet — hence the + 1.
@@ -274,14 +279,22 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     } else {
       setPhase('reward');
     }
-    setInfo(
-      previewDailyActivity(
-        st.lastLessonDate,
-        st.streak,
-        dateStr(new Date()),
-        dateStr(new Date(Date.now() - 86_400_000)),
-      ),
+    const day = previewDailyActivity(
+      st.lastLessonDate,
+      st.streak,
+      dateStr(new Date()),
+      dateStr(new Date(Date.now() - 86_400_000)),
     );
+    setInfo(day);
+    // The streak comes from `day`, not from the store: several badges are keyed
+    // on it, and this lesson is very often the one that moves it. Reading the
+    // stored value would hold back the badge until the lesson AFTER the one that
+    // actually earned it.
+    //
+    // Three at most. Finishing a single lesson can trip a lesson count, an XP
+    // milestone and a unit at once; beyond three the reward screen stops being a
+    // reward and becomes a list, and the rest are all still in the Badges tab.
+    setBadges(previewNewBadges(st, lessonId, xp, day.streak).slice(0, 3));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -297,6 +310,11 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     ...(perfect ? [{ label: 'NOTHING MISSED', amount: XP_PER_PERFECT_LESSON }] : []),
   ];
   const tallyAdds = parts.reduce((a, p) => a + p.amount, 0) === xp;
+
+  // Come in behind whatever is actually on screen: the full streak ceremony runs
+  // to ~2s, the one-line version is done immediately. A fixed delay would leave
+  // dead air on the days the reader has already played.
+  const badgeBase = info?.firstOfDay ? 2050 : 1450;
 
   // One frame of bare paper while the completion effect decides which screen this
   // is. Painting the reward first would flash XP behind a rank-up.
@@ -325,7 +343,16 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   return (
     <Modal visible animationType="fade" transparent={false} onRequestClose={handleContinue}>
       <View style={styles.root}>
-        <View style={styles.center}>
+        {/* SCROLLS ONLY WHEN IT HAS TO. `flexGrow` + centred content keeps the
+            unchanged screen exactly where it was, but a 104px number, a
+            three-line tally, the streak week AND up to three badge cards do not
+            fit a short phone — and this view has no overflow, so the surplus
+            would have been silently cropped rather than reachable. */}
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.center}
+          showsVerticalScrollIndicator={false}
+        >
           <Text style={styles.eyebrow}>LESSON COMPLETE</Text>
           <DrawnRule delay={120} width={54} />
 
@@ -369,7 +396,17 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
                 <Text style={styles.streakSmall}>{info.streak}-day streak</Text>
               </View>
             ))}
-        </View>
+
+          {/* …and anything the lesson just struck. */}
+          {badges.length > 0 && (
+            <View style={styles.badges}>
+              <BadgeEarnedHeading count={badges.length} delay={badgeBase} />
+              {badges.map((b, k) => (
+                <BadgeEarned key={b.id} badge={b} delay={badgeBase + 150 + k * 520} />
+              ))}
+            </View>
+          )}
+        </ScrollView>
 
         {/* Someone is waiting for you to finish reading. */}
         <View style={styles.loaferRow}>
@@ -396,7 +433,9 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     paddingTop: 56,
   },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  scroll: { flex: 1 },
+  center: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 6 },
+  badges: { alignSelf: 'stretch', marginTop: 4 },
 
   eyebrow: {
     fontFamily: 'Inter_700Bold',
