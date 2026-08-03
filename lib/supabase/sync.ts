@@ -1,5 +1,5 @@
 import { supabase } from './client';
-import { useUserDataStore, type SavedQuote, type ProfileQuote, type AppSettings } from '@/stores/userDataStore';
+import { useUserDataStore, type SavedQuote, type ProfileQuote, type AppSettings, type XpEvent } from '@/stores/userDataStore';
 import { branchCountsFromUnits, unitsFromBranchCounts } from '@/data';
 
 // The slice of userDataStore mirrored to the cloud — matches the store's
@@ -14,6 +14,7 @@ export interface CloudState {
   beliefResultId: string | null;
   streak: number;
   totalXP: number;
+  xpEvents: XpEvent[];
   rankIndex: number;
   lastLessonDate: string | null;
   joinedAt: number | null;
@@ -30,7 +31,7 @@ export interface CloudState {
 
 const SYNC_FIELDS: (keyof CloudState)[] = [
   'savedQuotes', 'profileQuote', 'philosopherViews', 'lessonsByUnit', 'lessonsByBranch', 'voiceEnabled', 'beliefResultId',
-  'streak', 'totalXP', 'rankIndex', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'badgesInitialized',
+  'streak', 'totalXP', 'xpEvents', 'rankIndex', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'badgesInitialized',
   'displayName', 'email', 'bio', 'portrait', 'profileBackground', 'nameFont', 'settings',
 ];
 
@@ -48,6 +49,12 @@ export function snapshotLocal(): CloudState {
   out.email = capStr(out.email, 254);
   if (Array.isArray(out.savedQuotes) && out.savedQuotes.length > 5000) {
     out.savedQuotes = out.savedQuotes.slice(0, 5000);
+  }
+  // The store already caps this, and so does the merge. Bounded a third time here
+  // for the reason this function exists: a corrupt or hand-edited local blob must
+  // not be able to push an unbounded array into its own row.
+  if (Array.isArray(out.xpEvents) && out.xpEvents.length > XP_EVENTS_CAP) {
+    out.xpEvents = out.xpEvents.slice(out.xpEvents.length - XP_EVENTS_CAP);
   }
   return out as CloudState;
 }
@@ -123,6 +130,33 @@ function mergeQuotes(a: SavedQuote[] = [], b: SavedQuote[] = []): SavedQuote[] {
   return Array.from(byId.values()).sort((x, y) => (y.savedAt ?? 0) - (x.savedAt ?? 0));
 }
 
+/**
+ * Two logs of the same climb, interleaved in time.
+ *
+ * The entries are TOTALS, not deltas, so this cannot double-count: the same
+ * moment recorded on two devices is one point, and a point only appears twice if
+ * the totals genuinely differed. Deduped on the timestamp, which is also what
+ * keeps a repeated sync from growing the log every round trip.
+ *
+ * Trimmed to the same cap the store uses. It has to be trimmed HERE as well as
+ * there — a merge of two full logs is twice the cap, and the whole point of the
+ * bound is that this array goes into the cloud snapshot on every sync.
+ */
+function mergeXpEvents(a: XpEvent[] = [], b: XpEvent[] = []): XpEvent[] {
+  const byT = new Map<number, XpEvent>();
+  for (const e of [...a, ...b]) {
+    if (!e || !Number.isFinite(e.t) || !Number.isFinite(e.v)) continue;
+    const prev = byT.get(e.t);
+    // Same instant on both sides: keep the higher total, matching the
+    // never-lose-progress rule the XP and rank merges already follow.
+    if (!prev || e.v > prev.v) byT.set(e.t, { t: e.t, v: e.v });
+  }
+  const out = Array.from(byT.values()).sort((x, y) => x.t - y.t);
+  return out.length > XP_EVENTS_CAP ? out.slice(out.length - XP_EVENTS_CAP) : out;
+}
+
+const XP_EVENTS_CAP = 200;
+
 const DEFAULT_NAME = 'Philosopher';
 const DEFAULT_PORTRAIT = 'overthinker';
 
@@ -163,6 +197,7 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
   // Same rule as XP: keep the higher, so a device that is behind can never demote
   // a rank the user has already been awarded on another one.
   const rankIndex = Math.max(local.rankIndex ?? 0, remote.rankIndex ?? 0);
+  const xpEvents = mergeXpEvents(local.xpEvents, remote.xpEvents);
   // Per-unit progress is canonical. A legacy cloud row only has lessonsByBranch;
   // reconstruct its per-unit shape before merging so old snapshots still count.
   const remoteUnits =
@@ -240,6 +275,7 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
     beliefResultId,
     streak,
     totalXP,
+    xpEvents,
     rankIndex,
     lastLessonDate,
     joinedAt,

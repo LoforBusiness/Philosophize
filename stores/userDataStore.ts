@@ -131,33 +131,63 @@ function sanitizeSettings(stored: unknown): AppSettings {
 }
 
 /**
- * A RUNNING TOTAL PER DAY, which is what a climb chart needs and what nothing in
- * this app recorded until now.
+ * ONE ENTRY PER THING EARNED, which is what makes the climb move when you earn
+ * rather than once a day.
  *
- * `weekDays` fakes its history: it infers which days were "done" from the streak
- * counter, because no per-day figure was ever stored. That is fine for seven dots
- * and useless for a chart, so the Ranks sheet's climb is drawn from this.
+ * This replaces `xpByDay`, a map of YYYY-MM-DD → total at the end of that day. A
+ * day map can only ever step once per calendar day, so a reader who finished six
+ * lessons in an evening saw one point, and a reader on their first day saw no
+ * line at all — there is nothing to draw between a single point and itself. The
+ * chart is meant to show the climb toward the next rank, and the climb happens
+ * per lesson, not per midnight.
  *
- * Each entry is the TOTAL XP AT THE END OF THAT DAY, not the day's earnings — a
- * snapshot rather than a delta. Snapshots are self-correcting: if a write is ever
- * missed the line has one flat day and then recovers, where a missed delta would
- * offset every later point permanently.
+ * Each entry is the TOTAL AFTER that event, not the amount earned — a snapshot
+ * rather than a delta, for the reason the day map gave: snapshots are
+ * self-correcting. Miss a write and the line has one longer step and then
+ * recovers; miss a delta and every later point is permanently offset.
  *
- * Capped at XP_DAYS because this slice is mirrored to Supabase on every sync (§4)
- * and an unbounded map would grow the snapshot forever.
+ * `t` is wall-clock ms. It is NOT the x-axis — the chart spaces events evenly, so
+ * each thing earned is one step of equal width — but it is what lets the chart
+ * date the ends of the climb, and what lets two devices' logs be merged in order.
+ *
+ * CAPPED, because this slice is mirrored to Supabase on every sync (§4) and an
+ * unbounded array would grow the snapshot forever. 200 entries is roughly 5KB and
+ * comfortably more than one rank band's worth of earning.
  */
-const XP_DAYS = 60;
-
-function xpDayKey(d = new Date()): string {
-  const p = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+export interface XpEvent {
+  t: number; // epoch ms
+  v: number; // total XP after this event
 }
 
-function stampXP(byDay: Record<string, number> | undefined, newTotal: number): Record<string, number> {
-  const out: Record<string, number> = { ...(byDay ?? {}), [xpDayKey()]: newTotal };
-  const keys = Object.keys(out).sort();
-  for (const k of keys.slice(0, Math.max(0, keys.length - XP_DAYS))) delete out[k];
-  return out;
+const XP_EVENTS_MAX = 200;
+
+function stampEvent(events: XpEvent[] | undefined, newTotal: number, now = Date.now()): XpEvent[] {
+  const prev = events ?? [];
+  const last = prev[prev.length - 1];
+  // Nothing actually moved — a bookmark toggled on and off nets zero, and two
+  // identical points would draw a step of no height.
+  if (last && last.v === newTotal) return prev;
+  const out = [...prev, { t: now, v: newTotal }];
+  return out.length > XP_EVENTS_MAX ? out.slice(out.length - XP_EVENTS_MAX) : out;
+}
+
+/**
+ * Rebuild an event log from the old day map, once, so nobody's climb resets.
+ *
+ * The totals are real — they were recorded — only their resolution is coarse, so
+ * this is not inventing history in the way the chart's own header warns against.
+ * Each day's figure was the total at the END of that day, so that is where it is
+ * stamped.
+ */
+export function eventsFromDayMap(byDay: Record<string, number> | undefined): XpEvent[] {
+  if (!byDay) return [];
+  return Object.keys(byDay)
+    .sort()
+    .map((k) => {
+      const [y, m, d] = k.split('-').map(Number);
+      return { t: new Date(y, (m ?? 1) - 1, d ?? 1, 23, 59, 0).getTime(), v: byDay[k] };
+    })
+    .filter((e) => Number.isFinite(e.t) && Number.isFinite(e.v));
 }
 
 interface UserDataState {
@@ -176,7 +206,7 @@ interface UserDataState {
   beliefResultId: string | null;             // legacy (belief quiz removed)
   streak: number;                             // consecutive-day streak
   totalXP: number;                            // all XP: lessons, saved quotes, thinkers met, quizzes
-  xpByDay: Record<string, number>;           // YYYY-MM-DD -> TOTAL XP at end of that day (see stampXP)
+  xpEvents: XpEvent[];                        // one entry per thing earned (see stampEvent)
   // THE RANK THE USER ACTUALLY HOLDS. Not derived from totalXP, because XP can be
   // earned by browsing (a saved quote, a thinker opened) and a promotion is meant to
   // be earned by work. This only ever moves inside recordLessonComplete, and by one
@@ -407,7 +437,7 @@ export const useUserDataStore = create<UserDataState>()(
       beliefResultId: null,
       streak: 0,
       totalXP: 0,
-      xpByDay: {},
+      xpEvents: [],
       rankIndex: 0,
       lastLessonDate: null,
       dailyLessonCount: 0,
@@ -439,7 +469,7 @@ export const useUserDataStore = create<UserDataState>()(
           return {
             savedQuotes: [q, ...state.savedQuotes],
             totalXP: state.totalXP + XP_PER_SAVED_QUOTE,
-            xpByDay: stampXP(state.xpByDay, state.totalXP + XP_PER_SAVED_QUOTE),
+            xpEvents: stampEvent(state.xpEvents, state.totalXP + XP_PER_SAVED_QUOTE),
           };
         });
         get().recomputeBadges();
@@ -469,7 +499,7 @@ export const useUserDataStore = create<UserDataState>()(
             totalXP: exists
               ? Math.max(0, state.totalXP - XP_PER_SAVED_QUOTE)
               : state.totalXP + XP_PER_SAVED_QUOTE,
-            xpByDay: stampXP(state.xpByDay, exists
+            xpEvents: stampEvent(state.xpEvents, exists
               ? Math.max(0, state.totalXP - XP_PER_SAVED_QUOTE)
               : state.totalXP + XP_PER_SAVED_QUOTE),
           };
@@ -513,7 +543,7 @@ export const useUserDataStore = create<UserDataState>()(
               [philosopherId]: (state.philosopherViews[philosopherId] ?? 0) + 1,
             },
             totalXP: seen ? state.totalXP : state.totalXP + XP_PER_PHILOSOPHER_MET,
-            xpByDay: stampXP(state.xpByDay, seen ? state.totalXP : state.totalXP + XP_PER_PHILOSOPHER_MET),
+            xpEvents: stampEvent(state.xpEvents, seen ? state.totalXP : state.totalXP + XP_PER_PHILOSOPHER_MET),
           };
         });
         track('philosopher_viewed', { philosopher_id: philosopherId });
@@ -540,7 +570,7 @@ export const useUserDataStore = create<UserDataState>()(
             },
           },
           totalXP: state.totalXP + bonus,
-          xpByDay: stampXP(state.xpByDay, state.totalXP + bonus),
+          xpEvents: stampEvent(state.xpEvents, state.totalXP + bonus),
         }));
         track('philosopher_quiz_completed', {
           philosopher_id: philosopherId,
@@ -571,7 +601,7 @@ export const useUserDataStore = create<UserDataState>()(
             // Keep the per-branch mirror consistent with the per-unit source.
             lessonsByBranch: branchCountsFromUnits(lessonsByUnit),
             totalXP: state.totalXP + xpEarned,
-            xpByDay: stampXP(state.xpByDay, state.totalXP + xpEarned),
+            xpEvents: stampEvent(state.xpEvents, state.totalXP + xpEarned),
           };
         });
         // THE ONLY PLACE A RANK EVER MOVES, and by ONE step. Everything else that
@@ -675,7 +705,7 @@ export const useUserDataStore = create<UserDataState>()(
       setWelcomeVersion: (v) => set({ welcomeVersion: v, hasSeenWelcome: true }),
 
       resetProgress: () =>
-        set({ lessonsByUnit: {}, lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, xpByDay: {}, rankIndex: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
+        set({ lessonsByUnit: {}, lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, xpEvents: [], rankIndex: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
 
       clearSavedQuotes: () => {
         set({ savedQuotes: [] });
@@ -698,7 +728,7 @@ export const useUserDataStore = create<UserDataState>()(
           beliefResultId: null,
           streak: 0,
           totalXP: 0,
-          xpByDay: {},
+          xpEvents: [],
           rankIndex: 0,
           lastLessonDate: null,
           dailyLessonCount: 0,
@@ -736,7 +766,7 @@ export const useUserDataStore = create<UserDataState>()(
           beliefResultId: null,
           streak: 0,
           totalXP: 0,
-          xpByDay: {},
+          xpEvents: [],
           rankIndex: 0,
           lastLessonDate: null,
           dailyLessonCount: 0,
@@ -773,7 +803,7 @@ export const useUserDataStore = create<UserDataState>()(
         beliefResultId: state.beliefResultId,
         streak: state.streak,
         totalXP: state.totalXP,
-        xpByDay: state.xpByDay,
+        xpEvents: state.xpEvents,
         rankIndex: state.rankIndex,
         lastLessonDate: state.lastLessonDate,
         dailyLessonCount: state.dailyLessonCount,
@@ -844,6 +874,19 @@ export const useUserDataStore = create<UserDataState>()(
         // Each app launch = a fresh "who you're becoming" bio.
         state?.bumpBioSeed();
         if (state && !state.badgesInitialized) state.recomputeBadges();
+        // ONE-TIME: carry the old day map over into the event log, so nobody's
+        // climb chart resets to empty on the update that replaced it.
+        //
+        // `xpByDay` is gone from the state shape and from `partialize`, but it is
+        // still sitting in every existing device's stored blob — persist merges
+        // that blob in wholesale, so it arrives here as an untyped extra even
+        // though nothing declares it. This is the only moment it can be read: the
+        // next write persists the new shape without it.
+        if (state && (!state.xpEvents || state.xpEvents.length === 0)) {
+          const legacy = (state as unknown as { xpByDay?: Record<string, number> }).xpByDay;
+          const carried = eventsFromDayMap(legacy);
+          if (carried.length) state.xpEvents = carried;
+        }
       },
     }
   )

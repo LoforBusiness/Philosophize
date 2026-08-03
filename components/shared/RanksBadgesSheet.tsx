@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Modal,
   View,
@@ -172,7 +172,7 @@ export default function RanksBadgesSheet() {
   const streak = useUserDataStore((s) => s.streak);
   const xp = useUserDataStore((s) => s.totalXP);
   const rankIndex = useUserDataStore((s) => s.rankIndex);
-  const xpByDay = useUserDataStore((s) => s.xpByDay);
+  const xpEvents = useUserDataStore((s) => s.xpEvents);
 
   const { height, width } = useWindowDimensions();
   const H = Math.round(height * 0.82);
@@ -181,7 +181,6 @@ export default function RanksBadgesSheet() {
   const [tab, setTab] = useState<'ranks' | 'badges'>('ranks');
   const [selected, setSelected] = useState<RankDef | null>(null);
   const [selectedBadge, setSelectedBadge] = useState<BadgeDef | null>(null);
-  const spineRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     if (tabReq) {
@@ -217,13 +216,6 @@ export default function RanksBadgesSheet() {
   const toNext = next ? Math.max(0, next.xp - totalXP) : 0;
   const earnedCount = BADGES.filter((b) => isEarned(b, stats)).length;
   const badgeW = (width - 32 - 2 * BADGE_GAP) / 3;
-
-  // Centre the spine on the current rank shortly after opening.
-  const onSpineLayout = () => {
-    requestAnimationFrame(() => {
-      spineRef.current?.scrollTo({ y: Math.max(0, index * ROW_H - 90), animated: false });
-    });
-  };
 
   return (
     <Modal visible transparent animationType="none" statusBarTranslucent onRequestClose={close}>
@@ -263,7 +255,20 @@ export default function RanksBadgesSheet() {
               </View>
 
               {tab === 'ranks' ? (
-                <>
+                /* ONE SCROLL FOR THE WHOLE TAB.
+                   The ladder used to be its own ScrollView nested under a fixed
+                   hero and chart, so it inherited whatever height was left — about
+                   150px on a normal phone, which is TWO of the twenty-five rungs.
+                   Twenty-three ranks were technically reachable and practically
+                   invisible. The hero and the chart scroll away with everything
+                   else now, and the ladder gets the full sheet.
+                   The auto-scroll-to-your-rank went with it: on one scroll it would
+                   open the tab already past the hero and the climb chart. */
+                <ScrollView
+                  style={{ flex: 1 }}
+                  contentContainerStyle={styles.ascent}
+                  showsVerticalScrollIndicator={false}
+                >
                   {/* HERO — the current rank as a credential */}
                   <View style={styles.hero}>
                     <RankSeal glyph={current.glyph} state="current" size={104} progress={rankPct} />
@@ -286,7 +291,7 @@ export default function RanksBadgesSheet() {
                     </View>
                   </View>
 
-                  {/* THE CLIMB — this band only, day by day.
+                  {/* THE CLIMB — this band only, one step per thing earned.
                       The full ladder is still below, because a chart of the
                       current band answers "how am I doing" and the ladder answers
                       "what is coming", and dropping one for the other would trade
@@ -295,35 +300,40 @@ export default function RanksBadgesSheet() {
                     <RankClimbChart
                       rankIndex={index}
                       totalXP={totalXP}
-                      xpByDay={xpByDay}
+                      events={xpEvents}
                       width={width - 32}
                     />
                   </View>
 
                   <Text style={styles.spineHint}>THE WHOLE LADDER · TAP A SEAL</Text>
 
-                  {/* SPINE — all 25 seals, connected, climbed below → locked above */}
-                  <ScrollView
-                    ref={spineRef}
-                    style={{ flex: 1 }}
-                    contentContainerStyle={styles.spine}
-                    showsVerticalScrollIndicator={false}
-                    onLayout={onSpineLayout}
-                  >
+                  {/* THE LADDER — all 25 seals hung off a rail on the left.
+                      The rule used to run down the CENTRE of the gutter, which put
+                      it straight through every seal. Now it runs down the left edge
+                      and turns off to each rank in a short branch, so the path
+                      passes the ranks rather than through them. */}
+                  <View style={styles.spine}>
                     {RANKS.map((r, i) => {
                       const st = stateFor(i, index);
                       const isNext = i === index + 1;
+                      // Inked as far as the rank you hold; faint beyond it, so the
+                      // rail reads as the distance already walked.
+                      const reached = i <= index;
                       return (
                         <Pressable key={r.id} onPress={() => setSelected(r)} style={styles.row}>
-                          {/* connector rule */}
                           <View style={styles.gutter}>
                             {i > 0 && (
-                              <View style={[styles.connector, styles.connTop, { backgroundColor: i <= index ? Ink : InkFaint }]} />
+                              <View style={[styles.rail, styles.railTop, { backgroundColor: reached ? Ink : InkFaint }]} />
                             )}
                             {i < RANKS.length - 1 && (
-                              <View style={[styles.connector, styles.connBot, { backgroundColor: i < index ? Ink : InkFaint }]} />
+                              <View style={[styles.rail, styles.railBot, { backgroundColor: i < index ? Ink : InkFaint }]} />
                             )}
-                            <RankSeal glyph={r.glyph} state={st} size={54} />
+                            {/* the turn-off, and the junction it turns off at */}
+                            <View style={[styles.branch, { backgroundColor: reached ? Ink : InkFaint }]} />
+                            <View style={[styles.junction, { backgroundColor: reached ? Ink : InkFaint }]} />
+                            <View style={styles.sealSlot}>
+                              <RankSeal glyph={r.glyph} state={st} size={50} />
+                            </View>
                           </View>
 
                           <View style={styles.rowText}>
@@ -341,8 +351,8 @@ export default function RanksBadgesSheet() {
                         </Pressable>
                       );
                     })}
-                  </ScrollView>
-                </>
+                  </View>
+                </ScrollView>
               ) : (
                 <>
                   {/* A struck count, and how much of the case is filled. */}
@@ -556,13 +566,30 @@ const styles = StyleSheet.create({
   climbWrap: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 2 },
   spineHint: { fontFamily: 'Inter_700Bold', fontSize: 9, color: InkSoft, letterSpacing: 2, marginTop: 18, marginBottom: 4 },
 
-  // spine
-  spine: { paddingBottom: 36 },
+  // ── the ladder ──────────────────────────────────────────────────────────
+  // THE RAIL RUNS DOWN THE LEFT AND TURNS OFF TO EACH RANK.
+  //
+  // It used to be a single rule at the gutter's centre with the seal drawn on top
+  // of it, so the line went straight through all twenty-five marks. The gutter is
+  // wider now (76 rather than 64) to make room for the rail, the branch and the
+  // seal side by side rather than stacked:
+  //
+  //     rail 7..9  ·  branch 9..31  ·  seal box 26..76, its RING 30..72
+  //
+  // The branch runs to 31, not to the seal box's edge at 26. A RankSeal draws its
+  // ring at r=42 in a 100 viewBox, so at size 50 the ring is inset 4 from the box
+  // — stopping the branch at the box left a 3-unit gap between the turn-off and
+  // the mark it turns off to. It now overlaps the ring by one.
+  ascent: { paddingBottom: 40 },
+  spine: { marginTop: 2 },
   row: { flexDirection: 'row', alignItems: 'center', height: ROW_H },
-  gutter: { width: 64, height: ROW_H, alignItems: 'center', justifyContent: 'center' },
-  connector: { position: 'absolute', left: 31, width: 2 },
-  connTop: { top: 0, height: ROW_H / 2 },
-  connBot: { bottom: 0, height: ROW_H / 2 },
+  gutter: { width: 76, height: ROW_H, justifyContent: 'center' },
+  rail: { position: 'absolute', left: 7, width: 2 },
+  railTop: { top: 0, height: ROW_H / 2 },
+  railBot: { bottom: 0, height: ROW_H / 2 },
+  branch: { position: 'absolute', left: 9, top: ROW_H / 2 - 1, width: 22, height: 2 },
+  junction: { position: 'absolute', left: 5, top: ROW_H / 2 - 3, width: 6, height: 6, borderRadius: 3 },
+  sealSlot: { position: 'absolute', left: 26, top: (ROW_H - 50) / 2, width: 50, height: 50 },
   rowText: { flex: 1, marginLeft: 6 },
   rowName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: Ink },
   rowXp: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, marginTop: 1 },
