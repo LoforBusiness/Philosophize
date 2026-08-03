@@ -162,31 +162,59 @@ Curriculum content lives in `data/branches/` as strongly-typed TypeScript files.
 
 ### Shape today
 
-**Every branch holds exactly 32 lessons, of which exactly 16 are cinematic.** Both
-numbers are deliberate invariants rather than where the counts happened to land —
-the totals were 27–30 and the cinematic share was 11–14, and both showed on the
-Learn cards.
+### 🎬 THE DIRECTION: CINEMATIC IS TAKING OVER
 
-They also constrain each other, and there are exactly two moves that respect both:
+**Cinematic lessons are replacing the card decks, not sitting beside them.** The
+card runner is the *old* format and the target is zero of it. Two consequences,
+and they are not suggestions:
+
+1. **Never write a new card-only lesson again.** Every lesson added from now on
+   ships with a `*Script.ts`, a `*Scene.tsx` and a `CINEMATIC` entry. If it is not
+   worth a scene, it is not worth adding.
+2. **Keep converting the ones that exist.** Six at a time, one per branch, so the
+   per-branch counts stay level while the card count falls.
+
+**`npm run check:cinematic` counts this and will not let it slip backwards.**
+`CARD_BUDGET` in `scripts/validate-cinematic.mjs` is a high-water mark: the number
+of card-only lessons may only ever go DOWN. Converting six lowers it (and the check
+tells you to lock the gain in); adding a card-only lesson raises it and fails the
+build. When it reaches 0 the takeover is done, and `LessonRunner`, `cards/`,
+`interactions/` and that whole half of §3 can be deleted.
+
+> The two things that do NOT change: **`fill-blank` / `match` stay unimplemented on
+> purpose** — they are card interactions, and building them now is work on the
+> format being retired. Cinematic lessons answer questions in the scene instead
+> (E33, H65), which is strictly the better mechanic and is why the format won.
+
+### Shape today
+
+**Every branch holds exactly 32 lessons, of which exactly 16 are cinematic** —
+50% of the way through the takeover. Both numbers are deliberate invariants rather
+than where the counts happened to land: the totals were 27–30 and the cinematic
+share was 11–14, and both showed on the Learn cards. `check:cinematic` enforces
+that all six branches match on both.
+
+They constrain each other, and there are exactly two moves that respect both:
 
 - **To raise the CINEMATIC count, give an EXISTING card lesson a scene.** Writing
   twelve new cinematic lessons instead would have taken the totals to
   33/32/30/33/31/33 and broken the first invariant to satisfy the second.
   Converting costs a `*Script.ts` + `*Scene.tsx` + a `CINEMATIC` entry, and usually
-  a second graded question added to the data file (E37c). It moves nothing else.
+  a second graded question added to the data file (E37c). It moves nothing else,
+  and it is the move that advances the takeover.
 - **To raise the LESSON count, add the same number to every branch and make each
   new one cinematic.** Two per branch took 30/14 to 32/16 and held both invariants
   in one pass. Adding one lesson to one branch breaks both at once.
 
-| Branch | Units | Lessons | of which cinematic |
-|---|---|---|---|
-| Metaphysics | 5 | 32 | 16 |
-| Epistemology | 5 | 32 | 16 |
-| Logic | 5 | 32 | 16 |
-| Ethics | 5 | 32 | 16 |
-| Aesthetics | 3 | 32 | 16 |
-| Political Philosophy | 5 | 32 | 16 |
-| **Total** | **28** | **192** | **96** |
+| Branch | Units | Lessons | of which cinematic | card decks left |
+|---|---|---|---|---|
+| Metaphysics | 5 | 32 | 16 | 16 |
+| Epistemology | 5 | 32 | 16 | 16 |
+| Logic | 5 | 32 | 16 | 16 |
+| Ethics | 5 | 32 | 16 | 16 |
+| Aesthetics | 3 | 32 | 16 | 16 |
+| Political Philosophy | 5 | 32 | 16 | 16 |
+| **Total** | **28** | **192** | **96 (50%)** | **96** |
 
 > **`Path` IS a unit.** The type is still called `Path` in `data/types.ts`, but
 > every screen calls it a *unit* and `branch.paths` is the unit list
@@ -212,7 +240,7 @@ type InteractionData = MultipleChoiceInteraction | TrueFalseInteraction | SortIt
   | FillBlankInteraction | MatchInteraction;
 ```
 
-**Implemented interactions:** `multiple-choice`, `true-false`, `sort`. **`fill-blank` and `match` are type-only stubs** — no component exists and `QuestionCard.tsx` renders nothing for them (Roadmap P0).
+**Implemented interactions:** `multiple-choice`, `true-false`, `sort`. **`fill-blank` and `match` are type-only stubs** — no component exists and `QuestionCard.tsx` renders nothing for them. **They are staying that way**: both belong to the card runner, and the card runner is being retired (§5). A cinematic lesson answers its questions on the stage instead (E33, H65).
 
 **Two added card types beyond the original six:**
 - `dilemma` — "Choose Your Belief": a `scenario` + `choices`, then 2–4 philosophers' `views` (stance + why) revealed after the user picks. Gates the forward swipe like `question`.
@@ -373,13 +401,24 @@ Both are required. Get them from your Supabase project → Settings → API.
 
 > Directory names still say `paths/`, but a "path" **is a unit** — see §5.
 
-To add a new lesson:
+> ⚠️ **A NEW LESSON IS A CINEMATIC LESSON.** Steps 1–5 below build the data file,
+> which every lesson still needs — the card deck is the fallback the runner uses if
+> the `CINEMATIC` entry is ever removed, which is what makes a scene safe to roll
+> back (§17). But steps 6–8 are not optional any more, and `check:cinematic` fails
+> the build if the card-only count goes up (§5).
 
 1. Create a file in `data/branches/<branch>/paths/<unit>/lessons/<slug>.ts`
 2. Export a `Lesson` object matching the interface in `data/types.ts`
 3. First card must be `{ type: 'hook' }`, last must be `{ type: 'summary' }`
 4. Import and add to the unit's `lessons` array in that unit's `index.ts`
 5. Run `npx tsc --noEmit` to validate types
+6. Write `components/lesson/cinematic/<name>Script.ts` — the beats, to the house
+   shape in group H of the rule book
+7. Write `components/lesson/cinematic/<name>Scene.tsx` — the stage, with a measured
+   band and a header stating the composition in numbers (H56)
+8. Add the id → component entry to `CINEMATIC` in
+   `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx`, then run
+   `npm run check`
 
 **Where a lesson lands changes what it means.** Units are contiguous slices of a
 branch in teaching order, and `lessonsByUnit` counts completions **by position**.
@@ -443,8 +482,11 @@ To add a new branch: create an `index.ts` in the branch directory, export a
   mastheads, the launch screen and Quick Start (§19).
 
 **Known gaps / tech debt:**
-- **`fill-blank` and `match` interactions are unimplemented** (type-only). This
-  is the oldest open item in the file.
+- **Half the lessons are still card decks** — 96 of 192. That is now the number
+  that matters; see the takeover rule at the top of §5.
+- **`fill-blank` and `match` are closed as won't-do.** They were the oldest open
+  item in this file. Finishing an interaction for the format being retired is work
+  pointed the wrong way, so the stubs stay stubs.
 - **Built but not wired:** `story/` scenes, `KineticNarration` voice, `feedback/`
   panels. Decide to ship or delete them.
 - **Haptics** is used only inside `lesson/story/*` — still absent from every
@@ -506,8 +548,12 @@ The Scholar's Pass paywall UI already exists; this is the value model it should 
 
 **P0 — Daily Review (spaced repetition).** The retention engine and the strongest reason to subscribe. Resurface concepts from completed lessons on a spacing schedule via quick `multiple-choice` / `true-false` / `reinforcement` prompts; add a "Review" entry on Home; completing a review counts toward the streak. Track per-concept last-seen + strength in `userDataStore`.
 
-**P0 — New interactions + sensory polish.**
-- Implement **`fill-blank`** and **`match` / Philosopher-Match** (match a quote to its thinker, reusing the ~223-philosopher DB to tie lessons back to the Thinkers tab). Wire both into `QuestionCard.tsx`.
+**P0 — Convert the remaining 96 card decks (§5).** Six at a time, one per branch, so
+the per-branch counts stay level, until `check:cinematic` reports 0 card decks left.
+Then `LessonRunner`, `cards/` and `interactions/` can go. Every lesson added along
+the way is cinematic.
+
+**P0 — Sensory polish.**
 - Add **haptics** (`expo-haptics`: light on correct, warning on incorrect, success on lesson complete) and **subtle sound** (page-turn on swipe, ink-scratch on reveal, soft chime on correct) — gated behind a Settings sound/haptics toggle.
 
 **P1 — Finish the orphaned premium machinery.** Wire the cinematic **story scenes** (`SnowWalkStory`, `ExistenceStory`) in as a path's hook or capstone; ship a **"Read to me"** narration toggle (`KineticNarration`); and decide to either **show** the `feedback/` panels in the runner or delete them.
@@ -551,7 +597,9 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**96 lessons** are not card decks at all: they are tap-advanced animated scenes.
+**This is the format the app is converging on** — 96 of the 192 lessons are here
+already, and the card runner is what they are replacing (§5). They are not card
+decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
 `CINEMATIC` map from lesson id → component; anything absent falls through to the
 normal `LessonRunner`. **Removing an entry is a complete, safe rollback** for one

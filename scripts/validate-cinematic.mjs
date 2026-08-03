@@ -135,6 +135,75 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
   if (warns.length) warnings.push([f, warns]);
 }
 
+// ── the balance, and the one-way ratchet ──────────────────────────────────────
+// THE DIRECTION IS ONE-WAY. Cinematic lessons are replacing the card decks, not
+// sitting beside them — so no new card-only lesson is ever written, and existing
+// ones get converted branch by branch until there are none left. That is a policy
+// nobody can be expected to remember three months from now, so it is counted here:
+//
+//   · every branch carries the SAME lesson count and the SAME cinematic count
+//     (§5). Level, or it shows on the Learn cards.
+//   · CARD_BUDGET is a high-water mark that may only ever go DOWN. Converting a
+//     lesson lowers it; adding a card-only lesson raises it and fails here. When
+//     it reaches 0 the takeover is done and this whole block can go.
+const CARD_BUDGET = 96;
+
+const ROUTE = path.join(
+  process.cwd(), 'app', '(app)', 'branches', '[branchSlug]', '[pathSlug]', 'lesson', '[lessonId].tsx',
+);
+const routeSrc = fs.readFileSync(ROUTE, 'utf8');
+const mapBody = routeSrc.split('const CINEMATIC')[1]?.split('\n};')[0] ?? '';
+const wired = new Set([...mapBody.matchAll(/'([a-z-]+-[a-z]+-\d+)':/g)].map((m) => m[1]));
+
+const BRANCHES = path.join(process.cwd(), 'data', 'branches');
+const tally = [];
+for (const branch of fs.readdirSync(BRANCHES).sort()) {
+  const paths = path.join(BRANCHES, branch, 'paths');
+  if (!fs.existsSync(paths)) continue;
+  let lessons = 0, cine = 0;
+  for (const unit of fs.readdirSync(paths)) {
+    const dir = path.join(paths, unit, 'lessons');
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir).filter((n) => n.endsWith('.ts'))) {
+      const id = fs.readFileSync(path.join(dir, f), 'utf8').match(/^ {2}id: '([^']+)',/m)?.[1];
+      if (!id) continue;
+      lessons++;
+      if (wired.has(id)) cine++;
+    }
+  }
+  tally.push({ branch, lessons, cine });
+}
+
+if (tally.length) {
+  const errs = [];
+  const nL = [...new Set(tally.map((t) => t.lessons))];
+  const nC = [...new Set(tally.map((t) => t.cine))];
+  const show = (key) => tally.map((t) => `${t.branch} ${t[key]}`).join(' · ');
+  if (nL.length !== 1) errs.push(`branches hold different lesson counts — ${show('lessons')} (§5)`);
+  if (nC.length !== 1) errs.push(`branches hold different cinematic counts — ${show('cine')} (§5)`);
+
+  const cards = tally.reduce((a, t) => a + t.lessons - t.cine, 0);
+  if (cards > CARD_BUDGET) {
+    errs.push(
+      `${cards} card-only lessons, up from ${CARD_BUDGET}. The direction is one-way: ` +
+        'a NEW lesson is always cinematic, and this number only ever falls (§5, §17).',
+    );
+  } else if (cards < CARD_BUDGET) {
+    errs.push(
+      `${cards} card-only lessons left, down from ${CARD_BUDGET} — good. ` +
+        'Lower CARD_BUDGET in this file to lock the gain in.',
+    );
+  }
+
+  const total = tally.reduce((a, t) => a + t.lessons, 0);
+  const cine = tally.reduce((a, t) => a + t.cine, 0);
+  console.log(
+    `\ntakeover: ${cine}/${total} cinematic (${Math.round((cine / total) * 100)}%) · ` +
+      `${cards} card decks left · ${tally.length} branches at ${tally[0].lessons}/${tally[0].cine}`,
+  );
+  if (errs.length) problems.push(['the branch balance', errs]);
+}
+
 // ── report ────────────────────────────────────────────────────────────────────
 for (const [f, warns] of warnings) {
   console.log(`~ ${f}`);
