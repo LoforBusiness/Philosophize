@@ -750,6 +750,28 @@ the allowance a build queues or is refused, never billed.
 1. `npx tsc --noEmit` must exit 0.
 2. `git status` — a build or OTA bundles the **working tree**, including someone
    else's half-finished edits. This has caught a total blocker more than once.
+3. **`git log -1`, immediately before the publish command — not five minutes
+   before.** The tree is a moving target while someone is working in it, and
+   `git status` only answers "is anything uncommitted", which is the wrong
+   question if the answer changed by being *committed*.
+
+   This is not hypothetical. An unfinished badge redesign was deliberately
+   stashed so that a narration-only update could go out clean; the tree verified
+   empty and `tsc` passed. Six minutes later the other person saved their buffers
+   and committed, which put all 1,556 lines back on disk — and the publish that
+   followed bundled every one of them. The stash had been the right tool at the
+   moment it was taken and the wrong one by the time it mattered, because **work
+   stops being protected by a stash the instant it is committed.**
+
+   The tell was in plain sight and went unread: `eas update` prints the HEAD
+   commit it published, and it printed a hash that was not the one stashed
+   against. **Read that line in the output.** If it is not the commit you meant
+   to ship, the bundle is not what you meant to ship either.
+
+   Isolating a publish from someone's in-flight work is therefore only reliable
+   when nobody is touching the tree. If they are, either wait, or ask them to
+   stop and confirm before you start — a five-minute publish window is long
+   enough for a whole feature to land in it.
 
 ---
 
