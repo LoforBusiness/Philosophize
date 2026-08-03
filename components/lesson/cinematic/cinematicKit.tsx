@@ -356,14 +356,30 @@ export function InteractPanel({
 // step is.
 //
 // WHY IT IS A ROW OF WORDS RATHER THAN ONE Text. Per-word opacity needs per-word
-// views, so the paragraph becomes a wrapping row and each word carries the space
-// after it. That is why the space is inside the string rather than a `gap`: a gap
-// is a guess at the width of a space, and the string is the space itself.
+// views, so the paragraph becomes a wrapping row.
+//
+// THE SPACE IS A GAP, NOT PART OF THE WORD, and that is not a stylistic choice —
+// it is a measured bug fix. Carrying " " inside each word makes its flex item a
+// space wider than the word, so the row runs out of width sooner than the
+// paragraph does and wraps early: measured against the real deck, "Two tests,
+// never confused. An argument is VALID…" took FOUR lines where the same sentence
+// as one Text takes three. A gap is only counted BETWEEN items on a line and is
+// dropped at a wrap, which is exactly how a space behaves in text.
+//
+// The gap is the real width of the real glyph — Playfair Display Regular's space
+// is 249/1000 em, read out of the TTF — rather than a plausible-looking number.
 //
 // SILENT READERS GET NONE OF THIS. With narration off the line is exactly the
 // single `<Text>` it always was — same component, same layout, no animation and
 // no per-word views. A reveal paced to a voice that is not speaking is just a
 // delay, and 102 lessons should not pay for machinery they are not using.
+
+/** The narration line's size, and the exact width of a space in its face. */
+export const NARR_SIZE = 18;
+// Playfair Display Regular: space advance 249 / 1000 upem, read from the TTF.
+// If the face or the size changes, this has to be re-measured or the words in a
+// line drift apart from what the same sentence looks like as one Text.
+const NARR_SPACE = NARR_SIZE * 0.249;
 
 /** Words mid-fade at any moment. Three reads as a wave; one reads as a ticker. */
 const REVEAL_OVERLAP = 3;
@@ -402,15 +418,22 @@ export function NarratedText({
 }) {
   // Split unconditionally: hooks and derived values must not sit behind the
   // branch, or turning narration off mid-lesson changes the hook count.
-  const words = useMemo(() => {
-    const parts = text.split(/\s+/).filter(Boolean);
-    return parts.map((w, k) => (k === parts.length - 1 ? w : `${w} `));
-  }, [text]);
+  const words = useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
 
   if (!animate) return <Text style={styles.narr}>{text}</Text>;
 
   return (
-    <View style={styles.narrWrap}>
+    // ONE PARAGRAPH TO ANYTHING THAT READS THE SCREEN. Splitting into per-word
+    // views is a rendering trick, and without this a screen reader would announce
+    // the sentence one word at a time — worse than what it replaced. Marking the
+    // wrapper accessible with the whole line as its label collapses the words back
+    // into the single paragraph they are.
+    <View
+      style={styles.narrWrap}
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={text}
+    >
       {words.map((w, k) => (
         <RevealWord key={`${k}-${w}`} word={w} i={k} n={words.length} progress={progress} />
       ))}
@@ -500,10 +523,10 @@ export const styles = StyleSheet.create({
 
   deck: { flex: 50, paddingHorizontal: 24, justifyContent: 'flex-start', overflow: 'hidden' },
   fadeWrap: { position: 'relative' },
-  narr: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 18, lineHeight: 27, color: INK },
+  narr: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: NARR_SIZE, lineHeight: 27, color: INK },
   // The animated form of the same paragraph: a wrapping row of words. Wraps at
   // word boundaries exactly as text does, because the items ARE words.
-  narrWrap: { flexDirection: 'row', flexWrap: 'wrap' },
+  narrWrap: { flexDirection: 'row', flexWrap: 'wrap', columnGap: NARR_SPACE },
   cite: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT, marginBottom: 7 },
 
   qWrap: { marginTop: 2 },
