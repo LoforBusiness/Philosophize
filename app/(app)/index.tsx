@@ -22,11 +22,6 @@ const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
 
-// The padded local day key the store writes to dailyLessonDate.
-function todayStamp(d = new Date()): string {
-  const p = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
 const Rule = '#ECEAE2';
 
 const SW = Dimensions.get('window').width;
@@ -105,13 +100,6 @@ export default function HomeScreen() {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const settings = useUserDataStore((s) => s.settings);
   const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'home';
-  // Today's goal. `dailyLessonDate` is the padded 'YYYY-MM-DD' the store writes —
-  // NOT the key useTodayKey returns, which is a re-render trigger in a different
-  // format. Yesterday's count reads as zero because the date no longer matches.
-  const dailyLessonCount = useUserDataStore((s) => s.dailyLessonCount);
-  const dailyLessonDate = useUserDataStore((s) => s.dailyLessonDate);
-  const goal = settings.dailyGoalLessons;
-  const doneToday = dailyLessonDate === todayStamp() ? Math.min(goal, dailyLessonCount) : 0;
   const [addWidgetOpen, setAddWidgetOpen] = useState(false);
   // Hide the CTA once the Quote widget is on the phone's home screen; it returns
   // if they remove it (re-checked whenever the app comes back to the foreground).
@@ -205,24 +193,9 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* Streak, and today's goal beside it.
-            The goal is why Settings → Learning has a slider at all: it was a
-            minutes figure nothing measured, and it is now a lesson count this
-            row reads back. Dots rather than a number — at one to ten of them,
-            how many are left is something you see rather than subtract. */}
         <View style={styles.streakRow}>
           <StreakBook value={streak} size={52} />
           <Text style={styles.streakLabel}>{streak} DAY STREAK</Text>
-        </View>
-        <View style={styles.goalRow}>
-          <View style={styles.goalDots}>
-            {Array.from({ length: goal }, (_, i) => (
-              <View key={i} style={[styles.goalDot, i < doneToday && styles.goalDotOn]} />
-            ))}
-          </View>
-          <Text style={styles.goalCaption}>
-            {doneToday >= goal ? 'GOAL MET' : `${doneToday} OF ${goal} TODAY`}
-          </Text>
         </View>
 
         {/* Daily quote card (opt-in, Settings → Display) */}
@@ -425,30 +398,5 @@ const styles = StyleSheet.create({
     color: InkSoft,
     letterSpacing: 1.5,
     marginLeft: 10,
-  },
-  // Today's goal, on its own line under the streak. Ten dots at 7pt plus their
-  // gaps is 106pt, so even the largest goal sits comfortably beside the caption
-  // on the narrowest phone.
-  goalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    marginTop: 9,
-  },
-  goalDots: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  goalDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 2,
-    borderWidth: 1.2,
-    borderColor: InkSoft,
-  },
-  goalDotOn: { backgroundColor: Ink, borderColor: Ink },
-  goalCaption: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 9.5,
-    color: InkSoft,
-    letterSpacing: 1.2,
   },
 });
