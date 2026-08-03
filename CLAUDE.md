@@ -686,6 +686,19 @@ the failure is completely silent.
 > **Publish to every runtime still in the wild**, newest first. Drop an old one
 > only once nobody is left on that binary.
 
+**"In the wild" means reachable, not merely installed.** A binary below
+`MIN_VERSION_CODE` (§20) is held behind the full-screen update wall, so its users
+cannot open a lesson at all — and an OTA to that runtime lands on people who are
+already stopped. Once the gate was raised to 16, runtime `7655f410…` (builds
+15/14) stopped needing updates entirely, and several were published to it anyway
+before anyone noticed.
+
+So the rule has two halves that must be read together: **publish to every runtime
+whose users can still reach the app, and check `MIN_VERSION_CODE` to know which
+those are.** They come apart again the moment the gate is raised: the release that
+raises it must reach the runtimes it is about to block, or it locks out people it
+never told to update.
+
 ### The fingerprint tracks your working tree, not the build
 
 `runtimeVersion` is `{ "policy": "fingerprint" }`, and the fingerprint is
