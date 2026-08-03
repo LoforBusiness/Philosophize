@@ -119,6 +119,38 @@ pointing arm, and a smoothness check called every fast snap a defect until it
 learned to re-sample 16× finer and see whether the jump shrinks. **A check that
 fires on almost everything has told you nothing — fix the check.**
 
+**A2d. A BROWSER AUDIT MEASURES WHATEVER IS ON SCREEN, WHICH IS NOT ALWAYS THE
+SCENE.** The split-word audit ran over all 102 lessons and reported **278 broken
+words across 53 of them**. Every one was the check's fault, in two distinct ways,
+and both are easy to write again:
+
+- **`stageOf() || document.body`.** The stage is the div measuring exactly
+  400×560. When it is not mounted — during the launch screen, and again once the
+  reward modal replaces the lesson — that fallback silently widened the search to
+  the entire page. The tell was that the *same five strings* appeared in all 53
+  lessons: `PHILOSOPHERS`, `Philosopher`, `0%`, `+25`, `+10`. Fifty-three lessons
+  do not share a defect; one component does. **No fallback: if the stage is absent,
+  return and measure nothing.**
+- **`Range.getClientRects()` returns one rect per TEXT NODE, not per line.** With
+  the scope fixed, one finding survived: `100%` in metaphysics-6, "split over 2
+  lines". It is not. `{Math.round(v * 100)}%` is two JSX children, so React renders
+  two adjacent text nodes — `"100"` and `"%"` — and the Range returns a rect for
+  each. Measured: both at **y 108.9**, at x 341.5 and 378.3. Side by side, one
+  baseline. **Count distinct rounded `y` values, not rects.**
+
+After both fixes the whole corpus measures **zero split words**. The margin audit
+agrees: its four remaining sub-8% findings are all shrink-wrap boxes (a speech
+bubble is styled with `maxWidth` and no width, so it grows to its text and can
+never split) — and note its `grows` tell, `parent.clientWidth > box.clientWidth + 8`,
+**misses a bubble because the parent shrink-wraps too**. `MORON!` at "60.1 in 60"
+is a box that fits itself, inside a `maxWidth: 216` that it never approaches.
+
+The general form, and the reason this keeps happening: **these checks predict a
+defect from geometry, and geometry has more ways of looking broken than of being
+broken.** Before fixing anything a browser audit reports, find the one measurement
+that shows the defect *itself* — is the word on two lines, y against y — because
+"fixing" a box that was never broken is how type gets shrunk until it really wraps.
+
 **A3. Secondary figures count.** The narrator's pose comes from the script and is
 easy to eyeball. A second figure — the friend, the opponent, the apprentice — is
 often posed from a **hard-coded** code inside the scene, where nobody looks. That is
