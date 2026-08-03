@@ -16,8 +16,29 @@ const MALE_NAMES = [
 // Voices that read as deep / mature — a "middle-aged philosopher" timbre.
 const DEEP_NAMES = ['daniel', 'arthur', 'george', 'brian', 'thomas', 'rishi', 'davis'];
 
+/**
+ * Everything we are allowed to judge a voice by, lowercased.
+ *
+ * THIS USED TO READ `v.name` ALONE, AND ON ANDROID THAT MATCHES NOTHING. iOS gives
+ * voices human names — "Daniel", "Arthur (Enhanced)" — so name-matching worked, and
+ * the whole table below was written against it. Android's Google engine does not:
+ * the name IS the identifier, `en-gb-x-gbb-network`, with no person, no gender and
+ * no quality word in it. So every en-GB voice scored exactly +100, the sort was a
+ * tie, and the pick was whichever the OS happened to return first — which is how a
+ * flat, compressed, possibly-female voice ended up reading the lessons.
+ */
+function tokens(v: Speech.Voice): string {
+  return `${v.name || ''} ${v.identifier || ''}`.toLowerCase().replace(/_/g, '-');
+}
+
+/** True when the engine renders this voice at full quality rather than on-device. */
+export function isHiFi(v: Speech.Voice): boolean {
+  const t = tokens(v);
+  return /-network\b/.test(t) || /enhanced|premium|neural|natural|siri/.test(t);
+}
+
 function score(v: Speech.Voice): number {
-  const name = (v.name || '').toLowerCase();
+  const t = tokens(v);
   const lang = (v.language || '').toLowerCase().replace('_', '-');
   let s = 0;
   if (lang.startsWith('en-gb')) s += 100;
@@ -26,22 +47,99 @@ function score(v: Speech.Voice): number {
 
   // Strongly prefer high-quality, natural-sounding engines — these are what
   // make narration sound human rather than robotic.
-  if (/enhanced|premium|neural|natural/.test(name)) s += 85;
-  if (name.includes('siri')) s += 70;
+  if (/enhanced|premium|neural|natural/.test(t)) s += 85;
+  if (t.includes('siri')) s += 70;
 
-  if (name.includes('google uk english male')) s += 90;
-  if (MALE_NAMES.some((n) => name.includes(n))) s += 80;
-  if (DEEP_NAMES.some((n) => name.includes(n))) s += 35; // prefer a deeper timbre
-  if (/\bmale\b/.test(name)) s += 50; // \bmale\b does NOT match "female"
-  if (name.includes('female')) s -= 80;
+  // Android ships two copies of its best voices under IDs that differ by one
+  // word: `en-gb-x-gbb-network` against `en-gb-x-gbb-local`. The network one is
+  // server-rendered and is the difference between "reads" and "buzzes"; the local
+  // one is a small compressed fallback. Nothing in the NAME distinguishes them.
+  if (/-network\b/.test(t)) s += 60;
+  if (/-local\b/.test(t)) s -= 15;
+
+  // Google's en-GB voices are identified by opaque code rather than by person:
+  // gba, gbb, gbc, gbd, rjs. By ear gbb/gbd/rjs read male and gba/gbc female, but
+  // that mapping is UNDOCUMENTED and has moved between engine versions — so it
+  // only nudges the automatic pick. The Settings picker is what actually settles
+  // it, because on this the ear is the only reliable instrument.
+  if (/-x-(gbb|gbd|rjs)-/.test(t)) s += 55;
+  if (/-x-(gba|gbc)-/.test(t)) s -= 30;
+
+  if (t.includes('google uk english male')) s += 90;
+  if (MALE_NAMES.some((n) => t.includes(n))) s += 80;
+  if (DEEP_NAMES.some((n) => t.includes(n))) s += 35; // prefer a deeper timbre
+  if (/\bmale\b/.test(t)) s += 50; // \bmale\b does NOT match "female"
+  if (t.includes('female')) s -= 80;
   if (
-    name.includes('uk') ||
-    name.includes('british') ||
-    name.includes('united kingdom') ||
-    name.includes('great britain')
+    t.includes('uk') ||
+    t.includes('british') ||
+    t.includes('united kingdom') ||
+    t.includes('great britain')
   )
     s += 25;
   return s;
+}
+
+/**
+ * A readable label for a voice, for the Settings picker.
+ *
+ * An opaque Android code is turned into a letter — "British voice B" says nothing
+ * false, where `en-gb-x-gbb-network` says nothing at all. A real name from iOS is
+ * shown as it is.
+ */
+export function describeVoice(v: Speech.Voice): { title: string; sub: string } {
+  const id = (v.identifier || '').toLowerCase();
+  const name = (v.name || '').trim();
+  const lang = `${v.language || ''} ${id}`.toLowerCase();
+  const region = lang.includes('en-gb') || lang.includes('en_gb') ? 'British' : 'English';
+
+  // An Android "name" looks like a language tag; a real name does not.
+  const opaque = !name || /^[a-z]{2}[-_][a-z]{2}/i.test(name);
+  const code = id.match(/-x-([a-z]{3})-/)?.[1];
+  const title = !opaque
+    ? name
+    : code
+      ? `${region} voice ${code.slice(-1).toUpperCase()}`
+      : `${region} voice`;
+
+  const net = /-network\b/.test(id);
+  const sub = net
+    ? 'Higher quality · rendered online'
+    : isHiFi(v)
+      ? 'Higher quality'
+      : 'On-device · works offline';
+  return { title, sub };
+}
+
+/**
+ * Every voice worth offering, best first.
+ *
+ * Deliberately NOT filtered down to a shortlist. The scoring above is a guess made
+ * from identifiers, and the whole reason this list exists is that the guess was
+ * wrong on a real phone — so the reader gets to hear all of them and overrule it.
+ */
+export async function listNarrationVoices(): Promise<Speech.Voice[]> {
+  let voices: Speech.Voice[] = [];
+  // Same retry as `resolve`: the list can come back empty until the engine is up.
+  for (let attempt = 0; attempt < 8 && voices.length === 0; attempt++) {
+    try {
+      voices = (await Speech.getAvailableVoicesAsync()) || [];
+    } catch {
+      /* try again */
+    }
+    if (voices.length === 0) await new Promise((r) => setTimeout(r, 250));
+  }
+  const seen = new Set<string>();
+  return voices
+    .map((v) => ({ v, s: score(v) }))
+    .filter((x) => x.s > -50)
+    .sort((a, b) => b.s - a.s)
+    .filter((x) => {
+      if (seen.has(x.v.identifier)) return false;
+      seen.add(x.v.identifier);
+      return true;
+    })
+    .map((x) => x.v);
 }
 
 async function resolve(): Promise<string | null> {

@@ -36,6 +36,40 @@ export const NARRATION_RATE = 0.92;
 export const NARRATION_PITCH = 0.96;
 
 /**
+ * The line the Settings picker auditions a voice with.
+ *
+ * It is a real narration line, from the one lesson that currently speaks. Judging
+ * a voice on "Hello, this is a test" tells you about the voice and nothing about
+ * the product — the words here are the length, register and punctuation the
+ * lessons actually use, so what is auditioned is what will be heard.
+ */
+export const NARRATION_SAMPLE =
+  'Why is there something rather than nothing? Every answer seems to need another answer standing behind it.';
+
+/**
+ * Speak the sample exactly as a lesson would.
+ *
+ * Rate, pitch, language and `forSpeech` are all shared with `useBeatNarration`
+ * below, deliberately. An audition rendered at different settings would flatter or
+ * libel a voice that then sounds different in the lesson, which would make the
+ * picker worse than useless.
+ */
+export function speakSample(voiceId: string | null) {
+  Speech.stop();
+  Speech.speak(forSpeech(NARRATION_SAMPLE), {
+    voice: voiceId ?? undefined,
+    rate: NARRATION_RATE,
+    pitch: NARRATION_PITCH,
+    language: 'en-GB',
+  });
+}
+
+/** Silence any audition — leaving the picker must not leave a voice talking. */
+export function stopSpeaking() {
+  Speech.stop();
+}
+
+/**
  * Rewrite a display string into something an engine reads well.
  *
  * All of these are real strings from the lessons, and each one is mangled by a

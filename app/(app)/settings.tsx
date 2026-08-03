@@ -31,6 +31,9 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { purchases } from '@/lib/purchases';
 import { ads } from '@/lib/ads';
 import { notifications } from '@/lib/notifications';
+import { listNarrationVoices, describeVoice } from '@/lib/voice';
+import { speakSample, stopSpeaking } from '@/lib/narrate';
+import type { Voice } from 'expo-speech';
 import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
 import { effectiveStreak } from '@/lib/utils/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
@@ -49,7 +52,7 @@ const TIMES = ['06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '12:00 PM', '06:0
 // Where user feedback is sent (opens the user's mail app pre-addressed here).
 const FEEDBACK_EMAIL = 'philosophizelearn@gmail.com';
 
-type SectionKey = 'profile' | 'account' | 'notifications' | 'display' | 'privacy' | 'feedback' | 'subscription' | 'danger';
+type SectionKey = 'profile' | 'account' | 'notifications' | 'narration' | 'display' | 'privacy' | 'feedback' | 'subscription' | 'danger';
 
 /**
  * The Notifications entry is present only in a binary that can actually schedule
@@ -67,6 +70,11 @@ const SECTIONS: { key: SectionKey; label: string; icon: SketchIconName }[] = [
     : []),
   // No 'learning' rail entry: its last control (auto-advance) is gone, and a rail
   // tab that opens an empty card is the same defect as a switch that does nothing.
+  // Narration, by contrast, EARNED its entry rather than being given one: `voiceEnabled`
+  // and `settings.voiceId` are both read outside this screen now (lib/narrate.ts →
+  // CinematicPlayer), which is the §22 test. Until the lessons actually spoke, a
+  // voice picker here would have been decoration, and it was rightly absent.
+  { key: 'narration', label: 'Narration', icon: 'mic' },
   { key: 'display', label: 'Display', icon: 'book' },
   { key: 'privacy', label: 'Privacy', icon: 'lock' },
   { key: 'feedback', label: 'Feedback', icon: 'pencil' },
@@ -248,6 +256,8 @@ function Section({ section }: { section: SectionKey }) {
       return <AccountSection />;
     case 'notifications':
       return <NotificationsSection />;
+    case 'narration':
+      return <NarrationSection />;
     case 'display':
       return <DisplaySection />;
     case 'privacy':
@@ -669,6 +679,117 @@ function DisplaySection() {
 // That is what lets sanitizeSettings() prune them from AsyncStorage and the cloud
 // snapshot — a key left behind in the defaults is re-adopted on every load and
 // pushed back up forever.
+
+/* ---------------- Narration ---------------- */
+
+/**
+ * PICK THE VOICE BY EAR, BECAUSE NOTHING ELSE WORKS.
+ *
+ * `lib/voice.ts` ranks the device's voices from their identifiers, and that ranking
+ * is a guess: Android names its voices `en-gb-x-gbb-network`, which states neither
+ * gender nor timbre, and the code→voice mapping is undocumented and has changed
+ * between engine versions. So the automatic pick is a starting position, not an
+ * answer, and this screen exists to overrule it.
+ *
+ * Every row auditions on tap — with the same rate, pitch and text processing the
+ * lessons use (`speakSample`), so what is heard here is what will be heard there.
+ */
+function NarrationSection() {
+  const voiceEnabled = useUserDataStore((s) => s.voiceEnabled);
+  const setVoiceEnabled = useUserDataStore((s) => s.setVoiceEnabled);
+  const voiceId = useUserDataStore((s) => s.settings.voiceId);
+  const setSetting = useUserDataStore((s) => s.setSetting);
+
+  const [voices, setVoices] = useState<Voice[] | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    listNarrationVoices().then((v) => { if (alive) setVoices(v); });
+    // Leaving the screen mid-audition must not leave a voice talking over the app.
+    return () => { alive = false; stopSpeaking(); };
+  }, []);
+
+  const choose = (id: string | null) => {
+    setSetting('voiceId', id);
+    // Selecting IS auditioning — a picker that makes you tap twice to hear the
+    // thing you are picking gets compared by memory instead of by ear.
+    speakSample(id);
+  };
+
+  return (
+    <Card>
+      <Header title="Narration" sub="Who reads the lessons aloud, and whether anyone does." icon="mic" />
+      <View style={styles.hr} />
+
+      <Row
+        title="Read lessons aloud"
+        sub="Speaks the narration under the drawing. Questions, choices and quotes are never read — hearing the four options in one flat voice gives the answer away."
+        last={!voiceEnabled}
+      >
+        <Toggle
+          value={voiceEnabled}
+          onChange={(v) => {
+            setVoiceEnabled(v);
+            if (!v) stopSpeaking();
+          }}
+        />
+      </Row>
+
+      {voiceEnabled && (
+        <View style={{ marginTop: 16 }}>
+          <Text style={styles.voiceHint}>
+            Tap a voice to hear it read a real line from a lesson. Your phone supplies
+            these, so the list differs from device to device.
+          </Text>
+
+          {voices === null ? (
+            <Text style={styles.voiceEmpty}>Asking your device what voices it has…</Text>
+          ) : voices.length === 0 ? (
+            // Not a failure worth an error: some devices genuinely ship no
+            // text-to-speech engine, and the honest thing is to say where to get one.
+            <Text style={styles.voiceEmpty}>
+              This device has no speech voices installed. Installing a text-to-speech
+              engine — Google Speech Services on Android — will fill this list.
+            </Text>
+          ) : (
+            <>
+              <VoiceRow
+                title="Automatic"
+                sub="Let the app choose the best British voice it can find"
+                on={!voiceId}
+                onPress={() => choose(null)}
+              />
+              {voices.map((v) => {
+                const { title, sub } = describeVoice(v);
+                return (
+                  <VoiceRow
+                    key={v.identifier}
+                    title={title}
+                    sub={sub}
+                    on={voiceId === v.identifier}
+                    onPress={() => choose(v.identifier)}
+                  />
+                );
+              })}
+            </>
+          )}
+        </View>
+      )}
+    </Card>
+  );
+}
+
+function VoiceRow({ title, sub, on, onPress }: { title: string; sub: string; on: boolean; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={[styles.voiceRow, on && styles.voiceRowOn]}>
+      <View style={{ flex: 1, paddingRight: 10 }}>
+        <Text style={styles.voiceName}>{title}</Text>
+        <Text style={styles.voiceSub}>{sub}</Text>
+      </View>
+      {on ? <Text style={styles.voiceCheck}>✓</Text> : <SketchIcon name="mic" size={16} color={InkSoft} />}
+    </Pressable>
+  );
+}
 
 /* ---------------- Privacy ---------------- */
 
