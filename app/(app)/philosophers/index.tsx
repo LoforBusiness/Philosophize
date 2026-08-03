@@ -525,7 +525,12 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
 
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  // `gap` only separates cards WITHIN a row, and each row is its own FlatList item —
+  // so between rows there was nothing at all, and the hard shadow (which hangs
+  // SHADOW_Y below the wrapper, being absolutely positioned) landed on the tab of the
+  // card underneath. 17 leaves 12 of clear paper below the shadow, the same air the
+  // two columns get.
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 17 },
 
   // ── the file-tab card ──────────────────────────────────────────────────────
   // The wrapper carries the tab's height as padding so the body still starts at a
@@ -544,6 +549,19 @@ const styles = StyleSheet.create({
   cardBody: {
     width: CARD_W,
     minHeight: 118,
+    // FILLS THE WRAPPER, and this is the fix for the stray bar of ink under a card.
+    //
+    // A row is a plain flex row, so `alignItems` is `stretch`: when one name wraps to
+    // two lines and its neighbour's does not, the SHORTER card's wrapper is stretched
+    // to match while its body keeps its own height. `bodyShadow` is pinned to the
+    // wrapper, so the difference showed as a black box hanging below the white card —
+    // Anaxagoras beside Theophrastus, which only diverge once the system font size is
+    // turned up. It is latent for everyone: 40 of the 160 pairs put a one-line name
+    // beside a two-line one at the default size, and 65 at 1.3×.
+    //
+    // flexGrow rather than `flex: 1` on purpose. `flex: 1` also sets flexBasis 0, and
+    // in a wrapper whose own height is auto that measures the body at nothing.
+    flexGrow: 1,
     borderWidth: 2,
     borderColor: Ink,
     borderRadius: 12,
