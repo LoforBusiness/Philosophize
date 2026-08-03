@@ -10,6 +10,7 @@ import { lessonXP } from '@/constants/xp';
 import { exitLesson } from '../exitLesson';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { useBeatNarration } from '@/lib/narrate';
 import { useUIStore } from '@/stores/uiStore';
 import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
@@ -42,7 +43,7 @@ export interface SceneApi {
 export type SceneComponent = ComponentType<SceneApi>;
 
 export default function CinematicPlayer({
-  lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B],
+  lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], narrate = false,
 }: {
   lesson: Lesson;
   beats: BaseBeat[];
@@ -55,6 +56,15 @@ export default function CinematicPlayer({
    * Must contain every prop the scene draws, or the top/bottom will be clipped.
    */
   band?: [number, number];
+  /**
+   * Read the beat's narration line aloud. OPT-IN PER LESSON while the voice is
+   * being judged, so one lesson can be compared against the silent ones rather
+   * than the whole app changing at once.
+   *
+   * Only `beat.text` is ever spoken — see `useBeatNarration`. The question, its
+   * four choices and the saveable quote are deliberately left silent.
+   */
+  narrate?: boolean;
 }) {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
@@ -73,6 +83,18 @@ export default function CinematicPlayer({
   const [shown, setShown] = useState(0);
 
   const beat = beats[i];
+
+  // NARRATION. Placed here deliberately: every hook in this file must sit ABOVE
+  // the `if (done) return null` further down (§17 rule 1) — a hook below that line
+  // makes the final tap render a different number of hooks and takes the reward
+  // modal down with it.
+  //
+  // Voiced from `shown`, not `i`, because the deck lags a tap by its fade-out: the
+  // sentence should begin when its own paragraph is on screen, not over the tail
+  // of the one it replaces.
+  const voiceEnabled = useUserDataStore((s) => s.voiceEnabled);
+  useBeatNarration(beats[shown]?.text, narrate && voiceEnabled && !done);
+
   const clock = useSharedValue(0);
   const bt = useSharedValue(0);
   const bi = useSharedValue(0);
