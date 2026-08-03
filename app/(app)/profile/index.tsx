@@ -14,7 +14,7 @@ import { signOut } from '@/lib/supabase/auth';
 import { useAuthSession } from '@/lib/supabase/useSession';
 import { ALL_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
-import { awardedRank } from '@/data/ranks';
+import { rankProgress } from '@/data/ranks';
 import { BADGES } from '@/data/badges';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -102,7 +102,20 @@ export default function ProfileScreen() {
   const lessonsDone = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
   const quotesSaved = savedQuotes.length;
   const distinctViewed = Object.keys(philosopherViews).length;
-  const totalXP = xp + quotesSaved * 10 + distinctViewed * 5;
+  // THE STORE'S TOTAL, NOT A RE-DERIVED ONE.
+  //
+  // This read `xp + quotesSaved * 10 + distinctViewed * 5`, which paid for the same
+  // things twice: `userDataStore` already adds XP_PER_SAVED_QUOTE (3) and
+  // XP_PER_PHILOSOPHER_MET (2) the moment a quote is saved or a thinker is opened,
+  // so those were being counted again here — and at rates that match nothing in
+  // constants/xp.ts.
+  //
+  // It is the reason Profile and the Ranks sheet disagreed about the same account.
+  // With a real 8,905 XP, thirty saved quotes and nineteen thinkers, this line
+  // showed 9,300 — over the Epistemologist threshold — so Profile said "FINISH A
+  // LESSON TO REACH EPISTEMOLOGIST" while the sheet, reading the store, correctly
+  // said 395 XP still to go. The sheet was right.
+  const totalXP = xp;
 
   const mastery = ALL_BRANCHES.map((b) => {
     const total = b.paths.reduce((acc, p) => acc + p.lessons.length, 0);
@@ -152,9 +165,11 @@ export default function ProfileScreen() {
     bioSeed
   );
 
-  const { current: cur, next, pending } = awardedRank(rankIndex, totalXP);
-  const nextThreshold = next?.xp ?? cur.xp;
-  const rankPct = next ? Math.min(1, totalXP / next.xp) : 1;
+  // One shared computation — see `rankProgress`. This screen used to divide
+  // totalXP by the next threshold, which counts from zero rather than from the
+  // start of the current band and read 96% where the Ranks sheet read 77%.
+  const { current: cur, next, pending, pct: rankPct, toNext, inBand, bandSize } =
+    rankProgress(rankIndex, totalXP);
 
   const join = joinedAt ? new Date(joinedAt) : new Date();
   const joinedLabel = `JOINED ${MONTHS[join.getMonth()]} ${join.getFullYear()}`;
@@ -325,7 +340,12 @@ export default function ProfileScreen() {
             <View style={styles.rankBoxTop}>
               <Text style={styles.rankName}>{cur.name}</Text>
               <Text style={styles.rankXp}>
-                {totalXP.toLocaleString()} / {nextThreshold.toLocaleString()} XP
+                {/* XP EARNED INSIDE THIS BAND, not total against the next threshold.
+                    The old pair could read "10,605 / 9,300 XP" once a promotion was
+                    pending — a fraction bigger than its own denominator. */}
+                {next
+                  ? `${inBand.toLocaleString()} / ${bandSize.toLocaleString()} XP`
+                  : `${totalXP.toLocaleString()} XP`}
               </Text>
             </View>
             <View style={styles.bigTrack}>
@@ -335,7 +355,7 @@ export default function ProfileScreen() {
               {pending
                 ? `FINISH A LESSON TO REACH ${(next?.name ?? '').toUpperCase()}`
                 : next
-                  ? `${(nextThreshold - totalXP).toLocaleString()} XP UNTIL ${next.name.toUpperCase()}`
+                  ? `${toNext.toLocaleString()} XP UNTIL ${next.name.toUpperCase()}`
                   : 'HIGHEST RANK ACHIEVED'}
             </Text>
           </View>

@@ -78,3 +78,63 @@ export function awardedRank(rankIndex: number, totalXP: number): {
     pending: rankForXP(totalXP).index > i,
   };
 }
+
+/**
+ * ONE ANSWER FOR "HOW FAR THROUGH THIS RANK AM I", because three screens each
+ * worked it out and got three different numbers.
+ *
+ * Profile measured `totalXP / next.xp` — total XP against the next threshold
+ * counted from ZERO, not progress across the current band. It agrees with the
+ * band only at rank 1, where the band happens to start at 0, and over-reports
+ * everywhere above: at 8,905 XP a Metaphysician (7,600 → 9,300) read 96% on
+ * Profile and 77% in the Ranks sheet, on the same data at the same moment.
+ *
+ * Profile also printed the raw pair "10,605 / 9,300 XP", which is what a pending
+ * promotion looks like when nothing clamps it — more XP than the target. The band
+ * figures below are capped, so a full band reads as full instead of as absurd.
+ */
+export function rankProgress(rankIndex: number, totalXP: number): {
+  current: RankDef;
+  next: RankDef | null;
+  index: number;
+  pending: boolean;
+  /** 0..1 across the CURRENT band — the only progress figure any screen should draw. */
+  pct: number;
+  /** XP still needed for the next rank's threshold, floored at 0. */
+  toNext: number;
+  /** XP earned inside this band, and the band's size — for an "x / y" label. */
+  inBand: number;
+  bandSize: number;
+} {
+  const a = awardedRank(rankIndex, totalXP);
+  const span = a.next ? a.next.xp - a.current.xp : 0;
+  const raw = totalXP - a.current.xp;
+  return {
+    ...a,
+    pct: a.next ? Math.max(0, Math.min(1, raw / span)) : 1,
+    toNext: a.next ? Math.max(0, a.next.xp - totalXP) : 0,
+    inBand: span > 0 ? Math.max(0, Math.min(span, raw)) : 0,
+    bandSize: span,
+  };
+}
+
+/**
+ * What a given rank still costs — in XP *and* in finished lessons.
+ *
+ * The Ranks sheet used to answer this in XP alone, which contradicted its own
+ * header: with a promotion pending it told you "Finish a lesson to reach
+ * Epistemologist" at the top and "0 XP to unlock" on Epistemologist's own page.
+ * Both were true and together they were nonsense, because a rank costs BOTH —
+ * `rankIndex` only ever advances one step per finished lesson (see `awardedRank`),
+ * so a rank three tiers up needs three lessons no matter how much XP is banked.
+ */
+export function rankRequirement(targetIndex: number, rankIndex: number, totalXP: number): {
+  xpShort: number;
+  lessonsShort: number;
+} {
+  const i = Math.max(0, Math.min(RANKS.length - 1, Math.floor(rankIndex) || 0));
+  return {
+    xpShort: Math.max(0, RANKS[targetIndex].xp - totalXP),
+    lessonsShort: Math.max(0, targetIndex - i),
+  };
+}

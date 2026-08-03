@@ -11,7 +11,7 @@ import {
 import { MotiView, AnimatePresence } from 'moti';
 import Glyph from './Glyph';
 import RankSeal, { type SealState } from './RankSeal';
-import { RANKS, awardedRank, type RankDef } from '@/data/ranks';
+import { RANKS, awardedRank, rankProgress, rankRequirement, type RankDef } from '@/data/ranks';
 import { circleForRank, RANK_EPITHETS, toRoman } from '@/data/rankLore';
 import { BADGES, type ProgressStats } from '@/data/badges';
 import { ALL_BRANCHES } from '@/data';
@@ -264,16 +264,27 @@ function RankDetail({
   let progress: number | null = null;
   let statusLine = '';
   if (st === 'current') {
-    const prevXP = rank.xp;
-    const span = nextRank ? nextRank.xp - prevXP : 1;
-    progress = nextRank ? clamp((totalXP - prevXP) / span, 0, 1) : 1;
-    statusLine = nextRank
-      ? `${Math.max(0, nextRank.xp - totalXP).toLocaleString()} XP to ${nextRank.name}`
-      : 'Highest rank attained';
+    const p = rankProgress(currentIndex, totalXP);
+    progress = p.pct;
+    statusLine = !p.next
+      ? 'Highest rank attained'
+      : p.pending
+        ? `Finish a lesson to reach ${p.next.name}`
+        : `${p.toNext.toLocaleString()} XP to ${p.next.name}`;
   } else if (st === 'earned') {
     statusLine = 'Achieved';
   } else {
-    statusLine = `${Math.max(0, rank.xp - totalXP).toLocaleString()} XP to unlock`;
+    // A LOCKED RANK COSTS XP *AND* LESSONS, and saying only the first contradicted
+    // this sheet's own header: with a promotion pending it read "Finish a lesson to
+    // reach Epistemologist" at the top and "0 XP to unlock" on Epistemologist's own
+    // page. Both were true; together they were nonsense. `rankIndex` advances one
+    // step per finished lesson, so a rank three tiers up needs three lessons however
+    // much XP is banked.
+    const { xpShort, lessonsShort } = rankRequirement(i, currentIndex, totalXP);
+    const lessons = `${lessonsShort} lesson${lessonsShort === 1 ? '' : 's'}`;
+    statusLine = xpShort > 0
+      ? `${xpShort.toLocaleString()} XP and ${lessons} to unlock`
+      : `${lessons} to unlock`;
   }
 
   return (
