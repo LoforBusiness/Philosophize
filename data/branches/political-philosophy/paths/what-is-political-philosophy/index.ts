@@ -29,6 +29,8 @@ import justWarTheory from './lessons/just-war-theory';
 import punishmentAndPrisons from './lessons/punishment-and-prisons';
 import bordersAndImmigration from './lessons/borders-and-immigration';
 import idealVsNonIdealTheory from './lessons/ideal-vs-non-ideal-theory';
+import theTragedyOfTheCommons from './lessons/the-tragedy-of-the-commons';
+import whyVoteAtAll from './lessons/why-vote-at-all';
 
 // 5 units — split from the original single "What Is Political Philosophy?" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
@@ -45,7 +47,10 @@ const units: Path[] = [
     slug: "the-goods-we-argue-over",
     name: "The Goods We Argue Over",
     description: "Justice, rights, equality, democracy, property — the great values a society has to weigh, defend, and divide.",
-    lessons: [justiceAsFairness, whereRightsComeFrom, thePuzzleOfEquality, democracyAndItsCritics, propertyAndDistribution],
+    // Appended, never inserted: `lessonsByUnit` counts completions BY POSITION, so
+    // slotting a lesson mid-unit would silently re-point every later slot for anyone
+    // part-way through (CLAUDE.md §11).
+    lessons: [justiceAsFairness, whereRightsComeFrom, thePuzzleOfEquality, democracyAndItsCritics, propertyAndDistribution, theTragedyOfTheCommons],
   },
   {
     id: "political-philosophy-liberty-justice-and-dissent",
@@ -66,7 +71,7 @@ const units: Path[] = [
     slug: "identity-and-the-hard-cases",
     name: "Identity & the Hard Cases",
     description: "The communal self, recognition, and feminism, then politics' toughest real-world tests — war, prisons, borders — down to how we should even theorize.",
-    lessons: [communitarianismVsLiberalism, recognitionAndMulticulturalism, feministPoliticalPhilosophy, deliberativeDemocracy, justWarTheory, punishmentAndPrisons, bordersAndImmigration, idealVsNonIdealTheory],
+    lessons: [communitarianismVsLiberalism, recognitionAndMulticulturalism, feministPoliticalPhilosophy, deliberativeDemocracy, justWarTheory, punishmentAndPrisons, bordersAndImmigration, idealVsNonIdealTheory, whyVoteAtAll],
   },
 ];
 

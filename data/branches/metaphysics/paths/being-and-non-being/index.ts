@@ -29,6 +29,8 @@ import lawsOfNature from './lessons/laws-of-nature';
 import panpsychism from './lessons/panpsychism';
 import realismVsAntiRealism from './lessons/realism-vs-anti-realism';
 import doesMetaphysicsMakeProgress from './lessons/does-metaphysics-make-progress';
+import doHolesExist from './lessons/do-holes-exist';
+import couldTwoThingsBeExactlyAlike from './lessons/could-two-things-be-exactly-alike';
 
 // 5 units — split from the original single "Being and Non-Being" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
@@ -52,7 +54,10 @@ const units: Path[] = [
     slug: "the-fabric-of-reality",
     name: "The Fabric of Reality",
     description: "Meet the hidden machinery of the world — possibility, cause, mind, numbers, and the stuff things are ultimately made of.",
-    lessons: [possibilityAndNecessity, causationHumesChallenge, compatibilismRevisited, hardProblemConsciousnessQualia, abstractObjectsPlatonism, substanceAndProperties],
+    // Appended, never inserted: `lessonsByUnit` counts completions BY POSITION, so
+    // slotting a lesson mid-unit would silently re-point every later slot for anyone
+    // part-way through (CLAUDE.md §11).
+    lessons: [possibilityAndNecessity, causationHumesChallenge, compatibilismRevisited, hardProblemConsciousnessQualia, abstractObjectsPlatonism, substanceAndProperties, doHolesExist],
   },
   {
     id: "metaphysics-puzzles-at-the-edge-of-the-real",
@@ -66,7 +71,7 @@ const units: Path[] = [
     slug: "frontiers-of-reality",
     name: "Frontiers of Reality",
     description: "Zoom out to the big picture — how reality layers, whether its laws truly compel, and if the world needs a mind at all.",
-    lessons: [emergenceAndReduction, lawsOfNature, panpsychism, realismVsAntiRealism, doesMetaphysicsMakeProgress],
+    lessons: [emergenceAndReduction, lawsOfNature, panpsychism, realismVsAntiRealism, doesMetaphysicsMakeProgress, couldTwoThingsBeExactlyAlike],
   },
 ];
 

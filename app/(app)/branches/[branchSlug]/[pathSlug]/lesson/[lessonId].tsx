@@ -61,6 +61,14 @@ import { Ethics31Lesson } from '@/components/lesson/cinematic/ethics31Scene';
 import { Ethics32Lesson } from '@/components/lesson/cinematic/ethics32Scene';
 import { Logic31Lesson } from '@/components/lesson/cinematic/logic31Scene';
 import { Logic32Lesson } from '@/components/lesson/cinematic/logic32Scene';
+import { Epistemology31Lesson } from '@/components/lesson/cinematic/epistemology31Scene';
+import { Epistemology32Lesson } from '@/components/lesson/cinematic/epistemology32Scene';
+import { Metaphysics31Lesson } from '@/components/lesson/cinematic/metaphysics31Scene';
+import { Metaphysics32Lesson } from '@/components/lesson/cinematic/metaphysics32Scene';
+import { Aesthetics31Lesson } from '@/components/lesson/cinematic/aesthetics31Scene';
+import { Aesthetics32Lesson } from '@/components/lesson/cinematic/aesthetics32Scene';
+import { Political31Lesson } from '@/components/lesson/cinematic/political31Scene';
+import { Political32Lesson } from '@/components/lesson/cinematic/political32Scene';
 import { Logic22Lesson } from '@/components/lesson/cinematic/logic22Scene';
 import { Logic25Lesson } from '@/components/lesson/cinematic/logic25Scene';
 import { Logic26Lesson } from '@/components/lesson/cinematic/logic26Scene';
@@ -165,6 +173,16 @@ const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   'ethics-ethics-32': Ethics32Lesson,
   'logic-arguments-31': Logic31Lesson,
   'logic-arguments-32': Logic32Lesson,
+  // Two NEW lessons per branch, each staged and answered differently from the last
+  // (E33): a cabinet of drawers you open, a board of maps you pick a scale from.
+  'epistemology-knowledge-31': Epistemology31Lesson,
+  'epistemology-knowledge-32': Epistemology32Lesson,
+  'metaphysics-being-31': Metaphysics31Lesson,
+  'metaphysics-being-32': Metaphysics32Lesson,
+  'aesthetics-aesthetics-31': Aesthetics31Lesson,
+  'aesthetics-aesthetics-32': Aesthetics32Lesson,
+  'political-political-31': Political31Lesson,
+  'political-political-32': Political32Lesson,
   'logic-arguments-22': Logic22Lesson,
   'ethics-ethics-18': Ethics18Lesson,
   'metaphysics-being-13': Metaphysics13Lesson,

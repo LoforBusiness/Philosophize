@@ -29,6 +29,8 @@ import becomingAWiseKnower from './lessons/becoming-a-wise-knower';
 import knowingHowAndKnowingThat from './lessons/knowing-how-and-knowing-that';
 import theTicketThatLoses from './lessons/the-ticket-that-loses';
 import canYouChooseABelief from './lessons/can-you-choose-a-belief';
+import whyTrustYourMemory from './lessons/why-trust-your-memory';
+import theMapIsNotTheTerritory from './lessons/the-map-is-not-the-territory';
 
 // 5 units — split from the original single "What Is Knowledge?" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
@@ -62,14 +64,14 @@ const units: Path[] = [
     slug: "what-holds-belief-up",
     name: "What Holds Belief Up",
     description: "If every reason needs a reason, find what finally makes a belief stand — and whether the skeptic can be answered.",
-    lessons: [reliabilismAndTheValueOfKnowledge, virtueEpistemology, answeringTheSkeptic, theProblemOfTheCriterion, canYouChooseABelief],
+    lessons: [reliabilismAndTheValueOfKnowledge, virtueEpistemology, answeringTheSkeptic, theProblemOfTheCriterion, canYouChooseABelief, whyTrustYourMemory],
   },
   {
     id: "epistemology-the-wise-knower",
     slug: "the-wise-knower",
     name: "The Wise Knower",
     description: "The humility, ethics, and hard-won wisdom of knowing well among other people.",
-    lessons: [peerDisagreement, epistemicInjustice, motivatedReasoning, knowledgeVersusUnderstanding, becomingAWiseKnower],
+    lessons: [peerDisagreement, epistemicInjustice, motivatedReasoning, knowledgeVersusUnderstanding, becomingAWiseKnower, theMapIsNotTheTerritory],
   },
 ];
 

@@ -89,7 +89,7 @@ Philosophize/
 │   ├── lesson/                  # LessonRunner, CardShell, LessonReward, LessonLoader
 │   │   ├── cards/               # 8 card components (incl. DilemmaCard, QuoteCard)
 │   │   ├── interactions/        # MultipleChoice, TrueFalse, SortItems (3 live)
-│   │   ├── cinematic/           # THE BIG ONE — 72 wired cinematic lessons, the
+│   │   ├── cinematic/           # THE BIG ONE — 96 wired cinematic lessons, the
 │   │   │                        #   shared rig.ts, Stickman.tsx, CinematicPlayer,
 │   │   │                        #   per-lesson *Scene.tsx + *Script.ts (§17)
 │   │   ├── feedback/            # CorrectFeedback, IncorrectFeedback (built, unwired)
@@ -107,7 +107,7 @@ Philosophize/
 │   ├── types.ts                 # ALL type definitions — the load-bearing file
 │   ├── index.ts                 # ALL_BRANCHES + getLessonById, lessonAccessibility,
 │   │                            #   branchCountsFromUnits, getLessonUnitInfo
-│   ├── branches/                # 6 branches · 28 units · 180 lessons (§5)
+│   ├── branches/                # 6 branches · 28 units · 192 lessons (§5)
 │   ├── philosophers.ts          # BASE + composes ALL_PHILOSOPHERS (~223)
 │   ├── extra-philosophers/      # ancient/eastern/medieval/modern/contemporary/
 │   │                            #   expansion, expansion2a/2b/3/4 (+ *-facts)
@@ -162,27 +162,31 @@ Curriculum content lives in `data/branches/` as strongly-typed TypeScript files.
 
 ### Shape today
 
-**Every branch holds exactly 30 lessons, of which exactly 14 are cinematic.** Both
+**Every branch holds exactly 32 lessons, of which exactly 16 are cinematic.** Both
 numbers are deliberate invariants rather than where the counts happened to land —
 the totals were 27–30 and the cinematic share was 11–14, and both showed on the
 Learn cards.
 
-They also constrain each other, which is the part worth remembering: **the way to
-raise the cinematic count is to give an EXISTING card lesson a scene, not to write
-a new one.** Twelve new cinematic lessons would have taken the totals to 33/32/30/
-33/31/33 and undone the first invariant to satisfy the second. Converting costs a
-`*Script.ts` + `*Scene.tsx` + a `CINEMATIC` entry, and usually a second graded
-question added to the data file (E37c), and it moves nothing else.
+They also constrain each other, and there are exactly two moves that respect both:
+
+- **To raise the CINEMATIC count, give an EXISTING card lesson a scene.** Writing
+  twelve new cinematic lessons instead would have taken the totals to
+  33/32/30/33/31/33 and broken the first invariant to satisfy the second.
+  Converting costs a `*Script.ts` + `*Scene.tsx` + a `CINEMATIC` entry, and usually
+  a second graded question added to the data file (E37c). It moves nothing else.
+- **To raise the LESSON count, add the same number to every branch and make each
+  new one cinematic.** Two per branch took 30/14 to 32/16 and held both invariants
+  in one pass. Adding one lesson to one branch breaks both at once.
 
 | Branch | Units | Lessons | of which cinematic |
 |---|---|---|---|
-| Metaphysics | 5 | 30 | 14 |
-| Epistemology | 5 | 30 | 14 |
-| Logic | 5 | 30 | 14 |
-| Ethics | 5 | 30 | 14 |
-| Aesthetics | 3 | 30 | 14 |
-| Political Philosophy | 5 | 30 | 14 |
-| **Total** | **28** | **180** | **84** |
+| Metaphysics | 5 | 32 | 16 |
+| Epistemology | 5 | 32 | 16 |
+| Logic | 5 | 32 | 16 |
+| Ethics | 5 | 32 | 16 |
+| Aesthetics | 3 | 32 | 16 |
+| Political Philosophy | 5 | 32 | 16 |
+| **Total** | **28** | **192** | **96** |
 
 > **`Path` IS a unit.** The type is still called `Path` in `data/types.ts`, but
 > every screen calls it a *unit* and `branch.paths` is the unit list
@@ -223,7 +227,7 @@ Every lesson MUST:
 - Have exactly one correct answer in every `MultipleChoiceInteraction`
 
 > `tsc` checks types only, so these are enforced by `npm run check:cards`
-> (`scripts/validate-lessons.mjs`) — 180/180 clean. Cinematic lessons have their own
+> (`scripts/validate-lessons.mjs`) — 192/192 clean. Cinematic lessons have their own
 > shape check, `npm run check:cinematic` (§17). `npm run check` runs tsc plus both.
 
 ### Content Limits
@@ -387,14 +391,16 @@ A unit's `index.ts` exports an array of `Path` objects (the units); each needs a
 stable `id` — `lessonsByUnit` is keyed on it, so **renaming an id silently resets
 that unit's progress for every existing user.**
 
-**Keep every branch at 30 (§5).** The counts were 27–30 and it showed on the Learn
-cards, so they were levelled deliberately; adding one lesson to one branch puts
-them back out. Add six, one per branch, or don't add any.
+**Keep every branch at 32, and at 16 cinematic (§5).** The counts were 27–30 and it
+showed on the Learn cards, so they were levelled deliberately; adding one lesson to
+one branch puts them back out. Add six, one per branch — and give each of the six a
+scene, or the cinematic invariant goes out instead of the lesson one.
 
-**The free id is usually not the next number.** A branch's ids run 1…30 with
-*gaps* where lessons were removed — ethics had no 9, aesthetics no 11 or 16,
-epistemology no 2, 13 or 21, and those six gaps were exactly the six lessons
-missing. So grep the branch's `id:` values, take a vacant number, and **append the
+**Grep for the free id; do not assume it is the next number.** Every branch runs
+1…32 unbroken today, but that is recent: the ids used to carry *gaps* where lessons
+had been removed — ethics had no 9, aesthetics no 11 or 16, epistemology no 2, 13 or
+21 — and those six gaps were exactly the six lessons missing when the branches were
+levelled. So grep the branch's `id:` values, take a vacant number, and **append the
 lesson to the end of whichever unit suits it** rather than slotting it where its
 number would sort. The id is cosmetic; the position is load-bearing (F45b, and the
 `lessonsByUnit` warning above).
@@ -409,7 +415,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` = `tsc` + both structural validators. `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 180 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across all 72. Both are clean today, so anything they print is yours.
+**Validation:** `npm run check` = `tsc` + both structural validators. `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 192 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across all 96. Both are clean today, so anything they print is yours.
 
 **Cinematic lessons have their own rule book:** [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md) — figure scale and proportion, reach and joint rules, motion and end-poses, band/deck/box/wrap clipping, and the text-must-match-the-picture rule. Read it before authoring a cinematic lesson and run its Part 3 checks before calling one done.
 
@@ -419,10 +425,10 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **Phase 5 — shipped and iterating in public.** Live on Google Play, versionCode 16.
 
-- **Content:** 6 branches · **28 units** · **180 lessons**. **~223 philosophers**
+- **Content:** 6 branches · **28 units** · **192 lessons**. **~223 philosophers**
   with bios, eras, 4–6 quotes and three "Did you know?" facts apiece.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
-  gating; **72 cinematic lessons** (animated stickman scenes, §17); animated
+  gating; **96 cinematic lessons** (animated stickman scenes, §17); animated
   `LessonReward` with XP count-up, streak and rank-up.
 - **Gamification:** 50 badges, 25 ranks with a conferred-rank ceremony, XP +
   level curve, daily streak.
@@ -490,7 +496,7 @@ The Scholar's Pass paywall UI already exists; this is the value model it should 
 **Why someone pays (the thesis):**
 1. They actually **retain** what they learn (spaced review), not just tap through it.
 2. The **cinematic, narrated** lessons feel like nothing else in the category.
-3. **Breadth** — 6 branches, 180 lessons, ~223 thinkers — is a genuine library.
+3. **Breadth** — 6 branches, 192 lessons, ~223 thinkers — is a genuine library.
 4. **Credential & mastery** — ranks + path-mastery give visible proof of progress.
 5. The **daily habit** (streak + review) makes the subscription part of a routine.
 
@@ -515,7 +521,7 @@ units where every other branch has 5 — level it up.
 validation script** that used to head this item is done — `npm run check`, see §11.)
 
 **Done since this list was written** — kept so nobody re-plans them: content grew
-from 60 lessons to 180 across 28 units; Supabase cloud sync went live; 48
+from 60 lessons to 192 across 28 units; Supabase cloud sync went live; 96
 cinematic lessons shipped; the app launched on Google Play with ads,
 subscriptions and a widget; the XP model was reconciled behind `lessonXP()`;
 ranks gained a conferred-rank ceremony; and the branch screen became a
@@ -545,7 +551,7 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**84 lessons** are not card decks at all: they are tap-advanced animated scenes.
+**96 lessons** are not card decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
 `CINEMATIC` map from lesson id → component; anything absent falls through to the
 normal `LessonRunner`. **Removing an entry is a complete, safe rollback** for one
