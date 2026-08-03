@@ -72,8 +72,12 @@ export interface AppSettings {
   widgetPlacement: WidgetPlacement;
   // Privacy
   usageAnalytics: boolean;
-  // Narration
-  voiceId: string | null; // manually chosen TTS voice; null = automatic
+  // Narration: `voiceId` was here — a hand-picked TTS voice, written by a picker in
+  // Settings that listed every voice the device had. It did its job (it is how the
+  // narrator was chosen, by ear) and the choice is now fixed in lib/voice.ts, so
+  // nothing writes it any more. Removed rather than defaulted to null, so
+  // sanitizeSettings() prunes it from AsyncStorage and the cloud snapshot instead of
+  // pushing a dead string up forever.
   // Data
   autoBackup: boolean;
 }
@@ -93,7 +97,6 @@ const DEFAULT_SETTINGS: AppSettings = {
   // Privacy-by-default: analytics stay OFF until the user explicitly opts in
   // (matches PostHog's defaultOptIn:false). Toggle in Settings → Usage Analytics.
   usageAnalytics: false,
-  voiceId: null,
   autoBackup: true,
 };
 
@@ -120,8 +123,10 @@ function sanitizeSettings(stored: unknown): AppSettings {
     const v = p[k as string];
     if (v !== undefined && typeof v === typeof DEFAULT_SETTINGS[k]) (out as any)[k] = v;
   }
-  // voiceId is `string | null`, so `typeof null === 'object'` fails the check above.
-  if (p.voiceId === null || typeof p.voiceId === 'string') out.voiceId = p.voiceId as string | null;
+  // A `string | null` key needed rescuing here, because `typeof null === 'object'`
+  // fails the check above. There is no such key left — `voiceId` was the only one —
+  // so if you add one, it needs its own line right here or it will silently reset to
+  // its default on every load.
   return out;
 }
 

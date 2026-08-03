@@ -1,5 +1,4 @@
 import * as Speech from 'expo-speech';
-import { useUserDataStore } from '@/stores/userDataStore';
 
 // Resolves the voice used for narration. A voice the user picked by hand in
 // Settings always wins; otherwise we auto-select the best available "deep
@@ -111,36 +110,30 @@ export function describeVoice(v: Speech.Voice): { title: string; sub: string } {
   return { title, sub };
 }
 
+// `listNarrationVoices` lived here — every voice the device had, best first, for a
+// Settings picker to offer. It served its purpose: the list is how the narrator was
+// found, by hearing all of them side by side on the real lesson text. Once that
+// answer was known the list became a menu with one right item on it, so both are
+// gone. `score` stays, because the fallback in `resolve` still needs to rank what
+// is present when the chosen voice is absent.
+
 /**
- * Every voice worth offering, best first.
+ * THE NARRATOR. Google's en-GB voice "B" — the one the lessons are read in.
  *
- * Deliberately NOT filtered down to a shortlist. The scoring above is a guess made
- * from identifiers, and the whole reason this list exists is that the guess was
- * wrong on a real phone — so the reader gets to hear all of them and overrule it.
+ * This is a fixed decision about the product, not a preference. It was chosen by
+ * listening to every voice a phone offered, side by side, on the real lesson text;
+ * the app should sound like itself on every device rather than like whatever the
+ * local engine happened to rank first.
+ *
+ * The chain below exists because the choice CANNOT ALWAYS BE HONOURED. Voice ids
+ * are supplied by the device, and `en-gb-x-gbb-network` is a Google Speech Services
+ * voice: a Samsung engine, an iPhone, or a phone with no Google TTS will not have
+ * it. Hard-coding one id and stopping there would mean silence on those devices —
+ * and Android reports a missing voice as silence rather than as an error, so the
+ * failure would be invisible. Hence: the voice, then the same voice on-device, then
+ * the best-scoring English voice present, then the engine's own default.
  */
-export async function listNarrationVoices(): Promise<Speech.Voice[]> {
-  let voices: Speech.Voice[] = [];
-  // Same retry as `resolve`: the list can come back empty until the engine is up.
-  for (let attempt = 0; attempt < 8 && voices.length === 0; attempt++) {
-    try {
-      voices = (await Speech.getAvailableVoicesAsync()) || [];
-    } catch {
-      /* try again */
-    }
-    if (voices.length === 0) await new Promise((r) => setTimeout(r, 250));
-  }
-  const seen = new Set<string>();
-  return voices
-    .map((v) => ({ v, s: score(v) }))
-    .filter((x) => x.s > -50)
-    .sort((a, b) => b.s - a.s)
-    .filter((x) => {
-      if (seen.has(x.v.identifier)) return false;
-      seen.add(x.v.identifier);
-      return true;
-    })
-    .map((x) => x.v);
-}
+const NARRATOR = /-x-gbb-/;
 
 async function resolve(): Promise<string | null> {
   // On web the voice list can be empty until `voiceschanged` fires; retry briefly.
@@ -148,6 +141,12 @@ async function resolve(): Promise<string | null> {
     try {
       const voices = await Speech.getAvailableVoicesAsync();
       if (voices && voices.length > 0) {
+        const id = (v: Speech.Voice) => (v.identifier || '').toLowerCase();
+        const narrator =
+          voices.find((v) => NARRATOR.test(id(v)) && /-network$/.test(id(v))) ??
+          voices.find((v) => NARRATOR.test(id(v)));
+        if (narrator) return narrator.identifier;
+
         const best = [...voices]
           .map((v) => ({ v, s: score(v) }))
           .sort((a, b) => b.s - a.s)[0];
@@ -163,6 +162,21 @@ async function resolve(): Promise<string | null> {
 }
 
 /**
+ * The voice object currently narrating, for Settings to name. Null when the device
+ * gave us nothing and the engine's own default is doing the reading.
+ */
+export async function getNarratorVoice(): Promise<Speech.Voice | null> {
+  const want = await getBritishVoice();
+  if (!want) return null;
+  try {
+    const voices = await Speech.getAvailableVoicesAsync();
+    return (voices || []).find((v) => v.identifier === want) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * The on-device twin of a server-rendered Android voice, or null if there is none.
  *
  * `en-gb-x-gbb-network` and `en-gb-x-gbb-local` are the same voice: one rendered on
@@ -175,31 +189,13 @@ export function offlineTwin(id: string | null | undefined): string | null {
   return /-network$/.test(id) ? id.replace(/-network$/, '-local') : null;
 }
 
-/** Identifiers this device actually has, cached. Empty means "could not tell". */
-let knownIds: Set<string> | undefined;
-async function deviceHas(id: string): Promise<boolean> {
-  if (knownIds === undefined) {
-    try {
-      const v = await Speech.getAvailableVoicesAsync();
-      knownIds = new Set((v || []).map((x) => x.identifier));
-    } catch {
-      knownIds = new Set();
-    }
-  }
-  // An empty set means the enumeration failed, not that the device has no voices.
-  // Overriding the user's choice on that basis would be a guess dressed as a fact.
-  return knownIds.size === 0 || knownIds.has(id);
-}
-
 export async function getBritishVoice(): Promise<string | null> {
-  // A hand-picked voice (Settings → Narration) overrides auto.
-  const manual = useUserDataStore.getState().settings?.voiceId;
-  // A VOICE ID IS DEVICE-SPECIFIC, AND SETTINGS RIDE THE CLOUD SNAPSHOT. Signing in
-  // on a new phone restores `voiceId` along with everything else, and that phone may
-  // simply not have `en-gb-x-gbb-network`. Android answers a missing voice with
-  // silence rather than an error, so the failure would look exactly like the feature
-  // being broken. Check first, and fall through to the automatic pick if it is gone.
-  if (manual && (await deviceHas(manual))) return manual;
+  // NO MANUAL OVERRIDE. `settings.voiceId` used to be consulted here, written by a
+  // picker in Settings that listed every voice the device had. The picker did its
+  // job — it was how the narrator above was chosen — and then the choice was made,
+  // so the list became a menu with one right answer on it. The key is gone from
+  // AppSettings too, so sanitizeSettings() prunes it from AsyncStorage and the cloud
+  // snapshot rather than syncing a dead string forever (§22).
   if (cached !== undefined) return cached;
   if (!pending) {
     pending = resolve()

@@ -54,12 +54,14 @@ export const NARRATION_SAMPLE =
  * libel a voice that then sounds different in the lesson, which would make the
  * picker worse than useless.
  */
-export function speakSample(voiceId: string | null) {
-  // Auditioning is the one moment the real voice must be attempted, whatever
+export function speakSample() {
+  // Pressing "Hear it" is the one moment the real voice must be attempted, whatever
   // happened on a previous train journey.
   downgraded = false;
   Speech.stop();
-  say(forSpeech(NARRATION_SAMPLE), voiceId);
+  getBritishVoice()
+    .then((voice) => say(forSpeech(NARRATION_SAMPLE), voice))
+    .catch(() => { /* a device with no TTS engine simply stays silent */ });
 }
 
 /**

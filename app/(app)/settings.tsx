@@ -31,7 +31,7 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { purchases } from '@/lib/purchases';
 import { ads } from '@/lib/ads';
 import { notifications } from '@/lib/notifications';
-import { listNarrationVoices, describeVoice } from '@/lib/voice';
+import { getNarratorVoice, describeVoice } from '@/lib/voice';
 import { speakSample, stopSpeaking } from '@/lib/narrate';
 import type { Voice } from 'expo-speech';
 import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
@@ -683,42 +683,41 @@ function DisplaySection() {
 /* ---------------- Narration ---------------- */
 
 /**
- * PICK THE VOICE BY EAR, BECAUSE NOTHING ELSE WORKS.
+ * THE NARRATOR IS NOT A CHOICE ANY MORE.
  *
- * `lib/voice.ts` ranks the device's voices from their identifiers, and that ranking
- * is a guess: Android names its voices `en-gb-x-gbb-network`, which states neither
- * gender nor timbre, and the code→voice mapping is undocumented and has changed
- * between engine versions. So the automatic pick is a starting position, not an
- * answer, and this screen exists to overrule it.
+ * This screen used to list every voice the device had, each auditioning on tap. That
+ * was the right tool for exactly one job — finding out which voice the lessons should
+ * be read in, which cannot be decided from an identifier and had to be done by ear.
+ * The answer came back the same on every listen, and a menu with one right item on it
+ * is not a setting, it is a way to make the app worse by accident.
  *
- * Every row auditions on tap — with the same rate, pitch and text processing the
- * lessons use (`speakSample`), so what is heard here is what will be heard there.
+ * So the voice is fixed in `lib/voice.ts` and this section states it rather than
+ * offering it. What remains is the one control that is genuinely the reader's: whether
+ * anybody is speaking at all.
+ *
+ * The voice is still NAMED here rather than asserted, because the chosen one is a
+ * Google Speech Services voice and a device without it falls down the chain to
+ * something else. Printing what is actually loaded means a phone that sounds wrong
+ * says so, instead of leaving it a mystery.
  */
 function NarrationSection() {
   const voiceEnabled = useUserDataStore((s) => s.voiceEnabled);
   const setVoiceEnabled = useUserDataStore((s) => s.setVoiceEnabled);
-  const voiceId = useUserDataStore((s) => s.settings.voiceId);
-  const setSetting = useUserDataStore((s) => s.setSetting);
 
-  const [voices, setVoices] = useState<Voice[] | null>(null);
+  const [voice, setVoice] = useState<Voice | null | undefined>(undefined);
 
   useEffect(() => {
     let alive = true;
-    listNarrationVoices().then((v) => { if (alive) setVoices(v); });
-    // Leaving the screen mid-audition must not leave a voice talking over the app.
+    getNarratorVoice().then((v) => { if (alive) setVoice(v); });
+    // Leaving the screen mid-sentence must not leave a voice talking over the app.
     return () => { alive = false; stopSpeaking(); };
   }, []);
 
-  const choose = (id: string | null) => {
-    setSetting('voiceId', id);
-    // Selecting IS auditioning — a picker that makes you tap twice to hear the
-    // thing you are picking gets compared by memory instead of by ear.
-    speakSample(id);
-  };
+  const named = voice ? describeVoice(voice) : null;
 
   return (
     <Card>
-      <Header title="Narration" sub="Who reads the lessons aloud, and whether anyone does." icon="mic" />
+      <Header title="Narration" sub="Whether the lessons read themselves aloud." icon="mic" />
       <View style={styles.hr} />
 
       <Row
@@ -737,57 +736,29 @@ function NarrationSection() {
 
       {voiceEnabled && (
         <View style={{ marginTop: 16 }}>
-          <Text style={styles.voiceHint}>
-            Tap a voice to hear it read a real line from a lesson. Your phone supplies
-            these, so the list differs from device to device.
-          </Text>
+          <Pressable onPress={() => speakSample()} style={styles.voiceRow}>
+            <View style={{ flex: 1, paddingRight: 10 }}>
+              <Text style={styles.voiceName}>
+                {named ? named.title : voice === undefined ? 'Finding the narrator…' : 'Your device’s default voice'}
+              </Text>
+              <Text style={styles.voiceSub}>
+                {named
+                  ? `${named.sub} · tap to hear a line`
+                  : voice === undefined
+                    ? 'Asking your device which voices it has'
+                    : 'The chosen narrator is not installed here · tap to hear what is'}
+              </Text>
+            </View>
+            <SketchIcon name="mic" size={16} color={InkSoft} />
+          </Pressable>
 
-          {voices === null ? (
-            <Text style={styles.voiceEmpty}>Asking your device what voices it has…</Text>
-          ) : voices.length === 0 ? (
-            // Not a failure worth an error: some devices genuinely ship no
-            // text-to-speech engine, and the honest thing is to say where to get one.
-            <Text style={styles.voiceEmpty}>
-              This device has no speech voices installed. Installing a text-to-speech
-              engine — Google Speech Services on Android — will fill this list.
-            </Text>
-          ) : (
-            <>
-              <VoiceRow
-                title="Automatic"
-                sub="Let the app choose the best British voice it can find"
-                on={!voiceId}
-                onPress={() => choose(null)}
-              />
-              {voices.map((v) => {
-                const { title, sub } = describeVoice(v);
-                return (
-                  <VoiceRow
-                    key={v.identifier}
-                    title={title}
-                    sub={sub}
-                    on={voiceId === v.identifier}
-                    onPress={() => choose(v.identifier)}
-                  />
-                );
-              })}
-            </>
-          )}
+          <Text style={styles.voiceHint}>
+            One voice, chosen for the lessons and the same on every screen. Your phone
+            supplies it, so it costs nothing and needs no account.
+          </Text>
         </View>
       )}
     </Card>
-  );
-}
-
-function VoiceRow({ title, sub, on, onPress }: { title: string; sub: string; on: boolean; onPress: () => void }) {
-  return (
-    <Pressable onPress={onPress} style={[styles.voiceRow, on && styles.voiceRowOn]}>
-      <View style={{ flex: 1, paddingRight: 10 }}>
-        <Text style={styles.voiceName}>{title}</Text>
-        <Text style={styles.voiceSub}>{sub}</Text>
-      </View>
-      {on ? <Text style={styles.voiceCheck}>✓</Text> : <SketchIcon name="mic" size={16} color={InkSoft} />}
-    </Pressable>
   );
 }
 
