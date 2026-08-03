@@ -7,7 +7,8 @@
 // Runs in plain Node: rig.ts has zero imports, sucrase strips the types, and
 // jimp-compact draws bones as thick lines and joints as discs. No Metro, no
 // device, about two seconds a sheet.
-import { readFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import os from 'node:os';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import JimpPkg from 'jimp-compact';
@@ -18,13 +19,19 @@ const { transform } = await import(
   pathToFileURL(path.join(REPO, 'node_modules/sucrase/dist/index.js')).href,
 );
 
-async function load(rel) {
-  const src = readFileSync(path.join(REPO, rel), 'utf8');
-  const js = transform(src, { transforms: ['typescript'] }).code;
-  return import('data:text/javascript;base64,' + Buffer.from(js).toString('base64'));
+// Same loader as check-moves: a data: URL has no base path, so moves.ts's
+// `./rig` import needs both files transpiled into one temp directory.
+const TMP = path.join(os.tmpdir(), 'philosophize-moves-sheet');
+mkdirSync(TMP, { recursive: true });
+function emit(rel, name) {
+  const js = transform(readFileSync(path.join(REPO, rel), 'utf8'), { transforms: ['typescript'] }).code
+    .replace(/(from\s+['"])\.\/rig(['"])/g, '$1./rig.mjs$2');
+  writeFileSync(path.join(TMP, name), js);
+  return pathToFileURL(path.join(TMP, name)).href;
 }
-
-const R = await load('components/lesson/cinematic/rig.ts');
+emit('components/lesson/cinematic/rig.ts', 'rig.mjs');
+const R = await import(pathToFileURL(path.join(TMP, 'rig.mjs')).href);
+const M = await import(emit('components/lesson/cinematic/moves.ts', 'moves.mjs'));
 
 const N = 20, CELL = 150, H = 260, GROUND = 210;
 const INK = 0x1a1a1aff, PAPER = 0xfafaf7ff, RULE = 0xd8d5ccff;
@@ -87,7 +94,26 @@ export async function sheet(name, frames) {
 const T = 3.0;
 const WALK_CYCLE = R.WALK.S / R.WALK.stance;
 
-// The baselines, drawn first so the renderer itself is verified against a figure
-// already known to look right before any new motion is judged by it.
-await sheet('walk', Array.from({ length: N }, (_, i) => R.walk((i / N) * WALK_CYCLE, R.WALK)));
-await sheet('seated', Array.from({ length: N }, () => R.seated(21, T)));
+// `node scripts/sheet-moves.mjs posture:8 act:3 move:7` draws just those; with no
+// arguments it draws the baselines, which is also how the renderer itself gets
+// verified — against a figure already known to look right.
+const want = process.argv.slice(2);
+if (!want.length) {
+  await sheet('walk', Array.from({ length: N }, (_, i) => R.walk((i / N) * WALK_CYCLE, R.WALK)));
+  await sheet('seated', Array.from({ length: N }, () => R.seated(21, T)));
+} else {
+  for (const arg of want) {
+    const [kind, nStr] = arg.split(':');
+    const n = Number(nStr);
+    if (kind === 'posture') {
+      // A settled posture does not change over u, so vary the CLOCK instead —
+      // that shows the breath and weight drift, and proves it never freezes.
+      await sheet(`posture-${n}`, Array.from({ length: N }, (_, i) => M.postureHold(n, T + i * 0.22)));
+    } else if (kind === 'act') {
+      await sheet(`act-${n}`, Array.from({ length: N }, (_, i) => M.actStance(n, T, i / (N - 1))));
+    } else if (kind === 'move') {
+      const g = M.gaitFor(n), cyc = g.S / g.stance;
+      await sheet(`move-${n}`, Array.from({ length: N }, (_, i) => M.moveStance(n, (i / N) * cyc)));
+    }
+  }
+}

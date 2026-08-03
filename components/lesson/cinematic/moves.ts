@@ -205,7 +205,15 @@ function moveBody(mode: number, dist: number, g: Gait): Stance {
     const bad = Math.max(0, c);
     return {
       ...w, bob: w.bob - bad * 3.6, tilt: w.tilt - bad * 0.05, neck: 0.07,
-      footR: { x: w.footR.x * 0.66, y: w.footR.y * 0.45 },
+      // ONLY THE LIFT IS ASYMMETRIC — NEVER THE X. This scaled `footR.x` by 0.66
+      // as well, and that skated the planted foot 7.3 units per stride: the whole
+      // foot-lock rests on `phaseFor` advancing a planted foot by exactly `S`
+      // while it is down, so shortening its travel while the body still covers
+      // the full distance slides it along the floor. `y` is safe because it is
+      // zero for the whole stance phase — scaling it only lowers the swing, which
+      // IS the limp: the bad leg barely leaves the ground and the body drops onto
+      // it. Same reason the two legs must keep one `S` and one `stance`.
+      footR: { x: w.footR.x, y: w.footR.y * 0.45 },
       fistL: { x: 2 + c * sw * 14, y: 8 }, fistR: { x: 2 - c * sw * 14, y: 8 },
     };
   }
@@ -380,9 +388,18 @@ export function postureHold(code: number, t: number): Stance {
     };
   }
   if (code === 8) {                              // all the way down into a squat
+    // THE BACK FOOT SITS AT −4, NOT −13. At −13 the pelvis is 13 above the ground
+    // and the ankle 13 behind it, so the leg folds to 18 of its 37 units and the
+    // solver bends the knee DOWN AND BACK — 4.9 units below the ground line, a
+    // shin driven through the floor. A squat's knee goes up and forward.
+    // Bringing the foot under the body fixes the fold without making the squat
+    // shallower: the depth stays at −21 and the knee comes out 1.6 above the line.
+    // The two knees still read apart — not by the 22 of stagger they had, but by
+    // 12.7 units of HEIGHT (1.6 against 14.3), which separates them far better
+    // than sideways distance ever did.
     return {
       ...hands(s, 18, 2, 25 + g, -2), tilt: s.tilt - 0.18, neck: s.neck + 0.02,
-      bob: s.bob - 21, footL: { x: -13, y: 0 }, footR: { x: 9, y: 0 },
+      bob: s.bob - 21, footL: { x: -4, y: 0 }, footR: { x: 9, y: 0 },
     };
   }
   if (code === 9) {                              // the thinker: elbow on knee, chin in hand
@@ -507,7 +524,17 @@ export function actStance(code: number, t: number, u: number): Stance {
   if (code === 3) {                              // JUMP — load, fly, absorb
     const air = clamp01((p - 0.24) / 0.52);
     const h = Math.sin(Math.PI * air);
-    const load = p < 0.24 ? ease01(p / 0.24) : 0;
+    // THE CROUCH HAS TO UNLOAD, NOT VANISH. This read `p < 0.24 ? ease01(p/0.24) : 0`,
+    // so at p = 0.24 the load went from a full 1 to 0 between one frame and the
+    // next while `h` was still 0 — and since bob carries −load × 13, the pelvis
+    // teleported 13 units upward at the exact moment of take-off. (A snap and a
+    // teleport look alike at one frame rate; sampling 16× finer told them apart —
+    // this held 13.9 → 13.0, where the startle beside it collapsed 12.3 → 0.2.)
+    // Releasing it over the launch window is also what a jump physically is: the
+    // legs extend out of the crouch, and that extension IS the push.
+    const load = p < 0.24
+      ? ease01(p / 0.24)
+      : 1 - ease01(clamp01((p - 0.24) / 0.12));
     const absorb = p > 0.76 ? Math.sin(Math.PI * ease01((p - 0.76) / 0.24)) : 0;
     return {
       ...s,

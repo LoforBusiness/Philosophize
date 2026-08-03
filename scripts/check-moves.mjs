@@ -73,13 +73,35 @@ function checkSkate(name, m) {
   if (worst > 0.01) note(name, 'skate', `planted foot drifts ${worst.toFixed(3)} units`);
 }
 
-// ── check 2 · nothing may go through the floor ───────────────────────────────
+// ── check 2 · a limb through the floor, as opposed to resting on it ──────────
+//
+// A planted ankle sits exactly ON the ground line and its joint disc straddles it;
+// that is how every standing figure in the app is drawn, so "no ink below the
+// line" would be a stricter rule than the rig's own and would fail everything.
+// The line is about joint CENTRES.
+//
+// Two things then have to be separated from a real defect, or this reports eight
+// poses that are all fine:
+//
+//   · AN AUTHORED SINK IS INTENT. Postures 3, 5 and 10 write `footR: { y: 1 }` or
+//     `{ y: 2 }` — the author deliberately pushed the far foot a little into the
+//     floor. Whatever the solver then does under that foot is what was asked for.
+//   · A KNEELING KNEE BELONGS ON THE FLOOR. Postures 1, 2 and 14 are kneels, and a
+//     knee touching or just breaking the line is the pose working, not failing.
+//     A leg driven several units THROUGH it is not — hence a tolerance rather than
+//     an exemption, so a genuinely buried leg still reports.
+const KNEE_REST = 3.0;
 function checkGround(name, m) {
   for (let i = 0; i <= FRAMES; i++) {
-    const j = solveAt(m.at(sampleAt(m, i)), 200);
+    const s = m.at(sampleAt(m, i));
+    const j = solveAt(s, 200);
+    // How far the author themselves pushed each foot under the line.
+    const sunk = Math.max(0, s.footL.y, s.footR.y);
     for (const [k, p] of Object.entries(j)) {
-      if (p.y > GROUND + 0.5) {
-        note(name, 'ground', `${k} is ${(p.y - GROUND).toFixed(1)} below the ground line`);
+      const depth = p.y - GROUND;
+      const allow = 0.5 + sunk + (k.startsWith('knee') ? KNEE_REST : 0);
+      if (depth > allow) {
+        note(name, 'ground', `${k} is ${depth.toFixed(1)} below the ground line`);
         return;
       }
     }
