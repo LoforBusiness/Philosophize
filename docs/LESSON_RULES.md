@@ -930,6 +930,35 @@ example ≤ 80 · question prompt ≤ 25 · reinforcement ≤ 50 · summary poin
 dilemma scenario ≤ 80 · quote ≈ 28. A beat that needs more words needs to be two
 beats.
 
+**F44b. `text` is read aloud — write it for the ear as well as the eye.** `beat.text`
+is the one string the narrator speaks (`cite`, `quote.text` and question prompts are
+deliberately never spoken), so it is prose with two audiences at once. The corpus is
+already in good shape — median sentence **10 words**, only one of 1,409 over 32 — and
+the aim is to keep it there. What actually breaks aloud:
+
+- **CAPITALS for emphasis are the dangerous one.** The lessons set the load-bearing
+  word in caps — "an argument is VALID", "the claim is TRUE. You BELIEVE it." An audit
+  found ~25 of them, and engines commonly read an all-caps token as an initialism and
+  spell it out, so the most important word in the sentence is the one most likely to
+  arrive as "V, A, L, I, D". `forSpeech` now lowercases them **for the voice only** —
+  caps buy nothing spoken, since TTS has no emphasis to render — so the display keeps
+  its emphasis. Two-letter caps are ambiguous (`IS` is a word, `AB` is a line segment)
+  and are decided by a list; if you write a new two-letter initialism, add it there.
+- **Punctuation is the only pacing control there is.** There is no emotion parameter.
+  An engine pauses at a comma, a full stop and a semicolon; it swallows an ellipsis
+  and is inconsistent about a colon. `forSpeech` converts em dashes and ellipses to
+  the pause they were drawing; anything else you want heard as a beat should be a
+  comma or a full stop in the first place.
+- **A quotation mark is silent.** 51 lines put a phrase in quotes; the voice reads
+  straight through. If the quotation matters, the sentence has to say so in words.
+- **Keep a sentence inside one breath.** Under 25 words. Long is not wrong on the
+  page and is hard to follow read aloud, where the listener cannot go back.
+
+Do **not** rewrite prose purely for the voice at the cost of the picture: A1 still
+wins, and the scene is built around the words. Where display and speech genuinely
+want different strings, fix it in `forSpeech` (it is shared) rather than bending the
+line.
+
 **F45. Never cross-reference a lesson by number.** "As we saw in Lesson 4" breaks
 silently the moment anything is reordered and `tsc` will never tell you. Write
 "earlier you saw…".

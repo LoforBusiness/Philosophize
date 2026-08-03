@@ -21,7 +21,7 @@ import SyllogismChart from './illustrations/SyllogismChart';
 import LoudnessChart from './illustrations/LoudnessChart';
 import TwoRoadsChart from './illustrations/TwoRoadsChart';
 import { BEATS, gates, type Beat, type BoardKey } from './argumentScript';
-import { Bubble, CORRECT_LABEL } from './cinematicKit';
+import { Bubble, CORRECT_LABEL, NarratedText } from './cinematicKit';
 import {
   BLANK, MOVE_ADV, WALK, boxMove, clamp01, dirsFrom, ease01, easeOutBack, headAt, life2, lerp,
   mixStance, moveTr, narratorHold, narratorLive, pose, stand, travelStance,
@@ -469,7 +469,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   // Only `beat.text` is spoken. The characters' `say` bubbles are dialogue the
   // picture is already delivering, and the question and its choices are never read.
   const voiceEnabled = useUserDataStore((s) => s.voiceEnabled);
-  useBeatNarration(BEATS[shown]?.text, voiceEnabled && !done);
+  const sayProgress = useBeatNarration(BEATS[shown]?.text, voiceEnabled && !done);
 
   const beat = BEATS[i];
   const clock = useSharedValue(0);
@@ -837,7 +837,9 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
           render={() => (
             <>
               {beat.cite ? <Text style={styles.cite}>{beat.cite.toUpperCase()}</Text> : null}
-              {beat.text ? <Text style={styles.narr}>{beat.text}</Text> : null}
+              {beat.text ? (
+                  <NarratedText text={beat.text} progress={sayProgress} animate={voiceEnabled} />
+                ) : null}
 
               {beat.quote ? (
                 <QuoteCard

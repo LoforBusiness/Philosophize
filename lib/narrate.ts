@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as Speech from 'expo-speech';
+import { useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 import { getBritishVoice, offlineTwin } from './voice';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -82,25 +83,37 @@ let downgraded = false;
  * there is nothing below it to fall back to, and a device with no working engine
  * should end in silence rather than in a retry storm.
  */
-function say(line: string, voice: string | null) {
+interface SayHooks {
+  /** 0..1 through the utterance, as the engine reports each word. */
+  onProgress?: (p: number) => void;
+  onDone?: () => void;
+}
+
+function say(line: string, voice: string | null, hooks: SayHooks = {}) {
   const twin = offlineTwin(voice);
   const use = downgraded && twin ? twin : voice;
+  // `onBoundary` fires with the char offset of the word about to be spoken, on
+  // both platforms. Reported against the SPOKEN string, which is why the caller
+  // gets a fraction rather than an index — the displayed string is not the same
+  // string (see forSpeech), so a char offset would not map onto it.
+  const opts = {
+    rate: NARRATION_RATE,
+    pitch: NARRATION_PITCH,
+    language: 'en-GB',
+    onBoundary: (e: { charIndex: number }) => {
+      if (line.length > 0) hooks.onProgress?.(Math.min(1, Math.max(0, e.charIndex / line.length)));
+    },
+    onDone: () => hooks.onDone?.(),
+  };
   Speech.speak(line, {
     // `voice: undefined` lets the engine pick its own default, which is what
     // getBritishVoice returns null to mean.
     voice: use ?? undefined,
-    rate: NARRATION_RATE,
-    pitch: NARRATION_PITCH,
-    language: 'en-GB',
+    ...opts,
     onError: () => {
       if (use === voice && twin) {
         downgraded = true;
-        Speech.speak(line, {
-          voice: twin,
-          rate: NARRATION_RATE,
-          pitch: NARRATION_PITCH,
-          language: 'en-GB',
-        });
+        Speech.speak(line, { voice: twin, ...opts });
       }
     },
   });
@@ -110,6 +123,21 @@ function say(line: string, voice: string | null) {
 export function stopSpeaking() {
   Speech.stop();
 }
+
+/**
+ * Two-letter capitals that are ENGLISH WORDS rather than labels.
+ *
+ * The distinction matters because the two want opposite treatment and look
+ * identical: `IS` in "This does not say it IS raining" must be read as a word,
+ * while `AB` in Euclid's construction must be read as two letters. Length alone
+ * sorts the long ones — nothing three letters or more in these lessons is an
+ * initialism — but at two letters it is genuinely ambiguous, so the words are
+ * listed and everything else is spelled.
+ */
+const CAPS_WORDS = new Set([
+  'IS', 'OF', 'IT', 'WE', 'AT', 'IN', 'ON', 'TO', 'DO', 'BE', 'OR', 'IF',
+  'NO', 'SO', 'AS', 'BY', 'MY', 'UP', 'AN', 'US', 'ME', 'HE', 'GO', 'AM',
+]);
 
 /**
  * Rewrite a display string into something an engine reads well.
@@ -122,6 +150,19 @@ export function stopSpeaking() {
  *   "BCE" / "CE"    → spaced out, so it is not read as a word
  *   "—"             → a comma, which is the pause the dash was doing visually
  *   curly quotes    → straight, since some engines announce them
+ *
+ * ── EMPHASIS CAPS ARE THE ONE THAT BREAKS A SENTENCE ────────────────────────
+ *
+ * The lessons set the load-bearing word in capitals — "an argument is VALID
+ * when…", "the claim is TRUE. You BELIEVE it. And you have JUSTIFICATION." An
+ * audit of all 102 scripts found about twenty-five of them. Engines commonly read
+ * an all-caps token as an initialism and spell it out, so the single most
+ * important word in the sentence is the one most likely to come out as
+ * "V, A, L, I, D".
+ *
+ * There is nothing to lose by lowercasing it for the voice: TTS has no emphasis
+ * to render anyway, so caps buy nothing spoken and cost a mangled word. The
+ * DISPLAY string is untouched, so the reader still sees VALID.
  */
 export function forSpeech(raw: string): string {
   return raw
@@ -130,10 +171,18 @@ export function forSpeech(raw: string): string {
     .replace(/§\s*/g, 'section ')
     .replace(/\bc\.\s*(?=\d)/gi, 'circa ')
     .replace(/(\d)(st|nd|rd|th)\s+c\b\.?/gi, '$1$2 century')
+    // Before the caps rule below, which would otherwise lowercase them to "bce".
     .replace(/\bBCE\b/g, 'B C E')
     .replace(/\bCE\b/g, 'C E')
+    .replace(/\b[A-Z]{2,}\b/g, (tok) =>
+      tok.length >= 3 || CAPS_WORDS.has(tok) ? tok.toLowerCase() : tok.split('').join(' '))
     // An em dash is a beat in the writing; a comma is the only way to ask for one.
     .replace(/\s*[—–]\s*/g, ', ')
+    // An ellipsis is a pause the writing asked for and the engine swallows whole:
+    // most read straight through it. A comma is the only way to get the beat back,
+    // and at the end of a line a full stop, so the voice actually lands.
+    .replace(/\s*(?:…|\.\.\.)\s*$/g, '.')
+    .replace(/\s*(?:…|\.\.\.)\s*/g, ', ')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -146,15 +195,40 @@ export function forSpeech(raw: string): string {
  * rather than left to talk over the next one — and leaving the lesson mid-sentence
  * must not leave a voice running over the rest of the app.
  */
+/**
+ * Roughly how many words a second the narrator gets through at NARRATION_RATE.
+ *
+ * Measured against the engine rather than guessed at: unhurried English TTS runs
+ * near 165 words per minute at rate 1.0, and this reads at 0.92.
+ */
+const WORDS_PER_SECOND = (165 * NARRATION_RATE) / 60;
+
+/** How long a line should take to say, in ms. Never instant, never a crawl. */
+export function estimateSpeechMs(text: string): number {
+  const words = forSpeech(text).split(/\s+/).filter(Boolean).length;
+  return Math.max(900, Math.round((words / WORDS_PER_SECOND) * 1000));
+}
+
 export function useBeatNarration(text: string | undefined, enabled: boolean) {
   // The last thing actually handed to the engine, so a re-render with identical
   // text does not restart the sentence from the top.
   const spoken = useRef<string | null>(null);
 
+  // HOW FAR THE VOICE HAS GOT, 0..1 — what paces the words onto the page.
+  //
+  // Two sources, and the order matters. A timed ramp starts immediately, because
+  // a device with no TTS engine, a muted phone or an engine that reports no word
+  // boundaries must still show the line; if the reveal waited for events that
+  // never came, narration-on would be strictly worse than narration-off. Once a
+  // real boundary event arrives it takes over, and the estimate is abandoned.
+  const progress = useSharedValue(0);
+
   useEffect(() => {
     if (!enabled || !text) {
       Speech.stop();
       spoken.current = null;
+      // Nothing is being read, so nothing is being paced: everything is present.
+      progress.value = 1;
       return;
     }
     const line = forSpeech(text);
@@ -162,11 +236,35 @@ export function useBeatNarration(text: string | undefined, enabled: boolean) {
     spoken.current = line;
 
     let cancelled = false;
+    let boundaryDriven = false;
     Speech.stop();
+
+    progress.value = 0;
+    progress.value = withTiming(1, {
+      duration: estimateSpeechMs(text),
+      easing: Easing.linear,
+    });
+
     getBritishVoice()
       .then((voice) => {
         if (cancelled) return;
-        say(line, voice);
+        say(line, voice, {
+          onProgress: (p) => {
+            if (cancelled) return;
+            boundaryDriven = true;
+            // Eased rather than snapped: the engine reports one event per word,
+            // and jumping the reveal on each would strobe.
+            progress.value = withTiming(p, { duration: 140, easing: Easing.out(Easing.quad) });
+          },
+          onDone: () => {
+            if (cancelled) return;
+            progress.value = withTiming(1, { duration: 180, easing: Easing.out(Easing.quad) });
+          },
+        });
+        // No boundary support (older Android, some engines): the estimate above is
+        // already running and stays in charge. Nothing to do — this comment is the
+        // reason there is no `else`.
+        void boundaryDriven;
       })
       .catch(() => { /* a device with no TTS engine simply stays silent */ });
 
@@ -177,4 +275,6 @@ export function useBeatNarration(text: string | undefined, enabled: boolean) {
   // to silence it. Separate from the effect above so it cannot be skipped by an
   // early return in a later edit.
   useEffect(() => () => { Speech.stop(); }, []);
+
+  return progress;
 }

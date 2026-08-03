@@ -13,7 +13,7 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { useBeatNarration } from '@/lib/narrate';
 import { useUIStore } from '@/stores/uiStore';
 import {
-  Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
+  Fade, Choices, InteractPanel, NarratedText, QuoteCard, SummaryCard, gates, styles,
   COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, INK,
   type BaseBeat,
 } from './cinematicKit';
@@ -89,8 +89,12 @@ export default function CinematicPlayer({
   // made, so a `narrate` prop passed as true in 102 places would be noise with a
   // single value. `voiceEnabled` is the switch, and Settings → Narration is where
   // it lives.
+  //
+  // It returns how far through the sentence the voice has got, which is what
+  // paces the words onto the page. With narration off it is pinned at 1 and the
+  // deck renders the plain paragraph — see NarratedText.
   const voiceEnabled = useUserDataStore((s) => s.voiceEnabled);
-  useBeatNarration(beats[shown]?.text, voiceEnabled && !done);
+  const sayProgress = useBeatNarration(beats[shown]?.text, voiceEnabled && !done);
 
   const clock = useSharedValue(0);
   const bt = useSharedValue(0);
@@ -241,7 +245,9 @@ export default function CinematicPlayer({
             render={() => (
               <>
                 {beat.cite ? <Text style={styles.cite}>{beat.cite.toUpperCase()}</Text> : null}
-                {beat.text ? <Text style={styles.narr}>{beat.text}</Text> : null}
+                {beat.text ? (
+                  <NarratedText text={beat.text} progress={sayProgress} animate={voiceEnabled} />
+                ) : null}
 
                 {beat.quote ? (
                   <QuoteCard

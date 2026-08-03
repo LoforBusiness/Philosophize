@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withTiming, Easing, FadeInDown,
@@ -344,6 +344,80 @@ export function InteractPanel({
   );
 }
 
+// ── the narration line ────────────────────────────────────────────────────────
+//
+// THE WORDS ARRIVE; THEY DO NOT MOVE.
+//
+// The whole paragraph is laid out at once and every word is already in its final
+// position — the reveal is opacity and a 5px lift, both of which are transforms
+// and neither of which touches layout. Rendering the sentence progressively
+// instead (a growing substring) would re-wrap the block on nearly every word, and
+// a paragraph that reflows while you read it is unreadable however smooth each
+// step is.
+//
+// WHY IT IS A ROW OF WORDS RATHER THAN ONE Text. Per-word opacity needs per-word
+// views, so the paragraph becomes a wrapping row and each word carries the space
+// after it. That is why the space is inside the string rather than a `gap`: a gap
+// is a guess at the width of a space, and the string is the space itself.
+//
+// SILENT READERS GET NONE OF THIS. With narration off the line is exactly the
+// single `<Text>` it always was — same component, same layout, no animation and
+// no per-word views. A reveal paced to a voice that is not speaking is just a
+// delay, and 102 lessons should not pay for machinery they are not using.
+
+/** Words mid-fade at any moment. Three reads as a wave; one reads as a ticker. */
+const REVEAL_OVERLAP = 3;
+
+function RevealWord({
+  word, i, n, progress,
+}: {
+  word: string;
+  i: number;
+  n: number;
+  progress: SharedValue<number>;
+}) {
+  // Each word owns a slice of the line, and the slices overlap so neighbours are
+  // fading together. Divided by (n + OVERLAP - 1) rather than n so the LAST word
+  // finishes exactly at 1 instead of running past the end of the sentence.
+  const denom = Math.max(1, n + REVEAL_OVERLAP - 1);
+  const at = i / denom;
+  const span = REVEAL_OVERLAP / denom;
+
+  const st = useAnimatedStyle(() => {
+    const raw = Math.max(0, Math.min(1, (progress.value - at) / span));
+    // Smoothstep: eases in AND out, so a word neither snaps on nor lingers at 99%.
+    const u = raw * raw * (3 - 2 * raw);
+    return { opacity: u, transform: [{ translateY: (1 - u) * 5 }] };
+  });
+
+  return <Animated.Text style={[styles.narr, st]}>{word}</Animated.Text>;
+}
+
+export function NarratedText({
+  text, progress, animate,
+}: {
+  text: string;
+  progress: SharedValue<number>;
+  animate: boolean;
+}) {
+  // Split unconditionally: hooks and derived values must not sit behind the
+  // branch, or turning narration off mid-lesson changes the hook count.
+  const words = useMemo(() => {
+    const parts = text.split(/\s+/).filter(Boolean);
+    return parts.map((w, k) => (k === parts.length - 1 ? w : `${w} `));
+  }, [text]);
+
+  if (!animate) return <Text style={styles.narr}>{text}</Text>;
+
+  return (
+    <View style={styles.narrWrap}>
+      {words.map((w, k) => (
+        <RevealWord key={`${k}-${w}`} word={w} i={k} n={words.length} progress={progress} />
+      ))}
+    </View>
+  );
+}
+
 // ── quote + summary ───────────────────────────────────────────────────────────
 export function QuoteCard({
   q, saved, onToggle,
@@ -427,6 +501,9 @@ export const styles = StyleSheet.create({
   deck: { flex: 50, paddingHorizontal: 24, justifyContent: 'flex-start', overflow: 'hidden' },
   fadeWrap: { position: 'relative' },
   narr: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 18, lineHeight: 27, color: INK },
+  // The animated form of the same paragraph: a wrapping row of words. Wraps at
+  // word boundaries exactly as text does, because the items ARE words.
+  narrWrap: { flexDirection: 'row', flexWrap: 'wrap' },
   cite: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT, marginBottom: 7 },
 
   qWrap: { marginTop: 2 },
