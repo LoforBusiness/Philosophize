@@ -153,9 +153,17 @@ export default function RankClimbChart({
           <Text style={styles.sealXp}>{current.xp.toLocaleString()}</Text>
         </View>
 
-        {/* day ticks: first, middle, last — more than three is unreadable here */}
+        {/* Day ticks: first, middle, last — more than three is unreadable here.
+            CLAMPED INTO THE CHART. Centring a 44-wide label on the last point put
+            it at 288..332 inside a 328-wide chart, so today's date hung 4px off
+            the right edge on a 360 phone — measured, not eyeballed. */}
         {n > 1 && [0, Math.floor((n - 1) / 2), n - 1].map((i, k) => (
-          <Text key={k} style={[styles.tick, { left: xFor(i) - 22, top: floorY + 8 }]}>{tick(i)}</Text>
+          <Text
+            key={k}
+            style={[styles.tick, { left: Math.max(0, Math.min(width - 44, xFor(i) - 22)), top: floorY + 8 }]}
+          >
+            {tick(i)}
+          </Text>
         ))}
       </View>
 
