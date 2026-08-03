@@ -57,6 +57,8 @@ import { Metaphysics15Lesson } from '@/components/lesson/cinematic/metaphysics15
 import { Metaphysics24Lesson } from '@/components/lesson/cinematic/metaphysics24Scene';
 import { Ethics18Lesson } from '@/components/lesson/cinematic/ethics18Scene';
 import { Ethics23Lesson } from '@/components/lesson/cinematic/ethics23Scene';
+import { Ethics31Lesson } from '@/components/lesson/cinematic/ethics31Scene';
+import { Ethics32Lesson } from '@/components/lesson/cinematic/ethics32Scene';
 import { Logic31Lesson } from '@/components/lesson/cinematic/logic31Scene';
 import { Logic32Lesson } from '@/components/lesson/cinematic/logic32Scene';
 import { Logic22Lesson } from '@/components/lesson/cinematic/logic22Scene';
@@ -159,6 +161,8 @@ const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   // Levelling every branch at 14 cinematic — these are EXISTING lessons given a
   // scene, not new ones, so the 30-per-branch total below is untouched.
   // Two per branch, each with its own staging and its own answer mechanic (E33).
+  'ethics-ethics-31': Ethics31Lesson,
+  'ethics-ethics-32': Ethics32Lesson,
   'logic-arguments-31': Logic31Lesson,
   'logic-arguments-32': Logic32Lesson,
   'logic-arguments-22': Logic22Lesson,

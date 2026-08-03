@@ -9,6 +9,8 @@ import moralLuck from './lessons/moral-luck';
 import ethicsOfCare from './lessons/ethics-of-care';
 import ethicsInPractice from './lessons/ethics-in-practice';
 import whenBothChoicesAreWrong from './lessons/when-both-choices-are-wrong';
+import oughtImpliesCan from './lessons/ought-implies-can';
+import borrowingAVerdict from './lessons/borrowing-a-verdict';
 import utilitarianismInDepth from './lessons/utilitarianism-in-depth';
 import kantsCategoricalImperative from './lessons/kants-categorical-imperative';
 import virtueEthicsAndEudaimonia from './lessons/virtue-ethics-and-eudaimonia';
@@ -69,7 +71,7 @@ const units: Path[] = [
     slug: "stepping-back",
     name: "Stepping Back",
     description: "Zoom out one last time: where morals actually live, how to settle a clash of principle and gut, what lies beyond duty — and how to live.",
-    lessons: [metaethicsWhereMoralsLive, reflectiveEquilibrium, supererogationBeyondDuty, howToLiveAnEthicalLife],
+    lessons: [metaethicsWhereMoralsLive, reflectiveEquilibrium, supererogationBeyondDuty, howToLiveAnEthicalLife, oughtImpliesCan, borrowingAVerdict],
   },
 ];
 
