@@ -43,7 +43,7 @@ export interface SceneApi {
 export type SceneComponent = ComponentType<SceneApi>;
 
 export default function CinematicPlayer({
-  lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], narrate = false,
+  lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B],
 }: {
   lesson: Lesson;
   beats: BaseBeat[];
@@ -56,15 +56,6 @@ export default function CinematicPlayer({
    * Must contain every prop the scene draws, or the top/bottom will be clipped.
    */
   band?: [number, number];
-  /**
-   * Read the beat's narration line aloud. OPT-IN PER LESSON while the voice is
-   * being judged, so one lesson can be compared against the silent ones rather
-   * than the whole app changing at once.
-   *
-   * Only `beat.text` is ever spoken — see `useBeatNarration`. The question, its
-   * four choices and the saveable quote are deliberately left silent.
-   */
-  narrate?: boolean;
 }) {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
@@ -92,8 +83,14 @@ export default function CinematicPlayer({
   // Voiced from `shown`, not `i`, because the deck lags a tap by its fade-out: the
   // sentence should begin when its own paragraph is on screen, not over the tail
   // of the one it replaces.
+  //
+  // There is no per-lesson opt-in any more. It existed so ONE lesson could speak
+  // while the voice was being judged against the silent ones; that judgement is
+  // made, so a `narrate` prop passed as true in 102 places would be noise with a
+  // single value. `voiceEnabled` is the switch, and Settings → Narration is where
+  // it lives.
   const voiceEnabled = useUserDataStore((s) => s.voiceEnabled);
-  useBeatNarration(beats[shown]?.text, narrate && voiceEnabled && !done);
+  useBeatNarration(beats[shown]?.text, voiceEnabled && !done);
 
   const clock = useSharedValue(0);
   const bt = useSharedValue(0);

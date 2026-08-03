@@ -162,10 +162,44 @@ async function resolve(): Promise<string | null> {
   return null;
 }
 
+/**
+ * The on-device twin of a server-rendered Android voice, or null if there is none.
+ *
+ * `en-gb-x-gbb-network` and `en-gb-x-gbb-local` are the same voice: one rendered on
+ * Google's servers, one squeezed onto the phone. The network one sounds better and
+ * is what the picker ranks first — but it needs a connection, and a lesson on the
+ * Underground has to keep talking.
+ */
+export function offlineTwin(id: string | null | undefined): string | null {
+  if (!id) return null;
+  return /-network$/.test(id) ? id.replace(/-network$/, '-local') : null;
+}
+
+/** Identifiers this device actually has, cached. Empty means "could not tell". */
+let knownIds: Set<string> | undefined;
+async function deviceHas(id: string): Promise<boolean> {
+  if (knownIds === undefined) {
+    try {
+      const v = await Speech.getAvailableVoicesAsync();
+      knownIds = new Set((v || []).map((x) => x.identifier));
+    } catch {
+      knownIds = new Set();
+    }
+  }
+  // An empty set means the enumeration failed, not that the device has no voices.
+  // Overriding the user's choice on that basis would be a guess dressed as a fact.
+  return knownIds.size === 0 || knownIds.has(id);
+}
+
 export async function getBritishVoice(): Promise<string | null> {
-  // A hand-picked voice (Settings → Learning → Narration Voice) overrides auto.
+  // A hand-picked voice (Settings → Narration) overrides auto.
   const manual = useUserDataStore.getState().settings?.voiceId;
-  if (manual) return manual;
+  // A VOICE ID IS DEVICE-SPECIFIC, AND SETTINGS RIDE THE CLOUD SNAPSHOT. Signing in
+  // on a new phone restores `voiceId` along with everything else, and that phone may
+  // simply not have `en-gb-x-gbb-network`. Android answers a missing voice with
+  // silence rather than an error, so the failure would look exactly like the feature
+  // being broken. Check first, and fall through to the automatic pick if it is gone.
+  if (manual && (await deviceHas(manual))) return manual;
   if (cached !== undefined) return cached;
   if (!pending) {
     pending = resolve()

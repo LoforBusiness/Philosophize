@@ -418,5 +418,5 @@ const styles = StyleSheet.create({
 // 923×647 device px, so 647/280 ≈ 923/400 — crop any harder and the WIDTH becomes
 // the limit, so the art stops growing while the risk of clipping does not.
 export function MetaphysicsLesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={MetaphysicsScene} band={[234, 514]} narrate />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={MetaphysicsScene} band={[234, 514]} />;
 }

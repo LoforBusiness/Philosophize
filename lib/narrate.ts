@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as Speech from 'expo-speech';
-import { getBritishVoice } from './voice';
+import { getBritishVoice, offlineTwin } from './voice';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // READING THE LESSON ALOUD — the narration line only.
@@ -55,12 +55,52 @@ export const NARRATION_SAMPLE =
  * picker worse than useless.
  */
 export function speakSample(voiceId: string | null) {
+  // Auditioning is the one moment the real voice must be attempted, whatever
+  // happened on a previous train journey.
+  downgraded = false;
   Speech.stop();
-  Speech.speak(forSpeech(NARRATION_SAMPLE), {
-    voice: voiceId ?? undefined,
+  say(forSpeech(NARRATION_SAMPLE), voiceId);
+}
+
+/**
+ * A server-rendered voice that has already failed once this session.
+ *
+ * The best British voices on Android are rendered on Google's servers, and with no
+ * connection they produce silence — not an obviously broken noise, just nothing,
+ * which reads as the feature being dead. So the first failure downgrades to the
+ * on-device twin and STAYS there: asking again on every beat would put a gap at the
+ * head of all eight of them. Choosing a voice in Settings clears it.
+ */
+let downgraded = false;
+
+/**
+ * Speak one line, falling back to the offline twin if the network voice fails.
+ *
+ * The retry is guarded on `use === voice` so a failing LOCAL voice cannot loop —
+ * there is nothing below it to fall back to, and a device with no working engine
+ * should end in silence rather than in a retry storm.
+ */
+function say(line: string, voice: string | null) {
+  const twin = offlineTwin(voice);
+  const use = downgraded && twin ? twin : voice;
+  Speech.speak(line, {
+    // `voice: undefined` lets the engine pick its own default, which is what
+    // getBritishVoice returns null to mean.
+    voice: use ?? undefined,
     rate: NARRATION_RATE,
     pitch: NARRATION_PITCH,
     language: 'en-GB',
+    onError: () => {
+      if (use === voice && twin) {
+        downgraded = true;
+        Speech.speak(line, {
+          voice: twin,
+          rate: NARRATION_RATE,
+          pitch: NARRATION_PITCH,
+          language: 'en-GB',
+        });
+      }
+    },
   });
 }
 
@@ -124,14 +164,7 @@ export function useBeatNarration(text: string | undefined, enabled: boolean) {
     getBritishVoice()
       .then((voice) => {
         if (cancelled) return;
-        Speech.speak(line, {
-          // `voice: undefined` lets the engine pick its own default, which is what
-          // getBritishVoice returns null to mean.
-          voice: voice ?? undefined,
-          rate: NARRATION_RATE,
-          pitch: NARRATION_PITCH,
-          language: 'en-GB',
-        });
+        say(line, voice);
       })
       .catch(() => { /* a device with no TTS engine simply stays silent */ });
 

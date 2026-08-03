@@ -14,6 +14,7 @@ import { lessonXP } from '@/constants/xp';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useBeatNarration } from '@/lib/narrate';
 import Stickman from './Stickman';
 import BrickStructure, {
   BASE_LX, BASE_RX, BASE_Y, CENTER_X, KEY_X, KEY_Y, type StructState,
@@ -184,6 +185,13 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
   const [done, setDone] = useState(false);
   const [boxSize, setBoxSize] = useState({ w: 0, h: 0 });
   const [shown, setShown] = useState(0);          // the beat the DECK is showing
+
+  // NARRATION — see the twin of this block in ArgumentFightLesson. Both lessons
+  // predate CinematicPlayer and carry their own copy of it, so the hook is repeated
+  // rather than inherited. It sits ABOVE `if (done) return null` and must stay
+  // there (§17 rule 1).
+  const voiceEnabled = useUserDataStore((s) => s.voiceEnabled);
+  useBeatNarration(BEATS[shown]?.text, voiceEnabled && !done);
 
   const beat = BEATS[i];
   const clock = useSharedValue(0);
