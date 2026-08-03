@@ -60,6 +60,43 @@ pose at all, so the author reached for `46 slump`, which is a *standing* slump.
 Adding `48 sit-on-floor` and `49 kneel-beside` cost twenty lines. Guessing cost a
 shipped lesson.
 
+**A2b. Look in `moves.ts` before you conclude the vocabulary can't say it — and
+list the directory before you conclude anything.** A2 says to extend the
+vocabulary rather than substitute a wrong pose. The failure mode on the other side
+is extending something that already exists: `components/lesson/cinematic/moves.ts`
+holds **12 travel modes** (stroll, hurry, run, trudge, march, sneak, limp, skip,
+tiptoe, back away, pace), **15 postures** (crouch, kneel, sit, perch, recline,
+squat, sprawl…), **28 one-shot actions** (sit down, stand up, jump, throw, push,
+drag, stumble, fall, get up…), plus `gazeAt`/`pointAt` — which turn the head and
+hand toward a real stage point instead of a hard-coded `neck` that only looked
+right where it was written — and `dirTurn`/`turnDip` for turning on the spot.
+
+A whole redundant expansion was specced here on the belief that the rig had one
+walk and no way to sit down, because the check was `grep` for `export function
+run|jump|sneak` **against `rig.ts` alone**. `moves.ts` names its functions
+`moveStance` / `actStance` / `postureHold`, which match no verb, and the directory
+was never listed. **Grepping for the names you expect only finds the design you
+already have in mind.**
+
+**A2c. The figure is checkable in plain Node — use it before and after any pose
+work.** `node scripts/check-moves.mjs` runs every motion in the library through
+four measurements: a planted foot that moves (skating), a limb through the floor,
+a genuine discontinuity, and a transition that misses its destination pose.
+`node scripts/sheet-moves.mjs posture:8 act:3 move:7` draws filmstrips at the
+renderer's true stroke weights for what numbers cannot see. Neither needs Metro or
+a device, because `rig.ts` has zero imports.
+
+It found three real defects on its first run over motions that had already
+shipped: a limp skating its planted foot 7.3 units per stride, a jump teleporting
+the pelvis 13 units at take-off, and a squat with a knee 4.9 units under the floor.
+
+Two of its checks had to be **deleted or rebuilt because they fired on almost
+everything**, which is the same lesson as D30's: a reach check flagged 30 of 55
+motions before it turned out that over-reach is the *intended* way to straighten a
+pointing arm, and a smoothness check called every fast snap a defect until it
+learned to re-sample 16× finer and see whether the jump shrinks. **A check that
+fires on almost everything has told you nothing — fix the check.**
+
 **A3. Secondary figures count.** The narrator's pose comes from the script and is
 easy to eyeball. A second figure — the friend, the opponent, the apprentice — is
 often posed from a **hard-coded** code inside the scene, where nobody looks. That is
