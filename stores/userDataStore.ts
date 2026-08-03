@@ -124,6 +124,36 @@ function sanitizeSettings(stored: unknown): AppSettings {
   return out;
 }
 
+/**
+ * A RUNNING TOTAL PER DAY, which is what a climb chart needs and what nothing in
+ * this app recorded until now.
+ *
+ * `weekDays` fakes its history: it infers which days were "done" from the streak
+ * counter, because no per-day figure was ever stored. That is fine for seven dots
+ * and useless for a chart, so the Ranks sheet's climb is drawn from this.
+ *
+ * Each entry is the TOTAL XP AT THE END OF THAT DAY, not the day's earnings — a
+ * snapshot rather than a delta. Snapshots are self-correcting: if a write is ever
+ * missed the line has one flat day and then recovers, where a missed delta would
+ * offset every later point permanently.
+ *
+ * Capped at XP_DAYS because this slice is mirrored to Supabase on every sync (§4)
+ * and an unbounded map would grow the snapshot forever.
+ */
+const XP_DAYS = 60;
+
+function xpDayKey(d = new Date()): string {
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+function stampXP(byDay: Record<string, number> | undefined, newTotal: number): Record<string, number> {
+  const out: Record<string, number> = { ...(byDay ?? {}), [xpDayKey()]: newTotal };
+  const keys = Object.keys(out).sort();
+  for (const k of keys.slice(0, Math.max(0, keys.length - XP_DAYS))) delete out[k];
+  return out;
+}
+
 interface UserDataState {
   savedQuotes: SavedQuote[];
   pinnedQuoteId: string | null;               // saved-quote id pinned to the home-screen widget
@@ -140,6 +170,7 @@ interface UserDataState {
   beliefResultId: string | null;             // legacy (belief quiz removed)
   streak: number;                             // consecutive-day streak
   totalXP: number;                            // all XP: lessons, saved quotes, thinkers met, quizzes
+  xpByDay: Record<string, number>;           // YYYY-MM-DD -> TOTAL XP at end of that day (see stampXP)
   // THE RANK THE USER ACTUALLY HOLDS. Not derived from totalXP, because XP can be
   // earned by browsing (a saved quote, a thinker opened) and a promotion is meant to
   // be earned by work. This only ever moves inside recordLessonComplete, and by one
@@ -283,6 +314,7 @@ export const useUserDataStore = create<UserDataState>()(
       beliefResultId: null,
       streak: 0,
       totalXP: 0,
+      xpByDay: {},
       rankIndex: 0,
       lastLessonDate: null,
       dailyLessonCount: 0,
@@ -314,6 +346,7 @@ export const useUserDataStore = create<UserDataState>()(
           return {
             savedQuotes: [q, ...state.savedQuotes],
             totalXP: state.totalXP + XP_PER_SAVED_QUOTE,
+            xpByDay: stampXP(state.xpByDay, state.totalXP + XP_PER_SAVED_QUOTE),
           };
         });
         get().recomputeBadges();
@@ -343,6 +376,9 @@ export const useUserDataStore = create<UserDataState>()(
             totalXP: exists
               ? Math.max(0, state.totalXP - XP_PER_SAVED_QUOTE)
               : state.totalXP + XP_PER_SAVED_QUOTE,
+            xpByDay: stampXP(state.xpByDay, exists
+              ? Math.max(0, state.totalXP - XP_PER_SAVED_QUOTE)
+              : state.totalXP + XP_PER_SAVED_QUOTE),
           };
         });
         if (!nowSaved && get().pinnedQuoteId === q.id) get().setPinnedQuote(null);
@@ -384,6 +420,7 @@ export const useUserDataStore = create<UserDataState>()(
               [philosopherId]: (state.philosopherViews[philosopherId] ?? 0) + 1,
             },
             totalXP: seen ? state.totalXP : state.totalXP + XP_PER_PHILOSOPHER_MET,
+            xpByDay: stampXP(state.xpByDay, seen ? state.totalXP : state.totalXP + XP_PER_PHILOSOPHER_MET),
           };
         });
         track('philosopher_viewed', { philosopher_id: philosopherId });
@@ -410,6 +447,7 @@ export const useUserDataStore = create<UserDataState>()(
             },
           },
           totalXP: state.totalXP + bonus,
+          xpByDay: stampXP(state.xpByDay, state.totalXP + bonus),
         }));
         track('philosopher_quiz_completed', {
           philosopher_id: philosopherId,
@@ -440,6 +478,7 @@ export const useUserDataStore = create<UserDataState>()(
             // Keep the per-branch mirror consistent with the per-unit source.
             lessonsByBranch: branchCountsFromUnits(lessonsByUnit),
             totalXP: state.totalXP + xpEarned,
+            xpByDay: stampXP(state.xpByDay, state.totalXP + xpEarned),
           };
         });
         // THE ONLY PLACE A RANK EVER MOVES, and by ONE step. Everything else that
@@ -543,7 +582,7 @@ export const useUserDataStore = create<UserDataState>()(
       setWelcomeVersion: (v) => set({ welcomeVersion: v, hasSeenWelcome: true }),
 
       resetProgress: () =>
-        set({ lessonsByUnit: {}, lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, rankIndex: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
+        set({ lessonsByUnit: {}, lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, xpByDay: {}, rankIndex: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
 
       clearSavedQuotes: () => {
         set({ savedQuotes: [] });
@@ -566,6 +605,7 @@ export const useUserDataStore = create<UserDataState>()(
           beliefResultId: null,
           streak: 0,
           totalXP: 0,
+          xpByDay: {},
           rankIndex: 0,
           lastLessonDate: null,
           dailyLessonCount: 0,
@@ -603,6 +643,7 @@ export const useUserDataStore = create<UserDataState>()(
           beliefResultId: null,
           streak: 0,
           totalXP: 0,
+          xpByDay: {},
           rankIndex: 0,
           lastLessonDate: null,
           dailyLessonCount: 0,
@@ -639,6 +680,7 @@ export const useUserDataStore = create<UserDataState>()(
         beliefResultId: state.beliefResultId,
         streak: state.streak,
         totalXP: state.totalXP,
+        xpByDay: state.xpByDay,
         rankIndex: state.rankIndex,
         lastLessonDate: state.lastLessonDate,
         dailyLessonCount: state.dailyLessonCount,

@@ -11,6 +11,7 @@ import {
 import { MotiView, AnimatePresence } from 'moti';
 import Glyph from './Glyph';
 import RankSeal, { type SealState } from './RankSeal';
+import RankClimbChart from './RankClimbChart';
 import { RANKS, awardedRank, rankProgress, rankRequirement, type RankDef } from '@/data/ranks';
 import { circleForRank, RANK_EPITHETS, toRoman } from '@/data/rankLore';
 import { BADGES, type ProgressStats } from '@/data/badges';
@@ -47,6 +48,7 @@ export default function RanksBadgesSheet() {
   const streak = useUserDataStore((s) => s.streak);
   const xp = useUserDataStore((s) => s.totalXP);
   const rankIndex = useUserDataStore((s) => s.rankIndex);
+  const xpByDay = useUserDataStore((s) => s.xpByDay);
 
   const { height, width } = useWindowDimensions();
   const H = Math.round(height * 0.82);
@@ -159,7 +161,21 @@ export default function RanksBadgesSheet() {
                     </View>
                   </View>
 
-                  <Text style={styles.spineHint}>YOUR ASCENT · TAP A SEAL</Text>
+                  {/* THE CLIMB — this band only, day by day.
+                      The full ladder is still below, because a chart of the
+                      current band answers "how am I doing" and the ladder answers
+                      "what is coming", and dropping one for the other would trade
+                      a real question for another real question. */}
+                  <View style={styles.climbWrap}>
+                    <RankClimbChart
+                      rankIndex={index}
+                      totalXP={totalXP}
+                      xpByDay={xpByDay}
+                      width={width - 32}
+                    />
+                  </View>
+
+                  <Text style={styles.spineHint}>THE WHOLE LADDER · TAP A SEAL</Text>
 
                   {/* SPINE — all 25 seals, connected, climbed below → locked above */}
                   <ScrollView
@@ -366,6 +382,7 @@ const styles = StyleSheet.create({
   heroFill: { height: 7, borderRadius: 4, backgroundColor: Ink },
   heroToNext: { fontFamily: 'Inter_500Medium', fontSize: 10.5, color: InkSoft, marginTop: 6 },
 
+  climbWrap: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 2 },
   spineHint: { fontFamily: 'Inter_700Bold', fontSize: 9, color: InkSoft, letterSpacing: 2, marginTop: 18, marginBottom: 4 },
 
   // spine
