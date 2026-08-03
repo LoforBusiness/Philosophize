@@ -59,6 +59,21 @@ const lesson: Lesson = {
       },
     },
     {
+      type: 'question',
+      prompt: 'So what makes someone courageous, on Aristotle\'s view?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'A settled habit, so they act well without having to work it out', isCorrect: true },
+          { id: 'b', text: 'Performing one clearly courageous act', isCorrect: false },
+          { id: 'c', text: 'Feeling no fear at all', isCorrect: false },
+          { id: 'd', text: 'Following a rule that says be brave', isCorrect: false },
+        ],
+        explanation: 'C is the trap: no fear at all is an extreme, not the mean. D is the rival theory, and Aristotle\'s reply is that anyone still consulting the rule has not yet become the sort of person the rule describes.',
+      },
+    },
+    {
       type: 'summary',
       title: 'Character Over Conduct',
       keyPoints: [

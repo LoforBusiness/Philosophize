@@ -1,0 +1,198 @@
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import type { Lesson } from '@/data/types';
+import Stickman from './Stickman';
+import CinematicPlayer from './CinematicPlayer';
+import {
+  ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle,
+} from './rig';
+import { BEATS } from './metaphysics12Script';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import type { SceneApi } from './CinematicPlayer';
+
+// A STREAM THAT NEVER STOPS, and a box drawn for its owner that stays empty all
+// lesson. Hume's result is nowhere asserted — it is just the fact that nothing ever
+// turns up in that box (H64). The answer targets are the stream, the empty box, and
+// the overreach (E33).
+//
+// · the stream is x 106…390, y 322…388. Eight tiles 34 wide on a 44 pitch scroll
+//   left inside it at 17 units/s, wrapping on a 352-unit span so the row never runs
+//   out; the box clips them (overflow hidden). Its own label sits at y 366…384.
+// · the owner's box is x 176…304, y 402…462 — its label at the top and nothing
+//   underneath, which is the whole content of the shape.
+// · the overreach plate is x 244…390, y 470…500, resting on the ground line.
+// · the figure is at x 46 facing right; measured across its poses it reaches x 85,
+//   twenty-one clear of the stream and ninety-one clear of the owner's box.
+//
+// The scroll rides the MONOTONIC clock, so tapping through a beat never restarts it
+// — a stream that jumps back to the start on every tap is not a stream (H67).
+
+const STR_L = 106;
+const STR_W = 284;
+const STR_T = 322;
+const STR_H = 66;
+
+const TILE_W = 34;
+const TILE_PITCH = 44;
+const TILE_N = 8;
+const SPAN = TILE_N * TILE_PITCH;          // 352 — wider than the box plus a tile
+const SPEED = 17;
+
+const OWN = { left: 176, top: 402, width: 128, height: 60 };
+const NONE = { left: 244, top: 470, width: 146, height: 30 };
+
+const FIG_X = 46;
+
+const G = BEATS.map((b) => b.g ?? 0);
+const OWNER = BEATS.map((b) => b.owner ?? 0);
+const NONES = BEATS.map((b) => b.none ?? 0);
+
+export default function Metaphysics12Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const cur = BEATS[i];
+
+  const SCENE = useDerivedValue(() => {
+    const n = bi.value;
+    const p = n > 0 ? n - 1 : 0;
+    const tr = ease01(bt.value / 0.7);      // nobody walks; this is a pose blend
+    const t = clock.value;
+    const grow = ease01(bt.value / 0.9);
+    const s = mixStance(emoteHold(G[p], t), emoteLive(G[n], t, bt.value), tr);
+    return {
+      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      flow: (t * SPEED) % SPAN,
+      owner: lerp(OWNER[p], OWNER[n], grow),
+      none: lerp(NONES[p], NONES[n], grow),
+    };
+  });
+
+  const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  const ownStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.owner,
+    transform: [{ translateY: (1 - SCENE.value.owner) * 8 }],
+  }));
+  const noneStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.none,
+    transform: [{ translateY: (1 - SCENE.value.none) * 8 }],
+  }));
+
+  const answered = picked !== null;
+  const live = (cur.pick ?? 0) > 0 && !!cur.interact;
+  const wrong = (id: string) => answered && picked === id;
+
+  return (
+    <Animated.View style={styles.scene}>
+      {/* the perceptions, running */}
+      <Pressable
+        style={styles.stream}
+        disabled={!live || answered}
+        onPress={() => onPick('stream', true)}
+      >
+        <View style={[styles.streamInner, answered && styles.pickRight]}>
+          {Array.from({ length: TILE_N }, (_, k) => (
+            <Tile key={k} k={k} onInk={answered} SCENE={SCENE} />
+          ))}
+          <Text
+            style={[styles.streamText, answered && styles.onInk]}
+            numberOfLines={1}
+          >
+            THE STREAM ITSELF
+          </Text>
+        </View>
+      </Pressable>
+
+      {/* the box drawn for whoever is having them */}
+      <Animated.View style={[styles.own, ownStyle]}>
+        <Pressable
+          style={styles.fill}
+          disabled={!live || answered}
+          onPress={() => onPick('owner', false)}
+        >
+          <View style={[styles.ownInner, wrong('owner') && styles.pickWrong]}>
+            <Text style={styles.ownText} numberOfLines={1}>THE OWNER</Text>
+          </View>
+        </Pressable>
+      </Animated.View>
+
+      {/* the overreach */}
+      <Animated.View style={[styles.none, noneStyle]}>
+        <Pressable
+          style={styles.fill}
+          disabled={!live || answered}
+          onPress={() => onPick('nothing', false)}
+        >
+          <View style={[styles.noneInner, wrong('nothing') && styles.pickWrong]}>
+            <Text style={styles.ownText} numberOfLines={1}>NOTHING AT ALL</Text>
+          </View>
+        </Pressable>
+      </Animated.View>
+
+      <View style={styles.ground} pointerEvents="none" />
+      <Stickman D={D} k={K_FIG} />
+    </Animated.View>
+  );
+}
+
+/** One perception, drifting through. Wraps on SPAN so the row is endless. */
+function Tile({ k, onInk, SCENE }: { k: number; onInk: boolean; SCENE: { value: { flow: number } } }) {
+  const st = useAnimatedStyle(() => {
+    const x = ((k * TILE_PITCH - SCENE.value.flow) % SPAN + SPAN) % SPAN;
+    return { transform: [{ translateX: x - TILE_W }] };
+  });
+  return (
+    <Animated.View style={[styles.tile, onInk && styles.tileOnInk, st]} pointerEvents="none">
+      <View style={[styles.dot, onInk && styles.dotOnInk, { left: 7, top: 8 }]} />
+      <View style={[styles.dot, onInk && styles.dotOnInk, { left: 20, top: 14 }]} />
+      <View style={[styles.dot, onInk && styles.dotOnInk, { left: 13, top: 21 }]} />
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
+  ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
+  fill: { flex: 1 },
+
+  stream: { position: 'absolute', left: STR_L, top: STR_T, width: STR_W, height: STR_H },
+  streamInner: {
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    overflow: 'hidden',
+  },
+  tile: {
+    position: 'absolute', left: 0, top: 6, width: TILE_W, height: 34,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+  },
+  tileOnInk: { borderColor: PAPER, backgroundColor: INK },
+  dot: { position: 'absolute', width: 4, height: 4, borderRadius: 2, backgroundColor: INK },
+  dotOnInk: { backgroundColor: PAPER },
+  streamText: {
+    position: 'absolute', left: 0, right: 0, top: 46,
+    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    textAlign: 'center', includeFontPadding: false,
+  },
+
+  own: { position: 'absolute', ...OWN },
+  // Empty by design: the label at the top and clear paper below it is the argument.
+  ownInner: {
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    alignItems: 'center', paddingTop: 7,
+  },
+  ownText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
+
+  none: { position: 'absolute', ...NONE },
+  noneInner: {
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+
+  onInk: { color: PAPER },
+  pickRight: { backgroundColor: INK, borderColor: INK },
+  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+});
+
+// Ink runs from the stream (322) to the ground line (500). Band 316…512 = 196 (H59).
+export function Metaphysics12Lesson({ lesson }: { lesson: Lesson }) {
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics12Scene} band={[316, 512]} />;
+}

@@ -69,6 +69,12 @@ import { Aesthetics31Lesson } from '@/components/lesson/cinematic/aesthetics31Sc
 import { Aesthetics32Lesson } from '@/components/lesson/cinematic/aesthetics32Scene';
 import { Political31Lesson } from '@/components/lesson/cinematic/political31Scene';
 import { Political32Lesson } from '@/components/lesson/cinematic/political32Scene';
+import { Logic12Lesson } from '@/components/lesson/cinematic/logic12Scene';
+import { Ethics13Lesson } from '@/components/lesson/cinematic/ethics13Scene';
+import { Epistemology14Lesson } from '@/components/lesson/cinematic/epistemology14Scene';
+import { Metaphysics12Lesson } from '@/components/lesson/cinematic/metaphysics12Scene';
+import { Aesthetics13Lesson } from '@/components/lesson/cinematic/aesthetics13Scene';
+import { Political14Lesson } from '@/components/lesson/cinematic/political14Scene';
 import { Logic22Lesson } from '@/components/lesson/cinematic/logic22Scene';
 import { Logic25Lesson } from '@/components/lesson/cinematic/logic25Scene';
 import { Logic26Lesson } from '@/components/lesson/cinematic/logic26Scene';
@@ -249,6 +255,16 @@ const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   'aesthetics-aesthetics-12': Aesthetics12Lesson,
   'political-political-10': Political10Lesson,
   'political-political-11': Political11Lesson,
+  // Round one of the conversion proper, taken in READING ORDER — the next
+  // unconverted lesson in each branch, not the one that best suits a scene (§5).
+  // `check:cinematic` prints the frontier, and its SOLID_FLOOR ratchet fails the
+  // build if a round is ever taken from behind it.
+  'logic-arguments-12': Logic12Lesson,
+  'ethics-ethics-13': Ethics13Lesson,
+  'epistemology-knowledge-14': Epistemology14Lesson,
+  'metaphysics-being-12': Metaphysics12Lesson,
+  'aesthetics-aesthetics-13': Aesthetics13Lesson,
+  'political-political-14': Political14Lesson,
 };
 
 function todayStr() {

@@ -90,6 +90,21 @@ const lesson: Lesson = {
       },
     },
     {
+      type: 'question',
+      prompt: 'To hold a fixed pattern in place, what would you have to keep interrupting?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'The voluntary transfers, over and over', isCorrect: true },
+          { id: 'b', text: 'The starting distribution', isCorrect: false },
+          { id: 'c', text: 'The final inequality', isCorrect: false },
+          { id: 'd', text: 'Nothing — patterns hold themselves', isCorrect: false },
+        ],
+        explanation: 'You cannot object to a start you were invited to choose, and the result is only where the transfers led. That leaves the transfers — which is why Nozick says liberty upsets patterns, and holding one means interfering again and again.',
+      },
+    },
+    {
       type: 'summary',
       title: 'Pattern Against History',
       keyPoints: [

@@ -89,7 +89,7 @@ Philosophize/
 │   ├── lesson/                  # LessonRunner, CardShell, LessonReward, LessonLoader
 │   │   ├── cards/               # 8 card components (incl. DilemmaCard, QuoteCard)
 │   │   ├── interactions/        # MultipleChoice, TrueFalse, SortItems (3 live)
-│   │   ├── cinematic/           # THE BIG ONE — 96 wired cinematic lessons, the
+│   │   ├── cinematic/           # THE BIG ONE — 102 wired cinematic lessons, the
 │   │   │                        #   shared rig.ts, Stickman.tsx, CinematicPlayer,
 │   │   │                        #   per-lesson *Scene.tsx + *Script.ts (§17)
 │   │   ├── feedback/            # CorrectFeedback, IncorrectFeedback (built, unwired)
@@ -173,12 +173,29 @@ and they are not suggestions:
    worth a scene, it is not worth adding.
 2. **Keep converting the ones that exist.** Six at a time, one per branch, so the
    per-branch counts stay level while the card count falls.
+3. **Convert in READING ORDER — the next unconverted lesson in the branch, not the
+   one that best suits a scene.** This is the rule that got learned the hard way.
+   The first 96 were picked by concept fit and the new ones were appended to the
+   end of their unit, which produced the worst possible pattern: a reader walks
+   three animated lessons, drops back into three card decks, and then finds one
+   more animated lesson at the end of the unit. Aesthetics "Puzzles at the Edge"
+   made you do **ten** card decks to reach a single scene. Stepping *backwards* in
+   format mid-unit reads as something being broken; a unit that is uniformly old
+   does not. So the converted region must always be a contiguous run from the
+   start of a branch, and the frontier only ever moves forward.
 
-**`npm run check:cinematic` counts this and will not let it slip backwards.**
-`CARD_BUDGET` in `scripts/validate-cinematic.mjs` is a high-water mark: the number
-of card-only lessons may only ever go DOWN. Converting six lowers it (and the check
-tells you to lock the gain in); adding a card-only lesson raises it and fails the
-build. When it reaches 0 the takeover is done, and `LessonRunner`, `cards/`,
+**`npm run check:cinematic` counts all three and will not let any slip backwards.**
+Two ratchets in `scripts/validate-cinematic.mjs`, both high-water marks:
+
+- **`CARD_BUDGET`** — how many card-only lessons are left. May only go DOWN.
+  Adding a card-only lesson raises it and fails the build.
+- **`SOLID_FLOOR`** — the total length of the unbroken cinematic run at the front
+  of each branch. May only go UP. This is what enforces reading order: converting
+  a lesson *behind* the frontier lowers `CARD_BUDGET` without moving `SOLID_FLOOR`,
+  and the check says so. It also prints **the next lesson to convert in each
+  branch**, so "in order" is never a judgement call.
+
+When `CARD_BUDGET` reaches 0 the takeover is done, and `LessonRunner`, `cards/`,
 `interactions/` and that whole half of §3 can be deleted.
 
 > The two things that do NOT change: **`fill-blank` / `match` stay unimplemented on
@@ -188,8 +205,8 @@ build. When it reaches 0 the takeover is done, and `LessonRunner`, `cards/`,
 
 ### Shape today
 
-**Every branch holds exactly 32 lessons, of which exactly 16 are cinematic** —
-50% of the way through the takeover. Both numbers are deliberate invariants rather
+**Every branch holds exactly 32 lessons, of which exactly 17 are cinematic** —
+53% of the way through the takeover. Both numbers are deliberate invariants rather
 than where the counts happened to land: the totals were 27–30 and the cinematic
 share was 11–14, and both showed on the Learn cards. `check:cinematic` enforces
 that all six branches match on both.
@@ -208,13 +225,16 @@ They constrain each other, and there are exactly two moves that respect both:
 
 | Branch | Units | Lessons | of which cinematic | card decks left |
 |---|---|---|---|---|
-| Metaphysics | 5 | 32 | 16 | 16 |
-| Epistemology | 5 | 32 | 16 | 16 |
-| Logic | 5 | 32 | 16 | 16 |
-| Ethics | 5 | 32 | 16 | 16 |
-| Aesthetics | 3 | 32 | 16 | 16 |
-| Political Philosophy | 5 | 32 | 16 | 16 |
-| **Total** | **28** | **192** | **96 (50%)** | **96** |
+| Metaphysics | 5 | 32 | 17 | 15 |
+| Epistemology | 5 | 32 | 17 | 15 |
+| Logic | 5 | 32 | 17 | 15 |
+| Ethics | 5 | 32 | 17 | 15 |
+| Aesthetics | 3 | 32 | 17 | 15 |
+| Political Philosophy | 5 | 32 | 17 | 15 |
+| **Total** | **28** | **192** | **102 (53%)** | **90** |
+
+> Numbers go stale; the check does not. `npm run check:cinematic` prints the live
+> figures and the next lesson to convert in each branch every time it runs.
 
 > **`Path` IS a unit.** The type is still called `Path` in `data/types.ts`, but
 > every screen calls it a *unit* and `branch.paths` is the unit list
@@ -454,7 +474,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` = `tsc` + both structural validators. `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 192 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across all 96. Both are clean today, so anything they print is yours.
+**Validation:** `npm run check` = `tsc` + both structural validators. `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 192 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
 
 **Cinematic lessons have their own rule book:** [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md) — figure scale and proportion, reach and joint rules, motion and end-poses, band/deck/box/wrap clipping, and the text-must-match-the-picture rule. Read it before authoring a cinematic lesson and run its Part 3 checks before calling one done.
 
@@ -467,7 +487,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 - **Content:** 6 branches · **28 units** · **192 lessons**. **~223 philosophers**
   with bios, eras, 4–6 quotes and three "Did you know?" facts apiece.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
-  gating; **96 cinematic lessons** (animated stickman scenes, §17); animated
+  gating; **102 cinematic lessons** (animated stickman scenes, §17); animated
   `LessonReward` with XP count-up, streak and rank-up.
 - **Gamification:** 50 badges, 25 ranks with a conferred-rank ceremony, XP +
   level curve, daily streak.
@@ -482,7 +502,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
   mastheads, the launch screen and Quick Start (§19).
 
 **Known gaps / tech debt:**
-- **Half the lessons are still card decks** — 96 of 192. That is now the number
+- **Half the lessons are still card decks** — 90 of 192. That is now the number
   that matters; see the takeover rule at the top of §5.
 - **`fill-blank` and `match` are closed as won't-do.** They were the oldest open
   item in this file. Finishing an interaction for the format being retired is work
@@ -548,7 +568,7 @@ The Scholar's Pass paywall UI already exists; this is the value model it should 
 
 **P0 — Daily Review (spaced repetition).** The retention engine and the strongest reason to subscribe. Resurface concepts from completed lessons on a spacing schedule via quick `multiple-choice` / `true-false` / `reinforcement` prompts; add a "Review" entry on Home; completing a review counts toward the streak. Track per-concept last-seen + strength in `userDataStore`.
 
-**P0 — Convert the remaining 96 card decks (§5).** Six at a time, one per branch, so
+**P0 — Convert the remaining 90 card decks (§5).** Six at a time, one per branch, so
 the per-branch counts stay level, until `check:cinematic` reports 0 card decks left.
 Then `LessonRunner`, `cards/` and `interactions/` can go. Every lesson added along
 the way is cinematic.
@@ -567,7 +587,7 @@ units where every other branch has 5 — level it up.
 validation script** that used to head this item is done — `npm run check`, see §11.)
 
 **Done since this list was written** — kept so nobody re-plans them: content grew
-from 60 lessons to 192 across 28 units; Supabase cloud sync went live; 96
+from 60 lessons to 192 across 28 units; Supabase cloud sync went live; 102
 cinematic lessons shipped; the app launched on Google Play with ads,
 subscriptions and a widget; the XP model was reconciled behind `lessonXP()`;
 ranks gained a conferred-rank ceremony; and the branch screen became a
@@ -597,7 +617,7 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**This is the format the app is converging on** — 96 of the 192 lessons are here
+**This is the format the app is converging on** — 102 of the 192 lessons are here
 already, and the card runner is what they are replacing (§5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a

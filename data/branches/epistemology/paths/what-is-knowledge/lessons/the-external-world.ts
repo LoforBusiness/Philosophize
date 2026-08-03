@@ -60,6 +60,21 @@ const lesson: Lesson = {
       },
     },
     {
+      type: 'question',
+      prompt: 'Of the world, your experience of it, and the step between — which can you inspect?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Your experience, and only that', isCorrect: true },
+          { id: 'b', text: 'The world, since that is what you look at', isCorrect: false },
+          { id: 'c', text: 'The step from one to the other', isCorrect: false },
+          { id: 'd', text: 'All three, given careful enough observation', isCorrect: false },
+        ],
+        explanation: 'B is the natural answer and it is the one the puzzle attacks: every check you have ever run, you ran by looking, which means you ran it on your experience. The step out to the world is exactly the part no observation reaches.',
+      },
+    },
+    {
       type: 'summary',
       title: 'The World Beyond Experience',
       keyPoints: [

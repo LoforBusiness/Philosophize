@@ -146,7 +146,12 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
 //   · CARD_BUDGET is a high-water mark that may only ever go DOWN. Converting a
 //     lesson lowers it; adding a card-only lesson raises it and fails here. When
 //     it reaches 0 the takeover is done and this whole block can go.
-const CARD_BUDGET = 96;
+//   · SOLID_FLOOR is the second ratchet, and the one that enforces READING ORDER:
+//     the combined length of the unbroken cinematic run at the FRONT of each
+//     branch. It may only go UP. Converting a lesson from behind the frontier
+//     lowers CARD_BUDGET without moving this, and the check says so.
+const CARD_BUDGET = 90;
+const SOLID_FLOOR = 79;
 
 const ROUTE = path.join(
   process.cwd(), 'app', '(app)', 'branches', '[branchSlug]', '[pathSlug]', 'lesson', '[lessonId].tsx',
@@ -160,18 +165,33 @@ const tally = [];
 for (const branch of fs.readdirSync(BRANCHES).sort()) {
   const paths = path.join(BRANCHES, branch, 'paths');
   if (!fs.existsSync(paths)) continue;
-  let lessons = 0, cine = 0;
-  for (const unit of fs.readdirSync(paths)) {
-    const dir = path.join(paths, unit, 'lessons');
-    if (!fs.existsSync(dir)) continue;
-    for (const f of fs.readdirSync(dir).filter((n) => n.endsWith('.ts'))) {
-      const id = fs.readFileSync(path.join(dir, f), 'utf8').match(/^ {2}id: '([^']+)',/m)?.[1];
-      if (!id) continue;
-      lessons++;
-      if (wired.has(id)) cine++;
+  // READING ORDER comes out of the unit index, not the directory listing — the
+  // filesystem is alphabetical and the reader is not.
+  const unitDir = fs.readdirSync(paths)[0];
+  const idx = fs.readFileSync(path.join(paths, unitDir, 'index.ts'), 'utf8');
+  const imports = {};
+  for (const m of idx.matchAll(/^import (\w+) from '\.\/lessons\/([^']+)';/gm)) imports[m[1]] = m[2];
+  const order = [...idx.matchAll(/lessons: \[([^\]]*)\]/g)]
+    .flatMap((m) => m[1].split(',').map((s) => s.trim()).filter(Boolean));
+
+  let lessons = 0, cine = 0, solid = 0, frontier = null;
+  for (const name of order) {
+    const file = path.join(paths, unitDir, 'lessons', `${imports[name]}.ts`);
+    if (!fs.existsSync(file)) continue;
+    const src = fs.readFileSync(file, 'utf8');
+    const id = src.match(/^ {2}id: '([^']+)',/m)?.[1];
+    if (!id) continue;
+    lessons++;
+    if (wired.has(id)) {
+      cine++;
+      if (frontier === null) solid++;
+    } else if (frontier === null) {
+      // The title comes out of SOURCE, so its escapes arrive as two characters.
+      const title = (src.match(/^ {2}title: '(.*)',/m)?.[1] ?? '').replace(/\\'/g, "'");
+      frontier = `${id}  ${title}`;
     }
   }
-  tally.push({ branch, lessons, cine });
+  tally.push({ branch, lessons, cine, solid, frontier });
 }
 
 if (tally.length) {
@@ -195,12 +215,35 @@ if (tally.length) {
     );
   }
 
+  // READING ORDER (§5): the converted region must be a contiguous run from the
+  // front of each branch, so a reader never steps from a scene back into cards.
+  const solid = tally.reduce((a, t) => a + t.solid, 0);
+  if (solid < SOLID_FLOOR) {
+    errs.push(
+      `the solid front is ${solid}, down from ${SOLID_FLOOR} — a lesson was un-wired ` +
+        'from inside the converted run (§5)',
+    );
+  } else if (solid > SOLID_FLOOR) {
+    errs.push(`the solid front is ${solid}, up from ${SOLID_FLOOR} — good. Raise SOLID_FLOOR to lock it in.`);
+  } else if (cards < CARD_BUDGET) {
+    errs.push(
+      'lessons were converted but the solid front did not move: they were taken from ' +
+        'BEHIND the frontier. Convert in reading order (§5) — the next one in each ' +
+        'branch is listed above.',
+    );
+  }
+
   const total = tally.reduce((a, t) => a + t.lessons, 0);
   const cine = tally.reduce((a, t) => a + t.cine, 0);
   console.log(
     `\ntakeover: ${cine}/${total} cinematic (${Math.round((cine / total) * 100)}%) · ` +
-      `${cards} card decks left · ${tally.length} branches at ${tally[0].lessons}/${tally[0].cine}`,
+      `${cards} card decks left · solid front ${solid} · ` +
+      `${tally.length} branches at ${tally[0].lessons}/${tally[0].cine}`,
   );
+  console.log('next to convert, in reading order:');
+  for (const t of tally) {
+    console.log(`  ${t.branch.padEnd(22)}${t.frontier ?? '— branch fully converted —'}`);
+  }
   if (errs.length) problems.push(['the branch balance', errs]);
 }
 

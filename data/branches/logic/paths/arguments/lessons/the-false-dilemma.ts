@@ -54,6 +54,21 @@ const lesson: Lesson = {
       },
     },
     {
+      type: 'question',
+      prompt: 'Which option does "with us or against us" have to hide to work?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Being partly with you and partly against you', isCorrect: true },
+          { id: 'b', text: 'Being with you', isCorrect: false },
+          { id: 'c', text: 'Being against you', isCorrect: false },
+          { id: 'd', text: 'Refusing to answer at all', isCorrect: false },
+        ],
+        explanation: 'The two offered doors are real, so B and C are not hidden — they are the offer. D tempts, but declining the question is not a third position; it is leaving the room. What has to stay out of sight is the middle.',
+      },
+    },
+    {
       type: 'summary',
       title: 'Both Doors Named',
       keyPoints: [

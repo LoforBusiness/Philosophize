@@ -89,6 +89,21 @@ const lesson: Lesson = {
       },
     },
     {
+      type: 'question',
+      prompt: 'On Hume\'s account, what is it that is having your experiences?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'The stream of perceptions itself — there is no one behind it', isCorrect: true },
+          { id: 'b', text: 'A soul, which owns each perception in turn', isCorrect: false },
+          { id: 'c', text: 'Nothing whatever — the experiences are an illusion too', isCorrect: false },
+          { id: 'd', text: 'The body, which produces them', isCorrect: false },
+        ],
+        explanation: 'C is the overreach the view is most often accused of. Hume denies an owner, not the experiences: introspect and you find perceptions in abundance, just never anything holding them.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [
