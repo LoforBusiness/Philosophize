@@ -1,212 +1,91 @@
-# Stickman movement library — expansion
+# Stickman movement library — verification harness
 
 **Date:** 2026-08-02
-**Status:** approved, not yet implemented
+**Status:** done. This file REPLACES an earlier design doc that was wrong; see below.
 
-## Why
+## What the earlier version of this file claimed, and why it was wrong
 
-`rig.ts` is broad in standing gesture and narrow in everything else. It has roughly
-fifty emote codes, a set of situational stances (seated, lean, read, sip, swing,
-kite, picnic, climb) and twenty-six boxing moves — but **exactly one way to
-travel**, and no transition between body positions.
+It proposed adding eighteen motions — travel gaits, asymmetric gaits, one-shots and
+change-of-level transitions — on the stated premise that `rig.ts` had *"exactly one
+way to travel, and no transition between body positions."*
 
-Two consequences, and only the second is a defect:
+**That premise was false when it was written.**
+`components/lesson/cinematic/moves.ts` had been in the repo since 2026-07-27
+(commit `9c8e3de`, "Rig: a much larger movement library") and already had:
 
-1. Every figure in every lesson moves at the same speed with the same carriage.
-   A script cannot say "he hurries over", "he creeps up on it", "he trudges back".
-   That is a *limit*.
-2. A figure changing level — standing to sitting, standing to the floor — is a
-   straight `mixStance` lerp between the two end poses. A lerp interpolates the
-   pelvis and both feet independently, so the body passes through positions it
-   never really occupies: the feet slide along the ground while the hips sink.
-   That is a *defect*, and it is the thing that currently looks unnatural rather
-   than merely absent.
+| | |
+|---|---|
+| 12 travel modes | walk · stroll · hurry · run · trudge · march · sneak · limp · skip · tiptoe · back away · pace |
+| 15 postures | crouch · kneel · sit on the ground · perch · recline · squat · sprawl · … |
+| 28 one-shot actions | sit down · stand up · jump · throw · push · drag · stumble · fall · get up · … |
+| aiming | `gazeAt` / `pointAt` — the head and hand track a real stage point |
+| turning | `dirTurn` / `turnDip` |
 
-This expansion is speculative breadth for lessons not yet written, so the bar is
-that each motion is usable without being tuned again at the call site.
+The proposed eighteen were almost entirely a rebuild of those.
 
-## Scope
+**How it was missed:** the search was `grep "export function \(run\|jump\|sneak\|…\)"`
+run against **`rig.ts` alone**. The directory was never listed, and `moves.ts` names
+its functions `moveStance` / `actStance` / `postureHold`, which match no verb in that
+pattern. A single `ls` of the directory would have caught it.
 
-Eighteen motions in four groups (6 travel · 2 asymmetric · 4 one-shot · 6
-transitions), plus a naming layer. No existing lesson changes.
+The lesson worth keeping: **before proposing to build a capability, list the
+directory.** Grepping for the names you expect only finds the design you already
+have in mind.
 
-## Where the code lives
+## What was actually built
 
-New file `components/lesson/cinematic/moves.ts`, importing only from `./rig`.
-
-`rig.ts` is already 1,973 lines with ~60 exports, and this work would add ~450
-more. The constraint that decides the split is that **`rig.ts` has zero imports
-specifically so it runs in plain Node** (CLAUDE.md §17) — that is what makes the
-filmstrip verification below possible at all. A two-file chain still loads under
-sucrase, so the property survives.
-
-Scenes import new motions from `./moves`. `moves.ts` must not be imported *by*
-`rig.ts` — that would be a cycle.
-
-## Group 1 — travel gaits
-
-Data only. New `Gait` presets beside the existing `WALK`.
-
-`STROLL` · `MARCH` · `TRUDGE` · `JOG` · `RUN` · `SNEAK`
-
-Two properties of the existing rig make this nearly free, and both are load-bearing:
-
-- **A flight phase falls out of `stance`.** `g.stance` is the fraction of the cycle
-  a foot is planted; at `WALK`'s 0.62 the two feet overlap and someone is always on
-  the ground. Below 0.5 they cannot overlap, so there are two airborne moments per
-  cycle — which is the difference between a run and a fast walk, and it needs no
-  new code.
-- **Stride is distance-driven, not time-driven.** `phaseFor(dist, g)` returns
-  `2π·dist·stance/S`, so the planted foot advances exactly `S` while it is down, at
-  any speed. Every preset therefore foot-locks automatically and composes with
-  `travelStance`, `strideStance`, `moveTr` and `gaitVary` with no change to any of
-  them.
-
-Starting values, to be tuned against the sheets rather than trusted as authored.
-Cycle distance is `S/stance` and is given because it is the number that decides
-whether a gait reads as the same character moving differently:
-
-| Gait | S | lift | stance | bob | tilt | armSwing | armY | standH | cycle |
-|---|---|---|---|---|---|---|---|---|---|
-| TRUDGE | 24 | 7 | 0.70 | 2.0 | 0.16 | 0.22 | 8 | 34 | 34 |
-| STROLL | 28 | 9 | 0.66 | 2.4 | 0.06 | 0.32 | 7 | 34 | 42 |
-| WALK *(existing)* | 34 | 13 | 0.62 | 3.0 | 0.09 | 0.42 | 7 | 34 | 55 |
-| MARCH | 34 | 18 | 0.58 | 3.6 | 0.04 | 0.55 | 2 | 34 | 59 |
-| SNEAK | 20 | 15 | 0.60 | 1.5 | 0.20 | 0.15 | −4 | 28 | 33 |
-| JOG | 42 | 17 | 0.46 | 4.5 | 0.14 | 0.50 | −8 | 34 | 91 |
-| RUN | 54 | 22 | 0.36 | 6.0 | 0.22 | 0.62 | −12 | 34 | 150 |
-
-`SNEAK` crouches by lowering `standH` to 28 — `standH` is already a `Gait` field,
-so a crouch costs nothing extra.
-
-`bobSign` and `armBase` keep `WALK`'s values (−1 and 0.09) for every preset; they
-are omitted from the table only because they do not vary. `armY` is the new
-optional field, and `WALK`'s 7 is the existing hard-coded value restated as data.
-
-### The one change to existing code
-
-A runner's hands ride near the ribs; `walk()` hard-codes hanging fists at `y: 7`.
-This needs an optional `armY` on `Gait`, read as `g.armY ?? 7`.
-
-`walk()` is used by every walking figure in all 84 cinematic lessons, so the
-default must provably move nothing: the acceptance check is that `walk()` output
-for `WALK` is **numerically identical** across a full cycle before and after the
-change, not merely "looks the same".
-
-## Group 2 — asymmetric gaits
-
-`LIMP` and `CARRY_HEAVY`, as functions rather than presets, because the two legs
-differ. Both are asymmetric for the same reason: a limp shortens the load on the
-bad leg, and a one-sided heavy load lists the torso away from the weight and
-shortens the step on the loaded side. A `Gait` describes one leg pattern, so
-neither can be expressed as a preset.
-
-The trap: giving each foot its own `Gait` with a different `stance` or `S`
-desynchronises them, because `phaseFor` derives phase from both — the feet would
-travel different distances per cycle and skate. So **`S` and the cycle stay
-identical for both legs**, and the asymmetry lives in:
-
-- per-foot `lift` (the bad leg barely leaves the ground)
-- a pelvis dip timed to when weight lands on the bad leg
-- a small torso tilt toward the good side during that stance
-
-That is also what a limp physically is, so the constraint and the appearance agree.
-
-## Group 3 — one-shots
-
-`hop` · `stumble` · `turnToFace` · `doubleTakeStep`
-
-Contract matches the existing boxing moves exactly: `(t: number, u: number) =>
-Stance`, with `u` running 0→1 and the pose returning to standing at **both** ends,
-so any of them can be dropped into a beat without the scene arranging an entry or
-exit.
-
-`turnToFace` is a partial motion by necessity: facing is `dir` in `Cfg`, not a
-field of `Stance`, so the function can only supply the weight shift and the step.
-The scene flips `dir` at `u = 0.5`. This must be documented at the call site,
-because a caller who forgets gets a figure that shuffles and stays facing the
-wrong way — which will look like the motion is broken rather than misused.
-
-## Group 4 — level transitions
-
-`standToSit` · `sitToStand` · `standToFloor` · `floorToStand` · `lieDown` · `getUp`
-
-The group that fixes the defect, so the construction matters more than the list.
-
-**These are not lerps between end poses.** They are built from the same principle
-that makes `walk` work — the feet are driven by ground contact, not by
-interpolation:
-
-- the planted feet stay where they are and do not slide
-- the pelvis descends on an eased curve, never linearly
-- the torso pitches forward on the way down and comes upright at the end, because
-  a body that sits by translating straight downward reads as a lift, not a person
-- the hands leave the standing pose early and arrive at the destination pose late,
-  so the limbs settle after the mass does
-
-Each transition **must land exactly on an existing pose** — `seated(seatH, t)` for
-the chair, emote 48 for the floor sit, emote 49 for the kneel — so a beat can hold
-after the transition without a visible jump. This is checkable and is one of the
-acceptance criteria below.
-
-`standToSit` takes `seatH` and lands on `seatBob(seatH)`; the floor variants land
-on the fixed floor poses.
-
-## Naming layer
-
-Named exports (`RUN`, `SNEAK`, `SIT_DOWN`, …) plus a `MOVES` index grouping them
-as travel / one-shot / change-of-level, each with a one-line description of what
-it depicts.
-
-The values are the same gaits and functions, so nothing is slower and no existing
-lesson changes. The point is discoverability: today a gesture is a bare number
-(`p: 25`) whose meaning lives in a fifty-branch if-chain, and the fifty-first
-entry makes that worse. Existing emote codes are **not** renamed — that would be a
-mechanical diff across all 84 shipped lesson scripts for no behaviour change.
-
-## Verification
-
-Sheets first, then numbers, per `docs/LESSON_RULES.md` Part 3. Neither alone is
-sufficient: sheets find poses that are valid and meaningless, numbers find
-everything a still frame cannot show.
-
-**Filmstrips.** Twenty frames per motion rendered in plain Node — sucrase strips
-the types, `solve()` gives the joints, `jimp-compact` draws bones as thick lines
-and joints as discs. Both are already in `node_modules`. A cyclic gait is also
-sheeted *against travel*, because a cycle on its own only proves the figure is
-moving, not that it is moving at the right speed for the ground it covers.
-
-**Numeric checks**, each targeting a specific known failure:
+**`scripts/check-moves.mjs`** — numeric verification for the whole movement library,
+running `rig.ts` and `moves.ts` in plain Node through sucrase. No Metro, no device.
+Four checks:
 
 | Check | Catches |
 |---|---|
-| Planted foot's world x is constant between frames | skating — the defect that made this whole area suspect |
-| No joint below the ground line; pelvis above its floor | a transition passing the body through the stage |
-| No hand held at ≥98% of the 33-unit arm for a sustained stretch | IK clamping, where the elbow pins straight then snaps — the failure the `seated` comment documents at length |
-| Bounded per-frame delta across every field | non-smoothness, measured directly rather than judged |
-| Transition at `u = 1` equals its target pose within epsilon | the visible jump when a beat holds after a transition |
+| skate | a planted foot moving in world space |
+| ground | a limb driven through the floor, allowing for authored sink and kneels |
+| discontinuity | a real gap in the function, told from merely-fast by re-sampling |
+| landing | a transition ending off its destination pose |
 
-**Guard against the checks themselves.** A pass that flags almost everything has
-told you nothing (LESSON_RULES Part 3): an earlier sweep flagged 99 of 100 poses
-because it counted a naturally hanging arm as clamped. If a check fires broadly,
-fix the check before touching a motion.
+`--probe` registers a deliberately broken motion per check and expects all of them
+to fire. A check that never fails is not a check.
 
-## Acceptance criteria
+**`scripts/sheet-moves.mjs`** — filmstrips at the renderer's true stroke weights,
+for the failures no number can see. `node scripts/sheet-moves.mjs posture:8 act:3`.
 
-1. `walk()` with `WALK` produces numerically identical output to before, across a
-   full cycle.
-2. All 84 cinematic lessons unchanged; `npm run check` green (tsc, 180 lesson
-   files, cinematic shape checks).
-3. Every new motion has a filmstrip that has been looked at.
-4. All five numeric checks pass for every new motion.
-5. Each transition lands on its target pose within epsilon at `u = 1`.
-6. No new colours, no scene-level constants shadowing rig constants (§17 rule 2).
+## Three defects it found, all now fixed
 
-## Out of scope
+1. **`move 7` (limp) skated its planted foot 7.3 units per stride.** It scaled
+   `footR.x` as well as the lift; the foot-lock depends on a planted foot advancing
+   by exactly `S`, so shortening its travel drags it along the floor.
+2. **`act 3` (jump) teleported the pelvis 13 units at take-off.** `load` fell 1 → 0
+   in one step while the flight term was still zero.
+3. **`posture 8` (squat) drove a knee 4.9 units below the ground line.** The back
+   foot at −13 folded the leg to 18 of its 37 units and the solver bent the knee
+   down and back.
 
-- Renaming the existing fifty emote codes.
-- Two-figure interaction (handshake, hand-off, leading) and object handling
-  (push, pull, throw, catch) — both were considered and deferred; they are the
-  obvious next expansions once these are in use.
-- Any change to `Stickman.tsx` rendering. Everything here is pose data; the
-  renderer already draws whatever `solve()` returns.
+## Two checks that had to be thrown away or rebuilt
+
+Both failed the same way, and it is the failure mode to expect here:
+
+- **A reach check** flagged ~30 of 55 motions. `moves.ts` states the rule it was
+  violating: past ~33 units the solver clamps and the arm goes straight, which is
+  **safe** and is how a pointing arm is made; the real defect is the 18–30 middle,
+  where the elbow bows out and cuts a hole against the torso. That depends on what
+  the author meant, so it is a sheet's job, not a number's. Removed.
+- **A continuity check** could not tell a snap from a teleport. It now samples 16×
+  finer and compares: a fast-but-continuous move's per-frame delta shrinks with the
+  interval, a real gap does not. `act 19` went 12.34 → 0.22 (fine); `act 3` held
+  13.95 → 13.02 (a cliff).
+
+**A check that fires on almost everything has told you nothing.** It happened twice
+in one day — here, and on the word-margin sweep that reported 40 split words and
+then 8, nearly all of them arithmetic.
+
+## Not done, deliberately
+
+`armY` on `Gait` was built and then reverted: `moves.ts` gives each travel mode its
+own hand positions in `moveBody`, so the field had no reader, and an unused field on
+a core type is the same clutter as a setting nothing reads.
+
+Two-figure interaction (handing over, handshake, leading) and object handling as
+full motions remain genuinely absent from the library — those are the real gaps if
+more vocabulary is wanted.
