@@ -92,6 +92,16 @@ export function ik(hx: number, hy: number, tx: number, ty: number, l1: number, l
 export interface Gait {
   S: number; lift: number; stance: number; bob: number; bobSign: number;
   tilt: number; armBase: number; armSwing: number; standH: number;
+  /**
+   * Hand height while travelling, in rig units, POSITIVE = LOWER — see the long
+   * note in `walk` about why 7 is the hanging value and why higher was wrong.
+   *
+   * Optional, and it defaults to exactly the 7 that used to be hard-coded, so
+   * every existing gait is untouched. Negative rides the hands up toward the
+   * ribs, which is as much of what separates a run from a fast walk as the
+   * stride length is.
+   */
+  armY?: number;
 }
 export const WALK: Gait = {
   S: 34, lift: 13, stance: 0.62, bob: 3.0, bobSign: -1,
@@ -1250,8 +1260,10 @@ export function walk(dist: number, g: Gait = WALK): Stance {
     // enclosed a triangle of paper against the torso: the hole-in-the-body defect,
     // present in every walking figure in every lesson until now. A hanging hand
     // belongs at mid-thigh; anything higher must be a deliberately bent arm.
-    fistL: { x: 3 + Math.cos(ph) * swing * 24, y: 7 - Math.abs(Math.cos(ph)) * 2 },
-    fistR: { x: 3 + Math.cos(ph + Math.PI) * swing * 24, y: 7 - Math.abs(Math.cos(ph + Math.PI)) * 2 },
+    // `armY` defaults to the 7 these two lines used to hard-code, so a gait that
+    // does not mention it is bit-for-bit what it always was. See Gait.armY.
+    fistL: { x: 3 + Math.cos(ph) * swing * 24, y: (g.armY ?? 7) - Math.abs(Math.cos(ph)) * 2 },
+    fistR: { x: 3 + Math.cos(ph + Math.PI) * swing * 24, y: (g.armY ?? 7) - Math.abs(Math.cos(ph + Math.PI)) * 2 },
     adv: 0,
   };
 }

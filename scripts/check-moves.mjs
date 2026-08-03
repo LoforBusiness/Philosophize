@@ -154,6 +154,19 @@ function checkLanding(name, m) {
   if (gap > 0.01) note(name, 'landing', `ends ${gap.toFixed(3)} units off its destination pose`);
 }
 
+// ── walk() must never change ─────────────────────────────────────────────────
+// walk() feeds every walking figure in all 84 cinematic lessons, so `armY` has to
+// be a pure addition: with the field absent the output must be BIT-IDENTICAL, not
+// "close enough". The baseline was captured from an unmodified rig.ts before the
+// field existed — captured afterwards it would prove nothing.
+function checkWalkUnchanged() {
+  const expect = JSON.parse(readFileSync(path.join(REPO, 'scripts/walk-baseline.json'), 'utf8'));
+  const got = Array.from({ length: 24 }, (_, i) => R.walk(i * 2.5, R.WALK));
+  if (JSON.stringify(got) !== JSON.stringify(expect)) {
+    note('walk (identity)', 'regression', 'walk(dist, WALK) output changed — 84 lessons depend on it');
+  }
+}
+
 // ── the register ─────────────────────────────────────────────────────────────
 // `gait`   : at(distance) -> Stance, cycle = distance per stride cycle
 // `oneShot`: at(u 0..1)   -> Stance
@@ -179,6 +192,8 @@ if (process.argv.includes('--probe')) {
     { name: 'probe landing', kind: 'oneShot', at: () => st, lands: () => R.seated(21, T) },
   );
 }
+
+if (!process.argv.includes('--probe')) checkWalkUnchanged();
 
 for (const m of MOTIONS) {
   checkSkate(m.name, m); checkGround(m.name, m);
