@@ -78,6 +78,28 @@ run|jump|sneak` **against `rig.ts` alone**. `moves.ts` names its functions
 was never listed. **Grepping for the names you expect only finds the design you
 already have in mind.**
 
+`interact.ts` is the third file, and it is the one to reach for whenever a beat
+involves anything that is not the figure's own body:
+
+- **`handAt(stance, placed)`** — the stage position of a hand. Draw a held object
+  THERE. Without it a prop is placed by eye and drifts out of the grip the moment
+  the figure breathes, walks, or plays a different beat, which is why every
+  "held" object in the app before this was really an object the figure stood next
+  to. `headStage` does the same for the head, and `reachHandTo` is the inverse —
+  put a named hand on a stage point.
+- **`carryMode(mode, dist, hold)`** — travel while holding something (a box, a
+  bag, a tray, a cradled thing, something over the shoulder). A figure that had
+  just picked something up used to walk off swinging both arms.
+- **`propAct(code, t, u)`** — catch · lift heavy · set down gently · pull · hold
+  out · place high · open · crank.
+- **`handshake` / `passObject` / `converse` / `leanToward` / `pairPosture`** —
+  two figures as one action. `passObject` returns the OBJECT's position along
+  with both stances, so the prop is in a real hand at every frame of the pass.
+
+**Two figures only touch within about 60 stage units** (at k = 1) — a hand gets
+roughly 30 forward of its own figure. `canShakeHands` answers it exactly; past
+that the arms genuinely cannot meet and the staging has to move them closer.
+
 **A2c. The figure is checkable in plain Node — use it before and after any pose
 work.** `node scripts/check-moves.mjs` runs every motion in the library through
 four measurements: a planted foot that moves (skating), a limb through the floor,

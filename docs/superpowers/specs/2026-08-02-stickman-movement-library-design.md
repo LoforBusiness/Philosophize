@@ -86,6 +86,33 @@ then 8, nearly all of them arithmetic.
 own hand positions in `moveBody`, so the field had no reader, and an unused field on
 a core type is the same clutter as a setting nothing reads.
 
-Two-figure interaction (handing over, handshake, leading) and object handling as
-full motions remain genuinely absent from the library — those are the real gaps if
-more vocabulary is wanted.
+## The gaps that were real — now filled
+
+Two-figure interaction and object handling *were* genuinely absent, and became
+`components/lesson/cinematic/interact.ts`.
+
+The enabler is **`handAt`**: `pose()` hands a scene transforms and never a joint,
+so a scene drawing an object in someone's hands had no way to ask where the hands
+were. Every held prop in the app was really a prop the figure stood beside. With
+`handAt` (body → stage point) alongside the existing `gazeAt`/`pointAt` (stage
+point → body), an object can sit in a real grip, and a second figure can reach for
+that same point.
+
+On top of it: `carryMode` (travel while holding — a figure that had just picked
+something up used to walk away swinging both arms), `propAct` (8 actions:
+catch, lift heavy, set down, pull, hold out, place high, open, crank), and the
+pair set — `handshake`, `passObject` (which returns the object's position, so the
+prop is in a hand at every frame), `converse`, `leanToward`, `pairPosture`.
+
+**A sixth check came with them.** Two figures each posed correctly can still reach
+past each other — it looks right in either figure alone and wrong in the frame, so
+no per-motion check would ever find it. `checkMeet` measures whether the two hands
+ever occupy the same point. It caught a bug on its first run, and then a second one
+in itself: `solveAt` assumed `dir = 1`, so the left-facing figure's hand came out on
+the wrong side of its body and a working handshake reported 56 units apart.
+
+It also pinned down a real limit: **two figures only touch within about 60 stage
+units.** `canShakeHands` computes it from the geometry — at the handshake height a
+hand gets 30.1 forward of its figure — after a first version using a round fudge
+factor answered "no" at separations where the hands measurably do meet.
+

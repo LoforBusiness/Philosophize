@@ -29,15 +29,17 @@ mkdirSync(TMP, { recursive: true });
 function emit(rel, name) {
   const src = readFileSync(path.join(REPO, rel), 'utf8');
   const js = transform(src, { transforms: ['typescript'] }).code
-    .replace(/(from\s+['"])\.\/rig(['"])/g, '$1./rig.mjs$2');
+    .replace(/(from\s+['"])\.\/(rig|moves)(['"])/g, '$1./$2.mjs$3');
   const out = path.join(TMP, name);
   writeFileSync(out, js);
   return pathToFileURL(out).href;
 }
 
 emit('components/lesson/cinematic/rig.ts', 'rig.mjs');
+emit('components/lesson/cinematic/moves.ts', 'moves.mjs');
 const R = await import(pathToFileURL(path.join(TMP, 'rig.mjs')).href);
-const M = await import(emit('components/lesson/cinematic/moves.ts', 'moves.mjs'));
+const M = await import(pathToFileURL(path.join(TMP, 'moves.mjs')).href);
+const I = await import(emit('components/lesson/cinematic/interact.ts', 'interact.mjs'));
 
 const GROUND = 500;
 const ARM = R.U.uarm + R.U.farm;          // 33
@@ -192,6 +194,38 @@ function checkLanding(name, m) {
   if (gap > 0.01) note(name, 'landing', `ends ${gap.toFixed(3)} units off its destination pose`);
 }
 
+// ── check 6 · two hands that are supposed to meet must actually meet ─────────
+//
+// The defect this exists for is the one two-figure staging always has: each figure
+// is posed correctly on its own, both look like they are reaching, and the hands
+// pass ten units apart — so it reads as two people grasping at the air near each
+// other. It cannot be seen in either figure alone, which is why no per-motion check
+// would ever find it.
+//
+// A handshake and a hand-over both go through a moment where the two hands are the
+// same point. The test is simply whether that moment exists.
+function checkMeet(pairs) {
+  for (const [key, sides] of Object.entries(pairs)) {
+    if (!sides.a || !sides.b) continue;
+    let best = Infinity, at = 0;
+    for (let i = 0; i <= FRAMES; i++) {
+      const u = i / FRAMES;
+      // EACH FIGURE MUST BE SOLVED WITH ITS OWN FACING. `solveAt` assumes dir = 1,
+      // and figure B faces left — solved the wrong way its hand comes out on the
+      // far side of its body, which reported 56 units for a handshake that works.
+      const ha = R.solve({ ...PA, ...sides.a.at(u) }).wrR;
+      const hb = R.solve({ ...PB, ...sides.b.at(u) }).wrR;
+      const d = Math.hypot(ha.x - hb.x, ha.y - hb.y);
+      if (d < best) { best = d; at = u; }
+    }
+    // A hand is drawn as a joint of radius limb/2 ≈ 5.5, so two hands within a few
+    // units are touching. Ten apart is the failure this is looking for.
+    if (best > 4) {
+      note(key, 'meet', `the two hands never get closer than ${best.toFixed(1)} units (best at u=${at.toFixed(2)})`);
+    }
+  }
+}
+
 // ── walk() must never change ─────────────────────────────────────────────────
 // walk() feeds every walking figure in all 84 cinematic lessons, so `armY` has to
 // be a pure addition: with the field absent the output must be BIT-IDENTICAL, not
@@ -210,6 +244,10 @@ function checkWalkUnchanged() {
 // `oneShot`: at(u 0..1)   -> Stance
 // `lands`  : optional destination pose a transition must equal at u = 1
 const T = 3.0;                               // a fixed clock, so runs are comparable
+// Two figures 56 stage units apart, facing each other. Inside the ~60 the arms can
+// span, so their hands are supposed to actually touch.
+const PA = { x: 172, groundY: GROUND, k: 1, dir: 1 };
+const PB = { x: 228, groundY: GROUND, k: 1, dir: -1 };
 const MOTIONS = [
   { name: 'walk (baseline)', kind: 'gait', cycle: R.WALK.S / R.WALK.stance, at: (d) => R.walk(d, R.WALK) },
   { name: 'stand (baseline)', kind: 'oneShot', at: () => R.stand(T) },
@@ -231,6 +269,30 @@ const MOTIONS = [
   ...Array.from({ length: 28 }, (_, i) => ({
     name: `act ${i + 1}`, kind: 'oneShot', at: (u) => M.actStance(i + 1, T, u),
   })),
+
+  // ── interact.ts: props and pairs ───────────────────────────────────────────
+  // Carrying rides a travel mode, so it must still foot-lock — that is the whole
+  // risk of layering an upper body onto a gait.
+  ...[1, 2, 3, 4, 5].map((hold) => ({
+    name: `carry walk/${hold}`, kind: 'gait',
+    cycle: M.gaitFor(0).S / M.gaitFor(0).stance,
+    at: (d) => I.carryMode(0, d, hold),
+  })),
+  ...[1, 2, 3, 4, 5].map((hold) => ({
+    name: `carry hurry/${hold}`, kind: 'gait',
+    cycle: M.gaitFor(2).S / M.gaitFor(2).stance,
+    at: (d) => I.carryMode(2, d, hold),
+  })),
+  ...Array.from({ length: 8 }, (_, i) => ({
+    name: `prop ${i + 1}`, kind: 'oneShot', at: (u) => I.propAct(i + 1, T, u),
+  })),
+
+  // Two figures 56 apart and facing — inside the reach limit, so their hands are
+  // supposed to meet. `pair` carries the shared point the check verifies against.
+  { name: 'handshake A', kind: 'oneShot', at: (u) => I.handshake(T, u, PA, PB).a, pair: 'shake', side: 'a' },
+  { name: 'handshake B', kind: 'oneShot', at: (u) => I.handshake(T, u, PA, PB).b, pair: 'shake', side: 'b' },
+  { name: 'passObject A', kind: 'oneShot', at: (u) => I.passObject(T, u, PA, PB).a, pair: 'pass', side: 'a' },
+  { name: 'passObject B', kind: 'oneShot', at: (u) => I.passObject(T, u, PA, PB).b, pair: 'pass', side: 'b' },
 ];
 
 // SELF-TEST. `--probe` registers a deliberately broken motion for each check and
@@ -248,6 +310,14 @@ if (process.argv.includes('--probe')) {
 }
 
 if (!process.argv.includes('--probe')) checkWalkUnchanged();
+
+const PAIRS = {};
+for (const m of MOTIONS) {
+  if (!m.pair) continue;
+  PAIRS[m.pair] = PAIRS[m.pair] || {};
+  PAIRS[m.pair][m.side] = m;
+}
+checkMeet(PAIRS);
 
 for (const m of MOTIONS) {
   checkSkate(m.name, m); checkGround(m.name, m);

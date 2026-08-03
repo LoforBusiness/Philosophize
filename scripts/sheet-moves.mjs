@@ -25,13 +25,15 @@ const TMP = path.join(os.tmpdir(), 'philosophize-moves-sheet');
 mkdirSync(TMP, { recursive: true });
 function emit(rel, name) {
   const js = transform(readFileSync(path.join(REPO, rel), 'utf8'), { transforms: ['typescript'] }).code
-    .replace(/(from\s+['"])\.\/rig(['"])/g, '$1./rig.mjs$2');
+    .replace(/(from\s+['"])\.\/(rig|moves)(['"])/g, '$1./$2.mjs$3');
   writeFileSync(path.join(TMP, name), js);
   return pathToFileURL(path.join(TMP, name)).href;
 }
 emit('components/lesson/cinematic/rig.ts', 'rig.mjs');
+emit('components/lesson/cinematic/moves.ts', 'moves.mjs');
 const R = await import(pathToFileURL(path.join(TMP, 'rig.mjs')).href);
-const M = await import(emit('components/lesson/cinematic/moves.ts', 'moves.mjs'));
+const M = await import(pathToFileURL(path.join(TMP, 'moves.mjs')).href);
+const I = await import(emit('components/lesson/cinematic/interact.ts', 'interact.mjs'));
 
 const N = 20, CELL = 150, H = 260, GROUND = 210;
 const INK = 0x1a1a1aff, PAPER = 0xfafaf7ff, RULE = 0xd8d5ccff;
@@ -69,13 +71,7 @@ function disc(img, c, r) {
   }
 }
 
-export async function sheet(name, frames) {
-  const img = new Jimp(CELL * N, H, PAPER);
-  for (let i = 0; i < N; i++) {
-    const ox = i * CELL;
-    for (let x = 0; x < CELL; x++) img.setPixelColor(RULE, ox + x, GROUND);
-    // Cfg is FLAT — the stance spreads in beside the placement fields.
-    const j = R.solve({ x: ox + CELL / 2, groundY: GROUND, k: K, dir: 1, ...frames[i] });
+function draw(img, j) {
     // Far side first, so the near limbs read in front — the same order Stickman
     // draws in, which is what makes a far arm behind the torso look correct here
     // rather than accidentally on top of it.
@@ -83,8 +79,37 @@ export async function sheet(name, frames) {
     line(img, j.hipL, j.kneeL, LIMB_W); line(img, j.kneeL, j.ankL, LIMB_W);
     line(img, j.pel, j.chest, TORSO_W);
     line(img, j.hipR, j.kneeR, LIMB_W); line(img, j.kneeR, j.ankR, LIMB_W);
-    line(img, j.shR, j.elR, LIMB_W); line(img, j.elR, j.wrR, LIMB_W);
-    disc(img, j.head, HEAD_R);
+  line(img, j.shR, j.elR, LIMB_W); line(img, j.elR, j.wrR, LIMB_W);
+  disc(img, j.head, HEAD_R);
+}
+
+export async function sheet(name, frames) {
+  const img = new Jimp(CELL * N, H, PAPER);
+  for (let i = 0; i < N; i++) {
+    const ox = i * CELL;
+    for (let x = 0; x < CELL; x++) img.setPixelColor(RULE, ox + x, GROUND);
+    // Cfg is FLAT — the stance spreads in beside the placement fields.
+    draw(img, R.solve({ x: ox + CELL / 2, groundY: GROUND, k: K, dir: 1, ...frames[i] }));
+  }
+  mkdirSync(path.join(REPO, '.moves-sheets'), { recursive: true });
+  await img.writeAsync(path.join(REPO, '.moves-sheets', `${name}.png`));
+  console.log(`.moves-sheets/${name}.png`);
+}
+
+/**
+ * Two figures in one cell. The only way to see the thing that matters about a
+ * pair motion — whether the hands actually arrive at the same place — since each
+ * figure on its own always looks like it is reaching correctly.
+ */
+export async function pairSheet(name, frames) {
+  const W = 190;
+  const img = new Jimp(W * N, H, PAPER);
+  for (let i = 0; i < N; i++) {
+    const ox = i * W;
+    for (let x = 0; x < W; x++) img.setPixelColor(RULE, ox + x, GROUND);
+    const { a, b, pa, pb } = frames[i];
+    draw(img, R.solve({ ...pa, x: ox + pa.x, groundY: GROUND, ...a }));
+    draw(img, R.solve({ ...pb, x: ox + pb.x, groundY: GROUND, ...b }));
   }
   mkdirSync(path.join(REPO, '.moves-sheets'), { recursive: true });
   await img.writeAsync(path.join(REPO, '.moves-sheets', `${name}.png`));
@@ -114,6 +139,24 @@ if (!want.length) {
     } else if (kind === 'move') {
       const g = M.gaitFor(n), cyc = g.S / g.stance;
       await sheet(`move-${n}`, Array.from({ length: N }, (_, i) => M.moveStance(n, (i / N) * cyc)));
+    } else if (kind === 'prop') {
+      await sheet(`prop-${n}`, Array.from({ length: N }, (_, i) => I.propAct(n, T, i / (N - 1))));
+    } else if (kind === 'carry') {
+      // `carry:3` means hold 3 on a plain walk; `carry:3.2` means hold 3 in mode 2.
+      const hold = Math.trunc(n), mode = Math.round((n - Math.trunc(n)) * 10);
+      const g = M.gaitFor(mode), cyc = g.S / g.stance;
+      await sheet(`carry-${hold}-mode${mode}`,
+        Array.from({ length: N }, (_, i) => I.carryMode(mode, (i / N) * cyc, hold)));
+    } else if (kind === 'pair') {
+      const pa = { x: 66, groundY: GROUND, k: K, dir: 1 };
+      const pb = { x: 122, groundY: GROUND, k: K, dir: -1 };
+      const fn = nStr === 'pass'
+        ? (u) => I.passObject(T, u, pa, pb)
+        : (u) => I.handshake(T, u, pa, pb);
+      await pairSheet(`pair-${nStr}`, Array.from({ length: N }, (_, i) => {
+        const r = fn(i / (N - 1));
+        return { a: r.a, b: r.b, pa, pb };
+      }));
     }
   }
 }
