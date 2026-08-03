@@ -418,8 +418,16 @@ export const ALL_PHILOSOPHERS: Philosopher[] = RAW_PHILOSOPHERS.map((p) => {
   return extra && extra.length ? { ...p, quotes: [...p.quotes, ...extra] } : p;
 });
 
+// Indexed rather than scanned. `getPhilosopherById` was a linear find over ~223
+// entries, which was fine while the callers were screens opening one profile —
+// but `recomputeBadges` now asks it once per thinker the reader has ever met, on
+// every quote saved and every lesson finished, and that is a scan per lookup.
+const BY_ID: Record<string, Philosopher> = Object.fromEntries(
+  ALL_PHILOSOPHERS.map((p) => [p.id, p]),
+);
+
 export function getPhilosopherById(id: string): Philosopher | undefined {
-  return ALL_PHILOSOPHERS.find((p) => p.id === id);
+  return BY_ID[id];
 }
 
 // ─── Era grouping ────────────────────────────────────────────────────────────

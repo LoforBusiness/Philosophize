@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { View } from 'react-native';
 import Svg, { Path, ClipPath, Defs, G, Line } from 'react-native-svg';
 import Animated, { useAnimatedProps, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
@@ -67,7 +67,11 @@ export default function BadgeMedal({
   // A hatched ghost is just mud, and it would also mean a locked tier-III badge
   // carried MORE ink than a locked tier-I one. The band arrives when it is won.
   const hatched = tier === 3 && earned;
-  const clipId = `bm-${family}-${tier}`;
+  // Per-instance, following the rule LoudnessChart wrote down: ClipPath ids live
+  // in a global-ish namespace and two mounted at once must not fight over the same
+  // `url(#…)`. Fifty medals in the badge case is exactly that situation. useId
+  // embeds ':', which is not a legal id, so strip everything non-alphanumeric.
+  const clipId = `badge-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
 
   const outlineProps = useAnimatedProps(() => ({
     strokeDashoffset: draw ? (1 - draw.value) * len : 0,
