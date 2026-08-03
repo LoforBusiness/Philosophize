@@ -19,6 +19,8 @@ import appealToAuthority from './lessons/appeal-to-authority';
 import appealToEmotionAndBandwagon from './lessons/appeal-to-emotion-and-bandwagon';
 import confirmationBias from './lessons/confirmation-bias';
 import charityAndSteelmanning from './lessons/charity-and-steelmanning';
+import theLoadedQuestion from './lessons/the-loaded-question';
+import theGamblersFallacy from './lessons/the-gamblers-fallacy';
 import necessaryAndSufficientConditions from './lessons/necessary-and-sufficient-conditions';
 import categoricalLogicAllSomeNone from './lessons/categorical-logic-all-some-none';
 import truthTablesAndConnectives from './lessons/truth-tables-and-connectives';
@@ -45,14 +47,15 @@ const units: Path[] = [
     slug: "where-arguments-cheat",
     name: "Where Arguments Cheat",
     description: "Meet the classic fallacies — the sleights of hand that make a bad argument feel airtight.",
-    lessons: [attackingThePerson, theHiddenPremise, beggingTheQuestion, theFalseDilemma, theSlipperySlope, equivocation],
+    // Appended, never inserted: lessonsByUnit counts completions BY POSITION.
+    lessons: [attackingThePerson, theHiddenPremise, beggingTheQuestion, theFalseDilemma, theSlipperySlope, equivocation, theLoadedQuestion],
   },
   {
     id: "logic-evidence-bias-and-the-fair-fight",
     slug: "evidence-bias-and-the-fair-fight",
     name: "Evidence, Bias & the Fair Fight",
     description: "How evidence gets misused, how our own bias fools us, and the discipline of arguing in good faith.",
-    lessons: [hastyGeneralization, correlationVsCausation, appealToAuthority, appealToEmotionAndBandwagon, confirmationBias, charityAndSteelmanning],
+    lessons: [hastyGeneralization, correlationVsCausation, appealToAuthority, appealToEmotionAndBandwagon, confirmationBias, charityAndSteelmanning, theGamblersFallacy],
   },
   {
     id: "logic-the-logician-s-toolkit",
