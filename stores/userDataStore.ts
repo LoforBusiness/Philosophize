@@ -267,6 +267,20 @@ interface UserDataState {
    * land, without replaying anything.
    */
   onboardingVersion: number;
+  /**
+   * Whether the reader has been asked, once, about reminders — outside Settings.
+   *
+   * Android gives an app ONE system prompt; a refusal after that can only be
+   * undone by digging into system settings, so the ask has to be spent at the
+   * warmest moment rather than on launch. This flag is what keeps it to one.
+   *
+   * It exists because the three reminder switches DEFAULT TO ON while permission
+   * is only requested by turning a switch on — so a reader who never opened
+   * Settings had three reminders enabled, a sync() that correctly refused to
+   * schedule against a permission it did not hold, and no notification ever. The
+   * switches were honest and the feature still reached nobody.
+   */
+  notifyAsked: boolean;
   joinedAt: number | null;                    // epoch ms of first app open
   earnedBadges: string[];                     // badge ids the user has earned (persists)
   badgesInitialized: boolean;                 // one-time backfill guard
@@ -332,6 +346,8 @@ interface UserDataState {
   ensureReviewBacklog: () => void;
   /** Records the welcome answers: the branch to steer to, and which set was asked. */
   completeOnboarding: (slug: string | null, version: number) => void;
+  /** Spend the one out-of-Settings reminder ask, whatever the answer was. */
+  markNotifyAsked: () => void;
   recomputeBadges: () => void;
   setProfile: (patch: Partial<{ displayName: string; email: string; bio: string }>) => void;
   bumpBioSeed: () => void;
@@ -531,6 +547,7 @@ export const useUserDataStore = create<UserDataState>()(
       reviewDayDate: null,
       startingBranch: null,
       onboardingVersion: 0,
+      notifyAsked: false,
       joinedAt: null,
       earnedBadges: [],
       badgesInitialized: false,
@@ -810,6 +827,8 @@ export const useUserDataStore = create<UserDataState>()(
         track('onboarding_completed', { starting_branch: slug ?? 'skipped' });
       },
 
+      markNotifyAsked: () => set({ notifyAsked: true }),
+
       // Union the currently-qualifying badges into the persisted set so earned
       // badges stick (until explicitly revoked). Only called at progress points
       // and as a one-time backfill — never on every render — so a revoke holds
@@ -902,6 +921,7 @@ export const useUserDataStore = create<UserDataState>()(
           // callers wipe to a clean baseline (account deleted, or signed out so
           // the next reader inherits nothing).
           onboardingVersion: 0,
+          notifyAsked: false,
           joinedAt: null,
           earnedBadges: [],
           badgesInitialized: true,
@@ -949,6 +969,7 @@ export const useUserDataStore = create<UserDataState>()(
           // callers wipe to a clean baseline (account deleted, or signed out so
           // the next reader inherits nothing).
           onboardingVersion: 0,
+          notifyAsked: false,
           joinedAt: null,
           earnedBadges: [],
           badgesInitialized: true,
@@ -994,6 +1015,7 @@ export const useUserDataStore = create<UserDataState>()(
         reviewDayDate: state.reviewDayDate,
         startingBranch: state.startingBranch,
         onboardingVersion: state.onboardingVersion,
+        notifyAsked: state.notifyAsked,
         joinedAt: state.joinedAt,
         earnedBadges: state.earnedBadges,
         badgesInitialized: state.badgesInitialized,
@@ -1052,6 +1074,7 @@ export const useUserDataStore = create<UserDataState>()(
         const reviewState = p.reviewState ?? {};
         const reviewDayCount = p.reviewDayCount ?? 0;
         const onboardingVersion = p.onboardingVersion ?? 0;
+        const notifyAsked = p.notifyAsked ?? false;
         return {
           ...current,
           ...p,
@@ -1067,6 +1090,7 @@ export const useUserDataStore = create<UserDataState>()(
           reviewState,
           reviewDayCount,
           onboardingVersion,
+          notifyAsked,
           settings: sanitizeSettings(p.settings),
         };
       },

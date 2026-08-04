@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
 import { effectiveStreak } from '@/lib/utils/streak';
 import { restDaysHeld } from '@/constants/streak';
 import { notifications } from '.';
@@ -29,6 +30,10 @@ export function useReminders() {
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
   const restDaysEarned = useUserDataStore((s) => s.restDaysEarned);
   const restDaysUsed = useUserDataStore((s) => s.restDaysUsed);
+  // Bumped when permission is newly granted. Without it a YES schedules nothing
+  // until the next foreground, because the settings it would have changed were
+  // already true (see uiStore.remindersNonce).
+  const remindersNonce = useUIStore((s) => s.remindersNonce);
 
   // Read through a ref inside the AppState listener so the listener is attached
   // once rather than torn down and re-attached on every settings change.

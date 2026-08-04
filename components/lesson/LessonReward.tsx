@@ -14,6 +14,7 @@ import type { BadgeDef } from '@/data/badges';
 import { getLessonUnitInfo } from '@/data';
 import { useUserDataStore, previewDailyActivity, previewNewBadges, type DayInfo } from '@/stores/userDataStore';
 import { restDaysHeld } from '@/constants/streak';
+import NotifyPrompt from './NotifyPrompt';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { ads } from '@/lib/ads';
@@ -427,6 +428,12 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
                 <Text style={styles.streakSmall}>{info.streak}-day streak</Text>
               </View>
             ))}
+
+          {/* THE ONE PERMISSION ASK, and this is where it is spent — see
+              NotifyPrompt. It renders itself away unless the OS has actually
+              refused so far and the reader has not been asked before, so it
+              appears once in a lifetime and never for anyone already granted. */}
+          <NotifyPrompt />
 
           {/* …and anything the lesson just struck. */}
           {badges.length > 0 && (

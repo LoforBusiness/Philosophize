@@ -44,6 +44,20 @@ interface UIStore {
   paywallOpen: boolean;
   openPaywall: () => void;
   closePaywall: () => void;
+  /**
+   * Bumped when the OS notification permission has just been granted, so the
+   * reminder scheduler re-runs.
+   *
+   * It exists because `useReminders` re-syncs on a CHANGE to the reminder
+   * settings, and granting permission changes none of them — all three default
+   * to true, so both places that ask (the reward-screen prompt and the Settings
+   * toggles) were writing a value that was already there. Nothing in the
+   * dependency list moved, sync() never re-ran, and the reminders the reader had
+   * just said yes to were not scheduled until the next foreground. This is the
+   * one signal that says "the answer changed even though the settings did not".
+   */
+  remindersNonce: number;
+  bumpReminders: () => void;
   // Lesson-complete reward, shown globally over everything. Set on completion,
   // cleared on "Continue". `rewardSeq` forces a fresh mount per completion.
   reward: RewardInfo | null;
@@ -103,6 +117,8 @@ export const useUIStore = create<UIStore>((set) => ({
   paywallOpen: false,
   openPaywall: () => set({ paywallOpen: true }),
   closePaywall: () => set({ paywallOpen: false }),
+  remindersNonce: 0,
+  bumpReminders: () => set((s) => ({ remindersNonce: s.remindersNonce + 1 })),
   reward: null,
   rewardSeq: 0,
   showReward: (r) => set((s) => ({ reward: r, rewardSeq: s.rewardSeq + 1 })),

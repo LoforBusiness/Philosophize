@@ -28,6 +28,7 @@ import { track } from '@/lib/posthog';
 import { awardedRank } from '@/data/ranks';
 import { useUserDataStore, type AppSettings } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { useUIStore } from '@/stores/uiStore';
 import { purchases } from '@/lib/purchases';
 import { ads } from '@/lib/ads';
 import { notifications } from '@/lib/notifications';
@@ -556,6 +557,7 @@ function AccountSection() {
 function NotificationsSection() {
   const settings = useUserDataStore((s) => s.settings);
   const setSetting = useUserDataStore((s) => s.setSetting);
+  const bumpReminders = useUIStore((s) => s.bumpReminders);
   // Whether the OS will let us through. Everything in this section depends on it,
   // and it can change while the app is backgrounded (the reader revoking it in
   // system settings), so it is re-read on every return to the foreground.
@@ -588,6 +590,11 @@ function NotificationsSection() {
     setAsking(false);
     setGranted(ok);
     if (ok) setSetting(key, true);
+    // The same trap as the reward-screen prompt: this switch READ as off only
+    // because permission was missing, so the stored value was very likely
+    // already true and `setSetting` is a no-op. Without this the scheduler sees
+    // no change and nothing is laid down until the next foreground.
+    if (ok) bumpReminders();
   };
 
   const blocked = granted === false;
