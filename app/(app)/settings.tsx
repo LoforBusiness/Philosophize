@@ -35,6 +35,7 @@ import { sound } from '@/lib/sound';
 import { cue, soundSupported } from '@/lib/feedback';
 import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
 import { effectiveStreak } from '@/lib/utils/streak';
+import { restDaysHeld } from '@/constants/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
 
 const Page = '#F1EEE7';
@@ -280,8 +281,14 @@ function ProfileSection() {
   const philosopherViews = useUserDataStore((s) => s.philosopherViews);
   const streakRaw = useUserDataStore((s) => s.streak);
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
+  const restDaysEarned = useUserDataStore((s) => s.restDaysEarned);
+  const restDaysUsed = useUserDataStore((s) => s.restDaysUsed);
   useTodayKey();
-  const streak = effectiveStreak(streakRaw, lastLessonDate);
+  const streak = effectiveStreak(
+    streakRaw,
+    lastLessonDate,
+    restDaysHeld(restDaysEarned, restDaysUsed),
+  );
   const xp = useUserDataStore((s) => s.totalXP);
   const rankIndex = useUserDataStore((s) => s.rankIndex);
 

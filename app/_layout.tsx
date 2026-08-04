@@ -56,6 +56,7 @@ import SavedQuotesSheet from '@/components/shared/SavedQuotesSheet';
 import PaywallSheet from '@/components/shared/PaywallSheet';
 import LaunchScreen from '@/components/launch/LaunchScreen';
 import UpdateGate from '@/components/shared/UpdateGate';
+import OnboardingGate from '@/components/welcome/OnboardingGate';
 import LessonReward from '@/components/lesson/LessonReward';
 
 SplashScreen.preventAutoHideAsync();
@@ -276,6 +277,10 @@ export default function RootLayout() {
           onDone={() => setLaunchDone(true)}
         />
       )}
+      {/* The three welcome questions. Above the app, below UpdateGate — a binary
+          held behind the update wall should not be asking anyone anything. It
+          gates itself on hydration and on the launch screen having lifted. */}
+      <OnboardingGate />
       {/* Last in the tree, so it sits above the launch screen and every sheet:
           a build too old to run has nothing else worth showing. */}
       <UpdateGate />

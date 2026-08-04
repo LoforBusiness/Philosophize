@@ -19,7 +19,16 @@ const InkFaint = '#E2E0D8';
 const TERMS_URL = 'https://philosophize.app/terms';
 const PRIVACY_URL = 'https://philosophize.app/privacy';
 
-const BENEFITS = ['Unlimited lessons every day', 'No ads, ever'];
+// Only things that are actually built and actually differ by tier. The list has
+// been kept honest deliberately — §14 has imagined several premium features over
+// time, and a paywall that promises one before it exists is the fastest way to
+// make every other line on it untrustworthy.
+const BENEFITS = [
+  'Unlimited lessons every day',
+  'Review everything that’s due, not three a day',
+  'Rest days that keep a streak alive, five at a time',
+  'No ads, ever',
+];
 
 export default function PaywallContent({
   onClose,

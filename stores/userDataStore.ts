@@ -13,6 +13,16 @@ import { awardedRank, rankForXP } from '@/data/ranks';
 import { DEFAULT_BACKGROUND_ID } from '@/data/profileBackgrounds';
 import { DEFAULT_PROFILE_FONT } from '@/data/profileFonts';
 import { XP_PER_PHILOSOPHER_MET, XP_PER_QUIZ, XP_PER_QUIZ_PERFECT, XP_PER_SAVED_QUOTE } from '@/constants/xp';
+import { restCap, restDaysHeld, restEarnEvery } from '@/constants/streak';
+import { restDaysToSpend } from '@/lib/utils/streak';
+import {
+  backfillEntries,
+  dayKey,
+  gradeEntry,
+  isReviewable,
+  seedEntry,
+  type ReviewState,
+} from '@/lib/review';
 import { track } from '@/lib/posthog';
 import { writePinnedQuote } from '@/lib/widget/pin';
 
@@ -227,6 +237,36 @@ interface UserDataState {
   lastLessonDate: string | null;             // YYYY-MM-DD of last completed lesson
   dailyLessonCount: number;                   // lessons completed on dailyLessonDate (free-tier gate)
   dailyLessonDate: string | null;            // YYYY-MM-DD the daily count belongs to
+  // ── rest days (streak freezes) ────────────────────────────────────────────
+  // TWO COUNTERS THAT ONLY EVER GO UP, never one "remaining" figure. The cloud
+  // merge keeps the LARGER of two numbers for anything progress-shaped, so a
+  // remaining-count would refill itself across devices: spend your last rest day
+  // here, open a tablet that still reads 2, and max() hands it back. With earned
+  // and used stored apart, max is right in both directions — the higher earn is
+  // the true one and so is the higher spend. Held is derived (constants/streak).
+  restDaysEarned: number;
+  restDaysUsed: number;
+  // ── daily review ──────────────────────────────────────────────────────────
+  // lessonId -> { s: strength 0-4, due: 'YYYY-MM-DD' }. Scheduled per LESSON
+  // rather than per question; see lib/review for why that is enough.
+  reviewState: ReviewState;
+  reviewDayCount: number;                     // review questions answered on reviewDayDate
+  reviewDayDate: string | null;               // YYYY-MM-DD the review count belongs to
+  // Branch chosen by the welcome questions. A SUGGESTION the home screen and
+  // Quick Start prefer — never a gate; all six branches stay open regardless.
+  startingBranch: string | null;
+  /**
+   * WHICH set of welcome questions they have answered — versioned for the same
+   * reason `welcomeVersion` is, and kept SEPARATE from it on purpose.
+   *
+   * Sharing one number would mean re-showing the ~30s intro animation to reach
+   * anyone who predates the questions, and it would still miss the readers who
+   * matter most: a signed-in user is redirected into (app) before app/index.tsx
+   * ever renders, so they never pass the intro gate at all. A version of its own
+   * lets the questions be asked exactly once, wherever the reader happens to
+   * land, without replaying anything.
+   */
+  onboardingVersion: number;
   joinedAt: number | null;                    // epoch ms of first app open
   earnedBadges: string[];                     // badge ids the user has earned (persists)
   badgesInitialized: boolean;                 // one-time backfill guard
@@ -269,8 +309,19 @@ interface UserDataState {
   ensureJoinDate: () => void;
   registerDailyActivity: (
     today: string,
-    yesterday: string
-  ) => { firstOfDay: boolean; streak: number; prevStreak: number };
+    yesterday: string,
+    opts?: { isPro?: boolean }
+  ) => { firstOfDay: boolean; streak: number; prevStreak: number; restSpent: number; restEarned: number };
+  /** Schedule a just-finished lesson for review. */
+  seedReview: (lessonId: string, correct: number, total: number) => void;
+  /** Move a reviewed lesson up or down the ladder. */
+  gradeReview: (lessonId: string, wasCorrect: boolean) => void;
+  /** Count one answered review question toward today's free allowance. */
+  bumpDailyReviews: () => void;
+  /** Schedule completed lessons not yet in the schedule. Idempotent; see backfillEntries. */
+  ensureReviewBacklog: () => void;
+  /** Records the welcome answers: the branch to steer to, and which set was asked. */
+  completeOnboarding: (slug: string | null, version: number) => void;
   recomputeBadges: () => void;
   setProfile: (patch: Partial<{ displayName: string; email: string; bio: string }>) => void;
   bumpBioSeed: () => void;
@@ -295,6 +346,8 @@ export interface DayInfo {
   firstOfDay: boolean;
   streak: number;
   prevStreak: number;
+  /** Rest days this activity would consume to bridge a missed day (0 normally). */
+  restSpent: number;
 }
 
 /**
@@ -313,13 +366,21 @@ export function previewDailyActivity(
   streak: number,
   today: string,
   yesterday: string,
+  restHeld = 0,
 ): DayInfo {
-  if (lastLessonDate === today) return { firstOfDay: false, streak, prevStreak: streak };
-  return {
-    firstOfDay: true,
-    streak: lastLessonDate === yesterday ? streak + 1 : 1,
-    prevStreak: streak,
-  };
+  if (lastLessonDate === today) {
+    return { firstOfDay: false, streak, prevStreak: streak, restSpent: 0 };
+  }
+  if (lastLessonDate === yesterday) {
+    return { firstOfDay: true, streak: streak + 1, prevStreak: streak, restSpent: 0 };
+  }
+  // There is a gap. Rest days bridge it if enough are held — the streak carries
+  // on as though the missed days had been worked. Otherwise it restarts at 1.
+  const restSpent = restDaysToSpend(lastLessonDate, today, restHeld);
+  if (restSpent > 0) {
+    return { firstOfDay: true, streak: streak + 1, prevStreak: streak, restSpent };
+  }
+  return { firstOfDay: true, streak: 1, prevStreak: streak, restSpent: 0 };
 }
 
 /** The slice of the store a badge can be judged from. */
@@ -451,6 +512,13 @@ export const useUserDataStore = create<UserDataState>()(
       lastLessonDate: null,
       dailyLessonCount: 0,
       dailyLessonDate: null,
+      restDaysEarned: 0,
+      restDaysUsed: 0,
+      reviewState: {},
+      reviewDayCount: 0,
+      reviewDayDate: null,
+      startingBranch: null,
+      onboardingVersion: 0,
       joinedAt: null,
       earnedBadges: [],
       badgesInitialized: false,
@@ -648,13 +716,85 @@ export const useUserDataStore = create<UserDataState>()(
         if (get().joinedAt == null) set({ joinedAt: Date.now() });
       },
 
-      registerDailyActivity: (today, yesterday) => {
-        const { lastLessonDate, streak } = get();
-        const info = previewDailyActivity(lastLessonDate, streak, today, yesterday);
-        if (!info.firstOfDay) return info;
-        set({ streak: info.streak, lastLessonDate: today });
+      registerDailyActivity: (today, yesterday, opts) => {
+        const isPro = opts?.isPro ?? false;
+        const { lastLessonDate, streak, restDaysEarned, restDaysUsed } = get();
+        const held = restDaysHeld(restDaysEarned, restDaysUsed);
+        const info = previewDailyActivity(lastLessonDate, streak, today, yesterday, held);
+        if (!info.firstOfDay) return { ...info, restEarned: 0 };
+        // Earn at most one rest day per day, on crossing a multiple of the tier's
+        // interval, and only when there is room to hold it. Refusing the earn at
+        // the cap (rather than capping `held` on read) is what keeps
+        // `earned - used` an exact count instead of a number that has to be
+        // clamped everywhere it is used — and keeps both halves monotonic, which
+        // is the whole reason the pair merges safely.
+        const heldAfter = held - info.restSpent;
+        const earns =
+          info.streak > 0 && info.streak % restEarnEvery(isPro) === 0 && heldAfter < restCap(isPro)
+            ? 1
+            : 0;
+        set({
+          streak: info.streak,
+          lastLessonDate: today,
+          restDaysUsed: restDaysUsed + info.restSpent,
+          restDaysEarned: restDaysEarned + earns,
+        });
         get().recomputeBadges();
-        return info;
+        return { ...info, restEarned: earns };
+      },
+
+      // ── daily review ─────────────────────────────────────────────────────────
+
+      seedReview: (lessonId, correct, total) =>
+        set((state) => {
+          if (!isReviewable(lessonId)) return state; // no gradeable question in its deck
+          return {
+            reviewState: {
+              ...state.reviewState,
+              [lessonId]: seedEntry(correct, total, dayKey()),
+            },
+          };
+        }),
+
+      gradeReview: (lessonId, wasCorrect) =>
+        set((state) => {
+          const entry = state.reviewState[lessonId];
+          if (!entry) return state;
+          return {
+            reviewState: {
+              ...state.reviewState,
+              [lessonId]: gradeEntry(entry, wasCorrect, dayKey()),
+            },
+          };
+        }),
+
+      bumpDailyReviews: () =>
+        set((state) => {
+          const today = dayKey();
+          return {
+            reviewDayCount: state.reviewDayDate === today ? state.reviewDayCount + 1 : 1,
+            reviewDayDate: today,
+          };
+        }),
+
+      // Called whenever the review surface is looked at, not once behind a latch:
+      // it also has to catch lessons that merge in from another device after
+      // sign-in. `backfillEntries` skips anything already scheduled, so re-running
+      // it is free and cannot disturb a lesson's place on the ladder. Returning
+      // `state` untouched when there is nothing to add keeps it from waking every
+      // subscriber on each visit.
+      ensureReviewBacklog: () =>
+        set((state) => {
+          const add = backfillEntries(state.reviewState, state.lessonsByUnit, dayKey());
+          if (Object.keys(add).length === 0) return state;
+          return { reviewState: { ...state.reviewState, ...add } };
+        }),
+
+      // One write, so a reader who is interrupted between the answer and the flag
+      // is never left steered-but-still-being-asked.
+      completeOnboarding: (slug, version) => {
+        set({ startingBranch: slug, onboardingVersion: version });
+        track('onboarding_completed', { starting_branch: slug ?? 'skipped' });
       },
 
       // Union the currently-qualifying badges into the persisted set so earned
@@ -712,7 +852,7 @@ export const useUserDataStore = create<UserDataState>()(
       setWelcomeVersion: (v) => set({ welcomeVersion: v, hasSeenWelcome: true }),
 
       resetProgress: () =>
-        set({ lessonsByUnit: {}, lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, xpEvents: [], rankIndex: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null }),
+        set({ lessonsByUnit: {}, lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, xpEvents: [], rankIndex: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null, restDaysEarned: 0, restDaysUsed: 0, reviewState: {}, reviewDayCount: 0, reviewDayDate: null }),
 
       clearSavedQuotes: () => {
         set({ savedQuotes: [] });
@@ -739,6 +879,16 @@ export const useUserDataStore = create<UserDataState>()(
           lastLessonDate: null,
           dailyLessonCount: 0,
           dailyLessonDate: null,
+          restDaysEarned: 0,
+          restDaysUsed: 0,
+          reviewState: {},
+          reviewDayCount: 0,
+          reviewDayDate: null,
+          startingBranch: null,
+          // Asked again, because this device is now a different person: both
+          // callers wipe to a clean baseline (account deleted, or signed out so
+          // the next reader inherits nothing).
+          onboardingVersion: 0,
           joinedAt: null,
           earnedBadges: [],
           badgesInitialized: true,
@@ -776,6 +926,16 @@ export const useUserDataStore = create<UserDataState>()(
           lastLessonDate: null,
           dailyLessonCount: 0,
           dailyLessonDate: null,
+          restDaysEarned: 0,
+          restDaysUsed: 0,
+          reviewState: {},
+          reviewDayCount: 0,
+          reviewDayDate: null,
+          startingBranch: null,
+          // Asked again, because this device is now a different person: both
+          // callers wipe to a clean baseline (account deleted, or signed out so
+          // the next reader inherits nothing).
+          onboardingVersion: 0,
           joinedAt: null,
           earnedBadges: [],
           badgesInitialized: true,
@@ -812,6 +972,13 @@ export const useUserDataStore = create<UserDataState>()(
         lastLessonDate: state.lastLessonDate,
         dailyLessonCount: state.dailyLessonCount,
         dailyLessonDate: state.dailyLessonDate,
+        restDaysEarned: state.restDaysEarned,
+        restDaysUsed: state.restDaysUsed,
+        reviewState: state.reviewState,
+        reviewDayCount: state.reviewDayCount,
+        reviewDayDate: state.reviewDayDate,
+        startingBranch: state.startingBranch,
+        onboardingVersion: state.onboardingVersion,
         joinedAt: state.joinedAt,
         earnedBadges: state.earnedBadges,
         badgesInitialized: state.badgesInitialized,
@@ -860,6 +1027,15 @@ export const useUserDataStore = create<UserDataState>()(
         // and nothing would report it. Nothing writes that shape today; this makes it
         // impossible to introduce one.
         const welcomeVersion = p.welcomeVersion ?? 0;
+        // Same coalescing, same reason, for everything review and rest days do
+        // arithmetic on: a key PRESENT AND UNDEFINED beats the default in a
+        // spread, and `undefined - undefined` is NaN, which would then persist
+        // and poison every later comparison silently.
+        const restDaysEarned = p.restDaysEarned ?? 0;
+        const restDaysUsed = p.restDaysUsed ?? 0;
+        const reviewState = p.reviewState ?? {};
+        const reviewDayCount = p.reviewDayCount ?? 0;
+        const onboardingVersion = p.onboardingVersion ?? 0;
         return {
           ...current,
           ...p,
@@ -870,6 +1046,11 @@ export const useUserDataStore = create<UserDataState>()(
           profileBackground,
           nameFont,
           welcomeVersion,
+          restDaysEarned,
+          restDaysUsed,
+          reviewState,
+          reviewDayCount,
+          onboardingVersion,
           settings: sanitizeSettings(p.settings),
         };
       },

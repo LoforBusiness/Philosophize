@@ -15,7 +15,9 @@ import { useWidgetPlaced } from '@/lib/widget/useWidgetPlaced';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { effectiveStreak } from '@/lib/utils/streak';
+import { daysMissed, effectiveStreak } from '@/lib/utils/streak';
+import { restDaysHeld } from '@/constants/streak';
+import ReviewCard from '@/components/home/ReviewCard';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
 
 const Paper = '#FAFAF7';
@@ -94,8 +96,15 @@ export default function HomeScreen() {
   const openPhilosopher = useUIStore((s) => s.openPhilosopher);
   const streakRaw = useUserDataStore((s) => s.streak);
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
+  const restDaysEarned = useUserDataStore((s) => s.restDaysEarned);
+  const restDaysUsed = useUserDataStore((s) => s.restDaysUsed);
   useTodayKey();
-  const streak = effectiveStreak(streakRaw, lastLessonDate);
+  // Rest days are passed in so a streak they are about to save still READS as
+  // alive. Without them the reader who missed yesterday sees a 0 on Home, gives
+  // up on the streak they actually still have, and the rest day never gets spent.
+  const held = restDaysHeld(restDaysEarned, restDaysUsed);
+  const streak = effectiveStreak(streakRaw, lastLessonDate, held);
+  const restBridging = streak > 0 && daysMissed(lastLessonDate) > 0;
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const settings = useUserDataStore((s) => s.settings);
@@ -169,6 +178,10 @@ export default function HomeScreen() {
             Sits between the reflection and the three small actions on purpose:
             the quote is what greets them, this is what they came to do, and
             Learn / Philosophers / Insights are where they go instead. */}
+        {/* Above Quick Start on purpose: keeping what you already learned comes
+            before adding more. Renders nothing when nothing is due. */}
+        <ReviewCard style={styles.reviewCard} />
+
         <QuickStartCard style={styles.quickStart} />
 
         {/* Actions */}
@@ -195,7 +208,17 @@ export default function HomeScreen() {
 
         <View style={styles.streakRow}>
           <StreakBook value={streak} size={52} />
-          <Text style={styles.streakLabel}>{streak} DAY STREAK</Text>
+          <View>
+            <Text style={styles.streakLabel}>{streak} DAY STREAK</Text>
+            {/* Only when a rest day is actually holding it up. It says the streak
+                is safe WITHOUT saying it has been spent, because it has not: the
+                deduction happens when they finish something today. */}
+            {restBridging && (
+              <Text style={styles.restLabel}>
+                A day of rest is holding it — finish anything today.
+              </Text>
+            )}
+          </View>
         </View>
 
         {/* Daily quote card (opt-in, Settings → Display) */}
@@ -399,4 +422,13 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     marginLeft: 10,
   },
+  restLabel: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 11,
+    color: InkSoft,
+    marginLeft: 10,
+    marginTop: 3,
+    maxWidth: 230,
+  },
+  reviewCard: { marginTop: 18 },
 });

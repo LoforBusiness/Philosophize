@@ -45,9 +45,13 @@ interface Props {
  */
 export default function QuickStartCard({ style }: Props) {
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
+  const startingBranch = useUserDataStore((s) => s.startingBranch);
 
   const dayNumber = Math.floor(Date.now() / 86_400_000);
-  const pick = useMemo(() => pickQuickStart(lessonsByUnit, dayNumber), [lessonsByUnit, dayNumber]);
+  const pick = useMemo(
+    () => pickQuickStart(lessonsByUnit, dayNumber, startingBranch),
+    [lessonsByUnit, dayNumber, startingBranch],
+  );
   const art = ART[quickStartArtIndex(dayNumber, ART.length)];
 
   if (!pick) return null;

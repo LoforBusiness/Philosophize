@@ -21,6 +21,7 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { generateUserBio } from '@/lib/utils/userBio';
 import { effectiveStreak } from '@/lib/utils/streak';
+import { restDaysHeld } from '@/constants/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
 
 const Paper = '#FAFAF7';
@@ -77,8 +78,14 @@ export default function ProfileScreen() {
   const philosopherViews = useUserDataStore((s) => s.philosopherViews);
   const streak = useUserDataStore((s) => s.streak);
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
+  const restDaysEarned = useUserDataStore((s) => s.restDaysEarned);
+  const restDaysUsed = useUserDataStore((s) => s.restDaysUsed);
   useTodayKey();
-  const shownStreak = effectiveStreak(streak, lastLessonDate);
+  const shownStreak = effectiveStreak(
+    streak,
+    lastLessonDate,
+    restDaysHeld(restDaysEarned, restDaysUsed),
+  );
   const joinedAt = useUserDataStore((s) => s.joinedAt);
   const ensureJoinDate = useUserDataStore((s) => s.ensureJoinDate);
   const displayName = useUserDataStore((s) => s.displayName);

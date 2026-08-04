@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { effectiveStreak } from '@/lib/utils/streak';
+import { restDaysHeld } from '@/constants/streak';
 import { notifications } from '.';
 
 function todayKey(d = new Date()): string {
@@ -26,11 +27,13 @@ export function useReminders() {
   const quoteOfDay = useUserDataStore((s) => s.settings.quoteOfDay);
   const streakRaw = useUserDataStore((s) => s.streak);
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
+  const restDaysEarned = useUserDataStore((s) => s.restDaysEarned);
+  const restDaysUsed = useUserDataStore((s) => s.restDaysUsed);
 
   // Read through a ref inside the AppState listener so the listener is attached
   // once rather than torn down and re-attached on every settings change.
-  const latest = useRef({ dailyReminder, reminderTime, streakAlerts, quoteOfDay, streakRaw, lastLessonDate });
-  latest.current = { dailyReminder, reminderTime, streakAlerts, quoteOfDay, streakRaw, lastLessonDate };
+  const latest = useRef({ dailyReminder, reminderTime, streakAlerts, quoteOfDay, streakRaw, lastLessonDate, restDaysEarned, restDaysUsed });
+  latest.current = { dailyReminder, reminderTime, streakAlerts, quoteOfDay, streakRaw, lastLessonDate, restDaysEarned, restDaysUsed };
 
   const run = () => {
     if (!hasHydrated || !notifications.isSupported()) return;
@@ -47,7 +50,7 @@ export function useReminders() {
         // its old value after a missed day, and a notification announcing a
         // streak that has already lapsed is exactly the kind of thing that
         // teaches people to ignore notifications.
-        streak: effectiveStreak(s.streakRaw, s.lastLessonDate),
+        streak: effectiveStreak(s.streakRaw, s.lastLessonDate, restDaysHeld(s.restDaysEarned, s.restDaysUsed)),
         doneToday: s.lastLessonDate === todayKey(),
       }
     );

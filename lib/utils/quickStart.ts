@@ -67,7 +67,8 @@ function shuffleSeed(seed: number): number {
  */
 export function pickQuickStart(
   lessonsByUnit: Record<string, number>,
-  dayNumber: number
+  dayNumber: number,
+  startingBranch?: string | null,
 ): QuickStartPick | null {
   const open: QuickStartPick[] = [];
   for (const branch of ALL_BRANCHES) {
@@ -77,6 +78,18 @@ export function pickQuickStart(
   if (open.length === 0) return null; // nothing left anywhere — every lesson done
 
   const done = Object.values(lessonsByUnit).reduce((n, v) => n + (v > 0 ? v : 0), 0);
+
+  // The welcome questions' answer wins while it is still the reader's FIRST
+  // steer — until they have finished a lesson anywhere. After that the daily
+  // rotation takes back over, because the point of the steer was to answer
+  // "where do I start", and once they have started it is answered. Holding a
+  // branch forever would turn a suggestion into the gate it was never meant to
+  // be, and quietly hide the other five.
+  if (startingBranch && done === 0) {
+    const preferred = open.find((p) => p.branch.slug === startingBranch);
+    if (preferred) return preferred;
+  }
+
   return open[shuffleSeed(dayNumber + done) % open.length];
 }
 

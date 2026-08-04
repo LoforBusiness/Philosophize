@@ -12,7 +12,8 @@ import BadgeEarned, { BadgeEarnedHeading } from '@/components/gamification/Badge
 import { RANKS, rankForXP, type RankDef } from '@/data/ranks';
 import type { BadgeDef } from '@/data/badges';
 import { getLessonUnitInfo } from '@/data';
-import { useUserDataStore, previewDailyActivity, previewNewBadges } from '@/stores/userDataStore';
+import { useUserDataStore, previewDailyActivity, previewNewBadges, type DayInfo } from '@/stores/userDataStore';
+import { restDaysHeld } from '@/constants/streak';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { ads } from '@/lib/ads';
@@ -44,11 +45,9 @@ function dateStr(d: Date) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
-interface DayInfo {
-  firstOfDay: boolean;
-  streak: number;
-  prevStreak: number;
-}
+// Imported rather than re-declared. The local copy of this shape drifted the
+// moment the store's grew a field, and a screen whose job is to promise exactly
+// what the store will write cannot afford its own idea of the shape.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE NUMBER, INKED ON.
@@ -149,6 +148,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   const recordLessonComplete = useUserDataStore((s) => s.recordLessonComplete);
   const registerDailyActivity = useUserDataStore((s) => s.registerDailyActivity);
   const bumpDailyLessons = useUserDataStore((s) => s.bumpDailyLessons);
+  const seedReview = useUserDataStore((s) => s.seedReview);
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
   const dailyLessonCount = useUserDataStore((s) => s.dailyLessonCount);
   const dailyLessonDate = useUserDataStore((s) => s.dailyLessonDate);
@@ -206,7 +206,12 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     const today = dateStr(new Date());
     const yesterday = dateStr(new Date(Date.now() - 86_400_000));
     bumpDailyLessons(today); // count this completion toward the free daily allowance
-    const dayInfo = registerDailyActivity(today, yesterday);
+    // Put this lesson on the review ladder — a clean run enters two rungs up, a
+    // fumbled one at the bottom and back tomorrow. This is the ONLY thing the
+    // schedule needs from a completion, which is why review needed no new
+    // capture path: `correct` and `total` are already in hand here.
+    seedReview(lessonId, correct, total);
+    const dayInfo = registerDailyActivity(today, yesterday, { isPro });
     track('lesson_completed', {
       branch_slug: branchSlug,
       xp,
@@ -214,6 +219,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
       total,
       new_streak: dayInfo.streak,
       streak_increased: dayInfo.firstOfDay,
+      rest_days_spent: dayInfo.restSpent,
     });
     // The home-screen widget shows the day streak — keep it current (best-effort).
     refreshQuoteWidget();
@@ -280,11 +286,17 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     } else {
       setPhase('reward');
     }
+    // Rest days are passed in here for the same reason the rest of this block
+    // exists: what the screen PROMISES and what `commit()` later writes have to
+    // be the same number. Leave them out and someone who missed a day, and holds
+    // a rest day that will save their streak, is shown a "1" that jumps back to
+    // their real streak the moment they press Continue.
     const day = previewDailyActivity(
       st.lastLessonDate,
       st.streak,
       dateStr(new Date()),
       dateStr(new Date(Date.now() - 86_400_000)),
+      restDaysHeld(st.restDaysEarned, st.restDaysUsed),
     );
     setInfo(day);
     // The streak comes from `day`, not from the store: several badges are keyed
@@ -389,9 +401,22 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
               <View style={styles.streakBox}>
                 <DrawnRule delay={1500} width={54} />
                 <Text style={styles.streakHeading}>
-                  {info.prevStreak === 0 ? 'Streak started' : 'Streak extended'}
+                  {info.restSpent > 0
+                    ? 'Streak kept'
+                    : info.prevStreak === 0
+                      ? 'Streak started'
+                      : 'Streak extended'}
                 </Text>
                 <StreakBook value={info.streak} from={info.prevStreak} animate size={100} />
+                {/* Said plainly, and only when it happened. A rest day is spent
+                    silently — the reader is told AFTER their streak was saved,
+                    not asked beforehand, because a prompt at that moment turns a
+                    kindness into one more decision on a day they already missed. */}
+                {info.restSpent > 0 && (
+                  <Text style={styles.restNote}>
+                    {info.restSpent === 1 ? 'A day of rest covered yesterday.' : `${info.restSpent} rest days covered the gap.`}
+                  </Text>
+                )}
                 <View style={styles.weekWrap}>
                   <StreakWeek streak={info.streak} lastLessonDate={lastLessonDate} size={30} />
                 </View>
@@ -498,6 +523,13 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginTop: 10,
     marginBottom: 2,
+  },
+  restNote: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 12.5,
+    color: InkSoft,
+    marginTop: 6,
+    textAlign: 'center',
   },
   weekWrap: { alignSelf: 'stretch', paddingHorizontal: 8, marginTop: 6 },
   streakSmallRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 24 },
