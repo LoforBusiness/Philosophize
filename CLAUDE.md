@@ -817,6 +817,36 @@ Hard-won specifics:
   card. Replacing them with higher-resolution files needs no code change — same
   filenames in `assets/images/branches/` and `assets/images/quickstart/`.
 
+### Struck things are shaded, and that is not a second colour
+
+Rank pins and badges carry **tone**: a lit side, a shaded side and a small drop
+shadow, so a frame reads as an object rather than an outline. This does not bend
+the B&W rule, because there is no new hue in it — every value in
+`components/shared/tone.ts` is ink, grey, or the warm paper the app is already
+printed on. What changed is that those greys are now arranged as *lighting*.
+
+**One light, top-left, and it never moves.** The face gradient runs light→dark
+down-right, the rim highlight sits top-left, the shadow falls bottom-right.
+Seventy-five marks lit from one direction read as a set; lit from wherever suited
+each one, they read as clip art. `tone.ts` has zero imports for the same reason
+`rig.ts` does — a contact sheet of every pin and badge can be rendered and looked
+at in plain Node, which is how the first two attempts were caught.
+
+**Locked is flat and cool** (`GHOST`, a slate off the warm ramp), with no
+gradient and no shadow. "The same thing, dimmer" is indistinguishable from a
+rendering fault; unlit against lit is the reward for earning it.
+
+Two findings worth not rediscovering:
+
+- **A 7% tonal range is invisible.** The first pass ran `#FEFEFC`→`#DFDBD1` and
+  read as flat at every size. It needs a real swing (`#FFFFFF`→`#C6C0B2`) before
+  it registers as shading at all.
+- **Crossed swords do not work behind a medal**, however heraldic the reference.
+  The medal covers the crossing, so all that shows is two tips above and two
+  hilts below — horns at 168px, mush at the 66px the badge grid actually draws.
+  A laurel is a continuous curved mass, so being half-covered costs it nothing.
+  `swordPaths` is kept in `badgeShapes.ts` so the decision is one line to revisit.
+
 **The welcome end card** (`assets/images/welcome/sky.jpg`) is the one background
 that is a *drawing* rather than a photograph, and it follows the same rule for the
 same reason: the ink hatching runs to near-black in places, so the wordmark's

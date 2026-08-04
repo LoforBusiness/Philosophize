@@ -1,26 +1,44 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { View } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
+import Svg, { Path, Defs, LinearGradient, Stop, G } from 'react-native-svg';
 import Glyph, { type GlyphName } from './Glyph';
+import { hexPath, hexPerimeter, HEX_R, HEX_INNER } from './badgeShapes';
+import { INK, GHOST, FAINT, PAPER, LIGHT, FACE, RIM, LOCKED_FACE, SHADOW, type Stops } from './tone';
 
-// A rank mark: the rank's hand-drawn Glyph inside ONE hairline ring. Nothing else.
+// ─────────────────────────────────────────────────────────────────────────────
+// A RANK IS A STRUCK HEXAGONAL PIN.
 //
-// This used to be an engraved wax-seal medallion whose ornament escalated by tier —
-// laurel wreaths, a reeded edge, a ribbon, a radiant crown of rays, an emboss
-// highlight and a wax fill. It read as busy at 54px and fought the glyph it was
-// meant to frame. A rank is now: the mark, and a ring around it.
+// It was a hairline ring around a glyph — correct, restrained, and completely
+// inert: at 54px twenty-five of them read as twenty-five small circles, and
+// nothing about holding rank 24 looked like more than holding rank 2. Before
+// that it was a wax-seal medallion whose ornament escalated by tier, which was
+// the opposite failure — so busy at 54px that it fought the glyph it framed.
 //
-// The ring doubles as the progress track, so on the rank-up screen the filling bar
-// and the frame are the SAME circle rather than two concentric ones.
+// A pin is the middle: ONE frame, repeated exactly, with the mark inside doing
+// all the distinguishing. That is what makes a set feel collectible rather than
+// decorative, and it is why the frame does NOT escalate by tier.
 //
-//   • earned  — full ink
-//   • current — ink, plus the progress arc toward the next rank
-//   • locked  — a faint slate silhouette that pulls the eye upward
+// ── WHAT IS NEW IS TONE, NOT COLOUR (§19) ───────────────────────────────────
+//
+// Every value comes from tone.ts: ink, grey, and the warm paper the app is
+// already printed on. What a pin has now is a lit side and a shaded side, lit
+// from the top left like everything else in the set — and that is the whole of
+// why it reads as an object rather than an outline.
+//
+// LOCKED IS FLAT AND COOL, deliberately. No gradient, no shadow, a slate that
+// sits off the warm ramp. "The same pin, dimmer" is indistinguishable from a
+// rendering fault; unlit against lit is the reward for earning it.
+//
+// ── THE RING WAS THE PROGRESS TRACK, AND STILL IS ───────────────────────────
+//
+// The arc toward the next rank runs along the pin's own edge rather than on a
+// second concentric ring, so the frame and the meter are one object. A regular
+// hexagon's perimeter is exactly 6r (its side equals its radius), so the
+// dasharray is exact — an approximation would leave the arc short of the corner
+// it is meant to reach at 100%.
 //
 // Geometry lives in a 100×100 viewBox centred on (50,50).
-
-const INK = '#1A1A1A';
-const GHOST = '#AAB1BC'; // locked linework (cool slate)
+// ─────────────────────────────────────────────────────────────────────────────
 
 export type SealState = 'earned' | 'current' | 'locked';
 
@@ -31,44 +49,84 @@ interface Props {
   progress?: number | null; // 0..1, draws the arc toward the next rank
 }
 
-const R = 42;
-const CIRC = 2 * Math.PI * R;
+const PERIM = hexPerimeter(HEX_R);
+
+const grad = (id: string, stops: Stops) => (
+  <LinearGradient id={id} x1={LIGHT.x1} y1={LIGHT.y1} x2={LIGHT.x2} y2={LIGHT.y2}>
+    {stops.map(([o, c, op], k) => (
+      <Stop key={k} offset={o} stopColor={c} stopOpacity={op} />
+    ))}
+  </LinearGradient>
+);
 
 export default function RankSeal({ glyph, state, size = 96, progress = null }: Props) {
   const locked = state === 'locked';
   const ink = locked ? GHOST : INK;
   const pct = progress == null ? null : Math.max(0, Math.min(1, progress));
-  // With an arc over it the ring becomes a track and steps back; on its own it is
+  // With an arc over it the edge becomes a track and steps back; on its own it is
   // the frame and carries full weight.
-  const trackOpacity = pct != null ? 0.2 : locked ? 0.55 : 1;
+  const trackOpacity = pct != null ? 0.22 : 1;
+
+  // useId, because two pins on one screen with the same gradient id would have
+  // the second silently adopt the first's fill.
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
+  const face = `f${uid}`, rim = `r${uid}`;
+
+  const outer = hexPath(50, 50, HEX_R);
+  const inner = hexPath(50, 50, HEX_R - HEX_INNER);
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <Svg width={size} height={size} viewBox="0 0 100 100" style={{ position: 'absolute' }}>
-        <Circle
-          cx={50}
-          cy={50}
-          r={R}
-          stroke={ink}
-          strokeWidth={2}
+        <Defs>
+          {grad(face, locked ? LOCKED_FACE : FACE)}
+          {grad(rim, locked ? [['0%', GHOST, 1], ['100%', GHOST, 1]] : RIM)}
+        </Defs>
+
+        {/* The pin sits ON the page, so it casts. Earned only: a locked pin is
+            drawn flat, and a shadow under a flat shape reads as a mistake. */}
+        {!locked && (
+          <G transform={`translate(${SHADOW.dx} ${SHADOW.dy})`}>
+            <Path d={outer} fill={INK} opacity={SHADOW.opacity} />
+          </G>
+        )}
+
+        <Path d={outer} fill={`url(#${face})`} />
+
+        {/* The inner rule: a hairline stepped in from the edge, which is what
+            gives the rim its width and the pin its turned edge. */}
+        <Path d={inner} fill="none" stroke={locked ? GHOST : FAINT} strokeWidth={1} opacity={locked ? 0.5 : 1} />
+
+        {/* The edge itself — and the progress track when there is an arc. */}
+        <Path
+          d={outer}
           fill="none"
+          stroke={`url(#${rim})`}
+          strokeWidth={2.4}
+          strokeLinejoin="round"
           opacity={trackOpacity}
         />
+
         {pct != null && pct > 0 && (
-          <Circle
-            cx={50}
-            cy={50}
-            r={R}
-            stroke={ink}
-            strokeWidth={3.2}
+          // Starts at the top-left vertex and runs clockwise, so a nearly-full
+          // band closes at the point it began rather than mid-edge.
+          <Path
+            d={outer}
             fill="none"
+            stroke={ink}
+            strokeWidth={3.4}
             strokeLinecap="round"
-            strokeDasharray={`${(pct * CIRC).toFixed(2)} ${CIRC.toFixed(2)}`}
-            transform="rotate(-90 50 50)"
+            strokeLinejoin="round"
+            strokeDasharray={`${(pct * PERIM).toFixed(2)} ${PERIM.toFixed(2)}`}
+            transform="rotate(-60 50 50)"
           />
         )}
       </Svg>
-      <Glyph name={glyph} size={size * 0.46} color={ink} />
+
+      {/* The mark. Sized to the hexagon's INSCRIBED circle (r·√3/2), not its
+          radius — the corners are 15% further out than the flat edges, so sizing
+          to the radius would let a wide glyph touch the top and bottom rules. */}
+      <Glyph name={glyph} size={size * 0.44} color={ink} />
     </View>
   );
 }
