@@ -21,6 +21,7 @@ import {
   XP_PER_LESSON_COMPLETION, XP_PER_CORRECT_ANSWER, XP_PER_PERFECT_LESSON,
 } from '@/constants/xp';
 import { track } from '@/lib/posthog';
+import { cue } from '@/lib/feedback';
 import { refreshQuoteWidget } from '@/lib/widget/render';
 
 interface Props {
@@ -295,6 +296,11 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     // milestone and a unit at once; beyond three the reward screen stops being a
     // reward and becomes a list, and the rest are all still in the Badges tab.
     setBadges(previewNewBadges(st, lessonId, xp, day.streak).slice(0, 3));
+    // The chime lands with the screen, not with the XP count-up: this is the
+    // moment the lesson ENDED, and the number arriving after it is the detail.
+    // Skipped on a rank-up, which pre-empts this screen entirely and has its own
+    // moment to sound — two flourishes 300ms apart is a jingle.
+    if (earned <= st.rankIndex) cue('reward');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

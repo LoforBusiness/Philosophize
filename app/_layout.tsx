@@ -48,6 +48,7 @@ import { useCloudSync } from '@/lib/supabase/useCloudSync';
 import { useReminders } from '@/lib/notifications/useReminders';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { ads } from '@/lib/ads';
+import { prepareFeedback } from '@/lib/feedback';
 import { configureGoogleSignIn } from '@/lib/auth/social';
 import PhilosopherSheet from '@/components/shared/PhilosopherSheet';
 import RanksBadgesSheet from '@/components/shared/RanksBadgesSheet';
@@ -187,6 +188,12 @@ export default function RootLayout() {
   useEffect(() => {
     if (subReady && !isPro) ads.initialize();
   }, [subReady, isPro]);
+
+  // Decode the sound clips before anything asks for one. Without this the FIRST
+  // tap of a session is silent — the player is still being built when the cue
+  // arrives, so the one sound a reader is most likely to be listening for is the
+  // one they do not get. Costs 68KB of already-bundled audio and no network.
+  useEffect(() => { prepareFeedback(); }, []);
 
   // The user id we last routed on. Supabase re-fires SIGNED_IN not only on a real
   // sign-in but on app resume / token refresh / re-subscription — and blindly

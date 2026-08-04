@@ -31,6 +31,8 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { purchases } from '@/lib/purchases';
 import { ads } from '@/lib/ads';
 import { notifications } from '@/lib/notifications';
+import { sound } from '@/lib/sound';
+import { cue, soundSupported } from '@/lib/feedback';
 import { getNarratorVoice, describeVoice } from '@/lib/voice';
 import { speakSample, stopSpeaking } from '@/lib/narrate';
 import type { Voice } from 'expo-speech';
@@ -703,6 +705,8 @@ function DisplaySection() {
 function NarrationSection() {
   const voiceEnabled = useUserDataStore((s) => s.voiceEnabled);
   const setVoiceEnabled = useUserDataStore((s) => s.setVoiceEnabled);
+  const settingsAll = useUserDataStore((s) => s.settings);
+  const setSettingAll = useUserDataStore((s) => s.setSetting);
 
   const [voice, setVoice] = useState<Voice | null | undefined>(undefined);
 
@@ -758,6 +762,39 @@ function NarrationSection() {
           </Text>
         </View>
       )}
+
+      <View style={styles.hr} />
+
+      {/* SOUND AND HAPTICS SHARE ONE SWITCH, and one key, because they are one
+          idea: whether the app answers when you touch it. Splitting them would
+          give the reader two controls for a single sensation and put the burden
+          of a distinction on them that only exists inside the code.
+
+          The sub-line changes with what the binary can actually do. `expo-audio`
+          arrived after the shipped builds, and §22's rule is absolute — an
+          over-the-air update cannot add a native module — so on a current install
+          this switch governs the taps you FEEL and nothing more. Saying so is the
+          same honesty the Notifications section practises by being absent: better
+          a control that states its reach than one that quietly half-works. */}
+      <Row
+        title="Sound & haptics"
+        sub={
+          soundSupported()
+            ? 'Footfalls, taps, and a chime when a lesson ends. Short, quiet, mixed under whatever else you are playing — and silent when your phone is.'
+            : 'Taps answer with a small vibration. Sounds arrive with the next app update — they need a part of the app that only a new install can carry.'
+        }
+        last
+      >
+        <Toggle
+          value={settingsAll.soundEffects}
+          onChange={(v) => {
+            setSettingAll('soundEffects', v);
+            sound.setEnabled(v);
+            // Answer the switch with the thing the switch controls.
+            if (v) cue('tap');
+          }}
+        />
+      </Row>
     </Card>
   );
 }

@@ -7,11 +7,13 @@ import Animated, {
   useFrameCallback,
   useDerivedValue,
   useAnimatedProps,
+  useAnimatedReaction,
   runOnJS,
   type SharedValue,
 } from 'react-native-reanimated';
 import { useFocusEffect } from 'expo-router';
 import { useUIStore } from '@/stores/uiStore';
+import { cue } from '@/lib/feedback';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A small ink figure who crosses the empty band under the home-screen actions.
@@ -463,6 +465,42 @@ export default function StickmanStroll({ style }: Props) {
       bOn,
     };
   });
+
+  // ── HE CAN BE HEARD ────────────────────────────────────────────────────────
+  //
+  // A footfall is not a timer: he pauses, has a look around, waves, and walks on,
+  // so a step every 500ms would carry on clopping while he stood still. `dist` is
+  // the distance actually walked and the phase is derived from it, so half a
+  // stride IS one foot landing — count those and the sound follows the legs
+  // through every pause for free.
+  //
+  // Guarded on `alpha` and `stand`: he fades in and out at the edges of the
+  // screen, and a step heard from an invisible figure is a ghost.
+  const lastStep = useSharedValue(-1);
+  const lastSwish = useSharedValue(0);
+  useAnimatedReaction(
+    () => {
+      const a = SIM.value.a;
+      const half = GAITS[a.gait].S / 2;
+      return {
+        step: a.alpha > 0.35 && a.stand < 0.5 ? Math.floor(a.dist / half) : -1,
+        arm: a.armMix,
+      };
+    },
+    (now) => {
+      if (now.step !== lastStep.value) {
+        const first = lastStep.value < 0;
+        lastStep.value = now.step;
+        // Not on the first reading: that one only says where he already was.
+        if (!first && now.step >= 0) runOnJS(cue)('step');
+      }
+      // One swish as the arm comes UP, not one per rock of the wave — the
+      // forearm oscillates at 2.8Hz and that would be a hiss, not a gesture.
+      if (now.arm > 0.4 && lastSwish.value <= 0.4) runOnJS(cue)('swish');
+      lastSwish.value = now.arm;
+    },
+    [],
+  );
 
   const DA = useDerivedValue<Bundle>(() => (w.value > 0 ? figure(SIM.value.a) : BLANK));
   const DB = useDerivedValue<Bundle>(() =>

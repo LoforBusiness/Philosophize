@@ -70,6 +70,10 @@ export interface AppSettings {
   // Daily quote widget (in-app, shown on a chosen screen)
   widgetEnabled: boolean;
   widgetPlacement: WidgetPlacement;
+  // Sound + haptics: taps, the stickman's footfalls, the reward chime. Read by
+  // lib/feedback.ts, which is the single gate both channels pass through — so
+  // this key has a reader outside Settings, which is the rule above.
+  soundEffects: boolean;
   // Privacy
   usageAnalytics: boolean;
   // Narration: `voiceId` was here — a hand-picked TTS voice, written by a picker in
@@ -94,6 +98,9 @@ const DEFAULT_SETTINGS: AppSettings = {
   // animation on the branch screen; the key is removed rather than defaulted off,
   // so sanitizeSettings() prunes it from AsyncStorage and the cloud snapshot
   // instead of syncing a dead flag forever.
+  // On by default: it is quiet, short, respects the device's silent switch, and
+  // never takes audio focus from whatever the reader is listening to.
+  soundEffects: true,
   // Privacy-by-default: analytics stay OFF until the user explicitly opts in
   // (matches PostHog's defaultOptIn:false). Toggle in Settings → Usage Analytics.
   usageAnalytics: false,

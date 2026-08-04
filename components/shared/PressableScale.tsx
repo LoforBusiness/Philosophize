@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Pressable, type StyleProp, type ViewStyle, type GestureResponderEvent } from 'react-native';
 import { MotiView } from 'moti';
+import { cue } from '@/lib/feedback';
 import { Easing } from 'react-native-reanimated';
 
 interface Props {
@@ -24,7 +25,10 @@ export default function PressableScale({ onPress, children, style, containerStyl
       onPress={onPress}
       disabled={disabled}
       style={containerStyle}
-      onPressIn={() => setPressed(true)}
+      // EVERY button in the app that uses this one component now answers when it
+      // is touched. On press-IN rather than on press: the sound is confirming the
+      // touch, and a click that arrives after the finger lifts reads as lag.
+      onPressIn={() => { setPressed(true); if (!disabled) cue('tap'); }}
       onPressOut={() => setPressed(false)}
     >
       <MotiView
