@@ -14,13 +14,12 @@ import { lessonXP } from '@/constants/xp';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { useBeatNarration } from '@/lib/narrate';
 import Stickman from './Stickman';
 import BrickStructure, {
   BASE_LX, BASE_RX, BASE_Y, CENTER_X, KEY_X, KEY_Y, type StructState,
 } from './BrickStructure';
 import { BEATS, gates, type Beat } from './builderScript';
-import { Bubble, CORRECT_LABEL, NarratedText } from './cinematicKit';
+import { Bubble, CORRECT_LABEL } from './cinematicKit';
 import {
   BLANK, clamp01, ease01, easeOutBack, easeOutCubic, headAt, lerp, masterHold, masterLive,
   mixStance, narratorHold, narratorLive, pose, seg, stand, type Bundle, type Stance,
@@ -185,13 +184,6 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
   const [done, setDone] = useState(false);
   const [boxSize, setBoxSize] = useState({ w: 0, h: 0 });
   const [shown, setShown] = useState(0);          // the beat the DECK is showing
-
-  // NARRATION — see the twin of this block in ArgumentFightLesson. Both lessons
-  // predate CinematicPlayer and carry their own copy of it, so the hook is repeated
-  // rather than inherited. It sits ABOVE `if (done) return null` and must stay
-  // there (§17 rule 1).
-  const voiceEnabled = useUserDataStore((s) => s.voiceEnabled);
-  const sayProgress = useBeatNarration(BEATS[shown]?.text, voiceEnabled && !done);
 
   const beat = BEATS[i];
   const clock = useSharedValue(0);
@@ -501,7 +493,7 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
               <>
                 {beat.cite ? <Text style={styles.cite}>{beat.cite.toUpperCase()}</Text> : null}
                 {beat.text ? (
-                  <NarratedText text={beat.text} progress={sayProgress} animate={voiceEnabled} />
+                  <Text style={styles.narr}>{beat.text}</Text>
                 ) : null}
 
                 {beat.quote ? (

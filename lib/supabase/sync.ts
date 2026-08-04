@@ -10,7 +10,6 @@ export interface CloudState {
   philosopherViews: Record<string, number>;
   lessonsByUnit: Record<string, number>;
   lessonsByBranch: Record<string, number>;
-  voiceEnabled: boolean;
   beliefResultId: string | null;
   streak: number;
   totalXP: number;
@@ -30,7 +29,7 @@ export interface CloudState {
 }
 
 const SYNC_FIELDS: (keyof CloudState)[] = [
-  'savedQuotes', 'profileQuote', 'philosopherViews', 'lessonsByUnit', 'lessonsByBranch', 'voiceEnabled', 'beliefResultId',
+  'savedQuotes', 'profileQuote', 'philosopherViews', 'lessonsByUnit', 'lessonsByBranch', 'beliefResultId',
   'streak', 'totalXP', 'xpEvents', 'rankIndex', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'badgesInitialized',
   'displayName', 'email', 'bio', 'portrait', 'profileBackground', 'nameFont', 'settings',
 ];
@@ -256,7 +255,6 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
     fresh && typeof remote.profileBackground === 'string' ? remote.profileBackground : local.profileBackground;
   const nameFont = fresh && typeof remote.nameFont === 'string' ? remote.nameFont : local.nameFont;
   const settings = fresh ? sanitizeSettings(remote.settings, local.settings) : local.settings;
-  const voiceEnabled = fresh && typeof remote.voiceEnabled === 'boolean' ? remote.voiceEnabled : local.voiceEnabled;
   const beliefResultId =
     fresh && (typeof remote.beliefResultId === 'string' || remote.beliefResultId === null)
       ? remote.beliefResultId
@@ -271,7 +269,6 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
     philosopherViews,
     lessonsByUnit,
     lessonsByBranch,
-    voiceEnabled,
     beliefResultId,
     streak,
     totalXP,

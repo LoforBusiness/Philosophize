@@ -10,10 +10,9 @@ import { lessonXP } from '@/constants/xp';
 import { exitLesson } from '../exitLesson';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
-import { useBeatNarration } from '@/lib/narrate';
 import { useUIStore } from '@/stores/uiStore';
 import {
-  Fade, Choices, InteractPanel, NarratedText, QuoteCard, SummaryCard, gates, styles,
+  Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
   COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, INK,
   type BaseBeat,
 } from './cinematicKit';
@@ -74,27 +73,6 @@ export default function CinematicPlayer({
   const [shown, setShown] = useState(0);
 
   const beat = beats[i];
-
-  // NARRATION. Placed here deliberately: every hook in this file must sit ABOVE
-  // the `if (done) return null` further down (§17 rule 1) — a hook below that line
-  // makes the final tap render a different number of hooks and takes the reward
-  // modal down with it.
-  //
-  // Voiced from `shown`, not `i`, because the deck lags a tap by its fade-out: the
-  // sentence should begin when its own paragraph is on screen, not over the tail
-  // of the one it replaces.
-  //
-  // There is no per-lesson opt-in any more. It existed so ONE lesson could speak
-  // while the voice was being judged against the silent ones; that judgement is
-  // made, so a `narrate` prop passed as true in 102 places would be noise with a
-  // single value. `voiceEnabled` is the switch, and Settings → Narration is where
-  // it lives.
-  //
-  // It returns how far through the sentence the voice has got, which is what
-  // paces the words onto the page. With narration off it is pinned at 1 and the
-  // deck renders the plain paragraph — see NarratedText.
-  const voiceEnabled = useUserDataStore((s) => s.voiceEnabled);
-  const sayProgress = useBeatNarration(beats[shown]?.text, voiceEnabled && !done);
 
   const clock = useSharedValue(0);
   const bt = useSharedValue(0);
@@ -246,7 +224,7 @@ export default function CinematicPlayer({
               <>
                 {beat.cite ? <Text style={styles.cite}>{beat.cite.toUpperCase()}</Text> : null}
                 {beat.text ? (
-                  <NarratedText text={beat.text} progress={sayProgress} animate={voiceEnabled} />
+                  <Text style={styles.narr}>{beat.text}</Text>
                 ) : null}
 
                 {beat.quote ? (

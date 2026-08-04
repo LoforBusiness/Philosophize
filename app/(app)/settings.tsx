@@ -33,9 +33,6 @@ import { ads } from '@/lib/ads';
 import { notifications } from '@/lib/notifications';
 import { sound } from '@/lib/sound';
 import { cue, soundSupported } from '@/lib/feedback';
-import { getNarratorVoice, describeVoice } from '@/lib/voice';
-import { speakSample, stopSpeaking } from '@/lib/narrate';
-import type { Voice } from 'expo-speech';
 import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
 import { effectiveStreak } from '@/lib/utils/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
@@ -54,7 +51,7 @@ const TIMES = ['06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '12:00 PM', '06:0
 // Where user feedback is sent (opens the user's mail app pre-addressed here).
 const FEEDBACK_EMAIL = 'philosophizelearn@gmail.com';
 
-type SectionKey = 'profile' | 'account' | 'notifications' | 'narration' | 'display' | 'privacy' | 'feedback' | 'subscription' | 'danger';
+type SectionKey = 'profile' | 'account' | 'notifications' | 'sound' | 'display' | 'privacy' | 'feedback' | 'subscription' | 'danger';
 
 /**
  * The Notifications entry is present only in a binary that can actually schedule
@@ -72,11 +69,10 @@ const SECTIONS: { key: SectionKey; label: string; icon: SketchIconName }[] = [
     : []),
   // No 'learning' rail entry: its last control (auto-advance) is gone, and a rail
   // tab that opens an empty card is the same defect as a switch that does nothing.
-  // Narration, by contrast, EARNED its entry rather than being given one: `voiceEnabled`
-  // and `settings.voiceId` are both read outside this screen now (lib/narrate.ts →
-  // CinematicPlayer), which is the §22 test. Until the lessons actually spoke, a
-  // voice picker here would have been decoration, and it was rightly absent.
-  { key: 'narration', label: 'Narration', icon: 'mic' },
+  // Sound earns its entry the same way (§22): `settings.soundEffects` is read by
+  // lib/feedback.ts, outside this screen. Spoken narration used to head this
+  // section and was removed entirely — see SoundSection.
+  { key: 'sound', label: 'Sound', icon: 'mic' },
   { key: 'display', label: 'Display', icon: 'book' },
   { key: 'privacy', label: 'Privacy', icon: 'lock' },
   { key: 'feedback', label: 'Feedback', icon: 'pencil' },
@@ -258,8 +254,8 @@ function Section({ section }: { section: SectionKey }) {
       return <AccountSection />;
     case 'notifications':
       return <NotificationsSection />;
-    case 'narration':
-      return <NarrationSection />;
+    case 'sound':
+      return <SoundSection />;
     case 'display':
       return <DisplaySection />;
     case 'privacy':
@@ -682,87 +678,32 @@ function DisplaySection() {
 // snapshot — a key left behind in the defaults is re-adopted on every load and
 // pushed back up forever.
 
-/* ---------------- Narration ---------------- */
+/* ---------------- Sound ---------------- */
 
 /**
- * THE NARRATOR IS NOT A CHOICE ANY MORE.
+ * SPOKEN NARRATION WAS HERE, AND IS GONE.
  *
- * This screen used to list every voice the device had, each auditioning on tap. That
- * was the right tool for exactly one job — finding out which voice the lessons should
- * be read in, which cannot be decided from an identifier and had to be done by ear.
- * The answer came back the same on every listen, and a menu with one right item on it
- * is not a setting, it is a way to make the app worse by accident.
+ * The lessons read themselves aloud for a day. The voice was the best the device
+ * had — the picker that found it worked, and the answer it gave was the same on
+ * every listen — but device text-to-speech has no emotion to give, and a flat
+ * reading of writing this deliberate was worse than silence. The alternatives that
+ * can act are all cloud services or GPU models; none of them is free without an
+ * account, a card, or hardware, and none was worth those for a voice-over.
  *
- * So the voice is fixed in `lib/voice.ts` and this section states it rather than
- * offering it. What remains is the one control that is genuinely the reader's: whether
- * anybody is speaking at all.
+ * So the whole of it went: the hook, the word-by-word reveal it paced, the switch,
+ * and the store key behind it. The narration line is a plain paragraph again.
  *
- * The voice is still NAMED here rather than asserted, because the chosen one is a
- * Google Speech Services voice and a device without it falls down the chain to
- * something else. Printing what is actually loaded means a phone that sounds wrong
- * says so, instead of leaving it a mystery.
+ * `lib/voice.ts` deliberately SURVIVES. It is device-voice selection, and the
+ * dormant story scenes (§12) still import it — deleting it would break files this
+ * change has no business touching.
  */
-function NarrationSection() {
-  const voiceEnabled = useUserDataStore((s) => s.voiceEnabled);
-  const setVoiceEnabled = useUserDataStore((s) => s.setVoiceEnabled);
+function SoundSection() {
   const settingsAll = useUserDataStore((s) => s.settings);
   const setSettingAll = useUserDataStore((s) => s.setSetting);
 
-  const [voice, setVoice] = useState<Voice | null | undefined>(undefined);
-
-  useEffect(() => {
-    let alive = true;
-    getNarratorVoice().then((v) => { if (alive) setVoice(v); });
-    // Leaving the screen mid-sentence must not leave a voice talking over the app.
-    return () => { alive = false; stopSpeaking(); };
-  }, []);
-
-  const named = voice ? describeVoice(voice) : null;
-
   return (
     <Card>
-      <Header title="Narration" sub="Whether the lessons read themselves aloud." icon="mic" />
-      <View style={styles.hr} />
-
-      <Row
-        title="Read lessons aloud"
-        sub="Speaks the narration under the drawing. Questions, choices and quotes are never read — hearing the four options in one flat voice gives the answer away."
-        last={!voiceEnabled}
-      >
-        <Toggle
-          value={voiceEnabled}
-          onChange={(v) => {
-            setVoiceEnabled(v);
-            if (!v) stopSpeaking();
-          }}
-        />
-      </Row>
-
-      {voiceEnabled && (
-        <View style={{ marginTop: 16 }}>
-          <Pressable onPress={() => speakSample()} style={styles.voiceRow}>
-            <View style={{ flex: 1, paddingRight: 10 }}>
-              <Text style={styles.voiceName}>
-                {named ? named.title : voice === undefined ? 'Finding the narrator…' : 'Your device’s default voice'}
-              </Text>
-              <Text style={styles.voiceSub}>
-                {named
-                  ? `${named.sub} · tap to hear a line`
-                  : voice === undefined
-                    ? 'Asking your device which voices it has'
-                    : 'The chosen narrator is not installed here · tap to hear what is'}
-              </Text>
-            </View>
-            <SketchIcon name="mic" size={16} color={InkSoft} />
-          </Pressable>
-
-          <Text style={styles.voiceHint}>
-            One voice, chosen for the lessons and the same on every screen. Your phone
-            supplies it, so it costs nothing and needs no account.
-          </Text>
-        </View>
-      )}
-
+      <Header title="Sound" sub="Whether the app answers when you touch it." icon="mic" />
       <View style={styles.hr} />
 
       {/* SOUND AND HAPTICS SHARE ONE SWITCH, and one key, because they are one
@@ -1384,16 +1325,6 @@ const styles = StyleSheet.create({
   modalConfirm: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 4, borderWidth: 1.5, borderColor: Ink, backgroundColor: Ink },
   modalConfirmText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Paper },
 
-  // Narration voice picker
-  voiceCard: { width: '100%', maxWidth: 420, backgroundColor: Paper, borderWidth: 2, borderColor: Ink, borderRadius: 8, paddingHorizontal: 20, paddingTop: 18, paddingBottom: 16 },
-  voiceHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  voiceHint: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12.5, color: InkSoft, marginTop: 4, marginBottom: 12 },
-  voiceRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderColor: InkFaint, borderRadius: 6, paddingHorizontal: 14, paddingVertical: 12, marginBottom: 8 },
-  voiceRowOn: { borderColor: Ink, borderStyle: 'dashed', backgroundColor: '#F4F2EC' },
-  voiceName: { fontFamily: 'Inter_500Medium', fontSize: 14, color: Ink },
-  voiceSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: InkSoft, marginTop: 2 },
-  voiceCheck: { fontFamily: 'Inter_700Bold', fontSize: 16, color: Ink },
-  voiceEmpty: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: InkSoft, textAlign: 'center', paddingVertical: 20 },
 
   // Portrait picker
   pickerCard: { backgroundColor: Paper, borderWidth: 2, borderColor: Ink, borderRadius: 8, paddingHorizontal: 22, paddingTop: 20, paddingBottom: 18 },

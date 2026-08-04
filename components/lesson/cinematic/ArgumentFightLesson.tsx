@@ -14,14 +14,13 @@ import { lessonXP } from '@/constants/xp';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { useBeatNarration } from '@/lib/narrate';
 import Stickman from './Stickman';
 import AnatomyDiagram from './illustrations/AnatomyDiagram';
 import SyllogismChart from './illustrations/SyllogismChart';
 import LoudnessChart from './illustrations/LoudnessChart';
 import TwoRoadsChart from './illustrations/TwoRoadsChart';
 import { BEATS, gates, type Beat, type BoardKey } from './argumentScript';
-import { Bubble, CORRECT_LABEL, NarratedText } from './cinematicKit';
+import { Bubble, CORRECT_LABEL } from './cinematicKit';
 import {
   BLANK, MOVE_ADV, WALK, boxMove, clamp01, dirsFrom, ease01, easeOutBack, headAt, life2, lerp,
   mixStance, moveTr, narratorHold, narratorLive, pose, stand, travelStance,
@@ -458,19 +457,6 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
   const [box, setBox] = useState({ w: 0, h: 0 });
   const [shown, setShown] = useState(0);          // the beat the DECK is showing
 
-  // NARRATION. This lesson predates CinematicPlayer and carries its own copy of the
-  // player, so it needs its own copy of this too — otherwise it would be one of two
-  // silent lessons among 102 that speak, which reads as a fault rather than a choice.
-  //
-  // ABOVE `if (done) return null` further down, and it must stay there (§17 rule 1):
-  // a hook below that line changes the hook count on the final tap and takes the
-  // reward modal down with it.
-  //
-  // Only `beat.text` is spoken. The characters' `say` bubbles are dialogue the
-  // picture is already delivering, and the question and its choices are never read.
-  const voiceEnabled = useUserDataStore((s) => s.voiceEnabled);
-  const sayProgress = useBeatNarration(BEATS[shown]?.text, voiceEnabled && !done);
-
   const beat = BEATS[i];
   const clock = useSharedValue(0);
   const bt = useSharedValue(0);
@@ -838,7 +824,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
             <>
               {beat.cite ? <Text style={styles.cite}>{beat.cite.toUpperCase()}</Text> : null}
               {beat.text ? (
-                  <NarratedText text={beat.text} progress={sayProgress} animate={voiceEnabled} />
+                  <Text style={styles.narr}>{beat.text}</Text>
                 ) : null}
 
               {beat.quote ? (

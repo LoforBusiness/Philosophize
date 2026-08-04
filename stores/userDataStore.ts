@@ -209,7 +209,11 @@ interface UserDataState {
   // Derived mirror kept in lockstep (= sum of each branch's unit counts) so the
   // stats / mastery / badge readers keep working unchanged. Never set on its own.
   lessonsByBranch: Record<string, number>;   // branchSlug -> lessons completed
-  voiceEnabled: boolean;                      // narrate lessons aloud + reveal words
+  // `voiceEnabled` was here — the switch for spoken narration. Narration is gone:
+  // device text-to-speech has no emotion to give, and nothing that can act is free
+  // without an account, a card or a GPU. The key has no reader and no writer now,
+  // so it is removed rather than left at true — that stops it riding the cloud
+  // snapshot forever. An old stored value is simply ignored on load.
   beliefResultId: string | null;             // legacy (belief quiz removed)
   streak: number;                             // consecutive-day streak
   totalXP: number;                            // all XP: lessons, saved quotes, thinkers met, quizzes
@@ -261,7 +265,6 @@ interface UserDataState {
   recordQuizResult: (philosopherId: string, correct: number, total: number) => number;
   recordLessonComplete: (lessonId: string, xpEarned?: number) => void;
   bumpDailyLessons: (today: string) => void;
-  setVoiceEnabled: (v: boolean) => void;
   setBeliefResult: (id: string | null) => void;
   ensureJoinDate: () => void;
   registerDailyActivity: (
@@ -440,7 +443,6 @@ export const useUserDataStore = create<UserDataState>()(
       philosopherViews: {},
       lessonsByUnit: {},
       lessonsByBranch: {},
-      voiceEnabled: true,
       beliefResultId: null,
       streak: 0,
       totalXP: 0,
@@ -640,8 +642,6 @@ export const useUserDataStore = create<UserDataState>()(
           dailyLessonDate: today,
         })),
 
-      setVoiceEnabled: (v) => set({ voiceEnabled: v }),
-
       setBeliefResult: (id) => set({ beliefResultId: id }),
 
       ensureJoinDate: () => {
@@ -731,7 +731,6 @@ export const useUserDataStore = create<UserDataState>()(
           philosopherViews: {},
           lessonsByUnit: {},
           lessonsByBranch: {},
-          voiceEnabled: true,
           beliefResultId: null,
           streak: 0,
           totalXP: 0,
@@ -769,7 +768,6 @@ export const useUserDataStore = create<UserDataState>()(
           philosopherViews: {},
           lessonsByUnit: {},
           lessonsByBranch: {},
-          voiceEnabled: true,
           beliefResultId: null,
           streak: 0,
           totalXP: 0,
@@ -806,7 +804,6 @@ export const useUserDataStore = create<UserDataState>()(
         philosopherViews: state.philosopherViews,
         lessonsByUnit: state.lessonsByUnit,
         lessonsByBranch: state.lessonsByBranch,
-        voiceEnabled: state.voiceEnabled,
         beliefResultId: state.beliefResultId,
         streak: state.streak,
         totalXP: state.totalXP,
