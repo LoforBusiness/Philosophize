@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Alert, StyleSheet, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import Glyph from '@/components/shared/Glyph';
 import BadgeMedal from '@/components/shared/BadgeMedal';
+import RankClimbChart from '@/components/shared/RankClimbChart';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { ProfileArtFill, ProfileAvatar, useProfileArt } from '@/components/shared/ProfileArt';
@@ -91,6 +92,9 @@ export default function ProfileScreen() {
   const displayName = useUserDataStore((s) => s.displayName);
   const xp = useUserDataStore((s) => s.totalXP);
   const rankIndex = useUserDataStore((s) => s.rankIndex);
+  const xpEvents = useUserDataStore((s) => s.xpEvents);
+  const chartSeenXP = useUserDataStore((s) => s.chartSeenXP);
+  const markChartSeen = useUserDataStore((s) => s.markChartSeen);
   const nameFont = useUserDataStore((s) => s.nameFont);
   const { palette } = useProfileArt();
   const earnedBadges = useUserDataStore((s) => s.earnedBadges);
@@ -106,6 +110,21 @@ export default function ProfileScreen() {
   useEffect(() => {
     ensureJoinDate();
   }, [ensureJoinDate]);
+
+  // IS THIS SCREEN ACTUALLY IN FRONT OF ANYONE?
+  //
+  // Every tab is built at startup so it can be switched to instantly, which means
+  // mounting is not the same as being seen — the climb chart would otherwise play
+  // its intro to a Profile tab the reader is nowhere near, spend the one animation
+  // it had, and mark the XP as seen. So the chart is told when the tab is focused
+  // and not before.
+  const [focused, setFocused] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      setFocused(true);
+      return () => setFocused(false);
+    }, []),
+  );
 
   const lessonsDone = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
   const quotesSaved = savedQuotes.length;
@@ -380,6 +399,25 @@ export default function ProfileScreen() {
                   ? `${toNext.toLocaleString()} XP UNTIL ${next.name.toUpperCase()}`
                   : 'HIGHEST RANK ACHIEVED'}
             </Text>
+
+            {/* THE SAME CLIMB, DRAWN. The bar above says how far along the band
+                the reader is; the chart says how they got there and what each
+                thing they did was worth. `active` is the focus flag rather than
+                `true`: every tab is built at startup so this screen is mounted
+                long before it is looked at, and an intro that plays to a screen
+                nobody is on has been spent for nothing. */}
+            <View style={styles.rankChartWrap}>
+              <RankClimbChart
+                rankIndex={rankIndex}
+                totalXP={totalXP}
+                events={xpEvents}
+                width={SW - 72}
+                height={188}
+                seenXP={chartSeenXP}
+                active={focused}
+                onSeen={markChartSeen}
+              />
+            </View>
           </View>
 
           <SectionLabel>BRANCH MASTERY</SectionLabel>
@@ -610,6 +648,7 @@ const styles = StyleSheet.create({
   dayChipText: { fontFamily: 'Inter_700Bold', fontSize: 10, color: Ink },
 
   rankBox: { borderWidth: 1.5, borderColor: Ink, borderRadius: 3, padding: 16 },
+  rankChartWrap: { marginTop: 14 },
   rankBoxTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 },
   rankName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 20, color: Ink },
   rankXp: { fontFamily: 'Inter_400Regular', fontSize: 13, color: InkSoft },

@@ -274,6 +274,16 @@ interface UserDataState {
   email: string;
   bio: string;
   bioSeed: number;                            // bumped each lesson + app launch to refresh the auto-bio
+  /**
+   * The total XP the reader had the LAST TIME they looked at the climb chart.
+   *
+   * It is what lets the chart animate only when there is something new to show:
+   * the line is drawn to where it stood at this figure, holds, and then grows on
+   * to where it stands now. Opening the same screen twice with nothing earned in
+   * between draws it finished and still — an animation that replays on every
+   * visit stops meaning "you moved" and starts meaning nothing at all.
+   */
+  chartSeenXP: number;
   portrait: string;                           // selected hand-drawn portrait id
   profileBackground: string;                  // id from data/profileBackgrounds — picture AND header art
   nameFont: string;                           // id from data/profileFonts — the face the name is set in
@@ -338,6 +348,8 @@ interface UserDataState {
   revokeBadges: () => void;
   deleteAccount: () => void;
   resetForSignOut: () => void;
+  /** Mark the climb chart as seen at the current total. */
+  markChartSeen: () => void;
   setHasHydrated: (v: boolean) => void;
 }
 
@@ -526,6 +538,7 @@ export const useUserDataStore = create<UserDataState>()(
       email: '',
       bio: '',
       bioSeed: 0,
+      chartSeenXP: 0,
       portrait: 'overthinker',
       profileBackground: DEFAULT_BACKGROUND_ID,
       nameFont: DEFAULT_PROFILE_FONT,
@@ -951,6 +964,8 @@ export const useUserDataStore = create<UserDataState>()(
         });
       },
 
+      markChartSeen: () => set({ chartSeenXP: get().totalXP }),
+
       setHasHydrated: (v) => set({ _hasHydrated: v }),
     }),
     {
@@ -986,6 +1001,7 @@ export const useUserDataStore = create<UserDataState>()(
         email: state.email,
         bio: state.bio,
         bioSeed: state.bioSeed,
+        chartSeenXP: state.chartSeenXP,
         portrait: state.portrait,
         profileBackground: state.profileBackground,
         nameFont: state.nameFont,

@@ -173,6 +173,10 @@ export default function RanksBadgesSheet() {
   const xp = useUserDataStore((s) => s.totalXP);
   const rankIndex = useUserDataStore((s) => s.rankIndex);
   const xpEvents = useUserDataStore((s) => s.xpEvents);
+  // The sheet only exists while it is open, so mounting IS coming into view —
+  // no focus plumbing needed here, unlike the Profile tab which stays mounted.
+  const chartSeenXP = useUserDataStore((s) => s.chartSeenXP);
+  const markChartSeen = useUserDataStore((s) => s.markChartSeen);
 
   const { height, width } = useWindowDimensions();
   const H = Math.round(height * 0.82);
@@ -302,6 +306,8 @@ export default function RanksBadgesSheet() {
                       totalXP={totalXP}
                       events={xpEvents}
                       width={width - 32}
+                      seenXP={chartSeenXP}
+                      onSeen={markChartSeen}
                     />
                   </View>
 
