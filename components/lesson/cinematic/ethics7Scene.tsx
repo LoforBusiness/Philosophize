@@ -325,6 +325,9 @@ const styles = StyleSheet.create({
 // The composition note above already says car A occupies y 53 → 112, so a band that
 // started at 96 cut the roof and body off both cars and left only their wheels. The
 // diagram (53 → 324) and the figure (361 → 500) together need the whole 49 → 512.
+// `walk={X}` is the same x track this scene drives `travelStance` with, handed to
+// the player so it can sound a footfall on each foot plant. One figure, default
+// seed — which is the case ./footfalls solves for.
 export function Ethics7Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics7Scene} band={[49, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics7Scene} band={[49, 512]} walk={X} />;
 }

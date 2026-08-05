@@ -34,7 +34,7 @@ const RULE = '#E4E1D8';
 // The timeline, in ms from mount. Each is the moment that step BEGINS.
 const T_RING = 120;
 const D_RING = 1400;
-const T_BURST = T_RING + D_RING - 70;    // fires as the circle closes
+export const T_BURST = T_RING + D_RING - 70;    // fires as the circle closes
 const T_NAME = T_BURST + 230;
 const T_BAR = T_NAME + 1200;
 const T_CTA = T_BAR + 800;

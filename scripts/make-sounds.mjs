@@ -70,14 +70,33 @@ const mix = (...layers) => {
 };
 const gain = (buf, g) => buf.map((x) => x * g);
 
-/** Normalise to a peak, then fade the last 4ms so nothing ends on a click. */
+/**
+ * Centre, normalise to a peak, then fade the last 4ms so nothing ends on a click.
+ *
+ * THE CENTRING IS NOT COSMETIC. A short burst of low-passed noise does not average
+ * to zero — filtering a finite random sequence leaves a residual offset, and
+ * `step-a` shipped with one of 0.0137. A clip with DC in it starts by yanking the
+ * speaker cone off centre and ends by letting it go, which is a click at both ends
+ * that no fade can remove because the fade is applied to an offset signal. It is
+ * worst on exactly the cue that can least afford it: the footfall, which fires
+ * two and a half times a second under a walking figure.
+ */
 function finish(buf, peak = 0.72) {
-  const max = Math.max(...buf.map(Math.abs)) || 1;
+  const dc = buf.reduce((a, x) => a + x, 0) / (buf.length || 1);
+  const centred = buf.map((x) => x - dc);
+  const max = Math.max(...centred.map(Math.abs)) || 1;
   const k = peak / max;
   const tail = Math.round(0.004 * RATE);
-  return buf.map((x, i) => {
-    const fade = i > buf.length - tail ? (buf.length - i) / tail : 1;
-    return x * k * fade;
+  // AND A FADE-IN, which centring is what made necessary. Every layer already
+  // starts at zero — the envelopes and swells all begin at 0 — but subtracting the
+  // mean moves the whole clip down by that mean, so the first sample lands at −dc
+  // instead of at silence and the click reappears at the head. 1ms is inaudible
+  // against a 0.8ms attack and pins the start to zero exactly.
+  const nose = Math.round(0.001 * RATE);
+  return centred.map((x, i) => {
+    const up = i < nose ? i / nose : 1;
+    const down = i > buf.length - tail ? (buf.length - i) / tail : 1;
+    return x * k * up * down;
   });
 }
 
@@ -183,12 +202,213 @@ function reward() {
   return finish(mix(note(587.33, 0, 1), note(880.0, 0.13, 0.8)), 0.78);
 }
 
+// ── the second set: the app gets a voice for the things it rewards ───────────
+//
+// THE PALETTE IS SPLIT ON PURPOSE, and the split is the whole design.
+//
+// Everything the WORLD does stays physical and unpitched — a shoe, a sleeve, a
+// leaf of paper, a wooden knock, a clasp. Those sounds are the room the lesson
+// happens in, and a room does not play notes at you.
+//
+// Everything the READER EARNS is pitched, and all of it is in D. `reward` was
+// written first, from D5 and A5, so D is already the app's key by accident; every
+// note added here is drawn from the same triad (D · F# · A) across three octaves.
+// That is why a correct answer, an XP tick, a badge and a rank-up can land within
+// four seconds of each other on the reward screen without turning into noise —
+// they are chords of one thing, not five separate jingles competing.
+//
+//   D4 293.66  ·  D5 587.33  F#5 739.99  A5 880.00  ·  D6 1174.66  F#6 1479.98  A6 1760
+
+/** A struck tone: fundamental, a soft octave, a trace of the twelfth. */
+function bell(n, f, decay, g = 1) {
+  const e = env(n, 0.004, decay);
+  const body = mix(
+    sine(n, f),
+    gain(sine(n, f * 2), 0.26),
+    gain(sine(n, f * 3.01), 0.07),
+  );
+  return body.map((x, i) => x * e[i] * g);
+}
+
+/** Silence, then a layer. Used to place notes in a phrase. */
+const at = (delay, layer) => [...new Array(secs(delay)).fill(0), ...layer];
+
+/**
+ * A PAGE TURNING — the beat-advance sound, ~10 times a lesson.
+ *
+ * Front-loaded, which is what separates it from `swish`. A sleeve is a symmetric
+ * swell that peaks in the middle of the gesture; a page is a crisp release at the
+ * corner followed by the leaf falling over. So: a short bright edge, then a
+ * decaying airy body underneath it.
+ *
+ * The quietest thing in the set apart from the ticks. It fires on nearly every
+ * tap, and anything with presence at that rate becomes the sound of the app
+ * rather than a detail in it.
+ */
+function page() {
+  reseed(70118);
+  const n = secs(0.20);
+  const edge = secs(0.035);
+  const crisp = highpass(noise(edge), 0.30);
+  const ce = env(edge, 0.0004, 0.010);
+  const body = highpass(lowpass(noise(n), 0.26), 0.05);
+  const be = Array.from({ length: n }, (_, i) => {
+    const u = i / n;
+    // Rises fast, falls away — the leaf is loudest as it leaves the thumb.
+    return Math.min(1, u / 0.12) * Math.exp(-u * 3.4);
+  });
+  return finish(mix(
+    crisp.map((x, i) => x * ce[i] * 0.9),
+    body.map((x, i) => x * be[i]),
+  ), 0.30);
+}
+
+/**
+ * A CORRECT ANSWER — one clean note, and it CLIMBS on a run of them.
+ *
+ * Three files rather than one, played by `step` at the call site: D5, F#5, A5.
+ * Getting two right in a row should sound different from getting one right
+ * twice, and the difference has to be audible without being a fanfare — a
+ * rising triad does it in three notes and then holds at the top.
+ *
+ * Rendered as separate files because pitch-shifting at playback means trusting a
+ * native playback-rate flag I cannot hear the result of. Three 24 KB files is the
+ * cheaper certainty.
+ */
+const right = (f) => finish(bell(secs(0.55), f, 0.20), 0.62);
+
+/**
+ * A WRONG ANSWER — a wooden knock that bends down, and NOTHING ELSE.
+ *
+ * Deliberately not a buzzer, not a minor chord, not two descending notes. This is
+ * a philosophy app: a reader who picks the tempting answer has usually thought
+ * about it, and the explanation that follows is the point. A comic failure noise
+ * would tell them they lost a game.
+ *
+ * So it is the same physical material as the world sounds — low, dry, wooden —
+ * with a small downward bend that reads as "not that" without reading as
+ * "wrong of you". It is also markedly quieter than the correct note.
+ */
+function rethink() {
+  reseed(31337);
+  const n = secs(0.16);
+  const knock = lowpass(noise(n), 0.11);
+  const ke = env(n, 0.0006, 0.022);
+  // 190 → 150 Hz over the clip: phase is integrated so the bend has no click.
+  let ph = 0;
+  const bend = Array.from({ length: n }, (_, i) => {
+    ph += (2 * Math.PI * (190 - 40 * (i / n))) / RATE;
+    return Math.sin(ph);
+  });
+  const be = env(n, 0.0008, 0.034);
+  return finish(mix(
+    knock.map((x, i) => x * ke[i]),
+    bend.map((x, i) => x * be[i] * 0.75),
+  ), 0.36);
+}
+
+/**
+ * A QUOTE SAVED — a small clasp closing.
+ *
+ * The saved-quote library is the one thing in the app the reader BUILDS, so
+ * saving needs to sound like an object going into a box, not like another tap.
+ * A bright snap over a short woody body: the catch, then the cover.
+ */
+function keep() {
+  reseed(5150);
+  const n = secs(0.13);
+  const snap = highpass(noise(n), 0.34);
+  const se = env(n, 0.0003, 0.008);
+  const wood = lowpass(noise(n), 0.14);
+  const we = env(n, 0.001, 0.030);
+  const tone = sine(n, 330);
+  return finish(mix(
+    snap.map((x, i) => x * se[i]),
+    wood.map((x, i) => x * we[i] * 0.8),
+    tone.map((x, i) => x * we[i] * 0.30),
+  ), 0.44);
+}
+
+/**
+ * THE XP COUNTING UP — three ticks, cycled, climbing D6 · F#6 · A6.
+ *
+ * The reward screen counts the number up over about a second, and a counter that
+ * makes no sound is a number changing while a counter that ticks is a number
+ * being AWARDED. Cycling three pitches upward means the run rises continuously
+ * instead of chattering on one note.
+ *
+ * The quietest clips in the set by a wide margin — around fifteen of them fire in
+ * a row, and anything with weight becomes a machine gun.
+ */
+const tick = (f) => {
+  const n = secs(0.028);
+  const e = env(n, 0.0003, 0.006);
+  return finish(sine(n, f).map((x, i) => x * e[i]), 0.20);
+};
+
+/**
+ * A BADGE EARNED — a low bell struck under a shimmer.
+ *
+ * The badge is drawn onto the reward screen as if pressed into the paper, so the
+ * sound is the press: a D an octave below the correct-answer note, with a slow
+ * bright wash over it for the light catching the face. Low and broad rather than
+ * bright and quick, so it sits UNDER the chime that is already playing rather
+ * than fighting it.
+ */
+function badge() {
+  reseed(24601);
+  const n = secs(1.30);
+  const strike = bell(n, 293.66, 0.42);
+  const fifth = at(0.055, bell(secs(1.24), 440.0, 0.30, 0.34));
+  const shine = highpass(lowpass(noise(n), 0.42), 0.10);
+  const se = Array.from({ length: n }, (_, i) => {
+    const u = i / n;
+    return Math.sin(Math.PI * Math.min(1, u * 1.35)) ** 2 * 0.16;
+  });
+  return finish(mix(strike, fifth, shine.map((x, i) => x * se[i])), 0.72);
+}
+
+/**
+ * A RANK-UP — the only fanfare in the app, and it is four notes.
+ *
+ * Rank-ups are rare (25 tiers over the whole curriculum) and they take the whole
+ * screen before the reward, so this is the one place a phrase is earned. D5 · F#5
+ * · A5 · D6 climbing, with the top note held and the D5 struck again beneath it
+ * so it resolves onto a chord rather than stopping.
+ *
+ * Still no percussion and still no brass. It is the same struck tone as
+ * everything else, just more of it — the app is a pen and paper, and it does not
+ * suddenly own a drum kit because you reached Dialectician.
+ */
+function rankup() {
+  const N = secs(1.85);
+  return finish(mix(
+    at(0.00, bell(secs(1.85), 587.33, 0.26, 0.85)),
+    at(0.11, bell(secs(1.74), 739.99, 0.26, 0.85)),
+    at(0.22, bell(secs(1.63), 880.00, 0.28, 0.90)),
+    at(0.34, bell(secs(1.51), 1174.66, 0.40, 1.00)),
+    at(0.34, bell(secs(1.51), 293.66, 0.55, 0.55)),
+  ).slice(0, N), 0.82);
+}
+
 const SET = {
   'step-a': step(0),
   'step-b': step(1),
   swish: swish(),
   tap: tap(),
   reward: reward(),
+
+  page: page(),
+  'right-1': right(587.33),
+  'right-2': right(739.99),
+  'right-3': right(880.00),
+  rethink: rethink(),
+  keep: keep(),
+  'tick-1': tick(1174.66),
+  'tick-2': tick(1479.98),
+  'tick-3': tick(1760.00),
+  badge: badge(),
+  rankup: rankup(),
 };
 
 fs.mkdirSync(OUT, { recursive: true });

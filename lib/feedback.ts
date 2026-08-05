@@ -24,27 +24,53 @@ import { useUserDataStore } from '@/stores/userDataStore';
 // reader CAUSED get a haptic.
 // ─────────────────────────────────────────────────────────────────────────────
 
-type Buzz = 'light' | 'success' | null;
+type Buzz = 'light' | 'medium' | 'success' | null;
 
 const HAPTIC: Record<Cue, Buzz> = {
-  step: null,     // ~2/sec while walking — a buzz here is a fault, not a texture
-  swish: null,    // ambient, not caused by the reader
+  // ── not caused by the reader, or far too frequent to be felt ───────────────
+  step: null,     // ~2.5/sec while walking — a buzz here is a fault, not a texture
+  swish: null,    // ambient
+  tick: null,     // fifteen in a row down the XP counter. Sound only.
+  // ── the reader did something ───────────────────────────────────────────────
   tap: 'light',   // they touched something; it answers
+  page: 'light',  // the beat advances under their thumb
+  keep: 'light',  // a quote goes into the library
+  // ── the reader was answered ────────────────────────────────────────────────
+  //
+  // A WRONG ANSWER GETS A SINGLE SOFT THUMP, NOT `Warning`. The warning pattern is
+  // two sharp pulses and it is the buzz a phone makes when you have done something
+  // it disapproves of. Picking the tempting answer in a philosophy lesson is not
+  // that — the explanation underneath is the point of the whole card, and the
+  // device should not editorialise before the reader has read it.
+  rethink: 'medium',
+  right: 'success',
   reward: 'success',
+  // The badge is PRESSED into the paper, so it gets an impact rather than a
+  // notification — and it usually lands while the reward chime's success buzz is
+  // still fading, which two successes in a row would smear into one long rumble.
+  badge: 'medium',
+  rankup: 'success',
 };
 
 /** Read once per call rather than subscribed: cues fire from animation frames. */
 const on = () => useUserDataStore.getState().settings.soundEffects !== false;
 
-export function cue(name: Cue) {
+/**
+ * `step` is passed straight through to the sound layer, which uses it for the two
+ * cues that have a ladder: how far up the triad a correct answer sounds, and where
+ * the XP counter is in its cycle. It never affects the haptic — a run of right
+ * answers should climb audibly, not buzz harder each time.
+ */
+export function cue(name: Cue, step = 0) {
   if (!on()) return;
-  sound.play(name);
+  sound.play(name, step);
   const buzz = HAPTIC[name];
   if (!buzz) return;
   // Fire-and-forget: haptics returns a promise that rejects on devices without a
   // motor, and an unhandled rejection from a decoration is not worth a crash.
   try {
     if (buzz === 'light') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    else if (buzz === 'medium') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     else void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   } catch {}
 }

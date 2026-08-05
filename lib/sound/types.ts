@@ -4,10 +4,19 @@
  * re-cut without touching the twenty places that tap.
  */
 export type Cue =
-  | 'step'    // a footfall — alternates between two samples at the call site
-  | 'swish'   // an arm through air
-  | 'tap'     // a fingertip on card: buttons, cards, advancing a beat
-  | 'reward'; // the chime at the end of a lesson
+  // ── the world: physical, unpitched ─────────────────────────────────────────
+  | 'step'     // a footfall — alternates between two samples inside the provider
+  | 'swish'    // an arm through air
+  | 'tap'      // a fingertip on card: buttons and list rows
+  | 'page'     // a leaf turning — advancing a cinematic beat
+  | 'rethink'  // a wooden knock: the answer was not that one
+  | 'keep'     // a clasp closing: a quote goes into the library
+  // ── what the reader earns: pitched, all of it in D ─────────────────────────
+  | 'right'    // a struck note; CLIMBS D→F#→A on a run (pass `step`)
+  | 'tick'     // the XP counter, cycling three rising pitches (pass `step`)
+  | 'reward'   // the chime at the end of a lesson
+  | 'badge'    // a low bell under a shimmer
+  | 'rankup';  // the only fanfare in the app
 
 export interface SoundProvider {
   /**
@@ -21,8 +30,15 @@ export interface SoundProvider {
   isSupported(): boolean;
   /** Load the clips. Safe to call repeatedly; only the first does work. */
   prepare(): Promise<void>;
-  /** Fire a cue. Never throws, never awaits — call sites are in animations. */
-  play(cue: Cue): void;
+  /**
+   * Fire a cue. Never throws, never awaits — call sites are in animations.
+   *
+   * `step` selects a variant for the two cues that have one: how far up the triad
+   * a correct answer sounds (a run of them climbs), and where the XP counter is
+   * in its cycle. Ignored by every other cue. It is a NUMBER, not a pitch or a
+   * filename, so the call site never has to know what the sound is made of.
+   */
+  play(cue: Cue, step?: number): void;
   /** Master gate, driven by the Settings toggle. */
   setEnabled(on: boolean): void;
   /** Release the players (leaving the app / lesson). */

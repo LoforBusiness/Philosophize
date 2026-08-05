@@ -36,7 +36,24 @@ const SOURCES = {
   swish: require('../../assets/sound/swish.wav'),
   tap: require('../../assets/sound/tap.wav'),
   reward: require('../../assets/sound/reward.wav'),
+  page: require('../../assets/sound/page.wav'),
+  // The correct-answer note, up the D triad. A run of right answers climbs it and
+  // then holds at the top — see `play`.
+  right1: require('../../assets/sound/right-1.wav'),
+  right2: require('../../assets/sound/right-2.wav'),
+  right3: require('../../assets/sound/right-3.wav'),
+  rethink: require('../../assets/sound/rethink.wav'),
+  keep: require('../../assets/sound/keep.wav'),
+  tick1: require('../../assets/sound/tick-1.wav'),
+  tick2: require('../../assets/sound/tick-2.wav'),
+  tick3: require('../../assets/sound/tick-3.wav'),
+  badge: require('../../assets/sound/badge.wav'),
+  rankup: require('../../assets/sound/rankup.wav'),
 } as const;
+
+/** The variant ladders. Indexed by the `step` argument; the last entry repeats. */
+const RIGHT = ['right1', 'right2', 'right3'] as const;
+const TICK = ['tick1', 'tick2', 'tick3'] as const;
 
 type Key = keyof typeof SOURCES;
 
@@ -53,8 +70,23 @@ let footToggle = 0;
  * past its attack — a buzz. Per-cue, because a footfall's natural rate is much
  * slower than a tap's.
  */
-const THROTTLE: Record<Cue, number> = { step: 90, swish: 120, tap: 40, reward: 400 };
+const THROTTLE: Record<Cue, number> = {
+  step: 90, swish: 120, tap: 40, page: 90, rethink: 200, keep: 150,
+  // 25ms, well under the counter's own cadence: the throttle is here to stop a
+  // runaway, not to thin the run. Thinning it would make the count stutter.
+  tick: 25,
+  right: 200, reward: 400, badge: 200, rankup: 800,
+};
 const lastAt: Partial<Record<Cue, number>> = {};
+
+/**
+ * Per-clip trim. The MIX is baked into the files — `finish(buf, peak)` in
+ * scripts/make-sounds.mjs is where a cue's loudness relative to the others is
+ * decided — so this only exists to lift the three that are meant to dominate the
+ * moment they play in. Everything else shares one level on purpose: a per-cue
+ * volume table is how a sound set drifts out of balance one nudge at a time.
+ */
+const LEVEL: Partial<Record<Key, number>> = { reward: 0.9, badge: 0.9, rankup: 0.95 };
 
 async function prepare() {
   if (ready) return;
@@ -71,9 +103,7 @@ async function prepare() {
   for (const k of Object.keys(SOURCES) as Key[]) {
     try {
       const p = createAudioPlayer(SOURCES[k]);
-      // Levels are baked into the files (see scripts/make-sounds.mjs), so this is
-      // the one place to trim a cue that turns out loud in situ.
-      p.volume = k === 'reward' ? 0.9 : 0.65;
+      p.volume = LEVEL[k] ?? 0.65;
       players[k] = p;
     } catch {
       // A single clip that will not decode leaves the rest working.
@@ -98,7 +128,7 @@ export const realSound: SoundProvider = {
   isSupported: () => true,
   prepare,
   setEnabled: (on) => { enabled = on; },
-  play: (cue: Cue) => {
+  play: (cue: Cue, step = 0) => {
     if (!enabled) return;
     const now = Date.now();
     if (now - (lastAt[cue] ?? 0) < THROTTLE[cue]) return;
@@ -109,6 +139,11 @@ export const realSound: SoundProvider = {
       fire(footToggle ? 'stepA' : 'stepB');
       return;
     }
+    // A run of correct answers CLIMBS and then holds at the top — clamped, so a
+    // ten-question lesson does not need ten notes.
+    if (cue === 'right') { fire(RIGHT[Math.min(Math.max(step | 0, 0), RIGHT.length - 1)]); return; }
+    // The counter CYCLES, so the rise is continuous however long the count runs.
+    if (cue === 'tick') { fire(TICK[(((step | 0) % TICK.length) + TICK.length) % TICK.length]); return; }
     fire(cue);
   },
   release: () => {

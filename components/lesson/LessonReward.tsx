@@ -6,7 +6,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import StreakBook from '@/components/gamification/StreakBook';
 import StreakWeek from '@/components/gamification/StreakWeek';
-import RankUpScreen from '@/components/gamification/RankUpScreen';
+import RankUpScreen, { T_BURST } from '@/components/gamification/RankUpScreen';
 import RewardLoafer, { pickLine } from '@/components/gamification/RewardLoafer';
 import BadgeEarned, { BadgeEarnedHeading } from '@/components/gamification/BadgeEarned';
 import { RANKS, rankForXP, type RankDef } from '@/data/ranks';
@@ -24,6 +24,7 @@ import {
 } from '@/constants/xp';
 import { track } from '@/lib/posthog';
 import { cue } from '@/lib/feedback';
+import { lessonHasSound } from '@/components/lesson/cinematic/lessonSound';
 import { refreshQuoteWidget } from '@/lib/widget/render';
 
 interface Props {
@@ -77,7 +78,27 @@ const XP_SIZE = 104;
 // has room to centre without touching its neighbour or the wipe's clip edge.
 const XP_CELL = Math.round(XP_SIZE * 0.54);
 
-function InkedNumber({ value, delay }: { value: number; delay: number }) {
+/**
+ * How many ticks the count-up makes, whatever it is counting.
+ *
+ * Not one per XP: a 60 XP lesson would fire sixty in a second. Not a fixed
+ * interval either, because the count eases out — the number slows down at the end
+ * and evenly-spaced ticks would keep hammering while it had stopped moving.
+ * Ticking every Nth UNIT ties the sound to the digits, so the run rattles as the
+ * number races and thins out as it settles, which is the count made audible
+ * rather than a metronome laid over it.
+ */
+const XP_TICKS = 14;
+
+/**
+ * How far into the rank-up fanfare its top note falls, in ms.
+ *
+ * Matches the `at(0.34, …)` on the D6 in scripts/make-sounds.mjs. The phrase is
+ * started this much before RankUpScreen's burst so the two coincide.
+ */
+const RANKUP_PEAK = 340;
+
+function InkedNumber({ value, delay, tick }: { value: number; delay: number; tick?: boolean }) {
   const [shown, setShown] = useState(0);
   const wipe = useSharedValue(0);
   const cells = Math.max(1, String(Math.max(0, value)).length);
@@ -88,11 +109,21 @@ function InkedNumber({ value, delay }: { value: number; delay: number }) {
     if (value <= 0) return;
     const DURATION = 980;
     const t0 = Date.now() + delay;
+    const stride = Math.max(1, Math.ceil(value / XP_TICKS));
+    let sounded = 0;   // the value the last tick was struck at
+    let step = 0;      // where we are in the three-note cycle
     const id = setInterval(() => {
       const t = Math.min(1, (Date.now() - t0) / DURATION);
       if (t < 0) return;
       const eased = 1 - Math.pow(1 - t, 3);
-      setShown(Math.round(eased * value));
+      const next = Math.round(eased * value);
+      setShown(next);
+      // The last tick fires on arrival even when the remainder is short of a
+      // stride, so the run always resolves on the final number.
+      if (tick && next > sounded && (next - sounded >= stride || t >= 1)) {
+        sounded = next;
+        cue('tick', step++);
+      }
       if (t >= 1) clearInterval(id);
     }, 16);
     return () => clearInterval(id);
@@ -157,6 +188,11 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   const isPro = useSubscriptionStore((s) => s.isPro);
   const openPaywall = useUIStore((s) => s.openPaywall);
   const markLessonFinished = useUIStore((s) => s.markLessonFinished);
+
+  // The XP ticks, the badge strike and the rank-up fanfare are all part of the
+  // one-lesson sound trial. The end-of-lesson chime below is not — it shipped
+  // already and plays for every lesson, cinematic or card.
+  const sounded = lessonHasSound(lessonId);
 
   const ran = useRef(false);
   const [info, setInfo] = useState<DayInfo | null>(null);
@@ -334,6 +370,32 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   // to ~2s, the one-line version is done immediately. A fixed delay would leave
   // dead air on the days the reader has already played.
   const badgeBase = info?.firstOfDay ? 2050 : 1450;
+  /** One expression for when badge k lands, so its sound cannot drift off its art. */
+  const badgeAt = (k: number) => badgeBase + 150 + k * 520;
+
+  // ── the sounds this screen makes ───────────────────────────────────────────
+  // Both of these are scheduled against the SAME constants that drive the
+  // animations they belong to — `badgeAt` above, and RankUpScreen's own exported
+  // T_BURST — rather than against numbers typed in to look about right. A reward
+  // sound that lands even 150ms off its picture reads as a glitch in the app.
+  //
+  // Everything here is behind the one-lesson trial gate. The chime in the effect
+  // above is not: that one already shipped.
+  useEffect(() => {
+    if (!sounded || phase !== 'reward' || badges.length === 0) return;
+    const ids = badges.map((_, k) => setTimeout(() => cue('badge'), badgeAt(k)));
+    return () => ids.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sounded, phase, badges, badgeBase]);
+
+  useEffect(() => {
+    if (!sounded || phase !== 'rankup') return;
+    // The fanfare CLIMBS: D5·F#5·A5·D6, reaching the top note 340ms in. Start it
+    // that much early and the top note lands on the burst as the ring closes,
+    // instead of the phrase beginning there and peaking into the aftermath.
+    const id = setTimeout(() => cue('rankup'), Math.max(0, T_BURST - RANKUP_PEAK));
+    return () => clearTimeout(id);
+  }, [sounded, phase]);
 
   // One frame of bare paper while the completion effect decides which screen this
   // is. Painting the reward first would flash XP behind a rank-up.
@@ -377,7 +439,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
 
           {/* the number, drawn on */}
           <View style={styles.xpBlock}>
-            <InkedNumber value={xp} delay={260} />
+            <InkedNumber value={xp} delay={260} tick={sounded} />
             <Text style={styles.xpLabel}>XP EARNED</Text>
           </View>
 

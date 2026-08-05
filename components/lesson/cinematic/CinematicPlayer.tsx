@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState, type ComponentType } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
-  useSharedValue, useFrameCallback, useAnimatedStyle, withTiming, Easing, type SharedValue,
+  useSharedValue, useFrameCallback, useAnimatedStyle, useAnimatedReaction, runOnJS,
+  withTiming, Easing, type SharedValue,
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import { getLessonById } from '@/data';
@@ -11,6 +12,9 @@ import { exitLesson } from '../exitLesson';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
+import { cue } from '@/lib/feedback';
+import { footfallTrack } from './footfalls';
+import { lessonHasSound } from './lessonSound';
 import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
   COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, INK,
@@ -42,7 +46,7 @@ export interface SceneApi {
 export type SceneComponent = ComponentType<SceneApi>;
 
 export default function CinematicPlayer({
-  lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B],
+  lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk,
 }: {
   lesson: Lesson;
   beats: BaseBeat[];
@@ -55,6 +59,18 @@ export default function CinematicPlayer({
    * Must contain every prop the scene draws, or the top/bottom will be clipped.
    */
   band?: [number, number];
+  /**
+   * The scene's per-beat x track for the walking figure — the same array the scene
+   * already builds to drive `travelStance`. Given it, the player sounds a footfall
+   * at each foot plant (see ./footfalls). Omit it and the lesson walks silently.
+   *
+   * OPT-IN PER LESSON rather than read off the beat, because `x` is a field each
+   * script declares in its OWN beat interface and nothing guarantees all 102 mean
+   * the same thing by it. A scene that hands over its x track is asserting that it
+   * drives a single figure through `travelStance` with the default seed — which is
+   * the only case these times are correct for.
+   */
+  walk?: number[];
 }) {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
@@ -74,10 +90,23 @@ export default function CinematicPlayer({
 
   const beat = beats[i];
 
+  // ── sound ──────────────────────────────────────────────────────────────────
+  // One flag for the whole lesson, read once (see ./lessonSound). `run` counts
+  // consecutive right answers so the note climbs the triad; it is a ref, not
+  // state, because it is only ever read at the instant a cue fires and a stale
+  // closure would sound the wrong note.
+  const sounded = lessonHasSound(lesson.id);
+  const run = useRef(0);
+  const plants = useMemo(() => (sounded && walk ? footfallTrack(walk) : []), [sounded, walk]);
+
   const clock = useSharedValue(0);
   const bt = useSharedValue(0);
   const bi = useSharedValue(0);
   const qv = useSharedValue(0);
+  // The foot-plant times for the walk into the current beat, and how many have
+  // already sounded. Numbers only — a JS closure cannot cross into a worklet (§17).
+  const plantAt = useSharedValue<number[]>([]);
+  const planted = useSharedValue(0);
   // Progress fills SMOOTHLY toward the next mark rather than jumping on each tap.
   const progress = useSharedValue((i + 1) / beats.length);
   const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: progress.value }] }));
@@ -90,6 +119,11 @@ export default function CinematicPlayer({
     bt.value = 0;
     bi.value = i;
     qv.value = 0;
+    // Re-arm the footfalls alongside the clock they are measured against, in the
+    // same statement that rewinds it — anything later would leave one frame in
+    // which the new beat's clock is being compared to the old beat's step times.
+    plantAt.value = plants[i] ?? [];
+    planted.value = 0;
   }
 
   useFrameCallback((f) => {
@@ -99,6 +133,29 @@ export default function CinematicPlayer({
     clock.value += dt;
     bt.value += dt;
   }, true);
+
+  // A FOOTFALL LANDS ON THE BEAT CLOCK, NOT THE WALL CLOCK. `bt` accumulates frame
+  // deltas, so if the device drops frames the figure walks slower — and a footstep
+  // scheduled by setTimeout would march on ahead of the feet. Comparing against the
+  // very value that positions them means the sound cannot get out of step.
+  //
+  // Costs one array-length comparison per frame in the 101 lessons that pass no
+  // walk track, because `plantAt` stays empty and this returns immediately.
+  const footfall = useCallback(() => cue('step'), []);
+  useAnimatedReaction(
+    () => bt.value,
+    (t) => {
+      const list = plantAt.value;
+      let k = planted.value;
+      if (k >= list.length) return;
+      while (k < list.length && t >= list[k]) k += 1;
+      if (k === planted.value) return;
+      planted.value = k;
+      // Once per frame however many plants elapsed: two thuds in one frame is a
+      // stumble, and dropping the extra is the honest repair for a long stall.
+      runOnJS(footfall)();
+    },
+  );
 
   // Drive the answer-progress value once a question on this beat is answered. It
   // ramps 0→1 linearly; each scene shapes it (gravity, settle, …) as it likes.
@@ -133,11 +190,14 @@ export default function CinematicPlayer({
 
   const advance = useCallback(() => {
     if (locked) return;
+    // No page turn on the last tap: that one ends the lesson and hands over to the
+    // reward chime, and a leaf turning under it would be a page to nowhere.
     if (last) { setDone(true); return; }
+    if (sounded) cue('page');
     setPicked(null);
     setPickedOk(false);
     setI((n) => n + 1);
-  }, [locked, last]);
+  }, [locked, last, sounded]);
 
   const choose = useCallback((id: string, isCorrect: boolean, graded: boolean) => {
     if (picked !== null) return;
@@ -147,7 +207,14 @@ export default function CinematicPlayer({
       setAsked((n) => n + 1);
       if (isCorrect) setCorrect((n) => n + 1);
     }
-  }, [picked]);
+    if (sounded) {
+      // The run counts EVERY answer, graded or not. An ungraded teaching tap still
+      // felt like getting it right, and a note that refuses to climb because the
+      // question was not worth XP is the app admitting which questions are real.
+      if (isCorrect) { cue('right', run.current); run.current += 1; }
+      else { run.current = 0; cue('rethink'); }
+    }
+  }, [picked, sounded]);
 
   const onStage = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -231,7 +298,10 @@ export default function CinematicPlayer({
                   <QuoteCard
                     q={beat.quote}
                     saved={quoteSaved}
-                    onToggle={() =>
+                    onToggle={() => {
+                      // The clasp only closes on the way IN. Taking a quote back
+                      // out is a plain tap; it is not an achievement.
+                      if (sounded) cue(quoteSaved ? 'tap' : 'keep');
                       toggleQuote({
                         id: beat.quote!.id,
                         text: beat.quote!.text,
@@ -239,8 +309,8 @@ export default function CinematicPlayer({
                         philosopherId: beat.quote!.philosopherId ?? '',
                         branchSlugs: beat.quote!.branchSlugs ?? [],
                         savedAt: Date.now(),
-                      })
-                    }
+                      });
+                    }}
                   />
                 ) : null}
 
