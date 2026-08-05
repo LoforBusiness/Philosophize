@@ -12,9 +12,21 @@
 // thing in the product that came from somewhere else. These are small, dry, close
 // sounds — paper, cloth, a pen tip, one soft chime.
 //
-// FORMAT: mono, 22.05 kHz, 16-bit PCM WAV. Uncompressed on purpose — it needs no
-// decoder, no dependency, and at these lengths the saving from m4a is a few tens
-// of kilobytes against a licensing and tooling story. A 60ms clip is 2.6 KB.
+// FORMAT: mono 16-bit PCM WAV, uncompressed on purpose — no decoder, no
+// dependency, and at these lengths the saving from m4a is a few tens of kilobytes
+// against a licensing and tooling story.
+//
+// SAMPLE RATE IS PER CLIP, AND THAT IS A CORRECTION.
+//
+// The whole set shipped at 22.05 kHz, which puts the Nyquist limit at 11 kHz. For
+// a bell that is irrelevant — its highest partial is under 3.5 kHz. For anything
+// with a TRANSIENT it is most of the character: the snap of a leather heel, the
+// edge of a fingertip on a surface, the tick of a counter all live between 4 and
+// 10 kHz, and everything above 11 was simply gone. That is a large part of why the
+// first set sounded cheap — not the shapes, the ceiling.
+//
+// So the percussive clips are 44.1 kHz and the pitched ones stay at 22.05, which
+// buys the crispness exactly where it exists and pays for it nowhere else.
 //
 //   node scripts/make-sounds.mjs
 // ─────────────────────────────────────────────────────────────────────────────
@@ -24,7 +36,18 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'assets', 'sound');
-const RATE = 22050;
+
+const HI = 44100;   // anything with a transient
+const LO = 22050;   // struck tones, whose partials are all well under 11 kHz
+
+// Mutable so the helpers below (which read it at call time) follow whichever clip
+// is being rendered. `atRate` is the only thing that may change it.
+let RATE = LO;
+const atRate = (rate, make) => {
+  const prev = RATE;
+  RATE = rate;
+  try { return { rate, data: make() }; } finally { RATE = prev; }
+};
 
 // A fixed generator, so re-running produces identical files. Math.random() would
 // make every rebuild a different sound and every diff a mystery.
@@ -49,6 +72,35 @@ function highpass(buf, c) {
 }
 
 const noise = (n) => Array.from({ length: n }, () => rnd());
+
+/**
+ * A RESONANT BANDPASS, which is the thing the first set was missing.
+ *
+ * A one-pole low pass only makes noise duller; it cannot make it sound like a
+ * MATERIAL. What tells an ear "leather on a hard floor" rather than "a filtered
+ * hiss" is a resonance — a frequency the object rings at, sharply. This is the
+ * standard RBJ biquad, and its `q` is the whole difference between a shoe and a
+ * shush.
+ */
+function bandpass(buf, f, q) {
+  const w = (2 * Math.PI * f) / RATE;
+  const alpha = Math.sin(w) / (2 * q);
+  const cosw = Math.cos(w);
+  const b0 = alpha, b1 = 0, b2 = -alpha;
+  const a0 = 1 + alpha, a1 = -2 * cosw, a2 = 1 - alpha;
+  let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+  return buf.map((x) => {
+    const y = (b0 / a0) * x + (b1 / a0) * x1 + (b2 / a0) * x2 - (a1 / a0) * y1 - (a2 / a0) * y2;
+    x2 = x1; x1 = x; y2 = y1; y1 = y;
+    return y;
+  });
+}
+
+/** A struck resonance: a decaying sine, the cheapest honest model of a ringing body. */
+const ring = (n, f, decay, g = 1) => {
+  const e = env(n, 0.0004, decay);
+  return sine(n, f).map((x, i) => x * e[i] * g);
+};
 
 /** Exponential decay from 1 to ~0 over the clip, with a short fade-in. */
 function env(n, attack, decay) {
@@ -100,7 +152,7 @@ function finish(buf, peak = 0.72) {
   });
 }
 
-function wav(samples) {
+function wav(samples, RATE) {
   const n = samples.length;
   const b = Buffer.alloc(44 + n * 2);
   b.write('RIFF', 0);
@@ -128,22 +180,56 @@ const secs = (s) => Math.round(s * RATE);
 // ── the set ──────────────────────────────────────────────────────────────────
 
 /**
- * A FOOTFALL — a shoe on boards, close and dry.
+ * A DRESS SHOE ON A HARD FLOOR — a leather heel, not a soft thud.
  *
- * Low-passed noise with a very fast decay, plus a thud an octave below to give it
- * a body. Two variants, alternated at the call site: one sample repeated at
- * walking cadence turns into a typewriter within three steps, and the ear catches
- * the repetition long before it notices the sound.
+ * The old footfall was low-passed noise plus a sine an octave down: correct as a
+ * description of a weight landing, and completely wrong as a description of a
+ * SHOE. It had nothing above 11 kHz because the whole set was 22.05, and nothing
+ * resonant anywhere, so it read as a dull bump. A leather sole is the opposite of
+ * dull — it is mostly edge.
+ *
+ * Four layers, in the order the ear reads them:
+ *
+ *   1. THE HEEL. A very short burst of high-passed noise, 3ms of decay. This is
+ *      the click of a hard heel meeting a hard floor and it is what makes the shoe
+ *      a dress shoe rather than a trainer. It needs the 44.1 kHz ceiling to exist
+ *      at all — most of it sits between 4 and 9 kHz.
+ *   2. THE SOLE. Noise through a resonant bandpass at 1.9/2.2 kHz, Q 2.4, decaying
+ *      in 14ms. The resonance is what says "leather" instead of "hiss".
+ *   3. THE FLOOR. A struck tone at 205/232 Hz answering underneath, 40ms.
+ *   4. THE ROOM. A whisper of low noise out to 90ms, so the step happens somewhere
+ *      rather than in a vacuum. Very quiet — at 0.10 it is felt, not heard.
+ *
+ * Two variants alternated at the call site: one sample repeated at walking cadence
+ * becomes a typewriter within three steps, and the ear catches the repetition long
+ * before it notices the sound. The right shoe is a shade brighter and higher than
+ * the left, which is what a real pair does.
  */
 function step(variant) {
   reseed(1013 + variant * 7717);
-  const n = secs(0.075);
-  const body = gain(lowpass(noise(n), 0.16), 1);
-  const thud = gain(sine(n, variant ? 96 : 84), 0.55);
+  const n = secs(0.11);
+  // The heel band starts at ~2.4 kHz rather than ~3.8: the crack of a hard heel is
+  // spread across 2–8 kHz, and cutting at 3.8 threw away the loudest half of it.
+  const heelN = secs(0.020);
+  const heel = highpass(noise(heelN), 0.30);
+  const heelE = env(heelN, 0.0002, 0.0055);
+  const soleF = variant ? 2200 : 1900;
+  const sole = bandpass(noise(n), soleF, 2.4);
+  const soleE = env(n, 0.0003, 0.014);
+  const floorHz = variant ? 232 : 205;
+  const room = lowpass(noise(n), 0.08);
+  const roomE = env(n, 0.002, 0.030);
+  // The BALANCE is the whole thing, and the first attempt had it backwards. With
+  // the floor ring at 0.45 over 40ms against a heel of 0.95 over 3, the low body
+  // carried almost all the energy and only 0.3% of the clip sat above 4 kHz — a
+  // thud with a hint of shoe. A dress shoe is the other way round: the crack leads
+  // and the floor answers underneath it.
   return finish(mix(
-    body.map((x, i) => x * env(n, 0.0008, 0.020)[i]),
-    thud.map((x, i) => x * env(n, 0.0005, 0.014)[i]),
-  ), 0.55);
+    heel.map((x, i) => x * heelE[i] * 1.40),
+    sole.map((x, i) => x * soleE[i] * 0.85),
+    ring(n, floorHz, 0.032, 0.24),
+    room.map((x, i) => x * roomE[i] * 0.07),
+  ), 0.50);
 }
 
 /**
@@ -165,18 +251,38 @@ function swish() {
 }
 
 /**
- * A TAP — a fingertip on card.
+ * A TAP — the one the reader hears most, and the one that was worst.
  *
- * Almost all attack: 40ms, high-passed so it sits above the narration rather than
- * under it, with a barely-there pitched click so it reads as an object being
- * touched rather than as static.
+ * It was 45ms of high-passed noise with a 1900 Hz sine through it: a CLICK, and a
+ * thin one. High-passed noise with nothing under it is the sound of static, not of
+ * touching something, and it fires on every button in the app.
+ *
+ * What reads as expensive in a UI sound is not brightness, it is BODY and
+ * SHORTNESS: a small warm resonance that decays before you can think about it, no
+ * harsh edge, and nothing left ringing. So this is a soft mallet on a solid thing —
+ * a warm fundamental at 620 Hz with its fifth above, both damped in 35ms, a low
+ * partial underneath for weight, and a whisper of LOW-passed noise on the attack
+ * for texture. Nothing high-passed anywhere, so there is no hiss in it.
+ *
+ * The attack is 1.2ms rather than instantaneous. That single number is most of the
+ * difference between "tick" and "tok": an instant onset is a click, a slightly
+ * softened one is a thing being touched.
  */
 function tap() {
   reseed(90210);
-  const n = secs(0.045);
-  const click = highpass(noise(n), 0.22);
-  const tick = gain(sine(n, 1900), 0.22);
-  return finish(mix(click, tick).map((x, i) => x * env(n, 0.0004, 0.010)[i]), 0.42);
+  const n = secs(0.075);
+  const puff = lowpass(noise(n), 0.34);
+  const puffE = env(n, 0.0006, 0.004);
+  const e = env(n, 0.0012, 0.035);
+  const warm = mix(
+    sine(n, 620),
+    gain(sine(n, 930), 0.34),      // the fifth — a chord, not a beep
+    gain(sine(n, 310), 0.22),      // an octave below for weight
+  );
+  return finish(mix(
+    warm.map((x, i) => x * e[i]),
+    puff.map((x, i) => x * puffE[i] * 0.30),
+  ), 0.34);
 }
 
 /**
@@ -296,7 +402,18 @@ function page() {
  * native playback-rate flag I cannot hear the result of. Three 24 KB files is the
  * cheaper certainty.
  */
-const right = (f) => finish(bell(secs(0.55), f, 0.20), 0.62);
+function right(f) {
+  const n = secs(0.66);
+  // TWO notes, not one. A single struck note is a notification; the fifth arriving
+  // 55ms behind it is a small chord opening, and that is what reads as a reward.
+  // The pair moves up the triad together on a run, so the interval is constant and
+  // only the pitch climbs — the answer always sounds like the same kind of good.
+  return finish(mix(
+    bell(n, f, 0.19, 1.0),
+    at(0.055, bell(secs(0.60), f * 1.5, 0.17, 0.62)),
+    at(0.055, bell(secs(0.60), f * 3, 0.10, 0.10)),   // a little air on top
+  ).slice(0, n), 0.62);
+}
 
 /**
  * A WRONG ANSWER — a wooden knock that bends down, and NOTHING ELSE.
@@ -312,20 +429,28 @@ const right = (f) => finish(bell(secs(0.55), f, 0.20), 0.62);
  */
 function rethink() {
   reseed(31337);
-  const n = secs(0.16);
-  const knock = lowpass(noise(n), 0.11);
-  const ke = env(n, 0.0006, 0.022);
-  // 190 → 150 Hz over the clip: phase is integrated so the bend has no click.
-  let ph = 0;
-  const bend = Array.from({ length: n }, (_, i) => {
-    ph += (2 * Math.PI * (190 - 40 * (i / n))) / RATE;
-    return Math.sin(ph);
-  });
-  const be = env(n, 0.0008, 0.034);
+  const n = secs(0.30);
+  // A MUTED WOODEN BODY, and no pitch bend.
+  //
+  // The bend was the cheap part of the old one — a sine sliding 190 → 150 Hz is
+  // the sound of a cartoon losing, and it undercut the whole point of not
+  // punishing a wrong answer. Gone.
+  //
+  // What replaces it is a thing being struck and immediately damped: a low
+  // resonance at 168 Hz with a second at 251 (a fifth, so it has a body rather
+  // than a hum), both dying in 55ms, over a soft bandpassed knock at 420 Hz. The
+  // ear hears wood with a hand on it — a definite event, clearly not the bell, and
+  // carrying no verdict about the person who caused it.
+  const knock = bandpass(noise(n), 420, 1.6);
+  const ke = env(n, 0.0010, 0.020);
+  const dust = lowpass(noise(n), 0.05);
+  const de = env(n, 0.004, 0.070);
   return finish(mix(
-    knock.map((x, i) => x * ke[i]),
-    bend.map((x, i) => x * be[i] * 0.75),
-  ), 0.36);
+    ring(n, 168, 0.055, 1.0),
+    ring(n, 251, 0.040, 0.34),
+    knock.map((x, i) => x * ke[i] * 0.55),
+    dust.map((x, i) => x * de[i] * 0.12),
+  ), 0.38);
 }
 
 /**
@@ -473,38 +598,42 @@ function impact() {
   ), 0.66);
 }
 
+// HI for anything with a transient in it — a heel, a fingertip, a page edge, a
+// counter tick. LO for the struck tones, whose highest partial is a third of the
+// way to that ceiling and which gain nothing from the extra bytes.
 const SET = {
-  'step-a': step(0),
-  'step-b': step(1),
-  settle: settle(),
-  impact: impact(),
-  swish: swish(),
-  tap: tap(),
-  reward: reward(),
+  'step-a': atRate(HI, () => step(0)),
+  'step-b': atRate(HI, () => step(1)),
+  settle: atRate(HI, settle),
+  impact: atRate(HI, impact),
+  swish: atRate(HI, swish),
+  tap: atRate(HI, tap),
+  page: atRate(HI, page),
+  rethink: atRate(HI, rethink),
+  keep: atRate(HI, keep),
+  'tick-1': atRate(HI, () => tick(1174.66)),
+  'tick-2': atRate(HI, () => tick(1479.98)),
+  'tick-3': atRate(HI, () => tick(1760.00)),
 
-  page: page(),
-  'right-1': right(587.33),
-  'right-2': right(739.99),
-  'right-3': right(880.00),
-  rethink: rethink(),
-  keep: keep(),
-  'tick-1': tick(1174.66),
-  'tick-2': tick(1479.98),
-  'tick-3': tick(1760.00),
-  badge: badge(),
-  rankup: rankup(),
+  reward: atRate(LO, reward),
+  'right-1': atRate(LO, () => right(587.33)),
+  'right-2': atRate(LO, () => right(739.99)),
+  'right-3': atRate(LO, () => right(880.00)),
+  badge: atRate(LO, badge),
+  rankup: atRate(LO, rankup),
 };
 
 fs.mkdirSync(OUT, { recursive: true });
 let total = 0;
 console.log('generated — no licence, no attribution, no provenance to track\n');
-for (const [name, samples] of Object.entries(SET)) {
-  const buf = wav(samples);
+for (const [name, { rate, data }] of Object.entries(SET)) {
+  const buf = wav(data, rate);
   fs.writeFileSync(path.join(OUT, `${name}.wav`), buf);
   total += buf.length;
-  const peak = Math.max(...samples.map(Math.abs));
+  const peak = Math.max(...data.map(Math.abs));
   console.log(
-    `  ${name.padEnd(8)} ${String((samples.length / RATE * 1000).toFixed(0)).padStart(5)}ms  ` +
+    `  ${name.padEnd(8)} ${String((data.length / rate * 1000).toFixed(0)).padStart(5)}ms  ` +
+    `${String((rate / 1000).toFixed(1)).padStart(5)}kHz  ` +
     `${String((buf.length / 1024).toFixed(1)).padStart(6)} KB  peak ${peak.toFixed(2)}`,
   );
 }

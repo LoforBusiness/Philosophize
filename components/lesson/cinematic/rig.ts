@@ -1412,8 +1412,18 @@ export function travelStance(
  * as "the stickman walks over way too fast". The feet never skated — the gait is
  * distance-driven — so it wasn't a stride problem. It was a TIME problem: the same
  * number of steps, played in a third of the time they need.
+ *
+ * 74 → 56, because the walk was still hurried once it could be HEARD. Cadence is
+ * this number divided by half a stride, so 74 put him at roughly 2.5 footfalls a
+ * second at speed — a brisk clip that reads as fine in silence and as scurrying
+ * the moment there is a shoe on it. 56 lands near 1.9, which is an ordinary
+ * unhurried human walk, and it is what the dress-shoe footfall was cut for.
+ *
+ * Changing it changes only the TIME a walk takes, never the stride: `moveTr`
+ * stretches to suit, the gait is driven by distance, and the same journey takes
+ * the same number of steps. Nothing about the pose moves.
  */
-export const WALK_SPEED = 74;
+export const WALK_SPEED = 56;
 
 /**
  * How long this beat's transition should take.

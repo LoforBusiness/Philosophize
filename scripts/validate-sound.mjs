@@ -86,7 +86,9 @@ for (const f of files) {
   };
   const problems = [];
   if (w.tag !== 'RIFFWAVE') problems.push('not a RIFF/WAVE');
-  if (w.fmt !== 1 || w.ch !== 1 || w.rate !== 22050 || w.bits !== 16) {
+  // Two rates are legitimate now — 44.1k where a transient needs the headroom,
+  // 22.05k for the struck tones. Anything else is a mistake.
+  if (w.fmt !== 1 || w.ch !== 1 || (w.rate !== 22050 && w.rate !== 44100) || w.bits !== 16) {
     problems.push(`format ${w.ch}ch ${w.rate}/${w.bits} fmt${w.fmt}`);
   }
   if (44 + w.bytes !== w.size) problems.push('declared length ≠ file length');
@@ -101,7 +103,7 @@ for (const f of files) {
 
   ok(name.padEnd(8), problems.length === 0,
     problems.length ? problems.join(' · ')
-      : `${String((w.n / 22050 * 1000).toFixed(0)).padStart(4)}ms  peak ${peak.toFixed(2)}`);
+      : `${String((w.n / w.rate * 1000).toFixed(0)).padStart(4)}ms  ${(w.rate / 1000).toFixed(1)}kHz  peak ${peak.toFixed(2)}`);
 }
 // Counted against what the player asks for rather than against a number typed in
 // here, which would go stale on the next clip added and quietly stop checking.
@@ -123,10 +125,13 @@ const N = { D4: 293.66, D5: 587.33, Fs5: 739.99, A5: 880.0, D6: 1174.66, Fs6: 14
 // broadband energy everywhere, including there".
 const OFF = (f) => f * Math.SQRT2;
 
+// Uses the CLIP'S OWN rate. The ticks moved to 44.1 kHz and this defaulted to
+// 22.05, which would have hunted for every note an octave out and quietly reported
+// that a pure D6 sine was not a D6.
 function hasNote(clip, f, ratio = 20) {
-  const x = clips[clip].x;
-  const p = power(x, f);
-  const q = power(x, OFF(f));
+  const { x, rate } = clips[clip];
+  const p = power(x, f, rate);
+  const q = power(x, OFF(f), rate);
   return { pass: p > q * ratio, ratio: q > 0 ? p / q : Infinity };
 }
 for (const [clip, note, label] of [
@@ -144,8 +149,10 @@ for (const [note, label] of [[N.D5, 'D5'], [N.Fs5, 'F#5'], [N.A5, 'A5'], [N.D6, 
 
 // The triads must actually CLIMB — three files that all sound the same note is
 // the exact way this feature fails silently.
-const dominant = (clip, cands) =>
-  cands.reduce((best, f) => (power(clips[clip].x, f) > power(clips[clip].x, best) ? f : best), cands[0]);
+const dominant = (clip, cands) => {
+  const { x, rate } = clips[clip];
+  return cands.reduce((best, f) => (power(x, f, rate) > power(x, best, rate) ? f : best), cands[0]);
+};
 const tri = [N.D5, N.Fs5, N.A5];
 const triHi = [N.D6, N.Fs6, N.A6];
 const rightRun = ['right-1', 'right-2', 'right-3'].map((c) => dominant(c, tri));
@@ -173,6 +180,64 @@ ok('a wrong answer is quieter than a right one', pk('rethink') < pk('right-1'),
   `${pk('rethink').toFixed(2)} vs ${pk('right-1').toFixed(2)}`);
 ok('the three footfall-adjacent world sounds stay under the notes',
   Math.max(pk('step-a'), pk('step-b'), pk('swish')) < pk('right-1'));
+
+// ── 3a2. THE CLIPS SOUND LIKE THE MATERIAL THEY CLAIM TO BE ──────────────────
+//
+// "Sounds cheap" is not measurable, but two of its causes are, and both were
+// present in the first set.
+//
+// A LEATHER HEEL is mostly edge — its character lives between 4 and 9 kHz. The
+// original footfall was low-passed noise in a 22.05 kHz file, so it had nothing up
+// there at all and could only ever read as a dull bump.
+//
+// A PREMIUM UI TAP is the opposite: warm body, no hiss. The original was
+// high-passed noise, which is the spectrum of static.
+//
+// So each is checked for the top-end content its material implies, and the two
+// must come out on OPPOSITE sides of the same measurement.
+head('the materials measure like their materials');
+
+// MEASURED OVER THE ATTACK, not the whole clip. A heel click lasts a few
+// milliseconds and the floor answering it rings for forty, so averaging across the
+// file reports the floor and says nothing about the shoe. The first 20ms is where
+// an ear decides what a percussive sound is made of.
+const ATTACK = 0.020;
+
+function bandEnergy(clip, lo, hi) {
+  const { x, rate } = clips[clip];
+  const to = Math.min(x.length, Math.round(ATTACK * rate));
+  let sum = 0;
+  const N = 24;
+  for (let k = 0; k < N; k++) {
+    const f = lo * Math.pow(hi / lo, k / (N - 1));
+    if (f >= rate / 2) break;
+    sum += Math.abs(power(x, f, rate, 0, to));
+  }
+  return sum;
+}
+function brightness(clip) {
+  const low = bandEnergy(clip, 200, 3500);
+  const high = bandEnergy(clip, 4000, 10000);
+  return high / (low + high || 1);
+}
+
+const shoe = brightness('step-a');
+const tapB = brightness('tap');
+ok('a dress-shoe heel has real top end', shoe > 0.08,
+  `${(shoe * 100).toFixed(1)}% of its energy is above 4 kHz — the leather on the floor`);
+ok('the tap is warm, not hissy', tapB < 0.05,
+  `${(tapB * 100).toFixed(1)}% above 4 kHz — body rather than static`);
+ok('and they sit on opposite sides of that line', shoe > tapB * 3,
+  `shoe ${(shoe * 100).toFixed(1)}% vs tap ${(tapB * 100).toFixed(1)}%`);
+
+// The top end can only exist if the file has room for it. A 22.05 kHz clip is
+// capped at 11 kHz, which is where the whole set used to be.
+const percussive = ['step-a', 'step-b', 'tap', 'page', 'keep', 'settle', 'tick-1', 'rethink', 'impact'];
+ok('every clip with a transient is 44.1 kHz',
+  percussive.every((c) => clips[c].rate === 44100),
+  percussive.filter((c) => clips[c].rate !== 44100).join(', ') || `${percussive.length} clips`);
+ok('the struck tones stay at 22.05 kHz', ['reward', 'rankup', 'badge', 'right-1'].every((c) => clips[c].rate === 22050),
+  'their highest partial is a third of the way to that ceiling — the bytes would buy nothing');
 
 // ── 3b. THE APP CAN ACTUALLY BE HEARD ────────────────────────────────────────
 //

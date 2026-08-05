@@ -7,13 +7,11 @@ import Animated, {
   useFrameCallback,
   useDerivedValue,
   useAnimatedProps,
-  useAnimatedReaction,
   runOnJS,
   type SharedValue,
 } from 'react-native-reanimated';
 import { useFocusEffect } from 'expo-router';
 import { useUIStore } from '@/stores/uiStore';
-import { cue } from '@/lib/feedback';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A small ink figure who crosses the empty band under the home-screen actions.
@@ -466,41 +464,21 @@ export default function StickmanStroll({ style }: Props) {
     };
   });
 
-  // ── HE CAN BE HEARD ────────────────────────────────────────────────────────
+  // ── HE IS SILENT, AND THAT IS THE POINT ────────────────────────────────────
   //
-  // A footfall is not a timer: he pauses, has a look around, waves, and walks on,
-  // so a step every 500ms would carry on clopping while he stood still. `dist` is
-  // the distance actually walked and the phase is derived from it, so half a
-  // stride IS one foot landing — count those and the sound follows the legs
-  // through every pause for free.
+  // This figure used to make a footfall every half stride and a swish on the wave,
+  // solved off `dist` so the sound followed his legs through every pause. The
+  // mechanism was right and the decision was wrong.
   //
-  // Guarded on `alpha` and `stand`: he fades in and out at the edges of the
-  // screen, and a step heard from an invisible figure is a ghost.
-  const lastStep = useSharedValue(-1);
-  const lastSwish = useSharedValue(0);
-  useAnimatedReaction(
-    () => {
-      const a = SIM.value.a;
-      const half = GAITS[a.gait].S / 2;
-      return {
-        step: a.alpha > 0.35 && a.stand < 0.5 ? Math.floor(a.dist / half) : -1,
-        arm: a.armMix,
-      };
-    },
-    (now) => {
-      if (now.step !== lastStep.value) {
-        const first = lastStep.value < 0;
-        lastStep.value = now.step;
-        // Not on the first reading: that one only says where he already was.
-        if (!first && now.step >= 0) runOnJS(cue)('step');
-      }
-      // One swish as the arm comes UP, not one per rock of the wave — the
-      // forearm oscillates at 2.8Hz and that would be a hiss, not a gesture.
-      if (now.arm > 0.4 && lastSwish.value <= 0.4) runOnJS(cue)('swish');
-      lastSwish.value = now.arm;
-    },
-    [],
-  );
+  // He is AMBIENT. He crosses the bottom of Home on his own, unprompted, for as
+  // long as the screen is open — nobody asked him to walk and nobody is watching
+  // him do it. Sound in this app answers something: a tap, an answer, a lesson
+  // ending, a figure the reader is deliberately watching perform a lesson. A
+  // decoration that clops away underneath the home screen while you decide what to
+  // read is not feedback, it is a room you cannot leave.
+  //
+  // The footfalls in the cinematic lessons stay, because there the walking figure
+  // IS the thing on screen and the reader is watching it. Do not restore this.
 
   const DA = useDerivedValue<Bundle>(() => (w.value > 0 ? figure(SIM.value.a) : BLANK));
   const DB = useDerivedValue<Bundle>(() =>
