@@ -19,9 +19,24 @@ import type { Cue, SoundProvider } from './types';
 //    for "sound effects, UI feedback, or short audio clips", and on Android it
 //    means no focus request at all.
 //
-// 2. `playsInSilentMode: false`. A phone on silent stays silent. These are
-//    decorative, and decoration does not get to override the switch on the side
-//    of the device.
+// 2. `playsInSilentMode: TRUE`, and the false version of this shipped and made the
+//    whole feature silent for a real reader on a real phone.
+//
+//    The reasoning behind `false` was "a phone on silent stays silent; decoration
+//    does not override the switch on the side of the device." That is an iOS mental
+//    model and it is wrong here. expo-audio's own docs are explicit: "On Android,
+//    when false, playback is suppressed when the ringer mode is silent OR VIBRATE."
+//
+//    Vibrate is not a request for silence on Android — it is where an enormous
+//    number of phones simply live, all day. Ringer mode governs ringtones and
+//    notifications; the media stream is separate, which is why YouTube and Spotify
+//    play perfectly well on a phone set to vibrate. Opting into `false` extended
+//    ringtone suppression to media and made every cue in the app inaudible for
+//    anyone whose phone was not actively ringing. The symptom was exact and
+//    complete: haptics fired, nothing was heard.
+//
+//    The reader already has the control this was trying to give them, and it is a
+//    better one — the media volume slider, plus a Sound toggle in Settings.
 //
 // 3. PLAYERS ARE MADE ONCE AND REWOUND, not created per hit. `createAudioPlayer`
 //    decodes the file; doing that on every footfall would allocate a player twice
@@ -96,7 +111,7 @@ async function prepare() {
   ready = true;
   try {
     await setAudioModeAsync({
-      playsInSilentMode: false,
+      playsInSilentMode: true,
       interruptionMode: 'mixWithOthers',
       shouldPlayInBackground: false,
     });

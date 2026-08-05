@@ -180,26 +180,47 @@ function tap() {
 }
 
 /**
- * THE REWARD — one warm chime, not a fanfare.
+ * THE LESSON IS FINISHED — a three-step lift that RESOLVES onto a chord.
  *
- * Two notes a fifth apart (D5, A5) with the second entering a beat later, on soft
- * exponential decays with a little of the octave above for shine. It is the
- * loudest thing in the set and still under 0.8 peak: this plays at the end of
- * every lesson, so a triumphant sound would wear out in a week.
+ * This replaces a version that was two notes a fifth apart and described itself as
+ * "one warm chime, not a fanfare". The restraint was aimed at the wrong risk. The
+ * thing that plays at the end of every lesson does have to survive repetition, but
+ * it also has to READ AS AN ENDING, and two notes fading out is an ellipsis rather
+ * than a full stop. Nothing about it said "done".
+ *
+ * What makes an ending is resolution, not volume. A4 lifts to D5 lifts to the
+ * chord — F#5 and A5 arriving together over a D5 that is still sounding — so the
+ * phrase climbs and then LANDS on the tonic triad instead of trailing off. The
+ * whole statement is over inside 600ms, which is deliberate: the XP counter starts
+ * ticking after it, and a finishing sound still going while the number counts is
+ * two events on top of each other instead of one following the other.
+ *
+ * Kept distinct from the rank-up, which is the other pitched flourish and must not
+ * be confused with it: that one climbs FOUR notes to a high D and holds for 1.85s.
+ * This one is a third as long, resolves downward into its chord rather than
+ * reaching above it, and never touches D6 except as a trace of shine.
  */
 function reward() {
-  const n = secs(1.15);
-  const note = (f, delay, g) => {
+  const n = secs(1.10);
+  const note = (f, delay, g, decay = 0.34) => {
     const d = secs(delay);
-    const e = env(n - d, 0.004, 0.34);
+    const len = n - d;
+    const e = env(len, 0.004, decay);
     const body = mix(
-      sine(n - d, f),
-      gain(sine(n - d, f * 2), 0.28),
-      gain(sine(n - d, f * 3.01), 0.08),
+      sine(len, f),
+      gain(sine(len, f * 2), 0.28),
+      gain(sine(len, f * 3.01), 0.08),
     );
     return [...new Array(d).fill(0), ...body.map((x, i) => x * e[i] * g)];
   };
-  return finish(mix(note(587.33, 0, 1), note(880.0, 0.13, 0.8)), 0.78);
+  return finish(mix(
+    note(440.00, 0.000, 0.55, 0.13),   // A4 — the step off
+    note(587.33, 0.085, 0.75, 0.16),   // D5 — the step up
+    note(587.33, 0.180, 0.95, 0.40),   // D5 again, this time to hold under the chord
+    note(739.99, 0.180, 0.70, 0.36),   // F#5 ┐ the third and fifth land together:
+    note(880.00, 0.180, 0.62, 0.36),   // A5  ┘ this is the moment it reads as an end
+    note(1174.66, 0.195, 0.16, 0.24),  // a trace of D6 for shine, not a fourth step
+  ), 0.78);
 }
 
 // ── the second set: the app gets a voice for the things it rewards ───────────

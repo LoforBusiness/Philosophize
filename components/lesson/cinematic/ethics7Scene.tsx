@@ -357,5 +357,10 @@ const styles = StyleSheet.create({
 // the player so it can sound a footfall on each foot plant. One figure, default
 // seed — which is the case ./footfalls solves for.
 export function Ethics7Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics7Scene} band={[49, 512]} walk={X} />;
+  return (
+    <CinematicPlayer
+      lesson={lesson} beats={BEATS} Scene={Ethics7Scene} band={[49, 512]}
+      walk={X} gesture={P}
+    />
+  );
 }

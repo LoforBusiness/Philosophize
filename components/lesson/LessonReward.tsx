@@ -98,6 +98,16 @@ const XP_TICKS = 14;
  */
 const RANKUP_PEAK = 340;
 
+/**
+ * When the XP number starts counting, in ms after the screen appears.
+ *
+ * Set by the SOUND, which is the unusual direction but the right one here: the
+ * completion phrase in scripts/make-sounds.mjs lifts A4 → D5 → the D-major chord
+ * and has said everything it has to say by 600ms. The counter comes in just after
+ * that, so the reader hears an ending and then a tally rather than both at once.
+ */
+const XP_AFTER_CHIME = 620;
+
 function InkedNumber({ value, delay, tick }: { value: number; delay: number; tick?: boolean }) {
   const [shown, setShown] = useState(0);
   const wipe = useSharedValue(0);
@@ -439,7 +449,16 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
 
           {/* the number, drawn on */}
           <View style={styles.xpBlock}>
-            <InkedNumber value={xp} delay={260} tick={sounded} />
+            {/* 620ms, not 260. THE FINISHING SOUND GETS TO FINISH FIRST.
+                The completion phrase lifts and lands inside about 600ms, and the
+                XP counter's ticks are supposed to follow it, not play over the top
+                of it — an ending and a tally arriving together are two things
+                happening at once instead of one thing after another. The 360ms it
+                costs the number is not dead air either: the eyebrow and its rule
+                are already on screen, so it reads as a beat of anticipation before
+                the score, which is what the pause is for on every reward screen
+                that has ever felt good. */}
+            <InkedNumber value={xp} delay={XP_AFTER_CHIME} tick={sounded} />
             <Text style={styles.xpLabel}>XP EARNED</Text>
           </View>
 

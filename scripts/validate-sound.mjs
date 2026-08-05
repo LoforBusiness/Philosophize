@@ -174,6 +174,27 @@ ok('a wrong answer is quieter than a right one', pk('rethink') < pk('right-1'),
 ok('the three footfall-adjacent world sounds stay under the notes',
   Math.max(pk('step-a'), pk('step-b'), pk('swish')) < pk('right-1'));
 
+// ── 3b. THE APP CAN ACTUALLY BE HEARD ────────────────────────────────────────
+//
+// This exists because the entire feature shipped inaudible.
+//
+// `setAudioModeAsync({ playsInSilentMode: false })` looked like good manners — a
+// phone on silent stays silent. On Android it is not good manners, it is an off
+// switch: expo-audio suppresses playback when the ringer is silent OR VIBRATE, and
+// vibrate is simply where a great many phones live all day. Ringer mode governs
+// ringtones; the media stream is separate, which is why every other app keeps
+// playing. The symptom was total and gave nothing away — haptics fired normally,
+// so everything looked wired, and not one sound came out.
+//
+// No measurement of a WAV file could have caught it. So the setting is asserted.
+head('nothing in the audio mode can silence the app');
+const realSrc0 = fs.readFileSync(path.join(ROOT, 'lib/sound/real.ts'), 'utf8');
+ok('playsInSilentMode is true', /playsInSilentMode:\s*true/.test(realSrc0),
+  'false suppresses ALL playback on an Android phone set to vibrate');
+ok('the app never takes audio focus', /interruptionMode:\s*'mixWithOthers'/.test(realSrc0),
+  'someone reading philosophy on a bus is probably playing music');
+ok('nothing plays in the background', /shouldPlayInBackground:\s*false/.test(realSrc0));
+
 // ── 4a. THE FOOT-LOCK ────────────────────────────────────────────────────────
 //
 // Not strictly a sound check, but it is the ground everything below stands on: a
