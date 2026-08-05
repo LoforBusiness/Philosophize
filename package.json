@@ -79,5 +79,8 @@
     "check:cinematic": "node scripts/validate-cinematic.mjs",
     "check:badges": "node scripts/validate-badges.mjs"
   },
+  "overrides": {
+    "@expo/require-utils": "56.1.6"
+  },
   "private": true
 }
