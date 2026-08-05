@@ -6,7 +6,9 @@
 export type Cue =
   // ── the world: physical, unpitched ─────────────────────────────────────────
   | 'step'     // a footfall — alternates between two samples inside the provider
+  | 'settle'   // a walk coming to rest: a weight shift, not another step
   | 'swish'    // an arm through air
+  | 'impact'   // something in the scene is struck
   | 'tap'      // a fingertip on card: buttons and list rows
   | 'page'     // a leaf turning — advancing a cinematic beat
   | 'rethink'  // a wooden knock: the answer was not that one

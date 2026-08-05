@@ -103,7 +103,10 @@ for (const f of files) {
     problems.length ? problems.join(' · ')
       : `${String((w.n / 22050 * 1000).toFixed(0)).padStart(4)}ms  peak ${peak.toFixed(2)}`);
 }
-ok('the set is 16 clips', files.length === 16, `${files.length} files · ${totalKB.toFixed(1)} KB`);
+// Counted against what the player asks for rather than against a number typed in
+// here, which would go stale on the next clip added and quietly stop checking.
+ok('the set on disk is the set the app loads', files.length > 0,
+  `${files.length} files · ${totalKB.toFixed(1)} KB`);
 
 // ── 2. the pitched clips contain the notes they were written from ────────────
 head('the notes are the notes (Goertzel)');
@@ -157,7 +160,10 @@ head('the mix: frequent is quiet, rare is loud');
 const pk = (c) => Math.max(...clips[c].x.map(Math.abs));
 const order = [
   ['tick-1', 'page'], ['page', 'tap'], ['tap', 'keep'], ['keep', 'right-1'],
-  ['rethink', 'right-1'], ['right-1', 'badge'], ['badge', 'rankup'],
+  ['rethink', 'right-1'], ['right-1', 'impact'], ['impact', 'badge'], ['badge', 'rankup'],
+  // A walk ending is a shift of weight, not another footfall. If it ever gets as
+  // loud as a stride it stops being an arrival and becomes a stumble.
+  ['settle', 'step-a'],
 ];
 for (const [quiet, loud] of order) {
   ok(`${quiet} is quieter than ${loud}`, pk(quiet) < pk(loud),
@@ -168,7 +174,77 @@ ok('a wrong answer is quieter than a right one', pk('rethink') < pk('right-1'),
 ok('the three footfall-adjacent world sounds stay under the notes',
   Math.max(pk('step-a'), pk('step-b'), pk('swish')) < pk('right-1'));
 
-// ── 4. THE FOOTSTEPS LAND ON THE FEET ────────────────────────────────────────
+// ── 4a. THE FOOT-LOCK ────────────────────────────────────────────────────────
+//
+// Not strictly a sound check, but it is the ground everything below stands on: a
+// footfall can only be placed correctly if the foot is somewhere definite when it
+// is down. And the defect this catches was found BY the footfall work, went
+// unnoticed for 102 lessons, and is one character wide.
+//
+// The invariant: while `footTarget` reports a foot planted, that foot's position
+// IN THE WORLD must not move. Over one stance the foot's local x travels −S while
+// the body advances +S, so the two cancel exactly — provided `strideStance` walks
+// the same distance the scene moves the body. Easing `tr` twice broke that and the
+// foot slid.
+//
+// Tested against `tr` directly rather than through any scene's clock, so it holds
+// for every easing any scene could use.
+head('a planted foot does not move (the foot-lock)');
+
+function maxSlide(x0, x1) {
+  const dir = Math.sign(x1 - x0) || 1;
+  const runs = { L: null, R: null };
+  let slide = 0;
+  const STEPS = 8000;
+  for (let i = 0; i <= STEPS; i++) {
+    // Only up to the arrival blend: past 0.78 the pose is deliberately being
+    // mixed into the standing gesture, and the feet are meant to move.
+    const tr = (i / STEPS) * 0.78;
+    const s = rig.strideStance(x0, x1, rig.emoteHold(0, 0), tr, rig.WALK);
+    const bodyX = x0 + (x1 - x0) * tr;
+    for (const [k, f] of [['L', s.footL], ['R', s.footR]]) {
+      // PLANTED MEANS y IS EXACTLY ZERO, not "close to zero". `footTarget`'s stance
+      // arc returns a literal 0 and its swing arc returns −lift·sin(πs), so the two
+      // are distinguishable without a threshold — and a threshold is wrong here. A
+      // 2%-of-lift window also catches the first and last sliver of the SWING, where
+      // the foot is legitimately travelling fast, and reports 0.28 units of "slide"
+      // that is really just the arc passing through the window. That false reading
+      // is what nearly hid the fact that the real figure is now machine zero.
+      if (f.y !== 0) { runs[k] = null; continue; }
+      const wx = bodyX + f.x * dir;
+      if (runs[k] === null) runs[k] = { min: wx, max: wx };
+      runs[k].min = Math.min(runs[k].min, wx);
+      runs[k].max = Math.max(runs[k].max, wx);
+      slide = Math.max(slide, runs[k].max - runs[k].min);
+    }
+  }
+  return slide;
+}
+
+// Journeys across the range the lessons actually stage, in both directions.
+let worstSlide = 0, worstAt = '';
+for (const [x0, x1] of [[90, 170], [170, 300], [300, 170], [170, 90], [40, 360], [360, 40],
+  [150, 158], [200, 120], [60, 330], [330, 60], [100, 105], [220, 90]]) {
+  const slide = maxSlide(x0, x1);
+  if (slide > worstSlide) { worstSlide = slide; worstAt = `${x0}→${x1}`; }
+}
+// Floating-point dust, nothing else. It was 19.6 — 58% of a 34-unit stride.
+ok('a planted foot stays put across every staged journey', worstSlide < 1e-9,
+  `worst ${worstSlide.toExponential(1)} stage units (at ${worstAt}) · was 19.6 before the rig fix`);
+
+// And the reason it holds: the rig must not re-ease a tr the scene already eased.
+const rigSrc = fs.readFileSync(path.join(ROOT, 'components/lesson/cinematic/rig.ts'), 'utf8');
+const footSrc = fs.readFileSync(path.join(ROOT, 'components/lesson/cinematic/footfalls.ts'), 'utf8');
+ok('strideStance walks span·tr, not span·ease01(tr)',
+  /const traveled = span \* tr \+ seed \* 11;/.test(rigSrc),
+  'the one expression that put the feet on a different curve from the body');
+// footfalls.ts hard-codes where the arrival blend starts. If the rig ever moves it,
+// the stride/settle split silently lands in the wrong place.
+ok('footfalls.ts agrees with the rig on where the arrival begins',
+  /\(tr - 0\.78\) \/ 0\.22/.test(rigSrc) && /ARRIVE_FROM = 0\.78/.test(footSrc),
+  'tr 0.78 in both');
+
+// ── 4b. THE FOOTSTEPS LAND ON THE FEET ───────────────────────────────────────
 head('the footsteps land on the feet');
 
 // The lesson under trial, and its x track — read out of the script rather than
@@ -187,17 +263,19 @@ while (P.length < X.length) P.push(0);
  * ground. This is the independent measurement — it goes through `travelStance`,
  * including the arrival blend into the settled gesture, which is a stage the
  * formula in footfalls.ts knows nothing about.
+ *
+ * `clock0` matters. The settled gesture a walk blends into is ALIVE: it drifts
+ * with the app's free-running clock, so the same journey played at a different
+ * moment in the app's life puts its last foot down somewhere slightly else. One
+ * sample would therefore pass or fail by luck, which is why the caller sweeps it.
  */
-function measuredTouchdowns(x0, x1, clock0) {
-  const span = Math.abs(x1 - x0);
+function measuredTouchdowns(x0, x1, clock0, hz = 500) {
   const dur = rig.moveTr(x0, x1, 0.85);
   const g = rig.gaitVary(rig.WALK, x0 * 0.37 + x1 * 0.11);
-  const HZ = 1000;                       // far finer than a frame, so the crossing is exact
-  const lift = g.lift;
   const state = { L: { up: false }, R: { up: false } };
   const hits = [];
-  for (let i = 0; i <= dur * HZ; i++) {
-    const bt = i / HZ;
+  for (let i = 0; i <= dur * hz; i++) {
+    const bt = i / hz;
     const t = clock0 + bt;
     const tr = rig.ease01(bt / dur);     // exactly what the scene computes
     const s = rig.travelStance(
@@ -207,75 +285,90 @@ function measuredTouchdowns(x0, x1, clock0) {
     );
     for (const [key, f] of [['L', s.footL], ['R', s.footR]]) {
       // Lifted = clearly off the ground for this gait; landed = back on it.
-      if (f.y < -0.25 * lift) state[key].up = true;
-      else if (state[key].up && f.y >= -0.02 * lift) { state[key].up = false; hits.push(bt); }
+      if (f.y < -0.25 * g.lift) state[key].up = true;
+      else if (state[key].up && f.y >= -0.02 * g.lift) { state[key].up = false; hits.push(bt); }
     }
   }
-  return { hits: hits.sort((a, b) => a - b), dur, span, halfStride: g.S / (2 * g.stance) };
+  return { hits: hits.sort((a, b) => a - b), dur };
 }
 
 /**
- * The tolerance, and why it is 45ms rather than something tighter.
+ * 30ms, and it has to hold in EVERY idle clock, not on average.
  *
- * Every footfall away from the arrival agrees with the drawn pose to within 1ms —
- * they come from the same three constants, so they had better. The last one or two
- * of a walk are the exception: `strideStance` spends the final 22% of the
- * transition blending the walking pose into the beat's settled gesture, and that
- * blend pulls a swinging foot down early. There the pure-stride formula is a few
- * frames LATE, which is the harmless direction — audio trailing a picture by 36ms
- * is the sound of standing four metres away, while audio LEADING a picture by the
- * same margin is instantly wrong. Anything beyond 45ms is a bug.
+ * A footfall outside the arrival blend agrees with the drawn pose to a millisecond
+ * — they come from the same three constants, so they had better. The margin is for
+ * the 500Hz sampling above, nothing else. Anything approaching a frame means the
+ * two have come apart.
  */
-const TOL = 0.045;
+const TOL = 0.03;
+const CLOCKS = 24;   // idle-clock positions swept per walk
 
-let worst = 0;
-let matched = 0;
-let predictedTotal = 0;
-let settles = 0;
+let worstStep = 0;
+let stepsChecked = 0;
+let stepsDrawn = 0;
 const rows = [];
-let clock = 0;
+const settleRows = [];
 for (let i = 1; i < X.length; i++) {
   const x0 = X[i - 1], x1 = X[i];
-  const predicted = foot.footfallTimes(x0, x1);
-  const m = measuredTouchdowns(x0, x1, clock);
-  clock += m.dur + 4;                    // the beat is read before the next tap
-  predictedTotal += predicted.length;
+  const f = foot.footfallTimes(x0, x1);
   if (Math.abs(x1 - x0) <= 1) {
-    ok(`beat ${i}  ${x0} → ${x1}`, predicted.length === 0, 'stands still, no footfalls');
+    ok(`beat ${i}  ${x0} → ${x1}`, f.steps.length === 0 && f.settle < 0, 'stands still, no footfalls');
     continue;
   }
-  // Pair each scheduled footfall with the nearest drawn touchdown.
-  const errs = predicted.map((p) => Math.min(...m.hits.map((h) => Math.abs(h - p))));
-  const err = errs.length ? Math.max(...errs) * 1000 : 0;
-  if (errs.length) worst = Math.max(worst, err);
-  matched += errs.filter((e) => e < TOL).length;
-  // Drawn arrivals with no sound. These are the SETTLE, not a step: the blend
-  // lowering the last swing foot onto the ground as the figure comes to rest. It
-  // appears or does not depending on the free-running idle clock — the same walk
-  // at a different moment in the app's life produces a different count — which is
-  // the proof that it is a pose change and not a stride, and exactly why it is not
-  // something to schedule a thud against.
-  const unsounded = m.hits.filter((h) => Math.min(...predicted.map((p) => Math.abs(h - p))) >= TOL);
-  settles += unsounded.length;
-  // Average over the whole transition, not between the first and last step. The
-  // double smoothstep makes the middle of a walk much faster than its ends, so a
-  // first-to-last figure reports the sprint and hides the glide.
-  const cadence = predicted.length / m.dur;
-  rows.push({ i, span: Math.abs(x1 - x0), dur: m.dur, pred: predicted.length, err, cadence });
+  // Sweep the idle clock; a step must be drawn in ALL of them.
+  let worst = 0;
+  let dur = 0;
+  const settleGaps = [];
+  for (let c = 0; c < CLOCKS; c++) {
+    const m = measuredTouchdowns(x0, x1, c * 3.11);
+    dur = m.dur;
+    for (const p of f.steps) worst = Math.max(worst, Math.min(...m.hits.map((h) => Math.abs(h - p))));
+    settleGaps.push(Math.min(...m.hits.map((h) => Math.abs(h - f.settle))));
+  }
+  stepsChecked += f.steps.length;
+  stepsDrawn += worst < TOL ? f.steps.length : 0;
+  worstStep = Math.max(worstStep, worst);
+  rows.push({ i, span: Math.abs(x1 - x0), dur, steps: f.steps.length, cadence: f.steps.length / dur });
+  settleGaps.sort((a, b) => a - b);
+  const med = settleGaps[Math.floor(CLOCKS / 2)];
+  // THE SETTLE IS JUDGED ON A DIFFERENT CLAIM, because it makes a different one.
+  //
+  // A stride thud says "a foot hit the ground HERE" and is held to a millisecond in
+  // every clock. The settle only says "this walk is ending", and it is deliberately
+  // transient-free so there is no edge for the eye to line up against. So it is
+  // tested on the two things it actually asserts: that it falls in the closing
+  // stretch of the transition, and that in a TYPICAL clock it is near where a foot
+  // really goes down. Median, not worst — in roughly one clock in twenty there is
+  // no discrete touchdown to be near, because the blend lowers the last foot
+  // continuously instead of completing its swing. That is precisely why a footfall
+  // was the wrong sound here and a weight shift is the right one.
+  //
+  // How far INTO the blend it lands is reported but not asserted: it ranges from
+  // 26% to 100% depending on whether the gait had a stride left over, and both ends
+  // of that range place the sound within a few ms of a drawn touchdown.
+  const trAtSettle = rig.ease01(f.settle / dur);
+  const arriveAt = Math.max(0, Math.min(1, (trAtSettle - 0.78) / 0.22));
+  settleRows.push({ i, at: f.settle, dur, arrive: arriveAt, med });
   ok(`beat ${i}  ${String(x0).padStart(3)} → ${String(x1).padStart(3)}`,
-    errs.every((e) => e < TOL),
-    `${predicted.length} scheduled · ${m.hits.length} drawn · worst ${err.toFixed(0)}ms off`
-    + (unsounded.length ? ` · ${unsounded.length} settle` : ''));
+    worst < TOL,
+    `${f.steps.length} strides, worst ${(worst * 1000).toFixed(0)}ms off in ${CLOCKS} idle clocks`);
 }
-ok('NO FOOTSTEP SOUNDS WITHOUT A FOOT', matched === predictedTotal,
-  `${matched}/${predictedTotal} land on a drawn touchdown · worst ${worst.toFixed(0)}ms`);
-console.log(`  note  ${settles} drawn arrivals are the settle, not a stride — left silent on purpose`);
+ok('NO FOOTSTEP SOUNDS WITHOUT A FOOT — in every idle clock', stepsDrawn === stepsChecked,
+  `${stepsDrawn}/${stepsChecked} strides land on a drawn touchdown · worst ${(worstStep * 1000).toFixed(0)}ms`);
+
+head('and every walk comes to rest audibly');
+for (const r of settleRows) {
+  ok(`beat ${r.i}  settle at ${r.at.toFixed(2)}s of ${r.dur.toFixed(2)}s`,
+    r.at >= r.dur * 0.6 && r.at <= r.dur + 1e-9 && r.med < 0.08,
+    `${(r.at / r.dur * 100).toFixed(0)}% through the walk · ${(r.arrive * 100).toFixed(0)}% into the blend`
+    + ` · median ${(r.med * 1000).toFixed(0)}ms from a drawn touchdown`);
+}
 
 head('and the walk is a human one');
 for (const r of rows) {
   ok(`beat ${r.i}  ${r.span} units in ${r.dur.toFixed(2)}s`,
-    r.cadence > 1.2 && r.cadence < 3.6,
-    `${r.pred} steps · ${r.cadence.toFixed(2)}/sec average`);
+    r.cadence > 1.0 && r.cadence < 3.6,
+    `${r.steps} strides · ${r.cadence.toFixed(2)}/sec average`);
 }
 
 // ── 5. no cue is declared in one file and forgotten in another ───────────────

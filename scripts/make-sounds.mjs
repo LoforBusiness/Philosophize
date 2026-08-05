@@ -391,9 +391,72 @@ function rankup() {
   ).slice(0, N), 0.82);
 }
 
+/**
+ * ARRIVING — the shift of weight as a walk stops, not another footfall.
+ *
+ * A walk in these scenes does not end on a stride. `strideStance` spends the last
+ * 22% of every transition blending the walking pose into the beat's settled
+ * gesture, and in that stretch the figure is no longer taking steps: it is coming
+ * to rest. A crisp footfall there is a lie about what the picture is doing, and
+ * measurably so — a stride thud scheduled inside the blend misses the drawn foot
+ * by up to 383ms depending on where the idle clock happens to be, while every
+ * thud outside it is accurate to a millisecond in all 200 clocks tested.
+ *
+ * So the last one becomes this instead: softer, slower to start, more scuff than
+ * impact, and quieter than either footfall. Being soft is also what makes it
+ * forgiving — a weight shift has no sharp transient for the eye to disagree with,
+ * so the few frames of slack in its timing cannot be seen.
+ */
+function settle() {
+  reseed(60622);
+  const n = secs(0.14);
+  const scuff = lowpass(noise(n), 0.20);
+  const se = env(n, 0.006, 0.040);         // a slow attack — no click, no strike
+  const body = sine(n, 72);
+  const be = env(n, 0.008, 0.028);
+  return finish(mix(
+    scuff.map((x, i) => x * se[i]),
+    body.map((x, i) => x * be[i] * 0.5),
+  ), 0.34);
+}
+
+/**
+ * THE IMPACT, and why it is not a car crash.
+ *
+ * Moral Luck draws the collision as an abstract struck ring — no wreck, no body,
+ * a mark on paper. Rule A1 cuts both ways: what the picture does, the sound must
+ * do. Tyres, glass and a metal crunch would describe an event the scene has
+ * deliberately declined to draw, and would make a lesson about how we apportion
+ * blame into a lesson about a crash.
+ *
+ * So it is one low struck thud with weight and a short room tail, closer to a
+ * heavy stamp than to anything automotive. Grave rather than loud: it is only
+ * slightly above the correct-answer note, and well under the reward.
+ *
+ * The pitch decays fast enough (0.09) not to read as a note, which keeps it on the
+ * physical side of the palette where a thing happening in the world belongs.
+ */
+function impact() {
+  reseed(19760);
+  const n = secs(0.70);
+  const thud = mix(gain(sine(n, 104), 1), gain(sine(n, 156), 0.35));
+  const te = env(n, 0.0015, 0.090);
+  const strike = lowpass(noise(secs(0.05)), 0.24);
+  const ke = env(secs(0.05), 0.0006, 0.014);
+  const room = lowpass(noise(n), 0.05);
+  const re = env(n, 0.010, 0.150);
+  return finish(mix(
+    thud.map((x, i) => x * te[i]),
+    strike.map((x, i) => x * ke[i] * 0.8),
+    room.map((x, i) => x * re[i] * 0.22),
+  ), 0.66);
+}
+
 const SET = {
   'step-a': step(0),
   'step-b': step(1),
+  settle: settle(),
+  impact: impact(),
   swish: swish(),
   tap: tap(),
   reward: reward(),

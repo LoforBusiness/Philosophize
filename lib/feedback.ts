@@ -29,7 +29,9 @@ type Buzz = 'light' | 'medium' | 'success' | null;
 const HAPTIC: Record<Cue, Buzz> = {
   // ── not caused by the reader, or far too frequent to be felt ───────────────
   step: null,     // ~2.5/sec while walking — a buzz here is a fault, not a texture
+  settle: null,   // the walk stopping; still not something the reader did
   swish: null,    // ambient
+  impact: null,   // something in the SCENE is struck, not something they touched
   tick: null,     // fifteen in a row down the XP counter. Sound only.
   // ── the reader did something ───────────────────────────────────────────────
   tap: 'light',   // they touched something; it answers

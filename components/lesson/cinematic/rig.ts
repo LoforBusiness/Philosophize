@@ -1331,7 +1331,31 @@ export function strideStance(
   // references a module const — like `g = WALK` — is not, and crashes the runtime.)
   const vg = gaitVary(g, x0 * 0.37 + x1 * 0.11 + seed * 3.7);
   const span = Math.abs(x1 - x0);
-  const traveled = span * ease01(tr) + seed * 11;
+  // THE DISTANCE WALKED IS `span * tr`, AND IT MUST NOT BE EASED HERE.
+  //
+  // This used to read `span * ease01(tr)`, and that one call was the difference
+  // between a walk and a glide. The foot-lock in this file is exact by
+  // construction — over one stance the foot's local x travels −S while the figure
+  // advances +S, so a planted foot's world position does not move at all — but it
+  // is only exact if `traveled` is the SAME distance the scene moves the body.
+  //
+  // It was not. Every scene positions the figure at `lerp(x0, x1, tr)` and hands
+  // that identical `tr` to travelStance, having ALREADY eased it: the house form
+  // is `const tr = ease01(bt / moveTr(x0, x1, 0.85))`. Easing it a second time
+  // here put the feet on `span·ease01(ease01(u))` while the body was on
+  // `span·ease01(u)` — two different curves, meeting only at the endpoints. In
+  // between, a foot that the pose said was planted slid up to 19.6 stage units,
+  // which is 58% of a stride, on a figure whose whole stride is 34. That is the
+  // skate this file's own docstring promises cannot happen.
+  //
+  // All 52 walking call sites were checked: 50 position the body at exactly
+  // `lerp(<the same two endpoints>, tr)`, ArgumentFightLesson's local `L(a, b)` IS
+  // `lerp(a, b, tr)`, and ethics5's extra `dx` is answer-driven and zero for the
+  // whole of any walk. So the invariant holds everywhere.
+  //
+  // If you ever call this with a RAW tr, ease it yourself before passing it — the
+  // stride follows the body, and the body is the scene's business, not the rig's.
+  const traveled = span * tr + seed * 11;
   const w = walk(traveled, vg);
   // A departure has a PRELOAD and an arrival has a LANDING. Without them the figure
   // simply switches on mid-stride, which is most of why a walk that also flips the

@@ -42,6 +42,17 @@ export interface SceneApi {
   beat: BaseBeat;               // current beat (for bubbles etc.)
   picked: string | null;        // which scene target is chosen (null until answered)
   onPick: (id: string, correct: boolean) => void;  // scene reports a scene-driven answer
+  /**
+   * Whether this lesson is allowed to make a noise (./lessonSound). The player
+   * already sounds everything the SHELL owns — beats, answers, quotes, footfalls
+   * — so a scene only needs this to voice something in its own staging: a thing
+   * struck, a door, a bell that is drawn ringing.
+   *
+   * Use it sparingly and only where the picture already shows the event. Rule A1
+   * runs both ways: a sound for something the scene declined to draw describes a
+   * different lesson.
+   */
+  sound: boolean;
 }
 export type SceneComponent = ComponentType<SceneApi>;
 
@@ -97,16 +108,22 @@ export default function CinematicPlayer({
   // closure would sound the wrong note.
   const sounded = lessonHasSound(lesson.id);
   const run = useRef(0);
-  const plants = useMemo(() => (sounded && walk ? footfallTrack(walk) : []), [sounded, walk]);
+  const plants = useMemo(
+    () => (sounded && walk ? footfallTrack(walk) : { steps: [], settle: [] }),
+    [sounded, walk],
+  );
 
   const clock = useSharedValue(0);
   const bt = useSharedValue(0);
   const bi = useSharedValue(0);
   const qv = useSharedValue(0);
-  // The foot-plant times for the walk into the current beat, and how many have
-  // already sounded. Numbers only — a JS closure cannot cross into a worklet (§17).
+  // The foot-plant times for the walk into the current beat, how many have already
+  // sounded, and when the walk comes to rest (−1 if it ends mid-stride). Numbers
+  // only — a JS closure cannot cross into a worklet (§17).
   const plantAt = useSharedValue<number[]>([]);
   const planted = useSharedValue(0);
+  const settleAt = useSharedValue(-1);
+  const settled = useSharedValue(0);
   // Progress fills SMOOTHLY toward the next mark rather than jumping on each tap.
   const progress = useSharedValue((i + 1) / beats.length);
   const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: progress.value }] }));
@@ -122,8 +139,10 @@ export default function CinematicPlayer({
     // Re-arm the footfalls alongside the clock they are measured against, in the
     // same statement that rewinds it — anything later would leave one frame in
     // which the new beat's clock is being compared to the old beat's step times.
-    plantAt.value = plants[i] ?? [];
+    plantAt.value = plants.steps[i] ?? [];
     planted.value = 0;
+    settleAt.value = plants.settle[i] ?? -1;
+    settled.value = 0;
   }
 
   useFrameCallback((f) => {
@@ -142,18 +161,29 @@ export default function CinematicPlayer({
   // Costs one array-length comparison per frame in the 101 lessons that pass no
   // walk track, because `plantAt` stays empty and this returns immediately.
   const footfall = useCallback(() => cue('step'), []);
+  const arrive = useCallback(() => cue('settle'), []);
   useAnimatedReaction(
     () => bt.value,
     (t) => {
       const list = plantAt.value;
       let k = planted.value;
-      if (k >= list.length) return;
-      while (k < list.length && t >= list[k]) k += 1;
-      if (k === planted.value) return;
-      planted.value = k;
-      // Once per frame however many plants elapsed: two thuds in one frame is a
-      // stumble, and dropping the extra is the honest repair for a long stall.
-      runOnJS(footfall)();
+      if (k < list.length) {
+        while (k < list.length && t >= list[k]) k += 1;
+        if (k !== planted.value) {
+          planted.value = k;
+          // Once per frame however many plants elapsed: two thuds in one frame is
+          // a stumble, and dropping the extra is the honest repair for a stall.
+          runOnJS(footfall)();
+        }
+      }
+      // …and the walk comes to rest. A different sound, because it is a different
+      // thing: the blend is lowering the last foot into a standing gesture rather
+      // than the gait planting one. See ./footfalls.
+      const s = settleAt.value;
+      if (s >= 0 && settled.value === 0 && t >= s) {
+        settled.value = 1;
+        runOnJS(arrive)();
+      }
     },
   );
 
@@ -274,7 +304,7 @@ export default function CinematicPlayer({
             <View style={{ width: STAGE_W * fit, height: bandH * fit, overflow: 'hidden' }}>
               <View style={{ position: 'absolute', left: 0, top: -bandT * fit, width: STAGE_W * fit, height: STAGE_H * fit }}>
                 <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
-                  <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} onPick={(id, ok) => choose(id, ok, true)} />
+                  <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
                 </View>
               </View>
             </View>

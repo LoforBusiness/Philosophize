@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
@@ -8,6 +9,7 @@ import {
 } from './rig';
 import { BEATS } from './ethics7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { cue } from '@/lib/feedback';
 import type { SceneApi } from './CinematicPlayer';
 
 // Two roads seen side-on, stacked as horizontal lanes across the UPPER stage, with
@@ -55,9 +57,35 @@ const HT = BEATS.map((b) => b.hit ?? 0);
 const GL = BEATS.map((b) => b.glance ?? 0);
 const CB = BEATS.map((b) => b.carB ?? -70);
 
-export default function Ethics7Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick }: SceneApi) {
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
+
+  // ── the one sound this scene makes for itself ──────────────────────────────
+  //
+  // The beat that lets luck in strikes the mark on road B, and that is the hinge
+  // the whole lesson turns on: up to here the two drivers are identical, and after
+  // it one of them is a defendant. It is the only moment in the lesson where
+  // something HAPPENS rather than being explained, so it is the only one worth a
+  // sound of its own.
+  //
+  // It is a low struck thud and nothing else — no tyres, no glass, no crunch. The
+  // scene draws the collision as an abstract ring, deliberately, and rule A1 runs
+  // in both directions: a crash sound would describe a wreck the picture has
+  // declined to show and would turn a lesson about apportioning blame into a
+  // lesson about a car accident.
+  //
+  // 260ms in, with the mark. The ring scales up over `grow` (ease01(bt/0.55)) and
+  // is most of the way there by then; car B is still travelling and does not reach
+  // the child until ~850ms, which is a pre-existing disagreement between the mark
+  // and the car. The sound follows the MARK, because the mark is the iconography
+  // of the impact and the car is a prop moving toward it.
+  const struck = (cur.hit ?? 0) > 0 && (prev?.hit ?? 0) === 0;
+  useEffect(() => {
+    if (!sound || !struck) return;
+    const id = setTimeout(() => cue('impact'), 260);
+    return () => clearTimeout(id);
+  }, [i, sound, struck]);
 
   // A prop only fades in on the beat that CHANGES it; otherwise it stays solid, so
   // the stage doesn't re-animate every time the reader taps forward.
