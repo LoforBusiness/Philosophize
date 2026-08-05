@@ -178,8 +178,8 @@ for (const [quiet, loud] of order) {
 }
 ok('a wrong answer is quieter than a right one', pk('rethink') < pk('right-1'),
   `${pk('rethink').toFixed(2)} vs ${pk('right-1').toFixed(2)}`);
-ok('the three footfall-adjacent world sounds stay under the notes',
-  Math.max(pk('step-a'), pk('step-b'), pk('swish')) < pk('right-1'));
+ok('the world stays under the notes',
+  Math.max(pk('step-a'), pk('step-b'), pk('settle')) < pk('right-1'));
 
 // ── 3a2. THE CLIPS SOUND LIKE THE MATERIAL THEY CLAIM TO BE ──────────────────
 //
@@ -238,6 +238,67 @@ ok('every clip with a transient is 44.1 kHz',
   percussive.filter((c) => clips[c].rate !== 44100).join(', ') || `${percussive.length} clips`);
 ok('the struck tones stay at 22.05 kHz', ['reward', 'rankup', 'badge', 'right-1'].every((c) => clips[c].rate === 22050),
   'their highest partial is a third of the way to that ceiling — the bytes would buy nothing');
+
+// ── 3a3. NO CLIP MAY HISS ────────────────────────────────────────────────────
+//
+// The single most disliked thing in this feature, reported three separate times
+// and described each time as "that bush sound". It was never one clip — it was a
+// SHAPE that several clips shared, and hunting them one at a time by ear (which I
+// cannot do) missed two of them twice.
+//
+// The shape is: noise-like energy that SUSTAINS. A transient made of noise is an
+// impact and reads as one — the dress-shoe heel is almost entirely noise and is
+// the sound the reader likes best. Noise that hangs on after the attack, with no
+// impact at its front, is hiss: shhh, wind, a bush.
+//
+// So it is measured as two things multiplied:
+//
+//   · how much energy survives past the first 40ms, and
+//   · SPECTRAL FLATNESS of that surviving part — the geometric mean of the band
+//     powers over their arithmetic mean, which is ~1 for white noise and near 0
+//     for anything with a pitch.
+//
+// Flatness alone is the discriminator, and it separated the set completely on the
+// first run:
+//
+//     swish   0.382   98% sustained   ← pure noise swell, removed
+//     settle  0.338   the scuff at the end of every walk, rebuilt with no noise
+//     keep    0.127   shortened
+//     impact  0.090   struck, tonal — fine
+//     badge   0.055   a bell — fine
+//     step-a  0.004   the footfall the reader likes. All attack, no tail.
+//
+// 0.15 is the line: comfortably above everything struck, far below anything that
+// hangs. A new clip that hisses now fails the build instead of shipping.
+head('nothing in the set hisses');
+
+function lateFlatness(clip) {
+  const { x, rate, n } = clips[clip];
+  const cut = Math.min(n, Math.round(0.040 * rate));
+  if (cut >= n - 8) return { flat: 0, late: 0 };
+  const energy = (a, b) => { let s = 0; for (let i = a; i < b; i++) s += x[i] * x[i]; return s; };
+  const late = energy(cut, n) / (energy(0, n) || 1);
+  const bands = [];
+  for (let k = 0; k < 28; k++) {
+    const f = 200 * Math.pow(9000 / 200, k / 27);
+    if (f < rate / 2) bands.push(Math.max(1e-20, power(x, f, rate, cut, n)));
+  }
+  const geo = Math.exp(bands.reduce((a, v) => a + Math.log(v), 0) / bands.length);
+  const arith = bands.reduce((a, v) => a + v, 0) / bands.length;
+  return { flat: geo / arith, late };
+}
+
+const HISS = 0.15;
+let worstHiss = 0, worstHissName = '';
+for (const name of Object.keys(clips)) {
+  const { flat } = lateFlatness(name);
+  if (flat > worstHiss) { worstHiss = flat; worstHissName = name; }
+}
+ok('no clip sustains noise past its attack', worstHiss < HISS,
+  `worst is ${worstHissName} at flatness ${worstHiss.toFixed(3)} (limit ${HISS}) — swish was 0.382, settle 0.338`);
+const shoeFlat = lateFlatness('step-a').flat;
+ok('and the footfall is all attack, which is why it works', shoeFlat < 0.02,
+  `flatness ${shoeFlat.toFixed(3)} after 40ms — the noise in it is the heel, not a tail`);
 
 // ── 3b. THE APP CAN ACTUALLY BE HEARD ────────────────────────────────────────
 //

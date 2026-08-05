@@ -232,23 +232,25 @@ function step(variant) {
   ), 0.50);
 }
 
-/**
- * AN ARM THROUGH AIR — cloth, not a whip.
- *
- * Band-passed noise on a slow swell: the energy rises into the middle of the
- * gesture and falls away, which is what a sleeve does. High-passed hard, because
- * anything low in it reads as a footstep and the two happen together.
- */
-function swish() {
-  reseed(4242);
-  const n = secs(0.22);
-  const air = highpass(lowpass(noise(n), 0.30), 0.03);
-  const swell = Array.from({ length: n }, (_, i) => {
-    const u = i / n;
-    return Math.sin(Math.PI * u) ** 1.6;
-  });
-  return finish(air.map((x, i) => x * swell[i]), 0.34);
-}
+// ── THE WHOOSH IS GONE, AND NOTHING REPLACES IT ─────────────────────────────
+//
+// `swish` was band-passed noise on a slow symmetric swell — energy rising into
+// the middle of the gesture and falling away, which is what a sleeve does and is
+// also, to an ear, exactly SHHH. Measured against the rest of the set it was not
+// close: 98% of its energy sustained past the attack at a spectral flatness of
+// 0.38, where the footfall the reader likes sits at 0.004 and the page turn at
+// 0.001. It was the single bushiest thing in the app by a factor of five.
+//
+// It is not being rebuilt, because there is no honest way to. A hand moving
+// through air IS broadband noise; that is what the sound physically is. Every
+// version of it would be some shape of hiss, and hiss is the thing that was
+// asked to go.
+//
+// The machinery that found WHERE to put one — components/lesson/cinematic/
+// gestures.ts, which measured hand travel out of the rig — is deleted with it. It
+// is in the history if a gesture ever wants a sound that is not made of air.
+
+
 
 /**
  * A TAP — the one the reader hears most, and the one that was worst.
@@ -492,7 +494,9 @@ function keep() {
   const snap = highpass(noise(n), 0.34);
   const se = env(n, 0.0003, 0.008);
   const wood = lowpass(noise(n), 0.14);
-  const we = env(n, 0.001, 0.030);
+  // 30ms → 16ms. It was the closest survivor to the hiss threshold, and a clasp
+  // has nothing to sustain — the catch and the cover are both instant.
+  const we = env(n, 0.001, 0.016);
   const tone = sine(n, 330);
   return finish(mix(
     snap.map((x, i) => x * se[i]),
@@ -583,16 +587,24 @@ function rankup() {
  * so the few frames of slack in its timing cannot be seen.
  */
 function settle() {
-  reseed(60622);
-  const n = secs(0.14);
-  const scuff = lowpass(noise(n), 0.20);
-  const se = env(n, 0.006, 0.040);         // a slow attack — no click, no strike
-  const body = sine(n, 72);
-  const be = env(n, 0.008, 0.028);
+  // NO NOISE IN IT ANYWHERE, and that is the correction.
+  //
+  // This was a scuff: low-passed noise on a 6ms attack. The slow attack was
+  // deliberate — "no click, no strike, a weight shift" — and it is precisely what
+  // made it a bush. A noise burst that fades UP has no transient for the ear to
+  // read as an impact, so all that is left to hear is the noise itself, and it
+  // landed at the end of every walk in the lesson. Flatness 0.338 against the
+  // footfall's 0.004.
+  //
+  // A shoe being set down is not a scuff, it is the same shoe placed gently: the
+  // floor tone of the footfall, without the heel crack or the leather on top of
+  // it. So it is that tone and its fifth, struck softly and damped, and it shares
+  // the footstep's pitch so the walk ends on the instrument it was played on.
+  const n = secs(0.13);
   return finish(mix(
-    scuff.map((x, i) => x * se[i]),
-    body.map((x, i) => x * be[i] * 0.5),
-  ), 0.34);
+    ring(n, 196, 0.045, 1.0),
+    ring(n, 294, 0.028, 0.28),
+  ), 0.26);
 }
 
 /**
@@ -635,7 +647,6 @@ const SET = {
   'step-b': atRate(HI, () => step(1)),
   settle: atRate(HI, settle),
   impact: atRate(HI, impact),
-  swish: atRate(HI, swish),
   tap: atRate(HI, tap),
   page: atRate(HI, page),
   rethink: atRate(HI, rethink),

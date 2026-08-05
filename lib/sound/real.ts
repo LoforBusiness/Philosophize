@@ -49,7 +49,6 @@ const SOURCES = {
   stepA: require('../../assets/sound/step-a.wav'),
   stepB: require('../../assets/sound/step-b.wav'),
   settle: require('../../assets/sound/settle.wav'),
-  swish: require('../../assets/sound/swish.wav'),
   impact: require('../../assets/sound/impact.wav'),
   tap: require('../../assets/sound/tap.wav'),
   reward: require('../../assets/sound/reward.wav'),
@@ -88,7 +87,7 @@ let footToggle = 0;
  * slower than a tap's.
  */
 const THROTTLE: Record<Cue, number> = {
-  step: 90, settle: 200, swish: 120, impact: 400,
+  step: 90, settle: 200, impact: 400,
   tap: 40, page: 90, rethink: 200, keep: 150,
   // 25ms, well under the counter's own cadence: the throttle is here to stop a
   // runaway, not to thin the run. Thinning it would make the count stutter.

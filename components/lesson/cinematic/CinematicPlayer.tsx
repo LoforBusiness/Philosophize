@@ -14,7 +14,6 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { cue } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
-import { swishTrack } from './gestures';
 import { lessonHasSound } from './lessonSound';
 import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
@@ -58,7 +57,7 @@ export interface SceneApi {
 export type SceneComponent = ComponentType<SceneApi>;
 
 export default function CinematicPlayer({
-  lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk, gesture,
+  lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk,
 }: {
   lesson: Lesson;
   beats: BaseBeat[];
@@ -83,17 +82,6 @@ export default function CinematicPlayer({
    * the only case these times are correct for.
    */
   walk?: number[];
-  /**
-   * The scene's per-beat gesture-code track (`P` in most scenes). Given it, the
-   * player sounds a whoosh wherever a hand genuinely sweeps — see ./gestures.
-   *
-   * Opt-in for the same reason as `walk`: a scene handing this over is asserting
-   * that these codes drive ONE figure through `emoteHold` / `emoteLive`. Most
-   * poses produce nothing, because most poses are a held position with a talking
-   * hand, and a whoosh over a hand that is not moving is the crash-sound mistake
-   * with the picture and the sound the other way round.
-   */
-  gesture?: number[];
 }) {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
@@ -124,12 +112,6 @@ export default function CinematicPlayer({
     () => (sounded && walk ? footfallTrack(walk) : { steps: [], settle: [] }),
     [sounded, walk],
   );
-  const swishes = useMemo(() => {
-    if (!sounded || !gesture) return [];
-    // A beat either walks or gestures — never both (see ./gestures).
-    const walked = gesture.map((_, i) => !!walk && i > 0 && Math.abs(walk[i] - walk[i - 1]) > 1);
-    return swishTrack(gesture, walked, beats.map((b) => b.dur));
-  }, [sounded, gesture, walk, beats]);
 
   const clock = useSharedValue(0);
   const bt = useSharedValue(0);
@@ -142,8 +124,6 @@ export default function CinematicPlayer({
   const planted = useSharedValue(0);
   const settleAt = useSharedValue(-1);
   const settled = useSharedValue(0);
-  const swishAt = useSharedValue<number[]>([]);
-  const swished = useSharedValue(0);
   // Progress fills SMOOTHLY toward the next mark rather than jumping on each tap.
   const progress = useSharedValue((i + 1) / beats.length);
   const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: progress.value }] }));
@@ -163,8 +143,6 @@ export default function CinematicPlayer({
     planted.value = 0;
     settleAt.value = plants.settle[i] ?? -1;
     settled.value = 0;
-    swishAt.value = swishes[i] ?? [];
-    swished.value = 0;
   }
 
   useFrameCallback((f) => {
@@ -184,7 +162,6 @@ export default function CinematicPlayer({
   // walk track, because `plantAt` stays empty and this returns immediately.
   const footfall = useCallback(() => cue('step'), []);
   const arrive = useCallback(() => cue('settle'), []);
-  const gestured = useCallback(() => cue('swish'), []);
   useAnimatedReaction(
     () => bt.value,
     (t) => {
@@ -206,13 +183,6 @@ export default function CinematicPlayer({
       if (s >= 0 && settled.value === 0 && t >= s) {
         settled.value = 1;
         runOnJS(arrive)();
-      }
-      // …and a hand sweeping through the air on a beat that stands and gestures.
-      const sw = swishAt.value;
-      let j = swished.value;
-      if (j < sw.length) {
-        while (j < sw.length && t >= sw[j]) j += 1;
-        if (j !== swished.value) { swished.value = j; runOnJS(gestured)(); }
       }
     },
   );
