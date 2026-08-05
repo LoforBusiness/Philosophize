@@ -22,13 +22,36 @@ export default function PressableScale({ onPress, children, style, containerStyl
   const [pressed, setPressed] = useState(false);
   return (
     <Pressable
-      onPress={onPress}
+      // ── THE SOUND FIRES ON `onPress`, AND IT MUST NOT MOVE BACK TO `onPressIn`.
+      //
+      // It was on press-in, with the reasoning that "the sound is confirming the
+      // touch, and a click that arrives after the finger lifts reads as lag". That
+      // is true in isolation and useless in a scrolling list, which is where most
+      // of these live.
+      //
+      // `onPressIn` fires the instant a finger lands, BEFORE the gesture has been
+      // disambiguated. Drag it and the touch becomes a scroll: `onPress` never
+      // fires, the responder is handed to the ScrollView — and the sound has
+      // already played. So flicking down the branch list or past the Home actions
+      // machine-gunned a tap off every card the thumb crossed, without a single
+      // button being pressed.
+      //
+      // `onPress` only fires for a movement the system has decided IS a tap. The
+      // cost is the few tens of milliseconds between touch and lift, which is
+      // nothing next to an app that clicks at you while you scroll.
+      //
+      // The VISUAL scale-down stays on press-in, and correctly: the ScrollView
+      // cancels the responder when a scroll begins, so `onPressOut` runs and the
+      // card springs back. A cheap animation that resolves itself is fine. A sound
+      // cannot be un-played.
+      //
+      // Nothing sounds if there is nothing to do: a PressableScale with no handler
+      // is decoration, and decoration that clicks is the same mistake as the figure
+      // who used to clop across the home screen.
+      onPress={onPress && ((e) => { if (!disabled) cue('tap'); onPress(e); })}
       disabled={disabled}
       style={containerStyle}
-      // EVERY button in the app that uses this one component now answers when it
-      // is touched. On press-IN rather than on press: the sound is confirming the
-      // touch, and a click that arrives after the finger lifts reads as lag.
-      onPressIn={() => { setPressed(true); if (!disabled) cue('tap'); }}
+      onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
     >
       <MotiView

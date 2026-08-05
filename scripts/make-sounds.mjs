@@ -270,19 +270,34 @@ function swish() {
  */
 function tap() {
   reseed(90210);
-  const n = secs(0.075);
-  const puff = lowpass(noise(n), 0.34);
-  const puffE = env(n, 0.0006, 0.004);
-  const e = env(n, 0.0012, 0.035);
-  const warm = mix(
-    sine(n, 620),
-    gain(sine(n, 930), 0.34),      // the fifth — a chord, not a beep
-    gain(sine(n, 310), 0.22),      // an octave below for weight
+  // THIRD ATTEMPT, and each one failed for its own reason.
+  //
+  //   1. high-passed noise + a 1900 Hz sine — the spectrum of static, and thin
+  //   2. 620 Hz with a fifth and an octave over 75ms — warm, but a KNOCK. Three
+  //      partials ringing for that long is a small wooden instrument being played,
+  //      and it is too much event for opening a screen.
+  //
+  // What a navigation tap has to be is barely there. It is the most-fired sound in
+  // the app by a wide margin, so the design target is not "nice sound" but "a
+  // surface answering" — noticed only if it were missing.
+  //
+  // So: 780 Hz, a single clean fundamental with a soft octave above it at a fifth
+  // of the level and nothing else, damped in 18ms — half as long as the last one.
+  // A 1.6ms attack, because an instant onset is a click and a softened one is a
+  // touch. A trace of very dull noise for surface, ceilinged near 900 Hz so there
+  // is no hiss in it at any level.
+  const n = secs(0.055);
+  const puff = lowpass(noise(n), 0.13);
+  const puffE = env(n, 0.0008, 0.003);
+  const e = env(n, 0.0016, 0.018);
+  const body = mix(
+    sine(n, 780),
+    gain(sine(n, 1560), 0.20),
   );
   return finish(mix(
-    warm.map((x, i) => x * e[i]),
-    puff.map((x, i) => x * puffE[i] * 0.30),
-  ), 0.34);
+    body.map((x, i) => x * e[i]),
+    puff.map((x, i) => x * puffE[i] * 0.22),
+  ), 0.26);
 }
 
 /**
@@ -374,20 +389,31 @@ const at = (delay, layer) => [...new Array(secs(delay)).fill(0), ...layer];
  */
 function page() {
   reseed(70118);
-  const n = secs(0.20);
-  const edge = secs(0.035);
-  const crisp = highpass(noise(edge), 0.30);
-  const ce = env(edge, 0.0004, 0.010);
-  const body = highpass(lowpass(noise(n), 0.26), 0.05);
-  const be = Array.from({ length: n }, (_, i) => {
-    const u = i / n;
-    // Rises fast, falls away — the leaf is loudest as it leaves the thumb.
-    return Math.min(1, u / 0.12) * Math.exp(-u * 3.4);
-  });
+  // THE SWELL OF NOISE IS GONE, AND IT WAS THE PROBLEM.
+  //
+  // This was band-passed noise on a rising-then-falling envelope, written as "a
+  // leaf leaving the thumb". Band-passed noise on a swell is, to an ear, simply
+  // SHHH — a bush, a breath, static with a shape. It fired on every tap in a
+  // lesson, ten times a reading, and it was the single most disliked sound in the
+  // app. Nothing about a swell of noise says "page"; it says "wind".
+  //
+  // What a page actually does when it lands is THUD, faintly and briefly: a light
+  // stiff sheet has a pitch, low and immediately damped. So this is a struck 300 Hz
+  // with a fifth above it, gone in 22ms, and only a whisper of very dull noise
+  // underneath for the fibre. `lowpass` at 0.10 puts that whisper's ceiling around
+  // 700 Hz, so there is no hiss left in it anywhere.
+  //
+  // It is also the quietest thing in the set apart from the counter, because of how
+  // often it fires. If it is ever noticed as a sound rather than as a page landing,
+  // it is too loud.
+  const n = secs(0.085);
+  const fibre = lowpass(noise(n), 0.10);
+  const fe = env(n, 0.0008, 0.012);
   return finish(mix(
-    crisp.map((x, i) => x * ce[i] * 0.9),
-    body.map((x, i) => x * be[i]),
-  ), 0.30);
+    ring(n, 300, 0.022, 1.0),
+    ring(n, 450, 0.016, 0.42),
+    fibre.map((x, i) => x * fe[i] * 0.30),
+  ), 0.20);
 }
 
 /**
@@ -489,7 +515,10 @@ function keep() {
 const tick = (f) => {
   const n = secs(0.028);
   const e = env(n, 0.0003, 0.006);
-  return finish(sine(n, f).map((x, i) => x * e[i]), 0.20);
+  // Under the page turn, which is itself under the tap. Fifteen of these run in a
+  // second and they are the one sound meant to be heard as a texture rather than
+  // as events.
+  return finish(sine(n, f).map((x, i) => x * e[i]), 0.15);
 };
 
 /**

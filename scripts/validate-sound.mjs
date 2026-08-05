@@ -260,6 +260,22 @@ ok('the app never takes audio focus', /interruptionMode:\s*'mixWithOthers'/.test
   'someone reading philosophy on a bus is probably playing music');
 ok('nothing plays in the background', /shouldPlayInBackground:\s*false/.test(realSrc0));
 
+// AND NOTHING SOUNDS THAT THE READER DID NOT DO.
+//
+// `onPressIn` fires the instant a finger lands, before Android has decided whether
+// the gesture is a tap or a scroll. Every button in the app goes through
+// PressableScale and most of them live in scrolling lists, so with the cue on
+// press-in a flick down the branch list or past the Home actions fired a tap off
+// every card the thumb crossed — with nothing pressed. The sound is on `onPress`,
+// which only fires for a movement the system has ruled a tap, and it must stay
+// there. This is asserted rather than trusted because the symptom appears only on
+// a device, under a finger, while scrolling.
+const pressSrc = fs.readFileSync(path.join(ROOT, 'components/shared/PressableScale.tsx'), 'utf8');
+ok('the button tap fires on onPress, never onPressIn',
+  /onPress=\{onPress && \(\(e\) => \{[^}]*cue\('tap'\)/.test(pressSrc)
+    && !/onPressIn=\{[^}]*cue\(/.test(pressSrc),
+  'press-in fires during a scroll, and a sound cannot be un-played');
+
 // ── 4a. THE FOOT-LOCK ────────────────────────────────────────────────────────
 //
 // Not strictly a sound check, but it is the ground everything below stands on: a
