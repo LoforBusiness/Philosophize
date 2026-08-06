@@ -189,3 +189,102 @@ export function propsBetween(x0: number, x1: number, depth: number): Prop[] {
 
 /** The moon: one per branch, high and far, and it never moves with the camera. */
 export const MOON = { x: 0.22, y: 0.24, r: 54 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCENES — one place per unit, so crossing a boundary changes the world.
+//
+// The reference images are seven PLACES, not one texture: a moonlit hilltop, a
+// pine forest, a town skyline at dusk. Scattering the same props evenly over
+// 10,000 units gives depth but never arrival — you walk for twenty minutes and
+// never get anywhere. A unit is the natural grain: five or six lessons, which at
+// SPAN each is a decent stretch of country before the scenery changes.
+//
+// Only the CAST and the DENSITY change, never the tone ramp — the layers stay
+// pale-to-dark by depth in every scene, because that ramp is what makes the
+// stacking read at all (§19).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface Scene {
+  name: string;
+  /** What stands at each depth: 0 far … 3 near. */
+  cast: [SceneryKind, SceneryKind, SceneryKind, SceneryKind];
+  /** Multiplies the pitch — above 1 is sparser, below 1 is crowded. */
+  spread: number;
+  /** Multiplies prop height. A forest is tall; a moor is not. */
+  scale: number;
+  hero: 'moon' | 'sun' | 'none';
+}
+
+export const SCENES: Scene[] = [
+  { name: 'the hills',   cast: ['peak', 'pine', 'tree', 'rock'], spread: 1.15, scale: 1.0, hero: 'moon' },
+  { name: 'deep forest', cast: ['peak', 'pine', 'tree', 'tree'], spread: 0.62, scale: 1.35, hero: 'none' },
+  { name: 'the moor',    cast: ['peak', 'rock', 'rock', 'tree'], spread: 1.45, scale: 0.78, hero: 'sun' },
+  { name: 'the ridge',   cast: ['peak', 'peak', 'pine', 'rock'], spread: 0.95, scale: 1.15, hero: 'moon' },
+  { name: 'the orchard', cast: ['peak', 'tree', 'tree', 'rock'], spread: 0.80, scale: 1.0, hero: 'sun' },
+  { name: 'the pass',    cast: ['peak', 'peak', 'rock', 'rock'], spread: 1.25, scale: 1.25, hero: 'none' },
+];
+
+/** Which scene an x falls in, given where each unit starts. */
+export function sceneAt(x: number, unitStarts: number[]): Scene {
+  let k = 0;
+  for (let i = 0; i < unitStarts.length; i++) if (x >= unitStarts[i]) k = i;
+  return SCENES[k % SCENES.length];
+}
+
+/** Props for one depth, honouring whichever scene each x falls in. */
+export function sceneProps(x0: number, x1: number, depth: number, unitStarts: number[]): Prop[] {
+  const out: Prop[] = [];
+  const basePitch = [420, 260, 190, 300][depth];
+  const baseH = [150, 74, 96, 120][depth];
+  let x = Math.floor(x0 / basePitch) * basePitch;
+  let i = 0;
+  while (x < x1 && i < 4000) {
+    const sc = sceneAt(x, unitStarts);
+    const pitch = basePitch * sc.spread;
+    const r = hash(Math.round(x) * 7 + depth * 131);
+    const r2 = hash(Math.round(x) * 13 + depth * 57);
+    const px = x + (r - 0.5) * pitch * 0.5;
+    out.push({
+      kind: sc.cast[depth],
+      x: px,
+      y: groundAt(px),
+      h: baseH * sc.scale * (0.72 + r2 * 0.56),
+      depth,
+    });
+    x += pitch;
+    i++;
+  }
+  return out;
+}
+
+/**
+ * How the figure travels this span — deterministic from the lesson index, so the
+ * same hop is always the same journey.
+ *
+ * Codes are `moves.gaitFor`: 0 walk · 1 stroll · 2 hurry · 3 run · 4 trudge. A
+ * run every time would be exhausting and a walk every time is what this was
+ * complained about for; varying it by index means the road has moods without
+ * anything being random.
+ */
+export function gaitForSpan(i: number): number {
+  const r = hash(i * 31 + 5);
+  if (r < 0.16) return 3;        // a run
+  if (r < 0.34) return 2;        // a hurry
+  if (r < 0.52) return 1;        // a stroll
+  if (r < 0.62) return 4;        // a trudge
+  return 0;                      // a plain walk
+}
+
+/**
+ * Where in a traverse the figure JUMPS, and how high — 0 for spans it walks.
+ *
+ * Only where the ground actually rises into an obstacle, so the jump is a
+ * response to the terrain rather than a trick performed at nothing (rule A1:
+ * what the picture does must be true of the world).
+ */
+export function jumpForSpan(fromX: number, toX: number): { at: number; h: number } | null {
+  const mid = (fromX + toX) / 2;
+  const rise = groundAt(mid) - groundAt(fromX);      // negative y is up
+  if (rise > -14) return null;                        // nothing worth leaving the ground for
+  return { at: 0.5, h: Math.min(64, 22 - rise * 1.6) };
+}

@@ -5,9 +5,10 @@ import Animated, {
   withTiming, withSequence, runOnJS, Easing, type SharedValue,
 } from 'react-native-reanimated';
 import Stickman from '@/components/lesson/cinematic/Stickman';
-import { pose, travelStance, stand, WALK, type Bundle } from '@/components/lesson/cinematic/rig';
+import { pose, stand, type Bundle } from '@/components/lesson/cinematic/rig';
+import { strideMode } from '@/components/lesson/cinematic/moves';
 import {
-  layout, groundAt, propsBetween, MOON, LAYERS, LEAD, SPAN, WALK_SECONDS,
+  layout, groundAt, sceneProps, gaitForSpan, jumpForSpan, MOON, LAYERS, LEAD, WALK_SECONDS,
   type Marker, type Prop,
 } from './worldPath';
 
@@ -21,7 +22,7 @@ import {
 // driven by exactly three things, all of them animations:
 //
 //   · arriving — it is simply where the reader already is
-//   · the WALK — five seconds to the next lesson, after finishing one
+//   · the WALK — seven seconds to the next lesson, after finishing one
 //   · the DROP — tapping any other lesson lands the figure beside it
 //
 // Moving between UNITS is vertical, in the list below this strip. Nothing here
@@ -72,6 +73,9 @@ export default function BranchWorld({
     [lessons],
   );
 
+  // Where each unit begins, in world x — what tells the scenery which place it is in.
+  const unitStarts = useMemo(() => markers.filter((m) => m.unitStart).map((m) => m.x), [markers]);
+
   const camX = useSharedValue(0);
   const figX = useSharedValue(0);
   const figLift = useSharedValue(0);      // the drop: height above the ground
@@ -79,6 +83,9 @@ export default function BranchWorld({
   const wTo = useSharedValue(0);
   const wp = useSharedValue(1);
   const gait = useSharedValue(0);
+  const mode = useSharedValue(0);        // how this span is travelled (moves.gaitFor)
+  const jumpH = useSharedValue(0);       // the arc over an obstacle, in stage units
+  const jumpAt = useSharedValue(-1);
   const clock = useSharedValue(0);
   const [at, setAt] = useState(current);
   const [busy, setBusy] = useState(false);
@@ -129,6 +136,10 @@ export default function BranchWorld({
     wTo.value = target.x;
     wp.value = 0;
     gait.value = 1;
+    mode.value = gaitForSpan(advanceTo.to);
+    const jump = jumpForSpan(from.x, target.x);
+    jumpAt.value = jump ? jump.at : -1;
+    jumpH.value = jump ? jump.h : 0;
     const ms = WALK_SECONDS * 1000;
     const cb = advanceTo.done;
     const to = advanceTo.to;
@@ -144,7 +155,7 @@ export default function BranchWorld({
   // ── THE DROP ───────────────────────────────────────────────────────────────
   // Tapping a lesson that is not the one you are standing at moves the figure
   // there by dropping in from above, rather than by walking. That is the honest
-  // signal: a walk is earned and takes five seconds, a jump is navigation.
+  // signal: a walk is earned and takes seven seconds, a jump is navigation.
   const dropTo = useCallback((i: number) => {
     const m = markers[i];
     if (!m || busy) return;
@@ -171,23 +182,35 @@ export default function BranchWorld({
   // lessons use, so the feet plant instead of sliding.
   const D = useDerivedValue<Bundle>(() => {
     const s = gait.value > 0
-      ? travelStance(wFrom.value, wTo.value, stand(clock.value), stand(clock.value), stand(clock.value), wp.value, WALK)
+      ? strideMode(wFrom.value, wTo.value, stand(clock.value), wp.value, mode.value)
       : stand(clock.value);
     return pose(s, 0, groundAt(figX.value), FIG_K, 1, 1);
   });
   useDerivedValue(() => {
     if (gait.value > 0) figX.value = wFrom.value + (wTo.value - wFrom.value) * wp.value;
   });
+  // The leap: a half-sine centred on the obstacle, added to whatever the drop is
+  // doing. Zero everywhere else, so a span with nothing to clear never lifts.
+  const airborne = useDerivedValue(() => {
+    if (gait.value === 0 || jumpAt.value < 0) return 0;
+    const d = Math.abs(wp.value - jumpAt.value);
+    const span = 0.16;
+    if (d > span) return 0;
+    return Math.sin((1 - d / span) * Math.PI * 0.5) * jumpH.value;
+  });
   const figStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: figX.value - camX.value }, { translateY: -figLift.value }],
+    transform: [
+      { translateX: figX.value - camX.value },
+      { translateY: -figLift.value - airborne.value },
+    ],
   }));
 
   return (
     <View style={{ height: H, backgroundColor: SKY, overflow: 'hidden' }}>
       <Moon width={width} />
-      <Depth depth={0} camX={camX} k={LAYERS[0].k} tone={LAYERS[0].tone} width={width} />
-      <Depth depth={1} camX={camX} k={LAYERS[1].k} tone={LAYERS[1].tone} width={width} />
-      <Depth depth={2} camX={camX} k={LAYERS[2].k} tone={LAYERS[2].tone} width={width} />
+      <Depth depth={0} camX={camX} k={LAYERS[0].k} tone={LAYERS[0].tone} unitStarts={unitStarts} />
+      <Depth depth={1} camX={camX} k={LAYERS[1].k} tone={LAYERS[1].tone} unitStarts={unitStarts} />
+      <Depth depth={2} camX={camX} k={LAYERS[2].k} tone={LAYERS[2].tone} unitStarts={unitStarts} />
       <GroundBand camX={camX} width={width} />
 
       {/* THE FIGURE, drawn BEFORE the markers so it stands behind their names. */}
@@ -226,10 +249,10 @@ function Moon({ width }: { width: number }) {
  * camera and the whole layer is translated, so nothing is recomputed per frame —
  * the same lesson the ridge steps taught: static geometry, one moving parent.
  */
-function Depth({ depth, camX, k, tone, width }: {
-  depth: number; camX: SharedValue<number>; k: number; tone: string; width: number;
+function Depth({ depth, camX, k, tone, unitStarts }: {
+  depth: number; camX: SharedValue<number>; k: number; tone: string; unitStarts: number[];
 }) {
-  const props = useMemo(() => propsBetween(-800, 12000, depth), [depth]);
+  const props = useMemo(() => sceneProps(-800, 14000, depth, unitStarts), [depth, unitStarts]);
   const st = useAnimatedStyle(() => ({ transform: [{ translateX: -camX.value * k }] }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, st]} pointerEvents="none">
@@ -287,7 +310,9 @@ function PropShape({ p, tone }: { p: Prop; tone: string }) {
 
 /** The ground the figure and the markers stand on. */
 function GroundBand({ camX, width }: { camX: SharedValue<number>; width: number }) {
-  const STEP = 20;
+  // 40, not 20. The ground is one static View per step across 14k units, and at 20
+  // that is 640 of them for a curve gentle enough that nobody can see the join.
+  const STEP = 40;
   const steps = useMemo(() => {
     const n = Math.ceil(12800 / STEP);
     return Array.from({ length: n }, (_, i) => {
