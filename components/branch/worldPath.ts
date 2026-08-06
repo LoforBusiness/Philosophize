@@ -29,12 +29,12 @@
 // being black and white.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** How long the figure takes to walk one lesson to the next. The reader asked for 5. */
-export const WALK_SECONDS = 5;
+/** How long the figure takes to walk one lesson to the next. */
+export const WALK_SECONDS = 7;
 /** Stage units per second at a walk — matches rig.ts's gait so feet do not slide. */
 export const WALK_SPEED = 46;
 /** Therefore the gap between two markers. Derived, never typed in twice. */
-export const SPAN = WALK_SECONDS * WALK_SPEED;   // 230
+export const SPAN = WALK_SECONDS * WALK_SPEED;   // 322 at 7s
 
 /** Where the ground sits when the terrain is level, in stage units from the top. */
 export const BASE_Y = 300;
