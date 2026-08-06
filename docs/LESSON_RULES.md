@@ -187,6 +187,68 @@ happened.
 > *"Make sure no other stickmen in other lessons are like this … find an easy way to
 > find this problem then fix."*
 
+**A6. EVERY LIVING THING ON STAGE IS ALIVE — including the ones in the background,
+and no matter how small.** A figure that stands perfectly still while another
+breathes beside it does not read as "in the background", it reads as a cardboard
+cut-out, and it drags the figure next to it down with it. There is no size at
+which this stops mattering: a small still thing is more obviously dead than a
+large one, because the eye has nothing else to look at in it.
+
+The bar is not "it has an animation somewhere". It is that the thing is a
+function of a clock **on every frame**. In practice:
+
+- Anything posed through the rig gets this for free — `stand(t)` carries breath, a
+  weight rock and a head drift, and `emoteHold(code, t)` adds a hand drift
+  specifically "so a hold never freezes". **Passing a figure through `pose()` with
+  a stance that never saw `t` is the defect**, not the rig's shape.
+- Anything drawn by hand out of `View`s has none of that and must be given it
+  explicitly, or it must go through a rig of its own (see A7).
+
+**This is checkable, and it was checked.** Trace every `pose(NAME, …)` back to
+where `NAME` is bound and ask whether that expression reaches a clock:
+
+```
+121 of 123 rig figures alive · 0 frozen · 2 untraceable by name (both boxers, both alive)
+```
+
+So the rig side of the app was already sound. **Both real offenders were animals**
+— see A7 — which is the useful part of the result: the thing that felt like a
+widespread stickman problem was actually two hand-built creatures with no
+skeleton. A separate check for "alive but holds ONE gesture for the whole lesson"
+found two more (`ethics8` code 48, `ethics10` code 24); both are figures the
+script says are sitting still, so both are correct.
+
+**A7. IF IT IS A REAL ANIMAL, IT MUST BE THAT ANIMAL.** A dog has to read as a
+dog, not as "a quadruped". The two in the app failed this completely: ethics-1's
+was a 48×20 pill, a circle, four straight 3.5px sticks and a line for a tail, and
+political-31's was a pill with *two* legs. Neither is a species; "generic animal"
+is the visual equivalent of writing "some philosopher said something".
+
+Keep the house style — ink, line, the same weights the figures are drawn in. The
+stickman look is not the problem and must not change. What must change is that
+the *proportions and joints* are the real creature's:
+
+- **The topline.** A dog's falls from withers to croup; an ox's is level. A level
+  back on a dog is a table.
+- **The underline.** Deep chest, then a tuck at the waist. A constant-depth body
+  is a pill, which is exactly what was there.
+- **The hind leg.** Stifle forward, hock back — a clear Z. This is the single
+  strongest cue and the one that separates a dog from a goat, a horse or a stool.
+- **The head.** A wedge on a rising neck with a muzzle projecting forward. One
+  circle is a seal.
+
+And it is alive, by A6: breath in the chest and not the belly, a head drift, an
+ear that flicks, a tail that wags, and a gait cycled on DISTANCE rather than on
+the wall clock (a walk driven by `t` slides its feet the moment speed changes).
+
+> **Draw it in plain Node before it reaches a device.** `critters.ts` has zero
+> imports for the same reason `rig.ts` does, so a contact sheet of every pose
+> answers "is this a dog?" without Metro. Two passes have already been rejected on
+> that sheet: the first had no elbow, so the forelegs were one vertical post, and
+> the second still read as a deer — spike tail, horn ear, a solid wedge for a
+> ribcage. **A stick-dog is harder than a stick-person**, because a person is
+> identified by proportion alone and an animal is identified by silhouette.
+
 ### B. The figure
 
 **B6. One figure scale for the whole app.** The shared `K_FIG` in `cinematicKit.tsx`
