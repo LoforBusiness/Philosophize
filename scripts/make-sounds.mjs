@@ -37,145 +37,14 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'assets', 'sound');
 
-const HI = 44100;   // anything with a transient
-const LO = 22050;   // struck tones, whose partials are all well under 11 kHz
-
-// Mutable so the helpers below (which read it at call time) follow whichever clip
-// is being rendered. `atRate` is the only thing that may change it.
-let RATE = LO;
-const atRate = (rate, make) => {
-  const prev = RATE;
-  RATE = rate;
-  try { return { rate, data: make() }; } finally { RATE = prev; }
-};
-
-// A fixed generator, so re-running produces identical files. Math.random() would
-// make every rebuild a different sound and every diff a mystery.
-let seed = 0x9e3779b9;
-const rnd = () => {
-  seed ^= seed << 13; seed >>>= 0;
-  seed ^= seed >> 17;
-  seed ^= seed << 5; seed >>>= 0;
-  return (seed / 0xffffffff) * 2 - 1;
-};
-const reseed = (s) => { seed = s >>> 0; };
-
-/** One-pole low pass. `c` is 0..1 — smaller is duller. */
-function lowpass(buf, c) {
-  let y = 0;
-  return buf.map((x) => (y += c * (x - y)));
-}
-/** Subtracting a low pass from the signal leaves the top end. */
-function highpass(buf, c) {
-  const lo = lowpass(buf, c);
-  return buf.map((x, i) => x - lo[i]);
-}
-
-const noise = (n) => Array.from({ length: n }, () => rnd());
-
-/**
- * A RESONANT BANDPASS, which is the thing the first set was missing.
- *
- * A one-pole low pass only makes noise duller; it cannot make it sound like a
- * MATERIAL. What tells an ear "leather on a hard floor" rather than "a filtered
- * hiss" is a resonance — a frequency the object rings at, sharply. This is the
- * standard RBJ biquad, and its `q` is the whole difference between a shoe and a
- * shush.
- */
-function bandpass(buf, f, q) {
-  const w = (2 * Math.PI * f) / RATE;
-  const alpha = Math.sin(w) / (2 * q);
-  const cosw = Math.cos(w);
-  const b0 = alpha, b1 = 0, b2 = -alpha;
-  const a0 = 1 + alpha, a1 = -2 * cosw, a2 = 1 - alpha;
-  let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-  return buf.map((x) => {
-    const y = (b0 / a0) * x + (b1 / a0) * x1 + (b2 / a0) * x2 - (a1 / a0) * y1 - (a2 / a0) * y2;
-    x2 = x1; x1 = x; y2 = y1; y1 = y;
-    return y;
-  });
-}
-
-/** A struck resonance: a decaying sine, the cheapest honest model of a ringing body. */
-const ring = (n, f, decay, g = 1) => {
-  const e = env(n, 0.0004, decay);
-  return sine(n, f).map((x, i) => x * e[i] * g);
-};
-
-/** Exponential decay from 1 to ~0 over the clip, with a short fade-in. */
-function env(n, attack, decay) {
-  const a = Math.max(1, Math.round(attack * RATE));
-  return Array.from({ length: n }, (_, i) => {
-    const rise = i < a ? i / a : 1;
-    return rise * Math.exp((-i / RATE) / decay);
-  });
-}
-
-const sine = (n, f, phase = 0) =>
-  Array.from({ length: n }, (_, i) => Math.sin(2 * Math.PI * f * (i / RATE) + phase));
-
-const mix = (...layers) => {
-  const n = Math.max(...layers.map((l) => l.length));
-  const out = new Array(n).fill(0);
-  for (const l of layers) for (let i = 0; i < l.length; i++) out[i] += l[i];
-  return out;
-};
-const gain = (buf, g) => buf.map((x) => x * g);
-
-/**
- * Centre, normalise to a peak, then fade the last 4ms so nothing ends on a click.
- *
- * THE CENTRING IS NOT COSMETIC. A short burst of low-passed noise does not average
- * to zero — filtering a finite random sequence leaves a residual offset, and
- * `step-a` shipped with one of 0.0137. A clip with DC in it starts by yanking the
- * speaker cone off centre and ends by letting it go, which is a click at both ends
- * that no fade can remove because the fade is applied to an offset signal. It is
- * worst on exactly the cue that can least afford it: the footfall, which fires
- * two and a half times a second under a walking figure.
- */
-function finish(buf, peak = 0.72) {
-  const dc = buf.reduce((a, x) => a + x, 0) / (buf.length || 1);
-  const centred = buf.map((x) => x - dc);
-  const max = Math.max(...centred.map(Math.abs)) || 1;
-  const k = peak / max;
-  const tail = Math.round(0.004 * RATE);
-  // AND A FADE-IN, which centring is what made necessary. Every layer already
-  // starts at zero — the envelopes and swells all begin at 0 — but subtracting the
-  // mean moves the whole clip down by that mean, so the first sample lands at −dc
-  // instead of at silence and the click reappears at the head. 1ms is inaudible
-  // against a 0.8ms attack and pins the start to zero exactly.
-  const nose = Math.round(0.001 * RATE);
-  return centred.map((x, i) => {
-    const up = i < nose ? i / nose : 1;
-    const down = i > buf.length - tail ? (buf.length - i) / tail : 1;
-    return x * k * up * down;
-  });
-}
-
-function wav(samples, RATE) {
-  const n = samples.length;
-  const b = Buffer.alloc(44 + n * 2);
-  b.write('RIFF', 0);
-  b.writeUInt32LE(36 + n * 2, 4);
-  b.write('WAVE', 8);
-  b.write('fmt ', 12);
-  b.writeUInt32LE(16, 16);          // PCM chunk size
-  b.writeUInt16LE(1, 20);           // format: PCM
-  b.writeUInt16LE(1, 22);           // channels: mono
-  b.writeUInt32LE(RATE, 24);
-  b.writeUInt32LE(RATE * 2, 28);    // byte rate
-  b.writeUInt16LE(2, 32);           // block align
-  b.writeUInt16LE(16, 34);          // bits
-  b.write('data', 36);
-  b.writeUInt32LE(n * 2, 40);
-  for (let i = 0; i < n; i++) {
-    const v = Math.max(-1, Math.min(1, samples[i]));
-    b.writeInt16LE(Math.round(v * 32767), 44 + i * 2);
-  }
-  return b;
-}
-
-const secs = (s) => Math.round(s * RATE);
+// The synthesis kit lives in ./lib/dsp.mjs so the sound LAB can build its
+// candidates with the identical arithmetic — see scripts/make-sound-lab.mjs. A
+// second copy of a bandpass would drift from this one within two edits, and then
+// the sound approved in the lab would not be the sound installed here.
+import {
+  HI, LO, atRate, reseed, lowpass, highpass, noise, bandpass, ring, env, sine,
+  mix, gain, at, finish, wav, secs, bell,
+} from './lib/dsp.mjs';
 
 // ── the set ──────────────────────────────────────────────────────────────────
 
@@ -363,19 +232,6 @@ function reward() {
 //
 //   D4 293.66  ·  D5 587.33  F#5 739.99  A5 880.00  ·  D6 1174.66  F#6 1479.98  A6 1760
 
-/** A struck tone: fundamental, a soft octave, a trace of the twelfth. */
-function bell(n, f, decay, g = 1) {
-  const e = env(n, 0.004, decay);
-  const body = mix(
-    sine(n, f),
-    gain(sine(n, f * 2), 0.26),
-    gain(sine(n, f * 3.01), 0.07),
-  );
-  return body.map((x, i) => x * e[i] * g);
-}
-
-/** Silence, then a layer. Used to place notes in a phrase. */
-const at = (delay, layer) => [...new Array(secs(delay)).fill(0), ...layer];
 
 /**
  * A PAGE TURNING — the beat-advance sound, ~10 times a lesson.

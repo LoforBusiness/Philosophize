@@ -48,3 +48,5 @@ yarn-error.*
 
 # Filmstrip sheets from scripts/sheet-moves.mjs — regenerate, never commit
 .moves-sheets/
+
+sound-lab.html

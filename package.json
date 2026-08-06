@@ -78,7 +78,8 @@
     "check:cards": "node scripts/validate-lessons.mjs",
     "check:cinematic": "node scripts/validate-cinematic.mjs",
     "check:badges": "node scripts/validate-badges.mjs",
-    "check:sound": "node scripts/validate-sound.mjs"
+    "check:sound": "node scripts/validate-sound.mjs",
+    "sound:lab": "node scripts/make-sound-lab.mjs"
   },
   "overrides": {
     "@expo/require-utils": "56.1.6"
