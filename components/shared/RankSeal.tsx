@@ -125,8 +125,19 @@ export default function RankSeal({ glyph, state, size = 96, progress = null }: P
 
       {/* The mark. Sized to the hexagon's INSCRIBED circle (r·√3/2), not its
           radius — the corners are 15% further out than the flat edges, so sizing
-          to the radius would let a wide glyph touch the top and bottom rules. */}
-      <Glyph name={glyph} size={size * 0.44} color={ink} />
+          to the radius would let a wide glyph touch the top and bottom rules.
+
+          THE zIndex IS FOR WEB, and it is not cosmetic there. React Native paints
+          siblings in DOM order, so on a device the mark has always sat correctly
+          on top of the hexagon above it. CSS does not: a `position: absolute`
+          element paints above static in-flow siblings whatever the order, so the
+          filled hexagon covered the mark completely and every seal in the app
+          rendered as an EMPTY hexagon in a browser — Profile and the Ranks sheet
+          included. Harmless on native, and it restores the one channel this
+          project can actually look at its own UI through (§21). */}
+      <View style={{ zIndex: 1 }}>
+        <Glyph name={glyph} size={size * 0.44} color={ink} />
+      </View>
     </View>
   );
 }

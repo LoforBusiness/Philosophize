@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator, Linking } from 'react-native';
+import {
+  View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator, Linking, useWindowDimensions,
+} from 'react-native';
 import { MotiView } from 'moti';
 import SketchIcon from '@/components/shared/SketchIcon';
+import PassCard from '@/components/shared/PassCard';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { useUserDataStore } from '@/stores/userDataStore';
+import { awardedRank } from '@/data/ranks';
 import { FALLBACK_PRICE, FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
 import { track } from '@/lib/posthog';
 
@@ -23,11 +28,17 @@ const PRIVACY_URL = 'https://philosophize.app/privacy';
 // been kept honest deliberately — §14 has imagined several premium features over
 // time, and a paywall that promises one before it exists is the fastest way to
 // make every other line on it untrustworthy.
+//
+// SET SHORT, because they are ENGRAVED ON THE CARD now rather than listed in a
+// column beside it. Each is one line on a face about 250pt wide, so the prose
+// versions ("Rest days that keep a streak alive, five at a time") ran off the
+// edge. Terse is also the right voice for a printed pass — a card states its
+// terms, it does not sell them.
 const BENEFITS = [
-  'Unlimited lessons every day',
-  'Review everything that’s due, not three a day',
-  'Rest days that keep a streak alive, five at a time',
-  'No ads, ever',
+  'Every lesson, every day',
+  'The whole review queue',
+  'Five rest days, held',
+  'No advertisement, ever',
 ];
 
 export default function PaywallContent({
@@ -44,6 +55,19 @@ export default function PaywallContent({
   const purchaseMonthly = useSubscriptionStore((s) => s.purchaseMonthly);
   const restore = useSubscriptionStore((s) => s.restore);
   const refresh = useSubscriptionStore((s) => s.refresh);
+
+  // The card is in the reader's own name and carries the rank they hold. It is
+  // the difference between a product shot and a thing addressed to them, and it
+  // costs two store reads.
+  const displayName = useUserDataStore((s) => s.displayName);
+  const rankIndex = useUserDataStore((s) => s.rankIndex);
+  const totalXP = useUserDataStore((s) => s.totalXP);
+  const rank = awardedRank(rankIndex, totalXP);
+
+  const { width: winW } = useWindowDimensions();
+  // 26pt of page padding either side, and never wider than a card wants to be
+  // held — beyond ~360 it stops reading as something in the hand.
+  const cardW = Math.min(360, winW - 52);
 
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -112,30 +136,45 @@ export default function PaywallContent({
     <View style={styles.safe}>
       <Header onClose={onClose} />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <MotiView from={{ opacity: 0, translateY: 8 }} animate={{ opacity: 1, translateY: 0 }} transition={{ type: 'timing', duration: 360 }}>
-          <Text style={styles.kicker}>SCHOLAR’S PASS</Text>
-          <Text style={styles.title}>Think without limits.</Text>
-          <Text style={styles.sub}>
-            Free gives you {FREE_DAILY_LESSON_LIMIT} {lessonsWord(FREE_DAILY_LESSON_LIMIT)} a day, with ads. Scholar’s Pass removes the cap and the ads — keep going as long as the curiosity lasts.
-          </Text>
+        {/* THE CARD IS THE PITCH. The benefits are printed ON the pass rather
+            than listed beside it, because the object is what is being offered —
+            a ticked feature table beside a drawn card would be two designs
+            arguing. The same component draws the day pass on the limit screen
+            with a stamp across it, so a reader meets this object twice and the
+            second meeting needs no explanation. */}
+        <MotiView
+          from={{ opacity: 0, translateY: 14 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 460 }}
+          style={styles.cardWrap}
+        >
+          <PassCard
+            variant="scholar"
+            name={displayName || 'Philosopher'}
+            rank={rank.current.name}
+            glyph={rank.current.glyph}
+            lines={BENEFITS}
+            width={cardW}
+          />
         </MotiView>
 
-        <View style={styles.card}>
-          {BENEFITS.map((b, i) => (
-            <View key={b} style={[styles.benefitRow, i === BENEFITS.length - 1 && { marginBottom: 0 }]}>
-              <View style={styles.tick}>
-                <SketchIcon name="check" color={Ink} size={15} />
-              </View>
-              <Text style={styles.benefitText}>{b}</Text>
-            </View>
-          ))}
-        </View>
+        <MotiView
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ type: 'timing', duration: 400, delay: 240 }}
+        >
+          <Text style={styles.title}>Think without limits.</Text>
+          <Text style={styles.sub}>
+            Free gives you {FREE_DAILY_LESSON_LIMIT} {lessonsWord(FREE_DAILY_LESSON_LIMIT)} a day, with ads.
+            The Pass lifts the cap, opens the whole review queue, and never stamps.
+          </Text>
 
-        <View style={styles.priceRow}>
-          <Text style={styles.price}>{price}</Text>
-          <Text style={styles.per}> / month</Text>
-        </View>
-        <Text style={styles.billNote}>Billed monthly · cancel anytime</Text>
+          <View style={styles.priceRow}>
+            <Text style={styles.price}>{price}</Text>
+            <Text style={styles.per}> / month</Text>
+          </View>
+          <Text style={styles.billNote}>Billed monthly · cancel anytime</Text>
+        </MotiView>
 
         {!available && (
           <View style={styles.previewBanner}>
@@ -200,29 +239,25 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 26, paddingBottom: 40 },
 
   kicker: { fontFamily: 'Inter_700Bold', fontSize: 12, color: InkSoft, letterSpacing: 2, marginBottom: 8 },
-  title: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 34, color: Ink, lineHeight: 38 },
-  sub: { fontFamily: 'Inter_400Regular', fontSize: 15, color: InkSoft, lineHeight: 22, marginTop: 12 },
+  // The card leads, so the headline is set smaller than it was and centred under
+  // it — at 34pt above a drawn object the two competed for the same job.
+  cardWrap: { marginTop: 4, marginBottom: 26 },
+  title: {
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 27,
+    color: Ink,
+    lineHeight: 32,
+    textAlign: 'center',
+  },
+  sub: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 14.5,
+    color: InkSoft,
+    lineHeight: 21,
+    marginTop: 10,
+    textAlign: 'center',
+  },
 
-  card: {
-    backgroundColor: Paper,
-    borderWidth: 2,
-    borderColor: Ink,
-    borderRadius: 4,
-    padding: 20,
-    marginTop: 26,
-  },
-  benefitRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  tick: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14,
-  },
-  benefitText: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 15.5, color: Ink },
 
   priceRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center', marginTop: 30 },
   price: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 40, color: Ink },

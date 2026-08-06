@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getLessonById, lessonAccessibility } from '@/data';
@@ -114,6 +114,8 @@ import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
+import PassCard from '@/components/shared/PassCard';
+import { awardedRank } from '@/data/ranks';
 import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
 
 const Page = '#FAFAF7';
@@ -267,6 +269,13 @@ const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   'political-political-14': Political14Lesson,
 };
 
+/** '6 AUG' — the day the pass was spent, struck across it. */
+function stampDate() {
+  const d = new Date();
+  const M = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  return d.getDate() + ' ' + M[d.getMonth()];
+}
+
 function todayStr() {
   const d = new Date();
   const p = (n: number) => String(n).padStart(2, '0');
@@ -284,6 +293,14 @@ export default function LessonScreen() {
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
   const hasHydrated = useUserDataStore((s) => s._hasHydrated);
   const openPaywall = useUIStore((s) => s.openPaywall);
+  // For the day-pass card on the limit screen. Read unconditionally — these are
+  // hooks, and the screen has several early returns below them.
+  const displayName = useUserDataStore((s) => s.displayName);
+  const rankIndex = useUserDataStore((s) => s.rankIndex);
+  const totalXP = useUserDataStore((s) => s.totalXP);
+  const lockRank = awardedRank(rankIndex, totalXP);
+  const { width: winW } = useWindowDimensions();
+  const lockCardW = Math.min(340, winW - 68);
 
   // Freeze the daily-limit gate ONCE — but only after the persisted store has
   // hydrated, so we never freeze a pre-hydration default (which would read used=0
@@ -356,22 +373,38 @@ export default function LessonScreen() {
   if (atLimit) {
     return (
       <ScreenTransition bg={Page}>
+        {/* THE DAY PASS, STAMPED. Not a lock icon: the free tier IS one
+            admission a day, and this reader has just spent theirs on a lesson
+            they finished. Drawing the thing they hold — in their name, struck
+            with today's date — says "you used it", which is true, rather than
+            "you are shut out", which is not. It is the same PassCard the offer
+            shows, so the upgrade needs no feature table: it is visibly this
+            object without the stamp. */}
         <SafeAreaView style={styles.lockWrap}>
-          <View style={styles.lockIcon}>
-            <SketchIcon name="lock" color={Ink} size={34} />
-          </View>
+          <PassCard
+            variant="day"
+            name={displayName || 'Philosopher'}
+            rank={lockRank.current.name}
+            glyph={lockRank.current.glyph}
+            lines={[
+              `${FREE_DAILY_LESSON_LIMIT} ${lessonsWord(FREE_DAILY_LESSON_LIMIT)} a day`,
+              'Three review questions',
+              'Renews at midnight',
+            ]}
+            stamp={`USED · ${stampDate()}`}
+            width={lockCardW}
+          />
           <Text style={styles.lockTitle}>
             {FREE_DAILY_LESSON_LIMIT === 1 ? 'That’s your lesson for today' : `That’s your ${FREE_DAILY_LESSON_LIMIT} for today`}
           </Text>
           <Text style={styles.lockBody}>
-            Free thinkers get {FREE_DAILY_LESSON_LIMIT} {lessonsWord(FREE_DAILY_LESSON_LIMIT)} a day. Come back
-            tomorrow — or unlock unlimited, ad-free lessons with Scholar’s Pass and keep the momentum going.
+            Come back tomorrow and it renews — or carry the one that never gets stamped.
           </Text>
           <Pressable
             onPress={openPaywall}
             style={({ pressed }) => [styles.primaryBtn, pressed && { opacity: 0.85 }]}
           >
-            <Text style={styles.primaryText}>Unlock Scholar’s Pass</Text>
+            <Text style={styles.primaryText}>See the Scholar’s Pass</Text>
           </Pressable>
           <Pressable onPress={exitLesson} style={styles.secondaryBtn} hitSlop={8}>
             <Text style={styles.secondaryText}>Maybe tomorrow</Text>
