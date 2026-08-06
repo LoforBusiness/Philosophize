@@ -677,6 +677,45 @@ the first attempt used `top: 300 + r * RUNG_SP`, which pushed every rung out of 
 so none of them showed at all. The same inversion is the answer for descending, falling
 and any other vertical travel.
 
+**C22f. A FOOT NEVER SLIDES — AND STOPPING IS WHERE IT SLIDES.** A planted foot's
+world position must not change, ever. The walk cycle itself gets this exactly right by
+construction: over one stance the foot's local x travels −S while the figure advances
++S, so a foot on the floor does not move at all. Mid-walk skating is therefore not a
+thing that happens here. **The skate is always in the hand-off from walking to
+standing**, and it was measured at up to 113% of a stride — more than a whole step of
+drift, at the exact moment the viewer is looking at the feet because the figure is
+arriving somewhere.
+
+Three separate mistakes produce it, and all three are now handled inside
+`strideStance` / `strideMode`, so a lesson gets the fix by calling them:
+
+- **Never ease the travel distance twice.** The scene positions the body at
+  `lerp(x0, x1, tr)` having ALREADY eased `tr`. Easing it again to drive the legs puts
+  the feet on `span·ease01(ease01(u))` while the body is on `span·ease01(u)` — two
+  curves that meet only at the endpoints, and glide in between. The distance handed to
+  the gait must be the SAME distance the scene moves the body.
+- **The arrival feet are pinned in the WORLD, not in the figure's frame.** A settled
+  pose has fixed ground-relative feet, so the moment the blend into it begins the
+  planted foot stops counter-translating and rides along with the body. Offset the
+  arrival target by the distance still to travel, so the body closes the gap instead of
+  dragging the foot.
+- **The foot with further to go LIFTS.** The walk holds the feet a stride apart and the
+  stance holds them a hand's width apart; something has to cover the difference, and
+  both feet cannot be pinned at once. A foot that travels while touching the floor *is*
+  the skate. So it takes a real step — lifted, arced, set down where it stays. Pinning
+  alone cannot fix this half, and leaving it out is why the first two attempts still
+  slid.
+
+And the settle is a **distance, not a fraction of the journey**. `clamp01((tr − 0.78) /
+0.22)` blends over the last 22% of the trip whatever the trip was, so the further the
+figure walked the more ground it covered while its feet were locking to a static pose —
+the slide grew with the journey, which is exactly backwards.
+
+> Verify by measurement, not by eye: `rig.ts` and `moves.ts` are pure maths with no
+> imports, so a walk can be sampled in plain Node and the world position of every
+> planted foot compared frame to frame. Count a foot as "on the floor" if it is within
+> ~1.5 units of it — testing `y === 0` lets a token lift hide a real skate.
+
 ### D. Nothing is hidden, cut, or covered
 
 **D23. Props must never cover the figure, and the figure must never cover the props.**

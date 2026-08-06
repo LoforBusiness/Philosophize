@@ -62,7 +62,7 @@
 
 import {
   clamp01, ease01, easeOutCubic, gaitVary, holdEnv, life2, lerp, mixStance,
-  phaseFor, seatBob, stand, U, walk, WALK,
+  phaseFor, seatBob, settleFrac, settleStep, stand, U, walk, WALK,
   type Gait, type P2, type Stance,
 } from './rig';
 
@@ -277,7 +277,14 @@ export function strideMode(
   // own gait habit and its own footfall, so a pair never marches in lockstep.
   const g = gaitVary(gaitFor(mode), x0 * 0.37 + x1 * 0.11 + seed * 3.7);
   const span = Math.abs(x1 - x0);
-  const w = moveBody(mode, span * ease01(tr) + seed * 11, g);
+  // NOT `span * ease01(tr)`. This file was written from the pre-fix version of
+  // `strideStance` and kept the double-ease that rig.ts had already removed: the
+  // scene puts the body at `lerp(x0, x1, tr)` having eased tr once, so easing it
+  // again here drove the feet along `span·ease01(ease01(u))` while the body ran
+  // on `span·ease01(u)`. Two curves meeting only at the ends, and a glide in
+  // between — measured at 122 units of skate on a 220-unit walk, three and a half
+  // strides. Every travel mode in this file went through it.
+  const w = moveBody(mode, span * tr + seed * 11, g);
   const far = clamp01(span / 40);
   const push = ease01(clamp01(1 - tr / 0.13)) * far;
   const land = Math.sin(Math.PI * clamp01((tr - 0.66) / 0.28)) * far;
@@ -287,7 +294,11 @@ export function strideMode(
     neck: w.neck - push * 0.05,
     bob: w.bob - push * 2.4 - land * 1.7,
   };
-  return mixStance(moving, settled, clamp01((tr - 0.78) / 0.22));
+  // Same footfall-snapped settle as the rig's walk, from the same helpers, so the
+  // twelve travel modes stop exactly as cleanly as the default one.
+  const sf = settleFrac(span);
+  const arrive = clamp01((tr - (1 - sf)) / sf);
+  return settleStep(moving, settled, span * (1 - tr), arrive);
 }
 
 /** `travelStance` for a travel mode: walk there in `mode`, or blend poses in place. */
