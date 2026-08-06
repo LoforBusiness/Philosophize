@@ -2,6 +2,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
+import CritterView from './CritterView';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './ethicsScript';
 import {
@@ -36,6 +37,8 @@ import type { SceneApi } from './CinematicPlayer';
 
 const HUMAN_X = 250;
 const CRIT_X = 86;
+/** Shoulder height on stage. A mid-sized dog beside a 103-unit person. */
+const CRIT_K = 46;
 const PIVOT_X = 158;
 const PIVOT_Y = 430;
 
@@ -157,6 +160,7 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
       tip: Math.sin(t * 1.2) * 4 * conOn * (1 - (n === 6 ? q : 0)),  // settles level on a considered Q1
       critOn,
       critX,
+      critGait: Q2[n] ? q : 0,
       ledOn: cnt > 0 ? (was > 0 ? 1 : write) : 0,
       r0: row(0), r1: row(1), r2: row(2),
       plant: L(PLANT[p], PLANT[n]),
@@ -176,6 +180,15 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
   });
 
   const DH = useDerivedValue<Bundle>(() => SCENE.value.human);
+
+  // The dog. It breathes, drifts its head, flicks an ear and wags whatever the
+  // beat is doing (A6), and only WALKS while it ambles off on Q2 — its legs cycle
+  // on the DISTANCE it has covered, never on the wall clock, so the stride matches
+  // the ground however fast the amble happens to be.
+  const CRIT_ON = useDerivedValue(() => SCENE.value.critOn);
+  const CRIT_XV = useDerivedValue(() => SCENE.value.critX);
+  const CRIT_GAIT = useDerivedValue(() => SCENE.value.critGait);
+  const CRIT_PHASE = useDerivedValue(() => (CRIT_X - SCENE.value.critX) / CRIT_K);
   const camStyle = useAnimatedStyle(() => {
     const c = SCENE.value.cam;
     return { transform: [{ translateX: STAGE_W / 2 - c.cx * c.s }, { translateY: STAGE_H / 2 - c.cy * c.s }, { scale: c.s }] };
@@ -189,7 +202,7 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
         <AskBanner S={SCENE} />
         <Origins S={SCENE} />
         <Sprout S={SCENE} />
-        <Critter S={SCENE} />
+        <CritterView kind="dog" clock={clock} x={CRIT_XV} ground={GROUND} k={CRIT_K} dir={-1} gait={CRIT_GAIT} phase={CRIT_PHASE} opacity={CRIT_ON} />
         <Stickman D={DH} k={K_FIG} />
         <Scale S={SCENE} />
       </Animated.View>
@@ -339,30 +352,6 @@ function Sprout({ S }: { S: SharedValue<any> }) {
   );
 }
 
-// ── the animal (shares the instincts, never steps out) ────────────────────────
-function Critter({ S }: { S: SharedValue<any> }) {
-  const wrap = useAnimatedStyle(() => ({
-    opacity: S.value.critOn,
-    transform: [{ translateX: S.value.critX }, { translateY: GROUND - 22 }],
-  }));
-  return (
-    <Animated.View style={[{ position: 'absolute', left: 0, top: 0 }, wrap]} pointerEvents="none">
-      {/* body */}
-      <View style={{ position: 'absolute', left: -24, top: -10, width: 48, height: 20, borderRadius: 10, backgroundColor: INK }} />
-      {/* head (front / left) */}
-      <View style={{ position: 'absolute', left: -34, top: -16, width: 17, height: 17, borderRadius: 9, backgroundColor: INK }} />
-      {/* ear */}
-      <View style={{ position: 'absolute', left: -33, top: -22, width: 7, height: 8, borderRadius: 3, backgroundColor: INK }} />
-      {/* legs */}
-      <View style={{ position: 'absolute', left: -20, top: 6, width: 3.5, height: 16, backgroundColor: INK }} />
-      <View style={{ position: 'absolute', left: -8, top: 8, width: 3.5, height: 14, backgroundColor: INK }} />
-      <View style={{ position: 'absolute', left: 10, top: 8, width: 3.5, height: 14, backgroundColor: INK }} />
-      <View style={{ position: 'absolute', left: 18, top: 6, width: 3.5, height: 16, backgroundColor: INK }} />
-      {/* tail */}
-      <View style={{ position: 'absolute', left: 22, top: -8, width: 12, height: 2.5, backgroundColor: INK, borderRadius: 2, transform: [{ rotate: '-25deg' }] }} />
-    </Animated.View>
-  );
-}
 
 // The band is measured AFTER the camera (scale 1.14 about (196, 430)): the ledger's
 // top edge lands at 247 and the ankle joints at 329, so [40, 338] holds every pixel
