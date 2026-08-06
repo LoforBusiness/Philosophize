@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Pressable, type StyleProp, type ViewStyle, type GestureResponderEvent } from 'react-native';
 import { MotiView } from 'moti';
-import { cue } from '@/lib/feedback';
+import { touch } from '@/lib/feedback';
 import { Easing } from 'react-native-reanimated';
 
 interface Props {
@@ -14,28 +14,25 @@ interface Props {
   containerStyle?: StyleProp<ViewStyle>;
   scaleTo?: number;
   disabled?: boolean;
-  /**
-   * WHICH FINGERTIP. Three tap sounds were chosen in the lab, and they are three
-   * MATERIALS, so cycling them would sound like the surface changed at random.
-   * They map to how weighty the control is instead:
-   *
-   *   'solid'  a card or a primary button — wood, the default
-   *   'glass'  a switch or a small precise mechanism
-   *   'light'  a list row or a secondary control — barely a ring
-   */
-  weight?: 'solid' | 'glass' | 'light';
 }
-
-/** The index of each material in the sound layer's ladder (lib/sound/real.ts). */
-const WEIGHT = { solid: 0, glass: 1, light: 2 } as const;
 
 // A pressable that gives a quick, springy scale-down while held — the subtle
 // tactile feedback that makes tapping feel responsive instead of dead.
-export default function PressableScale({ onPress, children, style, containerStyle, scaleTo = 0.96, disabled, weight = 'solid' }: Props) {
+export default function PressableScale({ onPress, children, style, containerStyle, scaleTo = 0.96, disabled }: Props) {
   const [pressed, setPressed] = useState(false);
   return (
     <Pressable
-      // ── THE SOUND FIRES ON `onPress`, AND IT MUST NOT MOVE BACK TO `onPressIn`.
+      // ── NO SOUND HERE, AND THE HAPTIC STILL FIRES ON `onPress`.
+      //
+      // This used to click. It had exactly three call sites — the branch cards,
+      // the three home actions, and Quick Start — which is to say every one of
+      // them is NAVIGATION, and navigating is not an event. It was the last of the
+      // small frequent sounds to go, after the page turn and the walk's arrival.
+      //
+      // What is left is the haptic, which was never the complaint and does the
+      // useful half: it confirms the press landed without adding to the noise.
+      //
+      // ── AND IT MUST NOT MOVE BACK TO `onPressIn`.
       //
       // It was on press-in, with the reasoning that "the sound is confirming the
       // touch, and a click that arrives after the finger lifts reads as lag". That
@@ -61,7 +58,7 @@ export default function PressableScale({ onPress, children, style, containerStyl
       // Nothing sounds if there is nothing to do: a PressableScale with no handler
       // is decoration, and decoration that clicks is the same mistake as the figure
       // who used to clop across the home screen.
-      onPress={onPress && ((e) => { if (!disabled) cue('tap', WEIGHT[weight]); onPress(e); })}
+      onPress={onPress && ((e) => { if (!disabled) touch(); onPress(e); })}
       disabled={disabled}
       style={containerStyle}
       onPressIn={() => setPressed(true)}

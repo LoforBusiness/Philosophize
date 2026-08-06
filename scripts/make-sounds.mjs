@@ -61,20 +61,10 @@ import {
 // four audible taps, and correctly tilted noise. See lib/dsp.mjs.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** A fingertip on a solid thing. Three materials, by how weighty the control is. */
-function realTap({ mat, f0, decay, damp, nailG, hi, len, wet, peak, seed }) {
-  reseed(seed);
-  const n = secs(len);
-  const cn = secs(0.010);
-  const nail = highpass(tilted(cn, -0.6), hi);
-  const ne = env(cn, 0.0002, 0.0022);
-  const dry = mix(nail.map((x, i) => x * ne[i] * nailG),
-    modal(n, f0, MATERIAL[mat], { decay, damp, g: 1, tilt: 1.3, attack: 0.0006 }));
-  return finish(reflect(dry, { time: 0.10, wet, damp: 0.6 }).slice(0, n), peak);
-}
-const tapWood  = () => realTap({ mat: 'wood',  f0: 700,  decay: 0.030, damp: 0.8, nailG: 0.35, hi: 0.30, len: 0.20, wet: 0.25, peak: 0.26, seed: 411 });
-const tapGlass = () => realTap({ mat: 'glass', f0: 1180, decay: 0.055, damp: 0.35, nailG: 0.50, hi: 0.30, len: 0.26, wet: 0.25, peak: 0.24, seed: 411 });
-const tapCard  = () => realTap({ mat: 'plate', f0: 380,  decay: 0.014, damp: 1.4, nailG: 0.22, hi: 0.20, len: 0.10, wet: 0.16, peak: 0.24, seed: 411 });
+// THE BUTTON TAP IS GONE. It had exactly three call sites and all three were
+// navigation — a branch card, the home actions, Quick Start — and navigating is
+// not an event. The three fingertips are still in scripts/sound-candidates.mjs if
+// a genuine control ever needs one; nothing in the app does.
 
 /**
  * A GESTURE THROUGH AIR — three of them, by how the hand is moving.
@@ -571,10 +561,6 @@ const SET = {
   'step-a': atRate(HI, () => step(0)),
   'step-b': atRate(HI, () => step(1)),
   impact: atRate(HI, impact),
-  // Three taps, by the weight of the control — see lib/sound/real.ts.
-  tap: atRate(HI, tapWood),
-  'tap-glass': atRate(HI, tapGlass),
-  'tap-card': atRate(HI, tapCard),
   'whoosh-1': atRate(HI, whooshSleeve),
   'whoosh-2': atRate(HI, whooshFast),
   'whoosh-3': atRate(HI, whooshHeavy),

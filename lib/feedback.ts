@@ -33,7 +33,6 @@ const HAPTIC: Record<Cue, Buzz> = {
   whoosh: null,   // the figure moves; the reader did not
   tick: null,     // fifteen in a row down the XP counter. Sound only.
   // ── the reader did something ───────────────────────────────────────────────
-  tap: 'light',   // they touched something; it answers
   keep: 'light',  // a quote goes into the library
   // ── the reader was answered ────────────────────────────────────────────────
   //
@@ -73,6 +72,23 @@ export function cue(name: Cue, step = 0) {
     else if (buzz === 'medium') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     else void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   } catch {}
+}
+
+/**
+ * TOUCHED, BUT NOT HEARD.
+ *
+ * Navigating is not an event. Opening a branch or a tab is how you move through
+ * the app rather than something that happens in it, and a click on every one of
+ * those was the last of the small frequent sounds to go — after the page turn and
+ * the walk's arrival, for the same reason.
+ *
+ * The HAPTIC stays, because it is not the thing that was objected to and it does
+ * the useful half of the job: it confirms the press landed without adding to the
+ * noise. This is deliberately not a `Cue` — a cue is a sound with a feel attached,
+ * and there is no sound here to attach one to.
+ */
+export function touch() {
+  try { void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
 }
 
 /** Warm the clips up. Called once the app is past its launch screen. */

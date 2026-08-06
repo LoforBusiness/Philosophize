@@ -8,7 +8,6 @@ export type Cue =
   | 'step'     // a footfall — alternates between two samples inside the provider
   | 'impact'   // something in the scene is struck
   | 'whoosh'   // a hand through air; the VARIANT is chosen by measured speed
-  | 'tap'      // a fingertip; the variant is chosen by the control's weight
   | 'rethink'  // a wooden knock: the answer was not that one
   | 'keep'     // a clasp closing: a quote goes into the library
   // ── what the reader earns: pitched, all of it in D ─────────────────────────

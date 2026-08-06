@@ -13,7 +13,7 @@ import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { shotAt, NEUTRAL, type Shot } from './camera';
-import { cue } from '@/lib/feedback';
+import { cue, touch } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import { swishTrack } from './gestures';
 import { lessonHasSound } from './lessonSound';
@@ -433,8 +433,11 @@ export default function CinematicPlayer({
                     saved={quoteSaved}
                     onToggle={() => {
                       // The clasp only closes on the way IN. Taking a quote back
-                      // out is a plain tap; it is not an achievement.
-                      if (sounded) cue(quoteSaved ? 'tap' : 'keep');
+                      // out is not an achievement, and now that the button tap is
+                      // gone there is nothing for it to sound like — so it is felt
+                      // and not heard, like every other control in the app.
+                      if (sounded && !quoteSaved) cue('keep');
+                      else touch();
                       toggleQuote({
                         id: beat.quote!.id,
                         text: beat.quote!.text,

@@ -745,8 +745,11 @@ function SoundSection() {
           onChange={(v) => {
             setSettingAll('soundEffects', v);
             sound.setEnabled(v);
-            // Answer the switch with the thing the switch controls.
-            if (v) cue('tap');
+            // Answer the switch with the thing the switch controls. It used to
+            // preview the button tap; that sound no longer exists, so it previews
+            // the note a correct answer makes instead — which is a better sample
+            // of what turning this on actually gets you.
+            if (v) cue('right');
           }}
         />
       </Row>

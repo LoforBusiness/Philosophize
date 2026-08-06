@@ -49,11 +49,6 @@ const SOURCES = {
   stepA: require('../../assets/sound/step-a.wav'),
   stepB: require('../../assets/sound/step-b.wav'),
   impact: require('../../assets/sound/impact.wav'),
-  // Three fingertips, by how weighty the control is: wood for a card or button,
-  // glass for a switch, card for a light row. Chosen with `step` at the call site.
-  tap: require('../../assets/sound/tap.wav'),
-  tapGlass: require('../../assets/sound/tap-glass.wav'),
-  tapCard: require('../../assets/sound/tap-card.wav'),
   // Three gestures, by how the hand is actually moving — see gestures.ts.
   whoosh1: require('../../assets/sound/whoosh-1.wav'),
   whoosh2: require('../../assets/sound/whoosh-2.wav'),
@@ -76,8 +71,6 @@ const SOURCES = {
 /** The variant ladders. Indexed by the `step` argument; the last entry repeats. */
 const RIGHT = ['right1', 'right2', 'right3'] as const;
 const TICK = ['tick1', 'tick2', 'tick3'] as const;
-/** wood · glass · card — by the weight of the control that was touched. */
-const TAP = ['tap', 'tapGlass', 'tapCard'] as const;
 /** sleeve · fast hand · heavy swing — by the measured speed of the gesture. */
 const WHOOSH = ['whoosh1', 'whoosh2', 'whoosh3'] as const;
 
@@ -98,7 +91,7 @@ let footToggle = 0;
  */
 const THROTTLE: Record<Cue, number> = {
   step: 90, impact: 400, whoosh: 150,
-  tap: 40, rethink: 200, keep: 150,
+  rethink: 200, keep: 150,
   // 25ms, well under the counter's own cadence: the throttle is here to stop a
   // runaway, not to thin the run. Thinning it would make the count stutter.
   tick: 25,
@@ -169,9 +162,8 @@ export const realSound: SoundProvider = {
     // A run of correct answers CLIMBS and then holds at the top — clamped, so a
     // ten-question lesson does not need ten notes.
     if (cue === 'right') { fire(RIGHT[Math.min(Math.max(step | 0, 0), RIGHT.length - 1)]); return; }
-    // The variant is the CALLER'S measurement, not a preference: how weighty the
-    // control is, and how fast the hand was actually moving.
-    if (cue === 'tap') { fire(TAP[Math.min(Math.max(step | 0, 0), TAP.length - 1)]); return; }
+    // The variant is the CALLER'S measurement, not a preference: how fast the hand
+    // was actually moving.
     if (cue === 'whoosh') { fire(WHOOSH[Math.min(Math.max(step | 0, 0), WHOOSH.length - 1)]); return; }
     // The counter CYCLES, so the rise is continuous however long the count runs.
     if (cue === 'tick') { fire(TICK[(((step | 0) % TICK.length) + TICK.length) % TICK.length]); return; }

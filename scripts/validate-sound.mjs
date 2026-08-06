@@ -169,7 +169,7 @@ ok('the XP counter climbs', tickRun[0] < tickRun[1] && tickRun[1] < tickRun[2],
 head('the mix: frequent is quiet, rare is loud');
 const pk = (c) => Math.max(...clips[c].x.map(Math.abs));
 const order = [
-  ['tick-1', 'tap'], ['tap', 'keep'], ['keep', 'right-1'],
+  ['tick-1', 'keep'], ['keep', 'right-1'],
   // The three gestures sit with the world sounds, under everything earned.
   ['whoosh-1', 'right-1'], ['whoosh-2', 'right-1'], ['whoosh-3', 'right-1'],
   ['rethink', 'right-1'], ['right-1', 'impact'], ['impact', 'badge'], ['badge', 'rankup'],
@@ -226,18 +226,21 @@ function brightness(clip) {
   return high / (low + high || 1);
 }
 
+// The reference used to be the button tap, which no longer exists. `rethink` is
+// the right replacement and arguably the better one: a struck, damped wooden body
+// is the app's darkest percussive sound, so the two still bracket the range.
 const shoe = brightness('step-a');
-const tapB = brightness('tap');
+const dull = brightness('rethink');
 ok('a dress-shoe heel has real top end', shoe > 0.08,
   `${(shoe * 100).toFixed(1)}% of its energy is above 4 kHz — the leather on the floor`);
-ok('the tap is warm, not hissy', tapB < 0.05,
-  `${(tapB * 100).toFixed(1)}% above 4 kHz — body rather than static`);
-ok('and they sit on opposite sides of that line', shoe > tapB * 3,
-  `shoe ${(shoe * 100).toFixed(1)}% vs tap ${(tapB * 100).toFixed(1)}%`);
+ok('a damped wooden knock has almost none', dull < 0.05,
+  `${(dull * 100).toFixed(1)}% above 4 kHz — body rather than edge`);
+ok('and they sit on opposite sides of that line', shoe > dull * 3,
+  `shoe ${(shoe * 100).toFixed(1)}% vs knock ${(dull * 100).toFixed(1)}%`);
 
 // The top end can only exist if the file has room for it. A 22.05 kHz clip is
 // capped at 11 kHz, which is where the whole set used to be.
-const percussive = ['step-a', 'step-b', 'tap', 'tap-glass', 'tap-card', 'keep',
+const percussive = ['step-a', 'step-b', 'keep',
   'tick-1', 'rethink', 'impact', 'whoosh-1', 'whoosh-2', 'whoosh-3'];
 ok('every clip with a transient is 44.1 kHz',
   percussive.every((c) => clips[c].rate === 44100),
@@ -337,10 +340,13 @@ ok('nothing plays in the background', /shouldPlayInBackground:\s*false/.test(rea
 // there. This is asserted rather than trusted because the symptom appears only on
 // a device, under a finger, while scrolling.
 const pressSrc = fs.readFileSync(path.join(ROOT, 'components/shared/PressableScale.tsx'), 'utf8');
-ok('the button tap fires on onPress, never onPressIn',
-  /onPress=\{onPress && \(\(e\) => \{[^}]*cue\('tap'/.test(pressSrc)
-    && !/onPressIn=\{[^}]*cue\(/.test(pressSrc),
-  'press-in fires during a scroll, and a sound cannot be un-played');
+// Still worth asserting now the sound is gone, because the HAPTIC is not: a buzz
+// off every card a thumb crosses while scrolling is the same defect wearing a
+// different coat, and it would be harder to notice.
+ok('the button feedback fires on onPress, never onPressIn',
+  /onPress=\{onPress && \(\(e\) => \{[^}]*touch\(\)/.test(pressSrc)
+    && !/onPressIn=\{[^}]*(cue|touch)\(/.test(pressSrc),
+  'press-in fires during a scroll, and neither a sound nor a buzz can be taken back');
 
 // ── 4a. THE FOOT-LOCK ────────────────────────────────────────────────────────
 //
