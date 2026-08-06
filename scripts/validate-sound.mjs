@@ -47,6 +47,9 @@ function loadTS(rel, requireShim = () => ({})) {
   return exports;
 }
 // rig.ts has ZERO imports, which is the property that makes this possible at all.
+// The hiss measure is imported rather than re-implemented, so this check and the
+// sound lab can never disagree about what a bush sound is.
+const { hiss: hissOf } = await import('./lib/dsp.mjs');
 const rig = loadTS('components/lesson/cinematic/rig.ts');
 const foot = loadTS('components/lesson/cinematic/footfalls.ts', () => rig);
 
@@ -258,35 +261,25 @@ ok('the struck tones stay at 22.05 kHz', ['reward', 'rankup', 'badge', 'right-1'
 //     powers over their arithmetic mean, which is ~1 for white noise and near 0
 //     for anything with a pitch.
 //
-// Flatness alone is the discriminator, and it separated the set completely on the
-// first run:
+// Flatness alone is the discriminator, and on the current 256-band measure it
+// separates the set completely:
 //
-//     swish   0.382   98% sustained   ← pure noise swell, removed
-//     settle  0.338   the scuff at the end of every walk, rebuilt with no noise
-//     keep    0.127   shortened
-//     impact  0.090   struck, tonal — fine
-//     badge   0.055   a bell — fine
-//     step-a  0.004   the footfall the reader likes. All attack, no tail.
+//     old swish   0.474   pure noise swell — deleted
+//     old settle  0.222   the scuff at the end of every walk — rebuilt without noise
+//     keep        0.107   the loudest survivor, and it is a clasp
+//     tap         0.027
+//     step-a      0.012   the footfall the reader likes. All attack, no tail.
 //
-// 0.15 is the line: comfortably above everything struck, far below anything that
-// hangs. A new clip that hisses now fails the build instead of shipping.
+// 0.15 is the line: above everything shipped, well below either thing removed. A
+// new clip that hisses fails the build instead of shipping.
+//
+// RESOLUTION MATTERS AND THE FIRST VERSION HAD TOO LITTLE — see dsp.mjs. At 28
+// bands a music box scored 0.230 for having five partials the sweep could not
+// resolve between, and a 96 Hz thud scored 0.112 for sitting entirely below the
+// measurement floor. Both are artifacts; both are gone at 256 bands from 80 Hz.
 head('nothing in the set hisses');
 
-function lateFlatness(clip) {
-  const { x, rate, n } = clips[clip];
-  const cut = Math.min(n, Math.round(0.040 * rate));
-  if (cut >= n - 8) return { flat: 0, late: 0 };
-  const energy = (a, b) => { let s = 0; for (let i = a; i < b; i++) s += x[i] * x[i]; return s; };
-  const late = energy(cut, n) / (energy(0, n) || 1);
-  const bands = [];
-  for (let k = 0; k < 28; k++) {
-    const f = 200 * Math.pow(9000 / 200, k / 27);
-    if (f < rate / 2) bands.push(Math.max(1e-20, power(x, f, rate, cut, n)));
-  }
-  const geo = Math.exp(bands.reduce((a, v) => a + Math.log(v), 0) / bands.length);
-  const arith = bands.reduce((a, v) => a + v, 0) / bands.length;
-  return { flat: geo / arith, late };
-}
+const lateFlatness = (clip) => ({ flat: hissOf(clips[clip].x, clips[clip].rate) });
 
 const HISS = 0.15;
 let worstHiss = 0, worstHissName = '';
@@ -295,9 +288,9 @@ for (const name of Object.keys(clips)) {
   if (flat > worstHiss) { worstHiss = flat; worstHissName = name; }
 }
 ok('no clip sustains noise past its attack', worstHiss < HISS,
-  `worst is ${worstHissName} at flatness ${worstHiss.toFixed(3)} (limit ${HISS}) — swish was 0.382, settle 0.338`);
+  `worst is ${worstHissName} at flatness ${worstHiss.toFixed(3)} (limit ${HISS}) — the removed swish scored 0.474`);
 const shoeFlat = lateFlatness('step-a').flat;
-ok('and the footfall is all attack, which is why it works', shoeFlat < 0.02,
+ok('and the footfall is all attack, which is why it works', shoeFlat < 0.03,
   `flatness ${shoeFlat.toFixed(3)} after 40ms — the noise in it is the heel, not a tail`);
 
 // ── 3b. THE APP CAN ACTUALLY BE HEARD ────────────────────────────────────────

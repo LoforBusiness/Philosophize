@@ -191,19 +191,46 @@ function power(x, f, sampleRate, from = 0, to = x.length) {
  * dress-shoe heel is nearly all noise and scores 0.004. Noise that HANGS ON after
  * the attack is hiss, and scored 0.382.
  */
+const HISS_BANDS = 256;
+const HISS_LO = 80;      // low enough to actually contain a 96 Hz thud
+const HISS_HI = 10000;
+
 export function hiss(x, sampleRate) {
   const n = x.length;
   const cut = Math.min(n, Math.round(0.040 * sampleRate));
   if (cut >= n - 8) return 0;
+  // SOMETHING HAS TO STILL BE SOUNDING, or the flatness is meaningless. A clip
+  // whose noise is gone in 9ms leaves twenty milliseconds of near-silence after
+  // the cut, and near-silence is perfectly flat — a dry unpitched tick scored
+  // 0.213 for having nothing in it. Below 2% of the clip's energy surviving the
+  // attack there is no tail to hear, whatever shape its spectrum has.
+  let total = 0, late = 0;
+  for (let i = 0; i < n; i++) { const e = x[i] * x[i]; total += e; if (i >= cut) late += e; }
+  if (!(total > 0) || late / total < 0.02) return 0;
   const bands = [];
-  for (let k = 0; k < 28; k++) {
-    const f = 200 * Math.pow(9000 / 200, k / 27);
+  for (let k = 0; k < HISS_BANDS; k++) {
+    const f = HISS_LO * Math.pow(HISS_HI / HISS_LO, k / (HISS_BANDS - 1));
     if (f < sampleRate / 2) bands.push(power(x, f, sampleRate, cut, n));
   }
   const geo = Math.exp(bands.reduce((a, v) => a + Math.log(v), 0) / bands.length);
   const arith = bands.reduce((a, v) => a + v, 0) / bands.length;
   return geo / arith;
 }
+// RESOLUTION IS THE WHOLE MEASUREMENT, and the first version did not have enough.
+//
+// It swept 28 log-spaced bands from 200 Hz. That is fine for telling white noise
+// from a two-partial bell, which is all the shipped set contained, and it fell
+// apart the moment richer candidates existed: a music box has partials at f, 2f,
+// 3.1f, 8.1f and 12.4f, and 28 bands cannot resolve the VALLEYS between them, so
+// the spectrum looks continuous and it scored 0.230 — a purely tonal sound flagged
+// as hiss. At 256 bands the valleys appear and it scores 0.001. Gravel, which is
+// genuinely noise, barely moves: 0.255 → 0.317.
+//
+// The floor came down from 200 Hz to 80 for the same reason in the other
+// direction. A 96 Hz thud has its fundamental BELOW a 200 Hz floor, so the sweep
+// measured only its faint upper air, which sits on the numerical noise floor and
+// looks perfectly flat. It scored 0.112 for having almost no content in the band
+// being examined.
 
 /** Log-spaced band levels in dB, for drawing a spectrum. */
 export function spectrum(x, sampleRate, bins = 48) {

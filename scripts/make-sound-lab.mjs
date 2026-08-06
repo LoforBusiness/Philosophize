@@ -45,6 +45,10 @@ const rig = loadTS('components/lesson/cinematic/rig.ts');
 const foot = loadTS('components/lesson/cinematic/footfalls.ts', () => rig);
 // The longest walk in the lesson: 170 → 300, three strides and an arrival.
 const WALK = foot.footfallTimes(170, 300);
+// And a LONG one, right across the stage, for previewing a footstep. Three steps
+// is not a walk; eleven is. This is the single most useful thing on the page —
+// judging a 110ms footfall from one tap is how the last two got chosen badly.
+const LONGWALK = foot.footfallTimes(40, 360);
 
 // The app's own per-clip volume trims, so the balance on the page is the balance
 // in the lesson rather than everything at full level.
@@ -55,6 +59,7 @@ const roles = ROLES.map((role) => ({
   id: role.id,
   title: role.title,
   fires: role.fires,
+  preview: role.preview,
   options: role.options.map((o) => {
     // A candidate with `pitches` is rendered once per pitch — a right answer and
     // an XP tick both CLIMB, and the climb cannot be judged from one note. The row
@@ -122,12 +127,20 @@ const rows = (role) => role.options.map((o) => `
     <span class="num hiss${o.hiss > 0.15 ? ' bad' : ''}"><b>${o.hiss.toFixed(3)}</b>hiss</span>
   </label>`).join('');
 
+const HOW = {
+  walk: ' · each row plays a full walk',
+  arrival: ' · each row plays three steps, then the arrival',
+  repeat: ' · each row plays a few in a row',
+  climb: ' · each row plays the three-note climb',
+  count: ' · each row plays the whole count',
+  once: '',
+};
 const sections = roles.map((role) => `
 <section class="role" id="role-${role.id}">
   <header>
     <h2>${esc(role.title)}</h2>
-    <p>${esc(role.fires)}</p>
-    <button class="seq" type="button" data-all="${role.id}">Play all ${role.options.length}</button>
+    <p>${esc(role.fires)}<em class="how">${esc(HOW[role.preview.kind] || '')}</em></p>
+    <button class="seq" type="button" data-all="${role.id}">Compare all ${role.options.length}</button>
   </header>
   <div class="opts">${rows(role)}</div>
 </section>`).join('');
@@ -165,6 +178,7 @@ h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,5vw,46px);
 .role header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px}
 h2{font-family:var(--serif);font-weight:400;font-size:23px;margin:0;letter-spacing:-.01em}
 .role header p{margin:0;flex:1 1 240px;color:var(--soft);font-size:13px}
+.how{font-style:normal;color:var(--ink);opacity:.55}
 
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .seq{border:1px solid var(--rule);border-radius:999px;padding:5px 13px;font-size:12px;
@@ -290,6 +304,8 @@ const TAKES = ${JSON.stringify(
   Object.fromEntries(roles.flatMap((r) => r.options.map((o) => [o.id, o.takes.length]))),
 )};
 const WALK = ${JSON.stringify({ steps: WALK.steps, settle: WALK.settle })};
+const LONGWALK = ${JSON.stringify({ steps: LONGWALK.steps, settle: LONGWALK.settle })};
+const PREVIEW = ${JSON.stringify(Object.fromEntries(roles.map((r) => [r.id, r.preview])))};
 const LEVEL = ${JSON.stringify(LEVEL)};
 const ROLE_IDS = ${JSON.stringify(roles.map((r) => r.id))};
 
@@ -334,23 +350,42 @@ const pickOf = (role) => {
   return role + '--' + (el ? el.value : '');
 };
 
-/* ── single clips ─────────────────────────────────────────────────── */
+/* ── previews ─────────────────────────────────────────────────────────
+   A row plays the sound THE WAY THE APP DELIVERS IT, not the bare clip. A 110ms
+   footfall heard once is nothing like a walk, fourteen counter ticks are nothing
+   like one tick, and choosing from single taps is exactly how the footstep and
+   the tap both got picked wrong. */
+function preview(id){
+  const role = id.split('--')[0];
+  const p = PREVIEW[role] || { kind: 'once' };
+  const L = lvl(role);
+  const n = TAKES[id] || 1;
+  if (p.kind === 'walk'){
+    LONGWALK.steps.forEach((t) => play(id, t, L));
+    if (LONGWALK.settle >= 0) play(pickOf('arrival'), LONGWALK.settle, L);
+    return;
+  }
+  if (p.kind === 'arrival'){
+    WALK.steps.forEach((t) => play(pickOf('footstep'), t, 0.65));
+    if (WALK.settle >= 0) play(id, WALK.settle, L);
+    return;
+  }
+  if (p.kind === 'climb'){ [0, 1, 2].forEach((k) => play(take(id, Math.min(k, n - 1)), k * p.gap, L)); return; }
+  if (p.kind === 'count'){ for (let k = 0; k < p.n; k++) play(take(id, k % n), k * p.gap, L); return; }
+  if (p.kind === 'repeat'){ for (let k = 0; k < p.n; k++) play(id, k * p.gap, L); return; }
+  play(id, 0, L);
+}
 document.querySelectorAll('[data-play]').forEach((b) => {
   b.addEventListener('click', (e) => {
     e.preventDefault(); e.stopPropagation();
-    const id = b.dataset.play;
-    play(id, 0, lvl(id.split('--')[0]));
+    preview(b.dataset.play);
     b.classList.add('on');
     setTimeout(() => b.classList.remove('on'), 220);
   });
 });
 /* Clicking the row selects it AND plays it — choosing and hearing are the same act. */
 document.querySelectorAll('.opt').forEach((row) => {
-  row.addEventListener('click', () => {
-    const id = row.dataset.id;
-    play(id, 0, lvl(id.split('--')[0]));
-    refresh();
-  });
+  row.addEventListener('click', () => { preview(row.dataset.id); refresh(); });
 });
 
 document.querySelectorAll('[data-all]').forEach((b) => {
