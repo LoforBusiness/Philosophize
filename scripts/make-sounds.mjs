@@ -44,7 +44,69 @@ const OUT = path.join(ROOT, 'assets', 'sound');
 import {
   HI, LO, atRate, reseed, lowpass, highpass, noise, bandpass, ring, env, sine,
   mix, gain, at, finish, wav, secs, bell,
+  MATERIAL, modal, reflect, tilted, sweepBand,
 } from './lib/dsp.mjs';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CHOSEN IN THE LAB, INSTALLED HERE.
+//
+// Everything below marked "physical" was picked by ear from sound-lab.html after
+// hearing it against five to eleven alternatives, which is the first time any
+// sound in this app has been chosen by listening rather than by me describing one
+// and finding out a publish later. They are built from the same lib/dsp.mjs the
+// lab used, so each is byte-for-byte the clip that was approved.
+//
+// What makes them different from the originals: eight to twenty INHARMONIC modes
+// with high ones damped faster, a dense quiet early-reflection cluster instead of
+// four audible taps, and correctly tilted noise. See lib/dsp.mjs.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** A fingertip on a solid thing. Three materials, by how weighty the control is. */
+function realTap({ mat, f0, decay, damp, nailG, hi, len, wet, peak, seed }) {
+  reseed(seed);
+  const n = secs(len);
+  const cn = secs(0.010);
+  const nail = highpass(tilted(cn, -0.6), hi);
+  const ne = env(cn, 0.0002, 0.0022);
+  const dry = mix(nail.map((x, i) => x * ne[i] * nailG),
+    modal(n, f0, MATERIAL[mat], { decay, damp, g: 1, tilt: 1.3, attack: 0.0006 }));
+  return finish(reflect(dry, { time: 0.10, wet, damp: 0.6 }).slice(0, n), peak);
+}
+const tapWood  = () => realTap({ mat: 'wood',  f0: 700,  decay: 0.030, damp: 0.8, nailG: 0.35, hi: 0.30, len: 0.20, wet: 0.25, peak: 0.26, seed: 411 });
+const tapGlass = () => realTap({ mat: 'glass', f0: 1180, decay: 0.055, damp: 0.35, nailG: 0.50, hi: 0.30, len: 0.26, wet: 0.25, peak: 0.24, seed: 411 });
+const tapCard  = () => realTap({ mat: 'plate', f0: 380,  decay: 0.014, damp: 1.4, nailG: 0.22, hi: 0.20, len: 0.10, wet: 0.16, peak: 0.24, seed: 411 });
+
+/**
+ * A GESTURE THROUGH AIR — three of them, by how the hand is moving.
+ *
+ * The deleted `swish` was noise through a FIXED band on a symmetric swell, which
+ * is a volume shape on a static timbre; static noise is hiss whatever its level
+ * does, and it measured 0.474 where the footfall measures 0.012. A real limb
+ * accelerates and decelerates, so the turbulence SWEEPS UP in pitch and back down
+ * while the resonance sharpens. The movement IS the sound. These measure
+ * 0.078–0.119 — four to six times cleaner from the same raw material.
+ *
+ * Which one plays is decided by MEASURING the gesture, not by choosing per lesson
+ * — see components/lesson/cinematic/gestures.ts.
+ */
+function whooshSleeve() {
+  reseed(2401);
+  const n = secs(0.17);
+  const e = Array.from({ length: n }, (_, i) => Math.pow(Math.sin(Math.PI * Math.pow(i / n, 0.72)), 1.9));
+  return finish(sweepBand(tilted(n, -0.5), 400, 2200, 700, 1.1, 3.4).map((x, i) => x * e[i]), 0.30);
+}
+function whooshFast() {
+  reseed(9931);
+  const n = secs(0.09);
+  const e = Array.from({ length: n }, (_, i) => Math.pow(Math.sin(Math.PI * Math.pow(i / n, 0.65)), 2.2));
+  return finish(sweepBand(tilted(n, -0.35), 700, 3600, 1200, 1.4, 4.2).map((x, i) => x * e[i]), 0.28);
+}
+function whooshHeavy() {
+  reseed(5520);
+  const n = secs(0.26);
+  const e = Array.from({ length: n }, (_, i) => Math.pow(Math.sin(Math.PI * Math.pow(i / n, 0.8)), 1.6));
+  return finish(sweepBand(tilted(n, -0.8), 220, 1250, 380, 1.0, 2.8).map((x, i) => x * e[i]), 0.30);
+}
 
 // ── the set ──────────────────────────────────────────────────────────────────
 
@@ -480,19 +542,19 @@ function settle() {
  * physical side of the palette where a thing happening in the world belongs.
  */
 function impact() {
-  reseed(19760);
-  const n = secs(0.70);
-  const thud = mix(gain(sine(n, 104), 1), gain(sine(n, 156), 0.35));
-  const te = env(n, 0.0015, 0.090);
-  const strike = lowpass(noise(secs(0.05)), 0.24);
-  const ke = env(secs(0.05), 0.0006, 0.014);
-  const room = lowpass(noise(n), 0.05);
-  const re = env(n, 0.010, 0.150);
-  return finish(mix(
-    thud.map((x, i) => x * te[i]),
-    strike.map((x, i) => x * ke[i] * 0.8),
-    room.map((x, i) => x * re[i] * 0.22),
-  ), 0.66);
+  // A STRUCK PANEL, chosen in the lab over five alternatives including the two
+  // sine waves this replaces. A dense low mode cluster in a real room: it has
+  // weight without being a crash, which is what the abstract ring on road B is
+  // drawing. Measures 0.000 for hiss and 0.00 for doubling.
+  reseed(7714);
+  const n = secs(0.95);
+  const cn = secs(0.020);
+  const c = lowpass(tilted(cn, -0.9), 0.30);
+  const ce = env(cn, 0.0004, 0.0055);
+  return finish(reflect(mix(
+    c.map((x, i) => x * ce[i] * 0.55),
+    modal(n, 96, MATERIAL.plate, { decay: 0.30, damp: 0.85, g: 1, tilt: 1.1 }),
+  ), { time: 0.34, wet: 0.45, damp: 0.42 }).slice(0, n), 0.66);
 }
 
 // HI for anything with a transient in it — a heel, a fingertip, a page edge, a
@@ -503,7 +565,13 @@ const SET = {
   'step-b': atRate(HI, () => step(1)),
   settle: atRate(HI, settle),
   impact: atRate(HI, impact),
-  tap: atRate(HI, tap),
+  // Three taps, by the weight of the control — see lib/sound/real.ts.
+  tap: atRate(HI, tapWood),
+  'tap-glass': atRate(HI, tapGlass),
+  'tap-card': atRate(HI, tapCard),
+  'whoosh-1': atRate(HI, whooshSleeve),
+  'whoosh-2': atRate(HI, whooshFast),
+  'whoosh-3': atRate(HI, whooshHeavy),
   page: atRate(HI, page),
   rethink: atRate(HI, rethink),
   keep: atRate(HI, keep),

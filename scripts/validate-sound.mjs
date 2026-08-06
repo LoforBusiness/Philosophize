@@ -49,7 +49,7 @@ function loadTS(rel, requireShim = () => ({})) {
 // rig.ts has ZERO imports, which is the property that makes this possible at all.
 // The hiss measure is imported rather than re-implemented, so this check and the
 // sound lab can never disagree about what a bush sound is.
-const { hiss: hissOf } = await import('./lib/dsp.mjs');
+const { hiss: hissOf, doubling } = await import('./lib/dsp.mjs');
 const rig = loadTS('components/lesson/cinematic/rig.ts');
 const foot = loadTS('components/lesson/cinematic/footfalls.ts', () => rig);
 
@@ -170,6 +170,8 @@ head('the mix: frequent is quiet, rare is loud');
 const pk = (c) => Math.max(...clips[c].x.map(Math.abs));
 const order = [
   ['tick-1', 'page'], ['page', 'tap'], ['tap', 'keep'], ['keep', 'right-1'],
+  // The three gestures sit with the world sounds, under everything earned.
+  ['whoosh-1', 'right-1'], ['whoosh-2', 'right-1'], ['whoosh-3', 'right-1'],
   ['rethink', 'right-1'], ['right-1', 'impact'], ['impact', 'badge'], ['badge', 'rankup'],
   // A walk ending is a shift of weight, not another footfall. If it ever gets as
   // loud as a stride it stops being an arrival and becomes a stumble.
@@ -235,7 +237,8 @@ ok('and they sit on opposite sides of that line', shoe > tapB * 3,
 
 // The top end can only exist if the file has room for it. A 22.05 kHz clip is
 // capped at 11 kHz, which is where the whole set used to be.
-const percussive = ['step-a', 'step-b', 'tap', 'page', 'keep', 'settle', 'tick-1', 'rethink', 'impact'];
+const percussive = ['step-a', 'step-b', 'tap', 'tap-glass', 'tap-card', 'page', 'keep', 'settle',
+  'tick-1', 'rethink', 'impact', 'whoosh-1', 'whoosh-2', 'whoosh-3'];
 ok('every clip with a transient is 44.1 kHz',
   percussive.every((c) => clips[c].rate === 44100),
   percussive.filter((c) => clips[c].rate !== 44100).join(', ') || `${percussive.length} clips`);
@@ -289,6 +292,15 @@ for (const name of Object.keys(clips)) {
 }
 ok('no clip sustains noise past its attack', worstHiss < HISS,
   `worst is ${worstHissName} at flatness ${worstHiss.toFixed(3)} (limit ${HISS}) — the removed swish scored 0.474`);
+// A FOOTSTEP MUST BE ONE IMPACT. Reported as "an unnatural double sound, it
+// doesn't sound like walking", and it had three separate causes before it went
+// away — reverb taps reading as flutter, a forefoot modelled as a strike, and two
+// modes beating. Calibrated on the shipped shoe (0.00) against that same shoe
+// played twice 42ms apart (0.94).
+for (const c of ['step-a', 'step-b', 'settle']) {
+  const d = doubling(clips[c].x);
+  ok(`${c} is a single impact`, d < 0.45, `double ${d.toFixed(2)} — a deliberate flam scores 0.94`);
+}
 const shoeFlat = lateFlatness('step-a').flat;
 ok('and the footfall is all attack, which is why it works', shoeFlat < 0.03,
   `flatness ${shoeFlat.toFixed(3)} after 40ms — the noise in it is the heel, not a tail`);
@@ -326,7 +338,7 @@ ok('nothing plays in the background', /shouldPlayInBackground:\s*false/.test(rea
 // a device, under a finger, while scrolling.
 const pressSrc = fs.readFileSync(path.join(ROOT, 'components/shared/PressableScale.tsx'), 'utf8');
 ok('the button tap fires on onPress, never onPressIn',
-  /onPress=\{onPress && \(\(e\) => \{[^}]*cue\('tap'\)/.test(pressSrc)
+  /onPress=\{onPress && \(\(e\) => \{[^}]*cue\('tap'/.test(pressSrc)
     && !/onPressIn=\{[^}]*cue\(/.test(pressSrc),
   'press-in fires during a scroll, and a sound cannot be un-played');
 

@@ -8,7 +8,8 @@ export type Cue =
   | 'step'     // a footfall — alternates between two samples inside the provider
   | 'settle'   // a walk coming to rest: a weight shift, not another step
   | 'impact'   // something in the scene is struck
-  | 'tap'      // a fingertip on card: buttons and list rows
+  | 'whoosh'   // a hand through air; the VARIANT is chosen by measured speed
+  | 'tap'      // a fingertip; the variant is chosen by the control's weight
   | 'page'     // a leaf turning — advancing a cinematic beat
   | 'rethink'  // a wooden knock: the answer was not that one
   | 'keep'     // a clasp closing: a quote goes into the library

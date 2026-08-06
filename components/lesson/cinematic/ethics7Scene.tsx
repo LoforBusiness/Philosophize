@@ -360,7 +360,7 @@ export function Ethics7Lesson({ lesson }: { lesson: Lesson }) {
   return (
     <CinematicPlayer
       lesson={lesson} beats={BEATS} Scene={Ethics7Scene} band={[49, 512]}
-      walk={X}
+      walk={X} gesture={P}
     />
   );
 }

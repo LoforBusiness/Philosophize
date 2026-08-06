@@ -234,8 +234,17 @@ export function modal(n, f0, ratios, { decay = 0.20, damp = 0.55, g = 1, tilt = 
     if (f > RATE * 0.47) continue;                       // above Nyquist, skip
     const dk = decay / (1 + damp * (ratios[k] - 1));
     const ak = (g / Math.pow(ratios[k], tilt)) * (0.85 + 0.3 * Math.abs(rnd()));
+    // EVERY MODE STARTS IN PHASE, because that is what being hit means.
+    //
+    // These used to start at a random phase, which is how a sustained resonator
+    // behaves and NOT how a struck one does: an impulse excites the whole mode set
+    // at once, at t = 0, together. The unphysical version also had an audible
+    // cost — seven modes at random phases interfere, and on a quiet sound where
+    // the modes ARE the sound the interference shapes the envelope, dipping and
+    // then swelling back. Measured at 0.66 on the soft-soled step: a second
+    // footfall made of nothing but arithmetic.
     const e = env(n, attack, dk);
-    const s = sine(n, f, rnd() * Math.PI);
+    const s = sine(n, f);
     for (let i = 0; i < n; i++) out[i] += s[i] * e[i] * ak;
   }
   return out;
@@ -249,17 +258,46 @@ export function modal(n, f0, ratios, { decay = 0.20, damp = 0.55, g = 1, tilt = 
  * available: an anechoic impact sounds synthetic no matter how good its modes
  * are, because nothing in the physical world reaches an ear only once.
  */
-export function reflect(buf, { taps = [[0.0113, 0.34], [0.0197, 0.25], [0.0313, 0.17], [0.0489, 0.11]],
-  damp = 0.55, wet = 1 } = {}) {
-  const extra = Math.round(taps[taps.length - 1][0] * RATE);
-  const out = buf.slice();
-  for (let i = 0; i < extra; i++) out.push(0);
-  let dull = buf;
-  for (const [t, a] of taps) {
-    dull = lowpass(dull, damp);                          // each bounce loses top end
-    const d = Math.round(t * RATE);
-    for (let i = 0; i < dull.length; i++) out[i + d] = (out[i + d] || 0) + dull[i] * a * wet;
+export function reflect(buf, { time = 0.16, wet = 0.35, damp = 0.5, taps = 140, seed = 7717 } = {}) {
+  // FOUR LOUD TAPS IS A FLUTTER ECHO, NOT A ROOM — and it was the "unnatural
+  // double sound".
+  //
+  // The first version placed four discrete reflections at 11, 20, 31 and 49ms at
+  // 0.34 / 0.25 / 0.17 / 0.11. On a sustained sound that is a plausible room. On a
+  // 5ms impact it is four separate audible repeats of the impact: measuring the
+  // amplitude envelope of one footstep found NINE peaks spread over 107ms, and a
+  // walk made of those does not sound like walking, it sounds like a stutter.
+  //
+  // A real early-reflection cluster is DENSE and QUIET — dozens of arrivals in the
+  // first 50ms, none of them individually audible, blurring into a single sense of
+  // space. So this is a sparse-random impulse response: ~140 taps at irregular
+  // times with random signs and exponentially falling amplitude. Random signs
+  // matter as much as density; same-sign taps sum into a comb filter and colour
+  // the sound. Irregular times matter because evenly spaced ones ring at their own
+  // spacing, which is the definition of a flutter.
+  const prev = seed;
+  reseed(seed);
+  const n = Math.round(time * RATE);
+  const ir = new Float64Array(n);
+  for (let k = 0; k < taps; k++) {
+    // Times skewed early — a room's reflections arrive densest right after the
+    // direct sound — and never in the first 4ms, which would just thicken the hit.
+    const u = Math.pow(Math.abs(rnd()), 1.7);
+    const i = Math.min(n - 1, Math.round(0.004 * RATE + u * (n - 0.004 * RATE)));
+    ir[i] += Math.sign(rnd() || 1) * Math.exp(-(i / RATE) / (time * 0.32)) * (0.4 + 0.6 * Math.abs(rnd()));
   }
+  const dull = lowpass(buf, damp);                       // the bounces lose top end
+  const out = buf.slice();
+  for (let i = 0; i < n; i++) out.push(0);
+  // Normalised by the tap count so `wet` means the same thing at any density.
+  const k = (wet * 2.2) / Math.sqrt(taps);
+  for (let i = 0; i < n; i++) {
+    const a = ir[i];
+    if (!a) continue;
+    const g = a * k;
+    for (let j = 0; j < dull.length; j++) out[j + i] += dull[j] * g;
+  }
+  reseed(prev);
   return out;
 }
 
@@ -424,6 +462,41 @@ export function spectrum(x, sampleRate, bins = 48) {
   }
   const max = Math.max(...out);
   return out.map((v) => Math.max(0, 1 + Math.log10(v / max) / 4));   // 0..1 over 80dB
+}
+
+/**
+ * DOES THIS READ AS TWO HITS? 0 is one clean impact, 1 is a flam.
+ *
+ * Reported as "an unnatural double sound, it doesn't sound like walking", and
+ * measurable: a natural decay only ever falls, so a SUSTAINED RISE after a real
+ * fall is a second contact. Smoothed first, because the ripple in a noisy decay
+ * is not a re-attack.
+ *
+ * Calibrated against two references rather than a guessed threshold — the dress
+ * shoe the reader likes scores 0.00, and that same shoe deliberately played twice
+ * 42ms apart scores 0.94. Anything past ~0.45 is audibly two events.
+ *
+ * It has already caught three separate causes, none of which were the one I
+ * assumed: four discrete reverb taps reading as a flutter echo, a forefoot
+ * modelled as a strike instead of a roll, and two modes 54 Hz apart beating into
+ * an 18ms warble.
+ */
+export function doubling(x) {
+  const raw = envelope(x, 240);
+  const w = 4;
+  const e = raw.map((_, i) => {
+    let s = 0, c = 0;
+    for (let j = Math.max(0, i - w); j <= Math.min(raw.length - 1, i + w); j++) { s += raw[j]; c++; }
+    return s / c;
+  });
+  let pk = 0, pi = 0;
+  for (let i = 0; i < e.length; i++) if (e[i] > pk) { pk = e[i]; pi = i; }
+  let min = Infinity, worst = 0;
+  for (let i = pi + 1; i < e.length; i++) {
+    if (e[i] < min) min = e[i];
+    if (min < pk * 0.55 && e[i] > pk * 0.30 && e[i] > min * 1.8) worst = Math.max(worst, e[i] / pk);
+  }
+  return worst;
 }
 
 /** Peak envelope, downsampled for drawing a waveform. */

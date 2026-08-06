@@ -20,7 +20,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { wav, hiss, spectrum, envelope } from './lib/dsp.mjs';
+import { wav, hiss, spectrum, envelope, doubling } from './lib/dsp.mjs';
 import { ROLES } from './sound-candidates.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -90,6 +90,9 @@ const roles = ROLES.map((role) => ({
       kb: +takes.reduce((a, t) => a + t.kb, 0).toFixed(1),
       peak: +Math.max(...data.map(Math.abs)).toFixed(2),
       hiss: +hiss(x, rate).toFixed(3),
+      // Worst across every variation — a walk plays all of them, so one bad
+      // render in four is one bad footstep in four.
+      dbl: +Math.max(...takes.map((t) => doubling(Float64Array.from(t.data)))).toFixed(2),
       wave: envelope(x, 140).map((v) => Math.round(v * 100)),
       spec: spectrum(x, rate, 40).map((v) => Math.round(v * 100)),
       b64: buf.toString('base64'),
@@ -131,6 +134,7 @@ const rows = (role) => role.options.map((o) => `
     <span class="num"><b>${o.ms}</b>ms</span>
     <span class="num"><b>${o.peak}</b>level</span>
     <span class="num hiss${o.hiss > 0.15 ? ' bad' : ''}"><b>${o.hiss.toFixed(3)}</b>hiss</span>
+    <span class="num hiss${o.dbl > 0.45 ? ' bad' : ''}"><b>${o.dbl.toFixed(2)}</b>double</span>
   </label>`).join('');
 
 const HOW = {
@@ -193,7 +197,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 /* ── one candidate ────────────────────────────────────────────────── */
 .opts{display:flex;flex-direction:column;gap:2px}
-.opt{display:grid;grid-template-columns:18px 30px minmax(180px,1fr) 140px 64px repeat(3,58px);
+.opt{display:grid;grid-template-columns:18px 30px minmax(150px,1fr) 126px 54px repeat(4,52px);
   align-items:center;gap:12px;padding:9px 10px;border-radius:7px;cursor:pointer;
   transition:background .12s}
 .opt:hover{background:var(--faint)}
@@ -268,9 +272,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
       <b>byte-for-byte</b> what gets installed, because this page and the app's generator
       share the same synthesis code.</p>
     <p class="lede" style="margin-top:9px">The bars beside each clip are its
-      <b>spectrum</b>, and <b>hiss</b> is the measure that finally caught the bush sound:
-      how noise-like the clip is <em>after</em> its attack. The footstep you liked scores
-      0.004. The whoosh you didn't scored 0.382.</p>
+      <b>spectrum</b>. <b>hiss</b> is how noise-like a clip is <em>after</em> its attack —
+      the deleted whoosh scored 0.474, the footfall you like scores 0.012. <b>double</b> is
+      whether it reads as two hits: the shoe you like scores 0.00 and that same shoe played
+      twice 42ms apart scores 0.94, so past 0.45 is audibly a flam. Both show the WORST of a
+      candidate’s variations, not its best.</p>
     <p class="meta">${count} clips · ${totalKB.toFixed(0)} KB · generated, not licensed</p>
   </header>
 

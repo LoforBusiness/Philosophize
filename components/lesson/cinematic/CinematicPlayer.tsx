@@ -15,6 +15,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { shotAt, NEUTRAL, type Shot } from './camera';
 import { cue } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
+import { swishTrack } from './gestures';
 import { lessonHasSound } from './lessonSound';
 import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
@@ -58,7 +59,7 @@ export interface SceneApi {
 export type SceneComponent = ComponentType<SceneApi>;
 
 export default function CinematicPlayer({
-  lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk, shots,
+  lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk, gesture, shots,
 }: {
   lesson: Lesson;
   beats: BaseBeat[];
@@ -83,6 +84,18 @@ export default function CinematicPlayer({
    * the only case these times are correct for.
    */
   walk?: number[];
+  /**
+   * The scene's per-beat gesture-code track (`P` in most scenes). Given it, the
+   * player sounds a hand through the air wherever one genuinely sweeps — and
+   * chooses WHICH of the three gesture sounds by measuring how fast and for how
+   * long it moves, so a flick and a swing differ without anyone deciding per beat.
+   * See ./gestures.
+   *
+   * Most poses produce nothing: 14 of the app's 49 are audible gestures and the
+   * rest are a held position with a talking hand. A whoosh over a hand that is not
+   * moving is the crash-sound mistake with the picture and the sound swapped.
+   */
+  gesture?: number[];
   /**
    * ONE CAMERA SHOT PER BEAT — where the reader is standing while it plays.
    *
@@ -125,6 +138,12 @@ export default function CinematicPlayer({
     () => (sounded && walk ? footfallTrack(walk) : { steps: [], settle: [] }),
     [sounded, walk],
   );
+  const gestures = useMemo(() => {
+    if (!sounded || !gesture) return [];
+    // A beat either walks or gestures — never both (see ./gestures).
+    const walked = gesture.map((_, k) => !!walk && k > 0 && Math.abs(walk[k] - walk[k - 1]) > 1);
+    return swishTrack(gesture, walked, beats.map((b) => b.dur));
+  }, [sounded, gesture, walk, beats]);
 
   const clock = useSharedValue(0);
   const bt = useSharedValue(0);
@@ -137,6 +156,12 @@ export default function CinematicPlayer({
   const planted = useSharedValue(0);
   const settleAt = useSharedValue(-1);
   const settled = useSharedValue(0);
+  // Gesture times and, in a parallel array, WHICH of the three sounds each one is.
+  // Two number arrays rather than an array of objects: numbers cross into a
+  // worklet cleanly and nothing else has to.
+  const swishAt = useSharedValue<number[]>([]);
+  const swishKind = useSharedValue<number[]>([]);
+  const swished = useSharedValue(0);
   // Progress fills SMOOTHLY toward the next mark rather than jumping on each tap.
   const progress = useSharedValue((i + 1) / beats.length);
   const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: progress.value }] }));
@@ -193,6 +218,10 @@ export default function CinematicPlayer({
     planted.value = 0;
     settleAt.value = plants.settle[i] ?? -1;
     settled.value = 0;
+    const g = gestures[i] ?? [];
+    swishAt.value = g.map((x) => x.at);
+    swishKind.value = g.map((x) => x.kind);
+    swished.value = 0;
   }
 
   useFrameCallback((f) => {
@@ -212,6 +241,7 @@ export default function CinematicPlayer({
   // walk track, because `plantAt` stays empty and this returns immediately.
   const footfall = useCallback(() => cue('step'), []);
   const arrive = useCallback(() => cue('settle'), []);
+  const gestured = useCallback((kind: number) => cue('whoosh', kind), []);
   useAnimatedReaction(
     () => bt.value,
     (t) => {
@@ -233,6 +263,19 @@ export default function CinematicPlayer({
       if (s >= 0 && settled.value === 0 && t >= s) {
         settled.value = 1;
         runOnJS(arrive)();
+      }
+      // …and a hand sweeping through the air on a beat that stands and gestures.
+      // The KIND travels with the time, so the sound matches the movement that
+      // earned it rather than being one whoosh for everything.
+      const sw = swishAt.value;
+      let j = swished.value;
+      if (j < sw.length) {
+        while (j < sw.length && t >= sw[j]) j += 1;
+        if (j !== swished.value) {
+          const kind = swishKind.value[j - 1] ?? 0;
+          swished.value = j;
+          runOnJS(gestured)(kind);
+        }
       }
     },
   );

@@ -14,11 +14,24 @@ interface Props {
   containerStyle?: StyleProp<ViewStyle>;
   scaleTo?: number;
   disabled?: boolean;
+  /**
+   * WHICH FINGERTIP. Three tap sounds were chosen in the lab, and they are three
+   * MATERIALS, so cycling them would sound like the surface changed at random.
+   * They map to how weighty the control is instead:
+   *
+   *   'solid'  a card or a primary button — wood, the default
+   *   'glass'  a switch or a small precise mechanism
+   *   'light'  a list row or a secondary control — barely a ring
+   */
+  weight?: 'solid' | 'glass' | 'light';
 }
+
+/** The index of each material in the sound layer's ladder (lib/sound/real.ts). */
+const WEIGHT = { solid: 0, glass: 1, light: 2 } as const;
 
 // A pressable that gives a quick, springy scale-down while held — the subtle
 // tactile feedback that makes tapping feel responsive instead of dead.
-export default function PressableScale({ onPress, children, style, containerStyle, scaleTo = 0.96, disabled }: Props) {
+export default function PressableScale({ onPress, children, style, containerStyle, scaleTo = 0.96, disabled, weight = 'solid' }: Props) {
   const [pressed, setPressed] = useState(false);
   return (
     <Pressable
@@ -48,7 +61,7 @@ export default function PressableScale({ onPress, children, style, containerStyl
       // Nothing sounds if there is nothing to do: a PressableScale with no handler
       // is decoration, and decoration that clicks is the same mistake as the figure
       // who used to clop across the home screen.
-      onPress={onPress && ((e) => { if (!disabled) cue('tap'); onPress(e); })}
+      onPress={onPress && ((e) => { if (!disabled) cue('tap', WEIGHT[weight]); onPress(e); })}
       disabled={disabled}
       style={containerStyle}
       onPressIn={() => setPressed(true)}

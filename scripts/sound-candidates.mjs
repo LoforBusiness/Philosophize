@@ -82,40 +82,72 @@ function shoe({ heelHi = 0.30, heelDec = 0.0055, heelG = 1.40, soleF = 1900, sol
  * played eleven times.
  */
 function realStep({ mat = 'plate', f0 = 190, decay = 0.10, damp = 0.7, heelHi = 0.34,
-  heelG = 1.0, toeGap = 0.042, toeG = 0.55, wet = 0.9, len = 0.34, v = 0, peak = 0.50 } = {}) {
+  heelG = 1.0, rollGap = 0.030, rollG = 0.16, wet = 0.30, room = 0.16,
+  spread = 0.02, modes = 0, tilt = 1.15, len = 0.34, v = 0, peak = 0.50 } = {}) {
   reseed(3300 + v * 971);
   const n = secs(len);
   const jitter = 1 + (v % 3 - 1) * 0.045;          // a real pair is never identical
-  const contact = (g, bright) => {
-    const cn = secs(0.030);
-    const c = highpass(tilted(cn, -0.5), heelHi * bright);
-    const ce = env(cn, 0.00015, 0.0042);
-    return mix(
-      c.map((x, i) => x * ce[i] * g * heelG),
-      modal(n, f0 * jitter * bright, MATERIAL[mat],
-        { decay, damp, g: g * 0.55, tilt: 1.15, attack: 0.0003 }),
-    );
-  };
-  const dry = mix(contact(1.0, 1.0), at(toeGap * jitter, contact(toeG, 1.18))).slice(0, n);
-  return finish(reflect(dry, { damp: 0.5, wet }).slice(0, n), peak * (0.94 + 0.06 * (v % 2)));
+
+  // THE HEEL — the one impact in a footstep. Contact noise into the floor's modes.
+  const cn = secs(0.030);
+  const c = highpass(tilted(cn, -0.5), heelHi);
+  const ce = env(cn, 0.00015, 0.0042);
+  const heel = mix(
+    c.map((x, i) => x * ce[i] * heelG),
+    modal(n, f0 * jitter, modes ? MATERIAL[mat].slice(0, modes) : MATERIAL[mat],
+      { decay, damp, g: 0.55, tilt, spread, attack: 0.0003 }),
+  );
+
+  // THE ROLL, and this is the part that was wrong.
+  //
+  // It used to be a SECOND CONTACT at 42ms with 55% of the heel's energy and MORE
+  // brightness — which is not what a foot does, it is a flam. In a real walk the
+  // forefoot does not strike the ground, it LOADS onto it: the weight transfers
+  // over about 80ms as a soft low swell with no contact noise and no high modes at
+  // all. So: a fifth of the level, a 6ms attack instead of a fifth of a
+  // millisecond, only the bottom of the mode set, and nothing above it.
+  //
+  // The gap and the gain were then SWEPT rather than guessed, against a measure
+  // calibrated on two references: the dress shoe the reader likes (which must read
+  // clean) and that same shoe deliberately played twice 42ms apart (which must read
+  // as a double). They score 0.00 and 0.94. Every physical step now scores 0.00 —
+  // the roll arrives while the heel is still sounding and swells into its decay
+  // instead of re-attacking after it.
+  const rn = secs(len - rollGap);
+  const roll = at(rollGap * jitter,
+    modal(rn, f0 * jitter * 0.82, MATERIAL[mat].slice(0, 3),
+      { decay: decay * 1.5, damp: damp * 1.6, g: rollG, tilt: 1.8, attack: 0.006 }));
+
+  const dry = mix(heel, roll).slice(0, n);
+  return finish(reflect(dry, { time: room, wet, damp: 0.5 }).slice(0, n),
+    peak * (0.94 + 0.06 * (v % 2)));
 }
 
 const FOOTSTEP = [
   { id: 'real-wood', name: 'Real: leather on a wooden floor', physical: true, vary: 4,
-    note: 'Heel then sole 42ms later, a floor with seven modes, and a room around it. Every stride renders differently.',
+    note: 'One heel strike into a seven-mode floor, the weight rolling on after it, and a real room. Renders differently every stride.',
     make: (_, v = 0) => R(HI, () => realStep({ v })) },
   { id: 'real-stone', name: 'Real: leather on stone', physical: true, vary: 4,
     note: 'The same shoe in a hall. Faster modes, brighter contact, a longer room.',
     make: (_, v = 0) => R(HI, () => realStep({ mat: 'stone', f0: 260, decay: 0.055, damp: 1.0,
-      heelHi: 0.40, toeGap: 0.038, wet: 1.5, len: 0.46, v })) },
+      heelHi: 0.40, rollGap: 0.068, rollG: 0.13, wet: 0.55, room: 0.30, len: 0.46, v })) },
   { id: 'real-boot', name: 'Real: a boot on boards', physical: true, vary: 4,
     note: 'Heavier, slower roll, and the floor answers much more than the shoe.',
     make: (_, v = 0) => R(HI, () => realStep({ mat: 'wood', f0: 120, decay: 0.16, damp: 0.5,
-      heelHi: 0.22, heelG: 0.7, toeGap: 0.058, toeG: 0.8, len: 0.40, peak: 0.55, v })) },
+      heelHi: 0.22, heelG: 0.7, rollGap: 0.062, rollG: 0.13, wet: 0.28, room: 0.18,
+      len: 0.40, peak: 0.55, v })) },
   { id: 'real-soft', name: 'Real: a soft sole indoors', physical: true, vary: 4,
-    note: 'Barely any contact noise; almost all of it is the floor being pushed.',
+    note: 'Barely any contact noise, and no separable roll — a soft sole has one continuous contact, which is what makes it soft.',
     make: (_, v = 0) => R(HI, () => realStep({ mat: 'plate', f0: 155, decay: 0.13, damp: 0.6,
-      heelHi: 0.14, heelG: 0.30, toeGap: 0.050, toeG: 0.7, wet: 0.7, peak: 0.40, v })) },
+      heelHi: 0.14, heelG: 0.30, rollG: 0, wet: 0.22, room: 0.14,
+      // TWO MODES, STEEPLY TILTED, because a muffled step barely has modes at all.
+      // With the full seven-mode plate set this candidate's fundamental at 155 Hz
+      // and its second at 209 BEAT against each other at 54 Hz — an 18ms warble
+      // plainly visible in the envelope and measuring 0.94 as a double. It is not
+      // a second footfall, it is two partials interfering, and the fix is not
+      // detune or damping (both were swept and neither helped) but simply not
+      // having a second partial loud enough to beat with the first.
+      modes: 2, tilt: 2.6, damp: 1.1, len: 0.26, peak: 0.40, v })) },
   { id: 'real-gravel', name: 'Real: gravel', physical: true, vary: 4,
     note: 'Sixty individual stones, not a noise swell. This is what grain sounds like.',
     make: (_, v = 0) => R(HI, () => { reseed(880 + v * 331); const n = secs(0.26);
@@ -123,7 +155,7 @@ const FOOTSTEP = [
         crumple(n, { grains: 70, decay: 0.045, f: 3000, q: 1.5 }),
         crumple(n, { grains: 30, decay: 0.070, f: 900, q: 1.1, spread: 1.4 }),
         modal(n, 130, MATERIAL.plate, { decay: 0.055, damp: 0.9, g: 0.35 }),
-      ), { damp: 0.45, wet: 0.5 }).slice(0, n), 0.48); }) },
+      ), { time: 0.14, wet: 0.22, damp: 0.45 }).slice(0, n), 0.48); }) },
 
   // ── the earlier, simpler approach ──────────────────────────────────────────
   { id: 'dress', name: 'Dress shoe', shipped: true,
@@ -217,7 +249,7 @@ const PAGE = [
       const c = bandpass(tilted(cn, -0.8), 1900, 1.1); const ce = env(cn, 0.0004, 0.0035);
       return finish(reflect(mix(c.map((x, i) => x * ce[i] * 0.7),
         modal(n, 300, MATERIAL.plate, { decay: 0.020, damp: 1.2, g: 0.9, tilt: 1.4 })),
-        { damp: 0.62, wet: 0.5 }).slice(0, n), 0.20); }) },
+        { time: 0.09, wet: 0.22, damp: 0.62 }).slice(0, n), 0.20); }) },
   { id: 'leaf', name: 'Paper landing', shipped: true,
     note: 'A struck 300 Hz with a fifth, gone in 22ms. What is in the app now.',
     make: () => R(HI, () => { reseed(70118); const n = secs(0.085);
@@ -278,7 +310,7 @@ function realTap({ mat = 'wood', f0 = 700, decay = 0.030, damp = 0.8, nailG = 0.
   const ne = env(cn, 0.0002, 0.0022);
   const dry = mix(nail.map((x, i) => x * ne[i] * nailG),
     modal(n, f0, MATERIAL[mat], { decay, damp, g: 1, tilt: 1.3, attack: 0.0006 }));
-  return finish(reflect(dry, { damp: 0.6, wet }).slice(0, n), peak);
+  return finish(reflect(dry, { time: 0.10, wet: wet * 0.45, damp: 0.6 }).slice(0, n), peak);
 }
 
 const TAP = [
@@ -641,7 +673,7 @@ const IMPACT = [
       const c = lowpass(tilted(cn, -0.9), 0.30); const ce = env(cn, 0.0004, 0.0055);
       return finish(reflect(mix(c.map((x, i) => x * ce[i] * 0.55),
         modal(n, 96, MATERIAL.plate, { decay: 0.30, damp: 0.85, g: 1, tilt: 1.1 })),
-        { damp: 0.42, wet: 1.3 }).slice(0, n), 0.66); }) },
+        { time: 0.34, wet: 0.45, damp: 0.42 }).slice(0, n), 0.66); }) },
   { id: 'thud', name: 'Low thud', shipped: true,
     note: 'One struck low tone with a room tail. What is in the app now.',
     make: () => R(HI, () => { reseed(19760); const n = secs(0.70);
