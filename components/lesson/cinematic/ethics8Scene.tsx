@@ -9,6 +9,7 @@ import {
 import { BEATS } from './ethics8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import type { Shot } from './camera';
 
 // A room with two halves. Up top, a rigid grid of empty rule-boxes — impartial,
 // tidy, nobody's name in them. Down on the floor, stage right, a second figure
@@ -277,9 +278,54 @@ const styles = StyleSheet.create({
   bedLegR: { position: 'absolute', left: 386, top: 464, width: 3, height: 36, backgroundColor: SOFT },
 });
 
+// ── THE CAMERA ───────────────────────────────────────────────────────────────
+//
+// The first lesson with one, and the reason it is this lesson: the script already
+// walks a figure across a room to someone on the floor, so there is somewhere for
+// the camera to GO. A shot list on a lesson whose staging never moves is just
+// motion for its own sake.
+//
+// The arc is close → wide → follow → close → wide:
+//
+//   0  a portrait of one person, alone in the room — nothing else established
+//   1  pull all the way back as the tidy boxes appear; the widest thing said
+//   2  drift right on "then you look up", finding the person on the floor
+//   3  travel with the walk and tighten as they arrive — the move IS the sentence
+//   4  full frame for Q1, because three cards have to be read and tapped
+//   5  a two-shot of the pair on the floor for Gilligan's different voice
+//   6  ease off a little to hold the quote
+//   7  the closest push of the lesson, across the thread between the two heads
+//   8  widen as the method is laid out
+//   9  full frame for the critics — the objection is about the whole picture
+//  10  neutral; the stage is hidden on a summary beat anyway
+//
+// EVERY NUMBER BELOW IS CHECKED, not judged by eye. `checkShots` in ./camera.ts
+// takes the list, this band and the ground line and reports any shot that would
+// show paper nobody drew. Four of the first draft's eleven failed it: two ran off
+// the bottom of the design space, one off the right edge, and one had the camera
+// beside the friend on a beat where the narrator has walked back across the room.
+// Re-run it after touching anything here.
+//
+// Q1 IS DELIBERATELY AT SCALE 1, which is the identity transform — the three
+// cards are Pressables, and a tap must not have to survive a camera offset to
+// land. The move into that beat finishes before the cards matter.
+const SHOTS: Shot[] = [
+  { cx: 132, cy: 404, s: 1.62, tr: 0 },
+  { cx: 200, cy: 280, s: 1.0, tr: 1.5 },
+  { cx: 236, cy: 352, s: 1.24, tr: 1.2 },
+  { cx: 236, cy: 392, s: 1.42, tr: 1.6 },
+  { cx: 200, cy: 280, s: 1.0, tr: 0.9 },
+  { cx: 238, cy: 384, s: 1.34, tr: 1.0 },
+  { cx: 224, cy: 358, s: 1.18, tr: 0.9 },
+  { cx: 205, cy: 380, s: 1.45, tr: 1.0 },
+  { cx: 200, cy: 340, s: 1.12, tr: 1.2 },
+  { cx: 200, cy: 280, s: 1.0, tr: 0.9 },
+  { cx: 200, cy: 280, s: 1.0, tr: 0.6 },
+];
+
 // The section header "RULES · RIGHTS · TOTALS" sits at y = 46, above the old band
 // top of 56, so it was 91% clipped — the row of boxes had no title. Lowest ink is
 // the figure's shadow at 506.
 export function Ethics8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics8Scene} band={[42, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics8Scene} band={[42, 512]} shots={SHOTS} />;
 }

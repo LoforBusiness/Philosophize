@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType }
 import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
-  useSharedValue, useFrameCallback, useAnimatedStyle, useAnimatedReaction, runOnJS,
+  useSharedValue, useFrameCallback, useAnimatedStyle, useAnimatedReaction, useDerivedValue, runOnJS,
   withTiming, Easing, type SharedValue,
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
@@ -12,6 +12,7 @@ import { exitLesson } from '../exitLesson';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
+import { shotAt, NEUTRAL, type Shot } from './camera';
 import { cue } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import { lessonHasSound } from './lessonSound';
@@ -57,7 +58,7 @@ export interface SceneApi {
 export type SceneComponent = ComponentType<SceneApi>;
 
 export default function CinematicPlayer({
-  lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk,
+  lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk, shots,
 }: {
   lesson: Lesson;
   beats: BaseBeat[];
@@ -82,6 +83,18 @@ export default function CinematicPlayer({
    * the only case these times are correct for.
    */
   walk?: number[];
+  /**
+   * ONE CAMERA SHOT PER BEAT — where the reader is standing while it plays.
+   *
+   * Omit it and the scene mounts exactly as it always has: no wrapper view, no
+   * transform, no derived value recomputed every frame. The camera is opt-in
+   * because 101 lessons should not pay for a feature one of them uses.
+   *
+   * See ./camera.ts for the geometry, and `checkShots` for the rules — the one
+   * that matters is that a shot may never scale below 1, because the lesson's
+   * BAND was measured at 1 and anything wider shows paper nobody drew.
+   */
+  shots?: Shot[];
 }) {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
@@ -112,6 +125,31 @@ export default function CinematicPlayer({
     () => (sounded && walk ? footfallTrack(walk) : { steps: [], settle: [] }),
     [sounded, walk],
   );
+
+  // THE CAMERA. Every hook must sit above `if (done) return null` (§17 rule 1),
+  // and these are no exception — they are declared unconditionally even when the
+  // lesson passes no shots, because a hook behind a condition is a hook count
+  // that changes between renders.
+  //
+  // It travels from the PREVIOUS beat's shot to this one over `to.tr` seconds,
+  // driven by `bt` — the beat clock — so a move that accompanies a walk is paced
+  // by the same clock the feet are, and a dropped frame slows both together.
+  const camNow = useDerivedValue(() => {
+    if (!shots || shots.length === 0) return NEUTRAL;
+    const n = Math.min(Math.max(bi.value, 0), shots.length - 1);
+    const from = n > 0 ? shots[n - 1] : shots[0];
+    return shotAt(from, shots[n], bt.value);
+  });
+  const camStyle = useAnimatedStyle(() => {
+    const c = camNow.value;
+    return {
+      transform: [
+        { translateX: STAGE_W / 2 - c.cx * c.s },
+        { translateY: STAGE_H / 2 - c.cy * c.s },
+        { scale: c.s },
+      ],
+    };
+  });
 
   const clock = useSharedValue(0);
   const bt = useSharedValue(0);
@@ -304,7 +342,20 @@ export default function CinematicPlayer({
             <View style={{ width: STAGE_W * fit, height: bandH * fit, overflow: 'hidden' }}>
               <View style={{ position: 'absolute', left: 0, top: -bandT * fit, width: STAGE_W * fit, height: STAGE_H * fit }}>
                 <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
-                  <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                  {/* THE CAMERA LAYER EXISTS ONLY WHEN A LESSON ASKS FOR ONE.
+                      Without `shots` the scene mounts exactly as it always did —
+                      no wrapper, no transform, no derived value driving a style
+                      every frame. 101 lessons should not pay a matrix multiply
+                      per frame for a feature one of them uses. */}
+                  {shots ? (
+                    <Animated.View
+                      style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
+                    >
+                      <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                    </Animated.View>
+                  ) : (
+                    <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                  )}
                 </View>
               </View>
             </View>
