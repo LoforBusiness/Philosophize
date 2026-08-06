@@ -190,7 +190,6 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   const recordLessonComplete = useUserDataStore((s) => s.recordLessonComplete);
   const registerDailyActivity = useUserDataStore((s) => s.registerDailyActivity);
   const bumpDailyLessons = useUserDataStore((s) => s.bumpDailyLessons);
-  const seedReview = useUserDataStore((s) => s.seedReview);
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
   const dailyLessonCount = useUserDataStore((s) => s.dailyLessonCount);
   const dailyLessonDate = useUserDataStore((s) => s.dailyLessonDate);
@@ -253,11 +252,6 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     const today = dateStr(new Date());
     const yesterday = dateStr(new Date(Date.now() - 86_400_000));
     bumpDailyLessons(today); // count this completion toward the free daily allowance
-    // Put this lesson on the review ladder — a clean run enters two rungs up, a
-    // fumbled one at the bottom and back tomorrow. This is the ONLY thing the
-    // schedule needs from a completion, which is why review needed no new
-    // capture path: `correct` and `total` are already in hand here.
-    seedReview(lessonId, correct, total);
     const dayInfo = registerDailyActivity(today, yesterday, { isPro });
     track('lesson_completed', {
       branch_slug: branchSlug,

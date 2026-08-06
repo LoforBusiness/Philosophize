@@ -15,14 +15,6 @@ import { DEFAULT_PROFILE_FONT } from '@/data/profileFonts';
 import { XP_PER_PHILOSOPHER_MET, XP_PER_QUIZ, XP_PER_QUIZ_PERFECT, XP_PER_SAVED_QUOTE } from '@/constants/xp';
 import { restCap, restDaysHeld, restEarnEvery } from '@/constants/streak';
 import { restDaysToSpend } from '@/lib/utils/streak';
-import {
-  backfillEntries,
-  dayKey,
-  gradeEntry,
-  isReviewable,
-  seedEntry,
-  type ReviewState,
-} from '@/lib/review';
 import { track } from '@/lib/posthog';
 import { writePinnedQuote } from '@/lib/widget/pin';
 
@@ -246,12 +238,6 @@ interface UserDataState {
   // the true one and so is the higher spend. Held is derived (constants/streak).
   restDaysEarned: number;
   restDaysUsed: number;
-  // ── daily review ──────────────────────────────────────────────────────────
-  // lessonId -> { s: strength 0-4, due: 'YYYY-MM-DD' }. Scheduled per LESSON
-  // rather than per question; see lib/review for why that is enough.
-  reviewState: ReviewState;
-  reviewDayCount: number;                     // review questions answered on reviewDayDate
-  reviewDayDate: string | null;               // YYYY-MM-DD the review count belongs to
   // Branch chosen by the welcome questions. A SUGGESTION the home screen and
   // Quick Start prefer — never a gate; all six branches stay open regardless.
   startingBranch: string | null;
@@ -336,14 +322,6 @@ interface UserDataState {
     yesterday: string,
     opts?: { isPro?: boolean }
   ) => { firstOfDay: boolean; streak: number; prevStreak: number; restSpent: number; restEarned: number };
-  /** Schedule a just-finished lesson for review. */
-  seedReview: (lessonId: string, correct: number, total: number) => void;
-  /** Move a reviewed lesson up or down the ladder. */
-  gradeReview: (lessonId: string, wasCorrect: boolean) => void;
-  /** Count one answered review question toward today's free allowance. */
-  bumpDailyReviews: () => void;
-  /** Schedule completed lessons not yet in the schedule. Idempotent; see backfillEntries. */
-  ensureReviewBacklog: () => void;
   /** Records the welcome answers: the branch to steer to, and which set was asked. */
   completeOnboarding: (slug: string | null, version: number) => void;
   /** Spend the one out-of-Settings reminder ask, whatever the answer was. */
@@ -542,9 +520,6 @@ export const useUserDataStore = create<UserDataState>()(
       dailyLessonDate: null,
       restDaysEarned: 0,
       restDaysUsed: 0,
-      reviewState: {},
-      reviewDayCount: 0,
-      reviewDayDate: null,
       startingBranch: null,
       onboardingVersion: 0,
       notifyAsked: false,
@@ -773,53 +748,6 @@ export const useUserDataStore = create<UserDataState>()(
         return { ...info, restEarned: earns };
       },
 
-      // ── daily review ─────────────────────────────────────────────────────────
-
-      seedReview: (lessonId, correct, total) =>
-        set((state) => {
-          if (!isReviewable(lessonId)) return state; // no gradeable question in its deck
-          return {
-            reviewState: {
-              ...state.reviewState,
-              [lessonId]: seedEntry(correct, total, dayKey()),
-            },
-          };
-        }),
-
-      gradeReview: (lessonId, wasCorrect) =>
-        set((state) => {
-          const entry = state.reviewState[lessonId];
-          if (!entry) return state;
-          return {
-            reviewState: {
-              ...state.reviewState,
-              [lessonId]: gradeEntry(entry, wasCorrect, dayKey()),
-            },
-          };
-        }),
-
-      bumpDailyReviews: () =>
-        set((state) => {
-          const today = dayKey();
-          return {
-            reviewDayCount: state.reviewDayDate === today ? state.reviewDayCount + 1 : 1,
-            reviewDayDate: today,
-          };
-        }),
-
-      // Called whenever the review surface is looked at, not once behind a latch:
-      // it also has to catch lessons that merge in from another device after
-      // sign-in. `backfillEntries` skips anything already scheduled, so re-running
-      // it is free and cannot disturb a lesson's place on the ladder. Returning
-      // `state` untouched when there is nothing to add keeps it from waking every
-      // subscriber on each visit.
-      ensureReviewBacklog: () =>
-        set((state) => {
-          const add = backfillEntries(state.reviewState, state.lessonsByUnit, dayKey());
-          if (Object.keys(add).length === 0) return state;
-          return { reviewState: { ...state.reviewState, ...add } };
-        }),
-
       // One write, so a reader who is interrupted between the answer and the flag
       // is never left steered-but-still-being-asked.
       completeOnboarding: (slug, version) => {
@@ -884,7 +812,7 @@ export const useUserDataStore = create<UserDataState>()(
       setWelcomeVersion: (v) => set({ welcomeVersion: v, hasSeenWelcome: true }),
 
       resetProgress: () =>
-        set({ lessonsByUnit: {}, lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, xpEvents: [], rankIndex: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null, restDaysEarned: 0, restDaysUsed: 0, reviewState: {}, reviewDayCount: 0, reviewDayDate: null }),
+        set({ lessonsByUnit: {}, lessonsByBranch: {}, quizScores: {}, streak: 0, totalXP: 0, xpEvents: [], rankIndex: 0, lastLessonDate: null, dailyLessonCount: 0, dailyLessonDate: null, restDaysEarned: 0, restDaysUsed: 0 }),
 
       clearSavedQuotes: () => {
         set({ savedQuotes: [] });
@@ -913,9 +841,6 @@ export const useUserDataStore = create<UserDataState>()(
           dailyLessonDate: null,
           restDaysEarned: 0,
           restDaysUsed: 0,
-          reviewState: {},
-          reviewDayCount: 0,
-          reviewDayDate: null,
           startingBranch: null,
           // Asked again, because this device is now a different person: both
           // callers wipe to a clean baseline (account deleted, or signed out so
@@ -961,9 +886,6 @@ export const useUserDataStore = create<UserDataState>()(
           dailyLessonDate: null,
           restDaysEarned: 0,
           restDaysUsed: 0,
-          reviewState: {},
-          reviewDayCount: 0,
-          reviewDayDate: null,
           startingBranch: null,
           // Asked again, because this device is now a different person: both
           // callers wipe to a clean baseline (account deleted, or signed out so
@@ -1010,9 +932,6 @@ export const useUserDataStore = create<UserDataState>()(
         dailyLessonDate: state.dailyLessonDate,
         restDaysEarned: state.restDaysEarned,
         restDaysUsed: state.restDaysUsed,
-        reviewState: state.reviewState,
-        reviewDayCount: state.reviewDayCount,
-        reviewDayDate: state.reviewDayDate,
         startingBranch: state.startingBranch,
         onboardingVersion: state.onboardingVersion,
         notifyAsked: state.notifyAsked,
@@ -1071,8 +990,6 @@ export const useUserDataStore = create<UserDataState>()(
         // and poison every later comparison silently.
         const restDaysEarned = p.restDaysEarned ?? 0;
         const restDaysUsed = p.restDaysUsed ?? 0;
-        const reviewState = p.reviewState ?? {};
-        const reviewDayCount = p.reviewDayCount ?? 0;
         const onboardingVersion = p.onboardingVersion ?? 0;
         const notifyAsked = p.notifyAsked ?? false;
         return {
@@ -1087,8 +1004,6 @@ export const useUserDataStore = create<UserDataState>()(
           welcomeVersion,
           restDaysEarned,
           restDaysUsed,
-          reviewState,
-          reviewDayCount,
           onboardingVersion,
           notifyAsked,
           settings: sanitizeSettings(p.settings),

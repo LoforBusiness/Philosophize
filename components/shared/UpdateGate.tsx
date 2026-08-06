@@ -16,8 +16,8 @@ import SketchIcon from '@/components/shared/SketchIcon';
 // 16 = the release carrying the new icon and the branch artwork.
 // 19 = the first binary containing expo-notifications and expo-audio. This is
 //      what makes the gate worth raising rather than merely tidy: a build 16
-//      reader has received every line of JS since, so they have Daily Review,
-//      rest days and the whole content expansion — but reminders and sound are
+//      reader has received every line of JS since, so they have rest days, the
+//      welcome questions and the whole content expansion — but reminders and sound are
 //      NATIVE, and no over-the-air update can ever put them on that binary. They
 //      are not behind on content, they are permanently cut off from the retention
 //      engine, and only a store update fixes it.

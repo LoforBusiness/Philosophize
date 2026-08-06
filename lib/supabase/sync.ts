@@ -1,7 +1,6 @@
 import { supabase } from './client';
 import { useUserDataStore, type SavedQuote, type ProfileQuote, type AppSettings, type XpEvent } from '@/stores/userDataStore';
 import { branchCountsFromUnits, unitsFromBranchCounts } from '@/data';
-import { MAX_STRENGTH, type ReviewEntry, type ReviewState } from '@/lib/review';
 
 // The slice of userDataStore mirrored to the cloud — matches the store's
 // `partialize`, so "what we persist locally" and "what we sync" stay identical.
@@ -22,10 +21,6 @@ export interface CloudState {
   // is the merge everything else here needs.
   restDaysEarned: number;
   restDaysUsed: number;
-  // Spaced-repetition schedule. Deliberately NOT accompanied by reviewDayCount /
-  // reviewDayDate: those are the free tier's daily allowance and stay per-device,
-  // exactly like dailyLessonCount, which has never synced either.
-  reviewState: ReviewState;
   startingBranch: string | null;
   // Synced so signing in on a second phone does not ask the three questions
   // again — the answer already travels with the account via startingBranch.
@@ -46,7 +41,7 @@ const SYNC_FIELDS: (keyof CloudState)[] = [
   'savedQuotes', 'profileQuote', 'philosopherViews', 'lessonsByUnit', 'lessonsByBranch', 'beliefResultId',
   'streak', 'totalXP', 'xpEvents', 'rankIndex', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'badgesInitialized',
   'displayName', 'email', 'bio', 'portrait', 'profileBackground', 'nameFont', 'settings',
-  'restDaysEarned', 'restDaysUsed', 'reviewState', 'startingBranch', 'onboardingVersion',
+  'restDaysEarned', 'restDaysUsed', 'startingBranch', 'onboardingVersion',
 ];
 
 const capStr = (v: unknown, n: number) => (typeof v === 'string' ? v.slice(0, n) : v);
@@ -132,41 +127,6 @@ export async function deleteCloudState(userId: string): Promise<boolean> {
 function mergeMax(a: Record<string, number> = {}, b: Record<string, number> = {}) {
   const out: Record<string, number> = { ...a };
   for (const k of Object.keys(b)) out[k] = Math.max(out[k] ?? 0, b[k] ?? 0);
-  return out;
-}
-
-/**
- * Newest write wins, per lesson.
- *
- * The only merge in this file that is NOT "keep the larger", and deliberately:
- * a review entry can legitimately go DOWN. Missing its question drops a lesson
- * to strength 0 and makes it due tomorrow, and a max-merge would hand the old
- * mastery straight back — the reader would have just proved they had forgotten
- * something, and the sync would overrule them. So sort by the touch stamp.
- *
- * Entries are shape-checked on the way in rather than trusted: this row is
- * whatever was last written to the cloud, and a malformed `s` or `due` would
- * otherwise reach the scheduler and sit there permanently un-due.
- */
-function validEntry(v: unknown): v is ReviewEntry {
-  if (!v || typeof v !== 'object') return false;
-  const e = v as Partial<ReviewEntry>;
-  return (
-    typeof e.s === 'number' && e.s >= 0 && e.s <= MAX_STRENGTH &&
-    typeof e.due === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.due) &&
-    typeof e.t === 'number' && Number.isFinite(e.t)
-  );
-}
-
-function mergeReviewState(a: ReviewState = {}, b: ReviewState = {}): ReviewState {
-  const out: ReviewState = {};
-  for (const k of Object.keys(a)) if (validEntry(a[k])) out[k] = a[k];
-  for (const k of Object.keys(b)) {
-    const rb = b[k];
-    if (!validEntry(rb)) continue;
-    const cur = out[k];
-    if (!cur || rb.t > cur.t) out[k] = rb;
-  }
   return out;
 }
 
@@ -272,7 +232,6 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
   // on another device, every time the two synced.
   const restDaysEarned = Math.max(local.restDaysEarned ?? 0, remote.restDaysEarned ?? 0);
   const restDaysUsed = Math.max(local.restDaysUsed ?? 0, remote.restDaysUsed ?? 0);
-  const reviewState = mergeReviewState(local.reviewState, remote.reviewState);
   // Monotonic version: the higher is the one that has been through more of the
   // flow, so max never re-asks someone who has already answered.
   const onboardingVersion = Math.max(local.onboardingVersion ?? 0, remote.onboardingVersion ?? 0);
@@ -335,7 +294,6 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
     profileQuote,
     restDaysEarned,
     restDaysUsed,
-    reviewState,
     startingBranch,
     onboardingVersion,
     philosopherViews,

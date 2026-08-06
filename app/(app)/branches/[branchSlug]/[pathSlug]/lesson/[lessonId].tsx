@@ -388,7 +388,6 @@ export default function LessonScreen() {
             glyph={lockRank.current.glyph}
             lines={[
               `${FREE_DAILY_LESSON_LIMIT} ${lessonsWord(FREE_DAILY_LESSON_LIMIT)} a day`,
-              'Three review questions',
               'Renews at midnight',
             ]}
             stamp={`USED · ${stampDate()}`}

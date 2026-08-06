@@ -36,7 +36,6 @@ const PRIVACY_URL = 'https://philosophize.app/privacy';
 // terms, it does not sell them.
 const BENEFITS = [
   'Every lesson, every day',
-  'The whole review queue',
   'Five rest days, held',
   'No advertisement, ever',
 ];
@@ -166,7 +165,7 @@ export default function PaywallContent({
           <Text style={styles.title}>Think without limits.</Text>
           <Text style={styles.sub}>
             Free gives you {FREE_DAILY_LESSON_LIMIT} {lessonsWord(FREE_DAILY_LESSON_LIMIT)} a day, with ads.
-            The Pass lifts the cap, opens the whole review queue, and never stamps.
+            The Pass lifts the cap, keeps your streak safe, and never stamps.
           </Text>
 
           <View style={styles.priceRow}>

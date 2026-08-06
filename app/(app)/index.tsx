@@ -17,7 +17,6 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { daysMissed, effectiveStreak } from '@/lib/utils/streak';
 import { restDaysHeld } from '@/constants/streak';
-import ReviewCard from '@/components/home/ReviewCard';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
 
 const Paper = '#FAFAF7';
@@ -178,10 +177,6 @@ export default function HomeScreen() {
             Sits between the reflection and the three small actions on purpose:
             the quote is what greets them, this is what they came to do, and
             Learn / Philosophers / Insights are where they go instead. */}
-        {/* Above Quick Start on purpose: keeping what you already learned comes
-            before adding more. Renders nothing when nothing is due. */}
-        <ReviewCard style={styles.reviewCard} />
-
         <QuickStartCard style={styles.quickStart} />
 
         {/* Actions */}
@@ -430,5 +425,4 @@ const styles = StyleSheet.create({
     marginTop: 3,
     maxWidth: 230,
   },
-  reviewCard: { marginTop: 18 },
 });

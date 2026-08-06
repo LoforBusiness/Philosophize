@@ -72,10 +72,6 @@ export default function AppLayout() {
       <Tabs.Screen name="settings" options={{ href: null }} />
       {/* Paywall — pushed from Settings and the daily-limit gate, hidden from tabs */}
       <Tabs.Screen name="paywall" options={{ href: null }} />
-      {/* Daily Review — pushed from the Home card, hidden from tabs. Not a sixth
-          tab on purpose: five is already the comfortable maximum, and review is a
-          thing you do once a day rather than a place you browse. */}
-      <Tabs.Screen name="review" options={{ href: null }} />
     </Tabs>
   );
 }
