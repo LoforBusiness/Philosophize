@@ -6,6 +6,7 @@ import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon'
 import Glyph from '@/components/shared/Glyph';
 import BadgeMedal from '@/components/shared/BadgeMedal';
 import RankClimbChart from '@/components/shared/RankClimbChart';
+import { ShareBars, StackBar, DayBars } from '@/components/profile/InkCharts';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { ProfileArtFill, ProfileAvatar, useProfileArt } from '@/components/shared/ProfileArt';
@@ -24,6 +25,7 @@ import { generateUserBio } from '@/lib/utils/userBio';
 import { effectiveStreak } from '@/lib/utils/streak';
 import { restDaysHeld } from '@/constants/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
+import { dailyXP, activeDays } from '@/lib/utils/xpSeries';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -154,13 +156,28 @@ export default function ProfileScreen() {
   const topBranch = (mastery[0]?.pct ?? 0) > 0 ? mastery[0].slug : null;
   const descriptor = topBranch ? TITLE[topBranch] ?? 'SEEKER' : 'SEEKER';
 
-  // "From your insights" — the user's top philosopher and top area of interest,
-  // scored the same way the Insights screen does.
+  // RETURNING TO SOMEONE MEANS YOU OPENED THEM.
+  //
+  // This used to score `views×3 + quotes×5 + lessons in their branches`, copied
+  // from the Insights pie. That last term is shared by every thinker in a branch
+  // and it is large, so it decided the ranking on its own: seeded with a real
+  // reader's shape of data, this section listed Zeno of Citium, Boethius and Duns
+  // Scotus as thinkers they "keep returning to" — none of whom they had ever
+  // opened. The entire score was lessons other people's names were attached to.
+  //
+  // The two-line layout hid that, because a single name looks authoritative and
+  // nothing was shown next to it. A ranked list with the behaviour beside each row
+  // could not hide it, which is the argument for drawing data rather than stating
+  // it: the picture failed loudly where the sentence failed silently.
+  //
+  // So this scores what its own heading promises — opening someone, and keeping
+  // something they said. Insights keeps the branch-weighted formula, which is
+  // right for the question IT asks ("which thinkers surround what I read"). They
+  // are now two different questions rather than one answered inconsistently.
   const philScores = ALL_PHILOSOPHERS.map((p) => {
     const views = philosopherViews[p.id] ?? 0;
     const quotes = savedQuotes.filter((q) => q.philosopherId === p.id).length;
-    const learn = p.branchSlugs.reduce((a, s) => a + (lessonsByBranch[s] ?? 0), 0);
-    return { name: p.name, score: views * 3 + quotes * 5 + learn };
+    return { name: p.name, score: views * 3 + quotes * 5, opened: views, kept: quotes };
   })
     .filter((p) => p.score > 0)
     .sort((a, b) => b.score - a.score);
@@ -176,6 +193,29 @@ export default function ProfileScreen() {
     return { slug: b.slug, name: b.name, interactions: lessons + quotes + views };
   }).sort((a, b) => b.interactions - a.interactions);
   const topInterest = (branchInterest[0]?.interactions ?? 0) > 0 ? branchInterest[0] : null;
+
+  // ── what the three sections DRAW ──────────────────────────────────────────
+  //
+  // All three used to state a single fact each — a name, a number, a paragraph —
+  // and a single fact has no shape. These are the same facts with their
+  // proportions left in, which is the whole difference between "Nietzsche" and
+  // "Nietzsche, and by how much".
+  const INK = { ink: Ink, soft: InkSoft, faint: InkFaint, paper: Paper };
+  const thinkerRows = philScores.slice(0, 4).map((ph) => ({
+    label: ph.name,
+    value: ph.score,
+    detail: ph.opened > 0 || ph.kept > 0
+      ? [ph.opened > 0 ? ph.opened + ' opened' : null, ph.kept > 0 ? ph.kept + ' saved' : null]
+          .filter(Boolean).join(' · ')
+      : undefined,
+  }));
+  const branchParts = branchInterest
+    .filter((b) => b.interactions > 0)
+    .map((b) => ({ label: SHORT[b.slug] ?? b.name, value: b.interactions }));
+  // A fortnight is long enough to show a habit and short enough that one good
+  // Sunday does not flatten every other day into the baseline.
+  const xpDays = dailyXP(xpEvents, 14, Date.now());
+  const daysActive = activeDays(xpDays);
 
   // A fun, auto-written character sketch assembled from what the user actually
   // does — lessons taken, quotes saved, thinkers they keep opening.
@@ -318,29 +358,23 @@ export default function ProfileScreen() {
 
           <SectionLabel>FROM YOUR INSIGHTS</SectionLabel>
           <View style={styles.insightsCard}>
-            <View style={styles.insightRow}>
-              <View style={styles.insightIcon}>
-                <SketchIcon name="person" size={18} color={Ink} />
+            {/* A NAME IS A FACT WITH NO SHAPE. This said "TOP PHILOSOPHER —
+                Nietzsche", which cannot tell you whether that is a landslide or a
+                one-quote lead, and left out second and third — the interesting
+                part of anyone's reading. Same data, proportions left in. */}
+            <Text style={styles.insightLabel}>THINKERS YOU KEEP RETURNING TO</Text>
+            {topPhilosopher ? (
+              <View style={{ marginTop: 9 }}>
+                <ShareBars rows={thinkerRows} c={INK} />
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.insightLabel}>TOP PHILOSOPHER</Text>
-                <Text style={styles.insightValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
-                  {topPhilosopher ? topPhilosopher.name : 'Keep exploring'}
+            ) : (
+              <>
+                <Text style={styles.insightValue}>Keep exploring</Text>
+                <Text style={styles.insightHint}>
+                  Open a few thinkers and they will rank themselves here.
                 </Text>
-              </View>
-            </View>
-            <View style={styles.insightDivider} />
-            <View style={styles.insightRow}>
-              <View style={styles.insightIcon}>
-                <SketchIcon name={topInterest ? BICON[topInterest.slug] ?? 'spiral' : 'spiral'} size={18} color={Ink} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.insightLabel}>TOP AREA OF INTEREST</Text>
-                <Text style={styles.insightValue} numberOfLines={1}>
-                  {topInterest ? topInterest.name : 'Keep learning'}
-                </Text>
-              </View>
-            </View>
+              </>
+            )}
           </View>
 
           <SectionLabel>WHO YOU'RE BECOMING</SectionLabel>
@@ -349,19 +383,49 @@ export default function ProfileScreen() {
               <SketchIcon name="pencil" size={16} color={Ink} />
             </View>
             <Text style={styles.bioText}>{bio}</Text>
+            {/* THE SENTENCE, THEN ITS SHAPE. Six bars would be a chart; one bar
+                cut six ways is a portrait, and it answers this section’s own
+                question in a way the prose cannot — whether this reader is a
+                specialist or a wanderer. */}
+            {branchParts.length > 0 ? (
+              <View style={styles.bioShape}>
+                <Text style={styles.insightLabel}>WHERE YOUR READING GOES</Text>
+                <View style={{ marginTop: 10 }}>
+                  <StackBar parts={branchParts} c={INK} />
+                </View>
+              </View>
+            ) : null}
           </View>
 
           <SectionLabel>AT A GLANCE</SectionLabel>
           <View style={styles.glanceRow}>
             <View style={styles.glanceBox}>
-              <SketchIcon name="book" size={20} color={Ink} />
+              <View style={styles.glanceTop}>
+                <SketchIcon name="book" size={15} color={Ink} />
+                <Text style={styles.glanceLabel}>LESSONS DONE</Text>
+              </View>
               <Text style={styles.glanceValue}>{lessonsDone}</Text>
-              <Text style={styles.glanceLabel}>LESSONS DONE</Text>
+              {/* HOW MANY DAYS, not just how many lessons. Six on one Sunday and
+                  one on each of six days are the same total and completely
+                  different habits. */}
+              <Text style={styles.glanceFoot}>
+                {daysActive > 0
+                  ? daysActive + ' active ' + (daysActive === 1 ? 'day' : 'days') + ' in a fortnight'
+                  : 'Quiet fortnight'}
+              </Text>
             </View>
             <View style={styles.glanceBox}>
-              <SketchIcon name="star" size={20} color={Ink} />
+              <View style={styles.glanceTop}>
+                <SketchIcon name="star" size={15} color={Ink} />
+                <Text style={styles.glanceLabel}>TOTAL XP</Text>
+              </View>
               <Text style={styles.glanceValue}>{totalXP.toLocaleString()}</Text>
-              <Text style={styles.glanceLabel}>TOTAL XP</Text>
+              {/* A fortnight, one bar a day, empty days drawn empty. A line would
+                  join the gaps and imply reading on days there was none — and the
+                  gaps are the habit. */}
+              <View style={{ marginTop: 11 }}>
+                <DayBars values={xpDays} c={INK} />
+              </View>
             </View>
           </View>
 
@@ -572,11 +636,19 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: Ink,
     borderRadius: 3,
-    paddingVertical: 18,
-    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 13,
   },
-  glanceValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: Ink, marginTop: 8 },
-  glanceLabel: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft, letterSpacing: 1.5, marginTop: 2 },
+  // LEFT-ALIGNED, not centred. A centred number over a centred caption is a
+  // poster; these are two readings side by side, and readings line up on an edge
+  // so the eye can compare them without hunting for each one's middle.
+  glanceTop: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  glanceValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 32, color: Ink, marginTop: 7 },
+  glanceLabel: { fontFamily: 'Inter_500Medium', fontSize: 9, color: InkSoft, letterSpacing: 1.4 },
+  glanceFoot: {
+    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 11.5,
+    color: InkSoft, marginTop: 10, lineHeight: 15,
+  },
 
   bioCard: {
     borderWidth: 1.5,
@@ -597,6 +669,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
   },
+  bioShape: { marginTop: 16, borderTopWidth: 1, borderTopColor: InkFaint, paddingTop: 14 },
   bioText: {
     fontFamily: 'PlayfairDisplay_400Regular',
     fontStyle: 'italic',
@@ -618,6 +691,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   insightLabel: { fontFamily: 'Inter_500Medium', fontSize: 9, color: InkSoft, letterSpacing: 1.5 },
+  insightHint: {
+    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13,
+    color: InkSoft, marginTop: 6, lineHeight: 19,
+  },
   insightValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 18, color: Ink, marginTop: 3 },
   insightDivider: { height: 1, backgroundColor: InkFaint, marginVertical: 14 },
 
