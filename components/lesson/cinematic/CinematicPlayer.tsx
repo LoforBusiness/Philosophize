@@ -126,10 +126,37 @@ export default function CinematicPlayer({
     [sounded, walk],
   );
 
-  // THE CAMERA. Every hook must sit above `if (done) return null` (§17 rule 1),
-  // and these are no exception — they are declared unconditionally even when the
-  // lesson passes no shots, because a hook behind a condition is a hook count
-  // that changes between renders.
+  const clock = useSharedValue(0);
+  const bt = useSharedValue(0);
+  const bi = useSharedValue(0);
+  const qv = useSharedValue(0);
+  // The foot-plant times for the walk into the current beat, how many have already
+  // sounded, and when the walk comes to rest (−1 if it ends mid-stride). Numbers
+  // only — a JS closure cannot cross into a worklet (§17).
+  const plantAt = useSharedValue<number[]>([]);
+  const planted = useSharedValue(0);
+  const settleAt = useSharedValue(-1);
+  const settled = useSharedValue(0);
+  // Progress fills SMOOTHLY toward the next mark rather than jumping on each tap.
+  const progress = useSharedValue((i + 1) / beats.length);
+  const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: progress.value }] }));
+
+  // THE CAMERA. Two rules govern where this block can live, and it has to satisfy
+  // both — it originally satisfied only the first.
+  //
+  // 1. ABOVE `if (done) return null` (§17 rule 1), like every other hook here.
+  // 2. BELOW `bt` and `bi`, which it reads. This is the one that bit. The block
+  //    sat above them, and `useDerivedValue` runs its worklet IMMEDIATELY to
+  //    establish an initial value — so it reached `bi` in the temporal dead zone
+  //    and threw `Cannot access 'bi' before initialization`, taking the whole
+  //    tree down to a grey screen with no way out.
+  //
+  //    It broke exactly one lesson, which is why it shipped. The guard on the
+  //    first line returns before touching `bi` when a lesson passes no shots, and
+  //    ethics-ethics-8 is the only lesson with a camera — so 101 lessons ran the
+  //    worklet's early return and were fine, and the 102nd crashed every time.
+  //    A hook's position relative to the values it READS is as load-bearing here
+  //    as its position relative to the early return.
   //
   // It travels from the PREVIOUS beat's shot to this one over `to.tr` seconds,
   // driven by `bt` — the beat clock — so a move that accompanies a walk is paced
@@ -150,21 +177,6 @@ export default function CinematicPlayer({
       ],
     };
   });
-
-  const clock = useSharedValue(0);
-  const bt = useSharedValue(0);
-  const bi = useSharedValue(0);
-  const qv = useSharedValue(0);
-  // The foot-plant times for the walk into the current beat, how many have already
-  // sounded, and when the walk comes to rest (−1 if it ends mid-stride). Numbers
-  // only — a JS closure cannot cross into a worklet (§17).
-  const plantAt = useSharedValue<number[]>([]);
-  const planted = useSharedValue(0);
-  const settleAt = useSharedValue(-1);
-  const settled = useSharedValue(0);
-  // Progress fills SMOOTHLY toward the next mark rather than jumping on each tap.
-  const progress = useSharedValue((i + 1) / beats.length);
-  const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: progress.value }] }));
 
   // Rewind the beat clock DURING RENDER (not in an effect): an effect paints one
   // frame of the previous beat's finished state first, which reads as a pop.

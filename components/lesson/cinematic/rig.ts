@@ -142,55 +142,6 @@ export function settleFrac(span: number) {
   return Math.min(0.22, SETTLE_UNITS / Math.max(span, 0.001));
 }
 
-/**
- * THE LAST STEP. Hand a walk over to a standing pose without a foot skating.
- *
- * Two things have to be true at once, and doing only the first is what left a
- * visible slide through several attempts at this:
- *
- * 1. THE ARRIVAL FEET ARE PINNED IN THE WORLD, not in the figure's frame. A
- *    settled pose has fixed ground-relative feet, so the moment the blend starts
- *    the planted foot stops counter-translating and simply rides along with the
- *    body — the slide is then the whole remaining journey. Offsetting the target
- *    by `remaining` puts it at the world position it will finish at, so the body
- *    closes the gap instead of dragging the foot.
- *
- * 2. THE FOOT WITH FURTHER TO GO LIFTS. Even pinned, the two poses disagree about
- *    where the feet belong — the walk has them a stride apart, the stance has
- *    them a hand's width apart — and something must cover that difference. Both
- *    feet cannot be pinned at once; one has to travel. A foot that travels while
- *    touching the floor IS the skate. So it takes a real step: lifted, arced over
- *    the gap, set down where it is going to stay. That is what stopping actually
- *    looks like, and it is the half that the pinning alone could never fix.
- *
- * `remaining` is unsigned: the local frame is mirrored by `dir`, and a figure
- * walks in the direction it faces, so forward is +x locally whichever way it
- * goes. (A figure BACKING AWAY while facing what it retreats from — moves.ts
- * mode 10 — holds `dir` deliberately; its gait cycle makes the same forward
- * assumption, so this is no more or less correct there than that already was.)
- */
-export function settleStep(
-  moving: Stance, settled: Stance, remaining: number, a: number
-): Stance {
-  'worklet';
-  if (a <= 0) return moving;
-  const d = Math.abs(remaining);
-  const tgtL = settled.footL.x + d;
-  const tgtR = settled.footR.x + d;
-  const gapL = Math.abs(tgtL - moving.footL.x);
-  const gapR = Math.abs(tgtR - moving.footR.x);
-  // Arc height scales with how far the foot has to come — a foot already nearly
-  // in place should not perform a whole step to move two units. Doubled because
-  // the mix halves it at the midpoint, which is exactly where the arc peaks.
-  const arc = Math.sin(Math.PI * clamp01(a)) * Math.min(U.standH * 0.38, Math.max(gapL, gapR) * 0.55) * 2;
-  const planted: Stance = {
-    ...settled,
-    footL: { x: tgtL, y: settled.footL.y - (gapL >= gapR ? arc : 0) },
-    footR: { x: tgtR, y: settled.footR.y - (gapR > gapL ? arc : 0) },
-  };
-  return mixStance(moving, planted, a);
-}
-
 // ── the pose ─────────────────────────────────────────────────────────────────
 
 export interface Cfg {
@@ -1339,6 +1290,55 @@ export function mixStance(a: Stance, b: Stance, t: number): Stance {
     fistL: m(a.fistL, b.fistL), fistR: m(a.fistR, b.fistR),
     adv: lerp(a.adv, b.adv, t),
   };
+}
+
+/**
+ * THE LAST STEP. Hand a walk over to a standing pose without a foot skating.
+ *
+ * Two things have to be true at once, and doing only the first is what left a
+ * visible slide through several attempts at this:
+ *
+ * 1. THE ARRIVAL FEET ARE PINNED IN THE WORLD, not in the figure's frame. A
+ *    settled pose has fixed ground-relative feet, so the moment the blend starts
+ *    the planted foot stops counter-translating and simply rides along with the
+ *    body — the slide is then the whole remaining journey. Offsetting the target
+ *    by `remaining` puts it at the world position it will finish at, so the body
+ *    closes the gap instead of dragging the foot.
+ *
+ * 2. THE FOOT WITH FURTHER TO GO LIFTS. Even pinned, the two poses disagree about
+ *    where the feet belong — the walk has them a stride apart, the stance has
+ *    them a hand's width apart — and something must cover that difference. Both
+ *    feet cannot be pinned at once; one has to travel. A foot that travels while
+ *    touching the floor IS the skate. So it takes a real step: lifted, arced over
+ *    the gap, set down where it is going to stay. That is what stopping actually
+ *    looks like, and it is the half that the pinning alone could never fix.
+ *
+ * `remaining` is unsigned: the local frame is mirrored by `dir`, and a figure
+ * walks in the direction it faces, so forward is +x locally whichever way it
+ * goes. (A figure BACKING AWAY while facing what it retreats from — moves.ts
+ * mode 10 — holds `dir` deliberately; its gait cycle makes the same forward
+ * assumption, so this is no more or less correct there than that already was.)
+ */
+export function settleStep(
+  moving: Stance, settled: Stance, remaining: number, a: number
+): Stance {
+  'worklet';
+  if (a <= 0) return moving;
+  const d = Math.abs(remaining);
+  const tgtL = settled.footL.x + d;
+  const tgtR = settled.footR.x + d;
+  const gapL = Math.abs(tgtL - moving.footL.x);
+  const gapR = Math.abs(tgtR - moving.footR.x);
+  // Arc height scales with how far the foot has to come — a foot already nearly
+  // in place should not perform a whole step to move two units. Doubled because
+  // the mix halves it at the midpoint, which is exactly where the arc peaks.
+  const arc = Math.sin(Math.PI * clamp01(a)) * Math.min(U.standH * 0.38, Math.max(gapL, gapR) * 0.55) * 2;
+  const planted: Stance = {
+    ...settled,
+    footL: { x: tgtL, y: settled.footL.y - (gapL >= gapR ? arc : 0) },
+    footR: { x: tgtR, y: settled.footR.y - (gapR > gapL ? arc : 0) },
+  };
+  return mixStance(moving, planted, a);
 }
 
 /**
