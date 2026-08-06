@@ -56,6 +56,9 @@ export interface Marker {
  * uses for idle: a repeating hill every span would read as wallpaper.
  */
 export function groundAt(x: number): number {
+  // MARKED, because the figure reads it on the UI thread every frame. An unmarked
+  // function called from a worklet is a synchronous cross-thread call and throws.
+  'worklet';
   const a = Math.sin(x / 197) * 26;
   const b = Math.sin(x / 71 + 1.7) * 9;
   const drift = Math.sin(x / 883) * 14;

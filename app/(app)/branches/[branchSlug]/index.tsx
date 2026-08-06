@@ -23,6 +23,7 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { BRANCH_ART, MAST_SCRIM, ArtCream, ArtSoft, ArtGold } from '@/constants/branchArt';
+import BranchWorld, { type WorldLesson } from '@/components/branch/BranchWorld';
 
 // ── THE ADVANCE, the thing you see after finishing a lesson ──────────────────
 //
@@ -178,6 +179,9 @@ export default function BranchDetailScreen() {
   const clearLessonFinished = useUIStore((s) => s.clearLessonFinished);
   const cel = useSharedValue(0);
   const [celTarget, setCelTarget] = useState<{ unitId: string; doneIndex: number } | null>(null);
+  // THE WALK. Armed by the same event as the accordion advance, so the two are
+  // one moment rather than two things that happen to fire together.
+  const [walkTo, setWalkTo] = useState<{ to: number; done: () => void } | null>(null);
 
   useEffect(() => {
     if (!justFinished || justFinished.branchSlug !== branchSlug) return;
@@ -191,6 +195,19 @@ export default function BranchDetailScreen() {
     // land — `firstIncomplete` has already moved by the time we get here.
     setPinned(u.id);
     setCelTarget({ unitId: u.id, doneIndex: idx });
+    // Walk to the lesson AFTER the one just finished. Computed against the flat
+    // teaching order, not the unit, so finishing a unit walks on into the next.
+    {
+      let flat = 0;
+      for (const uu of allUnits) {
+        if (uu.id === u.id) { flat += idx; break; }
+        flat += uu.lessons.length;
+      }
+      const next = flat + 1;
+      if (next < allUnits.reduce((n, x) => n + x.lessons.length, 0)) {
+        setWalkTo({ to: next, done: () => setWalkTo(null) });
+      }
+    }
     cel.value = 0;
     cel.value = withDelay(CEL_DELAY, withTiming(1, { duration: CEL_MS, easing: Easing.linear }));
 
@@ -238,6 +255,25 @@ export default function BranchDetailScreen() {
     );
   }
 
+  const worldLessons: WorldLesson[] = [];
+  for (const u of units) {
+    for (const lm of u.lessons) {
+      worldLessons.push({
+        id: lm.lesson.id,
+        title: lm.lesson.title,
+        unitId: u.unit.id,
+        unitSlug: u.unit.slug,
+        unitTitle: u.unit.name,
+        done: lm.state === 'done',
+        accessible: lm.state === 'done' || (lm.state === 'current' && !lm.gatedByPro),
+      });
+    }
+  }
+  // Where the figure stands: the first lesson not yet finished, or the end of the
+  // road if the branch is complete.
+  const firstUndone = worldLessons.findIndex((l) => !l.done);
+  const worldAt = firstUndone < 0 ? Math.max(0, worldLessons.length - 1) : firstUndone;
+
   const pres = PRES[branch.slug] ?? { desc: branch.description, glyph: 'book' as GlyphName, pills: [] };
   const roman = ROMAN[Math.max(0, ORDER.indexOf(branch.slug))];
 
@@ -282,6 +318,25 @@ export default function BranchDetailScreen() {
               </View>
             )}
           </ImageBackground>
+
+          {/* THE ROAD. The same lessons as the list below, laid end to end on the
+              ground with the reader standing where they got to. Finishing one
+              walks the figure the five seconds to the next.
+
+              THE UNIT LIST STAYS, and not out of caution: walking is the earned
+              forward motion, and a flat list is still the fastest way to look back
+              over thirty-two lessons and reopen one. The world is the hero; the
+              list is the index. */}
+          <BranchWorld
+            lessons={worldLessons}
+            current={worldAt}
+            advanceTo={walkTo}
+            onOpen={(l) => {
+              const u = allUnits.find((x) => x.id === l.unitId);
+              const les = u?.lessons.find((x) => x.id === l.id);
+              if (u && les) openLesson(u, les);
+            }}
+          />
 
           {/* One unit open at a time. The rest sit closed, so a 29-lesson branch
               reads as five lines plus the one road you're actually on. */}
