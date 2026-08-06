@@ -1,155 +1,174 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, {
-  useSharedValue, useAnimatedStyle, useAnimatedRef, useAnimatedScrollHandler,
-  useDerivedValue, useFrameCallback, withTiming, scrollTo, runOnJS, Easing,
-  type SharedValue,
+  useSharedValue, useAnimatedStyle, useDerivedValue, useFrameCallback,
+  withTiming, withSequence, runOnJS, Easing, type SharedValue,
 } from 'react-native-reanimated';
 import Stickman from '@/components/lesson/cinematic/Stickman';
 import { pose, travelStance, stand, WALK, type Bundle } from '@/components/lesson/cinematic/rig';
 import {
-  layout, groundAt, LAYERS, LEAD, SPAN, WALK_SECONDS, WALK_SPEED, BASE_Y, type Marker,
+  layout, groundAt, propsBetween, MOON, LAYERS, LEAD, SPAN, WALK_SECONDS,
+  type Marker, type Prop,
 } from './worldPath';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BRANCH IS A PLACE YOU WALK THROUGH.
 //
-// It was a vertical list of dots joined by a rule — accurate, scannable, and with
-// nothing in it that made you want to take the next step. This is the same 32
-// lessons laid end to end on the ground, with the reader's figure standing at the
-// last one they finished and walking to the next when they earn it.
+// ── THE WORLD DOES NOT SCROLL SIDEWAYS ──────────────────────────────────────
 //
-// ── ONE CAMERA, TWO DRIVERS, NEVER BOTH ─────────────────────────────────────
+// It did, and that was wrong: being able to drag the landscape turns the walk
+// into a thing you can skip, and the walk is the whole point. The camera is now
+// driven by exactly three things, all of them animations:
 //
-// `camX` is the only thing that decides what is on screen. It is driven either by
-// the native scroll (browsing) or by a timed walk — and the walk turns scrolling
-// OFF while it runs. Two things writing one camera is how a scroll fights an
-// animation and the world judders; making it impossible is cheaper than tuning it.
+//   · arriving — it is simply where the reader already is
+//   · the WALK — five seconds to the next lesson, after finishing one
+//   · the DROP — tapping any other lesson lands the figure beside it
 //
-// The ScrollView is doing the browsing rather than a pan gesture because it brings
-// momentum, bounds and fling for nothing, and `scrollTo` in a worklet is what lets
-// the walk drive the same surface.
+// Moving between UNITS is vertical, in the list below this strip. Nothing here
+// responds to a horizontal drag at all, so there is no way to be somewhere the
+// animation did not put you.
+//
+// ── THE FIGURE STANDS BEHIND THE SIGNS ──────────────────────────────────────
+//
+// Drawn before the markers, so a lesson's name is never covered by a person.
+// The words are the thing being chosen; the figure is who is choosing.
 //
 // ── DEPTH IS PARALLAX AND TONE, NEVER HUE (§19) ─────────────────────────────
 //
-// The layers ride `camX` at different rates (worldPath.LAYERS). They sit OUTSIDE
-// the scroll content, as siblings behind it, so they can move at their own speed
-// while the markers move at exactly the ground's.
-//
-// The markers are INSIDE the scroll content at their world x, so hit-testing is
-// native and a tap lands where the finger is — a marker positioned by a transform
-// would need its touch target moved in step, which is a bug waiting to happen.
+// Four layers of flat silhouette — peaks, pines, trees, foreground — each a
+// paler tone further out, each riding the camera at its own rate. That stacking
+// IS the look of the reference art; almost none of it is detail, and all of it
+// survives being black and white.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const INK = '#1A1A1A';
 const SOFT = '#6B6B6B';
 const FAINT = '#C9C5BA';
 const PAPER = '#FAFAF7';
-const SKY = '#F1EEE7';
+const SKY = '#EFECE4';
 
-/** The figure's height in stage units — the same 103 the cinematic lessons use. */
 const FIG_K = 0.62;
-const H = 340;                     // the world strip's height on screen
+const H = 360;
+/** How long the figure takes to drop in beside a lesson the reader tapped. */
+const DROP_MS = 900;
 
 export interface WorldLesson {
-  id: string;
-  title: string;
-  unitId: string;
-  unitSlug: string;
-  unitTitle: string;
-  done: boolean;
-  accessible: boolean;
+  id: string; title: string;
+  unitId: string; unitSlug: string; unitTitle: string;
+  done: boolean; accessible: boolean;
 }
 
 export default function BranchWorld({
   lessons, current, onOpen, advanceTo,
 }: {
-  /** Every lesson in the branch, in teaching order. */
   lessons: WorldLesson[];
-  /** Index the figure stands at. */
   current: number;
   onOpen: (l: WorldLesson) => void;
-  /** Set to an index to play the 5-second walk to it, then call back. */
-  advanceTo?: { to: number; done: () => void } | null;
+  advanceTo?: { from: number; to: number; done: () => void } | null;
 }) {
   const { width } = useWindowDimensions();
-  const markers = useMemo(() => layout(lessons.map((l) => ({ id: l.id, unitId: l.unitId }))), [lessons]);
-  const worldW = markers.length ? markers[markers.length - 1].x + SPAN : SPAN;
+  const markers = useMemo(
+    () => layout(lessons.map((l) => ({ id: l.id, unitId: l.unitId }))),
+    [lessons],
+  );
 
-  const aref = useAnimatedRef<Animated.ScrollView>();
   const camX = useSharedValue(0);
-  const figX = useSharedValue(markers[current]?.x ?? SPAN);
-  const wFrom = useSharedValue(markers[current]?.x ?? SPAN);
-  const wTo = useSharedValue(markers[current]?.x ?? SPAN);
-  const wp = useSharedValue(1);          // 0->1 through the traverse
-  const gait = useSharedValue(0);          // 0 standing … 1 walking
+  const figX = useSharedValue(0);
+  const figLift = useSharedValue(0);      // the drop: height above the ground
+  const wFrom = useSharedValue(0);
+  const wTo = useSharedValue(0);
+  const wp = useSharedValue(1);
+  const gait = useSharedValue(0);
   const clock = useSharedValue(0);
-  const [walking, setWalking] = useState(false);
+  const [at, setAt] = useState(current);
+  const [busy, setBusy] = useState(false);
 
   useFrameCallback((f) => {
     'worklet';
     clock.value += Math.min(0.05, (f.timeSincePreviousFrame ?? 16) / 1000);
   }, true);
 
-  // Browsing writes the camera…
-  const onScroll = useAnimatedScrollHandler({
-    onScroll: (e) => { if (gait.value === 0) camX.value = e.contentOffset.x; },
-  });
-  // …and the walk writes it instead, mirroring into the scroll surface so the two
-  // can never disagree about where the world is.
-  useDerivedValue(() => {
-    if (gait.value > 0) scrollTo(aref, camX.value, 0, false);
-  });
+  const camFor = useCallback((x: number) => x - width * LEAD, [width]);
 
-  const finish = useCallback((cb?: () => void) => {
-    setWalking(false);
+  // Arriving: put the reader where they already are, with no animation. This runs
+  // on mount AND whenever `current` moves underneath us — which is what makes the
+  // screen correct when it is reached from anywhere other than a finished lesson.
+  useEffect(() => {
+    const m = markers[current];
+    if (!m) return;
+    setAt(current);
+    figX.value = m.x;
+    camX.value = camFor(m.x);
+    figLift.value = 0;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, markers.length, width]);
+
+  const settle = useCallback((i: number, cb?: () => void) => {
+    setAt(i);
+    setBusy(false);
     cb?.();
   }, []);
 
+  // ── THE WALK ───────────────────────────────────────────────────────────────
+  // Armed by an event, not by a value, and started from wherever the figure is
+  // standing — so it plays on arrival at this screen after a lesson rather than
+  // needing the reader to already be looking at it.
   useEffect(() => {
     if (!advanceTo) return;
     const target = markers[advanceTo.to];
-    if (!target) { advanceTo.done(); return; }
-    setWalking(true);
-    gait.value = 1;
-    const camTarget = Math.max(0, Math.min(worldW - width, target.x - width * LEAD));
-    const ms = WALK_SECONDS * 1000;
-    const cb = advanceTo.done;
-    wFrom.value = figX.value;
+    // FROM THE LESSON JUST FINISHED, not from  — which has already moved
+    // to the next one by the time this screen rebuilds. Reading it here is why the
+    // walk was invisible: the figure was placed at its destination and then asked
+    // to walk there.
+    const from = markers[advanceTo.from] ?? markers[at];
+    if (!target || !from) { advanceTo.done(); return; }
+    setBusy(true);
+    figX.value = from.x;
+    camX.value = camFor(from.x);
+    wFrom.value = from.x;
     wTo.value = target.x;
     wp.value = 0;
+    gait.value = 1;
+    const ms = WALK_SECONDS * 1000;
+    const cb = advanceTo.done;
+    const to = advanceTo.to;
     wp.value = withTiming(1, { duration: ms, easing: Easing.inOut(Easing.quad) });
-    camX.value = withTiming(camTarget, { duration: ms, easing: Easing.inOut(Easing.quad) }, (ok) => {
+    camX.value = withTiming(camFor(target.x), { duration: ms, easing: Easing.inOut(Easing.quad) }, (ok) => {
       'worklet';
       gait.value = 0;
-      if (ok) runOnJS(finish)(cb);
+      if (ok) runOnJS(settle)(to, cb);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [advanceTo]);
 
-  // Jump to a unit — instant, because surveying is not the earned part.
-  const jumpTo = useCallback((i: number) => {
+  // ── THE DROP ───────────────────────────────────────────────────────────────
+  // Tapping a lesson that is not the one you are standing at moves the figure
+  // there by dropping in from above, rather than by walking. That is the honest
+  // signal: a walk is earned and takes five seconds, a jump is navigation.
+  const dropTo = useCallback((i: number) => {
     const m = markers[i];
-    if (!m || walking) return;
-    const x = Math.max(0, Math.min(worldW - width, m.x - width * LEAD));
-    aref.current?.scrollTo({ x, animated: true });
-  }, [markers, width, worldW, walking, aref]);
+    if (!m || busy) return;
+    setBusy(true);
+    camX.value = withTiming(camFor(m.x), { duration: DROP_MS * 0.6, easing: Easing.inOut(Easing.quad) });
+    figX.value = withTiming(m.x, { duration: DROP_MS * 0.6, easing: Easing.inOut(Easing.quad) });
+    figLift.value = withSequence(
+      withTiming(150, { duration: DROP_MS * 0.42, easing: Easing.out(Easing.quad) }),
+      withTiming(0, { duration: DROP_MS * 0.58, easing: Easing.bounce }, (ok) => {
+        'worklet';
+        if (ok) runOnJS(settle)(i, undefined);
+      }),
+    );
+  }, [markers, busy, camFor]);
 
-  // Start the reader looking at where they are.
-  useEffect(() => {
-    const m = markers[current];
-    if (!m) return;
-    const x = Math.max(0, Math.min(worldW - width, m.x - width * LEAD));
-    camX.value = x;
-    figX.value = m.x;
-    requestAnimationFrame(() => aref.current?.scrollTo({ x, animated: false }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [markers.length]);
+  const tapLesson = useCallback((i: number) => {
+    const l = lessons[i];
+    if (!l || busy) return;
+    if (i !== at) { dropTo(i); return; }   // move there first
+    if (l.accessible) onOpen(l);
+  }, [lessons, busy, at, dropTo, onOpen]);
 
-  // The figure: walks when gait is up, breathes when it is not. `travelStance`
-  // is the same one the lessons use, so the feet plant on the ground rather than
-  // sliding — and the gait is cycled on DISTANCE, which is what keeps it true at
-  // any speed the camera happens to be moving.
+  // The figure. Walks when the gait is up, breathes otherwise — the same rig the
+  // lessons use, so the feet plant instead of sliding.
   const D = useDerivedValue<Bundle>(() => {
     const s = gait.value > 0
       ? travelStance(wFrom.value, wTo.value, stand(clock.value), stand(clock.value), stand(clock.value), wp.value, WALK)
@@ -160,142 +179,195 @@ export default function BranchWorld({
     if (gait.value > 0) figX.value = wFrom.value + (wTo.value - wFrom.value) * wp.value;
   });
   const figStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: figX.value - camX.value }],
+    transform: [{ translateX: figX.value - camX.value }, { translateY: -figLift.value }],
   }));
 
-  const units = useMemo(
-    () => markers.filter((m) => m.unitStart).map((m) => ({ i: m.i, title: lessons[m.i]?.unitTitle ?? '' })),
-    [markers, lessons],
-  );
-
   return (
-    <View style={{ height: H, backgroundColor: SKY }}>
-      {/* PARALLAX, behind everything and outside the scroll content. */}
-      {LAYERS.slice(0, 3).map((L, k) => (
-        <Ridge key={k} camX={camX} k={L.k} tone={L.tone} lift={54 - k * 16} worldW={worldW} />
-      ))}
+    <View style={{ height: H, backgroundColor: SKY, overflow: 'hidden' }}>
+      <Moon width={width} />
+      <Depth depth={0} camX={camX} k={LAYERS[0].k} tone={LAYERS[0].tone} width={width} />
+      <Depth depth={1} camX={camX} k={LAYERS[1].k} tone={LAYERS[1].tone} width={width} />
+      <Depth depth={2} camX={camX} k={LAYERS[2].k} tone={LAYERS[2].tone} width={width} />
+      <GroundBand camX={camX} width={width} />
 
-      <Animated.ScrollView
-        ref={aref}
-        horizontal
-        scrollEnabled={!walking}
-        showsHorizontalScrollIndicator={false}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        contentContainerStyle={{ width: worldW }}
-        style={StyleSheet.absoluteFill}
-      >
-        {/* the ground the markers stand on */}
-        <Ground width={worldW} />
-        {markers.map((m, i) => (
-          <MarkerPost
-            key={m.lessonId}
-            m={m}
-            l={lessons[i]}
-            isCurrent={i === current}
-            onPress={() => !walking && lessons[i].accessible && onOpen(lessons[i])}
-          />
-        ))}
-      </Animated.ScrollView>
-
-      {/* THE FIGURE rides above the scroll surface, positioned from the same camX,
-          so it is never a frame behind the world it is standing on. */}
+      {/* THE FIGURE, drawn BEFORE the markers so it stands behind their names. */}
       <Animated.View style={[styles.figWrap, figStyle]} pointerEvents="none">
         <Stickman D={D} k={FIG_K} />
       </Animated.View>
 
-      {/* THE UNIT BAR — surveying, which is instant. The walk is the earned part;
-          crossing four units to look at something is not. */}
-      <View style={styles.bar} pointerEvents="box-none">
-        {units.map((u) => (
-          <Pressable key={u.i} onPress={() => jumpTo(u.i)} style={styles.barItem} hitSlop={6}>
-            <Text numberOfLines={1} style={styles.barText}>{u.title.toUpperCase()}</Text>
-          </Pressable>
-        ))}
-      </View>
+      <MarkerLayer
+        camX={camX}
+        markers={markers}
+        lessons={lessons}
+        at={at}
+        onTap={tapLesson}
+        width={width}
+      />
     </View>
   );
 }
 
-/** One parallax ridge: a stepped silhouette sampled from the same ground curve. */
-function Ridge({ camX, k, tone, lift, worldW }: {
-  camX: SharedValue<number>; k: number; tone: string; lift: number; worldW: number;
+/** High, far, and fixed — the moon does not ride the camera. */
+function Moon({ width }: { width: number }) {
+  return (
+    <View
+      style={{
+        position: 'absolute', left: width * MOON.x, top: H * MOON.y,
+        width: MOON.r * 2, height: MOON.r * 2, borderRadius: MOON.r,
+        backgroundColor: '#FFFFFF', opacity: 0.85,
+      }}
+      pointerEvents="none"
+    />
+  );
+}
+
+/**
+ * One depth of silhouette. The props are generated for a WIDE span around the
+ * camera and the whole layer is translated, so nothing is recomputed per frame —
+ * the same lesson the ridge steps taught: static geometry, one moving parent.
+ */
+function Depth({ depth, camX, k, tone, width }: {
+  depth: number; camX: SharedValue<number>; k: number; tone: string; width: number;
 }) {
-  // ONE animated style for the whole layer. The first version gave every step its
-  // own useAnimatedStyle and recomputed its height each frame — ninety animated
-  // styles across three ridges, all to draw a shape that only ever slides
-  // sideways. The steps are static; the layer moves.
-  const STEP = 18;
-  const steps = useMemo(() => {
-    const n = Math.ceil((worldW * k + 900) / STEP);
-    return Array.from({ length: n }, (_, i) => {
-      const y = groundAt((i * STEP) / Math.max(0.05, k)) - lift;
-      return { left: i * STEP, top: y, height: Math.max(2, H - y) };
-    });
-  }, [worldW, k, lift]);
+  const props = useMemo(() => propsBetween(-800, 12000, depth), [depth]);
   const st = useAnimatedStyle(() => ({ transform: [{ translateX: -camX.value * k }] }));
   return (
-    <Animated.View style={[styles.ridge, st]} pointerEvents="none">
+    <Animated.View style={[StyleSheet.absoluteFill, st]} pointerEvents="none">
+      {props.map((p, i) => <PropShape key={i} p={p} tone={tone} />)}
+    </Animated.View>
+  );
+}
+
+/** Flat silhouettes. No detail — the reference art has almost none either. */
+function PropShape({ p, tone }: { p: Prop; tone: string }) {
+  const foot = p.y;
+  if (p.kind === 'peak') {
+    return (
+      <View style={{
+        position: 'absolute', left: p.x - p.h, top: foot - p.h * 0.8,
+        width: 0, height: 0, borderLeftWidth: p.h, borderRightWidth: p.h,
+        borderBottomWidth: p.h * 0.8, borderLeftColor: 'transparent',
+        borderRightColor: 'transparent', borderBottomColor: tone,
+      }} />
+    );
+  }
+  if (p.kind === 'pine') {
+    return (
+      <View style={{
+        position: 'absolute', left: p.x - p.h * 0.28, top: foot - p.h,
+        width: 0, height: 0, borderLeftWidth: p.h * 0.28, borderRightWidth: p.h * 0.28,
+        borderBottomWidth: p.h, borderLeftColor: 'transparent',
+        borderRightColor: 'transparent', borderBottomColor: tone,
+      }} />
+    );
+  }
+  if (p.kind === 'rock') {
+    return (
+      <View style={{
+        position: 'absolute', left: p.x - p.h * 0.5, top: foot - p.h * 0.42,
+        width: p.h, height: p.h * 0.42, borderTopLeftRadius: p.h * 0.5,
+        borderTopRightRadius: p.h * 0.42, backgroundColor: tone,
+      }} />
+    );
+  }
+  // a broadleaf: a trunk and one heavy round crown, which is all a silhouette needs
+  return (
+    <View style={{ position: 'absolute', left: p.x - p.h * 0.42, top: foot - p.h, width: p.h * 0.84, height: p.h }}>
+      <View style={{
+        position: 'absolute', left: p.h * 0.36, top: p.h * 0.42,
+        width: p.h * 0.11, height: p.h * 0.58, backgroundColor: tone,
+      }} />
+      <View style={{
+        position: 'absolute', left: 0, top: 0,
+        width: p.h * 0.84, height: p.h * 0.6, borderRadius: p.h * 0.42, backgroundColor: tone,
+      }} />
+    </View>
+  );
+}
+
+/** The ground the figure and the markers stand on. */
+function GroundBand({ camX, width }: { camX: SharedValue<number>; width: number }) {
+  const STEP = 20;
+  const steps = useMemo(() => {
+    const n = Math.ceil(12800 / STEP);
+    return Array.from({ length: n }, (_, i) => {
+      const y = groundAt(i * STEP - 800);
+      return { left: i * STEP - 800, top: y, height: H - y + 40 };
+    });
+  }, []);
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: -camX.value }] }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, st]} pointerEvents="none">
       {steps.map((s, i) => (
-        <View key={i} style={{ position: 'absolute', left: s.left, top: s.top, width: STEP + 1, height: s.height, backgroundColor: tone }} />
+        <View key={i} style={{ position: 'absolute', left: s.left, top: s.top, width: STEP + 1, height: s.height, backgroundColor: INK }} />
       ))}
     </Animated.View>
   );
 }
 
-/** The ground line the markers stand on, sampled across the whole world. */
-function Ground({ width }: { width: number }) {
-  const STEP = 16;
-  const n = Math.ceil(width / STEP);
-  return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      {Array.from({ length: n }, (_, i) => {
-        const y = groundAt(i * STEP);
-        return <View key={i} style={{ position: 'absolute', left: i * STEP, top: y, width: STEP + 1, height: H - y, backgroundColor: INK }} />;
-      })}
-    </View>
-  );
-}
-
 /**
- * A lesson, standing on the ground.
+ * The lesson signs. Named, and shaped like something you press.
  *
- * DONE is a filled cairn, CURRENT is an open ring with its title showing, LOCKED
- * is the same post in faint grey — the same three states the dots carried, said
- * in a way that survives being one of thirty-two in a landscape.
+ * A bare dot said nothing about what it was or that it could be tapped. Each one
+ * is now a card carrying the lesson's name on a post — the one you are standing
+ * at is solid ink with a START caption, the ones you have finished are outlined,
+ * and the locked ones are faint. Tapping any other one moves you there; tapping
+ * the one you are at opens it.
  */
-function MarkerPost({ m, l, isCurrent, onPress }: {
-  m: Marker; l: WorldLesson; isCurrent: boolean; onPress: () => void;
+function MarkerLayer({ camX, markers, lessons, at, onTap, width }: {
+  camX: SharedValue<number>; markers: Marker[]; lessons: WorldLesson[];
+  at: number; onTap: (i: number) => void; width: number;
 }) {
-  const tone = !l.accessible ? FAINT : INK;
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: -camX.value }] }));
   return (
-    <Pressable
-      onPress={onPress}
-      disabled={!l.accessible}
-      style={{ position: 'absolute', left: m.x - 60, top: m.y - 120, width: 120, height: 130, alignItems: 'center', justifyContent: 'flex-end' }}
-    >
-      {isCurrent || l.done ? (
-        <Text numberOfLines={2} style={[styles.title, !l.accessible && { color: FAINT }]}>{l.title}</Text>
-      ) : null}
-      <View style={[styles.head, { borderColor: tone }, l.done && { backgroundColor: tone }, isCurrent && styles.headNow]} />
-      <View style={{ width: 3, height: 34, backgroundColor: tone }} />
-    </Pressable>
+    <Animated.View style={[StyleSheet.absoluteFill, st]}>
+      {markers.map((m, i) => {
+        const l = lessons[i];
+        if (!l) return null;
+        const here = i === at;
+        const tone = !l.accessible ? FAINT : INK;
+        return (
+          <Pressable
+            key={m.lessonId}
+            onPress={() => onTap(i)}
+            style={{ position: 'absolute', left: m.x - 74, top: m.y - 132, width: 148, alignItems: 'center' }}
+          >
+            <View style={[
+              styles.card,
+              here && styles.cardHere,
+              !l.accessible && styles.cardLocked,
+              l.done && !here && styles.cardDone,
+            ]}>
+              <Text numberOfLines={2} style={[styles.cardText, here && { color: PAPER }, !l.accessible && { color: SOFT }]}>
+                {l.title}
+              </Text>
+              {here && l.accessible ? <Text style={styles.start}>TAP TO START</Text> : null}
+            </View>
+            <View style={{ width: 2.5, height: 30, backgroundColor: tone }} />
+            <View style={[styles.foot, { borderColor: tone }, l.done && { backgroundColor: tone }]} />
+          </Pressable>
+        );
+      })}
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  ridge: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
   figWrap: { position: 'absolute', left: 0, top: 0 },
-  title: {
-    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 12, lineHeight: 15, color: INK,
-    textAlign: 'center', marginBottom: 6, includeFontPadding: false,
+  card: {
+    maxWidth: 148, paddingHorizontal: 10, paddingVertical: 7,
+    borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
   },
-  head: { width: 18, height: 18, borderRadius: 9, borderWidth: 2.5, backgroundColor: PAPER },
-  headNow: { width: 24, height: 24, borderRadius: 12, borderWidth: 3 },
-  bar: {
-    position: 'absolute', left: 0, right: 0, top: 0, flexDirection: 'row',
-    paddingHorizontal: 8, paddingTop: 8, gap: 6,
+  cardHere: { backgroundColor: INK, borderColor: INK, paddingBottom: 5 },
+  cardDone: { backgroundColor: PAPER, borderColor: INK },
+  cardLocked: { borderColor: FAINT, backgroundColor: '#F6F4EE' },
+  cardText: {
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 12, lineHeight: 15,
+    color: INK, textAlign: 'center', includeFontPadding: false,
   },
-  barItem: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4, backgroundColor: '#FAFAF7CC' },
-  barText: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.8, color: SOFT, includeFontPadding: false },
+  start: {
+    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.1,
+    color: '#C9C5BA', textAlign: 'center', marginTop: 3, includeFontPadding: false,
+  },
+  foot: { width: 14, height: 14, borderRadius: 7, borderWidth: 2.5, backgroundColor: PAPER, marginTop: -1 },
 });

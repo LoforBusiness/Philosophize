@@ -181,7 +181,7 @@ export default function BranchDetailScreen() {
   const [celTarget, setCelTarget] = useState<{ unitId: string; doneIndex: number } | null>(null);
   // THE WALK. Armed by the same event as the accordion advance, so the two are
   // one moment rather than two things that happen to fire together.
-  const [walkTo, setWalkTo] = useState<{ to: number; done: () => void } | null>(null);
+  const [walkTo, setWalkTo] = useState<{ from: number; to: number; done: () => void } | null>(null);
 
   useEffect(() => {
     if (!justFinished || justFinished.branchSlug !== branchSlug) return;
@@ -205,7 +205,7 @@ export default function BranchDetailScreen() {
       }
       const next = flat + 1;
       if (next < allUnits.reduce((n, x) => n + x.lessons.length, 0)) {
-        setWalkTo({ to: next, done: () => setWalkTo(null) });
+        setWalkTo({ from: flat, to: next, done: () => setWalkTo(null) });
       }
     }
     cel.value = 0;

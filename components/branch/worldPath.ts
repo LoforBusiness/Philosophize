@@ -127,3 +127,65 @@ export function checkWorld(markers: Marker[], screenW = 390): string[] {
   }
   return out;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE SCENERY — silhouettes, layered by depth.
+//
+// The reference is Alto's Odyssey and the flat-vector forest painters: almost
+// none of what makes those images is DETAIL. It is (1) big simple silhouettes,
+// (2) stacked at three or four depths, (3) each depth a flat tone, getting paler
+// with distance. That reads in ink exactly as well as it reads in teal, which is
+// why §19 does not have to bend for it.
+//
+// DETERMINISTIC FROM x. There is no random anywhere: a tree at x=1840 is the same
+// tree every time the screen is opened, so walking back past it does not find a
+// different forest. `hash` is the whole of that.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Stable pseudo-random in [0,1) from an integer. No state, no seed to thread. */
+export function hash(n: number): number {
+  'worklet';
+  let x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  x -= Math.floor(x);
+  return x;
+}
+
+export type SceneryKind = 'tree' | 'pine' | 'rock' | 'peak';
+export interface Prop {
+  kind: SceneryKind;
+  x: number;
+  /** Ground y at its foot — props stand ON the terrain, never float (rule A1). */
+  y: number;
+  /** Height in stage units. */
+  h: number;
+  /** Which parallax layer it belongs to: 0 far … 3 foreground. */
+  depth: number;
+}
+
+/**
+ * Everything standing between two x positions, for one depth.
+ *
+ * Spacing is jittered around a pitch rather than being even, because a row of
+ * evenly-spaced trees reads as a fence. The jitter is from `hash`, so it is the
+ * same forest every time.
+ */
+export function propsBetween(x0: number, x1: number, depth: number): Prop[] {
+  const pitch = [420, 260, 190, 300][depth];
+  const out: Prop[] = [];
+  const start = Math.floor(x0 / pitch) - 1;
+  const end = Math.ceil(x1 / pitch) + 1;
+  for (let i = start; i <= end; i++) {
+    const r = hash(i * 7 + depth * 131);
+    const r2 = hash(i * 13 + depth * 57);
+    const x = i * pitch + (r - 0.5) * pitch * 0.55;
+    // The far depths are ridgelines and pines; near depths are trees and rocks.
+    const kind: SceneryKind = depth === 0 ? 'peak' : depth === 1 ? 'pine' : r2 > 0.72 ? 'rock' : 'tree';
+    const base = [150, 74, 96, 120][depth];
+    const h = base * (0.7 + r2 * 0.6);
+    out.push({ kind, x, y: groundAt(x), h, depth });
+  }
+  return out;
+}
+
+/** The moon: one per branch, high and far, and it never moves with the camera. */
+export const MOON = { x: 0.22, y: 0.24, r: 54 };
