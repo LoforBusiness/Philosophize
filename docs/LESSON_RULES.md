@@ -1138,6 +1138,39 @@ built, and `tsc` is perfectly happy. The same line is the rollback: deleting one
 restores that lesson's card version instantly and touches nothing else, which is why
 the map is the only shared file a lesson should need to modify.
 
+**G51e. NOTHING MAY BE READ BEFORE IT EXISTS, and `tsc` cannot tell you.** Two
+initialisation-order faults, both of which throw at run time, both of which passed every
+check this project had, and both of which shipped:
+
+- **A worklet must be declared AFTER any worklet it calls.** Reanimated's babel plugin
+  builds a worklet's closure when the MODULE is evaluated, so calling one declared
+  further down the file captures it in its temporal dead zone. It throws at *import*,
+  which fails the whole route tree — a blank screen on every lesson, not a broken
+  animation on one. `settleStep` was added to `rig.ts` at line 172 calling `mixStance`
+  at line 1331, and the rule was already written four lines above `lift` in that same
+  file.
+- **A hook whose callback runs during render must be declared AFTER the shared values it
+  reads.** `useDerivedValue`, `useAnimatedStyle`, `useAnimatedProps` and
+  `useAnimatedReaction` all invoke their callback immediately to establish an initial
+  value; `useEffect` and `useCallback` defer and are safe. The camera in
+  `CinematicPlayer` read `bi.value` eighteen lines above `const bi = useSharedValue(0)`.
+
+The second one broke **exactly one lesson**, which is why nobody caught it: the worklet's
+first line returns early when a lesson passes no `shots`, and `ethics-ethics-8` is the
+only lesson with a camera — so 101 lessons took the early return and never reached the
+dead zone. A crash that only fires on the one file exercising a new feature is the
+easiest kind to ship and the hardest to attribute.
+
+> **Why `tsc` is structurally blind to both.** Referencing a later declaration from
+> inside a function body is legal, because the function normally runs later. TypeScript
+> has no way to know that Reanimated evaluates the closure eagerly. So this is checked by
+> `npm run check:worklets` instead, which runs FIRST in the chain because an import-time
+> throw makes every check after it meaningless. It strips comments before matching — its
+> first draft reported `solve` calling `lift` and `strideStance` calling `moveTr`, neither
+> of which happens, one of them from inside the very docstring that states this rule — and
+> it scopes per component, because a file-wide scan flagged three correct components whose
+> props merely shared a name with a later local.
+
 ### H. The house shape — what the 48 built lessons agree on
 
 > Everything above is a defect. **This group is the reverse: patterns the existing
