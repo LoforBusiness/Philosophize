@@ -106,7 +106,7 @@ const RANKUP_PEAK = 340;
  * and has said everything it has to say by 600ms. The counter comes in just after
  * that, so the reader hears an ending and then a tally rather than both at once.
  */
-const XP_AFTER_CHIME = 620;
+const XP_AFTER_CHIME = 950;
 
 function InkedNumber({ value, delay, tick }: { value: number; delay: number; tick?: boolean }) {
   const [shown, setShown] = useState(0);

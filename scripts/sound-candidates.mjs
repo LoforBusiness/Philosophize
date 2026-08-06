@@ -1,7 +1,7 @@
 import {
   HI, LO, atRate, reseed, lowpass, highpass, noise, bandpass, ring, env, sine,
   sweep, mix, gain, at, finish, secs, bell,
-  MATERIAL, modal, reflect, tilted, crumple, env2, sweepBand,
+  MATERIAL, modal, reflect, tilted, crumple, env2, sweepBand, rnd,
 } from './lib/dsp.mjs';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -65,6 +65,58 @@ function shoe({ heelHi = 0.30, heelDec = 0.0055, heelG = 1.40, soleF = 1900, sol
 // noise, and a different rendering on every stride.
 
 /**
+ * A FOOTSTEP BUILT FROM CONTACT TEXTURE, WHICH IS WHAT NAMES A SURFACE.
+ *
+ * The first physical attempt modelled the floor as a set of ringing modes and it
+ * was reported as unidentifiable — EXCEPT for gravel, which was "the one I can
+ * tell what it is walking on". That is the whole answer, handed over: gravel was
+ * the only one built from GRAINS. A struck panel ringing cleanly is a drum. What
+ * tells an ear it is wood rather than tile is the texture of the contact — two
+ * rough surfaces meeting is dozens of micro-impacts over a few milliseconds, and
+ * their spectrum is the surface's signature.
+ *
+ * So every surface is now grains first, and the numbers come from the footstep
+ * acoustics literature, which gives the band each material announces itself in:
+ *
+ *     concrete / stone / tile   sharp transients at 3 kHz and above
+ *     wood / hollow             resonance in 150–300 Hz
+ *     carpet / soft             highs attenuated, dull, 200–500 Hz
+ *
+ * The panel underneath is still modal, but it is now support rather than the
+ * subject, and it is tuned INTO those bands. `centroid()` measures where each
+ * one actually landed, so "this sounds like wood" is a claim with a number.
+ */
+function surfaceStep({
+  grains = 26, grainF = 1500, grainQ = 1.3, grainDecay = 0.012, grainSpread = 0.9, grainG = 1,
+  panelMat = 'plate', panelHz = 190, panelDecay = 0.075, panelDamp = 1.0, panelG = 0.42,
+  panelModes = 4, tilt = 1.5,
+  wet = 0.26, room = 0.15, len = 0.30, v = 0, peak = 0.50,
+} = {}) {
+  reseed(4400 + v * 1327);
+  const n = secs(len);
+  const jitter = 1 + (v % 4 - 1.5) * 0.035;
+
+  // THE CONTACT — many tiny impacts, not one. This is the part that says wood.
+  const gn = Math.min(n, secs(0.045));
+  const contact = crumple(gn, {
+    grains: Math.round(grains * (0.85 + 0.3 * Math.abs(rnd()))),
+    decay: grainDecay,
+    f: grainF * jitter,
+    q: grainQ,
+    spread: grainSpread,
+  });
+
+  // THE PANEL — the floor answering underneath, in the band the material owns.
+  const panel = modal(n, panelHz * jitter, MATERIAL[panelMat].slice(0, panelModes), {
+    decay: panelDecay, damp: panelDamp, g: panelG, tilt, attack: 0.0006,
+  });
+
+  const dry = mix(contact.map((x, i) => x * grainG), panel).slice(0, n);
+  return finish(reflect(dry, { time: room, wet, damp: 0.5 }).slice(0, n),
+    peak * (0.93 + 0.07 * (v % 2)));
+}
+
+/**
  * A REAL FOOTSTEP: two contacts, a floor with modes, and a room.
  *
  * A shoe does not hit the ground once. The heel lands, the foot rolls, and the
@@ -124,32 +176,35 @@ function realStep({ mat = 'plate', f0 = 190, decay = 0.10, damp = 0.7, heelHi = 
 }
 
 const FOOTSTEP = [
-  { id: 'real-wood', name: 'Real: leather on a wooden floor', physical: true, vary: 4,
-    note: 'One heel strike into a seven-mode floor, the weight rolling on after it, and a real room. Renders differently every stride.',
-    make: (_, v = 0) => R(HI, () => realStep({ v })) },
-  { id: 'real-stone', name: 'Real: leather on stone', physical: true, vary: 4,
-    note: 'The same shoe in a hall. Faster modes, brighter contact, a longer room.',
-    make: (_, v = 0) => R(HI, () => realStep({ mat: 'stone', f0: 260, decay: 0.055, damp: 1.0,
-      heelHi: 0.40, rollGap: 0.068, rollG: 0.13, wet: 0.55, room: 0.30, len: 0.46, v })) },
+  { id: 'real-wood', name: 'Real: shoes on a wooden floor', physical: true, vary: 4,
+    note: 'Grain contact into a 150–300 Hz panel, the band a wooden floor actually resonates in.',
+    make: (_, v = 0) => R(HI, () => surfaceStep({ v })) },
+  { id: 'real-tile', name: 'Real: shoes on tile', physical: true, vary: 4,
+    note: 'Sharp contact above 3 kHz with almost no body — how a hard shiny floor reads.',
+    make: (_, v = 0) => R(HI, () => surfaceStep({ grains: 24, grainF: 5600, grainQ: 2.4,
+      grainDecay: 0.005, grainSpread: 0.5, grainG: 4.2, panelMat: 'stone', panelHz: 760,
+      panelDecay: 0.020, panelDamp: 1.6, panelG: 0.07, panelModes: 3, tilt: 2.0,
+      wet: 0.38, room: 0.26, len: 0.34, v })) },
+  { id: 'real-concrete', name: 'Real: shoes on concrete', physical: true, vary: 4,
+    note: 'A hard scuffing contact and a dead floor. Bright, but with no ring behind it.',
+    make: (_, v = 0) => R(HI, () => surfaceStep({ grains: 34, grainF: 3400, grainQ: 1.3,
+      grainDecay: 0.009, grainSpread: 0.8, grainG: 3.0, panelMat: 'stone', panelHz: 520,
+      panelDecay: 0.014, panelDamp: 1.8, panelG: 0.09, panelModes: 3, tilt: 2.0,
+      wet: 0.28, room: 0.20, len: 0.30, v })) },
   { id: 'real-boot', name: 'Real: a boot on boards', physical: true, vary: 4,
-    note: 'Heavier, slower roll, and the floor answers much more than the shoe.',
-    make: (_, v = 0) => R(HI, () => realStep({ mat: 'wood', f0: 120, decay: 0.16, damp: 0.5,
-      heelHi: 0.22, heelG: 0.7, rollGap: 0.062, rollG: 0.13, wet: 0.28, room: 0.18,
-      len: 0.40, peak: 0.55, v })) },
-  { id: 'real-soft', name: 'Real: a soft sole indoors', physical: true, vary: 4,
-    note: 'Barely any contact noise, and no separable roll — a soft sole has one continuous contact, which is what makes it soft.',
-    make: (_, v = 0) => R(HI, () => realStep({ mat: 'plate', f0: 155, decay: 0.13, damp: 0.6,
-      heelHi: 0.14, heelG: 0.30, rollG: 0, wet: 0.22, room: 0.14,
-      // TWO MODES, STEEPLY TILTED, because a muffled step barely has modes at all.
-      // With the full seven-mode plate set this candidate's fundamental at 155 Hz
-      // and its second at 209 BEAT against each other at 54 Hz — an 18ms warble
-      // plainly visible in the envelope and measuring 0.94 as a double. It is not
-      // a second footfall, it is two partials interfering, and the fix is not
-      // detune or damping (both were swept and neither helped) but simply not
-      // having a second partial loud enough to beat with the first.
-      modes: 2, tilt: 2.6, damp: 1.1, len: 0.26, peak: 0.40, v })) },
+    note: 'Coarser, slower contact and much more of the board underneath.',
+    make: (_, v = 0) => R(HI, () => surfaceStep({ grains: 18, grainF: 900, grainQ: 1.0,
+      grainDecay: 0.018, grainSpread: 1.2, panelMat: 'wood', panelHz: 132, panelDecay: 0.11,
+      panelDamp: 0.8, panelG: 0.62, panelModes: 4, tilt: 1.2, wet: 0.26, room: 0.18,
+      len: 0.38, peak: 0.55, v })) },
+  { id: 'real-carpet', name: 'Real: shoes on carpet', physical: true, vary: 4,
+    note: 'Highs gone, dull, 200–500 Hz. Fibre rather than a surface being struck.',
+    make: (_, v = 0) => R(HI, () => surfaceStep({ grains: 22, grainF: 520, grainQ: 0.9,
+      grainDecay: 0.020, grainSpread: 1.3, panelMat: 'plate', panelHz: 240, panelDecay: 0.045,
+      panelDamp: 1.5, panelG: 0.30, panelModes: 2, tilt: 2.2, wet: 0.12, room: 0.10,
+      len: 0.22, peak: 0.38, v })) },
   { id: 'real-gravel', name: 'Real: gravel', physical: true, vary: 4,
-    note: 'Sixty individual stones, not a noise swell. This is what grain sounds like.',
+    note: 'Seventy individual stones. The one that already worked, and grains are why — every other surface is now built the same way. Its "double" score is high because a crunch genuinely IS many impacts; that is the sound.',
     make: (_, v = 0) => R(HI, () => { reseed(880 + v * 331); const n = secs(0.26);
       return finish(reflect(mix(
         crumple(n, { grains: 70, decay: 0.045, f: 3000, q: 1.5 }),
@@ -773,9 +828,9 @@ export const ROLES = [
   { id: 'footstep', title: 'Footstep', preview: { kind: 'walk' },
     fires: 'Twelve times in Moral Luck, under the walking figure.', options: FOOTSTEP },
   { id: 'arrival', title: 'End of a walk', preview: { kind: 'arrival' },
-    fires: 'Once at the close of each of the five walks.', options: ARRIVAL },
+    fires: 'NOT IN THE APP any more — the last footfall already ends a walk.', options: ARRIVAL },
   { id: 'page', title: 'Advancing a beat', preview: { kind: 'repeat', n: 4, gap: 1.15 },
-    fires: 'Every tap in a lesson — about ten times.', options: PAGE },
+    fires: 'NOT IN THE APP any more — removed; ten sounds a lesson was too many.', options: PAGE },
   { id: 'tap', title: 'Touching a control', preview: { kind: 'repeat', n: 3, gap: 0.5 },
     fires: 'Every button in the app. The most-heard sound by far.', options: TAP },
   { id: 'right', title: 'Answer correct', preview: { kind: 'climb', gap: 0.95 },
@@ -793,6 +848,6 @@ export const ROLES = [
   { id: 'impact', title: 'Something struck', preview: { kind: 'once' },
     fires: 'Once in Moral Luck, when the mark lands on road B.', options: IMPACT },
   { id: 'whoosh', title: 'A gesture through air', preview: { kind: 'repeat', n: 3, gap: 0.75 },
-    fires: 'NOT IN THE APP — deleted for hissing. Rebuilt here to see if it can be saved.',
+    fires: 'In the app, on the three poses where the hand is unmistakably quick.',
     options: WHOOSH },
 ];

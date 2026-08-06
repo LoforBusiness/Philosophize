@@ -48,7 +48,6 @@ import type { Cue, SoundProvider } from './types';
 const SOURCES = {
   stepA: require('../../assets/sound/step-a.wav'),
   stepB: require('../../assets/sound/step-b.wav'),
-  settle: require('../../assets/sound/settle.wav'),
   impact: require('../../assets/sound/impact.wav'),
   // Three fingertips, by how weighty the control is: wood for a card or button,
   // glass for a switch, card for a light row. Chosen with `step` at the call site.
@@ -60,7 +59,6 @@ const SOURCES = {
   whoosh2: require('../../assets/sound/whoosh-2.wav'),
   whoosh3: require('../../assets/sound/whoosh-3.wav'),
   reward: require('../../assets/sound/reward.wav'),
-  page: require('../../assets/sound/page.wav'),
   // The correct-answer note, up the D triad. A run of right answers climbs it and
   // then holds at the top — see `play`.
   right1: require('../../assets/sound/right-1.wav'),
@@ -99,8 +97,8 @@ let footToggle = 0;
  * slower than a tap's.
  */
 const THROTTLE: Record<Cue, number> = {
-  step: 90, settle: 200, impact: 400, whoosh: 150,
-  tap: 40, page: 90, rethink: 200, keep: 150,
+  step: 90, impact: 400, whoosh: 150,
+  tap: 40, rethink: 200, keep: 150,
   // 25ms, well under the counter's own cadence: the throttle is here to stop a
   // runaway, not to thin the run. Thinning it would make the count stutter.
   tick: 25,

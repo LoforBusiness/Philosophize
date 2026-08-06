@@ -29,7 +29,7 @@ export const rate = () => RATE;
 // A fixed generator, so re-running produces identical files. Math.random() would
 // make every rebuild a different sound and every diff a mystery.
 let seed = 0x9e3779b9;
-const rnd = () => {
+export const rnd = () => {
   seed ^= seed << 13; seed >>>= 0;
   seed ^= seed >> 17;
   seed ^= seed << 5; seed >>>= 0;
@@ -497,6 +497,32 @@ export function doubling(x) {
     if (min < pk * 0.55 && e[i] > pk * 0.30 && e[i] > min * 1.8) worst = Math.max(worst, e[i] / pk);
   }
   return worst;
+}
+
+/**
+ * SPECTRAL CENTROID in Hz — where the energy sits, and the number the footstep
+ * literature says identifies a SURFACE.
+ *
+ * The bands to build against, from the acoustics of real footsteps:
+ *
+ *     concrete / stone / tile   sharp transients, 3 kHz and above
+ *     wood / hollow             resonance in 150–300 Hz
+ *     carpet / soft             highs attenuated, dull, 200–500 Hz
+ *
+ * Measured over the ATTACK, because that is where a surface announces itself —
+ * the tail is the room, and every room sounds much the same.
+ */
+export function centroid(x, sampleRate, window = 0.030) {
+  const to = Math.min(x.length, Math.round(window * sampleRate));
+  let num = 0, den = 0;
+  for (let k = 0; k < 96; k++) {
+    const f = 90 * Math.pow(11000 / 90, k / 95);
+    if (f >= sampleRate / 2) break;
+    const p = Math.sqrt(power(x, f, sampleRate, 0, to));
+    num += f * p;
+    den += p;
+  }
+  return den > 0 ? num / den : 0;
 }
 
 /** Peak envelope, downsampled for drawing a waveform. */

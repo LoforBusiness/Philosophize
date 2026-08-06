@@ -240,7 +240,7 @@ export default function CinematicPlayer({
   // Costs one array-length comparison per frame in the 101 lessons that pass no
   // walk track, because `plantAt` stays empty and this returns immediately.
   const footfall = useCallback(() => cue('step'), []);
-  const arrive = useCallback(() => cue('settle'), []);
+
   const gestured = useCallback((kind: number) => cue('whoosh', kind), []);
   useAnimatedReaction(
     () => bt.value,
@@ -256,14 +256,10 @@ export default function CinematicPlayer({
           runOnJS(footfall)();
         }
       }
-      // …and the walk comes to rest. A different sound, because it is a different
-      // thing: the blend is lowering the last foot into a standing gesture rather
-      // than the gait planting one. See ./footfalls.
-      const s = settleAt.value;
-      if (s >= 0 && settled.value === 0 && t >= s) {
-        settled.value = 1;
-        runOnJS(arrive)();
-      }
+      // NOTHING WHEN THE WALK STOPS. There was a soft placement here to keep a
+      // walk from ending dead. It was not necessary — the last footfall already
+      // ends it — and one more small sound in a lesson full of them is one too
+      // many. `footfalls` still computes the arrival; nothing plays it.
       // …and a hand sweeping through the air on a beat that stands and gestures.
       // The KIND travels with the time, so the sound matches the movement that
       // earned it rather than being one whoosh for everything.
@@ -313,10 +309,11 @@ export default function CinematicPlayer({
 
   const advance = useCallback(() => {
     if (locked) return;
-    // No page turn on the last tap: that one ends the lesson and hands over to the
-    // reward chime, and a leaf turning under it would be a page to nowhere.
+    // NO SOUND ON ADVANCING A BEAT. There was a page turn here and it fired ten
+    // times a lesson, which is the single most frequent thing in a reading — and
+    // "I don't want a sound every time a user clicks to the next section" is the
+    // right call. Tapping forward is not an event, it is the medium.
     if (last) { setDone(true); return; }
-    if (sounded) cue('page');
     setPicked(null);
     setPickedOk(false);
     setI((n) => n + 1);

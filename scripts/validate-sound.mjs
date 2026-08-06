@@ -169,13 +169,13 @@ ok('the XP counter climbs', tickRun[0] < tickRun[1] && tickRun[1] < tickRun[2],
 head('the mix: frequent is quiet, rare is loud');
 const pk = (c) => Math.max(...clips[c].x.map(Math.abs));
 const order = [
-  ['tick-1', 'page'], ['page', 'tap'], ['tap', 'keep'], ['keep', 'right-1'],
+  ['tick-1', 'tap'], ['tap', 'keep'], ['keep', 'right-1'],
   // The three gestures sit with the world sounds, under everything earned.
   ['whoosh-1', 'right-1'], ['whoosh-2', 'right-1'], ['whoosh-3', 'right-1'],
   ['rethink', 'right-1'], ['right-1', 'impact'], ['impact', 'badge'], ['badge', 'rankup'],
   // A walk ending is a shift of weight, not another footfall. If it ever gets as
   // loud as a stride it stops being an arrival and becomes a stumble.
-  ['settle', 'step-a'],
+  ['whoosh-1', 'step-a'],
 ];
 for (const [quiet, loud] of order) {
   ok(`${quiet} is quieter than ${loud}`, pk(quiet) < pk(loud),
@@ -184,7 +184,7 @@ for (const [quiet, loud] of order) {
 ok('a wrong answer is quieter than a right one', pk('rethink') < pk('right-1'),
   `${pk('rethink').toFixed(2)} vs ${pk('right-1').toFixed(2)}`);
 ok('the world stays under the notes',
-  Math.max(pk('step-a'), pk('step-b'), pk('settle')) < pk('right-1'));
+  Math.max(pk('step-a'), pk('step-b'), pk('whoosh-1')) < pk('right-1'));
 
 // ── 3a2. THE CLIPS SOUND LIKE THE MATERIAL THEY CLAIM TO BE ──────────────────
 //
@@ -237,7 +237,7 @@ ok('and they sit on opposite sides of that line', shoe > tapB * 3,
 
 // The top end can only exist if the file has room for it. A 22.05 kHz clip is
 // capped at 11 kHz, which is where the whole set used to be.
-const percussive = ['step-a', 'step-b', 'tap', 'tap-glass', 'tap-card', 'page', 'keep', 'settle',
+const percussive = ['step-a', 'step-b', 'tap', 'tap-glass', 'tap-card', 'keep',
   'tick-1', 'rethink', 'impact', 'whoosh-1', 'whoosh-2', 'whoosh-3'];
 ok('every clip with a transient is 44.1 kHz',
   percussive.every((c) => clips[c].rate === 44100),
@@ -297,7 +297,7 @@ ok('no clip sustains noise past its attack', worstHiss < HISS,
 // away — reverb taps reading as flutter, a forefoot modelled as a strike, and two
 // modes beating. Calibrated on the shipped shoe (0.00) against that same shoe
 // played twice 42ms apart (0.94).
-for (const c of ['step-a', 'step-b', 'settle']) {
+for (const c of ['step-a', 'step-b']) {
   const d = doubling(clips[c].x);
   ok(`${c} is a single impact`, d < 0.45, `double ${d.toFixed(2)} — a deliberate flam scores 0.94`);
 }

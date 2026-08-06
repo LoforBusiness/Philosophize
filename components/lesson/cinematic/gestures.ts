@@ -41,7 +41,13 @@ import { emoteLive } from './rig';
 // already has footfalls, so a whoosh over the top of them is just noise.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const THRESHOLD = 7.5;
+// 12, not 7.5. At 7.5 this fired on fourteen of the app's poses including a hand
+// merely lifting to point, and a whoosh over a hand that is only rising reads as
+// unmotivated — "I don't know why I'm hearing that". The instruction is now the
+// threshold: ONLY when it is unmistakable that the hand moved quickly. Measured
+// across the whole pose table that leaves three — the stamp at 17.6, the
+// celebrate-bounce at 13.8 and the lever-yank at 13.9 — and nothing else.
+const THRESHOLD = 12;
 const WINDOW = 0.12;
 const HZ = 400;
 
@@ -109,8 +115,8 @@ export function swishes(code: number, dur: number): Swish[] {
 
     const peak = travel[k];
     let kind = SLEEVE;
-    if (peak >= 12 && secondsFast <= 0.20) kind = FAST;        // a flick: quick and sharp
-    else if (peak >= 9.5 && secondsFast >= 0.34) kind = HEAVY;  // a swing: big and sustained
+    if (secondsFast <= 0.20) kind = FAST;                 // a flick: quick and sharp
+    else if (secondsFast >= 0.34) kind = HEAVY;           // a swing: big and sustained
     out.push({ at, kind });
   }
   return out;

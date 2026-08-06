@@ -255,7 +255,13 @@ function tap() {
  * reaching above it, and never touches D6 except as a trace of shine.
  */
 function reward() {
-  const n = secs(1.10);
+  // SHORTENED, because it was eating the XP counter. The chord used to ring for
+  // 1.10s on decays of 0.36–0.40, and its octave partials sit at 1175, 1480 and
+  // 1760 Hz — which are EXACTLY the three counter pitches. So the ticks were
+  // masked twice over: nine times quieter, and at the same frequencies as the
+  // thing on top of them. The phrase still lifts and lands the same way, it just
+  // stops afterwards instead of hanging over the tally.
+  const n = secs(0.85);
   const note = (f, delay, g, decay = 0.34) => {
     const d = secs(delay);
     const len = n - d;
@@ -270,10 +276,10 @@ function reward() {
   return finish(mix(
     note(440.00, 0.000, 0.55, 0.13),   // A4 — the step off
     note(587.33, 0.085, 0.75, 0.16),   // D5 — the step up
-    note(587.33, 0.180, 0.95, 0.40),   // D5 again, this time to hold under the chord
-    note(739.99, 0.180, 0.70, 0.36),   // F#5 ┐ the third and fifth land together:
-    note(880.00, 0.180, 0.62, 0.36),   // A5  ┘ this is the moment it reads as an end
-    note(1174.66, 0.195, 0.16, 0.24),  // a trace of D6 for shine, not a fourth step
+    note(587.33, 0.180, 0.95, 0.26),   // D5 again, this time to hold under the chord
+    note(739.99, 0.180, 0.70, 0.24),   // F#5 ┐ the third and fifth land together:
+    note(880.00, 0.180, 0.62, 0.24),   // A5  ┘ this is the moment it reads as an end
+    note(1174.66, 0.195, 0.16, 0.16),  // a trace of D6 for shine, not a fourth step
   ), 0.78);
 }
 
@@ -437,10 +443,11 @@ function keep() {
 const tick = (f) => {
   const n = secs(0.028);
   const e = env(n, 0.0003, 0.006);
-  // Under the page turn, which is itself under the tap. Fifteen of these run in a
-  // second and they are the one sound meant to be heard as a texture rather than
-  // as events.
-  return finish(sine(n, f).map((x, i) => x * e[i]), 0.15);
+  // 0.15 → 0.26. Reported as inaudible under the finishing chord, and it was: at
+  // 0.15 against a chord at 0.78 played 40% louder again, it was nearly nine times
+  // quieter and sitting on the chord's own octave partials. Still the quietest
+  // thing in the set, but now it is a sound rather than a rumour.
+  return finish(sine(n, f).map((x, i) => x * e[i]), 0.26);
 };
 
 /**
@@ -563,7 +570,6 @@ function impact() {
 const SET = {
   'step-a': atRate(HI, () => step(0)),
   'step-b': atRate(HI, () => step(1)),
-  settle: atRate(HI, settle),
   impact: atRate(HI, impact),
   // Three taps, by the weight of the control — see lib/sound/real.ts.
   tap: atRate(HI, tapWood),
@@ -572,7 +578,6 @@ const SET = {
   'whoosh-1': atRate(HI, whooshSleeve),
   'whoosh-2': atRate(HI, whooshFast),
   'whoosh-3': atRate(HI, whooshHeavy),
-  page: atRate(HI, page),
   rethink: atRate(HI, rethink),
   keep: atRate(HI, keep),
   'tick-1': atRate(HI, () => tick(1174.66)),
