@@ -1,6 +1,7 @@
 import {
   HI, LO, atRate, reseed, lowpass, highpass, noise, bandpass, ring, env, sine,
   sweep, mix, gain, at, finish, secs, bell,
+  MATERIAL, modal, reflect, tilted, crumple, env2, sweepBand,
 } from './lib/dsp.mjs';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -55,7 +56,76 @@ function shoe({ heelHi = 0.30, heelDec = 0.0055, heelG = 1.40, soleF = 1900, sol
   ), peak);
 }
 
+// ── the physical models ──────────────────────────────────────────────────────
+//
+// These are the answer to "I can tell these aren't actually real". Everything
+// below the divider is the old approach — a couple of sines and a noise burst.
+// These use the four things that were missing: many inharmonic modes with
+// mode-dependent damping, early reflections off a real floor, correctly tilted
+// noise, and a different rendering on every stride.
+
+/**
+ * A REAL FOOTSTEP: two contacts, a floor with modes, and a room.
+ *
+ * A shoe does not hit the ground once. The heel lands, the foot rolls, and the
+ * sole slaps down 30–60ms later — and the ear uses that gap to decide what kind
+ * of shoe and how fast someone is moving. One impulse is always going to sound
+ * like a drum machine.
+ *
+ * The floor is `modal` rather than a sine: a wooden panel rings in a dense low
+ * cluster whose top dies in 15ms and whose bottom hangs for 200, so the timbre
+ * changes AS IT DECAYS. Then the whole thing goes through `reflect`, because the
+ * sound reaches an ear twice more off the floor and a wall.
+ *
+ * `v` renders a different one each call — level, timing, brightness and mode
+ * detuning all shift — so a walk is eleven different footsteps rather than one
+ * played eleven times.
+ */
+function realStep({ mat = 'plate', f0 = 190, decay = 0.10, damp = 0.7, heelHi = 0.34,
+  heelG = 1.0, toeGap = 0.042, toeG = 0.55, wet = 0.9, len = 0.34, v = 0, peak = 0.50 } = {}) {
+  reseed(3300 + v * 971);
+  const n = secs(len);
+  const jitter = 1 + (v % 3 - 1) * 0.045;          // a real pair is never identical
+  const contact = (g, bright) => {
+    const cn = secs(0.030);
+    const c = highpass(tilted(cn, -0.5), heelHi * bright);
+    const ce = env(cn, 0.00015, 0.0042);
+    return mix(
+      c.map((x, i) => x * ce[i] * g * heelG),
+      modal(n, f0 * jitter * bright, MATERIAL[mat],
+        { decay, damp, g: g * 0.55, tilt: 1.15, attack: 0.0003 }),
+    );
+  };
+  const dry = mix(contact(1.0, 1.0), at(toeGap * jitter, contact(toeG, 1.18))).slice(0, n);
+  return finish(reflect(dry, { damp: 0.5, wet }).slice(0, n), peak * (0.94 + 0.06 * (v % 2)));
+}
+
 const FOOTSTEP = [
+  { id: 'real-wood', name: 'Real: leather on a wooden floor', physical: true, vary: 4,
+    note: 'Heel then sole 42ms later, a floor with seven modes, and a room around it. Every stride renders differently.',
+    make: (_, v = 0) => R(HI, () => realStep({ v })) },
+  { id: 'real-stone', name: 'Real: leather on stone', physical: true, vary: 4,
+    note: 'The same shoe in a hall. Faster modes, brighter contact, a longer room.',
+    make: (_, v = 0) => R(HI, () => realStep({ mat: 'stone', f0: 260, decay: 0.055, damp: 1.0,
+      heelHi: 0.40, toeGap: 0.038, wet: 1.5, len: 0.46, v })) },
+  { id: 'real-boot', name: 'Real: a boot on boards', physical: true, vary: 4,
+    note: 'Heavier, slower roll, and the floor answers much more than the shoe.',
+    make: (_, v = 0) => R(HI, () => realStep({ mat: 'wood', f0: 120, decay: 0.16, damp: 0.5,
+      heelHi: 0.22, heelG: 0.7, toeGap: 0.058, toeG: 0.8, len: 0.40, peak: 0.55, v })) },
+  { id: 'real-soft', name: 'Real: a soft sole indoors', physical: true, vary: 4,
+    note: 'Barely any contact noise; almost all of it is the floor being pushed.',
+    make: (_, v = 0) => R(HI, () => realStep({ mat: 'plate', f0: 155, decay: 0.13, damp: 0.6,
+      heelHi: 0.14, heelG: 0.30, toeGap: 0.050, toeG: 0.7, wet: 0.7, peak: 0.40, v })) },
+  { id: 'real-gravel', name: 'Real: gravel', physical: true, vary: 4,
+    note: 'Sixty individual stones, not a noise swell. This is what grain sounds like.',
+    make: (_, v = 0) => R(HI, () => { reseed(880 + v * 331); const n = secs(0.26);
+      return finish(reflect(mix(
+        crumple(n, { grains: 70, decay: 0.045, f: 3000, q: 1.5 }),
+        crumple(n, { grains: 30, decay: 0.070, f: 900, q: 1.1, spread: 1.4 }),
+        modal(n, 130, MATERIAL.plate, { decay: 0.055, damp: 0.9, g: 0.35 }),
+      ), { damp: 0.45, wet: 0.5 }).slice(0, n), 0.48); }) },
+
+  // ── the earlier, simpler approach ──────────────────────────────────────────
   { id: 'dress', name: 'Dress shoe', shipped: true,
     note: 'Leather heel on a hard floor. What is in the app now.',
     make: () => R(HI, () => shoe()) },
@@ -140,6 +210,14 @@ const ARRIVAL = [
 // ── advancing a beat ─────────────────────────────────────────────────────────
 
 const PAGE = [
+  { id: 'real-page', name: 'Real: a leaf landing', physical: true,
+    note: 'A brief fibre contact into a damped panel, with the room behind it.',
+    make: () => R(HI, () => { reseed(6012); const n = secs(0.18);
+      const cn = secs(0.014);
+      const c = bandpass(tilted(cn, -0.8), 1900, 1.1); const ce = env(cn, 0.0004, 0.0035);
+      return finish(reflect(mix(c.map((x, i) => x * ce[i] * 0.7),
+        modal(n, 300, MATERIAL.plate, { decay: 0.020, damp: 1.2, g: 0.9, tilt: 1.4 })),
+        { damp: 0.62, wet: 0.5 }).slice(0, n), 0.20); }) },
   { id: 'leaf', name: 'Paper landing', shipped: true,
     note: 'A struck 300 Hz with a fifth, gone in 22ms. What is in the app now.',
     make: () => R(HI, () => { reseed(70118); const n = secs(0.085);
@@ -190,7 +268,30 @@ function uiTap({ f = 780, second = 2, secondG = 0.20, third = 0, thirdG = 0, dec
   return finish(mix(body.map((x, i) => x * e[i]), puff.map((x, i) => x * puffE[i] * puffG)), peak);
 }
 
+/** A fingertip on a solid thing: a short contact, real modes, and a small room. */
+function realTap({ mat = 'wood', f0 = 700, decay = 0.030, damp = 0.8, nailG = 0.35,
+  hi = 0.30, len = 0.20, wet = 0.55, peak = 0.26, seed = 411 } = {}) {
+  reseed(seed);
+  const n = secs(len);
+  const cn = secs(0.010);
+  const nail = highpass(tilted(cn, -0.6), hi);
+  const ne = env(cn, 0.0002, 0.0022);
+  const dry = mix(nail.map((x, i) => x * ne[i] * nailG),
+    modal(n, f0, MATERIAL[mat], { decay, damp, g: 1, tilt: 1.3, attack: 0.0006 }));
+  return finish(reflect(dry, { damp: 0.6, wet }).slice(0, n), peak);
+}
+
 const TAP = [
+  { id: 'real-wood-tap', name: 'Real: fingertip on wood', physical: true,
+    note: 'Five inharmonic modes with the high ones dying first, plus a small room.',
+    make: () => R(HI, () => realTap()) },
+  { id: 'real-glass-tap', name: 'Real: fingertip on glass', physical: true,
+    note: 'Nearly harmonic modes and much less damping — it rings a little.',
+    make: () => R(HI, () => realTap({ mat: 'glass', f0: 1180, decay: 0.055, damp: 0.35, nailG: 0.5, len: 0.26, peak: 0.24 })) },
+  { id: 'real-card-tap', name: 'Real: fingertip on card', physical: true,
+    note: 'Heavily damped and low. Almost all contact, almost no ring.',
+    make: () => R(HI, () => realTap({ mat: 'plate', f0: 380, decay: 0.014, damp: 1.4, nailG: 0.22, hi: 0.20, len: 0.10, wet: 0.35, peak: 0.24 })) },
+
   { id: 'tok-780', name: 'Tok', shipped: true,
     note: '780 Hz with a soft octave, damped in 18ms. What is in the app now.',
     make: () => R(HI, () => uiTap()) },
@@ -533,6 +634,14 @@ const RANKUP = [
 ];
 
 const IMPACT = [
+  { id: 'real-impact', name: 'Real: a struck panel', physical: true,
+    note: 'A dense low mode cluster in a real room. Weight without a crash.',
+    make: () => R(HI, () => { reseed(7714); const n = secs(0.95);
+      const cn = secs(0.020);
+      const c = lowpass(tilted(cn, -0.9), 0.30); const ce = env(cn, 0.0004, 0.0055);
+      return finish(reflect(mix(c.map((x, i) => x * ce[i] * 0.55),
+        modal(n, 96, MATERIAL.plate, { decay: 0.30, damp: 0.85, g: 1, tilt: 1.1 })),
+        { damp: 0.42, wet: 1.3 }).slice(0, n), 0.66); }) },
   { id: 'thud', name: 'Low thud', shipped: true,
     note: 'One struck low tone with a room tail. What is in the app now.',
     make: () => R(HI, () => { reseed(19760); const n = secs(0.70);
@@ -580,6 +689,54 @@ const IMPACT = [
 //   once    one-shots that genuinely fire alone
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * A GESTURE THROUGH AIR — rebuilt from the physics, after the first one was
+ * deleted for hissing.
+ *
+ * The old `swish` was noise through a FIXED band on a slow symmetric swell, which
+ * is a volume shape on a static timbre, and static noise is hiss whatever its
+ * level does. It scored 0.474 where the footfall scores 0.012.
+ *
+ * A real limb accelerates and decelerates, so the turbulence SWEEPS UP in pitch
+ * and back down while the resonance sharpens at speed. The movement is the sound.
+ * These use `sweepBand`, which is that and nothing else — worth judging on
+ * whether any of them escape the bush, because if none do, the honest answer is
+ * still that a gesture stays silent.
+ */
+const WHOOSH = [
+  { id: 'arm-sleeve', name: 'Real: a sleeve', physical: true,
+    note: 'Sweeps 400 → 2200 → 700 Hz over 170ms. Cloth on a moving arm.',
+    make: () => R(HI, () => { reseed(2401); const n = secs(0.17);
+      const e = Array.from({ length: n }, (_, i) => { const u = i / n;
+        return Math.pow(Math.sin(Math.PI * Math.pow(u, 0.72)), 1.9); });
+      return finish(sweepBand(tilted(n, -0.5), 400, 2200, 700, 1.1, 3.4).map((x, i) => x * e[i]), 0.30); }) },
+  { id: 'fast-hand', name: 'Real: a fast hand',  physical: true,
+    note: 'Shorter and higher — 90ms, sweeping to 3.6 kHz. A quick sharp gesture.',
+    make: () => R(HI, () => { reseed(9931); const n = secs(0.09);
+      const e = Array.from({ length: n }, (_, i) => { const u = i / n;
+        return Math.pow(Math.sin(Math.PI * Math.pow(u, 0.65)), 2.2); });
+      return finish(sweepBand(tilted(n, -0.35), 700, 3600, 1200, 1.4, 4.2).map((x, i) => x * e[i]), 0.28); }) },
+  { id: 'heavy-swing', name: 'Real: a heavy swing', physical: true,
+    note: 'Slower and lower, 260ms. An arm with weight behind it.',
+    make: () => R(HI, () => { reseed(5520); const n = secs(0.26);
+      const e = Array.from({ length: n }, (_, i) => { const u = i / n;
+        return Math.pow(Math.sin(Math.PI * Math.pow(u, 0.8)), 1.6); });
+      return finish(sweepBand(tilted(n, -0.8), 220, 1250, 380, 1.0, 2.8).map((x, i) => x * e[i]), 0.30); }) },
+  { id: 'paper-wave', name: 'Real: paper waved',  physical: true,
+    note: 'A sheet moved through air — brighter, with a flutter in the middle.',
+    make: () => R(HI, () => { reseed(3388); const n = secs(0.20);
+      const e = Array.from({ length: n }, (_, i) => { const u = i / n;
+        const flutter = 1 + 0.28 * Math.sin(2 * Math.PI * 34 * u);
+        return Math.pow(Math.sin(Math.PI * Math.pow(u, 0.7)), 1.8) * flutter; });
+      return finish(sweepBand(tilted(n, -0.25), 900, 4200, 1500, 1.3, 3.0).map((x, i) => x * e[i]), 0.28); }) },
+  { id: 'old-swish', name: 'The one that was deleted',
+    note: 'Static band on a symmetric swell — kept so the difference is audible.',
+    make: () => R(HI, () => { reseed(4242); const n = secs(0.22);
+      const air = highpass(lowpass(noise(n), 0.30), 0.03);
+      const sw = Array.from({ length: n }, (_, i) => Math.sin(Math.PI * (i / n)) ** 1.6);
+      return finish(air.map((x, i) => x * sw[i]), 0.34); }) },
+];
+
 export const ROLES = [
   { id: 'footstep', title: 'Footstep', preview: { kind: 'walk' },
     fires: 'Twelve times in Moral Luck, under the walking figure.', options: FOOTSTEP },
@@ -603,4 +760,7 @@ export const ROLES = [
     fires: 'Twenty-five times in the whole curriculum.', options: RANKUP },
   { id: 'impact', title: 'Something struck', preview: { kind: 'once' },
     fires: 'Once in Moral Luck, when the mark lands on road B.', options: IMPACT },
+  { id: 'whoosh', title: 'A gesture through air', preview: { kind: 'repeat', n: 3, gap: 0.75 },
+    fires: 'NOT IN THE APP — deleted for hissing. Rebuilt here to see if it can be saved.',
+    options: WHOOSH },
 ];

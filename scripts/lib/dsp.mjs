@@ -173,6 +173,189 @@ export function bell(n, f, decay, g = 1) {
   return body.map((x, i) => x * e[i] * g);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// WHY THE FIRST SET SOUNDED SYNTHETIC, AND THE FOUR THINGS THAT FIX IT.
+//
+// The clips above are built from one or two decaying sines plus a filtered noise
+// burst. That is a reasonable cartoon of an impact and it is not what any real
+// object does. Reported as "I can tell these aren't actually real", and correct.
+//
+// Real recordings were not obtainable — Freesound needs OAuth credentials I do
+// not have, and Wikimedia Commons has no footstep or whoosh audio at all — so
+// this is the acoustics done properly instead of a sample library. Four gaps, in
+// the order they matter:
+//
+//   1. MODE COUNT AND MODE-DEPENDENT DAMPING. A struck object rings at eight to
+//      twenty frequencies at once, they are INHARMONIC, and the high ones die
+//      first. One sine is a beep; the ratios and the differential damping are
+//      most of what says "a thing was hit".
+//   2. NO ROOM. Every real recording has early reflections — the same sound
+//      arriving again off a floor and two walls, 10–50ms later, quieter and
+//      duller each time. Their absence is why synthetic audio sounds like it is
+//      inside your head rather than in front of you.
+//   3. WHITE NOISE. Real impact noise falls off with frequency. Flat noise reads
+//      as hiss, which is exactly the complaint the whole "bush sound" was.
+//   4. PERFECT REPETITION. Two identical footsteps are instantly a loop. Real
+//      ones differ in level, timing and timbre on every stride.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Mode ratios for real materials. These are what make a struck thing sound like
+ * WHAT IT IS: a bar is stiff and wildly inharmonic, a bell has its famous minor
+ * tierce, glass is nearly harmonic and a floor panel is a dense low cluster.
+ */
+export const MATERIAL = {
+  bar:    [1, 2.756, 5.404, 8.933, 13.34],            // free-free bar: marimba, wood block
+  wood:   [1, 2.42, 4.19, 6.10, 8.4],                 // a struck board — stiff but damped
+  plate:  [1, 1.35, 1.72, 2.10, 2.61, 3.22, 3.9],     // a floor panel: dense and low
+  stone:  [1, 1.91, 3.12, 4.53, 6.18, 7.9],           // concrete or tile, very fast
+  glass:  [1, 2.02, 3.35, 4.81, 6.42],                // nearly harmonic, long
+  bell:   [0.5, 1, 1.19, 1.51, 2.0, 2.51, 3.01, 4.1], // hum, prime, minor tierce, quint…
+  metal:  [1, 1.73, 2.41, 3.14, 4.02, 5.11, 6.4],     // struck plate, dense
+};
+
+/**
+ * MODAL SYNTHESIS — the single biggest step from "beep" to "object".
+ *
+ * Every mode gets its own decay, and higher modes decay FASTER, which is what
+ * real damping does: `decay_k = decay / (1 + damp · (ratio − 1))`. That is why a
+ * struck object is bright for ten milliseconds and warm afterwards — the timbre
+ * changes as it rings, and a single sine cannot do that at all.
+ *
+ * `spread` detunes each mode slightly and randomises its level. Perfectly exact
+ * ratios sound manufactured; a real object is never quite the ideal shape.
+ */
+export function modal(n, f0, ratios, { decay = 0.20, damp = 0.55, g = 1, tilt = 1.0,
+  spread = 0.02, attack = 0.0004 } = {}) {
+  const out = new Array(n).fill(0);
+  for (let k = 0; k < ratios.length; k++) {
+    const detune = 1 + (rnd() * spread);
+    const f = f0 * ratios[k] * detune;
+    if (f > RATE * 0.47) continue;                       // above Nyquist, skip
+    const dk = decay / (1 + damp * (ratios[k] - 1));
+    const ak = (g / Math.pow(ratios[k], tilt)) * (0.85 + 0.3 * Math.abs(rnd()));
+    const e = env(n, attack, dk);
+    const s = sine(n, f, rnd() * Math.PI);
+    for (let i = 0; i < n; i++) out[i] += s[i] * e[i] * ak;
+  }
+  return out;
+}
+
+/**
+ * EARLY REFLECTIONS — the sound arriving again off the floor and the walls.
+ *
+ * Four taps at prime-ish delays so they never comb into a ringing pitch, each
+ * quieter and duller than the last. This is the cheapest large gain in realism
+ * available: an anechoic impact sounds synthetic no matter how good its modes
+ * are, because nothing in the physical world reaches an ear only once.
+ */
+export function reflect(buf, { taps = [[0.0113, 0.34], [0.0197, 0.25], [0.0313, 0.17], [0.0489, 0.11]],
+  damp = 0.55, wet = 1 } = {}) {
+  const extra = Math.round(taps[taps.length - 1][0] * RATE);
+  const out = buf.slice();
+  for (let i = 0; i < extra; i++) out.push(0);
+  let dull = buf;
+  for (const [t, a] of taps) {
+    dull = lowpass(dull, damp);                          // each bounce loses top end
+    const d = Math.round(t * RATE);
+    for (let i = 0; i < dull.length; i++) out[i + d] = (out[i + d] || 0) + dull[i] * a * wet;
+  }
+  return out;
+}
+
+/**
+ * A BANDPASS WHOSE CENTRE FREQUENCY MOVES — and the reason the old whoosh failed.
+ *
+ * `swish` was noise through a FIXED band on a slow rise-and-fall. That is a
+ * volume envelope on a static timbre, and a static timbre made of noise is hiss
+ * however you shape its level. It scored 0.474 and was correctly hated.
+ *
+ * A real limb moving through air does something else entirely: it accelerates and
+ * decelerates, so the turbulence it makes SWEEPS UP IN PITCH and back down, and
+ * the resonance sharpens at speed. The frequency moving is the whole sound. Get
+ * that and you have a whoosh; leave it out and you have a bush, and no amount of
+ * filtering or enveloping will convert one into the other.
+ *
+ * Coefficients are recomputed every 64 samples, which is 1.5ms at 44.1k — far
+ * finer than any audible zipper and 64× cheaper than doing it per sample.
+ */
+export function sweepBand(buf, f0, fPeak, f1, q0 = 1.2, qPeak = 3.0) {
+  const n = buf.length;
+  const out = new Array(n);
+  let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+  let b0 = 0, b2 = 0, a0 = 1, a1 = 0, a2 = 0;
+  for (let i = 0; i < n; i++) {
+    if (i % 64 === 0) {
+      const u = i / n;
+      // Up to the peak in the first 40% of the gesture, down after — the shape of
+      // an arm swing, not a symmetrical bump.
+      const f = u < 0.4 ? f0 + (fPeak - f0) * (u / 0.4) : fPeak + (f1 - fPeak) * ((u - 0.4) / 0.6);
+      const q = q0 + (qPeak - q0) * Math.sin(Math.PI * u);
+      const w = (2 * Math.PI * Math.min(f, RATE * 0.45)) / RATE;
+      const alpha = Math.sin(w) / (2 * q);
+      const cosw = Math.cos(w);
+      b0 = alpha; b2 = -alpha;
+      a0 = 1 + alpha; a1 = -2 * cosw; a2 = 1 - alpha;
+    }
+    const x = buf[i];
+    const y = (b0 / a0) * x + (b2 / a0) * x2 - (a1 / a0) * y1 - (a2 / a0) * y2;
+    x2 = x1; x1 = x; y2 = y1; y1 = y;
+    out[i] = y;
+  }
+  return out;
+}
+
+/** Noise with a spectral tilt. `-1` is roughly pink; real impact noise is −0.5…−1. */
+export function tilted(n, slope = -0.7) {
+  // Three one-pole lowpasses in parallel at spread cutoffs approximate a tilt far
+  // more cheaply than an FFT, and the ear cannot tell the difference on a 20ms burst.
+  const w = noise(n);
+  const a = lowpass(w, 0.9), b = lowpass(w, 0.35), c = lowpass(w, 0.08);
+  const k = Math.min(1, Math.max(0, -slope));
+  return w.map((x, i) => x * (1 - k) + (a[i] * 0.5 + b[i] * 0.9 + c[i] * 1.4) * k * 0.55);
+}
+
+/**
+ * CRUMPLING — how an aggregate surface actually sounds.
+ *
+ * Gravel, snow and dry leaves are not "noise". They are a burst of MANY tiny
+ * independent impacts whose rate and energy both fall away, which is why they
+ * have grain rather than hiss. Modelling it as a filtered noise swell is exactly
+ * the mistake that produced the bush sound.
+ */
+export function crumple(n, { grains = 60, decay = 0.055, f = 2600, q = 1.6, spread = 1.0 } = {}) {
+  const out = new Array(n).fill(0);
+  for (let k = 0; k < grains; k++) {
+    // Times drawn so density falls with the energy — a real crunch front-loads.
+    const u = Math.pow(Math.abs(rnd()), spread);
+    const at0 = Math.floor(u * n);
+    const amp = Math.exp(-(at0 / RATE) / decay) * (0.35 + 0.65 * Math.abs(rnd()));
+    const gl = Math.min(n - at0, Math.round(0.004 * RATE));
+    if (gl < 4) continue;
+    const gf = f * (0.6 + 0.9 * Math.abs(rnd()));
+    const grain = bandpass(noise(gl), Math.min(gf, RATE * 0.45), q);
+    const ge = env(gl, 0.0001, 0.0016);
+    for (let i = 0; i < gl; i++) out[at0 + i] += grain[i] * ge[i] * amp;
+  }
+  return out;
+}
+
+/**
+ * A two-stage decay: a fast initial drop into a slower tail.
+ *
+ * Real decays are not single exponentials. An object loses its high-frequency
+ * energy to the air almost at once and then rings on quietly for much longer, and
+ * a pure exponential is one of the quieter tells that a sound was computed.
+ */
+export function env2(n, attack, fast, slow, mixSlow = 0.30) {
+  const a = Math.max(1, Math.round(attack * RATE));
+  return Array.from({ length: n }, (_, i) => {
+    const rise = i < a ? i / a : 1;
+    const t = i / RATE;
+    return rise * ((1 - mixSlow) * Math.exp(-t / fast) + mixSlow * Math.exp(-t / slow));
+  });
+}
+
 // ── measurement, so a claim about a clip can be checked rather than asserted ──
 
 function power(x, f, sampleRate, from = 0, to = x.length) {

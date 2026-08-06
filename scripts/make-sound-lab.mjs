@@ -64,9 +64,13 @@ const roles = ROLES.map((role) => ({
     // A candidate with `pitches` is rendered once per pitch — a right answer and
     // an XP tick both CLIMB, and the climb cannot be judged from one note. The row
     // shows and plays the first; the sequences play all of them in order.
-    const pitches = o.pitches ?? [undefined];
-    const takes = pitches.map((f) => {
-      const { rate, data } = o.make(f);
+    // `pitches` renders one take per note (the climb); `vary` renders several
+    // different performances of the SAME sound, which the walk then cycles — a
+    // real pair of shoes never makes the same noise twice, and eleven identical
+    // footfalls is a loop rather than a walk.
+    const pitches = o.pitches ?? (o.vary ? Array.from({ length: o.vary }, (_, k) => k) : [undefined]);
+    const takes = pitches.map((f, k) => {
+      const { rate, data } = o.vary ? o.make(undefined, k) : o.make(f);
       return { rate, data, b64: wav(data, rate).toString('base64'), kb: (44 + data.length * 2) / 1024 };
     });
     const { rate, data } = takes[0];
@@ -79,6 +83,8 @@ const roles = ROLES.map((role) => ({
       name: o.name,
       note: o.note,
       shipped: !!o.shipped,
+      physical: !!o.physical,
+      vary: !!o.vary,
       ms: Math.round((data.length / rate) * 1000),
       rate,
       kb: +takes.reduce((a, t) => a + t.kb, 0).toFixed(1),
@@ -118,7 +124,7 @@ const rows = (role) => role.options.map((o) => `
     <button class="play" type="button" data-play="${o.id}" aria-label="Play ${esc(o.name)}">
       <svg viewBox="0 0 16 16" aria-hidden="true"><polygon points="4,3 13,8 4,13"/></svg>
     </button>
-    <span class="nm">${esc(o.name)}${o.shipped ? '<em class="tag">in the app</em>' : ''}
+    <span class="nm">${esc(o.name)}${o.shipped ? '<em class="tag">in the app</em>' : ''}${o.physical ? '<em class="tag phys">physical model</em>' : ''}${o.vary ? '<em class="tag">varies each step</em>' : ''}
       <small>${esc(o.note)}</small></span>
     ${waveSVG(o.wave)}
     ${specSVG(o.spec)}
@@ -210,6 +216,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 .nm{font-size:14px;min-width:0}
 .nm small{display:block;color:var(--soft);font-size:12px;line-height:1.4;margin-top:1px}
+.tag.phys{border-color:var(--ink);color:var(--ink)}
 .tag{font-style:normal;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
   border:1px solid var(--rule);border-radius:3px;padding:1px 5px;margin-left:7px;
   color:var(--soft);vertical-align:1px;white-space:nowrap}
@@ -303,6 +310,10 @@ const DATA = ${JSON.stringify(
 const TAKES = ${JSON.stringify(
   Object.fromEntries(roles.flatMap((r) => r.options.map((o) => [o.id, o.takes.length]))),
 )};
+/* Which of an option's takes are VARIATIONS (cycle them) rather than pitches. */
+const VARIES = ${JSON.stringify(
+  Object.fromEntries(roles.flatMap((r) => r.options.filter((o) => o.vary).map((o) => [o.id, true]))),
+)};
 const WALK = ${JSON.stringify({ steps: WALK.steps, settle: WALK.settle })};
 const LONGWALK = ${JSON.stringify({ steps: LONGWALK.steps, settle: LONGWALK.settle })};
 const PREVIEW = ${JSON.stringify(Object.fromEntries(roles.map((r) => [r.id, r.preview])))};
@@ -361,18 +372,19 @@ function preview(id){
   const L = lvl(role);
   const n = TAKES[id] || 1;
   if (p.kind === 'walk'){
-    LONGWALK.steps.forEach((t) => play(id, t, L));
+    LONGWALK.steps.forEach((t, k) => play(take(id, VARIES[id] ? k % n : 0), t, L));
     if (LONGWALK.settle >= 0) play(pickOf('arrival'), LONGWALK.settle, L);
     return;
   }
   if (p.kind === 'arrival'){
-    WALK.steps.forEach((t) => play(pickOf('footstep'), t, 0.65));
+    const fs = pickOf('footstep'), fn = TAKES[fs] || 1;
+    WALK.steps.forEach((t, k) => play(take(fs, VARIES[fs] ? k % fn : 0), t, 0.65));
     if (WALK.settle >= 0) play(id, WALK.settle, L);
     return;
   }
   if (p.kind === 'climb'){ [0, 1, 2].forEach((k) => play(take(id, Math.min(k, n - 1)), k * p.gap, L)); return; }
   if (p.kind === 'count'){ for (let k = 0; k < p.n; k++) play(take(id, k % n), k * p.gap, L); return; }
-  if (p.kind === 'repeat'){ for (let k = 0; k < p.n; k++) play(id, k * p.gap, L); return; }
+  if (p.kind === 'repeat'){ for (let k = 0; k < p.n; k++) play(take(id, VARIES[id] ? k % n : 0), k * p.gap, L); return; }
   play(id, 0, L);
 }
 document.querySelectorAll('[data-play]').forEach((b) => {
@@ -400,8 +412,8 @@ document.querySelectorAll('[data-all]').forEach((b) => {
 /* ── sequences, at the app's real timings ─────────────────────────── */
 const SEQ = {
   walk(){
-    const step = pickOf('footstep'), arr = pickOf('arrival');
-    WALK.steps.forEach((t) => play(step, t, 0.65));
+    const step = pickOf('footstep'), arr = pickOf('arrival'), sn = TAKES[step] || 1;
+    WALK.steps.forEach((t, k) => play(take(step, VARIES[step] ? k % sn : 0), t, 0.65));
     if (WALK.settle >= 0) play(arr, WALK.settle, 0.65);
     return WALK.settle + 0.6;
   },
@@ -426,7 +438,8 @@ const SEQ = {
     let t = 0;
     play(pickOf('tap'), t, 0.65); t += 0.9;
     play(pickOf('page'), t, 0.65); t += 0.35;
-    WALK.steps.forEach((s) => play(pickOf('footstep'), t + s, 0.65));
+    const fs3 = pickOf('footstep'), fn3 = TAKES[fs3] || 1;
+    WALK.steps.forEach((s, k) => play(take(fs3, VARIES[fs3] ? k % fn3 : 0), t + s, 0.65));
     if (WALK.settle >= 0) play(pickOf('arrival'), t + WALK.settle, 0.65);
     t += WALK.settle + 1.1;
     play(pickOf('page'), t, 0.65); t += 1.0;
