@@ -4,6 +4,7 @@ import Animated, {
   useSharedValue, useAnimatedStyle, useDerivedValue, useFrameCallback,
   withTiming, withSequence, runOnJS, Easing, type SharedValue,
 } from 'react-native-reanimated';
+import Svg, { Path as SvgPath } from 'react-native-svg';
 import Stickman from '@/components/lesson/cinematic/Stickman';
 import { pose, stand, type Bundle } from '@/components/lesson/cinematic/rig';
 import { strideMode } from '@/components/lesson/cinematic/moves';
@@ -11,6 +12,7 @@ import {
   layout, groundAt, sceneProps, gaitForSpan, jumpForSpan, MOON, LAYERS, LEAD, WALK_SECONDS,
   type Marker, type Prop,
 } from './worldPath';
+import { sceneLayers, DISC, TILE_W, TILE_H } from './sceneArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BRANCH IS A PLACE YOU WALK THROUGH.
@@ -207,10 +209,7 @@ export default function BranchWorld({
 
   return (
     <View style={{ height: H, backgroundColor: SKY, overflow: 'hidden' }}>
-      <Moon width={width} />
-      <Depth depth={0} camX={camX} k={LAYERS[0].k} tone={LAYERS[0].tone} unitStarts={unitStarts} />
-      <Depth depth={1} camX={camX} k={LAYERS[1].k} tone={LAYERS[1].tone} unitStarts={unitStarts} />
-      <Depth depth={2} camX={camX} k={LAYERS[2].k} tone={LAYERS[2].tone} unitStarts={unitStarts} />
+      <SceneBack camX={camX} unitStarts={unitStarts} width={width} />
       <GroundBand camX={camX} width={width} />
 
       {/* THE FIGURE, drawn BEFORE the markers so it stands behind their names. */}
@@ -230,81 +229,59 @@ export default function BranchWorld({
   );
 }
 
-/** High, far, and fixed — the moon does not ride the camera. */
-function Moon({ width }: { width: number }) {
-  return (
-    <View
-      style={{
-        position: 'absolute', left: width * MOON.x, top: H * MOON.y,
-        width: MOON.r * 2, height: MOON.r * 2, borderRadius: MOON.r,
-        backgroundColor: '#FFFFFF', opacity: 0.85,
-      }}
-      pointerEvents="none"
-    />
-  );
-}
-
 /**
- * One depth of silhouette. The props are generated for a WIDE span around the
- * camera and the whole layer is translated, so nothing is recomputed per frame —
- * the same lesson the ridge steps taught: static geometry, one moving parent.
+ * THE BACKDROP — the drawn scenes from sceneArt.ts, one per unit.
+ *
+ * Each layer is an inert <Path> inside an <Svg> under an ANIMATED PARENT (§17
+ * rule 6): the surface rasterises once and the parent translates it, so nothing
+ * re-uploads per frame. Two tiles side by side, offset by the camera modulo the
+ * tile width, which is what makes it repeat without a seam.
+ *
+ * The scene is chosen from the camera position rather than the figure's, so the
+ * place changes when the unit does even mid-walk.
  */
-function Depth({ depth, camX, k, tone, unitStarts }: {
-  depth: number; camX: SharedValue<number>; k: number; tone: string; unitStarts: number[];
+function SceneBack({ camX, unitStarts, width }: {
+  camX: SharedValue<number>; unitStarts: number[]; width: number;
 }) {
-  const props = useMemo(() => sceneProps(-800, 14000, depth, unitStarts), [depth, unitStarts]);
-  const st = useAnimatedStyle(() => ({ transform: [{ translateX: -camX.value * k }] }));
+  const [name, setName] = useState('the hills');
+  const NAMES = ['the hills', 'deep forest', 'the moor', 'the ridge', 'the orchard', 'the pass'];
+  useDerivedValue(() => {
+    let k = 0;
+    for (let i = 0; i < unitStarts.length; i++) if (camX.value + 120 >= unitStarts[i]) k = i;
+    runOnJS(setName)(NAMES[k % NAMES.length]);
+  });
+  const layers = useMemo(() => sceneLayers(name), [name]);
+  const disc = DISC[name] ?? DISC['the hills'];
   return (
-    <Animated.View style={[StyleSheet.absoluteFill, st]} pointerEvents="none">
-      {props.map((p, i) => <PropShape key={i} p={p} tone={tone} />)}
-    </Animated.View>
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={{
+        position: 'absolute', left: width * disc.x - disc.r, top: H * disc.y - disc.r,
+        width: disc.r * 2, height: disc.r * 2, borderRadius: disc.r, backgroundColor: '#FFFFFF', opacity: 0.92,
+      }} />
+      {layers.map((l, i) => (
+        <SceneStrip key={name + i} camX={camX} k={l.k} d={l.d} tone={l.tone} />
+      ))}
+    </View>
   );
 }
 
-/** Flat silhouettes. No detail — the reference art has almost none either. */
-function PropShape({ p, tone }: { p: Prop; tone: string }) {
-  const foot = p.y;
-  if (p.kind === 'peak') {
-    return (
-      <View style={{
-        position: 'absolute', left: p.x - p.h, top: foot - p.h * 0.8,
-        width: 0, height: 0, borderLeftWidth: p.h, borderRightWidth: p.h,
-        borderBottomWidth: p.h * 0.8, borderLeftColor: 'transparent',
-        borderRightColor: 'transparent', borderBottomColor: tone,
-      }} />
-    );
-  }
-  if (p.kind === 'pine') {
-    return (
-      <View style={{
-        position: 'absolute', left: p.x - p.h * 0.28, top: foot - p.h,
-        width: 0, height: 0, borderLeftWidth: p.h * 0.28, borderRightWidth: p.h * 0.28,
-        borderBottomWidth: p.h, borderLeftColor: 'transparent',
-        borderRightColor: 'transparent', borderBottomColor: tone,
-      }} />
-    );
-  }
-  if (p.kind === 'rock') {
-    return (
-      <View style={{
-        position: 'absolute', left: p.x - p.h * 0.5, top: foot - p.h * 0.42,
-        width: p.h, height: p.h * 0.42, borderTopLeftRadius: p.h * 0.5,
-        borderTopRightRadius: p.h * 0.42, backgroundColor: tone,
-      }} />
-    );
-  }
-  // a broadleaf: a trunk and one heavy round crown, which is all a silhouette needs
+/** TWO TILES SIDE BY SIDE, offset by the camera modulo the tile width — which is
+ *  what makes the backdrop repeat forever with no seam to find. */
+const VIEWBOX = `0 0 ${TILE_W * 2} ${TILE_H}`;
+
+function SceneStrip({ camX, k, d, tone }: {
+  camX: SharedValue<number>; k: number; d: string; tone: string;
+}) {
+  const st = useAnimatedStyle(() => ({
+    transform: [{ translateX: -((camX.value * k) % TILE_W) }],
+  }));
   return (
-    <View style={{ position: 'absolute', left: p.x - p.h * 0.42, top: foot - p.h, width: p.h * 0.84, height: p.h }}>
-      <View style={{
-        position: 'absolute', left: p.h * 0.36, top: p.h * 0.42,
-        width: p.h * 0.11, height: p.h * 0.58, backgroundColor: tone,
-      }} />
-      <View style={{
-        position: 'absolute', left: 0, top: 0,
-        width: p.h * 0.84, height: p.h * 0.6, borderRadius: p.h * 0.42, backgroundColor: tone,
-      }} />
-    </View>
+    <Animated.View style={[{ position: 'absolute', left: 0, top: 0, width: TILE_W * 2, height: H }, st]}>
+      <Svg width={TILE_W * 2} height={TILE_H} viewBox={VIEWBOX}>
+        <SvgPath d={d} fill={tone} />
+        <SvgPath d={d} fill={tone} x={TILE_W} />
+      </Svg>
+    </Animated.View>
   );
 }
 
