@@ -8,12 +8,18 @@ import { critter, type CritterKind } from './critters';
 //
 // A bone is a 1-wide View with transformOrigin '0% 50%', so
 // [translate, rotate, scaleX(len)] stretches it from its start joint. The segment
-// COUNT is fixed (15 segs, 5 dots — the cow's horn is the 15th and the dog leaves
+// COUNT is fixed (15 segs, 12 dots — the cow's horn is the 15th and the dog leaves
 // it at zero width) because a changing number of children would remount every
 // frame; unused slots simply draw nothing.
+//
+// The dots are the caps that make a butt-capped bone read as a filled limb, so
+// there is one per bone end that shows: two for the barrel, a skull, a nose, a
+// knee and a paw on each of four legs, one at the tail's bend. Raising this is
+// cheap — an unfilled slot costs an early return — but leaving it TOO LOW is
+// silent, because critters.ts simply pushes dots that never get drawn.
 
 const SEGS = 15;
-const DOTS = 5;
+const DOTS = 13;
 
 export default function CritterView({
   kind, clock, x, ground, k, dir = 1, gait, phase, opacity, color = '#1A1A1A',

@@ -26,6 +26,7 @@ import type { SceneApi } from './CinematicPlayer';
 // Measured extremes across every beat, top to bottom:
 //   ledger top      y 260  →  47   (the opening headline shares this exact box)
 //   ledger bottom   y 348  → 147
+//   dog crown       y 441  → 254   (ear tip, measured over the whole gait cycle)
 //   figure crown    y 359  → 160
 //   ORIGIN? card    y 366  → 168   … bottom y 486 → 305
 //   ask caption     y 398  → 205
@@ -34,11 +35,30 @@ import type { SceneApi } from './CinematicPlayer';
 //   ankle joints    y 507  → 329   (the ankle CIRCLE hangs ~7 below GROUND)
 // so the band below is [40, 338] — everything the scene can draw, with margin.
 // Anything added later must be re-measured through the same map before it ships.
+//
+// ACROSS, which the list above never covered and the dog needed: at rest the
+// animal spans screen x 21 (nose) … 114 (tail), the balance beam starts at 100
+// and its left end never falls below screen y 434 against a dog crown of 442, and
+// the figure's own ink starts near 194. Everything horizontal here is measured
+// over the WHOLE gait cycle, not the standing pose — the legs swing ±0.20 wither.
 
 const HUMAN_X = 250;
-const CRIT_X = 86;
-/** Shoulder height on stage. A mid-sized dog beside a 103-unit person. */
-const CRIT_K = 46;
+const CRIT_X = 94;
+/**
+ * Shoulder height on stage. A mid-sized dog beside a 103-unit person.
+ *
+ * 40, not the 46 it was. Filling the animal out (critters.ts) gave it a real
+ * head and a muzzle that projects, which grew it from 1.31 wither units tall to
+ * 1.49 and pushed its nose 0.36 further forward — at 46 that put the crown at
+ * 70px against the person's 103, a Great Dane rather than the mid-sized dog this
+ * line claims, and left the nose 7px off the frame edge. Dropping to 40 with
+ * CRIT_X out to 94 restores the ORIGINAL framing to within a few pixels (nose at
+ * screen x 21 against 26, crown 61px against 60, and the tail finishes its amble
+ * at 34.4 where it used to finish at 34.7) while keeping the new build — because
+ * `k` decides how big the animal is in the shot and the proportions inside
+ * critters.ts decide whether it looks fed, and those are separate questions.
+ */
+const CRIT_K = 40;
 const PIVOT_X = 158;
 const PIVOT_Y = 430;
 
