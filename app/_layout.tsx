@@ -46,6 +46,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { posthog, setAnalyticsConsent, track } from '@/lib/posthog';
 import { useCloudSync } from '@/lib/supabase/useCloudSync';
 import { useReminders } from '@/lib/notifications/useReminders';
+import { consumeReloadedFlag, useFirstRunUpdate } from '@/lib/updates/firstRun';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { ads } from '@/lib/ads';
 import { prepareFeedback } from '@/lib/feedback';
@@ -170,6 +171,28 @@ export default function RootLayout() {
   // must not start its timeline until the launch screen has actually lifted.
   const launchDone = useUIStore((s) => s.launchDone);
   const setLaunchDone = useUIStore((s) => s.setLaunchDone);
+
+  // TAKE THE NEWEST BUNDLE BEFORE DECIDING WHAT A NEW READER SEES FIRST.
+  //
+  // A fresh install runs the JS inside the APK, so whatever it meets first is
+  // frozen at build time — and the welcome screen is exactly that. See
+  // lib/updates/firstRun.ts. Held inside the launch animation, bounded, and only
+  // ever for a genuinely first-run reader on the embedded bundle.
+  const welcomeVersion = useUserDataStore((s) => s.welcomeVersion);
+  const hasSeenWelcome = useUserDataStore((s) => s.hasSeenWelcome);
+  const hasHydratedForUpdate = useUserDataStore((s) => s._hasHydrated);
+  const isFirstRun = welcomeVersion === 0 && !hasSeenWelcome;
+  const updateSettled = useFirstRunUpdate(hasHydratedForUpdate, isFirstRun);
+
+  // …and if we DID restart into one, do not play the launch animation a second
+  // time on the same cold start. Without this the reader's first ever launch
+  // shows the ink scene, blinks, and shows it again, which reads as a crash.
+  const [skipLaunchAnim, setSkipLaunchAnim] = useState(false);
+  useEffect(() => {
+    consumeReloadedFlag().then((did) => {
+      if (did) setSkipLaunchAnim(true);
+    });
+  }, []);
 
   // Gate analytics on the user's saved preference, but only once the store has
   // hydrated so we never capture before we know their real choice.
@@ -340,7 +363,8 @@ export default function RootLayout() {
           Sits over everything until the boot is ready and the count hits 100%. */}
       {!launchDone && (
         <LaunchScreen
-          ready={authChecked && hasHydrated && accentFonts}
+          ready={authChecked && hasHydrated && accentFonts && updateSettled}
+          skipAnimation={skipLaunchAnim}
           onDone={() => setLaunchDone(true)}
         />
       )}

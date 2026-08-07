@@ -97,6 +97,14 @@ const Pct = memo(function Pct({
 
 interface Props {
   ready: boolean;
+  /**
+   * Second boot of ONE cold start, because we restarted into a newly-downloaded
+   * bundle (see lib/updates/firstRun.ts). The reader has already watched this
+   * animation seconds ago; playing it again reads as a crash-and-restart, which
+   * is a bad first impression for the one launch that is actually somebody's
+   * first. So it stands down to a plain hold and lifts as soon as boot is ready.
+   */
+  skipAnimation?: boolean;
   onDone: () => void;
 }
 
@@ -104,7 +112,7 @@ interface Props {
 // different one each launch), the figure living in it, an ink stroke that draws
 // itself across the sky as a progress line with a counting percentage, and a
 // short quote resting on paper at the bottom. At 100% the screen lifts away.
-export default function LaunchScreen({ ready, onDone }: Props) {
+export default function LaunchScreen({ ready, skipAnimation = false, onDone }: Props) {
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
@@ -133,6 +141,14 @@ export default function LaunchScreen({ ready, onDone }: Props) {
   // With the finish + fade this puts the whole moment a little over 3s — long
   // enough to actually read the quote at the bottom.
   useEffect(() => {
+    if (skipAnimation) {
+      // Straight to held: no draw-on, no counting, no second performance. The
+      // `ready` effect below still governs the lift, so boot order is unchanged.
+      introFade.value = 1;
+      progress.value = 92;
+      setHeld(true);
+      return;
+    }
     introFade.value = withTiming(1, { duration: 420 });
     sceneScale.value = withTiming(1.04, { duration: 3800, easing: Easing.out(Easing.quad) });
     progress.value = withTiming(
