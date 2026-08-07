@@ -9,6 +9,16 @@ export interface SubPackage {
   identifier: string; // RevenueCat package identifier
   productId: string; // store product id
   priceString: string; // localized, e.g. "$6.99"
+  /**
+   * The numeric price and its ISO currency, carried ALONGSIDE `priceString`
+   * rather than instead of it. The UI wants the localized string and must keep
+   * using it — but "$6.99" is a label, not a number, and analytics cannot add
+   * labels up. Without these two, `subscribe_succeeded` could say that somebody
+   * subscribed and never how much for, so revenue, ARPU and LTV were all
+   * unanswerable no matter how well the funnel was instrumented.
+   */
+  price: number;
+  currency: string;
   period: 'month' | 'year' | 'unknown';
   raw?: unknown; // underlying PurchasesPackage (native only)
 }

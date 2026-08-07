@@ -103,13 +103,33 @@ const DEFAULT_SETTINGS: AppSettings = {
   // On by default: it is quiet, short, respects the device's silent switch, and
   // never takes audio focus from whatever the reader is listening to.
   soundEffects: true,
-  // Privacy-by-default: analytics stay OFF until the user explicitly opts in
-  // (matches PostHog's defaultOptIn:false). Toggle in Settings → Usage Analytics.
-  usageAnalytics: false,
+  // ON by default, disclosed on the welcome screen, one switch away in
+  // Settings → Usage Analytics.
+  //
+  // It was opt-in-by-default-off, which sounds more careful and in practice meant
+  // NOBODY was ever measured: the only thing in the whole app that could turn it
+  // on was a toggle inside Settings → Privacy, and almost nobody opens Settings.
+  // So the analytics were faultlessly built and switched off, and every question
+  // about which lessons people finish went unanswerable.
+  //
+  // What keeps this honest is the other half, which must not be dropped: the
+  // welcome screen SAYS SO in plain words before anyone starts, the toggle is
+  // where they were told it would be, and `before_send` in lib/posthog.ts strips
+  // every piece of personal text on the way out. Data collected by default has to
+  // be data you would be happy to describe out loud.
+  usageAnalytics: true,
   autoBackup: true,
 };
 
 const SETTING_KEYS = Object.keys(DEFAULT_SETTINGS) as (keyof AppSettings)[];
+
+/**
+ * Bump this ONLY if the analytics notice itself changes enough that people
+ * deserve to be told again. Bumping it re-runs the flip below, which will turn
+ * analytics back on for anyone who had switched them off — so it is not a
+ * cosmetic number, and there is no reason to touch it for a wording tweak.
+ */
+export const ANALYTICS_NOTICE_VERSION = 1;
 
 /**
  * Defaults, overlaid with whatever of the stored blob is still a real setting.
@@ -267,6 +287,24 @@ interface UserDataState {
    * switches were honest and the feature still reached nobody.
    */
   notifyAsked: boolean;
+  /**
+   * Which version of the analytics notice this install has been shown, and the
+   * guard on the one-time flip that goes with it.
+   *
+   * The default moved from off to on (see DEFAULT_SETTINGS.usageAnalytics), but a
+   * default only reaches NEW installs: every existing device has `false` sitting in
+   * AsyncStorage, sanitizeSettings faithfully preserves it, and the change would
+   * have reached nobody who already had the app — which is most people.
+   *
+   * So the flip is a migration, and it runs EXACTLY ONCE. That matters: it means
+   * anyone who turns analytics off after this lands stays off forever, because the
+   * version has already been bumped and the migration never looks at them again.
+   * Re-running it on every launch would override a real choice every time, which
+   * would be indefensible.
+   */
+  analyticsNoticeVersion: number;
+  /** One-shot: has this install ever reported itself as new? See lib/posthog.ts. */
+  installReported: boolean;
   joinedAt: number | null;                    // epoch ms of first app open
   earnedBadges: string[];                     // badge ids the user has earned (persists)
   badgesInitialized: boolean;                 // one-time backfill guard
@@ -326,6 +364,7 @@ interface UserDataState {
   completeOnboarding: (slug: string | null, version: number) => void;
   /** Spend the one out-of-Settings reminder ask, whatever the answer was. */
   markNotifyAsked: () => void;
+  markInstallReported: () => void;
   recomputeBadges: () => void;
   setProfile: (patch: Partial<{ displayName: string; email: string; bio: string }>) => void;
   bumpBioSeed: () => void;
@@ -523,6 +562,8 @@ export const useUserDataStore = create<UserDataState>()(
       startingBranch: null,
       onboardingVersion: 0,
       notifyAsked: false,
+      analyticsNoticeVersion: 0,
+      installReported: false,
       joinedAt: null,
       earnedBadges: [],
       badgesInitialized: false,
@@ -756,6 +797,7 @@ export const useUserDataStore = create<UserDataState>()(
       },
 
       markNotifyAsked: () => set({ notifyAsked: true }),
+      markInstallReported: () => set({ installReported: true }),
 
       // Union the currently-qualifying badges into the persisted set so earned
       // badges stick (until explicitly revoked). Only called at progress points
@@ -847,6 +889,11 @@ export const useUserDataStore = create<UserDataState>()(
           // the next reader inherits nothing).
           onboardingVersion: 0,
           notifyAsked: false,
+          // NOT reset to 0: the notice belongs to the INSTALL, not the person, and
+          // re-running the flip would silently re-enable analytics for someone who
+          // had turned them off before signing out.
+          analyticsNoticeVersion: ANALYTICS_NOTICE_VERSION,
+          installReported: true,
           joinedAt: null,
           earnedBadges: [],
           badgesInitialized: true,
@@ -892,6 +939,11 @@ export const useUserDataStore = create<UserDataState>()(
           // the next reader inherits nothing).
           onboardingVersion: 0,
           notifyAsked: false,
+          // NOT reset to 0: the notice belongs to the INSTALL, not the person, and
+          // re-running the flip would silently re-enable analytics for someone who
+          // had turned them off before signing out.
+          analyticsNoticeVersion: ANALYTICS_NOTICE_VERSION,
+          installReported: true,
           joinedAt: null,
           earnedBadges: [],
           badgesInitialized: true,
@@ -935,6 +987,8 @@ export const useUserDataStore = create<UserDataState>()(
         startingBranch: state.startingBranch,
         onboardingVersion: state.onboardingVersion,
         notifyAsked: state.notifyAsked,
+        analyticsNoticeVersion: state.analyticsNoticeVersion,
+        installReported: state.installReported,
         joinedAt: state.joinedAt,
         earnedBadges: state.earnedBadges,
         badgesInitialized: state.badgesInitialized,
@@ -992,6 +1046,22 @@ export const useUserDataStore = create<UserDataState>()(
         const restDaysUsed = p.restDaysUsed ?? 0;
         const onboardingVersion = p.onboardingVersion ?? 0;
         const notifyAsked = p.notifyAsked ?? false;
+        const installReported = p.installReported ?? false;
+
+        // THE ANALYTICS DEFAULT MOVED, AND A DEFAULT ONLY REACHES NEW INSTALLS.
+        //
+        // Every device that already has the app is carrying `usageAnalytics: false`
+        // in AsyncStorage, and sanitizeSettings preserves it exactly as it should.
+        // Without this, the change would apply to nobody who already had the app.
+        //
+        // Runs once, guarded by the stored version, so switching analytics off
+        // after this update STAYS off — the migration has already bumped the
+        // version and never looks at this install again.
+        const noticeSeen = p.analyticsNoticeVersion ?? 0;
+        const migrateAnalytics = noticeSeen < ANALYTICS_NOTICE_VERSION;
+        const settings = sanitizeSettings(p.settings);
+        if (migrateAnalytics) settings.usageAnalytics = true;
+
         return {
           ...current,
           ...p,
@@ -1006,7 +1076,9 @@ export const useUserDataStore = create<UserDataState>()(
           restDaysUsed,
           onboardingVersion,
           notifyAsked,
-          settings: sanitizeSettings(p.settings),
+          analyticsNoticeVersion: ANALYTICS_NOTICE_VERSION,
+          installReported,
+          settings,
         };
       },
       onRehydrateStorage: () => (state) => {

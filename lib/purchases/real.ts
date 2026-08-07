@@ -31,6 +31,8 @@ function normalize(pkg: PurchasesPackage): SubPackage {
     identifier: pkg.identifier,
     productId: pkg.product.identifier,
     priceString: pkg.product.priceString,
+    price: pkg.product.price,
+    currency: pkg.product.currencyCode,
     period: periodOf(pkg),
     raw: pkg,
   };

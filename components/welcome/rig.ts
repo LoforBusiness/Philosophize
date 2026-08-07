@@ -76,7 +76,11 @@ export const T_FADE = SPEAK_T0 + SPEAK_END; // bubble + board dissolve
 export const T_EXIT = T_FADE; // …and he starts turning to leave
 export const T_GONE = T_EXIT + T_BEAT + T_WINDUP + T_BOLT; // off the stage entirely
 export const T_BEGIN = T_GONE + 0.15; // wordmark + Begin resolve into the empty stage
-export const T_HOLD = T_BEGIN + 1.0; // freeze here — this plays ONCE, it must not loop
+// Freeze here — this plays ONCE, it must not loop. Long enough for the LAST thing
+// on the end card to finish arriving: the analytics notice resolves at T_BEGIN +
+// 1.15, and at the old +1.0 the clock stopped while it was still fading in, so the
+// one line on this screen that has to be read plainly sat at four-fifths opacity.
+export const T_HOLD = T_BEGIN + 1.4;
 
 export const BEATS: Beat[] = SCRIPT.map(([t, text, visual, gesture, cues], i) => {
   const nextT = i + 1 < SCRIPT.length ? SCRIPT[i + 1][0] : SPEAK_END;

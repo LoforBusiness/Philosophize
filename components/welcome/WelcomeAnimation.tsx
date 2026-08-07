@@ -36,8 +36,11 @@ import { clamp01, lerp, easeOutCubic, easeOutBack, INK, PAPER, SOFT } from './ea
  * 2 → the sky behind the end card.
  * 3 → he walks on and runs off instead of appearing and dissolving, and the two
  *     decorative boards became the six branches and a timeline of real thinkers.
+ * 4 → the analytics notice on the end card. This one is NOT a polish bump: the
+ *     analytics default moved to on, and existing readers are only told about it
+ *     because this number went up and put the intro back in front of them.
  */
-export const WELCOME_VERSION = 3;
+export const WELCOME_VERSION = 4;
 import {
   BEATS,
   BEAT_T,
@@ -1003,6 +1006,11 @@ function EndCard({
     const s = 0.94 + 0.06 * easeOutBack(clamp01((clock.value - T_BEGIN) / 0.6));
     return { opacity: a, transform: [{ scale: s }] };
   });
+  // Arrives AFTER the button, so it reads as a footnote to the choice rather than
+  // as a condition on it — but on the same screen, before anything is collected.
+  const notice = useAnimatedStyle(() => ({
+    opacity: 0.9 * easeOutCubic(clamp01((clock.value - T_BEGIN - 0.45) / 0.7)),
+  }));
   return (
     <View pointerEvents="box-none" style={styles.endCard}>
       <Animated.Text style={[styles.lockWord, word]}>Philosophize</Animated.Text>
@@ -1016,6 +1024,16 @@ function EndCard({
           <Text style={styles.beginText}>Begin</Text>
         </Pressable>
       </Animated.View>
+
+      {/* THE DISCLOSURE, and it is not decoration.
+          Analytics default to ON (see DEFAULT_SETTINGS.usageAnalytics), and the
+          only thing that makes that defensible rather than sneaky is telling
+          people plainly, before they start, in words they will actually read —
+          and saying exactly where the switch is. Do not shrink this away. */}
+      <Animated.Text style={[styles.notice, notice]}>
+        Anonymous usage data helps improve the lessons — never your name, notes or
+        saved quotes. You can turn it off in Settings.
+      </Animated.Text>
     </View>
   );
 }
@@ -1067,4 +1085,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 44,
   },
   beginText: { fontFamily: 'Inter_500Medium', fontSize: 17, color: PAPER },
+  // Its own shadow, like the wordmark: the sky behind runs to near-black in
+  // places and no type on this screen may take its contrast from the artwork (§19).
+  notice: {
+    marginTop: 26,
+    maxWidth: 300,
+    textAlign: 'center',
+    fontFamily: 'Inter_400Regular',
+    fontSize: 11.5,
+    lineHeight: 17,
+    color: '#4A4640',
+    textShadowColor: 'rgba(247,244,238,0.9)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
 });

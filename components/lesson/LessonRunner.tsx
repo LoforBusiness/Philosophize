@@ -108,11 +108,9 @@ export default function LessonRunner({ lesson }: Props) {
 
   useEffect(() => {
     startSession(lesson);
-    track('lesson_started', {
-      lesson_id: lesson.id,
-      branch_slug: branchSlug,
-      total_cards: N,
-    });
+    // `lesson_started` used to be captured here. It moved to the lesson ROUTE,
+    // because here it only ever saw the card lessons — see StartedRunner in
+    // app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx.
     return () => endSession();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson.id]);

@@ -125,7 +125,18 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         try {
           const isPro = await purchases.purchase(target);
           set({ isPro: isPro || get().isReviewer });
-          if (isPro) track('subscribe_succeeded', { plan: 'scholars_pass', product_id: target.productId });
+          // `$revenue` is the property PostHog's revenue views read; the rest is
+          // there so a purchase can be broken down by price point and currency.
+          if (isPro)
+            track('subscribe_succeeded', {
+              plan: 'scholars_pass',
+              product_id: target.productId,
+              $revenue: target.price,
+              revenue: target.price,
+              currency: target.currency,
+              price_string: target.priceString,
+              period: target.period,
+            });
           return isPro ? 'success' : 'error';
         } catch (e) {
           if (e instanceof PurchasesCancelledError) return 'cancelled';

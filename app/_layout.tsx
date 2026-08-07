@@ -75,12 +75,50 @@ function LessonRewardHost() {
   return <LessonReward key={seq} {...reward} onDone={dismiss} />;
 }
 
+/**
+ * A SCREEN NAME IS A ROUTE, NOT A PATH.
+ *
+ * `usePathname()` returns the RESOLVED path, so every lesson, branch and thinker
+ * arrived with its own `$screen_name`:
+ *
+ *   /branches/ethics/ethics-unit-1/lesson/ethics-ethics-8
+ *   /branches/logic/logic-unit-3/lesson/logic-logic-14      … and 190 more
+ *
+ * With 192 lessons, 28 units and ~223 thinkers that is several thousand distinct
+ * screens, and PostHog's screen report becomes a list too long to read with a
+ * handful of views against each row — the one question it exists to answer
+ * ("which screens do people use") is unanswerable. So the id is replaced by its
+ * placeholder and carried alongside as a property instead, where it can still be
+ * broken down or filtered on but does not shatter the aggregate.
+ */
+const ROUTE_PATTERNS: Array<[RegExp, string, string[]]> = [
+  [/^\/branches\/([^/]+)\/([^/]+)\/lesson\/([^/]+)$/, '/branches/[branch]/[unit]/lesson/[lesson]',
+    ['branch_slug', 'unit_slug', 'lesson_id']],
+  [/^\/branches\/([^/]+)$/, '/branches/[branch]', ['branch_slug']],
+  [/^\/thinker\/([^/]+)$/, '/thinker/[id]', ['philosopher_id']],
+  [/^\/philosophers\/([^/]+)$/, '/philosophers/[id]', ['philosopher_id']],
+];
+
+// Not exported: every file under app/ is a route, and Expo Router inspects the
+// module's exports.
+function screenFor(pathname: string) {
+  for (const [re, name, keys] of ROUTE_PATTERNS) {
+    const m = pathname.match(re);
+    if (!m) continue;
+    const props: Record<string, string> = {};
+    keys.forEach((k, i) => (props[k] = m[i + 1]));
+    return { name, props };
+  }
+  return { name: pathname || '/', props: {} as Record<string, string> };
+}
+
 // Expo Router (React Navigation v7) is not supported by PostHog's screen
 // autocapture, so we send a `$screen` event manually on every route change.
 function ScreenTracker() {
   const pathname = usePathname();
   useEffect(() => {
-    track('$screen', { $screen_name: pathname });
+    const { name, props } = screenFor(pathname);
+    track('$screen', { $screen_name: name, ...props });
   }, [pathname]);
   return null;
 }
@@ -137,9 +175,38 @@ export default function RootLayout() {
   // hydrated so we never capture before we know their real choice.
   const usageAnalytics = useUserDataStore((s) => s.settings.usageAnalytics);
   const hasHydrated = useUserDataStore((s) => s._hasHydrated);
+  const installReported = useUserDataStore((s) => s.installReported);
+  const markInstallReported = useUserDataStore((s) => s.markInstallReported);
+  const openSent = useRef(false);
   useEffect(() => {
-    if (hasHydrated) setAnalyticsConsent(usageAnalytics);
-  }, [hasHydrated, usageAnalytics]);
+    if (!hasHydrated) return;
+    setAnalyticsConsent(usageAnalytics);
+    if (!usageAnalytics) return;
+
+    // AND SEND THE SESSION EVENTS OURSELVES, because the SDK's own are gone by now.
+    //
+    // posthog-react-native fires `Application Installed` / `Application Opened` when
+    // the CLIENT is constructed, which happens at import time — long before
+    // AsyncStorage has hydrated and told us whether we are allowed to capture
+    // anything. And an event captured while opted out is not queued, it is dropped:
+    //
+    //     enqueue(type, msg) { if (this.optedOut) return void emit(
+    //       "Library is disabled. Not sending event.") }
+    //
+    // So on a fresh install those two events are thrown away every time, and
+    // `Application Installed` — the one anchor for "did this person ever come
+    // back" — can never be recovered afterwards. These two fire at the first
+    // moment consent is actually known, which is the earliest point at which they
+    // can be honest.
+    if (!installReported) {
+      track('app_installed');
+      markInstallReported();
+    }
+    if (!openSent.current) {
+      openSent.current = true;
+      track('app_opened');
+    }
+  }, [hasHydrated, usageAnalytics, installReported, markInstallReported]);
 
   // Local-first cloud sync: pull/merge/push progress while signed in.
   useCloudSync();

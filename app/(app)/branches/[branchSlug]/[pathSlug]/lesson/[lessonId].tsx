@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,6 +7,7 @@ import type { Lesson } from '@/data/types';
 import LessonRunner from '@/components/lesson/LessonRunner';
 import LessonLoader from '@/components/lesson/LessonLoader';
 import { exitLesson } from '@/components/lesson/exitLesson';
+import { track } from '@/lib/posthog';
 import ArgumentFightLesson from '@/components/lesson/cinematic/ArgumentFightLesson';
 import PremisesBuilderLesson from '@/components/lesson/cinematic/PremisesBuilderLesson';
 import { EthicsLesson } from '@/components/lesson/cinematic/ethicsScene';
@@ -413,17 +414,66 @@ export default function LessonScreen() {
     );
   }
 
-  const Runner = CINEMATIC[lessonId] ?? LessonRunner;
+  const cinematic = CINEMATIC[lessonId];
+  const Runner = cinematic ?? LessonRunner;
 
   return (
     <ScreenTransition bg="#FAFAF7">
       {loading ? (
         <LessonLoader onDone={() => setLoading(false)} />
       ) : (
-        <Runner lesson={result.lesson} />
+        <StartedRunner
+          Runner={Runner}
+          lesson={result.lesson}
+          branchSlug={result.branch.slug}
+          unitId={result.path.id}
+          format={cinematic ? 'cinematic' : 'cards'}
+        />
       )}
     </ScreenTransition>
   );
+}
+
+/**
+ * WHERE `lesson_started` BELONGS, which is here and not inside a runner.
+ *
+ * It used to live in LessonRunner — the CARD runner — so it reported the 90 card
+ * lessons and none of the 102 cinematic ones. Meanwhile `lesson_completed` fires
+ * from LessonReward, which every runner reaches. The result was a funnel that
+ * counted completions with no matching starts: cinematic lessons appeared to have
+ * an impossible completion rate and card lessons looked worse than they were, and
+ * the comparison between the two formats — the single most important content
+ * question this app has (§5) — read exactly backwards.
+ *
+ * This wrapper mounts with whichever runner the route chose, so a new runner is
+ * instrumented by existing, not by remembering. `format` is what makes the
+ * cinematic-versus-cards question answerable at all.
+ */
+function StartedRunner({
+  Runner,
+  lesson,
+  branchSlug,
+  unitId,
+  format,
+}: {
+  Runner: React.ComponentType<{ lesson: Lesson }>;
+  lesson: Lesson;
+  branchSlug: string;
+  unitId: string;
+  format: 'cinematic' | 'cards';
+}) {
+  useEffect(() => {
+    track('lesson_started', {
+      lesson_id: lesson.id,
+      branch_slug: branchSlug,
+      unit_id: unitId,
+      format,
+      total_cards: lesson.cards.length,
+    });
+    // Once per lesson, not once per re-render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lesson.id]);
+  return <Runner lesson={lesson} />;
 }
 
 const styles = StyleSheet.create({
