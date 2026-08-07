@@ -499,9 +499,29 @@ referred to either figure and the two moved identically.
 causes have produced visible beads at elbow, knee, wrist and ankle:
 - a joint circle drawn **wider** than the bone it caps (a cap at exactly half the
   bone thickness is already a perfect capsule; anything wider is a bead on a stick);
-- a **1px-wide** bone stretched by `scaleX`, which rasterises imprecisely and leaves
-  white nicks — hence `BONE_SRC = 100` with `scaleX: len / 100`. **The two are a
-  matched pair; never change one alone.**
+- a **1px-wide** bone stretched by `scaleX` — hence `BONE_SRC = 100` with
+  `scaleX: len / 100`. **The two are a matched pair; never change one alone.**
+
+  This is worse than "rasterises imprecisely", and the difference matters. The
+  element is rasterised at its LAYOUT size — one pixel of source — and the upscale
+  loses the far end **in proportion to the length**. Measured directly, outside
+  React, on the same stack:
+
+  | source | length asked for | length drawn |
+  |---|---|---|
+  | 1px × 99 | 99 | **79** |
+  | 1px × 57 | 57 | **45** |
+  | 1px × 41.8 | 41.8 | **33** |
+  | 4px × 24.8 | 99 | 99 ✓ |
+  | 12px × 8.3 | 99 | 99 ✓ |
+
+  **Every bone comes out a fifth short.** On a short bone that is a nick the joint
+  cap happens to hide, which is why it read as a cosmetic seam for so long. On a
+  long one it is a hole: the welcome host's 99-unit spine lost twenty units and
+  opened a gap between his head and his shoulders. So the symptom you see depends
+  on the bone, and a figure that looks fine is not evidence the rule is being
+  followed — **check the source width, not the silhouette.** Anything from about
+  4px up draws true.
 - a **missing** cap where two bones meet (the shoulders had none).
 
 Never "fix" a seam by making a cap bigger. Find which of the three it is.

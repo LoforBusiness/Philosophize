@@ -34,8 +34,10 @@ import { clamp01, lerp, easeOutCubic, easeOutBack, INK, PAPER, SOFT } from './ea
  *
  * 1 → the original.
  * 2 → the sky behind the end card.
+ * 3 → he walks on and runs off instead of appearing and dissolving, and the two
+ *     decorative boards became the six branches and a timeline of real thinkers.
  */
-export const WELCOME_VERSION = 2;
+export const WELCOME_VERSION = 3;
 import {
   BEATS,
   BEAT_T,
@@ -43,39 +45,38 @@ import {
   T_FADE,
   T_BEGIN,
   T_HOLD,
+  SPEAK_T0,
   STAGE_W,
   STAGE_H,
+  GROUND,
   LEN,
   STR,
-  GB,
   BUB,
-  PEL,
-  CHEST,
-  SH_L,
-  SH_R,
-  HIP_L,
-  HIP_R,
-  FOOT_L,
-  FOOT_R,
   beatIdxAt,
   speechEnv,
-  swayAt,
   ik,
+  reachTo,
   handTargets,
   tailTip,
   type Beat,
   type Chapter,
 } from './rig';
-import GrowthChart from './charts/GrowthChart';
-import TreeChart from './charts/TreeChart';
+import { hostAt, proportions } from './host';
+import MapChart from './charts/MapChart';
+import ThinkersChart from './charts/ThinkersChart';
 import LessonChart from './charts/LessonChart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// First-launch welcome. A featureless black stickman "host" on paper talks
-// through a speech bubble — the tail tracks his head as he sways, and the words
-// appear one at a time at his speaking pace — while he points at hand-drawn
-// charts on a board to his left. Then everything dissolves to the wordmark and
-// a Begin button. Plays ONCE and holds on the end card; Skip is always there.
+// First-launch welcome. A featureless black stickman "host" MARCHES ON from
+// off-stage right, overshoots his mark, backs up onto it and turns to face you
+// (see host.ts). Then he talks through a speech bubble — the tail tracks his head
+// as he sways, and the words appear one at a time at his speaking pace — while
+// hand-drawn boards to his left carry a real lesson card, the six branches of
+// philosophy and a timeline of real thinkers. On the last line he turns away,
+// fails to get any traction for half a second, and bolts; the wordmark and a Begin
+// button resolve into the empty stage.
+//
+// Plays ONCE and holds on the end card; Skip is always there.
 //
 // RENDERING NOTE — why the figure is native Views, not SVG:
 // react-native-svg 15 has no partial invalidation: any animated child re-renders
@@ -85,9 +86,9 @@ import LessonChart from './charts/LessonChart';
 // now plain RN Views driven by Reanimated transforms — those composite on the GPU
 // with NO per-frame rasterization. The maths in rig.ts is reused verbatim, so
 // every position, angle and timing is identical to the SVG version; only the draw
-// primitive changed (a butt-capped bone is a 1×STR.limb ink View stretched by
-// scaleX; a joint/head is a borderRadius View; a round-capped leg is a stadium
-// View). What stays in SVG — the paper gradient (static, drawn once), the charts
+// primitive changed (a butt-capped bone is a BONE_SRC×STR ink View scaled by
+// scaleX; a joint/head is a borderRadius View, and it is those caps that round the
+// bones off). What stays in SVG — the paper gradient (static, drawn once), the charts
 // (only the on-screen chapter is mounted, in a board-sized surface) and the tail
 // (a bounded surface a fraction of the screen) — no longer re-rasters the full
 // screen every frame.
@@ -100,11 +101,12 @@ const DEG = 180 / Math.PI;
 
 const AG = Animated.createAnimatedComponent(G);
 
-// Bounded stage sub-regions (400×800 space) for the surfaces that DO stay in SVG,
-// so each re-rasters a fraction of the screen instead of the whole thing.
-// BOARD_BOX covers every chart's extent (GB + margin); TAIL_BOX covers the band
-// the tail can ever reach (bubble bottom down past his swaying head).
-const BOARD_BOX = { x: 8, y: 384, w: 244, h: 132 };
+// Bounded stage sub-region for the tail, which is the one animated thing still
+// drawn in SVG, so it re-rasters a fraction of the screen rather than all of it.
+// It covers the band the tail can ever reach: the bubble's fixed bottom edge down
+// past his head. Safe even though he now walks, because the tail is only ever
+// visible while the bubble is — which is only ever while he is on his mark.
+// (Each board owns its own box now; see CHAPTERS in rig.ts.)
 const TAIL_BOX = { x: 30, y: 356, w: 340, h: 188 };
 
 // ── static tail path ─────────────────────────────────────────────────────────
@@ -124,50 +126,18 @@ const TAIL_EDGE_D =
   `M${TW} ${-4} Q${TW * 0.75} ${TL * 0.52} 0 ${TL} ` +
   `Q${-TW * 0.15} ${TL * 0.46} ${-TW} ${-4}`;
 
-// ── static figure geometry, as View styles (rig coords, no sway) ──────────────
-// The body wrapper applies sway; these never move relative to it.
-function limbStyle(ax: number, ay: number, bx: number, by: number, s: number): ViewStyle {
-  // A round-capped line A→B: a stadium of width L+s (caps extend s/2 past each
-  // end, exactly like strokeLinecap="round"), height s, centred on the midpoint.
-  const L = Math.hypot(bx - ax, by - ay);
-  const mx = (ax + bx) / 2;
-  const my = (ay + by) / 2;
-  const ang = Math.atan2(by - ay, bx - ax) * DEG;
-  return {
-    position: 'absolute',
-    left: mx - (L + s) / 2,
-    top: my - s / 2,
-    width: L + s,
-    height: s,
-    borderRadius: s / 2,
-    backgroundColor: INK,
-    transform: [{ rotate: `${ang}deg` }],
-  };
-}
-function dotStyle(cx: number, cy: number, r: number): ViewStyle {
-  return {
-    position: 'absolute',
-    left: cx - r,
-    top: cy - r,
-    width: 2 * r,
-    height: 2 * r,
-    borderRadius: r,
-    backgroundColor: INK,
-  };
-}
-
-const LEG_L_STYLE = limbStyle(HIP_L.x, HIP_L.y, FOOT_L.x, FOOT_L.y, STR.limb);
-const LEG_R_STYLE = limbStyle(HIP_R.x, HIP_R.y, FOOT_R.x, FOOT_R.y, STR.limb);
-const TORSO_STYLE = limbStyle(PEL.x, PEL.y, CHEST.x, CHEST.y, STR.torso);
-const PELVIS_STYLE = dotStyle(PEL.x, PEL.y, STR.torso / 2 + 1); // welded pelvis
-const SH_L_STYLE = dotStyle(SH_L.x, SH_L.y, STR.limb / 2);
-const SH_R_STYLE = dotStyle(SH_R.x, SH_R.y, STR.limb / 2);
-
-// Animated bases, anchored so a Reanimated transform lands them exactly where the
-// SVG version did. Head/joints are circles centred on the origin (translate moves
-// the centre). A bone is a unit-length butt-capped bar whose LEFT-centre is the
-// origin (transformOrigin 0% 50%), so [translate, rotate, scaleX(len)] — the very
-// array the SVG <G> used — stretches it from the start joint along the bone.
+// ── figure primitives ────────────────────────────────────────────────────────
+// NOTHING about the figure is static geometry any more. It used to be: the legs
+// were two frozen View styles computed once at module scope, which is exactly why
+// he could not walk — and why he simply existed, fully drawn, on the first frame.
+// Every part is now solved per frame from the same skeleton, and every one of
+// these is an anchored BASE that a Reanimated transform lands in place.
+//
+// Head/joints are circles centred on the origin, so a translate moves the centre.
+// A bone is a BONE_SRC-long butt-capped bar whose LEFT-centre is the origin
+// (transformOrigin 0% 50%), so [translate, rotate, scaleX(len/BONE_SRC)] lays it
+// from the start joint along the bone. Round caps come from the joint circles
+// sitting on top of the ends, which is what the old round-capped stadiums drew.
 const HEAD_BASE: ViewStyle = {
   position: 'absolute',
   left: -STR.headR,
@@ -186,15 +156,53 @@ const JOINT_BASE: ViewStyle = {
   borderRadius: STR.limb / 2,
   backgroundColor: INK,
 };
+/** The welded pelvis — wider than a limb joint, so it caps both hips at once. */
+const PELVIS_BASE: ViewStyle = {
+  position: 'absolute',
+  left: -(STR.torso / 2 + 1),
+  top: -(STR.torso / 2 + 1),
+  width: STR.torso + 2,
+  height: STR.torso + 2,
+  borderRadius: STR.torso / 2 + 1,
+  backgroundColor: INK,
+};
+/**
+ * A BONE IS 100 UNITS LONG AND SCALED DOWN, NOT ONE UNIT SCALED UP.
+ *
+ * THE SAME DEFECT THE LESSON RIG ALREADY FIXED, and this file predates that fix —
+ * see BONE_SRC in components/lesson/cinematic/rig.ts, which is this constant under
+ * the same name and for the same reason. Kept as a local copy rather than an
+ * import because these two rigs share no code on purpose.
+ *
+ * A bone used to be a 1px-wide bar stretched by scaleX(length), which is the
+ * obvious way to do it and is wrong: the element is rasterized at its LAYOUT size —
+ * a single pixel column — and the enormous upscale loses the far end. The loss is
+ * PROPORTIONAL, measured here in isolation outside React:
+ *
+ *     1px × 99   drew 79     1px × 57   drew 45     1px × 41.8 drew 33
+ *     4px × 24.8 drew 99     12px × 8.3 drew 99
+ *
+ * Every bone came out a fifth short. The lesson rig saw it as a white nick at each
+ * joint, because its bones are short enough that a fifth is about the radius of the
+ * cap that hides them. Here the torso is 99 units long, so a fifth of it is twenty
+ * units of missing spine — a hole between his head and his shoulders you cannot
+ * miss. It only appeared now because the torso had been a fixed-size rotated box
+ * until it had to start leaning.
+ *
+ * Anything from about 4px up rasterizes true, so the source is 100 and every scale
+ * factor is below 1. Downscaling has no such failure mode.
+ */
+const BONE_SRC = 100;
 const BONE_BASE: ViewStyle = {
   position: 'absolute',
   left: 0,
   top: -STR.limb / 2,
-  width: 1,
+  width: BONE_SRC,
   height: STR.limb,
   backgroundColor: INK,
   transformOrigin: '0% 50%',
 };
+const TORSO_BASE: ViewStyle = { ...BONE_BASE, top: -STR.torso / 2, height: STR.torso };
 
 /**
  * DEV-ONLY. `?t=13.2` on the web build pins the timeline to one instant so a
@@ -205,6 +213,30 @@ const FREEZE_T =
   __DEV__ && typeof window !== 'undefined' && window.location
     ? parseFloat(new URLSearchParams(window.location.search).get('t') ?? '')
     : NaN;
+
+/**
+ * Where the hands are trying to be, whoever is driving them.
+ *
+ * The talking system aims them at gestures and at whichever board is up; the gaits
+ * swing them off the pelvis. `walking` crossfades the two, so the hand-off at the
+ * top of the turn — and again when he leaves — is a blend rather than a cut.
+ *
+ * MODULE SCOPE deliberately. It captures nothing from the component, and a worklet
+ * defined in the render body is rebuilt and re-serialised on every render.
+ */
+function handMix(nt: number) {
+  'worklet';
+  const P = hostAt(nt);
+  const talk = handTargets(nt, P.x);
+  const w = P.walking;
+  return {
+    lx: lerp(talk.lx, P.handL.x, w),
+    ly: lerp(talk.ly, P.handL.y, w),
+    rx: lerp(talk.rx, P.handR.x, w),
+    ry: lerp(talk.ry, P.handR.y, w),
+    k: P.handK,
+  };
+}
 
 interface Props {
   /**
@@ -262,9 +294,9 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
     let rx = 0;
     let ry = 0;
     let init = false;
-    const k = 1 - Math.exp(-8.5 / 60);
     for (let t = 0; t <= FREEZE_T; t += 1 / 60) {
-      const tg = handTargets(t);
+      const tg = handMix(t);
+      const k = 1 - Math.exp(-tg.k / 60);
       if (!init) {
         lx = tg.lx;
         ly = tg.ly;
@@ -299,7 +331,7 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
     if (nt >= T_HOLD) nt = T_HOLD; // play ONCE, then freeze on the end card
     clock.value = nt;
 
-    const tgt = handTargets(nt);
+    const tgt = handMix(nt);
     if (!handInit.value) {
       hLx.value = tgt.lx;
       hLy.value = tgt.ly;
@@ -307,7 +339,11 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
       hRy.value = tgt.ry;
       handInit.value = 1;
     } else {
-      const k = 1 - Math.exp(-8.5 * dt); // ~120ms time constant
+      // The chase rate is the HOST'S now, not a constant. 8.5 (~120ms) is what the
+      // talking hands were tuned at and is kept exactly; a wind-up at four cycles a
+      // second through a 120ms filter comes out as a gentle waggle, so the walk
+      // phases ask for a much stiffer chase.
+      const k = 1 - Math.exp(-tgt.k * dt);
       // Snap each channel once it's within a sub-pixel of a (now-constant) target,
       // so on the frozen end card the chase reaches EXACT equality and the figure
       // stops re-committing. During playback the idle-sway terms keep the targets
@@ -410,65 +446,141 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
   }, [finish]);
 
   // ── per-frame figure state (consumed by native Views, not SVG) ──────────────
+  //
+  // The WHOLE skeleton, solved every frame from hostAt. This used to be arms-only:
+  // the legs, torso, pelvis and shoulders were module-scope constants and the body
+  // sway was a single group transform over the top. That is what made him a
+  // standing prop rather than a character, and it is why he could only ever appear
+  // and dissolve.
   const D = useDerivedValue(() => {
     const t = clock.value;
+    const P = hostAt(t);
+    const pr = proportions(P.face);
     const env = speechEnv(t);
-    const sway = swayAt(t);
+    const talk = 1 - P.walking;
+
+    // The idle head life belongs to the TALKING pose only — a walking figure has
+    // the gait's own rock, and running both at once reads as a wobble.
     const headTilt =
-      0.05 * Math.sin(t * 0.9 + 2.0) +
-      0.02 * Math.sin(t * 2.3) +
-      0.022 * env * Math.sin(t * 4.6 + 0.8);
+      talk *
+      (0.05 * Math.sin(t * 0.9 + 2.0) +
+        0.02 * Math.sin(t * 2.3) +
+        0.022 * env * Math.sin(t * 4.6 + 0.8));
     const headBob = 2.2 * env * (0.5 + 0.5 * Math.sin(t * 9.1)); // tiny talking bob
 
-    // arms: IK from the smoothed hands back to the (swayed) shoulders
-    const shLx = SH_L.x + sway;
-    const shRx = SH_R.x + sway;
-    const elL = ik(shLx, SH_L.y, hLx.value, hLy.value, LEN.uarm, LEN.farm, -1);
-    const elR = ik(shRx, SH_R.y, hRx.value, hRy.value, LEN.uarm, LEN.farm, +1);
+    // Spine. At lean 0 this collapses to exactly the constants it replaced, which
+    // is the point: the thirty seconds he spends talking are geometrically
+    // identical to the version that was approved.
+    const pelX = P.x;
+    const pelY = GROUND - P.pelvH;
+    const sinL = Math.sin(P.lean);
+    const cosL = Math.cos(P.lean);
+    const chestX = pelX + sinL * LEN.spine;
+    const chestY = pelY - cosL * LEN.spine;
+    const ha = P.lean + P.neck - headTilt;
+
+    // Shoulders and hips ride the spine's perpendicular, and their half-widths are
+    // what carries the turn (see PROFILE/FRONT in rig.ts).
+    const shBx = chestX - sinL * LEN.shDrop;
+    const shBy = chestY + cosL * LEN.shDrop;
+    const shLx = shBx - pr.shW * cosL;
+    const shLy = shBy - pr.shW * sinL;
+    const shRx = shBx + pr.shW * cosL;
+    const shRy = shBy + pr.shW * sinL;
+    const hipLx = pelX - pr.hipW * cosL;
+    const hipLy = pelY - pr.hipW * sinL;
+    const hipRx = pelX + pr.hipW * cosL;
+    const hipRy = pelY + pr.hipW * sinL;
+
+    // Legs. Clamped to the leg's own length first — see reachTo.
+    const legMax = LEN.thigh + LEN.shin - 0.02;
+    const anL = reachTo(hipLx, hipLy, pelX + P.footL.x, GROUND + P.footL.y, legMax);
+    const anR = reachTo(hipRx, hipRy, pelX + P.footR.x, GROUND + P.footR.y, legMax);
+    // Knees bow FORWARD, so the bend follows his facing. Pinned to −1 they bowed
+    // the right way walking on and backwards walking off.
+    const kb = -P.dir;
+    const knL = ik(hipLx, hipLy, anL.x, anL.y, LEN.thigh, LEN.shin, kb);
+    const knR = ik(hipRx, hipRy, anR.x, anR.y, LEN.thigh, LEN.shin, kb);
+
+    // Arms: IK from the smoothed hands back to the shoulders.
+    const elL = ik(shLx, shLy, hLx.value, hLy.value, pr.uarm, pr.farm, -1);
+    const elR = ik(shRx, shRy, hRx.value, hRy.value, pr.uarm, pr.farm, +1);
 
     // A butt-capped bone as a View transform: translate to the start joint, rotate
-    // onto the joint vector, stretch a unit bar to the bone length with scaleX.
-    // Identical array to the SVG <G> the arms used before.
+    // onto the joint vector, then scale the BONE_SRC-long bar to the bone's
+    // length. Dividing by BONE_SRC is not cosmetic — see the note on BONE_BASE.
     const bone = (ax: number, ay: number, bx: number, by: number) => {
       'worklet';
       return [
         { translateX: ax },
         { translateY: ay },
         { rotate: `${Math.atan2(by - ay, bx - ax) * DEG}deg` },
-        { scaleX: Math.hypot(bx - ax, by - ay) },
+        { scaleX: Math.hypot(bx - ax, by - ay) / BONE_SRC },
       ];
     };
-
-    const fade = 1 - easeOutCubic(clamp01((t - T_FADE) / 1.2));
+    const at = (x: number, y: number) => {
+      'worklet';
+      return [{ translateX: x }, { translateY: y }];
+    };
 
     return {
-      fade,
-      // the whole body sways; the wrapper carries this, its children are static
-      figure: [{ translateX: sway }],
-      // head centre in body-local space (no sway — the wrapper adds it), rotated
-      // about the chest by the tilt with the talking bob applied after.
-      headCx: CHEST.x - Math.sin(headTilt) * LEN.head,
-      headCy: CHEST.y - Math.cos(headTilt) * LEN.head + headBob,
-      upL: bone(shLx, SH_L.y, elL.x, elL.y),
+      // He LEAVES rather than dissolving, so there is no figure fade any more —
+      // only a hard cut once he is off the stage entirely, which nobody can see
+      // because there is nothing there to cut.
+      vis: P.vis,
+      // The board and the bubble dissolve over the BEAT he holds the last line
+      // for — 0.42s — so they are gone by the frame he turns to leave. At the old
+      // 1.2s his speech bubble was still hanging over an empty patch of paper
+      // while he was already crouched and spinning his legs.
+      fade: 1 - easeOutCubic(clamp01((t - T_FADE) / 0.5)),
+      headP: at(chestX + Math.sin(ha) * LEN.head, chestY - Math.cos(ha) * LEN.head + headBob),
+      torso: bone(pelX, pelY, chestX, chestY),
+      pelP: at(pelX, pelY),
+      shLp: at(shLx, shLy),
+      shRp: at(shRx, shRy),
+      thL: bone(hipLx, hipLy, knL.x, knL.y),
+      shnL: bone(knL.x, knL.y, anL.x, anL.y),
+      thR: bone(hipRx, hipRy, knR.x, knR.y),
+      shnR: bone(knR.x, knR.y, anR.x, anR.y),
+      knLp: at(knL.x, knL.y),
+      knRp: at(knR.x, knR.y),
+      anLp: at(anL.x, anL.y),
+      anRp: at(anR.x, anR.y),
+      upL: bone(shLx, shLy, elL.x, elL.y),
       foL: bone(elL.x, elL.y, hLx.value, hLy.value),
-      upR: bone(shRx, SH_R.y, elR.x, elR.y),
+      upR: bone(shRx, shRy, elR.x, elR.y),
       foR: bone(elR.x, elR.y, hRx.value, hRy.value),
-      elLp: [{ translateX: elL.x }, { translateY: elL.y }],
-      elRp: [{ translateX: elR.x }, { translateY: elR.y }],
-      haLp: [{ translateX: hLx.value }, { translateY: hLy.value }],
-      haRp: [{ translateX: hRx.value }, { translateY: hRy.value }],
+      elLp: at(elL.x, elL.y),
+      elRp: at(elR.x, elR.y),
+      haLp: at(hLx.value, hLy.value),
+      haRp: at(hRx.value, hRy.value),
+      // The tail has to track his head, and his head now moves a very long way.
+      headX: chestX + Math.sin(ha) * (LEN.head - headBob),
+      headY: chestY - Math.cos(ha) * (LEN.head - headBob),
     };
   });
 
-  // The body group (legs/torso/pelvis/shoulders/head) sways and fades as one.
-  const bodyStyle = useAnimatedStyle(() => ({ transform: D.value.figure, opacity: D.value.fade }));
-  const headStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: D.value.headCx }, { translateY: D.value.headCy }],
+  // Everything is now solved in stage coordinates, so the figure group carries no
+  // transform of its own — only whether he is on the stage at all. `display` and
+  // not just opacity, so once he has bolted the whole subtree stops being a
+  // composited layer behind the end card.
+  const figStyle = useAnimatedStyle(() => ({
+    opacity: D.value.vis,
+    display: D.value.vis <= 0 ? ('none' as const) : ('flex' as const),
   }));
-  // Arms sit OUTSIDE the swayed group (each bone's maths already carries sway, so
-  // the pointing hand aims at the board's real position). Their own fade, kept
-  // separate from the body's so overlaps composite exactly as they did in SVG.
-  const armsStyle = useAnimatedStyle(() => ({ opacity: D.value.fade }));
+  const headStyle = useAnimatedStyle(() => ({ transform: D.value.headP }));
+  const torsoStyle = useAnimatedStyle(() => ({ transform: D.value.torso }));
+  const pelStyle = useAnimatedStyle(() => ({ transform: D.value.pelP }));
+  const shLStyle = useAnimatedStyle(() => ({ transform: D.value.shLp }));
+  const shRStyle = useAnimatedStyle(() => ({ transform: D.value.shRp }));
+  const thLStyle = useAnimatedStyle(() => ({ transform: D.value.thL }));
+  const shnLStyle = useAnimatedStyle(() => ({ transform: D.value.shnL }));
+  const thRStyle = useAnimatedStyle(() => ({ transform: D.value.thR }));
+  const shnRStyle = useAnimatedStyle(() => ({ transform: D.value.shnR }));
+  const knLStyle = useAnimatedStyle(() => ({ transform: D.value.knLp }));
+  const knRStyle = useAnimatedStyle(() => ({ transform: D.value.knRp }));
+  const anLStyle = useAnimatedStyle(() => ({ transform: D.value.anLp }));
+  const anRStyle = useAnimatedStyle(() => ({ transform: D.value.anRp }));
   const upLStyle = useAnimatedStyle(() => ({ transform: D.value.upL }));
   const foLStyle = useAnimatedStyle(() => ({ transform: D.value.foL }));
   const upRStyle = useAnimatedStyle(() => ({ transform: D.value.upR }));
@@ -481,16 +593,11 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
   // ── the tail: static shape, transformed onto the line to his head ──────────
   const tailXf = useDerivedValue(() => {
     const t = clock.value;
-    const sway = swayAt(t);
-    const env = speechEnv(t);
-    const headTilt =
-      0.05 * Math.sin(t * 0.9 + 2.0) +
-      0.02 * Math.sin(t * 2.3) +
-      0.022 * env * Math.sin(t * 4.6 + 0.8);
-    const headBob = 2.2 * env * (0.5 + 0.5 * Math.sin(t * 9.1));
-    const L = LEN.head - headBob;
-    const headX = CHEST.x + sway - Math.sin(headTilt) * L;
-    const headY = CHEST.y - Math.cos(headTilt) * L;
+    // Straight off the solved skeleton rather than recomputed from constants — the
+    // head is no longer at a fixed place, and a tail that assumed it was would have
+    // pointed at where he used to stand.
+    const headX = D.value.headX;
+    const headY = D.value.headY;
 
     const half = bubW.value / 2;
     const left = BUB.cx - half;
@@ -510,14 +617,20 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
       { scaleY: len / TL },
     ];
   });
+  // Tied to the BUBBLE, not to the figure. On the figure's own alpha it would be
+  // drawn for the whole entrance — a speech tail trailing a man who has not spoken
+  // yet, anchored to a balloon that is not there.
   const tailProps = useAnimatedProps(() => ({
     transform: tailXf.value,
-    opacity: D.value.fade,
+    opacity: easeOutCubic(clamp01((clock.value - SPEAK_T0 + 0.16) / 0.34)) * D.value.fade,
   }));
 
   const bubbleStyle = useAnimatedStyle(() => ({
     height: bubH.value,
-    opacity: easeOutCubic(clamp01(clock.value / 0.6)) * D.value.fade,
+    // Arrives with his FIRST WORD, not with the screen. It used to fade in over the
+    // first 0.6 seconds, which now would float an empty balloon above a man still
+    // walking in from off-stage.
+    opacity: easeOutCubic(clamp01((clock.value - SPEAK_T0 + 0.16) / 0.34)) * D.value.fade,
   }));
 
   const onWordLines = useCallback((lines: number[]) => {
@@ -603,31 +716,39 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
       ))}
 
       {/* The host — native Views (GPU-composited transforms, no per-frame raster).
-          Legs are dead straight and never move, so they're static geometry; only
-          sway/tilt/bob and the arms animate. */}
+          Every part is solved per frame now, legs included, so he can walk.
+          Drawing order is the depth order: the far leg and far arm go down first,
+          then the torso, then the near ones on top. */}
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
         <View style={stageWrap}>
-          {/* body: sways + fades as one group. needsOffscreenAlphaCompositing so
-              the dissolve composites the whole body ONCE then applies alpha —
-              matching SVG group opacity, where overlapping parts (shoulders/head/
-              torso) don't double-darken. Only allocates the offscreen buffer while
-              opacity < 1 (the ~1.4s dissolve), so the main animation is unaffected. */}
-          <Animated.View needsOffscreenAlphaCompositing style={[StyleSheet.absoluteFill, bodyStyle]}>
-            <View style={LEG_L_STYLE} />
-            <View style={LEG_R_STYLE} />
-            <View style={TORSO_STYLE} />
-            <View style={PELVIS_STYLE} />
-            <View style={SH_L_STYLE} />
-            <View style={SH_R_STYLE} />
+          <Animated.View
+            needsOffscreenAlphaCompositing
+            style={[StyleSheet.absoluteFill, figStyle]}
+          >
+            {/* far leg + far arm */}
+            <Animated.View style={[BONE_BASE, thLStyle]} />
+            <Animated.View style={[BONE_BASE, shnLStyle]} />
+            <Animated.View style={[JOINT_BASE, knLStyle]} />
+            <Animated.View style={[JOINT_BASE, anLStyle]} />
+
+            {/* near leg */}
+            <Animated.View style={[BONE_BASE, thRStyle]} />
+            <Animated.View style={[BONE_BASE, shnRStyle]} />
+            <Animated.View style={[JOINT_BASE, knRStyle]} />
+            <Animated.View style={[JOINT_BASE, anRStyle]} />
+
+            <Animated.View style={[TORSO_BASE, torsoStyle]} />
+            <Animated.View style={[PELVIS_BASE, pelStyle]} />
+            <Animated.View style={[JOINT_BASE, shLStyle]} />
+            <Animated.View style={[JOINT_BASE, shRStyle]} />
+
             {/* no face — he reads as talking from the bubble, the word-by-word
                 reveal and the speech bob, not from a mouth */}
             <Animated.View style={[HEAD_BASE, headStyle]} />
-          </Animated.View>
 
-          {/* arms: each bone is a unit bar stretched with scaleX and rotated onto
-              its joint vector; butt-capped, with the joint circles rounding the
-              ends off — exactly the SVG construction, now as Views. */}
-          <Animated.View needsOffscreenAlphaCompositing style={[StyleSheet.absoluteFill, armsStyle]}>
+            {/* arms: each bone is a unit bar stretched with scaleX and rotated onto
+                its joint vector; butt-capped, with the joint circles rounding the
+                ends off — exactly the SVG construction, now as Views. */}
             <Animated.View style={[BONE_BASE, upLStyle]} />
             <Animated.View style={[BONE_BASE, foLStyle]} />
             <Animated.View style={[BONE_BASE, upRStyle]} />
@@ -725,12 +846,16 @@ const Board = memo(function Board({
     }
   );
 
-  const p = useDerivedValue(() => clamp01((clock.value - chapter.t0 - 0.25) / 3.3));
+  // Each board draws itself in over the whole time it is up, less a beat at each
+  // end — a fixed 3.3s was right for the lesson card and far too quick for a map
+  // whose six names have to land on six spoken words ten seconds apart.
+  const draw = Math.max(2.2, chapter.t1 - chapter.t0 - 1.2);
+  const p = useDerivedValue(() => clamp01((clock.value - chapter.t0 - 0.25) / draw));
   const wrapStyle = useAnimatedStyle(() => {
     const t = clock.value;
     const inA = easeOutCubic(clamp01((t - chapter.t0 + 0.35) / 0.5));
     const outA = 1 - easeOutCubic(clamp01((t - chapter.t1) / 0.3));
-    const fade = 1 - easeOutCubic(clamp01((t - T_FADE) / 1.2));
+    const fade = 1 - easeOutCubic(clamp01((t - T_FADE) / 0.5));
     return { opacity: clamp01(inA * outA) * fade };
   });
 
@@ -742,29 +867,29 @@ const Board = memo(function Board({
       style={[
         {
           position: 'absolute',
-          left: offX + BOARD_BOX.x * scale,
-          top: offY + BOARD_BOX.y * scale,
-          width: BOARD_BOX.w * scale,
-          height: BOARD_BOX.h * scale,
+          left: offX + chapter.box.x * scale,
+          top: offY + chapter.box.y * scale,
+          width: chapter.box.w * scale,
+          height: chapter.box.h * scale,
         },
         wrapStyle,
       ]}
     >
+      {/* The chart draws in its OWN space (cw × ch) and the viewBox scales that to
+          fill the board, so a chart never has to know how big its board is. */}
       <Svg
         width="100%"
         height="100%"
-        viewBox={`${BOARD_BOX.x} ${BOARD_BOX.y} ${BOARD_BOX.w} ${BOARD_BOX.h}`}
+        viewBox={`0 0 ${chapter.cw} ${chapter.ch}`}
         preserveAspectRatio="xMidYMid meet"
       >
-        <G transform={`translate(${GB.x}, ${GB.y}) scale(${GB.w / 300})`}>
-          {chapter.visual === 'lesson' ? (
-            <LessonChart p={p} />
-          ) : chapter.visual === 'growth' ? (
-            <GrowthChart p={p} />
-          ) : (
-            <TreeChart p={p} />
-          )}
-        </G>
+        {chapter.visual === 'lesson' ? (
+          <LessonChart p={p} />
+        ) : chapter.visual === 'map' ? (
+          <MapChart p={p} clock={clock} />
+        ) : (
+          <ThinkersChart p={p} />
+        )}
       </Svg>
     </Animated.View>
   );
