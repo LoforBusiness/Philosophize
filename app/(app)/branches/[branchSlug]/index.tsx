@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ImageBackground } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
@@ -191,6 +191,17 @@ export default function BranchDetailScreen() {
   // celebration for a lesson finished ten minutes ago.
   const justFinished = useUIStore((s) => s.justFinished);
   const clearLessonFinished = useUIStore((s) => s.clearLessonFinished);
+  // Is this screen actually in front of the reader, with nothing over it? The
+  // advance waits for all three (see the effect below).
+  const rewardUp = useUIStore((s) => s.reward !== null);
+  const paywallUp = useUIStore((s) => s.paywallOpen);
+  const [focused, setFocused] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      setFocused(true);
+      return () => setFocused(false);
+    }, [])
+  );
   const cel = useSharedValue(0);
   const [celTarget, setCelTarget] = useState<{ unitId: string; doneIndex: number } | null>(null);
   // THE WALK. Armed by the same event as the accordion advance, so the two are
@@ -199,6 +210,18 @@ export default function BranchDetailScreen() {
 
   useEffect(() => {
     if (!justFinished || justFinished.branchSlug !== branchSlug) return;
+    // ── NOT UNTIL IT CAN BE WATCHED ───────────────────────────────────────────
+    //
+    // The reward modal is still over this screen when the reader presses
+    // Continue, and this screen may not even be the one in front. Claiming the
+    // advance then meant the seven seconds were spent behind a modal, or on an
+    // instance about to be replaced — and because claiming CLEARED it, there was
+    // nothing left for the screen the reader actually ended up looking at.
+    //
+    // So leave it sitting in the store. It is claimed by whichever branch screen
+    // is focused with nothing over it, whenever that happens to be, which is
+    // exactly the requirement: the walk begins when there is someone to see it.
+    if (!focused || rewardUp || paywallUp) return;
     const u = allUnits.find((x) => x.id === justFinished.unitId);
     const idx = u ? u.lessons.findIndex((l) => l.id === justFinished.lessonId) : -1;
     clearLessonFinished();
@@ -244,7 +267,7 @@ export default function BranchDetailScreen() {
     const t = setTimeout(() => scroller.current?.scrollTo({ y: 0, animated: false }), 90);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [justFinished?.seq]);
+  }, [justFinished?.seq, focused, rewardUp, paywallUp]);
 
   const toggleUnit = useCallback(
     (id: string) => {

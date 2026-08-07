@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal, View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import Animated, {
   useSharedValue, useAnimatedStyle, withDelay, withTiming, Easing,
 } from 'react-native-reanimated';
@@ -187,6 +187,8 @@ function TallyRow({ label, amount, delay }: { label: string; amount: number; del
 }
 
 export default function LessonReward({ xp, correct, total, branchSlug, lessonId, onDone }: Props) {
+  // Where the stack actually is underneath this modal — see `goToBranch`.
+  const path = usePathname();
   const recordLessonComplete = useUserDataStore((s) => s.recordLessonComplete);
   const registerDailyActivity = useUserDataStore((s) => s.registerDailyActivity);
   const bumpDailyLessons = useUserDataStore((s) => s.bumpDailyLessons);
@@ -277,16 +279,30 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   // Worked out AFTER `commit()`, not before: the lesson just finished is what moves
   // the count, so a unit read beforehand would be one lesson behind.
   //
-  // `router.replace`, not push: the lesson screen is already being popped by
-  // `onDone`, and pushing a branch screen on top of a stack that is mid-pop leaves
-  // a back button that returns to a finished lesson.
+  // ── AND USUALLY THERE IS NOTHING TO NAVIGATE ──────────────────────────────
+  //
+  // The comment that used to sit here said the lesson screen was "already being
+  // popped by `onDone`". It is popped earlier than that, and by someone else:
+  // every runner calls `exitLesson()` the instant the lesson finishes, so by the
+  // time the reward is on screen the lesson is long gone and the BRANCH SCREEN is
+  // already the top of the stack, sitting underneath this modal.
+  //
+  // Which made `router.replace` replace the branch screen with itself. That is a
+  // fresh mount — and it threw away the instance that had just been handed the
+  // walk, so the reader arrived at a brand-new screen with the figure already
+  // standing at the next lesson and nothing to watch. It is why the walk was
+  // never seen, and why fixing the scroll changed nothing.
+  //
+  // So: navigate only when we are NOT already there — a deep link into a lesson,
+  // or anything else that left the stack somewhere unexpected.
   const goToBranch = () => {
     const info = getLessonUnitInfo(lessonId);
     const slug = branchSlug ?? info?.branchSlug;
     if (!info || !slug) return;
-    // The branch screen reads this once, plays the advance, and clears it.
+    // The branch screen claims this once it is actually in front of the reader.
     markLessonFinished({ lessonId, unitId: info.unitId, branchSlug: slug });
-    router.replace(`/(app)/branches/${slug}`);
+    const alreadyThere = !!path && path.includes(`/branches/${slug}`) && !path.includes('/lesson/');
+    if (!alreadyThere) router.replace(`/(app)/branches/${slug}`);
   };
 
   const handleContinue = async () => {
