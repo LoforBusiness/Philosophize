@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useCallback } from 'react';
 import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useFocusEffect } from 'expo-router';
 import Animated, {
-  Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming,
+  cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming,
 } from 'react-native-reanimated';
 import { backgroundSource } from '@/data/profileBackgrounds';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -42,16 +43,26 @@ export default function HomeHeader({ streak }: { streak: number }) {
   const bgId = useUserDataStore((s) => s.profileBackground);
   const src = backgroundSource(bgId);
 
-  // ONE continuous push, out and back, forever. Slow enough (26s each way) that
-  // it is never caught moving and never finishes while anyone is looking.
+  // ONE continuous push, out and back. Slow enough (26s each way) that it is
+  // never caught moving and never finishes while anyone is looking.
+  //
+  // STOPPED WHEN HOME IS NOT THE SCREEN YOU ARE ON. Tab screens stay mounted, so
+  // an unguarded `withRepeat(-1)` keeps a Reanimated timing animation evaluating
+  // on the UI thread for the entire session — through every lesson, on a screen
+  // nobody can see. It is a small cost and it is a permanent one, which is the
+  // worse kind. StickmanStroll has always guarded its frame callback this way;
+  // this one shipped without it.
   const drift = useSharedValue(0);
-  useEffect(() => {
-    drift.value = withRepeat(
-      withTiming(1, { duration: HOME_DRIFT.ms, easing: Easing.inOut(Easing.quad) }),
-      -1,
-      true,
-    );
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      drift.value = withRepeat(
+        withTiming(1, { duration: HOME_DRIFT.ms, easing: Easing.inOut(Easing.quad) }),
+        -1,
+        true,
+      );
+      return () => cancelAnimation(drift);
+    }, []),
+  );
   const art = useAnimatedStyle(() => ({
     transform: [
       { scale: HOME_DRIFT.from + drift.value * (HOME_DRIFT.to - HOME_DRIFT.from) },

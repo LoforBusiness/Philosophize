@@ -1,12 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, type LayoutChangeEvent, type ViewStyle } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Svg, { Circle, Line, G } from 'react-native-svg';
 import Animated, {
   useSharedValue,
   useFrameCallback,
   useDerivedValue,
-  useAnimatedProps,
+  useAnimatedStyle,
   runOnJS,
   type SharedValue,
 } from 'react-native-reanimated';
@@ -35,14 +34,32 @@ import { useUIStore } from '@/stores/uiStore';
 // of its own and renders nothing when the leftover band is too short, so it can
 // never push a feature off-screen. He is non-interactive: taps pass through.
 //
-// RENDERING RULE (see components/welcome/ease.ts): on react-native-svg 15 +
-// Fabric only transform/opacity repaint — animated geometry (x/y/cx/cy/d) does
-// NOT. So every bone here is a fixed unit <Line> stretched with scaleX and
-// rotated onto its joint vector, with circles filling the joints. Butt caps,
-// because a non-uniform scaleX would smear a round cap into an ellipse.
+// RENDERING RULE — HE IS DRAWN IN NATIVE VIEWS, NOT IN SVG.
+//
+// He used to be an <Svg> whose <G> transforms were animated, on the reading that
+// react-native-svg 15 repaints transform/opacity cheaply where it will not
+// repaint animated geometry. That reading is not good enough, and §17 rule 6 has
+// since been sharpened to say so: what costs is the surface being touched, and
+// an animated transform on an SVG node still goes through setAttribute and the
+// string-parsing that comes with it. An 8-second CPU profile of an IDLE Home was
+// topped by exactly that — setAttribute, parseTransformProp, camelCaseToDashed,
+// getAngleValueInDeg — from this component's 82 SVG nodes, and nothing else on
+// the page came close.
+//
+// So he is drawn the way every cinematic figure is drawn (Stickman.tsx): a bone
+// is a BONE_SRC-wide View with transformOrigin '0% 50%', so
+// [translate, rotate, scaleX(len/BONE_SRC)] stretches it from its start joint,
+// and a joint is a borderRadius View translated onto the point. Reanimated
+// composites those on the GPU with no per-frame rasterisation at all.
+//
+// BONE_SRC is 100 rather than 1 for the reason rig.ts records: stretching a
+// one-pixel-wide View leaves a visible nick at every joint. `bone()` divides its
+// scaleX by the same constant, so the drawn length is unchanged — the two must
+// be changed together.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const AG = Animated.createAnimatedComponent(G);
+const BONE_SRC = 100;
+
 const INK = '#1A1A1A';
 const DEG = 180 / Math.PI;
 
@@ -73,7 +90,20 @@ const FILL = 0.82;                                  // …of a band too short fo
                                                     // leaving the rest as headroom so
                                                     // the ruled line never crosses his head
 const FLOOR = 3.5;                                  // ground sits this far off the bottom
-const MIN_BAND = 14;                                // below this there's genuinely no room
+// BELOW THIS HE DOES NOT PERFORM AT ALL, and 37 is not a taste call — it is
+// TARGET_H / FILL, the exact height under which `frame_` stops being able to give
+// him his intended size.
+//
+// Under it two bad things happen together, and the second is invisible. He
+// shrinks, which is obvious. And because the design space is `band ÷ scale`, a
+// smaller scale makes that space BIGGER — so the walk across it takes longer at
+// the same units-per-second. Measured from these constants: a 37dp band gives a
+// 30dp figure walking for 19.3s; a 16dp band gives a 13dp figure walking for
+// 39.3s. Home grew taller, the leftover collapsed to its floor, and the app spent
+// twice as long animating a smudge nobody could see — below the fold, on the
+// screen people sit on. He is ambient; if there is no room for him, the right
+// answer is silence, not a longer performance.
+const MIN_BAND = 37;
 
 /** dp per design unit, and the design-space size of a given band. */
 function frame_(bw: number, bh: number) {
@@ -243,7 +273,9 @@ function figure(o: FigArgs): Bundle {
     return [
       { translateX: ax }, { translateY: a.y },
       { rotate: `${Math.atan2(b.y - a.y, bx - ax) * DEG}deg` },
-      { scaleX: Math.hypot(bx - ax, b.y - a.y) },
+      // Divided by BONE_SRC because the View is BONE_SRC wide, not 1 — see the
+      // note at the top. The drawn length is identical either way.
+      { scaleX: Math.hypot(bx - ax, b.y - a.y) / BONE_SRC },
     ];
   };
   const at = (p: { x: number; y: number }) => {
@@ -265,65 +297,106 @@ function figure(o: FigArgs): Bundle {
   };
 }
 
-// ── one figure's 20 animated nodes ───────────────────────────────────────────
-function Figure({ D }: { D: SharedValue<Bundle> }) {
-  const p = {
-    thighL: useAnimatedProps(() => ({ transform: D.value.thighL })),
-    shinL: useAnimatedProps(() => ({ transform: D.value.shinL })),
-    thighR: useAnimatedProps(() => ({ transform: D.value.thighR })),
-    shinR: useAnimatedProps(() => ({ transform: D.value.shinR })),
-    torso: useAnimatedProps(() => ({ transform: D.value.torso })),
-    uarmL: useAnimatedProps(() => ({ transform: D.value.uarmL })),
-    farmL: useAnimatedProps(() => ({ transform: D.value.farmL })),
-    uarmR: useAnimatedProps(() => ({ transform: D.value.uarmR })),
-    farmR: useAnimatedProps(() => ({ transform: D.value.farmR })),
-    kneeL: useAnimatedProps(() => ({ transform: D.value.kneeLp })),
-    kneeR: useAnimatedProps(() => ({ transform: D.value.kneeRp })),
-    ankL: useAnimatedProps(() => ({ transform: D.value.ankLp })),
-    ankR: useAnimatedProps(() => ({ transform: D.value.ankRp })),
-    elL: useAnimatedProps(() => ({ transform: D.value.elLp })),
-    elR: useAnimatedProps(() => ({ transform: D.value.elRp })),
-    wrL: useAnimatedProps(() => ({ transform: D.value.wrLp })),
-    wrR: useAnimatedProps(() => ({ transform: D.value.wrRp })),
-    pel: useAnimatedProps(() => ({ transform: D.value.pelp })),
-    sh: useAnimatedProps(() => ({ transform: D.value.shp })),
-    head: useAnimatedProps(() => ({ transform: D.value.headp })),
+// ── one figure's 20 animated nodes, as Views ─────────────────────────────────
+//
+// Thicknesses are baked once per figure: they never animate, so they stay in the
+// static style and only the transform is touched per frame.
+function Figure({ D, scale }: { D: SharedValue<Bundle>; scale: number }) {
+  const S = useMemo(() => {
+    const boneBase = (thick: number): ViewStyle => ({
+      position: 'absolute',
+      left: 0,
+      top: -thick / 2,
+      width: BONE_SRC,
+      height: thick,
+      backgroundColor: INK,
+      transformOrigin: '0% 50%',
+    });
+    // A JOINT IS EXACTLY AS WIDE AS THE BONE IT CAPS — the same rule, and the
+    // same reason, as Stickman.tsx: a circle of the bone's half-radius is
+    // tangent to both bones' outer edges and the union is a true capsule.
+    // Anything larger is a bead threaded onto the limb.
+    const dotBase = (r: number): ViewStyle => ({
+      position: 'absolute',
+      left: -r,
+      top: -r,
+      width: 2 * r,
+      height: 2 * r,
+      borderRadius: r,
+      backgroundColor: INK,
+    });
+    return {
+      limb: boneBase(STR.limb),
+      torso: boneBase(STR.torso),
+      joint: dotBase(STR.limb / 2),
+      torsoJoint: dotBase(STR.torso / 2),
+      head: dotBase(STR.headR),
+    };
+  }, []);
+
+  const a = {
+    thighL: useAnimatedStyle(() => ({ transform: D.value.thighL })),
+    shinL: useAnimatedStyle(() => ({ transform: D.value.shinL })),
+    thighR: useAnimatedStyle(() => ({ transform: D.value.thighR })),
+    shinR: useAnimatedStyle(() => ({ transform: D.value.shinR })),
+    torso: useAnimatedStyle(() => ({ transform: D.value.torso })),
+    uarmL: useAnimatedStyle(() => ({ transform: D.value.uarmL })),
+    farmL: useAnimatedStyle(() => ({ transform: D.value.farmL })),
+    uarmR: useAnimatedStyle(() => ({ transform: D.value.uarmR })),
+    farmR: useAnimatedStyle(() => ({ transform: D.value.farmR })),
+    kneeL: useAnimatedStyle(() => ({ transform: D.value.kneeLp })),
+    kneeR: useAnimatedStyle(() => ({ transform: D.value.kneeRp })),
+    ankL: useAnimatedStyle(() => ({ transform: D.value.ankLp })),
+    ankR: useAnimatedStyle(() => ({ transform: D.value.ankRp })),
+    elL: useAnimatedStyle(() => ({ transform: D.value.elLp })),
+    elR: useAnimatedStyle(() => ({ transform: D.value.elRp })),
+    wrL: useAnimatedStyle(() => ({ transform: D.value.wrLp })),
+    wrR: useAnimatedStyle(() => ({ transform: D.value.wrRp })),
+    pel: useAnimatedStyle(() => ({ transform: D.value.pelp })),
+    sh: useAnimatedStyle(() => ({ transform: D.value.shp })),
+    head: useAnimatedStyle(() => ({ transform: D.value.headp })),
   };
-  const fade = useAnimatedProps(() => ({ opacity: D.value.opacity }));
-  const Limb = () => (
-    <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={STR.limb} strokeLinecap="butt" />
-  );
+  // Opacity belongs on the GROUP, not on each bone: fading bones separately
+  // double-darkens every overlap, because two 50% shapes stack to 75%.
+  // `needsOffscreenAlphaCompositing` makes the figure composite flat first,
+  // which is what the SVG <G opacity> this replaced did for free.
+  const fade = useAnimatedStyle(() => ({ opacity: D.value.opacity }));
 
   return (
-    <AG animatedProps={fade}>
+    <Animated.View
+      pointerEvents="none"
+      needsOffscreenAlphaCompositing
+      // The design space maps onto the band by one static scale, from the top
+      // left — which is exactly what the <Svg> viewBox used to do, since
+      // dw*scale === band width and dh*scale === band height by construction.
+      style={[{ position: 'absolute', left: 0, top: 0, transformOrigin: '0% 0%' }, { transform: [{ scale }] }, fade]}
+    >
       {/* back leg + arm first, so the near limbs read in front */}
-      <AG animatedProps={p.thighL}><Limb /></AG>
-      <AG animatedProps={p.shinL}><Limb /></AG>
-      <AG animatedProps={p.uarmL}><Limb /></AG>
-      <AG animatedProps={p.farmL}><Limb /></AG>
-      <AG animatedProps={p.kneeL}><Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} /></AG>
-      <AG animatedProps={p.ankL}><Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} /></AG>
-      <AG animatedProps={p.elL}><Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} /></AG>
-      <AG animatedProps={p.wrL}><Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} /></AG>
+      <Animated.View style={[S.limb, a.thighL]} />
+      <Animated.View style={[S.limb, a.shinL]} />
+      <Animated.View style={[S.limb, a.uarmL]} />
+      <Animated.View style={[S.limb, a.farmL]} />
+      <Animated.View style={[S.joint, a.kneeL]} />
+      <Animated.View style={[S.joint, a.ankL]} />
+      <Animated.View style={[S.joint, a.elL]} />
+      <Animated.View style={[S.joint, a.wrL]} />
 
-      <AG animatedProps={p.torso}>
-        <Line x1={0} y1={0} x2={1} y2={0} stroke={INK} strokeWidth={STR.torso} strokeLinecap="butt" />
-      </AG>
-      <AG animatedProps={p.pel}><Circle cx={0} cy={0} r={STR.torso / 2} fill={INK} /></AG>
-      <AG animatedProps={p.sh}><Circle cx={0} cy={0} r={STR.torso / 2} fill={INK} /></AG>
+      <Animated.View style={[S.torso, a.torso]} />
+      <Animated.View style={[S.torsoJoint, a.pel]} />
+      <Animated.View style={[S.torsoJoint, a.sh]} />
 
-      <AG animatedProps={p.thighR}><Limb /></AG>
-      <AG animatedProps={p.shinR}><Limb /></AG>
-      <AG animatedProps={p.kneeR}><Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} /></AG>
-      <AG animatedProps={p.ankR}><Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} /></AG>
+      <Animated.View style={[S.limb, a.thighR]} />
+      <Animated.View style={[S.limb, a.shinR]} />
+      <Animated.View style={[S.joint, a.kneeR]} />
+      <Animated.View style={[S.joint, a.ankR]} />
 
-      <AG animatedProps={p.head}><Circle cx={0} cy={0} r={STR.headR} fill={INK} /></AG>
+      <Animated.View style={[S.head, a.head]} />
 
-      <AG animatedProps={p.uarmR}><Limb /></AG>
-      <AG animatedProps={p.farmR}><Limb /></AG>
-      <AG animatedProps={p.elR}><Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} /></AG>
-      <AG animatedProps={p.wrR}><Circle cx={0} cy={0} r={STR.limb / 2} fill={INK} /></AG>
-    </AG>
+      <Animated.View style={[S.limb, a.uarmR]} />
+      <Animated.View style={[S.limb, a.farmR]} />
+      <Animated.View style={[S.joint, a.elR]} />
+      <Animated.View style={[S.joint, a.wrR]} />
+    </Animated.View>
   );
 }
 
@@ -550,21 +623,15 @@ export default function StickmanStroll({ style }: Props) {
   }, []);
 
   const show = started && !done && band.w > 0 && band.h >= MIN_BAND;
-  const vb = band.h > 0 ? frame_(band.w, band.h) : { dw: band.w, dh: 1 };
+  const vb = band.h > 0 ? frame_(band.w, band.h) : { scale: 1, dw: band.w, dh: 1 };
 
   return (
     <View style={[styles.band, style]} onLayout={onLayout} pointerEvents="none">
       {show ? (
-        <Svg
-          width={band.w}
-          height={band.h}
-          viewBox={`0 0 ${vb.dw} ${vb.dh}`}
-          preserveAspectRatio="xMidYMax meet"
-          pointerEvents="none"
-        >
-          <Figure D={DA} />
-          <Figure D={DB} />
-        </Svg>
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          <Figure D={DA} scale={vb.scale} />
+          <Figure D={DB} scale={vb.scale} />
+        </View>
       ) : null}
     </View>
   );

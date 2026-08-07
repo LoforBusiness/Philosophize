@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Dimensions, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
-import StreakBook from '@/components/gamification/StreakBook';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import AddWidgetSheet from '@/components/shared/AddWidgetSheet';
@@ -12,9 +11,10 @@ import StickmanStroll from '@/components/home/StickmanStroll';
 import QuickStartCard from '@/components/home/QuickStartCard';
 import HomeHeader from '@/components/home/HomeHeader';
 import ThinkerOfTheDay from '@/components/home/ThinkerOfTheDay';
-import BranchProgress from '@/components/home/BranchProgress';
+import HabitCard from '@/components/home/HabitCard';
 import Arrive from '@/components/home/Arrive';
 import { LIGHT } from '@/components/shared/tone';
+import { branchCountsFromUnits } from '@/data/index';
 import { useWidgetPlaced } from '@/lib/widget/useWidgetPlaced';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -99,6 +99,15 @@ export default function HomeScreen() {
   const held = restDaysHeld(restDaysEarned, restDaysUsed);
   const streak = effectiveStreak(streakRaw, lastLessonDate, held);
   const restBridging = streak > 0 && daysMissed(lastLessonDate) > 0;
+  const totalXP = useUserDataStore((s) => s.totalXP);
+  const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
+  // Via branchCountsFromUnits rather than summing the raw map: it clamps each
+  // unit to its real length, so a stale count from a unit that later shrank
+  // cannot inflate the tally.
+  const lessonsDone = useMemo(
+    () => Object.values(branchCountsFromUnits(lessonsByUnit)).reduce((a, b) => a + b, 0),
+    [lessonsByUnit],
+  );
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const settings = useUserDataStore((s) => s.settings);
@@ -180,25 +189,19 @@ export default function HomeScreen() {
           <ThinkerOfTheDay style={styles.block} />
         </Arrive>
 
+        {/* One card for the streak, the week and the two running totals. It also
+            replaced a six-column "23 / 192" bar: lessons are still being written,
+            so that denominator grows and shortens the reader's bar for doing
+            nothing wrong. Nothing on this card has a total to be a fraction of. */}
         <Arrive index={3}>
-          <BranchProgress style={styles.block} />
-        </Arrive>
-
-        <Arrive index={4}>
-          <View style={styles.streakRow}>
-            <StreakBook value={streak} size={52} />
-            <View>
-              <Text style={styles.streakLabel}>{streak} DAY STREAK</Text>
-              {/* Only when a rest day is actually holding it up. It says the streak
-                  is safe WITHOUT saying it has been spent, because it has not: the
-                  deduction happens when they finish something today. */}
-              {restBridging && (
-                <Text style={styles.restLabel}>
-                  A day of rest is holding it — finish anything today.
-                </Text>
-              )}
-            </View>
-          </View>
+          <HabitCard
+            style={styles.block}
+            streak={streak}
+            lastLessonDate={lastLessonDate}
+            lessons={lessonsDone}
+            xp={totalXP}
+            restBridging={restBridging}
+          />
         </Arrive>
 
         {/* Daily quote card (opt-in, Settings → Display) */}
@@ -318,26 +321,4 @@ const styles = StyleSheet.create({
   quickStart: { marginTop: 18 },
   block: { marginTop: 14 },
 
-  streakRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
-    marginTop: 18,
-  },
-  streakLabel: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 11,
-    color: InkSoft,
-    letterSpacing: 1.5,
-    marginLeft: 10,
-  },
-  restLabel: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 11,
-    color: InkSoft,
-    marginLeft: 10,
-    marginTop: 3,
-    maxWidth: 230,
-  },
 });

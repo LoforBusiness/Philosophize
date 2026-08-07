@@ -2,9 +2,8 @@ import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
 import PressableScale from '@/components/shared/PressableScale';
-import { ALL_PHILOSOPHERS } from '@/data/philosophers';
-import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
 import { useUIStore } from '@/stores/uiStore';
+import { dayNumber, thinkerOfTheDay, factOfTheDay } from '@/lib/utils/thinkerOfDay';
 import { FACE, RIM, LIGHT, SHADOW, INK, FAINT, MID, PAPER } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -27,27 +26,8 @@ import { FACE, RIM, LIGHT, SHADOW, INK, FAINT, MID, PAPER } from '@/components/s
 // not.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const N = ALL_PHILOSOPHERS.length;
-
-/**
- * A stride that is coprime with the list, so consecutive days land far apart and
- * every thinker comes up exactly once before any repeats.
- *
- * Walking the array in order would give a week of philosophers whose names all
- * start with the same letter, because the list is grouped by era. Picking at
- * random would repeat within a fortnight (birthday problem) and would not be
- * stable across a reinstall. A coprime stride is the only one of the three that
- * is both stable and exhaustive — and it is CHOSEN rather than hardcoded because
- * the roster grows: a stride that happens to divide the new length would visit a
- * short cycle of the same few thinkers forever.
- */
-const STRIDE = (() => {
-  const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
-  for (const p of [97, 89, 83, 79, 73, 71, 67, 61, 59, 53, 47, 43, 41, 37, 31, 29, 23, 19, 13, 11, 7]) {
-    if (p < N && gcd(p, N) === 1) return p;
-  }
-  return 1;
-})();
+// WHO it is lives in lib/utils/thinkerOfDay, because the Thinkers tab features a
+// thinker of the day too and the two must agree. This file only draws it.
 
 const SEAL = 54;
 
@@ -80,16 +60,10 @@ function Seal({ letter }: { letter: string }) {
 
 export default function ThinkerOfTheDay({ style }: { style?: object }) {
   const openPhilosopher = useUIStore((s) => s.openPhilosopher);
-  const dayNumber = Math.floor(Date.now() / 86_400_000);
-
-  const { who, fact } = useMemo(() => {
-    const p = ALL_PHILOSOPHERS[(dayNumber * STRIDE) % N];
-    const facts = PHILOSOPHER_FACTS[p.id] ?? [];
-    // Only once the whole roster has been round does anyone show a second fact,
-    // so the first ~223 days are all first impressions.
-    const cycle = Math.floor((dayNumber * STRIDE) / N);
-    return { who: p, fact: facts.length ? facts[cycle % facts.length] : p.oneLiner };
-  }, [dayNumber]);
+  // Memoised on the DAY, not on Date.now() — read raw it recomputes every render.
+  const day = dayNumber();
+  const who = useMemo(() => thinkerOfTheDay(day), [day]);
+  const fact = useMemo(() => factOfTheDay(day), [day]);
 
   return (
     <PressableScale onPress={() => openPhilosopher(who.id)} containerStyle={style} style={styles.card}>

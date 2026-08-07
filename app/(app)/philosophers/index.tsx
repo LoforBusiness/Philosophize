@@ -18,7 +18,9 @@ import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { ALL_PHILOSOPHERS, ERA_GROUPS, eraGroupOf, type Philosopher } from '@/data/philosophers';
 import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
+import { dayNumber, thinkerOfTheDay } from '@/lib/utils/thinkerOfDay';
 import { useUIStore } from '@/stores/uiStore';
+import { useUserDataStore } from '@/stores/userDataStore';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -39,7 +41,6 @@ const SW = Dimensions.get('window').width;
 const SHADOW_X = 4;
 const SHADOW_Y = 5;
 const CARD_W = (SW - 40 - 12) / 2 - SHADOW_X;
-const FEAT_W = SW - 40;
 const TAB_H = 13;
 
 // ── the file-tab card, in five monochrome treatments ─────────────────────────
@@ -91,11 +92,13 @@ const COUNTRY: Record<string, string> = {
 
 const ORDER = [...ERA_GROUPS];
 const FILTERS = ['ALL', ...ORDER];
+const BY_ID: Record<string, Philosopher> = Object.fromEntries(ALL_PHILOSOPHERS.map((p) => [p.id, p]));
 
-/** One row of the flattened list: a section head, a pair of cards, or a tail piece. */
+/** One row of the flattened list: a section head, a pair of cards, a break band, or a tail piece. */
 type Row =
   | { k: string; type: 'head'; group: string }
   | { k: string; type: 'row'; items: Philosopher[] }
+  | { k: string; type: 'band'; kind: 'fact' | 'quote'; pid: string; text: string }
   | { k: string; type: 'empty' }
   | { k: string; type: 'hint' };
 
@@ -112,10 +115,17 @@ const tagsOf = (p: Philosopher) => p.areas.slice(0, 3).map((a) => a.toUpperCase(
 const groupOf = eraGroupOf;
 const countryOf = (p: Philosopher) => p.country ?? COUNTRY[p.id] ?? '';
 
+// The day the break bands rotate on. From `dayNumber()` rather than a fresh
+// `Date.now()` here: that file owns the day unit for every screen that shows a
+// thinker of the day, and a second copy of the arithmetic is exactly how Home and
+// this tab ended up disagreeing about who today's thinker was.
+const DAY = dayNumber();
+
 export default function ThinkersScreen() {
   const insets = useSafeAreaInsets();
   const openPhilosopher = useUIStore((s) => s.openPhilosopher);
   const pendingPhilosopherId = useUIStore((s) => s.pendingPhilosopherId);
+  const philosopherViews = useUserDataStore((s) => s.philosopherViews);
 
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('ALL');
@@ -151,12 +161,13 @@ export default function ThinkersScreen() {
   const q = query.trim().toLowerCase();
   const showFeatured = q === '' && filter === 'ALL';
 
-  // Deterministic "thinker of the day". Memoised on the DAY, not on Date.now() —
-  // read raw it recomputed on every keystroke and every re-render.
-  const featured = useMemo(
-    () => ALL_PHILOSOPHERS[Math.floor(Date.now() / 86_400_000) % ALL_PHILOSOPHERS.length],
-    [],
-  );
+  // ONE thinker of the day, shared with Home rather than derived again here. This
+  // used to be `day % length` inlined here, Home grew its own card with its own
+  // rule, and the app spent a while featuring two different thinkers on the same
+  // day under the same heading.
+  const featured = useMemo(() => thinkerOfTheDay(), []);
+
+  const metCount = useMemo(() => Object.keys(philosopherViews).length, [philosopherViews]);
 
   // A stable handler, so a memoised card is not re-rendered by a fresh closure on
   // every parent render — `onPress={() => open(p.id)}` allocated 222 new functions
@@ -170,10 +181,10 @@ export default function ThinkersScreen() {
   // this tab. That is the stall — the screen cannot paint until all of them exist,
   // and nothing about them is reusable on the way back down.
   //
-  // FlatList needs one flat array, so the section heads and the two-up rows become
-  // items in the same list. A row of two carries the same `styles.grid` the wrap
-  // layout used, so the picture is identical — same width, same 12 gap, and a
-  // trailing odd card sits left exactly as flex-wrap left it.
+  // FlatList needs one flat array, so the section heads, the two-up rows AND the
+  // break bands become items in the same list. A row of two carries the same
+  // `styles.grid` the wrap layout used, so the picture is identical — same width,
+  // same 12 gap, and a trailing odd card sits left exactly as flex-wrap left it.
   const rows = useMemo(() => {
     const matched = ALL_PHILOSOPHERS.filter(
       (p) =>
@@ -183,12 +194,46 @@ export default function ThinkersScreen() {
     const grid = matched.filter((p) => !(showFeatured && p.id === featured.id));
 
     const out: Row[] = [];
+    // Counts every band placed so far, so the fact/quote alternation carries on
+    // across era boundaries instead of restarting at each section head.
+    let bandN = 0;
+
     for (const group of ORDER) {
       const list = grid.filter((p) => groupOf(p) === group);
       if (list.length === 0) continue;
       out.push({ k: `h-${group}`, type: 'head', group });
+
+      let rowN = 0;
       for (let i = 0; i < list.length; i += 2) {
         out.push({ k: `r-${group}-${i}`, type: 'row', items: list.slice(i, i + 2) });
+        rowN += 1;
+
+        // A BREAK BAND EVERY THREE ROWS — the thing that makes the page worth
+        // scrolling. Six identical cells is about as far as the eye goes before the
+        // grid reads as wallpaper; a full-width band resets it and carries the one
+        // thing a card cannot fit, which is an actual surprise. Never trailing: a
+        // band sitting directly above a section head belongs to the wrong era.
+        if (rowN % 3 === 0 && i + 2 < list.length) {
+          // Walk from a day-seeded offset to the first thinker in THIS era who has
+          // the material, so a band always names someone the reader is scrolling
+          // past, and the whole set rotates once a day.
+          const kind: 'fact' | 'quote' = bandN % 2 === 0 ? 'fact' : 'quote';
+          const start = (DAY * 7 + bandN * 13) % list.length;
+          let picked: { p: Philosopher; text: string } | null = null;
+          for (let s = 0; s < list.length && !picked; s += 1) {
+            const cand = list[(start + s) % list.length];
+            if (kind === 'fact') {
+              const facts = PHILOSOPHER_FACTS[cand.id] ?? [];
+              if (facts.length) picked = { p: cand, text: facts[(DAY + bandN) % facts.length] };
+            } else if (cand.quotes.length) {
+              picked = { p: cand, text: shortestQuote(cand) };
+            }
+          }
+          if (picked) {
+            out.push({ k: `b-${group}-${i}`, type: 'band', kind, pid: picked.p.id, text: picked.text });
+            bandN += 1;
+          }
+        }
       }
     }
     if (out.length === 0 && !showFeatured) out.push({ k: 'empty', type: 'empty' });
@@ -213,6 +258,9 @@ export default function ThinkersScreen() {
             ))}
           </View>
         );
+      }
+      if (item.type === 'band') {
+        return <BreakBand kind={item.kind} pid={item.pid} text={item.text} onOpen={openById} />;
       }
       if (item.type === 'empty') {
         return <Text style={styles.empty}>No thinkers found.</Text>;
@@ -250,92 +298,112 @@ export default function ThinkersScreen() {
         removeClippedSubviews={Platform.OS === 'android'}
         ListHeaderComponent={
           <>
-        {/* Dark header */}
-        <View style={[styles.header, { paddingTop: insets.top + 18 }]}>
-          <Text style={styles.kicker}>THE GREAT MINDS</Text>
-          <Text style={styles.title}>THINKERS</Text>
-          <Text style={styles.subtitle}>Explore the philosophers who shaped the world</Text>
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Search a philosopher..."
-            placeholderTextColor={PaperMute}
-            style={styles.search}
-            autoCorrect={false}
-          />
-        </View>
+            {/* THE HERO — a PERSON, not a title card.
+                This was a flat ink block holding a kicker, a title, a subtitle and a
+                search field: four stacked lines of centred type, nothing to look at
+                and nothing to tap. It is now today's thinker at full bleed, because
+                the first screenful is the only chance this tab gets to say "there is
+                someone in here worth meeting". The wordmark shrinks to a label in the
+                corner — the reader tapped a tab called Thinkers to get here and does
+                not need to be told twice. */}
+            <View style={[styles.hero, { paddingTop: insets.top + 14 }]}>
+              {showFeatured && (
+                <>
+                  {/* THE RAIN DRAWING, and the scrim that makes it usable.
+                      Every word on this hero is PAPER on a dark ground, and the
+                      drawing is pen on white paper — mean tone 139–160 of 255, i.e.
+                      LIGHTER than the text. Dropped in raw it would erase the type.
+                      The wash is ink, heaviest at the bottom where the words run and
+                      lightest at the top where the window and the cat are, so the
+                      picture reads and the type never takes its contrast from it (§19).
+                      Explicit width, and pinned top AND bottom, so the art is exactly
+                      as tall as the hero turns out to be — which moves with the safe
+                      area and with how far a long name wraps. An Image given neither
+                      takes its own intrinsic 601×562 and overhangs. */}
+                  <Image
+                    source={require('@/assets/images/thinkers/rain.jpg')}
+                    style={styles.heroImg}
+                    resizeMode="cover"
+                  />
+                  <Scrim
+                    style={StyleSheet.absoluteFill}
+                    colors={['rgba(20,20,19,0.62)', 'rgba(20,20,19,0.80)', 'rgba(20,20,19,0.94)']}
+                    locations={[0, 0.5, 1]}
+                  />
+                </>
+              )}
 
-        <View style={styles.headerPad}>
-          {/* Filters */}
-          <View style={styles.filterRow}>
-            {FILTERS.map((f) => {
-              const on = filter === f;
-              return (
-                <Pressable
-                  key={f}
-                  onPress={() => setFilter(f)}
-                  style={[styles.filter, on && styles.filterOn]}
-                >
-                  <Text style={[styles.filterText, on && { color: Paper }]}>{f}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          {/* Thinker of the week */}
-          {showFeatured && (
-            <>
-              <SectionHead>THINKER OF THE DAY</SectionHead>
-              <Pressable style={styles.featured} onPress={() => openPhilosopher(featured.id)}>
-                {/* THE RAIN DRAWING, and the scrim that makes it usable.
-                    Every word on this card is PAPER on a dark ground, and the drawing
-                    is pen on white paper — mean tone 139–160 of 255, i.e. LIGHTER than
-                    the text. Dropped in raw it would erase the card. The wash is ink,
-                    heaviest at the bottom where the quote runs and lightest at the top
-                    right where the window and the cat are, so the picture reads and the
-                    type never takes its contrast from it (§19).
-                    Explicit width: an Image given none takes its own intrinsic 601 and
-                    overhangs the card. */}
-                <Image
-                  source={require('@/assets/images/thinkers/rain.jpg')}
-                  style={styles.featImg}
-                  resizeMode="cover"
-                />
-                <Scrim
-                  style={StyleSheet.absoluteFill}
-                  colors={[
-                    'rgba(20,20,19,0.70)',
-                    'rgba(20,20,19,0.78)',
-                    'rgba(20,20,19,0.90)',
-                  ]}
-                  locations={[0, 0.45, 1]}
-                />
-                <View style={styles.featTop}>
-                  <View style={styles.featAvatar}>
-                    <Text style={styles.featAvatarLetter}>{featured.name.charAt(0)}</Text>
-                  </View>
-                  <View style={{ flex: 1, marginLeft: 14 }}>
-                    <Text style={styles.featKicker}>
-                      FEATURED · {groupOf(featured)} · {countryOf(featured).toUpperCase()}
+              <View style={styles.heroPad}>
+                <View style={styles.wordmarkRow}>
+                  <Text style={styles.wordmark}>THINKERS</Text>
+                  {metCount > 0 && (
+                    <Text style={styles.metCount}>
+                      {metCount} of {ALL_PHILOSOPHERS.length} met
                     </Text>
-                    <Text style={styles.featName}>{featured.name}</Text>
-                    <Text style={styles.featLife}>{formatLife(featured.lifespan)}</Text>
-                  </View>
-                  <Text style={styles.featArrow}>→</Text>
+                  )}
                 </View>
-                <View style={styles.tagRow}>
-                  {tagsOf(featured).map((t) => (
-                    <View key={t} style={styles.darkTag}>
-                      <Text style={styles.darkTagText}>{t}</Text>
-                    </View>
-                  ))}
-                </View>
-                <Text style={styles.featQuote}>“{shortestQuote(featured)}”</Text>
-              </Pressable>
-            </>
-          )}
 
-        </View>
+                {showFeatured && (
+                  <Pressable
+                    style={({ pressed }) => [styles.heroBody, pressed && { opacity: 0.85 }]}
+                    onPress={() => openPhilosopher(featured.id)}
+                  >
+                    <Text style={styles.heroKicker}>
+                      TODAY&apos;S THINKER · {groupOf(featured)}
+                      {countryOf(featured) ? ` · ${countryOf(featured).toUpperCase()}` : ''}
+                    </Text>
+                    <Text style={styles.heroName}>{featured.name}</Text>
+                    <Text style={styles.heroLife}>{formatLife(featured.lifespan)}</Text>
+
+                    {/* The one-line idea, at hero scale. This is the whole reason the
+                        header changed: a name and a pair of dates give a reader
+                        nothing to be curious about, and every thinker in the data
+                        already carries their core idea in ten words or fewer. */}
+                    <Text style={styles.heroIdea}>“{featured.oneLiner}”</Text>
+
+                    <View style={styles.tagRow}>
+                      {tagsOf(featured).map((t) => (
+                        <View key={t} style={styles.darkTag}>
+                          <Text style={styles.darkTagText}>{t}</Text>
+                        </View>
+                      ))}
+                    </View>
+
+                    <View style={styles.heroCta}>
+                      <Text style={styles.heroCtaText}>MEET THIS THINKER</Text>
+                      <Text style={styles.heroArrow}>→</Text>
+                    </View>
+                  </Pressable>
+                )}
+
+                <TextInput
+                  value={query}
+                  onChangeText={setQuery}
+                  placeholder="Search a philosopher..."
+                  placeholderTextColor={PaperMute}
+                  style={styles.search}
+                  autoCorrect={false}
+                />
+              </View>
+            </View>
+
+            <View style={styles.headerPad}>
+              {/* Filters */}
+              <View style={styles.filterRow}>
+                {FILTERS.map((f) => {
+                  const on = filter === f;
+                  return (
+                    <Pressable
+                      key={f}
+                      onPress={() => setFilter(f)}
+                      style={[styles.filter, on && styles.filterOn]}
+                    >
+                      <Text style={[styles.filterText, on && { color: Paper }]}>{f}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
           </>
         }
       />
@@ -352,15 +420,18 @@ export default function ThinkersScreen() {
  * the TAB, and the body. The shadow is drawn for the tab as well as the card, because
  * a silhouette that casts a shadow everywhere except one corner reads as a mistake.
  *
- * The quote came off. The reference layout is legible because it holds four things —
- * a mark, a count, a name and nothing else — and a two-line italic quote at 12px was
- * the thing making these cells hard to scan. It is one tap away on the profile.
+ * WHAT THE CARD SAYS. It used to end on "5 quotes · 3 facts" — a stock count, true of
+ * every thinker in the file and so worth nothing to a reader deciding whether to tap.
+ * That pair is now the one line the data has always carried and this screen never
+ * showed: their core idea, in ten words or fewer. The card still holds four things,
+ * which is what keeps it scannable — a mark, a name, a date, an idea. The long italic
+ * QUOTE stays off: it was tried here, and at two lines of 12px it was the thing that
+ * made these cells hard to read. It is one tap away on the profile.
  */
 const ThinkerCard = memo(function ThinkerCard({
   p, onOpen,
 }: { p: Philosopher; onOpen: (id: string) => void }) {
   const t = treatmentOf(groupOf(p));
-  const facts = (PHILOSOPHER_FACTS[p.id] ?? []).length;
   const press = useCallback(() => onOpen(p.id), [onOpen, p.id]);
   return (
     <Pressable
@@ -371,20 +442,14 @@ const ThinkerCard = memo(function ThinkerCard({
       <View style={styles.bodyShadow} pointerEvents="none" />
       <View style={[styles.tab, { backgroundColor: t.tab }]} />
       <View style={styles.cardBody}>
-        <View style={styles.cardRow}>
-          <View
-            style={[
-              styles.badge,
-              { backgroundColor: t.badge.bg, borderColor: t.badge.border, borderWidth: t.badge.width },
-            ]}
-          >
-            {t.inner ? <View style={styles.badgeInner} pointerEvents="none" /> : null}
-            <Text style={[styles.badgeLetter, { color: t.letter }]}>{p.name.charAt(0)}</Text>
-          </View>
-          <View style={styles.countCol}>
-            <Text style={styles.countText}>{p.quotes.length} quotes</Text>
-            <Text style={styles.countText}>{facts} facts</Text>
-          </View>
+        <View
+          style={[
+            styles.badge,
+            { backgroundColor: t.badge.bg, borderColor: t.badge.border, borderWidth: t.badge.width },
+          ]}
+        >
+          {t.inner ? <View style={styles.badgeInner} pointerEvents="none" /> : null}
+          <Text style={[styles.badgeLetter, { color: t.letter }]}>{p.name.charAt(0)}</Text>
         </View>
 
         <Text style={styles.cardName} numberOfLines={2}>
@@ -394,8 +459,56 @@ const ThinkerCard = memo(function ThinkerCard({
           {formatLife(p.lifespan)}
           {countryOf(p) ? ` · ${countryOf(p)}` : ''}
         </Text>
+
+        <View style={styles.cardRule} />
+        <Text style={styles.cardIdea} numberOfLines={3}>
+          {p.oneLiner}
+        </Text>
       </View>
     </Pressable>
+  );
+});
+
+/**
+ * A full-width interruption in the grid, every third row.
+ *
+ * The two kinds alternate and are deliberately opposite in tone: the FACT band is
+ * reversed out (solid ink, paper type), the QUOTE band is paper inside a ruled
+ * border. Two identical bands would only be wallpaper at a larger size; a dark one
+ * every second break is what actually registers as a change of pace on a long scroll.
+ * Both are tappable and open the thinker they name, so a band is a way INTO the list
+ * rather than a decoration sitting beside it.
+ */
+const BreakBand = memo(function BreakBand({
+  kind, pid, text, onOpen,
+}: { kind: 'fact' | 'quote'; pid: string; text: string; onOpen: (id: string) => void }) {
+  const p = BY_ID[pid];
+  const press = useCallback(() => onOpen(pid), [onOpen, pid]);
+  if (!p) return null;
+
+  const dark = kind === 'fact';
+  return (
+    <View style={styles.rowPad}>
+      <Pressable
+        onPress={press}
+        style={({ pressed }) => [
+          styles.band,
+          dark ? styles.bandDark : styles.bandLight,
+          pressed && { opacity: 0.86 },
+        ]}
+      >
+        <Text style={[styles.bandKicker, dark && { color: PaperMute }]}>
+          {dark ? 'DID YOU KNOW' : 'IN THEIR WORDS'}
+        </Text>
+        <Text style={[dark ? styles.bandFact : styles.bandQuote, dark && { color: Paper }]}>
+          {dark ? text : `“${text}”`}
+        </Text>
+        <View style={styles.bandFoot}>
+          <Text style={[styles.bandWho, dark && { color: PaperMute }]}>{p.name}</Text>
+          <Text style={[styles.bandArrow, dark && { color: Paper }]}>→</Text>
+        </View>
+      </Pressable>
+    </View>
   );
 });
 
@@ -412,20 +525,37 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Ink },
   scroll: { flex: 1, backgroundColor: Paper },
 
-  header: { backgroundColor: Ink, paddingHorizontal: 20, paddingBottom: 22, alignItems: 'center' },
-  kicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: PaperMute, letterSpacing: 4 },
-  title: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 34, color: Paper, letterSpacing: 1.5, marginTop: 6 },
-  subtitle: {
+  // ── hero ───────────────────────────────────────────────────────────────────
+  hero: { backgroundColor: Ink, overflow: 'hidden', paddingBottom: 18 },
+  heroImg: { position: 'absolute', left: 0, top: 0, bottom: 0, width: SW },
+  heroPad: { paddingHorizontal: 20 },
+  wordmarkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  wordmark: { fontFamily: 'Inter_500Medium', fontSize: 11, color: PaperMuteOnArt, letterSpacing: 4 },
+  metCount: { fontFamily: 'Inter_400Regular', fontSize: 10.5, color: PaperMuteOnArt, letterSpacing: 0.5 },
+
+  heroBody: { marginTop: 22 },
+  heroKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: PaperMuteOnArt, letterSpacing: 1.5 },
+  heroName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 32, color: Paper, marginTop: 5, lineHeight: 38 },
+  heroLife: { fontFamily: 'Inter_400Regular', fontSize: 12, color: PaperMuteOnArt, marginTop: 2 },
+  heroIdea: {
     fontFamily: 'PlayfairDisplay_400Regular',
     fontStyle: 'italic',
-    fontSize: 13,
-    color: PaperMute,
-    marginTop: 6,
-    textAlign: 'center',
+    fontSize: 17,
+    color: '#EDEBE3',
+    lineHeight: 25,
+    marginTop: 14,
   },
+  heroCta: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 16 },
+  heroCtaText: { fontFamily: 'Inter_500Medium', fontSize: 10.5, color: Paper, letterSpacing: 2 },
+  heroArrow: { fontFamily: 'Inter_400Regular', fontSize: 15, color: Paper },
+
+  darkTag: { backgroundColor: 'rgba(255,255,255,0.13)', borderRadius: 3, paddingHorizontal: 8, paddingVertical: 3 },
+  darkTagText: { fontFamily: 'Inter_500Medium', fontSize: 8.5, color: '#DAD8D0', letterSpacing: 1 },
+  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 14 },
+
   search: {
     alignSelf: 'stretch',
-    marginTop: 16,
+    marginTop: 18,
     backgroundColor: DarkField,
     borderWidth: 1,
     borderColor: '#3A3A38',
@@ -459,51 +589,6 @@ const styles = StyleSheet.create({
   sectionLabel: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, letterSpacing: 3, marginRight: 12 },
   sectionLine: { flex: 1, height: 1, backgroundColor: InkFaint },
 
-  featured: { backgroundColor: Ink, borderRadius: 14, padding: 18, overflow: 'hidden' },
-  // Explicit width, and pinned top AND bottom so the height is the card's rather than
-  // a number guessed here. An Image given neither takes its own intrinsic 601×562 and
-  // overhangs (§19); a fixed height instead would crop from the top and cut the cat —
-  // the one thing in the drawing worth showing — off the bottom of a short card.
-  featImg: { position: 'absolute', left: 0, top: 0, bottom: 0, width: FEAT_W },
-  featTop: { flexDirection: 'row', alignItems: 'center' },
-  featAvatar: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    borderWidth: 1.5,
-    borderColor: Paper,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  featAvatarLetter: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 26,
-    color: Paper,
-    // Caveat's ink overhangs its glyph box on the right; Android clips text to
-    // its (tight, advance-width) layout box, cutting the right of the letter.
-    // Give the Text a width wider than the glyph so the ink has room; textAlign
-    // then centres the letter within that width.
-    width: 44,
-    lineHeight: 46,
-    textAlign: 'center',
-    includeFontPadding: false,
-    transform: [{ translateX: -1.5 }],
-  },
-  featKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: PaperMuteOnArt, letterSpacing: 1.5 },
-  featName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: Paper, marginTop: 3 },
-  featLife: { fontFamily: 'Inter_400Regular', fontSize: 12, color: PaperMuteOnArt, marginTop: 1 },
-  featArrow: { fontFamily: 'Inter_400Regular', fontSize: 22, color: Paper, marginLeft: 8 },
-  darkTag: { backgroundColor: '#2E2E2C', borderRadius: 3, paddingHorizontal: 8, paddingVertical: 3 },
-  darkTagText: { fontFamily: 'Inter_500Medium', fontSize: 8.5, color: '#CFCDC4', letterSpacing: 1 },
-  featQuote: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontStyle: 'italic',
-    fontSize: 14,
-    color: '#D9D7CF',
-    lineHeight: 21,
-    marginTop: 14,
-  },
-
   // `gap` only separates cards WITHIN a row, and each row is its own FlatList item —
   // so between rows there was nothing at all, and the hard shadow (which hangs
   // SHADOW_Y below the wrapper, being absolutely positioned) landed on the tab of the
@@ -527,7 +612,7 @@ const styles = StyleSheet.create({
   },
   cardBody: {
     width: CARD_W,
-    minHeight: 118,
+    minHeight: 150,
     // FILLS THE WRAPPER, and this is the fix for the stray bar of ink under a card.
     //
     // A row is a plain flex row, so `alignItems` is `stretch`: when one name wraps to
@@ -546,7 +631,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: Paper,
     padding: 11,
-    justifyContent: 'space-between',
   },
   // SOLID, NOT BLURRED. A soft shadow is a grey smudge in a two-tone app and does not
   // survive the paper-and-ink identity; a hard offset one is how a sticker or a cut
@@ -577,7 +661,6 @@ const styles = StyleSheet.create({
     backgroundColor: Ink,
   },
 
-  cardRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   badge: {
     width: 38,
     height: 38,
@@ -607,19 +690,35 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     transform: [{ translateX: -1 }],
   },
-  countCol: { alignItems: 'flex-end' },
-  countText: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 9.5,
+
+  cardName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: Ink, marginTop: 11 },
+  cardMeta: { fontFamily: 'Inter_400Regular', fontSize: 10, color: InkSoft, marginTop: 2 },
+  cardRule: { height: 1, backgroundColor: InkFaint, marginTop: 9, marginBottom: 8 },
+  cardIdea: {
+    fontFamily: 'PlayfairDisplay_400Regular',
+    fontStyle: 'italic',
+    fontSize: 11.5,
     color: InkSoft,
-    letterSpacing: 0.3,
-    includeFontPadding: false,
-    lineHeight: 13,
+    lineHeight: 16,
   },
 
-  cardName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: Ink, marginTop: 12 },
-  cardMeta: { fontFamily: 'Inter_400Regular', fontSize: 10, color: InkSoft, marginTop: 2 },
-  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 10 },
+  // ── break bands ────────────────────────────────────────────────────────────
+  band: { borderRadius: 12, padding: 16, marginBottom: 17 },
+  bandDark: { backgroundColor: Ink },
+  bandLight: { backgroundColor: Paper, borderWidth: 2, borderColor: Ink },
+  bandKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: InkSoft, letterSpacing: 2.5 },
+  bandFact: { fontFamily: 'Inter_400Regular', fontSize: 13.5, lineHeight: 21, marginTop: 9 },
+  bandQuote: {
+    fontFamily: 'PlayfairDisplay_400Regular',
+    fontStyle: 'italic',
+    fontSize: 16,
+    color: Ink,
+    lineHeight: 24,
+    marginTop: 9,
+  },
+  bandFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
+  bandWho: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, letterSpacing: 0.5 },
+  bandArrow: { fontFamily: 'Inter_400Regular', fontSize: 15, color: Ink },
 
   empty: { fontFamily: 'Inter_400Regular', fontSize: 14, color: InkSoft, textAlign: 'center', marginTop: 30 },
 
