@@ -62,7 +62,7 @@ export const BEATS: Et10Beat[] = [
   {
     p: 47, x: 268, wading: true, far: true, factors: true,
     interact: {
-      prompt: 'Two children, one at your feet and one far away. Tap the difference Singer says carries no moral weight.',
+      prompt: 'One child is near, one far. Tap the difference Singer says carries no moral weight.',
       explain:
         'Distance. It changes how the case feels and nothing about what is at stake. The other two are not decoys — Singer’s principle needs both: help you can actually give, at a cost that is not itself serious.',
     },

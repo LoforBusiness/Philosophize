@@ -58,7 +58,7 @@ export const BEATS: Metaphysics7Beat[] = [
   {
     p: 4, x: 70, line: 1, pick: 1,
     interact: {
-      prompt: 'Take the book seriously — every page already printed. On that view, which moments are real? Tap your answer on the timeline.',
+      prompt: 'Every page of the book is already printed. On that view, tap the moments that are real.',
       explain: 'If every page is already printed, no page gets to be more real than the others. Yesterday and tomorrow are not missing. They are pages you are simply not reading right now.',
       xp: 5,
     },

@@ -74,14 +74,15 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "check": "npx tsc --noEmit && node scripts/validate-worklets.mjs && node scripts/validate-lessons.mjs && node scripts/validate-cinematic.mjs && node scripts/validate-badges.mjs && node scripts/validate-sound.mjs && node scripts/check-walk.mjs",
+    "check": "npx tsc --noEmit && node scripts/validate-worklets.mjs && node scripts/validate-lessons.mjs && node scripts/validate-cinematic.mjs && node scripts/check-prompts.mjs && node scripts/validate-badges.mjs && node scripts/validate-sound.mjs && node scripts/check-walk.mjs",
     "check:cards": "node scripts/validate-lessons.mjs",
     "check:cinematic": "node scripts/validate-cinematic.mjs",
     "check:badges": "node scripts/validate-badges.mjs",
     "check:sound": "node scripts/validate-sound.mjs",
     "check:worklets": "node scripts/validate-worklets.mjs",
     "sound:lab": "node scripts/make-sound-lab.mjs",
-    "check:walk": "node scripts/check-walk.mjs"
+    "check:walk": "node scripts/check-walk.mjs",
+    "check:prompts": "node scripts/check-prompts.mjs"
   },
   "overrides": {
     "@expo/require-utils": "56.1.6"

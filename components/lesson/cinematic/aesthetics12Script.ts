@@ -78,7 +78,7 @@ export const BEATS: Aes12Beat[] = [
   {
     p: 30, r: 5, rx: 224, ticks: 5, box: 1, pick: 1,
     interact: {
-      prompt: 'The poet swears the famous line was a joke. Tap the thing that can actually settle what the poem means.',
+      prompt: 'The poet says the line was a joke. Tap what actually settles the poem’s meaning.',
       explain: 'The trap: the box feels like the source, so it feels authoritative. But nobody can open it, and an intention nobody can inspect settles nothing. The poem on the board is the one thing every reader can actually check.',
       xp: 5,
     },

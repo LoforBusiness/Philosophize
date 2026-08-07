@@ -62,7 +62,7 @@ export const BEATS: Metaphysics11Beat[] = [
   {
     p: 8, c: 31, tok: 1,
     mc: {
-      prompt: 'Both men are standing exactly where they were. On Locke’s account, what makes someone the same person over time?',
+      prompt: 'On Locke’s account, what makes someone the same person over time?',
       options: [
         { id: 'a', text: 'The consciousness that reaches back over their own past', correct: true },
         { id: 'b', text: 'The same living body, traced back without a break', correct: false },

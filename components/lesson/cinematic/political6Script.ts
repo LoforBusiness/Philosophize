@@ -50,7 +50,7 @@ export const BEATS: Pol6Beat[] = [
   {
     p: 13, bars: 1, prin: 1, pick: 1,
     interact: {
-      prompt: 'Rawls ranks societies by how the WORST-OFF fare — the dark bar. Compare each dark bar with the equality line, then tap the society he would choose.',
+      prompt: 'Rawls judges a society by its worst-off — the dark bar. Tap the one he would choose.',
       explain: 'Under the unequal rules the worst-off finish ABOVE the equality line, so that gap earns its keep. Rawls allows a difference only when it lifts the least advantaged — the yardstick is the bottom, never the top.',
       xp: 5,
     },
@@ -59,7 +59,7 @@ export const BEATS: Pol6Beat[] = [
   {
     p: 4, bars: 1, prin: 1,
     mc: {
-      prompt: 'Rawls protects the worst-off — so surely his liberty principle can be traded away to boost their wealth. Right?',
+      prompt: 'Rawls protects the worst-off. So can his liberty principle be traded away to boost their wealth?',
       options: [
         { id: 'a', text: 'Yes, Rawls let basic freedoms be sacrificed for extra income', correct: false },
         { id: 'b', text: 'No — equal basic liberties come first and cannot be bought off', correct: true },

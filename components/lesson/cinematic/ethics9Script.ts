@@ -61,7 +61,7 @@ export const BEATS: Ethics9Beat[] = [
   {
     p: 6, x: 124, notes: 1, taken: 2, pick: 1,
     interact: {
-      prompt: 'He chose, and chose well. Tap the claim that is still owed an account.',
+      prompt: 'He chose, and chose well. Tap the note that is still owed an account.',
       explain: 'A correct choice does not settle the account. The duty he could not meet was never cancelled, only outweighed — and it still has a claim on him.',
       xp: 5,
     },

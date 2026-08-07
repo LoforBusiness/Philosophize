@@ -71,7 +71,7 @@ export const BEATS: Metaphysics10Beat[] = [
   {
     p: 4, x: 124, frame: 1, str: 1,
     mc: {
-      prompt: 'Aristotle kept universals real. So did he agree with Plato that they live in a realm of their own?',
+      prompt: 'Aristotle kept universals real. Did he agree with Plato that they live in their own realm?',
       options: [
         { id: 'a', text: 'Yes — being a realist about universals just is accepting that realm', correct: false },
         { id: 'b', text: 'No — he kept them real, but only inside the things that have them', correct: true },

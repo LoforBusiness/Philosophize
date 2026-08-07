@@ -99,7 +99,7 @@ export const BEATS: AestheticsBeat[] = [
     critics: true,
     weigh: 'q2',
     mc: {
-      prompt: '"Beauty is just personal taste, so calling a sunset beautiful asks nothing of anyone else." Pick the best response.',
+      prompt: '"Beauty is just personal taste." So does calling a sunset beautiful ask nothing of anyone?',
       options: [
         { id: 'a', text: 'Right — taste is private, so the claim stays private', correct: false },
         { id: 'b', text: 'It rests on feeling, yet still claims everyone should agree', correct: true },

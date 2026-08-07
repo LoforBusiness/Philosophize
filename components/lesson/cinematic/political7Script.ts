@@ -74,7 +74,7 @@ export const BEATS: Political7Beat[] = [
   {
     p: 4, x: 262, stone: 1, charter: 1, tear: 1,
     mc: {
-      prompt: 'Someone says: "If it is not written into law, it is not a right at all." What does the natural-rights side answer?',
+      prompt: '"If it is not written into law, it is not a right." What do natural-rights thinkers answer?',
       options: [
         { id: 'a', text: 'Nothing — that is obviously correct, rights come from law', correct: false },
         { id: 'b', text: 'Then a law that strips a right cannot be unjust, because nothing is left to judge it by', correct: true },

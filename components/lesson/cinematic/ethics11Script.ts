@@ -63,7 +63,7 @@ export const BEATS: Ethics11Beat[] = [
   {
     p: 4, x: 126, tok: 1, led: 1, shelf: 1,
     mc: {
-      prompt: 'A roomful of cheap thrills sums to more raw pleasure than one symphony. For Mill, has it beaten the symphony?',
+      prompt: 'Cheap thrills sum to more raw pleasure than one symphony. For Mill, have they beaten it?',
       options: [
         { id: 'a', text: 'Yes — equally intense pleasures count equally, so the bigger total wins', correct: false },
         { id: 'b', text: 'No — Mill ranked some pleasures higher in kind, not just in amount', correct: true },

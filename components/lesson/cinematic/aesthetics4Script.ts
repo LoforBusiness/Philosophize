@@ -82,7 +82,7 @@ export const BEATS: Aes4Beat[] = [
   {
     a: 0, v: 8, test: 3, verdict: 1, signed: 1, art: 1,
     mc: {
-      prompt: 'A urinal becomes art in a gallery. So does that prove "anything is art if you call it art"?',
+      prompt: 'A urinal in a gallery is art. Does that make anything art if you call it art?',
       options: [
         { id: 'a', text: 'Yes — a personal label is all it takes', correct: false },
         { id: 'b', text: 'No — it took the artworld’s context, not one person’s say-so', correct: true },

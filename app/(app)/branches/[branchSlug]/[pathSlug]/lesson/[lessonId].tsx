@@ -129,7 +129,9 @@ const InkSoft = '#6B6B6B';
 // still run through exactly one path. Everything above this line — hydration, the
 // unlock gate, the daily limit — applies to both kinds of lesson unchanged.
 // Removing an entry here is a complete, safe rollback to the normal card runner.
-const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
+// EXPORTED so the lesson audit can mount any scene without duplicating the map.
+// A named export in a route file is inert — Expo Router only reads the default.
+export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
   'logic-arguments-1': ArgumentFightLesson,
   'logic-arguments-2': PremisesBuilderLesson,
   'ethics-ethics-1': EthicsLesson,

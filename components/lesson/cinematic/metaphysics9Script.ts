@@ -77,7 +77,7 @@ export const BEATS: M9Beat[] = [
   {
     p: 47, x: 232, panels: 2, cards: true,
     interact: {
-      prompt: '"I think, therefore I am." Tap the one thing that sentence actually establishes.',
+      prompt: '"I think, therefore I am." Tap the label for what that sentence really establishes.',
       explain:
         'A thinker, and no more: something is doing this thinking, so something exists. The trap is the second card. The leap from there to "and it is made of different stuff" is a further argument, and the one everybody has disputed since.',
     },

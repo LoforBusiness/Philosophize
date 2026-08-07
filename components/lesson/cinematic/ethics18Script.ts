@@ -58,7 +58,7 @@ export const BEATS: Ethics18Beat[] = [
   {
     p: 6, x: 124, line: 1, test: 2, wide: 1, pick: 1,
     interact: {
-      prompt: 'Excluding a being just for the group it belongs to has a name. Tap it.',
+      prompt: 'Excluding a being just for the group it belongs to has a name. Tap the right label.',
       explain: 'Speciesism, by analogy with racism and sexism: giving less weight to identical suffering because of the body it happens in. Naming it is the point — an unnamed bias just feels like common sense.',
       xp: 5,
     },

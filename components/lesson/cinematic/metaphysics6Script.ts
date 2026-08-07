@@ -77,7 +77,7 @@ export const BEATS: Meta6Beat[] = [
   {
     p: 5, swap: 0.4, two: 1, orig: 0,
     mc: {
-      prompt: 'Someone hoards the old planks and rebuilds them into a ship. Which one is the real Ship of Theseus?',
+      prompt: 'The old planks are rebuilt into a second ship. Which one is the real Ship of Theseus?',
       options: [
         { id: 'a', text: 'The rebuilt one — it has the original matter', correct: false },
         { id: 'b', text: 'The repaired one — it never stopped sailing', correct: false },

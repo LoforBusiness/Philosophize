@@ -29,12 +29,12 @@ import { INK } from './cinematicKit';
 //
 // ── WHAT IT DRAWS ───────────────────────────────────────────────────────────
 //
-// While the question is open: an ink ring just outside the target's own bounds,
-// breathing slowly. Not a fill and not a colour — the ring sits OUTSIDE the art
-// so it never covers the thing being chosen, and §19 has no second colour to
-// reach for. The breath is what separates "this is a button" from "this is a
-// box someone drew"; a static outline reads as part of the picture, which is the
-// whole problem being fixed.
+// While the question is open: an ink ring on the target's own bounds, breathing
+// slowly. Not a fill and not a colour — §19 has no second colour to reach for.
+// The breath is what separates "this is a button" from "this is a box someone
+// drew"; a static outline reads as part of the picture, which is the whole
+// problem being fixed. See the note on RING_INSET for why it sits ON the bounds
+// rather than outside them.
 //
 // The moment an answer lands, every ring is cancelled and removed. The scene's
 // own right/wrong styling then has the stage to itself — this component
@@ -51,7 +51,21 @@ import { INK } from './cinematicKit';
 // reader nothing — and "tap one of the 3 marked parts above".
 // ─────────────────────────────────────────────────────────────────────────────
 
-const RING_INSET = -5;
+// THE RING SITS ON THE TARGET'S OWN BOUNDS, NOT OUTSIDE THEM.
+//
+// It was -5 first, on the reasoning that a ring outside the art never covers the
+// thing being chosen. The audit measured what it covered instead: across the
+// first 26 lessons alone, 32 pairs of rings overlapped each other — by up to 46px
+// — and 29 rings crossed text belonging to something else. On a stage where the
+// answer targets are stacked rows of a proof, five units in every direction is
+// enough for each ring to reach into its neighbour, and two overlapping outlines
+// are worse than none: they say the two things are one thing.
+//
+// At 0 the ring is exactly the target's footprint, and a React Native border is
+// drawn INSIDE the box, so it cannot extend past it by even a pixel. Two rings
+// can now only touch if the two targets themselves overlap — which is a layout
+// fault the audit should report, not something the affordance should cause.
+const RING_INSET = 0;
 const RING_W = 2;
 const BREATH_MS = 1100;
 
@@ -143,13 +157,18 @@ export default function Target({
       {!answered ? (
         <Animated.View
           pointerEvents="none"
+          // Named so the lesson audit can find rings exactly. Detecting them by
+          // "a 2px border with a radius" also matched scene art — logic-3 draws
+          // bordered boxes — and reported 28 collisions between things that were
+          // not rings at all.
+          nativeID="target-ring"
           style={[
             StyleSheet.absoluteFill,
             {
               top: RING_INSET, left: RING_INSET, right: RING_INSET, bottom: RING_INSET,
               borderWidth: RING_W,
               borderColor: INK,
-              borderRadius: radius + Math.abs(RING_INSET),
+              borderRadius: radius,
             },
             ring,
           ]}
@@ -174,11 +193,12 @@ export function TargetRing({ answered, radius = 4 }: { answered: boolean; radius
   return (
     <Animated.View
       pointerEvents="none"
+      nativeID="target-ring"
       style={[
         StyleSheet.absoluteFill,
         {
           top: RING_INSET, left: RING_INSET, right: RING_INSET, bottom: RING_INSET,
-          borderWidth: RING_W, borderColor: INK, borderRadius: radius + Math.abs(RING_INSET),
+          borderWidth: RING_W, borderColor: INK, borderRadius: radius,
         },
         ring,
       ]}

@@ -76,7 +76,7 @@ export const BEATS: A9Beat[] = [
   {
     p: 13, x: 208, boxes: true, stands: true, labels: true,
     interact: {
-      prompt: 'Someone says: “It isn’t beautiful, so it can’t really be art.” Tap the label that belongs under the plinth.',
+      prompt: '“It isn’t beautiful, so it isn’t art.” Tap the label that belongs under the plinth.',
       explain:
         'The trap is the first label — the oldest assumption in the subject: art equals beauty. Warhol’s boxes are not beautiful and nobody says they are. The third smuggles beauty back in by insisting it must be there invisibly.',
     },

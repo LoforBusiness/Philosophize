@@ -78,7 +78,7 @@ export const BEATS: Epi8Beat[] = [
   {
     p: 4, x: 176, esc: 1, land: 2,
     mc: {
-      prompt: 'Some thinkers choose the circle instead — beliefs propping each other up, with nothing underneath. Is a loop of reasons automatically worthless?',
+      prompt: 'The circle instead: beliefs propping each other up, nothing underneath. Is a loop of reasons worthless?',
       options: [
         { id: 'a', text: 'Yes — reasoning in a circle is always worthless', correct: false },
         { id: 'b', text: 'Yes — only bedrock can justify anything at all', correct: false },

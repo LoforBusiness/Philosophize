@@ -73,7 +73,7 @@ export const BEATS: Epistemology12Beat[] = [
   {
     p: 21, x: 124, pipes: 3,
     mc: {
-      prompt: 'Rain on your hand, toast you remember, a wall you were taught about. Which route from the world to you is least direct?',
+      prompt: 'Rain felt, toast remembered, a wall you were told about. Which route is least direct?',
       options: [
         { id: 'test', text: 'Testimony — it passes through another mind first', correct: true },
         { id: 'perc', text: 'Perception — the senses can be fooled at any moment', correct: false },
@@ -88,7 +88,7 @@ export const BEATS: Epistemology12Beat[] = [
   {
     p: 47, x: 124, pipes: 3, token: 1, pick: 1,
     interact: {
-      prompt: 'A new belief drops into the tank: the Great Wall of China exists. Tap the pipe that delivered it.',
+      prompt: 'A new belief enters the tank: the Great Wall exists. Tap the pipe that delivered it.',
       explain: 'The trap: it feels seen — films, photographs, a line on a map. Every one of those is a report from somebody else. You have never stood on that wall, and most of the tank is stacked out of beliefs exactly like it.',
       xp: 5,
     },

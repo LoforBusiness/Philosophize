@@ -56,7 +56,7 @@ export const BEATS: Aes8Beat[] = [
   {
     p: 4, x: 68, mode: 0, lens: 0, pick: 1,
     interact: {
-      prompt: 'A critic cannot read a single thing that an old mosaic depicts — and she still calls it great art. Which pair is she looking through?',
+      prompt: 'She cannot read what the mosaic shows, yet calls it great art. Tap the pair she uses.',
       explain: 'She has no idea what the story is, so the story cannot be what moved her. Whatever did the work was the arrangement itself — the lines, the blocks, and the way they sit against each other.',
       xp: 5,
     },
@@ -89,7 +89,7 @@ export const BEATS: Aes8Beat[] = [
   {
     p: 45, x: 148, mode: 2, lens: 2, modeAns: 3,
     mc: {
-      prompt: 'A friend says the two theories are at war, so one of them has to be wrong. Best reply?',
+      prompt: 'A friend says the two theories are at war, so one must be wrong. Best reply?',
       options: [
         { id: 'a', text: 'They answer different questions about one object — its arrangement, and the feeling it carries', correct: true },
         { id: 'b', text: 'Agreed — a theory of art has to name one essence, so one camp must lose', correct: false },

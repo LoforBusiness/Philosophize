@@ -59,7 +59,7 @@ export const BEATS: Meta15Beat[] = [
   {
     p: 4, x: 124, balls: 1, gap: 1, found: 2,
     mc: {
-      prompt: 'A friend insists: "We plainly observe the force that makes the effect follow." Where does Hume say they err?',
+      prompt: '"We plainly observe the force that makes the effect follow." Where does Hume say that errs?',
       options: [
         { id: 'a', text: 'They project a felt expectation and mistake it for something seen', correct: true },
         { id: 'b', text: 'They are right — we perceive the connecting force directly', correct: false },

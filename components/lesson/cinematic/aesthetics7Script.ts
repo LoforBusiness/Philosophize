@@ -83,7 +83,7 @@ export const BEATS: Aesthetics7Beat[] = [
   {
     p: 4, x: 160, q: 39, art: 1, capt: 3, marks: 1,
     mc: {
-      prompt: '"Hume gave us a standard of taste — so he must think beauty is a real property sitting in the object."',
+      prompt: '"Hume gave us a standard of taste. So is beauty a real property of the object?"',
       options: [
         { id: 'a', text: 'True — a standard proves beauty is measurable in the work', correct: false },
         { id: 'b', text: 'False — beauty stays in our response; it is responses that can be trained', correct: true },

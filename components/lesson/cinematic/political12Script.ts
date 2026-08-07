@@ -59,7 +59,7 @@ export const BEATS: Pol12Beat[] = [
   {
     p: 4, x: 124, door: 1, open: 1, neg: 1, posi: 1,
     mc: {
-      prompt: 'A regime removes your choices while insisting it serves your real self. Which freedom is it claiming to expand?',
+      prompt: 'A regime removes your choices, saying it serves your real self. Which freedom does it claim?',
       options: [
         { id: 'a', text: 'Positive liberty — self-mastery, decided on your behalf', correct: true },
         { id: 'b', text: 'Negative liberty, since it is removing obstacles', correct: false },

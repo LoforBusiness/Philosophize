@@ -58,7 +58,7 @@ export const BEATS: Logic5Beat[] = [
   {
     p: 4, chain: 1,
     interact: {
-      prompt: 'Euclid’s proof is written out below, but one step is missing. Tap the gap — the place a hidden flaw could hide.',
+      prompt: 'Euclid’s proof has one step missing. Tap the gap where a hidden flaw could sit.',
       explain:
         'The gap sits between the two equalities and the conclusion. Euclid never leaves it out: things equal to the same thing are equal to each other. Every unwritten step is a place a faulty inference can hide, so skipping steps never makes a proof stronger.',
       xp: 5,
