@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Dimensions, Platform, ScrollView } from 'react-native';
-import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
-import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
+import { LinearGradient } from 'expo-linear-gradient';
+import SketchIcon from '@/components/shared/SketchIcon';
 import StreakBook from '@/components/gamification/StreakBook';
 import ScreenTransition from '@/components/shared/ScreenTransition';
-import PressableScale from '@/components/shared/PressableScale';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import AddWidgetSheet from '@/components/shared/AddWidgetSheet';
 import StickmanStroll from '@/components/home/StickmanStroll';
 import QuickStartCard from '@/components/home/QuickStartCard';
+import HomeHeader from '@/components/home/HomeHeader';
+import ThinkerOfTheDay from '@/components/home/ThinkerOfTheDay';
+import BranchProgress from '@/components/home/BranchProgress';
+import Arrive from '@/components/home/Arrive';
+import { LIGHT } from '@/components/shared/tone';
 import { useWidgetPlaced } from '@/lib/widget/useWidgetPlaced';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -28,10 +32,21 @@ const Rule = '#ECEAE2';
 const SW = Dimensions.get('window').width;
 const SH = Dimensions.get('window').height;
 
-// Keep the "PHILOSOPHIZE" wordmark on a single line at any width — scale the
-// font + letter-spacing down on narrow phones so the trailing "E" never wraps.
-const WORDMARK_SIZE = Math.min(42, Math.floor((SW - 56) / 8.6));
-const WORDMARK_LS = SW < 400 ? 2 : 3;
+// ── the one light, borrowed for a card face ──────────────────────────────────
+//
+// tone.ts states the light direction as SVG percentage strings; expo-linear-
+// gradient wants 0–1. PARSED rather than retyped, so the reflection card can
+// never end up lit from a different direction than every rank pin and badge.
+const pt = (x: string, y: string) => ({ x: parseFloat(x) / 100, y: parseFloat(y) / 100 });
+const FACE_START = pt(LIGHT.x1, LIGHT.y1);
+const FACE_END = pt(LIGHT.x2, LIGHT.y2);
+
+// tone.ts's own FACE runs to PAPER_SHADE (#C6C0B2), which is right for a 66px
+// struck badge and far too strong across a card this size — at 300dp wide it
+// stops reading as a lit surface and starts reading as a stain. This is the same
+// ramp with the shaded end pulled back, which still clears the "a 7% tonal range
+// is invisible" floor §19 records: #FFFFFF → #E9E4D8 is a 12% swing.
+const CARD_FACE = ['#FFFFFF', Paper, '#E9E4D8'] as const;
 
 // Daily quote pool from the philosophers.
 const QUOTE_POOL = ALL_PHILOSOPHERS.flatMap((p) =>
@@ -62,34 +77,14 @@ function RuledPaper() {
   );
 }
 
-function ActionCard({
-  icon,
-  label,
-  sub,
-  filled,
-  onPress,
-}: {
-  icon: SketchIconName;
-  label: string;
-  sub: string;
-  filled?: boolean;
-  onPress: () => void;
-}) {
-  const fg = filled ? Paper : Ink;
-  return (
-    <PressableScale onPress={onPress} containerStyle={styles.actionWrap} style={[styles.action, filled && styles.actionFilled]}>
-      <View style={[styles.actionIconBox, { borderColor: fg }]}>
-        <SketchIcon name={icon} size={18} color={fg} />
-      </View>
-      <Text style={[styles.actionLabel, { color: fg }]} numberOfLines={1}>
-        {label}
-      </Text>
-      <Text style={[styles.actionSub, { color: filled ? '#CBC9C2' : InkSoft }]} numberOfLines={1}>
-        {sub}
-      </Text>
-    </PressableScale>
-  );
-}
+// ── WHAT USED TO BE HERE ─────────────────────────────────────────────────────
+//
+// An `ActionCard` row of three: LEARN → /branches, PHILOSOPHERS → /philosophers,
+// INSIGHTS → /stats. Those are tabs 2, 3 and 4, permanently on screen sixty dp
+// below — so about 100dp of Home was spent duplicating navigation the reader
+// already had, in the flattest boxes on the page. The space now carries a
+// thinker and the shape of the reader's progress instead. If you are tempted to
+// put shortcuts back, check the tab bar first.
 
 export default function HomeScreen() {
   const openPhilosopher = useUIStore((s) => s.openPhilosopher);
@@ -132,89 +127,79 @@ export default function HomeScreen() {
         contentContainerStyle={styles.page}
         showsVerticalScrollIndicator={false}
       >
-        {/* Masthead */}
-        <Text style={styles.kicker}>EST. ANTIQUITY  ·  VOL. I</Text>
-        <Text
-          style={[styles.wordmark, { fontSize: WORDMARK_SIZE, letterSpacing: WORDMARK_LS }]}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
-          PHILOSOPHIZE
-        </Text>
-        <View style={styles.rule} />
-        <Text style={styles.tagline}>the art of thinking deeply</Text>
-        <Text style={styles.diamonds}>◇   ◆   ◇</Text>
+        {/* Masthead — the reader's own art, the wordmark, and today. Outside the
+            stagger: it IS the page arriving, so it must already be there. */}
+        <HomeHeader streak={streak} />
 
         {/* Daily reflection */}
-        <View style={styles.reflectionWrap}>
-          <View style={styles.reflectionCard}>
-            <Text style={styles.qmark}>“</Text>
-            <Pressable onPress={() => openPhilosopher(quote.philosopherId)}>
-              <Text style={styles.reflectionText} numberOfLines={4}>{quote.text}</Text>
-            </Pressable>
-            <View style={styles.reflectionFooter}>
-              <Pressable
-                hitSlop={10}
-                onPress={() => toggleQuote({ ...quote, savedAt: Date.now() })}
-              >
-                <SketchIcon
-                  name={quoteSaved ? 'bookmark-filled' : 'bookmark'}
-                  size={18}
-                  color={quoteSaved ? Ink : InkSoft}
-                />
+        <Arrive index={0}>
+          <View style={styles.reflectionWrap}>
+            <LinearGradient
+              colors={CARD_FACE}
+              locations={[0, 0.46, 1]}
+              start={FACE_START}
+              end={FACE_END}
+              style={styles.reflectionCard}
+            >
+              <Text style={styles.qmark}>“</Text>
+              <Pressable onPress={() => openPhilosopher(quote.philosopherId)}>
+                <Text style={styles.reflectionText} numberOfLines={4}>{quote.text}</Text>
               </Pressable>
-              <Pressable style={{ flex: 1 }} onPress={() => openPhilosopher(quote.philosopherId)}>
-                <Text style={styles.reflectionAuthor}>— {quote.author.toUpperCase()}</Text>
-              </Pressable>
+              <View style={styles.reflectionFooter}>
+                <Pressable
+                  hitSlop={10}
+                  onPress={() => toggleQuote({ ...quote, savedAt: Date.now() })}
+                >
+                  <SketchIcon
+                    name={quoteSaved ? 'bookmark-filled' : 'bookmark'}
+                    size={18}
+                    color={quoteSaved ? Ink : InkSoft}
+                  />
+                </Pressable>
+                <Pressable style={{ flex: 1 }} onPress={() => openPhilosopher(quote.philosopherId)}>
+                  <Text style={styles.reflectionAuthor}>— {quote.author.toUpperCase()}</Text>
+                </Pressable>
+              </View>
+            </LinearGradient>
+            <View style={styles.reflectionTab}>
+              <Text style={styles.reflectionTabText}>DAILY REFLECTION</Text>
             </View>
           </View>
-          <View style={styles.reflectionTab}>
-            <Text style={styles.reflectionTabText}>DAILY REFLECTION</Text>
-          </View>
-        </View>
+        </Arrive>
 
         {/* The next lesson this learner can open, on a different branch each day.
-            Sits between the reflection and the three small actions on purpose:
-            the quote is what greets them, this is what they came to do, and
-            Learn / Philosophers / Insights are where they go instead. */}
-        <QuickStartCard style={styles.quickStart} />
+            Still the one big invitation, and still the only tall photograph — the
+            masthead above it is half its height and wears a different picture. */}
+        <Arrive index={1}>
+          <QuickStartCard style={styles.quickStart} />
+        </Arrive>
 
-        {/* Actions */}
-        <View style={styles.actionsRow}>
-          <ActionCard
-            icon="flame"
-            label="LEARN"
-            sub="Guided paths"
-            onPress={() => router.push('/(app)/branches')}
-          />
-          <ActionCard
-            icon="person"
-            label="PHILOSOPHERS"
-            sub="Great thinkers"
-            onPress={() => router.push('/(app)/philosophers')}
-          />
-          <ActionCard
-            icon="spark"
-            label="INSIGHTS"
-            sub="Your interests"
-            onPress={() => router.push('/(app)/stats')}
-          />
-        </View>
+        {/* What the three tab-bar duplicates used to occupy: one thing to read
+            that is new today, and one drawing of how far in the reader is. */}
+        <Arrive index={2}>
+          <ThinkerOfTheDay style={styles.block} />
+        </Arrive>
 
-        <View style={styles.streakRow}>
-          <StreakBook value={streak} size={52} />
-          <View>
-            <Text style={styles.streakLabel}>{streak} DAY STREAK</Text>
-            {/* Only when a rest day is actually holding it up. It says the streak
-                is safe WITHOUT saying it has been spent, because it has not: the
-                deduction happens when they finish something today. */}
-            {restBridging && (
-              <Text style={styles.restLabel}>
-                A day of rest is holding it — finish anything today.
-              </Text>
-            )}
+        <Arrive index={3}>
+          <BranchProgress style={styles.block} />
+        </Arrive>
+
+        <Arrive index={4}>
+          <View style={styles.streakRow}>
+            <StreakBook value={streak} size={52} />
+            <View>
+              <Text style={styles.streakLabel}>{streak} DAY STREAK</Text>
+              {/* Only when a rest day is actually holding it up. It says the streak
+                  is safe WITHOUT saying it has been spent, because it has not: the
+                  deduction happens when they finish something today. */}
+              {restBridging && (
+                <Text style={styles.restLabel}>
+                  A day of rest is holding it — finish anything today.
+                </Text>
+              )}
+            </View>
           </View>
-        </View>
+        </Arrive>
 
         {/* Daily quote card (opt-in, Settings → Display) */}
         {showWidget ? <DailyQuoteWidget style={{ marginTop: 18 }} /> : null}
@@ -269,54 +254,23 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
   },
 
-  kicker: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 10,
-    color: InkSoft,
-    letterSpacing: 3,
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  wordmark: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 42,
-    color: Ink,
-    letterSpacing: 3,
-    textAlign: 'center',
-    marginTop: 6,
-  },
-  rule: {
-    alignSelf: 'center',
-    width: '66%',
-    height: 1.5,
-    backgroundColor: Ink,
-    marginTop: 6,
-    marginBottom: 10,
-  },
-  tagline: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontStyle: 'italic',
-    fontSize: 15,
-    color: InkSoft,
-    textAlign: 'center',
-  },
-  diamonds: {
-    fontSize: 13,
-    color: Ink,
-    letterSpacing: 4,
-    textAlign: 'center',
-    marginTop: 10,
-  },
-
   reflectionWrap: { marginTop: 18, position: 'relative' },
+  // No backgroundColor — the LinearGradient IS the fill, lit from the one light
+  // in tone.ts, which is what turns a rectangle drawn on the paper into a card
+  // sitting on it. The shadow is the other half; a gradient with no shadow reads
+  // as a smudge rather than as depth.
   reflectionCard: {
     borderWidth: 1.5,
     borderColor: Ink,
     borderRadius: 3,
-    backgroundColor: Paper,
     paddingTop: 14,
     paddingHorizontal: 22,
     paddingBottom: 18,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 0,
+    shadowOffset: { width: 2, height: 3 },
+    elevation: 2,
   },
   qmark: {
     fontFamily: 'PlayfairDisplay_700Bold',
@@ -362,46 +316,7 @@ const styles = StyleSheet.create({
   },
 
   quickStart: { marginTop: 18 },
-  actionsRow: { flexDirection: 'row', gap: 10, marginTop: 18 },
-  actionWrap: { flex: 1 },
-  action: {
-    width: '100%',
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 6,
-    backgroundColor: Paper,
-    paddingVertical: 18,
-    paddingHorizontal: 6,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 0,
-    shadowOffset: { width: 2, height: 3 },
-    elevation: 2,
-  },
-  actionFilled: { backgroundColor: Ink, borderColor: Ink },
-  actionIconBox: {
-    width: 38,
-    height: 38,
-    borderWidth: 1.5,
-    borderRadius: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionLabel: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 10.5,
-    letterSpacing: 0.5,
-    marginTop: 12,
-    textAlign: 'center',
-  },
-  actionSub: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontStyle: 'italic',
-    fontSize: 11,
-    marginTop: 4,
-    textAlign: 'center',
-  },
+  block: { marginTop: 14 },
 
   streakRow: {
     flexDirection: 'row',

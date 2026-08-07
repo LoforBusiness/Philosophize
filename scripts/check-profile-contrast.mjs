@@ -206,3 +206,135 @@ if (mismatches) {
 }
 console.log('\nAll backgrounds carry both the name and the muted line at WCAG AA,');
 console.log(`and every declared tone in ${CATALOGUE} matches its measurement.`);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PASS TWO — THE HOME MASTHEAD.
+//
+// Home wears the SAME ten images behind its wordmark, and cannot reuse the tone
+// flag measured above: that flag describes the band the PROFILE header's text
+// sits in (34% down the picture to the bottom, under an avatar). Home crops a
+// short, very wide band out of the MIDDLE of the same picture, and commits to
+// one direction — cream on an ink scrim, always. Different pixels, different
+// wash, so it needs its own arithmetic.
+//
+// The numbers come out of constants/homeArt.ts by regex rather than being
+// retyped here, for the same reason declaredTones() reads the catalogue: two
+// copies of a number is one copy plus a future bug.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const HOME = 'constants/homeArt.ts';
+
+function homeContract() {
+  const src = readFileSync(HOME, 'utf8');
+  const nums = (re) => {
+    const m = src.match(re);
+    return m ? m.slice(1).map(Number) : null;
+  };
+  const scrim = [...src.matchAll(/rgba\((\d+),(\d+),(\d+),([\d.]+)\)/g)].map((m) => ({
+    rgb: [+m[1], +m[2], +m[3]],
+    a: +m[4],
+  }));
+  const stops = nums(/HOME_SCRIM_STOPS[^=]*=\s*\[([\d.]+),\s*([\d.]+),\s*([\d.]+)\]/);
+  const textTop = nums(/HOME_TEXT_TOP\s*=\s*([\d.]+)/);
+  const bandH = nums(/HOME_BAND_H\s*=\s*(\d+)/);
+  const drift = nums(/HOME_DRIFT\s*=\s*\{\s*from:\s*([\d.]+),\s*to:\s*([\d.]+)/);
+  const cream = src.match(/HomeCream\s*=\s*'#([0-9A-Fa-f]{6})'/);
+  const soft = src.match(/HomeSoft\s*=\s*'rgba\((\d+),(\d+),(\d+),([\d.]+)\)'/);
+  if (!stops || !textTop || !bandH || !drift || !cream || scrim.length < 3 || !soft) return null;
+  const hex = cream[1];
+  return {
+    scrim: scrim.slice(0, 3),
+    stops,
+    textTop: textTop[0],
+    bandH: bandH[0],
+    drift,
+    cream: [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16)),
+    soft: { rgb: [+soft[1], +soft[2], +soft[3]], a: +soft[4] },
+  };
+}
+
+/** The wash's alpha at this fraction down the BAND — a 3-stop linear gradient. */
+function scrimAt(H, f) {
+  const [s0, s1, s2] = H.stops;
+  const [c0, c1, c2] = H.scrim;
+  if (f <= s1) return c0.a + (c1.a - c0.a) * ((f - s0) / (s1 - s0));
+  return c1.a + (c2.a - c1.a) * ((f - s1) / (s2 - s1));
+}
+
+const H = existsSync(HOME) ? homeContract() : null;
+if (!H) {
+  console.log(`\n(skipping the Home masthead — could not parse ${HOME})`);
+} else {
+  console.log(`\n\nThe HOME masthead — same images, cream on a fixed wash (${HOME})\n`);
+  console.log('file'.padEnd(34) + 'wordmark'.padEnd(11) + 'day line'.padEnd(11) + 'verdict');
+  console.log('-'.repeat(74));
+
+  // `resizeMode: cover` on a band far wider than it is tall scales the picture to
+  // the WIDTH, so what shows is a horizontal slice out of the middle. The drift
+  // zooms between two scales; the SHALLOWER one shows more of the picture, so it
+  // is the one that can find a bright row — but both are measured, because the
+  // deeper zoom shifts which rows land under the type.
+  const BAND_AR = 390 / H.bandH;                    // a common phone width
+  let homeFails = 0;
+
+  for (const f of files) {
+    const img = await Jimp.read(join(DIR, f));
+    const W = img.bitmap.width;
+    const IH = img.bitmap.height;
+    const step = Math.max(1, Math.floor(W / 160));
+
+    let worstWord = Infinity;
+    let worstLine = Infinity;
+    let worstAt = 0;
+
+    for (const zoom of H.drift) {
+      // Fraction of the image's HEIGHT that the band shows at this zoom.
+      const visible = Math.min(1, W / (BAND_AR * IH) / zoom);
+      const top = 0.5 - visible / 2;
+
+      // Only the rows the TYPE occupies: the bottom (1 - textTop) of the band.
+      for (let bf = H.textTop; bf <= 1; bf += 0.02) {
+        const iy = Math.min(IH - 1, Math.max(0, Math.round((top + visible * bf) * IH)));
+        let r = 0, g = 0, b = 0, n = 0;
+        for (let x = 0; x < W; x += step) {
+          const idx = (W * iy + x) << 2;
+          r += img.bitmap.data[idx];
+          g += img.bitmap.data[idx + 1];
+          b += img.bitmap.data[idx + 2];
+          n++;
+        }
+        const bg = over(H.scrim[0].rgb, [r / n, g / n, b / n], scrimAt(H, bf));
+        const lbg = lum(bg);
+        // The day line is cream at 82%, so what the eye gets is cream composited
+        // onto the scrimmed picture — measuring the solid cream would flatter it.
+        const softOn = over(H.soft.rgb, bg, H.soft.a);
+        const rw = ratio(lum(H.cream), lbg);
+        const rl = ratio(lum(softOn), lbg);
+        if (rw < worstWord) { worstWord = rw; worstAt = bf; }
+        if (rl < worstLine) worstLine = rl;
+      }
+    }
+
+    const ok = worstWord >= MIN_NAME && worstLine >= MIN_MUTED;
+    if (!ok) homeFails++;
+    console.log(
+      basename(f).padEnd(34) +
+        worstWord.toFixed(2).padEnd(11) +
+        worstLine.toFixed(2).padEnd(11) +
+        (ok ? 'ok' : `FAILS (worst at ${(worstAt * 100).toFixed(0)}% down the band)`)
+    );
+  }
+
+  console.log('-'.repeat(74));
+  console.log(`Thresholds: wordmark ≥ ${MIN_NAME} (large), day line ≥ ${MIN_MUTED} (small), WCAG AA.`);
+  if (homeFails) {
+    console.log(
+      `\n${homeFails} image(s) cannot carry the masthead. Deepen HOME_SCRIM in ${HOME}\n` +
+        '— but read the note there first: the scrim is already heavy enough to beat a\n' +
+        'pure-white pixel, so a failure here usually means the band is showing a part\n' +
+        'of the picture the profile header never does.'
+    );
+    process.exit(1);
+  }
+  console.log('\nEvery background carries the Home wordmark and its day line at WCAG AA.');
+}
