@@ -9,10 +9,11 @@ import Stickman from '@/components/lesson/cinematic/Stickman';
 import { pose, stand, type Bundle } from '@/components/lesson/cinematic/rig';
 import { strideMode } from '@/components/lesson/cinematic/moves';
 import {
-  layout, groundAt, sceneProps, gaitForSpan, jumpForSpan, MOON, LAYERS, LEAD, WALK_SECONDS,
-  type Marker, type Prop,
+  layout, groundAt, groundArt, chunkLeft, gaitForSpan, jumpForSpan,
+  LEAD, WALK_SECONDS, SPAN, CHUNK, CHUNK_W, GROUND_TOP, SIGN_DX,
+  type Marker,
 } from './worldPath';
-import { sceneLayers, DISC, TILE_W, TILE_H } from './sceneArt';
+import { sceneLayers, DISC, SCENE_NAMES, TILE_W, type LayerArt } from './sceneArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BRANCH IS A PLACE YOU WALK THROUGH.
@@ -31,17 +32,27 @@ import { sceneLayers, DISC, TILE_W, TILE_H } from './sceneArt';
 // responds to a horizontal drag at all, so there is no way to be somewhere the
 // animation did not put you.
 //
-// ── THE FIGURE STANDS BEHIND THE SIGNS ──────────────────────────────────────
+// ── THE FIGURE STANDS TO THE LEFT OF THE SIGN ───────────────────────────────
 //
-// Drawn before the markers, so a lesson's name is never covered by a person.
-// The words are the thing being chosen; the figure is who is choosing.
+// Not on it. The sign is `SIGN_DX` to the right of the marker the figure stands
+// at, which is reading order — you, then where you are going — and it means the
+// lesson's name is never behind a person.
 //
-// ── DEPTH IS PARALLAX AND TONE, NEVER HUE (§19) ─────────────────────────────
+// ── ONLY WHAT IS ON SCREEN IS MOUNTED ───────────────────────────────────────
 //
-// Four layers of flat silhouette — peaks, pines, trees, foreground — each a
-// paler tone further out, each riding the camera at its own rate. That stacking
-// IS the look of the reference art; almost none of it is detail, and all of it
-// survives being black and white.
+// This is the rule that makes the screen usable, and it was learned by breaking
+// it three ways at once. The first version mounted the WHOLE branch: 320 static
+// Views for the ground, 32 signs, and five backdrop layers each drawn into an
+// <Svg> two phones wide and the full height of the strip — all of it under a
+// transform that changes every frame. §17 rule 6 already had the number for that
+// (a moving full-screen <Svg> is worth about ten frames a second on an S24) and
+// this was five of them.
+//
+// So: the ground is drawn in CHUNKS and three are mounted; the signs are windowed
+// to the five around the camera; each backdrop layer is a BAND only as tall as
+// its own art, in two tiles so the off-screen one is culled. What re-mounts any
+// of that is a single derived value that fires only when one of three INTEGERS
+// changes — about twice per seven-second walk, instead of sixty times a second.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const INK = '#1A1A1A';
@@ -60,6 +71,9 @@ export interface WorldLesson {
   unitId: string; unitSlug: string; unitTitle: string;
   done: boolean; accessible: boolean;
 }
+
+/** What is mounted right now: which ground chunk, which sign, which place. */
+interface Viewport { c: number; m: number; s: number }
 
 export default function BranchWorld({
   lessons, current, onOpen, advanceTo,
@@ -99,6 +113,28 @@ export default function BranchWorld({
 
   const camFor = useCallback((x: number) => x - width * LEAD, [width]);
 
+  // ── WHAT IS MOUNTED ────────────────────────────────────────────────────────
+  // One derived value for all three windows, and it only crosses to the JS thread
+  // when an integer actually changes. The previous version called runOnJS on every
+  // single frame of every animation to re-check the scene name.
+  const [vp, setVp] = useState<Viewport>(() => {
+    const cam = (markers[current]?.x ?? SPAN) - width * LEAD;
+    return { c: Math.floor(cam / CHUNK), m: Math.floor(cam / SPAN), s: 0 };
+  });
+  const vKey = useSharedValue('');
+  useDerivedValue(() => {
+    const cam = camX.value;
+    const c = Math.floor(cam / CHUNK);
+    const m = Math.floor(cam / SPAN);
+    let s = 0;
+    for (let i = 0; i < unitStarts.length; i++) if (cam + 120 >= unitStarts[i]) s = i;
+    const key = `${c}.${m}.${s}`;
+    if (key !== vKey.value) {
+      vKey.value = key;
+      runOnJS(setVp)({ c, m, s });
+    }
+  });
+
   // Arriving: put the reader where they already are, with no animation. This runs
   // on mount AND whenever `current` moves underneath us — which is what makes the
   // screen correct when it is reached from anywhere other than a finished lesson.
@@ -125,8 +161,8 @@ export default function BranchWorld({
   useEffect(() => {
     if (!advanceTo) return;
     const target = markers[advanceTo.to];
-    // FROM THE LESSON JUST FINISHED, not from  — which has already moved
-    // to the next one by the time this screen rebuilds. Reading it here is why the
+    // FROM THE LESSON JUST FINISHED, not from `at` — which has already moved to
+    // the next one by the time this screen rebuilds. Reading it here is why the
     // walk was invisible: the figure was placed at its destination and then asked
     // to walk there.
     const from = markers[advanceTo.from] ?? markers[at];
@@ -209,22 +245,15 @@ export default function BranchWorld({
 
   return (
     <View style={{ height: H, backgroundColor: SKY, overflow: 'hidden' }}>
-      <SceneBack camX={camX} unitStarts={unitStarts} width={width} />
-      <GroundBand camX={camX} width={width} />
+      <SceneBack camX={camX} scene={vp.s} width={width} />
+      <GroundBand camX={camX} chunk={vp.c} />
 
-      {/* THE FIGURE, drawn BEFORE the markers so it stands behind their names. */}
+      {/* THE FIGURE, drawn BEFORE the signs so it can never cover a lesson's name. */}
       <Animated.View style={[styles.figWrap, figStyle]} pointerEvents="none">
         <Stickman D={D} k={FIG_K} />
       </Animated.View>
 
-      <MarkerLayer
-        camX={camX}
-        markers={markers}
-        lessons={lessons}
-        at={at}
-        onTap={tapLesson}
-        width={width}
-      />
+      <MarkerLayer camX={camX} markers={markers} lessons={lessons} at={at} m={vp.m} onTap={tapLesson} />
     </View>
   );
 }
@@ -232,24 +261,16 @@ export default function BranchWorld({
 /**
  * THE BACKDROP — the drawn scenes from sceneArt.ts, one per unit.
  *
- * Each layer is an inert <Path> inside an <Svg> under an ANIMATED PARENT (§17
- * rule 6): the surface rasterises once and the parent translates it, so nothing
- * re-uploads per frame. Two tiles side by side, offset by the camera modulo the
- * tile width, which is what makes it repeat without a seam.
- *
- * The scene is chosen from the camera position rather than the figure's, so the
- * place changes when the unit does even mid-walk.
+ * Each layer is an inert <Path> inside an <Svg> under an ANIMATED PARENT: the
+ * surface rasterises once and the parent translates it. Two tiles, offset by the
+ * camera modulo the tile width, which is what makes it repeat without a seam —
+ * and they are two SEPARATE <Svg> children rather than one twice as wide, so the
+ * one that is off screen is culled instead of drawn.
  */
-function SceneBack({ camX, unitStarts, width }: {
-  camX: SharedValue<number>; unitStarts: number[]; width: number;
+function SceneBack({ camX, scene, width }: {
+  camX: SharedValue<number>; scene: number; width: number;
 }) {
-  const [name, setName] = useState('the hills');
-  const NAMES = ['the hills', 'deep forest', 'the moor', 'the ridge', 'the orchard', 'the pass'];
-  useDerivedValue(() => {
-    let k = 0;
-    for (let i = 0; i < unitStarts.length; i++) if (camX.value + 120 >= unitStarts[i]) k = i;
-    runOnJS(setName)(NAMES[k % NAMES.length]);
-  });
+  const name = SCENE_NAMES[scene % SCENE_NAMES.length];
   const layers = useMemo(() => sceneLayers(name), [name]);
   const disc = DISC[name] ?? DISC['the hills'];
   return (
@@ -259,49 +280,63 @@ function SceneBack({ camX, unitStarts, width }: {
         width: disc.r * 2, height: disc.r * 2, borderRadius: disc.r, backgroundColor: '#FFFFFF', opacity: 0.92,
       }} />
       {layers.map((l, i) => (
-        <SceneStrip key={name + i} camX={camX} k={l.k} d={l.d} tone={l.tone} />
+        <SceneStrip key={name + i} camX={camX} layer={l} />
       ))}
     </View>
   );
 }
 
-/** TWO TILES SIDE BY SIDE, offset by the camera modulo the tile width — which is
- *  what makes the backdrop repeat forever with no seam to find. */
-const VIEWBOX = `0 0 ${TILE_W * 2} ${TILE_H}`;
-
-function SceneStrip({ camX, k, d, tone }: {
-  camX: SharedValue<number>; k: number; d: string; tone: string;
-}) {
-  const st = useAnimatedStyle(() => ({
-    transform: [{ translateX: -((camX.value * k) % TILE_W) }],
-  }));
+function SceneStrip({ camX, layer }: { camX: SharedValue<number>; layer: LayerArt }) {
+  const { d, tone, k, top, h } = layer;
+  const st = useAnimatedStyle(() => {
+    const t = camX.value * k;
+    // A positive modulo, so a camera left of zero cannot push the tiles off the
+    // right-hand side and leave bare sky behind them.
+    return { transform: [{ translateX: -(((t % TILE_W) + TILE_W) % TILE_W) }] };
+  });
+  const box = `0 ${top} ${TILE_W} ${h}`;
   return (
-    <Animated.View style={[{ position: 'absolute', left: 0, top: 0, width: TILE_W * 2, height: H }, st]}>
-      <Svg width={TILE_W * 2} height={TILE_H} viewBox={VIEWBOX}>
+    <Animated.View
+      style={[{ position: 'absolute', left: 0, top, width: TILE_W * 2, height: h }, st]}
+      pointerEvents="none"
+    >
+      <Svg style={{ position: 'absolute', left: 0, top: 0 }} width={TILE_W} height={h} viewBox={box}>
         <SvgPath d={d} fill={tone} />
-        <SvgPath d={d} fill={tone} x={TILE_W} />
+      </Svg>
+      <Svg style={{ position: 'absolute', left: TILE_W, top: 0 }} width={TILE_W} height={h} viewBox={box}>
+        <SvgPath d={d} fill={tone} />
       </Svg>
     </Animated.View>
   );
 }
 
-/** The ground the figure and the markers stand on. */
-function GroundBand({ camX, width }: { camX: SharedValue<number>; width: number }) {
-  // 40, not 20. The ground is one static View per step across 14k units, and at 20
-  // that is 640 of them for a curve gentle enough that nobody can see the join.
-  const STEP = 40;
-  const steps = useMemo(() => {
-    const n = Math.ceil(12800 / STEP);
-    return Array.from({ length: n }, (_, i) => {
-      const y = groundAt(i * STEP - 800);
-      return { left: i * STEP - 800, top: y, height: H - y + 40 };
-    });
-  }, []);
+/**
+ * THE GROUND the figure and the signs stand on — one smooth filled curve, with
+ * tufts, stones and low bushes growing out of it in the same ink.
+ *
+ * It was 320 static Views, one per 40 units, which is a staircase however gentle
+ * the curve behind it: every step had a flat top and a visible corner. Three
+ * chunks of path draw the same hill, smoothly, for a hundredth of the views.
+ */
+function GroundBand({ camX, chunk }: { camX: SharedValue<number>; chunk: number }) {
+  const chunks = useMemo(
+    () => [chunk - 1, chunk, chunk + 1].map((c) => ({ c, d: groundArt(c) })),
+    [chunk],
+  );
   const st = useAnimatedStyle(() => ({ transform: [{ translateX: -camX.value }] }));
+  const h = H - GROUND_TOP;
   return (
     <Animated.View style={[StyleSheet.absoluteFill, st]} pointerEvents="none">
-      {steps.map((s, i) => (
-        <View key={i} style={{ position: 'absolute', left: s.left, top: s.top, width: STEP + 1, height: s.height, backgroundColor: INK }} />
+      {chunks.map(({ c, d }) => (
+        <Svg
+          key={c}
+          style={{ position: 'absolute', left: chunkLeft(c), top: GROUND_TOP }}
+          width={CHUNK_W}
+          height={h}
+          viewBox={`0 ${GROUND_TOP} ${CHUNK_W} ${h}`}
+        >
+          <SvgPath d={d} fill={INK} />
+        </Svg>
       ))}
     </Animated.View>
   );
@@ -311,28 +346,40 @@ function GroundBand({ camX, width }: { camX: SharedValue<number>; width: number 
  * The lesson signs. Named, and shaped like something you press.
  *
  * A bare dot said nothing about what it was or that it could be tapped. Each one
- * is now a card carrying the lesson's name on a post — the one you are standing
- * at is solid ink with a START caption, the ones you have finished are outlined,
- * and the locked ones are faint. Tapping any other one moves you there; tapping
- * the one you are at opens it.
+ * is a card carrying the lesson's name on a post — the one you are standing at is
+ * solid ink with a START caption, the ones you have finished are outlined, and
+ * the locked ones are faint. Tapping any other one moves you there; tapping the
+ * one you are at opens it.
+ *
+ * Only the five around the camera are mounted. That is not only cheaper, it is
+ * complete: a sign you cannot see is a sign you cannot press.
  */
-function MarkerLayer({ camX, markers, lessons, at, onTap, width }: {
+function MarkerLayer({ camX, markers, lessons, at, m, onTap }: {
   camX: SharedValue<number>; markers: Marker[]; lessons: WorldLesson[];
-  at: number; onTap: (i: number) => void; width: number;
+  at: number; m: number; onTap: (i: number) => void;
 }) {
   const st = useAnimatedStyle(() => ({ transform: [{ translateX: -camX.value }] }));
+  const lo = Math.max(0, m - 1);
+  const hi = Math.min(markers.length - 1, m + 3);
+  const shown: Marker[] = [];
+  for (let i = lo; i <= hi; i++) if (markers[i]) shown.push(markers[i]);
   return (
     <Animated.View style={[StyleSheet.absoluteFill, st]}>
-      {markers.map((m, i) => {
+      {shown.map((mk) => {
+        const i = mk.i;
         const l = lessons[i];
         if (!l) return null;
         const here = i === at;
         const tone = !l.accessible ? FAINT : INK;
+        // The sign stands to the RIGHT of where the figure stands, on its own
+        // patch of ground — so its foot is planted at ITS x, not the figure's.
+        const sx = mk.x + SIGN_DX;
+        const sy = groundAt(sx);
         return (
           <Pressable
-            key={m.lessonId}
+            key={mk.lessonId}
             onPress={() => onTap(i)}
-            style={{ position: 'absolute', left: m.x - 74, top: m.y - 132, width: 148, alignItems: 'center' }}
+            style={{ position: 'absolute', left: sx - 74, top: sy - 132, width: 148, alignItems: 'center' }}
           >
             <View style={[
               styles.card,

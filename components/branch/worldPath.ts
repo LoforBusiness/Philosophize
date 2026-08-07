@@ -11,22 +11,25 @@
 //
 // A branch is 32 lessons in teaching order. They become 32 MARKERS on a single
 // horizontal ground line, left to right, and the reader's figure stands at the
-// last one they finished. Walking to the next marker takes ~5s (WALK_SECONDS),
-// which is what sets the spacing: distance = speed × time, so the gap is derived
-// from the walk rather than picked and then fought with.
+// last one they finished. Walking to the next marker takes WALK_SECONDS, which is
+// what sets the spacing: distance = speed × time, so the gap is derived from the
+// walk rather than picked and then fought with.
 //
 // The ground is NOT flat. A world that is one straight rule is a progress bar
-// with a man on it. Each span between markers gets a gentle profile — a rise, a
-// dip, a step — so the walk has somewhere to go and the parallax has something to
-// move against. `groundAt` is continuous and the markers always sit ON it, which
-// is what stops the figure hovering or sinking (rule A1: the picture must be true).
+// with a man on it. `groundAt` is a continuous curve and the markers always sit
+// ON it, which is what stops the figure hovering or sinking (rule A1: the picture
+// must be true).
 //
-// ── DEPTH WITHOUT COLOUR ────────────────────────────────────────────────────
+// ── THE GROUND IS A CURVE, AND IT IS DRAWN AS ONE ───────────────────────────
 //
-// §19 stays: this is ink. Depth comes from PARALLAX and tone, not hue — far hills
-// pale and slow, mid ground darker and quicker, foreground near-black and fastest.
-// `LAYERS` is that ramp, and it is the whole of the INSIDE feeling that survives
-// being black and white.
+// It used to be drawn as one static View per 40 units — 320 rectangles of
+// different heights standing side by side. That is a staircase, and it looked
+// like one: every step had a visible corner, and the figure walked up a flight of
+// stairs rather than over a hill. It was also 320 native views under a moving
+// transform, on a screen that already carries a figure and five backdrop layers.
+//
+// So the ground is now a PATH, built here and filled by one <Path> per chunk. The
+// curve was always smooth; only the drawing of it was not.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** How long the figure takes to walk one lesson to the next. */
@@ -39,12 +42,22 @@ export const SPAN = WALK_SECONDS * WALK_SPEED;   // 322 at 7s
 /** Where the ground sits when the terrain is level, in stage units from the top. */
 export const BASE_Y = 300;
 
+/**
+ * How far RIGHT of the figure a lesson's sign stands.
+ *
+ * The figure and the sign used to share an x, so the reader stood inside their
+ * own signpost. Standing to the LEFT of the words is the reading order — you, then
+ * where you are going — and it is far enough out (the figure is ~22 units wide at
+ * FIG_K, the card 148 wide) that the two never touch.
+ */
+export const SIGN_DX = 112;
+
 export interface Marker {
   /** Index within the branch, 0-based. */
   i: number;
   lessonId: string;
   unitId: string;
-  /** First marker of its unit — where the jump-bar lands. */
+  /** First marker of its unit — where the scenery changes. */
   unitStart: boolean;
   x: number;
   y: number;
@@ -65,6 +78,12 @@ export function groundAt(x: number): number {
   return BASE_Y + a + b + drift;
 }
 
+/** The highest and lowest the ground ever reaches — 26 + 9 + 14 either side. */
+export const GROUND_MIN = BASE_Y - 49;
+export const GROUND_MAX = BASE_Y + 49;
+/** Top of the band the ground art occupies: the crest, plus room for a bush. */
+export const GROUND_TOP = GROUND_MIN - 22;
+
 /** Lay a branch out as a world. `lessons` is in teaching order. */
 export function layout(lessons: { id: string; unitId: string }[]): Marker[] {
   let lastUnit = '';
@@ -75,23 +94,6 @@ export function layout(lessons: { id: string; unitId: string }[]): Marker[] {
     return { i, lessonId: l.id, unitId: l.unitId, unitStart, x, y: groundAt(x) };
   });
 }
-
-/**
- * Parallax layers, far to near. `k` is how fast a layer moves against the camera:
- * 0 is painted on the sky and never moves, 1 travels with the ground.
- *
- * The tones are the paper ramp from tone.ts, restated here rather than imported
- * because this file holds the zero-import rule — and because a layer's tone and
- * its speed have to be chosen together. A pale layer moving fast reads as a
- * mistake; the two are one decision.
- */
-export const LAYERS = [
-  { k: 0.10, tone: '#E6E2D8', name: 'far hills' },
-  { k: 0.28, tone: '#CFC9BC', name: 'hills' },
-  { k: 0.55, tone: '#9A968B', name: 'mid ridge' },
-  { k: 1.00, tone: '#1A1A1A', name: 'ground' },
-  { k: 1.45, tone: '#1A1A1A', name: 'foreground grass' },
-] as const;
 
 /**
  * Where the camera sits so the figure reads well while walking right.
@@ -125,24 +127,12 @@ export function checkWorld(markers: Marker[], screenW = 390): string[] {
   if (markers[1] && markers[1].x - cam > screenW * 1.6) {
     out.push('the next marker is more than a screen and a half away — the walk has no destination in view');
   }
+  // The figure must not stand on its own signpost.
+  if (SIGN_DX < 60) out.push('the sign is close enough to the figure to overlap it');
   return out;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// THE SCENERY — silhouettes, layered by depth.
-//
-// The reference is Alto's Odyssey and the flat-vector forest painters: almost
-// none of what makes those images is DETAIL. It is (1) big simple silhouettes,
-// (2) stacked at three or four depths, (3) each depth a flat tone, getting paler
-// with distance. That reads in ink exactly as well as it reads in teal, which is
-// why §19 does not have to bend for it.
-//
-// DETERMINISTIC FROM x. There is no random anywhere: a tree at x=1840 is the same
-// tree every time the screen is opened, so walking back past it does not find a
-// different forest. `hash` is the whole of that.
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** Stable pseudo-random in [0,1) from an integer. No state, no seed to thread. */
+/** Stable pseudo-random in [0,1) from a number. No state, no seed to thread. */
 export function hash(n: number): number {
   'worklet';
   let x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
@@ -150,111 +140,111 @@ export function hash(n: number): number {
   return x;
 }
 
-export type SceneryKind = 'tree' | 'pine' | 'rock' | 'peak';
-export interface Prop {
-  kind: SceneryKind;
-  x: number;
-  /** Ground y at its foot — props stand ON the terrain, never float (rule A1). */
-  y: number;
-  /** Height in stage units. */
-  h: number;
-  /** Which parallax layer it belongs to: 0 far … 3 foreground. */
-  depth: number;
+// ─────────────────────────────────────────────────────────────────────────────
+// THE GROUND, DRAWN.
+//
+// In CHUNKS, because one path across 11,000 units would be a single enormous
+// surface to rasterise and only ~400 units of it are ever on screen. A chunk is
+// 900 units — wider than a phone, so at most two are ever needed — and the screen
+// mounts the one the camera is in plus its neighbours. Walking a whole branch
+// therefore costs three <Path>s at a time instead of 320 views, and the chunk
+// index changes about once a lesson rather than once a frame.
+//
+// DETERMINISTIC FROM x. A tuft at x=1840 is the same tuft every time the screen
+// is opened, so walking back past it does not find a different meadow.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** World units in one drawn chunk of ground. */
+export const CHUNK = 900;
+/**
+ * How far past its own edge a chunk draws, in world units.
+ *
+ * Two chunks that butt exactly are not seamless: each anti-aliases its own edge,
+ * so the join shows as a hairline lighter than the fill either side of it — and a
+ * bush standing on the boundary is sliced down the middle by the clip. Chunks
+ * therefore OVERLAP by this much and redraw each other's edge. The geometry is
+ * deterministic from world x, so the two copies land on exactly the same pixels.
+ */
+export const CHUNK_PAD = 26;
+
+/**
+ * The ground line for one chunk, as a filled path in the 360-tall design space.
+ *
+ * Sampled every `step` units and joined with straight segments. That is not a
+ * compromise: the tightest wave in `groundAt` has a wavelength of 446, so at a
+ * step of 18 the deepest a chord can sag below the true curve is under a fifth of
+ * a unit — a tenth of a hairline. What made the old ground look stepped was 40-wide
+ * FLAT-TOPPED rectangles, not the sampling.
+ */
+export function groundPath(x0: number, w = CHUNK, bottom = 380, step = 18): string {
+  let d = `M0 ${groundAt(x0).toFixed(1)}`;
+  for (let x = step; x < w; x += step) d += ` L${x} ${groundAt(x0 + x).toFixed(1)}`;
+  d += ` L${w} ${groundAt(x0 + w).toFixed(1)} L${w} ${bottom} L0 ${bottom} Z`;
+  return d;
 }
 
 /**
- * Everything standing between two x positions, for one depth.
+ * WHAT GROWS ON IT — tufts, stones and low bushes standing on the ground line.
  *
- * Spacing is jittered around a pitch rather than being even, because a row of
- * evenly-spaced trees reads as a fence. The jitter is from `hash`, so it is the
- * same forest every time.
+ * Same ink as the ground and returned as more subpaths of the same fill, so it
+ * costs nothing extra to draw and cannot drift out of register with the hill it
+ * stands on: every item is placed at `groundAt(x)` exactly, so it is planted
+ * rather than floating (rule A1).
+ *
+ * They only read where they break the silhouette against the sky, which is the
+ * whole reason they are here — a bare curve says "graph", a curve with things
+ * growing out of it says "outside".
  */
-export function propsBetween(x0: number, x1: number, depth: number): Prop[] {
-  const pitch = [420, 260, 190, 300][depth];
-  const out: Prop[] = [];
-  const start = Math.floor(x0 / pitch) - 1;
-  const end = Math.ceil(x1 / pitch) + 1;
-  for (let i = start; i <= end; i++) {
-    const r = hash(i * 7 + depth * 131);
-    const r2 = hash(i * 13 + depth * 57);
-    const x = i * pitch + (r - 0.5) * pitch * 0.55;
-    // The far depths are ridgelines and pines; near depths are trees and rocks.
-    const kind: SceneryKind = depth === 0 ? 'peak' : depth === 1 ? 'pine' : r2 > 0.72 ? 'rock' : 'tree';
-    const base = [150, 74, 96, 120][depth];
-    const h = base * (0.7 + r2 * 0.6);
-    out.push({ kind, x, y: groundAt(x), h, depth });
+export function groundDeco(x0: number, w = CHUNK): string {
+  const PITCH = 23;
+  const i0 = Math.floor(x0 / PITCH);
+  const i1 = Math.ceil((x0 + w) / PITCH);
+  let d = '';
+  for (let i = i0; i <= i1; i++) {
+    const wx = i * PITCH + (hash(i * 7.7) - 0.5) * PITCH * 0.85;
+    const x = wx - x0;
+    const y = groundAt(wx);
+    const r = hash(i * 3.1);
+    if (r < 0.52) {
+      // A TUFT: three blades of different lengths leaning different ways. One
+      // blade reads as a hair; three read as grass.
+      const n = 2 + Math.floor(hash(i * 5.3) * 2);
+      for (let b = 0; b <= n; b++) {
+        const bx = x + (b - n / 2) * 2.6;
+        const h = 4.5 + hash(i * 11.3 + b) * 6.5;
+        const lean = (hash(i * 17.9 + b) - 0.5) * 5.5;
+        d += ` M${(bx - 1.1).toFixed(1)} ${(y + 1).toFixed(1)}`
+          + ` L${(bx + lean).toFixed(1)} ${(y - h).toFixed(1)}`
+          + ` L${(bx + 1.1).toFixed(1)} ${(y + 1).toFixed(1)} Z`;
+      }
+    } else if (r < 0.72) {
+      // A STONE. Flat-bottomed and lopsided; a circle would read as a ball.
+      const rw = 2.6 + hash(i * 23.1) * 3.4;
+      const rh = rw * (0.55 + hash(i * 29.3) * 0.4);
+      d += ` M${(x - rw).toFixed(1)} ${(y + 1).toFixed(1)}`
+        + ` L${(x - rw * 0.55).toFixed(1)} ${(y - rh).toFixed(1)}`
+        + ` L${(x + rw * 0.35).toFixed(1)} ${(y - rh * 0.82).toFixed(1)}`
+        + ` L${(x + rw).toFixed(1)} ${(y + 1).toFixed(1)} Z`;
+    } else if (r < 0.82) {
+      // A BUSH — a low rounded clump, the only rounded thing down here.
+      const bw = 6 + hash(i * 31.7) * 6;
+      const bh = 6 + hash(i * 37.1) * 7;
+      d += ` M${(x - bw).toFixed(1)} ${(y + 1).toFixed(1)}`
+        + ` Q${(x - bw * 0.8).toFixed(1)} ${(y - bh).toFixed(1)} ${(x - bw * 0.15).toFixed(1)} ${(y - bh * 0.86).toFixed(1)}`
+        + ` Q${(x + bw * 0.5).toFixed(1)} ${(y - bh * 1.16).toFixed(1)} ${(x + bw).toFixed(1)} ${(y + 1).toFixed(1)} Z`;
+    }
   }
-  return out;
+  return d;
 }
 
-/** The moon: one per branch, high and far, and it never moves with the camera. */
-export const MOON = { x: 0.22, y: 0.24, r: 54 };
+/** The drawn width of a chunk, and where its left edge sits in the world. */
+export const CHUNK_W = CHUNK + CHUNK_PAD * 2;
+export function chunkLeft(chunk: number): number { return chunk * CHUNK - CHUNK_PAD; }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SCENES — one place per unit, so crossing a boundary changes the world.
-//
-// The reference images are seven PLACES, not one texture: a moonlit hilltop, a
-// pine forest, a town skyline at dusk. Scattering the same props evenly over
-// 10,000 units gives depth but never arrival — you walk for twenty minutes and
-// never get anywhere. A unit is the natural grain: five or six lessons, which at
-// SPAN each is a decent stretch of country before the scenery changes.
-//
-// Only the CAST and the DENSITY change, never the tone ramp — the layers stay
-// pale-to-dark by depth in every scene, because that ramp is what makes the
-// stacking read at all (§19).
-// ─────────────────────────────────────────────────────────────────────────────
-
-export interface Scene {
-  name: string;
-  /** What stands at each depth: 0 far … 3 near. */
-  cast: [SceneryKind, SceneryKind, SceneryKind, SceneryKind];
-  /** Multiplies the pitch — above 1 is sparser, below 1 is crowded. */
-  spread: number;
-  /** Multiplies prop height. A forest is tall; a moor is not. */
-  scale: number;
-  hero: 'moon' | 'sun' | 'none';
-}
-
-export const SCENES: Scene[] = [
-  { name: 'the hills',   cast: ['peak', 'pine', 'tree', 'rock'], spread: 1.15, scale: 1.0, hero: 'moon' },
-  { name: 'deep forest', cast: ['peak', 'pine', 'tree', 'tree'], spread: 0.62, scale: 1.35, hero: 'none' },
-  { name: 'the moor',    cast: ['peak', 'rock', 'rock', 'tree'], spread: 1.45, scale: 0.78, hero: 'sun' },
-  { name: 'the ridge',   cast: ['peak', 'peak', 'pine', 'rock'], spread: 0.95, scale: 1.15, hero: 'moon' },
-  { name: 'the orchard', cast: ['peak', 'tree', 'tree', 'rock'], spread: 0.80, scale: 1.0, hero: 'sun' },
-  { name: 'the pass',    cast: ['peak', 'peak', 'rock', 'rock'], spread: 1.25, scale: 1.25, hero: 'none' },
-];
-
-/** Which scene an x falls in, given where each unit starts. */
-export function sceneAt(x: number, unitStarts: number[]): Scene {
-  let k = 0;
-  for (let i = 0; i < unitStarts.length; i++) if (x >= unitStarts[i]) k = i;
-  return SCENES[k % SCENES.length];
-}
-
-/** Props for one depth, honouring whichever scene each x falls in. */
-export function sceneProps(x0: number, x1: number, depth: number, unitStarts: number[]): Prop[] {
-  const out: Prop[] = [];
-  const basePitch = [420, 260, 190, 300][depth];
-  const baseH = [150, 74, 96, 120][depth];
-  let x = Math.floor(x0 / basePitch) * basePitch;
-  let i = 0;
-  while (x < x1 && i < 4000) {
-    const sc = sceneAt(x, unitStarts);
-    const pitch = basePitch * sc.spread;
-    const r = hash(Math.round(x) * 7 + depth * 131);
-    const r2 = hash(Math.round(x) * 13 + depth * 57);
-    const px = x + (r - 0.5) * pitch * 0.5;
-    out.push({
-      kind: sc.cast[depth],
-      x: px,
-      y: groundAt(px),
-      h: baseH * sc.scale * (0.72 + r2 * 0.56),
-      depth,
-    });
-    x += pitch;
-    i++;
-  }
-  return out;
+/** Ground and everything on it, as ONE fill, in coordinates local to `chunkLeft`. */
+export function groundArt(chunk: number): string {
+  const x0 = chunkLeft(chunk);
+  return groundPath(x0, CHUNK_W) + groundDeco(x0, CHUNK_W);
 }
 
 /**
