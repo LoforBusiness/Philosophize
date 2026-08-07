@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import Animated, {
   useSharedValue, useAnimatedStyle, useDerivedValue, useFrameCallback,
   withTiming, withSequence, withDelay, runOnJS, Easing, type SharedValue,
 } from 'react-native-reanimated';
 import Svg, { Path as SvgPath } from 'react-native-svg';
 import Stickman from '@/components/lesson/cinematic/Stickman';
-import { pose, stand, type Bundle } from '@/components/lesson/cinematic/rig';
-import { strideMode } from '@/components/lesson/cinematic/moves';
+import { pose, type Bundle } from '@/components/lesson/cinematic/rig';
 import {
   layout, groundAt, groundArt, chunkLeft, gaitForSpan, jumpForSpan,
   LEAD, WALK_SECONDS, SPAN, CHUNK, CHUNK_W, GROUND_TOP, SIGN_DX,
   type Marker,
 } from './worldPath';
+import { figureAt } from './walkFigure';
 import { sceneLayers, DISC, SCENE_NAMES, TILE_W, type LayerArt } from './sceneArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -113,10 +114,39 @@ export default function BranchWorld({
   const [at, setAt] = useState(current);
   const [busy, setBusy] = useState(false);
 
-  useFrameCallback((f) => {
+  // STOPPED WHEN THIS SCREEN IS NOT THE ONE YOU ARE LOOKING AT.
+  //
+  // This clock is not a counter. It feeds `D` below, which runs figureAt() and
+  // pose() — the full skeleton solve, the same rig the lessons use — and commits
+  // it to every bone of the figure. Every frame.
+  //
+  // And opening a lesson does not unmount this screen. The branches stack is a
+  // plain <Stack>, nothing calls enableFreeze or freezeOnBlur, so pushing a lesson
+  // leaves the whole world mounted and animating UNDERNEATH it. The reader sees a
+  // cinematic lesson; the UI thread is solving two figures, one of which is behind
+  // an opaque screen for the entire lesson.
+  //
+  // This is the third time this exact defect has been found in this app — see the
+  // identical notes on StickmanStroll's frame callback and HomeHeader's drift.
+  // Both were guarded; this one, the heaviest of the three, shipped without it.
+  const frame = useFrameCallback((f) => {
     'worklet';
     clock.value += Math.min(0.05, (f.timeSincePreviousFrame ?? 16) / 1000);
-  }, true);
+  }, false);
+
+  const [focused, setFocused] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      setFocused(true);
+      return () => setFocused(false);
+    }, [])
+  );
+  useEffect(() => {
+    // Pauses rather than resets: the clock stops where it was, so coming back
+    // continues the breath instead of snapping the figure to a fresh pose.
+    frame.setActive(focused);
+    return () => frame.setActive(false);
+  }, [focused, frame]);
 
   const camFor = useCallback((x: number) => x - width * LEAD, [width]);
 
@@ -199,8 +229,10 @@ export default function BranchWorld({
     // standing in the right place from the first frame. And it buys the shot its
     // establishing beat: someone already in motion when a screen appears reads as
     // gone, while someone who stands and then leaves reads as leaving.
-    wp.value = withDelay(WALK_LEAD_IN, withTiming(1, { duration: ms, easing: Easing.inOut(Easing.quad) }));
-    camX.value = withDelay(WALK_LEAD_IN, withTiming(camFor(target.x), { duration: ms, easing: Easing.inOut(Easing.quad) }, (ok) => {
+    // ONE animation drives the traverse. `figX` follows `wp`, and the camera
+    // follows `figX` — so there is a single clock for the body, the feet and the
+    // ground, and nothing to drift.
+    wp.value = withDelay(WALK_LEAD_IN, withTiming(1, { duration: ms, easing: Easing.inOut(Easing.quad) }, (ok) => {
       'worklet';
       gait.value = 0;
       if (ok) runOnJS(settle)(to, cb);
@@ -216,7 +248,7 @@ export default function BranchWorld({
     const m = markers[i];
     if (!m || busy) return;
     setBusy(true);
-    camX.value = withTiming(camFor(m.x), { duration: DROP_MS * 0.6, easing: Easing.inOut(Easing.quad) });
+    // Only the body is animated; the camera is derived from it.
     figX.value = withTiming(m.x, { duration: DROP_MS * 0.6, easing: Easing.inOut(Easing.quad) });
     figLift.value = withSequence(
       withTiming(150, { duration: DROP_MS * 0.42, easing: Easing.out(Easing.quad) }),
@@ -241,27 +273,33 @@ export default function BranchWorld({
   // mid-step with one foot in the air; falling through to `stand` means it waits
   // there breathing, and takes its first step the instant the traverse begins.
   const D = useDerivedValue<Bundle>(() => {
-    const s = gait.value > 0 && wp.value > 0
-      ? strideMode(wFrom.value, wTo.value, stand(clock.value), wp.value, mode.value)
-      : stand(clock.value);
-    return pose(s, 0, groundAt(figX.value), FIG_K, 1, 1);
+    const walking = gait.value > 0;
+    const f = figureAt(
+      walking ? wFrom.value : figX.value,
+      walking ? wTo.value : figX.value,
+      walking ? wp.value : 0,
+      clock.value,
+      mode.value,
+      walking ? jumpAt.value : -1,
+      jumpH.value,
+      FIG_K,
+    );
+    return pose(f.stance, 0, groundAt(figX.value) - f.lift, FIG_K, 1, 1);
   });
   useDerivedValue(() => {
     if (gait.value > 0) figX.value = wFrom.value + (wTo.value - wFrom.value) * wp.value;
   });
-  // The leap: a half-sine centred on the obstacle, added to whatever the drop is
-  // doing. Zero everywhere else, so a span with nothing to clear never lifts.
-  const airborne = useDerivedValue(() => {
-    if (gait.value === 0 || jumpAt.value < 0) return 0;
-    const d = Math.abs(wp.value - jumpAt.value);
-    const span = 0.16;
-    if (d > span) return 0;
-    return Math.sin((1 - d / span) * Math.PI * 0.5) * jumpH.value;
+  // THE CAMERA IS THE BODY, less the lead. Not a second animation that happens to
+  // carry the same duration and easing — that is two clocks agreeing by luck, and
+  // any frame they disagree on is a frame where the ground slides under planted
+  // feet. Derived, they cannot disagree at all.
+  useDerivedValue(() => {
+    camX.value = figX.value - width * LEAD;
   });
   const figStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: figX.value - camX.value },
-      { translateY: -figLift.value - airborne.value },
+      { translateY: -figLift.value },
     ],
   }));
 

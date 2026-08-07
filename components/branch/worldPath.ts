@@ -265,16 +265,73 @@ export function gaitForSpan(i: number): number {
   return 0;                      // a plain walk
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// THE JUMP.
+//
+// The first one was a half-sine on the figure's y over ±0.16 of the journey —
+// which on a seven-second traverse is TWO AND A QUARTER SECONDS in the air, with
+// the walk cycle still running underneath it. A man floating across the screen for
+// over two seconds, pedalling. Every part of that was wrong.
+//
+// What a jump is, in order: a gather, a shove, a ballistic arc with the legs
+// folded, and a landing that is absorbed rather than arrived at. So:
+//
+//   · It is measured in DISTANCE, not in a fraction of the journey, so it lasts
+//     the same on a long span as a short one.
+//   · The arc is a PARABOLA. A sine hump has its weight in the wrong place —
+//     gravity is constant, so the figure must hang at the top and fall fastest at
+//     the bottom, and that difference is most of what makes an arc read as real.
+//   · The legs stop walking. They tuck.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** World units covered while airborne — about a second at a walk. */
+export const JUMP_RUN = 58;
+/** Units of gather before the foot leaves the ground. */
+export const JUMP_GATHER = 20;
+/** Units of absorb after it lands. */
+export const JUMP_ABSORB = 24;
+
+/** Position within the jump for a distance travelled: 0 at takeoff, 1 at landing. */
+export function jumpPhase(trav: number, takeoff: number): number {
+  'worklet';
+  return (trav - takeoff) / JUMP_RUN;
+}
+
+/** Height above the ground line at jump phase `u`. Zero outside the flight. */
+export function jumpLift(u: number, h: number): number {
+  'worklet';
+  if (u <= 0 || u >= 1) return 0;
+  return 4 * h * u * (1 - u);
+}
+
 /**
- * Where in a traverse the figure JUMPS, and how high — 0 for spans it walks.
+ * How much the figure is compressed at this moment — the gather before the leap
+ * and the absorb after it. 0 while walking or flying, 1 at the deepest crouch.
+ */
+export function jumpCrouch(trav: number, takeoff: number): number {
+  'worklet';
+  const pre = (trav - (takeoff - JUMP_GATHER)) / JUMP_GATHER;
+  if (pre > 0 && pre < 1) return Math.sin(pre * Math.PI * 0.5);   // deepest AT takeoff
+  const post = (trav - (takeoff + JUMP_RUN)) / JUMP_ABSORB;
+  if (post > 0 && post < 1) return Math.cos(post * Math.PI * 0.5); // deepest ON landing
+  return 0;
+}
+
+/**
+ * Where in a traverse the figure JUMPS, and how high — null for spans it walks.
  *
  * Only where the ground actually rises into an obstacle, so the jump is a
  * response to the terrain rather than a trick performed at nothing (rule A1:
- * what the picture does must be true of the world).
+ * what the picture does must be true of the world). `at` is now a DISTANCE from
+ * the start of the span, and the takeoff is placed so the arc peaks over the rise
+ * instead of starting on top of it.
  */
 export function jumpForSpan(fromX: number, toX: number): { at: number; h: number } | null {
-  const mid = (fromX + toX) / 2;
+  const span = toX - fromX;
+  const mid = fromX + span * 0.5;
   const rise = groundAt(mid) - groundAt(fromX);      // negative y is up
   if (rise > -14) return null;                        // nothing worth leaving the ground for
-  return { at: 0.5, h: Math.min(64, 22 - rise * 1.6) };
+  // Take off half a flight early, so the apex sits over the rise.
+  const at = Math.max(JUMP_GATHER + 4, span * 0.5 - JUMP_RUN * 0.5);
+  return { at, h: Math.min(52, 20 - rise * 1.2) };
 }
