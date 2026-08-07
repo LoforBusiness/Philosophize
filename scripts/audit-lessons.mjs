@@ -22,8 +22,8 @@
 //
 // It writes app/previewaudit.tsx on the way in and DELETES it on the way out —
 // any file in app/ is a real route and would ship if left behind (§21).
-const CDP = require('node:http');
-const fs = require('node:fs');
+import CDP from 'node:http';
+import fs from 'node:fs';
 const PORT = +(process.env.PORT || 9381);
 const BASE = 'http://localhost:8847/previewaudit';
 
@@ -51,7 +51,21 @@ const PROBE = `(() => {
   const rings = ringEls.map(R);
   // Text: leaf elements that actually carry characters.
   const textEls = all.filter((d) => vis(d) && d.children.length === 0 && (d.textContent || '').trim().length > 1);
-  const texts = textEls.map((d) => ({ ...R(d), t: (d.textContent || '').trim().slice(0, 24) }));
+  // THE INKED BOX, NOT THE LAYOUT BOX. A centred Text in a wide container has a
+  // box far wider than its glyphs, and comparing boxes reported a steady 17px
+  // "collision" between a target and every label in the column beside it — the
+  // false positive Part 3 of LESSON_RULES already warns about. A Range over the
+  // text node gives the rectangle the characters actually occupy.
+  const inked = (d) => {
+    try {
+      const rg = document.createRange();
+      rg.selectNodeContents(d);
+      const r = rg.getBoundingClientRect();
+      if (r.width > 0.5 && r.height > 0.5) return { x: r.x, y: r.y, w: r.width, h: r.height };
+    } catch (e) { /* fall through */ }
+    return R(d);
+  };
+  const texts = textEls.map((d) => ({ ...inked(d), t: (d.textContent || '').trim().slice(0, 24) }));
   // OWNERSHIP IS A DOM QUESTION, NOT A GEOMETRIC ONE. A ring is a child of its
   // target, so any text inside that same target belongs to it — including text
   // that overflows the target's own box, which a rectangle test wrongly called a
@@ -134,7 +148,16 @@ function allIds() {
     let seen = null;
     for (let step = 0; step < 12; step++) {
       const p = JSON.parse(await ev(PROBE));
-      if (p.open && p.rings.length) { seen = p; break; }
+      if (p.open && p.rings.length) {
+        // LET THE BEAT LAND BEFORE MEASURING. Beat transitions run 0.7–1.3s and
+        // the step between taps was 450ms, so the first pass measured scenes
+        // mid-move and reported overlaps that do not exist once everything has
+        // arrived — 28 of them, across the four lessons whose question beats
+        // animate the most. Re-read after the longest transition in the app.
+        await wait(1600);
+        seen = JSON.parse(await ev(PROBE));
+        break;
+      }
       if (p.done) break;
       // React Native Web needs a REAL click; synthetic pointer events do not fire
       // a Pressable (§21).
@@ -146,11 +169,20 @@ function allIds() {
     ringed++;
 
     // 1 — a ring covering text that is not inside its own target.
+    // ENCLOSING TEXT IS NOT COVERING IT. Several targets are large invisible hit
+    // rectangles laid over drawn art — the art is not their DOM child, but the
+    // ring around the region is exactly right: it says "all of this is one
+    // button". What is wrong is a border CUTTING THROUGH glyphs, which happens
+    // only when the text is partly in and partly out. Testing plain intersection
+    // instead flagged 28 of the former and none of the latter.
     seen.rings.forEach((r, ri) => {
       for (const ti of (seen.foreign[ri] || [])) {
         const t = seen.texts[ti];
+        const inside = t.x >= r.x - 1 && t.y >= r.y - 1 &&
+                       t.x + t.w <= r.x + r.w + 1 && t.y + t.h <= r.y + r.h + 1;
+        if (inside) continue;
         const d = overlap(r, t);
-        if (d >= 4) findings.push({ lid, kind: 'ring-over-text', detail: `${d.toFixed(0)}px over "${t.t}"` });
+        if (d >= 4) findings.push({ lid, kind: 'ring-cuts-text', detail: `${d.toFixed(0)}px through "${t.t}"` });
       }
     });
     // 2 — two rings overlapping each other: the reader cannot tell them apart.
