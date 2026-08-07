@@ -9,6 +9,7 @@ import {
 import { BEATS } from './political7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // TWO SOURCES for the same right, facing each other across the stage:
 //   · stage LEFT  — a STONE TABLET, half-buried, "SPEAK YOUR MIND" chiselled into it
@@ -158,16 +159,14 @@ export default function Political7Scene({ clock, bt, bi, i, picked, onPick }: Sc
           <View style={styles.askWrap} pointerEvents="none">
             <Text style={styles.askLabel}>TAP THE SOURCE THAT SURVIVES</Text>
           </View>
-          <Pressable
-            style={styles.stoneHit}
+          <Target id={'stone'} correct={true} picked={picked} onPick={onPick}
+        style={styles.stoneHit}
             disabled={answered}
-            onPress={() => onPick('stone', true)}
-          />
-          <Pressable
-            style={styles.paperHit}
+      />
+          <Target id={'paper'} correct={false} picked={picked} onPick={onPick}
+        style={styles.paperHit}
             disabled={answered}
-            onPress={() => onPick('paper', false)}
-          />
+      />
         </>
       )}
 

@@ -9,6 +9,7 @@ import {
 import { BEATS } from './metaphysics31Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // THREE NESTED ANSWERS. The slab, the ring drawn round the big hole, and the empty
 // middle of that ring are three targets drawn INSIDE ONE ANOTHER, so the reader picks
@@ -114,10 +115,9 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
           <View key={k} style={[styles.hatch, { top: 22 + k * 22 }]} />
         ))}
       </Animated.View>
-      <Pressable
+      <Target id={'cheese'} correct={false} picked={picked} onPick={onPick}
         style={styles.slabHit}
         disabled={!live || answered}
-        onPress={() => onPick('cheese', false)}
       />
 
       {SMALL.map((s, k) => (
@@ -126,22 +126,20 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
 
       {/* the big hole: an outer ring (THE RIM) with its empty middle (THE GAP) on top */}
       <Animated.View style={[styles.bigWrap, bigStyle]}>
-        <Pressable
+        <Target id={'rim'} correct={true} picked={picked} onPick={onPick}
           style={styles.rim}
           disabled={!live || answered}
-          onPress={() => onPick('rim', true)}
         >
           <View style={[styles.rimInner, rimOn && styles.pickRight]} />
-        </Pressable>
-        <Pressable
+        </Target>
+        <Target id={'gap'} correct={false} picked={picked} onPick={onPick}
           style={styles.gap}
           disabled={!live || answered}
-          onPress={() => onPick('gap', false)}
         >
           <View style={[styles.gapInner, wrong('gap') && styles.pickWrong]}>
             <Text style={styles.gapText} numberOfLines={1}>THE GAP</Text>
           </View>
-        </Pressable>
+        </Target>
       </Animated.View>
 
       {/* the count */}
@@ -153,26 +151,24 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
       {/* the two labels that sit outside their shapes, and tap through to them */}
       <Animated.View style={[styles.leader, chipStyle]} pointerEvents="none" />
       <Animated.View style={[styles.chip, CHIP_RIM, chipStyle]}>
-        <Pressable
+        <Target id={'rim'} correct={true} picked={picked} onPick={onPick}
           style={styles.fill}
           disabled={!live || answered}
-          onPress={() => onPick('rim', true)}
         >
           <View style={[styles.chipInner, rimOn && styles.pickRight]}>
             <Text style={[styles.chipText, rimOn && styles.onInk]} numberOfLines={1}>THE RIM</Text>
           </View>
-        </Pressable>
+        </Target>
       </Animated.View>
       <Animated.View style={[styles.chip, CHIP_CHEESE, chipStyle]}>
-        <Pressable
+        <Target id={'cheese'} correct={false} picked={picked} onPick={onPick}
           style={styles.fill}
           disabled={!live || answered}
-          onPress={() => onPick('cheese', false)}
         >
           <View style={[styles.chipInner, wrong('cheese') && styles.pickWrong]}>
             <Text style={styles.chipText} numberOfLines={1}>THE CHEESE</Text>
           </View>
-        </Pressable>
+        </Target>
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />

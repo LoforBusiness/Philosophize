@@ -9,6 +9,7 @@ import {
 import { BEATS } from './epistemology8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { TargetRing } from './Target';
 
 // A pile of spare BECAUSE-blocks downstage far-left, and a tower of reasons hanging
 // stage-right that grows DOWNWARD — each new reason wedged UNDER the last, because
@@ -256,6 +257,7 @@ function EscapeCard({
           <EscIcon kind={kind} on={filled} />
           <Text style={[styles.escLabel, filled && styles.escLabelOn]}>{label}</Text>
         </View>
+        <TargetRing answered={disabled} radius={4} />
       </Pressable>
     </Animated.View>
   );

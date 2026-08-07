@@ -9,6 +9,7 @@ import {
 import { BEATS } from './epistemology32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // FOUR MAPS OF ONE COAST, and the answer targets are the four panels — you answer by
 // picking a SCALE (E33). The four profiles come out of a single `coast()` function
@@ -128,10 +129,13 @@ function Panel({
   const label = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.maps - k) }));
 
   return (
-    <Pressable
+    <Target
+      id={id}
+      correct={m.correct}
+      picked={picked}
+      onPick={onPick}
       style={[styles.panel, { left: COL[k % 2], top: ROW[k > 1 ? 1 : 0] }]}
-      disabled={!live || answered}
-      onPress={() => onPick(id, m.correct)}
+      disabled={!live}
     >
       <View
         style={[
@@ -160,7 +164,7 @@ function Panel({
           <Text style={[styles.nameText, on && styles.onInk]} numberOfLines={1}>{m.name}</Text>
         </Animated.View>
       </View>
-    </Pressable>
+    </Target>
   );
 }
 

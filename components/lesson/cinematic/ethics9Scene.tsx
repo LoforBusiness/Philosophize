@@ -9,6 +9,7 @@ import {
 import { BEATS } from './ethics9Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // Two claims pinned side by side on a board, stage right, with the figure working
 // downstage left of them.
@@ -120,10 +121,9 @@ export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick }: Scene
         <View style={[styles.pin, { left: NOTE_LX + NOTE_W / 2 - 3 }]} pointerEvents="none" />
         <View style={[styles.pin, { left: NOTE_RX + NOTE_W / 2 - 3 }]} pointerEvents="none" />
 
-        <Pressable
+        <Target id={'mother'} correct={target('mother').correct} picked={picked} onPick={onPick}
           style={[styles.note, { left: NOTE_LX }]}
           disabled={!showPick || answered}
-          onPress={() => onPick('mother', target('mother').correct)}
         >
           <View
             style={[
@@ -142,12 +142,11 @@ export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick }: Scene
               Stay{'\n'}with{'\n'}her
             </Text>
           </View>
-        </Pressable>
+        </Target>
 
-        <Pressable
+        <Target id={'fight'} correct={target('fight').correct} picked={picked} onPick={onPick}
           style={[styles.note, { left: NOTE_RX }]}
           disabled={!showPick || answered}
-          onPress={() => onPick('fight', target('fight').correct)}
         >
           <View
             style={[
@@ -166,7 +165,7 @@ export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick }: Scene
               Join{'\n'}the{'\n'}fight
             </Text>
           </View>
-        </Pressable>
+        </Target>
 
         {/* the claim he acts on fills in — it does not come down */}
         <Animated.View style={[styles.actedRule, takenStyle]} pointerEvents="none" />
@@ -182,10 +181,9 @@ export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick }: Scene
 
       {/* ── Q1's third option: the tempting "nothing is owed" ───────────────── */}
       {showPick && (
-        <Pressable
+        <Target id={'neither'} correct={target('neither').correct} picked={picked} onPick={onPick}
           style={styles.third}
           disabled={answered}
-          onPress={() => onPick('neither', target('neither').correct)}
         >
           <View
             style={[
@@ -195,7 +193,7 @@ export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick }: Scene
           >
             <Text style={styles.thirdText} numberOfLines={1}>NEITHER — HE CHOSE WELL</Text>
           </View>
-        </Pressable>
+        </Target>
       )}
 
       <View style={styles.ground} pointerEvents="none" />

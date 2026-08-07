@@ -25,9 +25,10 @@ const LEGACY = new Set(['argument', 'builder']);
 const problems = [];
 const warnings = [];
 const bands = [];
-// I70 debt: scenes whose answer targets are not yet wrapped in <Target>, so
-// nothing marks them as tappable. HIGH-WATER MARK — may only go down.
-const UNRINGED_BUDGET = 6;
+// I70: scenes whose answer targets are not marked as tappable. CLOSED — every
+// one of the 102 is wrapped in <Target> or carries a <TargetRing>, so this is a
+// hard zero rather than a budget, and a new lesson that forgets fails the build.
+const UNRINGED_BUDGET = 0;
 const unringed = [];
 let ok = 0;
 
@@ -124,11 +125,11 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
   // so the panel can say how many there are — but only for scenes that USE it, so
   // this is the half that cannot be left to memory.
   //
-  // Carried as a DEBT RATCHET rather than a hard error, the way CARD_BUDGET is:
-  // six scenes hold their targets in something other than a plain Pressable and
-  // have to be converted by hand. Turning those into build failures on the day
-  // the rule landed would have stopped everyone else's work; a high-water mark
-  // that may only fall makes them impossible to forget and impossible to add to.
+  // This landed as a debt ratchet with six scenes outstanding — the ones holding
+  // their targets in something other than a plain Pressable, which the codemod
+  // could not convert. All six are done, so UNRINGED_BUDGET is 0 and this is a
+  // hard rule again. Do not reopen it: a scene that answers by tapping and has no
+  // ring is a scene where the reader cannot tell what to press.
   if (/onPick\(/.test(src) && !/from '\.\/Target'/.test(src)) unringed.push(f);
 
   // H59 — the band. A scene with a CAMERA is exempt from the bottom rule, because

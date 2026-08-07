@@ -9,6 +9,7 @@ import {
 import { BEATS } from './political11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { TargetRing } from './Target';
 
 // A three-notch DIAL over three empty plots of ground. Set the dial and that plot
 // builds: a tower, a small house, a ring. The plots accumulate, so by the question
@@ -223,6 +224,7 @@ function PlotColumn({
           <View style={[styles.plateInner, answered && correct && styles.plateRight, answered && chosen && !correct && styles.plateWrong]}>
             <Text style={[styles.plateText, answered && correct && styles.plateTextOn]}>{label}</Text>
           </View>
+          <TargetRing answered={answered} radius={4} />
         </Pressable>
       ) : (
         <Animated.View style={[styles.plate, { left }, st]} pointerEvents="none">

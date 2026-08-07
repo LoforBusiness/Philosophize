@@ -183,6 +183,17 @@ export default function Target({
  * Pressable it cannot give up (a drag handle, a control with its own gesture).
  */
 export function TargetRing({ answered, radius = 4 }: { answered: boolean; radius?: number }) {
+  // Registers like a Target does, so a scene using rings instead of Targets still
+  // gets a counted hint. Without this the panel silently falls back to "Answer in
+  // the scene above" — the wording this whole change exists to replace — for
+  // exactly the scenes whose targets are hardest to spot.
+  const reg = useContext(TargetCtx);
+  const key = useId();
+  useEffect(() => {
+    reg?.add(key);
+    return () => reg?.remove(key);
+  }, [reg, key]);
+
   const breath = useSharedValue(0);
   useEffect(() => {
     if (answered) { cancelAnimation(breath); breath.value = withTiming(0, { duration: 180 }); return; }
