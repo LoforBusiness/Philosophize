@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, useDerivedValue, useFrameCallback,
-  withTiming, withSequence, runOnJS, Easing, type SharedValue,
+  withTiming, withSequence, withDelay, runOnJS, Easing, type SharedValue,
 } from 'react-native-reanimated';
 import Svg, { Path as SvgPath } from 'react-native-svg';
 import Stickman from '@/components/lesson/cinematic/Stickman';
@@ -65,6 +65,10 @@ const FIG_K = 0.62;
 const H = 360;
 /** How long the figure takes to drop in beside a lesson the reader tapped. */
 const DROP_MS = 900;
+/** How long the figure stands before setting off after a finished lesson. Long
+ *  enough for the screen behind it to finish arriving; short enough to read as a
+ *  breath rather than a stall. */
+const WALK_LEAD_IN = 520;
 /** A sign's box: two lines of title, the caption, the post and the foot. The
  *  stack is bottom-aligned inside it, so the foot always meets the ground. */
 const SIGN_H = 106;
@@ -184,12 +188,23 @@ export default function BranchWorld({
     const ms = WALK_SECONDS * 1000;
     const cb = advanceTo.done;
     const to = advanceTo.to;
-    wp.value = withTiming(1, { duration: ms, easing: Easing.inOut(Easing.quad) });
-    camX.value = withTiming(camFor(target.x), { duration: ms, easing: Easing.inOut(Easing.quad) }, (ok) => {
+    // ── A BEAT BEFORE IT SETS OFF ──────────────────────────────────────────────
+    //
+    // Arriving on this screen mounts a photograph, a world and a list of lessons.
+    // A seven-second animation beginning in the middle of that spends its opening
+    // stuttering — which is the whole of the lag: the walk was smooth, the mount
+    // was not, and they were happening on the same frames.
+    //
+    // The delay is on the ANIMATIONS, not on arming the walk, so the figure is
+    // standing in the right place from the first frame. And it buys the shot its
+    // establishing beat: someone already in motion when a screen appears reads as
+    // gone, while someone who stands and then leaves reads as leaving.
+    wp.value = withDelay(WALK_LEAD_IN, withTiming(1, { duration: ms, easing: Easing.inOut(Easing.quad) }));
+    camX.value = withDelay(WALK_LEAD_IN, withTiming(camFor(target.x), { duration: ms, easing: Easing.inOut(Easing.quad) }, (ok) => {
       'worklet';
       gait.value = 0;
       if (ok) runOnJS(settle)(to, cb);
-    });
+    }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [advanceTo]);
 
@@ -221,8 +236,12 @@ export default function BranchWorld({
 
   // The figure. Walks when the gait is up, breathes otherwise — the same rig the
   // lessons use, so the feet plant instead of sliding.
+  // `wp > 0` as well as the gait, and that is what makes the lead-in a STAND
+  // rather than a freeze. A stride pose held at zero progress is a figure stopped
+  // mid-step with one foot in the air; falling through to `stand` means it waits
+  // there breathing, and takes its first step the instant the traverse begins.
   const D = useDerivedValue<Bundle>(() => {
-    const s = gait.value > 0
+    const s = gait.value > 0 && wp.value > 0
       ? strideMode(wFrom.value, wTo.value, stand(clock.value), wp.value, mode.value)
       : stand(clock.value);
     return pose(s, 0, groundAt(figX.value), FIG_K, 1, 1);

@@ -38,6 +38,11 @@ import BranchWorld, { type WorldLesson } from '@/components/branch/BranchWorld';
 // drift apart.
 const CEL_MS = 1500;
 const CEL_DELAY = 380;          // let the push settle and the unit finish opening
+
+/** How long before the units that are CLOSED bother to build their contents.
+ *  Nothing is visible inside a closed unit, so there is no reason for thirty-odd
+ *  lesson rows to be competing with the walk for the first frames. */
+const LIST_MOUNT_DELAY = 900;
 const CEL_DOT: [number, number] = [0.0, 0.28];
 const CEL_LINE: [number, number] = [0.3, 0.62];
 const CEL_WORD: [number, number] = [0.64, 1.0];
@@ -112,6 +117,15 @@ export default function BranchDetailScreen() {
 
   // Which unit the user has explicitly opened. null = follow their progress.
   const [pinned, setPinned] = useState<string | null>(null);
+  // A closed unit still built every one of its lesson rows so its height could be
+  // measured ahead of being opened — thirty-odd rows of dots and titles, mounted
+  // on the same frame as the world and the walk. They are worth measuring ahead,
+  // just not YET.
+  const [listReady, setListReady] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setListReady(true), LIST_MOUNT_DELAY);
+    return () => clearTimeout(t);
+  }, []);
   const scroller = useRef<ScrollView | null>(null);
   // Live geometry, kept by onLayout: where each unit sits in the list, how tall
   // each unit's expanding body is, and where the list starts in the scroll
@@ -190,35 +204,44 @@ export default function BranchDetailScreen() {
     clearLessonFinished();
     if (!u || idx < 0) return;
 
+    // ── LAND ON THE WORLD ─────────────────────────────────────────────────────
+    //
+    // This used to scroll to the finished unit's ROW, and the row sits BELOW the
+    // world strip. So finishing a lesson carried the reader straight past the one
+    // thing that was about to move, and the seven-second walk played to an empty
+    // room. Scroll back up afterwards and the figure is simply standing at the
+    // next lesson — which reads as the walk being broken rather than missed.
+    //
+    // The scroll to the top is not a no-op that could be dropped instead. The
+    // branch screen is NOT always a fresh mount: `router.replace` can land on the
+    // instance already in the stack, scroll position and all, so without this the
+    // reader is returned to wherever they were when they pressed START.
+    scroller.current?.scrollTo({ y: 0, animated: false });
+
     // Pin the unit they just worked in. Without this a lesson that COMPLETED its
     // unit would slide the accordion to the next one before they saw the tick
     // land — `firstIncomplete` has already moved by the time we get here.
     setPinned(u.id);
     setCelTarget({ unitId: u.id, doneIndex: idx });
-    // Walk to the lesson AFTER the one just finished. Computed against the flat
-    // teaching order, not the unit, so finishing a unit walks on into the next.
-    {
-      let flat = 0;
-      for (const uu of allUnits) {
-        if (uu.id === u.id) { flat += idx; break; }
-        flat += uu.lessons.length;
-      }
-      const next = flat + 1;
-      if (next < allUnits.reduce((n, x) => n + x.lessons.length, 0)) {
-        setWalkTo({ from: flat, to: next, done: () => setWalkTo(null) });
-      }
+
+    // Hand the walk over IMMEDIATELY, so the figure is placed at the lesson just
+    // finished on the very first frame. The pause before it sets off belongs to
+    // the world, not to here — armed late, the figure would be standing at its
+    // DESTINATION for half a second and then snap backwards to start.
+    let flat = 0;
+    for (const uu of allUnits) {
+      if (uu.id === u.id) { flat += idx; break; }
+      flat += uu.lessons.length;
+    }
+    const next = flat + 1;
+    if (next < allUnits.reduce((n, x) => n + x.lessons.length, 0)) {
+      setWalkTo({ from: flat, to: next, done: () => setWalkTo(null) });
     }
     cel.value = 0;
     cel.value = withDelay(CEL_DELAY, withTiming(1, { duration: CEL_MS, easing: Easing.linear }));
 
-    // Bring the row into view on the same beat. The unit's y is not laid out yet
-    // on this pass, so this waits a frame rather than reading a stale zero.
-    const t = setTimeout(() => {
-      const y = unitY.current[u.id];
-      if (y != null) {
-        scroller.current?.scrollTo({ y: Math.max(0, listY.current + y - 10), animated: true });
-      }
-    }, 90);
+    // Once more after the list has laid itself out, which can nudge the offset.
+    const t = setTimeout(() => scroller.current?.scrollTo({ y: 0, animated: false }), 90);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [justFinished?.seq]);
@@ -352,6 +375,7 @@ export default function BranchDetailScreen() {
                 model={u}
                 glyph={pres.glyph}
                 open={openId === u.unit.id}
+                mountBody={openId === u.unit.id || listReady}
                 cel={cel}
                 celDoneIndex={celTarget?.unitId === u.unit.id ? celTarget.doneIndex : null}
                 onToggle={() => toggleUnit(u.unit.id)}
@@ -379,6 +403,7 @@ function UnitCard({
   model,
   glyph,
   open,
+  mountBody,
   cel,
   celDoneIndex,
   onToggle,
@@ -389,6 +414,8 @@ function UnitCard({
   model: UnitModel;
   glyph: GlyphName;
   open: boolean;
+  /** Whether to build the (invisible, when closed) contents yet. */
+  mountBody: boolean;
   /** 0→1 advance clock, shared by the whole screen. */
   cel: SharedValue<number>;
   /** Index within THIS unit of the lesson just finished, or null if not this one. */
@@ -489,6 +516,7 @@ function UnitCard({
       </Pressable>
 
       <Animated.View style={[styles.bodyClip, bodyStyle]} pointerEvents={open ? 'auto' : 'none'}>
+        {!mountBody ? null : (
         <View
           style={styles.body}
           onLayout={(e) => {
@@ -540,6 +568,7 @@ function UnitCard({
             ))}
           </View>
         </View>
+        )}
       </Animated.View>
     </Animated.View>
   );
