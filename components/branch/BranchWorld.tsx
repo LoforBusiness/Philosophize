@@ -65,6 +65,9 @@ const FIG_K = 0.62;
 const H = 360;
 /** How long the figure takes to drop in beside a lesson the reader tapped. */
 const DROP_MS = 900;
+/** A sign's box: two lines of title, the caption, the post and the foot. The
+ *  stack is bottom-aligned inside it, so the foot always meets the ground. */
+const SIGN_H = 106;
 
 export interface WorldLesson {
   id: string; title: string;
@@ -379,7 +382,16 @@ function MarkerLayer({ camX, markers, lessons, at, m, onTap }: {
           <Pressable
             key={mk.lessonId}
             onPress={() => onTap(i)}
-            style={{ position: 'absolute', left: sx - 74, top: sy - 132, width: 148, alignItems: 'center' }}
+            // ANCHORED AT ITS FOOT, not at its top. Positioned from the top, a
+            // sign's height decided where it stood: a one-line title made a
+            // shorter stack, so the post ended in mid-air 48 units above the
+            // ground with nothing holding it up (rule A1). Stacking from the
+            // bottom of a fixed box means the foot lands on the ground line
+            // whatever the title does above it.
+            style={{
+              position: 'absolute', left: sx - 74, top: sy - SIGN_H + 5,
+              width: 148, height: SIGN_H, alignItems: 'center', justifyContent: 'flex-end',
+            }}
           >
             <View style={[
               styles.card,
