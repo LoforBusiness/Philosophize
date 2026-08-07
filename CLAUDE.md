@@ -100,7 +100,7 @@ Philosophize/
 │   ├── gamification/            # StreakBook, StreakWeek, RankUpScreen
 │   ├── widget/                  # Android home-screen widget surface
 │   └── shared/                  # SketchIcon, Glyph, PhilosopherSheet, RanksBadgesSheet,
-│                                #   SavedQuotesSheet, PaywallSheet, QuoteBook, RankSeal,
+│                                #   SavedQuotesSheet, PaywallSheet, RankSeal,
 │                                #   UpdateGate, DailyQuoteWidget, Sketch{Pie,Bar,Line}Chart,
 │                                #   Portrait, ScreenTransition, PressableScale
 ├── data/                        # Curriculum + reference content (version-controlled)
