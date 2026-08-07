@@ -9,6 +9,7 @@ import {
 import { BEATS } from './logic8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A street at night: a soaked patch of pavement stage LEFT, a garden with a
 // sprinkler stage RIGHT, behind a kerb. The figure double-takes, walks back to the
@@ -227,13 +228,8 @@ export default function Logic8Scene({ clock, bt, bi, i, picked, onPick }: SceneA
         CARDS.map((c, k) => {
           const chosen = picked === c.id;
           return (
-            <Pressable
-              key={c.id}
-              style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]}
-              hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
-              disabled={answered}
-              onPress={() => onPick(c.id, c.correct)}
-            >
+            <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]} hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }} disabled={answered}>
               <View
                 style={[
                   styles.pickInner,
@@ -243,7 +239,7 @@ export default function Logic8Scene({ clock, bt, bi, i, picked, onPick }: SceneA
               >
                 <Text style={[styles.pickText, answered && c.correct && styles.pickTextOn]}>{c.label}</Text>
               </View>
-            </Pressable>
+            </Target>
           );
         })}
 

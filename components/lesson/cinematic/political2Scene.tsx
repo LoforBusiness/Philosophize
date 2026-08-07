@@ -7,6 +7,7 @@ import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bund
 import { BEATS } from './political2Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A ruler and a subject play out power vs authority, under two pieces of ink
 // information design:
@@ -186,14 +187,10 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick }: Sc
             return <View key={r.id} style={[styles.ledSlot, { top }]} pointerEvents="none">{body}</View>;
           }
           return (
-            <Pressable
-              key={r.id}
-              style={[styles.ledSlot, { top }]}
-              disabled={answered}
-              onPress={() => onPick(r.id, r.correct)}
-            >
+            <Target id={r.id} correct={r.correct} picked={picked} onPick={onPick}
+              key={r.id} style={[styles.ledSlot, { top }]} disabled={answered}>
               {body}
-            </Pressable>
+            </Target>
           );
         })}
       </Animated.View>

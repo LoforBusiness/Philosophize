@@ -10,6 +10,7 @@ import {
 import { BEATS } from './logic9Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A claim on a board, an arguer standing by it, and a dodger who walks on and never
 // once goes near it.
@@ -176,7 +177,8 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick }: SceneA
           const chosen = picked === r.id;
           return (
             <Animated.View key={r.id} style={[styles.replySlot, { top: REPLY_T + k * REPLY_GAP }, replyStyle]}>
-              <Pressable hitSlop={{ top: REPLY_SLOP, bottom: REPLY_SLOP, left: REPLY_SLOP, right: REPLY_SLOP }} disabled={answered} onPress={() => onPick(r.id, r.correct)}>
+              <Target id={r.id} correct={r.correct} picked={picked} onPick={onPick}
+              hitSlop={{ top: REPLY_SLOP, bottom: REPLY_SLOP, left: REPLY_SLOP, right: REPLY_SLOP }} disabled={answered}>
                 <View
                   style={[
                     styles.reply,
@@ -188,7 +190,7 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick }: SceneA
                     {r.text}
                   </Text>
                 </View>
-              </Pressable>
+              </Target>
             </Animated.View>
           );
         })}

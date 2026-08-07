@@ -7,6 +7,7 @@ import { ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle } from
 import { BEATS } from './logic6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // The conditional, drawn as one tall column of information down the right of the stage
 // while the figure holds the left:
@@ -114,9 +115,10 @@ export default function Logic6Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       </View>
     );
     return showTap ? (
-      <Pressable key={id} style={[styles.boxHit, { top }]} disabled={answered} onPress={() => onPick(id, correct)}>
+      <Target id={id} correct={correct} picked={picked} onPick={onPick}
+              key={id} style={[styles.boxHit, { top }]} disabled={answered}>
         {inner}
-      </Pressable>
+      </Target>
     ) : (
       <View key={id} style={[styles.boxHit, { top }]} pointerEvents="none">{inner}</View>
     );

@@ -9,6 +9,7 @@ import {
 import { BEATS } from './aesthetics32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // THREE CHARTS WITH THE SAME AREA UNDER THEM, and the answer targets are the charts —
 // the largest target in the app, because here the thing being chosen IS the argument
@@ -121,11 +122,8 @@ function Chart({
 
   return (
     <Animated.View style={[styles.row, { top: ROW_T[k] }, wrap]}>
-      <Pressable
-        style={styles.fill}
-        disabled={!live || answered}
-        onPress={() => onPick(c.id, c.correct)}
-      >
+      <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
         <View
           style={[
             styles.rowInner,
@@ -139,7 +137,7 @@ function Chart({
           ))}
           <Animated.View style={[styles.mean, on && styles.meanOnInk, meanLine]} />
         </View>
-      </Pressable>
+      </Target>
     </Animated.View>
   );
 }

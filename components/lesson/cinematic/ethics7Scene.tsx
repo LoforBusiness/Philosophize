@@ -11,6 +11,7 @@ import { BEATS } from './ethics7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import { cue } from '@/lib/feedback';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // Two roads seen side-on, stacked as horizontal lanes across the UPPER stage, with
 // a boxy car on each. Road A's car loops forever (nothing ever happens on it); road
@@ -211,12 +212,8 @@ export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick }
           {CARDS.map((c, k) => {
             const chosen = picked === c.id;
             return (
-              <Pressable
-                key={c.id}
-                style={[styles.vCard, { left: V_L + k * (V_W + V_GAP) }]}
-                disabled={answered}
-                onPress={() => onPick(c.id, c.correct)}
-              >
+              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.vCard, { left: V_L + k * (V_W + V_GAP) }]} disabled={answered}>
                 <View
                   style={[
                     styles.vInner,
@@ -226,7 +223,7 @@ export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick }
                 >
                   <Text style={[styles.vText, answered && c.correct && styles.vTextOn]}>{c.label}</Text>
                 </View>
-              </Pressable>
+              </Target>
             );
           })}
         </>

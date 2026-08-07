@@ -9,6 +9,7 @@ import {
 import { BEATS } from './epistemology31Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A CABINET WHOSE DRAWERS SLIDE OUT, and a door nobody walks to. The answer targets
 // are containers rather than cards — three drawers and the door — so choosing an
@@ -99,11 +100,8 @@ export default function Epistemology31Scene({ clock, bt, bi, i, picked, onPick }
         />
       ))}
 
-      <Pressable
-        style={styles.door}
-        disabled={!live || answered}
-        onPress={() => onPick('door', true)}
-      >
+      <Target id={'door'} correct={true} picked={picked} onPick={onPick}
+              style={styles.door} disabled={!live || answered}>
         <View
           style={[
             styles.doorInner,
@@ -118,7 +116,7 @@ export default function Epistemology31Scene({ clock, bt, bi, i, picked, onPick }
           </Text>
           <View style={[styles.knob, answered && styles.knobOnInk]} />
         </View>
-      </Pressable>
+      </Target>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -145,11 +143,8 @@ function Drawer({
   const text = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.open - index) }));
   return (
     <Animated.View style={[styles.drawer, { top: DRW_T0 + index * DRW_PITCH }, wrap]}>
-      <Pressable
-        style={styles.fill}
-        disabled={!live || answered}
-        onPress={() => onPick(id, false)}
-      >
+      <Target id={id} correct={false} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
         <View
           style={[
             styles.drawerInner,
@@ -161,7 +156,7 @@ function Drawer({
           </Animated.Text>
           <View style={styles.pull} />
         </View>
-      </Pressable>
+      </Target>
     </Animated.View>
   );
 }

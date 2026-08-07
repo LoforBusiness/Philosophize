@@ -9,6 +9,7 @@ import {
 import { BEATS } from './aesthetics31Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A PLAYHEAD THAT RUNS THE MELODY — the first thing in the app that plays in time —
 // and three answer targets that are three PARTS of one picture: the notes, the
@@ -99,29 +100,23 @@ export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick }: 
   return (
     <Animated.View style={styles.scene}>
       {/* the instrument */}
-      <Pressable
-        style={styles.inst}
-        disabled={!live || answered}
-        onPress={() => onPick('hard', false)}
-      >
+      <Target id={'hard'} correct={false} picked={picked} onPick={onPick}
+              style={styles.inst} disabled={!live || answered}>
         <View style={[styles.instInner, wrong('hard') && styles.pickWrong]}>
           <Text style={styles.instText} numberOfLines={2}>THE{'\n'}DIFFICULTY</Text>
         </View>
-      </Pressable>
+      </Target>
       {STRING_X.map((x, k) => (
         <Strand key={x} index={k} left={x} SCENE={SCENE} />
       ))}
 
       {/* the melody, and the head that runs it */}
-      <Pressable
-        style={styles.mel}
-        disabled={!live || answered}
-        onPress={() => onPick('music', false)}
-      >
+      <Target id={'music'} correct={false} picked={picked} onPick={onPick}
+              style={styles.mel} disabled={!live || answered}>
         <View style={[styles.melInner, wrong('music') && styles.pickWrong]}>
           <Text style={styles.melText} numberOfLines={1}>THE MUSIC</Text>
         </View>
-      </Pressable>
+      </Target>
       {NOTE_Y.map((y, j) => (
         <Note key={j} j={j} top={NOTE_TOP + y} SCENE={SCENE} />
       ))}
@@ -139,17 +134,14 @@ export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick }: 
       ))}
 
       {/* the player */}
-      <Pressable
-        style={styles.plate}
-        disabled={!live || answered}
-        onPress={() => onPick('player', true)}
-      >
+      <Target id={'player'} correct={true} picked={picked} onPick={onPick}
+              style={styles.plate} disabled={!live || answered}>
         <View style={[styles.plateInner, answered && styles.pickRight]}>
           <Text style={[styles.plateText, answered && styles.onInk]} numberOfLines={1}>
             THE PLAYER
           </Text>
         </View>
-      </Pressable>
+      </Target>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />

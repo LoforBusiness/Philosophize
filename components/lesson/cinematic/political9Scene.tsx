@@ -9,6 +9,7 @@ import {
 import { BEATS } from './political9Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // Four on the left, one on the right, and a line between them.
 //
@@ -163,11 +164,8 @@ export default function Political9Scene({ clock, bt, bi, i, picked, onPick }: Sc
           const chosen = picked === c.id;
           return (
             <Animated.View key={c.id} style={[styles.cardSlot, { top: CARD_T + k * CARD_GAP }, cardStyle]}>
-              <Pressable
-                disabled={answered}
-                hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
-                onPress={() => onPick(c.id, c.correct)}
-              >
+              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              disabled={answered} hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}>
                 <View
                   style={[
                     styles.card,
@@ -179,7 +177,7 @@ export default function Political9Scene({ clock, bt, bi, i, picked, onPick }: Sc
                     {c.text}
                   </Text>
                 </View>
-              </Pressable>
+              </Target>
             </Animated.View>
           );
         })}

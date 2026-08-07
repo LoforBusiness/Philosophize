@@ -1452,6 +1452,50 @@ and keep it pointed at **them** rather than at philosophy in general.
 
 ---
 
+### I. Being followable — the reader must never be confused about what to do
+
+Group A–H exist because a lesson looked wrong. This group exists because a lesson
+*read* wrong: the reader knew something was being asked and could not tell what.
+Every rule here was measured across all 102 cinematic lessons at once, not spotted
+in one.
+
+**I70 — an answer target must be a `<Target>`.**
+82 lessons ask their question by having the reader tap the picture. Measured across
+every one of them: **69 of 82 prompts already said "tap"**, so the instruction was
+never missing — but only **13 of 82 named something you can actually see**, and 15
+pointed at an abstraction (*"tap the claim that is still owed an account"*). The
+targets were drawn exactly like the scenery around them, so nothing on the stage
+said *these two rectangles are the buttons*.
+
+`components/lesson/cinematic/Target.tsx` is the fix and it is one component on
+purpose: it puts a breathing ink ring just **outside** each target's bounds (outside,
+so it never covers the thing being chosen), removes it the instant an answer lands,
+and **counts itself**, so the panel underneath can say "Tap one of the 3 outlined
+parts above" without any lesson declaring a number it could get wrong.
+
+`npm run check:cinematic` carries this as a debt ratchet, `UNRINGED_BUDGET`, the same
+shape as `CARD_BUDGET`: a high-water mark that may only fall. A new scene that answers
+by tapping and does not use `Target` raises it and fails the build.
+
+**I71 — the prompt must name something that is on the screen.**
+"Tap the difference Singer says carries no moral weight" is a fine sentence and a bad
+prompt: the reader has to derive which drawn object *is* "the difference". Name the
+thing as it is drawn — *"one of these two children is nearer. Tap the one Singer says
+that fact does not excuse."* If the prompt cannot name a visible thing, the scene has
+not drawn the question yet (A1 again, from the other end).
+
+**I72 — no back-reference to a sentence that has scrolled away.**
+"Which board does *that line* belong on?" asks the reader to hold a sentence from the
+previous beat. They will not have. Restate the claim inside the prompt, or put it on
+the stage where it can be pointed at.
+
+**I73 — one idea per prompt, and under 18 words.**
+Measured: in-scene prompts average 13.4 words and 8 are over 18; the longest is 27.
+Past about 18 the prompt stops being a question and becomes a paragraph with a
+question at the end, which is the format the cinematic lessons exist to replace.
+
+---
+
 ## Part 2 — Authoring checklist
 
 **Shape** — before writing a word, lay the beats out and count them (H52, H53).

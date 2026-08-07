@@ -9,6 +9,7 @@ import {
 import { BEATS } from './epistemology9Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // An easel with a hand-drawn MAP stage left, and the real LAND it claims to
 // describe out on the horizon stage right. The figure walks between the two —
@@ -194,23 +195,14 @@ export default function Epistemology9Scene({ clock, bt, bi, i, picked, onPick }:
             const line = right ? PAPER : INK;
             const fill = right ? INK : PAPER;
             return (
-              <Pressable
-                key={c.id}
-                style={[
-                  styles.card,
-                  { left: c.left },
-                  right && styles.cardRight,
-                  answered && chosen && !c.correct && styles.cardWrong,
-                ]}
-                disabled={answered}
-                onPress={() => onPick(c.id, c.correct)}
-              >
+              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[ styles.card, { left: c.left }, right && styles.cardRight, answered && chosen && !c.correct && styles.cardWrong, ]} disabled={answered}>
                 <Text style={[styles.cardLabel, right && styles.cardLabelOn]}>{c.label}</Text>
                 <Land
                   x0={8} width={110} base={CARD_BASE}
                   hills={c.hills} treeX={c.treeX} treeR={7} line={line} fill={fill}
                 />
-              </Pressable>
+              </Target>
             );
           })}
           <Text style={styles.tapLabel}>TAP THE TRUE MAP</Text>

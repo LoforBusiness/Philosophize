@@ -7,6 +7,7 @@ import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bund
 import { BEATS } from './ethics3Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // The trolley problem, staged as a schematic.
 //
@@ -183,12 +184,8 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick }: Scene
           {PLATES.map((c, k) => {
             const chosen = picked === c.id;
             return (
-              <Pressable
-                key={c.id}
-                style={[styles.plateSlot, { top: 20 + k * 62 }]}
-                disabled={answered}
-                onPress={() => onPick(c.id, c.correct)}
-              >
+              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.plateSlot, { top: 20 + k * 62 }]} disabled={answered}>
                 <View
                   style={[
                     styles.plate,
@@ -198,7 +195,7 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick }: Scene
                 >
                   <Text style={[styles.plateT, answered && c.correct && styles.plateTOn]}>{c.title}</Text>
                 </View>
-              </Pressable>
+              </Target>
             );
           })}
         </Animated.View>

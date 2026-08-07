@@ -9,6 +9,7 @@ import {
 import { BEATS } from './ethics13Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // ONE RAIL FROM TOO LITTLE TO TOO MUCH, and the answer targets are POSITIONS on it —
 // the reader answers with a place rather than a proposition (E33). Answering slides
@@ -96,12 +97,8 @@ export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick }: 
       <Animated.View style={[styles.marker, markStyle]} pointerEvents="none" />
 
       {NAMES.map((name, k) => (
-        <Pressable
-          key={name}
-          style={[styles.hit, { left: POS_X[k] - HIT_W / 2 }]}
-          disabled={!live || answered}
-          onPress={() => onPick(name.toLowerCase(), k === MEAN)}
-        >
+        <Target id={name.toLowerCase()} correct={k === MEAN} picked={picked} onPick={onPick}
+              key={name} style={[styles.hit, { left: POS_X[k] - HIT_W / 2 }]} disabled={!live || answered}>
           <View style={styles.tick} pointerEvents="none" />
           <View
             style={[
@@ -117,7 +114,7 @@ export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick }: 
               {name}
             </Text>
           </View>
-        </Pressable>
+        </Target>
       ))}
 
       <View style={styles.ground} pointerEvents="none" />

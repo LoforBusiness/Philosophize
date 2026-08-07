@@ -9,6 +9,7 @@ import {
 import { BEATS } from './logic31Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A SEATED lesson, and the composition is turned ninety degrees from the walking
 // ones: the run of flips is a full-width band across the top, the odds needle is a
@@ -122,13 +123,8 @@ export default function Logic31Scene({ clock, bt, bi, i, picked, onPick }: Scene
         TICKS.map((tk, k) => {
           const chosen = picked === tk.id;
           return (
-            <Pressable
-              key={tk.id}
-              style={[styles.tick, { left: SC_L + k * (TICK_W + TICK_GAP) }]}
-              hitSlop={{ top: 8, bottom: 8, left: TICK_GAP / 2, right: TICK_GAP / 2 }}
-              disabled={answered}
-              onPress={() => onPick(tk.id, tk.correct)}
-            >
+            <Target id={tk.id} correct={tk.correct} picked={picked} onPick={onPick}
+              key={tk.id} style={[styles.tick, { left: SC_L + k * (TICK_W + TICK_GAP) }]} hitSlop={{ top: 8, bottom: 8, left: TICK_GAP / 2, right: TICK_GAP / 2 }} disabled={answered}>
               <View
                 style={[
                   styles.tickInner,
@@ -143,7 +139,7 @@ export default function Logic31Scene({ clock, bt, bi, i, picked, onPick }: Scene
                   {tk.label}
                 </Text>
               </View>
-            </Pressable>
+            </Target>
           );
         })}
 

@@ -7,6 +7,7 @@ import { ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle } from
 import { BEATS } from './metaphysics3Script';
 import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PLATO'S LADDER OF REALITY, drawn as a labelled three-tier chart, stage right.
@@ -183,12 +184,8 @@ export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick }: 
         <>
           <Text style={styles.askLabel}>TAP THE MOST REAL</Text>
           {CARDS.map((c) => (
-            <Pressable
-              key={c.id}
-              style={[styles.cardHit, { top: c.y }]}
-              disabled={answered}
-              onPress={() => onPick(c.id, c.correct)}
-            >
+            <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.cardHit, { top: c.y }]} disabled={answered}>
               <View
                 style={[
                   styles.card,
@@ -198,7 +195,7 @@ export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick }: 
               >
                 <Text style={[styles.cardT, answered && c.correct && styles.cardTOn]}>{c.label}</Text>
               </View>
-            </Pressable>
+            </Target>
           ))}
         </>
       )}

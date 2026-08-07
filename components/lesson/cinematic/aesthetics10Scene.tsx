@@ -9,6 +9,7 @@ import {
 import { BEATS } from './aesthetics10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A SCREEN upper right showing a masterfully-made film, and directly under it a
 // second panel reading WHAT IT ASKS YOU TO FEEL. A shutter runs on a track across
@@ -189,13 +190,8 @@ export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick }: 
         BOARDS.map((b, k) => {
           const chosen = picked === b.id;
           return (
-            <Pressable
-              key={b.id}
-              style={[styles.board, { top: BRD_T + k * BRD_GAP }]}
-              hitSlop={{ top: BRD_SLOP, bottom: BRD_SLOP, left: BRD_SLOP, right: BRD_SLOP }}
-              disabled={answered}
-              onPress={() => onPick(b.id, b.correct)}
-            >
+            <Target id={b.id} correct={b.correct} picked={picked} onPick={onPick}
+              key={b.id} style={[styles.board, { top: BRD_T + k * BRD_GAP }]} hitSlop={{ top: BRD_SLOP, bottom: BRD_SLOP, left: BRD_SLOP, right: BRD_SLOP }} disabled={answered}>
               <View
                 style={[
                   styles.boardInner,
@@ -210,7 +206,7 @@ export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick }: 
                   {b.caption}
                 </Text>
               </View>
-            </Pressable>
+            </Target>
           );
         })}
 

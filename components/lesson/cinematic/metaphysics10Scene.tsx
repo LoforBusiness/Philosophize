@@ -9,6 +9,7 @@ import {
 import { BEATS } from './metaphysics10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A wall shelf holding three particular red things — a rose, a ruby, a flag — and
 // one card reading REDNESS that has to live somewhere. The card is the only thing
@@ -215,11 +216,8 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick }:
           const chosen = picked === h.id;
           return (
             <Animated.View key={h.id} style={[styles.slotWrap, { top: h.top }, slotStyle]}>
-              <Pressable
-                hitSlop={{ top: SLOT_SLOP, bottom: SLOT_SLOP, left: SLOT_SLOP, right: SLOT_SLOP }}
-                disabled={answered}
-                onPress={() => onPick(h.id, h.correct)}
-              >
+              <Target id={h.id} correct={h.correct} picked={picked} onPick={onPick}
+              hitSlop={{ top: SLOT_SLOP, bottom: SLOT_SLOP, left: SLOT_SLOP, right: SLOT_SLOP }} disabled={answered}>
                 <View
                   style={[
                     styles.slot,
@@ -231,7 +229,7 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick }:
                     {h.label}
                   </Text>
                 </View>
-              </Pressable>
+              </Target>
             </Animated.View>
           );
         })}

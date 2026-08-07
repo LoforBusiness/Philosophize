@@ -327,13 +327,24 @@ export function Choices({
 // tappable targets live in the SCENE, which calls onPick — so this panel has no
 // buttons of its own. `answered`/`correct` are owned by the player.
 export function InteractPanel({
-  prompt, explain, answered, correct,
-}: { prompt: string; explain: string; answered: boolean; correct: boolean }) {
+  prompt, explain, answered, correct, targets = 0,
+}: { prompt: string; explain: string; answered: boolean; correct: boolean; targets?: number }) {
+  // "Answer in the scene above ↑" was the entire instruction, and it tells the
+  // reader nothing they did not already know. What they could not tell was WHICH
+  // things were answerable — so the hint now names the number of marked things,
+  // which Target.tsx counts for itself. No lesson declares it and none can get it
+  // wrong. If the count is somehow zero the old wording still stands, because a
+  // hint that says "tap one of the 0 marked parts" is worse than a vague one.
+  const hint = targets >= 2
+    ? `Tap one of the ${targets} outlined parts above ↑`
+    : targets === 1
+      ? 'Tap the outlined part above ↑'
+      : 'Answer in the scene above ↑';
   return (
     <Animated.View style={styles.qWrap} layout={LinearTransition.duration(300)}>
       <Text style={styles.prompt}>{prompt}</Text>
       {!answered ? (
-        <Text style={styles.interactHint}>Answer in the scene above ↑</Text>
+        <Text style={styles.interactHint}>{hint}</Text>
       ) : (
         <Animated.View style={styles.explain} entering={FadeInDown.duration(300)}>
           <Text style={styles.explainHead}>{correct ? CORRECT_LABEL : 'Not quite'}</Text>

@@ -7,6 +7,7 @@ import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bund
 import { BEATS } from './strong4Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // An instrument panel the presenter reads from.
 //
@@ -198,12 +199,8 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick }: Scene
           {CHIPS.map((c, k) => {
             const chosen = picked === c.id;
             return (
-              <Pressable
-                key={c.id}
-                style={[styles.chipSlot, { top: 18 + k * CHIP_STEP }]}
-                disabled={answered}
-                onPress={() => onPick(c.id, c.correct)}
-              >
+              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.chipSlot, { top: 18 + k * CHIP_STEP }]} disabled={answered}>
                 <View
                   style={[
                     styles.chip,
@@ -213,7 +210,7 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick }: Scene
                 >
                   <Text style={[styles.chipT, answered && c.correct && styles.chipTOn]}>{c.title}</Text>
                 </View>
-              </Pressable>
+              </Target>
             );
           })}
         </Animated.View>

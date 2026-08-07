@@ -9,6 +9,7 @@ import {
 import { BEATS } from './political8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // THE FENCE. Stage right, a picket fence with a goal beyond it and three onlookers
 // of very different heights peering over. Stage left, a stack of three spare crates.
@@ -251,13 +252,8 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
           {CARDS.map((c, k) => {
             const chosen = picked === c.id;
             return (
-              <Pressable
-                key={c.id}
-                style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]}
-                hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
-                disabled={answered}
-                onPress={() => onPick(c.id, c.correct)}
-              >
+              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]} hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }} disabled={answered}>
                 <View
                   style={[
                     styles.pickInner,
@@ -276,7 +272,7 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
                     {c.label}
                   </Text>
                 </View>
-              </Pressable>
+              </Target>
             );
           })}
         </>

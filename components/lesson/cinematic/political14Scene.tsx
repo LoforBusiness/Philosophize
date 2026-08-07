@@ -9,6 +9,7 @@ import {
 import { BEATS } from './political14Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // THE WILT CHAMBERLAIN CASE AS THREE STAGES, and the answer targets are the stages —
 // the reader answers by pointing at a MOMENT in a process rather than at a claim
@@ -114,11 +115,8 @@ function Stage({
 
   return (
     <Animated.View style={[styles.row, { top: ROW_T[k] }, wrap]}>
-      <Pressable
-        style={styles.fill}
-        disabled={!live || answered}
-        onPress={() => onPick(s.id, s.correct)}
-      >
+      <Target id={s.id} correct={s.correct} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
         <View
           style={[
             styles.rowInner,
@@ -149,7 +147,7 @@ function Stage({
                 <Coin key={j} j={j} onInk={on} SCENE={SCENE} />
               ))}
         </View>
-      </Pressable>
+      </Target>
     </Animated.View>
   );
 }

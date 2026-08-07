@@ -10,6 +10,7 @@ import { BEATS } from './ethics8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import type { Shot } from './camera';
+import Target from './Target';
 
 // A room with two halves. Up top, a rigid grid of empty rule-boxes — impartial,
 // tidy, nobody's name in them. Down on the floor, stage right, a second figure
@@ -165,13 +166,8 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick }: Scene
           {CARDS.map((c, k) => {
             const chosen = picked === c.id;
             return (
-              <Pressable
-                key={c.id}
-                style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]}
-                hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
-                disabled={answered}
-                onPress={() => onPick(c.id, c.correct)}
-              >
+              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]} hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }} disabled={answered}>
                 <View
                   style={[
                     styles.pickInner,
@@ -183,7 +179,7 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick }: Scene
                     {c.label}
                   </Text>
                 </View>
-              </Pressable>
+              </Target>
             );
           })}
         </>

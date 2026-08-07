@@ -12,6 +12,7 @@ import {
 import { BEATS } from './aesthetics8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A gallery wall. Stage right hangs a big framed CANVAS on a picture wire; stage
 // left, a RACK holding two pairs of glasses — square lenses for shapes, round
@@ -265,12 +266,8 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick }: S
             const chosen = picked === c.id;
             const on = answered && c.correct;
             return (
-              <Pressable
-                key={c.id}
-                style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]}
-                disabled={answered}
-                onPress={() => onPick(c.id, c.correct)}
-              >
+              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]} disabled={answered}>
                 <View
                   style={[
                     styles.pickInner,
@@ -288,7 +285,7 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick }: S
                     <Text style={[styles.pickText, on && styles.pickTextOn]}>{c.l2}</Text>
                   </View>
                 </View>
-              </Pressable>
+              </Target>
             );
           })}
         </>

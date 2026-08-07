@@ -9,6 +9,7 @@ import {
 import { BEATS } from './political10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // AN UNEQUAL STACK OF HOLDINGS, READ TWICE. Stage right, three columns of very
 // different heights standing on a HISTORY TAPE whose four marks read ACQUIRED ·
@@ -249,11 +250,8 @@ export default function Political10Scene({ clock, bt, bi, i, picked, onPick }: S
           const chosen = picked === pl.id;
           return (
             <Animated.View key={pl.id} style={[styles.plateSlot, { top: PL_T + k * PL_GAP }, plateStyle]}>
-              <Pressable
-                hitSlop={{ top: PL_SLOP, bottom: PL_SLOP, left: PL_SLOP, right: PL_SLOP }}
-                disabled={answered}
-                onPress={() => onPick(pl.id, pl.correct)}
-              >
+              <Target id={pl.id} correct={pl.correct} picked={picked} onPick={onPick}
+              hitSlop={{ top: PL_SLOP, bottom: PL_SLOP, left: PL_SLOP, right: PL_SLOP }} disabled={answered}>
                 <View
                   style={[
                     styles.plate,
@@ -265,7 +263,7 @@ export default function Political10Scene({ clock, bt, bi, i, picked, onPick }: S
                     {pl.label}
                   </Text>
                 </View>
-              </Pressable>
+              </Target>
             </Animated.View>
           );
         })}

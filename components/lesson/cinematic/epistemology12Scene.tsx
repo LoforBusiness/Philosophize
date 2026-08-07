@@ -10,6 +10,7 @@ import {
 import { BEATS } from './epistemology12Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // THREE PIPES FEEDING ONE TANK labelled WHAT YOU KNOW. The pipes are laid one per
 // beat and each fills its own band of the tank; the third — testimony, the one that
@@ -245,13 +246,8 @@ export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick }
         SOURCES.map((s) => {
           const chosen = picked === s.id;
           return (
-            <Pressable
-              key={s.id}
-              style={[styles.plateBox, { left: s.left, top: s.top }]}
-              hitSlop={{ top: PLATE_SLOP, bottom: PLATE_SLOP, left: PLATE_SLOP, right: PLATE_SLOP }}
-              disabled={answered}
-              onPress={() => onPick(s.id, s.correct)}
-            >
+            <Target id={s.id} correct={s.correct} picked={picked} onPick={onPick}
+              key={s.id} style={[styles.plateBox, { left: s.left, top: s.top }]} hitSlop={{ top: PLATE_SLOP, bottom: PLATE_SLOP, left: PLATE_SLOP, right: PLATE_SLOP }} disabled={answered}>
               <View
                 style={[
                   styles.plate,
@@ -263,7 +259,7 @@ export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick }
                   {s.label}
                 </Text>
               </View>
-            </Pressable>
+            </Target>
           );
         })
       ) : (

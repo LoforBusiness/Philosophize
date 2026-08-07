@@ -9,6 +9,7 @@ import {
 import { BEATS } from './ethics11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // Bentham's counting table, stage right: one plank on two legs with three pleasure
 // tokens standing on it, all drawn the SAME SIZE, and a ledger slung underneath
@@ -196,11 +197,8 @@ export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick }: 
             style={k === 2 ? [...slot, riseStyle] : slot}
             pointerEvents={live ? 'box-none' : 'none'}
           >
-            <Pressable
-              disabled={!live}
-              hitSlop={{ top: 6, bottom: 6, left: TOK_SLOP, right: TOK_SLOP }}
-              onPress={() => onPick(tk.id, tk.correct)}
-            >
+            <Target id={tk.id} correct={tk.correct} picked={picked} onPick={onPick}
+              disabled={!live} hitSlop={{ top: 6, bottom: 6, left: TOK_SLOP, right: TOK_SLOP }}>
               <View
                 style={[
                   styles.tokenInner,
@@ -225,7 +223,7 @@ export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick }: 
                   {tk.sub}
                 </Text>
               </View>
-            </Pressable>
+            </Target>
           </Animated.View>
         );
       })}

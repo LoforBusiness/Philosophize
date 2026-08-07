@@ -9,6 +9,7 @@ import {
 import { BEATS } from './ethics31Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A CLIMB, which no other lesson in the app stages: the figure works on the spot
 // and the rungs scroll DOWN past it (C22d — raising a figure up a static ladder
@@ -123,15 +124,12 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick }: Scen
   return (
     <Animated.View style={styles.scene}>
       {/* the thing on the shelf — target one */}
-      <Pressable
-        style={styles.shelf}
-        disabled={!live || answered}
-        onPress={() => onPick('shelf', false)}
-      >
+      <Target id={'shelf'} correct={false} picked={picked} onPick={onPick}
+              style={styles.shelf} disabled={!live || answered}>
         <View style={[styles.shelfInner, ...state(false, 'shelf')]}>
           <Text style={styles.shelfText} numberOfLines={1}>THE SHELF</Text>
         </View>
-      </Pressable>
+      </Target>
 
       {/* the ladder: rails hung off the pose's hands, rungs scrolling inside a clip */}
       <Animated.View style={[styles.clip, ladderStyle]} pointerEvents="none">
@@ -145,22 +143,16 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick }: Scen
       </Animated.View>
 
       {/* the highest rung you can stand on — target two */}
-      <Pressable
-        style={styles.topRung}
-        disabled={!live || answered}
-        onPress={() => onPick('rung', false)}
-      >
+      <Target id={'rung'} correct={false} picked={picked} onPick={onPick}
+              style={styles.topRung} disabled={!live || answered}>
         <View style={[styles.topRungInner, ...state(false, 'rung')]}>
           <Text style={styles.topRungText} numberOfLines={1}>YOUR REACH</Text>
         </View>
-      </Pressable>
+      </Target>
 
       {/* the lamp — target three, and the answer */}
-      <Pressable
-        style={styles.lamp}
-        disabled={!live || answered}
-        onPress={() => onPick('duty', true)}
-      >
+      <Target id={'duty'} correct={true} picked={picked} onPick={onPick}
+              style={styles.lamp} disabled={!live || answered}>
         {/* Once answered the box fills INK, so the word has to flip to PAPER or it
             disappears into its own background — the correct-state fill and the
             text colour are a matched pair everywhere in the app (H61). */}
@@ -178,7 +170,7 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick }: Scen
             DUTY
           </Animated.Text>
         </View>
-      </Pressable>
+      </Target>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />

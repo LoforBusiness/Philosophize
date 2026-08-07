@@ -7,6 +7,7 @@ import { climb, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle
 import { BEATS } from './logic5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // The figure stands on the LEFT (and climbs a ladder in the same spot) so the whole
 // right-hand column — x 150…386 — is free for information design that is drawn BIG:
@@ -289,7 +290,8 @@ function ProofCard({ st, top, S, answered, picked, onPick }: {
   const after = useAnimatedStyle(() => ({ opacity: st.gap ? S.value.qv : 0 }));
   return (
     <Animated.View style={[styles.cardHit, { top }, wrap]}>
-      <Pressable disabled={answered} onPress={() => onPick(st.id, st.gap)} style={styles.press}>
+      <Target id={st.id} correct={st.gap} picked={picked} onPick={onPick}
+              disabled={answered} style={styles.press}>
         <View style={[styles.card, answered && chosen && !st.gap && styles.cardWrong]}>
           <Animated.View style={[styles.cardFill, fill]} pointerEvents="none" />
           <Animated.View style={[styles.cardText, before]}>
@@ -301,7 +303,7 @@ function ProofCard({ st, top, S, answered, picked, onPick }: {
             </Animated.View>
           ) : null}
         </View>
-      </Pressable>
+      </Target>
     </Animated.View>
   );
 }
@@ -312,15 +314,12 @@ function Bin({ b, answered, picked, onPick }: {
 }) {
   const chosen = picked === b.id;
   return (
-    <Pressable
-      style={[styles.binHit, { top: b.top }]}
-      disabled={answered}
-      onPress={() => onPick(b.id, b.correct)}
-    >
+    <Target id={b.id} correct={b.correct} picked={picked} onPick={onPick}
+              style={[styles.binHit, { top: b.top }]} disabled={answered}>
       <View style={[styles.bin, answered && b.correct && styles.binRight, answered && chosen && !b.correct && styles.binWrong]}>
         <Text style={[styles.binT, answered && b.correct && styles.onPaper]}>{b.label}</Text>
       </View>
-    </Pressable>
+    </Target>
   );
 }
 

@@ -10,6 +10,7 @@ import {
 import { BEATS } from './aesthetics12Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A poem pinned up on a public board stage right, the poet who wrote it planted
 // stage left, and a small SEALED BOX riding above his head. Marks accumulate under
@@ -223,11 +224,8 @@ export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick }: 
           const chosen = picked === c.id;
           return (
             <Animated.View key={c.id} style={[styles.cardSlot, { top: CARD_T + k * CARD_GAP }, cardStyle]}>
-              <Pressable
-                hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
-                disabled={answered}
-                onPress={() => onPick(c.id, c.correct)}
-              >
+              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }} disabled={answered}>
                 <View
                   style={[
                     styles.card,
@@ -239,7 +237,7 @@ export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick }: 
                     {c.label}
                   </Text>
                 </View>
-              </Pressable>
+              </Target>
             </Animated.View>
           );
         })}

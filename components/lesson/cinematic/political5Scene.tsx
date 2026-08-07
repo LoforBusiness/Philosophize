@@ -7,6 +7,7 @@ import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bund
 import { BEATS } from './political5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // THREE PIECES OF INK INFORMATION DESIGN, one per idea in the lesson:
 //
@@ -165,17 +166,13 @@ export default function Political5Scene({ clock, bt, bi, i, picked, onPick }: Sc
             const right = answered && d.correct;
             const wrong = answered && chosen && !d.correct;
             return (
-              <Pressable
-                key={d.id}
-                style={[styles.cardSlot, { top: CARD_T + k * CARD_STEP }]}
-                disabled={answered}
-                onPress={() => onPick(d.id, d.correct)}
-              >
+              <Target id={d.id} correct={d.correct} picked={picked} onPick={onPick}
+              key={d.id} style={[styles.cardSlot, { top: CARD_T + k * CARD_STEP }]} disabled={answered}>
                 <View style={[styles.card, right && styles.cardRight, wrong && styles.cardWrong]}>
                   <Text style={[styles.cardTitle, right && styles.cardTitleOn]}>{d.title}</Text>
                   <Text style={[styles.cardSub, right && styles.cardSubOn]}>{d.sub}</Text>
                 </View>
-              </Pressable>
+              </Target>
             );
           })}
         </>

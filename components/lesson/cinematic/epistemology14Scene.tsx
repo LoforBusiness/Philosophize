@@ -9,6 +9,7 @@ import {
 import { BEATS } from './epistemology14Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A SCREEN, A GAP, AND A WORLD — and the world is swapped for a vat while the screen
 // holds absolutely still. The argument is carried by the thing that does NOT animate,
@@ -81,36 +82,27 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick }
   return (
     <Animated.View style={styles.scene}>
       {/* what reaches you — and it never moves */}
-      <Pressable
-        style={styles.screen}
-        disabled={!live || answered}
-        onPress={() => onPick('screen', true)}
-      >
+      <Target id={'screen'} correct={true} picked={picked} onPick={onPick}
+              style={styles.screen} disabled={!live || answered}>
         <View style={styles.box}>
           <View style={styles.horizon} pointerEvents="none" />
           <View style={styles.sun} pointerEvents="none" />
           <View style={styles.trunk} pointerEvents="none" />
           <View style={styles.canopy} pointerEvents="none" />
         </View>
-      </Pressable>
-      <Pressable
-        style={[styles.label, { left: SCR_L, width: SCR_W }]}
-        disabled={!live || answered}
-        onPress={() => onPick('screen', true)}
-      >
+      </Target>
+      <Target id={'screen'} correct={true} picked={picked} onPick={onPick}
+              style={[styles.label, { left: SCR_L, width: SCR_W }]} disabled={!live || answered}>
         <View style={[styles.labelInner, answered && styles.pickRight]}>
           <Text style={[styles.labelText, answered && styles.onInk]} numberOfLines={1}>
             WHAT YOU SEE
           </Text>
         </View>
-      </Pressable>
+      </Target>
 
       {/* the world, whatever it turns out to be */}
-      <Pressable
-        style={styles.world}
-        disabled={!live || answered}
-        onPress={() => onPick('world', false)}
-      >
+      <Target id={'world'} correct={false} picked={picked} onPick={onPick}
+              style={styles.world} disabled={!live || answered}>
         <View style={[styles.box, wrong('world') && styles.pickWrong]}>
           <Animated.View style={[styles.layer, realStyle]} pointerEvents="none">
             <View style={styles.horizon} />
@@ -124,30 +116,24 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick }
             <View style={[styles.lead, { left: 74 }]} />
           </Animated.View>
         </View>
-      </Pressable>
-      <Pressable
-        style={[styles.label, { left: WOR_L, width: WOR_W }]}
-        disabled={!live || answered}
-        onPress={() => onPick('world', false)}
-      >
+      </Target>
+      <Target id={'world'} correct={false} picked={picked} onPick={onPick}
+              style={[styles.label, { left: WOR_L, width: WOR_W }]} disabled={!live || answered}>
         <View style={[styles.labelInner, wrong('world') && styles.pickWrong]}>
           <Text style={styles.labelText} numberOfLines={1}>THE WORLD</Text>
         </View>
-      </Pressable>
+      </Target>
 
       {/* the step from one to the other */}
       <Animated.View style={[styles.bridge, leapStyle]} pointerEvents="none" />
       <Animated.View style={[styles.leader, leapStyle]} pointerEvents="none" />
       <Animated.View style={[styles.chip, leapStyle]}>
-        <Pressable
-          style={styles.fill}
-          disabled={!live || answered}
-          onPress={() => onPick('leap', false)}
-        >
+        <Target id={'leap'} correct={false} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
           <View style={[styles.chipInner, wrong('leap') && styles.pickWrong]}>
             <Text style={styles.chipText} numberOfLines={1}>THE LEAP BETWEEN</Text>
           </View>
-        </Pressable>
+        </Target>
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />

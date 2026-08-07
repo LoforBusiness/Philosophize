@@ -10,6 +10,7 @@ import {
 import { BEATS } from './aesthetics9Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // Two boxes, drawn identically down to the last rule, because the lesson dies the
 // moment the reader can tell them apart by looking. One sits on a shop shelf, one
@@ -152,7 +153,8 @@ export default function Aesthetics9Scene({ clock, bt, bi, i, picked, onPick }: S
           const chosen = picked === l.id;
           return (
             <Animated.View key={l.id} style={[styles.labelSlot, { top: LABEL_T + k * LABEL_GAP }, labelStyle]}>
-              <Pressable hitSlop={{ top: LABEL_SLOP, bottom: LABEL_SLOP, left: LABEL_SLOP, right: LABEL_SLOP }} disabled={answered} onPress={() => onPick(l.id, l.correct)}>
+              <Target id={l.id} correct={l.correct} picked={picked} onPick={onPick}
+              hitSlop={{ top: LABEL_SLOP, bottom: LABEL_SLOP, left: LABEL_SLOP, right: LABEL_SLOP }} disabled={answered}>
                 <View
                   style={[
                     styles.label,
@@ -164,7 +166,7 @@ export default function Aesthetics9Scene({ clock, bt, bi, i, picked, onPick }: S
                     {l.text}
                   </Text>
                 </View>
-              </Pressable>
+              </Target>
             </Animated.View>
           );
         })}

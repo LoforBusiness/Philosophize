@@ -9,6 +9,7 @@ import {
 import { BEATS } from './logic12Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // FOUR DOORS IN ONE WALL, and the answer targets are the doors — the reader answers
 // by choosing a way out rather than a sentence (E33). A door here is a FRAME plus a
@@ -122,11 +123,8 @@ function Door({
 
   return (
     <Animated.View style={[styles.door, { left: DOOR_X[k] }, wrap]}>
-      <Pressable
-        style={styles.fill}
-        disabled={!live || answered}
-        onPress={() => onPick(d.id, d.correct)}
-      >
+      <Target id={d.id} correct={d.correct} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
         <View
           style={[
             styles.frame,
@@ -139,7 +137,7 @@ function Door({
             <View style={styles.knob} />
           </Animated.View>
         </View>
-      </Pressable>
+      </Target>
     </Animated.View>
   );
 }

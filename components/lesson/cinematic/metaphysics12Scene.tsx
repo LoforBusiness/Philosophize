@@ -9,6 +9,7 @@ import {
 import { BEATS } from './metaphysics12Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A STREAM THAT NEVER STOPS, and a box drawn for its owner that stays empty all
 // lesson. Hume's result is nowhere asserted — it is just the fact that nothing ever
@@ -82,11 +83,8 @@ export default function Metaphysics12Scene({ clock, bt, bi, i, picked, onPick }:
   return (
     <Animated.View style={styles.scene}>
       {/* the perceptions, running */}
-      <Pressable
-        style={styles.stream}
-        disabled={!live || answered}
-        onPress={() => onPick('stream', true)}
-      >
+      <Target id={'stream'} correct={true} picked={picked} onPick={onPick}
+              style={styles.stream} disabled={!live || answered}>
         <View style={[styles.streamInner, answered && styles.pickRight]}>
           {Array.from({ length: TILE_N }, (_, k) => (
             <Tile key={k} k={k} onInk={answered} SCENE={SCENE} />
@@ -98,32 +96,26 @@ export default function Metaphysics12Scene({ clock, bt, bi, i, picked, onPick }:
             THE STREAM ITSELF
           </Text>
         </View>
-      </Pressable>
+      </Target>
 
       {/* the box drawn for whoever is having them */}
       <Animated.View style={[styles.own, ownStyle]}>
-        <Pressable
-          style={styles.fill}
-          disabled={!live || answered}
-          onPress={() => onPick('owner', false)}
-        >
+        <Target id={'owner'} correct={false} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
           <View style={[styles.ownInner, wrong('owner') && styles.pickWrong]}>
             <Text style={styles.ownText} numberOfLines={1}>THE OWNER</Text>
           </View>
-        </Pressable>
+        </Target>
       </Animated.View>
 
       {/* the overreach */}
       <Animated.View style={[styles.none, noneStyle]}>
-        <Pressable
-          style={styles.fill}
-          disabled={!live || answered}
-          onPress={() => onPick('nothing', false)}
-        >
+        <Target id={'nothing'} correct={false} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
           <View style={[styles.noneInner, wrong('nothing') && styles.pickWrong]}>
             <Text style={styles.ownText} numberOfLines={1}>NOTHING AT ALL</Text>
           </View>
-        </Pressable>
+        </Target>
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />

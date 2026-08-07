@@ -10,6 +10,7 @@ import {
 import { BEATS } from './ethics10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A pond stage right with a child in it, and the same child again far off to the
 // left — smaller, standing higher up the picture at the end of a dotted line, which
@@ -151,11 +152,8 @@ export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: Scen
           const chosen = picked === f.id;
           return (
             <Animated.View key={f.id} style={[styles.cardSlot, { top: CARD_T + k * CARD_GAP }, cardStyle]}>
-              <Pressable
-                disabled={answered}
-                hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
-                onPress={() => onPick(f.id, f.correct)}
-              >
+              <Target id={f.id} correct={f.correct} picked={picked} onPick={onPick}
+              disabled={answered} hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}>
                 <View
                   style={[
                     styles.card,
@@ -167,7 +165,7 @@ export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: Scen
                     {f.text}
                   </Text>
                 </View>
-              </Pressable>
+              </Target>
             </Animated.View>
           );
         })}

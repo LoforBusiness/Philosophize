@@ -10,6 +10,7 @@ import {
 import { BEATS } from './ethics12Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A copying press on the floor stage-right, and above it a board that fills with
 // identical cards. One card reads "I PROMISE". The figure walks over, strikes the
@@ -225,11 +226,8 @@ export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick }: 
                 key={m.id}
                 style={[styles.pickSlot, { top: PICK_T + k * PICK_GAP }, pickStyle]}
               >
-                <Pressable
-                  hitSlop={{ top: PICK_SLOP, bottom: PICK_SLOP, left: PICK_SLOP, right: PICK_SLOP }}
-                  disabled={answered}
-                  onPress={() => onPick(m.id, m.correct)}
-                >
+                <Target id={m.id} correct={m.correct} picked={picked} onPick={onPick}
+              hitSlop={{ top: PICK_SLOP, bottom: PICK_SLOP, left: PICK_SLOP, right: PICK_SLOP }} disabled={answered}>
                   <View
                     style={[
                       styles.pickInner,
@@ -247,7 +245,7 @@ export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick }: 
                       </Text>
                     )}
                   </View>
-                </Pressable>
+                </Target>
               </Animated.View>
             );
           })}

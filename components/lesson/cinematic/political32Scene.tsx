@@ -9,6 +9,7 @@ import {
 import { BEATS } from './political32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // SEVENTY-SEVEN MARKS AND ONE OF THEM IS YOURS. The scale is the argument: the reader
 // has to find their own tick in the row, and how small it looks is the lesson (H64).
@@ -131,39 +132,30 @@ export default function Political32Scene({ clock, bt, bi, i, picked, onPick }: S
 
       {/* the three answers */}
       <Animated.View style={[styles.result, resultStyle]}>
-        <Pressable
-          style={styles.fill}
-          disabled={!live || answered}
-          onPress={() => onPick('result', false)}
-        >
+        <Target id={'result'} correct={false} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
           <View style={[styles.box, wrong('result') && styles.pickWrong]}>
             <Text style={styles.boxText} numberOfLines={1}>THE RESULT</Text>
           </View>
-        </Pressable>
+        </Target>
       </Animated.View>
 
       <Animated.View style={[styles.margin, labelStyle]}>
-        <Pressable
-          style={styles.fill}
-          disabled={!live || answered}
-          onPress={() => onPick('margin', true)}
-        >
+        <Target id={'margin'} correct={true} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
           <View style={[styles.chip, answered && styles.pickRight]}>
             <Text style={[styles.boxText, answered && styles.onInk]} numberOfLines={1}>THE MARGIN</Text>
           </View>
-        </Pressable>
+        </Target>
       </Animated.View>
 
       <Animated.View style={[styles.nothing, labelStyle]}>
-        <Pressable
-          style={styles.fill}
-          disabled={!live || answered}
-          onPress={() => onPick('nothing', false)}
-        >
+        <Target id={'nothing'} correct={false} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
           <View style={[styles.box, wrong('nothing') && styles.pickWrong]}>
             <Text style={styles.boxText} numberOfLines={1}>NOTHING AT ALL</Text>
           </View>
-        </Pressable>
+        </Target>
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />

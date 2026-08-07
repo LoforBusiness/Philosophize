@@ -9,6 +9,7 @@ import {
 import { BEATS } from './aesthetics11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A gallery wall stage right, two canvases on it, the figure working downstage left.
 //
@@ -145,13 +146,8 @@ export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick }: 
         CARDS.map((c, k) => {
           const chosen = picked === c.id;
           return (
-            <Pressable
-              key={c.id}
-              style={[styles.card, { top: CARD_T + k * CARD_PITCH }]}
-              hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
-              disabled={answered}
-              onPress={() => onPick(c.id, c.correct)}
-            >
+            <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.card, { top: CARD_T + k * CARD_PITCH }]} hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }} disabled={answered}>
               <View
                 style={[
                   styles.cardInner,
@@ -166,7 +162,7 @@ export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick }: 
                   {c.label}
                 </Text>
               </View>
-            </Pressable>
+            </Target>
           );
         })}
 

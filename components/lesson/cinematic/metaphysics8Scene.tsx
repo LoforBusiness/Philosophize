@@ -9,6 +9,7 @@ import {
 import { BEATS } from './metaphysics8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A thirteen-domino run standing on a long rail, sweeping right to left: the far
 // end is everything that happened before you were born, and domino 3 is labelled
@@ -171,13 +172,8 @@ export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick }: 
           {CARDS.map((c, k) => {
             const chosen = picked === c.id;
             return (
-              <Pressable
-                key={c.id}
-                style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]}
-                hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
-                disabled={answered}
-                onPress={() => onPick(c.id, c.correct)}
-              >
+              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.pickCard, { top: CARD_T + k * CARD_GAP }]} hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }} disabled={answered}>
                 <View
                   style={[
                     styles.pickInner,
@@ -189,7 +185,7 @@ export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick }: 
                     {c.label}
                   </Text>
                 </View>
-              </Pressable>
+              </Target>
             );
           })}
         </>

@@ -7,6 +7,7 @@ import { ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle } from
 import { BEATS } from './valid3Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // The argument pinned up as a FORM the inspector reads, stage right.
 //
@@ -234,12 +235,8 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
           {CARDS.map((c, k) => {
             const chosen = picked === c.id;
             return (
-              <Pressable
-                key={c.id}
-                style={[styles.balSlot, { top: BAL_TOP - 236 + k * BAL_STEP }]}
-                disabled={answered}
-                onPress={() => onPick(c.id, c.correct)}
-              >
+              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.balSlot, { top: BAL_TOP - 236 + k * BAL_STEP }]} disabled={answered}>
                 <View
                   style={[
                     styles.balCard,
@@ -250,7 +247,7 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
                   <Text style={[styles.balTitle, answered && c.correct && styles.balTitleOn]}>{c.title}</Text>
                   <Text style={[styles.balSub, answered && c.correct && styles.balSubOn]}>{c.sub}</Text>
                 </View>
-              </Pressable>
+              </Target>
             );
           })}
         </Animated.View>

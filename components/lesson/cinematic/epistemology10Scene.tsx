@@ -10,6 +10,7 @@ import {
 import { BEATS } from './epistemology10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // One gauge across the top of the stage: a guess at the left end, absolute certainty
 // at the right. A shaded BAND says where knowledge is allowed to live — a sliver at
@@ -132,7 +133,8 @@ export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick }
               key={f.id}
               style={[styles.flagSlot, { left: cx - FLAG_W / 2 }, flagStyle]}
             >
-              <Pressable disabled={answered} onPress={() => onPick(f.id, f.correct)}>
+              <Target id={f.id} correct={f.correct} picked={picked} onPick={onPick}
+              disabled={answered}>
                 <View style={styles.stem} />
                 <View
                   style={[
@@ -144,7 +146,7 @@ export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick }
                   <Text style={[styles.flagHead, answered && f.correct && styles.flagOn]}>{f.head}</Text>
                   <Text style={[styles.flagSub, answered && f.correct && styles.flagOn]}>{f.sub}</Text>
                 </View>
-              </Pressable>
+              </Target>
             </Animated.View>
           );
         })}

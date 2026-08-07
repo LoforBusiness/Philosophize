@@ -9,6 +9,7 @@ import {
 import { BEATS } from './logic10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A rule straight across the stage labelled SAID. Above it, the two sentences that
 // were actually spoken; below it, in dashed outline, the one that was not. The
@@ -207,11 +208,8 @@ export default function Logic10Scene({ clock, bt, bi, i, picked, onPick }: Scene
               key={c.id}
               style={[styles.pickSlot, { top: PICK_T + k * PICK_GAP }, pickStyle]}
             >
-              <Pressable
-                hitSlop={{ top: PICK_SLOP, bottom: PICK_SLOP, left: PICK_SLOP, right: PICK_SLOP }}
-                disabled={answered}
-                onPress={() => onPick(c.id, c.correct)}
-              >
+              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              hitSlop={{ top: PICK_SLOP, bottom: PICK_SLOP, left: PICK_SLOP, right: PICK_SLOP }} disabled={answered}>
                 <View
                   style={[
                     styles.pickInner,
@@ -223,7 +221,7 @@ export default function Logic10Scene({ clock, bt, bi, i, picked, onPick }: Scene
                     {c.label}
                   </Text>
                 </View>
-              </Pressable>
+              </Target>
             </Animated.View>
           );
         })}

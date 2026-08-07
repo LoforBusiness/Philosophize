@@ -9,6 +9,7 @@ import {
 import { BEATS } from './logic11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A four-step proof standing as a stack of cards on a base line, stage right, with
 // the narrator downstage left. The stack builds top-down, the base line slides in
@@ -203,14 +204,8 @@ export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick }: S
         {STEP_CARDS.map((c, k) => {
           const chosen = picked === c.id;
           return (
-            <Pressable
-              key={c.id}
-              style={[styles.step, { top: BOX_T + k * PITCH }]}
-              pointerEvents={live ? 'auto' : 'none'}
-              hitSlop={{ top: SLOP, bottom: SLOP, left: SLOP, right: SLOP }}
-              disabled={!live}
-              onPress={() => onPick(c.id, c.correct)}
-            >
+            <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.step, { top: BOX_T + k * PITCH }]} pointerEvents={live ? 'auto' : 'none'} hitSlop={{ top: SLOP, bottom: SLOP, left: SLOP, right: SLOP }} disabled={!live}>
               <Animated.View
                 style={[
                   styles.stepInner,
@@ -222,7 +217,7 @@ export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick }: S
                 <Text style={[styles.stepNum, answered && c.correct && styles.stepOn]}>{c.n}</Text>
                 <Text style={[styles.stepText, answered && c.correct && styles.stepOn]}>{c.label}</Text>
               </Animated.View>
-            </Pressable>
+            </Target>
           );
         })}
 

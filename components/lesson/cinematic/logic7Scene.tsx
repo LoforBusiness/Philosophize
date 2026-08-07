@@ -9,6 +9,7 @@ import {
 import { BEATS } from './logic7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A classroom whiteboard on an easel, stage right. The figure walks over to it,
 // taps the rule up, writes the fact, then steps back downstage so the whole board
@@ -134,13 +135,8 @@ export default function Logic7Scene({ clock, bt, bi, i, picked, onPick }: SceneA
         CARDS.map((c, k) => {
           const chosen = picked === c.id;
           return (
-            <Pressable
-              key={c.id}
-              style={[styles.pickCard, { top: PICK_T + k * PICK_GAP }]}
-              hitSlop={{ top: PICK_SLOP, bottom: PICK_SLOP, left: PICK_SLOP, right: PICK_SLOP }}
-              disabled={answered}
-              onPress={() => onPick(c.id, c.correct)}
-            >
+            <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.pickCard, { top: PICK_T + k * PICK_GAP }]} hitSlop={{ top: PICK_SLOP, bottom: PICK_SLOP, left: PICK_SLOP, right: PICK_SLOP }} disabled={answered}>
               <View
                 style={[
                   styles.pickInner,
@@ -150,7 +146,7 @@ export default function Logic7Scene({ clock, bt, bi, i, picked, onPick }: SceneA
               >
                 <Text style={[styles.pickText, answered && c.correct && styles.pickTextOn]}>{c.label}</Text>
               </View>
-            </Pressable>
+            </Target>
           );
         })}
 

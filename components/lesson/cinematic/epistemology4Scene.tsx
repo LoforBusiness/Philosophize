@@ -7,6 +7,7 @@ import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bund
 import { BEATS } from './epistemology4Script';
 import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A LABELLED FLOW DIAGRAM standing over the two arguers.
@@ -139,12 +140,8 @@ export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick }:
         <>
           <Text style={styles.askLabel}>TAP THE BLANK-SLATE THINKER</Text>
           {PLATES.map((pl) => (
-            <Pressable
-              key={pl.id}
-              style={[styles.plateHit, { left: pl.x, top: pl.y }]}
-              disabled={answered}
-              onPress={() => onPick(pl.id, pl.correct)}
-            >
+            <Target id={pl.id} correct={pl.correct} picked={picked} onPick={onPick}
+              key={pl.id} style={[styles.plateHit, { left: pl.x, top: pl.y }]} disabled={answered}>
               <View
                 style={[
                   styles.plate,
@@ -154,7 +151,7 @@ export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick }:
               >
                 <Text style={[styles.plateT, answered && pl.correct && styles.plateTOn]}>{pl.label}</Text>
               </View>
-            </Pressable>
+            </Target>
           ))}
         </>
       )}

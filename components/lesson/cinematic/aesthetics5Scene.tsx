@@ -7,6 +7,7 @@ import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bund
 import { BEATS } from './aesthetics5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // THE ATTENTION METER AND THE FRAME. Murdoch's argument drawn instead of asserted:
 //
@@ -235,17 +236,13 @@ export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick }: S
             const right = answered && g.correct;
             const wrong = answered && chosen && !g.correct;
             return (
-              <Pressable
-                key={g.id}
-                style={[styles.cardSlot, { top: CARD_T + k * CARD_STEP }]}
-                disabled={answered}
-                onPress={() => onPick(g.id, g.correct)}
-              >
+              <Target id={g.id} correct={g.correct} picked={picked} onPick={onPick}
+              key={g.id} style={[styles.cardSlot, { top: CARD_T + k * CARD_STEP }]} disabled={answered}>
                 <View style={[styles.card, right && styles.cardRight, wrong && styles.cardWrong]}>
                   <Text style={[styles.cardTitle, right && styles.cardTitleOn]}>{g.title}</Text>
                   <Text style={[styles.cardSub, right && styles.cardSubOn]}>{g.sub}</Text>
                 </View>
-              </Pressable>
+              </Target>
             );
           })}
         </>

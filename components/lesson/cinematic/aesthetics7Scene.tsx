@@ -9,6 +9,7 @@ import {
 import { BEATS } from './aesthetics7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A small gallery. Two framed works hang side by side on a picture rail — a
 // three-second scribble on the left, a thirty-year composition on the right — each
@@ -248,12 +249,8 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick }: S
           {FRAMES.map((f) => {
             const chosen = picked === f.id;
             return (
-              <Pressable
-                key={`hit${f.id}`}
-                style={[styles.hit, { left: f.left - 4 }]}
-                disabled={answered}
-                onPress={() => onPick(f.id, f.correct)}
-              >
+              <Target id={f.id} correct={f.correct} picked={picked} onPick={onPick}
+              key={`hit${f.id}`} style={[styles.hit, { left: f.left - 4 }]} disabled={answered}>
                 <View
                   style={[
                     styles.ring,
@@ -261,7 +258,7 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick }: S
                     answered && chosen && !f.correct && styles.ringWrong,
                   ]}
                 />
-              </Pressable>
+              </Target>
             );
           })}
         </>

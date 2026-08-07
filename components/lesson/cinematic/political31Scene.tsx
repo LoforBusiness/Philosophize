@@ -9,6 +9,7 @@ import {
 import { BEATS } from './political31Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A FIELD THAT DIES WHILE YOU WATCH — twenty-one blades falling together, the first
 // mass animation in the app — with the arithmetic laid over it at the end. The answer
@@ -122,24 +123,18 @@ export default function Political31Scene({ clock, bt, bi, i, picked, onPick }: S
 
       {/* the sum each of them did */}
       <Animated.View style={[styles.gain, sumStyle]}>
-        <Pressable
-          style={styles.fill}
-          disabled={!live || answered}
-          onPress={() => onPick('gain', false)}
-        >
+        <Target id={'gain'} correct={false} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
           <View style={[styles.box, wrong('gain') && styles.pickWrong]}>
             <Text style={styles.boxKick} numberOfLines={1}>ALL YOURS</Text>
             <Text style={styles.boxBig} numberOfLines={1}>+1</Text>
           </View>
-        </Pressable>
+        </Target>
       </Animated.View>
 
       <Animated.View style={[styles.cost, sumStyle]}>
-        <Pressable
-          style={styles.fill}
-          disabled={!live || answered}
-          onPress={() => onPick('cost', true)}
-        >
+        <Target id={'cost'} correct={true} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
           <View style={[styles.box, answered && styles.pickRight]}>
             <Text style={[styles.boxKick, answered && styles.onInkSoft]} numberOfLines={1}>
               SHARED FOUR WAYS
@@ -148,19 +143,16 @@ export default function Political31Scene({ clock, bt, bi, i, picked, onPick }: S
               <Cell key={j} j={j} onInk={answered} SCENE={SCENE} />
             ))}
           </View>
-        </Pressable>
+        </Target>
       </Animated.View>
 
       {/* the culprit everybody reaches for first */}
-      <Pressable
-        style={styles.plate}
-        disabled={!live || answered}
-        onPress={() => onPick('greed', false)}
-      >
+      <Target id={'greed'} correct={false} picked={picked} onPick={onPick}
+              style={styles.plate} disabled={!live || answered}>
         <View style={[styles.box, wrong('greed') && styles.pickWrong]}>
           <Text style={styles.plateText} numberOfLines={1}>THEIR GREED</Text>
         </View>
-      </Pressable>
+      </Target>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />

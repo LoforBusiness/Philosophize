@@ -9,6 +9,7 @@ import {
 import { BEATS } from './metaphysics7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A timeline strung across the top of the stage, and a figure that WALKS it.
 //
@@ -144,16 +145,13 @@ export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick }: 
           <View style={styles.pickLabelWrap} pointerEvents="none">
             <Text style={styles.pickLabel}>WHICH MOMENTS ARE REAL?  TAP ONE</Text>
           </View>
-          <Pressable
-            style={styles.allWrap}
-            disabled={answered}
-            onPress={() => onPick('all', true)}
-          >
+          <Target id={'all'} correct={true} picked={picked} onPick={onPick}
+              style={styles.allWrap} disabled={answered}>
             <View style={[styles.allBox, answered && styles.allRight]}>
               <Text style={[styles.allText, answered && styles.allTextOn]}>ALL THREE</Text>
               <Text style={[styles.allSub, answered && styles.allSubOn]}>past · now · future</Text>
             </View>
-          </Pressable>
+          </Target>
         </>
       )}
 

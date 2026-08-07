@@ -10,6 +10,7 @@ import {
 import { BEATS } from './metaphysics9Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // Two panels stand over the stage — MIND on the left, BODY on the right — with a
 // strip of bare paper between them that is the whole lesson. A thought sets out
@@ -149,11 +150,8 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: 
           const chosen = picked === c.id;
           return (
             <Animated.View key={c.id} style={[styles.cardSlot, { top: CARD_T + k * CARD_GAP }, cardStyle]}>
-              <Pressable
-                disabled={answered}
-                hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}
-                onPress={() => onPick(c.id, c.correct)}
-              >
+              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              disabled={answered} hitSlop={{ top: CARD_SLOP, bottom: CARD_SLOP, left: CARD_SLOP, right: CARD_SLOP }}>
                 <View
                   style={[
                     styles.card,
@@ -165,7 +163,7 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: 
                     {c.label}
                   </Text>
                 </View>
-              </Pressable>
+              </Target>
             </Animated.View>
           );
         })}

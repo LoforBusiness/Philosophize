@@ -9,6 +9,7 @@ import {
 import { BEATS } from './aesthetics13Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // TWO CANVASES THE READER CANNOT TELL APART, and a provenance line that draws
 // BACKWARDS in time underneath them — six links under one, a single link under the
@@ -81,11 +82,8 @@ export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick }: 
     <Animated.View style={styles.scene}>
       {ART_X.map((x, k) => (
         <Animated.View key={x} style={[styles.art, { left: x }, artStyle]}>
-          <Pressable
-            style={styles.fill}
-            disabled={!live || answered}
-            onPress={() => onPick(k === 0 ? 'left' : 'right', false)}
-          >
+          <Target id={k === 0 ? 'left' : 'right'} correct={false} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
             <View
               style={[
                 styles.artInner,
@@ -97,17 +95,14 @@ export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick }: 
               <View style={styles.sill} pointerEvents="none" />
               <View style={styles.figureBlob} pointerEvents="none" />
             </View>
-          </Pressable>
+          </Target>
         </Animated.View>
       ))}
 
       {/* where each canvas has been */}
       <View style={styles.strip}>
-        <Pressable
-          style={styles.fill}
-          disabled={!live || answered}
-          onPress={() => onPick('history', true)}
-        >
+        <Target id={'history'} correct={true} picked={picked} onPick={onPick}
+              style={styles.fill} disabled={!live || answered}>
           <Animated.View style={[styles.spine, spineStyle]} pointerEvents="none" />
           {LINK_X.map((x, k) => (
             <Link key={x} k={k} left={x - STRIP.left} SCENE={SCENE} />
@@ -124,7 +119,7 @@ export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick }: 
               WHERE IT HAS BEEN
             </Text>
           </View>
-        </Pressable>
+        </Target>
       </View>
 
       <View style={styles.ground} pointerEvents="none" />

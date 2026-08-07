@@ -7,6 +7,7 @@ import { WALK, clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, moveTr, p
 import { BEATS } from './ethics5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A lone traveller walks through snowy Athens — a colonnade behind them, snow
 // drifting past — while the lesson's spine hangs overhead as a piece of
@@ -256,15 +257,12 @@ function Signpost({ f, answered, picked, onPick }: {
 }) {
   const chosen = picked === f.id;
   return (
-    <Pressable
-      style={[styles.signHit, { left: f.left }]}
-      disabled={answered}
-      onPress={() => onPick(f.id, f.correct)}
-    >
+    <Target id={f.id} correct={f.correct} picked={picked} onPick={onPick}
+              style={[styles.signHit, { left: f.left }]} disabled={answered}>
       <View style={[styles.sign, answered && f.correct && styles.signRight, answered && chosen && !f.correct && styles.signWrong]}>
         <Text style={[styles.signT, answered && f.correct && styles.onPaper]}>{f.label}</Text>
       </View>
-    </Pressable>
+    </Target>
   );
 }
 
@@ -276,12 +274,13 @@ function Pan({ pn, S, answered, picked, onPick }: {
   const st = useAnimatedStyle(() => ({ transform: [{ translateY: S.value.tilt * pn.side * 16 }] }));
   return (
     <Animated.View style={[styles.panHit, { left: 200 + pn.side * (BEAM_W / 2) - PAN_W / 2 }, st]}>
-      <Pressable disabled={answered} onPress={() => onPick(pn.id, pn.correct)}>
+      <Target id={pn.id} correct={pn.correct} picked={picked} onPick={onPick}
+              disabled={answered}>
         <View style={[styles.pan, answered && pn.correct && styles.panRight, answered && chosen && !pn.correct && styles.panWrong]}>
           <Text style={[styles.panT, answered && pn.correct && styles.onPaper]}>{pn.title}</Text>
           <Text style={[styles.panSub, answered && pn.correct && styles.onPaper]}>{pn.sub}</Text>
         </View>
-      </Pressable>
+      </Target>
     </Animated.View>
   );
 }

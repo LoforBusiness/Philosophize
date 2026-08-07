@@ -9,6 +9,7 @@ import {
 import { BEATS } from './logic32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // TWO figures with the question between them, and the words of the question are
 // the answer targets.
@@ -119,13 +120,8 @@ export default function Logic32Scene({ clock, bt, bi, i, picked, onPick }: Scene
     row.map((w, k) => {
       const chosen = picked === w.id;
       return (
-        <Pressable
-          key={w.id}
-          style={[styles.word, { left: wordLeft(row, left, k), top, width: w.w }]}
-          hitSlop={{ top: 4, bottom: 4, left: WORD_GAP / 2, right: WORD_GAP / 2 }}
-          disabled={!live || answered}
-          onPress={() => onPick(w.id, w.correct)}
-        >
+        <Target id={w.id} correct={w.correct} picked={picked} onPick={onPick}
+              key={w.id} style={[styles.word, { left: wordLeft(row, left, k), top, width: w.w }]} hitSlop={{ top: 4, bottom: 4, left: WORD_GAP / 2, right: WORD_GAP / 2 }} disabled={!live || answered}>
           <View
             style={[
               styles.wordInner,
@@ -140,7 +136,7 @@ export default function Logic32Scene({ clock, bt, bi, i, picked, onPick }: Scene
               {w.label}
             </Text>
           </View>
-        </Pressable>
+        </Target>
       );
     });
 

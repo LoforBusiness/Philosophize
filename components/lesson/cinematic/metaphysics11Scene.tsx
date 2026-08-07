@@ -10,6 +10,7 @@ import {
 import { BEATS } from './metaphysics11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // Two men on two low stands, each stand carrying a name, and a plate reading
 // MEMORIES hanging over one head on a short leader line. The plate travels from
@@ -206,12 +207,8 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick }:
         // box-none so the wrapper never eats a tap meant for the stand under it,
         // and never eats one meant for the body Pressable behind it (E36).
         <View key={s.id} style={[styles.slot, { left: s.cx - PLINTH_W / 2 }]} pointerEvents="box-none">
-          <Pressable
-            style={styles.slotFill}
-            hitSlop={SLOP_BOX}
-            disabled={!live || answered}
-            onPress={() => onPick(s.id, s.correct)}
-          >
+          <Target id={s.id} correct={s.correct} picked={picked} onPick={onPick}
+              style={styles.slotFill} hitSlop={SLOP_BOX} disabled={!live || answered}>
             <View
               style={[
                 styles.face,
@@ -219,7 +216,7 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick }:
                 live && answered && picked === s.id && !s.correct && styles.faceWrong,
               ]}
             />
-          </Pressable>
+          </Target>
         </View>
       ))}
 

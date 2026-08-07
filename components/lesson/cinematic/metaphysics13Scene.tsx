@@ -9,6 +9,7 @@ import {
 import { BEATS } from './metaphysics13Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A track that forks, stage right; the figure downstage left.
 //
@@ -141,13 +142,8 @@ export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick }:
         ANSWERS.map((a, k) => {
           const chosen = picked === a.id;
           return (
-            <Pressable
-              key={a.id}
-              style={[styles.ans, { left: TR_L + k * (ANS_W + ANS_GAP) }]}
-              hitSlop={{ top: 6, bottom: 6, left: ANS_GAP / 2, right: ANS_GAP / 2 }}
-              disabled={answered}
-              onPress={() => onPick(a.id, a.correct)}
-            >
+            <Target id={a.id} correct={a.correct} picked={picked} onPick={onPick}
+              key={a.id} style={[styles.ans, { left: TR_L + k * (ANS_W + ANS_GAP) }]} hitSlop={{ top: 6, bottom: 6, left: ANS_GAP / 2, right: ANS_GAP / 2 }} disabled={answered}>
               <View
                 style={[
                   styles.ansInner,
@@ -162,7 +158,7 @@ export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick }:
                   {a.label}
                 </Text>
               </View>
-            </Pressable>
+            </Target>
           );
         })}
 

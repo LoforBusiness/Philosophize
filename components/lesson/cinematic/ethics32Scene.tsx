@@ -9,6 +9,7 @@ import {
 import { BEATS } from './ethics32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // TWO figures, and THE FIGURES ARE THE ANSWER TARGETS — you tap a person, not a
 // card. Their standing plates carry the answer state so the fill still looks like
@@ -110,11 +111,8 @@ export default function Ethics32Scene({ clock, bt, bi, i, picked, onPick }: Scen
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
 
   const plate = (id: string, correct: boolean, left: number, label: string) => (
-    <Pressable
-      style={[styles.plate, { left }]}
-      disabled={!live || answered}
-      onPress={() => onPick(id, correct)}
-    >
+    <Target id={id} correct={correct} picked={picked} onPick={onPick}
+              style={[styles.plate, { left }]} disabled={!live || answered}>
       <View
         style={[
           styles.plateInner,
@@ -129,7 +127,7 @@ export default function Ethics32Scene({ clock, bt, bi, i, picked, onPick }: Scen
           {label}
         </Text>
       </View>
-    </Pressable>
+    </Target>
   );
 
   return (

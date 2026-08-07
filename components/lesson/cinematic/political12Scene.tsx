@@ -9,6 +9,7 @@ import {
 import { BEATS } from './political12Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A doorway with two lamps beneath it. Stage right.
 //
@@ -129,13 +130,8 @@ export default function Political12Scene({ clock, bt, bi, i, picked, onPick }: S
         ANSWERS.map((a, k) => {
           const chosen = picked === a.id;
           return (
-            <Pressable
-              key={a.id}
-              style={[styles.ans, { top: ANS_T + k * ANS_PITCH }]}
-              hitSlop={{ top: ANS_SLOP, bottom: ANS_SLOP, left: ANS_SLOP, right: ANS_SLOP }}
-              disabled={answered}
-              onPress={() => onPick(a.id, a.correct)}
-            >
+            <Target id={a.id} correct={a.correct} picked={picked} onPick={onPick}
+              key={a.id} style={[styles.ans, { top: ANS_T + k * ANS_PITCH }]} hitSlop={{ top: ANS_SLOP, bottom: ANS_SLOP, left: ANS_SLOP, right: ANS_SLOP }} disabled={answered}>
               <View
                 style={[
                   styles.ansInner,
@@ -150,7 +146,7 @@ export default function Political12Scene({ clock, bt, bi, i, picked, onPick }: S
                   {a.label}
                 </Text>
               </View>
-            </Pressable>
+            </Target>
           );
         })}
 

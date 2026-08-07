@@ -1,0 +1,189 @@
+import { createContext, useContext, useEffect, useId, useMemo } from 'react';
+import { Pressable, StyleSheet, type PressableProps } from 'react-native';
+import Animated, {
+  Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withTiming,
+} from 'react-native-reanimated';
+import { INK } from './cinematicKit';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// A THING IN THE PICTURE THAT CAN BE TAPPED, AND LOOKS LIKE IT.
+//
+// Eighty-two of the 102 cinematic lessons ask their question by having the
+// reader tap something on the stage rather than press a button underneath. That
+// mechanic is the reason the format won — a lesson about which of three maps is
+// true is better answered by pointing at a map than by reading three sentences
+// that describe maps. It was also, measurably, where readers got lost:
+//
+//   69 of 82 prompts already said "tap"      — the instruction was never missing
+//   13 of 82 named something you can SEE     — "board", "pipe", "shelf"
+//   15 of 82 pointed at an abstraction       — "tap the claim that is still
+//                                               owed an account"
+//
+// So the reader knew a tap was wanted and could not tell WHAT was tappable,
+// because a scene's answer targets were drawn exactly like the scenery around
+// them. Nothing on the stage said "these two rectangles are the buttons".
+//
+// This component is the answer, and it is one component on purpose: wrapping a
+// scene's existing Pressable in it costs one line per target and fixes every
+// lesson the same way, rather than 82 scenes each inventing an affordance.
+//
+// ── WHAT IT DRAWS ───────────────────────────────────────────────────────────
+//
+// While the question is open: an ink ring just outside the target's own bounds,
+// breathing slowly. Not a fill and not a colour — the ring sits OUTSIDE the art
+// so it never covers the thing being chosen, and §19 has no second colour to
+// reach for. The breath is what separates "this is a button" from "this is a
+// box someone drew"; a static outline reads as part of the picture, which is the
+// whole problem being fixed.
+//
+// The moment an answer lands, every ring is cancelled and removed. The scene's
+// own right/wrong styling then has the stage to itself — this component
+// deliberately does NOT style the answered state, because each scene already
+// does that in its own vocabulary and two systems fighting over it would be
+// worse than none.
+//
+// ── WHY IT ALSO COUNTS ITSELF ───────────────────────────────────────────────
+//
+// Every mounted Target registers with the surrounding TargetCount provider, so
+// the question panel underneath can say how many marked things there are without
+// any lesson having to declare it. That number is the difference between "answer
+// in the scene above" — which is what the panel used to say, and which tells the
+// reader nothing — and "tap one of the 3 marked parts above".
+// ─────────────────────────────────────────────────────────────────────────────
+
+const RING_INSET = -5;
+const RING_W = 2;
+const BREATH_MS = 1100;
+
+interface Registry {
+  add: (key: string) => void;
+  remove: (key: string) => void;
+}
+const TargetCtx = createContext<Registry | null>(null);
+
+/** Wrap the scene so its Targets can be counted. Mounted by CinematicPlayer. */
+export function TargetCountProvider({
+  children, onCount,
+}: { children: React.ReactNode; onCount: (n: number) => void }) {
+  const reg = useMemo(() => {
+    const keys = new Set<string>();
+    return {
+      add: (k: string) => { keys.add(k); onCount(keys.size); },
+      remove: (k: string) => { keys.delete(k); onCount(keys.size); },
+    };
+  }, [onCount]);
+  return <TargetCtx.Provider value={reg}>{children}</TargetCtx.Provider>;
+}
+
+/**
+ * EVERY OTHER PROP GOES STRAIGHT THROUGH TO THE PRESSABLE, on purpose.
+ *
+ * The 98 targets this replaces are plain Pressables carrying their own styles,
+ * hit slop, function-style children and `disabled` flags. Passing the rest
+ * through makes converting one a tag rename plus four props — which is a change
+ * a compiler can check — rather than a reshaping of each scene's props, which is
+ * a change only a person can check, 98 times.
+ */
+export default function Target({
+  id,
+  correct,
+  picked,
+  onPick,
+  children,
+  /** Match the target's own corner, so the ring does not square off a round thing. */
+  radius = 4,
+  ...rest
+}: {
+  id: string;
+  correct: boolean;
+  /** From SceneApi — null until this beat has been answered. */
+  picked: string | null;
+  onPick: (id: string, correct: boolean) => void;
+  radius?: number;
+} & Omit<PressableProps, 'onPress' | 'children'> & { children?: React.ReactNode }) {
+  const answered = picked !== null;
+  const reg = useContext(TargetCtx);
+  const key = useId();
+
+  useEffect(() => {
+    reg?.add(key);
+    return () => reg?.remove(key);
+  }, [reg, key]);
+
+  const breath = useSharedValue(0);
+  useEffect(() => {
+    if (answered) {
+      cancelAnimation(breath);
+      breath.value = withTiming(0, { duration: 180 });
+      return;
+    }
+    breath.value = 0;
+    breath.value = withRepeat(
+      withTiming(1, { duration: BREATH_MS, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      true,
+    );
+    return () => cancelAnimation(breath);
+  }, [answered]);
+
+  // Opacity only. A ring that also SCALED would drift off a target whose own art
+  // is moving, and every one of these sits on a stage where something is walking.
+  const ring = useAnimatedStyle(() => ({ opacity: 0.35 + breath.value * 0.65 }));
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      {...rest}
+      // After the spread: a scene's own `disabled` may add a reason to be
+      // untappable, but it may never make an answered target tappable again.
+      disabled={answered || !!rest.disabled}
+      onPress={() => onPick(id, correct)}
+    >
+      {children}
+      {!answered ? (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              top: RING_INSET, left: RING_INSET, right: RING_INSET, bottom: RING_INSET,
+              borderWidth: RING_W,
+              borderColor: INK,
+              borderRadius: radius + Math.abs(RING_INSET),
+            },
+            ring,
+          ]}
+        />
+      ) : null}
+    </Pressable>
+  );
+}
+
+/**
+ * The same ring with no Pressable, for a scene whose target is already a
+ * Pressable it cannot give up (a drag handle, a control with its own gesture).
+ */
+export function TargetRing({ answered, radius = 4 }: { answered: boolean; radius?: number }) {
+  const breath = useSharedValue(0);
+  useEffect(() => {
+    if (answered) { cancelAnimation(breath); breath.value = withTiming(0, { duration: 180 }); return; }
+    breath.value = withRepeat(withTiming(1, { duration: BREATH_MS, easing: Easing.inOut(Easing.quad) }), -1, true);
+    return () => cancelAnimation(breath);
+  }, [answered]);
+  const ring = useAnimatedStyle(() => ({ opacity: answered ? 0 : 0.35 + breath.value * 0.65 }));
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        StyleSheet.absoluteFill,
+        {
+          top: RING_INSET, left: RING_INSET, right: RING_INSET, bottom: RING_INSET,
+          borderWidth: RING_W, borderColor: INK, borderRadius: radius + Math.abs(RING_INSET),
+        },
+        ring,
+      ]}
+    />
+  );
+}
+
+export const TARGET_RING_INSET = RING_INSET;

@@ -7,6 +7,7 @@ import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bund
 import { BEATS } from './political6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // Rawls's two principles, drawn as INFORMATION rather than illustration.
 //
@@ -121,14 +122,10 @@ export default function Political6Scene({ clock, bt, bi, i, picked, onPick }: Sc
       </>
     );
     return showPick ? (
-      <Pressable
-        key={id}
-        style={[styles.panelHit, { left: soc.left }, lost && styles.faded]}
-        disabled={answered}
-        onPress={() => onPick(id, isAnswer)}
-      >
+      <Target id={id} correct={isAnswer} picked={picked} onPick={onPick}
+              key={id} style={[styles.panelHit, { left: soc.left }, lost && styles.faded]} disabled={answered}>
         {inner}
-      </Pressable>
+      </Target>
     ) : (
       <View key={id} style={[styles.panelHit, { left: soc.left }]} pointerEvents="none">{inner}</View>
     );

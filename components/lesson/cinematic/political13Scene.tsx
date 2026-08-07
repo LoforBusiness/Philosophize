@@ -9,6 +9,7 @@ import {
 import { BEATS } from './political13Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A three-step argument, stage right. The steps are the tap targets.
 //
@@ -136,11 +137,8 @@ function Step({
   const chosen = picked === step.id;
   return (
     <Animated.View style={[styles.stepWrap, { top: STEP_T + index * STEP_PITCH }, st]}>
-      <Pressable
-        disabled={!live || answered}
-        hitSlop={{ top: STEP_SLOP, bottom: STEP_SLOP, left: 0, right: 0 }}
-        onPress={() => onPick(step.id, step.correct)}
-      >
+      <Target id={step.id} correct={step.correct} picked={picked} onPick={onPick}
+              disabled={!live || answered} hitSlop={{ top: STEP_SLOP, bottom: STEP_SLOP, left: 0, right: 0 }}>
         <View
           style={[
             styles.step,
@@ -155,7 +153,7 @@ function Step({
             {step.label}
           </Text>
         </View>
-      </Pressable>
+      </Target>
     </Animated.View>
   );
 }

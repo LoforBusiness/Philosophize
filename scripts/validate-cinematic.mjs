@@ -25,6 +25,10 @@ const LEGACY = new Set(['argument', 'builder']);
 const problems = [];
 const warnings = [];
 const bands = [];
+// I70 debt: scenes whose answer targets are not yet wrapped in <Target>, so
+// nothing marks them as tappable. HIGH-WATER MARK — may only go down.
+const UNRINGED_BUDGET = 6;
+const unringed = [];
 let ok = 0;
 
 /** Split a BEATS array into its top-level beat objects. Crude but stable: every
@@ -109,6 +113,23 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
   // H63 — no XP figure typed into a string.
   const xp = src.match(/\+\s?\d+\s?XP/g);
   if (xp) errs.push(`hard-coded XP text ${[...new Set(xp)].join(', ')} — derive it from constants/xp (H63)`);
+
+  // I70 — AN ANSWER TARGET MUST BE A <Target>, so it is visibly a button.
+  //
+  // 82 of the 102 lessons answer their question by having the reader tap the
+  // picture, and the targets used to be drawn exactly like the scenery: measured
+  // across all of them, 69 prompts said "tap" and only 13 named something you
+  // could see. The reader knew a tap was wanted and could not tell what was
+  // tappable. Target.tsx puts a breathing ink ring on every one and counts itself
+  // so the panel can say how many there are — but only for scenes that USE it, so
+  // this is the half that cannot be left to memory.
+  //
+  // Carried as a DEBT RATCHET rather than a hard error, the way CARD_BUDGET is:
+  // six scenes hold their targets in something other than a plain Pressable and
+  // have to be converted by hand. Turning those into build failures on the day
+  // the rule landed would have stopped everyone else's work; a high-water mark
+  // that may only fall makes them impossible to forget and impossible to add to.
+  if (/onPick\(/.test(src) && !/from '\.\/Target'/.test(src)) unringed.push(f);
 
   // H59 — the band. A scene with a CAMERA is exempt from the bottom rule, because
   // D25 requires its band be measured after the transform — ethicsScene's ground line
@@ -251,6 +272,25 @@ if (tally.length) {
 for (const [f, warns] of warnings) {
   console.log(`~ ${f}`);
   for (const w of warns) console.log(`    ${w}`);
+}
+
+// I70 — the unringed debt, reported and ratcheted.
+const shortNames = unringed.map((f) => f.replace('Scene.tsx', '')).join(', ');
+if (unringed.length > UNRINGED_BUDGET) {
+  console.log(
+    `\nI70: ${unringed.length} scenes answer by tapping the picture with no <Target> ` +
+      `marking their targets, and the budget is ${UNRINGED_BUDGET}:\n  ${shortNames}\n` +
+      'Wrap each answer Pressable in Target, or use TargetRing where it owns a gesture ' +
+      'it cannot give up.',
+  );
+  problems.push(['I70 target budget', [`${unringed.length} unringed, budget ${UNRINGED_BUDGET}`]]);
+} else if (unringed.length) {
+  console.log(
+    `\nI70 debt: ${unringed.length}/${UNRINGED_BUDGET} scenes still have unmarked answer ` +
+      `targets — ${shortNames}\n  Convert one and lower UNRINGED_BUDGET. It may never go up.`,
+  );
+} else if (UNRINGED_BUDGET > 0) {
+  console.log('\nI70: every answer target is marked. Set UNRINGED_BUDGET to 0.');
 }
 
 // The band budget, stated rather than nagged about. Every one of these is a

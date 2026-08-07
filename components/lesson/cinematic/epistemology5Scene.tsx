@@ -7,6 +7,7 @@ import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bund
 import { BEATS } from './epistemology5Script';
 import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ARISTOTLE'S LADDER, drawn as a stepped bar chart and climbed by the eye.
@@ -154,12 +155,8 @@ export default function Epistemology5Scene({ clock, bt, bi, i, picked, onPick }:
         <>
           <Text style={styles.askLabel}>TAP WHO SAID IT</Text>
           {PLATES.map((pl) => (
-            <Pressable
-              key={pl.id}
-              style={[styles.plateHit, { top: pl.y }]}
-              disabled={answered}
-              onPress={() => onPick(pl.id, pl.correct)}
-            >
+            <Target id={pl.id} correct={pl.correct} picked={picked} onPick={onPick}
+              key={pl.id} style={[styles.plateHit, { top: pl.y }]} disabled={answered}>
               <View
                 style={[
                   styles.plate,
@@ -169,7 +166,7 @@ export default function Epistemology5Scene({ clock, bt, bi, i, picked, onPick }:
               >
                 <Text style={[styles.plateT, answered && pl.correct && styles.plateTOn]}>{pl.label}</Text>
               </View>
-            </Pressable>
+            </Target>
           ))}
         </>
       )}

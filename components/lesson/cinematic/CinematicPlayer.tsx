@@ -17,6 +17,7 @@ import { cue, touch } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import { swishTrack } from './gestures';
 import { lessonHasSound } from './lessonSound';
+import { TargetCountProvider } from './Target';
 import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
   COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, INK,
@@ -118,6 +119,11 @@ export default function CinematicPlayer({
   const [pickedOk, setPickedOk] = useState(false);
   const [correct, setCorrect] = useState(0);
   const [asked, setAsked] = useState(0);
+  // How many outlined things the scene is currently offering, counted by the
+  // Targets themselves (see Target.tsx) so no lesson has to declare it and none
+  // can declare it wrongly. Feeds the interact panel's hint. ABOVE the early
+  // return below, like every other hook here — see the note on that return.
+  const [targetCount, setTargetCount] = useState(0);
   const [done, setDone] = useState(false);
   const [boxSize, setBoxSize] = useState({ w: 0, h: 0 });
   // Which beat's content the DECK is currently showing. It lags `i` by the fade-out,
@@ -403,10 +409,14 @@ export default function CinematicPlayer({
                     <Animated.View
                       style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
                     >
-                      <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                      <TargetCountProvider onCount={setTargetCount}>
+                        <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                      </TargetCountProvider>
                     </Animated.View>
                   ) : (
-                    <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                    <TargetCountProvider onCount={setTargetCount}>
+                      <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                    </TargetCountProvider>
                   )}
                 </View>
               </View>
@@ -477,6 +487,7 @@ export default function CinematicPlayer({
                   <InteractPanel
                     prompt={beat.interact.prompt}
                     explain={beat.interact.explain}
+                    targets={targetCount}
                     answered={picked !== null}
                     correct={pickedOk}
                   />

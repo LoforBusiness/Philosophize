@@ -9,6 +9,7 @@ import {
 import { BEATS } from './ethics18Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A boundary line with two groups either side of it, stage right.
 //
@@ -137,13 +138,8 @@ export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick }: Scen
         ANSWERS.map((a, k) => {
           const chosen = picked === a.id;
           return (
-            <Pressable
-              key={a.id}
-              style={[styles.ans, { top: ANS_T + k * ANS_PITCH }]}
-              hitSlop={{ top: ANS_SLOP, bottom: ANS_SLOP, left: ANS_SLOP, right: ANS_SLOP }}
-              disabled={answered}
-              onPress={() => onPick(a.id, a.correct)}
-            >
+            <Target id={a.id} correct={a.correct} picked={picked} onPick={onPick}
+              key={a.id} style={[styles.ans, { top: ANS_T + k * ANS_PITCH }]} hitSlop={{ top: ANS_SLOP, bottom: ANS_SLOP, left: ANS_SLOP, right: ANS_SLOP }} disabled={answered}>
               <View
                 style={[
                   styles.ansInner,
@@ -158,7 +154,7 @@ export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick }: Scen
                   {a.label}
                 </Text>
               </View>
-            </Pressable>
+            </Target>
           );
         })}
 

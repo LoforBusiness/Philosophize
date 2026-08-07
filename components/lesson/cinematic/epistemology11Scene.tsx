@@ -9,6 +9,7 @@ import {
 import { BEATS } from './epistemology11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // Two clock dials side by side, high above the figure. The LEFT one is the hallway
 // clock: its hands are frozen at 3:00 and never move again. The RIGHT one is the
@@ -240,11 +241,8 @@ export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick }
               key={m.id}
               style={[styles.pickSlot, { left: PICK_L + k * PICK_PITCH }, pickStyle]}
             >
-              <Pressable
-                hitSlop={{ top: PICK_SLOP, bottom: PICK_SLOP, left: PICK_SLOP, right: PICK_SLOP }}
-                disabled={answered}
-                onPress={() => onPick(m.id, m.correct)}
-              >
+              <Target id={m.id} correct={m.correct} picked={picked} onPick={onPick}
+              hitSlop={{ top: PICK_SLOP, bottom: PICK_SLOP, left: PICK_SLOP, right: PICK_SLOP }} disabled={answered}>
                 <View
                   style={[
                     styles.pickInner,
@@ -259,7 +257,7 @@ export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick }
                     {m.note}
                   </Text>
                 </View>
-              </Pressable>
+              </Target>
             </Animated.View>
           );
         })}

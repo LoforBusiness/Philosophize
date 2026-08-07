@@ -9,6 +9,7 @@ import {
 import { BEATS } from './metaphysics32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // THE APP'S FIRST ORBIT, and the answer targets are three NUMBERS — the reader answers
 // by counting what is in front of them (E33). Nothing in the frame ever breaks the
@@ -120,12 +121,8 @@ export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick }:
       <Animated.View style={[styles.orb, orbB]} pointerEvents="none" />
 
       {COUNTS.map((c, k) => (
-        <Pressable
-          key={c.id}
-          style={[styles.plate, { left: PLATE_X[k] }]}
-          disabled={!live || answered}
-          onPress={() => onPick(c.id, c.correct)}
-        >
+        <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              key={c.id} style={[styles.plate, { left: PLATE_X[k] }]} disabled={!live || answered}>
           <View
             style={[
               styles.plateInner,
@@ -140,7 +137,7 @@ export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick }:
               {c.label}
             </Text>
           </View>
-        </Pressable>
+        </Target>
       ))}
 
       <View style={styles.ground} pointerEvents="none" />

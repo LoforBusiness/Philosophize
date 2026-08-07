@@ -9,6 +9,7 @@ import {
 import { BEATS } from './political15Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // A four-stage stair, stage right. The stages are the tap targets.
 //
@@ -146,11 +147,8 @@ function Stage({
         st,
       ]}
     >
-      <Pressable
-        disabled={!live || answered}
-        hitSlop={{ top: STG_SLOP, bottom: STG_SLOP, left: 0, right: 0 }}
-        onPress={() => onPick(stage.id, stage.correct)}
-      >
+      <Target id={stage.id} correct={stage.correct} picked={picked} onPick={onPick}
+              disabled={!live || answered} hitSlop={{ top: STG_SLOP, bottom: STG_SLOP, left: 0, right: 0 }}>
         <View
           style={[
             styles.stage,
@@ -165,7 +163,7 @@ function Stage({
             {stage.label}
           </Text>
         </View>
-      </Pressable>
+      </Target>
     </Animated.View>
   );
 }

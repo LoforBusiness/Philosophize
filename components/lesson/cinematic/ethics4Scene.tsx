@@ -7,6 +7,7 @@ import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bund
 import { BEATS } from './ethics4Script';
 import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import Target from './Target';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A TWO-LAYER DIAGRAM with the argument happening inside it.
@@ -126,12 +127,8 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick }: Scene
         <>
           <Text style={styles.askLabel}>TAP YOUR VERDICT</Text>
           {VERDICTS.map((v) => (
-            <Pressable
-              key={v.id}
-              style={[styles.vHit, { left: v.x, top: V_T }]}
-              disabled={answered}
-              onPress={() => onPick(v.id, v.correct)}
-            >
+            <Target id={v.id} correct={v.correct} picked={picked} onPick={onPick}
+              key={v.id} style={[styles.vHit, { left: v.x, top: V_T }]} disabled={answered}>
               <View
                 style={[
                   styles.vBox,
@@ -141,7 +138,7 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick }: Scene
               >
                 <Text style={[styles.vText, answered && v.correct && styles.vTextOn]}>{v.label}</Text>
               </View>
-            </Pressable>
+            </Target>
           ))}
         </>
       )}
