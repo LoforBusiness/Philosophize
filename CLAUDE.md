@@ -663,6 +663,15 @@ drawn as native Views (`Stickman.tsx`), never SVG — see the performance rule b
    functions. This crashed the launch screen in production (§19).
 6. **An animated full-screen `<Svg>` costs ~10fps on an S24.** Any animated art
    is inert SVG with native Views moving on top of it.
+   **Putting the `<Svg>` under an animated parent does NOT buy the exemption** —
+   the branch world was built on that reading and was unusable on a real phone.
+   What costs is the AREA being repainted, and a moving parent repaints all of
+   it. So: a surface that moves is only as tall and as wide as its own art
+   (measure the band, don't close every layer to the full tile), and it is
+   tiled into separate children so the off-screen ones are culled.
+   The same arithmetic applies to plain Views: **hundreds of them under one
+   transform is the same bill.** 320 rectangles drawing a hillside is one path's
+   worth of picture and three hundred views' worth of cost.
 
 ---
 
