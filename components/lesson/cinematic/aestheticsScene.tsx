@@ -87,7 +87,23 @@ const RIPPLE_CY = 452;
 
 const HPOSE = BEATS.map((b) => b.hpose ?? 0);
 const GLOW = BEATS.map((b) => (b.glow ? 1 : 0));
-const APPLE = BEATS.map((b) => (b.apple ? 1 : 0));
+/**
+ * A PROP DOES NOT LEAVE THE ROOM AND COME BACK.
+ *
+ * The apple's cue read 01001000 — on its stand for beat 1, gone for beats 2-3,
+ * back for beat 4, gone again. It stands on a labelled plinth; a plinth whose
+ * apple teleports away and returns is the kind of thing a reader notices without
+ * being able to say what is wrong. This fills the gap between its first beat and
+ * its last, and nothing beyond them, so it still arrives and leaves exactly when
+ * the script intends. (`npm run check:props`.)
+ */
+function held(flags: number[]): number[] {
+  const first = flags.indexOf(1);
+  if (first < 0) return flags;
+  const last = flags.lastIndexOf(1);
+  return flags.map((_, i) => (i >= first && i <= last ? 1 : 0));
+}
+const APPLE = held(BEATS.map((b) => (b.apple ? 1 : 0)));
 const CROWD = BEATS.map((b) => (b.crowd ? 1 : 0));
 const CRIT = BEATS.map((b) => (b.critics ? 1 : 0));
 // Only the beat that RAISES the chart runs the convergence; on any later beat it

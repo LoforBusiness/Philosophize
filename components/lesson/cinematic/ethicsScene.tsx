@@ -43,10 +43,21 @@ import type { SceneApi } from './CinematicPlayer';
 // over the WHOLE gait cycle, not the standing pose — the legs swing ±0.20 wither.
 
 const HUMAN_X = 250;
-const CRIT_X = 94;
+const CRIT_X = 84;
 /**
  * Shoulder height on stage. A mid-sized dog beside a 103-unit person.
  *
+ * 33, not the 40 it was. Filling the animal out AGAIN — a real belly, a haunch,
+ * thigh thicker than shin, and a head raised clear of the barrel instead of fused
+ * into it — took the dog from 1.50 wither units of crown to 1.75 and from 1.95
+ * long to 2.22. At 40 that crown climbed to screen y 233 and, worse, its
+ * hindquarters reached screen x 110 against a balance beam starting at 100: the
+ * two overlapped, which is the "crammed together" the animal and the scales
+ * looked. At 33 with CRIT_X out to 84 the crown sits at 255 (it was 254), the
+ * nose at 12 and the rump at 95 — four pixels clear of the beam, and the shot
+ * reads left to right as animal, balance, person.
+ *
+ * The earlier note, kept because the reasoning still holds:
  * 40, not the 46 it was. Filling the animal out (critters.ts) gave it a real
  * head and a muzzle that projects, which grew it from 1.31 wither units tall to
  * 1.49 and pushed its nose 0.36 further forward — at 46 that put the crown at
@@ -58,7 +69,7 @@ const CRIT_X = 94;
  * `k` decides how big the animal is in the shot and the proportions inside
  * critters.ts decide whether it looks fed, and those are separate questions.
  */
-const CRIT_K = 40;
+const CRIT_K = 33;
 const PIVOT_X = 158;
 const PIVOT_Y = 430;
 
@@ -103,9 +114,31 @@ const ORIGIN_ROWS = [
 ] as const;
 
 // ── per-beat cues, precomputed for the worklet ────────────────────────────────
+/**
+ * A PROP DOES NOT LEAVE THE ROOM AND COME BACK.
+ *
+ * The script names a cue per beat, and the scene fades the prop with it — which
+ * is right for something that arrives, does its job and goes, and wrong the
+ * moment a cue reads 0100000100. That is what it read: the dog was here for beat
+ * 1, gone for beats 2-6 and back for beat 7, and the balance blinked 0011001100.
+ * Both are the subject of the lesson, and both flickered in and out of existence
+ * while the reader watched.
+ *
+ * This fills the gaps between a cue's FIRST and LAST beat, and nothing beyond
+ * them. The prop still arrives when the script says and still leaves when the
+ * script is done with it; it simply stops teleporting out of the room in between.
+ * `npm run check:props` fails the build if any script grows a new one.
+ */
+function held(flags: number[]): number[] {
+  const first = flags.indexOf(1);
+  if (first < 0) return flags;
+  const last = flags.lastIndexOf(1);
+  return flags.map((_, i) => (i >= first && i <= last ? 1 : 0));
+}
+
 const HPOSE = BEATS.map((b) => b.hpose ?? 0);
-const JUDGE = BEATS.map((b) => (b.judge ? 1 : 0));
-const CRITTER = BEATS.map((b) => (b.critter ? 1 : 0));
+const JUDGE = held(BEATS.map((b) => (b.judge ? 1 : 0)));
+const CRITTER = held(BEATS.map((b) => (b.critter ? 1 : 0)));
 const PLANT = BEATS.map((b) => (b.plant ? 1 : 0));
 const Q2 = BEATS.map((b) => (b.weigh === 'q2' ? 1 : 0));
 const ORIGINS = BEATS.map((b) => (b.origins ? 1 : 0));
@@ -158,7 +191,12 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
     const critOn = L(CRITTER[p], CRITTER[n]);
 
     // On Q2 the animal ambles off — the point that only the human stops to judge.
-    const critX = CRIT_X - (Q2[n] ? q * 70 : 0);
+    //
+    // 120, not 70. At 70 it stopped with its whole hindquarters still on screen
+    // and then simply faded out where it stood, which is not "walks away", it is
+    // "vanishes mid-stride". 120 design units puts its rearmost pixel at screen
+    // x -41, so it is genuinely gone before anything stops moving.
+    const critX = CRIT_X - (Q2[n] ? q * 120 : 0);
 
     // Ledger: a row that was already written stays solid; a row this beat ADDS
     // slides in over the beat's opening, so the tally reads as being filled out.

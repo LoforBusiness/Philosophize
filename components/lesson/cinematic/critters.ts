@@ -74,10 +74,16 @@ interface Build {
 
 const SHAPE: Record<CritterKind, Build> = {
   // Longer than tall, head up, tail up, ear laid back.
+  //
+  // FATTER, AND WITH A NECK. The previous numbers drew a dachshund-lizard: the
+  // barrel was a flat slab, the legs were wire against it, and `rise` 0.20 put
+  // the skull's underside exactly on the shoulder line so the head FUSED into the
+  // body and the muzzle read as a snout growing straight out of the chest. The
+  // head has to clear the barrel's top edge before it reads as a head at all.
   dog: {
-    len: 0.92, body: 0.32, drop: 0.05, neck: 0.25, rise: 0.20,
-    snout: 0.21, skull: 0.20, ear: 0.18, earBack: 1, knee: 0.07,
-    tail: 0.32, tailUp: 0.26, limb: 0.13, horn: 0,
+    len: 0.90, body: 0.42, drop: 0.05, neck: 0.27, rise: 0.40,
+    snout: 0.20, skull: 0.21, ear: 0.20, earBack: 1, knee: 0.07,
+    tail: 0.32, tailUp: 0.26, limb: 0.17, horn: 0,
   },
   // Heavier barrel, level back, head LOW (the grazing cue), tail hanging, horns.
   //
@@ -85,9 +91,9 @@ const SHAPE: Record<CritterKind, Build> = {
   // chest cap: at the old 0.16 a skull this size sat half inside the barrel and
   // the two fused into one lump with a muzzle sticking out of it.
   cow: {
-    len: 1.10, body: 0.46, drop: -0.02, neck: 0.33, rise: 0.02,
-    snout: 0.23, skull: 0.22, ear: 0.16, earBack: 0, knee: 0.05,
-    tail: 0.40, tailUp: -0.26, limb: 0.145, horn: 0.17,
+    len: 1.08, body: 0.56, drop: -0.02, neck: 0.36, rise: 0.14,
+    snout: 0.22, skull: 0.23, ear: 0.16, earBack: 0, knee: 0.05,
+    tail: 0.40, tailUp: -0.26, limb: 0.19, horn: 0.17,
   },
 };
 
@@ -118,13 +124,23 @@ export function critter(kind: CritterKind, t: number, gait = 0, phase = 0): Crit
   // rectangle leaves. This is the single biggest part of the fill: a slab with
   // sawn ends reads as furniture, and the same slab rounded reads as a ribcage.
   S(0, sh, -B.len, rp, B.body);
-  dot.push({ x: 0, y: sh, r: B.body / 2 });
-  dot.push({ x: -B.len, y: rp, r: B.body / 2 });
+  // CHEST AND HAUNCH ARE WIDER THAN THE BAR, and that is the whole of "fed".
+  //
+  // A capsule of constant depth is a sausage: the same thickness at the brisket,
+  // the waist and the rump, which is the one silhouette no animal has. Two discs
+  // a little larger than the bar's half-width swell the ends, and a third, low
+  // and just behind the middle, gives the underline a belly instead of a straight
+  // rule. The union of the four is one mass — no outlines to line up — so this
+  // costs three dots and buys the whole shape.
+  const chest = B.body * 0.62, haunch = B.body * 0.66;
+  dot.push({ x: -B.body * 0.10, y: sh + B.body * 0.06, r: chest });
+  dot.push({ x: -B.len + B.body * 0.12, y: rp + B.body * 0.04, r: haunch });
+  dot.push({ x: -B.len * 0.52, y: (sh + rp) / 2 + B.body * 0.16, r: B.body * 0.52 });
 
   // ── neck and head
   const hd = life2(t, 0.47, 0.29, 1.3) * 0.035;
   const nx = B.neck, ny = sh - B.rise + hd;
-  S(0, sh, nx, ny, B.body * 0.72);
+  S(0, sh, nx, ny, B.body * 0.56);   // a NECK, not a second barrel
   dot.push({ x: nx, y: ny, r: B.skull });
   // THE MUZZLE IS MEASURED FROM THE FACE, NOT FROM THE HEAD'S CENTRE.
   //
@@ -136,8 +152,8 @@ export function critter(kind: CritterKind, t: number, gait = 0, phase = 0): Crit
   // changed independently.
   const mz = ny + B.skull * 0.32;
   const nose = nx + B.skull + B.snout;
-  S(nx + B.skull * 0.30, mz, nose, mz + B.skull * 0.22 + hd * 0.4, B.limb * 1.5);
-  dot.push({ x: nose, y: mz + B.skull * 0.22 + hd * 0.4, r: B.limb * 0.75 });
+  S(nx + B.skull * 0.30, mz, nose, mz + B.skull * 0.22 + hd * 0.4, B.limb * 1.05);
+  dot.push({ x: nose, y: mz + B.skull * 0.22 + hd * 0.4, r: B.limb * 0.55 });
   // The ear is the one thing that must NOT scale with the limb. At limb × 1.3 a
   // leg thick enough to carry the animal gave it an ear wider than it was long,
   // which is a paddle, so the ear got its own length and a slimmer stroke.
@@ -156,9 +172,12 @@ export function critter(kind: CritterKind, t: number, gait = 0, phase = 0): Crit
     const up = Math.max(0, Math.sin(phase * 2 * Math.PI + ph + Math.PI / 2)) * gait * 0.11;
     const kx = hx - B.knee + sw * 0.45, ky = hy * 0.48;
     const fx = hx + sw, fy = -up;
-    S(hx, hy, kx, ky, w);
-    S(kx, ky, fx, fy, w * 0.9);
-    dot.push({ x: kx, y: ky, r: w * 0.5 });
+    // THIGH THICKER THAN SHIN. A leg of one width is a stick; the taper is what
+    // makes it a limb with muscle at the top, and it is also what stops a fatter
+    // barrel from looking like it is balanced on wire.
+    S(hx, hy, kx, ky, w * 1.18);
+    S(kx, ky, fx, fy, w * 0.82);
+    dot.push({ x: kx, y: ky, r: w * 0.59 });
     // A PAW, sitting ON the line rather than centred on it. The shin's butt cap
     // already ends flush with the ground, so a disc centred at the foot would
     // bury half a paw under the floor — the ankle circles on the figures hang
