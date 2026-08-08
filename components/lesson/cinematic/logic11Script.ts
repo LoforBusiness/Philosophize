@@ -40,7 +40,7 @@ export const BEATS: Logic11Beat[] = [
     dur: 5.2,
   },
   {
-    p: 44, x: 116, steps: 4, base: 1,
+    p: 128, x: 116, steps: 4, base: 1,
     quote: {
       id: 'lq-logic-arguments-11',
       text: 'Begging or assuming the point at issue consists in failing to demonstrate the required proposition.',
@@ -83,7 +83,7 @@ export const BEATS: Logic11Beat[] = [
     dur: 1.0,
   },
   {
-    p: 33, x: 116,
+    p: 130, x: 116,
     summary: {
       title: 'The Argument That Eats Its Tail',
       points: [

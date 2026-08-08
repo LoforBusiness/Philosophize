@@ -570,6 +570,95 @@ export function propAct(code: number, t: number, u: number): Stance {
       },
     };
   }
+
+  // ── 19–24: dragging, weighing, and giving something away ───────────────────
+  if (code === 19) {                             // DRAG — both hands back, hauling with the legs
+    const grip = ease01(clamp01(p / 0.22));
+    const haul = ease01(clamp01((p - 0.20) / 0.62));
+    // Steps BACKWARD while pulling: adv is negative and the feet reset behind.
+    const step = Math.sin(haul * Math.PI * 3);
+    return {
+      ...s,
+      tilt: s.tilt + grip * 0.16 + haul * 0.08,   // leaning away from the load
+      neck: s.neck + grip * 0.06,
+      bob: s.bob - haul * 1.2,
+      footL: { x: -10 - haul * 6, y: -Math.max(0, step) * 3 },
+      footR: { x: 6 - haul * 4, y: -Math.max(0, -step) * 3 },
+      fistL: { x: lerp(-5, 17, grip) - haul * 6, y: lerp(6, 0, grip) },
+      fistR: { x: lerp(5, 22, grip) - haul * 6, y: lerp(6, -2, grip) },
+      adv: -haul * 14,
+    };
+  }
+  if (code === 20) {                             // WEIGH — one in each hand, tipping to compare
+    // Both hands out level, then the body tips toward the heavier one. The TILT is
+    // the whole gesture; hands that move without the torso read as juggling.
+    const up = ease01(clamp01(p / 0.30));
+    const tip = Math.sin(clamp01((p - 0.28) / 0.72) * Math.PI * 1.5);
+    return {
+      ...s,
+      tilt: s.tilt + tip * 0.10,
+      neck: s.neck + up * 0.10 + tip * 0.06,
+      fistL: { x: lerp(-5, -17, up), y: lerp(6, -10 + tip * 9, up) },
+      fistR: { x: lerp(5, 24, up), y: lerp(6, -10 - tip * 9, up) },
+    };
+  }
+  if (code === 21) {                             // HAND IT OVER — offer, release, withdraw
+    // The withdrawal is what says it was GIVEN. A hand that stays out is still
+    // holding the thing.
+    const out = ease01(clamp01(p / 0.36));
+    const let_go = ease01(clamp01((p - 0.44) / 0.20));
+    const back = ease01(clamp01((p - 0.62) / 0.38));
+    return {
+      ...s,
+      tilt: s.tilt - out * 0.06 + back * 0.04,
+      neck: s.neck - out * 0.05,
+      fistL: { x: -5, y: 6 },
+      fistR: { x: lerp(5, 28, out) + let_go * 2 - back * 23, y: lerp(6, -12, out) + back * 18 },
+      adv: out * 3 - back * 3,
+    };
+  }
+  if (code === 22) {                             // WIND UP AND WIPE — clearing a surface
+    const on = ease01(clamp01(p / 0.20));
+    const off = ease01(clamp01((p - 0.82) / 0.18));
+    const sweep = Math.sin(clamp01((p - 0.18) / 0.64) * Math.PI * 3);
+    return {
+      ...s,
+      tilt: s.tilt - on * 0.08,
+      neck: s.neck + on * 0.14,
+      fistL: { x: -6, y: 6 },
+      fistR: { x: lerp(5, 22 + sweep * 8, on) - off * 17, y: lerp(6, -6, on) + off * 12 },
+    };
+  }
+  if (code === 23) {                             // DIG — a spade going in and coming up
+    const plunge = ease01(clamp01(p / 0.28));
+    const lever = ease01(clamp01((p - 0.28) / 0.30));
+    const lift = ease01(clamp01((p - 0.56) / 0.44));
+    return {
+      ...s,
+      tilt: s.tilt - plunge * 0.22 + lift * 0.16,
+      neck: s.neck + plunge * 0.22 - lift * 0.12,
+      // Down into the plunge, up on the lift — bob is negative-is-lower.
+      bob: s.bob - plunge * 6 + lift * 4,
+      footL: { x: -11, y: 0 }, footR: { x: 11, y: 0 },
+      fistL: { x: lerp(-4, 10, plunge) + lever * 3, y: lerp(6, 16, plunge) - lift * 14 },
+      fistR: { x: lerp(6, 21, plunge) + lever * 4, y: lerp(6, 12, plunge) - lift * 18 },
+    };
+  }
+  if (code === 24) {                             // RING — pull a cord, twice, and let it go
+    const grab = ease01(clamp01(p / 0.24));
+    const off = ease01(clamp01((p - 0.84) / 0.16));
+    const pull = Math.max(0, Math.sin(clamp01((p - 0.22) / 0.60) * Math.PI * 2));
+    return {
+      ...s,
+      tilt: s.tilt - grab * 0.04 + pull * 0.04,
+      neck: s.neck - grab * 0.12 + pull * 0.04,
+      bob: s.bob - pull * 1.4,
+      fistL: { x: -5, y: 6 },
+      // Up to the cord at 26 out — never overhead, where the head would eat it —
+      // then down with each pull.
+      fistR: { x: lerp(5, 26, grab) - off * 20, y: lerp(6, -34, grab) + pull * 16 + off * 30 },
+    };
+  }
   return s;
 }
 

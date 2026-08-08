@@ -4,8 +4,11 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, emoteHold, emoteLive, lerp, moveTr, pose, seg, travelStance, type Bundle,
+  WALK, dirsFrom, ease01, lerp, moveTr, pose, seg, travelStance, type Bundle,
 } from './rig';
+// The whole movement library, not just rig's 49 emotes: codes under 100 are
+// exactly rig's and mean what they always did, 100+ reach moves.ts (see emoteAny).
+import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';

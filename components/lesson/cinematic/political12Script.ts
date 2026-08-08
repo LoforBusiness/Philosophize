@@ -39,7 +39,7 @@ export const BEATS: Pol12Beat[] = [
     dur: 4.8,
   },
   {
-    p: 44, x: 124, door: 1, open: 1, neg: 1,
+    p: 147, x: 124, door: 1, open: 1, neg: 1,
     quote: {
       id: 'lq-political-political-12-1',
       text: 'The positive sense of the word liberty derives from the wish on the part of the individual to be his own master.',

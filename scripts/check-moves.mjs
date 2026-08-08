@@ -302,7 +302,7 @@ const MOTIONS = [
   { name: 'seated (baseline)', kind: 'oneShot', at: () => R.seated(21, T) },
 
   // ── the movement library ───────────────────────────────────────────────────
-  // 18 travel modes · 15 postures · 40 one-shot actions.
+  // 18 travel modes · 15 postures · 48 one-shot actions · 24 prop actions.
   ...Array.from({ length: 18 }, (_, mode) => ({
     name: `move ${mode}`, kind: 'gait',
     cycle: M.gaitFor(mode).S / M.gaitFor(mode).stance,
@@ -314,7 +314,7 @@ const MOTIONS = [
   ...Array.from({ length: 15 }, (_, code) => ({
     name: `posture ${code}`, kind: 'oneShot', at: () => M.postureHold(code, T),
   })),
-  ...Array.from({ length: 40 }, (_, i) => ({
+  ...Array.from({ length: 48 }, (_, i) => ({
     name: `act ${i + 1}`, kind: 'oneShot', at: (u) => M.actStance(i + 1, T, u),
   })),
 
@@ -331,7 +331,7 @@ const MOTIONS = [
     cycle: M.gaitFor(2).S / M.gaitFor(2).stance,
     at: (d) => I.carryMode(2, d, hold),
   })),
-  ...Array.from({ length: 18 }, (_, i) => ({
+  ...Array.from({ length: 24 }, (_, i) => ({
     name: `prop ${i + 1}`, kind: 'oneShot', at: (u) => I.propAct(i + 1, T, u),
   })),
 

@@ -43,7 +43,7 @@ export const BEATS: Aes12Beat[] = [
     dur: 4.8,
   },
   {
-    p: 10, r: 44, rx: 224, ticks: 3, box: 1,
+    p: 129, r: 44, rx: 224, ticks: 3, box: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-12-1',
       text: 'The design or intention of the author is neither available nor desirable as a standard for judging the success of a work of literary art.',
@@ -85,7 +85,7 @@ export const BEATS: Aes12Beat[] = [
     dur: 1.0,
   },
   {
-    p: 39, r: 33, rx: 224, ticks: 5, box: 1,
+    p: 139, r: 33, rx: 224, ticks: 5, box: 1,
     summary: {
       title: 'Meaning Lives in the Work',
       points: [

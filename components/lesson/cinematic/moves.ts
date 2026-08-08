@@ -64,7 +64,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import {
-  clamp01, ease01, easeOutCubic, gaitVary, holdEnv, life2, lerp, mixStance,
+  clamp01, ease01, easeOutCubic, emoteHold, emoteLive, gaitVary, holdEnv, life2, lerp, mixStance,
   phaseFor, seatBob, settleFrac, settleStep, stand, U, walk, WALK,
   type Gait, type P2, type Stance,
 } from './rig';
@@ -1088,6 +1088,84 @@ export function actStance(code: number, t: number, u: number): Stance {
       fistR: { x: lerp(6, 30, r), y: lerp(7, -37, r) },
     };
   }
+  // ── 41–48: more of the same kind — motion that is not an argument ──────────
+  if (code === 41) {                             // BOB AND WEAVE — light on the feet, ducking
+    const a = t * 2.1;
+    const side = Math.sin(a), dip = Math.max(0, -Math.cos(a));
+    return {
+      ...s, tilt: s.tilt + side * 0.06, neck: s.neck + dip * 0.10,
+      bob: s.bob - dip * 3.4,
+      footL: { x: -8, y: 0 }, footR: { x: 9, y: 0 },
+      fistL: { x: 12 + side * 4, y: -16 - dip * 3 },
+      fistR: { x: 19 - side * 4, y: -18 - dip * 3 },
+    };
+  }
+  if (code === 42) {                             // HEEL TAP — one foot keeping time, hands easy
+    // The tapping foot NEVER carries weight, so the pelvis does not move with it.
+    // A body that bobs in time with a tapping toe reads as the whole figure
+    // hopping.
+    const tap = Math.max(0, Math.sin(t * 4.4)) ** 2 * 4;
+    return {
+      ...s, neck: s.neck + Math.sin(t * 2.2) * 0.04,
+      footL: { x: -6, y: 0 }, footR: { x: 9, y: -tap },
+      fistL: { x: -5 + Math.sin(t * 1.3) * 2, y: 7 },
+      fistR: { x: 6 + Math.sin(t * 1.7 + 1) * 2, y: 7 },
+    };
+  }
+  if (code === 43) {                             // SLOW SPIRAL — one hand drawing a wide circle
+    const a = t * 1.1;
+    return {
+      ...s, tilt: s.tilt + Math.cos(a) * 0.04, neck: s.neck - 0.06,
+      fistL: { x: -6, y: 6 },
+      fistR: { x: 20 + Math.cos(a) * 9, y: -14 + Math.sin(a) * 12 },
+    };
+  }
+  if (code === 44) {                             // REACH AND SETTLE — a hand goes out and comes home
+    const r = Math.sin(Math.PI * ease01(p));
+    return {
+      ...s, tilt: s.tilt - r * 0.05, neck: s.neck - r * 0.08,
+      fistL: { x: -5, y: 6 },
+      fistR: { x: lerp(6, 29, r), y: lerp(7, -16, r) },
+    };
+  }
+  if (code === 45) {                             // ROCK ON HEELS — back on the heels, then forward
+    const a = Math.sin(t * 1.5);
+    return {
+      ...s, tilt: s.tilt + a * 0.10, bob: s.bob - Math.abs(a) * 0.8,
+      neck: s.neck - a * 0.05,
+      footL: { x: -6, y: 0 }, footR: { x: 7, y: 0 },
+      fistL: { x: -7 - a * 3, y: 7 }, fistR: { x: 8 - a * 3, y: 7 },
+    };
+  }
+  if (code === 46) {                             // LOOSE SHAKE-OUT — shaking the arms loose
+    // Fast, small, and DAMPED: the shake dies away over u, which is what makes it
+    // a shake-out rather than a tremor.
+    const die = 1 - ease01(p);
+    return {
+      ...s, neck: s.neck + Math.sin(t * 9) * 0.02 * die,
+      fistL: { x: -6 + Math.sin(t * 11) * 5 * die, y: 8 + Math.sin(t * 13) * 3 * die },
+      fistR: { x: 7 + Math.sin(t * 12 + 2) * 5 * die, y: 8 + Math.sin(t * 10 + 1) * 3 * die },
+    };
+  }
+  if (code === 47) {                             // SIDE-STEP TOUCH — two steps out, two steps back
+    const a = t * 1.6;
+    const out = Math.sin(a);
+    const lift = Math.max(0, Math.cos(a)) ** 2 * 4;
+    return {
+      ...s, tilt: s.tilt + out * 0.04, neck: s.neck - Math.sin(a - 0.8) * 0.05,
+      bob: s.bob - Math.abs(out) * 1.2,
+      footL: { x: -7 + out * 5, y: -lift * (out < 0 ? 1 : 0) },
+      footR: { x: 8 + out * 5, y: -lift * (out > 0 ? 1 : 0) },
+      fistL: { x: -10 + out * 8, y: 2 }, fistR: { x: 11 + out * 8, y: 2 },
+    };
+  }
+  if (code === 48) {                             // BREATHE DEEP — one slow lift and release
+    const r = Math.sin(Math.PI * ease01(p));
+    return {
+      ...s, tilt: s.tilt - r * 0.04, neck: s.neck - r * 0.12, bob: s.bob + r * 1.6,
+      fistL: { x: -6 - r * 3, y: 7 - r * 3 }, fistR: { x: 7 + r * 3, y: 7 - r * 3 },
+    };
+  }
   if (code === 40) {                             // ROLL SHOULDERS — a circle, one then the other
     // Two circles a half-cycle apart. The hand describes an ellipse rather than a
     // line, which is the difference between a shoulder rolling and an arm
@@ -1100,6 +1178,47 @@ export function actStance(code: number, t: number, u: number): Stance {
     };
   }
   return s;
+}
+
+// ── the bridge: how a LESSON reaches any of this ─────────────────────────────
+//
+// None of it could, and that is the whole reason the figure looked repetitive.
+//
+// Counted across the 102 cinematic scenes: `emoteHold` — which lives in rig.ts
+// and has 49 codes — is called 263 times, and `moves.ts` is called ZERO times.
+// Every lesson in the app poses its figure from one set of 49, about five reuses
+// each, while the 76 motions in this file were reachable only from the branch
+// world. Adding to this file therefore did nothing for the lessons at all until
+// something joined the two, which is what this is.
+//
+// WHY NOT JUST ADD THE POSES TO `emoteHold`? Because rig.ts has zero imports on
+// purpose (§17) so it can run in plain Node, and because a second session is
+// editing it. A scene swaps one import and gets the whole catalogue.
+//
+// The code space is deliberately sparse rather than continuous: 0–99 are rig's
+// existing emotes and mean exactly what they always did, so a scene can switch to
+// `emoteAny` without changing a single beat. Everything new is 100+.
+//
+//   0–99    rig's emoteHold, untouched
+//   100+    one-shot actions from this file, held at full extension
+//           (100 → act 1 … 139 → act 40; the dance and loose-arm set is 128–139)
+//   200+    prop actions from interact.ts are NOT here — a prop action needs an
+//           object, so it belongs to the scene that drew one.
+
+/** rig's emotes for 0–99, this file's actions for 100+. See the note above. */
+export function emoteAny(code: number, t: number): Stance {
+  'worklet';
+  if (code < 100) return emoteHold(code, t);
+  // u = 1: a one-shot held at its end. The dance and flow moves (128–139) read
+  // `t` rather than `u`, so holding them runs them forever, which is the point.
+  return actStance(code - 99, t, 1);
+}
+
+/** The live variant, so a beat's opening still carries rig's speech beat. */
+export function emoteAnyLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code < 100) return emoteLive(code, t, bt);
+  return actStance(code - 99, t, 1);
 }
 
 // ── aiming: what the figure is attending to ──────────────────────────────────
