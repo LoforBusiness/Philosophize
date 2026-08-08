@@ -25,6 +25,22 @@ const LEGACY = new Set(['argument', 'builder']);
 const problems = [];
 const warnings = [];
 const bands = [];
+const cameras = [];
+
+// checkShots comes out of the SAME module the player uses, transpiled rather than
+// reimplemented here. camera.ts is deliberately import-free so stripping the types
+// is enough to run it — and a checker carrying its own copy of the rule would drift
+// from the rule the moment either changed, which is worse than no checker.
+const tsc = (await import('typescript')).default;
+const camExports = {};
+new Function(
+  'exports',
+  tsc.transpileModule(
+    fs.readFileSync(path.join(DIR, 'camera.ts'), 'utf8'),
+    { compilerOptions: { module: tsc.ModuleKind.CommonJS, target: tsc.ScriptTarget.ES2020 } }
+  ).outputText
+)(camExports);
+const { checkShots } = camExports;
 // I70: scenes whose answer targets are not marked as tappable. CLOSED — every
 // one of the 102 is wrapped in <Target> or carries a <TargetRing>, so this is a
 // hard zero rather than a budget, and a new lesson that forgets fails the build.
@@ -149,6 +165,31 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
       } else {
         errs.push(`band bottom ${b} — the ground line is 500 and this scene has no camera, so it belongs in 508–518 (H59)`);
       }
+    }
+  }
+
+  // THE CAMERA, CHECKED RATHER THAN TRUSTED.
+  //
+  // checkShots has existed since the first lesson got a camera and nothing ever
+  // ran it — it was a function you were meant to remember to call from a scratch
+  // script. On the one lesson that has a shot list, four of the first eleven shots
+  // were illegal, so "remember to call it" is not a control.
+  //
+  // Hand-written lists stay legal; resolveMoves just makes them unnecessary. Either
+  // way, the numbers that actually reach the player are checked here.
+  const shotBlock = src.match(/const SHOTS: Shot\[\] = \[([\s\S]*?)\n\];/);
+  if (shotBlock && band) {
+    const shots = [...shotBlock[1].matchAll(
+      /\{\s*cx:\s*(-?[\d.]+),\s*cy:\s*(-?[\d.]+),\s*s:\s*(-?[\d.]+)(?:,\s*tr:\s*(-?[\d.]+))?/g
+    )].map((m) => ({ cx: +m[1], cy: +m[2], s: +m[3], ...(m[4] !== undefined ? { tr: +m[4] } : {}) }));
+    if (!shots.length) {
+      warns.push('a SHOTS list is declared but none of it parsed — the camera check did not run');
+    } else {
+      const groundM = src.match(/ground(?:Line)?\s*[=:]\s*(\d+)/);
+      for (const p of checkShots(shots, [+band[1], +band[2]], groundM ? +groundM[1] : undefined)) {
+        errs.push(`camera: ${p}`);
+      }
+      cameras.push({ f, n: shots.length });
     }
   }
 
@@ -308,6 +349,14 @@ if (bands.length) {
       `tallest ${worst.h} in ${worst.f} → ${fit(worst.h).toFixed(2)}×`,
   );
 }
+
+// SAID OUT LOUD, so a check that silently stopped running is visible. A camera
+// checker that matches nothing looks exactly like a camera checker that passes.
+console.log(
+  `\ncamera: ${cameras.length} of ${bands.length} lessons move it` +
+    (cameras.length ? ` (${cameras.map((c) => `${c.f.replace('Scene.tsx', '')} ×${c.n}`).join(', ')})` : '') +
+    ' — every shot checked against its own band',
+);
 if (problems.length) {
   console.log('');
   for (const [f, errs] of problems) {
