@@ -85,7 +85,8 @@
     "check:rest": "node scripts/check-rest.mjs",
     "check:prompts": "node scripts/check-prompts.mjs",
     "check:props": "node scripts/check-props.mjs",
-    "check:scale": "node scripts/check-scale.mjs"
+    "check:scale": "node scripts/check-scale.mjs",
+    "check:bible": "node scripts/check-bible.mjs"
   },
   "overrides": {
     "@expo/require-utils": "56.1.6"

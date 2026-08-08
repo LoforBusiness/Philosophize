@@ -12,10 +12,25 @@
 
 **Core principle:** Every screen should make the user feel smarter, not more confused.
 
+> **`npm run check:bible` re-derives every number in this file from the repo** —
+> the gate constant, the composed philosopher array, the cinematic validator,
+> package.json, app.json. It is not in `npm run check`, because a legitimate
+> version bump should not break an unrelated build; run it whenever you change
+> something this file talks about. It exists because a single audit found this
+> file claiming versionCode 16 while 19 was live and gating every user, ~223
+> philosophers against 322, and a whole section explaining that reminders reach
+> nobody — four days after the binary carrying them shipped.
+
 **Live: SHIPPED on Google Play**, full public rollout, package `com.philosophize.app`.
-Current binary is **versionCode 16**. Content and JS ship over the air between
-binaries (see §18) — a new build is only needed for native changes, app icons,
-splash, or anything else baked into the APK.
+Current binary is **versionCode 19** (2026-08-05). 17 and 18 exist in
+`eas build:list` but both ERRORED, so 19 is the successor to 16. Content and JS
+ship over the air between binaries (see §18) — a new build is only needed for
+native changes, app icons, splash, or anything else baked into the APK.
+
+**19 matters more than a version bump usually does**, because it is the first
+binary carrying `expo-notifications` and `expo-audio`. Two whole features that
+this file used to describe as unreachable — reminders (§22) and sound (§2) —
+are live for everyone who can open the app.
 
 ---
 
@@ -46,7 +61,8 @@ splash, or anything else baked into the APK.
 | Widget | react-native-android-widget | 0.20 | Android home-screen "Quote of the Day" |
 | Validation | Zod | 4.x | API boundary validation only |
 | Date math | date-fns | 4.x | Streak calculation |
-| Haptics | expo-haptics | ~56 | Installed; used ONLY in `lesson/story/*` — still not in the runner |
+| Haptics | expo-haptics | ~56 | Live in the runners via `lib/feedback.ts` |
+| Sound | expo-audio | ~56 | Live since build 19; clips are GENERATED, not sampled (`scripts/make-sounds.mjs`) |
 
 Every native-dependent module has a `stub.ts` + `index.web.ts` pair (`lib/ads`,
 `lib/purchases`, `lib/auth/social`) so the app still runs on web and in Expo Go,
@@ -95,6 +111,10 @@ Philosophize/
 │   │   ├── feedback/            # CorrectFeedback, IncorrectFeedback (built, unwired)
 │   │   ├── scenes/ inkScenes    # per-branch illustration art
 │   │   └── story/               # SnowWalkStory, ExistenceStory, PaintScene (unwired)
+│   ├── branch/                  # THE ROAD — BranchWorld (the walked strip on a
+│   │                            #   branch screen) + worldPath (layout, speed,
+│   │                            #   obstacles, jump) + walkFigure + sceneArt.
+│   │                            #   worldPath/sceneArt have ZERO imports (§17)
 │   ├── launch/                  # LaunchScreen + launchScenes + LaunchFigure (§19)
 │   ├── home/                    # QuickStartCard, StickmanStroll
 │   ├── gamification/            # StreakBook, StreakWeek, RankUpScreen
@@ -108,7 +128,7 @@ Philosophize/
 │   ├── index.ts                 # ALL_BRANCHES + getLessonById, lessonAccessibility,
 │   │                            #   branchCountsFromUnits, getLessonUnitInfo
 │   ├── branches/                # 6 branches · 28 units · 192 lessons (§5)
-│   ├── philosophers.ts          # BASE + composes ALL_PHILOSOPHERS (~223)
+│   ├── philosophers.ts          # BASE + composes ALL_PHILOSOPHERS (322)
 │   ├── extra-philosophers/      # ancient/eastern/medieval/modern/contemporary/
 │   │                            #   expansion, expansion2a/2b/3/4 (+ *-facts)
 │   ├── philosopherFacts.ts      # "Did you know?" facts, 3 per philosopher
@@ -120,6 +140,8 @@ Philosophize/
 │   ├── supabase/                # client, auth, secureStorage, sync, useCloudSync,
 │   │                            #   tombstone, useSession
 │   ├── ads/ purchases/ auth/    # each: types + real + stub + index.web (native-safe)
+│   ├── sound/                   # same four-file pattern; `cue()` in lib/feedback.ts
+│   │                            #   is the ONE call site for haptics + sound together
 │   ├── notifications/           # same pattern + useReminders (§22)
 │   ├── widget/                  # render.tsx, pin.ts, pinWidget.ts
 │   └── utils/                   # streak, week, progress, xp, quickStart,
@@ -276,7 +298,8 @@ Every lesson MUST:
 
 > `tsc` checks types only, so these are enforced by `npm run check:cards`
 > (`scripts/validate-lessons.mjs`) — 192/192 clean. Cinematic lessons have their own
-> shape check, `npm run check:cinematic` (§17). `npm run check` runs tsc plus both.
+> shape check, `npm run check:cinematic` (§17). `npm run check` runs tsc plus ten
+> validators — see §11.
 
 ### Content Limits
 (Authoritative source is the comments in `data/types.ts`.)
@@ -450,7 +473,7 @@ A unit's `index.ts` exports an array of `Path` objects (the units); each needs a
 stable `id` — `lessonsByUnit` is keyed on it, so **renaming an id silently resets
 that unit's progress for every existing user.**
 
-**Keep every branch at 32, and at 16 cinematic (§5).** The counts were 27–30 and it
+**Keep every branch at 32, and at 17 cinematic (§5).** The counts were 27–30 and it
 showed on the Learn cards, so they were levelled deliberately; adding one lesson to
 one branch puts them back out. Add six, one per branch — and give each of the six a
 scene, or the cinematic invariant goes out instead of the lesson one.
@@ -474,7 +497,13 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` = `tsc` + both structural validators. `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 192 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
+**Validation:** `npm run check` is `tsc` plus **ten** validators, in this order:
+`validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-prompts` ·
+`validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
+`check-rest`. It exits 0 today, so anything any of them prints is yours. (Several
+carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
+figures and 6 hand-built ones, `check-moves` 6 head-clearance defects. A budget
+line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 192 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
 
 **Cinematic lessons have their own rule book:** [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md) — figure scale and proportion, reach and joint rules, motion and end-poses, band/deck/box/wrap clipping, and the text-must-match-the-picture rule. Read it before authoring a cinematic lesson and run its Part 3 checks before calling one done.
 
@@ -484,8 +513,9 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **Phase 5 — shipped and iterating in public.** Live on Google Play, versionCode 16.
 
-- **Content:** 6 branches · **28 units** · **192 lessons**. **~223 philosophers**
-  with bios, eras, 4–6 quotes and three "Did you know?" facts apiece.
+- **Content:** 6 branches · **28 units** · **192 lessons**. **322 philosophers**
+  with bios, eras and **1,780 quotes** between them — and all 322 have exactly
+  three "Did you know?" facts, with nothing missing.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
   gating; **102 cinematic lessons** (animated stickman scenes, §17); animated
   `LessonReward` with XP count-up, streak and rank-up.
@@ -509,8 +539,6 @@ To add a new branch: create an `index.ts` in the branch directory, export a
   pointed the wrong way, so the stubs stay stubs.
 - **Built but not wired:** `story/` scenes, `KineticNarration` voice, `feedback/`
   panels. Decide to ship or delete them.
-- **Haptics** is used only inside `lesson/story/*` — still absent from every
-  runner the user actually reaches.
 - **Daily Review / spaced repetition does not exist.** It is the headline
   Scholar's Pass promise in §14 and the P0 in §15, and nothing has been built.
 - **`lib/utils/progress.ts` is legacy** — `isLessonUnlocked` / `isPathUnlocked`
@@ -558,7 +586,7 @@ The Scholar's Pass paywall UI already exists; this is the value model it should 
 **Why someone pays (the thesis):**
 1. They actually **retain** what they learn (spaced review), not just tap through it.
 2. The **cinematic, narrated** lessons feel like nothing else in the category.
-3. **Breadth** — 6 branches, 192 lessons, ~223 thinkers — is a genuine library.
+3. **Breadth** — 6 branches, 192 lessons, 322 thinkers — is a genuine library.
 4. **Credential & mastery** — ranks + path-mastery give visible proof of progress.
 5. The **daily habit** (streak + review) makes the subscription part of a routine.
 
@@ -573,8 +601,6 @@ the per-branch counts stay level, until `check:cinematic` reports 0 card decks l
 Then `LessonRunner`, `cards/` and `interactions/` can go. Every lesson added along
 the way is cinematic.
 
-**P0 — Sensory polish.**
-- Add **haptics** (`expo-haptics`: light on correct, warning on incorrect, success on lesson complete) and **subtle sound** (page-turn on swipe, ink-scratch on reveal, soft chime on correct) — gated behind a Settings sound/haptics toggle.
 
 **P1 — Finish the orphaned premium machinery.** Wire the cinematic **story scenes** (`SnowWalkStory`, `ExistenceStory`) in as a path's hook or capstone; ship a **"Read to me"** narration toggle (`KineticNarration`); and decide to either **show** the `feedback/` panels in the runner or delete them.
 
@@ -586,7 +612,9 @@ units where every other branch has 5 — level it up.
 `constants/achievements.ts` once nothing imports them. (The **lesson-contract
 validation script** that used to head this item is done — `npm run check`, see §11.)
 
-**Done since this list was written** — kept so nobody re-plans them: content grew
+**Done since this list was written** — kept so nobody re-plans them: sensory
+polish shipped (haptics AND generated sound, both behind one `cue()` call in
+`lib/feedback.ts` and one Settings toggle); content grew
 from 60 lessons to 192 across 28 units; Supabase cloud sync went live; 102
 cinematic lessons shipped; the app launched on Google Play with ads,
 subscriptions and a widget; the XP model was reconciled behind `lessonXP()`;
@@ -685,6 +713,52 @@ drawn as native Views (`Stickman.tsx`), never SVG — see the performance rule b
    transform is the same bill.** 320 rectangles drawing a hillside is one path's
    worth of picture and three hundred views' worth of cost.
 
+### The branch road — the same rig, outside a lesson
+
+`components/branch/` puts the rig on a **branch screen**: a 360-tall strip the
+reader's figure walks along, one marker per lesson, seven seconds to the next.
+Four files, and two of them (`worldPath.ts`, `sceneArt.ts`) hold the zero-import
+rule for the same reason `rig.ts` does — the whole world can be laid out,
+measured and *drawn* in plain Node.
+
+`npm run check:walk` runs the exact motion code frame by frame; `node
+scripts/sheet-scene.mjs` renders all six places × five weathers to a PNG. Between
+them almost nothing here needs a phone.
+
+What a viewer complained about, and what the answers cost:
+
+- **One speed.** The traverse runs on `travelEase`, a trapezoid. It replaced
+  `Easing.inOut(Easing.quad)`, which peaks at **twice** the average — so he
+  accelerated for three and a half seconds and braked for three and a half more,
+  with the stride cadence obediently doubling. Never use a symmetric ease for
+  something that is supposed to be walking.
+- **The ground is FLAT, on purpose.** It was a continuous curve, and the figure
+  spent a whole branch trudging over knolls that also tilted him. What stops a
+  level road being a progress bar is what grows on it and lies across it.
+- **He only jumps at something drawn.** `obstacleAt` puts a log or boulder in
+  about one span in three and `jumpForSpan` aims the apex at it. A hop over
+  nothing is rule A1 in its plainest form, and it is what a flat road would
+  otherwise have produced.
+- **Nothing dark may stand at his height.** The figure is solid ink, head
+  included, and walks in front of every scenery layer. A near-black mass behind
+  him is not drama, it is the man vanishing. Anything above `NEAR_TOP` (his knee)
+  is a mid tone or lighter; the dark band is scrub at his feet. Enforced by
+  `check:walk`, which measures contrast against ink rather than trusting anyone.
+- **A departure is a foot skate waiting to happen.** A walk that begins at cycle
+  phase 0 starts mid-stance with the feet a full stride apart and both planted,
+  and blending out of a standing pose reintroduces the body's motion in
+  proportion to how much stand is left in the mix. Both were true here and cost
+  13 world units of slide per departure. `strideMode(..., fromStand)` and a
+  world-locked blend source fixed it.
+- **`gaitVary` CLAMPS stance into `[STANCE_MIN, STANCE_MAX]`.** A run's tabled
+  0.40 is a gait no journey has ever actually walked. Read `stanceUsed(g)`, never
+  `gaitFor(mode).stance`, when reasoning about the cycle.
+
+> And the trap that cost the most: this is where the **worklet ordering** rule in
+> the list above was learned the second time. `figureAt` called a worklet declared
+> below it, `tsc` and every validator passed, and the bundle threw on import —
+> blank app. Only loading it in a browser found it.
+
 ---
 
 ## 18. Shipping: EAS Build and Over-the-Air Updates
@@ -694,10 +768,16 @@ drawn as native Views (`Stickman.tsx`), never SVG — see the performance rule b
 An OTA only reaches binaries whose **runtime version matches**. Builds do not
 share one:
 
-| Build | Runtime version |
-|---|---|
-| 16 (current) | `bd0c0637f7e636eef9e8ddbbe61db9c9c9ae513c` |
-| 15, 14 | `7655f410f4b7050d121f65fcfb33bb7c2da56b5a` |
+| Build | Runtime version | Can its users still open the app? |
+|---|---|---|
+| **19 (current)** | `29eb709aad3b70740f0c92239b1a350820c81247` | **yes — and it is the only one** |
+| 18, 17 | — | never finished; both ERRORED |
+| 16 | `bd0c0637f7e636eef9e8ddbbe61db9c9c9ae513c` | no — below `MIN_VERSION_CODE` |
+| 15, 14 | `7655f410f4b7050d121f65fcfb33bb7c2da56b5a` | no — below `MIN_VERSION_CODE` |
+
+So today there is exactly **one** runtime worth publishing to, and the third
+column is why: with the gate at 19, every older binary is held behind the update
+wall and an OTA to its runtime lands on people who are already stopped.
 
 The runtime is a **fingerprint of the native project**, so it changes whenever
 app icons, `app.json`, `eas.json` or any native dependency changes. Publishing to
@@ -710,7 +790,7 @@ the failure is completely silent.
 **"In the wild" means reachable, not merely installed.** A binary below
 `MIN_VERSION_CODE` (§20) is held behind the full-screen update wall, so its users
 cannot open a lesson at all — and an OTA to that runtime lands on people who are
-already stopped. Once the gate was raised to 16, runtime `7655f410…` (builds
+already stopped. Once the gate was raised past 16, runtime `7655f410…` (builds
 15/14) stopped needing updates entirely, and several were published to it anyway
 before anyone noticed.
 
@@ -753,7 +833,7 @@ left-behind pin will silently mis-target the next publish.
 > is the point: **it is a moving value and the only safe move is to generate it.**
 > First it said the fingerprint could never match because of an autolinked widget-pin
 > module. Then, at build 16, it matched exactly (`bd0c0637…`). As of 2026-07-30 it has
-> moved again, to `285fd93f…`, because a few pure-JS font packages were added — the
+> moved again, to `285fd93f…`, and as of **2026-08-08** it is `3dbfa1be…` — the
 > fingerprint hashes `package.json` and the lockfile, so **adding a dependency moves it
 > even when that dependency has no native code at all.**
 >
@@ -895,8 +975,9 @@ compiled into the APK — and *not* the version in `app.json`, because that one
 travels with OTA updates: an old binary carrying new JS would report the new
 number and walk straight past the gate.
 
-**It fails open, deliberately.** On Android the value is `"16"`, but `parseInt`
-would turn an unexpected `"1.0.0"` into `1`, and against a minimum of 16 that
+**It fails open, deliberately.** `MIN_VERSION_CODE` is **19**. On a current
+Android binary `nativeBuildVersion` reads `"19"`, but `parseInt`
+would turn an unexpected `"1.0.0"` into `1`, and against that minimum that
 locks out *every user on earth including up-to-date ones*, with no way back. So
 only whole digits count; anything else, and anything null (web, Expo Go, dev
 client), is unknown — and unknown never blocks. iOS is skipped entirely.
@@ -932,6 +1013,20 @@ browser at it; the first transform can take longer than a navigation timeout.
   and re-measure before believing it.
 - A stale Metro server will serve a bundle that never boots. Restart with
   `--clear` before concluding the app is broken.
+- **Generated art can be looked at WITHOUT a device or a browser.**
+  `scripts/lib/rasterpath.mjs` turns SVG path data into pixels in plain Node —
+  flatten, scanline-fill by non-zero winding, anti-alias — and
+  `scripts/sheet-scene.mjs` uses it to composite the branch road exactly as the
+  phone does. This is the fastest loop in the repo for anything shape-shaped, and
+  it is how the scenery went from "five grey stripes" to something worth shipping
+  in five rounds. Two rules learned in those five: **draw the FIGURE into the
+  sheet too** (a backdrop that swallows an ink stickman is invisible otherwise),
+  and no `A` (arc) commands anywhere — the rasteriser, and `sceneArt`'s own band
+  measurement, both assume every command's arguments are (x, y) pairs.
+- **A contact sheet cannot catch a module-load or React fault.** It renders path
+  strings; it never imports the component. The `airborne` dead zone (§17) passed
+  tsc, three validators and five contact sheets, and took one browser load to
+  find. When a real screen changes, load the real screen.
 - `jimp-compact` is available (via `@expo/image-utils`) for offline image work —
   resizing, desaturating, compositing icon layers, checking transparency.
 
@@ -988,12 +1083,18 @@ tonight's is dropped once a lesson is done and only tonight's quotes the real
 streak number; the quote of the day is written days ahead from
 `getQuoteForDay(day)` so the lock screen and the app agree.
 
-> **`expo-notifications` was added AFTER build 16, so no shipped APK contains it,
-> and an OTA cannot add a native module to a binary that lacks one.**
+> **This was the blocker and it is now cleared.** `expo-notifications` was added
+> on 2026-08-01, after build 16 — so for a week no shipped APK contained it, and
+> an OTA cannot add a native module to a binary that lacks one. **Build 19
+> (2026-08-05) contains it**, `app.json` carries the plugin and the status-bar
+> icon, and the gate at 19 means every reachable user is on that binary.
+> Reminders work today.
 
-That is why `notifications.isSupported()` exists and why the Settings entry is
-built from it — on an old binary the section is *absent*, not disabled, because
-six switches that cannot possibly work is the exact thing this section removed.
+The guard stays anyway, and this is the part worth not undoing. `notifications.isSupported()`
+exists and the Settings entry is built from it — on a binary without the module the
+section is *absent*, not disabled, because six switches that cannot possibly work is
+the exact thing this section removed. It still earns its place on web, in Expo Go and
+in any dev client, and it is what makes the next native module cheap to add.
 It is also why `lib/notifications/index.ts` requires `./real` inside a
 `try`/`catch`: `real.ts` imports the native module at module scope and **throws**
 on the way in when it is missing. Catching that is the difference between "the
@@ -1004,11 +1105,11 @@ never reference `expo-notifications` from anywhere else.
 Consequences to remember:
 
 1. Adding the dependency **moved the fingerprint** — see §18, and generate it
-   rather than assuming.
-2. Reminders reach nobody until a new binary is built and rolled out. The JS is
-   safe to ship over the air in the meantime; it simply hides the section.
-3. When that build happens, decide whether `app.json` wants an
-   `expo-notifications` plugin entry for the small Android status-bar icon.
-   Without one Android silhouettes the launcher icon, which for a feather on
-   white may come out as a blob. Changing `app.json` moves the fingerprint again,
-   so do it *with* the build, never just before an OTA.
+   rather than assuming. This is the one consequence that never expires: it is
+   true of every dependency, native or not.
+2. ~~Reminders reach nobody until a new binary ships.~~ **Settled by build 19.**
+3. ~~Decide whether `app.json` wants an `expo-notifications` plugin entry.~~
+   **Decided:** it has one, pointing at `assets/images/notification-icon.png`
+   with colour `#1A1A1A`. Without it Android silhouettes the launcher icon, which
+   for a feather on white comes out as a blob. It went in *with* build 19 rather
+   than just before an OTA, which is the rule that made it safe.
