@@ -3,7 +3,7 @@ import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'r
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle } from './rig';
+import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle, type Stance } from './rig';
 import { BEATS } from './ethics6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -33,6 +33,7 @@ import type { SceneApi } from './CinematicPlayer';
 const BRIDGE_Y = 410;
 const DEC_X = 150;
 const STR_X = 216;
+const PEG_K = 0.64;                // 103 x 0.64 = 66, the height the row already used
 const MAIN5 = [300, 320, 340, 360, 380];
 
 // ── the WOULD YOU DO IT? chart ────────────────────────────────────────────────
@@ -118,7 +119,7 @@ export default function Ethics6Scene({ clock, bt, bi }: SceneApi) {
       <View style={[styles.fiveTick, { left: 298 }]} pointerEvents="none" />
       <View style={[styles.fiveTick, { left: 382 }]} pointerEvents="none" />
       <Text style={styles.fiveT}>THE FIVE</Text>
-      {MAIN5.map((x) => <Peg key={x} x={x} />)}
+      {MAIN5.map((x, i) => <Peg key={x} x={x} seed={i * 1.7 + 0.4} clock={clock} />)}
 
       {/* ── the trolley bearing down, streaks trailing behind it ──────────────── */}
       <Animated.View style={[styles.trolleyWrap, trolleyStyle]} pointerEvents="none">
@@ -189,13 +190,34 @@ function Bar({
   );
 }
 
-function Peg({ x }: { x: number }) {
-  return (
-    <View style={[styles.peg, { left: x - 5 }]} pointerEvents="none">
-      <View style={styles.pegHead} />
-      <View style={styles.pegBody} />
-    </View>
-  );
+/**
+ * One of the five on the line — solved by the rig, not built out of Views.
+ *
+ * `Peg` here was a disc on a bar. Not even legs, let alone arms or motion, while
+ * two fully articulated figures argued on the bridge above it. Five of those read
+ * as bollards however tall you make them, which is the whole of "they don't look
+ * like stickmen". Bound at the ankles, hands behind the back, each on its own
+ * pair of incommensurable sines so the row never falls into step (rule A6).
+ */
+function boundStance(t: number, seed: number): Stance {
+  'worklet';
+  const w = Math.sin(t * 1.6 + seed) * 0.58 + Math.sin(t * 1.03 + seed * 2.7) * 0.42;
+  const v = Math.sin(t * 2.2 + seed * 1.9) * 0.6 + Math.sin(t * 1.4 + seed) * 0.4;
+  return {
+    tilt: 0.03 + w * 0.06,
+    neck: -0.03 + v * 0.16,
+    bob: v * 0.9,
+    footL: { x: -3.4 + w * 0.5, y: 0 },
+    footR: { x: 3.4 + w * 0.5, y: 0 },
+    fistL: { x: -11 - v * 0.8, y: 5 + w * 1.4 },
+    fistR: { x: -13 + v * 0.8, y: 6 - w * 1.4 },
+    adv: 0,
+  };
+}
+
+function Peg({ x, seed, clock }: { x: number; seed: number; clock: SharedValue<number> }) {
+  const D = useDerivedValue<Bundle>(() => pose(boundStance(clock.value, seed), x, GROUND, PEG_K, 1, 1));
+  return <Stickman D={D} k={PEG_K} />;
 }
 
 const styles = StyleSheet.create({
@@ -210,9 +232,6 @@ const styles = StyleSheet.create({
   // of a person — specks, when they are the five lives the whole dilemma weighs.
   // 18 + 49 − 1 = 66. Five at true scale cannot fit (they would need ~500 units of
   // width and have 90), so this stays a schematic — but one that reads as people.
-  peg: { position: 'absolute', top: GROUND - 66, width: 18, alignItems: 'center' },
-  pegHead: { width: 18, height: 18, borderRadius: 9, backgroundColor: INK },
-  pegBody: { width: 8, height: 49, backgroundColor: INK, marginTop: -1, borderRadius: 4 },
   // The tally moves up clear of the taller figures, which now reach y 434.
   fiveBar: { position: 'absolute', left: 298, top: 416, width: 86, height: 1.5, backgroundColor: SOFT },
   fiveTick: { position: 'absolute', top: 416, width: 1.5, height: 7, backgroundColor: SOFT },

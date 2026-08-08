@@ -643,6 +643,33 @@ helper of that shape before calling it fixed.
 > *"Sometimes the end movement is his hands up in the air or something awkward with
 > his hands … I want it to be fixed so the end movements never look strange."*
 
+**C20f. The ELBOW settles too, and `npm run check:rest` is what proves it.** C20 was
+written about hands, fixed twice by reading the source, and reported broken again
+months later — because a settled pose was only ever checked at the *fist target*, and
+the drawn arm is shoulder → **elbow** → wrist. An elbow can wing back behind the skull
+or sit inside the head disc while the hand it belongs to is somewhere perfectly
+reasonable, and a fist-only reading passes every one of those. Five of the fifty
+gestures were doing exactly that: `both-wide`, `reach-out`, `sway-conduct` and
+`frame-it-up` all pulled the OFF hand back and up — and the figure is drawn in
+**profile**, so a hand at x −32 is not "wide", it is *behind the person*, which threw
+the left elbow to x −21 at head height. `tap-high-on-board` reached so high it drove
+its own elbow into the face.
+
+So the settled pose is now checked in numbers, on the solved skeleton, and the check
+distinguishes the two cases that look identical in a diff:
+
+- **A hand may touch the head.** "At the chin", "at the temple", "shielding the eyes"
+  are all real poses, and a fist centred on the rim half overlaps and half shows —
+  that is the *intended* picture. Only a hand driven well inside the disc (< 0.8 r)
+  has actually disappeared.
+- **An elbow may not touch it at all.** No gesture ever wants an elbow in the face, so
+  it must stay off the disc, below the crown, and in front of the spine.
+
+`scripts/check-rest.mjs` sweeps every code of every gesture library at eight clocks
+and five beat-times past the lift, plus the four scenes that pose their own hands, and
+fails the build on any of them. **When a settled pose looks wrong, fix the pose and
+re-run it — do not widen the check.** The thresholds are the rule.
+
 **C20e. Anything inside a windowed gesture must be a function of THAT WINDOW, not of
 the free-running clock.** A gesture fades in and out over its own slice of the loop, so
 a wobble written as `sin(t · 9)` has a phase nobody chose: it is wherever the monotonic
@@ -1729,3 +1756,48 @@ don't chase it as a regression.
 - Overflows of **2–3 units are line-box rounding**, everywhere, and benign. Bar at ≥4.
 - Never call a collision from a low-resolution contact sheet — zoom the raw capture
   first.
+
+---
+
+## H57 · A person in a scene is drawn by the RIG, never out of Views
+
+A circle for a head and a rectangle for a body is not a small figure, it is a
+different species standing next to one. The five people roped to the trolley
+track in ethics-3 were `Peg` — a disc, a bar and two rectangles rotated ±7° — and
+ethics-6's were a disc on a bar with **no legs at all**, both beside fully
+articulated figures that breathe. Enlarging them never helped, because size was
+never the problem: they had no joints and no motion, so they read as bollards
+with heads.
+
+If a scene needs a person at any size, call `pose()` and render a `Stickman`.
+The rig scales: the trolley row runs at `k = 0.70` and the bridge row at `0.64`,
+which are the exact heights those hand-built shapes already used.
+
+**A crowd needs its own seeds.** Figures sharing one motion read as one figure
+duplicated, not as several people — give each a different phase.
+
+## H58 · One figure may not own more than ~38% of the band
+
+`K_FIG` is 1.0 (a 103-unit figure) and the median scene puts that at **35% of its
+declared band**, which is where a character sits in an illustrated scene without
+being the scene. Two ways to break it, and both have been shipped:
+
+- multiplying `K_FIG` locally (×1.08, ×1.16), and
+- cropping to a **short band**, which is the commoner one — the band is what the
+  reader actually sees, so a 103-unit figure in a 182-unit band is 57% of the
+  picture no matter what `K_FIG` says.
+
+The band is width-limited on a phone (`fit = min(boxW/400, boxH/bandH)`), so for
+any band under about 490 **widening it costs nothing on screen** — it does not
+shrink the art, it reveals more stage around it. That is usually the fix, and it
+is the safe one: shrinking a figure shortens its reach, so every scene where a
+hand meets a prop has to be re-checked when you do it.
+
+`npm run check:scale` measures both and holds a ratchet on each.
+
+## H59 · A prop does not leave the room and come back
+
+See `npm run check:props`. A cue that reads `0100000100` fades a prop out for
+five beats and brings it back — the reader sees objects vanishing and
+reappearing. A gap in the *script* is fine; the scene wraps the cue in `held()`
+so the prop stays on stage between its first and last beat.

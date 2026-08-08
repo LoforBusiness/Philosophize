@@ -1,9 +1,9 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle } from './rig';
+import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle, type Stance } from './rig';
 import { BEATS } from './ethics3Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -42,8 +42,21 @@ const BR_LEN = 88;                 // branch, 40° up-right → ends at (323, 44
 // five have to fit between the junction and the right edge, and five figures at the
 // decider's true scale would need roughly 500 stage units of width where only 90
 // exist. So the row stays a SCHEMATIC of five people — but a legible one.
-const PEG_W = 19;
-const PEG_H = 72;
+//
+// ── AND A SCHEMATIC IS NOT A LOLLIPOP ───────────────────────────────────────
+//
+// Making them 72 tall did not make them people. They were still `Peg`: a circle,
+// a rectangle and two rectangles rotated ±7°, drawn as plain Views. No arms at
+// all, no joints, and — the part that really shows — NO MOTION, standing beside a
+// fully articulated figure that breathes. That is why they "don't even look like
+// stickmen": they aren't. They are bollards with heads.
+//
+// They are solved by the rig now, at k = 0.70, in a bound stance: ankles together,
+// both fists behind the back, and a slow uneven struggle so five people roped to a
+// rail are not five statues (rule A6 — everything alive stays alive). Each gets
+// its own seed, because the rig's own note is that figures sharing a motion read
+// as one figure duplicated rather than as a crowd.
+const PEG_K = 0.70;                // 103 × 0.70 ≈ 72, the height the row was already using
 const FIVE = [298, 320, 342, 364, 386];
 const ONE = { x: 303.5, y: 460 };  // stands ON the branch line
 const SLEEPERS = [24, 50, 76, 102, 128, 154, 180, 206, 232, 258, 284, 310, 336, 362, 388];
@@ -140,8 +153,8 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick }: Scene
       </Animated.View>
 
       {/* the five on the main line, the one up the branch */}
-      {FIVE.map((x) => <Peg key={x} x={x} y={GROUND} />)}
-      <Peg x={ONE.x} y={ONE.y} />
+      {FIVE.map((x, i) => <Bound key={x} x={x} y={GROUND} seed={i * 1.7 + 0.4} clock={clock} />)}
+      <Bound x={ONE.x} y={ONE.y} seed={4.9} clock={clock} />
       <Text style={styles.fiveLab}>FIVE</Text>
       <Text style={styles.oneLab}>ONE</Text>
 
@@ -205,15 +218,33 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick }: Scene
 }
 
 /** One waiting figure — head, body, two legs — planted with its feet at (x, y). */
-function Peg({ x, y }: { x: number; y: number }) {
-  return (
-    <View style={[styles.peg, { left: x - PEG_W / 2, top: y - PEG_H }]} pointerEvents="none">
-      <View style={styles.pegHead} />
-      <View style={styles.pegBody} />
-      <View style={[styles.pegLeg, { left: 5, transform: [{ rotate: '7deg' }] }]} />
-      <View style={[styles.pegLeg, { left: 10, transform: [{ rotate: '-7deg' }] }]} />
-    </View>
-  );
+/**
+ * Someone roped to the rail: ankles together, both hands behind the back, and a
+ * struggle that never repeats — two incommensurable sines, the same trick the rig
+ * uses for idle, so five of these side by side never fall into step.
+ */
+function boundStance(t: number, seed: number): Stance {
+  'worklet';
+  const w = Math.sin(t * 1.6 + seed) * 0.58 + Math.sin(t * 1.03 + seed * 2.7) * 0.42;
+  const v = Math.sin(t * 2.2 + seed * 1.9) * 0.6 + Math.sin(t * 1.4 + seed) * 0.4;
+  return {
+    tilt: 0.03 + w * 0.06,
+    neck: -0.03 + v * 0.16,                 // head turning to look for the trolley
+    bob: v * 0.9,
+    // Bound at the ankles: the feet stay together and shift weight rather than step.
+    footL: { x: -3.4 + w * 0.5, y: 0 },
+    footR: { x: 3.4 + w * 0.5, y: 0 },
+    // Both fists BEHIND the pelvis (the figure faces +x), which is what reads as
+    // "hands tied" from a silhouette with no rope drawn.
+    fistL: { x: -11 - v * 0.8, y: 5 + w * 1.4 },
+    fistR: { x: -13 + v * 0.8, y: 6 - w * 1.4 },
+    adv: 0,
+  };
+}
+
+function Bound({ x, y, seed, clock }: { x: number; y: number; seed: number; clock: SharedValue<number> }) {
+  const D = useDerivedValue<Bundle>(() => pose(boundStance(clock.value, seed), x, y, PEG_K, 1, 1));
+  return <Stickman D={D} k={PEG_K} />;
 }
 
 const styles = StyleSheet.create({
@@ -237,13 +268,6 @@ const styles = StyleSheet.create({
     backgroundColor: INK, borderRadius: 2, transformOrigin: '50% 100%', alignItems: 'center',
   },
   leverKnob: { position: 'absolute', top: -6, width: 11, height: 11, borderRadius: 6, backgroundColor: INK },
-
-  // head + body − 1 overlap + legs must equal PEG_H exactly, or the figure floats
-  // off the rail: 19 + 33 − 1 + 21 = 72.
-  peg: { position: 'absolute', width: PEG_W, height: PEG_H, alignItems: 'center' },
-  pegHead: { width: 19, height: 19, borderRadius: 10, backgroundColor: INK },
-  pegBody: { width: 7, height: 33, backgroundColor: INK, marginTop: -1, borderRadius: 3 },
-  pegLeg: { position: 'absolute', bottom: 0, width: 4.5, height: 21, backgroundColor: INK, borderRadius: 2, transformOrigin: '50% 0%' },
 
   // Both labels moved UP clear of the taller figures: the five now reach y 428 and
   // the one on the branch reaches 388, so the old positions sat on top of them.
