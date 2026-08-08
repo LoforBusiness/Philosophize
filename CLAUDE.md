@@ -650,18 +650,30 @@ drawn as native Views (`Stickman.tsx`), never SVG — see the performance rule b
    just been mounted** — every cinematic lesson ended on a blank screen with no
    way forward. A hook below that line is not a style nit; it breaks finishing a
    lesson. Each early return now carries a comment saying so.
-2. **`K_FIG` is 1.0 and lives in `cinematicKit`.** A file declaring its own local
+2. **A worklet must be declared BEFORE any worklet that calls it.** The babel
+   plugin rewrites `function foo()` carrying `'worklet'` into a `const`, then
+   builds every worklet's closure at module scope — so calling one declared
+   further down the file hits its temporal dead zone and throws **at import**,
+   taking down the whole route tree rather than one animation. Function
+   declarations hoist and worklets do not, which is exactly why this looks fine.
+   `npm run check:worklets` catches it, but **check that it is actually looking
+   at your function**: it decides "is this a worklet" from the start of the body,
+   and an earlier version read only the first four lines of the declaration —
+   so anything with a signature longer than three lines was skipped entirely and
+   never checked at all. That is how `walkFigure.figureAt` shipped a broken
+   bundle past a green validator.
+3. **`K_FIG` is 1.0 and lives in `cinematicKit`.** A file declaring its own local
    `K_FIG` shadows it and silently misses future corrections.
-3. **Figure-to-figure distances scale with the figure; figure-to-prop distances
+4. **Figure-to-figure distances scale with the figure; figure-to-prop distances
    do not.** Props are fixed-size, so a shrinking figure against a prop is the
    point; two figures placed against each other must keep their separation
    proportional or the staging goes limp.
-4. **The BAND must contain every pixel a beat can draw.** Each lesson crops the
+5. **The BAND must contain every pixel a beat can draw.** Each lesson crops the
    400×560 design space to the slice its art occupies and scales that up. Adding
    art outside the band clips it. Re-measure when you add anything.
-5. **A plain JS closure cannot cross into a worklet.** Pass numbers, not
+6. **A plain JS closure cannot cross into a worklet.** Pass numbers, not
    functions. This crashed the launch screen in production (§19).
-6. **An animated full-screen `<Svg>` costs ~10fps on an S24.** Any animated art
+7. **An animated full-screen `<Svg>` costs ~10fps on an S24.** Any animated art
    is inert SVG with native Views moving on top of it.
    **Putting the `<Svg>` under an animated parent does NOT buy the exemption** —
    the branch world was built on that reading and was unusable on a real phone.

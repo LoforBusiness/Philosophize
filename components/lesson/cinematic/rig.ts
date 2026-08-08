@@ -1355,6 +1355,26 @@ export function settleStep(
  * Defined BEFORE strideStance — a worklet that calls one declared later captures it
  * as undefined and crashes the UI thread.
  */
+/**
+ * The range `gaitVary` will let a stance fraction land in.
+ *
+ * EXPORTED because this clamp is load-bearing outside gaitVary and was invisible
+ * from there. A run's table entry says stance 0.40 — a real flight phase — but no
+ * journey is ever walked at 0.40, because this pulls it back to 0.55. Anything
+ * that reasons about the cycle from `gaitFor(mode).stance` is therefore reasoning
+ * about a gait that does not get used. That is exactly how the branch road's
+ * departure came to start a run at the wrong phase, with its feet a third of a
+ * stride apart instead of crossing.
+ */
+export const STANCE_MIN = 0.55;
+export const STANCE_MAX = 0.70;
+
+/** The stance fraction a gait will ACTUALLY be walked at, after the clamp above. */
+export function stanceUsed(g: Gait): number {
+  'worklet';
+  return g.stance < STANCE_MIN ? STANCE_MIN : g.stance > STANCE_MAX ? STANCE_MAX : g.stance;
+}
+
 export function gaitVary(g: Gait, seed: number): Gait {
   'worklet';
   const frac = (v: number) => { 'worklet'; return v - Math.floor(v); };
@@ -1365,7 +1385,7 @@ export function gaitVary(g: Gait, seed: number): Gait {
   return {
     S: g.S * (0.84 + r1 * 0.34),            // stride length: short and busy → long and loping
     lift: g.lift * (0.76 + r2 * 0.54),      // how far the feet clear the ground
-    stance: st < 0.55 ? 0.55 : st > 0.70 ? 0.70 : st,
+    stance: st < STANCE_MIN ? STANCE_MIN : st > STANCE_MAX ? STANCE_MAX : st,
     bob: g.bob * (0.78 + r3 * 0.6),         // heavy tread → light tread
     bobSign: g.bobSign,
     tilt: g.tilt * (0.84 + r3 * 0.42),      // how much they lean into the walk

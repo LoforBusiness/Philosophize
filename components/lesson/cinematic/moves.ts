@@ -65,7 +65,7 @@
 
 import {
   clamp01, ease01, easeOutCubic, emoteHold, emoteLive, gaitVary, holdEnv, life2, lerp, mixStance,
-  phaseFor, seatBob, settleFrac, settleStep, stand, U, walk, WALK,
+  phaseFor, seatBob, settleFrac, settleStep, stanceUsed, stand, U, walk, WALK,
   type Gait, type P2, type Stance,
 } from './rig';
 
@@ -483,6 +483,27 @@ function moveBody(mode: number, dist: number, g: Gait): Stance {
   return w;                                      // 0 — the plain walk
 }
 
+/**
+ * How far the body travels between a `fromStand` departure and the swing foot
+ * LANDING — one first step, in the distance units the cycle is driven by.
+ *
+ * This is the honest length for a departure blend, and it is a derivation rather
+ * than a taste: a walk that is still part-standing when its raised foot comes
+ * down has that foot skimming forward along the ground, which is a skate. The
+ * blend has to be finished before the first footfall, so this is exactly how
+ * long it gets.
+ *
+ * Uses `stanceUsed`, not the table's own figure, for the reason spelled out on
+ * `strideMode`: the table says a run holds stance for 0.40 of its cycle and no
+ * run in this app has ever been walked that way.
+ */
+export function firstStep(mode: number): number {
+  'worklet';
+  const g = gaitFor(mode);
+  const st = stanceUsed(g);
+  return (1 - st) * 0.5 * g.S / st;
+}
+
 /** One travel mode's stance at a given distance travelled. See `gaitFor` for codes. */
 export function moveStance(mode: number, dist: number): Stance {
   'worklet';
@@ -498,15 +519,38 @@ export function moveStance(mode: number, dist: number): Stance {
  * Mode 10 (backing away) is the one that needs the scene's help: keep `dir`
  * pointing at whatever they are retreating FROM, rather than letting `dirsFrom`
  * flip them, or they will simply be walking normally in the other direction.
+ *
+ * `fromStand` says the journey begins from a genuine standstill, and it defaults
+ * to false — which is what every one of the 102 lessons gets, unchanged.
+ *
+ * A cycle starts at phase 0 unless told otherwise, and phase 0 is the WORST place
+ * to begin a walk from rest: it is mid-stance with the feet a full stride apart
+ * and BOTH of them planted, so the departure has to drag two loaded feet apart
+ * against the ground. `fromStand` starts it half a cycle past the end of stance
+ * instead — the instant the feet cross, swing foot at the top of its arc directly
+ * above the planted one, which is what the first step of a real gait initiation
+ * looks like.
+ *
+ * COMPUTED IN HERE, off `g`, and that is the whole point. `gaitVary` has just
+ * rewritten this journey's stride length and clamped its stance fraction into
+ * [STANCE_MIN, STANCE_MAX]; a caller reading `gaitFor(mode).stance` is reading a
+ * number that is about to be overwritten. Working it out from the table gave a
+ * run its crossing point at phase 0.70 when the gait it actually walks crosses at
+ * 0.775 — feet a third of a stride apart at the very moment they were supposed to
+ * be together, and eight world units of stance-foot skate to close the gap.
  */
 export function strideMode(
-  x0: number, x1: number, settled: Stance, tr: number, mode: number, seed = 0
+  x0: number, x1: number, settled: Stance, tr: number, mode: number, seed = 0, fromStand = false
 ): Stance {
   'worklet';
   // See `strideStance` in rig.ts: `seed` gives a companion on the same journey its
   // own gait habit and its own footfall, so a pair never marches in lockstep.
   const g = gaitVary(gaitFor(mode), x0 * 0.37 + x1 * 0.11 + seed * 3.7);
   const span = Math.abs(x1 - x0);
+  // At phase u the swing foot sits at −S/2 + S·smoothstep((u−st)/(1−st)) and the
+  // planted one at S/2 − S(u−½)/st. u = (1+st)/2 sends both to zero, whatever st
+  // is — so this is exact for every gait rather than tuned for the default one.
+  const lead = fromStand ? (1 + g.stance) * 0.5 * g.S / g.stance : 0;
   // NOT `span * ease01(tr)`. This file was written from the pre-fix version of
   // `strideStance` and kept the double-ease that rig.ts had already removed: the
   // scene puts the body at `lerp(x0, x1, tr)` having eased tr once, so easing it
@@ -514,7 +558,7 @@ export function strideMode(
   // on `span·ease01(u)`. Two curves meeting only at the ends, and a glide in
   // between — measured at 122 units of skate on a 220-unit walk, three and a half
   // strides. Every travel mode in this file went through it.
-  const w = moveBody(mode, span * tr + seed * 11, g);
+  const w = moveBody(mode, span * tr + seed * 11 + lead, g);
   const far = clamp01(span / 40);
   const push = ease01(clamp01(1 - tr / 0.13)) * far;
   const land = Math.sin(Math.PI * clamp01((tr - 0.66) / 0.28)) * far;

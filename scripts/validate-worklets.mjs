@@ -114,11 +114,25 @@ for (const file of files) {
       const m = l.match(/^(?:export\s+)?function\s+([A-Za-z_$][\w$]*)/);
       if (!m) return;
       const { body, end } = blockAt(lines, i);
-      const head = body.split('\n').slice(0, 4).join('\n');
+      // ── FROM THE START OF THE BODY, NOT THE FIRST FOUR LINES ────────────────
+      //
+      // This used to test the opening four lines of the declaration for the
+      // directive, which silently excludes any function whose SIGNATURE is longer
+      // than three lines — the directive is then on line five and the function is
+      // not treated as a worklet at all, so nothing it calls is ever checked.
+      //
+      // That is not hypothetical. `figureAt` in components/branch/walkFigure.ts
+      // carries an eight-parameter signature over four lines. It called a worklet
+      // declared below it, this check said "nothing read before it exists", and
+      // the bundle threw `Cannot access 'airborne' before initialization` on
+      // import — the whole route tree, from a detector that was looking straight
+      // at it. A directive is by definition the first statement of the body, so
+      // that is where to look for it.
+      const inner = strip(body.slice(body.indexOf('{') + 1));
       fns.push({
         name: m[1], line: i, end,
         code: strip(body),
-        worklet: /['"]worklet['"]/.test(head),
+        worklet: /^\s*['"]worklet['"]\s*;/.test(inner),
       });
     });
     const worklets = fns.filter((f) => f.worklet);

@@ -3,18 +3,18 @@ import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-na
 import { useFocusEffect } from 'expo-router';
 import Animated, {
   useSharedValue, useAnimatedStyle, useDerivedValue, useFrameCallback,
-  withTiming, withSequence, withDelay, runOnJS, Easing, type SharedValue,
+  withTiming, withDelay, runOnJS, Easing, type SharedValue,
 } from 'react-native-reanimated';
 import Svg, { Path as SvgPath } from 'react-native-svg';
 import Stickman from '@/components/lesson/cinematic/Stickman';
 import { pose, type Bundle } from '@/components/lesson/cinematic/rig';
 import {
-  layout, groundAt, groundArt, chunkLeft, gaitForSpan, jumpForSpan,
+  layout, groundAt, groundArt, chunkLeft, gaitForSpan, jumpForSpan, travelEase,
   LEAD, WALK_SECONDS, SPAN, CHUNK, CHUNK_W, GROUND_TOP, SIGN_DX,
   type Marker,
 } from './worldPath';
-import { figureAt } from './walkFigure';
-import { sceneLayers, DISC, SCENE_NAMES, TILE_W, type LayerArt } from './sceneArt';
+import { figureAt, hopAt, hopMs, hopTravel } from './walkFigure';
+import { sceneLayers, discFor, skyFor, TILE_W, type LayerArt } from './sceneArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BRANCH IS A PLACE YOU WALK THROUGH.
@@ -27,7 +27,7 @@ import { sceneLayers, DISC, SCENE_NAMES, TILE_W, type LayerArt } from './sceneAr
 //
 //   · arriving — it is simply where the reader already is
 //   · the WALK — seven seconds to the next lesson, after finishing one
-//   · the DROP — tapping any other lesson lands the figure beside it
+//   · the HOP — tapping any other lesson leaps the figure across to it
 //
 // Moving between UNITS is vertical, in the list below this strip. Nothing here
 // responds to a horizontal drag at all, so there is no way to be somewhere the
@@ -60,12 +60,11 @@ const INK = '#1A1A1A';
 const SOFT = '#6B6B6B';
 const FAINT = '#C9C5BA';
 const PAPER = '#FAFAF7';
-const SKY = '#EFECE4';
+/** The body of the ground, under its ink turf. See worldPath's drawing header. */
+const EARTH = '#635D51';
 
 const FIG_K = 0.62;
 const H = 360;
-/** How long the figure takes to drop in beside a lesson the reader tapped. */
-const DROP_MS = 900;
 /** How long the figure stands before setting off after a finished lesson. Long
  *  enough for the screen behind it to finish arriving; short enough to read as a
  *  breath rather than a stall. */
@@ -84,12 +83,22 @@ export interface WorldLesson {
 interface Viewport { c: number; m: number; s: number }
 
 export default function BranchWorld({
-  lessons, current, onOpen, advanceTo,
+  lessons, current, onOpen, advanceTo, place = '',
 }: {
   lessons: WorldLesson[];
   current: number;
   onOpen: (l: WorldLesson) => void;
   advanceTo?: { from: number; to: number; done: () => void } | null;
+  /**
+   * Branch slug — which of the six places this road runs through (sceneArt).
+   *
+   * OPTIONAL, and deliberately so: the branch screen that passes it is being
+   * rewritten in another working copy at the time of writing, and a required
+   * prop would make this component uncompilable until that lands. An unknown or
+   * absent slug falls through to `paletteFor`'s default country rather than
+   * throwing, so the worst case is the wrong scenery, not a blank screen.
+   */
+  place?: string;
 }) {
   const { width } = useWindowDimensions();
   const markers = useMemo(
@@ -102,7 +111,6 @@ export default function BranchWorld({
 
   const camX = useSharedValue(0);
   const figX = useSharedValue(0);
-  const figLift = useSharedValue(0);      // the drop: height above the ground
   const wFrom = useSharedValue(0);
   const wTo = useSharedValue(0);
   const wp = useSharedValue(1);
@@ -110,6 +118,12 @@ export default function BranchWorld({
   const mode = useSharedValue(0);        // how this span is travelled (moves.gaitFor)
   const jumpH = useSharedValue(0);       // the arc over an obstacle, in stage units
   const jumpAt = useSharedValue(-1);
+  // The hop: tapping a lesson you are not standing at. One clock, 0→1, linear —
+  // `hopAt` does the phasing, so gather, flight and absorb cannot drift apart.
+  const hopP = useSharedValue(0);
+  const hopping = useSharedValue(0);
+  const hopFrom = useSharedValue(0);
+  const hopDist = useSharedValue(0);
   const clock = useSharedValue(0);
   const [at, setAt] = useState(current);
   const [busy, setBusy] = useState(false);
@@ -181,7 +195,7 @@ export default function BranchWorld({
     setAt(current);
     figX.value = m.x;
     camX.value = camFor(m.x);
-    figLift.value = 0;
+    hopping.value = 0;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, markers.length, width]);
 
@@ -211,8 +225,11 @@ export default function BranchWorld({
     wTo.value = target.x;
     wp.value = 0;
     gait.value = 1;
+    hopping.value = 0;
     mode.value = gaitForSpan(advanceTo.to);
-    const jump = jumpForSpan(from.x, target.x);
+    // Aimed at whatever is lying in THIS span — the same `obstacleAt` the ground
+    // is drawn from, so he only ever leaves the ground at something that is there.
+    const jump = jumpForSpan(advanceTo.from);
     jumpAt.value = jump ? jump.at : -1;
     jumpH.value = jump ? jump.h : 0;
     const ms = WALK_SECONDS * 1000;
@@ -232,7 +249,17 @@ export default function BranchWorld({
     // ONE animation drives the traverse. `figX` follows `wp`, and the camera
     // follows `figX` — so there is a single clock for the body, the feet and the
     // ground, and nothing to drift.
-    wp.value = withDelay(WALK_LEAD_IN, withTiming(1, { duration: ms, easing: Easing.inOut(Easing.quad) }, (ok) => {
+    //
+    // ── AND IT TRAVELS AT ONE SPEED ────────────────────────────────────────────
+    //
+    // `travelEase` replaces `Easing.inOut(Easing.quad)`, which is the whole of
+    // "he gets faster and faster": a quadratic ease-in-out peaks at TWICE the
+    // average speed, so this seven-second walk spent three and a half seconds
+    // accelerating to 92 units a second and three and a half braking, with the
+    // stride cadence dutifully doubling along with it. The trapezoid gets him up
+    // to speed in seven-tenths of a second and then holds it — eleven per cent of
+    // variation across the whole span, against a hundred. See worldPath.
+    wp.value = withDelay(WALK_LEAD_IN, withTiming(1, { duration: ms, easing: travelEase }, (ok) => {
       'worklet';
       gait.value = 0;
       if (ok) runOnJS(settle)(to, cb);
@@ -240,31 +267,40 @@ export default function BranchWorld({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [advanceTo]);
 
-  // ── THE DROP ───────────────────────────────────────────────────────────────
+  // ── THE HOP ────────────────────────────────────────────────────────────────
   // Tapping a lesson that is not the one you are standing at moves the figure
-  // there by dropping in from above, rather than by walking. That is the honest
-  // signal: a walk is earned and takes seven seconds, a jump is navigation.
-  const dropTo = useCallback((i: number) => {
+  // there by leaping, rather than by walking. That is the honest signal: a walk
+  // is earned and takes seven seconds, a jump is navigation.
+  //
+  // ONE LINEAR CLOCK, and every part of the leap is derived from it inside
+  // `hopAt` / `hopTravel`. The version this replaces ran two animations at once —
+  // a horizontal `inOut(quad)` and a vertical `withSequence` ending on
+  // `Easing.bounce` — over a figure that was still in its STANDING pose, because
+  // nothing told the rig a jump was happening. So he slid sideways 150 units in
+  // the air, three and a half times his own height, with his knees straight, and
+  // then bounced twice on landing like a dropped ball.
+  const hopTo = useCallback((i: number) => {
     const m = markers[i];
     if (!m || busy) return;
     setBusy(true);
-    // Only the body is animated; the camera is derived from it.
-    figX.value = withTiming(m.x, { duration: DROP_MS * 0.6, easing: Easing.inOut(Easing.quad) });
-    figLift.value = withSequence(
-      withTiming(150, { duration: DROP_MS * 0.42, easing: Easing.out(Easing.quad) }),
-      withTiming(0, { duration: DROP_MS * 0.58, easing: Easing.bounce }, (ok) => {
-        'worklet';
-        if (ok) runOnJS(settle)(i, undefined);
-      }),
-    );
-  }, [markers, busy, camFor]);
+    const dist = m.x - figX.value;
+    hopFrom.value = figX.value;
+    hopDist.value = dist;
+    hopping.value = 1;
+    hopP.value = 0;
+    hopP.value = withTiming(1, { duration: hopMs(dist), easing: Easing.linear }, (ok) => {
+      'worklet';
+      hopping.value = 0;
+      if (ok) runOnJS(settle)(i, undefined);
+    });
+  }, [markers, busy, settle]);
 
   const tapLesson = useCallback((i: number) => {
     const l = lessons[i];
     if (!l || busy) return;
-    if (i !== at) { dropTo(i); return; }   // move there first
+    if (i !== at) { hopTo(i); return; }   // move there first
     if (l.accessible) onOpen(l);
-  }, [lessons, busy, at, dropTo, onOpen]);
+  }, [lessons, busy, at, hopTo, onOpen]);
 
   // The figure. Walks when the gait is up, breathes otherwise — the same rig the
   // lessons use, so the feet plant instead of sliding.
@@ -274,20 +310,25 @@ export default function BranchWorld({
   // there breathing, and takes its first step the instant the traverse begins.
   const D = useDerivedValue<Bundle>(() => {
     const walking = gait.value > 0;
-    const f = figureAt(
-      walking ? wFrom.value : figX.value,
-      walking ? wTo.value : figX.value,
-      walking ? wp.value : 0,
-      clock.value,
-      mode.value,
-      walking ? jumpAt.value : -1,
-      jumpH.value,
-      FIG_K,
-    );
+    const f = hopping.value > 0
+      ? hopAt(hopP.value, hopDist.value, clock.value, FIG_K)
+      : figureAt(
+        walking ? wFrom.value : figX.value,
+        walking ? wTo.value : figX.value,
+        walking ? wp.value : 0,
+        clock.value,
+        mode.value,
+        walking ? jumpAt.value : -1,
+        jumpH.value,
+        FIG_K,
+      );
+    // The lift goes in through the GROUND LINE, not as a second transform on the
+    // wrapper. One route off the floor, whether it is a hop or a hurdled log.
     return pose(f.stance, 0, groundAt(figX.value) - f.lift, FIG_K, 1, 1);
   });
   useDerivedValue(() => {
     if (gait.value > 0) figX.value = wFrom.value + (wTo.value - wFrom.value) * wp.value;
+    else if (hopping.value > 0) figX.value = hopFrom.value + hopDist.value * hopTravel(hopP.value);
   });
   // THE CAMERA IS THE BODY, less the lead. Not a second animation that happens to
   // carry the same duration and easing — that is two clocks agreeing by luck, and
@@ -297,15 +338,16 @@ export default function BranchWorld({
     camX.value = figX.value - width * LEAD;
   });
   const figStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: figX.value - camX.value },
-      { translateY: -figLift.value },
-    ],
+    transform: [{ translateX: figX.value - camX.value }],
   }));
 
   return (
-    <View style={{ height: H, backgroundColor: SKY, overflow: 'hidden' }}>
-      <SceneBack camX={camX} scene={vp.s} width={width} />
+    // THE SKY IS THE PLACE'S OWN. Cloud only reads against something darker than
+    // it is, and every one of the reference pictures is cream cloud on a grey
+    // ground — so a single near-white sky for all six was quietly forbidding the
+    // one shape they all have in common.
+    <View style={{ height: H, backgroundColor: skyFor(place), overflow: 'hidden' }}>
+      <SceneBack camX={camX} place={place} unit={vp.s} width={width} />
       <GroundBand camX={camX} chunk={vp.c} />
 
       {/* THE FIGURE, drawn BEFORE the signs so it can never cover a lesson's name. */}
@@ -327,27 +369,29 @@ export default function BranchWorld({
  * and they are two SEPARATE <Svg> children rather than one twice as wide, so the
  * one that is off screen is culled instead of drawn.
  */
-function SceneBack({ camX, scene, width }: {
-  camX: SharedValue<number>; scene: number; width: number;
+function SceneBack({ camX, place, unit, width }: {
+  camX: SharedValue<number>; place: string; unit: number; width: number;
 }) {
-  const name = SCENE_NAMES[scene % SCENE_NAMES.length];
-  const layers = useMemo(() => sceneLayers(name), [name]);
-  const disc = DISC[name] ?? DISC['the hills'];
+  const layers = useMemo(() => sceneLayers(place, unit), [place, unit]);
+  const disc = useMemo(() => discFor(place, unit), [place, unit]);
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <View style={{
-        position: 'absolute', left: width * disc.x - disc.r, top: H * disc.y - disc.r,
-        width: disc.r * 2, height: disc.r * 2, borderRadius: disc.r, backgroundColor: '#FFFFFF', opacity: 0.92,
-      }} />
+      {disc ? (
+        <View style={{
+          position: 'absolute', left: width * disc.x - disc.r, top: H * disc.y - disc.r,
+          width: disc.r * 2, height: disc.r * 2, borderRadius: disc.r,
+          backgroundColor: disc.tone, opacity: disc.opacity,
+        }} />
+      ) : null}
       {layers.map((l, i) => (
-        <SceneStrip key={name + i} camX={camX} layer={l} />
+        <SceneStrip key={place + unit + '.' + i} camX={camX} layer={l} />
       ))}
     </View>
   );
 }
 
 function SceneStrip({ camX, layer }: { camX: SharedValue<number>; layer: LayerArt }) {
-  const { d, tone, k, top, h } = layer;
+  const { d, tone, k, top, h, under, underTone } = layer;
   const st = useAnimatedStyle(() => {
     const t = camX.value * k;
     // A positive modulo, so a camera left of zero cannot push the tiles off the
@@ -355,39 +399,45 @@ function SceneStrip({ camX, layer }: { camX: SharedValue<number>; layer: LayerAr
     return { transform: [{ translateX: -(((t % TILE_W) + TILE_W) % TILE_W) }] };
   });
   const box = `0 ${top} ${TILE_W} ${h}`;
+  // `under` is the shaded face of the same mass, drawn first and in the SAME
+  // surface — one <Svg>, two <Path>s. A second layer would be a second thing to
+  // rasterise and a second thing to keep in register with this one.
+  const tile = (left: number) => (
+    <Svg key={left} style={{ position: 'absolute', left, top: 0 }} width={TILE_W} height={h} viewBox={box}>
+      {under ? <SvgPath d={under} fill={underTone} /> : null}
+      <SvgPath d={d} fill={tone} />
+    </Svg>
+  );
   return (
     <Animated.View
       style={[{ position: 'absolute', left: 0, top, width: TILE_W * 2, height: h }, st]}
       pointerEvents="none"
     >
-      <Svg style={{ position: 'absolute', left: 0, top: 0 }} width={TILE_W} height={h} viewBox={box}>
-        <SvgPath d={d} fill={tone} />
-      </Svg>
-      <Svg style={{ position: 'absolute', left: TILE_W, top: 0 }} width={TILE_W} height={h} viewBox={box}>
-        <SvgPath d={d} fill={tone} />
-      </Svg>
+      {tile(0)}
+      {tile(TILE_W)}
     </Animated.View>
   );
 }
 
 /**
- * THE GROUND the figure and the signs stand on — one smooth filled curve, with
- * tufts, stones and low bushes growing out of it in the same ink.
+ * THE GROUND the figure and the signs stand on — level, with a hard ink turf line
+ * along the top and grass, stones, bushes and the odd fallen log growing out of it.
  *
- * It was 320 static Views, one per 40 units, which is a staircase however gentle
- * the curve behind it: every step had a flat top and a visible corner. Three
- * chunks of path draw the same hill, smoothly, for a hundredth of the views.
+ * TWO FILLS, drawn back to front in one surface: the earth, then everything in
+ * ink on top of it. A single flat black slab under a black figure read as a
+ * shadow he was standing on; cutting a lit turf line away from a darker body is
+ * what every one of the reference engravings does where ground meets sky.
  */
 function GroundBand({ camX, chunk }: { camX: SharedValue<number>; chunk: number }) {
   const chunks = useMemo(
-    () => [chunk - 1, chunk, chunk + 1].map((c) => ({ c, d: groundArt(c) })),
+    () => [chunk - 1, chunk, chunk + 1].map((c) => ({ c, art: groundArt(c) })),
     [chunk],
   );
   const st = useAnimatedStyle(() => ({ transform: [{ translateX: -camX.value }] }));
   const h = H - GROUND_TOP;
   return (
     <Animated.View style={[StyleSheet.absoluteFill, st]} pointerEvents="none">
-      {chunks.map(({ c, d }) => (
+      {chunks.map(({ c, art }) => (
         <Svg
           key={c}
           style={{ position: 'absolute', left: chunkLeft(c), top: GROUND_TOP }}
@@ -395,7 +445,8 @@ function GroundBand({ camX, chunk }: { camX: SharedValue<number>; chunk: number 
           height={h}
           viewBox={`0 ${GROUND_TOP} ${CHUNK_W} ${h}`}
         >
-          <SvgPath d={d} fill={INK} />
+          <SvgPath d={art.earth} fill={EARTH} />
+          <SvgPath d={art.ink} fill={INK} />
         </Svg>
       ))}
     </Animated.View>
