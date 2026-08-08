@@ -405,6 +405,29 @@ export function visibleWindow(shot: Shot, band: [number, number]) {
  * @param ground the scene's ground line, if it has one. A shot whose window ends
  *   above the ground leaves the figure standing on nothing.
  */
+/**
+ * PULL BACK FOR ANYTHING THE READER HAS TO TAP.
+ *
+ * A shot is framed for what it is SAYING, and on a narrative beat that is right.
+ * On a beat with a graded question it is a trap: the author frames the figure,
+ * the answer plates sit wherever the scene put them — top-right, above the
+ * figure, out at the edge — and the window quietly crops one. A reader cannot tap
+ * what is not on screen, and cannot even tell that something is missing.
+ *
+ * It is not enough to zoom out "more", because how much is enough depends on
+ * geometry the camera does not know: a Target is a Pressable positioned by its
+ * own scene's styles, so the shot list has no idea where the plates are. The only
+ * framing guaranteed to contain them is the one the band was measured for.
+ *
+ * So an interactive beat is shown at NEUTRAL — the whole declared band, which is
+ * by definition everything the scene can draw. The MOVE is kept (`tr` survives),
+ * so it still reads as a deliberate pull-back to hand the reader the question,
+ * rather than as the camera giving up.
+ */
+export function openForTargets(shots: Shot[], interactive: boolean[]): Shot[] {
+  return shots.map((sh, i) => (interactive[i] ? { ...NEUTRAL, tr: sh.tr } : sh));
+}
+
 export function checkShots(
   shots: Shot[], band: [number, number], ground?: number,
 ): string[] {

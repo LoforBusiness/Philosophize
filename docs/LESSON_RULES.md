@@ -1801,3 +1801,29 @@ See `npm run check:props`. A cue that reads `0100000100` fades a prop out for
 five beats and brings it back — the reader sees objects vanishing and
 reappearing. A gap in the *script* is fine; the scene wraps the cue in `held()`
 so the prop stays on stage between its first and last beat.
+
+## H60 · A beat the reader must TAP is framed at the full band
+
+A shot is composed for what the beat is *saying*, and on a narrative beat that is
+right. On a beat carrying a graded question it is a trap: the author frames the
+figure, the answer plates sit wherever the scene's own styles put them — top
+right, above the figure, out at an edge — and the window crops one. The reader
+cannot tap what is off screen, and nothing tells them anything is missing. This
+was reported from a real lesson.
+
+"Zoom out a bit more" is not the fix, because how much is enough depends on
+geometry the camera cannot see: a `Target` is a `Pressable` positioned by its
+scene, so the shot list has no idea where the plates are. The only framing
+guaranteed to contain them is the one the band was measured for.
+
+So `openForTargets` (camera.ts) replaces the shot on any beat with an `interact`
+block with `NEUTRAL` — the whole declared band — and CinematicPlayer applies it
+**after** `resolveMoves`, so no authored verb can override it. The move is kept:
+`tr` survives, so it still reads as a deliberate pull-back handing the reader the
+question, which is what a question beat should do anyway.
+
+The camera work on every other beat is untouched.
+
+`npm run check:camera` guards the one hole this leaves — a scene that rolls its
+own camera transform instead of letting the player own it would bypass the
+guarantee. There are none today, and the check fails if one appears.

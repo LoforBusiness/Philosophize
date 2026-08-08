@@ -12,7 +12,7 @@ import { exitLesson } from '../exitLesson';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { shotAt, resolveMoves, NEUTRAL, type Move, type Shot } from './camera';
+import { shotAt, resolveMoves, openForTargets, NEUTRAL, type Move, type Shot } from './camera';
 import { cue, touch } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import { swishTrack } from './gestures';
@@ -210,8 +210,14 @@ export default function CinematicPlayer({
   // (it iterates fit() until each shot is legal) and the answer only changes when
   // the lesson does. `shots` still wins for a hand-written list.
   const cam = useMemo(
-    () => (shots && shots.length ? shots : camera && camera.length ? resolveMoves(camera, band, ground) : null),
-    [shots, camera, band, ground],
+    () => {
+      const list = shots && shots.length ? shots : camera && camera.length ? resolveMoves(camera, band, ground) : null;
+      if (!list) return null;
+      // Last, and after resolveMoves, so no authored verb can frame a question
+      // tighter than the band it has to be answered in. See openForTargets.
+      return openForTargets(list, beats.map((b) => !!b.interact));
+    },
+    [shots, camera, band, ground, beats],
   );
   const camNow = useDerivedValue(() => {
     if (!cam || cam.length === 0) return NEUTRAL;
