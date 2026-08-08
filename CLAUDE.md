@@ -57,7 +57,7 @@ are live for everyone who can open the app.
 | Subscriptions | react-native-purchases | 10.x | RevenueCat; entitlement `scholars_pass` |
 | Ads | react-native-google-mobile-ads | 16.x | AdMob interstitial for free users only |
 | Analytics | posthog-react-native | 4.x | Manual `$screen` events; consent-gated |
-| Reminders | expo-notifications | ~56 | **LOCAL only** — no server, no push token. Added after build 16, so it is absent from every shipped binary (§22) |
+| Reminders | expo-notifications | ~56 | **LOCAL only** — no server, no push token. Live since build 19 (§22) |
 | Widget | react-native-android-widget | 0.20 | Android home-screen "Quote of the Day" |
 | Validation | Zod | 4.x | API boundary validation only |
 | Date math | date-fns | 4.x | Streak calculation |
@@ -497,10 +497,10 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is `tsc` plus **ten** validators, in this order:
+**Validation:** `npm run check` is `tsc` plus **eleven** validators, in this order:
 `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
-`check-rest`. It exits 0 today, so anything any of them prints is yours. (Several
+`check-camera` · `check-rest`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
 figures and 6 hand-built ones, `check-moves` 6 head-clearance defects. A budget
 line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 192 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.

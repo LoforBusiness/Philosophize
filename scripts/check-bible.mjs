@@ -7,7 +7,7 @@
 // A single pass found it claiming versionCode 16 when 19 was live and gating
 // every user, ~223 philosophers when there are 322, sixteen cinematic lessons a
 // branch when the invariant is seventeen, two validators in `npm run check` when
-// there are ten, and — worst — a whole section explaining that reminders reach
+// there are eleven, and — worst — a whole section explaining that reminders reach
 // nobody because no shipped binary carries `expo-notifications`, four days after
 // build 19 shipped carrying it.
 //
@@ -48,19 +48,43 @@ ok(!md.includes('at 16 cinematic'), 'and the old 16 is gone');
 
 // philosophers, from the composed array
 ok(md.includes('**322 philosophers**'), 'S12 philosopher count is the composed one');
-ok(!md.includes('~223'), 'no ~223 left anywhere');
+// A SUPERSEDED NUMBER MAY STILL APPEAR — this file keeps "it used to say X, it is
+// now Y" notes deliberately, and they are worth more than the correction alone.
+// So the rule is not "never mention 223", it is "never mention it ALONE": every
+// occurrence must sit within sight of the number that replaced it. The first
+// version of this check banned the string outright and immediately failed on the
+// paragraph explaining why the string was wrong.
+const stale = [...md.matchAll(/~223/g)].filter((m) => {
+  const around = md.slice(Math.max(0, m.index - 240), m.index + 240);
+  return !around.includes('322');
+});
+ok(stale.length === 0, 'no bare ~223 left — only ones shown against 322',
+  stale.length ? `${stale.length} unqualified` : `${[...md.matchAll(/~223/g)].length} mention(s), all comparative`);
 
 // runtime table
 const runtime = '29eb709aad3b70740f0c92239b1a350820c81247';
 ok(md.includes(runtime), 'S18 lists the live runtime');
 ok(md.includes('19 (current)'), 'and marks 19 as current');
 
-// the check script really does run ten validators
+// ── every validator in `npm run check` must be NAMED in the file ─────────────
+//
+// Counting them was the first attempt and it was too weak by half: it went stale
+// within the hour, when a `check-camera` was added in another working copy and
+// "ten" quietly became eleven. Naming them is self-maintaining — add a validator
+// and this says which one the file has not heard of.
 const scripts = JSON.parse(fs.readFileSync('package.json', 'utf8')).scripts.check;
-const count = (scripts.match(/node scripts\//g) || []).length;
-ok(md.includes(`plus **${['zero','one','two','three','four','five','six','seven','eight','nine','ten'][count]}** validators`)
-  || md.includes(`plus ten\n> validators`), 'S11 validator count matches package.json', `${count} validators`);
-ok(count === 10, 'and there really are ten', String(count));
+const validators = [...scripts.matchAll(/node scripts\/([\w-]+)\.mjs/g)].map((m) => m[1]);
+const unlisted = validators.filter((v) => !md.includes(v));
+ok(unlisted.length === 0, 'S11 names every validator in `npm run check`',
+  unlisted.length ? `missing: ${unlisted.join(', ')}` : `all ${validators.length}`);
+const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
+  'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen'];
+ok(md.includes(`**${WORDS[validators.length]}** validators`),
+  'and states how many there are', `${validators.length} = ${WORDS[validators.length]}`);
+// They must also all exist — a script named in `check` but missing breaks the
+// build for everyone, and it is a one-line typo away.
+const ghosts = validators.filter((v) => !fs.existsSync(`scripts/${v}.mjs`));
+ok(ghosts.length === 0, 'and every one of them exists', ghosts.join(', ') || 'all present');
 
 // notifications + audio really are in the live binary
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')).dependencies;
@@ -73,6 +97,12 @@ ok(app.expo.runtimeVersion && app.expo.runtimeVersion.policy === 'fingerprint',
 ok(!md.includes('no shipped APK contains it,'), 'S22 no longer says no APK has it');
 ok(!md.includes('Reminders reach nobody until a new binary is built'),
   'S22 no longer says reminders reach nobody');
+// The tech-stack table is its own claim and drifts separately from the prose —
+// this row said "absent from every shipped binary" for a whole pass after S22
+// had been corrected, because nothing tied the two together.
+ok(!/expo-notifications \| ~56 \|.*absent from every shipped binary/.test(md),
+  'S2 reminders row agrees with S22');
+ok(/expo-audio/.test(md), 'S2 lists the audio dependency at all');
 
 // things the file now points at must exist
 for (const f of ['components/branch/BranchWorld.tsx', 'components/branch/worldPath.ts',
