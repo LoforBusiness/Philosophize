@@ -4,8 +4,13 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle,
+  clamp01, ease01, lerp, mixStance, pose, walk as rigWalk, WALK,
+  type Bundle,
 } from './rig';
+// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
+// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
+import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
+import { propAct } from './interact';
 import { BEATS } from './logic12Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -41,6 +46,10 @@ const DOOR_T = 352;
 const DOOR_H = 148;
 
 const FIG_X = 44;
+// Where he stands to work the third door. His arm reaches about 33 stage units at
+// K_FIG 1, so from 210 the hand arrives at ~243 — on the leaf's hinged left edge
+// (248), which is the edge that actually moves when it swings.
+const OPEN_X = 210;
 const KICK_T = 314;
 
 const DOORS = [
@@ -60,15 +69,42 @@ export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick }: S
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / 0.7);      // nobody walks; this is a pose blend
+    const tr = ease01(bt.value / 0.7);      // between beats this is a pose blend
     const t = clock.value;
     const grow = ease01(bt.value / 1.0);
-    const s = mixStance(emoteHold(G[p], t), emoteLive(G[n], t, bt.value), tr);
+
+    // ── HE OPENS THE DOOR HIMSELF ──────────────────────────────────────────────
+    //
+    // The door used to swing on `qv` alone while the figure stood eleven door-widths
+    // away with his hands by his sides — a door opening with nobody touching it,
+    // which is A1 straight through: the beat says the third way was always there and
+    // the picture said it opened by magic.
+    //
+    // The reveal is now two halves. He WALKS the 166 units to the third door (well
+    // past the 60 a walk needs to read as one, C18) and only then does the leaf move,
+    // driven by the same `act` that drives his arm — so the swing is caused by the
+    // hand rather than merely coincident with it.
+    const rv = revealing ? qv.value : 0;
+    const arrive = clamp01(rv / 0.45);           // first 45%: cross the room
+    const act = clamp01((rv - 0.45) / 0.55);     // then reach out and pull it open
+    const fx = lerp(FIG_X, OPEN_X, ease01(arrive));
+
+    let s;
+    if (rv <= 0) {
+      s = mixStance(emoteHold(G[p], t), emoteLive(G[n], t, bt.value), tr);
+    } else if (act <= 0) {
+      // Feet are driven by DISTANCE TRAVELLED, not by a clock, so they stay locked
+      // to the floor for the whole crossing instead of skating (C17).
+      s = mixStance(emoteHold(G[n], t), rigWalk(fx - FIG_X, WALK), ease01(clamp01(arrive / 0.22)));
+    } else {
+      s = mixStance(rigWalk(OPEN_X - FIG_X, WALK), propAct(7, t, act), ease01(clamp01(act / 0.2)));
+    }
+
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: pose(s, fx, GROUND, K_FIG, 1, 1),
       lit: lerp(LIT[p], LIT[n], grow),
-      // The swing rides the ANSWER, so the door opens as the explanation lands.
-      swing: revealing ? qv.value : 0,
+      // The leaf now waits for the hand: nothing moves until he has arrived.
+      swing: act,
     };
   });
 

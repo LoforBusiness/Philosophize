@@ -51,7 +51,7 @@ export const BEATS: Epi5Beat[] = [
     dur: 4.8,
   },
   {
-    p: 0, star: 1, power: 1, rungs: 5,
+    p: 129, star: 1, power: 1, rungs: 5,
     quote: {
       id: 'lq-epistemology-knowledge-5-1',
       text: 'Knowledge itself is power.',

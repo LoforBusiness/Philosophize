@@ -35,7 +35,7 @@ export const BEATS: M9Beat[] = [
     dur: 5.0,
   },
   {
-    p: 44, x: 160, panels: 1,
+    p: 144, x: 160, panels: 1,
     quote: {
       id: 'lq-metaphysics-being-9-1',
       text: 'I am, then, in the strict sense only a thing that thinks; that is, I am a mind, or intelligence, or intellect, or reason.',

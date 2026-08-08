@@ -27,7 +27,7 @@ export const BEATS: Pol5Beat[] = [
     dur: 5.2,
   },
   {
-    p: 0, city: 1,
+    p: 144, city: 1,
     quote: {
       id: 'lq-political-political-5-1',
       text: 'Man is by nature a political animal.',

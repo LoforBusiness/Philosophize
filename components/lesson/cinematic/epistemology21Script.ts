@@ -39,7 +39,7 @@ export const BEATS: Epi21Beat[] = [
     dur: 5.0,
   },
   {
-    p: 44, x: 124, dial: 1, will: 1,
+    p: 141, x: 124, dial: 1, will: 1,
     quote: {
       id: 'lq-epistemology-knowledge-21-1',
       text: 'It is wrong always, everywhere, and for anyone, to believe anything upon insufficient evidence.',

@@ -37,7 +37,7 @@ export const BEATS: Logic6Beat[] = [
     dur: 5.0,
   },
   {
-    p: 0, link: 1, table: 1,
+    p: 128, link: 1, table: 1,
     quote: {
       id: 'lq-logic-arguments-6',
       text: 'If it was so, it might be; and if it were so, it would be; but as it isn’t, it ain’t. That’s logic.',

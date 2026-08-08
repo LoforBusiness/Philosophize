@@ -38,7 +38,7 @@ export const BEATS: Aes13Beat[] = [
     cite: 'Where they have been',
   },
   {
-    g: 44, art: 1, chain: 1,
+    g: 144, art: 1, chain: 1,
     dur: 3.6,
     quote: {
       id: 'lq-aesthetics-aesthetics-13-2',

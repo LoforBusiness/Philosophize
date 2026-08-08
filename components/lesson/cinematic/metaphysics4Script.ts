@@ -40,7 +40,7 @@ export const BEATS: Meta4Beat[] = [
     dur: 5.2,
   },
   {
-    p: 0, tokens: 2, barred: 1,
+    p: 128, tokens: 2, barred: 1,
     quote: {
       id: 'lq-metaphysics-being-4-1',
       text: 'You cannot know what is not — that is impossible — nor utter it.',

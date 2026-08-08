@@ -4,10 +4,14 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, emoteHold, emoteLive, lerp, moveTr, pose, travelStance, type Bundle,
+  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle,
 } from './rig';
+// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
+// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
+import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 
@@ -115,6 +119,10 @@ const PIPS = [0, 90, 180, 270].map((a) => {
 
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? 154);
+// The camera, from the staging: it follows the figure this track describes,
+// pulls back to scale 1 on every graded beat so a tap lands where it is aimed,
+// and leans in on the quote. See followMoves in ./camera.ts.
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology11'));
 const DIR = dirsFrom(X, 1);
 const REAL = BEATS.map((b) => b.real ?? 180);
 const LINKV = BEATS.map((b) => b.link ?? 0);
@@ -346,5 +354,5 @@ const styles = StyleSheet.create({
 // outside that, and the answer row stops 10.2 units short of the crown the beat
 // that draws it actually holds (measured, not assumed — B9a).
 export function Epistemology11Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology11Scene} band={[200, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology11Scene} band={[200, 512]} camera={CAM} />;
 }

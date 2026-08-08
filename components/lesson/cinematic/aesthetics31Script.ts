@@ -39,7 +39,7 @@ export const BEATS: Aes31Beat[] = [
     cite: 'One string',
   },
   {
-    g: 44, strings: 1, playing: 0, clapA: 1, clapB: 0,
+    g: 137, strings: 1, playing: 0, clapA: 1, clapB: 0,
     dur: 3.6,
     quote: {
       id: 'lq-aesthetics-aesthetics-31-1',

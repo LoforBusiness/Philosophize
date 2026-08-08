@@ -36,7 +36,7 @@ export const BEATS: Meta2Beat[] = [
     dur: 4.8,
   },
   {
-    e: 4, x: 196, gone: 0.4, pr: 1, mx: 3,
+    e: 144, x: 196, gone: 0.4, pr: 1, mx: 3,
     quote: {
       id: 'lq-metaphysics-being-2-1',
       text: 'The same thing is there for thinking and for being.',

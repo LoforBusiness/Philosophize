@@ -66,7 +66,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 5.2,
   },
   {
-    p: 44, x: 182, grid: 0.4, oth: 1, thread: 1,
+    p: 137, x: 182, grid: 0.4, oth: 1, thread: 1,
     quote: {
       id: 'lq-ethics-ethics-8-1',
       text: 'The moral problem arises from conflicting responsibilities rather than from competing rights.',

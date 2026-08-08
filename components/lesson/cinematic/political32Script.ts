@@ -39,7 +39,7 @@ export const BEATS: Pol32Beat[] = [
     cite: 'Yours',
   },
   {
-    g: 44, fill: 1, result: 1, mark: 1, labels: 0,
+    g: 139, fill: 1, result: 1, mark: 1, labels: 0,
     dur: 3.6,
     quote: {
       id: 'lq-political-political-32-1',

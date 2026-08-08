@@ -40,7 +40,7 @@ export const BEATS: Ethics9Beat[] = [
     dur: 4.4,
   },
   {
-    p: 44, x: 124, notes: 1,
+    p: 139, x: 124, notes: 1,
     quote: {
       id: 'lq-ethics-ethics-9-1',
       text: 'No rule of general morality can show you what you ought to do: no signs are vouchsafed in this world.',

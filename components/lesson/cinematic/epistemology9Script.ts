@@ -56,7 +56,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 5.2,
   },
   {
-    p: 44, x: 208, land: 1, map: 1,
+    p: 144, x: 208, land: 1, map: 1,
     quote: {
       id: 'lq-epistemology-knowledge-9-1',
       text: 'To say of what is that it is, and of what is not that it is not, is true.',

@@ -38,7 +38,7 @@ export const BEATS: Meta3Beat[] = [
     dur: 5.2,
   },
   {
-    p: 4, shadow: 0.3, form: 0.9, apple: 1,
+    p: 147, shadow: 0.3, form: 0.9, apple: 1,
     quote: {
       id: 'lq-metaphysics-being-3-1',
       text: 'The soul is most like the divine, deathless, intelligible, uniform, indissoluble, always the same as itself.',

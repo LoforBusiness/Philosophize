@@ -37,7 +37,7 @@ export const BEATS: Meta12Beat[] = [
     cite: 'Hume looked',
   },
   {
-    g: 44, owner: 1, none: 0,
+    g: 139, owner: 1, none: 0,
     dur: 3.6,
     quote: {
       id: 'lq-metaphysics-being-12-2',

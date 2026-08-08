@@ -11,6 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 
@@ -88,6 +89,10 @@ const STEP_CARDS = [
 
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? 116);
+// The camera, from the staging: it follows the figure this track describes,
+// pulls back to scale 1 on every graded beat so a tap lands where it is aimed,
+// and leans in on the quote. See followMoves in ./camera.ts.
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic11'));
 const DIR = dirsFrom(X, 1);
 const STEPS = BEATS.map((b) => b.steps ?? 0);
 const BASEV = BEATS.map((b) => b.base ?? 0);
@@ -292,5 +297,5 @@ const styles = StyleSheet.create({
 // caption, figure — sits inside [198, 512], and nothing lives above the stack, so no
 // empty sky is being paid for (D25, D26, H59).
 export function Logic11Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic11Scene} band={[198, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic11Scene} band={[198, 512]} camera={CAM} />;
 }

@@ -50,7 +50,7 @@ export const BEATS: Political10Beat[] = [
     dur: 4.8,
   },
   {
-    p: 44, x: 108, tape: 1, ptr: 4,
+    p: 137, x: 108, tape: 1, ptr: 4,
     quote: {
       id: 'lq-political-political-10-1',
       text: 'Taxation of earnings from labor is on a par with forced labor.',

@@ -36,7 +36,7 @@ export const BEATS: Epis31Beat[] = [
     cite: 'The second drawer',
   },
   {
-    g: 44, open: 2,
+    g: 128, open: 2,
     dur: 3.6,
     quote: {
       id: 'lq-epistemology-knowledge-31-1',

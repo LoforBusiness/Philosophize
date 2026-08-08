@@ -35,7 +35,7 @@ export const BEATS: Logic12Beat[] = [
     cite: 'The claim about the room',
   },
   {
-    g: 44, lit: 0,
+    g: 147, lit: 0,
     dur: 3.6,
     quote: {
       id: 'lq-logic-arguments-12-1',

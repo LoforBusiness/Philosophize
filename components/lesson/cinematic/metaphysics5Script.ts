@@ -32,7 +32,7 @@ export const BEATS: Meta5Beat[] = [
     dur: 4.8,
   },
   {
-    p: 0, stars: 1, q: 1, psr: 1,
+    p: 129, stars: 1, q: 1, psr: 1,
     quote: {
       id: 'lq-metaphysics-being-5-1',
       text: 'Why are there beings at all instead of nothing? That is the question.',

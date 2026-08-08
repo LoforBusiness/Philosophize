@@ -38,7 +38,7 @@ export const BEATS: Meta15Beat[] = [
     dur: 4.4,
   },
   {
-    p: 44, x: 124, balls: 1, gap: 1,
+    p: 147, x: 124, balls: 1, gap: 1,
     quote: {
       id: 'lq-metaphysics-being-15-1',
       text: 'All inferences from experience suppose, as their foundation, that the future will resemble the past.',

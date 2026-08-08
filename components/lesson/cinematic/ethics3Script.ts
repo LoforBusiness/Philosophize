@@ -63,7 +63,7 @@ export const BEATS: Ethics3Beat[] = [
     dur: 4.6,
   },
   {
-    d: 0, tx: 196, lens: 0,
+    d: 141, tx: 196, lens: 0,
     quote: {
       id: 'lq-ethics-ethics-3-1',
       text: 'Act only according to that maxim whereby you can at the same time will that it should become a universal law.',

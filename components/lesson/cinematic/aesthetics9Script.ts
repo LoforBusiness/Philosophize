@@ -40,7 +40,7 @@ export const BEATS: A9Beat[] = [
     dur: 5.2,
   },
   {
-    p: 44, x: 144, boxes: true, stands: true,
+    p: 139, x: 144, boxes: true, stands: true,
     quote: {
       id: 'lq-aesthetics-aesthetics-9-1',
       text: 'Beauty is an option for art and not a necessary condition. But it is not an option for life.',

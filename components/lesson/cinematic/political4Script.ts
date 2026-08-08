@@ -40,7 +40,7 @@ export const BEATS: Pol4Beat[] = [
     dur: 5.2,
   },
   {
-    p: 0, walls: 0.25, harm: 1, panel: 1, test: 1,
+    p: 141, walls: 0.25, harm: 1, panel: 1, test: 1,
     quote: {
       id: 'lq-political-political-4-1',
       text: 'Over himself, over his own body and mind, the individual is sovereign.',

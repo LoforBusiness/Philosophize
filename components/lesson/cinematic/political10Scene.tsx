@@ -4,10 +4,14 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, clamp01, dirsFrom, ease01, emoteHold, emoteLive, lerp, moveTr, pose, travelStance, type Bundle,
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle,
 } from './rig';
+// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
+// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
+import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 
@@ -112,6 +116,10 @@ const PLATES = [
 
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_B);
+// The camera, from the staging: it follows the figure this track describes,
+// pulls back to scale 1 on every graded beat so a tap lands where it is aimed,
+// and leans in on the quote. See followMoves in ./camera.ts.
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political10'));
 const DIR = dirsFrom(X, 1);
 
 export default function Political10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
@@ -342,5 +350,5 @@ const styles = StyleSheet.create({
 // answer plates top out at 244 — so the crop is [232, 512], 280 units, which is the
 // tallest band that still renders at the free 2.31× (H59).
 export function Political10Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political10Scene} band={[232, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political10Scene} band={[232, 512]} camera={CAM} />;
 }

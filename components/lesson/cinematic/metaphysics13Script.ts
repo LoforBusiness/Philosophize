@@ -39,7 +39,7 @@ export const BEATS: Meta13Beat[] = [
     dur: 5.2,
   },
   {
-    p: 44, x: 124, track: 1, fork: 1,
+    p: 141, x: 124, track: 1, fork: 1,
     quote: {
       id: 'lq-metaphysics-being-13-1',
       text: 'Personal identity is not what matters.',

@@ -36,7 +36,7 @@ export const BEATS: Epi6Beat[] = [
     dur: 5.0,
   },
   {
-    p: 0, bal: 1, route: 3,
+    p: 137, bal: 1, route: 3,
     quote: {
       id: 'lq-epistemology-knowledge-6-1',
       text: 'To every argument an equal argument is opposed.',

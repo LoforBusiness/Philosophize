@@ -36,7 +36,7 @@ export const BEATS: Pol15Beat[] = [
     dur: 4.8,
   },
   {
-    p: 44, x: 124, stages: 4,
+    p: 128, x: 124, stages: 4,
     quote: {
       id: 'lq-political-political-15-1',
       text: 'One who breaks an unjust law must do it openly, lovingly, and with a willingness to accept the penalty.',

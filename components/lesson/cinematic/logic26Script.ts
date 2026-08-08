@@ -37,7 +37,7 @@ export const BEATS: Logic26Beat[] = [
     dur: 5.0,
   },
   {
-    p: 44, x: 124, links: 3,
+    p: 147, x: 124, links: 3,
     quote: {
       id: 'lq-logic-arguments-26-1',
       text: 'Reductio ad absurdum, which Euclid loved so much, is one of a mathematician\'s finest weapons.',

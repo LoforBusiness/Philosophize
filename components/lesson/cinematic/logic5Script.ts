@@ -44,7 +44,7 @@ export const BEATS: Logic5Beat[] = [
     dur: 5.0,
   },
   {
-    p: 0, machine: 1,
+    p: 147, machine: 1,
     quote: {
       id: 'lq-logic-arguments-5',
       text: 'Divide each of the difficulties under examination into as many parts as possible, as might be necessary for its solution.',

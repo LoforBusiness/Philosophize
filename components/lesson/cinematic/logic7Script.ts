@@ -78,7 +78,7 @@ export const BEATS: Logic7Beat[] = [
     dur: 5.0,
   },
   {
-    p: 44, x: 124, rule: 1,
+    p: 129, x: 124, rule: 1,
     quote: {
       id: 'lq-logic-arguments-7-1',
       text: 'When you have eliminated the impossible, whatever remains, however improbable, must be the truth.',

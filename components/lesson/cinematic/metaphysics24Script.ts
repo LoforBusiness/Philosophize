@@ -37,7 +37,7 @@ export const BEATS: Meta24Beat[] = [
     dur: 4.2,
   },
   {
-    p: 44, x: 124, grains: 9, lamp: 1,
+    p: 129, x: 124, grains: 9, lamp: 1,
     quote: {
       id: 'lq-metaphysics-being-24-1',
       text: 'Everything is vague to a degree you do not realize till you have tried to make it precise.',

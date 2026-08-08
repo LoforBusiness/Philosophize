@@ -95,7 +95,7 @@ export const BEATS: Metaphysics8Beat[] = [
     dur: 5.4,
   },
   {
-    p: 44, x: 140, chain: 1, front: 2, tags: 1, mark: 1,
+    p: 141, x: 140, chain: 1, front: 2, tags: 1, mark: 1,
     quote: {
       id: 'lq-metaphysics-being-8-1',
       text: 'By liberty, then, we can only mean a power of acting or not acting, according to the determinations of the will.',

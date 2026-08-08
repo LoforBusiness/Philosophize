@@ -89,7 +89,7 @@ export const BEATS: Logic8Beat[] = [
     dur: 4.8,
   },
   {
-    p: 44, x: 152, wet: 1, rule: 1, trap: 2, cross: 1, spr: 1,
+    p: 137, x: 152, wet: 1, rule: 1, trap: 2, cross: 1, spr: 1,
     quote: {
       id: 'lq-logic-arguments-8-1',
       text: 'There are often several independent modes in which the same phenomenon could have originated.',

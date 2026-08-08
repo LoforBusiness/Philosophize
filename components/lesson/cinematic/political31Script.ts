@@ -38,7 +38,7 @@ export const BEATS: Pol31Beat[] = [
     cite: 'And everyone else',
   },
   {
-    g: 44, grass: 0.22, herd: 4, sums: 0,
+    g: 137, grass: 0.22, herd: 4, sums: 0,
     dur: 3.6,
     quote: {
       id: 'lq-political-political-31-1',

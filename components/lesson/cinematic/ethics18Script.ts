@@ -38,7 +38,7 @@ export const BEATS: Ethics18Beat[] = [
     dur: 5.2,
   },
   {
-    p: 44, x: 124, line: 1, test: 1,
+    p: 139, x: 124, line: 1, test: 1,
     quote: {
       id: 'lq-ethics-ethics-18-1',
       text: 'The question is not, Can they reason? nor, Can they talk? but, Can they suffer?',

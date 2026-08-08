@@ -38,7 +38,7 @@ export const BEATS: Logic25Beat[] = [
     dur: 4.0,
   },
   {
-    p: 44, x: 124, result: 1, real: 1,
+    p: 144, x: 124, result: 1, real: 1,
     quote: {
       id: 'lq-logic-arguments-25-1',
       text: 'A wise man proportions his belief to the evidence.',

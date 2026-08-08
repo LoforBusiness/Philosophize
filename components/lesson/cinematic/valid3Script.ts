@@ -47,7 +47,7 @@ export const BEATS: Valid3Beat[] = [
     dur: 4.2,
   },
   {
-    p: 0, link: 1, stamp: 1, flaw: 1, form: 1,
+    p: 139, link: 1, stamp: 1, flaw: 1, form: 1,
     quote: {
       id: 'lq-logic-arguments-3',
       text: 'Mathematics may be defined as the subject in which we never know what we are talking about, nor whether what we are saying is true.',

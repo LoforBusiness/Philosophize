@@ -83,7 +83,7 @@ export const BEATS: Ethics7Beat[] = [
     dur: 5.0,
   },
   {
-    p: 44, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
+    p: 129, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
     quote: {
       id: 'lq-ethics-ethics-7-1',
       text: 'Prior to reflection it is intuitively plausible that people cannot be morally assessed for what is not their fault, or for what is due to factors beyond their control.',

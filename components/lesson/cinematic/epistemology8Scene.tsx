@@ -4,10 +4,14 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, clamp01, dirsFrom, ease01, emoteHold, emoteLive, lerp, moveTr, pose, seg, travelStance, type Bundle,
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, seg, travelStance, type Bundle,
 } from './rig';
+// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
+// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
+import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import { TargetRing } from './Target';
 
@@ -68,6 +72,10 @@ const CARRY_TOP = 442;                  // hand height for gestures 42 / 31 / 43
 
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? 98);
+// The camera, from the staging: it follows the figure this track describes,
+// pulls back to scale 1 on every graded beat so a tap lands where it is aimed,
+// and leans in on the quote. See followMoves in ./camera.ts.
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology8'));
 const DIR = dirsFrom(X, 1);
 const TOWER = BEATS.map((b) => b.tower ?? 0);
 const PILE = BEATS.map((b) => b.pile ?? 0);
@@ -406,5 +414,5 @@ const styles = StyleSheet.create({
 // whole lesson rendered at 0.75 with a side letterbox. At 360 tall it renders at
 // 0.87 — about 17% bigger — and still clears the fade-in's rise by 6 units.
 export function Epistemology8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology8Scene} band={[152, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology8Scene} band={[152, 512]} camera={CAM} />;
 }

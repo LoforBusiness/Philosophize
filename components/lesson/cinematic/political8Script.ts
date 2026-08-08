@@ -83,7 +83,7 @@ export const BEATS: Political8Beat[] = [
     dur: 5.4,
   },
   {
-    p: 6, x: 100, mode: 2, marks: 1, eyeline: 1,
+    p: 129, x: 100, mode: 2, marks: 1, eyeline: 1,
     quote: {
       id: 'lq-political-political-8-1',
       text: 'Human diversity is no secondary complication … it is a fundamental aspect of our interest in equality.',

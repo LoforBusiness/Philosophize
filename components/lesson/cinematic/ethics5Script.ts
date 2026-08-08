@@ -62,7 +62,7 @@ export const BEATS: Ethics5Beat[] = [
     dur: 5.2,
   },
   {
-    sx: 206, soc: 0, chart: 3,
+    sx: 206, soc: 147, chart: 3,
     quote: {
       id: 'lq-ethics-ethics-5-1',
       text: 'Do not impose on others what you yourself do not desire.',

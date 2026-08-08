@@ -34,7 +34,7 @@ export const BEATS: Aes5Beat[] = [
     dur: 5.0,
   },
   {
-    p: 19, bird: 1, ego: 0, self: 0.06,
+    p: 147, bird: 1, ego: 0, self: 0.06,
     quote: {
       id: 'lq-aesthetics-aesthetics-5-1',
       text: 'I observe a hovering kestrel. In a moment everything is altered. The brooding self with its hurt vanity has disappeared.',

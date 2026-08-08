@@ -39,7 +39,7 @@ export const BEATS: Aes11Beat[] = [
     dur: 4.4,
   },
   {
-    p: 44, x: 124, frames: 1, plaques: 1,
+    p: 139, x: 124, frames: 1, plaques: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-11-1',
       text: 'Art is a human activity having for its purpose the transmission to others of the highest and best feelings to which men have risen.',

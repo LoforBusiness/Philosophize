@@ -4,10 +4,14 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, emoteHold, emoteLive, lerp, moveTr, pose, travelStance, type Bundle,
+  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle,
 } from './rig';
+// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
+// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
+import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic22Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 
@@ -50,6 +54,10 @@ const ANSWERS = [
 
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? 124);
+// The camera, from the staging: it follows the figure this track describes,
+// pulls back to scale 1 on every graded beat so a tap lands where it is aimed,
+// and leans in on the quote. See followMoves in ./camera.ts.
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic22'));
 const DIR = dirsFrom(X, 1);
 const CLAIM = BEATS.map((b) => b.claim ?? 0);
 const FIELD = BEATS.map((b) => b.field ?? 0);
@@ -190,5 +198,5 @@ const styles = StyleSheet.create({
 
 // Ink runs from the claim card (226) to the ground line (500). Band 220…512 = 292 (H59).
 export function Logic22Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic22Scene} band={[220, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic22Scene} band={[220, 512]} camera={CAM} />;
 }

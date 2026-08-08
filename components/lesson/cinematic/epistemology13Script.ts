@@ -39,7 +39,7 @@ export const BEATS: Epi13Beat[] = [
     dur: 4.8,
   },
   {
-    p: 44, x: 124, grid: 1, off: 1,
+    p: 139, x: 124, grid: 1, off: 1,
     quote: {
       id: 'lq-epistemology-knowledge-13-1',
       text: 'A wise man proportions his belief to the evidence.',

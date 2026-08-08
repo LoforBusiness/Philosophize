@@ -36,7 +36,7 @@ export const BEATS: Meta6Beat[] = [
     dur: 5.0,
   },
   {
-    p: 0, swap: 1, orig: 0,
+    p: 137, swap: 1, orig: 0,
     quote: {
       id: 'lq-metaphysics-being-6-1',
       text: 'All things move and nothing remains still; you cannot step twice into the same stream.',

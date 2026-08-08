@@ -36,7 +36,7 @@ export const BEATS: Epis14Beat[] = [
     cite: 'The leap',
   },
   {
-    g: 44, vat: 0, leap: 1,
+    g: 141, vat: 0, leap: 1,
     dur: 3.6,
     quote: {
       id: 'lq-epistemology-knowledge-14-2',

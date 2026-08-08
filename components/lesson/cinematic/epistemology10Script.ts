@@ -42,7 +42,7 @@ export const BEATS: E10Beat[] = [
     dur: 4.6,
   },
   {
-    p: 44, x: 160, gauge: 1, band: 2, needle: 0.62,
+    p: 128, x: 160, gauge: 1, band: 2, needle: 0.62,
     quote: {
       id: 'lq-epistemology-knowledge-10-1',
       text: 'To teach how to live without certainty, and yet without being paralyzed by hesitation, is perhaps the chief thing philosophy can do.',

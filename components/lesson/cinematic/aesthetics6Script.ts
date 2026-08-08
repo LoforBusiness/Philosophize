@@ -32,7 +32,7 @@ export const BEATS: Aes6Beat[] = [
     dur: 5.0,
   },
   {
-    p: 0, vast: 1, split: 3,
+    p: 128, vast: 1, split: 3,
     quote: {
       id: 'lq-aesthetics-aesthetics-6-1',
       text: 'Infinity has a tendency to fill the mind with that sort of delightful horror, which is the most genuine effect and truest test of the sublime.',

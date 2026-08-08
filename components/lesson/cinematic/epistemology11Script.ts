@@ -50,7 +50,7 @@ export const BEATS: Epistemology11Beat[] = [
     dur: 5.0,
   },
   {
-    p: 44, x: 154, real: 255,
+    p: 129, x: 154, real: 255,
     quote: {
       id: 'lq-epistemology-knowledge-11-1',
       text: 'It is possible for a person to be justified in believing a proposition that is in fact false.',

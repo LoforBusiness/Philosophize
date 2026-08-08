@@ -38,7 +38,7 @@ export const BEATS: Aes16Beat[] = [
     dur: 4.2,
   },
   {
-    p: 44, x: 124, canvas: 1, facts: 1,
+    p: 129, x: 124, canvas: 1, facts: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-16-1',
       text: 'The design or intention of the author is neither available nor desirable as a standard for judging the success of a work of art.',

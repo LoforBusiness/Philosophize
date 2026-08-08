@@ -38,7 +38,7 @@ export const BEATS: Ethics23Beat[] = [
     dur: 4.6,
   },
   {
-    p: 44, x: 124, gauges: 1, near: 1,
+    p: 129, x: 124, gauges: 1, near: 1,
     quote: {
       id: 'lq-ethics-ethics-23-1',
       text: 'If it is in our power to prevent something bad from happening, without sacrificing anything of comparable moral importance, we ought, morally, to do it.',

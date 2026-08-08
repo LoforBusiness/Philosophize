@@ -45,7 +45,7 @@ export const BEATS: P9Beat[] = [
     dur: 5.2,
   },
   {
-    vote: 0, tally: true, advance: true, rights: true, one: 18,
+    vote: 0, tally: true, advance: true, rights: true, one: 137,
     quote: {
       id: 'lq-political-political-9-1',
       text: 'Society can and does execute its own mandates: and if it issues wrong mandates, it practises a social tyranny more formidable than many kinds of political oppression.',

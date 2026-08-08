@@ -37,7 +37,7 @@ export const BEATS: Meta32Beat[] = [
     cite: 'Even the relations',
   },
   {
-    g: 44, orbs: 1, tether: 1, tag: 0,
+    g: 137, orbs: 1, tether: 1, tag: 0,
     dur: 3.6,
     quote: {
       id: 'lq-metaphysics-being-32-1',

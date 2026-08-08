@@ -51,7 +51,7 @@ export const BEATS: Metaphysics10Beat[] = [
     dur: 5.0,
   },
   {
-    p: 44, x: 124, tags: 1,
+    p: 129, x: 124, tags: 1,
     quote: {
       id: 'lq-metaphysics-being-10-1',
       text: 'The universal is common, since that is called universal which is such as to belong to more than one thing.',

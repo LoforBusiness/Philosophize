@@ -45,7 +45,7 @@ export const BEATS: Political11Beat[] = [
     dur: 5.0,
   },
   {
-    p: 44, x: 120, dial: 1, set: 1, built: 1,
+    p: 139, x: 120, dial: 1, set: 1, built: 1,
     quote: {
       id: 'lq-political-political-11',
       text: 'During the time men live without a common power to keep them all in awe, they are in that condition which is called war.',

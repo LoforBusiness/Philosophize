@@ -43,7 +43,7 @@ export const BEATS: Logic10Beat[] = [
     dur: 4.8,
   },
   {
-    p: 44, x: 96, arg: 1, slot: 1, hid: 1,
+    p: 141, x: 96, arg: 1, slot: 1, hid: 1,
     quote: {
       id: 'lq-logic-arguments-10',
       text: 'The enthymeme is a kind of syllogism, and the body of all proof.',

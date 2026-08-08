@@ -37,7 +37,7 @@ export const BEATS: Aes32Beat[] = [
     cite: 'And a flat one',
   },
   {
-    g: 44, rows: 3, mean: 0,
+    g: 139, rows: 3, mean: 0,
     dur: 3.6,
     quote: {
       id: 'lq-aesthetics-aesthetics-32-1',

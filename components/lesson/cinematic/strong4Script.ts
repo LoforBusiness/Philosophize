@@ -53,7 +53,7 @@ export const BEATS: Strong4Beat[] = [
     dur: 4.8,
   },
   {
-    p: 0, fill: 0.78, dice: 1, verdict: 1, lens: 2,
+    p: 147, fill: 0.78, dice: 1, verdict: 1, lens: 2,
     quote: {
       id: 'lq-logic-arguments-4',
       text: 'Custom, then, is the great guide of human life.',

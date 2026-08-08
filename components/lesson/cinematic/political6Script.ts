@@ -30,7 +30,7 @@ export const BEATS: Pol6Beat[] = [
     dur: 5.0,
   },
   {
-    p: 0, bars: 1, prin: 1,
+    p: 147, bars: 1, prin: 1,
     quote: {
       id: 'lq-political-political-6-1',
       text: 'Justice is the first virtue of social institutions, as truth is of systems of thought.',

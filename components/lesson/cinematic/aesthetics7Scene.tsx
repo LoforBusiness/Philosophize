@@ -4,10 +4,14 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, emoteHold, emoteLive, lerp, mixStance, moveTr, pose, travelStance, type Bundle,
+  WALK, dirsFrom, ease01, lerp, mixStance, moveTr, pose, travelStance, type Bundle,
 } from './rig';
+// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
+// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
+import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 
@@ -96,6 +100,10 @@ const FRAMES = [
 
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? 160);
+// The camera, from the staging: it follows the figure this track describes,
+// pulls back to scale 1 on every graded beat so a tap lands where it is aimed,
+// and leans in on the quote. See followMoves in ./camera.ts.
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics7'));
 const DIR = dirsFrom(X, 1);
 const Q = BEATS.map((b) => b.q ?? 0);
 const ARTV = BEATS.map((b) => b.art ?? 0);
@@ -437,5 +445,5 @@ const styles = StyleSheet.create({
 // player crops to [98, 510] and scales up, so the whole gallery renders about 36%
 // larger than the letterboxed full-height fit.
 export function Aesthetics7Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics7Scene} band={[98, 510]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics7Scene} band={[98, 510]} camera={CAM} />;
 }

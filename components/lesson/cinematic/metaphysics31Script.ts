@@ -38,7 +38,7 @@ export const BEATS: Meta31Beat[] = [
     cite: 'One, two, three',
   },
   {
-    g: 44, holes: 1, ticks: 3, chips: 0,
+    g: 129, holes: 1, ticks: 3, chips: 0,
     dur: 3.6,
     quote: {
       id: 'lq-metaphysics-being-31-1',

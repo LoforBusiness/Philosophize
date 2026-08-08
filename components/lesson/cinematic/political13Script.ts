@@ -38,7 +38,7 @@ export const BEATS: Pol13Beat[] = [
     dur: 4.8,
   },
   {
-    p: 44, x: 124, steps: 3,
+    p: 144, x: 124, steps: 3,
     quote: {
       id: 'lq-political-political-13-1',
       text: 'The only purpose for which power can be rightfully exercised over any member of a civilized community, against his will, is to prevent harm to others.',

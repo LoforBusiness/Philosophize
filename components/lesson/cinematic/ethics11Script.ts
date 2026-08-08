@@ -48,7 +48,7 @@ export const BEATS: Ethics11Beat[] = [
     dur: 5.4,
   },
   {
-    p: 44, x: 126, tok: 1, led: 1, shelf: 1,
+    p: 139, x: 126, tok: 1, led: 1, shelf: 1,
     quote: {
       id: 'lq-ethics-ethics-11-1',
       text: 'It is better to be a human being dissatisfied than a pig satisfied; better to be Socrates dissatisfied than a fool satisfied.',

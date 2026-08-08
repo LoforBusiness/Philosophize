@@ -39,7 +39,7 @@ export const BEATS: Logic22Beat[] = [
     dur: 4.6,
   },
   {
-    p: 44, x: 124, claim: 1, field: 1,
+    p: 137, x: 124, claim: 1, field: 1,
     quote: {
       id: 'lq-logic-arguments-22-1',
       text: 'It is the mark of an educated mind to rest satisfied with the degree of precision which the nature of the subject admits.',

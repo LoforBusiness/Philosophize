@@ -92,7 +92,7 @@ export const BEATS: Epi8Beat[] = [
     dur: 1.0,
   },
   {
-    p: 44, x: 98, esc: 1, land: 2,
+    p: 141, x: 98, esc: 1, land: 2,
     quote: {
       id: 'lq-epistemology-knowledge-8-1',
       text: 'It is wrong always, everywhere, and for anyone, to believe anything upon insufficient evidence.',

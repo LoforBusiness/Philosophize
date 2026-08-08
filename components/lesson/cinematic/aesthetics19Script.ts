@@ -40,7 +40,7 @@ export const BEATS: Aes19Beat[] = [
     dur: 4.6,
   },
   {
-    p: 44, x: 124, row: 1, frame: 3, verdict: 1,
+    p: 141, x: 124, row: 1, frame: 3, verdict: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-19-1',
       text: 'We must appreciate nature for what it is and as having the qualities that it has; natural history plays the role art history plays for art.',

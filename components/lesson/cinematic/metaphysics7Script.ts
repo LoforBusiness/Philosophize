@@ -86,7 +86,7 @@ export const BEATS: Metaphysics7Beat[] = [
     dur: 1.0,
   },
   {
-    p: 44, x: 70, line: 1, solid: 1,
+    p: 139, x: 70, line: 1, solid: 1,
     quote: {
       id: 'lq-metaphysics-being-7-1',
       text: 'What then is time? If no one asks me, I know; if I wish to explain it to one who asks, I know not.',

@@ -52,7 +52,7 @@ export const BEATS: Epistemology12Beat[] = [
     dur: 5.0,
   },
   {
-    p: 44, x: 124, pipes: 2,
+    p: 137, x: 124, pipes: 2,
     quote: {
       id: 'lq-epistemology-knowledge-12-1',
       text: 'There is no species of reasoning more common, more useful, and even necessary to human life, than that which is derived from the testimony of men.',

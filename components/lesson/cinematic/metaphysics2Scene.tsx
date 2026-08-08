@@ -5,9 +5,13 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './metaphysics2Script';
 import {
-  WALK, clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, moveTr, pose, strideStance, type Bundle,
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, strideStance, type Bundle,
 } from './rig';
+// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
+// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
+import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -38,6 +42,10 @@ import type { SceneApi } from './CinematicPlayer';
 
 const E = BEATS.map((b) => b.e ?? 0);
 const X = BEATS.map((b) => b.x ?? 196);
+// The camera, from the staging: it follows the figure this track describes,
+// pulls back to scale 1 on every graded beat so a tap lands where it is aimed,
+// and leans in on the quote. See followMoves in ./camera.ts.
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics2'));
 const GONE = BEATS.map((b) => b.gone ?? 0);
 const PR = BEATS.map((b) => b.pr ?? 0);
 const MX = BEATS.map((b) => b.mx ?? 0);
@@ -248,5 +256,5 @@ const styles = StyleSheet.create({
 // ticks, which end at GROUND + 7 = 507. The table stops at 336, the traveller's
 // crown reaches ~355 mid-stride, and both signposts sit between 386 and 500.
 export function Metaphysics2Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics2Scene} band={[172, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics2Scene} band={[172, 512]} camera={CAM} />;
 }

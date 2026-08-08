@@ -37,7 +37,7 @@ export const BEATS: Ethics13Beat[] = [
     cite: 'Too much',
   },
   {
-    g: 44, pos: 4, habit: 0,
+    g: 144, pos: 4, habit: 0,
     dur: 3.6,
     quote: {
       id: 'lq-ethics-ethics-13-2',

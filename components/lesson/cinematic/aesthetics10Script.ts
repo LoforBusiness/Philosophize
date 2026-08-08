@@ -45,7 +45,7 @@ export const BEATS: Aes10Beat[] = [
     dur: 4.8,
   },
   {
-    p: 44, x: 110, film: 1, panel: 1, shut: 1, verdict: 1,
+    p: 137, x: 110, film: 1, panel: 1, shut: 1, verdict: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-10-1',
       text: 'There is no such thing as a moral or an immoral book. Books are well written, or badly written. That is all.',

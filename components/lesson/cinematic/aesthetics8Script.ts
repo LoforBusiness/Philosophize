@@ -69,7 +69,7 @@ export const BEATS: Aes8Beat[] = [
     dur: 5.2,
   },
   {
-    p: 44, x: 148, mode: 1, lens: 1,
+    p: 137, x: 148, mode: 1, lens: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-8-1',
       text: 'These relations and combinations of lines and colours, these aesthetically moving forms, I call Significant Form.',

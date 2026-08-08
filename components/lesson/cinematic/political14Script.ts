@@ -36,7 +36,7 @@ export const BEATS: Pol14Beat[] = [
     cite: 'The pattern is gone',
   },
   {
-    g: 44, rows: 3,
+    g: 147, rows: 3,
     dur: 3.6,
     quote: {
       id: 'lq-political-political-14-2',

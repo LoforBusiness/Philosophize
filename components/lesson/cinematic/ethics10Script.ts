@@ -41,7 +41,7 @@ export const BEATS: Et10Beat[] = [
     dur: 4.4,
   },
   {
-    p: 4, x: 268, wading: true,
+    p: 137, x: 268, wading: true,
     quote: {
       id: 'lq-ethics-ethics-10-1',
       text: 'If it is in our power to prevent something bad from happening, without thereby sacrificing anything of comparable moral importance, then we ought, morally, to do it.',

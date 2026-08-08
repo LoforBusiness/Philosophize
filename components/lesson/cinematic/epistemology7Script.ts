@@ -31,7 +31,7 @@ export const BEATS: Epi7Beat[] = [
     dur: 5.0,
   },
   {
-    p: 0, days: 4, circle: 1,
+    p: 139, days: 4, circle: 1,
     quote: {
       id: 'lq-epistemology-knowledge-7-1',
       text: 'Custom, then, is the great guide of human life.',

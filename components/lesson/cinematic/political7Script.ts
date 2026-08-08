@@ -38,7 +38,7 @@ export const BEATS: Political7Beat[] = [
     dur: 4.4,
   },
   {
-    p: 35, x: 262, stone: 1, charter: 1,
+    p: 128, x: 262, stone: 1, charter: 1,
     quote: {
       id: 'lq-political-political-7-1',
       text: 'Natural rights is simple nonsense: natural and imprescriptible rights, rhetorical nonsense — nonsense upon stilts.',

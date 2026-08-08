@@ -71,7 +71,7 @@ export const BEATS: Aes3Beat[] = [
     dur: 5.0,
   },
   {
-    p: 0, modes: 1, will: 1,
+    p: 141, modes: 1, will: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-3-1',
       text: 'Music is not, like the other arts, a copy of the Ideas, but a copy of the will itself.',

@@ -41,7 +41,7 @@ export const BEATS: KnowHowBeat[] = [
     dur: 4.6,
   },
   {
-    p: 44, x: 124, steps: 3,
+    p: 147, x: 124, steps: 3,
     quote: {
       id: 'lq-epistemology-knowledge-2-1',
       text: 'We learn how by practice, schooled indeed by criticism and example, but often quite unaided by any lesson in the theory.',

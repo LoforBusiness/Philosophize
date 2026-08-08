@@ -35,7 +35,7 @@ export const BEATS: Epis32Beat[] = [
     cite: 'More and more',
   },
   {
-    g: 44, maps: 3,
+    g: 129, maps: 3,
     dur: 3.6,
     quote: {
       id: 'lq-epistemology-knowledge-32-1',
