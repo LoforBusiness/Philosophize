@@ -652,6 +652,26 @@ function placeKey(place: string): string {
   return PALETTES[place] ? place : FALLBACK_PLACE;
 }
 
+/**
+ * Which place a unit belongs to, read off its own id.
+ *
+ * Unit ids are branch-prefixed — `metaphysics-being-and-non-being` — so the road
+ * can work out what country it is in without being told. That matters because
+ * the alternative is a prop threaded from the branch screen, and a prop that is
+ * merely FORGOTTEN gives every branch the same scenery, silently and everywhere.
+ * A screen may still pass `place` and it wins; this is the floor under it.
+ *
+ * Longest match, because `political-philosophy` is itself hyphenated and a
+ * shortest-match scan would stop at `political`.
+ */
+export function placeFromUnitId(unitId: string): string {
+  let best = '';
+  for (const p of PLACES) {
+    if (unitId.startsWith(p + '-') && p.length > best.length) best = p;
+  }
+  return best;
+}
+
 /** The sky this place is under. Read by BranchWorld for the strip's background. */
 export function skyFor(place: string): string {
   return paletteFor(place).sky;

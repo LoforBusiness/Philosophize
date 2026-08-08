@@ -14,7 +14,7 @@ import {
   type Marker,
 } from './worldPath';
 import { figureAt, hopAt, hopMs, hopTravel } from './walkFigure';
-import { sceneLayers, discFor, skyFor, TILE_W, type LayerArt } from './sceneArt';
+import { sceneLayers, discFor, skyFor, placeFromUnitId, TILE_W, type LayerArt } from './sceneArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BRANCH IS A PLACE YOU WALK THROUGH.
@@ -92,15 +92,18 @@ export default function BranchWorld({
   /**
    * Branch slug — which of the six places this road runs through (sceneArt).
    *
-   * OPTIONAL, and deliberately so: the branch screen that passes it is being
-   * rewritten in another working copy at the time of writing, and a required
-   * prop would make this component uncompilable until that lands. An unknown or
-   * absent slug falls through to `paletteFor`'s default country rather than
-   * throwing, so the worst case is the wrong scenery, not a blank screen.
+   * OPTIONAL, and it is not merely tolerated — omitting it is CORRECT. Unit ids
+   * are branch-prefixed, so `placeFromUnitId` reads the country off the lessons
+   * themselves and the road is right whether or not anybody threads a prop down
+   * to it. A prop that must be remembered is a prop that will one day be
+   * forgotten, and forgetting this one would put the same scenery behind all six
+   * branches without erroring anywhere.
    */
   place?: string;
 }) {
   const { width } = useWindowDimensions();
+  // Told, or worked out from the lessons themselves. See the prop's note.
+  const where = place || placeFromUnitId(lessons[0]?.unitId ?? '');
   const markers = useMemo(
     () => layout(lessons.map((l) => ({ id: l.id, unitId: l.unitId }))),
     [lessons],
@@ -346,8 +349,8 @@ export default function BranchWorld({
     // it is, and every one of the reference pictures is cream cloud on a grey
     // ground — so a single near-white sky for all six was quietly forbidding the
     // one shape they all have in common.
-    <View style={{ height: H, backgroundColor: skyFor(place), overflow: 'hidden' }}>
-      <SceneBack camX={camX} place={place} unit={vp.s} width={width} />
+    <View style={{ height: H, backgroundColor: skyFor(where), overflow: 'hidden' }}>
+      <SceneBack camX={camX} place={where} unit={vp.s} width={width} />
       <GroundBand camX={camX} chunk={vp.c} />
 
       {/* THE FIGURE, drawn BEFORE the signs so it can never cover a lesson's name. */}
