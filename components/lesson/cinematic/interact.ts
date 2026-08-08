@@ -659,6 +659,108 @@ export function propAct(code: number, t: number, u: number): Stance {
       fistR: { x: lerp(5, 26, grab) - off * 20, y: lerp(6, -34, grab) + pull * 16 + off * 30 },
     };
   }
+
+  // ── 25–30: two hands, taking turns ─────────────────────────────────────────
+  //
+  // Everything before this drives one hand and parks the other, or moves both
+  // together. What was missing is ALTERNATION — the hands taking turns at the
+  // same job, which is how a body climbs, hauls, sweeps or turns anything. Two
+  // hands doing the same thing at the same time is a puppet; two hands half a
+  // cycle apart is work.
+
+  if (code === 25) {                             // CLIMB — hand over hand up a ladder
+    const on = ease01(clamp01(p / 0.16));
+    const a = clamp01((p - 0.14) / 0.72) * Math.PI * 3;
+    // Half a cycle apart, and the FEET follow the opposite hands — a climber who
+    // reaches with the hand on the same side as the rising foot falls off.
+    const hl = Math.sin(a), hr = Math.sin(a + Math.PI);
+    return {
+      ...s,
+      tilt: s.tilt - on * 0.10,
+      neck: s.neck - on * 0.14,
+      footL: { x: -5, y: -Math.max(0, hr) * 7 },
+      footR: { x: 6, y: -Math.max(0, hl) * 7 },
+      // 22 and 27 out, not 14 and 20: at 14 the raised hand measured 18.5 from
+      // the head's centre and was drawn inside it — a climber with one hand. A
+      // rung is in FRONT of you anyway, so forward is also the truer answer.
+      fistL: { x: lerp(-5, 25, on), y: lerp(6, -22 - hl * 12, on) },
+      fistR: { x: lerp(5, 30, on), y: lerp(6, -22 - hr * 12, on) },
+    };
+  }
+  if (code === 26) {                             // SWEEP — long strokes, both hands on the shaft
+    const on = ease01(clamp01(p / 0.18));
+    const off = ease01(clamp01((p - 0.84) / 0.16));
+    const stroke = Math.sin(clamp01((p - 0.16) / 0.68) * Math.PI * 2.5);
+    return {
+      ...s,
+      tilt: s.tilt - on * 0.16 - stroke * 0.05,
+      neck: s.neck + on * 0.20,
+      // The lower hand travels much further than the upper one, which is what a
+      // lever looks like. Moving both the same distance reads as carrying a pole.
+      fistL: { x: lerp(-5, 10 + stroke * 5, on) - off * 12, y: lerp(6, -10, on) + off * 14 },
+      fistR: { x: lerp(5, 20 + stroke * 15, on) - off * 14, y: lerp(6, 4, on) + off * 4 },
+    };
+  }
+  if (code === 27) {                             // BALANCE — something on a flat palm
+    // The corrections are the whole thing, and they must be SMALL and CONSTANT.
+    // A hand that holds perfectly still is holding a glued object.
+    const up = ease01(clamp01(p / 0.30));
+    const wob = life2(t, 1.7, 2.6, 0.9);
+    return {
+      ...s,
+      tilt: s.tilt + wob * 0.02,
+      neck: s.neck - up * 0.10,
+      fistL: { x: -6 - wob, y: 8 },
+      fistR: { x: lerp(5, 23 + wob * 2, up), y: lerp(6, -15 + wob * 1.5, up) },
+    };
+  }
+  if (code === 28) {                             // TUG — rhythmic hauls, weight thrown back
+    const grip = ease01(clamp01(p / 0.20));
+    const pull = Math.sin(clamp01((p - 0.18) / 0.68) * Math.PI * 3);
+    const hard = Math.max(0, pull);
+    return {
+      ...s,
+      tilt: s.tilt + grip * 0.12 + hard * 0.16,
+      neck: s.neck + hard * 0.06,
+      bob: s.bob - hard * 1.8,
+      footL: { x: -12, y: 0 }, footR: { x: 8, y: 0 },
+      fistL: { x: lerp(-5, 20, grip) - hard * 15, y: lerp(6, -8, grip) + hard * 5 },
+      fistR: { x: lerp(5, 26, grip) - hard * 15, y: lerp(6, -10, grip) + hard * 5 },
+      adv: -hard * 4,
+    };
+  }
+  if (code === 29) {                             // SLIDE — push something along a surface
+    const set = ease01(clamp01(p / 0.24));
+    const glide = ease01(clamp01((p - 0.22) / 0.56));
+    const back = ease01(clamp01((p - 0.78) / 0.22));
+    return {
+      ...s,
+      tilt: s.tilt - set * 0.10 - glide * 0.04,
+      neck: s.neck + set * 0.10,
+      footL: { x: -7 - set * 6, y: 0 }, footR: { x: 8, y: 0 },
+      fistL: { x: lerp(-5, 15, set) + glide * 11 - back * 20, y: lerp(6, 0, set) + back * 6 },
+      fistR: { x: lerp(5, 21, set) + glide * 11 - back * 22, y: lerp(6, -2, set) + back * 8 },
+      adv: glide * 7 - back * 7,
+    };
+  }
+  if (code === 30) {                             // UNLOCK — offer it up, turn, and it gives
+    const up = ease01(clamp01(p / 0.28));
+    const seek = Math.sin(clamp01((p - 0.24) / 0.20) * Math.PI) * 2;
+    const turn = ease01(clamp01((p - 0.44) / 0.26));
+    const open = ease01(clamp01((p - 0.72) / 0.28));
+    return {
+      ...s,
+      tilt: s.tilt - up * 0.06 + open * 0.06,
+      neck: s.neck - up * 0.10,
+      fistL: { x: -5, y: 6 },
+      // The little hunt before it goes in is what makes it a key rather than a
+      // button: nobody finds a keyhole first time.
+      fistR: {
+        x: lerp(5, 24, up) + seek + turn * 2 - open * 18,
+        y: lerp(6, -12, up) + seek * 0.6 - turn * 3 + open * 16,
+      },
+    };
+  }
   return s;
 }
 

@@ -179,6 +179,51 @@ export const BOUND: Gait = {
   tilt: -0.04, armBase: 0.09, armSwing: 0.80, standH: 34,
 };
 
+// ── the third shelf: gaits that are not about speed ──────────────────────────
+//
+// Everything above answers "how fast, and how willingly". These answer a
+// different question — what the GROUND is doing, and whether the body is in
+// control of itself. A slope, a stumble and a stomp are all walks, and none of
+// them is a walk played at a different rate.
+//
+// `standH` is the knob the first two shelves never touched. Lowering it is how a
+// creep gets under something and how a climb leans into a hill: the pelvis rides
+// closer to the floor for the whole cycle rather than dipping once per step.
+
+/** Right down, under something, one slow foot at a time. */
+export const CREEP: Gait = {
+  S: 15, lift: 7, stance: 0.72, bob: 1.0, bobSign: -1,
+  tilt: -0.16, armBase: 0.14, armSwing: 0.10, standH: 27,
+};
+/** Off balance. Mode 19 makes the recovery uneven — this is only the wobble. */
+export const STAGGER: Gait = {
+  S: 26, lift: 12, stance: 0.54, bob: 4.6, bobSign: -1,
+  tilt: -0.02, armBase: 0.20, armSwing: 0.50, standH: 33,
+};
+/** Heavy, flat-footed, and loud. Each step arrives rather than rolls. */
+export const STOMP: Gait = {
+  S: 28, lift: 16, stance: 0.62, bob: 5.0, bobSign: -1,
+  // armSwing 0.62, not 0.40: at 0.40 the hands moved about six units and on the
+  // contact sheet this was indistinguishable from a plain walk. A stomp is loud,
+  // and the only way a silent picture can say loud is with amplitude.
+  tilt: 0.03, armBase: 0.12, armSwing: 0.62, standH: 34,
+};
+/** Almost no vertical at all — the head travels on a rail. */
+export const GLIDE: Gait = {
+  S: 34, lift: 5, stance: 0.60, bob: 0.6, bobSign: -1,
+  tilt: -0.06, armBase: 0.09, armSwing: 0.26, standH: 34,
+};
+/** Up a slope: short steps, knees high, the whole body leaning into it. */
+export const CLIMB: Gait = {
+  S: 20, lift: 20, stance: 0.64, bob: 3.0, bobSign: -1,
+  tilt: -0.26, armBase: 0.16, armSwing: 0.34, standH: 31,
+};
+/** Down a slope: long reaching steps, weight held BACK, braking each time. */
+export const DESCEND: Gait = {
+  S: 30, lift: 9, stance: 0.60, bob: 3.4, bobSign: -1,
+  tilt: 0.16, armBase: 0.22, armSwing: 0.38, standH: 32,
+};
+
 /**
  * Gait for a travel mode. 0 walk · 1 stroll · 2 hurry · 3 run · 4 trudge ·
  * 5 march · 6 sneak · 7 limp · 8 skip · 9 tiptoe · 10 back away · 11 pace.
@@ -201,6 +246,12 @@ export function gaitFor(mode: number): Gait {
   if (mode === 15) return SWAGGER;
   if (mode === 16) return SHUFFLE;
   if (mode === 17) return BOUND;
+  if (mode === 18) return CREEP;
+  if (mode === 19) return STAGGER;
+  if (mode === 20) return STOMP;
+  if (mode === 21) return GLIDE;
+  if (mode === 22) return CLIMB;
+  if (mode === 23) return DESCEND;
   return WALK;                                   // 0, and 10 (backing away) reversed
 }
 
@@ -378,6 +429,55 @@ function moveBody(mode: number, dist: number, g: Gait): Stance {
       ...w, neck: -0.09 - air * 0.05, tilt: w.tilt - air * 0.03,
       fistL: { x: 8 + c * sw * 16, y: 4 - air * 16 },
       fistR: { x: 8 - c * sw * 16, y: 4 - air * 16 },
+    };
+  }
+  if (mode === 18) {                             // CREEP — low, hands ready, eyes up
+    return {
+      ...w, neck: -0.18, tilt: w.tilt - 0.04,
+      fistL: { x: 13 + c * sw * 6, y: -6 }, fistR: { x: 18 - c * sw * 6, y: -8 },
+    };
+  }
+  if (mode === 19) {                             // STAGGER — the correction is always late
+    // A stumble is not a wobble: it is a body arriving somewhere it did not plan
+    // and CATCHING itself a moment afterwards. The lag is the whole read, so the
+    // torso runs a slower, offset wave than the legs rather than the same one.
+    const late = Math.sin(ph * 0.5 + 1.1);
+    return {
+      ...w, tilt: w.tilt + late * 0.16, neck: 0.06 - late * 0.10,
+      bob: w.bob - Math.abs(late) * 1.2,
+      fistL: { x: -2 + late * 14, y: 2 - Math.abs(late) * 8 },
+      fistR: { x: 12 - late * 12, y: 0 - Math.abs(late) * 6 },
+    };
+  }
+  if (mode === 20) {                             // STOMP — arrives flat, and the body knows it
+    // The jolt is tied to the FOOTFALL, not to the stride: it spikes when a foot
+    // lands and decays, which is what separates a stomp from a heavy walk.
+    const land = Math.max(0, -Math.cos(2 * ph)) ** 3;
+    return {
+      ...w,
+      tilt: w.tilt + 0.05 - land * 0.05,
+      neck: 0.05 + land * 0.09,                  // the head snaps down as it lands
+      bob: w.bob + land * 3.2,                   // and the whole body drops onto it
+      fistL: { x: 3 + c * sw * 22, y: 6 - Math.abs(c) * 3 },
+      fistR: { x: 3 - c * sw * 22, y: 6 - Math.abs(c) * 3 },
+    };
+  }
+  if (mode === 21) {                             // GLIDE — everything above the hips is still
+    return {
+      ...w, neck: -0.04, tilt: w.tilt,
+      fistL: { x: -3 + c * sw * 10, y: 7 }, fistR: { x: 4 - c * sw * 10, y: 7 },
+    };
+  }
+  if (mode === 22) {                             // CLIMB — hands help, chest over the toes
+    return {
+      ...w, neck: -0.22, tilt: w.tilt - 0.02,
+      fistL: { x: 16 + c * sw * 10, y: -14 }, fistR: { x: 21 - c * sw * 10, y: -18 },
+    };
+  }
+  if (mode === 23) {                             // DESCEND — weight back, arms out for balance
+    return {
+      ...w, neck: 0.14, tilt: w.tilt + 0.02,
+      fistL: { x: -14 + c * sw * 10, y: -4 }, fistR: { x: -9 - c * sw * 10, y: -6 },
     };
   }
   return w;                                      // 0 — the plain walk
@@ -1164,6 +1264,115 @@ export function actStance(code: number, t: number, u: number): Stance {
     return {
       ...s, tilt: s.tilt - r * 0.04, neck: s.neck - r * 0.12, bob: s.bob + r * 1.6,
       fistL: { x: -6 - r * 3, y: 7 - r * 3 }, fistR: { x: 7 + r * 3, y: 7 - r * 3 },
+    };
+  }
+  // ── 49–58: the ordinary things a person does while nothing happens ─────────
+  if (code === 49) {                             // SCRATCH THE HEAD — the thinking one
+    // The hand IS meant to reach the head here, so this is a named exemption in
+    // check-moves rather than a violation. It goes to the BACK of the skull, out
+    // at 26, not through the face.
+    const up = ease01(clamp01(p / 0.30));
+    const rub = Math.sin(p * Math.PI * 7) * (1 - ease01(clamp01((p - 0.62) / 0.38)));
+    const down = ease01(clamp01((p - 0.70) / 0.30));
+    return {
+      ...s, neck: s.neck + up * 0.10 - down * 0.06, tilt: s.tilt + up * 0.03,
+      fistL: { x: -5, y: 6 },
+      fistR: { x: lerp(5, -14 + rub * 3, up) + down * 18, y: lerp(6, -40, up) + down * 44 },
+    };
+  }
+  if (code === 50) {                             // CHECK OVER THE SHOULDER — a quick look back
+    const turn = Math.sin(Math.PI * ease01(p));
+    return {
+      ...s, neck: s.neck + turn * 0.30, tilt: s.tilt + turn * 0.10,
+      footL: { x: -6, y: 0 }, footR: { x: 7 - turn * 3, y: 0 },
+      fistL: { x: -6 - turn * 6, y: 7 }, fistR: { x: 6 - turn * 8, y: 7 },
+    };
+  }
+  if (code === 51) {                             // YAWN — a long one, with the stretch in it
+    const r = Math.sin(Math.PI * ease01(p));
+    return {
+      ...s, neck: s.neck - r * 0.24, tilt: s.tilt - r * 0.05, bob: s.bob + r * 1.4,
+      fistL: { x: lerp(-5, 22, r), y: lerp(6, -30, r) },
+      fistR: { x: lerp(6, 29, r), y: lerp(6, -34, r) },
+    };
+  }
+  if (code === 52) {                             // CLAP — hands meet in front, three times
+    const up = ease01(clamp01(p / 0.20));
+    const away = ease01(clamp01((p - 0.82) / 0.18));
+    // Zero at the start of each clap as well as the end — the lesson prop 11
+    // taught: a pulse that begins at its peak is a cut, not a strike.
+    const k = clamp01((p - 0.18) / 0.62) * 3;
+    const kk = k % 1;
+    const open = k > 0 && k < 3 ? (kk < 0.3 ? 1 - kk / 0.3 : (kk - 0.3) / 0.7) : 1;
+    return {
+      ...s, neck: s.neck - up * 0.06, tilt: s.tilt - up * 0.04,
+      fistL: { x: lerp(-5, 15 - open * 7, up) - away * 10, y: lerp(6, -14, up) + away * 20 },
+      fistR: { x: lerp(5, 18 + open * 7, up) - away * 12, y: lerp(6, -14, up) + away * 20 },
+    };
+  }
+  if (code === 53) {                             // BOW — from the hips, hold, and rise
+    const down = ease01(clamp01(p / 0.34));
+    const hold = clamp01((p - 0.30) / 0.30);
+    const up = ease01(clamp01((p - 0.60) / 0.40));
+    const d = down * (1 - up);
+    return {
+      ...s, tilt: s.tilt - d * 0.52, neck: s.neck + d * 0.30,
+      bob: s.bob - d * 2.0 - hold * 0,
+      footL: { x: -6, y: 0 }, footR: { x: 7, y: 0 },
+      fistL: { x: lerp(-5, 4, d), y: lerp(6, 20, d) },
+      fistR: { x: lerp(6, 14, d), y: lerp(6, 22, d) },
+    };
+  }
+  if (code === 54) {                             // SHIVER — cold: fast, small, arms wrapped in
+    const q = Math.sin(t * 13) * 1.6;
+    return {
+      ...s, tilt: s.tilt + 0.06, neck: s.neck + 0.10 + Math.sin(t * 11) * 0.012,
+      bob: s.bob - 0.8,
+      footL: { x: -4, y: 0 }, footR: { x: 5, y: 0 },
+      fistL: { x: 10 + q, y: -8 }, fistR: { x: 15 - q, y: -6 },
+    };
+  }
+  if (code === 55) {                             // LAUGH — head back, shoulders going
+    const h = Math.sin(t * 6.5);
+    return {
+      ...s, neck: s.neck - 0.26 - h * 0.05, tilt: s.tilt + 0.06 + h * 0.03,
+      bob: s.bob - Math.abs(h) * 1.0,
+      fistL: { x: 6 + h * 2, y: 2 }, fistR: { x: 13 - h * 2, y: 0 },
+    };
+  }
+  if (code === 56) {                             // SIGH — one long fall, shoulders down
+    // Rises a little first. A sigh that only descends is a slump; the intake is
+    // what makes the release read as a sigh.
+    const inh = Math.sin(Math.PI * clamp01(p / 0.34));
+    const out = ease01(clamp01((p - 0.30) / 0.70));
+    return {
+      ...s, bob: s.bob + inh * 1.6 - out * 1.4,
+      tilt: s.tilt - inh * 0.04 + out * 0.10,
+      neck: s.neck - inh * 0.10 + out * 0.18,
+      fistL: { x: -5 - inh * 2, y: 6 + out * 2 }, fistR: { x: 6 + inh * 2, y: 6 + out * 2 },
+    };
+  }
+  if (code === 57) {                             // PEEK — up on the toes to see over something
+    const r = Math.sin(Math.PI * ease01(p));
+    return {
+      ...s, neck: s.neck - 0.16 - r * 0.06, tilt: s.tilt - r * 0.04,
+      // Up on the toes: the pelvis rises and the feet come with it.
+      bob: s.bob + r * 4.5,
+      footL: { x: -6, y: -r * 4 }, footR: { x: 7, y: -r * 4 },
+      fistL: { x: -4 + r * 10, y: 7 - r * 4 }, fistR: { x: 5 + r * 12, y: 7 - r * 4 },
+    };
+  }
+  if (code === 58) {                             // STUMBLE AND CATCH — one bad step, recovered
+    const trip = Math.sin(Math.PI * clamp01(p / 0.30));
+    const catch_ = Math.sin(Math.PI * clamp01((p - 0.26) / 0.44));
+    return {
+      ...s, tilt: s.tilt - trip * 0.34 + catch_ * 0.14,
+      neck: s.neck + trip * 0.16 - catch_ * 0.06,
+      bob: s.bob - trip * 3.2 + catch_ * 0.8,
+      footL: { x: -6 - catch_ * 4, y: 0 }, footR: { x: 7 + trip * 13, y: -trip * 5 },
+      fistL: { x: -4 + trip * 20, y: 6 - trip * 16 },
+      fistR: { x: 6 + trip * 24, y: 6 - trip * 14 },
+      adv: trip * 4,
     };
   }
   if (code === 40) {                             // ROLL SHOULDERS — a circle, one then the other

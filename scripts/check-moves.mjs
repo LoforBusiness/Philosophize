@@ -184,6 +184,7 @@ const FACE_OK = new Set([
   'act 14',          // DUCK — hands go over the head, which is the gesture
   'act 17',          // FACEPALM — the hand is ON the face by definition
   'act 18',          // LOOK AROUND — the hand is shading the eyes
+  'act 49',          // SCRATCH THE HEAD — the hand goes to the skull by definition
   'act 19',          // STARTLE — hands fly to the face, which is the gesture
   'posture 9',       // the thinker — chin in hand
   'carry hurry/5',   // something long over the shoulder passes the head by design
@@ -302,8 +303,8 @@ const MOTIONS = [
   { name: 'seated (baseline)', kind: 'oneShot', at: () => R.seated(21, T) },
 
   // ── the movement library ───────────────────────────────────────────────────
-  // 18 travel modes · 15 postures · 48 one-shot actions · 24 prop actions.
-  ...Array.from({ length: 18 }, (_, mode) => ({
+  // 24 travel modes · 15 postures · 58 one-shot actions · 30 prop actions.
+  ...Array.from({ length: 24 }, (_, mode) => ({
     name: `move ${mode}`, kind: 'gait',
     cycle: M.gaitFor(mode).S / M.gaitFor(mode).stance,
     // Mode 10 backs away: it runs the cycle in reverse, so the body advances by
@@ -314,7 +315,7 @@ const MOTIONS = [
   ...Array.from({ length: 15 }, (_, code) => ({
     name: `posture ${code}`, kind: 'oneShot', at: () => M.postureHold(code, T),
   })),
-  ...Array.from({ length: 48 }, (_, i) => ({
+  ...Array.from({ length: 58 }, (_, i) => ({
     name: `act ${i + 1}`, kind: 'oneShot', at: (u) => M.actStance(i + 1, T, u),
   })),
 
@@ -331,7 +332,7 @@ const MOTIONS = [
     cycle: M.gaitFor(2).S / M.gaitFor(2).stance,
     at: (d) => I.carryMode(2, d, hold),
   })),
-  ...Array.from({ length: 24 }, (_, i) => ({
+  ...Array.from({ length: 30 }, (_, i) => ({
     name: `prop ${i + 1}`, kind: 'oneShot', at: (u) => I.propAct(i + 1, T, u),
   })),
 
