@@ -12,7 +12,7 @@ import { exitLesson } from '../exitLesson';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { shotAt, resolveMoves, openForTargets, NEUTRAL, type Move, type Shot } from './camera';
+import { shotAt, resolveMoves, containShot, NEUTRAL, type Box, type Move, type Shot } from './camera';
 import { cue, touch } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import { swishTrack } from './gestures';
@@ -210,20 +210,44 @@ export default function CinematicPlayer({
   // (it iterates fit() until each shot is legal) and the answer only changes when
   // the lesson does. `shots` still wins for a hand-written list.
   const cam = useMemo(
-    () => {
-      const list = shots && shots.length ? shots : camera && camera.length ? resolveMoves(camera, band, ground) : null;
-      if (!list) return null;
-      // Last, and after resolveMoves, so no authored verb can frame a question
-      // tighter than the band it has to be answered in. See openForTargets.
-      return openForTargets(list, beats.map((b) => !!b.interact));
-    },
-    [shots, camera, band, ground, beats],
+    () => (shots && shots.length ? shots : camera && camera.length ? resolveMoves(camera, band, ground) : null),
+    [shots, camera, band, ground],
   );
+
+  // ── WHATEVER THE READER HAS TO TAP MUST BE IN THE SHOT ─────────────────────
+  //
+  // A camera verb takes a POINT (`at: [x, y]`), so nothing in the shot maths ever
+  // knew how big the thing at that point was — which is how a push framed the
+  // figure and cropped half an answer plate off the top right of the screen.
+  //
+  // The targets measure themselves against the camera view (see Target.tsx) and
+  // report a union box in scene coordinates. `containShot` then pulls the shot
+  // only as far as it must for that box to fit: the scale can come DOWN but never
+  // up, and the centre slides the shortest distance that brings it in. A shot that
+  // was already wide enough is returned untouched, which is why the camera work on
+  // every other beat is unaffected.
+  //
+  // THE FALLBACK MATTERS AS MUCH AS THE FIX. Until a box has been reported for an
+  // interactive beat — the first frames of it, or if `measureLayout` ever fails on
+  // some device — the shot is NEUTRAL, the whole declared band, which cannot crop
+  // anything the scene draws. So the failure mode is a blunt frame, never an
+  // unreachable button.
+  const targetBox = useSharedValue<Box | null>(null);
+  const onBox = useCallback((b: Box | null) => { targetBox.value = b; }, [targetBox]);
+  const camHost = useRef(null);
+  const needsBox = useMemo(() => beats.map((b) => !!b.interact), [beats]);
+
   const camNow = useDerivedValue(() => {
     if (!cam || cam.length === 0) return NEUTRAL;
     const n = Math.min(Math.max(bi.value, 0), cam.length - 1);
-    const from = n > 0 ? cam[n - 1] : cam[0];
-    return shotAt(from, cam[n], bt.value);
+    const box = targetBox.value;
+    const frame = (k: number) => {
+      'worklet';
+      if (!needsBox[k]) return cam[k];
+      if (!box) return { ...NEUTRAL, tr: cam[k].tr };
+      return containShot(cam[k], box, band);
+    };
+    return shotAt(frame(n > 0 ? n - 1 : 0), frame(n), bt.value);
   });
   const camStyle = useAnimatedStyle(() => {
     const c = camNow.value;
@@ -434,9 +458,10 @@ export default function CinematicPlayer({
                       not pay a matrix multiply per frame for one that does. */}
                   {cam ? (
                     <Animated.View
+                      ref={camHost}
                       style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
                     >
-                      <TargetCountProvider onCount={setTargetCount}>
+                      <TargetCountProvider onCount={setTargetCount} onBox={onBox} host={camHost}>
                         <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
                       </TargetCountProvider>
                     </Animated.View>

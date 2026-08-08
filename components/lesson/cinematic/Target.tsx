@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useId, useMemo } from 'react';
-import { Pressable, StyleSheet, type PressableProps } from 'react-native';
+import { createContext, useContext, useEffect, useId, useMemo, useRef } from 'react';
+import { Pressable, StyleSheet, type View, type PressableProps } from 'react-native';
 import Animated, {
   Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withTiming,
 } from 'react-native-reanimated';
@@ -72,20 +72,49 @@ const BREATH_MS = 1100;
 interface Registry {
   add: (key: string) => void;
   remove: (key: string) => void;
+  /** Where this target actually is, in SCENE coordinates. See `measure` below. */
+  report?: (key: string, box: { x: number; y: number; w: number; h: number }) => void;
+  /** The camera view a target measures itself against. */
+  host?: { current: unknown };
 }
 const TargetCtx = createContext<Registry | null>(null);
 
 /** Wrap the scene so its Targets can be counted. Mounted by CinematicPlayer. */
 export function TargetCountProvider({
-  children, onCount,
-}: { children: React.ReactNode; onCount: (n: number) => void }) {
+  children, onCount, onBox, host,
+}: {
+  children: React.ReactNode;
+  onCount: (n: number) => void;
+  /** The union of every target on this beat, or null while none has measured. */
+  onBox?: (b: { x: number; y: number; w: number; h: number } | null) => void;
+  host?: { current: unknown };
+}) {
   const reg = useMemo(() => {
     const keys = new Set<string>();
+    const boxes = new Map<string, { x: number; y: number; w: number; h: number }>();
+    const union = () => {
+      if (!boxes.size) return null;
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      boxes.forEach((b) => {
+        x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y);
+        x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
+      });
+      return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+    };
     return {
       add: (k: string) => { keys.add(k); onCount(keys.size); },
-      remove: (k: string) => { keys.delete(k); onCount(keys.size); },
+      remove: (k: string) => {
+        keys.delete(k); boxes.delete(k);
+        onCount(keys.size);
+        onBox?.(union());
+      },
+      report: (k: string, b: { x: number; y: number; w: number; h: number }) => {
+        boxes.set(k, b);
+        onBox?.(union());
+      },
+      host,
     };
-  }, [onCount]);
+  }, [onCount, onBox, host]);
   return <TargetCtx.Provider value={reg}>{children}</TargetCtx.Provider>;
 }
 
@@ -144,8 +173,31 @@ export default function Target({
   // is moving, and every one of these sits on a stage where something is walking.
   const ring = useAnimatedStyle(() => ({ opacity: 0.35 + breath.value * 0.65 }));
 
+  // WHERE THIS TARGET ACTUALLY IS, so the camera can be made to contain it.
+  //
+  // Measured against the CAMERA VIEW rather than read off the scene's styles,
+  // because a Target is positioned by whatever wraps it — a row, a card, a column
+  // — and only the tree knows the accumulated offset. `measureLayout` against an
+  // ancestor returns the offset inside that ancestor's own coordinate space, which
+  // is scene space: the camera's transform lives ON the host and so is not counted.
+  //
+  // If it ever fails, nothing is reported and CinematicPlayer falls back to
+  // framing the whole band — see the note there. Wrong is not an option; blunt is.
+  const boxRef = useRef<View>(null);
+  const measure = () => {
+    const host = reg?.host?.current as never;
+    if (!host || !boxRef.current) return;
+    boxRef.current.measureLayout(
+      host,
+      (x, y, w, h) => reg?.report?.(key, { x, y, w, h }),
+      () => {},
+    );
+  };
+
   return (
     <Pressable
+      ref={boxRef}
+      onLayout={measure}
       accessibilityRole="button"
       {...rest}
       // After the spread: a scene's own `disabled` may add a reason to be

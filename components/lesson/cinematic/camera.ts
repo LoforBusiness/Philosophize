@@ -405,27 +405,50 @@ export function visibleWindow(shot: Shot, band: [number, number]) {
  * @param ground the scene's ground line, if it has one. A shot whose window ends
  *   above the ground leaves the figure standing on nothing.
  */
+/** A rectangle in scene coordinates — what a beat is actually about. */
+export interface Box { x: number; y: number; w: number; h: number }
+
 /**
- * PULL BACK FOR ANYTHING THE READER HAS TO TAP.
+ * KEEP THE SUBJECT IN THE SHOT.
  *
- * A shot is framed for what it is SAYING, and on a narrative beat that is right.
- * On a beat with a graded question it is a trap: the author frames the figure,
- * the answer plates sit wherever the scene put them — top-right, above the
- * figure, out at the edge — and the window quietly crops one. A reader cannot tap
- * what is not on screen, and cannot even tell that something is missing.
+ * A camera verb takes `at: [x, y]` — a POINT. That is the whole bug a reader hit:
+ * the shot was centred near the question, and nothing in the maths knew how BIG
+ * the question was, so its corners fell outside the window and part of a tappable
+ * answer was cropped. A point cannot be cropped; a box can.
  *
- * It is not enough to zoom out "more", because how much is enough depends on
- * geometry the camera does not know: a Target is a Pressable positioned by its
- * own scene's styles, so the shot list has no idea where the plates are. The only
- * framing guaranteed to contain them is the one the band was measured for.
+ * This takes the box the beat is about and returns the same shot, pulled only as
+ * far as it must be for the box to fit:
  *
- * So an interactive beat is shown at NEUTRAL — the whole declared band, which is
- * by definition everything the scene can draw. The MOVE is kept (`tr` survives),
- * so it still reads as a deliberate pull-back to hand the reader the question,
- * rather than as the camera giving up.
+ *   · the scale is REDUCED to fit, never raised — this is a floor on what must be
+ *     visible, not a re-framing. A shot already wide enough comes back untouched,
+ *     which is why every other beat's camera work survives.
+ *   · then the centre slides the shortest distance that brings the box inside.
+ *
+ * The stage clamp is applied FIRST and containment second, so if the two ever
+ * disagree the box wins: a sliver of blank paper at the edge of the frame is a
+ * far cheaper fault than a button the reader cannot see or press.
  */
-export function openForTargets(shots: Shot[], interactive: boolean[]): Shot[] {
-  return shots.map((sh, i) => (interactive[i] ? { ...NEUTRAL, tr: sh.tr } : sh));
+export function containShot(shot: Shot, box: Box | null, band: [number, number]): Shot {
+  'worklet';
+  if (!box || box.w <= 0 || box.h <= 0) return shot;
+  const bandH = band[1] - band[0];
+  const fitS = Math.min(STAGE_W / box.w, bandH / box.h);
+  const s = Math.max(1, Math.min(shot.s, fitS));
+  const halfW = STAGE_W / (2 * s);
+  const topOff = (band[0] - STAGE_H / 2) / s;
+  const botOff = (band[1] - STAGE_H / 2) / s;
+
+  let cx = shot.cx;
+  let cy = shot.cy;
+  // stage first …
+  cx = Math.max(halfW, Math.min(STAGE_W - halfW, cx));
+  cy = Math.max(-topOff, Math.min(STAGE_H - botOff, cy));
+  // … the subject second, so the subject wins.
+  cx = Math.min(cx, box.x + halfW);
+  cx = Math.max(cx, box.x + box.w - halfW);
+  cy = Math.min(cy, box.y - topOff);
+  cy = Math.max(cy, box.y + box.h - botOff);
+  return { ...shot, cx, cy, s };
 }
 
 export function checkShots(

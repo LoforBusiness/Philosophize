@@ -1802,28 +1802,33 @@ five beats and brings it back — the reader sees objects vanishing and
 reappearing. A gap in the *script* is fine; the scene wraps the cue in `held()`
 so the prop stays on stage between its first and last beat.
 
-## H60 · A beat the reader must TAP is framed at the full band
+## H60 · The camera must CONTAIN what the beat is about, not aim at it
 
-A shot is composed for what the beat is *saying*, and on a narrative beat that is
-right. On a beat carrying a graded question it is a trap: the author frames the
-figure, the answer plates sit wherever the scene's own styles put them — top
-right, above the figure, out at an edge — and the window crops one. The reader
-cannot tap what is off screen, and nothing tells them anything is missing. This
-was reported from a real lesson.
+A camera verb takes `at: [x, y]` — a **point**. Nothing in the shot maths ever
+knew how big the thing at that point was, which is exactly how a push framed the
+figure and cropped half an answer plate off the top right. A point cannot be
+cropped; a box can.
 
-"Zoom out a bit more" is not the fix, because how much is enough depends on
-geometry the camera cannot see: a `Target` is a `Pressable` positioned by its
-scene, so the shot list has no idea where the plates are. The only framing
-guaranteed to contain them is the one the band was measured for.
+So the targets measure themselves against the camera view and report a union box
+in scene coordinates, and `containShot` (camera.ts) pulls the shot only as far as
+it must for that box to fit:
 
-So `openForTargets` (camera.ts) replaces the shot on any beat with an `interact`
-block with `NEUTRAL` — the whole declared band — and CinematicPlayer applies it
-**after** `resolveMoves`, so no authored verb can override it. The move is kept:
-`tr` survives, so it still reads as a deliberate pull-back handing the reader the
-question, which is what a question beat should do anyway.
+- the scale comes **down** to fit and is never raised — this is a floor on what
+  must be visible, not a re-framing;
+- then the centre slides the shortest distance that brings the box inside;
+- a shot already wide enough comes back **untouched**, which is why the camera
+  work on every other beat is unaffected. A tight push stays a tight push; it just
+  moves over.
 
-The camera work on every other beat is untouched.
+Measured in Node against camera.ts (which has no imports, so it runs there): a
+2.2× push at a box in the top right keeps its 2.2× and slides the centre; a box
+wider than half the stage drops the scale to 1.11; a shot that already contained
+its box returns identical.
 
-`npm run check:camera` guards the one hole this leaves — a scene that rolls its
-own camera transform instead of letting the player own it would bypass the
-guarantee. There are none today, and the check fails if one appears.
+**The fallback is half the rule.** Until a box has been reported for an
+interactive beat — its first frames, or if `measureLayout` ever fails on a device
+— the shot is `NEUTRAL`, the whole declared band, which cannot crop anything the
+scene draws. Blunt is acceptable; unreachable is not.
+
+`npm run check:camera` guards the one hole: a scene that rolls its own camera
+transform bypasses the player and so bypasses all of this. There are none today.
