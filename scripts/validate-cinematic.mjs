@@ -40,7 +40,7 @@ new Function(
     { compilerOptions: { module: tsc.ModuleKind.CommonJS, target: tsc.ScriptTarget.ES2020 } }
   ).outputText
 )(camExports);
-const { checkShots } = camExports;
+const { checkShots, resolveMoves, followMoves, kindOf, seedOf } = camExports;
 // I70: scenes whose answer targets are not marked as tappable. CLOSED — every
 // one of the 102 is wrapped in <Target> or carries a <TargetRing>, so this is a
 // hard zero rather than a budget, and a new lesson that forgets fails the build.
@@ -190,6 +190,54 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
         errs.push(`camera: ${p}`);
       }
       cameras.push({ f, n: shots.length });
+    }
+  }
+
+  // …AND THE ONES WRITTEN AS VERBS, which is nearly all of them.
+  //
+  // A lesson using `followMoves` has no numbers in it to read — that is the whole
+  // point — so the checker has to do what the player does: resolve the moves
+  // against this lesson's band and check the result. Without this the summary line
+  // said "1 of 100 lessons move it" while 44 did, and every one of those 44 was
+  // unchecked. A camera check that silently covers 2% of the cameras is worse than
+  // none, because it reads like coverage.
+  if (/camera=\{CAM\}/.test(src) && band) {
+    const scriptPath = path.join(DIR, `${f.replace('Scene.tsx', '')}Script.ts`);
+    // The default is usually a literal but three scenes name it (VIEW_X, FIG_NEAR,
+    // FIG_B), so follow the constant rather than declining to check those lessons.
+    // "It did not parse" must never be a quiet way of meaning "it passed".
+    const xRaw = src.match(/const X = BEATS\.map\(\(b\) => b\.x \?\? ([A-Za-z_$][\w$]*|-?[\d.]+)\)/)?.[1];
+    let xDef = Number(xRaw);
+    if (xRaw && Number.isNaN(xDef)) {
+      const named = src.match(new RegExp(`const ${xRaw}\\s*=\\s*(-?[\\d.]+)`));
+      if (named) xDef = +named[1];
+    }
+    if (!fs.existsSync(scriptPath) || Number.isNaN(xDef)) {
+      warns.push('uses camera={CAM} but its x track or script could not be read — the camera went unchecked');
+    } else {
+      const chunks = beatsOf(fs.readFileSync(scriptPath, 'utf8'));
+      const xs = chunks.map((c) => {
+        const m = c.match(/^\s{4}x:\s*(-?[\d.]+)/m);
+        return m ? +m[1] : xDef;
+      });
+      const kinds = chunks.map((c) => kindOf({
+        summary: /^\s{4}summary:/m.test(c) || undefined,
+        quote: /^\s{4}quote:/m.test(c) || undefined,
+        mc: /^\s{4}mc:/m.test(c) || undefined,
+        interact: /^\s{4}interact:/m.test(c) || undefined,
+      }));
+      const seedM = src.match(/seedOf\('([^']+)'\)/);
+      const resolved = resolveMoves(
+        followMoves(xs, kinds, seedOf(seedM ? seedM[1] : ''), 500), [+band[1], +band[2]], 500,
+      );
+      for (const p of checkShots(resolved, [+band[1], +band[2]], 500)) errs.push(`camera: ${p}`);
+      // A tap must not have to survive a camera offset to land on what it aimed at.
+      kinds.forEach((k, bi) => {
+        if (k === 'question' && resolved[bi] && resolved[bi].s > 1.001) {
+          errs.push(`camera: graded beat ${bi} sits at scale ${resolved[bi].s.toFixed(2)} — answer targets are Pressables and must be at 1`);
+        }
+      });
+      cameras.push({ f, n: resolved.length });
     }
   }
 

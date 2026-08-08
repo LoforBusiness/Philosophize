@@ -184,30 +184,46 @@ export function shotAt(from: Shot, to: Shot, t: number): { cx: number; cy: numbe
 export function fit(
   at: [number, number], s: number, band: [number, number], ground?: number,
 ): Shot {
-  const bandH = band[1] - band[0];
+  // THE WINDOW IS LINEAR IN THE CENTRE, which makes this exact rather than
+  // iterative. Substituting the transform into visibleWindow:
+  //
+  //     left   = cx − STAGE_W / 2s          right  = cx + STAGE_W / 2s
+  //     top    = cy + (band0 − STAGE_H/2)/s bottom = cy + (band1 − STAGE_H/2)/s
+  //
+  // so each edge moves one-for-one with the centre and the legal range for cx and
+  // cy is a plain interval. The first version of this clamped against the BAND's
+  // own extent instead, which is a different rectangle — it looked right and put
+  // an illegal shot in 35 of 44 lessons, every one of them hanging the window off
+  // the bottom of the design space. Solve the constraint the checker actually
+  // tests, not one that resembles it.
   let scale = Math.max(1, s);
-  // The window is STAGE_W/scale wide and bandH/scale tall, so at scale 1 it is the
-  // whole design space and there is nothing to slide.
-  for (let pass = 0; pass < 24; pass++) {
+  for (let pass = 0; pass < 30; pass++) {
     const halfW = STAGE_W / (2 * scale);
-    const halfH = bandH / (2 * scale);
-    const midBand = (band[0] + band[1]) / 2;
-    // Centre must sit far enough from each edge that the window stays inside.
-    const cx = Math.min(Math.max(at[0], halfW), STAGE_W - halfW);
-    let cy = Math.min(Math.max(at[1], midBand - (bandH / 2 - halfH)), midBand + (bandH / 2 - halfH));
-    // …and the bottom of the window must not rise above the ground, or the figure
-    // is standing on nothing.
-    if (ground != null && scale > 1.02) {
-      const bottom = (band[1] - (STAGE_H / 2 - cy * scale)) / scale;
-      if (bottom < ground) cy += ground - bottom;
-      cy = Math.min(Math.max(cy, midBand - (bandH / 2 - halfH)), midBand + (bandH / 2 - halfH));
+    const oTop = (band[0] - STAGE_H / 2) / scale;
+    const oBot = (band[1] - STAGE_H / 2) / scale;
+    const cxLo = halfW - 1;
+    const cxHi = STAGE_W + 1 - halfW;
+    let cyLo = -1 - oTop;
+    let cyHi = STAGE_H + 1 - oBot;
+    // The bottom of the frame must not rise above the ground, or the figure is
+    // standing on nothing. A floor on cy, not a separate pass.
+    if (ground != null && scale > 1.02) cyLo = Math.max(cyLo, ground - oBot);
+    if (cxLo <= cxHi && cyLo <= cyHi) {
+      const shot: Shot = {
+        cx: Math.min(Math.max(at[0], cxLo), cxHi),
+        cy: Math.min(Math.max(at[1], cyLo), cyHi),
+        s: scale,
+      };
+      // Belt and braces: the closed form above should make this always true, and
+      // if it ever is not, easing the scale is still the right answer.
+      if (checkShots([shot], band, ground).length === 0) return shot;
     }
-    const test: Shot = { cx, cy, s: scale };
-    if (checkShots([test], band, ground).length === 0) return test;
-    if (scale <= 1.001) return { cx: STAGE_W / 2, cy: (band[0] + band[1]) / 2, s: 1 };
-    scale = Math.max(1, scale * 0.94); // ease out, do not jump to wide
+    if (scale <= 1.001) break;
+    scale = Math.max(1, scale * 0.94); // ease out, never jump straight to wide
   }
-  return { cx: STAGE_W / 2, cy: (band[0] + band[1]) / 2, s: 1 };
+  // Nothing at any scale fits — only possible for a band taller than the design
+  // space. Neutral is always legal.
+  return { cx: STAGE_W / 2, cy: STAGE_H / 2, s: 1 };
 }
 
 /** Default travel time and tightness per verb. */
@@ -253,6 +269,115 @@ export function resolveMoves(
     prev = shot;
   }
   return out;
+}
+
+// ── THE CAMERA A LESSON GETS FOR FREE ────────────────────────────────────────
+//
+// 45 of the 100 scenes already build `const X = BEATS.map((b) => b.x ?? n)` — the
+// figure's position, beat by beat, because travelStance needs it. That track is
+// also, for nothing, the answer to "what should the camera be looking at", which
+// is the expensive half of authoring a shot list.
+//
+// So `followMoves` reads the staging and writes the moves. It is not an automatic
+// camera in the sense of guessing what a beat is ABOUT — it cannot know that. It
+// knows where the figure is and whether they just walked, and that is enough to
+// choose a verb honestly:
+//
+//   the figure moved a long way   → `to`, and go with them
+//   the figure moved a little     → `drift`, so the frame breathes rather than snaps
+//   the figure has not moved      → `hold` or a slow `push`, alternating
+//   a graded question             → `pull`, all the way back to scale 1
+//   the quote                     → `push` close; it is the one line worth leaning in for
+//   the summary                   → `pull`; the stage is hidden under it anyway
+//
+// THE QUESTION BEATS ARE THE RULE THAT IS NOT NEGOTIABLE. Answer targets are
+// Pressables, and scale 1 is the identity transform — a tap must not have to
+// survive a camera offset to land on the thing the reader aimed at. ethics-8
+// worked this out by hand for one lesson; here it is structural.
+//
+// `seed` is what stops 51 lessons moving identically: it shifts which of the
+// equivalent verbs a still beat picks, so one lesson holds where the next drifts.
+
+/** What a beat is, as far as the camera needs to care. */
+export type BeatKind = 'plain' | 'question' | 'quote' | 'summary';
+
+/**
+ * A move per beat, from the figure's own track.
+ *
+ * @param x       the scene's per-beat figure x — the array it already builds
+ * @param kinds   what each beat is
+ * @param seed    per-lesson variation; any stable number (a name hash will do)
+ * @param ground  the scene's ground line, default the kit's 500
+ */
+export function followMoves(
+  x: number[], kinds: BeatKind[], seed = 0, ground = 500,
+): Move[] {
+  // Chest height: the figure stands ON the ground, so looking AT the ground line
+  // frames their feet and cuts their head off. ~78 up is the middle of the body.
+  const eye = ground - 78;
+  const out: Move[] = [];
+  for (let i = 0; i < x.length; i++) {
+    const kind = kinds[i] ?? 'plain';
+    if (kind === 'question' || kind === 'summary') {
+      out.push({ k: 'pull' });
+      continue;
+    }
+    if (kind === 'quote') {
+      out.push({ k: 'push', at: [x[i], eye], framing: 'close' });
+      continue;
+    }
+    const moved = i === 0 ? 0 : Math.abs(x[i] - x[i - 1]);
+    if (i === 0) {
+      out.push({ k: 'push', at: [x[i], eye], framing: 'mid', tr: 1.4 });
+    } else if (moved > 140) {
+      // Right across the stage. Thrown rather than driven — this is the one place
+      // an overshoot is earned, because the camera is being dragged by something
+      // that outran it.
+      out.push({ k: 'whip', at: [x[i], eye], framing: 'mid' });
+    } else if (moved > 60) {
+      out.push({ k: 'to', at: [x[i], eye], framing: 'mid', tr: 1.2 });
+    } else if (moved > 12) {
+      out.push({ k: 'drift', at: [x[i], eye], framing: 'mid' });
+    } else {
+      // STANDING STILL, AND MOSTLY THE CAMERA SHOULD TOO.
+      //
+      // A three-beat cycle rather than a two-beat one, so only one still beat in
+      // three pushes in and the other two hold or come back to the whole stage.
+      // The first pass alternated push/hold and left 64% of every lesson magnified
+      // — which is not a camera with ideas, it is a camera that never rests, and
+      // the moves stop registering as moves. The rest is what makes the pushes
+      // mean something.
+      const phase = (i + seed) % 3;
+      out.push(
+        phase === 0 ? { k: 'push', at: [x[i], eye], framing: 'close', tr: 1.6 }
+        : phase === 1 ? { k: 'pull' }
+        : { k: 'hold' },
+      );
+    }
+  }
+  return out;
+}
+
+/**
+ * What a beat is, from the beat itself.
+ *
+ * Structurally typed rather than importing BaseBeat, because this file has no
+ * imports and that is what lets the whole camera be run and checked in Node.
+ */
+export function kindOf(
+  b: { summary?: unknown; quote?: unknown; mc?: unknown; interact?: unknown },
+): BeatKind {
+  if (b.summary) return 'summary';
+  if (b.mc || b.interact) return 'question';
+  if (b.quote) return 'quote';
+  return 'plain';
+}
+
+/** A stable small number from a lesson's name, so `seed` never has to be chosen. */
+export function seedOf(name: string): number {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return h % 7;
 }
 
 /**

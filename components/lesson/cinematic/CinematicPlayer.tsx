@@ -12,7 +12,7 @@ import { exitLesson } from '../exitLesson';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { shotAt, NEUTRAL, type Shot } from './camera';
+import { shotAt, resolveMoves, NEUTRAL, type Move, type Shot } from './camera';
 import { cue, touch } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import { swishTrack } from './gestures';
@@ -61,6 +61,7 @@ export type SceneComponent = ComponentType<SceneApi>;
 
 export default function CinematicPlayer({
   lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk, gesture, shots,
+  camera, ground,
 }: {
   lesson: Lesson;
   beats: BaseBeat[];
@@ -109,6 +110,19 @@ export default function CinematicPlayer({
    * BAND was measured at 1 and anything wider shows paper nobody drew.
    */
   shots?: Shot[];
+  /**
+   * The camera as VERBS rather than coordinates — see `Move` in ./camera.ts.
+   *
+   * Resolved here rather than in the scene because the numbers depend on the
+   * lesson's own band and ground, and the player is the only place that knows
+   * both. A scene says "push on the figure"; what that means in pixels is worked
+   * out against the band it declared two props ago.
+   *
+   * Wins over `shots` if a lesson passes both, which no lesson should.
+   */
+  camera?: Move[];
+  /** The scene's ground line, if it is not the kit's 500. Only used by `camera`. */
+  ground?: number;
 }) {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
@@ -192,11 +206,18 @@ export default function CinematicPlayer({
   // It travels from the PREVIOUS beat's shot to this one over `to.tr` seconds,
   // driven by `bt` — the beat clock — so a move that accompanies a walk is paced
   // by the same clock the feet are, and a dropped frame slows both together.
+  // Verbs become coordinates ONCE, not every frame: resolveMoves does real work
+  // (it iterates fit() until each shot is legal) and the answer only changes when
+  // the lesson does. `shots` still wins for a hand-written list.
+  const cam = useMemo(
+    () => (shots && shots.length ? shots : camera && camera.length ? resolveMoves(camera, band, ground) : null),
+    [shots, camera, band, ground],
+  );
   const camNow = useDerivedValue(() => {
-    if (!shots || shots.length === 0) return NEUTRAL;
-    const n = Math.min(Math.max(bi.value, 0), shots.length - 1);
-    const from = n > 0 ? shots[n - 1] : shots[0];
-    return shotAt(from, shots[n], bt.value);
+    if (!cam || cam.length === 0) return NEUTRAL;
+    const n = Math.min(Math.max(bi.value, 0), cam.length - 1);
+    const from = n > 0 ? cam[n - 1] : cam[0];
+    return shotAt(from, cam[n], bt.value);
   });
   const camStyle = useAnimatedStyle(() => {
     const c = camNow.value;
@@ -401,11 +422,11 @@ export default function CinematicPlayer({
               <View style={{ position: 'absolute', left: 0, top: -bandT * fit, width: STAGE_W * fit, height: STAGE_H * fit }}>
                 <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
                   {/* THE CAMERA LAYER EXISTS ONLY WHEN A LESSON ASKS FOR ONE.
-                      Without `shots` the scene mounts exactly as it always did —
+                      Without a camera the scene mounts exactly as it always did —
                       no wrapper, no transform, no derived value driving a style
-                      every frame. 101 lessons should not pay a matrix multiply
-                      per frame for a feature one of them uses. */}
-                  {shots ? (
+                      every frame. A lesson that does not move the camera should
+                      not pay a matrix multiply per frame for one that does. */}
+                  {cam ? (
                     <Animated.View
                       style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
                     >
