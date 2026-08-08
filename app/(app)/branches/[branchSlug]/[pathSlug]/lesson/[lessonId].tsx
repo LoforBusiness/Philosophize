@@ -286,8 +286,23 @@ function todayStr() {
 }
 
 export default function LessonScreen() {
-  const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
+  const { lessonId, test } = useLocalSearchParams<{ lessonId: string; test?: string }>();
   const result = getLessonById(lessonId);
+  // ── PLAYED FROM THE LESSON TESTER ──────────────────────────────────────────
+  //
+  // Only ever true when the hidden tester pushed this route, and it does two
+  // things: it opens a lesson the reader has not earned, and it tells
+  // LessonReward to write nothing when the lesson ends.
+  //
+  // The flag is NAMED WITH THE LESSON and re-set on every mount — to this id
+  // under test, to null otherwise. So there is no state to leak: walking out of
+  // a test run and into a real lesson clears it on the way in, and a real run
+  // can never be silently swallowed.
+  const testing = test === '1';
+  const setTestLesson = useUIStore((s) => s.setTestLesson);
+  useEffect(() => {
+    setTestLesson(testing ? lessonId : null);
+  }, [lessonId, testing, setTestLesson]);
   const [loading, setLoading] = useState(true);
 
   const isPro = useSubscriptionStore((s) => s.isPro);
@@ -315,14 +330,14 @@ export default function LessonScreen() {
     const used = dailyLessonDate === todayStr() ? dailyLessonCount : 0;
     atLimitRef.current = !isPro && used >= FREE_DAILY_LESSON_LIMIT;
   }
-  const atLimit = atLimitRef.current ?? false;
+  const atLimit = (atLimitRef.current ?? false) && !testing;
 
   // Access is computed LIVE (not frozen): completing a lesson only ever advances
   // progress, which can unlock but never lock — so there's no mid-reward flip
   // risk — and live values avoid a stale pre-hydration {} snapshot false-locking
   // an already-completed lesson reached via a deep link.
   const access = lessonAccessibility(lessonId, lessonsByUnit, isPro);
-  const locked = !access.accessible;
+  const locked = !access.accessible && !testing;
   const gatedByPro = access.gatedByPro;
 
   if (!result) {

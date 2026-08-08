@@ -72,6 +72,9 @@ export default function AppLayout() {
       <Tabs.Screen name="settings" options={{ href: null }} />
       {/* Paywall — pushed from Settings and the daily-limit gate, hidden from tabs */}
       <Tabs.Screen name="paywall" options={{ href: null }} />
+      {/* The lesson tester. Hidden from the tab bar AND gated inside the screen —
+          a route can always be reached by URL, so the tab config is not the lock. */}
+      <Tabs.Screen name="devlessons" options={{ href: null }} />
     </Tabs>
   );
 }

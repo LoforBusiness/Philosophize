@@ -189,6 +189,8 @@ function TallyRow({ label, amount, delay }: { label: string; amount: number; del
 export default function LessonReward({ xp, correct, total, branchSlug, lessonId, onDone }: Props) {
   // Where the stack actually is underneath this modal — see `goToBranch`.
   const path = usePathname();
+  // Set by the lesson screen on mount; names the one lesson under test, or null.
+  const testLessonId = useUIStore((s) => s.testLessonId);
   const recordLessonComplete = useUserDataStore((s) => s.recordLessonComplete);
   const registerDailyActivity = useUserDataStore((s) => s.registerDailyActivity);
   const bumpDailyLessons = useUserDataStore((s) => s.bumpDailyLessons);
@@ -308,6 +310,21 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   const handleContinue = async () => {
     if (advancing) return;
     setAdvancing(true);
+    // ── A TEST RUN COSTS NOTHING ───────────────────────────────────────────────
+    //
+    // The reward screen still plays in full — that is half of what there is to
+    // test — but nothing is written: no XP, no completion, no streak, no daily
+    // count, no ad, and no `markLessonFinished`, so the branch world does not
+    // walk for a lesson that was never really finished.
+    //
+    // Compared by LESSON ID, not by a boolean, so this can only ever apply to the
+    // exact lesson the tester launched. `router.back()` returns to the tester's
+    // list, where the next one is one tap away.
+    if (testLessonId === lessonId) {
+      onDone();
+      router.back();
+      return;
+    }
     commit();
     if (isPro) {
       onDone();

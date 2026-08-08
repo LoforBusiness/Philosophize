@@ -42,6 +42,24 @@ interface UIStore {
   // Paywall sheet — slides the Scholar's Pass offer up as a dismissible option
   // (after a lesson, or from the daily-limit gate).
   paywallOpen: boolean;
+
+  // ── THE LESSON TESTER (dev only) ───────────────────────────────────────────
+  //
+  // `devUnlocked` is off in a shipped build until the version line in Settings is
+  // tapped seven times, and it is NOT persisted — it lasts the session, so it can
+  // never be left on by accident on a real user's phone. In a dev build it starts
+  // on, because tapping seven times to reach your own tools every launch is silly.
+  //
+  // `testLessonId` is what makes a test run cost nothing. It names the ONE lesson
+  // currently being played from the tester, and LessonReward compares against it
+  // before writing anything. Naming the lesson rather than carrying a bare boolean
+  // is the whole safety property: every lesson screen sets this on mount — to its
+  // own id when launched with ?test=1 and to null otherwise — so a flag can never
+  // survive into a real lesson and silently swallow someone's XP.
+  devUnlocked: boolean;
+  unlockDev: () => void;
+  testLessonId: string | null;
+  setTestLesson: (id: string | null) => void;
   openPaywall: () => void;
   closePaywall: () => void;
   /**
@@ -115,6 +133,10 @@ export const useUIStore = create<UIStore>((set) => ({
   openSavedQuotes: () => set({ savedQuotesOpen: true }),
   closeSavedQuotes: () => set({ savedQuotesOpen: false }),
   paywallOpen: false,
+  devUnlocked: __DEV__,
+  unlockDev: () => set({ devUnlocked: true }),
+  testLessonId: null,
+  setTestLesson: (id) => set({ testLessonId: id }),
   openPaywall: () => set({ paywallOpen: true }),
   closePaywall: () => set({ paywallOpen: false }),
   remindersNonce: 0,
