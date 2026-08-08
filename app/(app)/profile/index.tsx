@@ -26,6 +26,7 @@ import { effectiveStreak } from '@/lib/utils/streak';
 import { restDaysHeld } from '@/constants/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
 import { dailyXP, activeDays } from '@/lib/utils/xpSeries';
+import { useInView } from '@/lib/utils/useInView';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -121,6 +122,9 @@ export default function ProfileScreen() {
   // it had, and mark the XP as seen. So the chart is told when the tab is focused
   // and not before.
   const [focused, setFocused] = useState(false);
+  // Is the rank chart itself on screen? See `useInView`, and the comment on the
+  // chart below for why the focus flag alone was not enough.
+  const climb = useInView();
   useFocusEffect(
     useCallback(() => {
       setFocused(true);
@@ -285,6 +289,10 @@ export default function ProfileScreen() {
         style={styles.scroll}
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
+        // Only until the rank chart has been seen: `useInView` latches and then
+        // stops measuring, so this costs nothing for the rest of the session.
+        onScroll={climb.check}
+        scrollEventThrottle={64}
         // Fifty-one badges plus the ranks strip make this the longest fixed page in
         // the app. It is not worth virtualising — the content is a handful of
         // distinct sections rather than one repeating cell — but detaching the parts
@@ -466,11 +474,22 @@ export default function ProfileScreen() {
 
             {/* THE SAME CLIMB, DRAWN. The bar above says how far along the band
                 the reader is; the chart says how they got there and what each
-                thing they did was worth. `active` is the focus flag rather than
-                `true`: every tab is built at startup so this screen is mounted
-                long before it is looked at, and an intro that plays to a screen
-                nobody is on has been spent for nothing. */}
-            <View style={styles.rankChartWrap}>
+                thing they did was worth.
+
+                `active` IS NOT THE FOCUS FLAG. It was, on the correct reasoning
+                that every tab is built at startup and an intro played to a screen
+                nobody is on has been spent for nothing — but that guard stopped
+                one level too high. This chart sits two-thirds of the way down the
+                longest page in the app, so focus fires on arrival and the whole
+                animation plays to a chart that is hundreds of points below the
+                fold. It then marks itself seen (`onSeen` → `chartSeenXP`) and
+                refuses to play again, so the reader scrolls down to a finished
+                line and never finds out there was one. The same chart in the
+                Ranks sheet sits near the top and animates perfectly, which is
+                exactly how the bug was reported: "I see it there, not here."
+
+                So it waits for the chart to actually be ON SCREEN. */}
+            <View ref={climb.ref} onLayout={climb.check} style={styles.rankChartWrap}>
               <RankClimbChart
                 rankIndex={rankIndex}
                 totalXP={totalXP}
@@ -478,7 +497,7 @@ export default function ProfileScreen() {
                 width={SW - 72}
                 height={188}
                 seenXP={chartSeenXP}
-                active={focused}
+                active={focused && climb.inView}
                 onSeen={markChartSeen}
               />
             </View>
