@@ -167,6 +167,54 @@ function worstStep(m, n) {
   }
   return { worst, worstK, at };
 }
+// ── the head is not a place to put a hand ────────────────────────────────────
+//
+// Both library headers state this and nothing enforced it: the head is a
+// 20-radius disc, a fist is another ~6, so a hand whose centre comes within about
+// 26 of the head's centre is DRAWN INSIDE IT and disappears — forearm included.
+// The figure loses a hand and the shape of its skull in one go.
+//
+// It is invisible in the source, because the numbers that break it look perfectly
+// reasonable one at a time: a hand at (20, −35) is a sensible reach, and it is
+// 24.4 from a head centred at (0, −49). Only the arithmetic says so.
+//
+// EXEMPT: the poses where touching the face IS the gesture. Named rather than
+// pattern-matched, so adding one is a decision somebody makes on purpose.
+const FACE_OK = new Set([
+  'act 14',          // DUCK — hands go over the head, which is the gesture
+  'act 17',          // FACEPALM — the hand is ON the face by definition
+  'act 18',          // LOOK AROUND — the hand is shading the eyes
+  'act 19',          // STARTLE — hands fly to the face, which is the gesture
+  'posture 9',       // the thinker — chin in hand
+  'carry hurry/5',   // something long over the shoulder passes the head by design
+]);
+
+// Poses that break it and predate the check. Each is a hand DISAPPEARING into the
+// skull — a throw whose winding hand is gone, a reach for a high shelf with
+// nothing on the end of the arm — so they are defects rather than exemptions, and
+// they are carried as a ratchet rather than fixed blind at the end of a session.
+// DOWN ONLY.
+const HEAD_DEBT = new Set(['act 3', 'act 6', 'act 9', 'act 13', 'posture 11', 'prop 6']);
+const HEAD_DEBT_BUDGET = 6;
+const headDebt = [];
+const HEAD_CLEAR = 25.0;
+function checkHead(name, m) {
+  if (FACE_OK.has(name)) return;
+  let worst = Infinity, at = 0, which = '';
+  for (let i = 0; i <= FRAMES; i++) {
+    const s = m.at(sampleAt(m, i));
+    const j = solveAt(s, 200);
+    for (const k of ['wrL', 'wrR']) {
+      const d = Math.hypot(j[k].x - j.head.x, j[k].y - j.head.y);
+      if (d < worst) { worst = d; at = i / FRAMES; which = k; }
+    }
+  }
+  if (worst < HEAD_CLEAR) {
+    if (HEAD_DEBT.has(name)) { headDebt.push(`${name} (${worst.toFixed(1)})`); return; }
+    note(name, 'head', `${which} is ${worst.toFixed(1)} from the head centre at u=${at.toFixed(2)} (needs ${HEAD_CLEAR})`);
+  }
+}
+
 function checkContinuity(name, m) {
   const coarse = worstStep(m, FRAMES);
   if (coarse.worst <= 2) return;                       // nothing worth refining
@@ -254,8 +302,8 @@ const MOTIONS = [
   { name: 'seated (baseline)', kind: 'oneShot', at: () => R.seated(21, T) },
 
   // ── the movement library ───────────────────────────────────────────────────
-  // 12 travel modes · 15 postures · 28 one-shot actions.
-  ...Array.from({ length: 12 }, (_, mode) => ({
+  // 18 travel modes · 15 postures · 40 one-shot actions.
+  ...Array.from({ length: 18 }, (_, mode) => ({
     name: `move ${mode}`, kind: 'gait',
     cycle: M.gaitFor(mode).S / M.gaitFor(mode).stance,
     // Mode 10 backs away: it runs the cycle in reverse, so the body advances by
@@ -266,7 +314,7 @@ const MOTIONS = [
   ...Array.from({ length: 15 }, (_, code) => ({
     name: `posture ${code}`, kind: 'oneShot', at: () => M.postureHold(code, T),
   })),
-  ...Array.from({ length: 28 }, (_, i) => ({
+  ...Array.from({ length: 40 }, (_, i) => ({
     name: `act ${i + 1}`, kind: 'oneShot', at: (u) => M.actStance(i + 1, T, u),
   })),
 
@@ -283,7 +331,7 @@ const MOTIONS = [
     cycle: M.gaitFor(2).S / M.gaitFor(2).stance,
     at: (d) => I.carryMode(2, d, hold),
   })),
-  ...Array.from({ length: 8 }, (_, i) => ({
+  ...Array.from({ length: 18 }, (_, i) => ({
     name: `prop ${i + 1}`, kind: 'oneShot', at: (u) => I.propAct(i + 1, T, u),
   })),
 
@@ -321,7 +369,7 @@ checkMeet(PAIRS);
 
 for (const m of MOTIONS) {
   checkSkate(m.name, m); checkGround(m.name, m);
-  checkContinuity(m.name, m); checkLanding(m.name, m);
+  checkContinuity(m.name, m); checkLanding(m.name, m); checkHead(m.name, m);
 }
 
 
@@ -330,4 +378,15 @@ if (fail.length) {
   for (const f of fail) console.log(`  ${f.motion.padEnd(22)} ${f.check.padEnd(11)} ${f.detail}`);
   process.exit(1);
 }
-console.log(`${MOTIONS.length} motion(s) pass all five checks.`);
+if (headDebt.length > HEAD_DEBT_BUDGET) {
+  console.log(`\nhead debt grew: ${headDebt.length} against a budget of ${HEAD_DEBT_BUDGET}`);
+  process.exit(1);
+}
+if (headDebt.length) {
+  console.log(
+    `\nhead debt ${headDebt.length}/${HEAD_DEBT_BUDGET} — a hand inside the skull, ` +
+      `from before the check existed:\n  ${headDebt.join('\n  ')}\n` +
+      '  Push the hand FORWARD, not up. Fix one and lower HEAD_DEBT_BUDGET.',
+  );
+}
+console.log(`${MOTIONS.length} motion(s) pass all six checks.`);

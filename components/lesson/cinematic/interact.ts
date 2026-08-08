@@ -7,7 +7,7 @@
 //
 //   handAt() / headAt()          — WHERE the figure's hand and head actually are
 //   carryMode(mode, dist, hold)  — travelling WHILE HOLDING something
-//   propAct(code, t, u)          — 8 one-shot actions performed ON an object
+//   propAct(code, t, u)          — 18 one-shot actions performed ON an object
 //   faceEachOther() / betweenThem()
 //   handshake() / passObject() / converse()   — two figures, one action
 //
@@ -43,7 +43,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import {
-  U, clamp01, ease01, lerp, pulse, solve, stand,
+  U, clamp01, ease01, lerp, life2, pulse, solve, stand,
   type P2, type Stance,
 } from './rig';
 import { gaitFor, moveStance, postureHold } from './moves';
@@ -366,6 +366,207 @@ export function propAct(code: number, t: number, u: number): Stance {
       fistR: {
         x: lerp(5, 24 + Math.cos(a) * R, on) - off * 19,
         y: lerp(6, -14 + Math.sin(a) * R, on) + off * 20,
+      },
+    };
+  }
+
+  // ── 9–18: THE REST OF WHAT A BODY DOES TO A THING ──────────────────────────
+  //
+  // Eight actions covered catching, lifting, setting down, pulling, offering,
+  // shelving, opening and cranking — which is to say, almost entirely things done
+  // to an object ALREADY at chest height and directly in front. Nothing picked
+  // anything off the floor, nothing pushed, nothing struck, nothing was thrown,
+  // and nothing was read. Those are most of what the scenes actually need.
+  //
+  // THE RULE EVERY ONE OF THESE OBEYS, and the reason they read as effort rather
+  // than as mime: THE BODY COMMITS BEFORE THE HAND ARRIVES. A hand that travels
+  // to an object while the torso stays vertical is a hand on a stick. Real weight
+  // shows in the order — feet set, hips go, chest follows, hand last — and in the
+  // recoil afterwards, which is the half everybody forgets.
+  //
+  // Reach stays inside the 33 the arms have, targets stay 20–30 out and below the
+  // shoulder, and nothing comes within 26 of the head. Those three are from the
+  // header and they are not negotiable; the solver hides a violation by locking
+  // the elbow, so breaking them looks like a stiff arm rather than an error.
+
+  if (code === 9) {                              // PICK UP FROM THE FLOOR — knees, not spine
+    // Bending from the waist with straight legs is the single clearest sign an
+    // animator has not thought about weight. The knees go first and the pelvis
+    // drops; the hand only reaches the floor because the body already went there.
+    const down = ease01(clamp01(p / 0.40));
+    const grip = ease01(clamp01((p - 0.38) / 0.16));
+    const up = ease01(clamp01((p - 0.54) / 0.46));
+    const low = down * (1 - up);
+    return {
+      ...s,
+      // Feet come apart to make room for the descent.
+      footL: { x: -9 - low * 3, y: 0 }, footR: { x: 10 + low * 3, y: 0 },
+      // NEGATIVE bob LOWERS the pelvis — `solve` places it at
+      // groundY − (standH + bob). This read `+ low * 15` and the figure rose 15
+      // units while reaching for the floor, so on the contact sheet he barely
+      // bent at all: eight frames of a man standing up straight, patting the air.
+      bob: s.bob - low * 15,
+      tilt: s.tilt - low * 0.30,
+      neck: s.neck + low * 0.34 - up * 0.06,
+      fistL: { x: lerp(-5, -12, low), y: lerp(6, 22, low) },
+      fistR: { x: lerp(5, 15, low), y: lerp(6, 25 - grip * 2, low) - up * 12 },
+    };
+  }
+  if (code === 10) {                             // PUSH — a shove against something that resists
+    // The give is what sells it. A push that moves smoothly is a push against
+    // nothing; this loads, slips, and then the thing goes.
+    const set = ease01(clamp01(p / 0.22));
+    const strain = ease01(clamp01((p - 0.20) / 0.34));
+    const give = ease01(clamp01((p - 0.56) / 0.44));
+    return {
+      ...s,
+      tilt: s.tilt - set * 0.10 - strain * 0.18 + give * 0.10,
+      neck: s.neck + strain * 0.06,
+      bob: s.bob - strain * 1.2,
+      // The back foot plants far behind and takes the drive.
+      footL: { x: -6 - set * 14, y: 0 }, footR: { x: 8 + set * 4, y: 0 },
+      fistL: { x: lerp(-5, 22, set) + give * 8, y: lerp(6, -12, set) },
+      fistR: { x: lerp(5, 25, set) + give * 8, y: lerp(6, -8, set) },
+      adv: set * 3 + give * 12,
+    };
+  }
+  if (code === 11) {                             // KNOCK — three raps, wrist not shoulder
+    const up = ease01(clamp01(p / 0.20));
+    const away = ease01(clamp01((p - 0.80) / 0.20));
+    // Three sharp taps: a fast strike and a slower return, not a sine.
+    //
+    // It has to be ZERO at the start of each rap as well as the end. The first
+    // version was `(1 - (k % 1)) ** 3`, which is 1 at k = 0 — so the hand jumped
+    // 5 units the instant the taps began, and the move-checker caught it as a
+    // discontinuity that stayed 5 units wide when sampled 16× finer. A pulse that
+    // begins at its peak is not a strike, it is a cut.
+    const k = clamp01((p - 0.22) / 0.56) * 3;
+    const kk = k % 1;
+    const rap = k > 0 && k < 3
+      ? (kk < 0.28 ? kk / 0.28 : 1 - (kk - 0.28) / 0.72) ** 2
+      : 0;
+    return {
+      ...s,
+      tilt: s.tilt - up * 0.04,
+      neck: s.neck - up * 0.05,
+      fistL: { x: -5, y: 6 },
+      fistR: { x: lerp(5, 24 + rap * 5, up) - away * 19, y: lerp(6, -20, up) + away * 26 },
+    };
+  }
+  if (code === 12) {                             // THROW — wind up, whip through, follow through
+    // The follow-through is longer than the throw. An arm that stops at the point
+    // of release has not thrown anything — it has pointed, quickly.
+    const wind = ease01(clamp01(p / 0.34));
+    const whip = ease01(clamp01((p - 0.32) / 0.22));
+    const follow = ease01(clamp01((p - 0.52) / 0.48));
+    return {
+      ...s,
+      tilt: s.tilt + wind * 0.14 - whip * 0.26 + follow * 0.06,
+      neck: s.neck + wind * 0.05 - whip * 0.10,
+      bob: s.bob - whip * 1.6,
+      footL: { x: -6 - wind * 6, y: 0 }, footR: { x: 8 + whip * 8, y: 0 },
+      fistL: { x: -6 + whip * 10, y: 4 },
+      // Back past the hip, then out and across — and it keeps going after release.
+      fistR: {
+        x: lerp(5, -16, wind) + whip * 44 - follow * 14,
+        y: lerp(6, -6, wind) - whip * 22 + follow * 24,
+      },
+      adv: whip * 4,
+    };
+  }
+  if (code === 13) {                             // PRESS — one finger, one deliberate push
+    const out = ease01(clamp01(p / 0.34));
+    const push = pulse(clamp01((p - 0.34) / 0.30));
+    const back = ease01(clamp01((p - 0.68) / 0.32));
+    return {
+      ...s,
+      tilt: s.tilt - out * 0.04 - push * 0.03,
+      neck: s.neck - out * 0.04,
+      fistL: { x: -5, y: 6 },
+      fistR: { x: lerp(5, 26 + push * 4, out) - back * 21, y: lerp(6, -14, out) + back * 20 },
+      adv: push * 1.5,
+    };
+  }
+  if (code === 14) {                             // STRIKE — a hammer blow, whole body behind it
+    const raise = ease01(clamp01(p / 0.40));
+    const fall = ease01(clamp01((p - 0.40) / 0.16));
+    const rebound = pulse(clamp01((p - 0.54) / 0.30));
+    return {
+      ...s,
+      tilt: s.tilt + raise * 0.10 - fall * 0.24,
+      neck: s.neck - raise * 0.10 + fall * 0.14,
+      // Same sign rule: up on the backswing, down into the blow.
+      bob: s.bob + raise * 1.0 - fall * 2.4 + rebound * 0.8,
+      footL: { x: -8, y: 0 }, footR: { x: 10, y: 0 },
+      fistL: { x: -6, y: 5 },
+      // Up and BACK to 26 out — never overhead, where the head would eat it.
+      fistR: {
+        x: lerp(5, 26, raise) - fall * 4,
+        y: lerp(6, -36, raise) + fall * 44 + rebound * -6,
+      },
+    };
+  }
+  if (code === 15) {                             // READ — held at a comfortable distance, eyes down
+    // The one on this list that is a HOLD rather than a stroke: the page comes up
+    // and stays, and the only motion afterwards is the small drift of holding
+    // something while thinking.
+    const up = ease01(clamp01(p / 0.36));
+    const drift = life2(t, 0.7, 1.1, 0.4) * 1.6;
+    return {
+      ...s,
+      tilt: s.tilt + up * 0.05,
+      neck: s.neck + up * 0.30,                  // eyes down at the page
+      fistL: { x: lerp(-5, -14 + drift * 0.5, up), y: lerp(6, -6 + drift, up) },
+      fistR: { x: lerp(5, 15 + drift * 0.5, up), y: lerp(6, -8 + drift, up) },
+    };
+  }
+  if (code === 16) {                             // TURN A PAGE — a small, precise, two-handed thing
+    const reach = ease01(clamp01((p - 0.10) / 0.30));
+    const sweep = ease01(clamp01((p - 0.36) / 0.34));
+    const settle = ease01(clamp01((p - 0.66) / 0.34));
+    return {
+      ...s,
+      neck: s.neck + 0.28,
+      tilt: s.tilt + 0.04,
+      fistL: { x: -14, y: -6 },                  // the other hand holds the book still
+      fistR: {
+        x: lerp(15, 26, reach) - sweep * 24 + settle * 13,
+        y: -8 - reach * 4 + sweep * 2,
+      },
+    };
+  }
+  if (code === 17) {                             // POUR — tip, hold, and bring it level again
+    const lift = ease01(clamp01(p / 0.26));
+    const tip = ease01(clamp01((p - 0.24) / 0.22));
+    const back = ease01(clamp01((p - 0.70) / 0.30));
+    return {
+      ...s,
+      tilt: s.tilt - lift * 0.04,
+      neck: s.neck + lift * 0.16,
+      fistL: { x: -8, y: 4 },
+      // The wrist rises as it tips, which is what pouring looks like from the
+      // outside — the hand goes UP so the far end can go down.
+      fistR: {
+        x: lerp(5, 22, lift) + tip * 3 - back * 20,
+        y: lerp(6, -14, lift) - tip * 7 + back * 21,
+      },
+    };
+  }
+  if (code === 18) {                             // TRACE — a finger following a line across the art
+    // For a scene where the figure is explaining a chart. The hand travels at an
+    // even rate while the HEAD leads it slightly, because people look where they
+    // are about to point rather than where they are pointing.
+    const out = ease01(clamp01(p / 0.20));
+    const along = clamp01((p - 0.18) / 0.62);
+    const drop = ease01(clamp01((p - 0.84) / 0.16));
+    return {
+      ...s,
+      tilt: s.tilt - out * 0.05 + along * 0.04,
+      neck: s.neck - out * 0.10 - clamp01(along + 0.12) * 0.04,
+      fistL: { x: -5, y: 6 },
+      fistR: {
+        x: lerp(5, 14, out) + along * 14 - drop * 24,
+        y: lerp(6, -20, out) + along * 9 + drop * 24,
       },
     };
   }

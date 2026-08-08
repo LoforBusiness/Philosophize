@@ -9,9 +9,12 @@
 // This file is what the character can actually DO. Four families, each addressed
 // by a plain number so a lesson script stays data rather than code:
 //
-//   moveStance(mode, dist)      — HOW they travel        12 modes
+//   moveStance(mode, dist)      — HOW they travel        18 modes
 //   postureHold/Live(code, t)   — WHERE the body is      15 postures
-//   actStance(code, t, u)       — WHAT they do           28 one-shot actions
+//   actStance(code, t, u)       — WHAT they do           40 one-shot actions
+//                                 (29–40 are loose arms and dancing: motion
+//                                  for its own sake, held for as long as a
+//                                  scene likes rather than played once)
 //   gazeAt() / pointAt()        — WHAT they attend to    aimed at a stage point
 //
 // The aiming pair is the cheapest realism in the whole codebase and the least
@@ -128,6 +131,54 @@ export const PACE: Gait = {
   tilt: 0.04, armBase: 0.09, armSwing: 0.05, standH: 34,
 };
 
+// ── the second shelf of gaits ────────────────────────────────────────────────
+//
+// THERE WAS ONLY ONE RUN. Mode 3 is a single fixed sprint, so every figure that
+// ever ran, ran at exactly the same speed with exactly the same lean, and a
+// viewer watching two lessons in a row saw the same clip twice. Three runs and
+// three walks below, chosen so that each is different in the thing a viewer
+// actually reads — how long the stride is, how long both feet are off the ground,
+// and how far forward the chest is.
+//
+// `stance` is the tell and it is the only honest way to separate them: 0.46 is a
+// jog you could hold a conversation through, 0.44 is a distance runner's lope,
+// 0.32 is a sprint nobody sustains. Making them differ by speed alone produces
+// the same animation played faster, which is exactly the sameness being fixed.
+//
+// Every one obeys the standH rule from the header: a planted foot needs
+// `34 + bob − lift ≤ 36`, so the bob can never outrun the foot lift.
+
+/** An easy run you could talk through — short flight, relaxed arms. */
+export const JOG: Gait = {
+  S: 44, lift: 18, stance: 0.46, bob: 4.0, bobSign: -1,
+  tilt: -0.10, armBase: 0.09, armSwing: 0.62, standH: 34,
+};
+/** Flat out. The longest stride, the deepest lean, both feet off most of the cycle. */
+export const SPRINT: Gait = {
+  S: 68, lift: 32, stance: 0.32, bob: 6.5, bobSign: -1,
+  tilt: -0.30, armBase: 0.05, armSwing: 1.05, standH: 34,
+};
+/** The distance runner: long, loose and economical, almost no vertical. */
+export const LOPE: Gait = {
+  S: 62, lift: 20, stance: 0.44, bob: 3.2, bobSign: -1,
+  tilt: -0.12, armBase: 0.09, armSwing: 0.66, standH: 34,
+};
+/** Shoulders wide, weight rolling side to side. Mode 15 adds the roll. */
+export const SWAGGER: Gait = {
+  S: 30, lift: 10, stance: 0.64, bob: 3.0, bobSign: -1,
+  tilt: 0.07, armBase: 0.16, armSwing: 0.45, standH: 34,
+};
+/** Feet barely leave the floor at all — worn out, or unwilling. */
+export const SHUFFLE: Gait = {
+  S: 16, lift: 3, stance: 0.74, bob: 1.6, bobSign: -1,
+  tilt: 0.02, armBase: 0.09, armSwing: 0.12, standH: 34,
+};
+/** Big, light, airborne leaps. Delight, in the legs. */
+export const BOUND: Gait = {
+  S: 50, lift: 30, stance: 0.42, bob: 7.0, bobSign: 1,
+  tilt: -0.04, armBase: 0.09, armSwing: 0.80, standH: 34,
+};
+
 /**
  * Gait for a travel mode. 0 walk · 1 stroll · 2 hurry · 3 run · 4 trudge ·
  * 5 march · 6 sneak · 7 limp · 8 skip · 9 tiptoe · 10 back away · 11 pace.
@@ -144,6 +195,12 @@ export function gaitFor(mode: number): Gait {
   if (mode === 8) return SKIP;
   if (mode === 9) return TIPTOE;
   if (mode === 11) return PACE;
+  if (mode === 12) return JOG;
+  if (mode === 13) return SPRINT;
+  if (mode === 14) return LOPE;
+  if (mode === 15) return SWAGGER;
+  if (mode === 16) return SHUFFLE;
+  if (mode === 17) return BOUND;
   return WALK;                                   // 0, and 10 (backing away) reversed
 }
 
@@ -248,6 +305,79 @@ function moveBody(mode: number, dist: number, g: Gait): Stance {
     return {
       ...w, tilt: -0.04, neck: 0.15,
       fistL: { x: -13, y: 4 }, fistR: { x: -16, y: 6 },
+    };
+  }
+  // ── the second shelf ───────────────────────────────────────────────────────
+  // What separates one run from another is almost entirely above the waist. The
+  // legs of a jog and a sprint differ by numbers a viewer cannot name; the ARMS
+  // and the CHEST are what say which one they are looking at.
+  if (mode === 12) {                             // JOG — light, elbows in, breathing easy
+    return {
+      ...w, neck: -0.05,
+      // A jog carries its hands about chest height and barely crosses the body.
+      fistL: { x: 6 + c * sw * 15, y: -9 - Math.abs(c) * 2 },
+      fistR: { x: 6 - c * sw * 15, y: -9 - Math.abs(c) * 2 },
+    };
+  }
+  if (mode === 13) {                             // SPRINT — hand to chin, hand past the hip
+    // The sprinter's arm is the one real asymmetry in the set: it drives from the
+    // cheek to behind the hip, not evenly either side of a rest. Kept out at
+    // |x| ≥ 22 at the top so the fist never lands inside the head (the 26-unit
+    // rule in the header) — a sprint with its hand deleted reads as a stump.
+    const drive = c * sw;
+    return {
+      ...w, neck: -0.10, tilt: w.tilt - 0.04,
+      fistL: { x: 22 + drive * 14, y: -18 - drive * 8 },
+      fistR: { x: 22 - drive * 14, y: -18 + drive * 8 },
+    };
+  }
+  if (mode === 14) {                             // LOPE — long and loose, low hands, quiet head
+    return {
+      ...w, neck: -0.03, tilt: w.tilt + 0.03,
+      fistL: { x: 4 + c * sw * 20, y: -2 },
+      fistR: { x: 4 - c * sw * 20, y: -2 },
+    };
+  }
+  if (mode === 15) {                             // SWAGGER — the shoulders roll with the hips
+    // The roll is a half-cycle behind the legs, which is what makes it read as
+    // weight arriving rather than as the whole body wobbling in time.
+    //
+    // IT HAS TO BE BIG OR IT IS NOT THERE. The first pass rolled the torso 0.03
+    // and moved the hands 3 units, and on the contact sheet it was
+    // indistinguishable from SHUFFLE two rows below — both came out as an upright
+    // figure with hanging arms. This is a side view, so "shoulders held wide" is
+    // not available; everything a swagger has to say has to be said with the
+    // amount of vertical drop per step, the torso roll, and arms that ARC rather
+    // than slide.
+    const roll = Math.cos(ph - Math.PI / 2);
+    return {
+      ...w,
+      neck: -0.08,
+      tilt: w.tilt + 0.04 + roll * 0.07,
+      // Deeper drop onto each planted foot. lift is 10, so bob may reach 12.
+      bob: w.bob - Math.abs(roll) * 1.6,
+      // The vertical term is what turns a swing into an arc: the hand rises as it
+      // comes forward and drops as it goes back, the way a loose arm actually
+      // travels.
+      fistL: { x: 10 + c * sw * 20, y: 7 - c * 4 },
+      fistR: { x: 10 - c * sw * 20, y: 7 + c * 4 },
+    };
+  }
+  if (mode === 16) {                             // SHUFFLE — arms dead, head down, going nowhere
+    return {
+      ...w, neck: 0.16, tilt: w.tilt + 0.05,
+      fistL: { x: 1 + c * sw * 8, y: 9 }, fistR: { x: 1 - c * sw * 8, y: 9 },
+    };
+  }
+  if (mode === 17) {                             // BOUND — arms rise WITH the flight, not against it
+    // Tied to the bob rather than to the stride, so the arms lift as the body
+    // leaves the ground. Opposing the flight is what makes a jump look like a
+    // stumble.
+    const air = clamp01(-w.bob / 7);
+    return {
+      ...w, neck: -0.09 - air * 0.05, tilt: w.tilt - air * 0.03,
+      fistL: { x: 8 + c * sw * 16, y: 4 - air * 16 },
+      fistR: { x: 8 - c * sw * 16, y: 4 - air * 16 },
     };
   }
   return w;                                      // 0 — the plain walk
@@ -796,6 +926,177 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s, tilt: s.tilt - up * 0.05, neck: s.neck + up * 0.06,
       fistL: { x: lerp(-5, 13 + rub * 5, up), y: lerp(6, -14, up) },
       fistR: { x: lerp(5, 18 - rub * 5, up), y: lerp(6, -16, up) },
+    };
+  }
+
+  // ── 29–40: LOOSE ARMS, AND DANCING ─────────────────────────────────────────
+  //
+  // Everything above is a gesture with a message — a shrug, a point, a facepalm.
+  // Nothing above is the figure simply MOVING because moving is pleasant, and
+  // that absence is most of why watching him gets repetitive: every motion he
+  // has means something, so he only ever moves when there is something to say.
+  //
+  // THE THREE THINGS THAT MAKE THESE READ AS NATURAL, all learned from the
+  // gestures above going wrong:
+  //
+  // 1. THE ARMS ARE NEVER IN PHASE WITH EACH OTHER. Two limbs on one sine are a
+  //    windscreen wiper. Each hand here runs its own frequency, and the pair are
+  //    deliberately irrational multiples (1.0 / 1.37, 2.0 / 2.9) so the loop
+  //    never visibly repeats however long anyone stares.
+  // 2. THE HEAD IS LATE. A head that hits the beat with the hips reads as a
+  //    puppet on one string. Everything here delays the neck by about a fifth of
+  //    a cycle, which is the whole of what animators call follow-through.
+  // 3. WEIGHT GOES SOMEWHERE. A dance with a still pelvis is arm-waving. Each of
+  //    these shifts `bob` and `tilt` together, and the feet take the load — a
+  //    step is a foot moving BECAUSE the weight left it, never the reverse.
+  //
+  // These run on `t` (the free clock) rather than on `u`, because unlike a shrug
+  // they have no beginning or end — a scene holds them for as long as it likes.
+  // `u` is still honoured as a fade-in, so one can start without snapping on.
+
+  if (code === 29) {                             // ARMS LOOSE — hanging, swaying, alive
+    // The quietest thing in the library and the one most often wanted: standing,
+    // doing nothing, but not FROZEN. Hands stay near arm's length (B11b) and
+    // drift a few units; nothing here is a gesture.
+    const a = life2(t, 0.9, 1.37, 0.7) * 5;
+    const b = life2(t, 1.05, 1.6, 2.2) * 5;
+    return {
+      ...s, tilt: s.tilt + a * 0.004, neck: s.neck + b * 0.006,
+      fistL: { x: -4 + a, y: 7 + b * 0.4 },
+      fistR: { x: 5 + b, y: 7 + a * 0.4 },
+    };
+  }
+  if (code === 30) {                             // ARMS FLOWING — slow wide arcs, like water
+    const a = Math.sin(t * 0.8), b = Math.sin(t * 1.17 + 1.1);
+    return {
+      ...s, tilt: s.tilt + a * 0.05, neck: s.neck - b * 0.06, bob: s.bob - Math.abs(a) * 1.2,
+      // Out to 26 at the widest so the hands stay clear of the head disc.
+      fistL: { x: -6 + a * 20, y: -6 + b * 14 },
+      fistR: { x: 8 + b * 20, y: -4 - a * 14 },
+    };
+  }
+  if (code === 31) {                             // SWAY — weight side to side, the root of dancing
+    const sw = Math.sin(t * 2.0);
+    return {
+      ...s, tilt: s.tilt + sw * 0.06, neck: s.neck - Math.sin(t * 2.0 - 1.2) * 0.05,
+      bob: s.bob - Math.abs(sw) * 1.4,
+      // The feet stay planted and the WEIGHT moves — the pelvis leans over each
+      // one in turn. Sliding the feet instead is the single most common way a
+      // sway comes out looking like skating.
+      footL: { x: s.footL.x - 1, y: 0 }, footR: { x: s.footR.x + 1, y: 0 },
+      fistL: { x: -7 + sw * 9, y: 5 - Math.abs(sw) * 3 },
+      fistR: { x: 8 + sw * 9, y: 5 - Math.abs(sw) * 3 },
+    };
+  }
+  if (code === 32) {                             // TWO-STEP — a sway that steps, alternating feet
+    const ph2 = t * 2.4;
+    const sw = Math.sin(ph2);
+    // Only the UNWEIGHTED foot lifts, and only while the weight is off it.
+    const liftL = Math.max(0, -sw) ** 1.5 * 5;
+    const liftR = Math.max(0, sw) ** 1.5 * 5;
+    return {
+      ...s, tilt: s.tilt + sw * 0.05, neck: s.neck - Math.sin(ph2 - 1.0) * 0.06,
+      bob: s.bob - Math.abs(sw) * 1.8,
+      footL: { x: -6 + sw * 3, y: -liftL },
+      footR: { x: 7 + sw * 3, y: -liftR },
+      fistL: { x: -9 + sw * 11, y: -2 - Math.abs(sw) * 5 },
+      fistR: { x: 10 + sw * 11, y: -2 - Math.abs(sw) * 5 },
+    };
+  }
+  if (code === 33) {                             // GROOVE — shoulders and knees on the beat
+    const beat = Math.sin(t * 3.2);
+    const drop = Math.max(0, -beat) * 2.6;       // knees give on the downbeat
+    return {
+      ...s, tilt: s.tilt - beat * 0.04, neck: s.neck - Math.sin(t * 3.2 - 0.9) * 0.07,
+      bob: s.bob + drop,
+      footL: { x: -7, y: 0 }, footR: { x: 8, y: 0 },
+      fistL: { x: -12 - beat * 5, y: -8 + beat * 6 },
+      fistR: { x: 13 - beat * 5, y: -8 - beat * 6 },
+    };
+  }
+  if (code === 34) {                             // HANDS UP — the arms-overhead celebration dance
+    // Overhead means OUT, not up: |x| ≈ 26, per the head-collision rule in the
+    // header. Straight up puts both fists inside the skull and the figure loses
+    // its hands and its head shape at once.
+    // BOTH HANDS GO THE SAME WAY. The first version put one at x −27 and the
+    // other at +28 to keep them clear of the head, and on the contact sheet that
+    // is not two raised arms — it is one arm forward and one arm backwards at ear
+    // height, which reads as antennae. THIS IS A SIDE VIEW: x is forward and back,
+    // not left and right, so "overhead" can only be drawn as forward-and-up. The
+    // two hands are offset from each other by a few units so the near arm reads in
+    // front of the far one rather than the pair fusing into one limb.
+    const a = Math.sin(t * 2.6), b = Math.sin(t * 2.6 + 1.9);
+    return {
+      ...s, tilt: s.tilt + a * 0.05, neck: s.neck - 0.16,
+      bob: s.bob - Math.abs(a) * 1.6,
+      fistL: { x: 21 + a * 5, y: -36 + b * 7 },
+      fistR: { x: 29 + b * 5, y: -40 + a * 7 },
+    };
+  }
+  if (code === 35) {                             // THE WAVE — a ripple travelling down one arm
+    // The elbow leads and the hand follows a beat later. That lag IS the wave;
+    // moving both together is just an arm going up and down.
+    const ph2 = t * 2.2;
+    return {
+      ...s, tilt: s.tilt + Math.sin(ph2) * 0.03, neck: s.neck - 0.05,
+      fistL: { x: -6, y: 7 },
+      fistR: { x: 20 + Math.sin(ph2) * 8, y: -14 + Math.sin(ph2 - 0.9) * 13 },
+    };
+  }
+  if (code === 36) {                             // SPIN — a turn on the spot, arms trailing out
+    // A real turn cannot be drawn side-on, so this is the readable version: the
+    // body compresses, the arms fly wide with the momentum and settle. Trailing
+    // arms are what say "turning" without a third dimension.
+    const e = ease01(p);
+    const r = Math.sin(Math.PI * e);
+    return {
+      ...s, tilt: s.tilt + r * 0.12, neck: s.neck - r * 0.10, bob: s.bob - r * 2.0,
+      footL: { x: -6 + r * 4, y: -r * 3 }, footR: { x: 7 - r * 4, y: 0 },
+      fistL: { x: -10 - r * 16, y: 4 - r * 16 },
+      fistR: { x: 9 + r * 18, y: 4 - r * 14 },
+    };
+  }
+  if (code === 37) {                             // SHIMMY — fast small shoulder shakes
+    const q = Math.sin(t * 7.0);
+    return {
+      ...s, tilt: s.tilt + q * 0.035, neck: s.neck + Math.sin(t * 7.0 - 0.7) * 0.03,
+      footL: { x: -7, y: 0 }, footR: { x: 8, y: 0 },
+      fistL: { x: -16 + q * 3, y: -6 },
+      fistR: { x: 17 + q * 3, y: -6 },
+    };
+  }
+  if (code === 38) {                             // HEAD NOD — listening to something with a pulse
+    const beat = Math.sin(t * 2.8);
+    return {
+      ...s, neck: s.neck + 0.10 + beat * 0.10, tilt: s.tilt + beat * 0.02,
+      bob: s.bob - Math.max(0, beat) * 0.8,
+      fistL: { x: -5 + beat * 2, y: 7 }, fistR: { x: 6 - beat * 2, y: 7 },
+    };
+  }
+  if (code === 39) {                             // STRETCH — a long slow reach, then release
+    // One arc up and one back down over the whole of u. The bob rises WITH the
+    // arms, because a stretch that does not lift the ribcage is a wave.
+    const r = Math.sin(Math.PI * ease01(p));
+    return {
+      ...s, tilt: s.tilt - r * 0.06, neck: s.neck - r * 0.20, bob: s.bob - r * 2.2,
+      footL: { x: -6, y: 0 }, footR: { x: 7, y: 0 },
+      // Forward-and-up, both of them — same reason as act 34. One hand thrown
+      // backwards is not a stretch, it is a figure hailing a bus.
+      // 24 and 30 out, not 20 and 28: at 20 the near hand measured 24.4 from the
+      // head's centre and was drawn inside it. See checkHead in check-moves.
+      fistL: { x: lerp(-5, 24, r), y: lerp(7, -32, r) },
+      fistR: { x: lerp(6, 30, r), y: lerp(7, -37, r) },
+    };
+  }
+  if (code === 40) {                             // ROLL SHOULDERS — a circle, one then the other
+    // Two circles a half-cycle apart. The hand describes an ellipse rather than a
+    // line, which is the difference between a shoulder rolling and an arm
+    // twitching.
+    const a = t * 1.8, b = a + Math.PI;
+    return {
+      ...s, neck: s.neck + 0.04, tilt: s.tilt + Math.cos(a) * 0.02,
+      fistL: { x: -6 + Math.cos(a) * 5, y: 5 + Math.sin(a) * 6 },
+      fistR: { x: 7 + Math.cos(b) * 5, y: 5 + Math.sin(b) * 6 },
     };
   }
   return s;
