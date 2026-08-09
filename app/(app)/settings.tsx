@@ -609,7 +609,7 @@ function NotificationsSection() {
           <Text style={styles.noticeText}>
             {asking
               ? 'Waiting for permission…'
-              : 'Notifications are switched off for Philosophize in your phone’s settings. Nothing below can be delivered until they are allowed.'}
+              : 'Notifications are switched off for Deeply in your phone’s settings. Nothing below can be delivered until they are allowed.'}
           </Text>
           <Pressable
             onPress={() => Linking.openSettings().catch(() => {})}
@@ -809,8 +809,8 @@ function PrivacySection() {
 
 function FeedbackSection() {
   const openMail = () => {
-    const subject = encodeURIComponent('Philosophize feedback');
-    const body = encodeURIComponent("Hi — here's my feedback on Philosophize:\n\n");
+    const subject = encodeURIComponent('Deeply feedback');
+    const body = encodeURIComponent("Hi — here's my feedback on Deeply:\n\n");
     Linking.openURL(`mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${body}`).catch(() => {});
   };
   return (

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, View, Text, Pressable, Image, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { MotiView, AnimatePresence } from 'moti';
+import * as Application from 'expo-application';
 import { canPinWidget, requestPinWidget } from '@/lib/widget/pinWidget';
 
 const Paper = '#FAFAF7';
@@ -11,11 +12,21 @@ const InkFaint = '#D9D7CE';
 // Fallback for launchers that don't support the system pin dialog: the manual
 // long-press → Widgets → drag path, spelled out. Same bottom-sheet pattern as the
 // saved-quotes / ranks sheets.
+//
+// Step 3 has to name the app, because that is how Android's picker groups widgets
+// — under the launcher label, which is `expo.name` compiled into the APK. Reading
+// it back off the installed binary means renaming the app can never leave this
+// step pointing at a name the picker doesn't show, and needs no edit to do it.
+// Web has no launcher and reports null, so that case names nobody rather than
+// guessing.
+const APP_NAME = Application.applicationName;
 const STEPS = [
   'Touch and hold an empty area of your home screen.',
   'Tap “Widgets”.',
-  'Find “Philosophize” in the list.',
-  'Drag the “Quote” widget where you want it.',
+  APP_NAME ? `Find “${APP_NAME}” in the list.` : 'Find this app in the list.',
+  // Must read exactly as the widget's `label` in app.json — that label is the
+  // caption under the thumbnail this step is telling them to drag.
+  'Drag the “Quote of the Day” widget where you want it.',
 ];
 
 export default function AddWidgetSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {

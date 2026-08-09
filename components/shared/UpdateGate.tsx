@@ -95,7 +95,7 @@ export default function UpdateGate() {
 
           <Text style={styles.title}>Time to update</Text>
           <Text style={styles.body}>
-            This version of Philosophize is out of date. Update to keep your streak, your
+            This version of Deeply is out of date. Update to keep your streak, your
             progress and your saved quotes working properly.
           </Text>
 
@@ -106,7 +106,7 @@ export default function UpdateGate() {
             <Text style={styles.ctaText}>UPDATE NOW</Text>
           </Pressable>
 
-          <Text style={styles.foot}>Philosophize · Google Play</Text>
+          <Text style={styles.foot}>Deeply · Google Play</Text>
         </View>
       </View>
     </Modal>

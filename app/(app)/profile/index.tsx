@@ -268,7 +268,7 @@ export default function ProfileScreen() {
     .map((b) => ({ ...b, earned: earnedBadges.includes(b.id) }));
 
   function handleSignOut() {
-    Alert.alert('Account', 'Sign out of Philosophize?', [
+    Alert.alert('Account', 'Sign out of Deeply?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Sign Out',

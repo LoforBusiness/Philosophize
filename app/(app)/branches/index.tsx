@@ -50,7 +50,7 @@ export default function LearnScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       {/* Top bar */}
       <View style={styles.topBar}>
-        <Text style={styles.brand}>PHILOSOPHIZE · LEARN</Text>
+        <Text style={styles.brand}>DEEPLY · LEARN</Text>
         <Text style={styles.dots}>◆ ◆ ◆</Text>
       </View>
 

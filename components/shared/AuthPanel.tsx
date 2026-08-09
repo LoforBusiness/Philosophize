@@ -299,7 +299,7 @@ export default function AuthPanel() {
           {/* Masthead */}
           <View style={styles.masthead}>
             <Laurel />
-            <Text style={styles.wordmark}>PHILOSOPHIZE</Text>
+            <Text style={styles.wordmark}>DEEPLY</Text>
             <Text style={styles.tagline}>the art of thinking deeply</Text>
           </View>
 

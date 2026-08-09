@@ -677,7 +677,7 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
 
       {/* ── THE SKY, and only for the end card ──────────────────────────────────
           It fades in on the SAME T_BEGIN ramp as the wordmark, so it belongs to the
-          "Philosophize / Begin" screen and never appears behind the host while he is
+          "Deeply / Begin" screen and never appears behind the host while he is
           talking — which is what was asked for, and also what keeps the earlier
           chapters legible.
 
@@ -1013,7 +1013,7 @@ function EndCard({
   }));
   return (
     <View pointerEvents="box-none" style={styles.endCard}>
-      <Animated.Text style={[styles.lockWord, word]}>Philosophize</Animated.Text>
+      <Animated.Text style={[styles.lockWord, word]}>Deeply</Animated.Text>
       <Animated.View style={begin}>
         <Pressable
           onPress={onBegin}

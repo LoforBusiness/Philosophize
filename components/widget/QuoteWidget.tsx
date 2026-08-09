@@ -97,8 +97,14 @@ export function QuoteWidget({ text, author, dateLabel, philosopherId, streak }: 
         <FlexWidget
           style={{ flexDirection: 'row', justifyContent: 'space-between', width: 'match_parent' }}
         >
+          {/* Deliberately NOT the app's name. A widget already sits under the app's
+              own label in the picker, so the name here was only repeating it — and
+              it made a rename a native change, because this string is also drawn
+              into widget-preview.png. Naming the CONTENT instead is true whatever
+              the app is called. Kept shorter than the name it replaced (11 chars
+              vs 12) so it cannot overflow a row that already fit. */}
           <TextWidget
-            text="PHILOSOPHIZE"
+            text="DAILY QUOTE"
             style={{ fontSize: 9, color: INK, fontWeight: '700', letterSpacing: 2 }}
           />
           <TextWidget

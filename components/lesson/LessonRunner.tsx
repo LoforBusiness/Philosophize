@@ -285,7 +285,7 @@ export default function LessonRunner({ lesson }: Props) {
 
   const found = getLessonById(lesson.id);
   const lessonNum = found ? found.path.lessons.findIndex((l) => l.id === lesson.id) + 1 : 1;
-  const label = `${(found?.branch.name ?? 'PHILOSOPHIZE').toUpperCase()} · LESSON ${lessonNum > 0 ? lessonNum : 1}`;
+  const label = `${(found?.branch.name ?? 'DEEPLY').toUpperCase()} · LESSON ${lessonNum > 0 ? lessonNum : 1}`;
 
   const currentCard = lesson.cards[index];
   const needsAnswer = blocks(currentCard) && !answered.has(index);

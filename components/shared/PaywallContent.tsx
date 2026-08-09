@@ -90,7 +90,7 @@ export default function PaywallContent({
     if (outcome === 'success') return; // the success state renders from isPro
     if (outcome === 'cancelled') return; // user backed out — say nothing
     if (outcome === 'unavailable')
-      setNotice("Purchases run in the installed Philosophize app — this preview can't complete a real purchase.");
+      setNotice("Purchases run in the installed Deeply app — this preview can't complete a real purchase.");
     else setNotice('Something went wrong starting your subscription. Please try again.');
   };
 
@@ -102,7 +102,7 @@ export default function PaywallContent({
     setBusy(false);
     if (outcome === 'restored') setNotice('Your Scholar’s Pass has been restored.');
     else if (outcome === 'none') setNotice('No previous purchase found on this account.');
-    else if (outcome === 'unavailable') setNotice('Restoring works in the installed Philosophize app only.');
+    else if (outcome === 'unavailable') setNotice('Restoring works in the installed Deeply app only.');
     else setNotice('Could not restore right now. Please try again.');
   };
 

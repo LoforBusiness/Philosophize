@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Philosophize",
+    "name": "Deeply",
     "slug": "Philosophize",
     "owner": "lobusiness",
     "version": "1.0.0",
@@ -50,7 +50,7 @@
         {
           "androidAppId": "ca-app-pub-8916255747221090~2303226096",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511",
-          "userTrackingUsageDescription": "This lets us show ads relevant to you and keep Philosophize free. You can decline and still use the app."
+          "userTrackingUsageDescription": "This lets us show ads relevant to you and keep Deeply free. You can decline and still use the app."
         }
       ],
       [
@@ -59,7 +59,7 @@
           "widgets": [
             {
               "name": "QuoteOfTheDay",
-              "label": "Philosophize — Quote",
+              "label": "Quote of the Day",
               "description": "A philosophy quote that changes through the day.",
               "previewImage": "./assets/images/widget-preview.png",
               "minWidth": "180dp",
@@ -89,7 +89,6 @@
           "color": "#1A1A1A"
         }
       ],
-      "expo-quick-actions",
       "expo-asset",
       "expo-web-browser"
     ],
