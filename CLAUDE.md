@@ -22,15 +22,17 @@
 > nobody — four days after the binary carrying them shipped.
 
 **Live: SHIPPED on Google Play**, full public rollout, package `com.philosophize.app`.
-Current binary is **versionCode 19** (2026-08-05). 17 and 18 exist in
+Current binary is **versionCode 20** (2026-08-09). 17 and 18 exist in
 `eas build:list` but both ERRORED, so 19 is the successor to 16. Content and JS
 ship over the air between binaries (see §18) — a new build is only needed for
 native changes, app icons, splash, or anything else baked into the APK.
 
-**19 matters more than a version bump usually does**, because it is the first
-binary carrying `expo-notifications` and `expo-audio`. Two whole features that
-this file used to describe as unreachable — reminders (§22) and sound (§2) —
-are live for everyone who can open the app.
+**Two binaries did more than bump a version.** 19 was the first carrying
+`expo-notifications` and `expo-audio`, which made reminders (§22) and sound (§2)
+— both described as unreachable in this file at the time — live for everyone who
+can open the app. **20 carries `lib/updates/firstRun.ts`**, which takes the newest
+published bundle before deciding what a brand-new reader sees, and so ends the one
+thing an OTA could never reach: the welcome screen (§19).
 
 ---
 
@@ -511,7 +513,7 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 
 ## 12. Current Status
 
-**Phase 5 — shipped and iterating in public.** Live on Google Play, versionCode 16.
+**Phase 5 — shipped and iterating in public.** Live on Google Play, versionCode 20.
 
 - **Content:** 6 branches · **28 units** · **192 lessons**. **322 philosophers**
   with bios, eras and **1,780 quotes** between them — and all 322 have exactly
@@ -770,14 +772,23 @@ share one:
 
 | Build | Runtime version | Can its users still open the app? |
 |---|---|---|
-| **19 (current)** | `29eb709aad3b70740f0c92239b1a350820c81247` | **yes — and it is the only one** |
+| **20 (current)** | `b6f745e0007d2de75837eff60dc50fd3dd5b38c5` | **yes — and it is the only one** |
+| 19 | `29eb709aad3b70740f0c92239b1a350820c81247` | no — below `MIN_VERSION_CODE` |
 | 18, 17 | — | never finished; both ERRORED |
 | 16 | `bd0c0637f7e636eef9e8ddbbe61db9c9c9ae513c` | no — below `MIN_VERSION_CODE` |
 | 15, 14 | `7655f410f4b7050d121f65fcfb33bb7c2da56b5a` | no — below `MIN_VERSION_CODE` |
 
 So today there is exactly **one** runtime worth publishing to, and the third
-column is why: with the gate at 19, every older binary is held behind the update
+column is why: with the gate at 20, every older binary is held behind the update
 wall and an OTA to its runtime lands on people who are already stopped.
+
+> **This table goes stale the moment a build finishes, and a stale row here is
+> not a documentation nit — it is updates published into a void.** Build 20
+> finished on 2026-08-09 and raised the gate to 20, and several OTAs went out to
+> build 19's runtime afterwards: every one of them targeted people the update wall
+> was already holding. Nothing errored, because nothing can. **Run
+> `eas build:list` and read `MIN_VERSION_CODE` before every publish** — the two
+> together are the only way to know which runtime is actually reachable.
 
 The runtime is a **fingerprint of the native project**, so it changes whenever
 app icons, `app.json`, `eas.json` or any native dependency changes. Publishing to
@@ -956,12 +967,20 @@ contrast is set by the scrim, not by the crop. Its scrim is shaped rather than f
 is plainly visible and the type still measures **8.7:1**. A flat 90% wash was tried
 first and erased the drawing, which defeated the point of having it.
 
-> **It only reaches new users in a NEW BINARY.** `hasSeenWelcome` persists and gates
-> this screen to one showing per install, and a fresh install runs the *embedded*
-> bundle on its first launch (there is no `fallbackToCacheTimeout`, so the OTA lands
-> on the second). By then the flag is already set. Anything that changes the welcome
-> animation therefore needs an EAS build + Play upload to be seen by anybody; an OTA
-> carries it but shows it to no one.
+> **It used to reach new users only in a NEW BINARY, and that is now fixed.**
+> `hasSeenWelcome` persists and gates this screen to one showing per install, and a
+> fresh install runs the *embedded* bundle on its first launch — so whatever a
+> brand-new reader saw first was frozen at build time, and the flag was already set
+> by the time an OTA landed. Build 19 shipped a welcome that was rewritten the next
+> day: every new install played the OLD intro and then the NEW one on its second
+> launch.
+>
+> `lib/updates/firstRun.ts` closes it. On a first run from the embedded bundle it
+> takes any waiting update and restarts into it BEFORE the first-run experience is
+> decided — bounded by `BUDGET_MS`, hidden behind the launch animation, and with a
+> loop guard for the rollback case. **It shipped in build 20**, so from that binary
+> on the welcome screen is updatable over the air like anything else. It had to be
+> in a binary once; it never has to be again.
 
 ---
 
@@ -975,8 +994,8 @@ compiled into the APK — and *not* the version in `app.json`, because that one
 travels with OTA updates: an old binary carrying new JS would report the new
 number and walk straight past the gate.
 
-**It fails open, deliberately.** `MIN_VERSION_CODE` is **19**. On a current
-Android binary `nativeBuildVersion` reads `"19"`, but `parseInt`
+**It fails open, deliberately.** `MIN_VERSION_CODE` is **20**. On a current
+Android binary `nativeBuildVersion` reads `"20"`, but `parseInt`
 would turn an unexpected `"1.0.0"` into `1`, and against that minimum that
 locks out *every user on earth including up-to-date ones*, with no way back. So
 only whole digits count; anything else, and anything null (web, Expo Go, dev

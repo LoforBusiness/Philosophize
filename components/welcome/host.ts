@@ -14,12 +14,10 @@ import {
   SPRINT,
   STAND,
   SPEAK_T0,
-  T_BACK,
   T_BEAT,
   T_BOLT,
   T_EXIT,
   T_MARCH,
-  T_NOTICE,
   T_STOP,
   T_TURN,
   T_WINDUP,
@@ -99,7 +97,6 @@ export const X_OFF = 520;
 /** Where he means to stop. */
 export const X_MARK = CX;
 /** Where he actually stops, the first time — a comfortable two strides past it. */
-export const X_PAST = CX - 62;
 /**
  * Just far enough. He is fully off once x passes 460 (head included), so 500 keeps
  * him on the glass for almost the whole bolt; at 580 he cleared the frame a fifth
@@ -128,9 +125,7 @@ function faceFeet(f: Feet, dir: number): Feet {
 // Phase boundaries, absolute.
 const T1 = T_MARCH; // marching
 const T2 = T1 + T_STOP; // planted
-const T3 = T2 + T_NOTICE; // the double-take
-const T4 = T3 + T_BACK; // back on the mark
-const T5 = T4 + T_TURN; // facing you — equals SPEAK_T0
+const T5 = T2 + T_TURN; // facing you — equals SPEAK_T0
 
 const E1 = T_EXIT + T_BEAT; // the line has landed; he has turned away
 const E2 = E1 + T_WINDUP; // legs going, still here
@@ -363,9 +358,13 @@ export function hostAt(t: number): HostPose {
     // appears to start from a standstill just off-frame, which is a stranger idea
     // than simply walking in. Constant pace for most of it, then a real deceleration
     // into the stop, because the joke needs the stop to look intentional.
-    const e = u < 0.78 ? (u / 0.78) * 0.9 : 0.9 + 0.1 * (1 - Math.pow(1 - (u - 0.78) / 0.22, 2));
-    const x = X_OFF + (X_PAST - X_OFF) * e;
-    const st = stride(X_OFF, X_PAST, x, MARCH, PROFILE_FEET, DIR_IN);
+    // Constant pace for most of it, then a real deceleration — which now ARRIVES
+    // rather than overruns, so the slowdown is the walk ending instead of the
+    // set-up for a double-take. A longer tail than before, because stopping on
+    // the mark has to look chosen.
+    const e = u < 0.70 ? (u / 0.70) * 0.86 : 0.86 + 0.14 * (1 - Math.pow(1 - (u - 0.70) / 0.30, 2));
+    const x = X_OFF + (X_MARK - X_OFF) * e;
+    const st = stride(X_OFF, X_MARK, x, MARCH, PROFILE_FEET, DIR_IN);
     const rock = Math.sin(2 * st.ph) * (1 - smooth(st.settle));
     const pel = { x, y: GROUND - WALK_PELV };
     const h = gaitHands(st.ph, MARCH, pel, DIR_IN, st.settle);
@@ -387,62 +386,31 @@ export function hostAt(t: number): HostPose {
     };
   }
 
-  // ── 2 · planted, and 3 · the double-take ──────────────────────────────────
-  if (t < T3) {
-    const pel = { x: X_PAST, y: GROUND - WALK_PELV };
-    // The recoil: he rocks back onto his heels and his head snaps back with him,
-    // then both settle. With no face to work with, the double-take has to be a
-    // whole-body movement or it does not read at all.
-    const n = clamp01((t - T2) / T_NOTICE);
-    const recoil = Math.sin(Math.PI * n) * (1 - 0.35 * n);
-    // The march has already fully settled by the time it ends, so the feet are
-    // simply the pose it settled INTO — no second blend, which is what previously
-    // left a residue to slide off.
-    const arrived = stride(X_OFF, X_PAST, X_PAST, MARCH, PROFILE_FEET, DIR_IN);
+  // ── 2 · the weight arrives ────────────────────────────────────────────────
+  if (t < T2) {
+    const u = clamp01((t - T1) / T_STOP);
+    const sm = smooth(u);
+    // A shallow dip and recovery as the last step takes his weight. That is all
+    // that is left of the old stop-notice-reverse: he is where he meant to be, so
+    // there is nothing to correct and nothing to react to.
+    const pelvH = WALK_PELV - Math.sin(Math.PI * u) * 2.4;
+    const pel = { x: X_MARK, y: GROUND - pelvH };
+    // The march's settled feet, held. `stride` at its own endpoint returns the
+    // settled pose, so this is literally the walk's last frame and cannot snap.
+    const arrived = stride(X_OFF, X_MARK, X_MARK, MARCH, PROFILE_FEET, DIR_IN);
     return {
-      x: X_PAST,
-      pelvH: WALK_PELV + 2.5 * recoil,
-      // Ramps out of the march's lean over the whole notice, and ends exactly where
-      // the back-up begins — the two used to differ by 0.11 rad, which snapped his
-      // head sixteen units sideways in one frame.
-      lean: DIR_IN * (lerp(-0.05, 0.06, smooth(n)) - 0.16 * recoil),
-      neck: DIR_IN * (-0.04 - 0.2 * recoil),
+      x: X_MARK,
+      pelvH,
+      // Out of the march's chest-out lean and into the upright the turn expects.
+      lean: DIR_IN * lerp(-0.05, 0.02, sm),
+      neck: DIR_IN * lerp(-0.04, -0.01, sm),
       face: 0,
       walking: 1,
       footL: arrived.footL,
       footR: arrived.footR,
-      handL: { x: pel.x + DIR_IN * (9 - 6 * recoil), y: pel.y + 21 - 10 * recoil },
-      handR: { x: pel.x + DIR_IN * (9 - 6 * recoil), y: pel.y + 21 - 10 * recoil },
-      handK: 14,
-      dir: DIR_IN,
-      vis: 1,
-    };
-  }
-
-  // ── 4 · two steps backwards onto the mark ─────────────────────────────────
-  if (t < T4) {
-    const u = smooth((t - T3) / T_BACK);
-    const x = X_PAST + (X_MARK - X_PAST) * u;
-    // He does NOT turn round to do this — he reverses, still facing the way he
-    // came, which is the whole reason it reads as a correction rather than as a
-    // second walk. `dir` stays DIR_IN and the travel is backwards through it.
-    const st = stride(X_PAST, X_MARK, x, SHUFFLE, PROFILE_FEET, DIR_IN);
-    const pel = { x, y: GROUND - WALK_PELV };
-    const h = gaitHands(st.ph, SHUFFLE, pel, DIR_IN, st.settle);
-    return {
-      x,
-      pelvH: WALK_PELV + gaitBob(st.ph, SHUFFLE, st.settle),
-      // Held, NOT faded out with the settle: the turn that follows starts from
-      // this lean and takes it to zero, so decaying it here just moved the same
-      // 0.06 snap onto the next seam instead of removing it.
-      lean: DIR_IN * 0.06,
-      neck: DIR_IN * -0.02,
-      face: 0,
-      walking: 1,
-      footL: st.footL,
-      footR: st.footR,
-      ...h,
-      handK: 18,
+      handL: { x: pel.x + DIR_IN * 9, y: pel.y + 21 },
+      handR: { x: pel.x + DIR_IN * 9, y: pel.y + 21 },
+      handK: lerp(22, 18, sm),
       dir: DIR_IN,
       vis: 1,
     };
@@ -450,7 +418,7 @@ export function hostAt(t: number): HostPose {
 
   // ── 5 · the turn ──────────────────────────────────────────────────────────
   if (t < T5) {
-    const raw = clamp01((t - T4) / T_TURN);
+    const raw = clamp01((t - T2) / T_TURN);
     const u = smooth(raw);
     // A small rise through the middle. Turning on the spot with the pelvis pinned
     // reads as a sprite being flipped; lifting him a few units over the middle of
@@ -462,8 +430,8 @@ export function hostAt(t: number): HostPose {
     return {
       x: X_MARK + swayAt(T5) * u,
       pelvH,
-      lean: lerp(DIR_IN * 0.06, 0, u),
-      neck: lerp(DIR_IN * -0.02, 0, u),
+      lean: lerp(DIR_IN * 0.02, 0, u),
+      neck: lerp(DIR_IN * -0.01, 0, u),
       face: u,
       walking: 1 - u,
       footL: feet.footL,

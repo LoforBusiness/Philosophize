@@ -31,17 +31,23 @@ export type Gesture = 'point' | 'shrug' | 'open' | 'emphasize';
 // ── the host's entrance and exit ─────────────────────────────────────────────
 // He used to be simply PRESENT on frame one — full opacity, legs frozen, while
 // the bubble faded in around him. Nothing arrives that way, which is why it read
-// as a glitch rather than a beginning. Now he walks on, and the timeline below is
-// the choreography: march in from off-stage right, sail straight past his mark,
-// stop, notice, back up two steps onto it without ever turning round, and only
-// then turn to face the audience.
-export const T_MARCH = 1.55; // off-stage right → past the mark, at a brisk clip
-export const T_STOP = 0.22; // plants, dead
-export const T_NOTICE = 0.34; // "…this is not where I meant to be"
-export const T_BACK = 0.62; // two steps backwards onto the mark
+// as a glitch rather than a beginning. So he walks on.
+//
+// HE NO LONGER OVERSHOOTS. The entrance was a sight gag: he sailed past his mark,
+// planted, double-took, and reversed two steps onto it without turning round.
+// Read cold by someone who has never seen the app, that is not a joke — it is a
+// figure arriving, stopping, and then repositioning itself, which reads as the
+// animation correcting a mistake. A first-run screen cannot afford to look like
+// it is fixing itself in front of you.
+//
+// He walks on, decelerates onto the mark, plants, and turns. The time the
+// double-take used to occupy went back into the march, so the walk is a shade
+// longer and ends in a real deceleration rather than a stop.
+export const T_MARCH = 2.30; // off-stage right → onto the mark, decelerating
+export const T_STOP = 0.36; // the weight arrives and settles
 export const T_TURN = 0.46; // pivots out of profile to face the audience
 /** He does not say a word until he is standing on his mark facing you. */
-export const SPEAK_T0 = T_MARCH + T_STOP + T_NOTICE + T_BACK + T_TURN;
+export const SPEAK_T0 = T_MARCH + T_STOP + T_TURN;
 
 // …and the way out. He does not dissolve either: he turns, fails to get any
 // traction for half a second, and then leaves at a speed the walk never had.
