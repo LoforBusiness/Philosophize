@@ -77,17 +77,24 @@ export interface WorldLesson {
   id: string; title: string;
   unitId: string; unitSlug: string; unitTitle: string;
   done: boolean; accessible: boolean;
+  /** Not openable, but the Pass would fix it — so the tap can offer the Pass
+   *  rather than doing nothing. A lesson simply not reached yet is NOT this. */
+  needsPass?: boolean;
 }
 
 /** What is mounted right now: which ground chunk, which sign, which place. */
 interface Viewport { c: number; m: number; s: number }
 
 export default function BranchWorld({
-  lessons, current, onOpen, advanceTo, place = '',
+  lessons, current, onOpen, onLocked, advanceTo, place = '',
 }: {
   lessons: WorldLesson[];
   current: number;
   onOpen: (l: WorldLesson) => void;
+  /** Tapped a marker the Pass would unlock. Without this the tap does nothing,
+   *  which is the worst answer: the reader has reached for something specific
+   *  and the screen simply ignores them. */
+  onLocked?: (l: WorldLesson) => void;
   advanceTo?: { from: number; to: number; done: () => void } | null;
   /**
    * Branch slug — which of the six places this road runs through (sceneArt).
@@ -302,8 +309,11 @@ export default function BranchWorld({
     const l = lessons[i];
     if (!l || busy) return;
     if (i !== at) { hopTo(i); return; }   // move there first
-    if (l.accessible) onOpen(l);
-  }, [lessons, busy, at, hopTo, onOpen]);
+    if (l.accessible) { onOpen(l); return; }
+    // Greyed because it is finished and replay is part of the Pass — say so,
+    // rather than letting the signpost be inert.
+    if (l.needsPass) onLocked?.(l);
+  }, [lessons, busy, at, hopTo, onOpen, onLocked]);
 
   // The figure. Walks when the gait is up, breathes otherwise — the same rig the
   // lessons use, so the feet plant instead of sliding.

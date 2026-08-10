@@ -71,14 +71,40 @@ export function branchCountsFromUnits(
   return out;
 }
 
-// Can this user open this lesson right now? Mirrors the branch screen's gate:
-//  • an already-completed lesson is always openable (review);
-//  • a unit's NEXT lesson is openable if the plan lets them start that unit
-//    (paid can start any unit; free must have finished all previous units);
-//  • lessons further ahead in a unit are locked.
-// gatedByPro is true only for the case a free user could unlock with the Pass
-// (a future unit's first lesson). Defense-in-depth for deep links / the back
-// stack — the list already hides locked lessons.
+/**
+ * THE ONE RULE ABOUT WHO MAY OPEN A LESSON.
+ *
+ * Written once, here, taking numbers the caller already has, because four
+ * surfaces have to agree about the same lesson — the road's markers, the units
+ * drawer, the lesson route's own guard and a thinker's "lessons featuring".
+ * When the branch screen kept its own copy of this reasoning the two drifted,
+ * and a reader could be shown a lesson in one place and refused it in another.
+ *
+ *  • a lesson further ahead in its unit is locked, for everybody;
+ *  • a unit's NEXT lesson is openable if the plan lets them start that unit —
+ *    paid may start any unit, free must have closed every earlier one;
+ *  • an ALREADY-FINISHED lesson is a REPLAY, and replay is part of the Pass.
+ *
+ * That last line changed, and it takes something away rather than merely
+ * withholding it: replaying a finished lesson used to be free. It is a
+ * deliberate product decision, not a tidy-up — see the note on the flip risk in
+ * `[lessonId].tsx`, which is the one place it could have gone badly wrong.
+ *
+ * `needsPass` is true only where money is actually the obstacle, so a paywall is
+ * offered exactly there and never in front of a lesson the reader simply has not
+ * reached yet.
+ */
+export function lessonAccess(
+  li: number, unitDone: number, unitStartable: boolean, isPro: boolean
+): { open: boolean; needsPass: boolean } {
+  if (li > unitDone) return { open: false, needsPass: false };   // not reached yet
+  if (li < unitDone) return { open: isPro, needsPass: !isPro };  // a replay
+  return { open: unitStartable, needsPass: !unitStartable };     // the next one
+}
+
+// Can this user open this lesson right now? The id-based form of `lessonAccess`
+// above, for callers that have a lesson id and nothing else. Defense-in-depth
+// for deep links and the back stack.
 export function lessonAccessibility(
   lessonId: string,
   lessonsByUnit: Record<string, number>,
@@ -89,9 +115,6 @@ export function lessonAccessibility(
   const { branch, path } = found;
   const li = path.lessons.findIndex((l) => l.id === lessonId);
   const unitDone = Math.max(0, Math.min(path.lessons.length, lessonsByUnit[path.id] ?? 0));
-  if (li < unitDone) return { accessible: true, gatedByPro: false };
-  if (li > unitDone) return { accessible: false, gatedByPro: false };
-  // li === unitDone: the unit's next lesson.
   const ui = branch.paths.findIndex((p) => p.id === path.id);
   let allPrevComplete = true;
   for (let k = 0; k < ui; k++) {
@@ -102,7 +125,8 @@ export function lessonAccessibility(
     }
   }
   const startable = isPro || ui === 0 || allPrevComplete;
-  return startable ? { accessible: true, gatedByPro: false } : { accessible: false, gatedByPro: true };
+  const a = lessonAccess(li, unitDone, startable, isPro);
+  return { accessible: a.open, gatedByPro: a.needsPass };
 }
 
 /**

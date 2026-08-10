@@ -332,11 +332,27 @@ export default function LessonScreen() {
   }
   const atLimit = (atLimitRef.current ?? false) && !testing;
 
-  // Access is computed LIVE (not frozen): completing a lesson only ever advances
-  // progress, which can unlock but never lock — so there's no mid-reward flip
-  // risk — and live values avoid a stale pre-hydration {} snapshot false-locking
-  // an already-completed lesson reached via a deep link.
-  const access = lessonAccessibility(lessonId, lessonsByUnit, isPro);
+  // ── ONCE IT HAS OPENED, IT STAYS OPEN FOR THIS VISIT ───────────────────────
+  //
+  // Access is computed LIVE, so a stale pre-hydration `{}` cannot false-lock a
+  // finished lesson reached by deep link. That used to be safe on its own,
+  // because "completing a lesson only ever advances progress, which can unlock
+  // but never lock".
+  //
+  // THAT INVARIANT IS GONE. Replay is part of the Pass now (see `lessonAccess`),
+  // so the moment a free reader finishes lesson 3 the unit's count goes to 4 and
+  // lesson 3 stops being the next one and becomes a replay — locked, live, while
+  // they are still standing in it. Without the latch below they are thrown onto
+  // the lock screen at the exact moment they earn the reward, by a paywall for a
+  // lesson they have this second completed. It is the worst possible place to
+  // put one.
+  //
+  // A ONE-WAY latch: openable → stays openable until they leave. It does not
+  // latch the other way, so buying the Pass mid-lesson still unlocks at once.
+  const live = lessonAccessibility(lessonId, lessonsByUnit, isPro);
+  const everOpen = useRef(false);
+  if (live.accessible) everOpen.current = true;
+  const access = everOpen.current ? { accessible: true, gatedByPro: false } : live;
   const locked = !access.accessible && !testing;
   const gatedByPro = access.gatedByPro;
 

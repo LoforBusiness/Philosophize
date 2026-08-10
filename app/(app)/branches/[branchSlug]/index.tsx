@@ -1,22 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ImageBackground } from 'react-native';
 import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withDelay,
-  withTiming,
-  interpolate,
-  interpolateColor,
-  Easing,
-  Extrapolation,
-  type SharedValue,
-} from 'react-native-reanimated';
-import { getBranchBySlug } from '@/data';
+import { MotiView, AnimatePresence } from 'moti';
+import { getBranchBySlug, lessonAccess } from '@/data';
 import type { Path as Unit, Lesson } from '@/data/types';
-import Glyph, { type GlyphName } from '@/components/shared/Glyph';
+import type { GlyphName } from '@/components/shared/Glyph';
 import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -25,49 +15,13 @@ import { useUIStore } from '@/stores/uiStore';
 import { BRANCH_ART, MAST_SCRIM, ArtCream, ArtSoft, ArtGold } from '@/constants/branchArt';
 import BranchWorld, { type WorldLesson } from '@/components/branch/BranchWorld';
 
-// ── THE ADVANCE, the thing you see after finishing a lesson ──────────────────
-//
-// Three beats, strictly in order and never overlapping (C22c): the dot you just
-// earned fills and takes its tick, the line runs down from it to the next lesson,
-// and the next lesson's title comes up out of grey into solid ink. That order is
-// the whole point — it reads as cause and effect rather than as a screen that
-// simply arrived already changed, which is what it used to do.
-//
-// It is expressed as one 0→1 value with three windows rather than three chained
-// timings, so there is exactly one clock to reason about and the phases cannot
-// drift apart.
-const CEL_MS = 1500;
-const CEL_DELAY = 380;          // let the push settle and the unit finish opening
-
-/** How long before the units that are CLOSED bother to build their contents.
- *  Nothing is visible inside a closed unit, so there is no reason for thirty-odd
- *  lesson rows to be competing with the walk for the first frames. */
-const LIST_MOUNT_DELAY = 900;
-const CEL_DOT: [number, number] = [0.0, 0.28];
-const CEL_LINE: [number, number] = [0.3, 0.62];
-const CEL_WORD: [number, number] = [0.64, 1.0];
-
 const Page = '#F1EEE7';
 const Paper = '#FFFFFF';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
 const Faint = '#9A968C';
-const Cream = '#F4F1EA';
-const Gold = '#A8A49A';
 const LockGray = '#B7B3A9';
 const FaintLine = '#D8D4CB';
-const DimBorder = '#DCD8CF';
-const DimPaper = '#FBFAF7';
-
-/** How long a unit takes to open or close. Long enough to read as a movement
- *  rather than a redraw; the scroll that follows the unit runs on the same clock. */
-const OPEN_MS = 360;
-const EASE = Easing.inOut(Easing.cubic);
-
-// The left slot holds the state mark when closed and the branch glyph when open,
-// and grows between the two — so the header morphs instead of being swapped out.
-const MARK = 22;
-const TILE = 42;
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 
@@ -91,11 +45,12 @@ type LessonState = 'done' | 'current' | 'locked';
 interface LessonModel {
   lesson: Lesson;
   li: number;
+  /** What it IS: finished, the one to do next, or still ahead. */
   state: LessonState;
-  // This is a unit's NEXT lesson, locked only because a free user hasn't
-  // finished the earlier units — tapping it offers the Pass (which lets paid
-  // users drop into any unit) rather than doing nothing.
-  gatedByPro: boolean;
+  /** May THIS reader open it right now. From `lessonAccess` — never re-derived. */
+  open: boolean;
+  /** ...and if not, would the Pass fix it. Only then is a paywall honest. */
+  needsPass: boolean;
 }
 
 interface UnitModel {
@@ -115,24 +70,25 @@ export default function BranchDetailScreen() {
   const isPro = useSubscriptionStore((s) => s.isPro);
   const openPaywall = useUIStore((s) => s.openPaywall);
 
-  // Which unit the user has explicitly opened. null = follow their progress.
-  const [pinned, setPinned] = useState<string | null>(null);
-  // A closed unit still built every one of its lesson rows so its height could be
-  // measured ahead of being opened — thirty-odd rows of dots and titles, mounted
-  // on the same frame as the world and the walk. They are worth measuring ahead,
-  // just not YET.
-  const [listReady, setListReady] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setListReady(true), LIST_MOUNT_DELAY);
-    return () => clearTimeout(t);
-  }, []);
-  const scroller = useRef<ScrollView | null>(null);
-  // Live geometry, kept by onLayout: where each unit sits in the list, how tall
-  // each unit's expanding body is, and where the list starts in the scroll
-  // content (scrollTo wants a content offset; onLayout gives parent-relative).
-  const unitY = useRef<Record<string, number>>({});
-  const bodyH = useRef<Record<string, number>>({});
-  const listY = useRef(0);
+  // ── THE UNITS DRAWER ───────────────────────────────────────────────────────
+  //
+  // The list of units used to BE the screen: five expanding cards under the
+  // world, each holding every lesson it contains. That made the road the thing
+  // you scrolled past on the way to the index. The road is the product now, so
+  // the units are folded away behind one small box and the screen opens on the
+  // walk.
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  // Which unit is showing its lessons. One at a time: five units of eight would
+  // be forty rows in a floating panel, which is a screen of its own.
+  const [openUnitId, setOpenUnitId] = useState<string | null>(null);
+  // Where the box sits, measured — the drawer is an overlay anchored under it,
+  // and both are drawn AFTER the scroll view so neither is clipped by it.
+  const [barBottom, setBarBottom] = useState(0);
+  // Which unit the reader has asked to stand in. null = follow their progress.
+  // Cleared whenever they finish a lesson, so the road goes back to tracking
+  // where they actually are rather than where they last looked.
+  const [focusUnitId, setFocusUnitId] = useState<string | null>(null);
+
 
   // Progress is per-unit: each unit tracks its own completed count, and whether
   // its NEXT lesson is startable depends on the plan — free users must finish
@@ -152,15 +108,13 @@ export default function BranchDetailScreen() {
     if (isFirstIncomplete) firstIncomplete = unit.id;
 
     const lessons: LessonModel[] = unit.lessons.map((lesson, li) => {
-      let state: LessonState = 'locked';
-      let gatedByPro = false;
-      if (li < done) {
-        state = 'done'; // completed — anyone can revisit
-      } else if (li === done) {
-        if (startable) state = 'current';
-        else gatedByPro = true; // locked only by the free sequential rule
-      }
-      return { lesson, li, state, gatedByPro };
+      // WHAT IT IS and WHO MAY OPEN IT are two different questions, and this
+      // screen used to answer only the first. A finished lesson still reads as
+      // finished for a free reader — they did it — but it no longer opens for
+      // them, so the drawer can show it, tick it, and put a lock on it.
+      const state: LessonState = li < done ? 'done' : li === done ? 'current' : 'locked';
+      const { open, needsPass } = lessonAccess(li, done, startable, isPro);
+      return { lesson, li, state, open, needsPass };
     });
 
     units.push({
@@ -174,13 +128,15 @@ export default function BranchDetailScreen() {
     allPrevComplete = allPrevComplete && complete;
   }
 
-  // Default: the unit they're working in is the one that's open. A pinned unit
-  // wins — until they cross a unit boundary, at which point the accordion goes
-  // back to following progress so the next unit is already open on return.
-  const openId = pinned ?? firstIncomplete;
-  useEffect(() => {
-    setPinned(null);
-  }, [firstIncomplete]);
+  // WHAT THE DRAWER LISTS: EVERY UNIT.
+  //
+  // It used to hide finished ones, on the reasoning that re-reading a closed
+  // unit is not what the control is for. That was the wrong call — going back to
+  // something you have already done is precisely what a reader wants a contents
+  // page for, and hiding the finished units meant the further in you got, the
+  // less the drawer would show you, until eventually it said "every unit in this
+  // branch is complete" and nothing else.
+  const drawerUnits = units;
 
   // ── the advance ────────────────────────────────────────────────────────────
   //
@@ -202,10 +158,7 @@ export default function BranchDetailScreen() {
       return () => setFocused(false);
     }, [])
   );
-  const cel = useSharedValue(0);
-  const [celTarget, setCelTarget] = useState<{ unitId: string; doneIndex: number } | null>(null);
-  // THE WALK. Armed by the same event as the accordion advance, so the two are
-  // one moment rather than two things that happen to fire together.
+  // THE WALK, armed by the finish event.
   const [walkTo, setWalkTo] = useState<{ from: number; to: number; done: () => void } | null>(null);
 
   useEffect(() => {
@@ -227,25 +180,18 @@ export default function BranchDetailScreen() {
     clearLessonFinished();
     if (!u || idx < 0) return;
 
-    // ── LAND ON THE WORLD ─────────────────────────────────────────────────────
-    //
-    // This used to scroll to the finished unit's ROW, and the row sits BELOW the
-    // world strip. So finishing a lesson carried the reader straight past the one
-    // thing that was about to move, and the seven-second walk played to an empty
-    // room. Scroll back up afterwards and the figure is simply standing at the
-    // next lesson — which reads as the walk being broken rather than missed.
-    //
-    // The scroll to the top is not a no-op that could be dropped instead. The
-    // branch screen is NOT always a fresh mount: `router.replace` can land on the
-    // instance already in the stack, scroll position and all, so without this the
-    // reader is returned to wherever they were when they pressed START.
-    scroller.current?.scrollTo({ y: 0, animated: false });
+    // A lesson was just finished, so wherever the reader had parked the road with
+    // the drawer, they are HERE now. Leaving the focus set would arm the walk
+    // against a stretch of road the figure is not standing on.
+    setFocusUnitId(null);
+    setDrawerOpen(false);
 
-    // Pin the unit they just worked in. Without this a lesson that COMPLETED its
-    // unit would slide the accordion to the next one before they saw the tick
-    // land — `firstIncomplete` has already moved by the time we get here.
-    setPinned(u.id);
-    setCelTarget({ unitId: u.id, doneIndex: idx });
+    // The reader cannot be anywhere but the top any more — the screen does not
+    // scroll (see the ScrollView below) — so the pair of scrollTo calls that used
+    // to sit here, one now and one after layout, are gone. They existed because
+    // `router.replace` can land on the instance already in the stack WITH its old
+    // scroll offset, which could leave the reader parked below the walk they were
+    // about to be shown. With no offset to restore there is nothing to correct.
 
     // Hand the walk over IMMEDIATELY, so the figure is placed at the lesson just
     // finished on the very first frame. The pause before it sets off belongs to
@@ -260,36 +206,9 @@ export default function BranchDetailScreen() {
     if (next < allUnits.reduce((n, x) => n + x.lessons.length, 0)) {
       setWalkTo({ from: flat, to: next, done: () => setWalkTo(null) });
     }
-    cel.value = 0;
-    cel.value = withDelay(CEL_DELAY, withTiming(1, { duration: CEL_MS, easing: Easing.linear }));
 
-    // Once more after the list has laid itself out, which can nudge the offset.
-    const t = setTimeout(() => scroller.current?.scrollTo({ y: 0, animated: false }), 90);
-    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [justFinished?.seq, focused, rewardUp, paywallUp]);
-
-  const toggleUnit = useCallback(
-    (id: string) => {
-      const wasOpen = pinned ?? firstIncomplete;
-      const closing = wasOpen === id;
-      setPinned(closing ? '' : id); // '' = everything closed
-
-      if (closing) return;
-
-      // Scroll the opened unit to the top of the screen ON THE SAME CLOCK as the
-      // expansion, rather than waiting for it to settle. Its final y can't be read
-      // from layout yet, but it can be COMPUTED: the only thing moving above it is
-      // the unit that's closing, and that unit's body height is already measured.
-      const idx = units.findIndex((u) => u.unit.id === id);
-      const closingIdx = units.findIndex((u) => u.unit.id === wasOpen);
-      const shift = wasOpen && closingIdx > -1 && closingIdx < idx ? (bodyH.current[wasOpen] ?? 0) : 0;
-      const y = unitY.current[id];
-      if (y == null) return;
-      scroller.current?.scrollTo({ y: Math.max(0, listY.current + y - shift - 10), animated: true });
-    },
-    [pinned, firstIncomplete, units]
-  );
 
   if (!branch) {
     return (
@@ -311,20 +230,66 @@ export default function BranchDetailScreen() {
         unitSlug: u.unit.slug,
         unitTitle: u.unit.name,
         done: lm.state === 'done',
-        accessible: lm.state === 'done' || (lm.state === 'current' && !lm.gatedByPro),
+        accessible: lm.open,
+        needsPass: lm.needsPass,
       });
     }
   }
-  // Where the figure stands: the first lesson not yet finished, or the end of the
-  // road if the branch is complete.
+
+  /** The flat index of a unit's next unplayed lesson. */
+  const entryIndexOf = (unitId: string) => {
+    let flat = 0;
+    for (const u of units) {
+      if (u.unit.id === unitId) {
+        return flat + Math.min(u.done, Math.max(0, u.total - 1));
+      }
+      flat += u.total;
+    }
+    return -1;
+  };
+
+  // Where the figure stands: normally the first lesson not yet finished, or the
+  // end of the road if the branch is complete — but a unit chosen in the drawer
+  // wins. `current` is the only lever needed to move the road: BranchWorld
+  // re-places the figure and the camera whenever it changes.
   const firstUndone = worldLessons.findIndex((l) => !l.done);
-  const worldAt = firstUndone < 0 ? Math.max(0, worldLessons.length - 1) : firstUndone;
+  let worldAt = firstUndone < 0 ? Math.max(0, worldLessons.length - 1) : firstUndone;
+  if (focusUnitId) {
+    const i = entryIndexOf(focusUnitId);
+    if (i >= 0) worldAt = i;
+  }
 
   const pres = PRES[branch.slug] ?? { desc: branch.description, glyph: 'book' as GlyphName, pills: [] };
   const roman = ROMAN[Math.max(0, ORDER.indexOf(branch.slug))];
 
   const openLesson = (unit: Unit, lesson: Lesson) =>
     router.push(`/(app)/branches/${branch.slug}/${unit.slug}/lesson/${lesson.id}`);
+
+  // Tapping a unit shows its lessons. It no longer travels anywhere by itself,
+  // and it is no longer refused to free readers — looking at a contents page is
+  // not a paid feature. The travel happens when they pick an actual lesson.
+  const toggleUnit = (u: UnitModel) => setOpenUnitId((id) => (id === u.unit.id ? null : u.unit.id));
+
+  /**
+   * Picking a lesson out of the drawer.
+   *
+   * The road is moved to that unit underneath before the lesson opens, so
+   * closing it puts the figure where the reader has just been rather than back
+   * where they started. `needsPass` is the only case that raises the paywall:
+   * a lesson they simply have not reached yet is not something money fixes, and
+   * a paywall in front of it would be a lie.
+   */
+  const pickLesson = (u: UnitModel, lm: LessonModel) => {
+    if (!lm.open) {
+      if (!lm.needsPass) return;
+      setDrawerOpen(false);
+      openPaywall();
+      return;
+    }
+    setFocusUnitId(u.unit.id);
+    setDrawerOpen(false);
+    openLesson(u.unit, lm.lesson);
+  };
 
   return (
     <ScreenTransition bg={Page}>
@@ -338,7 +303,44 @@ export default function BranchDetailScreen() {
           <Text style={styles.dots}>◆ ◆ ◆</Text>
         </View>
 
-        <ScrollView ref={scroller} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        {/* The drawer's handle: one small box under the branch name, left. Kept
+            deliberately quiet — it is a way to leave the road, not the way to
+            walk it. */}
+        <View
+          style={styles.unitsBar}
+          onLayout={(e) => setBarBottom(e.nativeEvent.layout.y + e.nativeEvent.layout.height)}
+        >
+          <Pressable
+            onPress={() => setDrawerOpen((o) => !o)}
+            hitSlop={8}
+            style={({ pressed }) => [styles.unitsBox, drawerOpen && styles.unitsBoxOpen, pressed && { opacity: 0.7 }]}
+          >
+            <Text style={[styles.unitsLabel, drawerOpen && { color: Paper }]}>Units</Text>
+            <MotiView animate={{ rotate: drawerOpen ? '0deg' : '-90deg' }} transition={{ type: 'timing', duration: 200 }}>
+              <SketchIcon name="chevron-down" size={12} color={drawerOpen ? Paper : InkSoft} />
+            </MotiView>
+          </Pressable>
+        </View>
+
+        {/* THE BRANCH DOES NOT SCROLL. It is one fixed screen — masthead, road,
+            figure — and the road is the thing you are meant to be looking at.
+            There was never more than a few dozen units of travel in it, which is
+            worse than none: a page that gives slightly under a gesture reads as
+            loose rather than as having somewhere to go, and it lets the reader
+            drag the walk half off the top of the screen while it is playing.
+            `bounces` is off as well, or iOS still rubber-bands against the stop
+            and the screen appears to move after all.
+
+            It stays a ScrollView rather than becoming a plain View so the layout
+            is byte-for-byte the one that was signed off, and so re-enabling it is
+            one prop rather than a rewrite. */}
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          scrollEnabled={false}
+          bounces={false}
+          overScrollMode="never"
+        >
           {/* Masthead — the same picture the branch carries on its Learn card, so
               arriving here confirms you opened what you tapped. The ink over it is
               heavier and more even than on the card: this text is centred in the
@@ -365,415 +367,150 @@ export default function BranchDetailScreen() {
             )}
           </ImageBackground>
 
-          {/* THE ROAD. The same lessons as the list below, laid end to end on the
-              ground with the reader standing where they got to. Finishing one
-              walks the figure the five seconds to the next.
-
-              THE UNIT LIST STAYS, and not out of caution: walking is the earned
-              forward motion, and a flat list is still the fastest way to look back
-              over thirty-two lessons and reopen one. The world is the hero; the
-              list is the index. */}
+          {/* THE ROAD, and now the whole of it. Every lesson in the branch laid end
+              to end on the ground with the reader standing where they got to;
+              finishing one walks the figure to the next. The unit list that used
+              to sit beneath this is folded into the box above. */}
           <BranchWorld
             lessons={worldLessons}
             current={worldAt}
             advanceTo={walkTo}
+            // The road runs through THIS branch's own country — the same place the
+            // photograph above it is of. See sceneArt.
+            place={branch.slug}
             onOpen={(l) => {
               const u = allUnits.find((x) => x.id === l.unitId);
               const les = u?.lessons.find((x) => x.id === l.id);
               if (u && les) openLesson(u, les);
             }}
+            onLocked={() => openPaywall()}
           />
-
-          {/* One unit open at a time. The rest sit closed, so a 29-lesson branch
-              reads as five lines plus the one road you're actually on. */}
-          <View
-            style={styles.unitList}
-            onLayout={(e) => {
-              listY.current = e.nativeEvent.layout.y;
-            }}
-          >
-            {units.map((u) => (
-              <UnitCard
-                key={u.unit.id}
-                model={u}
-                glyph={pres.glyph}
-                open={openId === u.unit.id}
-                mountBody={openId === u.unit.id || listReady}
-                cel={cel}
-                celDoneIndex={celTarget?.unitId === u.unit.id ? celTarget.doneIndex : null}
-                onToggle={() => toggleUnit(u.unit.id)}
-                onOpenLesson={(lesson) => openLesson(u.unit, lesson)}
-                onLockedPress={openPaywall}
-                onMeasure={(y, h) => {
-                  if (y != null) unitY.current[u.unit.id] = y;
-                  if (h != null) bodyH.current[u.unit.id] = h;
-                }}
-              />
-            ))}
-          </View>
         </ScrollView>
+
+        {/* The drawer itself, drawn AFTER the scroll view so it lies over the
+            world rather than being clipped by it — and with a full-screen catcher
+            behind it, so a tap anywhere else puts it away. */}
+        <AnimatePresence>
+          {drawerOpen && (
+            <Pressable
+              key="catcher"
+              style={StyleSheet.absoluteFill}
+              onPress={() => setDrawerOpen(false)}
+            />
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {drawerOpen && (
+            <MotiView
+              key="drawer"
+              from={{ opacity: 0, translateY: -8 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              exit={{ opacity: 0, translateY: -8 }}
+              transition={{ type: 'timing', duration: 200 }}
+              style={[styles.drawer, { top: barBottom + 6 }]}
+            >
+              <ScrollView
+                style={{ maxHeight: 380 }}
+                showsVerticalScrollIndicator={false}
+                nestedScrollEnabled
+              >
+                {drawerUnits.map((u) => {
+                  const here = focusUnitId ? u.unit.id === focusUnitId : u.unit.id === firstIncomplete;
+                  const expanded = openUnitId === u.unit.id;
+                  return (
+                    <View key={u.unit.id}>
+                      <Pressable
+                        onPress={() => toggleUnit(u)}
+                        style={({ pressed }) => [
+                          styles.unitRow,
+                          here && styles.unitRowHere,
+                          pressed && { opacity: 0.6 },
+                        ]}
+                      >
+                        <View style={{ flex: 1, minWidth: 0 }}>
+                          <Text style={styles.unitKicker}>
+                            UNIT {u.index + 1}
+                            {here ? ' · HERE' : ''}
+                          </Text>
+                          <Text style={styles.unitName} numberOfLines={1}>{u.unit.name}</Text>
+                        </View>
+                        <Text style={styles.unitCount}>{u.done}/{u.total}</Text>
+                        <MotiView
+                          animate={{ rotate: expanded ? '0deg' : '-90deg' }}
+                          transition={{ type: 'timing', duration: 160 }}
+                          style={styles.unitChev}
+                        >
+                          <SketchIcon name="chevron-down" size={11} color={InkSoft} />
+                        </MotiView>
+                      </Pressable>
+
+                      {/* THE LESSONS. A finished one a free reader may not reopen
+                          still shows its tick — they did do it — and carries a
+                          lock beside it. Greyed rather than hidden, because the
+                          point of the list is to show what is there. */}
+                      {expanded && u.lessons.map((lm) => {
+                        const dim = !lm.open;
+                        return (
+                          <Pressable
+                            key={lm.lesson.id}
+                            onPress={() => pickLesson(u, lm)}
+                            style={({ pressed }) => [
+                              styles.lessonRow,
+                              pressed && lm.open && { opacity: 0.55 },
+                              pressed && lm.needsPass && { opacity: 0.75 },
+                            ]}
+                          >
+                            <Text style={[styles.lessonNo, dim && { color: LockGray }]}>
+                              {String(lm.li + 1).padStart(2, '0')}
+                            </Text>
+                            <Text
+                              style={[
+                                styles.lessonName,
+                                dim && { color: LockGray },
+                                lm.state === 'current' && lm.open && styles.lessonNext,
+                              ]}
+                              numberOfLines={1}
+                            >
+                              {lm.lesson.title}
+                            </Text>
+                            {lm.state === 'done' && (
+                              <SketchIcon name="check" size={11} color={dim ? LockGray : InkSoft} />
+                            )}
+                            {dim && (
+                              <View style={{ marginLeft: 6 }}>
+                                <SketchIcon name="lock" size={11} color={LockGray} />
+                              </View>
+                            )}
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  );
+                })}
+              </ScrollView>
+
+              {/* Said once, quietly, and only to the readers it applies to: the
+                  difference between a control that looks broken and one that is
+                  plainly not theirs yet. */}
+              {!isPro && (
+                <Pressable
+                  onPress={() => {
+                    setDrawerOpen(false);
+                    openPaywall();
+                  }}
+                  style={({ pressed }) => [styles.drawerHint, pressed && { opacity: 0.6 }]}
+                >
+                  <Text style={styles.drawerHintText}>
+                    Scholar’s Pass reopens any lesson you have finished.
+                  </Text>
+                </Pressable>
+              )}
+            </MotiView>
+          )}
+        </AnimatePresence>
       </SafeAreaView>
     </ScreenTransition>
   );
-}
-
-/* ---------------- The unit card ---------------- */
-
-/** One unit, open or closed. It is the SAME card in both states — the header
- *  morphs and the body expands, which is what lets the accordion be animated at
- *  all. Swapping a compact bar for a different card can only ever cut. */
-function UnitCard({
-  model,
-  glyph,
-  open,
-  mountBody,
-  cel,
-  celDoneIndex,
-  onToggle,
-  onOpenLesson,
-  onLockedPress,
-  onMeasure,
-}: {
-  model: UnitModel;
-  glyph: GlyphName;
-  open: boolean;
-  /** Whether to build the (invisible, when closed) contents yet. */
-  mountBody: boolean;
-  /** 0→1 advance clock, shared by the whole screen. */
-  cel: SharedValue<number>;
-  /** Index within THIS unit of the lesson just finished, or null if not this one. */
-  celDoneIndex: number | null;
-  onToggle: () => void;
-  onOpenLesson: (lesson: Lesson) => void;
-  onLockedPress: () => void;
-  onMeasure: (y: number | null, h: number | null) => void;
-}) {
-  const p = useSharedValue(open ? 1 : 0);
-  // Natural height of the body, measured once. The body is absolutely
-  // positioned so that clipping its parent to an animated height never squeezes
-  // it — otherwise measuring it would depend on the animation measuring it.
-  const bodyHeight = useSharedValue(0);
-  const dim = model.state === 'locked';
-
-  useEffect(() => {
-    p.value = withTiming(open ? 1 : 0, { duration: OPEN_MS, easing: EASE });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-
-  // A locked unit is quiet while closed and comes up to full ink as it opens.
-  // For every other unit both ends are identical, so nothing appears to change.
-  const c0Border = model.state === 'locked' ? DimBorder : Ink;
-  const c0Paper = model.state === 'locked' ? DimPaper : Paper;
-  const c0Text = model.state === 'locked' ? LockGray : Ink;
-  const c0Kicker = model.state === 'locked' ? LockGray : Faint;
-
-  const cardStyle = useAnimatedStyle(() => ({
-    borderColor: interpolateColor(p.value, [0, 1], [c0Border, Ink]),
-    backgroundColor: interpolateColor(p.value, [0, 1], [c0Paper, Paper]),
-  }));
-
-  const slotStyle = useAnimatedStyle(() => {
-    const size = interpolate(p.value, [0, 1], [MARK, TILE]);
-    return { width: size, height: size };
-  });
-
-  // The two occupants of the left slot cross over rather than cutting: the mark
-  // is gone before the glyph tile is really there, so they never both read at
-  // once and the slot looks like one thing growing.
-  const markStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(p.value, [0, 0.42], [1, 0], Extrapolation.CLAMP),
-  }));
-  const tileStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(p.value, [0.38, 1], [0, 1], Extrapolation.CLAMP),
-  }));
-  const countStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(p.value, [0, 0.5], [1, 0], Extrapolation.CLAMP),
-  }));
-  const chevStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${interpolate(p.value, [0, 1], [-90, 0])}deg` }],
-  }));
-  const titleStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(p.value, [0, 1], [c0Text, Ink]),
-  }));
-  const kickerStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(p.value, [0, 1], [c0Kicker, InkSoft]),
-  }));
-
-  // The body's height IS the animation. Its contents fade in over the back half
-  // so the text isn't legible while it's still sliding.
-  const bodyStyle = useAnimatedStyle(() => ({
-    height: p.value * bodyHeight.value,
-    opacity: interpolate(p.value, [0, 0.4, 1], [0, 0, 1], Extrapolation.CLAMP),
-  }));
-
-  return (
-    <Animated.View
-      style={[styles.card, cardStyle]}
-      onLayout={(e) => onMeasure(e.nativeEvent.layout.y, null)}
-    >
-      <Pressable onPress={onToggle} style={({ pressed }) => [styles.head, pressed && { opacity: 0.68 }]}>
-        <Animated.View style={[styles.slot, slotStyle]}>
-          <Animated.View style={[styles.slotItem, markStyle]}>
-            <UnitMark state={model.state} />
-          </Animated.View>
-          <Animated.View style={[styles.slotItem, tileStyle]}>
-            <View style={styles.tile}>
-              <Glyph name={glyph} size={22} color={Ink} />
-            </View>
-          </Animated.View>
-        </Animated.View>
-
-        <View style={styles.headText}>
-          <Animated.Text style={[styles.kicker, kickerStyle]}>UNIT {model.index + 1}</Animated.Text>
-          <Animated.Text style={[styles.name, titleStyle]} numberOfLines={2}>
-            {model.unit.name}
-          </Animated.Text>
-        </View>
-
-        <Animated.Text style={[styles.count, countStyle, dim && { color: LockGray }]}>
-          {model.done}/{model.total}
-        </Animated.Text>
-        <Animated.View style={chevStyle}>
-          <SketchIcon name="chevron-down" size={16} color={Faint} />
-        </Animated.View>
-      </Pressable>
-
-      <Animated.View style={[styles.bodyClip, bodyStyle]} pointerEvents={open ? 'auto' : 'none'}>
-        {!mountBody ? null : (
-        <View
-          style={styles.body}
-          onLayout={(e) => {
-            const h = e.nativeEvent.layout.height;
-            bodyHeight.value = h;
-            onMeasure(null, h);
-          }}
-        >
-          <Text style={styles.desc}>{model.unit.description}</Text>
-
-          <View style={styles.metaRow}>
-            {model.state === 'locked' ? (
-              <>
-                <SketchIcon name="lock" size={12} color={LockGray} />
-                <Text style={styles.metaLocked}>
-                  Finish Unit {model.index} — or open this one now with Scholar’s Pass
-                </Text>
-              </>
-            ) : (
-              <Text style={styles.metaCount}>
-                {model.done} of {model.total} complete
-              </Text>
-            )}
-          </View>
-
-          <View style={styles.timeline}>
-            {model.lessons.map((L, i) => (
-              <LessonNode
-                key={L.lesson.id}
-                model={L}
-                first={i === 0}
-                /* the line INTO this node is inked once the one before it is done */
-                reached={i > 0 && model.lessons[i - 1].state === 'done'}
-                cel={cel}
-                /* The finished lesson takes the tick; the one after it owns the
-                   line (a node's connector is the one ABOVE it) and the words. */
-                celRole={
-                  celDoneIndex == null
-                    ? null
-                    : i === celDoneIndex
-                      ? 'done'
-                      : i === celDoneIndex + 1
-                        ? 'next'
-                        : null
-                }
-                onPress={() => onOpenLesson(L.lesson)}
-                onLockedPress={onLockedPress}
-              />
-            ))}
-          </View>
-        </View>
-        )}
-      </Animated.View>
-    </Animated.View>
-  );
-}
-
-/** The state mark the header carries while the unit is closed. */
-function UnitMark({ state }: { state: UnitModel['state'] }) {
-  if (state === 'done') {
-    return (
-      <View style={styles.markDone}>
-        <SketchIcon name="check" size={12} color={Paper} />
-      </View>
-    );
-  }
-  if (state === 'locked') {
-    return (
-      <View style={styles.markPlain}>
-        <SketchIcon name="lock" size={13} color={LockGray} />
-      </View>
-    );
-  }
-  if (state === 'current') {
-    return (
-      <View style={styles.markCurrent}>
-        <View style={styles.markCurrentPip} />
-      </View>
-    );
-  }
-  return <View style={styles.markOpen} />;
-}
-
-/* ---------------- The timeline ---------------- */
-
-/** One stop on the road: the dot, the lesson name beneath it, and the line down
- *  to the next. The lesson you're up to is the one that opens out — it gets its
- *  description and the button; everything else stays a name. */
-function LessonNode({
-  model,
-  first,
-  reached,
-  cel,
-  celRole,
-  onPress,
-  onLockedPress,
-}: {
-  model: LessonModel;
-  first: boolean;
-  reached: boolean;
-  cel: SharedValue<number>;
-  /** 'done' = the lesson just finished · 'next' = the one it just unlocked. */
-  celRole: 'done' | 'next' | null;
-  onPress: () => void;
-  onLockedPress: () => void;
-}) {
-  const { lesson, state, gatedByPro } = model;
-  const locked = state === 'locked';
-  // A pro-gated next lesson is tappable (offers the Pass); other locked lessons
-  // (mid-unit, not yet reached) stay inert.
-  const pressable = !locked || gatedByPro;
-  const handlePress = locked ? (gatedByPro ? onLockedPress : undefined) : onPress;
-  // The gated node is a unit's next lesson, so it earns the same expanded
-  // treatment as a real current lesson — just with the Pass behind it.
-  const expanded = state === 'current' || gatedByPro;
-
-  // THE NODE IS ALREADY IN ITS FINISHED STATE when this screen mounts, because the
-  // completion was written before we navigated. So the animation does not change
-  // the layout — it only reveals what is already laid out. That matters: growing a
-  // node mid-flight would shove every row under it and the "line" would be chasing
-  // a moving target. Height is settled; only ink moves.
-  const dotStyle = useAnimatedStyle(() => {
-    if (celRole !== 'done') return {};
-    const e = interpolate(cel.value, CEL_DOT, [0, 1], Extrapolation.CLAMP);
-    return { opacity: e, transform: [{ scale: 0.72 + 0.28 * e }] };
-  });
-  // The OLD look of the finished node — the hollow current ring — held underneath
-  // and wiped out as the filled one arrives, so the change is a swap rather than a
-  // pop from nothing.
-  const ghostStyle = useAnimatedStyle(() => {
-    if (celRole !== 'done') return { opacity: 0 };
-    return { opacity: 1 - interpolate(cel.value, CEL_DOT, [0, 1], Extrapolation.CLAMP) };
-  });
-  // The line runs DOWNWARD out of the dot above it: scaled from its top edge, so
-  // it grows toward the next lesson rather than out of its own middle.
-  const connStyle = useAnimatedStyle(() => {
-    if (celRole !== 'next') return {};
-    return { transform: [{ scaleY: interpolate(cel.value, CEL_LINE, [0, 1], Extrapolation.CLAMP) }] };
-  });
-  const titleStyle = useAnimatedStyle(() => {
-    if (celRole !== 'next') return {};
-    const e = interpolate(cel.value, CEL_WORD, [0, 1], Extrapolation.CLAMP);
-    return { color: interpolateColor(e, [0, 1], [LockGray, Ink]) };
-  });
-  const bodyStyle = useAnimatedStyle(() => {
-    if (celRole !== 'next') return {};
-    return { opacity: interpolate(cel.value, CEL_WORD, [0, 1], Extrapolation.CLAMP) };
-  });
-
-  return (
-    <View style={styles.nodeBlock}>
-      {!first && (
-        <Animated.View
-          style={[
-            styles.conn,
-            reached ? styles.connInk : styles.connFaint,
-            celRole === 'next' && styles.connGrow,
-            connStyle,
-          ]}
-        />
-      )}
-      <Pressable
-        onPress={handlePress}
-        disabled={!pressable}
-        hitSlop={6}
-        style={({ pressed }) => [styles.nodeTap, pressed && pressable && { opacity: 0.6 }]}
-      >
-        {celRole === 'done' ? (
-          <View style={styles.dotSwap}>
-            <Animated.View style={[styles.dotSwapLayer, ghostStyle]}>
-              <View style={styles.dotCurrent}>
-                <View style={styles.dotCurrentPip} />
-              </View>
-            </Animated.View>
-            <Animated.View style={dotStyle}>
-              <LessonDot state={state} gatedByPro={gatedByPro} />
-            </Animated.View>
-          </View>
-        ) : (
-          <LessonDot state={state} gatedByPro={gatedByPro} />
-        )}
-
-        <Animated.Text
-          style={[
-            styles.nodeTitle,
-            expanded && styles.nodeTitleCurrent,
-            locked && !gatedByPro && { color: LockGray },
-            titleStyle,
-          ]}
-          numberOfLines={2}
-        >
-          {lesson.title}
-        </Animated.Text>
-
-        {expanded && (
-          <Animated.View style={[styles.nodeExpand, bodyStyle]}>
-            <Text style={styles.nodeDesc} numberOfLines={2}>
-              {gatedByPro ? 'Locked until the earlier units are done' : lesson.description}
-            </Text>
-            <View style={[styles.startBtn, gatedByPro && styles.unlockBtn]}>
-              <Text style={[styles.startText, gatedByPro && { color: Paper }]}>
-                {gatedByPro ? 'UNLOCK' : '▶ START'}
-              </Text>
-            </View>
-          </Animated.View>
-        )}
-      </Pressable>
-    </View>
-  );
-}
-
-function LessonDot({ state, gatedByPro }: { state: LessonState; gatedByPro: boolean }) {
-  if (state === 'done') {
-    return (
-      <View style={styles.dotDone}>
-        <SketchIcon name="check" size={11} color={Paper} />
-      </View>
-    );
-  }
-  if (state === 'current') {
-    return (
-      <View style={styles.dotCurrent}>
-        <View style={styles.dotCurrentPip} />
-      </View>
-    );
-  }
-  if (gatedByPro) {
-    return (
-      <View style={styles.dotGated}>
-        <SketchIcon name="lock" size={12} color={LockGray} />
-      </View>
-    );
-  }
-  return <View style={styles.dotLocked} />;
 }
 
 const styles = StyleSheet.create({
@@ -787,11 +524,92 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 4,
-    paddingBottom: 12,
+    paddingBottom: 8,
   },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   brand: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, letterSpacing: 2 },
   dots: { fontSize: 9, color: '#C9C5BB', letterSpacing: 2 },
+
+  // ── the units box ──────────────────────────────────────────────────────────
+  unitsBar: { paddingHorizontal: 20, paddingBottom: 10, alignItems: 'flex-start' },
+  unitsBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 4,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    backgroundColor: Paper,
+  },
+  unitsBoxOpen: { backgroundColor: Ink },
+  unitsLabel: { fontFamily: 'Inter_700Bold', fontSize: 11, color: Ink, letterSpacing: 1 },
+
+  // ── the drawer ─────────────────────────────────────────────────────────────
+  drawer: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    maxWidth: 320,
+    borderWidth: 1.5,
+    borderColor: Ink,
+    borderRadius: 6,
+    backgroundColor: Paper,
+    paddingVertical: 4,
+    // A hard offset shadow, the same device the thinker cards use — a blurred one
+    // is a grey smudge in a two-tone app.
+    shadowColor: Ink,
+    shadowOffset: { width: 3, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 8,
+  },
+  unitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  unitRowHere: { backgroundColor: '#F4F1EA' },
+  unitKicker: { fontFamily: 'Inter_700Bold', fontSize: 8.5, color: Faint, letterSpacing: 1.4 },
+  unitName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 14.5, color: Ink, marginTop: 2 },
+  unitCount: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft },
+  lessonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 7,
+    paddingLeft: 18,
+    paddingRight: 12,
+    gap: 8,
+  },
+  lessonNo: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 9,
+    letterSpacing: 0.6,
+    color: Faint,
+    width: 16,
+  },
+  lessonName: {
+    flex: 1,
+    minWidth: 0,
+    fontFamily: 'Inter_400Regular',
+    fontSize: 12.5,
+    color: Ink,
+  },
+  lessonNext: { fontFamily: 'Inter_600SemiBold' },
+
+  unitChev: { transform: [{ scaleX: -1 }] },
+  drawerHint: {
+    borderTopWidth: 1,
+    borderTopColor: FaintLine,
+    paddingHorizontal: 12,
+    paddingTop: 9,
+    paddingBottom: 7,
+    marginTop: 4,
+  },
+  drawerHintText: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, lineHeight: 16 },
 
   scroll: { paddingHorizontal: 20, paddingBottom: 48 },
 
@@ -830,95 +648,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 5, backgroundColor: 'rgba(16,15,13,0.35)',
   },
   pillText: { fontFamily: 'Inter_500Medium', fontSize: 9, color: ArtCream, letterSpacing: 1.5 },
-
-  unitList: { marginTop: 20, gap: 10 },
-
-  // The card — one shape for both states
-  card: { borderWidth: 1.5, borderRadius: 5, overflow: 'hidden' },
-  head: { flexDirection: 'row', alignItems: 'center', paddingVertical: 13, paddingHorizontal: 14 },
-  slot: { alignItems: 'center', justifyContent: 'center' },
-  slotItem: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
-  tile: { width: TILE, height: TILE, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
-  headText: { flex: 1, minWidth: 0, marginLeft: 12, marginRight: 8 },
-  kicker: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.5 },
-  name: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, marginTop: 2, lineHeight: 22 },
-  count: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, letterSpacing: 0.5, marginRight: 10 },
-
-  markDone: { width: MARK, height: MARK, borderRadius: MARK / 2, backgroundColor: Ink, alignItems: 'center', justifyContent: 'center' },
-  markPlain: { width: MARK, height: MARK, alignItems: 'center', justifyContent: 'center' },
-  markCurrent: {
-    width: MARK, height: MARK, borderRadius: MARK / 2, borderWidth: 2.5, borderColor: Ink,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  markCurrentPip: { width: 8, height: 8, borderRadius: 4, backgroundColor: Ink },
-  markOpen: { width: MARK, height: MARK, borderRadius: MARK / 2, borderWidth: 1.8, borderColor: Faint },
-
-  // The expanding body
-  bodyClip: { overflow: 'hidden' },
-  body: { position: 'absolute', left: 0, right: 0, top: 0, paddingHorizontal: 14, paddingBottom: 15 },
-  desc: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12.5, color: InkSoft, lineHeight: 18 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 12 },
-  metaCount: { fontFamily: 'Inter_500Medium', fontSize: 9.5, color: Faint, letterSpacing: 1.2 },
-  metaLocked: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 9.5, color: LockGray, letterSpacing: 0.6, lineHeight: 14 },
-
-  // Timeline
-  timeline: { alignItems: 'center', marginTop: 20, paddingBottom: 4 },
-  nodeBlock: { alignItems: 'center', alignSelf: 'stretch' },
-  conn: { width: 2, height: 26, borderRadius: 1 },
-  connInk: { backgroundColor: Ink },
-  connFaint: { backgroundColor: FaintLine },
-  // Grow from the TOP edge, so the line runs down out of the dot above it toward
-  // the lesson it is unlocking. Scaled about its centre it would open from the
-  // middle in both directions, which reads as a shutter rather than a path.
-  connGrow: { transformOrigin: '50% 0%' },
-  // The two dot looks are stacked so the old one can wipe out under the new one.
-  // The layer is absolute and centred, so swapping them cannot nudge the row.
-  dotSwap: { alignItems: 'center', justifyContent: 'center' },
-  dotSwapLayer: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
-  // The expanded half of a current node, wrapped so the advance can fade it in as
-  // one piece rather than animating the description and the button separately.
-  nodeExpand: { alignSelf: 'stretch', alignItems: 'center' },
-  // paddingBottom is what keeps the line from starting flush against the last
-  // line of the title — without it the two touch and the road looks like it is
-  // struck through the words.
-  nodeTap: { alignItems: 'center', alignSelf: 'stretch', paddingHorizontal: 8, paddingBottom: 11 },
-
-  dotDone: { width: 21, height: 21, borderRadius: 10.5, backgroundColor: Ink, alignItems: 'center', justifyContent: 'center' },
-  dotCurrent: {
-    width: 27, height: 27, borderRadius: 13.5, borderWidth: 2.5, borderColor: Ink,
-    backgroundColor: Paper, alignItems: 'center', justifyContent: 'center',
-  },
-  dotCurrentPip: { width: 11, height: 11, borderRadius: 5.5, backgroundColor: Ink },
-  dotGated: {
-    width: 25, height: 25, borderRadius: 12.5, borderWidth: 1.8, borderColor: LockGray,
-    backgroundColor: Paper, alignItems: 'center', justifyContent: 'center',
-  },
-  dotLocked: { width: 15, height: 15, borderRadius: 7.5, borderWidth: 1.8, borderColor: LockGray, backgroundColor: Paper },
-
-  nodeTitle: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 15,
-    color: Ink,
-    lineHeight: 20,
-    textAlign: 'center',
-    marginTop: 9,
-    maxWidth: 250,
-  },
-  nodeTitleCurrent: { fontSize: 17.5, lineHeight: 23 },
-  nodeDesc: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontStyle: 'italic',
-    fontSize: 12.5,
-    color: InkSoft,
-    lineHeight: 18,
-    textAlign: 'center',
-    marginTop: 6,
-    maxWidth: 260,
-  },
-  startBtn: {
-    borderWidth: 1.5, borderColor: Ink, borderRadius: 4,
-    paddingHorizontal: 18, paddingVertical: 8, backgroundColor: Paper, marginTop: 12,
-  },
-  unlockBtn: { backgroundColor: Ink, borderColor: Ink },
-  startText: { fontFamily: 'Inter_700Bold', fontSize: 11, color: Ink, letterSpacing: 0.8 },
 });
