@@ -1,16 +1,34 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { useEffect, useMemo, useRef } from 'react';
+import { View, Text, TextInput, StyleSheet } from 'react-native';
 import Svg, {
   Path, Circle, Line as SvgLine, Defs, LinearGradient, Stop, G,
 } from 'react-native-svg';
 import Animated, {
-  useSharedValue, useAnimatedProps, useAnimatedStyle, withTiming, withDelay, Easing,
+  useSharedValue, useAnimatedProps, useAnimatedStyle, withTiming, withDelay, runOnJS, Easing,
 } from 'react-native-reanimated';
 import { rankProgress } from '@/data/ranks';
 import { INK, MID, PAPER, PAPER_SHADE, FAINT } from './tone';
 import type { XpEvent } from '@/stores/userDataStore';
 
 const APath = Animated.createAnimatedComponent(Path);
+/**
+ * THE COUNTER IS A TextInput, AND THAT IS THE WHOLE PERFORMANCE FIX.
+ *
+ * It was a <Text> fed by React state from a `setInterval` running every 16ms —
+ * sixty state updates a second for the 1.6s the line takes to grow, each one
+ * re-rendering this component and with it the whole <Svg>: two paths, four
+ * gridlines, the node circles and every label. That is a re-render storm inside
+ * a ScrollView, which is exactly when the reader is scrolling, and it is why the
+ * profile went sticky at the graph.
+ *
+ * Reanimated can only write to a NATIVE PROP from the UI thread, and `text` on a
+ * TextInput is one; a Text's children are not. So the number is a read-only,
+ * unfocusable TextInput whose `text` is written straight from the same shared
+ * value that drives the line. Zero React renders for the entire count, and the
+ * digits are now driven by the identical clock as the stroke rather than by a
+ * second timer that agreed with it only approximately.
+ */
+const ACounter = Animated.createAnimatedComponent(TextInput);
 
 /**
  * THE CLIMB FROM THE RANK YOU HOLD TO THE NEXT ONE.
@@ -159,8 +177,7 @@ export default function RankClimbChart({
   const draw = useSharedValue(fresh ? geo.from : 1);
   const mark = useSharedValue(fresh ? 0 : 1);
   const played = useRef(false);
-  const [shownXP, setShownXP] = useState(() =>
-    Math.round((fresh ? geo.from : 1) * (Math.min(totalXP, ceil) - floor)));
+  const gained = Math.max(0, Math.min(totalXP, ceil) - floor);
 
   useEffect(() => {
     if (!active || played.current) return;
@@ -168,27 +185,24 @@ export default function RankClimbChart({
     if (!fresh) {
       draw.value = 1;
       mark.value = withDelay(200, withTiming(1, { duration: 300 }));
-      setShownXP(Math.min(totalXP, ceil) - floor);
       onSeen?.();
       return;
     }
     // A beat and a half to take in where you were, then the line grows.
     const HOLD = 1500, GROW = 1600;
-    draw.value = withDelay(HOLD, withTiming(1, { duration: GROW, easing: Easing.inOut(Easing.cubic) }));
+    // `onSeen` rides the line's OWN completion rather than a timer that finished
+    // at roughly the same moment.
+    const finish = onSeen;
+    draw.value = withDelay(HOLD, withTiming(
+      1, { duration: GROW, easing: Easing.inOut(Easing.cubic) },
+      (ok) => { 'worklet'; if (ok && finish) runOnJS(finish)(); },
+    ));
     mark.value = withDelay(HOLD + GROW - 250, withTiming(1, { duration: 380 }));
-    const gained = Math.min(totalXP, ceil) - floor;
-    const t0 = Date.now() + HOLD;
-    const id = setInterval(() => {
-      const p = Math.min(1, Math.max(0, (Date.now() - t0) / GROW));
-      const eased = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-      setShownXP(Math.round((geo.from + (1 - geo.from) * eased) * gained));
-      if (p >= 1) { clearInterval(id); onSeen?.(); }
-    }, 16);
-    return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
   const lineProps = useAnimatedProps(() => ({ strokeDashoffset: (1 - draw.value) * geo.len }));
+  const countProps = useAnimatedProps(() => ({ text: `+${Math.round(draw.value * gained)} XP` }) as never);
   const areaProps = useAnimatedProps(() => ({ opacity: draw.value * 0.9 }));
   const headStyle = useAnimatedStyle(() => ({
     opacity: mark.value,
@@ -266,7 +280,14 @@ export default function RankClimbChart({
           pointerEvents="none"
         >
           <View style={styles.callout}>
-            <Text style={styles.calloutText}>+{shownXP.toLocaleString()} XP</Text>
+            <ACounter
+              editable={false}
+              pointerEvents="none"
+              underlineColorAndroid="transparent"
+              defaultValue={`+${Math.round(draw.value * gained)} XP`}
+              style={[styles.calloutText, styles.counterInput]}
+              animatedProps={countProps}
+            />
           </View>
           <View style={styles.calloutTip} />
         </Animated.View>
@@ -286,6 +307,12 @@ export default function RankClimbChart({
 }
 
 const styles = StyleSheet.create({
+  // A TextInput carries platform padding and a minimum height that a Text does
+  // not, so it is stripped back to sit exactly where the old label sat.
+  counterInput: {
+    padding: 0, margin: 0, height: undefined, minHeight: 0,
+    includeFontPadding: false, textAlignVertical: 'center',
+  },
   card: {
     backgroundColor: PAPER,
     borderRadius: 14,
