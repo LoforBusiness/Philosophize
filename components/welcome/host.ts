@@ -250,9 +250,15 @@ function pivotFeet(from: Feet, to: Feet, u: number, lift: number): Feet {
 const RUN_FEET: Feet = { footL: footTarget(Math.PI, SPRINT), footR: footTarget(0, SPRINT) };
 
 /** Cycles per second while the legs are going and he is not. */
-const SPIN_RATE = 4.2;
+/**
+ * How far he GATHERS BACK before the run, in stage units.
+ *
+ * The anticipation is the whole of it: a figure that simply starts moving right
+ * has no weight, and the eye reads the first frames as a jump cut. Loading in the
+ * opposite direction first is what makes the release read as effort.
+ */
+const WINDUP_BACK = 30;
 /** Phase the wheel-spin has wound up to when the bolt takes over. */
-const SPIN_END_PH = 2 * Math.PI * SPIN_RATE * T_WINDUP;
 
 /**
  * One leg of the journey: the gait, foot-locked to distance, settling on arrival.
@@ -500,34 +506,37 @@ export function hostAt(t: number): HostPose {
     };
   }
 
-  // ── 7 · legs going, nothing happening ─────────────────────────────────────
+  // ── 7 · the wind-up ───────────────────────────────────────────────────────
   if (t < E2) {
     const u = clamp01((t - E1) / T_WINDUP);
-    // THE ONE PLACE IN THIS APP WHERE THE FEET ARE MEANT TO SLIDE.
+    // He GATHERS BACKWARD first, then holds coiled for the last third of the beat.
+    // The hold matters as much as the move: an anticipation with no stillness at
+    // the end of it is just a wobble.
+    const g = smooth(clamp01(u / 0.66));
+    const x = X_MARK - WINDUP_BACK * g;
+    // STEPPED, not slid. `stride` drives the cycle from DISTANCE, so the feet are
+    // planted the whole way back — the previous version spun the legs on the spot
+    // at 4.2 revolutions a second while the body moved fourteen units, which is
+    // why it read as running in place and then teleporting off.
     //
-    // Every other walk drives its phase from DISTANCE, which makes the foot-lock
-    // exact and is the rule (C22f). Here the phase is driven by TIME while the
-    // body barely moves, so the feet deliberately lose their purchase on the floor
-    // — that is the entire joke, and it only reads because every other step in the
-    // piece is properly planted.
-    // It is the SPRINT gait, not a gait of its own — the bolt picks the cycle up
-    // from exactly this phase a moment later, and two different gaits either side
-    // of that seam teleported a foot thirty-seven units however well the phases
-    // were matched.
-    const ph = 2 * Math.PI * SPIN_RATE * (t - E1);
-    const x = X_MARK + 14 * smooth(u);
-    const pelvH = WALK_PELV - 5 + SPRINT.bob * (0.5 - 0.5 * Math.cos(2 * ph));
+    // It settles onto RUN_FEET, which is SPRINT's phase 0 — exactly the frame the
+    // bolt below starts from, so the two share a pose rather than meeting at one.
+    const st = stride(X_MARK, X_MARK - WINDUP_BACK, x, SHUFFLE, RUN_FEET, DIR_OUT);
+    // Coiling: down into the crouch and further over the front foot.
+    const pelvH = lerp(WALK_PELV - 5, WALK_PELV - 17, g);
     const pel = { x, y: GROUND - pelvH };
-    const h = gaitHands(ph, SPRINT, pel, DIR_OUT);
+    // The arms are the run's OWN phase 0 — one forward, one back — which is a
+    // sprinter's set by construction, and means the bolt inherits them unchanged.
+    const h = gaitHands(0, SPRINT, pel, DIR_OUT);
     return {
       x,
       pelvH,
-      lean: 0.3 + 0.1 * u,
-      neck: -0.06,
+      lean: lerp(0.3, 0.66, g),
+      neck: -0.06 - 0.06 * g,
       face: 0,
       walking: 1,
-      footL: footTarget(ph + Math.PI, SPRINT),
-      footR: footTarget(ph, SPRINT),
+      footL: st.footL,
+      footR: st.footR,
       ...h,
       handK: 30,
       dir: DIR_OUT,
@@ -540,19 +549,28 @@ export function hostAt(t: number): HostPose {
     const u = clamp01((t - E2) / T_BOLT);
     // Traction, all at once. Quadratic out of the crouch, then flat out.
     const e = u < 0.34 ? 2.6 * u * u : 0.3 + (u - 0.34) * 1.06;
-    const x0 = X_MARK + 14;
+    // FROM WHERE THE WIND-UP LEFT HIM, which is behind the mark — so the bolt has
+    // a real runway and covers 44 units more than it used to in the same time.
+    const x0 = X_MARK - WINDUP_BACK;
     const x = x0 + (X_GONE - x0) * clamp01(e);
-    // Continues the wind-up's cycle rather than restarting it, so the frame the
-    // wheels finally bite is the next frame of the same run.
-    const ph = SPIN_END_PH + phaseOf(x0, x, SPRINT);
-    const pelvH = lerp(WALK_PELV - 5, WALK_PELV - 2, smooth(u * 3)) +
+    // The wind-up settled on SPRINT's phase 0, so the run simply carries on from
+    // there, distance-driven like every other walk in the piece.
+    const ph = phaseOf(x0, x, SPRINT);
+    // OUT OF THE COIL, not out of a stand. The bolt used to start from
+    // WALK_PELV−5 while the wind-up left him at −17, so he snapped twelve units
+    // upright on the first frame of the run — the pop that made the old exit read
+    // as two clips spliced together. He uncoils across the first third instead,
+    // which is what a sprinter's drive phase actually is.
+    const pelvH = lerp(WALK_PELV - 17, WALK_PELV - 2, smooth(clamp01(u * 2.2))) +
       SPRINT.bob * (0.5 - 0.5 * Math.cos(2 * ph));
     const pel = { x, y: GROUND - pelvH };
     const h = gaitHands(ph, SPRINT, pel, DIR_OUT);
     return {
       x,
       pelvH,
-      lean: 0.4 - 0.06 * u,
+      // Continues the wind-up's 0.66 and comes up as he reaches speed, rather
+      // than starting at 0.40 and snapping the torso back on frame one.
+      lean: lerp(0.66, 0.38, smooth(clamp01(u * 1.8))),
       neck: -0.1,
       face: 0,
       walking: 1,
