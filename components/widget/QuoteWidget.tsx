@@ -8,11 +8,13 @@ import { FlexWidget, OverlapWidget, SvgWidget, TextWidget } from 'react-native-a
 //   3. content — kicker/date, the quote, attribution, and the streak book
 // Tapping deep-links into the quoted thinker's profile.
 
-const PAPER = '#FAF7F0';
-const INK = '#1A1A1A';
-const INK_SOFT = '#6B6B6B';
-const HAIRLINE = '#D9D5CB';
-const SKETCH = '#DCD7CA'; // background scene strokes — light enough to sit behind text
+import { backgroundById, type WidgetBackground } from './backgrounds';
+
+// Colours are no longer constants here: they come from the chosen scene, because
+// a scene decides whether the card is paper-with-ink-type or ink-with-cream-type
+// and the two cannot share a palette. See components/widget/backgrounds.ts for
+// the contrast arithmetic that says how bold each scene's art is allowed to be,
+// and scripts/check-widget-contrast.mjs for the proof that it holds.
 
 export interface QuoteWidgetProps {
   text: string;
@@ -20,20 +22,13 @@ export interface QuoteWidgetProps {
   dateLabel: string;
   philosopherId: string;
   streak: number;
+  /** Omitted only by callers that predate scenes; falls back to the first. */
+  background?: WidgetBackground;
 }
-
-// The bare-trees-on-a-hill vignette from the lesson scenes, drawn faint so the
-// quote stays perfectly legible on top of it.
-const SCENE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 110">
-  <path d="M6 104 Q120 86 234 102" stroke="${SKETCH}" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <path d="M20 100 L20 95 M34 98 L34 92 M50 96 L50 91" stroke="${SKETCH}" stroke-width="2.6" stroke-linecap="round"/>
-  <path d="M70 98 L70 30 M70 54 L52 34 M70 68 L90 44 M70 44 L85 27" stroke="${SKETCH}" stroke-width="4" fill="none" stroke-linecap="round"/>
-  <path d="M160 100 L160 12 M160 36 L138 16 M160 56 L184 28 M160 76 L136 58 M160 27 L177 10" stroke="${SKETCH}" stroke-width="4.4" fill="none" stroke-linecap="round"/>
-</svg>`;
 
 // The app's streak book (StreakBook.tsx paths), with the day count written on the
 // cover. Stroke widths are heavier than in-app because the widget renders small.
-function bookSvg(streak: number): string {
+function bookSvg(streak: number, INK: string, PAPER: string): string {
   const label = String(Math.max(0, Math.min(999, streak)));
   const fs = label.length >= 3 ? 56 : label.length === 2 ? 66 : 80;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260">
@@ -51,37 +46,34 @@ function bookSvg(streak: number): string {
 </svg>`;
 }
 
-export function QuoteWidget({ text, author, dateLabel, philosopherId, streak }: QuoteWidgetProps) {
+export function QuoteWidget({ text, author, dateLabel, philosopherId, streak, background }: QuoteWidgetProps) {
+  const bg = background ?? backgroundById(null);
+  const { paper: PAPER, ink: INK, inkSoft: INK_SOFT, hairline: HAIRLINE } = bg;
   return (
     <OverlapWidget
       clickAction="OPEN_URI"
       clickActionData={{ uri: `philosophize://thinker/${philosopherId}` }}
       style={{ height: 'match_parent', width: 'match_parent' }}
     >
-      {/* 1 — paper card base */}
+      {/* 1 — card base. Also the border colour, which a dark scene has to invert
+              or the card loses its edge against a dark wallpaper. */}
       <FlexWidget
         style={{
           height: 'match_parent',
           width: 'match_parent',
           backgroundColor: PAPER,
           borderWidth: 2,
-          borderColor: INK,
+          borderColor: bg.dark ? INK : '#1A1A1A',
           borderRadius: 16,
         }}
       />
 
-      {/* 2 — faint scene, resting on the card's bottom-left */}
-      <FlexWidget
-        style={{
-          height: 'match_parent',
-          width: 'match_parent',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-          alignItems: 'flex-start',
-          padding: 8,
-        }}
-      >
-        <SvgWidget svg={SCENE_SVG} style={{ width: 216, height: 99 }} />
+      {/* 2 — the scene, FULL BLEED. It used to be a 216x99 vignette parked in the
+              bottom-left corner; scenes are composed for the whole card and carry
+              their own veil, so anything less would crop the composition and drop
+              the very thing that guarantees the type stays readable. */}
+      <FlexWidget style={{ height: 'match_parent', width: 'match_parent' }}>
+        <SvgWidget svg={bg.svg} style={{ height: 'match_parent', width: 'match_parent' }} />
       </FlexWidget>
 
       {/* 3 — content */}
@@ -146,7 +138,7 @@ export function QuoteWidget({ text, author, dateLabel, philosopherId, streak }: 
           </FlexWidget>
           <FlexWidget style={{ flexDirection: 'column', alignItems: 'center' }}>
             <SvgWidget
-              svg={bookSvg(streak)}
+              svg={bookSvg(streak, INK, PAPER)}
               accessibilityLabel={`${streak} day streak`}
               style={{ width: 44, height: 57 }}
             />

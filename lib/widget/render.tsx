@@ -4,13 +4,18 @@ import { QuoteWidget } from '@/components/widget/QuoteWidget';
 import { getRotatingQuote, todayLabel } from '@/lib/dailyQuote';
 import { readPinnedQuote } from './pin';
 import { readWidgetStreak } from './streak';
+import { readWidgetBackground } from './background';
 
 // Single source of truth for what the home-screen widget shows: the pinned quote
 // (or the 3-hour rotation) plus the live day streak. Used by the headless widget
 // task AND by every in-app refresh trigger, so the two can never drift apart.
 
 export async function buildQuoteWidget(): Promise<React.ReactElement> {
-  const [pinned, streak] = await Promise.all([readPinnedQuote(), readWidgetStreak()]);
+  const [pinned, streak, background] = await Promise.all([
+    readPinnedQuote(),
+    readWidgetStreak(),
+    readWidgetBackground(),
+  ]);
   const q = pinned ?? getRotatingQuote();
   return (
     <QuoteWidget
@@ -19,6 +24,7 @@ export async function buildQuoteWidget(): Promise<React.ReactElement> {
       dateLabel={todayLabel()}
       philosopherId={q.philosopherId}
       streak={streak}
+      background={background}
     />
   );
 }

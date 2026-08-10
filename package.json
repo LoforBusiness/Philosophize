@@ -88,7 +88,9 @@
     "check:bible": "node scripts/check-bible.mjs",
     "check:camera": "node scripts/check-camera.mjs",
     "check:poll": "node scripts/check-poll.mjs",
-    "check:access": "node scripts/check-access.mjs"
+    "check:access": "node scripts/check-access.mjs",
+    "check:widget": "node scripts/check-widget-contrast.mjs",
+    "sheet:widget": "node scripts/sheet-widget.mjs"
   },
   "overrides": {
     "@expo/require-utils": "56.1.6"

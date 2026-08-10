@@ -72,6 +72,11 @@ export interface AppSettings {
   // Daily quote widget (in-app, shown on a chosen screen)
   widgetEnabled: boolean;
   widgetPlacement: WidgetPlacement;
+  // Which scene the HOME-SCREEN widget is drawn on. Read outside Settings by
+  // lib/widget/background.ts, which the headless widget task calls — so this key
+  // meets the rule above. Values are ids from components/widget/backgrounds.ts;
+  // an unknown one falls back to the first scene rather than rendering nothing.
+  widgetBackground: string;
   // Sound + haptics: taps, the stickman's footfalls, the reward chime. Read by
   // lib/feedback.ts, which is the single gate both channels pass through — so
   // this key has a reader outside Settings, which is the rule above.
@@ -95,6 +100,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   quoteOfDay: true,
   widgetEnabled: false,
   widgetPlacement: 'home',
+  widgetBackground: 'grove',
   // `autoAdvance` was here and defaulted to TRUE, which is why finishing a lesson
   // threw the reader into the next one. Its behaviour is replaced by the advance
   // animation on the branch screen; the key is removed rather than defaulted off,

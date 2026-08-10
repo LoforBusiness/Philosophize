@@ -19,7 +19,9 @@ import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon'
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { ProfileArtFill, ProfileAvatar } from '@/components/shared/ProfileArt';
 import ProfileArtSheet from '@/components/shared/ProfileArtSheet';
+import { SvgXml } from 'react-native-svg';
 import { backgroundById } from '@/data/profileBackgrounds';
+import { WIDGET_BACKGROUNDS } from '@/components/widget/backgrounds';
 import { PROFILE_FONTS, profileNameStyle, profileNameText } from '@/data/profileFonts';
 import { signOut, deleteAccountCloud } from '@/lib/supabase/auth';
 import { signOutSocial } from '@/lib/auth/social';
@@ -645,6 +647,46 @@ function NotificationsSection() {
 
 /* ---------------- Display ---------------- */
 
+/**
+ * The home-screen widget's backdrop, chosen from thumbnails rather than a list of
+ * names — these are pictures, and "Colonnade" tells you nothing about what you are
+ * about to put on your home screen.
+ *
+ * Each thumbnail is the real scene SVG at the widget's own proportions, so what is
+ * previewed is exactly what Android will draw. Picking one re-renders any PLACED
+ * widget immediately; without that the change would not show until the next
+ * three-hour refresh and would read as broken. The require is dynamic and wrapped
+ * because it reaches react-native-android-widget, which does not exist on web or
+ * in Expo Go.
+ */
+function WidgetSceneRow() {
+  const chosen = useUserDataStore((s) => s.settings.widgetBackground);
+  const setSetting = useUserDataStore((s) => s.setSetting);
+  const pick = (id: string) => {
+    setSetting('widgetBackground', id);
+    try {
+      require('@/lib/widget/render').refreshQuoteWidget();
+    } catch {}
+  };
+  return (
+    <View style={styles.sceneRow}>
+      {WIDGET_BACKGROUNDS.map((b) => {
+        const on = b.id === chosen;
+        return (
+          <Pressable key={b.id} onPress={() => pick(b.id)} style={styles.sceneItem} hitSlop={4}>
+            <View style={[styles.sceneThumb, on && styles.sceneThumbOn]}>
+              <SvgXml xml={b.svg} width="100%" height="100%" />
+            </View>
+            <Text style={[styles.sceneName, on && styles.sceneNameOn]} numberOfLines={1}>
+              {b.name}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 function DisplaySection() {
   const settings = useUserDataStore((s) => s.settings);
   const setSetting = useUserDataStore((s) => s.setSetting);
@@ -668,9 +710,13 @@ function DisplaySection() {
           />
         </Row>
       ) : null}
+      <View style={styles.hr} />
+      <Row title="Home-Screen Widget" sub="The scene the quote is printed on" last stack>
+        <WidgetSceneRow />
+      </Row>
       <Text style={styles.footNote}>
-        This is the card inside the app. The Android home-screen widget is added from your home screen and
-        keeps its own quote.
+        The card inside the app and the Android home-screen widget keep their own quotes. The scene above is
+        the home-screen one; changing it redraws the widget straight away.
       </Text>
     </Card>
   );
@@ -1333,6 +1379,29 @@ const styles = StyleSheet.create({
   miniLabel: { fontFamily: 'Inter_400Regular', fontSize: 11, color: InkSoft, marginTop: 2 },
 
   footNote: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12, color: InkSoft, lineHeight: 19, marginTop: 18 },
+
+  // Widget scene picker. The thumbnails keep the widget's own 2.27:1 so the
+  // preview is the shape of the thing being chosen, not a crop of it.
+  sceneRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 2 },
+  sceneItem: { width: 66 },
+  sceneThumb: {
+    width: 66,
+    height: 29,
+    borderRadius: 7,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: InkFaint,
+    backgroundColor: Paper,
+  },
+  sceneThumbOn: { borderWidth: 2, borderColor: Ink },
+  sceneName: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 10,
+    color: InkSoft,
+    marginTop: 5,
+    textAlign: 'center',
+  },
+  sceneNameOn: { fontFamily: 'Inter_700Bold', color: Ink },
 
   // Subscription
   planRow: { flexDirection: 'row', gap: 14 },
