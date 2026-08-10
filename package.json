@@ -90,7 +90,8 @@
     "check:poll": "node scripts/check-poll.mjs",
     "check:access": "node scripts/check-access.mjs",
     "check:widget": "node scripts/check-widget-contrast.mjs",
-    "sheet:widget": "node scripts/sheet-widget.mjs"
+    "sheet:widget": "node scripts/sheet-widget.mjs",
+    "check:quickstart": "node scripts/check-quickstart-contrast.mjs"
   },
   "overrides": {
     "@expo/require-utils": "56.1.6"
