@@ -734,9 +734,35 @@ What a viewer complained about, and what the answers cost:
   accelerated for three and a half seconds and braked for three and a half more,
   with the stride cadence obediently doubling. Never use a symmetric ease for
   something that is supposed to be walking.
+- **One speed each, though — a shared duration inverts the cadence.** The span
+  is a fixed 322 units and it used to take 7 seconds *whatever the gait*, which
+  fixes the speed; and because foot phase is driven by distance,
+  `cadence = speed / stride`. Hold the speed and the gait with the SHORTEST steps
+  is forced to take the MOST of them, so the trudge churned at 6.18 steps a
+  second while the run ambled at 2.65 — backwards, and the trudge is the thing
+  that is supposed to look slow. `spanSeconds` gives each gait its own duration
+  (4.8s–9.0s) and `moves.ts` carries a **road shelf** of gaits at roughly double
+  the lesson strides, because a human gait cycle is ~0.8 of their own height and
+  the lesson walk's is 0.49 — fine across a stage in a second, half a stride at
+  road distance. It is a separate shelf because **53 scenes walk figures with
+  `WALK`** through `travelStance`; retuning the shared table would have restrided
+  every one of them.
 - **The ground is FLAT, on purpose.** It was a continuous curve, and the figure
   spent a whole branch trudging over knolls that also tilted him. What stops a
   level road being a progress bar is what grows on it and lies across it.
+- **`SETTLE_UNITS` is a fifth of a STRIDE, so compute it from one.** 7 is a fifth
+  of 34 and that was the only stride in the app, so the constant passed for one.
+  At road strides it is a ninth, the arrival had more to absorb in half the room,
+  and the settle went from 0.96 world units a frame to 2.32 — a scrape. Anything
+  written as an absolute that *means* a proportion breaks the day a second value
+  turns up.
+- **"Planted" is a branch of `footTarget`, not a distance from the ground.**
+  `check:walk` tested `|gap| < 0.05`, which cannot tell a foot that is DOWN from
+  one still coming down — the swing foot descends continuously, so whatever the
+  threshold, the last airborne sample falls inside it while travelling at full
+  swing speed, and a *landing* gets reported as a skate. Tightening the number
+  only changes which airborne sample is caught. Stance returns y **exactly 0**;
+  test that, and a planted foot measures 0.0000%.
 - **He only jumps at something drawn.** `obstacleAt` puts a log or boulder in
   about one span in three and `jumpForSpan` aims the apex at it. A hop over
   nothing is rule A1 in its plainest form, and it is what a flat road would

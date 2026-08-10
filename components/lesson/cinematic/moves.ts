@@ -224,12 +224,108 @@ export const DESCEND: Gait = {
   tilt: 0.16, armBase: 0.22, armSwing: 0.38, standH: 32,
 };
 
+// ── the road shelf: the same five gaits, at road scale ───────────────────────
+//
+// THE BRANCH ROAD IS THE ONE PLACE THAT PINS BOTH DISTANCE AND DURATION, and
+// that is a contradiction rather than a setting. A span is 322 world units and
+// it was walked in 7 seconds whatever the gait, so every gait travelled at
+// 1.08 body-heights a second. Foot phase is driven by DISTANCE (which is what
+// stops the feet skating), so cadence is not a free choice:
+//
+//     cadence = speed / stride
+//
+// Fix the speed and a short stride can only be paid for with more steps. The
+// five gaits came out at, in steps per second:
+//
+//     trudge 6.18 · stroll 5.71 · walk 4.36 · hurry 3.53 · run 2.65
+//
+// against 1.7–2.1 for a real walk and 2.6–3.2 for a real run. So four of the
+// five were churning, and the ORDER WAS INVERTED: the trudge — the slowest
+// thing on the road — moved its legs 2.3× faster than the run. That is the
+// whole of "its legs are moving really, really fast in a small distance", and
+// no amount of retiming one gait can fix it while the duration is shared.
+//
+// Two things follow, and they have to be done together:
+//
+//   · THE STRIDES ARE ROUGHLY DOUBLE the lesson shelf's. A human's gait cycle
+//     is about 0.8 of their own height; the lesson walk's is 0.49, which is
+//     fine for crossing a stage in a second and is half a stride at road
+//     distance. These run 0.84 → 1.09.
+//   · EACH GAIT KEEPS ITS OWN SPEED, so the span takes as long as that gait
+//     takes. See `spanSeconds` in worldPath — a trudge gets 9 seconds and a run
+//     4.8, which is the only way the cadence ordering comes out the right way
+//     round.
+//
+// They are a SEPARATE SHELF because 53 lesson scenes walk figures with `WALK`
+// through `travelStance`, over a couple of hundred stage units in under a
+// second. Those walks are not wrong and retuning the shared table to fix the
+// road would have quietly restrided every one of them. Lessons already solve
+// this properly — `travelStance` takes its duration FROM the distance — so the
+// road is the only consumer that needed its own numbers.
+//
+// The upper body is not duplicated: `roadBase` maps each of these back to the
+// lesson mode whose arms, head and lean it borrows.
+
+/** Road walk. Nothing to prove; the default journey between two lessons. */
+export const ROAD_WALK: Gait = {
+  S: 63, lift: 11, stance: 0.62, bob: 3.0, bobSign: -1,
+  tilt: 0.09, armBase: 0.09, armSwing: 0.42, standH: 34,
+};
+/** Road stroll. armSwing 0.50, not 0.30: at 0.30 the hands crossed 14 units of
+ *  a 43-unit-tall figure and read as pinned to the hips. */
+export const ROAD_STROLL: Gait = {
+  S: 60, lift: 8, stance: 0.66, bob: 2.2, bobSign: -1,
+  tilt: 0.11, armBase: 0.09, armSwing: 0.50, standH: 34,
+};
+/** Road hurry. Longer step, more lean, arms already at full pump. */
+export const ROAD_HURRY: Gait = {
+  S: 68, lift: 15, stance: 0.58, bob: 3.6, bobSign: -1,
+  tilt: -0.06, armBase: 0.09, armSwing: 0.60, standH: 34,
+};
+/** Road run. lift 19, not 26: at 26 the foot came up 0.46 of the figure's own
+ *  height — knee past the waist on every step, which is a cartoon prance and
+ *  was described exactly that way ("its feet were too high above the ground").
+ *  The long stride is the part worth keeping. */
+export const ROAD_RUN: Gait = {
+  S: 75, lift: 16, stance: 0.40, bob: 5.5, bobSign: -1,
+  tilt: -0.18, armBase: 0.09, armSwing: 0.85, standH: 34,
+};
+/** Road trudge. armSwing 0.60, not 0.22: "dead arms" was drawn as 4.4 units of
+ *  hand travel, which is not a tired arm, it is a missing one. A trudge swings
+ *  a little and LATE; the deadness now lives in the dropped head and the heavy
+ *  bob, where it can be seen. */
+export const ROAD_TRUDGE: Gait = {
+  S: 58, lift: 6, stance: 0.70, bob: 4.2, bobSign: -1,
+  tilt: -0.02, armBase: 0.09, armSwing: 0.75, standH: 34,
+};
+
+/** First road mode. `gaitForSpan` returns these; `worldPath.spanSeconds` times them. */
+export const ROAD_MODE_0 = 24;
+
+/**
+ * The lesson mode a road mode borrows its UPPER BODY from.
+ *
+ * Declared here, above `strideMode`, because a worklet that calls a worklet
+ * declared further down the file hits its temporal dead zone and throws at
+ * import — see the rule book. Plain modes pass through untouched.
+ */
+export function roadBase(mode: number): number {
+  'worklet';
+  return mode >= ROAD_MODE_0 ? mode - ROAD_MODE_0 : mode;
+}
+
 /**
  * Gait for a travel mode. 0 walk · 1 stroll · 2 hurry · 3 run · 4 trudge ·
  * 5 march · 6 sneak · 7 limp · 8 skip · 9 tiptoe · 10 back away · 11 pace.
+ * 24–28 are the road shelf: the same five at road scale.
  */
 export function gaitFor(mode: number): Gait {
   'worklet';
+  if (mode === 24) return ROAD_WALK;
+  if (mode === 25) return ROAD_STROLL;
+  if (mode === 26) return ROAD_HURRY;
+  if (mode === 27) return ROAD_RUN;
+  if (mode === 28) return ROAD_TRUDGE;
   if (mode === 1) return STROLL;
   if (mode === 2) return HURRY;
   if (mode === 3) return RUN;
@@ -558,7 +654,10 @@ export function strideMode(
   // on `span·ease01(u)`. Two curves meeting only at the ends, and a glide in
   // between — measured at 122 units of skate on a 220-unit walk, three and a half
   // strides. Every travel mode in this file went through it.
-  const w = moveBody(mode, span * tr + seed * 11 + lead, g);
+  // `roadBase` so a road mode borrows the lesson mode's arms, head and lean while
+  // `g` above stays the ROAD gait — the legs get road strides, the upper body is
+  // not written twice.
+  const w = moveBody(roadBase(mode), span * tr + seed * 11 + lead, g);
   const far = clamp01(span / 40);
   const push = ease01(clamp01(1 - tr / 0.13)) * far;
   const land = Math.sin(Math.PI * clamp01((tr - 0.66) / 0.28)) * far;
@@ -570,7 +669,7 @@ export function strideMode(
   };
   // Same footfall-snapped settle as the rig's walk, from the same helpers, so the
   // twelve travel modes stop exactly as cleanly as the default one.
-  const sf = settleFrac(span);
+  const sf = settleFrac(span, g.S);
   const arrive = clamp01((tr - (1 - sf)) / sf);
   return settleStep(moving, settled, span * (1 - tr), arrive);
 }

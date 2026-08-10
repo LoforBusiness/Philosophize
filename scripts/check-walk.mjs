@@ -89,7 +89,16 @@ function traverse(i) {
       L: foot(fig.stance.footL), R: foot(fig.stance.footR),
     });
   }
-  return { frames, jump: j, mode, from };
+  // WHERE THE ARRIVAL ACTUALLY BEGINS, derived rather than guessed. This used to
+  // be a flat `wp >= 0.97`, which was true while `settleFrac` returned a fixed 7
+  // units on a 519-unit span (1.3%). The settle window is a fifth of a STRIDE
+  // now, so on the road it is 17 units — 3.3% — and a hard 0.97 graded the first
+  // third of every settle as though it were mid-walk, then reported the blend as
+  // a skate. Ask the same function the screen asks.
+  const spanRig = (to - from) / K;
+  const gv = RIG.gaitVary(MOVES.gaitFor(mode), (from / K) * 0.37 + (to / K) * 0.11);
+  const settleStart = 1 - RIG.settleFrac(spanRig, gv.S);
+  return { frames, jump: j, mode, from, gait: gv, settleStart };
 }
 
 /** Does this gait leave the ground of its own accord? A run does; a walk does not. */
@@ -108,8 +117,9 @@ console.log('\nTHE WALK ON THE BRANCH ROAD\n');
 // blend, and a blend moves feet. The same goes for the arrival settle.
 let worstSlide = 0, worstSlideAt = '', plantedFrames = 0;
 let worstDepart = 0, worstArrive = 0, arriveFrames = 0;
+
 for (let i = 0; i < 12; i++) {
-  const { frames, mode } = traverse(i);
+  const { frames, mode, settleStart } = traverse(i);
   const D = F.departUnits(mode, K);
   // The span's AVERAGE step, not the instantaneous one. Dividing by the frame's
   // own travel looks more precise and is useless: the profile starts and ends at
@@ -121,7 +131,24 @@ for (let i = 0; i < 12; i++) {
     const a = frames[f - 1], b = frames[f];
     const airborne = a.lift > 0.5 || b.lift > 0.5;
     for (const s of ['L', 'R']) {
-      const planted = Math.abs(a[s].gap) < 0.05 && Math.abs(b[s].gap) < 0.05 && !airborne;
+      // ── PLANTED MEANS IN STANCE, NOT MERELY NEAR THE GROUND ────────────────
+      //
+      // This was a proximity test — `|gap| < 0.05` — and a proximity test cannot
+      // separate a foot that is DOWN from a foot that is still coming down. The
+      // swing foot descends continuously (y = −lift·sin(πs)), so whatever the
+      // threshold, the last airborne sample falls inside it, and that sample is
+      // travelling forward at full swing speed. Measured on the trudge: the
+      // frame at gap −0.0094 moves 144% of an average step, and the frame after
+      // it, genuinely down, moves 2%. Tightening 0.05 → 0.01 only moved which
+      // airborne sample got caught; it could not fix the kind of error.
+      //
+      // `footTarget` returns y EXACTLY 0 through stance and non-zero everywhere
+      // else, so the branch itself is the test, and it is exact. On flat ground
+      // `onTerrain` is an identity, so the 0 survives to here. With this, a
+      // planted foot measures 0.000% — which is what "does not move at all"
+      // claimed all along. `plantedFrames` below is what stops this being
+      // vacuous if that ever stops being true.
+      const planted = a[s].raw === 0 && b[s].raw === 0 && !airborne;
       if (!planted) continue;
       plantedFrames++;
       // ── AS A FRACTION OF THE BODY'S OWN TRAVEL, NOT PER FRAME ──────────────
@@ -139,9 +166,9 @@ for (let i = 0; i < 12; i++) {
       // at the ends where the body is barely moving.
       const jerk = Math.abs(b[s].x - a[s].x) / cruise;
       const trav = b.bodyX - W.SPAN * (i + 1);
-      if (trav > D + 4 && b.wp < 0.97) {
+      if (trav > D + 4 && b.wp < settleStart) {
         if (jerk > worstSlide) { worstSlide = jerk; worstSlideAt = `span ${i} frame ${f}`; }
-      } else if (b.wp >= 0.97) {
+      } else if (b.wp >= settleStart) {
         if (jerk > 0.5) arriveFrames++;
         worstArrive = Math.max(worstArrive, jerk);
       } else worstDepart = Math.max(worstDepart, jerk);
@@ -149,15 +176,15 @@ for (let i = 0; i < 12; i++) {
   }
 }
 ok(plantedFrames > 2000, 'the check actually found planted feet', `${plantedFrames} foot-frames examined`);
-// "AT ALL" WAS ASPIRATIONAL, and saying it while allowing 5% was the check
-// telling a small lie about itself. The foot-lock is exact in principle, but
-// `gaitVary` reshapes S and stance per journey and the residual is real: the
-// old road gaits crept 4.5% of a step, the wider-strided ones the road uses now
-// (mode 28: stance 0.70, stride 58) creep 8%. Both are a fraction of a
-// millimetre on glass and neither is a skate — a skate is 30% and up, which is
-// what this still catches. The number is named rather than rounded away.
-ok(worstSlide < 0.12, 'mid-walk, a planted foot barely creeps',
-  `worst ${(worstSlide * 100).toFixed(1)}% of an average step (${worstSlideAt || 'never moved'}) — a skate is 30%+`);
+// AND "AT ALL" TURNS OUT TO BE TRUE. This was briefly relaxed to "barely creeps"
+// at 12% of a step, on the reading that `gaitVary` reshapes S and stance per
+// journey and leaves a real residual. It does reshape them, but that is not
+// where the number came from: sampled frame by frame, a foot that is genuinely
+// down does not move by any amount that prints. Every unit of the old residual
+// was the LANDING frame being counted as a planted one — see the threshold
+// above. The lock is exact by construction and it measures exact.
+ok(worstSlide < 0.001, 'mid-walk, a planted foot does not move at all',
+  `worst ${(worstSlide * 100).toFixed(4)}% of an average step (${worstSlideAt || 'never moved'})`);
 ok(worstDepart < 1.2, 'setting off does not scuff the planted foot',
   `worst ${(worstDepart * 100).toFixed(0)}% of an average step`);
 // THE ARRIVAL IS THE RIG'S, NOT THIS ROAD'S. `settleStep` hands a walk back to a

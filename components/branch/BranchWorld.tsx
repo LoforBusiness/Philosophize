@@ -9,8 +9,8 @@ import Svg, { Path as SvgPath } from 'react-native-svg';
 import Stickman from '@/components/lesson/cinematic/Stickman';
 import { pose, type Bundle } from '@/components/lesson/cinematic/rig';
 import {
-  layout, groundAt, groundArt, chunkLeft, gaitForSpan, jumpForSpan, travelEase,
-  LEAD, WALK_SECONDS, SPAN, CHUNK, CHUNK_W, GROUND_TOP, SIGN_DX,
+  layout, groundAt, groundArt, chunkLeft, gaitForSpan, spanSeconds, jumpForSpan, travelEase,
+  LEAD, SPAN, CHUNK, CHUNK_W, GROUND_TOP, SIGN_DX,
   type Marker,
 } from './worldPath';
 import { figureAt, hopAt, hopMs, hopTravel } from './walkFigure';
@@ -236,13 +236,17 @@ export default function BranchWorld({
     wp.value = 0;
     gait.value = 1;
     hopping.value = 0;
-    mode.value = gaitForSpan(advanceTo.to);
+    const gaitMode = gaitForSpan(advanceTo.to);
+    mode.value = gaitMode;
     // Aimed at whatever is lying in THIS span — the same `obstacleAt` the ground
     // is drawn from, so he only ever leaves the ground at something that is there.
     const jump = jumpForSpan(advanceTo.from);
     jumpAt.value = jump ? jump.at : -1;
     jumpH.value = jump ? jump.h : 0;
-    const ms = WALK_SECONDS * 1000;
+    // THIS GAIT'S OWN DURATION, not one shared by all five. A span is a fixed
+    // distance, so the duration IS the speed — and a gait handed someone else's
+    // speed has to pay for it in cadence. See `spanSeconds`.
+    const ms = spanSeconds(gaitMode) * 1000;
     const cb = advanceTo.done;
     const to = advanceTo.to;
     // ── A BEAT BEFORE IT SETS OFF ──────────────────────────────────────────────

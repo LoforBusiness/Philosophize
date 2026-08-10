@@ -163,14 +163,25 @@ export function phaseFor(dist: number, g: Gait) {
  *
  * A fifth of a stride. Short enough that the feet are effectively already where
  * they will end up, long enough that the pose change is not a snap.
+ *
+ * IT IS A FIFTH OF A STRIDE, SO IT HAS TO BE COMPUTED FROM ONE. 7 is a fifth of
+ * 34, the walk this file is built around, and while that was the only stride in
+ * the app the difference never showed. The branch road walks at 58–83, where 7
+ * is a NINTH — and the arrival has strictly more to absorb at a longer stride
+ * (the feet are further apart when the settle begins) in half the room. It cost
+ * exactly what that predicts: the worst arrival frame went from 0.96 world units
+ * to 2.32 the moment the road's strides grew, which is a scrape, not a settle.
+ *
+ * `stride` defaults to 34 so every existing caller keeps the arrival it has.
  */
 export const SETTLE_UNITS = 7;
 
-export function settleFrac(span: number) {
+export function settleFrac(span: number, stride = 34) {
   'worklet';
   // Never wider than the old fixed 22%, so a short nudge keeps the arrival it
   // always had and only long walks — the ones that skated — are tightened.
-  return Math.min(0.22, SETTLE_UNITS / Math.max(span, 0.001));
+  const units = stride * 0.21 > SETTLE_UNITS ? stride * 0.21 : SETTLE_UNITS;
+  return Math.min(0.22, units / Math.max(span, 0.001));
 }
 
 // ── the pose ─────────────────────────────────────────────────────────────────
@@ -1518,7 +1529,7 @@ export function strideStance(
   // instead of a proportion — and because the scene's `tr` is itself eased, those
   // last few units are the slowest of the journey, so the blend still has real
   // time to happen in and never reads as a snap.
-  const sf = settleFrac(span);
+  const sf = settleFrac(span, g.S);
   const arrive = clamp01((tr - (1 - sf)) / sf);
   // …and over that window the arrival feet are placed where they will FINISH,
   // then walked back toward the body as it closes the gap, so their WORLD position

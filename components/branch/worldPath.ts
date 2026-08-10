@@ -33,7 +33,9 @@
 // assuming. It is the ONE place that decides flat or not.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** How long the figure takes to walk one lesson to the next. */
+/** How long a PLAIN WALK takes from one lesson to the next. Other gaits differ —
+ *  see `spanSeconds`. This one still sets the spacing, so the world is laid out
+ *  against the ordinary case rather than against the fastest or the slowest. */
 export const WALK_SECONDS = 7;
 /** Stage units per second at a walk — matches rig.ts's gait so feet do not slide. */
 export const WALK_SPEED = 46;
@@ -306,11 +308,43 @@ export function jumpForSpan(i: number): { at: number; h: number } | null {
  */
 export function gaitForSpan(i: number): number {
   const r = hash(i * 31 + 5);
-  if (r < 0.16) return 3;        // a run
-  if (r < 0.34) return 2;        // a hurry
-  if (r < 0.52) return 1;        // a stroll
-  if (r < 0.62) return 4;        // a trudge
-  return 0;                      // a plain walk
+  if (r < 0.16) return 27;       // a run
+  if (r < 0.34) return 26;       // a hurry
+  if (r < 0.52) return 25;       // a stroll
+  if (r < 0.62) return 28;       // a trudge
+  return 24;                     // a plain walk
+}
+
+/**
+ * HOW LONG THIS GAIT TAKES TO CROSS A SPAN, in seconds.
+ *
+ * The span is a fixed 322 units, so this is the gait's SPEED — and it has to
+ * vary, because pinning distance and duration together pins speed, and a gait
+ * whose speed is dictated cannot also choose its cadence. Foot phase is driven
+ * by distance (that is what stops the feet skating), so `cadence = speed /
+ * stride`: hold the speed and the gait with the shortest steps is forced to
+ * take the most of them. Every gait sharing 7 seconds is what made the trudge
+ * churn at 6.2 steps a second while the run ambled at 2.65 — the ordering
+ * exactly backwards. See the road shelf in moves.ts for the measurements.
+ *
+ * With these, and the road strides, the cadences come out
+ *
+ *     trudge 1.99 · stroll 2.11 · walk 2.36 · hurry 2.55 · run 2.89
+ *
+ * which is the right order, and inside the band a person actually moves in.
+ *
+ * THE MODE NUMBERS ARE REPEATED HERE rather than imported, because this file
+ * has no imports on purpose — it is what lets the whole world be laid out and
+ * measured in plain Node. `check:walk` re-derives every one of these cadences
+ * from moves.ts's real gaits and fails if this table and that shelf drift
+ * apart, so the duplication is checked rather than trusted.
+ */
+export function spanSeconds(mode: number): number {
+  if (mode === 25) return 8.2;   // stroll
+  if (mode === 26) return 6.0;   // hurry
+  if (mode === 27) return 4.8;   // run
+  if (mode === 28) return 9.0;   // trudge
+  return WALK_SECONDS;           // 24, a plain walk
 }
 
 /** Every complaint a laid-out world can have. Empty means it is sound. */
