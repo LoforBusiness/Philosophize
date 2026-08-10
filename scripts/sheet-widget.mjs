@@ -36,13 +36,10 @@ const font = (p) =>
 const px = (n) => `${n * S}px`;
 const QUOTE = '\u201cThe unexamined life is not worth living.\u201d';
 
-// The streak book, straight out of QuoteWidget so the sheet shows what ships.
-const BOOK = (ink, paper) => `<svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
-<path d="M52 52 C 36 56 25 62 23 68 L 41 214 C 42 221 53 215 68 200 Z" fill="${paper}" stroke="${ink}" stroke-width="7" stroke-linejoin="round"/>
-<path d="M56 50 L162 28 Q171 26 173 35 L182 178 Q183 188 173 191 L72 200 Q62 201 60 191 L50 62 Q48 51 56 50 Z" fill="${paper}" stroke="${ink}" stroke-width="8" stroke-linejoin="round"/>
-<path d="M64 194 L72 212 Q74 216 80 214 L186 194 Q191 192 188 187 L181 178 Z" fill="${paper}" stroke="${ink}" stroke-width="7" stroke-linejoin="round"/>
-<path d="M86 150 L152 138 M88 161 L148 150 M90 172 L140 163" stroke="${ink}" stroke-width="5" stroke-linecap="round"/>
-<text x="116" y="126" font-family="serif" font-weight="bold" font-size="80" fill="${ink}" text-anchor="middle" transform="rotate(-10 116 108)">3</text></svg>`;
+// The streak mark, straight out of QuoteWidget so the sheet shows what ships.
+const MARK = (ink) => `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2 C6 7 3 12 3 16 a9 9 0 0 0 18 0 c0-4-3-9-9-14 Z" fill="${ink}"/>
+<path d="M12 7 C9 11 7.5 13.5 7.5 16 a4.5 4.5 0 0 0 9 0 c0-2.5-1.5-5-4.5-9 Z" fill="${ink}" opacity="0.28"/></svg>`;
 
 const card = (b) => `
 <figure>
@@ -57,10 +54,8 @@ const card = (b) => `
       <div class="quote">${QUOTE}</div>
       <div class="foot">
         <div class="author" style="color:${b.inkSoft}">&mdash; SOCRATES</div>
-        <div class="streak">
-          <div class="book">${BOOK(b.ink, b.paper)}</div>
-          <div class="day" style="color:${b.inkSoft}">DAY STREAK</div>
-        </div>
+        <div class="mark">${MARK(b.inkSoft)}</div>
+        <div class="day" style="color:${b.inkSoft}">3 DAYS</div>
       </div>
     </div>
   </div>
@@ -79,17 +74,16 @@ figcaption{font-size:${px(7)};color:#fff;letter-spacing:${px(1)};margin-top:${px
 .card{position:relative;width:${W}px;height:${H}px;border-radius:${px(16)};overflow:hidden;border:${px(2)} solid #1A1A1A}
 .art{position:absolute;inset:0}
 .art svg{width:100%;height:100%;display:block}
-.body{position:absolute;inset:0;padding:${px(16)};display:flex;flex-direction:column}
+.body{position:absolute;inset:0;padding:${px(11)} ${px(13)};display:flex;flex-direction:column}
 .head{display:flex;justify-content:space-between;align-items:baseline}
 .kicker{font-size:${px(9)};font-weight:700;letter-spacing:${px(2)}}
 .date{font-size:${px(9)};font-weight:500;letter-spacing:${px(1)}}
-.rule{height:${px(1)};margin:${px(8)} 0}
-.quote{flex:1;display:flex;align-items:center;font-size:${px(15)};font-style:italic;line-height:1.34}
-.foot{display:flex;align-items:flex-end;margin-top:${px(4)}}
-.author{flex:1;font-size:${px(10)};font-weight:500;letter-spacing:${px(1)};padding-bottom:${px(6)}}
-.streak{display:flex;flex-direction:column;align-items:center}
-.book{width:${px(44)};height:${px(57)}}.book svg{width:100%;height:100%;display:block}
-.day{font-size:${px(7)};font-weight:700;letter-spacing:${px(1)};margin-top:${px(1)}}
+.rule{height:${px(1)};margin:${px(5)} 0}
+.quote{flex:1;display:flex;align-items:center;font-size:${px(14)};font-style:italic;line-height:1.34}
+.foot{display:flex;align-items:center;margin-top:${px(3)}}
+.author{flex:1;font-size:${px(9)};font-weight:700;letter-spacing:${px(1)}}
+.mark{width:${px(11)};height:${px(11)};margin-right:${px(4)}}.mark svg{width:100%;height:100%;display:block}
+.day{font-size:${px(9)};font-weight:700;letter-spacing:${px(1)}}
 </style>${WIDGET_BACKGROUNDS.map(card).join('')}`;
 
 const page = path.join(tmp, 'sheet.html');

@@ -188,131 +188,195 @@ const bird = (x: number, y: number, s: number, c: string, w: number) =>
 
 // ═══════════════════════════════════════════════════════════════════════════
 // THE SCENES
+//
+// ── WHERE THE TYPE IS, AND WHY THAT DECIDES EVERYTHING ──────────────────────
+//
+// The card is ~110dp tall and this box is 176 units, so 1dp is about 1.6 units.
+// Laying the content out through that map puts the type at:
+//
+//   header   y  18 …  37
+//   rule     y  45
+//   QUOTE    y  53 … 137   ← the middle half of the picture
+//   footer   y 145 … 163
+//
+// The previous scenes drew across all of it — a tree trunk straight through
+// "worth living", arcade columns behind the quote, a sun directly under the date
+// — and then tried to rescue the type with a veil. That is the wrong order. Line
+// art at the same tone as the letterforms does not stop competing with them
+// because something translucent was laid over both.
+//
+// So every scene here is built in BANDS, and the quote's band is left as field:
+//
+//   y   0 … 45   sky. Quiet — the header sits in it.
+//   y  45 … 137  THE QUOTE'S BAND. Gradient only. No object, no stroke, ever.
+//   y 137 … 176  the ground. Where the drawing lives, and where it can be bold,
+//                because only 9sp footer type crosses it and the tone ramp says
+//                how dark that is allowed to be.
+//
+// The hero — a sun, a moon — SETS INTO the horizon at the right, so it is a
+// composed picture rather than a texture, without ever entering the quote.
+//
+// ── AND IT SURVIVES BEING CROPPED ───────────────────────────────────────────
+//
+// The widget resizes from 180x110 to 360x300, so this 400x176 box is sliced to
+// cover anything from 3.3:1 to 1.2:1. Horizontal bands are exactly the
+// composition that survives that: `xMidYMid` keeps the middle in the middle, so
+// the quote's clean band stays behind the quote at every size, and cropping only
+// ever takes width off the ends of a horizon that runs past both edges anyway.
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** 1 — GROVE. A stand of trees at dusk, not two sticks in a field. */
+/** The sky: one wash down the whole box. Every scene starts here. */
+function sky(id: string, top: string, bottom: string): string {
+  return (
+    `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">` +
+    `<stop offset="0" stop-color="${top}"/>` +
+    `<stop offset="0.62" stop-color="${bottom}"/>` +
+    `</linearGradient>`
+  );
+}
+
+/** The hero disc, low and right, half-set behind the ground that follows it. */
+const disc = (cx: number, cy: number, r: number, c: string, op = 1) =>
+  `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}" opacity="${op}"/>`;
+
+/**
+ * A horizon: one filled run of hills from off-frame left to off-frame right.
+ *
+ * `y` is where it crosses the middle of the card, and it is never above 134 —
+ * that is the floor of the quote's band, and this is the file's one hard rule.
+ */
+function land(y: number, amp: number, phase: number, fill: string, op = 1): string {
+  let d = `M-10 ${r2(y)}`;
+  for (let i = 0; i < 5; i++) {
+    const x0 = -10 + i * 84;
+    const dip = amp * (0.5 + 0.5 * Math.sin(phase + i * 1.9));
+    d += ` C${r2(x0 + 30)} ${r2(y - dip)} ${r2(x0 + 54)} ${r2(y + dip * 0.35)} ${r2(x0 + 84)} ${r2(y - dip * 0.2)}`;
+  }
+  return `<path d="${d} L410 190 L-10 190 Z" fill="${fill}" opacity="${op}"/>`;
+}
+
+/** Conifers along a horizon — solid masses, never line art. */
+function pines(base: number, xs: number[], h: number, c: string, op = 1): string {
+  let d = '';
+  for (const x of xs) {
+    const w = h * 0.34;
+    d += `M${r2(x - w)} ${r2(base)} L${r2(x)} ${r2(base - h)} L${r2(x + w)} ${r2(base)} Z `;
+  }
+  return `<path d="${d}" fill="${c}" opacity="${op}"/>`;
+}
+
+/**
+ * An ARCADE: piers joined by round arches, drawn as one filled mass.
+ *
+ * Piers alone read as a fence at this size — which is exactly what they did, and
+ * a fence is not what a philosophy widget wants on its horizon. The arch is the
+ * whole signal, so it is drawn as solid stone with the OPENINGS punched back out
+ * in the sky's own colour: AndroidSVG has no masks, and a fill-rule hole would
+ * need the sub-paths wound opposite, which is more fragile than painting the gap.
+ */
+function arcade(base: number, x0: number, bays: number, bw: number, h: number, c: string, sky: string, op = 1): string {
+  const w = bw * bays;
+  const r = bw * 0.36;
+  let holes = '';
+  for (let i = 0; i < bays; i++) {
+    const cx = x0 + bw * (i + 0.5);
+    const top = base - h + r + 4;
+    holes += `M${r2(cx - r)} ${r2(base)} L${r2(cx - r)} ${r2(top)} `
+      + `A${r2(r)} ${r2(r)} 0 0 1 ${r2(cx + r)} ${r2(top)} L${r2(cx + r)} ${r2(base)} Z `;
+  }
+  return `<path d="M${r2(x0)} ${r2(base)} L${r2(x0)} ${r2(base - h)} L${r2(x0 + w)} ${r2(base - h)} L${r2(x0 + w)} ${r2(base)} Z" fill="${c}" opacity="${op}"/>`
+    + `<path d="${holes}" fill="${sky}" opacity="${op}"/>`;
+}
+
+/** 1 — GROVE. Pines on a low ridge, sun setting behind them. */
 function grove(): string {
-  const rnd = prng(7);
-  let grass = '';
-  for (let i = 0; i < 34; i++) {
-    const x = 4 + rnd() * 392;
-    const h = 5 + rnd() * 11;
-    grass += `M${r2(x)} 172 L${r2(x + (rnd() - 0.5) * 5)} ${r2(172 - h)} `;
-  }
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" ${VB}>` +
-    `<defs>${paperVeil('v-grove', PAPER)}</defs>` +
-    `<rect x="-10" y="-10" width="420" height="196" fill="${PAPER}"/>` +
-    `<circle cx="60" cy="44" r="24" fill="${FAR}" opacity="0.55"/>` +
-    `<path d="M-10 168 C90 162 150 172 220 167 C290 162 350 170 410 165" stroke="${MID}" stroke-width="2.6" fill="none" stroke-linecap="round"/>` +
-    tree(300, 170, 104, 30, MID) +
-    tree(352, 170, 74, 21, MID) +
-    tree(246, 170, 56, 16, FAR) +
-    tree(52, 170, 66, 19, MID) +
-    tree(100, 170, 46, 13, FAR) +
-    tree(168, 170, 34, 10, FAR) +
-    `<path d="${grass}" stroke="${NEAR}" stroke-width="1.9" fill="none" stroke-linecap="round" opacity="0.85"/>` +
-    bird(322, 40, 11, MID, 2) +
-    bird(292, 58, 8, MID, 1.7) +
-    bird(348, 62, 7, FAR, 1.5) +
-    `<rect x="-10" y="-10" width="420" height="196" fill="url(#v-grove)"/>` +
+    `<defs>${sky('s-grove', PAPER, '#EFE9DA')}</defs>` +
+    `<rect x="-10" y="-10" width="420" height="196" fill="url(#s-grove)"/>` +
+    disc(298, 132, 36, FAR, 0.9) +
+    land(134, 10, 0.6, FAR, 0.9) +
+    pines(140, [232, 268, 306, 344, 378], 46, MID, 0.9) +
+    land(150, 9, 2.4, MID, 0.75) +
+    land(164, 7, 4.1, NEAR, 0.5) +
     `</svg>`
   );
 }
 
-/** 2 — RIDGES. Layered hills under a low sun. */
+/** 2 — RIDGES. Nothing but land, receding. */
 function ridges(): string {
-  let rays = '';
-  for (let i = 0; i < 12; i++) {
-    const a = (i / 12) * Math.PI * 2;
-    rays += `M${r2(330 + Math.cos(a) * 40)} ${r2(50 + Math.sin(a) * 40)} L${r2(330 + Math.cos(a) * 54)} ${r2(50 + Math.sin(a) * 54)} `;
-  }
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" ${VB}>` +
-    `<defs>${paperVeil('v-ridges', PAPER)}</defs>` +
-    `<rect x="-10" y="-10" width="420" height="196" fill="${PAPER}"/>` +
-    `<circle cx="330" cy="50" r="33" fill="${FAR}" opacity="0.8"/>` +
-    `<path d="${rays}" stroke="${FAR}" stroke-width="2.4" fill="none" stroke-linecap="round"/>` +
-    ridge(138, 40, 0.4, FAR, 0.9) +
-    ridge(152, 30, 2.1, MID, 0.85) +
-    hatch(-10, 410, 150, 178, 12, NEAR, 1.7, 0.5) +
-    ridge(168, 16, 3.4, NEAR, 0.65) +
-    `<rect x="-10" y="-10" width="420" height="196" fill="url(#v-ridges)"/>` +
+    `<defs>${sky('s-ridges', PAPER, '#EEE7D6')}</defs>` +
+    `<rect x="-10" y="-10" width="420" height="196" fill="url(#s-ridges)"/>` +
+    disc(288, 128, 42, FAR, 0.8) +
+    land(132, 13, 0.2, FAR, 0.85) +
+    land(147, 12, 2.2, MID, 0.75) +
+    land(161, 9, 3.9, NEAR, 0.5) +
     `</svg>`
   );
 }
 
-/** 3 — COLONNADE. Three arches and a step: the oldest room in philosophy. */
+/** 3 — COLONNADE. A ruin on the skyline. */
 function colonnade(): string {
-  const col = (x: number, w: number, c: string) =>
-    `<path d="M${x} 154 L${x} 72 C${x} 50 ${r2(x + w)} 50 ${r2(x + w)} 72 L${r2(x + w)} 154" ` +
-    `stroke="${c}" stroke-width="3.2" fill="none" stroke-linejoin="round"/>` +
-    hatch(x + 3, x + w - 3, 88, 152, 8, c, 1.4, 0.5) +
-    `<path d="M${r2(x - 6)} 154 L${r2(x + w + 6)} 154" stroke="${c}" stroke-width="3.6" stroke-linecap="round"/>`;
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" ${VB}>` +
-    `<defs>${paperVeil('v-colonnade', PAPER)}</defs>` +
-    `<rect x="-10" y="-10" width="420" height="196" fill="${PAPER}"/>` +
-    col(228, 46, MID) +
-    col(290, 46, MID) +
-    col(352, 46, FAR) +
-    col(40, 46, FAR) +
-    `<path d="M28 62 L410 62 M32 53 L410 53" stroke="${MID}" stroke-width="2.6" fill="none" stroke-linecap="round"/>` +
-    `<path d="M-10 162 L410 162" stroke="${NEAR}" stroke-width="2.6" fill="none"/>` +
-    `<path d="M-10 172 L410 172" stroke="${NEAR}" stroke-width="3.4" fill="none"/>` +
-    `<rect x="-10" y="-10" width="420" height="196" fill="url(#v-colonnade)"/>` +
+    `<defs>${sky('s-colonnade', PAPER, '#EFEADC')}</defs>` +
+    `<rect x="-10" y="-10" width="420" height="196" fill="url(#s-colonnade)"/>` +
+    disc(92, 134, 30, FAR, 0.75) +
+    land(138, 8, 1.1, FAR, 0.85) +
+    arcade(152, 236, 4, 36, 40, MID, '#EFEADC', 0.9) +
+    `<rect x="228" y="110" width="160" height="7" rx="1.5" fill="${MID}" opacity="0.9"/>` +
+    land(162, 7, 3.2, NEAR, 0.5) +
     `</svg>`
   );
 }
 
-/** 4 — NIGHT. The one that reads from across the room. */
+/** 4 — NIGHT. Stars over hills, a moon going down behind them. */
 function night(): string {
-  const rnd = prng(19);
+  const rnd = prng(11);
   let stars = '';
-  for (let i = 0; i < 64; i++) {
-    const x = 4 + rnd() * 392;
-    const y = 4 + rnd() * 126;
-    const r = 0.7 + rnd() * 1.9;
-    stars += `<circle cx="${r2(x)}" cy="${r2(y)}" r="${r2(r)}" fill="${BRIGHT}" opacity="${r2(0.3 + rnd() * 0.65)}"/>`;
+  // STRATIFIED, not scattered. Forty independent draws across 400 units clump —
+  // they came out as one diagonal smear across the top middle, which reads as a
+  // smudge on the glass rather than as a sky. One star per column, jittered
+  // inside it, spreads them without making them a grid.
+  const COLS = 26;
+  for (let i = 0; i < COLS * 2; i++) {
+    const col = i % COLS;
+    const x = -6 + (col + rnd()) * (412 / COLS);
+    // ONLY in the sky band. A star inside the quote is a speck on a letter.
+    const y = 3 + rnd() * 40;
+    stars += `<circle cx="${r2(x)}" cy="${r2(y)}" r="${r2(0.7 + rnd() * 1.5)}" fill="${BRIGHT}" opacity="${r2(0.25 + rnd() * 0.5)}"/>`;
   }
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" ${VB}>` +
-    `<defs>${inkVeil('v-night', NIGHT_PAPER)}</defs>` +
-    `<rect x="-10" y="-10" width="420" height="196" fill="${NIGHT_PAPER}"/>` +
+    `<defs>${sky('s-night', '#0E0D0A', NIGHT_PAPER)}</defs>` +
+    `<rect x="-10" y="-10" width="420" height="196" fill="url(#s-night)"/>` +
     stars +
-    // a falling star, because one asymmetry stops a star field being wallpaper
-    `<path d="M96 34 L132 56" stroke="${BRIGHT}" stroke-width="1.7" opacity="0.5" stroke-linecap="round"/>` +
-    // crescent: a disc, then the backdrop disc offset across it (no masks in 1.1)
-    `<circle cx="338" cy="44" r="27" fill="${MOON}"/>` +
-    `<circle cx="325" cy="36" r="25" fill="${NIGHT_PAPER}"/>` +
-    ridge(148, 34, 1.2, DIM) +
-    ridge(164, 24, 3.0, GLOW, 0.55) +
-    `<rect x="-10" y="-10" width="420" height="196" fill="url(#v-night)"/>` +
+    disc(302, 130, 32, MOON, 0.95) +
+    land(134, 12, 0.9, DIM) +
+    land(150, 10, 2.7, '#211F19') +
+    land(165, 7, 4.4, '#0C0B08') +
     `</svg>`
   );
 }
 
-/** 5 — TIDE. Ink water under a ringed moon; the one scene that is all curve. */
+/** 5 — TIDE. A moon over water, its road running to the shore. */
 function tide(): string {
-  let waves = '';
-  for (let i = 0; i < 8; i++) {
-    const y = 92 + i * 12;
-    const a = 6 + i * 1.8;
-    waves +=
-      `<path d="M-10 ${r2(y)} C56 ${r2(y - a)} 108 ${r2(y + a)} 176 ${r2(y)} ` +
-      `C244 ${r2(y - a)} 316 ${r2(y + a)} 410 ${r2(y - a * 0.4)}" ` +
-      `stroke="${i < 4 ? DIM : GLOW}" stroke-width="${r2(1.5 + i * 0.3)}" ` +
-      `opacity="${r2(0.4 + i * 0.07)}" fill="none" stroke-linecap="round"/>`;
+  let road = '';
+  for (let i = 0; i < 7; i++) {
+    const y = 142 + i * 4.8;
+    const w = 16 + i * 13;
+    road += `<rect x="${r2(300 - w / 2)}" y="${r2(y)}" width="${r2(w)}" height="1.8" rx="0.9" fill="${GLOW}" opacity="${r2(0.5 - i * 0.05)}"/>`;
   }
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" ${VB}>` +
-    `<defs>${inkVeil('v-tide', NIGHT_PAPER)}</defs>` +
-    `<rect x="-10" y="-10" width="420" height="196" fill="${NIGHT_PAPER}"/>` +
-    `<circle cx="332" cy="42" r="22" fill="${MOON}"/>` +
-    `<circle cx="332" cy="42" r="32" fill="none" stroke="${GLOW}" stroke-width="1.5"/>` +
-    `<circle cx="332" cy="42" r="42" fill="none" stroke="${GLOW}" stroke-width="1.2" opacity="0.7"/>` +
-    waves +
-    `<rect x="-10" y="-10" width="420" height="196" fill="url(#v-tide)"/>` +
+    `<defs>${sky('s-tide', '#100F0C', NIGHT_PAPER)}</defs>` +
+    `<rect x="-10" y="-10" width="420" height="196" fill="url(#s-tide)"/>` +
+    disc(298, 130, 30, MOON, 0.9) +
+    land(136, 6, 1.4, '#1B1A15') +
+    `<rect x="-10" y="140" width="420" height="50" fill="#0D0C09"/>` +
+    road +
     `</svg>`
   );
 }

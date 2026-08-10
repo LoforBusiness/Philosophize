@@ -1,20 +1,55 @@
 import { FlexWidget, OverlapWidget, SvgWidget, TextWidget } from 'react-native-android-widget';
 
-// The Android home-screen widget UI. This is NOT a normal React Native tree — it
-// renders to Android RemoteViews, so it can only use react-native-android-widget
-// primitives and their limited style set. Layers (OverlapWidget):
-//   1. paper card base (border + background)
-//   2. faint hand-drawn scene — ground line + two bare trees, echoing the lesson art
-//   3. content — kicker/date, the quote, attribution, and the streak book
-// Tapping deep-links into the quoted thinker's profile.
-
 import { backgroundById, type WidgetBackground } from './backgrounds';
 
-// Colours are no longer constants here: they come from the chosen scene, because
-// a scene decides whether the card is paper-with-ink-type or ink-with-cream-type
-// and the two cannot share a palette. See components/widget/backgrounds.ts for
-// the contrast arithmetic that says how bold each scene's art is allowed to be,
-// and scripts/check-widget-contrast.mjs for the proof that it holds.
+// ─────────────────────────────────────────────────────────────────────────────
+// THE HOME-SCREEN WIDGET.
+//
+// NOT a normal React Native tree: it renders to Android RemoteViews, so only
+// react-native-android-widget primitives and their small style set exist here.
+//
+// ── IT DID NOT FIT, AND THE ARITHMETIC SAYS BY HOW MUCH ─────────────────────
+//
+// The widget's declared minimum is 110dp tall (app.json). The old card asked for:
+//
+//   padding 16×2                    32
+//   header row                      12
+//   rule + its margins              17
+//   quote, 4 lines at 15sp          76
+//   streak book + its label         66
+//                                  ───
+//                                  203dp
+//
+// — into 110. So on the smallest size, and on the default 4×2 cell, the bottom of
+// the card was simply cut off: the streak book was sliced in half by the card
+// edge and the attribution line, which sat beside it, never appeared at all. Both
+// are visible in scripts/sheet-widget.mjs, and had been for as long as the book
+// was 57dp tall inside a 110dp box.
+//
+// The book is gone. A 57dp illustration cannot live in a 110dp widget beside four
+// lines of type — it was the single biggest thing in the card and the least
+// informative. The streak is now one line of text in the footer, which is what it
+// always was semantically.
+//
+//   padding 11×2                    22
+//   header row                      12
+//   rule + margins                  11
+//   footer row                      12
+//                                  ───
+//                                   57dp of chrome, leaving 53 for the quote at
+//                                   the SMALLEST size — three lines at 17.5.
+//
+// Everything above the minimum goes to the quote, so a taller widget simply shows
+// more of it rather than re-laying anything out.
+//
+// ── THE ART IS FULL-BLEED; THE TYPE DOES NOT DEPEND ON IT ───────────────────
+//
+// The scene covers the whole card (the reader asked for exactly that), and the
+// type's legibility is guaranteed by the scene's own construction rather than by
+// hoping — see backgrounds.ts for the tone ramp and the veil, and
+// `npm run check:widget` for the proof, which measures every text run against
+// what is actually painted under it.
+// ─────────────────────────────────────────────────────────────────────────────
 
 export interface QuoteWidgetProps {
   text: string;
@@ -26,37 +61,33 @@ export interface QuoteWidgetProps {
   background?: WidgetBackground;
 }
 
-// The app's streak book (StreakBook.tsx paths), with the day count written on the
-// cover. Stroke widths are heavier than in-app because the widget renders small.
-function bookSvg(streak: number, INK: string, PAPER: string): string {
-  const label = String(Math.max(0, Math.min(999, streak)));
-  const fs = label.length >= 3 ? 56 : label.length === 2 ? 66 : 80;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260">
-  <path d="M52 52 C 36 56 25 62 23 68 L 41 214 C 42 221 53 215 68 200 Z" fill="${PAPER}" stroke="${INK}" stroke-width="7" stroke-linejoin="round"/>
-  <path d="M104 188 L100 250 L116 240 L131 251 L124 188 Z" fill="${PAPER}" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/>
-  <path d="M56 50 L162 28 Q171 26 173 35 L182 178 Q183 188 173 191 L72 200 Q62 201 60 191 L50 62 Q48 51 56 50 Z" fill="${PAPER}" stroke="${INK}" stroke-width="8" stroke-linejoin="round"/>
-  <path d="M64 194 L72 212 Q74 216 80 214 L186 194 Q191 192 188 187 L181 178 Z" fill="${PAPER}" stroke="${INK}" stroke-width="7" stroke-linejoin="round"/>
-  <path d="M76 205 L184 186" stroke="${INK}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.55"/>
-  <path d="M80 211 L186 192" stroke="${INK}" stroke-width="2.8" fill="none" stroke-linecap="round" opacity="0.4"/>
-  <path d="M72 212 L78 221 L191 201 L188 192 Z" fill="${PAPER}" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/>
-  <path d="M86 150 L152 138" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
-  <path d="M88 161 L148 150" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
-  <path d="M90 172 L140 163" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
-  <text x="116" y="126" font-family="serif" font-weight="bold" font-size="${fs}" fill="${INK}" text-anchor="middle" transform="rotate(-10 116 108)">${label}</text>
-</svg>`;
+/**
+ * The streak mark: one solid shape, because 13dp is far too small for line art.
+ *
+ * The old book was drawn with eight strokes at 7-unit widths and read as a blot
+ * at any size the card could actually spare. A filled leaf reads as a leaf at
+ * 13dp, and that is the whole test.
+ */
+function markSvg(INK: string): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">`
+    + `<path d="M12 2 C6 7 3 12 3 16 a9 9 0 0 0 18 0 c0-4-3-9-9-14 Z" fill="${INK}"/>`
+    + `<path d="M12 7 C9 11 7.5 13.5 7.5 16 a4.5 4.5 0 0 0 9 0 c0-2.5-1.5-5-4.5-9 Z" fill="${INK}" opacity="0.28"/>`
+    + `</svg>`;
 }
 
 export function QuoteWidget({ text, author, dateLabel, philosopherId, streak, background }: QuoteWidgetProps) {
   const bg = background ?? backgroundById(null);
   const { paper: PAPER, ink: INK, inkSoft: INK_SOFT, hairline: HAIRLINE } = bg;
+  const days = Math.max(0, Math.min(999, streak));
+
   return (
     <OverlapWidget
       clickAction="OPEN_URI"
       clickActionData={{ uri: `philosophize://thinker/${philosopherId}` }}
       style={{ height: 'match_parent', width: 'match_parent' }}
     >
-      {/* 1 — card base. Also the border colour, which a dark scene has to invert
-              or the card loses its edge against a dark wallpaper. */}
+      {/* 1 — the card itself. Its border is what keeps the card an object against
+              a busy wallpaper, so a dark scene inverts it rather than losing it. */}
       <FlexWidget
         style={{
           height: 'match_parent',
@@ -64,14 +95,11 @@ export function QuoteWidget({ text, author, dateLabel, philosopherId, streak, ba
           backgroundColor: PAPER,
           borderWidth: 2,
           borderColor: bg.dark ? INK : '#1A1A1A',
-          borderRadius: 16,
+          borderRadius: 18,
         }}
       />
 
-      {/* 2 — the scene, FULL BLEED. It used to be a 216x99 vignette parked in the
-              bottom-left corner; scenes are composed for the whole card and carry
-              their own veil, so anything less would crop the composition and drop
-              the very thing that guarantees the type stays readable. */}
+      {/* 2 — the scene, FULL BLEED, sliced to cover at any widget size. */}
       <FlexWidget style={{ height: 'match_parent', width: 'match_parent' }}>
         <SvgWidget svg={bg.svg} style={{ height: 'match_parent', width: 'match_parent' }} />
       </FlexWidget>
@@ -82,19 +110,13 @@ export function QuoteWidget({ text, author, dateLabel, philosopherId, streak, ba
           height: 'match_parent',
           width: 'match_parent',
           flexDirection: 'column',
-          padding: 16,
+          paddingHorizontal: 13,
+          paddingVertical: 11,
         }}
       >
-        {/* Header: kicker + date */}
         <FlexWidget
           style={{ flexDirection: 'row', justifyContent: 'space-between', width: 'match_parent' }}
         >
-          {/* Deliberately NOT the app's name. A widget already sits under the app's
-              own label in the picker, so the name here was only repeating it — and
-              it made a rename a native change, because this string is also drawn
-              into widget-preview.png. Naming the CONTENT instead is true whatever
-              the app is called. Kept shorter than the name it replaced (11 chars
-              vs 12) so it cannot overflow a row that already fit. */}
           <TextWidget
             text="DAILY QUOTE"
             style={{ fontSize: 9, color: INK, fontWeight: '700', letterSpacing: 2 }}
@@ -106,47 +128,48 @@ export function QuoteWidget({ text, author, dateLabel, philosopherId, streak, ba
         </FlexWidget>
 
         <FlexWidget
-          style={{ height: 1, width: 'match_parent', backgroundColor: HAIRLINE, marginTop: 8, marginBottom: 8 }}
+          style={{ height: 1, width: 'match_parent', backgroundColor: HAIRLINE, marginTop: 5, marginBottom: 5 }}
         />
 
-        {/* Quote — fills the middle, vertically centered */}
+        {/* The quote takes every dp the card can spare, so a bigger widget shows a
+            longer quote rather than the same two lines in more white space. */}
         <FlexWidget style={{ flex: 1, width: 'match_parent', justifyContent: 'center' }}>
           <TextWidget
             text={`“${text}”`}
             maxLines={4}
             truncate="END"
-            style={{ fontSize: 15, color: INK, fontStyle: 'italic' }}
+            style={{ fontSize: 14, color: INK, fontStyle: 'italic' }}
           />
         </FlexWidget>
 
-        {/* Bottom row: attribution left, streak book right */}
+        {/* One line. Attribution left, streak right — both 9sp, both on the
+            baseline the header sets, so the card reads as three bands and not as
+            a picture with things dropped on it. */}
         <FlexWidget
           style={{
             flexDirection: 'row',
             width: 'match_parent',
-            alignItems: 'flex-end',
-            marginTop: 4,
+            alignItems: 'center',
+            marginTop: 3,
           }}
         >
-          <FlexWidget style={{ flex: 1, flexDirection: 'column' }}>
+          <FlexWidget style={{ flex: 1 }}>
             <TextWidget
               text={`— ${author.toUpperCase()}`}
               maxLines={1}
               truncate="END"
-              style={{ fontSize: 10, color: INK_SOFT, fontWeight: '500', letterSpacing: 1, marginBottom: 6 }}
+              style={{ fontSize: 9, color: INK_SOFT, fontWeight: '700', letterSpacing: 1 }}
             />
           </FlexWidget>
-          <FlexWidget style={{ flexDirection: 'column', alignItems: 'center' }}>
-            <SvgWidget
-              svg={bookSvg(streak, INK, PAPER)}
-              accessibilityLabel={`${streak} day streak`}
-              style={{ width: 44, height: 57 }}
-            />
-            <TextWidget
-              text="DAY STREAK"
-              style={{ fontSize: 7, color: INK_SOFT, fontWeight: '700', letterSpacing: 1, marginTop: 1 }}
-            />
-          </FlexWidget>
+          <SvgWidget
+            svg={markSvg(INK_SOFT)}
+            accessibilityLabel={`${days} day streak`}
+            style={{ width: 11, height: 11, marginRight: 4 }}
+          />
+          <TextWidget
+            text={days === 1 ? '1 DAY' : `${days} DAYS`}
+            style={{ fontSize: 9, color: INK_SOFT, fontWeight: '700', letterSpacing: 1 }}
+          />
         </FlexWidget>
       </FlexWidget>
     </OverlapWidget>
