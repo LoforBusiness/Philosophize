@@ -24,8 +24,22 @@ import SketchIcon from '@/components/shared/SketchIcon';
 //
 //      17 and 18 were consumed by builds that failed in EAS's install phase and
 //      never shipped, so nothing exists between 16 and 19 to catch.
+//
+// 20 = the rename. The app is called Deeply now, and the launcher label, the
+//      icon, the widget picker entry and the notification header are all
+//      COMPILED RESOURCES — a build 19 reader on current JS gets an app that
+//      calls itself Deeply on every screen while their home screen still says
+//      Philosophize under a scroll icon, and no update can ever reconcile that
+//      without the store.
+//
+//      Be honest about the difference from 19, because it changes what this
+//      gate is doing. A build 16 reader was permanently cut off from reminders
+//      and sound — genuinely broken, and the wall was a rescue. A build 19
+//      reader is fully functional and merely inconsistent, so this raise trades
+//      a working app for a coherent one. That is a defensible call for a rename
+//      and a bad habit to acquire for anything less.
 // ─────────────────────────────────────────────────────────────────────────────
-export const MIN_VERSION_CODE = 19;
+export const MIN_VERSION_CODE = 20;
 
 const PACKAGE = 'com.philosophize.app';
 const Ink = '#1A1A1A';
