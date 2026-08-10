@@ -14,6 +14,7 @@ import { BEATS } from './aesthetics12Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // A poem pinned up on a public board stage right, the poet who wrote it planted
 // stage left, and a small SEALED BOX riding above his head. Marks accumulate under
@@ -111,6 +112,14 @@ const RX = BEATS.map((b) => b.rx ?? 224);
 const RDIR = dirsFrom(RX, -1);
 const TICKS = BEATS.map((b) => b.ticks ?? 0);
 const BOXV = BEATS.map((b) => b.box ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Beats that do not set `x` stand at POET_X.
+const X = BEATS.map((b) => b.x ?? POET_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics12'));
 
 export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -338,5 +347,5 @@ const styles = StyleSheet.create({
 // Art runs from the board's top edge (224) down to the ground line (500), and the
 // reader parks off-stage at x 456, which the crop never sees. 294 units of band.
 export function Aesthetics12Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics12Scene} band={[218, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics12Scene} band={[218, 512]} camera={CAM} />;
 }

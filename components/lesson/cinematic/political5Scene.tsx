@@ -11,6 +11,7 @@ import { BEATS } from './political5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // THREE PIECES OF INK INFORMATION DESIGN, one per idea in the lesson:
 //
@@ -88,6 +89,15 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const CITY = BEATS.map((b) => (b.interact ? 0 : b.city ?? 0));
 const VEIL = BEATS.map((b) => (b.interact ? 0 : b.veil ?? 0));
 const LINK = BEATS.map((b) => b.link ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political5'));
 
 export default function Political5Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -311,5 +321,5 @@ const styles = StyleSheet.create({
 // below, and the scene renders about 2.28× instead of the 1.15× a full-height fit
 // letterboxes it to.
 export function Political5Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political5Scene} band={[230, 514]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political5Scene} band={[230, 514]} camera={CAM} />;
 }

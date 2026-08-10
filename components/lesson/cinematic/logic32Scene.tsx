@@ -13,6 +13,7 @@ import { BEATS } from './logic32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // TWO figures with the question between them, and the words of the question are
 // the answer targets.
@@ -74,6 +75,15 @@ function wordLeft(row: typeof ROW1, left: number, k: number) {
   for (let j = 0; j < k; j++) x += row[j].w + WORD_GAP;
   return x;
 }
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Two figures at 66 and 316, so the track is the point BETWEEN them (191) — following
+// either one alone would frame the other out, and here the pair is the subject.
+const X = BEATS.map((b) => b.x ?? 191);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic32'));
 
 export default function Logic32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -209,5 +219,5 @@ const styles = StyleSheet.create({
 // Ink runs from the first word row (236) to the ground line (500).
 // Band 230…512 = 282 (H59).
 export function Logic32Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic32Scene} band={[230, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic32Scene} band={[230, 512]} camera={CAM} />;
 }

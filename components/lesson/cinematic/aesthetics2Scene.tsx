@@ -10,6 +10,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE INFECTION CHAIN.
@@ -79,6 +80,15 @@ const MINI_BASE = CANVAS_T + CANVAS_H - 9;      // y = 463
 
 // Studio floorboards, so the ground is a floor rather than one bare rule.
 const FLOOR = [52, 104, 156, 208, 260, 312, 364];
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Two figures at 112 and 292, so the track is the point BETWEEN them (202) — following
+// either one alone would frame the other out, and here the pair is the subject.
+const X = BEATS.map((b) => b.x ?? 202);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics2'));
 
 export default function Aesthetics2Scene({ clock, bt, bi }: SceneApi) {
   const SCENE = useDerivedValue(() => {
@@ -333,5 +343,5 @@ const styles = StyleSheet.create({
 // with a 19-unit radius at full scale, so it stays inside 353…391 — clear of the
 // labels above and of the canvas top at 396 below.
 export function Aesthetics2Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics2Scene} band={[180, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics2Scene} band={[180, 512]} camera={CAM} />;
 }

@@ -11,6 +11,7 @@ import { BEATS } from './valid3Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // The argument pinned up as a FORM the inspector reads, stage right.
 //
@@ -94,6 +95,15 @@ const LINK = BEATS.map((b) => b.link ?? 0);
 const STAMP = BEATS.map((b) => b.stamp ?? 0);
 const FLAW = BEATS.map((b) => b.flaw ?? 0);
 const TR = 0.85;
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('valid3'));
 
 export default function Valid3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -378,5 +388,5 @@ const styles = StyleSheet.create({
 // [228, 512] holds every extreme with 8 units of margin top and 10 bottom, and the
 // scene renders about twice the size of the letterboxed full-height fit.
 export function Valid3Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Valid3Scene} band={[228, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Valid3Scene} band={[228, 512]} camera={CAM} />;
 }

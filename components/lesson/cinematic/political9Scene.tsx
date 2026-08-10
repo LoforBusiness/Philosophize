@@ -13,6 +13,7 @@ import { BEATS } from './political9Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // Four on the left, one on the right, and a line between them.
 //
@@ -69,6 +70,14 @@ const CARDS = [
 const VOTE = BEATS.map((b) => b.vote ?? 0);
 const ADV = BEATS.map((b) => (b.advance ? 1 : 0));
 const ONE = BEATS.map((b) => b.one ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Beats that do not set `x` stand at ONE_X.
+const X = BEATS.map((b) => b.x ?? ONE_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political9'));
 
 export default function Political9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -241,5 +250,5 @@ const styles = StyleSheet.create({
 // Art runs from the tally board (210) to the ground line (500). Five figures at
 // 0.82 crown out at y 415, below every card and both boards.
 export function Political9Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political9Scene} band={[200, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political9Scene} band={[200, 512]} camera={CAM} />;
 }

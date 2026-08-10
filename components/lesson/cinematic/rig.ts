@@ -54,6 +54,37 @@ export const STR = { torso: 12, limb: 11, headR: 20, glove: 9 };
  */
 export const FIG_H = U.standH + U.spine + U.head + 2 * (STR.headR / 2);
 
+/**
+ * HOW CLOSE A LIMB MAY COME TO THE HEAD CENTRE, in rig units.
+ *
+ * There were three numbers for this idea in three files — `HEAD_CLEAR = 25` in
+ * check-moves, `GLOVE_CLEAR = 26` down in the boxing block, and 20/16 in
+ * check-rest — and none of them said what they were derived FROM. They are not
+ * the same requirement, which is why they never collapsed into one value, but
+ * they are all the head's radius plus a reason, so they belong together and they
+ * belong next to the radius they come from. Change `STR.headR` and these follow.
+ *
+ * The four cases, in the order they were learned:
+ *
+ * · `rest`   a SETTLED hand may touch the head. "At the chin", "at the temple",
+ *            "shielding the eyes" are real poses, and a fist centred on the rim
+ *            half overlaps and half shows — the intended picture. Only a hand
+ *            driven well inside the disc has actually disappeared.
+ * · `elbow`  no gesture ever wants an elbow in the face, so it stays off the disc
+ *            entirely. This is the one a fist-only check cannot see (C20f).
+ * · `moving` a hand mid-gesture sweeps, and a sweep THROUGH the skull reads as a
+ *            limb passing behind the face. It needs more room than a rest pose,
+ *            not less.
+ * · `glove`  a boxing glove is a 9-radius disc rather than a point, so it needs
+ *            the most. Kept at the 26 the fight was tuned to.
+ */
+export const HEAD_CLEAR = {
+  rest: STR.headR * 0.8,        // 16
+  elbow: STR.headR,             // 20
+  moving: STR.headR + 5,        // 25
+  glove: STR.headR + 6,         // 26
+} as const;
+
 // ── worklet maths ────────────────────────────────────────────────────────────
 
 export function clamp01(x: number) { 'worklet'; return x < 0 ? 0 : x > 1 ? 1 : x; }
@@ -1035,7 +1066,13 @@ export function emoteHold(code: number, t: number): Stance {
   if (code === 4) return { ...hands(s, -6, 5, 9, -32 + g), neck: 0.12 };
   if (code === 5) return hands(s, -24, 0, 31 + g, -18);
   if (code === 6) return { ...hands(s, -8, 4, 20, -28), neck: -0.08 };
-  if (code === 7) return hands(s, -32 - g, -18, 32 + g, -18);
+  // THE OFF HAND COMES FORWARD, and this is the shape of the whole C20b family.
+  // The figure is drawn in PROFILE, so a hand at x −32 is not "wide", it is
+  // BEHIND the person — and raised to −18 it threw the left elbow to x −21 at
+  // head height, an arm winged back behind the skull. Opening the pose across the
+  // body instead keeps the same "both arms out" silhouette with both elbows in
+  // front of the spine, which is what it always looked like it was doing.
+  if (code === 7) return hands(s, -22 - g, -6, 32 + g, -18);
   if (code === 8) return { ...hands(s, -26, -6, 26, -6), tilt: s.tilt + 0.03, bob: s.bob + 3, neck: 0.05 };
   if (code === 9) return { ...hands(s, -6, 6, 9, -8), tilt: s.tilt + 0.02 };
   // ARMS CROSSED, and BOTH forearms have to sit forward of the torso to exist at all.
@@ -1061,7 +1098,7 @@ export function emoteHold(code: number, t: number): Stance {
   if (code === 11) return { ...hands(s, -6, 6, 17, -47), neck: 0.2, tilt: s.tilt + 0.03 };
   if (code === 12) return { ...hands(s, -14, -6, 21, -47), neck: -0.07 };
   if (code === 13) return { ...hands(s, -6, 6, 34, -16), tilt: s.tilt - 0.05 };
-  if (code === 14) return { ...hands(s, -24, -16, 24, -16), tilt: s.tilt - 0.04 };
+  if (code === 14) return { ...hands(s, -17, -5, 24, -16), tilt: s.tilt - 0.04 };
   if (code === 15) return { ...hands(s, -16, -6, 16, -6), tilt: s.tilt + 0.10, neck: 0.04, footL: { x: -9, y: 0 }, footR: { x: 9, y: 0 } };
   if (code === 16) return { ...hands(s, -16, -4, 16, -4), neck: -0.04 };
   if (code === 17) return { ...hands(s, -3, 6, 5, 6), tilt: s.tilt - 0.30, neck: 0.22, bob: s.bob - 3 };
@@ -1080,7 +1117,7 @@ export function emoteHold(code: number, t: number): Stance {
   if (code === 29) return { ...hands(s, -30 - g, -14, 30 + g, -14), tilt: s.tilt + 0.02 };                   // press outward against the walls
   if (code === 30) return { ...hands(s, 12, -18, 22, -24), tilt: s.tilt - 0.06, neck: -0.08 };               // offer up with both hands
   if (code === 31) return { ...hands(s, 14, -2, 24, -6), tilt: s.tilt - 0.03, neck: 0.04 };                  // receive, hands cupped forward
-  if (code === 32) return { ...hands(s, -24, -22, 24, -22), tilt: s.tilt };                                  // conduct / sway (live oscillates both hands)
+  if (code === 32) return { ...hands(s, -16, -8, 24, -22), tilt: s.tilt };                                   // conduct / sway (live oscillates both hands)
   if (code === 33) return { ...hands(s, -26, -4, 26, -4), neck: -0.06, tilt: s.tilt - 0.03 };                // released, arms open but down
   // A shielding hand goes IN FRONT of the eyes, not on them: (4, −48) was dead centre
   // of the head disc and the hand vanished (three beats use this).
@@ -1095,13 +1132,13 @@ export function emoteHold(code: number, t: number): Stance {
   // it and turns them to face it), so the working hand stays forward and visible —
   // never tucked behind the head or crossing the face.
   if (code === 40) return { ...hands(s, -7, 6, 30 + g, -40), neck: -0.10, tilt: s.tilt - 0.05 };  // write on a board
-  if (code === 41) return { ...hands(s, -7, 6, 31, -54), neck: -0.18, tilt: s.tilt - 0.05 };      // tap high on the board
+  if (code === 41) return { ...hands(s, -7, 6, 30, -44), neck: -0.18, tilt: s.tilt - 0.05 };      // tap high on the board
   if (code === 42) return { ...hands(s, 18, 2, 26, 2), tilt: s.tilt + 0.04, bob: s.bob - 2 };      // carry a load, both hands forward-low
   if (code === 43) return { ...hands(s, 16, 10, 24, 12), tilt: s.tilt - 0.14, bob: s.bob - 9, neck: 0.14 }; // set it down
   if (code === 44) return { ...hands(s, -12, 2, -15, 4), neck: -0.06, tilt: s.tilt - 0.02 };       // hands clasped behind the back
   if (code === 45) return { ...hands(s, -7, 6, 14, -20), neck: 0.02 };                            // double-take (the live pass snaps the head)
   if (code === 46) return { ...hands(s, -8, 4, 8, 4), tilt: s.tilt + 0.10, neck: 0.20, bob: s.bob - 6 }; // slump, defeated
-  if (code === 47) return { ...hands(s, -18, -20, 18, -20), neck: -0.02, tilt: s.tilt - 0.02 };    // framed it, hands lowered
+  if (code === 47) return { ...hands(s, -13, -9, 18, -20), neck: -0.02, tilt: s.tilt - 0.02 };     // framed it, hands lowered
   // ── floor level ─────────────────────────────────────────────────────────────
   // Until these existed the vocabulary could not say "on the floor" at all, so a
   // script that said someone was on the floor beside their bed got the nearest

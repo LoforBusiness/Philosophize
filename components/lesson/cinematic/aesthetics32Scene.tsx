@@ -13,6 +13,7 @@ import { BEATS } from './aesthetics32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // THREE CHARTS WITH THE SAME AREA UNDER THEM, and the answer targets are the charts —
 // the largest target in the app, because here the thing being chosen IS the argument
@@ -54,6 +55,15 @@ const FIG_X = 60;
 const G = BEATS.map((b) => b.g ?? 0);
 const ROWS = BEATS.map((b) => b.rows ?? 0);
 const MEANS = BEATS.map((b) => b.mean ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics32'));
 
 export default function Aesthetics32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -201,5 +211,5 @@ const styles = StyleSheet.create({
 
 // Ink runs from the badge (258) to the ground line (500). Band 252…512 = 260 (H59).
 export function Aesthetics32Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics32Scene} band={[252, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics32Scene} band={[252, 512]} camera={CAM} />;
 }

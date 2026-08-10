@@ -10,6 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics4Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // A gallery that is also a scorecard.
 //
@@ -65,6 +66,15 @@ const TEST = BEATS.map((b) => b.test ?? 0);
 const VERD = BEATS.map((b) => b.verdict ?? 0);
 const SIGNED = BEATS.map((b) => b.signed ?? 0);
 const ART = BEATS.map((b) => b.art ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Two figures at 104 and 334, so the track is the point BETWEEN them (219) — following
+// either one alone would frame the other out, and here the pair is the subject.
+const X = BEATS.map((b) => b.x ?? 219);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics4'));
 
 export default function Aesthetics4Scene({ clock, bt, bi }: SceneApi) {
   const SCENE = useDerivedValue(() => {
@@ -315,5 +325,5 @@ const styles = StyleSheet.create({
 // with 10 units of margin at the top and 4.6 at the foot, and renders the scene
 // ~2.17× instead of the letterboxed 1.15×.
 export function Aesthetics4Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics4Scene} band={[214, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics4Scene} band={[214, 512]} camera={CAM} />;
 }

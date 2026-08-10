@@ -13,6 +13,7 @@ import { BEATS } from './political32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // SEVENTY-SEVEN MARKS AND ONE OF THEM IS YOURS. The scale is the argument: the reader
 // has to find their own tick in the row, and how small it looks is the lesson (H64).
@@ -59,6 +60,15 @@ const FILL = BEATS.map((b) => b.fill ?? 0);
 const RES = BEATS.map((b) => b.result ?? 0);
 const MARK = BEATS.map((b) => b.mark ?? 0);
 const LAB = BEATS.map((b) => b.labels ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political32'));
 
 export default function Political32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -219,5 +229,5 @@ const styles = StyleSheet.create({
 
 // Ink runs from the result plate (292) to the ground line (500). Band 286…512 = 226 (H59).
 export function Political32Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political32Scene} band={[286, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political32Scene} band={[286, 512]} camera={CAM} />;
 }

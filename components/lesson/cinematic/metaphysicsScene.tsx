@@ -9,6 +9,7 @@ import {
 } from './rig';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHY IS THERE SOMETHING RATHER THAN NOTHING?
@@ -102,6 +103,15 @@ const RULEIN = RULEON.map((v, k) => (v === 1 && (k === 0 || RULEON[k - 1] === 0)
 
 function hHold(code: number, t: number) { 'worklet'; return code === 0 ? stand(t) : narratorHold(code, t); }
 function hLive(code: number, t: number, bt: number) { 'worklet'; return code === 0 ? stand(t) : narratorLive(code, t, bt); }
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics'));
 
 export default function MetaphysicsScene({ clock, bt, bi, qv }: SceneApi) {
   const SCENE = useDerivedValue(() => {
@@ -418,5 +428,5 @@ const styles = StyleSheet.create({
 // 923×647 device px, so 647/280 ≈ 923/400 — crop any harder and the WIDTH becomes
 // the limit, so the art stops growing while the risk of clipping does not.
 export function MetaphysicsLesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={MetaphysicsScene} band={[234, 514]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={MetaphysicsScene} band={[234, 514]} camera={CAM} />;
 }

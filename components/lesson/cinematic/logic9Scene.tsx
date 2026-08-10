@@ -14,6 +14,7 @@ import { BEATS } from './logic9Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // A claim on a board, an arguer standing by it, and a dodger who walks on and never
 // once goes near it.
@@ -79,6 +80,14 @@ const STRAW = BEATS.map((b) => b.straw ?? 0);
 // The arguer never moves, so he never walks; his x is a constant and the rule about
 // routing motion through travelStance simply does not apply to him (C18).
 const ARG_X = 96;
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Beats that do not set `x` stand at ARG_X.
+const X = BEATS.map((b) => b.x ?? ARG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic9'));
 
 export default function Logic9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -260,5 +269,5 @@ const styles = StyleSheet.create({
 // from x 420, which is off the 400-wide stage and therefore outside the crop — that
 // is the point of parking him there, and it costs the band nothing.
 export function Logic9Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic9Scene} band={[200, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic9Scene} band={[200, 512]} camera={CAM} />;
 }

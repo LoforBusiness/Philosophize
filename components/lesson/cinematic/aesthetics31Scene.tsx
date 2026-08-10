@@ -13,6 +13,7 @@ import { BEATS } from './aesthetics31Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // A PLAYHEAD THAT RUNS THE MELODY — the first thing in the app that plays in time —
 // and three answer targets that are three PARTS of one picture: the notes, the
@@ -67,6 +68,15 @@ const STR = BEATS.map((b) => b.strings ?? 4);
 const PLAY = BEATS.map((b) => b.playing ?? 0);
 const CA = BEATS.map((b) => b.clapA ?? 0);
 const CB = BEATS.map((b) => b.clapB ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics31'));
 
 export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -253,5 +263,5 @@ const styles = StyleSheet.create({
 
 // Ink runs from the two target boxes (308) to the ground line (500). Band 302…512 = 210 (H59).
 export function Aesthetics31Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics31Scene} band={[302, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics31Scene} band={[302, 512]} camera={CAM} />;
 }

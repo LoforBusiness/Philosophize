@@ -11,6 +11,7 @@ import { BEATS } from './logic5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // The figure stands on the LEFT (and climbs a ladder in the same spot) so the whole
 // right-hand column — x 150…386 — is free for information design that is drawn BIG:
@@ -110,6 +111,15 @@ const CHAIN = BEATS.map((b) => b.chain ?? 0);
 const LADDER = BEATS.map((b) => b.ladder ?? 0);
 const STAIRV = BEATS.map((b) => b.steps ?? 0);
 const CHUTE = BEATS.map((b) => b.chute ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic5'));
 
 export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -449,5 +459,5 @@ const styles = StyleSheet.create({
 // feet at 500, and the ground rule at 501.5. Nothing is drawn above 232 or below 501.5,
 // so [224, 510] renders the stage at ~2.26×.
 export function Logic5Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic5Scene} band={[224, 510]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic5Scene} band={[224, 510]} camera={CAM} />;
 }

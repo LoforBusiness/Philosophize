@@ -237,6 +237,33 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
           errs.push(`camera: graded beat ${bi} sits at scale ${resolved[bi].s.toFixed(2)} — answer targets are Pressables and must be at 1`);
         }
       });
+
+      // ── AND THE FIGURE HAS TO BE IN IT ────────────────────────────────────
+      //
+      // The other half of H60b's rule: what the reader must SEE has to be inside
+      // the shot. Questions are covered above (forced to scale 1) and a quote's
+      // words are safe by construction — the deck sits OUTSIDE camStyle, so no
+      // push can crop them. What a close push can lose is the thing every one of
+      // these lessons is actually about: the man.
+      //
+      // `followMoves` pushes to 'close' on quotes and on one still beat in three,
+      // and those shots were only ever checked for being legal against the band —
+      // which says nothing about whether the figure survived them. He stands at
+      // the x track, ~103 tall at K_FIG 1 with his feet on the ground line, and he
+      // has to be inside the visible window on every beat, head included.
+      const FIG_TOP = 500 - 103, FIG_BOT = 500;
+      resolved.forEach((sh, bi) => {
+        if (!sh) return;
+        const hw = (400 / 2) / sh.s, hh = (560 / 2) / sh.s;
+        const fx = xs[bi];
+        const off = [];
+        if (fx < sh.cx - hw || fx > sh.cx + hw) off.push(`x ${fx} outside ${(sh.cx - hw).toFixed(0)}…${(sh.cx + hw).toFixed(0)}`);
+        if (FIG_TOP < sh.cy - hh) off.push(`head above the window by ${(sh.cy - hh - FIG_TOP).toFixed(0)}`);
+        if (FIG_BOT > sh.cy + hh) off.push(`feet below the window by ${(FIG_BOT - sh.cy - hh).toFixed(0)}`);
+        if (off.length) {
+          errs.push(`camera: beat ${bi} at scale ${sh.s.toFixed(2)} cuts the figure — ${off.join(' · ')}`);
+        }
+      });
       cameras.push({ f, n: resolved.length });
     }
   }

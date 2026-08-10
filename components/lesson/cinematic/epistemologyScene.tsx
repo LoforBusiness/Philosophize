@@ -10,6 +10,7 @@ import {
 } from './rig';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE GATE OF KNOWING, held by three locks: TRUE · BELIEF · REASONS.
@@ -96,6 +97,14 @@ function hLive(code: number, t: number, bt: number): Stance {
   if (code === 0) return stand(t);
   return narratorLive(code, t, bt);
 }
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Beats that do not set `x` stand at SEEKER_X.
+const X = BEATS.map((b) => b.x ?? SEEKER_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology'));
 
 export default function EpistemologyScene({ clock, bt, bi, qv, i, picked }: SceneApi) {
   const cur = BEATS[i];
@@ -358,5 +367,5 @@ const styles = StyleSheet.create({
 // pays: the stage region is ~923×647 device px, so 647/280 ≈ 923/400 — anything
 // narrower is capped by the width and gains nothing while risking a clipped crown.
 export function EpistemologyLesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={EpistemologyScene} band={[234, 514]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={EpistemologyScene} band={[234, 514]} camera={CAM} />;
 }

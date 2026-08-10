@@ -10,6 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // THE CONFIDENCE CHART. Hume's problem drawn as the picture it actually is: a bar
 // chart of the chicken's confidence climbing one fed morning at a time, a trend line
@@ -60,6 +61,15 @@ const FEED_X = [100, 108, 116];
 const P_CODE = BEATS.map((b) => b.p ?? 0);
 const DAYS = BEATS.map((b) => b.days ?? 0);
 const TWIST = BEATS.map((b) => b.twist ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology7'));
 
 export default function Epistemology7Scene({ clock, bt, bi }: SceneApi) {
   const SCENE = useDerivedValue(() => {
@@ -266,5 +276,5 @@ const styles = StyleSheet.create({
 // player crops to that slice, so everything renders about twice the size it did when
 // the full 560 was letterboxed into the stage.
 export function Epistemology7Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology7Scene} band={[226, 514]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology7Scene} band={[226, 514]} camera={CAM} />;
 }

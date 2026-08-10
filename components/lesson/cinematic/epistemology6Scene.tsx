@@ -10,6 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // Skepticism drawn as METHOD, not mood.
 //
@@ -64,6 +65,15 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const BAL = BEATS.map((b) => b.bal ?? 0);
 const CRACK = BEATS.map((b) => b.crack ?? 0);
 const ROUTE = BEATS.map((b) => b.route ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology6'));
 
 export default function Epistemology6Scene({ clock, bt, bi }: SceneApi) {
   const SCENE = useDerivedValue(() => {
@@ -269,5 +279,5 @@ const styles = StyleSheet.create({
 // band is 280 tall, which is still WIDTH-limited on a phone stage (923/400 = 2.31 ≈
 // 647/280 = 2.31), so the scene renders about 2.3× instead of 1.15×.
 export function Epistemology6Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology6Scene} band={[234, 514]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology6Scene} band={[234, 514]} camera={CAM} />;
 }

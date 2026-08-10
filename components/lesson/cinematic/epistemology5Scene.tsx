@@ -11,6 +11,7 @@ import { BEATS } from './epistemology5Script';
 import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ARISTOTLE'S LADDER, drawn as a stepped bar chart and climbed by the eye.
@@ -83,6 +84,15 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const STARB = BEATS.map((b) => b.star ?? 0);
 const POWER = BEATS.map((b) => b.power ?? 0);
 const RUNGN = BEATS.map((b) => b.rungs ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology5'));
 
 export default function Epistemology5Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -268,5 +278,5 @@ const styles = StyleSheet.create({
 // four name plates (318–498) all live inside. Cropping to 280 units instead of 560
 // puts the scene at the stage's WIDTH limit — about 2.3×, double the letterboxed fit.
 export function Epistemology5Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology5Scene} band={[206, 514]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology5Scene} band={[206, 514]} camera={CAM} />;
 }

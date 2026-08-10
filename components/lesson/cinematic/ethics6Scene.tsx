@@ -10,6 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // The footbridge — and, written up beside it, the SPLIT drawn as a chart: two bars
 // for the same trade, landing at opposite heights over one shared footing that
@@ -69,6 +70,15 @@ const STAMP = BEATS.map((b) => b.stamp ?? 0);
 const SLEEPERS = Array.from({ length: 14 }, (_, k) => 34 + k * 26);
 // Rail-side balusters, so the handrail reads as a footbridge and not a floating bar.
 const BALUSTERS = [110, 138, 166, 194, 222, 250];
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Two figures at 150 and 216, so the track is the point BETWEEN them (183) — following
+// either one alone would frame the other out, and here the pair is the subject.
+const X = BEATS.map((b) => b.x ?? 183);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics6'));
 
 export default function Ethics6Scene({ clock, bt, bi }: SceneApi) {
   const SCENE = useDerivedValue(() => {
@@ -345,5 +355,5 @@ const styles = StyleSheet.create({
 // at 312 tall the band is still WIDTH-limited on a phone stage (360/400 = 0.90 <
 // 314/312 = 1.01), so the scene renders at exactly the same 0.90 it did at 278 tall.
 export function Ethics6Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics6Scene} band={[200, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics6Scene} band={[200, 512]} camera={CAM} />;
 }

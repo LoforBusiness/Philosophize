@@ -10,6 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political4Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // A figure walled in by interference, drawn as an information graphic rather than a
 // mood piece:
@@ -79,6 +80,15 @@ const HARM = BEATS.map((b) => b.harm ?? 0);
 const TEST = BEATS.map((b) => b.test ?? 0);
 const NEG = BEATS.map((b) => ((b.panel ?? 0) === 1 ? 1 : 0));
 const POS = BEATS.map((b) => ((b.panel ?? 0) === 2 ? 1 : 0));
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political4'));
 
 export default function Political4Scene({ clock, bt, bi }: SceneApi) {
   const SCENE = useDerivedValue(() => {
@@ -297,5 +307,5 @@ const styles = StyleSheet.create({
 // and the tally only translate sideways or fade — so those are the true extremes, and
 // cropping to [214, 510] renders the stage at ~2.19× instead of the letterboxed 1.15×.
 export function Political4Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political4Scene} band={[214, 510]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political4Scene} band={[214, 510]} camera={CAM} />;
 }

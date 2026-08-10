@@ -11,6 +11,7 @@ import { BEATS } from './political2Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // A ruler and a subject play out power vs authority, under two pieces of ink
 // information design:
@@ -71,6 +72,15 @@ const POD = BEATS.map((b) => (b.podium ? 1 : 0));
 const CHART = BEATS.map((b) => b.chart ?? 0);
 const LED = BEATS.map((b) => (b.ledger ? 1 : 0));
 const TR = 0.85;
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Two figures at 96 and 252, so the track is the point BETWEEN them (174) — following
+// either one alone would frame the other out, and here the pair is the subject.
+const X = BEATS.map((b) => b.x ?? 174);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political2'));
 
 export default function Political2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -289,5 +299,5 @@ const styles = StyleSheet.create({
 // [216, 512] holds the lot with 8 units of margin at the top and 10 at the bottom,
 // and the whole scene renders about 90% larger than the letterboxed full-height fit.
 export function Political2Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political2Scene} band={[216, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political2Scene} band={[216, 512]} camera={CAM} />;
 }

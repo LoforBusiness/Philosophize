@@ -11,6 +11,7 @@ import { BEATS } from './logic6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // The conditional, drawn as one tall column of information down the right of the stage
 // while the figure holds the left:
@@ -64,6 +65,15 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const LINK = BEATS.map((b) => b.link ?? 0);
 const RAIN = BEATS.map((b) => b.rain ?? 0);
 const TABLE = BEATS.map((b) => b.table ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic6'));
 
 export default function Logic6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -241,5 +251,5 @@ const styles = StyleSheet.create({
 // those bounds — the arrow head only rides UP toward its shaft — so cropping to
 // [198, 508] renders the stage at ~2.09× instead of the letterboxed 1.15×.
 export function Logic6Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic6Scene} band={[198, 508]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic6Scene} band={[198, 508]} camera={CAM} />;
 }

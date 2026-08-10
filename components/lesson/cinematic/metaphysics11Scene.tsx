@@ -14,6 +14,7 @@ import { BEATS } from './metaphysics11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // Two men on two low stands, each stand carrying a name, and a plate reading
 // MEMORIES hanging over one head on a short leader line. The plate travels from
@@ -116,6 +117,14 @@ function crownOf(tilt: number, neck: number, bob: number, x: number, dir: number
     y: PLINTH_T - (PELVIS_UP + bob) * K_FIG + h.y * K_FIG - HEAD_R * K_FIG,
   };
 }
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Beats that do not set `x` stand at PRI_X.
+const X = BEATS.map((b) => b.x ?? PRI_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics11'));
 
 export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -290,5 +299,5 @@ const styles = StyleSheet.create({
 // the band is 242 units, inside the ~280 below which a tighter crop buys nothing
 // and above which every single thing in the scene renders smaller (H59).
 export function Metaphysics11Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics11Scene} band={[268, 510]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics11Scene} band={[268, 510]} camera={CAM} />;
 }

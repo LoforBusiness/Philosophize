@@ -11,6 +11,7 @@ import {
 } from './rig';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // The conscience that steps out of a figure and weighs the deed on a balance,
 // beside an animal that shares the instincts but never judges itself.
@@ -175,6 +176,14 @@ function hLive(code: number, t: number, bt: number): Stance {
   if (code === 0) return stand(t);
   return narratorLive(code, t, bt);
 }
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Beats that do not set `x` stand at HUMAN_X.
+const X = BEATS.map((b) => b.x ?? HUMAN_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics'));
 
 export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
   const SCENE = useDerivedValue(() => {
@@ -416,7 +425,7 @@ function Sprout({ S }: { S: SharedValue<any> }) {
 // the scene can draw on any beat and renders it about 1.9× larger than a full-height
 // fit would.
 export function EthicsLesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={EthicsScene} band={[40, 338]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={EthicsScene} band={[40, 338]} camera={CAM} />;
 }
 
 const styles = StyleSheet.create({

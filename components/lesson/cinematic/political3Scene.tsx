@@ -10,6 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political3Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // The right to rule, drawn as a CIRCUIT and a COMPARISON.
 //
@@ -96,6 +97,15 @@ const PAIR_MODE = (() => {
     return last;
   });
 })();
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Two figures at 66 and 334, so the track is the point BETWEEN them (200) — following
+// either one alone would frame the other out, and here the pair is the subject.
+const X = BEATS.map((b) => b.x ?? 200);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political3'));
 
 export default function Political3Scene({ clock, bt, bi, i }: SceneApi) {
   const mode = PAIR_MODE[i];
@@ -364,5 +374,5 @@ const styles = StyleSheet.create({
 // as it lands, but it grows about its own CENTRE (406→446 becomes 395→457), so the
 // stamp is comfortably inside the band at its largest.
 export function Political3Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political3Scene} band={[214, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political3Scene} band={[214, 512]} camera={CAM} />;
 }

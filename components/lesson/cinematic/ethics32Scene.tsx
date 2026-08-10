@@ -13,6 +13,7 @@ import { BEATS } from './ethics32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // TWO figures, and THE FIGURES ARE THE ANSWER TARGETS — you tap a person, not a
 // card. Their standing plates carry the answer state so the fill still looks like
@@ -61,6 +62,15 @@ const PLATE_H = 28;
 const A = BEATS.map((b) => b.a ?? 0);
 const B = BEATS.map((b) => b.b ?? 0);
 const CARD = BEATS.map((b) => b.card ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Two figures at 82 and 300, so the track is the point BETWEEN them (191) — following
+// either one alone would frame the other out, and here the pair is the subject.
+const X = BEATS.map((b) => b.x ?? 191);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics32'));
 
 export default function Ethics32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -227,5 +237,5 @@ const styles = StyleSheet.create({
 
 // Ink runs from the new case (214) to the ground line (500). Band 208…512 = 304 (H59).
 export function Ethics32Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics32Scene} band={[208, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics32Scene} band={[208, 512]} camera={CAM} />;
 }

@@ -10,6 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // The Ship of Theseus drawn as INFORMATION, not just mood.
 //
@@ -57,6 +58,15 @@ const SWAP = BEATS.map((b) => b.swap ?? 0);
 const TWO = BEATS.map((b) => b.two ?? 0);
 const ORIG = BEATS.map((b) => b.orig ?? 0);
 const YOU = BEATS.map((b) => b.you ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics6'));
 
 export default function Metaphysics6Scene({ clock, bt, bi, i }: SceneApi) {
   const orig = ORIG[i];
@@ -362,5 +372,5 @@ const styles = StyleSheet.create({
 // 647/280 = 2.31), so the extra bottom margin costs nothing and the scene renders
 // about 2.3× instead of the 1.15× a full-height fit would give.
 export function Metaphysics6Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics6Scene} band={[232, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics6Scene} band={[232, 512]} camera={CAM} />;
 }

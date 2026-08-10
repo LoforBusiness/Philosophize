@@ -3,11 +3,15 @@ import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'r
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle, type Stance } from './rig';
+import { clamp01, ease01, lerp, mixStance, pose, type Bundle, type Stance } from './rig';
+// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
+// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
+import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics3Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // The trolley problem, staged as a schematic.
 //
@@ -91,6 +95,15 @@ const TX = BEATS.map((b) => b.tx ?? 118);
 const PULL = BEATS.map((b) => b.pull ?? 0);
 const LENS = BEATS.map((b) => b.lens ?? 0);
 const TR = 0.85;
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics3'));
 
 export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -363,5 +376,5 @@ const styles = StyleSheet.create({
 // 350. So [224, 518] holds every extreme with 8 units of margin at each end, and the
 // scene renders about 90% larger than the letterboxed full-height fit.
 export function Ethics3Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics3Scene} band={[224, 518]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics3Scene} band={[224, 518]} camera={CAM} />;
 }

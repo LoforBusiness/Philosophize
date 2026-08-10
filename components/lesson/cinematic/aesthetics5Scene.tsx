@@ -11,6 +11,7 @@ import { BEATS } from './aesthetics5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // THE ATTENTION METER AND THE FRAME. Murdoch's argument drawn instead of asserted:
 //
@@ -94,6 +95,15 @@ const BIRD = BEATS.map((b) => b.bird ?? 0);
 const EGO = BEATS.map((b) => b.ego ?? 0);
 const LEAF = BEATS.map((b) => b.leaf ?? 0);
 const SELF = BEATS.map((b) => b.self ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics5'));
 
 export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -396,5 +406,5 @@ const styles = StyleSheet.create({
 // [228, 514] holds the lot with 8 units of margin above and 7 below, and the scene
 // renders about 2.26× instead of the 1.15× a full-height fit letterboxes it to.
 export function Aesthetics5Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics5Scene} band={[228, 514]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics5Scene} band={[228, 514]} camera={CAM} />;
 }

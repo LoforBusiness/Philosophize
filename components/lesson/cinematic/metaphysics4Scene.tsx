@@ -10,6 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics4Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // A LEDGER of failed attempts to name nothing, and the void that keeps refuting
 // them. Parmenides' trap drawn as information rather than mood.
@@ -63,6 +64,15 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const TOK = BEATS.map((b) => b.tokens ?? 0);
 const BAR = BEATS.map((b) => b.barred ?? 0);
 const FRZ = BEATS.map((b) => b.frozen ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics4'));
 
 export default function Metaphysics4Scene({ clock, bt, bi, i }: SceneApi) {
   const cur = BEATS[i];
@@ -304,5 +314,5 @@ const styles = StyleSheet.create({
 // letterboxed 1.15×. (The stage is only ~5% off the width-limited ceiling of 2.31×,
 // so there is nothing left to win by cropping harder.)
 export function Metaphysics4Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics4Scene} band={[216, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics4Scene} band={[216, 512]} camera={CAM} />;
 }

@@ -13,6 +13,7 @@ import { BEATS } from './ethics13Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // ONE RAIL FROM TOO LITTLE TO TOO MUCH, and the answer targets are POSITIONS on it —
 // the reader answers with a place rather than a proposition (E33). Answering slides
@@ -52,6 +53,15 @@ const NAMES = ['COWARD', 'TIMID', 'COURAGE', 'RASH', 'RECKLESS'];
 const G = BEATS.map((b) => b.g ?? 0);
 const POS = BEATS.map((b) => b.pos ?? 0);
 const HABIT = BEATS.map((b) => b.habit ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics13'));
 
 export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -167,5 +177,5 @@ const styles = StyleSheet.create({
 
 // Ink runs from the kicker (330) to the ground line (500). Band 324…512 = 188 (H59).
 export function Ethics13Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics13Scene} band={[324, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics13Scene} band={[324, 512]} camera={CAM} />;
 }

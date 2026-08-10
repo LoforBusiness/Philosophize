@@ -10,6 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics3Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // Three charts and a figure caught between them.
 //
@@ -117,6 +118,15 @@ const ARC = (() => {
   return BEATS.map((b) => { const v = b.arc ?? 0; if (v > 0) last = v; return last; });
 })();
 const CUTB = BEATS.map((b) => b.cut ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics3'));
 
 export default function Aesthetics3Scene({ clock, bt, bi, i }: SceneApi) {
   const cur = BEATS[i];
@@ -406,5 +416,5 @@ const styles = StyleSheet.create({
 // instead of the letterboxed 1.15× — within 5% of the width-limited ceiling of
 // 2.31×, so there is nothing left to win by cropping harder.
 export function Aesthetics3Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics3Scene} band={[218, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics3Scene} band={[218, 512]} camera={CAM} />;
 }

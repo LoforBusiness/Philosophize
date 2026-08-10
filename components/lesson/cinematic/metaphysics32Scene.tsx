@@ -13,6 +13,7 @@ import { BEATS } from './metaphysics32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // THE APP'S FIRST ORBIT, and the answer targets are three NUMBERS — the reader answers
 // by counting what is in front of them (E33). Nothing in the frame ever breaks the
@@ -58,6 +59,15 @@ const G = BEATS.map((b) => b.g ?? 0);
 const ORBS = BEATS.map((b) => b.orbs ?? 0);
 const TETHER = BEATS.map((b) => b.tether ?? 0);
 const TAG = BEATS.map((b) => b.tag ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics32'));
 
 export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -197,5 +207,5 @@ const styles = StyleSheet.create({
 
 // Ink runs from the counts (240) to the ground line (500). Band 234…512 = 278 (H59).
 export function Metaphysics32Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics32Scene} band={[234, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics32Scene} band={[234, 512]} camera={CAM} />;
 }

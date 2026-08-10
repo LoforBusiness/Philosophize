@@ -198,7 +198,11 @@ const FACE_OK = new Set([
 const HEAD_DEBT = new Set(['act 3', 'act 6', 'act 9', 'act 13', 'posture 11', 'prop 6']);
 const HEAD_DEBT_BUDGET = 6;
 const headDebt = [];
-const HEAD_CLEAR = 25.0;
+// From rig's HEAD_CLEAR — one source with check-rest, both derived from STR.headR.
+// `moving` rather than `rest`: these are hands MID-GESTURE, and a sweep through the
+// skull reads as a limb passing behind the face, so it needs more room than a
+// settled pose that is allowed to touch the rim.
+const HEAD_CLEAR = R.HEAD_CLEAR.moving;
 function checkHead(name, m) {
   if (FACE_OK.has(name)) return;
   let worst = Infinity, at = 0, which = '';

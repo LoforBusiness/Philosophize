@@ -1832,3 +1832,80 @@ scene draws. Blunt is acceptable; unreachable is not.
 
 `npm run check:camera` guards the one hole: a scene that rolls its own camera
 transform bypasses the player and so bypasses all of this. There are none today.
+
+> **The guarantee is NOT a function called `openForTargets`.** check-camera used to
+> say so in its header and in its success line, and no such function has ever
+> existed — it is `needsBox` + `containShot`, inline in `CinematicPlayer`. A safety
+> property asserted under a name nobody can grep is a dead end for the next person
+> auditing it, which is the whole reason this note exists.
+
+## H60b · USE the camera — a still wide shot is a wasted one
+
+H60 is a floor, not a style. It says what the camera may never crop; it does not
+ask for a camera that sits still, and 55 of the 100 lessons currently have none at
+all. The stage is 400×560 and a figure is ~103 tall in it, so a locked wide shot
+spends most of the frame on empty paper and renders every lesson at the same
+distance — which is why they read as one long shot of a small man.
+
+So the default is to MOVE, and the three things worth moving for:
+
+- **Push in on the figure**, and follow him when a walk is long enough to be worth
+  following. A traverse of 60+ stage units (the C18 minimum for a walk to read as
+  one at all) is long enough that a locked frame turns it into a figure shrinking
+  across a still picture. Track him.
+- **Push in on the thing being talked about** — a prop he is working, an
+  illustration, a diagram, a label. If a beat's text names an object, the shot
+  should be able to see that object at a size worth naming.
+- **Push in on a question.** Questions are the one place the reader has to *read
+  and act*, so they are the best case for a close shot — and the safest, because
+  `containShot` already guarantees the answer targets stay inside it.
+
+**Wide is a choice, not a default.** Keep it wide when the beat is about the space
+itself — a figure alone in a room, a distance being crossed, two figures far apart
+— and say so in the scene header, the same way every other composition decision is
+stated in numbers.
+
+## H60c · If the reader is told to look at it, the camera must frame it
+
+H60 guarantees a shot contains what the beat is *about* — but only a question ever
+declared what that was. Everything else the reader is pointed at (a diagram being
+drawn, a labelled prop, a box filling in, an animation the text names) had nothing
+to report, so the camera framed it by luck. With `followMoves` dealing pushes of up
+to 1.24×, luck is not good enough.
+
+**The rule: a beat that shows the reader a specific thing reports that thing's box,
+and the camera then either holds wide enough or moves onto it.** Not "aims near
+it" — H60's whole point is that a point cannot be cropped and a box can.
+
+The mechanism is the one questions already use, now available on every beat:
+
+- the scene measures the thing against the camera view and reports its box;
+- `CinematicPlayer` runs `containShot`, which **only loosens** — the scale comes
+  down to fit and the centre slides the shortest distance that brings it in;
+- **a shot that already showed the box is returned untouched**, so declaring one
+  costs nothing anywhere it was already right, and the authored camera work
+  survives.
+
+**Which way it moves is the scene's choice, and both are legal.** Pull out when the
+thing is large or the beat is about a relationship between parts; push in when it
+is small or detailed. What is NOT legal is leaving it to the deal.
+
+**Report a box whenever the beat's text names something on the stage.** If the
+words say "watch the third door", "the bar fills", "the two sides balance", the
+thing named is a must-see and takes a box. If the beat is only the figure talking,
+it needs none — he is already covered by the figure check in
+`validate-cinematic`, which tests his head, feet and x against the visible window
+on every beat.
+
+> Questions keep their stronger guarantee on top of this: they are forced to scale
+> 1.0 outright, because answer targets are Pressables and a tap must not have to
+> survive a camera offset.
+
+**And H60 still binds, always.** Anything the reader must see or read — an answer
+plate, a quote, a summary, a labelled illustration — has to be inside the shot at
+the moment they need it. For questions that is mechanical (`needsBox` measures the
+targets and `containShot` fits them). **For everything else it is still on the
+author**, because only a question reports a box today: a quote or a labelled
+diagram on a plain beat can be cropped by a tight push and nothing will catch it.
+Until a beat can declare its own must-see box, a close shot on a beat carrying
+text or art has to be checked by eye against the band.

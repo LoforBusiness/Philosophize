@@ -4,10 +4,14 @@
 // the figure, the question sat top-right, and the window cut it. They could not
 // tap it, and nothing on screen said anything was missing.
 //
-// The fix is central — `openForTargets` in camera.ts pulls any beat carrying an
-// `interact` block back to NEUTRAL, which is the whole declared band, and
-// CinematicPlayer applies it AFTER resolveMoves so no authored verb can override
-// it. That covers every lesson whose camera the PLAYER owns.
+// The fix is central, and it lives INLINE IN CinematicPlayer — not, as this header
+// claimed for a while, in a camera.ts function called `openForTargets`, which has
+// never existed. `needsBox` marks every beat carrying an `interact` block; the
+// answer targets measure themselves and report a box, and `containShot` pulls the
+// shot out only as far as that box needs. Before a box arrives the shot is
+// NEUTRAL — the whole declared band, which cannot crop anything. It is applied
+// AFTER resolveMoves, so no authored verb can override it. That covers every
+// lesson whose camera the PLAYER owns.
 //
 // This finds the ones it does not: a scene that builds its own camera transform
 // out of a local SHOTS table and applies its own `camStyle`. Those bypass the
@@ -45,7 +49,7 @@ for (const f of scenes) {
 
 console.log('\nTAPPABLE THINGS INSIDE THE SHOT\n');
 console.log(`  ${scenes.length} scenes scanned`);
-console.log('  player-owned cameras are guaranteed by openForTargets (camera.ts)');
+console.log('  player-owned cameras are guaranteed by needsBox + containShot (CinematicPlayer.tsx)');
 if (!rows.length) {
   console.log('  ok    no scene answers a question under a camera the player does not own.\n');
 } else {

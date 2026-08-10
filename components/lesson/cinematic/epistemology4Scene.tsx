@@ -11,6 +11,7 @@ import { BEATS } from './epistemology4Script';
 import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A LABELLED FLOW DIAGRAM standing over the two arguers.
@@ -57,6 +58,15 @@ const R_CODE = BEATS.map((b) => b.r ?? 0);
 const FILL = BEATS.map((b) => b.fill ?? 0);
 const GLOW = BEATS.map((b) => b.glow ?? 0);
 const BRIDGE = BEATS.map((b) => b.bridge ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Two figures at 96 and 296, so the track is the point BETWEEN them (196) — following
+// either one alone would frame the other out, and here the pair is the subject.
+const X = BEATS.map((b) => b.x ?? 196);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology4'));
 
 export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -285,5 +295,5 @@ const styles = StyleSheet.create({
 // on beat 1), so the Kant box (bottom 342) never meets them. The four name plates run
 // 220–318. 328 units instead of 560 renders everything at ~2×.
 export function Epistemology4Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology4Scene} band={[186, 514]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology4Scene} band={[186, 514]} camera={CAM} />;
 }

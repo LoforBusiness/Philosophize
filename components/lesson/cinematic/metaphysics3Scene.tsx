@@ -11,6 +11,7 @@ import { BEATS } from './metaphysics3Script';
 import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PLATO'S LADDER OF REALITY, drawn as a labelled three-tier chart, stage right.
@@ -65,6 +66,15 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const SHADOW = BEATS.map((b) => b.shadow ?? 0);
 const FORMB = BEATS.map((b) => b.form ?? 0);
 const APPLEB = BEATS.map((b) => b.apple ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics3'));
 
 export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -305,5 +315,5 @@ const styles = StyleSheet.create({
 // inside. 274 units instead of 560 puts the scene at the stage's WIDTH limit, about
 // 2.3×: double the letterboxed fit, and the old 0.92 camera is gone too.
 export function Metaphysics3Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics3Scene} band={[240, 514]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics3Scene} band={[240, 514]} camera={CAM} />;
 }

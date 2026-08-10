@@ -11,6 +11,7 @@ import { BEATS } from './strong4Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // An instrument panel the presenter reads from.
 //
@@ -69,6 +70,15 @@ const DICE = BEATS.map((b) => b.dice ?? 0);
 const VERD = BEATS.map((b) => b.verdict ?? 0);
 const LENS = BEATS.map((b) => b.lens ?? 0);
 const TR = 0.85;
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('strong4'));
 
 export default function Strong4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -308,5 +318,5 @@ const styles = StyleSheet.create({
 // [202, 510] holds the lot with 8 units of margin at each end — and since the art
 // genuinely spans 292 units there is no tighter honest crop.
 export function Strong4Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Strong4Scene} band={[202, 510]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Strong4Scene} band={[202, 510]} camera={CAM} />;
 }

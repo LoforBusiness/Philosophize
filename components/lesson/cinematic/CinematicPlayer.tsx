@@ -243,9 +243,24 @@ export default function CinematicPlayer({
     const box = targetBox.value;
     const frame = (k: number) => {
       'worklet';
-      if (!needsBox[k]) return cam[k];
-      if (!box) return { ...NEUTRAL, tr: cam[k].tr };
-      return containShot(cam[k], box, band);
+      // A REPORTED BOX WINS ON ANY BEAT, not just a question (H60c).
+      //
+      // This used to read `if (!needsBox[k]) return cam[k]` — so a box reported on
+      // a plain, quote or summary beat was computed, handed over, and then thrown
+      // away, and the only thing the camera would frame for was an answer target.
+      // That left every OTHER thing a reader is told to look at — a diagram being
+      // built, a labelled prop, an animation the text points at — at the mercy of
+      // whatever push `followMoves` happened to deal that beat, which can be 1.24×.
+      //
+      // Now: if the scene has said "this is the thing", the shot contains it.
+      // `containShot` only ever loosens — the scale comes down to fit and the
+      // centre slides the shortest distance — so a beat whose shot already showed
+      // its box is returned untouched and the authored camera work is unaffected.
+      if (box) return containShot(cam[k], box, band);
+      // No box yet. A question still falls back to the whole band, because an
+      // unreachable answer is worse than a blunt frame; anything else keeps its
+      // authored shot rather than snapping wide for a box that may never come.
+      return needsBox[k] ? { ...NEUTRAL, tr: cam[k].tr } : cam[k];
     };
     return shotAt(frame(n > 0 ? n - 1 : 0), frame(n), bt.value);
   });

@@ -9,6 +9,7 @@ import {
 } from './rig';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE DOUBT AUDIT.
@@ -74,6 +75,15 @@ const RUBBLE = [
   { left: 218, top: 485, w: 30, h: 12, rot: '5deg' },
   { left: 224, top: 472, w: 16, h: 9, rot: '-13deg' },
 ];
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Two figures at 272 and 96, so the track is the point BETWEEN them (184) — following
+// either one alone would frame the other out, and here the pair is the subject.
+const X = BEATS.map((b) => b.x ?? 184);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology2'));
 
 export default function Epistemology2Scene({ clock, bt, bi }: SceneApi) {
   const SCENE = useDerivedValue(() => {
@@ -331,5 +341,5 @@ const styles = StyleSheet.create({
 // the doubter's halo ~345 at their highest, both clear of the last row. The ruin
 // occupies x 138…248 on the floor, inside the corridor neither figure can reach.
 export function Epistemology2Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology2Scene} band={[172, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology2Scene} band={[172, 512]} camera={CAM} />;
 }

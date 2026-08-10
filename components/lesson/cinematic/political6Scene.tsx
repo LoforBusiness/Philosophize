@@ -11,6 +11,7 @@ import { BEATS } from './political6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // Rawls's two principles, drawn as INFORMATION rather than illustration.
 //
@@ -58,6 +59,15 @@ const EQ_DASHES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
 const P_CODE = BEATS.map((b) => b.p ?? 0);
 const BARS = BEATS.map((b) => b.bars ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political6'));
 
 export default function Political6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -254,5 +264,5 @@ const styles = StyleSheet.create({
 // (507); nothing is drawn outside that, so the player crops to it and the whole
 // scene renders about twice the size of the letterboxed full-height fit.
 export function Political6Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political6Scene} band={[232, 514]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political6Scene} band={[232, 514]} camera={CAM} />;
 }

@@ -13,6 +13,7 @@ import { BEATS } from './epistemology32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // FOUR MAPS OF ONE COAST, and the answer targets are the four panels — you answer by
 // picking a SCALE (E33). The four profiles come out of a single `coast()` function
@@ -62,6 +63,15 @@ const MAPS = [
 ];
 
 const G = BEATS.map((b) => b.g ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology32'));
 
 export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -226,5 +236,5 @@ const styles = StyleSheet.create({
 
 // Ink runs from the kicker (280) to the ground line (500). Band 274…512 = 238 (H59).
 export function Epistemology32Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology32Scene} band={[274, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology32Scene} band={[274, 512]} camera={CAM} />;
 }

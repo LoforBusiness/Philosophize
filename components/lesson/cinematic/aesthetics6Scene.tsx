@@ -10,6 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // A tiny figure at the foot of a vast range — and, written up beside it, the TABLE
 // Burke actually drew: two columns that are two different responses, not two doses
@@ -69,6 +70,15 @@ const SCREE = [
   { x: 296, w: 13, h: 16 },
   { x: 348, w: 8, h: 10 },
 ];
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics6'));
 
 export default function Aesthetics6Scene({ clock, bt, bi }: SceneApi) {
   const SCENE = useDerivedValue(() => {
@@ -352,5 +362,5 @@ const styles = StyleSheet.create({
 // old 510 clipped to within 2.6 of the ankles). The band is 274 tall, still
 // WIDTH-limited on a phone stage, so the scene renders about 2.3× instead of 1.15×.
 export function Aesthetics6Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics6Scene} band={[238, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics6Scene} band={[238, 512]} camera={CAM} />;
 }

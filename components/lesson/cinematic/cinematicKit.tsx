@@ -102,6 +102,23 @@ export interface BaseBeat {
   mc?: QBlock;                             // graded question (A/B/C/D in the deck)
   interact?: InteractBlock;                // graded question answered IN the scene
   summary?: SummaryBlock;
+  /**
+   * Where the figure stands on this beat, in stage x — the camera's x track.
+   *
+   * It lives on the BASE beat rather than on each lesson's own beat type because
+   * `validate-cinematic` can only check a camera it can READ: the 45 converted
+   * scenes all declare `const X = BEATS.map((b) => b.x ?? N)`, and a scene whose
+   * beat type had no `x` compiled, ran, and was reported as "camera went
+   * unchecked" — a shot nothing verifies against its band, which is the one thing
+   * H60 exists to prevent. Declaring it once here is what makes the remaining
+   * conversions checkable instead of merely working.
+   *
+   * Optional, and omitting it is normal: a scene whose figure does not move reads
+   * `b.x ?? <its standing x>` and gets a constant track, which is the honest
+   * input — `followMoves` then gives it the still-figure rhythm rather than
+   * inventing travel that is not in the picture.
+   */
+  x?: number;
   dur: number;
 }
 

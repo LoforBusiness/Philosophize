@@ -15,6 +15,7 @@ import { BEATS } from './logic12Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // FOUR DOORS IN ONE WALL, and the answer targets are the doors — the reader answers
 // by choosing a way out rather than a sentence (E33). A door here is a FRAME plus a
@@ -61,6 +62,16 @@ const DOORS = [
 
 const G = BEATS.map((b) => b.g ?? 0);
 const LIT = BEATS.map((b) => b.lit ?? 0);
+
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic12'));
 
 export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -212,5 +223,5 @@ const styles = StyleSheet.create({
 
 // Ink runs from the kicker (314) to the ground line (500). Band 308…512 = 204 (H59).
 export function Logic12Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic12Scene} band={[308, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic12Scene} band={[308, 512]} camera={CAM} />;
 }

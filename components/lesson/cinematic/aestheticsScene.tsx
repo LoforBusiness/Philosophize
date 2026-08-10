@@ -10,6 +10,7 @@ import {
 } from './rig';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHY THINGS FEEL BEAUTIFUL — Kant's two strange facts, drawn as a chart.
@@ -131,6 +132,15 @@ function hLive(code: number, t: number, bt: number): Stance {
   if (code === 0) return stand(t);
   return narratorLive(code, t, bt);
 }
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on. Beats that do not set
+// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
+// camera that never rests.
+const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics'));
 
 export default function AestheticsScene({ clock, bt, bi, qv }: SceneApi) {
   const SCENE = useDerivedValue(() => {
@@ -446,5 +456,5 @@ const styles = StyleSheet.create({
 // 923×647 device px, so 647/280 ≈ 923/400. Crop harder and the WIDTH becomes the
 // limit — the art stops growing while the risk of clipping keeps rising.
 export function AestheticsLesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={AestheticsScene} band={[234, 514]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={AestheticsScene} band={[234, 514]} camera={CAM} />;
 }

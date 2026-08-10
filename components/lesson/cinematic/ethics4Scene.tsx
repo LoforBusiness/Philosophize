@@ -11,6 +11,7 @@ import { BEATS } from './ethics4Script';
 import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A TWO-LAYER DIAGRAM with the argument happening inside it.
@@ -62,6 +63,15 @@ const A_CODE = BEATS.map((b) => b.a ?? 0);
 const B_CODE = BEATS.map((b) => b.b ?? 0);
 const FLOOR = BEATS.map((b) => b.floor ?? 0);
 const ROWS = BEATS.map((b) => b.rows ?? 0);
+
+// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
+// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
+// pushes close on a quote, and PULLS BACK to the whole band on a question or a
+// summary — the beats the reader has to read and act on.
+// Two figures at 118 and 282, so the track is the point BETWEEN them (200) — following
+// either one alone would frame the other out, and here the pair is the subject.
+const X = BEATS.map((b) => b.x ?? 200);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics4'));
 
 export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
@@ -273,5 +283,5 @@ const styles = StyleSheet.create({
 // 441, both comfortably inside. Cropping to 334 units instead of 560 renders the whole
 // scene at ~1.95× rather than the letterboxed 1.15×.
 export function Ethics4Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics4Scene} band={[184, 518]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics4Scene} band={[184, 518]} camera={CAM} />;
 }
