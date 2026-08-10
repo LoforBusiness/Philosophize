@@ -10,7 +10,9 @@ import { readWidgetBackground } from './background';
 // (or the 3-hour rotation) plus the live day streak. Used by the headless widget
 // task AND by every in-app refresh trigger, so the two can never drift apart.
 
-export async function buildQuoteWidget(): Promise<React.ReactElement> {
+export async function buildQuoteWidget(
+  size?: { width: number; height: number }
+): Promise<React.ReactElement> {
   const [pinned, streak, background] = await Promise.all([
     readPinnedQuote(),
     readWidgetStreak(),
@@ -25,6 +27,8 @@ export async function buildQuoteWidget(): Promise<React.ReactElement> {
       philosopherId={q.philosopherId}
       streak={streak}
       background={background}
+      width={size?.width}
+      height={size?.height}
     />
   );
 }
@@ -36,10 +40,13 @@ export async function refreshQuoteWidget(): Promise<void> {
   if (Platform.OS !== 'android') return;
   try {
     const { requestWidgetUpdate } = require('react-native-android-widget');
-    const element = await buildQuoteWidget();
+    type Info = { width: number; height: number };
+    // `renderWidget` is HANDED the widget's dimensions and this used to throw
+    // them away, which is why the backdrop was letterboxed. Build per widget:
+    // two widgets of different sizes want two differently-shaped scenes.
     requestWidgetUpdate({
       widgetName: 'QuoteOfTheDay',
-      renderWidget: () => element,
+      renderWidget: (info: Info) => buildQuoteWidget(info),
       widgetNotFound: () => {},
     });
   } catch {}

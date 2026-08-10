@@ -5,6 +5,38 @@
 // readable on this one" is arithmetic rather than an opinion.
 // `npm run check:widget` does exactly that, over every scene, every text run.
 //
+// ═════════════════════════════════════════════════════════════════════════════
+// A SCENE IS DRAWN TO THE WIDGET'S OWN SIZE. IT IS NOT SLICED.
+//
+// This file used to draw every scene into one 400×176 box and set
+// `preserveAspectRatio="xMidYMid slice"`, on the reasoning that the box would
+// then be cropped to cover whatever the widget happened to be. That is exactly
+// how SVG behaves in a browser, and it is why the contact sheet and the settings
+// picker both looked right. It is NOT what the widget does.
+//
+// The device path is `SvgWidget` → androidsvg:
+//
+//     SVG svg = getSvg();
+//     PictureDrawable pd = new PictureDrawable(svg.renderToPicture());
+//     view.setImageDrawable(pd);
+//
+// `renderToPicture()` with no arguments renders at the document's own intrinsic
+// size — the 400×176 viewBox — so `slice` has no differing viewport to act on and
+// does nothing at all. The Picture is then handed to an ImageView, and the
+// library never sets a scaleType, so Android's default FIT_CENTER applies: the
+// whole picture is fitted INSIDE the widget, letterboxed, with bare card showing
+// wherever the aspect ratios disagree. The widget is resizable from 180×110 to
+// 360×300 — 1.6:1 to 3.3:1 — so they almost always disagree.
+//
+// A scaleType would fix it in one line and cannot be shipped: it is native, and
+// an OTA cannot change the APK. So the fix is on this side. Every scene is a
+// FUNCTION OF THE WIDGET'S SIZE and its viewBox is that size in dp, which makes
+// fit-center exact — same aspect in, same aspect out, no bars at any size.
+//
+// Working in dp also makes the layout legible, because the type is specified in
+// dp: the header really is 11dp from the top, the hatching pitch really is 3dp,
+// and neither drifts when the widget is resized.
+//
 // ── HOW BOLD THE ART MAY BE, AS A NUMBER ────────────────────────────────────
 //
 // §19 says never take text contrast from the artwork. That is usually read as
@@ -17,41 +49,35 @@
 //
 // A mid grey — #ADA595, L 0.380 — still clears 7.1:1 against ink. So a stroke
 // crossing the quote can be a real mark rather than a rumour. What it may not be
-// is DARK: #6E675A is only 3.1:1 and fails. Hence the ramp below, and the rule
-// that NEAR is for the bottom band and the margins, never under type.
+// is DARK: #6E675A is only 3.1:1 and fails.
 //
-// ── THE TWO PARTS OF A SCENE ────────────────────────────────────────────────
+// ── AND THE MIDDLE OF THE CARD IS NO LONGER EMPTY ───────────────────────────
 //
-//   1. ART, full-bleed, heaviest in the bottom band and the outer margins.
-//   2. A VEIL of the card's own paper (ink, when dark), deepest across the type.
-//
-// The veil is now light, because the tone ramp does most of the work. A heavy
-// veil is what erased the branch mastheads at 0.62–0.86 (§19) and it erased
-// these too on the first pass.
-//
-// ── WHY DARK SCENES EXIST ───────────────────────────────────────────────────
-//
-// A light card can only ever carry mid-tone art, because ink type needs pale
-// paper under it. Invert it and that reverses: cream on near-black is legible
-// against marks far brighter than any light scene could risk, so the night
-// scenes are the ones that read from across the room. Each scene declares its
-// own type colours; `dark` is a fact about the scene, not a theme setting.
+// The previous scenes reserved the quote's whole band as bare field — nothing
+// above the horizon but a gradient — which is a defensible way to protect type
+// and the reason the card read as a footer illustration under a blank sheet
+// rather than as a picture. The ramp above is what makes that unnecessary: cloud
+// and hatching at FAR and MID clear 7:1 under ink, provably, so the sky can carry
+// real drawing. NEAR still never crosses type; it is for the ground band.
 //
 // ── DRAWING CONSTRAINTS ─────────────────────────────────────────────────────
 //
-// Rendered by AndroidSVG 1.4 (react-native-android-widget's SvgWidget), which is
-// SVG 1.1: shapes, paths, linearGradient, opacity are safe. NO filters, NO masks
-// — a crescent is cut with an overlapping disc in the backdrop colour instead.
+// Rendered by AndroidSVG 1.4, which is SVG 1.1: shapes, paths, linearGradient,
+// opacity, groups. NO filters, NO masks — a crescent is cut with an overlapping
+// disc in the backdrop colour instead.
+//
+// GROUP OPACITY IS THE ONE TRICK WORTH KNOWING HERE. A cumulus is a union of
+// overlapping discs, and overlapping translucent discs show every seam. Put them
+// in a `<g opacity="…">` and the group is flattened before the opacity applies,
+// so the union reads as one mass. That is what lets these clouds be lobed rather
+// than being one smooth blob.
 //
 // Gradient ids are per-scene (`v-night`, not `v`). Two of these can end up in one
 // document — the settings picker draws all five at once, and a contact sheet
 // does too — and duplicate ids mean every `url(#v)` resolves to whichever scene
 // happened to render first. That is not hypothetical: it silently gave both dark
 // scenes the light scene's paper veil, and the sheet showed two grey smears.
-//
-// The widget is resizable (180–360dp wide, 110–300dp tall), so each scene is
-// drawn to one 400x176 box and SLICED to cover. Nothing that matters goes near
-// an edge, because slicing crops them.
+// ═════════════════════════════════════════════════════════════════════════════
 
 /**
  * react-native-android-widget types its colours as a hex template literal rather
@@ -71,10 +97,19 @@ export interface WidgetBackground {
   ink: Hex;
   inkSoft: Hex;
   hairline: Hex;
-  svg: string;
+  /**
+   * The scene, drawn to fill a card of exactly `w` × `h` DP.
+   *
+   * A function rather than a string because the viewBox has to be the widget's
+   * own aspect — see the header. Callers that genuinely have no size (a swatch,
+   * a test) should pass `TARGET_W`/`TARGET_H`.
+   */
+  svg: (w: number, h: number) => string;
 }
 
-const VB = 'viewBox="0 0 400 176" preserveAspectRatio="xMidYMid slice"';
+/** The 4×2 cell the widget targets, in dp. The default when no size is known. */
+export const TARGET_W = 250;
+export const TARGET_H = 110;
 
 // A tiny deterministic generator. A star field wants dozens of marks, a hand
 // -typed list of them is unreadable, and Math.random would make the contrast
@@ -91,7 +126,7 @@ function prng(seed: number): () => number {
 const r2 = (n: number) => Math.round(n * 100) / 100;
 
 // ── the ramp ────────────────────────────────────────────────────────────────
-// LIGHT scenes. FAR and MID may cross type; NEAR may not (3.1:1).
+// LIGHT scenes. FAR and MID may cross type; NEAR may not.
 const FAR = '#CFC8B8';
 const MID = '#ADA595';
 const NEAR = '#8E8677';
@@ -146,247 +181,321 @@ function inkVeil(id: string, paper: string): string {
   );
 }
 
-// ── scene parts ─────────────────────────────────────────────────────────────
+// ── scene parts, all in DP and all sized from the box ───────────────────────
 
-/** A bare tree: trunk, then branch pairs thinning as they rise. */
-function tree(x: number, base: number, h: number, w: number, c: string, sw = 1): string {
-  const s = (h / 70) * sw;
-  return (
-    `<path d="M${x} ${base} L${x} ${r2(base - h)}" stroke="${c}" stroke-width="${r2(3.6 * s)}" stroke-linecap="round" fill="none"/>` +
-    `<path d="M${x} ${r2(base - h * 0.6)} L${r2(x - w)} ${r2(base - h * 0.85)}` +
-    `M${x} ${r2(base - h * 0.42)} L${r2(x + w * 0.9)} ${r2(base - h * 0.7)}` +
-    `M${x} ${r2(base - h * 0.78)} L${r2(x + w * 0.6)} ${r2(base - h * 0.97)}` +
-    `M${x} ${r2(base - h * 0.24)} L${r2(x - w * 0.72)} ${r2(base - h * 0.48)}` +
-    `M${r2(x - w * 0.55)} ${r2(base - h * 0.73)} L${r2(x - w * 0.78)} ${r2(base - h * 0.9)}" ` +
-    `stroke="${c}" stroke-width="${r2(2.5 * s)}" stroke-linecap="round" fill="none"/>`
-  );
-}
-
-/** A ridge: one cubic run of hills, filled to the floor. */
-function ridge(y: number, amp: number, phase: number, fill: string, op = 1): string {
-  let d = `M-10 ${y}`;
-  for (let i = 0; i < 5; i++) {
-    const x0 = -10 + i * 84;
-    const dip = amp * (0.55 + 0.45 * Math.sin(phase + i * 1.7));
-    d += ` C${r2(x0 + 28)} ${r2(y - dip)} ${r2(x0 + 56)} ${r2(y - dip * 0.5)} ${r2(x0 + 84)} ${r2(y - dip * 0.15)}`;
-  }
-  return `<path d="${d} L410 200 L-10 200 Z" fill="${fill}" opacity="${op}"/>`;
-}
-
-/** Woodcut hatching inside a band. */
-function hatch(x0: number, x1: number, y0: number, y1: number, step: number, c: string, w: number, op: number): string {
-  let d = '';
-  for (let x = x0; x < x1; x += step) d += `M${r2(x)} ${y1} L${r2(x + (y1 - y0) * 0.55)} ${y0} `;
-  return `<path d="${d}" stroke="${c}" stroke-width="${w}" opacity="${op}" fill="none" stroke-linecap="round"/>`;
-}
-
-/** A bird: two strokes, the oldest shorthand there is. */
-const bird = (x: number, y: number, s: number, c: string, w: number) =>
-  `<path d="M${x} ${y} C${r2(x + s * 0.3)} ${r2(y - s * 0.4)} ${r2(x + s * 0.7)} ${r2(y - s * 0.4)} ${r2(x + s)} ${y}` +
-  ` M${r2(x + s)} ${y} C${r2(x + s * 1.3)} ${r2(y - s * 0.4)} ${r2(x + s * 1.7)} ${r2(y - s * 0.4)} ${r2(x + s * 2)} ${y}" ` +
-  `stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round"/>`;
-
-// ═══════════════════════════════════════════════════════════════════════════
-// THE SCENES
-//
-// ── WHERE THE TYPE IS, AND WHY THAT DECIDES EVERYTHING ──────────────────────
-//
-// The card is ~110dp tall and this box is 176 units, so 1dp is about 1.6 units.
-// Laying the content out through that map puts the type at:
-//
-//   header   y  18 …  37
-//   rule     y  45
-//   QUOTE    y  53 … 137   ← the middle half of the picture
-//   footer   y 145 … 163
-//
-// The previous scenes drew across all of it — a tree trunk straight through
-// "worth living", arcade columns behind the quote, a sun directly under the date
-// — and then tried to rescue the type with a veil. That is the wrong order. Line
-// art at the same tone as the letterforms does not stop competing with them
-// because something translucent was laid over both.
-//
-// So every scene here is built in BANDS, and the quote's band is left as field:
-//
-//   y   0 … 45   sky. Quiet — the header sits in it.
-//   y  45 … 137  THE QUOTE'S BAND. Gradient only. No object, no stroke, ever.
-//   y 137 … 176  the ground. Where the drawing lives, and where it can be bold,
-//                because only 9sp footer type crosses it and the tone ramp says
-//                how dark that is allowed to be.
-//
-// The hero — a sun, a moon — SETS INTO the horizon at the right, so it is a
-// composed picture rather than a texture, without ever entering the quote.
-//
-// ── AND IT SURVIVES BEING CROPPED ───────────────────────────────────────────
-//
-// The widget resizes from 180x110 to 360x300, so this 400x176 box is sliced to
-// cover anything from 3.3:1 to 1.2:1. Horizontal bands are exactly the
-// composition that survives that: `xMidYMid` keeps the middle in the middle, so
-// the quote's clean band stays behind the quote at every size, and cropping only
-// ever takes width off the ends of a horizon that runs past both edges anyway.
-// ═══════════════════════════════════════════════════════════════════════════
-
-/** The sky: one wash down the whole box. Every scene starts here. */
+/** The sky: one wash down the whole card. Every scene starts here. */
 function sky(id: string, top: string, bottom: string): string {
   return (
     `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">` +
     `<stop offset="0" stop-color="${top}"/>` +
-    `<stop offset="0.62" stop-color="${bottom}"/>` +
+    `<stop offset="1" stop-color="${bottom}"/>` +
     `</linearGradient>`
   );
 }
 
-/** The hero disc, low and right, half-set behind the ground that follows it. */
-const disc = (cx: number, cy: number, r: number, c: string, op = 1) =>
-  `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}" opacity="${op}"/>`;
-
 /**
- * A horizon: one filled run of hills from off-frame left to off-frame right.
+ * RULED SKY — fine horizontal lines, thinning as they rise.
  *
- * `y` is where it crosses the middle of the card, and it is never above 134 —
- * that is the floor of the quote's band, and this is the file's one hard rule.
+ * The oldest way to make a sky out of nothing but a pen, and the single cheapest
+ * mark in this file that says "cut by hand" rather than "filled by a computer".
+ * Lengths and gaps are irregular; an even pitch would be a hatch swatch.
  */
-function land(y: number, amp: number, phase: number, fill: string, op = 1): string {
-  let d = `M-10 ${r2(y)}`;
-  for (let i = 0; i < 5; i++) {
-    const x0 = -10 + i * 84;
-    const dip = amp * (0.5 + 0.5 * Math.sin(phase + i * 1.9));
-    d += ` C${r2(x0 + 30)} ${r2(y - dip)} ${r2(x0 + 54)} ${r2(y + dip * 0.35)} ${r2(x0 + 84)} ${r2(y - dip * 0.2)}`;
+function ruled(seed: number, w: number, y0: number, y1: number, c: string, op: number): string {
+  const R = prng(seed);
+  let d = '';
+  for (let y = y1; y > y0; y -= 2.6) {
+    // sparser toward the top, so the sky opens out instead of ending at a line
+    const f = (y - y0) / Math.max(1, y1 - y0);
+    if (R() > 0.26 + f * 0.7) continue;
+    let x = -R() * 30;
+    while (x < w) {
+      const len = 10 + R() * 46 * (0.4 + f);
+      const x1 = Math.min(w + 2, x + len);
+      if (x1 > 0) d += `M${r2(Math.max(-2, x))} ${r2(y)} L${r2(x1)} ${r2(y)} `;
+      x += len + 6 + R() * 26;
+    }
   }
-  return `<path d="${d} L410 190 L-10 190 Z" fill="${fill}" opacity="${op}"/>`;
+  return `<path d="${d}" stroke="${c}" stroke-width="0.7" opacity="${op}" fill="none"/>`;
 }
 
-/** Conifers along a horizon — solid masses, never line art. */
-function pines(base: number, xs: number[], h: number, c: string, op = 1): string {
+/**
+ * A CUMULUS, as the discs it is made of.
+ *
+ * Wrapped in one `<g>` so the overlaps flatten before the opacity is applied —
+ * otherwise every disc boundary shows as a seam and the cloud reads as a pile of
+ * bubbles. Lobes are placed on an uneven walk with a tapering stack on top, which
+ * is what makes it lumpy in the particular way a cloud is lumpy.
+ */
+function cloud(
+  seed: number, cx: number, cy: number, s: number,
+  body: string, lit: string, op: number
+): string {
+  const R = prng(seed);
+  const discs: [number, number, number][] = [];
+  // the base run, left to right, never evenly spaced
+  let x = cx - s * 1.5;
+  while (x < cx + s * 1.5) {
+    const r = s * (0.30 + R() * 0.26);
+    discs.push([x, cy - r * 0.25, r]);
+    x += r * (0.9 + R() * 0.7);
+  }
+  // one or two heaped shoulders, off centre on purpose
+  const towers = 1 + Math.floor(R() * 2);
+  for (let t = 0; t < towers; t++) {
+    const tx = cx + (R() - 0.5) * s * 1.7;
+    let ty = cy - s * 0.34;
+    let r = s * 0.42;
+    for (let k = 0; k < 3; k++) {
+      discs.push([tx + (R() - 0.5) * s * 0.3, ty, r]);
+      ty -= r * 0.72;
+      r *= 0.68;
+    }
+  }
+  const of = (ds: [number, number, number][], fill: string, o: number) =>
+    `<g fill="${fill}" opacity="${o}">`
+    + ds.map(([x2, y2, r]) => `<circle cx="${r2(x2)}" cy="${r2(y2)}" r="${r2(r)}"/>`).join('')
+    + `</g>`;
+  // TWO TONES, and it is the whole difference between a cloud and a blob. The
+  // body is the darker tone at the true silhouette; the lit crown is each lobe
+  // pulled in by a tenth of its own radius and moved up-left by the same, so the
+  // top edge stays on the silhouette and the crevices between lobes open up.
+  // One light, top-left, as everywhere else in this app.
+  const crown = discs.map(([x2, y2, r]) =>
+    [x2 - r * 0.1, y2 - r * 0.1, r * 0.9] as [number, number, number]);
+  return of(discs, body, op) + of(crown, lit, op);
+}
+
+/**
+ * A FACETED RIDGE — planes meeting at edges, closed to the floor.
+ *
+ * Straight segments with a shoulder below each summit. The cubic-curve version
+ * this replaces gave every scene the same soft scalloped horizon, which is the
+ * shape a generator reaches for first and reads as one.
+ */
+function crag(seed: number, w: number, h: number, base: number, amp: number, c: string, op: number): string {
+  const R = prng(seed);
+  const step = w / 4.5;
+  let d = `M-2 ${r2(base)}`;
+  let x = -2;
+  let i = 0;
+  while (x < w + step) {
+    const tall = i % 2 === 0 ? 0.55 + R() * 0.45 : 0.16 + R() * 0.3;
+    const peak = base - amp * tall;
+    const sx = x + step * (0.3 + R() * 0.25);
+    d += ` L${r2(sx)} ${r2(base - amp * tall * (0.4 + R() * 0.3))}`;
+    d += ` L${r2(sx + step * 0.22)} ${r2(peak)}`;
+    x = sx + step * (0.5 + R() * 0.5);
+    d += ` L${r2(x)} ${r2(peak + amp * tall * (0.25 + R() * 0.25))}`;
+    i++;
+  }
+  return `<path d="${d} L${r2(w + 2)} ${r2(h + 2)} L-2 ${r2(h + 2)} Z" fill="${c}" opacity="${op}"/>`;
+}
+
+/**
+ * A TREELINE — conifers, two to four times taller than they are wide, in tiers.
+ *
+ * The proportion is the whole thing. The row this replaces was five identical
+ * isoceles triangles on an even 36-unit pitch; at that width a triangle is a
+ * tent, and five of them evenly spaced is a pattern swatch. Heights vary by a
+ * factor of three here, the gaps are uneven, and roughly one in seven is a bare
+ * snag, which is what stops a wood reading as a crop.
+ */
+function conifers(seed: number, w: number, base: number, h: number, c: string, op: number): string {
+  const R = prng(seed);
   let d = '';
-  for (const x of xs) {
-    const w = h * 0.34;
-    d += `M${r2(x - w)} ${r2(base)} L${r2(x)} ${r2(base - h)} L${r2(x + w)} ${r2(base)} Z `;
+  let x = -4;
+  while (x < w + 6) {
+    const th = h * (0.5 + R() * 0.95);
+    // Aspect is the whole thing: at 0.13 these came out as spikes on the sheet.
+    const halfW = th * (0.22 + R() * 0.16);
+    const tip = x + (R() - 0.5) * halfW;
+    if (R() < 0.09) {
+      // A BROKEN STUMP, not a spike. At 0.18 of an already-narrow tree this came
+      // out as a hair with an arm on it — an aerial rather than a dead tree, and
+      // the one shape on the sheet that read as a glitch.
+      const tw = Math.max(0.9, halfW * 0.34);
+      d += `M${r2(x - tw * 2)} ${r2(base)} L${r2(tip - tw)} ${r2(base - th * 0.85)}`
+        + ` L${r2(tip + tw + halfW * 0.5)} ${r2(base - th * 0.6)} L${r2(tip + tw)} ${r2(base - th * 0.72)}`
+        + ` L${r2(x + tw * 2)} ${r2(base)} Z `;
+    } else {
+      const tiers = 3 + Math.floor(R() * 2);
+      d += `M${r2(x - halfW)} ${r2(base)}`;
+      for (let s = 1; s <= tiers; s++) {
+        const f = s / tiers;
+        const out = halfW * (1 - f) * (0.9 + R() * 0.5);
+        d += ` L${r2(x - out)} ${r2(base - th * (f - 1 / tiers) - th * 0.05)}`;
+        d += ` L${r2(x - out * 0.55)} ${r2(base - th * f)}`;
+      }
+      d += ` L${r2(tip)} ${r2(base - th)}`;
+      for (let s = tiers; s >= 1; s--) {
+        const f = s / tiers;
+        const out = halfW * (1 - f) * (0.85 + R() * 0.55);
+        d += ` L${r2(x + out * 0.5)} ${r2(base - th * f)}`;
+        d += ` L${r2(x + out)} ${r2(base - th * (f - 1 / tiers) - th * 0.04)}`;
+      }
+      d += ` L${r2(x + halfW)} ${r2(base)} Z `;
+    }
+    x += halfW * (1.5 + R() * 2.6);
   }
   return `<path d="${d}" fill="${c}" opacity="${op}"/>`;
 }
 
-/**
- * An ARCADE: piers joined by round arches, drawn as one filled mass.
- *
- * Piers alone read as a fence at this size — which is exactly what they did, and
- * a fence is not what a philosophy widget wants on its horizon. The arch is the
- * whole signal, so it is drawn as solid stone with the OPENINGS punched back out
- * in the sky's own colour: AndroidSVG has no masks, and a fill-rule hole would
- * need the sub-paths wound opposite, which is more fragile than painting the gap.
- */
-function arcade(base: number, x0: number, bays: number, bw: number, h: number, c: string, sky: string, op = 1): string {
-  const w = bw * bays;
-  const r = bw * 0.36;
-  let holes = '';
+/** A disc — sun or moon. The one shape allowed to be perfect. */
+const disc = (cx: number, cy: number, r: number, c: string, op = 1) =>
+  `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(r)}" fill="${c}" opacity="${op}"/>`;
+
+/** A bird: two strokes, the oldest shorthand there is. */
+const bird = (x: number, y: number, s: number, c: string, wgt: number) =>
+  `<path d="M${r2(x)} ${r2(y)} C${r2(x + s * 0.3)} ${r2(y - s * 0.4)} ${r2(x + s * 0.7)} ${r2(y - s * 0.4)} ${r2(x + s)} ${r2(y)}` +
+  ` M${r2(x + s)} ${r2(y)} C${r2(x + s * 1.3)} ${r2(y - s * 0.4)} ${r2(x + s * 1.7)} ${r2(y - s * 0.4)} ${r2(x + s * 2)} ${r2(y)}" ` +
+  `stroke="${c}" stroke-width="${wgt}" fill="none" stroke-linecap="round"/>`;
+
+/** A colonnade: uneven bays, two of them broken. A ruin is not an arcade. */
+function ruin(seed: number, x0: number, base: number, h: number, bays: number, c: string, op: number): string {
+  const R = prng(seed);
+  let d = '';
+  let x = x0;
   for (let i = 0; i < bays; i++) {
-    const cx = x0 + bw * (i + 0.5);
-    const top = base - h + r + 4;
-    holes += `M${r2(cx - r)} ${r2(base)} L${r2(cx - r)} ${r2(top)} `
-      + `A${r2(r)} ${r2(r)} 0 0 1 ${r2(cx + r)} ${r2(top)} L${r2(cx + r)} ${r2(base)} Z `;
+    const bw = h * (0.30 + R() * 0.14);
+    const standing = R() > 0.22;
+    const ht = standing ? h : h * (0.35 + R() * 0.35);
+    d += `M${r2(x)} ${r2(base)} L${r2(x)} ${r2(base - ht)} L${r2(x + bw * 0.34)} ${r2(base - ht)}`
+      + ` L${r2(x + bw * 0.34)} ${r2(base)} Z `;
+    // the lintel only survives where both its columns do
+    if (standing && i > 0 && R() > 0.35) {
+      d += `M${r2(x - bw * 0.86)} ${r2(base - h)} L${r2(x + bw * 0.34)} ${r2(base - h)}`
+        + ` L${r2(x + bw * 0.34)} ${r2(base - h * 0.9)} L${r2(x - bw * 0.86)} ${r2(base - h * 0.9)} Z `;
+    }
+    x += bw * (1.05 + R() * 0.5);
   }
-  return `<path d="M${r2(x0)} ${r2(base)} L${r2(x0)} ${r2(base - h)} L${r2(x0 + w)} ${r2(base - h)} L${r2(x0 + w)} ${r2(base)} Z" fill="${c}" opacity="${op}"/>`
-    + `<path d="${holes}" fill="${sky}" opacity="${op}"/>`;
+  return `<path d="${d}" fill="${c}" opacity="${op}"/>`;
 }
 
-/** 1 — GROVE. Pines on a low ridge, sun setting behind them. */
-function grove(): string {
+// ═══════════════════════════════════════════════════════════════════════════
+// THE SCENES
+//
+// Laid out in DP against the card's real geometry, which is fixed by
+// QuoteWidget: 11dp of vertical padding, a 12dp header row, a rule at ~28dp, the
+// quote taking everything the card can spare, and a 12dp footer row.
+//
+//   y  0  … 26      sky. The header sits in it, so FAR only.
+//   y 26  … h−26    the quote. FAR and MID are provably fine here (7:1); this is
+//                   where the cloud and the ruled sky go, and it is the change
+//                   that makes the card a picture rather than a footer.
+//   y h−26 … h      the ground. NEAR lives here and nowhere else.
+//
+// The horizon is placed as a FRACTION of the card, so a tall widget gets more
+// sky rather than a stretched hill — and every scene fills the box exactly,
+// because the box is the widget.
+// ═══════════════════════════════════════════════════════════════════════════
+
+function frame(id: string, w: number, h: number, top: string, bottom: string, dark: boolean, body: string): string {
+  const veil = dark ? inkVeil(`v-${id}`, NIGHT_PAPER) : paperVeil(`v-${id}`, PAPER);
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" ${VB}>` +
-    `<defs>${sky('s-grove', PAPER, '#EFE9DA')}</defs>` +
-    `<rect x="-10" y="-10" width="420" height="196" fill="url(#s-grove)"/>` +
-    disc(298, 132, 36, FAR, 0.9) +
-    land(134, 10, 0.6, FAR, 0.9) +
-    pines(140, [232, 268, 306, 344, 378], 46, MID, 0.9) +
-    land(150, 9, 2.4, MID, 0.75) +
-    land(164, 7, 4.1, NEAR, 0.5) +
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${r2(w)} ${r2(h)}" width="${r2(w)}" height="${r2(h)}">` +
+    `<defs>${sky(`s-${id}`, top, bottom)}${veil}</defs>` +
+    `<rect x="0" y="0" width="${r2(w)}" height="${r2(h)}" fill="url(#s-${id})"/>` +
+    body +
+    `<rect x="0" y="0" width="${r2(w)}" height="${r2(h)}" fill="url(#v-${id})"/>` +
     `</svg>`
   );
 }
 
-/** 2 — RIDGES. Nothing but land, receding. */
-function ridges(): string {
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" ${VB}>` +
-    `<defs>${sky('s-ridges', PAPER, '#EEE7D6')}</defs>` +
-    `<rect x="-10" y="-10" width="420" height="196" fill="url(#s-ridges)"/>` +
-    disc(288, 128, 42, FAR, 0.8) +
-    land(132, 13, 0.2, FAR, 0.85) +
-    land(147, 12, 2.2, MID, 0.75) +
-    land(161, 9, 3.9, NEAR, 0.5) +
-    `</svg>`
-  );
+/** 1 — GROVE. A stand of pines on a low ridge under a heaped sky. */
+function grove(w: number, h: number): string {
+  const horizon = h * 0.74;
+  return frame('grove', w, h, PAPER, '#EFE9DA', false,
+    ruled(11, w, h * 0.06, horizon - h * 0.08, MID, 0.5) +
+    cloud(23, w * 0.30, h * 0.30, h * 0.20, MID, FAR, 0.85) +
+    cloud(47, w * 0.78, h * 0.20, h * 0.14, MID, FAR, 0.7) +
+    disc(w * 0.80, horizon - h * 0.06, h * 0.13, MID, 0.55) +
+    crag(59, w, h, horizon, h * 0.16, MID, 0.8) +
+    conifers(71, w, horizon + h * 0.04, h * 0.22, NEAR, 0.75) +
+    crag(83, w, h, horizon + h * 0.12, h * 0.09, NEAR, 0.72));
 }
 
-/** 3 — COLONNADE. A ruin on the skyline. */
-function colonnade(): string {
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" ${VB}>` +
-    `<defs>${sky('s-colonnade', PAPER, '#EFEADC')}</defs>` +
-    `<rect x="-10" y="-10" width="420" height="196" fill="url(#s-colonnade)"/>` +
-    disc(92, 134, 30, FAR, 0.75) +
-    land(138, 8, 1.1, FAR, 0.85) +
-    arcade(152, 236, 4, 36, 40, MID, '#EFEADC', 0.9) +
-    `<rect x="228" y="110" width="160" height="7" rx="1.5" fill="${MID}" opacity="0.9"/>` +
-    land(162, 7, 3.2, NEAR, 0.5) +
-    `</svg>`
-  );
+/** 2 — RIDGES. Nothing but land, receding, and a great deal of weather. */
+function ridges(w: number, h: number): string {
+  const horizon = h * 0.70;
+  return frame('ridges', w, h, PAPER, '#EEE7D6', false,
+    ruled(101, w, h * 0.05, horizon - h * 0.1, MID, 0.45) +
+    cloud(113, w * 0.22, h * 0.26, h * 0.22, MID, FAR, 0.9) +
+    cloud(127, w * 0.62, h * 0.17, h * 0.17, MID, FAR, 0.8) +
+    cloud(131, w * 0.93, h * 0.30, h * 0.13, MID, FAR, 0.65) +
+    disc(w * 0.44, horizon - h * 0.03, h * 0.15, MID, 0.5) +
+    crag(139, w, h, horizon, h * 0.2, FAR, 1) +
+    crag(149, w, h, horizon + h * 0.1, h * 0.15, MID, 0.85) +
+    crag(151, w, h, horizon + h * 0.2, h * 0.09, NEAR, 0.72));
 }
 
-/** 4 — NIGHT. Stars over hills, a moon going down behind them. */
-function night(): string {
-  const rnd = prng(11);
+/** 3 — COLONNADE. A ruin on the skyline, half of it fallen. */
+function colonnade(w: number, h: number): string {
+  const horizon = h * 0.78;
+  return frame('colonnade', w, h, PAPER, '#EFEADC', false,
+    ruled(163, w, h * 0.06, horizon - h * 0.1, MID, 0.45) +
+    cloud(173, w * 0.18, h * 0.24, h * 0.19, MID, FAR, 0.82) +
+    cloud(181, w * 0.70, h * 0.30, h * 0.15, MID, FAR, 0.7) +
+    disc(w * 0.24, horizon - h * 0.1, h * 0.12, MID, 0.5) +
+    crag(191, w, h, horizon, h * 0.1, FAR, 1) +
+    ruin(193, w * 0.52, horizon + h * 0.02, h * 0.30, 6, NEAR, 0.8) +
+    crag(197, w, h, horizon + h * 0.13, h * 0.07, NEAR, 0.72));
+}
+
+/** 4 — NIGHT. Stars, a moon low behind the hills, and one ragged treeline. */
+function night(w: number, h: number): string {
+  const horizon = h * 0.76;
+  const R = prng(211);
   let stars = '';
-  // STRATIFIED, not scattered. Forty independent draws across 400 units clump —
-  // they came out as one diagonal smear across the top middle, which reads as a
-  // smudge on the glass rather than as a sky. One star per column, jittered
-  // inside it, spreads them without making them a grid.
-  const COLS = 26;
-  for (let i = 0; i < COLS * 2; i++) {
-    const col = i % COLS;
-    const x = -6 + (col + rnd()) * (412 / COLS);
-    // ONLY in the sky band. A star inside the quote is a speck on a letter.
-    const y = 3 + rnd() * 40;
-    stars += `<circle cx="${r2(x)}" cy="${r2(y)}" r="${r2(0.7 + rnd() * 1.5)}" fill="${BRIGHT}" opacity="${r2(0.25 + rnd() * 0.5)}"/>`;
+  for (let i = 0; i < 46; i++) {
+    const x = R() * w;
+    const y = R() * horizon * 0.92;
+    const r = 0.35 + R() * 0.85;
+    stars += `<circle cx="${r2(x)}" cy="${r2(y)}" r="${r2(r)}" fill="${BRIGHT}" opacity="${r2(0.24 + R() * 0.5)}"/>`;
   }
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" ${VB}>` +
-    `<defs>${sky('s-night', '#0E0D0A', NIGHT_PAPER)}</defs>` +
-    `<rect x="-10" y="-10" width="420" height="196" fill="url(#s-night)"/>` +
+  // The horizon is LIGHTER than the top. A night scene whose sky is as dark as
+  // its land has no silhouette in it, which is what made this read as an empty
+  // black card with a smudge on it. Cream type wants a dark FIELD, and the check
+  // says there is ten to one of room here, so the glow can be a real glow.
+  return frame('night', w, h, '#100F0B', '#4A4335', true,
     stars +
-    disc(302, 130, 32, MOON, 0.95) +
-    land(134, 12, 0.9, DIM) +
-    land(150, 10, 2.7, '#211F19') +
-    land(165, 7, 4.4, '#0C0B08') +
-    `</svg>`
-  );
+    cloud(223, w * 0.66, h * 0.24, h * 0.18, DIM, GLOW, 0.85) +
+    disc(w * 0.30, horizon - h * 0.08, h * 0.14, '#8A8370', 1) +
+    crag(227, w, h, horizon, h * 0.14, '#0C0B08', 1) +
+    conifers(229, w, horizon + h * 0.05, h * 0.2, '#0B0A07', 1));
 }
 
-/** 5 — TIDE. A moon over water, its road running to the shore. */
-function tide(): string {
-  let road = '';
-  for (let i = 0; i < 7; i++) {
-    const y = 142 + i * 4.8;
-    const w = 16 + i * 13;
-    road += `<rect x="${r2(300 - w / 2)}" y="${r2(y)}" width="${r2(w)}" height="1.8" rx="0.9" fill="${GLOW}" opacity="${r2(0.5 - i * 0.05)}"/>`;
+/** 5 — TIDE. A moon over water, and the long light lying across it. */
+function tide(w: number, h: number): string {
+  const horizon = h * 0.62;
+  const R = prng(233);
+  let glints = '';
+  // the moon's path on the water: short broken rules, longest under the moon
+  for (let i = 0; i < 16; i++) {
+    const y = horizon + (i + 1) * ((h - horizon) / 17);
+    const spread = (i / 16) * w * 0.30 + w * 0.03;
+    const cx = w * 0.68;
+    const n = 1 + Math.floor(R() * 2);
+    for (let k = 0; k < n; k++) {
+      const x0 = cx - spread + R() * spread * 2;
+      const len = (0.1 + R() * 0.5) * spread;
+      glints += `<rect x="${r2(x0)}" y="${r2(y)}" width="${r2(len)}" height="${r2(0.6 + R() * 0.7)}"`
+        + ` fill="${BRIGHT}" opacity="${r2(0.16 + R() * 0.3)}"/>`;
+    }
   }
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" ${VB}>` +
-    `<defs>${sky('s-tide', '#100F0C', NIGHT_PAPER)}</defs>` +
-    `<rect x="-10" y="-10" width="420" height="196" fill="url(#s-tide)"/>` +
-    disc(298, 130, 30, MOON, 0.9) +
-    land(136, 6, 1.4, '#1B1A15') +
-    `<rect x="-10" y="140" width="420" height="50" fill="#0D0C09"/>` +
-    road +
-    `</svg>`
-  );
+  return frame('tide', w, h, '#100F0B', '#443E31', true,
+    cloud(239, w * 0.24, h * 0.2, h * 0.16, DIM, GLOW, 0.8) +
+    disc(w * 0.68, horizon - h * 0.16, h * 0.13, '#8A8370', 1) +
+    crag(241, w, h, horizon, h * 0.08, '#0C0B08', 1) +
+    `<rect x="0" y="${r2(horizon)}" width="${r2(w)}" height="${r2(h - horizon)}" fill="#0B0A07" opacity="0.9"/>` +
+    glints);
 }
 
 export const WIDGET_BACKGROUNDS: readonly WidgetBackground[] = [
-  { id: 'grove', name: 'Grove', dark: false, paper: PAPER, ink: INK, inkSoft: INK_SOFT, hairline: HAIRLINE, svg: grove() },
-  { id: 'ridges', name: 'Ridges', dark: false, paper: PAPER, ink: INK, inkSoft: INK_SOFT, hairline: HAIRLINE, svg: ridges() },
-  { id: 'colonnade', name: 'Colonnade', dark: false, paper: PAPER, ink: INK, inkSoft: INK_SOFT, hairline: HAIRLINE, svg: colonnade() },
-  { id: 'night', name: 'Night', dark: true, paper: NIGHT_PAPER, ink: NIGHT_INK, inkSoft: NIGHT_SOFT, hairline: NIGHT_HAIR, svg: night() },
-  { id: 'tide', name: 'Tide', dark: true, paper: NIGHT_PAPER, ink: NIGHT_INK, inkSoft: NIGHT_SOFT, hairline: NIGHT_HAIR, svg: tide() },
+  { id: 'grove', name: 'Grove', dark: false, paper: PAPER, ink: INK, inkSoft: INK_SOFT, hairline: HAIRLINE, svg: grove },
+  { id: 'ridges', name: 'Ridges', dark: false, paper: PAPER, ink: INK, inkSoft: INK_SOFT, hairline: HAIRLINE, svg: ridges },
+  { id: 'colonnade', name: 'Colonnade', dark: false, paper: PAPER, ink: INK, inkSoft: INK_SOFT, hairline: HAIRLINE, svg: colonnade },
+  { id: 'night', name: 'Night', dark: true, paper: NIGHT_PAPER, ink: NIGHT_INK, inkSoft: NIGHT_SOFT, hairline: NIGHT_HAIR, svg: night },
+  { id: 'tide', name: 'Tide', dark: true, paper: NIGHT_PAPER, ink: NIGHT_INK, inkSoft: NIGHT_SOFT, hairline: NIGHT_HAIR, svg: tide },
 ];
 
 export const DEFAULT_WIDGET_BACKGROUND = 'grove';

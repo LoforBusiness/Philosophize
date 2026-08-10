@@ -14,7 +14,8 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     case 'WIDGET_CLICK':
       // For WIDGET_CLICK the OPEN_URI action already opens the deep link; we just
       // refresh so a tap also advances the quote if a rotation window rolled over.
-      props.renderWidget(await buildQuoteWidget());
+      // props.widgetInfo carries the real dp size; the scene is drawn to it.
+      props.renderWidget(await buildQuoteWidget(props.widgetInfo));
       break;
     case 'WIDGET_DELETED':
     default:

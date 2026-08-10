@@ -24,6 +24,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const S = 3;
+// The scene is a FUNCTION of the card's size now — see backgrounds.ts. Passing
+// the widget's own 250x110 is not a detail: `b.svg` on its own stringifies to
+// the function's SOURCE, which is not SVG, so the card renders blank and every
+// run measures 1.00:1 against nothing. That is what this check reported the
+// first time it was run after the change, and a 1.00:1 is always this, never art.
 const W = 250 * S;
 const H = 110 * S;
 // WCAG AA for body text. The quote is 15sp italic — not large text, so 4.5.
@@ -83,7 +88,7 @@ html,body{width:${W}px;height:${H}px}
 .spacer{width:${px(44)};height:${px(57)}}
 .day{font-size:${px(7)};font-weight:700;letter-spacing:${px(1)};margin-top:${px(1)};${softMark}}
 </style>
-<div class="card"><div class="art">${b.svg}</div><div class="body">
+<div class="card"><div class="art">${b.svg(250, 110)}</div><div class="body">
 <div class="head"><div class="kicker">DAILY QUOTE</div><div class="date">JUL 6</div></div>
 <div class="rule"></div>
 <div class="quote"><span>${QUOTE}</span></div>

@@ -22,6 +22,11 @@ import ProfileArtSheet from '@/components/shared/ProfileArtSheet';
 import { SvgXml } from 'react-native-svg';
 import { backgroundById } from '@/data/profileBackgrounds';
 import { WIDGET_BACKGROUNDS } from '@/components/widget/backgrounds';
+
+/** The swatch's own size, so the scene is drawn to the shape it is shown at.
+ *  Must match `sceneThumb` below — a scene is a function of its box now. */
+const WIDGET_SWATCH_W = 66;
+const WIDGET_SWATCH_H = 29;
 import { PROFILE_FONTS, profileNameStyle, profileNameText } from '@/data/profileFonts';
 import { signOut, deleteAccountCloud } from '@/lib/supabase/auth';
 import { signOutSocial } from '@/lib/auth/social';
@@ -675,7 +680,7 @@ function WidgetSceneRow() {
         return (
           <Pressable key={b.id} onPress={() => pick(b.id)} style={styles.sceneItem} hitSlop={4}>
             <View style={[styles.sceneThumb, on && styles.sceneThumbOn]}>
-              <SvgXml xml={b.svg} width="100%" height="100%" />
+              <SvgXml xml={b.svg(WIDGET_SWATCH_W, WIDGET_SWATCH_H)} width="100%" height="100%" />
             </View>
             <Text style={[styles.sceneName, on && styles.sceneNameOn]} numberOfLines={1}>
               {b.name}

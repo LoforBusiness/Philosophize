@@ -1,6 +1,6 @@
 import { FlexWidget, OverlapWidget, SvgWidget, TextWidget } from 'react-native-android-widget';
 
-import { backgroundById, type WidgetBackground } from './backgrounds';
+import { backgroundById, TARGET_H, TARGET_W, type WidgetBackground } from './backgrounds';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE HOME-SCREEN WIDGET.
@@ -42,13 +42,18 @@ import { backgroundById, type WidgetBackground } from './backgrounds';
 // Everything above the minimum goes to the quote, so a taller widget simply shows
 // more of it rather than re-laying anything out.
 //
-// ── THE ART IS FULL-BLEED; THE TYPE DOES NOT DEPEND ON IT ───────────────────
+// ── THE ART IS FULL-BLEED, AND THAT TOOK A SIZE ─────────────────────────────
 //
-// The scene covers the whole card (the reader asked for exactly that), and the
-// type's legibility is guaranteed by the scene's own construction rather than by
-// hoping — see backgrounds.ts for the tone ramp and the veil, and
-// `npm run check:widget` for the proof, which measures every text run against
-// what is actually painted under it.
+// The scene covers the whole card, and it only does so because `width`/`height`
+// are passed in from `WidgetInfo`. Without them the SVG is drawn at some other
+// aspect and Android fit-centers it into the card, leaving bare paper down the
+// sides or across the top — which is what shipped, and what it looked like.
+// backgrounds.ts has the mechanism in full.
+//
+// The type's legibility is guaranteed by the scene's own construction rather
+// than by hoping — see the tone ramp there, and `npm run check:widget` for the
+// proof, which measures every text run against what is actually painted under
+// it.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface QuoteWidgetProps {
@@ -59,6 +64,16 @@ export interface QuoteWidgetProps {
   streak: number;
   /** Omitted only by callers that predate scenes; falls back to the first. */
   background?: WidgetBackground;
+  /**
+   * The widget's real size in dp, from `WidgetInfo`.
+   *
+   * Not decoration: the scene's viewBox is built from it. See backgrounds.ts —
+   * androidsvg renders the picture at the SVG's own aspect and the ImageView
+   * fit-centers it, so a scene whose aspect is not the widget's is letterboxed
+   * with bare card showing. Passing the size is what makes the art full-bleed.
+   */
+  width?: number;
+  height?: number;
 }
 
 /**
@@ -75,7 +90,10 @@ function markSvg(INK: string): string {
     + `</svg>`;
 }
 
-export function QuoteWidget({ text, author, dateLabel, philosopherId, streak, background }: QuoteWidgetProps) {
+export function QuoteWidget({
+  text, author, dateLabel, philosopherId, streak, background,
+  width = TARGET_W, height = TARGET_H,
+}: QuoteWidgetProps) {
   const bg = background ?? backgroundById(null);
   const { paper: PAPER, ink: INK, inkSoft: INK_SOFT, hairline: HAIRLINE } = bg;
   const days = Math.max(0, Math.min(999, streak));
@@ -101,7 +119,7 @@ export function QuoteWidget({ text, author, dateLabel, philosopherId, streak, ba
 
       {/* 2 — the scene, FULL BLEED, sliced to cover at any widget size. */}
       <FlexWidget style={{ height: 'match_parent', width: 'match_parent' }}>
-        <SvgWidget svg={bg.svg} style={{ height: 'match_parent', width: 'match_parent' }} />
+        <SvgWidget svg={bg.svg(width, height)} style={{ height: 'match_parent', width: 'match_parent' }} />
       </FlexWidget>
 
       {/* 3 — content */}
