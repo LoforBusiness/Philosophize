@@ -31,11 +31,23 @@ const ok = (pass, label, detail) => {
 };
 
 // ── numbers the file states ──────────────────────────────────────────────────
+//
+// DERIVED FROM THE GATE, NOT TYPED IN AGAIN. These four claims used to carry
+// their own copy of the version — `is **19**`, `gate === '19'`, `versionCode 19`,
+// `19 (current)` — written when 19 was the live build. Build 20 shipped, the gate
+// was raised, CLAUDE.md was updated correctly, and THIS FILE started reporting the
+// bible as wrong about four things it had right. A checker that hard-codes the
+// number it is checking is not a check, it is a second copy of the fact, and it
+// rots the same way the first one does. Worse: `gate === '19'` asserted a
+// CONSTANT, so raising the gate could only ever fail it.
+//
+// `MIN_VERSION_CODE` is the one shipping version this repo holds on disk (the
+// versionCode itself lives on EAS, `appVersionSource: remote`), so everything
+// hangs off it. Raise the gate and this names the sections that have not caught up.
 const gate = /MIN_VERSION_CODE = (\d+)/.exec(
   fs.readFileSync('components/shared/UpdateGate.tsx', 'utf8'))[1];
-ok(md.includes('`MIN_VERSION_CODE` is **19**'), 'S20 states the real gate', `code says ${gate}`);
-ok(gate === '19', 'and the gate really is 19', gate);
-ok(md.includes('versionCode 19'), 'S1 states the live binary');
+ok(md.includes(`\`MIN_VERSION_CODE\` is **${gate}**`), 'S20 states the real gate', `code says ${gate}`);
+ok(md.includes(`versionCode ${gate}`), 'S1 states the live binary', `the gate is ${gate}`);
 ok(!/versionCode 16\*\*/.test(md), 'S1 no longer claims 16');
 
 const cin = execSync('node scripts/validate-cinematic.mjs', { encoding: 'utf8' });
@@ -61,10 +73,19 @@ const stale = [...md.matchAll(/~223/g)].filter((m) => {
 ok(stale.length === 0, 'no bare ~223 left — only ones shown against 322',
   stale.length ? `${stale.length} unqualified` : `${[...md.matchAll(/~223/g)].length} mention(s), all comparative`);
 
-// runtime table
-const runtime = '29eb709aad3b70740f0c92239b1a350820c81247';
-ok(md.includes(runtime), 'S18 lists the live runtime');
-ok(md.includes('19 (current)'), 'and marks 19 as current');
+// ── the runtime table ────────────────────────────────────────────────────────
+//
+// Also derived. This used to hard-code build 19's runtime hash and the string
+// `19 (current)`, so the table it was guarding could be perfectly right and still
+// fail. What actually has to hold is a RELATION, and it is one worth enforcing:
+// the build the table calls current must be the build the gate lets in, and that
+// row must carry a real fingerprint — because §18's whole warning is that
+// publishing to a runtime nobody is on reaches nobody, silently.
+ok(md.includes(`${gate} (current)`), 'S18 marks the gated build as current',
+  `gate is ${gate}`);
+const row = new RegExp(`${gate} \\(current\\)\\*\\*\\s*\\|\\s*\`([0-9a-f]{40})\``).exec(md);
+ok(!!row, 'and gives it a real runtime fingerprint',
+  row ? `${row[1].slice(0, 8)}…` : `no 40-hex runtime on build ${gate}'s row`);
 
 // ── every validator in `npm run check` must be NAMED in the file ─────────────
 //
