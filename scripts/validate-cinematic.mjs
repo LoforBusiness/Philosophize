@@ -26,6 +26,8 @@ const problems = [];
 const warnings = [];
 const bands = [];
 const cameras = [];
+/** How many of each camera verb the 96 followMoves lessons actually deal. */
+const verbs = {};
 
 // checkShots comes out of the SAME module the player uses, transpiled rather than
 // reimplemented here. camera.ts is deliberately import-free so stripping the types
@@ -216,10 +218,34 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
       warns.push('uses camera={CAM} but its x track or script could not be read — the camera went unchecked');
     } else {
       const chunks = beatsOf(fs.readFileSync(scriptPath, 'utf8'));
-      const xs = chunks.map((c) => {
-        const m = c.match(/^\s{4}x:\s*(-?[\d.]+)/m);
-        return m ? +m[1] : xDef;
+      // `x:` IS NOT THE FIRST KEY ON ITS LINE, AND NEVER WAS.
+      //
+      // This read /^\s{4}x:/m — x as the opening key of a beat. Every script in the
+      // repo writes its staging keys on one line, `p: 25, x: 200,`, so the pattern
+      // matched nothing in any of 96 lessons and every beat silently fell back to
+      // xDef. The camera was therefore resolved against a figure who never moved:
+      // 44 lessons have a track that varies, 42 of them got different shots than
+      // the ones checked here, and 149 individual shots were never checked as they
+      // actually are. The `to`, `drift` and `whip` verbs — 113 moves, every one of
+      // them a camera CHASING something — could not be reached at all, so the half
+      // of followMoves that exists to follow a walk was tested by nothing.
+      //
+      // The same shape as the validate-worklets blind spot (§17 rule 2): a matcher
+      // that reads a narrower thing than the one it names, passing green forever.
+      // Hence the parse guard below — silence must not be able to mean "still".
+      const xKey = /(?:^\s{4}|[,{]\s*)x:\s*(-?[\d.]+)/m;
+      const unread = [];
+      const xs = chunks.map((c, bi) => {
+        const m = c.match(xKey);
+        if (m) return +m[1];
+        // The beat carries an x this pattern could not read. That is a broken
+        // checker, not a stationary figure, and it must say so.
+        if (/(?:^|[^\w$])x:/m.test(c)) unread.push(bi);
+        return xDef;
       });
+      if (unread.length) {
+        errs.push(`camera: beat(s) ${unread.join(', ')} carry an x: the checker could not read — the shot list was resolved against the wrong figure`);
+      }
       const kinds = chunks.map((c) => kindOf({
         summary: /^\s{4}summary:/m.test(c) || undefined,
         quote: /^\s{4}quote:/m.test(c) || undefined,
@@ -227,10 +253,21 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
         interact: /^\s{4}interact:/m.test(c) || undefined,
       }));
       const seedM = src.match(/seedOf\('([^']+)'\)/);
-      const resolved = resolveMoves(
-        followMoves(xs, kinds, seedOf(seedM ? seedM[1] : ''), 500), [+band[1], +band[2]], 500,
-      );
-      for (const p of checkShots(resolved, [+band[1], +band[2]], 500)) errs.push(`camera: ${p}`);
+      // THE GROUND THE PLAYER WILL USE, not a number that resembles it.
+      //
+      // This passed a literal 500 while CinematicPlayer passed its `ground` prop,
+      // which no scene sets — so the player resolved with `undefined` and skipped
+      // fit()'s ground clamp entirely, and the checker resolved WITH it. The
+      // checker was therefore validating a safer camera than the one that ships:
+      // ethicsScene had three beats whose frame ended up to 37 units above the
+      // ground line, the figure standing on nothing, and this file called it clean.
+      // The player now defaults to GROUND for the same reason this line reads it.
+      const groundProp = src.match(/ground=\{(\d+)\}/);
+      const g = groundProp ? +groundProp[1] : 500;
+      const moves = followMoves(xs, kinds, seedOf(seedM ? seedM[1] : ''), g);
+      const resolved = resolveMoves(moves, [+band[1], +band[2]], g);
+      for (const m of moves) verbs[m.k] = (verbs[m.k] ?? 0) + 1;
+      for (const p of checkShots(resolved, [+band[1], +band[2]], g)) errs.push(`camera: ${p}`);
       // A tap must not have to survive a camera offset to land on what it aimed at.
       kinds.forEach((k, bi) => {
         if (k === 'question' && resolved[bi] && resolved[bi].s > 1.001) {
@@ -251,7 +288,7 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
       // which says nothing about whether the figure survived them. He stands at
       // the x track, ~103 tall at K_FIG 1 with his feet on the ground line, and he
       // has to be inside the visible window on every beat, head included.
-      const FIG_TOP = 500 - 103, FIG_BOT = 500;
+      const FIG_TOP = g - 103, FIG_BOT = g;
       resolved.forEach((sh, bi) => {
         if (!sh) return;
         const hw = (400 / 2) / sh.s, hh = (560 / 2) / sh.s;
@@ -427,11 +464,30 @@ if (bands.length) {
 
 // SAID OUT LOUD, so a check that silently stopped running is visible. A camera
 // checker that matches nothing looks exactly like a camera checker that passes.
+//
+// The COUNT was already printed here and it was not enough: it said "97 of 100
+// lessons move it" throughout the whole period the x parser was reading nothing,
+// because the lessons did have cameras — it was the SUBJECT that had gone missing,
+// not the camera. So print the verb mix as well. `to`, `drift` and `whip` are the
+// three verbs followMoves can only choose when the figure actually moved between
+// two beats; if all three are zero across 96 lessons, the track being read is flat
+// and the checker is looking at a lesson nobody wrote.
+const shotTotal = cameras.reduce((n, c) => n + c.n, 0);
+const mix = Object.entries(verbs).sort((a, b) => b[1] - a[1])
+  .map(([k, v]) => `${k} ${v}`).join(' · ');
 console.log(
-  `\ncamera: ${cameras.length} of ${bands.length} lessons move it` +
-    (cameras.length ? ` (${cameras.map((c) => `${c.f.replace('Scene.tsx', '')} ×${c.n}`).join(', ')})` : '') +
-    ' — every shot checked against its own band',
+  `\ncamera: ${cameras.length} of ${bands.length} lessons move it, ${shotTotal} shots, ` +
+    `each checked against its own band and ground\n  verbs dealt: ${mix}`,
 );
+const chase = (verbs.to ?? 0) + (verbs.drift ?? 0) + (verbs.whip ?? 0);
+if (cameras.length > 20 && chase === 0) {
+  console.log(
+    '\n✗ camera: not one `to`, `drift` or `whip` in any lesson. Those are the only\n' +
+      '  verbs followMoves picks when the figure MOVED, so a flat sweep of them means\n' +
+      '  the x track is not being read — see the parse note above `xKey`.',
+  );
+  process.exit(1);
+}
 if (problems.length) {
   console.log('');
   for (const [f, errs] of problems) {

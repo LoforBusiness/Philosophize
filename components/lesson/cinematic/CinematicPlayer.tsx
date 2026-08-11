@@ -20,7 +20,7 @@ import { lessonHasSound } from './lessonSound';
 import { TargetCountProvider } from './Target';
 import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
-  COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, INK,
+  COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, GROUND, INK,
   type BaseBeat,
 } from './cinematicKit';
 
@@ -61,7 +61,7 @@ export type SceneComponent = ComponentType<SceneApi>;
 
 export default function CinematicPlayer({
   lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk, gesture, shots,
-  camera, ground,
+  camera, ground = GROUND,
 }: {
   lesson: Lesson;
   beats: BaseBeat[];
@@ -121,7 +121,19 @@ export default function CinematicPlayer({
    * Wins over `shots` if a lesson passes both, which no lesson should.
    */
   camera?: Move[];
-  /** The scene's ground line, if it is not the kit's 500. Only used by `camera`. */
+  /**
+   * The scene's ground line, if it is not the kit's GROUND. Only used by `camera`.
+   *
+   * DEFAULTED, not left undefined, and that is the whole point of it. No scene has
+   * ever passed this prop, so `resolveMoves` was handed `undefined` and fit() threw
+   * away its ground clamp — the one that stops a push ending the frame ABOVE the
+   * line the figure is standing on. `followMoves` defaults the same value, and
+   * validate-cinematic assumed it, so the checker was resolving with the clamp and
+   * the app was resolving without it: three beats of ethicsScene shipped with the
+   * bottom of the frame up to 37 units clear of the ground, the man standing on
+   * nothing, and every validator called it clean. A default that two of three
+   * callers already assume is not a default, it is a missing one.
+   */
   ground?: number;
 }) {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
@@ -462,8 +474,14 @@ export default function CinematicPlayer({
 
       <Pressable style={styles.body} onPress={advance} disabled={locked}>
         <Animated.View style={[styles.stageWrap, gone && styles.stageGone, stageStyle]} onLayout={onStage}>
+          {/* The View below is THE CROP — the rectangle the band is cut to, and so the
+              rectangle a camera push can hide art outside of. It carries a nativeID for
+              the same reason Target's ring does: scripts/check-frame.mjs has to find it
+              exactly, and locating it by "the element with overflow:hidden" also matches
+              scene art. An audit measuring the wrong rectangle reports confidently
+              about nothing. */}
           {fit > 0 && !gone ? (
-            <View style={{ width: STAGE_W * fit, height: bandH * fit, overflow: 'hidden' }}>
+            <View nativeID="stage-clip" style={{ width: STAGE_W * fit, height: bandH * fit, overflow: 'hidden' }}>
               <View style={{ position: 'absolute', left: 0, top: -bandT * fit, width: STAGE_W * fit, height: STAGE_H * fit }}>
                 <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
                   {/* THE CAMERA LAYER EXISTS ONLY WHEN A LESSON ASKS FOR ONE.
