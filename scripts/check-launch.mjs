@@ -71,5 +71,30 @@ for (const key of A.SCENE_KEYS) {
     `${ratio(lum(c), lum(sky)).toFixed(1)}:1 on ${sky}`);
 }
 
+// ── 3 · the planes recede, and are drawable offline ──────────────────────────
+for (const key of A.SCENE_KEYS) {
+  const planes = A.planesFor(key);
+  ok(planes.length >= 4 && planes.length <= 6, `${key}: 4-6 depth planes`, String(planes.length));
+  // Back to front means each plane is DARKER than the one behind it. Depth is
+  // carried by value, not by detail — that is the whole trick of the references.
+  const steps = planes.map((p) => p.step);
+  ok(steps.every((v, i) => i === 0 || v < steps[i - 1]),
+    `${key}: planes darken toward the viewer`, steps.join(' → '));
+  for (const p of planes) {
+    ok(!/[Aa]/.test(p.d), `${key}: no arc commands in a plane`,
+      /[Aa]/.test(p.d) ? p.d.slice(0, 40) : '');
+  }
+  const disc = A.discFor(key);
+  ok(!!disc && !/[Aa]/.test(disc.d), `${key}: exactly one celestial anchor, arc-free`);
+}
+
+// ── 4 · the crest is plain numbers, because a worklet cannot call a closure ──
+for (const key of A.SCENE_KEYS) {
+  const c = A.crestFor(key);
+  const numeric = c && ['base', 'amp', 'off', 'per'].every((k) => typeof c[k] === 'number');
+  ok(numeric, `${key}: crest is four plain numbers`, numeric ? '' : JSON.stringify(c));
+  ok(c.per !== 0, `${key}: crest period is non-zero`, String(c.per));
+}
+
 console.log(bad === 0 ? '\nlaunch screen: all clear.' : `\n${bad} launch check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);
