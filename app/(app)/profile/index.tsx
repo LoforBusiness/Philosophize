@@ -9,6 +9,10 @@ import RankClimbChart from '@/components/shared/RankClimbChart';
 import { ShareBars, StackBar, DayBars } from '@/components/profile/InkCharts';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import { C, TYPE, SPACE, type TypeKey } from '@/constants/design';
+import { GHOST } from '@/components/shared/tone';
 import { ProfileArtFill, ProfileAvatar, useProfileArt } from '@/components/shared/ProfileArt';
 import { profileNameStyle, profileNameText } from '@/data/profileFonts';
 import StreakBook from '@/components/gamification/StreakBook';
@@ -28,16 +32,9 @@ import { useTodayKey } from '@/lib/utils/useTodayKey';
 import { dailyXP, activeDays } from '@/lib/utils/xpSeries';
 import { useInView } from '@/lib/utils/useInView';
 
-const Paper = '#FAFAF7';
-const Ink = '#1A1A1A';
-const InkSoft = '#6B6B6B';
-const InkFaint = '#E2E0D8';
-const Gold = '#9C9A93';
-const PaperMute = '#9C9A93';
-const Track = '#E6E4DC';
-
 const SW = Dimensions.get('window').width;
-const BADGE_W = (SW - 40 - 30) / 4; // 20px page padding, three 10px gaps
+// The page gutter (SPACE[3], both sides) and three inter-badge gaps (SPACE[1]) across four columns.
+const BADGE_W = (SW - SPACE[3] * 2 - SPACE[1] * 3) / 4;
 
 const SHORT: Record<string, string> = {
   logic: 'LOGIC',
@@ -204,7 +201,7 @@ export default function ProfileScreen() {
   // and a single fact has no shape. These are the same facts with their
   // proportions left in, which is the whole difference between "Nietzsche" and
   // "Nietzsche, and by how much".
-  const INK = { ink: Ink, soft: InkSoft, faint: InkFaint, paper: Paper };
+  const chartInk = { ink: C.ink, soft: C.inkSoft, faint: C.hairline, paper: C.paper };
   const thinkerRows = philScores.slice(0, 4).map((ph) => ({
     label: ph.name,
     value: ph.score,
@@ -287,7 +284,7 @@ export default function ProfileScreen() {
     <View style={styles.root}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: SPACE[5] }}
         showsVerticalScrollIndicator={false}
         // Only until the rank chart has been seen: `useInView` latches and then
         // stops measuring, so this costs nothing for the rest of the session.
@@ -302,7 +299,7 @@ export default function ProfileScreen() {
         {/* The header wears the user's chosen artwork. Every colour in it comes
             from that art's tone palette, so a light engraving gets ink text and a
             dark one gets paper text — the words stay readable either way. */}
-        <View style={[styles.header, { paddingTop: insets.top + 18 }]}>
+        <View style={[styles.header, { paddingTop: insets.top + SPACE[3] }]}>
           <ProfileArtFill />
 
           <Pressable style={[styles.settingsBtn, { top: insets.top + 6 }]} hitSlop={10} onPress={() => router.push('/(app)/settings')}>
@@ -362,18 +359,18 @@ export default function ProfileScreen() {
 
         {/* Body */}
         <View style={styles.body}>
-          {showWidget ? <DailyQuoteWidget style={{ marginBottom: 22 }} /> : null}
+          {showWidget ? <DailyQuoteWidget style={{ marginBottom: SPACE[4] }} /> : null}
 
           <SectionLabel>FROM YOUR INSIGHTS</SectionLabel>
-          <View style={styles.insightsCard}>
+          <Card>
             {/* A NAME IS A FACT WITH NO SHAPE. This said "TOP PHILOSOPHER —
                 Nietzsche", which cannot tell you whether that is a landslide or a
                 one-quote lead, and left out second and third — the interesting
                 part of anyone's reading. Same data, proportions left in. */}
             <Text style={styles.insightLabel}>THINKERS YOU KEEP RETURNING TO</Text>
             {topPhilosopher ? (
-              <View style={{ marginTop: 9 }}>
-                <ShareBars rows={thinkerRows} c={INK} />
+              <View style={{ marginTop: SPACE[2] }}>
+                <ShareBars rows={thinkerRows} c={chartInk} />
               </View>
             ) : (
               <>
@@ -383,12 +380,12 @@ export default function ProfileScreen() {
                 </Text>
               </>
             )}
-          </View>
+          </Card>
 
           <SectionLabel>WHO YOU'RE BECOMING</SectionLabel>
-          <View style={styles.bioCard}>
+          <Card pad={4} style={styles.bioCard}>
             <View style={styles.bioQuill}>
-              <SketchIcon name="pencil" size={16} color={Ink} />
+              <SketchIcon name="pencil" size={16} color={C.ink} />
             </View>
             <Text style={styles.bioText}>{bio}</Text>
             {/* THE SENTENCE, THEN ITS SHAPE. Six bars would be a chart; one bar
@@ -398,47 +395,54 @@ export default function ProfileScreen() {
             {branchParts.length > 0 ? (
               <View style={styles.bioShape}>
                 <Text style={styles.insightLabel}>WHERE YOUR READING GOES</Text>
-                <View style={{ marginTop: 10 }}>
-                  <StackBar parts={branchParts} c={INK} />
+                <View style={{ marginTop: SPACE[2] }}>
+                  <StackBar parts={branchParts} c={chartInk} />
                 </View>
               </View>
             ) : null}
-          </View>
+          </Card>
 
           <SectionLabel>AT A GLANCE</SectionLabel>
           <View style={styles.glanceRow}>
-            <View style={styles.glanceBox}>
-              <View style={styles.glanceTop}>
-                <SketchIcon name="book" size={15} color={Ink} />
-                <Text style={styles.glanceLabel}>LESSONS DONE</Text>
-              </View>
-              <Text style={styles.glanceValue}>{lessonsDone}</Text>
-              {/* HOW MANY DAYS, not just how many lessons. Six on one Sunday and
-                  one on each of six days are the same total and completely
-                  different habits. */}
-              <Text style={styles.glanceFoot}>
-                {daysActive > 0
-                  ? daysActive + ' active ' + (daysActive === 1 ? 'day' : 'days') + ' in a fortnight'
-                  : 'Quiet fortnight'}
-              </Text>
+            {/* `glanceCol` carries the flex that would otherwise land on Card's
+                FACE, not on the box that has to share the row — the same fix
+                settings.tsx's `planCol` made for its two plan panels. */}
+            <View style={styles.glanceCol}>
+              <Card>
+                <View style={styles.glanceTop}>
+                  <SketchIcon name="book" size={15} color={C.ink} />
+                  <Text style={styles.glanceLabel}>LESSONS DONE</Text>
+                </View>
+                <Text style={styles.glanceValue}>{lessonsDone}</Text>
+                {/* HOW MANY DAYS, not just how many lessons. Six on one Sunday and
+                    one on each of six days are the same total and completely
+                    different habits. */}
+                <Text style={styles.glanceFoot}>
+                  {daysActive > 0
+                    ? daysActive + ' active ' + (daysActive === 1 ? 'day' : 'days') + ' in a fortnight'
+                    : 'Quiet fortnight'}
+                </Text>
+              </Card>
             </View>
-            <View style={styles.glanceBox}>
-              <View style={styles.glanceTop}>
-                <SketchIcon name="star" size={15} color={Ink} />
-                <Text style={styles.glanceLabel}>TOTAL XP</Text>
-              </View>
-              <Text style={styles.glanceValue}>{totalXP.toLocaleString()}</Text>
-              {/* A fortnight, one bar a day, empty days drawn empty. A line would
-                  join the gaps and imply reading on days there was none — and the
-                  gaps are the habit. */}
-              <View style={{ marginTop: 11 }}>
-                <DayBars values={xpDays} c={INK} />
-              </View>
+            <View style={styles.glanceCol}>
+              <Card>
+                <View style={styles.glanceTop}>
+                  <SketchIcon name="star" size={15} color={C.ink} />
+                  <Text style={styles.glanceLabel}>TOTAL XP</Text>
+                </View>
+                <Text style={styles.glanceValue}>{totalXP.toLocaleString()}</Text>
+                {/* A fortnight, one bar a day, empty days drawn empty. A line would
+                    join the gaps and imply reading on days there was none — and the
+                    gaps are the habit. */}
+                <View style={{ marginTop: SPACE[1] }}>
+                  <DayBars values={xpDays} c={chartInk} />
+                </View>
+              </Card>
             </View>
           </View>
 
           <SectionLabel>DAILY STREAK</SectionLabel>
-          <View style={styles.streakBox}>
+          <Card style={styles.streakBox}>
             <View style={styles.streakLeft}>
               <StreakBook value={shownStreak} size={66} />
               <Text style={styles.streakWord}>DAY STREAK</Text>
@@ -446,10 +450,10 @@ export default function ProfileScreen() {
             <View style={styles.chipsRow}>
               <StreakWeek streak={shownStreak} lastLessonDate={lastLessonDate} size={30} />
             </View>
-          </View>
+          </Card>
 
           <SectionLabel>PROGRESS TO NEXT RANK</SectionLabel>
-          <View style={styles.rankBox}>
+          <Card>
             <View style={styles.rankBoxTop}>
               <Text style={styles.rankName}>{cur.name}</Text>
               <Text style={styles.rankXp}>
@@ -494,20 +498,20 @@ export default function ProfileScreen() {
                 rankIndex={rankIndex}
                 totalXP={totalXP}
                 events={xpEvents}
-                width={SW - 72}
+                width={SW - 64}
                 height={188}
                 seenXP={chartSeenXP}
                 active={focused && climb.inView}
                 onSeen={markChartSeen}
               />
             </View>
-          </View>
+          </Card>
 
           <SectionLabel>BRANCH MASTERY</SectionLabel>
           <View style={styles.masteryBox}>
             {mastery.map((m) => (
               <View key={m.slug} style={styles.masteryRow}>
-                <SketchIcon name={m.icon} size={18} color={Ink} />
+                <SketchIcon name={m.icon} size={18} color={C.ink} />
                 <Text style={styles.masteryName}>{m.name}</Text>
                 <View style={styles.masteryTrack}>
                   <View style={[styles.masteryFill, { width: `${m.pct}%` }]} />
@@ -518,12 +522,9 @@ export default function ProfileScreen() {
           </View>
 
           <SectionLabel>SAVED QUOTES</SectionLabel>
-          <Pressable
-            style={({ pressed }) => [styles.quotesCard, pressed && { opacity: 0.7 }]}
-            onPress={openSavedQuotes}
-          >
+          <Card onPress={openSavedQuotes} style={styles.quotesCard}>
             <View style={styles.quotesIcon}>
-              <SketchIcon name={quotesSaved > 0 ? 'bookmark-filled' : 'bookmark'} size={20} color={Ink} />
+              <SketchIcon name={quotesSaved > 0 ? 'bookmark-filled' : 'bookmark'} size={20} color={C.ink} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.quotesCount}>
@@ -537,9 +538,9 @@ export default function ProfileScreen() {
             </View>
             {/* mirrored "back" chevron → forward chevron */}
             <View style={styles.quotesChev}>
-              <SketchIcon name="back" size={14} color={InkSoft} />
+              <SketchIcon name="back" size={14} color={C.inkSoft} />
             </View>
-          </Pressable>
+          </Card>
 
           <SectionLabel>BADGES EARNED</SectionLabel>
           <Pressable style={styles.badgeGrid} onPress={() => openRanksBadges('badges')}>
@@ -563,18 +564,22 @@ export default function ProfileScreen() {
           </Pressable>
 
           {isSignedIn ? (
-            <Pressable onPress={handleSignOut} style={styles.signOut} hitSlop={8}>
-              <Text style={styles.signOutText}>Sign Out</Text>
-            </Pressable>
+            <Button
+              label="Sign Out"
+              onPress={handleSignOut}
+              variant="secondary"
+              size="md"
+              style={styles.signOut}
+            />
           ) : (
-            <Pressable
+            <Button
+              label="Sign in or create an account"
               onPress={() => router.push('/sign-in')}
-              style={({ pressed }) => [styles.signInCta, pressed && { opacity: 0.85 }]}
-              hitSlop={8}
-            >
-              <SketchIcon name="person" size={16} color={Ink} />
-              <Text style={styles.signInCtaText}>Sign in or create an account</Text>
-            </Pressable>
+              variant="primary"
+              size="md"
+              icon="person"
+              style={styles.signInCta}
+            />
           )}
         </View>
       </ScrollView>
@@ -583,17 +588,25 @@ export default function ProfileScreen() {
   );
 }
 
+const role = (k: TypeKey) => ({
+  fontFamily: TYPE[k].family,
+  fontSize: TYPE[k].fontSize,
+  lineHeight: TYPE[k].lineHeight,
+  letterSpacing: TYPE[k].letterSpacing ?? 0,
+});
+const PLAYFAIR_CAPTION = 'PlayfairDisplay_400Regular';
+
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Ink },
-  scroll: { flex: 1, backgroundColor: Paper },
+  root: { flex: 1, backgroundColor: C.ink },
+  scroll: { flex: 1, backgroundColor: C.paper },
 
   header: {
     // No background colour: ProfileArtFill paints it. `overflow: hidden` keeps
     // the art inside the header, and it must stay above the art in z-order,
     // which it is by being rendered after it.
     alignItems: 'center',
-    paddingBottom: 26,
-    paddingHorizontal: 20,
+    paddingBottom: SPACE[4],
+    paddingHorizontal: SPACE[3],
     overflow: 'hidden',
   },
   settingsBtn: { position: 'absolute', right: 16, padding: 8, zIndex: 2 },
@@ -610,203 +623,127 @@ const styles = StyleSheet.create({
   },
   name: {
     // family / size / tracking come from the chosen face (profileNameStyle).
-    marginTop: 14,
+    marginTop: SPACE[3],
     textAlign: 'center',
   },
-  subtitle: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 10,
-    letterSpacing: 2,
-    marginTop: 6,
-  },
+  subtitle: { ...role('micro'), letterSpacing: 2, marginTop: SPACE[1] },
   rankChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: SPACE[1],
     borderWidth: 1.5,
     borderRadius: 3,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    marginTop: 14,
+    paddingHorizontal: SPACE[3],
+    paddingVertical: SPACE[1],
+    marginTop: SPACE[3],
   },
-  rankChipText: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1 },
+  rankChipText: { ...role('micro'), fontFamily: 'Inter_700Bold', letterSpacing: 1 },
 
-  profileQuote: { alignItems: 'center', marginTop: 18, paddingHorizontal: 10, maxWidth: 340 },
+  profileQuote: { alignItems: 'center', marginTop: SPACE[3], paddingHorizontal: SPACE[2], maxWidth: 340 },
   profileQuoteText: {
-    fontFamily: 'PlayfairDisplay_400Regular',
+    ...role('body'),
+    fontFamily: PLAYFAIR_CAPTION,
     fontStyle: 'italic',
-    fontSize: 15,
-    lineHeight: 22,
     textAlign: 'center',
   },
-  profileQuoteBy: { fontFamily: 'Inter_500Medium', fontSize: 9.5, letterSpacing: 1.5, marginTop: 8 },
-  profileQuotePrompt: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 16 },
-  profileQuotePromptText: { fontFamily: 'Inter_500Medium', fontSize: 11, letterSpacing: 0.5 },
+  profileQuoteBy: { ...role('micro'), letterSpacing: 1.5, marginTop: SPACE[1] },
+  profileQuotePrompt: { flexDirection: 'row', alignItems: 'center', gap: SPACE[1], marginTop: SPACE[3] },
+  profileQuotePromptText: { ...role('micro'), letterSpacing: 0.5 },
 
-  body: { paddingHorizontal: 20, paddingTop: 20 },
+  body: { paddingHorizontal: SPACE[3], paddingTop: SPACE[4] },
 
-  sectionRow: { flexDirection: 'row', alignItems: 'center', marginTop: 24, marginBottom: 12 },
-  sectionLabel: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, letterSpacing: 3, marginRight: 12 },
-  sectionLine: { flex: 1, height: 1, backgroundColor: InkFaint },
+  sectionRow: { flexDirection: 'row', alignItems: 'center', marginTop: SPACE[4], marginBottom: SPACE[2] },
+  sectionLabel: { ...role('micro'), color: C.inkSoft, letterSpacing: 3, marginRight: SPACE[2] },
+  sectionLine: { flex: 1, height: 1, backgroundColor: C.hairline },
 
-  glanceRow: { flexDirection: 'row', gap: 12 },
-  glanceBox: {
-    flex: 1,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 3,
-    paddingVertical: 15,
-    paddingHorizontal: 13,
-  },
+  glanceRow: { flexDirection: 'row', gap: SPACE[2] },
+  glanceCol: { flex: 1 },
   // LEFT-ALIGNED, not centred. A centred number over a centred caption is a
   // poster; these are two readings side by side, and readings line up on an edge
   // so the eye can compare them without hunting for each one's middle.
-  glanceTop: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  glanceValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 32, color: Ink, marginTop: 7 },
-  glanceLabel: { fontFamily: 'Inter_500Medium', fontSize: 9, color: InkSoft, letterSpacing: 1.4 },
+  glanceTop: { flexDirection: 'row', alignItems: 'center', gap: SPACE[1] },
+  glanceValue: { ...role('display'), color: C.ink, marginTop: SPACE[1] },
+  glanceLabel: { ...role('micro'), color: C.inkSoft, letterSpacing: 1.4 },
   glanceFoot: {
-    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 11.5,
-    color: InkSoft, marginTop: 10, lineHeight: 15,
+    ...role('micro'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic',
+    color: C.inkSoft, marginTop: SPACE[2], lineHeight: 15,
   },
 
-  bioCard: {
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 3,
-    paddingTop: 22,
-    paddingBottom: 20,
-    paddingHorizontal: 18,
-    alignItems: 'center',
-  },
+  bioCard: { alignItems: 'center' },
   bioQuill: {
     width: 34,
     height: 34,
     borderRadius: 17,
     borderWidth: 1.5,
-    borderColor: Ink,
+    borderColor: C.ink,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: SPACE[2],
   },
-  bioShape: { marginTop: 16, borderTopWidth: 1, borderTopColor: InkFaint, paddingTop: 14 },
+  bioShape: { marginTop: SPACE[3], borderTopWidth: 1, borderTopColor: C.hairline, paddingTop: SPACE[3] },
   bioText: {
-    fontFamily: 'PlayfairDisplay_400Regular',
+    ...role('body'),
+    fontFamily: PLAYFAIR_CAPTION,
     fontStyle: 'italic',
-    fontSize: 16,
-    lineHeight: 25,
-    color: Ink,
+    color: C.ink,
     textAlign: 'center',
   },
 
-  insightsCard: { borderWidth: 1.5, borderColor: Ink, borderRadius: 3, padding: 16 },
-  insightRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  insightIcon: {
-    width: 38,
-    height: 38,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  insightLabel: { fontFamily: 'Inter_500Medium', fontSize: 9, color: InkSoft, letterSpacing: 1.5 },
+  insightLabel: { ...role('micro'), color: C.inkSoft, letterSpacing: 1.5 },
   insightHint: {
-    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13,
-    color: InkSoft, marginTop: 6, lineHeight: 19,
+    ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic',
+    color: C.inkSoft, marginTop: SPACE[1], lineHeight: 19,
   },
-  insightValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 18, color: Ink, marginTop: 3 },
-  insightDivider: { height: 1, backgroundColor: InkFaint, marginVertical: 14 },
+  insightValue: { ...role('title'), color: C.ink, marginTop: SPACE[0] },
 
-  streakBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 3,
-    padding: 14,
-    gap: 12,
-  },
+  streakBox: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2] },
   streakLeft: { alignItems: 'center', width: 60 },
-  streakNum: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 30, color: Ink, lineHeight: 34 },
-  streakWord: { fontFamily: 'Inter_500Medium', fontSize: 8, color: InkSoft, letterSpacing: 1 },
+  streakWord: { ...role('micro'), color: C.inkSoft, letterSpacing: 1 },
   chipsRow: { flex: 1, justifyContent: 'center' },
-  dayChip: {
-    width: 30,
-    height: 30,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: InkFaint,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayChipFilled: { backgroundColor: Ink, borderColor: Ink },
-  dayChipToday: { borderColor: Ink },
-  dayChipText: { fontFamily: 'Inter_700Bold', fontSize: 10, color: Ink },
 
-  rankBox: { borderWidth: 1.5, borderColor: Ink, borderRadius: 3, padding: 16 },
-  rankChartWrap: { marginTop: 14 },
-  rankBoxTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 },
-  rankName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 20, color: Ink },
-  rankXp: { fontFamily: 'Inter_400Regular', fontSize: 13, color: InkSoft },
-  bigTrack: { height: 8, borderRadius: 4, backgroundColor: Track, overflow: 'hidden' },
-  bigFill: { height: 8, borderRadius: 4, backgroundColor: Ink },
-  rankUntil: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft, letterSpacing: 1, textAlign: 'right', marginTop: 10 },
+  rankChartWrap: { marginTop: SPACE[3] },
+  rankBoxTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: SPACE[2] },
+  rankName: { ...role('title'), color: C.ink },
+  rankXp: { ...role('label'), fontFamily: 'Inter_400Regular', color: C.inkSoft },
+  bigTrack: { height: 8, borderRadius: 4, backgroundColor: C.HUE_SOFT, overflow: 'hidden' },
+  bigFill: { height: 8, borderRadius: 4, backgroundColor: C.ink },
+  rankUntil: { ...role('micro'), color: C.inkSoft, letterSpacing: 1, textAlign: 'right', marginTop: SPACE[2] },
 
-  masteryBox: { gap: 16 },
-  masteryRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  masteryName: { fontFamily: 'Inter_700Bold', fontSize: 11, color: Ink, letterSpacing: 0.5, width: 96 },
-  masteryTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: Track, overflow: 'hidden' },
-  masteryFill: { height: 6, borderRadius: 3, backgroundColor: Ink },
-  masteryPct: { fontFamily: 'Inter_500Medium', fontSize: 12, color: InkSoft, width: 38, textAlign: 'right' },
+  masteryBox: { gap: SPACE[3] },
+  masteryRow: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2] },
+  masteryName: { ...role('micro'), fontFamily: 'Inter_700Bold', color: C.ink, letterSpacing: 0.5, width: 96 },
+  masteryTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: C.HUE_SOFT, overflow: 'hidden' },
+  masteryFill: { height: 6, borderRadius: 3, backgroundColor: C.ink },
+  masteryPct: { ...role('label'), color: C.inkSoft, width: 38, textAlign: 'right' },
 
-  quotesCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 3,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-  },
+  quotesCard: { flexDirection: 'row', alignItems: 'center', gap: SPACE[3] },
   quotesIcon: {
     width: 38,
     height: 38,
     borderWidth: 1.5,
-    borderColor: Ink,
+    borderColor: C.ink,
     borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  quotesCount: { fontFamily: 'Inter_700Bold', fontSize: 11, color: Ink, letterSpacing: 1.5 },
-  quotesTeaser: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: InkSoft, marginTop: 3 },
+  quotesCount: { ...role('micro'), fontFamily: 'Inter_700Bold', color: C.ink, letterSpacing: 1.5 },
+  quotesTeaser: { ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic', color: C.inkSoft, marginTop: SPACE[0] },
   quotesChev: { transform: [{ scaleX: -1 }], opacity: 0.7 },
 
-  badgeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  badgeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACE[1] },
   // No border: the medal already has an outline, and a box around it just puts a
   // seventh shape on top of the six that carry the meaning.
-  badge: { width: BADGE_W, alignItems: 'center', paddingVertical: 4, gap: 5 },
+  badge: { width: BADGE_W, alignItems: 'center', paddingVertical: SPACE[0], gap: SPACE[0] },
   badgeLabel: {
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, lineHeight: 10, color: Ink,
+    ...role('micro'), fontFamily: 'Inter_700Bold', lineHeight: 14, color: C.ink,
     letterSpacing: 0.2, textAlign: 'center',
   },
   // The same cool slate BadgeMedal draws a locked medal in, so the name and the
-  // mark under it are unmistakably one greyed-out object.
-  badgeLabelLocked: { color: '#AAB1BC', fontFamily: 'Inter_500Medium' },
+  // mark under it are unmistakably one greyed-out object. `GHOST` is imported
+  // straight from `components/shared/tone` — the single source that colour
+  // already had — rather than a second, duplicated hex living here.
+  badgeLabelLocked: { color: GHOST, fontFamily: 'Inter_500Medium' },
 
-  signOut: { alignSelf: 'center', marginTop: 30, padding: 10 },
-  signOutText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: InkSoft },
-  signInCta: {
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 30,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 22,
-  },
-  signInCtaText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: Ink, letterSpacing: 0.2 },
+  signOut: { alignSelf: 'center', marginTop: SPACE[5] },
+  signInCta: { alignSelf: 'center', marginTop: SPACE[5] },
 });

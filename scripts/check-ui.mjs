@@ -133,6 +133,7 @@ ok(/onPress\s*\?\s*LIP\.card\s*:\s*0|onPress\s*&&|!!onPress/.test(card),
 // act, and a glob would silently enrol the next file someone adds.
 const CONVERTED = [
   'app/(app)/settings.tsx',
+  'app/(app)/profile/index.tsx',
   // each adoption task appends its screen here
 ];
 const SIZES = new Set(Object.values(D.TYPE).map((t) => t.fontSize));
