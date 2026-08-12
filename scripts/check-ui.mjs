@@ -118,5 +118,14 @@ ok(/LIP\.button/.test(btn), 'the lip height comes from the token, not a literal'
 ok(/touch\(\)/.test(btn), 'pressing fires the existing haptic');
 ok(!/playSound|cue\(/.test(btn), 'the button makes no sound');
 
+// ── 5 · the card completes the rule ──────────────────────────────────────────
+const card = fs.readFileSync(path.join(REPO, 'components/ui/Card.tsx'), 'utf8');
+ok(!/#[0-9A-Fa-f]{3,8}\b/.test(card.replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, '')),
+  'Card declares no colour of its own');
+ok(/LIP\.card/.test(card), 'the card lip comes from the token');
+// The rule in one line: no onPress, no lip.
+ok(/onPress\s*\?\s*LIP\.card\s*:\s*0|onPress\s*&&|!!onPress/.test(card),
+  'a card only gets a lip when it can be pressed');
+
 console.log(bad === 0 ? '\nui system: all clear.' : `\n${bad} ui check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);
