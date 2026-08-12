@@ -69,13 +69,11 @@ export const BEATS: Logic8Beat[] = [
   },
   {
     p: 21, x: 152, wet: 1, rule: 1, trap: 2, spr: 1,
-    mc: {
+    interact: {
       prompt: 'It did not rain last night. So the streets must be dry this morning — right?',
-      options: [
-        { id: 'a', text: 'Not necessarily — the sprinkler could have soaked them again', correct: true },
-        { id: 'b', text: 'Yes — no rain means nothing made them wet', correct: false },
-        { id: 'c', text: 'Yes — the rule works in both directions', correct: false },
-        { id: 'd', text: 'No — dry streets would prove the rule is false', correct: false },
+      cards: [
+        { text: 'Not necessarily, the sprinkler', correct: true },
+        { text: 'Yes, nothing made them wet', correct: false },
       ],
       explain: 'The trap: switching off the cause feels like switching off the effect, so "no rain" sounds like it settles the matter. But the rule only ever ran one way, and the sprinkler does not check the forecast.',
       xp: 5,

@@ -72,16 +72,13 @@ export const BEATS: L9Beat[] = [
   },
   {
     a: 4, d: 12, dx: 264,
-    mc: {
+    interact: {
       prompt: 'An argument commits a fallacy. Does that make its conclusion false?',
-      options: [
-        { id: 'a', text: 'No — a bad argument can still land on a true conclusion', correct: true },
-        { id: 'b', text: 'Yes — a fallacy makes the conclusion false', correct: false },
-        { id: 'c', text: 'Yes — fallacies poison everything they touch', correct: false },
-        { id: 'd', text: 'Only when the fallacy is an ad hominem', correct: false },
+      cards: [
+        { text: 'No, it may still be true', correct: true },
+        { text: 'Yes, fallacies poison it', correct: false },
       ],
-      explain:
-        'A fallacy tells you the reasoning does not support the conclusion, not that the conclusion is false. Someone can give you a terrible argument that the sun will rise. Assuming otherwise has its own name: the fallacy fallacy.',
+      explain: 'A fallacy tells you the reasoning does not support the conclusion, not that the conclusion is false. Someone can give you a terrible argument that the sun will rise. Assuming otherwise has its own name: the fallacy fallacy.',
     },
     dur: 4.6,
   },

@@ -68,13 +68,11 @@ export const BEATS: Logic32Beat[] = [
   {
     a: 35, b: 21, q: 1, hidden: 1,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'So what is the right move when a question is loaded?',
-      options: [
-        { id: 'a', text: 'Refuse the question and challenge the hidden claim first', correct: true },
-        { id: 'b', text: 'Answer no, since that denies the most', correct: false },
-        { id: 'c', text: 'Answer with a loaded question of your own', correct: false },
-        { id: 'd', text: 'Say nothing, since anything you say can be used', correct: false },
+      cards: [
+        { text: 'Challenge the hidden claim', correct: true },
+        { text: 'Answer no, it denies most', correct: false },
       ],
       explain: 'The trap is B, and it feels like the safe answer. It is the worse one — "no" to "have you stopped" means you have not stopped. Splitting the question is the only reply that concedes nothing.',
       xp: 5,

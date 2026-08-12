@@ -58,13 +58,11 @@ export const BEATS: Logic7Beat[] = [
   },
   {
     p: 4, x: 124, rule: 1, fact: 2,
-    mc: {
+    interact: {
       prompt: 'The rule still holds and the streets are completely dry. What follows about the rain?',
-      options: [
-        { id: 'a', text: 'It did not rain — the rule guarantees that', correct: true },
-        { id: 'b', text: 'It rained, just not very hard', correct: false },
-        { id: 'c', text: 'The rule must be false', correct: false },
-        { id: 'd', text: 'Nothing follows without checking the sky', correct: false },
+      cards: [
+        { text: 'It did not rain', correct: true },
+        { text: 'Nothing follows yet', correct: false },
       ],
       explain: 'The trap: it feels like you need to look at the sky. You do not. The rule promised that rain ALWAYS brings wet streets — so dry streets are proof the rain never came.',
       xp: 5,

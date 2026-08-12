@@ -66,13 +66,11 @@ export const BEATS: Logic31Beat[] = [
   {
     p: 3, flips: 7, scale: 1,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'What exactly does the gambler\'s fallacy get wrong?',
-      options: [
-        { id: 'a', text: 'It treats independent events as if they balanced each other out', correct: true },
-        { id: 'b', text: 'It underestimates how rare long runs really are', correct: false },
-        { id: 'c', text: 'It assumes coins are fair when most are slightly weighted', correct: false },
-        { id: 'd', text: 'It confuses probability with certainty', correct: false },
+      cards: [
+        { text: 'It expects flips to balance', correct: true },
+        { text: 'It underrates long runs', correct: false },
       ],
       explain: 'The trap: the law of large numbers is real. Over millions of flips the ratio does settle near half — but it settles by SWAMPING the run, never by correcting it. The coin owes the average nothing.',
       xp: 5,

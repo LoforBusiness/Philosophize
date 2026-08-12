@@ -64,13 +64,11 @@ export const BEATS: Logic12Beat[] = [
   {
     g: 11, lit: 1,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'So when is an either/or fair?',
-      options: [
-        { id: 'a', text: 'When the two options genuinely leave nothing out', correct: true },
-        { id: 'b', text: 'When both options are about equally likely', correct: false },
-        { id: 'c', text: 'When the person offering them means well', correct: false },
-        { id: 'd', text: 'Never — every either/or is a fallacy', correct: false },
+      cards: [
+        { text: 'When nothing is left out', correct: true },
+        { text: 'Never, all are fallacies', correct: false },
       ],
       explain: 'D over-corrects, and the light switch refutes it: on or off leaves nothing out and is perfectly good reasoning. What makes a disjunction legitimate is that its options are exhaustive — not how they are offered, or by whom.',
       xp: 5,

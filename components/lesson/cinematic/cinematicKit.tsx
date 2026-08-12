@@ -90,7 +90,28 @@ export interface SummaryBlock { title: string; points: string[]; closing: string
  * The scene renders its own targets and calls `onPick(id, correct)`; the deck shows
  * only this prompt and, once answered, the explanation. Scored exactly like `mc`.
  */
-export interface InteractBlock { prompt: string; explain: string; xp?: number }
+/**
+ * One of the two short choices a `cards` question puts on the picture.
+ *
+ * `text` is held to a few words by `validate-cinematic`, which is the whole
+ * point of the format: the A/B/C/D deck it replaces asked a reader to get
+ * through four sentences to answer one question, and three of them were wrong.
+ */
+export interface ChoiceCard { text: string; correct: boolean }
+
+export interface InteractBlock {
+  prompt: string; explain: string; xp?: number;
+  /**
+   * Two short choices the PLAYER draws on the stage (see ./ChoiceCards).
+   *
+   * Omit it and the scene draws its own answer targets, exactly as the original
+   * 82 interact lessons do — this is an addition to that mechanic, not a
+   * replacement for it. Having both behind ONE block type is deliberate: the
+   * scoring path, the deck panel and the XP are already right for `interact`,
+   * and a third question type would have been a third thing to keep in step.
+   */
+  cards?: [ChoiceCard, ChoiceCard];
+}
 
 /** Every lesson's Beat extends this; the shell reads only these common fields. */
 export interface BaseBeat {

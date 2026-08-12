@@ -62,13 +62,11 @@ export const BEATS: Logic10Beat[] = [
   },
   {
     p: 21, x: 158, arg: 1, slot: 1, hid: 2,
-    mc: {
+    interact: {
       prompt: 'An argument leaves one premise unstated. Does that alone make it a fallacy?',
-      options: [
-        { id: 'a', text: 'No — a true, obvious hidden premise can be perfectly valid', correct: true },
-        { id: 'b', text: 'Yes — every missing premise is a logical error', correct: false },
-        { id: 'c', text: 'Yes — hiding a premise is always deceptive', correct: false },
-        { id: 'd', text: 'Yes — only a fully stated argument can be valid', correct: false },
+      cards: [
+        { text: 'No, if it\'s obviously true', correct: true },
+        { text: 'Yes, hiding is deceptive', correct: false },
       ],
       explain: 'The trap: “hidden” sounds like “dishonest”. Almost every real argument leaves something out — nobody says “all men are mortal” out loud. An enthymeme only fails when the unsaid premise is FALSE, which is why you drag it up and look at it.',
       xp: 5,

@@ -60,13 +60,11 @@ export const BEATS: Logic6Beat[] = [
   },
   {
     p: 4, link: 1, table: 1,
-    mc: {
+    interact: {
       prompt: 'A conditional is true. Does that mean its antecedent is actually true?',
-      options: [
-        { id: 'a', text: 'No — it only claims the link, not the condition', correct: true },
-        { id: 'b', text: 'Yes — a true "if-then" makes the "if" true', correct: false },
-        { id: 'c', text: 'Yes — otherwise the statement is meaningless', correct: false },
-        { id: 'd', text: 'Only if the consequent is also true', correct: false },
+      cards: [
+        { text: 'No, only the link', correct: true },
+        { text: 'Yes, the if is true', correct: false },
       ],
       explain: '"If pigs fly, the moon is cheese" can be accepted as true while pigs stay grounded — the conditional asserts only the connection.',
       xp: 5,

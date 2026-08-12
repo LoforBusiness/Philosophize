@@ -16,6 +16,7 @@ import { shotAt, resolveMoves, containShot, NEUTRAL, type Box, type Move, type S
 import { MUST } from './mustBoxes';
 import { cue, touch } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
+import ChoiceCards from './ChoiceCards';
 import { swishTrack } from './gestures';
 import { lessonHasSound } from './lessonSound';
 import { TargetCountProvider } from './Target';
@@ -552,6 +553,19 @@ export default function CinematicPlayer({
                 </View>
               </View>
             </View>
+          ) : null}
+
+          {/* THE TWO CHOICES, ON the picture rather than under it.
+              Outside `stage-clip` on purpose: a card drawn in scene coordinates
+              is a card that every lesson's band crops differently and every
+              camera push can cut in half (H60). Pinned here it needs no
+              per-lesson placement and nothing can clip it. */}
+          {beat.interact?.cards && !gone ? (
+            <ChoiceCards
+              cards={beat.interact.cards}
+              picked={picked}
+              onPick={(id, ok) => choose(id, ok, true)}
+            />
           ) : null}
         </Animated.View>
 

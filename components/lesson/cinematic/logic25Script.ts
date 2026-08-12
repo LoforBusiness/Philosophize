@@ -67,13 +67,11 @@ export const BEATS: Logic25Beat[] = [
   },
   {
     p: 4, x: 124, result: 1, real: 1, fake: 1,
-    mc: {
+    interact: {
       prompt: 'Steve is shy, tidy, and loves detail. Is he more likely a librarian or a farmer?',
-      options: [
-        { id: 'a', text: 'A farmer — there are vastly more farmers than librarians', correct: true },
-        { id: 'b', text: 'A librarian — the description fits the stereotype perfectly', correct: false },
-        { id: 'c', text: 'Equally likely either way', correct: false },
-        { id: 'd', text: 'Impossible to say without more traits', correct: false },
+      cards: [
+        { text: 'Farmer, there are more', correct: true },
+        { text: 'Librarian, he fits', correct: false },
       ],
       explain: 'The trap: the profile screams librarian. But farmers outnumber librarians many times over, so even a small fraction of tidy farmers dwarfs every librarian there is. Kahneman and Tversky\'s case.',
       xp: 5,

@@ -334,6 +334,27 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
 const CARD_BUDGET = 90;
 const SOLID_FLOOR = 79;
 
+// ── THE A/B/C/D DECK IS BEING RETIRED TOO ───────────────────────────────────
+//
+// A reader's verdict on it: "too much to read, boring, and not very fun." Four
+// options, each a sentence, read UNDER the picture while the picture waited —
+// and three of the four are wrong. §13 says a good wrong answer is tempting for
+// a NAMEABLE reason and the explanation names it, which means exactly one
+// distractor is doing work and the other two are filler.
+//
+// The replacement is `interact` + `cards`: the correct answer and the one
+// distractor the explanation already argues against, cut to a few words and
+// drawn ON the stage (see ./ChoiceCards). Same block type as the 82 lessons that
+// already answer on the stage, so the scoring path is unchanged.
+//
+// MC_BUDGET is a high-water mark that may only go DOWN, exactly like CARD_BUDGET.
+// Converting a question lowers it; writing a new A/B/C/D deck raises it and fails
+// here. At 0 the deck can be deleted along with `Choices` and `QBlock.options`.
+const MC_BUDGET = 110;
+// A card that needs a sentence is the thing being removed. Six words is what the
+// converted twelve actually needed — the longest is "No, it may still be true".
+const CARD_WORDS = 6;
+
 const ROUTE = path.join(
   process.cwd(), 'app', '(app)', 'branches', '[branchSlug]', '[pathSlug]', 'lesson', '[lessonId].tsx',
 );
@@ -382,6 +403,35 @@ if (tally.length) {
   const show = (key) => tally.map((t) => `${t.branch} ${t[key]}`).join(' · ');
   if (nL.length !== 1) errs.push(`branches hold different lesson counts — ${show('lessons')} (§5)`);
   if (nC.length !== 1) errs.push(`branches hold different cinematic counts — ${show('cine')} (§5)`);
+
+  // ── the A/B/C/D retirement, counted the same way ──────────────────────────
+  {
+    const scripts = fs.readdirSync(DIR).filter((f) => /Script\.ts$/.test(f));
+    let mc = 0; const longCards = [];
+    for (const f of scripts) {
+      const src = fs.readFileSync(path.join(DIR, f), 'utf8');
+      mc += (src.match(/\bmc:\s*\{/g) || []).length;
+      for (const m of src.matchAll(/\{\s*text:\s*'((?:[^'\\]|\\.)*)',\s*correct:\s*(?:true|false)\s*\}/g)) {
+        // Only the on-stage cards are held to the limit — a `tap`/`mc` option is
+        // deck text and is on its way out anyway.
+        const words = m[1].replace(/\\'/g, "'").trim().split(/\s+/).length;
+        if (words > CARD_WORDS && /cards:\s*\[/.test(src.slice(Math.max(0, m.index - 400), m.index))) {
+          longCards.push(`${f.replace('Script.ts', '')} "${m[1]}" (${words} words)`);
+        }
+      }
+    }
+    if (mc > MC_BUDGET) {
+      errs.push(
+        `${mc} A/B/C/D questions, up from ${MC_BUDGET}. That deck is being retired — ` +
+        'a new graded question uses `interact` with two short `cards` on the stage (see ChoiceCards).',
+      );
+    }
+    if (longCards.length) {
+      errs.push(`a choice card must be ${CARD_WORDS} words or fewer — ${longCards.slice(0, 4).join('; ')}`);
+    }
+    console.log(`\nthe deck: ${mc} A/B/C/D questions left, budget ${MC_BUDGET}` +
+      (mc < MC_BUDGET ? ` — lower it to ${mc}` : ''));
+  }
 
   const cards = tally.reduce((a, t) => a + t.lessons - t.cine, 0);
   if (cards > CARD_BUDGET) {
