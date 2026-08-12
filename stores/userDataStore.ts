@@ -328,6 +328,22 @@ interface UserDataState {
    * visit stops meaning "you moved" and starts meaning nothing at all.
    */
   chartSeenXP: number;
+  /**
+   * THE SAME IDEA AS `chartSeenXP`, for the Insights tab — a fingerprint of the
+   * numbers its three charts were drawing the last time this reader looked.
+   *
+   * The charts spring up on arrival only when this does not match what they draw
+   * now, so movement on that tab MEANS something happened since last time. The
+   * reasoning is the one directly above, and it is the reader's own: an entrance
+   * that replays on every visit is decoration, and decoration is what the tab
+   * was already accused of.
+   *
+   * Built by `statsFingerprint` in lib/utils/statsMilestone.ts, which takes
+   * exactly the drawn numbers and nothing else — fold in anything that moves on
+   * its own and the animation fires every time while still looking correct.
+   * Empty string on a fresh store, which reads as "never seen" and animates.
+   */
+  statsSeenFingerprint: string;
   portrait: string;                           // selected hand-drawn portrait id
   profileBackground: string;                  // id from data/profileBackgrounds — picture AND header art
   nameFont: string;                           // id from data/profileFonts — the face the name is set in
@@ -389,6 +405,8 @@ interface UserDataState {
   resetForSignOut: () => void;
   /** Mark the climb chart as seen at the current total. */
   markChartSeen: () => void;
+  /** Records the Insights charts as seen at this fingerprint. */
+  markStatsSeen: (fingerprint: string) => void;
   setHasHydrated: (v: boolean) => void;
 }
 
@@ -578,6 +596,7 @@ export const useUserDataStore = create<UserDataState>()(
       bio: '',
       bioSeed: 0,
       chartSeenXP: 0,
+      statsSeenFingerprint: '',
       portrait: 'overthinker',
       profileBackground: DEFAULT_BACKGROUND_ID,
       nameFont: DEFAULT_PROFILE_FONT,
@@ -907,6 +926,12 @@ export const useUserDataStore = create<UserDataState>()(
           email: '',
           bio: '',
           bioSeed: 0,
+          // Both "already seen" markers go back to never-seen: this device is now
+          // a different person, and their first look at either chart is a first
+          // look. `chartSeenXP` was being left behind, which handed the new reader
+          // a marker sitting above their own zero total.
+          chartSeenXP: 0,
+          statsSeenFingerprint: '',
           portrait: 'overthinker',
           profileBackground: DEFAULT_BACKGROUND_ID,
           nameFont: DEFAULT_PROFILE_FONT,
@@ -957,6 +982,12 @@ export const useUserDataStore = create<UserDataState>()(
           email: '',
           bio: '',
           bioSeed: 0,
+          // Both "already seen" markers go back to never-seen: this device is now
+          // a different person, and their first look at either chart is a first
+          // look. `chartSeenXP` was being left behind, which handed the new reader
+          // a marker sitting above their own zero total.
+          chartSeenXP: 0,
+          statsSeenFingerprint: '',
           portrait: 'overthinker',
           profileBackground: DEFAULT_BACKGROUND_ID,
           nameFont: DEFAULT_PROFILE_FONT,
@@ -966,6 +997,13 @@ export const useUserDataStore = create<UserDataState>()(
       },
 
       markChartSeen: () => set({ chartSeenXP: get().totalXP }),
+
+      // Only writes when it actually differs, so re-focusing the tab does not
+      // push an identical snapshot into AsyncStorage and the cloud on every visit.
+      markStatsSeen: (fingerprint) => {
+        if (get().statsSeenFingerprint === fingerprint) return;
+        set({ statsSeenFingerprint: fingerprint });
+      },
 
       setHasHydrated: (v) => set({ _hasHydrated: v }),
     }),
@@ -1003,6 +1041,7 @@ export const useUserDataStore = create<UserDataState>()(
         bio: state.bio,
         bioSeed: state.bioSeed,
         chartSeenXP: state.chartSeenXP,
+        statsSeenFingerprint: state.statsSeenFingerprint,
         portrait: state.portrait,
         profileBackground: state.profileBackground,
         nameFont: state.nameFont,

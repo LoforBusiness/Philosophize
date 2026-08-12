@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Svg, {
   Path, Circle, Line as SvgLine, Defs, LinearGradient, Stop, G,
 } from 'react-native-svg';
@@ -7,28 +7,14 @@ import Animated, {
   useSharedValue, useAnimatedProps, useAnimatedStyle, withTiming, withDelay, runOnJS, Easing,
 } from 'react-native-reanimated';
 import { rankProgress } from '@/data/ranks';
+import ACounter, { counterStyle } from './ACounter';
 import { INK, MID, PAPER, PAPER_SHADE, FAINT } from './tone';
 import type { XpEvent } from '@/stores/userDataStore';
 
 const APath = Animated.createAnimatedComponent(Path);
-/**
- * THE COUNTER IS A TextInput, AND THAT IS THE WHOLE PERFORMANCE FIX.
- *
- * It was a <Text> fed by React state from a `setInterval` running every 16ms —
- * sixty state updates a second for the 1.6s the line takes to grow, each one
- * re-rendering this component and with it the whole <Svg>: two paths, four
- * gridlines, the node circles and every label. That is a re-render storm inside
- * a ScrollView, which is exactly when the reader is scrolling, and it is why the
- * profile went sticky at the graph.
- *
- * Reanimated can only write to a NATIVE PROP from the UI thread, and `text` on a
- * TextInput is one; a Text's children are not. So the number is a read-only,
- * unfocusable TextInput whose `text` is written straight from the same shared
- * value that drives the line. Zero React renders for the entire count, and the
- * digits are now driven by the identical clock as the stroke rather than by a
- * second timer that agreed with it only approximately.
- */
-const ACounter = Animated.createAnimatedComponent(TextInput);
+// The counter — a TextInput whose `text` is written from the UI thread — moved to
+// components/shared/ACounter.tsx when the Insights ghost needed the same trick.
+// The reasoning that produced it lives there; this is now just a consumer.
 
 /**
  * THE CLIMB FROM THE RANK YOU HOLD TO THE NEXT ONE.
@@ -285,7 +271,7 @@ export default function RankClimbChart({
               pointerEvents="none"
               underlineColorAndroid="transparent"
               defaultValue={`+${Math.round(draw.value * gained)} XP`}
-              style={[styles.calloutText, styles.counterInput]}
+              style={[styles.calloutText, counterStyle]}
               animatedProps={countProps}
             />
           </View>
@@ -307,12 +293,6 @@ export default function RankClimbChart({
 }
 
 const styles = StyleSheet.create({
-  // A TextInput carries platform padding and a minimum height that a Text does
-  // not, so it is stripped back to sit exactly where the old label sat.
-  counterInput: {
-    padding: 0, margin: 0, height: undefined, minHeight: 0,
-    includeFontPadding: false, textAlignVertical: 'center',
-  },
   card: {
     backgroundColor: PAPER,
     borderRadius: 14,
