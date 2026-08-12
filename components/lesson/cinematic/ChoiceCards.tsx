@@ -25,18 +25,23 @@ import type { ChoiceCard } from './cinematicKit';
 // fails a card over the limit, so "too much to read" is a number rather than a
 // matter of taste.
 //
-// ── WHY THEY ARE PINNED TO THE STAGE, NOT PLACED IN IT ──────────────────────
+// ── WHERE THEY SIT, AND THE TWO PLACES THAT DO NOT WORK ─────────────────────
 //
-// The obvious thing is to draw them in scene coordinates so they stand among the
-// art. They cannot be: the stage is a 400×560 design space that every lesson
-// CROPS to its own band and that `followMoves` pushes the camera around inside.
-// A card placed in scene space is a card that 100 lessons each get to clip
-// differently, and H60 exists because that is exactly what happens.
+// IN THE SCENE, in scene coordinates, is the obvious idea and it is wrong: the
+// stage is a 400×560 space that every lesson CROPS to its own band and that
+// `followMoves` pushes a camera around inside. A card placed there is a card
+// that 100 lessons each get to clip differently, which is the whole reason H60
+// exists.
 //
-// So they are positioned against the stage's own lower edge instead — on the
-// picture, over the art, in the same ink and paper, but outside the band crop
-// and outside the camera transform. No per-lesson placement to get wrong, and
-// nothing a push can cut in half.
+// PINNED OVER THE STAGE'S LOWER EDGE was the second idea, and a browser killed
+// it in one screenshot: the figure stands ON the ground line, which is the
+// bottom of the band, so the cards landed squarely on top of him. Across 102
+// lessons that covers the man — and sometimes covers the very thing the question
+// is about, which is rule A1 with the answer hidden behind the answer.
+//
+// So they sit DIRECTLY UNDER the art and above the prompt: still the first thing
+// under the picture, still ink on paper, still nothing to read but a few words —
+// but they cover nothing and need no per-lesson placement.
 //
 // ── AND NOTHING HERE ANIMATES AN SVG PROPERTY ───────────────────────────────
 //
@@ -102,10 +107,12 @@ function Card({ card, id, picked, onPick }: {
       return { opacity: 1, transform: [{ translateY: -10 * t }, { scale: 1 + 0.06 * t }, { rotate: '0deg' }] };
     }
     // Crumples away — down, small, and off true, which reads as discarded rather
-    // than merely hidden.
+    // than merely hidden. It does NOT fall far: at 12 units it drifted onto the
+    // prompt line underneath, which a screenshot caught. Six units and a deeper
+    // fade say the same thing without landing on the question.
     return {
-      opacity: 1 - 0.75 * t,
-      transform: [{ translateY: 12 * t }, { scale: 1 - 0.18 * t }, { rotate: `${5 * t}deg` }],
+      opacity: 1 - 0.86 * t,
+      transform: [{ translateY: 6 * t }, { scale: 1 - 0.16 * t }, { rotate: `${5 * t}deg` }],
     };
   });
 
@@ -126,9 +133,15 @@ function Card({ card, id, picked, onPick }: {
   const body = (
     <Animated.View style={[styles.card, answered && card.correct && styles.cardTrue, style]}>
       <Text style={styles.text} numberOfLines={3}>{card.text}</Text>
-      <Animated.View style={[styles.seal, sealStyle]} pointerEvents="none">
-        <Text style={styles.sealMark}>✓</Text>
-      </Animated.View>
+      {/* MOUNTED ONLY WHEN IT IS EARNED, not hidden at opacity 0. A View that is
+          merely transparent still contributes its text: measured in a browser,
+          every card read "It did not rain ✓" from the moment it appeared, which
+          a screen reader would say out loud on both of them. */}
+      {chosen && card.correct ? (
+        <Animated.View style={[styles.seal, sealStyle]} pointerEvents="none">
+          <Text style={styles.sealMark}>✓</Text>
+        </Animated.View>
+      ) : null}
     </Animated.View>
   );
 
@@ -156,12 +169,11 @@ function Card({ card, id, picked, onPick }: {
 
 const styles = StyleSheet.create({
   row: {
-    position: 'absolute',
-    left: 0, right: 0, bottom: 10,
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
+    marginTop: 10,
   },
   slot: { flex: 1, maxWidth: 190 },
   card: {

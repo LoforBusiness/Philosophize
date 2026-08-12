@@ -555,19 +555,20 @@ export default function CinematicPlayer({
             </View>
           ) : null}
 
-          {/* THE TWO CHOICES, ON the picture rather than under it.
-              Outside `stage-clip` on purpose: a card drawn in scene coordinates
-              is a card that every lesson's band crops differently and every
-              camera push can cut in half (H60). Pinned here it needs no
-              per-lesson placement and nothing can clip it. */}
-          {beat.interact?.cards && !gone ? (
-            <ChoiceCards
-              cards={beat.interact.cards}
-              picked={picked}
-              onPick={(id, ok) => choose(id, ok, true)}
-            />
-          ) : null}
         </Animated.View>
+
+        {/* THE TWO CHOICES — directly under the art, above the prompt.
+            Not in scene coordinates (every lesson crops its band differently and
+            a camera push would cut them in half, H60) and not pinned over the
+            stage either: the figure stands on the ground line at the bottom of
+            the band, so cards there land on top of him. See ./ChoiceCards. */}
+        {beat.interact?.cards && !gone ? (
+          <ChoiceCards
+            cards={beat.interact.cards}
+            picked={picked}
+            onPick={(id, ok) => choose(id, ok, true)}
+          />
+        ) : null}
 
         <View style={[styles.deck, gone && styles.deckTall]}>
           <Fade
