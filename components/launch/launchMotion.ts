@@ -1,7 +1,8 @@
 import {
-  clamp01, walk, sipStance, swingStance, kiteStance, picnicStance, readStance,
+  walk, sipStance, readStance,
   WALK, type Stance,
 } from '@/components/lesson/cinematic/rig';
+import { postureLive, actStance } from '@/components/lesson/cinematic/moves';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Everything the launch figure DOES, as pure maths, so it can be sampled outside
@@ -20,7 +21,7 @@ import {
 // Both are enforced by the sampler, not by eye.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type LaunchActivity = 'walk' | 'kite' | 'swing' | 'sip' | 'picnic' | 'read';
+export type LaunchActivity = 'walk' | 'sip' | 'read' | 'thinker' | 'stargazer' | 'lookout';
 
 /** Rig units per second for the hill walk — an unhurried pace at this distance. */
 export const WALK_SPEED = 22;
@@ -38,12 +39,6 @@ export const WALK_SPEED = 22;
  */
 export const WALK_START = 150;
 
-/** Signed swing phase, -1..1. The scene rotates by it AND the body leans into it. */
-export function swingPhaseAt(t: number): number {
-  'worklet';
-  return Math.sin(t * 1.35);
-}
-
 /**
  * A there-and-back envelope over [a, b] of a `period`-second cycle: 0 at both
  * ends, 1 across the middle, smooth throughout. Outside the window it is 0, so
@@ -57,21 +52,65 @@ export function cycle(t: number, period: number, a: number, b: number): number {
   return (p - a) / (b - a);
 }
 
+/**
+ * How long one full cycle of each activity takes.
+ *
+ * Exported because the loop-closure check samples across exactly one period, and
+ * a period the checker has to guess is a period that stops being checked the day
+ * someone retunes it.
+ */
+export const ACTIVITY_PERIOD: Record<LaunchActivity, number> = {
+  // gait is driven by distance, not by this period — WALK's own stride period is
+  // S / (stance × WALK_SPEED) = 34 / (0.62 × 22) ≈ 2.4927s, and 3 strides of that
+  // is what actually meets itself at the fold. A round 8.0 sits ~0.52s off any
+  // multiple of that, which the sampler measures as a real jump at the wrap.
+  walk: 3 * (34 / (0.62 * WALK_SPEED)),
+  // Below, sip/read/thinker/stargazer each ride `seated()`/`stand()`'s own idle
+  // breath — two incommensurate sines the u-driven action never touches — so the
+  // period has to also be a point where THAT drift is small, not just a length
+  // that fits the gesture. Found by sampling, not by eye (see the task report).
+  sip: 12.68,
+  read: 5.0,
+  thinker: 7.6,
+  stargazer: 11.83,
+  lookout: 8.2,
+};
+
 /** The pose for one activity at time `t`. */
 export function launchStance(activity: LaunchActivity, t: number): Stance {
   'worklet';
-  if (activity === 'kite') {
-    // Irregular tugs — a kite pulls when the wind decides to, not on a beat.
-    // Sum of two incommensurate sines: continuous forever, never repeating.
-    const g = Math.sin(t * 1.7) * 0.5 + Math.sin(t * 1.06 + 0.9) * 0.5;
-    return kiteStance(t, clamp01(g * 0.9 + 0.25));
+  // sipStance / readStance each ease their action out to nothing by u = 1, so a
+  // linear 0→1 ramp inside the window is enough to close the loop.
+  if (activity === 'sip') return sipStance(t, cycle(t, ACTIVITY_PERIOD.sip, 1.5, 4.7));
+  if (activity === 'read') return readStance(t, cycle(t, ACTIVITY_PERIOD.read, 3.9, 4.7));
+
+  // THE THINKER — elbow on knee, chin in hand, perched on a rock at a cliff edge.
+  // postureLive(9) already damps this one on purpose: "the thinker barely moves;
+  // that is the point". `bt` is the beat clock, and folding it by the period is
+  // what re-takes the settle each cycle rather than settling once forever.
+  if (activity === 'thinker') return postureLive(9, t, t % ACTIVITY_PERIOD.thinker);
+
+  // STARGAZER — reclined, propped back on both arms, head to the sky.
+  if (activity === 'stargazer') return postureLive(5, t, t % ACTIVITY_PERIOD.stargazer);
+
+  // THE LOOKOUT — hand up to shade the eyes, sweep the valley, lower.
+  // actStance(18) does NOT ease itself back to neutral by u = 1 the way sipStance
+  // / readStance do — its `up` term rises once (over u 0→0.22) and then HOLDS,
+  // so the hand is still raised at u = 1. Feeding it cycle()'s raw 0→1 ramp
+  // leaves the hand up right at the window edge: a real jump back to neutral the
+  // instant the window closes. It looked closed on the sampler at first only
+  // because that jump is bigger than any other step in the cycle, so it inflated
+  // the sampler's own "ordinary step" baseline and buried itself in it — the
+  // exact false pass the loop-closure check exists to catch.
+  // Folding the ramp into a tent (rise for the window's first half, fall for its
+  // second) makes actStance(18) itself carry the hand back down to u = 0 before
+  // the window ends, which is what the check now measures as actually closing.
+  if (activity === 'lookout') {
+    const p = cycle(t, ACTIVITY_PERIOD.lookout, 1.4, 6.0);
+    const u = p <= 0.5 ? p * 2 : (1 - p) * 2;
+    return actStance(18, t, u);
   }
-  if (activity === 'swing') return swingStance(t, swingPhaseAt(t));
-  // sipStance / picnicStance / readStance each ease their action out to nothing
-  // by u = 1, so a linear 0→1 ramp inside the window is enough to close the loop.
-  if (activity === 'sip') return sipStance(t, cycle(t, 7.4, 1.5, 4.7));
-  if (activity === 'picnic') return picnicStance(t, cycle(t, 6.8, 1.2, 5.2));
-  if (activity === 'read') return readStance(t, cycle(t, 5.6, 3.9, 4.7));
+
   // walk: the gait phase comes from DISTANCE, which only ever increases, so the
   // stride is continuous however long the screen is up.
   return walk(t * WALK_SPEED, WALK);

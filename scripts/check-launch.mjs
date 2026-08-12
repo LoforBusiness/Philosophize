@@ -21,7 +21,13 @@ const TMP = path.join(os.tmpdir(), 'deeply-launch-check');
 fs.mkdirSync(TMP, { recursive: true });
 function emit(rel, name) {
   const src = fs.readFileSync(path.join(REPO, rel), 'utf8')
-    .replace(/from '@\/components\/lesson\/cinematic\/rig'/g, "from './rig.mjs'");
+    .replace(/from '@\/components\/lesson\/cinematic\/rig'/g, "from './rig.mjs'")
+    // moves.ts (§5's launchStance loop-closure check pulls it in) imports rig
+    // relatively rather than through the '@/...' alias, and launchMotion.ts now
+    // imports moves.ts through the alias — both need the same on-disk rewrite
+    // rig.ts already gets, or Node's ESM loader can't resolve the bare specifier.
+    .replace(/from '@\/components\/lesson\/cinematic\/moves'/g, "from './moves.mjs'")
+    .replace(/from '\.\/rig'/g, "from './rig.mjs'");
   fs.writeFileSync(path.join(TMP, name),
     transform(src, { transforms: ['typescript'] }).code);
   return pathToFileURL(path.join(TMP, name)).href;
@@ -144,6 +150,43 @@ for (const key of A.SCENE_KEYS) {
   // Determinism — the same scene must draw identically every call.
   const again = A.planesFor(key);
   ok(again.every((q, i) => q.d === planes[i].d), `${key}: planes are deterministic`);
+}
+
+// ── 5 · every activity's loop closes ─────────────────────────────────────────
+//
+// The rule this file inherits from launchMotion.ts: whatever drives a pose must
+// arrive back at its resting value before it wraps, so the modulo reset lands on
+// a pose identical to the one it left.
+//
+// Compared as a CONTINUITY test, not an equality one. `stand()` rides two
+// incommensurate sines so it never repeats exactly — that is deliberate, and an
+// equality test would fail on it forever. What must not happen is a JUMP: a
+// step across the wrap that is larger than an ordinary frame's step.
+emit('components/lesson/cinematic/moves.ts', 'moves.mjs');
+const LM = await import(emit('components/launch/launchMotion.ts', 'launchMotion.mjs'));
+
+const KEYS = ['tilt', 'neck', 'bob'];
+const PTS = ['footL', 'footR', 'fistL', 'fistR'];
+const delta = (a, b) => {
+  let d = 0;
+  for (const k of KEYS) d = Math.max(d, Math.abs(a[k] - b[k]) * 20);
+  for (const k of PTS) d = Math.max(d, Math.hypot(a[k].x - b[k].x, a[k].y - b[k].y));
+  return d;
+};
+
+for (const act of ['walk', 'sip', 'read', 'thinker', 'stargazer', 'lookout']) {
+  const T = LM.ACTIVITY_PERIOD[act];
+  ok(typeof T === 'number' && T > 0, `${act}: declares a period`, String(T));
+  if (!T) continue;
+  // the largest ordinary step, sampled at 60fps across one period
+  let ordinary = 0;
+  for (let t = 0; t < T; t += 1 / 60) {
+    ordinary = Math.max(ordinary, delta(LM.launchStance(act, t), LM.launchStance(act, t + 1 / 60)));
+  }
+  const atWrap = delta(LM.launchStance(act, T - 1 / 60), LM.launchStance(act, 1 / 60));
+  // `walk` folds x, not the gait, so its stance is continuous by construction.
+  ok(atWrap <= ordinary * 3 + 0.5, `${act}: no jump across the wrap`,
+    `wrap ${atWrap.toFixed(2)} vs ordinary ${ordinary.toFixed(2)}`);
 }
 
 console.log(bad === 0 ? '\nlaunch screen: all clear.' : `\n${bad} launch check(s) failed.`);
