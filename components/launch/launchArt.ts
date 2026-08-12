@@ -191,8 +191,9 @@ const DISCS: Record<SceneKey, { cx: number; cy: number; r: number }> = {
   // going down behind the mesas: the far plane clips its foot, and the tall
   // butte on the step-3 plane cuts a hard notch out of its right side
   walk:      { cx: 288, cy: 404, r: 60 },
-  // a high hazy sun on the one pale sky — soft by construction, not by accident
-  sip:       { cx: 112, cy: 198, r: 48 },
+  // a morning sun dropped onto the near tree cluster — cut the way walk's is,
+  // rather than raised in tone, which would fight the pale-gold sky it owns
+  sip:       { cx: 112, cy: 360, r: 48 },
   // a cold sun high in a slate sky, well above the mist bands
   read:      { cx: 252, cy: 218, r: 46 },
   // glimpsed through the canopy: the big tree on the step-3 plane overlaps it

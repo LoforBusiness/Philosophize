@@ -189,5 +189,69 @@ for (const act of ['walk', 'sip', 'read', 'thinker', 'stargazer', 'lookout']) {
     `wrap ${atWrap.toFixed(2)} vs ordinary ${ordinary.toFixed(2)}`);
 }
 
+// ── 3c · every disc is readable, by EDGE or by TONE ──────────────────────────
+//
+// A disc reads as an anchor one of two ways: the land cuts it and gives it an
+// edge, or it carries enough contrast against its own sky to stand on its own.
+//
+// Measured, both scenes that prove it: `walk` at 1.61:1 reads ONLY because an
+// 80-90px butte crosses it, and `read` at 2.87:1 reads with a 154px gap of clear
+// sky beneath it. `sip` at 1.57:1 and uncut has neither, and `sip` is the one
+// scene that came back soft from the art gate.
+//
+// The threshold is 2.5 rather than 2.0 deliberately. The ONLY evidence that an
+// uncut disc reads is `read` at 2.87, so anything materially below that is an
+// extrapolation past the data — a scene in between must earn it with an edge.
+const DISC_TONE_MIN = 2.5;
+
+for (const key of A.SCENE_KEYS) {
+  const disc = A.discFor(key);
+  const dc = coverage(disc.d, A.ART_W, A.ART_H);
+  let top = A.ART_H, bot = -1, lx = A.ART_W, rx = -1;
+  for (let y = 0; y < A.ART_H; y++) {
+    for (let x = 0; x < A.ART_W; x++) {
+      if (dc[y * A.ART_W + x] <= 0.5) continue;
+      if (y < top) top = y;
+      if (y > bot) bot = y;
+      if (x < lx) lx = x;
+      if (x > rx) rx = x;
+    }
+  }
+  ok(bot > top, `${key}: the disc renders`, `y ${top}..${bot}`);
+
+  // EDGE: a plane covering part of the disc's lower half. Counted in pixels off
+  // the real path data, with a floor well above a stray antialiased edge.
+  const midY = (top + bot) / 2;
+  let cut = 0;
+  for (const pl of A.planesFor(key)) {
+    const pc = coverage(pl.d, A.ART_W, A.ART_H);
+    for (let y = Math.ceil(midY); y <= bot; y++) {
+      for (let x = lx; x <= rx; x++) {
+        if (dc[y * A.ART_W + x] > 0.5 && pc[y * A.ART_W + x] > 0.5) cut++;
+      }
+    }
+  }
+  const edged = cut >= 200;
+
+  // TONE: the disc against the sky gradient at the disc's OWN height, which is
+  // what the eye actually compares — not against the sky's top or its horizon.
+  const p = A.PALETTES[key];
+  const stops = A.skyStops(key);
+  const t = Math.min(1, Math.max(0, top + (bot - top) / 2) / (A.crestFor(key).base - 150));
+  let a = stops[0], b = stops[stops.length - 1];
+  for (let i = 1; i < stops.length; i++) {
+    if (t <= stops[i].offset) { a = stops[i - 1]; b = stops[i]; break; }
+  }
+  const f = (t - a.offset) / Math.max(1e-6, b.offset - a.offset);
+  const ca = hexRgb(a.color), cb = hexRgb(b.color);
+  const sky = ca.map((v, i) => v + (cb[i] - v) * f);
+  const skyLum = 0.2126 * lin(sky[0]) + 0.7152 * lin(sky[1]) + 0.0722 * lin(sky[2]);
+  const tone = ratio(lum(p.disc), skyLum);
+
+  ok(edged || tone >= DISC_TONE_MIN, `${key}: the disc reads`,
+    `${cut}px cut, ${tone.toFixed(2)}:1 on its sky` +
+    (edged ? ' (edged)' : tone >= DISC_TONE_MIN ? ' (tonal)' : ' — NEITHER'));
+}
+
 console.log(bad === 0 ? '\nlaunch screen: all clear.' : `\n${bad} launch check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);
