@@ -397,5 +397,26 @@ ok(literals.length === 0, 'launchScenes.tsx declares no colour of its own',
 ok(!/\bswing\b|\bkite\b|\bpicnic\b/.test(scenes),
   'launchScenes.tsx has no kite, swing or picnic left');
 
+// ── 8 · the quote and the chrome are legible where they actually sit ─────────
+//
+// §19's rule: never take text contrast from the artwork. The quote takes it from
+// a FIXED scrim and one fixed cream, and this is the arithmetic. The welcome end
+// card measures 8.7:1 doing exactly this, so 7:1 is a floor, not an aspiration.
+const screen = fs.readFileSync(path.join(REPO, 'components/launch/LaunchScreen.tsx'), 'utf8');
+ok(/D\s*E\s*E\s*P\s*L\s*Y/.test(screen), 'the masthead says DEEPLY');
+ok(!/PHILOSOPHIZE/.test(screen), 'the old wordmark is gone');
+
+const SCRIM_ALPHA = 0.94;                     // the scrim's alpha where the quote sits
+const SCRIM_RGB = [16, 15, 13];
+for (const key of A.SCENE_KEYS) {
+  // The quote sits over the darkest plane plus the scrim.
+  const under = A.PALETTES[key].steps[0];
+  const [r, g, b] = hexRgb(under);
+  const over = [r, g, b].map((v, i) => v + (SCRIM_RGB[i] - v) * SCRIM_ALPHA);
+  const bgLum = 0.2126 * lin(over[0]) + 0.7152 * lin(over[1]) + 0.0722 * lin(over[2]);
+  ok(ratio(lum(A.CREAM), bgLum) >= 7.0, `${key}: the quote reads on its scrim`,
+    `${ratio(lum(A.CREAM), bgLum).toFixed(1)}:1`);
+}
+
 console.log(bad === 0 ? '\nlaunch screen: all clear.' : `\n${bad} launch check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);

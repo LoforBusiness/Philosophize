@@ -20,24 +20,21 @@ import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-// Every scene shares ONE fixed vertical palette: a dark sky at the top washing
-// to paper at the horizon (see launchScenes.tsx).
-//
-// That is what makes the quote safe. The old scenes each painted their own
-// full-bleed background and declared a light/dark "mode", and the quote took its
-// colour from that mode — so a pale quote could land on pale art and disappear.
-// Now the zones are fixed for every scene, so each element's background is known
-// in advance: chrome at the top is light, the quote at the bottom is ink on
-// paper. Nothing is chosen per scene, so nothing can come out unreadable.
-const PAPER = '#F4F3EE';
-const INK = '#1A1A1A';
-const SOFT = 'rgba(26,26,26,0.5)';
-// The sky is dark at the top, so the masthead, the progress stroke and the count
-// are drawn LIGHT. This is not a per-scene guess: launchScenes.tsx fixes the dark
-// zone to the top third and washes to paper by the horizon, so what sits behind
-// each of these is known by construction — the quote below stays ink on paper.
-const SKY_INK = '#F2F1EC';
-const SKY_SOFT = 'rgba(242,241,236,0.66)';
+import { chromeOn, PALETTES, CREAM, INK } from './launchArt';
+
+// The scene now runs full-bleed to the bottom edge and the foreground is the
+// DARK end, which is what let the art stop being a blank sheet below the horizon.
+// Two things carry the legibility that the old paper band used to:
+//   · the quote sits on a FIXED scrim in one fixed cream with its own shadow
+//     (§19 — never take text contrast from the artwork);
+//   · the masthead and the progress stroke take `chromeOn(scene.key)`, which is
+//     DERIVED from the sky band's own luminance rather than chosen per scene.
+// scripts/check-launch.mjs measures both. Nothing here is a guess.
+const SCRIM: readonly [string, string, string] = [
+  'rgba(16,15,13,0)',
+  'rgba(16,15,13,0.66)',
+  'rgba(16,15,13,0.94)',
+];
 
 // The stage y the progress stroke sits on — up in the sky, well clear of both
 // the figure below it and the masthead above.
@@ -119,6 +116,9 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
   // One scene + one quote per launch.
   const seed = useMemo(() => Math.floor(Math.random() * 233280), []);
   const scene = LAUNCH_SCENES[seed % LAUNCH_SCENES.length];
+  const chrome = chromeOn(scene.key);
+  const chromeSoft = chrome === INK ? 'rgba(26,26,26,0.62)' : 'rgba(244,241,234,0.70)';
+  const base = PALETTES[scene.key].steps[0];
   const quote = SHORT_QUOTES.length > 0 ? SHORT_QUOTES[seed % SHORT_QUOTES.length] : FALLBACK_QUOTE;
 
   // Cover-fit the 400×800 stage. The art and the figure both live inside it, so
@@ -193,9 +193,9 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
 
   return (
     <Animated.View
-      style={[StyleSheet.absoluteFill, styles.root, { backgroundColor: PAPER }, rootStyle]}
+      style={[StyleSheet.absoluteFill, styles.root, { backgroundColor: base }, rootStyle]}
     >
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={chrome === INK ? 'dark-content' : 'light-content'} />
 
       {/* The scene: inert SVG art with the figure moving on top of it, both in
           stage coordinates. needsOffscreenAlphaCompositing so the intro fade
@@ -216,14 +216,15 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
         </View>
       </Animated.View>
 
-      {/* Paper wash under the quote. It reaches FULL paper at the bottom, so the
-          words always sit on a clean sheet no matter what the scene does. */}
+      {/* The quote's scrim. Fixed alphas, never derived from the picture — the
+          art below the crest is deliberately near-black now, and the words have
+          to be safe on the lightest scene as well as the darkest. */}
       <Svg width="100%" height="34%" style={styles.scrim} pointerEvents="none">
         <Defs>
           <LinearGradient id="ls-fade" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor={PAPER} stopOpacity={0} />
-            <Stop offset="0.55" stopColor={PAPER} stopOpacity={0.92} />
-            <Stop offset="1" stopColor={PAPER} stopOpacity={1} />
+            <Stop offset="0" stopColor="rgb(16,15,13)" stopOpacity={0} />
+            <Stop offset="0.55" stopColor="rgb(16,15,13)" stopOpacity={0.66} />
+            <Stop offset="1" stopColor="rgb(16,15,13)" stopOpacity={0.94} />
           </LinearGradient>
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#ls-fade)" />
@@ -231,7 +232,7 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
 
       {/* Masthead */}
       <Animated.View style={[styles.mast, { top: insets.top + 18 }, fadeInStyle]}>
-        <Text style={[styles.mastText, { color: SKY_SOFT }]}>P H I L O S O P H I Z E</Text>
+        <Text style={[styles.mastText, { color: chromeSoft }]}>D E E P L Y</Text>
       </Animated.View>
 
       {/* The ink stroke drawing itself + percentage, pinned to the sky */}
@@ -239,7 +240,7 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
         <Svg width={strokeW} height={14} viewBox={`0 -7 ${strokeW} 14`}>
           <AnimatedPath
             d={d}
-            stroke={SKY_INK}
+            stroke={chrome}
             strokeWidth={3}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -248,15 +249,15 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
             animatedProps={strokeProps}
           />
         </Svg>
-        <Pct progress={progress} color={SKY_SOFT} />
+        <Pct progress={progress} color={chromeSoft} />
       </Animated.View>
 
       {/* Quote */}
       <Animated.View style={[styles.quoteWrap, { paddingBottom: insets.bottom + 34 }, fadeInStyle]}>
-        <Text style={[styles.quoteText, { color: INK }]} numberOfLines={3}>
+        <Text style={[styles.quoteText, { color: CREAM }]} numberOfLines={3}>
           “{quote.text}”
         </Text>
-        <Text style={[styles.quoteBy, { color: SOFT }]}>— {quote.author.toUpperCase()}</Text>
+        <Text style={[styles.quoteBy, { color: 'rgba(244,241,234,0.72)' }]}>— {quote.author.toUpperCase()}</Text>
       </Animated.View>
     </Animated.View>
   );
@@ -284,6 +285,9 @@ const styles = StyleSheet.create({
     fontSize: 16.5,
     lineHeight: 24,
     textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.55)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   quoteBy: {
     fontFamily: 'Inter_500Medium',
