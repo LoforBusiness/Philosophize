@@ -17,10 +17,11 @@ const ART: ImageSourcePropType[] = [
   require('../../assets/images/quickstart/05-citadel.jpg'),
 ];
 
+import { Dimensions } from 'react-native';
 import {
-  QS_CARD_H,
+  qsCardHeight,
   QS_SCRIM,
-  QS_SCRIM_STOPS,
+  qsScrimStops,
   QS_CREAM,
   QS_FAINT,
   QS_TAB_INK,
@@ -29,6 +30,14 @@ import {
 const Ink = '#1A1A1A';
 const Cream = QS_CREAM;
 const Faint = QS_FAINT;
+
+// The device read lives HERE, not in constants/quickStartArt.ts — that file has
+// to stay import-free so the contrast check can load it in plain Node.
+//
+// Module scope, not per render: Home does not survive a rotation, and the stops
+// only change when the height does.
+const QS_CARD_H = qsCardHeight(Dimensions.get('window').height);
+const SCRIM_STOPS = qsScrimStops(QS_CARD_H);
 
 // The scrim, the height and the tab colour all live in constants/quickStartArt.ts
 // because scripts/check-quickstart-contrast.mjs reads that file and measures
@@ -65,7 +74,10 @@ export default function QuickStartCard({ style }: Props) {
   return (
     <PressableScale onPress={open} style={[styles.card, style]}>
       <ImageBackground source={art} style={styles.bg} imageStyle={styles.img} resizeMode="cover">
-        <LinearGradient colors={QS_SCRIM} locations={QS_SCRIM_STOPS} style={StyleSheet.absoluteFill} />
+        {/* Stops are computed from the card's height: the body is a fixed number
+            of dp, so its FRACTION shrinks as the card grows, and a hard-coded
+            stop would drift further from the type on every taller phone. */}
+        <LinearGradient colors={QS_SCRIM} locations={SCRIM_STOPS} style={StyleSheet.absoluteFill} />
 
         {/* The label rides an ink tab rather than the picture. Loose on the thin
             top wash it measured 1.36:1 over four of the five skies; on ink it is
@@ -126,21 +138,26 @@ const styles = StyleSheet.create({
   },
   tabText: { fontFamily: 'Inter_700Bold', fontSize: 10, color: Cream, letterSpacing: 1.8 },
 
-  body: { paddingHorizontal: 16, paddingBottom: 16 },
+  // These six numbers ARE QS_BODY_DP in constants/quickStartArt.ts — 80 of title
+  // + 10 + 15 of meta + 16 + 53 of button + 17 of padding = 191. The scrim's
+  // deepening and the check's measuring band are both derived from that figure,
+  // so changing a size here without changing it there moves the type out from
+  // under the wash that protects it.
+  body: { paddingHorizontal: 18, paddingBottom: 17 },
   title: {
     fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 30,
-    lineHeight: 36,
+    fontSize: 34,
+    lineHeight: 40,
     color: Cream,
     textShadowColor: 'rgba(0,0,0,0.55)',
     textShadowRadius: 8,
   },
   meta: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 11,
+    fontSize: 11.5,
     color: Faint,
-    letterSpacing: 1.3,
-    marginTop: 9,
+    letterSpacing: 1.4,
+    marginTop: 10,
     textTransform: 'uppercase',
   },
   cta: {
@@ -148,8 +165,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Cream,
     borderRadius: 5,
-    paddingVertical: 15,
-    marginTop: 15,
+    paddingVertical: 17,
+    marginTop: 16,
   },
-  ctaText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: Ink, letterSpacing: 1.6 },
+  ctaText: { fontFamily: 'Inter_700Bold', fontSize: 15, color: Ink, letterSpacing: 1.7 },
 });
