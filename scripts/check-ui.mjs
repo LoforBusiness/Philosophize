@@ -93,5 +93,22 @@ const SPACE_WANT = [4, 8, 12, 16, 24, 32];
 ok(JSON.stringify(D.SPACE) === JSON.stringify(SPACE_WANT), 'the spacing rhythm is 4/8/12/16/24/32',
   JSON.stringify(D.SPACE));
 
+// ── 4 · the button obeys the affordance rule ─────────────────────────────────
+//
+// A lip means you can press it. That is the whole language: 4px on a button,
+// 2px on a pressable card, none on a static one. Nothing in the app said this
+// before, which is a real part of why nothing felt tappable.
+const btn = fs.readFileSync(path.join(REPO, 'components/ui/Button.tsx'), 'utf8');
+ok(/onPress/.test(btn), 'Button requires an onPress');
+ok(!/#[0-9A-Fa-f]{3,8}\b/.test(btn.replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, '')),
+  'Button declares no colour of its own',
+  (btn.replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, '').match(/#[0-9A-Fa-f]{3,8}\b/g) || []).join(' '));
+for (const v of ['primary', 'secondary', 'ghost', 'destructive']) {
+  ok(btn.includes(`'${v}'`), `Button has a ${v} variant`);
+}
+ok(/LIP\.button/.test(btn), 'the lip height comes from the token, not a literal');
+ok(/touch\(\)/.test(btn), 'pressing fires the existing haptic');
+ok(!/playSound|cue\(/.test(btn), 'the button makes no sound');
+
 console.log(bad === 0 ? '\nui system: all clear.' : `\n${bad} ui check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);
