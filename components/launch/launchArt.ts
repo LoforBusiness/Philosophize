@@ -16,6 +16,21 @@ import { STAGE_W, STAGE_H } from '@/components/lesson/cinematic/rig';
 export const INK = '#1A1A1A';
 export const CREAM = '#F4F1EA';
 
+/**
+ * The scrim the quote sits on — one fixed dark colour at three opacities,
+ * near-clear at the top so the picture reads, near-solid where the words are
+ * (§19's rule: never take text contrast from the artwork). The ONE place this
+ * is declared — LaunchScreen.tsx builds its gradient `<Stop>`s from it and
+ * check-launch.mjs measures contrast against it, so tuning either can never
+ * again silently stop describing what the other one does.
+ */
+export const SCRIM_RGB: readonly [number, number, number] = [16, 15, 13];
+export const SCRIM_STOPS: ReadonlyArray<{ offset: number; opacity: number }> = [
+  { offset: 0, opacity: 0 },
+  { offset: 0.55, opacity: 0.66 },
+  { offset: 1, opacity: 0.94 },
+];
+
 /** The frame everything here is authored in. Same stage as the figure. */
 export const ART_W = STAGE_W;   // 400
 export const ART_H = STAGE_H;   // 800

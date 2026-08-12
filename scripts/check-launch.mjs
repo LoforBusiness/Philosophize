@@ -406,8 +406,11 @@ const screen = fs.readFileSync(path.join(REPO, 'components/launch/LaunchScreen.t
 ok(/D\s*E\s*E\s*P\s*L\s*Y/.test(screen), 'the masthead says DEEPLY');
 ok(!/PHILOSOPHIZE/.test(screen), 'the old wordmark is gone');
 
-const SCRIM_ALPHA = 0.94;                     // the scrim's alpha where the quote sits
-const SCRIM_RGB = [16, 15, 13];
+// Read from launchArt.ts, not typed here a second time — LaunchScreen.tsx
+// builds its gradient <Stop>s from the same export, so this measures what
+// actually renders rather than a copy that can drift out of step with it.
+const SCRIM_RGB = A.SCRIM_RGB;
+const SCRIM_ALPHA = A.SCRIM_STOPS[A.SCRIM_STOPS.length - 1].opacity;  // the alpha where the quote sits
 for (const key of A.SCENE_KEYS) {
   // The quote sits over the darkest plane plus the scrim.
   const under = A.PALETTES[key].steps[0];

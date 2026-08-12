@@ -20,7 +20,7 @@ import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-import { chromeOn, PALETTES, CREAM, INK } from './launchArt';
+import { chromeOn, PALETTES, CREAM, INK, SCRIM_RGB, SCRIM_STOPS } from './launchArt';
 
 // The scene now runs full-bleed to the bottom edge and the foreground is the
 // DARK end, which is what let the art stop being a blank sheet below the horizon.
@@ -30,11 +30,6 @@ import { chromeOn, PALETTES, CREAM, INK } from './launchArt';
 //   · the masthead and the progress stroke take `chromeOn(scene.key)`, which is
 //     DERIVED from the sky band's own luminance rather than chosen per scene.
 // scripts/check-launch.mjs measures both. Nothing here is a guess.
-const SCRIM: readonly [string, string, string] = [
-  'rgba(16,15,13,0)',
-  'rgba(16,15,13,0.66)',
-  'rgba(16,15,13,0.94)',
-];
 
 // The stage y the progress stroke sits on — up in the sky, well clear of both
 // the figure below it and the masthead above.
@@ -108,7 +103,9 @@ interface Props {
 // The cold-start loading moment: one of six hand-drawn outdoor scenes (a
 // different one each launch), the figure living in it, an ink stroke that draws
 // itself across the sky as a progress line with a counting percentage, and a
-// short quote resting on paper at the bottom. At 100% the screen lifts away.
+// short quote resting on a dark scrim at the bottom. The stroke takes
+// `chromeOn(scene.key)` — cream on five of six scenes, ink on the pale-gold one
+// — never a fixed ink stroke. At 100% the screen lifts away.
 export default function LaunchScreen({ ready, skipAnimation = false, onDone }: Props) {
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -222,9 +219,14 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
       <Svg width="100%" height="34%" style={styles.scrim} pointerEvents="none">
         <Defs>
           <LinearGradient id="ls-fade" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor="rgb(16,15,13)" stopOpacity={0} />
-            <Stop offset="0.55" stopColor="rgb(16,15,13)" stopOpacity={0.66} />
-            <Stop offset="1" stopColor="rgb(16,15,13)" stopOpacity={0.94} />
+            {SCRIM_STOPS.map((s) => (
+              <Stop
+                key={s.offset}
+                offset={s.offset}
+                stopColor={`rgb(${SCRIM_RGB.join(',')})`}
+                stopOpacity={s.opacity}
+              />
+            ))}
           </LinearGradient>
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#ls-fade)" />
