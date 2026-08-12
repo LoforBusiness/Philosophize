@@ -91,8 +91,8 @@ function panel(key) {
 
   // the figure, on the crest, at this scene's scale
   const c = A.crestFor(key);
-  const x = key === 'walk' ? 150 : 200;
-  figure(cv, R.walk(14), x, A.crestY(c, x), 0.6);
+  const x = A.figureX(key);
+  figure(cv, R.walk(14), x, A.crestY(c, x), A.figureK(key));
   return cv;
 }
 

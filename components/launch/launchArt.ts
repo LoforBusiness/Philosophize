@@ -156,6 +156,34 @@ export function figureX(key: SceneKey): number {
 }
 
 /**
+ * Where the figure stands, in each scene — at what SCALE.
+ *
+ * `k` is PER SCENE and deliberately not one constant. A seated figure is far
+ * shorter than a standing one, so a single k makes the seated scenes read
+ * markedly smaller than the walking one on the launch right before. These
+ * values are MEASURED by scripts/check-launch.mjs against a crown-to-ground
+ * target, not estimated — if you change a pose, re-run it and take the number
+ * it gives you.
+ *
+ * Position is NOT duplicated here — `figureX(key)` above is the single source
+ * of truth for where the figure stands, and `beside()` is built on it. A
+ * second copy of x would risk diverging from the lane that clearance actually
+ * protects.
+ */
+export const FIGURE_K: Record<SceneKey, number> = {
+  walk:      0.60,
+  sip:       0.69,
+  read:      0.81,
+  thinker:   0.70,
+  stargazer: 0.87,
+  lookout:   0.60,
+};
+
+export function figureK(key: SceneKey): number {
+  return FIGURE_K[key];
+}
+
+/**
  * A disc as a POLYGON, not an arc.
  *
  * rasterpath.mjs flattens path commands assuming every argument is an (x, y)

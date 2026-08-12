@@ -296,5 +296,73 @@ for (const key of A.SCENE_KEYS) {
     (edged ? ' (edged)' : tone >= DISC_TONE_MIN ? ' (tonal)' : ' — NEITHER'));
 }
 
+// ── 6 · equal visual mass, and the man does not vanish ───────────────────────
+//
+// Two rules in one pass, because both need the solved skeleton.
+//
+// MASS: a seated figure is far shorter than a standing one, so one shared k
+// makes the seated scenes read smaller than the walking one on the launch right
+// before. Each scene's k is tuned until crown-to-ground matches.
+//
+// LEGIBILITY: he is solid ink, head included, and stands in front of every
+// layer. A near-black mass behind him is not drama, it is the man vanishing.
+// Whatever is behind his BODY — crown to knee — must contrast against ink.
+//
+// `coverage` is imported and `R` is bound at the top of this file already; do
+// not re-import them here.
+
+const ACT_OF = {
+  walk: 'walk', sip: 'sip', read: 'read',
+  thinker: 'thinker', stargazer: 'stargazer', lookout: 'lookout',
+};
+const TARGET_H = 62;        // stage units, crown to ground — FIG_H(103) × 0.6
+const MASS_TOL = 5;
+
+for (const key of A.SCENE_KEYS) {
+  const k = A.figureK(key);
+  const fx = A.figureX(key);           // Task 3b's single source of truth — see above
+  ok(typeof k === 'number' && k > 0, `${key}: declares a figure scale`, String(k));
+  if (!k) continue;
+
+  const c = A.crestFor(key);
+  const groundY = A.crestY(c, fx);
+  const s = LM.launchStance(ACT_OF[key], 2.0);
+  const j = R.solve({ x: fx, groundY, k, dir: 1, ...s });
+
+  const crown = j.head.y - R.STR.headR * k;
+  const height = groundY - crown;
+  ok(Math.abs(height - TARGET_H) <= MASS_TOL, `${key}: equal visual mass`,
+    `${height.toFixed(0)} units, target ${TARGET_H}±${MASS_TOL}`);
+
+  // What is behind the body? Sample the darkest thing drawn in the band.
+  const knee = Math.max(j.kneeL.y, j.kneeR.y);
+  const halfW = Math.max(18 * k, Math.abs(j.wrL.x - j.wrR.x) / 2 + 6);
+  const planes = A.planesFor(key);
+  const p = A.PALETTES[key];
+  let darkest = 5;                                    // 5 = lightest step
+  for (const pl of planes) {
+    const cov = coverage(pl.d, A.ART_W, A.ART_H);
+    let hit = false;
+    for (let y = Math.floor(crown); y <= Math.floor(knee) && !hit; y++) {
+      for (let x = Math.floor(fx - halfW); x <= Math.ceil(fx + halfW); x++) {
+        if (cov[y * A.ART_W + x] > 0.5) { hit = true; break; }
+      }
+    }
+    if (hit) darkest = Math.min(darkest, pl.step);
+  }
+  // The celestial disc counts as backing — that is exactly how the night scene
+  // keeps its figure readable, and how the reference does it too.
+  const disc = coverage(A.discFor(key).d, A.ART_W, A.ART_H);
+  let onDisc = false;
+  for (let y = Math.floor(crown); y <= Math.floor(knee) && !onDisc; y++) {
+    for (let x = Math.floor(fx - halfW); x <= Math.ceil(fx + halfW); x++) {
+      if (disc[y * A.ART_W + x] > 0.5) { onDisc = true; break; }
+    }
+  }
+  const backing = onDisc ? p.disc : p.steps[darkest];
+  ok(ratio(lum(backing), lum(A.INK)) >= 3.0, `${key}: the figure does not vanish`,
+    `${ratio(lum(backing), lum(A.INK)).toFixed(1)}:1 on ${backing}${onDisc ? ' (disc)' : ''}`);
+}
+
 console.log(bad === 0 ? '\nlaunch screen: all clear.' : `\n${bad} launch check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);
