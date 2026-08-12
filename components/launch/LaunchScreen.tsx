@@ -33,7 +33,30 @@ import { chromeOn, PALETTES, CREAM, INK, SCRIM_RGB, SCRIM_STOPS } from './launch
 
 // The stage y the progress stroke sits on — up in the sky, well clear of both
 // the figure below it and the masthead above.
-const STROKE_STAGE_Y = 258;
+//
+// launchArt.ts inverted the sky so it is brightest at the HORIZON (§Defect):
+// the top of the frame is now the dark end. 258 was chosen for the OLD sky —
+// dark at top, pale at bottom — and under the new gradient that y sits ~58%
+// down, the brightest region cream chrome can land on. 90 puts it back in the
+// dark band: ~28 stage units clear of the masthead's own box (which sits
+// around stage y 62–72 on a mid-size phone) and ~420 clear of the figure's
+// crown (y 512–575) — nowhere near either. check-launch.mjs measures the
+// composited chromeSoft colour at this exact y for every scene.
+const STROKE_STAGE_Y = 90;
+
+// chromeSoft's alpha, per chrome colour. Both were raised alongside the move
+// above: even at the best possible y, the OLD alphas (ink .62 / cream .70)
+// could not clear 4.5:1 once measured honestly — .70 cream tops out at 4.05:1
+// on `walk` even at the sky's darkest point, so the alpha had to move too, not
+// just the position. check-launch.mjs asserts both at every scene's real y.
+const CHROME_SOFT_INK_ALPHA = 0.76;
+const CHROME_SOFT_CREAM_ALPHA = 0.88;
+
+/** `chrome`, alpha-blended — derived from INK/CREAM, never retyped as decimals. */
+function toRgba(hex: string, alpha: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
+}
 
 // Quotes short enough to actually read during the ~3.4s the screen is up. The
 // fallback can't realistically be hit, but this screen sits on the boot path —
@@ -114,7 +137,7 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
   const seed = useMemo(() => Math.floor(Math.random() * 233280), []);
   const scene = LAUNCH_SCENES[seed % LAUNCH_SCENES.length];
   const chrome = chromeOn(scene.key);
-  const chromeSoft = chrome === INK ? 'rgba(26,26,26,0.62)' : 'rgba(244,241,234,0.70)';
+  const chromeSoft = toRgba(chrome, chrome === INK ? CHROME_SOFT_INK_ALPHA : CHROME_SOFT_CREAM_ALPHA);
   const base = PALETTES[scene.key].steps[0];
   const quote = SHORT_QUOTES.length > 0 ? SHORT_QUOTES[seed % SHORT_QUOTES.length] : FALLBACK_QUOTE;
 
@@ -259,7 +282,7 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
         <Text style={[styles.quoteText, { color: CREAM }]} numberOfLines={3}>
           “{quote.text}”
         </Text>
-        <Text style={[styles.quoteBy, { color: 'rgba(244,241,234,0.72)' }]}>— {quote.author.toUpperCase()}</Text>
+        <Text style={[styles.quoteBy, { color: toRgba(CREAM, 0.72) }]}>— {quote.author.toUpperCase()}</Text>
       </Animated.View>
     </Animated.View>
   );
@@ -270,9 +293,27 @@ const styles = StyleSheet.create({
   stageBox: { position: 'absolute', overflow: 'hidden' },
   scrim: { position: 'absolute', left: 0, right: 0, bottom: 0 },
   mast: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
-  mastText: { fontFamily: 'Inter_500Medium', fontSize: 10, letterSpacing: 4 },
+  // Same drop-shadow the quote wears below — the masthead and the percentage
+  // sit on a gradient that swings much further than the quote's flat scrim,
+  // so they get the same legibility hedge, on top of (not instead of) the
+  // measured chromeSoft contrast above.
+  mastText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 10,
+    letterSpacing: 4,
+    textShadowColor: 'rgba(0,0,0,0.55)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
   strokeWrap: { position: 'absolute', left: 0, right: 0, alignItems: 'center', gap: 12 },
-  pct: { fontFamily: 'Inter_500Medium', fontSize: 12, letterSpacing: 2 },
+  pct: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 12,
+    letterSpacing: 2,
+    textShadowColor: 'rgba(0,0,0,0.55)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
   quoteWrap: {
     position: 'absolute',
     left: 0,

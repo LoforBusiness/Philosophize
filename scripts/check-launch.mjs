@@ -65,6 +65,12 @@ function skyHexAt(key, y) {
   return '#' + ca.map((v, i) => byte(v + (cb[i] - v) * f)).join('');
 }
 
+// LaunchScreen.tsx's own source — read once, up here, because section 2 (the
+// masthead/stroke contrast) and section 7/8 (wordmark + hardcode checks) all
+// need it. Read from the component rather than retyped here a second time,
+// same reason skyHexAt reads launchArt's exports instead of a copy.
+const screen = fs.readFileSync(path.join(REPO, 'components/launch/LaunchScreen.tsx'), 'utf8');
+
 // ── 1 · the palettes are real ramps, not near-flat ones ──────────────────────
 // tone.ts shipped #FEFEFC→#DFDBD1 — a 7% range — and it read as flat at every
 // size. It needed a real swing before it registered as shading at all. Anything
@@ -83,13 +89,62 @@ for (const key of A.SCENE_KEYS) {
     `${(L[5] - L[0]).toFixed(2)}, need ${MIN_SWING}`);
 }
 
-// ── 2 · chrome is legible on its own sky, whichever end that sky is ──────────
+// ── 2 · chrome is legible where it actually renders ──────────────────────────
+//
+// The old version of this check measured `chromeOn(key)` at full opacity
+// against `skyBandTone(key)` — the sky's colour at y=0, the very top of the
+// gradient. Nothing in the rendered screen sits at y=0. The masthead sits near
+// MASTHEAD_STAGE_Y below and the progress stroke + percentage sit at
+// LaunchScreen.tsx's own STROKE_STAGE_Y — both mid-gradient, and both drawn in
+// `chromeSoft` (chrome alpha-blended), never at full opacity. A y=0/solid check
+// can read 8–16:1 while the real composited pixel at the real y reads 2–4:1,
+// which is exactly what shipped: the validator was measuring a point nothing
+// draws at, in a colour nothing draws in.
+//
+// `STROKE_STAGE_Y` is already a STAGE y — `strokeWrap` sits at
+// `offY + STROKE_STAGE_Y * fit` — so it needs no translation. The masthead is
+// positioned in SCREEN space (`insets.top + 18`), so putting it on the same
+// axis needs a device to run LaunchScreen's own cover-fit maths against
+// (fit = max(w/400, h/800), offY = (h - 800·fit)/2) — a mid-size phone
+// (390×844, 47pt safe-area top) is what produces the y≈62 this file's own
+// review used.
+const REF_W = 390, REF_H = 844, REF_INSET_TOP = 47;
+const refFit = Math.max(REF_W / A.ART_W, REF_H / A.ART_H);
+const refOffY = (REF_H - A.ART_H * refFit) / 2;
+const MASTHEAD_STAGE_Y = (REF_INSET_TOP + 18 - refOffY) / refFit;
+
+const strokeYMatch = screen.match(/STROKE_STAGE_Y\s*=\s*(-?[\d.]+)/);
+const inkAlphaMatch = screen.match(/CHROME_SOFT_INK_ALPHA\s*=\s*([\d.]+)/);
+const creamAlphaMatch = screen.match(/CHROME_SOFT_CREAM_ALPHA\s*=\s*([\d.]+)/);
+ok(!!strokeYMatch && !!inkAlphaMatch && !!creamAlphaMatch,
+  'LaunchScreen.tsx declares STROKE_STAGE_Y and both chromeSoft alphas',
+  strokeYMatch && inkAlphaMatch && creamAlphaMatch ? '' : 'one or more constants not found');
+const STROKE_STAGE_Y = strokeYMatch ? Number(strokeYMatch[1]) : 0;
+const INK_ALPHA = inkAlphaMatch ? Number(inkAlphaMatch[1]) : 1;
+const CREAM_ALPHA = creamAlphaMatch ? Number(creamAlphaMatch[1]) : 1;
+
+// Alpha-composite chrome over a background — the same maths an rgba() colour
+// gets when React Native draws it over an opaque surface underneath.
+const compositeLum = (chromeHex, alpha, bgHex) => {
+  const c = hexRgb(chromeHex), bg = hexRgb(bgHex);
+  const mix = c.map((v, i) => bg[i] + (v - bg[i]) * alpha);
+  return 0.2126 * lin(mix[0]) + 0.7152 * lin(mix[1]) + 0.0722 * lin(mix[2]);
+};
+
 for (const key of A.SCENE_KEYS) {
   const c = A.chromeOn(key);
   ok(c === A.INK || c === A.CREAM, `${key}: chrome is ink or cream`, c);
-  const sky = A.skyBandTone(key);
-  ok(ratio(lum(c), lum(sky)) >= 4.5, `${key}: chrome reads on its sky`,
-    `${ratio(lum(c), lum(sky)).toFixed(1)}:1 on ${sky}`);
+  const alpha = c === A.INK ? INK_ALPHA : CREAM_ALPHA;
+
+  const mastBg = skyHexAt(key, MASTHEAD_STAGE_Y);
+  const mastRatio = ratio(compositeLum(c, alpha, mastBg), lum(mastBg));
+  ok(mastRatio >= 4.5, `${key}: masthead reads at its own y (soft chrome)`,
+    `${mastRatio.toFixed(2)}:1 at y${MASTHEAD_STAGE_Y.toFixed(0)} on ${mastBg}`);
+
+  const strokeBg = skyHexAt(key, STROKE_STAGE_Y);
+  const strokeRatio = ratio(compositeLum(c, alpha, strokeBg), lum(strokeBg));
+  ok(strokeRatio >= 4.5, `${key}: stroke + percentage read at their own y (soft chrome)`,
+    `${strokeRatio.toFixed(2)}:1 at y${STROKE_STAGE_Y} on ${strokeBg}`);
 }
 
 // ── 3 · the planes recede, and are drawable offline ──────────────────────────
@@ -390,21 +445,41 @@ for (const key of A.SCENE_KEYS) {
 // The whole guarantee is that every element's background is decided by
 // construction. A hex literal typed into the renderer is a per-scene guess, and
 // a per-scene guess is what let a pale quote vanish into pale art before.
+//
+// Widened twice over. It used to scan launchScenes.tsx alone for 6-digit hex —
+// missing `#fff`, `rgb()` and `rgba()` entirely — and never looked at
+// LaunchScreen.tsx at all, which is exactly where INK/CREAM shipped hardcoded
+// as raw decimal rgba() (`rgba(26,26,26,0.62)`) instead of derived from the
+// imported constants (#Defect one-liner 2). launchScenes.tsx still may not
+// declare ANY colour of its own; LaunchScreen.tsx is allowed rgba()/hex for
+// things that are not a scene colour (the quote's drop-shadow, the scrim's own
+// `rgb()` built from the imported SCRIM_RGB) — but INK's and CREAM's decimal
+// triples typed literally is precisely how #2 shipped, so those two are
+// checked for by name and must never reappear.
 const scenes = fs.readFileSync(path.join(REPO, 'components/launch/launchScenes.tsx'), 'utf8');
-const literals = (scenes.match(/#[0-9A-Fa-f]{6}\b/g) || []);
-ok(literals.length === 0, 'launchScenes.tsx declares no colour of its own',
-  literals.join(' ') || 'none');
+const COLOUR_LITERAL = /#[0-9A-Fa-f]{6}\b|#[0-9A-Fa-f]{3}\b|\brgba?\([^)]*\)/g;
+const sceneLiterals = (scenes.match(COLOUR_LITERAL) || []);
+ok(sceneLiterals.length === 0, 'launchScenes.tsx declares no colour of its own',
+  sceneLiterals.join(' ') || 'none');
 ok(!/\bswing\b|\bkite\b|\bpicnic\b/.test(scenes),
   'launchScenes.tsx has no kite, swing or picnic left');
+
+const INK_DECIMAL = /\b26\s*,\s*26\s*,\s*26\b/;
+const CREAM_DECIMAL = /\b244\s*,\s*241\s*,\s*234\b/;
+const screenLiterals = (screen.match(new RegExp(`${INK_DECIMAL.source}|${CREAM_DECIMAL.source}`, 'g')) || []);
+ok(screenLiterals.length === 0, 'LaunchScreen.tsx does not hardcode INK/CREAM as decimals',
+  screenLiterals.join(' ') || 'none');
 
 // ── 8 · the quote and the chrome are legible where they actually sit ─────────
 //
 // §19's rule: never take text contrast from the artwork. The quote takes it from
 // a FIXED scrim and one fixed cream, and this is the arithmetic. The welcome end
 // card measures 8.7:1 doing exactly this, so 7:1 is a floor, not an aspiration.
-const screen = fs.readFileSync(path.join(REPO, 'components/launch/LaunchScreen.tsx'), 'utf8');
 ok(/D\s*E\s*E\s*P\s*L\s*Y/.test(screen), 'the masthead says DEEPLY');
-ok(!/PHILOSOPHIZE/.test(screen), 'the old wordmark is gone');
+// The pre-rename masthead was letter-spaced too ("P H I L O S O P H I Z E"),
+// which `/PHILOSOPHIZE/` — a contiguous run — can never match; this assertion
+// was permanently green. Matched the same way the DEEPLY check above does.
+ok(!/P\s*H\s*I\s*L\s*O\s*S\s*O\s*P\s*H\s*I\s*Z\s*E/.test(screen), 'the old wordmark is gone');
 
 // Read from launchArt.ts, not typed here a second time — LaunchScreen.tsx
 // builds its gradient <Stop>s from the same export, so this measures what
