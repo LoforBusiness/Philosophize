@@ -227,5 +227,5 @@ const styles = StyleSheet.create({
 // is drawn above or below, so the player crops to that and the whole scene renders
 // about 70% larger than the letterboxed full-height fit.
 export function Logic7Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic7Scene} band={[184, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Logic7Scene} band={[184, 512]} camera={CAM} />;
 }

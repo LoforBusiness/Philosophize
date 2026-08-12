@@ -247,5 +247,5 @@ const styles = StyleSheet.create({
 // Ink runs from the first instruction (226) to the ground line (500), with the box
 // label sitting at 316. Band 220…512 is 292 units (H59).
 export function KnowHowLesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={KnowHowScene} band={[220, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={KnowHowScene} band={[220, 512]} camera={CAM} />;
 }

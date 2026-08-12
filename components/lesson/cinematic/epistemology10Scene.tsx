@@ -213,5 +213,5 @@ const styles = StyleSheet.create({
 // out at 372, well clear of a crown at 397. A 256-unit band is inside the crop's
 // width limit, so this renders at the largest size the stage can give (H59).
 export function Epistemology10Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology10Scene} band={[256, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Epistemology10Scene} band={[256, 512]} camera={CAM} />;
 }

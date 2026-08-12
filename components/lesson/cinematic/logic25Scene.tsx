@@ -200,5 +200,5 @@ const styles = StyleSheet.create({
 
 // Ink runs from the result card (226) to the ground line (500). Band 220…512 = 292 (H59).
 export function Logic25Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic25Scene} band={[220, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Logic25Scene} band={[220, 512]} camera={CAM} />;
 }

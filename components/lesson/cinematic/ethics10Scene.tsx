@@ -222,5 +222,5 @@ const styles = StyleSheet.create({
 // children and the dotted distance all sit inside that, so the crop is as tight as
 // it can be and the scene renders at the stage's full width-limited size.
 export function Ethics10Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics10Scene} band={[200, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Ethics10Scene} band={[200, 512]} camera={CAM} />;
 }

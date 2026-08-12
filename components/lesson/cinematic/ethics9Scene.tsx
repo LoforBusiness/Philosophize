@@ -275,5 +275,5 @@ const styles = StyleSheet.create({
 // units — inside the 280–300 the other lessons sit in (H59), so it renders at the
 // same scale as its siblings rather than paying for empty rows.
 export function Ethics9Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics9Scene} band={[218, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Ethics9Scene} band={[218, 512]} camera={CAM} />;
 }

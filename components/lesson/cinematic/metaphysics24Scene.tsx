@@ -213,5 +213,5 @@ const styles = StyleSheet.create({
 
 // Ink runs from the counter (226) to the ground line (500). Band 220…512 = 292 (H59).
 export function Metaphysics24Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics24Scene} band={[220, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Metaphysics24Scene} band={[220, 512]} camera={CAM} />;
 }

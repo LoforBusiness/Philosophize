@@ -234,5 +234,5 @@ const styles = StyleSheet.create({
 // Ink runs from the stuck tag (272) and the YOU token (230) down to the ground line
 // (500). Band 224…512 = 288 (H59).
 export function Metaphysics13Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics13Scene} band={[224, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Metaphysics13Scene} band={[224, 512]} camera={CAM} />;
 }

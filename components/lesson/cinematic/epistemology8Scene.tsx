@@ -414,5 +414,5 @@ const styles = StyleSheet.create({
 // whole lesson rendered at 0.75 with a side letterbox. At 360 tall it renders at
 // 0.87 — about 17% bigger — and still clears the fade-in's rise by 6 units.
 export function Epistemology8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology8Scene} band={[152, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Epistemology8Scene} band={[152, 512]} camera={CAM} />;
 }

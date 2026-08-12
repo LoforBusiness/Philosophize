@@ -249,5 +249,5 @@ const styles = StyleSheet.create({
 // 386, above a crown of 397; the plinth labels sit BELOW that, at 396–477, in the
 // column right of x 254 where the figure never stands.
 export function Aesthetics9Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics9Scene} band={[194, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Aesthetics9Scene} band={[194, 512]} camera={CAM} />;
 }

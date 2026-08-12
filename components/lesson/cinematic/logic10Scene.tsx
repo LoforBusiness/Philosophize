@@ -307,5 +307,5 @@ const styles = StyleSheet.create({
 // units — a 2.02× fit against the 2.31× a scene gets for free at 280 or less, which
 // the answer stack under the line pays for honestly (H59).
 export function Logic10Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic10Scene} band={[192, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Logic10Scene} band={[192, 512]} camera={CAM} />;
 }

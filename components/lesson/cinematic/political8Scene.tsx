@@ -391,5 +391,5 @@ const styles = StyleSheet.create({
 });
 
 export function Political8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political8Scene} band={[56, 516]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Political8Scene} band={[56, 516]} camera={CAM} />;
 }

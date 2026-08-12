@@ -357,5 +357,5 @@ const styles = StyleSheet.create({
 // is drawn higher or lower, so the crop is [198, 512] — 314 units, which is what the
 // three finger-sized Q2 targets cost and what they are worth.
 export function Ethics12Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics12Scene} band={[198, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Ethics12Scene} band={[198, 512]} camera={CAM} />;
 }

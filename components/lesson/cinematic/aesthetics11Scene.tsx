@@ -233,5 +233,5 @@ const styles = StyleSheet.create({
 // Ink runs from the frames' top edge (226) to the ground line (500). Band 220…512
 // is 292 units, inside the 280–300 its siblings occupy (H59).
 export function Aesthetics11Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics11Scene} band={[220, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Aesthetics11Scene} band={[220, 512]} camera={CAM} />;
 }

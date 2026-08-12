@@ -324,5 +324,5 @@ const styles = StyleSheet.create({
 // crops to [206, 512]. 306 units renders at 2.11×, against 1.15× for the whole
 // design space, and sits on the 308-unit median of the other 59 scenes.
 export function Metaphysics10Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics10Scene} band={[206, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Metaphysics10Scene} band={[206, 512]} camera={CAM} />;
 }

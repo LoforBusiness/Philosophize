@@ -297,5 +297,5 @@ const styles = StyleSheet.create({
 // caption, figure — sits inside [198, 512], and nothing lives above the stack, so no
 // empty sky is being paid for (D25, D26, H59).
 export function Logic11Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic11Scene} band={[198, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Logic11Scene} band={[198, 512]} camera={CAM} />;
 }

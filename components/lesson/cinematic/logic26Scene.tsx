@@ -205,5 +205,5 @@ const styles = StyleSheet.create({
 
 // Ink runs from the FALSE tag (213) to the ground line (500). Band 208…512 = 304 (H59).
 export function Logic26Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic26Scene} band={[208, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Logic26Scene} band={[208, 512]} camera={CAM} />;
 }

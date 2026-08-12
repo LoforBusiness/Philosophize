@@ -220,5 +220,5 @@ const styles = StyleSheet.create({
 // units — inside the 280–300 its siblings occupy, and close to the 280 below which
 // cropping buys nothing (H59).
 export function Epistemology21Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology21Scene} band={[226, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Epistemology21Scene} band={[226, 512]} camera={CAM} />;
 }

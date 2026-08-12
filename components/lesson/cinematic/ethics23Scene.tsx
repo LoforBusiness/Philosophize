@@ -192,5 +192,5 @@ const styles = StyleSheet.create({
 
 // Ink runs from the header (226) to the ground line (500). Band 220…512 = 292 (H59).
 export function Ethics23Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics23Scene} band={[220, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Ethics23Scene} band={[220, 512]} camera={CAM} />;
 }

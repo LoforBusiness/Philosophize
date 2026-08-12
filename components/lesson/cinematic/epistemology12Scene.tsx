@@ -380,5 +380,5 @@ const styles = StyleSheet.create({
 // of the letterboxed 1.15×. Nothing is drawn above 212; the testimony run's tail at
 // x −44 is outside the crop horizontally, which costs the band nothing.
 export function Epistemology12Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology12Scene} band={[206, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Epistemology12Scene} band={[206, 512]} camera={CAM} />;
 }

@@ -389,5 +389,5 @@ const styles = StyleSheet.create({
 // showed, half cut. The scene really is this tall: the card column runs 32 → 338 and
 // the figure occupies 361 → 500, so there is no slack to shift art into.
 export function Logic8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic8Scene} band={[28, 521]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Logic8Scene} band={[28, 521]} camera={CAM} />;
 }

@@ -323,5 +323,5 @@ const styles = StyleSheet.create({
 // Art runs from the dial's tag at y 306 down to the ground line at 500, so the crop
 // takes exactly that and the whole scene renders at the full width-limited scale.
 export function Political11Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political11Scene} band={[298, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Political11Scene} band={[298, 512]} camera={CAM} />;
 }

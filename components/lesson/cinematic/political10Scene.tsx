@@ -350,5 +350,5 @@ const styles = StyleSheet.create({
 // answer plates top out at 244 — so the crop is [232, 512], 280 units, which is the
 // tallest band that still renders at the free 2.31× (H59).
 export function Political10Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political10Scene} band={[232, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Political10Scene} band={[232, 512]} camera={CAM} />;
 }

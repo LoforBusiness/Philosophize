@@ -327,5 +327,5 @@ const styles = StyleSheet.create({
 // 500. Cropping to [228, 512] is 284 units, which still fits at the width-limited
 // 2.31× — the shelf earns its rows because the shelf IS the lesson (H59, H64).
 export function Ethics11Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics11Scene} band={[228, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Ethics11Scene} band={[228, 512]} camera={CAM} />;
 }

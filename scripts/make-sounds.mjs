@@ -83,19 +83,19 @@ function whooshSleeve() {
   reseed(2401);
   const n = secs(0.17);
   const e = Array.from({ length: n }, (_, i) => Math.pow(Math.sin(Math.PI * Math.pow(i / n, 0.72)), 1.9));
-  return finish(sweepBand(tilted(n, -0.5), 400, 2200, 700, 1.1, 3.4).map((x, i) => x * e[i]), 0.30);
+  return finish(sweepBand(tilted(n, -0.5), 400, 2200, 700, 1.1, 3.4).map((x, i) => x * e[i]), 0.24);
 }
 function whooshFast() {
   reseed(9931);
   const n = secs(0.09);
   const e = Array.from({ length: n }, (_, i) => Math.pow(Math.sin(Math.PI * Math.pow(i / n, 0.65)), 2.2));
-  return finish(sweepBand(tilted(n, -0.35), 700, 3600, 1200, 1.4, 4.2).map((x, i) => x * e[i]), 0.28);
+  return finish(sweepBand(tilted(n, -0.35), 700, 3600, 1200, 1.4, 4.2).map((x, i) => x * e[i]), 0.22);
 }
 function whooshHeavy() {
   reseed(5520);
   const n = secs(0.26);
   const e = Array.from({ length: n }, (_, i) => Math.pow(Math.sin(Math.PI * Math.pow(i / n, 0.8)), 1.6));
-  return finish(sweepBand(tilted(n, -0.8), 220, 1250, 380, 1.0, 2.8).map((x, i) => x * e[i]), 0.30);
+  return finish(sweepBand(tilted(n, -0.8), 220, 1250, 380, 1.0, 2.8).map((x, i) => x * e[i]), 0.24);
 }
 
 // ── the set ──────────────────────────────────────────────────────────────────
@@ -145,12 +145,30 @@ function step(variant) {
   // carried almost all the energy and only 0.3% of the clip sat above 4 kHz — a
   // thud with a hint of shoe. A dress shoe is the other way round: the crack leads
   // and the floor answers underneath it.
-  return finish(mix(
+  // ── A LEAD-IN OF SILENCE, AND WHY THE TWO FEET WERE UNEVEN ────────────────
+  //
+  // `finish` fades every clip in over its first millisecond so it cannot open on
+  // a click. A footstep's whole character is a transient in the first three, so
+  // that fade was landing ON THE HEEL CRACK — and landing differently on each
+  // variant, because their peaks fall either side of the boundary. Measured off
+  // the shipped files: step-a peaked 0.389 at 1.02ms and step-b 0.500 at 1.68ms,
+  // from the SAME requested peak of 0.50. A 28% difference between two samples
+  // that alternate is a limp, and nobody chose it.
+  //
+  // A millisecond and a half of silence in front puts the fade on nothing, so
+  // both variants normalise to what they were asked for and the only difference
+  // left between the feet is the one the recipe means: the right shoe brighter
+  // and higher, never louder.
+  const lead = new Array(secs(0.0015)).fill(0);
+  // 0.30 / 0.33, not 0.50. A footfall fires ten to forty times in a lesson where
+  // an answer note fires twice, and `validate-sound`'s mix rule is that frequent
+  // is quiet. Half the answer note, with a shade more weight on the right foot.
+  return finish(lead.concat(mix(
     heel.map((x, i) => x * heelE[i] * 1.40),
     sole.map((x, i) => x * soleE[i] * 0.85),
     ring(n, floorHz, 0.032, 0.24),
     room.map((x, i) => x * roomE[i] * 0.07),
-  ), 0.50);
+  )), variant ? 0.33 : 0.30);
 }
 
 // ── THE WHOOSH IS GONE, AND NOTHING REPLACES IT ─────────────────────────────

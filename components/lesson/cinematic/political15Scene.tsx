@@ -215,5 +215,5 @@ const styles = StyleSheet.create({
 // x 208, left of the stair, which is still clear of the figure's 204.5.
 // Band 220…512 = 292 (H59).
 export function Political15Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political15Scene} band={[220, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Political15Scene} band={[220, 512]} camera={CAM} />;
 }

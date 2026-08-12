@@ -574,6 +574,72 @@ ok('every required clip exists', wanted.every((w) => onDisk.includes(w)),
 ok('no clip on disk is unused', onDisk.every((d) => wanted.includes(d)),
   onDisk.filter((d) => !wanted.includes(d)).join(', ') || 'none orphaned');
 
+// ── 5. A FOOTSTEP FOR EVERY WALKER, AND NO FOOTSTEP FOR ANYONE ELSE ─────────
+//
+// `walk={X}` is an ASSERTION by the scene: "I drive exactly one figure through
+// `travelStance`, with the default seed." That is the only case ./footfalls
+// solves for, and it is the whole reason the prop is opt-in rather than read off
+// the beat. An opt-in nobody re-checks is a promise that rots — a scene gains a
+// second figure and keeps sounding one pair of feet, which is rule A1 with the
+// picture and the sound swapped.
+//
+// So the claim is re-derived from the source here, both ways: a scene that
+// qualifies must hand its track over, and a scene that does not must not.
+head('every walker sounds, and nothing else does');
+{
+  const dir = path.join(ROOT, 'components/lesson/cinematic');
+  const scenes = fs.readdirSync(dir).filter((f) => /Scene\.tsx$/.test(f));
+
+  /** Null if this scene may sound footfalls; otherwise why it may not. */
+  const disqualify = (src) => {
+    const calls = [...src.matchAll(/travelStance\s*\(/g)];
+    if (calls.length === 0) return 'nobody walks';
+    if (calls.length > 1) return `${calls.length} figures walk`;
+    const tail = src.slice(calls[0].index, calls[0].index + 600);
+    const end = tail.indexOf(');');
+    const args = tail.slice(0, end < 0 ? 400 : end).replace(/\s+/g, ' ').split('(').slice(1).join('(');
+    if (!/^\s*X\[\s*p\s*\]\s*,\s*X\[\s*n\s*\]/.test(args)) return 'walks something other than X[p]→X[n]';
+    if (!/,\s*WALK\s*,?\s*$/.test(args)) return 'a custom gait or a seed';
+    if (!/const\s+X\s*=/.test(src)) return 'no X track';
+    if (!/const\s+P\s*=/.test(src)) return 'no P gesture track';
+    return null;
+  };
+
+  const missing = [], lying = [];
+  let sounding = 0, silent = 0;
+  for (const f of scenes) {
+    const src = fs.readFileSync(path.join(dir, f), 'utf8');
+    const why = disqualify(src);
+    const claims = /\bwalk=\{/.test(src);
+    if (!why && !claims) missing.push(f.replace('Scene.tsx', ''));
+    if (why && claims) lying.push(`${f.replace('Scene.tsx', '')} (${why})`);
+    if (claims) sounding++; else silent++;
+  }
+  ok('the check found scenes to judge', scenes.length > 80, `${scenes.length} scenes · ${sounding} sound their steps, ${silent} do not`);
+  ok('every scene that walks one figure sounds its steps', missing.length === 0,
+    missing.length ? `silent but qualifies: ${missing.slice(0, 6).join(', ')}` : `all ${sounding} wired`);
+  ok('and no scene claims a walk it does not have', lying.length === 0,
+    lying.length ? lying.slice(0, 4).join('; ') : 'no false claims');
+}
+
+// ── 6. THE FOOTFALL IS THE MOST REPEATED SOUND IN THE APP ───────────────────
+//
+// It fires ten to forty times in a lesson where an answer note fires twice, so
+// "frequent is quiet" bites hardest here. Two numbers, both of which were wrong
+// before the rollout and neither of which anything was watching:
+head('the footfall knows how often it fires');
+{
+  const a = pk('step-a'), b = pk('step-b'), note = pk('right-1');
+  ok('a step stays well under an answer note', Math.max(a, b) <= note * 0.6,
+    `${Math.max(a, b).toFixed(2)} vs ${note.toFixed(2)} — ${Math.round((Math.max(a, b) / note) * 100)}% of it, was 81%`);
+  // The two alternate every stride, so any gap between them IS a limp. They were
+  // 28% apart — not by design, but because finish()'s 1ms fade-in landed on one
+  // variant's heel crack and just past the other's. The lead-in silence in
+  // make-sounds.mjs fixed the cause; this holds the result.
+  const gap = Math.abs(a - b) / Math.min(a, b);
+  ok('and the two feet weigh the same', gap <= 0.15, `${(gap * 100).toFixed(1)}% apart, was 28.5%`);
+}
+
 // The trial gate must name a lesson that exists and is actually wired cinematic.
 const gateSrc = fs.readFileSync(path.join(ROOT, 'components/lesson/cinematic/lessonSound.ts'), 'utf8');
 const trial = [...gateSrc.matchAll(/'([a-z0-9-]+)',\s*\/\//g)].map((m) => m[1]);

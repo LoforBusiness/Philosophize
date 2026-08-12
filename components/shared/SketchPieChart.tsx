@@ -210,7 +210,12 @@ export default function SketchPieChart({
 
   const pick = (i: number) => {
     setSel((prev) => (prev === i ? null : i));
-    cue('impact');
+    // `keep`, not `impact`. `impact` is "something in the scene is struck" — 950ms
+    // and the second-loudest clip in the set, which is a boulder landing, not a
+    // reader touching a pie slice. `keep` is the clasp: 130ms at peak 0.40, the
+    // shortest quiet mechanical sound the vocabulary has, and a slice latching
+    // open is the same gesture as a quote latching into the library.
+    cue('keep');
   };
 
   /**

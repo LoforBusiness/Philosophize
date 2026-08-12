@@ -326,5 +326,5 @@ const SHOTS: Shot[] = [
 // top of 56, so it was 91% clipped — the row of boxes had no title. Lowest ink is
 // the figure's shadow at 506.
 export function Ethics8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics8Scene} band={[42, 512]} shots={SHOTS} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Ethics8Scene} band={[42, 512]} shots={SHOTS} />;
 }

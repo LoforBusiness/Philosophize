@@ -354,5 +354,5 @@ const styles = StyleSheet.create({
 // outside that, and the answer row stops 10.2 units short of the crown the beat
 // that draws it actually holds (measured, not assumed — B9a).
 export function Epistemology11Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology11Scene} band={[200, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Epistemology11Scene} band={[200, 512]} camera={CAM} />;
 }

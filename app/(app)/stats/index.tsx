@@ -348,7 +348,7 @@ function ActivityBars({ points, playToken, animate }: { points: BarPoint[]; play
 
   const pick = (i: number) => {
     setSel((prev) => (prev === i ? null : i));
-    cue('impact');
+    cue('keep');   // see SketchPieChart.pick — `impact` is a 950ms struck boulder
   };
 
   // The ghost's own height, in the same pixels the bars are drawn in.

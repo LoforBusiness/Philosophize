@@ -314,5 +314,5 @@ const styles = StyleSheet.create({
 // WIDTH becomes the limit and the crop is free: the whole scene renders at 2.31×
 // instead of the 1.15× a full-height fit would give it.
 export function Aesthetics10Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics10Scene} band={[232, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Aesthetics10Scene} band={[232, 512]} camera={CAM} />;
 }

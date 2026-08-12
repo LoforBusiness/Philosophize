@@ -444,5 +444,5 @@ const styles = StyleSheet.create({
 // The player crops to [138, 510] and scales up, so the whole wall renders about 50%
 // larger than the letterboxed full-height fit.
 export function Aesthetics8Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics8Scene} band={[138, 510]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Aesthetics8Scene} band={[138, 510]} camera={CAM} />;
 }
