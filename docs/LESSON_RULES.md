@@ -1833,6 +1833,30 @@ scene draws. Blunt is acceptable; unreachable is not.
 `npm run check:camera` guards the one hole: a scene that rolls its own camera
 transform bypasses the player and so bypasses all of this. There are none today.
 
+> **And for eight months the checker was checking a camera nobody ran.** Two
+> separate faults, both found in the same audit, both of the shape "the harness
+> agrees with the intention instead of the device":
+>
+> - `validate-cinematic` read each beat's figure position with `/^\s{4}x:/m` — `x:`
+>   as the *first key on its line*. Every script writes `p: 25, x: 200,`, so it
+>   matched nothing in any of 96 lessons and every beat fell back to the default.
+>   `followMoves` picks its verb from how far the figure moved, so it was picking
+>   verbs for a man who never moved: 44 lessons have a track that varies, 42 got
+>   different shots than the ones checked, **149 shots were never checked as they
+>   actually are**, and `to` / `drift` / `whip` — 113 moves, every one a camera
+>   chasing something — could not be reached at all. Same shape as the
+>   `validate-worklets` blind spot in §17.
+> - The checker resolved with `ground = 500`; the player passed its `ground` prop,
+>   which **no scene sets**, so `fit()` dropped its ground clamp. The checker was
+>   validating the safer of two different cameras, and ethicsScene shipped three
+>   beats whose frame ended up to 37 units above the ground line — the man standing
+>   on nothing — with every validator green.
+>
+> Both are fixed, and both left a guard behind rather than just a correction: a beat
+> whose `x:` cannot be read is an error, the verb mix is printed so a flat sweep of
+> `to`/`drift`/`whip` fails the build, and the player defaults `ground` to `GROUND`
+> so the two callers cannot drift apart again.
+
 > **The guarantee is NOT a function called `openForTargets`.** check-camera used to
 > say so in its header and in its success line, and no such function has ever
 > existed — it is `needsBox` + `containShot`, inline in `CinematicPlayer`. A safety
@@ -1842,10 +1866,28 @@ transform bypasses the player and so bypasses all of this. There are none today.
 ## H60b · USE the camera — a still wide shot is a wasted one
 
 H60 is a floor, not a style. It says what the camera may never crop; it does not
-ask for a camera that sits still, and 55 of the 100 lessons currently have none at
-all. The stage is 400×560 and a figure is ~103 tall in it, so a locked wide shot
-spends most of the frame on empty paper and renders every lesson at the same
-distance — which is why they read as one long shot of a small man.
+ask for a camera that sits still. The stage is 400×560 and a figure is ~103 tall in
+it, so a locked wide shot spends most of the frame on empty paper and renders every
+lesson at the same distance — which is why they read as one long shot of a small man.
+
+> **The count in this paragraph used to be "55 of the 100 lessons have none at all".
+> It is now 2 of 102**, and both are the lessons that predate the shared player and
+> carry their own copy of it: `logic-arguments-1` has a hand-rolled camera of its
+> own, `logic-arguments-2` has none. Every one of the 100 scene lessons moves.
+>
+> The last three to get one — ethics-ethics-2, ethics-ethics-5, political-political-1
+> — are worth reading as a set, because all three had a *stated* reason for having no
+> camera and none of the three reasons was about composition. One said the camera had
+> been static on every beat; one said identity made the constants easier to read; one
+> was about a translate that had made the band unmeasurable and had been fixed years
+> ago. "It was not doing anything" is a case for a better camera, not for none.
+>
+> They also could not safely have been given one before H60c: all three put their
+> teaching art above the figure — a verdict board, an axial chart, a headline and two
+> meters — and a close push shows y 321..561. The measured must-see boxes are what
+> made adding a camera to them a change rather than a regression.
+>
+> `npm run check:cinematic` prints the live figure; do not trust the one written here.
 
 So the default is to MOVE, and the three things worth moving for:
 
@@ -1856,9 +1898,15 @@ So the default is to MOVE, and the three things worth moving for:
 - **Push in on the thing being talked about** — a prop he is working, an
   illustration, a diagram, a label. If a beat's text names an object, the shot
   should be able to see that object at a size worth naming.
-- **Push in on a question.** Questions are the one place the reader has to *read
-  and act*, so they are the best case for a close shot — and the safest, because
-  `containShot` already guarantees the answer targets stay inside it.
+- **Do NOT push in on a question.** This bullet used to say the opposite — that a
+  question is "the best case for a close shot, and the safest, because
+  `containShot` already guarantees the answer targets stay inside it" — and it
+  contradicted the rule three paragraphs down, `followMoves`, and
+  `validate-cinematic`, all three of which force a graded beat to scale 1 and treat
+  anything else as an error. `containShot` guarantees the targets are *visible*; it
+  cannot make a tap land accurately through a camera offset, and a Pressable the
+  reader misses is worse than a wide shot. Scale 1 on every graded beat, no
+  exceptions.
 
 **Wide is a choice, not a default.** Keep it wide when the beat is about the space
 itself — a figure alone in a room, a distance being crossed, two figures far apart
@@ -1877,35 +1925,69 @@ to 1.24×, luck is not good enough.
 and the camera then either holds wide enough or moves onto it.** Not "aims near
 it" — H60's whole point is that a point cannot be cropped and a box can.
 
-The mechanism is the one questions already use, now available on every beat:
+### The rule was written before anything could obey it
 
-- the scene measures the thing against the camera view and reports its box;
-- `CinematicPlayer` runs `containShot`, which **only loosens** — the scale comes
-  down to fit and the centre slides the shortest distance that brings it in;
-- **a shot that already showed the box is returned untouched**, so declaring one
-  costs nothing anywhere it was already right, and the authored camera work
-  survives.
+For a while this section described a mechanism that did not exist. It said the box
+was "the one questions already use, now available on every beat" — and
+`CinematicPlayer` did honour a box on any beat, so that half was true. The half
+that was not: **`SceneApi` gives a scene no way to report one.** The only thing
+that ever called `onBox` was `TargetCountProvider`, which mounts answer targets, so
+in practice a box existed on question beats and nowhere else. Nought of 100 scenes
+followed this rule, and none could have.
 
-**Which way it moves is the scene's choice, and both are legal.** Pull out when the
-thing is large or the beat is about a relationship between parts; push in when it
-is small or detailed. What is NOT legal is leaving it to the deal.
+The bill came in when it was finally measured. `scripts/check-frame.mjs` steps a
+lesson in a browser and compares everything the scene draws against the stage's own
+crop: **8 of 8 lessons sampled were slicing words in half, 285 elements between
+them.** The same 8 with the camera switched off came back with 6 — so it was the
+camera doing it, not the layouts. metaphysics-being-7 was cutting "PAST", "NOW" and
+"FUTURE" off a timeline, which is the entire subject of that lesson.
 
-**Report a box whenever the beat's text names something on the stage.** If the
-words say "watch the third door", "the bar fills", "the two sides balance", the
-thing named is a must-see and takes a box. If the beat is only the figure talking,
-it needs none — he is already covered by the figure check in
-`validate-cinematic`, which tests his head, feet and x against the visible window
-on every beat.
+### What actually enforces it now
 
-> Questions keep their stronger guarantee on top of this: they are forced to scale
-> 1.0 outright, because answer targets are Pressables and a tap must not have to
-> survive a camera offset.
+Scenes draw their labels as raw `<Text>` with local styles, so there was no
+reporting component to hang this on and no honest way to hand-author ~800
+rectangles. So the boxes are **measured from the real render** and stored:
 
-**And H60 still binds, always.** Anything the reader must see or read — an answer
-plate, a quote, a summary, a labelled illustration — has to be inside the shot at
-the moment they need it. For questions that is mechanical (`needsBox` measures the
-targets and `containShot` fits them). **For everything else it is still on the
-author**, because only a question reports a box today: a quote or a labelled
-diagram on a plain beat can be cropped by a tight push and nothing will catch it.
-Until a beat can declare its own must-see box, a close shot on a beat carrying
-text or art has to be checked by eye against the band.
+- `scripts/measure-must.mjs` steps every lesson in a browser and records, per beat,
+  the union of the words that lesson has on stage — in scene coordinates, recovered
+  from `#stage-cam`, whose client rect top-left *is* the image of scene (0,0) and
+  whose width is `STAGE_W × fit × scale`.
+- `components/lesson/cinematic/mustBoxes.ts` is the generated table.
+- `CinematicPlayer` feeds it to `containShot`, which **only loosens** — the scale
+  comes down to fit and the centre slides the shortest distance. **A shot that
+  already showed its words is returned untouched**, which is why this cost the
+  authored camera work nothing anywhere it was already right.
+- A beat may still set its own `must: [x, y, w, h]`, and that wins. It is the
+  override for what measurement cannot see: art with no words in it that the beat
+  is nonetheless about.
+
+**It is the union of ALL the beat's words, deliberately, and not the cleverer
+rule.** Keeping only the words a beat newly brings on — treating anything carried
+over as chrome — was written and dropped: the plain union costs less than it looks
+like it should (47% of beats reduce scale at all; the reductions are 1.18 → 1.05…16
+and 1.40 → 1.12…14), and it buys a property `check-frame` can verify outright. The
+chrome rule would have traded that for "no word we judged important", which nothing
+can check. See the note above `mustBox` for the numbers.
+
+> Where the union really does flatten a lesson, the fault is in the SCENE, not the
+> camera. metaphysics-being-7 caps at 1.05 because it prints axis labels hard
+> against both edges of the stage; nothing can push in on that and keep them. Move
+> the labels inboard and the camera comes back.
+
+**Measured data rots, so it is stamped.** `MUST_STAMP` fingerprints the scene and
+script each box was taken from, and `check:cinematic` fails when one diverges —
+because the dangerous direction is silent. A box that has gone stale and *too
+small* still looks like a guarantee while letting a push crop the very label it was
+recorded to protect. **Re-run `node scripts/measure-must.mjs` after changing a
+scene's layout.**
+
+> Questions keep their stronger guarantee on top of all this: they are forced to
+> scale 1.0 outright, because answer targets are Pressables and a tap must not have
+> to survive a camera offset. Where a question beat also has a measured box, the
+> shot has to hold both, so the two contains are applied in series — each only
+> loosens, so the order does not matter.
+
+**What is still on the author.** The measurement sees words. A diagram made of
+lines, an unlabelled prop the narration points at, a bar that fills — none of those
+carry text, so none of them are in the table. If a beat's text names something the
+scene draws without words, give that beat a `must` by hand.

@@ -1074,6 +1074,25 @@ browser at it; the first transform can take longer than a navigation timeout.
   find. When a real screen changes, load the real screen.
 - `jimp-compact` is available (via `@expo/image-utils`) for offline image work —
   resizing, desaturating, compositing icon layers, checking transparency.
+- **Two harnesses step the real lessons in a browser**, because some questions
+  cannot be answered by arithmetic at all. `npm run check:frame` measures every
+  element a scene draws against the stage's own crop and reports what the camera
+  is cutting in half; `npm run measure:must` records what each beat has on stage
+  and writes `components/lesson/cinematic/mustBoxes.ts`, which is what stops the
+  camera cropping it (H60c). Both want Metro on 8847 and a headless Chrome on
+  9382 — the header of each script has the exact commands.
+
+  **Three things they got wrong first, all worth knowing before writing the
+  fourth harness of this kind.** Its taps did not advance the beat at all, so the
+  first sweep was one beat read nine times and reported as eight clean lessons —
+  CDP's `Input.dispatchMouseEvent` does not drive a React Native Web Pressable,
+  only a synthetic `click` does. It then judged "did the beat change" from a hash
+  of the page text, which cannot tell a dead tap from two beats that read alike;
+  the progress bar carries `nativeID="beat-progress"` now and *is* the beat index.
+  And it could not answer a question, so every lesson stopped at its first graded
+  beat — scene answers are `Target`s (they set an accessibility role) but deck
+  choices are bare `Pressable`s, which React Native Web gives a `tabindex` and no
+  role. **Selecting on `[role="button"]` alone finds half the buttons in this app.**
 
 **On device**, `adb` lives in the session scratchpad. Applying an OTA takes two
 launches: force-stop → launch (downloads) → force-stop → launch (applies).

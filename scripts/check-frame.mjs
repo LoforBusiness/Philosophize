@@ -113,8 +113,15 @@ const PROBE = `(() => {
       });
     }
   }
-  const body = document.body.innerText;
-  return JSON.stringify({ clip, out, done: /Finish/.test(body) });
+  // prog === 1 is the last beat. Matching the word "Finish" in the page text
+  // instead ends the audit early on any lesson whose prose contains it — see the
+  // note in measure-must.mjs.
+  const bar = document.getElementById('beat-progress');
+  let prog = -1;
+  try {
+    if (bar) { const tf = getComputedStyle(bar).transform; if (tf && tf !== 'none') prog = new DOMMatrixReadOnly(tf).a; }
+  } catch (e) {}
+  return JSON.stringify({ clip, out, done: prog >= 0.999 });
 })()`;
 
 const ROUTE = 'app/previewframe.tsx';
@@ -184,21 +191,59 @@ function allIds() {
     `(() => { const el = document.elementFromPoint(195, 700) || document.body;
       el.dispatchEvent(new MouseEvent('click', {bubbles:true})); return 1; })()`,
   );
-  /** A fingerprint of everything on screen, so "did the beat change" is answerable. */
+  // A GRADED BEAT GATES THE ADVANCE, so an audit that only taps stops at the first
+  // question and never sees the beats after it. Scene questions are answered by
+  // pressing a Target (findable by the ring it draws, which carries a role); deck
+  // questions by pressing a choice — a plain Pressable, so React Native Web gives
+  // it a tabindex and no role, which is why selecting on role alone found none.
+  const answerScene = () => evaluate(
+    `(() => { const ring = document.querySelector('#target-ring');
+      if (ring && ring.parentElement) { ring.parentElement.dispatchEvent(new MouseEvent('click', {bubbles:true})); return 1; }
+      return 0; })()`,
+  );
+  // Deck choices are plain Pressables, so React Native Web gives them a tabindex
+  // and no role. They are tried SEPARATELY from scene targets rather than as a
+  // fallback: a lesson can have rings mounted on every beat and still ask its
+  // question in the deck, in which case "a ring exists" never stops being true and
+  // the fallback is never reached.
+  const answerDeck = () => evaluate(
+    `(() => { const clip = document.getElementById('stage-clip');
+      const below = clip ? clip.getBoundingClientRect().bottom : 0;
+      const b = [...document.querySelectorAll('[role="button"],[tabindex]')].find((e) => {
+        const r = e.getBoundingClientRect();
+        return r.top > below && r.width > 150 && r.height >= 20 && r.height <= 90;
+      });
+      if (b) { b.dispatchEvent(new MouseEvent('click', {bubbles:true})); return 1; }
+      return 0; })()`,
+  );
+  /** The beat index, straight off the progress bar — see the note in measure-must. */
   const stamp = () => evaluate(
-    `(() => { const t = document.body.innerText || '';
-      let h = 0; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0;
-      return h; })()`,
+    `(() => {
+      const bar = document.getElementById('beat-progress');
+      try {
+        if (bar) { const tf = getComputedStyle(bar).transform; if (tf && tf !== 'none') return new DOMMatrixReadOnly(tf).a; }
+      } catch (e) {}
+      return -1;
+    })()`,
   );
 
   const report = [];
   let done = 0;
   for (const id of ids) {
     await send('Page.navigate', { url: `${BASE}?id=${encodeURIComponent(id)}` });
+    // WAIT FOR THE STAGE, NOT FOR A CLOCK. Body text appears while the lesson is
+    // still mounting, so waiting on it starts tapping before anything is
+    // interactive — two lessons reported "1 beat reached" purely because the audit
+    // arrived first. The first navigation of a run also pays for Metro compiling
+    // the preview route this script just wrote, which is far slower than the rest.
     let up = false;
-    for (let i = 0; i < 30; i++) { if (await evaluate('document.body && document.body.innerText.length > 20')) { up = true; break; } await wait(400); }
-    if (!up) { report.push({ id, beats: [], stepped: 0, blank: true }); console.log(`  ${String(++done).padStart(3)}/${ids.length}  ${id.padEnd(34)} NEVER RENDERED`); continue; }
-    await wait(1400);
+    const patience = done === 0 ? 180 : 40;
+    for (let i = 0; i < patience; i++) {
+      if (await evaluate("!!document.getElementById('stage-clip')")) { up = true; break; }
+      await wait(500);
+    }
+    if (!up) { report.push({ id, beats: [], stepped: 0, blank: true }); console.log(`  ${String(++done).padStart(3)}/${ids.length}  ${id.padEnd(34)} NEVER RENDERED A STAGE`); continue; }
+    await wait(1200);
 
     const beats = [];
     let stepped = 0;
@@ -210,20 +255,32 @@ function allIds() {
       if (got.none) break;
       if (got.out.length) beats.push({ beat: b, hits: got.out });
       if (got.done) break;
-      await tap();
-      // LET THE BEAT LAND BEFORE MEASURING. Beat transitions run 0.7–1.3s and the
-      // camera travel up to 2.2s on a `drift`; measuring mid-move reports things
-      // half out of frame that arrive a moment later.
-      await wait(1700);
-      const now = await stamp();
-      if (now === last) break; // nothing changed — the lesson is not advancing
-      last = now;
+      let moved = false;
+      for (let attempt = 0; attempt < 3 && !moved; attempt++) {
+        if (attempt === 1) { await answerScene(); await wait(700); }
+        if (attempt === 2) { await answerDeck(); await wait(700); }
+        await tap();
+        // LET THE BEAT LAND BEFORE MEASURING. Beat transitions run 0.7–1.3s and the
+        // camera travel up to 2.2s on a `drift`; measuring mid-move reports things
+        // half out of frame that arrive a moment later.
+        await wait(1700);
+        const now = await stamp();
+        if (last === null || now < 0 || now > last + 1e-4) { last = now; moved = true; }
+      }
+      if (!moved) break;
       stepped++;
     }
     report.push({ id, beats, stepped });
     done++;
-    const n = beats.reduce((a, x) => a + x.hits.length, 0);
-    const note = stepped < 2 ? `ONLY ${stepped + 1} BEAT REACHED` : n ? `${n} clipped over ${beats.length} beat(s)` : `clean (${stepped + 1} beats)`;
+    const nText = beats.reduce((a, x) => a + x.hits.filter((h) => h.kind === 'text').length, 0);
+    const nArt = beats.reduce((a, x) => a + x.hits.filter((h) => h.kind !== 'text').length, 0);
+    // TEXT AND ART ARE NOT THE SAME VERDICT. The must-see boxes are the union of a
+    // beat's WORDS, so a sliced label is a failure of the guarantee; a clipped piece
+    // of scenery is what pushing in IS. Reporting one number for both would have
+    // made a lesson that fixed every label look unchanged.
+    const note = stepped < 2 ? `ONLY ${stepped + 1} BEAT REACHED`
+      : nText ? `${nText} TEXT clipped (+${nArt} art) over ${beats.length} beat(s)`
+      : nArt ? `words clean · ${nArt} art clipped` : `clean (${stepped + 1} beats)`;
     console.log(`  ${String(done).padStart(3)}/${ids.length}  ${id.padEnd(34)} ${note}`);
   }
 
@@ -240,7 +297,10 @@ function allIds() {
     console.log(`  ⚠ ${stuck.length} lesson(s) never got past their second beat — they were NOT audited:`);
     console.log(`      ${stuck.map((r) => r.id).join(', ')}`);
   }
+  const textLessons = report.filter((r) => r.beats.some((b) => b.hits.some((h) => h.kind === 'text')));
+  const textHits = report.reduce((a, r) => a + r.beats.reduce((b, x) => b + x.hits.filter((h) => h.kind === 'text').length, 0), 0);
   console.log(`  ${dirty.length} lessons with something straddling the crop · ${totalHits} elements`);
+  console.log(`  OF WHICH WORDS: ${textLessons.length} lessons · ${textHits} sliced labels   <- the number H60c is about`);
   for (const r of dirty) {
     console.log(`\n  ${r.id}`);
     for (const b of r.beats) {

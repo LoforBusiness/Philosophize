@@ -13,6 +13,7 @@ import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { shotAt, resolveMoves, containShot, NEUTRAL, type Box, type Move, type Shot } from './camera';
+import { MUST } from './mustBoxes';
 import { cue, touch } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import { swishTrack } from './gestures';
@@ -249,6 +250,31 @@ export default function CinematicPlayer({
   const camHost = useRef(null);
   const needsBox = useMemo(() => beats.map((b) => !!b.interact), [beats]);
 
+  // ── AND WHATEVER THE READER HAS TO READ (H60c) ─────────────────────────────
+  //
+  // Answer targets were the only thing that ever reported a box, so on every
+  // other beat the camera framed the lesson's own labels by luck — and a browser
+  // sweep says luck lost: 8 of 8 lessons sampled were slicing words in half, 285
+  // elements, and the same 8 with the camera switched off came back with 6.
+  // metaphysics-being-7 was cutting "PAST", "NOW" and "FUTURE", which are the
+  // three things that lesson is entirely about.
+  //
+  // `MUST` is the union of the words each beat has on stage, in scene
+  // coordinates, measured from the real render by scripts/measure-must.mjs — the
+  // scenes draw their labels as raw <Text> with local styles, so there was no
+  // reporting component to hang this on and no honest way to hand-author 800
+  // rectangles. A beat may still override with its own `must`, which wins.
+  //
+  // It only ever loosens (see containShot), so this cannot break a shot that was
+  // already correct: those are returned identical.
+  const musts = useMemo(() => {
+    const table = MUST[lesson.id];
+    return beats.map((b, k) => {
+      const m = b.must ?? table?.[k] ?? null;
+      return m ? { x: m[0], y: m[1], w: m[2], h: m[3] } : null;
+    });
+  }, [beats, lesson.id]);
+
   const camNow = useDerivedValue(() => {
     if (!cam || cam.length === 0) return NEUTRAL;
     const n = Math.min(Math.max(bi.value, 0), cam.length - 1);
@@ -268,7 +294,15 @@ export default function CinematicPlayer({
       // `containShot` only ever loosens — the scale comes down to fit and the
       // centre slides the shortest distance — so a beat whose shot already showed
       // its box is returned untouched and the authored camera work is unaffected.
-      if (box) return containShot(cam[k], box, band);
+      // The tappable things and the readable things are both must-sees, so the
+      // shot has to hold BOTH — union them rather than letting one win. Applied
+      // as two successive contains, which is the same thing: each only loosens.
+      const must = musts[k];
+      if (box) {
+        const s1 = containShot(cam[k], box, band);
+        return must ? containShot(s1, must, band) : s1;
+      }
+      if (must && !needsBox[k]) return containShot(cam[k], must, band);
       // No box yet. A question still falls back to the whole band, because an
       // unreachable answer is worse than a blunt frame; anything else keeps its
       // authored shot rather than snapping wide for a box that may never come.
@@ -468,7 +502,13 @@ export default function CinematicPlayer({
           <SketchIcon name="close" size={20} color={INK} />
         </Pressable>
         <View style={styles.track}>
-          <Animated.View style={[styles.fill, fillStyle]} />
+          {/* Named so an audit can ask "did the beat actually advance?" directly.
+              scripts/measure-must.mjs inferred it from a hash of the page text,
+              which cannot tell a tap that did nothing from two beats that happen
+              to read the same — and stopped measuring ethics-ethics-3 at beat 8 of
+              10, leaving the last two silently unprotected. This bar IS the beat
+              index, scaled. */}
+          <Animated.View nativeID="beat-progress" style={[styles.fill, fillStyle]} />
         </View>
       </View>
 
@@ -492,6 +532,12 @@ export default function CinematicPlayer({
                   {cam ? (
                     <Animated.View
                       ref={camHost}
+                      // transformOrigin 0% 0% means this element's own client rect
+                      // top-left IS the image of scene point (0,0) and its width is
+                      // STAGE_W × fit × scale — which is all scripts/measure-must.mjs
+                      // needs to convert a measured rectangle back into scene
+                      // coordinates, at any zoom, without knowing either factor.
+                      nativeID="stage-cam"
                       style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
                     >
                       <TargetCountProvider onCount={setTargetCount} onBox={onBox} host={camHost}>

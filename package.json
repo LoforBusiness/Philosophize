@@ -91,7 +91,9 @@
     "check:access": "node scripts/check-access.mjs",
     "check:widget": "node scripts/check-widget-contrast.mjs",
     "sheet:widget": "node scripts/sheet-widget.mjs",
-    "check:quickstart": "node scripts/check-quickstart-contrast.mjs"
+    "check:quickstart": "node scripts/check-quickstart-contrast.mjs",
+    "check:frame": "node scripts/check-frame.mjs",
+    "measure:must": "node scripts/measure-must.mjs"
   },
   "overrides": {
     "@expo/require-utils": "56.1.6"

@@ -15,6 +15,7 @@
 // Run: node scripts/validate-cinematic.mjs
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 
 const DIR = path.join(process.cwd(), 'components', 'lesson', 'cinematic');
 
@@ -28,6 +29,8 @@ const bands = [];
 const cameras = [];
 /** How many of each camera verb the 96 followMoves lessons actually deal. */
 const verbs = {};
+/** Script name -> beat count, so H60c can tell a short measurement from a full one. */
+const beatCount = new Map();
 
 // checkShots comes out of the SAME module the player uses, transpiled rather than
 // reimplemented here. camera.ts is deliberately import-free so stripping the types
@@ -73,6 +76,9 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Script.ts')).sort(
   const quotes = idxOf('quote');
   const summaries = idxOf('summary');
   const n = beats.length;
+  // The count H60c cares about excludes the summary beat: `stageGone` unmounts the
+  // stage under the summary card, so it has no box and never needed one.
+  beatCount.set(name, n - summaries.length);
 
   if (!LEGACY.has(name)) {
     if (n < 7 || n > 11) errs.push(`${n} beats (H52 wants 7–11, 8 is the house length)`);
@@ -479,6 +485,101 @@ console.log(
   `\ncamera: ${cameras.length} of ${bands.length} lessons move it, ${shotTotal} shots, ` +
     `each checked against its own band and ground\n  verbs dealt: ${mix}`,
 );
+// ── H60c · THE MEASURED MUST-SEE BOXES HAVE NOT GONE STALE ───────────────────
+//
+// mustBoxes.ts holds, per beat, the box the camera has to contain — the union of
+// the words that beat has on stage, measured from a real render by
+// scripts/measure-must.mjs. Measured data rots: change a scene's layout without
+// re-measuring and the stored box describes a picture that is no longer there.
+//
+// The dangerous direction is silent. A box that has become too SMALL still looks
+// like a guarantee and lets a push crop the label it was recorded to protect —
+// exactly the defect H60c exists to stop, wearing the costume of a fix. So every
+// entry carries a fingerprint of the scene and script it was taken from, and a
+// divergence is an error rather than a note.
+{
+  const mbPath = path.join(DIR, 'mustBoxes.ts');
+  const routePath = path.join(process.cwd(), 'app', '(app)', 'branches', '[branchSlug]', '[pathSlug]', 'lesson', '[lessonId].tsx');
+  const mb = fs.existsSync(mbPath) ? fs.readFileSync(mbPath, 'utf8') : '';
+  const stampBlock = mb.match(/export const MUST_STAMP[^{]*\{([\s\S]*?)\n\};/);
+  const stamps = new Map(
+    stampBlock ? [...stampBlock[1].matchAll(/'([a-z0-9-]+)':\s*'([0-9a-f]+)'/g)].map((m) => [m[1], m[2]]) : [],
+  );
+  // Row length matters as much as row presence: a sweep that stopped early leaves
+  // a lesson with boxes for its first four beats and nothing for the rest, and the
+  // player reads `table?.[k] ?? null` — so those later beats are silently back to
+  // being framed by luck while the lesson still counts as "measured".
+  // Counted by scanning bracket depth, not by splitting on a delimiter. Splitting
+  // on "]," undercounts by one — the last entry has no trailing comma — and an
+  // off-by-one here reports a complete row as short, which is the fastest way to
+  // teach someone to ignore this check.
+  const countRow = (s) => {
+    let depth = 0, n = 0, sawItem = false;
+    for (const ch of s) {
+      if (ch === '[') { if (depth === 0) { n++; sawItem = true; } depth++; }
+      else if (ch === ']') depth--;
+      else if (depth === 0 && /\S/.test(ch) && ch !== ',') { if (!sawItem) { n++; sawItem = true; } }
+      else if (depth === 0 && ch === ',') sawItem = false;
+    }
+    return n;
+  };
+  const rowLen = new Map(
+    [...(mb.match(/export const MUST[^_][^{]*\{([\s\S]*?)\n\};/)?.[1] ?? '')
+      .matchAll(/'([a-z0-9-]+)':\s*\[(.*)\],\s*$/gm)]
+      .map((m) => [m[1], countRow(m[2])]),
+  );
+  const measured = new Set(rowLen.keys());
+  const comps = new Map(
+    [...fs.readFileSync(routePath, 'utf8').matchAll(/^\s*'([a-z0-9-]+)':\s*(\w+),/gm)].map((m) => [m[1], m[2]]),
+  );
+  const shaOf = (comp) => {
+    const base = comp.replace(/Lesson$/, '');
+    const lower = `${base[0].toLowerCase()}${base.slice(1)}`;
+    const files = [`${lower}Scene.tsx`, `${lower}Script.ts`, `${comp}.tsx`]
+      .map((f) => path.join(DIR, f)).filter((p) => fs.existsSync(p)).sort();
+    if (!files.length) return null;
+    const h = crypto.createHash('sha1');
+    for (const p of files) h.update(fs.readFileSync(p));
+    return h.digest('hex').slice(0, 12);
+  };
+  const stale = [];
+  for (const [id, want] of stamps) {
+    const comp = comps.get(id);
+    const now = comp ? shaOf(comp) : null;
+    if (now && now !== want) stale.push(id);
+  }
+  const unmeasured = [...comps.keys()].filter((id) => !measured.has(id));
+  const short = [];
+  for (const [id, len] of rowLen) {
+    const comp = comps.get(id); if (!comp) continue;
+    const base = comp.replace(/Lesson$/, '');
+    const want = beatCount.get(`${base[0].toLowerCase()}${base.slice(1)}`);
+    if (want && len < want) short.push(`${id} ${len}/${want}`);
+  }
+  if (short.length) {
+    problems.push(['H60c must-see boxes', [
+      `${short.length} lesson(s) measured fewer beats than they have — the rest are unprotected:`,
+      `  ${short.join(', ')}`,
+      'Re-run: node scripts/measure-must.mjs',
+    ]]);
+  }
+  if (stale.length) {
+    problems.push(['H60c must-see boxes', [
+      `${stale.length} lesson(s) changed since their boxes were measured: ${stale.join(', ')}`,
+      'Re-run: node scripts/measure-must.mjs   (a stale box that shrank crops the very thing it protects)',
+    ]]);
+  }
+  console.log(
+    `\nH60c: ${measured.size}/${comps.size} lessons carry measured must-see boxes` +
+      (unmeasured.length
+        ? `\n  ${unmeasured.length} never measured — the camera frames those by luck` +
+          `\n  ${unmeasured.slice(0, 6).join(', ')}${unmeasured.length > 6 ? ', …' : ''}` +
+          '\n  fix with: node scripts/measure-must.mjs'
+        : '') +
+      (stale.length ? '' : measured.size ? '\n  every stamp matches the scene it was measured from' : ''),
+  );
+}
+
 const chase = (verbs.to ?? 0) + (verbs.drift ?? 0) + (verbs.whip ?? 0);
 if (cameras.length > 20 && chase === 0) {
   console.log(

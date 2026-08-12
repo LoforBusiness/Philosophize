@@ -18,7 +18,6 @@ import type { BaseBeat } from './cinematicKit';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Ethics5Beat extends BaseBeat {
-  /** The walker's x (they stride between beats). */ sx?: number;
   /**
    * The walker's gesture (emote code).
    *
@@ -39,30 +38,30 @@ export const BEATS: Ethics5Beat[] = [
   {
     // The empty three-lane chart opens the lesson: it names the very three places
     // this line names, and the thinkers drop into it as the narration reaches them.
-    sx: 118, soc: 1, chart: 1,
+    x: 177, soc: 1, chart: 1,
     text: 'Long ago — in Greece, in India, in China — humans began to argue, out loud, about how to live.',
     dur: 3.2,
   },
   {
-    sx: 158, soc: 2, chart: 1,
+    x: 217, soc: 2, chart: 1,
     text: 'In 1949 Karl Jaspers named it the Axial Age: roughly 800 to 200 BCE, when reflective ethics flared up in three places at once. One shared cause? Historians still argue. The pattern is suggestive, not proven.',
     cite: 'The Axial Age',
     dur: 5.4,
   },
   {
-    sx: 158, soc: 13, chart: 2,
+    x: 217, soc: 13, chart: 2,
     text: 'Socrates wrote nothing; we meet him through Plato. He cross-examined Athenians — "What is virtue? Justice?" In 399 BCE the city tried him, and he drank hemlock. His question, what is the good life, never left.',
     cite: 'Greece — Socrates',
     dur: 5.4,
   },
   {
-    sx: 206, soc: 5, chart: 3,
+    x: 265, soc: 5, chart: 3,
     text: 'Half a world away, the same stirring. In India, ethics turned on dharma — duty and right conduct fit to your role. In China, Confucius grew virtue from ren, humaneness, cultivated in our bonds.',
     cite: 'India — China',
     dur: 5.2,
   },
   {
-    sx: 206, soc: 147, chart: 3,
+    x: 265, soc: 147, chart: 3,
     quote: {
       id: 'lq-ethics-ethics-5-1',
       text: 'Do not impose on others what you yourself do not desire.',
@@ -74,7 +73,7 @@ export const BEATS: Ethics5Beat[] = [
     dur: 3.4,
   },
   {
-    sx: 206, soc: 4, fork: 1,
+    x: 265, soc: 4, fork: 1,
     interact: {
       prompt: 'For Confucius, where does virtue (ren) grow? Take the path.',
       explain: 'For Confucius ren is shaped in real bonds — family, friends, ruler and citizen. Fittingly, his own disciples compiled the Analects after his death.',
@@ -83,7 +82,7 @@ export const BEATS: Ethics5Beat[] = [
     dur: 1.0,
   },
   {
-    sx: 206, soc: 4, balance: 1,
+    x: 265, soc: 4, balance: 1,
     interact: {
       prompt: 'The "Axial Age" — tip the scale. Is it a proven fact, or an interpretive thesis?',
       explain: 'It sounds like a settled date or shared creed, but Jaspers coined it in 1949 as an interpretive thesis about parallel awakenings — one many historians still dispute.',

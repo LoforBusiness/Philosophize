@@ -8,6 +8,7 @@ import {
   BLANK, WALK, clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, moveTr, pose, strideStance, type Bundle,
 } from './rig';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -27,12 +28,28 @@ import type { SceneApi } from './CinematicPlayer';
 //
 // Composition rule: the board lives entirely above y = 340 and the figures stand
 // on GROUND = 500 with their crowns at ~353 at the highest (the beat-7 shrug), so
-// the table never touches a head. The camera transform is gone — it was static on
-// every rendered beat, and dropping it lets the band do the zooming instead.
+// the table never touches a head.
+//
+// The camera went, and has come back. It was dropped because it sat static on every
+// rendered beat — but that is a case for a better camera, not for none (H60b), and
+// the lesson then read at one distance throughout. It is a `followMoves` camera now,
+// which was only safe once the board could defend itself: a 1.40x push at the
+// finder's chest shows y 321..561 and the board lives above y=340, so before H60c
+// this camera would have hidden the three lenses it is comparing. The measured
+// must-see box holds the shot open instead.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const P_CODE = BEATS.map((b) => b.p ?? 0);
-const PX = BEATS.map((b) => b.px ?? 262);
+// The finder's track, under the name validate-cinematic reads (it looks for
+// `b.x ?? N` exactly). It used to be `b.px`, declared on this lesson's own beat
+// type — which compiled and ran, and left the camera unreadable to the checker.
+const X = BEATS.map((b) => b.x ?? 262);
+// H60b: moving is the default. This lesson had no camera at all, on the reasoning
+// (in the header below) that the old one was static on every beat — but "it was
+// not doing anything" is an argument for a better camera, not for none. Safe to
+// add only now that the verdict board reports a must-see box (H60c): a push at the
+// finder's chest crops everything above y=321, and the board lives above y=340.
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics2'));
 const G_CODE = BEATS.map((b) => (b.g ?? -1));
 const GX = BEATS.map((b) => b.gx ?? 108);
 const G_ON = BEATS.map((b) => ((b.g ?? -1) >= 0 ? 1 : 0));
@@ -68,7 +85,7 @@ export default function Ethics2Scene({ clock, bt, bi }: SceneApi) {
 
     // Finder — gesture blend, small steps.
     const finderS = mixStance(emoteHold(P_CODE[p], t), emoteLive(P_CODE[n], t, bt.value), tr);
-    const fx = lerp(PX[p], PX[n], tr);
+    const fx = lerp(X[p], X[n], tr);
 
     // Guide — walks in when its position jumps; otherwise blends gestures in place.
     const gOn = lerp(G_ON[p], G_ON[n], tr);
@@ -260,5 +277,5 @@ const styles = StyleSheet.create({
 // lesson is the beat-7 shrug (bob +3, live accent +2.5 → crown ~353.6), still
 // 13 units below the table's last row at 340. Nothing is clipped, nothing collides.
 export function Ethics2Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics2Scene} band={[176, 512]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics2Scene} band={[176, 512]} camera={CAM} />;
 }

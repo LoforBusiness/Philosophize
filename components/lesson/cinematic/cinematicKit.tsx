@@ -119,6 +119,20 @@ export interface BaseBeat {
    * inventing travel that is not in the picture.
    */
   x?: number;
+  /**
+   * A rectangle in scene coordinates the camera MUST contain on this beat (H60c).
+   *
+   * Almost never written by hand: the measured union of each beat's on-stage words
+   * lives in ./mustBoxes.ts, generated from the real render, and CinematicPlayer
+   * reads it automatically. This is the override for the case measurement cannot
+   * see — art with no text in it that the beat is nonetheless about, a prop the
+   * narration points at, a diagram made of lines. Set it and it wins over the
+   * measured box.
+   *
+   * It can only ever make the shot WIDER (see `containShot`), so declaring one is
+   * safe: a beat whose camera already showed the rectangle is left exactly alone.
+   */
+  must?: readonly [x: number, y: number, w: number, h: number];
   dur: number;
 }
 

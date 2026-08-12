@@ -9,6 +9,7 @@ import { WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, strideStance, typ
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 
@@ -34,16 +35,22 @@ import Target from './Target';
 //     one and the walker steps toward it.
 //   · Q2 THE BALANCE      a wide beam with two big pans; tap a pan and it sinks.
 //
-// The camera is IDENTITY (no wrapper transform at all), so every constant here is a
-// FINAL stage coordinate and the band at the bottom of the file reads straight off
-// them. Composition rule: nothing but snow is ever drawn below y = 348 in the middle
+// Every constant here is a FINAL stage coordinate and the band at the bottom of the
+// file reads straight off them. That was once because the camera was identity; it
+// is now simply how the scene is written, and the camera moves under it (H60b). Composition rule: nothing but snow is ever drawn below y = 348 in the middle
 // of the stage, so no chart, sign or pan can ever cover a walker (crown ≈ 357).
 
 // The pair used to span bx .. bx+118, so their visual centre sat 59 to the right of
 // the scripted `sx`. The lone walker stands on that centre instead, which keeps the
 // composition — and the beat-by-beat framing against the colonnade and the chart —
-// exactly as it was measured, without editing every `sx` in the script.
-const CENTRE = 59;
+// exactly as it was measured.
+//
+// The 59 used to be added at DRAW time, so the script's number was not the figure's
+// position. That was invisible until the lesson got a camera, which has to aim at
+// the figure: pointed at the script's number it would have framed 59 units of empty
+// snow to his left on every beat. The offset is folded into the data now and this
+// constant is gone. Deltas are unaffected — stride and travel time both read the
+// difference between two beats, and a constant added to both cancels.
 
 // ── the colonnade ────────────────────────────────────────────────────────────
 const COL_T = 348;
@@ -94,7 +101,18 @@ const PANS = [
   { id: 'thesis', title: 'A THESIS', sub: 'an interpretation', side: 1, correct: true },
 ];
 
-const SX = BEATS.map((b) => b.sx ?? 200);
+// The WALKER'S OWN x, under the name validate-cinematic reads. It used to be a
+// local `sx` holding the pair's left edge, with the figure drawn 59 units right
+// of it — so a camera aimed at the script's number would have framed empty snow.
+// The offset now lives in the data, and the draw below just reads it.
+const X = BEATS.map((b) => b.x ?? 259);
+// H60b: moving is the default. The header used to note that the camera here was
+// IDENTITY, which was true and was not a reason — it made every constant in the
+// file a final stage coordinate, an authoring convenience, not a composition
+// choice. The chart, the signposts and the balance all live above y=348 and a
+// close push shows y 345..561, so this is only safe now that those report a
+// must-see box (H60c) and hold the shot open.
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics5'));
 const SOC = BEATS.map((b) => b.soc ?? 0);
 const FORK = BEATS.map((b) => b.fork ?? 0);
 const BAL = BEATS.map((b) => b.balance ?? 0);
@@ -113,18 +131,18 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: S
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / moveTr(SX[p], SX[n], 0.85));
+    const tr = ease01(bt.value / moveTr(X[p], X[n], 0.85));
     const t = clock.value;
-    const moving = Math.abs(SX[n] - SX[p]) > 1;
+    const moving = Math.abs(X[n] - X[p]) > 1;
 
     const socS = moving
-      ? strideStance(SX[p], SX[n], emoteHold(SOC[n], t), tr, WALK)
+      ? strideStance(X[p], X[n], emoteHold(SOC[n], t), tr, WALK)
       : mixStance(emoteHold(SOC[p], t), emoteLive(SOC[n], t, bt.value), tr);
 
     // The walker only ever shifts SIDEWAYS on an answer — never up or down, so the
     // band below can be measured once and stays true on every beat.
     const dx = (forkAnswered ? qv.value : 0) * stepX;
-    const bx = lerp(SX[p], SX[n], tr) + dx + CENTRE;
+    const bx = lerp(X[p], X[n], tr) + dx;
 
     return {
       soc: pose(socS, bx, GROUND, K_FIG, 1, 1),
@@ -374,5 +392,5 @@ const styles = StyleSheet.create({
 // them SIDEWAYS only); and the ground rule ends at 501.5. Cropping to [206, 508]
 // renders the stage at ~2.14× instead of the letterboxed 1.15×.
 export function Ethics5Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics5Scene} band={[206, 508]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics5Scene} band={[206, 508]} camera={CAM} />;
 }

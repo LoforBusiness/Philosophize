@@ -8,6 +8,7 @@ import {
   boxMove, clamp01, ease01, lerp, mixStance, pose, stand, type Bundle, type Stance,
 } from './rig';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -25,13 +26,29 @@ import type { SceneApi } from './CinematicPlayer';
 //   · a flow, MULTITUDE → SOVEREIGN → PEACE, whose last two boxes ink in;
 //   · two opposed meters, FEAR and PEACE, that trade places as `auth` rises.
 //
-// CAMERA: none. The old scene translated the whole stage up 136 units, which put
-// the ground line in mid-air and made the band unmeasurable. Design space is now
-// final space: everything stands on GROUND=500, art occupies y 244..508, and the
-// band is [234, 514].
+// CAMERA: a `followMoves` camera on the SOVEREIGN'S x, not on a walker — this is
+// the one lesson with no single protagonist. Four citizens sit at x 100..304 and
+// the fifth rises at 200, so the stage centre is the honest thing to look at and
+// the track is a constant; followMoves then deals the standing rhythm (push, pull,
+// hold) rather than inventing travel that is not in the picture.
+//
+// It had NO camera before, and the header's reason was about something else
+// entirely: the old scene translated the whole stage up 136 units, which put the
+// ground line in mid-air and made the band unmeasurable. That was fixed by making
+// design space final space — everything stands on GROUND=500, art occupies
+// y 244..508, band [234, 514] — and nothing about it argued against a camera. H60b
+// says moving is the default; this one had simply never been given one back.
+//
+// The headline, the ledger, the flow and the two meters all sit above the action,
+// which is exactly what a push at the ground line crops, so this is only safe with
+// the measured must-see boxes of H60c holding the shot open.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TR = 0.85;
+
+// No walker to follow, so the track is the sovereign's x — see CAMERA above.
+const X = BEATS.map((b) => b.x ?? 200);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political'));
 
 // Citizens pulled in from the edges so a lunging brawler never reaches the meters.
 const CIT_X = [100, 154, 250, 304];
@@ -389,5 +406,5 @@ const styles = StyleSheet.create({
 // 923×647 device px, so 647/280 ≈ 923/400. Any narrower and the WIDTH caps the
 // scale — the art stops growing while the clipping risk keeps climbing.
 export function PoliticalLesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={PoliticalScene} band={[234, 514]} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={PoliticalScene} band={[234, 514]} camera={CAM} />;
 }
