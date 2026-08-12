@@ -142,11 +142,11 @@ export function canvas(w, h, bg = '#FFFFFF') {
         }
       }
     },
-    path(d, hex, ox = 0, oy = 0, scale = 1) {
+    path(d, hex, ox = 0, oy = 0, scale = 1, alpha = 1) {
       const cov = coverage(d, w, h, ox, oy, scale);
       const [cr, cg, cb] = rgb(hex);
       for (let i = 0; i < w * h; i++) {
-        const a = cov[i] > 1 ? 1 : cov[i];
+        const a = Math.min(1, cov[i]) * alpha;
         if (a <= 0.002) continue;
         const j = i * 3;
         px[j] += (cr - px[j]) * a;

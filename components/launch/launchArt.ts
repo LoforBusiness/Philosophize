@@ -927,14 +927,34 @@ const SCENE_PLANES: Record<SceneKey, (c: Crest) => PlaneSpec[]> = {
       step: 2, dy: 0, amp: c.amp, off: c.off, per: c.per, jag: 2.5, seed: 139,
       sil: [
         [cliff, [[-EDGE, 136]], { from: -EDGE, edge: 132, rise: 58 }],
-        // HE IS PERCHED ON THIS, not crouching on bare ground — the design calls
-        // him out sitting on a rock at the cliff edge, and `postureHold(9)`
-        // agrees: it seats the pelvis at `seatBob(20)`, i.e. 20 rig units off
-        // the ground. At this scene's own figureK (0.70) that is ~14 stage
-        // units, which is what sizes the boulder below — its crown meets his
-        // hip line instead of a guessed height. A narrow span keeps it to the
-        // one rock he is sitting on, not a run of them.
-        [rocks, [[FIG_X.thinker - 40, FIG_X.thinker + 40]], { hMin: 14, hMax: 16, gap: 0 }],
+        // HE IS PERCHED AT THE CLIFF EDGE, not crouching on bare ground — an
+        // outcrop rising from the cliff base to meet his hip, sitting BESIDE
+        // him rather than centred under him.
+        //
+        // Height: `postureHold(9)` seats the pelvis at `seatBob(20)`, 20 rig
+        // units off the ground — measured off `rig.solve()` for this exact
+        // pose, that pelvis lands 14.5 stage units above the ground line at
+        // his own x (crown y512.65, knee y562.0-562.3, pelvis y560.1, groundY
+        // 574.6). `rocks()` sinks its base 5 units below the ridge before
+        // subtracting height (`b = yAt(x) + 5; t = b - h`), so an apex that
+        // meets a ~14.5-unit hip needs `h ≈ 19.5`, NOT `h ≈ 14.5` — the first
+        // version of this used hMin 14/16 and topped out 9-11 units up,
+        // visibly short of his seat despite a comment claiming otherwise.
+        // hMin 19/hMax 21 actually gets there.
+        //
+        // Position: NOT centred on him. A first attempt spanning his whole
+        // stance (`FIG_X.thinker ± 40`) put a rock directly behind his hip —
+        // exactly the lane `beside()`'s doc comment reserves for a reason: at
+        // this height it entered the vanish check's sampled crown-to-knee
+        // rows and measured 2.6:1 against his own ink, below the 3.0 floor.
+        // Reaching his hip height and staying clear of that lane are both
+        // real constraints, so the rock sits in the gap between the cliff
+        // face (ending ~132) and his sampled column (starting ~187) instead —
+        // profiled with `coverage()` to confirm its footprint (roughly
+        // x146-166) stays clear before trusting it. It reads as the ledge he
+        // is perched at the edge of, continuous with the cliff, rather than a
+        // mass hidden behind his own torso.
+        [rocks, [[140, 186]], { hMin: 19, hMax: 21, gap: 0 }],
         [canopy, [[268, ART_W + EDGE]], { rMin: 22, rMax: 34, gap: 18, lift: 0.5 }],
       ],
     },
