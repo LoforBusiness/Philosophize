@@ -1,6 +1,8 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import StreakBook from '@/components/gamification/StreakBook';
 import StreakWeek from '@/components/gamification/StreakWeek';
+import StreakSheet from '@/components/gamification/StreakSheet';
 import { INK, MID } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -39,9 +41,13 @@ export default function HabitCard({
   restBridging: boolean;
   style?: object;
 }) {
+  const [streakOpen, setStreakOpen] = useState(false);
   return (
     <View style={[styles.card, style]}>
-      <View style={styles.head}>
+      {/* The whole head opens the month. The streak is the thing readers come
+          back to check, and making them hunt for it in Settings would waste the
+          one habit the app is trying to build. */}
+      <Pressable style={styles.head} onPress={() => setStreakOpen(true)} hitSlop={6}>
         <StreakBook value={streak} size={40} />
         <View style={styles.headText}>
           <Text style={styles.streak}>
@@ -56,7 +62,9 @@ export default function HabitCard({
               : 'Every day you turn up is a day here.'}
           </Text>
         </View>
-      </View>
+      </Pressable>
+
+      <StreakSheet visible={streakOpen} onClose={() => setStreakOpen(false)} />
 
       <View style={styles.week}>
         <StreakWeek streak={streak} lastLessonDate={lastLessonDate} size={28} />

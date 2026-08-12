@@ -264,6 +264,24 @@ interface UserDataState {
   // the true one and so is the higher spend. Held is derived (constants/streak).
   restDaysEarned: number;
   restDaysUsed: number;
+  /**
+   * Every day a lesson was finished, and every day a rest day covered, as
+   * YYYY-MM-DD.
+   *
+   * WHY THESE EXIST. Until now the app stored only the streak LENGTH and the
+   * last lesson date, and lib/utils/week.ts inferred the current week by
+   * counting back from it. That is exact for the run you are on and wrong for
+   * everything before it — a day you studied in June, then missed a day, is
+   * indistinguishable from a day you never opened the app. A seven-day strip
+   * that only ever shows the current run can live with that. A month grid is
+   * mostly history, so it cannot.
+   *
+   * MERGED AS A UNION in the cloud, the way earnedBadges is — a day was either
+   * studied or it was not, and no merge should ever be able to un-study one.
+   * Capped at DAY_HISTORY_CAP, oldest dropped first.
+   */
+  activeDays: string[];
+  restDays: string[];
   // Branch chosen by the welcome questions. A SUGGESTION the home screen and
   // Quick Start prefer — never a gate; all six branches stay open regardless.
   startingBranch: string | null;
@@ -408,6 +426,65 @@ interface UserDataState {
   /** Records the Insights charts as seen at this fingerprint. */
   markStatsSeen: (fingerprint: string) => void;
   setHasHydrated: (v: boolean) => void;
+}
+
+/**
+ * Two years of daily history. ~11 bytes a day, so both arrays together are under
+ * 16KB at the cap — small enough for AsyncStorage and for the cloud snapshot,
+ * and longer than any calendar anyone will page back through.
+ */
+export const DAY_HISTORY_CAP = 730;
+
+/** Union, sorted, capped oldest-first. The same shape the cloud merge uses. */
+export function addDays(existing: string[], add: string[]): string[] {
+  if (add.length === 0) return existing;
+  const out = Array.from(new Set([...existing, ...add])).sort();
+  return out.length > DAY_HISTORY_CAP ? out.slice(out.length - DAY_HISTORY_CAP) : out;
+}
+
+/** The days strictly between two YYYY-MM-DD keys, exclusive of both ends. */
+export function daysBetween(from: string | null, to: string): string[] {
+  if (!from) return [];
+  const [fy, fm, fd] = from.split('-').map(Number);
+  const [ty, tm, td] = to.split('-').map(Number);
+  if (!fy || !ty) return [];
+  const cur = new Date(fy, fm - 1, fd);
+  const end = new Date(ty, tm - 1, td);
+  const out: string[] = [];
+  cur.setDate(cur.getDate() + 1);
+  const p = (n: number) => String(n).padStart(2, '0');
+  // Guarded: a clock moved backwards, or a key from a device in a later
+  // timezone, must not spin here.
+  for (let i = 0; i < 400 && cur < end; i++) {
+    out.push(`${cur.getFullYear()}-${p(cur.getMonth() + 1)}-${p(cur.getDate())}`);
+    cur.setDate(cur.getDate() + 1);
+  }
+  return out;
+}
+
+/**
+ * The days a reader's CURRENT streak must have covered, reconstructed from the
+ * streak length and the last lesson date.
+ *
+ * This is the one-time back-fill, and it is the most that can honestly be
+ * recovered: those N days genuinely were studied, or the streak would not stand
+ * at N. Everything before the run is unknowable and stays unrecorded, which is
+ * why the calendar treats pre-history as blank rather than as missed — showing
+ * somebody a wall of failures the app never actually observed would be a lie
+ * told against them.
+ */
+export function backfillStreakDays(streak: number, lastLessonDate: string | null): string[] {
+  if (!lastLessonDate || streak <= 0) return [];
+  const [y, m, d] = lastLessonDate.split('-').map(Number);
+  if (!y || !m || !d) return [];
+  const out: string[] = [];
+  const cur = new Date(y, m - 1, d);
+  const p = (n: number) => String(n).padStart(2, '0');
+  for (let i = 0; i < Math.min(streak, DAY_HISTORY_CAP); i++) {
+    out.push(`${cur.getFullYear()}-${p(cur.getMonth() + 1)}-${p(cur.getDate())}`);
+    cur.setDate(cur.getDate() - 1);
+  }
+  return out.reverse();
 }
 
 // Build a progress snapshot used to evaluate badge conditions.
@@ -583,6 +660,8 @@ export const useUserDataStore = create<UserDataState>()(
       dailyLessonDate: null,
       restDaysEarned: 0,
       restDaysUsed: 0,
+      activeDays: [],
+      restDays: [],
       startingBranch: null,
       onboardingVersion: 0,
       notifyAsked: false,
@@ -804,11 +883,18 @@ export const useUserDataStore = create<UserDataState>()(
           info.streak > 0 && info.streak % restEarnEvery(isPro) === 0 && heldAfter < restCap(isPro)
             ? 1
             : 0;
+        // Record the day, and the days a rest day just paid for. The bridged days
+        // are the ones strictly BETWEEN the last lesson and today — the same span
+        // restDaysToSpend counted, named here so the calendar can draw them as
+        // rested rather than as misses beside an unbroken counter.
+        const bridged = info.restSpent > 0 ? daysBetween(lastLessonDate, today) : [];
         set({
           streak: info.streak,
           lastLessonDate: today,
           restDaysUsed: restDaysUsed + info.restSpent,
           restDaysEarned: restDaysEarned + earns,
+          activeDays: addDays(get().activeDays, [today]),
+          restDays: addDays(get().restDays, bridged),
         });
         get().recomputeBadges();
         return { ...info, restEarned: earns };
@@ -1028,6 +1114,8 @@ export const useUserDataStore = create<UserDataState>()(
         dailyLessonDate: state.dailyLessonDate,
         restDaysEarned: state.restDaysEarned,
         restDaysUsed: state.restDaysUsed,
+        activeDays: state.activeDays,
+        restDays: state.restDays,
         startingBranch: state.startingBranch,
         onboardingVersion: state.onboardingVersion,
         notifyAsked: state.notifyAsked,
@@ -1107,9 +1195,30 @@ export const useUserDataStore = create<UserDataState>()(
         const settings = sanitizeSettings(p.settings);
         if (migrateAnalytics) settings.usageAnalytics = true;
 
+        // ONE-TIME BACK-FILL of the daily history.
+        //
+        // Nobody has an `activeDays` yet, and the streak calendar is mostly
+        // history — so shipping it without this would open on an empty month for
+        // every existing reader, including someone on a 40-day streak. Their run
+        // IS recoverable: a streak standing at N means those N days were studied,
+        // or it would not stand at N. Anything earlier is genuinely unknown and
+        // stays unrecorded rather than being guessed at.
+        //
+        // Runs only while the array is empty, so it can never overwrite real
+        // history later, and it unions rather than assigns so a cloud pull that
+        // arrives first is not clobbered.
+        const activeDays = addDays(
+          p.activeDays ?? [],
+          (p.activeDays?.length ?? 0) === 0
+            ? backfillStreakDays(p.streak ?? 0, p.lastLessonDate ?? null)
+            : []
+        );
+
         return {
           ...current,
           ...p,
+          activeDays,
+          restDays: p.restDays ?? [],
           lessonsByUnit,
           lessonsByBranch,
           totalXP,

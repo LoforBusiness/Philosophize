@@ -5,14 +5,14 @@ import Animated, {
   useSharedValue, useAnimatedStyle, withDelay, withTiming, Easing,
 } from 'react-native-reanimated';
 import StreakBook from '@/components/gamification/StreakBook';
-import StreakWeek from '@/components/gamification/StreakWeek';
+import StreakCelebration from '@/components/gamification/StreakCelebration';
 import RankUpScreen, { T_BURST } from '@/components/gamification/RankUpScreen';
 import RewardLoafer, { pickLine } from '@/components/gamification/RewardLoafer';
 import BadgeEarned, { BadgeEarnedHeading } from '@/components/gamification/BadgeEarned';
 import { RANKS, rankForXP, type RankDef } from '@/data/ranks';
 import type { BadgeDef } from '@/data/badges';
 import { getLessonUnitInfo } from '@/data';
-import { useUserDataStore, previewDailyActivity, previewNewBadges, type DayInfo } from '@/stores/userDataStore';
+import { useUserDataStore, previewDailyActivity, previewNewBadges, daysBetween, type DayInfo } from '@/stores/userDataStore';
 import { restDaysHeld } from '@/constants/streak';
 import NotifyPrompt from './NotifyPrompt';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
@@ -197,6 +197,11 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
   const dailyLessonCount = useUserDataStore((s) => s.dailyLessonCount);
   const dailyLessonDate = useUserDataStore((s) => s.dailyLessonDate);
+  // The recorded day history, for the week strip in the streak ceremony. The
+  // ceremony unions today in itself, because nothing is written until Continue.
+  const activeDays = useUserDataStore((s) => s.activeDays);
+  const restDays = useUserDataStore((s) => s.restDays);
+  const joinedAt = useUserDataStore((s) => s.joinedAt);
 
   const isPro = useSubscriptionStore((s) => s.isPro);
   const openPaywall = useUIStore((s) => s.openPaywall);
@@ -504,31 +509,29 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
             </Text>
           )}
 
-          {/* Streak */}
+          {/* THE STREAK CEREMONY. Ignite → count → the day lands, in that order
+              and staggered, because playing them together is the same
+              information and a fraction of the feeling.
+
+              The rest-day note inside it is said plainly and only when it
+              happened: a rest day is spent silently and the reader is told AFTER
+              their streak was saved, never asked beforehand, because a prompt at
+              that moment turns a kindness into one more decision on a day they
+              already missed. */}
           {info &&
             (info.firstOfDay ? (
               <View style={styles.streakBox}>
                 <DrawnRule delay={1500} width={54} />
-                <Text style={styles.streakHeading}>
-                  {info.restSpent > 0
-                    ? 'Streak kept'
-                    : info.prevStreak === 0
-                      ? 'Streak started'
-                      : 'Streak extended'}
-                </Text>
-                <StreakBook value={info.streak} from={info.prevStreak} animate size={100} />
-                {/* Said plainly, and only when it happened. A rest day is spent
-                    silently — the reader is told AFTER their streak was saved,
-                    not asked beforehand, because a prompt at that moment turns a
-                    kindness into one more decision on a day they already missed. */}
-                {info.restSpent > 0 && (
-                  <Text style={styles.restNote}>
-                    {info.restSpent === 1 ? 'A day of rest covered yesterday.' : `${info.restSpent} rest days covered the gap.`}
-                  </Text>
-                )}
-                <View style={styles.weekWrap}>
-                  <StreakWeek streak={info.streak} lastLessonDate={lastLessonDate} size={30} />
-                </View>
+                <StreakCelebration
+                  streak={info.streak}
+                  prevStreak={info.prevStreak}
+                  restSpent={info.restSpent}
+                  activeDays={activeDays}
+                  restDays={restDays}
+                  pendingRest={info.restSpent > 0 ? daysBetween(lastLessonDate, dateStr(new Date())) : undefined}
+                  today={dateStr(new Date())}
+                  since={joinedAt ? dateStr(new Date(joinedAt)) : null}
+                />
               </View>
             ) : (
               <View style={styles.streakSmallRow}>

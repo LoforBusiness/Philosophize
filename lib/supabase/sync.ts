@@ -1,5 +1,5 @@
 import { supabase } from './client';
-import { useUserDataStore, type SavedQuote, type ProfileQuote, type AppSettings, type XpEvent } from '@/stores/userDataStore';
+import { useUserDataStore, DAY_HISTORY_CAP, type SavedQuote, type ProfileQuote, type AppSettings, type XpEvent } from '@/stores/userDataStore';
 import { branchCountsFromUnits, unitsFromBranchCounts } from '@/data';
 
 // The slice of userDataStore mirrored to the cloud — matches the store's
@@ -21,6 +21,8 @@ export interface CloudState {
   // is the merge everything else here needs.
   restDaysEarned: number;
   restDaysUsed: number;
+  activeDays: string[];
+  restDays: string[];
   startingBranch: string | null;
   // Synced so signing in on a second phone does not ask the three questions
   // again — the answer already travels with the account via startingBranch.
@@ -42,6 +44,10 @@ const SYNC_FIELDS: (keyof CloudState)[] = [
   'streak', 'totalXP', 'xpEvents', 'rankIndex', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'badgesInitialized',
   'displayName', 'email', 'bio', 'portrait', 'profileBackground', 'nameFont', 'settings',
   'restDaysEarned', 'restDaysUsed', 'startingBranch', 'onboardingVersion',
+  // The daily history behind the streak calendar. Merged as a UNION below, the
+  // way earnedBadges is — a day was either studied or it was not, and no merge
+  // between two devices should ever be able to un-study one.
+  'activeDays', 'restDays',
 ];
 
 const capStr = (v: unknown, n: number) => (typeof v === 'string' ? v.slice(0, n) : v);
@@ -220,6 +226,16 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
   const earnedBadges = Array.from(
     new Set([...(local.earnedBadges ?? []), ...(remote.earnedBadges ?? [])])
   );
+  // Union, sorted, and capped oldest-first — the same rule the store applies, so
+  // a snapshot that has been round-tripped through the cloud is byte-identical to
+  // one that has not. Sorting matters: an unsorted union would make the cap drop
+  // an arbitrary day rather than the oldest.
+  const mergeDays = (a?: string[], b?: string[]) => {
+    const out = Array.from(new Set([...(a ?? []), ...(b ?? [])])).sort();
+    return out.length > DAY_HISTORY_CAP ? out.slice(out.length - DAY_HISTORY_CAP) : out;
+  };
+  const activeDays = mergeDays(local.activeDays, remote.activeDays);
+  const restDays = mergeDays(local.restDays, remote.restDays);
   const savedQuotes = mergeQuotes(local.savedQuotes, remote.savedQuotes);
   const joinedAt =
     local.joinedAt != null && remote.joinedAt != null
@@ -294,6 +310,8 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
     profileQuote,
     restDaysEarned,
     restDaysUsed,
+    activeDays,
+    restDays,
     startingBranch,
     onboardingVersion,
     philosopherViews,
