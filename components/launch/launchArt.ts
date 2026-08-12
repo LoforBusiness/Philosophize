@@ -927,6 +927,14 @@ const SCENE_PLANES: Record<SceneKey, (c: Crest) => PlaneSpec[]> = {
       step: 2, dy: 0, amp: c.amp, off: c.off, per: c.per, jag: 2.5, seed: 139,
       sil: [
         [cliff, [[-EDGE, 136]], { from: -EDGE, edge: 132, rise: 58 }],
+        // HE IS PERCHED ON THIS, not crouching on bare ground — the design calls
+        // him out sitting on a rock at the cliff edge, and `postureHold(9)`
+        // agrees: it seats the pelvis at `seatBob(20)`, i.e. 20 rig units off
+        // the ground. At this scene's own figureK (0.70) that is ~14 stage
+        // units, which is what sizes the boulder below — its crown meets his
+        // hip line instead of a guessed height. A narrow span keeps it to the
+        // one rock he is sitting on, not a run of them.
+        [rocks, [[FIG_X.thinker - 40, FIG_X.thinker + 40]], { hMin: 14, hMax: 16, gap: 0 }],
         [canopy, [[268, ART_W + EDGE]], { rMin: 22, rMax: 34, gap: 18, lift: 0.5 }],
       ],
     },

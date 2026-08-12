@@ -15,7 +15,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import JimpPkg from 'jimp-compact';
-import { canvas, text } from './lib/rasterpath.mjs';
+import { canvas, text, flatten } from './lib/rasterpath.mjs';
 
 const Jimp = JimpPkg.default || JimpPkg;
 const REPO = process.cwd();
@@ -48,6 +48,45 @@ const LM = await import(emit('components/launch/launchMotion.ts', 'launchMotion.
 const W = A.ART_W, H = A.ART_H;
 const FIG_INK = '#1A1A1A';
 
+// The sky gradient's colour at a given y — the SAME interpolation
+// check-launch.mjs's skyHexAt uses, ported here rather than written a third
+// time. panel()'s own row-by-row sky wash below is the same formula inlined
+// per-pixel; this is the callable form the band blend needs.
+function skyHexAt(key, y) {
+  const stops = A.skyStops(key);
+  const t = Math.min(1, Math.max(0, y) / (A.crestFor(key).base - 150));
+  let a = stops[0], b = stops[stops.length - 1];
+  for (let i = 1; i < stops.length; i++) {
+    if (t <= stops[i].offset) { a = stops[i - 1]; b = stops[i]; break; }
+  }
+  const f = (t - a.offset) / Math.max(1e-6, b.offset - a.offset);
+  const ca = [1, 3, 5].map((i) => parseInt(a.color.slice(i, i + 2), 16));
+  const cb = [1, 3, 5].map((i) => parseInt(b.color.slice(i, i + 2), 16));
+  const byte = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0');
+  return '#' + ca.map((v, i) => byte(v + (cb[i] - v) * f)).join('');
+}
+
+/** #RRGGBB, #RRGGBB, 0..1 -> #RRGGBB. Alpha-blend a toward b by t. */
+function mixHex(a, b, t) {
+  const ca = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16));
+  const cb = [1, 3, 5].map((i) => parseInt(b.slice(i, i + 2), 16));
+  const byte = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0');
+  return '#' + ca.map((v, i) => byte(v + (cb[i] - v) * t)).join('');
+}
+
+/** The vertical midpoint of a path's own points — cheap stand-in for "the sky
+ *  tone this band sits in front of", since a band is roughly horizontal. */
+function bandMidY(d) {
+  let minY = Infinity, maxY = -Infinity;
+  for (const sub of flatten(d)) {
+    for (const [, y] of sub) {
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+  }
+  return (minY + maxY) / 2;
+}
+
 function stroke(cv, a, b, w) {
   const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) * 2) + 1;
   for (let i = 0; i <= n; i++) {
@@ -77,27 +116,28 @@ function figure(cv, stance, x, groundY, k) {
 /** One scene, composited exactly as launchScenes.tsx will composite it. */
 function panel(key) {
   const p = A.PALETTES[key];
-  const cv = canvas(W, H, p.steps[p.sky[0]]);
+  // Base fill matches launchScenes.tsx's own base <Rect>: the sky's HORIZON
+  // step, covering the full stage before the gradient (which only reaches
+  // down to the horizon) is laid on top of it.
+  const cv = canvas(W, H, p.steps[p.sky[1]]);
 
   // sky gradient, painted as horizontal bands down to the horizon
-  const stops = A.skyStops(key);
   const skyBottom = A.crestFor(key).base - 150;
-  for (let y = 0; y < skyBottom; y++) {
-    const t = y / skyBottom;
-    let a = stops[0], b = stops[stops.length - 1];
-    for (let i = 1; i < stops.length; i++) {
-      if (t <= stops[i].offset) { a = stops[i - 1]; b = stops[i]; break; }
-    }
-    const f = (t - a.offset) / Math.max(1e-6, b.offset - a.offset);
-    const ca = [1, 3, 5].map((i) => parseInt(a.color.slice(i, i + 2), 16));
-    const cb = [1, 3, 5].map((i) => parseInt(b.color.slice(i, i + 2), 16));
-    const hex = '#' + ca.map((v, i) => Math.round(v + (cb[i] - v) * f)
-      .toString(16).padStart(2, '0')).join('');
-    cv.fillRect(0, y, W, 1, hex);
-  }
+  for (let y = 0; y < skyBottom; y++) cv.fillRect(0, y, W, 1, skyHexAt(key, y));
 
+  // PAINT ORDER matches launchScenes.tsx exactly: disc, then sky bands (cloud
+  // in front of the sun, mist in front of the far land), then planes LAST — the
+  // vanish check below assumes a plane, not the disc, is what the figure's body
+  // is actually read against.
   const disc = A.discFor(key);
   cv.path(disc.d, disc.fill, 0, 0);
+  // cv.path() has no opacity — blend each band's own fill toward the sky tone
+  // it sits over by its own opacity first, so the sheet shows what the
+  // component will show (soft cloud/mist) rather than a set of hard shapes.
+  for (const b of A.skyBandsFor(key)) {
+    const sky = skyHexAt(key, bandMidY(b.d));
+    cv.path(b.d, mixHex(sky, b.fill, b.opacity), 0, 0);
+  }
   for (const pl of A.planesFor(key)) cv.path(pl.d, pl.fill, 0, 0);
 
   // the figure, on the crest, at this scene's scale — the pose it actually

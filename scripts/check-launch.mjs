@@ -385,5 +385,17 @@ for (const key of A.SCENE_KEYS) {
     `${ratio(worstLum, lum(A.INK)).toFixed(1)}:1 on ${worstHex} (worst row y${worstRow})`);
 }
 
+// ── 7 · no colour is chosen in the renderer ──────────────────────────────────
+//
+// The whole guarantee is that every element's background is decided by
+// construction. A hex literal typed into the renderer is a per-scene guess, and
+// a per-scene guess is what let a pale quote vanish into pale art before.
+const scenes = fs.readFileSync(path.join(REPO, 'components/launch/launchScenes.tsx'), 'utf8');
+const literals = (scenes.match(/#[0-9A-Fa-f]{6}\b/g) || []);
+ok(literals.length === 0, 'launchScenes.tsx declares no colour of its own',
+  literals.join(' ') || 'none');
+ok(!/\bswing\b|\bkite\b|\bpicnic\b/.test(scenes),
+  'launchScenes.tsx has no kite, swing or picnic left');
+
 console.log(bad === 0 ? '\nlaunch screen: all clear.' : `\n${bad} launch check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);
