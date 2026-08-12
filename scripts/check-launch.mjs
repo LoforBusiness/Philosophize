@@ -50,6 +50,21 @@ const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const lum = (hex) => { const [r, g, b] = hexRgb(hex); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
 const ratio = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 
+// The sky gradient's colour at a given y — shared by the disc-tone check (3c)
+// and the per-row figure backing (6), so the interpolation is written once.
+function skyHexAt(key, y) {
+  const stops = A.skyStops(key);
+  const t = Math.min(1, Math.max(0, y) / (A.crestFor(key).base - 150));
+  let a = stops[0], b = stops[stops.length - 1];
+  for (let i = 1; i < stops.length; i++) {
+    if (t <= stops[i].offset) { a = stops[i - 1]; b = stops[i]; break; }
+  }
+  const f = (t - a.offset) / Math.max(1e-6, b.offset - a.offset);
+  const ca = hexRgb(a.color), cb = hexRgb(b.color);
+  const byte = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0');
+  return '#' + ca.map((v, i) => byte(v + (cb[i] - v) * f)).join('');
+}
+
 // ── 1 · the palettes are real ramps, not near-flat ones ──────────────────────
 // tone.ts shipped #FEFEFC→#DFDBD1 — a 7% range — and it read as flat at every
 // size. It needed a real swing before it registered as shading at all. Anything
@@ -279,17 +294,7 @@ for (const key of A.SCENE_KEYS) {
   // TONE: the disc against the sky gradient at the disc's OWN height, which is
   // what the eye actually compares — not against the sky's top or its horizon.
   const p = A.PALETTES[key];
-  const stops = A.skyStops(key);
-  const t = Math.min(1, Math.max(0, top + (bot - top) / 2) / (A.crestFor(key).base - 150));
-  let a = stops[0], b = stops[stops.length - 1];
-  for (let i = 1; i < stops.length; i++) {
-    if (t <= stops[i].offset) { a = stops[i - 1]; b = stops[i]; break; }
-  }
-  const f = (t - a.offset) / Math.max(1e-6, b.offset - a.offset);
-  const ca = hexRgb(a.color), cb = hexRgb(b.color);
-  const sky = ca.map((v, i) => v + (cb[i] - v) * f);
-  const skyLum = 0.2126 * lin(sky[0]) + 0.7152 * lin(sky[1]) + 0.0722 * lin(sky[2]);
-  const tone = ratio(lum(p.disc), skyLum);
+  const tone = ratio(lum(p.disc), lum(skyHexAt(key, top + (bot - top) / 2)));
 
   ok(edged || tone >= DISC_TONE_MIN, `${key}: the disc reads`,
     `${cut}px cut, ${tone.toFixed(2)}:1 on its sky` +
@@ -334,34 +339,50 @@ for (const key of A.SCENE_KEYS) {
   ok(Math.abs(height - TARGET_H) <= MASS_TOL, `${key}: equal visual mass`,
     `${height.toFixed(0)} units, target ${TARGET_H}±${MASS_TOL}`);
 
-  // What is behind the body? Sample the darkest thing drawn in the band.
+  // What is behind the body? The darkest thing actually behind him on his
+  // WORST row — not the whole-band union this replaces, which threw away the
+  // plane calculation entirely the instant ANY pixel of the crown-to-knee band
+  // touched the disc. On `stargazer` the disc backs only 24 of 56 rows (42%);
+  // the other 58% sit against the step-3 plane, which is darker — so the old
+  // check reported 14.8:1 (the disc, band-wide) when the true worst case is the
+  // step-3 plane's 3.98:1, a 3.7x overstatement. The other five scenes are
+  // unaffected: their disc never covers any row of the band, so their override
+  // never fired.
   const knee = Math.max(j.kneeL.y, j.kneeR.y);
   const halfW = Math.max(18 * k, Math.abs(j.wrL.x - j.wrR.x) / 2 + 6);
   const planes = A.planesFor(key);
   const p = A.PALETTES[key];
-  let darkest = 5;                                    // 5 = lightest step
-  for (const pl of planes) {
-    const cov = coverage(pl.d, A.ART_W, A.ART_H);
-    let hit = false;
-    for (let y = Math.floor(crown); y <= Math.floor(knee) && !hit; y++) {
-      for (let x = Math.floor(fx - halfW); x <= Math.ceil(fx + halfW); x++) {
-        if (cov[y * A.ART_W + x] > 0.5) { hit = true; break; }
+  // Hoisted out of the row loop: coverage() rasterises a whole 400x800 path, so
+  // each plane (and the disc) is rasterised once here, not once per row.
+  const planeCovs = planes.map((pl) => ({ cov: coverage(pl.d, A.ART_W, A.ART_H), fill: pl.fill }));
+  const dc = coverage(A.discFor(key).d, A.ART_W, A.ART_H);
+
+  let worstLum = 1, worstHex = p.disc, worstRow = -1;
+  for (let y = Math.floor(crown); y <= Math.floor(knee); y++) {
+    let rowHex = null, rowLum = 1;
+    for (const pl of planeCovs) {
+      let hit = false;
+      for (let x = Math.floor(fx - halfW); x <= Math.ceil(fx + halfW) && !hit; x++) {
+        if (pl.cov[y * A.ART_W + x] > 0.5) hit = true;
       }
+      if (!hit) continue;
+      const l = lum(pl.fill);
+      if (rowHex === null || l < rowLum) { rowHex = pl.fill; rowLum = l; }
     }
-    if (hit) darkest = Math.min(darkest, pl.step);
-  }
-  // The celestial disc counts as backing — that is exactly how the night scene
-  // keeps its figure readable, and how the reference does it too.
-  const disc = coverage(A.discFor(key).d, A.ART_W, A.ART_H);
-  let onDisc = false;
-  for (let y = Math.floor(crown); y <= Math.floor(knee) && !onDisc; y++) {
-    for (let x = Math.floor(fx - halfW); x <= Math.ceil(fx + halfW); x++) {
-      if (disc[y * A.ART_W + x] > 0.5) { onDisc = true; break; }
+    if (rowHex === null) {                        // no plane on this row — sky or disc
+      let onDiscRow = false;
+      for (let x = Math.floor(fx - halfW); x <= Math.ceil(fx + halfW) && !onDiscRow; x++) {
+        if (dc[y * A.ART_W + x] > 0.5) onDiscRow = true;
+      }
+      // The celestial disc counts as backing — that is exactly how the night
+      // scene keeps its figure readable, and how the reference does it too.
+      rowHex = onDiscRow ? p.disc : skyHexAt(key, y);
+      rowLum = lum(rowHex);
     }
+    if (rowLum < worstLum) { worstLum = rowLum; worstHex = rowHex; worstRow = y; }
   }
-  const backing = onDisc ? p.disc : p.steps[darkest];
-  ok(ratio(lum(backing), lum(A.INK)) >= 3.0, `${key}: the figure does not vanish`,
-    `${ratio(lum(backing), lum(A.INK)).toFixed(1)}:1 on ${backing}${onDisc ? ' (disc)' : ''}`);
+  ok(ratio(worstLum, lum(A.INK)) >= 3.0, `${key}: the figure does not vanish`,
+    `${ratio(worstLum, lum(A.INK)).toFixed(1)}:1 on ${worstHex} (worst row y${worstRow})`);
 }
 
 console.log(bad === 0 ? '\nlaunch screen: all clear.' : `\n${bad} launch check(s) failed.`);

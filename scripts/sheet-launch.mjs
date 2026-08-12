@@ -26,13 +26,24 @@ const TMP = path.join(os.tmpdir(), 'deeply-launch-sheet');
 mkdirSync(TMP, { recursive: true });
 function emit(rel, name) {
   const src = readFileSync(path.join(REPO, rel), 'utf8')
-    .replace(/from '@\/components\/lesson\/cinematic\/rig'/g, "from './rig.mjs'");
+    .replace(/from '@\/components\/lesson\/cinematic\/rig'/g, "from './rig.mjs'")
+    // moves.ts imports rig relatively rather than through the '@/...' alias, and
+    // launchMotion.ts imports moves.ts through the alias — both need the same
+    // on-disk rewrite rig.ts already gets, or Node's ESM loader can't resolve
+    // the bare specifier. Same rewrite check-launch.mjs's emit() carries.
+    .replace(/from '@\/components\/lesson\/cinematic\/moves'/g, "from './moves.mjs'")
+    .replace(/from '\.\/rig'/g, "from './rig.mjs'");
   writeFileSync(path.join(TMP, name), transform(src, { transforms: ['typescript'] }).code);
   return pathToFileURL(path.join(TMP, name)).href;
 }
 emit('components/lesson/cinematic/rig.ts', 'rig.mjs');
 const R = await import(pathToFileURL(path.join(TMP, 'rig.mjs')).href);
 const A = await import(emit('components/launch/launchArt.ts', 'launchArt.mjs'));
+// LM.launchStance is what check-launch.mjs actually measures each scene against
+// (§Defect 2) — draw that instead of a universal standing gait so the sheet
+// stops rendering a pose no scene plays.
+emit('components/lesson/cinematic/moves.ts', 'moves.mjs');
+const LM = await import(emit('components/launch/launchMotion.ts', 'launchMotion.mjs'));
 
 const W = A.ART_W, H = A.ART_H;
 const FIG_INK = '#1A1A1A';
@@ -89,10 +100,12 @@ function panel(key) {
   cv.path(disc.d, disc.fill, 0, 0);
   for (const pl of A.planesFor(key)) cv.path(pl.d, pl.fill, 0, 0);
 
-  // the figure, on the crest, at this scene's scale
+  // the figure, on the crest, at this scene's scale — the pose it actually
+  // plays (t = 2.0, the same instant check-launch.mjs samples), not a
+  // universal walk cycle.
   const c = A.crestFor(key);
   const x = A.figureX(key);
-  figure(cv, R.walk(14), x, A.crestY(c, x), A.figureK(key));
+  figure(cv, LM.launchStance(key, 2.0), x, A.crestY(c, x), A.figureK(key));
   return cv;
 }
 
