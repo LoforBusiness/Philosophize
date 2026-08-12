@@ -96,5 +96,55 @@ for (const key of A.SCENE_KEYS) {
   ok(c.per !== 0, `${key}: crest period is non-zero`, String(c.per));
 }
 
+// ── 3b · the light is at the horizon, and the land has shapes in it ──────────
+//
+// The first contact sheet showed six flat stacked stripes with a bright seam at
+// every horizon. Both were structural: the sky darkened DOWNWARD into a farthest
+// plane that was lighter than it, and every plane was the same sine wave.
+for (const key of A.SCENE_KEYS) {
+  const p = A.PALETTES[key];
+  const [top, horizon] = p.sky;
+  const planes = A.planesFor(key);
+  const farthest = planes[0].step;
+
+  // The seam: the land at the horizon may not be lighter than the sky it meets.
+  ok(farthest <= horizon, `${key}: farthest plane is no lighter than its horizon`,
+    `plane step ${farthest} vs sky horizon step ${horizon}`);
+
+  // Brightest at the horizon — except a night sky, which is allowed to run the
+  // other way because its light comes from the disc, not the sky.
+  //
+  // `top === 0`, not `top < 2`. Four scenes are dusk with a DARK zenith, which
+  // puts them at sky[0] = 1 — a looser test hands all four the night exemption
+  // and then prints "(night, exempt)" next to a sunset. They pass the real rule
+  // on their own; only stargazer is the night scene, so only stargazer is let off.
+  const night = top === 0;
+  ok(night || horizon > top, `${key}: sky brightens toward the horizon`,
+    `top ${top} -> horizon ${horizon}${night ? ' (night, exempt)' : ''}`);
+
+  // Shapes, not stripes. A bare ridge is ~24 commands; anything carrying a
+  // silhouette is far denser. Measured against the flat version this replaces.
+  for (const pl of planes) {
+    const cmds = (pl.d.match(/[MLZ]/g) || []).length;
+    ok(!/[Aa]/.test(pl.d), `${key}: plane step ${pl.step} is arc-free`);
+    if (pl.step <= 4) {
+      ok(cmds >= 40, `${key}: plane step ${pl.step} carries a silhouette`,
+        `${cmds} commands`);
+    }
+  }
+
+  // Sky detail.
+  const bands = A.skyBandsFor(key);
+  ok(bands.length >= 2 && bands.length <= 4, `${key}: 2-4 sky bands`, String(bands.length));
+  for (const b of bands) {
+    ok(!/[Aa]/.test(b.d), `${key}: sky band is arc-free`);
+    ok(b.opacity > 0 && b.opacity <= 1, `${key}: sky band opacity in range`, String(b.opacity));
+  }
+
+  // Determinism — the same scene must draw identically every call.
+  const again = A.planesFor(key);
+  ok(again.every((q, i) => q.d === planes[i].d), `${key}: planes are deterministic`);
+}
+
 console.log(bad === 0 ? '\nlaunch screen: all clear.' : `\n${bad} launch check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);
