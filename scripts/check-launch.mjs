@@ -6,7 +6,9 @@
 // DARK end and the quote is cream over a scrim, which is what let the art stop
 // being a blank sheet below the horizon. That inversion is only safe if every
 // element's background is decided by construction and then MEASURED. This is the
-// measurement.
+// measurement — for the quote at the bottom (section 8) and, since the chrome
+// stopped taking its contrast from the sky, for the masthead, the stroke and the
+// percentage at the top (section 2).
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -47,11 +49,13 @@ const ok = (cond, label, detail = '') => {
 // ── WCAG luminance, the same arithmetic check-quickstart-contrast.mjs uses ────
 const lin = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
 const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-const lum = (hex) => { const [r, g, b] = hexRgb(hex); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
+const lumRgb = ([r, g, b]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+const lum = (hex) => lumRgb(hexRgb(hex));
 const ratio = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 
-// The sky gradient's colour at a given y — shared by the disc-tone check (3c)
-// and the per-row figure backing (6), so the interpolation is written once.
+// The sky gradient's colour at a given y — shared by `renderScene` (2), the
+// disc-tone check (3c) and the per-row figure backing (6), so the interpolation
+// is written once.
 function skyHexAt(key, y) {
   const stops = A.skyStops(key);
   const t = Math.min(1, Math.max(0, y) / (A.crestFor(key).base - 150));
@@ -91,7 +95,7 @@ for (const key of A.SCENE_KEYS) {
 
 // ── 2 · the chrome band: where it LANDS, and whether it can be READ ──────────
 //
-// Two failures live here, and the second one is why the first went unnoticed.
+// Three failures live here, and each one is why the next went unnoticed.
 //
 // WHERE IT LANDS. The masthead is positioned in SCREEN space
 // (`insets.top + MAST_TOP_PAD`) and the stroke wants STAGE space
@@ -112,20 +116,30 @@ for (const key of A.SCENE_KEYS) {
 // is the relation between two coordinate spaces changing. One device measures
 // one device.
 //
-// WHETHER IT CAN BE READ. An older version measured `chromeOn(key)` at full
-// opacity against the sky's colour at y=0, the very top of the gradient.
-// Nothing renders at y=0. That was fixed, and then only half-fixed: the label
-// said "stroke + percentage" but the sample was the STROKE's y alone, and the
-// percentage is a sibling BELOW the stroke — `STROKE_SVG_H` + `PCT_GAP` + its
-// own line box, so 26–41 screen px lower, stage y 115–129 on the reference —
-// where the same chromeSoft measured 4.12:1 on `walk`. Every element is now
-// measured over the EXTENT it occupies, at the worse of its two ends, and the
-// percentage has its own assertion.
+// WHETHER IT CAN BE READ, ATTEMPT ONE. `chromeOn(key)` returned ink or cream by
+// measuring the sky's top band, and this section measured that choice against
+// `skyHexAt` — the sky GRADIENT's colour at the element's own rows. It cleared
+// 4.5:1 on the 390×844 reference and it was never true anywhere else: below 2:1
+// the cover-fit crops the sky's dark top away, and on a Z Fold's inner screen
+// the whole band measured 3.2–3.6:1 with pure white reaching only 4.03:1. Those
+// numbers were PRINTED here as an advisory note rather than asserted, on the
+// grounds that no alpha could fix them and the honest fix was a scrim. It was.
 //
-// Each element is also measured in the colour IT draws in: the percentage and
-// the masthead in chromeSoft, and the stroke at FULL opacity, because
-// `stroke={chrome}` is what LaunchScreen renders. Measuring the stroke soft
-// under-rated it by ~0.9 of a ratio point — safe, but not true.
+// WHETHER IT CAN BE READ, ATTEMPT TWO — and this is the one to remember.
+// `skyHexAt` returns the sky GRADIENT, and the sky is not the only thing drawn
+// up there. `read`'s cold sun is a near-white disc (#F2F6F8) spanning stage y
+// 172–263, and on 360×640, 820×1180 and 673×841 the chrome lands on it. Cream on
+// that disc is 1.04:1. The masthead was invisible on three of eight shipped
+// aspects while this file printed 3.62 and called it the worst case, because it
+// was measuring a background the screen does not have. A proxy for the picture
+// is not the picture.
+//
+// SO THIS SECTION COMPOSITES THE REAL ART. `renderScene` runs SceneArt's own
+// paint order into an RGB buffer and every assertion below reads the LIGHTEST
+// pixel the art can put under an element, on all eight devices, at both ends of
+// the intro zoom — then puts the top scrim and one fixed CREAM over it. All
+// three elements are cream at full opacity now, so the only thing that differs
+// between them is the span of screen rows each one occupies.
 
 /** A numeric constant read out of LaunchScreen.tsx, so the two cannot drift. */
 function screenConst(name) {
@@ -133,7 +147,7 @@ function screenConst(name) {
   return m ? Number(m[1]) : null;
 }
 const CHROME_CONSTS = [
-  'STROKE_STAGE_Y', 'CHROME_SOFT_INK_ALPHA', 'CHROME_SOFT_CREAM_ALPHA',
+  'STROKE_STAGE_Y',
   'MAST_TOP_PAD', 'MAST_LINE_H', 'CHROME_GAP',
   'STROKE_W', 'STROKE_JITTER', 'STROKE_SVG_H', 'PCT_GAP', 'PCT_LINE_H',
 ];
@@ -144,23 +158,27 @@ ok(missing.length === 0,
   missing.length ? `not found: ${missing.join(' ')}` : CHROME_CONSTS.length + ' read');
 for (const n of CHROME_CONSTS) if (K[n] === null) K[n] = 0;
 
-const INK_ALPHA = K.CHROME_SOFT_INK_ALPHA;
-const CREAM_ALPHA = K.CHROME_SOFT_CREAM_ALPHA;
 /** Half the stroke's real ink height: the path's worst jitter plus half its width. */
 const STROKE_INK_HALF = K.STROKE_JITTER + K.STROKE_W / 2;
 
 /**
- * The reference devices.
+ * The reference devices. EVERY ONE OF THEM IS MEASURED, for geometry and for
+ * contrast alike — there is no "measurement reference" any more.
  *
- * The FIRST is the measurement reference — a mid-size phone, the aspect the
- * composition is authored against, and the one the contrast assertions use.
- * The rest exist so the geometry is checked where `offY` is NOT zero. Six of
- * the seven are below 2:1; on three of those the stroke's ink laid out ABOVE
- * y=0 before the clamp, and on two of those three the percentage did as well.
- * `inset` is the safe-area top each form factor reports.
+ * There used to be: the first entry carried `measure: true` and was the only
+ * aspect the contrast assertions ran on, because on that one alone `offY` is 0
+ * and nothing could be done about the rest anyway. Both halves of that were
+ * wrong. 390×844 is the aspect where the composition is authored and therefore
+ * the aspect least likely to be broken, and "nothing could be done" stopped
+ * being true the moment the chrome got a scrim.
+ *
+ * The spread is the point. Six of the eight are below 2:1; on three of those the
+ * stroke's ink laid out ABOVE y=0 before the clamp, and on two of those three
+ * the percentage did as well. `inset` is the safe-area top each form factor
+ * reports.
  */
 const DEVICES = [
-  { name: '390x844 phone  2.16:1', w: 390, h: 844, inset: 47, measure: true },
+  { name: '390x844 phone  2.16:1', w: 390, h: 844, inset: 47 },
   { name: '360x640 16:9   1.78:1', w: 360, h: 640, inset: 24 },
   { name: '375x667 SE3    1.78:1', w: 375, h: 667, inset: 20 },
   { name: '411x731        1.78:1', w: 411, h: 731, inset: 24 },
@@ -184,32 +202,113 @@ function layout(dev) {
   const pctBot = pctTop + K.PCT_LINE_H;
   const stage = (y) => (y - offY) / fit;
   return {
-    fit, offY, mastTop, mastBot, inkTop, inkBot, pctTop, pctBot,
+    fit, offY, h: dev.h, mastTop, mastBot, inkTop, inkBot, pctTop, pctBot,
+    // The chrome's bottom, and the scrim sized from it by launchArt's own
+    // function — not a copy of the arithmetic, the arithmetic itself.
+    chromeBottom: pctBot,
+    scrimH: A.topScrimHeight(pctBot),
     mast: [stage(mastTop), stage(mastBot)],
     stroke: [stage(inkTop), stage(inkBot)],
     pct: [stage(pctTop), stage(pctBot)],
   };
 }
 
-// Alpha-composite chrome over a background — the same maths an rgba() colour
-// gets when React Native draws it over an opaque surface underneath.
-const compositeLum = (chromeHex, alpha, bgHex) => {
-  const c = hexRgb(chromeHex), bg = hexRgb(bgHex);
-  const mix = c.map((v, i) => bg[i] + (v - bg[i]) * alpha);
-  return 0.2126 * lin(mix[0]) + 0.7152 * lin(mix[1]) + 0.0722 * lin(mix[2]);
-};
-/** Contrast at ONE stage y, chrome composited at `alpha` over the sky there. */
-function contrastAt(key, y, alpha) {
-  const bg = skyHexAt(key, y);
-  return { r: ratio(compositeLum(A.chromeOn(key), alpha, bg), lum(bg)), bg };
+/**
+ * SceneArt's own paint order, composited into an RGB buffer at stage size.
+ *
+ * Base fill → the sky gradient over its own rect → the disc → the sky bands at
+ * their declared `fillOpacity` → the planes, back to front. That order is
+ * load-bearing in launchScenes.tsx and it is load-bearing here: the disc is
+ * painted BEFORE the bands and the planes, so what shows of it is whatever they
+ * leave uncovered, and that is exactly the pixel the chrome has to be read
+ * against. Costs about half a second for all six.
+ */
+function renderScene(key) {
+  const W = A.ART_W, H = A.ART_H;
+  const p = A.PALETTES[key];
+  const stops = A.skyStops(key);
+  const skyH = A.crestFor(key).base - 150;
+  const buf = new Float64Array(W * H * 3);
+  const base = hexRgb(p.steps[p.sky[1]]);
+  for (let i = 0; i < W * H; i++) {
+    buf[i * 3] = base[0]; buf[i * 3 + 1] = base[1]; buf[i * 3 + 2] = base[2];
+  }
+  for (let y = 0; y < Math.min(H, skyH); y++) {
+    const c = hexRgb(skyHexAt(key, y));
+    for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 3;
+      buf[i] = c[0]; buf[i + 1] = c[1]; buf[i + 2] = c[2];
+    }
+  }
+  const over = (d, hex, opacity) => {
+    const cov = coverage(d, W, H), c = hexRgb(hex);
+    for (let px = 0; px < W * H; px++) {
+      const a = Math.min(1, cov[px]) * opacity;
+      if (a <= 0) continue;
+      const i = px * 3;
+      for (let ch = 0; ch < 3; ch++) buf[i + ch] += (c[ch] - buf[i + ch]) * a;
+    }
+  };
+  const disc = A.discFor(key);
+  over(disc.d, disc.fill, 1);
+  for (const b of A.skyBandsFor(key)) over(b.d, b.fill, b.opacity);
+  for (const pl of A.planesFor(key)) over(pl.d, pl.fill, 1);
+  return buf;
 }
-/** The WORSE end of an element's extent — never the anchor, never the midpoint. */
-function worstOver(key, [y0, y1], alpha) {
-  const a = contrastAt(key, y0, alpha), b = contrastAt(key, y1, alpha);
-  return a.r <= b.r ? { ...a, y: y0 } : { ...b, y: y1 };
+const COMPOSITE = Object.fromEntries(A.SCENE_KEYS.map((k) => [k, renderScene(k)]));
+
+/**
+ * A screen y as a stage y, at a given intro zoom.
+ *
+ * `sceneScale` runs 1 → 1.04 over 3800ms about the stage box's centre, so the
+ * art SLIDES under the chrome while the screen is up: on the 390×844 reference
+ * the stroke's row starts over stage y 89 and ends over stage y 101. The chrome
+ * itself does not move — it is outside the animated box — so the zoom changes
+ * nothing about the layout and everything about what is behind it. Both ends
+ * are sampled below; measuring frame one only would be measuring a third of a
+ * second of a 3.4-second screen.
+ */
+function stageRow(L, y, scale) {
+  const boxTop = L.offY + (A.ART_H * L.fit) * (1 - scale) / 2;
+  return (y - boxTop) / (L.fit * scale);
 }
 
-// ── 2a · geometry, on every reference device ─────────────────────────────────
+/**
+ * The LIGHTEST pixel the art can put behind a span of screen rows.
+ *
+ * Sampled across the full stage width, which is conservative on purpose and
+ * costs nothing: `offX = (w − 400·fit)/2` with `fit = max(w/400, h/800)` is
+ * never positive, so the stage is always at least as wide as the screen and
+ * stage x 0…399 is a superset of what is visible.
+ */
+function lightestUnder(key, L, y0, y1) {
+  const W = A.ART_W, H = A.ART_H, buf = COMPOSITE[key];
+  let best = -1, at = null;
+  for (const scale of [1, 1.04]) {
+    const r0 = Math.max(0, Math.floor(stageRow(L, y0, scale)));
+    const r1 = Math.min(H - 1, Math.ceil(stageRow(L, y1, scale)));
+    for (let sy = r0; sy <= r1; sy++) {
+      for (let x = 0; x < W; x++) {
+        const i = (sy * W + x) * 3;
+        const l = lumRgb([buf[i], buf[i + 1], buf[i + 2]]);
+        if (l > best) {
+          best = l;
+          at = { sy, scale, rgb: [buf[i], buf[i + 1], buf[i + 2]].map(Math.round) };
+        }
+      }
+    }
+  }
+  return { lum: best, ...at };
+}
+
+/** CREAM on the top scrim on the worst pixel under a span. */
+function chromeReads(key, L, [y0, y1]) {
+  const w = lightestUnder(key, L, y0, y1);
+  const mixed = w.rgb.map((v, i) => v + (A.SCRIM_RGB[i] - v) * A.TOP_SCRIM_ALPHA);
+  return { ...w, r: ratio(lum(A.CREAM), lumRgb(mixed)) };
+}
+
+// ── 2a · geometry, and the scrim's reach, on every reference device ──────────
 for (const dev of DEVICES) {
   const L = layout(dev);
   ok(L.inkTop > L.mastBot, `${dev.name}: stroke ink clears the masthead`,
@@ -219,64 +318,67 @@ for (const dev of DEVICES) {
     `ink ${L.inkTop.toFixed(1)}..${L.inkBot.toFixed(1)}`);
   ok(L.pctTop >= 0, `${dev.name}: the percentage is on screen`,
     `pct ${L.pctTop.toFixed(1)}..${L.pctBot.toFixed(1)}`);
+  // The whole guarantee in one line: full alpha has to reach the last row of
+  // the percentage's line box. It does by construction — `topScrimHeight` is
+  // `chromeBottom / TOP_SCRIM_HOLD` — and this is what fails if that stops
+  // being true, e.g. if someone sizes the scrim as a percentage of the screen.
+  const hold = L.scrimH * A.TOP_SCRIM_HOLD;
+  ok(hold + 1e-9 >= L.pctBot, `${dev.name}: the top scrim's full alpha covers the chrome`,
+    `hold ends ${hold.toFixed(1)}, chrome ends ${L.pctBot.toFixed(1)}; scrim ` +
+    `${L.scrimH.toFixed(0)}px = ${(100 * L.scrimH / L.h).toFixed(0)}% of the screen`);
 }
 
-// ── 2b · contrast, at the measurement reference, over each element's extent ──
-const REF = DEVICES.find((d) => d.measure);
-const RL = layout(REF);
-for (const key of A.SCENE_KEYS) {
-  const c = A.chromeOn(key);
-  ok(c === A.INK || c === A.CREAM, `${key}: chrome is ink or cream`, c);
-  const alpha = c === A.INK ? INK_ALPHA : CREAM_ALPHA;
+// ── 2b · the scrim's stops are the shape the guarantee assumes ───────────────
+const TS = A.TOP_SCRIM_STOPS;
+ok(TS.length >= 3, 'the top scrim has a hold, a fade and an end', `${TS.length} stops`);
+ok(TS.every((s, i) => i === 0 || s.offset > TS[i - 1].offset),
+  'the top scrim\'s stops run downward', TS.map((s) => s.offset).join(' → '));
+ok(TS[0].offset === 0 && TS[0].opacity === A.TOP_SCRIM_ALPHA,
+  'the top scrim starts at full alpha on the screen edge', `${TS[0].opacity} at ${TS[0].offset}`);
+const holdStop = TS.find((s) => s.offset === A.TOP_SCRIM_HOLD);
+ok(!!holdStop && holdStop.opacity === A.TOP_SCRIM_ALPHA,
+  'the top scrim still holds full alpha at TOP_SCRIM_HOLD',
+  `${A.TOP_SCRIM_ALPHA} at ${A.TOP_SCRIM_HOLD}`);
+ok(TS[TS.length - 1].offset === 1 && TS[TS.length - 1].opacity === 0,
+  'the top scrim fades to nothing rather than ending on an edge',
+  `${TS[TS.length - 1].opacity} at ${TS[TS.length - 1].offset}`);
 
-  const m = worstOver(key, RL.mast, alpha);
-  ok(m.r >= 4.5, `${key}: masthead reads over its own box (soft chrome)`,
-    `${m.r.toFixed(2)}:1 at stage y${m.y.toFixed(0)} on ${m.bg}`);
-
-  // Full opacity: `stroke={chrome}` is what renders, so that is what is measured.
-  const s = worstOver(key, RL.stroke, 1);
-  ok(s.r >= 4.5, `${key}: stroke reads over its own ink extent (full chrome)`,
-    `${s.r.toFixed(2)}:1 at stage y${s.y.toFixed(0)} on ${s.bg}`);
-
-  const p = worstOver(key, RL.pct, alpha);
-  ok(p.r >= 4.5, `${key}: percentage reads over its own line box (soft chrome)`,
-    `${p.r.toFixed(2)}:1 at stage y${p.y.toFixed(0)} on ${p.bg}`);
-}
-
-// ── 2c · what the clamp costs, printed rather than asserted ──────────────────
+// ── 2c · contrast, every element, every device, worst of all six scenes ──────
 //
-// NOT an assertion, and the reason is arithmetic rather than leniency. Below
-// 2:1 the cover-fit crops the sky's DARK end off the top of the frame: on a Z
-// Fold's inner screen the topmost visible row is already stage y 150, and the
-// masthead — which has always been in screen space and is not what this fix
-// moved — sits at stage 178-186 whatever anything else does.
-//
-// Measured on `walk` at the stroke's clamped span there (stage 195.2-200.0,
-// sky #9E7453-#A07653): its cream chrome reads 3.67-3.57:1 at FULL opacity,
-// and PURE WHITE reaches only 4.14-4.03:1. No value of CHROME_SOFT_CREAM_ALPHA
-// can lift that over 4.5, so asserting the floor per-device would be asserting
-// something unreachable. (Ink reads 4.21-4.32 across the same span, also short,
-// and `chromeOn` derives the chrome from the sky's TOP band by construction
-// rather than per device — see launchArt.ts.) The honest fix is a scrim under
-// the chrome, the way §19 already does for the quote, and that is a design
-// change rather than a layout one. Printed so the cost is visible and can be
-// traded off deliberately — a number nobody prints is the state this whole
-// section exists to end.
-console.log('\n  note  chrome contrast off the measurement reference (worst scene, ' +
-  'masthead / stroke / percentage):');
+// This used to be a printed advisory. It is assertions now, which is the whole
+// point of the scrim: the floor is reached by construction rather than by which
+// scene the shuffle happened to pick and which phone the reader happened to own.
+const ELEMENTS = [
+  ['masthead', (L) => L.mast],
+  ['stroke', (L) => L.stroke],
+  ['percentage', (L) => L.pct],
+];
+const GRID = {};
 for (const dev of DEVICES) {
   const L = layout(dev);
-  let wm = Infinity, ws = Infinity, wp = Infinity, low = Infinity, who = '';
-  for (const key of A.SCENE_KEYS) {
-    const alpha = A.chromeOn(key) === A.INK ? INK_ALPHA : CREAM_ALPHA;
-    const m = worstOver(key, L.mast, alpha).r;
-    const s = worstOver(key, L.stroke, 1).r;
-    const p = worstOver(key, L.pct, alpha).r;
-    wm = Math.min(wm, m); ws = Math.min(ws, s); wp = Math.min(wp, p);
-    if (Math.min(m, s, p) < low) { low = Math.min(m, s, p); who = key; }
+  GRID[dev.name] = {};
+  for (const [label, span] of ELEMENTS) {
+    let worst = null, who = '';
+    for (const key of A.SCENE_KEYS) {
+      const c = chromeReads(key, L, span(L));
+      if (!worst || c.r < worst.r) { worst = c; who = key; }
+      const cell = GRID[dev.name][key];
+      if (!cell || c.r < cell.r) GRID[dev.name][key] = { r: c.r, label };
+    }
+    ok(worst.r >= 4.5, `${dev.name}: ${label} reads on the top scrim`,
+      `${worst.r.toFixed(2)}:1 worst of six scenes (${who}, rgb(${worst.rgb.join(',')}) ` +
+      `at stage y${worst.sy} zoom ${worst.scale})`);
   }
-  console.log(`          ${dev.name}  ${wm.toFixed(2)} / ${ws.toFixed(2)} / ${wp.toFixed(2)}` +
-    `   (worst scene ${who}; stroke stage y ${L.stroke[0].toFixed(0)}-${L.stroke[1].toFixed(0)})`);
+}
+
+// The same measurements per scene, printed. Nothing here can hide a failure —
+// every cell is covered by an assertion above — but a grid says which scene is
+// close to the floor, which the worst-of-six line cannot.
+console.log('\n  note  worst chrome element per scene per device, cream on the top scrim:');
+console.log('          ' + 'device'.padEnd(24) + A.SCENE_KEYS.map((k) => k.padStart(11)).join(''));
+for (const dev of DEVICES) {
+  console.log('          ' + dev.name.padEnd(24) +
+    A.SCENE_KEYS.map((k) => `${GRID[dev.name][k].r.toFixed(2)}`.padStart(11)).join(''));
 }
 console.log('');
 
@@ -585,8 +687,8 @@ for (const key of A.SCENE_KEYS) {
 // as raw decimal rgba() (`rgba(26,26,26,0.62)`) instead of derived from the
 // imported constants (#Defect one-liner 2). launchScenes.tsx still may not
 // declare ANY colour of its own; LaunchScreen.tsx is allowed rgba()/hex for
-// things that are not a scene colour (the quote's drop-shadow, the scrim's own
-// `rgb()` built from the imported SCRIM_RGB) — but INK's and CREAM's decimal
+// things that are not a scene colour (the drop-shadows, and the `rgb()` both
+// scrims build from the imported SCRIM_RGB) — but INK's and CREAM's decimal
 // triples typed literally is precisely how #2 shipped, so those two are
 // checked for by name and must never reappear.
 const scenes = fs.readFileSync(path.join(REPO, 'components/launch/launchScenes.tsx'), 'utf8');
@@ -603,11 +705,14 @@ const screenLiterals = (screen.match(new RegExp(`${INK_DECIMAL.source}|${CREAM_D
 ok(screenLiterals.length === 0, 'LaunchScreen.tsx does not hardcode INK/CREAM as decimals',
   screenLiterals.join(' ') || 'none');
 
-// ── 8 · the quote and the chrome are legible where they actually sit ─────────
+// ── 8 · the quote is legible where it actually sits ──────────────────────────
 //
 // §19's rule: never take text contrast from the artwork. The quote takes it from
 // a FIXED scrim and one fixed cream, and this is the arithmetic. The welcome end
 // card measures 8.7:1 doing exactly this, so 7:1 is a floor, not an aspiration.
+// (The chrome at the top of the screen is the same construction inverted, and it
+// is measured in section 2 — against the composited art rather than against the
+// darkest plane, because the top of the frame is where the bright things are.)
 ok(/D\s*E\s*E\s*P\s*L\s*Y/.test(screen), 'the masthead says DEEPLY');
 // The pre-rename masthead was letter-spaced too ("P H I L O S O P H I Z E"),
 // which `/PHILOSOPHIZE/` — a contiguous run — can never match; this assertion

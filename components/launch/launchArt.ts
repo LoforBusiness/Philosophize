@@ -17,19 +17,83 @@ export const INK = '#1A1A1A';
 export const CREAM = '#F4F1EA';
 
 /**
- * The scrim the quote sits on — one fixed dark colour at three opacities,
- * near-clear at the top so the picture reads, near-solid where the words are
- * (§19's rule: never take text contrast from the artwork). The ONE place this
- * is declared — LaunchScreen.tsx builds its gradient `<Stop>`s from it and
- * check-launch.mjs measures contrast against it, so tuning either can never
- * again silently stop describing what the other one does.
+ * The ONE dark the two scrims are mixed from. Declared here, not in the
+ * renderer — LaunchScreen.tsx builds its gradient `<Stop>`s from these exports
+ * and check-launch.mjs measures contrast against the same numbers, so tuning
+ * either can never again silently stop describing what the other one does.
  */
 export const SCRIM_RGB: readonly [number, number, number] = [16, 15, 13];
+
+/**
+ * THE QUOTE'S SCRIM, at the bottom of the screen — near-clear at the top so the
+ * picture reads, near-solid where the words are (§19's rule: never take text
+ * contrast from the artwork).
+ */
 export const SCRIM_STOPS: ReadonlyArray<{ offset: number; opacity: number }> = [
   { offset: 0, opacity: 0 },
   { offset: 0.55, opacity: 0.66 },
   { offset: 1, opacity: 0.94 },
 ];
+
+/**
+ * THE CHROME'S SCRIM, at the top — the same construction inverted, and the
+ * reason `chromeOn()` no longer exists.
+ *
+ * The masthead, the progress stroke and the percentage used to take their
+ * contrast from the artwork: `chromeOn(key)` measured the sky's top band and
+ * returned ink or cream. That worked while the sky's dark end was reliably at
+ * the top, and it stopped working twice over. The sky was inverted to be
+ * brightest at the HORIZON, and below a 2:1 aspect the cover-fit crops the dark
+ * top away entirely — on a Z Fold's inner screen the topmost visible row is
+ * already stage y 150, where `walk`'s sky is #9E7453 and PURE WHITE reaches only
+ * 4.03:1. No colour and no alpha could fix that.
+ *
+ * Worse, measuring the *sky gradient* was measuring the wrong thing: `read`'s
+ * cold sun is a near-white disc at stage y 172-263, and on 360x640, 820x1180 and
+ * 673x841 the chrome lands squarely on it. Cream on #F2F6F8 is 1.04:1 — the
+ * masthead was invisible on three of eight shipped aspects and nothing said so.
+ *
+ * So the chrome is fixed cream on a fixed scrim now, exactly like the quote.
+ *
+ * ALPHA 0.66 IS MEASURED, NOT PICKED. The lightest pixel that can sit behind any
+ * chrome element, over six scenes x eight aspects x both ends of the 1.00-1.04
+ * intro zoom, is that sun: rgb(242,246,248), relative luminance 0.916. Composite
+ * SCRIM_RGB over it at alpha a and put CREAM on top:
+ *
+ *   a = 0.590 -> 4.50:1   the bare minimum, and no margin at all
+ *   a = 0.660 -> 5.81:1   this
+ *   a = 0.700 -> 6.70:1   and by here the pale scenes are losing their morning
+ *
+ * `TOP_SCRIM_HOLD` is the fraction of the scrim's own height that holds that
+ * full alpha. LaunchScreen sizes the scrim as `topScrimHeight(chromeBottom)`, so
+ * the hold ends EXACTLY at the bottom of the percentage's line box whatever the
+ * clamp did with the layout — the guarantee is therefore "every chrome pixel
+ * sits on alpha 0.66", by construction, not "on a device we happened to check".
+ * The remaining 52% fades out, in two runs rather than one straight line, so the
+ * bottom of the scrim has no edge to it.
+ */
+export const TOP_SCRIM_HOLD = 0.48;
+export const TOP_SCRIM_ALPHA = 0.66;
+export const TOP_SCRIM_STOPS: ReadonlyArray<{ offset: number; opacity: number }> = [
+  { offset: 0, opacity: TOP_SCRIM_ALPHA },
+  { offset: TOP_SCRIM_HOLD, opacity: TOP_SCRIM_ALPHA },
+  { offset: 0.72, opacity: 0.2 },
+  { offset: 1, opacity: 0 },
+];
+
+/**
+ * How tall the top scrim must be for its full-alpha run to end exactly at
+ * `chromeBottom` (the bottom of the percentage's line box, in screen px).
+ *
+ * A function rather than a number because the chrome's bottom MOVES: it is
+ * `max(insets.top + MAST_TOP_PAD + MAST_LINE_H + CHROME_GAP, offY + STROKE_STAGE_Y * fit)`
+ * plus the stroke box, the gap and the line box — 136px on a 390x844 phone,
+ * 114px on a Z Fold. Both LaunchScreen.tsx and check-launch.mjs call this, so
+ * the scrim the checker measures is the scrim that renders.
+ */
+export function topScrimHeight(chromeBottom: number): number {
+  return chromeBottom / TOP_SCRIM_HOLD;
+}
 
 /** The frame everything here is authored in. Same stage as the figure. */
 export const ART_W = STAGE_W;   // 400
@@ -46,7 +110,7 @@ export interface Palette {
   steps: readonly [string, string, string, string, string, string];
   /** The celestial anchor's fill. May sit a touch warmer than the family. */
   disc: string;
-  /** Which steps the sky occupies, top → horizon. Drives chromeOn(). */
+  /** Which steps the sky occupies, top → horizon. Drives skyStops(). */
   sky: readonly [number, number];
 }
 
@@ -60,9 +124,10 @@ export interface Palette {
 //   sky[1] > sky[0]      the sky brightens downward (night is exempt)
 //   planes[0].step <= sky[1]   the farthest land is never lighter than its horizon
 //
-// `chromeOn` reads steps[sky[0]], so the top of the sky decides whether the
-// masthead comes out ink or cream. A mid-tone top fails the 4.5:1 assertion in
-// both directions — the sky top has to commit to being dark or being pale.
+// The top of the sky used to carry a third constraint — it decided whether the
+// masthead came out ink or cream, so it had to commit to being dark or being
+// pale. It does not any more: the chrome sits on TOP_SCRIM_STOPS, so steps[sky[0]]
+// is free to be whatever the picture wants.
 export const PALETTES: Record<SceneKey, Palette> = {
   // amber dusk — a low sun going down behind desert mesas
   walk: {
@@ -70,8 +135,8 @@ export const PALETTES: Record<SceneKey, Palette> = {
     disc: '#FFE0A8',
     sky: [1, 4],
   },
-  // pale gold morning — the high-key one, and the one scene whose chrome still
-  // comes out INK. It has to span two steps: [4, 5] is a one-step sky, and this
+  // pale gold morning — the high-key one, and so the scene the top scrim costs
+  // the most. It has to span two steps: [4, 5] is a one-step sky, and this
   // family's top two steps are 1.29:1 apart, so the whole thing rendered as a
   // single flat cream with the far hills invisible inside it.
   sip: {
@@ -91,8 +156,8 @@ export const PALETTES: Record<SceneKey, Palette> = {
     disc: '#DCEFE4',
     sky: [1, 5],
   },
-  // dusk blue — THE NIGHT SCENE. Sky is the DARK end, so chrome comes out cream.
-  // This is the case a fixed "the sky is always light" rule would have banned.
+  // dusk blue — THE NIGHT SCENE, and the case a fixed "the sky is always light"
+  // rule would have banned: its sky is the DARK end, top to bottom.
   // Its horizon still lifts to step 4, because a moon lays a glow on the skyline
   // and because the far treeline has to have something to read against.
   stargazer: {
@@ -107,30 +172,6 @@ export const PALETTES: Record<SceneKey, Palette> = {
     sky: [1, 4],
   },
 };
-
-/** The tone the top band (y 0–300) averages to — what chrome sits on. */
-export function skyBandTone(key: SceneKey): string {
-  return PALETTES[key].steps[PALETTES[key].sky[0]];
-}
-
-/**
- * Ink or cream, DERIVED — never hand-picked per scene.
- *
- * The old file fixed the dark zone to the top third so chrome could always be
- * light. That worked, and it also banned every night sky. Reading the sky band's
- * own luminance keeps the guarantee (nothing lands on a background it cannot be
- * read against) without the ban.
- */
-export function chromeOn(key: SceneKey): string {
-  const l = (hex: string) => {
-    const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
-    const f = (v: number) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
-    return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]);
-  };
-  const r = (a: number, b: number) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
-  const sky = l(skyBandTone(key));
-  return r(l(INK), sky) >= r(l(CREAM), sky) ? INK : CREAM;
-}
 
 /**
  * A crest contour as PLAIN NUMBERS: y = base - sin((x - off) / per) * amp.

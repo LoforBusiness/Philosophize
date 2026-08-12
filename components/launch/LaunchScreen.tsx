@@ -20,16 +20,23 @@ import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-import { chromeOn, PALETTES, CREAM, INK, SCRIM_RGB, SCRIM_STOPS } from './launchArt';
+import {
+  PALETTES, CREAM, SCRIM_RGB, SCRIM_STOPS,
+  TOP_SCRIM_STOPS, topScrimHeight,
+} from './launchArt';
 
 // The scene now runs full-bleed to the bottom edge and the foreground is the
 // DARK end, which is what let the art stop being a blank sheet below the horizon.
-// Two things carry the legibility that the old paper band used to:
-//   · the quote sits on a FIXED scrim in one fixed cream with its own shadow
-//     (§19 — never take text contrast from the artwork);
-//   · the masthead and the progress stroke take `chromeOn(scene.key)`, which is
-//     DERIVED from the sky band's own luminance rather than chosen per scene.
-// scripts/check-launch.mjs measures both. Nothing here is a guess.
+// NOTHING ON THIS SCREEN TAKES ITS CONTRAST FROM THE ARTWORK (§19). Both ends
+// are built the same way: a FIXED gradient scrim mixed from SCRIM_RGB, one fixed
+// cream over it, and a drop shadow on top of that.
+//   · the quote, at the bottom, on SCRIM_STOPS — clear at its top edge, 0.94
+//     where the words are;
+//   · the masthead, the stroke and the percentage, at the top, on
+//     TOP_SCRIM_STOPS — the same thing inverted, 0.66 across the whole chrome
+//     band and out to nothing below it.
+// scripts/check-launch.mjs composites the real art under both and measures them.
+// Nothing here is a guess.
 
 // ─── THE CHROME BAND ─────────────────────────────────────────────────────────
 //
@@ -73,8 +80,11 @@ const PCT_LINE_H = 15;          // the percentage's line box
 //
 // launchArt.ts inverted the sky so it is brightest at the HORIZON: the top of
 // the frame is now the dark end. 258 was chosen for the OLD sky — dark at top,
-// pale at bottom — and under the new gradient that y sits ~58% down, the
-// brightest region cream chrome can land on. 90 puts it back in the dark band.
+// pale at bottom — and under the new gradient that y sits ~58% down, in the
+// brightest part of the frame. 90 keeps the stroke up where the composition
+// wants it, high in the sky and well clear of the figure. Legibility is no
+// longer a reason to prefer one y over another — the top scrim covers whatever
+// row the clamp lands on — but the composition still is.
 //
 // The clearance it buys, on the 390×844 reference check-launch.mjs measures
 // (insets.top 47, fit 1.055, offY 0), with every term shown:
@@ -90,25 +100,13 @@ const PCT_LINE_H = 15;          // the percentage's line box
 // sits at stage y 512–575, so the other end has ~420 units and is not close.
 const STROKE_STAGE_Y = 90;
 
-// chromeSoft's alpha, per chrome colour. Raised twice, both times because the
-// composited pixel was measured rather than assumed: the ORIGINAL pair
-// (ink .62 / cream .70) could not clear 4.5:1 anywhere, and .88 cream cleared
-// it at the STROKE's y while the PERCENTAGE — a sibling 26–41px lower, i.e.
-// stage y 115–129 on the reference — sat at 4.12:1 on `walk` and was never
-// measured at all.
-//
-// .955 is the measured minimum that clears 4.5:1 at stage y 128.9, the
-// percentage's lowest row, on `walk` (the scene with the brightest sky under
-// cream chrome). .96 is the nearest hundredth above it and measures 4.55:1.
-// THAT IS 0.04 OF MARGIN AND THERE IS NO MORE: the percentage cannot be moved
-// up, because the masthead is directly above it and the sky only brightens
-// downward. If this needs to give again, the answer is a scrim under the
-// chrome, not another decimal. check-launch.mjs asserts all three elements at
-// the y each one actually occupies.
-const CHROME_SOFT_INK_ALPHA = 0.76;
-const CHROME_SOFT_CREAM_ALPHA = 0.96;
+// There were two alphas here, one for ink chrome and one for cream, tuned until
+// the chrome could be read off the sky. The last note left on them said the
+// cream one had "0.04 of margin and there is no more… if this needs to give
+// again, the answer is a scrim under the chrome". It did, and it is: the chrome
+// is cream on TOP_SCRIM_STOPS now and neither alpha has anything left to do.
 
-/** `chrome`, alpha-blended — derived from INK/CREAM, never retyped as decimals. */
+/** CREAM, alpha-blended — derived from the constant, never retyped as decimals. */
 function toRgba(hex: string, alpha: number): string {
   const n = parseInt(hex.slice(1), 16);
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
@@ -180,11 +178,11 @@ interface Props {
 }
 
 // The cold-start loading moment: one of six hand-drawn outdoor scenes (a
-// different one each launch), the figure living in it, an ink stroke that draws
+// different one each launch), the figure living in it, a cream stroke that draws
 // itself across the sky as a progress line with a counting percentage, and a
-// short quote resting on a dark scrim at the bottom. The stroke takes
-// `chromeOn(scene.key)` — cream on five of six scenes, ink on the pale-gold one
-// — never a fixed ink stroke. At 100% the screen lifts away.
+// short quote resting on a dark scrim at the bottom. Both ends of the screen are
+// fixed cream on a fixed scrim, so the scene underneath can be anything at all.
+// At 100% the screen lifts away.
 export default function LaunchScreen({ ready, skipAnimation = false, onDone }: Props) {
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -192,8 +190,6 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
   // One scene + one quote per launch.
   const seed = useMemo(() => Math.floor(Math.random() * 233280), []);
   const scene = LAUNCH_SCENES[seed % LAUNCH_SCENES.length];
-  const chrome = chromeOn(scene.key);
-  const chromeSoft = toRgba(chrome, chrome === INK ? CHROME_SOFT_INK_ALPHA : CHROME_SOFT_CREAM_ALPHA);
   const base = PALETTES[scene.key].steps[0];
   const quote = SHORT_QUOTES.length > 0 ? SHORT_QUOTES[seed % SHORT_QUOTES.length] : FALLBACK_QUOTE;
 
@@ -215,6 +211,13 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
   // note by MAST_TOP_PAD — this one line is the whole of that fix.
   const mastTop = insets.top + MAST_TOP_PAD;
   const strokeTop = Math.max(mastTop + MAST_LINE_H + CHROME_GAP, offY + STROKE_STAGE_Y * fit);
+
+  // THE BOTTOM OF THE CHROME, and therefore the bottom of the scrim's full-alpha
+  // run. Derived from `strokeTop` — the clamped one — down through the stroke's
+  // box, `strokeWrap`'s own gap and the percentage's line box, which is the same
+  // chain check-launch.mjs lays out. Every term is a named constant above, so a
+  // scrim that stops short of the percentage is not a thing that can be typed.
+  const chromeBottom = strokeTop + STROKE_SVG_H + PCT_GAP + PCT_LINE_H;
 
   const progress = useSharedValue(0);
   const screenOpacity = useSharedValue(1);
@@ -281,7 +284,9 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
     <Animated.View
       style={[StyleSheet.absoluteFill, styles.root, { backgroundColor: base }, rootStyle]}
     >
-      <StatusBar barStyle={chrome === INK ? 'dark-content' : 'light-content'} />
+      {/* Always light: the status bar sits inside the top scrim's full-alpha
+          run on every device, whatever scene came up behind it. */}
+      <StatusBar barStyle="light-content" />
 
       {/* The scene: inert SVG art with the figure moving on top of it, both in
           stage coordinates. needsOffscreenAlphaCompositing so the intro fade
@@ -321,12 +326,38 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#ls-fade)" />
       </Svg>
 
+      {/* The chrome's scrim — the same construction as the quote's, inverted:
+          full alpha from the top edge down to `chromeBottom`, then out to
+          nothing. `topScrimHeight` is what makes the hold land exactly there,
+          so this is sized by the layout rather than by a guessed percentage.
+          Unanimated, like the quote's — the text fades in over it. */}
+      <Svg
+        width="100%"
+        height={topScrimHeight(chromeBottom)}
+        style={styles.topScrim}
+        pointerEvents="none"
+      >
+        <Defs>
+          <LinearGradient id="ls-top-fade" x1="0" y1="0" x2="0" y2="1">
+            {TOP_SCRIM_STOPS.map((s) => (
+              <Stop
+                key={s.offset}
+                offset={s.offset}
+                stopColor={`rgb(${SCRIM_RGB.join(',')})`}
+                stopOpacity={s.opacity}
+              />
+            ))}
+          </LinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#ls-top-fade)" />
+      </Svg>
+
       {/* Masthead */}
       <Animated.View style={[styles.mast, { top: mastTop }, fadeInStyle]}>
-        <Text style={[styles.mastText, { color: chromeSoft }]}>D E E P L Y</Text>
+        <Text style={[styles.mastText, { color: CREAM }]}>D E E P L Y</Text>
       </Animated.View>
 
-      {/* The ink stroke drawing itself + percentage, pinned to the sky — but
+      {/* The cream stroke drawing itself + percentage, pinned to the sky — but
           never above the masthead, and never off the top of the display. */}
       <Animated.View style={[styles.strokeWrap, { top: strokeTop }, fadeInStyle]}>
         <Svg
@@ -336,7 +367,7 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
         >
           <AnimatedPath
             d={d}
-            stroke={chrome}
+            stroke={CREAM}
             strokeWidth={STROKE_W}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -345,7 +376,7 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
             animatedProps={strokeProps}
           />
         </Svg>
-        <Pct progress={progress} color={chromeSoft} />
+        <Pct progress={progress} color={CREAM} />
       </Animated.View>
 
       {/* Quote */}
@@ -363,11 +394,11 @@ const styles = StyleSheet.create({
   root: { zIndex: 1000, elevation: 1000 },
   stageBox: { position: 'absolute', overflow: 'hidden' },
   scrim: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+  topScrim: { position: 'absolute', left: 0, right: 0, top: 0 },
   mast: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
-  // Same drop-shadow the quote wears below — the masthead and the percentage
-  // sit on a gradient that swings much further than the quote's flat scrim,
-  // so they get the same legibility hedge, on top of (not instead of) the
-  // measured chromeSoft contrast above.
+  // The same drop-shadow the quote wears below, and it is the same hedge for
+  // the same reason: it sits ON TOP of the measured scrim contrast, never
+  // instead of it. Nothing here is relying on a shadow to be readable.
   mastText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 10,
