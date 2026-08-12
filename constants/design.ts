@@ -16,8 +16,16 @@ export const C = {
   /** The accent. STRUCTURAL ONLY — outlines, button lips, rings, tracks.
    *  Never a flooded surface: the loudest thing on any screen stays ink. */
   HUE: '#1B3B3C',
-  /** A second petrol tone, distinct from both the accent and ink. */
-  HUE_DEEP: '#2E5556',
+
+  // NO SEPARATE SHADOW COLOUR — and don't add one back. The button's lip is a
+  // solid slab of `HUE` itself; the face lands on it, so the lip IS the shadow.
+  // A second "deeper" petrol tone (`HUE_DEEP`) was tried here and removed:
+  // nothing ever consumed it, and the only value that cleared the distinctness
+  // check against `HUE` and `ink` was LIGHTER than `HUE` — backwards for a
+  // shadow. A colour and its own shade are meant to read as one material, which
+  // is what `components/shared/tone.ts` does correctly for the rank pins
+  // (light/shadow on one hex), not a second, separately-named hex.
+
   /** Progress tracks and faint fills. */
   HUE_SOFT: '#F0F7F6',
 
