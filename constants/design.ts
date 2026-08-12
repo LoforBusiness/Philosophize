@@ -31,6 +31,9 @@ export const C = {
 
   ink: '#1A1A1A',
   inkSoft: '#686868',
+  /** For disabled and decorative marks ONLY — never for text a user needs to
+   *  read. Measured at 2.11:1 on `paper`, under even the 3:1 non-text floor;
+   *  it recedes on purpose and is not a body/caption colour. */
   dim: '#B3AEA3',
 
   paper: '#FAFAF7',

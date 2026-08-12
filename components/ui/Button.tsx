@@ -62,10 +62,14 @@ export default function Button({
       style={[{ opacity: disabled ? 0.4 : 1 }, style]}
     >
       {/* The lip: a solid slab the face rests on. It is not a shadow — a shadow
-          would blur, and this has to read as a physical edge. */}
-      <View style={{ borderRadius: RADIUS.button, backgroundColor: f.lip ?? 'transparent' }}>
+          would blur, and this has to read as a physical edge.
+          The parent's height is CONSTANT (paddingBottom: lip, never animated) —
+          it reserves the lip's space permanently. Only the face moves, and
+          translateY is paint-only, so Yoga never re-measures this box and
+          nothing below the button shifts when it is pressed. */}
+      <View style={{ borderRadius: RADIUS.button, backgroundColor: f.lip ?? 'transparent', paddingBottom: lip }}>
         <MotiView
-          animate={{ translateY: drop, marginBottom: lip - drop }}
+          animate={{ translateY: drop }}
           transition={{ type: 'timing', duration: 90, easing: Easing.out(Easing.quad) }}
           style={[
             styles.face,

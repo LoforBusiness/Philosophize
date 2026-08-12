@@ -56,6 +56,12 @@ const spread = (a, b) => {
 // on the RGB diagonal, so a near-duplicate grey still fails both halves — this
 // does not let an actual duplicate through. Do not simplify this back to
 // luminance alone.
+//
+// CAVEAT: raw sRGB distance is not colourblind-aware. Its one live use today
+// (correct/wrong) is safe only because every answer-state site also carries a
+// checkmark/X mark, not because 60 was chosen with any colour-vision model in
+// mind -- a future palette addition should not be assumed distinguishable to a
+// deuteranope or protanope just because it clears this number.
 const shades = Object.entries(D.C).filter(([, v]) => /^#[0-9A-Fa-f]{6}$/.test(v));
 ok(shades.length <= 14, 'the palette stays small', `${shades.length} colours`);
 for (let i = 0; i < shades.length; i++) {
@@ -75,6 +81,8 @@ const PAIRS = [
   ['paper', 'ink', 4.5],            // cream text on the primary button
   ['HUE', 'paper', 3.0],            // an outline is a graphic, not body text
   ['wrong', 'paper', 4.5],
+  ['inkSoft', 'surfaceSoft', 4.5],
+  ['wrong', 'wrongSoft', 4.5],      // the Danger Zone's text on its own fill
 ];
 for (const [fg, bg, floor] of PAIRS) {
   const r = ratio(lum(D.C[fg]), lum(D.C[bg]));
