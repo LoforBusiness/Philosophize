@@ -95,7 +95,8 @@
     "check:frame": "node scripts/check-frame.mjs",
     "measure:must": "node scripts/measure-must.mjs",
     "check:launch": "node scripts/check-launch.mjs",
-    "sheet:launch": "node scripts/sheet-launch.mjs"
+    "sheet:launch": "node scripts/sheet-launch.mjs",
+    "camera:wins": "node scripts/camera-wins.mjs"
   },
   "overrides": {
     "@expo/require-utils": "56.1.6"

@@ -2000,24 +2000,25 @@ runs edge to edge: in metaphysics-being-7 the text and figures ALONE span x 12..
 of a 400-wide stage before any art is counted. Any push crops something, so the
 honest shot is the wide one.
 
-**The fix for that is in the scenes, not the camera.** Move the outermost labels
-inboard and the push comes back for free, because `containShot` only ever loosens.
-`node scripts/measure-must.mjs` then re-measures and the room reappears. The worst
-offenders today, by the tightest ceiling their layout allows:
+**The fix for that is in the scenes, not the camera.** Move an outlying label
+inboard and the push returns by itself, because `containShot` only ever loosens —
+no camera has to be re-authored. Re-run `node scripts/measure-must.mjs` and the room
+reappears.
 
-| lesson | ceiling |
-|---|---|
-| logic-arguments-8 | 1.00× |
-| ethics-ethics-12 · -31 · -32 | 1.01× |
-| political-political-31 · -32 | 1.01× |
-| epistemology-knowledge-11 | 1.01× |
-| aesthetics-aesthetics-6 · -7 | 1.01× |
-| metaphysics-being-12 | 1.01× |
+`npm run camera:wins` says where that is worth doing, offline and in a second, from
+the measurements already stored. It reports each lesson's ceiling now against the
+ceiling it would have if the single most extreme thing on each edge were pulled in.
+A large gap is one stray label holding a whole lesson flat; a small one means the
+content genuinely fills the stage and only a redesign would help.
 
-> Where the union really does flatten a lesson, the fault is in the SCENE, not the
-> camera. metaphysics-being-7 caps at 1.05 because it prints axis labels hard
-> against both edges of the stage; nothing can push in on that and keep them. Move
-> the labels inboard and the camera comes back.
+As of this writing **29 lessons would regain 0.10× or more from one nudge per edge**
+— aesthetics-19 goes 1.01 → 1.23, ethics-11 1.03 → 1.24, political-9 1.06 → 1.26 —
+and 35 would gain almost nothing. logic-arguments-8 is the extreme case and is not a
+nudge at all: its band is 493 tall, the tallest in the app, with art at y 33 and
+y 517, so it spans nearly the whole design space by construction.
+
+> Do not trust those figures here; run the script. They are a snapshot of a moving
+> repo and the whole point of the script is that it re-derives them.
 
 **Measured data rots, so it is stamped.** `MUST_STAMP` fingerprints the scene and
 script each box was taken from, and `check:cinematic` fails when one diverges —
