@@ -44,6 +44,13 @@ export const C = {
   /** Unchanged, and NOT repurposed: these mean answer states in
    *  components/lesson/theme.ts and must go on meaning that. */
   correct: '#4F7A4A',
+  /** `wrong` on `wrongSoft` (the Danger Zone's text on its own fill) measures
+   *  4.54:1 against a 4.5:1 floor — passing, but by only 0.04. Both are
+   *  hard-gated in scripts/check-ui.mjs's PAIRS with no buffer built in, so
+   *  do not nudge either value without re-running the checker: this margin is
+   *  thin enough that a small change to either token, or a different
+   *  contrast calculator's rounding, could tip it under. Left as measured,
+   *  not adjusted — see the checker for the number in context. */
   wrong: '#A8513F',
   wrongSoft: '#F7E9E9',
 } as const;

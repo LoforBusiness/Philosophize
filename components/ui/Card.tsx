@@ -14,8 +14,21 @@ import { C, RADIUS, LIP, SPACE } from '@/constants/design';
 // rather than something to play. One consistent edge fixes it everywhere at
 // once, without a single new colour.
 //
-// The parent's height is CONSTANT (paddingBottom: lip, never animated) — it
-// reserves the lip's space permanently. Only the face's translateY animates,
+// The lip is a separate slab, pinned BEHIND the face and offset down by its
+// own height — not a colour on the container itself. At rest the face covers
+// all of the slab except a `lip`-px sliver at the bottom (the ledge); pressed,
+// the face slides down over the whole slab, and the band that opens at the
+// TOP is the transparent container, not a second colour. Painting the colour
+// on the container and animating a margin to "collapse" it (an earlier draft
+// of both this file and Button.tsx did exactly that) does not collapse the
+// lip on press — the container's own background is still there the instant
+// the face uncovers it, so the coloured band moves from the bottom edge to
+// the top edge instead of disappearing. Only a slab that sits BEHIND the
+// face, not a container that IS the colour, actually vanishes when covered.
+//
+// The parent's height is still CONSTANT (paddingBottom: lip, never animated)
+// — it reserves the lip's space permanently, and the slab is absolutely
+// positioned so it never touches layout. Only the face's translateY animates,
 // and translateY is paint-only, so Yoga never re-measures this box and
 // nothing below the card shifts when it is pressed. (An earlier draft of
 // this component animated `marginBottom` alongside translateY instead — the
@@ -56,7 +69,22 @@ export default function Card({ children, onPress, pad = 3, style }: Props) {
       onPressOut={() => setDown(false)}
       accessibilityRole="button"
     >
-      <View style={[styles.flat, { backgroundColor: C.HUE, paddingBottom: lip }]}>{face}</View>
+      {/* Transparent container, height fixed at content + lip (constant,
+          never animated). */}
+      <View style={[styles.flat, { paddingBottom: lip }]}>
+        {/* The lip slab: spans [lip, height], behind the face — see the file
+            header for why the colour lives here and not on the container. */}
+        {lip > 0 && (
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute', top: lip, left: 0, right: 0, bottom: 0,
+              backgroundColor: C.HUE, borderRadius: RADIUS.card,
+            }}
+          />
+        )}
+        {face}
+      </View>
     </Pressable>
   );
 }

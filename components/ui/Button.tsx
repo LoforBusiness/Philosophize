@@ -9,11 +9,26 @@ import { C, TYPE, RADIUS, LIP } from '@/constants/design';
 // ─────────────────────────────────────────────────────────────────────────────
 // THE CHUNK.
 //
-// The button sits on a solid lip of its own colour. Pressing it moves the face
-// down by exactly the lip's height and collapses the lip to nothing, so the
-// button lands on its own shadow instead of merely dimming. That single
-// mechanic is most of what makes a game UI feel tactile, and it costs one
-// translateY and one height.
+// A solid slab of the lip colour sits BEHIND the face, offset down by the
+// lip's own height. At rest the face covers all of the slab except a
+// `lip`-px sliver at the bottom — the visible ledge. Pressing slides the face
+// down by exactly that many pixels, which covers the slab completely; the
+// band that opens up at the TOP is the transparent container showing whatever
+// is behind the button, not a second colour. That is what makes it read as
+// dropping into a socket rather than a colour swapping edges.
+//
+// An earlier version put the colour on the CONTAINER itself and animated a
+// margin to "collapse" it. That does not collapse anything: the container's
+// background is still there at the top the instant the face uncovers it, so
+// pressing moved the coloured band from the bottom edge to the top edge
+// instead of removing it — visibly on `secondary` and `destructive`, whose
+// faces are paper, not ink. It also made Yoga re-measure the container on
+// every press, since the margin was the animated property, which shifted
+// whatever sat below the button in a list. Neither is true of the version
+// below: the container's height is fixed at content + lip via a constant,
+// never-animated `paddingBottom`, the slab is absolutely positioned so it
+// never touches layout, and `translateY` — paint-only, so Yoga never
+// re-measures for it — is the only thing that animates.
 //
 // THE PRIMARY IS INK, NOT PETROL. The accent appears only as the edge. The
 // loudest thing on any screen stays black on paper — the app is still printed
@@ -61,13 +76,23 @@ export default function Button({
       accessibilityRole="button"
       style={[{ opacity: disabled ? 0.4 : 1 }, style]}
     >
-      {/* The lip: a solid slab the face rests on. It is not a shadow — a shadow
-          would blur, and this has to read as a physical edge.
-          The parent's height is CONSTANT (paddingBottom: lip, never animated) —
-          it reserves the lip's space permanently. Only the face moves, and
-          translateY is paint-only, so Yoga never re-measures this box and
-          nothing below the button shifts when it is pressed. */}
-      <View style={{ borderRadius: RADIUS.button, backgroundColor: f.lip ?? 'transparent', paddingBottom: lip }}>
+      {/* Transparent container, height fixed at content + lip (constant,
+          never animated). */}
+      <View style={{ paddingBottom: lip }}>
+        {/* The lip slab: spans [lip, height], behind the face. At rest the
+            face covers all but its bottom `lip` px — the ledge. Pressed, the
+            face translates down by `lip` and covers the slab entirely, and
+            the gap that opens at the TOP is this container's own
+            transparency, not a colour. */}
+        {lip > 0 && (
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute', top: lip, left: 0, right: 0, bottom: 0,
+              backgroundColor: f.lip, borderRadius: RADIUS.button,
+            }}
+          />
+        )}
         <MotiView
           animate={{ translateY: drop }}
           transition={{ type: 'timing', duration: 90, easing: Easing.out(Easing.quad) }}
