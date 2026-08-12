@@ -160,8 +160,25 @@ for (const key of A.SCENE_KEYS) {
 //
 // Compared as a CONTINUITY test, not an equality one. `stand()` rides two
 // incommensurate sines so it never repeats exactly — that is deliberate, and an
-// equality test would fail on it forever. What must not happen is a JUMP: a
-// step across the wrap that is larger than an ordinary frame's step.
+// equality test would fail on it forever. What must not happen is a JUMP.
+//
+// Two separate assertions, not one, after a false pass slipped through the
+// first version of this check. `lookout`'s hand used to hold up at the window's
+// edge instead of lowering — a genuine 54.71-unit snap once per cycle — and it
+// read as PASSING, because nothing tested that snap directly: it only fed into
+// `ordinary`, the one number the wrap comparison was tolerant of, and a bigger
+// `ordinary` just raised its own bar. An internal jump must fail on its own
+// merits, so it gets its own ceiling below, independent of the wrap check.
+//
+// The wrap comparison itself was also comparing the wrong pair: `t = T − 1/60`
+// against `t = 1/60` are a full PERIOD apart in wall-clock time, which the app
+// never renders back to back — `clock.value` in LaunchFigure only ever
+// accumulates, so nothing resets it. The two frames that are actually adjacent
+// on screen, and that straddle wherever the internal `% period` folds, are
+// `T − 1/60` and `T + 1/60`. Comparing `T − 1/60` to `1/60` demands that
+// `stand()`'s idle be periodic in T, which rig.ts says on purpose it is not
+// ("All on `life2`, so none of it repeats") — the old version was testing for
+// something this file itself says never happens.
 emit('components/lesson/cinematic/moves.ts', 'moves.mjs');
 const LM = await import(emit('components/launch/launchMotion.ts', 'launchMotion.mjs'));
 
@@ -178,15 +195,41 @@ for (const act of ['walk', 'sip', 'read', 'thinker', 'stargazer', 'lookout']) {
   const T = LM.ACTIVITY_PERIOD[act];
   ok(typeof T === 'number' && T > 0, `${act}: declares a period`, String(T));
   if (!T) continue;
-  // the largest ordinary step, sampled at 60fps across one period
-  let ordinary = 0;
+
+  // Every per-frame step across one period, sampled at 60fps — kept as an
+  // array, not just a running max, so the wrap check below can be keyed off a
+  // robust statistic instead of the single worst sample.
+  const steps = [];
   for (let t = 0; t < T; t += 1 / 60) {
-    ordinary = Math.max(ordinary, delta(LM.launchStance(act, t), LM.launchStance(act, t + 1 / 60)));
+    steps.push(delta(LM.launchStance(act, t), LM.launchStance(act, t + 1 / 60)));
   }
-  const atWrap = delta(LM.launchStance(act, T - 1 / 60), LM.launchStance(act, 1 / 60));
-  // `walk` folds x, not the gait, so its stance is continuous by construction.
-  ok(atWrap <= ordinary * 3 + 0.5, `${act}: no jump across the wrap`,
-    `wrap ${atWrap.toFixed(2)} vs ordinary ${ordinary.toFixed(2)}`);
+  const worst = Math.max(...steps);
+  // Asserted absolutely: an internal jump fails here, on its own, whatever the
+  // wrap check below says. Today's genuine worst case is 2.70 (lookout, at the
+  // peak of its hand-raise); 8 leaves ample room without being loose enough to
+  // hide another hold-at-peak defect the way the missing version of this line
+  // once did.
+  ok(worst <= 8, `${act}: no jump inside the period`, `worst frame step ${worst.toFixed(2)}`);
+
+  // The two frames straddling the fold, adjacent in real time.
+  const atWrap = delta(LM.launchStance(act, T - 1 / 60), LM.launchStance(act, T + 1 / 60));
+  // The 95th percentile of this period's own steps, not the max — so one
+  // anomalous frame (an internal jump, or just the fastest instant of a
+  // gesture) can never set its own tolerance the way `ordinary` used to.
+  const sorted = [...steps].sort((a, b) => a - b);
+  const p95 = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))];
+  // +6, not +0.5: `thinker`/`stargazer` deliberately retrigger `postureLive`'s
+  // settle every cycle ("re-takes the settle each cycle rather than settling
+  // once forever" — launchMotion.ts), and that settle's steepest instant sits
+  // exactly at bt = 0, which is exactly where the fold lands — by construction,
+  // not by which period is chosen. Its worst-case 2-frame contribution is
+  // bounded by the settle's own known amplitude: `db = -settle × 1.2` for any
+  // code without an override, and `settle`'s steepest slope is 2π at bt = 0, so
+  // one 2-frame (1/30s) slice moves it at most ≈ 1.2 × 2π / 30 ≈ 0.25 raw units,
+  // ×20 for the bob scale ≈ 5. 6 covers that with a small margin, while staying
+  // well under the 8-unit absolute ceiling above for anything actually wrong.
+  ok(atWrap <= p95 * 3 + 6, `${act}: no jump across the wrap`,
+    `wrap ${atWrap.toFixed(2)} vs p95 ${p95.toFixed(2)}`);
 }
 
 // ── 3c · every disc is readable, by EDGE or by TONE ──────────────────────────

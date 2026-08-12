@@ -60,19 +60,13 @@ export function cycle(t: number, period: number, a: number, b: number): number {
  * someone retunes it.
  */
 export const ACTIVITY_PERIOD: Record<LaunchActivity, number> = {
-  // gait is driven by distance, not by this period — WALK's own stride period is
-  // S / (stance × WALK_SPEED) = 34 / (0.62 × 22) ≈ 2.4927s, and 3 strides of that
-  // is what actually meets itself at the fold. A round 8.0 sits ~0.52s off any
-  // multiple of that, which the sampler measures as a real jump at the wrap.
-  walk: 3 * (34 / (0.62 * WALK_SPEED)),
-  // Below, sip/read/thinker/stargazer each ride `seated()`/`stand()`'s own idle
-  // breath — two incommensurate sines the u-driven action never touches — so the
-  // period has to also be a point where THAT drift is small, not just a length
-  // that fits the gesture. Found by sampling, not by eye (see the task report).
-  sip: 12.68,
-  read: 5.0,
-  thinker: 7.6,
-  stargazer: 11.83,
+  // gait is driven by distance, not by this period — it's just the window the
+  // sampler measures one lap of the stride over.
+  walk: 8.0,
+  sip: 7.4,
+  read: 5.6,
+  thinker: 9.0,
+  stargazer: 11.0,
   lookout: 8.2,
 };
 
@@ -90,7 +84,7 @@ export function launchStance(activity: LaunchActivity, t: number): Stance {
   // what re-takes the settle each cycle rather than settling once forever.
   if (activity === 'thinker') return postureLive(9, t, t % ACTIVITY_PERIOD.thinker);
 
-  // STARGAZER — reclined, propped back on both arms, head to the sky.
+  // STARGAZER — reclined, weight back on one propping arm, head to the sky.
   if (activity === 'stargazer') return postureLive(5, t, t % ACTIVITY_PERIOD.stargazer);
 
   // THE LOOKOUT — hand up to shade the eyes, sweep the valley, lower.
