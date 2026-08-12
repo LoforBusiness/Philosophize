@@ -35,20 +35,36 @@ const lin = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0
 const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const lum = (h) => { const [r, g, b] = rgb(h); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
 const ratio = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+const spread = (a, b) => {
+  const [x, y, z] = rgb(a), [p, q, r] = rgb(b);
+  return Math.hypot(x - p, y - q, z - r);
+};
 
 // ── 1 · the palette is small and every value is distinct ─────────────────────
 //
 // Two greys four points apart are not two greys, they are one grey and a bug.
 // 0.02 of luminance is the floor below which a difference cannot be seen and
 // therefore cannot be meaning.
+//
+// Luminance alone is not enough: it is blind to hue. The first version of this
+// check flagged `correct` (green) and `wrong` (red) as indistinguishable because
+// they sit close in lightness — a green and a red, which nobody has trouble
+// telling apart, because they differ in HUE, not lightness. Testing lightness
+// alone would have forced a repaint of the answer-state colours to satisfy an
+// instrument measuring the wrong channel. So: two tokens are tellable apart if
+// they differ enough in lightness OR in RGB spread (hue/saturation). Greys sit
+// on the RGB diagonal, so a near-duplicate grey still fails both halves — this
+// does not let an actual duplicate through. Do not simplify this back to
+// luminance alone.
 const shades = Object.entries(D.C).filter(([, v]) => /^#[0-9A-Fa-f]{6}$/.test(v));
 ok(shades.length <= 14, 'the palette stays small', `${shades.length} colours`);
 for (let i = 0; i < shades.length; i++) {
   for (let j = i + 1; j < shades.length; j++) {
     const [na, va] = shades[i], [nb, vb] = shades[j];
-    const d = Math.abs(lum(va) - lum(vb));
-    ok(d >= 0.02 || va === vb, `${na} and ${nb} are tellable apart`,
-      `ΔL ${d.toFixed(3)} (${va} vs ${vb})`);
+    const dL = Math.abs(lum(va) - lum(vb));
+    const dRGB = spread(va, vb);
+    ok(dL >= 0.02 || dRGB >= 60 || va === vb, `${na} and ${nb} are tellable apart`,
+      `ΔL ${dL.toFixed(3)}, ΔRGB ${Math.round(dRGB)} (${va} vs ${vb})`);
   }
 }
 

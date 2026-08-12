@@ -22,7 +22,7 @@ export const C = {
   HUE_SOFT: '#F0F7F6',
 
   ink: '#1A1A1A',
-  inkSoft: '#5F5F5F',
+  inkSoft: '#686868',
   dim: '#B3AEA3',
 
   paper: '#FAFAF7',
