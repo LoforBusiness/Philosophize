@@ -50,3 +50,7 @@ yarn-error.*
 .moves-sheets/
 
 sound-lab.html
+components/lesson/cinematic/.measure-must.lock
+
+# superpowers brainstorming companion (mockups, not source)
+.superpowers/
