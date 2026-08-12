@@ -66,13 +66,11 @@ export const BEATS: Aes32Beat[] = [
   {
     g: 11, rows: 3, mean: 1,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'So what does that show about endings?',
-      options: [
-        { id: 'a', text: 'The order of events carries value the total cannot see', correct: true },
-        { id: 'b', text: 'The ending matters most because it is what you remember', correct: false },
-        { id: 'c', text: 'Nothing — preferring improvement is a bias we should correct', correct: false },
-        { id: 'd', text: 'That later goods are simply worth more than earlier ones', correct: false },
+      cards: [
+        { text: 'Order carries its own value', correct: true },
+        { text: 'Only the total matters', correct: false },
       ],
       explain: 'B explains the feeling and leaves the question open — we are asking what makes a life go well, not what it is like to look back on one. C is the honest hard line, and it has to call the declining life exactly as good.',
       xp: 5,

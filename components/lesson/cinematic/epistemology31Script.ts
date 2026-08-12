@@ -65,13 +65,11 @@ export const BEATS: Epis31Beat[] = [
   {
     g: 11, open: 3,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'So how should you hold what you remember?',
-      options: [
-        { id: 'a', text: 'Trust it by default, and drop it only for a specific reason', correct: true },
-        { id: 'b', text: 'Distrust it until something independent confirms it', correct: false },
-        { id: 'c', text: 'Trust it completely — a vivid memory cannot be wrong', correct: false },
-        { id: 'd', text: 'Trust only memories from the last day or two', correct: false },
+      cards: [
+        { text: 'Trust it until given reason', correct: true },
+        { text: 'Check it against something independent', correct: false },
       ],
       explain: 'The trap is B: nothing independent is available, because the confirmation is remembered too. Memory is a floor rather than a conclusion, so the reasonable stance is trust until something specific goes wrong.',
       xp: 5,

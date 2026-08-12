@@ -79,13 +79,11 @@ export const BEATS: Ethics8Beat[] = [
   },
   {
     p: 4, x: 112, grid: 0.34, oth: 1, thread: 1,
-    mc: {
+    interact: {
       prompt: 'So is caring just being nice — soft, warm and without any real standards?',
-      options: [
-        { id: 'a', text: 'Yes — it is a warm feeling, and feelings are not a method', correct: false },
-        { id: 'b', text: 'No — it is a method: attend, take responsibility, respond to this person', correct: true },
-        { id: 'c', text: 'No — it is utilitarianism again, with softer vocabulary', correct: false },
-        { id: 'd', text: 'Yes — it works inside families and nowhere else', correct: false },
+      cards: [
+        { text: 'No, it is a method', correct: true },
+        { text: 'Yes, feelings are not method', correct: false },
       ],
       explain: 'The trap: care sounds like a mood, so it is easy to file under "nice" instead of "reasoning". But it makes demands — pay attention, accept the responsibility, respond to who is actually there — and you can fail every one of them. Impartial rules never even ask.',
       xp: 5,

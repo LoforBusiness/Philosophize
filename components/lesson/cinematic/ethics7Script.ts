@@ -63,13 +63,11 @@ export const BEATS: Ethics7Beat[] = [
   },
   {
     p: 4, x: 90, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
-    mc: {
+    interact: {
       prompt: 'Same choice, wildly different verdicts. Why does that unsettle philosophers?',
-      options: [
-        { id: 'a', text: 'We insist blame tracks control — yet only luck differed here', correct: true },
-        { id: 'b', text: 'Driver B made the worse decision behind the wheel', correct: false },
-        { id: 'c', text: 'Nobody can ever be blamed for anything they do', correct: false },
-        { id: 'd', text: 'Consequences should always outweigh intentions', correct: false },
+      cards: [
+        { text: 'Only luck differed', correct: true },
+        { text: 'Driver B decided worse', correct: false },
       ],
       explain: 'The trap: it feels obvious that driver B "chose worse", because we read the choice backwards from the wreckage. Rewind the tape and the two choices match to the second. We say blame should track what you control — then punish one of them for the one thing neither controlled.',
       xp: 5,

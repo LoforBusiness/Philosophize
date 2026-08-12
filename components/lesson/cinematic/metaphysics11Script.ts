@@ -61,13 +61,11 @@ export const BEATS: Metaphysics11Beat[] = [
   },
   {
     p: 8, c: 31, tok: 1,
-    mc: {
+    interact: {
       prompt: 'On Locke’s account, what makes someone the same person over time?',
-      options: [
-        { id: 'a', text: 'The consciousness that reaches back over their own past', correct: true },
-        { id: 'b', text: 'The same living body, traced back without a break', correct: false },
-        { id: 'c', text: 'A soul underneath, whatever the memories do', correct: false },
-        { id: 'd', text: 'Nothing — "the same person" is a convenient fiction', correct: false },
+      cards: [
+        { text: 'The consciousness reaching back', correct: true },
+        { text: 'The same living body', correct: false },
       ],
       explain: 'The trap: the bodily answer is the one you would give a court, and it feels safest. But a body replaces nearly all its matter over a lifetime — it is the Ship of Theseus wearing your face. Locke hangs identity on the thread of consciousness instead.',
       xp: 5,

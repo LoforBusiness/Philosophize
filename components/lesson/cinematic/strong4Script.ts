@@ -78,16 +78,13 @@ export const BEATS: Strong4Beat[] = [
   },
   {
     p: 4, fill: 0.78, dice: 1, verdict: 1, lens: 2,
-    mc: {
+    interact: {
       prompt: 'You call a strong inductive argument "invalid" because its conclusion isn’t guaranteed. Right?',
-      options: [
-        { id: 'a', text: 'No — "valid" is the wrong ruler for induction', correct: true },
-        { id: 'b', text: 'Yes — no guarantee means invalid', correct: false },
-        { id: 'c', text: 'Yes — only deductions can be valid, so it’s invalid', correct: false },
-        { id: 'd', text: 'Yes — likely isn’t certain, so it fails', correct: false },
+      cards: [
+        { text: 'No, wrong ruler for induction', correct: true },
+        { text: 'Yes, it is not guaranteed', correct: false },
       ],
-      explain:
-        'Validity only grades deductions. Judging induction by it is a category mistake — use strong or weak instead.',
+      explain: 'Validity only grades deductions. Judging induction by it is a category mistake — use strong or weak instead.',
       xp: 5,
     },
     dur: 1.0,

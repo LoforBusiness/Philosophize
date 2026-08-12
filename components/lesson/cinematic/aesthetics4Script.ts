@@ -65,32 +65,26 @@ export const BEATS: Aes4Beat[] = [
   },
   {
     a: 21, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
-    mc: {
+    interact: {
       prompt: 'On Dickie’s institutional theory, what makes something count as art?',
-      options: [
-        { id: 'a', text: 'The artworld’s institutions conferring the status of art', correct: true },
-        { id: 'b', text: 'Being crafted with rare technical skill', correct: false },
-        { id: 'c', text: 'Expressing a powerful emotion to viewers', correct: false },
-        { id: 'd', text: 'Faithfully imitating something in nature', correct: false },
+      cards: [
+        { text: 'The artworld confers the status', correct: true },
+        { text: 'Something in the object', correct: false },
       ],
-      explain:
-        'For Dickie, status is conferred by galleries, critics, and traditions — not the object. A chosen urinal becomes art; an identical one in a shop stays plumbing.',
+      explain: 'For Dickie, status is conferred by galleries, critics, and traditions — not the object. A chosen urinal becomes art; an identical one in a shop stays plumbing.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     a: 0, v: 8, test: 3, verdict: 1, signed: 1, art: 1,
-    mc: {
+    interact: {
       prompt: 'A urinal in a gallery is art. Does that make anything art if you call it art?',
-      options: [
-        { id: 'a', text: 'Yes — a personal label is all it takes', correct: false },
-        { id: 'b', text: 'No — it took the artworld’s context, not one person’s say-so', correct: true },
-        { id: 'c', text: 'No — the urinal was secretly beautiful after all', correct: false },
-        { id: 'd', text: 'Yes — Duchamp proved craft and skill are meaningless', correct: false },
+      cards: [
+        { text: 'No, it took the artworld', correct: true },
+        { text: 'Yes, anything you call art', correct: false },
       ],
-      explain:
-        'The trap: "anything goes." Danto and Dickie say it took theory, history, and the artworld — not a private label — to make the choice register as art.',
+      explain: 'The trap: "anything goes." Danto and Dickie say it took theory, history, and the artworld — not a private label — to make the choice register as art.',
       xp: 5,
     },
     dur: 1.0,

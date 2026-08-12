@@ -76,16 +76,13 @@ export const BEATS: Ethics3Beat[] = [
   },
   {
     d: 21, tx: 196, lens: 0,
-    mc: {
+    interact: {
       prompt: 'Which theory weighs an action purely by the consequences it brings?',
-      options: [
-        { id: 'a', text: 'Virtue ethics', correct: false },
-        { id: 'b', text: 'Deontology', correct: false },
-        { id: 'c', text: 'Consequentialism', correct: true },
-        { id: 'd', text: 'Moral relativism', correct: false },
+      cards: [
+        { text: 'Consequentialism', correct: true },
+        { text: 'Deontology', correct: false },
       ],
-      explain:
-        'Consequentialism, and its famous form utilitarianism, pins an action’s worth entirely on its results — above all the happiness produced.',
+      explain: 'Consequentialism, and its famous form utilitarianism, pins an action’s worth entirely on its results — above all the happiness produced.',
       xp: 5,
     },
     dur: 1.0,

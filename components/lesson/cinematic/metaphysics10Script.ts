@@ -70,13 +70,11 @@ export const BEATS: Metaphysics10Beat[] = [
   },
   {
     p: 4, x: 124, frame: 1, str: 1,
-    mc: {
+    interact: {
       prompt: 'Aristotle kept universals real. Did he agree with Plato that they live in their own realm?',
-      options: [
-        { id: 'a', text: 'Yes — being a realist about universals just is accepting that realm', correct: false },
-        { id: 'b', text: 'No — he kept them real, but only inside the things that have them', correct: true },
-        { id: 'c', text: 'Yes — both men placed the Forms beyond the physical world', correct: false },
-        { id: 'd', text: 'No — Aristotle denied that universals exist at all', correct: false },
+      cards: [
+        { text: 'No, real inside the things', correct: true },
+        { text: 'Yes, both put them beyond', correct: false },
       ],
       explain: 'The trap: treating realism and Plato’s realm as one package deal. Aristotle took the card off the wall and pinned it to the things — redness is fully real, but never floating free of some red object.',
       xp: 5,

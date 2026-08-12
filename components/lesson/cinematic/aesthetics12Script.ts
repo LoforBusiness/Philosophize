@@ -62,13 +62,11 @@ export const BEATS: Aes12Beat[] = [
   },
   {
     p: 20, r: 4, rx: 224, ticks: 5, box: 1,
-    mc: {
+    interact: {
       prompt: 'A reader insists: "The poem means whatever the author says he intended." What is wrong with that?',
-      options: [
-        { id: 'a', text: 'It commits the intentional fallacy — meaning lives in the public text, not in private intention', correct: true },
-        { id: 'b', text: 'Nothing — the author always has the last word on what his own work means', correct: false },
-        { id: 'c', text: 'It is wrong because art is judged on beauty, never on meaning', correct: false },
-        { id: 'd', text: 'It is wrong because no work of art has any meaning at all', correct: false },
+      cards: [
+        { text: 'Meaning lives in the text', correct: true },
+        { text: 'The author decides meaning', correct: false },
       ],
       explain: 'The trap is the genetic fallacy: mistaking how a work was made for what it means. Intention is private and unverifiable, so it cannot settle a public dispute — the poem is the one thing every reader can actually examine.',
       xp: 5,

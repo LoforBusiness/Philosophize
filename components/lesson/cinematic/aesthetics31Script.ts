@@ -68,13 +68,11 @@ export const BEATS: Aes31Beat[] = [
   {
     g: 11, strings: 1, playing: 0, clapA: 1, clapB: 1,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'So is the harder performance the better artwork?',
-      options: [
-        { id: 'a', text: 'Not necessarily — achievement and beauty are two values that often travel together', correct: true },
-        { id: 'b', text: 'Yes — the more skill a work takes, the better it is', correct: false },
-        { id: 'c', text: 'No — how a work was made has no bearing on how good it is', correct: false },
-        { id: 'd', text: 'Yes, but only when the audience can see the difficulty', correct: false },
+      cards: [
+        { text: 'Not necessarily, two values', correct: true },
+        { text: 'Yes, difficulty is the point', correct: false },
       ],
       explain: 'C is strict formalism, and the spliced recording embarrasses it: if the making truly did not matter, finding out would change nothing. B goes too far the other way — difficulty with nothing to show for it is only effort.',
       xp: 5,

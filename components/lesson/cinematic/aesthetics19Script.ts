@@ -59,13 +59,11 @@ export const BEATS: Aes19Beat[] = [
   },
   {
     p: 4, x: 124, row: 1, frame: 3, verdict: 2, know: 1,
-    mc: {
+    interact: {
       prompt: 'Carlson says a pretty glance is enough for nature, since it is only scenery. True?',
-      options: [
-        { id: 'a', text: 'False — he argues knowledge guides correct appreciation', correct: true },
-        { id: 'b', text: 'True — nature has no author, so there is nothing to know', correct: false },
-        { id: 'c', text: 'True — knowing the science ruins the aesthetic response', correct: false },
-        { id: 'd', text: 'False — he thinks nature cannot be appreciated at all', correct: false },
+      cards: [
+        { text: 'False, knowledge guides appreciation', correct: true },
+        { text: 'True, it is only scenery', correct: false },
       ],
       explain: 'The trap is the scenery picture, where not knowing counts as not needing to know. Carlson says natural history does for a marsh what art history does for a painting: it tells you what you are looking at.',
       xp: 5,

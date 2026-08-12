@@ -66,13 +66,11 @@ export const BEATS: Meta32Beat[] = [
   {
     g: 11, orbs: 1, tether: 1, tag: 0,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'So what could still tell the two spheres apart?',
-      options: [
-        { id: 'a', text: 'Where each one is — if space is a thing in its own right', correct: true },
-        { id: 'b', text: 'Nothing: sharing all properties, they are one sphere described twice', correct: false },
-        { id: 'c', text: 'Their histories — one was made before the other', correct: false },
-        { id: 'd', text: 'A difference too bare to detect, which must exist anyway', correct: false },
+      cards: [
+        { text: 'Where each one is', correct: true },
+        { text: 'Nothing, they are one sphere', correct: false },
       ],
       explain: 'C is ruled out by the setup. D is the interesting failure — a bare "thisness" answers the question by restating it. A is the live reply: if space is real rather than a pattern of relations, two positions are two facts.',
       xp: 5,

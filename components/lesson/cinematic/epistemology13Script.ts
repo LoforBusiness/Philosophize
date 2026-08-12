@@ -59,13 +59,11 @@ export const BEATS: Epi13Beat[] = [
   },
   {
     p: 4, x: 124, grid: 1, off: 2, winner: 1,
-    mc: {
+    interact: {
       prompt: 'Every verdict is reasonable, yet together they are false. What gives?',
-      options: [
-        { id: 'a', text: 'Knowing each separately is not knowing them all at once', correct: true },
-        { id: 'b', text: 'One of the individual verdicts must secretly be false', correct: false },
-        { id: 'c', text: 'High probability is never enough for knowledge, ever', correct: false },
-        { id: 'd', text: 'A million is simply too large a number to reason about', correct: false },
+      cards: [
+        { text: 'Each is not all', correct: true },
+        { text: 'One verdict must fail', correct: false },
       ],
       explain: 'The trap: B and C both look decisive. B cannot say WHICH verdict fails. C throws out almost everything you know, since nearly all of it rests on probability rather than proof.',
       xp: 5,

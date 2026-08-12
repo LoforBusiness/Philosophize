@@ -55,32 +55,26 @@ export const BEATS: Meta2Beat[] = [
   },
   {
     e: 7, x: 198, gone: 0.5, pr: 1, mx: 3,
-    mc: {
+    interact: {
       prompt: 'On Parmenides’s view, why can pure nothingness never truly exist?',
-      options: [
-        { id: 'a', text: 'Physics has not yet discovered it', correct: false },
-        { id: 'b', text: 'To think of nothing is to turn it into a something', correct: true },
-        { id: 'c', text: 'Nothingness is far too small to detect', correct: false },
-        { id: 'd', text: 'The gods forbade it in his poem', correct: false },
+      cards: [
+        { text: 'Thinking it makes it something', correct: true },
+        { text: 'Physics has not found it', correct: false },
       ],
-      explain:
-        '"What is not" can be neither known nor spoken. Try to think nothing and you treat it as a thing — so genuine non-being slips away.',
+      explain: '"What is not" can be neither known nor spoken. Try to think nothing and you treat it as a thing — so genuine non-being slips away.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     e: 9, x: 198, gone: 0.5, pr: 1, mx: 3,
-    mc: {
+    interact: {
       prompt: 'Leibniz and Parmenides both reasoned about being. So they reached the same conclusion, right?',
-      options: [
-        { id: 'a', text: 'Yes — both proved a necessary being exists', correct: false },
-        { id: 'b', text: 'Yes — both said nothing is unthinkable', correct: false },
-        { id: 'c', text: 'No — Leibniz wants a reason for being; Parmenides denies nothing was ever an option', correct: true },
-        { id: 'd', text: 'No — Parmenides agreed with science, Leibniz did not', correct: false },
+      cards: [
+        { text: 'No, Leibniz wants a reason', correct: true },
+        { text: 'Yes, both proved a being', correct: false },
       ],
-      explain:
-        'Leibniz seeks a sufficient reason (a necessary being); Parmenides argues "nothing" is unthinkable, so being never needed to beat an alternative.',
+      explain: 'Leibniz seeks a sufficient reason (a necessary being); Parmenides argues "nothing" is unthinkable, so being never needed to beat an alternative.',
       xp: 5,
     },
     dur: 1.0,

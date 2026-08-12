@@ -61,13 +61,11 @@ export const BEATS: Ethics6Beat[] = [
   },
   {
     d: 4, str: 0, tx: 180, card: 2, stamp: 1,
-    mc: {
+    interact: {
       prompt: 'Why do most people permit the switch but refuse the footbridge shove?',
-      options: [
-        { id: 'a', text: 'The shove uses a person as a means; the switch redirects a threat', correct: true },
-        { id: 'b', text: 'The shove kills more people than the switch does', correct: false },
-        { id: 'c', text: 'The footbridge case saves fewer than five lives', correct: false },
-        { id: 'd', text: 'Pushing is illegal, while flipping a switch is not', correct: false },
+      cards: [
+        { text: 'The shove uses a person', correct: true },
+        { text: 'The shove kills more', correct: false },
       ],
       explain: 'Both cases trade one life for five. What shifts is treating the stranger as a tool — which the doctrine of double effect and Foot both flag.',
       xp: 5,
@@ -76,11 +74,11 @@ export const BEATS: Ethics6Beat[] = [
   },
   {
     d: 21, str: 0, tx: 180, card: 2, stamp: 1,
-    mc: {
+    interact: {
       prompt: 'A strict utilitarian must judge the lever and footbridge cases exactly alike. True?',
-      options: [
-        { id: 't', text: 'True', correct: true },
-        { id: 'f', text: 'False', correct: false },
+      cards: [
+        { text: 'True', correct: true },
+        { text: 'False', correct: false },
       ],
       explain: 'It feels off, but pure utilitarianism counts only outcomes: five saved for one lost is identical in both, so the cases get the same verdict.',
       xp: 5,

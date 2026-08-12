@@ -65,16 +65,13 @@ export const BEATS: Ethics4Beat[] = [
   },
   {
     a: 21, b: 0, floor: 1, rows: 3,
-    mc: {
+    interact: {
       prompt: 'What does the strong (metaethical) version of moral relativism claim?',
-      options: [
-        { id: 'a', text: 'Beneath the surface, every culture obeys one universal law', correct: false },
-        { id: 'b', text: 'Moral truth is relative to a group; no culture-free fact', correct: true },
-        { id: 'c', text: 'Cultures happen to disagree, but a true morality still exists', correct: false },
-        { id: 'd', text: 'Morality is hardwired by biology, not shaped by culture', correct: false },
+      cards: [
+        { text: 'Truth is relative to group', correct: true },
+        { text: 'Cultures differ, truth remains', correct: false },
       ],
-      explain:
-        'Metaethical relativism is more than the fact that cultures differ. It claims a judgment’s truth is relative to a group, with no culture-independent moral fact.',
+      explain: 'Metaethical relativism is more than the fact that cultures differ. It claims a judgment’s truth is relative to a group, with no culture-independent moral fact.',
       xp: 5,
     },
     dur: 1.0,

@@ -63,13 +63,11 @@ export const BEATS: Political8Beat[] = [
   },
   {
     p: 4, x: 100, mode: 2, marks: 1, eyeline: 1,
-    mc: {
+    interact: {
       prompt: 'The three of them now hold different numbers of crates. Does that make this arrangement unfair?',
-      options: [
-        { id: 'a', text: 'Yes — handing people different amounts is unfair by definition', correct: false },
-        { id: 'b', text: 'No — the identical shares were equal too, and still left someone blocked', correct: true },
-        { id: 'c', text: 'Yes, because the tallest ended up worse off than before', correct: false },
-        { id: 'd', text: 'No, because fairness has nothing to do with equality', correct: false },
+      cards: [
+        { text: 'No, equal shares still blocked', correct: true },
+        { text: 'Yes, the shares differ', correct: false },
       ],
       explain: 'The trap: "equal" and "identical" feel like the same word. But the identical crates were perfectly equal in resources and still left one person staring at wood. Equal shares and equal outcomes come apart — which is why the real argument is over equality OF WHAT.',
       xp: 5,

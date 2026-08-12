@@ -350,7 +350,16 @@ const SOLID_FLOOR = 79;
 // MC_BUDGET is a high-water mark that may only go DOWN, exactly like CARD_BUDGET.
 // Converting a question lowers it; writing a new A/B/C/D deck raises it and fails
 // here. At 0 the deck can be deleted along with `Choices` and `QBlock.options`.
-const MC_BUDGET = 110;
+//
+// FOUR LEFT, AND THEY ARE THE TWO LESSONS §17 WARNS ABOUT. 118 of the 122 are
+// converted. The remaining four live in `argumentScript` and `builderScript` —
+// logic-arguments-1 and the premises builder — which predate the shared player
+// and carry their OWN copies of it, their own `Beat` interface and their own
+// local `Choices`. Converting them is not a script edit: it needs `interact` on
+// two private beat types, `ChoiceCards` rendered in two 1,100-line bespoke
+// players, and `pickedOk` state that neither of them has. That is a separate,
+// carefully-verified pass, not a tail-end of this one.
+const MC_BUDGET = 4;
 // A card that needs a sentence is the thing being removed. Six words is what the
 // converted twelve actually needed — the longest is "No, it may still be true".
 const CARD_WORDS = 6;

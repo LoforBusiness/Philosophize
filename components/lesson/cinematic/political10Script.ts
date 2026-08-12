@@ -69,13 +69,11 @@ export const BEATS: Political10Beat[] = [
   },
   {
     p: 21, x: 108, tape: 1, ptr: 4, ruler: 1,
-    mc: {
+    interact: {
       prompt: 'Locke defended private property. So did he hand owners an unlimited right to grab all they could reach?',
-      options: [
-        { id: 'a', text: 'Yes — Locke set no ceiling on what you may acquire', correct: false },
-        { id: 'b', text: 'No — his proviso demands leaving enough, and as good, for others', correct: true },
-        { id: 'c', text: 'Yes — whoever is strong enough to hold it may take it', correct: false },
-        { id: 'd', text: 'No — because Locke rejected private property altogether', correct: false },
+      cards: [
+        { text: 'No, leave enough for others', correct: true },
+        { text: 'Yes, grab what you reach', correct: false },
       ],
       explain: 'The trap: defending property sounds like endorsing limitless grabbing. Locke built the brake into the theory instead — you may take from the common only while enough, and as good, is still left for everybody behind you.',
       xp: 5,

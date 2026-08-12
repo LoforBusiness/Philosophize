@@ -74,32 +74,26 @@ export const BEATS: Pol3Beat[] = [
   },
   {
     sub: 21, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1,
-    mc: {
+    interact: {
       prompt: 'According to Locke, what causes a government to lose its legitimacy?',
-      options: [
-        { id: 'a', text: 'When it grows unpopular or makes clumsy decisions', correct: false },
-        { id: 'b', text: 'When it tramples the natural rights it was trusted to protect', correct: true },
-        { id: 'c', text: 'When it loses a majority at the next election', correct: false },
-        { id: 'd', text: 'When a stronger foreign army conquers it', correct: false },
+      cards: [
+        { text: 'It tramples natural rights', correct: true },
+        { text: 'It loses an election', correct: false },
       ],
-      explain:
-        'For Locke, power is held in trust to guard our lives, liberties, and estates. Turn against that trust and rulers forfeit the right to rule.',
+      explain: 'For Locke, power is held in trust to guard our lives, liberties, and estates. Turn against that trust and rulers forfeit the right to rule.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     sub: 4, r: 0, scroll: 1, pair: 2, flow: 1, seal: 1,
-    mc: {
+    interact: {
       prompt: 'Rousseau prized the general will, so a 51% majority vote must always equal it. Correct?',
-      options: [
-        { id: 'a', text: 'Yes — the general will is simply whatever the majority votes for', correct: false },
-        { id: 'b', text: 'No — a majority can chase private interests and miss the common good', correct: true },
-        { id: 'c', text: 'Yes — Rousseau equated counting votes with the common good', correct: false },
-        { id: 'd', text: 'No — because Rousseau rejected voting entirely', correct: false },
+      cards: [
+        { text: 'No, a majority can err', correct: true },
+        { text: 'Yes, the majority decides', correct: false },
       ],
-      explain:
-        'The trap: Rousseau split the "will of all" (the sum of private wants) from the "general will" (what serves the whole). Even a majority can be wrong.',
+      explain: 'The trap: Rousseau split the "will of all" (the sum of private wants) from the "general will" (what serves the whole). Even a majority can be wrong.',
       xp: 5,
     },
     dur: 1.0,

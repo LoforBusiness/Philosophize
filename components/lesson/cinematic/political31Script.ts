@@ -67,13 +67,11 @@ export const BEATS: Pol31Beat[] = [
   {
     g: 11, grass: 0.22, herd: 4, sums: 1,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'So what actually fixes it?',
-      options: [
-        { id: 'a', text: 'Changing the arithmetic — a limit all are bound to, or ownership that returns the cost to the user', correct: true },
-        { id: 'b', text: 'Persuading people to be less selfish', correct: false },
-        { id: 'c', text: 'Nothing — a commons always collapses', correct: false },
-        { id: 'd', text: 'Abolishing the commons and letting the state own everything', correct: false },
+      cards: [
+        { text: 'Change the arithmetic', correct: true },
+        { text: 'Ask people to restrain themselves', correct: false },
       ],
       explain: 'B fails on its own terms: whoever complies simply loses and the field dies anyway. C was Hardin\'s own pessimism — Elinor Ostrom won a Nobel documenting commons that never collapsed, each binding its users to a limit they helped set.',
       xp: 5,

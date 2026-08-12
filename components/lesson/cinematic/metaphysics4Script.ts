@@ -59,32 +59,26 @@ export const BEATS: Meta4Beat[] = [
   },
   {
     p: 4, tokens: 3, barred: 1, frozen: 1,
-    mc: {
+    interact: {
       prompt: 'Why did Parmenides claim that non-being cannot exist?',
-      options: [
-        { id: 'a', text: 'Scientists had proven empty space is full', correct: false },
-        { id: 'b', text: 'To think or speak of non-being is to make it a something', correct: true },
-        { id: 'c', text: 'Nothingness is too small to measure', correct: false },
-        { id: 'd', text: 'The gods filled creation, leaving no room for nothing', correct: false },
+      cards: [
+        { text: 'Speaking it makes it something', correct: true },
+        { text: 'Science proved space is full', correct: false },
       ],
-      explain:
-        'Every thought and word needs an object. "It is not" fails because what-is-not can be neither known nor said: try to think it, and you quietly convert it into a something.',
+      explain: 'Every thought and word needs an object. "It is not" fails because what-is-not can be neither known nor said: try to think it, and you quietly convert it into a something.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 13, tokens: 3, barred: 1, frozen: 1,
-    mc: {
+    interact: {
       prompt: 'Physics talks about vacuums and empty space. Doesn’t that prove "nothing" really exists?',
-      options: [
-        { id: 'a', text: 'Yes — a vacuum is a region of pure nothingness', correct: false },
-        { id: 'b', text: 'Yes — empty space is the "nothing" Parmenides denied', correct: false },
-        { id: 'c', text: 'No — a vacuum is still a something: a region with properties', correct: true },
-        { id: 'd', text: 'No — because vacuums are impossible to create', correct: false },
+      cards: [
+        { text: 'No, a vacuum is something', correct: true },
+        { text: 'Yes, a vacuum is nothing', correct: false },
       ],
-      explain:
-        'A vacuum is empty space — still a something with dimensions and quantum fields. Parmenides’ "nothing" is the total absence of any thing, which a vacuum never delivers.',
+      explain: 'A vacuum is empty space — still a something with dimensions and quantum fields. Parmenides’ "nothing" is the total absence of any thing, which a vacuum never delivers.',
       xp: 5,
     },
     dur: 1.0,

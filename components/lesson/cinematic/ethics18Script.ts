@@ -66,13 +66,11 @@ export const BEATS: Ethics18Beat[] = [
   },
   {
     p: 4, x: 124, line: 1, test: 2, wide: 1,
-    mc: {
+    interact: {
       prompt: 'For Singer, what determines whether a being deserves moral consideration?',
-      options: [
-        { id: 'a', text: 'Whether the being can suffer', correct: true },
-        { id: 'b', text: 'Animals cannot reason or speak, so they fall outside ethics', correct: false },
-        { id: 'c', text: 'Whether the being is useful to human beings', correct: false },
-        { id: 'd', text: 'Whether the being belongs to an endangered species', correct: false },
+      cards: [
+        { text: 'Whether it can suffer', correct: true },
+        { text: 'Whether it can reason', correct: false },
       ],
       explain: 'The trap is B, and it is a non sequitur as well as speciesism: reasoning has nothing to do with suffering. Infants cannot reason either, and plainly count.',
       xp: 5,

@@ -68,13 +68,11 @@ export const BEATS: Pol32Beat[] = [
   {
     g: 11, fill: 1, result: 1, mark: 1, labels: 1,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'So is it rational to vote?',
-      options: [
-        { id: 'a', text: 'Yes — the case rests on what a vote reliably does, not on its chance of deciding', correct: true },
-        { id: 'b', text: 'No — the chance of deciding is near zero, so the cost is wasted', correct: false },
-        { id: 'c', text: 'Yes — a tiny chance of a huge outcome makes it the highest-value act available', correct: false },
-        { id: 'd', text: 'Yes — because if nobody voted, democracy would collapse', correct: false },
+      cards: [
+        { text: 'Yes, for what it does', correct: true },
+        { text: 'No, one vote never decides', correct: false },
       ],
       explain: 'D is the classic slip: what everyone else does is already fixed, so "if nobody voted" was never your choice. C over-reaches, since the odds only work under assumptions about closeness that rarely hold.',
       xp: 5,

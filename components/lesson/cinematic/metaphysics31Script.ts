@@ -67,13 +67,11 @@ export const BEATS: Meta31Beat[] = [
   {
     g: 8, holes: 1, ticks: 3, chips: 1,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'Why does it matter what a hole is?',
-      options: [
-        { id: 'a', text: 'Because we count and measure absences, and an inventory of the world has to say what they are', correct: true },
-        { id: 'b', text: 'It does not — say "perforated" instead and nothing is left to explain', correct: false },
-        { id: 'c', text: 'Because absences cause things, which proves they are substances', correct: false },
-        { id: 'd', text: 'Because only what can be seen or touched exists, and a hole is neither', correct: false },
+      cards: [
+        { text: 'We count and measure absences', correct: true },
+        { text: 'Just say perforated instead', correct: false },
       ],
       explain: 'B is respectable: paraphrase the hole-talk away and the problem dissolves. It only has to work — and "there are as many holes as pegs" has resisted paraphrase for fifty years. That is why this is still live.',
       xp: 5,

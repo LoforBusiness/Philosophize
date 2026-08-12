@@ -70,16 +70,13 @@ export const BEATS: Et10Beat[] = [
   },
   {
     p: 8, x: 268, wading: true, far: true,
-    mc: {
+    interact: {
       prompt: 'Singer’s argument only works if you already accept utilitarianism, so everyone else can ignore it. True?',
-      options: [
-        { id: 'a', text: 'True — it is a utilitarian calculation from start to finish', correct: false },
-        { id: 'b', text: 'False — it rests on a modest premise almost anyone already accepts', correct: true },
-        { id: 'c', text: 'True — only utilitarians think consequences matter at all', correct: false },
-        { id: 'd', text: 'False — because Singer was not himself a utilitarian', correct: false },
+      cards: [
+        { text: 'False, the premise is modest', correct: true },
+        { text: 'True, it is utilitarian', correct: false },
       ],
-      explain:
-        'The trap is knowing Singer IS a utilitarian and assuming the argument must be too. It needs far less: prevent something terrible at small cost to yourself. You need not be a utilitarian to agree — which is why it is so hard to put down.',
+      explain: 'The trap is knowing Singer IS a utilitarian and assuming the argument must be too. It needs far less: prevent something terrible at small cost to yourself. You need not be a utilitarian to agree — which is why it is so hard to put down.',
     },
     dur: 4.8,
   },

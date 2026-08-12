@@ -45,13 +45,11 @@ export const BEATS: Aes6Beat[] = [
   },
   {
     p: 25, vast: 1, split: 3,
-    mc: {
+    interact: {
       prompt: 'For Burke, what feeling marks the sublime apart from the merely beautiful?',
-      options: [
-        { id: 'a', text: 'A delight mixed with terror at what overwhelms us', correct: true },
-        { id: 'b', text: 'Calm pleasure at smooth, pleasing forms', correct: false },
-        { id: 'c', text: 'Pride in our own skill and craft', correct: false },
-        { id: 'd', text: 'Indifference to whether others agree', correct: false },
+      cards: [
+        { text: 'Delight mixed with terror', correct: true },
+        { text: 'A gentle, pleasing calm', correct: false },
       ],
       explain: 'The sublime grips us through vastness and power, stirring a delight laced with terror — not the gentle, pleasing calm Burke linked with beauty.',
       xp: 5,
@@ -66,13 +64,11 @@ export const BEATS: Aes6Beat[] = [
   },
   {
     p: 15, vast: 1, split: 3, mind: 1,
-    mc: {
+    interact: {
       prompt: '"The sublime just means something extremely beautiful." Accurate?',
-      options: [
-        { id: 'a', text: 'Yes — it is simply beauty turned up to maximum', correct: false },
-        { id: 'b', text: 'No — it is a different response: awe and terror, not heightened beauty', correct: true },
-        { id: 'c', text: 'No — the sublime is only ever found in painted art', correct: false },
-        { id: 'd', text: 'Yes — Burke used the two words as exact synonyms', correct: false },
+      cards: [
+        { text: 'No, awe and terror', correct: true },
+        { text: 'Yes, very beautiful', correct: false },
       ],
       explain: 'The trap: "sublime sounds like a fancy word for very beautiful." Burke set them apart — the sublime overwhelms with awe and terror; beauty pleases and soothes.',
       xp: 5,

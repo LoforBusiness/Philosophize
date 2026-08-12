@@ -70,13 +70,11 @@ export const BEATS: Ethics31Beat[] = [
   {
     p: 3, rungs: 11, ladder: 1, duty: 0,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'What does "ought implies can" NOT excuse?',
-      options: [
-        { id: 'a', text: 'Being unable because of choices you made earlier', correct: true },
-        { id: 'b', text: 'Anything at all — inability always cancels duty', correct: false },
-        { id: 'c', text: 'Failing something that was physically impossible', correct: false },
-        { id: 'd', text: 'Failing a duty nobody told you about', correct: false },
+      cards: [
+        { text: 'Inability you caused yourself', correct: true },
+        { text: 'Nothing, inability always excuses', correct: false },
       ],
       explain: 'The trap is B, the version that turns the principle into a blanket excuse. A driver who cannot brake because they chose to drink is still answerable: the inability is real, and they authored it.',
       xp: 5,

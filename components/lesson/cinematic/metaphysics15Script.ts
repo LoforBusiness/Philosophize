@@ -58,13 +58,11 @@ export const BEATS: Meta15Beat[] = [
   },
   {
     p: 4, x: 124, balls: 1, gap: 1, found: 2,
-    mc: {
+    interact: {
       prompt: '"We plainly observe the force that makes the effect follow." Where does Hume say that errs?',
-      options: [
-        { id: 'a', text: 'They project a felt expectation and mistake it for something seen', correct: true },
-        { id: 'b', text: 'They are right — we perceive the connecting force directly', correct: false },
-        { id: 'c', text: 'Causes and effects do not really happen at all', correct: false },
-        { id: 'd', text: 'Science has not yet found the link, but instruments will', correct: false },
+      cards: [
+        { text: 'They project a felt expectation', correct: true },
+        { text: 'Nothing really causes anything', correct: false },
       ],
       explain: 'The trap is C, which overshoots: Hume keeps the events, he only denies the visible necessity. Repeated pairing builds a habit of expectation, and we read that inner push back onto the world.',
       xp: 5,

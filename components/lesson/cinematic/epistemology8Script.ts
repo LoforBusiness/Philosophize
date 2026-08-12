@@ -77,16 +77,13 @@ export const BEATS: Epi8Beat[] = [
   },
   {
     p: 4, x: 176, esc: 1, land: 2,
-    mc: {
+    interact: {
       prompt: 'The circle instead: beliefs propping each other up, nothing underneath. Is a loop of reasons worthless?',
-      options: [
-        { id: 'a', text: 'Yes — reasoning in a circle is always worthless', correct: false },
-        { id: 'b', text: 'Yes — only bedrock can justify anything at all', correct: false },
-        { id: 'c', text: 'Not necessarily — a wide enough web can hold its own weight', correct: true },
-        { id: 'd', text: 'No — every argument is secretly circular anyway', correct: false },
+      cards: [
+        { text: 'A wide enough web holds', correct: true },
+        { text: 'Circles are always worthless', correct: false },
       ],
-      explain:
-        'The trap: "circular reasoning" is a famous insult, so "always worthless" sounds obviously right. A two-step loop really is empty — but coherentists argue a huge, tightly knit web holds itself up. The sharper objection: a consistent web can still be false.',
+      explain: 'The trap: "circular reasoning" is a famous insult, so "always worthless" sounds obviously right. A two-step loop really is empty — but coherentists argue a huge, tightly knit web holds itself up. The sharper objection: a consistent web can still be false.',
       xp: 5,
     },
     dur: 1.0,

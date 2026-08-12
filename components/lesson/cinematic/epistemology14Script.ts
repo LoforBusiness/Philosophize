@@ -65,13 +65,11 @@ export const BEATS: Epis14Beat[] = [
   {
     g: 11, vat: 1, leap: 1,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'Why is "you might be a brain in a vat" so hard to refute with experience alone?',
-      options: [
-        { id: 'a', text: 'The fake experiences would be identical, so no observation separates them', correct: true },
-        { id: 'b', text: 'Because it has already been scientifically shown to be true', correct: false },
-        { id: 'c', text: 'Because pinching yourself reliably wakes you from any simulation', correct: false },
-        { id: 'd', text: 'Because a vat like that is physically impossible to build', correct: false },
+      cards: [
+        { text: 'The experiences would be identical', correct: true },
+        { text: 'Common sense rules it out', correct: false },
       ],
       explain: 'C is the tempting appeal to common sense, and it begs the question — a simulation would fake the pinch too. The scenario is built so that every possible piece of evidence is explained equally well by both worlds.',
       xp: 5,

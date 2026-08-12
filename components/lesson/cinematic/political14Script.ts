@@ -65,13 +65,11 @@ export const BEATS: Pol14Beat[] = [
   {
     g: 11, rows: 3,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'So what is the Wilt Chamberlain case meant to show?',
-      options: [
-        { id: 'a', text: 'Any fixed pattern survives only by repeatedly interrupting voluntary transfers', correct: true },
-        { id: 'b', text: 'That equality is undesirable', correct: false },
-        { id: 'c', text: 'That the worst-off do not matter', correct: false },
-        { id: 'd', text: 'That a star deserves whatever his fans will pay', correct: false },
+      cards: [
+        { text: 'Patterns interrupt voluntary transfers', correct: true },
+        { text: 'Sport pays far too much', correct: false },
       ],
       explain: 'Not B or D: the argument bites on ANY pattern, equal or not, and says nothing about desert. Rawls\'s reply is that the target was never one distribution — it is the basic structure, the rules of property and tax running over time.',
       xp: 5,

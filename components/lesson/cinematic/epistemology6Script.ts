@@ -49,13 +49,11 @@ export const BEATS: Epi6Beat[] = [
   },
   {
     p: 22, bal: 1, route: 3,
-    mc: {
+    interact: {
       prompt: 'What did the Pyrrhonist skeptics say suspending judgment leads to?',
-      options: [
-        { id: 'a', text: 'Peace of mind — ataraxia — from ceasing to fight over claims', correct: true },
-        { id: 'b', text: 'Proof that the external world does not exist', correct: false },
-        { id: 'c', text: 'Certainty that all our beliefs are false', correct: false },
-        { id: 'd', text: 'A faster, surer path to scientific knowledge', correct: false },
+      cards: [
+        { text: 'Peace of mind', correct: true },
+        { text: 'Certainty at last', correct: false },
       ],
       explain: 'For Pyrrho, suspending judgment quieted the mind. Tranquility — not certainty or denial — was the skeptic’s real prize.',
       xp: 5,
@@ -70,13 +68,11 @@ export const BEATS: Epi6Beat[] = [
   },
   {
     p: 4, crack: 1, route: 3,
-    mc: {
+    interact: {
       prompt: 'A skeptic insists: "I know for certain that nobody can know anything." What’s wrong?',
-      options: [
-        { id: 'a', text: 'Nothing — it is the strongest possible skeptical claim', correct: false },
-        { id: 'b', text: 'It undercuts itself: it claims to know that nothing is known', correct: true },
-        { id: 'c', text: 'It is wrong only because science has disproven it', correct: false },
-        { id: 'd', text: 'It proves the skeptic actually believes in certainty', correct: false },
+      cards: [
+        { text: 'It undercuts itself', correct: true },
+        { text: 'Nothing, it is consistent', correct: false },
       ],
       explain: 'Claiming certain knowledge that knowledge is impossible is self-defeating — it asserts the very thing it denies.',
       xp: 5,

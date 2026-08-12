@@ -50,13 +50,11 @@ export const BEATS: Epi7Beat[] = [
   },
   {
     p: 4, days: 4, twist: 1,
-    mc: {
+    interact: {
       prompt: 'What is Hume’s problem of induction?',
-      options: [
-        { id: 'a', text: 'We cannot logically prove the future will resemble the past', correct: true },
-        { id: 'b', text: 'The past is unknowable, so the future must be too', correct: false },
-        { id: 'c', text: 'Scientists make too many careless measurement errors', correct: false },
-        { id: 'd', text: 'Patterns in nature are random and never repeat', correct: false },
+      cards: [
+        { text: 'No proof the future matches', correct: true },
+        { text: 'Nature has been proven uniform', correct: false },
       ],
       explain: 'Induction assumes nature stays uniform, but that assumption itself rests only on past experience — which is circular.',
       xp: 5,
@@ -65,13 +63,11 @@ export const BEATS: Epi7Beat[] = [
   },
   {
     p: 8, days: 4, twist: 1,
-    mc: {
+    interact: {
       prompt: 'Hume showed induction is unprovable. So should we stop relying on it?',
-      options: [
-        { id: 'a', text: 'Yes — a rational person abandons all inductive reasoning', correct: false },
-        { id: 'b', text: 'Yes — only deductive logic should ever guide belief', correct: false },
-        { id: 'c', text: 'No — custom and habit make us expect the future to match; we can’t help it', correct: true },
-        { id: 'd', text: 'No — because he secretly found a logical proof after all', correct: false },
+      cards: [
+        { text: 'No, habit makes it unavoidable', correct: true },
+        { text: 'Yes, it has no proof', correct: false },
       ],
       explain: 'Hume says induction has no logical proof, yet habit makes it unavoidable. We live by custom, not airtight reasoning.',
       xp: 5,

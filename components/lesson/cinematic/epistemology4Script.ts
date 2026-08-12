@@ -80,16 +80,13 @@ export const BEATS: Epi4Beat[] = [
   },
   {
     e: 0, r: 4, glow: 1, bridge: 1,
-    mc: {
+    interact: {
       prompt: 'Which claim best fits actual rationalism?',
-      options: [
-        { id: 'a', text: 'ALL knowledge comes from reason, the senses adding nothing', correct: false },
-        { id: 'b', text: 'SOME truths, like math, are reachable by reason alone', correct: true },
-        { id: 'c', text: 'Reason is just experience we have forgotten', correct: false },
-        { id: 'd', text: 'The senses are illusions, so only reason is real', correct: false },
+      cards: [
+        { text: 'Some truths need reason alone', correct: true },
+        { text: 'All truths come from reason', correct: false },
       ],
-      explain:
-        'Rationalists claim some truths are a priori, not that experience is worthless. The "all" version overshoots their real position.',
+      explain: 'Rationalists claim some truths are a priori, not that experience is worthless. The "all" version overshoots their real position.',
       xp: 5,
     },
     dur: 1.0,

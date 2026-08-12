@@ -64,16 +64,13 @@ export const BEATS: Epi5Beat[] = [
   },
   {
     p: 25, star: 1, rungs: 5,
-    mc: {
+    interact: {
       prompt: 'According to Aristotle, why do human beings desire knowledge?',
-      options: [
-        { id: 'a', text: 'The pull to understand is woven into human nature', correct: true },
-        { id: 'b', text: 'Only to seize power and advantage over rivals', correct: false },
-        { id: 'c', text: 'Because society pressures us to keep learning', correct: false },
-        { id: 'd', text: 'To hold the terror of death at arm’s length', correct: false },
+      cards: [
+        { text: 'It is woven into us', correct: true },
+        { text: 'It is taught to us', correct: false },
       ],
-      explain:
-        'Aristotle grounds the desire to know in human nature itself — the highest wisdom is wanted for its own sake.',
+      explain: 'Aristotle grounds the desire to know in human nature itself — the highest wisdom is wanted for its own sake.',
       xp: 5,
     },
     dur: 1.0,

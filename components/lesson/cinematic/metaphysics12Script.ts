@@ -66,13 +66,11 @@ export const BEATS: Meta12Beat[] = [
   {
     g: 11, owner: 1, none: 1,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'So does denying a permanent owner make the self unreal?',
-      options: [
-        { id: 'a', text: 'No — both views still grant a real stream of experience', correct: true },
-        { id: 'b', text: 'Yes — with no owner there is nothing left', correct: false },
-        { id: 'c', text: 'Yes for Hume, but not for Buddhism', correct: false },
-        { id: 'd', text: 'There is no way to tell either way', correct: false },
+      cards: [
+        { text: 'No, the stream is real', correct: true },
+        { text: 'Yes, no owner means nothing', correct: false },
       ],
       explain: 'B is the false dilemma — reading "no permanent soul" as "nothing at all". Both deny an unchanging owner and both keep the stream: Hume\'s bundle of perceptions, the Buddhist flow of experience. Denying a soul is not denying the experiences.',
       xp: 5,

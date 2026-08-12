@@ -88,13 +88,11 @@ export const BEATS: Aes8Beat[] = [
   },
   {
     p: 45, x: 148, mode: 2, lens: 2, modeAns: 3,
-    mc: {
+    interact: {
       prompt: 'A friend says the two theories are at war, so one must be wrong. Best reply?',
-      options: [
-        { id: 'a', text: 'They answer different questions about one object — its arrangement, and the feeling it carries', correct: true },
-        { id: 'b', text: 'Agreed — a theory of art has to name one essence, so one camp must lose', correct: false },
-        { id: 'c', text: 'Neither works; art is really just skilful copying of nature', correct: false },
-        { id: 'd', text: 'Whichever theory the artist believed is the true one for that painting', correct: false },
+      cards: [
+        { text: 'They answer different questions', correct: true },
+        { text: 'One of them is wrong', correct: false },
       ],
       explain: 'The trap: rival theories sound like a fight to the death, so you feel forced to pick a winner. But formalism asks how a work is put together and expression asks what got carried across — different questions, same canvas. Which is why most critics keep both pairs of glasses on the wall.',
       xp: 5,

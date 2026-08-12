@@ -39,7 +39,11 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Script.ts')).sort(
   const name = f.replace('Script.ts', '');
   for (const kind of ['interact', 'mc', 'tap']) {
     const re = new RegExp(`\\b${kind}:\\s*\\{\\s*[\\r\\n]+\\s*prompt:\\s*(['"])((?:(?!\\1)[\\s\\S])*)\\1`, 'g');
-    for (const m of src.matchAll(re)) rows.push({ name, kind, prompt: m[2] });
+    for (const m of src.matchAll(re)) {
+      // Does this block print its own answers? See the note on `vague` below.
+      const cards = /cards:\s*\[/.test(src.slice(m.index, m.index + 700));
+      rows.push({ name, kind, prompt: m[2], cards });
+    }
   }
 }
 
@@ -55,8 +59,16 @@ const long = rows.filter((r) => words(r.prompt) > MAX_WORDS);
 // "What follows about the rain?" is perfectly followable there — the answers are
 // the three things in front of you. Applying the rule to mc flagged three
 // perfectly clear questions and would have had them rewritten to say less.
+// AND NOT AN INTERACT THAT CARRIES ITS OWN CARDS, for exactly the reason given
+// above for `mc`. `interact` used to mean one thing — find the target in the
+// scenery — and now means two: that, or two short choices printed under the art
+// (see ChoiceCards). The card kind puts the answers in front of the reader just
+// as the old A/B/C/D deck did, so "What follows about the rain?" is followable
+// there and naming a stage object is not required. Converting the deck brought
+// three such prompts under this rule and would have had them rewritten to say
+// less — which is the same mistake the mc exemption already records.
 const vague = rows.filter(
-  (r) => r.kind === 'interact' && VAGUE.test(r.prompt) && !CONCRETE.test(r.prompt),
+  (r) => r.kind === 'interact' && !r.cards && VAGUE.test(r.prompt) && !CONCRETE.test(r.prompt),
 );
 
 console.log(`${rows.length} question prompts across ${new Set(rows.map((r) => r.name)).size} lessons`);

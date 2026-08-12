@@ -60,13 +60,11 @@ export const BEATS: KnowHowBeat[] = [
   },
   {
     p: 4, x: 124, steps: 3, done: 1,
-    mc: {
+    interact: {
       prompt: 'You have memorised every step perfectly. What exactly do you now have?',
-      options: [
-        { id: 'a', text: 'Knowledge that — the doing is a separate achievement', correct: true },
-        { id: 'b', text: 'Knowledge how, since the steps are what the skill is', correct: false },
-        { id: 'c', text: 'Nothing at all until you succeed at the task', correct: false },
-        { id: 'd', text: 'A guarantee of success on the first attempt', correct: false },
+      cards: [
+        { text: 'Knowledge that, not how', correct: true },
+        { text: 'The skill itself', correct: false },
       ],
       explain: 'The trap is B, and it is a serious view — intellectualists argue skill just is knowing facts about how. Ryle\'s reply: the expert cannot state most of what they do, and does it anyway.',
       xp: 5,

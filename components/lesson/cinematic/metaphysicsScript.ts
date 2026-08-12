@@ -68,16 +68,13 @@ export const BEATS: MetaBeat[] = [
     hpose: 2,
     chain: true,
     qregress: 'q1',
-    mc: {
+    interact: {
       prompt: 'Why can’t science fully answer why anything exists at all?',
-      options: [
-        { id: 'a', text: 'The Big Bang has already settled the matter', correct: false },
-        { id: 'b', text: 'Science presumes things exist; it cannot account for existence itself', correct: true },
-        { id: 'c', text: 'Scientists simply aren’t clever enough yet', correct: false },
-        { id: 'd', text: 'The question is too brief to be scientific', correct: false },
+      cards: [
+        { text: 'It presumes things exist', correct: true },
+        { text: 'The Big Bang settled it', correct: false },
       ],
-      explain:
-        'Science explains each state by a prior state and the laws. It presupposes there are laws and states at all — so it never reaches why there is anything to begin with.',
+      explain: 'Science explains each state by a prior state and the laws. It presupposes there are laws and states at all — so it never reaches why there is anything to begin with.',
       xp: 5,
     },
     dur: 1.0,
@@ -86,16 +83,13 @@ export const BEATS: MetaBeat[] = [
     hpose: 4,
     chain: true,
     qregress: 'q2',
-    mc: {
+    interact: {
       prompt: 'The Big Bang explains where the universe came from. Doesn’t that answer Leibniz’s question?',
-      options: [
-        { id: 'a', text: 'Yes — the Big Bang is the reason there is something', correct: false },
-        { id: 'b', text: 'Yes, once we find what caused the Big Bang', correct: false },
-        { id: 'c', text: 'No — it describes an early state, still presupposing something existed', correct: true },
-        { id: 'd', text: 'No, because the Big Bang never actually happened', correct: false },
+      cards: [
+        { text: 'No, it presupposes something existed', correct: true },
+        { text: 'Yes, that is the reason', correct: false },
       ],
-      explain:
-        'The Big Bang describes how an existing universe evolved from a dense early state. It assumes that state already was — so it cannot say why there is anything rather than nothing.',
+      explain: 'The Big Bang describes how an existing universe evolved from a dense early state. It assumes that state already was — so it cannot say why there is anything rather than nothing.',
       xp: 5,
     },
     dur: 1.0,

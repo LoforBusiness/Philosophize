@@ -75,13 +75,11 @@ export const BEATS: Metaphysics8Beat[] = [
   },
   {
     p: 12, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
-    mc: {
+    interact: {
       prompt: 'So what has that third camp actually done to the chain of causes?',
-      options: [
-        { id: 'a', text: 'Shown the chain stops short of your choices', correct: false },
-        { id: 'b', text: 'Kept every link and redefined what "free" means', correct: true },
-        { id: 'c', text: 'Swapped causes for randomness in the brain', correct: false },
-        { id: 'd', text: 'Proved that determinism is false', correct: false },
+      cards: [
+        { text: 'Kept every link, redefined free', correct: true },
+        { text: 'Shown the chain stops', correct: false },
       ],
       explain: 'The trap: "it is compatible with free will" sounds like something got rescued from the causes. Nothing did. Every domino still falls; the camp only changed the test from "was it uncaused?" to "was it forced?"',
       xp: 5,

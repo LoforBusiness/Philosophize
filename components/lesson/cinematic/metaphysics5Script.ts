@@ -51,13 +51,11 @@ export const BEATS: Meta5Beat[] = [
   },
   {
     p: 4, stars: 1, q: 0.4, psr: 1, dasein: 1,
-    mc: {
+    interact: {
       prompt: 'For Heidegger, which mood throws open the question of why anything exists at all?',
-      options: [
-        { id: 'a', text: 'Cartesian doubt', correct: false },
-        { id: 'b', text: 'Wonder at Being', correct: true },
-        { id: 'c', text: 'The leap of faith', correct: false },
-        { id: 'd', text: 'The absurd', correct: false },
+      cards: [
+        { text: 'Wonder at Being', correct: true },
+        { text: 'Cartesian doubt', correct: false },
       ],
       explain: 'Wonder — astonishment that anything is at all — opens the fundamental question. Doubt is Descartes’s, the leap is Kierkegaard’s, the absurd is Camus’s.',
       xp: 5,
@@ -66,13 +64,11 @@ export const BEATS: Meta5Beat[] = [
   },
   {
     p: 4, stars: 1, q: 0.4, psr: 1, dasein: 1,
-    mc: {
+    interact: {
       prompt: '"Dasein" is German. Which translation is the one Heidegger actually means?',
-      options: [
-        { id: 'a', text: 'Daydream — the mind wandering toward Being', correct: false },
-        { id: 'b', text: 'Design — existence with a built-in purpose', correct: false },
-        { id: 'c', text: 'Being-there — the being whose own being is in question', correct: true },
-        { id: 'd', text: 'Decision — choosing one’s own existence', correct: false },
+      cards: [
+        { text: 'Being-there', correct: true },
+        { text: 'Decision', correct: false },
       ],
       explain: '"Dasein" splits into Da (there) and Sein (being): "being-there." The look-alikes are traps — it names human existence, the being for whom being is a question.',
       xp: 5,

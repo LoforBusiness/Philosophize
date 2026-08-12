@@ -76,16 +76,13 @@ export const BEATS: Valid3Beat[] = [
   },
   {
     p: 4, link: 1, stamp: 0, flaw: 0, form: 0,
-    mc: {
+    interact: {
       prompt: 'An argument reaches a TRUE conclusion. Does that make the argument valid?',
-      options: [
-        { id: 'a', text: 'No — a true conclusion can follow from broken logic', correct: true },
-        { id: 'b', text: 'Yes — a true conclusion proves the form works', correct: false },
-        { id: 'c', text: 'Yes — that makes it sound, so also valid', correct: false },
-        { id: 'd', text: 'Only if the conclusion is obviously true', correct: false },
+      cards: [
+        { text: 'No, the form is what counts', correct: true },
+        { text: 'Yes, the conclusion is true', correct: false },
       ],
-      explain:
-        'Validity is about the form, not the conclusion. "Grass is green, so the sky is blue" has a true conclusion but no valid link.',
+      explain: 'Validity is about the form, not the conclusion. "Grass is green, so the sky is blue" has a true conclusion but no valid link.',
       xp: 5,
     },
     dur: 1.0,

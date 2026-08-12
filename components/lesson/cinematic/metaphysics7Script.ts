@@ -72,13 +72,11 @@ export const BEATS: Metaphysics7Beat[] = [
   },
   {
     p: 12, x: 200, line: 1, solid: 1,
-    mc: {
+    interact: {
       prompt: 'If every moment already exists, has the block universe just declared change to be a lie?',
-      options: [
-        { id: 'a', text: 'Yes — if it is all already there, nothing really changes', correct: false },
-        { id: 'b', text: 'No — every moment is equally real; the flow you feel is you moving through them', correct: true },
-        { id: 'c', text: 'Yes — only the whole block is real, so single moments are illusions', correct: false },
-        { id: 'd', text: 'No — because the block universe says only the present exists', correct: false },
+      cards: [
+        { text: 'No, the flow is you', correct: true },
+        { text: 'Yes, nothing really changes', correct: false },
       ],
       explain: 'The trap: "already there" sounds exactly like "frozen". But the block is full of differences between its slices, and that IS change. What it denies is a magic spotlight sweeping along the line. The thing that moves is you.',
       xp: 5,

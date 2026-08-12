@@ -60,32 +60,26 @@ export const BEATS: Pol4Beat[] = [
   {
     // Both cards sit neutral here — lighting one would hand the reader the answer.
     p: 21, walls: 0, harm: 0, panel: 0,
-    mc: {
+    interact: {
       prompt: 'Which idea of liberty is about removing obstacles and interference?',
-      options: [
-        { id: 'a', text: 'Positive liberty, being your own master and directing your life', correct: false },
-        { id: 'b', text: 'Negative liberty, freedom from interference by others', correct: true },
-        { id: 'c', text: 'Natural liberty, the freedom we are born with', correct: false },
-        { id: 'd', text: 'Civil liberty, the freedom a constitution guarantees', correct: false },
+      cards: [
+        { text: 'Negative liberty', correct: true },
+        { text: 'Positive liberty', correct: false },
       ],
-      explain:
-        'For Berlin, negative liberty is the space where no one blocks your way. Positive liberty asks instead whether you truly have the power to be your own master.',
+      explain: 'For Berlin, negative liberty is the space where no one blocks your way. Positive liberty asks instead whether you truly have the power to be your own master.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 4, walls: 0, harm: 0, panel: 2,
-    mc: {
+    interact: {
       prompt: 'Berlin championed positive liberty, so he surely wanted the state to force people toward their "real" freedom. Right?',
-      options: [
-        { id: 'a', text: 'Yes — Berlin urged rulers to coerce people into self-mastery', correct: false },
-        { id: 'b', text: 'No — Berlin feared positive liberty could be twisted to justify coercion', correct: true },
-        { id: 'c', text: 'Yes — Berlin said a "higher self" should always overrule your choices', correct: false },
-        { id: 'd', text: 'No — because Berlin rejected positive liberty as meaningless', correct: false },
+      cards: [
+        { text: 'No, he feared its abuse', correct: true },
+        { text: 'Yes, he championed it', correct: false },
       ],
-      explain:
-        'The trap: Berlin valued positive liberty but warned it can be twisted, letting rulers coerce you in the name of your "real self." He guarded a core of negative liberty.',
+      explain: 'The trap: Berlin valued positive liberty but warned it can be twisted, letting rulers coerce you in the name of your "real self." He guarded a core of negative liberty.',
       xp: 5,
     },
     dur: 1.0,

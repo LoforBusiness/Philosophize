@@ -73,16 +73,13 @@ export const BEATS: Pol2Beat[] = [
   },
   {
     r: 16, sub: 19, podium: true, chart: 2, ledger: true,
-    mc: {
+    interact: {
       prompt: 'A wildly popular, magnetic leader wins a landslide election. Which authority makes their commands legitimate?',
-      options: [
-        { id: 'a', text: 'Charismatic, since their personal magnetism is obvious', correct: false },
-        { id: 'b', text: 'Rational-legal, since legitimacy comes from the elected office, not the charm', correct: true },
-        { id: 'c', text: 'Traditional, since landslides become a custom', correct: false },
-        { id: 'd', text: 'Pure power, since popularity is just force in disguise', correct: false },
+      cards: [
+        { text: 'Rational-legal, from the office', correct: true },
+        { text: 'Charismatic, from the person', correct: false },
       ],
-      explain:
-        'Charisma may win the vote, but the legitimacy of the commands flows from the lawful office they now hold. Real leaders blend types; the binding one here is rational-legal.',
+      explain: 'Charisma may win the vote, but the legitimacy of the commands flows from the lawful office they now hold. Real leaders blend types; the binding one here is rational-legal.',
       xp: 5,
     },
     dur: 1.0,

@@ -71,16 +71,13 @@ export const BEATS: E10Beat[] = [
   },
   {
     p: 21, x: 228, gauge: 1, band: 2, needle: 0.78,
-    mc: {
+    interact: {
       prompt: 'A fallibilist says, "I might be wrong about this." Does that mean they do not really believe it?',
-      options: [
-        { id: 'a', text: 'Yes — admitting you could be wrong cancels the belief', correct: false },
-        { id: 'b', text: 'Yes — real belief demands total, doubt-free certainty', correct: false },
-        { id: 'c', text: 'No — you can hold and act on a claim while staying open to revising it', correct: true },
-        { id: 'd', text: 'No — because fallibilists never actually believe anything', correct: false },
+      cards: [
+        { text: 'No, you can still act', correct: true },
+        { text: 'Yes, that is hedging', correct: false },
       ],
-      explain:
-        'The trap is reading "I might be wrong" as hedging. It is not doubt about the claim, it is a standing invitation to evidence. You can commit fully, act on it, and still leave the door open.',
+      explain: 'The trap is reading "I might be wrong" as hedging. It is not doubt about the claim, it is a standing invitation to evidence. You can commit fully, act on it, and still leave the door open.',
     },
     dur: 4.4,
   },

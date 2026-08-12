@@ -79,13 +79,11 @@ export const BEATS: Aes10Beat[] = [
   },
   {
     p: 9, x: 110, film: 1, panel: 1, shut: 0, verdict: 2, link: 1,
-    mc: {
+    interact: {
       prompt: '"Plato wanted art controlled, so he must have prized beauty above moral concern." Assess it.',
-      options: [
-        { id: 'a', text: 'Right — for Plato beauty outranked the good of the city', correct: false },
-        { id: 'b', text: 'Wrong — he policed art because he put morality above it', correct: true },
-        { id: 'c', text: 'Wrong — Plato thought art had no effect on character', correct: false },
-        { id: 'd', text: 'Right — he barred the ugly and kept the beautiful', correct: false },
+      cards: [
+        { text: 'Wrong, morality came first', correct: true },
+        { text: 'Right, he prized beauty', correct: false },
       ],
       explain: 'The trap reverses Plato. He policed art precisely because he ranked the good of the city ABOVE beauty — and he feared beautiful art most, since beauty is what makes a bad lesson persuasive.',
       xp: 5,

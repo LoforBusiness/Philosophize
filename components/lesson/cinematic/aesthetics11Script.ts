@@ -67,13 +67,11 @@ export const BEATS: Aes11Beat[] = [
   },
   {
     p: 4, x: 124, frames: 1, plaques: 1, same: 1,
-    mc: {
+    interact: {
       prompt: 'If the canvases match exactly, what could the human maker be adding?',
-      options: [
-        { id: 'a', text: 'An intention the work expresses — a feeling handed on', correct: true },
-        { id: 'b', text: 'Nothing — identical objects must have identical value', correct: false },
-        { id: 'c', text: 'Better technique, which you would eventually learn to see', correct: false },
-        { id: 'd', text: 'Rarity, which is about the price rather than the art', correct: false },
+      cards: [
+        { text: 'An intention it expresses', correct: true },
+        { text: 'Nothing, the canvases match', correct: false },
       ],
       explain: 'The trap: "identical objects, identical value" sounds like rigour. It assumes art is only its surface — and Tolstoy\'s test is transmission, which needs somebody with something to transmit.',
       xp: 5,

@@ -50,16 +50,13 @@ export const BEATS: Aes3Beat[] = [
   },
   {
     p: 4, arc: 1, mask: 1,
-    mc: {
+    interact: {
       prompt: 'What did Aristotle call the emotional release felt after a tragic story?',
-      options: [
-        { id: 'a', text: 'Catharsis', correct: true },
-        { id: 'b', text: 'Mimesis', correct: false },
-        { id: 'c', text: 'Logos', correct: false },
-        { id: 'd', text: 'Eudaimonia', correct: false },
+      cards: [
+        { text: 'Catharsis', correct: true },
+        { text: 'Mimesis', correct: false },
       ],
-      explain:
-        'Catharsis names the contested release of pity and fear. Mimesis is imitation, logos is reason, eudaimonia is flourishing.',
+      explain: 'Catharsis names the contested release of pity and fear. Mimesis is imitation, logos is reason, eudaimonia is flourishing.',
       xp: 5,
     },
     dur: 1.0,
@@ -84,16 +81,13 @@ export const BEATS: Aes3Beat[] = [
   },
   {
     p: 3, modes: 1, cut: 1, will: 1,
-    mc: {
+    interact: {
       prompt: 'In the Republic, why did Plato want to control music — and what did he actually do?',
-      options: [
-        { id: 'a', text: 'It shapes character before reason judges, so he banned all music', correct: false },
-        { id: 'b', text: 'It shapes the soul, so he regulated the modes — not a total ban', correct: true },
-        { id: 'c', text: 'It distracted workers, so he taxed it', correct: false },
-        { id: 'd', text: 'It was too costly, so only elites could hear it', correct: false },
+      cards: [
+        { text: 'He regulated the modes', correct: true },
+        { text: 'He banned all music', correct: false },
       ],
-      explain:
-        'The trap is "banned all music." Plato kept the steadfast modes and removed the soft ones — he regulated, not abolished. His worry was the soul, not cost.',
+      explain: 'The trap is "banned all music." Plato kept the steadfast modes and removed the soft ones — he regulated, not abolished. His worry was the soul, not cost.',
       xp: 5,
     },
     dur: 1.0,

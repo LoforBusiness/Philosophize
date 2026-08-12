@@ -69,13 +69,11 @@ export const BEATS: Ethics9Beat[] = [
   },
   {
     p: 4, x: 124, notes: 1, taken: 2, owed: 1,
-    mc: {
+    interact: {
       prompt: 'Bernard Williams says a man who walks away untroubled has missed something. What?',
-      options: [
-        { id: 'a', text: 'That a real duty went unmet, even though he chose rightly', correct: true },
-        { id: 'b', text: 'That he should have searched harder for a third option', correct: false },
-        { id: 'c', text: 'That feeling nothing proves the choice was wrong', correct: false },
-        { id: 'd', text: 'That guilt is the proper response to any hard choice', correct: false },
+      cards: [
+        { text: 'A real duty went unmet', correct: true },
+        { text: 'He should have found another', correct: false },
       ],
       explain: 'The trap: if choosing rightly cancelled the loss, regret would be irrational. Yet we distrust anyone untroubled by it. Williams called what survives moral residue.',
       xp: 5,

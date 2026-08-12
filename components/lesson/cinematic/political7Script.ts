@@ -73,13 +73,11 @@ export const BEATS: Political7Beat[] = [
   },
   {
     p: 4, x: 262, stone: 1, charter: 1, tear: 1,
-    mc: {
+    interact: {
       prompt: '"If it is not written into law, it is not a right." What do natural-rights thinkers answer?',
-      options: [
-        { id: 'a', text: 'Nothing — that is obviously correct, rights come from law', correct: false },
-        { id: 'b', text: 'Then a law that strips a right cannot be unjust, because nothing is left to judge it by', correct: true },
-        { id: 'c', text: 'Laws are always unjust, so writing rights down is pointless', correct: false },
-        { id: 'd', text: 'Only the oldest rights count, because they were written first', correct: false },
+      cards: [
+        { text: 'Then no law could be unjust', correct: true },
+        { text: 'Correct, rights need writing', correct: false },
       ],
       explain: 'The trap: "no law, no right" sounds hard-headed, and it is what Bentham argued. But if a right is only whatever the law says, then a law that strips one is unjust by no standard at all — which is exactly what a natural right supplies.',
       xp: 5,

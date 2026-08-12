@@ -58,13 +58,11 @@ export const BEATS: Pol12Beat[] = [
   },
   {
     p: 4, x: 124, door: 1, open: 1, neg: 1, posi: 1,
-    mc: {
+    interact: {
       prompt: 'A regime removes your choices, saying it serves your real self. Which freedom does it claim?',
-      options: [
-        { id: 'a', text: 'Positive liberty — self-mastery, decided on your behalf', correct: true },
-        { id: 'b', text: 'Negative liberty, since it is removing obstacles', correct: false },
-        { id: 'c', text: 'Both at once, which is why the claim works', correct: false },
-        { id: 'd', text: 'Neither — coercion is simply the opposite of freedom', correct: false },
+      cards: [
+        { text: 'Positive liberty', correct: true },
+        { text: 'Negative liberty', correct: false },
       ],
       explain: 'The trap is D, which is the comfortable answer. Berlin\'s point is sharper and nastier: the claim is coherent. Once someone else defines your "real" self, they can shrink your choices in freedom\'s own name.',
       xp: 5,

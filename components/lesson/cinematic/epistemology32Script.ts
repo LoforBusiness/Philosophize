@@ -64,13 +64,11 @@ export const BEATS: Epis32Beat[] = [
   {
     g: 10, maps: 4,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'So what kind of thing is a model?',
-      options: [
-        { id: 'a', text: 'A deliberate simplification, right for some jobs and wrong for others', correct: true },
-        { id: 'b', text: 'An approximation that gets truer the more detail you add', correct: false },
-        { id: 'c', text: 'A fiction, since it is never the thing itself', correct: false },
-        { id: 'd', text: 'A true description of the world\'s underlying structure', correct: false },
+      cards: [
+        { text: 'A deliberate simplification', correct: true },
+        { text: 'A map with too little detail', correct: false },
       ],
       explain: 'B is the trap, and the fourth map refutes it: add detail without limit and you get the coastline back at coastline size. C over-corrects — a model can still be plainly wrong. Fit to purpose is the standard.',
       xp: 5,

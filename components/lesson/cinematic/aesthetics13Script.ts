@@ -67,13 +67,11 @@ export const BEATS: Aes13Beat[] = [
   {
     g: 11, art: 1, chain: 1,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'Why does the strict formalist deny the perfect forgery is aesthetically lesser?',
-      options: [
-        { id: 'a', text: 'Because aesthetic value lives only in the visible form, not in origin', correct: true },
-        { id: 'b', text: 'Because forgeries are usually more beautiful than originals', correct: false },
-        { id: 'c', text: 'Because the forger worked harder than the original artist', correct: false },
-        { id: 'd', text: 'Because no expert can truly be fooled by a fake', correct: false },
+      cards: [
+        { text: 'Value lives in the form', correct: true },
+        { text: 'Because someone toiled harder', correct: false },
       ],
       explain: 'C tempts you into the genetic fallacy — judging a work by where it came from and how hard someone toiled. The formalist refuses that move in both directions: if the visible form is identical, so is the value, and provenance is only history.',
       xp: 5,

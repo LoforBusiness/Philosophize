@@ -67,13 +67,11 @@ export const BEATS: Epi21Beat[] = [
   },
   {
     p: 4, x: 124, dial: 1, will: 1, ev: 1,
-    mc: {
+    interact: {
       prompt: 'So is what you believe entirely out of your hands?',
-      options: [
-        { id: 'a', text: 'No — you choose what evidence you go and stand in front of', correct: true },
-        { id: 'b', text: 'Yes — belief is involuntary, so nothing you do matters', correct: false },
-        { id: 'c', text: 'No — with enough discipline you can simply decide', correct: false },
-        { id: 'd', text: 'Yes, which makes Clifford\'s demand meaningless', correct: false },
+      cards: [
+        { text: 'You choose what evidence to face', correct: true },
+        { text: 'Yes, belief is involuntary', correct: false },
       ],
       explain: 'The trap is "involuntary" sliding into "not my responsibility". Pascal saw the way out: you cannot will a belief, but you do choose the company, habits and reading that decide what reaches the tray.',
       xp: 5,

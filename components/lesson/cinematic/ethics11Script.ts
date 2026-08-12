@@ -62,13 +62,11 @@ export const BEATS: Ethics11Beat[] = [
   },
   {
     p: 4, x: 126, tok: 1, led: 1, shelf: 1,
-    mc: {
+    interact: {
       prompt: 'Cheap thrills sum to more raw pleasure than one symphony. For Mill, have they beaten it?',
-      options: [
-        { id: 'a', text: 'Yes — equally intense pleasures count equally, so the bigger total wins', correct: false },
-        { id: 'b', text: 'No — Mill ranked some pleasures higher in kind, not just in amount', correct: true },
-        { id: 'c', text: 'Yes — Mill dropped Bentham and counted only bodily pleasure', correct: false },
-        { id: 'd', text: 'No — Mill thought pleasure plays no part in ethics at all', correct: false },
+      cards: [
+        { text: 'No, some pleasures rank higher', correct: true },
+        { text: 'Yes, the bigger total wins', correct: false },
       ],
       explain: 'The trap: reading Mill as Bentham with better manners. He broke the ledger. Higher pleasures differ in KIND, and judges who have tasted both prefer them — so a taller pile of lower ones does not simply outvote them.',
       xp: 5,

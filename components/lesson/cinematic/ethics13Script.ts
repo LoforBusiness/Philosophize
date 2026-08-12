@@ -66,13 +66,11 @@ export const BEATS: Ethics13Beat[] = [
   {
     g: 26, pos: 2, habit: 1,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'So what makes someone courageous?',
-      options: [
-        { id: 'a', text: 'A settled habit, so they act well without having to work it out', correct: true },
-        { id: 'b', text: 'Performing one clearly courageous act', correct: false },
-        { id: 'c', text: 'Feeling no fear at all', correct: false },
-        { id: 'd', text: 'Following a rule that says be brave', correct: false },
+      cards: [
+        { text: 'A settled habit', correct: true },
+        { text: 'Feeling no fear', correct: false },
       ],
       explain: 'C is the trap, and the rail refutes it: no fear at all is the far left of this line, not the middle. D is the rival theory — and Aristotle\'s reply is that anyone still consulting the rule has not yet become the person the rule describes.',
       xp: 5,

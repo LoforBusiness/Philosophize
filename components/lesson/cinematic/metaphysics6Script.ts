@@ -61,13 +61,11 @@ export const BEATS: Meta6Beat[] = [
   },
   {
     p: 4, swap: 1, orig: 0,
-    mc: {
+    interact: {
       prompt: 'Why does the Ship of Theseus threaten our idea of identity over time?',
-      options: [
-        { id: 'a', text: 'Wooden ships rot too quickly to last', correct: false },
-        { id: 'b', text: 'A thing’s parts can all change while we still call it the same thing', correct: true },
-        { id: 'c', text: 'Theseus never actually owned a ship', correct: false },
-        { id: 'd', text: 'Ships cannot be repaired without sinking', correct: false },
+      cards: [
+        { text: 'Every part can change', correct: true },
+        { text: 'Wooden ships rot quickly', correct: false },
       ],
       explain: 'If a thing keeps its identity after every part is replaced, identity cannot rest on the parts alone — which is exactly what makes the case so puzzling.',
       xp: 5,
@@ -76,13 +74,11 @@ export const BEATS: Meta6Beat[] = [
   },
   {
     p: 5, swap: 0.4, two: 1, orig: 0,
-    mc: {
+    interact: {
       prompt: 'The old planks are rebuilt into a second ship. Which one is the real Ship of Theseus?',
-      options: [
-        { id: 'a', text: 'The rebuilt one — it has the original matter', correct: false },
-        { id: 'b', text: 'The repaired one — it never stopped sailing', correct: false },
-        { id: 'c', text: 'No automatic answer: "same" depends on tracking matter or continuity', correct: true },
-        { id: 'd', text: 'Both are fakes, since neither is unchanged', correct: false },
+      cards: [
+        { text: 'No automatic answer', correct: true },
+        { text: 'The one still sailing', correct: false },
       ],
       explain: 'Each ship has a strong claim — one keeps the original matter, the other unbroken continuity — so identity depends on which criterion we choose, not on a single fact.',
       xp: 5,

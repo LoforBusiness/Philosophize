@@ -57,13 +57,11 @@ export const BEATS: Aes16Beat[] = [
   },
   {
     p: 4, x: 124, canvas: 1, facts: 3,
-    mc: {
+    interact: {
       prompt: 'You learn the painter was cruel. What changed about the painting?',
-      options: [
-        { id: 'a', text: 'Nothing on the canvas — but what it is for you did change', correct: true },
-        { id: 'b', text: 'Its beauty, which cruelty genuinely diminishes', correct: false },
-        { id: 'c', text: 'Nothing at all, and your discomfort is a mistake', correct: false },
-        { id: 'd', text: 'Its meaning, fixed by whatever the artist intended', correct: false },
+      cards: [
+        { text: 'Nothing, but your experience did', correct: true },
+        { text: 'It ruins the work', correct: false },
       ],
       explain: 'The trap is that both extremes feel principled. "It ruins the work" and "it is simply irrelevant" each dodge the honest answer: the object is untouched and your experience of it is not.',
       xp: 5,

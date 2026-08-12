@@ -81,16 +81,13 @@ export const BEATS: EthicsBeat[] = [
     hpose: 4,
     judge: true,
     weigh: 'q1',
-    mc: {
+    interact: {
       prompt: 'What most clearly sets human moral life apart from other social animals?',
-      options: [
-        { id: 'a', text: 'We step back, judge our actions, and give reasons in words', correct: true },
-        { id: 'b', text: 'We run on raw instinct alone, never on thought', correct: false },
-        { id: 'c', text: 'Only humans show any trace of empathy or fairness', correct: false },
-        { id: 'd', text: 'We always grab whatever serves us best', correct: false },
+      cards: [
+        { text: 'We judge and give reasons', correct: true },
+        { text: 'Only humans feel empathy', correct: false },
       ],
-      explain:
-        'Apes show the building blocks — empathy, fairness. What humans add is language and reflective self-judgment: stepping back to ask "was that right?"',
+      explain: 'Apes show the building blocks — empathy, fairness. What humans add is language and reflective self-judgment: stepping back to ask "was that right?"',
       xp: 5,
     },
     dur: 1.0,
@@ -99,14 +96,13 @@ export const BEATS: EthicsBeat[] = [
     critter: true,
     judge: true,
     weigh: 'q2',
-    mc: {
+    interact: {
       prompt: 'Apes show empathy and fairness — so they must have a conscience just like ours. True or false?',
-      options: [
-        { id: 't', text: 'True', correct: false },
-        { id: 'f', text: 'False', correct: true },
+      cards: [
+        { text: 'False', correct: true },
+        { text: 'True', correct: false },
       ],
-      explain:
-        'They share the building blocks, but conscience adds the reflective step — judging yourself, in words. The animal cares; only you step out and ask "was that right?"',
+      explain: 'They share the building blocks, but conscience adds the reflective step — judging yourself, in words. The animal cares; only you step out and ask "was that right?"',
       xp: 5,
     },
     dur: 1.0,

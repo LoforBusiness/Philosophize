@@ -51,16 +51,13 @@ export const BEATS: PoliticalBeat[] = [
   {
     auth: 1,
     weigh: 'q1',
-    mc: {
+    interact: {
       prompt: 'According to Hobbes, why do people accept rules and government?',
-      options: [
-        { id: 'a', text: 'Because rulers are wiser and more virtuous than ordinary people', correct: false },
-        { id: 'b', text: 'Because life with no sovereign would be a brutal war of all against all', correct: true },
-        { id: 'c', text: 'Because humans are naturally peaceful and crave order for its own sake', correct: false },
-        { id: 'd', text: 'Because kings rule by divine right, chosen directly by God', correct: false },
+      cards: [
+        { text: 'Without a sovereign, war', correct: true },
+        { text: 'People are naturally cooperative', correct: false },
       ],
-      explain:
-        'The war comes from the situation — no common arbiter — not from people being wicked. Fear of death drives the covenant, since nearly any sovereign beats anarchy.',
+      explain: 'The war comes from the situation — no common arbiter — not from people being wicked. Fear of death drives the covenant, since nearly any sovereign beats anarchy.',
       xp: 5,
     },
     dur: 1.0,
@@ -73,16 +70,13 @@ export const BEATS: PoliticalBeat[] = [
   {
     auth: 1,
     weigh: 'q2',
-    mc: {
+    interact: {
       prompt: 'Hobbes’s sovereign keeps the peace — so surely he wanted citizens free to overthrow a bad one. Right?',
-      options: [
-        { id: 'a', text: 'Yes, Hobbes built in a clear right to revolt against tyrants', correct: false },
-        { id: 'b', text: 'No, Hobbes feared chaos more than tyranny and denied a right to revolt', correct: true },
-        { id: 'c', text: 'Yes, Hobbes thought rebellion was a citizen’s highest duty', correct: false },
-        { id: 'd', text: 'No, because Hobbes wanted no sovereign at all', correct: false },
+      cards: [
+        { text: 'No, he feared chaos more', correct: true },
+        { text: 'Yes, against a bad ruler', correct: false },
       ],
-      explain:
-        'Tempting, but it was Locke who defended resistance. Hobbes saw even a harsh sovereign as better than a return to the war of all against all.',
+      explain: 'Tempting, but it was Locke who defended resistance. Hobbes saw even a harsh sovereign as better than a return to the war of all against all.',
       xp: 5,
     },
     dur: 1.0,

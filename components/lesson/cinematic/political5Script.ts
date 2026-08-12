@@ -46,13 +46,11 @@ export const BEATS: Pol5Beat[] = [
   },
   {
     p: 4, veil: 1,
-    mc: {
+    interact: {
       prompt: 'What is the point of Rawls’ "veil of ignorance" thought experiment?',
-      options: [
-        { id: 'a', text: 'To prove justice can never be pinned down at all', correct: false },
-        { id: 'b', text: 'To model fair rules by hiding who you happen to be', correct: true },
-        { id: 'c', text: 'To insist society must be identical in every way', correct: false },
-        { id: 'd', text: 'To show the wealthy have earned every advantage', correct: false },
+      cards: [
+        { text: 'Fair rules, hiding who you are', correct: true },
+        { text: 'To make everyone equal', correct: false },
       ],
       explain: 'The veil hides your race, class, and talents, so your chosen principles stay impartial: equal liberties, plus inequalities only if they help the least advantaged.',
       xp: 5,

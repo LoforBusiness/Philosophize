@@ -60,16 +60,13 @@ export const BEATS: A9Beat[] = [
   },
   {
     p: 3, x: 208, boxes: true, stands: true,
-    mc: {
+    interact: {
       prompt: 'On Danto’s account, what is the relationship between beauty and art?',
-      options: [
-        { id: 'a', text: 'Beauty is one option for art, not a requirement', correct: true },
-        { id: 'b', text: 'Beauty is the single necessary mark of all art', correct: false },
-        { id: 'c', text: 'Beauty and art turn out to be the same thing', correct: false },
-        { id: 'd', text: 'Art can no longer be beautiful at all', correct: false },
+      cards: [
+        { text: 'An option, not a requirement', correct: true },
+        { text: 'Beauty was banned from art', correct: false },
       ],
-      explain:
-        'An option, not a condition. The trap is D — hearing "dethroned" as "banned." A work can still be beautiful, it just no longer has to be, because what made it art was never the beauty.',
+      explain: 'An option, not a condition. The trap is D — hearing "dethroned" as "banned." A work can still be beautiful, it just no longer has to be, because what made it art was never the beauty.',
     },
     dur: 4.6,
   },

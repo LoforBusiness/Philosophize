@@ -68,13 +68,11 @@ export const BEATS: Ethics32Beat[] = [
   {
     a: 35, b: 24, reasons: 3, card: 2, fresh: 1,
     dur: 1.0,
-    mc: {
+    interact: {
       prompt: 'So should you ever defer to someone else on a moral question?',
-      options: [
-        { id: 'a', text: 'Yes — as a signal to go and look, not a substitute for looking', correct: true },
-        { id: 'b', text: 'No — moral judgements must always be worked out alone', correct: false },
-        { id: 'c', text: 'Yes, exactly as you would defer about a train time', correct: false },
-        { id: 'd', text: 'Only when the person is an accredited ethicist', correct: false },
+      cards: [
+        { text: 'Yes, a signal to look', correct: true },
+        { text: 'No, always work it alone', correct: false },
       ],
       explain: 'The trap is B: it flatters us and nobody lives that way. Testimony is excellent evidence that you have missed something. It is a poor replacement for going and seeing what you missed.',
       xp: 5,

@@ -49,16 +49,13 @@ export const BEATS: Aes2Beat[] = [
   },
   {
     a: 14, v: 8, chain: 3,
-    mc: {
+    interact: {
       prompt: 'What did Tolstoy believe was the primary purpose of art?',
-      options: [
-        { id: 'a', text: 'To transmit the artist’s feeling into the audience', correct: true },
-        { id: 'b', text: 'To copy nature as beautifully as possible', correct: false },
-        { id: 'c', text: 'To flaunt the artist’s technical skill', correct: false },
-        { id: 'd', text: 'To deliver clear moral lessons', correct: false },
+      cards: [
+        { text: 'To transmit the artist\'s feeling', correct: true },
+        { text: 'To make beautiful objects', correct: false },
       ],
-      explain:
-        'Tolstoy called art "infection": the maker passes on a feeling so the audience shares it. He rejected beauty, pleasure, and skill as the test.',
+      explain: 'Tolstoy called art "infection": the maker passes on a feeling so the audience shares it. He rejected beauty, pleasure, and skill as the test.',
       xp: 5,
     },
     dur: 1.0,
@@ -71,16 +68,13 @@ export const BEATS: Aes2Beat[] = [
   },
   {
     a: 0, v: 22, felt: true, chain: 3,
-    mc: {
+    interact: {
       prompt: 'Crying at a film about people you know never existed — what does this show?',
-      options: [
-        { id: 'a', text: 'The emotion is fake, since the characters are fake', correct: false },
-        { id: 'b', text: 'Real feeling for known fictions — a live puzzle, the paradox of fiction', correct: true },
-        { id: 'c', text: 'You secretly believe the characters are real', correct: false },
-        { id: 'd', text: 'Only badly made fiction can move us this way', correct: false },
+      cards: [
+        { text: 'Real feeling for known fictions', correct: true },
+        { text: 'The tears are not real', correct: false },
       ],
-      explain:
-        'The trap: "fake people, so fake tears." Radford named this the paradox of fiction (1975) — the feeling is genuine, and explaining it is still debated.',
+      explain: 'The trap: "fake people, so fake tears." Radford named this the paradox of fiction (1975) — the feeling is genuine, and explaining it is still debated.',
       xp: 5,
     },
     dur: 1.0,

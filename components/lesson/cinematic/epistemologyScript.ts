@@ -65,16 +65,13 @@ export const BEATS: EpistBeat[] = [
     hpose: 5,
     locks: [1, 1, 0.15],
     qkey: 'q1',
-    mc: {
+    interact: {
       prompt: 'In the standard analysis, which THREE things does genuine knowledge require?',
-      options: [
-        { id: 'a', text: 'A true belief held for good reasons — justified true belief', correct: true },
-        { id: 'b', text: 'A belief felt with total confidence and conviction', correct: false },
-        { id: 'c', text: 'A belief shared by experts and the crowd alike', correct: false },
-        { id: 'd', text: 'Any belief that simply turns out correct', correct: false },
+      cards: [
+        { text: 'Justified true belief', correct: true },
+        { text: 'Confident, popular, and true', correct: false },
       ],
-      explain:
-        'The recipe is justified true belief. Confidence and popularity are not justification, however convincing they feel — only reasons turn the third lock.',
+      explain: 'The recipe is justified true belief. Confidence and popularity are not justification, however convincing they feel — only reasons turn the third lock.',
       xp: 5,
     },
     dur: 1.0,
@@ -83,16 +80,13 @@ export const BEATS: EpistBeat[] = [
     hpose: 5,
     locks: [1, 1, 0],
     qkey: 'q2',
-    mc: {
+    interact: {
       prompt: 'You are 100% certain it will rain tomorrow, and it does. Did you KNOW it would rain?',
-      options: [
-        { id: 'a', text: 'Yes — you were certain and you were right', correct: false },
-        { id: 'b', text: 'Yes — a true belief always counts as knowledge', correct: false },
-        { id: 'c', text: 'Only if good reasons, not just a feeling, backed the belief', correct: true },
-        { id: 'd', text: 'No — the future can never be known at all', correct: false },
+      cards: [
+        { text: 'Only with good reasons', correct: true },
+        { text: 'Yes, you were certain', correct: false },
       ],
-      explain:
-        'Certainty is a feeling, not justification. True and believed, but the reasons lock never turned — being right without reasons is luck, and the door stays shut.',
+      explain: 'Certainty is a feeling, not justification. True and believed, but the reasons lock never turned — being right without reasons is luck, and the door stays shut.',
       xp: 5,
     },
     dur: 1.0,

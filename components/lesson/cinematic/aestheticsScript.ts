@@ -72,16 +72,13 @@ export const BEATS: AestheticsBeat[] = [
     apple: true,
     critics: true,
     weigh: 'q1',
-    mc: {
+    interact: {
       prompt: 'For Kant, what makes aesthetic pleasure differ from the pleasure of eating?',
-      options: [
-        { id: 'a', text: 'It is disinterested — indifferent to the object’s use', correct: true },
-        { id: 'b', text: 'It lasts longer than bodily pleasure', correct: false },
-        { id: 'c', text: 'It applies only to visual art', correct: false },
-        { id: 'd', text: 'It can only be felt after training', correct: false },
+      cards: [
+        { text: 'It is disinterested', correct: true },
+        { text: 'It is simply stronger', correct: false },
       ],
-      explain:
-        'Aesthetic pleasure is "disinterested": free of any desire for the object. Eating gratifies a need; beauty asks for nothing — the reaching hand falls away.',
+      explain: 'Aesthetic pleasure is "disinterested": free of any desire for the object. Eating gratifies a need; beauty asks for nothing — the reaching hand falls away.',
       xp: 5,
     },
     dur: 1.0,
@@ -98,16 +95,13 @@ export const BEATS: AestheticsBeat[] = [
     crowd: true,
     critics: true,
     weigh: 'q2',
-    mc: {
+    interact: {
       prompt: '"Beauty is just personal taste." So does calling a sunset beautiful ask nothing of anyone?',
-      options: [
-        { id: 'a', text: 'Right — taste is private, so the claim stays private', correct: false },
-        { id: 'b', text: 'It rests on feeling, yet still claims everyone should agree', correct: true },
-        { id: 'c', text: 'Wrong — beauty is a measurable property like weight', correct: false },
-        { id: 'd', text: 'Only trained critics may call anything beautiful', correct: false },
+      cards: [
+        { text: 'Felt, yet claims everyone agrees', correct: true },
+        { text: 'It asks nothing of anyone', correct: false },
       ],
-      explain:
-        'The trap: "feeling" sounds like "merely private." For Kant a judgment of taste is felt yet claims universal validity — it reaches out and asks all to agree.',
+      explain: 'The trap: "feeling" sounds like "merely private." For Kant a judgment of taste is felt yet claims universal validity — it reaches out and asks all to agree.',
       xp: 5,
     },
     dur: 1.0,

@@ -71,13 +71,11 @@ export const BEATS: Political11Beat[] = [
   },
   {
     p: 4, x: 120, dial: 1, set: 3, built: 3,
-    mc: {
+    interact: {
       prompt: 'A friend says the three disagree because each simply wanted a different government. What is the deeper truth?',
-      options: [
-        { id: 'a', text: 'They read human nature differently, and the state followed from that', correct: true },
-        { id: 'b', text: 'Each picked the government he wanted, then invented a nature to fit', correct: false },
-        { id: 'c', text: 'They actually agreed — the differences are old-fashioned wording', correct: false },
-        { id: 'd', text: 'They disagreed because they wrote in different countries', correct: false },
+      cards: [
+        { text: 'They read human nature differently', correct: true },
+        { text: 'Each wanted a different government', correct: false },
       ],
       explain: 'The trap reverses cause and effect: it has each man choosing his conclusion first and reverse-engineering a premise to reach it. The argument runs the other way. Fix the reading of human nature and the state you are allowed to build is already decided.',
       xp: 5,

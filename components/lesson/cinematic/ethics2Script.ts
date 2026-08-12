@@ -62,30 +62,26 @@ export const BEATS: Ethics2Beat[] = [
   },
   {
     p: 21, x: 262, g: -1, named: 1, lens: 3,
-    mc: {
+    interact: {
       prompt: 'Returning the found wallet, which question does a consequentialist ask first?',
-      options: [
-        { id: 'a', text: 'Is keeping it a rule I could will everyone to follow?', correct: false },
-        { id: 'b', text: 'Which choice produces the most overall happiness?', correct: true },
-        { id: 'c', text: 'What would an honest person do here?', correct: false },
-        { id: 'd', text: 'Does the law require me to return it?', correct: false },
+      cards: [
+        { text: 'Which brings most happiness', correct: true },
+        { text: 'Could everyone follow it', correct: false },
       ],
-      explain:
-        'Consequentialism weighs results — whose happiness rises or falls. The universalizing question is Kant’s, the honest-person question is Aristotle’s, and law is not the same as morality.',
+      explain: 'Consequentialism weighs results — whose happiness rises or falls. The universalizing question is Kant’s, the honest-person question is Aristotle’s, and law is not the same as morality.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 8, x: 262, g: -1, named: 1, lens: 3,
-    mc: {
+    interact: {
       prompt: 'Almost everyone keeps small change they find, so keeping the wallet must be morally fine. Sound reasoning?',
-      options: [
-        { id: 't', text: 'True', correct: false },
-        { id: 'f', text: 'False', correct: true },
+      cards: [
+        { text: 'False', correct: true },
+        { text: 'True', correct: false },
       ],
-      explain:
-        'This is the is–ought gap Hume flagged in 1739: what people commonly do never, by itself, proves what is right.',
+      explain: 'This is the is–ought gap Hume flagged in 1739: what people commonly do never, by itself, proves what is right.',
       xp: 5,
     },
     dur: 1.0,

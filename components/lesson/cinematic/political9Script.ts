@@ -65,16 +65,13 @@ export const BEATS: P9Beat[] = [
   },
   {
     vote: 0, tally: true, advance: true, rights: true, one: 9,
-    mc: {
+    interact: {
       prompt: 'What do Mill and Tocqueville mean by "the tyranny of the majority"?',
-      options: [
-        { id: 'a', text: 'A king seizing power against the people’s wishes', correct: false },
-        { id: 'b', text: 'The majority using its weight to oppress a minority', correct: true },
-        { id: 'c', text: 'A small elite outvoting the broad public', correct: false },
-        { id: 'd', text: 'A foreign power interfering in an election', correct: false },
+      cards: [
+        { text: 'The majority oppressing a minority', correct: true },
+        { text: 'One ruler oppressing everyone', correct: false },
       ],
-      explain:
-        'The danger is internal, which is what makes it hard to see. The trap is A: a tyrant is the picture the word brings up, and this tyrant is the electorate. No coup — just a majority closing in on the few.',
+      explain: 'The danger is internal, which is what makes it hard to see. The trap is A: a tyrant is the picture the word brings up, and this tyrant is the electorate. No coup — just a majority closing in on the few.',
     },
     dur: 4.6,
   },

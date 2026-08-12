@@ -56,13 +56,11 @@ export const BEATS: Meta24Beat[] = [
   },
   {
     p: 4, x: 124, grains: 1, lamp: 1,
-    mc: {
+    interact: {
       prompt: 'A friend says: "Just define a heap as 100 grains or more. Solved." Why does that dodge it?',
-      options: [
-        { id: 'a', text: 'A precise cut-off is arbitrary and is not how the word works', correct: true },
-        { id: 'b', text: 'It is the correct solution — vagueness is sloppy definition', correct: false },
-        { id: 'c', text: 'Because 100 is too small a number for sand', correct: false },
-        { id: 'd', text: 'Because heaps are not really made of grains', correct: false },
+      cards: [
+        { text: 'A cut-off would be arbitrary', correct: true },
+        { text: 'Correct, vagueness is sloppiness', correct: false },
       ],
       explain: 'The trap is false precision. It makes 99 a non-heap and 100 a heap with no real difference between them, and it quietly replaces our vague word instead of explaining why the vague word resists a line.',
       xp: 5,

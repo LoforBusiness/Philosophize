@@ -55,32 +55,26 @@ export const BEATS: Epi2Beat[] = [
   },
   {
     d: 9, m: 3, doubt: 0.85, glow: true,
-    mc: {
+    interact: {
       prompt: 'What was Descartes really trying to do with his evil-demon thought experiment?',
-      options: [
-        { id: 'a', text: 'To find a belief that survives even the fiercest doubt', correct: true },
-        { id: 'b', text: 'To prove that such demons genuinely exist', correct: false },
-        { id: 'c', text: 'To show that knowledge is forever out of reach', correct: false },
-        { id: 'd', text: 'To argue that mathematics can never be trusted', correct: false },
+      cards: [
+        { text: 'Find what survives fiercest doubt', correct: true },
+        { text: 'Prove the world unreal', correct: false },
       ],
-      explain:
-        'The demon is a deliberate stress test. Cranking deception to the extreme reveals what still holds: the thinking self.',
+      explain: 'The demon is a deliberate stress test. Cranking deception to the extreme reveals what still holds: the thinking self.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     d: 16, m: 15, doubt: 1.0, glow: true,
-    mc: {
+    interact: {
       prompt: 'If the demon fakes everything, why can’t it fake "I exist" away?',
-      options: [
-        { id: 'a', text: 'Because the demon agreed to leave that one belief alone', correct: false },
-        { id: 'b', text: 'Because math proves existence is logically certain', correct: false },
-        { id: 'c', text: 'Because being deceived still requires someone there to be deceived', correct: true },
-        { id: 'd', text: 'It can — Descartes admitted even this belief might be false', correct: false },
+      cards: [
+        { text: 'Being deceived needs a doubter', correct: true },
+        { text: 'It could fake that too', correct: false },
       ],
-      explain:
-        'To be fooled, you must exist to be fooled. The very act of doubting proves a doubter is there.',
+      explain: 'To be fooled, you must exist to be fooled. The very act of doubting proves a doubter is there.',
       xp: 5,
     },
     dur: 1.0,

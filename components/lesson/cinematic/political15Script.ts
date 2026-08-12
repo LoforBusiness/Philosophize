@@ -55,13 +55,11 @@ export const BEATS: Pol15Beat[] = [
   },
   {
     p: 4, x: 124, stages: 4, night: 1,
-    mc: {
+    interact: {
       prompt: 'A protester smashes windows by night and hides from the police. Civil disobedience?',
-      options: [
-        { id: 'a', text: 'No — violence, secrecy and evasion fail every condition', correct: true },
-        { id: 'b', text: 'Yes, if the cause is genuinely just', correct: false },
-        { id: 'c', text: 'Yes — lawbreaking for a principle is what the term means', correct: false },
-        { id: 'd', text: 'No, but only because of the property damage', correct: false },
+      cards: [
+        { text: 'No, it fails every condition', correct: true },
+        { text: 'Yes, it protests injustice', correct: false },
       ],
       explain: 'The trap is C, which is how the phrase is usually used. King and Rawls set a much narrower bar: public, nonviolent, penalty-accepting. Strip those and what is left is ordinary crime with a motive.',
       xp: 5,

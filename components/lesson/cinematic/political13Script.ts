@@ -66,13 +66,11 @@ export const BEATS: Pol13Beat[] = [
   },
   {
     p: 4, x: 124, steps: 3, tag: 1,
-    mc: {
+    interact: {
       prompt: 'On Mill\'s view, what makes something harm rather than mere offence?',
-      options: [
-        { id: 'a', text: 'It sets back another person\'s interests or rights', correct: true },
-        { id: 'b', text: 'Enough people are upset by it', correct: false },
-        { id: 'c', text: 'It is deeply disrespectful of what others hold sacred', correct: false },
-        { id: 'd', text: 'It damages the speaker\'s own character', correct: false },
+      cards: [
+        { text: 'It sets back another\'s interests', correct: true },
+        { text: 'It offends other people', correct: false },
       ],
       explain: 'The trap is B, because it feels democratic. But offence scales with how many people object, and harm does not — which is exactly why Mill will not let a headcount do the work of an injury.',
       xp: 5,

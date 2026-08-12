@@ -58,13 +58,11 @@ export const BEATS: Meta13Beat[] = [
   },
   {
     p: 4, x: 124, track: 1, fork: 1, both: 1, stuck: 1,
-    mc: {
+    interact: {
       prompt: 'In the fission case, exactly one of the two people must be the real you. True?',
-      options: [
-        { id: 'a', text: 'False — both are equally continuous and nothing picks a winner', correct: true },
-        { id: 'b', text: 'True — the one on Earth, since that body never stopped', correct: false },
-        { id: 'c', text: 'True — the one on Mars, since that is where you were going', correct: false },
-        { id: 'd', text: 'True, but which one is unknowable in principle', correct: false },
+      cards: [
+        { text: 'False, both are equally continuous', correct: true },
+        { text: 'True, the one on Earth', correct: false },
       ],
       explain: 'The trap is that identity feels all-or-nothing, so one of them has to be the "real" one. Both branches are equally continuous. Parfit\'s answer: the question is empty, and what they share is what mattered.',
       xp: 5,

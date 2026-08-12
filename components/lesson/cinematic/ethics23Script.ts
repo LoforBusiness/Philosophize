@@ -66,13 +66,11 @@ export const BEATS: Ethics23Beat[] = [
   },
   {
     p: 4, x: 124, gauges: 1, near: 1, far: 1,
-    mc: {
+    interact: {
       prompt: 'Someone replies: "Thousands of others could help too, so the duty is not mine." Does that work?',
-      options: [
-        { id: 'a', text: 'No — the child still dies if everyone reasons that way', correct: true },
-        { id: 'b', text: 'Yes, shared responsibility means no individual is obligated', correct: false },
-        { id: 'c', text: 'Yes, because morality applies only to people present', correct: false },
-        { id: 'd', text: 'No, because Singer thinks only governments have duties', correct: false },
+      cards: [
+        { text: 'No, the child still dies', correct: true },
+        { text: 'Yes, responsibility is shared', correct: false },
       ],
       explain: 'The trap is B, the diffusion of responsibility. At the pond you would not stroll past because a crowd was also watching. Others being able to act has never cancelled your being able to.',
       xp: 5,

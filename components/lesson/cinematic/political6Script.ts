@@ -58,13 +58,11 @@ export const BEATS: Pol6Beat[] = [
   },
   {
     p: 4, bars: 1, prin: 1,
-    mc: {
+    interact: {
       prompt: 'Rawls protects the worst-off. So can his liberty principle be traded away to boost their wealth?',
-      options: [
-        { id: 'a', text: 'Yes, Rawls let basic freedoms be sacrificed for extra income', correct: false },
-        { id: 'b', text: 'No — equal basic liberties come first and cannot be bought off', correct: true },
-        { id: 'c', text: 'Yes, Rawls ranked wealth above all the liberties', correct: false },
-        { id: 'd', text: 'No, because Rawls rejected liberty as a value entirely', correct: false },
+      cards: [
+        { text: 'No, basic liberties come first', correct: true },
+        { text: 'Yes, if the poorest gain', correct: false },
       ],
       explain: 'The trap: helping the poor sounds like grounds to trade liberty for cash. But Rawls gives the basic liberties strict priority; only once they are secured does the difference principle apply.',
       xp: 5,

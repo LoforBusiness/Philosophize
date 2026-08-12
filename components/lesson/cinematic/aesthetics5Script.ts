@@ -47,13 +47,11 @@ export const BEATS: Aes5Beat[] = [
   },
   {
     p: 19, bird: 1, ego: 0, self: 0.06,
-    mc: {
+    interact: {
       prompt: 'What did Iris Murdoch mean by "unselfing"?',
-      options: [
-        { id: 'a', text: 'Some real thing absorbs you so fully the ego drops away', correct: true },
-        { id: 'b', text: 'A meditation technique for shedding your identity', correct: false },
-        { id: 'c', text: 'Deciding the self is an illusion', correct: false },
-        { id: 'd', text: 'Putting others’ needs above your own', correct: false },
+      cards: [
+        { text: 'Something absorbs you completely', correct: true },
+        { text: 'A technique you perform', correct: false },
       ],
       explain: 'Unselfing is not a technique you perform but something that happens to you: a kestrel or artwork grips you so wholly the self-preoccupied ego vanishes.',
       xp: 5,
