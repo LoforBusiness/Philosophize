@@ -1,7 +1,7 @@
 # Launch screen rebuild — layered landscapes and contemplative motion
 
 **Date:** 2026-08-11
-**Status:** approved design, not yet implemented.
+**Status:** implemented 2026-08-11. See docs/superpowers/plans/2026-08-11-launch-screen-rebuild.md.
 **Scope:** `components/launch/*` and two new scripts. Nothing outside that directory
 changes except the two new `scripts/` files and one line in `package.json`.
 

@@ -99,7 +99,7 @@ const unlisted = validators.filter((v) => !md.includes(v));
 ok(unlisted.length === 0, 'S11 names every validator in `npm run check`',
   unlisted.length ? `missing: ${unlisted.join(', ')}` : `all ${validators.length}`);
 const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
-  'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen'];
+  'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen'];
 ok(md.includes(`**${WORDS[validators.length]}** validators`),
   'and states how many there are', `${validators.length} = ${WORDS[validators.length]}`);
 // They must also all exist — a script named in `check` but missing breaks the
