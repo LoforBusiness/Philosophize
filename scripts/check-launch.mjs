@@ -89,39 +89,107 @@ for (const key of A.SCENE_KEYS) {
     `${(L[5] - L[0]).toFixed(2)}, need ${MIN_SWING}`);
 }
 
-// ── 2 · chrome is legible where it actually renders ──────────────────────────
+// ── 2 · the chrome band: where it LANDS, and whether it can be READ ──────────
 //
-// The old version of this check measured `chromeOn(key)` at full opacity
-// against `skyBandTone(key)` — the sky's colour at y=0, the very top of the
-// gradient. Nothing in the rendered screen sits at y=0. The masthead sits near
-// MASTHEAD_STAGE_Y below and the progress stroke + percentage sit at
-// LaunchScreen.tsx's own STROKE_STAGE_Y — both mid-gradient, and both drawn in
-// `chromeSoft` (chrome alpha-blended), never at full opacity. A y=0/solid check
-// can read 8–16:1 while the real composited pixel at the real y reads 2–4:1,
-// which is exactly what shipped: the validator was measuring a point nothing
-// draws at, in a colour nothing draws in.
+// Two failures live here, and the second one is why the first went unnoticed.
 //
-// `STROKE_STAGE_Y` is already a STAGE y — `strokeWrap` sits at
-// `offY + STROKE_STAGE_Y * fit` — so it needs no translation. The masthead is
-// positioned in SCREEN space (`insets.top + 18`), so putting it on the same
-// axis needs a device to run LaunchScreen's own cover-fit maths against
-// (fit = max(w/400, h/800), offY = (h - 800·fit)/2) — a mid-size phone
-// (390×844, 47pt safe-area top) is what produces the y≈62 this file's own
-// review used.
-const REF_W = 390, REF_H = 844, REF_INSET_TOP = 47;
-const refFit = Math.max(REF_W / A.ART_W, REF_H / A.ART_H);
-const refOffY = (REF_H - A.ART_H * refFit) / 2;
-const MASTHEAD_STAGE_Y = (REF_INSET_TOP + 18 - refOffY) / refFit;
+// WHERE IT LANDS. The masthead is positioned in SCREEN space
+// (`insets.top + MAST_TOP_PAD`) and the stroke wants STAGE space
+// (`offY + STROKE_STAGE_Y * fit`). Their separation is therefore fixed ONLY
+// while `offY === 0`, which is true exactly when the device is 2:1 or taller.
+// Below that `offY` goes negative and the stroke marches up through the
+// masthead and then off the top of the display: at 820×1180 its ink laid out at
+// screen y −43…−34 and the percentage at −19…−4, i.e. nothing visible at all.
+// `app.json` ships `orientation: portrait` with `supportsTablet: true`, and
+// Play excludes neither tablets nor foldables, so those are shipped form
+// factors and not a thought experiment. LaunchScreen.tsx now clamps `strokeTop`
+// against the masthead's own box; the assertions below lay the band out on
+// EIGHT devices and check the clamp actually holds.
+//
+// WHY IT WENT UNNOTICED. This check used ONE reference device — 390×844 —
+// which is precisely the aspect where `offY` is 0 and the two elements are in
+// fixed relation. A single reference cannot see a defect whose whole mechanism
+// is the relation between two coordinate spaces changing. One device measures
+// one device.
+//
+// WHETHER IT CAN BE READ. An older version measured `chromeOn(key)` at full
+// opacity against the sky's colour at y=0, the very top of the gradient.
+// Nothing renders at y=0. That was fixed, and then only half-fixed: the label
+// said "stroke + percentage" but the sample was the STROKE's y alone, and the
+// percentage is a sibling BELOW the stroke — `STROKE_SVG_H` + `PCT_GAP` + its
+// own line box, so 26–41 screen px lower, stage y 115–129 on the reference —
+// where the same chromeSoft measured 4.12:1 on `walk`. Every element is now
+// measured over the EXTENT it occupies, at the worse of its two ends, and the
+// percentage has its own assertion.
+//
+// Each element is also measured in the colour IT draws in: the percentage and
+// the masthead in chromeSoft, and the stroke at FULL opacity, because
+// `stroke={chrome}` is what LaunchScreen renders. Measuring the stroke soft
+// under-rated it by ~0.9 of a ratio point — safe, but not true.
 
-const strokeYMatch = screen.match(/STROKE_STAGE_Y\s*=\s*(-?[\d.]+)/);
-const inkAlphaMatch = screen.match(/CHROME_SOFT_INK_ALPHA\s*=\s*([\d.]+)/);
-const creamAlphaMatch = screen.match(/CHROME_SOFT_CREAM_ALPHA\s*=\s*([\d.]+)/);
-ok(!!strokeYMatch && !!inkAlphaMatch && !!creamAlphaMatch,
-  'LaunchScreen.tsx declares STROKE_STAGE_Y and both chromeSoft alphas',
-  strokeYMatch && inkAlphaMatch && creamAlphaMatch ? '' : 'one or more constants not found');
-const STROKE_STAGE_Y = strokeYMatch ? Number(strokeYMatch[1]) : 0;
-const INK_ALPHA = inkAlphaMatch ? Number(inkAlphaMatch[1]) : 1;
-const CREAM_ALPHA = creamAlphaMatch ? Number(creamAlphaMatch[1]) : 1;
+/** A numeric constant read out of LaunchScreen.tsx, so the two cannot drift. */
+function screenConst(name) {
+  const m = screen.match(new RegExp(`\\b${name}\\s*=\\s*(-?[\\d.]+)\\s*;`));
+  return m ? Number(m[1]) : null;
+}
+const CHROME_CONSTS = [
+  'STROKE_STAGE_Y', 'CHROME_SOFT_INK_ALPHA', 'CHROME_SOFT_CREAM_ALPHA',
+  'MAST_TOP_PAD', 'MAST_LINE_H', 'CHROME_GAP',
+  'STROKE_W', 'STROKE_JITTER', 'STROKE_SVG_H', 'PCT_GAP', 'PCT_LINE_H',
+];
+const K = Object.fromEntries(CHROME_CONSTS.map((n) => [n, screenConst(n)]));
+const missing = CHROME_CONSTS.filter((n) => K[n] === null);
+ok(missing.length === 0,
+  'LaunchScreen.tsx declares every chrome constant this check lays out',
+  missing.length ? `not found: ${missing.join(' ')}` : CHROME_CONSTS.length + ' read');
+for (const n of CHROME_CONSTS) if (K[n] === null) K[n] = 0;
+
+const INK_ALPHA = K.CHROME_SOFT_INK_ALPHA;
+const CREAM_ALPHA = K.CHROME_SOFT_CREAM_ALPHA;
+/** Half the stroke's real ink height: the path's worst jitter plus half its width. */
+const STROKE_INK_HALF = K.STROKE_JITTER + K.STROKE_W / 2;
+
+/**
+ * The reference devices.
+ *
+ * The FIRST is the measurement reference — a mid-size phone, the aspect the
+ * composition is authored against, and the one the contrast assertions use.
+ * The rest exist so the geometry is checked where `offY` is NOT zero. Six of
+ * the seven are below 2:1; on three of those the stroke's ink laid out ABOVE
+ * y=0 before the clamp, and on two of those three the percentage did as well.
+ * `inset` is the safe-area top each form factor reports.
+ */
+const DEVICES = [
+  { name: '390x844 phone  2.16:1', w: 390, h: 844, inset: 47, measure: true },
+  { name: '360x640 16:9   1.78:1', w: 360, h: 640, inset: 24 },
+  { name: '375x667 SE3    1.78:1', w: 375, h: 667, inset: 20 },
+  { name: '411x731        1.78:1', w: 411, h: 731, inset: 24 },
+  { name: '412x915 Pixel8 2.22:1', w: 412, h: 915, inset: 24 },
+  { name: '744x1133 iPad  1.52:1', w: 744, h: 1133, inset: 24 },
+  { name: '820x1180 iPad  1.44:1', w: 820, h: 1180, inset: 24 },
+  { name: '673x841 ZFold  1.25:1', w: 673, h: 841, inset: 30 },
+];
+
+/** LaunchScreen's own arithmetic, run against one device. Screen px throughout. */
+function layout(dev) {
+  const fit = Math.max(dev.w / A.ART_W, dev.h / A.ART_H);
+  const offY = (dev.h - A.ART_H * fit) / 2;
+  const mastTop = dev.inset + K.MAST_TOP_PAD;
+  const mastBot = mastTop + K.MAST_LINE_H;
+  // The clamp under test.
+  const strokeTop = Math.max(mastBot + K.CHROME_GAP, offY + K.STROKE_STAGE_Y * fit);
+  const inkTop = strokeTop + K.STROKE_SVG_H / 2 - STROKE_INK_HALF;
+  const inkBot = strokeTop + K.STROKE_SVG_H / 2 + STROKE_INK_HALF;
+  const pctTop = strokeTop + K.STROKE_SVG_H + K.PCT_GAP;
+  const pctBot = pctTop + K.PCT_LINE_H;
+  const stage = (y) => (y - offY) / fit;
+  return {
+    fit, offY, mastTop, mastBot, inkTop, inkBot, pctTop, pctBot,
+    mast: [stage(mastTop), stage(mastBot)],
+    stroke: [stage(inkTop), stage(inkBot)],
+    pct: [stage(pctTop), stage(pctBot)],
+  };
+}
 
 // Alpha-composite chrome over a background — the same maths an rgba() colour
 // gets when React Native draws it over an opaque surface underneath.
@@ -130,22 +198,87 @@ const compositeLum = (chromeHex, alpha, bgHex) => {
   const mix = c.map((v, i) => bg[i] + (v - bg[i]) * alpha);
   return 0.2126 * lin(mix[0]) + 0.7152 * lin(mix[1]) + 0.0722 * lin(mix[2]);
 };
+/** Contrast at ONE stage y, chrome composited at `alpha` over the sky there. */
+function contrastAt(key, y, alpha) {
+  const bg = skyHexAt(key, y);
+  return { r: ratio(compositeLum(A.chromeOn(key), alpha, bg), lum(bg)), bg };
+}
+/** The WORSE end of an element's extent — never the anchor, never the midpoint. */
+function worstOver(key, [y0, y1], alpha) {
+  const a = contrastAt(key, y0, alpha), b = contrastAt(key, y1, alpha);
+  return a.r <= b.r ? { ...a, y: y0 } : { ...b, y: y1 };
+}
 
+// ── 2a · geometry, on every reference device ─────────────────────────────────
+for (const dev of DEVICES) {
+  const L = layout(dev);
+  ok(L.inkTop > L.mastBot, `${dev.name}: stroke ink clears the masthead`,
+    `masthead ends ${L.mastBot.toFixed(1)}, ink starts ${L.inkTop.toFixed(1)} ` +
+    `(${(L.inkTop - L.mastBot).toFixed(1)}px clear, offY ${L.offY.toFixed(0)})`);
+  ok(L.inkTop >= 0, `${dev.name}: the stroke is on screen`,
+    `ink ${L.inkTop.toFixed(1)}..${L.inkBot.toFixed(1)}`);
+  ok(L.pctTop >= 0, `${dev.name}: the percentage is on screen`,
+    `pct ${L.pctTop.toFixed(1)}..${L.pctBot.toFixed(1)}`);
+}
+
+// ── 2b · contrast, at the measurement reference, over each element's extent ──
+const REF = DEVICES.find((d) => d.measure);
+const RL = layout(REF);
 for (const key of A.SCENE_KEYS) {
   const c = A.chromeOn(key);
   ok(c === A.INK || c === A.CREAM, `${key}: chrome is ink or cream`, c);
   const alpha = c === A.INK ? INK_ALPHA : CREAM_ALPHA;
 
-  const mastBg = skyHexAt(key, MASTHEAD_STAGE_Y);
-  const mastRatio = ratio(compositeLum(c, alpha, mastBg), lum(mastBg));
-  ok(mastRatio >= 4.5, `${key}: masthead reads at its own y (soft chrome)`,
-    `${mastRatio.toFixed(2)}:1 at y${MASTHEAD_STAGE_Y.toFixed(0)} on ${mastBg}`);
+  const m = worstOver(key, RL.mast, alpha);
+  ok(m.r >= 4.5, `${key}: masthead reads over its own box (soft chrome)`,
+    `${m.r.toFixed(2)}:1 at stage y${m.y.toFixed(0)} on ${m.bg}`);
 
-  const strokeBg = skyHexAt(key, STROKE_STAGE_Y);
-  const strokeRatio = ratio(compositeLum(c, alpha, strokeBg), lum(strokeBg));
-  ok(strokeRatio >= 4.5, `${key}: stroke + percentage read at their own y (soft chrome)`,
-    `${strokeRatio.toFixed(2)}:1 at y${STROKE_STAGE_Y} on ${strokeBg}`);
+  // Full opacity: `stroke={chrome}` is what renders, so that is what is measured.
+  const s = worstOver(key, RL.stroke, 1);
+  ok(s.r >= 4.5, `${key}: stroke reads over its own ink extent (full chrome)`,
+    `${s.r.toFixed(2)}:1 at stage y${s.y.toFixed(0)} on ${s.bg}`);
+
+  const p = worstOver(key, RL.pct, alpha);
+  ok(p.r >= 4.5, `${key}: percentage reads over its own line box (soft chrome)`,
+    `${p.r.toFixed(2)}:1 at stage y${p.y.toFixed(0)} on ${p.bg}`);
 }
+
+// ── 2c · what the clamp costs, printed rather than asserted ──────────────────
+//
+// NOT an assertion, and the reason is arithmetic rather than leniency. Below
+// 2:1 the cover-fit crops the sky's DARK end off the top of the frame: on a Z
+// Fold's inner screen the topmost visible row is already stage y 150, and the
+// masthead — which has always been in screen space and is not what this fix
+// moved — sits at stage 178-186 whatever anything else does.
+//
+// Measured on `walk` at the stroke's clamped span there (stage 195.2-200.0,
+// sky #9E7453-#A07653): its cream chrome reads 3.67-3.57:1 at FULL opacity,
+// and PURE WHITE reaches only 4.14-4.03:1. No value of CHROME_SOFT_CREAM_ALPHA
+// can lift that over 4.5, so asserting the floor per-device would be asserting
+// something unreachable. (Ink reads 4.21-4.32 across the same span, also short,
+// and `chromeOn` derives the chrome from the sky's TOP band by construction
+// rather than per device — see launchArt.ts.) The honest fix is a scrim under
+// the chrome, the way §19 already does for the quote, and that is a design
+// change rather than a layout one. Printed so the cost is visible and can be
+// traded off deliberately — a number nobody prints is the state this whole
+// section exists to end.
+console.log('\n  note  chrome contrast off the measurement reference (worst scene, ' +
+  'masthead / stroke / percentage):');
+for (const dev of DEVICES) {
+  const L = layout(dev);
+  let wm = Infinity, ws = Infinity, wp = Infinity, low = Infinity, who = '';
+  for (const key of A.SCENE_KEYS) {
+    const alpha = A.chromeOn(key) === A.INK ? INK_ALPHA : CREAM_ALPHA;
+    const m = worstOver(key, L.mast, alpha).r;
+    const s = worstOver(key, L.stroke, 1).r;
+    const p = worstOver(key, L.pct, alpha).r;
+    wm = Math.min(wm, m); ws = Math.min(ws, s); wp = Math.min(wp, p);
+    if (Math.min(m, s, p) < low) { low = Math.min(m, s, p); who = key; }
+  }
+  console.log(`          ${dev.name}  ${wm.toFixed(2)} / ${ws.toFixed(2)} / ${wp.toFixed(2)}` +
+    `   (worst scene ${who}; stroke stage y ${L.stroke[0].toFixed(0)}-${L.stroke[1].toFixed(0)})`);
+}
+console.log('');
 
 // ── 3 · the planes recede, and are drawable offline ──────────────────────────
 for (const key of A.SCENE_KEYS) {

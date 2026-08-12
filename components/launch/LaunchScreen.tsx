@@ -31,26 +31,82 @@ import { chromeOn, PALETTES, CREAM, INK, SCRIM_RGB, SCRIM_STOPS } from './launch
 //     DERIVED from the sky band's own luminance rather than chosen per scene.
 // scripts/check-launch.mjs measures both. Nothing here is a guess.
 
-// The stage y the progress stroke sits on — up in the sky, well clear of both
-// the figure below it and the masthead above.
+// ─── THE CHROME BAND ─────────────────────────────────────────────────────────
 //
-// launchArt.ts inverted the sky so it is brightest at the HORIZON (§Defect):
-// the top of the frame is now the dark end. 258 was chosen for the OLD sky —
-// dark at top, pale at bottom — and under the new gradient that y sits ~58%
-// down, the brightest region cream chrome can land on. 90 puts it back in the
-// dark band: ~28 stage units clear of the masthead's own box (which sits
-// around stage y 62–72 on a mid-size phone) and ~420 clear of the figure's
-// crown (y 512–575) — nowhere near either. check-launch.mjs measures the
-// composited chromeSoft colour at this exact y for every scene.
+// The masthead, the progress stroke and the percentage, in that order down the
+// top of the screen. They are declared as named constants rather than typed
+// into the styles because scripts/check-launch.mjs READS THESE VERY LINES and
+// lays the band out itself on eight device sizes — so the check can never again
+// be measuring a geometry the component does not have.
+//
+// TWO COORDINATE SPACES MEET HERE, and that is the whole hazard. The masthead
+// is positioned in SCREEN space (`insets.top + MAST_TOP_PAD`); the stroke wants
+// to be in STAGE space, pinned to a dark part of the sky. The stage is
+// cover-fitted — fit = max(w/400, h/800), offY = (h - 800·fit)/2 — so `offY` is
+// 0 only when the device is exactly 2:1 or taller. Below that it goes NEGATIVE
+// and stage space slides upward relative to the screen: at 820×1180 by 230px,
+// on a Z Fold's inner screen by 253px. A stroke placed at a bare
+// `offY + STROKE_STAGE_Y * fit` therefore climbs through the masthead and then
+// off the top of the display entirely, and `app.json` ships
+// `orientation: portrait` with `supportsTablet: true` and excludes neither
+// tablets nor foldables on Play. `strokeTop` below CLAMPS against the
+// masthead's own box for exactly that reason.
+//
+// Both line heights are SET, not inherited from the font. Inter at fontSize 10
+// lays out ≈12.1px and at 12 ≈14.6px, but the exact figure is platform metrics —
+// and a checker cannot measure a box whose height it has to guess at.
+const MAST_TOP_PAD = 18;        // masthead box top, below the safe-area inset
+const MAST_LINE_H = 13;         // the masthead's line box
+const CHROME_GAP = 12;          // clear air between the masthead box and strokeWrap's top
+const STROKE_W = 3;             // the ink line's own width
+const STROKE_JITTER = 2.6;      // makeStroke's worst |y|: 1.4 sine + 1.2 noise
+const STROKE_SVG_H = 14;        // the Svg box the stroke is centred in
+const PCT_GAP = 12;             // strokeWrap's own `gap`, stroke box → percentage
+const PCT_LINE_H = 15;          // the percentage's line box
+// The ink therefore reaches STROKE_JITTER + STROKE_W/2 = 4.1 either side of that
+// box's centre — 2.9 to 11.1 down from strokeWrap's top, which is the extent
+// check-launch.mjs tests against the masthead and against the top of the screen.
+
+// The stage y the progress stroke PREFERS — up in the sky, clear of the figure
+// below it and below the masthead above. It is a preference, not a position:
+// `strokeTop` takes the lower of it and the masthead's floor.
+//
+// launchArt.ts inverted the sky so it is brightest at the HORIZON: the top of
+// the frame is now the dark end. 258 was chosen for the OLD sky — dark at top,
+// pale at bottom — and under the new gradient that y sits ~58% down, the
+// brightest region cream chrome can land on. 90 puts it back in the dark band.
+//
+// The clearance it buys, on the 390×844 reference check-launch.mjs measures
+// (insets.top 47, fit 1.055, offY 0), with every term shown:
+//
+//   masthead box   47 + 18 = 65 → 65 + 13 = 78 screen   (stage 61.6 – 73.9)
+//   strokeWrap top 0 + 90 × 1.055 = 94.95 screen
+//   stroke ink     94.95 + 2.9 = 97.85 → 106.05 screen  (stage 92.7 – 100.5)
+//   clearance      97.85 − 78 = 19.85 screen px ÷ 1.055 = 18.8 STAGE UNITS
+//
+// 18.8, not the ~28 an earlier version of this comment claimed: that number
+// measured the stroke's ANCHOR to the masthead box's TOP, which throws away the
+// masthead's 13px line box and the stroke's own 2.9px inset. The figure's crown
+// sits at stage y 512–575, so the other end has ~420 units and is not close.
 const STROKE_STAGE_Y = 90;
 
-// chromeSoft's alpha, per chrome colour. Both were raised alongside the move
-// above: even at the best possible y, the OLD alphas (ink .62 / cream .70)
-// could not clear 4.5:1 once measured honestly — .70 cream tops out at 4.05:1
-// on `walk` even at the sky's darkest point, so the alpha had to move too, not
-// just the position. check-launch.mjs asserts both at every scene's real y.
+// chromeSoft's alpha, per chrome colour. Raised twice, both times because the
+// composited pixel was measured rather than assumed: the ORIGINAL pair
+// (ink .62 / cream .70) could not clear 4.5:1 anywhere, and .88 cream cleared
+// it at the STROKE's y while the PERCENTAGE — a sibling 26–41px lower, i.e.
+// stage y 115–129 on the reference — sat at 4.12:1 on `walk` and was never
+// measured at all.
+//
+// .955 is the measured minimum that clears 4.5:1 at stage y 128.9, the
+// percentage's lowest row, on `walk` (the scene with the brightest sky under
+// cream chrome). .96 is the nearest hundredth above it and measures 4.55:1.
+// THAT IS 0.04 OF MARGIN AND THERE IS NO MORE: the percentage cannot be moved
+// up, because the masthead is directly above it and the sky only brightens
+// downward. If this needs to give again, the answer is a scrim under the
+// chrome, not another decimal. check-launch.mjs asserts all three elements at
+// the y each one actually occupies.
 const CHROME_SOFT_INK_ALPHA = 0.76;
-const CHROME_SOFT_CREAM_ALPHA = 0.88;
+const CHROME_SOFT_CREAM_ALPHA = 0.96;
 
 /** `chrome`, alpha-blended — derived from INK/CREAM, never retyped as decimals. */
 function toRgba(hex: string, alpha: number): string {
@@ -149,6 +205,16 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
 
   const strokeW = Math.round(width * 0.68);
   const { d, len } = useMemo(() => makeStroke(strokeW, seed + 7), [strokeW, seed]);
+
+  // Where the chrome band lands. The masthead is plain screen space; the stroke
+  // takes the LOWER of its preferred stage y and a screen-space floor sitting
+  // CHROME_GAP under the masthead's box. On a 2:1-or-taller device offY is 0 and
+  // the floor never binds, so the composition is exactly the one authored above;
+  // below 2:1 offY goes negative, the stage placement would climb through the
+  // masthead and off the display, and the floor takes over. See the two-spaces
+  // note by MAST_TOP_PAD — this one line is the whole of that fix.
+  const mastTop = insets.top + MAST_TOP_PAD;
+  const strokeTop = Math.max(mastTop + MAST_LINE_H + CHROME_GAP, offY + STROKE_STAGE_Y * fit);
 
   const progress = useSharedValue(0);
   const screenOpacity = useSharedValue(1);
@@ -256,17 +322,22 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
       </Svg>
 
       {/* Masthead */}
-      <Animated.View style={[styles.mast, { top: insets.top + 18 }, fadeInStyle]}>
+      <Animated.View style={[styles.mast, { top: mastTop }, fadeInStyle]}>
         <Text style={[styles.mastText, { color: chromeSoft }]}>D E E P L Y</Text>
       </Animated.View>
 
-      {/* The ink stroke drawing itself + percentage, pinned to the sky */}
-      <Animated.View style={[styles.strokeWrap, { top: offY + STROKE_STAGE_Y * fit }, fadeInStyle]}>
-        <Svg width={strokeW} height={14} viewBox={`0 -7 ${strokeW} 14`}>
+      {/* The ink stroke drawing itself + percentage, pinned to the sky — but
+          never above the masthead, and never off the top of the display. */}
+      <Animated.View style={[styles.strokeWrap, { top: strokeTop }, fadeInStyle]}>
+        <Svg
+          width={strokeW}
+          height={STROKE_SVG_H}
+          viewBox={`0 ${-STROKE_SVG_H / 2} ${strokeW} ${STROKE_SVG_H}`}
+        >
           <AnimatedPath
             d={d}
             stroke={chrome}
-            strokeWidth={3}
+            strokeWidth={STROKE_W}
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"
@@ -300,15 +371,17 @@ const styles = StyleSheet.create({
   mastText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 10,
+    lineHeight: MAST_LINE_H,
     letterSpacing: 4,
     textShadowColor: 'rgba(0,0,0,0.55)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
-  strokeWrap: { position: 'absolute', left: 0, right: 0, alignItems: 'center', gap: 12 },
+  strokeWrap: { position: 'absolute', left: 0, right: 0, alignItems: 'center', gap: PCT_GAP },
   pct: {
     fontFamily: 'Inter_500Medium',
     fontSize: 12,
+    lineHeight: PCT_LINE_H,
     letterSpacing: 2,
     textShadowColor: 'rgba(0,0,0,0.55)',
     textShadowOffset: { width: 0, height: 1 },
