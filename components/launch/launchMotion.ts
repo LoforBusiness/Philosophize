@@ -3,6 +3,7 @@ import {
   WALK, type Stance,
 } from '@/components/lesson/cinematic/rig';
 import { postureLive, actStance } from '@/components/lesson/cinematic/moves';
+import type { Crest } from './launchArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Everything the launch figure DOES, as pure maths, so it can be sampled outside
@@ -120,7 +121,7 @@ export function launchStance(activity: LaunchActivity, t: number): Stance {
 export function walkPlacement(
   t: number, k: number, dir: number,
   span: { from: number; to: number },
-  wave: { base: number; amp: number; off: number; per: number } | undefined,
+  crest: Crest | undefined,
   groundY: number
 ): { x: number; groundY: number } {
   'worklet';
@@ -129,6 +130,6 @@ export function walkPlacement(
   const x = span.from + (((travelled % width) + width) % width);
   return {
     x,
-    groundY: wave ? wave.base - Math.sin((x - wave.off) / wave.per) * wave.amp : groundY,
+    groundY: crest ? crest.base - Math.sin((x - crest.off) / crest.per) * crest.amp : groundY,
   };
 }

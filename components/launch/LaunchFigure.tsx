@@ -11,7 +11,7 @@ import {
   solve, bundle, DEG, STAGE_W, STAGE_H,
   type Joints, type Bundle,
 } from '@/components/lesson/cinematic/rig';
-import { launchStance, swingPhaseAt, walkPlacement } from './launchMotion';
+import { launchStance, walkPlacement } from './launchMotion';
 import type { LaunchScene } from './launchScenes';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -22,9 +22,9 @@ import type { LaunchScene } from './launchScenes';
 // at the panel's refresh rate instead of the ~10fps an animated full-screen
 // <Svg> costs. (Same reason, same measurement, as WelcomeAnimation.)
 //
-// Props that a hand holds (cup, book, kite string) are positioned from the SOLVED
-// WRIST each frame rather than being guessed at, so they can never drift off the
-// hand mid-animation.
+// Props that a hand holds (cup, book) are positioned from the SOLVED WRIST each
+// frame rather than being guessed at, so they can never drift off the hand
+// mid-animation.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const INK = '#1A1A1A';
@@ -38,28 +38,18 @@ interface Props {
 // anyway; this stops one being asked for in the first place, and keeps the
 // figure's frame budget away from the screen's bookkeeping.
 export default memo(function LaunchFigure({ scene }: Props) {
-  const { activity, k, dir, x: x0, groundY: gy0, pivot, kite, groundWave, walkSpan } = scene;
+  const { activity, k, dir, x: x0, groundY: gy0, crest, walkSpan } = scene;
 
   // Everything the figure holds is sized in the SAME rig units as the figure, so
   // shrinking the figure into the distance shrinks its props with it. Fixed pixel
   // sizes would leave a distant walker carrying a comically oversized book.
   const P = useMemo(() => {
     const u = k / 1.3;                       // the scale these props were drawn at
-    const pelvisY = gy0 - 20 * k;            // where a seated rider's hips land
-    const tireR = Math.max(9, 30 * u);
     return {
       cupW: 13 * u, cupH: 14 * u, cupB: Math.max(1, 2.2 * u),
       bookW: 40 * u, bookH: 27 * u, bookB: Math.max(1, 2.4 * u),
-      // The kite is the one prop that ISN'T held against the body, so it doesn't
-      // shrink with the figure the way a cup does — it has to hold its own
-      // against a whole sky. At 30*u it came out 15 units and read as a speck.
-      kiteS: Math.max(24, 44 * u), kiteB: Math.max(1.4, 2.4 * u),
-      tireR, tireB: Math.max(3, 7 * u),
-      ropeW: Math.max(1.6, 2.4 * u),
-      // The rope must END at the top of the tire, which hangs at the rider's hips.
-      ropeLen: pivot ? Math.max(20, pelvisY - tireR - pivot.y) : 0,
     };
-  }, [k, gy0, pivot]);
+  }, [k]);
 
   // ACCUMULATE the clock; never read timeSinceFirstFrame.
   //
@@ -82,13 +72,6 @@ export default memo(function LaunchFigure({ scene }: Props) {
     clock.value += dt;
   }, true);
 
-  // Swing phase, -1..1. Kept separate because the scene rotates the whole rig by
-  // it AND the body leans into it — one source, two consumers.
-  const swingPhase = useDerivedValue(() => {
-    'worklet';
-    return activity === 'swing' ? swingPhaseAt(clock.value) : 0;
-  });
-
   // Stance + placement for this activity, every frame. The maths lives in
   // launchMotion.ts so it can be sampled frame by frame outside the app — a loop
   // that jumps once every forty seconds is not something eyes find.
@@ -99,7 +82,7 @@ export default memo(function LaunchFigure({ scene }: Props) {
     let x = x0;
     let groundY = gy0;
     if (activity === 'walk' && walkSpan) {
-      const p = walkPlacement(t, k, dir, walkSpan, groundWave, gy0);
+      const p = walkPlacement(t, k, dir, walkSpan, crest, gy0);
       x = p.x;
       groundY = p.groundY;
     }
@@ -115,11 +98,6 @@ export default memo(function LaunchFigure({ scene }: Props) {
     'worklet';
     return bundle(J.value, k, 1);
   });
-
-  // The swing arc: rotate the rope, tire and rider together about the bough.
-  const swingStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${swingPhase.value * 13}deg` }],
-  }));
 
   // ── held props ─────────────────────────────────────────────────────────────
 
@@ -137,40 +115,6 @@ export default memo(function LaunchFigure({ scene }: Props) {
         { translateX: (a.x + b.x) / 2 },
         { translateY: (a.y + b.y) / 2 },
         { rotate: `${Math.atan2(b.y - a.y, b.x - a.x) * DEG}deg` },
-      ],
-    };
-  });
-
-  // Kite: drifts on the wind, and the string is redrawn from the hand to wherever
-  // it has drifted to — so the line always meets both ends.
-  const kiteAt = useDerivedValue(() => {
-    'worklet';
-    if (!kite) return { x: 0, y: 0, a: 0 };
-    const t = clock.value;
-    const sway = Math.sin(t * 0.9) * 0.6 + Math.sin(t * 0.57 + 1.2) * 0.4;
-    const rise = Math.sin(t * 0.72 + 0.4) * 0.5 + Math.sin(t * 1.13) * 0.5;
-    return { x: kite.x + sway * 16, y: kite.y + rise * 11, a: sway * 12 };
-  });
-
-  const kiteStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: kiteAt.value.x },
-      { translateY: kiteAt.value.y },
-      { rotate: `${45 + kiteAt.value.a}deg` },
-    ],
-  }));
-
-  const stringStyle = useAnimatedStyle(() => {
-    'worklet';
-    const h = J.value.wrR;
-    const kx = kiteAt.value.x;
-    const ky = kiteAt.value.y;
-    return {
-      width: Math.hypot(kx - h.x, ky - h.y),
-      transform: [
-        { translateX: h.x },
-        { translateY: h.y },
-        { rotate: `${Math.atan2(ky - h.y, kx - h.x) * DEG}deg` },
       ],
     };
   });
@@ -214,54 +158,7 @@ export default memo(function LaunchFigure({ scene }: Props) {
 
   return (
     <View style={styles.stage} pointerEvents="none">
-      {activity === 'kite' && kite ? (
-        <>
-          <Animated.View style={[styles.prop, styles.stringWrap, stringStyle]} />
-          <Animated.View style={[styles.prop, kiteStyle]}>
-            {/* A diamond with its two spars, and a tail of bows streaming off the
-                bottom point — an empty outline read as a floating rhombus. The
-                wrapper carries the 45° so the spars land as a cross, not an X. */}
-            <View style={{ marginLeft: -P.kiteS / 2, marginTop: -P.kiteS / 2 }}>
-              <View style={[styles.kite, { width: P.kiteS, height: P.kiteS, borderWidth: P.kiteB }]}>
-                <View style={[styles.spar, { top: P.kiteS / 2 - P.kiteB / 4, left: 0, right: 0, height: Math.max(1, P.kiteB * 0.55) }]} />
-                <View style={[styles.spar, { left: P.kiteS / 2 - P.kiteB / 4, top: 0, bottom: 0, width: Math.max(1, P.kiteB * 0.55) }]} />
-              </View>
-              {[0, 1, 2].map((i) => (
-                <View
-                  key={i}
-                  style={[
-                    styles.bow,
-                    {
-                      width: Math.max(2.5, P.kiteS * 0.2),
-                      height: Math.max(1.2, P.kiteS * 0.075),
-                      borderRadius: P.kiteS * 0.05,
-                      left: P.kiteS * (0.96 + i * 0.2),
-                      top: P.kiteS * (0.96 + i * 0.2),
-                    },
-                  ]}
-                />
-              ))}
-            </View>
-          </Animated.View>
-        </>
-      ) : null}
-
-      {activity === 'swing' && pivot ? (
-        <Animated.View
-          style={[
-            StyleSheet.absoluteFill,
-            { transformOrigin: `${pivot.x}px ${pivot.y}px` },
-            swingStyle,
-          ]}
-        >
-          {/* rope, then the tire it carries — both hang straight down from the bough */}
-          <View style={[styles.rope, { left: pivot.x - P.ropeW / 2, top: pivot.y, width: P.ropeW, height: P.ropeLen }]} />
-          <View style={[styles.tire, { left: pivot.x - P.tireR, top: pivot.y + P.ropeLen, width: P.tireR * 2, height: P.tireR * 2, borderRadius: P.tireR, borderWidth: P.tireB }]} />
-          {figure}
-        </Animated.View>
-      ) : (
-        figure
-      )}
+      {figure}
     </View>
   );
 });
@@ -286,12 +183,4 @@ const styles = StyleSheet.create({
   bookWrap: { flexDirection: 'row', alignItems: 'flex-start' },
   leaf: { borderColor: INK, backgroundColor: '#F7F5F0' },
   bookSpine: { position: 'absolute', left: '50%', top: 0, backgroundColor: INK },
-
-  stringWrap: { height: 1.4, backgroundColor: INK, opacity: 0.5, transformOrigin: '0% 50%' },
-  kite: { borderColor: INK, backgroundColor: '#F7F5F0' },
-  spar: { position: 'absolute', backgroundColor: INK, opacity: 0.55 },
-  bow: { position: 'absolute', backgroundColor: INK, opacity: 0.75 },
-
-  rope: { position: 'absolute', backgroundColor: INK, opacity: 0.85 },
-  tire: { position: 'absolute', borderColor: INK, backgroundColor: 'transparent' },
 });
