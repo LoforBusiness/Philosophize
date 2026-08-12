@@ -140,8 +140,23 @@ export default function HomeScreen() {
             stagger: it IS the page arriving, so it must already be there. */}
         <HomeHeader streak={streak} />
 
-        {/* Daily reflection */}
+        {/* The next lesson this learner can open, on a different branch each day.
+            FIRST, above the reflection, because lessons are the product: whatever
+            sits directly under the masthead is what the app is claiming to be
+            about, and for a while that was a quotation. A reader who opens Home
+            and taps nothing should still have been shown the way in.
+
+            It follows the masthead immediately, so this is the one place on the
+            screen where two photographs meet. `quickStartLead` opens the gap that
+            keeps them from reading as one tall picture — the masthead's own image
+            is the reader's choice and the card's is not, and they are never the
+            same crop. */}
         <Arrive index={0}>
+          <QuickStartCard style={styles.quickStartLead} />
+        </Arrive>
+
+        {/* Daily reflection */}
+        <Arrive index={1}>
           <View style={styles.reflectionWrap}>
             <LinearGradient
               colors={CARD_FACE}
@@ -176,12 +191,6 @@ export default function HomeScreen() {
           </View>
         </Arrive>
 
-        {/* The next lesson this learner can open, on a different branch each day.
-            Still the one big invitation, and still the only tall photograph — the
-            masthead above it is half its height and wears a different picture. */}
-        <Arrive index={1}>
-          <QuickStartCard style={styles.quickStart} />
-        </Arrive>
 
         {/* What the three tab-bar duplicates used to occupy: one thing to read
             that is new today, and one drawing of how far in the reader is. */}
@@ -318,7 +327,11 @@ const styles = StyleSheet.create({
     color: Paper,
   },
 
-  quickStart: { marginTop: 18 },
+  // 22, not the 18 every other block uses. This one sits directly under the
+  // masthead photograph and is itself a photograph; at 18 the two crops read as
+  // a single tall picture with a wordmark buried in it. The extra 4dp is the
+  // whole difference between two images and one.
+  quickStartLead: { marginTop: 22 },
   block: { marginTop: 14 },
 
 });
