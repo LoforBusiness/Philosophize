@@ -1,91 +1,121 @@
-// THE MUST-SEE RULE — which of a beat's measured words the camera has to hold.
+// THE MUST-SEE RULE — which of a beat's measured things the camera has to hold.
 //
 // Its own file, and with no imports, for the same reason rig.ts and camera.ts have
 // none: the rule is the arguable part of H60c and it should be possible to change
 // it and regenerate the whole table (scripts/regen-must.mjs) without paying for
-// another browser sweep. measure-must.mjs collects the words; this decides what
+// another browser sweep. measure-must.mjs collects the things; this decides what
 // they add up to.
 
 export const STAGE_W = 400;
 export const STAGE_H = 560;
 
-/** The same word read twice within one beat, covered across both readings. */
-export function mergeReadings(a = [], b = []) {
-  const by = new Map();
-  for (const it of [...a, ...b]) {
-    const prev = by.get(it.t);
-    if (!prev) { by.set(it.t, it.b.slice()); continue; }
-    const x0 = Math.min(prev[0], it.b[0]);
-    const y0 = Math.min(prev[1], it.b[1]);
-    const x1 = Math.max(prev[0] + prev[2], it.b[0] + it.b[2]);
-    const y1 = Math.max(prev[1] + prev[3], it.b[1] + it.b[3]);
-    by.set(it.t, [x0, y0, x1 - x0, y1 - y0]);
+/**
+ * The readings taken across one beat, pooled.
+ *
+ * No attempt is made to match a thing to itself between readings, because it does
+ * not matter: the output is a union either way, and the union over all readings is
+ * exactly the coverage wanted — wherever a thing travelled during the beat, the box
+ * contains it. Duplicates are dropped only to keep the sidecar small.
+ */
+export function mergeReadings(...readings) {
+  const out = [];
+  const seen = new Set();
+  for (const list of readings) {
+    for (const it of list ?? []) {
+      const key = `${it.k}|${it.t ?? ''}|${it.b.map((n) => Math.round(n)).join(',')}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(it);
+    }
   }
-  return [...by.entries()].map(([t, b2]) => ({ t, b: b2.map((n) => +n.toFixed(1)) }));
+  return out;
 }
 
 /**
- * Every word the beat has on stage, and no cleverer than that.
+ * WHAT COUNTS AS SOMETHING THE READER MUST SEE WHOLE.
  *
- * The obvious refinement is to keep only the words this beat BROUGHT ON, treating
- * anything carried over unmoved as chrome — a timeline's "EARLIER"/"LATER", a title
- * that stays up all lesson — on the reasoning that H60c is about "a beat that shows
- * the reader a SPECIFIC thing". That rule was written and then dropped, because the
- * plain union turned out to cost far less than it looked like it would. Measured
- * across the sample: 47% of beats reduce scale at all, and the reductions are
- * 1.18 -> 1.05…1.16 and 1.40 -> 1.12…1.14. The camera still pans, still drifts,
- * still slides its centre; it stops pushing PAST the words.
+ * The first version of this was words only, and it was wrong in the way that
+ * matters. A reader reported the camera cutting the stickman in half and slicing
+ * the illustration above him — and the frame audit had already counted 438 clipped
+ * art elements, which the rule had been written to ignore on the grounds that
+ * cropping scenery is what a push IS. That is true of scenery and false of the
+ * lesson: the figure and the diagram above him are the thing being taught with.
  *
- * Buying back that last tenth of zoom would have cost the guarantee. Under the
- * union, "no word the scene draws is ever sliced" is a property check-frame.mjs can
- * verify outright; under the chrome rule it becomes "no word we judged important",
- * which nothing can check and which leaves the reader looking at half of "LATER".
- * The wrong trade at 0.1x.
+ * So:
+ *   fig   ALWAYS. The whole man, arms included, and every figure on stage — not the
+ *         single point and head-height that validate-cinematic models, which cannot
+ *         see a reaching hand or a second figure.
+ *   text  ALWAYS. If it is set in words the reader is meant to read it.
+ *   art   UNLESS IT BLEEDS. A ground line drawn from x -20 to x 420 is meant to
+ *         continue past the frame and demanding the camera hold it would pin every
+ *         shot to scale 1 for nothing. A prop that sits wholly inside the stage is a
+ *         thing with edges, and slicing it reads as damage.
  *
- * Where the union really does flatten a lesson — metaphysics-being-7 caps at 1.05
- * because it prints axis labels hard against both edges of the stage — the fix is
- * in the SCENE, moving those labels inboard, not in the camera. `prev` stays in the
- * signature, and the raw per-word measurements stay in the sidecar JSON, so that
- * argument can be reopened cheaply.
+ * `mode` exists so the cost of each of these can be measured against the same
+ * recordings instead of argued about: 'text' is the old rule, 'figure' adds the
+ * man, 'all' is the shipped rule.
  */
-export function mustBox(items, _prev) {
+export function mustBox(items, _prev, mode = 'all', band = [0, STAGE_H]) {
   if (!items || !items.length) return null;
+  const want = (it) => {
+    if (it.k === 'fig') return mode !== 'text';
+    if (it.k === 'text') return true;
+    return mode === 'all' && !it.bleed;
+  };
+  const use = items.filter(want);
+  if (!use.length) return null;
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-  for (const it of items) {
+  for (const it of use) {
     x0 = Math.min(x0, it.b[0]); y0 = Math.min(y0, it.b[1]);
     x1 = Math.max(x1, it.b[0] + it.b[2]); y1 = Math.max(y1, it.b[1] + it.b[3]);
   }
-  x0 = Math.floor(x0) - 2; y0 = Math.floor(y0) - 2;
-  x1 = Math.ceil(x1) + 2; y1 = Math.ceil(y1) + 2;
-  // CLAMPED TO THE STAGE. A word may sit a few units off the edge (the on-stage
-  // filter keeps anything whose CENTRE is on), and containShot's two clamps — "the
-  // box's left edge is visible" and "its right edge is visible" — contradict each
-  // other once the box is wider than the frame, with the second winning. The result
-  // is a shot pushed off the design space to chase a rectangle that reaches past
-  // it. Nothing outside the stage can be shown anyway, so ask for nothing.
-  x0 = Math.max(0, x0); y0 = Math.max(0, y0);
-  x1 = Math.min(STAGE_W, x1); y1 = Math.min(STAGE_H, y1);
+  // A FOUR-UNIT PAD. The audit was reporting figures at 96–98% inside — one to four
+  // pixels of a shoulder or a heel over the edge, from rounding between the measured
+  // box and the shot that contains it. Four units on a 400-wide stage costs nothing
+  // in zoom and takes those off the board, so the remaining hits are real ones.
+  x0 = Math.floor(x0) - 4; y0 = Math.floor(y0) - 4;
+  x1 = Math.ceil(x1) + 4; y1 = Math.ceil(y1) + 4;
+  // CLAMPED TO WHAT THE CAMERA CAN ACTUALLY SHOW — the stage across, the lesson's
+  // BAND down. This is not tidiness; an impossible box is worse than no box at all.
+  //
+  // containShot has two clamps per axis: "the box's near edge is visible" and "its
+  // far edge is visible". While the box fits they agree. Once it does not they
+  // contradict, and the second one is applied last, so it wins — the window is
+  // dragged toward the far edge and the near edge is cut.
+  //
+  // logic-arguments-5 is the worked example. Its band is 224..510, 286 tall; the
+  // measured box came to 240..546, 306 tall, because the scene draws 36 units below
+  // its own band. Asking for the bottom of that pulled the window down to y 260 on
+  // every beat and sliced "AB = AC" — which sits at y 256, comfortably INSIDE the
+  // band and perfectly visible if nothing had asked for the impossible. The box was
+  // not protecting the label; it was the reason the label was cut.
+  //
+  // Anything outside the band is an H59 fault (the band must contain every pixel a
+  // beat can draw) and belongs to the scene. The camera's job is to frame what is
+  // reachable, so that is all it is asked for.
+  x0 = Math.max(0, x0); y0 = Math.max(band[0], y0);
+  x1 = Math.min(STAGE_W, x1); y1 = Math.min(band[1], y1);
   if (x1 - x0 < 1 || y1 - y0 < 1) return null;
   return [x0, y0, x1 - x0, y1 - y0];
 }
 
-/** The generated file, from a map of lesson id -> per-beat word lists. */
-export function renderTable(words, stamps) {
+/** The generated file, from a map of lesson id -> per-beat item lists. */
+export function renderTable(words, stamps, mode = 'all', bands = new Map()) {
   const boxes = {};
   for (const [id, per] of Object.entries(words)) {
-    boxes[id] = per.map((items, i) => mustBox(items, i > 0 ? per[i - 1] : null));
+    boxes[id] = per.map((items, i) => mustBox(items, i > 0 ? per[i - 1] : null, mode, bands.get(id) ?? [0, STAGE_H]));
   }
   const lines = [
     '// GENERATED by scripts/measure-must.mjs — do not hand-edit.',
     '//',
-    '// Per beat, the box (scene coordinates) the camera must contain: the union of the',
-    '// words that lesson has on stage at that moment. H60c — "if the reader is told to',
-    '// look at it, the camera must frame it" — with the looking-at measured from what',
-    '// the scene actually draws rather than declared by hand in 800 places.',
+    '// Per beat, the box (scene coordinates) the camera must contain, measured from',
+    '// the real render: every figure on stage, every word, and every piece of art that',
+    "// does not already bleed off the stage edge. H60c — \"if the reader is told to look",
+    '// at it, the camera must frame it".',
     '//',
     '// CinematicPlayer feeds these to containShot, which only ever LOOSENS a shot: the',
     '// scale comes down to fit and the centre slides the shortest distance. A beat whose',
-    '// shot already showed its words is returned untouched, so the authored camera work',
+    '// shot already showed everything is returned untouched, so the authored camera work',
     '// survives everywhere it was already right.',
     '//',
     '// MUST_STAMP fingerprints the scene and script each box was measured from.',

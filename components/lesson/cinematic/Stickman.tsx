@@ -131,6 +131,18 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
     <Animated.View
       pointerEvents="none"
       needsOffscreenAlphaCompositing
+      // MEASURABLE, because "is the man in shot?" was being answered by a model
+      // rather than by the man. validate-cinematic tests a single x and a head and
+      // feet height; that misses the arms, misses a second figure, and misses
+      // whatever he is holding — so a camera could cut a reaching hand, or half a
+      // guide, and every check stayed green.
+      //
+      // A testID rather than a nativeID: React Native Web renders this as
+      // data-testid, and unlike an id it is legal for the several figures a scene
+      // may have on stage to share it. The root itself is a zero-size absolute box,
+      // so the figure's real extent is the union of this element's descendants —
+      // see scripts/measure-must.mjs.
+      testID="figure"
       style={[{ position: 'absolute', left: 0, top: 0 }, groupFade]}
     >
       {/* Far side first, so the near limbs read in front. */}

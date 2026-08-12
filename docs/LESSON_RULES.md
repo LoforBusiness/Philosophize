@@ -1944,6 +1944,38 @@ camera doing it, not the layouts. metaphysics-being-7 was cutting "PAST", "NOW" 
 
 ### What actually enforces it now
 
+**It protects the FIGURE, the WORDS and the ART — not just the words.** The first
+version of this measured text only, on the reasoning that scenery being cropped is
+what a push IS. A reader then reported the camera cutting the stickman in half and
+slicing the illustration above him, and both were true: the frame audit had counted
+438 clipped art elements and the rule had been written to ignore them. That reasoning
+holds for a ground line running off both edges and is false for the thing the lesson
+teaches with.
+
+So the measurement records three kinds and the rule (`scripts/lib/mustrule.mjs`)
+decides what to do with each:
+
+- **figure** — the union of one `Stickman`'s limb Views, and every figure on stage.
+  The root is a zero-size absolute box, so it carries a `testID` and the extent is
+  its descendants. This matters: `validate-cinematic` models the figure as a single
+  `x` and a head-and-feet height, which cannot see a reaching arm, cannot see what
+  he is holding, and cannot see a second figure at all — metaphysics-being-7 has
+  THREE and only one was ever checked.
+- **text** — always. If it is set in words the reader is meant to read it.
+- **art** — unless it already bleeds off the stage edge. A ground line drawn from
+  x −20 to x 420 is meant to continue past the frame; demanding the camera hold it
+  would pin every shot to 1.0 for nothing.
+
+**And the box is clamped to the BAND, which is not tidiness.** `containShot` has two
+clamps per axis — show the near edge, show the far edge. While the box fits they
+agree; once it does not they contradict, and the one applied last wins. logic-arguments-5
+is the worked example: its band is 224..510 and the measured box came to 240..546,
+because the scene draws 36 units below its own band. Asking for the bottom of that
+dragged the window down on every beat and sliced "AB = AC" — a label at y 256, well
+inside the band and perfectly visible if nothing had asked for the impossible. **The
+box was not protecting the label; the box was why it was cut.** Anything outside the
+band is an H59 fault and belongs to the scene.
+
 Scenes draw their labels as raw `<Text>` with local styles, so there was no
 reporting component to hang this on and no honest way to hand-author ~800
 rectangles. So the boxes are **measured from the real render** and stored:
@@ -1961,13 +1993,26 @@ rectangles. So the boxes are **measured from the real render** and stored:
   override for what measurement cannot see: art with no words in it that the beat
   is nonetheless about.
 
-**It is the union of ALL the beat's words, deliberately, and not the cleverer
-rule.** Keeping only the words a beat newly brings on — treating anything carried
-over as chrome — was written and dropped: the plain union costs less than it looks
-like it should (47% of beats reduce scale at all; the reductions are 1.18 → 1.05…16
-and 1.40 → 1.12…14), and it buys a property `check-frame` can verify outright. The
-chrome rule would have traded that for "no word we judged important", which nothing
-can check. See the note above `mustBox` for the numbers.
+**What it costs, measured rather than guessed.** Across 771 beats the mean shot goes
+1.124 → 1.017, the peak is 1.10×, and 72% of beats sit at 1.0. That is most of the
+camera's zoom, and it is not the rule being greedy — it is the scenes. Their content
+runs edge to edge: in metaphysics-being-7 the text and figures ALONE span x 12..388
+of a 400-wide stage before any art is counted. Any push crops something, so the
+honest shot is the wide one.
+
+**The fix for that is in the scenes, not the camera.** Move the outermost labels
+inboard and the push comes back for free, because `containShot` only ever loosens.
+`node scripts/measure-must.mjs` then re-measures and the room reappears. The worst
+offenders today, by the tightest ceiling their layout allows:
+
+| lesson | ceiling |
+|---|---|
+| logic-arguments-8 | 1.00× |
+| ethics-ethics-12 · -31 · -32 | 1.01× |
+| political-political-31 · -32 | 1.01× |
+| epistemology-knowledge-11 | 1.01× |
+| aesthetics-aesthetics-6 · -7 | 1.01× |
+| metaphysics-being-12 | 1.01× |
 
 > Where the union really does flatten a lesson, the fault is in the SCENE, not the
 > camera. metaphysics-being-7 caps at 1.05 because it prints axis labels hard

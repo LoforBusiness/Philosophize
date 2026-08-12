@@ -45,6 +45,8 @@ const put = (p) => new Promise((res, rej) => {
   r.on('error', rej); r.end();
 });
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const BEATS_BLOCK = /BEATS[^=]*=\s*\[([\s\S]*)\n\];/;
+const BEAT_SPLIT = /\n\s{2}\},?\s*\n?/;
 
 // ── the probe ────────────────────────────────────────────────────────────────
 //
@@ -52,7 +54,8 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 // nativeID for the same reason Target's ring does — finding it by "the element
 // with overflow:hidden" also matches scene art, and an audit measuring the wrong
 // rectangle reports confidently about nothing.
-const PROBE = `(() => {
+const PROBE = (BT, BB) => `(() => {
+  const BAND_T = ${BT}, BAND_B = ${BB};
   const clipEl = document.getElementById('stage-clip');
   if (!clipEl) return JSON.stringify({ none: true });
   const c = clipEl.getBoundingClientRect();
@@ -87,10 +90,66 @@ const PROBE = `(() => {
     return { l, t, r: rt, b, inside };
   };
   const out = [];
+  // IS THE CAMERA DOING IT, OR WOULD THE CROP DO IT ANYWAY?
+  //
+  // Two things get cut that no camera can be blamed for, and counting them as
+  // defects makes the number unactionable:
+  //
+  //   BLEED   art deliberately drawn past the stage edge — a ground line from
+  //           x -20 to x 420 is 29% inside at scale 1 and always will be.
+  //   BAND    something the PLAYER draws inside the crop but OUTSIDE #stage-cam.
+  //           It does not ride the camera at all, so if it is clipped the band is
+  //           too tight for it (H59), which is a scene fix, not a camera one.
+  //
+  // So each hit is resolved back into scene coordinates through #stage-cam — the
+  // same inversion measure-must uses — and labelled with which of the three it is.
+  const camEl = document.getElementById('stage-cam');
+  const camRect = camEl ? camEl.getBoundingClientRect() : null;
+  const kCam = camRect ? camRect.width / 400 : 0;
+  const classify = (el, r) => {
+    if (!camEl || !camEl.contains(el) || !(kCam > 0.01)) return 'band';
+    const bx = (r.x - camRect.x) / kCam, by = (r.y - camRect.y) / kCam;
+    const bw = r.w / kCam, bh = r.h / kCam;
+    // Outside the design space at all => drawn to run off; the crop cuts it at any
+    // zoom, including none.
+    if (bx < 1 || by < 1 || bx + bw > 399 || by + bh > 559) return 'bleed';
+    // OUTSIDE THE LESSON'S OWN BAND. The band is the slice of the design space the
+    // player crops to, so anything drawn above or below it is cut at scale 1 too —
+    // with no camera at all. That is an H59 fault ("the band must contain every
+    // pixel a beat can draw"), and no shot can rescue it: metaphysics-being-8 draws
+    // its question prompt at y 134 against a band starting at 134, so four units of
+    // it are outside the picture by construction. Calling that a camera fault sends
+    // the next person to fix the wrong file.
+    if (by < BAND_T - 1 || by + bh > BAND_B + 1) return 'band';
+    return 'camera';
+  };
+  // THE FIGURE FIRST, and as one thing. A Stickman's root is a zero-size absolute
+  // box whose descendants are the limbs, so measuring the root says nothing and
+  // measuring each limb reports "a shin is clipped" instead of "the man is cut in
+  // half". Several figures may be on stage; each is its own union.
+  const partOfFigure = new Set();
+  for (const fig of clipEl.querySelectorAll('[data-testid="figure"]')) {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const part of fig.querySelectorAll('*')) {
+      partOfFigure.add(part);
+      if (!vis(part)) continue;
+      const q = part.getBoundingClientRect();
+      x0 = Math.min(x0, q.x); y0 = Math.min(y0, q.y);
+      x1 = Math.max(x1, q.x + q.width); y1 = Math.max(y1, q.y + q.height);
+    }
+    if (x0 === Infinity) continue;
+    const r = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+    const k = cut(r);
+    if (k.inside > 0.02 && k.inside < 0.985) {
+      out.push({ kind: 'FIGURE', why: classify(fig, r), t: '', inside: +k.inside.toFixed(3),
+        l: Math.round(k.l), t_: Math.round(k.t), r: Math.round(k.r), b: Math.round(k.b) });
+    }
+  }
   // Only what the SCENE draws. The text deck, quote card and summary sit outside
   // the camera by construction and cannot be cropped by it.
   const nodes = [...clipEl.querySelectorAll('div,span')];
   for (const d of nodes) {
+    if (partOfFigure.has(d)) continue;
     if (!vis(d)) continue;
     const isLeafText = d.children.length === 0 && (d.textContent || '').trim().length > 1;
     const s = getComputedStyle(d);
@@ -107,6 +166,7 @@ const PROBE = `(() => {
     if (k.inside > 0.02 && k.inside < 0.985) {
       out.push({
         kind: isLeafText ? 'text' : 'art',
+        why: classify(d, r),
         t: isLeafText ? (d.textContent || '').trim().slice(0, 30) : '',
         inside: +k.inside.toFixed(3),
         l: Math.round(k.l), t_: Math.round(k.t), r: Math.round(k.r), b: Math.round(k.b),
@@ -162,6 +222,13 @@ function allIds() {
   process.on('exit', cleanup);
   process.on('SIGINT', () => { cleanup(); process.exit(1); });
 
+  // A POOL OF TABS. Auditing is mostly waiting for beats to settle, and the lessons
+  // are independent, so they run concurrently — 102 lessons in a quarter of an hour
+  // instead of two and a half. See measure-must.mjs for the two things that had to
+  // change to make parallel CORRECT and not merely fast: background tabs are not
+  // laid out (focus emulation), and every fixed wait had to become a condition.
+  const LANES = +(process.env.LANES || 6);
+  const makeTab = async () => {
   const tab = await put('/json/new?about:blank');
   const ws = new WebSocket(tab.webSocketDebuggerUrl);
   let mid = 0; const pending = new Map();
@@ -170,6 +237,10 @@ function allIds() {
   ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.id && pending.has(m.id)) { pending.get(m.id)(m.result); pending.delete(m.id); } };
   await send('Page.enable');
   await send('Runtime.enable');
+  // Only the front tab of a headless window is laid out; the rest never fire their
+  // ResizeObserver, so the player's onLayout never runs and the stage never mounts.
+  await send('Emulation.setFocusEmulationEnabled', { enabled: true });
+  await send('Page.setWebLifecycleState', { state: 'active' }).catch(() => {});
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
 
   const evaluate = async (expr) => {
@@ -199,6 +270,15 @@ function allIds() {
   const answerScene = () => evaluate(
     `(() => { const ring = document.querySelector('#target-ring');
       if (ring && ring.parentElement) { ring.parentElement.dispatchEvent(new MouseEvent('click', {bubbles:true})); return 1; }
+      // Choices drawn ON the picture (./ChoiceCards). Searched across the DOCUMENT
+      // even though they appear inside the stage: the PLAYER renders them, so they
+      // overlay the crop rather than living inside it. The size floor excludes the
+      // header's 28x28 close button, which would exit the lesson.
+      const card = [...document.querySelectorAll('[role="button"]')].find((e) => {
+        const r = e.getBoundingClientRect();
+        return r.width > 60 && r.height > 28;
+      });
+      if (card) { card.dispatchEvent(new MouseEvent('click', {bubbles:true})); return 1; }
       return 0; })()`,
   );
   // Deck choices are plain Pressables, so React Native Web gives them a tabindex
@@ -216,6 +296,28 @@ function allIds() {
       if (b) { b.dispatchEvent(new MouseEvent('click', {bubbles:true})); return 1; }
       return 0; })()`,
   );
+  /**
+   * WAIT FOR THE CAMERA TO STOP, then measure.
+   *
+   * A shot travels for up to 2.2s on a `drift` and the audit was reading at 1.7s —
+   * mid-move, when the frame is between two framings and transiently crops things
+   * that arrive a moment later. The tell was that two identical runs disagreed:
+   * 12 sliced words in one, 13 and a different lesson list in the next. A defect
+   * that comes and goes between runs of the same build is the harness moving, not
+   * the app.
+   */
+  const settle = async () => {
+    let prev = null;
+    for (let i = 0; i < 20; i++) {
+      const now = await evaluate(
+        `(() => { const c = document.getElementById('stage-cam');
+          return c ? getComputedStyle(c).transform : 'x'; })()`,
+      );
+      if (now === prev) return;
+      prev = now;
+      await wait(200);
+    }
+  };
   /** The beat index, straight off the progress bar — see the note in measure-must. */
   const stamp = () => evaluate(
     `(() => {
@@ -227,9 +329,14 @@ function allIds() {
     })()`,
   );
 
+    return { send, evaluate, tap, answerScene, answerDeck, stamp, settle, close: () => { try { ws.close(); } catch {} } };
+  };
+
   const report = [];
   let done = 0;
-  for (const id of ids) {
+  const auditOne = async (T, id, first, nBeats, band) => {
+    const { send, evaluate, tap, answerScene, answerDeck, stamp, settle } = T;
+    {
     await send('Page.navigate', { url: `${BASE}?id=${encodeURIComponent(id)}` });
     // WAIT FOR THE STAGE, NOT FOR A CLOCK. Body text appears while the lesson is
     // still mounting, so waiting on it starts tapping before anything is
@@ -237,19 +344,20 @@ function allIds() {
     // arrived first. The first navigation of a run also pays for Metro compiling
     // the preview route this script just wrote, which is far slower than the rest.
     let up = false;
-    const patience = done === 0 ? 180 : 40;
+    const patience = first ? 220 : 60;
     for (let i = 0; i < patience; i++) {
       if (await evaluate("!!document.getElementById('stage-clip')")) { up = true; break; }
       await wait(500);
     }
-    if (!up) { report.push({ id, beats: [], stepped: 0, blank: true }); console.log(`  ${String(++done).padStart(3)}/${ids.length}  ${id.padEnd(34)} NEVER RENDERED A STAGE`); continue; }
+    if (!up) { report.push({ id, beats: [], stepped: 0, blank: true }); console.log(`  ${String(++done).padStart(3)}/${ids.length}  ${id.padEnd(34)} NEVER RENDERED A STAGE`); return; }
     await wait(1200);
 
     const beats = [];
     let stepped = 0;
-    let last = await stamp();
+    let last = (() => { const n = -1; return n; })();
     for (let b = 0; b < 14; b++) {
-      const raw = await evaluate(PROBE);
+      await settle();
+      const raw = await evaluate(PROBE(band[0], band[1]));
       if (!raw) break;
       const got = JSON.parse(raw);
       if (got.none) break;
@@ -260,29 +368,86 @@ function allIds() {
         if (attempt === 1) { await answerScene(); await wait(700); }
         if (attempt === 2) { await answerDeck(); await wait(700); }
         await tap();
-        // LET THE BEAT LAND BEFORE MEASURING. Beat transitions run 0.7–1.3s and the
-        // camera travel up to 2.2s on a `drift`; measuring mid-move reports things
-        // half out of frame that arrive a moment later.
+        // LET THE BEAT LAND, then POLL for the advance rather than timing it. Beat
+        // transitions run 0.7–1.3s and camera travel up to 2.2s; measuring mid-move
+        // reports things half out of frame that arrive a moment later. Under six
+        // lanes a fixed wait is also simply wrong — see measure-must.mjs.
         await wait(1700);
-        const now = await stamp();
-        if (last === null || now < 0 || now > last + 1e-4) { last = now; moved = true; }
+        for (let t = 0; t < 12 && !moved; t++) {
+          const now = await stamp();
+          const idx = now < 0 || !nBeats ? -1 : Math.round(now * nBeats) - 1;
+          if (last === null || idx < 0 || idx > last) { last = idx; moved = true; break; }
+          await wait(250);
+        }
       }
       if (!moved) break;
       stepped++;
     }
     report.push({ id, beats, stepped });
     done++;
-    const nText = beats.reduce((a, x) => a + x.hits.filter((h) => h.kind === 'text').length, 0);
-    const nArt = beats.reduce((a, x) => a + x.hits.filter((h) => h.kind !== 'text').length, 0);
+    const cam_ = (k) => beats.reduce((a, x) => a + x.hits.filter((h) => h.kind === k && h.why === 'camera').length, 0);
+    const nFig = cam_('FIGURE'), nText = cam_('text'), nArt = cam_('art');
+    const other = beats.reduce((a, x) => a + x.hits.filter((h) => h.why !== 'camera').length, 0);
     // TEXT AND ART ARE NOT THE SAME VERDICT. The must-see boxes are the union of a
     // beat's WORDS, so a sliced label is a failure of the guarantee; a clipped piece
     // of scenery is what pushing in IS. Reporting one number for both would have
     // made a lesson that fixed every label look unchanged.
+    const bad = nFig + nText + nArt;
     const note = stepped < 2 ? `ONLY ${stepped + 1} BEAT REACHED`
-      : nText ? `${nText} TEXT clipped (+${nArt} art) over ${beats.length} beat(s)`
-      : nArt ? `words clean · ${nArt} art clipped` : `clean (${stepped + 1} beats)`;
+      : bad ? `${nFig ? `${nFig} FIGURE · ` : ''}${nText ? `${nText} text · ` : ''}${nArt ? `${nArt} art · ` : ''}CUT BY CAMERA`
+      : `camera clean${other ? ` (${other} bleed/band)` : ''}`;
     console.log(`  ${String(done).padStart(3)}/${ids.length}  ${id.padEnd(34)} ${note}`);
-  }
+    }
+  };
+
+  const nBeatsOf = (() => {
+    const src = fs.readFileSync('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx', 'utf8');
+    const comps = new Map([...src.matchAll(/^\s*'([a-z0-9-]+)':\s*(\w+),/gm)].map((m) => [m[1], m[2]]));
+    const out = new Map();
+    for (const [id, comp] of comps) {
+      const base = comp.replace(/Lesson$/, '');
+      const f = `components/lesson/cinematic/${base[0].toLowerCase()}${base.slice(1)}Script.ts`;
+      if (!fs.existsSync(f)) continue;
+      const body = fs.readFileSync(f, 'utf8').match(BEATS_BLOCK);
+      if (!body) continue;
+      out.set(id, body[1].split(BEAT_SPLIT).filter((c) => /\S/.test(c)).length);
+    }
+    return out;
+  })();
+
+  /** Each lesson's declared band, so a hit can be blamed on the right thing. */
+  const bandOf = (() => {
+    const src = fs.readFileSync('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx', 'utf8');
+    const comps = new Map([...src.matchAll(/^\s*'([a-z0-9-]+)':\s*(\w+),/gm)].map((m) => [m[1], m[2]]));
+    const out = new Map();
+    for (const [id, comp] of comps) {
+      const base = comp.replace(/Lesson$/, '');
+      for (const f of [`components/lesson/cinematic/${base[0].toLowerCase()}${base.slice(1)}Scene.tsx`,
+                       `components/lesson/cinematic/${comp}.tsx`]) {
+        if (!fs.existsSync(f)) continue;
+        const m = fs.readFileSync(f, 'utf8').match(/band=\{\[(\d+),\s*(\d+)\]\}/);
+        if (m) { out.set(id, [+m[1], +m[2]]); break; }
+      }
+    }
+    return out;
+  })();
+
+  const queue = [...ids];
+  const runLane = async (T) => {
+    let laneFirst = true;
+    for (;;) {
+      const id = queue.shift();
+      if (id === undefined) return;
+      const first = laneFirst; laneFirst = false;
+      try { await auditOne(T, id, first, nBeatsOf.get(id) ?? 0, bandOf.get(id) ?? [0, 560]); }
+      catch (e) { console.log(`  ${id.padEnd(34)} ERRORED: ${String(e).slice(0, 60)}`); done++; }
+    }
+  };
+  const lanes = [];
+  for (let i = 0; i < Math.min(LANES, ids.length); i++) lanes.push(await makeTab());
+  console.log(`auditing ${ids.length} lessons across ${lanes.length} tabs`);
+  await Promise.all(lanes.map((T) => runLane(T)));
+  for (const T of lanes) T.close();
 
   console.log('\nFRAME AUDIT — what the camera cuts in half\n');
   const dirty = report.filter((r) => r.beats.length);
@@ -297,10 +462,15 @@ function allIds() {
     console.log(`  ⚠ ${stuck.length} lesson(s) never got past their second beat — they were NOT audited:`);
     console.log(`      ${stuck.map((r) => r.id).join(', ')}`);
   }
-  const textLessons = report.filter((r) => r.beats.some((b) => b.hits.some((h) => h.kind === 'text')));
-  const textHits = report.reduce((a, r) => a + r.beats.reduce((b, x) => b + x.hits.filter((h) => h.kind === 'text').length, 0), 0);
+  const count = (kind) => report.reduce((a, r) => a + r.beats.reduce((b, x) => b + x.hits.filter((h) => h.kind === kind && h.why === 'camera').length, 0), 0);
+  const lessonsWith = (kind) => report.filter((r) => r.beats.some((b) => b.hits.some((h) => h.kind === kind && h.why === 'camera'))).length;
+  const why = (w) => report.reduce((a, r) => a + r.beats.reduce((b, x) => b + x.hits.filter((h) => h.why === w).length, 0), 0);
   console.log(`  ${dirty.length} lessons with something straddling the crop · ${totalHits} elements`);
-  console.log(`  OF WHICH WORDS: ${textLessons.length} lessons · ${textHits} sliced labels   <- the number H60c is about`);
+  console.log(`    figures cut in half : ${count('FIGURE')}  (${lessonsWith('FIGURE')} lessons)`);
+  console.log(`    words sliced        : ${count('text')}  (${lessonsWith('text')} lessons)`);
+  console.log(`    art sliced          : ${count('art')}  (${lessonsWith('art')} lessons)`);
+  console.log('    all three should be 0 — H60c protects the figure, the words and any art that');
+  console.log('    does not already bleed off the stage edge.');
   for (const r of dirty) {
     console.log(`\n  ${r.id}`);
     for (const b of r.beats) {
