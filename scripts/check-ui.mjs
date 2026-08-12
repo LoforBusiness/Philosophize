@@ -127,5 +127,32 @@ ok(/LIP\.card/.test(card), 'the card lip comes from the token');
 ok(/onPress\s*\?\s*LIP\.card\s*:\s*0|onPress\s*&&|!!onPress/.test(card),
   'a card only gets a lip when it can be pressed');
 
+// ── 6 · converted screens use tokens and nothing else ────────────────────────
+//
+// A literal list, not a glob: adopting a screen into the system is a deliberate
+// act, and a glob would silently enrol the next file someone adds.
+const CONVERTED = [
+  'app/(app)/settings.tsx',
+  // each adoption task appends its screen here
+];
+const SIZES = new Set(Object.values(D.TYPE).map((t) => t.fontSize));
+const GAPS = new Set([...D.SPACE, 0]);
+for (const rel of CONVERTED) {
+  const src = fs.readFileSync(path.join(REPO, rel), 'utf8')
+    .replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, '');
+  const hexes = [...new Set(src.match(/#[0-9A-Fa-f]{3,8}\b/g) || [])];
+  ok(hexes.length === 0, `${rel}: no colour of its own`, hexes.join(' '));
+  const rgbs = [...new Set(src.match(/rgba?\([^)]*\)/g) || [])];
+  ok(rgbs.length === 0, `${rel}: no rgb() of its own`, rgbs.join(' '));
+
+  const fsz = [...new Set((src.match(/fontSize:\s*([\d.]+)/g) || [])
+    .map((m) => Number(m.split(':')[1])))].filter((n) => !SIZES.has(n));
+  ok(fsz.length === 0, `${rel}: every font size is on the scale`, fsz.join(' '));
+
+  const sp = [...new Set((src.match(/(?:padding|margin|gap)[A-Za-z]*:\s*([\d.]+)/g) || [])
+    .map((m) => Number(m.split(':')[1])))].filter((n) => !GAPS.has(n));
+  ok(sp.length === 0, `${rel}: every gap is on the rhythm`, sp.join(' '));
+}
+
 console.log(bad === 0 ? '\nui system: all clear.' : `\n${bad} ui check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);

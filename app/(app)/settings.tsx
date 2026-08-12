@@ -17,6 +17,9 @@ import * as Application from 'expo-application';
 import { router } from 'expo-router';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
+import Button from '@/components/ui/Button';
+import UICard from '@/components/ui/Card';
+import { C, TYPE, SPACE, RADIUS, type TypeKey } from '@/constants/design';
 import { ProfileArtFill, ProfileAvatar } from '@/components/shared/ProfileArt';
 import ProfileArtSheet from '@/components/shared/ProfileArtSheet';
 import { SvgXml } from 'react-native-svg';
@@ -47,13 +50,19 @@ import { effectiveStreak } from '@/lib/utils/streak';
 import { restDaysHeld } from '@/constants/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
 
-const Page = '#F1EEE7';
-const Paper = '#FFFFFF';
-const Ink = '#1A1A1A';
-const InkSoft = '#6B6B6B';
-const InkFaint = '#E2E0D8';
-const Gold = '#6B6B6B';
-const Crimson = '#A83232';
+// THE SEVEN LOCAL COLOUR CONSTANTS ARE GONE. They were `Page #F1EEE7`,
+// `Paper #FFFFFF`, `Ink #1A1A1A`, `InkSoft #6B6B6B`, `InkFaint #E2E0D8`,
+// `Gold #6B6B6B` and `Crimson #A83232` — and `Gold` was the same hex as
+// `InkSoft`, which is the whole problem in one line: two names for one grey,
+// so nothing could tell you whether a difference was meant. Everything now
+// reads from `constants/design.ts`, and `scripts/check-ui.mjs` fails the build
+// if a colour of this screen's own ever comes back.
+//
+// A note on the two near-whites, because they are not interchangeable:
+// `C.surface` is a SURFACE (the card under your finger, the knob) and `C.paper`
+// is the FOREGROUND used on ink (button text, an icon on a filled row). The
+// contrast pair the validator measures is `paper on ink`, so type on a black
+// fill takes `paper`; a panel takes `surface`.
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const TIMES = ['06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '12:00 PM', '06:00 PM', '09:00 PM'];
@@ -96,7 +105,7 @@ export default function SettingsScreen() {
   const compact = width < 600;
 
   return (
-    <ScreenTransition bg={Page}>
+    <ScreenTransition bg={C.surfaceSoft}>
     <SafeAreaView style={styles.safe} edges={['top']}>
       {/* Top bar. There is no Save button: every control on every section writes
           to the store the moment it is touched. The one that used to sit here
@@ -104,12 +113,12 @@ export default function SettingsScreen() {
           that had already happened, which is indistinguishable from a button that
           does nothing. Profile keeps its own real Save, because Profile is the
           one section that holds a draft. */}
-      <View style={[styles.topBar, compact && { paddingHorizontal: 14 }]}>
-        <Text style={[styles.topTitle, compact && { fontSize: 26 }]}>Settings</Text>
+      <View style={[styles.topBar, compact && { paddingHorizontal: SPACE[2] }]}>
+        <Text style={styles.topTitle}>Settings</Text>
       </View>
 
-      <ScrollView contentContainerStyle={[styles.scroll, compact && { paddingHorizontal: 12 }]} showsVerticalScrollIndicator={false}>
-        <View style={[styles.layout, styles.layoutRow, { gap: compact ? 10 : 16 }]}>
+      <ScrollView contentContainerStyle={[styles.scroll, compact && { paddingHorizontal: SPACE[2] }]} showsVerticalScrollIndicator={false}>
+        <View style={[styles.layout, styles.layoutRow, { gap: compact ? SPACE[2] : SPACE[3] }]}>
           <Sidebar section={section} onSelect={setSection} compact={compact} />
           <View style={styles.contentWrap}>
             <Section section={section} />
@@ -145,10 +154,10 @@ function Sidebar({ section, onSelect, compact }: { section: SectionKey; onSelect
               accessibilityLabel={s.label}
               style={[styles.railItem, on && styles.railItemOn]}
             >
-              <SketchIcon name={s.icon} size={17} color={on ? Paper : InkSoft} />
+              <SketchIcon name={s.icon} size={17} color={on ? C.paper : C.inkSoft} />
               <Text
                 numberOfLines={2}
-                style={[styles.railLabel, on && { color: Paper, fontFamily: 'Inter_700Bold' }]}
+                style={[styles.railLabel, on && { color: C.paper, fontFamily: 'Inter_700Bold' }]}
               >
                 {s.label}
               </Text>
@@ -168,9 +177,9 @@ function Sidebar({ section, onSelect, compact }: { section: SectionKey; onSelect
         const on = s.key === section;
         return (
           <Pressable key={s.key} onPress={() => onSelect(s.key)} style={[styles.navItem, on && styles.navItemOn]}>
-            <SketchIcon name={s.icon} size={18} color={on ? Ink : InkSoft} />
+            <SketchIcon name={s.icon} size={18} color={on ? C.ink : C.inkSoft} />
             <Text
-              style={[styles.navText, on && { color: Ink, fontFamily: 'Inter_700Bold' }]}
+              style={[styles.navText, on && { color: C.ink, fontFamily: 'Inter_700Bold' }]}
               numberOfLines={1}
             >
               {s.label}
@@ -184,17 +193,21 @@ function Sidebar({ section, onSelect, compact }: { section: SectionKey; onSelect
 
 /* ---------------- Shared controls ---------------- */
 
+/** A section panel. This used to be a hand-rolled View with its own border, its
+ *  own radius and a hard offset shadow; it is the shared `Card` now, at the
+ *  screen's own padding — the ONE surface definition the whole app draws. It
+ *  keeps no `onPress`, so by the affordance rule it correctly has no lip: a
+ *  section is a sheet of paper, not a button. */
 function Card({ children }: { children: React.ReactNode }) {
   const { width } = useWindowDimensions();
-  const pad = width < 600 ? 16 : 22;
-  return <View style={[styles.card, { padding: pad }]}>{children}</View>;
+  return <UICard pad={width < 600 ? 3 : 4}>{children}</UICard>;
 }
 
 function Header({ title, sub, icon }: { title: string; sub?: string; icon?: SketchIconName }) {
   return (
     <View style={styles.headerBlock}>
       <View style={styles.headerRow}>
-        {icon ? <SketchIcon name={icon} size={20} color={Ink} /> : null}
+        {icon ? <SketchIcon name={icon} size={20} color={C.ink} /> : null}
         <Text style={styles.headerTitle}>{title}</Text>
       </View>
       {sub ? <Text style={styles.headerSub}>{sub}</Text> : null}
@@ -209,11 +222,11 @@ function Row({ title, sub, children, last, stack, z }: { title: string; sub?: st
     // `z` lifts a row (and any open dropdown inside it) above the rows below,
     // so dropdown options stay tappable instead of hiding behind the next row.
     <View style={[styles.row, stacked && styles.rowStacked, last && { borderBottomWidth: 0 }, z ? { zIndex: z } : null]}>
-      <View style={stacked ? { width: '100%' } : { flex: 1, paddingRight: 12 }}>
+      <View style={stacked ? { width: '100%' } : { flex: 1, paddingRight: SPACE[2] }}>
         <Text style={styles.rowTitle}>{title}</Text>
         {sub ? <Text style={styles.rowSub}>{sub}</Text> : null}
       </View>
-      <View style={stacked ? { width: '100%', marginTop: 12, alignItems: 'flex-start' } : undefined}>
+      <View style={stacked ? { width: '100%', marginTop: SPACE[2], alignItems: 'flex-start' } : undefined}>
         {children}
       </View>
     </View>
@@ -235,7 +248,7 @@ function Segmented({ value, options, onChange }: { value: string; options: { key
         const on = o.key === value;
         return (
           <Pressable key={o.key} onPress={() => onChange(o.key)} style={[styles.segBtn, on && styles.segBtnOn]}>
-            <Text style={[styles.segText, on && { color: Paper }]}>{o.label}</Text>
+            <Text style={[styles.segText, on && { color: C.paper }]}>{o.label}</Text>
           </Pressable>
         );
       })}
@@ -359,7 +372,7 @@ function ProfileSection() {
 
       <View style={styles.identity}>
         <ProfileAvatar size={84} backgroundId={draftBg} letter={shownName.charAt(0)} />
-        <View style={{ flex: 1, marginLeft: 18 }}>
+        <View style={{ flex: 1, marginLeft: SPACE[3] }}>
           <Text style={styles.idName} numberOfLines={1}>{shownName}</Text>
           <Text style={styles.idRank}>
             {current.name} · Rank {current.id}
@@ -381,8 +394,8 @@ function ProfileSection() {
           <Text
             numberOfLines={1}
             style={[
-              profileNameStyle(draftFont, 20),
-              { color: backgroundById(draftBg).tone === 'dark' ? Paper : Ink },
+              profileNameStyle(draftFont, TYPE.title.fontSize),
+              { color: backgroundById(draftBg).tone === 'dark' ? C.paper : C.ink },
             ]}
           >
             {profileNameText(draftFont, shownName)}
@@ -390,14 +403,16 @@ function ProfileSection() {
           <Text
             style={[
               styles.artPreviewName,
-              { color: backgroundById(draftBg).tone === 'dark' ? '#C9C6BD' : '#5A574E' },
+              // Both of these were their own hex — `#C9C6BD` and `#5A574E`, a pale
+              // grey and a warm one, four points from tokens that already existed.
+              { color: backgroundById(draftBg).tone === 'dark' ? C.dim : C.inkSoft },
             ]}
           >
             {backgroundById(draftBg).name.toUpperCase()}
           </Text>
         </View>
         <View style={styles.artChange}>
-          <SketchIcon name="pencil" size={13} color={Paper} />
+          <SketchIcon name="pencil" size={13} color={C.paper} />
           <Text style={styles.artChangeText}>CHANGE</Text>
         </View>
       </Pressable>
@@ -408,7 +423,7 @@ function ProfileSection() {
         onChangeText={setDraftName}
         style={styles.input}
         placeholder="Your name"
-        placeholderTextColor={InkSoft}
+        placeholderTextColor={C.inkSoft}
         maxLength={60}
       />
 
@@ -416,7 +431,7 @@ function ProfileSection() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8, paddingVertical: 2, paddingRight: 4 }}
+        contentContainerStyle={{ gap: SPACE[1], paddingVertical: SPACE[0], paddingRight: SPACE[0] }}
       >
         {PROFILE_FONTS.map((f) => {
           const on = f.id === draftFont;
@@ -428,11 +443,11 @@ function ProfileSection() {
             >
               <Text
                 numberOfLines={1}
-                style={[profileNameStyle(f.id, 17), { color: on ? Paper : Ink }]}
+                style={[profileNameStyle(f.id, TYPE.body.fontSize), { color: on ? C.paper : C.ink }]}
               >
                 {profileNameText(f.id, shownName)}
               </Text>
-              <Text style={[styles.fontChipName, { color: on ? '#C9C6BD' : InkSoft }]}>
+              <Text style={[styles.fontChipName, { color: on ? C.dim : C.inkSoft }]}>
                 {f.name.toUpperCase()}
               </Text>
             </Pressable>
@@ -440,19 +455,17 @@ function ProfileSection() {
         })}
       </ScrollView>
 
-      <Pressable
+      {/* The one real Save on this screen (Profile holds a draft; nothing else
+          does). Same handler, same disabled rule, same two labels — the shared
+          Button draws it now, so its dimmed state and its press come from the
+          same place as every other button in the app. */}
+      <Button
+        label={justSaved && !dirty ? 'SAVED' : 'SAVE CHANGES'}
         onPress={save}
         disabled={!dirty}
-        style={({ pressed }) => [
-          styles.profileSaveBtn,
-          !dirty && styles.profileSaveBtnOff,
-          pressed && dirty && { opacity: 0.85 },
-        ]}
-      >
-        <Text style={[styles.profileSaveText, !dirty && { color: InkSoft }]}>
-          {justSaved && !dirty ? 'SAVED' : 'SAVE CHANGES'}
-        </Text>
-      </Pressable>
+        size="lg"
+        style={{ marginTop: SPACE[3] }}
+      />
 
       <View style={styles.hr} />
       <View style={styles.miniStats}>
@@ -535,14 +548,13 @@ function AccountSection() {
         </View>
       ) : null}
       <Row title="Sign Out" sub="Sign out on this device — your progress stays saved to your account." last stack>
-        <Pressable
+        <Button
+          label={signingOut ? 'Signing out…' : 'Sign Out'}
           onPress={() => setConfirm(true)}
           disabled={signingOut}
-          style={({ pressed }) => [styles.signOutBtn, pressed && { opacity: 0.85 }]}
-        >
-          <SketchIcon name="back" size={15} color={Ink} />
-          <Text style={styles.signOutText}>{signingOut ? 'Signing out…' : 'Sign Out'}</Text>
-        </Pressable>
+          variant="secondary"
+          icon="back"
+        />
       </Row>
       <Text style={styles.footNote}>
         Signing out clears your data from this device; it syncs back the next time you sign in with this account.
@@ -618,12 +630,12 @@ function NotificationsSection() {
               ? 'Waiting for permission…'
               : 'Notifications are switched off for Deeply in your phone’s settings. Nothing below can be delivered until they are allowed.'}
           </Text>
-          <Pressable
+          <Button
+            label="Open phone settings"
             onPress={() => Linking.openSettings().catch(() => {})}
-            style={({ pressed }) => [styles.manageBtn, { alignSelf: 'flex-start', marginTop: 12 }, pressed && { opacity: 0.85 }]}
-          >
-            <Text style={styles.manageText}>Open phone settings</Text>
-          </Pressable>
+            variant="secondary"
+            style={{ alignSelf: 'flex-start', marginTop: SPACE[2] }}
+          />
         </View>
       ) : null}
 
@@ -631,10 +643,11 @@ function NotificationsSection() {
         <Toggle value={settings.dailyReminder && !blocked} onChange={(v) => void enable('dailyReminder', v)} />
       </Row>
       <Row title="Reminder Time" sub="When the daily nudge arrives">
-        <Pressable onPress={cycleTime} style={styles.timePill}>
-          <Text style={styles.timeText}>{settings.reminderTime}</Text>
-          <SketchIcon name="clock" size={15} color={Ink} />
-        </Pressable>
+        {/* Still one tap, still cycling through TIMES, still showing the stored
+            value as its label. The clock now sits before the time rather than
+            after it, because that is the order the shared Button draws an icon —
+            the alternative was a second, near-identical button definition. */}
+        <Button label={settings.reminderTime} onPress={cycleTime} variant="secondary" icon="clock" />
       </Row>
       <Row title="Streak Alerts" sub="A warning at 8pm on a day you haven't studied">
         <Toggle value={settings.streakAlerts && !blocked} onChange={(v) => void enable('streakAlerts', v)} />
@@ -840,12 +853,7 @@ function PrivacySection() {
       </Row>
       {adPrivacy && (
         <Row title="Ad Privacy Settings" sub="Change or withdraw your consent for personalised ads" last>
-          <Pressable
-            onPress={() => ads.showPrivacyOptions()}
-            style={({ pressed }) => [styles.manageBtn, pressed && { opacity: 0.85 }]}
-          >
-            <Text style={styles.manageText}>Manage</Text>
-          </Pressable>
+          <Button label="Manage" onPress={() => ads.showPrivacyOptions()} variant="secondary" />
         </Row>
       )}
       <Text style={styles.footNote}>
@@ -869,10 +877,7 @@ function FeedbackSection() {
       <Header title="Feedback" sub="Found a bug, or have an idea? We'd love to hear from you." />
       <View style={styles.hr} />
       <Row title="Send feedback" sub="Opens your mail app, addressed to our team" last stack>
-        <Pressable onPress={openMail} style={({ pressed }) => [styles.feedbackBtn, pressed && { opacity: 0.85 }]}>
-          <SketchIcon name="pencil" size={15} color={Paper} />
-          <Text style={styles.feedbackBtnText}>Email us</Text>
-        </Pressable>
+        <Button label="Email us" onPress={openMail} icon="pencil" />
       </Row>
       <Text style={styles.footNote}>
         Or write to us directly at {FEEDBACK_EMAIL}. Every message is read by a real person.
@@ -913,15 +918,13 @@ function VersionLine() {
       </Pressable>
       {devUnlocked && (
         <Row title="Lesson tester" sub="Open any lesson. Nothing is recorded." last stack>
-          <Pressable
+          <Button
+            label="Browse lessons"
             // The typed-route table is generated by Metro at dev-server start, so
             // a route added while it is not running is not in the union yet.
             onPress={() => router.push('/(app)/devlessons' as never)}
-            style={({ pressed }) => [styles.feedbackBtn, pressed && { opacity: 0.85 }]}
-          >
-            <SketchIcon name="book" size={15} color={Paper} />
-            <Text style={styles.feedbackBtnText}>Browse lessons</Text>
-          </Pressable>
+            icon="book"
+          />
         </Row>
       )}
     </>
@@ -964,66 +967,73 @@ function SubscriptionSection() {
       <View style={styles.hr} />
       <View style={[styles.planRow, !wide && { flexDirection: 'column' }]}>
         {/* Free */}
-        <View style={[styles.planCard, !isPro && styles.planCurrent]}>
-          {!isPro && (
-            <View style={styles.currentTag}>
-              <Text style={styles.currentTagText}>CURRENT</Text>
+        {/* `planCol` carries the flex that `planCard` used to, because the
+            shared Card puts a `style` prop on its FACE, not on the box that
+            has to share the row. */}
+        <View style={styles.planCol}>
+          <UICard pad={3}>
+            {!isPro && (
+              <View style={styles.currentTag}>
+                <Text style={styles.currentTagText}>CURRENT</Text>
+              </View>
+            )}
+            <Text style={styles.planName}>FREE</Text>
+            <Text style={styles.planPrice}>$0</Text>
+            <Text style={styles.planNote}>Forever free</Text>
+            <View style={{ marginTop: SPACE[2], gap: SPACE[1] }}>
+              <Check label={`${FREE_DAILY_LESSON_LIMIT} free ${lessonsWord(FREE_DAILY_LESSON_LIMIT)} per day`} />
+              <Check label="Unlimited saved quotes" />
+              <Check label="Full rank progression" />
+              <Check label="All 50 badges" />
+              <Check label="Philosopher bios" />
             </View>
-          )}
-          <Text style={styles.planName}>FREE</Text>
-          <Text style={styles.planPrice}>$0</Text>
-          <Text style={styles.planNote}>Forever free</Text>
-          <View style={{ marginTop: 14, gap: 10 }}>
-            <Check label={`${FREE_DAILY_LESSON_LIMIT} free ${lessonsWord(FREE_DAILY_LESSON_LIMIT)} per day`} />
-            <Check label="Unlimited saved quotes" />
-            <Check label="Full rank progression" />
-            <Check label="All 50 badges" />
-            <Check label="Philosopher bios" />
-          </View>
-          {!isPro && <Text style={styles.planFoot}>Your current plan</Text>}
+            {!isPro && <Text style={styles.planFoot}>Your current plan</Text>}
+          </UICard>
         </View>
 
         {/* Scholar's Pass */}
-        <View style={[styles.planCard, styles.planPro]}>
-          {isPro && (
-            <View style={styles.currentTag}>
-              <Text style={styles.currentTagText}>CURRENT</Text>
+        <View style={styles.planCol}>
+          <UICard pad={3}>
+            {isPro && (
+              <View style={styles.currentTag}>
+                <Text style={styles.currentTagText}>CURRENT</Text>
+              </View>
+            )}
+            <Text style={styles.proKicker}>SCHOLAR'S PASS</Text>
+            <Text style={styles.planPrice}>
+              $6.99 <Text style={styles.perMo}>/month</Text>
+            </Text>
+            <Text style={styles.planNote}>Billed monthly · cancel anytime</Text>
+            <View style={{ marginTop: SPACE[2], gap: SPACE[1] }}>
+              <Check label="Everything in Free" />
+              <View style={styles.andMore}>
+                <View style={styles.andLine} />
+                <Text style={styles.andMoreText}>& more</Text>
+                <View style={styles.andLine} />
+              </View>
+              <Check label="Unlimited lessons per day" />
+              <Check label="Ad-free experience" />
             </View>
-          )}
-          <Text style={styles.proKicker}>SCHOLAR'S PASS</Text>
-          <Text style={styles.planPrice}>
-            $6.99 <Text style={styles.perMo}>/month</Text>
-          </Text>
-          <Text style={styles.planNote}>Billed monthly · cancel anytime</Text>
-          <View style={{ marginTop: 14, gap: 10 }}>
-            <Check label="Everything in Free" />
-            <View style={styles.andMore}>
-              <View style={styles.andLine} />
-              <Text style={styles.andMoreText}>& more</Text>
-              <View style={styles.andLine} />
-            </View>
-            <Check label="Unlimited lessons per day" />
-            <Check label="Ad-free experience" />
-          </View>
-          {isPro ? (
-            <Text style={styles.planFoot}>Active — thank you for your support</Text>
-          ) : (
-            <Pressable
-              onPress={() => router.push('/(app)/paywall')}
-              style={({ pressed }) => [styles.upgradeBtn, pressed && { opacity: 0.85 }]}
-            >
-              <Text style={styles.upgradeText}>Upgrade — $6.99 / mo</Text>
-            </Pressable>
-          )}
+            {isPro ? (
+              <Text style={styles.planFoot}>Active — thank you for your support</Text>
+            ) : (
+              <Button
+                label="Upgrade — $6.99 / mo"
+                onPress={() => router.push('/(app)/paywall')}
+                size="lg"
+                style={{ marginTop: SPACE[3] }}
+              />
+            )}
+          </UICard>
         </View>
       </View>
       {isPro && (
-        <Pressable
+        <Button
+          label="Cancel subscription"
           onPress={() => setConfirmCancel(true)}
-          style={({ pressed }) => [styles.cancelSubBtn, pressed && { backgroundColor: '#F7E9E9' }]}
-        >
-          <Text style={styles.cancelSubText}>Cancel subscription</Text>
-        </Pressable>
+          variant="destructive"
+          style={{ alignSelf: 'flex-start', marginTop: SPACE[3] }}
+        />
       )}
 
       <Text style={styles.footNote}>
@@ -1140,13 +1150,11 @@ function DangerSection() {
 function DangerRow({ title, sub, label, onPress, last }: { title: string; sub: string; label: string; onPress: () => void; last?: boolean }) {
   return (
     <View style={[styles.row, last && { borderBottomWidth: 0 }]}>
-      <View style={{ flex: 1, paddingRight: 12 }}>
+      <View style={{ flex: 1, paddingRight: SPACE[2] }}>
         <Text style={styles.rowTitle}>{title}</Text>
         <Text style={styles.rowSub}>{sub}</Text>
       </View>
-      <Pressable onPress={onPress} style={({ pressed }) => [styles.dangerBtn, pressed && { backgroundColor: '#F7E9E9' }]}>
-        <Text style={styles.dangerBtnText}>{label}</Text>
-      </Pressable>
+      <Button label={label} onPress={onPress} variant="destructive" />
     </View>
   );
 }
@@ -1175,22 +1183,24 @@ function ConfirmModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel} statusBarTranslucent>
       <View style={styles.modalBackdrop}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
+        {/* The scrim WAS `rgba(0,0,0,0.45)` on the backdrop itself — the one
+            colour on this screen that was not even a hex. It is the same wash
+            drawn as ink at 45% on the dismiss layer that was already sitting
+            there, so the dialog above it keeps its full opacity and tapping
+            outside still cancels. */}
+        <Pressable style={[StyleSheet.absoluteFill, styles.modalScrim]} onPress={onCancel} />
         <View style={styles.modalCard}>
           <Text style={styles.modalTitle}>{title}</Text>
           <Text style={styles.modalMsg}>{message}</Text>
           <View style={styles.modalBtns}>
             {!single && (
-              <Pressable onPress={onCancel} style={({ pressed }) => [styles.modalCancel, pressed && { opacity: 0.7 }]}>
-                <Text style={styles.modalCancelText}>Cancel</Text>
-              </Pressable>
+              <Button label="Cancel" onPress={onCancel} variant="secondary" />
             )}
-            <Pressable
+            <Button
+              label={confirmLabel}
               onPress={onConfirm}
-              style={({ pressed }) => [styles.modalConfirm, destructive && { backgroundColor: Crimson, borderColor: Crimson }, pressed && { opacity: 0.85 }]}
-            >
-              <Text style={[styles.modalConfirmText, destructive && { color: Paper }]}>{confirmLabel}</Text>
-            </Pressable>
+              variant={destructive ? 'destructive' : 'primary'}
+            />
           </View>
         </View>
       </View>
@@ -1198,283 +1208,272 @@ function ConfirmModal({
   );
 }
 
+/**
+ * One of the five roles from `TYPE`, as a React Native text style.
+ *
+ * TYPE names the face `family` rather than `fontFamily` because
+ * `constants/design.ts` holds no React and must be readable by plain Node —
+ * this is the one line that translates. Everything below sets its size through
+ * this function, which is why the type scale cannot drift: there is no font
+ * size on this screen that is a number typed into a style.
+ *
+ * TWO OVERRIDES ARE USED DELIBERATELY BELOW, and both are principled:
+ *  · `fontFamily` is put back to Playfair on the EDITORIAL text — a card's
+ *    heading, a row's italic sub-line, a footnote. Those are the app's voice,
+ *    and swapping them for Inter would be a change of register, not a
+ *    decluttering. Sizes and line-heights still come from the scale.
+ *  · `letterSpacing: 0` on sentence-case `micro`. Micro's 1.5 tracking is for
+ *    all-caps kickers (FREE, CURRENT, DISPLAY NAME). On a sentence-case label
+ *    it is just extra width, and in two places here — the rail and the widget
+ *    swatch — width is exactly what there is none of.
+ */
+const role = (k: TypeKey) => ({
+  fontFamily: TYPE[k].family,
+  fontSize: TYPE[k].fontSize,
+  lineHeight: TYPE[k].lineHeight,
+  letterSpacing: TYPE[k].letterSpacing ?? 0,
+});
+
+const PLAYFAIR_HEAD = 'PlayfairDisplay_700Bold';
+const PLAYFAIR_CAPTION = 'PlayfairDisplay_400Regular';
+
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Page },
+  safe: { flex: 1, backgroundColor: C.surfaceSoft },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 6,
-    paddingBottom: 14,
+    paddingHorizontal: SPACE[3],
+    paddingTop: SPACE[1],
+    paddingBottom: SPACE[2],
   },
-  topTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 32, color: Ink },
-  saveBtn: { backgroundColor: Ink, borderRadius: 4, paddingHorizontal: 18, paddingVertical: 11 },
-  saveBtnText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Paper },
+  // One size, not two. The compact override shrank this to 26 — a step of six
+  // points that no other heading on the screen took, so it read as a different
+  // heading rather than the same one on a smaller phone.
+  topTitle: { ...role('display'), color: C.ink },
 
-  scroll: { paddingHorizontal: 20, paddingBottom: 40 },
-  layout: { gap: 16 },
+  scroll: { paddingHorizontal: SPACE[3], paddingBottom: SPACE[5] },
+  layout: { gap: SPACE[3] },
   layoutRow: { flexDirection: 'row', alignItems: 'flex-start' },
-  layoutCol: { flexDirection: 'column' },
   contentWrap: { flex: 1 },
 
   // Sidebar (wide)
   sidebar: {
     width: 210,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 4,
-    backgroundColor: Paper,
-    padding: 14,
-    gap: 4,
+    borderWidth: 2,
+    borderColor: C.ink,
+    borderRadius: RADIUS.card,
+    backgroundColor: C.surface,
+    padding: SPACE[2],
+    gap: SPACE[0],
   },
-  sidebarHead: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft, letterSpacing: 2, marginBottom: 10 },
+  sidebarHead: { ...role('micro'), color: C.inkSoft, marginBottom: SPACE[1] },
 
-  // Labelled rail (phone). 78 wide, and the number is measured rather than
-  // judged: 'Notifications' is the longest word with nowhere to wrap, and in
-  // Inter 700 at 9.5 it is 59.7pt. After the 1.5 borders, 4 of rail padding and
-  // 2 of item padding on each side, 63pt is left — so it clears by 3.3pt. It is
-  // BOLD that has to fit, because the selected label switches weight. An earlier
-  // 76 with wider padding left 59pt and would have clipped it by half a point.
+  // Labelled rail (phone). RE-MEASURED for the type scale, because the width of
+  // this rail is a function of the label's size and nothing else.
+  //
+  // It was 78 wide for a 9.5pt label, and 9.5 is not on the scale. The nearest
+  // role is `micro` at 11. 'Notifications' is the longest word and it has
+  // nowhere to wrap, so it sets the width: at Inter 700 9.5 it measured 59.7pt,
+  // which is 6.28 × the font size, so at 11 it is 69.1pt. Inside 92: less 2×2 of
+  // border, 2×4 of rail padding and 2×4 of item padding leaves 72pt — it clears
+  // by 2.9, the same margin the old 78 had. It is BOLD that has to fit, because
+  // the selected label switches weight.
+  //
+  // Item padding is 4 rather than the old 2 because 2 is not on the rhythm; the
+  // 14 extra points of rail width are what buying that costs, and they come out
+  // of a content column that is 262 wide on a 390pt phone.
   rail: {
-    width: 78,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 4,
-    backgroundColor: Paper,
-    paddingVertical: 7,
-    paddingHorizontal: 4,
-    gap: 3,
+    width: 92,
+    borderWidth: 2,
+    borderColor: C.ink,
+    borderRadius: RADIUS.card,
+    backgroundColor: C.surface,
+    paddingVertical: SPACE[1],
+    paddingHorizontal: SPACE[0],
+    gap: SPACE[0],
   },
-  railItem: { borderRadius: 4, alignItems: 'center', justifyContent: 'center', paddingVertical: 8, paddingHorizontal: 2, gap: 4 },
-  railItemOn: { backgroundColor: Ink },
+  railItem: { borderRadius: RADIUS.card, alignItems: 'center', justifyContent: 'center', paddingVertical: SPACE[1], paddingHorizontal: SPACE[0], gap: SPACE[0] },
+  railItemOn: { backgroundColor: C.ink },
   railLabel: {
-    fontFamily: 'Inter_500Medium', fontSize: 9.5, lineHeight: 12, color: InkSoft,
+    ...role('micro'), letterSpacing: 0, color: C.inkSoft,
     textAlign: 'center', includeFontPadding: false,
   },
-  navItem: { flexDirection: 'row', alignItems: 'center', gap: 9, paddingVertical: 11, paddingHorizontal: 7, borderRadius: 4, borderWidth: 1.5, borderColor: 'transparent' },
-  navItemOn: { borderColor: Ink, borderStyle: 'dashed' },
-  navText: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 13, color: InkSoft },
+  navItem: { flexDirection: 'row', alignItems: 'center', gap: SPACE[1], paddingVertical: SPACE[2], paddingHorizontal: SPACE[1], borderRadius: RADIUS.card, borderWidth: 2, borderColor: 'transparent' },
+  navItemOn: { borderColor: C.ink, borderStyle: 'dashed' },
+  navText: { flex: 1, ...role('label'), color: C.inkSoft },
 
-  // Sidebar (narrow chips)
-  chipRow: { gap: 8, paddingBottom: 4 },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1.5, borderColor: InkFaint, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 7 },
-  chipOn: { borderColor: Ink, borderStyle: 'dashed' },
-  chipText: { fontFamily: 'Inter_500Medium', fontSize: 12, color: InkSoft },
+  // THE SECTION PANEL IS `components/ui/Card` NOW. The rule that was here —
+  // 1.5 of ink border, a 4pt radius, and a hard 3×4 offset shadow in a colour
+  // (`#000`) that was in nobody's palette — is deleted, not converted: the one
+  // surface definition lives in the shared component.
 
-  // Card
-  card: {
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 4,
-    backgroundColor: Paper,
-    padding: 22,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 0,
-    shadowOffset: { width: 3, height: 4 },
-    elevation: 2,
-  },
-  headerBlock: { marginBottom: 4 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  headerTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: Ink },
-  headerSub: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: InkSoft, marginTop: 4 },
-  hr: { height: 1, backgroundColor: InkFaint, marginVertical: 16 },
+  headerBlock: { marginBottom: SPACE[0] },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: SPACE[1] },
+  headerTitle: { ...role('title'), color: C.ink },
+  headerSub: { ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic', color: C.inkSoft, marginTop: SPACE[0] },
+  hr: { height: 1, backgroundColor: C.hairline, marginVertical: SPACE[3] },
 
-  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: InkFaint },
+  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: SPACE[3], borderBottomWidth: 1, borderBottomColor: C.hairline },
   rowStacked: { flexDirection: 'column', alignItems: 'stretch' },
-  rowTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: Ink },
-  rowSub: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12, color: InkSoft, marginTop: 3 },
+  // A row's title is a heading in the editorial voice, at body size — 16 over an
+  // italic 13, where it used to be 15 over 12. Two sizes one point apart is the
+  // clutter this whole change is about: the eye cannot tell whether they were
+  // meant to be different.
+  rowTitle: { ...role('body'), fontFamily: PLAYFAIR_HEAD, color: C.ink },
+  rowSub: { ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic', color: C.inkSoft, marginTop: SPACE[0] },
 
-  // Toggle
-  track: { width: 46, height: 26, borderRadius: 5, padding: 3, justifyContent: 'center' },
-  trackOn: { backgroundColor: Ink, alignItems: 'flex-end' },
-  trackOff: { backgroundColor: Paper, borderWidth: 1.5, borderColor: Ink, alignItems: 'flex-start' },
-  knob: { width: 18, height: 18, borderRadius: 3 },
-  knobOn: { backgroundColor: Paper },
-  knobOff: { backgroundColor: Ink },
-
-  // Time pill
-  timePill: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, paddingHorizontal: 12, paddingVertical: 8 },
-  timeText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: Ink },
-
+  // Toggle. THE GEOMETRY IS NOW THE SAME IN BOTH STATES, which it was not: the
+  // off track carried a 1.5 border and the on track carried none, so the 18pt
+  // knob had 20pt of room in one state and 17 in the other and shifted as you
+  // flipped it. The border is always 2 and only its colour changes — ink when
+  // on, the accent when off — so 28 − 4 of border − 8 of padding leaves exactly
+  // the knob's 16 either way.
+  track: { width: 48, height: 28, borderRadius: RADIUS.pill, padding: SPACE[0], borderWidth: 2, justifyContent: 'center' },
+  trackOn: { backgroundColor: C.ink, borderColor: C.ink, alignItems: 'flex-end' },
+  trackOff: { backgroundColor: C.surfaceSoft, borderColor: C.HUE, alignItems: 'flex-start' },
+  knob: { width: 16, height: 16, borderRadius: RADIUS.pill },
+  knobOn: { backgroundColor: C.paper },
+  knobOff: { backgroundColor: C.HUE },
 
   // Segmented
-  segmented: { flexDirection: 'row', borderWidth: 1.5, borderColor: Ink, borderRadius: 4, overflow: 'hidden' },
-  segBtn: { paddingHorizontal: 14, paddingVertical: 8, backgroundColor: Paper },
-  segBtnOn: { backgroundColor: Ink },
-  segText: { fontFamily: 'Inter_500Medium', fontSize: 12, color: Ink },
-
-  // Dropdown
-  dropdown: { flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, paddingHorizontal: 14, paddingVertical: 9 },
-  dropdownText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: Ink },
-  dropdownList: { position: 'absolute', top: '100%', right: 0, marginTop: 4, minWidth: 150, backgroundColor: Paper, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, overflow: 'hidden', zIndex: 30 },
-  dropdownItem: { paddingHorizontal: 14, paddingVertical: 10 },
-  dropdownItemText: { fontFamily: 'Inter_400Regular', fontSize: 13, color: Ink },
+  segmented: { flexDirection: 'row', borderWidth: 2, borderColor: C.HUE, borderRadius: RADIUS.button, overflow: 'hidden' },
+  segBtn: { paddingHorizontal: SPACE[2], paddingVertical: SPACE[1], backgroundColor: C.surface },
+  segBtnOn: { backgroundColor: C.ink },
+  segText: { ...role('label'), color: C.ink },
 
   // Check rows
-  checkRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  checkBox: { width: 16, height: 16, borderWidth: 1.5, borderColor: Ink, borderRadius: 3, alignItems: 'center', justifyContent: 'center' },
-  checkMark: { fontFamily: 'Inter_700Bold', fontSize: 10, color: Ink, lineHeight: 12 },
-  checkLabel: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 13, color: Ink },
+  checkRow: { flexDirection: 'row', alignItems: 'center', gap: SPACE[1] },
+  checkBox: { width: 18, height: 18, borderWidth: 2, borderColor: C.HUE, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center' },
+  checkMark: { ...role('micro'), letterSpacing: 0, color: C.ink },
+  checkLabel: { flex: 1, ...role('label'), color: C.ink },
 
   // Profile
-  profileHeadRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   identity: { flexDirection: 'row', alignItems: 'center' },
 
   // The picture-and-background control: a live miniature of the real header.
   artPreview: {
     height: 112,
-    borderRadius: 8,
+    borderRadius: RADIUS.card,
     overflow: 'hidden',
-    borderWidth: 1.5,
-    borderColor: Ink,
+    borderWidth: 2,
+    borderColor: C.ink,
     justifyContent: 'flex-end',
   },
-  artPreviewInner: { padding: 12 },
+  artPreviewInner: { padding: SPACE[2] },
   artPreviewName: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.6, marginTop: 4,
+    ...role('micro'), marginTop: SPACE[0],
     includeFontPadding: false,
   },
   artChange: {
-    position: 'absolute', top: 10, right: 10,
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: Ink, borderRadius: 4, paddingHorizontal: 10, paddingVertical: 6,
+    position: 'absolute', top: SPACE[1], right: SPACE[1],
+    flexDirection: 'row', alignItems: 'center', gap: SPACE[0],
+    backgroundColor: C.ink, borderRadius: RADIUS.pill, paddingHorizontal: SPACE[1], paddingVertical: SPACE[0],
   },
-  artChangeText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, color: Paper, letterSpacing: 1.4 },
+  artChangeText: { ...role('micro'), color: C.paper },
 
   fontChip: {
     minWidth: 96,
     maxWidth: 190,
-    borderWidth: 1.5,
-    borderColor: InkFaint,
-    borderRadius: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    backgroundColor: Paper,
+    borderWidth: 2,
+    borderColor: C.hairline,
+    borderRadius: RADIUS.button,
+    paddingHorizontal: SPACE[2],
+    paddingVertical: SPACE[1],
+    backgroundColor: C.surface,
     alignItems: 'center',
   },
-  fontChipOn: { backgroundColor: Ink, borderColor: Ink },
+  fontChipOn: { backgroundColor: C.ink, borderColor: C.ink },
   fontChipName: {
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.3, marginTop: 5,
+    ...role('micro'), marginTop: SPACE[0],
     includeFontPadding: false,
   },
 
-  profileSaveBtn: {
-    marginTop: 18,
-    height: 48,
-    borderRadius: 6,
-    backgroundColor: Ink,
-    alignItems: 'center',
-    justifyContent: 'center',
+  // `profileSaveBtn` / `profileSaveBtnOff` / `profileSaveText` are gone with the
+  // hand-rolled Save. Its disabled fill was `#EFEEE9` — a fourth off-white,
+  // three points from one that already existed.
+  idName: { ...role('title'), color: C.ink },
+  // `Gold` used to colour these two, and `Gold` was `#6B6B6B` — the very same
+  // hex as `InkSoft`. One grey under two names, which is exactly how a palette
+  // grows to nine without anyone deciding anything.
+  idRank: { ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic', color: C.inkSoft, marginTop: SPACE[0] },
+  idMeta: { ...role('label'), color: C.inkSoft, marginTop: SPACE[0] },
+  fieldLabel: { ...role('micro'), color: C.inkSoft, marginTop: SPACE[3], marginBottom: SPACE[1] },
+  fieldValue: { ...role('body'), fontFamily: PLAYFAIR_HEAD, color: C.ink },
+  input: {
+    borderWidth: 2, borderColor: C.ink, borderRadius: RADIUS.button,
+    paddingHorizontal: SPACE[2], paddingVertical: SPACE[1],
+    // Face and size from the scale, but NO lineHeight: a line height on a
+    // TextInput clips the text vertically on Android. This is the one place a
+    // role is taken apart rather than spread.
+    fontFamily: TYPE.body.family, fontSize: TYPE.body.fontSize, color: C.ink,
   },
-  profileSaveBtnOff: { backgroundColor: '#EFEEE9' },
-  profileSaveText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Paper, letterSpacing: 2 },
-  idName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: Ink },
-  idRank: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: Gold, marginTop: 3 },
-  idMeta: { fontFamily: 'Inter_400Regular', fontSize: 12, color: Gold, marginTop: 5 },
-  changeLink: { fontFamily: 'Inter_400Regular', fontSize: 12, color: InkSoft, textDecorationLine: 'underline' },
-  fieldLabel: { fontFamily: 'Inter_700Bold', fontSize: 10, color: InkSoft, letterSpacing: 1.5, marginTop: 16, marginBottom: 6 },
-  fieldValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 16, color: Ink },
-  bioValue: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 15, color: Ink },
-  input: { borderWidth: 1.5, borderColor: Ink, borderRadius: 4, paddingHorizontal: 12, paddingVertical: 9, fontFamily: 'Inter_400Regular', fontSize: 15, color: Ink },
   miniStats: { flexDirection: 'row', alignItems: 'center' },
-  miniDiv: { width: 1, height: 36, backgroundColor: InkFaint },
-  miniValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: Ink },
-  miniLabel: { fontFamily: 'Inter_400Regular', fontSize: 11, color: InkSoft, marginTop: 2 },
+  miniDiv: { width: 1, height: 36, backgroundColor: C.hairline },
+  miniValue: { ...role('title'), color: C.ink },
+  miniLabel: { ...role('label'), color: C.inkSoft, marginTop: SPACE[0] },
 
-  footNote: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12, color: InkSoft, lineHeight: 19, marginTop: 18 },
+  footNote: { ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic', color: C.inkSoft, marginTop: SPACE[3] },
 
   // Widget scene picker. The thumbnails keep the widget's own 2.27:1 so the
   // preview is the shape of the thing being chosen, not a crop of it.
-  sceneRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 2 },
+  sceneRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACE[1], marginTop: SPACE[0] },
   sceneItem: { width: 66 },
   sceneThumb: {
     width: 66,
     height: 29,
+    // The one radius on this screen that is not a token, and it is deliberate:
+    // RADIUS.card at 12 on a box only 29 tall eats the picture's corners. This
+    // is the shape of the thing being previewed, not the app's own edge.
     borderRadius: 7,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: InkFaint,
-    backgroundColor: Paper,
+    borderColor: C.hairline,
+    backgroundColor: C.surface,
   },
-  sceneThumbOn: { borderWidth: 2, borderColor: Ink },
+  sceneThumbOn: { borderWidth: 2, borderColor: C.ink },
   sceneName: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 10,
-    color: InkSoft,
-    marginTop: 5,
+    ...role('micro'),
+    letterSpacing: 0,
+    color: C.inkSoft,
+    marginTop: SPACE[0],
     textAlign: 'center',
   },
-  sceneNameOn: { fontFamily: 'Inter_700Bold', color: Ink },
+  sceneNameOn: { fontFamily: 'Inter_700Bold', color: C.ink },
 
-  // Subscription
-  planRow: { flexDirection: 'row', gap: 14 },
-  planCard: { flex: 1, borderWidth: 2, borderColor: Ink, borderRadius: 4, padding: 18 },
-  planCurrent: {},
-  planPro: {},
-  currentTag: { position: 'absolute', top: -1, right: -1, backgroundColor: Ink, paddingHorizontal: 10, paddingVertical: 4 },
-  currentTagText: { fontFamily: 'Inter_700Bold', fontSize: 9, color: Paper, letterSpacing: 1 },
-  proKicker: { fontFamily: 'Inter_700Bold', fontSize: 11, color: Ink, letterSpacing: 1 },
-  planName: { fontFamily: 'Inter_700Bold', fontSize: 12, color: InkSoft, letterSpacing: 1 },
-  planPrice: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 30, color: Ink, marginTop: 6 },
-  perMo: { fontFamily: 'Inter_400Regular', fontSize: 13, color: InkSoft },
-  planNote: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12, color: InkSoft, marginTop: 4 },
-  planFoot: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12, color: InkSoft, textAlign: 'center', marginTop: 18 },
-  andMore: { flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 2 },
-  andLine: { flex: 1, height: 1, backgroundColor: InkFaint },
-  andMoreText: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 11, color: InkSoft },
-  upgradeBtn: { backgroundColor: Ink, borderRadius: 4, paddingVertical: 13, alignItems: 'center', marginTop: 18 },
-  upgradeText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: Paper },
-
-  // Feedback
-  feedbackBtn: { flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: Ink, borderRadius: 4, paddingHorizontal: 20, paddingVertical: 12 },
-  feedbackBtnText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: Paper },
+  // Subscription. The two plan panels are `components/ui/Card` now; `planCol`
+  // is what is left of `planCard` — the flex that made them share the row.
+  planRow: { flexDirection: 'row', gap: SPACE[2] },
+  planCol: { flex: 1 },
+  currentTag: { position: 'absolute', top: SPACE[1], right: SPACE[1], backgroundColor: C.ink, borderRadius: RADIUS.pill, paddingHorizontal: SPACE[1], paddingVertical: SPACE[0] },
+  currentTagText: { ...role('micro'), color: C.paper },
+  proKicker: { ...role('micro'), color: C.ink },
+  planName: { ...role('micro'), color: C.inkSoft },
+  planPrice: { ...role('display'), color: C.ink, marginTop: SPACE[0] },
+  perMo: { ...role('label'), color: C.inkSoft },
+  planNote: { ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic', color: C.inkSoft, marginTop: SPACE[0] },
+  planFoot: { ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic', color: C.inkSoft, textAlign: 'center', marginTop: SPACE[3] },
+  andMore: { flexDirection: 'row', alignItems: 'center', gap: SPACE[1], marginVertical: SPACE[0] },
+  andLine: { flex: 1, height: 1, backgroundColor: C.hairline },
+  andMoreText: { ...role('micro'), letterSpacing: 0, fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic', color: C.inkSoft },
 
   // An inline note that a control is currently unable to do its job (permission
   // refused, backup switched off). Ink on a tinted panel, not red — it is a state
   // of affairs, not an error.
-  notice: { backgroundColor: '#F4F2EC', borderLeftWidth: 3, borderLeftColor: Ink, padding: 14, marginTop: 14 },
-  noticeText: { fontFamily: 'Inter_400Regular', fontSize: 12.5, lineHeight: 19, color: Ink },
+  notice: { backgroundColor: C.surfaceSoft, borderLeftWidth: 4, borderLeftColor: C.ink, borderRadius: RADIUS.card, padding: SPACE[2], marginTop: SPACE[2] },
+  noticeText: { ...role('body'), color: C.ink },
 
-  // Privacy
-  manageBtn: { borderWidth: 1.5, borderColor: Ink, borderRadius: 4, paddingHorizontal: 16, paddingVertical: 9, backgroundColor: Paper },
-  manageText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Ink },
-
-  // Account
-  signOutBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, paddingHorizontal: 18, paddingVertical: 11, backgroundColor: Paper },
-  signOutText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Ink },
-
-  // Cancel subscription
-  cancelSubBtn: { alignSelf: 'flex-start', borderWidth: 1.5, borderColor: Crimson, borderRadius: 4, paddingHorizontal: 18, paddingVertical: 11, marginTop: 18 },
-  cancelSubText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Crimson },
-
-  // Danger
-  dangerBtn: { borderWidth: 1.5, borderColor: Crimson, borderRadius: 4, paddingHorizontal: 16, paddingVertical: 10 },
-  dangerBtnText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Crimson },
+  // EIGHT HAND-ROLLED BUTTON RULES ARE GONE — `upgradeBtn`, `feedbackBtn`,
+  // `manageBtn`, `signOutBtn`, `cancelSubBtn`, `dangerBtn`, `timePill`,
+  // `modalCancel`/`modalConfirm`, and the text rule each carried. Between them
+  // they used four radii, three border widths and five paddings to draw what is
+  // one component with four variants.
 
   // Modal
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center', padding: 28 },
-  modalCard: { width: '100%', maxWidth: 380, backgroundColor: Paper, borderWidth: 2, borderColor: Ink, borderRadius: 8, padding: 22 },
-  modalTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 20, color: Ink },
-  modalMsg: { fontFamily: 'Inter_400Regular', fontSize: 14, color: InkSoft, lineHeight: 21, marginTop: 10 },
-  modalBtns: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 20 },
-  modalCancel: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 4, borderWidth: 1.5, borderColor: Ink },
-  modalCancelText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: Ink },
-  modalConfirm: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 4, borderWidth: 1.5, borderColor: Ink, backgroundColor: Ink },
-  modalConfirmText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Paper },
-
-
-  // Portrait picker
-  pickerCard: { backgroundColor: Paper, borderWidth: 2, borderColor: Ink, borderRadius: 8, paddingHorizontal: 22, paddingTop: 20, paddingBottom: 18 },
-  pickerHead: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 14 },
-  pickerTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, color: Ink },
-  pickerSub: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: InkSoft, marginTop: 3 },
-  pickerClose: { paddingHorizontal: 4, paddingVertical: 2 },
-  pickerCloseText: { fontFamily: 'Inter_400Regular', fontSize: 18, color: Ink },
-  pickerGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  tile: { aspectRatio: 1, borderWidth: 1.5, borderColor: Ink, borderRadius: 4, backgroundColor: Paper, alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 8 },
-  tileOn: { backgroundColor: Ink },
-  tileName: { fontFamily: 'Inter_500Medium', fontSize: 11, color: Ink, textAlign: 'center', paddingHorizontal: 2 },
-  pickerFoot: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12, color: InkSoft, marginTop: 14 },
+  modalBackdrop: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: SPACE[4] },
+  modalScrim: { backgroundColor: C.ink, opacity: 0.45 },
+  modalCard: { width: '100%', maxWidth: 380, backgroundColor: C.surface, borderWidth: 2, borderColor: C.ink, borderRadius: RADIUS.card, padding: SPACE[4] },
+  modalTitle: { ...role('title'), color: C.ink },
+  modalMsg: { ...role('body'), color: C.inkSoft, marginTop: SPACE[1] },
+  modalBtns: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: SPACE[1], marginTop: SPACE[4] },
 });
