@@ -562,6 +562,68 @@ const rocks: Silhouette = (x0, x1, yAt, seed, o = {}) => {
   return d;
 };
 
+/**
+ * THE SEAT. A low flat-topped stone, sized to a MEASURED pelvis — the one
+ * silhouette here whose job is to be underneath the figure rather than beside
+ * him.
+ *
+ * `sip` and `thinker` both play chair-height seated poses (`sipStance`'s
+ * `seated(21, …)` and `postureHold(9)`'s `seatBob(20)`), which put the hips
+ * 15.0 and 14.5 stage units off the ground with the knees up and the feet
+ * planted forward. moves.ts says it plainly — "postures 3–5 and 9–10 assume the
+ * scene has put something under the figure… Nothing here draws furniture" — so
+ * over open ground those two were hips floating a body-width above the grass.
+ * This is the furniture, and rule A1 is the reason it exists.
+ *
+ * TWO NUMBERS DECIDE `topY`, and neither is a guess:
+ *
+ *  · the LOWEST INK at the hip, which the crown has to touch. That is not the
+ *    pelvis joint: the torso is stroked at half-width `STR.torso/2 × k`, so its
+ *    lower edge sits that much below the joint. On `sip` the pelvis is y577.06
+ *    and the lowest hip ink runs y581.18–581.72 across the whole idle cycle; on
+ *    `thinker`, pelvis y560.10 and ink y564.29–565.12. A crown at 581.0 / 564.2
+ *    is therefore always overlapped by the figure, never floating under a gap.
+ *
+ *  · the VANISH BAND, which the crown has to stay out of. check-launch.mjs
+ *    samples crown-to-lower-knee for the darkest thing behind him, and a seat is
+ *    drawn in its own plane's step — step 1 on `sip` (2.16:1 against ink) and
+ *    step 2 on `thinker` (2.57:1), both far under the 3.0 floor. A first attempt
+ *    at this used `rocks` with h 19–21, which tops out around the PELVIS, three
+ *    rows inside the band, and measured exactly that 2.57:1. The band's last row
+ *    is the lower knee — y579 on `sip`, y562 on `thinker`, and both are stable
+ *    to a fiftieth of a unit across the cycle — so a crown at 581.0 / 564.2 sits
+ *    a clear row or two below anything the check reads. The seat is under the
+ *    hips, which is below the knee in a seated pose; that is WHY this can be
+ *    done at all, and it was verified rather than assumed.
+ *
+ * `topY` is an absolute stage y for that reason: it is a figure measurement, not
+ * a height above a ridge that moves with `jag` and the 20px ridge sampling.
+ */
+const perch: Silhouette = (x0, x1, yAt, seed, o = {}) => {
+  const w = x1 - x0;
+  const top = o.topY ?? yAt((x0 + x1) / 2) - 12;
+  const rise = o.rise ?? 0;            // a shoulder standing above the seat itself
+  const back = top - rise;
+  const bl = yAt(x0) + 6, br = yAt(x1) + 6;
+  return poly([
+    [x0, bl],
+    [x0 + w * 0.04, back + (bl - back) * 0.46],
+    // The shoulder is a short FLAT run, not a vertex. Taken to a point it comes
+    // out as a spike on the skyline and the whole thing reads as a hill with a
+    // peak rather than as two courses of stone.
+    [x0 + w * 0.11, back],
+    [x0 + w * 0.24, back + rise * 0.12],
+    [x0 + w * 0.30, back + rise * 0.72],
+    [x0 + w * 0.36, top],
+    // The seat DIPS, never rises: `top` is a measured ceiling, and a vertex
+    // above it is a vertex inside the vanish band.
+    [x0 + w * 0.64, top + 0.7],
+    [x1 - w * 0.05, top],
+    [x1 - w * 0.01, top + (br - top) * 0.34],
+    [x1, br],
+  ]) + ' ';
+};
+
 /** A broken tower and a run of fallen wall, for the knoll on `sip`. */
 const ruin: Silhouette = (x0, x1, yAt, seed, o = {}) => {
   const cx = o.cx ?? (x0 + x1) / 2;
@@ -870,6 +932,20 @@ const SCENE_PLANES: Record<SceneKey, (c: Crest) => PlaneSpec[]> = {
       sil: [
         [swells, beside('sip', 66), { hMin: 12, hMax: 30, wMin: 70, wMax: 140 }],
         [blades, beside('sip', 92), { hMin: 7, hMax: 15, gap: 18 }],
+        // HE IS SITTING ON THIS. A block of fallen stone — kin to the ruin on the
+        // far knoll, and the one thing allowed inside the lane `beside()` clears,
+        // because its crown (y581.0) sits below the last row the vanish check
+        // samples (y579, his lower knee) and so can never reach his body.
+        //
+        // NO `rise`, deliberately: the FLAT top is what says "seat". A 5-unit
+        // shoulder was tried here first and the block came out as a mound with a
+        // hump on it, which is a thing to stand beside, not a thing to sit on.
+        //
+        // It ends at x209, so its front face is hidden behind his shins (ink
+        // x208-216) and what shows is the back of it, out to his left. Measured
+        // off the drawn path: crown y581-582 across x172-206, its own ground
+        // y590-594 either side, so the stone stands 9-13 units proud.
+        [perch, [[168, 209]], { topY: 581 }],
       ],
     },
     {
@@ -942,34 +1018,31 @@ const SCENE_PLANES: Record<SceneKey, (c: Crest) => PlaneSpec[]> = {
       step: 2, dy: 0, amp: c.amp, off: c.off, per: c.per, jag: 2.5, seed: 139,
       sil: [
         [cliff, [[-EDGE, 136]], { from: -EDGE, edge: 132, rise: 58 }],
-        // HE IS PERCHED AT THE CLIFF EDGE, not crouching on bare ground — an
-        // outcrop rising from the cliff base to meet his hip, sitting BESIDE
-        // him rather than centred under him.
+        // HE IS SITTING ON THIS — an outcrop at the foot of the cliff, running
+        // from x152 (20 clear of the cliff face, which ends at x132) to x208,
+        // just behind his shins, with its crown UNDER HIS HIPS, not beside them.
         //
-        // Height: `postureHold(9)` seats the pelvis at `seatBob(20)`, 20 rig
-        // units off the ground — measured off `rig.solve()` for this exact
-        // pose, that pelvis lands 14.5 stage units above the ground line at
-        // his own x (crown y512.65, knee y562.0-562.3, pelvis y560.1, groundY
-        // 574.6). `rocks()` sinks its base 5 units below the ridge before
-        // subtracting height (`b = yAt(x) + 5; t = b - h`), so an apex that
-        // meets a ~14.5-unit hip needs `h ≈ 19.5`, NOT `h ≈ 14.5` — the first
-        // version of this used hMin 14/16 and topped out 9-11 units up,
-        // visibly short of his seat despite a comment claiming otherwise.
-        // hMin 19/hMax 21 actually gets there.
+        // The comment this replaces claimed "he is perched at the cliff edge",
+        // and the picture said otherwise twice over: the cliff is a raised shelf
+        // to his LEFT and he sits on the low ground to its right, and the rock
+        // itself spanned x140-186 while he sits at x200 — 14 units clear of his
+        // own hip, so nothing was under him at all. The rock was pushed out
+        // there because the version before it, centred on him and topping out at
+        // his pelvis, measured 2.57:1 in the vanish check. Both are fixed by
+        // dropping the crown to y564.2: it is under his hips, and it is two rows
+        // below the last row that check reads (y562, his lower knee).
         //
-        // Position: NOT centred on him. A first attempt spanning his whole
-        // stance (`FIG_X.thinker ± 40`) put a rock directly behind his hip —
-        // exactly the lane `beside()`'s doc comment reserves for a reason: at
-        // this height it entered the vanish check's sampled crown-to-knee
-        // rows and measured 2.6:1 against his own ink, below the 3.0 floor.
-        // Reaching his hip height and staying clear of that lane are both
-        // real constraints, so the rock sits in the gap between the cliff
-        // face (ending ~132) and his sampled column (starting ~187) instead —
-        // profiled with `coverage()` to confirm its footprint (roughly
-        // x146-166) stays clear before trusting it. It reads as the ledge he
-        // is perched at the edge of, continuous with the cliff, rather than a
-        // mass hidden behind his own torso.
-        [rocks, [[140, 186]], { hMin: 19, hMax: 21, gap: 0 }],
+        // `rise: 13` gives it a second, higher course at x158-165 — well left of
+        // the sampled column (x187-213), and what stops a 56-wide flat top
+        // reading as a swell in the turf rather than as rock. Unlike `sip`'s
+        // block this one wants the shoulder: it is a shelf running out of a cliff
+        // foot, not a stone someone put there. 13 is where that lands and 17 is
+        // past it: at 17 the shoulder detaches into a standing stone of its own
+        // beside him and the eye reads two objects where there is one ledge.
+        // Measured off the drawn path: shoulder y551-553 at x158-165, seat
+        // y564-565 across x172-205, its own ground y576-578 either side. See
+        // `perch` for where 564.2 comes from.
+        [perch, [[152, 208]], { topY: 564.2, rise: 13 }],
         [canopy, [[268, ART_W + EDGE]], { rMin: 22, rMax: 34, gap: 18, lift: 0.5 }],
       ],
     },
