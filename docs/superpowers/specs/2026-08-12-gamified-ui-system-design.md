@@ -1,7 +1,7 @@
 # A gamified UI system — chunky buttons, one palette, four decluttered screens
 
 **Date:** 2026-08-12
-**Status:** approved design, not yet implemented.
+**Status:** implemented 2026-08-13.
 **Scope:** a new shared UI system, adopted on four screens. No feature is added, removed or changed.
 
 ---

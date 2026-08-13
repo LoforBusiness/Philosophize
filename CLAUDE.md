@@ -499,10 +499,10 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is `tsc` plus **thirteen** validators, in this order:
+**Validation:** `npm run check` is `tsc` plus **fourteen** validators, in this order:
 `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
-`check-camera` · `check-poll` · `check-access` · `check-rest`. It exits 0 today, so anything any of them prints is yours. (Several
+`check-camera` · `check-poll` · `check-access` · `check-rest` · `check-ui`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
 figures and 6 hand-built ones, `check-moves` 6 head-clearance defects. A budget
 line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 192 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
