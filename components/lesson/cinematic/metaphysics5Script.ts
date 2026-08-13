@@ -27,7 +27,7 @@ export const BEATS: Meta5Beat[] = [
   },
   {
     p: 19, stars: 1, q: 1, psr: 1,
-    text: 'In 1714 Leibniz pressed it sharpest, and answered with his Principle of Sufficient Reason: every fact needs a reason — so existence itself must demand one.',
+    text: 'In 1714 Leibniz pressed it hardest. His Principle of Sufficient Reason says every fact needs a reason. So existence itself must demand one.',
     cite: 'Leibniz, 1714',
     dur: 4.8,
   },

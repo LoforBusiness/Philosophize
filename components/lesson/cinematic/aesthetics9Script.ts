@@ -54,7 +54,7 @@ export const BEATS: A9Beat[] = [
   },
   {
     p: 5, x: 208, boxes: true, stands: true,
-    text: 'So the difference is not in the object. It is in what the object is doing — the argument it is making, the moment it is making it in, the history it answers. Beauty came off the throne and became one option among many.',
+    text: 'So the difference is not in the object. It is in what the object is doing. The argument it makes, the moment it makes it in, the history it answers. Beauty came off the throne and became one option among many.',
     cite: 'Beauty dethroned',
     dur: 5.0,
   },

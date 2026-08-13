@@ -31,7 +31,7 @@ export const BEATS: Et10Beat[] = [
   },
   {
     p: 14, x: 168,
-    text: 'Nobody deliberates. You do not price the shoes against the child, because there is no comparison to make — and Peter Singer’s whole argument starts from the fact that you already know this.',
+    text: 'Nobody deliberates. You do not price the shoes against the child. There is no comparison to make. Peter Singer’s whole argument starts from the fact that you already know this.',
     cite: 'Singer’s drowning child',
     dur: 4.8,
   },

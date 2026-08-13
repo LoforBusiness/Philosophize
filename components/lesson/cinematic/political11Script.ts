@@ -65,7 +65,7 @@ export const BEATS: Political11Beat[] = [
   },
   {
     p: 33, x: 120, dial: 1, set: 3, built: 3,
-    text: 'Rousseau turns it to INNOCENT. We were fine until property and rank taught us to compare ourselves. His answer has no one at the top at all — everybody bound to the common good, which is how he means to hand freedom back.',
+    text: 'Rousseau turns it to INNOCENT. We were fine until property and rank taught us to compare ourselves. His answer has no one at the top at all. Everybody is bound to the common good. That is how he means to hand freedom back.',
     cite: 'Rousseau · the general will',
     dur: 5.0,
   },

@@ -30,7 +30,7 @@ export const BEATS: Epistemology9Beat[] = [
   },
   {
     p: 34, x: 268, land: 1,
-    text: 'Start with the world. Two hills and one lonely tree, sitting there being exactly what they are — whether or not anybody ever looks, draws, or argues about them.',
+    text: 'Start with the world. Two hills and one lonely tree, sitting there being exactly what they are. Whether or not anybody ever looks, draws, or argues about them.',
     cite: 'Out there',
     dur: 4.4,
   },
@@ -95,7 +95,7 @@ export const BEATS: Epistemology9Beat[] = [
   },
   {
     p: 13, x: 268, land: 1, map: 1, theory: 2,
-    text: 'The other answer is blunter. A belief is true if it keeps working — if it walks you across those real hills, year after year, and never once strands you. Comfort is not enough; only what survives the walk counts.',
+    text: 'The other answer is blunter. A belief is true if it keeps working. If it walks you across those real hills, year after year, and never once strands you. Comfort is not enough; only what survives the walk counts.',
     cite: 'Pragmatism',
     dur: 5.2,
   },

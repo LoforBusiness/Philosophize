@@ -28,7 +28,7 @@ export const BEATS: Meta31Beat[] = [
   {
     g: 45, holes: 1, ticks: 0, chips: 0,
     dur: 4.2,
-    text: 'Now three holes. Nothing has been added to the slab — something has been taken out of it — and yet the picture plainly contains three more things than it did.',
+    text: 'Now three holes. Nothing has been added to the slab. Something has been taken out of it. And yet the picture plainly holds three more things than it did.',
     cite: 'Three more things',
   },
   {
@@ -52,7 +52,7 @@ export const BEATS: Meta31Beat[] = [
   {
     g: 4, holes: 1, ticks: 3, chips: 1,
     dur: 4.8,
-    text: 'So say what you counted. There are only three candidates in the picture: the cheese, the ring of cheese bent around each gap, and the gap in the middle of it.',
+    text: 'So say what you counted. There are only three candidates. The cheese, the ring of cheese bent around each gap, and the gap in the middle.',
     cite: 'Three candidates',
   },
   {

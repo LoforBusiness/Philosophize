@@ -52,7 +52,7 @@ export const BEATS: Pol12Beat[] = [
   },
   {
     p: 29, x: 168, door: 1, open: 1, neg: 1, posi: 1,
-    text: 'Here is Berlin\'s worry. A regime announces that your real self wants its plan, lights the second lamp on your behalf, and shuts the door — and calls the whole thing freedom.',
+    text: 'Here is Berlin\'s worry. A regime announces that your real self wants its plan. It lights the second lamp on your behalf and shuts the door. Then it calls that freedom.',
     cite: 'The second lamp',
     dur: 5.2,
   },

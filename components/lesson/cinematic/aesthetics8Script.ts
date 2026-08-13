@@ -43,7 +43,7 @@ export const BEATS: Aes8Beat[] = [
   },
   {
     p: 31, x: 68, mode: 0, lens: 2,
-    text: 'Hang those up. There is a second pair on the same wall, and it is about to show you a different painting — on exactly the same canvas.',
+    text: 'Hang those up. There is a second pair on the same wall. It is about to show you a different painting, on exactly the same canvas.',
     cite: 'The second pair',
     dur: 4.0,
   },
@@ -94,7 +94,7 @@ export const BEATS: Aes8Beat[] = [
         { text: 'They answer different questions', correct: true },
         { text: 'One of them is wrong', correct: false },
       ],
-      explain: 'The trap: rival theories sound like a fight to the death, so you feel forced to pick a winner. But formalism asks how a work is put together and expression asks what got carried across — different questions, same canvas. Which is why most critics keep both pairs of glasses on the wall.',
+      explain: 'The trap: rival theories sound like a fight, so you feel you must pick a winner. But formalism asks how a work is put together. Expression asks what got carried across. Different questions, same canvas — which is why critics keep both pairs of glasses.',
       xp: 5,
     },
     dur: 1.0,

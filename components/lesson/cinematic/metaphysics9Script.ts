@@ -55,7 +55,7 @@ export const BEATS: M9Beat[] = [
   },
   {
     p: 33, x: 232, panels: 2,
-    text: 'So many philosophers close the gap instead. Damage a brain and the memory, the mood, even the character change with it — which suggests the mind is not another substance but something the brain does, the way digestion is something the gut does.',
+    text: 'So many philosophers close the gap instead. Damage a brain and the memory, the mood, even the character change with it. That suggests the mind is not another substance. It is something the brain does, the way digestion is something the gut does.',
     cite: 'The physicalist reply',
     dur: 5.2,
   },

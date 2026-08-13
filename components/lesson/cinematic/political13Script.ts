@@ -33,7 +33,7 @@ export const BEATS: Pol13Beat[] = [
   },
   {
     p: 40, x: 168, steps: 3,
-    text: 'Three steps. Read them in order and it feels like a proof — each one seems to follow from the one before it, and the conclusion is exactly what the town wanted.',
+    text: 'Three steps. Read them in order and it feels like a proof. Each one seems to follow from the one before. And the conclusion is exactly what the town wanted.',
     cite: 'All three',
     dur: 4.8,
   },

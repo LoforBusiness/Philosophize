@@ -88,7 +88,7 @@ export const BEATS: Aesthetics7Beat[] = [
         { text: 'False, beauty stays in response', correct: true },
         { text: 'True, a standard measures it', correct: false },
       ],
-      explain: 'The trap: "a standard" sounds like a ruler you hold against the canvas. Hume never put beauty back into the paint. He kept it in the response — and a response can be practised, compared and free of grudges, or none of those. That is why criticism is not just noise.',
+      explain: 'The trap: "a standard" sounds like a ruler you hold against the canvas. Hume never put beauty back into the paint. He kept it in the response. And a response can be practised, compared, and free of grudges. That is why criticism is not just noise.',
       xp: 5,
     },
     dur: 1.0,

@@ -500,10 +500,11 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is `tsc` plus **fifteen** validators, in this order:
+**Validation:** `npm run check` is `tsc` plus **sixteen** validators, in this order:
 `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
-`check-camera` · `check-poll` · `check-access` · `check-rest` · `check-stats` · `check-launch`. It exits 0 today, so anything any of them prints is yours. (Several
+`check-camera` · `check-poll` · `check-access` · `check-rest` · `check-stats` · `check-launch` ·
+`check-words`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
 figures and 6 hand-built ones, `check-moves` 6 head-clearance defects. A budget
 line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 192 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
@@ -567,7 +568,14 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 
 Lessons are the product. They must *look*, *feel*, and *teach* well enough that a curious beginner would pay to keep going. Every lesson should honor:
 
-- **Teach, don't lecture.** One idea per card; concrete example before the abstract term; never a wall of text.
+- **Teach, don't lecture.** One idea per card; concrete example before the abstract
+  term; never a wall of text. **This is now countable — group J of the rule book,
+  enforced by `check-words`.** Write it as you would say it to someone who does not
+  know the subject: one thought per sentence, under 20 words. The habit that broke
+  it was bolting a second complete thought onto the first with a dash — 48 of the
+  69 over-long sentences did exactly that, and the fix is a full stop, not a rewrite.
+  A long WORD is fine; "consequentialism" is the lesson. A long sentence is where
+  the reader loses the thread.
 - **Productive struggle.** Every lesson earns its payoff with a real question or dilemma. A good "trick" answer is tempting for a *nameable* reason — so the explanation should **name the bias/fallacy and say why the tempting choice fails.**
 - **Ground it in a real thinker.** Pair the concept with a primary-source `quote` card. Authenticity ("here is the sentence Descartes actually wrote") is what makes it feel valuable, not gamified trivia.
 - **Give it an arc.** Hook (provocation) → build → struggle → a "what you now know" payoff on the summary.

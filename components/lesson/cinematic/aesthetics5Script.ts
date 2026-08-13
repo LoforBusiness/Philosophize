@@ -60,7 +60,7 @@ export const BEATS: Aes5Beat[] = [
   },
   {
     p: 13, bird: 0, ego: 0, leaf: 1, self: 0.12,
-    text: 'Ruskin taught that drawing recovers "the innocence of the eye" — seeing patches of colour as they truly are, before the mind swaps in its idea. His students studied one leaf before any tree.',
+    text: 'Ruskin taught that drawing recovers "the innocence of the eye". You see patches of colour as they truly are, before the mind swaps in its idea. His students studied one leaf before any tree.',
     cite: 'Ruskin’s drawing lessons',
     dur: 5.0,
   },

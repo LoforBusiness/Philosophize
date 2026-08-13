@@ -1523,6 +1523,60 @@ question at the end, which is the format the cinematic lessons exist to replace.
 
 ---
 
+## Group J — the words the reader reads
+
+Every other group in this book guards the picture. This one guards the prose, which
+is what the reader actually spends the lesson doing. It exists because a reader said
+the lessons were *"sometimes difficult to understand because of the wording, and
+sometimes just too much to read"* — and because nothing in `npm run check` had ever
+looked at a sentence.
+
+**The measurement first, because it overturned the obvious theory.** Across 884 beats
+the app's own voice is good: the median narration beat is 22 words at 9 words a
+sentence, roughly how a person explains something out loud. The obvious culprit —
+verbatim source prose from Nagel, Singer, Mill, Danto, Carlson and Burke, which really
+does sit in the narration slot — turned out to be innocent: beats carrying a `cite`
+read **better** than beats without one (11 words a sentence against 11.5, 8% long words
+against 11%). Attribution was never the problem.
+
+What the 69 hardest sentences share is a **device**. 48 contain an em-dash, 14 a colon,
+23 two or more commas; only 5 are plainly long with nothing joining them. The habit is
+to bolt a second complete thought onto the first with a dash instead of ending the
+sentence. That is what makes a beat feel like work.
+
+**J1 — one thought per sentence, and under 20 words.**
+The median is 11 and the app rarely reaches 20 on its own. When it does, a dash is
+almost always joining two things that should have been two sentences. The fix is a
+full stop, not a rewrite. `check-words` counts them.
+
+**J2 — a beat of narration stays under 45 words.**
+The median is 22 and the longest honest beat is 44, so this only bites on something
+genuinely overstuffed. A beat is one thing said once, not a paragraph.
+
+**J3 — an explanation after an answer stays under 50 words.**
+It is the longest thing anyone reads (median 34) and it lands at the moment attention
+is lowest: the reader has already committed to a choice and wants to know if they were
+right. Say that, say why the tempting answer tempted, stop.
+
+**J4 — no beat is more than 30% long words.**
+Deliberately loose. The subject *is* long words — "consequentialism" is the lesson, not
+a failure — so this catches only a beat that is wall-to-wall abstraction with nothing
+concrete to hold onto.
+
+**J5 — write it as you would say it to someone who does not know the subject.**
+The one rule here that cannot be counted, and the one the others serve. Name a concrete
+thing before the abstract term for it. Prefer the short word where it means the same.
+If a sentence would sound strange said out loud to a friend, it is wrong on the page
+too. The countable rules above exist because this one is a matter of judgement and
+judgement drifts; they are the floor, not the standard.
+
+**A `quote` block is exempt from all of it.** That is what it is for: a primary source,
+framed as a quotation, attributed, saveable. §13 wants the reader to see the sentence
+Descartes actually wrote — in the quote card where it is announced, not in the narration
+where it reads as the app.
+
+---
+
 ## Part 2 — Authoring checklist
 
 **Shape** — before writing a word, lay the beats out and count them (H52, H53).

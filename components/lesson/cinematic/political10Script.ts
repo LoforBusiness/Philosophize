@@ -39,7 +39,7 @@ export const BEATS: Political10Beat[] = [
   },
   {
     p: 13, x: 108, tape: 1,
-    text: 'So a pile is never only a pile. Under every one of them runs a record of how it got there — taken from the common, traded, traded again, handed on as a gift.',
+    text: 'So a pile is never only a pile. Under every one runs a record of how it got there. Taken from the common, traded, traded again, handed on as a gift.',
     cite: 'The record',
     dur: 4.4,
   },
