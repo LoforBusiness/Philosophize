@@ -134,6 +134,7 @@ ok(/onPress\s*\?\s*LIP\.card\s*:\s*0|onPress\s*&&|!!onPress/.test(card),
 const CONVERTED = [
   'app/(app)/settings.tsx',
   'app/(app)/profile/index.tsx',
+  'app/(app)/philosophers/index.tsx',
   // each adoption task appends its screen here
 ];
 const SIZES = new Set(Object.values(D.TYPE).map((t) => t.fontSize));
