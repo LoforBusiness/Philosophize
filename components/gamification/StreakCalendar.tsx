@@ -106,22 +106,36 @@ export default function StreakCalendar({ activeDays, restDays, today, since, siz
         ))}
       </View>
 
-      <View style={styles.grid}>
-        {month.cells.map((c, i) => (
-          <Cell key={i} cell={c} size={size} prev={month.cells[i - 1]} next={month.cells[i + 1]} index={i} />
-        ))}
-      </View>
+      {/* SIX EXPLICIT ROWS OF SEVEN, not one wrapping container.
+          `flexWrap` with a fixed cell width lets the CONTAINER decide how many
+          cells fit — at 34dp in a 298dp column that is eight, and the calendar
+          renders a week with eight days in it. It looked fine on the phone this
+          was written against and would have been wrong on a wider one. A week
+          has seven days; the layout should not be able to disagree. */}
+      {[0, 1, 2, 3, 4, 5].map((r) => (
+        <View key={r} style={styles.row}>
+          {month.cells.slice(r * 7, r * 7 + 7).map((c, i) => (
+            <Cell
+              key={i}
+              cell={c}
+              size={size}
+              prev={i > 0 ? month.cells[r * 7 + i - 1] : undefined}
+              next={i < 6 ? month.cells[r * 7 + i + 1] : undefined}
+              index={r * 7 + i}
+              col={i}
+            />
+          ))}
+        </View>
+      ))}
     </View>
   );
 }
 
 function Cell({
-  cell, size, prev, next, index,
+  cell, size, prev, next, index, col,
 }: {
-  cell: CalendarDay; size: number; prev?: CalendarDay; next?: CalendarDay; index: number;
+  cell: CalendarDay; size: number; prev?: CalendarDay; next?: CalendarDay; index: number; col: number;
 }) {
-  const lit = cell.state === 'done' || cell.state === 'rest';
-  const col = index % 7;
   // The bar only joins cells on the SAME ROW. Joining across a row break would
   // draw a band through the empty gutter at the edge of the grid.
   const joinLeft = cell.inRun && col > 0 && !!prev?.inRun;
@@ -196,7 +210,7 @@ const styles = StyleSheet.create({
   labels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14, marginBottom: 4 },
   label: { fontFamily: 'Inter_500Medium', fontSize: 10, color: INK_SOFT, textAlign: 'center', letterSpacing: 0.5 },
 
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  row: { flexDirection: 'row', justifyContent: 'space-between' },
   cellWrap: { alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
 
   // The band that turns a row of dots into one unbroken run.
