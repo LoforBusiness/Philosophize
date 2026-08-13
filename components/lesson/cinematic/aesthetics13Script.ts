@@ -23,7 +23,7 @@ export const BEATS: Aes13Beat[] = [
   {
     g: 5, art: 1, chain: 0,
     dur: 4.0,
-    text: 'Two canvases. One is a Vermeer and one was painted last year by a man called van Meegeren, and no expert in Europe could separate them.',
+    text: 'Two canvases. One is a Vermeer. The other was painted last year by a man called van Meegeren, and no expert in Europe could separate them.',
   },
   {
     g: 4, art: 1, chain: 0,
@@ -73,7 +73,7 @@ export const BEATS: Aes13Beat[] = [
         { text: 'Value lives in the form', correct: true },
         { text: 'Because someone toiled harder', correct: false },
       ],
-      explain: 'C tempts you into the genetic fallacy — judging a work by where it came from and how hard someone toiled. The formalist refuses that move in both directions: if the visible form is identical, so is the value, and provenance is only history.',
+      explain: 'The other card tempts you into the genetic fallacy — judging a work by where it came from and how hard someone toiled. The formalist refuses that move in both directions: if the visible form is identical, so is the value, and provenance is only history.',
       xp: 5,
     },
   },

@@ -61,7 +61,7 @@ export const BEATS: Pol4Beat[] = [
     // Both cards sit neutral here — lighting one would hand the reader the answer.
     p: 21, walls: 0, harm: 0, panel: 0,
     interact: {
-      prompt: 'Which idea of liberty is about removing obstacles and interference?',
+      prompt: 'Tap the kind of freedom that is only about nobody standing in your way.',
       cards: [
         { text: 'Negative liberty', correct: true },
         { text: 'Positive liberty', correct: false },

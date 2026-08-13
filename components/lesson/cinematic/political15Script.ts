@@ -61,7 +61,7 @@ export const BEATS: Pol15Beat[] = [
         { text: 'No, it fails every condition', correct: true },
         { text: 'Yes, it protests injustice', correct: false },
       ],
-      explain: 'The trap is C, which is how the phrase is usually used. King and Rawls set a much narrower bar: public, nonviolent, penalty-accepting. Strip those and what is left is ordinary crime with a motive.',
+      explain: 'The trap is the other card, which is how the phrase is usually used. King and Rawls set a much narrower bar: public, nonviolent, penalty-accepting. Strip those and what is left is ordinary crime with a motive.',
       xp: 5,
     },
     dur: 1.0,

@@ -31,7 +31,7 @@ export const BEATS: Epis32Beat[] = [
   {
     g: 3, maps: 3,
     dur: 4.8,
-    text: 'The second gives you the shape and its bays. The third gives you every rock — and is already the sort of map you would still be reading when the tide came in.',
+    text: 'The second gives you the shape and its bays. The third gives you every rock. It is also the sort of map you would still be reading when the tide came in.',
     cite: 'More and more',
   },
   {
@@ -70,7 +70,7 @@ export const BEATS: Epis32Beat[] = [
         { text: 'A deliberate simplification', correct: true },
         { text: 'A map with too little detail', correct: false },
       ],
-      explain: 'B is the trap, and the fourth map refutes it: add detail without limit and you get the coastline back at coastline size. C over-corrects — a model can still be plainly wrong. Fit to purpose is the standard.',
+      explain: 'The other card calls a model a map with too little detail, and the fourth map refutes that. Add detail without limit and you get the coastline back at coastline size. Leaving things out is the job, not the shortfall.',
       xp: 5,
     },
   },

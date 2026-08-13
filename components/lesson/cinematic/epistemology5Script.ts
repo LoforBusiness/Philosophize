@@ -23,30 +23,32 @@ export interface Epi5Beat extends BaseBeat {
 export const BEATS: Epi5Beat[] = [
   {
     p: 25, star: 0.4, power: 0, rungs: 2,
-    text: '"All men by nature desire to know." The first line of Aristotle’s Metaphysics — 2,400 years old, still humming.',
+    text: '"All men by nature desire to know." Aristotle opens his largest book with that line, and it is a claim about you. Nobody taught you to want to know things.',
     dur: 3.6,
   },
   {
     p: 24, star: 0.8, rungs: 5,
-    text: 'The highest knowledge, he says, is not the useful kind — it is wisdom, sought for its own sake. He calls it the only "free" science, serving nothing but understanding itself.',
+    text: 'The best kind of knowing, he says, is not the useful kind. It is the kind you want for no reason beyond wanting it. He calls that the only free knowledge, because it is in service of nothing.',
     cite: 'Aristotle, Metaphysics I',
     dur: 5.0,
   },
   {
     p: 19, star: 1, rungs: 5,
-    text: 'His proof? The delight we take in our senses, above all sight. We love seeing "even apart from its usefulness." That bare joy in grasping the world is where wisdom begins.',
+    text: 'His evidence is small and hard to argue with. You like looking at things. Not in order to get anything out of it — you just do, and that plain pleasure is where the whole ladder starts.',
     cite: 'The joy of sight',
     dur: 4.8,
   },
   {
     p: 4, star: 1, rungs: 5,
-    text: 'Both Plato and Aristotle root philosophy in thaumazein — wonder. "It is owing to their wonder that men begin to philosophize." But wonder is also being puzzled, thrown off balance.',
+    // The cite plate carries `thaumazein`; the narration says what it means. A term
+    // the reader can SEE spelled out does not also need spelling out in the prose (J7).
+    text: 'Both Plato and Aristotle say philosophy begins in wonder. Not the pleasant kind. Their word is closer to being knocked off balance by something you cannot account for.',
     cite: 'Thaumazein — wonder',
     dur: 4.8,
   },
   {
     p: 37, star: 1, power: 1, rungs: 5,
-    text: 'Centuries later Francis Bacon shifts the goal: knowledge should give command over nature. Where Aristotle prized it for contemplation, Bacon seized it as an instrument.',
+    text: 'Centuries later Francis Bacon points the whole ladder somewhere else. Knowledge is for getting things done, and for making nature do what you want. Aristotle wanted to understand it. Bacon wanted to use it.',
     cite: 'Knowledge as power',
     dur: 4.8,
   },
@@ -65,12 +67,12 @@ export const BEATS: Epi5Beat[] = [
   {
     p: 25, star: 1, rungs: 5,
     interact: {
-      prompt: 'According to Aristotle, why do human beings desire knowledge?',
+      prompt: 'So where does curiosity come from? Were you taught to want to know, or did you arrive wanting it?',
       cards: [
         { text: 'It is woven into us', correct: true },
         { text: 'It is taught to us', correct: false },
       ],
-      explain: 'Aristotle grounds the desire to know in human nature itself — the highest wisdom is wanted for its own sake.',
+      explain: 'Aristotle puts it in the nature, not the upbringing. Nobody has to be trained to want to know what is behind a closed door.',
       xp: 5,
     },
     dur: 1.0,
@@ -78,9 +80,11 @@ export const BEATS: Epi5Beat[] = [
   {
     p: 13, star: 1, power: 1, rungs: 5,
     interact: {
-      prompt: 'Who said "knowledge itself is power," tying knowing to command over nature? Tap the name.',
+      // Was "Who said ... ? Tap the name" — a memory test of the quote card two beats
+      // back. Asking which of them HELD the position is the same tap and a real question (J8).
+      prompt: 'One of these four wanted knowledge in order to make nature obey. Tap them.',
       explain:
-        'Bacon wrote "knowledge itself is power" (1597). Aristotle prized knowledge for its own sake, not for command over nature.',
+        'Bacon. He is the one who turned knowing into a tool. Aristotle is the trap, and he wanted the opposite — knowledge worth having even if it never did a thing for you.',
       xp: 5,
     },
     dur: 1.0,

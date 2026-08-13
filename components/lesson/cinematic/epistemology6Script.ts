@@ -31,7 +31,7 @@ export const BEATS: Epi6Beat[] = [
   },
   {
     p: 0, bal: 1, route: 3,
-    text: 'Pyrrho of Elis met each claim with its opposite, found them equally strong, and refused to decide — epoche, suspension. The result was not despair but ataraxia: peace of mind.',
+    text: 'Pyrrho met each claim with its opposite, found them equally strong, and simply refused to decide. His word for that is epoche. What he got out of it was not despair but calm — ataraxia.',
     cite: 'Pyrrho suspends judgment',
     dur: 5.0,
   },
@@ -50,19 +50,19 @@ export const BEATS: Epi6Beat[] = [
   {
     p: 22, bal: 1, route: 3,
     interact: {
-      prompt: 'What did the Pyrrhonist skeptics say suspending judgment leads to?',
+      prompt: 'Refusing to decide anything sounds miserable. Tap what Pyrrho says it actually gets you.',
       cards: [
         { text: 'Peace of mind', correct: true },
         { text: 'Certainty at last', correct: false },
       ],
-      explain: 'For Pyrrho, suspending judgment quieted the mind. Tranquility — not certainty or denial — was the skeptic’s real prize.',
+      explain: 'Calm. He is not claiming to have proved anything, and he is not denying anything either. Putting the question down is the thing that quiets the mind.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 12, bal: 0.3, crack: 1, route: 3,
-    text: 'But total doubt eats itself. If you claim "nothing can be known," is THAT known? The boast seems to refute itself. So most skeptics doubt softly — questioning confidence, not the very possibility of inquiry.',
+    text: 'But total doubt eats itself. If nothing can be known, is THAT known? So most sceptics doubt softly. They go after your confidence, not after the possibility of ever finding anything out.',
     cite: 'Doubt that eats itself',
     dur: 5.0,
   },

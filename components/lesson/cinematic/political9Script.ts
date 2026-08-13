@@ -71,7 +71,7 @@ export const BEATS: P9Beat[] = [
         { text: 'The majority oppressing a minority', correct: true },
         { text: 'One ruler oppressing everyone', correct: false },
       ],
-      explain: 'The danger is internal, which is what makes it hard to see. The trap is A: a tyrant is the picture the word brings up, and this tyrant is the electorate. No coup — just a majority closing in on the few.',
+      explain: 'The danger is internal, which is what makes it hard to see. The trap is the other card: a tyrant is the picture the word brings up, and this tyrant is the electorate. No coup — just a majority closing in on the few.',
     },
     dur: 4.6,
   },

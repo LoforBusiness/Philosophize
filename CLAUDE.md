@@ -576,6 +576,27 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
   69 over-long sentences did exactly that, and the fix is a full stop, not a rewrite.
   A long WORD is fine; "consequentialism" is the lesson. A long sentence is where
   the reader loses the thread.
+
+  **Length was only half of it, and the smaller half.** Read all 102 lessons and there
+  are two voices in here: one that stages an idea and walks you through it, and one
+  that reads like an encyclopaedia entry. The second tracks **where the reader meets
+  it** — lessons 1–9 carried 3.5× the crammed-in names and **20 of 110** trivia-recall
+  questions, against 4 of 96 later. That is the wrong way round: the worst-written
+  lessons were the first ones every reader sees. It is heritage rather than
+  carelessness — the low numbers were card decks that got converted and kept a deck's
+  voice. J6–J9 are that difference made countable; the recall questions are down to 5.
+
+  **Read the stage before naming anything.** `metaphysics5` draws
+  **EVERY FACT NEEDS A REASON** on screen while the narration said "his Principle of
+  Sufficient Reason" over the top of it. `ethics2`'s table reads **OUTCOMES · DUTY ·
+  CHARACTER** while its narration recited "Consequentialism · Deontology · Virtue
+  ethics". Half the time the scene has already picked the better word.
+
+  **J9 is a zero because 27 explanations failed it silently.** "The trap is B",
+  "C over-corrects", "Not B or D" — written when a question had four lettered options,
+  and left behind when the two-card answer replaced them. The reader sees two
+  unlabelled cards, so every one of those letters named nothing. Nothing failed and
+  nothing could: a stale letter still typechecks and still renders. Say *which card*.
 - **Productive struggle.** Every lesson earns its payoff with a real question or dilemma. A good "trick" answer is tempting for a *nameable* reason — so the explanation should **name the bias/fallacy and say why the tempting choice fails.**
 - **Ground it in a real thinker.** Pair the concept with a primary-source `quote` card. Authenticity ("here is the sentence Descartes actually wrote") is what makes it feel valuable, not gamified trivia.
 - **Give it an arc.** Hook (provocation) → build → struggle → a "what you now know" payoff on the summary.

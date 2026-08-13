@@ -1558,10 +1558,70 @@ It is the longest thing anyone reads (median 34) and it lands at the moment atte
 is lowest: the reader has already committed to a choice and wants to know if they were
 right. Say that, say why the tempting answer tempted, stop.
 
-**J4 — no beat is more than 30% long words.**
-Deliberately loose. The subject *is* long words — "consequentialism" is the lesson, not
-a failure — so this catches only a beat that is wall-to-wall abstraction with nothing
-concrete to hold onto.
+**J4 — no beat is more than 35% long words.**
+Deliberately loose, and loosened once already. At 30 it caught exactly one beat —
+*"Philosophy means something completely different by the word. An argument is a machine
+with parts."* — which is the plainest sentence in that lesson and carries the concrete
+image the rule exists to protect. A checker that would have had **that** reworded is
+measuring the wrong thing, so the number moved rather than the prose. The subject *is*
+long words: "consequentialism" is the lesson, not a failure. This now catches only a
+beat that is wall-to-wall abstraction with nothing concrete to hold onto.
+
+### The second measurement: there are two voices, and the worse one is at the front door
+
+Length was never the whole complaint. Read all 102 lessons end to end and the app plainly
+has **two voices** — one that stages an idea and walks you through it, and one that reads
+like an encyclopaedia entry: names stacked three to a sentence, Greek dropped in
+untranslated, questions that ask what you remember rather than what you can work out.
+
+It tracks **where the reader meets it**, and it is backwards:
+
+| | names crammed mid-sentence | trivia-recall questions |
+|---|---|---|
+| lessons 1–9 | 0.56 / beat | **20 of 110** |
+| lessons 10+ | 0.16 / beat | 4 of 96 |
+
+Three and a half times the name density and four and a half times the trivia, in the
+lessons **every reader sees first**. The cause is heritage rather than carelessness: the
+low numbers were written as card decks and later converted, so they kept a deck's voice,
+while the high numbers were authored for a stage from the start. J6–J9 are that
+difference made countable.
+
+**J6 — at most two names crammed mid-sentence in one beat.**
+A name that *starts* its own sentence is free: "Nozick reads only that strip" gives the
+man a clause and a verb, and reads well. What costs is three surnames riding along inside
+other clauses — *"Plato and Aristotle: art is mimesis, skilled imitation. Later Tolstoy
+and Collingwood: art is the expression of feeling"* put four names into 22 words and
+taught none of them. A **budget, not a zero**, and honestly so: the count cannot tell a
+person from a place, and three of the four beats over the line are "in Greece, in India,
+in China" and its kind.
+
+**J7 — a term arrives alone, and the sentence around it says what it means.**
+Not countable; judgement, like J5. One new word per beat, after the thing it names has
+been shown. *"India's word is dharma: doing what your place in life actually asks of you"*
+works because the gloss is attached. Four Greek terms in one explanation does not.
+
+**And check what the stage already says.** `metaphysics5` draws the label
+**EVERY FACT NEEDS A REASON** on screen, and the narration was saying "his Principle of
+Sufficient Reason" over the top of it — a term added, no meaning added, and the scene's
+own plain-language choice undone. `ethics2`'s table reads **OUTCOMES · DUTY · CHARACTER**
+while its narration recited "Consequentialism · Deontology · Virtue ethics". Read the
+scene before naming anything; half the time it has already picked the better word.
+
+**J8 — ask what the reader can work out, not what they can remember.**
+*"Who said 'knowledge itself is power'?"* is a memory test of the slide two beats back.
+Ask which thinker **held the position** and it is the same tap and a real question. The
+tell is the subject: a recall prompt's subject is a person or a work ("According to X",
+"For X, what", "What did X call"). A *What/Which* opener proves nothing on its own —
+*"Which single fact proves 'All cats are black' false?"* opens the same way and is
+genuine reasoning. A budget, falling.
+
+**J9 — an explanation points at something the reader can see.**
+A zero, and it is here because **27 explanations failed it silently**. They said "the
+trap is B", "C over-corrects", "Not B or D" — written when a question had four lettered
+options, and left behind when the two-card answer replaced them. The reader now sees two
+unlabelled cards, so every one of those letters named nothing at all. Nothing failed and
+nothing could: a stale letter still typechecks and still renders. Say *which card*.
 
 **J5 — write it as you would say it to someone who does not know the subject.**
 The one rule here that cannot be counted, and the one the others serve. Name a concrete

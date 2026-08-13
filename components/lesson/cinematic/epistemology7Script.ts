@@ -20,13 +20,13 @@ export const BEATS: Epi7Beat[] = [
   },
   {
     p: 1, days: 3,
-    text: 'Induction reasons from cases you’ve seen to cases you haven’t. Every swan so far was white, so all swans are white. Science runs on this leap — from past patterns to future predictions.',
+    text: 'Induction goes from the cases you have seen to the ones you have not. Every swan so far was white, so all swans are white. Science runs on that leap constantly.',
     cite: 'Induction',
     dur: 5.0,
   },
   {
     p: 4, days: 4, circle: 1,
-    text: 'Why expect the future to match the past? Only because it always has. But that uses the past to justify trusting the past — circular. Induction cannot be proven by logic.',
+    text: 'Why expect the future to match the past? Only because it always has. But that uses the past to vouch for the past. The circle closes, and logic never gets a grip on it.',
     cite: 'Hume’s problem',
     dur: 5.0,
   },
@@ -51,7 +51,7 @@ export const BEATS: Epi7Beat[] = [
   {
     p: 4, days: 4, twist: 1,
     interact: {
-      prompt: 'What is Hume’s problem of induction?',
+      prompt: 'So what exactly is the problem Hume has found here?',
       cards: [
         { text: 'No proof the future matches', correct: true },
         { text: 'Nature has been proven uniform', correct: false },

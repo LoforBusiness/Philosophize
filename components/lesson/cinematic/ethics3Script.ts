@@ -52,7 +52,7 @@ export const BEATS: Ethics3Beat[] = [
   },
   {
     d: 10, tx: 196, pull: 0, lens: 2,
-    text: 'Immanuel Kant would not. He refused to trade lives like sums — the one has a dignity no arithmetic outweighs. Duty binds, whatever follows.',
+    text: 'Immanuel Kant would not. He will not trade lives like sums, because the one person has a worth no arithmetic can outweigh. Duty binds whatever follows from it.',
     cite: 'Deontology — the duty',
     dur: 4.8,
   },
@@ -77,7 +77,7 @@ export const BEATS: Ethics3Beat[] = [
   {
     d: 21, tx: 196, lens: 0,
     interact: {
-      prompt: 'Which theory weighs an action purely by the consequences it brings?',
+      prompt: 'Tap the theory that judges an act by nothing but what happens next.',
       cards: [
         { text: 'Consequentialism', correct: true },
         { text: 'Deontology', correct: false },

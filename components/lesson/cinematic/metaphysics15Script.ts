@@ -64,7 +64,7 @@ export const BEATS: Meta15Beat[] = [
         { text: 'They project a felt expectation', correct: true },
         { text: 'Nothing really causes anything', correct: false },
       ],
-      explain: 'The trap is C, which overshoots: Hume keeps the events, he only denies the visible necessity. Repeated pairing builds a habit of expectation, and we read that inner push back onto the world.',
+      explain: 'The trap is the other card, which overshoots: Hume keeps the events, he only denies the visible necessity. Repeated pairing builds a habit of expectation, and we read that inner push back onto the world.',
       xp: 5,
     },
     dur: 1.0,

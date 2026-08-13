@@ -55,7 +55,7 @@ export const BEATS: Aesthetics7Beat[] = [
   },
   {
     p: 12, x: 90, q: 7, art: 1, capt: 1,
-    text: 'If beauty only happens in minds, then your friend’s mind is as full of it as anyone’s, and the scribble ties with the masterwork. Something in you refuses that. Hume refused it too.',
+    text: 'If beauty only happens in minds, your friend’s mind is as full of it as anyone’s. So the scribble ties with the masterwork. Something in you refuses that. Hume refused it too.',
     cite: 'So the scribble wins?',
     dur: 4.8,
   },

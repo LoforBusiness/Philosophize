@@ -34,7 +34,7 @@ export const BEATS: MetaBeat[] = [
   {
     hpose: 2,
     rule: true,
-    text: 'In 1714, Leibniz argued nothing is true without a sufficient reason. Apply that to everything at once: why this crowded universe instead of an empty one? Nothing, he said, would have been simpler.',
+    text: 'Leibniz said nothing is ever just true for no reason. Point that at everything at once. Why this crowded universe rather than an empty one? Nothing would have been simpler, he said, and easier.',
     cite: 'Leibniz, Principles of Nature and Grace §7',
     dur: 4.8,
   },
@@ -54,14 +54,14 @@ export const BEATS: MetaBeat[] = [
   {
     hpose: 1,
     erase: 0.86,
-    text: 'Try to reach it. Parmenides did: strip away objects, space, time, physics — and a dark void is still something. "What is not" can be neither thought nor spoken. Pure nothing slips your grip.',
+    text: 'Try to reach it. Parmenides did. Strip away objects, space, time, physics — and a dark empty void is still something. You cannot even think about what is not, because thinking about it makes it a thing.',
     cite: 'Parmenides, On Nature, early 5th c. BCE',
     dur: 5.0,
   },
   {
     hpose: 2,
     chain: true,
-    text: 'Science never even tries. It starts mid-game, explaining one state of the world by an earlier one — and it presumes there are laws and states at all.',
+    text: 'Science never even tries. It starts mid-game, explaining one state of the world by an earlier one. It has to assume there are states and laws to begin with.',
     dur: 4.4,
   },
   {

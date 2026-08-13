@@ -72,7 +72,7 @@ export const BEATS: Pol13Beat[] = [
         { text: 'It sets back another\'s interests', correct: true },
         { text: 'It offends other people', correct: false },
       ],
-      explain: 'The trap is B, because it feels democratic. But offence scales with how many people object, and harm does not — which is exactly why Mill will not let a headcount do the work of an injury.',
+      explain: 'The trap is the other card, because it feels democratic. But offence scales with how many people object, and harm does not — which is exactly why Mill will not let a headcount do the work of an injury.',
       xp: 5,
     },
     dur: 1.0,

@@ -26,13 +26,16 @@ export const BEATS: Ethics2Beat[] = [
   },
   {
     p: 7, x: 262, g: -1, gx: 48, named: 1,
-    text: 'Ethics hands you three lenses, not three religions. Consequentialism weighs results. Deontology asks about duty. Virtue ethics asks who the act makes you. Most of us quietly blend all three.',
+    // Nothing on this stage is labelled "Deontology", and the next three beats show
+    // each lens by working the wallet through it. Naming all three first was a
+    // vocabulary tax paid before any of them meant anything (J6).
+    text: 'Ethics hands you three lenses, not three religions. One asks what happens next. One asks what your duty is. One asks who the act turns you into. Most of us quietly use all three.',
     cite: 'Three lenses',
     dur: 5.0,
   },
   {
     p: 4, x: 262, g: 21, gx: 108, named: 1, lens: 1,
-    text: 'Mill points the first lens at the wallet: did returning it make life go better? Acts are right, he says, as they tend to promote happiness — everyone weighed equally.',
+    text: 'Mill points the first lens at the wallet. Did handing it in make anyone’s life go better? For him that is the whole question, and everybody’s happiness counts the same.',
     cite: 'J.S. Mill, Utilitarianism, 1863',
     dur: 4.8,
   },
@@ -50,25 +53,26 @@ export const BEATS: Ethics2Beat[] = [
   },
   {
     p: 14, x: 262, g: 6, gx: 108, named: 1, lens: 2,
-    text: 'Kant ignores the happy ending. Act only on a rule you could will everyone to follow — and "keep wallets you find" self-destructs, because trust in returning things would collapse.',
+    text: 'Kant ignores the happy ending. Only act on a rule you could want everyone to follow. Try that with "keep wallets you find" and it eats itself, because nobody would hand anything in.',
     cite: 'Kant, Groundwork, 1785',
     dur: 4.8,
   },
   {
     p: 13, x: 262, g: 22, gx: 108, named: 1, lens: 3,
-    text: 'Aristotle asks a third question — not "what do I do?" but "who am I becoming?" Each honest act, done as habit, makes the next one easier. That is the road to a flourishing life.',
+    text: 'Aristotle asks a third question. Not "what do I do?" but "who am I becoming?" Every honest act makes the next one easier, and that is what he means by a good life.',
     cite: 'Aristotle, Nicomachean Ethics',
     dur: 4.8,
   },
   {
     p: 21, x: 262, g: -1, named: 1, lens: 3,
     interact: {
-      prompt: 'Returning the found wallet, which question does a consequentialist ask first?',
+      // The table on stage calls this lens OUTCOMES, not "consequentialist".
+      prompt: 'Tap the question the OUTCOMES lens asks about that wallet.',
       cards: [
         { text: 'Which brings most happiness', correct: true },
         { text: 'Could everyone follow it', correct: false },
       ],
-      explain: 'Consequentialism weighs results — whose happiness rises or falls. The universalizing question is Kant’s, the honest-person question is Aristotle’s, and law is not the same as morality.',
+      explain: 'It weighs results, and nothing else — whose life got better, whose got worse. The other card is Kant’s question, and it does not care how the story ends.',
       xp: 5,
     },
     dur: 1.0,

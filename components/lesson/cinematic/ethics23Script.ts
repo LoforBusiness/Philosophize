@@ -72,7 +72,7 @@ export const BEATS: Ethics23Beat[] = [
         { text: 'No, the child still dies', correct: true },
         { text: 'Yes, responsibility is shared', correct: false },
       ],
-      explain: 'The trap is B, the diffusion of responsibility. At the pond you would not stroll past because a crowd was also watching. Others being able to act has never cancelled your being able to.',
+      explain: 'The trap is the other card, and it has a name: diffusion of responsibility. At the pond you would not stroll past because a crowd was also watching. Others being able to act has never cancelled your being able to.',
       xp: 5,
     },
     dur: 1.0,

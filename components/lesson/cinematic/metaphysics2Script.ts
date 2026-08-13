@@ -25,13 +25,13 @@ export const BEATS: Meta2Beat[] = [
   },
   {
     e: 1, x: 148, gone: 0.35, pr: 1,
-    text: 'Leibniz held that nothing is so without a sufficient reason. Turn that on existence itself: why something rather than nothing? Nothing, he noted, would be simpler and easier.',
+    text: 'Leibniz held that nothing is ever the case without a reason for it. Turn that on existence itself. Why something rather than nothing? Nothing would have been simpler, he noted, and easier.',
     cite: 'Leibniz, sufficient reason',
     dur: 4.6,
   },
   {
     e: 13, x: 196, gone: 0.4, pr: 1, mx: 2,
-    text: 'Parmenides had struck first, and here is his fork. To speak of "what is not," you must think it — yet you can neither know nor utter what is not. Non-being gives reason nothing to grip.',
+    text: 'Parmenides had struck first, and here is his fork. To talk about what is not, you have to think it. But you cannot think it, because there is nothing there for the thought to be about.',
     cite: 'Parmenides, On Nature',
     dur: 4.8,
   },

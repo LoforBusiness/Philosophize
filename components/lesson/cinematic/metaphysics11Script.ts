@@ -62,7 +62,7 @@ export const BEATS: Metaphysics11Beat[] = [
   {
     p: 8, c: 31, tok: 1,
     interact: {
-      prompt: 'On Locke’s account, what makes someone the same person over time?',
+      prompt: 'The memories moved and the bodies did not. Tap what Locke says carries the person.',
       cards: [
         { text: 'The consciousness reaching back', correct: true },
         { text: 'The same living body', correct: false },

@@ -33,37 +33,39 @@ export const BEATS: Aes3Beat[] = [
     // Both halves alive at once: a story arc beginning to climb while the modes
     // play — "song or story", drawn rather than asserted.
     p: 32, arc: 0.3, modes: 1,
-    text: 'No culture has ever lived without song or story. Not coincidence — a puzzle philosophers have chased for millennia.',
+    text: 'No culture has ever lived without song or story. Not one, anywhere. That is strange enough to want an explanation.',
     dur: 3.6,
   },
   {
     p: 22, arc: 0.5, mask: 1,
-    text: 'Tragedy hurts, yet we crave it. In the Poetics, Aristotle says it raises pity and fear, then works a katharsis of them — a release he never quite defines.',
+    text: 'Tragedy hurts, and we go anyway. Aristotle says it raises pity and fear in you, then works them back out of you. He called that katharsis, and he never quite says what it is.',
     cite: 'Catharsis',
     dur: 4.8,
   },
   {
     p: 15, arc: 1, mask: 1,
-    text: 'Athens watches Oedipus learn he killed his father — a reversal snapped tight by recognition. We even enjoy lifelike images of painful things, Aristotle says, because seeing them, we learn.',
+    text: 'Athens watches Oedipus work out that he killed his own father. Nobody looks away. Aristotle thinks we can bear to look at painful things drawn well, because looking at them teaches us something.',
     cite: 'Aristotle at the theatre',
     dur: 5.0,
   },
   {
     p: 4, arc: 1, mask: 1,
     interact: {
-      prompt: 'What did Aristotle call the emotional release felt after a tragic story?',
+      prompt: 'You leave a tragedy wrung out and somehow lighter. Tap Aristotle’s word for that.',
       cards: [
         { text: 'Catharsis', correct: true },
         { text: 'Mimesis', correct: false },
       ],
-      explain: 'Catharsis names the contested release of pity and fear. Mimesis is imitation, logos is reason, eudaimonia is flourishing.',
+      // Was a list of FOUR Greek terms, three of them glossing options that stopped
+      // existing when the A/B/C/D cards went. Only one is on screen now.
+      explain: 'Catharsis. It is the one word Aristotle never pins down, and people have argued about what he meant ever since. Mimesis, the other card, means imitation — a different idea altogether.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 33, modes: 1, will: 1,
-    text: 'A minor key floods you with sadness, no argument offered. Schopenhauer said music alone copies the will itself — our restless inner drive. Plato thought that same direct power a danger.',
+    text: 'A minor key floods you with sadness and never argues for it. Schopenhauer thought music reaches something underneath all the arguing — the restless wanting that drives you. Plato thought exactly that made it dangerous.',
     cite: 'Music slips past reason',
     dur: 5.0,
   },
@@ -82,12 +84,12 @@ export const BEATS: Aes3Beat[] = [
   {
     p: 3, modes: 1, cut: 1, will: 1,
     interact: {
-      prompt: 'In the Republic, why did Plato want to control music — and what did he actually do?',
+      prompt: 'Plato thought music was dangerous. Tap what he actually did about it.',
       cards: [
         { text: 'He regulated the modes', correct: true },
         { text: 'He banned all music', correct: false },
       ],
-      explain: 'The trap is "banned all music." Plato kept the steadfast modes and removed the soft ones — he regulated, not abolished. His worry was the soul, not cost.',
+      explain: 'He regulated rather than abolished. The steadfast modes stayed and the soft ones went, because he thought music shapes a character before you get a chance to argue with it.',
       xp: 5,
     },
     dur: 1.0,

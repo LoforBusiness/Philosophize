@@ -71,7 +71,7 @@ export const BEATS: Pol14Beat[] = [
         { text: 'Patterns interrupt voluntary transfers', correct: true },
         { text: 'Sport pays far too much', correct: false },
       ],
-      explain: 'Not B or D: the argument bites on ANY pattern, equal or not, and says nothing about desert. Rawls\'s reply is that the target was never one distribution — it is the basic structure, the rules of property and tax running over time.',
+      explain: 'Not the other card: the argument bites on ANY pattern, equal or not, and says nothing about what a sportsman deserves. Rawls\'s reply is that the target was never one distribution — it is the basic structure, the rules of property and tax running over time.',
       xp: 5,
     },
   },

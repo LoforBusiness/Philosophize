@@ -55,7 +55,7 @@ export const BEATS: Et10Beat[] = [
   },
   {
     p: 21, x: 268, wading: true, far: true,
-    text: 'There is another child. Same danger, same small cost to you, nine thousand kilometres further off. The argument that got you into this pond does not obviously stop at the bank — and that thought is where effective altruism came from.',
+    text: 'There is another child. Same danger, same small cost to you, nine thousand kilometres further off. The argument that got you into this pond does not obviously stop at the bank. That thought is where effective altruism came from.',
     cite: 'Famine, Affluence, and Morality',
     dur: 5.2,
   },

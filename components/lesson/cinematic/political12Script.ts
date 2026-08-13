@@ -64,7 +64,7 @@ export const BEATS: Pol12Beat[] = [
         { text: 'Positive liberty', correct: true },
         { text: 'Negative liberty', correct: false },
       ],
-      explain: 'The trap is D, which is the comfortable answer. Berlin\'s point is sharper and nastier: the claim is coherent. Once someone else defines your "real" self, they can shrink your choices in freedom\'s own name.',
+      explain: 'The trap is the other card, which is the comfortable answer. Berlin\'s point is sharper and nastier: the claim is coherent. Once someone else defines your "real" self, they can shrink your choices in freedom\'s own name.',
       xp: 5,
     },
     dur: 1.0,

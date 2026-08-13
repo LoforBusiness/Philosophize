@@ -74,7 +74,7 @@ export const BEATS: Logic32Beat[] = [
         { text: 'Challenge the hidden claim', correct: true },
         { text: 'Answer no, it denies most', correct: false },
       ],
-      explain: 'The trap is B, and it feels like the safe answer. It is the worse one — "no" to "have you stopped" means you have not stopped. Splitting the question is the only reply that concedes nothing.',
+      explain: 'The trap is the other card, and it feels like the safe answer. It is the worse one — "no" to "have you stopped" means you have not stopped. Splitting the question is the only reply that concedes nothing.',
       xp: 5,
     },
   },

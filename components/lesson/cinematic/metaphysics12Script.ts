@@ -72,7 +72,7 @@ export const BEATS: Meta12Beat[] = [
         { text: 'No, the stream is real', correct: true },
         { text: 'Yes, no owner means nothing', correct: false },
       ],
-      explain: 'B is the false dilemma — reading "no permanent soul" as "nothing at all". Both deny an unchanging owner and both keep the stream: Hume\'s bundle of perceptions, the Buddhist flow of experience. Denying a soul is not denying the experiences.',
+      explain: 'The other card is the false dilemma — reading "no permanent soul" as "nothing at all". Both deny an unchanging owner and both keep the stream: Hume\'s bundle of perceptions, the Buddhist flow of experience. Denying a soul is not denying the experiences.',
       xp: 5,
     },
   },

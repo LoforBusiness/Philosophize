@@ -23,13 +23,13 @@ export const BEATS: Aes5Beat[] = [
   },
   {
     p: 11, bird: 0, ego: 1, self: 0.88,
-    text: 'Murdoch borrowed from Simone Weil: attention is "a just and loving gaze" at one reality. Normally the "fat, relentless ego" filters everything. Real attention quiets it, so reality comes forward.',
+    text: 'Murdoch took the idea from Simone Weil. Attention is a just and loving look at one real thing. In the way of it sits what she calls the fat, relentless ego — and attention is what quiets it.',
     cite: 'Attention as a skill',
     dur: 5.2,
   },
   {
     p: 25, bird: 1, ego: 0, self: 0.06,
-    text: 'At a window, brooding over a bruise to her pride, Murdoch sees a hovering kestrel. In a moment the brooding self vanishes — nothing now but kestrel. She called it "unselfing."',
+    text: 'She is at a window, brooding over a bruise to her pride, when she sees a hovering kestrel. In a moment the brooding is gone. Nothing left but kestrel. She called that unselfing.',
     cite: 'Murdoch and the kestrel',
     dur: 5.0,
   },
@@ -48,12 +48,12 @@ export const BEATS: Aes5Beat[] = [
   {
     p: 19, bird: 1, ego: 0, self: 0.06,
     interact: {
-      prompt: 'What did Iris Murdoch mean by "unselfing"?',
+      prompt: 'Tap what actually happened to her at that window.',
       cards: [
         { text: 'Something absorbs you completely', correct: true },
         { text: 'A technique you perform', correct: false },
       ],
-      explain: 'Unselfing is not a technique you perform but something that happens to you: a kestrel or artwork grips you so wholly the self-preoccupied ego vanishes.',
+      explain: 'Unselfing is not something you do. It is something that happens to you, when a kestrel or a painting takes hold so completely that there is no room left for brooding.',
       xp: 5,
     },
     dur: 1.0,

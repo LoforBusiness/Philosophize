@@ -74,7 +74,7 @@ export const BEATS: Aes31Beat[] = [
         { text: 'Not necessarily, two values', correct: true },
         { text: 'Yes, difficulty is the point', correct: false },
       ],
-      explain: 'C is strict formalism, and the spliced recording embarrasses it: if the making truly did not matter, finding out would change nothing. B goes too far the other way — difficulty with nothing to show for it is only effort.',
+      explain: 'Strict formalism says the making never mattered, and the spliced recording embarrasses it. If that were true, finding out would change nothing. But the other card goes too far the other way. Difficulty with nothing to show for it is only effort.',
       xp: 5,
     },
   },

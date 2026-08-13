@@ -50,7 +50,7 @@ export const BEATS: Meta24Beat[] = [
   },
   {
     p: 29, x: 168, grains: 1, lamp: 1,
-    text: 'One grain, and the verdict is still HEAP. Every single step was fine and the destination is nonsense — which means something you agreed to is wrong, and it is not obvious which.',
+    text: 'One grain, and the verdict is still HEAP. Every single step was fine and the destination is nonsense. So something you agreed to is wrong, and it is not obvious which.',
     cite: 'One grain left',
     dur: 5.2,
   },

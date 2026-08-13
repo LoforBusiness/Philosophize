@@ -31,7 +31,7 @@ export const BEATS: Ethics11Beat[] = [
   },
   {
     p: 3, x: 60, tok: 1,
-    text: 'Jeremy Bentham built that table. A bar game, a helping of dessert, a symphony — three pleasures, drawn the same size, because to him they are the same stuff.',
+    text: 'Jeremy Bentham built that table. A bar game, a helping of dessert, a symphony. Three pleasures, drawn the same size, because to him they are the same stuff.',
     cite: 'The counting table',
     dur: 5.0,
   },
@@ -43,7 +43,7 @@ export const BEATS: Ethics11Beat[] = [
   },
   {
     p: 6, x: 126, tok: 1, led: 1, shelf: 1,
-    text: 'Then his own student refused the arithmetic. Watch a second shelf go up above the table: John Stuart Mill would not leave a bar game and a symphony on one level.',
+    text: 'Then his own student refused the arithmetic. Watch a second shelf go up above the table. John Stuart Mill would not leave a bar game and a symphony on one level.',
     cite: 'Mill puts up a shelf',
     dur: 5.4,
   },

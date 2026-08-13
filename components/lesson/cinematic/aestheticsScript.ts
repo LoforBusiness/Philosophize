@@ -44,7 +44,7 @@ export const BEATS: AestheticsBeat[] = [
     hpose: 4,
     glow: true,
     critics: true,
-    text: 'Hume admitted beauty lives "merely in the mind." Yet we still rank a master above a hack and feel right. His fix: a standard set by true critics, refined over time.',
+    text: 'Hume admitted beauty lives only in the mind. And yet we still rank a master above a hack, and feel right about it. His fix was a standard set by critics who have seen enough to judge.',
     cite: 'Hume, Of the Standard of Taste, 1757',
     dur: 4.6,
   },
@@ -73,7 +73,7 @@ export const BEATS: AestheticsBeat[] = [
     critics: true,
     weigh: 'q1',
     interact: {
-      prompt: 'For Kant, what makes aesthetic pleasure differ from the pleasure of eating?',
+      prompt: 'Tap what makes a sunset’s pleasure different from a meal’s.',
       cards: [
         { text: 'It is disinterested', correct: true },
         { text: 'It is simply stronger', correct: false },
@@ -87,7 +87,7 @@ export const BEATS: AestheticsBeat[] = [
     hpose: 1,
     crowd: true,
     critics: true,
-    text: 'And you rarely stop at "I like this." You say "this is beautiful" — as if it were a fact about the thing. Kant: a feeling that quietly demands everyone agree.',
+    text: 'And you rarely stop at "I like this." You say "this is beautiful", as if it were a fact about the thing. Kant noticed that — a feeling that quietly demands everyone agree with it.',
     dur: 4.4,
   },
   {

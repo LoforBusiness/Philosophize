@@ -44,19 +44,21 @@ export const BEATS: Ethics5Beat[] = [
   },
   {
     x: 217, soc: 2, chart: 1,
-    text: 'In 1949 Karl Jaspers named it the Axial Age: roughly 800 to 200 BCE, when reflective ethics flared up in three places at once. One shared cause? Historians still argue. The pattern is suggestive, not proven.',
+    // The chart overhead already draws the window and its dates. Saying them again
+    // in the narration is the reader reading a number they can see (J6).
+    text: 'Karl Jaspers gave that window a name: the Axial Age. Three places, no contact between them, all starting to ask the same kind of question. Nobody has ever agreed on why.',
     cite: 'The Axial Age',
     dur: 5.4,
   },
   {
     x: 217, soc: 13, chart: 2,
-    text: 'Socrates wrote nothing; we meet him through Plato. He cross-examined Athenians — "What is virtue? Justice?" In 399 BCE the city tried him, and he drank hemlock. His question, what is the good life, never left.',
+    text: 'Socrates never wrote a word down. Everything we have, a student wrote later. He walked up to people in Athens and asked them what virtue was. The city put him on trial and killed him for it.',
     cite: 'Greece — Socrates',
     dur: 5.4,
   },
   {
     x: 265, soc: 5, chart: 3,
-    text: 'Half a world away, the same stirring. In India, ethics turned on dharma — duty and right conduct fit to your role. In China, Confucius grew virtue from ren, humaneness, cultivated in our bonds.',
+    text: 'The same thing is stirring elsewhere. India’s word is dharma: doing what your place in life actually asks of you. China’s is ren, which means something like humaneness, and Confucius says it only ever grows between people.',
     cite: 'India — China',
     dur: 5.2,
   },
@@ -75,8 +77,8 @@ export const BEATS: Ethics5Beat[] = [
   {
     x: 265, soc: 4, fork: 1,
     interact: {
-      prompt: 'For Confucius, where does virtue (ren) grow? Take the path.',
-      explain: 'For Confucius ren is shaped in real bonds — family, friends, ruler and citizen. Fittingly, his own disciples compiled the Analects after his death.',
+      prompt: 'Ren has to grow somewhere. Take the path Confucius would send you down.',
+      explain: 'Ren is shaped in real relationships — family, friends, ruler and citizen. Confucius has no interest in a virtue you could practise alone in a room.',
       xp: 5,
     },
     dur: 1.0,
@@ -85,7 +87,7 @@ export const BEATS: Ethics5Beat[] = [
     x: 265, soc: 4, balance: 1,
     interact: {
       prompt: 'The "Axial Age" — tip the scale. Is it a proven fact, or an interpretive thesis?',
-      explain: 'It sounds like a settled date or shared creed, but Jaspers coined it in 1949 as an interpretive thesis about parallel awakenings — one many historians still dispute.',
+      explain: 'It sounds like a fact with a date on it. It is a reading of history. Jaspers noticed three places changing at once and proposed that the timing meant something, and historians have argued about it ever since.',
       xp: 5,
     },
     dur: 1.0,

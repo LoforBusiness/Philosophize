@@ -24,7 +24,7 @@ export const BEATS: Epi2Beat[] = [
   },
   {
     d: 4, m: 7, doubt: 0.2,
-    text: 'First he pries certainty from truth. Feeling certain is a state of mind; truth is how the world stands. The two can split — so he wants beliefs that survive every possible reason to doubt.',
+    text: 'First he separates two things we run together. Feeling certain is something happening in you. Truth is how the world is. Those two can come apart, so he goes hunting for beliefs that survive every possible doubt.',
     cite: 'Certainty vs truth',
     dur: 4.8,
   },
@@ -56,7 +56,7 @@ export const BEATS: Epi2Beat[] = [
   {
     d: 9, m: 3, doubt: 0.85, glow: true,
     interact: {
-      prompt: 'What was Descartes really trying to do with his evil-demon thought experiment?',
+      prompt: 'Descartes never believed in the demon. Tap what he was using it for.',
       cards: [
         { text: 'Find what survives fiercest doubt', correct: true },
         { text: 'Prove the world unreal', correct: false },

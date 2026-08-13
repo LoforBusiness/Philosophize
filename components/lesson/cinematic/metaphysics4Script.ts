@@ -35,7 +35,7 @@ export const BEATS: Meta4Beat[] = [
   },
   {
     p: 35, tokens: 2, barred: 1,
-    text: 'At Elea he set out two ways: that it is, and that it is not. He rejects the second — what-is-not can be neither known nor spoken. So only what-is is real, and change is a trick of the senses.',
+    text: 'At Elea he set out two ways. That it is, and that it is not. He throws out the second, because what is not can be neither known nor said. So only what is counts as real, and change is a trick of the senses.',
     cite: 'Parmenides, On Nature',
     dur: 5.2,
   },
@@ -53,7 +53,7 @@ export const BEATS: Meta4Beat[] = [
   },
   {
     p: 15, tokens: 3, barred: 1, frozen: 1,
-    text: 'Follow it and the world freezes. Change would mean passing into or out of non-being — but that path is barred. So motion itself dissolves into illusion. Aristotle later loosened the knot.',
+    text: 'Follow it and the world freezes. To change, a thing would have to pass into or out of not-being, and that road is closed. So motion itself becomes an illusion. Aristotle later loosened the knot.',
     cite: 'Change becomes impossible',
     dur: 5.0,
   },

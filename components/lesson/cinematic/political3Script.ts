@@ -39,7 +39,7 @@ export interface Pol3Beat extends BaseBeat {
 export const BEATS: Pol3Beat[] = [
   {
     sub: 2, r: 28, scroll: 0, pair: 1, force: 1, flow: 0, seal: 0,
-    text: 'A gun makes you obey. What makes you owe obedience? Power compels; legitimacy commands. Philosophers fought over the gap.',
+    text: 'A gun makes you obey. What makes you owe obedience? Power compels. Legitimacy is the other thing, and the gap between them is the whole subject.',
     dur: 3.8,
   },
   {
@@ -75,7 +75,7 @@ export const BEATS: Pol3Beat[] = [
   {
     sub: 21, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1,
     interact: {
-      prompt: 'According to Locke, what causes a government to lose its legitimacy?',
+      prompt: 'On Locke’s account, tap what makes a government forfeit its right to rule.',
       cards: [
         { text: 'It tramples natural rights', correct: true },
         { text: 'It loses an election', correct: false },

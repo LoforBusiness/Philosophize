@@ -24,12 +24,12 @@ export interface Ethics4Beat extends BaseBeat {
 export const BEATS: Ethics4Beat[] = [
   {
     a: 1, b: 8, floor: 0, rows: 1,
-    text: 'Cultures disagree about right and wrong. So what? That they differ is a fact. That no truth is culture-free is a further, bolder claim.',
+    text: 'Cultures disagree about right and wrong. That much is just a fact. Saying there is no right answer underneath the disagreement is a much bigger claim, and a separate one.',
     dur: 3.8,
   },
   {
     a: 2, b: 10, rows: 2,
-    text: 'First, the harmless fact: societies hold deeply different codes. The bold claim goes further — a judgment’s truth is relative to a group, with no culture-independent fact behind it. Sliding from one to the other is the classic mistake.',
+    text: 'First the harmless fact. Societies really do hold very different codes. The bold claim goes further. Whether something is right depends on the group asking, and there is no answer underneath. Sliding from the first to the second is the classic mistake.',
     cite: 'Two kinds of relativism',
     dur: 5.4,
   },
@@ -59,14 +59,14 @@ export const BEATS: Ethics4Beat[] = [
   },
   {
     a: 38, b: 38, floor: 1, rows: 3,
-    text: 'And look down: Donald Brown catalogued traits in every documented society — fairness, reciprocity, bans on murder and incest. A shared moral floor, under feet that thought they stood apart.',
+    text: 'And look down. Donald Brown went through every society on record and found the same handful of things in all of them. Fairness. Returning a favour. Bans on murder and incest. A shared floor, under feet that thought they stood apart.',
     cite: 'Donald Brown, Human Universals, 1991',
     dur: 5.0,
   },
   {
     a: 21, b: 0, floor: 1, rows: 3,
     interact: {
-      prompt: 'What does the strong (metaethical) version of moral relativism claim?',
+      prompt: 'Tap the claim that goes past "cultures disagree" into "there is no fact of the matter".',
       cards: [
         { text: 'Truth is relative to group', correct: true },
         { text: 'Cultures differ, truth remains', correct: false },

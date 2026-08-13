@@ -66,7 +66,7 @@ export const BEATS: KnowHowBeat[] = [
         { text: 'Knowledge that, not how', correct: true },
         { text: 'The skill itself', correct: false },
       ],
-      explain: 'The trap is B, and it is a serious view — intellectualists argue skill just is knowing facts about how. Ryle\'s reply: the expert cannot state most of what they do, and does it anyway.',
+      explain: 'The trap is the other card, and it is a serious view — intellectualists argue skill just is knowing facts about how. Ryle\'s reply: the expert cannot state most of what they do, and does it anyway.',
       xp: 5,
     },
     dur: 1.0,

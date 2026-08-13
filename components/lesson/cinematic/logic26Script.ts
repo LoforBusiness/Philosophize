@@ -21,7 +21,7 @@ export interface Logic26Beat extends BaseBeat {
 export const BEATS: Logic26Beat[] = [
   {
     p: 25, x: 70,
-    text: 'Here is a strange way to prove something is true: begin by assuming it is false, and then be as reasonable as you possibly can.',
+    text: 'Here is a strange way to prove something is true. Begin by assuming it is false. Then be as reasonable as you possibly can.',
     dur: 4.2,
   },
   {
@@ -50,7 +50,7 @@ export const BEATS: Logic26Beat[] = [
   },
   {
     p: 35, x: 168, links: 4, snap: 1,
-    text: 'Something in that chain has to give. Every step after the first was valid, so the break lands where it started — the assumption was false, and there is no largest number.',
+    text: 'Something in that chain has to give. Every step after the first was valid, so the break lands where it started. The assumption was false. There is no largest number.',
     cite: 'Where it breaks',
     dur: 5.0,
   },

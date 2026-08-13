@@ -25,7 +25,7 @@ export const BEATS: EpistBeat[] = [
   {
     hpose: 2,
     locks: [0.25, 0.25, 0.25],
-    text: 'You say you "know" it. But what is knowing? Epistemology is the study of that question — Plato pressed it first, in the Theaetetus.',
+    text: 'You say you know it. But what is knowing? That question is the whole of epistemology, and Plato was already pressing it in the Theaetetus.',
     dur: 4.2,
   },
   {
@@ -43,7 +43,7 @@ export const BEATS: EpistBeat[] = [
   {
     hpose: 4,
     locks: [1, 1, 0],
-    text: 'In the Theaetetus, Socrates makes the case: a jury talked into a true verdict still does not KNOW — they never witnessed it. True belief, but no account. Two locks turn; the door holds.',
+    text: 'Socrates makes the case with a jury. They are talked into a verdict that happens to be true, and they never saw a thing. Two locks turn. The door holds.',
     cite: 'Plato, Theaetetus 201a–c, c. 369 BCE',
     dur: 4.8,
   },
@@ -66,7 +66,7 @@ export const BEATS: EpistBeat[] = [
     locks: [1, 1, 0.15],
     qkey: 'q1',
     interact: {
-      prompt: 'In the standard analysis, which THREE things does genuine knowledge require?',
+      prompt: 'So what does it actually take to know something?',
       cards: [
         { text: 'Justified true belief', correct: true },
         { text: 'Confident, popular, and true', correct: false },

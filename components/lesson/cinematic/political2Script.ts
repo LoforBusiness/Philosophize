@@ -31,7 +31,7 @@ export const BEATS: Pol2Beat[] = [
   },
   {
     r: 13, sub: 18, podium: false, chart: 2,
-    text: 'Weber split two ideas we blur. Power imposes your will despite resistance, by threat or force — a mugger has it. Authority is being obeyed because people accept your commands as valid.',
+    text: 'Weber split two ideas we blur together. Power gets its way despite resistance, by threat or force, and a mugger has it. Authority is being obeyed because people think you are entitled to be.',
     cite: 'Weber: power vs authority',
     dur: 4.8,
   },
@@ -55,7 +55,7 @@ export const BEATS: Pol2Beat[] = [
   },
   {
     r: 3, sub: 0, podium: true, chart: 2, ledger: true,
-    text: 'Weber sorted legitimacy into three sources. Traditional authority leans on custom and bloodline. Charismatic flows from devotion to one person. Rational-legal rests on rules, offices, and law.',
+    text: 'Weber sorted legitimacy into three sources. Traditional authority leans on custom and bloodline. Charismatic runs on devotion to one person. Rational-legal rests on rules and offices, where the power sits in the job rather than the holder.',
     cite: 'Weber’s three types',
     dur: 4.8,
   },

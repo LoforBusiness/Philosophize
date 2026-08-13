@@ -71,7 +71,7 @@ export const BEATS: Epis14Beat[] = [
         { text: 'The experiences would be identical', correct: true },
         { text: 'Common sense rules it out', correct: false },
       ],
-      explain: 'C is the tempting appeal to common sense, and it begs the question — a simulation would fake the pinch too. The scenario is built so that every possible piece of evidence is explained equally well by both worlds.',
+      explain: 'The other card is the tempting appeal to common sense, and it begs the question — a simulation would fake the pinch too. The scenario is built so that every possible piece of evidence is explained equally well by both worlds.',
       xp: 5,
     },
   },

@@ -27,7 +27,7 @@ export const BEATS: PoliticalBeat[] = [
   },
   {
     auth: 0,
-    text: 'Hobbes ran a thought experiment: strip away every law, court, and ruler. With no common power to judge between us, fear and rivalry collide — and life turns "nasty, brutish, and short."',
+    text: 'Hobbes ran a thought experiment. Strip away every law, every court and every ruler. With nobody left to judge between us, fear and rivalry collide, and life turns "nasty, brutish, and short."',
     cite: 'Thomas Hobbes, Leviathan, 1651',
     dur: 4.8,
   },
@@ -52,7 +52,7 @@ export const BEATS: PoliticalBeat[] = [
     auth: 1,
     weigh: 'q1',
     interact: {
-      prompt: 'According to Hobbes, why do people accept rules and government?',
+      prompt: 'So why would anyone hand that much power to a sovereign?',
       cards: [
         { text: 'Without a sovereign, war', correct: true },
         { text: 'People are naturally cooperative', correct: false },

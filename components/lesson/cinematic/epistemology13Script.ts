@@ -65,7 +65,7 @@ export const BEATS: Epi13Beat[] = [
         { text: 'Each is not all', correct: true },
         { text: 'One verdict must fail', correct: false },
       ],
-      explain: 'The trap: B and C both look decisive. B cannot say WHICH verdict fails. C throws out almost everything you know, since nearly all of it rests on probability rather than proof.',
+      explain: 'The other card looks decisive and cannot deliver. It says one verdict must fail, and it can never say WHICH one — every ticket has exactly the same case against it.',
       xp: 5,
     },
     dur: 1.0,

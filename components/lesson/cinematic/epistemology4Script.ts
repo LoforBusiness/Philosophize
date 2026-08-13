@@ -23,12 +23,12 @@ export interface Epi4Beat extends BaseBeat {
 export const BEATS: Epi4Beat[] = [
   {
     e: 8, r: 4, fill: 0, glow: 0, bridge: 0,
-    text: 'Blank mind at birth, or already primed? Two camps, one question, centuries of philosophical war.',
+    text: 'Blank mind at birth, or already primed? Two camps, and they have never once stopped arguing about it.',
     dur: 3.4,
   },
   {
     e: 2, r: 0, fill: 0.35,
-    text: 'Empiricists say nothing is in the mind before you live it. Locke pictured it as blank paper — every idea arriving through sensation and reflection.',
+    text: 'Locke pictured the newborn mind as a sheet of blank paper. Nothing is on it before you live it, and everything that arrives got there by being seen, felt or thought over. That camp is the empiricists.',
     cite: 'Empiricism — from experience',
     dur: 4.8,
   },
@@ -52,20 +52,20 @@ export const BEATS: Epi4Beat[] = [
   },
   {
     e: 0, r: 11, fill: 0.85, glow: 1,
-    text: 'Rationalists fire back: some truths are part of our nature. Descartes and Leibniz held that math and logic are grasped by reason alone — known a priori, prior to the senses.',
+    text: 'The other camp fires back. Some things you never had to be shown. Descartes and Leibniz thought maths and logic get worked out by reason alone, before experience gets a say. That is what a priori means.',
     cite: 'Rationalism — from reason',
     dur: 5.0,
   },
   {
     e: 0, r: 19, glow: 1,
-    text: 'In Plato’s Meno, an untaught slave boy is led to double a square using only questions. Nobody taught him geometry — so, Plato says, to learn is to recollect what the mind already holds.',
+    text: 'Plato has Socrates walk an untaught boy through doubling a square, using nothing but questions. Nobody teaches him any geometry. So learning, Plato says, is remembering what was in there already.',
     cite: 'Plato, Meno',
     dur: 5.0,
   },
   {
     e: 2, r: 11, fill: 0.85, glow: 1,
     interact: {
-      prompt: 'Which thinker held the mind begins as a blank slate, with no innate principles? Tap the name.',
+      prompt: 'One of these says you arrive with nothing written on you yet. Tap them.',
       explain:
         'Locke called the newborn mind "white paper," filled only through sensation and reflection. Descartes, Plato, and Leibniz argued the reverse — some ideas are innate.',
       xp: 5,
@@ -74,19 +74,19 @@ export const BEATS: Epi4Beat[] = [
   },
   {
     e: 39, r: 39, fill: 0.85, glow: 1, bridge: 1,
-    text: 'Then Kant brokered a truce: both were half right. Raw data pours in through the senses, but the mind’s own forms — space, time, cause — shape it into experience. They need each other.',
+    text: 'Then Kant brokered a truce, and said both were half right. The raw material does pour in through the senses. But the mind has shapes of its own — space, time, cause — and pours it into those. Neither works alone.',
     cite: 'Kant’s bridge',
     dur: 5.0,
   },
   {
     e: 0, r: 4, glow: 1, bridge: 1,
     interact: {
-      prompt: 'Which claim best fits actual rationalism?',
+      prompt: 'Tap the claim a rationalist would actually make.',
       cards: [
         { text: 'Some truths need reason alone', correct: true },
         { text: 'All truths come from reason', correct: false },
       ],
-      explain: 'Rationalists claim some truths are a priori, not that experience is worthless. The "all" version overshoots their real position.',
+      explain: 'They say SOME truths come before experience. Not that experience is worthless — that is the overshoot, and no rationalist ever held it.',
       xp: 5,
     },
     dur: 1.0,

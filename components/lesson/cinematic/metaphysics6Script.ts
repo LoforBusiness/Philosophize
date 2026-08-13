@@ -49,7 +49,7 @@ export const BEATS: Meta6Beat[] = [
   },
   {
     p: 1, swap: 1, orig: 0,
-    text: 'Philosophers split the word "same." Qualitative identity: sharing all the same features. Numerical identity: being one and the same thing over time. The ship can lose the first while keeping the second.',
+    text: 'Philosophers split the word "same" in two. Qualitative sameness is sharing every feature, like two new coins. Numerical sameness is being the one thing you were yesterday. The ship keeps the second and loses the first.',
     cite: 'Two senses of sameness',
     dur: 5.2,
   },

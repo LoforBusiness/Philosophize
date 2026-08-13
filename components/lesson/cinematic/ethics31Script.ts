@@ -76,7 +76,7 @@ export const BEATS: Ethics31Beat[] = [
         { text: 'Inability you caused yourself', correct: true },
         { text: 'Nothing, inability always excuses', correct: false },
       ],
-      explain: 'The trap is B, the version that turns the principle into a blanket excuse. A driver who cannot brake because they chose to drink is still answerable: the inability is real, and they authored it.',
+      explain: 'The trap is the other card, which turns the principle into a blanket excuse. A driver who cannot brake because they chose to drink is still answerable: the inability is real, and they authored it.',
       xp: 5,
     },
   },

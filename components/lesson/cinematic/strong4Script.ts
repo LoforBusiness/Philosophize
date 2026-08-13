@@ -31,18 +31,18 @@ export interface Strong4Beat extends BaseBeat {
 export const BEATS: Strong4Beat[] = [
   {
     p: 2, fill: 0.55, lock: 0, dice: 0, verdict: 0, lens: 0,
-    text: 'Some arguments prove. Others only bet the odds. Deduction aims to guarantee its conclusion; induction only makes it probable.',
+    text: 'Some arguments prove their point. Others only make it a good bet. Both are useful, and grading one by the other’s standard is where people go wrong.',
     dur: 3.8,
   },
   {
     p: 1, fill: 0.55, verdict: 0, lens: 0,
-    text: 'A DEDUCTIVE argument claims its premises guarantee the conclusion — we grade it valid or sound. An INDUCTIVE one only makes the conclusion likely — so we grade it strong or weak. Wrong ruler, wrong verdict.',
+    text: 'A deductive argument promises its conclusion. Grade that one valid or sound. An inductive argument only makes its conclusion likely, so grade it strong or weak. Use the wrong ruler and you get the wrong verdict.',
     cite: 'Two families of argument',
     dur: 5.2,
   },
   {
     p: 6, fill: 1, lock: 1, dice: 0, verdict: 2, lens: 1,
-    text: '"All men are mortal; Socrates is a man; so he is mortal." It cannot be false. The needle pins at 100% and the guarantee locks shut.',
+    text: '"All men are mortal; Socrates is a man; so he is mortal." Grant the first two and the third cannot be false. The needle pins and the guarantee locks shut.',
     cite: 'Deduction — guaranteed',
     dur: 4.6,
   },
@@ -69,9 +69,9 @@ export const BEATS: Strong4Beat[] = [
     // Answered ON the panel: the ruler cards clear and four verdict chips take
     // their place, so the reader grades the argument instead of reading a list.
     interact: {
-      prompt: 'An inductive argument’s premises make its conclusion likely. What is it?',
+      prompt: 'These premises make the conclusion likely, not certain. Tap the verdict that fits.',
       explain:
-        'For induction the yardstick is strength, not validity. Strong premises make the conclusion likely; add true premises and it becomes cogent.',
+        'Strong, not valid. Validity is the deductive ruler and it does not apply here. A strong argument that also has true premises has its own name: cogent.',
       xp: 5,
     },
     dur: 1.0,
@@ -84,7 +84,7 @@ export const BEATS: Strong4Beat[] = [
         { text: 'No, wrong ruler for induction', correct: true },
         { text: 'Yes, it is not guaranteed', correct: false },
       ],
-      explain: 'Validity only grades deductions. Judging induction by it is a category mistake — use strong or weak instead.',
+      explain: 'Validity is a deductive word, and induction was never trying to be valid. It never promised certainty, so failing to deliver certainty is not a fault in it.',
       xp: 5,
     },
     dur: 1.0,

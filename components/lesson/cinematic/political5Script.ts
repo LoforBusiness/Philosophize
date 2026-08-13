@@ -22,7 +22,7 @@ export const BEATS: Pol5Beat[] = [
   },
   {
     p: 13, city: 1,
-    text: 'In the Republic, Plato asks what a perfectly just city looks like. His answer: justice is each part doing its own work and not meddling. Rule goes to philosopher-kings, who alone know the good.',
+    text: 'Plato asks what a perfectly just city would look like. His answer: everyone does the work they are suited to, and nobody meddles. Ruling goes to philosopher-kings, the only people he thinks actually know what good is.',
     cite: 'Plato’s just city',
     dur: 5.2,
   },
@@ -40,14 +40,14 @@ export const BEATS: Pol5Beat[] = [
   },
   {
     p: 4, city: 0, veil: 1,
-    text: 'Rawls asks a different way: what rules would you pick if you did not know who you would be? Behind a "veil of ignorance," your class, talents, and luck are hidden. Stripped of bias, people choose fair terms.',
+    text: 'Rawls asks it another way. What rules would you pick if you did not know who you were going to be? Hide your class, your talents and your luck behind a veil, and watch how fair your choices get.',
     cite: 'Rawls’ veil of ignorance',
     dur: 5.4,
   },
   {
     p: 4, veil: 1,
     interact: {
-      prompt: 'What is the point of Rawls’ "veil of ignorance" thought experiment?',
+      prompt: 'You pick the rules without knowing who you will turn out to be. Tap what that is for.',
       cards: [
         { text: 'Fair rules, hiding who you are', correct: true },
         { text: 'To make everyone equal', correct: false },

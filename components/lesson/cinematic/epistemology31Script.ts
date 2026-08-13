@@ -71,7 +71,7 @@ export const BEATS: Epis31Beat[] = [
         { text: 'Trust it until given reason', correct: true },
         { text: 'Check it against something independent', correct: false },
       ],
-      explain: 'The trap is B: nothing independent is available, because the confirmation is remembered too. Memory is a floor rather than a conclusion, so the reasonable stance is trust until something specific goes wrong.',
+      explain: 'The trap is the other card: nothing independent is available, because the confirmation is remembered too. Memory is a floor rather than a conclusion, so the reasonable stance is trust until something specific goes wrong.',
       xp: 5,
     },
   },

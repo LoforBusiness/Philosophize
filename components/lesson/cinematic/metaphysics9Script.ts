@@ -62,12 +62,12 @@ export const BEATS: M9Beat[] = [
   {
     p: 4, x: 232, panels: 2,
     interact: {
-      prompt: 'What is the core claim of Descartes’s dualism?',
+      prompt: 'Tap what Descartes is actually claiming about mind and body.',
       cards: [
         { text: 'Two distinct kinds of substance', correct: true },
         { text: 'The mind is brain', correct: false },
       ],
-      explain: 'Two different substances, not one. The trap is A: "the mind is part of the brain" sounds like a modest version of the same claim, and it is the view Descartes was arguing against.',
+      explain: 'Two different substances, not one. The trap is the other card: "the mind is part of the brain" sounds like a modest version of the same claim, and it is the view Descartes was arguing against.',
     },
     dur: 4.4,
   },

@@ -72,7 +72,7 @@ export const BEATS: Ethics13Beat[] = [
         { text: 'A settled habit', correct: true },
         { text: 'Feeling no fear', correct: false },
       ],
-      explain: 'C is the trap, and the rail refutes it: no fear at all is the far left of this line, not the middle. D is the rival theory — and Aristotle\'s reply is that anyone still consulting the rule has not yet become the person the rule describes.',
+      explain: 'The other card is the trap: no fear at all is the far left of this rail, not the middle. Courage is a settled habit of the right amount — and Aristotle\'s reply is that anyone still consulting the rule has not yet become the person the rule describes.',
       xp: 5,
     },
   },

@@ -73,7 +73,7 @@ export const BEATS: Pol31Beat[] = [
         { text: 'Change the arithmetic', correct: true },
         { text: 'Ask people to restrain themselves', correct: false },
       ],
-      explain: 'B fails on its own terms: whoever complies simply loses and the field dies anyway. C was Hardin\'s own pessimism — Elinor Ostrom won a Nobel documenting commons that never collapsed, each binding its users to a limit they helped set.',
+      explain: 'The other card fails on its own terms, because whoever complies simply loses and the field dies anyway. Despair was Hardin\'s own pessimism — Elinor Ostrom won a Nobel documenting commons that never collapsed, each binding its users to a limit they helped set.',
       xp: 5,
     },
   },

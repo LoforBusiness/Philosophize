@@ -27,7 +27,7 @@ export const BEATS: Aes6Beat[] = [
   },
   {
     p: 15, vast: 1, flower: 0, split: 3,
-    text: 'Stand on a cliff in a gale. The drop could kill you — yet you are safe. Real danger, held at a distance, leaves a delight tinged with terror, unlike any gentle pleasure.',
+    text: 'Stand on a cliff in a gale. The drop could kill you, and you are perfectly safe. Real danger held at a distance is a pleasure of its own, and nothing gentle feels like it.',
     cite: 'Terror at a safe distance',
     dur: 5.0,
   },
@@ -46,7 +46,7 @@ export const BEATS: Aes6Beat[] = [
   {
     p: 25, vast: 1, split: 3,
     interact: {
-      prompt: 'For Burke, what feeling marks the sublime apart from the merely beautiful?',
+      prompt: 'Tap the feeling that separates the sublime from the merely beautiful.',
       cards: [
         { text: 'Delight mixed with terror', correct: true },
         { text: 'A gentle, pleasing calm', correct: false },
@@ -58,7 +58,7 @@ export const BEATS: Aes6Beat[] = [
   },
   {
     p: 4, vast: 1, split: 3, mind: 1,
-    text: 'Kant moved the awe inward. The sublime overwhelms the senses, yes — but the true awe, he said, is reason discovering it can grasp infinity in thought. The mind, not the mountain, is sublime.',
+    text: 'Kant moved the awe inward. The mountain does overwhelm your senses. But the real jolt, he says, is your mind finding that it can hold something that big. The mountain is not the sublime thing. You are.',
     cite: 'Kant — awe in the mind',
     dur: 5.0,
   },

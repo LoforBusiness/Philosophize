@@ -27,7 +27,7 @@ export const BEATS: Ethics18Beat[] = [
   },
   {
     p: 41, x: 168, line: 1, test: 1,
-    text: 'For most of history the line ran here, and the reason given was reason itself: they cannot argue, cannot promise, cannot be held to anything. So they were furniture.',
+    text: 'For most of history the line ran here. The reason given was reason itself. They cannot argue, cannot promise, cannot be held to anything — so they were furniture.',
     cite: 'Where the line ran',
     dur: 5.0,
   },
@@ -67,12 +67,12 @@ export const BEATS: Ethics18Beat[] = [
   {
     p: 4, x: 124, line: 1, test: 2, wide: 1,
     interact: {
-      prompt: 'For Singer, what determines whether a being deserves moral consideration?',
+      prompt: 'Tap the thing Singer says actually decides it.',
       cards: [
         { text: 'Whether it can suffer', correct: true },
         { text: 'Whether it can reason', correct: false },
       ],
-      explain: 'The trap is B, and it is a non sequitur as well as speciesism: reasoning has nothing to do with suffering. Infants cannot reason either, and plainly count.',
+      explain: 'The other card is the old test, and it is a non sequitur as well as speciesism: reasoning has nothing to do with suffering. Infants cannot reason either, and plainly count.',
       xp: 5,
     },
     dur: 1.0,

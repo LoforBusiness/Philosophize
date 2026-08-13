@@ -35,7 +35,7 @@ export const BEATS: Aes4Beat[] = [
   },
   {
     a: 1, v: 10, test: 2,
-    text: 'For ages, two ideas ruled. Plato and Aristotle: art is mimesis, skilled imitation. Later Tolstoy and Collingwood: art is the expression of feeling. Both assume a maker’s craft.',
+    text: 'For ages there were two answers. Plato’s: art copies the world skilfully, and the Greek word for that is mimesis. Tolstoy’s: art puts a feeling into a form somebody else can pick up. Both assume a person made it.',
     cite: 'Two old answers',
     dur: 5.0,
   },
@@ -59,19 +59,19 @@ export const BEATS: Aes4Beat[] = [
   },
   {
     a: 13, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
-    text: 'Fountain defies mimesis and expression alike — it stirs a question more than a feeling. Asking "but is this art?" is itself philosophy: it drags your hidden definition into the open.',
+    text: 'Fountain fits neither answer. It copies nothing and expresses nothing, and it still will not go away. Asking "but is that art?" is already philosophy, because it makes you say what you secretly think art is.',
     cite: 'The artworld confers',
     dur: 5.0,
   },
   {
     a: 21, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
     interact: {
-      prompt: 'On Dickie’s institutional theory, what makes something count as art?',
+      prompt: 'So where does the art actually live — in the object, or in the room around it?',
       cards: [
         { text: 'The artworld confers the status', correct: true },
         { text: 'Something in the object', correct: false },
       ],
-      explain: 'For Dickie, status is conferred by galleries, critics, and traditions — not the object. A chosen urinal becomes art; an identical one in a shop stays plumbing.',
+      explain: 'George Dickie’s answer is the room. Galleries, critics and a tradition hand the object its status, and the object contributes nothing. A chosen urinal becomes art, and an identical one in a shop stays plumbing.',
       xp: 5,
     },
     dur: 1.0,

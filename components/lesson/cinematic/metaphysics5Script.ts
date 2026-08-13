@@ -21,13 +21,16 @@ export const BEATS: Meta5Beat[] = [
   },
   {
     p: 24, stars: 1, q: 1,
-    text: 'Heidegger’s "fundamental question of metaphysics": why are there beings at all instead of nothing? Not why this or that exists — but why anything does. The jolt of noticing it is wonder.',
+    text: 'Heidegger called this the fundamental question of metaphysics. Not why this thing or that thing exists. Why there is anything at all to ask about.',
     cite: 'The fundamental question',
     dur: 5.2,
   },
   {
     p: 19, stars: 1, q: 1, psr: 1,
-    text: 'In 1714 Leibniz pressed it hardest. His Principle of Sufficient Reason says every fact needs a reason. So existence itself must demand one.',
+    // The rule is drawn on stage in plain words — EVERY FACT NEEDS A REASON. Naming
+    // it "the Principle of Sufficient Reason" over the top of that adds a term and
+    // no meaning, and undoes the choice the scene already made (J7).
+    text: 'Leibniz pressed it hardest. Nothing is just true for no reason, he said. Every fact has one somewhere — so what is the reason for there being anything?',
     cite: 'Leibniz, 1714',
     dur: 4.8,
   },
@@ -45,19 +48,21 @@ export const BEATS: Meta5Beat[] = [
   },
   {
     p: 20, stars: 1, q: 0.4, psr: 1, dasein: 1,
-    text: 'And here is what is strangest about us: we are the beings whose own being is at issue. Heidegger calls this "Dasein." Through you, existence turns around and questions itself.',
+    text: 'And here is the strange part. You are a thing that wonders what it is. Heidegger’s name for that is Dasein, and through you the universe turns round and asks about itself.',
     cite: 'Dasein — being-there',
     dur: 5.0,
   },
   {
     p: 4, stars: 1, q: 0.4, psr: 1, dasein: 1,
     interact: {
-      prompt: 'For Heidegger, which mood throws open the question of why anything exists at all?',
+      prompt: 'So what opens this question in the first place — amazement, or doubt?',
       cards: [
         { text: 'Wonder at Being', correct: true },
         { text: 'Cartesian doubt', correct: false },
       ],
-      explain: 'Wonder — astonishment that anything is at all — opens the fundamental question. Doubt is Descartes’s, the leap is Kierkegaard’s, the absurd is Camus’s.',
+      // Was "the leap is Kierkegaard's, the absurd is Camus's" — a leftover list of
+      // two options that no longer exist, naming two thinkers for nothing.
+      explain: 'Amazement that there is anything at all. Doubt is Descartes’s move, and it asks a different question — not whether anything exists, but whether you can trust what you see.',
       xp: 5,
     },
     dur: 1.0,
@@ -65,12 +70,12 @@ export const BEATS: Meta5Beat[] = [
   {
     p: 4, stars: 1, q: 0.4, psr: 1, dasein: 1,
     interact: {
-      prompt: '"Dasein" is German. Which translation is the one Heidegger actually means?',
+      prompt: 'Heidegger picked that word deliberately. Tap what it says about you.',
       cards: [
         { text: 'Being-there', correct: true },
         { text: 'Decision', correct: false },
       ],
-      explain: '"Dasein" splits into Da (there) and Sein (being): "being-there." The look-alikes are traps — it names human existence, the being for whom being is a question.',
+      explain: 'Da means there and Sein means being. Being-there. It is deliberately plain: you are not a soul visiting a world, you are something already in the middle of one.',
       xp: 5,
     },
     dur: 1.0,

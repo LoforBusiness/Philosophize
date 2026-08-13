@@ -35,7 +35,7 @@ export const BEATS: Pol32Beat[] = [
   {
     g: 1, fill: 1, result: 1, mark: 1, labels: 0,
     dur: 4.6,
-    text: 'Including yours. The odds of a single vote deciding a national election are worse than most lotteries, and you knew that on the way to the hall.',
+    text: 'Including yours. The odds of a single vote deciding a national election are worse than most lotteries. You knew that on the way to the hall.',
     cite: 'Yours',
   },
   {
@@ -74,7 +74,7 @@ export const BEATS: Pol32Beat[] = [
         { text: 'Yes, for what it does', correct: true },
         { text: 'No, one vote never decides', correct: false },
       ],
-      explain: 'D is the classic slip: what everyone else does is already fixed, so "if nobody voted" was never your choice. C over-reaches, since the odds only work under assumptions about closeness that rarely hold.',
+      explain: 'The classic slip is "but what if nobody voted". What everyone else does is already fixed, so that was never your choice. The other card is right that one vote rarely decides, and wrong that deciding is all a mark does.',
       xp: 5,
     },
   },

@@ -25,13 +25,13 @@ export const BEATS: Aes2Beat[] = [
   },
   {
     a: 7, v: 0, wave: true, felt: true, chain: 3,
-    text: 'Forget beauty and skill. Tolstoy says art is "infection": the maker relives a feeling and transmits it, so you feel the very same. Collingwood adds that real art clarifies a feeling not yet understood.',
+    text: 'Forget beauty and forget skill. Tolstoy’s word for art is infection. The maker feels something, puts it into the work, and you catch it off them. Collingwood adds that they often do not know the feeling until it is made.',
     cite: 'Expression theory',
     dur: 5.0,
   },
   {
     a: 15, v: 15, wave: true, felt: true, chain: 3,
-    text: 'A boy who once met a wolf retells his terror so vividly his listeners feel it too. That transfer of a real feeling, Tolstoy wrote, is art — and sincerity matters most of all.',
+    text: 'A boy who once met a wolf tells it so well that the room is frightened too. That is art, Tolstoy says, and it only works if he means it.',
     cite: 'Tolstoy, What Is Art?, 1897',
     dur: 4.8,
   },
@@ -50,7 +50,7 @@ export const BEATS: Aes2Beat[] = [
   {
     a: 14, v: 8, chain: 3,
     interact: {
-      prompt: 'What did Tolstoy believe was the primary purpose of art?',
+      prompt: 'Tap what Tolstoy thinks art is actually doing.',
       cards: [
         { text: 'To transmit the artist\'s feeling', correct: true },
         { text: 'To make beautiful objects', correct: false },
@@ -62,7 +62,7 @@ export const BEATS: Aes2Beat[] = [
   },
   {
     a: 20, v: 17, wave: true, felt: true, chain: 3,
-    text: 'If the expression theorists are right, emotion can be carried in lines, sounds, and words — and survive death, language, and centuries. Almost nothing else we build does that.',
+    text: 'If they are right, a feeling can be packed into lines and sounds and words. It then outlives the person, the language and the century. Almost nothing else we build does that.',
     cite: 'Feeling made portable',
     dur: 4.4,
   },
@@ -74,7 +74,7 @@ export const BEATS: Aes2Beat[] = [
         { text: 'Real feeling for known fictions', correct: true },
         { text: 'The tears are not real', correct: false },
       ],
-      explain: 'The trap: "fake people, so fake tears." Radford named this the paradox of fiction (1975) — the feeling is genuine, and explaining it is still debated.',
+      explain: 'The trap: fake people, so fake tears. The tears are real, and that is the puzzle. Radford called it the paradox of fiction, and nobody has settled it since.',
       xp: 5,
     },
     dur: 1.0,

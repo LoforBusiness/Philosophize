@@ -27,13 +27,13 @@ export const BEATS: Meta3Beat[] = [
   },
   {
     p: 1, shadow: 0.9, form: 0.15, apple: 1,
-    text: 'Heraclitus said everything flows — a river you cannot step in twice. Plato wanted an object of real knowledge, so he split reality: stable Being you can know, restless Becoming you can only guess.',
+    text: 'Heraclitus said everything flows, like a river you cannot step in twice. That troubled Plato. You cannot know a thing that will not hold still, so he split the world in two. Being holds still and can be known. Becoming never does.',
     cite: 'Being vs Becoming',
     dur: 5.2,
   },
   {
     p: 34, shadow: 0.5, form: 0.7, apple: 1,
-    text: 'Prisoners chained since birth take flickering shadows for reality. One breaks free, climbs into daylight, and sees real things. Our world is the wall; the truly real lies upstream, in eternal Forms.',
+    text: 'Prisoners chained since birth take flickering shadows for the real world. One gets free, climbs into daylight, and sees the things themselves. Plato says the wall is where we live, and the Forms are what is casting the shadows.',
     cite: 'The Republic, Book VII',
     dur: 5.2,
   },
@@ -51,14 +51,14 @@ export const BEATS: Meta3Beat[] = [
   },
   {
     p: 24, shadow: 0.15, form: 1, apple: 1,
-    text: 'Each physical thing is a deficient copy that "participates in" a perfect Form. Equal sticks always fall short of Equality itself. Because Forms never change, they can be known; changing things can only be believed.',
+    text: 'Everything you can touch is a rough copy of something perfect. Two sticks are never exactly equal; the idea of Equality always is. And you can know the thing that never changes, where the copy is only ever a good guess.',
     cite: 'The theory of Forms',
     dur: 5.2,
   },
   {
     p: 6, shadow: 0.15, form: 1, apple: 1,
     interact: {
-      prompt: 'According to Plato, which of these is MOST fully real? Tap it.',
+      prompt: 'Plato ranks these against each other. Tap whichever one he calls most real.',
       explain:
         'For Plato the Forms enjoy the fullest being because they never change. The apple bruises and rots; its shadow and its portrait are fainter still — images of a copy.',
       xp: 5,

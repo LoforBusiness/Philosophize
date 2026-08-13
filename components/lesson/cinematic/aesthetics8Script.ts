@@ -64,7 +64,7 @@ export const BEATS: Aes8Beat[] = [
   },
   {
     p: 35, x: 148, mode: 1, lens: 1,
-    text: 'That way of looking has a name: formalism. Clive Bell claimed every real work of visual art shares one thing — significant form, an arrangement of line and colour that moves you. The subject is beside the point.',
+    text: 'That way of looking has a name: formalism. Clive Bell claimed every real work of visual art shares one thing. He called it significant form: an arrangement of line and colour that moves you. The subject is beside the point.',
     cite: 'Formalism · Clive Bell',
     dur: 5.2,
   },

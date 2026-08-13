@@ -54,13 +54,13 @@ export const BEATS: EthicsBeat[] = [
     hpose: 4,
     judge: true,
     origins: true,
-    text: 'That inward weighing is your conscience — the sense something is wrong even when no one is watching. Darwin traced it to instinct, Freud to society turned inward, Kant to reason itself.',
+    text: 'That inward weighing is your conscience. It is the sense that something is wrong even when nobody is watching. Where it comes from is disputed — instinct, says Darwin; society turned inward, says Freud; reason itself, says Kant.',
     cite: 'Darwin · Freud · Kant',
     dur: 4.6,
   },
   {
     hpose: 2,
-    text: 'Around 350 BCE, Aristotle asked a different question: not "which rules?" but "what is a good life?" Our defining power is reason — so living well means using it, with virtue, across a whole life.',
+    text: 'Aristotle asked a different question. Not "which rules?" but "what is a good life?" What sets us apart is that we can reason. So living well means doing that well, over a whole life.',
     cite: 'Aristotle, Nicomachean Ethics, c. 350 BCE',
     dur: 4.8,
   },
@@ -110,7 +110,7 @@ export const BEATS: EthicsBeat[] = [
   {
     hpose: 2,
     plant: true,
-    text: 'Aristotle named the goal eudaimonia — best rendered "flourishing," not "feeling happy." It is living and acting well, with strong character, over a lifetime.',
+    text: 'Aristotle’s word for the goal is eudaimonia. It usually gets translated as happiness, which is wrong. Flourishing is closer — living and acting well, with a strong character, over a whole life.',
     dur: 4.4,
   },
   {

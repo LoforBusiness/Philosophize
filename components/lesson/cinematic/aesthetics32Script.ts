@@ -72,7 +72,7 @@ export const BEATS: Aes32Beat[] = [
         { text: 'Order carries its own value', correct: true },
         { text: 'Only the total matters', correct: false },
       ],
-      explain: 'B explains the feeling and leaves the question open — we are asking what makes a life go well, not what it is like to look back on one. C is the honest hard line, and it has to call the declining life exactly as good.',
+      explain: 'The other card is the honest hard line, and it has to call the declining life exactly as good as the rising one. Almost nobody can. That reluctance is the evidence that the order carries value of its own.',
       xp: 5,
     },
   },

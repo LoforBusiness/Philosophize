@@ -73,7 +73,7 @@ export const BEATS: Meta31Beat[] = [
         { text: 'We count and measure absences', correct: true },
         { text: 'Just say perforated instead', correct: false },
       ],
-      explain: 'B is respectable: paraphrase the hole-talk away and the problem dissolves. It only has to work — and "there are as many holes as pegs" has resisted paraphrase for fifty years. That is why this is still live.',
+      explain: 'The other card is respectable: paraphrase the hole-talk away and the problem dissolves. It only has to work — and "there are as many holes as pegs" has resisted paraphrase for fifty years. That is why this is still live.',
       xp: 5,
     },
   },

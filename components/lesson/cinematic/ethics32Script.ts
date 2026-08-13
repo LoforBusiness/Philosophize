@@ -74,7 +74,7 @@ export const BEATS: Ethics32Beat[] = [
         { text: 'Yes, a signal to look', correct: true },
         { text: 'No, always work it alone', correct: false },
       ],
-      explain: 'The trap is B: it flatters us and nobody lives that way. Testimony is excellent evidence that you have missed something. It is a poor replacement for going and seeing what you missed.',
+      explain: 'The trap is the other card: it flatters us and nobody lives that way. Testimony is excellent evidence that you have missed something. It is a poor replacement for going and seeing what you missed.',
       xp: 5,
     },
   },

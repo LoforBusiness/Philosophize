@@ -72,7 +72,7 @@ export const BEATS: Meta32Beat[] = [
         { text: 'Where each one is', correct: true },
         { text: 'Nothing, they are one sphere', correct: false },
       ],
-      explain: 'C is ruled out by the setup. D is the interesting failure — a bare "thisness" answers the question by restating it. A is the live reply: if space is real rather than a pattern of relations, two positions are two facts.',
+      explain: 'The other card is ruled out by the setup, since they are plainly two. The live reply is position. If space is real rather than just a pattern of relations, being here rather than there is a second fact about each sphere.',
       xp: 5,
     },
   },
