@@ -221,6 +221,43 @@ const ANSWER_DECK = `(() => {
   return 0;
 })()`;
 
+// A FOURTH ANSWER MECHANISM, AND THE FIRST ONE THAT IS NOT A CLICK.
+//
+// `interact.drag` (components/lesson/cinematic/DragScale.tsx) is answered by
+// dragging a knob along a rail, so there is no button anywhere on the beat and
+// both snippets above find nothing. The first sweep of the twelve drag lessons
+// therefore measured 6 or 7 beats of 9 and reported them as measured — the exact
+// failure mode §21 already records twice, where a harness that cannot act on a
+// beat reports a short sweep as a clean one.
+//
+// react-native-gesture-handler listens on POINTER events on the web, so a
+// MouseEvent does nothing here however carefully it is aimed. The sequence has to
+// be down / move / move / up with a live pointerId, and it needs at least two
+// moves: `onUpdate` integrates translationX, and a single jump from the press
+// point is indistinguishable from a tap to the pan recogniser's activation check.
+const ANSWER_DRAG = `(() => {
+  const strip = document.getElementById('drag-strip');
+  if (!strip) return 0;
+  const r = strip.getBoundingClientRect();
+  if (!(r.width > 20)) return 0;
+  const y = r.y + r.height / 2;
+  const x0 = r.x + 6;
+  // 0.55 across lands mid-rail, which is a legal answer on every zone layout the
+  // twelve use. WHERE it lands does not matter for measurement — the beat's own
+  // box is read before this runs; this only has to get the gate open.
+  const x1 = r.x + r.width * 0.55;
+  const opts = (x) => ({ bubbles: true, cancelable: true, composed: true,
+    clientX: x, clientY: y, pointerId: 1, pointerType: 'mouse', isPrimary: true, buttons: 1 });
+  try {
+    strip.dispatchEvent(new PointerEvent('pointerdown', opts(x0)));
+    for (let k = 1; k <= 6; k++) {
+      strip.dispatchEvent(new PointerEvent('pointermove', opts(x0 + (x1 - x0) * (k / 6))));
+    }
+    strip.dispatchEvent(new PointerEvent('pointerup', { ...opts(x1), buttons: 0 }));
+    return 1;
+  } catch (e) { return 0; }
+})()`;
+
 const ROUTE = 'app/previewframe.tsx';
 const ROUTE_SRC = `// WRITTEN BY scripts/measure-must.mjs — deleted again when it finishes.
 import { useEffect, useState } from 'react';
@@ -495,7 +532,7 @@ function stampFor(comp) {
       // before concluding the lesson is stuck.
       let moved = false;
       let ended = false;
-      for (let attempt = 0; attempt < 3 && !moved; attempt++) {
+      for (let attempt = 0; attempt < 4 && !moved; attempt++) {
         // Second try onward: the beat is probably gated, so answer it first.
         // TRY BOTH KINDS OF ANSWER, in separate attempts.
         //
@@ -507,6 +544,8 @@ function stampFor(comp) {
         // answered in the scene".
         if (attempt === 1) { await T.ev(ANSWER_SCENE); await wait(700); }
         if (attempt === 2) { await T.ev(ANSWER_DECK); await wait(700); }
+        // And a drag, which is not a click at all — see ANSWER_DRAG.
+        if (attempt === 3) { await T.ev(ANSWER_DRAG); await wait(700); }
         await T.ev(CLICK);
         // POLL FOR THE ADVANCE; DO NOT TIME IT.
         //

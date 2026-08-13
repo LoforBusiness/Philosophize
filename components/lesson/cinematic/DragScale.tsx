@@ -177,8 +177,15 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
 
       <GestureDetector gesture={pan}>
         {/* The touch target is the whole strip, not the 30px knob — a knob-sized
-            hit area on a phone is a knob you keep missing. */}
-        <View style={styles.strip}>
+            hit area on a phone is a knob you keep missing.
+
+            `nativeID` so the measurement harness can find it: a drag has no button
+            to click, so scripts/measure-must.mjs could not answer one and stopped
+            every drag lesson two beats short of its end. Same fix, same reason as
+            the `beat-progress` id — a harness that has to guess which element to
+            drive will eventually guess wrong and report a short sweep as a clean
+            one. See §21. */}
+        <View style={styles.strip} nativeID="drag-strip">
           <View
             style={styles.rail}
             onLayout={(e) => { railW.value = e.nativeEvent.layout.width; }}

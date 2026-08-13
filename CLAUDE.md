@@ -1154,6 +1154,22 @@ browser at it; the first transform can take longer than a navigation timeout.
   choices are bare `Pressable`s, which React Native Web gives a `tabindex` and no
   role. **Selecting on `[role="button"]` alone finds half the buttons in this app.**
 
+  **A fourth, from the drag lessons, and it is the same shape a third time.** A
+  `drag` question (§17) has no button anywhere on the beat, so both answer snippets
+  found nothing and the first sweep of the twelve measured **6 or 7 beats of 9 and
+  reported them as measured** — a short sweep is indistinguishable from a clean one
+  unless something counts. Two things fixed it: the rail carries `nativeID="drag-strip"`
+  so the harness never has to guess which element to drive, and the answer is a
+  POINTER sequence, because react-native-gesture-handler listens on pointer events
+  and a `MouseEvent` does nothing to it however carefully aimed. It also needs
+  several `pointermove`s rather than one jump — `onUpdate` integrates
+  `translationX`, and a single leap from the press point does not clear the pan
+  recogniser's activation check.
+
+  The rule underneath all four: **when a lesson gains a new way to be answered, the
+  harness gains one too, in the same commit.** Otherwise the next sweep quietly
+  measures less and says nothing.
+
 **On device**, `adb` lives in the session scratchpad. Applying an OTA takes two
 launches: force-stop → launch (downloads) → force-stop → launch (applies).
 Crashes: `adb logcat -d -b crash`.
