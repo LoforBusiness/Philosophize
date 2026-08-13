@@ -99,6 +99,38 @@ export interface SummaryBlock { title: string; points: string[]; closing: string
  */
 export interface ChoiceCard { text: string; correct: boolean }
 
+/**
+ * One region of a `drag` question's line (see ./DragScale).
+ *
+ * `reads` is the word shown above the knob while it is in here, and it is the part
+ * that TEACHES: the reader hunts the boundary by watching "a hunch" give way to "a
+ * good bet" give way to "knowledge". It is lesson copy under group J, not scoring
+ * furniture — keep it to a few plain words.
+ */
+export interface ScaleZone {
+  id: string;
+  /** This zone's right-hand edge as a fraction of the rail. The last must be 1. */
+  upto: number;
+  /** The reading shown while the knob is inside this zone. */
+  reads: string;
+  correct?: boolean;
+}
+
+/**
+ * A graded question whose answer is a POSITION on a line rather than a choice.
+ *
+ * For the "how much" questions — how much may a society tolerate, how simple should
+ * an explanation be, how sure are you — where offering two cards would answer the
+ * interesting half of the question for the reader.
+ */
+export interface DragBlock {
+  /** Label under the left end of the rail. */ lo: string;
+  /** Label under the right end. */ hi: string;
+  /** Where the knob starts, 0..1. Keep it OUT of the correct zone. */ start: number;
+  /** Left to right, each `upto` greater than the last, the final one exactly 1. */
+  zones: ScaleZone[];
+}
+
 export interface InteractBlock {
   prompt: string; explain: string; xp?: number;
   /**
@@ -111,6 +143,11 @@ export interface InteractBlock {
    * and a third question type would have been a third thing to keep in step.
    */
   cards?: [ChoiceCard, ChoiceCard];
+  /**
+   * A line the reader drags a knob along (see ./DragScale). Mutually exclusive with
+   * `cards` in practice — a question is either "which of these" or "how much".
+   */
+  drag?: DragBlock;
 }
 
 /** Every lesson's Beat extends this; the shell reads only these common fields. */

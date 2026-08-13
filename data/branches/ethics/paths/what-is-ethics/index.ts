@@ -31,6 +31,8 @@ import metaethicsWhereMoralsLive from './lessons/metaethics-where-morals-live';
 import reflectiveEquilibrium from './lessons/reflective-equilibrium';
 import supererogationBeyondDuty from './lessons/supererogation-beyond-duty';
 import howToLiveAnEthicalLife from './lessons/how-to-live-an-ethical-life';
+import howMuchIsRequired from './lessons/how-much-is-required';
+import morePeopleWorseLives from './lessons/more-people-worse-lives';
 
 // 5 units — split from the original single "What Is Ethics?" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
@@ -71,7 +73,7 @@ const units: Path[] = [
     slug: "stepping-back",
     name: "Stepping Back",
     description: "Zoom out one last time: where morals actually live, how to settle a clash of principle and gut, what lies beyond duty — and how to live.",
-    lessons: [metaethicsWhereMoralsLive, reflectiveEquilibrium, supererogationBeyondDuty, howToLiveAnEthicalLife, oughtImpliesCan, borrowingAVerdict],
+    lessons: [metaethicsWhereMoralsLive, reflectiveEquilibrium, supererogationBeyondDuty, howToLiveAnEthicalLife, oughtImpliesCan, borrowingAVerdict, howMuchIsRequired, morePeopleWorseLives],
   },
 ];
 

@@ -31,6 +31,8 @@ import bordersAndImmigration from './lessons/borders-and-immigration';
 import idealVsNonIdealTheory from './lessons/ideal-vs-non-ideal-theory';
 import theTragedyOfTheCommons from './lessons/the-tragedy-of-the-commons';
 import whyVoteAtAll from './lessons/why-vote-at-all';
+import mustAFreeSocietyTolerateEverything from './lessons/must-a-free-society-tolerate-everything';
+import whoShouldDecideThis from './lessons/who-should-decide-this';
 
 // 5 units — split from the original single "What Is Political Philosophy?" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
@@ -71,7 +73,7 @@ const units: Path[] = [
     slug: "identity-and-the-hard-cases",
     name: "Identity & the Hard Cases",
     description: "The communal self, recognition, and feminism, then politics' toughest real-world tests — war, prisons, borders — down to how we should even theorize.",
-    lessons: [communitarianismVsLiberalism, recognitionAndMulticulturalism, feministPoliticalPhilosophy, deliberativeDemocracy, justWarTheory, punishmentAndPrisons, bordersAndImmigration, idealVsNonIdealTheory, whyVoteAtAll],
+    lessons: [communitarianismVsLiberalism, recognitionAndMulticulturalism, feministPoliticalPhilosophy, deliberativeDemocracy, justWarTheory, punishmentAndPrisons, bordersAndImmigration, idealVsNonIdealTheory, whyVoteAtAll, mustAFreeSocietyTolerateEverything, whoShouldDecideThis],
   },
 ];
 

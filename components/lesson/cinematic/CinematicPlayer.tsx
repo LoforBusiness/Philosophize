@@ -17,6 +17,7 @@ import { MUST } from './mustBoxes';
 import { cue, touch } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import ChoiceCards from './ChoiceCards';
+import DragScale from './DragScale';
 import { swishTrack } from './gestures';
 import { lessonHasSound } from './lessonSound';
 import { TargetCountProvider } from './Target';
@@ -47,6 +48,15 @@ export interface SceneApi {
   beat: BaseBeat;               // current beat (for bubbles etc.)
   picked: string | null;        // which scene target is chosen (null until answered)
   onPick: (id: string, correct: boolean) => void;  // scene reports a scene-driven answer
+  /**
+   * The `drag` question's knob position, 0..1 (see ./DragScale). Meaningless on a
+   * beat with no `interact.drag`, where it simply holds its last value.
+   *
+   * A scene reads this to make the ART the thing being dragged rather than a
+   * picture sitting next to a slider: the painting cleans, the population fills,
+   * the curve grows its wiggles, all on the UI thread under the reader's thumb.
+   */
+  dragPos: SharedValue<number>;
   /**
    * Whether this lesson is allowed to make a noise (./lessonSound). The player
    * already sounds everything the SHELL owns — beats, answers, quotes, footfalls
@@ -183,6 +193,11 @@ export default function CinematicPlayer({
   const bt = useSharedValue(0);
   const bi = useSharedValue(0);
   const qv = useSharedValue(0);
+  // The `drag` knob, 0..1. Owned HERE rather than inside DragScale so the scene can
+  // read the same value and animate its art under the reader's thumb (see
+  // ./DragScale). Reset to the beat's declared start whenever a drag beat opens, or
+  // the second drag question in a lesson would begin wherever the first was left.
+  const dragPos = useSharedValue(0);
   // The foot-plant times for the walk into the current beat, how many have already
   // sounded, and when the walk comes to rest (−1 if it ends mid-stride). Numbers
   // only — a JS closure cannot cross into a worklet (§17).
@@ -407,6 +422,14 @@ export default function CinematicPlayer({
     progress.value = withTiming((i + 1) / beats.length, { duration: 500, easing: Easing.out(Easing.cubic) });
   }, [i]);
 
+  // A drag beat opens with its knob where the script put it. Without this the
+  // SECOND drag question in a lesson would start wherever the first was released —
+  // which on a two-drag lesson means opening already inside the answer.
+  useEffect(() => {
+    const d = beat.interact?.drag;
+    if (d) dragPos.value = d.start;
+  }, [i, beat.interact?.drag, dragPos]);
+
   // On completion, hand the result to the GLOBAL reward overlay and pop this
   // screen off the tab stack, so it never lingers and re-shows the reward.
   useEffect(() => {
@@ -542,12 +565,12 @@ export default function CinematicPlayer({
                       style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
                     >
                       <TargetCountProvider onCount={setTargetCount} onBox={onBox} host={camHost}>
-                        <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                        <Scene clock={clock} bt={bt} bi={bi} qv={qv} dragPos={dragPos} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
                       </TargetCountProvider>
                     </Animated.View>
                   ) : (
                     <TargetCountProvider onCount={setTargetCount}>
-                      <Scene clock={clock} bt={bt} bi={bi} qv={qv} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                      <Scene clock={clock} bt={bt} bi={bi} qv={qv} dragPos={dragPos} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
                     </TargetCountProvider>
                   )}
                 </View>
@@ -567,6 +590,17 @@ export default function CinematicPlayer({
             cards={beat.interact.cards}
             picked={picked}
             onPick={(id, ok) => choose(id, ok, true)}
+          />
+        ) : null}
+
+        {/* THE LINE — same slot, same reasoning, for a question whose answer is a
+            position rather than a pick. See ./DragScale. */}
+        {beat.interact?.drag && !gone ? (
+          <DragScale
+            drag={beat.interact.drag}
+            picked={picked}
+            onPick={(id, ok) => choose(id, ok, true)}
+            pos={dragPos}
           />
         ) : null}
 

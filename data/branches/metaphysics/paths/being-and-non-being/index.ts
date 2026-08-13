@@ -31,6 +31,8 @@ import realismVsAntiRealism from './lessons/realism-vs-anti-realism';
 import doesMetaphysicsMakeProgress from './lessons/does-metaphysics-make-progress';
 import doHolesExist from './lessons/do-holes-exist';
 import couldTwoThingsBeExactlyAlike from './lessons/could-two-things-be-exactly-alike';
+import theArrowOfTime from './lessons/the-arrow-of-time';
+import isThereABottomLevel from './lessons/is-there-a-bottom-level';
 
 // 5 units — split from the original single "Being and Non-Being" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
@@ -71,7 +73,7 @@ const units: Path[] = [
     slug: "frontiers-of-reality",
     name: "Frontiers of Reality",
     description: "Zoom out to the big picture — how reality layers, whether its laws truly compel, and if the world needs a mind at all.",
-    lessons: [emergenceAndReduction, lawsOfNature, panpsychism, realismVsAntiRealism, doesMetaphysicsMakeProgress, couldTwoThingsBeExactlyAlike],
+    lessons: [emergenceAndReduction, lawsOfNature, panpsychism, realismVsAntiRealism, doesMetaphysicsMakeProgress, couldTwoThingsBeExactlyAlike, theArrowOfTime, isThereABottomLevel],
   },
 ];
 

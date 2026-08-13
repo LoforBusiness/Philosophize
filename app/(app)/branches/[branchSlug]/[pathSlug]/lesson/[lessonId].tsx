@@ -66,6 +66,18 @@ import { Epistemology31Lesson } from '@/components/lesson/cinematic/epistemology
 import { Epistemology32Lesson } from '@/components/lesson/cinematic/epistemology32Scene';
 import { Metaphysics31Lesson } from '@/components/lesson/cinematic/metaphysics31Scene';
 import { Metaphysics32Lesson } from '@/components/lesson/cinematic/metaphysics32Scene';
+import { Political33Lesson } from '@/components/lesson/cinematic/political33Scene';
+import { Political34Lesson } from '@/components/lesson/cinematic/political34Scene';
+import { Aesthetics33Lesson } from '@/components/lesson/cinematic/aesthetics33Scene';
+import { Aesthetics34Lesson } from '@/components/lesson/cinematic/aesthetics34Scene';
+import { Ethics33Lesson } from '@/components/lesson/cinematic/ethics33Scene';
+import { Ethics34Lesson } from '@/components/lesson/cinematic/ethics34Scene';
+import { Logic33Lesson } from '@/components/lesson/cinematic/logic33Scene';
+import { Logic34Lesson } from '@/components/lesson/cinematic/logic34Scene';
+import { Epistemology33Lesson } from '@/components/lesson/cinematic/epistemology33Scene';
+import { Epistemology34Lesson } from '@/components/lesson/cinematic/epistemology34Scene';
+import { Metaphysics33Lesson } from '@/components/lesson/cinematic/metaphysics33Scene';
+import { Metaphysics34Lesson } from '@/components/lesson/cinematic/metaphysics34Scene';
 import { Aesthetics31Lesson } from '@/components/lesson/cinematic/aesthetics31Scene';
 import { Aesthetics32Lesson } from '@/components/lesson/cinematic/aesthetics32Scene';
 import { Political31Lesson } from '@/components/lesson/cinematic/political31Scene';
@@ -190,6 +202,18 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   'epistemology-knowledge-32': Epistemology32Lesson,
   'metaphysics-being-31': Metaphysics31Lesson,
   'metaphysics-being-32': Metaphysics32Lesson,
+  'political-political-33': Political33Lesson,
+  'political-political-34': Political34Lesson,
+  'aesthetics-aesthetics-33': Aesthetics33Lesson,
+  'aesthetics-aesthetics-34': Aesthetics34Lesson,
+  'ethics-ethics-33': Ethics33Lesson,
+  'ethics-ethics-34': Ethics34Lesson,
+  'logic-arguments-33': Logic33Lesson,
+  'logic-arguments-34': Logic34Lesson,
+  'epistemology-knowledge-33': Epistemology33Lesson,
+  'epistemology-knowledge-34': Epistemology34Lesson,
+  'metaphysics-being-33': Metaphysics33Lesson,
+  'metaphysics-being-34': Metaphysics34Lesson,
   'aesthetics-aesthetics-31': Aesthetics31Lesson,
   'aesthetics-aesthetics-32': Aesthetics32Lesson,
   'political-political-31': Political31Lesson,

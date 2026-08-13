@@ -31,6 +31,8 @@ import artAndTruth from './lessons/art-and-truth';
 import beautyAndTheGoodLife from './lessons/beauty-and-the-good-life';
 import whyDoWeApplaudDifficulty from './lessons/why-do-we-applaud-difficulty';
 import whyDoEndingsMatter from './lessons/why-do-endings-matter';
+import howMuchShouldYouCleanAPainting from './lessons/how-much-should-you-clean-a-painting';
+import whenAPictureStopsBeingOfSomething from './lessons/when-a-picture-stops-being-of-something';
 
 // 3 units — split from the original single "What Is Aesthetics?" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
@@ -58,7 +60,7 @@ const units: Path[] = [
     slug: "puzzles-at-the-edge",
     name: "Puzzles at the Edge",
     description: "The deeper puzzles — where an artwork actually lives, why a perfect fake unsettles us, how taste is shaped — and what beauty is finally for.",
-    lessons: [theOntologyOfArt, theParadoxOfFiction, musicAndEmotion, benjaminAuraAndReproduction, bourdieuTasteAndClass, kitschAndCamp, theAvantGarde, aestheticsOfTheEveryday, artAndTruth, beautyAndTheGoodLife, whyDoEndingsMatter],
+    lessons: [theOntologyOfArt, theParadoxOfFiction, musicAndEmotion, benjaminAuraAndReproduction, bourdieuTasteAndClass, kitschAndCamp, theAvantGarde, aestheticsOfTheEveryday, artAndTruth, beautyAndTheGoodLife, whyDoEndingsMatter, howMuchShouldYouCleanAPainting, whenAPictureStopsBeingOfSomething],
   },
 ];
 
