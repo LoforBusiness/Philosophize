@@ -67,7 +67,7 @@ export const BEATS: Epi5Beat[] = [
   {
     p: 25, star: 1, rungs: 5,
     interact: {
-      prompt: 'So where does curiosity come from? Were you taught to want to know, or did you arrive wanting it?',
+      prompt: 'Where does curiosity come from? Were you taught to want to know, or did you arrive wanting it?',
       cards: [
         { text: 'It is woven into us', correct: true },
         { text: 'It is taught to us', correct: false },
