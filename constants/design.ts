@@ -26,17 +26,56 @@ export const C = {
   // is what `components/shared/tone.ts` does correctly for the rank pins
   // (light/shadow on one hex), not a second, separately-named hex.
 
-  /** Progress tracks and faint fills. */
-  HUE_SOFT: '#F0F7F6',
+  /** Progress tracks and faint fills.
+   *
+   *  NOTHING CONSUMES THIS TODAY, and the value moved (#F0F7F6 → #CEDEDC)
+   *  without a pixel changing anywhere, because the two tracks that used to
+   *  hold it are on `hairline` now. The old value was the reason: at #F0F7F6 a
+   *  track measured ΔL* 1.50 against `paper` and 3.30 against a Card face —
+   *  1.04:1 and 1.09:1 — so the six Branch Mastery bars had no visible unfilled
+   *  remainder at all, which is the only thing a progress bar communicates.
+   *  It passed 117 checks because it was the ONE token with no contrast pair.
+   *  It has two now (see PAIRS in scripts/check-ui.mjs, floor 1.2), and this
+   *  value clears them at 1.33:1 on paper and 1.39:1 on surface. A faint fill
+   *  still has to be a fill you can see. */
+  HUE_SOFT: '#CEDEDC',
 
   ink: '#1A1A1A',
   inkSoft: '#686868',
   /** For disabled and decorative marks ONLY — never for text a user needs to
    *  read. Measured at 2.11:1 on `paper`, under even the 3:1 non-text floor;
-   *  it recedes on purpose and is not a body/caption colour. */
+   *  it recedes on purpose and is not a body/caption colour.
+   *
+   *  ON A DARK GROUND it is the opposite story, and that is what makes it the
+   *  right edge for a field sitting on ink: 7.87:1 on `ink`, and 7.28:1 on the
+   *  heaviest stop of the Thinkers hero scrim. Both are non-text marks, which
+   *  is the use this comment has always allowed — the prohibition is on text,
+   *  not on lines. `inkSoft` was measured for the same job and reads 2.89:1
+   *  there, under the 3:1 floor, so it is not a substitute. */
   dim: '#B3AEA3',
 
   paper: '#FAFAF7',
+  /** SECONDARY TEXT ON A DARK GROUND — what `inkSoft` is on paper, reversed.
+   *
+   *  The palette had no such token, so `hairline` absorbed the role by default
+   *  and ended up doing three unrelated jobs at once: a border, on-dark caption
+   *  text, and a placeholder. The cost was measurable — `hairline` sits ΔL* 7.88
+   *  from `paper`, so every kicker, wordmark, date and attribution on the
+   *  Thinkers hero came out at almost exactly the brightness of the headlines
+   *  they were meant to sit under, and the hierarchy flattened.
+   *
+   *  This value is not invented: it is the tone that screen already had for the
+   *  job (`PaperMuteOnArt`), and it restores the spread it was tuned to give —
+   *  ΔL* 19.79 below `paper`. It has to survive TWO grounds, which is what rules
+   *  the darker candidates out: solid `ink` (9.76:1) and the lightest stop of
+   *  the hero scrim, where the wordmark sits (5.05:1, over a 0.62 ink wash on
+   *  pen-on-white art). The screen's older, darker mute measured 3.2:1 there and
+   *  that is exactly why it needed a second tone; one token that clears both is
+   *  the point of having a system.
+   *
+   *  It is TEXT. Borders on a dark ground are `dim`'s job, per its comment
+   *  above — do not let this one drift back into doing two things. */
+  paperSoft: '#C4C2BB',
   surface: '#FFFFFF',
   surfaceSoft: '#F4F2EC',
   hairline: '#E7E3DA',

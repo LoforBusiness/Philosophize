@@ -216,12 +216,15 @@ export default function ThinkersScreen() {
         return (
           <View style={[styles.rowPad, styles.grid]}>
             {item.items.map((p) => (
-              // The column wrapper carries the width; Card sizes to fill it. Putting
-              // the width on Card directly would make it the row's flex item, and a
-              // row's default `alignItems: stretch` would then stretch CARD'S OWN
-              // outer (petrol) layer to match a taller neighbour without stretching
-              // the paper face inside it — the same fix profile.tsx's `glanceCol`
-              // comment documents for this exact composition.
+              // The column wrapper carries the width; the row's default
+              // `alignItems: stretch` makes both wrappers as tall as the taller
+              // one; and `containerStyle={{ flexGrow: 1 }}` on the Card inside
+              // (see ThinkerCard) is what turns that into a card of that height
+              // rather than a short card in a tall transparent box. All three are
+              // needed: the old `cardBody` did the last two with `minHeight: 150`
+              // plus `flexGrow: 1`, and neither survived the conversion, so two
+              // cards side by side went back to differing in height whenever the
+              // names wrapped differently — 40 of 160 pairs, about 50pt of spread.
               <View key={p.id} style={{ width: CARD_W }}>
                 <ThinkerCard p={p} onOpen={openById} />
               </View>
@@ -355,7 +358,13 @@ export default function ThinkersScreen() {
                   value={query}
                   onChangeText={setQuery}
                   placeholder="Search a philosopher..."
-                  placeholderTextColor={C.hairline}
+                  // A placeholder has to look UNLIKE a value, or it reads as
+                  // something already typed. `hairline` sits ΔL* 7.88 from the
+                  // typed text's `paper` — the two were nearly the same
+                  // brightness. `paperSoft` is secondary text on a dark ground,
+                  // which is exactly what a placeholder is, and restores ΔL*
+                  // 19.79 of separation at 9.76:1 on the field's own ink.
+                  placeholderTextColor={C.paperSoft}
                   style={styles.search}
                   autoCorrect={false}
                 />
@@ -406,7 +415,10 @@ const ThinkerCard = memo(function ThinkerCard({
 }: { p: Philosopher; onOpen: (id: string) => void }) {
   const press = useCallback(() => onOpen(p.id), [onOpen, p.id]);
   return (
-    <Card onPress={press} pad={2}>
+    // `containerStyle`, not `style`: the height has to reach the OUTER box, and
+    // `style` lands on the face. A registered StyleSheet entry rather than an
+    // inline object, so memo() still sees an unchanged prop on a parent render.
+    <Card onPress={press} pad={2} containerStyle={styles.cardCol}>
       <View style={styles.badge}>
         <Text style={styles.badgeLetter}>{p.name.charAt(0)}</Text>
       </View>
@@ -458,14 +470,16 @@ const BreakBand = memo(function BreakBand({
           pressed && { opacity: 0.86 },
         ]}
       >
-        <Text style={[styles.bandKicker, dark && { color: C.hairline }]}>
+        {/* The dark band's caption and attribution are the same on-dark
+            secondary role as the hero's — `paperSoft`, not `hairline`. */}
+        <Text style={[styles.bandKicker, dark && { color: C.paperSoft }]}>
           {dark ? 'DID YOU KNOW' : 'IN THEIR WORDS'}
         </Text>
         <Text style={[dark ? styles.bandFact : styles.bandQuote, dark && { color: C.paper }]}>
           {dark ? text : `“${text}”`}
         </Text>
         <View style={styles.bandFoot}>
-          <Text style={[styles.bandWho, dark && { color: C.hairline }]}>{p.name}</Text>
+          <Text style={[styles.bandWho, dark && { color: C.paperSoft }]}>{p.name}</Text>
           <Text style={[styles.bandArrow, dark && { color: C.paper }]}>→</Text>
         </View>
       </Pressable>
@@ -512,23 +526,31 @@ const styles = StyleSheet.create({
   heroImg: { position: 'absolute', left: 0, top: 0, bottom: 0, width: SW },
   heroPad: { paddingHorizontal: SPACE[3] },
   wordmarkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  // Both captions were a bespoke "muted grey" (PaperMuteOnArt / PaperMute) tuned
-  // specifically for text over this photograph — not a plain hex either Settings or
-  // Profile ever needed, so it is not in the shared mapping table. `dim` is the
-  // nearest value BY NUMBER, but its own doc comment in constants/design.ts rules it
-  // out: "never for text a user needs to read" — and a wordmark label, a kicker and
-  // an attribution are exactly that, not decoration. `hairline` carries no such
-  // restriction, sits in the same near-white family, and — being lighter than the
-  // original PaperMuteOnArt — actually clears the 4.5:1 floor that comment says the
-  // old colour fell short of (3.2:1) over this same drawing, rather than only
-  // matching it. See the report for the fuller version of this reasoning.
-  wordmark: { ...role('micro'), color: C.hairline, letterSpacing: 4 },
-  metCount: { ...role('micro'), fontFamily: 'Inter_400Regular', color: C.hairline, letterSpacing: 0.5 },
+  // EVERY CAPTION ON THIS HERO IS `paperSoft`, AND THE HEADLINES STAY `paper`.
+  //
+  // The bespoke tones these replaced (PaperMuteOnArt / PaperMute) were ruled out
+  // of the palette for the right reason and replaced with the wrong token.
+  // `hairline` is readable — it is 7.03:1 over the lightest stop of this scrim —
+  // but readability was never the question a caption asks. It sits ΔL* 7.88 from
+  // the `paper` the headlines are set in, so six captions and the two headlines
+  // they belong under all arrived at the same brightness, and the hierarchy on
+  // the tab's most prominent screen went flat. `dim` was correctly rejected (its
+  // comment forbids readable text) and the role then fell to `hairline` by
+  // default, which left one token doing three jobs: border, on-dark caption, and
+  // placeholder.
+  //
+  // `paperSoft` exists for the one job. It restores the exact spread the bespoke
+  // tone was tuned to give — ΔL* 19.79 below `paper` — and clears 4.5:1 on both
+  // grounds this hero has: 5.05:1 over the 0.62 scrim where the wordmark sits,
+  // 9.76:1 on solid ink. That second ground is what the darker of the two old
+  // tones could not do (3.2:1), which is why there used to be two of them.
+  wordmark: { ...role('micro'), color: C.paperSoft, letterSpacing: 4 },
+  metCount: { ...role('micro'), fontFamily: 'Inter_400Regular', color: C.paperSoft, letterSpacing: 0.5 },
 
   heroBody: { marginTop: SPACE[4] },
-  heroKicker: { ...role('micro'), color: C.hairline },
+  heroKicker: { ...role('micro'), color: C.paperSoft },
   heroName: { ...role('display'), color: C.paper, marginTop: SPACE[0] },
-  heroLife: { ...role('micro'), fontFamily: 'Inter_400Regular', color: C.hairline, letterSpacing: 0 },
+  heroLife: { ...role('micro'), fontFamily: 'Inter_400Regular', color: C.paperSoft, letterSpacing: 0 },
   heroIdea: {
     ...role('body'),
     fontFamily: PLAYFAIR_CAPTION,
@@ -541,20 +563,29 @@ const styles = StyleSheet.create({
   heroArrow: { ...role('body'), color: C.paper },
 
   darkTag: { backgroundColor: wash(C.surface, 0.13), borderRadius: 3, paddingHorizontal: SPACE[1], paddingVertical: SPACE[0] },
-  darkTagText: { ...role('micro'), color: C.hairline, letterSpacing: 1 },
+  darkTagText: { ...role('micro'), color: C.paperSoft, letterSpacing: 1 },
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACE[0], marginTop: SPACE[3] },
 
-  // Border and fill are now the same `ink` token — the three near-blacks this
-  // screen used to carry (#1A1A1A / #262626 / #3A3A38) collapse to the one token,
-  // which is the point of this conversion, and it means this particular border no
-  // longer reads as a separate edge. Disclosed rather than quietly kept apart.
+  // THE EDGE IS `dim`, AND THE FIELD ONLY EXISTS BECAUSE OF IT.
+  //
+  // Collapsing the three near-blacks (#1A1A1A / #262626 / #3A3A38) to one `ink`
+  // token is right for the fill and was wrong for the border: an ink border on
+  // an ink fill, at the bottom of a hero scrimmed to 94% ink over the drawing
+  // (composite ≈ #212121), measures 1.08:1 against its own surround. That is not
+  // a quiet edge, it is no edge — a search field with no box around it.
+  //
+  // `dim` is the token whose comment names this exact use (decorative marks,
+  // never text) and it measures 7.28:1 against that composite and 7.87:1 against
+  // the plain ink hero the no-featured case shows. `inkSoft` was the quieter
+  // candidate and reads 2.89:1 there, under the 3:1 non-text floor, so it is out
+  // on the measurement rather than on taste. The FILL is untouched.
   search: {
     ...role('body'),
     alignSelf: 'stretch',
     marginTop: SPACE[3],
     backgroundColor: C.ink,
     borderWidth: 1,
-    borderColor: C.ink,
+    borderColor: C.dim,
     borderRadius: 10,
     paddingHorizontal: SPACE[3],
     paddingVertical: SPACE[2],
@@ -589,6 +620,9 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACE[2], marginBottom: SPACE[3] },
 
   // ── the thinker card's contents (the surface itself is `Card`) ───────────────
+  // Fills the height its column wrapper was stretched to — the equal-height half
+  // of what `cardBody` used to do. See the wrapper comment in renderRow.
+  cardCol: { flexGrow: 1 },
   badge: {
     width: 38,
     height: 38,

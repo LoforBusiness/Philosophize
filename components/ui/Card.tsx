@@ -37,15 +37,41 @@ import { C, RADIUS, LIP, SPACE } from '@/constants/design';
 // sibling below it jittered. Cards live in long scrolling lists, so that
 // bug would have been worse here than it was there.)
 
+// ── WHY THERE ARE TWO STYLE PROPS ────────────────────────────────────────────
+//
+// `style` lands on the FACE — the painted surface — which is right for anything
+// visual, and useless for anything about how this card sits among its siblings.
+// The outer box was unreachable from outside, and three screens in this branch
+// worked around it the same way: settings' `planCol`, profile's `glanceCol`,
+// and the thinkers grid's width wrapper, each with its own comment explaining
+// the same gap. Three workarounds for one missing prop is the tell.
+//
+// `containerStyle` is that prop, named and shaped exactly as
+// components/shared/PressableScale.tsx already does it — LAYOUT for the outer
+// flex child, visual on the inner. A second, differently-named convention for
+// the identical idea would be the worse outcome.
+//
+// The face RELAYS the growth, and that half matters as much as the prop. A row
+// stretches its children, and a grown outer box used to leave the paper face at
+// content height inside it — a taller transparent box with a short card in it,
+// which is precisely the bug the thinkers grid comment described. `flexGrow: 1`
+// on the inner layers costs nothing when the outer box is content-sized (no
+// free space to grow into, so Yoga ignores it) and is what makes an equal-height
+// column an equal-height CARD.
 interface Props {
   children: ReactNode;
   onPress?: () => void;
   /** Index into SPACE. Default 3 → 16. */
   pad?: 0 | 1 | 2 | 3 | 4 | 5;
+  /** Visual style for the face. */
   style?: StyleProp<ViewStyle>;
+  /** Layout style for the OUTER box (the actual flex child). Needed when the
+   *  card must stretch or grow — e.g. `flexGrow: 1` for equal-height columns —
+   *  since `style` lives on the face inside it. */
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
-export default function Card({ children, onPress, pad = 3, style }: Props) {
+export default function Card({ children, onPress, pad = 3, style, containerStyle }: Props) {
   const [down, setDown] = useState(false);
   const lip = onPress ? LIP.card : 0;
   const drop = down ? lip : 0;
@@ -60,7 +86,9 @@ export default function Card({ children, onPress, pad = 3, style }: Props) {
     </MotiView>
   );
 
-  if (!onPress) return <View style={styles.flat}>{face}</View>;
+  // Static card: the flat box IS the outer flex child, so `containerStyle`
+  // lands here.
+  if (!onPress) return <View style={[styles.flat, containerStyle]}>{face}</View>;
 
   return (
     <Pressable
@@ -68,10 +96,13 @@ export default function Card({ children, onPress, pad = 3, style }: Props) {
       onPressIn={() => setDown(true)}
       onPressOut={() => setDown(false)}
       accessibilityRole="button"
+      // Pressable card: the Pressable is the outer flex child (same place
+      // PressableScale puts it), and the box below relays the height inwards.
+      style={containerStyle}
     >
       {/* Transparent container, height fixed at content + lip (constant,
           never animated). */}
-      <View style={[styles.flat, { paddingBottom: lip }]}>
+      <View style={[styles.flat, styles.grow, { paddingBottom: lip }]}>
         {/* The lip slab: spans [lip, height], behind the face — see the file
             header for why the colour lives here and not on the container. */}
         {lip > 0 && (
@@ -91,10 +122,13 @@ export default function Card({ children, onPress, pad = 3, style }: Props) {
 
 const styles = StyleSheet.create({
   flat: { borderRadius: RADIUS.card },
+  // Inert unless the outer box was grown or stretched — see the header.
+  grow: { flexGrow: 1 },
   face: {
     backgroundColor: C.surface,
     borderRadius: RADIUS.card,
     borderWidth: 1,
     borderColor: C.hairline,
+    flexGrow: 1,
   },
 });

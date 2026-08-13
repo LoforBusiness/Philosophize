@@ -642,7 +642,15 @@ function NotificationsSection() {
       <Row title="Daily Reminder" sub="A gentle nudge to return to your studies">
         <Toggle value={settings.dailyReminder && !blocked} onChange={(v) => void enable('dailyReminder', v)} />
       </Row>
-      <Row title="Reminder Time" sub="When the daily nudge arrives">
+      {/* `stack`, for the reason DangerRow carries it: the shared Button is
+          wider than the bespoke control it replaced, and this is the worst case
+          on the screen — its label is an icon AND a time string, so it takes
+          more width than any other row's control while the text beside it is a
+          title and a seven-word description. Unstacked, both columns lose.
+          Neither this row nor Ad Privacy below renders on web (the section is
+          absent unless notifications.isSupported()), so no browser pass could
+          have shown it; the cause is the one already fixed in Danger Zone. */}
+      <Row title="Reminder Time" sub="When the daily nudge arrives" stack>
         {/* Still one tap, still cycling through TIMES, still showing the stored
             value as its label. The clock now sits before the time rather than
             after it, because that is the order the shared Button draws an icon —
@@ -851,8 +859,12 @@ function PrivacySection() {
       >
         <Toggle value={settings.usageAnalytics} onChange={(v) => setSetting('usageAnalytics', v)} />
       </Row>
+      {/* `stack` on the row below — same cause as Reminder Time and Danger Zone.
+          It is invisible to any browser check too: it renders only when
+          ads.isPrivacyOptionsRequired() is true, which needs the native SDK and
+          an EEA/UK/CH reader. */}
       {adPrivacy && (
-        <Row title="Ad Privacy Settings" sub="Change or withdraw your consent for personalised ads" last>
+        <Row title="Ad Privacy Settings" sub="Change or withdraw your consent for personalised ads" last stack>
           <Button label="Manage" onPress={() => ads.showPrivacyOptions()} variant="secondary" />
         </Row>
       )}

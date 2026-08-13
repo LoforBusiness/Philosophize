@@ -705,14 +705,30 @@ const styles = StyleSheet.create({
   rankBoxTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: SPACE[2] },
   rankName: { ...role('title'), color: C.ink },
   rankXp: { ...role('label'), fontFamily: 'Inter_400Regular', color: C.inkSoft },
-  bigTrack: { height: 8, borderRadius: 4, backgroundColor: C.HUE_SOFT, overflow: 'hidden' },
+  // THE TRACK IS `hairline`, NOT `HUE_SOFT`, AND THIS WAS MEASURED.
+  //
+  // `HUE_SOFT` is the token whose comment says "progress tracks", which is why
+  // the conversion reached for it — but the value it carried (#F0F7F6) put this
+  // track at ΔL* 3.30 from the white Card face under it, and the six Branch
+  // Mastery bars below at ΔL* 1.50 from `paper`. A progress bar communicates
+  // exactly one thing, how much is LEFT, and at 1.04:1 there was no remainder
+  // to see: six full-looking bars, whatever the reader had actually finished.
+  //
+  // `hairline` is what these tracks were before the conversion in all but name
+  // — #E7E3DA against the original #E6E4DC is ΔL* 0.22 — and it restores the
+  // measurements the screen shipped with: ΔL* 7.88 on paper, 9.68 on the card.
+  // Naming beat measuring once here; it does not get to twice, so `HUE_SOFT`
+  // now carries contrast pairs of its own in scripts/check-ui.mjs.
+  bigTrack: { height: 8, borderRadius: 4, backgroundColor: C.hairline, overflow: 'hidden' },
   bigFill: { height: 8, borderRadius: 4, backgroundColor: C.ink },
   rankUntil: { ...role('micro'), color: C.inkSoft, letterSpacing: 1, textAlign: 'right', marginTop: SPACE[2] },
 
   masteryBox: { gap: SPACE[3] },
   masteryRow: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2] },
   masteryName: { ...role('micro'), fontFamily: 'Inter_700Bold', color: C.ink, letterSpacing: 0.5, width: 96 },
-  masteryTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: C.HUE_SOFT, overflow: 'hidden' },
+  // `hairline`, for the reason spelled out on `bigTrack` above — these are the
+  // six bars the measurement was taken on.
+  masteryTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: C.hairline, overflow: 'hidden' },
   masteryFill: { height: 6, borderRadius: 3, backgroundColor: C.ink },
   masteryPct: { ...role('label'), color: C.inkSoft, width: 38, textAlign: 'right' },
 

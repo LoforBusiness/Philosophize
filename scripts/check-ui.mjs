@@ -83,6 +83,29 @@ const PAIRS = [
   ['wrong', 'paper', 4.5],
   ['inkSoft', 'surfaceSoft', 4.5],
   ['wrong', 'wrongSoft', 4.5],      // the Danger Zone's text on its own fill
+
+  // A TRACK IS NOT TEXT, AND IT STILL HAS TO BE VISIBLE.
+  //
+  // `HUE_SOFT` was the only token in the palette with no pair at all, and that
+  // is precisely how six Branch Mastery bars shipped with nothing readable in
+  // them: at #F0F7F6 the unfilled remainder measured 1.04:1 on `paper` and
+  // 1.09:1 on a Card face (ΔL* 1.50 and 3.30), so the bar and its ground were
+  // the same surface. Nothing here failed, because nothing here was looking.
+  //
+  // 1.2 is not a WCAG number — no WCAG rule covers "a fill against the surface
+  // behind it". It is the measured floor this app already trusts: the tracks
+  // these screens shipped with before the conversion sat at 1.217:1 on paper
+  // and 1.273:1 on a card, and they read correctly on a real phone. So the
+  // floor is set just under the value known to work, and a track that cannot
+  // clear it is a track nobody can see.
+  ['HUE_SOFT', 'surface', 1.2],
+  ['HUE_SOFT', 'paper', 1.2],
+
+  // On-dark text, and the edge that keeps a dark field from vanishing into a
+  // dark hero. `paperSoft` is caption-weight text, so it carries the text
+  // floor; `dim` is a border, so it carries the 3:1 non-text one.
+  ['paperSoft', 'ink', 4.5],
+  ['dim', 'ink', 3.0],
 ];
 for (const [fg, bg, floor] of PAIRS) {
   const r = ratio(lum(D.C[fg]), lum(D.C[bg]));
