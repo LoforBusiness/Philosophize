@@ -1147,15 +1147,18 @@ function DangerSection() {
   );
 }
 
+// Danger Zone carries the longest descriptions on the screen, and the shared
+// destructive Button (paddingHorizontal 20, border 2 — wider than the old
+// bespoke danger button's 16/1.5) left the text column no slack at all: titles
+// broke one word per line and descriptions ran to six. `Row` already has a
+// `stack` variant built for exactly this — full-width text, control beneath —
+// so DangerRow is a thin wrapper around it rather than a second stacking
+// mechanism of its own.
 function DangerRow({ title, sub, label, onPress, last }: { title: string; sub: string; label: string; onPress: () => void; last?: boolean }) {
   return (
-    <View style={[styles.row, last && { borderBottomWidth: 0 }]}>
-      <View style={{ flex: 1, paddingRight: SPACE[2] }}>
-        <Text style={styles.rowTitle}>{title}</Text>
-        <Text style={styles.rowSub}>{sub}</Text>
-      </View>
+    <Row title={title} sub={sub} last={last} stack>
       <Button label={label} onPress={onPress} variant="destructive" />
-    </View>
+    </Row>
   );
 }
 
