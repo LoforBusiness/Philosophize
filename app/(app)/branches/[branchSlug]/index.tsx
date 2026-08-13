@@ -9,19 +9,13 @@ import type { Path as Unit, Lesson } from '@/data/types';
 import type { GlyphName } from '@/components/shared/Glyph';
 import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
+import Card from '@/components/ui/Card';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { BRANCH_ART, MAST_SCRIM, ArtCream, ArtSoft, ArtGold } from '@/constants/branchArt';
+import { C, TYPE, SPACE, type TypeKey } from '@/constants/design';
 import BranchWorld, { type WorldLesson } from '@/components/branch/BranchWorld';
-
-const Page = '#F1EEE7';
-const Paper = '#FFFFFF';
-const Ink = '#1A1A1A';
-const InkSoft = '#6B6B6B';
-const Faint = '#9A968C';
-const LockGray = '#B7B3A9';
-const FaintLine = '#D8D4CB';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 
@@ -292,12 +286,12 @@ export default function BranchDetailScreen() {
   };
 
   return (
-    <ScreenTransition bg={Page}>
+    <ScreenTransition bg={C.surfaceSoft}>
       <SafeAreaView style={styles.safe} edges={['top']}>
         {/* Top bar */}
         <View style={styles.topBar}>
           <Pressable onPress={() => router.back()} hitSlop={10} style={styles.backRow}>
-            <SketchIcon name="back" size={18} color={InkSoft} />
+            <SketchIcon name="back" size={18} color={C.inkSoft} />
             <Text style={styles.brand}>{branch.name.toUpperCase()}</Text>
           </Pressable>
           <Text style={styles.dots}>◆ ◆ ◆</Text>
@@ -305,7 +299,11 @@ export default function BranchDetailScreen() {
 
         {/* The drawer's handle: one small box under the branch name, left. Kept
             deliberately quiet — it is a way to leave the road, not the way to
-            walk it. */}
+            walk it. Left as a bespoke toggle rather than `Button`: it swaps its
+            OWN fill between paper and ink depending on whether the drawer is
+            open, which `Button`'s fixed per-variant face can't express — a
+            Button never remembers an open/closed state past the release of the
+            gesture that pressed it. */}
         <View
           style={styles.unitsBar}
           onLayout={(e) => setBarBottom(e.nativeEvent.layout.y + e.nativeEvent.layout.height)}
@@ -315,9 +313,9 @@ export default function BranchDetailScreen() {
             hitSlop={8}
             style={({ pressed }) => [styles.unitsBox, drawerOpen && styles.unitsBoxOpen, pressed && { opacity: 0.7 }]}
           >
-            <Text style={[styles.unitsLabel, drawerOpen && { color: Paper }]}>Units</Text>
+            <Text style={[styles.unitsLabel, drawerOpen && { color: C.paper }]}>Units</Text>
             <MotiView animate={{ rotate: drawerOpen ? '0deg' : '-90deg' }} transition={{ type: 'timing', duration: 200 }}>
-              <SketchIcon name="chevron-down" size={12} color={drawerOpen ? Paper : InkSoft} />
+              <SketchIcon name="chevron-down" size={12} color={drawerOpen ? C.paper : C.inkSoft} />
             </MotiView>
           </Pressable>
         </View>
@@ -345,7 +343,11 @@ export default function BranchDetailScreen() {
               arriving here confirms you opened what you tapped. The ink over it is
               heavier and more even than on the card: this text is centred in the
               box rather than stacked along the bottom, so there is no low band to
-              hide it in and the whole area has to be safe to read on. */}
+              hide it in and the whole area has to be safe to read on.
+
+              NOT MINE TO RETUNE: `BRANCH_ART` and `MAST_SCRIM` are governed by
+              `constants/branchArt.ts` and CLAUDE.md §19 — the scrim's three stops
+              were measured, not chosen, and stay exactly as imported. */}
           <ImageBackground
             source={BRANCH_ART[branch.slug]}
             style={styles.masthead}
@@ -370,7 +372,10 @@ export default function BranchDetailScreen() {
           {/* THE ROAD, and now the whole of it. Every lesson in the branch laid end
               to end on the ground with the reader standing where they got to;
               finishing one walks the figure to the next. The unit list that used
-              to sit beneath this is folded into the box above. */}
+              to sit beneath this is folded into the box above.
+
+              NOT MINE TO OPEN: `BranchWorld` is its own art system, validated by
+              `npm run check:walk` — not touched here, not even its import. */}
           <BranchWorld
             lessons={worldLessons}
             current={worldAt}
@@ -411,6 +416,7 @@ export default function BranchDetailScreen() {
             >
               <ScrollView
                 style={{ maxHeight: 380 }}
+                contentContainerStyle={styles.unitList}
                 showsVerticalScrollIndicator={false}
                 nestedScrollEnabled
               >
@@ -419,35 +425,45 @@ export default function BranchDetailScreen() {
                   const expanded = openUnitId === u.unit.id;
                   return (
                     <View key={u.unit.id}>
-                      <Pressable
+                      {/* THE UNIT ROW IS NOW A `Card`: pressable, so by the
+                          affordance rule it keeps its 2px lip — a locked unit's
+                          row still opens (it just shows locked lessons behind a
+                          paywall tap, same as any other unit), so it stays
+                          pressable and keeps the lip like every other row here. */}
+                      <Card
                         onPress={() => toggleUnit(u)}
-                        style={({ pressed }) => [
-                          styles.unitRow,
-                          here && styles.unitRowHere,
-                          pressed && { opacity: 0.6 },
-                        ]}
+                        pad={2}
+                        style={here ? styles.unitRowHere : undefined}
                       >
-                        <View style={{ flex: 1, minWidth: 0 }}>
-                          <Text style={styles.unitKicker}>
-                            UNIT {u.index + 1}
-                            {here ? ' · HERE' : ''}
-                          </Text>
-                          <Text style={styles.unitName} numberOfLines={1}>{u.unit.name}</Text>
+                        <View style={styles.unitRowInner}>
+                          <View style={{ flex: 1, minWidth: 0 }}>
+                            <Text style={styles.unitKicker}>
+                              UNIT {u.index + 1}
+                              {here ? ' · HERE' : ''}
+                            </Text>
+                            <Text style={styles.unitName} numberOfLines={1}>{u.unit.name}</Text>
+                          </View>
+                          <Text style={styles.unitCount}>{u.done}/{u.total}</Text>
+                          <MotiView
+                            animate={{ rotate: expanded ? '0deg' : '-90deg' }}
+                            transition={{ type: 'timing', duration: 160 }}
+                            style={styles.unitChev}
+                          >
+                            <SketchIcon name="chevron-down" size={11} color={C.inkSoft} />
+                          </MotiView>
                         </View>
-                        <Text style={styles.unitCount}>{u.done}/{u.total}</Text>
-                        <MotiView
-                          animate={{ rotate: expanded ? '0deg' : '-90deg' }}
-                          transition={{ type: 'timing', duration: 160 }}
-                          style={styles.unitChev}
-                        >
-                          <SketchIcon name="chevron-down" size={11} color={InkSoft} />
-                        </MotiView>
-                      </Pressable>
+                      </Card>
 
                       {/* THE LESSONS. A finished one a free reader may not reopen
                           still shows its tick — they did do it — and carries a
                           lock beside it. Greyed rather than hidden, because the
-                          point of the list is to show what is there. */}
+                          point of the list is to show what is there.
+
+                          Left as plain `Pressable`s rather than nested `Card`s:
+                          each one already sits inside the unit's own bordered
+                          panel above, and a card inside a card doubles the
+                          border and the padding for no gain in a list this
+                          dense — see the note on Card in the report. */}
                       {expanded && u.lessons.map((lm) => {
                         const dim = !lm.open;
                         return (
@@ -460,13 +476,13 @@ export default function BranchDetailScreen() {
                               pressed && lm.needsPass && { opacity: 0.75 },
                             ]}
                           >
-                            <Text style={[styles.lessonNo, dim && { color: LockGray }]}>
+                            <Text style={[styles.lessonNo, dim && { color: C.dim }]}>
                               {String(lm.li + 1).padStart(2, '0')}
                             </Text>
                             <Text
                               style={[
                                 styles.lessonName,
-                                dim && { color: LockGray },
+                                dim && { color: C.dim },
                                 lm.state === 'current' && lm.open && styles.lessonNext,
                               ]}
                               numberOfLines={1}
@@ -474,11 +490,11 @@ export default function BranchDetailScreen() {
                               {lm.lesson.title}
                             </Text>
                             {lm.state === 'done' && (
-                              <SketchIcon name="check" size={11} color={dim ? LockGray : InkSoft} />
+                              <SketchIcon name="check" size={11} color={dim ? C.dim : C.inkSoft} />
                             )}
                             {dim && (
-                              <View style={{ marginLeft: 6 }}>
-                                <SketchIcon name="lock" size={11} color={LockGray} />
+                              <View style={{ marginLeft: SPACE[1] }}>
+                                <SketchIcon name="lock" size={11} color={C.dim} />
                               </View>
                             )}
                           </Pressable>
@@ -513,112 +529,148 @@ export default function BranchDetailScreen() {
   );
 }
 
+// One place to build a `Text` style from the shared scale, exactly as Settings,
+// Profile and Thinkers do — `letterSpacing` defaults to the role's own, and a
+// site with a different original spacing overrides it after spreading.
+const role = (k: TypeKey) => ({
+  fontFamily: TYPE[k].family,
+  fontSize: TYPE[k].fontSize,
+  lineHeight: TYPE[k].lineHeight,
+  letterSpacing: TYPE[k].letterSpacing ?? 0,
+});
+const PLAYFAIR_HEAD = 'PlayfairDisplay_700Bold';
+const PLAYFAIR_CAPTION = 'PlayfairDisplay_400Regular';
+
+// `C` only carries opaque hexes, and this screen has two spots that need alpha:
+// the masthead title/caption's drop shadow (so the type stays legible over
+// whatever the crop happens to be, independent of the scrim above it) and the
+// pill chips drawn on top of the art. Rather than a standalone rgba() literal —
+// which is exactly what the checker's "no colour of its own" rule exists to
+// catch — the alpha is appended to a token at runtime. Same move settings.tsx
+// made for its modal scrim and philosophers/index.tsx made for its hero scrim.
+//
+// The pill's fill was `rgba(16,15,13,0.35)` — numerically close to but not
+// exactly `ink` (`#1A1A1A` vs `#100F0D`, ΔRGB ≈ 20). That near-black was never
+// exported as its own token (it only ever existed inlined here and, separately,
+// baked into `constants/branchArt.ts`'s own scrim stops, which are NOT touched
+// by this file). Rather than invent a new token for one decorative chip fill,
+// or reach into branchArt.ts to add one, it is expressed as `ink` at the same
+// 0.35 alpha — see the report for the disclosed reasoning.
+const wash = (hex: string, a: number) => hex + Math.round(a * 255).toString(16).padStart(2, '0');
+
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Page },
+  safe: { flex: 1, backgroundColor: C.surfaceSoft },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  notFound: { fontFamily: 'Inter_400Regular', fontSize: 16, color: Ink },
+  notFound: { ...role('body'), color: C.ink },
 
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 4,
-    paddingBottom: 8,
+    paddingHorizontal: SPACE[3],
+    paddingTop: SPACE[0],
+    paddingBottom: SPACE[1],
   },
-  backRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  brand: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, letterSpacing: 2 },
-  dots: { fontSize: 9, color: '#C9C5BB', letterSpacing: 2 },
+  backRow: { flexDirection: 'row', alignItems: 'center', gap: SPACE[1] },
+  brand: { ...role('micro'), color: C.inkSoft, letterSpacing: 2 },
+  dots: { ...role('micro'), color: C.dim, letterSpacing: 2 },
 
   // ── the units box ──────────────────────────────────────────────────────────
-  unitsBar: { paddingHorizontal: 20, paddingBottom: 10, alignItems: 'flex-start' },
+  unitsBar: { paddingHorizontal: SPACE[3], paddingBottom: SPACE[2], alignItems: 'flex-start' },
   unitsBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
+    gap: SPACE[1],
     borderWidth: 1.5,
-    borderColor: Ink,
+    borderColor: C.ink,
     borderRadius: 4,
-    paddingHorizontal: 11,
-    paddingVertical: 5,
-    backgroundColor: Paper,
+    paddingHorizontal: SPACE[2],
+    paddingVertical: SPACE[0],
+    backgroundColor: C.paper,
   },
-  unitsBoxOpen: { backgroundColor: Ink },
-  unitsLabel: { fontFamily: 'Inter_700Bold', fontSize: 11, color: Ink, letterSpacing: 1 },
+  unitsBoxOpen: { backgroundColor: C.ink },
+  unitsLabel: { ...role('micro'), fontFamily: 'Inter_700Bold', color: C.ink, letterSpacing: 1 },
 
   // ── the drawer ─────────────────────────────────────────────────────────────
   drawer: {
     position: 'absolute',
-    left: 20,
-    right: 20,
+    left: SPACE[3],
+    right: SPACE[3],
     maxWidth: 320,
     borderWidth: 1.5,
-    borderColor: Ink,
+    borderColor: C.ink,
     borderRadius: 6,
-    backgroundColor: Paper,
-    paddingVertical: 4,
-    // A hard offset shadow, the same device the thinker cards use — a blurred one
-    // is a grey smudge in a two-tone app.
-    shadowColor: Ink,
+    backgroundColor: C.paper,
+    paddingVertical: SPACE[0],
+    // A hard offset shadow, the same device the thinker cards use — a blurred
+    // one is a grey smudge in a two-tone app. This stays its own hand-rolled
+    // box rather than becoming a `Card`: it is a floating popover OVER the
+    // page, and `Card` carries a hairline border with no shadow at all — right
+    // for a sheet of paper sitting flat on the page, wrong for a panel
+    // hovering above one.
+    shadowColor: C.ink,
     shadowOffset: { width: 3, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 8,
   },
-  unitRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  unitRowHere: { backgroundColor: '#F4F1EA' },
-  unitKicker: { fontFamily: 'Inter_700Bold', fontSize: 8.5, color: Faint, letterSpacing: 1.4 },
-  unitName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 14.5, color: Ink, marginTop: 2 },
-  unitCount: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft },
+  // A small gap between each unit's own block, now that the header row is a
+  // bordered `Card` — flush cards would just be one unbroken rectangle at the
+  // seam. Lesson rows inside stay tight against their own unit's card.
+  unitList: { gap: SPACE[1] },
+  unitRowInner: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2] },
+  // Passed as Card's own `style` override — Card's face is `surface` by
+  // default; this is the one row the reader is standing in right now.
+  unitRowHere: { backgroundColor: C.surfaceSoft },
+  unitKicker: { ...role('micro'), fontFamily: 'Inter_700Bold', color: C.inkSoft, letterSpacing: 1.4 },
+  unitName: { ...role('body'), fontFamily: PLAYFAIR_HEAD, color: C.ink, marginTop: SPACE[0] },
+  unitCount: { ...role('micro'), color: C.inkSoft, letterSpacing: 0 },
   lessonRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 7,
-    paddingLeft: 18,
-    paddingRight: 12,
-    gap: 8,
+    paddingVertical: SPACE[1],
+    paddingLeft: SPACE[3],
+    paddingRight: SPACE[2],
+    gap: SPACE[1],
   },
   lessonNo: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 9,
+    ...role('micro'),
+    // The old weight was Inter_600SemiBold — not a loaded face (§2). 700 reads
+    // closer to what SemiBold looked like here than 500 does.
+    fontFamily: 'Inter_700Bold',
     letterSpacing: 0.6,
-    color: Faint,
+    color: C.inkSoft,
     width: 16,
   },
   lessonName: {
     flex: 1,
     minWidth: 0,
+    ...role('label'),
     fontFamily: 'Inter_400Regular',
-    fontSize: 12.5,
-    color: Ink,
+    letterSpacing: 0,
+    color: C.ink,
   },
-  lessonNext: { fontFamily: 'Inter_600SemiBold' },
+  lessonNext: { fontFamily: 'Inter_700Bold' },
 
   unitChev: { transform: [{ scaleX: -1 }] },
   drawerHint: {
     borderTopWidth: 1,
-    borderTopColor: FaintLine,
-    paddingHorizontal: 12,
-    paddingTop: 9,
-    paddingBottom: 7,
-    marginTop: 4,
+    borderTopColor: C.hairline,
+    paddingHorizontal: SPACE[2],
+    paddingTop: SPACE[1],
+    paddingBottom: SPACE[1],
+    marginTop: SPACE[0],
   },
-  drawerHintText: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, lineHeight: 16 },
+  drawerHintText: { ...role('micro'), letterSpacing: 0, color: C.inkSoft },
 
-  scroll: { paddingHorizontal: 20, paddingBottom: 48 },
+  scroll: { paddingHorizontal: SPACE[3], paddingBottom: SPACE[5] },
 
   // Masthead
   masthead: {
-    backgroundColor: Ink, // holds the frame before the image decodes
+    backgroundColor: C.ink, // holds the frame before the image decodes
     borderRadius: 6,
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+    paddingVertical: SPACE[5],
+    paddingHorizontal: SPACE[3],
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -630,22 +682,35 @@ const styles = StyleSheet.create({
     minHeight: 232,
   },
   mastImg: { borderRadius: 6 },
-  mastKicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: ArtGold, letterSpacing: 4 },
+  mastKicker: { ...role('micro'), color: ArtGold, letterSpacing: 4 },
   mastTitle: {
-    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 34, color: ArtCream, letterSpacing: 1,
-    marginTop: 8, textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.55)', textShadowRadius: 9,
+    ...role('display'),
+    color: ArtCream,
+    letterSpacing: 1,
+    marginTop: SPACE[1],
+    textAlign: 'center',
+    textShadowColor: wash(C.ink, 0.55),
+    textShadowRadius: 9,
   },
   mastSub: {
-    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: ArtSoft,
-    marginTop: 8, textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 7,
+    ...role('label'),
+    fontFamily: PLAYFAIR_CAPTION,
+    fontStyle: 'italic',
+    color: ArtSoft,
+    marginTop: SPACE[1],
+    textAlign: 'center',
+    textShadowColor: wash(C.ink, 0.5),
+    textShadowRadius: 7,
   },
-  pillRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 18 },
+  pillRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: SPACE[1], marginTop: SPACE[3] },
   // Lifted off the old near-black border, which vanished against the art.
   pill: {
-    borderWidth: 1, borderColor: 'rgba(244,241,234,0.42)', borderRadius: 20,
-    paddingHorizontal: 12, paddingVertical: 5, backgroundColor: 'rgba(16,15,13,0.35)',
+    borderWidth: 1,
+    borderColor: wash(ArtCream, 0.42),
+    borderRadius: 20,
+    paddingHorizontal: SPACE[2],
+    paddingVertical: SPACE[0],
+    backgroundColor: wash(C.ink, 0.35),
   },
-  pillText: { fontFamily: 'Inter_500Medium', fontSize: 9, color: ArtCream, letterSpacing: 1.5 },
+  pillText: { ...role('micro'), color: ArtCream },
 });

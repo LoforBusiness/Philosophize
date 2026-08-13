@@ -135,6 +135,7 @@ const CONVERTED = [
   'app/(app)/settings.tsx',
   'app/(app)/profile/index.tsx',
   'app/(app)/philosophers/index.tsx',
+  'app/(app)/branches/[branchSlug]/index.tsx',
   // each adoption task appends its screen here
 ];
 const SIZES = new Set(Object.values(D.TYPE).map((t) => t.fontSize));
