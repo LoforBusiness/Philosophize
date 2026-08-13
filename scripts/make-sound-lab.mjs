@@ -20,7 +20,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { wav, hiss, spectrum, envelope, doubling } from './lib/dsp.mjs';
+import { wav, hiss, spectrum, envelope, doubling, readWav } from './lib/dsp.mjs';
 import { ROLES } from './sound-candidates.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -54,13 +54,62 @@ const LONGWALK = foot.footfallTimes(40, 360);
 // in the lesson rather than everything at full level.
 const LEVEL = { finish: 0.9, badge: 0.9, rankup: 0.95 };
 
+// ── WHAT SHIPS TODAY, FIRST IN EVERY ROW ─────────────────────────────────────
+//
+// The lab could always compare candidates against EACH OTHER, which answers "which
+// of these five is best" and never answers the question that decides anything:
+// "is any of them better than the one already in the app?" Five options that are
+// all worse than what ships look exactly like five options that are all better.
+//
+// So the clip currently in assets/sound/ is loaded from disk and put first in its
+// role, marked, and it is genuinely the shipped bytes rather than a re-render of
+// the recipe — if make-sounds.mjs has drifted from what was installed, this shows
+// the installed one, which is what a reader actually hears.
+const SHIPPED = {
+  footstep: ['step-a', 'step-b'],
+  right: ['right-1', 'right-2', 'right-3'],
+  wrong: ['rethink'],
+  finish: ['reward'],
+  tick: ['tick-1', 'tick-2', 'tick-3'],
+  badge: ['badge'],
+  rankup: ['rankup'],
+  impact: ['impact'],
+  whoosh: ['whoosh-1', 'whoosh-2', 'whoosh-3'],
+  keep: ['keep'],
+  save: ['keep'],
+};
+
+function shippingOption(roleId) {
+  const names = SHIPPED[roleId];
+  if (!names) return null;
+  const files = names
+    .map((n) => path.join(ROOT, 'assets', 'sound', `${n}.wav`))
+    .filter((f) => fs.existsSync(f));
+  if (!files.length) return null;
+  const loaded = files.map((f) => readWav(fs.readFileSync(f)));
+  return {
+    id: `${roleId}-shipping`,
+    name: 'IN THE APP NOW',
+    // Marked so the page can style it apart from the candidates — it is the
+    // baseline, not a contender.
+    shipping: true,
+    note: `assets/sound/${names.join('.wav, ')}.wav — the bytes on the device today`,
+    vary: loaded.length > 1 ? loaded.length : undefined,
+    make: (_f, k = 0) => {
+      const w = loaded[Math.min(k ?? 0, loaded.length - 1)];
+      return { rate: w.rate, data: Float64Array.from(w.data) };
+    },
+  };
+}
+
 // ── render every candidate ───────────────────────────────────────────────────
 const roles = ROLES.map((role) => ({
   id: role.id,
   title: role.title,
   fires: role.fires,
   preview: role.preview,
-  options: role.options.map((o) => {
+  // The shipping clip leads, so every judgement is "better than what we have?"
+  options: [shippingOption(role.id), ...role.options].filter(Boolean).map((o) => {
     // A candidate with `pitches` is rendered once per pitch — a right answer and
     // an XP tick both CLIMB, and the climb cannot be judged from one note. The row
     // shows and plays the first; the sequences play all of them in order.

@@ -26,6 +26,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const { applyCut } = await import('./cut-sounds.mjs');
 const SOUND = path.join(ROOT, 'assets', 'sound');
 
 let fails = 0;
@@ -651,6 +652,165 @@ const routeSrc = fs.readFileSync(
 const wideOpen = /^\s*return true;\s*$/m.test(gateSrc);
 ok('the trial names lessons that are wired cinematic', wideOpen || trial.every((id) => routeSrc.includes(id)),
   wideOpen ? 'rolled out to every lesson' : `trial: ${trial.join(', ')}`);
+
+// ── THE SOURCES ARE FREE, AND THAT IS CHECKED ────────────────────────────────
+//
+// Every .wav in assets/sound-src/ must have a row in SOURCES.md and that row must
+// say CC0. The constraint is that nothing in the sound set may ever cost money, and
+// CC0 is also the only licence that permits the source file to live in a PUBLIC repo
+// at all — Sonniss and Pixabay both forbid redistributing a sound "on a standalone
+// basis", which is what committing one does. A rule nobody can forget is worth more
+// here than a rule everybody agrees with.
+head('SOURCES ARE CC0');
+{
+  const srcDir = path.join(ROOT, 'assets', 'sound-src');
+  const listed = new Map();
+  const docPath = path.join(srcDir, 'SOURCES.md');
+  if (fs.existsSync(docPath)) {
+    for (const line of fs.readFileSync(docPath, 'utf8').split('\n')) {
+      const m = line.match(/^\|\s*([\w.-]+\.wav)\s*\|([^|]*)\|([^|]*)\|([^|]*)\|/i);
+      if (m) listed.set(m[1].trim(), m[3].trim());
+    }
+  }
+  const files = fs.existsSync(srcDir)
+    ? fs.readdirSync(srcDir).filter((f) => f.toLowerCase().endsWith('.wav')) : [];
+  ok('SOURCES.md exists', fs.existsSync(docPath));
+  if (!files.length) {
+    ok('no source recordings yet, so every cue is synthesised', true,
+      'drop a CC0 excerpt in assets/sound-src/ to sample one');
+  }
+  for (const f of files) {
+    const lic = listed.get(f);
+    ok(`${f} is recorded in SOURCES.md`, !!lic, lic ? '' : 'add a row, or the build fails');
+    if (lic) ok(`${f} is CC0`, /cc0/i.test(lic), `licence reads "${lic}"`);
+  }
+}
+
+// ── WHAT MAKES A CLIP SOUND CHEAP, IN NUMBERS ────────────────────────────────
+//
+// Nobody working on this can hear it, so the qualities that separate a real
+// recording from a synthetic approximation are measured rather than judged. Neither
+// of these is an aesthetic opinion; both are defects this app has actually had.
+//
+//   HIGH-FREQUENCY PRESENCE is the important one. The first set shipped entirely at
+//   22.05 kHz, putting the Nyquist limit at 11 kHz — and the snap of a heel, the
+//   edge of a fingertip and the tick of a counter all live between 4 and 10 kHz.
+//   make-sounds.mjs's own header records that this ceiling was "a large part of why
+//   the first set sounded cheap". A percussive clip with nothing up there is that
+//   defect, and it is a number instead of a feeling.
+//
+//   ATTACK SHARPNESS separates a struck thing from a swelling one, measured from
+//   10% to 90% of the envelope peak.
+head('QUALITY, MEASURED');
+{
+  const bandShare = (x, lo, hi, rate) => {
+    const n = Math.min(x.length, 4096);
+    const bins = 64;
+    let inBand = 0, total = 0;
+    for (let b = 0; b < bins; b++) {
+      const f = ((b + 0.5) * (rate / 2)) / bins;
+      let re = 0, im = 0;
+      const w = (2 * Math.PI * f) / rate;
+      for (let i = 0; i < n; i++) { re += x[i] * Math.cos(w * i); im += x[i] * Math.sin(w * i); }
+      const pw = (re * re + im * im) / (n * n);
+      total += pw;
+      if (f >= lo && f <= hi) inBand += pw;
+    }
+    return total > 0 ? inBand / total : 0;
+  };
+  const attackMs = (x, rate) => {
+    let peak = 0, at = 0;
+    for (let i = 0; i < x.length; i++) { const a = Math.abs(x[i]); if (a > peak) { peak = a; at = i; } }
+    if (peak <= 0) return Infinity;
+    let lo = at, hi = at;
+    for (let i = 0; i <= at; i++) { if (Math.abs(x[i]) >= 0.1 * peak) { lo = i; break; } }
+    for (let i = lo; i <= at; i++) { if (Math.abs(x[i]) >= 0.9 * peak) { hi = i; break; } }
+    return ((hi - lo) / rate) * 1000;
+  };
+
+  // How many percussive clips may carry nothing in the band that makes a strike
+  // audible on a phone. A HIGH-WATER MARK: it may go down and never up.
+  const THIN_BUDGET = 2;
+  const thin = [];
+  const PERCUSSIVE = ['step-a', 'step-b', 'impact', 'rethink', 'keep'];
+  for (const name of PERCUSSIVE) {
+    if (!clips[name]) continue;
+    // Reuse the clips the format pass already loaded, rather than opening a second
+    // reader over the same files. `clips[name].x` is the samples; `.rate` the rate.
+    const { x: data, rate } = clips[name];
+    const hf = bandShare(data, 4000, Math.min(11000, rate / 2 - 1), rate);
+    const ms = attackMs(data, rate);
+    // BUDGETS, NOT VERDICTS, in the style of this repo's other ratchets. The floor
+    // is where the current synthesised set already sits; the point is that a re-cut
+    // may only move it up. A real recording of the same object usually lands two to
+    // four times higher.
+    // A BUDGET, NOT A VERDICT, and it starts at two because two clips fail today.
+    //
+    // `impact` and `rethink` carry 99.5% and 99.7% of their energy BELOW 500 Hz and
+    // nothing measurable above 2 kHz. That is not the 22.05 kHz ceiling — both are
+    // 44.1 kHz files — it is the synthesis: two pure low thumps with no strike in
+    // them. A phone speaker rolls off hard under about 500 Hz, so on the device
+    // these two are probably close to inaudible while sounding fine in headphones,
+    // which is exactly the defect a person testing on good monitors never finds.
+    // They are first in line to be re-cut from a real recording (scripts/sound-cuts.mjs).
+    if (hf < 0.06) thin.push(`${name} ${(hf * 100).toFixed(1)}%`);
+    else ok(`${name}: energy in 4-11 kHz`, true, `${(hf * 100).toFixed(1)}%`);
+    ok(`${name}: attack within 12ms`, ms <= 12, `${ms.toFixed(1)}ms`);
+  }
+  ok(`at most ${THIN_BUDGET} clips are too low to hear on a phone`, thin.length <= THIN_BUDGET,
+    thin.length ? `${thin.join(', ')} — re-cut these first; lower the budget when you do` : 'none');
+}
+
+// ── THE CUTTER STILL WORKS ───────────────────────────────────────────────────
+//
+// A self-test rather than a committed fixture: the source is synthesised right here,
+// so no binary lives in the repo and there is nothing to keep in step. It is
+// deliberately awkward in the ways a DOWNLOADED file is awkward — stereo, 48 kHz,
+// and carrying a LIST chunk before the audio — because assuming `fmt ` at byte 12
+// and `data` at 36 is exactly what a hand-rolled WAV reader gets wrong, and reading
+// metadata as audio returns a buzz rather than an error.
+head('THE CUTTER');
+{
+  const rate = 48000, n = rate * 2;
+  const L = new Float32Array(n);
+  let seed = 7;
+  const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return (seed / 0x7fffffff) * 2 - 1; };
+  for (let i = 0; i < n; i++) L[i] = rnd() * 0.004;
+  const hit = Math.round(0.8 * rate);
+  for (let i = 0; i < Math.round(0.2 * rate); i++) L[hit + i] += rnd() * 0.8 * Math.exp(-i / (rate * 0.03));
+  const frames = n, dataBytes = frames * 2 * 2;
+  const list = Buffer.alloc(34);
+  list.write('LIST', 0); list.writeUInt32LE(26, 4); list.write('INFOISFT', 8);
+  const b = Buffer.alloc(12 + 24 + list.length + 8 + dataBytes);
+  b.write('RIFF', 0); b.writeUInt32LE(b.length - 8, 4); b.write('WAVE', 8);
+  let q = 12;
+  b.write('fmt ', q); b.writeUInt32LE(16, q + 4); b.writeUInt16LE(1, q + 8); b.writeUInt16LE(2, q + 10);
+  b.writeUInt32LE(rate, q + 12); b.writeUInt32LE(rate * 4, q + 16);
+  b.writeUInt16LE(4, q + 20); b.writeUInt16LE(16, q + 22); q += 24;
+  list.copy(b, q); q += list.length;
+  b.write('data', q); b.writeUInt32LE(dataBytes, q + 4); q += 8;
+  for (let i = 0; i < frames; i++) {
+    const v = Math.max(-32767, Math.min(32767, Math.round(L[i] * 32767)));
+    b.writeInt16LE(v, q + i * 4); b.writeInt16LE(v, q + i * 4 + 2);
+  }
+  let out = null, err = null;
+  try {
+    out = applyCut(b, { in: 0.79, out: 1.02, hp: 180, lp: 9000, rate: 44100, gain: 0.62 });
+  } catch (e) { err = e; }
+  ok('reads stereo, 48 kHz, and an out-of-order chunk layout', !!out, err ? String(err.message) : '');
+  if (out) {
+    let peak = 0;
+    for (const v of out.samples) peak = Math.max(peak, Math.abs(v));
+    ok('resamples to the requested rate', out.rate === 44100, `${out.rate} Hz`);
+    ok('normalises to the requested peak', Math.abs(peak - 0.62) < 0.002, peak.toFixed(3));
+    ok('leaves no click at either edge',
+      Math.abs(out.samples[0]) < 1e-3 && Math.abs(out.samples[out.samples.length - 1]) < 1e-3);
+    const headE = out.samples.slice(0, Math.round(0.02 * out.rate)).reduce((a, v) => a + v * v, 0);
+    const tailE = out.samples.slice(Math.round(0.15 * out.rate)).reduce((a, v) => a + v * v, 0);
+    ok('keeps the transient at the front', headE > tailE * 4,
+      `head/tail energy ${(headE / (tailE + 1e-9)).toFixed(0)}:1`);
+  }
+}
 
 console.log(fails ? `\n${fails} failing.\n` : '\nall clear.\n');
 process.exit(fails ? 1 : 0);

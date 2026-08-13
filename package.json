@@ -96,7 +96,8 @@
     "measure:must": "node scripts/measure-must.mjs",
     "check:launch": "node scripts/check-launch.mjs && node scripts/check-words.mjs",
     "sheet:launch": "node scripts/sheet-launch.mjs",
-    "camera:wins": "node scripts/camera-wins.mjs"
+    "camera:wins": "node scripts/camera-wins.mjs",
+    "sound:cut": "node scripts/cut-sounds.mjs"
   },
   "overrides": {
     "@expo/require-utils": "56.1.6"

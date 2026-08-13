@@ -137,6 +137,101 @@ export function finish(buf, peak = 0.72) {
   });
 }
 
+/**
+ * READ a WAV back into the float samples the rest of this kit works in.
+ *
+ * `wav()` above has always been able to write; nothing could read, because until
+ * now every clip in the app was synthesised and there was no such thing as a source
+ * recording. A sampled cue starts from a file somebody else made, so this has to
+ * cope with what real files contain rather than only with what we write:
+ *
+ *   · CHUNKS IN ANY ORDER, and unknown ones. A recorder writes LIST/INFO, a DAW
+ *     writes cue points and iXML. Assuming `fmt ` at 12 and `data` at 36 — which is
+ *     all our own writer ever produces — reads metadata as audio and returns a
+ *     buzz. So the chunks are walked.
+ *   · STEREO, downmixed to mono. Everything downstream is mono and a stereo file
+ *     read as mono is a clip at half speed with the channels interleaved into it.
+ *   · 8, 24 and 32-bit, and 32-bit float. 16-bit PCM is the one case our writer
+ *     emits and close to the last case a download arrives in.
+ *
+ * Returns { data: Float32Array, rate }, samples in -1..1, so a source is
+ * indistinguishable from a synthesised buffer from here on.
+ */
+export function readWav(buf) {
+  if (buf.toString('ascii', 0, 4) !== 'RIFF' || buf.toString('ascii', 8, 12) !== 'WAVE') {
+    throw new Error('not a RIFF/WAVE file');
+  }
+  let fmt = null;
+  let dataAt = -1;
+  let dataLen = 0;
+  let p = 12;
+  while (p + 8 <= buf.length) {
+    const id = buf.toString('ascii', p, p + 4);
+    const size = buf.readUInt32LE(p + 4);
+    const body = p + 8;
+    if (id === 'fmt ') {
+      fmt = {
+        format: buf.readUInt16LE(body),
+        channels: buf.readUInt16LE(body + 2),
+        rate: buf.readUInt32LE(body + 4),
+        bits: buf.readUInt16LE(body + 14),
+      };
+    } else if (id === 'data') {
+      dataAt = body;
+      // A streamed file can declare 0 or 0xFFFFFFFF; trust the file's real length.
+      dataLen = size > 0 && body + size <= buf.length ? size : buf.length - body;
+    }
+    p = body + size + (size & 1); // chunks are word-aligned
+  }
+  if (!fmt) throw new Error('no fmt chunk');
+  if (dataAt < 0) throw new Error('no data chunk');
+
+  const { channels, bits, rate, format } = fmt;
+  const bytes = bits >> 3;
+  const frames = Math.floor(dataLen / (bytes * channels));
+  const out = new Float32Array(frames);
+  const isFloat = format === 3;
+  for (let i = 0; i < frames; i++) {
+    let acc = 0;
+    for (let c = 0; c < channels; c++) {
+      const at = dataAt + (i * channels + c) * bytes;
+      let v;
+      if (isFloat) v = bytes === 8 ? buf.readDoubleLE(at) : buf.readFloatLE(at);
+      else if (bits === 8) v = (buf.readUInt8(at) - 128) / 128;      // 8-bit is UNSIGNED
+      else if (bits === 16) v = buf.readInt16LE(at) / 32768;
+      else if (bits === 24) v = (buf.readIntLE(at, 3)) / 8388608;
+      else if (bits === 32) v = buf.readInt32LE(at) / 2147483648;
+      else throw new Error(`unsupported bit depth ${bits}`);
+      acc += v;
+    }
+    out[i] = acc / channels;   // downmix
+  }
+  return { data: out, rate };
+}
+
+/**
+ * Resample by linear interpolation.
+ *
+ * Good enough here and only here: a source is trimmed to a few hundred milliseconds
+ * and then low-passed by the cut, so the interpolation error lands above the band
+ * the clip keeps. Anything more (a windowed sinc) would be arithmetic nobody can
+ * hear, in a file whose whole point is that its numbers are readable.
+ */
+export function resample(data, from, to) {
+  if (from === to) return Float32Array.from(data);
+  const n = Math.max(1, Math.round((data.length * to) / from));
+  const out = new Float32Array(n);
+  const ratio = from / to;
+  for (let i = 0; i < n; i++) {
+    const x = i * ratio;
+    const i0 = Math.floor(x);
+    const i1 = Math.min(data.length - 1, i0 + 1);
+    const t = x - i0;
+    out[i] = data[i0] * (1 - t) + data[i1] * t;
+  }
+  return out;
+}
+
 export function wav(samples, sampleRate) {
   const n = samples.length;
   const b = Buffer.alloc(44 + n * 2);
