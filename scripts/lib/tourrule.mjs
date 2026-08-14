@@ -116,6 +116,9 @@ export const wanted = (items) => (items ?? []).filter((it) => it.k !== 'art' || 
  * @param band    the lesson's band
  * @param single  true for graded / drag / summary beats, which get one shot (K6)
  * @param reveal  whether the measurements carry reveal-order data at all
+ * @param dur     the beat's own declared duration, for a follow station's dwell
+ * @param seed    a per-lesson number, so the beats that rest differ between lessons
+ * @param k       the beat index, which with `seed` decides which beats rest
  *
  * ── WHEN THE REVEAL ORDER IS NOT KNOWN ──────────────────────────────────────
  *
@@ -131,7 +134,7 @@ export const wanted = (items) => (items ?? []).filter((it) => it.k !== 'art' || 
  * whole picture. The multi-station tours come back by re-running the sweep, which
  * is the only thing that can honestly authorise them.
  */
-export function tourFor(items, wide, band, single, reveal = true, dur = 0) {
+export function tourFor(items, wide, band, single, reveal = true, dur = 0, seed = 0, k = 0) {
   if (single || !wide) return null;
   const raw = wanted(items);
   if (raw.length < 2) return null;
@@ -194,7 +197,6 @@ export function tourFor(items, wide, band, single, reveal = true, dur = 0) {
     .filter((g) => Math.max(g.box[2], g.box[3]) >= MIN_SUBJECT)
     .map((g) => ({ ...g, s: Math.max(1, Math.min(CAP, scaleFor(g.box, band))) }))
     .filter((g) => g.s > wideS + MIN_GAIN);
-  if (!groups.length) return null;
 
   // K2 — REVEAL ORDER, from the reading each thing was first seen in. Ties, and
   // beats whose things all arrived together, fall back to reading order: top band
@@ -214,14 +216,47 @@ export function tourFor(items, wide, band, single, reveal = true, dur = 0) {
   // failing that the largest subject: a lone incidental label getting the beat's
   // only close-up reads as the camera having missed the point, and the figure is
   // what the reader is following.
-  const picked = reveal ? groups : [
+  let picked = !groups.length ? [] : reveal ? groups : [
     groups.find((g) => g.items.some((it) => it.k === 'fig'))
       ?? groups.reduce((a, b) => (a.box[2] * a.box[3] >= b.box[2] * b.box[3] ? a : b)),
   ];
 
+  // ── THE FIGURE IS A SUBJECT, NOT A REGION ──────────────────────────────────
+  //
+  // Everything above separates subjects by finding blank paper between them, and
+  // that misses the commonest composition in the app: a person standing among the
+  // words about him. Measured, 243 beats produce a single cluster and 263 untoured
+  // beats have a figure on stage — so gap-splitting alone leaves the most obvious
+  // close-up in the whole vocabulary on the table. H60b's first bullet is "push in
+  // on the figure"; this is what lets that happen when nothing else separates.
+  //
+  // Only when there is exactly ONE person, decided by the reading buckets rather
+  // than the sample count: a figure that walks contributes several boxes and is
+  // still one man, whereas two people contribute several to the same reading and
+  // "which one do we push in on" has no answer worth guessing.
+  if (!picked.length) {
+    const figs = raw.filter((it) => it.k === 'fig');
+    const bucket = new Map();
+    for (const f of figs) bucket.set(f.r ?? 0, (bucket.get(f.r ?? 0) ?? 0) + 1);
+    const one = figs.length > 0 && [...bucket.values()].every((n) => n === 1);
+    // NOT EVERY BEAT, and this is the lesson followMoves already paid for: its first
+    // pass pushed in on two beats out of three and left the reader with a camera that
+    // never rests, at which point the moves stop registering as moves. A push reads as
+    // a push against stillness. Seeded by the lesson so the beats that rest are not
+    // the same ones in every lesson.
+    if (one && (k + seed) % 3 !== 2) {
+      const box = clampToBand(union([figs[figs.length - 1]]), band);
+      const s = Math.max(1, Math.min(CAP, scaleFor(box, band)));
+      if (Math.max(box[2], box[3]) >= MIN_SUBJECT && s > wideS + MIN_GAIN) {
+        picked = [{ box, s }];
+      }
+    }
+  }
+
   // K3 — always end on the whole beat. This doubles as the NEXT beat's establishing
   // shot: every beat therefore opens on the full picture without spending a station
   // on it, which is why a tour can be three framings long and still read as four.
+  if (!picked.length) return null;
   const stations = [...picked.map((g) => g.box), wide];
   const pace = PACE[Math.min(stations.length, MAX_STATIONS)] ?? PACE[4];
   return stations.map((box, i) => ({

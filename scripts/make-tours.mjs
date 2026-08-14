@@ -150,6 +150,11 @@ for (const [id, comp] of map) {
   const single = singles(comp);
   if (!single) continue;
   const dur = durs(comp);
+  // A per-lesson number so the beats that REST are not the same index in every
+  // lesson — the same reason followMoves carries one. Any stable hash will do.
+  let seed = 0;
+  for (let c = 0; c < id.length; c++) seed = (seed * 31 + id.charCodeAt(c)) >>> 0;
+  seed %= 3;
   // Skip anything whose scene has moved since it was measured — see stampOf.
   const now = stampOf(comp);
   if (!now || !side.stamps[id] || now !== side.stamps[id]) { skipped.push(id); continue; }
@@ -160,7 +165,7 @@ for (const [id, comp] of map) {
   for (let k = 0; k < words.length; k++) {
     nBeats++;
     const wide = boxes[k];
-    const t = tourFor(words[k], wide, band, single[k] ?? true, hasReveal, dur[k] ?? 0);
+    const t = tourFor(words[k], wide, band, single[k] ?? true, hasReveal, dur[k] ?? 0, seed, k);
     if (!t) { per.push(null); continue; }
     // Verified against the SHIPPING maths, not against the generator's intention.
     const bad = checkTour(

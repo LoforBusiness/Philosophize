@@ -1723,8 +1723,29 @@ hold:
 - it is at least **0.12×** tighter than the closing wide shot. A move that changes
   the framing by less than that reads as drift, not as a decision.
 
-Everything failing either test is merged back into its neighbour. A beat left with no
-qualifying station keeps a single shot, and 422 of 884 beats do.
+Everything failing either test is merged back into its neighbour.
+
+**And the figure is a subject even when nothing separates it.** The tests above find
+subjects by looking for blank paper between them, which misses the commonest
+composition in the app: a person standing among the words about him. Measured, 243
+beats produced a single cluster while 263 untoured beats had a figure on stage — so
+gap-splitting alone was leaving the most obvious close-up in the vocabulary unused,
+and H60b's first bullet is *"push in on the figure"*. A beat with exactly one person
+therefore gets a station on him whether or not the layout separates him.
+
+"Exactly one" is decided by the reading buckets, not the sample count: a figure who
+walks contributes several boxes and is still one man, whereas two people contribute
+several to the *same* reading and "which one do we push in on" has no answer worth
+guessing.
+
+**Not on every beat, though**, and this is a lesson `followMoves` already paid for.
+Its first pass pushed in on two beats out of three and left the reader with a camera
+that never rests, at which point the moves stop registering as moves. So the figure
+station runs on a seeded two-in-three cycle — seeded per lesson, so the beats that
+rest are not the same index every time. The result is 55% of beats toured, a mean of
+58% per lesson, and **no lesson where every beat moves**.
+
+A beat left with no qualifying station keeps a single shot.
 
 ### K5 · Nothing goes closer than `tight`
 
