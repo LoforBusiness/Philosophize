@@ -198,7 +198,14 @@ if (problems.length) {
 // ── emit ─────────────────────────────────────────────────────────────────────
 const body = Object.keys(tours).sort().map((id) => {
   const per = tours[id].map((t) => (t === null ? 'null'
-    : `[${t.map((s) => `[${s.box.map((n) => Math.round(n)).join(', ')}, ${s.tr}, ${s.dwell}]`).join(', ')}]`));
+    // A FOLLOW EMITS TEN NUMBERS, and dropping the last four is not a cosmetic loss:
+    // the station ships as a static one that still carries the follow's long dwell,
+    // so the camera parks for the length of a walk it is no longer following. That
+    // is strictly worse than never having tried, and it is what happened once here —
+    // the same bug also blew K8's waiting budget, because a follow's dwell is only
+    // exempt from it while the thing is still a follow.
+    : `[${t.map((s) => `[${s.box.map((n) => Math.round(n)).join(', ')}, ${s.tr}, ${s.dwell}${
+      s.to ? `, ${s.to.map((n) => Math.round(n)).join(', ')}` : ''}]`).join(', ')}]`));
   return `  '${id}': [${per.join(', ')}],`;
 }).join('\n');
 
