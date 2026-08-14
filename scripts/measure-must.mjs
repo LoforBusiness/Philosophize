@@ -266,6 +266,7 @@ import { getLessonById } from '@/data/index';
 import { CINEMATIC } from './(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId]';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
+import { setToursOff } from '@/components/lesson/cinematic/tourFlag';
 
 export default function PreviewFrame() {
   const [go, setGo] = useState(false);
@@ -275,6 +276,10 @@ export default function PreviewFrame() {
     setGo(true);
   }, []);
   const q = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  // MEASURE THE UN-TOURED LESSON. Group K is derived from this recording, so taking
+  // the recording through a gated clock would measure a timeline the tours had
+  // already moved — and every regeneration would shift it further. See tourFlag.ts.
+  setToursOff(q?.get('notour') === '1');
   const id = q?.get('id') ?? '';
   const found = getLessonById(id);
   const Comp = (CINEMATIC as Record<string, any>)[id];
@@ -460,7 +465,7 @@ function stampFor(comp) {
   // denominator turns a moving number into an integer that cannot drift.
   const measureOne = async (T, id, first, nBeats) => {
     const idxOf = (prog) => (prog < 0 || !nBeats ? -1 : Math.round(prog * nBeats) - 1);
-    await T.send('Page.navigate', { url: `${BASE}?id=${encodeURIComponent(id)}` });
+    await T.send('Page.navigate', { url: `${BASE}?id=${encodeURIComponent(id)}&notour=1` });
     // WAIT FOR THE STAGE, NOT FOR A CLOCK.
     //
     // This waited for `innerText.length > 20` and then a flat 1100ms. Body text
@@ -521,8 +526,16 @@ function stampFor(comp) {
       // by hand, reached every one of them. Discarding data because a later sample
       // of the SAME beat failed is never right — the beat is measured by whichever
       // readings did land.
-      const items = [r1, r2, r3, r4].filter((r) => r && !r.none).map((r) => r.items);
-      per.push(items.reduce((a, b) => mergeReadings(a, b)));
+      // SPREAD, NOT REDUCE, AND THE HOLES ARE KEPT. This was `.filter(...).reduce(
+      // (a, b) => mergeReadings(a, b))`, which merged pairwise — so every call saw a
+      // two-element list and the reading index mergeReadings stamps was always 0 or
+      // 1, whatever the true position. Group K orders a tour by that index (K2), so
+      // pairwise merging silently flattens the reveal order into "first or not
+      // first". Filtering the misses out would shift every later index down by one,
+      // which is the same fault more quietly, so nulls are passed through and
+      // mergeReadings skips them in place.
+      const items = [r1, r2, r3, r4].map((r) => (r && !r.none ? r.items : null));
+      per.push(mergeReadings(...items));
       if ((r4.none ? (r3.none ? r2 : r3) : r4).done) break;
       // ADVANCE, AND CHECK THAT IT ADVANCED — against the progress bar, which is
       // literally (beat + 1) / beats. The old test compared a hash of the page

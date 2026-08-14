@@ -20,12 +20,21 @@ export const STAGE_H = 560;
 export function mergeReadings(...readings) {
   const out = [];
   const seen = new Set();
-  for (const list of readings) {
-    for (const it of list ?? []) {
+  for (let r = 0; r < readings.length; r++) {
+    for (const it of readings[r] ?? []) {
       const key = `${it.k}|${it.t ?? ''}|${it.b.map((n) => Math.round(n)).join(',')}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      out.push(it);
+      // WHICH READING IT FIRST APPEARED IN — the ordering input for group K.
+      //
+      // Free, because the sweep already takes four timed readings across each beat
+      // and was throwing the timing away. A station's place in the tour is the
+      // earliest reading anything in it was seen at (K2), and the alternative —
+      // ordering stations by reading order — is not a safe guess: scenes routinely
+      // build the right side first or drop a headline in last, and with the clock
+      // gated a mis-ordered tour parks the camera on one label while another draws
+      // itself off screen. That is worse than no tour at all.
+      out.push(r > 0 ? { ...it, r } : it);
     }
   }
   return out;

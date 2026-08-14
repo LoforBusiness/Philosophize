@@ -337,7 +337,7 @@ function allIds() {
   const auditOne = async (T, id, first, nBeats, band) => {
     const { send, evaluate, tap, answerScene, answerDeck, stamp, settle } = T;
     {
-    await send('Page.navigate', { url: `${BASE}?id=${encodeURIComponent(id)}` });
+    await send('Page.navigate', { url: `${BASE}?id=${encodeURIComponent(id)}&notour=1` });
     // WAIT FOR THE STAGE, NOT FOR A CLOCK. Body text appears while the lesson is
     // still mounting, so waiting on it starts tapping before anything is
     // interactive — two lessons reported "1 beat reached" purely because the audit

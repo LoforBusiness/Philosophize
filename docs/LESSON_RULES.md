@@ -1637,6 +1637,233 @@ where it reads as the app.
 
 ---
 
+## Group K — the tour: the camera moves, and nothing moves without it
+
+Every other group in this book guards a *picture*. This one guards **time** — the
+order the reader is shown things in, and the guarantee that the camera is pointed at
+each one when it happens.
+
+It exists because the two camera rules before it pulled in opposite directions and
+H60c won. H60b asks the camera to move and to get close. H60c says a shot may never
+crop anything the beat is showing. Both are right, and together they are a vice:
+**one framing has to hold everything the beat will ever draw, so the framing is the
+widest thing the beat contains.** The measured cost is in H60c — mean shot 1.124×
+→ 1.017×, 72% of beats sitting at exactly 1.0. The camera was made safe by being
+made timid, and a reader put it plainly: everything is one long shot of a small man.
+
+The way out is not to loosen H60c. It is to stop asking one frame to do the work of
+a sequence.
+
+**A beat is a TOUR of STATIONS.** A station is one framing of one thing, held long
+enough to read. The camera travels between them; H60c then binds **per station**
+instead of per beat, because at any instant the only thing that must fit is the thing
+being shown *now*. That is the entire trade, and it is what buys the zoom back:
+measured across the same 884 beats, 462 of them support a tour, and on those the
+ceiling goes from **1.056× to 1.671×**.
+
+### K1 · The clock waits for the camera
+
+**Scene time does not advance while the camera is in transit.** A beat's clock runs
+during a station and freezes during the travel between stations.
+
+This is the rule the whole group exists for, and it is **structural** — the player
+gates the clock it hands the scene, so a scene obeys this by doing nothing. There is
+no version of this an author can forget, which matters at 102 lessons.
+
+What it guarantees: nothing the reader is meant to watch can happen while the camera
+is on its way somewhere else. An animation that would have played to an empty frame
+now waits, and plays when it is being looked at.
+
+> The corollary is the reason it must be the clock and not a convention: **a scene
+> animates on `bt` and has no idea a camera exists.** Gating `bt` is the only
+> intervention that reaches all 102 scenes without editing one of them. Anything
+> requiring a scene to ask "has the camera arrived?" would be 102 files of judgement
+> and would be wrong in some of them within a month.
+
+### K2 · Station order is REVEAL order, and it is measured, not guessed
+
+Because the clock is chunked by K1, station *j* is showing whatever the scene reveals
+in scene-time window *j*. So the order of the stations has to be the order the scene
+reveals things in, or the gate makes the problem worse rather than better: the camera
+sits on the right-hand label while the left-hand one draws itself off screen.
+
+**Spatial order is not a safe substitute.** Reading order looks like a reasonable
+proxy and is not one — scenes routinely build the right side first, drop a headline
+in last, or animate a prop before the label that names it.
+
+So reveal time is **sampled from the real render** and stored, the same way the
+must-see boxes are (H60c): `scripts/measure-must.mjs` records, per item, the first
+scene-time it is drawn at. Stations are then ordered by the earliest reveal in each,
+and ties broken by reading order.
+
+### K3 · The tour ENDS wide, on everything the beat has
+
+The last station of every tour frames the beat's whole must-box — the H60c box, the
+shot the beat has today.
+
+Two things fall out of it, and both are deliberate:
+
+- **The reader always finishes a beat having seen the whole picture.** Close framing
+  is a way of directing attention, not a way of hiding two thirds of the stage. "The
+  user should still be able to see the whole screen" is this rule.
+- **The resting frame of every beat is exactly what shipped before this group
+  existed.** The tour is new motion added *ahead* of an unchanged final framing, so
+  the change cannot regress a beat's composition. Empty the station table and every
+  lesson is byte-for-byte its old self, which is what makes this safe to roll out to
+  102 lessons at once and trivial to roll back.
+
+### K4 · A station needs a subject worth stopping for
+
+Not every cluster of ink deserves its own framing. A station is only made when both
+hold:
+
+- the subject is at least **88 scene units** on its longer side — below that the
+  camera is framing a single word, and the closest station measured on the raw data
+  was **32.6×**, which is not drama, it is a microscope;
+- it is at least **0.12×** tighter than the closing wide shot. A move that changes
+  the framing by less than that reads as drift, not as a decision.
+
+Everything failing either test is merged back into its neighbour. A beat left with no
+qualifying station keeps a single shot, and 422 of 884 beats do.
+
+### K5 · Nothing goes closer than `tight`
+
+**1.72× is the ceiling**, the existing `tight` framing. Past it the frame is inside
+the figure — a 103-unit body in a ~300-unit band already fills the height at 1.72×.
+The cap is applied after containment, so it can only ever make a station wider.
+
+### K6 · Graded beats, drag beats and the summary get exactly ONE station, at 1.0
+
+Unchanged and non-negotiable, and now for a second reason on top of the old one.
+
+The old one (H60b): answer targets are `Pressable`s and scale 1 is the identity
+transform, so a tap must not have to survive a camera offset. The new one: a tour
+holds the clock, and a beat whose clock is held is a beat whose *answer* can be held
+with it. A reader who has decided must be able to act immediately.
+
+`drag` beats (§17) are the same case — `dragPos` drives the picture live, and a
+gated clock between the hand and the drawing is exactly the lag that makes a scrub
+feel broken.
+
+### K7 · A tap fast-forwards the tour; it never skips it
+
+The beat is tap-advanced, so a reader can always outrun the camera. The first tap
+during a tour **completes it** — every station's content resolves and the camera
+lands on the closing wide shot; the next tap advances the beat.
+
+The alternative was locking the tap until the tour finished, and it is worse than
+the problem: `locked` already exists for unanswered questions and is felt as the app
+being unresponsive. Fast-forward respects an impatient reader without costing them
+anything, because K3 guarantees the thing they land on is the complete picture.
+
+### K8 · A tour fits inside a beat a reader will actually sit through
+
+- travel **0.55–0.9s** — under 0.35 reads as a jump-cut (`checkShots` already says
+  so), over ~1s and the reader taps;
+- dwell **≥0.7s**, and long enough to cover its own reveal window;
+- **at most 4 stations**, including the closing wide;
+- total tour **≤5.5s**.
+
+A beat carrying more than four things worth separate framings is a composition
+problem, not a camera problem — see H52 and the one-idea-per-beat rule.
+
+### K9 · A follow is not a travel, and its clock runs
+
+When the camera tracks something that is itself moving — a figure walking on, a prop
+being carried — that is one continuous station whose target moves, not two stations
+with a transit between them. The clock runs throughout, or the walk stutters.
+
+This is the distinction the user's own description turns on: *"the camera is very
+close to him, following him walk"* is a station; *"then the camera moves over to
+another part"* is a transit, and only the second one freezes the clock.
+
+### K10 · The tour is generated, and the generator is the authority
+
+Station tables are **derived** from the measured parts, not hand-written, for the
+same reason the must-see boxes are: there are ~880 beats and hand-authoring
+rectangles at that scale is how the four-in-eleven error rate in `camera.ts`'s own
+header happened.
+
+`components/lesson/cinematic/tours.ts` is generated. A beat may still declare its own
+`tour` and that wins — the override for what measurement cannot see. Re-run the
+generator after changing a scene's layout, and note that the stamp mechanism from
+H60c covers this too: a tour derived from a scene that has since moved is stale in
+the same silent, dangerous direction.
+
+> **What is not yet proven.** Groups A–G each exist because a real lesson broke that
+> rule on a real phone. This one is the opposite: it is a design, measured offline
+> against 884 beats and verified in a browser, and it has not yet met a reader. The
+> numbers above are the ones it was built to; treat them as a starting calibration
+> rather than as findings, and expect K8's timings in particular to want tuning once
+> somebody has actually watched twenty lessons end to end.
+
+---
+
+## Group L — nothing may teleport
+
+A reader watching real lessons on a real phone: *"in changing of scenes, an answered
+question, a change of direction of walking for the stickman, no matter how fast the
+user taps the screen, all of these need smooth transitions… it looks as if there is a
+glitch on screen, or a frame miss."*
+
+Four symptoms, and measurement found they are **two defects**, both of them in three
+lines every scene shares. `npm run check:smooth` replays all 112 lessons at 60fps in
+plain Node — `rig.ts` and `moves.ts` have zero imports, so this needs no phone.
+
+### What a beat change actually does
+
+`CinematicPlayer` rewinds the beat clock during render, `bt.value = 0`, and the scene
+then builds its picture from:
+
+```js
+const n = bi.value, p = n - 1;
+const tr = ease01(bt.value / 0.7);
+mixStance(emoteHold(P[p], t), emoteLive(P[n], t, bt.value), tr)
+```
+
+**L1 — a blend starts from the pose that is on screen, never from `P[p]`.**
+`P[p]` is the pose the *previous* beat was heading toward, not the one being drawn. Tap
+before that blend finished and the figure covers the whole remaining distance in one
+frame. The jump is `(1 − tr_reached) × the gap`, which is precisely why it gets worse
+the faster the reader taps — and why the reader described it as tap-rate dependent.
+
+**L2 — the gesture's own clock restarts too.** `emoteLive(code, t, bt)` uses `bt` as the
+gesture's local phase, so a hand halfway through a swing snaps back to the start of that
+swing *even when the blend fraction was already complete*. This is why the worst measured
+case was a tap at exactly 0.70s — the blend was done and the gesture was not.
+
+Both are fixed by the same three-line helper in `cinematicKit`: `useHeld()` keeps the last
+stance the scene emitted, `carryFrom()` makes it the next blend's source, `keepHeld()`
+records it. The first frame of a new beat is then *identical* to the last frame of the old
+one, so it cannot pop at any tap rate — the two frames either side of the change are the
+same picture.
+
+**L3 — a figure turns, it does not mirror.** `pose(s, x, ground, k, dir)` takes `dir` as a
+raw ±1, and 30 lessons flip it. Flipping the sign inverts the whole man between two frames:
+measured at 31 units, and unlike L1 it happens *however patiently* the reader taps. `facing()`
+eases the sign through zero so he turns through a profile, which is what a body does.
+
+### The numbers
+
+| | before | after |
+|---|---|---|
+| lessons that teleport on an early tap | **97 of 112** | **0** |
+| median worst one-frame limb move, fast tap | 24.9 units | **1.3** |
+| worst single case | 40.5 (a wrist) | under 8 |
+
+A limb travelling naturally covers about 3 units a frame; the patient-tap worst across the
+library is 3.5. The threshold is **8** — comfortably above honest motion and comfortably
+below a teleport. `check-smooth` is a **zero**, not a budget: the fix is mechanical and
+there is no reason for a new scene to reintroduce it.
+
+> **The general rule this is an instance of.** Any value driven by `bt` is discontinuous at
+> a beat change, because `bt` is discontinuous at a beat change. If a scene interpolates
+> `lerp(TRACK[p], TRACK[n], tr)` for a prop, that prop has the identical defect — it simply
+> has no limb for the checker to measure. When you add an animated track, ask what it does
+> if the reader taps at 0.3s, and if the answer is "jumps", carry the value the same way.
+
+---
+
 ## Part 2 — Authoring checklist
 
 **Shape** — before writing a word, lay the beats out and count them (H52, H53).

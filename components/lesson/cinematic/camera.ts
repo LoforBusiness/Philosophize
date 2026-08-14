@@ -471,3 +471,161 @@ export function checkShots(
   });
   return out;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE TOUR — group K. A beat is a sequence of framings, not one framing.
+//
+// WHY THIS EXISTS, in one paragraph. H60c says a shot may never crop anything the
+// beat draws, and a beat draws everything it will ever draw, so one framing per
+// beat has to be as wide as the widest thing in it. Measured: mean shot 1.124 →
+// 1.017, 72% of beats at exactly 1.0. The camera was made safe by being made
+// timid. Splitting the beat into STATIONS moves the containment guarantee from
+// "per beat" to "per instant", because at any instant the only thing that has to
+// fit is the thing being shown now — and the same 884 beats then support 1.671×.
+//
+// THE CLOCK IS THE OTHER HALF, and it is the half that makes it teach rather than
+// merely swoop. Scene time does not advance while the camera is in transit (K1),
+// so an animation cannot play to a frame that is pointed somewhere else. A scene
+// obeys this by doing nothing at all: the player gates the `bt` it hands over, so
+// all 102 scenes comply without one of them being edited.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** How close a station may ever go. `tight` — past this the frame is inside the figure (K5). */
+export const STATION_CAP = SCALE.tight;
+
+export interface Station {
+  /** The rectangle this station exists to show. Contained whole, or the station is pointless. */
+  box: Box;
+  /** Seconds to travel here from the previous station (or, for the first, from the previous beat). */
+  tr: number;
+  /**
+   * Seconds to sit here once arrived — the window of SCENE time this station owns.
+   *
+   * Ignored on the last station, which holds until the reader taps. That is not a
+   * special case bolted on: K3 makes the last station the beat's full must-box, so
+   * "hold on the last one" and "the beat rests on the shot it has today" are the
+   * same statement.
+   */
+  dwell: number;
+}
+
+export type Tour = Station[];
+
+/**
+ * The legal shot that frames one station's box as tightly as K5 allows.
+ *
+ * Three steps, and the order is the point: pick the scale that just contains the
+ * box, clamp the whole window inside the design space and above the ground with
+ * `fit`, and then run `containShot` anyway. The third step looks redundant and is
+ * not — `fit`'s clamp can slide a centre that `containShot` would then have to
+ * slide back, and containment is the guarantee, so it goes last.
+ */
+export function stationShot(
+  box: Box, band: [number, number], ground?: number, cap = STATION_CAP,
+): Shot {
+  const bandH = band[1] - band[0];
+  const want = Math.min(STAGE_W / Math.max(box.w, 1), bandH / Math.max(box.h, 1));
+  const s = Math.max(1, Math.min(cap, want));
+  const at: [number, number] = [box.x + box.w / 2, box.y + box.h / 2];
+  return containShot(fit(at, s, band, ground), box, band);
+}
+
+/** Every station of one beat, as legal shots. Precomputed — never per frame. */
+export function tourShots(
+  tour: Tour, band: [number, number], ground?: number, cap = STATION_CAP,
+): Shot[] {
+  return tour.map((st, i) => ({ ...stationShot(st.box, band, ground, cap), tr: i === 0 ? st.tr : st.tr }));
+}
+
+/**
+ * WHERE THE TOUR IS, AND WHAT TIME THE SCENE THINKS IT IS.
+ *
+ * `rt` is the raw beat clock — real seconds since the beat began, which is what the
+ * camera runs on. The returned `g` is the GATED clock, which is what the scene runs
+ * on: it accumulates only while the camera is parked.
+ *
+ *   g(rt) = Σ (dwell already served by earlier stations) + (time parked at this one)
+ *
+ * so a scene that reveals its content over `bt` has that reveal chopped into the
+ * same windows the camera is visiting, in the same order — which is exactly why K2
+ * insists the station order be the measured reveal order and not reading order.
+ *
+ * A worklet, and it allocates one small object per frame, which Reanimated handles.
+ * Written against flat number arrays rather than the Station[] so the whole thing
+ * can cross into the UI thread without carrying a nested structure.
+ */
+export function tourAt(
+  trs: readonly number[], dwells: readonly number[], rt: number,
+): { k: number; t: number; g: number } {
+  'worklet';
+  const n = trs.length;
+  if (n === 0) return { k: 0, t: rt, g: rt };
+  let start = 0;
+  let served = 0;
+  for (let j = 0; j < n; j++) {
+    const arrive = start + trs[j];
+    const last = j === n - 1;
+    // Still on the way to j.
+    if (rt < arrive) return { k: j, t: rt - start, g: served };
+    // Parked at j. The last station holds for the rest of the beat, so its dwell is
+    // not a bound — this is where the free-running tail comes from.
+    const parked = rt - arrive;
+    if (last || parked < dwells[j]) {
+      return { k: j, t: trs[j], g: served + parked };
+    }
+    served += dwells[j];
+    start = arrive + dwells[j];
+  }
+  return { k: n - 1, t: trs[n - 1], g: served };
+}
+
+/** When the tour is over — the moment the camera reaches its last station. */
+export function tourEnd(trs: readonly number[], dwells: readonly number[]): number {
+  let t = 0;
+  for (let j = 0; j < trs.length; j++) {
+    t += trs[j];
+    if (j < trs.length - 1) t += dwells[j];
+  }
+  return t;
+}
+
+/**
+ * Every way a tour can fail group K. The offline half of `npm run check:tour`.
+ *
+ * `wide` is the beat's full must-box — K3's closing station — so this can check
+ * that the tour actually ends on it rather than trusting the generator to have
+ * added it.
+ */
+export function checkTour(
+  tour: Tour, band: [number, number], wide: Box | null, ground?: number,
+): string[] {
+  const out: string[] = [];
+  if (!tour.length) return out;
+  if (tour.length > 4) out.push(`${tour.length} stations — K8 allows 4 including the closing wide`);
+  const shots = tourShots(tour, band, ground);
+  shots.forEach((sh, i) => {
+    if (sh.s < 1) out.push(`station ${i}: scale ${sh.s.toFixed(2)} is below 1`);
+    if (sh.s > STATION_CAP + 0.001) out.push(`station ${i}: ${sh.s.toFixed(2)}× is past the ${STATION_CAP}× ceiling (K5)`);
+    const w = visibleWindow(sh, band);
+    const b = tour[i].box;
+    // K3/H60c per station: the box this station exists for must be inside its window.
+    if (b.x < w.left - 0.5 || b.x + b.w > w.right + 0.5 || b.y < w.top - 0.5 || b.y + b.h > w.bottom + 0.5) {
+      out.push(`station ${i}: its own box is not inside its shot — containment failed (K3)`);
+    }
+    if (tour[i].tr > 0 && tour[i].tr < 0.35) out.push(`station ${i}: a ${tour[i].tr}s travel reads as a jump-cut (K8)`);
+    if (tour[i].tr > 1.2) out.push(`station ${i}: a ${tour[i].tr}s travel is longer than K8 allows`);
+    if (i < tour.length - 1 && tour[i].dwell < 0.7) {
+      out.push(`station ${i}: a ${tour[i].dwell}s dwell is too short to read (K8)`);
+    }
+  });
+  const total = tourEnd(tour.map((s) => s.tr), tour.map((s) => s.dwell));
+  if (total > 5.5) out.push(`the tour takes ${total.toFixed(1)}s to complete — K8 caps it at 5.5s`);
+  // K3 — the last station is the whole beat.
+  if (wide && tour.length > 1) {
+    const l = tour[tour.length - 1].box;
+    const holds = l.x <= wide.x + 0.5 && l.y <= wide.y + 0.5
+      && l.x + l.w >= wide.x + wide.w - 0.5 && l.y + l.h >= wide.y + wide.h - 0.5;
+    if (!holds) out.push('the last station is not the beat\'s full must-box — the reader never sees the whole picture (K3)');
+  }
+  return out;
+}

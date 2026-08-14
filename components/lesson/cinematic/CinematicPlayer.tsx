@@ -12,8 +12,13 @@ import { exitLesson } from '../exitLesson';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { shotAt, resolveMoves, containShot, NEUTRAL, type Box, type Move, type Shot } from './camera';
+import {
+  shotAt, resolveMoves, containShot, NEUTRAL, tourShots, tourAt, tourEnd,
+  type Box, type Move, type Shot, type Tour,
+} from './camera';
 import { MUST } from './mustBoxes';
+import { TOURS } from './tours';
+import { toursOff } from './tourFlag';
 import { cue, touch } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import ChoiceCards from './ChoiceCards';
@@ -41,8 +46,25 @@ import {
 
 export interface SceneApi {
   clock: SharedValue<number>;   // never resets — idle life
-  bt: SharedValue<number>;      // resets each beat — transitions / reveals
+  /**
+   * Resets each beat — transitions and reveals.
+   *
+   * GATED BY THE CAMERA (K1). It stops while the camera travels between the beat's
+   * stations, so an entrance keyed to it cannot play to a frame pointed elsewhere.
+   * A scene gets that by doing nothing; on a beat with no tour it is real seconds,
+   * exactly as before.
+   */
+  bt: SharedValue<number>;
   bi: SharedValue<number>;      // current beat index (worklet-readable)
+  /**
+   * Which station of the beat's tour the camera is at, 0 when there is no tour.
+   *
+   * Nothing needs this for the camera to work — K1's gate is what synchronises the
+   * scene, and it does so without the scene participating. It is here for the case
+   * measurement cannot reach: a reveal that must fire on ARRIVAL rather than after a
+   * dwell, which is a thing a scene can only know by being told.
+   */
+  si: SharedValue<number>;
   qv: SharedValue<number>;      // 0→1 answer progress on the current question beat
   i: number;                    // current beat index (JS)
   beat: BaseBeat;               // current beat (for bubbles etc.)
@@ -190,8 +212,23 @@ export default function CinematicPlayer({
   }, [sounded, gesture, walk, beats]);
 
   const clock = useSharedValue(0);
+  // TWO BEAT CLOCKS, AND WHICH IS WHICH IS THE WHOLE OF K1.
+  //
+  //   rt  RAW. Real seconds since the beat opened. The CAMERA runs on this, because
+  //       the camera is the one thing that must keep moving while everything waits.
+  //   bt  GATED. What the SCENE is handed, and it does not advance while the camera
+  //       is in transit between stations. A scene animating on `bt` therefore cannot
+  //       play an entrance to a frame that is pointed somewhere else — without the
+  //       scene knowing a camera exists, which is what makes this reach all 102 of
+  //       them without one being edited.
+  //
+  // With no tour on the beat the two are equal to the sample, so every un-toured beat
+  // in the app is bit-for-bit unchanged.
+  const rt = useSharedValue(0);
   const bt = useSharedValue(0);
   const bi = useSharedValue(0);
+  /** Which station the camera is at (or travelling toward). Scenes may key reveals to it. */
+  const si = useSharedValue(0);
   const qv = useSharedValue(0);
   // The `drag` knob, 0..1. Owned HERE rather than inside DragScale so the scene can
   // read the same value and animate its art under the reader's thumb (see
@@ -291,6 +328,44 @@ export default function CinematicPlayer({
     });
   }, [beats, lesson.id]);
 
+  // ── THE TOUR (group K) ─────────────────────────────────────────────────────
+  //
+  // A beat's stations, resolved to legal shots ONCE. `tourShots` iterates `fit` per
+  // station and the answer only changes when the lesson does, so doing it per frame
+  // would be the same waste `resolveMoves` was moved out of the frame path to avoid.
+  //
+  // A beat may carry its own `tour` and it wins over the generated table (K10) — the
+  // override for what measurement cannot see. A GRADED BEAT IS REFUSED A TOUR HERE
+  // as well as in the generator: K6 is the rule that answer targets take the identity
+  // transform, and a hand-written override is exactly the route by which that would
+  // otherwise be lost.
+  const tourData = useMemo(() => {
+    const table = TOURS[lesson.id];
+    return beats.map((b, k) => {
+      const raw = (b as BaseBeat & { tour?: readonly (readonly number[])[] }).tour ?? table?.[k] ?? null;
+      if (!raw || raw.length < 2 || needsBox[k] || toursOff()) return null;
+      const tour: Tour = raw.map((s) => ({ box: { x: s[0], y: s[1], w: s[2], h: s[3] }, tr: s[4], dwell: s[5] }));
+      return {
+        shots: tourShots(tour, band, ground),
+        trs: tour.map((t) => t.tr),
+        dwells: tour.map((t) => t.dwell),
+      };
+    });
+  }, [beats, lesson.id, band, ground, needsBox]);
+
+  /**
+   * When the closing travel begins, per beat — where a tap fast-forwards to (K7).
+   *
+   * Not the end of the tour: landing the reader ON the final shot would make an
+   * impatient tap a hard cut. Warping to the start of the last travel resolves every
+   * station's content at once and lets the camera glide out over its own final move,
+   * which reads as winding forward rather than as a jump.
+   */
+  const tourSkip = useMemo(
+    () => tourData.map((t) => (t ? tourEnd(t.trs, t.dwells) - t.trs[t.trs.length - 1] : 0)),
+    [tourData],
+  );
+
   const camNow = useDerivedValue(() => {
     if (!cam || cam.length === 0) return NEUTRAL;
     const n = Math.min(Math.max(bi.value, 0), cam.length - 1);
@@ -324,7 +399,22 @@ export default function CinematicPlayer({
       // authored shot rather than snapping wide for a box that may never come.
       return needsBox[k] ? { ...NEUTRAL, tr: cam[k].tr } : cam[k];
     };
-    return shotAt(frame(n > 0 ? n - 1 : 0), frame(n), bt.value);
+    // Where a beat LEAVES the camera: its tour's last station if it has one, else the
+    // single shot. This is what the next beat travels from, and getting it wrong is
+    // what would make every toured beat begin with a snap back to the un-toured
+    // framing before setting off again.
+    const restOf = (k: number) => {
+      'worklet';
+      const t = tourData[k];
+      return t ? t.shots[t.shots.length - 1] : frame(k);
+    };
+    const tour = tourData[n];
+    if (tour) {
+      const a = tourAt(tour.trs, tour.dwells, rt.value);
+      const from = a.k > 0 ? tour.shots[a.k - 1] : restOf(n > 0 ? n - 1 : n);
+      return shotAt(from, tour.shots[a.k], a.t);
+    }
+    return shotAt(restOf(n > 0 ? n - 1 : 0), frame(n), rt.value);
   });
   const camStyle = useAnimatedStyle(() => {
     const c = camNow.value;
@@ -342,8 +432,10 @@ export default function CinematicPlayer({
   const prevBeat = useRef(-1);
   if (prevBeat.current !== i) {
     prevBeat.current = i;
+    rt.value = 0;
     bt.value = 0;
     bi.value = i;
+    si.value = 0;
     qv.value = 0;
     // Re-arm the footfalls alongside the clock they are measured against, in the
     // same statement that rewinds it — anything later would leave one frame in
@@ -363,7 +455,23 @@ export default function CinematicPlayer({
     let dt = (f.timeSincePreviousFrame ?? 16) / 1000;
     if (dt > 0.05) dt = 0.05;
     clock.value += dt;
-    bt.value += dt;
+    rt.value += dt;
+    // K1 — THE SCENE'S CLOCK IS DERIVED, NOT ACCUMULATED. `bt` used to be `+= dt`
+    // like the other two; it is now a function of the raw clock and the beat's tour,
+    // which is what freezes it while the camera travels. Derived rather than
+    // conditionally incremented on purpose: an accumulator that skips frames drifts
+    // from the camera it is supposed to be synchronised with, and the footfall times
+    // (which are measured against `bt`) would drift with it.
+    const n = Math.min(Math.max(bi.value, 0), tourData.length - 1);
+    const t = n >= 0 ? tourData[n] : null;
+    if (t) {
+      const a = tourAt(t.trs, t.dwells, rt.value);
+      bt.value = a.g;
+      si.value = a.k;
+    } else {
+      bt.value = rt.value;
+      si.value = 0;
+    }
   }, true);
 
   // A FOOTFALL LANDS ON THE BEAT CLOCK, NOT THE WALL CLOCK. `bt` accumulates frame
@@ -451,6 +559,17 @@ export default function CinematicPlayer({
 
   const advance = useCallback(() => {
     if (locked) return;
+    // K7 — A TAP DURING A TOUR FAST-FORWARDS IT; IT NEVER SKIPS IT.
+    //
+    // The reader can always outrun the camera, and the alternative to this was
+    // locking the tap until the tour finished — which is worse than the problem it
+    // solves, because `locked` already exists for unanswered questions and is felt as
+    // the app being unresponsive. Warping the raw clock forward resolves every
+    // station's content at once and leaves only the closing move to play, and K3
+    // guarantees what the reader lands on is the whole picture, so nothing is lost by
+    // being impatient.
+    const skip = tourSkip[i] ?? 0;
+    if (skip > 0 && rt.value < skip) { rt.value = skip; return; }
     // NO SOUND ON ADVANCING A BEAT. There was a page turn here and it fired ten
     // times a lesson, which is the single most frequent thing in a reading — and
     // "I don't want a sound every time a user clicks to the next section" is the
@@ -459,7 +578,7 @@ export default function CinematicPlayer({
     setPicked(null);
     setPickedOk(false);
     setI((n) => n + 1);
-  }, [locked, last, sounded]);
+  }, [locked, last, sounded, tourSkip, i, rt]);
 
   const choose = useCallback((id: string, isCorrect: boolean, graded: boolean) => {
     if (picked !== null) return;
@@ -565,12 +684,12 @@ export default function CinematicPlayer({
                       style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
                     >
                       <TargetCountProvider onCount={setTargetCount} onBox={onBox} host={camHost}>
-                        <Scene clock={clock} bt={bt} bi={bi} qv={qv} dragPos={dragPos} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                        <Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
                       </TargetCountProvider>
                     </Animated.View>
                   ) : (
                     <TargetCountProvider onCount={setTargetCount}>
-                      <Scene clock={clock} bt={bt} bi={bi} qv={qv} dragPos={dragPos} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                      <Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
                     </TargetCountProvider>
                   )}
                 </View>
