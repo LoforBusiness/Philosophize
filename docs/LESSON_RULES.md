@@ -1920,6 +1920,13 @@ there is no reason for a new scene to reintroduce it.
       between the two beats holds rather than replaying (H58, C20c).
 - [ ] Channels lifted from `BEATS` once at module level, not read per frame (H54).
 - [ ] Only INK / PAPER / SOFT / RULE — no scene declares a colour (H60).
+- [ ] Nothing keyed to `bt` assumes it is real seconds — it is GATED by the camera,
+      and stops while the camera travels between stations (K1). This is free to obey
+      and impossible to obey wrongly; it is listed so nobody "fixes" a pause.
+- [ ] After changing a layout: `node scripts/measure-must.mjs && node scripts/make-tours.mjs`.
+      A tour derived from a picture that has moved points at where things used to be,
+      and unlike a stale must-box it does not merely crop — it spends the beat looking
+      at the wrong thing (K10).
 - [ ] `pointerEvents="none"` on every non-interactive element, not just wrappers (H62).
 - [ ] Scene-owned answer targets use the standard card states and go `disabled` on
       answer (H61).
@@ -1976,6 +1983,7 @@ there is no reason for a new scene to reintroduce it.
 ```
 npm run check          # tsc + both validators
 npm run check:cinematic
+npm run check:tour     # group K, offline, against each lesson's own band
 ```
 
 `scripts/validate-cinematic.mjs` enforces the group-H rules that are arithmetic — beat
@@ -1986,6 +1994,21 @@ card decks. The baseline is clean, so **anything it prints is yours**; it also r
 the band budget so a new lesson can see what its crop is costing against the other 46.
 
 It cannot see anything about the picture. That is what the rest of this part is for.
+
+**`check:tour` is the exception that proves it, and worth reading for the technique.**
+Group K's whole safety property — every station contains its own subject, no station
+goes past the ceiling, the tour ends on the beat's full must-box — is settled by
+arithmetic against `camera.ts`, the same module the player runs, transpiled rather
+than reimplemented. Nothing is sampled and nothing is eyeballed, so it covers every
+station in the app in about a second rather than the eight lessons a browser sweep
+gets through. **That is only possible because the tours are generated from
+measurements**: hand-authored stations would each need looking at.
+
+The corollary matters as much. `measure-must.mjs` and `check-frame.mjs` both load the
+lesson with tours switched OFF (`?notour=1`), because measuring through a gated clock
+reads less content per beat, shrinks the boxes, and generates tighter tours next time
+— a ratchet, turning the wrong way, and invisible in the output. The browser harnesses
+measure the scene's own timeline; the tour built on top of it is proved offline.
 
 **Sheet the WHOLE vocabulary before trusting any of it.** Rendering all 50 gestures
 into one grid takes seconds and is the only thing that finds a pose which is *valid*
