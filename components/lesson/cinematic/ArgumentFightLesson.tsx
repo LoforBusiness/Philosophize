@@ -722,7 +722,7 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
           <SketchIcon name="close" size={20} color={INK} />
         </Pressable>
         <View style={styles.track}>
-          <Animated.View style={[styles.fill, fillStyle]} />
+          <Animated.View nativeID="beat-progress" style={[styles.fill, fillStyle]} />
         </View>
       </View>
 
@@ -738,11 +738,18 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
           under 560 units of empty paper. */}
       <Animated.View style={[styles.stageWrap, stageGone && styles.stageGone, stageStyle]} onLayout={onStage}>
         {fit > 0 && beat.act !== 5 ? (
-          <View style={{ width: STAGE_W * fit, height: BAND_H * fit, overflow: 'hidden' }}>
+          <View nativeID="stage-clip" style={{ width: STAGE_W * fit, height: BAND_H * fit, overflow: 'hidden' }}>
             <View style={{ position: 'absolute', left: 0, top: -BAND_T * fit, width: STAGE_W * fit, height: STAGE_H * fit }}>
               <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
                 {/* everything inside here moves with the camera */}
-                <Animated.View style={[styles.scene, camStyle]}>
+                                {/* NAMED FOR THE MEASURING HARNESSES. These two lessons predate the shared
+                    player and carry their own copy of it, so scripts/measure-must.mjs
+                    could never find a stage here and H60c has listed them as unmeasured
+                    since it existed. `nativeID` becomes a DOM id on web and costs
+                    nothing at layout, and #stage-cam's own rect is the image of scene
+                    (0,0) at STAGE_W x fit x scale, which is what the harness divides by
+                    to recover scene coordinates. */}
+                <Animated.View nativeID="stage-cam" style={[styles.scene, camStyle]}>
                   {/* THE RING. Act 1 used to be two figures on a bare rule, which read
                       as "nowhere". It is now a raised canvas: a front edge with an end
                       cap at each side (so the mat has thickness) and a corner post

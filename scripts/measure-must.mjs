@@ -317,13 +317,29 @@ function bandMap(map) {
   return out;
 }
 
+/**
+ * Where a lesson's BEATS live.
+ *
+ * Almost always `<name>Script.ts`. The two lessons that predate the shared player —
+ * logic-arguments-1 and -2 — declare theirs INLINE in the component, which is why
+ * every beat-count lookup here quietly `continue`d past them and why H60c has listed
+ * them as never measured since it existed. Falling back to the component file costs
+ * one line and turns two permanent blanks into two lessons.
+ */
+function beatsSource(comp) {
+  const base = comp.replace(/Lesson$/, '');
+  const script = path.join(DIR, `${base[0].toLowerCase()}${base.slice(1)}Script.ts`);
+  if (fs.existsSync(script)) return fs.readFileSync(script, 'utf8');
+  const inline = path.join(DIR, `${comp}.tsx`);
+  return fs.existsSync(inline) ? fs.readFileSync(inline, 'utf8') : null;
+}
+
 function totalBeats(map) {
   const out = new Map();
   for (const [id, comp] of map) {
-    const base = comp.replace(/Lesson$/, '');
-    const p = path.join(DIR, `${base[0].toLowerCase()}${base.slice(1)}Script.ts`);
-    if (!fs.existsSync(p)) continue;
-    const body = fs.readFileSync(p, 'utf8').match(BEATS_BLOCK);
+    const src = beatsSource(comp);
+    if (!src) continue;
+    const body = src.match(BEATS_BLOCK);
     if (!body) continue;
     out.set(id, body[1].split(BEAT_SPLIT).filter((c) => /\S/.test(c)).length);
   }
@@ -333,10 +349,9 @@ function totalBeats(map) {
 function expectedBeats(map) {
   const out = new Map();
   for (const [id, comp] of map) {
-    const base = comp.replace(/Lesson$/, '');
-    const p = path.join(DIR, `${base[0].toLowerCase()}${base.slice(1)}Script.ts`);
-    if (!fs.existsSync(p)) continue;
-    const body = fs.readFileSync(p, 'utf8').match(/BEATS[^=]*=\s*\[([\s\S]*)\n\];/);
+    const src = beatsSource(comp);
+    if (!src) continue;
+    const body = src.match(/BEATS[^=]*=\s*\[([\s\S]*)\n\];/);
     if (!body) continue;
     const chunks = body[1].split(/\n\s{2}\},?\s*\n?/).filter((c) => /\S/.test(c));
     // NOT THE SUMMARY BEAT. `stageGone` unmounts the stage under the summary card,

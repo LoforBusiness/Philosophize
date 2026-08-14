@@ -628,8 +628,25 @@ console.log(
       'Re-run: node scripts/measure-must.mjs   (a stale box that shrank crops the very thing it protects)',
     ]]);
   }
+  // MEASURED IS NOT THE SAME AS ENFORCED, and saying "114/114 carry boxes" without
+  // that distinction is the more dangerous of the two errors this section can make.
+  // `containShot` lives in CinematicPlayer; a lesson that renders its own player gets
+  // its boxes recorded and nothing applies them, so the number would report a
+  // guarantee that does not exist for those lessons. A stale box at least fails
+  // loudly — an imaginary one reads as green forever.
+  const ownPlayer = [...comps.entries()].filter(([id, comp]) => {
+    if (!measured.has(id)) return false;
+    const p = path.join(DIR, `${comp}.tsx`);
+    return fs.existsSync(p) && !/from '\.\/CinematicPlayer'/.test(fs.readFileSync(p, 'utf8'));
+  }).map(([id]) => id);
+
   console.log(
     `\nH60c: ${measured.size}/${comps.size} lessons carry measured must-see boxes` +
+      (ownPlayer.length
+        ? `\n  ${ownPlayer.length} of them run their OWN player, so the box is recorded and never applied:` +
+          `\n  ${ownPlayer.join(', ')}` +
+          '\n  their framing is argued in their scene headers, not enforced by containShot'
+        : '') +
       (unmeasured.length
         ? `\n  ${unmeasured.length} never measured — the camera frames those by luck` +
           `\n  ${unmeasured.slice(0, 6).join(', ')}${unmeasured.length > 6 ? ', …' : ''}` +
