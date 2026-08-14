@@ -1,19 +1,19 @@
-import { useEffect } from 'react';
+import {
+  useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, {
-  useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing,
-} from 'react-native-reanimated';
+  useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle,
-} from './rig';
+  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics8Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+} from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -91,6 +91,7 @@ const M0 = BEATS[0].mode ?? 0;
 const L0 = BEATS[0].lens ?? 0;
 
 export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const heldS = useHeld();
   const cur = BEATS[i];
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -136,12 +137,12 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick }: S
     // The canonical travel body: walks the 80-unit gap when the beat moves them,
     // blends gesture-to-gesture when it doesn't. WALK is passed EXPLICITLY — a
     // Gait left to a default parameter is not captured into the worklet runtime.
-    const s = travelStance(
+    const s = keepHeld(heldS, travelStance(
       X[p], X[n],
-      emoteHold(P[p], t), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
+      carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
-    );
-    return { fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, DIR[n], 1) };
+    ));
+    return { fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1) };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);

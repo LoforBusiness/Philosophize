@@ -1,13 +1,14 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  climb, ease01, emoteHold, lerp, mixStance, pose, type Bundle,
-} from './rig';
+  climb, ease01, emoteHold, lerp, mixStance, pose, type Bundle, } from './rig';
 import { BEATS } from './ethics31Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -81,6 +82,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics31'));
 
 export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const heldS = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -102,11 +104,10 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick }: Scen
     // Climbing only while the rung count is actually changing; otherwise hold a
     // human pose rather than a frozen half-step (C20).
     const moving = dr > 0 ? 1 - Math.abs(tr * 2 - 1) : 0;
-    const s = mixStance(
-      emoteHold(HOLD[P[n]] ?? 0, t),
+    const s = keepHeld(heldS, mixStance(carryFrom(heldS, n,
+      emoteHold(HOLD[P[n]] ?? 0, t)),
       climb(travelled * PHASE_PER_RUNG),
-      moving,
-    );
+      moving));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       // The rungs slide by exactly the distance the legs walked, then wrap — every

@@ -8,7 +8,9 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics4Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
@@ -77,14 +79,16 @@ const X = BEATS.map((b) => b.x ?? 219);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics4'));
 
 export default function Aesthetics4Scene({ clock, bt, bi }: SceneApi) {
+  const heldA = useHeld();
+  const heldV = useHeld();
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
     const t = clock.value;
 
-    const a = mixStance(emoteHold(A_CODE[p], t), emoteLive(A_CODE[n], t, bt.value), tr);
-    const v = mixStance(emoteHold(V_CODE[p], t), emoteLive(V_CODE[n], t, bt.value), tr);
+    const a = keepHeld(heldA, mixStance(carryFrom(heldA, n, emoteHold(A_CODE[p], t)), emoteLive(A_CODE[n], t, bt.value), tr));
+    const v = keepHeld(heldV, mixStance(carryFrom(heldV, n, emoteHold(V_CODE[p], t)), emoteLive(V_CODE[n], t, bt.value), tr));
     // ONE SLOT, TWO OCCUPANTS. The question card and the row of tests share the
     // pinned strip, so they hand over in stages rather than cross-fading: the card
     // is off the wall by 45% of the transition and the tests go up from 55%. A

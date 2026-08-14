@@ -1,16 +1,18 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, lerp, mixStance, moveTr, pose, travelStance, type Bundle,
-} from './rig';
+  WALK, dirsFrom, ease01, lerp, mixStance, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics7Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+} from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -113,6 +115,8 @@ const MKV = BEATS.map((b) => b.marks ?? 0);
 const CHV = BEATS.map((b) => (b.summary ? 0 : (b.capt ?? 0) <= 1 ? 1 : 0));
 
 export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const heldS = useHeld();
+  const heldC = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -134,16 +138,16 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick }: S
     // The canonical travel body: walks the gap when the beat moves them, blends
     // gesture-to-gesture when it doesn't. WALK is passed EXPLICITLY — a Gait left to
     // a default parameter is not captured into the worklet runtime and crashes.
-    const s = travelStance(
+    const s = keepHeld(heldS, travelStance(
       X[p], X[n],
-      emoteHold(P[p], t), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
+      carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
-    );
+    ));
     // The companion never moves, so they only ever blend gesture into gesture.
-    const c = mixStance(emoteHold(Q[p], t), emoteLive(Q[n], t, bt.value), tr);
+    const c = keepHeld(heldC, mixStance(carryFrom(heldC, n, emoteHold(Q[p], t)), emoteLive(Q[n], t, bt.value), tr));
 
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, DIR[n], 1),
+      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       comp: pose(c, COMP_X, GROUND, K_FIG, -1, 1),
       art: lerp(ARTV[p], ARTV[n], tr),
       capt: captOn ? (captFade ? grow : 1) : 0,

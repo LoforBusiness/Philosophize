@@ -1,14 +1,14 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './aestheticsScript';
 import {
-  clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand,
-  type Bundle, type Stance,
-} from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+  clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
@@ -143,6 +143,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics'));
 
 export default function AestheticsScene({ clock, bt, bi, qv }: SceneApi) {
+  const heldFigS = useHeld();
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -151,7 +152,7 @@ export default function AestheticsScene({ clock, bt, bi, qv }: SceneApi) {
     const t = clock.value;
     const q = clamp01(qv.value);
 
-    const figS = mixStance(hHold(HPOSE[p], t), hLive(HPOSE[n], t, bt.value), tr);
+    const figS = keepHeld(heldFigS, mixStance(carryFrom(heldFigS, n,hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
     // On Q1 the reaching hand and the apple fall away — pleasure that wants nothing.
     const appleOn = L(APPLE[p], APPLE[n]) * (Q1[n] === 1 ? 1 - ease01(q) : 1);
     const glowOn = L(GLOW[p], GLOW[n]) * (Q1[n] === 1 ? 1 + 0.4 * ease01(q) : 1);

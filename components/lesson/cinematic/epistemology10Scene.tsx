@@ -1,17 +1,17 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance,
-  type Bundle,
-} from './rig';
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology10Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+} from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -64,6 +64,7 @@ const NEEDLE = BEATS.map((b) => b.needle ?? 0.5);
 const BAND_L = [0.98, 0.93, 0.34];
 
 export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const heldS = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -80,15 +81,15 @@ export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick }
     const t = clock.value;
     const grow = ease01(bt.value / 0.55);
 
-    const s = travelStance(
+    const s = keepHeld(heldS, travelStance(
       X[p], X[n],
-      emoteHold(P[p], t), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
+      carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
-    );
+    ));
 
     const bl = lerp(BAND_L[BAND[p]], BAND_L[BAND[n]], tr);
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, DIR[n], 1),
+      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       gauge: lerp(GAUGE[p], GAUGE[n], tr) * (gaugeFade ? grow : 1),
       bandL: SC_L + bl * SC_W,
       bandW: Math.max(0, SC_W * (1 - bl)),

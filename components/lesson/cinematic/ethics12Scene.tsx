@@ -1,17 +1,17 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance,
-  type Bundle,
-} from './rig';
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics12Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+} from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -116,6 +116,7 @@ const C1V = NV.map((n) => (n >= 6 ? 1 : 0));
 const C2V = NV.map((n) => (n >= 12 ? 1 : 0));
 
 export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+  const heldS = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -136,11 +137,11 @@ export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick }: 
     const tr = ease01(bt.value / moveTr(X[p], X[n], 0.85));
     const t = clock.value;
 
-    const s = travelStance(
+    const s = keepHeld(heldS, travelStance(
       X[p], X[n],
-      emoteHold(P[p], t), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
+      carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
-    );
+    ));
 
     // The handle goes down only on the beat the figure actually strikes it, over
     // exactly the window `26 stamp` swings its fist through — so the bar moves with
@@ -158,7 +159,7 @@ export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick }: 
     const growB = ease01(clamp01((bt.value - 1.8) / 0.9));
 
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, DIR[n], 1),
+      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       // Sequential, never a cross-fade: the board is fully gone before the three
       // maxims start arriving on the same marks (C22).
       field: pickOn ? (pickFade ? 1 - ease01(clamp01(bt.value / 0.3)) : 0) : 1,

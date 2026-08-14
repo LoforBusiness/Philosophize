@@ -12,7 +12,9 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { propAct } from './interact';
 import { BEATS } from './logic12Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -74,6 +76,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic12'));
 
 export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+  const heldS = useHeld();
   const cur = BEATS[i];
   const revealing = (cur.pick ?? 0) > 0;
 
@@ -102,7 +105,9 @@ export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick }: S
 
     let s;
     if (rv <= 0) {
-      s = mixStance(emoteHold(G[p], t), emoteLive(G[n], t, bt.value), tr);
+      // Group L: blend from the pose last drawn, not from G[p], or an early tap
+      // teleports the figure the rest of the way in one frame.
+      s = mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr);
     } else if (act <= 0) {
       // Feet are driven by DISTANCE TRAVELLED, not by a clock, so they stay locked
       // to the floor for the whole crossing instead of skating (C17).
@@ -111,6 +116,7 @@ export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick }: S
       s = mixStance(rigWalk(OPEN_X - FIG_X, WALK), propAct(7, t, act), ease01(clamp01(act / 0.2)));
     }
 
+    keepHeld(heldS, s);
     return {
       fig: pose(s, fx, GROUND, K_FIG, 1, 1),
       lit: lerp(LIT[p], LIT[n], grow),

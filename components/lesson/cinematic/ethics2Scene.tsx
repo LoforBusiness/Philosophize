@@ -7,7 +7,9 @@ import { BEATS } from './ethics2Script';
 import {
   BLANK, WALK, clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, moveTr, pose, strideStance, type Bundle,
 } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 
@@ -77,6 +79,7 @@ const LENSES = [
 ];
 
 export default function Ethics2Scene({ clock, bt, bi }: SceneApi) {
+  const heldFinderS = useHeld();
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -84,7 +87,7 @@ export default function Ethics2Scene({ clock, bt, bi }: SceneApi) {
     const t = clock.value;
 
     // Finder — gesture blend, small steps.
-    const finderS = mixStance(emoteHold(P_CODE[p], t), emoteLive(P_CODE[n], t, bt.value), tr);
+    const finderS = keepHeld(heldFinderS, mixStance(carryFrom(heldFinderS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     const fx = lerp(X[p], X[n], tr);
 
     // Guide — walks in when its position jumps; otherwise blends gestures in place.

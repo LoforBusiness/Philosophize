@@ -6,7 +6,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
-import { ease01, seg } from './rig';
+import { ease01, seg, type Stance } from './rig';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared kit for cinematic lessons — the parts that are identical across every
@@ -196,6 +196,85 @@ export interface BaseBeat {
 
 /** Beats that hold the reader until they answer, rather than until they tap. */
 export function gates(b: BaseBeat) { return Boolean(b.tap || b.mc || b.interact); }
+
+// ── NOTHING MAY TELEPORT (group L) ────────────────────────────────────────────
+//
+// CinematicPlayer rewinds the beat clock during render — `bt.value = 0` — and
+// every scene then builds its figure from
+//
+//     const n = bi.value, p = n - 1;
+//     const tr = ease01(bt.value / 0.7);
+//     mixStance(emoteHold(P[p], t), emoteLive(P[n], t, bt.value), tr)
+//
+// which hides two discontinuities, and a reader found both: "it looks as if there
+// is a glitch on screen, or a frame miss."
+//
+//   1. THE SOURCE IS THE WRONG POSE. The new blend starts from `P[p]`, the pose
+//      the last beat was heading TOWARD — not the pose actually on screen. Tap
+//      before the blend finished and the figure covers the whole remaining
+//      distance in one frame. The jump is (1 − tr_reached) × the gap, which is
+//      exactly why it worsens the faster the reader taps.
+//   2. THE GESTURE'S OWN CLOCK RESTARTS. `emoteLive(code, t, bt)` uses `bt` as the
+//      gesture's local phase, so a hand halfway through a swing snaps back to the
+//      beginning of that swing even when the blend fraction was already done.
+//
+// Measured over all 112 scenes with `npm run check:smooth`: the worst limb moved
+// 3.0 units a frame when the reader waited and 24.9 when they did not, with a
+// worst case of 40.5 — a hand crossing a tenth of the stage between two frames.
+//
+// THE FIX IS TO REMEMBER WHAT WAS ON SCREEN. `held` keeps the last stance the
+// scene actually emitted; at a beat change that becomes the new blend's source,
+// so the first frame of the new beat is identical to the last frame of the old
+// one and the motion continues from there. It cannot pop, whatever the tap rate,
+// because the two frames either side of the change are the same picture.
+
+/** The three shared values `carryFrom` needs. One call per figure in a scene. */
+export function useHeld() {
+  return {
+    last: useSharedValue<Stance | null>(null),
+    from: useSharedValue<Stance | null>(null),
+    seen: useSharedValue(-1),
+  };
+}
+export type Held = ReturnType<typeof useHeld>;
+
+/**
+ * The pose a blend should start from: whatever was last drawn.
+ *
+ * `fallback` is used only on the very first frame of a lesson, when nothing has
+ * been drawn yet — pass the scene's usual `emoteHold(P[p], t)` for that.
+ */
+export function carryFrom(held: Held, n: number, fallback: Stance): Stance {
+  'worklet';
+  if (held.seen.value !== n) {
+    held.seen.value = n;
+    held.from.value = held.last.value;
+  }
+  return held.from.value ?? fallback;
+}
+
+/** Record what was drawn, so the next beat change can start from it. */
+export function keepHeld(held: Held, s: Stance): Stance {
+  'worklet';
+  held.last.value = s;
+  return s;
+}
+
+/**
+ * A facing that turns instead of mirroring.
+ *
+ * `pose()` takes `dir` as a raw ±1, so a scene that turns the figure round flips
+ * the sign between two frames and the whole man inverts at once — measured at 31
+ * units, and unlike the blend defect it happens however patiently the reader
+ * taps. Easing the sign through zero turns him through a profile instead, which
+ * is what a body does. Feed it `bt` and the beat's own facing.
+ */
+export function facing(from: number, to: number, t: number, dur = 0.36): number {
+  'worklet';
+  if (from === to) return to;
+  const u = t <= 0 ? 0 : t >= dur ? 1 : t / dur;
+  return from + (to - from) * (u * u * (3 - 2 * u));
+}
 
 // ── beat-to-beat transition (SEQUENTIAL) ──────────────────────────────────────
 // Fade the deck fully out, swap content while invisible, fade back in. `render`

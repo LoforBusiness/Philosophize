@@ -10,7 +10,9 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political31Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -91,6 +93,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political31'));
 
 export default function Political31Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const heldS = useHeld();
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -102,7 +105,7 @@ export default function Political31Scene({ clock, bt, bi, i, picked, onPick }: S
     // field going at the speed of a gesture reads as a glitch (C17).
     const fall = ease01(bt.value / 1.3);
     const grow = ease01(bt.value / 0.9);
-    const s = mixStance(emoteHold(G[p], t), emoteLive(G[n], t, bt.value), tr);
+    const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       grass: lerp(GRASS[p], GRASS[n], fall),

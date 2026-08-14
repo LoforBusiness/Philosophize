@@ -8,7 +8,9 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics4Script';
-import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -74,6 +76,8 @@ const X = BEATS.map((b) => b.x ?? 200);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics4'));
 
 export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const heldA = useHeld();
+  const heldB = useHeld();
   const cur = BEATS[i];
   const answered = picked !== null;
   const asking = !!cur.interact;
@@ -84,8 +88,8 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick }: Scene
     const tr = ease01(bt.value / 0.85);
     const t = clock.value;
 
-    const a = mixStance(emoteHold(A_CODE[p], t), emoteLive(A_CODE[n], t, bt.value), tr);
-    const b = mixStance(emoteHold(B_CODE[p], t), emoteLive(B_CODE[n], t, bt.value), tr);
+    const a = keepHeld(heldA, mixStance(carryFrom(heldA, n, emoteHold(A_CODE[p], t)), emoteLive(A_CODE[n], t, bt.value), tr));
+    const b = keepHeld(heldB, mixStance(carryFrom(heldB, n, emoteHold(B_CODE[p], t)), emoteLive(B_CODE[n], t, bt.value), tr));
     return {
       a: pose(a, A_X, FIG_G, K_FIG, 1, 1),
       b: pose(b, B_X, FIG_G, K_FIG, -1, 1),

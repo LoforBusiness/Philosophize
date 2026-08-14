@@ -600,7 +600,12 @@ head('every walker sounds, and nothing else does');
     const end = tail.indexOf(');');
     const args = tail.slice(0, end < 0 ? 400 : end).replace(/\s+/g, ' ').split('(').slice(1).join('(');
     if (!/^\s*X\[\s*p\s*\]\s*,\s*X\[\s*n\s*\]/.test(args)) return 'walks something other than X[p]→X[n]';
-    if (!/,\s*WALK\s*,?\s*$/.test(args)) return 'a custom gait or a seed';
+    // The trailing `\)?` is the group-L wrapper. A travelStance call is now written
+    // `keepHeld(heldS, travelStance(...))` so the blend can start from the pose on
+    // screen, which moves the `');'` this slice stops at and leaves one unbalanced
+    // paren on the end of the args. Without allowing it, four walking scenes were
+    // reported as "a custom gait or a seed" when their gait had not changed at all.
+    if (!/,\s*WALK\s*,?\s*\)?\s*$/.test(args)) return 'a custom gait or a seed';
     if (!/const\s+X\s*=/.test(src)) return 'no X track';
     if (!/const\s+P\s*=/.test(src)) return 'no P gesture track';
     return null;

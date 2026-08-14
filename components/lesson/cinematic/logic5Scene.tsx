@@ -1,4 +1,5 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -8,7 +9,8 @@ import { climb, ease01, lerp, mixStance, pose, type Bundle, type Stance } from '
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic5Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -122,6 +124,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic5'));
 
 export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+  const heldS = useHeld();
   const cur = BEATS[i];
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -135,7 +138,7 @@ export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick }: Sc
       if (isClimb) return climb(t * 3.4);
       return useLive ? emoteLive(P_CODE[idx], t, bt.value) : emoteHold(P_CODE[idx], t);
     };
-    const s = mixStance(stanceOf(p, climbPrev, false), stanceOf(n, climbNow, true), tr);
+    const s = keepHeld(heldS, mixStance(carryFrom(heldS, n,stanceOf(p, climbPrev, false)), stanceOf(n, climbNow, true), tr));
 
     return {
       fig: pose(s, lerp(climbPrev ? LADDER_X : FIG_X, climbNow ? LADDER_X : FIG_X, tr), GROUND, K_FIG, 1, 1),

@@ -1,17 +1,18 @@
-import { useEffect } from 'react';
+import {
+  useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle,
-} from './rig';
+  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics7Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+} from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import { cue } from '@/lib/feedback';
 import type { SceneApi } from './CinematicPlayer';
@@ -67,6 +68,7 @@ const GL = BEATS.map((b) => b.glance ?? 0);
 const CB = BEATS.map((b) => b.carB ?? -70);
 
 export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick }: SceneApi) {
+  const heldS = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -116,11 +118,11 @@ export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick }
     const t = clock.value;
     const grow = ease01(bt.value / 0.55);
 
-    const s = travelStance(
+    const s = keepHeld(heldS, travelStance(
       X[p], X[n],
-      emoteHold(P[p], t), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
+      carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
-    );
+    ));
 
     // Road A never stops: one untroubled car after another, wrapping while fully
     // off-stage (-70 → 416) so the loop never pops in view.
@@ -129,7 +131,7 @@ export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick }
     const xb = lerp(CB[p], CB[n], tr);
 
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, DIR[n], 1),
+      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       laneA: laneAOn ? (laneAFade ? grow : 1) : 0,
       laneB: laneBOn ? (laneBFade ? grow : 1) : 0,
       kid: kidOn ? (kidFade ? grow : 1) : 0,

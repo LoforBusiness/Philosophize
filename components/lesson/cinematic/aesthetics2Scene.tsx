@@ -8,7 +8,9 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
@@ -91,14 +93,16 @@ const X = BEATS.map((b) => b.x ?? 202);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics2'));
 
 export default function Aesthetics2Scene({ clock, bt, bi }: SceneApi) {
+  const heldArtistS = useHeld();
+  const heldViewerS = useHeld();
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
     const t = clock.value;
 
-    const artistS = mixStance(emoteHold(A_CODE[p], t), emoteLive(A_CODE[n], t, bt.value), tr);
-    const viewerS = mixStance(emoteHold(V_CODE[p], t), emoteLive(V_CODE[n], t, bt.value), tr);
+    const artistS = keepHeld(heldArtistS, mixStance(carryFrom(heldArtistS, n, emoteHold(A_CODE[p], t)), emoteLive(A_CODE[n], t, bt.value), tr));
+    const viewerS = keepHeld(heldViewerS, mixStance(carryFrom(heldViewerS, n, emoteHold(V_CODE[p], t)), emoteLive(V_CODE[n], t, bt.value), tr));
 
     // The feeling-pulse crosses from artist to viewer over the first ~1.4s of a
     // transmission beat, brightest mid-flight.

@@ -1,13 +1,14 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './politicalScript';
 import {
-  boxMove, clamp01, ease01, lerp, mixStance, pose, stand, type Bundle, type Stance,
-} from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+  boxMove, clamp01, ease01, lerp, mixStance, pose, stand, type Bundle, type Stance, } from './rig';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 
@@ -101,6 +102,7 @@ function sovereignPose(t: number): Stance {
 }
 
 export default function PoliticalScene({ clock, bt, bi, qv }: SceneApi) {
+  const heldS = useHeld();
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -113,7 +115,7 @@ export default function PoliticalScene({ clock, bt, bi, qv }: SceneApi) {
     const cit = (k: number): Bundle => {
       'worklet';
       const dir = CIT_DIR[k];
-      const s = mixStance(melee(t, k), stand(t), auth);
+      const s = keepHeld(heldS, mixStance(carryFrom(heldS, n,melee(t, k)), stand(t), auth));
       const x = CIT_X[k] + s.adv * dir * (1 - auth);   // lunges only in the brawl
       return pose(s, x, GROUND, CIT_K, dir, 1);
     };

@@ -6,7 +6,9 @@ import CinematicPlayer from './CinematicPlayer';
 import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political33Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE } from './cinematicKit';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
@@ -45,6 +47,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political33'));
 
 export default function Political33Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
+  const heldS = useHeld();
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -52,7 +55,7 @@ export default function Political33Scene({ clock, bt, bi, i, dragPos }: SceneApi
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.7);
     const t = clock.value;
-    const s = mixStance(emoteHold(P[p], t), emoteLive(P[n], t, bt.value), tr);
+    const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P[p], t)), emoteLive(P[n], t, bt.value), tr));
     // A door takes a moment to swing — 1.2s, so it is watchable rather than snapping.
     const swing = ease01(bt.value / 1.2);
     return {

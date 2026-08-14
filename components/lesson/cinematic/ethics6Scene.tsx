@@ -8,7 +8,9 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle, type Stance } from
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics6Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
@@ -81,14 +83,16 @@ const X = BEATS.map((b) => b.x ?? 183);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics6'));
 
 export default function Ethics6Scene({ clock, bt, bi }: SceneApi) {
+  const heldD = useHeld();
+  const heldStr = useHeld();
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
     const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
-    const d = mixStance(emoteHold(D_CODE[p], t), emoteLive(D_CODE[n], t, bt.value), tr);
-    const str = mixStance(emoteHold(S_CODE[p], t), emoteLive(S_CODE[n], t, bt.value), tr);
+    const d = keepHeld(heldD, mixStance(carryFrom(heldD, n, emoteHold(D_CODE[p], t)), emoteLive(D_CODE[n], t, bt.value), tr));
+    const str = keepHeld(heldStr, mixStance(carryFrom(heldStr, n, emoteHold(S_CODE[p], t)), emoteLive(S_CODE[n], t, bt.value), tr));
     return {
       dec: pose(d, DEC_X, BRIDGE_Y, K_FIG, 1, 1),
       str: pose(str, STR_X, BRIDGE_Y, K_FIG * 1.16, -1, 1),

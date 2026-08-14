@@ -1,13 +1,15 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './epistemology2Script';
 import {
-  clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle,
-} from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+  clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle, } from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
@@ -86,19 +88,20 @@ const X = BEATS.map((b) => b.x ?? 184);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology2'));
 
 export default function Epistemology2Scene({ clock, bt, bi }: SceneApi) {
+  const heldDemonS = useHeld();
+  const heldDoubterS = useHeld();
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
     const t = clock.value;
 
-    const doubterS = mixStance(emoteHold(D_CODE[p], t), emoteLive(D_CODE[n], t, bt.value), tr);
+    const doubterS = keepHeld(heldDoubterS, mixStance(carryFrom(heldDoubterS, n, emoteHold(D_CODE[p], t)), emoteLive(D_CODE[n], t, bt.value), tr));
     const mOn = lerp(M_ON[p], M_ON[n], tr);
-    const demonS = mixStance(
-      emoteHold(M_CODE[p] < 0 ? 0 : M_CODE[p], t),
+    const demonS = keepHeld(heldDemonS, mixStance(carryFrom(heldDemonS, n,
+      emoteHold(M_CODE[p] < 0 ? 0 : M_CODE[p], t)),
       emoteLive(M_CODE[n] < 0 ? 0 : M_CODE[n], t, bt.value),
-      tr,
-    );
+      tr));
 
     return {
       doubter: pose(doubterS, DOUBT_X, GROUND, K_FIG, -1, 1),

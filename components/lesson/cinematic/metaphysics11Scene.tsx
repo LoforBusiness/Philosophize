@@ -1,17 +1,17 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, clamp01, dirsFrom, ease01, headAt, lerp, moveTr, pose,
-  travelStance, type Bundle,
-} from './rig';
+  WALK, clamp01, dirsFrom, ease01, headAt, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics11Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -127,6 +127,7 @@ const X = BEATS.map((b) => b.x ?? PRI_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics11'));
 
 export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const heldCS = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -160,11 +161,11 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick }:
       PRI_X, PRI_X,
       emoteHold(P[p], t + 4.3), emoteHold(P[n], t + 4.3), pLive, tr, WALK, 3,
     );
-    const cS = travelStance(
+    const cS = keepHeld(heldCS, travelStance(
       CX[p], CX[n],
-      emoteHold(C[p], t), emoteHold(C[n], t), emoteLive(C[n], t, bt.value),
+      carryFrom(heldCS, n, emoteHold(C[p], t)), emoteHold(C[n], t), emoteLive(C[n], t, bt.value),
       tr, WALK, 1,
-    );
+    ));
     const cx = lerp(CX[p], CX[n], tr);
     // He arrives at FULL opacity: the fade is spent in the wing, over the first
     // fifth of a 150-unit walk, so the reader only ever sees a man walking on.

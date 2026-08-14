@@ -1,13 +1,14 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  ease01, lerp, mixStance, pose, seated, type Bundle, type Stance,
-} from './rig';
+  ease01, lerp, mixStance, pose, seated, type Bundle, type Stance, } from './rig';
 import { BEATS } from './logic31Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -89,6 +90,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic31'));
 
 export default function Logic31Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const heldS = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
   const scaleFade = (cur.scale ?? 0) !== (prev?.scale ?? 0);
@@ -101,7 +103,7 @@ export default function Logic31Scene({ clock, bt, bi, i, picked, onPick }: Scene
     const tr = ease01(bt.value / 0.7);
     const t = clock.value;
     const grow = ease01(bt.value / 0.55);
-    const s = mixStance(attitude(P[p], t), attitude(P[n], t), tr);
+    const s = keepHeld(heldS, mixStance(carryFrom(heldS, n,attitude(P[p], t)), attitude(P[n], t), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       flips: lerp(FLIPS[p], FLIPS[n], grow),

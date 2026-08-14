@@ -8,7 +8,9 @@ import { WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, strideStance, typ
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics5Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -119,6 +121,7 @@ const BAL = BEATS.map((b) => b.balance ?? 0);
 const CHART = BEATS.map((b) => b.chart ?? 0);
 
 export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+  const heldSocS = useHeld();
   const cur = BEATS[i];
   // Answer-direction constants resolved on the JS thread — the worklet stays free of
   // array methods, and strideStance is called DIRECTLY (calling it from a nested
@@ -135,9 +138,12 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: S
     const t = clock.value;
     const moving = Math.abs(X[n] - X[p]) > 1;
 
-    const socS = moving
+    // Standing, the blend starts from the pose LAST DRAWN rather than from
+    // SOC[p] — see group L. Walking, strideStance sets the whole body from the
+    // distance covered and there is nothing to carry, so it is left alone.
+    const socS = keepHeld(heldSocS, moving
       ? strideStance(X[p], X[n], emoteHold(SOC[n], t), tr, WALK)
-      : mixStance(emoteHold(SOC[p], t), emoteLive(SOC[n], t, bt.value), tr);
+      : mixStance(carryFrom(heldSocS, n, emoteHold(SOC[p], t)), emoteLive(SOC[n], t, bt.value), tr));
 
     // The walker only ever shifts SIDEWAYS on an answer — never up or down, so the
     // band below can be measured once and stays true on every beat.

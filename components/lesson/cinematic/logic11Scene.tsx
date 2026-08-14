@@ -1,16 +1,17 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, lerp, moveTr, pose, seg, travelStance, type Bundle,
-} from './rig';
+  WALK, dirsFrom, ease01, lerp, moveTr, pose, seg, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes: codes under 100 are
 // exactly rig's and mean what they always did, 100+ reach moves.ts (see emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic11Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+} from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -112,6 +113,7 @@ function stepOp(k: number, p: number, n: number, grow: number) {
 }
 
 export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+  const heldS = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -132,11 +134,11 @@ export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick }: S
     const t = clock.value;
     const grow = ease01(bt.value / 0.55);
 
-    const s = travelStance(
+    const s = keepHeld(heldS, travelStance(
       X[p], X[n],
-      emoteHold(P[p], t), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
+      carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
-    );
+    ));
 
     // THE PAYOFF, IN ORDER (C22c): the stub leaves step 3, the line climbs the
     // outside, the head lands on step 1 — and only then does the stack leave its
@@ -149,7 +151,7 @@ export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick }: S
     const lift = a * ease01(seg(qv.value, 0.58, 1.0));
 
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, DIR[n], 1),
+      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       base: lerp(BASEV[p], BASEV[n], tr) * (baseFade ? grow : 1),
       spine: lerp(SPINEV[p], SPINEV[n], tr) * (spineFade ? grow : 1),
       s0: stepOp(0, p, n, grow) * (wrongIdx === 0 ? 0.45 : 1),

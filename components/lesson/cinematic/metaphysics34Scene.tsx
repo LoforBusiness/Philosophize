@@ -6,7 +6,9 @@ import CinematicPlayer from './CinematicPlayer';
 import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics34Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
@@ -52,6 +54,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics34'));
 
 export default function Metaphysics34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
+  const heldS = useHeld();
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -59,7 +62,7 @@ export default function Metaphysics34Scene({ clock, bt, bi, i, dragPos }: SceneA
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.7);
     const t = clock.value;
-    const s = mixStance(emoteHold(P[p], t), emoteLive(P[n], t, bt.value), tr);
+    const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P[p], t)), emoteLive(P[n], t, bt.value), tr));
     // Descending a level takes a moment to read, so the scripted move is slower
     // than the pose blend (C17). Under the reader's thumb it is immediate.
     const sink = ease01(bt.value / 1.0);

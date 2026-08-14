@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -6,10 +7,9 @@ import CritterView from './CritterView';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './ethicsScript';
 import {
-  clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand,
-  type Bundle, type Stance,
-} from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+  clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
@@ -186,6 +186,7 @@ const X = BEATS.map((b) => b.x ?? HUMAN_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics'));
 
 export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
+  const heldHumanS = useHeld();
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -195,7 +196,7 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
     const t = clock.value;
     const q = clamp01(qv.value);
 
-    const humanS = mixStance(hHold(HPOSE[p], t), hLive(HPOSE[n], t, bt.value), tr);
+    const humanS = keepHeld(heldHumanS, mixStance(carryFrom(heldHumanS, n,hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
     const conOn = L(JUDGE[p], JUDGE[n]);
     const critOn = L(CRITTER[p], CRITTER[n]);
 

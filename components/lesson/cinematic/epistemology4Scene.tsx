@@ -8,7 +8,9 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology4Script';
-import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -69,6 +71,8 @@ const X = BEATS.map((b) => b.x ?? 196);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology4'));
 
 export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const heldE = useHeld();
+  const heldR = useHeld();
   const cur = BEATS[i];
   const answered = picked !== null;
   const asking = !!cur.interact;
@@ -80,8 +84,8 @@ export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick }:
     const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
-    const e = mixStance(emoteHold(E_CODE[p], t), emoteLive(E_CODE[n], t, bt.value), tr);
-    const r = mixStance(emoteHold(R_CODE[p], t), emoteLive(R_CODE[n], t, bt.value), tr);
+    const e = keepHeld(heldE, mixStance(carryFrom(heldE, n, emoteHold(E_CODE[p], t)), emoteLive(E_CODE[n], t, bt.value), tr));
+    const r = keepHeld(heldR, mixStance(carryFrom(heldR, n, emoteHold(R_CODE[p], t)), emoteLive(R_CODE[n], t, bt.value), tr));
     return {
       e: pose(e, E_X, 500, K_FIG, 1, 1),
       r: pose(r, R_X, 500, K_FIG, -1, 1),

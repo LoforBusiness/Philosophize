@@ -1,17 +1,17 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance,
-  type Bundle,
-} from './rig';
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes: codes under 100 are
 // exactly rig's and mean what they always did, 100+ reach moves.ts (see emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics12Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -122,6 +122,7 @@ const X = BEATS.map((b) => b.x ?? POET_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics12'));
 
 export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const heldRMix = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -139,11 +140,11 @@ export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick }: 
     // reveal is offset past the move that causes it (C20d).
     const grow = ease01(clamp01((bt.value - dur * 0.55) / 0.9));
 
-    const rMix = travelStance(
+    const rMix = keepHeld(heldRMix, travelStance(
       RX[p], RX[n],
-      emoteHold(R[p], t), emoteHold(R[n], t), emoteLive(R[n], t, bt.value),
+      carryFrom(heldRMix, n, emoteHold(R[p], t)), emoteHold(R[n], t), emoteLive(R[n], t, bt.value),
       tr, WALK, 1,
-    );
+    ));
     // The poet stands on one mark all lesson, so his x never changes and nothing
     // about him goes through a walk. His CLOCK is shifted instead, because stand()
     // takes no seed and two figures breathing on the same frames read as one puppet

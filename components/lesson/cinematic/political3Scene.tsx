@@ -8,7 +8,9 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political3Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
@@ -108,6 +110,8 @@ const X = BEATS.map((b) => b.x ?? 200);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political3'));
 
 export default function Political3Scene({ clock, bt, bi, i }: SceneApi) {
+  const heldSub = useHeld();
+  const heldR = useHeld();
   const mode = PAIR_MODE[i];
   const panel = PANELS[mode] ?? PANELS[1]!;
   const rots = mode === 2 ? SCATTER : null;
@@ -118,8 +122,8 @@ export default function Political3Scene({ clock, bt, bi, i }: SceneApi) {
     const tr = ease01(bt.value / 0.85);
     const t = clock.value;
 
-    const sub = mixStance(emoteHold(SUB_CODE[p], t), emoteLive(SUB_CODE[n], t, bt.value), tr);
-    const r = mixStance(emoteHold(R_CODE[p], t), emoteLive(R_CODE[n], t, bt.value), tr);
+    const sub = keepHeld(heldSub, mixStance(carryFrom(heldSub, n, emoteHold(SUB_CODE[p], t)), emoteLive(SUB_CODE[n], t, bt.value), tr));
+    const r = keepHeld(heldR, mixStance(carryFrom(heldR, n, emoteHold(R_CODE[p], t)), emoteLive(R_CODE[n], t, bt.value), tr));
     return {
       sub: pose(sub, SUB_X, GROUND, K_FIG, 1, 1),
       ruler: pose(r, R_X, GROUND, K_FIG, -1, 1),

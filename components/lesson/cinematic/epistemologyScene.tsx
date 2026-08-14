@@ -1,14 +1,14 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './epistemologyScript';
 import {
-  clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand,
-  type Bundle, type Stance,
-} from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+  clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
@@ -107,6 +107,7 @@ const X = BEATS.map((b) => b.x ?? SEEKER_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology'));
 
 export default function EpistemologyScene({ clock, bt, bi, qv, i, picked }: SceneApi) {
+  const heldSeekerS = useHeld();
   const cur = BEATS[i];
   // Only the RIGHT answer turns the third bolt. A door that swings open on a wrong
   // pick would tell the reader "you know" at the exact moment they showed they
@@ -122,7 +123,7 @@ export default function EpistemologyScene({ clock, bt, bi, qv, i, picked }: Scen
     const t = clock.value;
     const q = clamp01(qv.value);
 
-    const seekerS = mixStance(hHold(HPOSE[p], t), hLive(HPOSE[n], t, bt.value), tr);
+    const seekerS = keepHeld(heldSeekerS, mixStance(carryFrom(heldSeekerS, n,hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
 
     const l1 = L(LOCKS[p][0], LOCKS[n][0]);
     const l2 = L(LOCKS[p][1], LOCKS[n][1]);

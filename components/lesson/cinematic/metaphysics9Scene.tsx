@@ -1,17 +1,17 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance,
-  type Bundle,
-} from './rig';
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics9Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+} from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -75,6 +75,7 @@ const PANELS = BEATS.map((b) => b.panels ?? 0);
 const CROSS = BEATS.map((b) => (b.cross ?? 0));
 
 export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const heldS = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -94,11 +95,11 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: 
     const t = clock.value;
     const grow = ease01(bt.value / 0.55);
 
-    const s = travelStance(
+    const s = keepHeld(heldS, travelStance(
       X[p], X[n],
-      emoteHold(P[p], t), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
+      carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
-    );
+    ));
 
     // The thought sets out and STOPS. It eases toward the far panel and arrives at
     // 0.86 of the way — close enough to be trying, short enough that the strip of
@@ -106,7 +107,7 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: 
     const reach = lerp(CROSS[p], CROSS[n], tr) * ease01(clamp01(bt.value / 1.5)) * 0.86;
 
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, DIR[n], 1),
+      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       lit: lerp(PANELS[p] > 0 ? 1 : 0, PANELS[n] > 0 ? 1 : 0, tr) * (litFade ? grow : 1),
       shut: lerp(PANELS[p] === 2 ? 1 : 0, PANELS[n] === 2 ? 1 : 0, tr),
       reach,

@@ -1,16 +1,18 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  ease01, lerp, mixStance, pose, type Bundle,
-} from './rig';
+  ease01, lerp, mixStance, pose, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics32Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -73,6 +75,8 @@ const X = BEATS.map((b) => b.x ?? 191);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics32'));
 
 export default function Ethics32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const heldSb = useHeld();
+  const heldSa = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -88,12 +92,11 @@ export default function Ethics32Scene({ clock, bt, bi, i, picked, onPick }: Scen
     const t = clock.value;
     const grow = ease01(bt.value / 0.55);
 
-    const sa = mixStance(emoteHold(A[p], t), emoteLive(A[n], t, bt.value), tr);
-    const sb = mixStance(
-      emoteHold(B[p], t + B_CLOCK),
+    const sa = keepHeld(heldSa, mixStance(carryFrom(heldSa, n, emoteHold(A[p], t)), emoteLive(A[n], t, bt.value), tr));
+    const sb = keepHeld(heldSb, mixStance(carryFrom(heldSb, n,
+      emoteHold(B[p], t + B_CLOCK)),
       emoteLive(B[n], t + B_CLOCK, bt.value),
-      tr,
-    );
+      tr));
     const card = lerp(CARD[p], CARD[n], tr);
     return {
       know: pose(sa, A_X, GROUND, K_FIG, 1, 1),

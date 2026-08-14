@@ -8,7 +8,9 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political2Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER } from './cinematicKit';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -83,6 +85,8 @@ const X = BEATS.map((b) => b.x ?? 174);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political2'));
 
 export default function Political2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const heldRulerS = useHeld();
+  const heldSubS = useHeld();
   const cur = BEATS[i];
   const showPick = !!cur.interact && !!cur.ledger;
   const answered = picked !== null;
@@ -94,8 +98,8 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick }: Sc
     const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
-    const rulerS = mixStance(emoteHold(R_CODE[p], t), emoteLive(R_CODE[n], t, bt.value), tr);
-    const subS = mixStance(emoteHold(SUB_CODE[p], t), emoteLive(SUB_CODE[n], t, bt.value), tr);
+    const rulerS = keepHeld(heldRulerS, mixStance(carryFrom(heldRulerS, n, emoteHold(R_CODE[p], t)), emoteLive(R_CODE[n], t, bt.value), tr));
+    const subS = keepHeld(heldSubS, mixStance(carryFrom(heldSubS, n, emoteHold(SUB_CODE[p], t)), emoteLive(SUB_CODE[n], t, bt.value), tr));
     const pod = L(POD[p], POD[n]);
     const led = L(LED[p], LED[n]);
 

@@ -500,11 +500,11 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is `tsc` plus **seventeen** validators, in this order:
+**Validation:** `npm run check` is `tsc` plus **eighteen** validators, in this order:
 `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
 `check-camera` · `check-poll` · `check-access` · `check-rest` · `check-stats` · `check-launch` ·
-`check-ui` · `check-words`. It exits 0 today, so anything any of them prints is yours. (Several
+`check-ui` · `check-words` · `check-smooth`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
 figures and 6 hand-built ones, `check-moves` 6 head-clearance defects. A budget
 line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 204 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
@@ -730,6 +730,38 @@ defects they already made. Read H before laying out a new lesson's beats.
 imports** — which is what lets it run in plain Node for verification. Pelvis
 origin, `+x` = facing, **negative y = up**, feet ground-relative. Everything is
 drawn as native Views (`Stickman.tsx`), never SVG — see the performance rule below.
+
+### Nothing may teleport (group L)
+
+A reader saw "a glitch on screen, or a frame miss" on scene changes, answered
+questions, the figure turning round, and fast tapping. Measured with
+`npm run check:smooth` — which replays all 112 lessons at 60fps in plain Node —
+those four symptoms were **two defects**, both living in the three lines every
+scene shares:
+
+- **The blend started from the wrong pose.** `mixStance(emoteHold(P[p], …), …)`
+  begins at the pose the PREVIOUS beat was heading toward, not the one on screen.
+  Tap before that blend finished and the figure covers the whole remaining
+  distance in one frame — `(1 − tr_reached) × the gap`, which is exactly why it
+  got worse the faster you tapped.
+- **The gesture's own clock restarted.** `emoteLive(code, t, bt)` uses `bt` as the
+  gesture's phase, so a hand mid-swing snapped back to the start of the swing even
+  when the blend itself was done. The worst case measured was a tap at exactly
+  0.70s — blend complete, gesture not.
+
+`useHeld` / `carryFrom` / `keepHeld` in `cinematicKit` fix both: the first frame of
+a new beat is *identical* to the last frame of the old one, so it cannot pop at any
+tap rate. **97 of 112 lessons → 0**; median worst one-frame limb move on a fast tap
+**24.9 → 1.3 units**.
+
+Separately, `pose(…, dir)` took a raw ±1 and **30 lessons flip it**, mirroring the
+whole man between two frames (31 units, at any tap speed). `facing()` eases the sign
+through zero so he turns through a profile.
+
+> **The general form, worth remembering when adding any track:** anything driven by
+> `bt` is discontinuous at a beat change, because `bt` is. A prop interpolated as
+> `lerp(TRACK[p], TRACK[n], tr)` has the identical defect and merely has no limb for
+> the checker to measure.
 
 **Rules that keep biting, in rough order of how often:**
 
