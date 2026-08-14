@@ -230,22 +230,34 @@ export function tourFor(items, wide, band, single, reveal = true, dur = 0, seed 
   // close-up in the whole vocabulary on the table. H60b's first bullet is "push in
   // on the figure"; this is what lets that happen when nothing else separates.
   //
-  // Only when there is exactly ONE person, decided by the reading buckets rather
-  // than the sample count: a figure that walks contributes several boxes and is
-  // still one man, whereas two people contribute several to the same reading and
-  // "which one do we push in on" has no answer worth guessing.
+  // WITH SEVERAL PEOPLE IT IS THE GROUP, not one of them. "Which man do we push in
+  // on" has no answer worth guessing, and that was first read as a reason to skip the
+  // beat entirely — which left six lessons with no camera at all, every one of them a
+  // two-hander. The subject was never one figure; it is the people, and their union
+  // is a two-shot. Measured, 143 multi-figure beats frame the group at least 0.12×
+  // tighter than the whole stage and only 11 gain nothing.
+  //
+  // A single figure is the same rule with one member. What decides "one" is the
+  // reading buckets rather than the sample count, because a figure who walks leaves
+  // several boxes and is still one man — but here it does not even matter, since the
+  // union of one man's positions across a beat is exactly what a static station on a
+  // slow mover should hold.
   if (!picked.length) {
     const figs = raw.filter((it) => it.k === 'fig');
     const bucket = new Map();
     for (const f of figs) bucket.set(f.r ?? 0, (bucket.get(f.r ?? 0) ?? 0) + 1);
-    const one = figs.length > 0 && [...bucket.values()].every((n) => n === 1);
+    const walker = figs.length > 0 && [...bucket.values()].every((n) => n === 1);
+    // One man: his LAST position, because a static station on a mover should sit
+    // where he ends up rather than splitting the difference. A group: all of them.
+    const box = figs.length
+      ? clampToBand(union(walker ? [figs[figs.length - 1]] : figs), band)
+      : null;
     // NOT EVERY BEAT, and this is the lesson followMoves already paid for: its first
     // pass pushed in on two beats out of three and left the reader with a camera that
     // never rests, at which point the moves stop registering as moves. A push reads as
     // a push against stillness. Seeded by the lesson so the beats that rest are not
     // the same ones in every lesson.
-    if (one && (k + seed) % 3 !== 2) {
-      const box = clampToBand(union([figs[figs.length - 1]]), band);
+    if (box && (k + seed) % 3 !== 2) {
       const s = Math.max(1, Math.min(CAP, scaleFor(box, band)));
       if (Math.max(box[2], box[3]) >= MIN_SUBJECT && s > wideS + MIN_GAIN) {
         picked = [{ box, s }];

@@ -1733,10 +1733,16 @@ gap-splitting alone was leaving the most obvious close-up in the vocabulary unus
 and H60b's first bullet is *"push in on the figure"*. A beat with exactly one person
 therefore gets a station on him whether or not the layout separates him.
 
-"Exactly one" is decided by the reading buckets, not the sample count: a figure who
-walks contributes several boxes and is still one man, whereas two people contribute
-several to the *same* reading and "which one do we push in on" has no answer worth
-guessing.
+**With several people it is the GROUP, not one of them.** "Which man do we push in
+on" has no answer worth guessing, and that was first read as a reason to skip the
+beat — which left six lessons with no camera at all, every one of them a two-hander.
+The subject was never one figure; it is *the people*, and their union is a two-shot.
+Measured, 143 multi-figure beats frame the group at least 0.12× tighter than the
+whole stage and only 11 gain nothing.
+
+A single figure is the same rule with one member, and there the reading buckets
+decide which box to take: a man who walks leaves several, and a static station on a
+slow mover should sit where he ends up rather than splitting the difference.
 
 **Not on every beat, though**, and this is a lesson `followMoves` already paid for.
 Its first pass pushed in on two beats out of three and left the reader with a camera
