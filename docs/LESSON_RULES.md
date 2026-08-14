@@ -1762,7 +1762,13 @@ anything, because K3 guarantees the thing they land on is the complete picture.
   so), over ~1s and the reader taps;
 - dwell **≥0.7s**, and long enough to cover its own reveal window;
 - **at most 4 stations**, including the closing wide;
-- total tour **≤5.5s**.
+- **≤5.5s of the reader being kept waiting.**
+
+That last figure counts travel and *static* dwell only, and the distinction is not a
+loophole. A follow station's dwell (K9) is the walk the beat already contained, now
+tracked instead of watched from across the room — the reader is watching the lesson,
+not waiting for the camera. Charging it to the budget would make the one shot this
+group exists to enable the one shot it forbids.
 
 A beat carrying more than four things worth separate framings is a composition
 problem, not a camera problem — see H52 and the one-idea-per-beat rule.
@@ -1776,6 +1782,29 @@ with a transit between them. The clock runs throughout, or the walk stutters.
 This is the distinction the user's own description turns on: *"the camera is very
 close to him, following him walk"* is a station; *"then the camera moves over to
 another part"* is a transit, and only the second one freezes the clock.
+
+**How it is found, and why it needs the same measurement K2 does.** The sweep samples
+each beat four times, so a figure crossing the stage leaves four boxes at four
+positions; ordered by reveal index they are a trajectory, and its first and last
+entries are the two ends of the track. Unordered they are a set, and the figure could
+as easily be walking the other way — which is why a follow, like a multi-station tour,
+is only generated from a sweep that recorded reveal order.
+
+**Both ends are framed at one shared scale** — the tighter of the two requirements —
+so the shot slides rather than zooming. That also makes it legal for free: at a fixed
+scale the legal range of the centre is a plain interval, so any point between two
+legal centres is legal and nothing can clamp halfway through the move. `checkTour`
+still tests both ends, because the far end is the half that can lose him.
+
+The floor is C18's: **60 stage units**. Under that a walk does not read as a walk, and
+a camera sliding after it reads as drift. 318 of 891 beats clear it and the longest
+crosses 350 — the full width of the stage, which as a single static station is
+necessarily the widest shot in the lesson. That shot is precisely what a reader
+described as one long take of a small man.
+
+The dwell is the beat's own declared `dur`, clamped to 1.6–4.2s: the same number the
+footfalls and gesture sounds are already measured against, so the camera and the feet
+are working off one clock.
 
 ### K10 · The tour is generated, and the generator is the authority
 

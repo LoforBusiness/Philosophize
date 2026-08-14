@@ -97,9 +97,6 @@ export function cluster(items, max) {
   return groups;
 }
 
-/** What the camera has to hold: the figure and the words always, art unless it bleeds. */
-export const wanted = (items) => (items ?? []).filter((it) => it.k !== 'art' || !it.bleed);
-
 const clampToBand = (box, band) => {
   const x0 = Math.max(0, box[0]);
   const y0 = Math.max(band[0], box[1]);
@@ -107,6 +104,9 @@ const clampToBand = (box, band) => {
   const y1 = Math.min(band[1], box[1] + box[3]);
   return [x0, y0, Math.max(0, x1 - x0), Math.max(0, y1 - y0)];
 };
+
+/** What the camera has to hold: the figure and the words always, art unless it bleeds. */
+export const wanted = (items) => (items ?? []).filter((it) => it.k !== 'art' || !it.bleed);
 
 /**
  * ONE BEAT'S TOUR, or null if it does not earn one.
@@ -131,10 +131,59 @@ const clampToBand = (box, band) => {
  * whole picture. The multi-station tours come back by re-running the sweep, which
  * is the only thing that can honestly authorise them.
  */
-export function tourFor(items, wide, band, single, reveal = true) {
+export function tourFor(items, wide, band, single, reveal = true, dur = 0) {
   if (single || !wide) return null;
   const raw = wanted(items);
   if (raw.length < 2) return null;
+
+  // ── K9 · IS THE SUBJECT WALKING? ───────────────────────────────────────────
+  //
+  // If it is, that beat wants a FOLLOW, not a pair of parked framings — "the camera
+  // is very close to him, following him walk" is one continuous station whose target
+  // moves. The sweep samples each beat four times, so a figure that crosses the
+  // stage leaves four boxes at four x positions; ordered by reveal index they are a
+  // trajectory, and the first and last of them are the two ends of the track.
+  //
+  // Needs the reveal order for the same reason everything else here does: without it
+  // the samples are an unordered set and the figure could as easily be walking the
+  // other way. 318 of 891 beats move a figure and the longest crosses 350 units, the
+  // full width of the stage — which as ONE static station is necessarily the widest
+  // shot in the lesson, and is exactly the shot readers described as a small man in
+  // a long take.
+  if (reveal) {
+    const figs = raw.filter((it) => it.k === 'fig').sort((a, b) => (a.r ?? 0) - (b.r ?? 0));
+    // ONE FIGURE PER READING, OR THIS CANNOT BE A WALK.
+    //
+    // Two people standing 200 units apart leave exactly the same trace as one person
+    // who walked 200 units: a set of figure boxes at different x. The readings are
+    // what tell them apart — a walker contributes ONE box per reading and moves
+    // between them, whereas a crowd contributes several to the same reading and the
+    // samples cannot be matched to owners at all.
+    //
+    // So a bucket holding more than one figure means the beat has company, and the
+    // follow is abandoned rather than guessed. Conservative on purpose: the failure
+    // it prevents is the camera gliding smoothly from one motionless person to
+    // another as though it were tracking, which reads as the app being confused
+    // about what it is looking at.
+    const bucket = new Map();
+    for (const f of figs) bucket.set(f.r ?? 0, (bucket.get(f.r ?? 0) ?? 0) + 1);
+    const alone = [...bucket.values()].every((n) => n === 1);
+    if (figs.length > 1 && alone && bucket.size > 1) {
+      const a = figs[0], b = figs[figs.length - 1];
+      const travelled = Math.abs((b.b[0] + b.b[2] / 2) - (a.b[0] + a.b[2] / 2));
+      // C18's floor: under 60 units a walk does not read as a walk, and a camera
+      // sliding after it reads as drift.
+      if (travelled >= 60) {
+        const near = clampToBand([a.b[0], a.b[1], a.b[2], a.b[3]], band);
+        const far = clampToBand([b.b[0], b.b[1], b.b[2], b.b[3]], band);
+        const hold = Math.max(1.6, Math.min(4.2, dur || 2.6));
+        return [
+          { box: near, to: far, tr: 0.7, dwell: hold },
+          { box: wide, tr: 0.7, dwell: 9 },
+        ];
+      }
+    }
+  }
 
   const wideS = Math.max(1, Math.min(CAP, scaleFor(wide, band)));
 

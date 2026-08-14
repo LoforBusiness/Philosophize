@@ -496,6 +496,21 @@ export const STATION_CAP = SCALE.tight;
 export interface Station {
   /** The rectangle this station exists to show. Contained whole, or the station is pointless. */
   box: Box;
+  /**
+   * WHERE THE SUBJECT HAS GOT TO BY THE END OF THE DWELL — a FOLLOW station (K9).
+   *
+   * Omitted, the station is static and the camera parks. Given, the camera tracks:
+   * it arrives on `box`, then travels with the subject to `to` while the scene clock
+   * runs, which is the difference between following a walk and watching one cross a
+   * still frame.
+   *
+   * Both ends are framed at the SAME scale — the tighter of the two requirements —
+   * so the tracking shot interpolates a centre at fixed magnification. That is what
+   * keeps it legal for free: at a fixed scale the legal range of the centre is a
+   * plain interval, so a point between two legal centres is legal, and no clamping
+   * can bite halfway through the move.
+   */
+  to?: Box;
   /** Seconds to travel here from the previous station (or, for the first, from the previous beat). */
   tr: number;
   /**
@@ -534,7 +549,46 @@ export function stationShot(
 export function tourShots(
   tour: Tour, band: [number, number], ground?: number, cap = STATION_CAP,
 ): Shot[] {
-  return tour.map((st, i) => ({ ...stationShot(st.box, band, ground, cap), tr: i === 0 ? st.tr : st.tr }));
+  return tour.map((st) => ({ ...stationShot(st.box, band, ground, cap), tr: st.tr }));
+}
+
+/**
+ * The far end of a FOLLOW station (K9), at the same scale as the near end.
+ *
+ * Returns the arrival shot unchanged for a static station, so a caller can hold one
+ * array and interpolate unconditionally.
+ *
+ * The shared scale is the tighter requirement of the two boxes, which is what stops
+ * a walk that ends beside a wide prop from having to zoom out mid-track — the shot
+ * is already wide enough for both when it sets off.
+ */
+export function tourEndShots(
+  tour: Tour, band: [number, number], ground?: number, cap = STATION_CAP,
+): Shot[] {
+  return tour.map((st) => {
+    const a = stationShot(st.box, band, ground, cap);
+    if (!st.to) return a;
+    const b = stationShot(st.to, band, ground, cap);
+    const s = Math.min(a.s, b.s);
+    // Re-frame BOTH ends at the shared scale, so the interpolation is a straight
+    // slide and each end still contains its own box.
+    const at: [number, number] = [st.to.x + st.to.w / 2, st.to.y + st.to.h / 2];
+    return containShot(fit(at, s, band, ground), st.to, band);
+  });
+}
+
+/** The near end of every station, re-framed to match its follow partner's scale. */
+export function tourStartShots(
+  tour: Tour, band: [number, number], ground?: number, cap = STATION_CAP,
+): Shot[] {
+  return tour.map((st) => {
+    const a = stationShot(st.box, band, ground, cap);
+    if (!st.to) return a;
+    const b = stationShot(st.to, band, ground, cap);
+    const s = Math.min(a.s, b.s);
+    const at: [number, number] = [st.box.x + st.box.w / 2, st.box.y + st.box.h / 2];
+    return { ...containShot(fit(at, s, band, ground), st.box, band), tr: st.tr };
+  });
 }
 
 /**
@@ -556,27 +610,38 @@ export function tourShots(
  */
 export function tourAt(
   trs: readonly number[], dwells: readonly number[], rt: number,
-): { k: number; t: number; g: number } {
+): { k: number; t: number; g: number; p: number } {
   'worklet';
   const n = trs.length;
-  if (n === 0) return { k: 0, t: rt, g: rt };
+  if (n === 0) return { k: 0, t: rt, g: rt, p: 0 };
   let start = 0;
   let served = 0;
   for (let j = 0; j < n; j++) {
     const arrive = start + trs[j];
     const last = j === n - 1;
     // Still on the way to j.
-    if (rt < arrive) return { k: j, t: rt - start, g: served };
+    if (rt < arrive) return { k: j, t: rt - start, g: served, p: 0 };
     // Parked at j. The last station holds for the rest of the beat, so its dwell is
     // not a bound — this is where the free-running tail comes from.
     const parked = rt - arrive;
     if (last || parked < dwells[j]) {
-      return { k: j, t: trs[j], g: served + parked };
+      // `p` is how far through THIS station's dwell we are, which is what a follow
+      // station (K9) tracks along. `g` is the whole beat's scene clock and cannot
+      // answer that, because it has every earlier dwell folded into it.
+      return { k: j, t: trs[j], g: served + parked, p: parked };
     }
     served += dwells[j];
     start = arrive + dwells[j];
   }
-  return { k: n - 1, t: trs[n - 1], g: served };
+  return { k: n - 1, t: trs[n - 1], g: served, p: dwells[n - 1] };
+}
+
+/** Slide between two shots taken at the same scale — a follow station's tracking. */
+export function trackAt(a: Shot, b: Shot, u: number): { cx: number; cy: number; s: number } {
+  'worklet';
+  const t = u < 0 ? 0 : u > 1 ? 1 : u;
+  const e = ease(t);
+  return { cx: a.cx + (b.cx - a.cx) * e, cy: a.cy + (b.cy - a.cy) * e, s: a.s + (b.s - a.s) * e };
 }
 
 /** When the tour is over — the moment the camera reaches its last station. */
@@ -602,15 +667,26 @@ export function checkTour(
   const out: string[] = [];
   if (!tour.length) return out;
   if (tour.length > 4) out.push(`${tour.length} stations — K8 allows 4 including the closing wide`);
-  const shots = tourShots(tour, band, ground);
+  const shots = tourStartShots(tour, band, ground);
+  const ends = tourEndShots(tour, band, ground);
+  const holds = (sh: Shot, b: Box) => {
+    const w = visibleWindow(sh, band);
+    return !(b.x < w.left - 0.5 || b.x + b.w > w.right + 0.5 || b.y < w.top - 0.5 || b.y + b.h > w.bottom + 0.5);
+  };
   shots.forEach((sh, i) => {
     if (sh.s < 1) out.push(`station ${i}: scale ${sh.s.toFixed(2)} is below 1`);
     if (sh.s > STATION_CAP + 0.001) out.push(`station ${i}: ${sh.s.toFixed(2)}× is past the ${STATION_CAP}× ceiling (K5)`);
-    const w = visibleWindow(sh, band);
     const b = tour[i].box;
     // K3/H60c per station: the box this station exists for must be inside its window.
-    if (b.x < w.left - 0.5 || b.x + b.w > w.right + 0.5 || b.y < w.top - 0.5 || b.y + b.h > w.bottom + 0.5) {
-      out.push(`station ${i}: its own box is not inside its shot — containment failed (K3)`);
+    if (!holds(sh, b)) out.push(`station ${i}: its own box is not inside its shot — containment failed (K3)`);
+    // A follow station has to hold its subject at BOTH ends, or the track loses it
+    // partway. The two are framed at one shared scale, so checking the ends is
+    // enough: a fixed scale makes the legal centre an interval, and a point between
+    // two legal centres is legal.
+    const to = tour[i].to;
+    if (to) {
+      if (!holds(ends[i], to)) out.push(`station ${i}: the follow loses its subject by the end (K9)`);
+      if (Math.abs(ends[i].s - sh.s) > 0.001) out.push(`station ${i}: a follow must hold one scale, not ${sh.s.toFixed(2)}→${ends[i].s.toFixed(2)} (K9)`);
     }
     if (tour[i].tr > 0 && tour[i].tr < 0.35) out.push(`station ${i}: a ${tour[i].tr}s travel reads as a jump-cut (K8)`);
     if (tour[i].tr > 1.2) out.push(`station ${i}: a ${tour[i].tr}s travel is longer than K8 allows`);
@@ -618,8 +694,15 @@ export function checkTour(
       out.push(`station ${i}: a ${tour[i].dwell}s dwell is too short to read (K8)`);
     }
   });
-  const total = tourEnd(tour.map((s) => s.tr), tour.map((s) => s.dwell));
-  if (total > 5.5) out.push(`the tour takes ${total.toFixed(1)}s to complete — K8 caps it at 5.5s`);
+  // K8's budget is about how long the READER IS KEPT WAITING, so it counts travel and
+  // static dwell only. A follow station's dwell is not waiting — it is the walk the
+  // beat already contained, now being tracked instead of watched from across the room
+  // — and charging it to the budget would make exactly the shot this group exists to
+  // enable the one thing it forbids.
+  const waiting = tour.reduce(
+    (a, s, i) => a + s.tr + (s.to || i === tour.length - 1 ? 0 : s.dwell), 0,
+  );
+  if (waiting > 5.5) out.push(`the tour keeps the reader waiting ${waiting.toFixed(1)}s — K8 caps it at 5.5s`);
   // K3 — the last station is the whole beat.
   if (wide && tour.length > 1) {
     const l = tour[tour.length - 1].box;

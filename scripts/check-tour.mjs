@@ -71,7 +71,7 @@ if (stale.length) {
 }
 
 // ── the geometry, per station, against each lesson's own band ────────────────
-let nTours = 0, nStations = 0, geomBad = 0, tightest = 1, cappedAt = 0;
+let nTours = 0, nStations = 0, geomBad = 0, tightest = 1, cappedAt = 0, follows = 0;
 const perLesson = [];
 for (const [id, per] of Object.entries(TOURS)) {
   const comp = comps.get(id);
@@ -86,14 +86,26 @@ for (const [id, per] of Object.entries(TOURS)) {
   per.forEach((t, k) => {
     if (!t) return;
     nTours++; toured++; nStations += t.length;
-    const tour = t.map((s) => ({ box: { x: s[0], y: s[1], w: s[2], h: s[3] }, tr: s[4], dwell: s[5] }));
+    const tour = t.map((s) => ({
+      box: { x: s[0], y: s[1], w: s[2], h: s[3] },
+      // Ten numbers is a follow station (K9) — the last four are where the subject
+      // has got to. Reading only the first six would check the near end of every
+      // tracking shot and none of the far ends, which is the half that can lose him.
+      ...(s.length >= 10 ? { to: { x: s[6], y: s[7], w: s[8], h: s[9] } } : {}),
+      tr: s[4],
+      dwell: s[5],
+    }));
     const wide = tour[tour.length - 1].box;
     for (const p of checkTour(tour, band, wide, ground)) {
       geomBad++;
       if (geomBad <= 12) console.log(`  FAIL  ${id} beat ${k}: ${p}`);
     }
     for (const s of t) {
-      const sc = Math.min(CAP, scaleFor([s[0], s[1], s[2], s[3]], band));
+      // A follow is framed at the tighter of its two ends, so score it that way or
+      // the report claims a zoom the tracking shot never actually holds.
+      let sc = Math.min(CAP, scaleFor([s[0], s[1], s[2], s[3]], band));
+      if (s.length >= 10) sc = Math.min(sc, Math.min(CAP, scaleFor([s[6], s[7], s[8], s[9]], band)));
+      if (s.length >= 10) follows++;
       best = Math.max(best, sc);
       if (sc >= CAP - 0.001) cappedAt++;
     }
@@ -162,6 +174,7 @@ const totalBeats = Object.values(TOURS).reduce((a, p) => a + p.length, 0);
 console.log(`\n  ${Object.keys(TOURS).length} lessons carry a tour · ${nTours} of ${totalBeats} beats toured`);
 console.log(`  ${nStations} stations · ${(nStations / Math.max(1, nTours)).toFixed(2)} per toured beat`);
 console.log(`  closest framing anywhere ${tightest.toFixed(2)}× · ${cappedAt} station(s) sit at the ${CAP}× ceiling (K5)`);
+console.log(`  ${follows} station(s) FOLLOW a moving subject rather than parking (K9)`);
 
 console.log(fails ? `\n${fails} failing.\n` : '\nall clear.\n');
 process.exit(fails ? 1 : 0);

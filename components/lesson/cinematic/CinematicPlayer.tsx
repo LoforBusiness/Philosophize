@@ -13,7 +13,7 @@ import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import {
-  shotAt, resolveMoves, containShot, NEUTRAL, tourShots, tourAt, tourEnd,
+  shotAt, resolveMoves, containShot, NEUTRAL, tourStartShots, tourEndShots, tourAt, tourEnd, trackAt,
   type Box, type Move, type Shot, type Tour,
 } from './camera';
 import { MUST } from './mustBoxes';
@@ -344,9 +344,18 @@ export default function CinematicPlayer({
     return beats.map((b, k) => {
       const raw = (b as BaseBeat & { tour?: readonly (readonly number[])[] }).tour ?? table?.[k] ?? null;
       if (!raw || raw.length < 2 || needsBox[k] || toursOff()) return null;
-      const tour: Tour = raw.map((s) => ({ box: { x: s[0], y: s[1], w: s[2], h: s[3] }, tr: s[4], dwell: s[5] }));
+      const tour: Tour = raw.map((s) => ({
+        box: { x: s[0], y: s[1], w: s[2], h: s[3] },
+        // A follow station carries where its subject has got to by the end (K9).
+        // Six numbers is a static station, ten is a tracking one.
+        ...(s.length >= 10 ? { to: { x: s[6], y: s[7], w: s[8], h: s[9] } } : {}),
+        tr: s[4],
+        dwell: s[5],
+      }));
       return {
-        shots: tourShots(tour, band, ground),
+        shots: tourStartShots(tour, band, ground),
+        ends: tourEndShots(tour, band, ground),
+        follow: tour.map((t) => (t.to ? 1 : 0)),
         trs: tour.map((t) => t.tr),
         dwells: tour.map((t) => t.dwell),
       };
@@ -406,12 +415,18 @@ export default function CinematicPlayer({
     const restOf = (k: number) => {
       'worklet';
       const t = tourData[k];
-      return t ? t.shots[t.shots.length - 1] : frame(k);
+      return t ? t.ends[t.ends.length - 1] : frame(k);
     };
     const tour = tourData[n];
     if (tour) {
       const a = tourAt(tour.trs, tour.dwells, rt.value);
-      const from = a.k > 0 ? tour.shots[a.k - 1] : restOf(n > 0 ? n - 1 : n);
+      // ARRIVED, AND THE SUBJECT IS WALKING (K9). The camera goes with it instead of
+      // parking — one continuous station whose target moves, at a fixed scale, which
+      // is why this is a slide and not a second travel.
+      if (a.p > 0 && tour.follow[a.k]) {
+        return trackAt(tour.shots[a.k], tour.ends[a.k], a.p / Math.max(0.001, tour.dwells[a.k]));
+      }
+      const from = a.k > 0 ? tour.ends[a.k - 1] : restOf(n > 0 ? n - 1 : n);
       return shotAt(from, tour.shots[a.k], a.t);
     }
     return shotAt(restOf(n > 0 ? n - 1 : 0), frame(n), rt.value);
