@@ -132,10 +132,43 @@ export function critter(kind: CritterKind, t: number, gait = 0, phase = 0): Crit
   // and just behind the middle, gives the underline a belly instead of a straight
   // rule. The union of the four is one mass — no outlines to line up — so this
   // costs three dots and buys the whole shape.
+  // A CHAIN, NOT THREE DISCS.
+  //
+  // Three widely-spaced circles of different sizes do not make one mass — between
+  // them the outline drops back to the bar's own half-width and rises again, so
+  // the belly reads as two round bulges with a notch bitten out between them. You
+  // can SEE the parts, which is the one thing a filled silhouette must not show.
+  //
+  // The fix is spacing, not size. Discs whose radius varies smoothly AND whose
+  // centres are close enough that each overlaps its neighbour well past its own
+  // centre produce a single smooth envelope — the standard capsule-chain result.
+  // Nine of them across the barrel is dense enough that the outline never returns
+  // to the bar between two discs, which is exactly the condition being violated.
+  //
+  // The profile still has a shape: fullest at the chest and the haunch, a little
+  // tucked at the waist, and hanging lower toward the rear. It is the same animal
+  // the three discs were aiming at, drawn as one continuous edge.
   const chest = B.body * 0.62, haunch = B.body * 0.66;
-  dot.push({ x: -B.body * 0.10, y: sh + B.body * 0.06, r: chest });
-  dot.push({ x: -B.len + B.body * 0.12, y: rp + B.body * 0.04, r: haunch });
-  dot.push({ x: -B.len * 0.52, y: (sh + rp) / 2 + B.body * 0.16, r: B.body * 0.52 });
+  const BELLY = 9;
+  for (let i = 0; i < BELLY; i++) {
+    const u = i / (BELLY - 1);                       // 0 chest … 1 haunch
+    // Radius: chest → waist → haunch, as a smooth curve rather than three steps.
+    const waist = Math.sin(u * Math.PI) * 0.085;      // the tuck, subtracted
+    const r = (chest * (1 - u) + haunch * u) - B.body * waist;
+    // Centre line: dropped, then sagging toward the middle-rear where a belly
+    // hangs. THE CONSTANT 0.09 IS NOT TASTE — it is what keeps every disc's TOP
+    // at or below the bar's top edge. A disc of radius 0.62·body centred only
+    // 0.05·body under the spine reaches 0.57·body above it, against the bar's own
+    // 0.50, so each one crested the back by 0.07 and the topline came out
+    // scalloped. Dropping the chain hides it under the bar and the swell shows
+    // only where it should: below.
+    const sag = 0.09 + Math.sin(u * Math.PI) * 0.07 + u * 0.02;
+    dot.push({
+      x: -B.body * 0.10 - u * (B.len - B.body * 0.22),
+      y: (sh * (1 - u) + rp * u) + B.body * (0.05 + sag),
+      r,
+    });
+  }
 
   // ── neck and head
   const hd = life2(t, 0.47, 0.29, 1.3) * 0.035;
@@ -158,12 +191,17 @@ export function critter(kind: CritterKind, t: number, gait = 0, phase = 0): Crit
   // leg thick enough to carry the animal gave it an ear wider than it was long,
   // which is a paddle, so the ear got its own length and a slimmer stroke.
   const flick = Math.max(0, Math.sin(t * 0.62 + 1.1)) ** 8 * 0.09;
-  S(nx - B.skull * 0.2, ny - B.skull * 0.5,
-    nx - B.skull * 0.2 - B.ear * B.earBack,
-    ny - B.skull * 0.5 - B.ear * (1 - B.earBack * 0.45) + flick, B.limb * 0.9);
+  const earX = nx - B.skull * 0.2 - B.ear * B.earBack;
+  const earY = ny - B.skull * 0.5 - B.ear * (1 - B.earBack * 0.45) + flick;
+  S(nx - B.skull * 0.2, ny - B.skull * 0.5, earX, earY, B.limb * 0.9);
+  // ROUND THE TIP. A butt-capped bar ends in two square corners, and on an ear —
+  // which sticks out into paper with nothing behind it — those corners are the
+  // most visible thing on the animal. It read as a folded card, not an ear.
+  dot.push({ x: earX, y: earY, r: B.limb * 0.45 });
   if (B.horn > 0) {
-    S(nx + B.skull * 0.1, ny - B.skull * 0.7,
-      nx + B.skull * 0.1 + B.horn * 0.5, ny - B.skull * 0.7 - B.horn, B.limb);
+    const hx2 = nx + B.skull * 0.1 + B.horn * 0.5, hy2 = ny - B.skull * 0.7 - B.horn;
+    S(nx + B.skull * 0.1, ny - B.skull * 0.7, hx2, hy2, B.limb);
+    dot.push({ x: hx2, y: hy2, r: B.limb * 0.5 });
   }
 
   // ── four legs, ONE knee each, diagonal pairs half a cycle apart
@@ -176,13 +214,20 @@ export function critter(kind: CritterKind, t: number, gait = 0, phase = 0): Crit
     // makes it a limb with muscle at the top, and it is also what stops a fatter
     // barrel from looking like it is balanced on wire.
     S(hx, hy, kx, ky, w * 1.18);
-    S(kx, ky, fx, fy, w * 0.82);
+    // THE SHIN STOPS SHORT OF THE GROUND, and the paw finishes the leg.
+    //
+    // It used to run all the way to fy, where its butt cap left two square
+    // corners at ±0.41w — and the paw disc, tangent to the ground, has narrowed
+    // to nothing exactly there, so it could not cover them. Hence square feet.
+    // Ending the shin 0.30w up puts its corners where the disc is still 0.42w
+    // wide, so they are inside it, and the foot is a rounded paw sitting ON the
+    // line rather than a post with tabs.
+    S(kx, ky, fx, fy - w * 0.30, w * 0.82);
     dot.push({ x: kx, y: ky, r: w * 0.59 });
-    // A PAW, sitting ON the line rather than centred on it. The shin's butt cap
-    // already ends flush with the ground, so a disc centred at the foot would
-    // bury half a paw under the floor — the ankle circles on the figures hang
-    // below the ground line and get away with it because a person's ankle is
-    // above their foot, which a dog's is not.
+    // A PAW, TANGENT to the ground — centred a radius above it, so the animal
+    // stands on the line instead of sinking through it. A person's ankle can hang
+    // below the ground line and get away with it because their foot is beneath
+    // it; a dog's is not.
     const pr = w * 0.45;
     dot.push({ x: fx, y: fy - pr, r: pr });
   };
@@ -197,12 +242,17 @@ export function critter(kind: CritterKind, t: number, gait = 0, phase = 0): Crit
     ? life2(t, 2.4, 1.5, 0.4) * 0.15 + Math.sin(t * 5.6) * 0.05 * gait
     : life2(t, 0.9, 0.55, 0.2) * 0.09;
   const t1x = -B.len - B.tail * 0.5, t1y = rp - B.tailUp * 0.6 + wag * 0.45;
+  const t2x = -B.len - B.tail, t2y = rp - B.tailUp + wag;
   S(-B.len, rp, t1x, t1y, B.limb * 1.1);
-  S(t1x, t1y, -B.len - B.tail, rp - B.tailUp + wag, B.limb * 0.85);
+  S(t1x, t1y, t2x, t2y, B.limb * 0.85);
   // Capped at the SMALLER of the two half-widths meeting here. The wider bone's
   // own corners already reach past it, so this fills the notch on the outside of
   // the bend without beading the thin end.
   dot.push({ x: t1x, y: t1y, r: B.limb * 0.85 * 0.5 });
+  // AND THE TIP, which never had one. This was the 14th dot the view silently
+  // dropped (CritterView rendered 13), so even when it existed it was invisible —
+  // the tail ended in two square corners and read as a plank nailed to the rump.
+  dot.push({ x: t2x, y: t2y, r: B.limb * 0.85 * 0.5 });
 
   return { seg, dot };
 }

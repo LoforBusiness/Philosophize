@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import Animated, { useAnimatedStyle, useDerivedValue, type SharedValue } from 'react-native-reanimated';
 import { critter, type CritterKind } from './critters';
 
@@ -12,14 +12,22 @@ import { critter, type CritterKind } from './critters';
 // it at zero width) because a changing number of children would remount every
 // frame; unused slots simply draw nothing.
 //
-// The dots are the caps that make a butt-capped bone read as a filled limb, so
-// there is one per bone end that shows: two for the barrel, a skull, a nose, a
-// knee and a paw on each of four legs, one at the tail's bend. Raising this is
-// cheap — an unfilled slot costs an early return — but leaving it TOO LOW is
-// silent, because critters.ts simply pushes dots that never get drawn.
-
-const SEGS = 15;
-const DOTS = 13;
+// The dots are the caps that make a butt-capped bone read as a filled limb, and
+// the belly chain that makes the barrel one mass rather than three circles.
+//
+// THESE WERE TOO LOW, AND IT COST THE ANIMAL ITS TAIL. DOTS was 13 while
+// critters.ts pushed 14, so the last dot — the cap on the tail's tip — was never
+// drawn, and the tail ended in two square corners for as long as it existed.
+// The comment here warned that being too low is SILENT and it was right; nothing
+// failed, nothing logged, the animal just had a plank on the back.
+//
+// So both counts now carry real headroom over what either animal asks for (the
+// cow is the larger: 16 segs, 34 dots), and the assert below turns the silent
+// version of this mistake into a loud one. An unfilled slot costs an early
+// return and nothing else, so headroom is close to free; a missing one is
+// invisible until somebody looks at the picture.
+const SEGS = 20;
+const DOTS = 44;
 
 export default function CritterView({
   kind, clock, x, ground, k, dir = 1, gait, phase, opacity, color = '#1A1A1A',
@@ -39,6 +47,20 @@ export default function CritterView({
 }) {
   const D = useDerivedValue(() =>
     critter(kind, clock.value, gait ? gait.value : 0, phase ? phase.value : 0));
+
+  // The loud version of the bug above. Dev only, once per kind, off the UI
+  // thread: if critters.ts ever asks for more slots than exist, say so instead of
+  // quietly drawing an animal with a piece missing.
+  useEffect(() => {
+    if (!__DEV__) return;
+    const probe = critter(kind, 0, 0, 0);
+    if (probe.seg.length > SEGS || probe.dot.length > DOTS) {
+      console.warn(
+        `CritterView: "${kind}" needs ${probe.seg.length} segs / ${probe.dot.length} dots, ` +
+        `but only ${SEGS} / ${DOTS} are rendered. Raise them — the extras are dropped silently.`
+      );
+    }
+  }, [kind]);
 
   const wrap = useAnimatedStyle(() => ({
     opacity: opacity ? opacity.value : 1,
