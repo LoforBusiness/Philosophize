@@ -637,6 +637,23 @@ export function tourAt(
 }
 
 /** Slide between two shots taken at the same scale — a follow station's tracking. */
+/**
+ * How far ahead of a followed subject the camera looks, as a share of the span.
+ *
+ * DECLARED ABOVE `trackAt`, AND THAT IS NOT A STYLE CHOICE — it is §17 rule 2,
+ * which until now was only ever written about one worklet CALLING another. A
+ * worklet closing over a plain `const` fails in exactly the same way and is
+ * harder to see: the Reanimated babel plugin builds each worklet's closure
+ * object at module scope immediately after the declaration, so a `const` living
+ * further down the file is still in its temporal dead zone when that runs. This
+ * sat ten lines below `trackAt` and threw `Cannot access 'LEAD' before
+ * initialization` on IMPORT — taking down the whole route tree, not one
+ * animation, because every cinematic lesson pulls this module in.
+ *
+ * `tsc` passed, all seventeen validators passed, and one browser load found it.
+ */
+const LEAD = 0.07;
+
 export function trackAt(a: Shot, b: Shot, u: number): { cx: number; cy: number; s: number } {
   'worklet';
   const t = u < 0 ? 0 : u > 1 ? 1 : u;
@@ -665,8 +682,6 @@ export function trackAt(a: Shot, b: Shot, u: number): { cx: number; cy: number; 
     s: a.s + (b.s - a.s) * t,
   };
 }
-/** How far ahead of a followed subject the camera looks, as a share of the span. */
-const LEAD = 0.07;
 
 /** When the tour is over — the moment the camera reaches its last station. */
 export function tourEnd(trs: readonly number[], dwells: readonly number[]): number {

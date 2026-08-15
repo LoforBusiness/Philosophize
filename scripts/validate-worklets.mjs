@@ -128,7 +128,29 @@ for (const file of files) {
       // import — the whole route tree, from a detector that was looking straight
       // at it. A directive is by definition the first statement of the body, so
       // that is where to look for it.
-      const inner = strip(body.slice(body.indexOf('{') + 1));
+      // ── AND THE BODY BRACE IS NOT THE FIRST BRACE ───────────────────────────
+      //
+      // `indexOf('{')` finds the first brace in the whole declaration, which for
+      // any function with an INLINE OBJECT RETURN TYPE is the return type's:
+      //
+      //     function trackAt(a, b, u): { cx: number; cy: number; s: number } {
+      //
+      // so `inner` began " cx: number; …" and the directive test failed. Every
+      // such function was silently classified as not-a-worklet and neither this
+      // check nor 1b ever looked at it. That is exactly how camera.ts's `LEAD`
+      // shipped — `trackAt` has that signature.
+      //
+      // This is the SECOND time this detector has missed a real crash by getting
+      // "where does the body start" wrong; the first was a signature longer than
+      // three lines. So do it properly: the body brace is the one that MATCHES
+      // the block's final `}`. Walk back from the end and balance.
+      const sb = strip(body);
+      let depth = 0, open = -1;
+      for (let k = sb.lastIndexOf('}'); k >= 0; k--) {
+        if (sb[k] === '}') depth++;
+        else if (sb[k] === '{' && --depth === 0) { open = k; break; }
+      }
+      const inner = open < 0 ? '' : sb.slice(open + 1);
       fns.push({
         name: m[1], line: i, end,
         code: strip(body),
@@ -146,6 +168,44 @@ for (const file of files) {
             `${rel(file)}: worklet \`${f.name}\` (line ${f.line + 1}) calls worklet ` +
             `\`${g.name}\`, declared later at line ${g.line + 1} — throws at import. ` +
             `Move \`${f.name}\` below \`${g.name}\`.`
+          );
+        }
+      }
+
+      // ── 1b. worklet → module-scope CONST declared later ────────────────────
+      //
+      // The same fault, with a value instead of a function, and it is the harder
+      // one to see: 1 above only ever looked for one worklet CALLING another, so
+      // a worklet closing over a plain number sailed through.
+      //
+      // It is the identical mechanism. The babel plugin builds each worklet's
+      // closure object at module scope right after the declaration, and captures
+      // every free identifier — so a `const` further down the file is still in
+      // its temporal dead zone when that runs.
+      //
+      // `camera.ts` had `const LEAD = 0.07` ten lines BELOW the worklet that
+      // reads it. tsc passed, all seventeen validators passed, and the bundle
+      // threw `Cannot access 'LEAD' before initialization` on import — which
+      // takes down the whole route tree rather than one camera move, because
+      // every cinematic lesson imports that module. It reached production.
+      const consts = [];
+      lines.forEach((l, i) => {
+        // Module scope only: column 0, no indentation. An indented const is
+        // inside something and has its own scope.
+        const m = l.match(/^(?:export\s+)?const\s+([A-Z_][A-Z0-9_]*)\s*=/);
+        if (m) consts.push({ name: m[1], line: i });
+      });
+      for (const f of worklets) {
+        for (const c of consts) {
+          if (c.line <= f.end) continue;
+          if (!new RegExp('\\b' + c.name + '\\b').test(f.code)) continue;
+          // Shadowed by its own local of the same name? Then it is not captured.
+          if (new RegExp('(?:const|let|var)\\s+' + c.name + '\\b').test(f.code)) continue;
+          errs.push(
+            `${rel(file)}: worklet \`${f.name}\` (line ${f.line + 1}) reads \`${c.name}\`, ` +
+            `a module-scope const declared later at line ${c.line + 1} — throws at import ` +
+            `with "Cannot access '${c.name}' before initialization". ` +
+            `Move \`${c.name}\` above \`${f.name}\`.`
           );
         }
       }
