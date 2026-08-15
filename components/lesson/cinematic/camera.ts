@@ -640,9 +640,33 @@ export function tourAt(
 export function trackAt(a: Shot, b: Shot, u: number): { cx: number; cy: number; s: number } {
   'worklet';
   const t = u < 0 ? 0 : u > 1 ? 1 : u;
-  const e = ease(t);
-  return { cx: a.cx + (b.cx - a.cx) * e, cy: a.cy + (b.cy - a.cy) * e, s: a.s + (b.s - a.s) * e };
+  // LINEAR, NOT EASED, and this is the difference between a follow and a drift.
+  //
+  // A travel between two stations is eased because it is a camera MOVE — it should
+  // start and stop gently. A follow is not a move: it is the camera holding station
+  // on a subject that is itself walking at a constant rate. Easing it makes the
+  // camera accelerate and decelerate underneath a subject that does neither, so the
+  // figure slides forward in frame, then back, for the whole beat. That is the
+  // "following objects isn't very smooth" a reader reported, and it is not a
+  // smoothness problem at all — the camera was moving smoothly along the wrong
+  // curve. Matching the subject's own rate is what makes a follow read as a follow.
+  //
+  // LEAD. A follow that centres its subject exactly reads as reactive, because the
+  // subject is always walking into the frame edge it is about to reach. Looking a
+  // little way ahead of them is what a camera operator does and what an audience
+  // expects; 7% of the span is enough to feel intentional and far too small to make
+  // the subject look off-centre. Clamped so the lead can never run past the station.
+  const led = t + LEAD > 1 ? 1 : t + LEAD;
+  return {
+    cx: a.cx + (b.cx - a.cx) * led,
+    cy: a.cy + (b.cy - a.cy) * led,
+    // Scale does NOT lead — the subject is not getting nearer, and pre-empting a
+    // zoom reads as the camera guessing.
+    s: a.s + (b.s - a.s) * t,
+  };
 }
+/** How far ahead of a followed subject the camera looks, as a share of the span. */
+const LEAD = 0.07;
 
 /** When the tour is over — the moment the camera reaches its last station. */
 export function tourEnd(trs: readonly number[], dwells: readonly number[]): number {

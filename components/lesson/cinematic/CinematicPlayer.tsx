@@ -235,6 +235,10 @@ export default function CinematicPlayer({
    * instead of a cut.
    */
   const CAM_OMEGA = 12;
+  /** What the camera last actually drew, and the shot a new beat travels from. */
+  const camHold = useSharedValue({ cx: 0, cy: 0, s: 1, has: 0 });
+  const camFrom = useSharedValue({ cx: 0, cy: 0, s: 1, has: 0 });
+  const camSeen = useSharedValue(-1);
   const bt = useSharedValue(0);
   const bi = useSharedValue(0);
   /** Which station the camera is at (or travelling toward). Scenes may key reveals to it. */
@@ -413,10 +417,23 @@ export default function CinematicPlayer({
         return must ? containShot(s1, must, band) : s1;
       }
       if (must && !needsBox[k]) return containShot(cam[k], must, band);
-      // No box yet. A question still falls back to the whole band, because an
-      // unreachable answer is worse than a blunt frame; anything else keeps its
-      // authored shot rather than snapping wide for a box that may never come.
-      return needsBox[k] ? { ...NEUTRAL, tr: cam[k].tr } : cam[k];
+      // NO BOX YET — AND THE STATIC ONE IS ALREADY GOOD ENOUGH TO FRAME WITH.
+      //
+      // This used to drop a question beat straight to NEUTRAL until `measureLayout`
+      // came back, then switch to the contained shot the frame it landed. That step
+      // is what a reader described as the camera "moving to a spot first that isn't
+      // right and then adjusting to be in the right spot" — it was literally framing
+      // the whole band for a few frames and then correcting.
+      //
+      // But the measured must-see box (H60c) is known at MODULE LOAD, not
+      // asynchronously, and on an interactive beat it already contains the answer
+      // targets, because they are things the scene drew. So frame with it
+      // immediately. The async box then only ever loosens further, which is a
+      // small correction rather than a jump — and the NEUTRAL fallback survives
+      // only for a beat with no measured box at all, where a blunt frame really is
+      // better than an unreachable answer.
+      if (needsBox[k]) return must ? containShot(cam[k], must, band) : { ...NEUTRAL, tr: cam[k].tr };
+      return cam[k];
     };
     // Where a beat LEAVES the camera: its tour's last station if it has one, else the
     // single shot. This is what the next beat travels from, and getting it wrong is
@@ -427,6 +444,30 @@ export default function CinematicPlayer({
       const t = tourData[k];
       return t ? t.ends[t.ends.length - 1] : frame(k);
     };
+    // ── THE TRAVEL STARTS FROM WHERE THE CAMERA IS (group L) ────────────────
+    //
+    // `restOf(n-1)` is where the previous beat was SUPPOSED to leave the camera. If
+    // the reader tapped before it got there — or fast-forwarded a tour, or the beat
+    // was still travelling — the camera was never at that shot, and starting the new
+    // travel from it teleports the whole stage before setting off. This is the
+    // camera's exact analogue of the pose defect group L fixed in the figure, and
+    // the cure is the same: remember what was actually drawn and travel from that.
+    //
+    // The downstream spring would smooth this over, but smoothing a jump is not the
+    // same as not jumping: the spring would be absorbing a step on nearly every
+    // beat change, which is what makes an authored move arrive late and soft. With
+    // the source correct the spring has almost nothing left to do, which is the
+    // point — it is there for the cases nothing can predict, not as the mechanism.
+    if (camSeen.value !== n) {
+      camSeen.value = n;
+      camFrom.value = camHold.value;
+    }
+    const carried = camFrom.value;
+    const startFrom = (k: number) => {
+      'worklet';
+      return carried.has ? { cx: carried.cx, cy: carried.cy, s: carried.s } as Shot : restOf(k);
+    };
+
     const tour = tourData[n];
     if (tour) {
       const a = tourAt(tour.trs, tour.dwells, rt.value);
@@ -434,12 +475,20 @@ export default function CinematicPlayer({
       // parking — one continuous station whose target moves, at a fixed scale, which
       // is why this is a slide and not a second travel.
       if (a.p > 0 && tour.follow[a.k]) {
-        return trackAt(tour.shots[a.k], tour.ends[a.k], a.p / Math.max(0.001, tour.dwells[a.k]));
+        const out = trackAt(tour.shots[a.k], tour.ends[a.k], a.p / Math.max(0.001, tour.dwells[a.k]));
+        camHold.value = { cx: out.cx, cy: out.cy, s: out.s, has: 1 };
+        return out;
       }
-      const from = a.k > 0 ? tour.ends[a.k - 1] : restOf(n > 0 ? n - 1 : n);
-      return shotAt(from, tour.shots[a.k], a.t);
+      // Only the FIRST station travels from the carried shot; the later ones travel
+      // from the station the camera genuinely just left, which it did reach.
+      const from = a.k > 0 ? tour.ends[a.k - 1] : startFrom(n > 0 ? n - 1 : n);
+      const out = shotAt(from, tour.shots[a.k], a.t);
+      camHold.value = { cx: out.cx, cy: out.cy, s: out.s, has: 1 };
+      return out;
     }
-    return shotAt(restOf(n > 0 ? n - 1 : 0), frame(n), rt.value);
+    const out = shotAt(startFrom(n > 0 ? n - 1 : 0), frame(n), rt.value);
+    camHold.value = { cx: out.cx, cy: out.cy, s: out.s, has: 1 };
+    return out;
   });
   // ── THE CAMERA IS SMOOTHED, NOT DRIVEN DIRECTLY (group L) ──────────────────
   //
