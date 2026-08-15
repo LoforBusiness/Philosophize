@@ -477,9 +477,24 @@ export default function CinematicPlayer({
   // the first frame after a step moves almost nothing and the camera eases into
   // the move. It also cannot overshoot at critical damping, so a shot never sails
   // past its subject and comes back — the "adjusts afterwards" the reader saw.
+  // AND IT FEEDS THE TARGET'S VELOCITY FORWARD, or the fix breaks the very thing
+  // this was asked to improve. A spring that damps its own ABSOLUTE velocity has a
+  // permanent steady-state error against a MOVING target: measured, the camera sat
+  // 15 units behind a figure walking at 100 units/s and 24 behind a run. That is a
+  // follow shot that trails its subject for the whole beat — worse than what it
+  // replaced. Damping the RELATIVE velocity (camera minus target) instead takes the
+  // trail to about zero and costs the step smoothing almost nothing: 15.0 → -1.7
+  // units of trail, 5.5 → 6.1 units of stutter, against a line of 8.
+  //
+  // The target's velocity is measured, so it is filtered and clamped: a STEP in the
+  // request would otherwise read as an enormous one-frame velocity and launch the
+  // camera, which is the same cut coming back through a different door.
   const camS = useSharedValue({
     cx: NEUTRAL.cx, cy: NEUTRAL.cy, s: NEUTRAL.s,
-    vx: 0, vy: 0, vs: 0, primed: 0,
+    vx: 0, vy: 0, vs: 0,
+    wx: 0, wy: 0, ws: 0,        // last requested shot, for the velocity estimate
+    tx: 0, ty: 0, ts: 0,        // the filtered target velocity
+    primed: 0,
   });
   useFrameCallback((f) => {
     'worklet';
@@ -490,20 +505,33 @@ export default function CinematicPlayer({
     // The first frame of a lesson snaps: there is nothing to be continuous WITH,
     // and gliding in from NEUTRAL would look like an unrequested opening move.
     if (!c.primed) {
-      camS.value = { cx: want.cx, cy: want.cy, s: want.s, vx: 0, vy: 0, vs: 0, primed: 1 };
+      camS.value = {
+        cx: want.cx, cy: want.cy, s: want.s, vx: 0, vy: 0, vs: 0,
+        wx: want.cx, wy: want.cy, ws: want.s, tx: 0, ty: 0, ts: 0, primed: 1,
+      };
       return;
     }
+    // How fast the REQUEST is moving, clamped so a step cannot launch the camera
+    // and filtered so the estimate is not one frame of noise.
+    const g = dt / 0.08 > 1 ? 1 : dt / 0.08;
+    const rx = (want.cx - c.wx) / dt;
+    const ry = (want.cy - c.wy) / dt;
+    const rs = (want.s - c.ws) / dt;
+    const tx = c.tx + ((rx < -400 ? -400 : rx > 400 ? 400 : rx) - c.tx) * g;
+    const ty = c.ty + ((ry < -400 ? -400 : ry > 400 ? 400 : ry) - c.ty) * g;
+    const ts = c.ts + ((rs < -4 ? -4 : rs > 4 ? 4 : rs) - c.ts) * g;
+
     const w = CAM_OMEGA;
     const k = w * w;
     const d = 2 * w;
     // Scale is on its own axis and a unit of it is worth far more than a unit of
     // position, so it gets the same spring rather than a shared one.
-    const vx = c.vx + (-d * c.vx - k * (c.cx - want.cx)) * dt;
-    const vy = c.vy + (-d * c.vy - k * (c.cy - want.cy)) * dt;
-    const vs = c.vs + (-d * c.vs - k * (c.s - want.s)) * dt;
+    const vx = c.vx + (-d * (c.vx - tx) - k * (c.cx - want.cx)) * dt;
+    const vy = c.vy + (-d * (c.vy - ty) - k * (c.cy - want.cy)) * dt;
+    const vs = c.vs + (-d * (c.vs - ts) - k * (c.s - want.s)) * dt;
     camS.value = {
       cx: c.cx + vx * dt, cy: c.cy + vy * dt, s: c.s + vs * dt,
-      vx, vy, vs, primed: 1,
+      vx, vy, vs, wx: want.cx, wy: want.cy, ws: want.s, tx, ty, ts, primed: 1,
     };
   }, true);
 
