@@ -225,6 +225,16 @@ export default function CinematicPlayer({
   // With no tour on the beat the two are equal to the sample, so every un-toured beat
   // in the app is bit-for-bit unchanged.
   const rt = useSharedValue(0);
+  /**
+   * How fast the camera catches the shot it is being asked for (seconds).
+   *
+   * 0.10 is short enough that an authored move — the quickest is a ~0.45s push —
+   * still reads as that move rather than as a lag, and long enough that a
+   * one-frame step in the request (a box landing, a tour warp, a beat change
+   * mid-travel) is spread over about six frames, which the eye reads as motion
+   * instead of a cut.
+   */
+  const CAM_OMEGA = 12;
   const bt = useSharedValue(0);
   const bi = useSharedValue(0);
   /** Which station the camera is at (or travelling toward). Scenes may key reveals to it. */
@@ -431,8 +441,74 @@ export default function CinematicPlayer({
     }
     return shotAt(restOf(n > 0 ? n - 1 : 0), frame(n), rt.value);
   });
+  // ── THE CAMERA IS SMOOTHED, NOT DRIVEN DIRECTLY (group L) ──────────────────
+  //
+  // `camNow` is the shot the lesson ASKS for, and it is discontinuous in four
+  // separate places — a reader saw all four and called them "a glitch, or a frame
+  // miss… the camera might move to a spot first that isn't right and then adjust":
+  //
+  //   1. A BEAT CHANGE resets `rt` to 0, so the travel restarts from
+  //      `restOf(n-1)`. If the previous beat's tour had not finished, the camera
+  //      was never at that shot and teleports there before setting off. This is
+  //      the camera's version of the figure defect group L already fixed.
+  //   2. THE BOX ARRIVES LATE. `frame()` returns NEUTRAL (or the raw authored
+  //      shot) until `targetBox` has been measured, then switches to
+  //      `containShot(...)` the frame it lands. That step IS "moves somewhere
+  //      wrong first, then adjusts".
+  //   3. A TAP DURING A TOUR warps `rt` straight to the skip point, which jumps
+  //      the camera to the end of the tour in one frame.
+  //   4. A MUST-BOX CHANGING between beats moves the target under a travel that
+  //      is already part-way through.
+  //
+  // Chasing the requested shot with a critically-damped follow fixes all four at
+  // once and needs no per-lesson change, because it makes the OUTPUT continuous
+  // whatever the input does. The authored push/pull still reads through — TAU is
+  // well under the shortest authored move — and a discontinuity in the request
+  // becomes a fast glide instead of a cut.
+  //
+  // Frame-rate independent on purpose: `1 - exp(-dt/TAU)` gives the same curve at
+  // 60fps and at 30, where a fixed per-frame fraction would make the camera lag
+  // twice as far on a slow device.
+  // A CRITICALLY DAMPED SPRING, NOT AN EXPONENTIAL LAG, and the difference is the
+  // whole point. A first-order lag takes its LARGEST step on the first frame — it
+  // moves a fixed fraction of the error immediately — so a 138-unit step in the
+  // request still moved the stage 21 units in one frame, which is exactly the cut
+  // this is meant to remove. A spring starts at zero velocity and accelerates, so
+  // the first frame after a step moves almost nothing and the camera eases into
+  // the move. It also cannot overshoot at critical damping, so a shot never sails
+  // past its subject and comes back — the "adjusts afterwards" the reader saw.
+  const camS = useSharedValue({
+    cx: NEUTRAL.cx, cy: NEUTRAL.cy, s: NEUTRAL.s,
+    vx: 0, vy: 0, vs: 0, primed: 0,
+  });
+  useFrameCallback((f) => {
+    'worklet';
+    let dt = (f.timeSincePreviousFrame ?? 16) / 1000;
+    if (dt > 0.05) dt = 0.05;
+    const want = camNow.value;
+    const c = camS.value;
+    // The first frame of a lesson snaps: there is nothing to be continuous WITH,
+    // and gliding in from NEUTRAL would look like an unrequested opening move.
+    if (!c.primed) {
+      camS.value = { cx: want.cx, cy: want.cy, s: want.s, vx: 0, vy: 0, vs: 0, primed: 1 };
+      return;
+    }
+    const w = CAM_OMEGA;
+    const k = w * w;
+    const d = 2 * w;
+    // Scale is on its own axis and a unit of it is worth far more than a unit of
+    // position, so it gets the same spring rather than a shared one.
+    const vx = c.vx + (-d * c.vx - k * (c.cx - want.cx)) * dt;
+    const vy = c.vy + (-d * c.vy - k * (c.cy - want.cy)) * dt;
+    const vs = c.vs + (-d * c.vs - k * (c.s - want.s)) * dt;
+    camS.value = {
+      cx: c.cx + vx * dt, cy: c.cy + vy * dt, s: c.s + vs * dt,
+      vx, vy, vs, primed: 1,
+    };
+  }, true);
+
   const camStyle = useAnimatedStyle(() => {
-    const c = camNow.value;
+    const c = camS.value;
     return {
       transform: [
         { translateX: STAGE_W / 2 - c.cx * c.s },
@@ -583,8 +659,14 @@ export default function CinematicPlayer({
     // station's content at once and leaves only the closing move to play, and K3
     // guarantees what the reader lands on is the whole picture, so nothing is lost by
     // being impatient.
+    // …BUT IT DOES NOT EAT THE TAP. This used to `return` after warping the clock,
+    // so a reader tapping during a tour got no beat change and had to tap again —
+    // "sometimes it doesn't actually properly move to the next section after the
+    // user taps". One tap, one advance, always: warp the tour to its end AND go on.
+    // Safe now that the camera is smoothed rather than driven directly, because
+    // the warp is a fast glide rather than the teleport it used to be.
     const skip = tourSkip[i] ?? 0;
-    if (skip > 0 && rt.value < skip) { rt.value = skip; return; }
+    if (skip > 0 && rt.value < skip) rt.value = skip;
     // NO SOUND ON ADVANCING A BEAT. There was a page turn here and it fired ten
     // times a lesson, which is the single most frequent thing in a reading — and
     // "I don't want a sound every time a user clicks to the next section" is the

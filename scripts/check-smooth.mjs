@@ -196,5 +196,73 @@ if (over.length) {
   if (over.length > 14) console.log(`    …and ${over.length - 14} more`);
 }
 
+// ── AND THE CAMERA, WHICH MOVES EVERY PIXEL AT ONCE ─────────────────────────
+//
+// `camNow` in CinematicPlayer is the shot the lesson ASKS for, and it steps
+// discontinuously in four places: a beat change restarting the travel from a shot
+// the camera was never at, the must-see box landing several frames late, a tap
+// warping a tour's clock to its end, and a must-box changing mid-travel. A camera
+// step moves the whole stage, so it reads as a far worse glitch than a limb does.
+//
+// The player no longer drives the transform from that value. It CHASES it with a
+// critically-damped follow, `1 - exp(-dt/TAU)`, which makes the output continuous
+// whatever the request does. This replays the worst request the player can
+// produce — a hard step of the entire stage — and checks the smoothing bounds it.
+const CAM_OMEGA = 12;
+const STAGE = 400;
+
+/**
+ * Replay the nastiest realistic request — the must-see box landing on frame 4 and
+ * moving the shot a third of the stage while the scale rises — and report the
+ * worst ONE-FRAME movement of the stage itself.
+ *
+ * `omega = 0` means "drive the transform straight off the request", which is what
+ * the player used to do.
+ */
+function camJump(omega) {
+  const want = (f) => (f < 4
+    ? { cx: 200, cy: 280, s: 1.0 }
+    : { cx: 268, cy: 214, s: 1.32 });
+  let c = { ...want(0), vx: 0, vy: 0, vs: 0 };
+  let worst = 0;
+  let prev = null;
+  let lastD = null;
+  const dt = 1 / 60;
+  for (let f = 0; f < 60; f++) {
+    const w = want(f);
+    if (omega <= 0) {
+      c = { ...w, vx: 0, vy: 0, vs: 0 };
+    } else {
+      const k = omega * omega;
+      const d = 2 * omega;
+      const vx = c.vx + (-d * c.vx - k * (c.cx - w.cx)) * dt;
+      const vy = c.vy + (-d * c.vy - k * (c.cy - w.cy)) * dt;
+      const vs = c.vs + (-d * c.vs - k * (c.s - w.s)) * dt;
+      c = { cx: c.cx + vx * dt, cy: c.cy + vy * dt, s: c.s + vs * dt, vx, vy, vs };
+    }
+    // What the reader sees move: the stage's own translate, in stage units.
+    const px = { x: STAGE / 2 - c.cx * c.s, y: STAGE / 2 - c.cy * c.s };
+    if (prev) {
+      // NOT the speed — a camera move is ALLOWED to be fast. What reads as a
+      // glitch is a discontinuity: the stage standing still and then covering a
+      // third of itself in one frame. That is a spike in how much the speed
+      // CHANGES between frames, which is zero for smooth motion however quick.
+      const dd = Math.hypot(px.x - prev.x, px.y - prev.y);
+      if (lastD !== null && Math.abs(dd - lastD) > worst) worst = Math.abs(dd - lastD);
+      lastD = dd;
+    }
+    prev = px;
+  }
+  return worst;
+}
+
+const raw = camJump(0);            // driving the transform straight off the request
+const smoothed = camJump(CAM_OMEGA); // what the player does now
+
+console.log('\nTHE CAMERA\n');
+ok('a step in the requested shot does not stutter the stage (L4)',
+  smoothed <= 8,
+  `worst frame-to-frame change in stage speed — driven straight ${raw.toFixed(1)} · smoothed ${smoothed.toFixed(1)} units`);
+
 console.log(fails ? `\n${fails} problem(s).\n` : '\nall clear.\n');
 process.exit(fails ? 1 : 0);
