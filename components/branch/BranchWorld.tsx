@@ -10,7 +10,7 @@ import Stickman from '@/components/lesson/cinematic/Stickman';
 import { pose, type Bundle } from '@/components/lesson/cinematic/rig';
 import {
   layout, groundAt, groundArt, chunkLeft, gaitForSpan, spanSeconds, jumpForSpan, travelEase,
-  LEAD, SPAN, CHUNK, CHUNK_W, GROUND_TOP, SIGN_DX,
+  LEAD, SPAN, CHUNK, CHUNK_W, GROUND_TOP, SIGN_DX, FOOT_SINK,
   type Marker,
 } from './worldPath';
 import { figureAt, hopAt, hopMs, hopTravel } from './walkFigure';
@@ -341,7 +341,12 @@ export default function BranchWorld({
       );
     // The lift goes in through the GROUND LINE, not as a second transform on the
     // wrapper. One route off the floor, whether it is a hop or a hurdled log.
-    return pose(f.stance, 0, groundAt(figX.value) - f.lift, FIG_K, 1, 1);
+    //
+    // FOOT_SINK is added, not subtracted: the ink turf slab hides the bottom of
+    // both shins, so the feet are drawn on the edge the eye can actually see —
+    // see the constant's own comment in worldPath. It rides along with the lift
+    // so a jump still leaves from, and lands on, the same line.
+    return pose(f.stance, 0, groundAt(figX.value) + FOOT_SINK - f.lift, FIG_K, 1, 1);
   });
   useDerivedValue(() => {
     if (gait.value > 0) figX.value = wFrom.value + (wTo.value - wFrom.value) * wp.value;

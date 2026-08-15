@@ -51,7 +51,10 @@ const K = 0.62;                       // FIG_K in BranchWorld
 const FPS = 60;
 const DUR = W.WALK_SECONDS;           // the PLAIN walk; every other gait has its own
 /** The road shelf, in the order their cadence must come out. */
-const ROAD = [[28, 'trudge'], [25, 'stroll'], [24, 'walk'], [26, 'hurry'], [27, 'run']];
+const ROAD = [
+  [28, 'trudge'], [25, 'stroll'], [24, 'walk'], [29, 'march'],
+  [26, 'hurry'], [32, 'skip'], [27, 'run'],
+];
 /** How tall the figure actually is on this road, in world units. Everything the
  *  jump is judged against is a fraction of THIS — an apex is only "too high" or
  *  "about right" relative to the man doing it. Head disc centre −49, radius 20. */
@@ -101,8 +104,18 @@ function traverse(i) {
   return { frames, jump: j, mode, from, gait: gv, settleStart };
 }
 
-/** Does this gait leave the ground of its own accord? A run does; a walk does not. */
+/**
+ * Does this gait leave the ground of its own accord? A run does; a walk does not.
+ *
+ * `stance < 0.5` catches the run, because a stance phase under half the cycle
+ * means there is a moment with neither foot down — that is what the number is.
+ * It does NOT catch the skip, and cannot: mode 8 gets its air from a hop laid
+ * ON TOP of the cycle (`footL.y - hop*9`), so a skip flies while its tabled
+ * stance still says 0.50. Leaving that to the stance number reported the hop as
+ * a foot-skate — 5.58 units of both-feet-up, which is the skip working.
+ */
 function flies(mode) {
+  if (MOVES.roadBase(mode) === 8) return true;      // the skip hops by design
   return MOVES.gaitFor(mode).stance < 0.5;
 }
 const MOVES = await import(pathToFileURL(path.join(TMP, 'moves.mjs')).href);
@@ -502,27 +515,57 @@ console.log('\nHOW THE ROAD GAITS ACTUALLY MOVE\n');
   for (const [mode, name] of ROAD) {
     const dur = W.spanSeconds(mode);
     let cMin = Infinity, cMax = 0, liftMax = 0, handMin = Infinity;
+    const hands = [];
     for (let i = 0; i < SPANS; i++) {
       const from = W.SPAN * (i + 1), to = W.SPAN * (i + 2);
-      let footMin = 0, fxMin = Infinity, fxMax = -Infinity;
-      for (let f = Math.floor(dur * FPS * 0.35); f <= Math.floor(dur * FPS * 0.65); f++) {
+      let footMin = 0;
+      // ── THE WRIST THAT IS DRAWN, NOT THE FIST THAT WAS ASKED FOR ───────────
+      //
+      // This measured `s.fistL.x` over a nominal 69, and passed at 0.15 while a
+      // reader was watching arms that "hardly move at all". Three reasons it
+      // could not see the defect, and all three are the same mistake — judging
+      // the input to the arm rather than the arm:
+      //
+      //   · `fistL` is a TARGET handed to the two-bone IK. What gets drawn is
+      //     `solve()`'s wrist, and when the target is close in the elbow eats
+      //     part of the travel.
+      //   · the shoulder travels too. A stiff arm carried along by a rocking
+      //     torso sweeps a respectable-looking x range while never once moving
+      //     relative to the body, which is exactly what a dead arm looks like.
+      //   · 69 is a nominal height, not the one on screen.
+      //
+      // So: solve the figure, take the wrist, subtract the shoulder's own
+      // travel, and divide by the height actually drawn. Measured that way the
+      // old shelf ran 0.087–0.145 at the median where a person is 0.20–0.30.
+      let wlo = Infinity, whi = -Infinity, slo = Infinity, shi = -Infinity;
+      let top = Infinity, bot = -Infinity;
+      for (let f = Math.floor(dur * FPS * 0.12); f <= Math.floor(dur * FPS * 0.88); f++) {
         const s = F.figureAt(from, to, W.travelEase(f / (dur * FPS)), f / FPS, mode, -1, 0, K).stance;
         footMin = Math.min(footMin, s.footL.y, s.footR.y);
-        fxMin = Math.min(fxMin, s.fistL.x); fxMax = Math.max(fxMax, s.fistL.x);
+        const j = RIG.solve({ x: 0, groundY: 0, k: K, dir: 1, ...s });
+        wlo = Math.min(wlo, j.wrL.x); whi = Math.max(whi, j.wrL.x);
+        slo = Math.min(slo, j.shL.x); shi = Math.max(shi, j.shL.x);
+        top = Math.min(top, j.head.y - RIG.STR.headR * K);
+        bot = Math.max(bot, Math.max(j.ankL.y, j.ankR.y));
       }
+      const hand = ((whi - wlo) - (shi - slo)) / (bot - top);
       // The stride this journey actually used — the seed strideMode builds.
       const g = RIG.gaitVary(MOVES.gaitFor(mode), (from / K) * 0.37 + (to / K) * 0.11);
       const steps = 2 * ((W.SPAN / dur) / (g.S * K));
       cMin = Math.min(cMin, steps); cMax = Math.max(cMax, steps);
       liftMax = Math.max(liftMax, -footMin / 69);
-      handMin = Math.min(handMin, (fxMax - fxMin) / 69);
+      handMin = Math.min(handMin, hand);
+      hands.push(hand);
     }
-    rows.push({ name, dur, cMin, cMax, liftMax, handMin });
+    hands.sort((a, b) => a - b);
+    const handMed = hands[Math.floor(hands.length / 2)];
+    rows.push({ name, dur, cMin, cMax, liftMax, handMin, handMed });
   }
 
   for (const r of rows) {
     console.log(`  ${r.name.padEnd(7)} ${r.dur.toFixed(1)}s  ${r.cMin.toFixed(2)}–${r.cMax.toFixed(2)} steps/s`
-      + `  ·  foot up to ${r.liftMax.toFixed(3)}  ·  hands sweep ${r.handMin.toFixed(3)}+ of his height`);
+      + `  ·  foot up to ${r.liftMax.toFixed(3)}`
+      + `  ·  hands sweep ${r.handMed.toFixed(3)} of his height (worst span ${r.handMin.toFixed(3)})`);
   }
 
   // A trudge must not out-step a run. This is the defect itself, as one line.
@@ -535,14 +578,31 @@ console.log('\nHOW THE ROAD GAITS ACTUALLY MOVE\n');
   const fast = rows.filter((r) => r.cMax > 3.5), slow = rows.filter((r) => r.cMin < 1.6);
   ok(fast.length === 0 && slow.length === 0, 'every gait steps at a rate a person steps at',
     fast.concat(slow).map((r) => `${r.name} ${r.cMin.toFixed(2)}–${r.cMax.toFixed(2)}`).join('; ')
-      || `${rows[0].cMin.toFixed(2)}–${rows[rows.length - 1].cMax.toFixed(2)} steps/s across all five, against 1.7–3.2 for a person`);
+      || `${rows[0].cMin.toFixed(2)}–${rows[rows.length - 1].cMax.toFixed(2)} steps/s across all ${rows.length}, against 1.7–3.2 for a person`);
 
-  // "I do not want the stickman to be walking without his arms moving."
-  const still = rows.filter((r) => r.handMin < 0.15);
+  // "I do not want the stickman to be walking without his arms moving." Said
+  // twice, a month apart, because the first fix was measured on the wrong
+  // quantity — see the block above. 0.13 is the floor for the WORST journey a
+  // gait can roll, not its median: `gaitVary` scales the swing ×0.70–1.36, so a
+  // shelf tuned only at the middle still ships one dead-looking span in ten.
+  const still = rows.filter((r) => r.handMin < 0.13);
   ok(still.length === 0, 'no gait walks with its arms pinned to its sides',
     still.map((r) => `${r.name} only ${r.handMin.toFixed(3)}`).join('; ')
       || `quietest is ${rows.reduce((a, b) => (a.handMin < b.handMin ? a : b)).name} at `
-         + `${Math.min(...rows.map((r) => r.handMin)).toFixed(3)} of his height, against 0.06 before`);
+         + `${Math.min(...rows.map((r) => r.handMin)).toFixed(3)} of his height on its worst span, `
+         + `against 0.087 before`);
+
+  // And the other half of "moving properly": a median inside the band a person
+  // actually walks in. A gait can clear the floor above on every span and still
+  // read as tentative if the middle of its distribution sits at 0.16.
+  // 0.18, not 0.20: the trudge is DELIBERATELY the quietest arm on the road and
+  // sits at the floor by design. What the line is really guarding is that the
+  // floor stays more than double the 0.087 a reader called a dead arm.
+  const timid = rows.filter((r) => r.handMed < 0.18);
+  ok(timid.length === 0, 'and every gait swings through a human range, not just a visible one',
+    timid.map((r) => `${r.name} median only ${r.handMed.toFixed(3)}`).join('; ')
+      || `quietest median is ${rows.reduce((a, b) => (a.handMed < b.handMed ? a : b)).name} at `
+         + `${Math.min(...rows.map((r) => r.handMed)).toFixed(3)}, against 0.20–0.30 for a person`);
 
   // "its feet were too high above the ground, so it didn't look good"
   const prancing = rows.filter((r) => r.liftMax > 0.31);

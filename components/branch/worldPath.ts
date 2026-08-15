@@ -301,17 +301,24 @@ export function jumpForSpan(i: number): { at: number; h: number } | null {
  * How the figure travels this span — deterministic from the lesson index, so the
  * same hop is always the same journey.
  *
- * Codes are `moves.gaitFor`: 0 walk · 1 stroll · 2 hurry · 3 run · 4 trudge. A
- * run every time would be exhausting and a walk every time is what this was
- * complained about for; varying it by index means the road has moods without
- * anything being random.
+ * Codes are `moves.gaitFor`: 24 walk · 25 stroll · 26 hurry · 27 run ·
+ * 28 trudge · 29 march · 32 skip. A run every time would be exhausting and a
+ * walk every time is what this was complained about for; varying it by index
+ * means the road has moods without anything being random.
+ *
+ * THE LAST TWO ARE THE JOKE, AND THEY ARE RARE ON PURPOSE. 8% each: about one
+ * journey in twelve, so a reader meets a march or a skip perhaps three times
+ * across a branch. At 20% they would stop being a surprise and start being what
+ * the walk is, which is the opposite of the point.
  */
 export function gaitForSpan(i: number): number {
   const r = hash(i * 31 + 5);
-  if (r < 0.16) return 27;       // a run
-  if (r < 0.34) return 26;       // a hurry
-  if (r < 0.52) return 25;       // a stroll
-  if (r < 0.62) return 28;       // a trudge
+  if (r < 0.15) return 27;       // a run
+  if (r < 0.31) return 26;       // a hurry
+  if (r < 0.47) return 25;       // a stroll
+  if (r < 0.55) return 28;       // a trudge
+  if (r < 0.63) return 29;       // a march, for no reason at all
+  if (r < 0.71) return 32;       // a skip
   return 24;                     // a plain walk
 }
 
@@ -329,7 +336,8 @@ export function gaitForSpan(i: number): number {
  *
  * With these, and the road strides, the cadences come out
  *
- *     trudge 1.99 · stroll 2.11 · walk 2.36 · hurry 2.55 · run 2.89
+ *     trudge 1.99 · stroll 2.11 · walk 2.36 · march 2.46 · hurry 2.55 ·
+ *     skip 2.70 · run 2.89
  *
  * which is the right order, and inside the band a person actually moves in.
  *
@@ -344,6 +352,8 @@ export function spanSeconds(mode: number): number {
   if (mode === 26) return 6.0;   // hurry
   if (mode === 27) return 4.8;   // run
   if (mode === 28) return 9.0;   // trudge
+  if (mode === 29) return 6.6;   // march
+  if (mode === 32) return 5.5;   // skip
   return WALK_SECONDS;           // 24, a plain walk
 }
 
@@ -414,6 +424,31 @@ export function chunkLeft(chunk: number): number { return chunk * CHUNK - CHUNK_
 
 /** How deep the ink turf band runs before the earth takes over. */
 export const TURF_H = 5;
+
+/**
+ * HOW FAR BELOW `groundAt` THE FIGURE'S FEET ARE DRAWN — and why that is not
+ * cheating.
+ *
+ * A reader said he "looks like he is walking on the air". He was not: measured,
+ * the ankle sits at exactly BASE_Y on 97% of frames and the foot-lock is clean.
+ * The defect is that BASE_Y is INVISIBLE. The turf is a solid ink slab from
+ * BASE_Y to BASE_Y + TURF_H and the figure is solid ink too, so the last five
+ * pixels of both shins are drawn black on black: the lowest thing the eye can
+ * actually find is the TOP of that slab, and the nearest edge that reads as a
+ * floor is the ink→earth boundary five pixels BELOW it. So he was drawn standing
+ * on a surface, and appeared to stand five pixels above a different one.
+ *
+ * Sinking him by exactly the slab's depth puts the ankle on that boundary, which
+ * is the edge a reader is actually looking at. Rendered at 0, 3, 5 and 7: at 0 no
+ * foot is visible at all, at 7 he wades. It is TURF_H rather than 5 because the
+ * two are the same fact — if the slab ever gets deeper, the feet follow it down
+ * without anyone remembering to come back here.
+ *
+ * ONLY THE FIGURE MOVES. `groundAt` is still the contract for markers, obstacles,
+ * scenery and every jump height, so nothing else shifts and the world stays
+ * self-consistent.
+ */
+export const FOOT_SINK = TURF_H;
 
 /** The body of the ground: everything below the turf. */
 export function earthPath(w = CHUNK_W, bottom = 380): string {

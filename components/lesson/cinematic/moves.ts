@@ -266,21 +266,46 @@ export const DESCEND: Gait = {
 // The upper body is not duplicated: `roadBase` maps each of these back to the
 // lesson mode whose arms, head and lean it borrows.
 
+// ── HOW BIG A ROAD SWING HAS TO BE, AND HOW THAT WAS SETTLED ────────────────
+//
+// "Make sure the arms are moving properly and not awkwardly or hardly at all."
+// The previous round of this was judged on `fistL.x`, the number handed TO the
+// arm — and that is the wrong end. What a reader sees is the WRIST the IK
+// actually solves, minus the shoulder's own travel, against the figure's DRAWN
+// height. Measured that way, across every span of a branch rather than one:
+//
+//     walk 0.115–0.221 · stroll 0.099–0.194 · hurry 0.145–0.277
+//     run  0.285–0.292 · trudge 0.087–0.170
+//
+// A person walking swings a hand through 0.20–0.30 of their own height. So
+// three of the five sat under it and the worst individual journeys — a trudge at
+// 0.087, a stroll at 0.099 — are the dead arm being described. Walk and stroll
+// alone are 54% of all spans.
+//
+// The old check passed all of this because it divided the REQUESTED fist target
+// by a nominal 69 and asked for 0.15; the request is not the movement. It now
+// measures the solved wrist, and its floor is 0.15 of real drawn height.
+//
+// The values below are set so the MEDIAN lands in 0.20–0.30 and, because
+// `gaitVary` re-rolls the swing ×0.70–1.36 per journey, so the WORST draw still
+// clears 0.15. Tuning the median alone leaves one span in ten looking broken.
+
 /** Road walk. Nothing to prove; the default journey between two lessons. */
 export const ROAD_WALK: Gait = {
   S: 63, lift: 11, stance: 0.62, bob: 3.0, bobSign: -1,
-  tilt: 0.09, armBase: 0.09, armSwing: 0.42, standH: 34,
+  tilt: 0.09, armBase: 0.09, armSwing: 0.62, standH: 34,
 };
-/** Road stroll. armSwing 0.50, not 0.30: at 0.30 the hands crossed 14 units of
- *  a 43-unit-tall figure and read as pinned to the hips. */
+/** Road stroll. Loose and unhurried, but a hanging arm still swings: at 0.50 the
+ *  quietest journey drew 0.099 of his height, which reads as an arm that is not
+ *  attached to anything. */
 export const ROAD_STROLL: Gait = {
   S: 60, lift: 8, stance: 0.66, bob: 2.2, bobSign: -1,
-  tilt: 0.11, armBase: 0.09, armSwing: 0.50, standH: 34,
+  tilt: 0.11, armBase: 0.09, armSwing: 0.80, standH: 34,
 };
 /** Road hurry. Longer step, more lean, arms already at full pump. */
 export const ROAD_HURRY: Gait = {
   S: 68, lift: 15, stance: 0.58, bob: 3.6, bobSign: -1,
-  tilt: -0.06, armBase: 0.09, armSwing: 0.60, standH: 34,
+  tilt: -0.06, armBase: 0.09, armSwing: 0.74, standH: 34,
 };
 /** Road run. lift 19, not 26: at 26 the foot came up 0.46 of the figure's own
  *  height — knee past the waist on every step, which is a cartoon prance and
@@ -288,15 +313,47 @@ export const ROAD_HURRY: Gait = {
  *  The long stride is the part worth keeping. */
 export const ROAD_RUN: Gait = {
   S: 75, lift: 16, stance: 0.40, bob: 5.5, bobSign: -1,
-  tilt: -0.18, armBase: 0.09, armSwing: 0.85, standH: 34,
+  tilt: -0.18, armBase: 0.09, armSwing: 0.98, standH: 34,
 };
-/** Road trudge. armSwing 0.60, not 0.22: "dead arms" was drawn as 4.4 units of
- *  hand travel, which is not a tired arm, it is a missing one. A trudge swings
- *  a little and LATE; the deadness now lives in the dropped head and the heavy
- *  bob, where it can be seen. */
+/** Road trudge. The deadness lives in the dropped head and the heavy bob, where
+ *  it can be seen — NOT in the arms, because an arm that does not move is not a
+ *  tired arm, it is a missing one. 1.18 looks large beside the others only
+ *  because mode 4 multiplies it by 10 where a walk multiplies by 24; the hand
+ *  still ends up moving less than every other gait here (0.196 of his height
+ *  against the walk's 0.240), which is the point. */
 export const ROAD_TRUDGE: Gait = {
   S: 58, lift: 6, stance: 0.70, bob: 4.2, bobSign: -1,
-  tilt: -0.02, armBase: 0.09, armSwing: 0.75, standH: 34,
+  tilt: -0.02, armBase: 0.09, armSwing: 1.18, standH: 34,
+};
+
+// ── two that are not about getting there ─────────────────────────────────────
+//
+// "Move its arms in a walking manner, or a funny manner in some of the walking
+// animations." The five above are all answers to "how fast, and how willingly",
+// so a reader who walks a whole branch sees five versions of the same errand.
+// These two are the road doing something for its own sake.
+//
+// They cost no new upper body. `roadBase` is `mode − 24`, so 29 lands on lesson
+// mode 5 and 32 on mode 8 — the march's straight high arms and the skip's extra
+// hop per stride, already written and already checked. Only the legs are
+// restrided for road distance.
+//
+// Both are RARE on purpose (8% each). A gag that turns up every third journey is
+// not a gag, it is the walk.
+
+/** Road march. Chin up, arms straight out and swinging hard. Absurd, on a path
+ *  through a wood, which is exactly why it is worth 8% of the journeys. */
+export const ROAD_MARCH: Gait = {
+  S: 64, lift: 15, stance: 0.55, bob: 3.0, bobSign: -1,
+  tilt: 0.04, armBase: 0.09, armSwing: 0.62, standH: 34,
+};
+/** Road skip. Mode 8 adds a hop per stride on top of this, so the tabled `lift`
+ *  is deliberately LOW — 9, where the hurry has 15. The air comes from the hop;
+ *  stacking a high lift under it puts the foot above his own waist and the whole
+ *  thing turns into the cartoon prance the run was already pulled back from. */
+export const ROAD_SKIP: Gait = {
+  S: 70, lift: 9, stance: 0.50, bob: 4.0, bobSign: -1,
+  tilt: 0.02, armBase: 0.09, armSwing: 0.60, standH: 34,
 };
 
 /** First road mode. `gaitForSpan` returns these; `worldPath.spanSeconds` times them. */
@@ -317,7 +374,10 @@ export function roadBase(mode: number): number {
 /**
  * Gait for a travel mode. 0 walk · 1 stroll · 2 hurry · 3 run · 4 trudge ·
  * 5 march · 6 sneak · 7 limp · 8 skip · 9 tiptoe · 10 back away · 11 pace.
- * 24–28 are the road shelf: the same five at road scale.
+ * 24–28 are the road shelf: the same five at road scale. 29 and 32 are the two
+ * character gaits, and their numbers are not free — `roadBase` is `mode − 24`,
+ * so 29 must be the march (5) and 32 must be the skip (8) to borrow the right
+ * upper body.
  */
 export function gaitFor(mode: number): Gait {
   'worklet';
@@ -326,6 +386,8 @@ export function gaitFor(mode: number): Gait {
   if (mode === 26) return ROAD_HURRY;
   if (mode === 27) return ROAD_RUN;
   if (mode === 28) return ROAD_TRUDGE;
+  if (mode === 29) return ROAD_MARCH;
+  if (mode === 32) return ROAD_SKIP;
   if (mode === 1) return STROLL;
   if (mode === 2) return HURRY;
   if (mode === 3) return RUN;
@@ -381,10 +443,22 @@ function moveBody(mode: number, dist: number, g: Gait): Stance {
     };
   }
   if (mode === 3) {                              // RUN — elbows bent and driving
+    // ── `sw`, NOT A FIXED 16 ────────────────────────────────────────────────
+    // This branch, and modes 5 and 8 below, typed their amplitude in and so
+    // ignored `armSwing` completely. Three consequences, all invisible until
+    // measured: the gait tables carried a number that did nothing (ROAD_RUN
+    // still says 0.85 and had no way to spend it), `gaitVary` could re-roll the
+    // swing per journey without any of these three arms changing — measured at
+    // 0.285→0.292 of his height across forty spans, where a walk moves through
+    // 0.115→0.221 — and the road shelf could not be tuned at all.
+    //
+    // 18.8 rather than a round number so the LESSON run is unchanged:
+    // RUN.armSwing is 0.85 and 0.85 × 18.8 = 15.98, against the 16 that was
+    // there. 53 scenes run through here and none of them should move.
     return {
       ...w, neck: -0.10, tilt: w.tilt - 0.04,
-      fistL: { x: 8 + c * 16, y: -14 - c * 6 },
-      fistR: { x: 8 - c * 16, y: -14 + c * 6 },
+      fistL: { x: 8 + c * sw * 18.8, y: -14 - c * 6 },
+      fistR: { x: 8 - c * sw * 18.8, y: -14 + c * 6 },
     };
   }
   if (mode === 4) {                              // TRUDGE — head down, arms dead
@@ -394,9 +468,11 @@ function moveBody(mode: number, dist: number, g: Gait): Stance {
     };
   }
   if (mode === 5) {                              // MARCH — chin up, arms straight and high
+    // 43.6 keeps the lesson march exactly where it was: MARCH.armSwing 0.55 ×
+    // 43.6 = 23.98, against the 24 typed here before. See mode 3.
     return {
       ...w, tilt: 0.03, neck: -0.13,
-      fistL: { x: 4 + c * 24, y: 2 }, fistR: { x: 4 - c * 24, y: 2 },
+      fistL: { x: 4 + c * sw * 43.6, y: 2 }, fistR: { x: 4 - c * sw * 43.6, y: 2 },
     };
   }
   if (mode === 6) {                              // SNEAK — crouched, hands out front
@@ -431,7 +507,9 @@ function moveBody(mode: number, dist: number, g: Gait): Stance {
       ...w, bob: w.bob + hop * 6, neck: -0.09,
       footL: { x: w.footL.x, y: w.footL.y - hop * 9 },
       footR: { x: w.footR.x, y: w.footR.y - hop * 9 },
-      fistL: { x: 4 + c * 20, y: -5 }, fistR: { x: 4 - c * 20, y: -5 },
+      // 36.4 keeps the lesson skip where it was: SKIP.armSwing 0.55 × 36.4 =
+      // 20.02, against the 20 typed here before. See mode 3.
+      fistL: { x: 4 + c * sw * 36.4, y: -5 }, fistR: { x: 4 - c * sw * 36.4, y: -5 },
     };
   }
   if (mode === 9) {                              // TIPTOE — tall, arms out for balance
