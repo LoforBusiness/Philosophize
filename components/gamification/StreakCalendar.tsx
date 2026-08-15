@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { MotiView } from 'moti';
 import SketchIcon from '@/components/shared/SketchIcon';
@@ -54,9 +54,18 @@ interface Props {
   since: string | null;
   /** Cell diameter. The sheet uses the default; the reward screen goes smaller. */
   size?: number;
+  /**
+   * Fired with the month now on screen, so a caller can show ITS figures rather
+   * than always this month's.
+   *
+   * The grid owns the paging (it is the thing with the arrows) and lifting that
+   * state out would make every caller carry it, so the month is reported instead
+   * of controlled. A caller that does not care simply omits this.
+   */
+  onMonth?: (year: number, month: number) => void;
 }
 
-export default function StreakCalendar({ activeDays, restDays, today, since, size = 34 }: Props) {
+export default function StreakCalendar({ activeDays, restDays, today, since, size = 34, onMonth }: Props) {
   const [offset, setOffset] = useState(0);
 
   const active = useMemo(() => new Set(activeDays), [activeDays]);
@@ -68,6 +77,11 @@ export default function StreakCalendar({ activeDays, restDays, today, since, siz
     () => buildMonth({ year: at.year, month: at.month, active, rest, today, since }),
     [at.year, at.month, active, rest, today, since],
   );
+
+  // Reported in an effect, not during render: calling a parent's setState while
+  // this component is rendering is the classic cross-component update warning, and
+  // on the first paint it would fire before the parent had finished mounting.
+  useEffect(() => { onMonth?.(at.year, at.month); }, [at.year, at.month, onMonth]);
 
   // Never page forward past the month the reader is in — there is nothing there,
   // and an empty grid of futures reads as a bug.

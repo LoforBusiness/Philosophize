@@ -90,3 +90,56 @@ export const STREAK_MILESTONES = [7, 30, 100, 365] as const;
 export function nextMilestone(n: number): number | null {
   return STREAK_MILESTONES.find((m) => m > n) ?? null;
 }
+
+// ═════════════════════════════════════════════════════════════════════════════
+// THE SOCIETY — what a long streak makes you, as opposed to what it counts.
+//
+// A number going up is not an identity. Duolingo's "Streak Society" works because
+// at 365 days you stop being someone with a big number and start being a MEMBER of
+// something, and the app says so out loud. This is that, in this app's own terms.
+//
+// WHY THESE NAMES AND NOT RANK NAMES. `data/ranks.ts` already has 25 tiers from
+// Novice to Grand Philosopher, and those are earned with XP — they say how much you
+// have LEARNED. These say how faithfully you have shown up, which is a different
+// virtue and deserves different words. Every one is a real school or discipline
+// whose defining trait is the habit itself:
+//
+//   Peripatetic  Aristotle's school, named for the covered walk its members paced
+//                while arguing. It means, literally, "given to walking" — which is
+//                also what the mascot does, so the first tier a reader reaches is
+//                named after the thing they have been watching all along.
+//   Stoic        the discipline of turning up whether or not you feel like it.
+//   Ascetic      practice sustained past the point where it is still novel.
+//   Immovable    Aristotle's unmoved mover, the thing that causes motion in
+//                everything else without itself being moved. A year without a
+//                missed day has earned the joke.
+//
+// THE THRESHOLDS ARE STREAK_MILESTONES, deliberately, and not a second ladder
+// beside them. Two sets of landmarks in one feature means the reward screen
+// celebrates one thing and the streak screen celebrates another.
+export interface StreakTier {
+  /** Streak length at which this tier is conferred. */
+  at: number;
+  name: string;
+  /** One line, shown under the name. Not a slogan — a description of the reader. */
+  blurb: string;
+}
+
+export const STREAK_TIERS: readonly StreakTier[] = [
+  { at: 7, name: 'Peripatetic', blurb: 'A week of showing up. You walk while you think.' },
+  { at: 30, name: 'Stoic', blurb: 'A month. You come whether or not you feel like it.' },
+  { at: 100, name: 'Ascetic', blurb: 'A hundred days. It stopped being novel long ago.' },
+  { at: 365, name: 'Immovable', blurb: 'A year unbroken. Nothing moves you. You move everything else.' },
+] as const;
+
+/** The tier a streak of `n` days has earned, or null below the first one. */
+export function tierFor(n: number): StreakTier | null {
+  let out: StreakTier | null = null;
+  for (const t of STREAK_TIERS) if (n >= t.at) out = t;
+  return out;
+}
+
+/** The next tier to reach, or null once they are all behind you. */
+export function nextTier(n: number): StreakTier | null {
+  return STREAK_TIERS.find((t) => t.at > n) ?? null;
+}

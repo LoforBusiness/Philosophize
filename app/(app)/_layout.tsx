@@ -72,6 +72,10 @@ export default function AppLayout() {
       <Tabs.Screen name="settings" options={{ href: null }} />
       {/* Paywall — pushed from Settings and the daily-limit gate, hidden from tabs */}
       <Tabs.Screen name="paywall" options={{ href: null }} />
+      {/* The streak, pushed from wherever the count appears. A sixth tab was the
+          obvious home and is the wrong one: at 390pt that is ~62pt a tab and the
+          labels clip, and the streak does not need to outrank Learn to matter. */}
+      <Tabs.Screen name="streak" options={{ href: null }} />
       {/* The lesson tester. Hidden from the tab bar AND gated inside the screen —
           a route can always be reached by URL, so the tab config is not the lock. */}
       <Tabs.Screen name="devlessons" options={{ href: null }} />

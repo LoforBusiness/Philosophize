@@ -442,15 +442,23 @@ export default function ProfileScreen() {
           </View>
 
           <SectionLabel>DAILY STREAK</SectionLabel>
-          <Card style={styles.streakBox}>
-            <View style={styles.streakLeft}>
-              <StreakBook value={shownStreak} size={66} />
-              <Text style={styles.streakWord}>DAY STREAK</Text>
-            </View>
-            <View style={styles.chipsRow}>
-              <StreakWeek streak={shownStreak} lastLessonDate={lastLessonDate} size={30} />
-            </View>
-          </Card>
+          {/* Tappable, and it was not before — the streak was the one number on this
+              screen with nowhere to go. Both entry points (this and Home's habit
+              card) land on the same screen rather than on two different summaries. */}
+          <Pressable onPress={() => router.push('/(app)/streak')}>
+            <Card style={styles.streakBox}>
+              <View style={styles.streakLeft}>
+                <StreakBook value={shownStreak} size={66} />
+                <Text style={styles.streakWord}>DAY STREAK</Text>
+              </View>
+              <View style={styles.chipsRow}>
+                <StreakWeek streak={shownStreak} lastLessonDate={lastLessonDate} size={30} />
+              </View>
+              <View style={styles.streakChevron}>
+                <SketchIcon name="back" size={16} color={C.dim} />
+              </View>
+            </Card>
+          </Pressable>
 
           <SectionLabel>PROGRESS TO NEXT RANK</SectionLabel>
           <Card>
@@ -697,6 +705,9 @@ const styles = StyleSheet.create({
   insightValue: { ...role('title'), color: C.ink, marginTop: SPACE[0] },
 
   streakBox: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2] },
+  // Turned around, because the icon set has `back` and no forward twin — the same
+  // trick StreakCalendar uses for its month arrows.
+  streakChevron: { transform: [{ scaleX: -1 }] },
   streakLeft: { alignItems: 'center', width: 60 },
   streakWord: { ...role('micro'), color: C.inkSoft, letterSpacing: 1 },
   chipsRow: { flex: 1, justifyContent: 'center' },

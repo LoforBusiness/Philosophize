@@ -96,6 +96,20 @@ async function doSync(prefs: ReminderPrefs, ctx: StreakContext) {
   }
 
   if (prefs.streakAlerts) {
+    // Rotated by evening so seven nights running are not seven identical sentences,
+    // which is the fastest way to get a notification channel switched off.
+    // `known` is tonight, where the streak number is real; `blind` is any later
+    // evening, where it is not and nothing may be asserted about it.
+    const STREAK_NAGS = [
+      { known: 'One lesson before midnight and it carries. I will wait up.',
+        blind: 'One lesson keeps it. I am not going anywhere.' },
+      { known: 'It ends at midnight. That is not a threat, it is a timetable.',
+        blind: 'Still nothing today. There is time, but not much of it.' },
+      { known: 'Two minutes. I have watched you spend more than that scrolling.',
+        blind: 'A lesson takes two minutes. I have done the maths.' },
+      { known: 'I would hate to see this one go. I would mention it often.',
+        blind: 'Whatever you are doing instead — is it going well?' },
+    ];
     for (let d = 0; d < STREAK_DAYS; d++) {
       const when = at(STREAK_HOUR, d);
       if (when.getTime() <= Date.now()) continue; // 8pm has already gone by
@@ -105,12 +119,21 @@ async function doSync(prefs: ReminderPrefs, ctx: StreakContext) {
       // streak" would be asserting something four days stale.
       const known = d === 0;
       if (known && (ctx.doneToday || ctx.streak <= 0)) continue;
+      // HIS VOICE, NOT THE APP'S — this is the one place the guilt trip reaches
+      // somebody who has already left, which is the only audience it can actually
+      // change. The escalation cannot be computed here (a notification laid down on
+      // Tuesday cannot know what Friday looks like), so it is carried by the ONE
+      // fact each evening knows: tonight knows the number, the rest do not.
+      //
+      // Kept to the same rule as the screen — it needles ATTENDANCE, never ability.
+      // A lock screen is the most public surface this app has, and a line that reads
+      // as an insult when a colleague glances over is a line that gets the app
+      // deleted rather than opened.
+      const line = STREAK_NAGS[d % STREAK_NAGS.length];
       await schedule(
         `streak-${d}`,
         known ? `Your ${ctx.streak}-day streak ends at midnight` : 'Keep the streak alive',
-        known
-          ? 'One lesson before the day is out and it carries over.'
-          : 'One lesson today keeps it going.',
+        known ? line.known : line.blind,
         { type: N.SchedulableTriggerInputTypes.DATE, date: when, channelId: CHANNEL }
       );
     }
