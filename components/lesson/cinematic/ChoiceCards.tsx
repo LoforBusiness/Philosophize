@@ -55,15 +55,51 @@ interface Props {
   /** 'c0' | 'c1' once answered; null while the question is open. */
   picked: string | null;
   onPick: (id: string, correct: boolean) => void;
+  /**
+   * WHICH SIDE THE TRUE CARD LANDS ON — required, so no call site can forget it.
+   *
+   * Every one of the 130 two-card questions in the app was authored with the
+   * correct answer FIRST, and nothing had ever shuffled them: measured, the true
+   * card was the left one 130 times out of 130. A reader who noticed could score
+   * every question in the app without reading a word of it, which is the whole
+   * lesson format defeated by a habit nobody chose.
+   *
+   * Any stable string. It must be stable, not random: re-rolling on every render
+   * would swap the cards under a reader's thumb mid-question, and re-rolling on
+   * revisit would make a remembered answer wrong. Beat identity is the natural key.
+   */
+  seed: string;
+}
+
+/**
+ * Should this question's cards be shown swapped?
+ *
+ * A plain character hash, taken on the seed and read one bit deep. It only has to
+ * split two ways and be stable; a better-distributed hash would buy nothing, and
+ * being readable here is worth more than being uniform. `check-cards` measures the
+ * real split across the app rather than trusting the arithmetic.
+ */
+export function swapFor(seed: string): boolean {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return (h & 1) === 1;
 }
 
 /** How long the loser takes to crumple, and the winner to lift. */
 const REACT = 460;
 
-export default function ChoiceCards({ cards, picked, onPick }: Props) {
+export default function ChoiceCards({ cards, picked, onPick, seed }: Props) {
+  // THE ORDER IS DECIDED HERE AND NOWHERE ELSE. Doing it in the 130 scripts would
+  // be 130 chances to forget, and the ones already written all forgot the same way.
+  //
+  // The id keeps following DISPLAY position, and `correct` keeps travelling with
+  // the card object, so everything downstream — the reveal, the seal, the player's
+  // scoring — is unchanged. Nothing outside this file has ever read 'c0' as "the
+  // one the script wrote first", which is what makes this safe.
+  const shown = swapFor(seed) ? ([cards[1], cards[0]] as const) : cards;
   return (
     <View style={styles.row} pointerEvents="box-none">
-      {cards.map((c, i) => (
+      {shown.map((c, i) => (
         <Card
           key={i}
           card={c}

@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useId, useMemo, useRef } from 'react';
-import { Pressable, StyleSheet, type View, type PressableProps } from 'react-native';
+import { Pressable, StyleSheet, Text, type View, type PressableProps } from 'react-native';
 import Animated, {
-  Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withTiming,
+  Easing, cancelAnimation, useAnimatedStyle, useSharedValue,
+  withDelay, withRepeat, withSequence, withSpring, withTiming,
 } from 'react-native-reanimated';
-import { INK } from './cinematicKit';
+import { INK, PAPER } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A THING IN THE PICTURE THAT CAN BE TAPPED, AND LOOKS LIKE IT.
@@ -68,6 +69,9 @@ import { INK } from './cinematicKit';
 const RING_INSET = 0;
 const RING_W = 2;
 const BREATH_MS = 1100;
+/** How long the reaction takes. The same 460ms ChoiceCards uses, so the two
+ *  question formats reply at one tempo rather than at two. */
+const REACT_MS = 460;
 
 interface Registry {
   add: (key: string) => void;
@@ -173,6 +177,59 @@ export default function Target({
   // is moving, and every one of these sits on a stage where something is walking.
   const ring = useAnimatedStyle(() => ({ opacity: 0.35 + breath.value * 0.65 }));
 
+  // ── THE REACTION ──────────────────────────────────────────────────────────
+  //
+  // Answering used to do NOTHING here. The ring faded out and the picture sat
+  // there, so the largest group of questions in the app — the ones answered by
+  // tapping the thing itself — were the only ones with no reply. A deck question
+  // lifts the card and stamps it, a drag question reveals its band, and the
+  // scene target, which is the most physical of the three, went quiet.
+  //
+  // Same language as ChoiceCards, deliberately: what you took RISES, what was
+  // right rises whether or not you took it, and a wrong pick recedes. Three
+  // outcomes, and the third is the one that teaches — a reader who missed is
+  // shown the answer rather than merely denied the point.
+  //
+  // WHAT IT MAY NOT DO IS DISAPPEAR. A card is furniture and can crumple away; a
+  // target is part of the PICTURE, and a scene that deletes its own prop on a
+  // wrong answer breaks rule A1 and usually the composition with it. So a wrong
+  // pick dims and shrinks slightly and stays exactly where it was.
+  const mine = picked === id;
+  const react = useSharedValue(0);
+  useEffect(() => {
+    if (!answered) { react.value = 0; return; }
+    react.value = withDelay(60, withTiming(1, { duration: REACT_MS, easing: Easing.out(Easing.cubic) }));
+  }, [answered, react]);
+
+  const reaction = useAnimatedStyle(() => {
+    const t = react.value;
+    if (!answered) return { opacity: 1, transform: [{ translateY: 0 }, { scale: 1 }] };
+    if (correct) {
+      // Taken or merely revealed, the true one lifts. The reader must end the beat
+      // knowing which it was.
+      return { opacity: 1, transform: [{ translateY: -5 * t }, { scale: 1 + 0.05 * t }] };
+    }
+    if (mine) return { opacity: 1 - 0.5 * t, transform: [{ translateY: 0 }, { scale: 1 - 0.06 * t }] };
+    // Neither picked nor right: it simply stops competing for attention.
+    return { opacity: 1 - 0.3 * t, transform: [{ translateY: 0 }, { scale: 1 }] };
+  });
+
+  // The seal lands only on a target the reader actually TOOK and got right —
+  // never on a revealed one, because a tick over something they did not choose
+  // reads as though they had.
+  const seal = useSharedValue(0);
+  useEffect(() => {
+    if (!(answered && mine && correct)) { seal.value = 0; return; }
+    seal.value = withDelay(180, withSequence(
+      withTiming(1.35, { duration: 110, easing: Easing.out(Easing.quad) }),
+      withSpring(1, { damping: 9, stiffness: 220 }),
+    ));
+  }, [answered, mine, correct, seal]);
+  const sealStyle = useAnimatedStyle(() => ({
+    opacity: seal.value > 0 ? 1 : 0,
+    transform: [{ scale: seal.value }, { rotate: '-12deg' }],
+  }));
+
   // WHERE THIS TARGET ACTUALLY IS, so the camera can be made to contain it.
   //
   // Measured against the CAMERA VIEW rather than read off the scene's styles,
@@ -205,7 +262,17 @@ export default function Target({
       disabled={answered || !!rest.disabled}
       onPress={() => onPick(id, correct)}
     >
-      {children}
+      {/* The reaction transforms the ART, not the Pressable: `measureLayout` reads
+          layout and is unaffected by transforms, so the box this target reports to
+          the camera stays exactly where it was (H60c). */}
+      <Animated.View pointerEvents="box-none" style={reaction}>
+        {children}
+      </Animated.View>
+      {answered && mine && correct ? (
+        <Animated.View style={[styles.seal, sealStyle]} pointerEvents="none">
+          <Text style={styles.sealMark}>✓</Text>
+        </Animated.View>
+      ) : null}
       {!answered ? (
         <Animated.View
           pointerEvents="none"
@@ -270,3 +337,17 @@ export function TargetRing({ answered, radius = 4 }: { answered: boolean; radius
 }
 
 export const TARGET_RING_INSET = RING_INSET;
+
+const styles = StyleSheet.create({
+  // Same mark, same corner, same size as the deck's (./ChoiceCards). A second tick
+  // drawn slightly differently would read as a different app congratulating you.
+  seal: {
+    position: 'absolute',
+    right: -8, top: -10,
+    width: 28, height: 28, borderRadius: 14,
+    borderWidth: 2, borderColor: INK,
+    backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  sealMark: { fontFamily: 'Inter_700Bold', fontSize: 14, color: INK, marginTop: -1 },
+});

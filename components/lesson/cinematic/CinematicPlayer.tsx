@@ -883,6 +883,9 @@ export default function CinematicPlayer({
             cards={beat.interact.cards}
             picked={picked}
             onPick={(id, ok) => choose(id, ok, true)}
+            // Beat identity: stable for this question forever, different from every
+            // other question's, and it costs nothing to compute.
+            seed={`${lesson.id}#${i}`}
           />
         ) : null}
 
