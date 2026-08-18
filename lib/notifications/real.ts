@@ -75,6 +75,74 @@ async function schedule(identifier: string, title: string, body: string, trigger
   });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// THE VOICE, AND THE TWO RULES IT KEEPS.
+//
+// Dry, faintly disappointed, and entirely uninterested in motivating anybody.
+// "One lesson. One idea you did not have yesterday" is a homework reminder; this
+// is a housemate who has noticed you came in late and is not going to make a
+// thing of it.
+//
+//   1. IT NEEDLES ATTENDANCE, NEVER ABILITY. A lock screen is the most public
+//      surface this app has. "You have not been in" survives a colleague reading
+//      it over a shoulder; anything about how quick or clever the reader is does
+//      not, and gets the app deleted rather than opened.
+//   2. IT NEVER CLAIMS A FACT IT CANNOT HOLD. Nothing here can be composed at
+//      send time (see the header), so a line counting what the reader did today
+//      would be a guess printed as a statement. The jabs are rhetorical — "I
+//      imagine today was busy" — never numeric.
+// ─────────────────────────────────────────────────────────────────────────────
+const DAILY_NAGS = [
+  { title: 'Still here',
+    body: 'So are the philosophers. None of us has anywhere better to be.' },
+  { title: 'No rush',
+    body: 'Socrates gave his whole life to one question. I am asking for a minute.' },
+  { title: 'Whenever suits you',
+    body: 'The unexamined life is going fine, I am sure. People do say that.' },
+  { title: 'Don’t mind me',
+    body: 'Two minutes was the entire pitch. I have not revised it.' },
+  { title: 'It’s fine',
+    body: 'I have been in here with the ideas. We were just talking about you.' },
+  { title: 'Just checking',
+    body: 'You said you wanted to think more clearly. Your words. I kept them.' },
+  { title: 'Nothing urgent',
+    body: 'Marcus Aurelius ran an empire and still wrote something down at night.' },
+  { title: 'Take your time',
+    body: 'Ideas keep. That is rather the point of them. And yet.' },
+  { title: 'I imagine today was busy',
+    body: 'They usually are. That is generally how it goes.' },
+  { title: 'Hello again',
+    body: 'I am not going to nag. I am simply going to be here, at this hour, daily.' },
+];
+
+// SEVEN, BECAUSE THE WINDOW IS SEVEN EVENINGS. At four, a reader who leaves the
+// app alone for a week gets nights five, six and seven repeating nights one, two
+// and three word for word — and a nag that repeats stops being a voice and
+// becomes a bug. One per evening the window can reach.
+//
+// `known` is TONIGHT, the only evening whose facts are real: whether a lesson is
+// already done and what the streak actually stands at. `blind` is any later
+// evening. A blind line may still say "nothing today", because a blind evening
+// only fires when the app was not opened that day at all — and a day the app was
+// not opened is a day no lesson was finished. It may not say the NUMBER, which
+// would be days stale by the time it arrived.
+const STREAK_NAGS = [
+  { known: 'One lesson before midnight and it carries. I will wait up.',
+    blind: 'One lesson keeps it. I am not going anywhere.' },
+  { known: 'It ends at midnight. That is not a threat, it is a timetable.',
+    blind: 'Still nothing today. There is time, but not much of it.' },
+  { known: 'Two minutes. I have watched you spend more than that scrolling.',
+    blind: 'A lesson takes two minutes. I have done the maths.' },
+  { known: 'I would hate to see this one go. I would mention it often.',
+    blind: 'Whatever you are doing instead — is it going well?' },
+  { known: 'After midnight it is just a number you used to have.',
+    blind: 'Nothing yet today. I am choosing not to read into it.' },
+  { known: 'You have kept this going. Odd place to stop.',
+    blind: 'One lesson and I will leave you alone until tomorrow. Promise.' },
+  { known: 'I am not going to beg. I am simply noting how late it is getting.',
+    blind: 'Getting late. I am noting it, that is all.' },
+];
+
 async function doSync(prefs: ReminderPrefs, ctx: StreakContext) {
   await ensureChannel();
   // Cancel-then-rebuild rather than diffing. The set is small, this runs on
@@ -84,32 +152,31 @@ async function doSync(prefs: ReminderPrefs, ctx: StreakContext) {
 
   if (prefs.dailyReminder) {
     const { hour, minute } = parseTime(prefs.reminderTime);
-    // The only REPEATING trigger here, so the daily nudge never runs out even if
-    // the app is not opened for a month. The price is fixed copy — a repeating
-    // notification cannot know anything about the day it fires on.
+    // ── ROTATED BY DAY, NOT FIXED FOREVER ────────────────────────────────────
+    //
+    // This said "A minute of philosophy / One lesson. One idea you did not have
+    // yesterday." — a homework reminder, and the one voice this app had no
+    // business using. Every other surface here is dry and faintly put out; the
+    // notification that arrives most often was the one being earnest.
+    //
+    // It is still the only REPEATING trigger, so it never runs out even if the
+    // app is not opened for a month — but the copy no longer has to be fixed
+    // FOREVER, only fixed until the next sync. `doSync` runs on every
+    // foreground, so keying the line to `dayNumber()` means it changes each day
+    // the app is opened and simply holds if it is not. Nothing is asserted about
+    // the day it fires on, which is the actual constraint.
+    const nag = DAILY_NAGS[dayNumber() % DAILY_NAGS.length];
     await schedule(
       'daily-reminder',
-      'A minute of philosophy',
-      'One lesson. One idea you did not have yesterday.',
+      nag.title,
+      nag.body,
       { type: N.SchedulableTriggerInputTypes.DAILY, hour, minute, channelId: CHANNEL }
     );
   }
 
   if (prefs.streakAlerts) {
-    // Rotated by evening so seven nights running are not seven identical sentences,
-    // which is the fastest way to get a notification channel switched off.
-    // `known` is tonight, where the streak number is real; `blind` is any later
-    // evening, where it is not and nothing may be asserted about it.
-    const STREAK_NAGS = [
-      { known: 'One lesson before midnight and it carries. I will wait up.',
-        blind: 'One lesson keeps it. I am not going anywhere.' },
-      { known: 'It ends at midnight. That is not a threat, it is a timetable.',
-        blind: 'Still nothing today. There is time, but not much of it.' },
-      { known: 'Two minutes. I have watched you spend more than that scrolling.',
-        blind: 'A lesson takes two minutes. I have done the maths.' },
-      { known: 'I would hate to see this one go. I would mention it often.',
-        blind: 'Whatever you are doing instead — is it going well?' },
-    ];
+    // One line per evening the window reaches — see STREAK_NAGS above, which is
+    // sized to STREAK_DAYS for exactly that reason.
     for (let d = 0; d < STREAK_DAYS; d++) {
       const when = at(STREAK_HOUR, d);
       if (when.getTime() <= Date.now()) continue; // 8pm has already gone by
@@ -129,7 +196,17 @@ async function doSync(prefs: ReminderPrefs, ctx: StreakContext) {
       // A lock screen is the most public surface this app has, and a line that reads
       // as an insult when a colleague glances over is a line that gets the app
       // deleted rather than opened.
-      const line = STREAK_NAGS[d % STREAK_NAGS.length];
+      // ── `dayNumber() + d`, NOT `d` ──────────────────────────────────────────
+      //
+      // Indexing on `d` alone looks like it rotates and does not, for the line
+      // that matters most: `known` is only ever true at d === 0, so tonight's
+      // notification always drew STREAK_NAGS[0] and every evening the reader
+      // actually saw said the same sentence. The variety was real for the six
+      // future evenings and absent from the one delivered daily.
+      //
+      // Offsetting by the day makes tonight move through the set as the days do,
+      // and keeps the six ahead of it distinct from tonight and from each other.
+      const line = STREAK_NAGS[(dayNumber() + d) % STREAK_NAGS.length];
       await schedule(
         `streak-${d}`,
         known ? `Your ${ctx.streak}-day streak ends at midnight` : 'Keep the streak alive',
