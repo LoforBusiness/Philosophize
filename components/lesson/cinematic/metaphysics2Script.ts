@@ -2,41 +2,93 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic metaphysics-being-2, "Something vs. Nothing" — Parmenides' two ways.
-// A traveller walks a road to a fork: one sign reads IT IS (a solid road), the
-// other IT IS NOT (a road that dissolves the moment he steps toward it). Lots of
-// LOCOMOTION — he strides to the fork, tries the nothing-road, and recoils.
 //
-// Both graded questions come from data/.../something-vs-nothing.ts.
+// ONE PICTURE (H64): a road that forks into two signed ways, and over the lesson
+// the second way turns out to have no road under it at all. Everything else on
+// the stage serves that or is not there.
+//
+// ── WHAT THIS REPLACED, AND WHY ─────────────────────────────────────────────
+//
+// The old version ran a 3×2 comparison matrix across the top third — CAN THINK
+// IT / CAN SAY IT / CAN KNOW IT against IT IS / IT IS NOT — above the road. Three
+// things were wrong with it and only the third is obvious:
+//
+//   · TWO PICTURES ARGUING (H64). The road already says "the second way is not
+//     there". The matrix said it again in words, in a different visual language,
+//     and the reader had to decide which one was the lesson.
+//   · IT COST A FIFTH OF THE PICTURE (H59). The matrix pushed the band top to
+//     172, so the whole stage drew at 1.90. With it gone the band is 282 tall,
+//     which is inside the width-limited ceiling — everything is drawn at 2.31,
+//     about 20% bigger, for free.
+//   · A1: the old script said "step toward the second and it dissolves" and the
+//     traveller's x track stopped at 220, 86 units short of the fork at 306. He
+//     never stepped toward anything. He walks onto it now (beat 4, x 292) and
+//     recoils with a PLAYED startle rather than holding a pose.
+//
+// The matrix's teaching is not lost — it is what Q1 now ASKS, on the stage
+// (H65). Three posted claims, and the reader taps the one there is nothing to
+// picture. That is the same distinction the matrix asserted, except the reader
+// draws it instead of reading it.
+//
+// ── THE VOICE (group M) ─────────────────────────────────────────────────────
+//
+// It read as an encyclopaedia: "Leibniz gave the riddle its classic form in
+// 1714. The case is still open." Dates and surnames in the hook, no manner at
+// all. It is dry and faintly put-upon now, one barb a beat at most and most
+// beats none, and every barb lands on the subject rather than on the reader
+// (M1). The summary points and the explanations stay straight (M5).
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Meta2Beat extends BaseBeat {
-  /** Traveller gesture (emote code). */ e?: number;
-  /** Traveller x (walks along the road between beats). */ x?: number;
-  /** How dissolved the IT-IS-NOT road is this beat, 0→1. */ gone?: number;
-  /** Leibniz's principle strip has slid into place (0/1). */ pr?: number;
-  /** How many rows of the two-ways test table are filled in, 0→3. */ mx?: number;
+  /** Traveller gesture. Bands per N2: <100 rig, 100+ held action, 300+ played once. */ e?: number;
+  /** Traveller x. 92 downstage · 214 at the fork · 292 out on the dashes. */ x?: number;
+  /**
+   * How dissolved the IT-IS-NOT way is this beat, 0→1.
+   *
+   * MONOTONIC ON PURPOSE. It ran 0.95 on the recoil and then back to 0.6 for the
+   * questions, so the road the lesson had just finished proving was not there
+   * quietly came back for the last three beats. A way that is not there does not
+   * partially return; H59 is the general form of the same rule.
+   */ gone?: number;
+  /**
+   * Leibniz's principle strip has slid into place (0/1).
+   *
+   * 1 from beat 1 to the end. It was set on beat 1 alone, so the strip slid in,
+   * held for one beat and then vanished for the rest of the lesson — the reader
+   * loses the first half of the argument exactly when the second half starts
+   * arguing with it. H59: a prop does not leave the room and come back.
+   */ pr?: number;
+  /** 1 = the three posted claims are live and tappable (Q1). */ pick?: number;
 }
 
 export const BEATS: Meta2Beat[] = [
   {
-    e: 6, x: 92, gone: 0.35,
-    text: 'Why is there something rather than nothing? Leibniz gave the riddle its classic form in 1714. The case is still open.',
+    // 167 = TALKING WITH THE HANDS, the narration loop (N2). The hook is somebody
+    // talking to you, and this is what that looks like from the neck down.
+    e: 167, x: 92, gone: 0.3,
+    text: 'There is a universe. There did not have to be one. That is the whole question, and it has outlasted everyone who has picked it up.',
     dur: 3.6,
   },
   {
-    e: 1, x: 148, gone: 0.35, pr: 1,
-    text: 'Leibniz held that nothing is ever the case without a reason for it. Turn that on existence itself. Why something rather than nothing? Nothing would have been simpler, he noted, and easier.',
+    // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
+    e: 168, x: 150, gone: 0.3, pr: 1,
+    text: 'Leibniz had a rule. Nothing is ever simply the case — there is always a reason for it. Then he aimed the rule at existence itself. Why is there anything? Nothing would have been simpler. He was right about that much.',
     cite: 'Leibniz, sufficient reason',
-    dur: 4.6,
+    dur: 4.8,
   },
   {
-    e: 13, x: 196, gone: 0.4, pr: 1, mx: 2,
-    text: 'Parmenides had struck first, and here is his fork. To talk about what is not, you have to think it. But you cannot think it, because there is nothing there for the thought to be about.',
+    // 379 = THE IDEA, PLAYED (N2) — it arrives and the finger goes up, once, as he
+    // reaches the fork. Held (179) it would just be a man standing with a finger up.
+    e: 379, x: 214, gone: 0.35, pr: 1,
+    text: 'Parmenides got there first and went the other way. Forget reasons for a moment. Ask whether nothing was ever an option at all. Here is the fork he left: one way says it is, the other says it is not.',
     cite: 'Parmenides, On Nature',
     dur: 4.8,
   },
   {
-    e: 144, x: 196, gone: 0.4, pr: 1, mx: 3,
+    // 161 = ARMS FOLDED, a LIVING hold — it loops and re-settles, so he has small
+    // business while the reader reads a quote (H67). A rest beat is the one place
+    // a figure is on screen doing nothing, and still is what reads as broken.
+    e: 161, x: 214, gone: 0.35, pr: 1,
     quote: {
       id: 'lq-metaphysics-being-2-1',
       text: 'The same thing is there for thinking and for being.',
@@ -48,33 +100,35 @@ export const BEATS: Meta2Beat[] = [
     dur: 3.0,
   },
   {
-    e: 15, x: 220, gone: 0.95, pr: 1, mx: 3,
-    text: 'A goddess in his poem sets out two ways: that it is, and that it is not. Step toward the second and it dissolves — what is not can never be grasped. Judge by reason, she says, not by eye and ear.',
-    cite: 'Parmenides, On Nature',
+    // 318 = STARTLE, PLAYED: a sharp recoil and a step back. This beat is the A1
+    // fix — the sentence says he steps onto the second way and finds nothing, so
+    // he walks out past the fork and recoils, once, on arrival.
+    e: 318, x: 292, gone: 0.95, pr: 1,
+    text: 'So he tries it. He steps onto the second way — and there is nothing there to step onto. What is not cannot be walked on, pointed at, or thought about. It does not have the decency to be an option.',
+    cite: 'The second way',
     dur: 5.0,
   },
   {
-    e: 7, x: 198, gone: 0.5, pr: 1, mx: 3,
+    // 178 = SHRUG, held. M6: a shrug is the right pose for a question beat — the
+    // reader is weighing two things and "well, that is what the man said" is
+    // exactly the attitude to hold while they do it.
+    e: 178, x: 236, gone: 0.95, pr: 1, pick: 1,
     interact: {
-      prompt: 'On Parmenides’s view, why can pure nothingness never truly exist?',
-      cards: [
-        { text: 'Thinking it makes it something', correct: true },
-        { text: 'Physics has not found it', correct: false },
-      ],
-      explain: '"What is not" can be neither known nor spoken. Try to think nothing and you treat it as a thing — so genuine non-being slips away.',
+      prompt: 'Two of these you can picture. Tap the one there is nothing to picture.',
+      explain: 'A unicorn does not exist, and you pictured it anyway — so not existing was never the problem. "Nothing at all" leaves the thought nothing to be about, and that is Parmenides\u2019 point.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
-    e: 9, x: 198, gone: 0.5, pr: 1, mx: 3,
+    e: 178, x: 236, gone: 0.95, pr: 1,
     interact: {
-      prompt: 'Leibniz and Parmenides both reasoned about being. So they reached the same conclusion, right?',
+      prompt: 'Both men end up defending being. Which one thinks it had a rival to beat?',
       cards: [
-        { text: 'No, Leibniz wants a reason', correct: true },
-        { text: 'Yes, both proved a being', correct: false },
+        { text: 'Leibniz', correct: true },
+        { text: 'Parmenides', correct: false },
       ],
-      explain: 'Leibniz seeks a sufficient reason (a necessary being); Parmenides argues "nothing" is unthinkable, so being never needed to beat an alternative.',
+      explain: 'Leibniz asks why something won, so nothing was a live option that needed ruling out. Parmenides says nothing was never on the table — so being never had to beat anything to be here.',
       xp: 5,
     },
     dur: 1.0,
@@ -84,11 +138,11 @@ export const BEATS: Meta2Beat[] = [
       title: 'The Riddle of Being',
       points: [
         'Leibniz: why something rather than nothing?',
-        'His ground: a necessary being',
-        'Parmenides: what is not cannot be',
-        'Reason, not measurement, does the work',
+        'His answer needs a necessary being',
+        'Parmenides: what is not cannot be thought',
+        'Reason settles this, not measurement',
       ],
-      closing: 'If non-being truly cannot be thought, perhaps being never needed permission to exist.',
+      closing: 'If nothing was never available, existence did not beat the alternative. There was not one.',
     },
     dur: 2.8,
   },

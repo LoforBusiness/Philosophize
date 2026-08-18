@@ -511,8 +511,25 @@ export function Choices({
 // tappable targets live in the SCENE, which calls onPick — so this panel has no
 // buttons of its own. `answered`/`correct` are owned by the player.
 export function InteractPanel({
-  prompt, explain, answered, correct, targets = 0,
-}: { prompt: string; explain: string; answered: boolean; correct: boolean; targets?: number }) {
+  prompt, explain, answered, correct, targets = 0, inScene = true,
+}: {
+  prompt: string; explain: string; answered: boolean; correct: boolean; targets?: number;
+  /**
+   * Is this question answered on the STAGE?
+   *
+   * This panel carries the prompt and the reveal for EVERY graded beat, including
+   * the ones answered by the two cards below it or by the drag rail — so the hint
+   * it prints has to know which kind it is looking at. It did not, and told the
+   * reader to "answer in the scene above" on all 119 lessons that ask with cards,
+   * pointing them at a picture with nothing tappable in it while the two buttons
+   * they actually wanted sat directly underneath.
+   *
+   * Default true because a scene question is the shape this panel was written for
+   * and the one that needs the hint; the deck's own cards and rail are their own
+   * instruction.
+   */
+  inScene?: boolean;
+}) {
   // "Answer in the scene above ↑" was the entire instruction, and it tells the
   // reader nothing they did not already know. What they could not tell was WHICH
   // things were answerable — so the hint now names the number of marked things,
@@ -527,7 +544,7 @@ export function InteractPanel({
   return (
     <Animated.View style={styles.qWrap} layout={LinearTransition.duration(300)}>
       <Text style={styles.prompt}>{prompt}</Text>
-      {!answered ? (
+      {!answered && inScene ? (
         <Text style={styles.interactHint}>{hint}</Text>
       ) : (
         <Animated.View style={styles.explain} entering={FadeInDown.duration(300)}>

@@ -937,6 +937,10 @@ export default function CinematicPlayer({
                     prompt={beat.interact.prompt}
                     explain={beat.interact.explain}
                     targets={targetCount}
+                    // Cards and the drag rail are their own instruction and sit
+                    // right below this panel; only a STAGE question needs telling
+                    // where to look. See the prop's note in cinematicKit.
+                    inScene={!beat.interact.cards && !beat.interact.drag}
                     answered={picked !== null}
                     correct={pickedOk}
                   />
