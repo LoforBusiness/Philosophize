@@ -21,6 +21,11 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import SketchIcon from './SketchIcon';
 import PhilosopherQuiz from './PhilosopherQuiz';
+import { eraGroupOf } from '@/data/philosophers';
+import { lifespanOf, contemporariesOf } from '@/lib/utils/thinkerStats';
+import {
+  EraChip, StatTile, LifeStrip, BranchSpread, ContemporariesRow, eraColour,
+} from '@/components/thinkers/ThinkerStats';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -51,6 +56,10 @@ export default function PhilosopherSheet() {
   const id = useUIStore((s) => s.philosopherSheetId);
   const openSeq = useUIStore((s) => s.philosopherSheetSeq);
   const close = useUIStore((s) => s.closePhilosopher);
+  // Tapping a contemporary swaps the sheet's subject in place. `openPhilosopher`
+  // bumps `philosopherSheetSeq`, so the scroll resets to the top and the reader
+  // lands on the new masthead rather than halfway down the previous thinker.
+  const openPhilosopher = useUIStore((s) => s.openPhilosopher);
 
   const recordView = useUserDataStore((s) => s.recordPhilosopherView);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
@@ -121,6 +130,18 @@ export default function PhilosopherSheet() {
       .slice(0, 4);
   }, [phil, lessonsByUnit, isPro]);
 
+  // THE NUMBERS. Above the early return with every other hook — see the note on
+  // `lessons`; a hook below `if (!visible)` makes the unmounting render count
+  // fewer than the last one and React throws.
+  const stats = useMemo(() => {
+    if (!phil) return null;
+    return {
+      life: lifespanOf(phil.id),
+      era: eraGroupOf(phil),
+      contem: contemporariesOf(phil),
+    };
+  }, [phil]);
+
   if (!visible) return null;
 
   const savedIds = new Set(savedQuotes.map((q) => q.id));
@@ -184,6 +205,15 @@ export default function PhilosopherSheet() {
                 </Text>
                 <Text style={styles.mastheadKicker}>{phil.era.toUpperCase()}</Text>
                 <Text style={styles.mastheadName}>{phil.name}</Text>
+                {/* THE ERA, AS THE ONE COLOURED THING ON A BLACK BLOCK. It is a
+                    rule under the name rather than a chip beside it, because the
+                    masthead is already carrying five stacked lines and a sixth
+                    element in the flow would be the clutter this pass is for.
+                    The colour says "Ancient" faster than the word does, and the
+                    word is right there anyway. */}
+                {stats && (
+                  <View style={[styles.mastheadRule, { backgroundColor: eraColour(stats.era) }]} />
+                )}
                 <Text style={styles.mastheadLife}>{phil.lifespan}</Text>
                 <Text style={styles.mastheadIdea}>“{phil.oneLiner}”</Text>
                 <View style={styles.chipRow}>
@@ -196,6 +226,59 @@ export default function PhilosopherSheet() {
               </View>
 
               <View style={styles.body}>
+                {/* ── THE NUMBERS ────────────────────────────────────────────
+                    Everything above this is words about a person. This is the
+                    same person as facts you can take in without reading: how
+                    long they lived, when that was, what they worked on, and who
+                    else was in the room. All four were already in the record and
+                    none of them had ever been shown.
+
+                    IT COMES FIRST, before the prose, because it is what makes
+                    the prose worth starting. A reader who knows they are looking
+                    at a Greek who lived 71 years and wrote on ethics and
+                    knowledge has somewhere to put the next paragraph. */}
+                {stats && (
+                  <MotiView
+                    from={{ opacity: 0, translateY: 10 }}
+                    animate={{ opacity: 1, translateY: 0 }}
+                    transition={{ type: 'timing', duration: 320, delay: 60 }}
+                    style={styles.statBlock}
+                  >
+                    {/* THREE TILES AT MOST, AND CONTEMPORARIES IS NOT ONE.
+                        Four fitted on paper and not on a phone: "CONTEMPORARIES"
+                        is fourteen characters and it ran straight into
+                        "LESSONS" at 412px. It was also the one number here that
+                        already had somewhere better to be — the "At the same
+                        time" section below states it AND names three of them, so
+                        the tile was a worse copy of a thing further down the
+                        same page. */}
+                    <View style={styles.statRow}>
+                      {/* OMITTED, NOT DASHED, for the six thinkers dated only to
+                          a century. See the header in ThinkerStats. */}
+                      {stats.life.age !== null && (
+                        <StatTile
+                          value={String(stats.life.age)}
+                          label={stats.life.living ? 'YEARS OLD' : 'YEARS LIVED'}
+                          tint={eraColour(stats.era)}
+                        />
+                      )}
+                      <StatTile
+                        value={String(phil.quotes.length)}
+                        label={phil.quotes.length === 1 ? 'QUOTE' : 'QUOTES'}
+                      />
+                      {lessons.length > 0 && (
+                        <StatTile
+                          value={String(lessons.length)}
+                          label={lessons.length === 1 ? 'LESSON' : 'LESSONS'}
+                        />
+                      )}
+                    </View>
+
+                    <LifeStrip life={stats.life} era={stats.era} />
+                    <BranchSpread slugs={phil.branchSlugs} era={stats.era} />
+                  </MotiView>
+                )}
+
                 {/* Straight back into the curriculum. */}
                 {lessons.length > 0 && (
                   <MotiView
@@ -249,6 +332,25 @@ export default function PhilosopherSheet() {
                 <SectionHeading label="Biography" />
                 <Text style={styles.standfirst}>{standfirst}</Text>
                 {restOfBio ? <Text style={styles.bio}>{restOfBio}</Text> : null}
+
+                {/* ── AND WHO ELSE WAS THERE ─────────────────────────────────
+                    Placed after the bio rather than at the foot of the sheet on
+                    purpose: it is the one element on the page that leads
+                    somewhere else, and a doorway at the very bottom is a doorway
+                    most readers never reach. Mid-scroll, just after you have
+                    learned who this person was, is the moment "who else?" is
+                    actually a question. */}
+                {stats && stats.contem.count > 0 && (
+                  <View style={styles.contemBlock}>
+                    <SectionHeading label="At the same time" />
+                    <ContemporariesRow
+                      count={stats.contem.count}
+                      notable={stats.contem.notable}
+                      era={stats.era}
+                      onOpen={openPhilosopher}
+                    />
+                  </View>
+                )}
 
                 {/* ── DID YOU KNOW, face down ────────────────────────────────
                     Three identical bulleted rows were the most surprising
@@ -443,6 +545,7 @@ const styles = StyleSheet.create({
     lineHeight: 39,
     marginTop: 6,
   },
+  mastheadRule: { width: 44, height: 4, borderRadius: 2, marginTop: 8, marginBottom: 6 },
   mastheadLife: { fontFamily: 'Inter_400Regular', fontSize: 12.5, color: PaperMute, marginTop: 2 },
   mastheadIdea: {
     fontFamily: 'PlayfairDisplay_400Regular',
@@ -463,6 +566,20 @@ const styles = StyleSheet.create({
   chipText: { fontFamily: 'Inter_500Medium', fontSize: 11.5, color: '#DAD8D0' },
 
   body: { paddingHorizontal: 24, paddingTop: 4 },
+  /** The stat block sits in its own well so the four figures read as one object
+   *  rather than as the first paragraph of the page. */
+  statBlock: {
+    gap: 16,
+    marginTop: 20,
+    marginBottom: 4,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: InkFaint,
+    backgroundColor: '#FFFFFF',
+  },
+  statRow: { flexDirection: 'row', alignItems: 'flex-start' },
+  contemBlock: { marginTop: 4 },
 
   // ── lessons ────────────────────────────────────────────────────────────────
   lessonRow: {

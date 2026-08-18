@@ -94,6 +94,43 @@ export const C = {
   wrongSoft: '#F7E9E9',
 } as const;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// THE ERAS, AND THE ONE PLACE THIS APP IS ALLOWED A HUE THAT MEANS SOMETHING.
+//
+// The identity is ink on paper, and it stays that way everywhere else. 322
+// thinkers is the exception, and the reason is legibility rather than
+// decoration: a list that long is unnavigable in one tone, and "which era is
+// this person from" is the single fact a reader sorts them by. Five colours, one
+// per era, is therefore a LABEL, not a mood — the same argument §19 makes for
+// letting photographs behind the branch cards.
+//
+// A SEPARATE SCALE, NOT PART OF `C`. Two reasons, and the first is hard:
+// check-ui caps the palette at 14 and it currently holds 13, so five more would
+// fail the build. The second is that they are not interchangeable with `C` —
+// nothing here may be used as a general-purpose colour, only to say "this
+// thinker belongs to this era".
+//
+// CHOSEN BY SEARCH, NOT BY EYE. The first hand-picked set put a terracotta
+// ANCIENT 19 RGB units from `wrong` and a jade EASTERN 39 from `correct`, so an
+// era chip read as an answer state; MEDIEVAL and CONTEMPORARY were 49 apart and
+// indistinguishable from each other. These are the output of a constrained
+// search over muted HSL space: every one clears 4.5:1 on paper (so it can carry
+// its own name as text, not only a rule), stays clear of `wrong`, `correct`,
+// `HUE` and the greys, and is tellable from the other four. scripts/check-ui.mjs
+// re-derives all of that.
+//
+// KEYED ON `EraGroup` from data/philosophers.ts — the same five strings that
+// file already groups by, so there is no second mapping to drift.
+export type EraKey = 'ANCIENT' | 'MEDIEVAL' | 'MODERN' | 'CONTEMPORARY' | 'EASTERN';
+
+export const ERA: Record<EraKey, string> = {
+  ANCIENT: '#6A5C2F',       // bronze / olive — antiquity
+  MEDIEVAL: '#394974',      // manuscript ultramarine
+  MODERN: '#592C2C',        // oxblood, the colour of a bound library
+  CONTEMPORARY: '#794082',  // muted plum
+  EASTERN: '#3B7D76',       // jade
+};
+
 export type TypeKey = 'display' | 'title' | 'body' | 'label' | 'micro';
 
 /** Five sizes. Inter is loaded at 400/500/700 only — there is no 600. */

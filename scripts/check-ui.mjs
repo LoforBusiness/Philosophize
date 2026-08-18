@@ -112,6 +112,56 @@ for (const [fg, bg, floor] of PAIRS) {
   ok(r >= floor, `${fg} on ${bg}`, `${r.toFixed(2)}:1, need ${floor}`);
 }
 
+// ── 2b · the era scale ───────────────────────────────────────────────────────
+//
+// Five hues that mean "this thinker is from this era" — the one place in the app
+// a colour carries information (see the comment on ERA in design.ts). They live
+// outside `C` and so miss every check above, which is exactly how the first
+// hand-picked set got as far as it did: a terracotta ANCIENT sat 19 RGB units
+// from `wrong`, so an era chip and an incorrect answer were the same colour.
+//
+// Each one has to survive three separate jobs on the Thinkers surfaces: a solid
+// chip with paper text on it, a rule under a name, and a dot on a hairline. The
+// first is what forces 4.5:1 rather than the 3:1 a pure graphic would need — the
+// chip carries the era's NAME.
+{
+  const eras = Object.entries(D.ERA);
+  ok(eras.length === 5, 'five eras, one colour each', `${eras.length} values`);
+
+  for (const [name, v] of eras) {
+    ok(/^#[0-9A-F]{6}$/i.test(v), `ERA.${name} is a plain hex`, v);
+    // ONE ASSERTION, NOT TWO. Contrast is symmetric, so "ERA on paper" and
+    // "paper on ERA" are the same number — and both uses are real (the era's
+    // name printed in its colour, and paper text on a solid chip of it), which
+    // is what makes the single 4.5:1 cover both rather than needing a pair.
+    ok(ratio(lum(v), lum(D.C.paper)) >= 4.5, `ERA.${name} and paper, either way round`,
+      `${ratio(lum(v), lum(D.C.paper)).toFixed(2)}:1, need 4.5`);
+  }
+
+  // Tellable from each other, by the same rule the core palette uses.
+  for (let i = 0; i < eras.length; i++) {
+    for (let j = i + 1; j < eras.length; j++) {
+      const [na, va] = eras[i], [nb, vb] = eras[j];
+      const dL = Math.abs(lum(va) - lum(vb));
+      const dRGB = spread(va, vb);
+      ok(dL >= 0.02 || dRGB >= 60, `ERA.${na} and ERA.${nb} are tellable apart`,
+        `ΔL ${dL.toFixed(3)}, ΔRGB ${Math.round(dRGB)}`);
+    }
+  }
+
+  // AND NOT CONFUSABLE WITH A COLOUR THAT ALREADY MEANS SOMETHING ELSE.
+  // `wrong` and `correct` are answer states and `HUE` is the interactive accent;
+  // an era mark landing on any of them says the wrong thing in a place the
+  // reader has been trained to read it.
+  const LOADED = ['wrong', 'correct', 'HUE'];
+  for (const [name, v] of eras) {
+    for (const other of LOADED) {
+      const d = spread(v, D.C[other]);
+      ok(d >= 45, `ERA.${name} is not mistakable for ${other}`, `ΔRGB ${Math.round(d)}, need 45`);
+    }
+  }
+}
+
 // ── 3 · the scales are closed sets ───────────────────────────────────────────
 ok(Object.keys(D.TYPE).length === 5, 'five type sizes', Object.keys(D.TYPE).join(' '));
 for (const [k, t] of Object.entries(D.TYPE)) {
@@ -159,6 +209,10 @@ const CONVERTED = [
   'app/(app)/profile/index.tsx',
   'app/(app)/philosophers/index.tsx',
   'app/(app)/branches/[branchSlug]/index.tsx',
+  // Not a screen, but held to the same rule for the same reason: it is where the
+  // Thinkers surfaces get their era colour and their stats, so it is the first
+  // place a stray hex would appear once colour entered this app at all.
+  'components/thinkers/ThinkerStats.tsx',
   // each adoption task appends its screen here
 ];
 const SIZES = new Set(Object.values(D.TYPE).map((t) => t.fontSize));

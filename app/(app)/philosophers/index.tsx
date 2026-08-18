@@ -18,7 +18,11 @@ import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import Card from '@/components/ui/Card';
 import { C, TYPE, SPACE, RADIUS, type TypeKey } from '@/constants/design';
-import { ALL_PHILOSOPHERS, ERA_GROUPS, eraGroupOf, type Philosopher } from '@/data/philosophers';
+import {
+  ALL_PHILOSOPHERS, ERA_GROUPS, eraGroupOf, type Philosopher, type EraGroup,
+} from '@/data/philosophers';
+import { eraColour } from '@/components/thinkers/ThinkerStats';
+import { collectionOf } from '@/lib/utils/thinkerStats';
 import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
 import { dayNumber, thinkerOfTheDay } from '@/lib/utils/thinkerOfDay';
 import { useUIStore } from '@/stores/uiStore';
@@ -130,6 +134,9 @@ export default function ThinkersScreen() {
   const featured = useMemo(() => thinkerOfTheDay(), []);
 
   const metCount = useMemo(() => Object.keys(philosopherViews).length, [philosopherViews]);
+  // Per-era tallies for the section heads. One pass over 322 rather than one
+  // filter per head, and memoised on the views object so scrolling costs nothing.
+  const collection = useMemo(() => collectionOf(philosopherViews), [philosopherViews]);
 
   // A stable handler, so a memoised card is not re-rendered by a fresh closure on
   // every parent render — `onPress={() => open(p.id)}` allocated 222 new functions
@@ -208,7 +215,12 @@ export default function ThinkersScreen() {
       if (item.type === 'head') {
         return (
           <View style={styles.rowPad}>
-            <SectionHead>{item.group}</SectionHead>
+            <SectionHead
+              met={collection.byEra[item.group as EraGroup]?.met ?? 0}
+              total={collection.byEra[item.group as EraGroup]?.total ?? 0}
+            >
+              {item.group}
+            </SectionHead>
           </View>
         );
       }
@@ -226,7 +238,7 @@ export default function ThinkersScreen() {
               // cards side by side went back to differing in height whenever the
               // names wrapped differently — 40 of 160 pairs, about 50pt of spread.
               <View key={p.id} style={{ width: CARD_W }}>
-                <ThinkerCard p={p} onOpen={openById} />
+                <ThinkerCard p={p} met={Boolean(philosopherViews[p.id])} onOpen={openById} />
               </View>
             ))}
           </View>
@@ -376,13 +388,25 @@ export default function ThinkersScreen() {
               <View style={styles.filterRow}>
                 {FILTERS.map((f) => {
                   const on = filter === f;
+                  // ALL is the only one with no era, so it keeps ink. The other
+                  // five fill with their own colour when selected and carry it as
+                  // a border when not — which is what teaches the code in the
+                  // first place: a reader picks MEDIEVAL, sees the pill go blue,
+                  // and every blue rule further down the list now means something.
+                  const tint = f === 'ALL' ? C.ink : eraColour(f);
                   return (
                     <Pressable
                       key={f}
                       onPress={() => setFilter(f)}
-                      style={[styles.filter, on && styles.filterOn]}
+                      style={[
+                        styles.filter,
+                        { borderColor: tint },
+                        on && { backgroundColor: tint },
+                      ]}
                     >
-                      <Text style={[styles.filterText, on && { color: C.paper }]}>{f}</Text>
+                      <Text style={[styles.filterText, on ? { color: C.paper } : { color: tint }]}>
+                        {f}
+                      </Text>
                     </Pressable>
                   );
                 })}
@@ -409,18 +433,40 @@ export default function ThinkersScreen() {
  * data, same order, just one surface instead of five.
  *
  * WHAT THE CARD SAYS is unchanged: a mark, a name, a date, an idea.
+ *
+ * ── MET AND UNMET, AND WHY NEITHER ONE IS HIDDEN ────────────────────────────
+ *
+ * The brief was "a collection you unlock", and the obvious build is a silhouette
+ * over every thinker you have not opened. That was tried against the OTHER half
+ * of the same brief — "a simpler way to discover different philosophers" — and
+ * it loses: with 320 of 322 blanked, the tab stops being somewhere you can find
+ * Spinoza and becomes a wall of locks. Search over hidden names is worse still.
+ *
+ * So the collection is expressed in TONE, not in concealment. Every name is
+ * always readable. A thinker you have met carries their era's colour — a filled
+ * badge and a coloured rule — and one you have not is the same card in grey.
+ * Meeting somebody lights them up, the era progress ticks over, and nothing was
+ * ever withheld to make that happen.
  */
 const ThinkerCard = memo(function ThinkerCard({
-  p, onOpen,
-}: { p: Philosopher; onOpen: (id: string) => void }) {
+  p, met, onOpen,
+}: { p: Philosopher; met: boolean; onOpen: (id: string) => void }) {
   const press = useCallback(() => onOpen(p.id), [onOpen, p.id]);
+  const tint = eraColour(eraGroupOf(p));
   return (
     // `containerStyle`, not `style`: the height has to reach the OUTER box, and
     // `style` lands on the face. A registered StyleSheet entry rather than an
     // inline object, so memo() still sees an unchanged prop on a parent render.
     <Card onPress={press} pad={2} containerStyle={styles.cardCol}>
-      <View style={styles.badge}>
-        <Text style={styles.badgeLetter}>{p.name.charAt(0)}</Text>
+      <View style={styles.cardTop}>
+        <View style={[styles.badge, met && { backgroundColor: tint, borderColor: tint }]}>
+          {/* The symbol on a met card, the initial on an unmet one. The emoji is
+              the reward for opening them: 322 initials are 322 letters, and 322
+              symbols are a set worth completing. */}
+          <Text style={met ? styles.badgeSymbol : styles.badgeLetter}>
+            {met ? p.symbol : p.name.charAt(0)}
+          </Text>
+        </View>
       </View>
 
       <Text style={styles.cardName} numberOfLines={2}>
@@ -431,7 +477,7 @@ const ThinkerCard = memo(function ThinkerCard({
         {countryOf(p) ? ` · ${countryOf(p)}` : ''}
       </Text>
 
-      <View style={styles.cardRule} />
+      <View style={[styles.cardRule, met && { backgroundColor: tint }]} />
       <Text style={styles.cardIdea} numberOfLines={3}>
         {p.oneLiner}
       </Text>
@@ -487,11 +533,29 @@ const BreakBand = memo(function BreakBand({
   );
 });
 
-function SectionHead({ children }: { children: string }) {
+/**
+ * An era, and how much of it you have.
+ *
+ * The head used to be a word and a rule. It is the natural place for the
+ * collection to keep score, because it is the one element that already knows
+ * which era it is talking about — and "12 of 47" beside ANCIENT turns a section
+ * break into a shelf with a gap in it. The bar is the same fact for the eye.
+ */
+function SectionHead({ children, met, total }: { children: string; met: number; total: number }) {
+  const tint = eraColour(children);
+  const frac = total > 0 ? met / total : 0;
   return (
-    <View style={styles.sectionRow}>
-      <Text style={styles.sectionLabel}>{children}</Text>
-      <View style={styles.sectionLine} />
+    <View>
+      <View style={styles.sectionRow}>
+        <Text style={[styles.sectionLabel, { color: tint }]}>{children}</Text>
+        <View style={styles.sectionLine} />
+        <Text style={styles.sectionCount}>{met} / {total}</Text>
+      </View>
+      <View style={styles.sectionTrack}>
+        <View
+          style={[styles.sectionFill, { width: `${frac * 100}%`, backgroundColor: tint }]}
+        />
+      </View>
     </View>
   );
 }
@@ -613,6 +677,9 @@ const styles = StyleSheet.create({
   sectionRow: { flexDirection: 'row', alignItems: 'center', marginTop: SPACE[4], marginBottom: SPACE[2] },
   sectionLabel: { ...role('micro'), color: C.inkSoft, letterSpacing: 3, marginRight: SPACE[2] },
   sectionLine: { flex: 1, height: 1, backgroundColor: C.hairline },
+  sectionCount: { ...role('micro'), fontFamily: 'Inter_400Regular', letterSpacing: 0, color: C.inkSoft, marginLeft: SPACE[2] },
+  sectionTrack: { height: 4, borderRadius: RADIUS.pill, backgroundColor: C.hairline, marginBottom: SPACE[2] },
+  sectionFill: { height: 4, borderRadius: RADIUS.pill },
 
   // `gap` only separates cards WITHIN a row, and each row is its own FlatList item —
   // so between rows there was nothing at all. SPACE[3] leaves clear paper below
@@ -646,6 +713,10 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     transform: [{ translateX: -1 }],
   },
+  /** The met card's emoji. No Caveat overhang to work around, so none of the
+   *  width/translate correction above applies — this is a plain centred glyph. */
+  badgeSymbol: { fontSize: 22, lineHeight: 38, textAlign: 'center' },
+  cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
 
   cardName: { ...role('body'), fontFamily: PLAYFAIR_HEAD, color: C.ink, marginTop: SPACE[2] },
   cardMeta: { ...role('micro'), fontFamily: 'Inter_400Regular', letterSpacing: 0, color: C.inkSoft, marginTop: SPACE[0] },
