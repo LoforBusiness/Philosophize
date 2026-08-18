@@ -2166,9 +2166,90 @@ named constant as pose 0 — quietly reporting a lesson it had not actually repl
 
 ---
 
+## Group N — the figure has a vocabulary, and half of it was behind a locked door
+
+A beat carries one pose code in `p:`, and `emoteAny` resolves it. Which number you
+write decides whether the reader sees anything at all, and until this group was
+written the answer was usually no.
+
+### N1 · A HELD code shows the pose an action ENDS in
+
+`emoteAny(code, t)` calls `actStance(code − 99, t, 1)` — u pinned to 1. Every one-shot
+in `moves.ts` is authored to begin and end at the neutral stand, so that consecutive
+actions meet without a cross-fade. Hold one and you get the stand.
+
+This is not a hypothetical. Counted across every `*Script.ts` in the app, the only
+codes above 99 any lesson used were **128, 129, 130, 137, 139, 141, 144 and 147** —
+eight codes across seventy-five beats, and every one of them from the handful of
+actions that loop on `t` and ignore `u`. Ninety-odd one-shots and thirty prop actions
+were unreachable, and nothing reported it: a script asking for SHRUG type-checked,
+validated, rendered, and drew a figure standing still.
+
+### N2 · The three bands, and which one you want
+
+| code | what it does | use it when |
+|---|---|---|
+| `0–99` | rig's 49 gestures, held | the beat is *about* an attitude |
+| `100–195` | an action from `moves.ts`, **held at its end** | you want the pose it finishes in — a posture transition like `191` (kneel down), or one of the loops |
+| `158–177` | the **living holds** — they loop on `t` for ever | the figure is *being* someone for the length of the beat |
+| `300–395` | the same action **played once** as the beat opens, then settled | the figure *does* something and then carries on |
+
+The two you will reach for most:
+
+- **`167` — talking with the hands.** A lesson beat is somebody talking, and this is
+  what talking looks like from the neck down. It is the default for a narrated beat
+  with nothing else going on.
+- **`378` — shrug**, `379` the idea, `380` weigh it up, `389` refuse. Played, not held.
+
+The arithmetic is `hold = 99 + n` and `play = 299 + n` for action *n*, and it is
+off-by-one bait — this table was first written with all five numbers one too high.
+Call **`holdCode(n)`** and **`playCode(n)`** instead; `check-moves` re-derives both
+against the shipping resolver, so a wrong number here fails rather than draws the
+wrong gesture. (The anchor that settles it: `128` is the code every existing script
+uses for ARMS LOOSE, which is action 29, and 99 + 29 = 128.)
+
+### N3 · A played action is smooth because its held twin is its END pose
+
+`carryFrom`/`keepHeld` blend the outgoing beat against `emoteAny(code, t)` while
+`emoteAnyLive` drives the incoming one (group L). Because the held value of a 300 code
+is *identical* to its 100 twin, the two agree the moment the action finishes and there
+is nothing to pop. An action that ends somewhere other than the stand — 1 sits down,
+92 kneels — therefore holds its destination, which is exactly what the next beat should
+inherit.
+
+`PLAY_SECONDS` is 1.5, the window rig's own speech accents already decay over. It does
+**not** repeat: a gesture that restarted every 1.5 s is a tic.
+
+### N4 · Two forearms on a 12-thick torso are no forearms at all
+
+The single most repeated defect in this library, and it passes every numeric check
+because nothing is out of range. Hands folded at the natural-looking `(8, −19)` sit
+almost on the spine; both forearms then lie along the torso in the same ink and the
+figure renders **with no arms**. Rig's `arms-crossed` carries the corrected targets —
+`(18, −22)` and `(13, −17)`, forward of the body, where each forearm is a horizontal
+against open paper — and any new pose that folds an arm must clear the torso the same
+way. It has now been made three times: once in rig, once in a completion screen, and
+twice more in the same afternoon in `62` and `74`.
+
+Only the contact sheet finds it. `node scripts/sheet-moves.mjs act:79 hold:68
+posture:17` draws twenty frames in plain Node in about two seconds.
+
+### N5 · Sheet a living hold with `hold:`, never `act:`
+
+59–78 ignore `u`. `act:63` therefore draws the same frame twenty times and produces a
+sheet that *looks* checked; `hold:63` sweeps the clock across twelve seconds, which is
+also the only way the rare events are seen at all — the re-settle in `62` fires about
+every ten seconds and the scratch in `66` about every eight. `check-moves` registers
+them the same way, under the name `hold N`.
+
+---
+
 ## Part 2 — Authoring checklist
 
 **Shape** — before writing a word, lay the beats out and count them (H52, H53).
+- [ ] **Every beat's pose code is from the right band** (N2): `300+` to PLAY an action
+      once as the beat opens, `158–177` for a hold that lives for the whole beat.
+      A one-shot written in the `100+` band draws a figure standing still (N1).
 - [ ] **The one-sentence picture written down first**: "the picture is X, and over the
       lesson X does Y" (H64). If it won't fit in a sentence, the scene isn't found yet.
 - [ ] One question in the deck, one answered on the stage (H65); the distractors are

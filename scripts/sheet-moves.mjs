@@ -119,7 +119,8 @@ export async function pairSheet(name, frames) {
 const T = 3.0;
 const WALK_CYCLE = R.WALK.S / R.WALK.stance;
 
-// `node scripts/sheet-moves.mjs posture:8 act:3 move:7` draws just those; with no
+// `node scripts/sheet-moves.mjs posture:8 act:3 hold:68 move:7` draws just those;
+// with no
 // arguments it draws the baselines, which is also how the renderer itself gets
 // verified — against a figure already known to look right.
 const want = process.argv.slice(2);
@@ -136,6 +137,14 @@ if (!want.length) {
       await sheet(`posture-${n}`, Array.from({ length: N }, (_, i) => M.postureHold(n, T + i * 0.22)));
     } else if (kind === 'act') {
       await sheet(`act-${n}`, Array.from({ length: N }, (_, i) => M.actStance(n, T, i / (N - 1))));
+    } else if (kind === 'hold') {
+      // A LIVING HOLD (59–78) IGNORES u ENTIRELY, so `act:63` draws the same frame
+      // twenty times and tells you nothing — the sheet comes out looking like a
+      // pose that has been checked when nothing has looked at it. Sweep the CLOCK
+      // instead, over twelve seconds, which is also the only way the slow events
+      // are seen at all: the re-settle in 62 fires about every ten seconds and the
+      // scratch in 66 about every eight.
+      await sheet(`hold-${n}`, Array.from({ length: N }, (_, i) => M.actStance(n, T + (i / N) * 12, 1)));
     } else if (kind === 'move') {
       const g = M.gaitFor(n), cyc = g.S / g.stance;
       await sheet(`move-${n}`, Array.from({ length: N }, (_, i) => M.moveStance(n, (i / N) * cyc)));

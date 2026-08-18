@@ -9,12 +9,12 @@
 // This file is what the character can actually DO. Four families, each addressed
 // by a plain number so a lesson script stays data rather than code:
 //
-//   moveStance(mode, dist)      — HOW they travel        18 modes
-//   postureHold/Live(code, t)   — WHERE the body is      15 postures
-//   actStance(code, t, u)       — WHAT they do           40 one-shot actions
-//                                 (29–40 are loose arms and dancing: motion
-//                                  for its own sake, held for as long as a
-//                                  scene likes rather than played once)
+//   moveStance(mode, dist)      — HOW they travel        24 modes
+//   postureHold/Live(code, t)   — WHERE the body is      21 postures
+//   actStance(code, t, u)       — WHAT they do           96 actions, of which
+//                                 32 are HOLDS that loop on `t` (29–40 and
+//                                 59–78, motion for its own sake) and 64 are
+//                                 one-shots played over `u`
 //   gazeAt() / pointAt()        — WHAT they attend to    aimed at a stage point
 //
 // The aiming pair is the cheapest realism in the whole codebase and the least
@@ -785,9 +785,14 @@ function hands(base: Stance, lx: number, ly: number, rx: number, ry: number): St
  * 4 sit on an edge · 5 recline propped back · 6 lean back against something ·
  * 7 hands on knees, winded · 8 deep squat · 9 perch and think (chin in hand) ·
  * 10 sprawl · 11 up on toes reaching high · 12 wide braced stance ·
- * 13 crouch and inspect something on the ground · 14 kneel and write.
+ * 13 crouch and inspect something on the ground · 14 kneel and write ·
+ * 15 cross-legged on the ground · 16 balanced on one leg · 17 crouched small,
+ * arms round the knees · 18 leaning on a surface at table height ·
+ * 19 sitting on an edge, elbows on knees · 20 resting a hand on something at
+ * shoulder height.
  *
- * Postures 3–5 and 9–10 assume the scene has put something under the figure, or
+ * Postures 3–5, 9–10 and 18–19 assume the scene has put something under the
+ * figure, or
  * that the ground is the seat. Nothing here draws furniture.
  */
 export function postureHold(code: number, t: number): Stance {
@@ -902,6 +907,76 @@ export function postureHold(code: number, t: number): Stance {
       bob: s.bob - 17, footL: { x: -15, y: 0 }, footR: { x: 13, y: 0 },
     };
   }
+  // ── 15–20 ──────────────────────────────────────────────────────────────────
+  // Six more settled configurations, chosen for what the existing fifteen could
+  // not say: sitting on the floor to think, being off balance, being small,
+  // working at a surface, listening from a bench, and being flat on your back.
+  if (code === 15) {                             // cross-legged on the ground
+    // The pelvis sits 6 above the floor and the feet come IN rather than out, so
+    // the IK folds both legs into the crossed shape on its own. Staggered by four
+    // units: two 11-thick legs folded identically overlap into one black mass.
+    return {
+      ...hands(s, -13, -4, 15 + g, -3), tilt: s.tilt + 0.04, neck: 0.10,
+      bob: s.bob - 28, footL: { x: 20, y: 0 }, footR: { x: 15, y: 0 },
+    };
+  }
+  if (code === 16) {                             // balanced on one leg, the other tucked
+    // The lifted foot is the whole pose, and it has to be high enough to read as
+    // deliberate — at 4 or 5 units it looks like a solver error. The arms go out
+    // for balance, which also keeps them clear of the torso.
+    const s2 = life2(t, 1.1, 0.71, 0.9) * 1.6;
+    return {
+      ...hands(s, -27 + s2, -22, 27 + s2, -25), tilt: s.tilt - 0.03, neck: -0.06,
+      bob: s.bob - 1.0, footL: { x: -2, y: 0 }, footR: { x: 9, y: -15 },
+    };
+  }
+  if (code === 17) {                             // crouched small, arms round the knees
+    // Down as low as posture 8 and CLOSED, where the squat is open. The hands
+    // reach past the shins rather than resting on the knees, which is what turns
+    // a squat into somebody making themselves small.
+    return {
+      ...hands(s, 13, -6, 18 + g * 0.5, -4), tilt: -0.20, neck: 0.22,
+      bob: s.bob - 22, footL: { x: 4, y: 0 }, footR: { x: 12, y: 0 },
+    };
+  }
+  if (code === 18) {                             // leaning on a surface at table height
+    // Both hands take weight at about y −18, which is roughly a table to a figure
+    // this size; the scene draws the table. The feet go BACK, because a body
+    // leaning on its hands has its weight in front of its ankles.
+    return {
+      ...hands(s, 26, -18, 30, -19), tilt: -0.30, neck: 0.20,
+      bob: s.bob - 2.5, footL: { x: -14, y: 0 }, footR: { x: -6, y: 0 },
+    };
+  }
+  if (code === 19) {                             // sitting on an edge, elbows on knees
+    // Posture 4 sits upright with the hands beside the hips; this is the same
+    // seat leaned forward with the forearms on the thighs — the listening pose,
+    // and the one a person actually holds for a long conversation.
+    return {
+      ...hands(s, 20, -8, 25 + g * 0.6, -10), tilt: -0.34, neck: 0.24,
+      bob: s.bob - 15, footL: { x: 10, y: 0 }, footR: { x: 17, y: 0 },
+    };
+  }
+  if (code === 20) {                             // resting a hand on something shoulder-high
+    // The pose that was going to be here was LYING DOWN, and it is not here
+    // because a horizontal torso puts the head exactly where the hands have to
+    // go. Lay the spine flat and the skull travels out to x ≈ −49 with the
+    // shoulders at −26; every natural arm position — past the head, behind it, on
+    // the chest, propped on the elbows — then measures 9 to 20 units from the head
+    // centre against the 25 it needs, so the hand is DRAWN INSIDE THE SKULL and
+    // both disappear. It is not a tuning problem: it is what profile drawing does
+    // to a body whose head and hands are at the same height, and three separate
+    // arrangements measured 9.4, 15.2 and 17.5. Naming it in FACE_OK would have
+    // silenced the instrument rather than fixed the picture.
+    //
+    // So: an upright pose that adds something the other twenty cannot say —
+    // weight parked against a surface the scene draws at shoulder height, one arm
+    // taking it, the near leg loaded and the far one crossed over.
+    return {
+      ...hands(s, -7, 4, 30, -30), tilt: s.tilt - 0.02, neck: -0.04,
+      bob: s.bob - 1.5, footL: { x: -3, y: 0 }, footR: { x: 6, y: 0 },
+    };
+  }
   return s;
 }
 
@@ -960,8 +1035,28 @@ function snap(u: number, peak: number) {
  * 21 hand something over · 22 take something · 23 nod yes · 24 wave it away ·
  * 25 beckon someone in · 26 shiver · 27 wobble for balance · 28 dust off hands.
  *
+ * 29–40 are the loose-arm and dance set and 41–58 the second wave of one-shots.
+ * Two shelves were then added together:
+ *
+ *   59–78  THE LIVING HOLDS. They read `t`, ignore `u`, and run for ever:
+ *          59 weight shift · 60 listening · 61 chin in hand · 62 arms folded ·
+ *          63 hands behind the back · 64 hands on the hips · 65 gazing up ·
+ *          66 fidgeting · 67 impatient · 68 talking with the hands ·
+ *          69 counting the points · 70 hands clasped · 71 deep breathing ·
+ *          72 stepping in place · 73 up on the toes · 74 slouched on one hip ·
+ *          75 at attention · 76 warming the hands · 77 weighing it slowly ·
+ *          78 leaning in, listening close.
+ *
+ *   79–96  ONE-SHOTS: 79 shrug · 80 the idea · 81 weigh it up · 82 hesitate ·
+ *          83 change of mind · 84 make the point · 85 offer it · 86 split it in
+ *          two · 87 show the size · 88 flinch · 89 cringe · 90 refuse ·
+ *          91 celebrate · 92 kneel down · 93 rise from one knee · 94 turn on
+ *          the spot · 95 check the time · 96 rub the neck.
+ *
  * 1 ends seated on an edge (posture 4); 11 ends sprawled (posture 10); 12 starts
- * there. Everything else returns to standing.
+ * there; 92 ends kneeling (posture 1) and 93 starts there. Everything else
+ * returns to standing — which is why a lesson reaches a one-shot through the
+ * 300 band (played once as the beat opens) and not the 100 band (held).
  */
 export function actStance(code: number, t: number, u: number): Stance {
   'worklet';
@@ -1607,6 +1702,623 @@ export function actStance(code: number, t: number, u: number): Stance {
       fistR: { x: 7 + Math.cos(b) * 5, y: 5 + Math.sin(b) * 6 },
     };
   }
+
+  // ── THE LIVING HOLDS: 59–78 ────────────────────────────────────────────────
+  //
+  // These read `t` and ignore `u`, so holding one runs it forever. That is not a
+  // stylistic choice, it is the only kind of motion a LESSON can currently show.
+  //
+  // A beat hands the scene one pose code and the scene holds it: `emoteAny(code,
+  // t)` calls `actStance(code − 99, t, 1)`, pinning u to 1. Every one-shot above
+  // ends at the neutral stand, so held at u = 1 it IS the neutral stand — which
+  // is exactly why, counted across every script in the app, the only 100+ codes
+  // any lesson uses are 128, 129, 130, 137, 139, 141, 144 and 147. All eight are
+  // from the loose-arm and dance set. All eight loop. The other fifty one-shots
+  // are unreachable from a script, and adding a fifty-ninth would have been too.
+  //
+  // (The other half of that problem — letting a beat PLAY a one-shot rather than
+  // only hold one — is the 300+ band down at the bridge.)
+  //
+  // So this shelf is deliberately weighted toward the things a person does while
+  // standing there being a person: waiting, listening, thinking, fidgeting. A
+  // lesson beat lasts four to nine seconds and the figure is on screen for all of
+  // it, which is long enough for a loop to be caught repeating — hence `life2`
+  // everywhere rather than a bare sine, and hence the rare punctuating events
+  // (the foot tap, the re-settle, the scratch) raised off a slow sine so they
+  // land seconds apart and never on the same beat as each other.
+
+  if (code === 59) {                             // WEIGHT SHIFT — the plainest human idle
+    // Nobody stands evenly on two legs for long. `stand` already does a version
+    // of this at under two units; this is the same idea made visible, with the
+    // pelvis riding out over the loaded leg and sinking onto it.
+    const w = life2(t, 0.26, 0.163, 0.9);
+    const load = Math.abs(w);
+    return {
+      ...s,
+      tilt: s.tilt + w * 0.025,
+      neck: s.neck + w * 0.035,
+      bob: s.bob - load * 1.6,
+      footL: { x: -5 - w * 1.8, y: 0 }, footR: { x: 5 - w * 1.8, y: 0 },
+      fistL: { x: -5 - w * 2.2, y: 6 + load * 0.6 },
+      fistR: { x: 6 - w * 2.2, y: 6 + load * 0.6 },
+    };
+  }
+  if (code === 60) {                             // LISTENING — inclined, with the odd small nod
+    // The nod is a NARROW PULSE off a slow sine, not a steady beat: raised to the
+    // 14th power it is flat for about six seconds and then fires. A metronomic
+    // nod reads as a machine agreeing with you.
+    const drift = life2(t, 0.42, 0.27, 1.4);
+    const gate = Math.max(0, Math.sin(t * 0.52));
+    const nod = Math.pow(gate, 14) * Math.sin(t * 6.4);
+    return {
+      ...s,
+      neck: s.neck + 0.09 + drift * 0.035 + nod * 0.075,
+      tilt: s.tilt + 0.015 + nod * 0.012,
+      fistL: { x: -5 + drift * 1.4, y: 6 }, fistR: { x: 6 + drift * 1.2, y: 6 },
+    };
+  }
+  if (code === 61) {                             // CHIN IN HAND — thinking, and barely moving
+    // Deliberate face contact, so it is named in check-moves' FACE_OK. The
+    // supporting arm is the point of the pose; the free one crosses under it to
+    // carry the elbow, which is what a person actually does.
+    const d = life2(t, 0.31, 0.2, 0.4);
+    return {
+      ...s,
+      tilt: s.tilt + 0.02, neck: s.neck + 0.06 + d * 0.03,
+      bob: s.bob - 0.6,
+      footL: { x: -5, y: 0 }, footR: { x: 6, y: 0 },
+      // BOTH forearms have to sit FORWARD of the torso or they do not exist: the
+      // torso is 12 thick in the same ink, so a hand at x 4 lays its forearm along
+      // the body and the arm disappears (rig's arms-crossed comment, B16b). The
+      // supporting hand goes out to 13, where the forearm has paper behind it.
+      fistL: { x: 13, y: -11 + d * 0.8 },         // carrying the other elbow
+      fistR: { x: 11 + d * 0.7, y: -35 + d * 0.6 },// knuckles at the chin
+    };
+  }
+  if (code === 62) {                             // ARMS FOLDED — settled, with a re-settle
+    // The arms cross, which is one of the poses the "no folded triangle against
+    // the torso" rule explicitly exempts: the bend is meant to be seen. Every ten
+    // seconds or so the fold RE-SETTLES — the top arm shifts and the weight goes
+    // over — because a folded figure that never adjusts reads as a statue.
+    const w = life2(t, 0.22, 0.14, 1.9);
+    const gate = Math.max(0, Math.sin(t * 0.31 + 0.8));
+    const adj = Math.pow(gate, 20);
+    return {
+      ...s,
+      tilt: s.tilt + 0.03 + w * 0.02,
+      neck: s.neck + 0.03,
+      bob: s.bob - Math.abs(w) * 1.1 - adj * 0.8,
+      footL: { x: -6 - w * 1.4, y: 0 }, footR: { x: 6 - w * 1.4, y: 0 },
+      // (18, −22) and (13, −17) are rig's own arms-crossed targets and they are
+      // not a preference. At (8, −19) / (−7, −22) — which is where this pose was
+      // first written, and where anyone would write it — the hands sit almost on
+      // the spine, both forearms lie along a 12-thick torso in the same ink, and
+      // the figure renders WITH NO ARMS. It passes every numeric check, because
+      // nothing is out of range; only the contact sheet says so. Folded in front,
+      // the two forearms are two horizontals against open paper, one a little
+      // below the other, which is what folded arms look like in profile.
+      fistL: { x: 18 - adj * 2, y: -22 - adj * 1.5 },
+      fistR: { x: 13 + adj * 2, y: -17 + adj * 1.5 },
+    };
+  }
+  if (code === 63) {                             // HANDS BEHIND THE BACK — rocking heel to toe
+    // The rock is the whole motion, and it has to move the FEET as well as the
+    // pelvis: rising onto the toes without the feet leaving the floor is the
+    // solver stretching the shins (rule 4).
+    const r = Math.sin(t * 0.85) * 0.6 + Math.sin(t * 0.53 + 1.1) * 0.4;
+    const up = Math.max(0, r);
+    return {
+      ...s,
+      tilt: s.tilt - r * 0.05,
+      neck: s.neck - up * 0.05,
+      bob: s.bob + up * 2.6,
+      footL: { x: -5, y: -up * 2.4 }, footR: { x: 5, y: -up * 2.4 },
+      fistL: { x: -12 - r * 1.4, y: 1 }, fistR: { x: -13 - r * 1.4, y: 3 },
+    };
+  }
+  if (code === 64) {                             // HANDS ON THE HIPS — surveying, chest open
+    // Hands sit at the BACK of the hips rather than the front. On the front the
+    // folded forearm encloses a triangle of paper against the torso and the arm
+    // reads as a hole punched through the body (rule 1); behind them the same
+    // fold has nothing but background inside it.
+    const w = life2(t, 0.24, 0.15, 2.6);
+    return {
+      ...s,
+      tilt: s.tilt - 0.04 + w * 0.02,
+      neck: s.neck - 0.05,
+      bob: s.bob - Math.abs(w) * 0.9,
+      footL: { x: -8 - w * 1.2, y: 0 }, footR: { x: 8 - w * 1.2, y: 0 },
+      fistL: { x: -9 + w * 1.2, y: 1 }, fistR: { x: -8 + w * 1.2, y: -1 },
+    };
+  }
+  if (code === 65) {                             // GAZING UP — head back, arms forgotten
+    const d = life2(t, 0.23, 0.145, 0.3);
+    return {
+      ...s,
+      tilt: s.tilt - 0.05, neck: -0.30 + d * 0.05,
+      bob: s.bob + 0.5,
+      fistL: { x: -5 + d * 1.6, y: 7 }, fistR: { x: 6 + d * 1.4, y: 7 },
+    };
+  }
+  if (code === 66) {                             // FIDGETING — nothing is ever quite still
+    // Three clocks that never realign: the hands, the weight, and a scratch that
+    // fires about every eight seconds. The scratch reaches the upper arm, not the
+    // head — a hand on the skull is a different gesture and needs the exemption.
+    const a = life2(t, 1.7, 2.31, 0.2) * 3.2;
+    const b = life2(t, 1.3, 1.91, 2.4) * 3.0;
+    const w = life2(t, 0.35, 0.22, 1.2);
+    const sc = Math.pow(Math.max(0, Math.sin(t * 0.4 + 2.1)), 16);
+    return {
+      ...s,
+      tilt: s.tilt + w * 0.02, neck: s.neck + b * 0.008 - sc * 0.04,
+      bob: s.bob - Math.abs(w) * 0.9,
+      footL: { x: -5 - w * 1.5, y: 0 }, footR: { x: 6 - w * 1.5, y: 0 },
+      fistL: { x: -4 + a, y: 6 + b * 0.5 },
+      // Across to the far upper arm, not back onto the ribs: at x −4 the scratching
+      // forearm lies on the torso and the whole gesture is invisible.
+      fistR: { x: lerp(6 + b, 14, sc), y: lerp(6 + a * 0.5, -22, sc) },
+    };
+  }
+  if (code === 67) {                             // IMPATIENT — folded, and the foot going
+    // Same fold as 62 with the clock wound up: the tap is fast and regular
+    // BECAUSE impatience is the one idle where a metronome is right.
+    const tap = Math.max(0, Math.sin(t * 4.6));
+    const w = life2(t, 0.5, 0.31, 0.4);
+    return {
+      ...s,
+      tilt: s.tilt + 0.04, neck: s.neck + 0.02 + w * 0.05,
+      bob: s.bob - 0.4,
+      footL: { x: -6, y: 0 }, footR: { x: 7, y: -tap * 3.4 },
+      fistL: { x: 18, y: -22 }, fistR: { x: 13, y: -17 },   // the fold, forward — see 62
+    };
+  }
+  if (code === 68) {                             // TALKING WITH THE HANDS — the narration loop
+    // The single most useful hold in the file: a lesson beat is somebody talking,
+    // and this is what talking looks like from the neck down. Both hands turn
+    // over in slow alternation, out in front where the forearm has background
+    // behind it rather than torso.
+    const a = t * 1.15, b = a + 2.1;
+    const ha = Math.sin(a), hb = Math.sin(b);
+    const sw = life2(t, 0.6, 0.37, 1.7);
+    return {
+      ...s,
+      tilt: s.tilt - 0.03 + sw * 0.02,
+      neck: s.neck - 0.02 + ha * 0.02,
+      bob: s.bob - Math.abs(sw) * 0.7,
+      footL: { x: -5, y: 0 }, footR: { x: 6, y: 0 },
+      fistL: { x: 19 + ha * 7, y: -12 + hb * 6 },
+      fistR: { x: 25 + hb * 7, y: -17 + ha * 6 },
+    };
+  }
+  if (code === 69) {                             // COUNTING THE POINTS — one, and two, and three
+    // A four-count that cycles, so a beat of any length lands mid-list rather
+    // than at a tidy stop. The counting hand ticks DOWN a step on each beat and
+    // the other holds the place.
+    // A COUNTER IS A STAIRCASE AND A STAIRCASE IS A POP. The first version read
+    // `Math.floor(ph * 4)` straight into the hand's height, so the wrist jumped
+    // 9.6 units between two frames four times a cycle — and again by the whole
+    // flight when the cycle wrapped. `f` walks each step over the first 30% of its
+    // count (fast, so it still reads as ticking rather than sliding) and `back`
+    // returns the hand over the last fifth, which closes the wrap.
+    const cyc = (t * 0.5) % 1;
+    const k = clamp01(cyc / 0.80) * 4;
+    const step = Math.min(3, Math.floor(k));
+    const f = ease01(clamp01((k - step) / 0.30));
+    const level = (step + f) * (1 - ease01(clamp01((cyc - 0.82) / 0.18)));
+    const tick = Math.pow(Math.max(0, Math.sin(k * Math.PI)), 3) * clamp01((0.95 - cyc) / 0.1);
+    return {
+      ...s,
+      tilt: s.tilt - 0.02, neck: s.neck + 0.05,
+      fistL: { x: 15, y: -20 },                   // the hand being counted on
+      fistR: { x: 24 - tick * 3, y: -30 + level * 3.2 + tick * 4 },
+    };
+  }
+  if (code === 70) {                             // HANDS CLASPED — held in front; nerves
+    const th = Math.sin(t * 2.6) * 1.2 + Math.sin(t * 1.7) * 0.8;
+    const w = life2(t, 0.33, 0.21, 2.9);
+    return {
+      ...s,
+      tilt: s.tilt + 0.04, neck: s.neck + 0.07,
+      bob: s.bob - Math.abs(w) * 1.2,
+      footL: { x: -5 - w * 1.6, y: 0 }, footR: { x: 5 - w * 1.6, y: 0 },
+      fistL: { x: 12 + th * 0.5, y: -3 }, fistR: { x: 13 - th * 0.5, y: -2 },
+    };
+  }
+  if (code === 71) {                             // DEEP BREATHING — a big slow cycle
+    // `stand`'s breath is 1.1 units at its widest. This is nine, with the chest
+    // opening and the head lifting on the intake, and it is the calmest thing in
+    // the library.
+    const c = 0.5 - 0.5 * Math.cos(t * 0.72);
+    return {
+      ...s,
+      tilt: s.tilt - c * 0.07, neck: s.neck - c * 0.10,
+      bob: s.bob + c * 2.0,
+      footL: { x: -5, y: -c * 1.4 }, footR: { x: 5, y: -c * 1.4 },
+      fistL: { x: -6 - c * 3, y: 7 - c * 2 }, fistR: { x: 7 + c * 3, y: 7 - c * 2 },
+    };
+  }
+  if (code === 72) {                             // STEPPING IN PLACE — restless, or cold
+    // A gait's foot cycle with no travel. `stance` is irrelevant here because
+    // nothing moves in x, so this is just two feet lifting out of phase — which
+    // is precisely what marking time is.
+    const ph = t * 2.1;
+    const fl = Math.max(0, Math.sin(ph));
+    const fr = Math.max(0, Math.sin(ph + Math.PI));
+    return {
+      ...s,
+      tilt: s.tilt + 0.02,
+      bob: s.bob - 0.8 + (fl + fr) * 0.5,
+      footL: { x: -5, y: -fl * 5.5 }, footR: { x: 6, y: -fr * 5.5 },
+      fistL: { x: -5 + fr * 2.5, y: 6 }, fistR: { x: 6 + fl * 2.5, y: 6 },
+    };
+  }
+  if (code === 73) {                             // UP ON THE TOES — light, springy, ready
+    const b = Math.abs(Math.sin(t * 1.55));
+    return {
+      ...s,
+      tilt: s.tilt - 0.03, neck: s.neck - 0.03,
+      bob: s.bob + b * 3.0,
+      footL: { x: -5, y: -b * 3.2 }, footR: { x: 5, y: -b * 3.2 },
+      fistL: { x: -6, y: 6 - b * 2 }, fistR: { x: 7, y: 6 - b * 2 },
+    };
+  }
+  if (code === 74) {                             // SLOUCHED ON ONE HIP — bored
+    // The weight is PARKED, not drifting: one hip carries it for the whole beat
+    // and only the free arm moves. That asymmetry is the entire read.
+    const d = life2(t, 0.4, 0.26, 1.1);
+    return {
+      ...s,
+      tilt: s.tilt + 0.06, neck: s.neck + 0.10 + d * 0.02,
+      bob: s.bob - 2.2,
+      footL: { x: -9, y: 0 }, footR: { x: 3, y: 0 },
+      // The crossing hand goes to 15, not 4: on the sternum the forearm is ink on
+      // ink and the arm vanishes, which turns a slouch into a figure with one arm.
+      fistL: { x: -8, y: 2 }, fistR: { x: 15 + d * 1.5, y: -12 },
+    };
+  }
+  if (code === 75) {                             // AT ATTENTION — almost nothing, on purpose
+    // A library of motion needs one entry that is stillness, or a scene has no
+    // way to say formal, braced, or holding itself together. Everything is a
+    // third of `stand`'s amplitude; the sway is there only so it does not freeze.
+    const d = life2(t, 0.3, 0.19, 0.5);
+    return {
+      ...s,
+      tilt: 0.02 + d * 0.006, neck: -0.04,
+      bob: s.bob * 0.4,
+      footL: { x: -4, y: 0 }, footR: { x: 4, y: 0 },
+      fistL: { x: -6 + d * 0.5, y: 8 }, fistR: { x: 6 + d * 0.5, y: 8 },
+    };
+  }
+  if (code === 76) {                             // WARMING THE HANDS — rubbing, shoulders in
+    const r = Math.sin(t * 5.2);
+    const sh = life2(t, 0.7, 0.44, 2.0);
+    return {
+      ...s,
+      tilt: s.tilt + 0.05, neck: s.neck + 0.09,
+      bob: s.bob - 1.4 + Math.abs(r) * 0.3,
+      fistL: { x: 13 + r * 2.6, y: -8 }, fistR: { x: 14 - r * 2.6, y: -7 + sh * 0.6 },
+    };
+  }
+  if (code === 77) {                             // WEIGHING IT, SLOWLY — one open palm, up and down
+    // The gesture the whole app is about, as a hold rather than a one-shot: a
+    // hand out at chest height that rises and falls while somebody decides.
+    const w = Math.sin(t * 0.66) * 0.7 + Math.sin(t * 0.41 + 0.9) * 0.3;
+    return {
+      ...s,
+      tilt: s.tilt - 0.02, neck: s.neck + 0.04 - w * 0.05,
+      fistL: { x: -5, y: 6 },
+      fistR: { x: 26 + w * 2, y: -14 - w * 9 },
+    };
+  }
+  if (code === 78) {                             // LEANING IN, LISTENING CLOSE
+    // The torso goes forward and the head inclines; the near hand comes up toward
+    // the ear, which is face contact and is named in FACE_OK. The far foot slides
+    // back to carry the lean, because a body that leans without moving a foot is
+    // a body falling over.
+    const d = life2(t, 0.5, 0.32, 1.6);
+    const nod = Math.pow(Math.max(0, Math.sin(t * 0.6 + 1.4)), 12) * Math.sin(t * 6.8);
+    return {
+      ...s,
+      tilt: s.tilt - 0.18, neck: s.neck + 0.14 + nod * 0.06,
+      bob: s.bob - 1.6,
+      footL: { x: -11, y: 0 }, footR: { x: 7, y: 0 },
+      fistL: { x: -6, y: 4 },
+      fistR: { x: 14 + d * 0.8, y: -38 },
+      adv: 2,
+    };
+  }
+
+  // ── ONE-SHOTS: 79–96 ───────────────────────────────────────────────────────
+  //
+  // Played over `u`, beginning and ending at the neutral stand so consecutive
+  // actions meet cleanly — except 92 and 93, which name their destination.
+  //
+  // Reachable from a lesson through the 300+ band at the bridge, which plays one
+  // over the opening seconds of a beat and then settles. Held at u = 1 through
+  // the 100+ band they are the neutral stand, which is correct and is why the
+  // shelf above exists.
+
+  if (code === 79) {                             // SHRUG — the one gesture the library lacked
+    // Shoulders up, head sinking into them, palms turning out. `bob` lifts the
+    // pelvis, so the feet lift with it (rule 4) — a shrug that stretches the
+    // shins is a shrug performed by a puppet.
+    const r = Math.sin(Math.PI * ease01(p));
+    return {
+      ...s,
+      tilt: s.tilt + r * 0.04,
+      neck: s.neck + r * 0.17,
+      bob: s.bob + r * 1.5,
+      footL: { x: -6, y: -r * 1.1 }, footR: { x: 6, y: -r * 1.1 },
+      fistL: { x: -5 - r * 13, y: 6 - r * 12 },
+      fistR: { x: 6 + r * 15, y: 6 - r * 13 },
+    };
+  }
+  if (code === 80) {                             // THE IDEA — it arrives, and the finger goes up
+    // Three movements in order, which is what makes it read as a thought rather
+    // than an arm: the head is DOWN first, then it comes up, and only then does
+    // the hand follow. Reverse any two and it becomes a person hailing a bus.
+    const up = ease01(clamp01((p - 0.30) / 0.28));
+    const off = 1 - ease01(clamp01((p - 0.80) / 0.20));
+    const r = up * off;
+    const brood = (1 - up) * ease01(clamp01(p / 0.24));
+    return {
+      ...s,
+      tilt: s.tilt + brood * 0.06 - r * 0.05,
+      neck: s.neck + brood * 0.14 - r * 0.21,
+      bob: s.bob - brood * 0.8 + r * 1.6,
+      footL: { x: -5, y: -r * 1.3 }, footR: { x: 5, y: -r * 1.3 },
+      fistL: { x: -5, y: 6 },
+      // OUT FIRST, UP SECOND. Clearing the head at the top is not enough: on a
+      // straight hip-to-target line the hand cuts the corner and passes 22.8 from
+      // the head centre at r ≈ 0.9, which is inside the 25 the skull needs. The
+      // fractional power throws x out ahead of y, so the wrist swings around the
+      // head instead of through it — 29.7 at its closest — and it is the arc a
+      // real arm describes anyway.
+      fistR: { x: 6 + Math.pow(r, 0.7) * 26, y: 6 - r * 58 },
+    };
+  }
+  if (code === 81) {                             // WEIGH IT UP — two palms, and a see-saw
+    // The gesture this whole app is about. Both hands come up level, one dips as
+    // the other rises, then they level and drop. `tip` completes exactly one
+    // cycle inside the raised window, so it is 0 at both ends and the hands never
+    // jump when the raise or the release takes over.
+    const up = ease01(clamp01(p / 0.22));
+    const down = 1 - ease01(clamp01((p - 0.80) / 0.20));
+    const e = up * down;
+    const tip = Math.sin(((p - 0.22) / 0.58) * Math.PI * 2) * e;
+    return {
+      ...s,
+      tilt: s.tilt + tip * 0.03,
+      neck: s.neck + e * 0.07 + tip * 0.07,
+      fistL: { x: -5 + e * 25, y: 6 - e * 19 + tip * 7 },
+      fistR: { x: 6 + e * 22, y: 6 - e * 25 - tip * 7 },
+    };
+  }
+  if (code === 82) {                             // HESITATE — a reach begun, withdrawn, then made
+    // The withdrawal is the gesture. A reach that goes straight out says
+    // "taking"; a reach that starts, thinks better of it, and then commits says
+    // the thing no amount of narration can.
+    let reach: number;
+    if (p < 0.28) reach = easeOutCubic(p / 0.28) * 0.52;
+    else if (p < 0.54) reach = 0.52 - ease01((p - 0.28) / 0.26) * 0.44;
+    else reach = lerp(0.08, 1, ease01((p - 0.54) / 0.46));
+    return {
+      ...s,
+      tilt: s.tilt - reach * 0.12,
+      neck: s.neck + reach * 0.05,
+      footL: { x: -5, y: 0 }, footR: { x: 5 + reach * 5, y: 0 },
+      fistL: { x: -5, y: 6 - reach * 2 },
+      fistR: { x: 6 + reach * 24, y: 6 - reach * 24 },
+      adv: reach * 2.5,
+    };
+  }
+  if (code === 83) {                             // CHANGE OF MIND — committed, stopped, reversed
+    // Goes one way with the whole body, halts dead, and goes the other. The halt
+    // has to be a real pause with no motion in it — a smooth reversal is a sway,
+    // and a sway means nothing.
+    let g: number;
+    if (p < 0.34) g = easeOutCubic(p / 0.34);
+    else if (p < 0.48) g = 1;
+    else g = lerp(1, -0.85, ease01((p - 0.48) / 0.42));
+    const fw = Math.max(0, g), bk = Math.max(0, -g);
+    return {
+      ...s,
+      tilt: s.tilt - fw * 0.16 + bk * 0.10,
+      neck: s.neck + fw * 0.06 - bk * 0.08,
+      bob: s.bob - Math.abs(g) * 1.2,
+      footL: { x: -5 - bk * 9, y: 0 }, footR: { x: 5 + fw * 11, y: 0 },
+      fistL: { x: -5 - bk * 6, y: 6 }, fistR: { x: 6 + fw * 14 - bk * 8, y: 6 - fw * 10 },
+      adv: g * 4,
+    };
+  }
+  if (code === 84) {                             // MAKE THE POINT — three chops on the beat
+    const up = ease01(clamp01(p / 0.16));
+    const off = 1 - ease01(clamp01((p - 0.84) / 0.16));
+    const e = up * off;
+    const chop = Math.sin(((p - 0.16) / 0.68) * Math.PI * 3) * e;
+    return {
+      ...s,
+      tilt: s.tilt - 0.04 * e,
+      neck: s.neck + 0.03 * e + chop * 0.03,
+      fistL: { x: -5, y: 6 },
+      fistR: { x: 6 + e * 18, y: 6 - e * 34 + chop * 9 },
+    };
+  }
+  if (code === 85) {                             // OFFER IT — both palms out, and held there
+    // Held open at the top for nearly half the action, because an offer that is
+    // withdrawn as fast as it is made is not an offer.
+    const up = ease01(clamp01(p / 0.26));
+    const off = 1 - ease01(clamp01((p - 0.72) / 0.28));
+    const e = up * off;
+    return {
+      ...s,
+      tilt: s.tilt - e * 0.07,
+      neck: s.neck + e * 0.04,
+      footL: { x: -6, y: 0 }, footR: { x: 6, y: 0 },
+      fistL: { x: -5 + e * 28, y: 6 - e * 16 },
+      fistR: { x: 6 + e * 21, y: 6 - e * 22 },
+      adv: e * 1.5,
+    };
+  }
+  if (code === 86) {                             // SPLIT IT IN TWO — one thing, then two
+    // Separated UP AND DOWN, never left and right. The figure is drawn in
+    // profile, so two hands parting along x are one hand in front of the other:
+    // the reader sees a single arm extending, not a distinction being made.
+    const meet = ease01(clamp01(p / 0.26));
+    const gap = ease01(clamp01((p - 0.30) / 0.38));
+    const off = 1 - ease01(clamp01((p - 0.78) / 0.22));
+    const e = Math.max(meet, gap) * off;
+    return {
+      ...s,
+      tilt: s.tilt - e * 0.05,
+      neck: s.neck + e * 0.06 - gap * off * 0.04,
+      fistL: { x: -5 + e * 26, y: 6 - e * 15 + gap * off * 11 },
+      fistR: { x: 6 + e * 21, y: 6 - e * 19 - gap * off * 15 },
+    };
+  }
+  if (code === 87) {                             // SHOW THE SIZE — this big, then this big
+    // Wide first and then narrow, which is the useful direction: nearly every
+    // time a lesson needs this it is saying something is SMALLER than you think.
+    const up = ease01(clamp01(p / 0.24));
+    const close = ease01(clamp01((p - 0.40) / 0.36));
+    const off = 1 - ease01(clamp01((p - 0.80) / 0.20));
+    const e = up * off;
+    const span = lerp(17, 4, close);
+    return {
+      ...s,
+      tilt: s.tilt - e * 0.04,
+      neck: s.neck + e * 0.08,
+      fistL: { x: -5 + e * 27, y: 6 - e * 14 + e * span },
+      fistR: { x: 6 + e * 20, y: 6 - e * 18 - e * span },
+    };
+  }
+  if (code === 88) {                             // FLINCH — fast in, slow out, no step
+    // The distinction from STARTLE (19) is the feet: a startle takes a step back,
+    // a flinch is a body that could not get out of the way in time.
+    const f = p < 0.11 ? easeOutCubic(p / 0.11) : 1 - ease01(clamp01((p - 0.11) / 0.55));
+    return {
+      ...s,
+      tilt: s.tilt + f * 0.14,
+      neck: s.neck + f * 0.20,
+      bob: s.bob - f * 3.4,
+      footL: { x: -5, y: 0 }, footR: { x: 5, y: 0 },
+      fistL: { x: -4 + f * 14, y: 6 - f * 22 },
+      fistR: { x: 6 + f * 13, y: 6 - f * 26 },
+      adv: -f * 1.5,
+    };
+  }
+  if (code === 89) {                             // CRINGE — shoulders up, head down, held
+    const up = ease01(clamp01(p / 0.20));
+    const off = 1 - ease01(clamp01((p - 0.62) / 0.38));
+    const e = up * off;
+    return {
+      ...s,
+      tilt: s.tilt + e * 0.10,
+      neck: s.neck + e * 0.23,
+      bob: s.bob + e * 1.4,
+      footL: { x: -5, y: -e * 1.0 }, footR: { x: 5, y: -e * 1.0 },
+      // Clear of the skull at 27.7 units; at the more natural-looking x 16 the
+      // hands sit 24.8 from the head centre and vanish into it.
+      fistL: { x: -5 + e * 23, y: 6 - e * 34 },
+      fistR: { x: 6 + e * 12, y: 6 - e * 32 },
+    };
+  }
+  if (code === 90) {                             // REFUSE — both palms out, pushed away twice
+    const up = ease01(clamp01(p / 0.18));
+    const off = 1 - ease01(clamp01((p - 0.78) / 0.22));
+    const e = up * off;
+    const push = Math.max(0, Math.sin(((p - 0.18) / 0.60) * Math.PI * 2)) * e;
+    return {
+      ...s,
+      tilt: s.tilt + e * 0.06 - push * 0.05,
+      neck: s.neck - e * 0.04,
+      footL: { x: -6, y: 0 }, footR: { x: 5, y: 0 },
+      fistL: { x: -5 + e * 30 + push * 4, y: 6 - e * 22 },
+      fistR: { x: 6 + e * 25 + push * 4, y: 6 - e * 27 },
+      adv: -e * 1.2,
+    };
+  }
+  if (code === 91) {                             // CELEBRATE — a fist to the air, twice
+    const up = ease01(clamp01(p / 0.16));
+    const off = 1 - ease01(clamp01((p - 0.80) / 0.20));
+    const e = up * off;
+    const pump = Math.max(0, Math.sin(((p - 0.16) / 0.64) * Math.PI * 2));
+    const r = e * (0.55 + 0.45 * pump);
+    return {
+      ...s,
+      tilt: s.tilt - r * 0.06,
+      neck: s.neck - r * 0.16,
+      bob: s.bob + r * 2.2,
+      footL: { x: -5, y: -r * 2.0 }, footR: { x: 5, y: -r * 2.0 },
+      fistL: { x: -5 - e * 6, y: 6 - e * 6 },
+      fistR: { x: 6 + Math.pow(r, 0.65) * 25, y: 6 - r * 57 },   // out first, up second — see 80
+    };
+  }
+  if (code === 92 || code === 93) {              // KNEEL DOWN / RISE FROM ONE KNEE
+    // One move, either direction — the same construction as SIT DOWN and STAND
+    // UP above. 92 ENDS on posture 1 and 93 starts there, so the scene holds that
+    // posture on the other side of the beat.
+    const e = ease01(code === 92 ? p : 1 - p);
+    const m = mixStance(s, postureHold(1, t), e);
+    // A body lowering itself puts a hand out for the floor on the way down and
+    // takes the weight on the front thigh; the arc peaks mid-descent.
+    const r = Math.sin(Math.PI * e);
+    return {
+      ...m,
+      tilt: m.tilt - r * 0.12,
+      bob: m.bob - r * 1.2,
+      fistR: { x: m.fistR.x + r * 9, y: m.fistR.y + r * 5 },
+    };
+  }
+  if (code === 94) {                             // TURN ON THE SPOT — the weight of a pivot
+    // The FACING is the scene's to change — `dirTurn` eases the sign through zero
+    // so the figure turns through a profile instead of mirroring between frames
+    // (§17, group L). This supplies what that helper cannot: the dip, the arms
+    // swinging across the body, and the feet re-planting the other way round.
+    const sw = Math.sin(Math.PI * ease01(p));
+    const cross = Math.sin(Math.PI * 2 * ease01(p));
+    return {
+      ...s,
+      tilt: s.tilt - sw * 0.05,
+      neck: s.neck - sw * 0.04,
+      bob: s.bob - sw * 2.6,
+      footL: { x: -5 - sw * 4, y: -Math.max(0, cross) * 3.5 },
+      footR: { x: 5 + sw * 4, y: -Math.max(0, -cross) * 3.5 },
+      fistL: { x: -5 + sw * 13, y: 6 - sw * 8 },
+      fistR: { x: 6 - sw * 12, y: 6 - sw * 6 },
+    };
+  }
+  if (code === 95) {                             // CHECK THE TIME — and be unimpressed by it
+    const up = ease01(clamp01(p / 0.22));
+    const off = 1 - ease01(clamp01((p - 0.66) / 0.34));
+    const e = up * off;
+    return {
+      ...s,
+      tilt: s.tilt + e * 0.03,
+      neck: s.neck + e * 0.15,
+      fistL: { x: -5 + e * 20, y: 6 - e * 26 },   // the wrist being read
+      fistR: { x: 6 + e * 11, y: 6 - e * 30 },    // the other hand steadying it
+    };
+  }
+  if (code === 96) {                             // RUB THE NECK — awkwardness, in one gesture
+    // The hand goes behind the neck, which is face-adjacent and named in
+    // check-moves' FACE_OK; the elbow winging out is most of the read, and the
+    // weight goes onto one leg because nobody does this standing square.
+    const up = ease01(clamp01(p / 0.24));
+    const off = 1 - ease01(clamp01((p - 0.72) / 0.28));
+    const e = up * off;
+    const rub = Math.sin(p * Math.PI * 5) * e;
+    return {
+      ...s,
+      tilt: s.tilt + e * 0.05,
+      neck: s.neck + e * 0.13,
+      bob: s.bob - e * 1.0,
+      footL: { x: -8 - e * 2, y: 0 }, footR: { x: 4, y: 0 },
+      fistL: { x: -5 - e * 3, y: 6 },
+      fistR: { x: -6 * e + 6 * (1 - e), y: 6 - e * 48 + rub * 2 },
+    };
+  }
+
   return s;
 }
 
@@ -1630,17 +2342,50 @@ export function actStance(code: number, t: number, u: number): Stance {
 // `emoteAny` without changing a single beat. Everything new is 100+.
 //
 //   0–99    rig's emoteHold, untouched
-//   100+    one-shot actions from this file, held at full extension
-//           (100 → act 1 … 139 → act 40; the dance and loose-arm set is 128–139)
+//   100+    one-shot actions from this file, HELD at full extension
+//           (100 → act 1 … 195 → act 96; the loose-arm and dance set is 128–139,
+//           and the living holds — the ones a beat can actually show — are
+//           158–177)
 //   200+    prop actions from interact.ts are NOT here — a prop action needs an
 //           object, so it belongs to the scene that drew one.
+//   300+    the same actions PLAYED ONCE as the beat opens, then settled
+//           (300 → act 1 … 395 → act 96)
+//
+// ── WHY THE 300 BAND HAD TO EXIST ───────────────────────────────────────────
+//
+// Because holding a one-shot shows nothing. `emoteAny` pins u to 1, and every
+// action here is authored to begin and end at the neutral stand so that
+// consecutive actions meet cleanly — so a beat that asks for SHRUG gets the pose
+// a shrug ENDS in, which is a person standing there.
+//
+// It is not a theory. Counted across every `*Script.ts` in the app, the only
+// codes above 99 any lesson uses are 128, 129, 130, 137, 139, 141, 144 and 147 —
+// eight codes, seventy-five beats, and every one of them from the handful of
+// actions that loop on `t` and ignore `u` entirely. Ninety-odd one-shots and
+// thirty prop actions were sitting behind a door with no handle.
+//
+// This is the handle, and it costs nothing at the call site: `emoteAnyLive` is
+// already handed `bt`, the beat's own clock in seconds, and already uses it for
+// exactly this shape — rig's speech accents decay over the first 1–2.6s of a beat
+// and then settle into the held pose. A played action is that generalised.
+//
+// The HELD value of a 300 code is deliberately identical to its 100 twin, and
+// that is what keeps it smooth: `carryFrom`/`keepHeld` blend the outgoing beat
+// against `emoteAny(code, t)` while `emoteAnyLive` drives the incoming one, so
+// the two agree the moment the action finishes (§17, group L). An action that
+// ends somewhere other than the stand — 92 kneels down, 1 sits — therefore holds
+// its destination, which is the correct thing for the next beat to inherit.
+
+/** How long a played action takes. Matches the window rig's own accents decay over. */
+export const PLAY_SECONDS = 1.5;
 
 /** rig's emotes for 0–99, this file's actions for 100+. See the note above. */
 export function emoteAny(code: number, t: number): Stance {
   'worklet';
   if (code < 100) return emoteHold(code, t);
-  // u = 1: a one-shot held at its end. The dance and flow moves (128–139) read
+  // u = 1: a one-shot held at its end. The living holds and the dance set read
   // `t` rather than `u`, so holding them runs them forever, which is the point.
+  if (code >= 300) return actStance(code - 299, t, 1);
   return actStance(code - 99, t, 1);
 }
 
@@ -1648,7 +2393,22 @@ export function emoteAny(code: number, t: number): Stance {
 export function emoteAnyLive(code: number, t: number, bt: number): Stance {
   'worklet';
   if (code < 100) return emoteLive(code, t, bt);
+  // PLAYED: u runs 0 → 1 over the first PLAY_SECONDS of the beat and then stays
+  // there, so the action performs once and the figure settles into whatever it
+  // ended in. `clamp01` rather than a modulo — a played action that restarted
+  // every 1.5s would be a tic, not a gesture.
+  if (code >= 300) return actStance(code - 299, t, clamp01(bt / PLAY_SECONDS));
   return actStance(code - 99, t, 1);
+}
+
+/** The played code for an action, and the held one. Use these rather than arithmetic. */
+export function playCode(act: number): number {
+  'worklet';
+  return 299 + act;
+}
+export function holdCode(act: number): number {
+  'worklet';
+  return 99 + act;
 }
 
 // ── aiming: what the figure is attending to ──────────────────────────────────

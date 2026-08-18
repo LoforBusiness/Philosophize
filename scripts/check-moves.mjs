@@ -182,6 +182,9 @@ function worstStep(m, n) {
 // pattern-matched, so adding one is a decision somebody makes on purpose.
 const FACE_OK = new Set([
   'act 14',          // DUCK — hands go over the head, which is the gesture
+  'act 61', 'hold 61',   // CHIN IN HAND — the hand is at the chin by definition
+  'act 78', 'hold 78',   // LEANING IN CLOSE — the hand comes up to the ear
+  'act 96',              // RUB THE NECK — the hand goes behind the neck
   'act 17',          // FACEPALM — the hand is ON the face by definition
   'act 18',          // LOOK AROUND — the hand is shading the eyes
   'act 49',          // SCRATCH THE HEAD — the hand goes to the skull by definition
@@ -307,7 +310,7 @@ const MOTIONS = [
   { name: 'seated (baseline)', kind: 'oneShot', at: () => R.seated(21, T) },
 
   // ── the movement library ───────────────────────────────────────────────────
-  // 24 travel modes · 15 postures · 58 one-shot actions · 30 prop actions.
+  // 24 travel modes · 21 postures · 96 actions · 30 prop actions.
   ...Array.from({ length: 24 }, (_, mode) => ({
     name: `move ${mode}`, kind: 'gait',
     cycle: M.gaitFor(mode).S / M.gaitFor(mode).stance,
@@ -316,11 +319,24 @@ const MOTIONS = [
     dirSign: mode === 10 ? -1 : 1,
     at: (d) => M.moveStance(mode, d),
   })),
-  ...Array.from({ length: 15 }, (_, code) => ({
+  ...Array.from({ length: 21 }, (_, code) => ({
     name: `posture ${code}`, kind: 'oneShot', at: () => M.postureHold(code, T),
   })),
-  ...Array.from({ length: 58 }, (_, i) => ({
+  // `lands` is what makes a transition honest: 92 must arrive EXACTLY on posture
+  // 1, because the scene holds that posture on the far side of the beat and any
+  // gap between the two is a pop the reader sees on the tap.
+  ...Array.from({ length: 96 }, (_, i) => ({
     name: `act ${i + 1}`, kind: 'oneShot', at: (u) => M.actStance(i + 1, T, u),
+    ...(i + 1 === 92 ? { lands: () => M.postureHold(1, T) } : {}),
+  })),
+  // THE HOLDS ARE SAMPLED ON THE CLOCK, NOT ON u. 59–78 ignore `u` entirely, so
+  // running them through the one-shot sampler above measures the same frame 49
+  // times over and reports a clean pass on a motion nothing has looked at.
+  // Sweeping `t` across twelve seconds is what actually exercises them, and it is
+  // the only way the slow events are seen at all: the re-settle in 62 fires about
+  // every ten seconds and the scratch in 66 about every eight.
+  ...Array.from({ length: 20 }, (_, i) => ({
+    name: `hold ${i + 59}`, kind: 'oneShot', at: (u) => M.actStance(i + 59, T + u * 12, 1),
   })),
 
   // ── interact.ts: props and pairs ───────────────────────────────────────────
@@ -363,6 +379,42 @@ if (process.argv.includes('--probe')) {
 }
 
 if (!process.argv.includes('--probe')) checkWalkUnchanged();
+
+// ── check 7 · the code bands resolve to what the rule book says they do ──────
+//
+// `p:` in a script is a bare number, and a wrong one does not fail — it draws a
+// different gesture, or the neutral stand, and nothing anywhere reports it. Group
+// N's table was written with five of its numbers one too high on the first pass.
+//
+// So the arithmetic is re-derived from the SHIPPING resolver rather than restated:
+// `holdCode`/`playCode` must agree with what `emoteAny`/`emoteAnyLive` actually do,
+// and — the property group L rests on — a played action must have SETTLED onto its
+// held twin by the time PLAY_SECONDS is up, or every beat using one pops when the
+// blend hands over.
+{
+  const T7 = 2.4;
+  const same = (a, b) => ['tilt', 'neck', 'bob'].every((k) => Math.abs(a[k] - b[k]) < 1e-9)
+    && ['footL', 'footR', 'fistL', 'fistR'].every((k) => Math.abs(a[k].x - b[k].x) < 1e-9
+      && Math.abs(a[k].y - b[k].y) < 1e-9);
+  for (const n of [1, 29, 68, 79, 92, 96]) {
+    if (!same(M.emoteAny(M.holdCode(n), T7), M.actStance(n, T7, 1))) {
+      note(`code ${M.holdCode(n)}`, 'band', `holdCode(${n}) does not resolve to action ${n}`);
+    }
+    if (!same(M.emoteAny(M.playCode(n), T7), M.actStance(n, T7, 1))) {
+      note(`code ${M.playCode(n)}`, 'band', `playCode(${n}) held is not action ${n}'s end pose`);
+    }
+    const settled = M.emoteAnyLive(M.playCode(n), T7, M.PLAY_SECONDS + 0.5);
+    if (!same(settled, M.emoteAny(M.holdCode(n), T7))) {
+      note(`code ${M.playCode(n)}`, 'band',
+        `played action ${n} has not settled onto its held twin after PLAY_SECONDS`);
+    }
+  }
+  // 128 is the code every existing script uses for ARMS LOOSE. If this ever stops
+  // being action 29, seventy-five beats already in the app change gesture silently.
+  if (!same(M.emoteAny(128, T7), M.actStance(29, T7, 1))) {
+    note('code 128', 'band', '128 is no longer ARMS LOOSE — beats already shipped rely on it');
+  }
+}
 
 const PAIRS = {};
 for (const m of MOTIONS) {
