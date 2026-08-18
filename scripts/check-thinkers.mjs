@@ -146,5 +146,39 @@ ok(noBranch.length === 0, 'and at least one branch to chart',
   noBranch.map((p) => p.name).join('; ')
     || `1–${Math.max(...ALL.map((p) => p.branchSlugs.length))} branches each`);
 
+// ── 8. every quote still fits the home page that shows one a day ────────────
+//
+// Home's Daily Reflection steps its type down as a quote gets longer, so that a
+// nine-word aphorism can be set large without the longest passage in the library
+// being cut off mid-clause. The steps in components/home/DailyReflection.tsx are
+// read out of the shipping component rather than restated, because a checker
+// holding its own copy of a constant measures a layout that may no longer exist.
+//
+// The ceiling is the last step's characters-per-line times its numberOfLines. It
+// matters because the failure is invisible from this end: a quote 60 characters
+// longer than today's longest simply ends in an ellipsis on somebody's home
+// screen, on one day, and nothing anywhere reports it.
+{
+  const src = readFileSync(path.join(REPO, 'components/home/DailyReflection.tsx'), 'utf8');
+  // SCOPED TO THE STEPS ARRAY, not to the file. The first draft of this took the
+  // last `fontSize:` anywhere in the source, which is the byline's 11 — so it
+  // computed a 536-character ceiling from a size the quote is never set at, and
+  // reported "ok" while measuring the wrong thing entirely.
+  const steps = (src.match(/const STEPS = \[[\s\S]*?\n\];/) || [''])[0];
+  const sizes = [...steps.matchAll(/fontSize:\s*([\d.]+)/g)].map((m) => Number(m[1]));
+  const last = sizes.length ? Math.min(...sizes) : 0;
+  const lines = Number((src.match(/numberOfLines=\{(\d+)\}/) || [])[1]);
+  // 342dp of column (a 390dp phone less its margins) at Playfair italic's ~0.46em
+  // average advance — the same arithmetic the component's own note sets out.
+  const perLine = Math.floor(342 / (last * 0.46));
+  const ceiling = perLine * lines;
+  const quotes = ALL.flatMap((p) => p.quotes.map((q) => ({ n: q.text.length, who: p.name })));
+  quotes.sort((a, b) => b.n - a.n);
+  ok(last > 0 && lines > 0, 'the reflection still declares a smallest step and a line cap',
+    `${last}pt × ${lines} lines`);
+  ok(quotes[0].n <= ceiling, 'the longest quote in the library still fits it',
+    `${quotes[0].n} chars (${quotes[0].who}), ceiling ${ceiling}`);
+}
+
 console.log(fails ? `\n${fails} problem(s).\n` : '\nall clear.\n');
 process.exit(fails ? 1 : 0);

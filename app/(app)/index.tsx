@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Dimensions, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
-import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
@@ -10,10 +9,10 @@ import AddWidgetSheet from '@/components/shared/AddWidgetSheet';
 import StickmanStroll from '@/components/home/StickmanStroll';
 import QuickStartCard from '@/components/home/QuickStartCard';
 import HomeHeader from '@/components/home/HomeHeader';
+import DailyReflection from '@/components/home/DailyReflection';
 import ThinkerOfTheDay from '@/components/home/ThinkerOfTheDay';
 import HabitCard from '@/components/home/HabitCard';
 import Arrive from '@/components/home/Arrive';
-import { LIGHT } from '@/components/shared/tone';
 import { branchCountsFromUnits } from '@/data/index';
 import { useWidgetPlaced } from '@/lib/widget/useWidgetPlaced';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
@@ -25,28 +24,14 @@ import { useTodayKey } from '@/lib/utils/useTodayKey';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
-const InkSoft = '#6B6B6B';
 
-const Rule = '#ECEAE2';
+// The ruled-paper texture. `hairline` from constants/design.ts — Home used to
+// carry its own #ECEAE2, four points off the token, which is exactly the "two
+// greys that are one grey and a bug" the design file was written to stop.
+const Rule = '#E7E3DA';
 
 const SW = Dimensions.get('window').width;
 const SH = Dimensions.get('window').height;
-
-// ── the one light, borrowed for a card face ──────────────────────────────────
-//
-// tone.ts states the light direction as SVG percentage strings; expo-linear-
-// gradient wants 0–1. PARSED rather than retyped, so the reflection card can
-// never end up lit from a different direction than every rank pin and badge.
-const pt = (x: string, y: string) => ({ x: parseFloat(x) / 100, y: parseFloat(y) / 100 });
-const FACE_START = pt(LIGHT.x1, LIGHT.y1);
-const FACE_END = pt(LIGHT.x2, LIGHT.y2);
-
-// tone.ts's own FACE runs to PAPER_SHADE (#C6C0B2), which is right for a 66px
-// struck badge and far too strong across a card this size — at 300dp wide it
-// stops reading as a lit surface and starts reading as a stain. This is the same
-// ramp with the shaded end pulled back, which still clears the "a 7% tonal range
-// is invisible" floor §19 records: #FFFFFF → #E9E4D8 is a 12% swing.
-const CARD_FACE = ['#FFFFFF', Paper, '#E9E4D8'] as const;
 
 // Daily quote pool from the philosophers.
 const QUOTE_POOL = ALL_PHILOSOPHERS.flatMap((p) =>
@@ -155,56 +140,30 @@ export default function HomeScreen() {
           <QuickStartCard style={styles.quickStartLead} />
         </Arrive>
 
-        {/* Daily reflection */}
+        {/* Daily reflection — printed on the page rather than parcelled into a
+            box; see components/home/DailyReflection.tsx for why. */}
         <Arrive index={1}>
-          <View style={styles.reflectionWrap}>
-            <LinearGradient
-              colors={CARD_FACE}
-              locations={[0, 0.46, 1]}
-              start={FACE_START}
-              end={FACE_END}
-              style={styles.reflectionCard}
-            >
-              <Text style={styles.qmark}>“</Text>
-              <Pressable onPress={() => openPhilosopher(quote.philosopherId)}>
-                <Text style={styles.reflectionText} numberOfLines={4}>{quote.text}</Text>
-              </Pressable>
-              <View style={styles.reflectionFooter}>
-                <Pressable
-                  hitSlop={10}
-                  onPress={() => toggleQuote({ ...quote, savedAt: Date.now() })}
-                >
-                  <SketchIcon
-                    name={quoteSaved ? 'bookmark-filled' : 'bookmark'}
-                    size={18}
-                    color={quoteSaved ? Ink : InkSoft}
-                  />
-                </Pressable>
-                <Pressable style={{ flex: 1 }} onPress={() => openPhilosopher(quote.philosopherId)}>
-                  <Text style={styles.reflectionAuthor}>— {quote.author.toUpperCase()}</Text>
-                </Pressable>
-              </View>
-            </LinearGradient>
-            <View style={styles.reflectionTab}>
-              <Text style={styles.reflectionTabText}>DAILY REFLECTION</Text>
-            </View>
-          </View>
+          <DailyReflection
+            style={styles.section}
+            quote={quote}
+            saved={quoteSaved}
+            onOpenAuthor={() => openPhilosopher(quote.philosopherId)}
+            onToggleSave={() => toggleQuote({ ...quote, savedAt: Date.now() })}
+          />
         </Arrive>
-
 
         {/* What the three tab-bar duplicates used to occupy: one thing to read
             that is new today, and one drawing of how far in the reader is. */}
         <Arrive index={2}>
-          <ThinkerOfTheDay style={styles.block} />
+          <ThinkerOfTheDay style={styles.section} />
         </Arrive>
 
-        {/* One card for the streak, the week and the two running totals. It also
-            replaced a six-column "23 / 192" bar: lessons are still being written,
-            so that denominator grows and shortens the reader's bar for doing
-            nothing wrong. Nothing on this card has a total to be a fraction of. */}
+        {/* The streak, the week and the two running totals — the one solid
+            object below the fold, so the page closes in ink the way it opened
+            rather than trailing off into a third pale rectangle. */}
         <Arrive index={3}>
           <HabitCard
-            style={styles.block}
+            style={styles.panel}
             streak={streak}
             lastLessonDate={lastLessonDate}
             lessons={lessonsDone}
@@ -214,7 +173,7 @@ export default function HomeScreen() {
         </Arrive>
 
         {/* Daily quote card (opt-in, Settings → Display) */}
-        {showWidget ? <DailyQuoteWidget style={{ marginTop: 18 }} /> : null}
+        {showWidget ? <DailyQuoteWidget style={styles.panel} /> : null}
 
         {/* The leftover space, which also doubles as the stickman's stage: he
             strolls across it once per visit and hides himself when it's too
@@ -254,7 +213,9 @@ const styles = StyleSheet.create({
     gap: 9,
     borderWidth: 1.5,
     borderColor: Ink,
-    borderRadius: 12,
+    // 6, matching Quick Start and the record panel. It was 12, which is the one
+    // radius on the page that belonged to nothing else on it.
+    borderRadius: 6,
     paddingVertical: 13,
     marginBottom: 6,
     backgroundColor: Paper,
@@ -266,72 +227,23 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
   },
 
-  reflectionWrap: { marginTop: 18, position: 'relative' },
-  // No backgroundColor — the LinearGradient IS the fill, lit from the one light
-  // in tone.ts, which is what turns a rectangle drawn on the paper into a card
-  // sitting on it. The shadow is the other half; a gradient with no shadow reads
-  // as a smudge rather than as depth.
-  reflectionCard: {
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 3,
-    paddingTop: 14,
-    paddingHorizontal: 22,
-    paddingBottom: 18,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 0,
-    shadowOffset: { width: 2, height: 3 },
-    elevation: 2,
-  },
-  qmark: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 46,
-    color: Ink,
-    lineHeight: 40,
-    height: 30,
-  },
-  reflectionText: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontStyle: 'italic',
-    fontSize: 19,
-    color: Ink,
-    lineHeight: 29,
-    marginTop: 6,
-  },
-  reflectionFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 18,
-    gap: 12,
-  },
-  reflectionAuthor: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 12,
-    color: InkSoft,
-    letterSpacing: 2,
-    textAlign: 'right',
-  },
-  reflectionTab: {
-    position: 'absolute',
-    top: -11,
-    right: 16,
-    backgroundColor: Ink,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  reflectionTabText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 9,
-    letterSpacing: 1.5,
-    color: Paper,
-  },
-
   // 22, not the 18 every other block uses. This one sits directly under the
   // masthead photograph and is itself a photograph; at 18 the two crops read as
   // a single tall picture with a wordmark buried in it. The extra 4dp is the
   // whole difference between two images and one.
   quickStartLead: { marginTop: 22 },
-  block: { marginTop: 14 },
 
+  // ── THE GAPS ARE NOT ALL THE SAME, AND THAT IS THE POINT ────────────────────
+  //
+  // Everything below Quick Start used to be 18 / 14 / 14 apart, which is four
+  // near-identical intervals between four near-identical boxes: the reader is
+  // given no signal about where one idea ends and the next begins, so the whole
+  // lower half reads as one undifferentiated list.
+  //
+  // An unboxed section needs MORE air than a boxed one, because it has no border
+  // doing the separating — 30dp is roughly the leading of the quote it sits
+  // under, which is the interval the page is already built on. The ink panel
+  // needs less, because its own edge is the separation.
+  section: { marginTop: 30 },
+  panel: { marginTop: 26 },
 });

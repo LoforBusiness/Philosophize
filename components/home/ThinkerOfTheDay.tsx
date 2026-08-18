@@ -2,9 +2,10 @@ import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
 import PressableScale from '@/components/shared/PressableScale';
+import SectionHead from '@/components/home/SectionHead';
 import { useUIStore } from '@/stores/uiStore';
 import { dayNumber, thinkerOfTheDay, factOfTheDay } from '@/lib/utils/thinkerOfDay';
-import { FACE, RIM, LIGHT, SHADOW, INK, FAINT, MID, PAPER } from '@/components/shared/tone';
+import { FACE, RIM, LIGHT, SHADOW, INK, FAINT, MID } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A DIFFERENT THINKER EVERY DAY — the one thing on Home that is new content
@@ -29,7 +30,7 @@ import { FACE, RIM, LIGHT, SHADOW, INK, FAINT, MID, PAPER } from '@/components/s
 // WHO it is lives in lib/utils/thinkerOfDay, because the Thinkers tab features a
 // thinker of the day too and the two must agree. This file only draws it.
 
-const SEAL = 54;
+const SEAL = 58;
 
 /** A struck disc bearing one letter. */
 function Seal({ letter }: { letter: string }) {
@@ -66,52 +67,35 @@ export default function ThinkerOfTheDay({ style }: { style?: object }) {
   const fact = useMemo(() => factOfTheDay(day), [day]);
 
   return (
-    <PressableScale onPress={() => openPhilosopher(who.id)} containerStyle={style} style={styles.card}>
-      <Text style={styles.kicker}>THINKER OF THE DAY</Text>
-      <View style={styles.row}>
-        <Seal letter={who.name.trim().charAt(0).toUpperCase()} />
-        <View style={styles.body}>
-          <Text style={styles.name} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
-            {who.name}
-          </Text>
-          <Text style={styles.meta} numberOfLines={1}>
-            {who.lifespan}  ·  {who.era}
-          </Text>
-          <Text style={styles.fact} numberOfLines={3}>{fact}</Text>
+    <View style={style}>
+      <SectionHead>THINKER OF THE DAY</SectionHead>
+      <PressableScale onPress={() => openPhilosopher(who.id)} style={styles.block}>
+        <View style={styles.row}>
+          <Seal letter={who.name.trim().charAt(0).toUpperCase()} />
+          <View style={styles.body}>
+            <Text style={styles.name} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+              {who.name}
+            </Text>
+            <Text style={styles.meta} numberOfLines={1}>
+              {who.lifespan}  ·  {who.era}
+            </Text>
+          </View>
         </View>
-      </View>
-    </PressableScale>
+        <Text style={styles.fact} numberOfLines={3}>{fact}</Text>
+      </PressableScale>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderWidth: 1.5,
-    borderColor: INK,
-    borderRadius: 6,
-    backgroundColor: PAPER,
-    paddingTop: 11,
-    paddingBottom: 14,
-    paddingHorizontal: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 0,
-    shadowOffset: { width: 2, height: 3 },
-    elevation: 2,
-  },
-  kicker: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 9,
-    color: MID,
-    letterSpacing: 2,
-  },
-  row: { flexDirection: 'row', alignItems: 'flex-start', gap: 13, marginTop: 10 },
+  block: { marginTop: 14 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
 
   seal: { width: SEAL, height: SEAL, alignItems: 'center', justifyContent: 'center' },
   sealLetter: {
     position: 'absolute',
     fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 24,
+    fontSize: 26,
     color: INK,
     includeFontPadding: false,
   },
@@ -119,7 +103,7 @@ const styles = StyleSheet.create({
   body: { flex: 1 },
   name: {
     fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 19,
+    fontSize: 23,
     color: INK,
     includeFontPadding: false,
   },
@@ -127,16 +111,24 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium',
     fontSize: 9,
     color: MID,
-    letterSpacing: 0.8,
-    marginTop: 3,
+    letterSpacing: 1.2,
+    marginTop: 4,
     textTransform: 'uppercase',
   },
+  // ── SET IN INTER, NOT IN PLAYFAIR ITALIC ───────────────────────────────────
+  //
+  // The reflection directly above this is Playfair italic, and so was this. Two
+  // blocks of the same italic book face, one under the other, read as one long
+  // quotation broken in half — which is a large part of why the reflection and
+  // the thinker looked like the same feature printed twice.
+  //
+  // They are not the same kind of writing. Up there is somebody's VOICE; this is
+  // a note ABOUT somebody. The utility face says so without a word of labelling.
   fact: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontStyle: 'italic',
-    fontSize: 13,
-    lineHeight: 19,
-    color: INK,
-    marginTop: 8,
+    fontFamily: 'Inter_400Regular',
+    fontSize: 13.5,
+    lineHeight: 21,
+    color: MID,
+    marginTop: 12,
   },
 });

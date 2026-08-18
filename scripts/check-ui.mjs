@@ -162,6 +162,53 @@ for (const [fg, bg, floor] of PAIRS) {
   }
 }
 
+// ── 2c · the one surface that is printed the other way up ────────────────────
+//
+// Home's record panel is a solid ink field with cream type on it — the only
+// inverted surface in the app that carries numbers rather than a photograph, and
+// therefore the one place a colour can go wrong in a direction nothing else here
+// is looking. Every pair above measures text on PAPER; a value that is safely
+// dark on cream is invisible on ink, and the mistake looks like nothing at all
+// until someone reads their streak in daylight.
+//
+// The tones are read out of the shipping component rather than restated here.
+// They cannot live in `C` — the palette is capped at 14 and holds 13 — and a
+// second copy of them in this file would measure a colour the panel might no
+// longer be using, which is the failure mode this whole script exists to stop.
+{
+  const src = fs.readFileSync(path.join(REPO, 'components/home/HabitCard.tsx'), 'utf8');
+  const tone = (name) => (src.match(new RegExp(`const ${name} = '(#[0-9A-Fa-f]{6})'`)) || [])[1];
+  const INK = tone('INK');
+  ok(INK === D.C.ink, 'the panel is printed on the palette ink', `${INK} vs ${D.C.ink}`);
+
+  // [constant, floor, what it is]. The rule sits below every floor ON PURPOSE —
+  // see its comment in the component — so it is asserted from the other side.
+  const ON_INK = [
+    ['CREAM', 4.5, 'the streak, the day count and both totals'],
+    ['ON_INK_SOFT', 4.5, "the line under the streak"],
+    ['ON_INK_DIM', 4.5, 'the kickers and the stat words'],
+    ['ON_INK_FAINT', 3.0, 'unearned weekday labels and their rings'],
+  ];
+  for (const [name, floor, what] of ON_INK) {
+    const v = tone(name);
+    if (!v) { ok(false, `HabitCard declares ${name}`); continue; }
+    const r = ratio(lum(v), lum(INK));
+    ok(r >= floor, `${name} on the ink panel — ${what}`, `${r.toFixed(2)}:1, need ${floor}`);
+  }
+  const rule = tone('ON_INK_RULE');
+  ok(rule && ratio(lum(rule), lum(INK)) < 2.0, 'the panel divider stays felt rather than seen',
+    `${ratio(lum(rule), lum(INK)).toFixed(2)}:1, want under 2`);
+
+  // AND THE WEEK ROW CAN ACTUALLY BE INVERTED. The panel hands StreakWeek a
+  // tint/ground pair; if those props are ever dropped the row silently falls back
+  // to ink-on-paper defaults and every completed day disappears into the field.
+  const week = fs.readFileSync(path.join(REPO, 'components/gamification/StreakWeek.tsx'), 'utf8');
+  for (const p of ['tint', 'ground', 'faint', 'soft']) {
+    ok(new RegExp(`${p}\\s*=`).test(week), `StreakWeek takes \`${p}\` with a default`);
+    ok(new RegExp(`${p}=\\{`).test(src), `the record panel passes \`${p}\``);
+  }
+}
+
 // ── 3 · the scales are closed sets ───────────────────────────────────────────
 ok(Object.keys(D.TYPE).length === 5, 'five type sizes', Object.keys(D.TYPE).join(' '));
 for (const [k, t] of Object.entries(D.TYPE)) {
