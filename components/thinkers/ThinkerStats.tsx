@@ -20,6 +20,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { C, ERA, TYPE, SPACE, RADIUS, type EraKey } from '@/constants/design';
 import { ALL_BRANCHES } from '@/data';
 import { timelinePos, yearLabel, FIRST_YEAR, LAST_YEAR, type Lifespan } from '@/lib/utils/lifespan';
+import ThinkerSeal from './ThinkerSeal';
 
 export function eraColour(era: string): string {
   return ERA[era as EraKey] ?? C.inkSoft;
@@ -155,7 +156,8 @@ export function ContemporariesRow({
   count, notable, era, onOpen,
 }: {
   count: number;
-  notable: { id: string; name: string; symbol: string }[];
+  /** `symbol` is deliberately NOT required: nothing here draws an emoji any more. */
+  notable: { id: string; name: string }[];
   era: string;
   onOpen: (id: string) => void;
 }) {
@@ -176,7 +178,12 @@ export function ContemporariesRow({
             accessibilityLabel={`Open ${n.name}`}
             style={({ pressed }) => [styles.contemCard, pressed && styles.contemPressed]}
           >
-            <Text style={styles.contemSymbol}>{n.symbol}</Text>
+            {/* The same struck tile the collection uses, so a contemporary looks
+                like the thing you are about to go and collect. It carries THIS
+                thinker's era colour rather than their own: they are being shown
+                as somebody who shared this period, and re-colouring three tiles
+                by their own eras would turn one thought into four. */}
+            <ThinkerSeal initial={n.name.charAt(0)} tint={tint} met size={34} />
             <Text style={styles.contemName} numberOfLines={2}>{n.name}</Text>
           </Pressable>
         ))}
@@ -238,6 +245,5 @@ const styles = StyleSheet.create({
     backgroundColor: C.surface,
   },
   contemPressed: { backgroundColor: C.surfaceSoft },
-  contemSymbol: { fontSize: 22 },
   contemName: { ...TYPE.label, color: C.ink, textAlign: 'center' },
 });

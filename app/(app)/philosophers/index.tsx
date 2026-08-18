@@ -23,6 +23,7 @@ import {
 } from '@/data/philosophers';
 import { eraColour } from '@/components/thinkers/ThinkerStats';
 import { collectionOf } from '@/lib/utils/thinkerStats';
+import ThinkerSeal from '@/components/thinkers/ThinkerSeal';
 import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
 import { dayNumber, thinkerOfTheDay } from '@/lib/utils/thinkerOfDay';
 import { useUIStore } from '@/stores/uiStore';
@@ -459,14 +460,13 @@ const ThinkerCard = memo(function ThinkerCard({
     // inline object, so memo() still sees an unchanged prop on a parent render.
     <Card onPress={press} pad={2} containerStyle={styles.cardCol}>
       <View style={styles.cardTop}>
-        <View style={[styles.badge, met && { backgroundColor: tint, borderColor: tint }]}>
-          {/* The symbol on a met card, the initial on an unmet one. The emoji is
-              the reward for opening them: 322 initials are 322 letters, and 322
-              symbols are a set worth completing. */}
-          <Text style={met ? styles.badgeSymbol : styles.badgeLetter}>
-            {met ? p.symbol : p.name.charAt(0)}
-          </Text>
-        </View>
+        {/* THEIR INITIAL ON A STRUCK TILE, NOT THEIR EMOJI.
+            An earlier pass put `p.symbol` here on the theory that 322 symbols
+            are a set worth collecting where 322 letters are just letters. They
+            are — but they are somebody else's drawings, in full colour, at three
+            different saturations, in an app that is otherwise hand-drawn ink on
+            paper. See the header in ThinkerSeal. */}
+        <ThinkerSeal initial={p.name.charAt(0)} tint={tint} met={met} />
       </View>
 
       <Text style={styles.cardName} numberOfLines={2}>
@@ -690,32 +690,6 @@ const styles = StyleSheet.create({
   // Fills the height its column wrapper was stretched to — the equal-height half
   // of what `cardBody` used to do. See the wrapper comment in renderRow.
   cardCol: { flexGrow: 1 },
-  badge: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: C.ink,
-    backgroundColor: C.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeLetter: {
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 22,
-    color: C.ink,
-    // Caveat's ink overhangs its glyph box on the right and Android clips text to its
-    // tight advance-width box, cutting the letter. A width wider than the glyph gives
-    // the ink room; textAlign then centres it back.
-    width: 34,
-    lineHeight: 38,
-    textAlign: 'center',
-    includeFontPadding: false,
-    transform: [{ translateX: -1 }],
-  },
-  /** The met card's emoji. No Caveat overhang to work around, so none of the
-   *  width/translate correction above applies — this is a plain centred glyph. */
-  badgeSymbol: { fontSize: 22, lineHeight: 38, textAlign: 'center' },
   cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
 
   cardName: { ...role('body'), fontFamily: PLAYFAIR_HEAD, color: C.ink, marginTop: SPACE[2] },
