@@ -8,6 +8,7 @@ export interface CloudState {
   savedQuotes: SavedQuote[];
   profileQuote: ProfileQuote | null;
   philosopherViews: Record<string, number>;
+  philosopherLessons: Record<string, number>;
   lessonsByUnit: Record<string, number>;
   lessonsByBranch: Record<string, number>;
   beliefResultId: string | null;
@@ -40,7 +41,7 @@ export interface CloudState {
 }
 
 const SYNC_FIELDS: (keyof CloudState)[] = [
-  'savedQuotes', 'profileQuote', 'philosopherViews', 'lessonsByUnit', 'lessonsByBranch', 'beliefResultId',
+  'savedQuotes', 'profileQuote', 'philosopherViews', 'philosopherLessons', 'lessonsByUnit', 'lessonsByBranch', 'beliefResultId',
   'streak', 'totalXP', 'xpEvents', 'rankIndex', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'badgesInitialized',
   'displayName', 'email', 'bio', 'portrait', 'profileBackground', 'nameFont', 'settings',
   'restDaysEarned', 'restDaysUsed', 'startingBranch', 'onboardingVersion',
@@ -223,6 +224,9 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
   // Derive the per-branch mirror from the merged units so the two never drift.
   const lessonsByBranch = branchCountsFromUnits(lessonsByUnit);
   const philosopherViews = mergeMax(local.philosopherViews, remote.philosopherViews);
+  // Max, not sum: the counter is monotonic per device, so the higher number is the
+  // truer one and adding them would double-count a lesson synced from both.
+  const philosopherLessons = mergeMax(local.philosopherLessons, remote.philosopherLessons);
   const earnedBadges = Array.from(
     new Set([...(local.earnedBadges ?? []), ...(remote.earnedBadges ?? [])])
   );
@@ -315,6 +319,7 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
     startingBranch,
     onboardingVersion,
     philosopherViews,
+    philosopherLessons,
     lessonsByUnit,
     lessonsByBranch,
     beliefResultId,

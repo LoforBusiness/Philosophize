@@ -14,6 +14,7 @@ import { DEFAULT_BACKGROUND_ID } from '@/data/profileBackgrounds';
 import { DEFAULT_PROFILE_FONT } from '@/data/profileFonts';
 import { XP_PER_PHILOSOPHER_MET, XP_PER_QUIZ, XP_PER_QUIZ_PERFECT, XP_PER_SAVED_QUOTE } from '@/constants/xp';
 import { restCap, restDaysHeld, restEarnEvery } from '@/constants/streak';
+import { mentionsFor } from '@/data/lessonMentions';
 import { restDaysToSpend } from '@/lib/utils/streak';
 import { track } from '@/lib/posthog';
 import { writePinnedQuote } from '@/lib/widget/pin';
@@ -231,6 +232,19 @@ interface UserDataState {
   profileQuote: ProfileQuote | null;          // the quote featured on the Profile header (any quote, not just saved)
   quizScores: Record<string, QuizScore>;      // philosopherId -> best quiz result
   philosopherViews: Record<string, number>; // philosopherId -> times profile opened
+  /**
+   * philosopherId -> how much of this reader's LESSON work was about them.
+   *
+   * Weighted: a lesson built on someone's quote adds 3, a lesson that merely names
+   * them adds 1 (data/lessonMentions.ts). Insights used to credit a philosopher for
+   * every lesson finished in their BRANCH, so one ethics lesson moved all forty
+   * ethics thinkers up together — a reading of which tab you were in rather than of
+   * who you actually read.
+   *
+   * Monotonic, like every other progress counter here, so the cloud's max-merge
+   * (lib/supabase/sync.ts) can never lose a device's work.
+   */
+  philosopherLessons: Record<string, number>;
   // Canonical progression: unitId (path.id) -> lessons completed in that unit.
   // Per-unit (not per-branch) so a paid user can advance several units at once.
   lessonsByUnit: Record<string, number>;
@@ -648,6 +662,7 @@ export const useUserDataStore = create<UserDataState>()(
       profileQuote: null,
       quizScores: {},
       philosopherViews: {},
+      philosopherLessons: {},
       lessonsByUnit: {},
       lessonsByBranch: {},
       beliefResultId: null,
@@ -823,10 +838,22 @@ export const useUserDataStore = create<UserDataState>()(
             const next = Math.max(state.lessonsByUnit[info.unitId] ?? 0, info.indexInUnit + 1);
             lessonsByUnit = { ...state.lessonsByUnit, [info.unitId]: next };
           }
+          // WHO THIS LESSON WAS ABOUT, credited on every completion.
+          //
+          // Not gated on it being the FIRST completion, unlike the unit pointer
+          // above: re-reading a lesson is genuinely more time spent with those
+          // thinkers, and Insights is a picture of attention rather than of
+          // progress. The unit pointer uses max() because it is progress; this
+          // accumulates because it is not.
+          const philosopherLessons = { ...state.philosopherLessons };
+          for (const [pid, w] of mentionsFor(lessonId)) {
+            philosopherLessons[pid] = (philosopherLessons[pid] ?? 0) + w;
+          }
           return {
             lessonsByUnit,
             // Keep the per-branch mirror consistent with the per-unit source.
             lessonsByBranch: branchCountsFromUnits(lessonsByUnit),
+            philosopherLessons,
             totalXP: state.totalXP + xpEarned,
             xpEvents: stampEvent(state.xpEvents, state.totalXP + xpEarned),
           };
@@ -1102,6 +1129,7 @@ export const useUserDataStore = create<UserDataState>()(
         profileQuote: state.profileQuote,
         quizScores: state.quizScores,
         philosopherViews: state.philosopherViews,
+        philosopherLessons: state.philosopherLessons,
         lessonsByUnit: state.lessonsByUnit,
         lessonsByBranch: state.lessonsByBranch,
         beliefResultId: state.beliefResultId,

@@ -50,6 +50,7 @@ const AREA_TINT: Record<string, string> = Object.fromEntries(
 export default function StatsScreen() {
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const philosopherViews = useUserDataStore((s) => s.philosopherViews);
+  const philosopherLessons = useUserDataStore((s) => s.philosopherLessons);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
   const settings = useUserDataStore((s) => s.settings);
@@ -67,6 +68,26 @@ export default function StatsScreen() {
     const quotes = savedQuotes.filter((q) => q.branchSlugs.includes(b.slug)).length;
     const views = ALL_PHILOSOPHERS.filter((p) => p.branchSlugs.includes(b.slug)).reduce(
       (a, p) => a + (philosopherViews[p.id] ?? 0),
+      0
+    );
+    // WHOSE IDEAS THE READER HAS ACTUALLY SPENT TIME ON, in this branch.
+    //
+    // The three signals above are all COARSE about area: a lesson counts for its
+    // own branch, a quote for the branches its author works in, a view likewise.
+    // None of them notices that a reader who keeps meeting Hume — in epistemology
+    // lessons, in ethics lessons, on his page — is telling you something about
+    // what interests them. This is that, and it is the signal the reader asked
+    // for: the areas move because of who the lessons were ABOUT, not only which
+    // shelf the lesson sat on.
+    //
+    // SPLIT ACROSS THE THINKER'S AREAS, NOT COUNTED IN FULL IN EACH. Hume works in
+    // four branches, so crediting his whole weight to all four turns one ethics
+    // lesson into four branches' worth of interest — and a reader who had never
+    // opened Politics was shown 17% Politics. Dividing means reading a thinker is
+    // worth the same total wherever they happen to be filed, which is what makes
+    // this an attribution rather than a multiplier.
+    const thinkers = ALL_PHILOSOPHERS.filter((p) => p.branchSlugs.includes(b.slug)).reduce(
+      (a, p) => a + (philosopherLessons[p.id] ?? 0) / Math.max(1, p.branchSlugs.length),
       0
     );
     // The first unit in this branch that is not finished — the nearest whole
@@ -90,17 +111,31 @@ export default function StatsScreen() {
       totalLessons,
       unitRemaining,
       unitLabel,
-      interactions: lessons + quotes + views,
-      interest: lessons * 3 + quotes * 2 + views,
+      thinkers: Math.round(thinkers),
+      // `thinkers` is already weighted at source (3 for a lesson built on someone,
+      // 1 for a lesson that names them), so it enters both totals at 1× — folding a
+      // second multiplier on top would make one signal shout over the other three.
+      interactions: Math.round(lessons + quotes + views + thinkers),
+      interest: Math.round(lessons * 3 + quotes * 2 + views + thinkers),
     };
   });
   const metricBySlug = Object.fromEntries(branchMetrics.map((m) => [m.slug, m]));
 
-  // Top philosophers (by views, saved quotes, and lessons in their areas).
+  // ── TOP PHILOSOPHERS ──────────────────────────────────────────────────────
+  //
+  // This used to read `p.branchSlugs.reduce((a, s) => a + lessonsByBranch[s])` —
+  // every philosopher scored for every lesson finished anywhere in their branch.
+  // One ethics lesson moved all forty ethics thinkers up by the same amount, so
+  // the ordering was decided almost entirely by who the reader had OPENED in
+  // Thinkers, and the lesson term only added a constant that shifted everyone.
+  //
+  // `philosopherLessons` is the honest version: who the lessons were actually
+  // about, weighted 3 when the lesson carries their words and 1 when it names them
+  // (data/lessonMentions.ts, credited in recordLessonComplete).
   const philScores = ALL_PHILOSOPHERS.map((p) => {
     const views = philosopherViews[p.id] ?? 0;
     const quotes = savedQuotes.filter((q) => q.philosopherId === p.id).length;
-    const learn = p.branchSlugs.reduce((a, s) => a + (lessonsByBranch[s] ?? 0), 0);
+    const learn = philosopherLessons[p.id] ?? 0;
     return { id: p.id, name: p.name, surname: p.name.split(' ').slice(-1)[0], score: views * 3 + quotes * 5 + learn };
   })
     .filter((p) => p.score > 0)
@@ -188,14 +223,43 @@ export default function StatsScreen() {
     }, [fingerprint, seenFingerprint, markStatsSeen]),
   );
 
-  // "This Week" insight.
+  // ── "THIS WEEK" ───────────────────────────────────────────────────────────
+  //
+  // This used to end "Their ideas appear in N of your saved quotes", and the
+  // sentence had two faults. N was the BRANCH's quote count, not the named
+  // thinker's, so the pronoun pointed at the wrong noun — and for most readers N
+  // is 0, which made the app's one piece of prose about them a statement that they
+  // had done nothing.
+  //
+  // It now says WHY each thing leads, from whichever signal actually earned it, so
+  // the reader learns what the chart is made of rather than being handed a number
+  // they cannot place.
   const topArea = [...branchMetrics].sort((a, b) => b.interactions - a.interactions)[0];
   const topPhil = philScores[0];
+  const philReason = (() => {
+    if (!topPhil) return null;
+    const p = { views: philosopherViews[topPhil.id] ?? 0,
+      quotes: savedQuotes.filter((q) => q.philosopherId === topPhil.id).length,
+      learn: philosopherLessons[topPhil.id] ?? 0 };
+    // Named in order of what the reader DID, heaviest first — lessons are the new
+    // signal and the one worth telling them about.
+    if (p.learn >= Math.max(p.views * 3, p.quotes * 5)) return 'from the lessons you have read';
+    if (p.quotes > 0) return `from the ${p.quotes} quote${p.quotes === 1 ? '' : 's'} of theirs you saved`;
+    return 'from the time you have spent on their page';
+  })();
+  const areaReason = (() => {
+    if (!topArea) return '';
+    const m = topArea;
+    const parts: string[] = [];
+    if (m.lessons) parts.push(`${m.lessons} lesson${m.lessons === 1 ? '' : 's'}`);
+    if (m.quotes) parts.push(`${m.quotes} quote${m.quotes === 1 ? '' : 's'}`);
+    if (m.thinkers) parts.push('the thinkers behind them');
+    return parts.length ? ` — ${parts.slice(0, 2).join(' and ')}` : '';
+  })();
   const insight =
     topArea && topArea.interactions > 0
-      ? `You've spent most time in ${AREA_NAME[topArea.slug] ?? topArea.slug}${
-          topPhil ? `, guided by ${topPhil.name}` : ''
-        }. Their ideas appear in ${metricBySlug[topArea.slug]?.quotes ?? 0} of your saved quotes.`
+      ? `${AREA_NAME[topArea.slug] ?? topArea.slug} is where you spend your time${areaReason}.` +
+        (topPhil ? ` ${topPhil.name} leads your thinkers, ${philReason}.` : '')
       : 'Finish a lesson or save a quote, and your weekly story will appear here.';
 
   const hasAny = lessonsDone + quotesSaved + philosophersViewed > 0;
@@ -231,7 +295,7 @@ export default function StatsScreen() {
                 {areaPie.length > 0 && (
                   <SketchPieChart
                     title="Areas of Interest"
-                    subtitle="by quotes, lessons & views"
+                    subtitle="lessons, quotes, thinkers & who they teach"
                     data={areaPie}
                     valueMode="percent"
                     playToken={playToken}
