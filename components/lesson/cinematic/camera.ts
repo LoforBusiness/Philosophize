@@ -245,18 +245,73 @@ const VERB: Record<MoveKind, { tr: number; framing: Framing; e?: 'smooth' | 'bac
  * means a different number in a scene whose art sits high than in one whose art
  * runs to the floor, and neither author should have to work that out.
  */
+/**
+ * K4b — HOW FAR OFF THE MIDDLE A SHOT MAY LEAVE THE THING IT WAS AIMED AT.
+ *
+ * A share of the frame's width; 0.18 is a hair past the rule-of-thirds line, where a
+ * subject stops reading as *placed* and starts reading as a camera that missed.
+ *
+ * The same number lives in `scripts/lib/tourrule.mjs`, and both files are zero-import
+ * on purpose (that is what lets the whole camera be replayed in plain Node), so the
+ * duplication is the price. If one moves, move the other.
+ */
+export const MAX_OFF_CENTRE = 0.18;
+
+/**
+ * `fit`, except that it gives the push up rather than aim it badly.
+ *
+ * `fit` may not let the window leave the design space, so the centre is clamped to
+ * [200/s, 400 − 200/s]. Aim at a figure standing near the edge of the stage and the
+ * clamp wins: the camera travels, arrives, and pins him against the frame edge.
+ * Measured across the app, **488 pushed shots sat a median 19.4% off centre, 251 of
+ * them past the thirds line, the worst at 39.5%** — "the camera moves to anything and
+ * it is mainly to the left or right side of the screen".
+ *
+ * There is no scale that rescues it, and tightening makes it worse rather than better
+ * (a wider frame has its centre pinned nearer the stage centre). So the answer is not
+ * to go: fall back to the whole stage, where the reader sees everything and the
+ * subject being off to one side is the composition rather than the camera.
+ */
+function centredFit(
+  at: [number, number], s: number, band: [number, number], ground?: number,
+): Shot {
+  const shot = fit(at, s, band, ground);
+  if (shot.s <= 1.02) return shot;
+  const w = visibleWindow(shot, band);
+  const off = Math.abs(at[0] - (w.left + w.right) / 2) / (w.right - w.left);
+  return off <= MAX_OFF_CENTRE ? shot : fit(at, 1, band, ground);
+}
+
 export function resolveMoves(
   moves: Move[], band: [number, number], ground?: number,
 ): Shot[] {
   const out: Shot[] = [];
-  let prev: Shot = { cx: STAGE_W / 2, cy: (band[0] + band[1]) / 2, s: 1 };
+  // WHERE THE CAMERA STARTS, and it has to be a LEGAL shot.
+  //
+  // This was `cy = (band[0] + band[1]) / 2` — the middle of the band, which is not
+  // the middle of the design space and is not a shot the transform can hold: at s=1
+  // the window runs off the bottom by however far the band's centre sits from 280.
+  // It never showed, because the first verb was always a push or a pull and `fit`
+  // recomputed the centre. Now that a plain beat deals `hold`, the first beat of a
+  // lesson can inherit this directly — and 102 lessons came back with a window
+  // bottom of 602 against a design space of 560.
+  //
+  // NEUTRAL is the identity transform and the shot a lesson with no camera already
+  // has, which makes it the only honest answer to "where was it before beat 0".
+  let prev: Shot = { ...NEUTRAL };
   for (const m of moves) {
     const d = VERB[m.k];
     const framing = m.framing ?? d.framing;
     const at: [number, number] = m.at ?? [prev.cx, prev.cy];
     // `hold` and `shake` do not travel: they keep the framing they were handed.
     const s = m.k === 'hold' || m.k === 'shake' ? prev.s : SCALE[framing];
-    const target = m.k === 'hold' || m.k === 'shake' ? { cx: prev.cx, cy: prev.cy, s } : fit(at, s, band, ground);
+    // A HOLD IS STILL PUT THROUGH `fit`. It keeps the previous centre and scale, but
+    // the previous shot was legal against the PREVIOUS beat's constraints, and a
+    // ground line can differ per lesson; running it through costs nothing and makes
+    // "keep what you had" incapable of carrying an illegal frame forward.
+    const target = m.k === 'hold' || m.k === 'shake'
+      ? fit([prev.cx, prev.cy], s, band, ground)
+      : centredFit(at, s, band, ground);
     const shot: Shot = {
       cx: target.cx,
       cy: target.cy,
@@ -312,50 +367,36 @@ export type BeatKind = 'plain' | 'question' | 'quote' | 'summary';
 export function followMoves(
   x: number[], kinds: BeatKind[], seed = 0, ground = 500,
 ): Move[] {
-  // Chest height: the figure stands ON the ground, so looking AT the ground line
-  // frames their feet and cuts their head off. ~78 up is the middle of the body.
-  const eye = ground - 78;
-  const out: Move[] = [];
-  for (let i = 0; i < x.length; i++) {
-    const kind = kinds[i] ?? 'plain';
-    if (kind === 'question' || kind === 'summary') {
-      out.push({ k: 'pull' });
-      continue;
-    }
-    if (kind === 'quote') {
-      out.push({ k: 'push', at: [x[i], eye], framing: 'close' });
-      continue;
-    }
-    const moved = i === 0 ? 0 : Math.abs(x[i] - x[i - 1]);
-    if (i === 0) {
-      out.push({ k: 'push', at: [x[i], eye], framing: 'mid', tr: 1.4 });
-    } else if (moved > 140) {
-      // Right across the stage. Thrown rather than driven — this is the one place
-      // an overshoot is earned, because the camera is being dragged by something
-      // that outran it.
-      out.push({ k: 'whip', at: [x[i], eye], framing: 'mid' });
-    } else if (moved > 60) {
-      out.push({ k: 'to', at: [x[i], eye], framing: 'mid', tr: 1.2 });
-    } else if (moved > 12) {
-      out.push({ k: 'drift', at: [x[i], eye], framing: 'mid' });
-    } else {
-      // STANDING STILL, AND MOSTLY THE CAMERA SHOULD TOO.
-      //
-      // A three-beat cycle rather than a two-beat one, so only one still beat in
-      // three pushes in and the other two hold or come back to the whole stage.
-      // The first pass alternated push/hold and left 64% of every lesson magnified
-      // — which is not a camera with ideas, it is a camera that never rests, and
-      // the moves stop registering as moves. The rest is what makes the pushes
-      // mean something.
-      const phase = (i + seed) % 3;
-      out.push(
-        phase === 0 ? { k: 'push', at: [x[i], eye], framing: 'close', tr: 1.6 }
-        : phase === 1 ? { k: 'pull' }
-        : { k: 'hold' },
-      );
-    }
-  }
-  return out;
+  // NO LONGER THE SOURCE OF A LESSON'S FRAMINGS, and that is the point.
+  //
+  // This used to deal a verb per beat from the figure's track plus a seeded
+  // three-phase cycle — push, pull, hold — which gave every lesson in the app the
+  // same rhythm and gave each beat a reason to move whether or not anything had
+  // happened. A reader watching it said so exactly: *"it'll zoom in, then zoom out,
+  // and then two clicks later, it'll be the exact same zoom in and zoom out… I don't
+  // want these continual same camera movements."* A cycle cannot help but repeat;
+  // that is what a cycle is.
+  //
+  // Framings now come from the lesson's own content, decided in order and with a
+  // memory of where the camera is standing (`lessonTours` in scripts/lib/tourrule.mjs
+  // — one move, only when the next thing to see is not already in front of you).
+  // What is left here is the one framing the camera is not free to choose:
+  //
+  //   · a QUESTION beat pulls all the way back to scale 1, because an answer target
+  //     is a Pressable and the identity transform is the only one a tap does not
+  //     have to survive an offset to land through (K6);
+  //   · the SUMMARY does the same, and the stage is hidden under it anyway;
+  //   · everything else HOLDS — the player then keeps the shot it already had.
+  //
+  // `whip` went with the cycle, and with it the last overshooting move in the app.
+  // "That same bouncy camera movement" was `easeBack`, which only `whip` ever dealt.
+  //
+  // `x`, `seed` and `ground` are kept in the signature because 112 scenes pass them
+  // and the shape of a scene's call is not worth churning for a parameter that is now
+  // unread; `kinds` is the whole input.
+  void x; void seed; void ground;
+  return kinds.map((kind) =>
+    kind === 'question' || kind === 'summary' ? { k: 'pull' as const } : { k: 'hold' as const });
 }
 
 /**
@@ -640,6 +681,14 @@ export function tourAt(
 /**
  * How far ahead of a followed subject the camera looks, as a share of the span.
  *
+ * ZERO. It was 0.07 — a operator's habit of looking a little into the move — and a
+ * reader asked for the opposite in as many words: *"I want it to move WITH, for
+ * example, the stickman walking… I want it to follow it the same moment it is
+ * walking."* Leading is not lagging, but it is still the camera and the subject
+ * disagreeing about where the subject is, and once the spring came out (which was
+ * the actual lag) this was the only remaining disagreement. Kept as a named constant
+ * rather than deleted because the arithmetic around it is the thing worth keeping.
+ *
  * DECLARED ABOVE `trackAt`, AND THAT IS NOT A STYLE CHOICE — it is §17 rule 2,
  * which until now was only ever written about one worklet CALLING another. A
  * worklet closing over a plain `const` fails in exactly the same way and is
@@ -652,7 +701,7 @@ export function tourAt(
  *
  * `tsc` passed, all seventeen validators passed, and one browser load found it.
  */
-const LEAD = 0.07;
+const LEAD = 0;
 
 export function trackAt(a: Shot, b: Shot, u: number): { cx: number; cy: number; s: number } {
   'worklet';
@@ -696,16 +745,17 @@ export function tourEnd(trs: readonly number[], dwells: readonly number[]): numb
 /**
  * Every way a tour can fail group K. The offline half of `npm run check:tour`.
  *
- * `wide` is the beat's full must-box — K3's closing station — so this can check
- * that the tour actually ends on it rather than trusting the generator to have
- * added it.
+ * `wide` is the beat's full must-box, and what this checks against it is COVERAGE:
+ * that between them the stations frame everything the beat is about. Not that the
+ * last one does. See the K3 check at the bottom, and tourrule.mjs's header for why
+ * the difference is the whole fix.
  */
 export function checkTour(
   tour: Tour, band: [number, number], wide: Box | null, ground?: number,
 ): string[] {
   const out: string[] = [];
   if (!tour.length) return out;
-  if (tour.length > 4) out.push(`${tour.length} stations — K8 allows 4 including the closing wide`);
+  if (tour.length > 2) out.push(`${tour.length} stations — K8 allows 2, and the last one holds`);
   const shots = tourStartShots(tour, band, ground);
   const ends = tourEndShots(tour, band, ground);
   const holds = (sh: Shot, b: Box) => {
@@ -742,12 +792,37 @@ export function checkTour(
     (a, s, i) => a + s.tr + (s.to || i === tour.length - 1 ? 0 : s.dwell), 0,
   );
   if (waiting > 5.5) out.push(`the tour keeps the reader waiting ${waiting.toFixed(1)}s — K8 caps it at 5.5s`);
-  // K3 — the last station is the whole beat.
-  if (wide && tour.length > 1) {
-    const l = tour[tour.length - 1].box;
-    const holds = l.x <= wide.x + 0.5 && l.y <= wide.y + 0.5
-      && l.x + l.w >= wide.x + wide.w - 0.5 && l.y + l.h >= wide.y + wide.h - 0.5;
-    if (!holds) out.push('the last station is not the beat\'s full must-box — the reader never sees the whole picture (K3)');
+  // K3 — NO LAP. EVERY STATION IS A FRAMING, NOT A RETURN TO THE WHOLE STAGE.
+  //
+  // This used to assert the exact opposite: that the LAST station be the beat's whole
+  // must-box, so the reader always finished having seen everything. That single line
+  // is what a reader described as "a loop of movement… it will move 3 different times
+  // just to be sure it shows everything". The closing station revealed nothing,
+  // because the shot it pulled back to was the shot the beat opened on.
+  //
+  // So the test is inverted. A station has to be at least MIN_GAIN tighter than the
+  // beat's own wide shot, which is precisely what a lap is not — and because that
+  // applies to the LAST station too, a tour can no longer end by undoing itself.
+  // What guarantees the reader still sees what matters is no longer this check but
+  // what the stations are chosen FROM: the things that appear during the beat
+  // (tourrule.mjs). The camera frames the change and holds on it.
+  // A LAP IS A RETURN, AND A RETURN NEEDS SOMEWHERE TO RETURN FROM.
+  //
+  // The first version of this scored every station against the beat's wide shot, so a
+  // deliberate pull BACK to the whole stage failed it — and pulling back is a real
+  // move now: when the next thing to see cannot be framed tightly AND centred, the
+  // honest answer is to show the whole picture (K4b). What is forbidden is going
+  // somewhere and then undoing it inside one beat, which is what the reader saw as
+  // "it'll zoom in, then zoom out". One station cannot do that; two can.
+  const bandH2 = band[1] - band[0];
+  const sOf = (b: Box) =>
+    Math.max(1, Math.min(STATION_CAP, Math.min(STAGE_W / Math.max(b.w, 1), bandH2 / Math.max(b.h, 1))));
+  if (tour.length > 1) {
+    const first = sOf(tour[0].to ?? tour[0].box);
+    const last = sOf(tour[tour.length - 1].box);
+    if (last < first - 0.001) {
+      out.push(`the tour pushes to ${first.toFixed(2)}x and then pulls back to ${last.toFixed(2)}x in the same beat — that is a lap (K3)`);
+    }
   }
   return out;
 }

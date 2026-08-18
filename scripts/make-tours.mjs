@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { loadTs } from './lib/loadts.mjs';
-import { tourFor, CAP, scaleFor } from './lib/tourrule.mjs';
+import { lessonTours, CAP, scaleFor } from './lib/tourrule.mjs';
 
 const DIR = 'components/lesson/cinematic';
 const SIDECAR = path.join(DIR, 'mustBoxes.ts.json');
@@ -150,11 +150,6 @@ for (const [id, comp] of map) {
   const single = singles(comp);
   if (!single) continue;
   const dur = durs(comp);
-  // A per-lesson number so the beats that REST are not the same index in every
-  // lesson — the same reason followMoves carries one. Any stable hash will do.
-  let seed = 0;
-  for (let c = 0; c < id.length; c++) seed = (seed * 31 + id.charCodeAt(c)) >>> 0;
-  seed %= 3;
   // Skip anything whose scene has moved since it was measured — see stampOf.
   const now = stampOf(comp);
   if (!now || !side.stamps[id] || now !== side.stamps[id]) { skipped.push(id); continue; }
@@ -162,10 +157,24 @@ for (const [id, comp] of map) {
   const per = [];
   let toured = 0;
   let tightest = 1;
+  // THE WHOLE LESSON AT ONCE, because the camera has a memory now: a beat's framing
+  // depends on where the previous beats left it, so it cannot be decided one beat at
+  // a time (see lessonTours). Reveal order is still required for a FOLLOW; without it
+  // the walk's direction is a guess, so the lesson is decided with the walks off.
+  const decided = lessonTours(
+    words.map((items, k) => ({
+      items: hasReveal ? items : (items ?? []).map((it) => ({ ...it, r: 0 })),
+      wide: boxes[k],
+      single: single[k] ?? true,
+      dur: dur[k] ?? 0,
+    })),
+    band,
+    ground,
+  );
   for (let k = 0; k < words.length; k++) {
     nBeats++;
     const wide = boxes[k];
-    const t = tourFor(words[k], wide, band, single[k] ?? true, hasReveal, dur[k] ?? 0, seed, k);
+    const t = decided[k];
     if (!t) { per.push(null); continue; }
     // Verified against the SHIPPING maths, not against the generator's intention.
     const bad = checkTour(

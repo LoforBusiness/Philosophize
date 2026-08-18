@@ -75,6 +75,22 @@ export const COMPLETION_XP = 5;            // matches LessonRunner
 // cinematic lesson quietly promised the reader less than half of what it paid.
 export const CORRECT_LABEL = `Correct  ·  +${XP_PER_CORRECT_ANSWER} XP`;
 
+// ── the narrator's manner (group M) ───────────────────────────────────────────
+// The figure below the words is the one saying them, so his body has to agree
+// with their tone (A1). These are the four poses that read as *put upon* — codes
+// into the wide emote library in `rig.ts`, named so a scene asks for an attitude
+// rather than for a number.
+//
+// They are the smallest half of the character. The voice is in the writing rules
+// (group M of docs/LESSON_RULES.md); this is what stops the picture undercutting
+// it by standing there explaining cheerfully.
+export const SIGH = {
+  FOLDED: 10,   // arms crossed — waiting, visibly, for the point to land
+  SHRUG: 8,     // 'well, that is what the man said'
+  HIP: 9,       // a hand on the hip — patience, and you can see it
+  TEMPLE: 11,   // a hand to the head — he has explained this before
+} as const;
+
 // ── shared beat vocabulary ─────────────────────────────────────────────────────
 export interface Choice { id: string; text: string; correct: boolean }
 export interface Say { who: string; text: string }

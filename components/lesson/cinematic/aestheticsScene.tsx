@@ -6,8 +6,8 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './aestheticsScript';
 import {
-  clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, SIGH, useHeld, carryFrom, keepHeld,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -120,16 +120,27 @@ function reachApple(t: number): Stance {
   const s = stand(t);
   return { ...s, tilt: s.tilt - 0.06, neck: 0.10, fistR: { x: 25, y: -2 }, fistL: { x: -4, y: -4 } };
 }
+// THE MANNER (group M). Codes 0–6 are the seven narrator gestures and 7 is this
+// lesson's reach for the apple. 8–11 are the put-upon poses — `SIGH` in
+// cinematicKit — and they have to come from the WIDE library, because not one of
+// the seven narrator gestures can fold its arms, put a hand on a hip or reach for
+// its own forehead. Those four are the whole difference between a figure who is
+// saying these lines and a figure who is cheerfully explaining underneath them.
+//
+// The range is bounded by two named codes rather than a bare `>= 8` so that the
+// boundary moves if the repertoire ever does.
 function hHold(code: number, t: number): Stance {
   'worklet';
   if (code === 7) return reachApple(t);
   if (code === 0) return stand(t);
+  if (code >= SIGH.SHRUG && code <= SIGH.TEMPLE) return emoteHold(code, t);
   return narratorHold(code, t);
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
   if (code === 7) return reachApple(t);
   if (code === 0) return stand(t);
+  if (code >= SIGH.SHRUG && code <= SIGH.TEMPLE) return emoteLive(code, t, bt);
   return narratorLive(code, t, bt);
 }
 

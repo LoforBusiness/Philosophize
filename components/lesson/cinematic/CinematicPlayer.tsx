@@ -316,6 +316,15 @@ export default function CinematicPlayer({
   const onBox = useCallback((b: Box | null) => { targetBox.value = b; }, [targetBox]);
   const camHost = useRef(null);
   const needsBox = useMemo(() => beats.map((b) => !!b.interact), [beats]);
+  /**
+   * Beats where the camera PARKS at its own framing instead of holding the last one.
+   *
+   * A graded beat (K6) and the summary, and nothing else. The generator makes exactly
+   * the same assumption when it walks a lesson's path — it resets its idea of where
+   * the camera is on these two — so if this list and that one ever disagree, the
+   * table's holds start meaning something the player does not do.
+   */
+  const stageGoneAt = useMemo(() => beats.map((b) => stageGone(b)), [beats, stageGone]);
 
   // ── AND WHATEVER THE READER HAS TO READ (H60c) ─────────────────────────────
   //
@@ -357,7 +366,15 @@ export default function CinematicPlayer({
     const table = TOURS[lesson.id];
     return beats.map((b, k) => {
       const raw = (b as BaseBeat & { tour?: readonly (readonly number[])[] }).tour ?? table?.[k] ?? null;
-      if (!raw || raw.length < 2 || needsBox[k] || toursOff()) return null;
+      // ONE STATION IS A TOUR. This read `raw.length < 2` and was harmless for as long
+      // as K3 forced every tour to end on the beat's whole must-box, which made two
+      // the minimum any generator could emit — "fewer than two" meant "degenerate".
+      // With the lap gone the ordinary tour is a SINGLE station the camera moves to
+      // and holds, so that guard silently discarded 300 of them: generated, validated,
+      // written to the table, and dropped here. The lesson looked exactly as it had.
+      // A condition whose meaning depends on a rule elsewhere goes stale without ever
+      // failing.
+      if (!raw || raw.length < 1 || needsBox[k] || toursOff()) return null;
       const tour: Tour = raw.map((s) => ({
         box: { x: s[0], y: s[1], w: s[2], h: s[3] },
         // A follow station carries where its subject has got to by the end (K9).
@@ -435,6 +452,23 @@ export default function CinematicPlayer({
       if (needsBox[k]) return must ? containShot(cam[k], must, band) : { ...NEUTRAL, tr: cam[k].tr };
       return cam[k];
     };
+    // A BEAT WITH NOTHING TO GO TO KEEPS THE SHOT IT HAS.
+    //
+    // This is the other half of the sequential path (see lessonTours): the generator
+    // decides a lesson's framings knowing where each beat leaves the camera, and a
+    // `null` in the table means "the next thing to see is already in front of you".
+    // The player has to honour that, or the two disagree and the disagreement is the
+    // bounce — the generator holding while the player pulls back out to the whole
+    // stage, then pushes in again on the next beat that has a subject.
+    //
+    // Graded beats are the exception and not a negotiable one: an answer target is a
+    // Pressable, and K6 requires the identity transform, or the tap has to survive a
+    // camera offset to land on what the reader aimed at. The summary hides the stage
+    // anyway. Both are what `frame` returns.
+    const parks = (k: number) => {
+      'worklet';
+      return needsBox[k] || stageGoneAt[k];
+    };
     // Where a beat LEAVES the camera: its tour's last station if it has one, else the
     // single shot. This is what the next beat travels from, and getting it wrong is
     // what would make every toured beat begin with a snap back to the un-toured
@@ -444,6 +478,7 @@ export default function CinematicPlayer({
       const t = tourData[k];
       return t ? t.ends[t.ends.length - 1] : frame(k);
     };
+
     // ── THE TRAVEL STARTS FROM WHERE THE CAMERA IS (group L) ────────────────
     //
     // `restOf(n-1)` is where the previous beat was SUPPOSED to leave the camera. If
@@ -486,106 +521,44 @@ export default function CinematicPlayer({
       camHold.value = { cx: out.cx, cy: out.cy, s: out.s, has: 1 };
       return out;
     }
+    if (!parks(n) && carried.has) {
+      // HOLD. Not a travel of zero length — no interpolation at all, so there is
+      // nothing for a rounding error or a clock reset to shake loose.
+      const h = { cx: carried.cx, cy: carried.cy, s: carried.s };
+      camHold.value = { ...h, has: 1 };
+      return h;
+    }
     const out = shotAt(startFrom(n > 0 ? n - 1 : 0), frame(n), rt.value);
     camHold.value = { cx: out.cx, cy: out.cy, s: out.s, has: 1 };
     return out;
   });
-  // ── THE CAMERA IS SMOOTHED, NOT DRIVEN DIRECTLY (group L) ──────────────────
+  // ── THE CAMERA IS DRIVEN DIRECTLY, AND THE SPRING IS GONE ──────────────────
   //
-  // `camNow` is the shot the lesson ASKS for, and it is discontinuous in four
-  // separate places — a reader saw all four and called them "a glitch, or a frame
-  // miss… the camera might move to a spot first that isn't right and then adjust":
+  // There used to be a critically-damped spring here chasing `camNow`, hired when the
+  // requested shot was discontinuous in four separate places. Those four are now all
+  // fixed at source — the travel carries the shot actually drawn, a question beat
+  // frames with its static must-box immediately, a tap no longer warps the clock out
+  // from under a travel, and a beat with nothing to go to simply holds. The request
+  // is continuous, and smoothing something already smooth only costs lag.
   //
-  //   1. A BEAT CHANGE resets `rt` to 0, so the travel restarts from
-  //      `restOf(n-1)`. If the previous beat's tour had not finished, the camera
-  //      was never at that shot and teleports there before setting off. This is
-  //      the camera's version of the figure defect group L already fixed.
-  //   2. THE BOX ARRIVES LATE. `frame()` returns NEUTRAL (or the raw authored
-  //      shot) until `targetBox` has been measured, then switches to
-  //      `containShot(...)` the frame it lands. That step IS "moves somewhere
-  //      wrong first, then adjusts".
-  //   3. A TAP DURING A TOUR warps `rt` straight to the skip point, which jumps
-  //      the camera to the end of the tour in one frame.
-  //   4. A MUST-BOX CHANGING between beats moves the target under a travel that
-  //      is already part-way through.
+  // And lag was exactly what a reader then reported, twice over:
   //
-  // Chasing the requested shot with a critically-damped follow fixes all four at
-  // once and needs no per-lesson change, because it makes the OUTPUT continuous
-  // whatever the input does. The authored push/pull still reads through — TAU is
-  // well under the shortest authored move — and a discontinuity in the request
-  // becomes a fast glide instead of a cut.
+  //   · **"the camera zooms in and the thing is on the left side, then over a little
+  //     bit of time it corrects to the center."** That is the spring settling. The
+  //     travel had arrived; the spring had not, so the frame drifted into place after
+  //     the move was supposed to be over.
+  //   · **"it sees the movement and then moves after — I want it to move WITH the
+  //     stickman walking."** A chase has a steady-state error against a moving target.
+  //     Feeding the target's velocity forward shrank it and could not remove it,
+  //     because a measured velocity is always a frame behind.
   //
-  // Frame-rate independent on purpose: `1 - exp(-dt/TAU)` gives the same curve at
-  // 60fps and at 30, where a fixed per-frame fraction would make the camera lag
-  // twice as far on a slow device.
-  // A CRITICALLY DAMPED SPRING, NOT AN EXPONENTIAL LAG, and the difference is the
-  // whole point. A first-order lag takes its LARGEST step on the first frame — it
-  // moves a fixed fraction of the error immediately — so a 138-unit step in the
-  // request still moved the stage 21 units in one frame, which is exactly the cut
-  // this is meant to remove. A spring starts at zero velocity and accelerates, so
-  // the first frame after a step moves almost nothing and the camera eases into
-  // the move. It also cannot overshoot at critical damping, so a shot never sails
-  // past its subject and comes back — the "adjusts afterwards" the reader saw.
-  // AND IT FEEDS THE TARGET'S VELOCITY FORWARD, or the fix breaks the very thing
-  // this was asked to improve. A spring that damps its own ABSOLUTE velocity has a
-  // permanent steady-state error against a MOVING target: measured, the camera sat
-  // 15 units behind a figure walking at 100 units/s and 24 behind a run. That is a
-  // follow shot that trails its subject for the whole beat — worse than what it
-  // replaced. Damping the RELATIVE velocity (camera minus target) instead takes the
-  // trail to about zero and costs the step smoothing almost nothing: 15.0 → -1.7
-  // units of trail, 5.5 → 6.1 units of stutter, against a line of 8.
-  //
-  // The target's velocity is measured, so it is filtered and clamped: a STEP in the
-  // request would otherwise read as an enormous one-frame velocity and launch the
-  // camera, which is the same cut coming back through a different door.
-  const camS = useSharedValue({
-    cx: NEUTRAL.cx, cy: NEUTRAL.cy, s: NEUTRAL.s,
-    vx: 0, vy: 0, vs: 0,
-    wx: 0, wy: 0, ws: 0,        // last requested shot, for the velocity estimate
-    tx: 0, ty: 0, ts: 0,        // the filtered target velocity
-    primed: 0,
-  });
-  useFrameCallback((f) => {
-    'worklet';
-    let dt = (f.timeSincePreviousFrame ?? 16) / 1000;
-    if (dt > 0.05) dt = 0.05;
-    const want = camNow.value;
-    const c = camS.value;
-    // The first frame of a lesson snaps: there is nothing to be continuous WITH,
-    // and gliding in from NEUTRAL would look like an unrequested opening move.
-    if (!c.primed) {
-      camS.value = {
-        cx: want.cx, cy: want.cy, s: want.s, vx: 0, vy: 0, vs: 0,
-        wx: want.cx, wy: want.cy, ws: want.s, tx: 0, ty: 0, ts: 0, primed: 1,
-      };
-      return;
-    }
-    // How fast the REQUEST is moving, clamped so a step cannot launch the camera
-    // and filtered so the estimate is not one frame of noise.
-    const g = dt / 0.08 > 1 ? 1 : dt / 0.08;
-    const rx = (want.cx - c.wx) / dt;
-    const ry = (want.cy - c.wy) / dt;
-    const rs = (want.s - c.ws) / dt;
-    const tx = c.tx + ((rx < -400 ? -400 : rx > 400 ? 400 : rx) - c.tx) * g;
-    const ty = c.ty + ((ry < -400 ? -400 : ry > 400 ? 400 : ry) - c.ty) * g;
-    const ts = c.ts + ((rs < -4 ? -4 : rs > 4 ? 4 : rs) - c.ts) * g;
-
-    const w = CAM_OMEGA;
-    const k = w * w;
-    const d = 2 * w;
-    // Scale is on its own axis and a unit of it is worth far more than a unit of
-    // position, so it gets the same spring rather than a shared one.
-    const vx = c.vx + (-d * (c.vx - tx) - k * (c.cx - want.cx)) * dt;
-    const vy = c.vy + (-d * (c.vy - ty) - k * (c.cy - want.cy)) * dt;
-    const vs = c.vs + (-d * (c.vs - ts) - k * (c.s - want.s)) * dt;
-    camS.value = {
-      cx: c.cx + vx * dt, cy: c.cy + vy * dt, s: c.s + vs * dt,
-      vx, vy, vs, wx: want.cx, wy: want.cy, ws: want.s, tx, ty, ts, primed: 1,
-    };
-  }, true);
-
+  // Both are the same sentence: a follower cannot be in two places at once, and the
+  // place the reader wants it is the requested one. `shotAt` already eases every
+  // travel out of rest and back into it (smoothstep, geometric on scale), so the
+  // motion is smooth without anything chasing it — and it ARRIVES, on the frame it
+  // was supposed to, centred.
   const camStyle = useAnimatedStyle(() => {
-    const c = camS.value;
+    const c = camNow.value;
     return {
       transform: [
         { translateX: STAGE_W / 2 - c.cx * c.s },

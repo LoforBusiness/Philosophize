@@ -34,6 +34,18 @@ if (!fs.existsSync(toursSrc)) {
 }
 const { TOURS, TOUR_STAMP } = await loadTs(toursSrc);
 
+// THE MUST-BOXES, LOADED FIRST, because every geometry check below needs them.
+//
+// They used to be read at the bottom for one separate K3 assertion, and `checkTour`
+// was handed `tour[tour.length - 1].box` as the beat's wide shot — which was only
+// ever true while K3 forced the last station to BE the must-box. With that rule gone
+// (see camera.ts) passing the tour its own last entry compares a station to itself
+// and every anti-lap test comes out trivially true. The independent record is the
+// only honest input here, and it is also what catches a table generated against a
+// must-box that has since moved.
+const mustSrc = path.join(DIR, 'mustBoxes.ts');
+const MUST = fs.existsSync(mustSrc) ? (await loadTs(mustSrc)).MUST : {};
+
 const route = fs.readFileSync(ROUTE, 'utf8');
 const comps = new Map();
 for (const m of route.matchAll(/'([a-z0-9-]+)':\s*([A-Za-z0-9_]+)/g)) comps.set(m[1], m[2]);
@@ -95,7 +107,8 @@ for (const [id, per] of Object.entries(TOURS)) {
       tr: s[4],
       dwell: s[5],
     }));
-    const wide = tour[tour.length - 1].box;
+    const w = MUST[id]?.[k];
+    const wide = w ? { x: w[0], y: w[1], w: w[2], h: w[3] } : null;
     for (const p of checkTour(tour, band, wide, ground)) {
       geomBad++;
       if (geomBad <= 12) console.log(`  FAIL  ${id} beat ${k}: ${p}`);
@@ -141,31 +154,110 @@ for (const [id, per] of Object.entries(TOURS)) {
 }
 if (k6) fails++; else ok('no graded, drag or summary beat carries a tour (K6)');
 
-// ── K3 · a reader always ends a beat having seen everything ─────────────────
+// ── K3 · NO LAP, AND NO REPEAT ─────────────────────────────────────────────
 //
-// The closing station is compared against the lesson's MUST box for that beat — the
-// independent record of what the beat draws. Checking the tour against its own last
-// entry, which is what checkTour does above, cannot catch a table generated from a
-// different must-box than the one that ships.
-const mustSrc = path.join(DIR, 'mustBoxes.ts');
-if (fs.existsSync(mustSrc)) {
-  const { MUST } = await loadTs(mustSrc);
-  let k3 = 0;
+// Two different things a reader called the same name.
+//
+// The LAP is a tour that goes somewhere and comes back inside one beat; `checkTour`
+// now tests that directly (last station wider than the first), and a station framing
+// the whole must-box is no longer evidence of it — pulling back to the whole picture
+// is a legitimate move when the next thing to see cannot be framed tightly AND
+// centred (K4b).
+//
+// The REPEAT is the one this counts: *"two clicks later, it'll be the exact same zoom
+// in and zoom out."* The path is decided with a memory of where the camera is
+// standing (`lessonTours`), so a run of beats about one subject should be ONE move.
+// Two moves in a row landing in the same place means that memory is not working.
+{
+  let repeats = 0, moves = 0;
   for (const [id, per] of Object.entries(TOURS)) {
-    const m = MUST[id];
-    if (!m) continue;
+    // A GRADED BEAT RESETS THE PATH, so returning to a subject after a question is
+    // not a repeat — the camera genuinely had to leave for the tap to land (K6).
+    const comp = comps.get(id);
+    const sp = comp ? path.join(DIR, `${lower(comp)}Script.ts`) : null;
+    const body = sp && fs.existsSync(sp)
+      ? fs.readFileSync(sp, 'utf8').match(/BEATS[^=]*=\s*\[([\s\S]*)\n\];/) : null;
+    const chunks = body ? body[1].split(/\n\s{2}\},?\s*\n?/).filter((c) => /\S/.test(c)) : [];
+    let last = null;
     per.forEach((t, k) => {
-      const w = m[k];
-      if (!t || !w) return;
-      const l = t[t.length - 1];
-      if (l[0] > w[0] + 0.5 || l[1] > w[1] + 0.5
-        || l[0] + l[2] < w[0] + w[2] - 0.5 || l[1] + l[3] < w[1] + w[3] - 0.5) {
-        k3++;
-        if (k3 <= 6) console.log(`  FAIL  ${id} beat ${k}: the closing station is smaller than the beat's must-box (K3)`);
+      if (chunks[k] && /^\s{4}(mc|interact|summary):/m.test(chunks[k])) { last = null; return; }
+      if (!t || !t.length) return;
+      moves++;
+      const b = t[t.length - 1];
+      // A FOLLOW THAT BEGINS WHERE THE CAMERA IS PARKED IS NOT A REPEAT. It is the
+      // best possible start for a track: no move at all, and then the camera leaves
+      // with its subject. aesthetics-9 beat 4 does exactly that after beat 3 parked
+      // on the same man. Compared as a static box it looks like standing still twice.
+      if (b.length >= 10) { last = [b[6], b[7], b[8], b[9]]; return; }
+      if (last && Math.abs(last[0] - b[0]) < 12 && Math.abs(last[1] - b[1]) < 12
+        && Math.abs(last[2] - b[2]) < 12 && Math.abs(last[3] - b[3]) < 12) {
+        repeats++;
+        if (repeats <= 4) console.log(`  FAIL  ${id} beat ${k}: this move lands where the camera already was`);
       }
+      last = b;
     });
   }
-  if (k3) fails++; else ok('every tour ends on the beat\'s whole must-box (K3)');
+  if (repeats) bad(`${repeats} of ${moves} moves land where the camera already was — the path is repeating itself (K3)`);
+  else ok(`no move repeats the one before it (K3) · ${moves} moves`);
+}
+
+// ── D · THE CAMERA MAY NOT CUT A WORD IN HALF ──────────────────────────────
+//
+// Only bites now that a station HOLDS. While every tour ended wide, a framing that
+// sliced a caption was a moment on the way somewhere; now it is the picture the beat
+// rests on. `cleanEdges` grows a station to swallow any text it would otherwise cut,
+// and this is the independent check on that — run against the real `stationShot`,
+// not against the generator's own model of it, because the first version of that
+// model was 56 units out vertically and passed captions it was cutting.
+{
+  const sidecar = path.join(DIR, 'mustBoxes.ts.json');
+  if (fs.existsSync(sidecar)) {
+    const { words } = JSON.parse(fs.readFileSync(sidecar, 'utf8'));
+    const { stationShot, visibleWindow } = await loadTs(path.join(DIR, 'camera.ts'));
+    let sliced = 0, seen = 0;
+    for (const [id, per] of Object.entries(TOURS)) {
+      const comp = comps.get(id);
+      const scene = comp ? readScene(comp) : null;
+      const bm = scene?.match(/band=\{\[(\d+),\s*(\d+)\]\}/);
+      if (!bm) continue;
+      const band = [+bm[1], +bm[2]];
+      const gm = scene.match(/ground=\{(\d+)\}/);
+      const ground = gm ? +gm[1] : 500;
+      per.forEach((t, k) => {
+        if (!t) return;
+        const items = (words[id]?.[k] ?? []).filter((it) => it.k === 'text');
+        for (const s of t) {
+          // A FOLLOW IS EXEMPT. Its window travels the whole time, so words passing
+          // through frame are ordinary tracking, not a crop — and K9 pins both ends
+          // to one shared scale, which makes growing them to clear a word impossible
+          // anyway. What this rule protects is the framing a beat comes to REST on.
+          if (s.length >= 10) continue;
+          seen++;
+          const w = visibleWindow(stationShot({ x: s[0], y: s[1], w: s[2], h: s[3] }, band, ground), band);
+          for (const it of items) {
+            const [x, y, bw, bh] = it.b;
+            // Text drawn outside the lesson's band is unreachable at any shot — the
+            // band IS the camera's vertical world — so this is an H59 fault in the
+            // scene, not a framing the camera chose. `cleanEdges` skips it for the
+            // same reason, and counting it here would only hide the real ones.
+            if (y < band[0] - 0.5 || y + bh > band[1] + 0.5) continue;
+            const over = x < w.right && x + bw > w.left && y < w.bottom && y + bh > w.top;
+            const whole = x >= w.left - 0.5 && x + bw <= w.right + 0.5
+              && y >= w.top - 0.5 && y + bh <= w.bottom + 0.5;
+            if (over && !whole) { sliced++; break; }
+          }
+        }
+      });
+    }
+    // A BUDGET, AND IT IS A DEBT. 6 of 294 survive `cleanEdges`, and more passes do
+    // not shift them — the growth oscillates rather than converging, because widening
+    // a box lowers its scale, which widens the window, which can newly clip something
+    // that was wholly outside it a moment earlier. They are all a label sitting a unit
+    // or two over one edge. Lower this number when they are fixed; do not raise it.
+    const SLICE_BUDGET = 6;
+    if (sliced > SLICE_BUDGET) bad(`${sliced} of ${seen} stations cut a word in half, budget ${SLICE_BUDGET} — a held framing is the picture, not a moment (D)`);
+    else ok(`no more than ${SLICE_BUDGET} stations cut a word in half (D)`, `${sliced} of ${seen}`);
+  }
 }
 
 // ── what it bought ───────────────────────────────────────────────────────────

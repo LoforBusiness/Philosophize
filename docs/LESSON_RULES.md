@@ -1696,21 +1696,119 @@ must-see boxes are (H60c): `scripts/measure-must.mjs` records, per item, the fir
 scene-time it is drawn at. Stations are then ordered by the earliest reveal in each,
 and ties broken by reading order.
 
-### K3 · The tour ENDS wide, on everything the beat has
+### K3 · The camera is a PATH with a memory, and it moves when it must
 
-The last station of every tour frames the beat's whole must-box — the H60c box, the
-shot the beat has today.
+**It is somewhere. It moves when the next thing to see is not already in front of
+it. Otherwise it holds.** A lesson is therefore a handful of deliberate moves — three
+in a typical eight-beat lesson — and the tap between them is what advances the story,
+not the camera.
 
-Two things fall out of it, and both are deliberate:
+Three parts, and the third is the one that took two attempts:
 
-- **The reader always finishes a beat having seen the whole picture.** Close framing
-  is a way of directing attention, not a way of hiding two thirds of the stage. "The
-  user should still be able to see the whole screen" is this rule.
-- **The resting frame of every beat is exactly what shipped before this group
-  existed.** The tour is new motion added *ahead* of an unchanged final framing, so
-  the change cannot regress a beat's composition. Empty the station table and every
-  lesson is byte-for-byte its old self, which is what makes this safe to roll out to
-  102 lessons at once and trivial to roll back.
+1. **The subject of a beat is what ARRIVES during it.** Every measured item carries
+   the reading it was first seen in, so `r > 0` is exactly "this happened while the
+   beat was playing". A living figure does not count — see the note below.
+2. **The reason to move is emphasis, not visibility.** Read the other way round the
+   rule does nothing: the camera starts on the whole stage, so everything is already
+   in frame, so there is never anywhere to go — measured, **47 moves across 905
+   beats** and most lessons dead still. It pushes in because the beat is *about* this
+   thing. `worth` (K4, K4b) decides whether there is a framing here at all; only when
+   there is not does visibility get a say, and then the answer is the whole stage.
+3. **It is decided for the whole lesson at once, in order** (`lessonTours`). Deciding
+   each beat alone cannot help but bounce: beat 0 finds a subject and pushes, beat 1
+   finds nothing and so has no reason to be anywhere and falls back to wide, beat 2
+   finds the same subject and pushes again. A reader watching that said so exactly —
+   *"it'll zoom in, then zoom out, and then two clicks later, it'll be the exact same
+   zoom in and zoom out"* — and **every lesson did it the same way, because the
+   pattern came from the rule rather than from the lesson.**
+
+A `null` in the table means **hold what you have**, and the player must honour it or
+the two disagree — the generator holding while the player pulls back out is the bounce
+rebuilt from both ends. The only beats that park at their own framing are a **graded**
+one (K6 — an answer target needs the identity transform) and the **summary**, and both
+sides know it.
+
+> `followMoves` no longer chooses framings at all. It used to deal a verb per beat
+> from the figure's track plus a seeded three-phase cycle, which gave every lesson in
+> the app the same rhythm; a cycle cannot help but repeat, that is what a cycle is. It
+> now deals `pull` for a question or a summary and `hold` for everything else. **`whip`
+> went with it, and with `whip` the last overshooting move in the app** — "that same
+> bouncy camera movement" was `easeBack`, which nothing else ever dealt.
+
+#### The camera frames what CHANGES, and then it stays there
+
+**A station exists to show something that happens.** The subject of a beat is not its
+contents — it is the part of them that arrives while the beat is playing. Everything
+already on stage when the beat opened was carried in from the shot the reader was
+looking at a moment ago, and there is nothing to move for.
+
+The sweep already records this: every measured item carries the reading it was first
+seen in, so `r > 0` *is* "this appeared during the beat". The tour is built from those
+items and from nothing else.
+
+Then the camera **holds until the tap**. No closing station, no coming back out.
+
+> #### What this replaced, and why
+>
+> This rule used to say the opposite: *the last station of every tour frames the
+> beat's whole must-box*, so a reader always finished a beat having seen everything.
+> It sounded like a safety property. It was the single line that produced what a
+> reader described as **"this loop of movement… it will move 3 different times just
+> to be sure it shows everything, that is inefficient and doesn't really make
+> sense"**.
+>
+> Measured, it had put **2.39 stations on every toured beat, 1262 of them across 527
+> beats**, and the commonest tour in the whole app was `[tight on the man for 1.2s]
+> → [the whole stage]`. The close-up taught nothing and the camera then undid it —
+> because the shot it pulled back to was the shot the beat had opened on. A reader
+> sees a dip, not a decision.
+>
+> The honest reading of H60c was always "if the reader is told to look at it, the
+> camera must frame it" — **at some point in the beat**, not at the end of it. A
+> camera that pans from a man to a chart and stays on the chart has not hidden the
+> man. Removing the lap took stations from **1262 → 502** and camera stops from
+> **1.81 → 1.10 per beat**.
+>
+> The one thing genuinely lost is the old rollback property: emptying the table no
+> longer leaves every lesson byte-for-byte its old self, because the table is now the
+> camera rather than motion added ahead of it. Which was in fact already true and
+> merely unstated — measured on the base shots alone, **66 lessons never move at
+> all**: `frame()` contains every beat by its must-box, most must-boxes are
+> near-full-stage, and what was left after containment was one static wide.
+
+#### Three things about K3 that only a screenshot found
+
+Each of these passed `tsc`, the generator's own verifier and `check:tour`, and each
+was wrong on the real screen. The offline harness cannot see any of them.
+
+- **A living figure is not a change.** `stand()` gives every figure breath, a weight
+  rock and head drift, so his measured box differs in all four readings whatever he is
+  doing — which made the man the freshest thing on every beat in the app. The camera
+  pushed in on him, and aesthetics-1 beat 0 came back as a full-frame close-up of a
+  stickman under the words *"Look at it. Beautiful, obviously"*, with the sunset those
+  words are about off the stage. **A1, produced by a camera rule.** He now counts as
+  changing at **24 units** of centre travel: above breathing (2–3) and an arm coming
+  out (~10), below the 60 that makes it a walk to follow.
+- **A held framing may not cut a word in half.** While every tour ended wide, a
+  framing that sliced a caption was a moment on the way somewhere. Now it is the
+  picture the beat rests on — the same beat came back with the chart panel chopped
+  down its middle reading *"APP… SUN… BEAU…"*. `cleanEdges` grows a station to swallow
+  any text it would otherwise cut; art is exempt, because art bleeding off a frame
+  edge is ordinary composition. If growing costs the station its gain, the beat holds
+  wide, which is the right answer: it cannot be framed tightly without cutting a word.
+- **The table is written in integers, and it must round OUTWARD.** `make-tours` stores
+  every station through `Math.round`, so a box validated at y 232.5 shipped as y 233 —
+  half a unit tighter than everything had been checked against, which was enough to
+  slice five labels sitting exactly on that line in epistemology-13. Rounding outward
+  makes the stored box a superset of the proven one.
+
+> **And the guard that silently inverted.** `CinematicPlayer` refused any tour with
+> `raw.length < 2`. That was harmless for exactly as long as K3 forced a closing wide
+> station, which made two the minimum any generator could emit — "fewer than two"
+> meant "degenerate". With the lap gone the ordinary tour is a SINGLE station, and the
+> line quietly discarded **300 of them**: generated, verified, written to the table,
+> and dropped on load. Every lesson looked precisely as it had. A condition whose
+> meaning depends on a rule kept somewhere else goes stale without ever failing.
 
 ### K4 · A station needs a subject worth stopping for
 
@@ -1753,6 +1851,45 @@ rest are not the same index every time. The result is 55% of beats toured, a mea
 
 A beat left with no qualifying station keeps a single shot.
 
+### K4b · If it cannot be centred, do not go
+
+**A shot that travels to something must put it near the middle of the frame** — within
+**18%** of frame width, a hair past the rule-of-thirds line, which is where a subject
+stops reading as *placed* and starts reading as a camera that missed. Otherwise the
+move is not made and the frame stays where it is.
+
+This is the second half of what the reader asked for: *"make sure that when the camera
+moves to anything that it is centered, not mainly to the left or right side of the
+screen, but the center."*
+
+**It is a hard geometric limit, not a preference.** `fit` may never let the window
+leave the design space, so the centre is clamped to `[200/s, 400 − 200/s]`. A figure
+standing at x 72 needs `s ≥ 2.78` before its own centre is even reachable, and K5 caps
+every station at 1.72. The clamp wins, the camera arrives, and the man is pinned
+against the edge of a frame that has just travelled to look at him.
+
+Two things about it are worth knowing before trying to be clever:
+
+- **Tightening makes it worse, not better.** Relative offset is `0.5 − bx/(2h)` with
+  `h = 200/s`, so a *wider* frame has its centre pinned nearer the stage centre and
+  the subject further from it. There is no scale that rescues an edge subject.
+- **Overhang would fix it and is not worth it.** Letting the window run past the
+  design space would allow a true centre, but scenes stop their ground lines short of
+  the stage edge (`left: 20, right: 14` is typical), so the frame would show a rule
+  ending in mid-air. `checkShots` forbids it, and should keep forbidding it.
+
+Measured across the app before this rule: **983 pushed shots, 709 of them past the
+thirds line, the worst 35.6% off centre.** After: **528 pushed shots and 2 past the
+line.**
+
+> **Where it bites, it is a staging note and not a camera one.** Three lessons —
+> `logic-arguments-12`, `political-political-32`, `aesthetics-aesthetics-34` — stand
+> their figure at x 15–35 on every beat, so nothing in them is centrable and they now
+> hold one wide shot throughout. That is the correct trade (the whole stage is
+> legible, and the figure is at the left because that is where the scene draws them),
+> but the real fix is in the scene: move the figure inward and the camera comes back
+> on its own.
+
 ### K5 · Nothing goes closer than `tight`
 
 **1.72× is the ceiling**, the existing `tight` framing. Past it the frame is inside
@@ -1788,8 +1925,14 @@ anything, because K3 guarantees the thing they land on is the complete picture.
 - travel **0.55–0.9s** — under 0.35 reads as a jump-cut (`checkShots` already says
   so), over ~1s and the reader taps;
 - dwell **≥0.7s**, and long enough to cover its own reveal window;
-- **at most 4 stations**, including the closing wide;
+- **at most 2 stations**, and the last one holds until the tap;
 - **≤5.5s of the reader being kept waiting.**
+
+**Two, and there is no third.** Two is the smallest number that can say "look here,
+now look there" and the largest that is not a lap. Measured after K3 was rewritten,
+**1.22 stations per toured beat** — so the ordinary tour is a single move, and the
+second one is the shape the reader themselves named as worth having: *"the camera
+zooms into a moving thing, then pans to information after that."*
 
 That last figure counts travel and *static* dwell only, and the distinction is not a
 loophole. A follow station's dwell (K9) is the walk the beat already contained, now
@@ -1799,6 +1942,34 @@ group exists to enable the one shot it forbids.
 
 A beat carrying more than four things worth separate framings is a composition
 problem, not a camera problem — see H52 and the one-idea-per-beat rule.
+
+### K8b · Nothing chases the camera — it IS the camera
+
+**The requested shot is driven straight to the transform. There is no smoother.**
+
+There was one: a critically-damped spring chasing `camNow`, hired when the requested
+shot was discontinuous in four separate places. All four are now fixed at source — the
+travel carries the shot actually drawn (group L), a question beat frames with its
+static must-box immediately, a tap no longer warps the clock out from under a travel,
+and a beat with nothing to go to holds. **Smoothing something already smooth only buys
+lag**, and a reader reported that lag twice without knowing it was one thing:
+
+- *"the camera zooms in and the thing is on the left side, and then over a little bit
+  of time it eventually corrects to the center."* That is the spring settling. The
+  travel had arrived; the follower had not.
+- *"it sees the movement and then moves after — I want it to move WITH the stickman
+  walking, the same moment it is walking."* A chase has a steady-state error against a
+  moving target. Feeding the target's velocity forward shrank it and could not remove
+  it, because a measured velocity is always one frame old.
+
+Both are one sentence: **a follower cannot be in two places at once, and the place the
+reader wants it is the requested one.** `shotAt` already eases every travel out of rest
+and back into it — smoothstep on the centre, geometric on the scale — so the motion is
+smooth with nothing chasing it, and it *arrives*, on the frame it was meant to, centred.
+
+`LEAD` went to **0** in the same pass. Looking a little into a move is an operator's
+habit and it is still the camera disagreeing with its subject about where the subject
+is; "move with" is the instruction, and it is now literal.
 
 ### K9 · A follow is not a travel, and its clock runs
 
@@ -1917,6 +2088,81 @@ there is no reason for a new scene to reintroduce it.
 > `lerp(TRACK[p], TRACK[n], tr)` for a prop, that prop has the identical defect — it simply
 > has no limb for the checker to measure. When you add an animated track, ask what it does
 > if the reader taps at 0.3s, and if the answer is "jumps", carry the value the same way.
+
+---
+
+## Group M — the narrator is a character, and the character is passive-aggressive
+
+Group J says *how* to write a sentence. This one says **who is saying it**.
+
+The words sit under a figure who is plainly the one speaking them, and until now he
+had no manner at all — he explained things pleasantly and identically for 114
+lessons. A voice costs nothing to add and is most of what makes an app feel like it
+was made by someone. The voice chosen is **dry, faintly put-upon, fond of you and
+tired of his subject**: a man who has explained Kant before and will explain him
+again, thanks.
+
+The reference implementation is **aesthetics 1** — Kant needed a whole book to say
+you don't want to eat a sunset, Hume's fix for taste is suspiciously tidy, and a
+private feeling has the nerve to summon eight people to agree with it.
+
+**M1 — the barb lands on the subject, never on the reader.**
+He may be tired of Kant. He may never be tired of *you*. "He needed a whole book to
+say that" is the voice; "take your time" aimed at someone deciding between two cards
+is not, and at the scale this ships it is just an app being unpleasant to a stranger.
+The test is mechanical: name who the sentence is at the expense of. If the answer is
+the reader, rewrite it.
+
+**M2 — it is what he doesn't say.**
+Passive-aggression is implication. *"Philosophy has been working on why for three
+hundred years. No rush."* never calls anyone slow. Stating the insult outright is
+sarcasm, which is a different and much cheaper thing, and it dates badly on a second
+reading — which every reader who repeats a lesson will give it.
+
+**M3 — the information survives the attitude.**
+Delete every dry aside and the beat must still teach exactly what it taught before.
+The manner is a layer over a complete lesson, never a substitute for a clause of it.
+If cutting the joke also cuts the point, the joke was carrying teaching weight and
+the beat is now worse than the plain version it replaced.
+
+**M4 — one barb a beat.**
+Two is a comedian; one is a person. Most beats should have none at all — the voice
+reads as character precisely because it is intermittent, and a narrator who lands a
+zinger every four seconds is exhausting by lesson three.
+
+**M5 — three places stay straight.** The summary **points**, any **quote**, and the
+**explanation after an answer**. These are the moments the reader is being told the
+truth and has to be able to trust the app flatly: the payoff they are meant to walk
+away with, someone else's actual sentence, and the verdict on a choice they have
+already committed to. An explanation may be dry about the *losing idea* — *"Stronger
+is not the difference. A toothache is strong too."* teaches why the axis was wrong —
+but never about the person who picked it. The summary's **closing** line is the
+exception and the release valve: that is where he gets the last word.
+
+**M6 — the body agrees with the voice (A1, applied to tone).**
+A figure standing there explaining cheerfully underneath a dry line undoes it. The
+put-upon poses are `SIGH` in `cinematicKit` — folded arms, a shrug, a hand on the
+hip, a hand to the head — and they are codes into the **wide** emote library,
+because not one of the seven narrator gestures can fold its arms.
+
+Three things learned putting them on: **in profile a hand on the hip is a bulge at the
+waist**, indistinguishable from the neutral stand, so `SIGH.HIP` costs a must-box
+re-measure and buys nothing on a still beat. A **shrug is the right pose for a
+question beat** — the reader is reading two cards rather than watching, and "well,
+that is what the man said" is exactly the attitude to hold while they decide. And the
+**summary beat covers the stage**, so a pose written there draws nothing at all: the
+sign-off is the closing *line*, and it has no body to deliver it with.
+
+The first two came off a contact sheet (Part 3); the third only came off a
+screenshot of the real screen, because a pose that is never drawn is numerically
+perfect.
+
+**None of this is countable, and that is stated rather than faked.** A checker cannot
+tell dry from mean, and a "sarcasm budget" would be a number that measured nothing.
+Group M is judgement, like J5 and J7 — with one thing the machine *does* hold: pose
+codes are written as literal digits in a script, never as `SIGH.FOLDED`, because
+`check-smooth` reads the pose track out of the source with a regex and would score a
+named constant as pose 0 — quietly reporting a lesson it had not actually replayed.
 
 ---
 

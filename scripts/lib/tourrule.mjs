@@ -14,6 +14,39 @@
 // stations moves that guarantee from "per beat" to "per instant". The arithmetic on
 // the shipped measurements: 462 of 884 beats support a tour, and on those the
 // ceiling goes 1.056× → 1.671×.
+//
+// ── AND WHAT A STATION IS NOT FOR: THE LAP ──────────────────────────────────
+//
+// The first version of this rule read H60c as "the reader must have seen the whole
+// picture BY THE END OF THE BEAT", and implemented it by ending every tour on the
+// beat's full must-box. That one line produced everything a reader then described as
+// "a loop of movement": 2.39 stations a beat, 527 toured beats, and — the tell — a
+// closing move that reveals nothing, because the shot it pulls back to is the shot
+// the beat opened on.
+//
+// The commonest tour in the app was [tight on the man, 1.2s] → [the whole stage].
+// The close-up taught nothing, and then the camera undid it. A reader sees a dip,
+// not a decision.
+//
+// So the rule is now the one its own name always said: **every must-see thing is
+// framed at some point in the beat**, not at the end of it. A camera that pans from
+// a man to a chart and stays on the chart has not hidden the man. That single change
+// is what removes the lap, and it makes the rest fall out:
+//
+//   · A tour is at most TWO stations, and the last one HOLDS until the tap.
+//   · Two stations exist only when the beat's contents actually split into two
+//     subjects, each worth stopping for. Then station 1 is one of them and station 2
+//     is the other, so between them nothing is lost — the coverage is structural,
+//     because `cluster` partitions every item into one group or the other.
+//   · A lone subject among the words about it gets NO tour. It cannot: a station
+//     that covers every item is by definition at least as wide as the must-box, so
+//     it can never be tighter than the shot the beat already has. That beat rests on
+//     its `followMoves` shot — which pushes in on the figure one beat in three
+//     anyway, at the beat level, where a push reads as a push.
+//   · A FOLLOW is one continuous move that tracks a walk, and it may pan once more
+//     afterwards if there is genuinely something else to read. It is the one shot
+//     allowed to end on its subject rather than on everything, because a walk IS the
+//     beat and framing the whole stage as well is precisely what it exists not to do.
 
 export const STAGE_W = 400;
 export const STAGE_H = 560;
@@ -26,23 +59,68 @@ export const MIN_SUBJECT = 88;
 export const MIN_GAIN = 0.12;
 /** The narrowest empty corridor that counts as a real separation between subjects. */
 export const MIN_GAP = 34;
-/** K8 — including the closing wide station. */
-export const MAX_STATIONS = 4;
+/**
+ * K4b — HOW FAR OFF THE MIDDLE A STATION MAY LEAVE ITS SUBJECT.
+ *
+ * A share of the frame's width. 0.18 is a hair past the rule-of-thirds line (0.167),
+ * which is where a subject stops reading as *placed* and starts reading as a camera
+ * that was aimed badly.
+ *
+ * This exists because the camera physically cannot centre a subject near the edge of
+ * the stage. `fit` may not let the window leave the design space, so the centre is
+ * clamped to [200/s, 400 − 200/s]; for a subject at x 72 that needs s ≥ 2.78, and K5
+ * caps every station at 1.72. Measured on the shipped tours: **76 stations sat more
+ * than 12% off centre and the worst was 35.5%** — a man pinned against the left edge
+ * of a frame that had just travelled to look at him, which is exactly what the reader
+ * described.
+ *
+ * Tightening the scale makes it WORSE, not better, which is the counter-intuitive
+ * part: a wider frame has its centre pinned nearer the stage centre. So there is no
+ * scale that rescues an edge subject, and the honest move is not to go. A beat that
+ * fails this keeps the shot it already had — where the whole stage is visible and the
+ * subject being off to one side is the composition, not the camera.
+ */
+export const MAX_OFF = 0.18;
+/**
+ * K3 — how far a figure must travel before the camera treats him as the beat's
+ * change. Below this he is breathing and gesturing, which every figure does on every
+ * beat; above 60 he is walking and gets a follow (K9) instead.
+ */
+export const FIG_MOVE = 24;
 
 /**
- * Travel and dwell per tour length, chosen so the total always clears K8's 5.5s.
+ * Can the camera put this box near the middle of the frame? Mirrors `fit`'s x-clamp
+ * exactly — including its one unit of slack — because agreeing with the shipping
+ * maths is the whole point of deciding this here.
+ */
+export function centrable(box, band) {
+  const s = Math.max(1, Math.min(CAP, scaleFor(box, band)));
+  const halfW = STAGE_W / (2 * s);
+  const bx = box[0] + box[2] / 2;
+  const cx = Math.min(Math.max(bx, halfW - 1), STAGE_W + 1 - halfW);
+  return Math.abs(bx - cx) / (2 * halfW) <= MAX_OFF;
+}
+/**
+ * K8 — the whole tour, and there is no closing station on top of it.
  *
- *   2 stations  0.70 + 1.20 + 0.70                        = 2.60s
- *   3 stations  0.70 + 1.10 + 0.70 + 1.10 + 0.70          = 4.30s
- *   4 stations  0.65 + 0.95 thrice, then 0.65             = 5.45s
+ * Two, because two is the smallest number that can express "look here, now look
+ * there" and the largest that is not a lap. Three framings in one beat means the
+ * camera has visited something it did not need to, which is what the reader saw.
+ */
+export const MAX_STATIONS = 2;
+
+/**
+ * Travel and dwell. One shape now, because there is one tour length.
  *
- * The last station's dwell is not in the sum: K3 makes it the beat's full must-box
- * and it holds until the reader taps.
+ *   0.70 travel + 1.60 dwell + 0.70 travel = 3.00s, then it holds until the tap.
+ *
+ * The dwell went 1.2 → 1.6 with the lap removed. Under the old rule the first
+ * station was one of three or four and the reader was being hurried through it;
+ * now it is half the beat, and it owns that much of the scene clock (K1), so it
+ * needs long enough for what it is framing to actually happen.
  */
 export const PACE = {
-  2: { tr: 0.7, dwell: 1.2 },
-  3: { tr: 0.7, dwell: 1.1 },
-  4: { tr: 0.65, dwell: 0.95 },
+  2: { tr: 0.7, dwell: 1.6 },
 };
 
 export const union = (items) => {
@@ -97,185 +175,239 @@ export function cluster(items, max) {
   return groups;
 }
 
+/**
+ * ROUNDED OUTWARD, and the table stores integers, which is the point.
+ *
+ * `make-tours` writes every station through `Math.round`, so a box validated at
+ * y 232.5 ships as y 233 — half a unit tighter than the one every check was run
+ * against. That is enough: epistemology-13 beat 2 had five labels sitting exactly on
+ * y 232.5, inside the framing the generator approved and sliced by the one it wrote.
+ * Growing outward makes the stored box a superset of the computed one, so nothing the
+ * generator proved can be lost in the write.
+ */
+const outward = (box) => [
+  Math.floor(box[0]), Math.floor(box[1]),
+  Math.ceil(box[0] + box[2]) - Math.floor(box[0]),
+  Math.ceil(box[1] + box[3]) - Math.floor(box[1]),
+];
+
 const clampToBand = (box, band) => {
   const x0 = Math.max(0, box[0]);
   const y0 = Math.max(band[0], box[1]);
   const x1 = Math.min(STAGE_W, box[0] + box[2]);
   const y1 = Math.min(band[1], box[1] + box[3]);
-  return [x0, y0, Math.max(0, x1 - x0), Math.max(0, y1 - y0)];
+  return outward([x0, y0, Math.max(0, x1 - x0), Math.max(0, y1 - y0)]);
 };
 
 /** What the camera has to hold: the figure and the words always, art unless it bleeds. */
 export const wanted = (items) => (items ?? []).filter((it) => it.k !== 'art' || !it.bleed);
 
 /**
- * ONE BEAT'S TOUR, or null if it does not earn one.
+ * The window a station on `box` would actually show, mirroring `stationShot` + `fit`.
  *
- * @param items   the measured parts for this beat (mergeReadings output)
- * @param wide    the beat's full must-box — K3's closing station
- * @param band    the lesson's band
- * @param single  true for graded / drag / summary beats, which get one shot (K6)
- * @param reveal  whether the measurements carry reveal-order data at all
- * @param dur     the beat's own declared duration, for a follow station's dwell
- * @param seed    a per-lesson number, so the beats that rest differ between lessons
- * @param k       the beat index, which with `seed` decides which beats rest
- *
- * ── WHEN THE REVEAL ORDER IS NOT KNOWN ──────────────────────────────────────
- *
- * K2 says a tour's order must be measured, because with the clock gated a
- * mis-ordered tour parks the camera on one subject while another draws itself off
- * screen — worse than not touring at all. A sweep taken before reveal times were
- * recorded cannot answer that, and "everything was in the first reading" is
- * indistinguishable from "nobody looked".
- *
- * So without it the tour is capped at ONE detail station plus the closing wide.
- * That is safe by construction rather than by assumption: with a single detail
- * there is no order to get wrong, and K3 still guarantees the beat resolves to the
- * whole picture. The multi-station tours come back by re-running the sweep, which
- * is the only thing that can honestly authorise them.
+ * Kept here rather than imported so this file stays zero-import (see the header); the
+ * cost is that the two must agree, and the reason it is worth paying is that the
+ * next function needs to know what a framing CUTS before deciding whether to make it.
  */
-export function tourFor(items, wide, band, single, reveal = true, dur = 0, seed = 0, k = 0) {
-  if (single || !wide) return null;
-  const raw = wanted(items);
-  if (raw.length < 2) return null;
+export function windowOf(box, band, ground) {
+  const s = Math.max(1, Math.min(CAP, scaleFor(box, band)));
+  const halfW = STAGE_W / (2 * s);
+  const oTop = (band[0] - STAGE_H / 2) / s;
+  const oBot = (band[1] - STAGE_H / 2) / s;
 
-  // ── K9 · IS THE SUBJECT WALKING? ───────────────────────────────────────────
+  // ── fit(): clamp the window inside the design space and above the ground ──
+  let cx = Math.min(Math.max(box[0] + box[2] / 2, halfW - 1), STAGE_W + 1 - halfW);
+  let cyLo = -1 - oTop;
+  const cyHi = STAGE_H + 1 - oBot;
+  if (ground != null && s > 1.02) cyLo = Math.max(cyLo, ground - oBot);
+  let cy = Math.min(Math.max(box[1] + box[3] / 2, cyLo), cyHi);
+
+  // ── AND THEN containShot(), WHICH IS THE HALF I LEFT OUT ─────────────────
   //
-  // If it is, that beat wants a FOLLOW, not a pair of parked framings — "the camera
-  // is very close to him, following him walk" is one continuous station whose target
-  // moves. The sweep samples each beat four times, so a figure that crosses the
-  // stage leaves four boxes at four x positions; ordered by reveal index they are a
-  // trajectory, and the first and last of them are the two ends of the track.
-  //
-  // Needs the reveal order for the same reason everything else here does: without it
-  // the samples are an unordered set and the figure could as easily be walking the
-  // other way. 318 of 891 beats move a figure and the longest crosses 350 units, the
-  // full width of the stage — which as ONE static station is necessarily the widest
-  // shot in the lesson, and is exactly the shot readers described as a small man in
-  // a long take.
-  if (reveal) {
+  // `stationShot` is fit-then-contain, and modelling only the first half put this
+  // 56 units out vertically while agreeing exactly across — so `cleanEdges` was
+  // testing a window the camera never shows, and passed captions it was in fact
+  // slicing (aesthetics-1 beat 0, the panel's caption at y 254 against a real window
+  // starting at 264). Horizontal agreement is what made it look right.
+  cx = Math.max(halfW, Math.min(STAGE_W - halfW, cx));
+  cy = Math.max(-oTop, Math.min(STAGE_H - oBot, cy));
+  cx = Math.max(Math.min(cx, box[0] + halfW), box[0] + box[2] - halfW);
+  cy = Math.max(Math.min(cy, box[1] - oTop), box[1] + box[3] - oBot);
+
+  return { left: cx - halfW, right: cx + halfW, top: cy + oTop, bottom: cy + oBot };
+}
+
+/**
+ * D — THE CAMERA MAY NOT CUT A WORD IN HALF.
+ *
+ * A cost of holding on a station instead of ending wide. Under the old rule the beat
+ * always resolved to the whole stage, so a mid-tour framing slicing a label was a
+ * moment rather than the picture the reader was left with. Now it IS the picture:
+ * aesthetics-1 beat 0 came back framing the sunset beautifully with the chart panel
+ * beside it chopped down its middle, reading "APP… SUN… BEAU…".
+ *
+ * So a station grows to swallow any TEXT it would otherwise slice. Art is exempt —
+ * art bleeding off a frame edge is ordinary composition, and `wanted` already drops
+ * the pieces that are meant to bleed. If growing costs the station its gain, `worth`
+ * rejects it and the beat holds wide, which is the correct answer: it means the beat
+ * cannot be framed tightly without cutting a word.
+ */
+export function cleanEdges(box, band, all, ground) {
+  let out = box;
+  for (let pass = 0; pass < 4; pass++) {
+    const w = windowOf(out, band, ground);
+    const cut = (all ?? []).filter((it) => {
+      if (it.k !== 'text') return false;
+      // ONLY WHAT THE CAMERA COULD HAVE FRAMED. Text drawn outside the lesson's band
+      // is unreachable at any shot — the band is the camera's vertical world — so
+      // growing for it never converges and the fault is H59's, in the scene, not the
+      // camera's. Blaming the camera for it would also hide the real ones.
+      if (it.b[1] < band[0] - 0.5 || it.b[1] + it.b[3] > band[1] + 0.5) return false;
+      const [x, y, bw, bh] = it.b;
+      const overlaps = x < w.right && x + bw > w.left && y < w.bottom && y + bh > w.top;
+      const whole = x >= w.left - 0.5 && x + bw <= w.right + 0.5 && y >= w.top - 0.5 && y + bh <= w.bottom + 0.5;
+      return overlaps && !whole;
+    });
+    if (!cut.length) return out;
+    out = clampToBand(union([{ b: out }, ...cut]), band);
+  }
+  return out;
+}
+
+/** Is an item's box wholly inside `o`? Half a unit of slack for rounding. */
+const inside = (b, o) =>
+  b[0] >= o[0] - 0.5 && b[1] >= o[1] - 0.5 &&
+  b[0] + b[2] <= o[0] + o[2] + 0.5 && b[1] + b[3] <= o[1] + o[3] + 0.5;
+
+
+/** Is a box wholly inside a visible window? */
+const inWindow = (b, w) =>
+  b[0] >= w.left - 0.5 && b[0] + b[2] <= w.right + 0.5 &&
+  b[1] >= w.top - 0.5 && b[1] + b[3] <= w.bottom + 0.5;
+
+/** Two framings that differ by less than this are the same shot; moving is a twitch. */
+const SAME = 12;
+const sameBox = (a, b) =>
+  !!a && !!b && Math.abs(a[0] - b[0]) < SAME && Math.abs(a[1] - b[1]) < SAME &&
+  Math.abs(a[2] - b[2]) < SAME && Math.abs(a[3] - b[3]) < SAME;
+
+/** What ARRIVES during a beat — the beat's subject. A living figure does not count. */
+export function freshOf(raw) {
+  const figs = raw.filter((it) => it.k === 'fig');
+  let moved = 0;
+  if (figs.length > 1) {
+    const ord = [...figs].sort((a, b) => (a.r ?? 0) - (b.r ?? 0));
+    const cx = (it) => it.b[0] + it.b[2] / 2;
+    moved = Math.abs(cx(ord[ord.length - 1]) - cx(ord[0]));
+  }
+  return raw.filter((it) => (it.r ?? 0) > 0 && (it.k !== 'fig' || moved >= FIG_MOVE));
+}
+
+/**
+ * A WHOLE LESSON'S CAMERA, decided in order, with a memory of where it is pointing.
+ *
+ * ── WHY THIS IS SEQUENTIAL AND THE OLD ONE WAS NOT ──────────────────────────
+ *
+ * Deciding each beat on its own cannot help but bounce. Beat 0 finds a subject and
+ * pushes in; beat 1 finds nothing and therefore has no reason to be anywhere, so it
+ * falls back to the whole stage; beat 2 finds the same subject and pushes in again.
+ * A reader watching that sees exactly what one reported: *"it'll zoom in, then zoom
+ * out, and then two clicks later, it'll be the exact same zoom in and zoom out"* —
+ * and every lesson does it the same way, because the pattern comes from the rule
+ * rather than from the lesson.
+ *
+ * The camera is a PATH. It is somewhere, and it moves when the next thing to see is
+ * not already in front of it. So this walks the beats carrying `held` — the framing
+ * the camera will be sitting in — and emits a move only when that framing does not
+ * already contain what the beat is about. Everything else emits `null`, which the
+ * player now reads as **hold what you have** rather than as "fall back to wide".
+ *
+ * Three consequences, and they are the three things that were asked for:
+ *
+ *   · **One move per beat at most, and usually none.** A lesson becomes a handful of
+ *     deliberate moves instead of a push and a pull on every tap.
+ *   · **No two moves in a row to the same place.** `sameBox` refuses a move that
+ *     would land within 12 units of where the camera already is.
+ *   · **It differs per lesson by construction**, because the path is driven by where
+ *     that lesson's content actually is and when it arrives — not by a seeded cycle
+ *     dealing push/pull/hold to every lesson alike.
+ *
+ * @param beats  per beat: { items, wide, single, dur }
+ * @returns per beat: an array of stations, or null to hold
+ */
+export function lessonTours(beats, band, ground) {
+  const WHOLE = [0, band[0], STAGE_W, band[1] - band[0]];
+  const out = [];
+  // `null` means the camera is showing the whole stage, which is where it starts and
+  // where every graded beat puts it back (K6 — an answer target must take the
+  // identity transform or the tap has to survive a camera offset).
+  let held = null;
+  const heldWindow = () => windowOf(held ?? WHOLE, band, ground);
+
+  for (const beat of beats) {
+    const { items, wide, single, dur } = beat;
+    if (single || !wide) { out.push(null); held = null; continue; }
+    const raw = wanted(items ?? []);
+    if (raw.length < 2) { out.push(null); continue; }
+
+    const wideS = Math.max(1, Math.min(CAP, scaleFor(wide, band)));
+    const worth = (box) =>
+      Math.max(box[2], box[3]) >= MIN_SUBJECT &&
+      Math.max(1, Math.min(CAP, scaleFor(box, band))) > wideS + MIN_GAIN &&
+      centrable(box, band);
+
+    // ── K9 · the subject is walking → go WITH it ─────────────────────────────
     const figs = raw.filter((it) => it.k === 'fig').sort((a, b) => (a.r ?? 0) - (b.r ?? 0));
-    // ONE FIGURE PER READING, OR THIS CANNOT BE A WALK.
-    //
-    // Two people standing 200 units apart leave exactly the same trace as one person
-    // who walked 200 units: a set of figure boxes at different x. The readings are
-    // what tell them apart — a walker contributes ONE box per reading and moves
-    // between them, whereas a crowd contributes several to the same reading and the
-    // samples cannot be matched to owners at all.
-    //
-    // So a bucket holding more than one figure means the beat has company, and the
-    // follow is abandoned rather than guessed. Conservative on purpose: the failure
-    // it prevents is the camera gliding smoothly from one motionless person to
-    // another as though it were tracking, which reads as the app being confused
-    // about what it is looking at.
     const bucket = new Map();
     for (const f of figs) bucket.set(f.r ?? 0, (bucket.get(f.r ?? 0) ?? 0) + 1);
     const alone = [...bucket.values()].every((n) => n === 1);
+    let followed = null;
     if (figs.length > 1 && alone && bucket.size > 1) {
       const a = figs[0], b = figs[figs.length - 1];
       const travelled = Math.abs((b.b[0] + b.b[2] / 2) - (a.b[0] + a.b[2] / 2));
-      // C18's floor: under 60 units a walk does not read as a walk, and a camera
-      // sliding after it reads as drift.
       if (travelled >= 60) {
         const near = clampToBand([a.b[0], a.b[1], a.b[2], a.b[3]], band);
         const far = clampToBand([b.b[0], b.b[1], b.b[2], b.b[3]], band);
-        const hold = Math.max(1.6, Math.min(4.2, dur || 2.6));
-        return [
-          { box: near, to: far, tr: 0.7, dwell: hold },
-          { box: wide, tr: 0.7, dwell: 9 },
-        ];
+        if (centrable(near, band) && centrable(far, band)) followed = { near, far };
       }
     }
-  }
-
-  const wideS = Math.max(1, Math.min(CAP, scaleFor(wide, band)));
-
-  // K4 twice over: big enough to be a subject, and tight enough to be a move.
-  const groups = cluster(raw, MAX_STATIONS - 1)
-    .filter((g) => g.length)
-    .map((g) => ({ items: g, box: clampToBand(union(g), band) }))
-    .filter((g) => Math.max(g.box[2], g.box[3]) >= MIN_SUBJECT)
-    .map((g) => ({ ...g, s: Math.max(1, Math.min(CAP, scaleFor(g.box, band))) }))
-    .filter((g) => g.s > wideS + MIN_GAIN);
-
-  // K2 — REVEAL ORDER, from the reading each thing was first seen in. Ties, and
-  // beats whose things all arrived together, fall back to reading order: top band
-  // first, then left to right. That fallback is only ever applied WITHIN one reveal
-  // bucket, where by construction the reader saw them appear at the same time and
-  // no order can be wrong.
-  const firstSeen = (g) => Math.min(...g.items.map((it) => it.r ?? 0));
-  groups.sort((a, b) => {
-    const d = firstSeen(a) - firstSeen(b);
-    if (d !== 0) return d;
-    const ay = Math.round(a.box[1] / 40), by = Math.round(b.box[1] / 40);
-    return ay !== by ? ay - by : a.box[0] - b.box[0];
-  });
-
-  // No measured reveal order — keep one detail and drop the rest, so there is no
-  // order left to be wrong about. The one kept is whichever holds a FIGURE, and
-  // failing that the largest subject: a lone incidental label getting the beat's
-  // only close-up reads as the camera having missed the point, and the figure is
-  // what the reader is following.
-  let picked = !groups.length ? [] : reveal ? groups : [
-    groups.find((g) => g.items.some((it) => it.k === 'fig'))
-      ?? groups.reduce((a, b) => (a.box[2] * a.box[3] >= b.box[2] * b.box[3] ? a : b)),
-  ];
-
-  // ── THE FIGURE IS A SUBJECT, NOT A REGION ──────────────────────────────────
-  //
-  // Everything above separates subjects by finding blank paper between them, and
-  // that misses the commonest composition in the app: a person standing among the
-  // words about him. Measured, 243 beats produce a single cluster and 263 untoured
-  // beats have a figure on stage — so gap-splitting alone leaves the most obvious
-  // close-up in the whole vocabulary on the table. H60b's first bullet is "push in
-  // on the figure"; this is what lets that happen when nothing else separates.
-  //
-  // WITH SEVERAL PEOPLE IT IS THE GROUP, not one of them. "Which man do we push in
-  // on" has no answer worth guessing, and that was first read as a reason to skip the
-  // beat entirely — which left six lessons with no camera at all, every one of them a
-  // two-hander. The subject was never one figure; it is the people, and their union
-  // is a two-shot. Measured, 143 multi-figure beats frame the group at least 0.12×
-  // tighter than the whole stage and only 11 gain nothing.
-  //
-  // A single figure is the same rule with one member. What decides "one" is the
-  // reading buckets rather than the sample count, because a figure who walks leaves
-  // several boxes and is still one man — but here it does not even matter, since the
-  // union of one man's positions across a beat is exactly what a static station on a
-  // slow mover should hold.
-  if (!picked.length) {
-    const figs = raw.filter((it) => it.k === 'fig');
-    const bucket = new Map();
-    for (const f of figs) bucket.set(f.r ?? 0, (bucket.get(f.r ?? 0) ?? 0) + 1);
-    const walker = figs.length > 0 && [...bucket.values()].every((n) => n === 1);
-    // One man: his LAST position, because a static station on a mover should sit
-    // where he ends up rather than splitting the difference. A group: all of them.
-    const box = figs.length
-      ? clampToBand(union(walker ? [figs[figs.length - 1]] : figs), band)
-      : null;
-    // NOT EVERY BEAT, and this is the lesson followMoves already paid for: its first
-    // pass pushed in on two beats out of three and left the reader with a camera that
-    // never rests, at which point the moves stop registering as moves. A push reads as
-    // a push against stillness. Seeded by the lesson so the beats that rest are not
-    // the same ones in every lesson.
-    if (box && (k + seed) % 3 !== 2) {
-      const s = Math.max(1, Math.min(CAP, scaleFor(box, band)));
-      if (Math.max(box[2], box[3]) >= MIN_SUBJECT && s > wideS + MIN_GAIN) {
-        picked = [{ box, s }];
-      }
+    if (followed) {
+      const hold = Math.max(1.6, Math.min(4.2, dur || 2.6));
+      out.push([{ box: followed.near, to: followed.far, tr: 0.7, dwell: hold }]);
+      held = followed.far;
+      continue;
     }
-  }
 
-  // K3 — always end on the whole beat. This doubles as the NEXT beat's establishing
-  // shot: every beat therefore opens on the full picture without spending a station
-  // on it, which is why a tour can be three framings long and still read as four.
-  if (!picked.length) return null;
-  const stations = [...picked.map((g) => g.box), wide];
-  const pace = PACE[Math.min(stations.length, MAX_STATIONS)] ?? PACE[4];
-  return stations.map((box, i) => ({
-    box,
-    tr: pace.tr,
-    // The last dwell is unbounded — it holds until the tap. A number is stored so
-    // the table has one shape, and the player ignores it on the final station.
-    dwell: i === stations.length - 1 ? 9 : pace.dwell,
-  }));
+    // ── WHAT HAPPENS THIS BEAT, AND IS IT ALREADY IN FRAME? ──────────────────
+    const fresh = freshOf(raw);
+    if (!fresh.length) { out.push(null); continue; }              // nothing happens: hold
+    const need = clampToBand(union(fresh), band);
+    const box = cleanEdges(need, band, raw, ground);
+
+    // ── THE REASON TO MOVE IS EMPHASIS, NOT VISIBILITY ───────────────────────
+    //
+    // Read the other way round this rule does nothing at all: the camera starts on
+    // the whole stage, so everything is already in frame, so there is never anything
+    // to go to — measured, 47 moves across 905 beats and most lessons dead still.
+    // The camera pushes in because the beat is ABOUT this thing, not because the
+    // thing would otherwise be invisible.
+    //
+    // So `worth` (K4 — big enough, tighter enough, centrable) decides whether there
+    // is a framing here at all, and only when there is not does visibility get a say.
+    if (worth(box)) {
+      // Already framing exactly this — hold. This is the line that kills the bounce:
+      // a run of beats about one subject is ONE move, not a move per beat.
+      if (sameBox(box, held)) { out.push(null); continue; }
+      out.push([{ box, tr: 0.7, dwell: 9 }]);
+      held = box;
+      continue;
+    }
+    // No framing worth making. If it can be seen from where the camera already is,
+    // stay — otherwise come back to the whole stage, which always contains it.
+    if (inWindow(need, heldWindow())) { out.push(null); continue; }
+    if (held === null) { out.push(null); continue; }
+    out.push([{ box: WHOLE, tr: 0.7, dwell: 9 }]);
+    held = null;
+  }
+  return out;
 }

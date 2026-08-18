@@ -33,7 +33,10 @@ import burdenOfProof from './lessons/burden-of-proof';
 import buildingAStrongArgument from './lessons/building-a-strong-argument';
 import howSimpleShouldAnExplanationBe from './lessons/how-simple-should-an-explanation-be';
 import howManyDoYouNeedToCheck from './lessons/how-many-do-you-need-to-check';
+import theThirdThing from './lessons/the-third-thing';
+import whatSilenceProves from './lessons/what-silence-proves';
 
+import theBarberWhoCannotExist from './lessons/the-barber-who-cannot-exist';
 // 5 units — split from the original single "What Is an Argument?" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
 const units: Path[] = [
@@ -71,8 +74,8 @@ const units: Path[] = [
     slug: "advanced-moves-and-mastery",
     name: "Advanced Moves & Mastery",
     description: "Logic's sharpest moves — proof by contradiction, paradox, and analogy — then build and stress-test an argument of your own.",
-    lessons: [reductioAdAbsurdum, theLiarParadox, arguingByAnalogy, burdenOfProof, buildingAStrongArgument, howSimpleShouldAnExplanationBe, howManyDoYouNeedToCheck],
+    lessons: [reductioAdAbsurdum, theLiarParadox, arguingByAnalogy, burdenOfProof, buildingAStrongArgument, howSimpleShouldAnExplanationBe, howManyDoYouNeedToCheck, theThirdThing, whatSilenceProves, theBarberWhoCannotExist],
   },
 ];
 
-export default units;
+export default units;

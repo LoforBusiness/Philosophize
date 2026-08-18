@@ -656,15 +656,31 @@ console.log(
   );
 }
 
-const chase = (verbs.to ?? 0) + (verbs.drift ?? 0) + (verbs.whip ?? 0);
-if (cameras.length > 20 && chase === 0) {
-  console.log(
-    '\n✗ camera: not one `to`, `drift` or `whip` in any lesson. Those are the only\n' +
-      '  verbs followMoves picks when the figure MOVED, so a flat sweep of them means\n' +
-      '  the x track is not being read — see the parse note above `xKey`.',
-  );
+// THE LIVENESS CHECK MOVED, BECAUSE WHAT IT WATCHED MOVED.
+//
+// This used to demand at least one `to`, `drift` or `whip` across the app - the three
+// verbs followMoves could only deal when the figure had walked - as proof that the x
+// track was being parsed rather than read as a flat line. followMoves no longer reads
+// x at all: it deals `pull` for a question or a summary and `hold` for everything
+// else, and a lesson's framings come from tours.ts, decided from that lesson's own
+// content (K3). The old assertion would now be permanently false, and widening it
+// just to keep the line green would be worse than replacing it.
+//
+// What is worth asserting is the same thing in the new place: that followMoves has
+// not quietly gone back to picking framings in parallel with the tours table, because
+// the two would then disagree and the disagreement is the bounce.
+const strays = Object.keys(verbs).filter((k) => k !== 'hold' && k !== 'pull');
+if (cameras.length > 20 && strays.length) {
+  console.log([
+    '',
+    `✗ camera: followMoves dealt ${strays.join(', ')}. Since group K it only frames`,
+    '  what the camera is not free to choose - the identity transform a question',
+    '  needs (K6) and the summary. Anything else means it is choosing shots again,',
+    '  alongside tours.ts, and a lesson cannot have two cameras.',
+  ].join(String.fromCharCode(10)));
   process.exit(1);
 }
+
 if (problems.length) {
   console.log('');
   for (const [f, errs] of problems) {

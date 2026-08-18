@@ -33,7 +33,10 @@ import whyTrustYourMemory from './lessons/why-trust-your-memory';
 import theMapIsNotTheTerritory from './lessons/the-map-is-not-the-territory';
 import stakesAndKnowing from './lessons/stakes-and-knowing';
 import howSureAreYouReally from './lessons/how-sure-are-you-really';
+import thePaintedMule from './lessons/the-painted-mule';
+import areYouTheExpertOnYou from './lessons/are-you-the-expert-on-you';
 
+import theShipownersBelief from './lessons/the-shipowners-belief';
 // 5 units — split from the original single "What Is Knowledge?" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
 const units: Path[] = [
@@ -73,8 +76,8 @@ const units: Path[] = [
     slug: "the-wise-knower",
     name: "The Wise Knower",
     description: "The humility, ethics, and hard-won wisdom of knowing well among other people.",
-    lessons: [peerDisagreement, epistemicInjustice, motivatedReasoning, knowledgeVersusUnderstanding, becomingAWiseKnower, theMapIsNotTheTerritory, stakesAndKnowing, howSureAreYouReally],
+    lessons: [peerDisagreement, epistemicInjustice, motivatedReasoning, knowledgeVersusUnderstanding, becomingAWiseKnower, theMapIsNotTheTerritory, stakesAndKnowing, howSureAreYouReally, thePaintedMule, areYouTheExpertOnYou, theShipownersBelief],
   },
 ];
 
-export default units;
+export default units;
