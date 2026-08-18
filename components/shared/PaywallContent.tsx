@@ -9,6 +9,7 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { awardedRank } from '@/data/ranks';
 import { FALLBACK_PRICE, FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
+import { TERMS_URL, PRIVACY_URL } from '@/constants/legal';
 import { track } from '@/lib/posthog';
 
 // The Scholar's Pass offer, factored out so it can render BOTH as a full-screen
@@ -21,8 +22,13 @@ const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
 const InkFaint = '#E2E0D8';
 
-const TERMS_URL = 'https://philosophize.app/terms';
-const PRIVACY_URL = 'https://philosophize.app/privacy';
+// The legal links come from constants/legal.ts and are NOT re-declared here.
+// This screen carried its own pair pointing at philosophize.app/terms and
+// /privacy — a domain that does not resolve (HTTP 000), so on the one screen
+// where somebody is about to be charged, both links did nothing. constants/legal
+// has always held the address that actually serves the policy, and it also
+// records the fact that no Terms page exists yet, which is why the Terms link
+// below is conditional rather than pointing somewhere hopeful.
 
 // Only things that are actually built and actually differ by tier. The list has
 // been kept honest deliberately — §14 has imagined several premium features over
@@ -67,6 +73,10 @@ export default function PaywallContent({
   // 26pt of page padding either side, and never wider than a card wants to be
   // held — beyond ~360 it stops reading as something in the hand.
   const cardW = Math.min(360, winW - 52);
+
+  // A local const, because TypeScript will not carry a narrowing of an IMPORTED
+  // binding into a callback — it cannot know the module has not reassigned it.
+  const terms = TERMS_URL;
 
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -208,10 +218,14 @@ export default function PaywallContent({
           account settings.
         </Text>
         <View style={styles.linksRow}>
-          <Pressable hitSlop={8} onPress={() => Linking.openURL(TERMS_URL)}>
-            <Text style={styles.link}>Terms</Text>
-          </Pressable>
-          <Text style={styles.linkDot}>·</Text>
+          {terms ? (
+            <>
+              <Pressable hitSlop={8} onPress={() => Linking.openURL(terms)}>
+                <Text style={styles.link}>Terms</Text>
+              </Pressable>
+              <Text style={styles.linkDot}>·</Text>
+            </>
+          ) : null}
           <Pressable hitSlop={8} onPress={() => Linking.openURL(PRIVACY_URL)}>
             <Text style={styles.link}>Privacy</Text>
           </Pressable>
