@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Deeply",
+    "name": "Ashmere",
     "slug": "Philosophize",
     "owner": "lobusiness",
     "version": "1.0.0",
@@ -22,7 +22,7 @@
     "android": {
       "package": "com.philosophize.app",
       "adaptiveIcon": {
-        "backgroundColor": "#f5f4f0",
+        "backgroundColor": "#f1ece1",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -50,7 +50,7 @@
         {
           "androidAppId": "ca-app-pub-8916255747221090~2303226096",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511",
-          "userTrackingUsageDescription": "This lets us show ads relevant to you and keep Deeply free. You can decline and still use the app."
+          "userTrackingUsageDescription": "This lets us show ads relevant to you and keep Ashmere free. You can decline and still use the app."
         }
       ],
       [

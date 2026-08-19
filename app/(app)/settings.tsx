@@ -628,7 +628,7 @@ function NotificationsSection() {
           <Text style={styles.noticeText}>
             {asking
               ? 'Waiting for permission…'
-              : 'Notifications are switched off for Deeply in your phone’s settings. Nothing below can be delivered until they are allowed.'}
+              : 'Notifications are switched off for Ashmere in your phone’s settings. Nothing below can be delivered until they are allowed.'}
           </Text>
           <Button
             label="Open phone settings"
@@ -880,8 +880,8 @@ function PrivacySection() {
 
 function FeedbackSection() {
   const openMail = () => {
-    const subject = encodeURIComponent('Deeply feedback');
-    const body = encodeURIComponent("Hi — here's my feedback on Deeply:\n\n");
+    const subject = encodeURIComponent('Ashmere feedback');
+    const body = encodeURIComponent("Hi — here's my feedback on Ashmere:\n\n");
     Linking.openURL(`mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${body}`).catch(() => {});
   };
   return (

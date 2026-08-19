@@ -38,6 +38,18 @@ import SketchIcon from '@/components/shared/SketchIcon';
 //      reader is fully functional and merely inconsistent, so this raise trades
 //      a working app for a coherent one. That is a defensible call for a rename
 //      and a bad habit to acquire for anything less.
+//
+// 21 = the SECOND rename, to Ashmere, with a new icon — the reader with his mug
+//      and his book. Same class of change as 20 and the same argument applies,
+//      which is exactly why the gate is NOT being raised to 21 in the build that
+//      carries it.
+//
+//      A gate is JavaScript. Raising this constant only reaches a binary through
+//      an update published to THAT binary's runtime, so shipping 21 with the
+//      number already at 21 walls nobody who is not already on 21 — it just
+//      arms a wall pointed at a build that may still be rolling out. The raise
+//      is a separate, later step: once 21 is live and at 100%, set this to 21
+//      and publish to every runtime still reachable (§20's two conditions).
 // ─────────────────────────────────────────────────────────────────────────────
 export const MIN_VERSION_CODE = 20;
 
@@ -109,7 +121,7 @@ export default function UpdateGate() {
 
           <Text style={styles.title}>Time to update</Text>
           <Text style={styles.body}>
-            This version of Deeply is out of date. Update to keep your streak, your
+            This version of Ashmere is out of date. Update to keep your streak, your
             progress and your saved quotes working properly.
           </Text>
 
@@ -120,7 +132,7 @@ export default function UpdateGate() {
             <Text style={styles.ctaText}>UPDATE NOW</Text>
           </Pressable>
 
-          <Text style={styles.foot}>Deeply · Google Play</Text>
+          <Text style={styles.foot}>Ashmere · Google Play</Text>
         </View>
       </View>
     </Modal>

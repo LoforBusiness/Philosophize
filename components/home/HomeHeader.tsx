@@ -27,13 +27,13 @@ import {
 
 const SW = Dimensions.get('window').width;
 
-// Same trick as the old wordmark: keep DEEPLY on one line at any width. Six
+// Same trick as the old wordmark: keep ASHMERE on one line at any width. Seven
 // characters, so the divisor is the per-character budget including the
 // letter-spacing — measured against the narrowest phone we support, not guessed.
-// At six characters the cap binds on every phone we support rather than the
+// At seven characters the cap still binds on every phone we support rather than the
 // width term, which is the point: the name is set at the same letter height it
 // always was, and the mark is simply a shorter word than PHILOSOPHIZE was.
-const WORDMARK = Math.min(27, Math.floor((SW - 72) / 6.3));
+const WORDMARK = Math.min(27, Math.floor((SW - 72) / 7.3));
 
 function greeting(hour: number): string {
   if (hour < 5) return 'STILL AWAKE';
@@ -101,7 +101,7 @@ export default function HomeHeader({ streak }: { streak: number }) {
 
       <View style={styles.type}>
         <Text style={[styles.wordmark, { fontSize: WORDMARK }]} numberOfLines={1} adjustsFontSizeToFit>
-          DEEPLY
+          ASHMERE
         </Text>
         <Text style={styles.line} numberOfLines={1}>{line}</Text>
       </View>

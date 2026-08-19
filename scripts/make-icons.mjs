@@ -1,4 +1,4 @@
-// Derives every icon the app ships from ONE artwork: assets/brand/deeply-D-1024.png.
+// Derives every icon the app ships from ONE artwork: assets/brand/ashmere-reader-1024.png.
 //
 //   node scripts/make-icons.mjs
 //
@@ -8,7 +8,7 @@
 //
 //   icon.png                     1024  full-bleed, as drawn
 //   android-icon-background.png  1024  the paper, flat
-//   android-icon-foreground.png  1024  the D alone, inside the adaptive safe zone
+//   android-icon-foreground.png  1024  the reader alone, inside the adaptive safe zone
 //   android-icon-monochrome.png  1024  themed icons — alpha only, speckles closed
 //   notification-icon.png          96  status bar — alpha only, speckles closed
 //   favicon.png                    48  web
@@ -16,24 +16,26 @@
 // TWO THINGS ARE MEASURED, NOT CHOSEN.
 //
 // 1. THE SAFE ZONE. An adaptive icon is a 108dp canvas the launcher masks to its
-//    own shape; only the centre 66dp is guaranteed to survive. The D's furthest
-//    ink from its own centre is the bottom-left serif, 460.4px out of 512 — so
-//    the full-size D would lose that serif to a circular mask. FIT scales by the
-//    measured extreme rather than by the bounding box, because the bbox CORNER
-//    holds no ink (485.6px) and using it would shrink the mark for nothing.
+//    own shape; only the centre 66dp is guaranteed to survive. The reader's
+//    furthest ink from its own centre is 472.2px out of 512 — the mug on one
+//    side and the trailing foot on the other — so drawn full size he would lose
+//    both to a circular mask. FIT scales by the measured extreme rather than by
+//    the bounding box, because the bbox CORNER holds no ink (552.9px) and using
+//    it would shrink the mark by a fifth for nothing.
 //
-// 2. THE SPECKLES. The artwork is letterpress: the ink is full of tiny holes.
-//    That reads as texture at launcher size and as dirt at 24dp, which is the
-//    same lesson as the crossed swords in §19 — a fine detail is mush at the size
-//    it is actually drawn. So the two silhouette outputs get a morphological
-//    CLOSE first, which fills the holes without moving the letterform's edge.
+// 2. THE CLOSE. The reader is line art on paper, so isolate() — which reads
+//    alpha from LUMINANCE — turns the mug body, the book pages and the stool
+//    seat transparent along with the background: they are the same paper. The
+//    silhouette outputs are therefore outlines, and an outline is mush at 24dp,
+//    which is the crossed-swords lesson in §19 again. The morphological CLOSE
+//    welds those hairlines into a mass without moving the drawing's outer edge.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import J from 'jimp-compact';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SRC = path.join(ROOT, 'assets/brand/deeply-D-1024.png');
+const SRC = path.join(ROOT, 'assets/brand/ashmere-reader-1024.png');
 const IMG = path.join(ROOT, 'assets/images');
 const N = 1024;
 
@@ -57,6 +59,83 @@ function isolate(src) {
     o[j] = d[i]; o[j + 1] = d[i + 1]; o[j + 2] = d[i + 2]; o[j + 3] = a;
   });
   return out;
+}
+
+// ── the SOLID silhouette, for the two outputs drawn small ───────────────────
+// isolate() reads alpha from luminance, which is right for the launcher: the mug
+// body, the book pages and the stool seat ARE paper, and letting the adaptive
+// background show through them is what makes the drawing look drawn.
+//
+// At 24dp it is a disaster. Everything that survives is a hairline, so the status
+// bar gets a scatter of disconnected white pixels that reads as dirt — measured,
+// not guessed: rendered at 24dp the reader was not identifiable as a figure at all.
+//
+// So the silhouette outputs use the drawing's OUTER CONTOUR instead. A flood fill
+// from the border marks the true background; everything the fill cannot reach is
+// ink, enclosed paper included. The mug becomes a solid block, the book a solid
+// wedge, and the whole mark becomes one connected mass that still reads as a
+// seated figure holding two things when it is 24 pixels wide.
+function solid(src) {
+  const w = src.bitmap.width, h = src.bitmap.height, d = src.bitmap.data;
+  const bg = new Uint8Array(w * h);
+  const paperish = (i) => (0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]) >= LUM_CLEAR;
+  // iterative flood so a 1024² canvas cannot blow the stack
+  const stack = [];
+  for (let x = 0; x < w; x++) { stack.push(x, 0, x, h - 1); }
+  for (let y = 0; y < h; y++) { stack.push(0, y, w - 1, y); }
+  while (stack.length) {
+    const y = stack.pop(), x = stack.pop();
+    if (x < 0 || y < 0 || x >= w || y >= h) continue;
+    const k = y * w + x;
+    if (bg[k]) continue;
+    if (!paperish(k * 4)) continue;
+    bg[k] = 1;
+    stack.push(x + 1, y, x - 1, y, x, y + 1, x, y - 1);
+  }
+  const out = new J(w, h, 0x00000000);
+  const o = out.bitmap.data;
+  for (let k = 0; k < w * h; k++) {
+    const j = k * 4;
+    o[j] = 0; o[j + 1] = 0; o[j + 2] = 0; o[j + 3] = bg[k] ? 0 : 255;
+  }
+  return out;
+}
+
+// ── drop what is too small to survive the size it will be drawn at ──────────
+// The steam over the mug is three curls and four flecks — seven ink components,
+// none above 0.32% of the figure, which is ONE component at 236,064px because the
+// mug, the book and the stool all touch him. At 24dp those seven become loose
+// specks beside the mark and read as dirt in the status bar; at launcher size they
+// are the nicest thing in the drawing. So they are dropped from the silhouettes
+// and kept everywhere else.
+//
+// By AREA rather than by a hardcoded rectangle: a rectangle would be a number
+// nobody could check, and it would silently clip the mug the day the artwork is
+// redrawn an inch to the left.
+function dropSpecks(img, minShare = 0.02) {
+  const w = img.bitmap.width, h = img.bitmap.height, d = img.bitmap.data;
+  const lab = new Int32Array(w * h).fill(-1);
+  const areas = [];
+  for (let s0 = 0; s0 < w * h; s0++) {
+    if (d[s0 * 4 + 3] <= 10 || lab[s0] >= 0) continue;
+    const id = areas.length; let a = 0; const q = [s0]; lab[s0] = id;
+    while (q.length) {
+      const k = q.pop(); a++; const x = k % w;
+      for (const m of [k + 1, k - 1, k + w, k - w]) {
+        if (m < 0 || m >= w * h) continue;
+        if (Math.abs((m % w) - x) > 1) continue;          // no wrap at the row edge
+        if (d[m * 4 + 3] <= 10 || lab[m] >= 0) continue;
+        lab[m] = id; q.push(m);
+      }
+    }
+    areas.push(a);
+  }
+  const big = Math.max(...areas, 1);
+  for (let k = 0; k < w * h; k++) {
+    const id = lab[k];
+    if (id >= 0 && areas[id] < big * minShare) d[k * 4 + 3] = 0;
+  }
+  return img;
 }
 
 // ── morphological close on the alpha channel ────────────────────────────────
@@ -140,8 +219,9 @@ if (src.bitmap.width !== N || src.bitmap.height !== N) throw new Error(`source m
 }
 
 const mark = isolate(src);
+const blob = dropSpecks(solid(src));   // outer contour, steam dropped: for anything drawn small
 const m = extremes(mark);
-console.log(`D ink ${m.w}x${m.h}, centre (${m.cx.toFixed(1)}, ${m.cy.toFixed(1)}), extreme ${m.maxR.toFixed(1)}px`);
+console.log(`ink ${m.w}x${m.h}, centre (${m.cx.toFixed(1)}, ${m.cy.toFixed(1)}), extreme ${m.maxR.toFixed(1)}px`);
 
 // 1 — full-bleed launcher / store icon, exactly as drawn
 await save(src.clone(), 'icon.png');
@@ -154,11 +234,11 @@ await save(place(mark, N, 0.3055, null), 'android-icon-foreground.png');
 
 // 4 — themed (monochrome) icon. Alpha carries the shape and the system tints it,
 // so the RGB is set flat; speckles closed because this is drawn small.
-await save(place(close(mark.clone(), 9), N, 0.3055, [0, 0, 0]), 'android-icon-monochrome.png');
+await save(place(close(blob.clone(), 3), N, 0.3055, [0, 0, 0]), 'android-icon-monochrome.png');
 
 // 5 — notification icon: silhouette in the status bar at ~24dp. Same closing, and
 // a little more inset than the adaptive zone because the bar crops tightly.
-await save(place(close(mark.clone(), 9), 96, 0.40, [255, 255, 255]), 'notification-icon.png');
+await save(place(close(blob.clone(), 3), 96, 0.40, [255, 255, 255]), 'notification-icon.png');
 
 // 6 — web favicon
 await save(src.clone().resize(48, 48), 'favicon.png');
