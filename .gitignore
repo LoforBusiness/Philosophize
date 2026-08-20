@@ -54,3 +54,6 @@ components/lesson/cinematic/.measure-must.lock
 
 # superpowers brainstorming companion (mockups, not source)
 .superpowers/
+
+# harness route locks (scripts/lib/previewroute.mjs)
+scripts/.preview-*.lock

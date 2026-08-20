@@ -33,6 +33,7 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { STAGE_W, STAGE_H, mergeReadings, mustBox, renderTable } from './lib/mustrule.mjs';
+import { claimRoute } from './lib/previewroute.mjs';
 
 const PORT = +(process.env.CDP_PORT || 9382);
 const WEB = +(process.env.WEB_PORT || 8847);
@@ -406,29 +407,11 @@ function stampFor(comp) {
   // removed app/previewframe.tsx out from under the live sweep, which then
   // reported lesson after lesson as NEVER RENDERED A STAGE. Every symptom pointed
   // at the app.
-  const LOCK = path.join(DIR, '.measure-must.lock');
-  if (fs.existsSync(LOCK)) {
-    const owner = fs.readFileSync(LOCK, 'utf8').trim();
-    console.error(
-      `another measure-must is running (pid ${owner}).\n` +
-      'Two of these fight over one Chrome and delete each other\'s preview route.\n' +
-      `If that pid is dead, remove ${LOCK} and try again.`,
-    );
-    process.exit(1);
-  }
-  fs.writeFileSync(LOCK, String(process.pid));
-
-  // Only remove what this run created — deleting a file that was already there
-  // invalidates Metro's file map and the next bundle cannot find modules that
-  // plainly exist.
-  const createdHere = !fs.existsSync(ROUTE);
-  if (createdHere) fs.writeFileSync(ROUTE, ROUTE_SRC);
-  const cleanup = () => {
-    if (createdHere) { try { fs.unlinkSync(ROUTE); } catch {} }
-    try { if (fs.readFileSync(LOCK, 'utf8').trim() === String(process.pid)) fs.unlinkSync(LOCK); } catch {}
-  };
-  process.on('exit', cleanup);
-  process.on('SIGINT', () => { cleanup(); process.exit(1); });
+  //
+  // The lock is now SHARED with every other harness that writes a route into
+  // app/ (lib/previewroute.mjs), because this script was the only one of four
+  // that ever took one — and two of the other three write this same filename.
+  const { release: cleanup } = claimRoute({ route: ROUTE, src: ROUTE_SRC, owner: 'measure-must' });
 
   // ── A POOL OF TABS, because the browser is idle almost the whole time ───────
   //

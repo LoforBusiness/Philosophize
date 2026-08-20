@@ -49,6 +49,7 @@
 // any file in app/ is a real route and would ship if left behind (§21).
 import http from 'node:http';
 import fs from 'node:fs';
+import { claimRoute } from './lib/previewroute.mjs';
 
 const PORT = +(process.env.CDP_PORT || 9392);
 const WEB = +(process.env.WEB_PORT || 8852);
@@ -450,11 +451,7 @@ function allIds() {
   // Metro's file map, and the next bundle answers `Requiring unknown module
   // "3175"` for a module that plainly exists. That cost a full --clear restart
   // and ninety seconds of rebundling to work out.
-  const createdHere = !fs.existsSync(ROUTE);
-  if (createdHere) fs.writeFileSync(ROUTE, ROUTE_SRC);
-  const cleanup = () => { if (createdHere) { try { fs.unlinkSync(ROUTE); } catch {} } };
-  process.on('exit', cleanup);
-  process.on('SIGINT', () => { cleanup(); process.exit(1); });
+  const { release: cleanup } = claimRoute({ route: ROUTE, src: ROUTE_SRC, owner: 'check-cover' });
 
   const LANES = +(process.env.LANES || 6);
   const makeTab = async () => {

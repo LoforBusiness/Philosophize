@@ -33,6 +33,7 @@
 // any file in app/ is a real route and would ship if left behind (§21).
 import http from 'node:http';
 import fs from 'node:fs';
+import { claimRoute } from './lib/previewroute.mjs';
 
 const PORT = +(process.env.CDP_PORT || 9382);
 const WEB = +(process.env.WEB_PORT || 8847);
@@ -217,10 +218,9 @@ function allIds() {
 (async () => {
   const ids = process.argv[2] ? JSON.parse(fs.readFileSync(process.argv[2], 'utf8')) : allIds();
   const outPath = process.argv[3] ?? null;
-  if (!fs.existsSync(ROUTE)) fs.writeFileSync(ROUTE, ROUTE_SRC);
-  const cleanup = () => { try { fs.unlinkSync(ROUTE); } catch {} };
-  process.on('exit', cleanup);
-  process.on('SIGINT', () => { cleanup(); process.exit(1); });
+  // Shared lock: check-spoiler writes this EXACT filename, so without one the
+  // two delete each other's route mid-sweep and both report an empty stage.
+  const { release: cleanup } = claimRoute({ route: ROUTE, src: ROUTE_SRC, owner: 'check-frame' });
 
   // A POOL OF TABS. Auditing is mostly waiting for beats to settle, and the lessons
   // are independent, so they run concurrently — 102 lessons in a quarter of an hour
