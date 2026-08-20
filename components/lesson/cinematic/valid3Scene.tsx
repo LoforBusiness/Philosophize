@@ -197,9 +197,11 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
           <Animated.Text style={[styles.rowT, styles.conclT, wordStyle]}>{lines[2]}</Animated.Text>
         </Animated.View>
 
-        {/* the false-premise strikes and their tag */}
-        <Animated.View style={[styles.strike, { top: P1_Y + ROW_H / 2 }, flawStyle]} />
-        <Animated.View style={[styles.strike, { top: P2_Y + ROW_H / 2 }, flawStyle]} />
+        {/* The false-premise strikes and their tag. `nativeID` is not decoration:
+            check-cover treats ink over a word as a defect unless the scene DECLARES
+            it an annotation, which is what these are (D33). */}
+        <Animated.View nativeID="strike-premise-1" style={[styles.strike, { top: P1_Y + ROW_H / 2 - 1.25 }, flawStyle]} />
+        <Animated.View nativeID="strike-premise-2" style={[styles.strike, { top: P2_Y + ROW_H / 2 - 1.25 }, flawStyle]} />
         <Animated.View style={[styles.falseTag, flawStyle]}>
           <Text style={styles.falseTagT}>FALSE</Text>
         </Animated.View>
@@ -213,8 +215,8 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
           <View style={styles.vdRule} />
           <Text style={styles.vdLine}>{'CONCLUSION\nFALSE'}</Text>
         </View>
-        <Animated.View style={[styles.vdCross, { top: VD_BOX_T }, cross1Style]} />
-        <Animated.View style={[styles.vdCross, { top: VD_BOX_T + VD_BOX_H }, cross2Style]} />
+        <Animated.View nativeID="crossout-impossible-1" style={[styles.vdCross, { top: VD_BOX_T }, cross1Style]} />
+        <Animated.View nativeID="crossout-impossible-2" style={[styles.vdCross, { top: VD_BOX_T + VD_BOX_H }, cross2Style]} />
         <Text style={styles.vdVerdict}>IMPOSSIBLE</Text>
       </Animated.View>
 
@@ -325,7 +327,25 @@ const styles = StyleSheet.create({
     color: INK, textAlign: 'center', includeFontPadding: false,
   },
 
-  strike: { position: 'absolute', left: BX - 4, width: BW + 8, height: 2.5, backgroundColor: INK, transform: [{ rotate: '-4deg' }] },
+  // ── A STRIKE-THROUGH HAS TO COMMIT (D33) ───────────────────────────────────
+  //
+  // This was 172 wide at −4°, which is the worst available answer. −4° over that
+  // length drifts twelve units vertically, and the second premise — "All gold
+  // things are time machines" — WRAPS to two lines inside a 42-unit row. So the
+  // bar entered at the height of the lower line and left at the height of the
+  // upper one, slicing the tops of some letters and the bottoms of others without
+  // ever reading as a strike. A reader described the result as a word "being
+  // intersected … cut off", and called it cheap; they were right.
+  //
+  // Corner to corner instead: atan(42/164) = 14.4°, a bar of 168 whose painted
+  // extent is 168·cos = 163 wide by 168·sin = 42 tall — exactly the row. That
+  // reads as crossed out whether the text runs to one line or two, and it is the
+  // SAME device this scene already uses for the impossible pairing twenty lines
+  // above, so the lesson says "struck out" one way rather than two.
+  strike: {
+    position: 'absolute', left: BX - 2, width: 168, height: 2.5,
+    backgroundColor: INK, transform: [{ rotate: '-14.4deg' }],
+  },
   falseTag: {
     position: 'absolute', left: 240, top: 240, borderWidth: 2, borderColor: INK, backgroundColor: INK,
     paddingHorizontal: 7, paddingVertical: 2, borderRadius: 3, transform: [{ rotate: '-7deg' }],

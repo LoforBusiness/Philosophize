@@ -225,7 +225,12 @@ function Hidden({ S, k, word }: { S: SharedValue<any>; k: number; word: string }
   return (
     <View style={[styles.hidRow, { top: HID_T + k * HID_STEP }]} pointerEvents="none">
       <Text style={styles.hidWord}>{word}</Text>
-      <Animated.View style={[styles.hidStrike, st]} />
+      {/* Declared, not decorative: check-cover treats ink across a word as a
+          defect unless the scene says the mark is deliberate (D33). This one is
+          the thought experiment — the veil striking out what it hides — and it
+          runs the width of the card rather than the width of the word, so the
+          geometry alone cannot tell it from a stray rule. */}
+      <Animated.View nativeID={`strike-hidden-${k}`} style={[styles.hidStrike, st]} />
     </View>
   );
 }

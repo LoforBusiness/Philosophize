@@ -368,16 +368,28 @@ const styles = StyleSheet.create({
   },
   // A ruled baseline turns five floating bars into a chart.
   meterBase: { position: 'absolute', left: BAR_L0, top: BAR_BASE, width: BAR_SPAN, height: 1.5, backgroundColor: SOFT },
+  // ── THE LABEL ROW AND THE CAPTION WERE INSIDE EACH OTHER (D33) ─────────────
+  //
+  // barLabel ran 474..486.5 (top 474, lineHeight 12.5) and meterFoot began at 485,
+  // so the two overlapped by a unit and a half and the caption's capitals sat on
+  // the mode labels' baseline. Five words — DOR PHR LYD MIX ION — each measured
+  // 9-11% covered by "MUSIC ARRIVES BEFORE REASON".
+  //
+  // There is no room BELOW: the caption already bottomed out 4 units above the
+  // ground rule at 501.5, and pushing it down would put a rule through it, which
+  // is the same defect wearing the other hat. So the leading comes in instead —
+  // 12.5 to 11 on both, which these two 10.5/10pt capital-only lines can spare —
+  // and that buys the 4 units of air between them.
   barLabel: {
     position: 'absolute', top: BAR_BASE + 4, width: BAR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 12.5, letterSpacing: 0.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 11, letterSpacing: 0.6, color: SOFT,
     includeFontPadding: false,
   },
   cross: { position: 'absolute', top: 426, width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
   crossBar: { position: 'absolute', width: 28, height: 3.5, backgroundColor: INK, borderRadius: 2 },
   meterFoot: {
-    position: 'absolute', left: BAR_L0, top: 485, width: 250,
-    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12.5, letterSpacing: 0.9, color: SOFT,
+    position: 'absolute', left: BAR_L0, top: 489, width: 250,
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 11, letterSpacing: 0.9, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -412,7 +424,8 @@ const styles = StyleSheet.create({
 //   BOTTOM the true extreme is NOT the ground line at 501.5 but the figure's ankle
 //          JOINTS: circles of radius STR.limb·K_FIG/2 = 7.43 centred exactly on
 //          GROUND, so ink reaches y = 507.4. The meter's caption bottoms out at
-//          497.5 and the mask at 484.
+//          500 (489 + an 11-unit line, moved down 4 to clear the mode labels — D33)
+//          and the mask at 484.
 // The figure stands on GROUND = 500 with its crown near 361, and nothing is drawn
 // right of x 386. [218, 512] therefore holds every extreme on every beat with 8
 // units of margin at the top and 4.6 at the foot, and renders the scene ~2.20×

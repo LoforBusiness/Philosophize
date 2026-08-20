@@ -36,7 +36,13 @@ import { STAGE_W, STAGE_H, mergeReadings, mustBox, renderTable } from './lib/mus
 
 const PORT = +(process.env.CDP_PORT || 9382);
 const WEB = +(process.env.WEB_PORT || 8847);
-const BASE = `http://localhost:${WEB}/previewframe`;
+// THE ROUTE NAME IS OVERRIDABLE, and the comment at the bottom of this file
+// explains why it had to become so: two of these sharing one preview route delete
+// it out from under each other. A second session auditing at the same time is the
+// same hazard from outside, and it cannot be fixed by being careful — so
+// MUST_ROUTE=previewmust gives a run its own file and its own URL.
+const SLUG = process.env.MUST_ROUTE || 'previewframe';
+const BASE = `http://localhost:${WEB}/${SLUG}`;
 const DIR = 'components/lesson/cinematic';
 const OUT = path.join(DIR, 'mustBoxes.ts');
 
@@ -258,7 +264,7 @@ const ANSWER_DRAG = `(() => {
   } catch (e) { return 0; }
 })()`;
 
-const ROUTE = 'app/previewframe.tsx';
+const ROUTE = `app/${SLUG}.tsx`;
 const ROUTE_SRC = `// WRITTEN BY scripts/measure-must.mjs — deleted again when it finishes.
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
@@ -412,9 +418,13 @@ function stampFor(comp) {
   }
   fs.writeFileSync(LOCK, String(process.pid));
 
-  if (!fs.existsSync(ROUTE)) fs.writeFileSync(ROUTE, ROUTE_SRC);
+  // Only remove what this run created — deleting a file that was already there
+  // invalidates Metro's file map and the next bundle cannot find modules that
+  // plainly exist.
+  const createdHere = !fs.existsSync(ROUTE);
+  if (createdHere) fs.writeFileSync(ROUTE, ROUTE_SRC);
   const cleanup = () => {
-    try { fs.unlinkSync(ROUTE); } catch {}
+    if (createdHere) { try { fs.unlinkSync(ROUTE); } catch {} }
     try { if (fs.readFileSync(LOCK, 'utf8').trim() === String(process.pid)) fs.unlinkSync(LOCK); } catch {}
   };
   process.on('exit', cleanup);

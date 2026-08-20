@@ -1011,6 +1011,109 @@ off a real render, and that number was only discovered because "Descartes doubte
 stranded "all." on a line of its own. Counting characters in the editor is guessing;
 the font, the padding and the device width all get a vote.
 
+**D33. Nothing may be painted across a word — and that is now measured, at the
+glyphs, in the browser's own paint order.**
+
+D31 has said "nothing opaque may cover text" since ethics-6 sliced "THE FIVE" in
+half. It was never measured, and a reader hit it in a shipped lesson: a small
+labelled box with a rule drawn through it, the word cut in two. Their words:
+
+> *"a small box that had the word in it was behind another line … it was being
+> intersected, and the word was being cut off. This is a big red flag, and it
+> makes everything look cheap."*
+
+**Nothing in the repo could have caught it, and the reason is worth stating.** Two
+harnesses already render every lesson beat by beat: `check-frame` measures each
+element against the CAMERA CROP, and `measure-must` measures a beat's boxes against
+the SHOT. Both are about the frame's *edge*. Neither has ever compared one drawn
+element to another, so a line laid across a label was outside every instrument the
+app owns.
+
+`npm run check:cover` is that instrument. For every beat of every cinematic lesson
+it takes each word's glyph rectangle, samples it on a 2px grid, and asks
+`document.elementsFromPoint` what is on top. Anything inked painted above the
+glyphs is the defect. Paint order comes from the browser rather than from this
+script reasoning about z-index, stacking contexts and transforms — which is the
+only reason the answer can be trusted.
+
+**A mark that is MEANT to cross a word must say so.** Some are the lesson: valid3
+draws a corner-to-corner cross over "PREMISES TRUE / CONCLUSION FALSE" because that
+pairing is what validity forbids. Geometry cannot tell those from a stray rule, so
+intent is declared rather than inferred — give the mark a `nativeID` beginning
+`strike` or `crossout` and it counts as an annotation. That puts the decision in the
+scene, where somebody made it, and leaves the undeclared count meaning exactly one
+thing.
+
+**Six things had to be true before the number meant anything**, and every one was
+found by screenshotting a reported hit rather than by thinking harder:
+
+- **A strike-through is a rule across a word on purpose.** political-1 draws a 2px
+  bar through "WAR OF ALL AGAINST ALL" to say the sovereign ends it. Geometrically
+  that is the defect exactly. What separates them is EXTENT: a decoration starts
+  and stops at the word, within about an eighth of its width at each end.
+- **A word covering itself is not a covered word.** Several scenes stack two
+  identical `<Text>` nodes on one rect; that was 17 hits of the first 212.
+- **Judge everything on the whole opacity chain.** Scenes mount every beat's labels
+  and fade the ones they are not showing — usually by fading a *parent* — so a
+  `<Text>` at opacity 1 inside a group at opacity 0 passes an element-level test
+  while being invisible. epistemology-1 reported *"UNTESTED is 100% covered by JUST
+  LUCK"* on a beat whose screenshot contains neither word.
+- **Wait for the frame, not for the camera.** A beat change cross-fades, and for a
+  few hundred milliseconds two captions genuinely do sit on one another. Settling
+  on `#stage-cam`'s transform alone measures the middle of that.
+- **A frame around a word is not a cover.** `elementsFromPoint` returns an element
+  for any point inside its border box, fill or no fill — so a card outline enclosing
+  its own caption came back as covering 100% of it, fourteen times in
+  metaphysics-being-7, every one a label sitting correctly inside its own box. For
+  an unfilled element only the border BAND is ink, so the sample point has to land
+  on it.
+- **A word behind a SOLID PANEL is hidden, not sliced — and that is a different
+  thing.** Scenes replace a beat's diagram with the next beat's cards in the same
+  place and leave the old labels mounted underneath. Taking "the topmost inked
+  element" gets this exactly backwards: the topmost thing over political-5's
+  "GUARDIANS" is the *card's own text*, so it reads as two labels interleaved when
+  in fact a solid card sits between them. Scan the whole span from the top down to
+  the word; any opaque background in it settles the question. A word that is not on
+  screen cannot look cut in half. This one alone was **36 of 94** apparent defects,
+  and it is why political-5 went from the worst lesson in the app to clean without
+  a line of its source changing.
+
+Together those took the sweep from **212 hits across 8 lessons — seven in eight
+dirty, which per Part 3 is a check that has told you nothing — to something that
+names real defects and nothing else.**
+
+**And 0 is what a check reports when it has quietly stopped looking, so this one
+carries its own counter-test.** `SELFTEST=1 npm run check:cover` lays a real 2px bar
+across the middle third of a word on every beat and requires the probe to find every
+one. It has already earned its keep twice, and the second time is the important one:
+
+- It caught the sampler missing **5 of 68** planted bars, because three sample rows
+  on a 17px word are under 5px apart and a 2px rule can fall between two of them.
+  The sampler cannot be coarser than the thing it hunts — hence 2px in *both*
+  directions.
+- Then, after the "behind a solid panel" exemption was added, it reported **0 of
+  67**. An ink rule *is* opaque, so the escape hatch for a word behind a panel was
+  swallowing the exact defect the file exists to find. A full 132-lesson sweep had
+  already run and produced a tidy-looking 12 lessons / 45 occurrences — every
+  number of it meaningless, and nothing else would have said so. A backing surface
+  now has to ENCLOSE the word (95% of its glyph rect) and be panel-shaped in its
+  PRE-TRANSFORM box, because a rotated 168×2.5 bar has axis-aligned bounds of
+  163×42 and would otherwise qualify.
+
+**Run the self-test whenever the probe's logic changes.** Not the sweep — the
+self-test. A sweep that reports fewer defects is indistinguishable from a sweep that
+has gone blind.
+
+**The one thing that is deliberately NOT measured here.** "The word is sitting on a
+line rather than on paper" is the same defect from underneath, and as geometry it is
+easy to compute — but geometry cannot tell a caption printed on a dark panel, which
+is correct and everywhere, from a caption buried in one. epistemology-1 alone
+produced 38 hits of that shape, all of them cream labels doing their job. The real
+question underneath is CONTRAST between the glyph colour and what it lands on, which
+is a different instrument; shipping the geometric version would have buried the real
+hits in correct ones.
+
+
 ### E. Questions and interaction
 
 **E33. Vary how the reader answers.** Not every question is A/B/C/D under a picture.
@@ -2272,9 +2375,101 @@ them the same way, under the name `hold N`.
 
 ---
 
+## Group O — the reader answers first, and only then is told
+
+Reported by a reader, in their own words: on a two-answer question *"even before you
+press on one, it says the not quite thing that would happen if you got it wrong. This
+is not supposed to fill up until the user answers."*
+
+That is one rule with three faces, and it is worth stating separately from the rest of
+group H because it is the only rule about **time** rather than about layout: the same
+pixels that are correct after a pick are a defect before one.
+
+### O1 · Nothing from the reveal may be legible before the pick
+
+A graded beat owns three things the reader must not see until they have committed:
+
+- **the verdict** — `Correct`, `That's the one`, `Not quite`;
+- **the explanation** — the `explain` string, in whole or in part;
+- **the answer state on the options** — the green/red faces, the ✓/✕ seals, the
+  lift on the true card, the crumple on the discarded one, the `+10 XP`.
+
+Before the pick, a graded beat shows exactly: the kicker (`QUESTION · +10 XP` or
+`YOUR TURN`), the prompt, the answer controls in their neutral state, and the nudge.
+Nothing else.
+
+**Why it is a rule and not a preference.** It is a spoiler, first — a reader who can
+read the explanation can score the question without thinking, which is the whole
+lesson format defeated, the same way `ChoiceCards` shuffles because the true card was
+the left one 130 times out of 130. And it is a *staging* fault second: a panel that is
+already full has nothing left to do when the answer lands, so the moment the lesson
+has been building to arrives and nothing happens. The reader noticed the second one
+before the first — "it doesn't look right" came before "I could see the answer".
+
+### O2 · The gate is `answered`, and it is one expression
+
+Every reveal hangs off `picked !== null` — passed down as `answered` — and nothing
+else. Not a timer, not a beat index, not "the animation has started". There are five
+places that own this and they all already do it: `Choices` and `InteractPanel` in
+`cinematicKit`, `Reveal` inside them, `ChoiceCards`, `DragScale`, and the two
+bespoke players (`ArgumentFightLesson`, `PremisesBuilderLesson`).
+
+A scene that draws its own answer state does the same, through its own helper:
+
+```tsx
+const wrong = (id: string) => answered && picked === id;   // aesthetics35, metaphysics31
+const right = answered && g.correct;                        // aesthetics5, political2
+```
+
+**A helper without `answered` in it is the bug this rule exists for.** `wrong(id)`
+that reads `picked === id` alone is correct today only because `picked` is null until
+the pick — it stops being correct the moment anything else writes to it, and it reads
+as an accident either way. Put `answered` in the helper.
+
+### O3 · Mount it, do not hide it
+
+A reveal that is rendered at `opacity: 0`, or behind a `height: 0`, is still there:
+its text is in the accessibility tree and a screen reader says it out loud. This is
+not hypothetical in this codebase — `ChoiceCards` carries the same note about its ✓
+seal, which was measured reading "It did not rain ✓" from the moment the card
+appeared. Return `null` until answered; do not style it away.
+
+### O4 · The readout on a drag is NOT a reveal
+
+`ScaleZone.reads` — the word above the knob that changes as it travels — is lesson
+copy under group J and is *supposed* to be visible from the first frame. It is what
+makes a drag teach rather than merely slide: the reader finds the boundary by hunting
+for the flip. What must stay hidden on a drag beat is the same three things as
+everywhere else: the verdict, the `explain`, and the mark showing where the right
+answer was.
+
+### Verifying it
+
+`npm run check:spoiler` steps every wired lesson in a browser, and at each graded beat
+reads the whole visible page **before** answering, comparing it against that beat's own
+`explain` and against the verdict wording. It needs Metro and a headless Chrome — the
+header of `scripts/check-spoiler.mjs` has the exact commands.
+
+Two things about it that are load-bearing, both learned by getting them wrong:
+
+- **The preview route must exist before Metro starts.** Expo Router builds its route
+  table at bundle time, so a route written afterwards serves "This screen doesn't
+  exist" — which renders no buttons, so every lesson reports "could not be answered"
+  and the sweep finishes GREEN having measured nothing at all.
+- **A short sweep is not a clean sweep.** Anything the harness could not step to the
+  end is reported as a failure of the check, not as a pass, and exits non-zero. The
+  first version of this file reported 130 lessons clean while rendering a 404 for
+  every one of them.
+
+---
+
 ## Part 2 — Authoring checklist
 
 **Shape** — before writing a word, lay the beats out and count them (H52, H53).
+- [ ] **Nothing is painted across a word** (D33). Run `npm run check:cover` on the new
+      lesson; a rule, a prop edge, a second label or the figure lying over a caption
+      is the defect a reader called "cheap", and it is the one thing no offline check
+      can see.
 - [ ] **Every beat's pose code is from the right band** (N2): `300+` to PLAY an action
       once as the beat opens, `158–177` for a hold that lives for the whole beat.
       A one-shot written in the `100+` band draws a figure standing still (N1).
@@ -2395,6 +2590,32 @@ them the same way, under the name `hold N`.
 npm run check          # tsc + both validators
 npm run check:cinematic
 npm run check:tour     # group K, offline, against each lesson's own band
+```
+
+> **`measure-must` does not currently reproduce its own table, and that is unsettled.**
+> Re-measuring `aesthetics-aesthetics-4` — a lesson nobody had touched, whose source
+> stamp in `mustBoxes.ts` matches byte for byte — returns `[34, 222, 342, 288]` where
+> the committed table holds `[12, 222, 376, 288]`: 22 units narrower on each side, on
+> the same viewport, through the same route, with tours off. Something about the
+> environment the table was made in is not captured by the script.
+>
+> The consequence is practical: a lesson whose scene changes cannot have its box
+> re-measured in isolation, because splicing one fresh reading into a table of stale
+> ones mixes two environments — and a must-box is what stops the camera cropping the
+> very words this group is about. Until it reproduces, treat the table as
+> regenerate-everything-or-nothing, and do not hand-edit it to silence the stamp
+> check. Two lessons carry a stale stamp today for exactly this reason
+> (`aesthetics-aesthetics-3`, `logic-arguments-3`); the boxes are the ones that were
+> measured, and the scenes have moved a caption and a strike bar since.
+
+**Then the two browser sweeps, which answer questions arithmetic cannot.** They want
+Metro and a headless Chrome — the header of each script has the exact commands, and
+they default to different ports so both can run at once.
+
+```
+npm run check:frame    # what the CAMERA cuts in half   (edge of the frame)
+npm run check:cover    # what is painted ON a word      (D33, element vs element)
+SELFTEST=1 npm run check:cover   # prove the cover check can still see a defect
 ```
 
 `scripts/validate-cinematic.mjs` enforces the group-H rules that are arithmetic — beat
