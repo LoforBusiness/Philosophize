@@ -247,7 +247,7 @@ export const MUST_STAMP: Record<string, string> = {
   'metaphysics-being-12': '3f41cc08e6ca',
   'metaphysics-being-13': '1b588ca19ab8',
   'metaphysics-being-15': 'c297e318bb60',
-  'metaphysics-being-2': '6069d999c667',
+  'metaphysics-being-2': 'a5044ae8e43d',
   'metaphysics-being-24': '3328273c9b84',
   'metaphysics-being-3': '3cfc2f9aad51',
   'metaphysics-being-31': '8cfae1f1837a',

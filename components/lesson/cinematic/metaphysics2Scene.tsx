@@ -134,8 +134,17 @@ export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick }: 
   const answered = picked !== null;
   const showClaims = (cur.pick ?? 0) > 0 && !!cur.interact;
 
+  // NO pointerEvents="none" ON THIS ROOT. It blocks the View *and every
+  // descendant*, so the three claim Targets below were rendered, ringed, and
+  // completely dead — the reader could not answer Q1 at all and had no way past
+  // the beat. It was copied from the sibling "lesson 2" scenes, which are
+  // deck-question lessons with nothing tappable on stage. The Scene renders
+  // INSIDE the player's advance Pressable, so `auto` is what every other
+  // Target-using scene does: taps bubble up to advance, and a Target stops that
+  // bubble for itself. check:cinematic now fails any scene that imports Target
+  // and carries this prop on its root.
   return (
-    <Animated.View style={styles.scene} pointerEvents="none">
+    <Animated.View style={styles.scene}>
       {/* ── the riddle, and Leibniz's answer to it ────────────────────────── */}
       <View style={styles.qBox} pointerEvents="none">
         <Text style={styles.qText}>WHY SOMETHING RATHER THAN NOTHING?</Text>

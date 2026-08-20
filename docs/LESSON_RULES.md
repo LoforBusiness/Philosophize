@@ -1521,6 +1521,34 @@ Measured: in-scene prompts average 13.4 words and 8 are over 18; the longest is 
 Past about 18 the prompt stops being a question and becomes a paragraph with a
 question at the end, which is the format the cinematic lessons exist to replace.
 
+**I74 — a scene that answers by tapping may not carry `pointerEvents="none"` on its
+root.**
+The other rules in this group are about a reader who cannot tell what to do. This one
+is about a reader who knows exactly what to do and is not allowed to do it.
+
+`pointerEvents="none"` blocks the View **and every descendant** — `box-none` is the
+value that lets children through. A scene root carrying `none` therefore renders its
+`Target`s, breathes their rings, prints "Tap one of the 3 outlined parts above", and
+swallows every tap on them. The beat is gated on an answer, so the lesson stops dead:
+no console error, no visual tell, nothing that separates it from a lesson that works.
+
+It shipped in `metaphysics2Scene`, copied from the sibling "lesson 2" scenes, which
+carry the prop **correctly** because they ask with the deck and have nothing tappable
+on stage. That is the trap worth remembering: the prop is right in three of the four
+files it appears in, so it reads as house style rather than as a bug.
+
+Nothing is bought by it either. The Scene mounts INSIDE the player's advance
+`Pressable`; a plain View is never a touch responder, so taps already bubble through
+to advance, and a `Target` stops that bubble for itself. All 60 other Target-using
+scenes leave the root at its default.
+
+`npm run check:cinematic` fails any scene that imports `Target` and carries the prop.
+The check keys on **the import**, not on `onPick(` — a scene hands `onPick` to a
+Target as a prop rather than calling it, and the first version of this check borrowed
+I70's regex and so sat green over the very file it was written for. It was only caught
+by re-introducing the bug on purpose. A check nobody has watched fail is a check
+nobody has tested.
+
 ---
 
 ## Group J — the words the reader reads

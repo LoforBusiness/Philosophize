@@ -156,6 +156,35 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
   // ring is a scene where the reader cannot tell what to press.
   if (/onPick\(/.test(src) && !/from '\.\/Target'/.test(src)) unringed.push(f);
 
+  // I74 — A SCENE THAT ANSWERS BY TAPPING MAY NOT SWITCH ITS OWN TOUCHES OFF.
+  //
+  // `pointerEvents="none"` on a View blocks that View **and every descendant**;
+  // `box-none` is the one that lets children through. So a root carrying `none`
+  // renders its Targets, breathes their rings, and swallows every tap on them.
+  // The reader is shown three buttons, told to press one, and cannot — and the
+  // beat is gated on an answer, so the lesson simply stops. There is no console
+  // error and no visual tell: it looks exactly like a lesson that works.
+  //
+  // It shipped in metaphysics2Scene, copied off the sibling "lesson 2" scenes,
+  // which carry `none` correctly because they ask with the deck and have nothing
+  // tappable on stage. That is the trap — the prop is right in three of the four
+  // files it appears in, so it reads as house style rather than as a bug.
+  //
+  // The Scene renders INSIDE the player's advance Pressable, so `auto` (the
+  // default, and what the other 60 Target scenes do) is safe: a plain View is
+  // never a responder, taps bubble to advance, and a Target stops the bubble for
+  // itself. Nothing is bought by the prop and a whole lesson is lost to it.
+  //
+  // The predicate is "imports Target", NOT "calls onPick(" — which is what this
+  // check was first written with, copied off I70 above. A scene hands `onPick`
+  // to a Target as a prop (`onPick={onPick}`) rather than calling it, so the
+  // borrowed regex matched nothing and the guard sat there green over the very
+  // file it was written for. Re-introducing the bug on purpose is what showed it;
+  // a check nobody has watched fail is a check nobody has tested.
+  if (/from '\.\/Target'/.test(src) && /style=\{styles\.scene\}[^>]*pointerEvents=["']none["']/.test(src)) {
+    errs.push('root carries pointerEvents="none", which kills every Target under it — the reader cannot answer at all (I74)');
+  }
+
   // H59 — the band. A scene with a CAMERA is exempt from the bottom rule, because
   // D25 requires its band be measured after the transform — ethicsScene's ground line
   // legitimately lands at screen y 322 under a 1.14 zoom. Anything else with a bottom

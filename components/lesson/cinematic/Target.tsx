@@ -4,7 +4,7 @@ import Animated, {
   Easing, cancelAnimation, useAnimatedStyle, useSharedValue,
   withDelay, withRepeat, withSequence, withSpring, withTiming,
 } from 'react-native-reanimated';
-import { INK, PAPER } from './cinematicKit';
+import { INK, PAPER, RIGHT, WRONG } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A THING IN THE PICTURE THAT CAN BE TAPPED, AND LOOKS LIKE IT.
@@ -219,7 +219,7 @@ export default function Target({
   // reads as though they had.
   const seal = useSharedValue(0);
   useEffect(() => {
-    if (!(answered && mine && correct)) { seal.value = 0; return; }
+    if (!(answered && mine)) { seal.value = 0; return; }
     seal.value = withDelay(180, withSequence(
       withTiming(1.35, { duration: 110, easing: Easing.out(Easing.quad) }),
       withSpring(1, { damping: 9, stiffness: 220 }),
@@ -268,9 +268,19 @@ export default function Target({
       <Animated.View pointerEvents="box-none" style={reaction}>
         {children}
       </Animated.View>
-      {answered && mine && correct ? (
-        <Animated.View style={[styles.seal, sealStyle]} pointerEvents="none">
-          <Text style={styles.sealMark}>✓</Text>
+      {/* THE MARK ON THE READER'S OWN ANSWER, right or wrong.
+          It used to appear only when they were RIGHT, so a stage question that
+          went badly gave back nothing at all at the point of contact — the ring
+          vanished, the true target lifted, and the thing they actually pressed
+          was left looking untouched. Same two marks, same two colours as the
+          deck's cards, because a stage question and a deck question are the same
+          question to a reader. */}
+      {answered && mine ? (
+        <Animated.View
+          style={[styles.seal, correct ? styles.sealTrue : styles.sealMiss, sealStyle]}
+          pointerEvents="none"
+        >
+          <Text style={styles.sealMark}>{correct ? '✓' : '✕'}</Text>
         </Animated.View>
       ) : null}
       {!answered ? (
@@ -345,9 +355,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -8, top: -10,
     width: 28, height: 28, borderRadius: 14,
-    borderWidth: 2, borderColor: INK,
-    backgroundColor: PAPER,
+    borderWidth: 2,
     alignItems: 'center', justifyContent: 'center',
   },
-  sealMark: { fontFamily: 'Inter_700Bold', fontSize: 14, color: INK, marginTop: -1 },
+  sealTrue: { borderColor: RIGHT, backgroundColor: RIGHT },
+  sealMiss: { borderColor: WRONG, backgroundColor: WRONG },
+  sealMark: { fontFamily: 'Inter_700Bold', fontSize: 14, color: PAPER, marginTop: -1 },
 });

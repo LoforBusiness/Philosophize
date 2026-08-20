@@ -3,8 +3,10 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, {
   Easing, useAnimatedStyle, useSharedValue, withDelay, withSequence, withSpring, withTiming,
 } from 'react-native-reanimated';
-import { INK, PAPER } from './cinematicKit';
+import { INK, PAPER, RIGHT, RIGHT_BG, WRONG, WRONG_BG } from './cinematicKit';
 import type { ChoiceCard } from './cinematicKit';
+import { LIP } from '@/constants/design';
+import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO CHOICES, STANDING ON THE PICTURE.
@@ -125,22 +127,62 @@ function Card({ card, id, picked, onPick }: {
   const chosen = answered && mine;
   const revealed = answered && !mine && card.correct;
 
-  const a = useSharedValue(0);   // 0 open, 1 reacted
+  const a = useSharedValue(0);      // 0 open, 1 reacted
+  const down = useSharedValue(0);   // 1 while a finger is on this card
+  const wob = useSharedValue(0);    // the wrong-answer shake, +1 / -1 / 0
+
   useEffect(() => {
     if (!answered) { a.value = 0; return; }
     a.value = withDelay(60, withTiming(1, { duration: REACT, easing: Easing.out(Easing.cubic) }));
   }, [answered, a]);
 
+  // THE SHAKE. Only the card that was actually taken and was wrong — a refusal,
+  // aimed at the choice the reader made rather than played over the whole row.
+  // Four crossings, decaying, which is a head-shake; two reads as a glitch and
+  // six reads as a error dialog.
+  const missed = answered && mine && !card.correct;
+  useEffect(() => {
+    if (!missed) { wob.value = 0; return; }
+    wob.value = withSequence(
+      withTiming(1, { duration: 55 }),
+      withTiming(-1, { duration: 55 }),
+      withTiming(0.55, { duration: 50 }),
+      withTiming(-0.55, { duration: 50 }),
+      withTiming(0, { duration: 45 }),
+    );
+  }, [missed, wob]);
+
   const style = useAnimatedStyle(() => {
     const t = a.value;
-    if (!answered) return { opacity: 1, transform: [{ scale: 1 }, { rotate: '0deg' }, { translateY: 0 }] };
+    // THE CHUNK. Unanswered, the card rides `LIP.button` above its own ledge and
+    // drops onto it under a finger. Every branch below returns the same four
+    // transforms in the same order — Reanimated will interpolate a transform
+    // array positionally, and a branch that drops `translateX` shifts what every
+    // later entry means.
+    if (!answered) {
+      return {
+        opacity: 1,
+        transform: [{ translateX: 0 }, { translateY: down.value * LIP.button }, { scale: 1 }, { rotate: '0deg' }],
+      };
+    }
     if (chosen && card.correct) {
       // Taken: rises and settles, slightly larger. The seal lands on it.
-      return { opacity: 1, transform: [{ translateY: -10 * t }, { scale: 1 + 0.06 * t }, { rotate: '0deg' }] };
+      return { opacity: 1, transform: [{ translateX: 0 }, { translateY: -10 * t }, { scale: 1 + 0.06 * t }, { rotate: '0deg' }] };
     }
     if (revealed) {
       // The true one they did not take: lifts and holds, so the answer is shown.
-      return { opacity: 1, transform: [{ translateY: -10 * t }, { scale: 1 + 0.06 * t }, { rotate: '0deg' }] };
+      return { opacity: 1, transform: [{ translateX: 0 }, { translateY: -10 * t }, { scale: 1 + 0.06 * t }, { rotate: '0deg' }] };
+    }
+    if (mine) {
+      // TAKEN AND WRONG. It used to fall into the crumple branch below and fade
+      // to 0.14 — so the reader's own answer quietly disappeared and the only
+      // thing left on screen was the right one rising. That tells you what the
+      // answer is and never tells you that you got it wrong. It stays, in red,
+      // and shakes its head.
+      return {
+        opacity: 1,
+        transform: [{ translateX: wob.value * 7 }, { translateY: 0 }, { scale: 1 - 0.04 * t }, { rotate: '0deg' }],
+      };
     }
     // Crumples away — down, small, and off true, which reads as discarded rather
     // than merely hidden. It does NOT fall far: at 12 units it drifted onto the
@@ -148,34 +190,72 @@ function Card({ card, id, picked, onPick }: {
     // fade say the same thing without landing on the question.
     return {
       opacity: 1 - 0.86 * t,
-      transform: [{ translateY: 6 * t }, { scale: 1 - 0.16 * t }, { rotate: `${5 * t}deg` }],
+      transform: [{ translateX: 0 }, { translateY: 6 * t }, { scale: 1 - 0.16 * t }, { rotate: `${5 * t}deg` }],
     };
   });
 
+  // THE PAYMENT, SHOWN WHERE IT WAS EARNED. The number was only ever on the
+  // reward screen after the lesson; this is it leaving the card that won it.
+  const xp = useSharedValue(0);
+  useEffect(() => {
+    if (!(chosen && card.correct)) { xp.value = 0; return; }
+    xp.value = withDelay(240, withTiming(1, { duration: 900, easing: Easing.out(Easing.cubic) }));
+  }, [chosen, card.correct, xp]);
+  const xpStyle = useAnimatedStyle(() => ({
+    opacity: xp.value === 0 ? 0 : Math.min(1, xp.value * 4) * (1 - Math.max(0, (xp.value - 0.6) / 0.4)),
+    transform: [{ translateY: -26 * xp.value }],
+  }));
+
   const seal = useSharedValue(0);
   useEffect(() => {
-    if (!(chosen && card.correct)) { seal.value = 0; return; }
+    if (!(chosen && card.correct) && !missed) { seal.value = 0; return; }
     // A thump: overshoots hard and settles, arriving after the card has begun to rise.
     seal.value = withDelay(180, withSequence(
       withTiming(1.35, { duration: 110, easing: Easing.out(Easing.quad) }),
       withSpring(1, { damping: 9, stiffness: 220 }),
     ));
-  }, [chosen, card.correct, seal]);
+  }, [chosen, card.correct, missed, seal]);
   const sealStyle = useAnimatedStyle(() => ({
     opacity: seal.value > 0 ? 1 : 0,
     transform: [{ scale: seal.value }, { rotate: '-12deg' }],
   }));
 
   const body = (
-    <Animated.View style={[styles.card, answered && card.correct && styles.cardTrue, style]}>
-      <Text style={styles.text} numberOfLines={3}>{card.text}</Text>
+    <Animated.View
+      style={[
+        styles.card,
+        answered && card.correct && styles.cardTrue,
+        missed && styles.cardMiss,
+        style,
+      ]}
+    >
+      <Text
+        style={[
+          styles.text,
+          answered && card.correct && styles.textTrue,
+          missed && styles.textMiss,
+        ]}
+        numberOfLines={3}
+      >
+        {card.text}
+      </Text>
       {/* MOUNTED ONLY WHEN IT IS EARNED, not hidden at opacity 0. A View that is
           merely transparent still contributes its text: measured in a browser,
           every card read "It did not rain ✓" from the moment it appeared, which
           a screen reader would say out loud on both of them. */}
       {chosen && card.correct ? (
-        <Animated.View style={[styles.seal, sealStyle]} pointerEvents="none">
-          <Text style={styles.sealMark}>✓</Text>
+        <Animated.View style={[styles.seal, styles.sealTrue, sealStyle]} pointerEvents="none">
+          <Text style={[styles.sealMark, styles.sealMarkOn]}>✓</Text>
+        </Animated.View>
+      ) : null}
+      {missed ? (
+        <Animated.View style={[styles.seal, styles.sealMiss, sealStyle]} pointerEvents="none">
+          <Text style={[styles.sealMark, styles.sealMarkOn]}>✕</Text>
+        </Animated.View>
+      ) : null}
+      {chosen && card.correct ? (
+        <Animated.View style={[styles.xpFly, xpStyle]} pointerEvents="none">
+          <Text style={styles.xpFlyText}>{`+${XP_PER_CORRECT_ANSWER} XP`}</Text>
         </Animated.View>
       ) : null}
     </Animated.View>
@@ -197,8 +277,16 @@ function Card({ card, id, picked, onPick }: {
       accessibilityRole="button"
       accessibilityLabel={card.text}
       onPress={() => onPick(id, card.correct)}
+      onPressIn={() => { down.value = 1; }}
+      onPressOut={() => { down.value = 0; }}
     >
-      {body}
+      {/* The ledge the card sits on. Fixed `paddingBottom`, never animated, so
+          Yoga never re-measures and the prompt below cannot shift on a press —
+          see components/ui/Button for the version of this that got it wrong. */}
+      <View style={{ paddingBottom: answered ? 0 : LIP.button }}>
+        {!answered ? <View pointerEvents="none" style={styles.cardLip} /> : null}
+        {body}
+      </View>
     </Pressable>
   );
 }
@@ -223,8 +311,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // The true card thickens rather than colouring — §19 has no second colour.
-  cardTrue: { borderWidth: 3 },
+  // The ledge: a slab of ink sitting `LIP.button` lower than the face, so the
+  // face covers all but the bottom sliver of it. Pressing drops the face onto it.
+  cardLip: {
+    position: 'absolute', left: 0, right: 0, top: LIP.button, bottom: 0,
+    borderRadius: 4, backgroundColor: INK,
+  },
+  // THE ANSWER STATES. This used to be `borderWidth: 3` and nothing else, on the
+  // grounds that the app has no second colour — but the CARD runner it replaces
+  // has tinted its answered rows green and red since before this format existed
+  // (components/lesson/theme.ts), and design.ts adopted the same two hexes app
+  // wide. One pixel of extra border was the weakest feedback in either runner,
+  // on the moment that most needs to land. See cinematicKit's token block.
+  cardTrue: { borderWidth: 3, borderColor: RIGHT, backgroundColor: RIGHT_BG },
+  cardMiss: { borderWidth: 3, borderColor: WRONG, backgroundColor: WRONG_BG },
   text: {
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 14,
@@ -232,6 +332,8 @@ const styles = StyleSheet.create({
     color: INK,
     textAlign: 'center',
   },
+  textTrue: { color: RIGHT },
+  textMiss: { color: WRONG },
   seal: {
     position: 'absolute',
     right: -8, top: -10,
@@ -240,5 +342,12 @@ const styles = StyleSheet.create({
     backgroundColor: PAPER,
     alignItems: 'center', justifyContent: 'center',
   },
+  sealTrue: { borderColor: RIGHT, backgroundColor: RIGHT },
+  sealMiss: { borderColor: WRONG, backgroundColor: WRONG },
   sealMark: { fontFamily: 'Inter_700Bold', fontSize: 14, color: INK, marginTop: -1 },
+  sealMarkOn: { color: PAPER },
+  // Rises off the card that won it and fades. Absolutely positioned and
+  // pointer-inert, so it never touches the row's layout or its hit area.
+  xpFly: { position: 'absolute', top: -6, alignSelf: 'center' },
+  xpFlyText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.4, color: RIGHT },
 });

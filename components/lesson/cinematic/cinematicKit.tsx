@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
 import Animated, {
-  useSharedValue, useAnimatedStyle, withTiming, Easing, FadeInDown,
-  LinearTransition, runOnJS, type SharedValue,
+  useSharedValue, useAnimatedStyle, withTiming, withRepeat, withSequence, withSpring,
+  Easing, FadeInDown, LinearTransition, runOnJS, type SharedValue,
 } from 'react-native-reanimated';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
+import { C, RADIUS, LIP } from '@/constants/design';
 import { ease01, seg, type Stance } from './rig';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -22,6 +23,39 @@ export const INK = '#1A1A1A';
 export const PAPER = '#FAFAF7';
 export const SOFT = '#6B6B6B';
 export const RULE = '#E4E1D8';
+
+// ── THE ANSWER STATES, AND WHY THIS IS NOT A NEW COLOUR ──────────────────────
+//
+// H60 says a SCENE gets four colours and no more, and that stands — the picture
+// stays ink on paper, and validate-cinematic still fails any *Scene.tsx carrying
+// a hex. These four are for the CHROME: the progress rail, the answer reveal,
+// the explanation panel. Nothing here is ever handed to a scene.
+//
+// They are not invented. `components/lesson/theme.ts` — the CARD runner, the
+// format this one is replacing — has carried exactly this pair since before the
+// first cinematic lesson existed, and MultipleChoice, TrueFalse and TapFlaw all
+// tint their answered rows with it. `constants/design.ts` then adopted the same
+// two hexes as `C.correct` / `C.wrong` for the whole app.
+//
+// So the odd one out was the cinematic deck. Measured across both runners: a
+// card-deck reader who answers gets a green row and a red row; a cinematic
+// reader who answers gets a border that goes from 2px to 3px. The format that is
+// taking over had the WEAKER feedback of the two, and it is the one 132 of 222
+// lessons use. That is the gap this closes — the app's existing answer palette,
+// carried into the format that inherited everything else.
+//
+// The tints come from design.ts where it has them (`C.wrongSoft`) and from the
+// card runner's measured pair where it does not (`greenBg`), rather than being
+// eyeballed here.
+export const RIGHT = C.correct;        // #4F7A4A
+export const RIGHT_BG = '#EAF1E6';     // theme.ts greenBg — the pair it was measured against
+export const WRONG = C.wrong;          // #A8513F
+export const WRONG_BG = C.wrongSoft;   // #F7E9E9
+
+/** The unfilled part of the progress rail. `RULE` is the SCENE's hairline and is
+ *  too faint to read as an empty track at 10px tall; this is the card runner's
+ *  `segOff`, which was chosen for exactly this job. */
+export const TRACK_OFF = '#E2DED4';
 
 export const STAGE_W = 400;
 export const STAGE_H = 560;
@@ -457,6 +491,91 @@ export function Bubble({
 }
 
 // ── choices (teaching taps + graded questions) ────────────────────────────────
+/**
+ * THE CHIP THAT SAYS A QUESTION HAS STARTED.
+ *
+ * Shared by both panels below so the two kinds of question announce themselves
+ * identically. On a graded beat it names the stake; on a teaching tap there is
+ * no stake to name, and saying so would be a lie the reward screen then
+ * contradicts.
+ */
+export function QKicker({ graded }: { graded?: boolean }) {
+  return (
+    <View style={styles.kicker}>
+      <Text style={styles.kickerText}>
+        {graded ? `QUESTION  \u00b7  +${XP_PER_CORRECT_ANSWER} XP` : 'YOUR TURN'}
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * THE REVEAL, in one place for both panels.
+ *
+ * It has to say WHICH of the two things happened before it says anything else —
+ * see `explain` in the stylesheet for what it used to do instead.
+ */
+export function Reveal({ correct, graded, explain }: {
+  correct: boolean; graded?: boolean; explain: string;
+}) {
+  return (
+    <Animated.View
+      style={[styles.explain, correct ? styles.explainRight : styles.explainWrong]}
+      entering={FadeInDown.duration(300)}
+    >
+      <Text style={[styles.explainHead, correct ? styles.explainHeadRight : styles.explainHeadWrong]}>
+        {correct ? (graded ? CORRECT_LABEL : 'That\u2019s the one') : 'Not quite'}
+      </Text>
+      <Text style={styles.explainText}>{explain}</Text>
+    </Animated.View>
+  );
+}
+
+/** One option row, with the chunk. Its own press state, because the lip has to
+ *  drop under the finger that is on it and not under the other three. */
+function Opt({ o, answered, reveal, chosen, onPick }: {
+  o: Choice; answered: boolean; reveal: boolean; chosen: boolean;
+  onPick: (id: string, correct: boolean) => void;
+}) {
+  const [down, setDown] = useState(false);
+  // No lip once answered: the row has stopped being a button, and a ledge under
+  // a thing that cannot be pressed is an affordance that lies.
+  const lip = answered ? 0 : LIP.button;
+  return (
+    <Pressable
+      style={styles.optSlot}
+      disabled={answered}
+      accessibilityRole="button"
+      accessibilityLabel={o.text}
+      onPress={() => onPick(o.id, o.correct)}
+      onPressIn={() => setDown(true)}
+      onPressOut={() => setDown(false)}
+    >
+      <View style={{ paddingBottom: lip }}>
+        {lip > 0 ? <View pointerEvents="none" style={[styles.optLip, { top: lip }]} /> : null}
+        <View
+          style={[
+            styles.opt,
+            reveal && styles.optRight,
+            chosen && !o.correct && styles.optWrong,
+            { transform: [{ translateY: down && !answered ? lip : 0 }] },
+          ]}
+        >
+          <Text
+            style={[
+              styles.optText,
+              reveal && styles.optRightText,
+              chosen && !o.correct && styles.optWrongText,
+            ]}
+          >
+            {o.text}
+          </Text>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
 export function Choices({
   prompt, options, explain, picked, graded, onPick,
 }: {
@@ -468,9 +587,10 @@ export function Choices({
   onPick: (id: string, correct: boolean) => void;
 }) {
   const answered = picked !== null;
-  const gotIt = answered && options.find((o) => o.id === picked)?.correct;
+  const gotIt = Boolean(answered && options.find((o) => o.id === picked)?.correct);
   return (
     <Animated.View style={styles.qWrap} layout={LinearTransition.duration(300)}>
+      {!answered ? <QKicker graded={graded} /> : null}
       <Text style={styles.prompt}>{prompt}</Text>
       {options.map((o) => {
         const chosen = picked === o.id;
@@ -479,29 +599,17 @@ export function Choices({
         // so a four-option question plus its explanation fits the fixed deck.
         if (answered && !chosen && !o.correct) return null;
         return (
-          <Pressable
+          <Opt
             key={o.id}
-            disabled={answered}
-            onPress={() => onPick(o.id, o.correct)}
-            style={({ pressed }) => [
-              styles.opt,
-              reveal && styles.optRight,
-              chosen && !o.correct && styles.optWrong,
-              pressed && !answered && { opacity: 0.75 },
-            ]}
-          >
-            <Text style={[styles.optText, reveal && styles.optRightText]}>{o.text}</Text>
-          </Pressable>
+            o={o}
+            answered={answered}
+            reveal={reveal}
+            chosen={chosen}
+            onPick={onPick}
+          />
         );
       })}
-      {answered ? (
-        <Animated.View style={styles.explain} entering={FadeInDown.duration(300)}>
-          <Text style={styles.explainHead}>
-            {gotIt ? (graded ? CORRECT_LABEL : 'That’s the one') : 'Not quite'}
-          </Text>
-          <Text style={styles.explainText}>{explain}</Text>
-        </Animated.View>
-      ) : null}
+      {answered ? <Reveal correct={gotIt} graded={graded} explain={explain} /> : null}
     </Animated.View>
   );
 }
@@ -543,14 +651,12 @@ export function InteractPanel({
       : 'Answer in the scene above ↑';
   return (
     <Animated.View style={styles.qWrap} layout={LinearTransition.duration(300)}>
+      {!answered ? <QKicker graded /> : null}
       <Text style={styles.prompt}>{prompt}</Text>
       {!answered && inScene ? (
         <Text style={styles.interactHint}>{hint}</Text>
-      ) : (
-        <Animated.View style={styles.explain} entering={FadeInDown.duration(300)}>
-          <Text style={styles.explainHead}>{correct ? CORRECT_LABEL : 'Not quite'}</Text>
-          <Text style={styles.explainText}>{explain}</Text>
-        </Animated.View>
+      ) : !answered ? null : (
+        <Reveal correct={correct} graded explain={explain} />
       )}
     </Animated.View>
   );
@@ -598,16 +704,121 @@ export function SummaryCard({ s }: { s: SummaryBlock }) {
   );
 }
 
+/**
+ * THE RUNNING SCORE.
+ *
+ * Its own component, for the reason rule 1 of §17 gives: the player carries an
+ * `if (done) return null` near the bottom and every hook has to sit above it.
+ * A pill that owns its own pop animation adds no hook to the player at all,
+ * which is the version that cannot be got wrong later.
+ *
+ * It pops on CHANGE rather than on every render — `withSequence` off a
+ * `useEffect` keyed on the number. A counter that jumps without moving is just
+ * a different number in the same place, and the reader misses it.
+ */
+export function XpPill({ xp }: { xp: number }) {
+  const pop = useSharedValue(1);
+  const first = useRef(true);
+  useEffect(() => {
+    // Not on mount: the pill arrives at 0 XP and has nothing to celebrate yet.
+    if (first.current) { first.current = false; return; }
+    pop.value = withSequence(
+      withTiming(1.22, { duration: 120, easing: Easing.out(Easing.quad) }),
+      withSpring(1, { damping: 8, stiffness: 220 }),
+    );
+  }, [xp, pop]);
+  const st = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
+  return (
+    <Animated.View style={[styles.xpPill, st]}>
+      <Text style={styles.xpPillText}>{xp} XP</Text>
+    </Animated.View>
+  );
+}
+
+/**
+ * THE NUDGE UNDER THE DECK.
+ *
+ * A tap ripple — a ring that swells out of a dot and fades, on a loop. The
+ * screen's only instruction used to be three words of static grey caps, so a
+ * reader who had finished reading could not tell the lesson was WAITING for
+ * them from the lesson still playing. This is the one thing on the screen whose
+ * whole job is to say "your move".
+ *
+ * It stops when the beat is `locked` on an unanswered question, because then a
+ * tap is not what is wanted and a pulse pointing at the wrong gesture is worse
+ * than none.
+ */
+export function TapNudge({ label, resting }: { label: string; resting?: boolean }) {
+  const r = useSharedValue(0);
+  useEffect(() => {
+    if (resting) { r.value = withTiming(0, { duration: 200 }); return; }
+    r.value = 0;
+    r.value = withRepeat(withTiming(1, { duration: 1500, easing: Easing.out(Easing.quad) }), -1, false);
+  }, [resting, r]);
+  const ring = useAnimatedStyle(() => ({
+    opacity: (1 - r.value) * 0.55,
+    transform: [{ scale: 0.6 + r.value * 1.1 }],
+  }));
+  return (
+    <View style={styles.hintRow}>
+      {!resting ? (
+        <View style={styles.nudge}>
+          <Animated.View style={[styles.nudgeRing, ring]} pointerEvents="none" />
+          <View style={styles.nudgeDot} pointerEvents="none" />
+        </View>
+      ) : null}
+      <Text style={styles.hint}>{label}</Text>
+    </View>
+  );
+}
+
 export const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: PAPER },
   body: { flex: 1 },
 
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingTop: 4, gap: 12 },
   close: { padding: 4 },
-  track: { flex: 1, height: 2, backgroundColor: RULE, overflow: 'hidden' },
+
+  // ── THE RAIL ──────────────────────────────────────────────────────────────
+  //
+  // It was 2px of hairline, which is a rule, not a progress bar — you could not
+  // see it move and there was nothing to feel good about filling. 10px on a pill
+  // track is the shape every reader already knows this control by, and it is the
+  // one piece of chrome on screen for every beat of every lesson.
+  //
+  // `overflow: hidden` on the track is what rounds the fill's leading end: the
+  // fill itself must stay a plain rectangle, because it is driven by scaleX and
+  // a border radius on a scaled View is scaled with it — a 999 radius at 8%
+  // progress comes out as a squashed lozenge rather than a bar. The track clips
+  // it into shape instead.
+  track: {
+    flex: 1, height: 10, backgroundColor: TRACK_OFF,
+    borderRadius: RADIUS.pill, overflow: 'hidden',
+  },
   // Full-width bar scaled from the left, so a smooth scaleX reads as the fill
   // advancing (a percentage-width jump on each tap is what we're replacing).
-  fill: { position: 'absolute', left: 0, top: 0, height: 2, width: '100%', backgroundColor: INK, transformOrigin: '0% 50%' },
+  fill: { position: 'absolute', left: 0, top: 0, height: 10, width: '100%', backgroundColor: INK, transformOrigin: '0% 50%' },
+  /** The gloss. A paper-tinted sliver along the top of the fill, which is what
+   *  stops a 10px slab reading as a flat black brick. It rides inside the fill,
+   *  so it is scaled and clipped with it and costs no extra animation. */
+  fillTop: {
+    position: 'absolute', left: 0, top: 2, height: 3, width: '100%',
+    backgroundColor: PAPER, opacity: 0.22,
+  },
+
+  // ── THE RUNNING SCORE ─────────────────────────────────────────────────────
+  //
+  // A lesson pays XP per correct answer and told the reader so exactly once, in
+  // the reveal line, and then again on the reward screen after it was over.
+  // Between those two the number did not exist. This is it, kept on screen and
+  // counting — the difference between being scored and being told your score
+  // afterwards.
+  xpPill: {
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 2, borderColor: INK, borderRadius: RADIUS.pill,
+    paddingHorizontal: 8, paddingVertical: 2, backgroundColor: PAPER,
+  },
+  xpPillText: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.6, color: INK },
 
   // Fixed proportions (content-independent) so the stage never resizes on a tap.
   // A slightly shorter stage than 46/46 so the deck holds a 3-line prompt + four
@@ -645,19 +856,62 @@ export const styles = StyleSheet.create({
   cite: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT, marginBottom: 7 },
 
   qWrap: { marginTop: 2 },
+
+  /** The chip that says a question has started. A beat used to become a question
+   *  silently — the narration simply stopped and a prompt appeared in the same
+   *  place, in a slightly heavier face. This announces it, and on a graded beat
+   *  it names the stake, derived from constants/xp rather than typed (H63). */
+  kicker: {
+    alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center',
+    borderRadius: RADIUS.pill, paddingHorizontal: 9, paddingVertical: 3,
+    marginBottom: 8, backgroundColor: INK,
+  },
+  kickerText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.4, color: PAPER },
+
   prompt: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 16, color: INK, marginBottom: 8, lineHeight: 21 },
   interactHint: { fontFamily: 'Inter_500Medium', fontSize: 12, letterSpacing: 0.5, color: SOFT, fontStyle: 'italic' },
-  opt: {
-    borderWidth: 1.5, borderColor: RULE, borderRadius: 5,
-    paddingVertical: 8, paddingHorizontal: 14, marginBottom: 6, backgroundColor: PAPER,
+
+  // ── THE OPTION ROWS ───────────────────────────────────────────────────────
+  //
+  // Same chunk as components/ui/Button: a slab of the lip colour behind the
+  // face, and pressing drops the face onto it. See that file's header for why
+  // the lip is absolutely positioned and only `translateY` animates.
+  //
+  // The reveal is COLOUR now rather than an ink flood. The old `optRight`
+  // filled the row solid black, which is the heaviest mark the app has, and it
+  // landed on the one row the reader got RIGHT — the same treatment a headline
+  // gets, used to mean "correct". Tinted green states it once and lets the
+  // explanation underneath do the talking.
+  optSlot: { marginBottom: 8 },
+  optLip: {
+    position: 'absolute', left: 0, right: 0, bottom: 0,
+    borderRadius: RADIUS.button, backgroundColor: C.HUE,
   },
-  optRight: { borderColor: INK, backgroundColor: INK },
-  optRightText: { color: PAPER, fontFamily: 'Inter_700Bold' },
-  optWrong: { borderColor: SOFT, opacity: 0.55 },
+  opt: {
+    borderWidth: 2, borderColor: INK, borderRadius: RADIUS.button,
+    paddingVertical: 11, paddingHorizontal: 14, backgroundColor: PAPER,
+  },
+  optRight: { borderColor: RIGHT, backgroundColor: RIGHT_BG },
+  optRightText: { color: RIGHT, fontFamily: 'Inter_700Bold' },
+  optWrong: { borderColor: WRONG, backgroundColor: WRONG_BG },
+  optWrongText: { color: WRONG },
   optText: { fontFamily: 'Inter_400Regular', fontSize: 13.5, color: INK, lineHeight: 18 },
-  explain: { marginTop: 4, borderLeftWidth: 2, borderLeftColor: INK, paddingLeft: 12, paddingVertical: 2 },
+
+  // ── THE EXPLANATION ───────────────────────────────────────────────────────
+  //
+  // A bare 2px rule down the left, in ink, whatever had just happened. It read
+  // the same for "you got it" and for "not quite", which is the one moment in a
+  // lesson where the reader most wants to be told which of those it was.
+  explain: {
+    marginTop: 4, borderRadius: RADIUS.card, borderLeftWidth: 5,
+    paddingLeft: 12, paddingRight: 12, paddingVertical: 10,
+  },
+  explainRight: { backgroundColor: RIGHT_BG, borderLeftColor: RIGHT },
+  explainWrong: { backgroundColor: WRONG_BG, borderLeftColor: WRONG },
   explainHead: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.2, color: INK, marginBottom: 4 },
-  explainText: { fontFamily: 'Inter_400Regular', fontSize: 13.5, color: SOFT, lineHeight: 20 },
+  explainHeadRight: { color: RIGHT },
+  explainHeadWrong: { color: WRONG },
+  explainText: { fontFamily: 'Inter_400Regular', fontSize: 13.5, color: INK, lineHeight: 20, opacity: 0.82 },
 
   quoteCard: { borderWidth: 1.5, borderColor: INK, borderRadius: 3, padding: 18, marginTop: 2 },
   quoteMark: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 40, color: INK, height: 26, lineHeight: 36 },
@@ -679,5 +933,16 @@ export const styles = StyleSheet.create({
   },
 
   tapLayer: { flex: 8, alignItems: 'center', justifyContent: 'center' },
+  hintRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   hint: { fontFamily: 'Inter_500Medium', fontSize: 11, letterSpacing: 2, color: SOFT },
+  /** The nudge. Static grey caps said "Tap to continue" and were the only thing
+   *  on the screen not moving; a reader who had finished reading had no sign the
+   *  lesson was waiting for them rather than still playing. It rests while the
+   *  beat is LOCKED on an answer, because then the tap is not what is wanted. */
+  nudge: { width: 16, height: 16, alignItems: 'center', justifyContent: 'center' },
+  nudgeRing: {
+    position: 'absolute', width: 16, height: 16, borderRadius: 8,
+    borderWidth: 1.5, borderColor: SOFT,
+  },
+  nudgeDot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: SOFT },
 });

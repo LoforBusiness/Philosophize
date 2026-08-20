@@ -7,7 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import { getLessonById } from '@/data';
-import { lessonXP } from '@/constants/xp';
+import { lessonXP, XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import { exitLesson } from '../exitLesson';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -28,6 +28,7 @@ import { lessonHasSound } from './lessonSound';
 import { TargetCountProvider } from './Target';
 import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
+  XpPill, TapNudge,
   COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, GROUND, INK,
   type BaseBeat,
 } from './cinematicKit';
@@ -798,8 +799,12 @@ export default function CinematicPlayer({
               to read the same — and stopped measuring ethics-ethics-3 at beat 8 of
               10, leaving the last two silently unprotected. This bar IS the beat
               index, scaled. */}
-          <Animated.View nativeID="beat-progress" style={[styles.fill, fillStyle]} />
+          <Animated.View nativeID="beat-progress" style={[styles.fill, fillStyle]}>
+            <View style={styles.fillTop} pointerEvents="none" />
+          </Animated.View>
         </View>
+        {/* The score, while it is still being earned rather than after. */}
+        <XpPill xp={correct * XP_PER_CORRECT_ANSWER} />
       </View>
 
       <Pressable style={styles.body} onPress={advance} disabled={locked}>
@@ -951,9 +956,10 @@ export default function CinematicPlayer({
         </View>
 
         <View style={styles.tapLayer}>
-          <Text style={styles.hint}>
-            {locked ? 'Choose an answer' : last ? 'Finish' : 'Tap to continue'}
-          </Text>
+          <TapNudge
+            label={locked ? 'Choose an answer' : last ? 'Finish' : 'Tap to continue'}
+            resting={locked}
+          />
         </View>
       </Pressable>
     </SafeAreaView>
