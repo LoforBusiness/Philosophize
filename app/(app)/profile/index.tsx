@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Alert, StyleSheet, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
@@ -12,9 +12,10 @@ import ScreenTransition from '@/components/shared/ScreenTransition';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { C, TYPE, SPACE, BRANCH, type TypeKey, type BranchKey } from '@/constants/design';
-import { GHOST, METAL, TIER_METAL, ramp } from '@/components/shared/tone';
+import { GHOST, METAL, ramp } from '@/components/shared/tone';
 import { StruckBar, StruckTile, MetalPlate, MasteryRow, ShelfCount } from '@/components/profile/Struck';
 import RankSeal from '@/components/shared/RankSeal';
+import Showcase from '@/components/profile/Showcase';
 import { ProfileArtFill, ProfileAvatar, useProfileArt } from '@/components/shared/ProfileArt';
 import { profileNameStyle, profileNameText } from '@/data/profileFonts';
 import StreakBook from '@/components/gamification/StreakBook';
@@ -23,9 +24,9 @@ import { signOut } from '@/lib/supabase/auth';
 import { useAuthSession } from '@/lib/supabase/useSession';
 import { ALL_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
-import { rankProgress, rankBand, RANKS } from '@/data/ranks';
+import { rankProgress, rankOrder, rankDegree, rankInsignia, RANKS } from '@/data/ranks';
 import { BADGES } from '@/data/badges';
-import { useUserDataStore } from '@/stores/userDataStore';
+import { useUserDataStore, progressStats } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { generateUserBio } from '@/lib/utils/userBio';
 import { effectiveStreak } from '@/lib/utils/streak';
@@ -79,6 +80,12 @@ export default function ProfileScreen() {
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
   const philosopherViews = useUserDataStore((s) => s.philosopherViews);
+  const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
+  const quizScores = useUserDataStore((s) => s.quizScores);
+  // NOT `activeDays` — that name is already taken in this file by the FUNCTION
+  // imported from lib/utils/xpSeries, and shadowing it here would have silently
+  // handed `progressStats` a function where it wanted an array of dates.
+  const practisedDays = useUserDataStore((s) => s.activeDays);
   const streak = useUserDataStore((s) => s.streak);
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
   const restDaysEarned = useUserDataStore((s) => s.restDaysEarned);
@@ -254,6 +261,18 @@ export default function ProfileScreen() {
   // One shared computation — see `rankProgress`. This screen used to divide
   // totalXP by the next threshold, which counts from zero rather than from the
   // start of the current band and read 96% where the Ranks sheet read 77%.
+  // The same measurement the store awards from and the Ranks sheet displays —
+  // three copies of one calculation is three chances for the cabinet to disagree
+  // with the badge grid about whether a medal is held.
+  const badgeStats = useMemo(
+    () => progressStats({
+      lessonsByBranch, lessonsByUnit, savedQuotes, philosopherViews, quizScores,
+      streak: shownStreak, totalXP, activeDays: practisedDays, rankIndex,
+    }),
+    [lessonsByBranch, lessonsByUnit, savedQuotes, philosopherViews, quizScores,
+      shownStreak, totalXP, practisedDays, rankIndex],
+  );
+
   const { current: cur, next, pending, pct: rankPct, toNext, inBand, bandSize } =
     rankProgress(rankIndex, totalXP);
 
@@ -377,6 +396,12 @@ export default function ProfileScreen() {
 
         {/* Body */}
         <View style={styles.body}>
+          {/* THE CABINET, FIRST. The pin you hold and the three medals you chose
+              to be seen holding — see components/profile/Showcase. It is above
+              everything because it is the only part of this page that is a
+              statement rather than a measurement. */}
+          <Showcase stats={badgeStats} rankIndex={rankIndex} />
+
           {showWidget ? <DailyQuoteWidget style={{ marginBottom: SPACE[4] }} /> : null}
 
           <SectionLabel>FROM YOUR INSIGHTS</SectionLabel>
@@ -507,7 +532,7 @@ export default function ProfileScreen() {
                 card and every name fits it. */}
             <View style={styles.rankLadder}>
               <View style={styles.rankPin}>
-                <RankSeal glyph={cur.glyph} state="current" size={56} band={rankBand(rankIndex)} />
+                <RankSeal glyph={cur.glyph} state="current" size={56} order={rankOrder(rankIndex)} degree={rankDegree(rankIndex)} />
               </View>
 
               <View style={styles.rankMid}>
@@ -522,7 +547,7 @@ export default function ProfileScreen() {
                 </Text>
                 <StruckBar
                   pct={rankPct}
-                  fill={ramp(METAL[TIER_METAL[rankBand(rankIndex)]].base)}
+                  fill={ramp(rankInsignia(rankIndex).base)}
                   height={12}
                   style={{ marginTop: SPACE[1] }}
                 />

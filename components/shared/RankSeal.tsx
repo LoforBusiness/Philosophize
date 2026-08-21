@@ -1,13 +1,15 @@
 import { memo } from 'react';
 import React, { useId } from 'react';
 import { View } from 'react-native';
-import Svg, { Path, Defs, LinearGradient, Stop, G } from 'react-native-svg';
+import Svg, { Path, Circle, Defs, LinearGradient, Stop, G } from 'react-native-svg';
 import Glyph, { type GlyphName } from './Glyph';
 import { hexPath, hexPerimeter, HEX_R, HEX_INNER } from './badgeShapes';
 import {
-  INK, GHOST, FAINT, PAPER, LIGHT, FACE, RIM, LOCKED_FACE, SHADOW,
-  METAL, TIER_METAL, metalFace, metalRim, type Stops,
+  INK, GHOST, FAINT, PAPER, LIGHT, FACE, RIM, LOCKED_FACE, SHADOW, type Stops,
 } from './tone';
+import {
+  ORDER, insigniaFace, insigniaRim, finishFor, type OrderName,
+} from '@/constants/insignia';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A RANK IS A STRUCK HEXAGONAL PIN.
@@ -52,23 +54,44 @@ interface Props {
   size?: number;
   progress?: number | null; // 0..1, draws the arc toward the next rank
   /**
-   * WHICH METAL THE PIN IS STRUCK IN — 0 bronze, 1 silver, 2 gold.
+   * WHICH OF THE EIGHT ORDERS THE PIN IS STRUCK IN — see constants/insignia.ts.
    *
-   * Twenty-five ranks in one material is twenty-five identical pins, which is
-   * the complaint this component's own header opens with and only half solved:
-   * the mark inside changed and nothing else did, so holding rank 24 still
-   * looked exactly like holding rank 2. A band of metal every eight ranks is the
-   * missing half — the frame does not escalate in ORNAMENT (that was tried and
-   * rejected as too busy at 54px), it escalates in MATERIAL, which costs no
-   * extra linework at any size.
+   * This replaced `band`, which was 0/1/2 for bronze/silver/gold across
+   * twenty-five ranks. Three materials over a long ladder means eight
+   * consecutive promotions return the same one, so eight consecutive pins were
+   * the same object with a different mark in it.
    *
-   * Omit it and the pin is struck in paper exactly as before, so every existing
-   * call site is unchanged.
+   * Omit it and the pin is struck in paper exactly as before, which is what the
+   * ranks sheet wants for a rank nobody has reached yet.
    */
-  band?: number | null;
+  order?: OrderName | null;
+  /**
+   * HOW FINISHED THE STRIKING IS, 0–4 — the rank's position inside its order.
+   *
+   * The header above records that escalating ornament was tried once and
+   * rejected as "so busy at 54px that it fought the glyph it framed", and that
+   * verdict stands for the version it describes: ornament that escalated across
+   * all twenty-five ranks, so the top pins carried twenty-five steps of it.
+   *
+   * This resets every five. No pin is ever more than four steps ornamented, and
+   * the steps are studs ON THE HEXAGON'S OWN VERTICES rather than new shapes
+   * added around it — so the silhouette never changes and the mark never has to
+   * share its space. The fifth rank of an order is its capstone and is the only
+   * one that gets rays.
+   */
+  degree?: number;
 }
 
 const PERIM = hexPerimeter(HEX_R);
+
+// WHICH VERTICES GET A STUD FIRST, and it is not 0,1,2,3.
+//
+// Two studs have to sit OPPOSITE each other or the pin looks knocked askew, and
+// four have to make a rectangle rather than a horseshoe. So the order is
+// left/right, then top/bottom of those, then the remaining pair — every count is
+// symmetric about both axes, which is the only way a partial set reads as
+// deliberate.
+const STUD_ORDER = [0, 3, 1, 4, 2, 5];
 
 const grad = (id: string, stops: Stops) => (
   <LinearGradient id={id} x1={LIGHT.x1} y1={LIGHT.y1} x2={LIGHT.x2} y2={LIGHT.y2}>
@@ -83,13 +106,19 @@ const grad = (id: string, stops: Stops) => (
 // ThinkerCard). A struck mark is an <Svg> with gradients — the most expensive
 // leaf this app draws — and Profile renders ten of them, none of which change
 // when the screen re-renders for an unrelated reason. Measured: see SketchIcon.
-export default memo(function RankSeal({ glyph, state, size = 96, progress = null, band = null }: Props) {
+export default memo(function RankSeal({
+  glyph, state, size = 96, progress = null, order = null, degree = 0,
+}: Props) {
   const locked = state === 'locked';
-  const ink = locked ? GHOST : INK;
-  // A locked pin is unstruck and takes no metal, whatever band it would be in —
-  // the material IS the reward, so handing it out before it is earned spends the
-  // only thing this pin has to give.
-  const metal = !locked && band != null ? METAL[TIER_METAL[Math.max(0, Math.min(2, band))]] : null;
+  // A locked pin is unstruck and takes no material, whatever order it would be
+  // in — the material IS the reward, so handing it out before it is earned
+  // spends the only thing this pin has to give.
+  const ins = !locked && order != null ? ORDER[order] : null;
+  // THE MARK IS WHITE ON A STRUCK PIN, ink on an unstruck one. Every order's
+  // face was fitted so white clears 3:1 on its lit corner (insignia.ts); ink on
+  // a crimson or amethyst face would be the one that vanishes.
+  const ink = locked ? GHOST : ins ? ins.on : INK;
+  const fin = finishFor(degree);
   const pct = progress == null ? null : Math.max(0, Math.min(1, progress));
   // With an arc over it the edge becomes a track and steps back; on its own it is
   // the frame and carries full weight.
@@ -107,8 +136,8 @@ export default memo(function RankSeal({ glyph, state, size = 96, progress = null
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <Svg width={size} height={size} viewBox="0 0 100 100" style={{ position: 'absolute' }}>
         <Defs>
-          {grad(face, locked ? LOCKED_FACE : metal ? metalFace(metal) : FACE)}
-          {grad(rim, locked ? [['0%', GHOST, 1], ['100%', GHOST, 1]] : metal ? metalRim(metal) : RIM)}
+          {grad(face, locked ? LOCKED_FACE : ins ? insigniaFace(ins) : FACE)}
+          {grad(rim, locked ? [['0%', GHOST, 1], ['100%', GHOST, 1]] : ins ? insigniaRim(ins) : RIM)}
         </Defs>
 
         {/* The pin sits ON the page, so it casts. Earned only: a locked pin is
@@ -121,18 +150,21 @@ export default memo(function RankSeal({ glyph, state, size = 96, progress = null
 
         <Path d={outer} fill={`url(#${face})`} />
 
-        {/* The inner rule: a hairline stepped in from the edge, which is what
-            gives the rim its width and the pin its turned edge. */}
-        {/* On metal the inner rule takes the metal's own lit tone — `FAINT` is a
-            warm paper grey and vanishes on gold, which is the band that most
-            needs the rule to show. */}
-        <Path
-          d={inner}
-          fill="none"
-          stroke={locked ? GHOST : metal ? metal.lit : FAINT}
-          strokeWidth={1}
-          opacity={locked ? 0.5 : 1}
-        />
+        {/* THE INNER RULE — the first step of finish, and the reason a rank 2
+            pin already looks different from a rank 1 in the same order.
+            `FAINT` is a warm paper grey and disappears on a coloured face, so a
+            struck pin uses its order's own `rule` tone: a warm line low on the
+            ladder, a near-white one from jade up. That white line is what the
+            reader meant by "green with white, red with white". */}
+        {(fin.rule || locked) && (
+          <Path
+            d={inner}
+            fill="none"
+            stroke={locked ? GHOST : ins ? ins.rule : FAINT}
+            strokeWidth={1}
+            opacity={locked ? 0.5 : 1}
+          />
+        )}
 
         {/* The edge itself — and the progress track when there is an arc. */}
         <Path
@@ -143,6 +175,48 @@ export default memo(function RankSeal({ glyph, state, size = 96, progress = null
           strokeLinejoin="round"
           opacity={trackOpacity}
         />
+
+        {/* THE STUDS — two, four, then all six of the hexagon's own vertices.
+            On the vertices rather than anywhere new, so they read as part of the
+            frame being finished rather than as decoration stuck to it, and so
+            they can never drift into the mark's space however small the pin is
+            drawn. */}
+        {!locked && fin.studs > 0 && STUD_ORDER.slice(0, fin.studs).map((i) => {
+          const a = (i * Math.PI) / 3;
+          const cx = 50 + (HEX_R - HEX_INNER * 1.5) * Math.cos(a);
+          const cy = 50 + (HEX_R - HEX_INNER * 1.5) * Math.sin(a);
+          // A rivet, not a dot: the dark seat under it is what makes it sit IN
+          // the face rather than float on it, and it is also what keeps a stud
+          // legible on the pale orders, where the bright fill alone was
+          // invisible against its own lit corner.
+          return (
+            <G key={i}>
+              <Circle cx={cx} cy={cy} r={3.5} fill={ins ? ins.rim : INK} opacity={0.55} />
+              <Circle cx={cx} cy={cy} r={2.5} fill={ins ? ins.rule : FAINT} />
+            </G>
+          );
+        })}
+
+        {/* THE CAPSTONE'S COLLAR. Only the fifth rank of an order has it, so it
+            means "this is as far as this material goes" rather than merely
+            "this is a high rank".
+            
+            This was six rays off the flat edges first, and on a contact sheet of
+            all forty they read as whiskers — stray marks escaping the pin rather
+            than an honour added to it, worst on clay and iron where a thin dark
+            spoke on a drab face just looks like damage. A second rule OUTSIDE
+            the edge is the same idea done as framing: it closes the pin instead
+            of fraying it, and it costs one path. */}
+        {!locked && fin.rays && (
+          <Path
+            d={hexPath(50, 50, HEX_R + 3.4)}
+            fill="none"
+            stroke={ins ? ins.rule : FAINT}
+            strokeWidth={1.6}
+            strokeLinejoin="round"
+            opacity={0.9}
+          />
+        )}
 
         {pct != null && pct > 0 && (
           // Starts at the top-left vertex and runs clockwise, so a nearly-full

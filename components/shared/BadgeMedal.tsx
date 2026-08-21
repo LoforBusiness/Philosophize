@@ -12,8 +12,9 @@ import {
 // every one of them was the PAPER ramp, and the medal is struck in metal now.
 import {
   INK, GHOST, PAPER, LIGHT, LOCKED_FACE, SHADOW,
-  METAL, TIER_METAL, metalFace, metalRim, type Stops,
+  type Stops,
 } from './tone';
+import { tierInsignia, insigniaFace, insigniaRim } from '@/constants/insignia';
 import type { BadgeFamily, BadgeTier } from '@/data/badges';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -136,16 +137,30 @@ const LAUREL = [laurelSprig(-1), laurelSprig(1)];
 export default memo(function BadgeMedal({
   family, tier, glyph, earned, size = 72, draw = null, reveal = null,
 }: Props) {
-  const ink = earned ? INK : GHOST;
-  // Bronze at I, silver at II, gold at III. A locked medal has no metal at all —
-  // it is unstruck, which is the whole of what "locked" means here.
-  const metal = METAL[TIER_METAL[tier - 1]];
+  // FIVE MATERIALS, AND THEY ARE THE RANK LADDER'S OWN.
+  //
+  // This was bronze / silver / gold, which is three steps for a case of badges
+  // a reader is meant to work through for months — and a reader said so: "not
+  // just silver and gold, but a red that's really beautiful, a blue".
+  //
+  // Iron, bronze, jade, crimson, aurum — four of them borrowed straight from
+  // constants/insignia.ts rather than invented here, so a reader who has learnt
+  // that jade sits above bronze on the rank ladder does not have to learn a
+  // second, different order for badges. One language used twice.
+  const ins = tierInsignia(tier);
+  // The mark is white on a struck medal, slate on a locked one. Every order's
+  // face was fitted so white clears 3:1 on its lit corner; ink on crimson is
+  // the combination that disappears.
+  const ink = earned ? ins.on : GHOST;
   const len = LEN[family];
   const outer = SHAPE[family](0);
   const inner = tier > 1 ? SHAPE[family](INNER[tier]) : null;
   // The ornament arrives when it is won — see the locked note above.
   const ribbon = tier >= 2 && earned;
-  const wreath = tier === 3 && earned;
+  // The laurel from III up rather than at III alone: it was the top tier's mark
+  // when there were three tiers, and a set where the highest two carry LESS
+  // furniture than the middle one reads as a mistake.
+  const wreath = tier >= 3 && earned;
 
   // Per-instance, following the rule LoudnessChart wrote down: ClipPath and
   // gradient ids live in a global-ish namespace and two mounted at once must not
@@ -182,8 +197,8 @@ export default memo(function BadgeMedal({
       <Svg width={size} height={size} viewBox="0 0 100 100" style={{ position: 'absolute' }}>
         <Defs>
           <ClipPath id={clipId}><Path d={outer} /></ClipPath>
-          {grad(face, earned ? metalFace(metal) : LOCKED_FACE)}
-          {grad(rim, earned ? metalRim(metal) : [['0%', GHOST, 1], ['100%', GHOST, 1]])}
+          {grad(face, earned ? insigniaFace(ins) : LOCKED_FACE)}
+          {grad(rim, earned ? insigniaRim(ins) : [['0%', GHOST, 1], ['100%', GHOST, 1]])}
         </Defs>
 
         {/* THE LAUREL, behind everything — tier III.
@@ -232,7 +247,7 @@ export default memo(function BadgeMedal({
               // The inner rule is the metal's own LIT tone once there is metal
               // under it: `FAINT` is a warm paper grey and disappears completely
               // on gold, which is where this rule is most needed (tier III).
-              stroke={earned ? metal.lit : GHOST}
+              stroke={earned ? ins.rule : GHOST}
               strokeWidth={1.2}
               fill="none"
               opacity={earned ? 1 : 0.5}
@@ -243,7 +258,7 @@ export default memo(function BadgeMedal({
           <APath
             d={outer}
             stroke={earned ? `url(#${rim})` : GHOST}
-            strokeWidth={tier === 3 ? 2.6 : 2.2}
+            strokeWidth={tier >= 3 ? 2.6 : 2.2}
             strokeLinejoin="round"
             fill="none"
             strokeDasharray={len}
@@ -259,8 +274,8 @@ export default memo(function BadgeMedal({
             {/* The tabs are the band's own metal in shadow — they are the folds
                 BEHIND it, so they take the shaded end of the same ramp rather
                 than a paper grey that would read as a different material. */}
-            <Path d={RIBBON.tabL} fill={metal.shade} stroke={ink} strokeWidth={1.3} strokeLinejoin="round" />
-            <Path d={RIBBON.tabR} fill={metal.shade} stroke={ink} strokeWidth={1.3} strokeLinejoin="round" />
+            <Path d={RIBBON.tabL} fill={ins.shade} stroke={ink} strokeWidth={1.3} strokeLinejoin="round" />
+            <Path d={RIBBON.tabR} fill={ins.shade} stroke={ink} strokeWidth={1.3} strokeLinejoin="round" />
             <Path d={RIBBON.band} fill={`url(#${face})`} stroke={ink} strokeWidth={1.6} strokeLinejoin="round" />
           </G>
         )}

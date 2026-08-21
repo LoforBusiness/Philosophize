@@ -57,7 +57,29 @@ export type GlyphName =
   | 'ship'
   | 'chain'
   | 'owl'
-  | 'flower';
+  | 'flower'
+  | 'anvil'
+  | 'key'
+  | 'bridge'
+  | 'spiral'
+  | 'maze'
+  | 'obelisk'
+  | 'fountain'
+  | 'beacon'
+  | 'feather'
+  | 'knot'
+  | 'prism'
+  | 'seed'
+  | 'wave'
+  | 'tower'
+  | 'bell'
+  | 'sundial'
+  | 'ascend'
+  | 'cube'
+  | 'orbit'
+  | 'vault'
+  | 'mask'
+  | 'harp';
 
 interface GlyphProps {
   name: GlyphName;
@@ -539,6 +561,190 @@ export default memo(function Glyph({ name, size = 28, color = '#1A1A1A' }: Glyph
             <Circle {...s} cx={9.5} cy={12.4} r={4.2} />
             <Circle {...s} cx={16} cy={14.5} r={2.4} fill={color} />
             <Line {...s} x1={16} y1={24.6} x2={16} y2={29} />
+          </>
+        );
+      // ── TWENTY-TWO MARKS ADDED FOR THE REBALANCED BADGE CASE ──────────────
+      //
+      // validate-badges requires that no two badges share a mark, on the
+      // reasoning that fifty medals drawn from fifty different pictures is a
+      // set and fifty drawn from twenty is wallpaper. The case went from fifty
+      // badges to seventy-four and this file held fifty-two marks, so the
+      // constraint was not "should there be more glyphs" but "how many".
+      //
+      // Same hand as the rest: one 32x32 box, 2px round-capped strokes, no
+      // fills except where a mark needs a solid pip to read at 20px.
+      case 'anvil':
+        return (
+          <>
+            <Path {...s} d="M6 13 H26 L22 17 H10 Z" />
+            <Path {...s} d="M13 17 V23 H19 V17" />
+            <Line {...s} x1={9} y1={26} x2={23} y2={26} />
+          </>
+        );
+      case 'key':
+        return (
+          <>
+            <Circle {...s} cx={11} cy={12} r={5} />
+            <Line {...s} x1={14.5} y1={15.5} x2={25} y2={26} />
+            <Line {...s} x1={21} y1={22} x2={18} y2={25} />
+            <Line {...s} x1={24} y1={25} x2={21} y2={28} />
+          </>
+        );
+      case 'bridge':
+        return (
+          <>
+            <Path {...s} d="M4 21 C10 11 22 11 28 21" />
+            <Line {...s} x1={4} y1={21} x2={28} y2={21} />
+            <Line {...s} x1={11} y1={15.5} x2={11} y2={21} />
+            <Line {...s} x1={21} y1={15.5} x2={21} y2={21} />
+            <Line {...s} x1={16} y1={13.4} x2={16} y2={21} />
+          </>
+        );
+      case 'spiral':
+        return (
+          <>
+            <Path {...s} d="M16 16 C16 13.8 18.2 13.8 18.2 16 C18.2 19.4 13.6 19.4 13.6 16 C13.6 11 21 11 21 16 C21 22.6 10.6 22.6 10.6 16 C10.6 8 25 8 25 16" />
+          </>
+        );
+      case 'maze':
+        return (
+          <>
+            <Rect {...s} x={5} y={5} width={22} height={22} rx={1.5} />
+            <Path {...s} d="M10 10 H22 V22 H14 V15 H18" />
+          </>
+        );
+      case 'obelisk':
+        return (
+          <>
+            <Path {...s} d="M13 26 L14 9 L16 5 L18 9 L19 26 Z" />
+            <Line {...s} x1={10} y1={26} x2={22} y2={26} />
+          </>
+        );
+      case 'fountain':
+        return (
+          <>
+            <Path {...s} d="M8 26 H24" />
+            <Path {...s} d="M11 26 C11 20 21 20 21 26" />
+            <Line {...s} x1={16} y1={20} x2={16} y2={12} />
+            <Path {...s} d="M16 12 C13 12 12 9 12.6 7" />
+            <Path {...s} d="M16 12 C19 12 20 9 19.4 7" />
+          </>
+        );
+      case 'beacon':
+        return (
+          <>
+            <Path {...s} d="M12 26 L13.5 13 H18.5 L20 26 Z" />
+            <Rect {...s} x={12.6} y={8} width={6.8} height={5} rx={1} />
+            <Line {...s} x1={5} y1={8} x2={9} y2={10} />
+            <Line {...s} x1={27} y1={8} x2={23} y2={10} />
+          </>
+        );
+      case 'feather':
+        return (
+          <>
+            <Path {...s} d="M23 7 C12 9 8 17 8 25 C16 25 24 20 25 9 Z" />
+            <Line {...s} x1={8} y1={25} x2={22} y2={11} />
+          </>
+        );
+      case 'knot':
+        return (
+          <>
+            <Path {...s} d="M11 11 C21 11 21 21 11 21 C6 21 6 11 11 11 Z" />
+            <Path {...s} d="M21 21 C11 21 11 11 21 11 C26 11 26 21 21 21 Z" />
+          </>
+        );
+      case 'prism':
+        return (
+          <>
+            <Path {...s} d="M16 5 L27 25 H5 Z" />
+            <Line {...s} x1={16} y1={5} x2={16} y2={25} />
+          </>
+        );
+      case 'seed':
+        return (
+          <>
+            <Path {...s} d="M16 27 C9 22 9 12 16 6 C23 12 23 22 16 27 Z" />
+            <Line {...s} x1={16} y1={11} x2={16} y2={23} />
+          </>
+        );
+      case 'wave':
+        return (
+          <>
+            <Path {...s} d="M4 13 C8 8 12 18 16 13 C20 8 24 18 28 13" />
+            <Path {...s} d="M4 22 C8 17 12 27 16 22 C20 17 24 27 28 22" />
+          </>
+        );
+      case 'tower':
+        return (
+          <>
+            <Path {...s} d="M11 27 V12 H21 V27" />
+            <Path {...s} d="M10 12 V8 H12.5 V10 H15 V8 H17.5 V10 H20 V8 H22 V12" />
+            <Rect {...s} x={14.4} y={19} width={3.4} height={8} />
+          </>
+        );
+      case 'bell':
+        return (
+          <>
+            <Path {...s} d="M9 22 C9 14 11 10 16 10 C21 10 23 14 23 22 Z" />
+            <Line {...s} x1={7} y1={22} x2={25} y2={22} />
+            <Line {...s} x1={16} y1={7} x2={16} y2={10} />
+            <Circle {...s} cx={16} cy={25} r={1.8} />
+          </>
+        );
+      case 'sundial':
+        return (
+          <>
+            <Path {...s} d="M5 24 H27" />
+            <Path {...s} d="M9 24 L16 8 L23 24" />
+            <Line {...s} x1={16} y1={8} x2={16} y2={24} />
+          </>
+        );
+      case 'ascend':
+        return (
+          <>
+            <Path {...s} d="M6 26 H12 V20 H18 V14 H24 V8" />
+            <Path {...s} d="M21 11 L24 8 L27 11" />
+          </>
+        );
+      case 'cube':
+        return (
+          <>
+            <Path {...s} d="M16 5 L27 11 V21 L16 27 L5 21 V11 Z" />
+            <Path {...s} d="M5 11 L16 17 L27 11" />
+            <Line {...s} x1={16} y1={17} x2={16} y2={27} />
+          </>
+        );
+      case 'orbit':
+        return (
+          <>
+            <Circle {...s} cx={16} cy={16} r={4.5} />
+            <Path {...s} d="M16 6.5 C24 6.5 29 11 29 16 C29 21 24 25.5 16 25.5 C8 25.5 3 21 3 16 C3 11 8 6.5 16 6.5 Z" transform="rotate(-28 16 16)" />
+            <Circle {...s} cx={26} cy={11} r={1.8} fill={color} />
+          </>
+        );
+      case 'vault':
+        return (
+          <>
+            <Path {...s} d="M7 27 V14 C7 8 25 8 25 14 V27" />
+            <Line {...s} x1={5} y1={27} x2={27} y2={27} />
+            <Circle {...s} cx={16} cy={17} r={3.6} />
+          </>
+        );
+      case 'mask':
+        return (
+          <>
+            <Path {...s} d="M6 10 C6 22 11 27 16 27 C21 27 26 22 26 10 C22 12 10 12 6 10 Z" />
+            <Line {...s} x1={11.5} y1={16} x2={14} y2={16} />
+            <Line {...s} x1={18} y1={16} x2={20.5} y2={16} />
+          </>
+        );
+      case 'harp':
+        return (
+          <>
+            <Path {...s} d="M9 27 C9 14 15 7 24 5" />
+            <Line {...s} x1={9} y1={27} x2={24} y2={5} />
+            <Line {...s} x1={12.5} y1={17.5} x2={17.5} y2={10} />
+            <Line {...s} x1={10.5} y1={22} x2={20.5} y2={7.5} />
           </>
         );
       default:

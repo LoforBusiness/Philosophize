@@ -25,6 +25,9 @@ function emit(rel, name) {
 const D = await import(emit('constants/design.ts', 'design.mjs'));
 // tone.ts is zero-import by rule, so it loads in plain Node exactly like design.ts.
 const T = await import(emit('components/shared/tone.ts', 'tone.mjs'));
+// insignia.ts is zero-import for the same reason, so the eight order materials
+// can be re-derived here rather than trusted.
+const I = await import(emit('constants/insignia.ts', 'insignia.mjs'));
 
 let bad = 0;
 const ok = (cond, label, detail = '') => {
@@ -375,6 +378,78 @@ const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
       `ΔE ${dE(m.base, T.GHOST).toFixed(1)}, need 12`);
   }
 }
+
+// Placed HERE, beside the metals it replaces on the rank pins, because the
+// CIELAB helpers this needs (`Lstar`, `dE`) are defined further down the file
+// than the era scale is. Inserting it up there cost one ReferenceError.
+// ── 4b · the eight order materials ───────────────────────────────────────────
+//
+// The third and last place a colour carries information: what a rank pin is
+// struck in (constants/insignia.ts). Eight orders of five, clay at the bottom
+// and gold at the top, and the whole point of them is that a reader can tell
+// how far up the ladder somebody is without reading a number.
+//
+// EVERY ONE OF THESE WAS A REAL FAILURE OF A CANDIDATE PALETTE, which is why
+// they are checked rather than trusted:
+//
+//   · a hand-picked set had a mint #B7E7CB green and a powder #B3CEF3 blue, on
+//     which the WHITE MARK measured 1.2:1 — the glyph vanished into the pin's
+//     own lit corner. The mark is checked against the lightest point of the
+//     face, not the base, because the base is not where it fails.
+//   · a search that maximised contrast returned clay and iron at nearly black
+//     and every jewel order as a pastel, and let each order pick its own mark
+//     colour: white/ink/ink/ink/ink/white/ink. One mark colour for the set is
+//     an assertion here so that cannot come back.
+//   · bronze and gold, both warm metals, measured ΔE 21 apart — one order
+//     wearing two names.
+{
+  const orders = I.ORDERS;
+  ok(orders.length === 8, 'eight orders', `${orders.length}`);
+  ok(orders.length * I.ORDER_SIZE === 40, 'the orders cover the whole ladder',
+    `${orders.length} x ${I.ORDER_SIZE}`);
+
+  const marks = new Set(orders.map((o) => I.ORDER[o].on));
+  ok(marks.size === 1, 'one mark colour across the whole set', [...marks].join(' '));
+
+  for (const name of orders) {
+    const m = I.ORDER[name];
+    for (const [role, v] of Object.entries(m)) {
+      ok(/^#[0-9A-F]{6}$/i.test(v), `ORDER.${name}.${role} is a plain hex`, v);
+    }
+    // The mark rides the whole face, so the worst point is what counts. 3:1 is
+    // the non-text floor — it is a 2px-stroke icon, not body copy.
+    const worst = Math.min(
+      ratio(lum(m.on), lum(m.lit)),
+      ratio(lum(m.on), lum(m.base)),
+      ratio(lum(m.on), lum(m.shade)),
+    );
+    ok(worst >= 3.0, `ORDER.${name}: the mark reads across the whole face`,
+      `${worst.toFixed(2)}:1, need 3`);
+    // A face with no tonal swing stops reading as struck metal — tone.ts: "a 7%
+    // tonal range is invisible".
+    const swing = Lstar(m.lit) - Lstar(m.shade);
+    ok(swing >= 22, `ORDER.${name} has a real tonal swing`, `${swing.toFixed(0)} L*, need 22`);
+    // And the rim has to be darker than the face it turns away from.
+    const gap = Lstar(m.shade) - Lstar(m.rim);
+    ok(gap >= 7, `ORDER.${name}'s rim is darker than its own shade`, `${gap.toFixed(0)} L*, need 7`);
+  }
+
+  let min = Infinity, pair = '';
+  for (let i = 0; i < orders.length; i++) {
+    for (let j = i + 1; j < orders.length; j++) {
+      const d = dE(I.ORDER[orders[i]].base, I.ORDER[orders[j]].base);
+      if (d < min) { min = d; pair = `${orders[i]}/${orders[j]}`; }
+    }
+  }
+  ok(min >= 22, 'no two orders are mistakable for each other', `ΔE ${min.toFixed(1)} (${pair}), need 22`);
+
+  // The badge tiers borrow four of the orders on purpose — one language used
+  // twice. If they ever stop being orders, the two ladders have drifted apart.
+  ok(I.TIER_ORDER.every((t) => orders.includes(t)),
+    'every badge tier is struck in one of the rank orders', I.TIER_ORDER.join(' '));
+  ok(I.TIER_ORDER.length === 5, 'five badge tiers', `${I.TIER_ORDER.length}`);
+}
+
 
 // ── 2f · ramp(), which derives a struck face from any one colour ─────────────
 //

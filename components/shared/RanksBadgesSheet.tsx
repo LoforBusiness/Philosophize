@@ -13,7 +13,7 @@ import { MotiView, AnimatePresence } from 'moti';
 import BadgeMedal from './BadgeMedal';
 import RankSeal, { type SealState } from './RankSeal';
 import RankClimbChart from './RankClimbChart';
-import { RANKS, awardedRank, rankProgress, rankRequirement, type RankDef } from '@/data/ranks';
+import { RANKS, awardedRank, rankProgress, rankRequirement, type RankDef, rankOrder, rankDegree } from '@/data/ranks';
 import { circleForRank, RANK_EPITHETS, toRoman } from '@/data/rankLore';
 import {
   BADGES, FAMILY_LABEL, FAMILY_ORDER, badgeCriterion, badgeProgress, badgeProgressLabel,
@@ -172,6 +172,7 @@ export default function RanksBadgesSheet() {
   const streak = useUserDataStore((s) => s.streak);
   const xp = useUserDataStore((s) => s.totalXP);
   const rankIndex = useUserDataStore((s) => s.rankIndex);
+  const activeDays = useUserDataStore((s) => s.activeDays);
   const xpEvents = useUserDataStore((s) => s.xpEvents);
   // The sheet only exists while it is open, so mounting IS coming into view —
   // no focus plumbing needed here, unlike the Profile tab which stays mounted.
@@ -202,8 +203,10 @@ export default function RanksBadgesSheet() {
   const stats: ProgressStats = useMemo(
     () => progressStats({
       lessonsByBranch, lessonsByUnit, savedQuotes, philosopherViews, quizScores, streak, totalXP,
+      activeDays, rankIndex,
     }),
-    [lessonsByBranch, lessonsByUnit, savedQuotes, philosopherViews, quizScores, streak, totalXP],
+    [lessonsByBranch, lessonsByUnit, savedQuotes, philosopherViews, quizScores, streak, totalXP,
+      activeDays, rankIndex],
   );
 
   // Rows for the badge grid: a header per family, then its medals three across.
@@ -275,7 +278,8 @@ export default function RanksBadgesSheet() {
                 >
                   {/* HERO — the current rank as a credential */}
                   <View style={styles.hero}>
-                    <RankSeal glyph={current.glyph} state="current" size={104} progress={rankPct} />
+                    <RankSeal glyph={current.glyph} state="current" size={104} progress={rankPct}
+                      order={rankOrder(index)} degree={rankDegree(index)} />
                     <View style={styles.heroText}>
                       <Text style={styles.heroKicker}>RANK {current.id} · {toRoman(current.id)}</Text>
                       <Text style={styles.heroName}>{current.name}</Text>
@@ -338,7 +342,8 @@ export default function RanksBadgesSheet() {
                             <View style={[styles.branch, { backgroundColor: reached ? Ink : InkFaint }]} />
                             <View style={[styles.junction, { backgroundColor: reached ? Ink : InkFaint }]} />
                             <View style={styles.sealSlot}>
-                              <RankSeal glyph={r.glyph} state={st} size={50} />
+                              <RankSeal glyph={r.glyph} state={st} size={50}
+                                order={st === 'locked' ? null : rankOrder(i)} degree={rankDegree(i)} />
                             </View>
                           </View>
 
@@ -497,7 +502,8 @@ function RankDetail({
       </Pressable>
 
       <View style={styles.detailSealWrap}>
-        <RankSeal glyph={rank.glyph} state={st} size={168} progress={progress} />
+        <RankSeal glyph={rank.glyph} state={st} size={168} progress={progress}
+          order={st === 'locked' ? null : rankOrder(rank.id - 1)} degree={rankDegree(rank.id - 1)} />
       </View>
 
       <Text style={styles.detailKicker}>RANK {rank.id} · {toRoman(rank.id)} · {circle.name.toUpperCase()}</Text>

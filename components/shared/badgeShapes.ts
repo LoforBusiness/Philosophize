@@ -152,7 +152,12 @@ export const GLYPH_DY: Record<Family, number> = {
 };
 
 /** How far in the tier's inner rule sits. Tier I has none. */
-export const INNER: Record<1 | 2 | 3, number> = { 1: 0, 2: 7, 3: 9 };
+// Tiers IV and V share tier III's inset deliberately. The inset is what the
+// inner rule is drawn at, and validate-badges measures every mark against the
+// tightest one — moving it for the two new tiers would re-open a geometry
+// question that is already settled, to buy a difference nobody can see at 72px.
+// What separates III, IV and V is MATERIAL and FURNITURE, not inset.
+export const INNER: Record<1 | 2 | 3 | 4 | 5, number> = { 1: 0, 2: 7, 3: 9, 4: 9, 5: 9 };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE RANK PIN, AND THE HERALDIC FURNITURE

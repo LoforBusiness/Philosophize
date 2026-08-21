@@ -154,8 +154,10 @@ Philosophize/
 │   ├── extra-philosophers/      # ancient/eastern/medieval/modern/contemporary/
 │   │                            #   expansion, expansion2a/2b/3/4 (+ *-facts)
 │   ├── philosopherFacts.ts      # "Did you know?" facts, 3 per philosopher
-│   ├── ranks.ts                 # 25 ranks; rankForXP() + awardedRank()
-│   └── badges.ts                # 50 badges + earned(stats) predicates
+│   ├── ranks.ts                 # 40 ranks in 8 orders of 5; rankForXP(),
+│   │                            #   awardedRank(), rankOrder(), rankDegree()
+│   ├── rankLore.ts              # the 8 Circles + a one-line epithet per rank
+│   └── badges.ts                # 68 badges, 5 tiers + goal(stats)/need pairs
 ├── stores/                      # Zustand: lessonStore, uiStore, subscriptionStore,
 │                                #   userDataStore (persisted + cloud-synced)
 ├── lib/
@@ -408,13 +410,29 @@ Index on (user_id, lesson_id).
 
 **Level formula:** Level N requires `Math.floor(50 * N * Math.sqrt(N))` total XP (`getXPForLevel`).
 
+> **THE LADDER IS FITTED TO WHAT THE APP ACTUALLY CONTAINS, and the old one was
+> not.** Counted out of the tree: 222 lessons at a perfect 60 each is 13,320, all
+> 28 units mastered 2,800, all 132 saveable quotes 396, all 322 thinkers met 644,
+> every one of their quizzes aced 6,440 — **21,400 XP for doing everything in the
+> app, perfectly, once**. The 25-rank ladder topped out at 52,000, so its last
+> five rungs could not be reached by finishing the entire curriculum. The 40-rank
+> ladder tops out at 16,000. Re-derive the ceiling before retuning either.
+
 **Streak:** Maintained by completing at least one lesson per calendar day. Alive if the last activity is today or yesterday (`lib/utils/streak.ts`). Stored in `userDataStore`.
 
 **Stars:** 100% score = 3 stars. ≥70% = 2 stars. Any completion = 1 star.
 
 **Progression systems (live):**
-- **Badges** — **50** in `data/badges.ts`, each `{ id, name, glyph, earned(stats) }`; evaluated by `recomputeBadges()` and shown in `RanksBadgesSheet`.
-- **Ranks** — **25** tiers in `data/ranks.ts` (Novice → Grand Philosopher). Two
+- **Badges** — **68** in `data/badges.ts`, each `{ id, name, glyph, family, tier,
+  goal(stats), need }`; evaluated by `recomputeBadges()` and shown in
+  `RanksBadgesSheet`. **Five tiers**, struck in four of the rank orders plus gold
+  (`constants/insignia.ts`), so both reward ladders speak one language. The ids
+  are FROZEN and `check:badges` holds the roll.
+- **Ranks** — **40** in `data/ranks.ts` (Novice → Grand Philosopher), in **eight
+  orders of five**: clay, iron, bronze, jade, lapis, crimson, amethyst, aurum.
+  The order changes every five ranks and the pin's FINISH every rank, so no two
+  consecutive promotions look alike (`constants/insignia.ts`, and the third place
+  §19 licenses colour). Two
   functions, and the difference matters: `rankForXP(totalXP)` is what the XP
   alone would earn, while `awardedRank(rankIndex, totalXP)` is what has actually
   been *conferred*. `userDataStore.rankIndex` advances at most one tier per
@@ -555,7 +573,8 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
   gating; **132 cinematic lessons** (animated stickman scenes, §17); animated
   `LessonReward` with XP count-up, streak and rank-up.
-- **Gamification:** 50 badges, 25 ranks with a conferred-rank ceremony, XP +
+- **Gamification:** 68 badges in 5 tiers, 40 ranks in 8 coloured orders with a
+  conferred-rank ceremony, a three-badge profile cabinet, XP +
   level curve, daily streak.
 - **Screens:** Home (with Quick Start, §19), Learn → branch → unit accordion →
   lesson, Thinkers, Stats, Profile, Settings, paywall, widget, saved quotes.

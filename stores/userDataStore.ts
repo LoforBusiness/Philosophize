@@ -344,7 +344,21 @@ interface UserDataState {
   /** One-shot: has this install ever reported itself as new? See lib/posthog.ts. */
   installReported: boolean;
   joinedAt: number | null;                    // epoch ms of first app open
-  earnedBadges: string[];                     // badge ids the user has earned (persists)
+  earnedBadges: string[];
+  /**
+   * THE THREE BADGES THE READER CHOSE TO SHOW, in the order they chose them.
+   *
+   * Ids, not indexes, because the badge case is re-ordered whenever it is
+   * rebalanced and an index would silently start pointing at a different medal.
+   * Held ids that are no longer earned (or no longer exist) are filtered at the
+   * point of display rather than pruned here — a reset that wipes progress
+   * should not also quietly forget what somebody chose to be proud of.
+   *
+   * Capped at three by `setShowcase`, not by the type: a longer array arriving
+   * from an older or newer client through the cloud merge is truncated rather
+   * than rejected.
+   */
+  showcaseBadges: string[];                     // badge ids the user has earned (persists)
   badgesInitialized: boolean;                 // one-time backfill guard
   displayName: string;
   email: string;
@@ -420,6 +434,7 @@ interface UserDataState {
   markNotifyAsked: () => void;
   markInstallReported: () => void;
   recomputeBadges: () => void;
+  setShowcase: (ids: string[]) => void;
   setProfile: (patch: Partial<{ displayName: string; email: string; bio: string }>) => void;
   bumpBioSeed: () => void;
   setPortrait: (id: string) => void;
@@ -552,6 +567,13 @@ export interface StatSource {
   quizScores: Record<string, QuizScore>;
   streak: number;
   totalXP: number;
+  // ── added for the rebalanced badge case ───────────────────────────────────
+  // All four are DERIVED from state the store already persists. Nothing here
+  // needed a new key, which is the bar a badge criterion has to clear: a badge
+  // that requires new bookkeeping is a badge that reads 0 for everyone who was
+  // already playing.
+  activeDays: string[];
+  rankIndex: number;
 }
 
 /**
@@ -563,6 +585,10 @@ export interface StatSource {
  * calculation is three chances for the grid to disagree with the pop-up about
  * whether you have a badge.
  */
+/** How many badges a reader may pin to their profile. Three fits the strip
+ *  beside the rank pin at every phone width without the row wrapping. */
+export const SHOWCASE_MAX = 3;
+
 export function progressStats(s: StatSource): ProgressStats {
   const lessons = Object.values(s.lessonsByBranch).reduce((a, b) => a + b, 0);
   const quotes = s.savedQuotes.length;
@@ -609,10 +635,27 @@ export function progressStats(s: StatSource): ProgressStats {
     }
   }
 
+  const branchesComplete = Object.values(mastery).filter((v) => v >= 100).length;
+
+  // DAYS PRACTISED, not days in a row. A streak is a fragile thing to hang a
+  // long badge on — one bad Tuesday and a 200-day condition is unreachable for
+  // seven months — so the deep end of the case counts total days the reader
+  // turned up, which only ever goes up. `activeDays` is already persisted for
+  // the streak calendar.
+  const daysPractised = s.activeDays.length;
+
+  // Distinct THINKERS in the collection, which is a different deed from the
+  // number of quotes: thirty lines from one author is a favourite, thirty
+  // authors is a library.
+  const authors = new Set<string>();
+  for (const q of s.savedQuotes) if (q.philosopherId) authors.add(q.philosopherId);
+
   return {
     totalXP, lessons, quotes, philosophers, streak: s.streak, mastery,
     quizAces, eras: eras.size, quoteBranches: quoteBranches.size,
     branchesTouched, branchesHalf, unitsComplete,
+    branchesComplete, daysPractised, quoteAuthors: authors.size,
+    rank: Math.max(0, Math.floor(s.rankIndex) || 0),
   };
 }
 
@@ -650,6 +693,8 @@ export function previewNewBadges(
     quizScores: s.quizScores,
     streak,
     totalXP: s.totalXP + xpEarned,
+    activeDays: s.activeDays,
+    rankIndex: s.rankIndex,
   });
   return BADGES.filter((b) => isEarned(b, after) && !s.earnedBadges.includes(b.id));
 }
@@ -684,6 +729,7 @@ export const useUserDataStore = create<UserDataState>()(
       installReported: false,
       joinedAt: null,
       earnedBadges: [],
+      showcaseBadges: [],
       badgesInitialized: false,
       displayName: 'Philosopher',
       email: '',
@@ -941,6 +987,7 @@ export const useUserDataStore = create<UserDataState>()(
       // badges stick (until explicitly revoked). Only called at progress points
       // and as a one-time backfill — never on every render — so a revoke holds
       // until the user makes new progress.
+      setShowcase: (ids) => set({ showcaseBadges: ids.slice(0, SHOWCASE_MAX) }),
       recomputeBadges: () => {
         const state = get();
         const stats = progressStats(state);
@@ -1151,6 +1198,7 @@ export const useUserDataStore = create<UserDataState>()(
         installReported: state.installReported,
         joinedAt: state.joinedAt,
         earnedBadges: state.earnedBadges,
+        showcaseBadges: state.showcaseBadges,
         badgesInitialized: state.badgesInitialized,
         displayName: state.displayName,
         email: state.email,

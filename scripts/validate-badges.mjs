@@ -33,17 +33,29 @@ const warns = [];
 // ─── 1. the frozen roll ──────────────────────────────────────────────────────
 // Fifty ids, as shipped. A badge may be renamed, re-glyphed, re-tiered and its
 // criterion rewritten — but this list may not change without a migration.
+// The roll, as shipped. A badge may be renamed, re-glyphed, re-tiered and its
+// criterion rewritten — but an id may not leave this list without a migration.
+//
+// It went from fifty to sixty-eight when the case was rebalanced for
+// difficulty. Every one of the original fifty is still in it: the eighteen
+// additions are appended, and nothing was dropped, which is the only kind of
+// change to this list that needs no migration at all — an id nobody holds yet
+// cannot be stranded.
 const FROZEN = [
   'first-light', 'star-pupil', 'arch-of-wisdom', 'true-north', 'the-pillars',
-  'grid-thinker', 'the-great-question', 'diamond-eye', 'turning-point', 'lamp-bearer',
-  'oval-seeker', 'crowned-star', 'tender-heart', 'peak-climber', 'radiant-mind',
-  'marble-pillar', 'summit', 'half-circle', 'moonlit-path', 'the-crown',
-  'deep-roots', 'solar-mind', 'lotus-bloom', 'compass-rose', 'the-shield',
-  'crossroads', 'the-arch', 'open-page', 'balance', 'bright-star',
-  'ascent', 'the-vessel', 'flourish', 'the-rings', 'delta-rise',
-  'the-amphora', 'crossed-paths', 'the-gate', 'circle-of-stars', 'the-keep',
-  'facets', 'the-lens', 'the-colosseum', 'mandala', 'the-fortress',
-  'the-vessel-ii', 'star-of-david', 'the-infinite', 'the-willow', 'the-hourglass',
+  'grid-thinker', 'ascent', 'summit', 'the-great-question', 'turning-point',
+  'lamp-bearer', 'moonlit-path', 'solar-mind', 'the-hourglass', 'deep-roots',
+  'the-willow', 'the-keep', 'the-fortress', 'oval-seeker', 'crowned-star',
+  'circle-of-stars', 'crossed-paths', 'the-colosseum', 'the-lens', 'the-infinite',
+  'half-circle', 'open-page', 'the-vessel', 'flourish', 'the-amphora',
+  'the-vessel-ii', 'the-rings', 'facets', 'mandala', 'compass-rose',
+  'bright-star', 'radiant-mind', 'the-crown', 'diamond-eye', 'star-of-david',
+  'the-gate', 'the-shield', 'balance', 'delta-rise', 'dottarget-forty',
+  'target-hundred', 'the-anvil', 'crossroads', 'the-arch', 'the-fountain',
+  'peak-climber', 'marble-pillar', 'the-obelisk-ii', 'the-keystone', 'tender-heart',
+  'lotus-bloom', 'deep-well', 'the-first-whole', 'three-whole', 'the-whole-tree',
+  'moonrise', 'the-ages', 'order-bronze', 'order-jade', 'order-lapis',
+  'order-crimson', 'order-amethyst', 'order-aurum',
 ];
 
 const src = fs.readFileSync(path.join(ROOT, 'data/badges.ts'), 'utf8');
@@ -60,7 +72,7 @@ const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
 if (missing.length) errs.push(`badge ids dropped (they are persisted + cloud-synced): ${missing.join(', ')}`);
 if (invented.length) errs.push(`badge ids invented without a migration: ${invented.join(', ')}`);
 if (dupes.length) errs.push(`duplicate badge ids: ${[...new Set(dupes)].join(', ')}`);
-if (ids.length !== 50) errs.push(`expected 50 badges, found ${ids.length}`);
+if (ids.length !== FROZEN.length) errs.push(`expected ${FROZEN.length} badges, found ${ids.length}`);
 
 // Every glyph must exist, and no two badges may share a mark — the badges are
 // meant to be fifty distinct objects.
@@ -182,4 +194,12 @@ if (errs.length) {
   console.log(`\n${errs.length} problem${errs.length === 1 ? '' : 's'}.`);
   process.exit(1);
 }
-console.log(`50 badges, ${new Set(glyphs).size} distinct marks, 18 medal variants clean.`);
+// Derived, not typed. This line read "50 badges … 18 medal variants" for a
+// sixty-eight badge case with thirty variants — a summary that states a count
+// it did not count is the same class of thing as the checks in this file exist
+// to catch.
+const variants = new Set(
+  [...src.slice(src.indexOf('export const BADGES')).matchAll(/family: '([a-z]+)', tier: (\d)/g)]
+    .map((m) => m[1] + m[2]),
+);
+console.log(`${ids.length} badges, ${new Set(glyphs).size} distinct marks, ${variants.size} medal variants clean.`);
