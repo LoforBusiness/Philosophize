@@ -131,6 +131,67 @@ export const ERA: Record<EraKey, string> = {
   EASTERN: '#3B7D76',       // jade
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// THE SIX BRANCHES, AND THE SECOND PLACE A COLOUR CARRIES INFORMATION.
+//
+// Same argument as ERA above, applied to the other fact a reader sorts this app
+// by. Profile draws six mastery bars, a reading-share stack and a run of branch
+// marks; in one tone those are six identical readings that have to be matched to
+// their labels one at a time, which is exactly the "dull" the redesign was asked
+// to fix. A hue per branch makes the stack readable without a legend and makes a
+// bar recognisable before its name is read.
+//
+// A SEPARATE SCALE, NOT PART OF `C`, for both of ERA's reasons: check-ui caps
+// the palette at 14 and it holds 13, and nothing here may be used as a
+// general-purpose colour — only to say "this is that branch".
+//
+// ── CHOSEN BY SEARCH, AND THE SEARCH HAD TO BE REWRITTEN TWICE ──────────────
+//
+// Eight colours were already spoken for (`wrong`, `correct`, `HUE`, and ERA's
+// five), so six more is a genuinely crowded fit and picking by eye was never an
+// option. Two things the first attempts got wrong, both worth keeping written
+// down:
+//
+// · MEASURED IN sRGB, the search ran straight to the most saturated corner it
+//   was allowed — #AE22C3 electric magenta, #167E16 pure green. Everything dark
+//   enough to clear 4.5:1 on near-white paper crowds toward the origin in RGB,
+//   so a muted set scores as "too close" and the only way to win is to shout.
+//   These are measured in CIELAB instead, which separates the way an eye does.
+//
+// · LEFT FREE, IT BOUGHT SEPARATION WITH LIGHTNESS rather than hue, and returned
+//   logic at L* 7.0 (#0C0C45, indistinguishable from ink) beside epistemology at
+//   L* 47.8. Six branches are peers; a set where one bar reads as black and
+//   another reads as a colour is a hierarchy nobody meant to declare. So all six
+//   are pinned into one band — L* 30.2–44.8, C* 24.1–34.0 — and every bit of the
+//   separation comes from hue.
+//
+// The result sits at minimum ΔE 25.1 between any two, against the 29.3 the
+// shipped ERA scale manages, and every one clears 4.5:1 on BOTH paper and a
+// white card face, so a branch may carry its own name as text. scripts/check-ui.mjs
+// re-derives all of it.
+//
+// ── WHAT THESE ARE DELIBERATELY NOT CHECKED AGAINST, AND WHY ────────────────
+//
+// ERA and the answer states are held to a LOWER floor here (ΔE 15 and 18) than
+// the branches are held to each other (24). That is not the constraint being
+// quietly dropped — it is the observation that confusability needs a shared
+// view. Six branch bars sit in one list and must be told apart at a glance; an
+// era chip lives on Thinkers and an answer state lives inside a lesson, and
+// neither is ever on screen beside a mastery bar. The floors that remain are
+// insurance for the day one of them is.
+export type BranchKey =
+  | 'metaphysics' | 'epistemology' | 'logic'
+  | 'ethics' | 'aesthetics' | 'political-philosophy';
+
+export const BRANCH: Record<BranchKey, string> = {
+  metaphysics: '#5F3D61',           // aubergine — the cosmos
+  epistemology: '#16677C',          // petrol — the clear eye
+  logic: '#466BA2',                 // slate blue — the machinery of proof
+  ethics: '#0F523A',                // pine — conduct
+  aesthetics: '#9A4E61',            // dusty rose — taste
+  'political-philosophy': '#693C19',// burnt sienna — the forum
+};
+
 export type TypeKey = 'display' | 'title' | 'body' | 'label' | 'micro';
 
 /** Five sizes. Inter is loaded at 400/500/700 only — there is no 600. */

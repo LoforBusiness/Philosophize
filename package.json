@@ -104,6 +104,7 @@
     "check:frame": "node scripts/check-frame.mjs",
     "check:spoiler": "node scripts/check-spoiler.mjs",
     "check:cover": "node scripts/check-cover.mjs",
+    "check:hold": "node scripts/check-hold.mjs",
     "measure:must": "node scripts/measure-must.mjs",
     "check:launch": "node scripts/check-launch.mjs && node scripts/check-words.mjs",
     "sheet:launch": "node scripts/sheet-launch.mjs",

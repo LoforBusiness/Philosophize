@@ -1,5 +1,5 @@
 import { Easing, type ColorValue } from 'react-native';
-import { Tabs } from 'expo-router';
+import { Tabs, useSegments } from 'expo-router';
 import { MotiView } from 'moti';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
@@ -20,6 +20,33 @@ export default function AppLayout() {
   // bar isn't hidden behind it. A fixed height with no inset put the icons
   // underneath the 3-button nav on Android.
   const insets = useSafeAreaInsets();
+
+  // ── A LESSON IS NOT A TAB, AND THE BAR SHOULD NOT BE ACROSS IT ─────────────
+  //
+  // The lesson route lives under `branches`, which is a tab, so it inherited the
+  // tab bar — five navigation icons pinned across the bottom of a full-screen,
+  // tap-anywhere-to-advance cinematic scene. Two things were wrong with that:
+  //
+  // · A cinematic lesson advances on a tap ANYWHERE on the stage, and the bar sits
+  //   in the bottom 70pt (104pt with a home indicator) of exactly that surface. A
+  //   thumb reaching for the next beat and landing low does not advance the beat,
+  //   it leaves the lesson — mid-lesson, with the reader's progress uncommitted,
+  //   because the completion is only banked when they press Continue on the reward
+  //   screen (see LessonReward). So the mis-tap costs the whole lesson.
+  // · It is redundant. The lesson already carries its own ✕ and a progress bar; a
+  //   second, competing way out says the screen is not really in charge of itself.
+  //
+  // `href: null` does NOT do this — it removes a tab's BUTTON, not the bar, which
+  // is why settings / paywall / streak all show the bar too. Those keep it
+  // deliberately: they are ordinary screens where tabbing away is the right
+  // affordance, and hiding it on the paywall in particular would turn a
+  // dismissible offer into something that reads as a trap.
+  //
+  // Matched on the segment rather than the pathname so it cannot be fooled by a
+  // slug that happens to contain the word.
+  const segments = useSegments() as string[];
+  const inLesson = segments.includes('lesson');
+
   return (
     <Tabs
       screenOptions={{
@@ -51,14 +78,19 @@ export default function AppLayout() {
         // to build ~3,100 views on mount, and eagerly paying that at startup would
         // have traded one stall for a worse one.
         lazy: false,
-        tabBarStyle: {
-          backgroundColor: '#FAFAF7',
-          borderTopColor: '#1A1A1A',
-          borderTopWidth: 1.5,
-          height: 70 + insets.bottom,
-          paddingTop: 10,
-          paddingBottom: 12 + insets.bottom,
-        },
+        tabBarStyle: inLesson
+          // `display: 'none'` rather than a zero height: a 0-height bar still
+          // takes hit-testing space at the bottom edge on Android, which is the
+          // half of the problem that actually costs the reader a lesson.
+          ? { display: 'none' }
+          : {
+              backgroundColor: '#FAFAF7',
+              borderTopColor: '#1A1A1A',
+              borderTopWidth: 1.5,
+              height: 70 + insets.bottom,
+              paddingTop: 10,
+              paddingBottom: 12 + insets.bottom,
+            },
         tabBarActiveTintColor: '#1A1A1A',
         tabBarInactiveTintColor: '#B8B8B2',
       }}

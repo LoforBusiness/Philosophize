@@ -160,7 +160,20 @@ export default function RankClimbChart({
   const fresh = totalXP > seenXP && geo.from < 1;
 
   // ── the intro ──────────────────────────────────────────────────────────────
-  const draw = useSharedValue(fresh ? geo.from : 1);
+  //
+  // `drawFrom` IS a plain number, and that is the point: it is the initial value
+  // of the shared value below, so anything on the render path that needs "where
+  // the line starts" can read this instead of reaching into `draw.value`.
+  //
+  // The counter's `defaultValue` used to read `draw.value` directly, which fires
+  // Reanimated's strict-mode "reading from `value` during component render"
+  // warning on every screen this chart appears on — Home, Profile and Insights.
+  // The render was harmless (a snapshot used once, for one frame, before
+  // `countProps` takes the text over), but the warning is not: it is identical to
+  // the one a real stale-read produces, so three copies of it per screen is
+  // exactly the noise that hides the next genuine one.
+  const drawFrom = fresh ? geo.from : 1;
+  const draw = useSharedValue(drawFrom);
   const mark = useSharedValue(fresh ? 0 : 1);
   const played = useRef(false);
   const gained = Math.max(0, Math.min(totalXP, ceil) - floor);
@@ -270,7 +283,7 @@ export default function RankClimbChart({
               editable={false}
               pointerEvents="none"
               underlineColorAndroid="transparent"
-              defaultValue={`+${Math.round(draw.value * gained)} XP`}
+              defaultValue={`+${Math.round(drawFrom * gained)} XP`}
               style={[styles.calloutText, counterStyle]}
               animatedProps={countProps}
             />

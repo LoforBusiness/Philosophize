@@ -2463,9 +2463,108 @@ Two things about it that are load-bearing, both learned by getting them wrong:
 
 ---
 
+## Group P — the figure and the things it holds
+
+A reader described the carry in The Puzzle of Equality without needing any of the
+vocabulary in this file:
+
+> *"the stickman carries an object, it doesnt look good, his arms arent out, the
+> object is just floating and it just disapears all the suddon."*
+
+Three complaints, one cause, and `interact.ts` had already written it down before
+any of these scenes existed: **`pose()` hands a scene a Bundle of transforms and
+never exposes a joint, so a scene drawing a box in someone's hands has no way to
+ask where the hands ARE.** It hard-codes a rectangle at a position that looked
+right once, and the moment the figure breathes, walks or changes pose the object
+drifts out of the grip. Every prop in the app that a figure "holds" was really a
+prop the figure stands next to.
+
+political-8 is the worked example, and it is six lines:
+
+```
+carried:  { position: 'absolute', left: -17, top: 444, ... }   // a fixed height
+carryX:   fx + DIR[n] * 30                                     // a fixed offset
+carry:    lerp(CARRYV[p], CARRYV[n], tr)  → opacity            // a fade
+```
+
+- `top: 444` never moved, so the crate floated while he did — **"just floating"**.
+- The figure walked on `travelStance`'s WALK gait, arms swinging through the
+  cycle, with a crate beside him — **"his arms arent out"**.
+- `carry` was 1 on one beat and 0 on the next, so the crate came out of nothing
+  and went back to nothing — **"it just disapears all the suddon"**.
+
+### P1 · A held object's position comes from the HAND, every frame
+
+`gripAt(stance, placed)` returns the midpoint of the two wrists in stage units,
+solved from the live Stance — so it tracks the breath, the walk cycle and every
+pose change for free. `handAt(stance, placed, which)` does one hand. Both are in
+`interact.ts` and both are worklets, so they belong in the same
+`useDerivedValue` the scene already runs.
+
+**Anchor the object by the edge that touches.** A box rests ON hands, so its
+BOTTOM edge goes at the grip point (`top: -BOX_H` on a centred absolute box), not
+its centre. political-8 was first written with centres and the crate came to rest
+eleven units above the floor at the other end of the journey.
+
+### P2 · It is never an opacity. It is a position between two places
+
+```
+position = lerp(where it rests, gripAt(...), held)
+```
+
+`held` is 0 when the object is on its pile, its table or the ground, and 1 when it
+is in the hands. Everything in between is the lift or the set-down. Nothing about
+a held object ever fades.
+
+That single line also gets the pick-up and the put-down for free, which is the
+half the reader noticed: an object that is always somewhere cannot appear out of
+nothing, and the frames where `held` is between 0 and 1 ARE the reach.
+
+**Change `held` at the DESTINATION, not during the walk.** Pack it into the last
+quarter of the move (`clamp01((tr − 0.72) / 0.28)`) and the trip reads as "walk
+over, lift, walk back, put down". Spread it across the whole move and the object
+slides into his hands somewhere in the middle of the room.
+
+### P3 · The arms come out, and the legs keep walking
+
+`carryHands(stance, amount)` pins both fists forward-low under the load and
+leaves everything else alone, so a walk cycle keeps its legs, its bob and its
+lean while the arms stop swinging. Blend it by the same `held` fraction and the
+arms come out as the weight arrives.
+
+The targets are rig emote 42's — 18 and 26 forward at y +2 — and they are not
+arbitrary: far enough out that the forearm has paper behind it rather than torso
+(B11b / the folded-forearm defect), low enough that nothing goes near the head.
+
+### P4 · If it came off a stack, take it OFF the stack
+
+political-8 drew three crates on the spare pile AND a fourth in his arms, so the
+stack never got shorter. It draws two now, and the crate he carries is the third —
+the same object, the same 40×22, resting on top of them until he lifts it. A
+carried object that is a different size from the one it came from is a different
+object, and the reader is entitled to notice.
+
+### P5 · What is measured
+
+`npm run check:hold` sweeps every cinematic lesson in a browser and looks for
+props that RIDE the figure — an element whose offset to the figure's centre stays
+fixed while the figure walks. For each one it asks the two questions above:
+
+- does it **pop** — appear or vanish between adjacent beats rather than moving to
+  or from somewhere?
+- does it sit at the **grip** — within a hand's reach of the figure's own hands?
+
+A prop that rides the figure and passes both is a held object. One that fails
+either is the defect a reader called "cheap".
+
+---
+
 ## Part 2 — Authoring checklist
 
 **Shape** — before writing a word, lay the beats out and count them (H52, H53).
+- [ ] **Anything the figure holds is held** (group P): its position is
+      `lerp(rest, gripAt(...), held)`, its arms are pinned with `carryHands`, and it
+      is never faded in or out. `npm run check:hold`.
 - [ ] **Nothing is painted across a word** (D33). Run `npm run check:cover` on the new
       lesson; a rule, a prop edge, a second label or the figure lying over a caption
       is the defect a reader called "cheap", and it is the one thing no offline check
@@ -2615,6 +2714,7 @@ they default to different ports so both can run at once.
 ```
 npm run check:frame    # what the CAMERA cuts in half   (edge of the frame)
 npm run check:cover    # what is painted ON a word      (D33, element vs element)
+npm run check:hold     # objects that ride the figure   (group P, grip and pop)
 SELFTEST=1 npm run check:cover   # prove the cover check can still see a defect
 ```
 

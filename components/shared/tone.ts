@@ -100,3 +100,139 @@ export const LOCKED_FACE: Stops = [
  * stops reading as depth and starts reading as a misregistered second copy.
  */
 export const SHADOW = { dx: 1.2, dy: 1.4, opacity: 0.16 } as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE METALS — and yes, this file used to say they would never be used.
+//
+// `BadgeMedal.tsx` carried the line "Bronze / silver / gold is still not
+// available and still would not be used", on the reasoning that tier belongs in
+// the FLOURISH where it can be read rather than compared. That reasoning is
+// still right about the flourish, which is why the flourish stays: ribbon at II,
+// laurel at III, exactly as before. What changed is the answer to a different
+// question — whether a trophy shelf may look like one — and the answer is now
+// yes, so tier is said TWICE, in shape and in metal, which is what every set of
+// struck things has always done.
+//
+// STILL ONE LIGHT, STILL TOP-LEFT. A metal is not a flat colour with a name; it
+// is a face that runs lit→base→shade along the same diagonal every other struck
+// thing in this app uses, over a rim darker than any of them. That is the whole
+// reason these read as metal rather than as three coloured circles, and it is
+// why they belong in this file rather than in the palette.
+//
+// WHY SILVER IS A WARM PEWTER, AND THE WRONG REASON IT WAS FIRST.
+//
+// Silver is the difficult one on a page printed in warm near-white, and it took
+// two tries because the first try measured the wrong pair. The worry was that a
+// cool silver would collide with `GHOST`, the slate a LOCKED medal is drawn in —
+// so silver was pushed light and warm until that gap opened, landing at #DCD8CD.
+// It cleared the check and looked wrong on sight: a silver badge in the grid read
+// as a blank sheet of paper with an outline, indistinguishable from the paper
+// medals the set used to be struck in.
+//
+// The measurement said why. #DCD8CD sits ΔE 12.6 from `PAPER` — it was not near
+// the locked slate, it WAS the page. And `GHOST` was never the right comparison
+// in the first place: it is the RIM of a locked medal, not its face, and the
+// face is `LOCKED_FACE`. A silver medal already differs from a locked one in
+// four ways at once (a lit face, a dark rim, a shadow, and its flourish), which
+// is the "unlit against lit" argument this file makes above.
+//
+// So the floor that matters is distance from the PAPER the app is printed on: a
+// metal that reads as the page is not a metal. #BFB9AA is ΔE 24 from paper and
+// 21 from the locked face, and it reads as pewter. check-ui measures all three.
+export type MetalName = 'BRONZE' | 'SILVER' | 'GOLD';
+
+export interface Metal {
+  /** The lit corner, top-left. */ lit: string;
+  /** The body of the metal — what it is called when named. */ base: string;
+  /** The shaded corner, bottom-right. */ shade: string;
+  /** The turned edge: darker than the shade, so the object has a boundary. */ rim: string;
+  /** Ink or paper, whichever reads on `base`. Never guessed — see check-ui. */ on: string;
+}
+
+// Both of the values below that look arbitrary were solved for, not chosen, and
+// the checker is what found them:
+//
+// · BRONZE sat at #A66C38 and landed in the dead zone where NEITHER paper nor
+//   ink clears 4.5:1 on it — white measured 4.35 and ink 4.16. A mid-tone that
+//   nothing can be printed on is not a usable metal, so it darkened until paper
+//   cleared with margin.
+// · SILVER went the wrong way twice — see the note above. It is a mid pewter,
+//   not a light one, because the thing it has to stand clear of is the paper.
+export const METAL: Record<MetalName, Metal> = {
+  BRONZE: { lit: '#E0B183', base: '#9F6634', shade: '#6B4120', rim: '#4A2B14', on: '#FFFFFF' },
+  // The LIT end matters as much as the base, and silver got caught by that too:
+  // at #F7F4EC the highlight was ΔE 3 from `PAPER`, so on a 66px badge — where
+  // the lit corner covers a third of the face — the medal read as a blank page
+  // again even with a pewter base underneath it.
+  SILVER: { lit: '#E4DFD2', base: '#BFB9AA', shade: '#847E72', rim: '#524D45', on: '#1A1A1A' },
+  GOLD:   { lit: '#F6E4A4', base: '#C09B37', shade: '#7C601A', rim: '#54400E', on: '#1A1A1A' },
+};
+
+/** Badge tier 1/2/3 and rank band 1/2/3 both read as bronze → silver → gold. */
+export const TIER_METAL: MetalName[] = ['BRONZE', 'SILVER', 'GOLD'];
+
+/** A metal's face, as gradient stops along the one light direction. */
+export const metalFace = (m: Metal): Stops => [
+  ['0%', m.lit, 1],
+  ['52%', m.base, 1],
+  ['100%', m.shade, 1],
+];
+
+/** A metal's rim, dark on the shaded side so the edge turns away from the light. */
+export const metalRim = (m: Metal): Stops => [
+  ['0%', m.shade, 1],
+  ['45%', m.rim, 1],
+  ['100%', m.rim, 1],
+];
+
+// ── deriving a ramp from any single colour ───────────────────────────────────
+//
+// The six branch hues are declared as ONE hex each, not as three. A hand-written
+// lit/base/shade per branch is eighteen values to keep consistent by eye, and the
+// first thing to drift would be the light direction — which is the one thing that
+// has to be identical everywhere for the set to read as a set. So the lit and
+// shaded ends are DERIVED, by the same two mixes for every colour.
+
+const clamp255 = (n: number) => (n < 0 ? 0 : n > 255 ? 255 : Math.round(n));
+const parse = (h: string): [number, number, number] =>
+  [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)) as [number, number, number];
+const toHex = (r: number, g: number, b: number) =>
+  '#' + [r, g, b].map((v) => clamp255(v).toString(16).padStart(2, '0').toUpperCase()).join('');
+
+/** Mix two hexes. `t` 0 → a, 1 → b. */
+export function mix(a: string, b: string, t: number): string {
+  const [r1, g1, b1] = parse(a);
+  const [r2, g2, b2] = parse(b);
+  return toHex(r1 + (r2 - r1) * t, g1 + (g2 - g1) * t, b1 + (b2 - b1) * t);
+}
+
+export interface Ramp { lit: string; base: string; shade: string; rim: string; track: string; }
+
+/**
+ * A struck ramp for any base colour — the branch hues use this.
+ *
+ * Toward PAPER for the lit end rather than toward pure white, because the app is
+ * printed on warm paper and a highlight that goes cold reads as a specular
+ * reflection off glass. Toward INK for the shade, not toward black, for the same
+ * reason in reverse.
+ *
+ * `track` is the empty part of a progress bar in that colour — the hue at a
+ * tenth strength, so an unfilled bar still says which branch it belongs to
+ * instead of six identical grey gutters.
+ */
+export function ramp(base: string): Ramp {
+  return {
+    lit: mix(base, PAPER, 0.34),
+    base,
+    shade: mix(base, INK, 0.36),
+    rim: mix(base, INK, 0.58),
+    track: mix(base, PAPER, 0.86),
+  };
+}
+
+/** The face of a struck thing in an arbitrary colour, along the one light. */
+export const rampFace = (r: Ramp): Stops => [
+  ['0%', r.lit, 1],
+  ['52%', r.base, 1],
+  ['100%', r.shade, 1],
+];

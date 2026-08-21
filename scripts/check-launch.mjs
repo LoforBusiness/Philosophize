@@ -713,7 +713,21 @@ ok(screenLiterals.length === 0, 'LaunchScreen.tsx does not hardcode INK/CREAM as
 // (The chrome at the top of the screen is the same construction inverted, and it
 // is measured in section 2 — against the composited art rather than against the
 // darkest plane, because the top of the frame is where the bright things are.)
-ok(/D\s*E\s*E\s*P\s*L\s*Y/.test(screen), 'the masthead says DEEPLY');
+// THE MASTHEAD MUST NAME THE APP THE APP IS ACTUALLY CALLED.
+//
+// This asserted DEEPLY, and went on asserting it for the whole of build 21 —
+// which is the rename to Ashmere. Every other surface followed the rename; the
+// launch screen did not, because its wordmark is spaced ("D E E P L Y") and
+// therefore matches no search for the name. A check that hard-codes the string
+// it is checking cannot notice this: it was green the entire time the first
+// screen of every launch showed the wrong brand.
+//
+// So it is derived from app.json's `expo.name` now — the one place the brand is
+// declared, and the one that becomes the launcher label (§18).
+const brand = JSON.parse(fs.readFileSync('app.json', 'utf8')).expo.name.toUpperCase();
+const spaced = new RegExp(brand.split('').join('\\s*'));
+ok(spaced.test(screen), `the masthead says ${brand}`, `app.json says ${brand}`);
+ok(!/D\s*E\s*E\s*P\s*L\s*Y/.test(screen), 'the Deeply wordmark is gone');
 // The pre-rename masthead was letter-spaced too ("P H I L O S O P H I Z E"),
 // which `/PHILOSOPHIZE/` — a contiguous run — can never match; this assertion
 // was permanently green. Matched the same way the DEEPLY check above does.

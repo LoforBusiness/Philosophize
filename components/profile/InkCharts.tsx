@@ -57,7 +57,22 @@ export interface ShareRow {
  * "how far ahead", and a share-of-total bar for a six-way split is four
  * indistinguishable stubs.
  */
-export function ShareBars({ rows, c, max = 4 }: { rows: ShareRow[]; c: Ink; max?: number }) {
+export function ShareBars({
+  rows, c, max = 4, accent,
+}: {
+  rows: ShareRow[];
+  c: Ink;
+  max?: number;
+  /**
+   * A colour for the LEADER's bar only — gold, where this is called.
+   *
+   * The runners-up were already drawn lighter, so the ranking was legible; what
+   * was missing is that first place looked like a longer version of fourth
+   * rather than like a placing. One struck bar at the top of a list of ink ones
+   * is a podium, and it costs no extra element.
+   */
+  accent?: string;
+}) {
   const top = rows.slice(0, max);
   if (top.length === 0) return null;
   const lead = Math.max(1, top[0].value);
@@ -67,7 +82,7 @@ export function ShareBars({ rows, c, max = 4 }: { rows: ShareRow[]; c: Ink; max?
         style={[
           s.barFill,
           {
-            backgroundColor: c.ink,
+            backgroundColor: i === 0 && accent ? accent : c.ink,
             // A floor of 6%, so a real but tiny score is still a mark on the page
             // rather than a name with nothing next to it.
             width: `${Math.max(6, Math.round((r.value / lead) * 100))}%`,
@@ -89,7 +104,17 @@ export function ShareBars({ rows, c, max = 4 }: { rows: ShareRow[]; c: Ink; max?
         {top[0].label}
       </Text>
       {top[0].detail ? <Text style={[s.leadDetail, { color: c.soft }]}>{top[0].detail}</Text> : null}
-      <View style={{ marginTop: 8 }}>{bar(top[0], 0)}</View>
+      {/* `flexDirection: 'row'` IS LOad-BEARING, and its absence is why the
+          leader's bar has never been visible.
+          `barTrack` carries `flex: 1`, which is right inside `barRow` (a row, so
+          flex governs WIDTH) and fatal in a plain column: flex-basis 0 along the
+          main axis makes the bar 0 tall, and the parent had no height to give it
+          back. So the headline row — the one bar the layout deliberately
+          promotes — measured 0 pixels and drew nothing, on every profile, for as
+          long as this component has existed. It went unnoticed because the
+          runners-up below it are in rows and rendered correctly, so the section
+          looked populated. */}
+      <View style={{ marginTop: 8, flexDirection: 'row' }}>{bar(top[0], 0)}</View>
       {top.length > 1 ? (
         <View style={s.bars}>
           {top.slice(1).map((r, k) => (
@@ -112,6 +137,15 @@ export function ShareBars({ rows, c, max = 4 }: { rows: ShareRow[]; c: Ink; max?
 export interface Part {
   label: string;
   value: number;
+  /**
+   * The branch's own colour, when the caller knows it.
+   *
+   * Optional, and the fallback below is why: this component is not only used for
+   * branches, and a caller with no colour to give still gets the density ramp it
+   * has always got. Passing one is strictly better where it exists — see the
+   * note on `StackBar`.
+   */
+  color?: string;
 }
 
 /**
@@ -121,14 +155,32 @@ export interface Part {
  * that is the section this belongs in. It says at a glance whether the reader is
  * a specialist or a wanderer, which no ranked list does.
  *
- * The parts are hatched at descending density instead of coloured, because there
- * is no second colour in this app to reach for (§19). Density is a legitimate
- * ordering — the eye reads dense-to-sparse as most-to-least without a legend.
+ * ── THIS IS THE CHART COLOUR WAS INVENTED FOR ───────────────────────────────
+ *
+ * The comment here used to read "the parts are hatched at descending density
+ * instead of coloured, because there is no second colour in this app to reach
+ * for (§19)", and it was an honest answer to a real constraint. It was also the
+ * chart that suffered most for it. A density ramp orders the parts, which is
+ * genuinely useful — but it cannot NAME them, so the key could only ever label
+ * the first three, and the reader had four unexplained shades of grey to the
+ * right of it. Whether the fourth band was Ethics or Aesthetics was not
+ * recoverable from the picture at all.
+ *
+ * `BRANCH` is that second colour, and it is exactly the case §19's argument
+ * allows: a hue that carries information rather than mood. Every segment is now
+ * identifiable, so the key can list all six — and the ordering the density ramp
+ * was providing is still there, because the segments are still sorted by size.
+ *
+ * The density fallback stays for any caller with no colours to give.
  */
 export function StackBar({ parts, c }: { parts: Part[]; c: Ink }) {
   const live = parts.filter((p) => p.value > 0);
   const total = live.reduce((a, p) => a + p.value, 0);
   if (total <= 0) return null;
+  const shade = (p: Part, i: number) =>
+    p.color
+      ? { backgroundColor: p.color, opacity: 1 }
+      : { backgroundColor: c.ink, opacity: Math.max(0.14, 1 - i * 0.19) };
   return (
     <View>
       <View style={[s.stack, { borderColor: c.ink }]}>
@@ -137,8 +189,7 @@ export function StackBar({ parts, c }: { parts: Part[]; c: Ink }) {
             key={p.label}
             style={{
               flex: p.value,
-              backgroundColor: c.ink,
-              opacity: Math.max(0.14, 1 - i * 0.19),
+              ...shade(p, i),
               borderRightWidth: i < live.length - 1 ? 1 : 0,
               borderRightColor: c.paper,
             }}
@@ -146,9 +197,11 @@ export function StackBar({ parts, c }: { parts: Part[]; c: Ink }) {
         ))}
       </View>
       <View style={s.stackKey}>
-        {live.slice(0, 3).map((p, i) => (
+        {/* ALL SIX, not the first three. Three was the most a density ramp could
+            honestly explain; with a colour per branch every segment is named. */}
+        {live.map((p, i) => (
           <View key={p.label} style={s.keyItem}>
-            <View style={[s.keyChip, { backgroundColor: c.ink, opacity: Math.max(0.14, 1 - i * 0.19) }]} />
+            <View style={[s.keyChip, shade(p, i)]} />
             <Text style={[s.keyText, { color: c.soft }]} numberOfLines={1}>
               {p.label}
             </Text>

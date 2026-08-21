@@ -74,11 +74,54 @@ function stroke(cv, a, b, w) {
   }
 }
 
-function figure(cv, stance, x, groundY, k) {
+/**
+ * The contact shadow, drawn the same way LaunchFigure draws it.
+ *
+ * It is a second copy of that geometry, which is a cost worth paying: the
+ * shadow is the whole answer to "he looks like he is sitting on air", and a
+ * sheet that omits it shows a picture nobody will ever see. Same straddle of
+ * the ankles, same 34k + stride width, same tenth-of-width height, same 0.5.
+ */
+function contactShadow(cv, j, k, tone, cast) {
+  const lo = Math.min(j.ankL.x, j.ankR.x);
+  const hi = Math.max(j.ankL.x, j.ankR.x);
+  const cy = Math.max(j.ankL.y, j.ankR.y);
+  const reach = R.FIG_H * k * cast.len;
+  const fullW = 22 * k + (hi - lo) + reach;
+  const foot = (lo + hi) / 2 + cast.dir * ((hi - lo) / 2 + 11 * k);
+  // Same anchoring as LaunchFigure: the ellipse starts at the feet and grows
+  // only in the direction the light throws it.
+  const cx = cast.dir === 1 ? foot - 11 * k - (hi - lo) / 2 + fullW / 2
+                            : foot + 11 * k + (hi - lo) / 2 - fullW / 2;
+  const w = fullW / 2;
+  const h = Math.max(2.5, 5 * k) / 2;
+  const [tr, tg, tb] = [1, 3, 5].map((i) => parseInt(tone.slice(i, i + 2), 16));
+  for (let dx = -w; dx <= w; dx++) {
+    const dy = h * Math.sqrt(Math.max(0, 1 - (dx / w) * (dx / w)));
+    // The same ramp LaunchFigure's LinearGradient applies: full strength for the
+    // first 18% out from the feet, then falling to nothing. u is 0 at the foot
+    // end whichever way the light throws it.
+    const u = cast.dir === 1 ? (dx + w) / (2 * w) : 1 - (dx + w) / (2 * w);
+    const fade = u <= 0.18 ? 1 : Math.max(0, (1 - u) / 0.82);
+    const a = 0.42 * fade;
+    if (a <= 0.004) continue;
+    for (let y = -Math.ceil(dy); y <= Math.ceil(dy); y++) {
+      const px = Math.round(cx + dx), py = Math.round(cy + y);
+      if (px < 0 || py < 0 || px >= cv.w || py >= cv.h) continue;
+      const i = (py * cv.w + px) * 3;
+      cv.px[i] += (tr - cv.px[i]) * a;
+      cv.px[i + 1] += (tg - cv.px[i + 1]) * a;
+      cv.px[i + 2] += (tb - cv.px[i + 2]) * a;
+    }
+  }
+}
+
+function figure(cv, stance, x, groundY, k, shadowTone, cast) {
   const limbW = (R.STR.limb / 2) * k;
   const torsoW = (R.STR.torso / 2) * k;
   const headR = R.STR.headR * k;
   const j = R.solve({ x, groundY, k, dir: 1, ...stance });
+  if (shadowTone) contactShadow(cv, j, k, shadowTone, cast);
   stroke(cv, j.shL, j.elL, limbW); stroke(cv, j.elL, j.wrL, limbW);
   stroke(cv, j.hipL, j.kneeL, limbW); stroke(cv, j.kneeL, j.ankL, limbW);
   stroke(cv, j.pel, j.chest, torsoW);
@@ -121,13 +164,20 @@ function panel(key) {
   // authored to cross the disc in the first place (lookout, sip).
   for (const b of A.skyBandsFor(key)) cv.path(b.d, b.fill, 0, 0, 1, b.opacity);
   for (const pl of A.planesFor(key)) cv.path(pl.d, pl.fill, 0, 0);
+  // (the near cover is painted AFTER the figure — see below)
 
   // the figure, on the crest, at this scene's scale — the pose it actually
   // plays (t = 2.0, the same instant check-launch.mjs samples), not a
   // universal walk cycle.
   const c = A.crestFor(key);
   const x = A.figureX(key);
-  figure(cv, LM.launchStance(key, 2.0), x, A.crestY(c, x), A.figureK(key));
+  figure(cv, LM.launchStance(key, 2.0), x, A.crestY(c, x), A.figureK(key),
+    A.PALETTES[key].steps[0], A.castFor(key));
+
+  // THE NEAR GROUND COVER, in front of him — the same order launchScenes.tsx
+  // composites: back, figure, front.
+  const fore = A.foreFor(key);
+  if (fore.d) cv.path(fore.d, fore.fill, 0, 0);
   return cv;
 }
 

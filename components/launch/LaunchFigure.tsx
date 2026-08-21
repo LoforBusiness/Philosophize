@@ -1,5 +1,6 @@
 import { memo, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useDerivedValue,
@@ -8,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Stickman from '@/components/lesson/cinematic/Stickman';
 import {
-  solve, bundle, DEG, STAGE_W, STAGE_H,
+  solve, bundle, DEG, STAGE_W, STAGE_H, FIG_H,
   type Joints, type Bundle,
 } from '@/components/lesson/cinematic/rig';
 import { launchStance, walkPlacement } from './launchMotion';
@@ -38,7 +39,7 @@ interface Props {
 // anyway; this stops one being asked for in the first place, and keeps the
 // figure's frame budget away from the screen's bookkeeping.
 export default memo(function LaunchFigure({ scene }: Props) {
-  const { activity, k, dir, x: x0, groundY: gy0, crest, walkSpan } = scene;
+  const { activity, k, dir, x: x0, groundY: gy0, crest, walkSpan, shadow, cast } = scene;
 
   // Everything the figure holds is sized in the SAME rig units as the figure, so
   // shrinking the figure into the distance shrinks its props with it. Fixed pixel
@@ -99,6 +100,55 @@ export default memo(function LaunchFigure({ scene }: Props) {
     return bundle(J.value, k, 1);
   });
 
+  // ── the contact shadow ─────────────────────────────────────────────────────
+  //
+  // "The stickman is just like he is sitting on air." He was: he stood at
+  // crestY(x) — geometrically ON the ridge — but nothing on the page said so.
+  // A silhouette standing on the top EDGE of a plane that recedes away from the
+  // camera has no contact cue at all, and the eye reads it as pasted on.
+  //
+  // It has to live HERE rather than in the scenery, because `walk` moves the
+  // figure right across the frame and re-solves his groundY from the crest every
+  // frame. A shadow painted into the inert SVG would be a smudge he walks away
+  // from.
+  //
+  // It is drawn UNDER the figure and reads as a darkening of the ground rather
+  // than an object: the palette's darkest step, and a WIDE flat ellipse. Height
+  // is a tenth of the width — anything rounder stops being a shadow cast by a
+  // low sun and starts being a stone he is standing on.
+  const shade = useDerivedValue(() => {
+    'worklet';
+    const j = J.value;
+    // Straddle the feet rather than centring on his origin: mid-stride the two
+    // feet are a stride apart, and one puddle under the pelvis would sit between
+    // them touching neither.
+    const lo = Math.min(j.ankL.x, j.ankR.x);
+    const hi = Math.max(j.ankL.x, j.ankR.x);
+    return { cx: (lo + hi) / 2, span: hi - lo, y: Math.max(j.ankL.y, j.ankR.y) };
+  });
+
+  // The figure's own height in stage units — `FIG_H` is the rig's, so the cast
+  // scales with him and a distant walker's shadow is short in the same way he is.
+  const figH = FIG_H * k;
+
+  const shadowStyle = useAnimatedStyle(() => {
+    const s = shade.value;
+    // The pool at the feet, plus the cast reaching away from the light. They are
+    // one ellipse: two shapes would show a seam where they met, and the seam is
+    // exactly where the eye is looking for the contact.
+    const reach = figH * cast.len;
+    const w = 22 * k + s.span + reach;
+    const h = Math.max(2.5, 5 * k);
+    // Anchored at the feet, growing only in the direction the light throws it.
+    const left = cast.dir === 1 ? s.cx - (11 * k + s.span / 2) : s.cx + (11 * k + s.span / 2) - w;
+    return {
+      width: w,
+      height: h,
+      borderRadius: h / 2,
+      transform: [{ translateX: left }, { translateY: s.y - h / 2 }],
+    };
+  });
+
   // ── held props ─────────────────────────────────────────────────────────────
 
   const cupStyle = useAnimatedStyle(() => ({
@@ -121,6 +171,20 @@ export default memo(function LaunchFigure({ scene }: Props) {
 
   const figure = (
     <>
+      {/* BEFORE the figure, so his feet sit on top of it rather than in it.
+          A GRADIENT, not a fill: a shadow is darkest where the thing casting it
+          touches the ground and dissolves as it runs out. Solid, it read as a
+          plank lying on the hillside — the shape was right and the edge was the
+          tell. Ends at 0 opacity, so nothing has to decide where to stop it. */}
+      <Animated.View style={[styles.shade, shadowStyle]}>
+        <LinearGradient
+          colors={[shadow, shadow, `${shadow}00`]}
+          locations={[0, 0.18, 1]}
+          start={cast.dir === 1 ? { x: 0, y: 0.5 } : { x: 1, y: 0.5 }}
+          end={cast.dir === 1 ? { x: 1, y: 0.5 } : { x: 0, y: 0.5 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
       <Stickman D={D} k={k} color={INK} />
       {activity === 'sip' ? (
         <Animated.View style={[styles.prop, cupStyle]}>
@@ -165,6 +229,9 @@ export default memo(function LaunchFigure({ scene }: Props) {
 
 const styles = StyleSheet.create({
   stage: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  // Soft rather than solid: a cast shadow on open ground has no edge, and at
+  // this size an opaque ellipse reads as a hole in the hillside.
+  shade: { position: 'absolute', left: 0, top: 0, opacity: 0.42, overflow: 'hidden' },
   // Props place themselves by transform from a 0,0 origin, exactly like the bones.
   prop: { position: 'absolute', left: 0, top: 0 },
 

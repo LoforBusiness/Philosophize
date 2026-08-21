@@ -51,6 +51,21 @@ interface Props {
   state: SealState;
   size?: number;
   progress?: number | null; // 0..1, draws the arc toward the next rank
+  /**
+   * WHICH METAL THE PIN IS STRUCK IN — 0 bronze, 1 silver, 2 gold.
+   *
+   * Twenty-five ranks in one material is twenty-five identical pins, which is
+   * the complaint this component's own header opens with and only half solved:
+   * the mark inside changed and nothing else did, so holding rank 24 still
+   * looked exactly like holding rank 2. A band of metal every eight ranks is the
+   * missing half — the frame does not escalate in ORNAMENT (that was tried and
+   * rejected as too busy at 54px), it escalates in MATERIAL, which costs no
+   * extra linework at any size.
+   *
+   * Omit it and the pin is struck in paper exactly as before, so every existing
+   * call site is unchanged.
+   */
+  band?: number | null;
 }
 
 const PERIM = hexPerimeter(HEX_R);
@@ -92,8 +107,8 @@ export default memo(function RankSeal({ glyph, state, size = 96, progress = null
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <Svg width={size} height={size} viewBox="0 0 100 100" style={{ position: 'absolute' }}>
         <Defs>
-          {grad(face, locked ? LOCKED_FACE : FACE)}
-          {grad(rim, locked ? [['0%', GHOST, 1], ['100%', GHOST, 1]] : RIM)}
+          {grad(face, locked ? LOCKED_FACE : metal ? metalFace(metal) : FACE)}
+          {grad(rim, locked ? [['0%', GHOST, 1], ['100%', GHOST, 1]] : metal ? metalRim(metal) : RIM)}
         </Defs>
 
         {/* The pin sits ON the page, so it casts. Earned only: a locked pin is
@@ -108,7 +123,16 @@ export default memo(function RankSeal({ glyph, state, size = 96, progress = null
 
         {/* The inner rule: a hairline stepped in from the edge, which is what
             gives the rim its width and the pin its turned edge. */}
-        <Path d={inner} fill="none" stroke={locked ? GHOST : FAINT} strokeWidth={1} opacity={locked ? 0.5 : 1} />
+        {/* On metal the inner rule takes the metal's own lit tone — `FAINT` is a
+            warm paper grey and vanishes on gold, which is the band that most
+            needs the rule to show. */}
+        <Path
+          d={inner}
+          fill="none"
+          stroke={locked ? GHOST : metal ? metal.lit : FAINT}
+          strokeWidth={1}
+          opacity={locked ? 0.5 : 1}
+        />
 
         {/* The edge itself — and the progress track when there is an arc. */}
         <Path

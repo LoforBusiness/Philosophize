@@ -23,6 +23,8 @@ function emit(rel, name) {
   return pathToFileURL(path.join(TMP, name)).href;
 }
 const D = await import(emit('constants/design.ts', 'design.mjs'));
+// tone.ts is zero-import by rule, so it loads in plain Node exactly like design.ts.
+const T = await import(emit('components/shared/tone.ts', 'tone.mjs'));
 
 let bad = 0;
 const ok = (cond, label, detail = '') => {
@@ -206,6 +208,197 @@ for (const [fg, bg, floor] of PAIRS) {
   for (const p of ['tint', 'ground', 'faint', 'soft']) {
     ok(new RegExp(`${p}\\s*=`).test(week), `StreakWeek takes \`${p}\` with a default`);
     ok(new RegExp(`${p}=\\{`).test(src), `the record panel passes \`${p}\``);
+  }
+}
+
+// ── 2c · CIELAB, because sRGB distance is the wrong instrument twice over ────
+//
+// The spread() above is Euclidean distance in sRGB. It is fine for the bright,
+// well-separated ERA set, and it is actively misleading for anything dark: every
+// colour that clears 4.5:1 on near-white paper crowds toward the origin, so a set
+// that is obviously tellable apart to an eye scores as "too close". The branch
+// scale was searched under exactly that error first and the search answered by
+// running to the most saturated corner available (#AE22C3 electric magenta) —
+// the metric, not the taste, produced that. Lab measures lightness and hue the
+// way an eye weighs them, so a MUTED set can be judged honestly.
+const lab = (h) => {
+  const [R, G, B] = rgb(h).map(lin);
+  const X = (0.4124 * R + 0.3576 * G + 0.1805 * B) / 0.95047;
+  const Y = 0.2126 * R + 0.7152 * G + 0.0722 * B;
+  const Z = (0.0193 * R + 0.1192 * G + 0.9505 * B) / 1.08883;
+  const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  const [fx, fy, fz] = [f(X), f(Y), f(Z)];
+  return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+};
+const dE = (a, b) => {
+  const [l1, a1, b1] = lab(a), [l2, a2, b2] = lab(b);
+  return Math.hypot(l1 - l2, a1 - a2, b1 - b2);
+};
+const Lstar = (h) => lab(h)[0];
+const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
+
+// ── 2d · the branch scale ────────────────────────────────────────────────────
+//
+// Six hues that mean "this is that branch" — the second place in the app a
+// colour carries information, on the same argument ERA won (see design.ts). Like
+// ERA it lives outside `C` and so misses every check above, which is precisely
+// the hole this section exists to close.
+{
+  const branches = Object.entries(D.BRANCH);
+  ok(branches.length === 6, 'six branches, one colour each', `${branches.length} values`);
+
+  // THE KEYS ARE THE REAL BRANCH SLUGS, checked against the directories rather
+  // than against a second hand-written list. A colour keyed on a slug that does
+  // not exist is a branch that silently renders in no colour at all, and nothing
+  // else in the build would say so.
+  const dirs = fs.readdirSync(path.join(REPO, 'data/branches'), { withFileTypes: true })
+    .filter((d) => d.isDirectory()).map((d) => d.name).sort();
+  ok(JSON.stringify(Object.keys(D.BRANCH).sort()) === JSON.stringify(dirs),
+    'every branch colour is keyed on a real branch', dirs.join(' '));
+
+  for (const [name, v] of branches) {
+    ok(/^#[0-9A-F]{6}$/i.test(v), `BRANCH.${name} is a plain hex`, v);
+    // 4.5:1 on BOTH grounds, because a branch may carry its own name as text and
+    // the mastery list sits on paper while the same colour fills a bar on a card.
+    for (const ground of ['paper', 'surface']) {
+      const r = ratio(lum(v), lum(D.C[ground]));
+      ok(r >= 4.5, `BRANCH.${name} on ${ground}`, `${r.toFixed(2)}:1, need 4.5`);
+    }
+  }
+
+  // ONE LIGHTNESS BAND. Six branches are peers. Left unconstrained the search
+  // bought its separation with lightness instead of hue and returned logic at
+  // L* 7.0 — ink, effectively — beside epistemology at L* 47.8, which is a
+  // hierarchy nobody declared. Hue does the separating; lightness stays put.
+  const Ls = branches.map(([, v]) => Lstar(v));
+  ok(Math.max(...Ls) - Math.min(...Ls) <= 20, 'the six sit in one lightness band',
+    `L* ${Math.min(...Ls).toFixed(1)}…${Math.max(...Ls).toFixed(1)}`);
+  for (const [name, v] of branches) {
+    const c = chroma(v);
+    ok(c >= 18 && c <= 38, `BRANCH.${name} is muted`, `C* ${c.toFixed(1)}, want 18…38`);
+  }
+
+  // Tellable from EACH OTHER — the strict floor, because these six are the one
+  // set that genuinely shares a view (the mastery list, the reading stack).
+  for (let i = 0; i < branches.length; i++) {
+    for (let j = i + 1; j < branches.length; j++) {
+      const [na, va] = branches[i], [nb, vb] = branches[j];
+      ok(dE(va, vb) >= 24, `BRANCH.${na} and BRANCH.${nb} are tellable apart`,
+        `ΔE ${dE(va, vb).toFixed(1)}, need 24`);
+    }
+  }
+
+  // AND HELD OFF THE SCALES THEY DO NOT SHARE A VIEW WITH, at a lower floor.
+  // An era chip lives on Thinkers and an answer state lives inside a lesson;
+  // neither is ever on screen beside a mastery bar. These are insurance for the
+  // day one of them is, not a claim that they are interchangeable.
+  for (const [name, v] of branches) {
+    for (const [en, ev] of Object.entries(D.ERA)) {
+      ok(dE(v, ev) >= 15, `BRANCH.${name} is not ERA.${en}`, `ΔE ${dE(v, ev).toFixed(1)}, need 15`);
+    }
+    for (const other of ['wrong', 'correct', 'HUE']) {
+      ok(dE(v, D.C[other]) >= 18, `BRANCH.${name} is not ${other}`,
+        `ΔE ${dE(v, D.C[other]).toFixed(1)}, need 18`);
+    }
+  }
+}
+
+// ── 2e · the metals ──────────────────────────────────────────────────────────
+//
+// Bronze / silver / gold, for tier. This file's own history is the reason they
+// are checked rather than trusted: BadgeMedal.tsx carried a comment saying metal
+// "would not be used", so when it started being used there was nothing anywhere
+// measuring it.
+{
+  const metals = Object.entries(T.METAL);
+  ok(metals.length === 3, 'three metals', metals.map(([n]) => n).join(' '));
+  ok(JSON.stringify(T.TIER_METAL) === JSON.stringify(['BRONZE', 'SILVER', 'GOLD']),
+    'tier reads bronze → silver → gold', T.TIER_METAL.join(' → '));
+
+  for (const [name, m] of metals) {
+    // A FACE THAT DOES NOT DARKEN IS NOT A FACE. The whole claim of this file is
+    // one light from the top left; if lit → base → shade is not monotone in
+    // lightness the gradient is decoration rather than shading.
+    ok(Lstar(m.lit) > Lstar(m.base) && Lstar(m.base) > Lstar(m.shade),
+      `${name} runs lit → base → shade`,
+      `L* ${Lstar(m.lit).toFixed(0)} → ${Lstar(m.base).toFixed(0)} → ${Lstar(m.shade).toFixed(0)}`);
+    ok(Lstar(m.shade) > Lstar(m.rim), `${name}'s rim is darker than its shade`,
+      `L* ${Lstar(m.shade).toFixed(0)} vs ${Lstar(m.rim).toFixed(0)}`);
+    // A real swing, not a 7% one — the lesson §19 records from the first tonal
+    // pass, which shipped #FEFEFC→#DFDBD1 and read as flat at every size.
+    ok(Lstar(m.lit) - Lstar(m.shade) >= 22, `${name} has a visible swing`,
+      `ΔL* ${(Lstar(m.lit) - Lstar(m.shade)).toFixed(1)}, need 22`);
+    // Whatever is printed ON the metal has to be readable on it.
+    ok(ratio(lum(m.on), lum(m.base)) >= 4.5, `${name}.on reads on ${name}.base`,
+      `${ratio(lum(m.on), lum(m.base)).toFixed(2)}:1, need 4.5`);
+  }
+
+  for (let i = 0; i < metals.length; i++) {
+    for (let j = i + 1; j < metals.length; j++) {
+      const [na, ma] = metals[i], [nb, mb] = metals[j];
+      ok(dE(ma.base, mb.base) >= 22, `${na} and ${nb} are tellable apart`,
+        `ΔE ${dE(ma.base, mb.base).toFixed(1)}, need 22`);
+    }
+  }
+
+  // A METAL THAT READS AS THE PAGE IS NOT A METAL, and this is the check that
+  // was missing when silver first shipped.
+  //
+  // The original worry was a collision with `GHOST` — the slate a LOCKED medal
+  // is drawn in — so silver was pushed light and warm until THAT gap opened, and
+  // it passed. It also looked like a blank sheet of paper with an outline round
+  // it, because at #DCD8CD it sat ΔE 12.6 from `PAPER`: the check was measuring a
+  // collision that was not happening and missing the one that was.
+  //
+  // `GHOST` was the wrong comparison anyway. It is the RIM of a locked medal and
+  // `LOCKED_FACE` is its face, and a locked medal differs from a struck one in
+  // four ways at once — flat face, ghost rim, no shadow, no flourish. So the
+  // face pair is checked at a modest floor and the PAPER distance is checked
+  // hard, which is the way round the evidence puts them.
+  const lockedStops = T.LOCKED_FACE.map(([, c]) => c);
+  for (const [name, m] of metals) {
+    ok(dE(m.base, T.PAPER) >= 20, `${name} does not read as the page`,
+      `ΔE ${dE(m.base, T.PAPER).toFixed(1)} from paper, need 20`);
+    // AND NEITHER DOES ITS HIGHLIGHT. Checking `base` alone was not enough: on a
+    // 66px badge the lit corner covers about a third of the face, so a highlight
+    // that is effectively paper makes the whole medal read as paper however
+    // correct the base is. Silver failed exactly this way twice — at ΔE 3.0.
+    // The floor is lower than the base's because a highlight is SUPPOSED to be
+    // pale; it just may not be the page.
+    ok(dE(m.lit, T.PAPER) >= 8, `${name}'s highlight is not the page`,
+      `ΔE ${dE(m.lit, T.PAPER).toFixed(1)} from paper, need 8`);
+    for (const stop of lockedStops) {
+      ok(dE(m.base, stop) >= 14, `${name} is not the locked face`,
+        `ΔE ${dE(m.base, stop).toFixed(1)} from ${stop}, need 14`);
+    }
+    ok(dE(m.base, T.GHOST) >= 12, `${name} is not the locked rim`,
+      `ΔE ${dE(m.base, T.GHOST).toFixed(1)}, need 12`);
+  }
+}
+
+// ── 2f · ramp(), which derives a struck face from any one colour ─────────────
+//
+// The branch hues are declared as one hex each and lit by this. Eighteen
+// hand-written values would drift, and the first thing to drift would be the
+// light direction — the one thing that must be identical everywhere.
+{
+  for (const [name, v] of Object.entries(D.BRANCH)) {
+    const r = T.ramp(v);
+    ok(Lstar(r.lit) > Lstar(r.base) && Lstar(r.base) > Lstar(r.shade),
+      `ramp(${name}) runs lit → base → shade`,
+      `L* ${Lstar(r.lit).toFixed(0)} → ${Lstar(r.base).toFixed(0)} → ${Lstar(r.shade).toFixed(0)}`);
+    ok(Lstar(r.shade) > Lstar(r.rim), `ramp(${name})'s rim is darkest`);
+    // The unfilled part of a progress bar in that branch's colour. Same floor
+    // and the same reason as HUE_SOFT above: a faint fill still has to be a fill
+    // you can see, or the bar communicates nothing at all.
+    for (const ground of ['paper', 'surface']) {
+      const rr = ratio(lum(r.track), lum(D.C[ground]));
+      ok(rr >= 1.2, `ramp(${name}).track is visible on ${ground}`, `${rr.toFixed(2)}:1, need 1.2`);
+    }
+    // And the filled part must still read against its own track, or a full bar
+    // and an empty one look alike.
+    ok(ratio(lum(r.base), lum(r.track)) >= 3.0, `ramp(${name}) fill reads on its own track`,
+      `${ratio(lum(r.base), lum(r.track)).toFixed(2)}:1, need 3.0`);
   }
 }
 

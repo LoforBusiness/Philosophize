@@ -8,8 +8,11 @@ import {
   SHAPE, LEN, GLYPH_SCALE, GLYPH_DY, INNER,
   ribbonPaths, laurelSprig, MEDAL_SCALE, MEDAL_DY,
 } from './badgeShapes';
+// FACE / RIM / FAINT / PAPER_SHADE / MID are gone from this list on purpose:
+// every one of them was the PAPER ramp, and the medal is struck in metal now.
 import {
-  INK, GHOST, PAPER, PAPER_SHADE, FAINT, MID, LIGHT, FACE, RIM, LOCKED_FACE, SHADOW, type Stops,
+  INK, GHOST, PAPER, LIGHT, LOCKED_FACE, SHADOW,
+  METAL, TIER_METAL, metalFace, metalRim, type Stops,
 } from './tone';
 import type { BadgeFamily, BadgeTier } from '@/data/badges';
 
@@ -63,12 +66,30 @@ import type { BadgeFamily, BadgeTier } from '@/data/badges';
 // than a tier-I one, which is backwards; scaling it per tier would make the grid
 // jump between rows.
 //
-// ── TONE, NOT COLOUR (§19) ──────────────────────────────────────────────────
+// ── TONE, AND NOW METAL TOO ─────────────────────────────────────────────────
 //
-// Everything comes from tone.ts: ink, grey, and the warm paper the app is
-// printed on, lit from the top left like every other struck thing. Bronze /
-// silver / gold is still not available and still would not be used — tier is in
-// the flourish, where it can be read rather than compared.
+// This comment used to end "bronze / silver / gold is still not available and
+// still would not be used — tier is in the flourish, where it can be read rather
+// than compared." The first half stopped being true when METAL entered tone.ts;
+// the second half is still right, which is why THE FLOURISH IS UNCHANGED —
+// ribbon at II, laurel at III, at exactly the geometry validate-badges measures.
+//
+// Tier is now said twice, in shape and in metal, and that is what struck sets
+// have always done. The flourish carries it for a reader looking at one badge;
+// the metal carries it for a reader scanning fifty, which is the case the
+// flourish alone was weakest at — a ribbon and a wreath are hard to tell apart
+// at the 28px a grid draws, and bronze from gold is not.
+//
+// THE MARK STAYS INK ON EVERY METAL, and that is deliberate rather than lazy.
+// `metal.on` exists for TEXT printed on a plate and is held to 4.5:1; a glyph is
+// a graphic and carries the 3:1 floor instead, which ink clears on all three
+// (4.16:1 on bronze, the tightest). Flipping the mark to white on bronze and ink
+// on the other two would make one badge in the grid read inverted, which looks
+// like a fault rather than like a metal.
+//
+// The ORNAMENT stays ink as well, for a different reason: the laurel and the
+// ribbon tabs sit on PAPER, outside the medal, so they are lit by the page and
+// not by the metal.
 //
 // LOCKED IS FLAT AND COOL. No gradient, no shadow, no flourish: the ornament
 // arrives when it is won, so a locked tier-III badge never carries more ink than
@@ -161,8 +182,8 @@ export default memo(function BadgeMedal({
       <Svg width={size} height={size} viewBox="0 0 100 100" style={{ position: 'absolute' }}>
         <Defs>
           <ClipPath id={clipId}><Path d={outer} /></ClipPath>
-          {grad(face, earned ? FACE : LOCKED_FACE)}
-          {grad(rim, earned ? RIM : [['0%', GHOST, 1], ['100%', GHOST, 1]])}
+          {grad(face, earned ? metalFace(metal) : LOCKED_FACE)}
+          {grad(rim, earned ? metalRim(metal) : [['0%', GHOST, 1], ['100%', GHOST, 1]])}
         </Defs>
 
         {/* THE LAUREL, behind everything — tier III.
@@ -208,7 +229,10 @@ export default memo(function BadgeMedal({
           {inner && (
             <APath
               d={inner}
-              stroke={earned ? FAINT : GHOST}
+              // The inner rule is the metal's own LIT tone once there is metal
+              // under it: `FAINT` is a warm paper grey and disappears completely
+              // on gold, which is where this rule is most needed (tier III).
+              stroke={earned ? metal.lit : GHOST}
               strokeWidth={1.2}
               fill="none"
               opacity={earned ? 1 : 0.5}
@@ -232,8 +256,11 @@ export default memo(function BadgeMedal({
             stacked ones. Tabs first, so the band overlaps its own folds. */}
         {ribbon && (
           <G>
-            <Path d={RIBBON.tabL} fill={PAPER_SHADE} stroke={ink} strokeWidth={1.3} strokeLinejoin="round" />
-            <Path d={RIBBON.tabR} fill={PAPER_SHADE} stroke={ink} strokeWidth={1.3} strokeLinejoin="round" />
+            {/* The tabs are the band's own metal in shadow — they are the folds
+                BEHIND it, so they take the shaded end of the same ramp rather
+                than a paper grey that would read as a different material. */}
+            <Path d={RIBBON.tabL} fill={metal.shade} stroke={ink} strokeWidth={1.3} strokeLinejoin="round" />
+            <Path d={RIBBON.tabR} fill={metal.shade} stroke={ink} strokeWidth={1.3} strokeLinejoin="round" />
             <Path d={RIBBON.band} fill={`url(#${face})`} stroke={ink} strokeWidth={1.6} strokeLinejoin="round" />
           </G>
         )}

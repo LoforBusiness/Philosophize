@@ -14,7 +14,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { STAGE_W, STAGE_H } from '@/components/lesson/cinematic/rig';
-import { LAUNCH_SCENES, SceneArt } from './launchScenes';
+import { LAUNCH_SCENES, SceneArt, SceneFore } from './launchScenes';
 import LaunchFigure from './LaunchFigure';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 
@@ -302,8 +302,13 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
         pointerEvents="none"
       >
         <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
+          {/* BACK · FIGURE · FRONT. The third layer is the whole of what stops
+              this reading as a man pasted onto a backdrop: everything used to be
+              painted before him, so he was by construction the nearest thing in
+              the world and there was no near plane at all. See `foreFor`. */}
           <SceneArt scene={scene} />
           <LaunchFigure scene={scene} />
+          <SceneFore scene={scene} />
         </View>
       </Animated.View>
 
@@ -354,7 +359,17 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
 
       {/* Masthead */}
       <Animated.View style={[styles.mast, { top: mastTop }, fadeInStyle]}>
-        <Text style={[styles.mastText, { color: CREAM }]}>D E E P L Y</Text>
+        {/* THE LETTERS ARE SPACED IN THE STRING, and that is how the old name
+            survived a rename. The app became Ashmere in build 21 and every other
+            surface followed — Home, the auth panel, the paywall, the update gate
+            — but a wordmark written one letter at a time matches no search for
+            the name itself, so the first screen of every launch kept the
+            previous brand and nothing reported it. check-launch asserted the old
+            string outright, so it was green throughout.
+
+            It now derives the expected wordmark from app.json's `expo.name`. If
+            this is renamed again, search for the LETTER-SPACED form as well. */}
+        <Text style={[styles.mastText, { color: CREAM }]}>A S H M E R E</Text>
       </Animated.View>
 
       {/* The cream stroke drawing itself + percentage, pinned to the sky — but

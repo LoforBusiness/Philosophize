@@ -1,9 +1,10 @@
 import * as React from 'react';
+import { StyleSheet } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { STAGE_W, STAGE_H } from '@/components/lesson/cinematic/rig';
 import {
   SCENE_KEYS, PALETTES, skyStops, discFor, planesFor, skyBandsFor, crestFor, crestY,
-  figureX, figureK,
+  figureX, figureK, castFor, foreFor,
   type SceneKey, type Crest,
 } from './launchArt';
 
@@ -39,6 +40,16 @@ export interface LaunchScene {
    * takes the app down.
    */
   crest: Crest;
+  /**
+   * The tone the figure's contact shadow is drawn in — the palette's darkest
+   * step, so it stays inside the scene's own hue family.
+   *
+   * Not a colour declared here: it is read from PALETTES, which is the single
+   * place any tone in this screen is chosen.
+   */
+  shadow: string;
+  /** Which way the shadow falls, and how long — derived from the scene's disc. */
+  cast: { dir: -1 | 1; len: number };
   /** Walk only: the span the figure loops across, off-screen at both ends. */
   walkSpan?: { from: number; to: number };
 }
@@ -54,6 +65,8 @@ export const LAUNCH_SCENES: LaunchScene[] = SCENE_KEYS.map((key) => {
     k: figureK(key),
     dir: 1 as const,
     crest,
+    shadow: PALETTES[key].steps[0],
+    cast: castFor(key),
     ...(key === 'walk' ? { walkSpan: { from: -60, to: 460 } } : {}),
   };
 });
@@ -85,6 +98,29 @@ export function SceneArt({ scene }: { scene: LaunchScene }) {
       {planes.map((pl, i) => (
         <Path key={i} d={pl.d} fill={pl.fill} />
       ))}
+    </Svg>
+  );
+}
+
+/**
+ * The half of the scene that is NEARER than the figure — see `foreFor`.
+ *
+ * A second <Svg> rather than a layer inside the first, because the figure has to
+ * be between them and the figure is a View. Inert like its sibling: nothing here
+ * animates, so the ~10fps an animated full-screen <Svg> costs is not paid twice.
+ */
+export function SceneFore({ scene }: { scene: LaunchScene }) {
+  const fore = foreFor(scene.key);
+  if (!fore.d) return null;
+  return (
+    <Svg
+      width={STAGE_W}
+      height={STAGE_H}
+      viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}
+      style={StyleSheet.absoluteFill}
+      pointerEvents="none"
+    >
+      <Path d={fore.d} fill={fore.fill} />
     </Svg>
   );
 }

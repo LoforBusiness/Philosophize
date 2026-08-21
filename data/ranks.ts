@@ -138,3 +138,23 @@ export function rankRequirement(targetIndex: number, rankIndex: number, totalXP:
     lessonsShort: Math.max(0, targetIndex - i),
   };
 }
+
+/**
+ * WHICH METAL A RANK IS STRUCK IN — 0 bronze, 1 silver, 2 gold.
+ *
+ * Twenty-five ranks is a long ladder and every rung of it looked identical: the
+ * mark inside the pin changed and nothing else did, so a Grand Philosopher's pin
+ * and a Seeker's were the same object with a different doodle in it. Three bands
+ * of metal give the ladder a shape you can see from the bottom of it — and, more
+ * to the point, give the twenty-four promotions in between something to be.
+ *
+ * The thresholds are the ladder's own thirds (ranks 1–8, 9–16, 17–25) rather
+ * than XP figures, so this stays correct if the XP curve is ever retuned. There
+ * is deliberately no fourth band: `TIER_METAL` has three entries and badges use
+ * the same three, so a rank band and a badge tier mean the same thing wherever
+ * they appear together.
+ */
+export function rankBand(index: number): number {
+  const i = Math.max(0, Math.min(RANKS.length - 1, Math.floor(index) || 0));
+  return i < 8 ? 0 : i < 16 ? 1 : 2;
+}

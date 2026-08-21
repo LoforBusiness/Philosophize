@@ -1,4 +1,4 @@
-import { STAGE_W, STAGE_H } from '@/components/lesson/cinematic/rig';
+import { STAGE_W, STAGE_H, FIG_H } from '@/components/lesson/cinematic/rig';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The launch screen's landscape, as pure data and path strings.
@@ -293,6 +293,44 @@ const DISCS: Record<SceneKey, { cx: number; cy: number; r: number }> = {
 export function discFor(key: SceneKey): { d: string; fill: string } {
   const { cx, cy, r } = DISCS[key];
   return { d: discPath(cx, cy, r), fill: PALETTES[key].disc };
+}
+
+/**
+ * WHERE THE FIGURE'S SHADOW FALLS, derived from the light that is already drawn.
+ *
+ * "He is just sitting on air" — he was, and a puddle under his feet only half
+ * answers it. Every one of these scenes hangs its whole composition on ONE
+ * celestial anchor, most of them low; a low sun does not put a dot under a
+ * standing figure, it throws a long one sideways. That long shadow is the single
+ * strongest cue that a silhouette is standing ON something, because it is the
+ * only mark in the picture that belongs to both the figure and the ground.
+ *
+ * Both numbers come from the disc rather than being tuned per scene, so the
+ * shadow can never disagree with the light:
+ *
+ * · DIRECTION is away from the disc. A shadow pointing at the sun is the kind
+ *   of mistake that reads as wrong before anyone can say why.
+ * · LENGTH is set by how low the disc sits. `elev` is 0 at the horizon and 1 at
+ *   the top of the sky. The true relation is a cotangent and it runs to
+ *   infinity at sunset, which is not a picture: at four figure-heights the
+ *   shadow stopped tapering, read as a hard plank laid on the hillside, and ran
+ *   off the plane it was supposed to be lying on and across the next one down.
+ *   A shadow has to stay on its own surface. So it tops out at 1.6 heights,
+ *   where the ellipse still visibly narrows to a point.
+ *
+ * `read` and `thinker` therefore get short shadows from their high suns, `walk`
+ * and `lookout` long ones from their setting suns, and `stargazer` gets a faint
+ * short one from a moon — without a table anywhere.
+ */
+export function castFor(key: SceneKey): { dir: -1 | 1; len: number } {
+  const d = DISCS[key];
+  const horizon = CRESTS[key].base;
+  // 0 at the horizon, 1 at the top of the frame.
+  const elev = Math.max(0, Math.min(1, (horizon - d.cy) / horizon));
+  return {
+    dir: figureX(key) >= d.cx ? 1 : -1,
+    len: 0.35 + 1.25 * Math.pow(1 - elev, 2.2),
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1250,6 +1288,60 @@ function starField(x0: number, y0: number, x1: number, y1: number, n: number, se
     ]) + ' ';
   }
   return d.trim();
+}
+
+/**
+ * THE NEAR GROUND COVER — the only thing in these scenes drawn IN FRONT of the
+ * figure, and the answer to "the background is far away".
+ *
+ * It was, and it could not have been anything else. Every plane in `planesFor`
+ * is painted before `LaunchFigure`, so the man was by construction the nearest
+ * object in the world: five bands of scenery receding behind him and nothing at
+ * all between him and the viewer. That is the definition of a backdrop rather
+ * than a place, and no amount of extra distance layers fixes it — the missing
+ * plane is the one in FRONT.
+ *
+ * So: a low band of cover sitting on the same crest he stands on, flanking him
+ * and overlapping his feet by a few units. Three things follow from that being
+ * the whole job:
+ *
+ * · IT FLANKS, NEVER COVERS. Two spans, one either side, with a gap across his
+ *   own lane — the point is to occlude his ANKLES, not his silhouette. The
+ *   figure has to stay readable; `check-launch`'s vanish test measures him.
+ * · IT IS THE DARKEST STEP. Nearest means darkest in this scheme (the note on
+ *   SCENE_PLANES), and it has to separate from the step-2 ground he stands on.
+ * · IT IS SHORT. Tall cover at the bottom of the frame would fight the quote,
+ *   which sits over exactly that band.
+ */
+export function foreFor(key: SceneKey): { d: string; fill: string } {
+  const c = CRESTS[key];
+  const fx = FIG_X[key];
+  const k = FIGURE_K[key];
+  // THE PARTING IS SIZED TO THE POSE, NOT TO A STANDING MAN.
+  //
+  // It was `13 * k`, which is about right for someone upright and badly wrong
+  // for everyone else: `stargazer` reclines on one elbow with his legs stretched
+  // out and `read` sits with a book held forward, so a tuft placed 13 units out
+  // came up THROUGH his shin. On screen that is not foreground, it is a glitch.
+  //
+  // Sampling all six loops frame by frame, the widest any figure reaches from
+  // his own x is 0.36 of his height (`read`; `stargazer` 0.34, the standing
+  // scenes 0.17–0.26). 0.45 clears the worst of them by a quarter and still puts
+  // the cover close enough to a walker to read as the same patch of ground.
+  const lane = FIG_H * k * 0.45;
+  const pts = ridgePoints('sine', c.base + 3, c.amp, c.off, c.per, 2, 0, 97, ART_H);
+  const yAt = sampler(pts);
+  // Tuft heights are a fraction of HIS height, so the cover reads as the same
+  // scale of thing in every scene rather than as six different plants.
+  const h = FIG_H * k;
+  const o = { hMin: h * 0.16, hMax: h * 0.34, gap: h * 0.5 };
+  const spans: Array<[number, number]> = [
+    [fx - 96, fx - lane],
+    [fx + lane, fx + 96],
+  ];
+  let d = '';
+  for (const [a, b] of spans) if (b > a) d += scrub(a, b, yAt, 71, o) + ' ';
+  return { d: d.trim(), fill: PALETTES[key].steps[0] };
 }
 
 export interface SkyBand { d: string; fill: string; opacity: number }

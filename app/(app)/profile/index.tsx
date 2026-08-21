@@ -11,8 +11,10 @@ import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
-import { C, TYPE, SPACE, type TypeKey } from '@/constants/design';
-import { GHOST } from '@/components/shared/tone';
+import { C, TYPE, SPACE, BRANCH, type TypeKey, type BranchKey } from '@/constants/design';
+import { GHOST, METAL, TIER_METAL, ramp } from '@/components/shared/tone';
+import { StruckBar, StruckTile, MetalPlate, MasteryRow, ShelfCount } from '@/components/profile/Struck';
+import RankSeal from '@/components/shared/RankSeal';
 import { ProfileArtFill, ProfileAvatar, useProfileArt } from '@/components/shared/ProfileArt';
 import { profileNameStyle, profileNameText } from '@/data/profileFonts';
 import StreakBook from '@/components/gamification/StreakBook';
@@ -21,7 +23,7 @@ import { signOut } from '@/lib/supabase/auth';
 import { useAuthSession } from '@/lib/supabase/useSession';
 import { ALL_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
-import { rankProgress } from '@/data/ranks';
+import { rankProgress, rankBand, RANKS } from '@/data/ranks';
 import { BADGES } from '@/data/badges';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -147,12 +149,24 @@ export default function ProfileScreen() {
   // said 395 XP still to go. The sheet was right.
   const totalXP = xp;
 
+  // `done` and `total` ride along now, because the percentage was hiding them.
+  // "68%" of an unknown number is not something a reader can act on; "23 of 34"
+  // is, and it is the same fact with the denominator left in.
   const mastery = ALL_BRANCHES.map((b) => {
     const total = b.paths.reduce((acc, p) => acc + p.lessons.length, 0);
-    const done = lessonsByBranch[b.slug] ?? 0;
+    const done = Math.min(total, lessonsByBranch[b.slug] ?? 0);
     const pct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
-    return { slug: b.slug, name: SHORT[b.slug] ?? b.name.toUpperCase(), icon: BICON[b.slug] ?? 'frame', pct };
+    return {
+      slug: b.slug,
+      name: SHORT[b.slug] ?? b.name.toUpperCase(),
+      icon: BICON[b.slug] ?? 'frame',
+      hue: BRANCH[b.slug as BranchKey] ?? C.ink,
+      done,
+      total,
+      pct,
+    };
   }).sort((a, b) => b.pct - a.pct);
+  const branchesComplete = mastery.filter((m) => m.total > 0 && m.done >= m.total).length;
 
   const topBranch = (mastery[0]?.pct ?? 0) > 0 ? mastery[0].slug : null;
   const descriptor = topBranch ? TITLE[topBranch] ?? 'SEEKER' : 'SEEKER';
@@ -212,7 +226,11 @@ export default function ProfileScreen() {
   }));
   const branchParts = branchInterest
     .filter((b) => b.interactions > 0)
-    .map((b) => ({ label: SHORT[b.slug] ?? b.name, value: b.interactions }));
+    .map((b) => ({
+      label: SHORT[b.slug] ?? b.name,
+      value: b.interactions,
+      color: BRANCH[b.slug as BranchKey],
+    }));
   // A fortnight is long enough to show a habit and short enough that one good
   // Sunday does not flatten every other day into the baseline.
   const xpDays = dailyXP(xpEvents, 14, Date.now());
@@ -265,7 +283,7 @@ export default function ProfileScreen() {
     .map((b) => ({ ...b, earned: earnedBadges.includes(b.id) }));
 
   function handleSignOut() {
-    Alert.alert('Account', 'Sign out of Deeply?', [
+    Alert.alert('Account', 'Sign out of Ashmere?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Sign Out',
@@ -370,7 +388,8 @@ export default function ProfileScreen() {
             <Text style={styles.insightLabel}>THINKERS YOU KEEP RETURNING TO</Text>
             {topPhilosopher ? (
               <View style={{ marginTop: SPACE[2] }}>
-                <ShareBars rows={thinkerRows} c={chartInk} />
+                {/* Gold on the leader only — a placing rather than a longer bar. */}
+                <ShareBars rows={thinkerRows} c={chartInk} accent={METAL.GOLD.base} />
               </View>
             ) : (
               <>
@@ -407,8 +426,15 @@ export default function ProfileScreen() {
             {/* `glanceCol` carries the flex that would otherwise land on Card's
                 FACE, not on the box that has to share the row — the same fix
                 settings.tsx's `planCol` made for its two plan panels. */}
+            {/* EMBOSSED, not flat. These two are the headline numbers on the
+                page and they were drawn on the same inert white face as every
+                other box, so the biggest facts arrived with the least weight.
+                A lit corner, a shaded one and a shadow is the badge treatment
+                applied to a rectangle — which is the point, since a profile is a
+                case of struck things. The top edge carries the metal of whatever
+                the tile is about. */}
             <View style={styles.glanceCol}>
-              <Card>
+              <StruckTile accent={METAL.BRONZE.base} style={styles.glanceTile}>
                 <View style={styles.glanceTop}>
                   <SketchIcon name="book" size={15} color={C.ink} />
                   <Text style={styles.glanceLabel}>LESSONS DONE</Text>
@@ -422,10 +448,10 @@ export default function ProfileScreen() {
                     ? daysActive + ' active ' + (daysActive === 1 ? 'day' : 'days') + ' in a fortnight'
                     : 'Quiet fortnight'}
                 </Text>
-              </Card>
+              </StruckTile>
             </View>
             <View style={styles.glanceCol}>
-              <Card>
+              <StruckTile accent={METAL.GOLD.base} style={styles.glanceTile}>
                 <View style={styles.glanceTop}>
                   <SketchIcon name="star" size={15} color={C.ink} />
                   <Text style={styles.glanceLabel}>TOTAL XP</Text>
@@ -437,7 +463,7 @@ export default function ProfileScreen() {
                 <View style={{ marginTop: SPACE[1] }}>
                   <DayBars values={xpDays} c={chartInk} />
                 </View>
-              </Card>
+              </StruckTile>
             </View>
           </View>
 
@@ -462,26 +488,77 @@ export default function ProfileScreen() {
 
           <SectionLabel>PROGRESS TO NEXT RANK</SectionLabel>
           <Card>
-            <View style={styles.rankBoxTop}>
-              <Text style={styles.rankName}>{cur.name}</Text>
-              <Text style={styles.rankXp}>
-                {/* XP EARNED INSIDE THIS BAND, not total against the next threshold.
-                    The old pair could read "10,605 / 9,300 XP" once a promotion was
-                    pending — a fraction bigger than its own denominator. */}
-                {next
-                  ? `${inBand.toLocaleString()} / ${bandSize.toLocaleString()} XP`
-                  : `${totalXP.toLocaleString()} XP`}
-              </Text>
+            {/* THE LADDER, WITH BOTH ENDS OF THE RUNG ON IT.
+                This was a name, a fraction and an ink bar — which says how far
+                along you are and nothing whatever about what you are climbing
+                toward. Now the rank you hold is struck in its own band's metal on
+                the left, the one you are climbing to sits LOCKED on the right,
+                and the bar runs between them. That is the same three facts
+                arranged as a journey instead of as a readout, and the locked pin
+                is doing the work: it is the first time this screen has shown a
+                reader the thing they have not got yet. */}
+            {/* THE NAMES ARE IN THE MIDDLE, NOT UNDER THE PINS, and that is a
+                measurement rather than a preference. Eleven of the twenty-five
+                rank names do not fit a pin-width column at any size this screen
+                is allowed to use — the type scale stops at 11px (`micro`) and
+                check-ui enforces it — so captioned pins truncated half the ladder
+                to "METAPH…", and wrapping them broke "EPISTEMOL / OGIST" across
+                two lines mid-word. The middle column is the full width of the
+                card and every name fits it. */}
+            <View style={styles.rankLadder}>
+              <View style={styles.rankPin}>
+                <RankSeal glyph={cur.glyph} state="current" size={56} band={rankBand(rankIndex)} />
+              </View>
+
+              <View style={styles.rankMid}>
+                <Text style={styles.rankName} numberOfLines={1}>{cur.name}</Text>
+                <Text style={styles.rankXp}>
+                  {/* XP EARNED INSIDE THIS BAND, not total against the next threshold.
+                      The old pair could read "10,605 / 9,300 XP" once a promotion was
+                      pending — a fraction bigger than its own denominator. */}
+                  {next
+                    ? `${inBand.toLocaleString()} / ${bandSize.toLocaleString()} XP`
+                    : `${totalXP.toLocaleString()} XP`}
+                </Text>
+                <StruckBar
+                  pct={rankPct}
+                  fill={ramp(METAL[TIER_METAL[rankBand(rankIndex)]].base)}
+                  height={12}
+                  style={{ marginTop: SPACE[1] }}
+                />
+                <Text style={styles.rankUntil}>
+                  {pending
+                    ? `FINISH A LESSON TO REACH ${(next?.name ?? '').toUpperCase()}`
+                    : next
+                      // NOT "…TO EPISTEMOLOGIST". The climb chart directly below
+                      // is captioned "Metaphysician → Epistemologist" and then
+                      // "395 XP TO EPISTEMOLOGIST", so naming it here printed the
+                      // identical sentence twice inside one card.
+                      ? `${toNext.toLocaleString()} XP TO GO`
+                      : 'HIGHEST RANK ACHIEVED'}
+                </Text>
+              </View>
+
+              {next ? (
+                <View style={styles.rankPin}>
+                  {/* Deliberately `locked` even when the promotion is PENDING. A
+                      pending rank has been earned in XP but not conferred — the
+                      ceremony happens on the reward screen (§7) — so lighting it
+                      here would spend the one moment that promotion has. The
+                      "XP TO <NAME>" line beside it is what names this pin, which
+                      is why it needs no caption of its own. */}
+                  <RankSeal glyph={next.glyph} state="locked" size={44} />
+                </View>
+              ) : (
+                <View style={styles.rankPin}>
+                  <MetalPlate metal={METAL.GOLD} label="TOP" />
+                </View>
+              )}
             </View>
-            <View style={styles.bigTrack}>
-              <View style={[styles.bigFill, { width: `${Math.round(rankPct * 100)}%` }]} />
-            </View>
-            <Text style={styles.rankUntil}>
-              {pending
-                ? `FINISH A LESSON TO REACH ${(next?.name ?? '').toUpperCase()}`
-                : next
-                  ? `${toNext.toLocaleString()} XP UNTIL ${next.name.toUpperCase()}`
-                  : 'HIGHEST RANK ACHIEVED'}
+
+            {/* How far up the ladder of 25, which the band alone cannot say. */}
+            <Text style={styles.rankRung}>
+              RANK {cur.id} OF {RANKS.length}
             </Text>
 
             {/* THE SAME CLIMB, DRAWN. The bar above says how far along the band
@@ -516,16 +593,29 @@ export default function ProfileScreen() {
           </Card>
 
           <SectionLabel>BRANCH MASTERY</SectionLabel>
+          {/* SIX ROWS THAT ARE NO LONGER THE SAME ROW SIX TIMES.
+              Each carries its branch's own hue — on the icon chip, on the fill,
+              and at a tenth strength on the empty part of the track — so a row is
+              identifiable before its name is read. The percentage moved aside for
+              the count it was hiding, and a branch that is finished says so on a
+              gold plate rather than by having a bar that is full to within a few
+              pixels of one that is not. */}
+          {branchesComplete > 0 ? (
+            <Text style={styles.masteryLead}>
+              {branchesComplete === 1 ? 'One branch finished' : `${branchesComplete} branches finished`}
+              {branchesComplete < mastery.length ? ` · ${mastery.length - branchesComplete} to go` : ' · all six'}
+            </Text>
+          ) : null}
           <View style={styles.masteryBox}>
             {mastery.map((m) => (
-              <View key={m.slug} style={styles.masteryRow}>
-                <SketchIcon name={m.icon} size={18} color={C.ink} />
-                <Text style={styles.masteryName}>{m.name}</Text>
-                <View style={styles.masteryTrack}>
-                  <View style={[styles.masteryFill, { width: `${m.pct}%` }]} />
-                </View>
-                <Text style={styles.masteryPct}>{m.pct}%</Text>
-              </View>
+              <MasteryRow
+                key={m.slug}
+                name={m.name}
+                hue={m.hue}
+                done={m.done}
+                total={m.total}
+                icon={<SketchIcon name={m.icon} size={17} color={ramp(m.hue).shade} />}
+              />
             ))}
           </View>
 
@@ -551,6 +641,10 @@ export default function ProfileScreen() {
           </Card>
 
           <SectionLabel>BADGES EARNED</SectionLabel>
+          {/* THE ONE QUESTION A CASE OF FIFTY RAISES. The grid showed eight
+              medals and no total, so "how much of this is mine" — the only thing
+              a trophy shelf is for — was the fact not on the page. */}
+          <ShelfCount earned={earnedBadges.length} total={BADGES.length} />
           <Pressable style={styles.badgeGrid} onPress={() => openRanksBadges('badges')}>
             {badges.map((b) => (
               <View key={b.id} style={styles.badge}>
@@ -666,6 +760,10 @@ const styles = StyleSheet.create({
 
   glanceRow: { flexDirection: 'row', gap: SPACE[2] },
   glanceCol: { flex: 1 },
+  // The tile relays the column's growth inwards, the same job Card's `flexGrow`
+  // does — without it the shorter tile floats at content height inside a
+  // stretched column and the row reads as two boxes of different sizes.
+  glanceTile: { flexGrow: 1 },
   // LEFT-ALIGNED, not centred. A centred number over a centred caption is a
   // poster; these are two readings side by side, and readings line up on an edge
   // so the eye can compare them without hunting for each one's middle.
@@ -713,35 +811,39 @@ const styles = StyleSheet.create({
   chipsRow: { flex: 1, justifyContent: 'center' },
 
   rankChartWrap: { marginTop: SPACE[3] },
-  rankBoxTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: SPACE[2] },
-  rankName: { ...role('title'), color: C.ink },
+  // The rung, drawn: the pin you hold, the climb, the pin you are climbing to.
+  rankLadder: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2] },
+  rankPin: { alignItems: 'center' },
+  rankMid: { flex: 1 },
+  rankName: { ...role('title'), color: C.ink, marginBottom: SPACE[0] },
+  rankRung: {
+    ...role('micro'), color: C.inkSoft, letterSpacing: 2,
+    textAlign: 'center', marginTop: SPACE[3],
+  },
   rankXp: { ...role('label'), fontFamily: 'Inter_400Regular', color: C.inkSoft },
-  // THE TRACK IS `hairline`, NOT `HUE_SOFT`, AND THIS WAS MEASURED.
+  // THE TRACKS THAT USED TO LIVE HERE ARE NOW `StruckBar`, and the measurement
+  // that justified them survives the move.
   //
-  // `HUE_SOFT` is the token whose comment says "progress tracks", which is why
-  // the conversion reached for it — but the value it carried (#F0F7F6) put this
-  // track at ΔL* 3.30 from the white Card face under it, and the six Branch
-  // Mastery bars below at ΔL* 1.50 from `paper`. A progress bar communicates
-  // exactly one thing, how much is LEFT, and at 1.04:1 there was no remainder
-  // to see: six full-looking bars, whatever the reader had actually finished.
+  // The lesson was: `HUE_SOFT` is the token whose comment says "progress tracks",
+  // so the conversion reached for it, and the value it carried (#F0F7F6) put this
+  // track at ΔL* 3.30 from the white Card face under it and the six Branch
+  // Mastery bars at ΔL* 1.50 from `paper`. A progress bar communicates exactly
+  // one thing — how much is LEFT — and at 1.04:1 there was no remainder to see:
+  // six full-looking bars, whatever the reader had actually finished.
   //
-  // `hairline` is what these tracks were before the conversion in all but name
-  // — #E7E3DA against the original #E6E4DC is ΔL* 0.22 — and it restores the
-  // measurements the screen shipped with: ΔL* 7.88 on paper, 9.68 on the card.
-  // Naming beat measuring once here; it does not get to twice, so `HUE_SOFT`
-  // now carries contrast pairs of its own in scripts/check-ui.mjs.
-  bigTrack: { height: 8, borderRadius: 4, backgroundColor: C.hairline, overflow: 'hidden' },
-  bigFill: { height: 8, borderRadius: 4, backgroundColor: C.ink },
-  rankUntil: { ...role('micro'), color: C.inkSoft, letterSpacing: 1, textAlign: 'right', marginTop: SPACE[2] },
+  // The track is now the branch's own hue at a tenth strength (`ramp().track`),
+  // which is a different colour per row and so could not be checked by eye at
+  // all. It is checked by arithmetic instead: check-ui asserts every ramp's
+  // track clears 1.2:1 on both paper and a card face, AND that the fill clears
+  // 3:1 against its own track. Naming beat measuring once here; it does not get
+  // to twice.
+  rankUntil: { ...role('micro'), color: C.inkSoft, letterSpacing: 1, textAlign: 'right', marginTop: SPACE[1] },
 
-  masteryBox: { gap: SPACE[3] },
-  masteryRow: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2] },
-  masteryName: { ...role('micro'), fontFamily: 'Inter_700Bold', color: C.ink, letterSpacing: 0.5, width: 96 },
-  // `hairline`, for the reason spelled out on `bigTrack` above — these are the
-  // six bars the measurement was taken on.
-  masteryTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: C.hairline, overflow: 'hidden' },
-  masteryFill: { height: 6, borderRadius: 3, backgroundColor: C.ink },
-  masteryPct: { ...role('label'), color: C.inkSoft, width: 38, textAlign: 'right' },
+  masteryBox: { gap: SPACE[2] },
+  masteryLead: {
+    ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic',
+    color: C.inkSoft, marginBottom: SPACE[2],
+  },
 
   quotesCard: { flexDirection: 'row', alignItems: 'center', gap: SPACE[3] },
   quotesIcon: {

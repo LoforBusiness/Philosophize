@@ -76,6 +76,72 @@ export function handAt(s: Stance, p: Placed, which: 1 | -1 = 1): P2 {
 }
 
 /** Stage position of the head's centre — what a second figure should look AT. */
+// ── CARRYING SOMETHING, AND WHY EVERY SCENE GOT IT WRONG ────────────────────
+//
+// A reader described the carry in The Puzzle of Equality exactly: "his arms arent
+// out, the object is just floating and it just disapears all the suddon." All
+// three are the same root cause, and this file's own header named it before any
+// scene was written — a scene has no way to ask where the hands ARE, so it draws
+// the object at a position that looked right once and fades it in and out.
+//
+// political-8 is the worked example. The crate sat at a FIXED `top: 444` with
+// `translateX: figureX + dir * 30` and `opacity: 0 or 1`. So:
+//   · it did not move when he breathed, walked or changed pose — floating;
+//   · his hands kept swinging through the walk cycle — arms not out;
+//   · it appeared from nothing and vanished again — disappearing.
+//
+// These two calls fix all three, and they are meant to be used together:
+//
+//   gripAt(s, p)          WHERE the load is — the point between the two wrists,
+//                         in stage units, recomputed every frame from the pose
+//                         the figure is actually in.
+//   carryHands(s, amount) WHAT the arms do — both hands pinned forward-low under
+//                         the load, blended in by `amount`, leaving the legs to
+//                         walk normally underneath.
+//
+// And the third part is not a function, it is the rule: a held object's position
+// is `lerp(where it rests, gripAt(...), held)`. At held = 0 it is on the pile; at
+// held = 1 it is in the hands; in between it is being picked up or set down. It
+// is never an opacity. See group P of the rule book.
+
+/**
+ * Where a two-handed load sits: the midpoint of the wrists, in stage units.
+ *
+ * Solved from the live Stance, so it tracks the breath, the walk cycle and every
+ * pose change for free — which is the entire difference between a carried object
+ * and an object drawn next to somebody.
+ */
+export function gripAt(s: Stance, p: Placed): P2 {
+  'worklet';
+  const j = solve({ x: p.x, groundY: p.groundY, k: p.k, dir: p.dir, ...s });
+  return { x: (j.wrL.x + j.wrR.x) / 2, y: (j.wrL.y + j.wrR.y) / 2 };
+}
+
+/**
+ * Both hands under a load, blended in by `amount` (0 = the pose as given, 1 = a
+ * full two-handed carry). Only the FISTS are touched, so a walk cycle keeps its
+ * legs, its bob and its lean while the arms stop swinging — which is what a person
+ * carrying a box actually looks like from the knees down.
+ *
+ * The targets are rig emote 42's, and they are not arbitrary: 18 and 26 forward at
+ * y +2 is far enough out that the forearm has paper behind it rather than torso
+ * (constraint 1 above), and low enough that nothing goes near the head.
+ */
+export function carryHands(s: Stance, amount: number): Stance {
+  'worklet';
+  const a = clamp01(amount);
+  if (a <= 0.001) return s;
+  return {
+    ...s,
+    fistL: { x: lerp(s.fistL.x, 18, a), y: lerp(s.fistL.y, 2, a) },
+    fistR: { x: lerp(s.fistR.x, 26, a), y: lerp(s.fistR.y, 2, a) },
+    // A load pulls the shoulders down and the body back a little. Small — the
+    // point is that carrying is not free, not that he is struggling.
+    bob: s.bob - a * 1.6,
+    tilt: s.tilt + a * 0.03,
+  };
+}
+
 export function headStage(s: Stance, p: Placed): P2 {
   'worklet';
   const j = solve({ x: p.x, groundY: p.groundY, k: p.k, dir: p.dir, ...s });

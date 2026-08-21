@@ -152,9 +152,16 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
       <Animated.View style={[S.limbBone, a.farmL]} />
       <Animated.View style={[S.joint, a.shLd]} />
       <Animated.View style={[S.joint, a.kneeL]} />
-      <Animated.View style={[S.joint, a.ankL]} />
+      {/* The ankles are findable for the same reason the fists are: "resting on
+          the floor" is measured against where his feet actually are, not against
+          the bottom of his bounding box — a joint is a disc CENTRED on the ground,
+          so the box hangs half a joint below it. */}
+      <Animated.View testID="ankle-l" style={[S.joint, a.ankL]} />
       <Animated.View style={[S.joint, a.elL]} />
-      <Animated.View style={[S.fist, a.wrL]} />
+      {/* testID for the same reason the root has one: group P's check has to
+          find the hands before it can ask whether the thing drawn in them is
+          in them. React Native Web renders it as data-testid. */}
+      <Animated.View testID="fist-l" style={[S.fist, a.wrL]} />
 
       <Animated.View style={[S.torsoBone, a.torso]} />
       <Animated.View style={[S.pelvis, a.pel]} />
@@ -163,7 +170,7 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
       <Animated.View style={[S.limbBone, a.thighR]} />
       <Animated.View style={[S.limbBone, a.shinR]} />
       <Animated.View style={[S.joint, a.kneeR]} />
-      <Animated.View style={[S.joint, a.ankR]} />
+      <Animated.View testID="ankle-r" style={[S.joint, a.ankR]} />
 
       <Animated.View style={[S.head, a.head]} />
 
@@ -171,7 +178,7 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
       <Animated.View style={[S.limbBone, a.farmR]} />
       <Animated.View style={[S.joint, a.shRd]} />
       <Animated.View style={[S.joint, a.elR]} />
-      <Animated.View style={[S.fist, a.wrR]} />
+      <Animated.View testID="fist-r" style={[S.fist, a.wrR]} />
     </Animated.View>
   );
 }

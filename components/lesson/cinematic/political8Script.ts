@@ -35,13 +35,13 @@ export const BEATS: Political8Beat[] = [
     dur: 4.4,
   },
   {
-    p: 42, x: 100, carry: 1, marks: 1,
+    p: 42, x: 100, carry: 1, pile: 1, marks: 1,
     text: 'Luckily somebody left three crates by the gate. Three crates, three people. One each — you cannot get fairer than that. Can you?',
     cite: 'Three spare crates',
     dur: 4.2,
   },
   {
-    p: 43, x: 170, mode: 1, marks: 1,
+    p: 43, x: 170, pile: 1, mode: 1, marks: 1,
     text: 'One crate each. Same size, same share, nobody favoured, nobody skipped. And the shortest one is still looking at wood.',
     cite: 'Perfectly equal shares',
     dur: 4.6,

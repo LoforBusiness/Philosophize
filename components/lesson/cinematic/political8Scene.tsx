@@ -9,6 +9,9 @@ import {
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
+// Where the hands are, and what they do under a load. Everything about the crate
+// he fetches comes from these two — see the header of interact.ts.
+import { carryHands, gripAt } from './interact';
 import { BEATS } from './political8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
 } from './cinematicKit';
@@ -96,7 +99,28 @@ const N0 = MODE.map((m) => CNT0[m]);
 const N1 = MODE.map((m) => CNT1[m]);
 const N2 = MODE.map((m) => CNT2[m]);
 const PILEV = BEATS.map((b) => b.pile ?? 0);
-const CARRYV = BEATS.map((b) => b.carry ?? 0);
+// ── THE CRATE HE FETCHES ────────────────────────────────────────────────────
+//
+// `carry` used to be an OPACITY: 1 on the beat he holds it, 0 either side, so the
+// crate appeared out of nothing in his arms and vanished again a beat later. A
+// reader put it exactly — "the object is just floating and it just disapears all
+// the suddon".
+//
+// It is a POSITION now. `HELD` is how much of the crate's weight is in his hands
+// at the END of each beat, and the crate is drawn at lerp(where it rests, his
+// grip, held). At 0 it is on the pile or on the ground; at 1 it is in his hands
+// and tracks them frame by frame; in between it is being lifted or set down.
+// Nothing fades. (Group P.)
+const HELD = BEATS.map((b) => b.carry ?? 0);
+// Its two resting places, both centres. It starts as the TOP crate of the spare
+// stack — the pile draws only the two beneath it — and ends on the ground at
+// arm's length in front of him at the fence.
+// BOTTOM EDGES, not centres — `styles.carried` is anchored so the point given is
+// where the crate's underside sits, which is what makes "resting on his hands"
+// and "resting on the ground" the same statement. Written as centres first, and
+// the crate duly came to rest eleven units above the floor.
+const PILE_PT = { x: PILE_L + BOX_W / 2, y: SLOT_TOPS[2] + BOX_H };
+const DROP_PT = { x: 206, y: GROUND };
 const MARKV = BEATS.map((b) => b.marks ?? 0);
 const EYEV = BEATS.map((b) => b.eyeline ?? 0);
 
@@ -121,18 +145,32 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
     // The canonical travel body: walks the gap when the beat moves him, blends
     // gesture-to-gesture when it doesn't. WALK is passed EXPLICITLY — a Gait left
     // to a default parameter is not captured into the worklet runtime.
-    const s = keepHeld(heldS, travelStance(
+    const s0 = keepHeld(heldS, travelStance(
       X[p], X[n],
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
     const fx = lerp(X[p], X[n], tr);
 
+    // A LOAD IS PICKED UP AND SET DOWN AT THE DESTINATION, NOT WHILE WALKING.
+    // Packing the change into the last quarter of the move is what makes the trip
+    // read as "walk over, lift, walk back, put down" rather than as an object
+    // sliding into his hands somewhere along the way.
+    const held = lerp(HELD[p], HELD[n], ease01(clamp01((tr - 0.72) / 0.28)));
+    // The arms stop swinging and come out under it — the legs, bob and lean are
+    // left alone, so he still walks. This is the half a reader named first: "his
+    // arms arent out".
+    const s = carryHands(s0, held);
+    const dir = facing(DIR[p], DIR[n], bt.value);
+    const grip = gripAt(s, { x: fx, groundY: GROUND, k: K_FIG, dir });
+    // It comes OFF the pile on the fetch beat and goes TO the ground from then on.
+    const rest = n <= 2 ? PILE_PT : DROP_PT;
+
     return {
-      fig: pose(s, fx, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      // The crate in his arms rides just in front of whichever way he faces.
-      carry: lerp(CARRYV[p], CARRYV[n], tr),
-      carryX: fx + DIR[n] * 30,
+      fig: pose(s, fx, GROUND, K_FIG, dir, 1),
+      // Between its resting place and his hands. Never an opacity.
+      crateX: lerp(rest.x, grip.x, held),
+      crateY: lerp(rest.y, grip.y, held),
       pile: lerp(PILEV[p], PILEV[n], tr),
       marks: lerp(MARKV[p], MARKV[n], tr) * (modeFade ? grow : 1),
       eye: lerp(EYEV[p], EYEV[n], tr),
@@ -157,8 +195,10 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
   const pileStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pile }));
   const eyeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.eye }));
   const carryStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.carry,
-    transform: [{ translateX: SCENE.value.carryX }],
+    transform: [
+      { translateX: SCENE.value.crateX },
+      { translateY: SCENE.value.crateY },
+    ],
   }));
 
   const answered = picked !== null;
@@ -246,7 +286,10 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
 
       {/* ── the spare crates, far stage left of every walk ──────────────────── */}
       <Animated.View style={[styles.layer, pileStyle]} pointerEvents="none">
-        {SLOT_TOPS.map((py) => (
+        {/* TWO, not three: the top one is the crate he carries, which is drawn
+            separately because it moves. Three here would leave a ghost behind on
+            the stack the moment he lifted it. */}
+        {SLOT_TOPS.slice(0, 2).map((py) => (
           <View key={py} style={[styles.crate, { left: PILE_L, top: py }]}>
             <View style={styles.brace} />
           </View>
@@ -291,9 +334,11 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
 
-      {/* the crate in his arms, drawn last so it sits in front of the body */}
+      {/* The crate he fetches — drawn last so it sits in front of the body while
+          he carries it. It is always on stage: on the pile, in his hands, or on
+          the ground where he put it. */}
       <Animated.View style={[styles.carried, carryStyle]} pointerEvents="none">
-        <View style={styles.braceSm} />
+        <View style={styles.brace} />
       </Animated.View>
     </Animated.View>
   );
@@ -343,11 +388,16 @@ const styles = StyleSheet.create({
   },
   brace: { position: 'absolute', left: 5, top: 8, width: 26, height: 1.5, backgroundColor: SOFT },
   // Centred on x = 0 so a plain translateX puts it at his hands.
+  // THE SAME OBJECT AS THE ONES ON THE PILE, and it has to be: it IS one of them.
+  // It was 34x20 against their 40x22, so the crate that arrived at the fence was
+  // not the crate that left the stack.
+  //
+  // Anchored so that (translateX, translateY) puts its BOTTOM EDGE on the point
+  // given — a box rests ON the hands, it is not skewered by them.
   carried: {
-    position: 'absolute', left: -17, top: 444, width: 34, height: 20,
+    position: 'absolute', left: -BOX_W / 2, top: -BOX_H, width: BOX_W, height: BOX_H,
     borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
   },
-  braceSm: { position: 'absolute', left: 5, top: 7, width: 20, height: 1.5, backgroundColor: SOFT },
 
   // ── the three onlookers ─────────────────────────────────────────────────────
   folk: { position: 'absolute', width: 60 },
