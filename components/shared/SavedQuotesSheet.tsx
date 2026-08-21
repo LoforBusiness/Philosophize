@@ -43,6 +43,21 @@ const InkFaint = '#D9D7CE';
 // thinkers" — a set with a shape, and a visible way to finish it.
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * A tile is a fifth of the sheet minus its gaps — 66px on a 390pt phone, 63
+ * inside the rule. At 8px Inter Bold that is room for eight characters, so four
+ * of the five eras keep their whole name. Truncating to four was tried and
+ * printed MODE and CONT, which read as an English word and an abbreviation of
+ * nothing; only CONTEMPORARY actually needs shortening.
+ */
+const SHORT: Record<EraKey, string> = {
+  ANCIENT: 'ANCIENT',
+  MEDIEVAL: 'MEDIEVAL',
+  MODERN: 'MODERN',
+  CONTEMPORARY: 'CONTEMP',
+  EASTERN: 'EASTERN',
+};
+
 export default function SavedQuotesSheet() {
   const open = useUIStore((s) => s.savedQuotesOpen);
   const close = useUIStore((s) => s.closeSavedQuotes);
@@ -266,9 +281,7 @@ function EraTile({
       <View style={[styles.tileBar, { backgroundColor: has ? P.spine.base : GHOST }]} />
       <Text style={[styles.tileN, { color: has ? P.label : GHOST }]}>{n}</Text>
       <Text style={[styles.tileLabel, { color: has ? P.label : GHOST }]} numberOfLines={1}>
-        {/* Four letters is all that fits at a fifth of the width, and the first
-            four are unique across all five groups. */}
-        {era.slice(0, 4)}
+        {SHORT[era]}
       </Text>
     </View>
   );
