@@ -1148,6 +1148,64 @@ Two findings worth not rediscovering:
   A laurel is a continuous curved mass, so being half-covered costs it nothing.
   `swordPaths` is kept in `badgeShapes.ts` so the decision is one line to revisit.
 
+### A quote is a struck thing too, and its metal is the era
+
+Quotes were the flattest surface in the app, and the cause was structural rather
+than a matter of taste: **four screens each drew their own rectangle** — Quote of
+the Day, the saved collection, a thinker's profile, and the lesson deck — a
+hairline border, italic Playfair, the same two greys, in four files that had
+never been reconciled. So a quotation said nothing about who wrote it or when,
+nothing changed about it when you kept it, and it was the one object in the app
+still drawn as an outline while every button, card and rank pin sat on a lip.
+
+`components/shared/QuotePlate.tsx` is the one object all of them use now, and
+`tone.plate(hue)` derives its five roles from a single hex by the same two mixes
+`ramp()` uses — so the light direction cannot drift between eras.
+
+- **The colour is a LABEL and it already existed.** `ERA` in `constants/design.ts`
+  is the licensed "one place a hue means something", keyed on the five groups
+  `data/philosophers.ts` already sorts 322 thinkers by. Five recognisable colours
+  is what makes a list of twenty quotes scannable; one tone is what made it a
+  pile.
+- **The identity does not bend.** The rim is ink and the quotation is ink. The
+  era lives in the spine, the printer's mark, the byline and the ledge — edges
+  and marks, never a flooded surface. That is `HUE`'s own rule applied to five
+  hues, and it is why a shelf of these still reads as printed matter.
+- **Two states are worn by the OBJECT, not just the button.** Saved fills the
+  spine (3px rail → 7px struck spine); featured folds the corner. A toggle that
+  only changes an icon is not a collection.
+- **The Saved sheet leads with the SET, not the count.** Five era tiles, held ones
+  lit and empty ones flat and cool — `LOCKED_FACE` under `GHOST`, the exact
+  treatment a locked rank pin gets, for the reason stated above. The readout is
+  "3 of 5 eras · 8 thinkers", and the tiles are the filter.
+
+Two things that were measured rather than judged, and both had already failed:
+
+- **A colour measured on one ground does not survive another.** All five ERA hues
+  clear 4.5:1 on `paper` by construction, but the byline sits in the plate's
+  SHADED corner, and jade measured **4.20:1** there — under the floor, on a value
+  that had passed its own check. Hence `plate().label` carries its own tone.
+  `check:ui` re-derives all twenty-five pairs.
+- **The kicker and the printer's mark cannot share a band.** At one offset the
+  mark was painted across QUOTE OF THE DAY; at the next it was painted across the
+  quotation's first word. Both were rendered and looked at, and they bracket a
+  4px gap that a 24px glyph does not go into — so the answer was not a better
+  offset but `kickerGap`, which makes the band. **Nothing painted over a word is
+  acceptable (D31), including the app's own decoration.**
+
+> The lesson deck's quote card (`cinematicKit.tsx`) is the one surface not yet
+> converted — see §17; it is the highest-traffic file in the repo and was being
+> refactored across ninety scenes at the time. It is a drop-in when that settles.
+
+**Verified without Metro.** `tone.ts` is zero-import, so a contact sheet of every
+era's plate — held, kept, featured, pressed — renders in plain Node against a
+headless Chrome, reading the palette from `tone.plate()` and the size table out
+of the component rather than retyping either. That is how both defects above were
+found. Two CDP traps cost an hour: `Page.captureScreenshot` with
+`captureBeyondViewport` + `clip` **hangs** in `--headless=new`, and attaching to
+`/json/list[0]` rather than a tab made by `PUT /json/new` makes `Page.navigate` a
+silent no-op — use `scripts/peek.mjs`'s pattern.
+
 **The welcome end card** (`assets/images/welcome/sky.jpg`) is the one background
 that is a *drawing* rather than a photograph, and it follows the same rule for the
 same reason: the ink hatching runs to near-black in places, so the wordmark's

@@ -236,3 +236,71 @@ export const rampFace = (r: Ramp): Stops => [
   ['52%', r.base, 1],
   ['100%', r.shade, 1],
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// A QUOTE IS A STRUCK THING TOO.
+//
+// Quotes were the flattest surface in the app and the reason was structural
+// rather than lazy: four screens each drew their own rectangle — a hairline
+// border, italic Playfair, two greys — so a quotation carried no information
+// about WHO said it, WHEN, or whether you had kept it. Twenty saved quotes were
+// twenty identical grey boxes.
+//
+// Every one of those facts already exists. `ERA` in constants/design.ts is the
+// app's licensed "colour that means something", keyed on the five era groups
+// data/philosophers.ts already sorts 322 thinkers by. So a quote plate takes its
+// MATERIAL from the era it was written in, and is lit by the same one light
+// every pin and badge in this file uses.
+//
+// WHY THE VALUES ARE DERIVED AND NOT WRITTEN DOWN. Five eras × five roles is
+// twenty-five hexes to keep in agreement by eye, and the first thing to drift
+// would be the light direction — the one thing that has to be identical for the
+// set to read as a set. Same argument as `ramp()` above, same two mixes.
+//
+// THE FACE IS ALMOST PAPER, ON PURPOSE. The tint is a seventh of the way to the
+// hue at the SHADED corner only, which is enough to say "this plate is oxblood"
+// and nowhere near enough to be a coloured card. The app is still ink on paper;
+// what changed is that the paper now turns toward the light. scripts/check-ui.mjs
+// re-derives all five and measures every pair — the era label must still clear
+// 4.5:1 on the tinted corner it sits in, and the printer's mark must stay UNDER
+// 2.2:1 so a decorative glyph can never be mistaken for a word (D31).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface Plate {
+  /** The face, along `LIGHT`: lit corner → paper → a breath of the hue. */
+  face: [string, string, string];
+  /** The spine down the left edge — the era, said as a turned edge. */
+  spine: Ramp;
+  /** The big opening mark, set behind the first line. Faint by measurement. */
+  mark: string;
+  /** The era's name, as text. Must be readable on `face[2]`. */
+  label: string;
+  /** The plate's own outline. */
+  rim: string;
+  /** The ledge the plate sits on, and drops onto when pressed. */
+  lip: string;
+  /** The hairline rule between the quotation and its byline. */
+  rule: string;
+}
+
+export function plate(hue: string): Plate {
+  const r = ramp(hue);
+  return {
+    face: [PAPER_LIT, PAPER, mix(PAPER, hue, 0.07)],
+    spine: r,
+    // 0.22 was solved for, not chosen: at 0.30 the mark measured 2.6:1 on its
+    // own face and started reading as a character someone forgot to delete;
+    // under 0.15 it vanished on paper and the plate lost its printer's mark.
+    mark: mix(PAPER, hue, 0.22),
+    // TEXT GETS ITS OWN TONE, for the reason `paperSoft` exists in design.ts:
+    // a colour measured on one ground does not survive another. All five ERA
+    // hues clear 4.5:1 on `paper` by construction, but the label sits in the
+    // footer — the SHADED corner — and jade measured 4.20:1 there, under the
+    // floor. A sixteenth of the way to ink puts the worst case at 5.20:1 and
+    // costs the hue nothing: #3B7D76 → #366D67 is still plainly jade.
+    label: mix(hue, INK, 0.16),
+    rim: r.rim,
+    lip: r.shade,
+    rule: mix(PAPER, hue, 0.30),
+  };
+}

@@ -20,6 +20,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import SketchIcon from './SketchIcon';
+import QuotePlate from './QuotePlate';
 import PhilosopherQuiz from './PhilosopherQuiz';
 import { eraGroupOf } from '@/data/philosophers';
 import { lifespanOf, contemporariesOf } from '@/lib/utils/thinkerStats';
@@ -394,65 +395,50 @@ export default function PhilosopherSheet() {
                   </>
                 )}
 
-                {/* ── QUOTES, as pull quotes ─────────────────────────────────
+                {/* ── QUOTES, as struck plates ───────────────────────────────
                     ALL of them, not the first three. The cap existed to give the
                     page-turning quote book something to be for; with the book
                     gone it only hid content, and every thinker has four or five.
-                    The actions moved to a footer rule: crammed beside the text
-                    they squeezed the quote into a narrow column and made the two
-                    icons compete with the words for the same line. */}
+
+                    They are the shared QuotePlate now, so a quote read here is
+                    the same object as the one saved to the collection, shown on
+                    Home and set on the Profile — struck in this thinker's era.
+                    The actions still live on the footer rule, for the reason the
+                    old comment here gave: crammed beside the text they squeezed
+                    the quote into a narrow column and made the two icons compete
+                    with the words for the same line. The plate keeps them there
+                    by construction. */}
                 <SectionHeading label="Quotes" />
                 <Text style={styles.quotesHint}>Bookmark to save · star to feature it on your profile.</Text>
-                {phil.quotes.map((q) => {
-                  const saved = savedIds.has(q.id);
-                  const featured = profileQuote?.id === q.id;
-                  return (
-                    <View key={q.id} style={styles.quoteBox}>
-                      <Text style={styles.quoteMark} pointerEvents="none">“</Text>
-                      <Text style={styles.quoteText}>{q.text}</Text>
-                      <View style={styles.quoteFoot}>
-                        <Text style={styles.quoteWho}>{phil.name}</Text>
-                        <View style={styles.quoteActions}>
-                          <Pressable
-                            hitSlop={10}
-                            onPress={() =>
-                              toggleQuote({
-                                id: q.id,
-                                text: q.text,
-                                author: phil.name,
-                                philosopherId: phil.id,
-                                branchSlugs: phil.branchSlugs,
-                                savedAt: Date.now(),
-                              })
-                            }
-                          >
-                            <SketchIcon
-                              name={saved ? 'bookmark-filled' : 'bookmark'}
-                              size={21}
-                              color={saved ? Ink : InkSoft}
-                            />
-                          </Pressable>
-                          <Pressable
-                            hitSlop={10}
-                            onPress={() =>
-                              setProfileQuote(
-                                featured
-                                  ? null
-                                  : { id: q.id, text: q.text, author: phil.name, philosopherId: phil.id }
-                              )
-                            }
-                          >
-                            <SketchIcon
-                              name={featured ? 'star-filled' : 'star'}
-                              size={21}
-                              color={featured ? Ink : InkSoft}
-                            />
-                          </Pressable>
-                        </View>
-                      </View>
-                    </View>
-                  );
-                })}
+                {phil.quotes.map((q) => (
+                  <QuotePlate
+                    key={q.id}
+                    style={styles.quotePlate}
+                    text={q.text}
+                    author={phil.name}
+                    meta={phil.era}
+                    eraGroup={stats?.era ?? null}
+                    saved={savedIds.has(q.id)}
+                    onToggleSave={() =>
+                      toggleQuote({
+                        id: q.id,
+                        text: q.text,
+                        author: phil.name,
+                        philosopherId: phil.id,
+                        branchSlugs: phil.branchSlugs,
+                        savedAt: Date.now(),
+                      })
+                    }
+                    featured={profileQuote?.id === q.id}
+                    onToggleFeature={() =>
+                      setProfileQuote(
+                        profileQuote?.id === q.id
+                          ? null
+                          : { id: q.id, text: q.text, author: phil.name, philosopherId: phil.id }
+                      )
+                    }
+                  />
+                ))}
               </View>
             </ScrollView>
           </MotiView>
@@ -669,46 +655,7 @@ const styles = StyleSheet.create({
     marginTop: -4,
     marginBottom: 14,
   },
-  // ── quotes, as pull quotes ─────────────────────────────────────────────────
-  quoteBox: {
-    borderWidth: 2,
-    borderColor: Ink,
-    borderRadius: 14,
-    paddingTop: 30,
-    paddingHorizontal: 18,
-    paddingBottom: 12,
-    marginBottom: 12,
-    overflow: 'hidden',
-  },
-  // A real opening mark, set big and pale, behind the first line. Playfair's
-  // quote glyph has a lot of ink, so it reads as a printer's mark rather than
-  // as punctuation someone forgot to delete.
-  quoteMark: {
-    position: 'absolute',
-    left: 12,
-    top: -14,
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 82,
-    lineHeight: 96,
-    color: InkFaint,
-    includeFontPadding: false,
-  },
-  quoteText: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontStyle: 'italic',
-    fontSize: 17.5,
-    color: Ink,
-    lineHeight: 27,
-  },
-  quoteFoot: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 14,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: InkFaint,
-  },
-  quoteWho: { fontFamily: 'Inter_500Medium', fontSize: 12, color: InkSoft },
-  quoteActions: { flexDirection: 'row', alignItems: 'center', gap: 18 },
+  // The plate owns everything else about a quote; the sheet owns only how far
+  // apart they sit.
+  quotePlate: { marginBottom: 12 },
 });

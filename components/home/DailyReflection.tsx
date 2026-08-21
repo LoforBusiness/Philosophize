@@ -1,6 +1,9 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import SketchIcon from '@/components/shared/SketchIcon';
 import SectionHead from '@/components/home/SectionHead';
+import { plate as platePalette } from '@/components/shared/tone';
+import { ERA, C, type EraKey } from '@/constants/design';
+import { eraGroupOfId } from '@/data/philosophers';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE QUOTE IS PRINTED ON THE PAGE, NOT PARCELLED INTO A CARD.
@@ -26,6 +29,15 @@ import SectionHead from '@/components/home/SectionHead';
 // hundred years, and the space that glyph occupied went to the type instead:
 // 19pt → 23pt, which is the actual difference between reading it and skimming
 // past it.
+//
+// ── THE ONE THING IT GAINED: WHEN ───────────────────────────────────────────
+//
+// It still has no box, and it is not getting one — see above. But the byline
+// said only WHO, and a name with no date is the fact a beginner can do least
+// with. The attribution rule is now drawn in the era's own colour and the era
+// is named after the author, the same `ERA` scale every quote plate in the app
+// is struck in (components/shared/QuotePlate.tsx). Two marks, no box, and Home
+// reads as part of the same set as the collection.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const INK = '#1A1A1A';
@@ -74,6 +86,10 @@ interface Props {
 }
 
 export default function DailyReflection({ quote, saved, onOpenAuthor, onToggleSave, style }: Props) {
+  const group = (eraGroupOfId(quote.philosopherId) as EraKey | null) ?? null;
+  // No thinker on record: the rule falls back to plain ink, which is what it
+  // always was, and no era is named. Nothing invented for a fact we lack.
+  const tint = group ? platePalette(ERA[group]).label : INK;
   return (
     <View style={style}>
       <SectionHead>DAILY REFLECTION</SectionHead>
@@ -84,13 +100,21 @@ export default function DailyReflection({ quote, saved, onOpenAuthor, onToggleSa
         </Text>
       </Pressable>
 
-      {/* A byline, not a right-aligned caption. The short ink rule is the dash
-          an attribution is set with in print; it reads as the same mark at any
-          type size, where an em-dash character does not. */}
+      {/* A byline, not a right-aligned caption. The short rule is the dash an
+          attribution is set with in print; it reads as the same mark at any type
+          size, where an em-dash character does not — and it carries the era's
+          colour, so the same thinker is the same colour here, in the collection
+          and on their own profile. */}
       <View style={styles.byline}>
         <Pressable style={styles.who} onPress={onOpenAuthor} accessibilityRole="button" hitSlop={6}>
-          <View style={styles.dash} />
+          <View style={[styles.dash, { backgroundColor: tint }]} />
           <Text style={styles.author} numberOfLines={1}>{quote.author.toUpperCase()}</Text>
+          {group ? (
+            <>
+              <Text style={styles.sep}>·</Text>
+              <Text style={[styles.era, { color: tint }]} numberOfLines={1}>{group}</Text>
+            </>
+          ) : null}
         </Pressable>
         <Pressable
           hitSlop={12}
@@ -122,7 +146,17 @@ const styles = StyleSheet.create({
   // `flexShrink` so a long name gives way to the bookmark rather than pushing
   // it off the right edge — several of these run to four words.
   who: { flexDirection: 'row', alignItems: 'center', flexShrink: 1, paddingRight: 12 },
-  dash: { width: 18, height: 1.5, backgroundColor: INK, marginRight: 10 },
+  // Colour is set at render from the era — see the header. 1.5px of a hue that
+  // clears 4.5:1 on paper is comfortably above the 3:1 floor a non-text mark is
+  // held to.
+  dash: { width: 18, height: 1.5, marginRight: 10 },
+  sep: { fontFamily: 'Inter_400Regular', fontSize: 11, color: C.dim, marginHorizontal: 7 },
+  era: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 9.5,
+    letterSpacing: 1.3,
+    flexShrink: 0,
+  },
   author: {
     fontFamily: 'Inter_500Medium',
     fontSize: 11,

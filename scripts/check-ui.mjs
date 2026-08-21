@@ -474,5 +474,68 @@ for (const rel of CONVERTED) {
   ok(sp.length === 0, `${rel}: every gap is on the rhythm`, sp.join(' '));
 }
 
+// ── 7 · the quote plate: colour that means something, measured on its own face ─
+//
+// components/shared/QuotePlate.tsx is the app's only surface that takes its
+// whole treatment from a data value — the era its thinker belongs to — so it is
+// the one place five separate palettes have to hold five separate contrast
+// budgets at once. Nobody can eyeball twenty-five pairs, which is why they are
+// derived by `tone.plate()` from one hex each and measured here.
+//
+// THE ONE THAT ACTUALLY FAILED, so the floor is not theoretical: every ERA hue
+// clears 4.5:1 on `paper` by construction, but the plate's byline sits in the
+// SHADED corner where the face has turned a seventh of the way toward the hue,
+// and jade measured 4.20:1 there — under the floor, on a value that had passed
+// its own check. That is why `plate().label` carries its own tone.
+const ERA_FACES = Object.entries(D.ERA).concat([['(no thinker)', D.C.HUE]]);
+for (const [name, hue] of ERA_FACES) {
+  const P = T.plate(hue);
+  const lit = P.face[1];      // the body of the face
+  const shade = P.face[2];    // the shaded corner, where the byline sits
+  const r2 = (a, b) => ratio(lum(a), lum(b));
+
+  // The era's name is TEXT, and it sits on the shaded corner.
+  ok(r2(P.label, shade) >= 4.5, `plate ${name}: the era reads as text`,
+    `${r2(P.label, shade).toFixed(2)}:1 on ${shade}`);
+
+  // THE QUOTATION IS THE LOUDEST THING ON THE PLATE and must stay that way —
+  // the tint exists to say which era, never to dim the words.
+  ok(r2(T.INK, shade) >= 7, `plate ${name}: the quotation stays ink-loud`,
+    `${r2(T.INK, shade).toFixed(2)}:1`);
+
+  // The printer's mark is DECORATION SET BEHIND WORDS. Too faint and the plate
+  // loses its mark; too strong and it is a glyph competing with the quotation,
+  // which is D31 in docs/LESSON_RULES.md read from the other side. Both ends are
+  // held, because only one of them is the obvious mistake.
+  const m = r2(P.mark, lit);
+  ok(m >= 1.15, `plate ${name}: the printer's mark is visible at all`, `${m.toFixed(2)}:1`);
+  ok(m <= 2.2, `plate ${name}: the printer's mark can never read as a word`, `${m.toFixed(2)}:1`);
+
+  // The spine and the ledge are non-text marks: the 3:1 floor, not 4.5.
+  ok(r2(P.spine.base, D.C.paper) >= 3, `plate ${name}: the spine reads on paper`,
+    `${r2(P.spine.base, D.C.paper).toFixed(2)}:1`);
+  ok(r2(P.lip, D.C.paper) >= 3, `plate ${name}: the ledge reads on paper`,
+    `${r2(P.lip, D.C.paper).toFixed(2)}:1`);
+
+  // The hairline under the quotation: present, but never a second rule
+  // competing with the byline it separates.
+  const rr = r2(P.rule, lit);
+  ok(rr >= 1.1 && rr <= 2.0, `plate ${name}: the rule is a hairline, not a bar`, `${rr.toFixed(2)}:1`);
+}
+
+// The plate is where colour entered the app's ordinary surfaces, so it is held
+// to the same no-colour-of-its-own rule as a converted screen: every value in it
+// comes from `tone.ts` or `design.ts`. Without this the next hue someone likes
+// gets typed in here and the five eras quietly become six.
+{
+  const src = fs.readFileSync(path.join(REPO, 'components/shared/QuotePlate.tsx'), 'utf8')
+    .replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, '');
+  const hexes = [...new Set(src.match(/#[0-9A-Fa-f]{3,8}\b/g) || [])];
+  ok(hexes.length === 0, 'QuotePlate: no colour of its own', hexes.join(' '));
+  const rgbs = [...new Set(src.match(/rgba?\([^)]*\)/g) || [])];
+  ok(rgbs.length === 0, 'QuotePlate: no rgb() of its own', rgbs.join(' '));
+}
+
+
 console.log(bad === 0 ? '\nui system: all clear.' : `\n${bad} ui check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);
