@@ -2557,6 +2557,33 @@ fixed while the figure walks. For each one it asks the two questions above:
 A prop that rides the figure and passes both is a held object. One that fails
 either is the defect a reader called "cheap".
 
+**Getting that to mean anything took four narrowings, and each was caught by the
+check's own counter-test rather than by thinking harder.** `SELFTEST=1` plants a
+real object on the figure — in a hand on even beats, adrift on odd ones, under one
+identity — and requires the probe to report every adrift one.
+
+- *Overlapping his body box* flagged **six lessons in the first ten**: a figure
+  walking in FRONT of a chart overlaps it, and so does every board and fence he
+  stands against. A held object is also SMALL (under 40% of his body box) and
+  PAINTED IN FRONT of him, which is asked of the browser's own hit-test stack
+  rather than reasoned about.
+- Then it flagged the crate he had just **set down**. That object is small, in
+  front, overlapping him and nowhere near his hands — every condition, and
+  correct. An object on the floor has its underside level with his feet.
+- And **his feet are not the bottom of his box**: an ankle joint is a disc centred
+  exactly on the ground line, so the box hangs half a joint below it. Measured at
+  the box, political-8's crate read as floating 29px from a hand while sitting
+  perfectly on the ground. `Stickman` gives the ankles a testID for this, as it
+  now does the fists.
+- Then it would have flagged every **speech bubble**, which correctly appears and
+  goes. An element only qualifies at all if on at least one beat it is genuinely
+  IN a hand — then both questions are about a thing he demonstrably holds.
+
+The self-test also has to validate its own aim: a plant on a faded figure, or one
+too big for the size gate, or at a spot where the figure's stacking context sits
+above it, is a plant the probe is RIGHT to ignore. Counting those made it report
+blindness that was its own.
+
 ---
 
 ## Part 2 — Authoring checklist
