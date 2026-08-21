@@ -326,18 +326,13 @@ const styles = StyleSheet.create({
 
   list: { paddingBottom: 36, gap: 14 },
 
-  // The pin strip lives INSIDE the plate's face, so it spans the padding it was
-  // given rather than the plate's full width — the negative margins put it back
-  // on the edges. The plate clips, so its own corner radius does the rest.
+  // The plate renders `footer` OUTSIDE its padded content box, so this spans the
+  // full width on its own and the plate's clipped corners finish it. No margins.
   pinRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginTop: 14,
-    marginBottom: -15,
-    marginLeft: -25,
-    marginRight: -18,
     paddingVertical: 11,
     borderTopWidth: 1.5,
     borderTopColor: InkFaint,

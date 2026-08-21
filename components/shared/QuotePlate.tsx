@@ -160,16 +160,7 @@ export default function QuotePlate({
       <MotiView
         animate={{ translateY: drop }}
         transition={{ type: 'timing', duration: 90, easing: Easing.out(Easing.quad) }}
-        style={[
-          styles.face,
-          {
-            borderRadius: S.radius,
-            paddingLeft: S.padH + SPINE_MAX,
-            paddingRight: S.padH,
-            paddingTop: S.padTop,
-            paddingBottom: S.padBottom,
-          },
-        ]}
+        style={[styles.face, { borderRadius: S.radius }]}
       >
         {/* The face, along the one light: lit corner top-left, a breath of the
             era in the shaded corner. Absolute, so it never touches layout. */}
@@ -197,6 +188,19 @@ export default function QuotePlate({
           <View pointerEvents="none" style={[styles.fold, { backgroundColor: P.spine.base }]} />
         ) : null}
 
+        {/* THE PADDING LIVES HERE, NOT ON THE FACE, so that `footer` can reach
+            the plate's own edges without knowing what the padding is. It used to
+            get there with negative margins copied from the md size row — three
+            magic numbers that would have gone silently wrong the first time a
+            padding changed, on a strip that is only rendered on Android. */}
+        <View
+          style={{
+            paddingLeft: S.padH + SPINE_MAX,
+            paddingRight: S.padH,
+            paddingTop: S.padTop,
+            paddingBottom: S.padBottom,
+          }}
+        >
         {kicker || kickerRight ? (
           <View style={[styles.kickerRow, { marginBottom: S.kickerGap }]}>
             {kicker ? <Text style={[styles.kicker, { color: P.label }]}>{kicker}</Text> : <View />}
@@ -268,6 +272,8 @@ export default function QuotePlate({
               <View style={styles.chev}><SketchIcon name="back" size={13} color={C.inkSoft} /></View>
             ) : null}
           </View>
+        </View>
+
         </View>
 
         {footer}
