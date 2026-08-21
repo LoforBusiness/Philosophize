@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import Animated, {
   useSharedValue, useDerivedValue, useFrameCallback, useAnimatedStyle,
   withTiming, withDelay, Easing,
@@ -50,12 +51,34 @@ interface Props {
 
 export default function StreakMascot({ mood, alive, delay = 0 }: Props) {
   const clock = useSharedValue(0);
-  useFrameCallback((f) => {
+
+  // AUTOSTART OFF, AND STOPPED WHEN THIS IS NOT THE SCREEN YOU ARE ON.
+  //
+  // `useFrameCallback(fn, true)` runs a worklet on the UI thread every frame for
+  // as long as the component is mounted, and this one drives a full rig solve
+  // and twenty-odd View transforms behind it. A route pushed on top of the
+  // streak screen does not unmount it, so the mascot went on being animated,
+  // at 60fps, on a screen nobody could see, for as long as the reader stayed
+  // above it.
+  //
+  // This is the same guard `StickmanStroll` and `BranchWorld` have always had,
+  // and the same one `HomeHeader` had to be given after it shipped without it —
+  // its comment is the one worth reading: "It is a small cost and it is a
+  // permanent one, which is the worse kind."
+  const frame = useFrameCallback((f) => {
     'worklet';
     let dt = (f.timeSincePreviousFrame ?? 16) / 1000;
     if (dt > 0.05) dt = 0.05;
     clock.value += dt;
-  }, true);
+  }, false);
+  const frameRef = useRef<{ setActive: (v: boolean) => void } | null>(null);
+  frameRef.current = frame;
+  useFocusEffect(
+    useCallback(() => {
+      frameRef.current?.setActive(true);
+      return () => frameRef.current?.setActive(false);
+    }, []),
+  );
 
   // THE POSE CROSSES ON A SHARED VALUE, NOT A PROP. `emoteAnyLive` takes the gesture
   // code as a number, so the mood can change under the worklet without the component

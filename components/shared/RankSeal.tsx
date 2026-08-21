@@ -1,9 +1,13 @@
+import { memo } from 'react';
 import React, { useId } from 'react';
 import { View } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop, G } from 'react-native-svg';
 import Glyph, { type GlyphName } from './Glyph';
 import { hexPath, hexPerimeter, HEX_R, HEX_INNER } from './badgeShapes';
-import { INK, GHOST, FAINT, PAPER, LIGHT, FACE, RIM, LOCKED_FACE, SHADOW, type Stops } from './tone';
+import {
+  INK, GHOST, FAINT, PAPER, LIGHT, FACE, RIM, LOCKED_FACE, SHADOW,
+  METAL, TIER_METAL, metalFace, metalRim, type Stops,
+} from './tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A RANK IS A STRUCK HEXAGONAL PIN.
@@ -59,9 +63,18 @@ const grad = (id: string, stops: Stops) => (
   </LinearGradient>
 );
 
-export default function RankSeal({ glyph, state, size = 96, progress = null }: Props) {
+// MEMOISED. Every prop below is a primitive, so the comparison is exact and no
+// call site can defeat it with a fresh object (the trap Thinkers records for
+// ThinkerCard). A struck mark is an <Svg> with gradients — the most expensive
+// leaf this app draws — and Profile renders ten of them, none of which change
+// when the screen re-renders for an unrelated reason. Measured: see SketchIcon.
+export default memo(function RankSeal({ glyph, state, size = 96, progress = null, band = null }: Props) {
   const locked = state === 'locked';
   const ink = locked ? GHOST : INK;
+  // A locked pin is unstruck and takes no metal, whatever band it would be in —
+  // the material IS the reward, so handing it out before it is earned spends the
+  // only thing this pin has to give.
+  const metal = !locked && band != null ? METAL[TIER_METAL[Math.max(0, Math.min(2, band))]] : null;
   const pct = progress == null ? null : Math.max(0, Math.min(1, progress));
   // With an arc over it the edge becomes a track and steps back; on its own it is
   // the frame and carries full weight.
@@ -140,4 +153,4 @@ export default function RankSeal({ glyph, state, size = 96, progress = null }: P
       </View>
     </View>
   );
-}
+});

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import Animated, {
+  cancelAnimation,
   useSharedValue,
   useAnimatedStyle,
   withTiming,
@@ -66,6 +67,8 @@ export default function StreakBook({
       return;
     }
     handOpacity.value = withTiming(1, { duration: 280 });
+    // THE HAND'S SCRUB. Infinite on purpose — it has to keep going for as long as
+    // the hand is on screen — but see the cleanup below: it was never cancelled.
     wiggle.value = withRepeat(withTiming(1, { duration: 150, easing: Easing.inOut(Easing.sin) }), -1, true);
 
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -99,7 +102,17 @@ export default function StreakBook({
       }, writeAt + 760)
     );
 
-    return () => timers.forEach(clearTimeout);
+    return () => {
+      timers.forEach(clearTimeout);
+      // AND CANCEL THE WIGGLE. Clearing the timers left `wiggle` repeating for
+      // ever: a 150ms timing animation re-evaluated on the UI thread, on a hand
+      // that had already faded to zero opacity, for as long as the component
+      // stayed mounted. StreakBook is on Home, on Profile and on the reward
+      // screen, so the leak outlives the moment it was started for. Same rule as
+      // HomeHeader's drift and Target's breath, both of which cancel.
+      cancelAnimation(wiggle);
+      wiggle.value = 0;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [willAnimate, eraseFirst, value, from]);
 

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import Svg, { Path, Circle } from 'react-native-svg';
 
 export type SketchIconName =
@@ -44,7 +45,24 @@ interface Props {
 }
 
 // Hand-drawn black-and-white line icons used throughout the app.
-export default function SketchIcon({ name, color = '#1A1A1A', size = 28 }: Props) {
+// ─────────────────────────────────────────────────────────────────────────────
+// MEMOISED, AND THIS IS A MEASURED FIX RATHER THAN A HABIT.
+//
+// A screen that re-renders re-renders every icon on it, and an icon is an <Svg>
+// — the most expensive kind of leaf this app has. Measured on Profile at 6x CPU
+// throttle: one `setState` mid-scroll (the rank chart's in-view latch) blocked
+// for 671-2050ms, because the commit walked all 807 nodes and 44 SVGs. Removing
+// the state change entirely took the worst frame to 37ms, which is the size of
+// the prize.
+//
+// The props are three primitives, so `memo` is exact — there is no object to
+// compare and no call site that can accidentally defeat it by passing a fresh
+// one (the trap `app/(app)/philosophers/index.tsx` records for ThinkerCard).
+//
+// It also skips the long `name === '...'` chain in the body, which builds the
+// whole element tree for a branch on every render.
+// ─────────────────────────────────────────────────────────────────────────────
+export default memo(function SketchIcon({ name, color = '#1A1A1A', size = 28 }: Props) {
   const s = {
     stroke: color,
     strokeWidth: 2,
@@ -351,4 +369,4 @@ export default function SketchIcon({ name, color = '#1A1A1A', size = 28 }: Props
       {name === 'check' && <Path d="M6 17 L13 24 L26 9" {...s} />}
     </Svg>
   );
-}
+});

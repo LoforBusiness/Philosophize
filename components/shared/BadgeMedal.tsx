@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import React, { useId } from 'react';
 import { View } from 'react-native';
 import Svg, { Path, Ellipse, ClipPath, Defs, G, LinearGradient, Stop } from 'react-native-svg';
@@ -106,10 +107,18 @@ const grad = (id: string, stops: Stops) => (
 const RIBBON = ribbonPaths(84, 34, 13);
 const LAUREL = [laurelSprig(-1), laurelSprig(1)];
 
-export default function BadgeMedal({
+// MEMOISED. Every prop below is a primitive, so the comparison is exact and no
+// call site can defeat it with a fresh object (the trap Thinkers records for
+// ThinkerCard). A struck mark is an <Svg> with gradients — the most expensive
+// leaf this app draws — and Profile renders ten of them, none of which change
+// when the screen re-renders for an unrelated reason. Measured: see SketchIcon.
+export default memo(function BadgeMedal({
   family, tier, glyph, earned, size = 72, draw = null, reveal = null,
 }: Props) {
   const ink = earned ? INK : GHOST;
+  // Bronze at I, silver at II, gold at III. A locked medal has no metal at all —
+  // it is unstruck, which is the whole of what "locked" means here.
+  const metal = METAL[TIER_METAL[tier - 1]];
   const len = LEN[family];
   const outer = SHAPE[family](0);
   const inner = tier > 1 ? SHAPE[family](INNER[tier]) : null;
@@ -235,4 +244,4 @@ export default function BadgeMedal({
       </Animated.View>
     </View>
   );
-}
+});
