@@ -47,7 +47,19 @@ const ok = (pass, label, detail) => {
 const gate = /MIN_VERSION_CODE = (\d+)/.exec(
   fs.readFileSync('components/shared/UpdateGate.tsx', 'utf8'))[1];
 ok(md.includes(`\`MIN_VERSION_CODE\` is **${gate}**`), 'S20 states the real gate', `code says ${gate}`);
-ok(md.includes(`versionCode ${gate}`), 'S1 states the live binary', `the gate is ${gate}`);
+// THE GATE IS A FLOOR, NOT THE CURRENT BUILD — and it stopped being both at 21.
+//
+// Every build up to 20 raised the gate to itself, so "current === gate" held by
+// accident and this asserted it directly. Build 21 shipped with the gate
+// deliberately left at 20 (§20: a wall aimed at a release still rolling out points
+// at a version nobody can download), and three checks here failed on a file that
+// was right. A check that fails when the project does the correct thing teaches
+// people to ignore it, which is worse than not having it.
+//
+// What must actually hold is that the current binary is at or above the gate.
+const current = /Current binary is \*\*versionCode (\d+)\*\*/.exec(md)?.[1];
+ok(current && +current >= +gate, 'S1 states a live binary at or above the gate',
+  current ? `binary ${current}, gate ${gate}` : 'S1 does not state a versionCode');
 ok(!/versionCode 16\*\*/.test(md), 'S1 no longer claims 16');
 
 const cin = execSync('node scripts/validate-cinematic.mjs', { encoding: 'utf8' });
@@ -81,11 +93,25 @@ ok(stale.length === 0, 'no bare ~223 left — only ones shown against 322',
 // the build the table calls current must be the build the gate lets in, and that
 // row must carry a real fingerprint — because §18's whole warning is that
 // publishing to a runtime nobody is on reaches nobody, silently.
-ok(md.includes(`${gate} (current)`), 'S18 marks the gated build as current',
-  `gate is ${gate}`);
-const row = new RegExp(`${gate} \\(current\\)\\*\\*\\s*\\|\\s*\`([0-9a-f]{40})\``).exec(md);
-ok(!!row, 'and gives it a real runtime fingerprint',
-  row ? `${row[1].slice(0, 8)}…` : `no 40-hex runtime on build ${gate}'s row`);
+ok(md.includes(`${current} (current)`), 'S18 marks the newest build as current',
+  `binary is ${current}`);
+
+// AND EVERY REACHABLE RUNTIME MUST BE IN THE TABLE WITH A REAL FINGERPRINT.
+//
+// This is the check that earns its place. The gate is a floor, so every build from
+// the gate upward can still open the app and still needs every update — and §18's
+// whole warning is that publishing to a runtime nobody is on reaches nobody,
+// silently. The mirror of that, new at 21, is FORGETTING one: an OTA sent only to
+// the newest runtime reaches only the people who already updated, and it fails
+// just as loudly, which is to say not at all.
+const missing = [];
+for (let v = +gate; v <= +current; v++) {
+  const line = md.split('\n').find((l) => l.includes('**' + v + '**') || l.includes('**' + v + ' (current)**'));
+  if (!line || !/`[0-9a-f]{40}`/.test(line)) missing.push(v);
+}
+ok(missing.length === 0, 'and every runtime at or above the gate has a fingerprint',
+  missing.length ? `build ${missing.join(', ')} has no 40-hex runtime row`
+                 : `${+current - +gate + 1} reachable runtime(s) listed`);
 
 // ── every validator in `npm run check` must be NAMED in the file ─────────────
 //
@@ -94,12 +120,42 @@ ok(!!row, 'and gives it a real runtime fingerprint',
 // "ten" quietly became eleven. Naming them is self-maintaining — add a validator
 // and this says which one the file has not heard of.
 const scripts = JSON.parse(fs.readFileSync('package.json', 'utf8')).scripts.check;
-const validators = [...scripts.matchAll(/node scripts\/([\w-]+)\.mjs/g)].map((m) => m[1]);
+// NOT /node scripts\/…/ — that anchor silently lost a validator.
+//
+// `check-mentions` is invoked as `node --import ./scripts/lib/register.mjs
+// scripts/check-mentions.mjs`, so the token before its path is the register
+// shim, not `node`. The old pattern therefore never saw it: it counted 22 where
+// the script runs 23, and — worse than the count — it excluded check-mentions
+// from the "is it named in CLAUDE.md" test, so the one validator this check
+// could not see was also the one it could never hold the file to.
+//
+// Matching the path alone is safe: `[\w-]+` cannot cross a `/`, so
+// `./scripts/lib/register.mjs` does not match and the shim is not mistaken for
+// a validator.
+const validators = [...scripts.matchAll(/scripts\/([\w-]+)\.mjs/g)].map((m) => m[1]);
 const unlisted = validators.filter((v) => !md.includes(v));
 ok(unlisted.length === 0, 'S11 names every validator in `npm run check`',
   unlisted.length ? `missing: ${unlisted.join(', ')}` : `all ${validators.length}`);
+// THIS ARRAY RAN OUT, AND A CHECK THAT RUNS OUT REPORTS A PASS IT CANNOT MAKE.
+//
+// It stopped at 'fifteen'. The suite passed fifteen validators a long time ago,
+// so `WORDS[validators.length]` has been `undefined` ever since — and
+// `md.includes('**undefined** validators')` is false for every possible file, so
+// this assertion could not be satisfied by any wording of CLAUDE.md at all. It
+// reported `22 = undefined`, which is the shape of a checker failing rather than
+// a claim being wrong, and the fix belonged here rather than in the prose.
+//
+// Extended well past the current count so the next validator does not re-break
+// it. Anything above the end of this list is still caught, but as an explicit
+// "extend WORDS" rather than as a mystery mismatch.
 const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
-  'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen'];
+  'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
+  'seventeen', 'eighteen', 'nineteen', 'twenty', 'twenty-one', 'twenty-two',
+  'twenty-three', 'twenty-four', 'twenty-five', 'twenty-six', 'twenty-seven',
+  'twenty-eight', 'twenty-nine', 'thirty', 'thirty-one', 'thirty-two'];
+if (!WORDS[validators.length]) {
+  console.log(`  FAIL  WORDS has no entry for ${validators.length} — extend it in this file`);
+}
 ok(md.includes(`**${WORDS[validators.length]}** validators`),
   'and states how many there are', `${validators.length} = ${WORDS[validators.length]}`);
 // They must also all exist — a script named in `check` but missing breaks the

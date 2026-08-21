@@ -1,4 +1,11 @@
-# Philosophize — Project Bible
+# Ashmere — Project Bible
+
+> **The app is called Ashmere. The repo, the slug and the package are not.**
+> `slug: Philosophize`, `scheme: philosophize` and `package: com.philosophize.app`
+> all stay as they are — a Play package name is immutable once published, and the
+> slug keys the EAS project. Only `expo.name` carries the brand, and it is a
+> COMPILED resource (§18). The app has been renamed twice: Philosophize → Deeply
+> in build 20, Deeply → Ashmere in build 21.
 
 > Philosophy as gameplay, not lecture. Interactive micro-lessons that make thinking feel like a superpower.
 
@@ -6,7 +13,7 @@
 
 ## 1. Project Overview
 
-**Philosophize** is a mobile philosophy learning app for iOS and Android. It makes philosophy interactive, visual, and gamified — using micro-lesson cards, XP systems, streaks, and curiosity-driven progression instead of walls of text.
+**Ashmere** is a mobile philosophy learning app for iOS and Android. It makes philosophy interactive, visual, and gamified — using micro-lesson cards, XP systems, streaks, and curiosity-driven progression instead of walls of text.
 
 **Target audience:** Ages 16–35, curious beginners with no prior philosophy background.
 
@@ -22,17 +29,29 @@
 > nobody — four days after the binary carrying them shipped.
 
 **Live: SHIPPED on Google Play**, full public rollout, package `com.philosophize.app`.
-Current binary is **versionCode 20** (2026-08-09). 17 and 18 exist in
-`eas build:list` but both ERRORED, so 19 is the successor to 16. Content and JS
-ship over the air between binaries (see §18) — a new build is only needed for
-native changes, app icons, splash, or anything else baked into the APK.
+Current binary is **versionCode 21** (2026-08-19), carrying the Ashmere name and
+the reader icon. 17 and 18 exist in `eas build:list` but both ERRORED, so 19 is
+the successor to 16. Content and JS ship over the air between binaries (see §18)
+— a new build is only needed for native changes, app icons, splash, or anything
+else baked into the APK.
 
-**Two binaries did more than bump a version.** 19 was the first carrying
+> **A rename is a BUILD, and this is why.** `expo.name` becomes the `app_name`
+> string resource and then `android:label` — a compiled resource, like the icons,
+> the splash and the notification icon. No OTA can touch any of them. So a reader
+> on an older binary gets an app that calls itself Ashmere on every screen while
+> their home screen still says something else under a different picture, and
+> nothing but the store can reconcile that. Verify a rename the same way you
+> verify an icon: unzip the AAB (§18). Build 21's resources contain "Ashmere"
+> once and "Deeply" and "Philosophize" zero times.
+
+**Three binaries did more than bump a version.** 19 was the first carrying
 `expo-notifications` and `expo-audio`, which made reminders (§22) and sound (§2)
 — both described as unreachable in this file at the time — live for everyone who
 can open the app. **20 carries `lib/updates/firstRun.ts`**, which takes the newest
 published bundle before deciding what a brand-new reader sees, and so ends the one
-thing an OTA could never reach: the welcome screen (§19).
+thing an OTA could never reach: the welcome screen (§19). **21 is the rename to
+Ashmere** and the new mark — the seated reader with his mug and his book,
+replacing the letterpress D.
 
 ---
 
@@ -107,7 +126,7 @@ Philosophize/
 │   ├── lesson/                  # LessonRunner, CardShell, LessonReward, LessonLoader
 │   │   ├── cards/               # 8 card components (incl. DilemmaCard, QuoteCard)
 │   │   ├── interactions/        # MultipleChoice, TrueFalse, SortItems (3 live)
-│   │   ├── cinematic/           # THE BIG ONE — 102 wired cinematic lessons, the
+│   │   ├── cinematic/           # THE BIG ONE — 132 wired cinematic lessons, the
 │   │   │                        #   shared rig.ts, Stickman.tsx, CinematicPlayer,
 │   │   │                        #   per-lesson *Scene.tsx + *Script.ts (§17)
 │   │   ├── feedback/            # CorrectFeedback, IncorrectFeedback (built, unwired)
@@ -130,7 +149,7 @@ Philosophize/
 │   ├── types.ts                 # ALL type definitions — the load-bearing file
 │   ├── index.ts                 # ALL_BRANCHES + getLessonById, lessonAccessibility,
 │   │                            #   branchCountsFromUnits, getLessonUnitInfo
-│   ├── branches/                # 6 branches · 28 units · 204 lessons (§5)
+│   ├── branches/                # 6 branches · 28 units · 222 lessons (§5)
 │   ├── philosophers.ts          # BASE + composes ALL_PHILOSOPHERS (322)
 │   ├── extra-philosophers/      # ancient/eastern/medieval/modern/contemporary/
 │   │                            #   expansion, expansion2a/2b/3/4 (+ *-facts)
@@ -230,8 +249,8 @@ When `CARD_BUDGET` reaches 0 the takeover is done, and `LessonRunner`, `cards/`,
 
 ### Shape today
 
-**Every branch holds exactly 34 lessons, of which exactly 19 are cinematic** —
-56% of the way through the takeover. Both numbers are deliberate invariants rather
+**Every branch holds exactly 37 lessons, of which exactly 22 are cinematic** —
+59% of the way through the takeover. Both numbers are deliberate invariants rather
 than where the counts happened to land: the totals were 27–30 and the cinematic
 share was 11–14, and both showed on the Learn cards. `check:cinematic` enforces
 that all six branches match on both.
@@ -246,17 +265,18 @@ They constrain each other, and there are exactly two moves that respect both:
   and it is the move that advances the takeover.
 - **To raise the LESSON count, add the same number to every branch and make each
   new one cinematic.** Two per branch took 30/14 to 32/16 and held both invariants
-  in one pass. Adding one lesson to one branch breaks both at once.
+  in one pass; three per branch, in three rounds of six, took 34/19 to 37/22 the
+  same way. Adding one lesson to one branch breaks both at once.
 
 | Branch | Units | Lessons | of which cinematic | card decks left |
 |---|---|---|---|---|
-| Metaphysics | 5 | 34 | 19 | 15 |
-| Epistemology | 5 | 34 | 19 | 15 |
-| Logic | 5 | 34 | 19 | 15 |
-| Ethics | 5 | 34 | 19 | 15 |
-| Aesthetics | 3 | 34 | 19 | 15 |
-| Political Philosophy | 5 | 34 | 19 | 15 |
-| **Total** | **28** | **204** | **114 (56%)** | **90** |
+| Metaphysics | 5 | 37 | 22 | 15 |
+| Epistemology | 5 | 37 | 22 | 15 |
+| Logic | 5 | 37 | 22 | 15 |
+| Ethics | 5 | 37 | 22 | 15 |
+| Aesthetics | 3 | 37 | 22 | 15 |
+| Political Philosophy | 5 | 37 | 22 | 15 |
+| **Total** | **28** | **222** | **132 (59%)** | **90** |
 
 > Numbers go stale; the check does not. `npm run check:cinematic` prints the live
 > figures and the next lesson to convert in each branch every time it runs.
@@ -300,7 +320,7 @@ Every lesson MUST:
 - Have exactly one correct answer in every `MultipleChoiceInteraction`
 
 > `tsc` checks types only, so these are enforced by `npm run check:cards`
-> (`scripts/validate-lessons.mjs`) — 204/204 clean. Cinematic lessons have their own
+> (`scripts/validate-lessons.mjs`) — 222/222 clean. Cinematic lessons have their own
 > shape check, `npm run check:cinematic` (§17). `npm run check` runs tsc plus ten
 > validators — see §11.
 
@@ -476,7 +496,7 @@ A unit's `index.ts` exports an array of `Path` objects (the units); each needs a
 stable `id` — `lessonsByUnit` is keyed on it, so **renaming an id silently resets
 that unit's progress for every existing user.**
 
-**Keep every branch at 34, and at 19 cinematic (§5).** The counts were 27–30 and it
+**Keep every branch at 37, and at 22 cinematic (§5).** The counts were 27–30 and it
 showed on the Learn cards, so they were levelled deliberately; adding one lesson to
 one branch puts them back out. Add six, one per branch — and give each of the six a
 scene, or the cinematic invariant goes out instead of the lesson one.
@@ -500,15 +520,26 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is `tsc` plus **twenty-three** validators, in this order:
-`validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-prompts` ·
+**Validation:** `npm run check` is **twenty-five** validators plus `tsc`, in this order —
+`check-routes` runs FIRST, before even the typecheck, because a stray preview route
+makes every browser-derived result in the run suspect and would ship if a build
+followed:
+`check-routes` · `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
 `check-camera` · `check-tour` · `check-streak` · `check-answers` · `check-mentions` ·
 `check-poll` · `check-access` · `check-rest` · `check-stats` · `check-launch` ·
-`check-ui` · `check-thinkers` · `check-words` · `check-smooth`. It exits 0 today, so anything any of them prints is yours. (Several
+`check-ui` · `check-thinkers` · `check-words` · `check-smooth` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
 figures and 6 hand-built ones, `check-moves` 6 head-clearance defects. A budget
-line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 204 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
+line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 222 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
+
+> **`check-moves` was the last one on that list to actually run, and for a long
+> time it did not.** It existed, this section quoted its budget, and
+> `docs/LESSON_RULES.md` told authors to run it — but it was in no npm script and
+> not in `npm run check`, so its 6-defect high-water mark could not ratchet and a
+> seventh would have shipped in silence. A budget nobody executes is not a budget.
+> If you add a validator, add it to `check` in the same commit, and name it above:
+> `check:bible` compares this list against `package.json` and will tell you.
 
 **Cinematic lessons have their own rule book:** [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md) — figure scale and proportion, reach and joint rules, motion and end-poses, band/deck/box/wrap clipping, and the text-must-match-the-picture rule. Read it before authoring a cinematic lesson and run its Part 3 checks before calling one done.
 
@@ -516,13 +547,13 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 
 ## 12. Current Status
 
-**Phase 5 — shipped and iterating in public.** Live on Google Play, versionCode 20.
+**Phase 5 — shipped and iterating in public.** Live on Google Play, versionCode 21, as Ashmere.
 
-- **Content:** 6 branches · **28 units** · **204 lessons**. **322 philosophers**
+- **Content:** 6 branches · **28 units** · **222 lessons**. **322 philosophers**
   with bios, eras and **1,780 quotes** between them — and all 322 have exactly
   three "Did you know?" facts, with nothing missing.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
-  gating; **114 cinematic lessons** (animated stickman scenes, §17); animated
+  gating; **132 cinematic lessons** (animated stickman scenes, §17); animated
   `LessonReward` with XP count-up, streak and rank-up.
 - **Gamification:** 50 badges, 25 ranks with a conferred-rank ceremony, XP +
   level curve, daily streak.
@@ -537,7 +568,7 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
   mastheads, the launch screen and Quick Start (§19).
 
 **Known gaps / tech debt:**
-- **Card decks are now a minority** — 90 of 204. That is now the number
+- **Card decks are now a minority** — 90 of 222. That is now the number
   that matters; see the takeover rule at the top of §5.
 - **`fill-blank` and `match` are closed as won't-do.** They were the oldest open
   item in this file. Finishing an interaction for the format being retired is work
@@ -550,6 +581,31 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
   encode the *old* per-branch model. The live gate is
   `lessonAccessibility()` in `data/index.ts`. Don't call the old ones.
 - Aesthetics has 3 units where the others have 5.
+- **Deprecated RN style APIs — a KNOWN and deliberately un-swept debt.** ~1,000
+  `pointerEvents=` props, 48 `shadow*` declarations across 11 files, and
+  `textShadow*` in 9. All three are deprecated, and the decision is to leave them
+  until someone can do it with a device attached. The reasoning, because it is
+  the sort of thing that gets "tidied" by the next reader:
+  - **Both warnings come from `react-native-web`, not React Native.**
+    `createDOMProps/index.js` emits the `pointerEvents` one and
+    `StyleSheet/preprocess.js` the two shadow ones. Nothing in
+    `react-native/Libraries` warns, and Android — the only thing that ships —
+    supports all three APIs unwarned. So the sweep buys zero user-facing change
+    today.
+  - **They are `warnOnce`.** Three lines per page load, deduped, not three per
+    element. They are not drowning the browser console that §21 depends on.
+  - **`shadow*` → `boxShadow` is not a like-for-like swap.** `boxShadow` paints
+    on Android where `shadow*` needed `elevation`, and the offset/spread
+    semantics differ, so converting 48 sites silently restyles every card, medal
+    and pin in the app — and none of it is verifiable in a browser, which is
+    where this project can actually look at itself.
+  - **`pointerEvents` is not purely mechanical either.** Many of the ~1,000 sites
+    are on custom components (`Target`, wrappers) for which it is an ordinary
+    prop they forward, not a View prop. Rewriting those into `style` breaks them,
+    and telling which is which is 1,000 judgements, not a regex.
+
+  When it is done: do `shadow*` first (48 sites, one visual review), on a device,
+  as its own commit. Leave `pointerEvents` until RN actually schedules removal.
 
 ---
 
@@ -619,7 +675,7 @@ The Scholar's Pass paywall UI already exists; this is the value model it should 
 **Why someone pays (the thesis):**
 1. They actually **retain** what they learn (spaced review), not just tap through it.
 2. The **cinematic, narrated** lessons feel like nothing else in the category.
-3. **Breadth** — 6 branches, 204 lessons, 322 thinkers — is a genuine library.
+3. **Breadth** — 6 branches, 222 lessons, 322 thinkers — is a genuine library.
 4. **Credential & mastery** — ranks + path-mastery give visible proof of progress.
 5. The **daily habit** (streak + review) makes the subscription part of a routine.
 
@@ -678,7 +734,7 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**This is the format the app is converging on** — 102 of the 204 lessons are here
+**This is the format the app is converging on** — 132 of the 222 lessons are here
 already, and the card runner is what they are replacing (§5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
@@ -736,7 +792,7 @@ drawn as native Views (`Stickman.tsx`), never SVG — see the performance rule b
 
 A reader saw "a glitch on screen, or a frame miss" on scene changes, answered
 questions, the figure turning round, and fast tapping. Measured with
-`npm run check:smooth` — which replays all 112 lessons at 60fps in plain Node —
+`npm run check:smooth` — which replays all 130 lessons at 60fps in plain Node —
 those four symptoms were **two defects**, both living in the three lines every
 scene shares:
 
@@ -891,15 +947,25 @@ share one:
 
 | Build | Runtime version | Can its users still open the app? |
 |---|---|---|
-| **20 (current)** | `b6f745e0007d2de75837eff60dc50fd3dd5b38c5` | **yes — and it is the only one** |
+| **21 (current)** | `8c32d9181fa168c587b1109a48d0d89108cfe32b` | **yes** |
+| **20** | `b6f745e0007d2de75837eff60dc50fd3dd5b38c5` | **yes — the gate is still 20** |
 | 19 | `29eb709aad3b70740f0c92239b1a350820c81247` | no — below `MIN_VERSION_CODE` |
 | 18, 17 | — | never finished; both ERRORED |
 | 16 | `bd0c0637f7e636eef9e8ddbbe61db9c9c9ae513c` | no — below `MIN_VERSION_CODE` |
 | 15, 14 | `7655f410f4b7050d121f65fcfb33bb7c2da56b5a` | no — below `MIN_VERSION_CODE` |
 
-So today there is exactly **one** runtime worth publishing to, and the third
-column is why: with the gate at 20, every older binary is held behind the update
-wall and an OTA to its runtime lands on people who are already stopped.
+So today there are **TWO** runtimes worth publishing to, and the third column is
+why: the gate is 20, so build 20 readers can still open the app and still need
+every update. **An OTA that goes only to 21's runtime reaches only the people who
+already updated** — which is the same silent failure as publishing to a dead
+runtime, wearing the opposite disguise.
+
+> This is the first time since build 16 that the number is not one, and it is the
+> direct consequence of NOT raising the gate with the build that carries it (§20).
+> That was the right call — a wall pointed at a release still rolling out locks
+> people out of a version they cannot get — but the price is two runtimes to
+> publish to until the gate moves, and forgetting the second one is free of any
+> error message.
 
 > **This table goes stale the moment a build finishes, and a stale row here is
 > not a documentation nit — it is updates published into a void.** Build 20
@@ -1113,8 +1179,8 @@ compiled into the APK — and *not* the version in `app.json`, because that one
 travels with OTA updates: an old binary carrying new JS would report the new
 number and walk straight past the gate.
 
-**It fails open, deliberately.** `MIN_VERSION_CODE` is **20**. On a current
-Android binary `nativeBuildVersion` reads `"20"`, but `parseInt`
+**It fails open, deliberately.** `MIN_VERSION_CODE` is **20**, while the current
+binary is **21**. On a current Android binary `nativeBuildVersion` reads `"21"`, but `parseInt`
 would turn an unexpected `"1.0.0"` into `1`, and against that minimum that
 locks out *every user on earth including up-to-date ones*, with no way back. So
 only whole digits count; anything else, and anything null (web, Expo Go, dev
@@ -1124,6 +1190,18 @@ client), is unknown — and unknown never blocks. iOS is skipped entirely.
 already be live and fully rolled out, and the update must be published to **every
 runtime still in the wild** (§18). A gate published only to the current runtime
 reaches exactly the people who do not need it.
+
+**The gate LAGS the build on purpose, and 21 is the worked example.** Build 21
+shipped with this constant still reading 20, because a gate is JavaScript: raising
+it only reaches a binary through an update published to THAT binary's runtime. Set
+it to 21 inside the build that carries 21 and you wall nobody who is not already
+on 21 — you have merely armed a wall aimed at a release that may still be rolling
+out, and if the rollout stalls it points at a version nobody can download.
+
+So the sequence is always: ship the build → let it reach 100% → raise the constant
+→ publish to **both** runtimes, oldest first. The raise is the only change in this
+file that can lock a user out with no way back, and it is the one worth being
+slowest about. Until it happens, §18's table has two live rows, not one.
 
 ---
 
@@ -1143,6 +1221,12 @@ browser at it; the first transform can take longer than a navigation timeout.
 - **Authenticated screens are not reachable by URL.** Add a throwaway
   `app/preview*.tsx` that seeds `userDataStore` and renders the screen directly.
   **Delete it before committing** — any file in `app/` is a real route.
+  **`npm run check:routes` now enforces that, and it runs FIRST in `npm run check`,
+  ahead of even the typecheck.** It used to be a rule you had to remember, which is
+  the same shape of mistake as a budget nobody executes (§11): an orphan was found
+  on disk by hand twice in one afternoon, both times with a build minutes away, and
+  the scaffolding is not inert — `previewcover.tsx` forces `_hasHydrated` and
+  `launchDone`, so anyone reaching it gets a store lying about its own state.
 - **React Native Web needs a real `click` event**; synthetic `pointerdown` +
   `pointerup` alone do not trigger a `Pressable`.
 - **Measure, don't eyeball.** Sampling geometry every frame catches what
@@ -1167,13 +1251,40 @@ browser at it; the first transform can take longer than a navigation timeout.
   find. When a real screen changes, load the real screen.
 - `jimp-compact` is available (via `@expo/image-utils`) for offline image work —
   resizing, desaturating, compositing icon layers, checking transparency.
-- **Two harnesses step the real lessons in a browser**, because some questions
-  cannot be answered by arithmetic at all. `npm run check:frame` measures every
+- **Four harnesses step the real lessons in a browser**, because some questions
+  cannot be answered by arithmetic at all. **They share one lock**
+  (`scripts/lib/previewroute.mjs`) because they also share a Metro, a Chrome and —
+  fatally — a filename: `check-frame` and `check-spoiler` both write
+  `app/previewframe.tsx`, and for a while only `measure-must` took a lock at all.
+  Two together means one deletes the other's route mid-sweep and the victim reports
+  lesson after lesson as NEVER RENDERED A STAGE while every symptom points at the
+  app. The lock is per ROUTE, not per repo, so two harnesses on two different
+  routes still run at once; it is taken with the `wx` flag so two starting in the
+  same millisecond cannot both win; and **a dead owner is not an owner** — stopping
+  a background task does not always kill the node process under it, so a lock whose
+  pid has gone is taken over rather than obeyed, and the orphaned route it left
+  behind is deleted on the way past. `npm run check:frame` measures every
   element a scene draws against the stage's own crop and reports what the camera
   is cutting in half; `npm run measure:must` records what each beat has on stage
   and writes `components/lesson/cinematic/mustBoxes.ts`, which is what stops the
-  camera cropping it (H60c). Both want Metro on 8847 and a headless Chrome on
-  9382 — the header of each script has the exact commands.
+  camera cropping it (H60c); `npm run check:spoiler` reads the whole visible page
+  at every graded beat BEFORE answering it and fails if any of the reveal is
+  already legible (group O). All three want Metro on 8847 and a headless Chrome
+  on 9382 — the header of each script has the exact commands.
+
+  **`check:spoiler` exists because reading the source said the app was clean and
+  the reader could see that it was not.** Every shared component gates its reveal
+  on `answered` — `Choices`, `InteractPanel`, `Reveal`, `ChoiceCards`,
+  `DragScale`, both bespoke players — and so does every scene's own
+  `wrong(id)` helper. A grep therefore proves nothing here; only the rendered
+  page does.
+
+  **And it needs its preview route to exist BEFORE Metro starts.** Expo Router
+  builds its route table at bundle time, so `app/previewframe.tsx` written after
+  the dev server is up serves "This screen doesn't exist" — which renders no
+  buttons, so every lesson reports "could not be answered" and the sweep finishes
+  GREEN having measured nothing. Its first run did exactly that for all 130.
+  `SPOILER_KEEP=1` leaves the route in place between runs while iterating.
 
   **Three things they got wrong first, all worth knowing before writing the
   fourth harness of this kind.** Its taps did not advance the beat at all, so the
