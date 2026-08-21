@@ -50,8 +50,14 @@ import SketchIcon from '@/components/shared/SketchIcon';
 //      arms a wall pointed at a build that may still be rolling out. The raise
 //      is a separate, later step: once 21 is live and at 100%, set this to 21
 //      and publish to every runtime still reachable (§20's two conditions).
+//
+//      DONE, 2026-08-19. 21 reached 100% and this went to 21 in the same commit
+//      that was published to BOTH runtimes — build 20's FIRST, because those are
+//      the only people the wall is for and an update they never receive is a
+//      wall that does not exist. After that publish there is one reachable
+//      runtime again (§18).
 // ─────────────────────────────────────────────────────────────────────────────
-export const MIN_VERSION_CODE = 20;
+export const MIN_VERSION_CODE = 21;
 
 const PACKAGE = 'com.philosophize.app';
 const Ink = '#1A1A1A';

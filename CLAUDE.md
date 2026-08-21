@@ -948,24 +948,28 @@ share one:
 | Build | Runtime version | Can its users still open the app? |
 |---|---|---|
 | **21 (current)** | `8c32d9181fa168c587b1109a48d0d89108cfe32b` | **yes** |
-| **20** | `b6f745e0007d2de75837eff60dc50fd3dd5b38c5` | **yes — the gate is still 20** |
+| 20 | `b6f745e0007d2de75837eff60dc50fd3dd5b38c5` | no — below `MIN_VERSION_CODE` (raised 2026-08-19) |
 | 19 | `29eb709aad3b70740f0c92239b1a350820c81247` | no — below `MIN_VERSION_CODE` |
 | 18, 17 | — | never finished; both ERRORED |
 | 16 | `bd0c0637f7e636eef9e8ddbbe61db9c9c9ae513c` | no — below `MIN_VERSION_CODE` |
 | 15, 14 | `7655f410f4b7050d121f65fcfb33bb7c2da56b5a` | no — below `MIN_VERSION_CODE` |
 
-So today there are **TWO** runtimes worth publishing to, and the third column is
-why: the gate is 20, so build 20 readers can still open the app and still need
-every update. **An OTA that goes only to 21's runtime reaches only the people who
-already updated** — which is the same silent failure as publishing to a dead
-runtime, wearing the opposite disguise.
+So today there is again exactly **one** runtime worth publishing to, and the third
+column is why: with the gate at 21, every older binary is held behind the update
+wall and an OTA to its runtime lands on people who are already stopped.
 
-> This is the first time since build 16 that the number is not one, and it is the
-> direct consequence of NOT raising the gate with the build that carries it (§20).
-> That was the right call — a wall pointed at a release still rolling out locks
-> people out of a version they cannot get — but the price is two runtimes to
-> publish to until the gate moves, and forgetting the second one is free of any
-> error message.
+> **It was two for the length of one afternoon, and that window is the lesson.**
+> Build 21 shipped on 2026-08-19 with the gate deliberately left at 20 (§20), so
+> for as long as the rollout was running, build 20 readers could still open the
+> app and still needed every update — and an OTA sent only to 21's runtime would
+> have reached only the people who had already updated. That is the same silent
+> failure as publishing to a dead runtime, wearing the opposite disguise, and
+> nothing would have reported it.
+>
+> The window closed the way it is supposed to: 21 reached 100%, the gate went to
+> 21, and **that release was published to build 20's runtime FIRST**. A gate raise
+> that does not reach the binaries it is about to block is a wall nobody is told
+> about. Expect this window every time a rename or a native change ships.
 
 > **This table goes stale the moment a build finishes, and a stale row here is
 > not a documentation nit — it is updates published into a void.** Build 20
@@ -1179,8 +1183,8 @@ compiled into the APK — and *not* the version in `app.json`, because that one
 travels with OTA updates: an old binary carrying new JS would report the new
 number and walk straight past the gate.
 
-**It fails open, deliberately.** `MIN_VERSION_CODE` is **20**, while the current
-binary is **21**. On a current Android binary `nativeBuildVersion` reads `"21"`, but `parseInt`
+**It fails open, deliberately.** `MIN_VERSION_CODE` is **21**, matching the current
+binary. On a current Android binary `nativeBuildVersion` reads `"21"`, but `parseInt`
 would turn an unexpected `"1.0.0"` into `1`, and against that minimum that
 locks out *every user on earth including up-to-date ones*, with no way back. So
 only whole digits count; anything else, and anything null (web, Expo Go, dev
@@ -1201,7 +1205,11 @@ out, and if the rollout stalls it points at a version nobody can download.
 So the sequence is always: ship the build → let it reach 100% → raise the constant
 → publish to **both** runtimes, oldest first. The raise is the only change in this
 file that can lock a user out with no way back, and it is the one worth being
-slowest about. Until it happens, §18's table has two live rows, not one.
+slowest about. While it is pending, §18's table has two live rows, not one.
+
+**21 ran that sequence in full on 2026-08-19** and it is the worked example: built
+on the 19th with the gate at 20, left alone through review and rollout, raised to
+21 only once Play reported 100%, then published to build 20's runtime before 21's.
 
 ---
 
