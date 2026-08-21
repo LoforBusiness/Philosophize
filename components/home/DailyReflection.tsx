@@ -2,7 +2,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import SketchIcon from '@/components/shared/SketchIcon';
 import SectionHead from '@/components/home/SectionHead';
 import { plate as platePalette } from '@/components/shared/tone';
-import { ERA, C, type EraKey } from '@/constants/design';
+import { ERA, type EraKey } from '@/constants/design';
 import { eraGroupOfId } from '@/data/philosophers';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -109,13 +109,13 @@ export default function DailyReflection({ quote, saved, onOpenAuthor, onToggleSa
         <Pressable style={styles.who} onPress={onOpenAuthor} accessibilityRole="button" hitSlop={6}>
           <View style={[styles.dash, { backgroundColor: tint }]} />
           <Text style={styles.author} numberOfLines={1}>{quote.author.toUpperCase()}</Text>
-          {group ? (
-            <>
-              <Text style={styles.sep}>·</Text>
-              <Text style={[styles.era, { color: tint }]} numberOfLines={1}>{group}</Text>
-            </>
-          ) : null}
         </Pressable>
+        {/* THE ERA SITS AT THE OTHER END, not after the name. Trailing the
+            author it added about a hundred points to a row that already
+            ellipsised the longest names — Maurice Merleau-Ponty overran it — and
+            the name is the half worth keeping whole. Opposite the bookmark it
+            uses space that was empty, and reads as a tag on a byline. */}
+        {group ? <Text style={[styles.era, { color: tint }]}>{group}</Text> : null}
         <Pressable
           hitSlop={12}
           onPress={onToggleSave}
@@ -143,19 +143,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 16,
   },
-  // `flexShrink` so a long name gives way to the bookmark rather than pushing
-  // it off the right edge — several of these run to four words.
-  who: { flexDirection: 'row', alignItems: 'center', flexShrink: 1, paddingRight: 12 },
+  // `flex: 1` rather than bare `flexShrink`, so the byline SWALLOWS the slack
+  // and the era tag lands beside the bookmark instead of floating in the middle
+  // of the row — which is where space-between puts a lone middle child. It still
+  // shrinks (flex:1 is grow 1, shrink 1), so a long name gives way to the
+  // bookmark rather than pushing it off the right edge; several run to four
+  // words.
+  who: { flexDirection: 'row', alignItems: 'center', flex: 1, paddingRight: 12 },
   // Colour is set at render from the era — see the header. 1.5px of a hue that
   // clears 4.5:1 on paper is comfortably above the 3:1 floor a non-text mark is
   // held to.
   dash: { width: 18, height: 1.5, marginRight: 10 },
-  sep: { fontFamily: 'Inter_400Regular', fontSize: 11, color: C.dim, marginHorizontal: 7 },
   era: {
     fontFamily: 'Inter_700Bold',
     fontSize: 9.5,
     letterSpacing: 1.3,
     flexShrink: 0,
+    marginRight: 14,
   },
   author: {
     fontFamily: 'Inter_500Medium',
