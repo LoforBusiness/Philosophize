@@ -180,5 +180,42 @@ ok(noBranch.length === 0, 'and at least one branch to chart',
     `${quotes[0].n} chars (${quotes[0].who}), ceiling ${ceiling}`);
 }
 
+// ── the first-run intro tells a reader how many thinkers there are ──────────
+//
+// It said "two hundred and twenty-three" for as long as it had existed, and the
+// board beside it said "AND 218 MORE" — both encoding a roll of 223 against a
+// real 322. It is the first factual claim the app makes about itself, in the
+// first thirty seconds, in an app about thinking clearly, and nothing could
+// notice, because a spoken line is a string.
+//
+// The board's figure is derived from ALL_PHILOSOPHERS now. The spoken line
+// cannot be — it is spelled out in words and revealed one word at a time
+// against its own beat — so it is checked instead.
+{
+  const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+  const TENS = { twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
+  const introSrc = readFileSync(path.join(REPO, 'components/welcome/rig.ts'), 'utf8');
+  const m = introSrc.match(/'([A-Za-z -]+) thinkers\.'/);
+  const spoken = m ? m[1] : null;
+  let n = 0;
+  if (spoken) {
+    // "Three hundred and twenty-two" -> 322. Enough grammar for any figure this
+    // roll will plausibly reach.
+    for (const part of spoken.toLowerCase().replace(/-/g, ' ').split(/\s+/)) {
+      if (part === 'hundred') n *= 100;
+      else if (part === 'and') continue;
+      else if (TENS[part] != null) n += TENS[part];
+      else if (WORDS.indexOf(part) >= 0) n += WORDS.indexOf(part);
+    }
+  }
+  ok(spoken != null, 'the intro still states a thinker count', spoken ?? '(line not found)');
+  ok(n === ALL.length, 'the intro says how many thinkers there actually are',
+    `says ${n} ("${spoken}"), roll is ${ALL.length}`);
+
+  const chart = readFileSync(path.join(REPO, 'components/welcome/charts/ThinkersChart.tsx'), 'utf8');
+  ok(/AND \{ALL_PHILOSOPHERS\.length - THINKERS\.length\} MORE/.test(chart),
+    'the intro board derives its "and n more" rather than typing it');
+}
+
 console.log(fails ? `\n${fails} problem(s).\n` : '\nall clear.\n');
 process.exit(fails ? 1 : 0);

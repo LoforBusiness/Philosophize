@@ -69,9 +69,15 @@ const SCRIPT: Array<[number, string, Visual | null, Gesture | null, number[]?]> 
   // says, the picture must do). The cues are the words each name lands on.
   [14.4, 'What is real. How you know. What follows.', 'map', null, [2, 5, 7]],
   [18.0, 'How to live. What is beautiful. Who rules.', 'map', null, [2, 5, 7]],
-  // The exact figure, because it is more impressive than the round one and the
-  // board beside it counts the same set (six drawn, "AND 217 MORE").
-  [21.8, 'Two hundred and twenty-three thinkers.', 'thinkers', null],
+  // THE EXACT FIGURE, because it is more impressive than the round one — and it
+  // has to be the RIGHT exact figure. This said "two hundred and twenty-three"
+  // for as long as the intro has existed; there are 322. A wrong number is worse
+  // than a round one in the first thirty seconds of an app about thinking
+  // clearly, and it is the one line here that can rot on its own.
+  //
+  // `check-thinkers` now compares this line and the board's "AND n MORE" against
+  // ALL_PHILOSOPHERS.length, so the next person to add a thinker is told.
+  [21.8, 'Three hundred and twenty-two thinkers.', 'thinkers', null],
   [25.0, 'Socrates. Kant. Nietzsche. Simone de Beauvoir.', 'thinkers', null],
   [28.6, 'Ready to think differently?', null, 'open'],
 ];

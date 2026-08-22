@@ -56,15 +56,15 @@ import {
   STR,
   BUB,
   beatIdxAt,
-  speechEnv,
   ik,
   reachTo,
-  handTargets,
   tailTip,
   type Beat,
   type Chapter,
 } from './rig';
-import { hostAt, proportions } from './host';
+import Stickman from '@/components/lesson/cinematic/Stickman';
+import { solve, bundle, type Bundle } from '@/components/lesson/cinematic/rig';
+import { hostAtRig, K_HOST, FIG_GROUND } from './hostFigure';
 import MapChart from './charts/MapChart';
 import ThinkersChart from './charts/ThinkersChart';
 import LessonChart from './charts/LessonChart';
@@ -118,6 +118,11 @@ const TAIL_BOX = { x: 30, y: 356, w: 340, h: 188 };
 // line between the bubble and his head — its `d` never changes.
 // The root is lifted 4px INTO the bubble so the bubble's own bottom border is
 // covered where they meet and the two read as one shape.
+/** How far the Begin button drops onto its own ledge. Matches LIP.button. */
+const BEGIN_LIP = 4;
+/** The accent the ledge is cut from — the app's one structural colour. */
+const HUE = '#1B3B3C';
+
 const TW = BUB.tailW;
 const TL = BUB.tailLen0;
 const TAIL_FILL_D =
@@ -130,6 +135,10 @@ const TAIL_EDGE_D =
   `Q${-TW * 0.15} ${TL * 0.46} ${-TW} ${-4}`;
 
 // ── figure primitives ────────────────────────────────────────────────────────
+// GONE. Twenty-two anchored View bases and a bone-transform helper used to live
+// here — a second copy of components/lesson/cinematic/Stickman that had drifted
+// from it, which is the same fork the walk itself was. Stickman draws him now.
+// ── figure primitives ────────────────────────────────────────────────────────
 // NOTHING about the figure is static geometry any more. It used to be: the legs
 // were two frozen View styles computed once at module scope, which is exactly why
 // he could not walk — and why he simply existed, fully drawn, on the first frame.
@@ -141,34 +150,7 @@ const TAIL_EDGE_D =
 // (transformOrigin 0% 50%), so [translate, rotate, scaleX(len/BONE_SRC)] lays it
 // from the start joint along the bone. Round caps come from the joint circles
 // sitting on top of the ends, which is what the old round-capped stadiums drew.
-const HEAD_BASE: ViewStyle = {
-  position: 'absolute',
-  left: -STR.headR,
-  top: -STR.headR,
-  width: 2 * STR.headR,
-  height: 2 * STR.headR,
-  borderRadius: STR.headR,
-  backgroundColor: INK,
-};
-const JOINT_BASE: ViewStyle = {
-  position: 'absolute',
-  left: -STR.limb / 2,
-  top: -STR.limb / 2,
-  width: STR.limb,
-  height: STR.limb,
-  borderRadius: STR.limb / 2,
-  backgroundColor: INK,
-};
 /** The welded pelvis — wider than a limb joint, so it caps both hips at once. */
-const PELVIS_BASE: ViewStyle = {
-  position: 'absolute',
-  left: -(STR.torso / 2 + 1),
-  top: -(STR.torso / 2 + 1),
-  width: STR.torso + 2,
-  height: STR.torso + 2,
-  borderRadius: STR.torso / 2 + 1,
-  backgroundColor: INK,
-};
 /**
  * A BONE IS 100 UNITS LONG AND SCALED DOWN, NOT ONE UNIT SCALED UP.
  *
@@ -196,17 +178,6 @@ const PELVIS_BASE: ViewStyle = {
  * factor is below 1. Downscaling has no such failure mode.
  */
 const BONE_SRC = 100;
-const BONE_BASE: ViewStyle = {
-  position: 'absolute',
-  left: 0,
-  top: -STR.limb / 2,
-  width: BONE_SRC,
-  height: STR.limb,
-  backgroundColor: INK,
-  transformOrigin: '0% 50%',
-};
-const TORSO_BASE: ViewStyle = { ...BONE_BASE, top: -STR.torso / 2, height: STR.torso };
-
 /**
  * DEV-ONLY. `?t=13.2` on the web build pins the timeline to one instant so a
  * frame can be screenshotted and checked. Inert on native (no window.location)
@@ -217,29 +188,6 @@ const FREEZE_T =
     ? parseFloat(new URLSearchParams(window.location.search).get('t') ?? '')
     : NaN;
 
-/**
- * Where the hands are trying to be, whoever is driving them.
- *
- * The talking system aims them at gestures and at whichever board is up; the gaits
- * swing them off the pelvis. `walking` crossfades the two, so the hand-off at the
- * top of the turn — and again when he leaves — is a blend rather than a cut.
- *
- * MODULE SCOPE deliberately. It captures nothing from the component, and a worklet
- * defined in the render body is rebuilt and re-serialised on every render.
- */
-function handMix(nt: number) {
-  'worklet';
-  const P = hostAt(nt);
-  const talk = handTargets(nt, P.x);
-  const w = P.walking;
-  return {
-    lx: lerp(talk.lx, P.handL.x, w),
-    ly: lerp(talk.ly, P.handL.y, w),
-    rx: lerp(talk.rx, P.handR.x, w),
-    ry: lerp(talk.ry, P.handR.y, w),
-    k: P.handK,
-  };
-}
 
 interface Props {
   /**
@@ -269,11 +217,6 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
 
   // Persistent, exponentially-chased hand state. The targets can jump hard when
   // a line or a board changes; the hand itself can only ever glide there.
-  const hLx = useSharedValue(0);
-  const hLy = useSharedValue(0);
-  const hRx = useSharedValue(0);
-  const hRy = useSharedValue(0);
-  const handInit = useSharedValue(0);
 
   // Bubble box, measured once per beat (its width is content-driven) and chased
   // so it inflates rather than snapping when he reaches a second line.
@@ -292,32 +235,11 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
   // DEBUG: ?t=12.4 pins the timeline to one instant so it can be screenshotted.
   useEffect(() => {
     if (isNaN(FREEZE_T)) return;
-    let lx = 0;
-    let ly = 0;
-    let rx = 0;
-    let ry = 0;
-    let init = false;
-    for (let t = 0; t <= FREEZE_T; t += 1 / 60) {
-      const tg = handMix(t);
-      const k = 1 - Math.exp(-tg.k / 60);
-      if (!init) {
-        lx = tg.lx;
-        ly = tg.ly;
-        rx = tg.rx;
-        ry = tg.ry;
-        init = true;
-      } else {
-        lx = lerp(lx, tg.lx, k);
-        ly = lerp(ly, tg.ly, k);
-        rx = lerp(rx, tg.rx, k);
-        ry = lerp(ry, tg.ry, k);
-      }
-    }
-    hLx.value = lx;
-    hLy.value = ly;
-    hRx.value = rx;
-    hRy.value = ry;
-    handInit.value = 1;
+    // NO HAND CATCH-UP ANY MORE. This used to step a 60Hz exponential filter from
+    // zero to FREEZE_T to find where two smoothed hand targets had settled,
+    // because the hands were chased toward targets rather than posed. The rig
+    // poses them: `hostAtRig(t)` is a pure function of t, so there is nothing to
+    // catch up — jumping the clock is the whole of it.
     started.value = 0;
     clock.value = FREEZE_T;
     const idx = beatIdxAt(FREEZE_T);
@@ -334,50 +256,6 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
     if (nt >= T_HOLD) nt = T_HOLD; // play ONCE, then freeze on the end card
     clock.value = nt;
 
-    const tgt = handMix(nt);
-    if (!handInit.value) {
-      hLx.value = tgt.lx;
-      hLy.value = tgt.ly;
-      hRx.value = tgt.rx;
-      hRy.value = tgt.ry;
-      handInit.value = 1;
-    } else {
-      // The chase rate is the HOST'S now, not a constant. 8.5 (~120ms) is what the
-      // talking hands were tuned at and is kept exactly; a wind-up at four cycles a
-      // second through a 120ms filter comes out as a gentle waggle, so the walk
-      // phases ask for a much stiffer chase.
-      const k = 1 - Math.exp(-tgt.k * dt);
-      // Snap each channel once it's within a sub-pixel of a (now-constant) target,
-      // so on the frozen end card the chase reaches EXACT equality and the figure
-      // stops re-committing. During playback the idle-sway terms keep the targets
-      // moving, so this threshold is never hit and the glide is unchanged.
-      const nlx = lerp(hLx.value, tgt.lx, k);
-      hLx.value = Math.abs(nlx - tgt.lx) < 0.1 ? tgt.lx : nlx;
-      const nly = lerp(hLy.value, tgt.ly, k);
-      hLy.value = Math.abs(nly - tgt.ly) < 0.1 ? tgt.ly : nly;
-      const nrx = lerp(hRx.value, tgt.rx, k);
-      hRx.value = Math.abs(nrx - tgt.rx) < 0.1 ? tgt.rx : nrx;
-      const nry = lerp(hRy.value, tgt.ry, k);
-      hRy.value = Math.abs(nry - tgt.ry) < 0.1 ? tgt.ry : nry;
-    }
-
-    // Bubble height chases the number of lines he has reached. An asymptotic chase
-    // never exactly equals its target, and `height` is a LAYOUT prop — writing a
-    // sub-pixel-different value every frame relays out the bubble + wrapped Words
-    // for the whole 34s. Snap the final <0.25px and then hold a bit-exact constant,
-    // so a layout pass runs only when the target actually steps at a beat.
-    const diff = bubHTarget.value - bubH.value;
-    if (Math.abs(diff) > 0.25) {
-      const kb = 1 - Math.exp(-11 * dt);
-      bubH.value = lerp(bubH.value, bubHTarget.value, kb);
-    } else if (diff !== 0) {
-      bubH.value = bubHTarget.value;
-    }
-
-    if (nt >= T_BEGIN && !endLatched.value) {
-      endLatched.value = 1;
-      runOnJS(setEndReady)(true);
-    }
   });
 
   // Which beat is on screen — drives the words (JS side); ~13 renders in 30s.
@@ -455,113 +333,44 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
   // sway was a single group transform over the top. That is what made him a
   // standing prop rather than a character, and it is why he could only ever appear
   // and dissolve.
+  // ── the host, solved by the LESSON rig ────────────────────────────────────
+  //
+  // This was 110 lines of bespoke skeleton — its own leg IK, its own foot-lock,
+  // its own settle, its own arm reach — and a reader could see the difference:
+  // "the walking onto the screen is kinda bad … he has to reposition himself.
+  // The actual stickman in lessons looks really good."
+  //
+  // It does not solve anything itself now. `hostAtRig` says where he is and what
+  // he is doing; `solve` and `bundle` are the same two calls every cinematic
+  // lesson makes, so the gait, the foot-lock, the settle and the arm arcs are
+  // literally the same code that draws him in a lesson. See ./hostFigure.
   const D = useDerivedValue(() => {
     const t = clock.value;
-    const P = hostAt(t);
-    const pr = proportions(P.face);
-    const env = speechEnv(t);
-    const talk = 1 - P.walking;
-
-    // The idle head life belongs to the TALKING pose only — a walking figure has
-    // the gait's own rock, and running both at once reads as a wobble.
-    const headTilt =
-      talk *
-      (0.05 * Math.sin(t * 0.9 + 2.0) +
-        0.02 * Math.sin(t * 2.3) +
-        0.022 * env * Math.sin(t * 4.6 + 0.8));
-    const headBob = 2.2 * env * (0.5 + 0.5 * Math.sin(t * 9.1)); // tiny talking bob
-
-    // Spine. At lean 0 this collapses to exactly the constants it replaced, which
-    // is the point: the thirty seconds he spends talking are geometrically
-    // identical to the version that was approved.
-    const pelX = P.x;
-    const pelY = GROUND - P.pelvH;
-    const sinL = Math.sin(P.lean);
-    const cosL = Math.cos(P.lean);
-    const chestX = pelX + sinL * LEN.spine;
-    const chestY = pelY - cosL * LEN.spine;
-    const ha = P.lean + P.neck - headTilt;
-
-    // Shoulders and hips ride the spine's perpendicular, and their half-widths are
-    // what carries the turn (see PROFILE/FRONT in rig.ts).
-    const shBx = chestX - sinL * LEN.shDrop;
-    const shBy = chestY + cosL * LEN.shDrop;
-    const shLx = shBx - pr.shW * cosL;
-    const shLy = shBy - pr.shW * sinL;
-    const shRx = shBx + pr.shW * cosL;
-    const shRy = shBy + pr.shW * sinL;
-    const hipLx = pelX - pr.hipW * cosL;
-    const hipLy = pelY - pr.hipW * sinL;
-    const hipRx = pelX + pr.hipW * cosL;
-    const hipRy = pelY + pr.hipW * sinL;
-
-    // Legs. Clamped to the leg's own length first — see reachTo.
-    const legMax = LEN.thigh + LEN.shin - 0.02;
-    const anL = reachTo(hipLx, hipLy, pelX + P.footL.x, GROUND + P.footL.y, legMax);
-    const anR = reachTo(hipRx, hipRy, pelX + P.footR.x, GROUND + P.footR.y, legMax);
-    // Knees bow FORWARD, so the bend follows his facing. Pinned to −1 they bowed
-    // the right way walking on and backwards walking off.
-    const kb = -P.dir;
-    const knL = ik(hipLx, hipLy, anL.x, anL.y, LEN.thigh, LEN.shin, kb);
-    const knR = ik(hipRx, hipRy, anR.x, anR.y, LEN.thigh, LEN.shin, kb);
-
-    // Arms: IK from the smoothed hands back to the shoulders.
-    const elL = ik(shLx, shLy, hLx.value, hLy.value, pr.uarm, pr.farm, -1);
-    const elR = ik(shRx, shRy, hRx.value, hRy.value, pr.uarm, pr.farm, +1);
-
-    // A butt-capped bone as a View transform: translate to the start joint, rotate
-    // onto the joint vector, then scale the BONE_SRC-long bar to the bone's
-    // length. Dividing by BONE_SRC is not cosmetic — see the note on BONE_BASE.
-    const bone = (ax: number, ay: number, bx: number, by: number) => {
-      'worklet';
-      return [
-        { translateX: ax },
-        { translateY: ay },
-        { rotate: `${Math.atan2(by - ay, bx - ax) * DEG}deg` },
-        { scaleX: Math.hypot(bx - ax, by - ay) / BONE_SRC },
-      ];
-    };
-    const at = (x: number, y: number) => {
-      'worklet';
-      return [{ translateX: x }, { translateY: y }];
-    };
-
+    const F = hostAtRig(t);
+    const s = F.stance;
+    const j = solve({
+      x: F.x, groundY: FIG_GROUND, k: K_HOST, dir: F.dir,
+      tilt: s.tilt, neck: s.neck, bob: s.bob,
+      footL: s.footL, footR: s.footR, fistL: s.fistL, fistR: s.fistR,
+    });
     return {
-      // He LEAVES rather than dissolving, so there is no figure fade any more —
-      // only a hard cut once he is off the stage entirely, which nobody can see
-      // because there is nothing there to cut.
-      vis: P.vis,
+      // He LEAVES rather than dissolving, so there is no figure fade — only a
+      // hard cut once he is off the stage entirely, which nobody can see.
+      vis: F.vis,
       // The board and the bubble dissolve over the BEAT he holds the last line
-      // for — 0.42s — so they are gone by the frame he turns to leave. At the old
-      // 1.2s his speech bubble was still hanging over an empty patch of paper
-      // while he was already crouched and spinning his legs.
+      // for, so they are gone by the frame he turns to leave.
       fade: 1 - easeOutCubic(clamp01((t - T_FADE) / 0.5)),
-      headP: at(chestX + Math.sin(ha) * LEN.head, chestY - Math.cos(ha) * LEN.head + headBob),
-      torso: bone(pelX, pelY, chestX, chestY),
-      pelP: at(pelX, pelY),
-      shLp: at(shLx, shLy),
-      shRp: at(shRx, shRy),
-      thL: bone(hipLx, hipLy, knL.x, knL.y),
-      shnL: bone(knL.x, knL.y, anL.x, anL.y),
-      thR: bone(hipRx, hipRy, knR.x, knR.y),
-      shnR: bone(knR.x, knR.y, anR.x, anR.y),
-      knLp: at(knL.x, knL.y),
-      knRp: at(knR.x, knR.y),
-      anLp: at(anL.x, anL.y),
-      anRp: at(anR.x, anR.y),
-      upL: bone(shLx, shLy, elL.x, elL.y),
-      foL: bone(elL.x, elL.y, hLx.value, hLy.value),
-      upR: bone(shRx, shRy, elR.x, elR.y),
-      foR: bone(elR.x, elR.y, hRx.value, hRy.value),
-      elLp: at(elL.x, elL.y),
-      elRp: at(elR.x, elR.y),
-      haLp: at(hLx.value, hLy.value),
-      haRp: at(hRx.value, hRy.value),
-      // The tail has to track his head, and his head now moves a very long way.
-      headX: chestX + Math.sin(ha) * (LEN.head - headBob),
-      headY: chestY - Math.cos(ha) * (LEN.head - headBob),
+      // The tail tracks his head, and the head comes straight off the solved
+      // skeleton — a tail computed from constants would point at where he used
+      // to stand.
+      headX: j.head.x,
+      headY: j.head.y,
+      b: bundle(j, K_HOST, 1),
     };
   });
+  // Stickman wants a Bundle on its own, so the tail's two numbers ride beside it
+  // rather than inside it.
+  const DT = useDerivedValue<Bundle>(() => D.value.b);
 
   // Everything is now solved in stage coordinates, so the figure group carries no
   // transform of its own — only whether he is on the stage at all. `display` and
@@ -571,27 +380,6 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
     opacity: D.value.vis,
     display: D.value.vis <= 0 ? ('none' as const) : ('flex' as const),
   }));
-  const headStyle = useAnimatedStyle(() => ({ transform: D.value.headP }));
-  const torsoStyle = useAnimatedStyle(() => ({ transform: D.value.torso }));
-  const pelStyle = useAnimatedStyle(() => ({ transform: D.value.pelP }));
-  const shLStyle = useAnimatedStyle(() => ({ transform: D.value.shLp }));
-  const shRStyle = useAnimatedStyle(() => ({ transform: D.value.shRp }));
-  const thLStyle = useAnimatedStyle(() => ({ transform: D.value.thL }));
-  const shnLStyle = useAnimatedStyle(() => ({ transform: D.value.shnL }));
-  const thRStyle = useAnimatedStyle(() => ({ transform: D.value.thR }));
-  const shnRStyle = useAnimatedStyle(() => ({ transform: D.value.shnR }));
-  const knLStyle = useAnimatedStyle(() => ({ transform: D.value.knLp }));
-  const knRStyle = useAnimatedStyle(() => ({ transform: D.value.knRp }));
-  const anLStyle = useAnimatedStyle(() => ({ transform: D.value.anLp }));
-  const anRStyle = useAnimatedStyle(() => ({ transform: D.value.anRp }));
-  const upLStyle = useAnimatedStyle(() => ({ transform: D.value.upL }));
-  const foLStyle = useAnimatedStyle(() => ({ transform: D.value.foL }));
-  const upRStyle = useAnimatedStyle(() => ({ transform: D.value.upR }));
-  const foRStyle = useAnimatedStyle(() => ({ transform: D.value.foR }));
-  const elLStyle = useAnimatedStyle(() => ({ transform: D.value.elLp }));
-  const elRStyle = useAnimatedStyle(() => ({ transform: D.value.elRp }));
-  const haLStyle = useAnimatedStyle(() => ({ transform: D.value.haLp }));
-  const haRStyle = useAnimatedStyle(() => ({ transform: D.value.haRp }));
 
   // ── the tail: static shape, transformed onto the line to his head ──────────
   const tailXf = useDerivedValue(() => {
@@ -728,38 +516,11 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
             needsOffscreenAlphaCompositing
             style={[StyleSheet.absoluteFill, figStyle]}
           >
-            {/* far leg + far arm */}
-            <Animated.View style={[BONE_BASE, thLStyle]} />
-            <Animated.View style={[BONE_BASE, shnLStyle]} />
-            <Animated.View style={[JOINT_BASE, knLStyle]} />
-            <Animated.View style={[JOINT_BASE, anLStyle]} />
-
-            {/* near leg */}
-            <Animated.View style={[BONE_BASE, thRStyle]} />
-            <Animated.View style={[BONE_BASE, shnRStyle]} />
-            <Animated.View style={[JOINT_BASE, knRStyle]} />
-            <Animated.View style={[JOINT_BASE, anRStyle]} />
-
-            <Animated.View style={[TORSO_BASE, torsoStyle]} />
-            <Animated.View style={[PELVIS_BASE, pelStyle]} />
-            <Animated.View style={[JOINT_BASE, shLStyle]} />
-            <Animated.View style={[JOINT_BASE, shRStyle]} />
-
-            {/* no face — he reads as talking from the bubble, the word-by-word
-                reveal and the speech bob, not from a mouth */}
-            <Animated.View style={[HEAD_BASE, headStyle]} />
-
-            {/* arms: each bone is a unit bar stretched with scaleX and rotated onto
-                its joint vector; butt-capped, with the joint circles rounding the
-                ends off — exactly the SVG construction, now as Views. */}
-            <Animated.View style={[BONE_BASE, upLStyle]} />
-            <Animated.View style={[BONE_BASE, foLStyle]} />
-            <Animated.View style={[BONE_BASE, upRStyle]} />
-            <Animated.View style={[BONE_BASE, foRStyle]} />
-            <Animated.View style={[JOINT_BASE, elLStyle]} />
-            <Animated.View style={[JOINT_BASE, elRStyle]} />
-            <Animated.View style={[JOINT_BASE, haLStyle]} />
-            <Animated.View style={[JOINT_BASE, haRStyle]} />
+            {/* ONE COMPONENT, THE SAME ONE THE LESSONS DRAW.
+                Twenty-two hand-placed Views used to live here, each with its own
+                animated style reading its own field off the solver above. They
+                were a copy of Stickman that had drifted from it. */}
+            <Stickman D={DT} k={K_HOST} />
           </Animated.View>
         </View>
       </View>
@@ -997,6 +758,7 @@ function EndCard({
   endReady: boolean;
   onBegin: () => void;
 }) {
+  const [beginDown, setBeginDown] = useState(false);
   const word = useAnimatedStyle(() => {
     const r = easeOutCubic(clamp01((clock.value - T_BEGIN) / 0.6));
     return { opacity: r, transform: [{ translateY: 14 * (1 - r) }] };
@@ -1015,13 +777,26 @@ function EndCard({
     <View pointerEvents="box-none" style={styles.endCard}>
       <Animated.Text style={[styles.lockWord, word]}>Ashmere</Animated.Text>
       <Animated.View style={begin}>
+        {/* THE FIRST BUTTON ANYONE EVER PRESSES IN THIS APP, and it was a flat
+            pill that dimmed to 70%. Dimming is what a disabled control does; it
+            is not what a press feels like. This is the chunk every other button
+            in the app has — a slab of the accent behind the face, and the face
+            drops onto it — so the very first press teaches the gesture the rest
+            of the app answers to. See components/ui/Button. */}
         <Pressable
           onPress={onBegin}
+          onPressIn={() => setBeginDown(true)}
+          onPressOut={() => setBeginDown(false)}
           disabled={!endReady}
           hitSlop={16}
-          style={({ pressed }) => [styles.beginBtn, pressed && { opacity: 0.7 }]}
+          style={styles.beginSlot}
         >
-          <Text style={styles.beginText}>Begin</Text>
+          <View style={{ paddingBottom: BEGIN_LIP }}>
+            <View pointerEvents="none" style={styles.beginLip} />
+            <View style={[styles.beginBtn, { transform: [{ translateY: beginDown ? BEGIN_LIP : 0 }] }]}>
+              <Text style={styles.beginText}>Begin</Text>
+            </View>
+          </View>
         </Pressable>
       </Animated.View>
 
@@ -1077,8 +852,12 @@ const styles = StyleSheet.create({
 
   endCard: { position: 'absolute', left: 0, right: 0, top: 330, alignItems: 'center' },
   lockWord: { fontFamily: 'PlayfairDisplay_700Bold_Italic', fontSize: 46, color: INK, lineHeight: 58 },
+  beginSlot: { marginTop: 38 },
+  beginLip: {
+    position: 'absolute', left: 0, right: 0, bottom: 0, top: BEGIN_LIP,
+    backgroundColor: HUE, borderRadius: 25,
+  },
   beginBtn: {
-    marginTop: 38,
     backgroundColor: INK,
     borderRadius: 25,
     paddingVertical: 14,

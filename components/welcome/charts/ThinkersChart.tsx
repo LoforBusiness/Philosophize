@@ -17,6 +17,7 @@
 import Animated, { useAnimatedProps, type SharedValue } from 'react-native-reanimated';
 import { Circle, G, Path, Text as SvgText } from 'react-native-svg';
 import { INK, SOFT, clamp01, easeOutBack, easeOutCubic, seg } from '@/components/welcome/ease';
+import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 
 const APath = Animated.createAnimatedComponent(Path);
 const ACircle = Animated.createAnimatedComponent(Circle);
@@ -53,6 +54,10 @@ interface Thinker {
  * "BEAUVOIR" rather than "DE BEAUVOIR": the full form is 11 characters and
  * overruns the board. The host says her name in full.
  */
+// The five drawn here are subtracted from the real roll for the footer, so the
+// board cannot disagree with the app about how many thinkers there are. It said
+// "AND 218 MORE" — which encodes a total of 223, the figure the spoken line was
+// also stuck on.
 const THINKERS: Thinker[] = [
   { name: 'SOCRATES', dates: '470–399 BCE', x: 34, up: true, at: 0.1 },
   { name: 'DESCARTES', dates: '1596–1650', x: 140, up: false, at: 0.34 },
@@ -193,7 +198,7 @@ export default function ThinkersChart({ p }: { p: SharedValue<number> }) {
           letterSpacing={1.6}
           textAnchor="middle"
         >
-          AND 218 MORE
+          AND {ALL_PHILOSOPHERS.length - THINKERS.length} MORE
         </SvgText>
       </AG>
     </G>
