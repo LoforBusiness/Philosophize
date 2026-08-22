@@ -49,7 +49,10 @@
 // discarded in favour of a further one that can be seen.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type ActionKind = 'lesson' | 'quote';
+// 'thinker' exists because the era rail counts PEOPLE MET, not lessons, and a
+// screen reader being told "3 more lessons takes Ancient to 5" would be told
+// something false about the only row it cannot see.
+export type ActionKind = 'lesson' | 'quote' | 'thinker';
 
 /** One tappable thing on a chart: a bar or a league row. */
 export interface StatElement {
@@ -87,6 +90,7 @@ export interface MilestoneOpts {
 
 function plural(cost: number, action: ActionKind): string {
   if (action === 'quote') return cost === 1 ? '1 more saved quote' : `${cost} more saved quotes`;
+  if (action === 'thinker') return cost === 1 ? '1 more thinker' : `${cost} more thinkers`;
   return cost === 1 ? '1 more lesson' : `${cost} more lessons`;
 }
 
@@ -171,7 +175,7 @@ export function milestoneFor(
       kind: 'mark', cost: markCost, action: me.action, projected, ghost: ghostOf(projected),
       copy: me.action === 'quote'
         ? `${plural(markCost, 'quote')} and ${me.label} reaches ${mark}.`
-        : `${plural(markCost, 'lesson')} takes ${me.label} to ${mark}.`,
+        : `${plural(markCost, me.action)} takes ${me.label} to ${mark}.`,
     });
     if (ghostOf(projected) >= opts.minGhost) break;
   }
@@ -227,4 +231,72 @@ export function statsFingerprint(input: FingerprintInput): string {
   const p = input.philosophers.map((x) => `${x.id}:${x.score}`).join('|');
   const e = input.eras.map((x) => `${x.key}:${x.value}`).sort().join('|');
   return `2;${b};;${p};;${e}`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WHICH ROW ACTUALLY MOVED, AND WHY IT COMES OUT OF THE FINGERPRINT.
+//
+// The reader asked for the graph to react to what THEY did:
+//
+//   > "I want cool animations, like when the graphs gets updated becuase of
+//   > something the user did ... the information in the graph squezzes in and
+//   > then bounces out further because of the change of the graph."
+//
+// A bounce that plays on every row every visit is decoration. A bounce that
+// plays on the ONE row that grew is feedback, and the difference is entirely in
+// knowing which row that is.
+//
+// The obvious way to know is to persist the previous values — a new store key,
+// a new thing to migrate, a new thing to keep in step with what the charts draw.
+// It is not needed: `statsSeenFingerprint` is ALREADY the previous values, in
+// order, keyed. Parsing it back is free, has nothing to drift from, and cannot
+// disagree with the entrance animation, because it is the same string that
+// decides whether there is an entrance at all.
+//
+// A VERSION BUMP MEANS NOBODY POPS. If the format changes, every key looks new,
+// and every bar in the app would bounce at once for no reason a reader did —
+// exactly the meaningless decoration this exists to avoid. So a mismatched
+// version returns an empty set: the entrance still plays, nothing pops.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** `key:a:b:c` → [key, a]. The first number is the one the charts draw. */
+function firstValues(section: string): Map<string, number> {
+  const out = new Map<string, number>();
+  if (!section) return out;
+  for (const entry of section.split('|')) {
+    if (!entry) continue;
+    const bits = entry.split(':');
+    if (bits.length < 2) continue;
+    const n = Number(bits[1]);
+    if (Number.isFinite(n)) out.set(bits[0], n);
+  }
+  return out;
+}
+
+/**
+ * The keys whose drawn value went UP between two fingerprints.
+ *
+ * Only up: a value that fell is a sign-out, a reset or a migration, and none of
+ * those is an achievement to bounce about.
+ */
+export function grownKeys(prev: string, next: string): Set<string> {
+  const grown = new Set<string>();
+  if (!prev || !next) return grown;
+  const a = prev.split(';;');
+  const b = next.split(';;');
+  // `2;<branches>` — the version rides on the front of the first section.
+  const va = a[0]?.split(';')[0];
+  const vb = b[0]?.split(';')[0];
+  if (va !== vb) return grown;
+  a[0] = a[0].slice(String(va).length + 1);
+  b[0] = b[0].slice(String(vb).length + 1);
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const before = firstValues(a[i] ?? '');
+    const after = firstValues(b[i] ?? '');
+    for (const [k, v] of after) {
+      const was = before.get(k);
+      if (was == null || v > was) grown.add(k);
+    }
+  }
+  return grown;
 }

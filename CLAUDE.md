@@ -1392,6 +1392,47 @@ first and erased the drawing, which defeated the point of having it.
 > takes any waiting update and restarts into it BEFORE the first-run experience is
 > decided — bounded by `BUDGET_MS`, hidden behind the launch animation, and with a
 > loop guard for the rollback case. **It shipped in build 20**, so from that binary
+**The ring came back, and the tap stopped stating the obvious.** Two follow-up
+notes from the reader, both right:
+
+- *"I liked how that graphs looked before, I want more graphs like that look, but
+  redone in a way that is more visually pleasing."* A ranking answers "which is
+  biggest"; a ring answers "what is the shape of my reading", and those are
+  different questions. `components/stats/Donut.tsx` is the ring — the six BRANCH
+  hues, one light across the whole object, a groove behind it so an empty reader
+  still sees the shape, and the total in the hub. It shares its selection with
+  the bars under it, so the two are one chart rather than two views.
+- *"I dont like the obvious information ... like '5 more lessons and your at 20
+  lessons done' this is obvious and isnt informative."* Also right, and it was
+  the shape of a progress bar wearing words. `lib/utils/statsDiscovery.ts`
+  replaced it: tapping a branch or an era names a thinker from it the reader has
+  **never opened**, with their symbol, their dates and their idea in ten words;
+  tapping a thinker in the league gives one of their three "Did you know?" facts.
+  Every card ends in a door. `check:stats` asserts the complaint directly — no
+  card may ever contain "N more".
+
+**The bounce is feedback, not decoration, and that distinction is the design.**
+`bounceTo` squeezes to 0.82 and then springs past to about 1.07 — anticipation
+then overshoot, which is the whole reason a bounce reads as a thing *reacting*.
+It plays on the ring every visit that has news, and on rows **only where the
+reader's own number went up**: `grownKeys` recovers that from the previous
+fingerprint, which the tab already stores, so no new store key was needed. A
+grown row squeezes from its CURRENT length rather than from zero — reset it to
+zero first and the reader sees the bar being rebuilt, which reads as a reload.
+
+Measured in a browser rather than eyeballed: ring 0.82 → 1.07, the one grown row
+0.82 → 1.07, and all fifteen others 0 → 1 with no overshoot at all.
+
+> **The entrance was snapping to its end state, and nothing looked wrong.**
+> `markStatsSeen` writes the fingerprint, which re-renders, which changes the
+> focus callback's identity, which makes `useFocusEffect` run it AGAIN — and on
+> that pass the fingerprints match, so the old code called `setAnimate(false)`
+> while every spring was still travelling. Every child keys on `animate`, so all
+> of them jumped to the end. The instrument is what found it: the ring and all
+> seventeen bars sat at exactly 1.000 through a growth event that should have
+> bounced. The flag never needed clearing — children re-run on `playToken`, which
+> only moves when there is news.
+
 > on the welcome screen is updatable over the air like anything else. It had to be
 > in a binary once; it never has to be again.
 

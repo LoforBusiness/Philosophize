@@ -4,79 +4,116 @@ import {
   type StyleProp, type ViewStyle,
 } from 'react-native';
 import Animated, {
-  useSharedValue, useAnimatedStyle, useAnimatedProps, withSpring, withTiming, withDelay, Easing,
+  useSharedValue, useAnimatedStyle, useAnimatedProps,
+  withSpring, withTiming, withDelay, withSequence, Easing,
   type SharedValue,
 } from 'react-native-reanimated';
+import { MotiView } from 'moti';
 import { LinearGradient } from 'expo-linear-gradient';
 import ACounter, { counterStyle } from '@/components/shared/ACounter';
-import { StruckBar, StruckTile, MetalPlate } from '@/components/profile/Struck';
-import { INK, PAPER, PAPER_LIT, MID, ramp, mix, METAL, type Ramp } from '@/components/shared/tone';
+import { StruckBar, StruckTile } from '@/components/profile/Struck';
+import { INK, PAPER, PAPER_LIT, MID, ramp, mix, METAL } from '@/components/shared/tone';
 import { C } from '@/constants/design';
 import { milestoneFor, type StatElement, type Milestone } from '@/lib/utils/statsMilestone';
+import type { Discovery } from '@/lib/utils/statsDiscovery';
 import { cue } from '@/lib/feedback';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE INSIGHTS TAB'S PARTS.
 //
-// ── WHAT WAS WRONG, IN THREE SENTENCES ──────────────────────────────────────
-//
-// It drew the same data three times — a pie of "interest", a pie of thinkers and
-// a bar chart of "interactions" — so three shapes said one thing and none of
-// them said it well. Every one of them was GREY, six branches in six greys, at a
-// point where constants/design.ts already held six measured branch hues put there
-// for exactly this job. And everything it drew was a COMPOSITE SCORE:
-// `lessons×3 + quotes×2 + views`, a number no reader has ever earned or could
-// name.
-//
-// So: colour that means something, counts instead of scores, and four readings
-// that are actually four different things.
-//
 // ── EVERYTHING IS STRUCK, AND NOT BY A NEW SYSTEM ───────────────────────────
 //
 // `components/profile/Struck.tsx` already draws bars, tiles and metal plates in
-// the one light from `tone.ts`. This tab uses those, rather than growing a
+// the one light from `tone.ts`. This tab uses those rather than growing a
 // parallel set — the whole argument for one light is that it never moves, and
 // two files drawing the same object is how it starts moving.
 //
+// ── THE BOUNCE, AND WHY IT IS NOT ON EVERYTHING ─────────────────────────────
+//
+//   > "I want cool animations, like when the graphs gets updated becuase of
+//   > something the user did ... the information in the graph squezzes in and
+//   > then bounces out further because of the change of the graph. I want a
+//   > smooth gamified bouncy animation for this."
+//
+// `bounceTo` is that motion, and it has two modes on purpose. A row that GREW
+// since the reader last looked squeezes back first and then springs past its
+// new length before settling — anticipation, then overshoot, which is the whole
+// of why a bounce reads as a thing reacting rather than a thing appearing. Every
+// other row just springs in.
+//
+// The distinction is the point. A bounce that plays on every row every visit is
+// decoration and stops meaning anything by the third visit; a bounce on the one
+// row the reader moved is feedback. `grownKeys` in statsMilestone.ts is what
+// knows which, and it gets it out of the fingerprint the tab already stores.
+//
 // ── THE HEADROOM IS 30% AND IT IS LOAD-BEARING ──────────────────────────────
 //
-// Bars are drawn against `max × 1.3`, not against `max`. If the leader sat at
-// 100% of its track there would be nowhere to draw its ghost, so tapping the
-// biggest bar — the one a reader is most likely to tap first — would be the one
-// tap that showed nothing. The headroom is a constant so it cannot change when a
-// row is selected: re-scaling on tap would move every bar at once, which is the
-// camera cut §17's group L is about.
+// Bars draw against `max × 1.3`, not `max`. If the leader sat at 100% of its
+// track there would be nowhere for its ghost — so tapping the biggest bar, the
+// one a reader taps first, would be the one tap that showed nothing. It also
+// leaves room for the overshoot above to travel into instead of clipping.
+//
+// It is a CONSTANT: re-scaling on selection would move every bar at once, which
+// is the camera cut §17's group L is about.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** See the note above. Also the floor `check-stats.mjs` measures ghosts against. */
 export const HEADROOM = 1.3;
 export const MIN_GHOST = 8 / 144;
 
+/**
+ * SQUEEZE IN, THEN BOUNCE OUT FURTHER.
+ *
+ * Built on the JS thread and assigned to a shared value, so it deliberately is
+ * NOT a worklet — which also keeps it clear of §17's rule 2, the trap where a
+ * worklet calling a worklet declared below it throws at import.
+ *
+ * `damping: 7.5` is what makes the spring overshoot; anything over about 12
+ * settles without ever passing the target and the bounce disappears. The 0.82
+ * squeeze is small enough to read as a wind-up rather than as the bar breaking.
+ */
+export function bounceTo(to: number, delay: number, pop: boolean) {
+  if (pop) {
+    return withDelay(delay, withSequence(
+      withTiming(to * 0.82, { duration: 150, easing: Easing.out(Easing.quad) }),
+      withSpring(to, { damping: 7.5, stiffness: 190, mass: 0.9 }),
+    ));
+  }
+  return withDelay(delay, withSpring(to, { damping: 11, stiffness: 155, mass: 0.9 }));
+}
+
 // ── the ledger ───────────────────────────────────────────────────────────────
 
-export interface LedgerItem { label: string; value: number; hue: string }
+export interface LedgerItem { key: string; label: string; value: number; hue: string }
 
 /**
  * FOUR NUMBERS THAT ONLY EVER GO UP.
  *
  * Deliberately not "12 of 34": a denominator drawn from the curriculum shrinks
- * a reader's achievement every time content ships, which is the whole complaint
- * this redesign started from. These are counts of things done, full stop.
+ * a reader's achievement every time content ships, which is the complaint this
+ * redesign started from. These are counts of things done, full stop.
  */
-export function Ledger({ items, playToken, animate }: {
-  items: LedgerItem[]; playToken: number; animate: boolean;
+export function Ledger({ items, playToken, animate, grown }: {
+  items: LedgerItem[]; playToken: number; animate: boolean; grown: Set<string>;
 }) {
   return (
     <View style={s.ledger}>
       {items.map((it, i) => (
-        <LedgerTile key={it.label} item={it} index={i} playToken={playToken} animate={animate} />
+        <LedgerTile
+          key={it.key}
+          item={it}
+          index={i}
+          playToken={playToken}
+          animate={animate}
+          pop={grown.has(it.key)}
+        />
       ))}
     </View>
   );
 }
 
-function LedgerTile({ item, index, playToken, animate }: {
-  item: LedgerItem; index: number; playToken: number; animate: boolean;
+function LedgerTile({ item, index, playToken, animate, pop }: {
+  item: LedgerItem; index: number; playToken: number; animate: boolean; pop: boolean;
 }) {
   const r = ramp(item.hue);
   const n = useSharedValue(animate ? 0 : item.value);
@@ -85,14 +122,14 @@ function LedgerTile({ item, index, playToken, animate }: {
   useEffect(() => {
     if (!animate) { n.value = item.value; rise.value = 1; return; }
     n.value = 0; rise.value = 0;
-    rise.value = withDelay(index * 70, withSpring(1, { damping: 14, stiffness: 170 }));
-    n.value = withDelay(index * 70, withTiming(item.value, { duration: 720, easing: Easing.out(Easing.cubic) }));
-  }, [playToken, animate, item.value, index, n, rise]);
+    rise.value = bounceTo(1, index * 70, pop);
+    n.value = withDelay(index * 70, withTiming(item.value, { duration: 760, easing: Easing.out(Easing.cubic) }));
+  }, [playToken, animate, item.value, index, pop, n, rise]);
 
   const props = useAnimatedProps(() => ({ text: `${Math.round(n.value)}` }) as never);
   const style = useAnimatedStyle(() => ({
-    opacity: rise.value,
-    transform: [{ translateY: (1 - rise.value) * 10 }],
+    opacity: Math.min(1, rise.value * 1.6),
+    transform: [{ scale: rise.value }],
   }));
 
   return (
@@ -121,23 +158,35 @@ export interface BarRow {
   label: string;
   value: number;
   hue: string;
-  /** The line under the label when this row is picked — its composition. */
+  /** The composition line under the name when this row is picked. */
   detail: string;
-  action: 'lesson' | 'quote';
+  action: 'lesson' | 'quote' | 'thinker';
 }
 
 /**
  * A RANKED RUN OF STRUCK BARS, in the colour of whatever they are.
  *
- * Tapping one draws its ghost and says what would move it. Nothing it can say
- * depends on the size of the curriculum — see lib/utils/statsMilestone.ts, which
- * is where the reader's objection is answered and measured.
+ * Tapping one draws its ghost — how far the next round number is — and opens a
+ * DISCOVERY, which is a thinker or a fact rather than a restatement of the
+ * number already on the row. See lib/utils/statsDiscovery.ts for why.
  */
 export function RankedBars({
-  title, subtitle, rows, playToken, animate, hint, style,
+  title, subtitle, rows, playToken, animate, grown, discoverFor, onOpenThinker, chart, hint, style,
 }: {
   title: string; subtitle: string; rows: BarRow[];
   playToken: number; animate: boolean;
+  grown: Set<string>;
+  discoverFor: (key: string) => Discovery | null;
+  onOpenThinker: (id: string) => void;
+  /**
+   * An optional graph drawn ABOVE the rows, sharing their selection.
+   *
+   * A render prop rather than a child, because the chart has to know what is
+   * picked and be able to pick — the ring and the rows are two views of one
+   * choice, and threading that through a parent would put the selection in the
+   * screen, where three sections would then have to keep three copies of it.
+   */
+  chart?: (selected: string | null, onSelect: (key: string) => void) => React.ReactNode;
   /** Shown until a row is picked. One per screen — twice reads as a stutter. */
   hint?: boolean;
   style?: StyleProp<ViewStyle>;
@@ -155,13 +204,16 @@ export function RankedBars({
   useEffect(() => {
     if (!animate || reduce) { grow.value = 1; return; }
     grow.value = 0;
-    grow.value = withDelay(160, withSpring(1, { damping: 13, stiffness: 150, mass: 0.9 }));
+    grow.value = withDelay(140, withSpring(1, { damping: 13, stiffness: 150, mass: 0.9 }));
   }, [playToken, animate, reduce, grow]);
 
   const max = rows.reduce((a, r) => (r.value > a ? r.value : a), 0);
   const scale = Math.max(1, max * HEADROOM);
 
   const selIndex = sel == null ? -1 : rows.findIndex((r) => r.key === sel);
+  // The milestone is no longer PRINTED — it draws the ghost, and it carries the
+  // accessibility hint, so a screen reader is still told what the dashed part
+  // of the bar means. The card says something worth reading instead.
   const milestone: Milestone | null = useMemo(() => {
     if (selIndex < 0) return null;
     const els: StatElement[] = rows.map((r) => ({
@@ -169,6 +221,8 @@ export function RankedBars({
     }));
     return milestoneFor(els, selIndex, { minGhost: MIN_GHOST });
   }, [selIndex, rows]);
+
+  const discovery = useMemo(() => (sel == null ? null : discoverFor(sel)), [sel, discoverFor]);
 
   const pick = (key: string) => {
     setSel((p) => (p === key ? null : key));
@@ -178,6 +232,7 @@ export function RankedBars({
   return (
     <View style={[s.section, style]}>
       <SectionHead title={title} subtitle={subtitle} />
+      {chart ? <View style={s.chart}>{chart(sel, pick)}</View> : null}
       {rows.map((r, i) => (
         <BarLine
           key={r.key}
@@ -186,31 +241,55 @@ export function RankedBars({
           count={rows.length}
           scale={scale}
           grow={grow}
+          reduce={reduce}
+          playToken={playToken}
+          animate={animate}
+          pop={grown.has(r.key)}
           selected={sel === r.key}
           ghost={sel === r.key && milestone && milestone.kind !== 'none'
             ? (milestone.projected - r.value) / scale
             : 0}
+          ghostTo={milestone && milestone.kind !== 'none' ? milestone.projected : 0}
+          hintText={sel === r.key && milestone ? milestone.copy : undefined}
           onPress={() => pick(r.key)}
         />
       ))}
-      {milestone && selIndex >= 0 ? (
-        <Detail row={rows[selIndex]} milestone={milestone} reduce={reduce} />
+      {selIndex >= 0 && discovery ? (
+        <DiscoveryCard d={discovery} hue={rows[selIndex].hue} sub={rows[selIndex].detail} onOpen={onOpenThinker} />
       ) : hint ? (
-        <Text style={s.hint}>Tap a row to see what would move it.</Text>
+        <Text style={s.hint}>Tap a row to meet someone from it.</Text>
       ) : null}
     </View>
   );
 }
 
-function BarLine({ row, index, count, scale, grow, selected, ghost, onPress }: {
+function BarLine({
+  row, index, count, scale, grow, reduce, playToken, animate, pop,
+  selected, ghost, ghostTo, hintText, onPress,
+}: {
   row: BarRow; index: number; count: number; scale: number;
-  grow: SharedValue<number>; selected: boolean; ghost: number; onPress: () => void;
+  grow: SharedValue<number>; reduce: boolean; playToken: number; animate: boolean; pop: boolean;
+  selected: boolean; ghost: number; ghostTo: number; hintText?: string; onPress: () => void;
 }) {
   const r = ramp(row.hue);
   const pct = row.value / scale;
 
-  // Each bar starts a little after the one above it — a stagger, not a queue.
+  // A row that GREW gets its own squeeze-and-overshoot, on its own clock; the
+  // rest ride the shared stagger. Two sources, one property — so the grown row
+  // opts out of `grow` entirely rather than fighting it.
+  // STARTS AT ITS CURRENT LENGTH, not at zero. A grown row should squeeze IN
+  // from where it already was and then spring out past its new length — reset it
+  // to 0 first and what the reader sees is the bar being rebuilt, which reads as
+  // a reload rather than as a reaction to what they just did.
+  const solo = useSharedValue(1);
+  useEffect(() => {
+    if (!pop) return;
+    if (!animate || reduce) { solo.value = 1; return; }
+    solo.value = bounceTo(1, 260 + index * 60, true);
+  }, [playToken, animate, reduce, pop, index, solo]);
+
   const fillStyle = useAnimatedStyle(() => {
+    if (pop) return { transform: [{ scaleX: solo.value }] };
     const lead = (index / Math.max(1, count)) * 0.35;
     const t = Math.min(1, Math.max(0, (grow.value - lead) / (1 - lead)));
     return { transform: [{ scaleX: t }] };
@@ -221,6 +300,7 @@ function BarLine({ row, index, count, scale, grow, selected, ghost, onPress }: {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`${row.label}, ${row.value}`}
+      accessibilityHint={hintText}
       style={({ pressed }) => [s.barRow, pressed && { opacity: 0.75 }]}
     >
       <View style={s.barTop}>
@@ -236,51 +316,78 @@ function BarLine({ row, index, count, scale, grow, selected, ghost, onPress }: {
           <StruckBar pct={pct} fill={r} height={12} />
         </Animated.View>
         {ghost > 0 ? (
-          <View
+          <MotiView
             pointerEvents="none"
-            style={[s.ghost, { left: `${pct * 100}%`, width: `${Math.min(1 - pct, ghost) * 100}%`, borderColor: r.shade }]}
-          />
+            from={{ opacity: 0, scaleX: 0.4 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            transition={{ type: 'spring', damping: 9, stiffness: 170 }}
+            style={[
+              s.ghost,
+              {
+                left: `${pct * 100}%`,
+                width: `${Math.min(1 - pct, ghost) * 100}%`,
+                borderColor: r.shade,
+              },
+            ]}
+          >
+            {/* The target as a NUMERAL, not a sentence — the dashed run already
+                says "this far", so the only thing missing is how far. */}
+            <Text style={[s.ghostNum, { color: r.shade }]} numberOfLines={1}>{ghostTo}</Text>
+          </MotiView>
         ) : null}
       </View>
     </Pressable>
   );
 }
 
-function Detail({ row, milestone, reduce }: { row: BarRow; milestone: Milestone; reduce: boolean }) {
-  const r = ramp(row.hue);
-  const shown = useSharedValue(row.value);
+// ── the discovery card ───────────────────────────────────────────────────────
 
-  useEffect(() => {
-    if (milestone.kind === 'none') { shown.value = row.value; return; }
-    shown.value = row.value;
-    if (reduce) { shown.value = milestone.projected; return; }
-    shown.value = withTiming(milestone.projected, { duration: 620, easing: Easing.out(Easing.cubic) });
-  }, [row.value, milestone, reduce, shown]);
-
-  const props = useAnimatedProps(() => ({ text: `${Math.round(shown.value)}` }) as never);
-
+/**
+ * WHAT A TAP IS FOR.
+ *
+ * It used to print "5 more lessons and Ethics reaches 20", which is a sentence
+ * about a number already on the row. This is a thinker the reader has never
+ * opened, or a fact about one they read constantly — and it ends in a door.
+ */
+export function DiscoveryCard({ d, hue, sub, onOpen }: {
+  d: Discovery; hue: string; sub?: string; onOpen: (id: string) => void;
+}) {
+  const r = ramp(hue);
   return (
-    <View style={[s.detail, { borderLeftColor: r.base, backgroundColor: mix(PAPER, row.hue, 0.05) }]}>
-      <View style={s.detailHead}>
-        <Text style={[s.detailLabel, { color: r.shade }]} numberOfLines={1}>{row.label.toUpperCase()}</Text>
-        {milestone.kind !== 'none' ? (
-          <View style={s.detailNums}>
-            <Text style={s.detailNow}>{row.value}</Text>
-            <Text style={s.detailArrow}>→</Text>
-            <ACounter
-              editable={false}
-              pointerEvents="none"
-              underlineColorAndroid="transparent"
-              defaultValue={`${row.value}`}
-              style={[s.detailNext, { color: r.base }, counterStyle]}
-              animatedProps={props}
-            />
-          </View>
-        ) : null}
-      </View>
-      <Text style={s.detailSub}>{row.detail}</Text>
-      <Text style={s.detailCopy}>{milestone.copy}</Text>
-    </View>
+    <MotiView
+      key={`${d.kicker}-${d.name ?? ''}-${d.body.slice(0, 12)}`}
+      from={{ opacity: 0, translateY: -6, scale: 0.97 }}
+      animate={{ opacity: 1, translateY: 0, scale: 1 }}
+      transition={{ type: 'spring', damping: 14, stiffness: 190 }}
+      style={[s.card, { borderLeftColor: r.base, backgroundColor: mix(PAPER, hue, 0.05) }]}
+    >
+      <Text style={[s.cardKicker, { color: r.shade }]} numberOfLines={1}>{d.kicker}</Text>
+
+      {d.name ? (
+        <View style={s.cardWho}>
+          {d.symbol ? <Text style={s.cardSymbol}>{d.symbol}</Text> : null}
+          <Text style={s.cardName} numberOfLines={1}>{d.name}</Text>
+          {d.meta ? <Text style={s.cardMeta} numberOfLines={1}>{d.meta}</Text> : null}
+        </View>
+      ) : null}
+
+      <Text style={s.cardBody}>{d.body}</Text>
+
+      {sub ? <Text style={s.cardSub} numberOfLines={1}>{sub}</Text> : null}
+
+      {d.philosopherId ? (
+        <Pressable
+          onPress={() => { cue('keep'); onOpen(d.philosopherId as string); }}
+          accessibilityRole="button"
+          style={({ pressed }) => [s.cardCta, pressed && { opacity: 0.6 }]}
+        >
+          <Text style={[s.cardCtaText, { color: r.shade }]}>
+            {d.kind === 'meet' ? `Meet ${d.name}` : `Read ${d.name}`}
+          </Text>
+          <Text style={[s.cardCtaText, { color: r.base }]}>→</Text>
+        </Pressable>
+      ) : null}
+    </MotiView>
   );
 }
 
@@ -289,7 +396,6 @@ function Detail({ row, milestone, reduce }: { row: BarRow; milestone: Milestone;
 export interface LeagueRow {
   id: string;
   name: string;
-  /** The era group, for its colour. Null if the thinker is not on file. */
   hue: string;
   era: string;
   lessons: number;
@@ -300,45 +406,83 @@ export interface LeagueRow {
 /**
  * WHO YOU READ MOST — a ranked league, not a pie.
  *
- * Five names in a pie is the least readable form a ranking can take: it asks the
- * reader to compare five arcs and then hunt a legend for which arc is whom. A
- * league puts the ranking in the one place a ranking belongs — the order — and
- * the first three places wear the app's own metals, which are already what a
- * badge tier means here.
+ * Five names in a pie is the least readable form a ranking can take: it asks
+ * the reader to compare five arcs and then hunt a legend for which arc is whom.
+ * A league puts the ranking where a ranking belongs — in the order — and the
+ * first three places wear the app's own metals, which is already what a badge
+ * tier means here.
+ *
+ * Tapping does NOT jump straight to the profile any more. It opens a fact about
+ * them first, because a tap that navigates away is the one interaction that
+ * cannot tell you anything.
  */
-export function ThinkerLeague({ rows, playToken, animate, onOpen, style }: {
+export function ThinkerLeague({
+  rows, playToken, animate, grown, discoverFor, onOpen, style,
+}: {
   rows: LeagueRow[]; playToken: number; animate: boolean;
+  grown: Set<string>;
+  discoverFor: (id: string) => Discovery | null;
   onOpen: (id: string) => void; style?: StyleProp<ViewStyle>;
 }) {
+  const [sel, setSel] = useState<string | null>(null);
   const grow = useSharedValue(animate ? 0 : 1);
   useEffect(() => {
     if (!animate) { grow.value = 1; return; }
     grow.value = 0;
-    grow.value = withDelay(240, withSpring(1, { damping: 14, stiffness: 160 }));
+    grow.value = withDelay(220, withSpring(1, { damping: 14, stiffness: 160 }));
   }, [playToken, animate, grow]);
 
   const max = rows.reduce((a, r) => (r.score > a ? r.score : a), 0) || 1;
+  const discovery = useMemo(() => (sel == null ? null : discoverFor(sel)), [sel, discoverFor]);
+  const selRow = rows.find((r) => r.id === sel);
 
   return (
     <View style={[s.section, style]}>
       <SectionHead title="Who You Read Most" subtitle="lessons about them, and quotes of theirs you kept" />
       {rows.map((r, i) => (
-        <LeagueLine key={r.id} row={r} place={i} count={rows.length} max={max} grow={grow} onPress={() => onOpen(r.id)} />
+        <LeagueLine
+          key={r.id}
+          row={r}
+          place={i}
+          count={rows.length}
+          max={max}
+          grow={grow}
+          animate={animate}
+          playToken={playToken}
+          pop={grown.has(r.id)}
+          selected={sel === r.id}
+          onPress={() => { setSel((p) => (p === r.id ? null : r.id)); cue('keep'); }}
+        />
       ))}
+      {discovery && selRow ? (
+        <DiscoveryCard d={discovery} hue={selRow.hue} onOpen={onOpen} />
+      ) : null}
     </View>
   );
 }
 
 const PLACE_METAL = [METAL.GOLD, METAL.SILVER, METAL.BRONZE];
 
-function LeagueLine({ row, place, count, max, grow, onPress }: {
+function LeagueLine({
+  row, place, count, max, grow, animate, playToken, pop, selected, onPress,
+}: {
   row: LeagueRow; place: number; count: number; max: number;
-  grow: SharedValue<number>; onPress: () => void;
+  grow: SharedValue<number>; animate: boolean; playToken: number;
+  pop: boolean; selected: boolean; onPress: () => void;
 }) {
   const r = ramp(row.hue);
   const metal = PLACE_METAL[place];
 
+  // See BarLine: a grown row squeezes from its current length, never from zero.
+  const solo = useSharedValue(1);
+  useEffect(() => {
+    if (!pop) return;
+    if (!animate) { solo.value = 1; return; }
+    solo.value = bounceTo(1, 320 + place * 60, true);
+  }, [playToken, animate, pop, place, solo]);
+
   const fillStyle = useAnimatedStyle(() => {
+    if (pop) return { transform: [{ scaleX: solo.value }] };
     const lead = (place / Math.max(1, count)) * 0.4;
     const t = Math.min(1, Math.max(0, (grow.value - lead) / (1 - lead)));
     return { transform: [{ scaleX: t }] };
@@ -353,7 +497,7 @@ function LeagueLine({ row, place, count, max, grow, onPress }: {
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${row.name}, ${place + 1} of ${count}`}
+      accessibilityLabel={`${row.name}, number ${place + 1} of ${count}`}
       style={({ pressed }) => [s.leagueRow, pressed && { opacity: 0.75 }]}
     >
       {/* First three places are struck in a metal; the rest get a plain paper
@@ -375,7 +519,7 @@ function LeagueLine({ row, place, count, max, grow, onPress }: {
 
       <View style={s.leagueBody}>
         <View style={s.leagueTop}>
-          <Text style={s.leagueName} numberOfLines={1}>{row.name}</Text>
+          <Text style={[s.leagueName, selected && { color: r.shade }]} numberOfLines={1}>{row.name}</Text>
           <Text style={[s.leagueEra, { color: r.shade }]} numberOfLines={1}>{row.era}</Text>
         </View>
         <View style={s.leagueTrack}>
@@ -405,13 +549,9 @@ export function SectionHead({ title, subtitle, right }: {
   );
 }
 
-/** A gold plate for a reading that has topped out — the only "complete" left. */
-export function TopPlate({ label }: { label: string }) {
-  return <MetalPlate metal={METAL.GOLD} label={label} />;
-}
-
 const s = StyleSheet.create({
   section: { marginTop: 28 },
+  chart: { marginBottom: 18 },
 
   head: { flexDirection: 'row', alignItems: 'flex-end', marginBottom: 14 },
   headTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: INK },
@@ -449,27 +589,31 @@ const s = StyleSheet.create({
     position: 'absolute', top: 0, bottom: 0,
     borderWidth: 1.5, borderStyle: 'dashed', borderRadius: 6,
     backgroundColor: 'transparent',
+    transformOrigin: 'left',
+    alignItems: 'flex-end', justifyContent: 'center',
+    paddingRight: 4,
   },
+  ghostNum: { fontFamily: 'Inter_700Bold', fontSize: 9 },
 
   hint: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
-    fontSize: 12, color: C.dim, marginTop: 2,
+    fontSize: 12.5, color: C.inkSoft, marginTop: 2,
   },
 
-  detail: { borderLeftWidth: 4, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, marginTop: 4 },
-  detailHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  detailLabel: { flex: 1, fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4 },
-  detailNums: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  detailNow: { fontFamily: 'Inter_500Medium', fontSize: 13, color: C.inkSoft },
-  detailArrow: { fontFamily: 'Inter_400Regular', fontSize: 12, color: C.dim },
-  // WIDTH, not minWidth — see the note in ACounter.tsx. Four digits of
-  // Playfair 17 is 44px; nobody reads 10,000 lessons in one branch.
-  detailNext: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, padding: 0, margin: 0, width: 46 },
-  detailSub: { fontFamily: 'Inter_400Regular', fontSize: 11.5, color: C.inkSoft, marginTop: 5 },
-  detailCopy: {
+  // ── the discovery card ──
+  card: { borderLeftWidth: 4, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 12, marginTop: 4 },
+  cardKicker: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.5 },
+  cardWho: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 7 },
+  cardSymbol: { fontSize: 15 },
+  cardName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 18, color: INK, flexShrink: 1 },
+  cardMeta: { fontFamily: 'Inter_400Regular', fontSize: 11, color: C.inkSoft },
+  cardBody: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
-    fontSize: 14, color: INK, marginTop: 4, lineHeight: 20,
+    fontSize: 15, lineHeight: 22, color: INK, marginTop: 6,
   },
+  cardSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: C.inkSoft, marginTop: 8 },
+  cardCta: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10 },
+  cardCtaText: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.6 },
 
   // ── league ──
   leagueRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },

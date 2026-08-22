@@ -222,5 +222,75 @@ for (const [name, mutate] of [
 ok(moved.length === 0, 'and every drawn number moves it',
   moved.length ? `missed: ${moved.join(', ')}` : 'lessons, quotes, thinkers, scores, ranking and eras all register');
 
+// ── what a tap SAYS, now that it is not arithmetic ──────────────────────────
+//
+//   > "I dont like the obvious information ... like '5 more lessons and your at
+//   > 20 lessons done' this is obvious and isnt informative"
+//
+// lib/utils/statsDiscovery.ts replaced that with a thinker the reader has not
+// met, or a fact about one they have. Five things have to hold, and the fourth
+// is the reader's complaint written as an assertion.
+writeFileSync(
+  path.join(TMP, 'statsDiscovery.mjs'),
+  transform(readFileSync(path.join(REPO, 'lib/utils/statsDiscovery.ts'), 'utf8'), {
+    transforms: ['typescript'],
+  }).code,
+);
+const DSC = await import(pathToFileURL(path.join(TMP, 'statsDiscovery.mjs')).href);
+
+const cand = (i, met) => ({
+  id: `p${i}`, name: `Thinker ${i}`, symbol: '*', oneLiner: `Idea number ${i}`,
+  lifespan: '100-200', group: 'ANCIENT', branchSlugs: BRANCHES.slice(0, 1 + (i % 4)),
+  met, lessons: i % 5,
+});
+
+let dBlank = 0, dMet = 0, dUnstable = 0, dArith = 0, dOneNote = 0;
+for (let n = 1; n <= 40; n++) {
+  for (const metCount of [0, 1, Math.floor(n / 2), n]) {
+    const pool = Array.from({ length: n }, (_, i) => cand(i, i < metCount));
+    for (const seed of ['ethics:0', 'ethics:3', 'logic:0', 'ANCIENT:7']) {
+      const d = DSC.discoverIn(pool, seed);
+      if (!d || !d.body || !d.body.trim()) { dBlank++; continue; }
+      if (metCount < n && d.kind !== 'meet') dMet++;
+      if (DSC.discoverIn(pool, seed).body !== d.body) dUnstable++;
+      if (/\d+\s+more\b/i.test(d.body) || /\d+\s+more\b/i.test(d.kicker)) dArith++;
+    }
+    if (n >= 9 && metCount === 0) {
+      const seen = new Set(['a:0', 'b:1', 'c:2', 'd:3', 'e:4', 'f:5']
+        .map((sd) => DSC.discoverIn(pool, sd).body));
+      if (seen.size < 2) dOneNote++;
+    }
+  }
+}
+ok(dBlank === 0, 'every graph tap has something to say', dBlank ? `${dBlank} blank` : 'across 160 pools, empty through fully met');
+ok(dMet === 0, 'an unmet thinker is offered while one exists', dMet ? `${dMet} wrong` : 'and the best-read one when none is left');
+ok(dUnstable === 0, 'a card does not re-roll under the reader', dUnstable ? `${dUnstable} unstable` : 'same inputs, same card');
+ok(dArith === 0, 'no card is arithmetic the reader can already see', dArith ? `${dArith} said "N more ..."` : 'nothing says "N more"');
+ok(dOneNote === 0, 'different rows can say different things', dOneNote ? `${dOneNote} pools were one-note` : 'the pick turns over with the seed');
+
+{
+  const facts = ['Fact one', 'Fact two', 'Fact three'];
+  const got = new Set();
+  for (let i = 0; i < 30; i++) got.add(DSC.discoverFact('X', 'x', facts, `x:${i}`).body);
+  ok([...got].every((b) => facts.some((f) => b.startsWith(f))), 'a fact card only ever quotes a real fact');
+  ok(got.size > 1, 'and it does not always pick the same one', `${got.size} of ${facts.length} seen`);
+  ok(DSC.discoverFact('X', 'x', [], 'x') === null, 'a thinker with no facts on file yields no card');
+}
+
+// ── which row bounces ───────────────────────────────────────────────────────
+{
+  const f = (a, b, c) => `2;ethics:${a}:0:0|logic:${b}:0:0;;kant:${c};;ANCIENT:1`;
+  const g = (x, y) => [...M.grownKeys(x, y)].sort().join(',');
+  ok(g(f(1, 1, 1), f(1, 1, 1)) === '', 'nothing bounces when nothing changed');
+  ok(g(f(1, 1, 1), f(2, 1, 1)) === 'ethics', 'the branch that grew is the one that bounces', g(f(1, 1, 1), f(2, 1, 1)));
+  ok(g(f(1, 1, 1), f(2, 3, 1)) === 'ethics,logic', 'two growing rows both bounce');
+  ok(g(f(1, 1, 1), f(1, 1, 9)) === 'kant', 'a thinker climbing counts too');
+  ok(g(f(5, 5, 5), f(2, 5, 5)) === '', 'a value that FELL does not bounce — a reset is not an achievement');
+  ok(g('1;ethics:1:0:0', f(9, 9, 9)) === '', 'a fingerprint version bump bounces nothing at all');
+  ok(g('', f(1, 1, 1)) === '' && g(f(1, 1, 1), '') === '', 'a missing fingerprint bounces nothing');
+  ok([...M.grownKeys(f(1, 1, 1), '2;ethics:1:0:0|logic:1:0:0|newbranch:2:0:0;;kant:1;;ANCIENT:1')].join(',') === 'newbranch',
+    'a row that did not exist before counts as grown');
+}
+
 console.log(fails ? `\n${fails} problem(s).\n` : '\nall clear.\n');
 process.exit(fails ? 1 : 0);

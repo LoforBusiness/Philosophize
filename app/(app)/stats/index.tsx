@@ -1,19 +1,23 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
+import { useSharedValue } from 'react-native-reanimated';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import {
-  Ledger, RankedBars, ThinkerLeague,
+  Ledger, RankedBars, ThinkerLeague, bounceTo,
   type LedgerItem, type BarRow, type LeagueRow,
 } from '@/components/stats/InsightBoard';
+import Donut from '@/components/stats/Donut';
 import { ALL_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS, ERA_GROUPS, eraGroupOf, eraGroupOfId } from '@/data/philosophers';
+import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
 import { BRANCH, ERA, C, type BranchKey, type EraKey } from '@/constants/design';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { statsFingerprint } from '@/lib/utils/statsMilestone';
+import { statsFingerprint, grownKeys } from '@/lib/utils/statsMilestone';
+import { discoverIn, discoverFact, type Candidate } from '@/lib/utils/statsDiscovery';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -156,7 +160,7 @@ export default function StatsScreen() {
         value: met[g] ?? 0,
         hue: ERA[g as EraKey],
         detail: `${n} quote${n === 1 ? '' : 's'} kept from this era`,
-        action: 'lesson' as const,
+        action: 'thinker' as const,
       };
     }).sort((a, b) => b.value - a.value);
   }, [philosopherViews, savedQuotes]);
@@ -181,20 +185,94 @@ export default function StatsScreen() {
 
   const [playToken, setPlayToken] = useState(0);
   const [animate, setAnimate] = useState(false);
+  // WHICH rows the reader actually moved. Read out of the PREVIOUS fingerprint,
+  // which is still in the store at the moment the effect runs — after
+  // `markStatsSeen` it is gone, so the order inside the effect is load-bearing.
+  const [grown, setGrown] = useState<Set<string>>(() => new Set());
   const armed = useRef<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
-      if (fingerprint === seenFingerprint) { setAnimate(false); return; }
+      // NO `setAnimate(false)` HERE, and that is a fix rather than an omission.
+      //
+      // `markStatsSeen` writes the fingerprint, which re-renders, which changes
+      // this callback's identity, which makes useFocusEffect run it AGAIN — and
+      // on that second pass the two fingerprints are equal. Clearing the flag
+      // there set `animate` false while the springs were still travelling, and
+      // every child effect keys on `animate`, so all of them snapped straight to
+      // their end state. Measured in a browser: the ring and all seventeen bars
+      // sat at exactly 1.000 through a growth event that should have bounced.
+      //
+      // The flag does not need clearing. Children re-run on `playToken`, which
+      // only moves when there is news, so a focus with nothing new animates
+      // nothing whatever `animate` says.
+      if (fingerprint === seenFingerprint) return;
       // Guard against the effect re-running for the same fingerprint while the
       // store write settles — otherwise the entrance restarts mid-flight.
       if (armed.current === fingerprint) return;
       armed.current = fingerprint;
+      setGrown(grownKeys(seenFingerprint, fingerprint));
       setAnimate(true);
       setPlayToken((n) => n + 1);
       markStatsSeen(fingerprint);
     }, [fingerprint, seenFingerprint, markStatsSeen]),
   );
+
+  // The ring squeezes and bounces on every visit that has news, which is what
+  // makes arriving at the tab feel like arriving at a scoreboard. It is one
+  // transform on one wrapper — the SVG under it never animates (see the file
+  // header of Donut.tsx).
+  const donutPop = useSharedValue(1);
+  useEffect(() => {
+    if (!animate) { donutPop.value = 1; return; }
+    donutPop.value = 1;
+    donutPop.value = bounceTo(1, 60, true);
+  }, [playToken, animate, donutPop]);
+
+  // ── the discovery pool ────────────────────────────────────────────────────
+  //
+  // 322 thinkers, shaped once. Everything a tap needs in order to say something
+  // the reader does not already know is in here: who they have never opened,
+  // whose ideas turn up in the most places, and what each of them thought.
+  const candidates: Candidate[] = useMemo(() => ALL_PHILOSOPHERS.map((p) => ({
+    id: p.id,
+    name: p.name,
+    symbol: p.symbol,
+    oneLiner: p.oneLiner,
+    lifespan: p.lifespan,
+    group: eraGroupOf(p),
+    branchSlugs: p.branchSlugs,
+    met: (philosopherViews[p.id] ?? 0) > 0,
+    lessons: philosopherLessons[p.id] ?? 0,
+  })), [philosopherViews, philosopherLessons]);
+
+  // The seed carries the row AND how far the reader has got in it, so a card is
+  // stable while they read it and turns over as they make progress.
+  const discoverBranch = useCallback((slug: string) => {
+    const row = areaRows.find((r) => r.key === slug);
+    return discoverIn(
+      candidates.filter((c) => c.branchSlugs.includes(slug)),
+      `${slug}:${row?.value ?? 0}`,
+    );
+  }, [candidates, areaRows]);
+
+  const discoverEra = useCallback((key: string) => {
+    const row = eraRows.find((r) => r.key === key);
+    return discoverIn(
+      candidates.filter((c) => c.group === key),
+      `${key}:${row?.value ?? 0}`,
+    );
+  }, [candidates, eraRows]);
+
+  // A thinker the reader HAS read: "you have not met them" is the wrong card, so
+  // it is one of their three facts instead.
+  const discoverThinker = useCallback((id: string) => {
+    const c = candidates.find((x) => x.id === id);
+    if (!c) return null;
+    return discoverFact(
+      c.name, c.id, PHILOSOPHER_FACTS[id] ?? [], `${id}:${c.lessons}`, c.symbol, c.lifespan,
+    );
+  }, [candidates]);
 
   // ── the one piece of prose ────────────────────────────────────────────────
   //
@@ -216,11 +294,23 @@ export default function StatsScreen() {
   })();
 
   const ledger: LedgerItem[] = [
-    { label: 'LESSONS', value: lessonsDone, hue: BRANCH.ethics },
-    { label: 'THINKERS', value: thinkersMet, hue: BRANCH.metaphysics },
-    { label: 'QUOTES', value: quotesKept, hue: BRANCH.aesthetics },
-    { label: 'DAYS', value: daysPractised, hue: BRANCH.epistemology },
+    { key: '__lessons', label: 'LESSONS', value: lessonsDone, hue: BRANCH.ethics },
+    { key: '__thinkers', label: 'THINKERS', value: thinkersMet, hue: BRANCH.metaphysics },
+    { key: '__quotes', label: 'QUOTES', value: quotesKept, hue: BRANCH.aesthetics },
+    { key: '__days', label: 'DAYS', value: daysPractised, hue: BRANCH.epistemology },
   ];
+
+  // The ledger has no fingerprint keys of its own — a tile pops when any row it
+  // totals grew, which is the honest reading of "this number moved because of
+  // something you did".
+  const ledgerGrown = useMemo(() => {
+    const g = new Set<string>();
+    if (grown.size === 0) return g;
+    if (areaRows.some((r) => grown.has(r.key))) { g.add('__lessons'); g.add('__days'); }
+    if (eraRows.some((r) => grown.has(r.key))) g.add('__thinkers');
+    if (league.some((r) => grown.has(r.id))) g.add('__quotes');
+    return g;
+  }, [grown, areaRows, eraRows, league]);
 
   // NOTE there is no `hasAny` gate any more, and that is deliberate. An empty
   // Insights tab used to be a single grey box saying "your charts will appear
@@ -241,7 +331,7 @@ export default function StatsScreen() {
 
           {showWidget ? <DailyQuoteWidget style={{ marginBottom: 20 }} /> : null}
 
-          <Ledger items={ledger} playToken={playToken} animate={animate} />
+          <Ledger items={ledger} playToken={playToken} animate={animate} grown={ledgerGrown} />
 
           <RankedBars
             title="Where Your Reading Goes"
@@ -249,6 +339,19 @@ export default function StatsScreen() {
             rows={areaRows}
             playToken={playToken}
             animate={animate}
+            grown={grown}
+            discoverFor={discoverBranch}
+            onOpenThinker={openPhilosopher}
+            chart={(sel, onSelect) => (
+              <Donut
+                segments={areaRows}
+                total={lessonsDone}
+                totalLabel="LESSONS READ"
+                selected={sel}
+                onSelect={onSelect}
+                pop={donutPop}
+              />
+            )}
             hint
           />
 
@@ -257,6 +360,8 @@ export default function StatsScreen() {
               rows={league}
               playToken={playToken}
               animate={animate}
+              grown={grown}
+              discoverFor={discoverThinker}
               onOpen={openPhilosopher}
             />
           )}
@@ -267,6 +372,9 @@ export default function StatsScreen() {
             rows={eraRows}
             playToken={playToken}
             animate={animate}
+            grown={grown}
+            discoverFor={discoverEra}
+            onOpenThinker={openPhilosopher}
           />
 
           <View style={styles.weekCard}>
