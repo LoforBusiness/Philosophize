@@ -19,7 +19,8 @@ import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { daysMissed, effectiveStreak } from '@/lib/utils/streak';
-import { restDaysHeld } from '@/constants/streak';
+import { restDaysHeld, restCap } from '@/constants/streak';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
 
 const Paper = '#FAFAF7';
@@ -82,6 +83,10 @@ export default function HomeScreen() {
   // alive. Without them the reader who missed yesterday sees a 0 on Home, gives
   // up on the streak they actually still have, and the rest day never gets spent.
   const held = restDaysHeld(restDaysEarned, restDaysUsed);
+  // The CAP as well as the count, because the habit panel draws both — an empty
+  // socket beside a full one is what says a rest day is a thing you can run out
+  // of, and the cap is the reader's tier rather than a constant.
+  const isPro = useSubscriptionStore((s) => s.isPro);
   const streak = effectiveStreak(streakRaw, lastLessonDate, held);
   const restBridging = streak > 0 && daysMissed(lastLessonDate) > 0;
   const totalXP = useUserDataStore((s) => s.totalXP);
@@ -168,6 +173,8 @@ export default function HomeScreen() {
             lastLessonDate={lastLessonDate}
             lessons={lessonsDone}
             xp={totalXP}
+            restHeld={held}
+            restMax={restCap(isPro)}
             restBridging={restBridging}
           />
         </Arrive>

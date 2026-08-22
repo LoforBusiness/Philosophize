@@ -169,7 +169,7 @@ for (const [fg, bg, floor] of PAIRS) {
   }
 }
 
-// ── 2c · the one surface that is printed the other way up ────────────────────
+// ── 2c · the one surface that is printed the other way up ────────────────
 //
 // Home's record panel is a solid ink field with cream type on it — the only
 // inverted surface in the app that carries numbers rather than a photograph, and
@@ -178,42 +178,54 @@ for (const [fg, bg, floor] of PAIRS) {
 // dark on cream is invisible on ink, and the mistake looks like nothing at all
 // until someone reads their streak in daylight.
 //
-// The tones are read out of the shipping component rather than restated here.
+// The tones are read out of the shipping components rather than restated here.
 // They cannot live in `C` — the palette is capped at 14 and holds 13 — and a
 // second copy of them in this file would measure a colour the panel might no
 // longer be using, which is the failure mode this whole script exists to stop.
+//
+// TWO FILES NOW, because the streak moved out of HabitCard into StreakPanel so
+// that Home and Profile could stop being two hand-built copies of one object.
+// HabitCard keeps the ground, the kickers and the odometers; the panel took the
+// tones that belong to the week row with it.
 {
   const src = fs.readFileSync(path.join(REPO, 'components/home/HabitCard.tsx'), 'utf8');
-  const tone = (name) => (src.match(new RegExp(`const ${name} = '(#[0-9A-Fa-f]{6})'`)) || [])[1];
-  const INK = tone('INK');
+  const panelSrc = fs.readFileSync(path.join(REPO, 'components/gamification/StreakPanel.tsx'), 'utf8');
+  const find = (name) =>
+    (src.match(new RegExp(`const ${name} = '(#[0-9A-Fa-f]{6})'`)) || [])[1] ??
+    (panelSrc.match(new RegExp(`const ${name} = '(#[0-9A-Fa-f]{6})'`)) || [])[1];
+  const INK = find('INK');
   ok(INK === D.C.ink, 'the panel is printed on the palette ink', `${INK} vs ${D.C.ink}`);
 
   // [constant, floor, what it is]. The rule sits below every floor ON PURPOSE —
   // see its comment in the component — so it is asserted from the other side.
   const ON_INK = [
     ['CREAM', 4.5, 'the streak, the day count and both totals'],
-    ['ON_INK_SOFT', 4.5, "the line under the streak"],
+    ['ON_INK_SOFT', 4.5, 'the line under the streak'],
     ['ON_INK_DIM', 4.5, 'the kickers and the stat words'],
-    ['ON_INK_FAINT', 3.0, 'unearned weekday labels and their rings'],
+    ['ON_INK_FAINT', 3.0, 'unearned weekday rings'],
   ];
   for (const [name, floor, what] of ON_INK) {
-    const v = tone(name);
-    if (!v) { ok(false, `HabitCard declares ${name}`); continue; }
+    const v = find(name);
+    if (!v) { ok(false, `the habit panel declares ${name}`); continue; }
     const r = ratio(lum(v), lum(INK));
     ok(r >= floor, `${name} on the ink panel — ${what}`, `${r.toFixed(2)}:1, need ${floor}`);
   }
-  const rule = tone('ON_INK_RULE');
+  const rule = find('ON_INK_RULE');
   ok(rule && ratio(lum(rule), lum(INK)) < 2.0, 'the panel divider stays felt rather than seen',
     `${ratio(lum(rule), lum(INK)).toFixed(2)}:1, want under 2`);
 
-  // AND THE WEEK ROW CAN ACTUALLY BE INVERTED. The panel hands StreakWeek a
-  // tint/ground pair; if those props are ever dropped the row silently falls back
-  // to ink-on-paper defaults and every completed day disappears into the field.
-  const week = fs.readFileSync(path.join(REPO, 'components/gamification/StreakWeek.tsx'), 'utf8');
-  for (const p of ['tint', 'ground', 'faint', 'soft']) {
-    ok(new RegExp(`${p}\\s*=`).test(week), `StreakWeek takes \`${p}\` with a default`);
-    ok(new RegExp(`${p}=\\{`).test(src), `the record panel passes \`${p}\``);
+  // AND THE PANEL CAN ACTUALLY BE INVERTED. It is drawn on ink on Home and on
+  // paper on Profile, and every role it paints has to carry a value for BOTH
+  // grounds — a role that resolves to one constant either way is a colour
+  // measured on one ground and shipped on two, which is §19's scrim rule
+  // applied to a surface instead of to a photograph. This is also the check that
+  // would have caught the defect the panel was built to fix: the paper printing
+  // spent a RING tone on TEXT and labelled half the week at 1.52:1.
+  for (const role of ['mark', 'text', 'soft', 'dim', 'faint', 'rule', 'ground', 'labelOn', 'labelOff']) {
+    ok(new RegExp(`const ${role} = onInk \\?`).test(panelSrc),
+      `StreakPanel gives '${role}' a value for each ground`);
   }
+  ok(/StreakPanel/.test(src), 'the record panel draws the shared streak object');
 }
 
 // ── 2c · CIELAB, because sRGB distance is the wrong instrument twice over ────

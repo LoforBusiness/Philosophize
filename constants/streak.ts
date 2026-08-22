@@ -55,16 +55,44 @@ export function restDaysHeld(earned: number, used: number): number {
 //   · the streak flame, when the streak is alive
 //   · a completed day in the streak calendar
 //   · the count-up and ignite on the reward screen
+//   · THE HABIT PANEL, on Home and on Profile — added deliberately, see below
 //
 // It may NOT appear on: lesson art, badges, ranks, buttons, the paywall, or any
 // other counter. One colour used in one place is a signal. The same colour used
 // in six places is a theme, and then it signals nothing.
+//
+// ── WHY THE HABIT PANEL WAS ADDED TO THAT LIST ──────────────────────────────
+//
+// The list above was written when the flame lived in Home's header, and it went
+// stale the day the flame came out of the header and the habit card took over.
+// The result was that the two screens a reader actually looks at — Home's streak
+// panel and Profile's — drew the streak in flat ink and cream, while the app
+// carried a measured ember whose stated purpose is to say ALIVE or ABOUT TO DIE
+// "before the reader has decided whether to open the app". The one colour in the
+// app existed for exactly this object and was not on it.
+//
+// It is still one signal in one place: the streak, wherever the streak is drawn.
+//
+// ── AND A COLOUR MEASURED ON ONE GROUND DOES NOT SURVIVE ANOTHER ────────────
+//
+// Home's panel is printed on INK, and every value below was fitted against
+// paper. `EMBER` measures 3.50:1 on ink and `ASH` 3.31:1 — both under the 4.5:1
+// floor for the number they are supposed to be colouring. That is the same
+// finding tone.ts records for the era plates ("all five clear 4.5:1 on paper by
+// construction, but the byline sits in the plate's SHADED corner"), and the same
+// reason constants/design.ts carries `paperSoft` and `dim` as separate tokens
+// from `inkSoft`: a dark ground needs its own secondary values, not a borrowed
+// one.
+//
+// So there are two of each, and `npm run check:streak` measures both pairs.
 //
 // THE VALUES ARE MEASURED, not picked, and `npm run check:streak` re-derives
 // every one of them so this comment cannot drift into fiction.
 export const EMBER = '#B4541E';       // 4.75:1 on paper — safe for the number
 export const EMBER_DEEP = '#8A3F16';  // 7.16:1 on paper, carries cream at 6.64:1
 export const EMBER_SOFT = '#F0DCCB';  // wash only; ink on it is 13.10:1
+/** The ember on a DARK ground — Home's habit panel. 5.46:1 on ink. */
+export const EMBER_LIT = '#DC7434';
 
 /**
  * A lapsed streak is not a dimmer ember, it is ash — cool, flat, obviously off.
@@ -77,6 +105,12 @@ export const EMBER_SOFT = '#F0DCCB';  // wash only; ink on it is 13.10:1
  * reading of "burnt out" anyway.
  */
 export const ASH = '#6E6C64';         // 5.03:1 on paper
+/**
+ * And ash on a dark ground. 5.60:1 on ink, and ΔE 59.6 from `EMBER_LIT` — the
+ * pair has to stay tellable apart in BOTH printings or the panel that inverts
+ * loses the only state it exists to report.
+ */
+export const ASH_LIT = '#95928A';
 
 /**
  * Milestones the calendar marks and the reward screen celebrates.

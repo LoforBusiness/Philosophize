@@ -19,8 +19,7 @@ import { BRANCH_SHORT, BRANCH_ICON } from '@/components/shared/branchMarks';
 import Showcase from '@/components/profile/Showcase';
 import { ProfileArtFill, ProfileAvatar, useProfileArt } from '@/components/shared/ProfileArt';
 import { profileNameStyle, profileNameText } from '@/data/profileFonts';
-import StreakBook from '@/components/gamification/StreakBook';
-import StreakWeek from '@/components/gamification/StreakWeek';
+import StreakPanel from '@/components/gamification/StreakPanel';
 import { signOut } from '@/lib/supabase/auth';
 import { useAuthSession } from '@/lib/supabase/useSession';
 import { ALL_BRANCHES } from '@/data';
@@ -30,8 +29,9 @@ import { BADGES } from '@/data/badges';
 import { useUserDataStore, progressStats } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { generateUserBio } from '@/lib/utils/userBio';
-import { effectiveStreak } from '@/lib/utils/streak';
-import { restDaysHeld } from '@/constants/streak';
+import { effectiveStreak, daysMissed } from '@/lib/utils/streak';
+import { restDaysHeld, restCap } from '@/constants/streak';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
 import { dailyXP, activeDays } from '@/lib/utils/xpSeries';
 import { useInView } from '@/lib/utils/useInView';
@@ -81,11 +81,15 @@ export default function ProfileScreen() {
   const restDaysEarned = useUserDataStore((s) => s.restDaysEarned);
   const restDaysUsed = useUserDataStore((s) => s.restDaysUsed);
   useTodayKey();
-  const shownStreak = effectiveStreak(
-    streak,
-    lastLessonDate,
-    restDaysHeld(restDaysEarned, restDaysUsed),
-  );
+  // The cap is the reader's TIER, not a constant — free holds two rest days and
+  // a Scholar's Pass five, so the panel's empty sockets have to be counted from
+  // the subscription rather than hard-coded.
+  const isPro = useSubscriptionStore((s) => s.isPro);
+  const restHeld = restDaysHeld(restDaysEarned, restDaysUsed);
+  const shownStreak = effectiveStreak(streak, lastLessonDate, restHeld);
+  // Whether a rest day is currently carrying the streak. Derived here the same
+  // way Home derives it, so the two panels never disagree about the same day.
+  const restBridging = shownStreak > 0 && daysMissed(lastLessonDate) > 0;
   const joinedAt = useUserDataStore((s) => s.joinedAt);
   const ensureJoinDate = useUserDataStore((s) => s.ensureJoinDate);
   const displayName = useUserDataStore((s) => s.displayName);
@@ -487,16 +491,25 @@ export default function ProfileScreen() {
               screen with nowhere to go. Both entry points (this and Home's habit
               card) land on the same screen rather than on two different summaries. */}
           <Pressable onPress={() => router.push('/(app)/streak')}>
+            {/* THE SAME OBJECT HOME DRAWS, printed on paper instead of on ink.
+                It was a book, a word, a week row and a chevron — three of the
+                four facts Home showed, arranged differently, so every change to
+                one screen had to be made twice and the two drifted apart.
+                StreakPanel is the one object; this screen supplies the ground. */}
             <Card style={styles.streakBox}>
-              <View style={styles.streakLeft}>
-                <StreakBook value={shownStreak} size={66} />
-                <Text style={styles.streakWord}>DAY STREAK</Text>
-              </View>
-              <View style={styles.chipsRow}>
-                <StreakWeek streak={shownStreak} lastLessonDate={lastLessonDate} size={30} />
-              </View>
-              <View style={styles.streakChevron}>
-                <SketchIcon name="back" size={16} color={C.dim} />
+              <StreakPanel
+                streak={shownStreak}
+                lastLessonDate={lastLessonDate}
+                restHeld={restHeld}
+                restMax={restCap(isPro)}
+                restBridging={restBridging}
+                daySize={30}
+              />
+              <View style={styles.streakDoor}>
+                <Text style={styles.streakDoorText}>SEE THE MONTH</Text>
+                <View style={styles.streakChevron}>
+                  <SketchIcon name="back" size={13} color={C.dim} />
+                </View>
               </View>
             </Card>
           </Pressable>
@@ -828,13 +841,15 @@ const styles = StyleSheet.create({
   },
   insightValue: { ...role('title'), color: C.ink, marginTop: SPACE[0] },
 
-  streakBox: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2] },
+  streakBox: {},
+  streakDoor: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end',
+    gap: SPACE[0], marginTop: SPACE[3],
+  },
+  streakDoorText: { ...role('micro'), color: C.dim, letterSpacing: 2 },
   // Turned around, because the icon set has `back` and no forward twin — the same
   // trick StreakCalendar uses for its month arrows.
   streakChevron: { transform: [{ scaleX: -1 }] },
-  streakLeft: { alignItems: 'center', width: 60 },
-  streakWord: { ...role('micro'), color: C.inkSoft, letterSpacing: 1 },
-  chipsRow: { flex: 1, justifyContent: 'center' },
 
   rankChartWrap: { marginTop: SPACE[3] },
   // The rung, drawn: the pin you hold, the climb, the pin you are climbing to.

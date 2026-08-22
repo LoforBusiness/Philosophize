@@ -1,8 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import PressableScale from '@/components/shared/PressableScale';
-import StreakBook from '@/components/gamification/StreakBook';
-import StreakWeek from '@/components/gamification/StreakWeek';
+import StreakPanel from '@/components/gamification/StreakPanel';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THIS WEEK — and NOT how close you are to the end.
@@ -23,6 +22,21 @@ import StreakWeek from '@/components/gamification/StreakWeek';
 // folding them in gives back about 100dp — which is what the home stickman needs
 // to have a band to walk in at all (see StickmanStroll: below a 37dp band his
 // routine stretches from 19s to 39s).
+//
+// ── THE STREAK ITSELF MOVED OUT INTO ITS OWN OBJECT ─────────────────────────
+//
+// A reader: "I like this but it needs to be more gamified and better UI for
+// this, it is a little boring. I also want you to do the same for the daily
+// streak box in the profile tab."
+//
+// The second half of that sentence is why the streak is not drawn here any more.
+// This card and Profile's box were two hand-built arrangements of the same three
+// facts, so "do the same for both" would have meant writing every improvement
+// twice and watching them drift. `components/gamification/StreakPanel.tsx` is
+// the one object, printed on ink here and on paper there, and it carries what
+// the app already had and neither screen showed: the ember, the society, and the
+// rest days. This card keeps what is genuinely its own — the two odometers, the
+// ink ground, and the door to the month.
 //
 // ── WHY IT IS PRINTED IN INK, AND IT IS THE ONLY THING DOWN HERE THAT IS ────
 //
@@ -49,18 +63,10 @@ import StreakWeek from '@/components/gamification/StreakWeek';
 
 const INK = '#1A1A1A';
 const CREAM = '#FAFAF7';
-const ON_INK_SOFT = '#C4C2BB';    // paperSoft — secondary text on a dark ground
 const ON_INK_DIM = '#B3AEA3';     // dim — marks and labels, never body text
-// The unearned rings AND their weekday labels — one value, because the component
-// spends it on both. It has to sit BETWEEN ink and `dim`: at full `dim` an
-// unfinished day is brighter than the streak line above it, so the week reads as
-// five loud empty circles and two quiet full ones, shouting about the days you
-// missed. But it is still carrying six pieces of text, so it cannot recede as far
-// as it wants to — measured at 4.23:1 on ink, just under the 4.5:1 body-text
-// floor and well over the 3:1 a mark needs, against 16.64:1 for the filled days.
-// (For scale: the paper version of this row labels its unearned days at 1.52:1,
-// which is why they cannot be read on the profile screen at all.)
-const ON_INK_FAINT = '#807D74';
+// `ON_INK_SOFT` and `ON_INK_FAINT` moved into StreakPanel with the week row they
+// were measured for. The note that came with them is worth keeping in one place
+// rather than two, and it is now in that file's header.
 // A divider inside a dark field, and nothing else. 1.51:1 — deliberately below
 // every text and mark floor, because a rule separating two numbers should be
 // felt rather than seen; the numbers either side are at 16.64:1.
@@ -71,6 +77,8 @@ export default function HabitCard({
   lastLessonDate,
   lessons,
   xp,
+  restHeld,
+  restMax,
   restBridging,
   style,
 }: {
@@ -78,6 +86,8 @@ export default function HabitCard({
   lastLessonDate: string | null;
   lessons: number;
   xp: number;
+  restHeld: number;
+  restMax: number;
   restBridging: boolean;
   style?: object;
 }) {
@@ -101,36 +111,14 @@ export default function HabitCard({
         <Text style={styles.kicker}>SEE THE MONTH  →</Text>
       </View>
 
-      <View style={styles.head}>
-        {/* Inverted: the book is drawn in cream on the ink panel. It takes the
-            pair as props precisely so it can be printed either way up. */}
-        <StreakBook value={streak} size={44} color={CREAM} paper={INK} />
-        <View style={styles.headText}>
-          <Text style={styles.streak}>
-            {streak} DAY{streak === 1 ? '' : 'S'} RUNNING
-          </Text>
-          {/* Only when a rest day is actually holding it up. It says the streak is
-              safe WITHOUT saying it has been spent, because it has not: the
-              deduction happens when they finish something today. */}
-          <Text style={styles.sub} numberOfLines={2}>
-            {restBridging
-              ? 'A day of rest is holding it — finish anything today.'
-              : 'Every day you turn up is a day here.'}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.week}>
-        <StreakWeek
-          streak={streak}
-          lastLessonDate={lastLessonDate}
-          size={28}
-          tint={CREAM}
-          ground={INK}
-          faint={ON_INK_FAINT}
-          soft={ON_INK_SOFT}
-        />
-      </View>
+      <StreakPanel
+        onInk
+        streak={streak}
+        lastLessonDate={lastLessonDate}
+        restHeld={restHeld}
+        restMax={restMax}
+        restBridging={restBridging}
+      />
 
       {/* Two odometers. No totals to be a fraction of — these only ever climb,
           and they are set at a size worth climbing to: a run of lessons read as
@@ -186,26 +174,6 @@ const styles = StyleSheet.create({
     letterSpacing: 2.2,
     includeFontPadding: false,
   },
-
-  head: { flexDirection: 'row', alignItems: 'center', gap: 13 },
-  headText: { flex: 1 },
-  streak: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 12,
-    color: CREAM,
-    letterSpacing: 1.8,
-    includeFontPadding: false,
-  },
-  sub: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontStyle: 'italic',
-    fontSize: 12.5,
-    color: ON_INK_SOFT,
-    marginTop: 4,
-    lineHeight: 17,
-  },
-
-  week: { marginTop: 18 },
 
   foot: { flexDirection: 'row', alignItems: 'stretch', marginTop: 18 },
   stat: { flex: 1, alignItems: 'center', paddingVertical: 14 },

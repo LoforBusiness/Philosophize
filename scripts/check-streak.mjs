@@ -54,6 +54,12 @@ head('THE EMBER, MEASURED');
     ['EMBER_DEEP carrying cream', streak.EMBER_DEEP, CREAM, 4.5],
     ['ink on EMBER_SOFT', INK, streak.EMBER_SOFT, 4.5],
     ['ASH on paper', streak.ASH, PAPER, 4.5],
+    // THE OTHER PRINTING. Home's habit panel is on ink, and the paper values do
+    // not survive the move: EMBER reads 3.50:1 there and ASH 3.31:1, both under
+    // the floor for the number they colour. These two exist for that ground and
+    // are checked against it, never against paper.
+    ['EMBER_LIT on ink', streak.EMBER_LIT, INK, 4.5],
+    ['ASH_LIT on ink', streak.ASH_LIT, INK, 4.5],
   ];
   for (const [name, fg, bg, floor] of claims) {
     const r = ratio(fg, bg);
@@ -90,6 +96,17 @@ head('THE EMBER, MEASURED');
     `ΔE ${dE.toFixed(1)}, and only ${Math.abs(L1 - L2).toFixed(1)} of it is lightness`);
   else bad('ember and ash are too close to tell apart', `ΔE ${dE.toFixed(1)}`);
 
+  // AND THE SAME MUST HOLD IN THE OTHER PRINTING. The habit panel inverts — ink
+  // on Home, paper on Profile — and a pair that separates on one ground and not
+  // the other means the panel silently stops reporting its own state on one of
+  // the two screens it lives on.
+  const [L3, a3, b3] = lab(streak.EMBER_LIT);
+  const [L4, a4, b4] = lab(streak.ASH_LIT);
+  const dLit = Math.hypot(L3 - L4, a3 - a4, b3 - b4);
+  if (dLit > 20) ok('ember and ash stay different on a dark ground too',
+    `ΔE ${dLit.toFixed(1)}`);
+  else bad('the on-ink pair is too close to tell apart', `ΔE ${dLit.toFixed(1)}`);
+
   // AND THE COROLLARY, since the separation is almost entirely chroma: a reader who
   // cannot see the hue difference has nothing left. Alive and lapsed must therefore
   // differ by something that is not colour at all — the copy, the mascot's pose, a
@@ -98,6 +115,40 @@ head('THE EMBER, MEASURED');
   if (Math.abs(L1 - L2) < 8) {
     ok('lightness alone does not carry the state, so the screen must not rely on it',
       `only ${Math.abs(L1 - L2).toFixed(1)} L apart — the mascot and the copy carry it too`);
+  }
+}
+
+head('THE WEEK ROW, BOTH WAYS UP');
+{
+  // components/gamification/StreakPanel.tsx prints on ink (Home) and on paper
+  // (Profile), and its weekday labels are TEXT — which is the thing the paper
+  // printing got wrong for as long as it existed. HabitCard's header had already
+  // written the defect down ("they cannot be read on the profile screen at all")
+  // without anything measuring it, which is exactly the shape of failure this
+  // whole script exists for.
+  const src = fs.readFileSync(path.join('components', 'gamification', 'StreakPanel.tsx'), 'utf8');
+  const pick = (name) => (src.match(new RegExp(`const ${name} = '(#[0-9A-Fa-f]{6})'`)) ?? [])[1];
+  const claims = [
+    ['an earned weekday on paper', pick('LABEL_ON_PAPER'), PAPER, 4.5],
+    ['an unearned weekday on paper', pick('LABEL_OFF_PAPER'), PAPER, 3.0],
+    ['an earned weekday on ink', pick('LABEL_ON_INK'), INK, 4.5],
+    ['an unearned weekday on ink', pick('LABEL_OFF_INK'), INK, 3.0],
+  ];
+  for (const [name, hex, bg, floor] of claims) {
+    if (!hex) { bad(`${name}: its constant is gone from StreakPanel`); continue; }
+    const r = ratio(hex, bg);
+    if (r >= floor) ok(`${name} is ${r.toFixed(2)}:1`, `floor ${floor}`);
+    else bad(`${name} is only ${r.toFixed(2)}:1`, `needs ${floor}`);
+  }
+  // AND THE TWO STATES MUST STILL BE TELLABLE APART. A pair that both clear the
+  // floor but sit on top of each other says nothing about which days were earned,
+  // which is the only thing the row is for.
+  for (const [ground, on, off] of [['paper', pick('LABEL_ON_PAPER'), PAPER], ['ink', pick('LABEL_ON_INK'), INK]]) {
+    const offHex = ground === 'paper' ? pick('LABEL_OFF_PAPER') : pick('LABEL_OFF_INK');
+    if (!on || !offHex) continue;
+    const step = ratio(on, off) / ratio(offHex, off);
+    if (step >= 2) ok(`earned and unearned are a real step apart on ${ground}`, `${step.toFixed(1)}x`);
+    else bad(`earned and unearned look the same on ${ground}`, `${step.toFixed(1)}x, need 2`);
   }
 }
 
