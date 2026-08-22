@@ -182,13 +182,52 @@ function beatAt(t: number): { code: number; t0: number; prev: number; prevT0: nu
 /** How long one gesture takes to give way to the next. */
 const BLEND = 0.38;
 
+/**
+ * HE WAS TOO STILL WHILE TALKING, AND THE REASON IS IN THE CODES.
+ *
+ * Six of the ten lines carry no gesture of their own, so they all run TALK — and
+ * every code at 100+ is an ACTION, which `emoteAnyLive` plays once over
+ * PLAY_SECONDS (1.5s) and then HOLDS. A line lasts about three seconds. So he
+ * gestured for the first half of each line and then stood still for the rest of
+ * it, ten times over.
+ *
+ * Act 68 does keep a slow hand turnover going underneath, but at ±7 units it is
+ * a breath rather than speech.
+ *
+ * THIS DOES NOT TOUCH THE ACTION. Act 68 is the narration hold for a hundred and
+ * fifty cinematic lessons, and widening it there would restage every one of them
+ * — the same trap the road gaits hit when a shared stride table was retuned for
+ * one caller. The overlay is the HOST's alone, applied after the blend.
+ *
+ * Two sine pairs at incommensurable rates (1.15 and 0.83, offset by 2.1 and 1.4)
+ * so the hands never fall into lockstep and the cycle does not visibly repeat
+ * across half a minute. It stays a pure function of `t`, which is what lets the
+ * intro jump its own clock after a slow boot and still be continuous.
+ */
+function withSpeechLife(s: Stance, t: number): Stance {
+  'worklet';
+  const a = t * 1.15, b = t * 0.83 + 2.1, c = t * 0.61 + 1.4;
+  const la = Math.sin(a), lb = Math.sin(b), lc = Math.sin(c);
+  // Moderate on purpose: the fists are IK targets, and a hand thrown past the
+  // arm's reach is clamped by the solver, which reads as a stiff arm rather than
+  // a big gesture. ±10 across and ±7 up roughly triples the travel act 68 has on
+  // its own while staying inside the reach.
+  return {
+    ...s,
+    neck: s.neck + la * 0.018,
+    tilt: s.tilt + lb * 0.012,
+    fistL: { x: s.fistL.x + la * 10, y: s.fistL.y + lc * 7 },
+    fistR: { x: s.fistR.x + lb * 10, y: s.fistR.y + la * 7 },
+  };
+}
+
 /** The talking pose at `t`, continuous across every beat boundary. */
 function talkStance(t: number): Stance {
   'worklet';
   const b = beatAt(t);
   const from = emoteAnyLive(b.prev, t, t - b.prevT0);
   const to = emoteAnyLive(b.code, t, t - b.t0);
-  return mixStance(from, to, ease01(clamp01((t - b.t0) / BLEND)));
+  return withSpeechLife(mixStance(from, to, ease01(clamp01((t - b.t0) / BLEND))), t);
 }
 
 export interface HostFrame {

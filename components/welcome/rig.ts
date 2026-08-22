@@ -25,7 +25,7 @@ export interface Beat {
    */
   cues: number[];
 }
-export type Visual = 'lesson' | 'map' | 'thinkers';
+export type Visual = 'lesson' | 'map' | 'thinkers' | 'growth';
 export type Gesture = 'point' | 'shrug' | 'open' | 'emphasize';
 
 // ── the host's entrance and exit ─────────────────────────────────────────────
@@ -79,10 +79,14 @@ const SCRIPT: Array<[number, string, Visual | null, Gesture | null, number[]?]> 
   // ALL_PHILOSOPHERS.length, so the next person to add a thinker is told.
   [21.8, 'Three hundred and twenty-two thinkers.', 'thinkers', null],
   [25.0, 'Socrates. Kant. Nietzsche. Simone de Beauvoir.', 'thinkers', null],
-  [28.6, 'Ready to think differently?', null, 'open'],
+  // The bars and the rank line. This beat exists because the intro said what
+  // philosophy IS and never what a habit of it adds up to — and the board column
+  // sat empty through both closing lines anyway.
+  [28.6, 'A little every day. It adds up.', 'growth', null],
+  [34.2, 'Ready to think differently?', null, 'open'],
 ];
 
-const SPEAK_END = 31.0; // relative — he stops talking here
+const SPEAK_END = 37.0; // relative — he stops talking here
 
 export const T_FADE = SPEAK_T0 + SPEAK_END; // bubble + board dissolve
 export const T_EXIT = T_FADE; // …and he starts turning to leave
@@ -179,6 +183,10 @@ const BOARDS: Record<Visual, { box: Box; cw: number; ch: number }> = {
   lesson: { box: { x: 14, y: 392, w: 232, h: 116 }, cw: 300, ch: 150 },
   map: { box: { x: 14, y: 386, w: 232, h: 174 }, cw: 300, ch: 225 },
   thinkers: { box: { x: 14, y: 396, w: 232, h: 156 }, cw: 300, ch: 202 },
+  // Tall, because it is the only board with a plot in it: bars need height to be
+  // a shape rather than a row of ticks, and x 14…246 is the width the layout
+  // reserves for boards (see X_MARK in hostFigure).
+  growth: { box: { x: 14, y: 384, w: 232, h: 232 }, cw: 300, ch: 300 },
 };
 
 export const CHAPTERS: Chapter[] = (() => {

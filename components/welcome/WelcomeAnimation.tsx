@@ -20,6 +20,7 @@ import Animated, {
   useAnimatedReaction,
   runOnJS,
   withTiming,
+  Easing,
   type SharedValue,
 } from 'react-native-reanimated';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -68,6 +69,7 @@ import { hostAtRig, K_HOST, FIG_GROUND } from './hostFigure';
 import MapChart from './charts/MapChart';
 import ThinkersChart from './charts/ThinkersChart';
 import LessonChart from './charts/LessonChart';
+import GrowthChart from './charts/GrowthChart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // First-launch welcome. A featureless black stickman "host" MARCHES ON from
@@ -225,7 +227,6 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
   const bubHTarget = useSharedValue(BUB.lh + 2 * BUB.padY);
   const lineOf = useSharedValue<number[]>([]);
 
-  const endLatched = useSharedValue(0);
   const [endReady, setEndReady] = useState(false);
   const leaving = useSharedValue(0);
 
@@ -258,6 +259,26 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
 
   });
 
+  // THE BEGIN BUTTON IS ENABLED HERE, AND NOTHING USED TO DO IT.
+  //
+  // `endReady` gates `disabled` on the only button this screen has, and the sole
+  // place it was ever set true was inside the ?t= debug effect — which returns on
+  // its first line whenever FREEZE_T is NaN. FREEZE_T is NaN in every build that
+  // is not a dev web bundle with ?t= in the query string, so on a phone the flag
+  // could never flip: the intro played to the end and left the reader looking at
+  // a Begin button that was permanently disabled, with no way into the app at all.
+  //
+  // A `useSharedValue(0)` named endLatched sat beside it, declared and never read
+  // — the shape of a latch somebody meant to wire and did not. This is that
+  // wiring. The condition is the clock crossing T_BEGIN, which is exactly what the
+  // button's own fade-in uses, so it becomes pressable when it becomes visible.
+  useAnimatedReaction(
+    () => clock.value >= T_BEGIN,
+    (past, was) => {
+      if (past && !was) runOnJS(setEndReady)(true);
+    },
+  );
+
   // Which beat is on screen — drives the words (JS side); ~13 renders in 30s.
   useAnimatedReaction(
     () => beatIdxAt(clock.value),
@@ -280,15 +301,35 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
       let n = 1;
       for (let i = 0; i < lines.length; i++) {
         const at = s0 + (s1 - s0) * (i / Math.max(1, lines.length));
-        if (age >= at && lines[i] + 1 > n) n = lines[i] + 1;
+        // LEAD, not lag. The word fades in over 0.16s from `at` and the box eases
+        // open over 0.18s, so matching the thresholds exactly means the two race and
+        // the arriving word is clipped for the length of the transition — measured
+        // at 25px, which is most of a descender. The box is told 0.22s early, so it
+        // is already the right size when the word lands in it.
+        if (age >= at - 0.22 && lines[i] + 1 > n) n = lines[i] + 1;
       }
       return n;
     },
     (n) => {
-      bubHTarget.value = n * BUB.lh + 2 * BUB.padY;
-      // Nothing is chasing it while the clock is held, so snap instead of
-      // sitting at a stale height (this is also what makes ?t= frames honest).
-      if (!started.value) bubH.value = bubHTarget.value;
+      const target = n * BUB.lh + 2 * BUB.padY;
+      bubHTarget.value = target;
+      // THE BUBBLE HAS TO ACTUALLY GROW, AND FOR A LONG TIME IT DID NOT.
+      //
+      // This line used to read `if (!started.value) bubH.value = target;` — so the
+      // height was set once, before the clock was running, and then never again.
+      // `bubHTarget` went on being computed correctly every frame and nothing ever
+      // read it. Measured in a browser, the bubble sat at 66px for the whole
+      // thirty seconds while its text needed up to 126px, and `overflow: hidden`
+      // did the rest: the second and third line of nearly every beat were cut in
+      // half or missing outright — "boring, or too difficult?", "Nietzsche. Simone
+      // de Beauvoir." A reader could not read the introduction to the app.
+      //
+      // withTiming rather than a snap because the bubble is bottom-anchored and
+      // grows UPWARD into the space above it: at 180ms that reads as the balloon
+      // making room for a line he is about to say, which is the effect the
+      // per-line schedule was written for in the first place.
+      if (!started.value) bubH.value = target;
+      else bubH.value = withTiming(target, { duration: 180, easing: Easing.out(Easing.quad) });
     }
   );
 
@@ -651,8 +692,10 @@ const Board = memo(function Board({
           <LessonChart p={p} />
         ) : chapter.visual === 'map' ? (
           <MapChart p={p} clock={clock} />
-        ) : (
+        ) : chapter.visual === 'thinkers' ? (
           <ThinkersChart p={p} />
+        ) : (
+          <GrowthChart p={p} />
         )}
       </Svg>
     </Animated.View>
