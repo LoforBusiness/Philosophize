@@ -27,6 +27,13 @@ import Animated from 'react-native-reanimated';
 // Use it with `animatedProps={useAnimatedProps(() => ({ text: … }))}` and give it
 // `counterStyle` alongside your own text style, or the platform's default
 // TextInput padding will shift the digits off whatever they are labelling.
+//
+// AND GIVE IT AN EXPLICIT WIDTH. `counterStyle` cannot: how wide four digits of
+// Playfair are is the caller's business. What it costs to forget is invisible on
+// a device and obvious on web — this is a TextInput, and an unstyled `<input>`
+// claims a default intrinsic width of about twenty characters, so it silently
+// eats a flex row. On the Insights detail line that squeezed a label that had
+// plenty of room into "EPISTEMOL...".
 // ─────────────────────────────────────────────────────────────────────────────
 
 const ACounter = Animated.createAnimatedComponent(TextInput);

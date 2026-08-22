@@ -114,7 +114,8 @@ Philosophize/
 │       │                        #   → [branchSlug] (units accordion)
 │       │                        #   → [pathSlug]/lesson/[lessonId]
 │       ├── philosophers/        # "Thinkers" directory (+ its own stack _layout)
-│       ├── stats/               # Insights (sketch charts)
+│       ├── stats/               # Insights — the ledger, branch/era rails,
+│       │                        #   the thinker league (§19)
 │       ├── profile/             # Rank, badges, streak, saved quotes
 │       ├── settings.tsx         # Hidden route. 9 sections down a LABELLED rail:
 │       │                        #   Profile · Account · Notifications · Learning ·
@@ -143,7 +144,9 @@ Philosophize/
 │   ├── widget/                  # Android home-screen widget surface
 │   └── shared/                  # SketchIcon, Glyph, PhilosopherSheet, RanksBadgesSheet,
 │                                #   SavedQuotesSheet, PaywallSheet, RankSeal,
-│                                #   UpdateGate, DailyQuoteWidget, Sketch{Pie,Bar,Line}Chart,
+│                                #   UpdateGate, DailyQuoteWidget, QuotePlate,
+│                                #   Sketch{Bar,Line}Chart (both ORPHANED — nothing
+│                                #   imports them; ship or delete),
 │                                #   Portrait, ScreenTransition, PressableScale
 ├── data/                        # Curriculum + reference content (version-controlled)
 │   ├── types.ts                 # ALL type definitions — the load-bearing file
@@ -1254,6 +1257,51 @@ Two things that were measured rather than judged, and both had already failed:
   4px gap that a 24px glyph does not go into — so the answer was not a better
   offset but `kickerGap`, which makes the band. **Nothing painted over a word is
   acceptable (D31), including the app's own decoration.**
+
+### Insights is coloured now, and no target comes from a total
+
+The tab drew the same numbers three times — a pie of "interest", a pie of
+thinkers, a bar chart of "interactions" — in six greys, at a point where
+`constants/design.ts` already held six measured branch hues put there for
+exactly this job. Its own comment calls one-tone readings "the 'dull' the
+redesign was asked to fix", and Insights was the last screen still doing it.
+
+It is four different readings now, all struck by `components/profile/Struck.tsx`
+so the light matches the profile rather than starting a second system: a ledger
+of four counts, the branches by lessons, a thinker league, and thinkers by era.
+`SketchPieChart` is deleted — five names in a pie is the least readable form a
+ranking can take, since it asks a reader to compare five arcs and then hunt a
+legend for whose arc is whose.
+
+**The load-bearing part is that no target may come from a ceiling.** The tap
+interaction used to say "4 more lessons finishes Logic", and the reader named
+what is wrong with it: *"since I will be continuing adding lessons that doesnt
+make sense."* It is worse than untidy — the curriculum has gone 60 → 192 → 222
+lessons and is still growing, so a ceiling-based target **moves away from a
+reader who has done nothing wrong** every time content ships. Effort is supposed
+to be permanent.
+
+`lib/utils/statsMilestone.ts` has two target shapes left, both immune: OVERTAKE
+(pass the next thing along — both sides are the reader's own numbers) and MARK
+(the next round number of something actually done). `npm run check:stats` runs
+every synthetic profile against a **32-lesson and a 900-lesson** curriculum and
+fails if a single milestone differs; today 4,078 come out identical. It also
+holds that a target never retreats as you work.
+
+> The same "N of M" shape still lives on Profile's `MasteryRow` ("22 / 34"), and
+> it has the identical problem for the identical reason. It was left alone only
+> because that file was being edited elsewhere at the time.
+
+Two things measured rather than judged:
+
+- **The bar headroom is 30% and it is load-bearing.** Bars draw against
+  `max × 1.3`, so the LEADER — the row a reader taps first — still has track left
+  to draw its ghost in. Re-scaling on selection instead would move every bar at
+  once, which is the camera cut group L is about.
+- **`ACounter` needs an explicit width and `counterStyle` cannot give it one.**
+  It is a `TextInput`, and an unstyled `<input>` claims ~20 characters of
+  intrinsic width, which silently eats a flex row. It squeezed a label with
+  plenty of room into "EPISTEMOL…" — invisible on a device, obvious in a browser.
 
 > The lesson deck's quote card (`cinematicKit.tsx`) is the one surface not yet
 > converted — see §17; it is the highest-traffic file in the repo and was being

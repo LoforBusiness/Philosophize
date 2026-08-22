@@ -1,209 +1,182 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  View, Text, ScrollView, StyleSheet, Dimensions, Pressable, AccessibilityInfo,
-  type ViewStyle,
-} from 'react-native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import Svg, { Line } from 'react-native-svg';
-import Animated, {
-  useSharedValue, useAnimatedStyle, useAnimatedProps, withSpring, withTiming, withDelay, Easing,
-  type SharedValue,
-} from 'react-native-reanimated';
-import SketchPieChart, { type PiePoint, TINTS } from '@/components/shared/SketchPieChart';
-import ACounter, { counterStyle } from '@/components/shared/ACounter';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
+import {
+  Ledger, RankedBars, ThinkerLeague,
+  type LedgerItem, type BarRow, type LeagueRow,
+} from '@/components/stats/InsightBoard';
 import { ALL_BRANCHES } from '@/data';
-import { ALL_PHILOSOPHERS } from '@/data/philosophers';
+import { ALL_PHILOSOPHERS, ERA_GROUPS, eraGroupOf, eraGroupOfId } from '@/data/philosophers';
+import { BRANCH, ERA, C, type BranchKey, type EraKey } from '@/constants/design';
 import { useUserDataStore } from '@/stores/userDataStore';
-import { milestoneFor, statsFingerprint, type StatElement, type Milestone } from '@/lib/utils/statsMilestone';
-import { cue } from '@/lib/feedback';
+import { useUIStore } from '@/stores/uiStore';
+import { statsFingerprint } from '@/lib/utils/statsMilestone';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
-const InkSoft = '#6B6B6B';
-const InkFaint = '#E2E0D8';
 
-const SW = Dimensions.get('window').width;
-// On a phone the two pies can't sit side-by-side without overflowing — stack them.
-const STACK_PIES = SW < 600;
+// Politics is the only branch whose real name will not sit on a bar row beside
+// its count, and "Political Philosophy" wrapping to two lines in a ranked list
+// breaks the rhythm of the other five.
+const SHORT: Record<string, string> = { 'political-philosophy': 'Politics' };
+const shortName = (slug: string, name: string) => SHORT[slug] ?? name;
 
-// Fixed display order + names for the area charts (matches the mockup).
-const AREA_ORDER = ['ethics', 'metaphysics', 'epistemology', 'aesthetics', 'logic', 'political-philosophy'];
-const AREA_NAME: Record<string, string> = {
-  ethics: 'Ethics',
-  metaphysics: 'Metaphysics',
-  epistemology: 'Epistemology',
-  aesthetics: 'Aesthetics',
-  logic: 'Logic',
-  'political-philosophy': 'Politics',
+const ERA_NAME: Record<EraKey, string> = {
+  ANCIENT: 'Ancient',
+  MEDIEVAL: 'Medieval',
+  MODERN: 'Modern',
+  CONTEMPORARY: 'Contemporary',
+  EASTERN: 'Eastern',
 };
 
-// Each branch gets a fixed grayscale tint by its position in AREA_ORDER, so the
-// same colour stands for a branch in BOTH the Areas-of-Interest pie and the
-// Activity Breakdown bars (Ethics = ink black → Politics = lightest gray).
-const AREA_TINT: Record<string, string> = Object.fromEntries(
-  AREA_ORDER.map((slug, i) => [slug, TINTS[i % TINTS.length]])
-);
+// ─────────────────────────────────────────────────────────────────────────────
+// INSIGHTS.
+//
+// ── WHAT THIS TAB USED TO BE, AND WHY IT WAS DULL ───────────────────────────
+//
+// Two grey pies and a grey bar chart, all three drawn from the same numbers, and
+// those numbers were composites: `interest = lessons×3 + quotes×2 + views`.
+// Three shapes, one fact, no colour, and a unit nobody has ever earned.
+//
+// Three changes, and none of them invents any data:
+//
+// · COLOUR THAT MEANS SOMETHING. `BRANCH` and `ERA` in constants/design.ts are
+//   two measured scales that exist precisely so a list of six or five readings
+//   can be told apart at a glance. This tab was the last screen still drawing
+//   six branches in six greys — the exact thing design.ts's own comment calls
+//   "the 'dull' the redesign was asked to fix".
+//
+// · COUNTS, NOT SCORES. Every number drawn here is a thing the reader did:
+//   lessons read, thinkers met, quotes kept, days practised. "Interest 47" is
+//   gone.
+//
+// · FOUR DIFFERENT READINGS instead of one repeated three times — the ledger,
+//   where the reading goes, who it was about, and which eras have been met.
+//
+// ── AND NO TARGET COMES FROM A TOTAL ────────────────────────────────────────
+//
+//   > "I dont want ... '4 more lessons to complete Logic' ... since I will be
+//   > continuing adding lessons that doesnt make sense."
+//
+// Right, and the harm is bigger than the wording: a ceiling-based target moves
+// AWAY from a reader whenever content ships. lib/utils/statsMilestone.ts is
+// rebuilt around targets that cannot — pass the next thing along, or reach the
+// next round number — and scripts/check-stats.mjs runs every profile against a
+// 32-lesson and a 900-lesson curriculum and fails if a single milestone differs.
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function StatsScreen() {
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const philosopherViews = useUserDataStore((s) => s.philosopherViews);
   const philosopherLessons = useUserDataStore((s) => s.philosopherLessons);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
-  const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
+  const practisedDays = useUserDataStore((s) => s.activeDays);
   const settings = useUserDataStore((s) => s.settings);
   const seenFingerprint = useUserDataStore((s) => s.statsSeenFingerprint);
   const markStatsSeen = useUserDataStore((s) => s.markStatsSeen);
+  const openPhilosopher = useUIStore((s) => s.openPhilosopher);
   const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'insights';
 
   const lessonsDone = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
-  const quotesSaved = savedQuotes.length;
-  const philosophersViewed = Object.keys(philosopherViews).length;
+  const quotesKept = savedQuotes.length;
+  const thinkersMet = Object.keys(philosopherViews).length;
+  const daysPractised = practisedDays.length;
 
-  // Per-branch metrics.
-  const branchMetrics = ALL_BRANCHES.map((b) => {
+  // ── where the reading goes ────────────────────────────────────────────────
+  const areaRows: BarRow[] = useMemo(() => ALL_BRANCHES.map((b) => {
     const lessons = lessonsByBranch[b.slug] ?? 0;
     const quotes = savedQuotes.filter((q) => q.branchSlugs.includes(b.slug)).length;
-    const views = ALL_PHILOSOPHERS.filter((p) => p.branchSlugs.includes(b.slug)).reduce(
-      (a, p) => a + (philosopherViews[p.id] ?? 0),
-      0
-    );
-    // WHOSE IDEAS THE READER HAS ACTUALLY SPENT TIME ON, in this branch.
-    //
-    // The three signals above are all COARSE about area: a lesson counts for its
-    // own branch, a quote for the branches its author works in, a view likewise.
-    // None of them notices that a reader who keeps meeting Hume — in epistemology
-    // lessons, in ethics lessons, on his page — is telling you something about
-    // what interests them. This is that, and it is the signal the reader asked
-    // for: the areas move because of who the lessons were ABOUT, not only which
-    // shelf the lesson sat on.
-    //
-    // SPLIT ACROSS THE THINKER'S AREAS, NOT COUNTED IN FULL IN EACH. Hume works in
-    // four branches, so crediting his whole weight to all four turns one ethics
-    // lesson into four branches' worth of interest — and a reader who had never
-    // opened Politics was shown 17% Politics. Dividing means reading a thinker is
-    // worth the same total wherever they happen to be filed, which is what makes
-    // this an attribution rather than a multiplier.
-    const thinkers = ALL_PHILOSOPHERS.filter((p) => p.branchSlugs.includes(b.slug)).reduce(
-      (a, p) => a + (philosopherLessons[p.id] ?? 0) / Math.max(1, p.branchSlugs.length),
-      0
-    );
-    // The first unit in this branch that is not finished — the nearest whole
-    // thing a reader can complete, which is one of the three milestone targets.
-    const totalLessons = b.paths.reduce((a, p) => a + p.lessons.length, 0);
-    let unitRemaining: number | undefined;
-    let unitLabel: string | undefined;
-    for (const p of b.paths) {
-      const done = lessonsByUnit[p.id] ?? 0;
-      if (done < p.lessons.length) {
-        unitRemaining = p.lessons.length - done;
-        unitLabel = p.name;
-        break;
-      }
-    }
+    const met = ALL_PHILOSOPHERS.filter(
+      (p) => p.branchSlugs.includes(b.slug) && (philosopherViews[p.id] ?? 0) > 0
+    ).length;
+    const bits = [
+      `${quotes} quote${quotes === 1 ? '' : 's'} kept`,
+      `${met} thinker${met === 1 ? '' : 's'} met`,
+    ];
     return {
-      slug: b.slug,
-      lessons,
-      quotes,
-      views,
-      totalLessons,
-      unitRemaining,
-      unitLabel,
-      thinkers: Math.round(thinkers),
-      // `thinkers` is already weighted at source (3 for a lesson built on someone,
-      // 1 for a lesson that names them), so it enters both totals at 1× — folding a
-      // second multiplier on top would make one signal shout over the other three.
-      interactions: Math.round(lessons + quotes + views + thinkers),
-      interest: Math.round(lessons * 3 + quotes * 2 + views + thinkers),
+      key: b.slug,
+      label: shortName(b.slug, b.name),
+      value: lessons,
+      hue: BRANCH[b.slug as BranchKey] ?? C.HUE,
+      detail: bits.join('  ·  '),
+      action: 'lesson' as const,
     };
-  });
-  const metricBySlug = Object.fromEntries(branchMetrics.map((m) => [m.slug, m]));
+  }).sort((a, b) => b.value - a.value), [lessonsByBranch, savedQuotes, philosopherViews]);
 
-  // ── TOP PHILOSOPHERS ──────────────────────────────────────────────────────
+  // ── who it was about ──────────────────────────────────────────────────────
   //
-  // This used to read `p.branchSlugs.reduce((a, s) => a + lessonsByBranch[s])` —
-  // every philosopher scored for every lesson finished anywhere in their branch.
-  // One ethics lesson moved all forty ethics thinkers up by the same amount, so
-  // the ordering was decided almost entirely by who the reader had OPENED in
-  // Thinkers, and the lesson term only added a constant that shifted everyone.
-  //
-  // `philosopherLessons` is the honest version: who the lessons were actually
-  // about, weighted 3 when the lesson carries their words and 1 when it names them
-  // (data/lessonMentions.ts, credited in recordLessonComplete).
-  const philScores = ALL_PHILOSOPHERS.map((p) => {
-    const views = philosopherViews[p.id] ?? 0;
-    const quotes = savedQuotes.filter((q) => q.philosopherId === p.id).length;
-    const learn = philosopherLessons[p.id] ?? 0;
-    return { id: p.id, name: p.name, surname: p.name.split(' ').slice(-1)[0], score: views * 3 + quotes * 5 + learn };
-  })
+  // The score is a COUNT of two things the reader did — lessons that were about
+  // them, and quotes of theirs kept. Opening a page is the tie-break rather than
+  // a term, because scrolling a profile is not reading someone.
+  const league: LeagueRow[] = useMemo(() => ALL_PHILOSOPHERS
+    .map((p) => {
+      const lessons = philosopherLessons[p.id] ?? 0;
+      const quotes = savedQuotes.filter((q) => q.philosopherId === p.id).length;
+      const group = eraGroupOf(p) as EraKey;
+      return {
+        id: p.id,
+        name: p.name,
+        hue: ERA[group] ?? C.HUE,
+        era: (ERA_NAME[group] ?? '').toUpperCase(),
+        lessons,
+        quotes,
+        score: lessons + quotes,
+        views: philosopherViews[p.id] ?? 0,
+      };
+    })
     .filter((p) => p.score > 0)
-    .sort((a, b) => b.score - a.score);
+    .sort((a, b) => (b.score - a.score) || (b.views - a.views))
+    .slice(0, 5), [philosopherLessons, savedQuotes, philosopherViews]);
 
-  // Only the leading philosophers — no catch-all "Others" slice. Percentages are
-  // computed across just these top thinkers.
+  // ── which eras have been met ──────────────────────────────────────────────
   //
-  // A thinker's cheapest lever is a SAVED QUOTE (+5), so that is the action the
-  // milestone counts in and the copy names. Reading them is worth 3 and finishing
-  // a lesson in their area 1, but neither is a thing a reader does *to* a thinker.
-  const philPie: PiePoint[] = philScores.slice(0, 5).map((p) => ({
-    label: p.surname,
-    value: p.score,
-    element: { key: p.id, label: p.surname, value: p.score, perAction: 5, action: 'quote' },
-  }));
-
-  const areaPie: PiePoint[] = AREA_ORDER.map((slug) => {
-    const m = metricBySlug[slug];
-    const value = m?.interest ?? 0;
-    return {
-      label: AREA_NAME[slug],
-      value,
-      color: AREA_TINT[slug],
-      element: m ? {
-        key: slug,
-        label: AREA_NAME[slug],
-        value,
-        perAction: 3,                                  // interest = lessons×3 + …
+  // A reading no other screen has: 322 thinkers are sorted into five eras, and
+  // "whose century do you actually read" is a question the app has always had
+  // the answer to and never asked. Counts of thinkers MET — never out of a
+  // total, for the same reason nothing else here is.
+  const eraRows: BarRow[] = useMemo(() => {
+    const met: Record<string, number> = {};
+    const quoted: Record<string, number> = {};
+    for (const id of Object.keys(philosopherViews)) {
+      const g = eraGroupOfId(id);
+      if (g) met[g] = (met[g] ?? 0) + 1;
+    }
+    for (const q of savedQuotes) {
+      const g = eraGroupOfId(q.philosopherId);
+      if (g) quoted[g] = (quoted[g] ?? 0) + 1;
+    }
+    return ERA_GROUPS.map((g) => {
+      const n = quoted[g] ?? 0;
+      return {
+        key: g,
+        label: ERA_NAME[g as EraKey],
+        value: met[g] ?? 0,
+        hue: ERA[g as EraKey],
+        detail: `${n} quote${n === 1 ? '' : 's'} kept from this era`,
         action: 'lesson' as const,
-        ceiling: m.totalLessons * 3 + m.quotes * 2 + m.views,
-        unitRemaining: m.unitRemaining,
-        unitLabel: m.unitLabel,
-      } : undefined,
-    };
-  }).filter((d) => d.value > 0);
+      };
+    }).sort((a, b) => b.value - a.value);
+  }, [philosopherViews, savedQuotes]);
 
-  const activity = AREA_ORDER.map((slug) => {
-    const m = metricBySlug[slug];
-    return {
-      label: AREA_NAME[slug],
-      value: m?.interactions ?? 0,
-      color: AREA_TINT[slug],
-      element: m ? {
-        key: slug,
-        label: AREA_NAME[slug],
-        value: m.interactions,
-        perAction: 1,                                  // interactions = lessons + …
-        action: 'lesson' as const,
-        ceiling: m.totalLessons + m.quotes + m.views,
-        unitRemaining: m.unitRemaining,
-        unitLabel: m.unitLabel,
-      } : undefined,
-    };
-  });
-  const hasActivity = activity.some((a) => a.value > 0);
-
-  // ── HAS ANYTHING CHANGED SINCE THEY LAST LOOKED? ──────────────────────────
+  // ── has anything changed since they last looked? ──────────────────────────
   //
-  // The entrance plays only when it has. `playToken` is what the charts watch:
-  // it moves when a fresh look is due and stays put otherwise, so re-focusing
-  // the tab with nothing new draws everything finished and still.
+  // The entrance plays only when it has, so movement on this tab MEANS something
+  // happened rather than decorating every visit.
   const fingerprint = useMemo(
     () => statsFingerprint({
-      branches: branchMetrics.map((m) => ({ slug: m.slug, interest: m.interest, interactions: m.interactions })),
-      philosophers: philScores.slice(0, 5).map((p) => ({ id: p.id, score: p.score })),
+      branches: areaRows.map((r) => ({
+        slug: r.key,
+        lessons: r.value,
+        quotes: savedQuotes.filter((q) => q.branchSlugs.includes(r.key)).length,
+        thinkers: 0,
+      })),
+      philosophers: league.map((p) => ({ id: p.id, score: p.score })),
+      eras: eraRows.map((r) => ({ key: r.key, value: r.value })),
     }),
-    [branchMetrics, philScores],
+    [areaRows, league, eraRows, savedQuotes],
   );
 
   const [playToken, setPlayToken] = useState(0);
@@ -223,397 +196,118 @@ export default function StatsScreen() {
     }, [fingerprint, seenFingerprint, markStatsSeen]),
   );
 
-  // ── "THIS WEEK" ───────────────────────────────────────────────────────────
+  // ── the one piece of prose ────────────────────────────────────────────────
   //
-  // This used to end "Their ideas appear in N of your saved quotes", and the
-  // sentence had two faults. N was the BRANCH's quote count, not the named
-  // thinker's, so the pronoun pointed at the wrong noun — and for most readers N
-  // is 0, which made the app's one piece of prose about them a statement that they
-  // had done nothing.
-  //
-  // It now says WHY each thing leads, from whichever signal actually earned it, so
-  // the reader learns what the chart is made of rather than being handed a number
-  // they cannot place.
-  const topArea = [...branchMetrics].sort((a, b) => b.interactions - a.interactions)[0];
-  const topPhil = philScores[0];
-  const philReason = (() => {
-    if (!topPhil) return null;
-    const p = { views: philosopherViews[topPhil.id] ?? 0,
-      quotes: savedQuotes.filter((q) => q.philosopherId === topPhil.id).length,
-      learn: philosopherLessons[topPhil.id] ?? 0 };
-    // Named in order of what the reader DID, heaviest first — lessons are the new
-    // signal and the one worth telling them about.
-    if (p.learn >= Math.max(p.views * 3, p.quotes * 5)) return 'from the lessons you have read';
-    if (p.quotes > 0) return `from the ${p.quotes} quote${p.quotes === 1 ? '' : 's'} of theirs you saved`;
-    return 'from the time you have spent on their page';
+  // It says WHY each thing leads, from whichever signal actually earned it, so
+  // the reader learns what the chart is made of rather than being handed a
+  // number they cannot place.
+  const topArea = areaRows[0];
+  const topPhil = league[0];
+  const insight = (() => {
+    if (!topArea || topArea.value === 0) {
+      return 'Read a lesson or keep a quote, and your story will start here.';
+    }
+    const a = `${topArea.label} is where you spend your time — ${topArea.value} lesson${topArea.value === 1 ? '' : 's'} so far.`;
+    if (!topPhil) return a;
+    const why = topPhil.lessons >= topPhil.quotes
+      ? `${topPhil.lessons} of your lessons were about them`
+      : `you have kept ${topPhil.quotes} of their lines`;
+    return `${a} ${topPhil.name} leads your thinkers: ${why}.`;
   })();
-  const areaReason = (() => {
-    if (!topArea) return '';
-    const m = topArea;
-    const parts: string[] = [];
-    if (m.lessons) parts.push(`${m.lessons} lesson${m.lessons === 1 ? '' : 's'}`);
-    if (m.quotes) parts.push(`${m.quotes} quote${m.quotes === 1 ? '' : 's'}`);
-    if (m.thinkers) parts.push('the thinkers behind them');
-    return parts.length ? ` — ${parts.slice(0, 2).join(' and ')}` : '';
-  })();
-  const insight =
-    topArea && topArea.interactions > 0
-      ? `${AREA_NAME[topArea.slug] ?? topArea.slug} is where you spend your time${areaReason}.` +
-        (topPhil ? ` ${topPhil.name} leads your thinkers, ${philReason}.` : '')
-      : 'Finish a lesson or save a quote, and your weekly story will appear here.';
 
-  const hasAny = lessonsDone + quotesSaved + philosophersViewed > 0;
+  const ledger: LedgerItem[] = [
+    { label: 'LESSONS', value: lessonsDone, hue: BRANCH.ethics },
+    { label: 'THINKERS', value: thinkersMet, hue: BRANCH.metaphysics },
+    { label: 'QUOTES', value: quotesKept, hue: BRANCH.aesthetics },
+    { label: 'DAYS', value: daysPractised, hue: BRANCH.epistemology },
+  ];
+
+  // NOTE there is no `hasAny` gate any more, and that is deliberate. An empty
+  // Insights tab used to be a single grey box saying "your charts will appear
+  // here", which is the most boring thing on the most boring screen — and it
+  // hid the one thing a new reader most wants to see, which is the SHAPE of
+  // what they are about to fill. Zeroed, the ledger and the two rails still draw
+  // six branches and five eras in their own colours, with empty grooves waiting.
+  // It is the same argument the saved-quotes rail makes for drawing locked eras.
 
   return (
     <ScreenTransition bg={Paper}>
-    <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Masthead */}
-        <Text style={styles.kicker}>YOUR PROGRESS</Text>
-        <Text style={styles.title}>Philosophy</Text>
-        <Text style={styles.titleItalic}>Statistics</Text>
-        <View style={styles.rule} />
+      <SafeAreaView style={styles.safe}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <Text style={styles.kicker}>YOUR PROGRESS</Text>
+          <Text style={styles.title}>Philosophy</Text>
+          <Text style={styles.titleItalic}>Statistics</Text>
+          <View style={styles.rule} />
 
-        {showWidget ? <DailyQuoteWidget style={{ marginBottom: 20 }} /> : null}
+          {showWidget ? <DailyQuoteWidget style={{ marginBottom: 20 }} /> : null}
 
-        {hasAny ? (
-          <>
-            {/* Pies */}
-            {(philPie.length > 0 || areaPie.length > 0) && (
-              <View style={[styles.pieRow, STACK_PIES && { flexDirection: 'column' }]}>
-                {philPie.length > 0 && (
-                  <SketchPieChart
-                    title="Top Philosophers"
-                    subtitle="by lessons & research"
-                    data={philPie}
-                    valueMode="raw"
-                    playToken={playToken}
-                    animate={animate}
-                    stacked={STACK_PIES}
-                  />
-                )}
-                {areaPie.length > 0 && (
-                  <SketchPieChart
-                    title="Areas of Interest"
-                    subtitle="lessons, quotes, thinkers & who they teach"
-                    data={areaPie}
-                    valueMode="percent"
-                    playToken={playToken}
-                    animate={animate}
-                    delay={110}
-                    stacked={STACK_PIES}
-                  />
-                )}
-              </View>
-            )}
+          <Ledger items={ledger} playToken={playToken} animate={animate} />
 
-            {/* Activity breakdown */}
-            {hasActivity && <ActivityBars points={activity} playToken={playToken} animate={animate} />}
+          <RankedBars
+            title="Where Your Reading Goes"
+            subtitle="lessons finished, by branch"
+            rows={areaRows}
+            playToken={playToken}
+            animate={animate}
+            hint
+          />
 
-            {/* This week */}
-            <View style={styles.weekCard}>
-              <View style={styles.weekHead}>
-                <Text style={styles.weekDiamond}>◈</Text>
-                <Text style={styles.weekTitle}>This Week</Text>
-              </View>
-              <Text style={styles.weekBody}>{insight}</Text>
+          {league.length > 0 && (
+            <ThinkerLeague
+              rows={league}
+              playToken={playToken}
+              animate={animate}
+              onOpen={openPhilosopher}
+            />
+          )}
+
+          <RankedBars
+            title="Thinkers by Era"
+            subtitle="whose century you actually read"
+            rows={eraRows}
+            playToken={playToken}
+            animate={animate}
+          />
+
+          <View style={styles.weekCard}>
+            <View style={styles.weekHead}>
+              <Text style={styles.weekDiamond}>◈</Text>
+              <Text style={styles.weekTitle}>This Week</Text>
             </View>
-          </>
-        ) : (
-          <View style={styles.emptyBox}>
-            <Text style={styles.emptyText}>
-              Complete a few lessons and save some quotes — your charts will appear here.
-            </Text>
+            <Text style={styles.weekBody}>{insight}</Text>
           </View>
-        )}
 
-        <Text style={styles.footerQuote}>“The unexamined life is not worth living.” — Socrates</Text>
-      </ScrollView>
-    </SafeAreaView>
+          <Text style={styles.footerQuote}>“The unexamined life is not worth living.” — Socrates</Text>
+        </ScrollView>
+      </SafeAreaView>
     </ScreenTransition>
   );
-}
-
-interface BarPoint { label: string; value: number; color: string; element?: StatElement }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// THE BARS ARE VIEWS NOW, NOT SVG RECTS.
-//
-// They are rectangles. Drawing them in an <Svg> bought nothing and cost the one
-// thing that matters here: an SVG rect cannot be given its own transform without
-// animating an SVG property every frame, which is precisely the shape §17 warns
-// about and `check-poll` was written after. As native Views each bar carries its
-// own `scaleY`, anchored at the baseline, composited on the UI thread — cheaper
-// than what this drew before AND independently animatable.
-//
-// The <Svg> that remains draws one line: the baseline. It never moves.
-//
-// Geometry is unchanged from the SVG version on purpose — same `slot`, same
-// `barW`, same `baseline` — because the value and label text are positioned
-// against those numbers and would drift off the bars if either drifted.
-// ─────────────────────────────────────────────────────────────────────────────
-const MIN_GHOST_BAR = 8 / 144;   // 8px in the plot below; see check-stats.mjs
-
-function ActivityBars({ points, playToken, animate }: { points: BarPoint[]; playToken: number; animate: boolean }) {
-  const innerW = SW - 40 - 32; // page padding + card padding
-  const H = 200;
-  const padTop = 26;
-  const padBottom = 30;
-  const baseline = H - padBottom;
-  const plotH = baseline - padTop;
-  const max = Math.max(...points.map((p) => p.value), 1);
-  const n = points.length;
-  const slot = innerW / n;
-  const barW = Math.min(46, slot * 0.5);
-
-  const [reduce, setReduce] = useState(false);
-  const [sel, setSel] = useState<number | null>(null);
-  useEffect(() => {
-    let alive = true;
-    AccessibilityInfo.isReduceMotionEnabled().then((v) => { if (alive) setReduce(v); });
-    return () => { alive = false; };
-  }, []);
-
-  const grow = useSharedValue(animate ? 0 : 1);
-  const ghost = useSharedValue(0);
-  const shown = useSharedValue(0);
-
-  useEffect(() => {
-    if (!animate || reduce) { grow.value = 1; return; }
-    grow.value = 0;
-    grow.value = withDelay(220, withSpring(1, { damping: 12, stiffness: 150, mass: 0.9 }));
-  }, [playToken, animate, reduce, grow]);
-
-  const milestone: Milestone | null = useMemo(() => {
-    if (sel == null) return null;
-    const els = points.map((p) => p.element).filter(Boolean) as StatElement[];
-    if (els.length !== points.length) return null;
-    return milestoneFor(els, sel, { mode: 'bar', minGhost: MIN_GHOST_BAR });
-  }, [sel, points]);
-
-  const nowVal = sel != null ? points[sel].value : 0;
-  const nextVal = milestone && milestone.kind !== 'complete' ? milestone.projected : nowVal;
-
-  useEffect(() => {
-    const live = sel != null && milestone != null && milestone.kind !== 'complete';
-    if (!live) { ghost.value = withTiming(0, { duration: 140 }); return; }
-    shown.value = nowVal;
-    if (reduce) { ghost.value = 1; shown.value = nextVal; return; }
-    ghost.value = 0;
-    ghost.value = withSpring(1, { damping: 13, stiffness: 160 });
-    shown.value = withTiming(nextVal, { duration: 620, easing: Easing.out(Easing.cubic) });
-  }, [sel, milestone, nowVal, nextVal, reduce, ghost, shown]);
-
-  const countProps = useAnimatedProps(() => ({ text: `${Math.round(shown.value)}` }) as never);
-  const ghostStyle = useAnimatedStyle(() => ({
-    opacity: ghost.value,
-    transform: [{ scaleY: ghost.value }],
-  }));
-
-  const pick = (i: number) => {
-    setSel((prev) => (prev === i ? null : i));
-    cue('keep');   // see SketchPieChart.pick — `impact` is a 950ms struck boulder
-  };
-
-  // The ghost's own height, in the same pixels the bars are drawn in.
-  const ghostH = milestone && milestone.kind !== 'complete'
-    ? Math.max(2, ((milestone.projected - nowVal) / max) * plotH)
-    : 0;
-
-  return (
-    <View style={styles.activityCard}>
-      <Text style={styles.activityTitle}>Activity Breakdown</Text>
-      <Text style={styles.activitySub}>total interactions per area</Text>
-
-      <View style={{ width: innerW, height: H, marginTop: 8 }}>
-        {/* The only thing left in SVG, and the only thing that never moves. */}
-        <Svg width={innerW} height={H} style={StyleSheet.absoluteFill}>
-          <Line x1={0} y1={baseline} x2={innerW} y2={baseline} stroke={Ink} strokeWidth={1.5} />
-        </Svg>
-
-        {points.map((p, i) => {
-          const barH = Math.max(2, (p.value / max) * plotH);
-          const cx = slot * i + slot / 2;
-          return (
-            <Bar
-              key={`bar-${p.label}`}
-              grow={grow}
-              index={i}
-              count={n}
-              style={{
-                left: cx - barW / 2,
-                top: baseline - barH,
-                width: barW,
-                height: barH,
-                backgroundColor: p.color,
-                borderWidth: sel === i ? 2.6 : 1.5,
-              }}
-            />
-          );
-        })}
-
-        {/* The ghost sits directly on top of the bar it belongs to, growing up
-            out of it — same anchor, same width, dashed rather than filled. */}
-        {sel != null && ghostH > 0 && (
-          <Animated.View
-            pointerEvents="none"
-            style={[
-              styles.ghostBar,
-              {
-                left: slot * sel + slot / 2 - barW / 2,
-                top: baseline - Math.max(2, (points[sel].value / max) * plotH) - ghostH,
-                width: barW,
-                height: ghostH,
-              },
-              ghostStyle,
-            ]}
-          />
-        )}
-
-        {/* Hit targets: a full-height column per bar, so a two-pixel bar is as
-            tappable as a tall one. */}
-        {points.map((p, i) => (
-          <Pressable
-            key={`hit-${p.label}`}
-            onPress={p.element ? () => pick(i) : undefined}
-            accessibilityRole={p.element ? 'button' : undefined}
-            accessibilityLabel={p.element ? `${p.label}, ${p.value} interactions` : undefined}
-            style={{ position: 'absolute', left: slot * i, top: padTop, width: slot, height: plotH }}
-          />
-        ))}
-
-        {points.map((p, i) => {
-          const barH = Math.max(2, (p.value / max) * plotH);
-          const cx = slot * i + slot / 2;
-          return (
-            <Text key={`v${p.label}`} style={[styles.actValue, { left: cx - 24, top: baseline - barH - 18, width: 48 }]}>
-              {p.value}
-            </Text>
-          );
-        })}
-        {points.map((p, i) => {
-          const cx = slot * i + slot / 2;
-          return (
-            <Text
-              key={`l${p.label}`}
-              numberOfLines={1}
-              style={[styles.actLabel, { left: cx - slot / 2, top: baseline + 8, width: slot }]}
-            >
-              {p.label}
-            </Text>
-          );
-        })}
-      </View>
-
-      {sel != null && milestone && (
-        <View style={styles.detail}>
-          <View style={styles.detailHead}>
-            <Text style={styles.detailLabel} numberOfLines={1}>{points[sel].label.toUpperCase()}</Text>
-            {milestone.kind === 'complete' ? null : (
-              <>
-                <Text style={styles.detailNow}>{nowVal}</Text>
-                <Text style={styles.detailArrow}>→</Text>
-                <ACounter
-                  editable={false}
-                  pointerEvents="none"
-                  underlineColorAndroid="transparent"
-                  defaultValue={`${nowVal}`}
-                  style={[styles.detailNext, counterStyle]}
-                  animatedProps={countProps}
-                />
-              </>
-            )}
-          </View>
-          <Text style={styles.detailCopy}>{milestone.copy}</Text>
-        </View>
-      )}
-    </View>
-  );
-}
-
-/**
- * ONE BAR, AND IT IS ITS OWN COMPONENT FOR A REASON.
- *
- * Each bar needs its own `useAnimatedStyle` to carry its own stagger, and the
- * obvious way to write that — calling the hook inside the `.map()` — is a hook
- * in a loop. It would even work today, because this chart always draws exactly
- * six bars, so the count and order never vary. That is precisely the kind of
- * "fine until it isn't" that rule 1 in §17 is about: the day the chart filters
- * an empty branch, React counts a different number of hooks between renders and
- * throws. A component per bar makes the hook count structural rather than lucky.
- */
-function Bar({ grow, index, count, style }: {
-  grow: SharedValue<number>;
-  index: number;
-  count: number;
-  style: ViewStyle;
-}) {
-  const aStyle = useAnimatedStyle(() => {
-    // Each bar starts a little after the one to its left, and the whole run is
-    // over well inside `grow`'s spring — a stagger, not a queue.
-    const lead = (index / Math.max(1, count)) * 0.35;
-    const t = Math.min(1, Math.max(0, (grow.value - lead) / (1 - lead)));
-    return { transform: [{ scaleY: t }] };
-  });
-  return <Animated.View style={[styles.bar, style, aStyle]} />;
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Paper },
   content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 40 },
 
-  kicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft, letterSpacing: 3, marginTop: 8 },
+  kicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: C.inkSoft, letterSpacing: 3, marginTop: 8 },
   title: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 34, color: Ink, marginTop: 6 },
   titleItalic: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 30, color: Ink, marginTop: -2 },
-  rule: { height: 1.5, backgroundColor: Ink, marginTop: 14, marginBottom: 22 },
+  rule: { height: 1.5, backgroundColor: Ink, marginTop: 14, marginBottom: 4 },
 
-  pieRow: { flexDirection: 'row', gap: 14, marginTop: 28 },
-
-  activityCard: { borderWidth: 2, borderColor: Ink, borderRadius: 4, padding: 16, marginTop: 22 },
-  activityTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 18, color: Ink },
-  activitySub: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 11, color: InkSoft, marginTop: 2 },
-  actValue: { position: 'absolute', textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 11, color: Ink },
-  actLabel: { position: 'absolute', textAlign: 'center', fontFamily: 'Inter_400Regular', fontSize: 11, color: InkSoft },
-
-  // A bar grows from its own base, so the transform origin has to be the bottom
-  // edge — RN scales about the centre by default, which would grow it both ways
-  // and push it through the baseline.
-  bar: { position: 'absolute', borderColor: Ink, transformOrigin: 'bottom' },
-  ghostBar: {
-    position: 'absolute',
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderStyle: 'dashed',
-    backgroundColor: 'transparent',
-    transformOrigin: 'bottom',
+  weekCard: {
+    borderLeftWidth: 4, borderLeftColor: Ink, borderRadius: 8,
+    backgroundColor: C.surfaceSoft,
+    paddingHorizontal: 14, paddingVertical: 14, marginTop: 30,
   },
-
-  detail: { borderTopWidth: 1, borderTopColor: InkFaint, paddingTop: 10, marginTop: 14 },
-  detailHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  detailLabel: { flex: 1, fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: InkSoft },
-  detailNow: { fontFamily: 'Inter_400Regular', fontSize: 12, color: InkSoft },
-  detailArrow: { fontFamily: 'Inter_400Regular', fontSize: 12, color: InkSoft },
-  detailNext: { fontFamily: 'Inter_700Bold', fontSize: 13, color: Ink, minWidth: 30, textAlign: 'right' },
-  detailCopy: {
-    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12.5,
-    color: Ink, lineHeight: 19, marginTop: 5,
+  weekHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  weekDiamond: { fontSize: 12, color: Ink },
+  weekTitle: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.8, color: Ink },
+  weekBody: {
+    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
+    fontSize: 15, lineHeight: 23, color: Ink, marginTop: 8,
   },
-
-  weekCard: { borderWidth: 2, borderColor: Ink, borderRadius: 4, padding: 18, marginTop: 22 },
-  weekHead: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
-  weekDiamond: { fontSize: 14, color: Ink },
-  weekTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 16, color: Ink },
-  weekBody: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 14, color: InkSoft, lineHeight: 22 },
-
-  emptyBox: { borderWidth: 2, borderColor: InkFaint, borderRadius: 4, padding: 24, marginTop: 28 },
-  emptyText: { fontFamily: 'Inter_400Regular', fontSize: 14, color: InkSoft, textAlign: 'center', lineHeight: 21 },
 
   footerQuote: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontStyle: 'italic',
-    fontSize: 12,
-    color: InkSoft,
-    textAlign: 'center',
-    marginTop: 34,
+    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
+    fontSize: 12, color: C.dim, textAlign: 'center', marginTop: 34,
   },
 });
