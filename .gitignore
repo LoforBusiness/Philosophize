@@ -57,3 +57,5 @@ components/lesson/cinematic/.measure-must.lock
 
 # harness route locks (scripts/lib/previewroute.mjs)
 scripts/.preview-*.lock
+# sheet-pass.mjs writes its screenshots here to be looked at, not kept
+scripts/.pass-shots/

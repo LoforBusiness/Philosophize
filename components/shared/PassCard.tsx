@@ -4,6 +4,7 @@ import Svg, { Path } from 'react-native-svg';
 import RankSeal from './RankSeal';
 import { INK, MID, PAPER, PAPER_SHADE, FAINT } from './tone';
 import type { GlyphName } from './Glyph';
+import type { OrderName } from '@/constants/insignia';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE PASS.
@@ -40,13 +41,28 @@ interface Props {
   lines: string[];
   /** 'USED · 6 AUG' etc. Only the day pass carries one. */
   stamp?: string;
+  /**
+   * WHICH ORDER THE SEAL IS STRUCK IN, and why it is worth passing.
+   *
+   * Omitted, `RankSeal` strikes the pin in paper. That was fine while this card
+   * was the only pin on its screen — and the paywall now shows the reader's real
+   * pin at the top of the page and this card at the bottom, so the same rank
+   * appeared twice in two different materials, one iron and one blank. A reader
+   * cannot tell "a different finish" from "a different thing".
+   *
+   * Still optional: the DAY pass draws a locked seal on purpose and wants none.
+   */
+  order?: OrderName | null;
+  degree?: number;
   width: number;
 }
 
 /** Corner notch, in points, on a card of this width. */
 const NOTCH = 13;
 
-export default function PassCard({ variant, name, rank, glyph, lines, stamp, width }: Props) {
+export default function PassCard({
+  variant, name, rank, glyph, lines, stamp, order = null, degree = 0, width,
+}: Props) {
   // 1.62:1 — near enough the golden ratio, and close to a real admission card.
   const height = Math.round(width / 1.34);
   const scholar = variant === 'scholar';
@@ -104,7 +120,13 @@ export default function PassCard({ variant, name, rank, glyph, lines, stamp, wid
               30px of thin arcs and read as an EMPTY hexagon — the seal looked
               unstruck. The glyph is sized to 44% of the seal, so the seal has to
               carry it. */}
-          <RankSeal glyph={glyph} state={scholar ? 'current' : 'locked'} size={Math.round(width * 0.24)} />
+          <RankSeal
+            glyph={glyph}
+            state={scholar ? 'current' : 'locked'}
+            size={Math.round(width * 0.24)}
+            order={scholar ? order : null}
+            degree={scholar ? degree : 0}
+          />
         </View>
 
         <View style={styles.lines}>

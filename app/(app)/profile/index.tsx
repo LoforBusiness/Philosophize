@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Alert, StyleSheet, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
-import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
+import SketchIcon from '@/components/shared/SketchIcon';
 import Glyph from '@/components/shared/Glyph';
 import BadgeMedal from '@/components/shared/BadgeMedal';
 import RankClimbChart from '@/components/shared/RankClimbChart';
@@ -15,6 +15,7 @@ import { C, TYPE, SPACE, BRANCH, type TypeKey, type BranchKey } from '@/constant
 import { GHOST, METAL, ramp } from '@/components/shared/tone';
 import { StruckBar, StruckTile, MetalPlate, MasteryRow, ShelfCount } from '@/components/profile/Struck';
 import RankSeal from '@/components/shared/RankSeal';
+import { BRANCH_SHORT, BRANCH_ICON } from '@/components/shared/branchMarks';
 import Showcase from '@/components/profile/Showcase';
 import { ProfileArtFill, ProfileAvatar, useProfileArt } from '@/components/shared/ProfileArt';
 import { profileNameStyle, profileNameText } from '@/data/profileFonts';
@@ -39,22 +40,11 @@ const SW = Dimensions.get('window').width;
 // The page gutter (SPACE[3], both sides) and three inter-badge gaps (SPACE[1]) across four columns.
 const BADGE_W = (SW - SPACE[3] * 2 - SPACE[1] * 3) / 4;
 
-const SHORT: Record<string, string> = {
-  logic: 'LOGIC',
-  ethics: 'ETHICS',
-  epistemology: 'EPISTEMOLOGY',
-  metaphysics: 'METAPHYSICS',
-  aesthetics: 'AESTHETICS',
-  'political-philosophy': 'POLITICS',
-};
-const BICON: Record<string, SketchIconName> = {
-  logic: 'logic',
-  ethics: 'scales',
-  epistemology: 'eye',
-  metaphysics: 'spiral',
-  aesthetics: 'palette',
-  'political-philosophy': 'building',
-};
+// The short names and marks moved to components/shared/branchMarks.ts when the
+// paywall started drawing mastery rows too — two private copies of the same six
+// keys is how "POLITICS" becomes "Political Philosophy" on one screen only.
+const SHORT = BRANCH_SHORT;
+const BICON = BRANCH_ICON;
 const TITLE: Record<string, string> = {
   logic: 'LOGICIAN',
   ethics: 'ETHICIST',

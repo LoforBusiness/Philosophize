@@ -122,7 +122,7 @@ Philosophize/
 │       │                        #   Display · Privacy · Feedback · Subscription ·
 │       │                        #   Danger Zone. Notifications only when §22 says
 │       │                        #   the binary can schedule one
-│       └── paywall.tsx          # Hidden route (Scholar's Pass)
+│       └── paywall.tsx          # Hidden route — hosts PaywallContent full-screen
 ├── components/
 │   ├── lesson/                  # LessonRunner, CardShell, LessonReward, LessonLoader
 │   │   ├── cards/               # 8 card components (incl. DilemmaCard, QuoteCard)
@@ -140,6 +140,9 @@ Philosophize/
 │   ├── launch/                  # LaunchScreen + launchArt + launchScenes +
 │   │                            #   LaunchFigure + launchMotion (§19)
 │   ├── home/                    # QuickStartCard, StickmanStroll
+│   ├── paywall/                 # THE PASS FAMILY — PassParts (the reader's
+│   │                            #   standing, the wall in days, the five-row
+│   │                            #   comparison), DailyLimit, LessonLocked (§14)
 │   ├── gamification/            # StreakBook, StreakWeek, RankUpScreen
 │   ├── widget/                  # Android home-screen widget surface
 │   └── shared/                  # SketchIcon, Glyph, PhilosopherSheet, RanksBadgesSheet,
@@ -574,14 +577,14 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **twenty-five** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **twenty-six** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
 `check-routes` · `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
 `check-camera` · `check-tour` · `check-streak` · `check-answers` · `check-mentions` ·
-`check-poll` · `check-access` · `check-rest` · `check-stats` · `check-launch` ·
+`check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
 `check-ui` · `check-thinkers` · `check-words` · `check-smooth` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
 figures and 6 hand-built ones, `check-moves` 6 head-clearance defects. A budget
@@ -616,7 +619,11 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 - **Screens:** Home (with Quick Start, §19), Learn → branch → unit accordion →
   lesson, Thinkers, Stats, Profile, Settings, paywall, widget, saved quotes.
 - **Money:** RevenueCat `scholars_pass` entitlement; AdMob interstitial after a
-  free user's lesson; free daily lesson limit.
+  free user's lesson; free daily lesson limit. The offer, the daily limit and the
+  locked lesson are **one family** (`components/paywall/`) built out of the
+  reader's own account — their rank pin, six mastery bars, and the wait to finish
+  the library drawn in real days. Every claim on them is derived from the gate
+  that enforces it and re-checked by `check:pass` (§14).
 - **Infra:** Supabase auth + cloud sync; PostHog; EAS Build + EAS Update;
   forced-update gate (§20).
 - **Identity:** hand-drawn black-and-white "paper-and-ink" editorial aesthetic,
@@ -722,13 +729,36 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
 
 ## 14. Premium Experience & Monetization
 
-The Scholar's Pass paywall UI already exists; this is the value model it should sell.
+> **THIS SECTION USED TO BE THE PROBLEM IT WARNS ABOUT.** It sold "Daily Review,
+> offline lessons, exclusive deep-dive lessons, and the full saveable-quote
+> library/export" — four things, none of which exist. The paywall screen never
+> printed them, so nobody was actually lied to; but this is the file people build
+> from, and a value model listing four unbuilt features is how they end up on a
+> screen. **What the Pass buys is now DERIVED, in `lib/utils/passValue.ts`, and
+> `npm run check:pass` re-derives every row from the function that enforces it.**
+> The aspiration is still below, and it is labelled as one.
 
-**Free tier** — enough to fall in love: the first path of each branch (or N lessons/day), basic streak + XP, and full philosopher browsing.
+### What the Pass actually buys, today
 
-**Scholar's Pass** — all branches & paths, **Daily Review** (spaced repetition), unlimited + offline lessons, exclusive deep-dive lessons, and the full saveable-quote library/export.
+Five things differ by tier, and all five are enforced in code:
 
-**Why someone pays (the thesis):**
+| | Free | Scholar's Pass | Enforced by |
+|---|---|---|---|
+| Lessons a day | `FREE_DAILY_LESSON_LIMIT` (1) | unlimited | the lesson route's frozen gate |
+| Advertisements | one after each lesson | none | `LessonReward.handleContinue` |
+| Reopen a finished lesson | **no** | any, any time | `lessonAccess(li < unitDone)` |
+| Start a unit out of order | no | any unit, any time | `startable = isPro \|\| …` |
+| Rest days | 2 held · 1 per 10 | 5 held · 1 per 5 | `restCap` / `restEarnEvery` |
+
+**Replay and jumping ahead were missing from the paywall for its whole life**, so
+the two biggest things the Pass buys were being given away for nothing. That is
+the failure mode a hand-written benefit list has in the direction nobody watches
+for — everyone guards against over-promising, and nothing guards against silence.
+
+**Free tier** — enough to fall in love: a lesson a day, every branch's first unit
+in order, the full streak, XP, rank and badge systems, and all 322 thinkers.
+
+**Why someone pays (the thesis — the aspiration, not the current feature list):**
 1. They actually **retain** what they learn (spaced review), not just tap through it.
 2. The **cinematic, narrated** lessons feel like nothing else in the category.
 3. **Breadth** — 6 branches, 222 lessons, 322 thinkers — is a genuine library.
@@ -1515,6 +1545,19 @@ browser at it; the first transform can take longer than a navigation timeout.
   The rule underneath all four: **when a lesson gains a new way to be answered, the
   harness gains one too, in the same commit.** Otherwise the next sweep quietly
   measures less and says nothing.
+
+  **A fifth harness, and it is not about lessons.** `npm run sheet:pass` loads the
+  three Scholar's Pass screens (§14) for real and reports whether React actually
+  mounted, whether anything sticks out past the viewport, and whether any line of
+  text is cut off inside its own box — then writes a PNG of each so they can be
+  looked at. Its own two lessons, both of which cost a run:
+  **release the launch gate** (`useUIStore.setState({ launchDone: true })`, as
+  `previewcover` does) or the page photographs blank with no error anywhere; and
+  **poll for the mount rather than sleeping at it** — a fixed wait returned four
+  screens mounted and three "module or render fault" on one run and the reverse on
+  the next, which reads exactly like an intermittent bug and is not one.
+  Its route source is `scripts/lib/previewpass.txt` rather than a template literal
+  in the script, so JSX braces need no escaping. Ports 8853/9393.
 
 **On device**, `adb` lives in the session scratchpad. Applying an OTA takes two
 launches: force-stop → launch (downloads) → force-stop → launch (applies).

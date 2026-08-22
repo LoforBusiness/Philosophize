@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getLessonById, lessonAccessibility } from '@/data';
@@ -159,17 +159,14 @@ import { Aesthetics12Lesson } from '@/components/lesson/cinematic/aesthetics12Sc
 import { Political10Lesson } from '@/components/lesson/cinematic/political10Scene';
 import { Political11Lesson } from '@/components/lesson/cinematic/political11Scene';
 import ScreenTransition from '@/components/shared/ScreenTransition';
-import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
-import PassCard from '@/components/shared/PassCard';
-import { awardedRank } from '@/data/ranks';
-import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
+import DailyLimit from '@/components/paywall/DailyLimit';
+import LessonLocked from '@/components/paywall/LessonLocked';
+import { FREE_DAILY_LESSON_LIMIT } from '@/constants/subscription';
 
 const Page = '#FAFAF7';
-const Ink = '#1A1A1A';
-const InkSoft = '#6B6B6B';
 
 // Lessons that play as a continuous animated scene instead of the card pager.
 // A cinematic component takes the same `{ lesson }` prop and renders LessonReward
@@ -371,12 +368,6 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
 };
 
 /** '6 AUG' — the day the pass was spent, struck across it. */
-function stampDate() {
-  const d = new Date();
-  const M = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-  return d.getDate() + ' ' + M[d.getMonth()];
-}
-
 function todayStr() {
   const d = new Date();
   const p = (n: number) => String(n).padStart(2, '0');
@@ -408,15 +399,10 @@ export default function LessonScreen() {
   const dailyLessonDate = useUserDataStore((s) => s.dailyLessonDate);
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
   const hasHydrated = useUserDataStore((s) => s._hasHydrated);
-  const openPaywall = useUIStore((s) => s.openPaywall);
-  // For the day-pass card on the limit screen. Read unconditionally — these are
-  // hooks, and the screen has several early returns below them.
-  const displayName = useUserDataStore((s) => s.displayName);
-  const rankIndex = useUserDataStore((s) => s.rankIndex);
-  const totalXP = useUserDataStore((s) => s.totalXP);
-  const lockRank = awardedRank(rankIndex, totalXP);
-  const { width: winW } = useWindowDimensions();
-  const lockCardW = Math.min(340, winW - 68);
+  // The gate screens are their own components now (components/paywall/), so the
+  // reader's name, rank and card width are read where they are drawn rather than
+  // here — this route was carrying six store reads and a width calculation for
+  // two screens it did not otherwise know anything about.
 
   // Freeze the daily-limit gate ONCE — but only after the persisted store has
   // hydrated, so we never freeze a pre-hydration default (which would read used=0
@@ -469,35 +455,26 @@ export default function LessonScreen() {
     return <ScreenTransition bg="#FAFAF7"><View style={{ flex: 1, backgroundColor: '#FAFAF7' }} /></ScreenTransition>;
   }
 
-  // Locked lesson (reached via a deep link / back stack, not the list). Free
-  // users must finish the previous unit first; the Pass lets them jump ahead.
+  // ── THE TWO GATES, BOTH DRAWN ELSEWHERE ────────────────────────────────────
+  //
+  // components/paywall/ holds them, because they are two thirds of one family —
+  // the offer, the daily limit, and the locked lesson share a header, a struck
+  // vocabulary and a comparison table, and they were three unrelated drawings
+  // while they lived in three files. Keeping them here also meant this route
+  // owned ~90 lines of styling for screens that never play a lesson.
+  //
+  // Reached via a deep link or the back stack rather than by tapping a live
+  // marker; `LessonLocked` works out which of the three reasons applies.
   if (locked) {
     return (
       <ScreenTransition bg={Page}>
-        <SafeAreaView style={styles.lockWrap}>
-          <View style={styles.lockIcon}>
-            <SketchIcon name="lock" color={Ink} size={34} />
-          </View>
-          <Text style={styles.lockTitle}>
-            {gatedByPro ? 'This unit is a jump ahead' : 'Not yet unlocked'}
-          </Text>
-          <Text style={styles.lockBody}>
-            {gatedByPro
-              ? 'Finish the previous unit to reach this one — or unlock Scholar’s Pass to start any unit whenever you like.'
-              : 'Finish the earlier lessons in this unit first to unlock this one.'}
-          </Text>
-          {gatedByPro && (
-            <Pressable
-              onPress={openPaywall}
-              style={({ pressed }) => [styles.primaryBtn, pressed && { opacity: 0.85 }]}
-            >
-              <Text style={styles.primaryText}>Unlock Scholar’s Pass</Text>
-            </Pressable>
-          )}
-          <Pressable onPress={exitLesson} style={styles.secondaryBtn} hitSlop={8}>
-            <Text style={styles.secondaryText}>Go back</Text>
-          </Pressable>
-        </SafeAreaView>
+        <LessonLocked
+          lesson={result.lesson}
+          branch={result.branch}
+          unit={result.path}
+          gatedByPro={gatedByPro}
+          onExit={exitLesson}
+        />
       </ScreenTransition>
     );
   }
@@ -505,42 +482,7 @@ export default function LessonScreen() {
   if (atLimit) {
     return (
       <ScreenTransition bg={Page}>
-        {/* THE DAY PASS, STAMPED. Not a lock icon: the free tier IS one
-            admission a day, and this reader has just spent theirs on a lesson
-            they finished. Drawing the thing they hold — in their name, struck
-            with today's date — says "you used it", which is true, rather than
-            "you are shut out", which is not. It is the same PassCard the offer
-            shows, so the upgrade needs no feature table: it is visibly this
-            object without the stamp. */}
-        <SafeAreaView style={styles.lockWrap}>
-          <PassCard
-            variant="day"
-            name={displayName || 'Philosopher'}
-            rank={lockRank.current.name}
-            glyph={lockRank.current.glyph}
-            lines={[
-              `${FREE_DAILY_LESSON_LIMIT} ${lessonsWord(FREE_DAILY_LESSON_LIMIT)} a day`,
-              'Renews at midnight',
-            ]}
-            stamp={`USED · ${stampDate()}`}
-            width={lockCardW}
-          />
-          <Text style={styles.lockTitle}>
-            {FREE_DAILY_LESSON_LIMIT === 1 ? 'That’s your lesson for today' : `That’s your ${FREE_DAILY_LESSON_LIMIT} for today`}
-          </Text>
-          <Text style={styles.lockBody}>
-            Come back tomorrow and it renews — or carry the one that never gets stamped.
-          </Text>
-          <Pressable
-            onPress={openPaywall}
-            style={({ pressed }) => [styles.primaryBtn, pressed && { opacity: 0.85 }]}
-          >
-            <Text style={styles.primaryText}>See the Scholar’s Pass</Text>
-          </Pressable>
-          <Pressable onPress={exitLesson} style={styles.secondaryBtn} hitSlop={8}>
-            <Text style={styles.secondaryText}>Maybe tomorrow</Text>
-          </Pressable>
-        </SafeAreaView>
+        <DailyLimit lesson={result.lesson} branch={result.branch} onExit={exitLesson} />
       </ScreenTransition>
     );
   }
@@ -607,30 +549,6 @@ function StartedRunner({
   return <Runner lesson={lesson} />;
 }
 
-const styles = StyleSheet.create({
-  lockWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 34 },
-  lockIcon: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    borderWidth: 2,
-    borderColor: Ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  lockTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: Ink, textAlign: 'center' },
-  lockBody: { fontFamily: 'Inter_400Regular', fontSize: 15, color: InkSoft, lineHeight: 22, textAlign: 'center', marginTop: 14 },
-  primaryBtn: {
-    backgroundColor: Ink,
-    borderRadius: 4,
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    alignItems: 'center',
-    marginTop: 30,
-    alignSelf: 'stretch',
-  },
-  primaryText: { fontFamily: 'Inter_700Bold', fontSize: 16, color: Page, letterSpacing: 0.3 },
-  secondaryBtn: { paddingVertical: 14, alignItems: 'center' },
-  secondaryText: { fontFamily: 'Inter_500Medium', fontSize: 14, color: InkSoft, textDecorationLine: 'underline' },
-});
+// NO STYLESHEET. Everything this route used to style belonged to the two gate
+// screens, and both now draw themselves (components/paywall/). What is left is a
+// router: it decides hydration, access and the daily limit, then hands over.

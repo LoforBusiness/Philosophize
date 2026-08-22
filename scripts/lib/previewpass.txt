@@ -1,0 +1,115 @@
+// TEMPORARY — DELETE BEFORE COMMITTING. Any file in app/ is a real route (§21).
+// Written and removed by scripts/sheet-pass.mjs; check-routes.mjs blocks a build
+// if one is left behind.
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import PaywallContent from '@/components/shared/PaywallContent';
+import DailyLimit from '@/components/paywall/DailyLimit';
+import LessonLocked from '@/components/paywall/LessonLocked';
+import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { ALL_BRANCHES } from '@/data';
+
+const q = (k: string) =>
+  typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(k);
+
+export default function PreviewPass() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const fresh = q('seed') === 'new';
+    const kind = q('k') ?? 'replay';
+
+    // A mid-journey reader: a few lessons in every branch, a live streak, enough
+    // XP to hold a rank with an arc toward the next one.
+    const byUnit: Record<string, number> = {};
+    const byBranch: Record<string, number> = {};
+    ALL_BRANCHES.forEach((b, bi) => {
+      let n = 0;
+      b.paths.forEach((u, ui) => {
+        const done = fresh ? 0 : ui === 0 ? Math.min(u.lessons.length, 2 + bi) : 0;
+        byUnit[u.id] = done;
+        n += done;
+      });
+      byBranch[b.slug] = n;
+    });
+
+    // The three locked readings need the unit counts arranged to produce them.
+    const branch = ALL_BRANCHES[2]; // logic
+    const unit0 = branch.paths[0];
+    const unit1 = branch.paths[1];
+    if (kind === 'replay') byUnit[unit0.id] = 3;
+    if (kind === 'unreached') byUnit[unit0.id] = 1;
+    if (kind === 'ahead') { byUnit[unit0.id] = 2; byUnit[unit1.id] = 0; }
+
+    useUserDataStore.setState({
+      _hasHydrated: true,
+      displayName: fresh ? 'Philosopher' : 'Landy',
+      totalXP: fresh ? 0 : 1240,
+      rankIndex: fresh ? 0 : 6,
+      streak: fresh ? 0 : 12,
+      lastLessonDate: new Date().toISOString().slice(0, 10),
+      restDaysEarned: fresh ? 0 : 1,
+      restDaysUsed: 0,
+      lessonsByUnit: byUnit,
+      lessonsByBranch: byBranch,
+      savedQuotes: [],
+      philosopherViews: {},
+    } as never);
+
+    // The root layout holds every route behind the launch animation, so a
+    // preview that does not release it photographs an empty page with no error
+    // anywhere — which is exactly what the first run of this harness did.
+    useUIStore.setState({ launchDone: true } as never);
+
+    // `refresh` IS NEUTRALISED, not just the flag set. PaywallContent calls it
+    // on mount and the web stub answers "not subscribed", so a seeded `isPro`
+    // was being overwritten a frame later and the subscriber state could not be
+    // previewed at all — it silently showed the offer instead.
+    useSubscriptionStore.setState({
+      ready: true,
+      available: false,
+      isPro: q('pro') === '1',
+      monthly: null,
+      refresh: async () => {},
+    } as never);
+
+    setReady(true);
+  }, []);
+
+  if (!ready) return <View style={{ flex: 1 }} nativeID="pass-boot" />;
+
+  const s = q('s') ?? 'paywall';
+  const kind = q('k') ?? 'replay';
+  const branch = ALL_BRANCHES[2];
+  const unit0 = branch.paths[0];
+  const unit1 = branch.paths[1];
+
+  let body = null;
+  if (s === 'limit') {
+    body = <DailyLimit lesson={unit0.lessons[2]} branch={branch} onExit={() => {}} />;
+  } else if (s === 'locked') {
+    const unit = kind === 'ahead' ? unit1 : unit0;
+    const lesson = kind === 'replay' ? unit0.lessons[0]
+      : kind === 'ahead' ? unit1.lessons[0]
+      : unit0.lessons[3];
+    body = (
+      <LessonLocked
+        lesson={lesson}
+        branch={branch}
+        unit={unit}
+        gatedByPro={kind !== 'unreached'}
+        onExit={() => {}}
+      />
+    );
+  } else {
+    body = <PaywallContent onClose={() => {}} source="preview" />;
+  }
+
+  return (
+    <View nativeID="pass-root" style={{ flex: 1, backgroundColor: '#FAFAF7' }}>
+      {body}
+    </View>
+  );
+}
