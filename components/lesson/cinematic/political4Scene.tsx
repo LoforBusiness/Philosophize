@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political4Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -94,6 +94,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political4'));
 
 export default function Political4Scene({ clock, bt, bi }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -103,11 +104,11 @@ export default function Political4Scene({ clock, bt, bi }: SceneApi) {
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      walls: lerp(WALLS[p], WALLS[n], tr),
-      harm: lerp(HARM[p], HARM[n], tr),
-      test: lerp(TEST[p], TEST[n], tr),
-      neg: lerp(NEG[p], NEG[n], tr),
-      pos: lerp(POS[p], POS[n], tr),
+      walls: carry(cv, 0, n, WALLS[p], WALLS[n], tr),
+      harm: carry(cv, 1, n, HARM[p], HARM[n], tr),
+      test: carry(cv, 2, n, TEST[p], TEST[n], tr),
+      neg: carry(cv, 3, n, NEG[p], NEG[n], tr),
+      pos: carry(cv, 4, n, POS[p], POS[n], tr),
     };
   });
 

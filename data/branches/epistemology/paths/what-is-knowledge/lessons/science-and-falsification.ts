@@ -45,6 +45,22 @@ const lesson: Lesson = {
       philosopherId: 'karl-popper',
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping the theory whose
+      // bar covers every possible result (E37c).
+      type: 'question',
+      prompt: 'Three theories about the 1919 eclipse. Which one could no result have refuted?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'The one compatible with any amount of bending, or none', isCorrect: true },
+          { id: 'b', text: 'Einstein\'s, which predicted 1.75 seconds of arc', isCorrect: false },
+          { id: 'c', text: 'Newton\'s, which predicted about half that', isCorrect: false },
+        ],
+        explanation: 'A theory that permits every outcome forbids none, so nothing that came back could count against it — and it learned nothing from the measurement either way. The two specific predictions each staked almost everything on a single reading, which is exactly what made the eclipse worth photographing. Popper\'s test is what a theory rules out.',
+      },
+    },
+    {
       type: 'question',
       prompt: 'Someone boasts: "My theory fits every possible outcome, so nothing could ever prove it wrong — that is its strength." For Popper, is this a strength?',
       xpValue: 5,

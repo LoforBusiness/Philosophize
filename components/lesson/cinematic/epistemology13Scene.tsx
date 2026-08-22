@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology13Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -76,6 +76,7 @@ function cellTop(k: number) { return GRID_T + Math.floor(k / COLS) * (CELL_H + C
 
 export default function Epistemology13Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -98,10 +99,10 @@ export default function Epistemology13Scene({ clock, bt, bi, i, picked, onPick }
       tr, WALK,
     ));
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      grid: lerp(GRIDV[p], GRIDV[n], tr) * (gridFade ? grow : 1),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      grid: carry(cv, 1, n, GRIDV[p], GRIDV[n], tr, gridFade ? grow : 1),
       // How far the strike-through has spread, 0…2, so a cell can read its own share.
-      strike: lerp(OFF[p], OFF[n], grow),
+      strike: carry(cv, 2, n, OFF[p], OFF[n], grow),
       winner: winOn ? (winFade ? grow : 1) : 0,
     };
   });

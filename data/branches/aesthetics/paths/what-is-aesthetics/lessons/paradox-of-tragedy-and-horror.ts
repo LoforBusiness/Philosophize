@@ -72,6 +72,22 @@ const lesson: Lesson = {
       xpValue: 5,
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping the thing the
+      // frame changed (E37c) — same concept, re-cut for the staging.
+      type: 'question',
+      prompt: 'The same terrifying shape, once in a dark street and once on a screen. What does the frame actually change?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'What follows from it — the consequences', isCorrect: true },
+          { id: 'b', text: 'How frightening the shape is', isCorrect: false },
+          { id: 'c', text: 'Whether any fear is felt at all', isCorrect: false },
+        ],
+        explanation: 'The frame removes the consequence, not the feeling. The trap is either of the other two, because both say the fear is somehow lessened or absent — and if that were so there would be no paradox left to explain. Aristotle, Hume and Carroll disagree about what happens to the fear next, but all three take it to be real fear.',
+      },
+    },
+    {
       type: 'question',
       prompt: 'A friend says: "Real fear is unpleasant, so horror fans must just be faking their enjoyment." Is this right?',
       xpValue: 5,

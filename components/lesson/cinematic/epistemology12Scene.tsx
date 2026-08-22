@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology12Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -154,6 +154,7 @@ const TOK = BEATS.map((b) => b.token ?? 0);
 
 export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -165,7 +166,7 @@ export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick }
     // ONE channel drives all three pipes. `pv` blends the previous beat's count into
     // this one's, so a pipe that is already laid simply HOLDS at 1 instead of
     // redrawing itself every time the reader taps forward (C20c / H58).
-    const pv = lerp(PIPES[p], PIPES[n], tr);
+    const pv = carry(cv, 0, n, PIPES[p], PIPES[n], tr);
     const perc = clamp01(pv);
     const mem = clamp01(pv - 1);
     const test = clamp01(pv - 2);
@@ -176,7 +177,7 @@ export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick }
       tr, WALK,
     ));
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       perc,
       mem,
       test,
@@ -186,7 +187,7 @@ export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick }
       memDown: ease01(clamp01((mem - MEM_SPLIT) / (1 - MEM_SPLIT))),
       testDown: ease01(clamp01(test / TEST_SPLIT)),
       testRun: ease01(clamp01((test - TEST_SPLIT) / (1 - TEST_SPLIT))),
-      token: lerp(TOK[p], TOK[n], tr),
+      token: carry(cv, 2, n, TOK[p], TOK[n], tr),
       t,
     };
   });

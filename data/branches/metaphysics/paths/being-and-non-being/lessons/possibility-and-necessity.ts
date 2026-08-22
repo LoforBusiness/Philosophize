@@ -57,6 +57,22 @@ const lesson: Lesson = {
       emoji: '🪜',
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping the claim whose
+      // row of worlds is full but could not be filled from an armchair (E37c).
+      type: 'question',
+      prompt: 'Both "a triangle has three sides" and "water is H2O" hold in every possible world. What separates them?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Only one of them had to be discovered by looking', isCorrect: true },
+          { id: 'b', text: 'Only one of them is really necessary', isCorrect: false },
+          { id: 'c', text: 'Only one of them is true', isCorrect: false },
+        ],
+        explanation: 'Kripke\'s point is that necessity and a priority come apart. Once you know what water IS there is no world where it is something else, so the claim is necessary — yet no amount of reflecting on the word gets you to the chemistry. The triangle is settled by meaning alone. Option B is the tempting one, because we expect anything found by experiment to be contingent.',
+      },
+    },
+    {
       type: 'question',
       prompt: 'Sort these from most necessary to most contingent.',
       xpValue: 5,

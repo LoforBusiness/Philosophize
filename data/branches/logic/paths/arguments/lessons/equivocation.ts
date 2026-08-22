@@ -47,6 +47,22 @@ const lesson: Lesson = {
       philosopherId: 'john-locke',
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping the shifting
+      // word itself (E37c) — same concept, re-cut for the staging.
+      type: 'question',
+      prompt: 'In the sandwich argument, which word is doing the damage?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: '"Nothing"', isCorrect: true },
+          { id: 'b', text: '"Better"', isCorrect: false },
+          { id: 'c', text: '"Happiness"', isCorrect: false },
+        ],
+        explanation: '"Nothing" is the only term that appears in both premises, which is what lets the two lines join at all — and it carries a different sense in each. In the first it means "no thing is better"; in the second, "better than having nothing". The other two words mean the same thing every time they appear, so neither could be the join that failed.',
+      },
+    },
+    {
       type: 'question',
       prompt: 'In the sandwich argument, what actually broke?',
       xpValue: 5,

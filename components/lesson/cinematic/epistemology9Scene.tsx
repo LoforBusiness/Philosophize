@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology9Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -81,6 +81,7 @@ const THEORY = BEATS.map((b) => b.theory ?? 0);
 
 export default function Epistemology9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -110,12 +111,12 @@ export default function Epistemology9Scene({ clock, bt, bi, i, picked, onPick }:
       tr, WALK,
     ));
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       land: landOn ? (landFade ? grow : 1) : 0,
       map: mapOn ? (mapFade ? grow : 1) : 0,
       link: linkOn ? (linkFade ? grow : 1) : 0,
       cards: cardsOn ? (cardsFade ? grow : 1) : 0,
-      theory: lerp(THEORY[p], THEORY[n], tr),
+      theory: carry(cv, 1, n, THEORY[p], THEORY[n], tr),
       t,
     };
   });

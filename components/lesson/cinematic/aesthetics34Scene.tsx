@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics34Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -64,6 +64,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics34'));
 
 export default function Aesthetics34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -75,8 +76,8 @@ export default function Aesthetics34Scene({ clock, bt, bi, i, dragPos }: SceneAp
     const wipe = ease01(bt.value / 1.1);
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      strip: live ? dragPos.value : lerp(STRIP[p], STRIP[n], wipe),
-      arrows: lerp(ARROWS[p], ARROWS[n], tr),
+      strip: live ? dragPos.value : carry(cv, 0, n, STRIP[p], STRIP[n], wipe),
+      arrows: carry(cv, 1, n, ARROWS[p], ARROWS[n], tr),
     };
   });
 

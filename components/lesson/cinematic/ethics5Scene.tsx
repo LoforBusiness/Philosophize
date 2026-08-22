@@ -9,7 +9,7 @@ import { WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, strideStance, typ
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics5Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -122,6 +122,7 @@ const CHART = BEATS.map((b) => b.chart ?? 0);
 
 export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const heldSocS = useHeld();
+  const cv = useCarry(4);
   const cur = BEATS[i];
   // Answer-direction constants resolved on the JS thread — the worklet stays free of
   // array methods, and strideStance is called DIRECTLY (calling it from a nested
@@ -148,13 +149,13 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: S
     // The walker only ever shifts SIDEWAYS on an answer — never up or down, so the
     // band below can be measured once and stays true on every beat.
     const dx = (forkAnswered ? qv.value : 0) * stepX;
-    const bx = lerp(X[p], X[n], tr) + dx;
+    const bx = carry(cv, 0, n, X[p], X[n], tr) + dx;
 
     return {
       soc: pose(socS, bx, GROUND, K_FIG, 1, 1),
-      fork: lerp(FORK[p], FORK[n], tr),
-      balance: lerp(BAL[p], BAL[n], tr),
-      chart: lerp(CHART[p], CHART[n], tr),
+      fork: carry(cv, 1, n, FORK[p], FORK[n], tr),
+      balance: carry(cv, 2, n, BAL[p], BAL[n], tr),
+      chart: carry(cv, 3, n, CHART[p], CHART[n], tr),
       tilt: balAnswered ? qv.value * tiltDir : 0,
       t,
     };

@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics12Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -117,6 +117,7 @@ const C2V = NV.map((n) => (n >= 12 ? 1 : 0));
 
 export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -159,15 +160,15 @@ export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick }: 
     const growB = ease01(clamp01((bt.value - 1.8) / 0.9));
 
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       // Sequential, never a cross-fade: the board is fully gone before the three
       // maxims start arriving on the same marks (C22).
       field: pickOn ? (pickFade ? 1 - ease01(clamp01(bt.value / 0.3)) : 0) : 1,
       pick: pickOn ? (pickFade ? ease01(clamp01((bt.value - 0.38) / 0.42)) : 1) : 0,
-      b: nChanged ? lerp(BV[p], BV[n], growA) : BV[n],
-      c1: nChanged ? lerp(C1V[p], C1V[n], growA) : C1V[n],
-      c2: nChanged ? lerp(C2V[p], C2V[n], growB) : C2V[n],
-      word: wordChanged ? lerp(WV[p], WV[n], growA) : WV[n],
+      b: nChanged ? carry(cv, 1, n, BV[p], BV[n], growA) : BV[n],
+      c1: nChanged ? carry(cv, 2, n, C1V[p], C1V[n], growA) : C1V[n],
+      c2: nChanged ? carry(cv, 3, n, C2V[p], C2V[n], growB) : C2V[n],
+      word: wordChanged ? carry(cv, 4, n, WV[p], WV[n], growA) : WV[n],
       handle,
       ram,
       // qv only leaves zero once the reader has answered, so the losing maxims are

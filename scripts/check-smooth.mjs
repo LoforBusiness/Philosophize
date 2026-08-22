@@ -264,5 +264,96 @@ ok('a step in the requested shot does not stutter the stage (L4)',
   smoothed <= 8,
   `worst frame-to-frame change in stage speed — driven straight ${raw.toFixed(1)} · smoothed ${smoothed.toFixed(1)} units`);
 
+// ── AND EVERYTHING THAT IS NOT A LIMB (L5) ──────────────────────────────────
+//
+// Everything above this line draws the figure at a FIXED x = 200 and compares
+// joints against the pelvis. That is the whole reason this file was green while
+// a reader was still watching lessons skip: the one track it can never see is the
+// one that moves the entire man, and 89 scenes interpolated that plus 173 more —
+// prop opacities, shutters, dial angles, second figures.
+//
+// Each of them is `lerp(T[p], T[n], tr)`, which is L1 with no limb attached: the
+// blend starts at the value the PREVIOUS beat was heading toward rather than the
+// one on screen, so an early tap covers the remainder in a frame. Replayed over
+// the real tracks it was 49 sites past the line and 166 units at worst; driven in
+// a browser, 226px of ankle between two frames.
+//
+// `carry()` (cinematicKit) is `lerp` with a memory and takes the same numbers.
+// This section is what stops a bare one coming back.
+const bare = [];
+const bags = [];
+for (const name of names) {
+  const src = readFileSync(path.join(CIN, `${name}Scene.tsx`), 'utf8');
+  // A track lerp is specifically `lerp(NAME[p], NAME[n], …)` — the same array on
+  // both sides. `lerp` for anything else (two constants, a pair of measured edges)
+  // is ordinary arithmetic with no beat boundary in it and is left alone.
+  const n = [...src.matchAll(/lerp\(\s*([A-Za-z_$][\w$]*)\[p\]\s*,\s*([A-Za-z_$][\w$]*)\[n\]/g)]
+    .filter((m) => m[1] === m[2]).length;
+  if (n) bare.push(`${name} (${n})`);
+
+  // THE SLOTS MUST ACCOUNT FOR THEMSELVES. An undersized `useCarry(N)` does not
+  // throw — it aliases two tracks onto one slot, so a prop starts each beat from
+  // some other prop's last value. That is a worse picture than the defect being
+  // fixed and it is completely silent, which is why it is checked rather than
+  // trusted to the codemod that wrote them.
+  const decl = /useCarry\((\d+)\)/.exec(src);
+  const ks = [...src.matchAll(/carry\(cv,\s*(\d+),/g)].map((m) => +m[1]);
+  if (!decl && !ks.length) continue;
+  const want = decl ? +decl[1] : -1;
+  const uniq = new Set(ks);
+  if (!decl) bags.push(`${name} — ${ks.length} carry site(s), no useCarry()`);
+  else if (ks.length !== want || uniq.size !== want || (ks.length && Math.max(...ks) !== want - 1)) {
+    bags.push(`${name} — useCarry(${want}) but ${ks.length} site(s), ${uniq.size} distinct, top index ${ks.length ? Math.max(...ks) : '—'}`);
+  }
+}
+
+console.log('\nEVERY TRACK, NOT JUST THE FIGURE\n');
+ok('no scene blends a track straight off T[p] (L5)', bare.length === 0,
+  bare.length ? `${bare.length} scene(s): ${bare.slice(0, 6).join(', ')}${bare.length > 6 ? '…' : ''}`
+    : `${names.length} scenes carry every track they interpolate`);
+ok('every carry slot is declared and distinct (L5)', bags.length === 0,
+  bags.length ? bags.slice(0, 5).join(' · ') : 'no aliased or undeclared slots');
+
+// ── THE STAGE IS THE SAME SIZE ALL THE WAY THROUGH (L6) ─────────────────────
+//
+// The biggest jump of all was not in any scene. `ChoiceCards` and `DragScale`
+// were siblings of the stage inside `body`, so the 42/50/8 flex split ran over
+// whatever height was left AFTER the answer control took its own ~74px — the
+// stage lost 34px of it on the one frame a question beat mounted, and `fit` is
+// `min(w / STAGE_W, h / bandH)`, so the whole picture rescaled about 12% between
+// two frames. Twice per question, and once more each way through `boxSize` being
+// React state rather than a layout value.
+//
+// This is structural rather than replayed: there is no layout engine here, and
+// the property that matters is that the control CANNOT be a sibling of the stage.
+// The browser numbers are in group L6 of the rule book — one stage-clip size per
+// lesson for its whole run.
+const player = readFileSync(path.join(REPO, 'components/lesson/cinematic/CinematicPlayer.tsx'), 'utf8');
+const kit = readFileSync(path.join(CIN, 'cinematicKit.tsx'), 'utf8');
+const iLower = player.indexOf('styles.lower');
+const iCards = player.indexOf('<ChoiceCards');
+const iDrag = player.indexOf('<DragScale');
+const iDeck = player.indexOf('styles.deck');
+const weight = (n) => {
+  const m = new RegExp(`\\b${n}:\\s*\\{[^}]*?flex:\\s*(\\d+)`, 's').exec(kit);
+  return m ? +m[1] : null;
+};
+const wStage = weight('stageWrap'), wLower = weight('lower'), wTap = weight('tapLayer');
+
+console.log('\nTHE STAGE DOES NOT RESIZE UNDER A QUESTION\n');
+ok('the answer controls sit inside the deck\'s box, not the stage\'s (L6)',
+  iLower > 0 && iCards > iLower && iDrag > iLower && iDeck > iLower,
+  iLower > 0 && iCards > iLower && iDrag > iLower && iDeck > iLower
+    ? 'ChoiceCards, DragScale and the deck are all inside styles.lower'
+    : 'a control is a sibling of stageWrap again — it will take height out of the picture');
+ok('the stage keeps a fixed share of the body (L6)',
+  wStage !== null && wLower !== null && wTap !== null && wStage + wLower + wTap === 100,
+  wStage === null || wLower === null || wTap === null
+    ? 'could not read the flex weights'
+    : `stage ${wStage} · lower ${wLower} · tap ${wTap} = ${wStage + wLower + wTap}`);
+ok('the deck takes its height from `lower`, not from `body` (L6)',
+  /\bdeck:\s*\{[^}]*?flex:\s*1\b/s.test(kit),
+  'a weight on the deck would put it back in competition with the stage');
+
 console.log(fails ? `\n${fails} problem(s).\n` : '\nall clear.\n');
 process.exit(fails ? 1 : 0);

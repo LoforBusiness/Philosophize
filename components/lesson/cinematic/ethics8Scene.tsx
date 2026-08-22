@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics8Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import type { Shot } from './camera';
@@ -77,6 +77,7 @@ const THRV = BEATS.map((b) => b.thread ?? 0);
 
 export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(4);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -93,9 +94,9 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick }: Scene
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
-    const fx = lerp(X[p], X[n], tr);
-    const oth = lerp(OTHV[p], OTHV[n], tr);
-    const thread = lerp(THRV[p], THRV[n], tr);
+    const fx = carry(cv, 0, n, X[p], X[n], tr);
+    const oth = carry(cv, 1, n, OTHV[p], OTHV[n], tr);
+    const thread = carry(cv, 2, n, THRV[p], THRV[n], tr);
 
     return {
       fig: pose(s, fx, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
@@ -108,7 +109,7 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick }: Scene
       fx,
       oth,
       thread,
-      grid: lerp(GRIDV[p], GRIDV[n], tr),
+      grid: carry(cv, 3, n, GRIDV[p], GRIDV[n], tr),
     };
   });
 

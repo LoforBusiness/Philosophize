@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics10Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -107,6 +107,7 @@ const LINKV = BEATS.map((b) => b.link ?? 0);
 
 export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -131,13 +132,13 @@ export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick }: 
       tr, WALK,
     ));
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      film: lerp(FILM[p], FILM[n], tr) * (filmFade ? grow : 1),
-      panel: lerp(PANELV[p], PANELV[n], tr) * (panelFade ? grow : 1),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      film: carry(cv, 1, n, FILM[p], FILM[n], tr, filmFade ? grow : 1),
+      panel: carry(cv, 2, n, PANELV[p], PANELV[n], tr, panelFade ? grow : 1),
       // The shutter runs over the LAST 60% of the transition, so on the beat he
       // walks in he arrives at the jamb first and draws it across after.
-      shut: lerp(SHUT[p], SHUT[n], ease01(seg(tr, 0.4, 1))),
-      link: lerp(LINKV[p], LINKV[n], tr) * (linkFade ? grow : 1),
+      shut: carry(cv, 3, n, SHUT[p], SHUT[n], ease01(seg(tr, 0.4, 1))),
+      link: carry(cv, 4, n, LINKV[p], LINKV[n], tr, linkFade ? grow : 1),
       verdict: verdictOn ? (verdictFade ? grow : 1) : 0,
     };
   });

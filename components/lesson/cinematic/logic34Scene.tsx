@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic34Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -62,6 +62,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic34'));
 
 export default function Logic34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -71,8 +72,8 @@ export default function Logic34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P[p], t)), emoteLive(P[n], t, bt.value), tr));
     const grow = ease01(bt.value / 1.0);
-    const u = live ? dragPos.value : lerp(N[p], N[n], grow);
-    const bias = lerp(BIAS[p], BIAS[n], tr);
+    const u = live ? dragPos.value : carry(cv, 0, n, N[p], N[n], grow);
+    const bias = carry(cv, 1, n, BIAS[p], BIAS[n], tr);
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       // Half-width in fractions of the span, clamped so a tiny sample cannot draw

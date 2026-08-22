@@ -43,6 +43,22 @@ const lesson: Lesson = {
       work: 'Slippery Slopes',
     },
     {
+      // The scene asks the tap-the-step question on the stage; this is the second
+      // graded question, matching the deck question the scene asks (E37c).
+      type: 'question',
+      prompt: 'What makes a slippery slope argument fallacious?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'A link in the chain with no reason given for it', isCorrect: true },
+          { id: 'b', text: 'An ending too far-fetched to take seriously', isCorrect: false },
+          { id: 'c', text: 'Predicting the future at all', isCorrect: false },
+        ],
+        explanation: 'Option B is the trap and it is why the fallacy keeps working on people: an alarming ending is perfectly fine if the steps to it are shown, and a modest ending is still a slope if they are not. Option C would rule out ordinary causal reasoning. The fault lives in the joins, which means you can catch it long before the ending arrives.',
+      },
+    },
+    {
       type: 'question',
       prompt: 'Tap the first step that has not been earned.',
       xpValue: 5,

@@ -51,6 +51,22 @@ const lesson: Lesson = {
       emoji: '🪣',
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping what puts the
+      // newcomer on the rota (E37c).
+      type: 'question',
+      prompt: 'The newcomer never agreed to the well\'s rota but drinks from it daily. On fair-play theory, what creates his duty?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Accepting the benefit of what others produced', isCorrect: true },
+          { id: 'b', text: 'His signature on the arrangement', isCorrect: false },
+          { id: 'c', text: 'A majority of the village voting for it', isCorrect: false },
+        ],
+        explanation: 'Fair play deliberately does without both of the others. There is no signature — that is the whole point of the case — and a vote he lost would not by itself bind him either. What binds him is that he takes the water a cooperative scheme produces. Hume had already shown consent could not do this work, since almost nobody is ever genuinely free to refuse.',
+      },
+    },
+    {
       type: 'question',
       prompt: "True or false: Because you never signed a social contract, fair-play theory says you have no obligation to obey any law.",
       xpValue: 5,

@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology8Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -84,6 +84,7 @@ const HOLD = BEATS.map((b) => b.hold ?? 0);
 
 export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -110,7 +111,7 @@ export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick }:
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
-    const fx = lerp(X[p], X[n], tr);
+    const fx = carry(cv, 0, n, X[p], X[n], tr);
     return {
       fig: pose(s, fx, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       // The carried block rides in front of the figure and only appears / vanishes
@@ -118,10 +119,10 @@ export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick }:
       // arrival — so it is visible for the whole walk across. Its offset swings
       // with the FACING across the beat rather than snapping, so turning around at
       // the pile shifts the block to the new front instead of teleporting it.
-      carryX: fx + lerp(DIR[p], DIR[n], tr) * 12,
-      hold: lerp(HOLD[p], HOLD[n], seg(tr, 0.78, 1)),
-      pile: lerp(PILE[p], PILE[n], seg(tr, 0.6, 0.92)) * open,
-      tower: lerp(TOWER[p], TOWER[n], tr) * open,
+      carryX: fx + carry(cv, 1, n, DIR[p], DIR[n], tr) * 12,
+      hold: carry(cv, 2, n, HOLD[p], HOLD[n], seg(tr, 0.78, 1)),
+      pile: carry(cv, 3, n, PILE[p], PILE[n], seg(tr, 0.6, 0.92), open),
+      tower: carry(cv, 4, n, TOWER[p], TOWER[n], tr, open),
       esc: escOn ? (escFade ? grow : 1) : 0,
     };
   });

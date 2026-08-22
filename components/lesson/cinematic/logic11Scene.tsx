@@ -10,7 +10,7 @@ import {
 // exactly rig's and mean what they always did, 100+ reach moves.ts (see emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic11Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -114,6 +114,7 @@ function stepOp(k: number, p: number, n: number, grow: number) {
 
 export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -151,9 +152,9 @@ export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick }: S
     const lift = a * ease01(seg(qv.value, 0.58, 1.0));
 
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      base: lerp(BASEV[p], BASEV[n], tr) * (baseFade ? grow : 1),
-      spine: lerp(SPINEV[p], SPINEV[n], tr) * (spineFade ? grow : 1),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      base: carry(cv, 1, n, BASEV[p], BASEV[n], tr, baseFade ? grow : 1),
+      spine: carry(cv, 2, n, SPINEV[p], SPINEV[n], tr, spineFade ? grow : 1),
       s0: stepOp(0, p, n, grow) * (wrongIdx === 0 ? 0.45 : 1),
       s1: stepOp(1, p, n, grow) * (wrongIdx === 1 ? 0.45 : 1),
       s2: stepOp(2, p, n, grow) * (wrongIdx === 2 ? 0.45 : 1),

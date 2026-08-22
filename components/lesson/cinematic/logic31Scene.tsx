@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import {
   ease01, lerp, mixStance, pose, seated, type Bundle, type Stance, } from './rig';
 import { BEATS } from './logic31Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -91,6 +91,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic31'));
 
 export default function Logic31Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
   const scaleFade = (cur.scale ?? 0) !== (prev?.scale ?? 0);
@@ -106,8 +107,8 @@ export default function Logic31Scene({ clock, bt, bi, i, picked, onPick }: Scene
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n,attitude(P[p], t)), attitude(P[n], t), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      flips: lerp(FLIPS[p], FLIPS[n], grow),
-      scale: lerp(SCALEV[p], SCALEV[n], tr) * (scaleFade ? grow : 1),
+      flips: carry(cv, 0, n, FLIPS[p], FLIPS[n], grow),
+      scale: carry(cv, 1, n, SCALEV[p], SCALEV[n], tr, scaleFade ? grow : 1),
     };
   });
 

@@ -51,6 +51,22 @@ const lesson: Lesson = {
       source: 'Jackson, "Epiphenomenal Qualia" (1982)',
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping what Mary gains
+      // when she steps outside (E37c).
+      type: 'question',
+      prompt: 'Mary knows every physical fact about colour and then sees red for the first time. What does she gain?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'What red is like from the inside', isCorrect: true },
+          { id: 'b', text: 'One more physical fact she had not reached yet', isCorrect: false },
+          { id: 'c', text: 'Nothing — she only feels as though she learns', isCorrect: false },
+        ],
+        explanation: 'Options B and C are the two serious physicalist replies, which is why they are here rather than as filler. B has to say the wall of physical facts was never actually complete, which is awkward when it was complete by stipulation. C has to tell Mary she is mistaken about her own first look at a rose. The knowledge argument says she gains a quale, and that qualia are what physical description keeps leaving out.',
+      },
+    },
+    {
       type: 'question',
       prompt: "Mary knows every physical fact about color, but has only seen black and white. She learns nothing new the first time she sees red. True?",
       xpValue: 5,

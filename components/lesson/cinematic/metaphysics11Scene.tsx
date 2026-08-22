@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics11Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -128,6 +128,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics11'));
 
 export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldCS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -166,7 +167,7 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick }:
       carryFrom(heldCS, n, emoteHold(C[p], t)), emoteHold(C[n], t), emoteLive(C[n], t, bt.value),
       tr, WALK, 1,
     ));
-    const cx = lerp(CX[p], CX[n], tr);
+    const cx = carry(cv, 0, n, CX[p], CX[n], tr);
     // He arrives at FULL opacity: the fade is spent in the wing, over the first
     // fifth of a 150-unit walk, so the reader only ever sees a man walking on.
     const walkIn = CX[p] > 380 && CX[n] < 380 ? ease01(clamp01(tr / 0.2)) : (CX[n] < 380 ? 1 : 0);
@@ -175,13 +176,13 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick }:
     // unhurried 1.6s to cross rather than the beat's transition.
     const cr0 = crownOf(pS.tilt, pS.neck, pS.bob, PRI_X, 1);
     const cr1 = crownOf(cS.tilt, cS.neck, cS.bob, cx, CDIR[n]);
-    const u = TOK[p] === TOK[n] ? TOK[n] : lerp(TOK[p], TOK[n], ease01(clamp01(bt.value / 1.6)));
+    const u = TOK[p] === TOK[n] ? TOK[n] : carry(cv, 1, n, TOK[p], TOK[n], ease01(clamp01(bt.value / 1.6)));
 
     // The names cross a beat later, and start a touch after the line does, so the
     // reader is looking at the floor by the time they move (C22c).
     const sw = SWAP[p] === SWAP[n]
       ? SWAP[n]
-      : lerp(SWAP[p], SWAP[n], ease01(clamp01((bt.value - 0.2) / 1.5)));
+      : carry(cv, 2, n, SWAP[p], SWAP[n], ease01(clamp01((bt.value - 0.2) / 1.5)));
     const part = Math.sin(Math.PI * sw);
 
     return {

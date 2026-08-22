@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic22Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -68,6 +68,7 @@ function dotTop(k: number) { return FIELD_T + Math.floor(k / COLS) * (DOT + DOT_
 
 export default function Logic22Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -91,9 +92,9 @@ export default function Logic22Scene({ clock, bt, bi, i, picked, onPick }: Scene
       tr, WALK,
     ));
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      claim: lerp(CLAIM[p], CLAIM[n], tr) * (claimFade ? grow : 1),
-      field: lerp(FIELD[p], FIELD[n], tr) * (fieldFade ? grow : 1),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      claim: carry(cv, 1, n, CLAIM[p], CLAIM[n], tr, claimFade ? grow : 1),
+      field: carry(cv, 2, n, FIELD[p], FIELD[n], tr, fieldFade ? grow : 1),
       odd: oddOn ? (oddFade ? grow : 1) : 0,
       dead: deadOn ? (deadFade ? grow : 1) : 0,
     };

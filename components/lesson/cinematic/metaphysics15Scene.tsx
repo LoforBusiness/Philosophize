@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics15Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -70,6 +70,7 @@ const FOUND = BEATS.map((b) => b.found ?? 0);
 
 export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(4);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -90,11 +91,11 @@ export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick }:
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
-    const f = lerp(FOUND[p], FOUND[n], fFade ? grow : tr);
+    const f = carry(cv, 0, n, FOUND[p], FOUND[n], fFade ? grow : tr);
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      balls: lerp(BALLS[p], BALLS[n], tr) * (bFade ? grow : 1),
-      gap: lerp(GAPV[p], GAPV[n], gFade ? grow : tr),
+      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      balls: carry(cv, 2, n, BALLS[p], BALLS[n], tr, bFade ? grow : 1),
+      gap: carry(cv, 3, n, GAPV[p], GAPV[n], gFade ? grow : tr),
       // 0 → hidden, 1 → over the gap, 2 → over the observer. The x is a function of
       // that same number, so the card cannot be somewhere its verdict does not match.
       show: Math.min(1, f),

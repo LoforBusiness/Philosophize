@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics12Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -65,6 +65,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics12'));
 
 export default function Metaphysics12Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -77,8 +78,8 @@ export default function Metaphysics12Scene({ clock, bt, bi, i, picked, onPick }:
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       flow: (t * SPEED) % SPAN,
-      owner: lerp(OWNER[p], OWNER[n], grow),
-      none: lerp(NONES[p], NONES[n], grow),
+      owner: carry(cv, 0, n, OWNER[p], OWNER[n], grow),
+      none: carry(cv, 1, n, NONES[p], NONES[n], grow),
     };
   });
 

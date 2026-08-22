@@ -50,6 +50,22 @@ const lesson: Lesson = {
       emoji: '🕊️',
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping what Sen wants
+      // equalised (E37c).
+      type: 'question',
+      prompt: 'Two people are given identical bicycles and one of them cannot walk. What does Sen say we should be equalising?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'The real freedom to get where they want to go', isCorrect: true },
+          { id: 'b', text: 'The resources handed out at the start', isCorrect: false },
+          { id: 'c', text: 'How hard each of them tries', isCorrect: false },
+        ],
+        explanation: 'The bicycles are already equal and it bought one of them almost nothing, which is the resourcist trap in option B: mistaking the means for the end. Option C is worth being careful about — nothing in the example is a story about effort, and reading it that way is how the argument most often gets lost. Sen measures capabilities: what a life actually permits.',
+      },
+    },
+    {
       type: 'question',
       prompt: 'Give two people identical incomes and you have made them equal, full stop. Right?',
       xpValue: 5,

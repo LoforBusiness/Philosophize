@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political6Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -73,6 +73,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political6'));
 
 export default function Political6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(1);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
   const prinOn = (cur.prin ?? 0) > 0;
@@ -88,7 +89,7 @@ export default function Political6Scene({ clock, bt, bi, i, picked, onPick }: Sc
     const intro = n === 0 ? ease01(bt.value / 1.1) : 1;
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      chart: lerp(BARS[p], BARS[n], tr) * intro,
+      chart: carry(cv, 0, n, BARS[p], BARS[n], tr, intro),
       prinA: prinOn ? (prinFade ? ease01(bt.value / 0.45) : 1) : 0,
       prinB: prinOn ? (prinFade ? ease01((bt.value - 0.32) / 0.45) : 1) : 0,
     };

@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic33Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -77,6 +77,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic33'));
 
 export default function Logic33Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -88,8 +89,8 @@ export default function Logic33Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
     const grow = ease01(bt.value / 1.0);
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      bend: live ? dragPos.value : lerp(BEND[p], BEND[n], grow),
-      next: lerp(NEXTD[p], NEXTD[n], tr),
+      bend: live ? dragPos.value : carry(cv, 0, n, BEND[p], BEND[n], grow),
+      next: carry(cv, 1, n, NEXTD[p], NEXTD[n], tr),
     };
   });
 

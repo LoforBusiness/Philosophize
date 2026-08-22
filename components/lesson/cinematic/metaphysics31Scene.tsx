@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics31Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -85,6 +85,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics31'));
 
 export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const revealing = (cur.pick ?? 0) > 0;
 
@@ -97,9 +98,9 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      holes: lerp(HOLES[p], HOLES[n], grow),
-      ticks: lerp(TICKS[p], TICKS[n], grow),
-      chips: lerp(CHIPS[p], CHIPS[n], grow),
+      holes: carry(cv, 0, n, HOLES[p], HOLES[n], grow),
+      ticks: carry(cv, 1, n, TICKS[p], TICKS[n], grow),
+      chips: carry(cv, 2, n, CHIPS[p], CHIPS[n], grow),
       // The reveal rides the ANSWER, not the beat: the cheese dissolves as the
       // explanation appears, so the picture makes the point at the same moment
       // the words do.

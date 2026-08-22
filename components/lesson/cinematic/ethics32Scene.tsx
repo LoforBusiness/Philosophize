@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics32Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -76,6 +76,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics32'));
 
 export default function Ethics32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldSb = useHeld();
+  const cv = useCarry(1);
   const heldSa = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
@@ -97,7 +98,7 @@ export default function Ethics32Scene({ clock, bt, bi, i, picked, onPick }: Scen
       emoteHold(B[p], t + B_CLOCK)),
       emoteLive(B[n], t + B_CLOCK, bt.value),
       tr));
-    const card = lerp(CARD[p], CARD[n], tr);
+    const card = carry(cv, 0, n, CARD[p], CARD[n], tr);
     return {
       know: pose(sa, A_X, GROUND, K_FIG, 1, 1),
       borr: pose(sb, B_X, GROUND, K_FIG, -1, 1),

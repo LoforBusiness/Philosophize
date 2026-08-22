@@ -45,6 +45,22 @@ const lesson: Lesson = {
       philosopherId: 'thomas-kuhn',
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping what moved when
+      // the paradigm did (E37c).
+      type: 'question',
+      prompt: 'Copernicus moves the Sun to the centre and the whole picture reorganises. On Kuhn\'s account, what changed?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'The framework the facts were read inside', isCorrect: true },
+          { id: 'b', text: 'The observations themselves', isCorrect: false },
+          { id: 'c', text: 'The instruments available to astronomers', isCorrect: false },
+        ],
+        explanation: 'The observed positions of the planets did not move, and Copernicus had no better instruments than Ptolemy. What changed was the framework the same data was read inside — which is why Kuhn says the scientist afterwards works in a different world while the world has not changed. Option B is the reading that makes Kuhn sound like a relativist, and it is the one he takes care to avoid.',
+      },
+    },
+    {
       type: 'question',
       prompt: 'Place a scientific revolution in Kuhn’s order, from settled work to a new framework.',
       xpValue: 5,

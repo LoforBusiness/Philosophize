@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import {
   climb, ease01, emoteHold, lerp, mixStance, pose, type Bundle, } from './rig';
 import { BEATS } from './ethics31Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -83,6 +83,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics31'));
 
 export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -100,7 +101,7 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick }: Scen
     const t = clock.value;
     const grow = ease01(bt.value / 0.55);
 
-    const travelled = lerp(RUNGS[p], RUNGS[n], tr);
+    const travelled = carry(cv, 0, n, RUNGS[p], RUNGS[n], tr);
     // Climbing only while the rung count is actually changing; otherwise hold a
     // human pose rather than a frozen half-step (C20).
     const moving = dr > 0 ? 1 - Math.abs(tr * 2 - 1) : 0;
@@ -113,8 +114,8 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick }: Scen
       // The rungs slide by exactly the distance the legs walked, then wrap — every
       // rung is identical, so the wrap is invisible and the climb never ends.
       scroll: (travelled * RUNG_SP) % RUNG_SP,
-      ladder: lerp(LADDER[p], LADDER[n], tr) * (ladderFade ? grow : 1),
-      duty: lerp(DUTY[p], DUTY[n], dutyFade ? grow : tr),
+      ladder: carry(cv, 1, n, LADDER[p], LADDER[n], tr, ladderFade ? grow : 1),
+      duty: carry(cv, 2, n, DUTY[p], DUTY[n], dutyFade ? grow : tr),
     };
   });
 

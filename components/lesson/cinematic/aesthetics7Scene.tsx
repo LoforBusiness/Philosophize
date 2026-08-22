@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics7Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -116,6 +116,7 @@ const CHV = BEATS.map((b) => (b.summary ? 0 : (b.capt ?? 0) <= 1 ? 1 : 0));
 
 export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(4);
   const heldC = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
@@ -147,12 +148,12 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick }: S
     const c = keepHeld(heldC, mixStance(carryFrom(heldC, n, emoteHold(Q[p], t)), emoteLive(Q[n], t, bt.value), tr));
 
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       comp: pose(c, COMP_X, GROUND, K_FIG, -1, 1),
-      art: lerp(ARTV[p], ARTV[n], tr),
+      art: carry(cv, 1, n, ARTV[p], ARTV[n], tr),
       capt: captOn ? (captFade ? grow : 1) : 0,
-      marks: lerp(MKV[p], MKV[n], tr) * (marksFade ? grow : 1),
-      chart: lerp(CHV[p], CHV[n], tr) * (chartFade ? grow : 1),
+      marks: carry(cv, 2, n, MKV[p], MKV[n], tr, marksFade ? grow : 1),
+      chart: carry(cv, 3, n, CHV[p], CHV[n], tr, chartFade ? grow : 1),
     };
   });
 

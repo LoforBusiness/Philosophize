@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic10Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -124,6 +124,7 @@ const HIDSOL: number[] = [];
 
 export default function Logic10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -152,12 +153,12 @@ export default function Logic10Scene({ clock, bt, bi, i, picked, onPick }: Scene
       tr, WALK,
     ));
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       arg: argFade ? grow : 1,
-      slot: lerp(SLOTV[p], SLOTV[n], tr) * (slotFade ? grow : 1),
-      rise: lerp(HIDTOP[p], HIDTOP[n], tr) - HID_T,
-      hid: lerp(HIDOP[p], HIDOP[n], tr),
-      sol: lerp(HIDSOL[p], HIDSOL[n], cross),
+      slot: carry(cv, 1, n, SLOTV[p], SLOTV[n], tr, slotFade ? grow : 1),
+      rise: carry(cv, 2, n, HIDTOP[p], HIDTOP[n], tr) - HID_T,
+      hid: carry(cv, 3, n, HIDOP[p], HIDOP[n], tr),
+      sol: carry(cv, 4, n, HIDSOL[p], HIDSOL[n], cross),
     };
   });
 

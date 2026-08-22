@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics9Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -76,6 +76,7 @@ const CROSS = BEATS.map((b) => (b.cross ?? 0));
 
 export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -104,10 +105,10 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: 
     // The thought sets out and STOPS. It eases toward the far panel and arrives at
     // 0.86 of the way — close enough to be trying, short enough that the strip of
     // paper it cannot cross is the thing you actually look at.
-    const reach = lerp(CROSS[p], CROSS[n], tr) * ease01(clamp01(bt.value / 1.5)) * 0.86;
+    const reach = carry(cv, 0, n, CROSS[p], CROSS[n], tr) * ease01(clamp01(bt.value / 1.5)) * 0.86;
 
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       lit: lerp(PANELS[p] > 0 ? 1 : 0, PANELS[n] > 0 ? 1 : 0, tr) * (litFade ? grow : 1),
       shut: lerp(PANELS[p] === 2 ? 1 : 0, PANELS[n] === 2 ? 1 : 0, tr),
       reach,

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withTiming, withRepeat, withSequence, withSpring,
-  Easing, FadeInDown, LinearTransition, runOnJS, type SharedValue,
+  makeMutable, Easing, FadeInDown, LinearTransition, runOnJS, type SharedValue,
 } from 'react-native-reanimated';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
@@ -324,6 +324,91 @@ export function facing(from: number, to: number, t: number, dur = 0.36): number 
   if (from === to) return to;
   const u = t <= 0 ? 0 : t >= dur ? 1 : t / dur;
   return from + (to - from) * (u * u * (3 - 2 * u));
+}
+
+// ── …AND EVERY OTHER TRACK, WHICH HAD THE SAME DEFECT AND NO LIMB TO SHOW IT ──
+//
+// `carryFrom` above fixed the STANCE. It did not fix anything else, and a scene
+// interpolates far more than a stance:
+//
+//     fig:  pose(s, lerp(X[p], X[n], tr), …)     ← where he STANDS
+//     film: lerp(FILM[p], FILM[n], tr)           ← a prop's opacity
+//     shut: lerp(SHUT[p], SHUT[n], ease01(seg(tr, 0.4, 1)))
+//
+// Every one of those starts its blend at `T[p]` — the value the PREVIOUS beat was
+// heading toward, not the value on screen — so a tap before the blend finished
+// covers the rest of the distance in a single frame, exactly as the stance did.
+// The jump is `(1 − tr_reached) × (T[n] − T[p])`.
+//
+// It went unnoticed for as long as it did because `scripts/check-smooth.mjs`
+// draws the figure at a FIXED x=200 and measures limbs only. Replaying the real
+// tracks instead: **166 units in one frame** in metaphysics7 — the man crossing
+// 40% of the stage between two frames — with 49 tracks over the 8-unit line
+// across 89 scenes. The file said this could happen and nothing measured it:
+// "a prop interpolated as lerp(TRACK[p], TRACK[n], tr) has the identical defect
+// and merely has no limb for the checker to measure."
+//
+// `carry` is `lerp` with a memory. Same three numbers, plus which slot to
+// remember it in, and it blends from what it last returned.
+//
+//     lerp(X[p], X[n], tr)            →  carry(cv, 0, n, X[p], X[n], tr)
+//
+// THE MULTIPLIER GOES INSIDE IT, and that is not a convenience. The house pattern
+// for "only the thing that changed re-draws itself" (C20c / H58) is
+//
+//     film: lerp(FILM[p], FILM[n], tr) * (filmFade ? grow : 1)
+//
+// so what reaches the screen is the product. Carry the bare lerp and the memory
+// is of a value that was never drawn: interrupt a fade-in at 0.10 and the next
+// beat — which has nothing to fade, so no `grow` — resumes from 0.29 and the prop
+// pops brighter on the tap. Passing `mul` makes the remembered value the drawn one.
+export interface Carry {
+  seen: SharedValue<number>;
+  from: SharedValue<number>[];
+  last: SharedValue<number>[];
+}
+
+/**
+ * One call per scene. `n` is how many `carry()` sites the scene has — the codemod
+ * and `check:smooth` both count them, and an undersized bag is a build failure
+ * rather than a silent hold at the wrong value.
+ */
+export function useCarry(n: number): Carry {
+  // makeMutable inside a useMemo rather than n calls to useSharedValue: the count
+  // is a module constant per scene so a hook loop would in fact be legal, but this
+  // keeps the scene's hook count at one whatever it grows to — and rule 1 of §17
+  // is about hook counts changing between renders.
+  const slots = useMemo(
+    () => ({
+      from: Array.from({ length: n }, () => makeMutable(NaN)),
+      last: Array.from({ length: n }, () => makeMutable(NaN)),
+    }),
+    [n],
+  );
+  return { seen: useSharedValue(-1), from: slots.from, last: slots.last };
+}
+
+/**
+ * `lerp(prev, next, tr)` that starts from whatever it last drew.
+ *
+ * The snapshot is taken by whichever site runs first on the beat's first frame,
+ * so a scene with two derived values sharing one `cv` still takes exactly one.
+ */
+export function carry(
+  cv: Carry, k: number, n: number, prev: number, next: number, tr: number, mul = 1,
+): number {
+  'worklet';
+  if (cv.seen.value !== n) {
+    cv.seen.value = n;
+    for (let j = 0; j < cv.from.length; j++) cv.from[j].value = cv.last[j].value;
+  }
+  const a = cv.from[k].value;
+  // NaN only on the lesson's very first beat, when nothing has been drawn yet —
+  // there `T[p]` IS the right source, because it is also what is on screen.
+  const src = a === a ? a : prev;
+  const v = (src + (next - src) * tr) * mul;
+  cv.last[k].value = v;
+  return v;
 }
 
 // ── beat-to-beat transition (SEQUENTIAL) ──────────────────────────────────────
@@ -825,7 +910,10 @@ export const styles = StyleSheet.create({
   // two-line options without clipping the last one.
   stageWrap: { flex: 42, alignItems: 'center', justifyContent: 'flex-end' },
   stageGone: { flex: 0, height: 0 },
-  deckTall: { flex: 92, justifyContent: 'center' },
+  // The summary. `stageGone` already zeroes the stage, so `lower` is the only
+  // flexible child left and takes the whole body without needing a weight of its
+  // own — all this has to do now is centre the card in it.
+  deckTall: { justifyContent: 'center' },
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 40, right: 40, top: GROUND, height: 1.5, backgroundColor: RULE },
 
@@ -850,7 +938,15 @@ export const styles = StyleSheet.create({
   tailShout: { backgroundColor: INK },
   leader: { width: 2, height: LEADER_H, backgroundColor: INK, marginTop: -2, opacity: 0.55 },
 
-  deck: { flex: 50, paddingHorizontal: 24, justifyContent: 'flex-start', overflow: 'hidden' },
+  /**
+   * The lower half — answer control (if any) and deck, as ONE box (L6).
+   *
+   * The flex weight lives HERE and not on the deck, which is the whole point: a
+   * beat that mounts cards or a drag rail takes their height out of this box's
+   * 50, never out of the stage's 42. See the note at the JSX in CinematicPlayer.
+   */
+  lower: { flex: 50 },
+  deck: { flex: 1, paddingHorizontal: 24, justifyContent: 'flex-start', overflow: 'hidden' },
   fadeWrap: { position: 'relative' },
   narr: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: NARR_SIZE, lineHeight: 27, color: INK },
   cite: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT, marginBottom: 7 },

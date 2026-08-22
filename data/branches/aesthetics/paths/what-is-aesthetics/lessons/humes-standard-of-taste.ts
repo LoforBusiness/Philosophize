@@ -60,6 +60,22 @@ const lesson: Lesson = {
       philosopherId: 'david-hume',
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping the verdict
+      // itself (E37c) — same concept, same correct answer, re-cut for the staging.
+      type: 'question',
+      prompt: 'The cask is drained and a key on a leather thong lies at the bottom. Whose verdict does that settle?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'The taster who found iron in it', isCorrect: true },
+          { id: 'b', text: 'The room, which found nothing wrong', isCorrect: false },
+          { id: 'c', text: 'The taster who found it too sweet', isCorrect: false },
+        ],
+        explanation: 'A key on a thong is iron and leather, so one palate detected what a whole room could not. The "too sweet" verdict is the trap: it is a preference, reporting the taster rather than the cask, so nothing at the bottom could ever confirm or refute it. That is exactly why Hume\'s standard is built from detections by practised judges and not from a headcount.',
+      },
+    },
+    {
       type: 'question',
       prompt: '"Because Hume admits taste differs from person to person, he concludes every judgment of taste is equally valid."',
       xpValue: 5,

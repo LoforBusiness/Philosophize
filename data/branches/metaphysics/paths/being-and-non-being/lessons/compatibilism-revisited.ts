@@ -72,6 +72,22 @@ const lesson: Lesson = {
       xpValue: 5,
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping the addict whose
+      // second-order arrow points against his own craving (E37c).
+      type: 'question',
+      prompt: 'Two addicts, identical cravings and identical behaviour. Which one is unfree, for Frankfurt?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'The one who wishes he did not want it', isCorrect: true },
+          { id: 'b', text: 'Both, since both cravings are caused', isCorrect: false },
+          { id: 'c', text: 'Neither, since both take the drug willingly', isCorrect: false },
+        ],
+        explanation: 'Their bodies and their chemistry are identical, so nothing about the act can separate them. The unwilling addict is moved by a will he disowns; the willing one endorses his. Option B is hard determinism, which Frankfurt rejects — he is a compatibilist and does not mind the desires being caused at all.',
+      },
+    },
+    {
       type: 'question',
       prompt: 'A friend says: "Frankfurt proves we are free because our choices are uncaused." Where does this go wrong?',
       xpValue: 5,

@@ -44,6 +44,22 @@ const lesson: Lesson = {
       philosopherId: 'francis-bacon',
     },
     {
+      // The scene asks the where-does-it-break question on the stage; this is the
+      // second graded question, matching the one the scene asks in the deck (E37c).
+      type: 'question',
+      prompt: 'Two rude tourists, therefore a rude country. What would actually repair this argument?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'A larger and fairly chosen sample', isCorrect: true },
+          { id: 'b', text: 'Being more certain you saw it correctly', isCorrect: false },
+          { id: 'c', text: 'Meeting the same two people again', isCorrect: false },
+        ],
+        explanation: 'Options B and C both offer more confidence about the same two people, and confidence was never what was short. You could be provably right about both tourists and still know nothing about the country. Sample size and certainty are different quantities, and only one of them is missing here.',
+      },
+    },
+    {
       type: 'question',
       prompt: 'Every line here is true. Where does the reasoning still break?',
       xpValue: 5,

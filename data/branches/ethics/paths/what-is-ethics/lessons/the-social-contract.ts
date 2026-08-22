@@ -81,6 +81,22 @@ const lesson: Lesson = {
       philosopherId: 'thomas-hobbes',
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping what the wall is
+      // made of (E37c) — same concept, re-cut for the staging.
+      type: 'question',
+      prompt: 'On the social contract picture, where does a legitimate government get its authority from?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Liberties the governed handed over', isCorrect: true },
+          { id: 'b', text: 'Power the ruler holds in his own right', isCorrect: false },
+          { id: 'c', text: 'The fear of punishment it can inflict', isCorrect: false },
+        ],
+        explanation: 'The whole force of the idea is that authority is BUILT from surrendered liberty, so it has exactly as much as was surrendered and no more. Option B is the older answer the contract was invented to replace, and it is the tempting one because it describes how most historical states actually behaved. Option C confuses what makes a state obeyed with what makes it legitimate.',
+      },
+    },
+    {
       type: 'question',
       prompt: 'Both Hobbes and Locke endorse a social contract. What is their deepest disagreement?',
       xpValue: 5,

@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics4Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -78,6 +78,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics4'));
 
 export default function Metaphysics4Scene({ clock, bt, bi, i }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -89,9 +90,9 @@ export default function Metaphysics4Scene({ clock, bt, bi, i }: SceneApi) {
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, -1, 1),
-      rows: lerp(TOK[p], TOK[n], tr),
-      barred: lerp(BAR[p], BAR[n], tr),
-      frozen: lerp(FRZ[p], FRZ[n], tr),
+      rows: carry(cv, 0, n, TOK[p], TOK[n], tr),
+      barred: carry(cv, 1, n, BAR[p], BAR[n], tr),
+      frozen: carry(cv, 2, n, FRZ[p], FRZ[n], tr),
       t,
     };
   });

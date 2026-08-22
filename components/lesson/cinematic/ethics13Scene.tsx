@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics13Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -67,6 +67,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics13'));
 
 export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const cur = BEATS[i];
   const revealing = (cur.pick ?? 0) > 0;
 
@@ -79,13 +80,13 @@ export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick }: 
     // travels at a readable rate rather than teleporting (C17).
     const slide = ease01(bt.value / 1.2);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
-    const base = lerp(POS[p], POS[n], slide);
+    const base = carry(cv, 0, n, POS[p], POS[n], slide);
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       // On the question beat the marker waits at the far end and only travels to the
       // mean once the reader has answered — so the picture never gives it away.
       pos: revealing ? lerp(base, MEAN, qv.value) : base,
-      habit: revealing ? qv.value : lerp(HABIT[p], HABIT[n], slide),
+      habit: revealing ? qv.value : carry(cv, 1, n, HABIT[p], HABIT[n], slide),
     };
   });
 

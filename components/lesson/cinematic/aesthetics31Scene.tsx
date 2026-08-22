@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics31Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -82,6 +82,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics31'));
 
 export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(4);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -96,10 +97,10 @@ export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick }: 
       // The playhead rides the MONOTONIC clock, not the beat clock, so tapping
       // through a beat never restarts the phrase mid-bar.
       play: (t * 0.385) % 1,
-      playing: lerp(PLAY[p], PLAY[n], grow),
-      strings: lerp(STR[p], STR[n], grow),
-      clapA: lerp(CA[p], CA[n], grow),
-      clapB: lerp(CB[p], CB[n], grow),
+      playing: carry(cv, 0, n, PLAY[p], PLAY[n], grow),
+      strings: carry(cv, 1, n, STR[p], STR[n], grow),
+      clapA: carry(cv, 2, n, CA[p], CA[n], grow),
+      clapB: carry(cv, 3, n, CB[p], CB[n], grow),
     };
   });
 

@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political3Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -111,6 +111,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political3'));
 
 export default function Political3Scene({ clock, bt, bi, i }: SceneApi) {
   const heldSub = useHeld();
+  const cv = useCarry(5);
   const heldR = useHeld();
   const mode = PAIR_MODE[i];
   const panel = PANELS[mode] ?? PANELS[1]!;
@@ -130,15 +131,15 @@ export default function Political3Scene({ clock, bt, bi, i }: SceneApi) {
       // The scroll's journey is DELAYED into the back half of the transition, so it
       // is still near the subject's end of the rail at the moment the circuit
       // becomes visible — otherwise it would pop into view already delivered.
-      scroll: ease01(clamp01((lerp(SCROLL[p], SCROLL[n], tr) - 0.45) / 0.55)),
-      seal: lerp(SEAL[p], SEAL[n], tr),
-      pair: lerp(PAIR_ON[p], PAIR_ON[n], tr),
+      scroll: ease01(clamp01((carry(cv, 0, n, SCROLL[p], SCROLL[n], tr) - 0.45) / 0.55)),
+      seal: carry(cv, 1, n, SEAL[p], SEAL[n], tr),
+      pair: carry(cv, 2, n, PAIR_ON[p], PAIR_ON[n], tr),
       // The corridor's two diagrams hand over in stages: force is off the rails by
       // 45% of the transition, the circuit goes up from 55%, and the corridor is
       // briefly — deliberately — empty between them. Cross-fading them left both at
       // half opacity on top of each other, which on a phone reads as a smudge.
-      force: ease01(clamp01((lerp(FORCE[p], FORCE[n], tr) - 0.55) / 0.45)),
-      flow: ease01(clamp01((lerp(FLOW[p], FLOW[n], tr) - 0.55) / 0.45)),
+      force: ease01(clamp01((carry(cv, 3, n, FORCE[p], FORCE[n], tr) - 0.55) / 0.45)),
+      flow: ease01(clamp01((carry(cv, 4, n, FLOW[p], FLOW[n], tr) - 0.55) / 0.45)),
       t,
     };
   });

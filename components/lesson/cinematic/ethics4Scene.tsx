@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics4Script';
 import {
-  K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -77,6 +77,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics4'));
 
 export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldA = useHeld();
+  const cv = useCarry(2);
   const heldB = useHeld();
   const cur = BEATS[i];
   const answered = picked !== null;
@@ -93,8 +94,8 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick }: Scene
     return {
       a: pose(a, A_X, FIG_G, K_FIG, 1, 1),
       b: pose(b, B_X, FIG_G, K_FIG, -1, 1),
-      floor: lerp(FLOOR[p], FLOOR[n], tr),
-      rows: lerp(ROWS[p], ROWS[n], tr),
+      floor: carry(cv, 0, n, FLOOR[p], FLOOR[n], tr),
+      rows: carry(cv, 1, n, ROWS[p], ROWS[n], tr),
       t,
     };
   });

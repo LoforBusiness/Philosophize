@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './knowHowScript';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -77,6 +77,7 @@ const DONE = BEATS.map((b) => b.done ?? 0);
 
 export default function KnowHowScene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -96,10 +97,10 @@ export default function KnowHowScene({ clock, bt, bi, i, picked, onPick }: Scene
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
-    const done = lerp(DONE[p], DONE[n], doneFade ? grow : tr);
+    const done = carry(cv, 0, n, DONE[p], DONE[n], doneFade ? grow : tr);
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      fill: lerp(NSTEPS[p], NSTEPS[n], grow),
+      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fill: carry(cv, 2, n, NSTEPS[p], NSTEPS[n], grow),
       done,
       // The column recedes as the box fills — the two are one movement, so the
       // reader reads it as a handover rather than as two things happening.

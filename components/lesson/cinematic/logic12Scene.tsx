@@ -13,7 +13,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { propAct } from './interact';
 import { BEATS } from './logic12Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -77,6 +77,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic12'));
 
 export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(1);
   const cur = BEATS[i];
   const revealing = (cur.pick ?? 0) > 0;
 
@@ -119,7 +120,7 @@ export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick }: S
     keepHeld(heldS, s);
     return {
       fig: pose(s, fx, GROUND, K_FIG, 1, 1),
-      lit: lerp(LIT[p], LIT[n], grow),
+      lit: carry(cv, 0, n, LIT[p], LIT[n], grow),
       // The leaf now waits for the hand: nothing moves until he has arrived.
       swing: act,
     };

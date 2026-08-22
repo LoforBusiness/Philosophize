@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics18Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -77,6 +77,7 @@ const WIDE = BEATS.map((b) => b.wide ?? 0);
 
 export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -97,10 +98,10 @@ export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick }: Scen
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
-    const wide = lerp(WIDE[p], WIDE[n], wideFade ? grow : tr);
+    const wide = carry(cv, 0, n, WIDE[p], WIDE[n], wideFade ? grow : tr);
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      board: lerp(LINEV[p], LINEV[n], tr) * (lineFade ? grow : 1),
+      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      board: carry(cv, 2, n, LINEV[p], LINEV[n], tr, lineFade ? grow : 1),
       wide,
       line: lerp(LINE_NARROW, LINE_WIDE, wide),
       test: testOn ? (testFade ? grow : 1) : 0,

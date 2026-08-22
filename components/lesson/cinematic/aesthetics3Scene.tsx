@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics3Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -132,6 +132,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics3'));
 
 export default function Aesthetics3Scene({ clock, bt, bi, i }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(6);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -143,13 +144,13 @@ export default function Aesthetics3Scene({ clock, bt, bi, i }: SceneApi) {
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, -1, 1),
-      arc: lerp(ARC[p], ARC[n], tr),
-      cut: lerp(CUTB[p], CUTB[n], tr),
+      arc: carry(cv, 0, n, ARC[p], ARC[n], tr),
+      cut: carry(cv, 1, n, CUTB[p], CUTB[n], tr),
       // The staggered slot gates: out by 45%, in from 55%, never both at once.
-      arcOn: ease01(clamp01((lerp(ARC_ON[p], ARC_ON[n], tr) - 0.55) / 0.45)),
-      maskOn: ease01(clamp01((lerp(MASK_ON[p], MASK_ON[n], tr) - 0.55) / 0.45)),
-      meterOn: ease01(clamp01((lerp(METER_ON[p], METER_ON[n], tr) - 0.55) / 0.45)),
-      willOn: ease01(clamp01((lerp(WILL_ON[p], WILL_ON[n], tr) - 0.55) / 0.45)),
+      arcOn: ease01(clamp01((carry(cv, 2, n, ARC_ON[p], ARC_ON[n], tr) - 0.55) / 0.45)),
+      maskOn: ease01(clamp01((carry(cv, 3, n, MASK_ON[p], MASK_ON[n], tr) - 0.55) / 0.45)),
+      meterOn: ease01(clamp01((carry(cv, 4, n, METER_ON[p], METER_ON[n], tr) - 0.55) / 0.45)),
+      willOn: ease01(clamp01((carry(cv, 5, n, WILL_ON[p], WILL_ON[n], tr) - 0.55) / 0.45)),
       t,
     };
   });

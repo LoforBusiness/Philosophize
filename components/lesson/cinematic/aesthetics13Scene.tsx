@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics13Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -64,6 +64,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics13'));
 
 export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -77,8 +78,8 @@ export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick }: 
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      art: lerp(ART[p], ART[n], ease01(bt.value / 0.9)),
-      chain: lerp(CHAIN[p], CHAIN[n], draw),
+      art: carry(cv, 0, n, ART[p], ART[n], ease01(bt.value / 0.9)),
+      chain: carry(cv, 1, n, CHAIN[p], CHAIN[n], draw),
     };
   });
 

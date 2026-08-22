@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics16Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -84,6 +84,7 @@ const NFACTS = BEATS.map((b) => b.facts ?? 0);
 
 export default function Aesthetics16Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -104,10 +105,10 @@ export default function Aesthetics16Scene({ clock, bt, bi, i, picked, onPick }: 
       tr, WALK,
     ));
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      canvas: lerp(CANV[p], CANV[n], tr) * (canvFade ? grow : 1),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      canvas: carry(cv, 1, n, CANV[p], CANV[n], tr, canvFade ? grow : 1),
       // How far the rail has filled, as a card count that can be fractional mid-blend.
-      fill: lerp(NFACTS[p], NFACTS[n], grow),
+      fill: carry(cv, 2, n, NFACTS[p], NFACTS[n], grow),
     };
   });
 

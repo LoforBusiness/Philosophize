@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics19Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -71,6 +71,7 @@ const FRAME = BEATS.map((b) => b.frame ?? 0);
 
 export default function Aesthetics19Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -92,11 +93,11 @@ export default function Aesthetics19Scene({ clock, bt, bi, i, picked, onPick }: 
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
-    const f = lerp(FRAME[p], FRAME[n], tr);
+    const f = carry(cv, 0, n, FRAME[p], FRAME[n], tr);
     const slot = Math.max(0, Math.min(2, f - 1));
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      row: lerp(ROW[p], ROW[n], tr) * (rowFade ? grow : 1),
+      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      row: carry(cv, 2, n, ROW[p], ROW[n], tr, rowFade ? grow : 1),
       frameOn: f > 0 ? 1 : 0,
       frameX: lerp(ITEM_X[0], ITEM_X[2], slot / 2),
       verdict: verOn ? (verFade ? grow : 1) : 0,

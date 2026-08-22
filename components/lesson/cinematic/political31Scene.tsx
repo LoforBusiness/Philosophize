@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political31Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -94,6 +94,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political31'));
 
 export default function Political31Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -108,12 +109,12 @@ export default function Political31Scene({ clock, bt, bi, i, picked, onPick }: S
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      grass: lerp(GRASS[p], GRASS[n], fall),
+      grass: carry(cv, 0, n, GRASS[p], GRASS[n], fall),
       // A living field: every blade leans on its own two frequencies, so the mass
       // never reads as one shape breathing (H67).
       sway: t,
-      herd: lerp(HERD[p], HERD[n], grow),
-      sums: lerp(SUMS[p], SUMS[n], grow),
+      herd: carry(cv, 1, n, HERD[p], HERD[n], grow),
+      sums: carry(cv, 2, n, SUMS[p], SUMS[n], grow),
     };
   });
 

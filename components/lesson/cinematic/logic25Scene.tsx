@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic25Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -74,6 +74,7 @@ const FAKE = BEATS.map((b) => b.fake ?? 0);
 
 export default function Logic25Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(4);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -94,10 +95,10 @@ export default function Logic25Scene({ clock, bt, bi, i, picked, onPick }: Scene
       tr, WALK,
     ));
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      result: lerp(RES[p], RES[n], tr) * (resFade ? grow : 1),
-      real: lerp(REAL[p], REAL[n], realFade ? grow : tr),
-      fake: lerp(FAKE[p], FAKE[n], fakeFade ? grow : tr),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      result: carry(cv, 1, n, RES[p], RES[n], tr, resFade ? grow : 1),
+      real: carry(cv, 2, n, REAL[p], REAL[n], realFade ? grow : tr),
+      fake: carry(cv, 3, n, FAKE[p], FAKE[n], fakeFade ? grow : tr),
     };
   });
 

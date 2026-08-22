@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics34Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -54,6 +54,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics34'));
 
 export default function Ethics34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -63,7 +64,7 @@ export default function Ethics34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P[p], t)), emoteLive(P[n], t, bt.value), tr));
     const grow = ease01(bt.value / 1.1);
-    const u = live ? dragPos.value : lerp(POP[p], POP[n], grow);
+    const u = live ? dragPos.value : carry(cv, 0, n, POP[p], POP[n], grow);
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       pop: u,
@@ -71,7 +72,7 @@ export default function Ethics34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
       // lesson's claim is false. 10→40 lives against quality 1→0.30 gives 10→12,
       // which climbs the whole way and climbs slowly, exactly as it should.
       total: ((10 + u * 30) * (1 - u * 0.70)) / 12,
-      avg: lerp(AVG[p], AVG[n], tr),
+      avg: carry(cv, 1, n, AVG[p], AVG[n], tr),
     };
   });
 

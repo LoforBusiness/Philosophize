@@ -9,7 +9,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic6Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -79,6 +79,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic6'));
 
 export default function Logic6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -88,9 +89,9 @@ export default function Logic6Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      link: lerp(LINK[p], LINK[n], tr),
-      rain: lerp(RAIN[p], RAIN[n], tr),
-      table: lerp(TABLE[p], TABLE[n], tr),
+      link: carry(cv, 0, n, LINK[p], LINK[n], tr),
+      rain: carry(cv, 1, n, RAIN[p], RAIN[n], tr),
+      table: carry(cv, 2, n, TABLE[p], TABLE[n], tr),
       t,
     };
   });

@@ -10,7 +10,7 @@ import {
 // exactly rig's and mean what they always did, 100+ reach moves.ts (see emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political12Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -70,6 +70,7 @@ const POS = BEATS.map((b) => b.posi ?? 0);
 
 export default function Political12Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -91,11 +92,11 @@ export default function Political12Scene({ clock, bt, bi, i, picked, onPick }: S
       tr, WALK,
     ));
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      door: lerp(DOORV[p], DOORV[n], tr) * (dFade ? grow : 1),
-      open: lerp(OPEN[p], OPEN[n], oFade ? grow : tr),
-      neg: lerp(NEG[p], NEG[n], nFade ? grow : tr),
-      pos: lerp(POS[p], POS[n], pFade ? grow : tr),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      door: carry(cv, 1, n, DOORV[p], DOORV[n], tr, dFade ? grow : 1),
+      open: carry(cv, 2, n, OPEN[p], OPEN[n], oFade ? grow : tr),
+      neg: carry(cv, 3, n, NEG[p], NEG[n], nFade ? grow : tr),
+      pos: carry(cv, 4, n, POS[p], POS[n], pFade ? grow : tr),
     };
   });
 

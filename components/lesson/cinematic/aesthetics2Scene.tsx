@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -94,6 +94,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics2'));
 
 export default function Aesthetics2Scene({ clock, bt, bi }: SceneApi) {
   const heldArtistS = useHeld();
+  const cv = useCarry(2);
   const heldViewerS = useHeld();
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -112,9 +113,9 @@ export default function Aesthetics2Scene({ clock, bt, bi }: SceneApi) {
       viewer: pose(viewerS, VIEWER_X, GROUND, K_FIG, -1, 1),
       waveX: lerp(ARTIST_X + 46, VIEWER_X - 46, ease01(cross)),
       waveVis: WAVE[n] * Math.sin(Math.PI * cross),
-      felt: lerp(FELT[p], FELT[n], tr),
+      felt: carry(cv, 0, n, FELT[p], FELT[n], tr),
       // A single continuous 1→3 value: panel j fills as it crosses j + 1.
-      chain: lerp(CHAIN[p], CHAIN[n], tr),
+      chain: carry(cv, 1, n, CHAIN[p], CHAIN[n], tr),
       t,
     };
   });

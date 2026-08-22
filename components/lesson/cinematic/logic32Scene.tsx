@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic32Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -89,6 +89,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic32'));
 
 export default function Logic32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldSb = useHeld();
+  const cv = useCarry(1);
   const heldSa = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
@@ -114,7 +115,7 @@ export default function Logic32Scene({ clock, bt, bi, i, picked, onPick }: Scene
     return {
       askr: pose(sa, A_X, GROUND, K_FIG, 1, 1),
       corn: pose(sb, B_X, GROUND, K_FIG, -1, 1),
-      q: lerp(QV[p], QV[n], tr) * (qFade ? grow : 1),
+      q: carry(cv, 0, n, QV[p], QV[n], tr, qFade ? grow : 1),
       hidden: hidOn ? (hidFade ? grow : 1) : 0,
       tried: tried > 0 ? (triedFade ? grow : 1) : 0,
     };

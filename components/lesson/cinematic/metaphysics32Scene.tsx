@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics32Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -73,6 +73,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics32'));
 
 export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -85,9 +86,9 @@ export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick }:
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       theta: t * 0.28,
-      orbs: lerp(ORBS[p], ORBS[n], grow),
-      tether: lerp(TETHER[p], TETHER[n], grow),
-      tag: lerp(TAG[p], TAG[n], grow),
+      orbs: carry(cv, 0, n, ORBS[p], ORBS[n], grow),
+      tether: carry(cv, 1, n, TETHER[p], TETHER[n], grow),
+      tag: carry(cv, 2, n, TAG[p], TAG[n], grow),
     };
   });
 

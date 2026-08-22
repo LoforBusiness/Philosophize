@@ -8,7 +8,7 @@ import {
   BLANK, WALK, clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, moveTr, pose, strideStance, type Bundle,
 } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -80,6 +80,7 @@ const LENSES = [
 
 export default function Ethics2Scene({ clock, bt, bi }: SceneApi) {
   const heldFinderS = useHeld();
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -88,22 +89,22 @@ export default function Ethics2Scene({ clock, bt, bi }: SceneApi) {
 
     // Finder — gesture blend, small steps.
     const finderS = keepHeld(heldFinderS, mixStance(carryFrom(heldFinderS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
-    const fx = lerp(X[p], X[n], tr);
+    const fx = carry(cv, 0, n, X[p], X[n], tr);
 
     // Guide — walks in when its position jumps; otherwise blends gestures in place.
-    const gOn = lerp(G_ON[p], G_ON[n], tr);
+    const gOn = carry(cv, 1, n, G_ON[p], G_ON[n], tr);
     const moving = Math.abs(GX[n] - GX[p]) > 10;
     const guideS = moving
       ? strideStance(GX[p], GX[n], emoteLive(G_CODE[n] < 0 ? 0 : G_CODE[n], t, bt.value), tr, WALK)
       : mixStance(emoteHold(G_CODE[p] < 0 ? 0 : G_CODE[p], t), emoteLive(G_CODE[n] < 0 ? 0 : G_CODE[n], t, bt.value), tr);
-    const gx = lerp(GX[p], GX[n], tr);
+    const gx = carry(cv, 2, n, GX[p], GX[n], tr);
 
     return {
       finder: pose(finderS, fx, GROUND, K_FIG, -1, 1),
       guide: gOn > 0.02 ? pose(guideS, gx, GROUND, K_FIG, 1, gOn) : BLANK,
-      named: lerp(NAMED[p], NAMED[n], tr),
+      named: carry(cv, 3, n, NAMED[p], NAMED[n], tr),
       // One continuous 0→3 value drives all three rows: row k lights as it crosses k.
-      lens: lerp(LENS[p], LENS[n], tr),
+      lens: carry(cv, 4, n, LENS[p], LENS[n], tr),
       t,
     };
   });

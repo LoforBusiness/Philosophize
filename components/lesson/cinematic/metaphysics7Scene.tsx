@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics7Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -73,6 +73,7 @@ const SPOT = BEATS.map((b) => b.spot ?? 0);
 
 export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(4);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -91,13 +92,13 @@ export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick }: 
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
-    const fx = lerp(X[p], X[n], tr);
+    const fx = carry(cv, 0, n, X[p], X[n], tr);
     return {
       fig: pose(s, fx, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       fx,
-      line: lerp(LINE[p], LINE[n], tr) * (lineFade ? grow : 1),
-      solid: lerp(SOLID[p], SOLID[n], tr),
-      spot: lerp(SPOT[p], SPOT[n], tr),
+      line: carry(cv, 1, n, LINE[p], LINE[n], tr, lineFade ? grow : 1),
+      solid: carry(cv, 2, n, SOLID[p], SOLID[n], tr),
+      spot: carry(cv, 3, n, SPOT[p], SPOT[n], tr),
       t,
     };
   });

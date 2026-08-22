@@ -51,6 +51,23 @@ const lesson: Lesson = {
       emoji: '🏛️',
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping the remark that
+      // has no stake in the rose (E37c) — same concept, re-cut for the staging.
+      type: 'question',
+      prompt: 'Four of these remarks about a rose want something from it. Which one does not?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: '"You should see this"', isCorrect: true },
+          { id: 'b', text: '"I would pick it"', isCorrect: false },
+          { id: 'c', text: '"It would suit my room"', isCorrect: false },
+          { id: 'd', text: '"It would impress her"', isCorrect: false },
+        ],
+        explanation: 'Telling someone else to look is the only one with nothing in it for you. The other three are appetites in different clothes — possession, decoration, being admired beside it — and the whole test is to remove exactly those and see whether the delight survives. "You should see this" also shows the second half of his claim: taste speaks as though you ought to agree, rather than reporting a private preference.',
+      },
+    },
+    {
       type: 'question',
       prompt: 'A friend says: "Kant\'s disinterested beauty means he found beauty cold and unmoving." Why is this a misreading?',
       xpValue: 5,

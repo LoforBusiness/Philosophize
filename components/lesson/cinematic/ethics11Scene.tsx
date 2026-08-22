@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics11Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -133,6 +133,7 @@ const LEDV = BEATS.map((b) => (b.led === 2 ? 0.3 : b.led === 1 ? 1 : 0));
 
 export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(5);
   const cur = BEATS[i];
 
   // The rise is the reader's own answer playing out, so on the interact beat it is
@@ -155,11 +156,11 @@ export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick }: 
       tr, WALK,
     ));
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      tok: lerp(TOKV[p], TOKV[n], tr),
-      shelf: lerp(SHELFV[p], SHELFV[n], tr),
-      led: lerp(LEDV[p], LEDV[n], tr),
-      rise: riseNow ? ease01(qv.value) : lerp(UPV[p], UPV[n], tr),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      tok: carry(cv, 1, n, TOKV[p], TOKV[n], tr),
+      shelf: carry(cv, 2, n, SHELFV[p], SHELFV[n], tr),
+      led: carry(cv, 3, n, LEDV[p], LEDV[n], tr),
+      rise: riseNow ? ease01(qv.value) : carry(cv, 4, n, UPV[p], UPV[n], tr),
     };
   });
 

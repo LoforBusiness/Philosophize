@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics4Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -80,6 +80,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics4'));
 
 export default function Aesthetics4Scene({ clock, bt, bi }: SceneApi) {
   const heldA = useHeld();
+  const cv = useCarry(5);
   const heldV = useHeld();
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -94,14 +95,14 @@ export default function Aesthetics4Scene({ clock, bt, bi }: SceneApi) {
     // is off the wall by 45% of the transition and the tests go up from 55%. A
     // straight cross-fade left both sitting at half opacity on top of each other,
     // which on a phone reads as a smudge.
-    const ask = lerp(ASK[p], ASK[n], tr);
+    const ask = carry(cv, 0, n, ASK[p], ASK[n], tr);
     return {
       a: pose(a, A_X, GROUND, K_FIG, 1, 1),
       v: pose(v, V_X, GROUND, K_FIG, -1, 1),
-      test: lerp(TEST[p], TEST[n], tr),
-      verdict: lerp(VERD[p], VERD[n], tr),
-      signed: lerp(SIGNED[p], SIGNED[n], tr),
-      art: lerp(ART[p], ART[n], tr),
+      test: carry(cv, 1, n, TEST[p], TEST[n], tr),
+      verdict: carry(cv, 2, n, VERD[p], VERD[n], tr),
+      signed: carry(cv, 3, n, SIGNED[p], SIGNED[n], tr),
+      art: carry(cv, 4, n, ART[p], ART[n], tr),
       askOn: ease01(clamp01((ask - 0.55) / 0.45)),
       testsOn: ease01(clamp01((1 - ask - 0.55) / 0.45)),
     };

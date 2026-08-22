@@ -13,7 +13,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 // he fetches comes from these two — see the header of interact.ts.
 import { carryHands, gripAt } from './interact';
 import { BEATS } from './political8Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -126,6 +126,7 @@ const EYEV = BEATS.map((b) => b.eyeline ?? 0);
 
 export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(8);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -150,13 +151,13 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
-    const fx = lerp(X[p], X[n], tr);
+    const fx = carry(cv, 0, n, X[p], X[n], tr);
 
     // A LOAD IS PICKED UP AND SET DOWN AT THE DESTINATION, NOT WHILE WALKING.
     // Packing the change into the last quarter of the move is what makes the trip
     // read as "walk over, lift, walk back, put down" rather than as an object
     // sliding into his hands somewhere along the way.
-    const held = lerp(HELD[p], HELD[n], ease01(clamp01((tr - 0.72) / 0.28)));
+    const held = carry(cv, 1, n, HELD[p], HELD[n], ease01(clamp01((tr - 0.72) / 0.28)));
     // The arms stop swinging and come out under it — the legs, bob and lean are
     // left alone, so he still walks. This is the half a reader named first: "his
     // arms arent out".
@@ -171,14 +172,14 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
       // Between its resting place and his hands. Never an opacity.
       crateX: lerp(rest.x, grip.x, held),
       crateY: lerp(rest.y, grip.y, held),
-      pile: lerp(PILEV[p], PILEV[n], tr),
-      marks: lerp(MARKV[p], MARKV[n], tr) * (modeFade ? grow : 1),
-      eye: lerp(EYEV[p], EYEV[n], tr),
+      pile: carry(cv, 2, n, PILEV[p], PILEV[n], tr),
+      marks: carry(cv, 3, n, MARKV[p], MARKV[n], tr, modeFade ? grow : 1),
+      eye: carry(cv, 4, n, EYEV[p], EYEV[n], tr),
       // Crate counts lerp, so an onlooker RISES smoothly as a crate slides under
       // them and the crate itself fades in beneath their feet.
-      n0: lerp(N0[p], N0[n], tr),
-      n1: lerp(N1[p], N1[n], tr),
-      n2: lerp(N2[p], N2[n], tr),
+      n0: carry(cv, 5, n, N0[p], N0[n], tr),
+      n1: carry(cv, 6, n, N1[p], N1[n], tr),
+      n2: carry(cv, 7, n, N2[p], N2[n], tr),
     };
   });
 

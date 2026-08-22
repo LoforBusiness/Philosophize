@@ -11,7 +11,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics7Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import { cue } from '@/lib/feedback';
@@ -69,6 +69,7 @@ const CB = BEATS.map((b) => b.carB ?? -70);
 
 export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -128,10 +129,10 @@ export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick }
     // off-stage (-70 → 416) so the loop never pops in view.
     const xa = -70 + ((t * 44) % 486);
     // Road B is beat-driven, so the car reaches the child on the beat that says so.
-    const xb = lerp(CB[p], CB[n], tr);
+    const xb = carry(cv, 0, n, CB[p], CB[n], tr);
 
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       laneA: laneAOn ? (laneAFade ? grow : 1) : 0,
       laneB: laneBOn ? (laneBFade ? grow : 1) : 0,
       kid: kidOn ? (kidFade ? grow : 1) : 0,

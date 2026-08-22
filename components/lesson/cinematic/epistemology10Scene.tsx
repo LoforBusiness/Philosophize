@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology10Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -65,6 +65,7 @@ const BAND_L = [0.98, 0.93, 0.34];
 
 export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -89,14 +90,14 @@ export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick }
 
     const bl = lerp(BAND_L[BAND[p]], BAND_L[BAND[n]], tr);
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      gauge: lerp(GAUGE[p], GAUGE[n], tr) * (gaugeFade ? grow : 1),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      gauge: carry(cv, 1, n, GAUGE[p], GAUGE[n], tr, gaugeFade ? grow : 1),
       bandL: SC_L + bl * SC_W,
       bandW: Math.max(0, SC_W * (1 - bl)),
       bandOn: bandOn ? 1 : 0,
       // The needle takes its own unhurried time to travel, so the beat where the
       // evidence arrives reads as a movement rather than a cut.
-      needle: SC_L + lerp(NEEDLE[p], NEEDLE[n], ease01(clamp01(bt.value / 1.4))) * SC_W,
+      needle: SC_L + carry(cv, 2, n, NEEDLE[p], NEEDLE[n], ease01(clamp01(bt.value / 1.4)), SC_W),
       t,
     };
   });

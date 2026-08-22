@@ -9,7 +9,7 @@ import { climb, ease01, lerp, mixStance, pose, type Bundle, type Stance } from '
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic5Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -125,6 +125,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic5'));
 
 export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(6);
   const cur = BEATS[i];
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -142,12 +143,12 @@ export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick }: Sc
 
     return {
       fig: pose(s, lerp(climbPrev ? LADDER_X : FIG_X, climbNow ? LADDER_X : FIG_X, tr), GROUND, K_FIG, 1, 1),
-      machine: lerp(MACHINE[p], MACHINE[n], tr),
-      run: lerp(RUN[p], RUN[n], tr),
-      chain: lerp(CHAIN[p], CHAIN[n], tr),
-      ladder: lerp(LADDER[p], LADDER[n], tr),
-      stairs: lerp(STAIRV[p], STAIRV[n], tr),
-      chute: lerp(CHUTE[p], CHUTE[n], tr),
+      machine: carry(cv, 0, n, MACHINE[p], MACHINE[n], tr),
+      run: carry(cv, 1, n, RUN[p], RUN[n], tr),
+      chain: carry(cv, 2, n, CHAIN[p], CHAIN[n], tr),
+      ladder: carry(cv, 3, n, LADDER[p], LADDER[n], tr),
+      stairs: carry(cv, 4, n, STAIRV[p], STAIRV[n], tr),
+      chute: carry(cv, 5, n, CHUTE[p], CHUTE[n], tr),
       gear: t * 80,
       feed: (t * 0.55) % 1,
       // Rungs scroll DOWN so the climber ascends — at the speed HIS LEGS ARE GOING.

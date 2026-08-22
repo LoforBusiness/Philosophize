@@ -2220,6 +2220,103 @@ there is no reason for a new scene to reintroduce it.
 > has no limb for the checker to measure. When you add an animated track, ask what it does
 > if the reader taps at 0.3s, and if the answer is "jumps", carry the value the same way.
 
+### L5 · Every scalar track carries, not just the stance
+
+That warning stood in this file for weeks and was correct the whole time, and nothing
+acted on it, because a rule with no number attached is a note. The same reader came back:
+
+> *"the transition from an animation and words to a question usually has a glitch or not
+> a smooth animation… after an animation, and it's just information, and then when you
+> click the screen, it's a kind of glitch or a skip in frames."*
+
+L1–L3 were all in force and `check:smooth` was green at zero. It was green because it
+**draws the figure at a fixed `x = 200` and measures limbs relative to the pelvis** — so
+the one track it can never see is the one that moves the whole man, and 89 scenes were
+interpolating that plus 173 other things:
+
+```js
+fig:  pose(s, lerp(X[p], X[n], tr), …)      // where he STANDS
+film: lerp(FILM[p], FILM[n], tr)            // a prop's opacity
+shut: lerp(SHUT[p], SHUT[n], ease01(seg(tr, 0.4, 1)))
+```
+
+Every one of those starts at `T[p]` — the value the previous beat was heading toward,
+not the value on screen — which is L1 exactly, with no limb attached. Replayed against
+the real tracks: **49 of 262 over the 8-unit line, worst 166 units** in
+`metaphysics7`. Driven in a browser on the real page, tapping every 320ms, the ankle
+moved **226px between two frames** — the man crossing 60% of the stage in one frame.
+
+**`carry` is `lerp` with a memory**, and it takes the same three numbers plus the slot
+to remember them in:
+
+```js
+lerp(X[p], X[n], tr)   →   carry(cv, 0, n, X[p], X[n], tr)
+```
+
+`useCarry(N)` once per scene declares the slots; `scripts/carry-tracks.mjs` did the 262
+existing sites and `check:smooth` fails a scene that grows a bare one back.
+
+**The multiplier goes INSIDE the carry.** The house pattern for "only what changed
+re-draws itself" (C20c / H58) is `lerp(F[p], F[n], tr) * (fFade ? grow : 1)`, so the
+product is what reaches the screen. Carry the bare `lerp` and you remember a value that
+was never drawn: interrupt a fade-in at 0.10 and the next beat — which has nothing to
+fade, so no `grow` — resumes at 0.29 and the prop pops brighter on the tap. Pass it as
+the last argument instead.
+
+| | before | after |
+|---|---|---|
+| worst prop/position teleport, replayed | 166 units | **under 8** |
+| worst measured in a browser, `metaphysics7` ankle | 226.1px | **20.5px** |
+| …and that 20.5px is at a beat change | yes | **no** — the bar does not move on that frame |
+
+The residue is honest: a figure crossing 260 stage units in under a second genuinely
+moves that fast, and with a *patient* tap the worst frame is larger still (29px) and also
+mid-beat. **That is the test for "is what is left a defect":** if the worst frame does
+not coincide with a beat change, it is staging, not a teleport.
+
+### L6 · The stage may not resize when a question arrives
+
+The largest one of these was never in a scene at all, and it is the one the reader named
+first — *"from an animation and words to a question."*
+
+`ChoiceCards` and `DragScale` were siblings of the stage inside `body`, so the flex split
+ran `stageWrap: 42`, `deck: 50`, `tapLayer: 8` **over whatever height was left after the
+answer control took its own**. A control is about 74px, so the stage lost 42/100 of it —
+34px — on the single frame a question beat mounted, and got it back on the frame the next
+beat unmounted it.
+
+The stage does not merely move when that happens, it **rescales**: `fit` is
+`min(w / STAGE_W, h / bandH)` off the measured box, so the entire picture stepped about
+12% between two frames, twice per question — and once more each way, because `boxSize` is
+React state rather than a layout value, so one frame draws the old scale inside the new
+box before the snap. A camera cut nobody wrote, moving every pixel at once.
+
+**So the answer control and the deck are ONE box.** `styles.lower` carries the flex
+weight; the control comes out of the deck's 50, never out of the stage's 42. The stage is
+now 42% of the body on every beat of every lesson.
+
+Measured in the browser, every lesson reports **one** stage-clip size for its whole run —
+`361×341` for `metaphysics-being-7`, `390×287` for `aesthetics-aesthetics-12`. Two sizes
+in that list is this defect, back.
+
+> A control whose height is not constant (a card label that wraps to three lines) still
+> changes the *deck's* room and never the stage's. That is the right place for it to
+> land: the deck is text with `overflow: hidden` and no measurement depends on it, while
+> the stage is what every camera shot, every band and all 132 must-see boxes are
+> computed against.
+
+### L7 · When a lesson gains a new way to move, the checker gains one too
+
+`check:smooth` was green through all of L5 and L6 because it models the figure and
+nothing else — the same shape of failure as the four browser harnesses in §21, where a
+new way to *answer* a question left the sweep quietly measuring less. It now replays
+each scene's declared tracks out of its script as well, and asserts the stage is a
+constant fraction of the body.
+
+If you add a track that is not `lerp`/`carry` over a `BEATS.map` array — a spring, a
+value read from a gesture, anything with its own clock — say so in the scene header and
+add the measurement in the same commit. A budget nobody executes is not a budget.
+
 ---
 
 ## Group M — the narrator is a character, and the character is passive-aggressive

@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics13Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -75,6 +75,7 @@ const BOTH = BEATS.map((b) => b.both ?? 0);
 
 export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(4);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -97,10 +98,10 @@ export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick }:
       tr, WALK,
     ));
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      track: lerp(TRACK[p], TRACK[n], tr) * (trFade ? grow : 1),
-      fork: lerp(FORK[p], FORK[n], fkFade ? grow : tr),
-      both: lerp(BOTH[p], BOTH[n], boFade ? grow : tr),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      track: carry(cv, 1, n, TRACK[p], TRACK[n], tr, trFade ? grow : 1),
+      fork: carry(cv, 2, n, FORK[p], FORK[n], fkFade ? grow : tr),
+      both: carry(cv, 3, n, BOTH[p], BOTH[n], boFade ? grow : tr),
       stuck: stuckOn ? (stuckFade ? grow : 1) : 0,
     };
   });

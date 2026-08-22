@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic9Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -91,6 +91,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic9'));
 
 export default function Logic9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldDMix = useHeld();
+  const cv = useCarry(1);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -128,7 +129,7 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       carryFrom(heldDMix, n, emoteHold(D[p], t)), emoteHold(D[n], t), emoteLive(D[n], t, bt.value),
       tr, WALK, 1,
     ));
-    const dx = lerp(DX[p], DX[n], tr);
+    const dx = carry(cv, 0, n, DX[p], DX[n], tr);
 
     // He arrives at FULL opacity: the fade is spent in the wing, over the first
     // fifth of a 156-unit walk, so the reader only ever sees a man walking on.

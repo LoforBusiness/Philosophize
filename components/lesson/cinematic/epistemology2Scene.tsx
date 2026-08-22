@@ -8,7 +8,7 @@ import { BEATS } from './epistemology2Script';
 import {
   clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle, } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -89,6 +89,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology2'));
 
 export default function Epistemology2Scene({ clock, bt, bi }: SceneApi) {
   const heldDemonS = useHeld();
+  const cv = useCarry(3);
   const heldDoubterS = useHeld();
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -97,7 +98,7 @@ export default function Epistemology2Scene({ clock, bt, bi }: SceneApi) {
     const t = clock.value;
 
     const doubterS = keepHeld(heldDoubterS, mixStance(carryFrom(heldDoubterS, n, emoteHold(D_CODE[p], t)), emoteLive(D_CODE[n], t, bt.value), tr));
-    const mOn = lerp(M_ON[p], M_ON[n], tr);
+    const mOn = carry(cv, 0, n, M_ON[p], M_ON[n], tr);
     const demonS = keepHeld(heldDemonS, mixStance(carryFrom(heldDemonS, n,
       emoteHold(M_CODE[p] < 0 ? 0 : M_CODE[p], t)),
       emoteLive(M_CODE[n] < 0 ? 0 : M_CODE[n], t, bt.value),
@@ -107,8 +108,8 @@ export default function Epistemology2Scene({ clock, bt, bi }: SceneApi) {
       doubter: pose(doubterS, DOUBT_X, GROUND, K_FIG, -1, 1),
       demon: pose(demonS, DEMON_X, GROUND, K_FIG, 1, mOn),
       demonOn: mOn,
-      doubt: lerp(DOUBT[p], DOUBT[n], tr),
-      glow: lerp(GLOW[p], GLOW[n], tr),
+      doubt: carry(cv, 1, n, DOUBT[p], DOUBT[n], tr),
+      glow: carry(cv, 2, n, GLOW[p], GLOW[n], tr),
       t,
     };
   });

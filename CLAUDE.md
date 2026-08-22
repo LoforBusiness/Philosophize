@@ -251,8 +251,8 @@ When `CARD_BUDGET` reaches 0 the takeover is done, and `LessonRunner`, `cards/`,
 
 ### Shape today
 
-**Every branch holds exactly 37 lessons, of which exactly 22 are cinematic** —
-59% of the way through the takeover. Both numbers are deliberate invariants rather
+**Every branch holds exactly 37 lessons, of which exactly 25 are cinematic** —
+68% of the way through the takeover. Both numbers are deliberate invariants rather
 than where the counts happened to land: the totals were 27–30 and the cinematic
 share was 11–14, and both showed on the Learn cards. `check:cinematic` enforces
 that all six branches match on both.
@@ -270,15 +270,23 @@ They constrain each other, and there are exactly two moves that respect both:
   in one pass; three per branch, in three rounds of six, took 34/19 to 37/22 the
   same way. Adding one lesson to one branch breaks both at once.
 
+> **The round that took 22 to 25 also moved the FRONTIER by twenty-one, not by
+> three,** and that is worth expecting rather than being surprised by. The solid
+> front is the unbroken cinematic run at the START of a branch, so converting the
+> next three unconverted lessons in reading order also absorbs every already-
+> converted lesson sitting behind them: 79 → 100 across the six. `SOLID_FLOOR`
+> and `CARD_BUDGET` both have to be raised in the same commit, and
+> `check:cinematic` prints the numbers to put in them.
+
 | Branch | Units | Lessons | of which cinematic | card decks left |
 |---|---|---|---|---|
-| Metaphysics | 5 | 37 | 22 | 15 |
-| Epistemology | 5 | 37 | 22 | 15 |
-| Logic | 5 | 37 | 22 | 15 |
-| Ethics | 5 | 37 | 22 | 15 |
-| Aesthetics | 3 | 37 | 22 | 15 |
-| Political Philosophy | 5 | 37 | 22 | 15 |
-| **Total** | **28** | **222** | **132 (59%)** | **90** |
+| Metaphysics | 5 | 37 | 25 | 12 |
+| Epistemology | 5 | 37 | 25 | 12 |
+| Logic | 5 | 37 | 25 | 12 |
+| Ethics | 5 | 37 | 25 | 12 |
+| Aesthetics | 3 | 37 | 25 | 12 |
+| Political Philosophy | 5 | 37 | 25 | 12 |
+| **Total** | **28** | **222** | **150 (68%)** | **72** |
 
 > Numbers go stale; the check does not. `npm run check:cinematic` prints the live
 > figures and the next lesson to convert in each branch every time it runs.
@@ -514,7 +522,7 @@ A unit's `index.ts` exports an array of `Path` objects (the units); each needs a
 stable `id` — `lessonsByUnit` is keyed on it, so **renaming an id silently resets
 that unit's progress for every existing user.**
 
-**Keep every branch at 37, and at 22 cinematic (§5).** The counts were 27–30 and it
+**Keep every branch at 37, and at 25 cinematic (§5).** The counts were 27–30 and it
 showed on the Learn cards, so they were levelled deliberately; adding one lesson to
 one branch puts them back out. Add six, one per branch — and give each of the six a
 scene, or the cinematic invariant goes out instead of the lesson one.
@@ -571,7 +579,7 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
   with bios, eras and **1,780 quotes** between them — and all 322 have exactly
   three "Did you know?" facts, with nothing missing.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
-  gating; **132 cinematic lessons** (animated stickman scenes, §17); animated
+  gating; **150 cinematic lessons** (animated stickman scenes, §17); animated
   `LessonReward` with XP count-up, streak and rank-up.
 - **Gamification:** 68 badges in 5 tiers, 40 ranks in 8 coloured orders with a
   conferred-rank ceremony, a three-badge profile cabinet, XP +
@@ -587,7 +595,7 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
   mastheads, the launch screen and Quick Start (§19).
 
 **Known gaps / tech debt:**
-- **Card decks are now a minority** — 90 of 222. That is now the number
+- **Card decks are now a minority** — 72 of 222. That is now the number
   that matters; see the takeover rule at the top of §5.
 - **`fill-blank` and `match` are closed as won't-do.** They were the oldest open
   item in this file. Finishing an interaction for the format being retired is work
@@ -704,7 +712,7 @@ The Scholar's Pass paywall UI already exists; this is the value model it should 
 
 **P0 — Daily Review (spaced repetition).** The retention engine and the strongest reason to subscribe. Resurface concepts from completed lessons on a spacing schedule via quick `multiple-choice` / `true-false` / `reinforcement` prompts; add a "Review" entry on Home; completing a review counts toward the streak. Track per-concept last-seen + strength in `userDataStore`.
 
-**P0 — Convert the remaining 90 card decks (§5).** Six at a time, one per branch, so
+**P0 — Convert the remaining 72 card decks (§5).** Six at a time, one per branch, so
 the per-branch counts stay level, until `check:cinematic` reports 0 card decks left.
 Then `LessonRunner`, `cards/` and `interactions/` can go. Every lesson added along
 the way is cinematic.
@@ -838,6 +846,41 @@ through zero so he turns through a profile.
 > `bt` is discontinuous at a beat change, because `bt` is. A prop interpolated as
 > `lerp(TRACK[p], TRACK[n], tr)` has the identical defect and merely has no limb for
 > the checker to measure.
+
+### That warning was right, and nothing acted on it (L5, L6)
+
+The same reader came back: *"the transition from an animation and words to a
+question usually has a glitch… after an animation, and it's just information, and
+then when you click the screen, it's a kind of glitch or a skip in frames."*
+L1–L3 were all in force and `check:smooth` was green at zero. **Two defects, and
+neither of them was anything the checker could see.**
+
+- **Every other track had the stance's defect and no limb attached (L5).**
+  `check-smooth` draws the figure at a FIXED `x = 200` and measures joints against
+  the pelvis — so the one track it can never see is the one that moves the whole
+  man, and 89 scenes were interpolating that plus 173 more. Replayed against the
+  real tracks: 49 sites past the 8-unit line, **166 units at worst**. Driven in a
+  browser, `metaphysics7`'s ankle moved **226px between two frames**.
+  `carry()` in `cinematicKit` is `lerp` with a memory and takes the same numbers;
+  `scripts/carry-tracks.mjs` did the 262 existing sites. **226px → 20.5px, and the
+  20.5 is no longer at a beat change** — with a patient tap the worst frame is
+  larger still (29px) and also mid-beat, which is the test for whether what is left
+  is a defect or just staging.
+- **The stage RESIZED when a question arrived (L6), and that was the big one.**
+  `ChoiceCards` and `DragScale` were siblings of the stage, so `body`'s 42/50/8
+  flex split ran over whatever height was left after the control took its ~74px.
+  The stage lost 34px of it on the single frame a question beat mounted — and it
+  does not merely move, it **rescales**, because `fit` is `min(w/STAGE_W, h/bandH)`
+  off the measured box. The whole picture stepped about 12% between two frames,
+  twice per question, plus one more each way through `boxSize` being React state.
+  A camera cut nobody wrote, moving every pixel at once. The control and the deck
+  are one box now (`styles.lower`); every lesson reports a single stage-clip size
+  for its whole run.
+
+> And the lesson under both, which is the same one §21 keeps learning: **when a
+> lesson gains a new way to move, the checker gains one too, in the same commit.**
+> A checker that models only the figure will stay green through anything that is
+> not a figure, and say so confidently.
 
 **Rules that keep biting, in rough order of how often:**
 

@@ -57,6 +57,22 @@ const lesson: Lesson = {
       highlight: 'structures the mind imposes',
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping the box the sum
+      // belongs in (E37c) — same concept, re-cut for the staging.
+      type: 'question',
+      prompt: 'Sort 7 + 5 = 12. Do you need experience to know it, and does it add anything to the ideas of 7, 5 and plus?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'No experience needed, and it does add something', isCorrect: true },
+          { id: 'b', text: 'No experience needed, and it only unpacks a definition', isCorrect: false },
+          { id: 'c', text: 'Experience needed, and it adds something', isCorrect: false },
+        ],
+        explanation: 'Option B is the tempting trap, and it is the assumption of the whole tradition Kant is arguing with: that a priori must mean analytic, so anything knowable without checking must be empty. The idea of twelve is not contained in the ideas of seven, five and plus, so the sum genuinely adds content. Kant calls that combination synthetic a priori, and puts mathematics and causation in it.',
+      },
+    },
+    {
       type: 'question',
       prompt: "A friend says: 'Knowing 7 + 5 = 12 without an experiment makes it just an empty definition.' Why would Kant disagree?",
       xpValue: 5,

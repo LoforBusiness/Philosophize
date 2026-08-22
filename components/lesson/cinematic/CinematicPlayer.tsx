@@ -851,34 +851,57 @@ export default function CinematicPlayer({
 
         </Animated.View>
 
-        {/* THE TWO CHOICES — directly under the art, above the prompt.
-            Not in scene coordinates (every lesson crops its band differently and
-            a camera push would cut them in half, H60) and not pinned over the
-            stage either: the figure stands on the ground line at the bottom of
-            the band, so cards there land on top of him. See ./ChoiceCards. */}
-        {beat.interact?.cards && !gone ? (
-          <ChoiceCards
-            cards={beat.interact.cards}
-            picked={picked}
-            onPick={(id, ok) => choose(id, ok, true)}
-            // Beat identity: stable for this question forever, different from every
-            // other question's, and it costs nothing to compute.
-            seed={`${lesson.id}#${i}`}
-          />
-        ) : null}
+        {/* ── THE LOWER HALF, AND WHY IT IS ONE BOX (L6) ────────────────────
+            The cards, the drag rail and the deck used to be three siblings of the
+            stage, so `body` split its height between `stageWrap` (flex 42) and
+            `deck` (flex 50) AFTER subtracting whatever the answer control took.
+            A control is ~74px, so the stage lost 42/92 of that — 34px — on the
+            single frame a question beat mounted, and got it back on the frame the
+            next beat unmounted it.
 
-        {/* THE LINE — same slot, same reasoning, for a question whose answer is a
-            position rather than a pick. See ./DragScale. */}
-        {beat.interact?.drag && !gone ? (
-          <DragScale
-            drag={beat.interact.drag}
-            picked={picked}
-            onPick={(id, ok) => choose(id, ok, true)}
-            pos={dragPos}
-          />
-        ) : null}
+            The stage does not merely move when that happens, it RESCALES: `fit`
+            is `min(w / STAGE_W, h / bandH)` off the measured box, so the whole
+            picture stepped about 12% between two frames, twice per question, and
+            once more each way through `boxSize` being React state rather than a
+            layout value — the old scale drawn inside the new box for a frame,
+            then the snap. This is the "glitch when you tap into a question" a
+            reader reported, and it is the largest single one in the format: a
+            camera cut nobody wrote, moving every pixel at once.
 
-        <View style={[styles.deck, gone && styles.deckTall]}>
+            Wrapping them makes the split unconditional. The stage is 42/92 of the
+            body on every beat of every lesson, and the control comes out of the
+            deck's 50 instead — where it costs ~34px of text room on the one kind
+            of beat whose deck holds a prompt rather than narration, and where
+            nothing is measured against anything. */}
+        <View style={styles.lower}>
+          {/* THE TWO CHOICES — directly under the art, above the prompt.
+              Not in scene coordinates (every lesson crops its band differently and
+              a camera push would cut them in half, H60) and not pinned over the
+              stage either: the figure stands on the ground line at the bottom of
+              the band, so cards there land on top of him. See ./ChoiceCards. */}
+          {beat.interact?.cards && !gone ? (
+            <ChoiceCards
+              cards={beat.interact.cards}
+              picked={picked}
+              onPick={(id, ok) => choose(id, ok, true)}
+              // Beat identity: stable for this question forever, different from every
+              // other question's, and it costs nothing to compute.
+              seed={`${lesson.id}#${i}`}
+            />
+          ) : null}
+
+          {/* THE LINE — same slot, same reasoning, for a question whose answer is a
+              position rather than a pick. See ./DragScale. */}
+          {beat.interact?.drag && !gone ? (
+            <DragScale
+              drag={beat.interact.drag}
+              picked={picked}
+              onPick={(id, ok) => choose(id, ok, true)}
+              pos={dragPos}
+            />
+          ) : null}
+
+          <View style={[styles.deck, gone && styles.deckTall]}>
           <Fade
             trigger={i}
             onSwap={() => setShown(i)}
@@ -952,7 +975,8 @@ export default function CinematicPlayer({
                 ) : null}
               </>
             )}
-          />
+            />
+          </View>
         </View>
 
         <View style={styles.tapLayer}>

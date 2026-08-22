@@ -44,6 +44,22 @@ const lesson: Lesson = {
       philosopherId: 'aj-ayer',
     },
     {
+      // The cinematic scene asks this one on the stage (E37c) — same concept,
+      // re-cut so the reader taps the claim rather than reading four of them.
+      type: 'question',
+      prompt: 'According to emotivism, what does the word "wrongly" add to "You stole that money"?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'A feeling, and not a claim at all', isCorrect: true },
+          { id: 'b', text: 'A further fact about the act', isCorrect: false },
+          { id: 'c', text: 'A fact about how the speaker feels', isCorrect: false },
+        ],
+        explanation: 'Option C is the trap, and it is worth slowing down for: "I disapprove of stealing" IS a claim — it can be true or false, and you could check it by watching the speaker. That view is subjectivism, not emotivism. Emotivism says the moral word does not REPORT the disapproval; it performs it, the way booing does. Option B is moral realism, the position emotivism is arguing against.',
+      },
+    },
+    {
       type: 'question',
       prompt: 'What does emotivism actually claim about a statement like "Cruelty is wrong"?',
       interaction: {

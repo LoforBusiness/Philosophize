@@ -43,6 +43,22 @@ const lesson: Lesson = {
       emoji: '🧩',
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping which of the four
+      // cords a paced production line severs (E37c).
+      type: 'question',
+      prompt: 'The line sets the pace and you cannot stop it. Which of the four severings is that?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'From the act of working itself', isCorrect: true },
+          { id: 'b', text: 'From the product you made', isCorrect: false },
+          { id: 'c', text: 'From the other workers beside you', isCorrect: false },
+        ],
+        explanation: 'Not being able to set your own pace estranges you from the activity while you are inside it — the day becomes time survived rather than lived. Severance from the product is a separate cord, and it is cut by who owns the thing rather than by how fast the line runs. Keeping the four apart is what stops alienation collapsing into "a bad job".',
+      },
+    },
+    {
       type: 'question',
       prompt: 'A friend says: "Alienation just means low pay, so a big enough raise would cure it." Where does this go wrong?',
       xpValue: 5,

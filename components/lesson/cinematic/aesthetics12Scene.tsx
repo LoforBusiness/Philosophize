@@ -10,7 +10,7 @@ import {
 // exactly rig's and mean what they always did, 100+ reach moves.ts (see emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics12Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -123,6 +123,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics12'));
 
 export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldRMix = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -158,16 +159,16 @@ export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick }: 
     const pf = pose(pMix, POET_X, GROUND, K_FIG, 1, 1);
     const hx = pf.head[0].translateX;
     const hy = pf.head[1].translateY;
-    const tally = lerp(TICKS[p], TICKS[n], grow);
+    const tally = carry(cv, 0, n, TICKS[p], TICKS[n], grow);
 
     return {
       poet: pf,
-      reader: pose(rMix, lerp(RX[p], RX[n], tr), GROUND, K_FIG, RDIR[n], 1),
+      reader: pose(rMix, carry(cv, 1, n, RX[p], RX[n], tr), GROUND, K_FIG, RDIR[n], 1),
       boxX: hx - BOX_W / 2,
       boxY: hy - BOX_LIFT - BOX_H,
       tetherX: hx - 3,
       tetherY: hy - TETHER_LIFT - 3,
-      box: lerp(BOXV[p], BOXV[n], tr) * (boxFade ? grow : 1),
+      box: carry(cv, 2, n, BOXV[p], BOXV[n], tr, boxFade ? grow : 1),
       tally,
       // The verdict only exists once somebody has read the thing.
       verdict: clamp01(tally),

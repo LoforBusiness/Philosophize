@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology33Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -54,6 +54,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology33'));
 
 export default function Epistemology33Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -65,8 +66,8 @@ export default function Epistemology33Scene({ clock, bt, bi, i, dragPos }: Scene
     const rise = ease01(bt.value / 1.0);
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      bar: live ? dragPos.value : lerp(BAR[p], BAR[n], rise),
-      ev: lerp(EV[p], EV[n], rise),
+      bar: live ? dragPos.value : carry(cv, 0, n, BAR[p], BAR[n], rise),
+      ev: carry(cv, 1, n, EV[p], EV[n], rise),
     };
   });
 

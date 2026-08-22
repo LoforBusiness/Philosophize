@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics33Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -49,6 +49,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics33'));
 
 export default function Ethics33Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -60,8 +61,8 @@ export default function Ethics33Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
     const slide = ease01(bt.value / 1.1);
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      give: live ? dragPos.value : lerp(GIVE[p], GIVE[n], slide),
-      more: lerp(MORE[p], MORE[n], tr),
+      give: live ? dragPos.value : carry(cv, 0, n, GIVE[p], GIVE[n], slide),
+      more: carry(cv, 1, n, MORE[p], MORE[n], tr),
     };
   });
 

@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political32Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -74,6 +74,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political32'));
 
 export default function Political32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(4);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -86,16 +87,16 @@ export default function Political32Scene({ clock, bt, bi, i, picked, onPick }: S
     const run = ease01(bt.value / 1.4);
     const grow = ease01(bt.value / 0.9);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
-    const fill = lerp(FILL[p], FILL[n], run);
+    const fill = carry(cv, 0, n, FILL[p], FILL[n], run);
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       fillA: fill,
       // The second pile lands a little behind the first, so the two rows read as two
       // counts rather than one shutter opening.
       fillB: clamp01(fill * 1.16 - 0.16),
-      result: lerp(RES[p], RES[n], grow),
-      mark: lerp(MARK[p], MARK[n], grow),
-      labels: lerp(LAB[p], LAB[n], grow),
+      result: carry(cv, 1, n, RES[p], RES[n], grow),
+      mark: carry(cv, 2, n, MARK[p], MARK[n], grow),
+      labels: carry(cv, 3, n, LAB[p], LAB[n], grow),
     };
   });
 

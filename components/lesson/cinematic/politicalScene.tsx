@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './politicalScript';
 import {
   boxMove, clamp01, ease01, lerp, mixStance, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -103,6 +103,7 @@ function sovereignPose(t: number): Stance {
 
 export default function PoliticalScene({ clock, bt, bi, qv }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(1);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -110,7 +111,7 @@ export default function PoliticalScene({ clock, bt, bi, qv }: SceneApi) {
     const t = clock.value;
     const q = clamp01(qv.value);
 
-    const auth = Q1[n] === 1 ? ease01(q) : lerp(AUTH[p], AUTH[n], tr);
+    const auth = Q1[n] === 1 ? ease01(q) : carry(cv, 0, n, AUTH[p], AUTH[n], tr);
 
     const cit = (k: number): Bundle => {
       'worklet';

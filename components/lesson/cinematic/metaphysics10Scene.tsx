@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics10Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -118,6 +118,7 @@ const CARD_TOP = (() => {
 
 export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(2);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -152,13 +153,13 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick }:
     const was = CARDV[p] > 0;
 
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       frame: (frameOn ? 1 : 0) * (frameFade ? grow : 1),
       tags: (tagsOn ? 1 : 0) * (tagsFade ? grow : 1),
       str: (strOn ? 1 : 0) * (strFade ? grow : 1),
       slots: (slotsOn ? 1 : 0) * (slotsFade ? grow : 1),
       cardV: on ? (was ? 1 : grow) : (was ? 1 - grow : 0),
-      cardT: was ? lerp(CARD_TOP[p], CARD_TOP[n], tr) : CARD_TOP[n],
+      cardT: was ? carry(cv, 1, n, CARD_TOP[p], CARD_TOP[n], tr) : CARD_TOP[n],
     };
   });
 

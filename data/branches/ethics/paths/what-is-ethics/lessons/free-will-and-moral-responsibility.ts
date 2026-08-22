@@ -51,6 +51,22 @@ const lesson: Lesson = {
       emoji: '🔪',
     },
     {
+      // The cinematic scene asks this one on the stage, by tapping the one thing
+      // that differs between the two hand-overs (E37c).
+      type: 'question',
+      prompt: 'You hand over money at knifepoint, and later hand a friend the same sum to repay a loan. For a compatibilist, what makes only the second one free?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Nobody was coercing you', isCorrect: true },
+          { id: 'b', text: 'The second act had no causes', isCorrect: false },
+          { id: 'c', text: 'The two acts were different acts', isCorrect: false },
+        ],
+        explanation: 'Both acts are fully caused, so option B is not available to anyone — that is what makes compatibilism necessary in the first place. And the acts are the same act: same hand, same money. The only difference is the coercion, which is precisely why Hume relocates freedom from "uncaused" to "uncoerced".',
+      },
+    },
+    {
       type: 'question',
       prompt: 'True or false: Compatibilists believe that because the universe is determined, no one is ever morally responsible.',
       xpValue: 5,

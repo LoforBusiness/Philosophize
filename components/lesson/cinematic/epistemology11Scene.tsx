@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology11Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -130,6 +130,7 @@ const LINKV = BEATS.map((b) => b.link ?? 0);
 
 export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -154,16 +155,16 @@ export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick }
     // hands SWEEP between readings instead of cutting. Minutes are unbounded (6°
     // each) rather than taken modulo an hour — a modulo would make the minute hand
     // jump backwards mid-transition, and a rotation past 360° draws identically.
-    const mins = lerp(REAL[p], REAL[n], tr);
+    const mins = carry(cv, 0, n, REAL[p], REAL[n], tr);
 
     return {
-      fig: pose(s, lerp(X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       hour: mins * 0.5,
       minute: mins * 6,
       // A plain previous→current blend, not the grow pattern: this value only ever
       // goes 1 → 0, and multiplying a falling lerp by a rising `grow` would blink
       // it out on the first frame of the beat and then bulge back (C20c/H58).
-      link: lerp(LINKV[p], LINKV[n], tr),
+      link: carry(cv, 2, n, LINKV[p], LINKV[n], tr),
       // This one only ever goes 0 → 1, so it takes the house grow — and holds at 1
       // on any later beat instead of re-revealing itself on every tap.
       pick: (pickOn ? 1 : 0) * (pickFade ? grow : 1),
