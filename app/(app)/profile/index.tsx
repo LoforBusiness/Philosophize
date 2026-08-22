@@ -571,8 +571,19 @@ export default function ProfileScreen() {
                       ceremony happens on the reward screen (§7) — so lighting it
                       here would spend the one moment that promotion has. The
                       "XP TO <NAME>" line beside it is what names this pin, which
-                      is why it needs no caption of its own. */}
-                  <RankSeal glyph={next.glyph} state="locked" size={44} />
+                      is why it needs no caption of its own.
+
+                      The ORDER is passed anyway, because it decides the SHAPE as
+                      well as the material now — and the shape is the half a
+                      reader should be able to see coming. A locked pin that is
+                      already a winged crest is an argument for carrying on;
+                      thirty-six identical grey hexagons are not. */}
+                  <RankSeal
+                    glyph={next.glyph}
+                    state="locked"
+                    size={44}
+                    order={rankOrder(rankIndex + 1)}
+                  />
                 </View>
               ) : (
                 <View style={styles.rankPin}>
@@ -581,7 +592,7 @@ export default function ProfileScreen() {
               )}
             </View>
 
-            {/* How far up the ladder of 25, which the band alone cannot say. */}
+            {/* How far up the ladder of forty-eight, which the band alone cannot say. */}
             <Text style={styles.rankRung}>
               RANK {cur.id} OF {RANKS.length}
             </Text>

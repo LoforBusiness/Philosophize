@@ -424,7 +424,7 @@ export const BADGES: BadgeDef[] = [
   },
   {
     id: 'the-gate', name: 'Sixteen Thousand',
-    caption: 'The figure the top rank is set at.',
+    caption: 'Three quarters of a full pass through the app.',
     glyph: 'gate', family: 'xp', tier: 5,
     goal: (s) => s.totalXP, need: 16000, unit: 'XP',
   },
@@ -433,6 +433,24 @@ export const BADGES: BadgeDef[] = [
     caption: 'Within sight of everything the app contains.',
     glyph: 'shieldcross', family: 'xp', tier: 5,
     goal: (s) => s.totalXP, need: 21000, unit: 'XP',
+  },
+  // ── AND ABOVE A SINGLE PASS ─────────────────────────────────────────────────
+  // 21,400 is everything in the app, done perfectly, ONCE — and the rank ladder
+  // now runs to 50,000 (data/ranks.ts), because a re-read pays full XP. Without
+  // these two the whole upper half of that climb, seventeen promotions of it,
+  // hands out no badge at all: a reader who has done more than the app contains
+  // would watch the case stop rewarding them exactly where the work gets hard.
+  {
+    id: 'the-ship', name: 'Thirty-Two Thousand',
+    caption: 'Past everything there is, and still going.',
+    glyph: 'ship', family: 'xp', tier: 5,
+    goal: (s) => s.totalXP, need: 32000, unit: 'XP',
+  },
+  {
+    id: 'the-beacon', name: 'Fifty Thousand',
+    caption: 'The figure the top rank is set at.',
+    glyph: 'beacon', family: 'xp', tier: 5,
+    goal: (s) => s.totalXP, need: 50000, unit: 'XP',
   },
 
   // ── QUIZZES ACED ────────────────────────────────────────────────────────────
@@ -572,37 +590,37 @@ export const BADGES: BadgeDef[] = [
     id: 'order-bronze', name: 'The Bronze Circle',
     caption: 'Your pin is struck in bronze now.',
     glyph: 'feather', family: 'mastery', tier: 2,
-    goal: (s) => s.rank + 1, need: 11, unit: 'ranks',
+    goal: (s) => s.rank + 1, need: 13, unit: 'ranks',
   },
   {
     id: 'order-jade', name: 'The Jade Circle',
     caption: 'Where the ladder turns precious.',
     glyph: 'question', family: 'mastery', tier: 3,
-    goal: (s) => s.rank + 1, need: 16, unit: 'ranks',
+    goal: (s) => s.rank + 1, need: 19, unit: 'ranks',
   },
   {
     id: 'order-lapis', name: 'The Lapis Circle',
     caption: 'The most expensive blue in the world, for four thousand years.',
     glyph: 'cycle', family: 'mastery', tier: 3,
-    goal: (s) => s.rank + 1, need: 21, unit: 'ranks',
+    goal: (s) => s.rank + 1, need: 25, unit: 'ranks',
   },
   {
     id: 'order-crimson', name: 'The Crimson Circle',
     caption: 'The dye a city went bankrupt over.',
     glyph: 'mask', family: 'mastery', tier: 4,
-    goal: (s) => s.rank + 1, need: 26, unit: 'ranks',
+    goal: (s) => s.rank + 1, need: 31, unit: 'ranks',
   },
   {
     id: 'order-amethyst', name: 'The Amethyst Circle',
     caption: 'The imperial colour, and the last stone before metal.',
     glyph: 'eye', family: 'mastery', tier: 4,
-    goal: (s) => s.rank + 1, need: 31, unit: 'ranks',
+    goal: (s) => s.rank + 1, need: 37, unit: 'ranks',
   },
   {
     id: 'order-aurum', name: 'The Aurum Circle',
     caption: 'There is nothing above it. That is the point.',
     glyph: 'key', family: 'mastery', tier: 5,
-    goal: (s) => s.rank + 1, need: 36, unit: 'ranks',
+    goal: (s) => s.rank + 1, need: 43, unit: 'ranks',
   },
 ];
 

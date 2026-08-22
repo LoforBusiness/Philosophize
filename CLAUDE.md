@@ -421,29 +421,54 @@ Index on (user_id, lesson_id).
 
 **Level formula:** Level N requires `Math.floor(50 * N * Math.sqrt(N))` total XP (`getXPForLevel`).
 
-> **THE LADDER IS FITTED TO WHAT THE APP ACTUALLY CONTAINS, and the old one was
-> not.** Counted out of the tree: 222 lessons at a perfect 60 each is 13,320, all
-> 28 units mastered 2,800, all 132 saveable quotes 396, all 322 thinkers met 644,
-> every one of their quizzes aced 6,440 — **21,400 XP for doing everything in the
-> app, perfectly, once**. The 25-rank ladder topped out at 52,000, so its last
-> five rungs could not be reached by finishing the entire curriculum. The 40-rank
-> ladder tops out at 16,000. Re-derive the ceiling before retuning either.
+> **21,400 IS A FIRST PASS, NOT A CEILING — and this file said otherwise for a
+> long time.** Counted out of the tree: 222 lessons at a perfect 60 each is
+> 13,320, all 28 units mastered 2,800, all 132 saveable quotes 396, all 322
+> thinkers met 644, every one of their quizzes aced 6,440 — **21,400 XP for doing
+> everything in the app, perfectly, once**. That number was then used to argue a
+> 52,000-XP ladder was unreachable and to cut it to 16,000.
+>
+> The argument was wrong, and one line in `recordLessonComplete` is why: *"XP is
+> still awarded on every completion."* The unit pointer uses `max()` so a re-read
+> cannot skip anyone forward, but **the XP pays every time**. So the ladder tops
+> out at **50,000** now, which is the app read through once and then some, and a
+> perfect single pass lands a reader at **rank 31 of 48** — a real achievement
+> with seventeen visible rungs above it.
+>
+> Re-derive both figures before retuning anything: 21,400 is what the CONTENT
+> contains, 50,000 is what the LADDER costs, and they are not the same kind of
+> number.
 
 **Streak:** Maintained by completing at least one lesson per calendar day. Alive if the last activity is today or yesterday (`lib/utils/streak.ts`). Stored in `userDataStore`.
 
 **Stars:** 100% score = 3 stars. ≥70% = 2 stars. Any completion = 1 star.
 
 **Progression systems (live):**
-- **Badges** — **68** in `data/badges.ts`, each `{ id, name, glyph, family, tier,
+- **Badges** — **70** in `data/badges.ts`, each `{ id, name, glyph, family, tier,
   goal(stats), need }`; evaluated by `recomputeBadges()` and shown in
   `RanksBadgesSheet`. **Five tiers**, struck in four of the rank orders plus gold
   (`constants/insignia.ts`), so both reward ladders speak one language. The ids
-  are FROZEN and `check:badges` holds the roll.
-- **Ranks** — **40** in `data/ranks.ts` (Novice → Grand Philosopher), in **eight
-  orders of five**: clay, iron, bronze, jade, lapis, crimson, amethyst, aurum.
-  The order changes every five ranks and the pin's FINISH every rank, so no two
-  consecutive promotions look alike (`constants/insignia.ts`, and the third place
-  §19 licenses colour). Two
+  are FROZEN and `check:badges` holds the roll — the roll is a literal list in
+  `validate-badges.mjs`, so **adding one is a deliberate two-file act**, which is
+  what the last two (32,000 and 50,000 XP) were.
+- **Ranks** — **48** in `data/ranks.ts` (Novice → Grand Philosopher), in **eight
+  orders of six**: clay, iron, bronze, jade, lapis, crimson, amethyst, aurum.
+  Three things change as you climb, and between them **no two consecutive
+  promotions look alike**:
+  - the **MATERIAL**, every six ranks (`constants/insignia.ts`, and the third
+    place §19 licenses colour);
+  - the **SHAPE**, every six ranks — `components/shared/rankShapes.ts` gives each
+    order its own silhouette, escalating by accretion: disc → cut plate →
+    hexagon → notched gem → shield → crested shield → winged → crowned. The
+    footprint grows from 66 to 96 units of a 100-unit tile while the mark's room
+    stays flat at 0.36–0.40, so everything the ladder gains it gains OUTSIDE the
+    glyph. That discipline is the whole reason it survives being drawn at 44px;
+  - the **FINISH**, every rank — inner rule, two/four/six studs, then the
+    capstone's outer collar.
+
+  **`npm run sheet:ranks` renders all forty-eight in plain Node** and is how they
+  are judged; `check:ui` is what stops them breaking (a frame that outgrows the
+  viewBox is clipped silently on every screen at once). Two
   functions, and the difference matters: `rankForXP(totalXP)` is what the XP
   alone would earn, while `awardedRank(rankIndex, totalXP)` is what has actually
   been *conferred*. `userDataStore.rankIndex` advances at most one tier per
@@ -584,9 +609,10 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
   gating; **150 cinematic lessons** (animated stickman scenes, §17); animated
   `LessonReward` with XP count-up, streak and rank-up.
-- **Gamification:** 68 badges in 5 tiers, 40 ranks in 8 coloured orders with a
-  conferred-rank ceremony, a three-badge profile cabinet, XP +
-  level curve, daily streak.
+- **Gamification:** 70 badges in 5 tiers, **48 ranks in 8 coloured orders, each
+  order struck in its own silhouette** (§7), a conferred-rank ceremony that shows
+  the pin they held handing over to the pin they just earned, a three-badge
+  profile cabinet, XP + level curve, daily streak. Top rank at 50,000 XP.
 - **Screens:** Home (with Quick Start, §19), Learn → branch → unit accordion →
   lesson, Thinkers, Stats, Profile, Settings, paywall, widget, saved quotes.
 - **Money:** RevenueCat `scholars_pass` entitlement; AdMob interstitial after a

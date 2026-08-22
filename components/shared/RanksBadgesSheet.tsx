@@ -342,8 +342,14 @@ export default function RanksBadgesSheet() {
                             <View style={[styles.branch, { backgroundColor: reached ? Ink : InkFaint }]} />
                             <View style={[styles.junction, { backgroundColor: reached ? Ink : InkFaint }]} />
                             <View style={styles.sealSlot}>
+                              {/* THE ORDER IS PASSED EVEN WHEN LOCKED. It decides
+                                  the frame as well as the material, and the whole
+                                  point of a ladder whose shape escalates is that
+                                  you can see the shape you are climbing toward.
+                                  RankSeal still withholds the MATERIAL — that is
+                                  the part that has to be earned. */}
                               <RankSeal glyph={r.glyph} state={st} size={50}
-                                order={st === 'locked' ? null : rankOrder(i)} degree={rankDegree(i)} />
+                                order={rankOrder(i)} degree={rankDegree(i)} />
                             </View>
                           </View>
 
@@ -503,7 +509,7 @@ function RankDetail({
 
       <View style={styles.detailSealWrap}>
         <RankSeal glyph={rank.glyph} state={st} size={168} progress={progress}
-          order={st === 'locked' ? null : rankOrder(rank.id - 1)} degree={rankDegree(rank.id - 1)} />
+          order={rankOrder(rank.id - 1)} degree={rankDegree(rank.id - 1)} />
       </View>
 
       <Text style={styles.detailKicker}>RANK {rank.id} · {toRoman(rank.id)} · {circle.name.toUpperCase()}</Text>

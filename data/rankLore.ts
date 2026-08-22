@@ -1,21 +1,24 @@
 // Flavour for the Ranks "Almanac": each rank's one-line epithet, the eight
-// thematic Circles the forty ranks are grouped into, and a Roman-numeral helper.
+// thematic Circles the forty-eight ranks are grouped into, and a Roman-numeral
+// helper.
 // Kept beside the ranks so the sheet (and the rank-up ceremony) share one copy.
 //
 // ── THE CIRCLE AND THE ORDER ARE NOW THE SAME GROUPING ──────────────────────
 //
 // This was five Circles of five, for a twenty-five rank ladder. The ladder is
-// forty now (see data/ranks.ts for why: the old one topped out at 52,000 XP in
-// an app that contains 21,400), and it is built as eight ORDERS of five —
-// clay, iron, bronze, jade, lapis, crimson, amethyst, aurum.
+// forty-EIGHT now — see data/ranks.ts for why it tops out at 50,000 — and it is
+// built as eight ORDERS of six: clay, iron, bronze, jade, lapis, crimson,
+// amethyst, aurum.
 //
-// Two groupings of five over the same ladder, with different names and different
+// Two groupings over the same ladder, with different names and different
 // boundaries, would be two things for a reader to learn where there is only one
-// fact. So a Circle IS an order: same five ranks, same colour, and the Circle is
-// named after the material its pins are struck in. `tierForRank` still returns
-// 1-based groups, so nothing that consumed it has to change.
+// fact. So a Circle IS an order: same six ranks, same colour, same SHAPE (each
+// order is struck in its own silhouette now — components/shared/rankShapes.ts),
+// and the Circle is named after the material. `tierForRank` still returns
+// 1-based groups, so nothing that consumed it has to change; only its divisor
+// moved, from five to six.
 
-export const tierForRank = (id: number) => Math.max(1, Math.min(8, Math.ceil(id / 5)));
+export const tierForRank = (id: number) => Math.max(1, Math.min(8, Math.ceil(id / 6)));
 
 export interface Circle {
   tier: number;
@@ -43,48 +46,56 @@ export const RANK_EPITHETS: Record<number, string> = {
   3: 'Learning to wield the quill.',
   4: 'Reading the great conversation.',
   5: 'The page stops being difficult.',
+  6: 'Copying it out is how it sticks.',
   // iron — the doubt
-  6: 'Nothing is taken on trust.',
-  7: 'Certainty is the first thing to go.',
-  8: 'Asking better, not more.',
-  9: 'Taking the claim apart.',
-  10: 'Suspending judgement on purpose.',
+  7: 'Nothing is taken on trust.',
+  8: 'Certainty is the first thing to go.',
+  9: 'Asking better, not more.',
+  10: 'Taking the claim apart.',
+  11: 'Suspending judgement on purpose.',
+  12: 'Doubt with the manners taken off.',
   // bronze — the argument
-  11: 'Premises, and what follows.',
-  12: 'The machinery of proof.',
-  13: 'Two positions, one conversation.',
-  14: 'Finding the joint to cut at.',
-  15: 'Saying it so it lands.',
+  13: 'Premises, and what follows.',
+  14: 'The machinery of proof.',
+  15: 'Two positions, one conversation.',
+  16: 'Finding the joint to cut at.',
+  17: 'Saying it so it lands.',
+  18: 'Willing to be shown wrong in public.',
   // jade — the conduct
-  16: 'The world before anyone explained it.',
-  17: 'What is owed, and to whom.',
-  18: 'Character over calculation.',
-  19: 'What is yours to control.',
-  20: 'Thinking while walking.',
+  19: 'The world before anyone explained it.',
+  20: 'What is owed, and to whom.',
+  21: 'Character over calculation.',
+  22: 'What is yours to control.',
+  23: 'Thinking while walking.',
+  24: 'A citizen of nowhere in particular.',
   // lapis — the real
-  21: 'What there is, under the names.',
-  22: 'How anyone knows anything.',
-  23: 'Being, and its furniture.',
-  24: 'The mind was here first.',
-  25: 'Reason settles it, not the eye.',
+  25: 'What there is, under the names.',
+  26: 'How anyone knows anything.',
+  27: 'Being, and its furniture.',
+  28: 'The mind was here first.',
+  29: 'Reason settles it, not the eye.',
+  30: 'Go and look, then argue.',
   // crimson — the quarrel
-  26: 'Judgement becomes taste.',
-  27: 'The argument taken to them.',
-  28: 'Breaking what everyone agreed on.',
-  29: 'Wrong in the useful direction.',
-  30: 'The order was never necessary.',
+  31: 'Judgement becomes taste.',
+  32: 'The argument taken to them.',
+  33: 'Breaking what everyone agreed on.',
+  34: 'Wrong in the useful direction.',
+  35: 'The order was never necessary.',
+  36: 'Some arguments are meant to spread.',
   // amethyst — the vision
-  31: 'Knowing which questions are worth it.',
-  32: 'Past what argument reaches.',
-  33: 'A light for others to read by.',
-  34: 'Answering what was not asked.',
-  35: 'Seeing the shape of it whole.',
+  37: 'Knowing which questions are worth it.',
+  38: 'Past what argument reaches.',
+  39: 'A light for others to read by.',
+  40: 'Answering what was not asked.',
+  41: 'Seeing the shape of it whole.',
+  42: 'Handing on what was handed down.',
   // aurum — the summit
-  36: 'Holding the thread of the whole.',
-  37: 'Others navigate by you now.',
-  38: 'The work outlasts the worker.',
-  39: 'Past the edge of words.',
-  40: 'The summit of the ascent.',
+  43: 'Holding the thread of the whole.',
+  44: 'Others navigate by you now.',
+  45: 'Knowledge old enough to look like magic.',
+  46: 'The work outlasts the worker.',
+  47: 'Past the edge of words.',
+  48: 'The summit of the ascent.',
 };
 
 export const toRoman = (n: number): string => {

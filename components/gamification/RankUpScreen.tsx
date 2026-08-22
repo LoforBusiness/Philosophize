@@ -5,18 +5,41 @@ import Animated, {
   Easing, type SharedValue,
 } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
-import Glyph from '@/components/shared/Glyph';
-import type { RankDef } from '@/data/ranks';
+import RankSeal from '@/components/shared/RankSeal';
+import { rankOrder, rankDegree, type RankDef } from '@/data/ranks';
+import { ORDER, ORDER_LABEL } from '@/constants/insignia';
+import { LIP } from '@/constants/design';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE RANK-UP MOMENT. Shown once, immediately after Finish, BEFORE the XP and
 // streak screen — so the rarest thing that just happened gets the stage to
 // itself instead of being a line item under an XP counter.
 //
+// ── IT USED TO SHOW A GLYPH AND NOTHING ELSE ───────────────────────────────
+//
+// A reader: "I also need the rank icons to be in the lesson when the user does
+// rank up. Right now it is just a black-and-white look when you see the rank-up
+// in lessons."
+//
+// They were exactly right, and it was worse than merely plain. Every other place
+// a rank appears — Profile, the showcase, the ranks sheet — draws the real
+// struck PIN: its order's material, its order's silhouette, its degree of
+// finish. This screen drew `<Glyph>` on paper inside a thin ink ring. So the one
+// moment in the whole app that exists to say "your rank changed" was the only
+// one that showed the reader nothing about what it changed TO, and a reader who
+// had just crossed from Lapis into Crimson — new colour, new shape — saw a black
+// line drawing either side of the boundary.
+//
+// It shows both pins now, and the swap is the beat: the pin they HELD is on
+// screen from the first frame, and at the burst it hands over to the pin they
+// have just been given. That is the whole point of an escalating ladder
+// (components/shared/rankShapes.ts) and this is the only screen that can ever
+// show two rungs of it at once.
+//
 // The order is deliberate and reads top-to-bottom, one thing at a time:
-//   1. the rank mark, with a bar filling all the way around it — ACCELERATING,
-//      so the circle closes with a rush rather than arriving at a constant crawl
-//   2. black-and-white confetti bursts out of it the instant the ring closes
+//   1. the pin they held, with a bar filling all the way around it —
+//      ACCELERATING, so the ring closes with a rush rather than a constant crawl
+//   2. the new pin lands and the confetti bursts, both on the frame it closes
 //   3. below the mark, the rank they WERE slides out and the rank they now ARE
 //      slides in — the swap is the point, so it is its own beat
 //   4. below the words, a bar fills to show how far the next rank is
@@ -45,6 +68,16 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const BOX = 208;          // the mark's box on screen
 const VB = 200;           // viewBox units
 const R = 86;
+/**
+ * The pin inside the closing ring.
+ *
+ * 176 rather than something safely smaller: the ring's own diameter is 179px at
+ * this box, and a frame only fills 66–96 units of its own 100, so a pin sized to
+ * "obviously fit" leaves a visible moat between the two. The widest frame — the
+ * imperial halo — comes out at 169px inside a 179px ring, which is the top rank
+ * pressing against its own circle, and that is the right relationship for it.
+ */
+const PIN = 176;
 const CIRC = 2 * Math.PI * R;
 
 // ── confetti ────────────────────────────────────────────────────────────────
@@ -58,7 +91,9 @@ const hash = (n: number) => {
 
 interface Piece {
   angle: number; dist: number; w: number; h: number;
-  spin: number; delay: number; filled: boolean; drop: number;
+  spin: number; delay: number; drop: number;
+  /** Which of the order's four tones this scrap is cut from. */
+  tone: number;
 }
 
 // Pieces leave from the RING, not the centre. Launching them at the middle threw
@@ -79,14 +114,14 @@ function makePieces(n: number): Piece[] {
       h: 11 + hash(i * 9.1) * 9,
       spin: (hash(i * 2.3) - 0.5) * 900,
       delay: hash(i * 4.7) * 0.14,
-      filled: hash(i * 6.1) > 0.45,
       drop: 30 + hash(i * 8.9) * 54,
+      tone: Math.floor(hash(i * 6.1) * 4),
     });
   }
   return out;
 }
 
-function Confetti({ p, burst }: { p: Piece; burst: SharedValue<number> }) {
+function Confetti({ p, burst, tones }: { p: Piece; burst: SharedValue<number>; tones: string[] }) {
   const st = useAnimatedStyle(() => {
     const u = Math.max(0, Math.min(1, (burst.value - p.delay) / (1 - p.delay)));
     const out = 1 - Math.pow(1 - u, 2.2);            // fast out, easing to a stop
@@ -110,8 +145,11 @@ function Confetti({ p, burst }: { p: Piece; burst: SharedValue<number> }) {
           width: p.w,
           height: p.h,
           borderRadius: 1,
-          backgroundColor: p.filled ? INK : PAPER,
-          borderWidth: p.filled ? 0 : 1.2,
+          // CUT FROM THE ORDER, not from ink. The burst used to be black and
+          // white scraps whatever rank had just been reached, which is a
+          // celebration that does not know what it is celebrating.
+          backgroundColor: tones[p.tone],
+          borderWidth: p.tone === 3 ? 1.2 : 0,
           borderColor: INK,
         },
         st,
@@ -136,9 +174,22 @@ export default function RankUpScreen({ from, to, next, totalXP, onDone }: Props)
   const bar = useSharedValue(0);
   const cta = useSharedValue(0);
   const [ready, setReady] = useState(false);
+  const [down, setDown] = useState(false);
   const skipped = useRef(false);
 
   const pieces = useMemo(() => makePieces(34), []);
+
+  // Both pins, and the material the new one is struck in. `to.id` is 1-based and
+  // `rankOrder`/`rankDegree` want the index, which is where the -1 comes from.
+  const toIndex = to.id - 1;
+  const fromIndex = from.id - 1;
+  const ins = ORDER[rankOrder(toIndex)];
+  // Four scraps: the face, its highlight, its shade, and one in paper so the
+  // burst still reads against a dark order.
+  const tones = useMemo(() => [ins.base, ins.lit, ins.shade, PAPER], [ins]);
+  // A promotion that CHANGES ORDER is the rarer event, and it is the one worth
+  // naming — the shape and the colour both change on that step and on no other.
+  const rising = rankOrder(toIndex) !== rankOrder(fromIndex);
 
   // How far into the NEW rank they already are, and what is left to the next.
   const span = next ? Math.max(1, next.xp - to.xp) : 1;
@@ -183,6 +234,19 @@ export default function RankUpScreen({ from, to, next, totalXP, onDone }: Props)
     };
   });
 
+  // THE HANDOVER. The old pin is on screen from the first frame and leaves on
+  // the frame the ring closes; the new one arrives into the same space a beat
+  // behind it, so the reader sees one become the other rather than a pin
+  // appearing out of nothing.
+  const oldPinStyle = useAnimatedStyle(() => {
+    const u = Math.min(1, burst.value / 0.18);
+    return { opacity: 1 - u, transform: [{ scale: 1 - 0.18 * u }] };
+  });
+  const newPinStyle = useAnimatedStyle(() => {
+    const u = Math.max(0, Math.min(1, (burst.value - 0.06) / 0.22));
+    return { opacity: u, transform: [{ scale: 0.62 + 0.38 * u }] };
+  });
+
   const ringProps = useAnimatedProps(() => ({
     strokeDashoffset: CIRC * (1 - ring.value),
   }));
@@ -215,17 +279,19 @@ export default function RankUpScreen({ from, to, next, totalXP, onDone }: Props)
   return (
     <Pressable style={styles.root} onPress={skip}>
       <View style={styles.center}>
-        <Animated.Text style={[styles.eyebrow, eyebrowStyle]}>RANK UP</Animated.Text>
+        <Animated.Text style={[styles.eyebrow, eyebrowStyle, { color: ins.base }]}>
+          {rising ? `THE ${ORDER_LABEL[rankOrder(toIndex)].toUpperCase()} ORDER` : 'RANK UP'}
+        </Animated.Text>
 
         {/* 1 — the mark, with the bar closing around it */}
         <Animated.View style={[styles.markWrap, markStyle]}>
           <Svg width={BOX} height={BOX} viewBox={`0 0 ${VB} ${VB}`} style={StyleSheet.absoluteFill as any}>
-            <Circle cx={VB / 2} cy={VB / 2} r={R} stroke={INK} strokeWidth={2} fill="none" opacity={0.16} />
+            <Circle cx={VB / 2} cy={VB / 2} r={R} stroke={ins.base} strokeWidth={2} fill="none" opacity={0.16} />
             <AnimatedCircle
               cx={VB / 2}
               cy={VB / 2}
               r={R}
-              stroke={INK}
+              stroke={ins.base}
               strokeWidth={5}
               fill="none"
               strokeLinecap="round"
@@ -234,11 +300,30 @@ export default function RankUpScreen({ from, to, next, totalXP, onDone }: Props)
               transform={`rotate(-90 ${VB / 2} ${VB / 2})`}
             />
           </Svg>
-          <Glyph name={to.glyph} size={BOX * 0.4} color={INK} />
+          {/* The pin they held… */}
+          <Animated.View style={[styles.pin, oldPinStyle]} pointerEvents="none">
+            <RankSeal
+              glyph={from.glyph}
+              state="current"
+              size={PIN}
+              order={rankOrder(fromIndex)}
+              degree={rankDegree(fromIndex)}
+            />
+          </Animated.View>
+          {/* …and the one they have just been given. */}
+          <Animated.View style={[styles.pin, newPinStyle]} pointerEvents="none">
+            <RankSeal
+              glyph={to.glyph}
+              state="current"
+              size={PIN}
+              order={rankOrder(toIndex)}
+              degree={rankDegree(toIndex)}
+            />
+          </Animated.View>
 
           {/* 2 — the burst, from the centre of the mark */}
           <View style={styles.confetti} pointerEvents="none">
-            {pieces.map((p, k) => <Confetti key={k} p={p} burst={burst} />)}
+            {pieces.map((p, k) => <Confetti key={k} p={p} burst={burst} tones={tones} />)}
           </View>
         </Animated.View>
 
@@ -251,7 +336,7 @@ export default function RankUpScreen({ from, to, next, totalXP, onDone }: Props)
         {/* 4 — how far the next rank is */}
         <Animated.View style={[styles.barBlock, barBlockStyle]}>
           <View style={styles.track}>
-            <Animated.View style={[styles.fill, fillStyle]} />
+            <Animated.View style={[styles.fill, fillStyle, { backgroundColor: ins.base }]} />
           </View>
           <Text style={styles.barLabel}>
             {next
@@ -262,10 +347,24 @@ export default function RankUpScreen({ from, to, next, totalXP, onDone }: Props)
       </View>
 
       {/* 5 — and only now, the way out */}
+      {/* THE WAY OUT, struck in the order they just reached — and on a ledge,
+          not a fade. Dimming on press is what a DISABLED control does; every
+          other button in the app depresses into its own lip. */}
       <Animated.View style={ctaStyle} pointerEvents={ready ? 'auto' : 'none'}>
-        <Pressable onPress={onDone} style={({ pressed }) => [styles.btn, pressed && { opacity: 0.85 }]}>
-          <Text style={styles.btnText}>Continue →</Text>
-        </Pressable>
+        <View style={{ paddingBottom: LIP.button }}>
+          <View pointerEvents="none" style={[styles.btnLip, { backgroundColor: ins.shade }]} />
+          <Pressable
+            onPress={onDone}
+            onPressIn={() => setDown(true)}
+            onPressOut={() => setDown(false)}
+            style={[
+              styles.btn,
+              { backgroundColor: ins.base, transform: [{ translateY: down ? LIP.button : 0 }] },
+            ]}
+          >
+            <Text style={[styles.btnText, { color: ins.on }]}>Continue →</Text>
+          </Pressable>
+        </View>
       </Animated.View>
     </Pressable>
   );
@@ -281,6 +380,7 @@ const styles = StyleSheet.create({
   },
 
   markWrap: { width: BOX, height: BOX, alignItems: 'center', justifyContent: 'center' },
+  pin: { position: 'absolute', width: PIN, height: PIN, alignItems: 'center', justifyContent: 'center' },
   // Room for the burst to travel beyond the mark without being clipped.
   confetti: {
     position: 'absolute', left: BOX / 2, top: BOX / 2,
@@ -315,6 +415,7 @@ const styles = StyleSheet.create({
     color: SOFT, marginTop: 12,
   },
 
-  btn: { backgroundColor: INK, borderRadius: 14, paddingVertical: 18, alignItems: 'center' },
-  btnText: { fontFamily: 'Inter_700Bold', fontSize: 18, color: PAPER },
+  btn: { borderRadius: 14, paddingVertical: 18, alignItems: 'center' },
+  btnLip: { position: 'absolute', left: 0, right: 0, top: LIP.button, bottom: 0, borderRadius: 14 },
+  btnText: { fontFamily: 'Inter_700Bold', fontSize: 18 },
 });

@@ -50,7 +50,7 @@ const FROZEN = [
   'half-circle', 'open-page', 'the-vessel', 'flourish', 'the-amphora',
   'the-vessel-ii', 'the-rings', 'facets', 'mandala', 'compass-rose',
   'bright-star', 'radiant-mind', 'the-crown', 'diamond-eye', 'star-of-david',
-  'the-gate', 'the-shield', 'balance', 'delta-rise', 'dottarget-forty',
+  'the-gate', 'the-shield', 'the-ship', 'the-beacon', 'balance', 'delta-rise', 'dottarget-forty',
   'target-hundred', 'the-anvil', 'crossroads', 'the-arch', 'the-fountain',
   'peak-climber', 'marble-pillar', 'the-obelisk-ii', 'the-keystone', 'tender-heart',
   'lotus-bloom', 'deep-well', 'the-first-whole', 'three-whole', 'the-whole-tree',

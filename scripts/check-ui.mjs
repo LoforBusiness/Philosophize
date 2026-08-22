@@ -28,6 +28,8 @@ const T = await import(emit('components/shared/tone.ts', 'tone.mjs'));
 // insignia.ts is zero-import for the same reason, so the eight order materials
 // can be re-derived here rather than trusted.
 const I = await import(emit('constants/insignia.ts', 'insignia.mjs'));
+// rankShapes.ts is zero-import for the same reason — the frames are plain data.
+const R = await import(emit('components/shared/rankShapes.ts', 'rankShapes.mjs'));
 
 let bad = 0;
 const ok = (cond, label, detail = '') => {
@@ -385,7 +387,7 @@ const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
 // ── 4b · the eight order materials ───────────────────────────────────────────
 //
 // The third and last place a colour carries information: what a rank pin is
-// struck in (constants/insignia.ts). Eight orders of five, clay at the bottom
+// struck in (constants/insignia.ts). Eight orders of six, clay at the bottom
 // and gold at the top, and the whole point of them is that a reader can tell
 // how far up the ladder somebody is without reading a number.
 //
@@ -405,7 +407,7 @@ const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
 {
   const orders = I.ORDERS;
   ok(orders.length === 8, 'eight orders', `${orders.length}`);
-  ok(orders.length * I.ORDER_SIZE === 40, 'the orders cover the whole ladder',
+  ok(orders.length * I.ORDER_SIZE === 48, 'the orders cover the whole ladder',
     `${orders.length} x ${I.ORDER_SIZE}`);
 
   const marks = new Set(orders.map((o) => I.ORDER[o].on));
@@ -448,6 +450,82 @@ const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
   ok(I.TIER_ORDER.every((t) => orders.includes(t)),
     'every badge tier is struck in one of the rank orders', I.TIER_ORDER.join(' '));
   ok(I.TIER_ORDER.length === 5, 'five badge tiers', `${I.TIER_ORDER.length}`);
+}
+
+
+// ── 4c · the eight FRAMES ────────────────────────────────────────────────────
+//
+// components/shared/rankShapes.ts gives every order its own silhouette, because
+// a reader told us colour alone was not enough: "the rank icons are better, but
+// they don't improve in look — the icons get prettier, and more complex."
+//
+// scripts/sheet-ranks.mjs is how the shapes are JUDGED; this is what stops them
+// breaking. Everything below is a defect a picture cannot report:
+//
+//   · a frame that outgrows the 100x100 viewBox is CLIPPED, silently, on every
+//     screen at once. The wing tips and the crown sit within four units of the
+//     edge, so this has almost no slack left in it.
+//   · a footprint that does not grow up the ladder means an order that reads as
+//     a step BACKWARDS — the whole thing this file exists to prevent.
+//   · a mark that shrinks to make room for ornament is the failure RankSeal's
+//     header records from the last time ornament escalated here.
+{
+  const frames = R.FRAMES;
+  ok(frames.length === I.ORDERS.length,
+    'one frame per order', `${frames.length} frames, ${I.ORDERS.length} orders`);
+  ok(new Set(frames).size === frames.length, 'no frame is used twice', frames.join(' '));
+
+  // The extent of everything a frame can draw, ornament included.
+  const spanOf = (name) => {
+    const orn = R.ORNAMENT[name];
+    const d = [R.CORE[name](0), orn.wings, orn.crown, orn.rays].filter(Boolean).join(' ');
+    const nums = d.match(/-?\d*\.?\d+/g).map(Number);
+    let lo = Infinity, hi = -Infinity;
+    for (const v of nums) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+    return [lo, hi];
+  };
+
+  let prev = 0;
+  for (const name of frames) {
+    const [lo, hi] = spanOf(name);
+    ok(lo >= 0 && hi <= 100, `frame ${name} stays inside the viewBox`,
+      `${lo.toFixed(1)} .. ${hi.toFixed(1)}, need 0 .. 100`);
+
+    const g = R.frameGeom(name);
+    ok(g.perimeter > 100, `frame ${name} has a measurable edge to run an arc along`,
+      `${g.perimeter.toFixed(0)} units`);
+    ok(g.studs.length === 6, `frame ${name} offers six stud positions`, `${g.studs.length}`);
+    for (const [sx, sy] of g.studs) {
+      const r = Math.hypot(sx - 50, sy - 50);
+      ok(r > 8, `frame ${name}'s studs clear the mark`, `${r.toFixed(1)} units from centre`);
+    }
+    ok(g.markScale >= 0.34 && g.markScale <= 0.42,
+      `frame ${name} leaves the mark its room`, `markScale ${g.markScale}`);
+
+    // THE FOOTPRINT IS THE WHOLE OBJECT, ornament included, and it is measured
+    // as the tile it fills rather than as a radius. Two reasons, both of which
+    // this check found the hard way:
+    //   · an octagon presents its FLAT to the tile edge, so a circumradius that
+    //     is larger than the disc below it can still draw something narrower;
+    //   · the winged frames deliberately SHRINK their core to make room for the
+    //     wings, so a core-only measure reports the two grandest pins on the
+    //     ladder as a step backwards.
+    const span = Math.max(hi - 50, 50 - lo) * 2;
+    ok(span >= prev - 0.01, `frame ${name} is not smaller than the rung below it`,
+      `fills ${span.toFixed(1)} of 100, previous ${prev.toFixed(1)}`);
+    prev = span;
+  }
+
+  // A negative inset GROWS the frame, which is how the capstone's collar is
+  // drawn. If that ever stops working the sixth rank of every order loses its
+  // one distinguishing mark and nothing else changes.
+  for (const name of frames) {
+    const grown = R.CORE[name](-3.4).match(/-?\d*\.?\d+/g).map(Number);
+    const tight = R.CORE[name](0).match(/-?\d*\.?\d+/g).map(Number);
+    const reach = (a) => Math.max(...a.map((v) => Math.abs(v - 50)));
+    ok(reach(grown) > reach(tight), `frame ${name}'s collar sits outside its edge`,
+      `${reach(grown).toFixed(1)} vs ${reach(tight).toFixed(1)}`);
+  }
 }
 
 

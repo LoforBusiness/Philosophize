@@ -27,7 +27,7 @@
 //
 // The reader asked for "brown being the worst" and then "a beautiful green with
 // white, red with white, blue with white", each colour held for about five ranks
-// before the next. So the ladder is EIGHT ORDERS OF FIVE, and the sequence is
+// before the next. So the ladder is EIGHT ORDERS OF SIX, and the sequence is
 // not arbitrary — it is the oldest status ladder there is, materials in the
 // order a culture learns to work them:
 //
@@ -64,9 +64,19 @@
 //    grey — so a high pin has a bright line running inside its edge that the low
 //    orders simply do not have, and AURUM's is white outright.
 //
+// ── AND THE ORDER IS NOT THE ONLY THING THAT CHANGES ANY MORE ───────────────
+//
+// Colour alone was not enough either, which the same reader said next: "the rank
+// icons are better, but they don't improve in look — the icons get prettier, and
+// more complex." So each order is also struck in its own SILHOUETTE, escalating
+// disc → plate → hexagon → gem → shield → crest → winged → crowned. That lives
+// in components/shared/rankShapes.ts, which is keyed on this file's `ORDERS`
+// array index for index.
+//
 // NO REACT AND NO IMPORTS IN THIS FILE, so scripts can render a contact sheet of
-// all forty pins in plain Node and someone can LOOK at them (§21). That is how
-// this was tuned, and it is how the first two palettes were caught.
+// all forty-eight pins in plain Node and someone can LOOK at them (§21 —
+// `npm run sheet:ranks`). That is how this was tuned, and it is how the first two
+// palettes were caught.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type OrderName =
@@ -162,8 +172,24 @@ export const ORDERS: OrderName[] = [
   'CLAY', 'IRON', 'BRONZE', 'JADE', 'LAPIS', 'CRIMSON', 'AMETHYST', 'AURUM',
 ];
 
-/** How many ranks share one order. Eight orders of five is the forty-rank ladder. */
-export const ORDER_SIZE = 5;
+/**
+ * How many ranks share one order. Eight orders of SIX is the forty-eight-rank
+ * ladder.
+ *
+ * It was eight of five, and the ladder grew rather than the palette because of
+ * something that was measured rather than guessed. The obvious way to lengthen
+ * a coloured ladder is to add colours, and a sweep of the whole (L*, C*, h)
+ * space for two more orders that clear every constraint in check-ui came back
+ * with exactly one usable pair: a magenta, and a TEAL WHOSE CHROMA CANNOT
+ * EXCEED 25. Teal at mid lightness is simply not available in sRGB at the
+ * chroma the neighbouring orders sit at (bronze 41, jade 39) while still
+ * carrying a white mark — so a ninth order slotted between them would have been
+ * a visibly DULLER pin at rank 16 than at rank 11.
+ *
+ * That is the exact complaint this whole file exists to answer, reintroduced
+ * one rung higher up. Six ranks per order costs nothing and breaks nothing.
+ */
+export const ORDER_SIZE = 6;
 
 /**
  * The human name of an order, for the ranks sheet. Not the enum: a reader should
@@ -177,35 +203,36 @@ export const ORDER_LABEL: Record<OrderName, string> = {
 /**
  * WHAT ESCALATES INSIDE AN ORDER.
  *
- * Colour alone would make five consecutive ranks identical again, one order
- * lower — the exact complaint this file exists to answer. So each order runs
- * through five DEGREES of finish, and the mark of the fifth is that it is the
- * last before the material changes.
+ * The order says WHAT a pin is made of and components/shared/rankShapes.ts says
+ * what SHAPE it is — both change every six ranks. Between those, five promotions
+ * would look identical, which is the exact complaint one rung down. So each order
+ * also runs through six DEGREES of finish.
  *
  * This is ornament, and RankSeal's own header records that escalating ornament
  * was tried once and rejected as "so busy at 54px that it fought the glyph it
  * framed". The difference is that THAT version escalated across all twenty-five
  * ranks, so by the top the pin was carrying twenty-five steps of decoration.
- * Here it resets every five, so no pin is ever more than four steps ornamented,
- * and the steps are studs on the hexagon's own vertices rather than new shapes:
+ * Here it resets every six, no pin is ever more than five steps ornamented, and
+ * every step lands on the frame's own edge rather than in the mark's room:
  *
  *   0  plain. The pin, the rim, the mark.
  *   1  + the inner rule
- *   2  + two studs, on the left and right vertices
- *   3  + four studs
- *   4  + all six, and a ring of rays outside the edge
+ *   2  + two studs, left and right
+ *   3  + four
+ *   4  + all six
+ *   5  + the collar: a second rule OUTSIDE the edge
  *
- * Degree 4 is the capstone of its order and is meant to look like one.
+ * Degree 5 is the capstone of its order and is meant to look like one.
  */
-export const DEGREES = 5;
+export const DEGREES = 6;
 
 export interface Finish {
   /** Draw the hairline inside the edge. */
   rule: boolean;
-  /** How many of the hexagon's six vertices carry a stud. */
+  /** How many of the frame's six stud positions are filled. */
   studs: number;
-  /** The capstone's ring of rays. */
-  rays: boolean;
+  /** The capstone's outer collar. */
+  collar: boolean;
 }
 
 export function finishFor(degree: number): Finish {
@@ -213,7 +240,7 @@ export function finishFor(degree: number): Finish {
   return {
     rule: d >= 1,
     studs: d >= 4 ? 6 : d >= 3 ? 4 : d >= 2 ? 2 : 0,
-    rays: d >= 4,
+    collar: d >= 5,
   };
 }
 
@@ -281,4 +308,30 @@ export const insigniaRim = (m: Insignia): InsigniaStops => [
   ['0%', m.shade, 1],
   ['45%', m.rim, 1],
   ['100%', m.rim, 1],
+];
+
+/**
+ * A WING, which is the same material seen from BEHIND the pin.
+ *
+ * Base into shade rather than lit into shade: the whole reason a winged frame
+ * reads as one object with something behind it, rather than as two objects, is
+ * that the thing behind never catches the highlight.
+ */
+export const insigniaWing = (m: Insignia): InsigniaStops => [
+  ['0%', m.base, 1],
+  ['100%', m.shade, 1],
+];
+
+/**
+ * THE HALO, and the reason it is not painted in `rule` like every other piece
+ * of finish on the pin.
+ *
+ * `rule` is the order's near-white, and AURUM's is `#FFFFFF` outright — so the
+ * first halo was white rays on warm paper, and the contact sheet showed the top
+ * rank of the whole ladder wearing an ornament nobody could see. A halo is
+ * material, struck like the rest of it.
+ */
+export const insigniaRay = (m: Insignia): InsigniaStops => [
+  ['0%', m.lit, 1],
+  ['100%', m.base, 1],
 ];

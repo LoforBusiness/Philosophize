@@ -108,6 +108,7 @@
     "measure:must": "node scripts/measure-must.mjs",
     "check:launch": "node scripts/check-launch.mjs && node scripts/check-words.mjs",
     "sheet:launch": "node scripts/sheet-launch.mjs",
+    "sheet:ranks": "node scripts/sheet-ranks.mjs",
     "camera:wins": "node scripts/camera-wins.mjs",
     "sound:cut": "node scripts/cut-sounds.mjs",
     "check:ui": "node scripts/check-ui.mjs",

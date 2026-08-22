@@ -9,97 +9,125 @@ export interface RankDef {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE FORTY-RANK LADDER — eight orders of five (constants/insignia.ts).
+// THE FORTY-EIGHT-RANK LADDER — eight orders of six (constants/insignia.ts),
+// topping out at exactly 50,000 XP.
 //
-// ── THE OLD LADDER TOPPED OUT ABOVE WHAT THE APP CONTAINS ──────────────────
+// ── WHERE 50,000 CAME FROM, AND WHY IT IS NOT WHERE IT WAS BEFORE ──────────
 //
-// This was twenty-five ranks ending at 52,000 XP, and that number was never
-// reachable. Counted out of the tree rather than remembered: 222 lessons at a
-// perfect 60 each is 13,320; every unit mastered is 600 more; all 132 saveable
-// quotes 396; all 322 thinkers met 644; and every one of their quizzes aced
-// 6,440. Everything, done perfectly, once — 21,400 XP.
+// A reader: "I want the total of 50,000 XP to be the top rank, but I want to
+// have plenty of ranks in between so the user can still get the gratification of
+// ranking up."
 //
-// So ranks 20 through 25 (22,000 → 52,000) could not be earned by finishing the
-// entire app. Archon and everything above it were decoration on a wall nobody
-// could reach, and the top four rungs of a reward ladder being unreachable is
-// the opposite of what a reward ladder is for.
+// This file previously topped out at 16,000 and its own comment argued the case
+// against 50,000 — the app contains 21,400 XP if you do everything in it
+// perfectly ONCE (222 lessons at a perfect 60, every unit mastered, all 132
+// saveable quotes, all 322 thinkers met, every quiz aced), so a 52,000 ceiling
+// left the top rungs on a wall nobody could reach.
 //
-// ── WHAT THIS ONE IS FITTED TO ─────────────────────────────────────────────
+// THAT ARGUMENT WAS WRONG, AND THE THING THAT MAKES IT WRONG IS ONE LINE IN
+// `recordLessonComplete`: "XP is still awarded on every completion". The unit
+// pointer uses max() so re-reading a lesson cannot skip anyone forward, but the
+// XP is paid every time. 21,400 is not a ceiling, it is a FIRST PASS. So 50,000
+// is roughly the app read through once and then some — which is exactly what the
+// top of a ladder called Grand Philosopher ought to cost.
 //
-// Forty ranks, topping out at 16,000. That is inside the 21,400 ceiling with
-// room to spare, so a reader who finishes the app and takes some quizzes arrives
-// at Grand Philosopher rather than stalling four rungs short of it.
+// The worked figures, because "roughly" is not good enough for a top rank:
 //
-// The bands grow linearly, 80 XP to 750, which is roughly two lessons for the
-// first promotion and seventeen for the last. That shape is the answer to two
-// requests that pull against each other — "I want it to take a long time" and "I
-// don't want a user to be on a rank for a long time and never get satisfaction".
-// A long climb made of short steps: forty promotions across 222 lessons is one
-// about every five or six.
+//   rank  2      60 XP  — one perfect lesson. The first promotion is immediate.
+//   rank  6     740     — the Clay order takes about a fortnight of one a day
+//   rank 24  12,400     — halfway up, and about halfway through the content
+//   rank 31  20,800     — where a perfect single pass through the whole app lands
+//   rank 48  50,000     — the top
+//
+// So finishing everything the app contains, perfectly, leaves a reader 31 rungs
+// up a 48-rung ladder: a real achievement with a visible seventeen rungs above
+// it. That is the shape a ladder is supposed to have. It is also why the ORDERS
+// were re-cut at six ranks each rather than the ladder being stretched over the
+// old forty — see ORDER_SIZE in constants/insignia.ts for the measurement that
+// ruled out simply adding two more colours.
+//
+// ── THE BANDS GROW, AND THAT IS THE OTHER HALF OF THE REQUEST ──────────────
+//
+// 60 XP for the first promotion, 2,100 for the last, rising smoothly — about one
+// lesson, then about thirty-eight. Two requests pull against each other here,
+// "I want it to take a really long time" and "I don't want a user to be on a
+// rank for a long time and never get satisfaction", and a long climb made of
+// steps that start tiny is the only shape that answers both.
 //
 // `rankIndex` still advances at most ONE rung per finished lesson (see
-// `awardedRank`), so forty ranks also means forty lessons at an absolute
-// minimum, whatever the XP says.
+// `awardedRank`), so forty-eight ranks also means forty-eight lessons at an
+// absolute minimum, whatever the XP says.
 //
-// ── IDS ARE POSITIONS, AND THE OLD ONES MOVED ──────────────────────────────
+// ── IDS ARE POSITIONS, AND THE OLD ONES MOVED — AGAIN ──────────────────────
 //
-// `userDataStore.rankIndex` is an INDEX into this array, so extending the ladder
-// re-bases every held rank: someone at index 12 of the old twenty-five is at
-// index 12 of the new forty, which is a lower place on a longer ladder but the
-// same distance from the bottom. Nobody loses a rank they hold and nobody is
-// demoted; the ladder simply got longer above them. `rankForXP` then reports a
-// higher earned rank than they hold, which `pending` already exists to describe
-// and which they collect one lesson at a time.
+// `userDataStore.rankIndex` is an INDEX into this array, so lengthening the
+// ladder re-bases every held rank: someone at index 12 of the old forty is at
+// index 12 of the new forty-eight. Nobody is demoted and nobody loses a rung.
+// What DOES change is that index 12's threshold moved from 2,075 XP to 3,600 —
+// so an existing reader can now hold a rank their XP has not reached.
+//
+// That is a state this file has never had to describe before, and it is why
+// `rankProgress` measures the band from `min(current.xp, totalXP)` rather than
+// from the threshold. Measuring from the threshold made the two halves of the
+// same sentence disagree: "0 / 600 XP" beside "2,100 XP to Logician".
 // ─────────────────────────────────────────────────────────────────────────────
 export const RANKS: RankDef[] = [
-  // ── CLAY ──────────────────────────────────────────────────────────
+  // ── CLAY · the disc ──────────────────────────────────────────────────
   { id: 1, name: 'Novice', xp: 0, glyph: 'candle' },
-  { id: 2, name: 'Seeker', xp: 80, glyph: 'book' },
-  { id: 3, name: 'Apprentice', xp: 175, glyph: 'quill' },
-  { id: 4, name: 'Student', xp: 285, glyph: 'scroll' },
-  { id: 5, name: 'Reader', xp: 415, glyph: 'page' },
-  // ── IRON ──────────────────────────────────────────────────────────
-  { id: 6, name: 'Questioner', xp: 565, glyph: 'question' },
-  { id: 7, name: 'Doubter', xp: 725, glyph: 'magnifier' },
-  { id: 8, name: 'Inquirer', xp: 900, glyph: 'eye' },
-  { id: 9, name: 'Examiner', xp: 1100, glyph: 'xcross' },
-  { id: 10, name: 'Sceptic', xp: 1325, glyph: 'chain' },
-  // ── BRONZE ────────────────────────────────────────────────────────
-  { id: 11, name: 'Reasoner', xp: 1575, glyph: 'scales' },
-  { id: 12, name: 'Logician', xp: 1825, glyph: 'grid' },
-  { id: 13, name: 'Dialectician', xp: 2075, glyph: 'cycle' },
-  { id: 14, name: 'Analyst', xp: 2375, glyph: 'dottarget' },
-  { id: 15, name: 'Rhetorician', xp: 2675, glyph: 'wheel' },
-  // ── JADE ──────────────────────────────────────────────────────────
-  { id: 16, name: 'Naturalist', xp: 3000, glyph: 'tree' },
-  { id: 17, name: 'Ethicist', xp: 3350, glyph: 'heart' },
-  { id: 18, name: 'Moralist', xp: 3700, glyph: 'willow' },
-  { id: 19, name: 'Stoic', xp: 4050, glyph: 'flower' },
-  { id: 20, name: 'Peripatetic', xp: 4450, glyph: 'lotus' },
-  // ── LAPIS ─────────────────────────────────────────────────────────
-  { id: 21, name: 'Metaphysician', xp: 4900, glyph: 'pyramid' },
-  { id: 22, name: 'Epistemologist', xp: 5300, glyph: 'target' },
-  { id: 23, name: 'Ontologist', xp: 5750, glyph: 'dome' },
-  { id: 24, name: 'Idealist', xp: 6200, glyph: 'ripple' },
-  { id: 25, name: 'Rationalist', xp: 6700, glyph: 'infinity' },
-  // ── CRIMSON ───────────────────────────────────────────────────────
-  { id: 26, name: 'Aesthete', xp: 7200, glyph: 'torch' },
-  { id: 27, name: 'Polemicist', xp: 7700, glyph: 'lamp' },
-  { id: 28, name: 'Iconoclast', xp: 8250, glyph: 'shieldcross' },
-  { id: 29, name: 'Heretic', xp: 8800, glyph: 'gate' },
-  { id: 30, name: 'Revolutionary', xp: 9350, glyph: 'ship' },
-  // ── AMETHYST ──────────────────────────────────────────────────────
-  { id: 31, name: 'Sage', xp: 9950, glyph: 'crescent' },
-  { id: 32, name: 'Mystic', xp: 10550, glyph: 'hexagram' },
-  { id: 33, name: 'Illuminate', xp: 11150, glyph: 'ring' },
-  { id: 34, name: 'Oracle', xp: 11800, glyph: 'owl' },
-  { id: 35, name: 'Visionary', xp: 12450, glyph: 'gem' },
-  // ── AURUM ─────────────────────────────────────────────────────────
-  { id: 36, name: 'Archon', xp: 13150, glyph: 'crown' },
-  { id: 37, name: 'Luminary', xp: 13800, glyph: 'star' },
-  { id: 38, name: 'Immortal', xp: 14550, glyph: 'sunface' },
-  { id: 39, name: 'Transcendent', xp: 15250, glyph: 'starcompass' },
-  { id: 40, name: 'Grand Philosopher', xp: 16000, glyph: 'bookrays' },
+  { id: 2, name: 'Seeker', xp: 60, glyph: 'book' },
+  { id: 3, name: 'Apprentice', xp: 160, glyph: 'quill' },
+  { id: 4, name: 'Student', xp: 310, glyph: 'scroll' },
+  { id: 5, name: 'Reader', xp: 500, glyph: 'page' },
+  { id: 6, name: 'Scribe', xp: 740, glyph: 'feather' },
+  // ── IRON · the cut plate ─────────────────────────────────────────────
+  { id: 7, name: 'Questioner', xp: 1000, glyph: 'question' },
+  { id: 8, name: 'Doubter', xp: 1350, glyph: 'magnifier' },
+  { id: 9, name: 'Inquirer', xp: 1700, glyph: 'eye' },
+  { id: 10, name: 'Examiner', xp: 2100, glyph: 'xcross' },
+  { id: 11, name: 'Sceptic', xp: 2550, glyph: 'chain' },
+  { id: 12, name: 'Cynic', xp: 3050, glyph: 'mask' },
+  // ── BRONZE · the hexagon ─────────────────────────────────────────────
+  { id: 13, name: 'Reasoner', xp: 3600, glyph: 'scales' },
+  { id: 14, name: 'Logician', xp: 4200, glyph: 'grid' },
+  { id: 15, name: 'Dialectician', xp: 4800, glyph: 'cycle' },
+  { id: 16, name: 'Analyst', xp: 5500, glyph: 'dottarget' },
+  { id: 17, name: 'Rhetorician', xp: 6200, glyph: 'wheel' },
+  { id: 18, name: 'Disputant', xp: 6950, glyph: 'anvil' },
+  // ── JADE · the notched gem ───────────────────────────────────────────
+  { id: 19, name: 'Naturalist', xp: 7750, glyph: 'tree' },
+  { id: 20, name: 'Ethicist', xp: 8600, glyph: 'heart' },
+  { id: 21, name: 'Moralist', xp: 9500, glyph: 'willow' },
+  { id: 22, name: 'Stoic', xp: 10400, glyph: 'flower' },
+  { id: 23, name: 'Peripatetic', xp: 11400, glyph: 'lotus' },
+  { id: 24, name: 'Cosmopolite', xp: 12400, glyph: 'bridge' },
+  // ── LAPIS · the shield ───────────────────────────────────────────────
+  { id: 25, name: 'Metaphysician', xp: 13500, glyph: 'pyramid' },
+  { id: 26, name: 'Epistemologist', xp: 14600, glyph: 'target' },
+  { id: 27, name: 'Ontologist', xp: 15700, glyph: 'dome' },
+  { id: 28, name: 'Idealist', xp: 16900, glyph: 'ripple' },
+  { id: 29, name: 'Rationalist', xp: 18200, glyph: 'infinity' },
+  { id: 30, name: 'Empiricist', xp: 19500, glyph: 'prism' },
+  // ── CRIMSON · the crested shield ─────────────────────────────────────
+  { id: 31, name: 'Aesthete', xp: 20800, glyph: 'torch' },
+  { id: 32, name: 'Polemicist', xp: 22200, glyph: 'lamp' },
+  { id: 33, name: 'Iconoclast', xp: 23600, glyph: 'shieldcross' },
+  { id: 34, name: 'Heretic', xp: 25000, glyph: 'gate' },
+  { id: 35, name: 'Revolutionary', xp: 26500, glyph: 'ship' },
+  { id: 36, name: 'Firebrand', xp: 28100, glyph: 'beacon' },
+  // ── AMETHYST · the winged ────────────────────────────────────────────
+  { id: 37, name: 'Sage', xp: 29700, glyph: 'crescent' },
+  { id: 38, name: 'Mystic', xp: 31300, glyph: 'hexagram' },
+  { id: 39, name: 'Illuminate', xp: 33000, glyph: 'ring' },
+  { id: 40, name: 'Oracle', xp: 34700, glyph: 'owl' },
+  { id: 41, name: 'Visionary', xp: 36400, glyph: 'gem' },
+  { id: 42, name: 'Hierophant', xp: 38200, glyph: 'key' },
+  // ── AURUM · the crowned ──────────────────────────────────────────────
+  { id: 43, name: 'Archon', xp: 40100, glyph: 'crown' },
+  { id: 44, name: 'Luminary', xp: 42000, glyph: 'star' },
+  { id: 45, name: 'Magus', xp: 43900, glyph: 'orbit' },
+  { id: 46, name: 'Immortal', xp: 45900, glyph: 'sunface' },
+  { id: 47, name: 'Transcendent', xp: 47900, glyph: 'starcompass' },
+  { id: 48, name: 'Grand Philosopher', xp: 50000, glyph: 'bookrays' },
 ];
 
 /**
@@ -173,8 +201,13 @@ export function rankProgress(rankIndex: number, totalXP: number): {
   bandSize: number;
 } {
   const a = awardedRank(rankIndex, totalXP);
-  const span = a.next ? a.next.xp - a.current.xp : 0;
-  const raw = totalXP - a.current.xp;
+  // THE BAND STARTS WHEREVER THEY ACTUALLY WERE. Normally that is the current
+  // rank's threshold; for a reader holding a rank above their XP — which the
+  // ladder's own lengthening can produce, see the header — it is their XP, so
+  // the band and the "x XP to go" figure below describe the same distance.
+  const base = a.next ? Math.min(a.current.xp, totalXP) : a.current.xp;
+  const span = a.next ? a.next.xp - base : 0;
+  const raw = totalXP - base;
   return {
     ...a,
     pct: a.next ? Math.max(0, Math.min(1, raw / span)) : 1,
