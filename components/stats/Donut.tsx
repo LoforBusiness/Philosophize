@@ -1,113 +1,113 @@
 import { useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet, type GestureResponderEvent } from 'react-native';
 import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
-import Svg, { Circle, Defs, G, LinearGradient, Stop } from 'react-native-svg';
-import { INK, PAPER, ramp, mix } from '@/components/shared/tone';
+import Svg, { Circle, Defs, G, LinearGradient, Line, Stop } from 'react-native-svg';
+import { PANEL_BASE, PANEL_RULE, glow, mix } from '@/components/shared/tone';
 import { C } from '@/constants/design';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE RING — a real graph again, struck rather than flat.
+// THE DIAL — the ring at the top of the instrument.
 //
-// The reader liked having a chart here and said the replacement bars, while
-// clearer, lost something. They were right: a ranking answers "which is
-// biggest", and a ring answers "what is the shape of my reading", which is a
-// different and more satisfying question. So the ring is back, and the two
-// things that made the old pie dull are not.
+// ── WHY IT IS THIN NOW ──────────────────────────────────────────────────────
 //
-// WHAT THE OLD PIE GOT WRONG:
-//  · it was drawn in six GREYS, so a slice had to be matched to a legend one at
-//    a time. These are the six measured `BRANCH` hues.
-//  · it was FLAT — a filled wedge with a hairline. Every segment here runs
-//    lit → base → shade along the one light from `tone.ts`, the same light every
-//    rank pin, badge, quote plate and profile bar in this app uses, so the ring
-//    reads as a turned object rather than a printed chart.
-//  · it hung leader ticks and percentage labels around itself, which is what
-//    made it need 50px of padding on every side and still look cramped. The
-//    legend below carries the numbers instead, and it is also what you tap.
+//   > "the graph is too kidesh ... not just a bunch of colors that make the app
+//   > feel cheep."
 //
-// ── NOT ONE SVG PROPERTY IS ANIMATED, AND THAT IS THE RULE ──────────────────
+// The previous ring was 26px of saturated colour on white, which is a great deal
+// of pigment and reads as poster paint. Nothing was wrong with the hues: this
+// one carries the same six branches at 14px on near-black, cut to jewel tones by
+// `glow()`, and the whole difference is AREA and GROUND. A thin arc of amber on
+// black is a filament; a fat one on paper is a crayon.
 //
-// §17: what costs is the AREA being repainted, and an animated <Svg> is the
-// shape that rule is about. The ring is INERT — the arcs are computed once and
-// never touched. Everything that moves is a transform on the wrapper, composited
-// on the UI thread, which is how the old pie did its entrance too and the one
-// thing about it worth keeping.
+// ── THE TICKS ARE NOT DECORATION ────────────────────────────────────────────
+//
+// Sixty of them, every six degrees, every fifth one longer. They are what makes
+// a circle read as an INSTRUMENT rather than as a pie: a bezel implies the ring
+// is measured against something, and it gives the eye a scale to judge a
+// segment against. They are also the cheapest depth available — a second, finer,
+// entirely static ring outside the first.
+//
+// ── AND STILL NOT ONE ANIMATED SVG PROPERTY ─────────────────────────────────
+//
+// §17. Arcs and ticks are computed once. The only thing that moves is a scale
+// transform on the wrapper — see `pop`, and `bounceTo` in InsightBoard for the
+// squeeze-then-overshoot it carries.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Segment { key: string; label: string; value: number; hue: string }
 
 interface Props {
   segments: Segment[];
-  /** The big number in the middle. */
   total: number;
-  /** What that number is. */
   totalLabel: string;
   size?: number;
   selected?: string | null;
   onSelect?: (key: string) => void;
-  /** Drives the entrance and the bounce — see `bounceTo` in InsightBoard. */
   pop: SharedValue<number>;
 }
 
-/** How thick the ring is, and how much of a paper gap sits between segments. */
-const STROKE = 26;
-const GAP_DEG = 2.2;
+const STROKE = 14;
+const GAP_DEG = 3;
+const TICKS = 60;
 
 export default function Donut({
-  segments, total, totalLabel, size = 190, selected, onSelect, pop,
+  segments, total, totalLabel, size = 132, selected, onSelect, pop,
 }: Props) {
-  const r = (size - STROKE) / 2 - 2;
+  const r = (size - STROKE) / 2 - 8;          // 8 leaves room for the tick bezel
   const circ = 2 * Math.PI * r;
-  const sum = segments.reduce((a, s) => a + s.value, 0);
+  const sum = segments.reduce((a, x) => a + x.value, 0);
 
-  // Geometry once. A segment carries its own angular span so a tap can be
-  // resolved against it without re-deriving anything.
   const arcs = useMemo(() => {
     if (sum <= 0) return [];
+    const drawn = segments.filter((x) => x.value > 0);
     let acc = 0;
-    return segments
-      .filter((s) => s.value > 0)
-      .map((s) => {
-        const frac = s.value / sum;
-        const startDeg = acc * 360;
-        const endDeg = (acc + frac) * 360;
-        acc += frac;
-        // The gap is taken off the END of each arc, so the run still starts
-        // where the previous one nominally finished and the ring stays closed.
-        const drawn = Math.max(0.6, (endDeg - startDeg) - (segments.length > 1 ? GAP_DEG : 0));
-        return {
-          ...s,
-          startDeg,
-          endDeg,
-          len: (drawn / 360) * circ,
-          // THE QUARTER TURN LIVES HERE, not in a <G rotation>, and that is not
-          // a preference. A `userSpaceOnUse` gradient inside a rotated group is
-          // rotated with it, so putting the ring's -90 on a <G> silently spun
-          // the ONE LIGHT with it and the whole ring rendered washed out with no
-          // two segments agreeing. An SVG circle's dash starts at three o'clock
-          // and runs clockwise; a positive dashoffset walks the pattern back, so
-          // a quarter of the circumference moves the run to twelve o'clock and
-          // leaves the gradient in plain, unrotated user space.
-          offset: -(startDeg / 360) * circ + circ / 4,
-          ramp: ramp(s.hue),
-        };
-      });
+    return drawn.map((x) => {
+      const frac = x.value / sum;
+      const startDeg = acc * 360;
+      const endDeg = (acc + frac) * 360;
+      acc += frac;
+      const span = Math.max(0.8, (endDeg - startDeg) - (drawn.length > 1 ? GAP_DEG : 0));
+      return {
+        ...x,
+        startDeg,
+        endDeg,
+        len: (span / 360) * circ,
+        // THE QUARTER TURN IS IN THE DASH, not in a <G rotation>: a
+        // userSpaceOnUse gradient is rotated by its own group, so putting the
+        // −90 on a <G> spins the one light along with the ring.
+        offset: -(startDeg / 360) * circ + circ / 4,
+        g: glow(x.hue),
+      };
+    });
   }, [segments, sum, circ]);
 
-  const ringStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pop.value }],
-  }));
+  const ticks = useMemo(() => {
+    const rIn = r + STROKE / 2 + 3;
+    return Array.from({ length: TICKS }, (_, i) => {
+      const rad = (((i / TICKS) * 360 - 90) * Math.PI) / 180;
+      const long = i % 5 === 0;
+      const rOut = rIn + (long ? 5 : 2.5);
+      return {
+        x1: size / 2 + Math.cos(rad) * rIn,
+        y1: size / 2 + Math.sin(rad) * rIn,
+        x2: size / 2 + Math.cos(rad) * rOut,
+        y2: size / 2 + Math.sin(rad) * rOut,
+        long,
+      };
+    });
+  }, [r, size]);
 
-  // Which segment did that touch land on? Anything in the hole or outside the
-  // ring is deliberately inert — a tap there means "none of them", not the
-  // nearest one, which is the behaviour a stray thumb wants.
+  const ringStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
+
+  // Anything in the hole or outside the ring is deliberately inert — a stray
+  // thumb means "none of them", not "the nearest one".
   const hit = (e: GestureResponderEvent) => {
     if (!onSelect || arcs.length === 0) return;
     const { locationX, locationY } = e.nativeEvent;
     const dx = locationX - size / 2;
     const dy = locationY - size / 2;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist < r - STROKE / 2 - 4 || dist > r + STROKE / 2 + 4) return;
+    if (dist < r - STROKE / 2 - 6 || dist > r + STROKE / 2 + 8) return;
     const deg = ((Math.atan2(dy, dx) * 180) / Math.PI + 90 + 360) % 360;
     const found = arcs.find((a) => deg >= a.startDeg && deg < a.endDeg);
     if (found) onSelect(found.key);
@@ -116,27 +116,14 @@ export default function Donut({
   return (
     <View style={styles.wrap}>
       <Pressable onPress={hit} accessibilityRole="none">
-        <Animated.View style={[{ width: size, height: size }, ringStyle]}>
+        {/* A STABLE ID SO A HARNESS CAN FIND IT. `document.querySelector('svg')`
+            used to be good enough and stopped being so the moment the dial grew
+            a tick bezel and the ledger grew icons — the sampler started reading
+            rotation matrices off tick marks and reporting negative "scales".
+            Same reasoning as `#beat-progress` and `#drag-strip` in §21. */}
+        <Animated.View nativeID="dial" style={[{ width: size, height: size }, ringStyle]}>
           <Svg width={size} height={size}>
             <Defs>
-              {/* USER SPACE, NOT THE OBJECT BOX.
-                  A stroked circle's bounding box is the WHOLE circle however
-                  little of it the dash actually paints, so an objectBoundingBox
-                  gradient gives every arc its own private light and each one
-                  samples whichever diagonal slice it happens to sit on — six
-                  segments lit from six directions. Spanning the ring in user
-                  space instead means ONE light across the whole object, which is
-                  what tone.ts requires: an arc at eleven o'clock is lit, one at
-                  five is shaded.
-
-                  It only works because the quarter turn is in the dash offset
-                  rather than on a <G rotation> — a userSpaceOnUse gradient is
-                  rotated along with its group, which would spin the light with
-                  the ring and undo the whole point. See `offset` above.
-
-                  The lit end is pulled in from ramp().lit (34% toward paper) to
-                  16%: across a whole ring that wider swing reads as a segment
-                  that has not finished loading rather than one catching light. */}
               {arcs.map((a) => (
                 <LinearGradient
                   key={`g-${a.key}`}
@@ -144,22 +131,28 @@ export default function Donut({
                   gradientUnits="userSpaceOnUse"
                   x1={size * 0.12} y1={0} x2={size * 0.88} y2={size}
                 >
-                  <Stop offset="0%" stopColor={mix(a.hue, PAPER, 0.16)} />
-                  <Stop offset="52%" stopColor={a.ramp.base} />
-                  <Stop offset="100%" stopColor={a.ramp.shade} />
+                  <Stop offset="0%" stopColor={a.g.mark} />
+                  <Stop offset="100%" stopColor={a.g.deep} />
                 </LinearGradient>
               ))}
             </Defs>
+
+            {ticks.map((t, i) => (
+              <Line
+                key={`t${i}`}
+                x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
+                stroke={t.long ? mix(PANEL_RULE, C.paper, 0.28) : PANEL_RULE}
+                strokeWidth={1}
+              />
+            ))}
 
             {/* The groove the ring sits in, so an empty reader still sees the
                 shape of the thing they are about to fill. */}
             <Circle
               cx={size / 2} cy={size / 2} r={r}
-              stroke={mix(PAPER, INK, 0.07)} strokeWidth={STROKE} fill="none"
+              stroke={mix(PANEL_BASE, C.paper, 0.09)} strokeWidth={STROKE} fill="none"
             />
 
-            {/* No rotation — see the dash offset above for why the run still
-                starts at twelve o'clock. */}
             <G>
               {arcs.map((a) => {
                 const on = selected === a.key;
@@ -168,14 +161,14 @@ export default function Donut({
                     key={a.key}
                     cx={size / 2} cy={size / 2} r={r}
                     stroke={`url(#seg-${a.key})`}
-                    strokeWidth={on ? STROKE + 7 : STROKE}
+                    strokeWidth={on ? STROKE + 4 : STROKE}
                     strokeDasharray={`${a.len} ${circ - a.len}`}
                     strokeDashoffset={a.offset}
                     strokeLinecap="butt"
                     fill="none"
-                    // Dimmed, not drained: at 0.45 the unselected arcs lost their hue
-                    // and the ring read as grey the moment anything was picked, which
-                    // is the dullness this tab was rebuilt to get rid of.
+                    // Dimmed, not drained: below about 0.6 the unselected arcs
+                    // lose their hue and the dial reads grey the moment anything
+                    // is picked, which is the dullness this was rebuilt to fix.
                     opacity={selected && !on ? 0.62 : 1}
                   />
                 );
@@ -183,8 +176,6 @@ export default function Donut({
             </G>
           </Svg>
 
-          {/* The hub. Absolute so it never enters the SVG's layout, and so the
-              ring can scale under it without dragging the type along. */}
           <View style={styles.hub} pointerEvents="none">
             <Text style={styles.hubValue}>{total}</Text>
             <Text style={styles.hubLabel}>{totalLabel}</Text>
@@ -202,11 +193,11 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   hubValue: {
-    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 40, lineHeight: 46,
-    color: INK,
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 30, lineHeight: 34,
+    color: C.paper,
   },
   hubLabel: {
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6,
-    color: C.inkSoft, marginTop: 1,
+    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 1.4,
+    color: C.dim, marginTop: 1,
   },
 });

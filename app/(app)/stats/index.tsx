@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { useSharedValue } from 'react-native-reanimated';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import {
-  Ledger, RankedBars, ThinkerLeague, bounceTo,
+  Ledger, RankedBars, ThinkerLeague, DiscoveryCard, bounceTo,
   type LedgerItem, type BarRow, type LeagueRow,
 } from '@/components/stats/InsightBoard';
 import Donut from '@/components/stats/Donut';
+import {
+  Instrument, PanelHead, PanelRule, Legend, SparkLine, MetricStrip, type Metric,
+} from '@/components/stats/Instrument';
 import { ALL_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS, ERA_GROUPS, eraGroupOf, eraGroupOfId } from '@/data/philosophers';
 import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
@@ -18,13 +21,16 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { statsFingerprint, grownKeys } from '@/lib/utils/statsMilestone';
 import { discoverIn, discoverFact, type Candidate } from '@/lib/utils/statsDiscovery';
+import { dailyXP, activeDays as countActive } from '@/lib/utils/xpSeries';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 
-// Politics is the only branch whose real name will not sit on a bar row beside
-// its count, and "Political Philosophy" wrapping to two lines in a ranked list
-// breaks the rhythm of the other five.
+/** How far back the line chart looks. Thirty is a month you can still resolve. */
+const WINDOW = 30;
+
+// Politics is the only branch whose real name will not sit on a legend row
+// beside its count without wrapping.
 const SHORT: Record<string, string> = { 'political-philosophy': 'Politics' };
 const shortName = (slug: string, name: string) => SHORT[slug] ?? name;
 
@@ -39,37 +45,39 @@ const ERA_NAME: Record<EraKey, string> = {
 // ─────────────────────────────────────────────────────────────────────────────
 // INSIGHTS.
 //
-// ── WHAT THIS TAB USED TO BE, AND WHY IT WAS DULL ───────────────────────────
+// ── THE INSTRUMENT, AND WHY THE TAB WAS CHEAP BEFORE IT ─────────────────────
 //
-// Two grey pies and a grey bar chart, all three drawn from the same numbers, and
-// those numbers were composites: `interest = lessons×3 + quotes×2 + views`.
-// Three shapes, one fact, no colour, and a unit nobody has ever earned.
+//   > "the whole tab looks too much childish, I need more premium feel and
+//   > vibrent colors, not just a bunch of colors that make the app feel cheep."
 //
-// Three changes, and none of them invents any data:
+// The two halves of that only look contradictory. What made it cheap was never
+// the palette, it was the AREA: six saturated fills on white, all large, all at
+// once — a 26px ring, twelve-pixel rounded pill bars, pastel tinted cards behind
+// the prose. Six big colours competing on paper is a rainbow.
 //
-// · COLOUR THAT MEANS SOMETHING. `BRANCH` and `ERA` in constants/design.ts are
-//   two measured scales that exist precisely so a list of six or five readings
-//   can be told apart at a glance. This tab was the last screen still drawing
-//   six branches in six greys — the exact thing design.ts's own comment calls
-//   "the 'dull' the redesign was asked to fix".
+// So the readings that ARE a chart moved onto one dark instrument panel, where
+// the same six hues appear as a thin arc and an 8px swatch and read as cut
+// stones rather than poster paint, and where the type is cream and the rules are
+// hairlines. See components/stats/Instrument.tsx and tone.ts's `glow()`.
 //
-// · COUNTS, NOT SCORES. Every number drawn here is a thing the reader did:
-//   lessons read, thinkers met, quotes kept, days practised. "Interest 47" is
-//   gone.
+// The panel also answers the other half of the brief — "a line graph below the
+// pie chart" with real metrics — with thirty days of XP, its seven-day mean, the
+// best day marked, and four figures under it. That is comprehensive in the way
+// the reader asked for: more to read, not more to look at.
 //
-// · FOUR DIFFERENT READINGS instead of one repeated three times — the ledger,
-//   where the reading goes, who it was about, and which eras have been met.
+// ── WHAT STAYED ON PAPER, AND WHY ───────────────────────────────────────────
+//
+// The ledger, the thinker league and the era rail. They are lists rather than
+// charts, they carry the reader's own achievements, and the app is printed
+// matter — turning the entire tab dark would make it a dashboard belonging to
+// some other product. One instrument on a page of paper is a plate in a book.
 //
 // ── AND NO TARGET COMES FROM A TOTAL ────────────────────────────────────────
 //
-//   > "I dont want ... '4 more lessons to complete Logic' ... since I will be
-//   > continuing adding lessons that doesnt make sense."
-//
-// Right, and the harm is bigger than the wording: a ceiling-based target moves
-// AWAY from a reader whenever content ships. lib/utils/statsMilestone.ts is
-// rebuilt around targets that cannot — pass the next thing along, or reach the
-// next round number — and scripts/check-stats.mjs runs every profile against a
-// 32-lesson and a 900-lesson curriculum and fails if a single milestone differs.
+// lib/utils/statsMilestone.ts and statsDiscovery.ts hold that line: a tap names
+// a thinker you have never opened, never a countdown to a ceiling the curriculum
+// keeps moving. scripts/check-stats.mjs re-derives it against a 32-lesson and a
+// 900-lesson curriculum.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function StatsScreen() {
@@ -78,11 +86,17 @@ export default function StatsScreen() {
   const philosopherLessons = useUserDataStore((s) => s.philosopherLessons);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
   const practisedDays = useUserDataStore((s) => s.activeDays);
+  const xpEvents = useUserDataStore((s) => s.xpEvents);
+  const streak = useUserDataStore((s) => s.streak);
   const settings = useUserDataStore((s) => s.settings);
   const seenFingerprint = useUserDataStore((s) => s.statsSeenFingerprint);
   const markStatsSeen = useUserDataStore((s) => s.markStatsSeen);
   const openPhilosopher = useUIStore((s) => s.openPhilosopher);
   const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'insights';
+
+  const { width } = useWindowDimensions();
+  // page padding 20 each side, panel padding 16 each side.
+  const panelW = Math.max(220, width - 40 - 32);
 
   const lessonsDone = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
   const quotesKept = savedQuotes.length;
@@ -96,25 +110,21 @@ export default function StatsScreen() {
     const met = ALL_PHILOSOPHERS.filter(
       (p) => p.branchSlugs.includes(b.slug) && (philosopherViews[p.id] ?? 0) > 0
     ).length;
-    const bits = [
-      `${quotes} quote${quotes === 1 ? '' : 's'} kept`,
-      `${met} thinker${met === 1 ? '' : 's'} met`,
-    ];
     return {
       key: b.slug,
       label: shortName(b.slug, b.name),
       value: lessons,
       hue: BRANCH[b.slug as BranchKey] ?? C.HUE,
-      detail: bits.join('  ·  '),
+      detail: `${quotes} quote${quotes === 1 ? '' : 's'} kept  ·  ${met} thinker${met === 1 ? '' : 's'} met`,
       action: 'lesson' as const,
     };
   }).sort((a, b) => b.value - a.value), [lessonsByBranch, savedQuotes, philosopherViews]);
 
   // ── who it was about ──────────────────────────────────────────────────────
   //
-  // The score is a COUNT of two things the reader did — lessons that were about
-  // them, and quotes of theirs kept. Opening a page is the tie-break rather than
-  // a term, because scrolling a profile is not reading someone.
+  // A COUNT of two things the reader did — lessons that were about them, and
+  // quotes of theirs kept. Opening a page is the tie-break rather than a term,
+  // because scrolling a profile is not reading someone.
   const league: LeagueRow[] = useMemo(() => ALL_PHILOSOPHERS
     .map((p) => {
       const lessons = philosopherLessons[p.id] ?? 0;
@@ -136,11 +146,6 @@ export default function StatsScreen() {
     .slice(0, 5), [philosopherLessons, savedQuotes, philosopherViews]);
 
   // ── which eras have been met ──────────────────────────────────────────────
-  //
-  // A reading no other screen has: 322 thinkers are sorted into five eras, and
-  // "whose century do you actually read" is a question the app has always had
-  // the answer to and never asked. Counts of thinkers MET — never out of a
-  // total, for the same reason nothing else here is.
   const eraRows: BarRow[] = useMemo(() => {
     const met: Record<string, number> = {};
     const quoted: Record<string, number> = {};
@@ -165,10 +170,26 @@ export default function StatsScreen() {
     }).sort((a, b) => b.value - a.value);
   }, [philosopherViews, savedQuotes]);
 
-  // ── has anything changed since they last looked? ──────────────────────────
+  // ── the month ─────────────────────────────────────────────────────────────
   //
-  // The entrance plays only when it has, so movement on this tab MEANS something
-  // happened rather than decorating every visit.
+  // `dailyXP` buckets the cumulative XP log into per-day gains and keeps the
+  // empty days, which is the whole reason the line means anything: a log only
+  // records earning, so bucketing by index would draw four busy days in a row
+  // where there were four busy days spread over a fortnight.
+  const series = useMemo(() => dailyXP(xpEvents, WINDOW, Date.now()), [xpEvents]);
+  const monthXP = series.reduce((a, b) => a + b, 0);
+  const bestDay = series.reduce((a, b) => (b > a ? b : a), 0);
+  const activeInWindow = countActive(series);
+  const perActive = activeInWindow > 0 ? Math.round(monthXP / activeInWindow) : 0;
+
+  const metrics: Metric[] = [
+    { key: 'best', label: 'BEST DAY', value: bestDay },
+    { key: 'per', label: 'PER ACTIVE DAY', value: perActive },
+    { key: 'active', label: 'DAYS ACTIVE', value: activeInWindow, suffix: `/${WINDOW}` },
+    { key: 'streak', label: 'STREAK', value: streak },
+  ];
+
+  // ── has anything changed since they last looked? ──────────────────────────
   const fingerprint = useMemo(
     () => statsFingerprint({
       branches: areaRows.map((r) => ({
@@ -194,7 +215,6 @@ export default function StatsScreen() {
   useFocusEffect(
     useCallback(() => {
       // NO `setAnimate(false)` HERE, and that is a fix rather than an omission.
-      //
       // `markStatsSeen` writes the fingerprint, which re-renders, which changes
       // this callback's identity, which makes useFocusEffect run it AGAIN — and
       // on that second pass the two fingerprints are equal. Clearing the flag
@@ -204,8 +224,7 @@ export default function StatsScreen() {
       // sat at exactly 1.000 through a growth event that should have bounced.
       //
       // The flag does not need clearing. Children re-run on `playToken`, which
-      // only moves when there is news, so a focus with nothing new animates
-      // nothing whatever `animate` says.
+      // only moves when there is news.
       if (fingerprint === seenFingerprint) return;
       // Guard against the effect re-running for the same fingerprint while the
       // store write settles — otherwise the entrance restarts mid-flight.
@@ -218,22 +237,17 @@ export default function StatsScreen() {
     }, [fingerprint, seenFingerprint, markStatsSeen]),
   );
 
-  // The ring squeezes and bounces on every visit that has news, which is what
-  // makes arriving at the tab feel like arriving at a scoreboard. It is one
-  // transform on one wrapper — the SVG under it never animates (see the file
-  // header of Donut.tsx).
-  const donutPop = useSharedValue(1);
+  // The dial squeezes and bounces on every visit that has news, which is what
+  // makes arriving at the tab feel like arriving at a scoreboard. One transform
+  // on one wrapper — the SVG under it never animates.
+  const dialPop = useSharedValue(1);
   useEffect(() => {
-    if (!animate) { donutPop.value = 1; return; }
-    donutPop.value = 1;
-    donutPop.value = bounceTo(1, 60, true);
-  }, [playToken, animate, donutPop]);
+    if (!animate) { dialPop.value = 1; return; }
+    dialPop.value = 1;
+    dialPop.value = bounceTo(1, 60, true);
+  }, [playToken, animate, dialPop]);
 
   // ── the discovery pool ────────────────────────────────────────────────────
-  //
-  // 322 thinkers, shaped once. Everything a tap needs in order to say something
-  // the reader does not already know is in here: who they have never opened,
-  // whose ideas turn up in the most places, and what each of them thought.
   const candidates: Candidate[] = useMemo(() => ALL_PHILOSOPHERS.map((p) => ({
     id: p.id,
     name: p.name,
@@ -246,8 +260,6 @@ export default function StatsScreen() {
     lessons: philosopherLessons[p.id] ?? 0,
   })), [philosopherViews, philosopherLessons]);
 
-  // The seed carries the row AND how far the reader has got in it, so a card is
-  // stable while they read it and turns over as they make progress.
   const discoverBranch = useCallback((slug: string) => {
     const row = areaRows.find((r) => r.key === slug);
     return discoverIn(
@@ -264,8 +276,6 @@ export default function StatsScreen() {
     );
   }, [candidates, eraRows]);
 
-  // A thinker the reader HAS read: "you have not met them" is the wrong card, so
-  // it is one of their three facts instead.
   const discoverThinker = useCallback((id: string) => {
     const c = candidates.find((x) => x.id === id);
     if (!c) return null;
@@ -274,24 +284,12 @@ export default function StatsScreen() {
     );
   }, [candidates]);
 
-  // ── the one piece of prose ────────────────────────────────────────────────
-  //
-  // It says WHY each thing leads, from whichever signal actually earned it, so
-  // the reader learns what the chart is made of rather than being handed a
-  // number they cannot place.
-  const topArea = areaRows[0];
-  const topPhil = league[0];
-  const insight = (() => {
-    if (!topArea || topArea.value === 0) {
-      return 'Read a lesson or keep a quote, and your story will start here.';
-    }
-    const a = `${topArea.label} is where you spend your time — ${topArea.value} lesson${topArea.value === 1 ? '' : 's'} so far.`;
-    if (!topPhil) return a;
-    const why = topPhil.lessons >= topPhil.quotes
-      ? `${topPhil.lessons} of your lessons were about them`
-      : `you have kept ${topPhil.quotes} of their lines`;
-    return `${a} ${topPhil.name} leads your thinkers: ${why}.`;
-  })();
+  // The dial and its legend share one selection, so they are one chart rather
+  // than two views of the same numbers.
+  const [dialSel, setDialSel] = useState<string | null>(null);
+  const dialPick = (k: string) => setDialSel((p) => (p === k ? null : k));
+  const dialRow = areaRows.find((r) => r.key === dialSel) ?? null;
+  const dialFind = dialSel ? discoverBranch(dialSel) : null;
 
   const ledger: LedgerItem[] = [
     { key: '__lessons', label: 'LESSONS', value: lessonsDone, hue: BRANCH.ethics },
@@ -312,13 +310,19 @@ export default function StatsScreen() {
     return g;
   }, [grown, areaRows, eraRows, league]);
 
-  // NOTE there is no `hasAny` gate any more, and that is deliberate. An empty
-  // Insights tab used to be a single grey box saying "your charts will appear
-  // here", which is the most boring thing on the most boring screen — and it
-  // hid the one thing a new reader most wants to see, which is the SHAPE of
-  // what they are about to fill. Zeroed, the ledger and the two rails still draw
-  // six branches and five eras in their own colours, with empty grooves waiting.
-  // It is the same argument the saved-quotes rail makes for drawing locked eras.
+  const topArea = areaRows[0];
+  const topPhil = league[0];
+  const insight = (() => {
+    if (!topArea || topArea.value === 0) {
+      return 'Read a lesson or keep a quote, and your story will start here.';
+    }
+    const a = `${topArea.label} is where you spend your time — ${topArea.value} lesson${topArea.value === 1 ? '' : 's'} so far.`;
+    if (!topPhil) return a;
+    const why = topPhil.lessons >= topPhil.quotes
+      ? `${topPhil.lessons} of your lessons were about them`
+      : `you have kept ${topPhil.quotes} of their lines`;
+    return `${a} ${topPhil.name} leads your thinkers: ${why}.`;
+  })();
 
   return (
     <ScreenTransition bg={Paper}>
@@ -333,27 +337,58 @@ export default function StatsScreen() {
 
           <Ledger items={ledger} playToken={playToken} animate={animate} grown={ledgerGrown} />
 
-          <RankedBars
-            title="Where Your Reading Goes"
-            subtitle="lessons finished, by branch"
-            rows={areaRows}
-            playToken={playToken}
-            animate={animate}
-            grown={grown}
-            discoverFor={discoverBranch}
-            onOpenThinker={openPhilosopher}
-            chart={(sel, onSelect) => (
+          {/* ── the instrument ── */}
+          <Instrument>
+            <PanelHead kicker="WHERE YOUR READING GOES" right="BY BRANCH" />
+            <View style={styles.dialRow}>
               <Donut
                 segments={areaRows}
                 total={lessonsDone}
-                totalLabel="LESSONS READ"
-                selected={sel}
-                onSelect={onSelect}
-                pop={donutPop}
+                totalLabel="LESSONS"
+                selected={dialSel}
+                onSelect={dialPick}
+                pop={dialPop}
               />
+              <Legend
+                rows={areaRows}
+                total={lessonsDone}
+                selected={dialSel}
+                onSelect={dialPick}
+                grown={grown}
+                playToken={playToken}
+                animate={animate}
+              />
+            </View>
+
+            {dialFind && dialRow ? (
+              <DiscoveryCard
+                d={dialFind}
+                hue={dialRow.hue}
+                sub={dialRow.detail}
+                onOpen={openPhilosopher}
+                dark
+              />
+            ) : (
+              <Text style={styles.panelHint}>Tap a branch to meet someone from it.</Text>
             )}
-            hint
-          />
+
+            <PanelRule />
+
+            <PanelHead kicker={`LAST ${WINDOW} DAYS`} right={`${monthXP} XP`} />
+            <View style={{ marginTop: 8 }}>
+              <SparkLine
+                series={series}
+                spanLabel={`${WINDOW} DAYS AGO`}
+                width={panelW}
+                playToken={playToken}
+                animate={animate}
+              />
+            </View>
+
+            <PanelRule />
+
+            <MetricStrip metrics={metrics} playToken={playToken} animate={animate} />
+          </Instrument>
 
           {league.length > 0 && (
             <ThinkerLeague
@@ -375,6 +410,7 @@ export default function StatsScreen() {
             grown={grown}
             discoverFor={discoverEra}
             onOpenThinker={openPhilosopher}
+            hint
           />
 
           <View style={styles.weekCard}>
@@ -401,14 +437,19 @@ const styles = StyleSheet.create({
   titleItalic: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 30, color: Ink, marginTop: -2 },
   rule: { height: 1.5, backgroundColor: Ink, marginTop: 14, marginBottom: 4 },
 
+  dialRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 12, marginBottom: 10 },
+  panelHint: {
+    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
+    fontSize: 12, color: C.dim, marginTop: 2,
+  },
+
   weekCard: {
-    borderLeftWidth: 4, borderLeftColor: Ink, borderRadius: 8,
-    backgroundColor: C.surfaceSoft,
-    paddingHorizontal: 14, paddingVertical: 14, marginTop: 30,
+    borderLeftWidth: 3, borderLeftColor: Ink,
+    paddingLeft: 14, paddingVertical: 4, marginTop: 30,
   },
   weekHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  weekDiamond: { fontSize: 12, color: Ink },
-  weekTitle: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.8, color: Ink },
+  weekDiamond: { fontSize: 11, color: Ink },
+  weekTitle: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.8, color: Ink },
   weekBody: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
     fontSize: 15, lineHeight: 23, color: Ink, marginTop: 8,

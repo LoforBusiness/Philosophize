@@ -304,3 +304,94 @@ export function plate(hue: string): Plate {
     rule: mix(PAPER, hue, 0.30),
   };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE INSTRUMENT: COLOUR THAT HAS TO SURVIVE A DARK GROUND.
+//
+// Insights was rebuilt around a dark panel, and the reader's brief for it was
+// exact and, on the face of it, contradictory:
+//
+//   > "I need more premium feel and vibrent colors, not just a bunch of colors
+//   > that make the app feel cheep."
+//
+// Both halves are real, and the two obvious moves each fail one of them. Mixing
+// the branch hues toward PAPER to lift them off the dark — what `ramp().lit`
+// does — DESATURATES: the six came out #8E768E, #5A93A1, #7C96BC, a pastel set
+// that reads washed rather than rich. Pushing saturation up in HSL instead runs
+// straight to #C651CD electric magenta and #41DCA5 neon mint, which is the exact
+// corner `constants/design.ts` already records its own colour search falling
+// into, and it is the cheapest a palette can look.
+//
+// The band between them is a JEWEL TONE: the branch's own hue, its chroma lifted
+// by a quarter rather than doubled, and lightness at the midpoint. Amethyst,
+// teal, sapphire, emerald, garnet, amber — the same six branches, recognisably
+// the same colours as on paper, but cut rather than printed.
+//
+// ── AND THE VIBRANCY IS IN THE GROUND, NOT THE PIGMENT ──────────────────────
+//
+// This is the part that actually answers the brief. A colour on near-black looks
+// far richer than the same colour on paper, so the six do not need to shout —
+// what makes the old ring look like a toy is not its hue, it is that 26px of it
+// was painted at once. On the instrument the same tones appear as a THIN arc and
+// a 8px swatch, and everything else is cream. Small area, dark ground, restraint.
+//
+// TYPE ON THE PANEL IS NEVER A BRANCH COLOUR. Measured on `PANEL_BASE`, the six
+// run 3.8:1 to 9.1:1 — comfortably past the 3:1 a non-text mark is held to, and
+// three of them under the 4.5:1 that text needs. So the hues encode and the
+// words stay cream. scripts/check-ui.mjs re-derives both floors.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** The instrument's ground: ink taken down toward black, and its lit top edge. */
+export const PANEL_BASE = '#0E0E0E';
+export const PANEL_LIP = '#232220';
+/** The hairline that separates blocks on the panel. */
+export const PANEL_RULE = '#2E2C29';
+
+function toHsl(hex: string): [number, number, number] {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const mx = Math.max(r, g, b);
+  const mn = Math.min(r, g, b);
+  const l = (mx + mn) / 2;
+  const d = mx - mn;
+  if (d === 0) return [0, 0, l];
+  const s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+  let h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h /= 6;
+  return [h * 360, s, l];
+}
+
+function fromHsl(h: number, s: number, l: number): string {
+  const hh = h / 360;
+  const f = (p: number, q: number, t0: number) => {
+    let t = t0;
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  if (s === 0) return toHex(l * 255, l * 255, l * 255);
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  return toHex(f(p, q, hh + 1 / 3) * 255, f(p, q, hh) * 255, f(p, q, hh - 1 / 3) * 255);
+}
+
+export interface Glow { mark: string; deep: string; wash: string; }
+
+/**
+ * A branch or era hue, cut for the dark panel. MARKS ONLY — never type.
+ *
+ * `mark` is the jewel tone itself. `deep` is the same stone in shadow, for the
+ * far end of an arc so it still turns away from the one light. `wash` is it at a
+ * whisper, for a groove or an area fill that must not become a second surface.
+ */
+export function glow(hue: string): Glow {
+  const [h, s] = toHsl(hue);
+  const mark = fromHsl(h, Math.min(0.52, s * 1.25), 0.5);
+  return {
+    mark,
+    deep: fromHsl(h, Math.min(0.52, s * 1.25), 0.34),
+    wash: mix(PANEL_BASE, mark, 0.16),
+  };
+}

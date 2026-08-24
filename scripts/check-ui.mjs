@@ -702,5 +702,89 @@ for (const [name, hue] of ERA_FACES) {
 }
 
 
+// ── 8 · the instrument: colour that has to survive a dark ground ─────────────
+//
+// Insights' charts sit on a near-black panel, which is where the reader's brief
+// for it lands — "premium feel and vibrent colors, not just a bunch of colors
+// that make the app feel cheep". `tone.glow()` cuts the six branch hues into
+// jewel tones for that ground, and the two ways of getting it wrong are both
+// measurable: mixing toward paper desaturates into pastel, and pushing HSL
+// saturation runs to neon.
+//
+// THE FLOOR THAT MATTERS IS THE ONE THAT SPLITS MARKS FROM WORDS. Three of the
+// six land under 4.5:1 on the panel, so they may draw an arc, a swatch or a rule
+// and may NEVER carry a word. Every string on the panel is cream. This check is
+// what stops the next person tinting a label.
+{
+  const GROUND = T.PANEL_BASE;
+  const r2 = (a, b) => ratio(lum(a), lum(b));
+
+  ok(r2(D.C.paper, GROUND) >= 4.5, 'panel: cream reads as text', `${r2(D.C.paper, GROUND).toFixed(1)}:1`);
+  ok(r2(D.C.paperSoft, GROUND) >= 4.5, 'panel: the muted cream still reads as text',
+    `${r2(D.C.paperSoft, GROUND).toFixed(1)}:1`);
+  ok(r2(D.C.dim, GROUND) >= 3, 'panel: the caption grey clears the mark floor',
+    `${r2(D.C.dim, GROUND).toFixed(1)}:1`);
+  ok(r2(T.METAL.GOLD.lit, GROUND) >= 3, 'panel: the XP line reads', `${r2(T.METAL.GOLD.lit, GROUND).toFixed(1)}:1`);
+  ok(r2(T.PANEL_RULE, GROUND) >= 1.15, 'panel: a hairline is actually visible',
+    `${r2(T.PANEL_RULE, GROUND).toFixed(2)}:1`);
+  // TWO DIFFERENT THINGS, and the first draft measured the wrong one. The
+  // panel's gradient top is SUPPOSED to be barely there — a ground that
+  // announces itself is not a ground. What has to be seen is the 1px bezel
+  // hairline drawn on top of it.
+  ok(r2(T.PANEL_LIP, GROUND) >= 1.1 && r2(T.PANEL_LIP, GROUND) <= 1.8,
+    'panel: the ground shades without becoming a second surface',
+    `${r2(T.PANEL_LIP, GROUND).toFixed(2)}:1`);
+  const bezel = T.mix(T.PANEL_LIP, D.C.paper, 0.22);
+  ok(r2(bezel, GROUND) >= 2, 'panel: the bezel hairline catches light',
+    `${bezel} at ${r2(bezel, GROUND).toFixed(2)}:1`);
+
+  const marks = Object.entries(D.BRANCH).map(([n, h]) => [n, T.glow(h)]);
+  for (const [n, g] of marks) {
+    ok(r2(g.mark, GROUND) >= 3, `glow ${n}: the arc reads on the panel`, `${r2(g.mark, GROUND).toFixed(1)}:1`);
+    // The shaded end of an arc still has to be an arc rather than a shadow.
+    ok(r2(g.deep, GROUND) >= 1.6, `glow ${n}: its shaded end is still visible`,
+      `${r2(g.deep, GROUND).toFixed(2)}:1`);
+    // NOT NEON. A jewel tone is lifted, not blown out — anything that clears
+    // 12:1 on near-black is a highlighter, and that is the corner design.ts
+    // records its own colour search falling into.
+    ok(r2(g.mark, GROUND) <= 12, `glow ${n}: and it is not a highlighter`, `${r2(g.mark, GROUND).toFixed(1)}:1`);
+  }
+
+  // Six arcs in one ring have to be tellable apart, or the legend beside them
+  // is the only way to read the chart.
+  //
+  // MEASURED IN CIELAB, and the first draft of this check was not — it used raw
+  // sRGB distance with a floor of 60 and failed two pairs, which is precisely
+  // the mistake constants/design.ts records its own colour search making. In
+  // sRGB a set pinned to one lightness scores as crowded however far apart it
+  // actually looks. In LAB the jewel set's closest pair is 34.9, against the
+  // 25.1 the SHIPPED branch palette manages — the tones are better separated
+  // than the ones they are cut from, and the instrument was never the problem.
+  const lab = (hex) => {
+    let [r, g, b] = rgb(hex).map((v) => v / 255);
+    const f = (c) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    r = f(r); g = f(g); b = f(b);
+    let X = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047;
+    let Y = r * 0.2126 + g * 0.7152 + b * 0.0722;
+    let Z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883;
+    const t = (v) => (v > 0.008856 ? Math.cbrt(v) : 7.787 * v + 16 / 116);
+    X = t(X); Y = t(Y); Z = t(Z);
+    return [116 * Y - 16, 500 * (X - Y), 200 * (Y - Z)];
+  };
+  const dE = (a, b) => {
+    const [l1, a1, b1] = lab(a); const [l2, a2, b2] = lab(b);
+    return Math.hypot(l1 - l2, a1 - a2, b1 - b2);
+  };
+  let worst = Infinity; let worstPair = '';
+  for (let i = 0; i < marks.length; i++) {
+    for (let j = i + 1; j < marks.length; j++) {
+      const d = dE(marks[i][1].mark, marks[j][1].mark);
+      if (d < worst) { worst = d; worstPair = `${marks[i][0]}/${marks[j][0]}`; }
+    }
+  }
+  ok(worst >= 24, 'the six jewel tones stay tellable apart',
+    `closest pair ${worstPair} at deltaE ${worst.toFixed(1)}, floor 24`);
+}
+
 console.log(bad === 0 ? '\nui system: all clear.' : `\n${bad} ui check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);

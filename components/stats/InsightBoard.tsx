@@ -12,7 +12,9 @@ import { MotiView } from 'moti';
 import { LinearGradient } from 'expo-linear-gradient';
 import ACounter, { counterStyle } from '@/components/shared/ACounter';
 import { StruckBar, StruckTile } from '@/components/profile/Struck';
-import { INK, PAPER, PAPER_LIT, MID, ramp, mix, METAL } from '@/components/shared/tone';
+import {
+  INK, PAPER, PAPER_LIT, MID, PANEL_BASE, PANEL_RULE, ramp, mix, glow, METAL,
+} from '@/components/shared/tone';
 import { C } from '@/constants/design';
 import { milestoneFor, type StatElement, type Milestone } from '@/lib/utils/statsMilestone';
 import type { Discovery } from '@/lib/utils/statsDiscovery';
@@ -79,7 +81,13 @@ export function bounceTo(to: number, delay: number, pop: boolean) {
       withSpring(to, { damping: 7.5, stiffness: 190, mass: 0.9 }),
     ));
   }
-  return withDelay(delay, withSpring(to, { damping: 11, stiffness: 155, mass: 0.9 }));
+  // THE SWEEP IS CALM ON PURPOSE, and this number was measured rather than
+  // picked. At damping 11 the entrance overshot to 1.19 — every untouched row
+  // springing a fifth past its own value, every visit, which is both springier
+  // than a premium readout should be and slightly untrue about the data. At 16
+  // it lands around 1.05. The strong squeeze-and-overshoot stays for the ONE row
+  // the reader actually moved, which is the whole point of having two modes.
+  return withDelay(delay, withSpring(to, { damping: 16, stiffness: 155, mass: 0.9 }));
 }
 
 // ── the ledger ───────────────────────────────────────────────────────────────
@@ -312,8 +320,10 @@ function BarLine({
       {/* The track is always full width; only the FILL grows, so the groove is
           there from the first frame and the bar fills into it. */}
       <View style={s.barTrack}>
-        <Animated.View style={[s.barFill, fillStyle]}>
-          <StruckBar pct={pct} fill={r} height={12} />
+        {/* nativeID so check-bounce can measure THIS row rather than guessing
+            which transformed div is a bar — see Donut.tsx. */}
+        <Animated.View nativeID={`barfill-${row.key}`} style={[s.barFill, fillStyle]}>
+          <StruckBar pct={pct} fill={r} height={9} />
         </Animated.View>
         {ghost > 0 ? (
           <MotiView
@@ -349,31 +359,50 @@ function BarLine({
  * about a number already on the row. This is a thinker the reader has never
  * opened, or a fact about one they read constantly — and it ends in a door.
  */
-export function DiscoveryCard({ d, hue, sub, onOpen }: {
+export function DiscoveryCard({ d, hue, sub, onOpen, dark }: {
   d: Discovery; hue: string; sub?: string; onOpen: (id: string) => void;
+  /** On the instrument panel. Ink ground, cream type, jewel rule. */
+  dark?: boolean;
 }) {
   const r = ramp(hue);
+  const g = glow(hue);
+  // ON THE PANEL THE COLOUR IS AN EDGE, NEVER A WORD. Three of the six jewel
+  // tones sit under 4.5:1 on the panel ground — fine for a rule or an arrow,
+  // not for text — so every character here is cream and the hue is the rail.
+  const t = dark
+    ? { rule: g.mark, bg: mix(PANEL_BASE, hue, 0.10), kicker: C.paperSoft,
+        name: C.paper, meta: C.dim, body: C.paper, sub: C.dim, cta: C.paper, arrow: g.mark }
+    : { rule: r.base, bg: 'transparent', kicker: r.shade,
+        name: INK, meta: C.inkSoft, body: INK, sub: C.inkSoft, cta: r.shade, arrow: r.base };
   return (
     <MotiView
       key={`${d.kicker}-${d.name ?? ''}-${d.body.slice(0, 12)}`}
       from={{ opacity: 0, translateY: -6, scale: 0.97 }}
       animate={{ opacity: 1, translateY: 0, scale: 1 }}
       transition={{ type: 'spring', damping: 14, stiffness: 190 }}
-      style={[s.card, { borderLeftColor: r.base, backgroundColor: mix(PAPER, hue, 0.05) }]}
+      style={[
+        s.card,
+        { borderLeftColor: t.rule, backgroundColor: t.bg },
+        !dark && s.cardPaper,
+      ]}
     >
-      <Text style={[s.cardKicker, { color: r.shade }]} numberOfLines={1}>{d.kicker}</Text>
+      <Text style={[s.cardKicker, { color: t.kicker }]} numberOfLines={1}>{d.kicker}</Text>
 
       {d.name ? (
         <View style={s.cardWho}>
           {d.symbol ? <Text style={s.cardSymbol}>{d.symbol}</Text> : null}
-          <Text style={s.cardName} numberOfLines={1}>{d.name}</Text>
-          {d.meta ? <Text style={s.cardMeta} numberOfLines={1}>{d.meta}</Text> : null}
+          {/* TWO LINES, AND THE DATES NEVER SHRINK. On one line the card read
+              "Abu Sulayman al-Sijist... c. 912-9..." — both halves clipped, and
+              a card whose whole job is to introduce someone cannot cut their
+              name in half. 322 thinkers include a good many long ones. */}
+          <Text style={[s.cardName, { color: t.name }]} numberOfLines={2}>{d.name}</Text>
+          {d.meta ? <Text style={[s.cardMeta, { color: t.meta }]} numberOfLines={1}>{d.meta}</Text> : null}
         </View>
       ) : null}
 
-      <Text style={s.cardBody}>{d.body}</Text>
+      <Text style={[s.cardBody, { color: t.body }]}>{d.body}</Text>
 
-      {sub ? <Text style={s.cardSub} numberOfLines={1}>{sub}</Text> : null}
+      {sub ? <Text style={[s.cardSub, { color: t.sub }]} numberOfLines={1}>{sub}</Text> : null}
 
       {d.philosopherId ? (
         <Pressable
@@ -381,10 +410,10 @@ export function DiscoveryCard({ d, hue, sub, onOpen }: {
           accessibilityRole="button"
           style={({ pressed }) => [s.cardCta, pressed && { opacity: 0.6 }]}
         >
-          <Text style={[s.cardCtaText, { color: r.shade }]}>
+          <Text style={[s.cardCtaText, { color: t.cta }]}>
             {d.kind === 'meet' ? `Meet ${d.name}` : `Read ${d.name}`}
           </Text>
-          <Text style={[s.cardCtaText, { color: r.base }]}>→</Text>
+          <Text style={[s.cardCtaText, { color: t.arrow }]}>→</Text>
         </Pressable>
       ) : null}
     </MotiView>
@@ -523,8 +552,8 @@ function LeagueLine({
           <Text style={[s.leagueEra, { color: r.shade }]} numberOfLines={1}>{row.era}</Text>
         </View>
         <View style={s.leagueTrack}>
-          <Animated.View style={[s.barFill, fillStyle]}>
-            <StruckBar pct={row.score / max} fill={r} height={8} />
+          <Animated.View nativeID={`barfill-${row.id}`} style={[s.barFill, fillStyle]}>
+            <StruckBar pct={row.score / max} fill={r} height={7} />
           </Animated.View>
         </View>
         {parts.length ? <Text style={s.leagueParts}>{parts.join('  ·  ')}</Text> : null}
@@ -578,9 +607,9 @@ const s = StyleSheet.create({
   // ── bars ──
   barRow: { marginBottom: 14 },
   barTop: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
-  barChip: { width: 12, height: 12, borderRadius: 3, borderWidth: 1.5 },
+  barChip: { width: 9, height: 9, borderRadius: 2, borderWidth: 1.5 },
   barLabel: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 13, color: INK },
-  barValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 16 },
+  barValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15 },
   barTrack: { position: 'relative', justifyContent: 'center' },
   // The FILL is what grows, anchored at the left edge. RN scales about the
   // centre by default, which would grow a bar out of both ends of its groove.
@@ -601,17 +630,22 @@ const s = StyleSheet.create({
   },
 
   // ── the discovery card ──
-  card: { borderLeftWidth: 4, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 12, marginTop: 4 },
+  // A LEFT RULE AND A HAIRLINE, not a tinted slab. The pastel fill behind this
+  // card was one of the things that made the tab read as cheap — a wash of
+  // colour behind prose is decoration, and the rule already says which row it
+  // belongs to.
+  card: { borderLeftWidth: 3, borderRadius: 6, paddingHorizontal: 13, paddingVertical: 11, marginTop: 6 },
+  cardPaper: { borderTopWidth: 1, borderRightWidth: 1, borderBottomWidth: 1, borderColor: C.hairline },
   cardKicker: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.5 },
-  cardWho: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 7 },
+  cardWho: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', gap: 8, marginTop: 7 },
   cardSymbol: { fontSize: 15 },
-  cardName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 18, color: INK, flexShrink: 1 },
-  cardMeta: { fontFamily: 'Inter_400Regular', fontSize: 11, color: C.inkSoft },
+  cardName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, flexShrink: 1 },
+  cardMeta: { fontFamily: 'Inter_400Regular', fontSize: 10.5, flexShrink: 0 },
   cardBody: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
-    fontSize: 15, lineHeight: 22, color: INK, marginTop: 6,
+    fontSize: 14.5, lineHeight: 21, marginTop: 6,
   },
-  cardSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: C.inkSoft, marginTop: 8 },
+  cardSub: { fontFamily: 'Inter_400Regular', fontSize: 10.5, marginTop: 8 },
   cardCta: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10 },
   cardCtaText: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.6 },
 

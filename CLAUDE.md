@@ -1438,6 +1438,117 @@ Measured in a browser rather than eyeballed: ring 0.82 → 1.07, the one grown r
 
 ---
 
+**The ring came back, and the tap stopped stating the obvious.** Two follow-up
+notes from the reader, both right:
+
+- *"I liked how that graphs looked before, I want more graphs like that look, but
+  redone in a way that is more visually pleasing."* A ranking answers "which is
+  biggest"; a ring answers "what is the shape of my reading", and those are
+  different questions. `components/stats/Donut.tsx` is the ring — the six BRANCH
+  hues, one light across the whole object, a groove behind it so an empty reader
+  still sees the shape, and the total in the hub. It shares its selection with
+  the bars under it, so the two are one chart rather than two views.
+- *"I dont like the obvious information ... like '5 more lessons and your at 20
+  lessons done' this is obvious and isnt informative."* Also right, and it was
+  the shape of a progress bar wearing words. `lib/utils/statsDiscovery.ts`
+  replaced it: tapping a branch or an era names a thinker from it the reader has
+  **never opened**, with their symbol, their dates and their idea in ten words;
+  tapping a thinker in the league gives one of their three "Did you know?" facts.
+  Every card ends in a door. `check:stats` asserts the complaint directly — no
+  card may ever contain "N more".
+
+**The bounce is feedback, not decoration, and that distinction is the design.**
+`bounceTo` squeezes to 0.82 and then springs past to about 1.07 — anticipation
+then overshoot, which is the whole reason a bounce reads as a thing *reacting*.
+It plays on the ring every visit that has news, and on rows **only where the
+reader's own number went up**: `grownKeys` recovers that from the previous
+fingerprint, which the tab already stores, so no new store key was needed. A
+grown row squeezes from its CURRENT length rather than from zero — reset it to
+zero first and the reader sees the bar being rebuilt, which reads as a reload.
+
+Measured in a browser rather than eyeballed: ring 0.82 → 1.07, the one grown row
+0.82 → 1.07, and all fifteen others 0 → 1 with no overshoot at all.
+
+> **The entrance was snapping to its end state, and nothing looked wrong.**
+> `markStatsSeen` writes the fingerprint, which re-renders, which changes the
+> focus callback's identity, which makes `useFocusEffect` run it AGAIN — and on
+> that pass the fingerprints match, so the old code called `setAnimate(false)`
+> while every spring was still travelling. Every child keys on `animate`, so all
+> of them jumped to the end. The instrument is what found it: the ring and all
+> seventeen bars sat at exactly 1.000 through a growth event that should have
+> bounced. The flag never needed clearing — children re-run on `playToken`, which
+> only moves when there is news.
+
+### The instrument, and what "cheap" actually was
+
+The tab was rebuilt again, and the brief looked contradictory: *"the whole tab
+looks too much childish, I need more premium feel and vibrent colors, not just a
+bunch of colors that make the app feel cheep."*
+
+**What made it cheap was never the palette. It was the AREA.** Six saturated
+fills on white, all large, all at once — a 26px ring, twelve-pixel rounded pill
+bars, pastel tinted cards behind the prose. Six big colours competing on paper
+is a rainbow, and a rainbow is the cheapest an interface can look.
+
+So the readings that ARE charts moved onto one dark panel
+(`components/stats/Instrument.tsx`), where the same six hues appear as a 14px arc
+and an 8px swatch and read as cut stones. The ledger, the thinker league and the
+era rail stay on paper: they are lists of the reader's own achievements, and one
+instrument on a page of paper is a plate in a book, where a wholly dark tab would
+be a dashboard belonging to some other product.
+
+- **`tone.glow()` cuts the branch hues for the dark ground, and both obvious ways
+  of doing it fail.** Mixing toward `PAPER` — what `ramp().lit` does —
+  DESATURATES, and the six came out `#8E768E`, `#5A93A1`, `#7C96BC`: pastel, not
+  rich. Pushing HSL saturation instead runs to `#C651CD` electric magenta and
+  `#41DCA5` neon mint, which is the exact corner `design.ts` records its own
+  colour search falling into. The band between is the branch's own hue with its
+  chroma lifted a quarter and lightness at the midpoint.
+- **The dial has a sixty-tick bezel**, and it is not decoration: a bezel implies
+  the ring is measured against something, which is the difference between an
+  instrument and a pie. It is also the cheapest depth available.
+- **One accent for everything that is not a branch.** The XP line is `METAL.GOLD`
+  and nothing else — the same material a first-place league disc is struck in,
+  and XP is what gold already means here. A second data colour would start a
+  palette; one accent plus six labels is a system.
+- **Type on the panel is never a branch colour.** Measured on `PANEL_BASE` the
+  six run 3.8:1 to 9.1:1 — past the 3:1 a mark needs, and three of them under the
+  4.5:1 text needs. So the hues encode and every word is cream.
+
+**The line chart is thirty days of XP** from `dailyXP`, with its seven-day mean
+dashed under it, the best day marked, and four figures beneath: best day, per
+active day, days active, streak. Not one SVG property animates — the chart is
+drawn once and revealed by a CURTAIN of the panel's own ground sliding right,
+which is also why the chart block sits on flat `PANEL_BASE` while the panel above
+it carries the gradient. A curtain can only be invisible if it is exactly the
+colour of what it covers.
+
+Three things measured rather than judged, and the first two were checks being
+wrong rather than colours:
+
+- **sRGB distance is the wrong instrument for a palette pinned to one lightness.**
+  The first draft held the jewel set to a raw-sRGB floor of 60 and failed two
+  pairs. In CIELAB — the metric `design.ts` uses, for the reason it states — the
+  closest pair is **ΔE 34.9**, against the **25.1** the shipped branch palette
+  manages. The tones are better separated than the ones they are cut from.
+- **The bezel check measured the gradient, not the bezel.** The panel's gradient
+  top is supposed to be barely there; the 1px hairline drawn on it is what has to
+  be seen. Two different floors, and the first draft applied one to both.
+- **A row's bounce nearly went missing in the move.** The branch bars carried it,
+  and as legend rows their fill became a WIDTH rather than a transform — so the
+  one row the reader had actually moved stopped reacting and only the dial
+  popped. Measured through a real growth event: dial **0.82 → 1.07**, the grown
+  row **0.82 → 1.07**, every other row a calm **0 → 1.055**. The entrance sweep
+  was damped from 11 to 16 for that last number: at 11 it overshot to 1.19, which
+  is both springier than a premium readout wants and slightly untrue about the
+  data.
+
+> **Two sessions writing routes into `app/` will delete each other's.** Mid-verification
+> the preview route vanished and the page went blank with no error anywhere —
+> the other session had swept `app/` while its own harness ran. Metro also wedged
+> and served nothing on a port that was still LISTENING. If a preview route stops
+> rendering for no reason, check that the file still exists before debugging the app.
+
 ## 20. Forced Update Gate
 
 `components/shared/UpdateGate.tsx`, mounted last in the root layout so it covers
