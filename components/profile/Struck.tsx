@@ -150,6 +150,51 @@ export function StruckTile({
   );
 }
 
+// ── a niche cut into the paper ───────────────────────────────────────────────
+
+/**
+ * THE INVERSE OF StruckTile — a recess rather than a raised face.
+ *
+ * A tile and a niche are the same gradient run in opposite directions, and that
+ * inversion is the whole of it: `StruckBar`'s track already records the rule —
+ * "a groove is bright where a dome is dark, and that inversion is the only thing
+ * that says CUT IN rather than raised". So the face here runs PAPER_SHADE →
+ * PAPER → PAPER_LIT, the dark hairline is at the TOP where the light cannot
+ * reach into the cut, and the pale one is at the bottom where it catches the far
+ * wall. It casts no shadow, because a hole does not cast onto the surface it is
+ * cut into.
+ *
+ * WHAT IT IS FOR. Something struck, sitting in something. The profile's cabinet
+ * puts a medal in each of three of these, so the medal reads as an object placed
+ * in a socket rather than as a picture printed on a card — which is the whole
+ * difference between a display case and a list.
+ */
+export function StruckNiche({
+  children, style, empty = false,
+}: {
+  children?: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+  /** Draw the socket as unfilled: a dashed inner outline, no shading. */
+  empty?: boolean;
+}) {
+  if (empty) {
+    return <View style={[s.niche, s.nicheEmpty, style]}>{children}</View>;
+  }
+  return (
+    <LinearGradient
+      colors={[PAPER_SHADE, PAPER, PAPER_LIT]}
+      locations={[0, 0.42, 1]}
+      start={LIGHT_START}
+      end={LIGHT_END}
+      style={[s.niche, style]}
+    >
+      <View pointerEvents="none" style={[s.nicheTop, { backgroundColor: mix(PAPER_SHADE, INK, 0.3) }]} />
+      <View pointerEvents="none" style={[s.nicheFoot, { backgroundColor: PAPER_LIT }]} />
+      {children}
+    </LinearGradient>
+  );
+}
+
 // ── a struck plate in a metal ────────────────────────────────────────────────
 
 /**
@@ -278,6 +323,17 @@ const s = StyleSheet.create({
   },
   tile: { borderRadius: 12, borderWidth: 1, borderColor: FAINT, overflow: 'hidden' },
   tileAccent: { position: 'absolute', left: 0, right: 0, top: 0, height: 3 },
+
+  // ── niche ──
+  niche: {
+    borderRadius: 12, alignItems: 'center', justifyContent: 'center',
+    overflow: 'hidden', borderWidth: 1, borderColor: FAINT,
+  },
+  // A CUT, not a rim: dark along the top edge, pale along the bottom. Reversing
+  // these two lines is the one change that turns this back into a tile.
+  nicheTop: { position: 'absolute', left: 0, right: 0, top: 0, height: 1.5 },
+  nicheFoot: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 1 },
+  nicheEmpty: { borderStyle: 'dashed', borderColor: GHOST, backgroundColor: 'transparent' },
 
   // ── plate ──
   plateShadow: {

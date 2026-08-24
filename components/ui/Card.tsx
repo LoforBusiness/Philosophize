@@ -69,9 +69,15 @@ interface Props {
    *  card must stretch or grow — e.g. `flexGrow: 1` for equal-height columns —
    *  since `style` lives on the face inside it. */
   containerStyle?: StyleProp<ViewStyle>;
+  /** What a pressable card DOES. The role alone announces "button" and nothing
+   *  else, which for a card whose children are marks rather than words leaves a
+   *  screen reader with a button it cannot name. */
+  accessibilityLabel?: string;
 }
 
-export default function Card({ children, onPress, pad = 3, style, containerStyle }: Props) {
+export default function Card({
+  children, onPress, pad = 3, style, containerStyle, accessibilityLabel,
+}: Props) {
   const [down, setDown] = useState(false);
   const lip = onPress ? LIP.card : 0;
   const drop = down ? lip : 0;
@@ -96,6 +102,7 @@ export default function Card({ children, onPress, pad = 3, style, containerStyle
       onPressIn={() => setDown(true)}
       onPressOut={() => setDown(false)}
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
       // Pressable card: the Pressable is the outer flex child (same place
       // PressableScale puts it), and the box below relays the height inwards.
       style={containerStyle}

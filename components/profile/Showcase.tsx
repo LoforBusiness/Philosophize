@@ -3,6 +3,8 @@ import { View, Text, Pressable, ScrollView, StyleSheet, Modal } from 'react-nati
 import BadgeMedal from '@/components/shared/BadgeMedal';
 import RankSeal from '@/components/shared/RankSeal';
 import SketchIcon from '@/components/shared/SketchIcon';
+import Card from '@/components/ui/Card';
+import { StruckNiche } from '@/components/profile/Struck';
 import { BADGES, isEarned, type BadgeDef, type ProgressStats } from '@/data/badges';
 import { RANKS, rankOrder, rankDegree, rankInsignia } from '@/data/ranks';
 import { ORDER_LABEL } from '@/constants/insignia';
@@ -17,30 +19,60 @@ import { touch } from '@/lib/feedback';
 // their profile and their rank also on their profile … visible on the top of the
 // user's profile that the user can edit."
 //
-// ── WHY IT SITS ABOVE EVERYTHING, AND WHY IT IS ONE ROW ────────────────────
+// ── IT WAS ONE ROW, AND THE MEDALS HAD NO NAMES ────────────────────────────
 //
-// Profile already carries a rank card, a climb chart, six mastery bars, a
-// trophy shelf and three charts, and the note in that screen about "a
-// bombardment of information" is the reason this is a STRIP rather than a
-// panel. One row, four objects, no numbers: the pin you hold and the three
-// medals you picked. Everything explanatory is already further down the page,
-// so this does not have to explain anything — it only has to be the first thing
-// you see, which is the whole of what a cabinet is for.
+// A reader, on the version this replaces: "make the showcase more pretty, have
+// some depth, also I want to be able to read the different names of the badges
+// that are listed on there."
+//
+// The second half is the one that decided the layout. The strip put the rank in
+// a 104pt column and the three medals in what was left, which is about 70pt
+// each — no room for a caption, so there were none. Three unlabelled marks is a
+// case of curiosities: the reader knows they earned something and cannot say
+// what, and a badge nobody can name is not a thing anybody displays. Names need
+// room, so the row became two: the rank across the top, the medals across the
+// bottom at ~100pt each, which carries a 26-character badge name over two lines
+// with margin.
+//
+// The old header argued for a single strip on the grounds that Profile is
+// already "a bombardment of information". That is still true and it is why the
+// SECOND row carries no numbers, no progress and no dates — three medals and
+// three names. A cabinet is not a readout.
+//
+// ── DEPTH, IN THE VOCABULARY THE SCREEN ALREADY HAS ────────────────────────
+//
+// Three layers, none of them invented here:
+//
+//   THE CARD  is a `Card` with `onPress`, so it grows the same 2px lip every
+//             pressable surface in this app has. It was a hand-rolled View with
+//             a hairline border — the one arrangement that says "document".
+//   THE SOCKET is `StruckNiche`, the inverse of the `StruckTile` this screen is
+//             already built out of: the same gradient run the other way, dark
+//             along the top edge where light cannot reach into a cut. A medal
+//             sitting in one reads as an object placed in a socket rather than
+//             as a picture printed on a card.
+//   THE MARKS  were already struck — §19 gave every pin and medal a lit side, a
+//             shaded side and a drop shadow. They just had nothing to sit in.
 //
 // The rank pin is NOT one of the three. It is not chosen and cannot be
-// unchosen, so putting it in the same row as three slots the reader controls
-// would suggest it could be swapped out. It sits before them, larger, with a
-// rule between: the thing you were given, then the things you picked.
+// unchosen, so putting it among three slots the reader controls would suggest it
+// could be swapped out. It sits on its own line above them, with a rule between:
+// the thing you were given, then the things you picked.
 //
 // ── AN EMPTY SLOT IS A SLOT, NOT A GAP ────────────────────────────────────
 //
-// A reader with no badges chosen sees three dashed outlines carrying a pencil,
+// A reader with no badges chosen sees three dashed sockets carrying a pencil,
 // because an empty strip that renders as blank paper reads as a broken row
-// rather than as an invitation. The outline occupies the same box a filled slot
-// does, so nothing shifts when one is filled.
+// rather than as an invitation. The socket occupies the same box a filled one
+// does, and the caption below reserves its two lines either way, so nothing
+// shifts when one is filled.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SLOT = 54;
+const SLOT = 52;
+/** The socket the medal sits in — big enough to hold the medal's own shadow. */
+const NICHE = SLOT + 16;
+/** Two lines of `micro`, reserved whether or not there is a name to put in it. */
+const NAME_H = TYPE.micro.lineHeight * 2;
 
 interface Props {
   stats: ProgressStats;
@@ -80,52 +112,73 @@ export default function Showcase({ stats, rankIndex }: Props) {
 
   return (
     <View style={styles.wrap}>
-      <Pressable
-        style={styles.row}
-        onPress={() => { touch(); setPicking(true); }}
-        accessibilityRole="button"
+      <Card
+        onPress={() => setPicking(true)}
+        pad={3}
         accessibilityLabel="Edit the badges shown on your profile"
       >
-        <View style={styles.rankCol}>
+        {/* ── what you were GIVEN ──────────────────────────────────────────── */}
+        <View style={styles.rankRow}>
           <RankSeal
             glyph={rank.glyph}
             state="current"
-            size={SLOT + 10}
+            size={64}
             order={rankOrder(rankIndex)}
             degree={rankDegree(rankIndex)}
           />
-          <Text style={[styles.rankName, { color: ins.base }]} numberOfLines={1}>
-            {rank.name.toUpperCase()}
-          </Text>
-          {/* THE ORDER AND THE RUNG, not the Circle's subtitle — "LAPIS · THE
-              REAL" measured wider than the 96pt column and rendered as
-              "LAPIS · THE R…", which is a label that has stopped being one.
-              The position on the ladder is the more useful half anyway: the
-              colour already says which order this is. */}
-          <Text style={styles.rankOrder} numberOfLines={1}>
-            {rank.id} / {RANKS.length} · {ORDER_LABEL[rankOrder(rankIndex)].toUpperCase()}
-          </Text>
+          <View style={styles.rankText}>
+            <Text style={[styles.rankName, { color: ins.base }]} numberOfLines={1}>
+              {rank.name}
+            </Text>
+            {/* THE ORDER AND THE RUNG, not the Circle's subtitle — "LAPIS · THE
+                REAL" measured wider than the old 96pt column and rendered as
+                "LAPIS · THE R…", which is a label that has stopped being one.
+                The position on the ladder is the more useful half anyway: the
+                colour and the SHAPE already say which order this is. */}
+            <Text style={styles.rankOrder} numberOfLines={1}>
+              RANK {rank.id} OF {RANKS.length} · {ORDER_LABEL[rankOrder(rankIndex)].toUpperCase()}
+            </Text>
+          </View>
         </View>
 
-        <View style={styles.divider} />
+        <View style={styles.rule} />
+
+        {/* ── and what you CHOSE ───────────────────────────────────────────── */}
+        <View style={styles.cabinetHead}>
+          <Text style={styles.cabinetLabel}>YOUR CABINET</Text>
+          <View style={styles.editRow}>
+            <Text style={styles.editText}>EDIT</Text>
+            <SketchIcon name="pencil" size={12} color={C.inkSoft} />
+          </View>
+        </View>
 
         <View style={styles.slots}>
           {Array.from({ length: SHOWCASE_MAX }).map((_, i) => {
             const b = chosen[i];
             return (
               <View key={i} style={styles.slot}>
-                {b ? (
-                  <BadgeMedal family={b.family} tier={b.tier} glyph={b.glyph} earned size={SLOT} />
-                ) : (
-                  <View style={styles.empty}>
-                    <SketchIcon name="pencil" size={15} color={C.dim} />
-                  </View>
-                )}
+                <StruckNiche style={styles.niche} empty={!b}>
+                  {b ? (
+                    <BadgeMedal family={b.family} tier={b.tier} glyph={b.glyph} earned size={SLOT} />
+                  ) : (
+                    <SketchIcon name="pencil" size={16} color={C.dim} />
+                  )}
+                </StruckNiche>
+                {/* THE NAME, which is the whole point of the rewrite. Two lines
+                    are reserved either way — a caption that appears only when a
+                    slot is filled makes the row change height as the reader
+                    picks, and a cabinet that jumps is not one. */}
+                <Text
+                  style={[styles.slotName, !b && styles.slotNameEmpty]}
+                  numberOfLines={2}
+                >
+                  {b ? b.name : 'Empty'}
+                </Text>
               </View>
             );
           })}
         </View>
-      </Pressable>
+      </Card>
 
       <PickerSheet
         visible={picking}
@@ -180,7 +233,12 @@ function PickerSheet({
                   accessibilityState={{ selected: on }}
                   accessibilityLabel={b.name}
                 >
-                  <BadgeMedal family={b.family} tier={b.tier} glyph={b.glyph} earned size={56} />
+                  {/* THE SAME SOCKET the cabinet uses, so a medal is picked out
+                      of one and put into another rather than moving between two
+                      different kinds of surface. */}
+                  <StruckNiche style={styles.cellNiche}>
+                    <BadgeMedal family={b.family} tier={b.tier} glyph={b.glyph} earned size={52} />
+                  </StruckNiche>
                   <Text style={styles.cellName} numberOfLines={2}>{b.name}</Text>
                 </Pressable>
               );
@@ -194,29 +252,47 @@ function PickerSheet({
 
 const styles = StyleSheet.create({
   wrap: { marginBottom: SPACE[3] },
-  row: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: C.surface, borderRadius: RADIUS.card,
-    borderWidth: 1, borderColor: C.hairline,
-    paddingVertical: SPACE[2], paddingHorizontal: SPACE[3], gap: SPACE[2],
-  },
-  rankCol: { alignItems: 'center', width: 104 },
+
+  rankRow: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2] },
+  rankText: { flex: 1 },
+  // The rank's own name in Playfair rather than in a caps micro label: it is a
+  // TITLE the reader holds, and the old strip printed it as a caption because a
+  // 104pt column could not carry anything larger.
   rankName: {
-    fontFamily: TYPE.micro.family, fontSize: TYPE.micro.fontSize,
-    letterSpacing: 1, marginTop: SPACE[0], textAlign: 'center',
+    fontFamily: TYPE.title.family, fontSize: TYPE.label.fontSize,
+    includeFontPadding: false,
   },
   rankOrder: {
     fontFamily: TYPE.micro.family, fontSize: TYPE.micro.fontSize,
-    letterSpacing: 0.2, color: C.dim, textAlign: 'center',
+    letterSpacing: 1.2, color: C.dim, marginTop: SPACE[0],
   },
-  divider: { width: 1, alignSelf: 'stretch', backgroundColor: C.hairline, marginHorizontal: SPACE[1] },
-  slots: { flex: 1, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' },
-  slot: { width: SLOT, height: SLOT, alignItems: 'center', justifyContent: 'center' },
-  empty: {
-    width: SLOT - 8, height: SLOT - 8, borderRadius: RADIUS.card,
-    borderWidth: 1, borderColor: C.dim, borderStyle: 'dashed',
-    alignItems: 'center', justifyContent: 'center',
+
+  rule: { height: 1, backgroundColor: C.hairline, marginVertical: SPACE[2] },
+
+  cabinetHead: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginBottom: SPACE[1],
   },
+  cabinetLabel: {
+    fontFamily: TYPE.micro.family, fontSize: TYPE.micro.fontSize,
+    letterSpacing: 2, color: C.inkSoft,
+  },
+  editRow: { flexDirection: 'row', alignItems: 'center', gap: SPACE[0] },
+  editText: {
+    fontFamily: TYPE.micro.family, fontSize: TYPE.micro.fontSize,
+    letterSpacing: 1.6, color: C.inkSoft,
+  },
+
+  slots: { flexDirection: 'row', justifyContent: 'space-between', gap: SPACE[1] },
+  slot: { flex: 1, alignItems: 'center' },
+  niche: { width: NICHE, height: NICHE },
+  slotName: {
+    fontFamily: TYPE.micro.family, fontSize: TYPE.micro.fontSize,
+    lineHeight: TYPE.micro.lineHeight, letterSpacing: 0.2,
+    color: C.ink, textAlign: 'center',
+    marginTop: SPACE[1], height: NAME_H,
+  },
+  slotNameEmpty: { color: C.dim },
 
   scrim: { flex: 1, backgroundColor: 'rgba(26,26,26,0.45)', justifyContent: 'flex-end' },
   sheet: {
@@ -229,11 +305,20 @@ const styles = StyleSheet.create({
     fontFamily: TYPE.label.family, fontSize: TYPE.label.fontSize,
     color: C.inkSoft, marginTop: SPACE[0], marginBottom: SPACE[2],
   },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACE[2], paddingBottom: SPACE[3] },
+  grid: {
+    flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between',
+    gap: SPACE[2], paddingBottom: SPACE[3],
+  },
+  // THREE UP, NOT FOUR. At four columns a cell is 84pt and the names truncated —
+  // "The Commonpla…", "Every Line Worth …" — which is the same complaint the
+  // cabinet itself was rewritten for, one screen further in. Three columns give
+  // ~114pt, which carries the longest name in the roll (24 characters) over two
+  // lines with room to spare.
   cell: {
-    width: 84, alignItems: 'center', paddingVertical: SPACE[1],
+    width: '31%', alignItems: 'center', paddingVertical: SPACE[1],
     borderRadius: RADIUS.card, borderWidth: 2, borderColor: 'transparent',
   },
+  cellNiche: { width: 68, height: 68 },
   cellOn: { borderColor: C.HUE, backgroundColor: C.surface },
   cellName: {
     fontFamily: TYPE.micro.family, fontSize: TYPE.micro.fontSize,
