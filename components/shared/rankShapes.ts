@@ -156,7 +156,7 @@ function shieldish(k: number, spikes: boolean): string {
  * whole wing is twenty across.
  */
 function wing(side: 1 | -1, m = 0): string {
-  const k = (47 - m) / 47;                       // 47 = the wing's own reach
+  const k = (52 - m) / 52;                       // 52 = the wing's own reach
   const P = (x: number, y: number) =>
     pt(CX + (x - CX) * side * k, CY + (y - CY) * k);
   return (
@@ -164,17 +164,17 @@ function wing(side: 1 | -1, m = 0): string {
     // sweeping UP and OUT. THE TIP HAS TO FINISH HIGHER THAN THE ROOT. The
     // second attempt at this ran level, out to the side, and read as a serrated
     // collar — a wing is a diagonal before it is anything else.
-    `M${P(52, 54)}` +
-    ` C${P(60, 30)} ${P(76, 13)} ${P(97, 14)}` +
+    `M${P(50, 60)}` +
+    ` C${P(62, 40)} ${P(80, 24)} ${P(96, 24)}` +
     // …then the trailing edge back along the diagonal, four feathers deep. Each
     // notch cuts in about six units and NONE of them reaches back past the
     // leading edge — the first attempt let them, and what came out was not a
     // feathered wing but three loose petals with daylight between them.
-    ` L${P(99, 27)} L${P(88, 23)}` +
-    ` L${P(92, 37)} L${P(81, 33)}` +
-    ` L${P(85, 48)} L${P(74, 44)}` +
-    ` L${P(78, 60)} L${P(66, 54)}` +
-    ` C${P(61, 55)} ${P(56, 55)} ${P(52, 54)} Z`
+    ` L${P(97, 37)} L${P(84, 31)}` +
+    ` L${P(89, 46)} L${P(75, 40)}` +
+    ` L${P(80, 55)} L${P(66, 50)}` +
+    ` L${P(71, 64)} L${P(57, 60)}` +
+    ` C${P(55, 61)} ${P(52, 61)} ${P(50, 60)} Z`
   );
 }
 
@@ -187,22 +187,29 @@ export const wingsInset = (m: number) => `${wing(1, m)} ${wing(-1, m)}`;
 
 
 /**
- * A three-point coronet, sitting on the crest's peak.
+ * A five-point coronet, sitting clear above the crest's peak.
  *
- * Drawn as a function of its own inset so the renderer can lay a smaller copy
- * inside a larger one and get a rimmed crown out of two fills. It was a single
- * flat shape first, and on the contact sheet it vanished: a gold coronet on a
- * gold pin in front of gold rays is one continuous mass unless something turns
- * its edge.
+ * IT WAS A SAW, AND THE CAUSE WAS ACCRETION TAKEN LITERALLY. The rule this file
+ * was built on — "each frame is the one below it plus one thing" — put wings AND
+ * a crown AND a halo on the capstone, and at 2× the sheet showed the result
+ * honestly: three ornaments arguing over the same silhouette, with the coronet's
+ * points reading as the teeth of whatever was behind them. A reader had already
+ * said it in fewer words: the complex pins at the end look worse.
+ *
+ * So the top two orders now own ONE signature each — amethyst the wings, aurum
+ * the wreath — and the coronet is drawn to be read rather than to be counted:
+ * five points instead of three-plus-fill, a tall centre, and its feet lifted off
+ * the shield so paper shows between them.
  */
 function crown(m: number): string {
   const P = (x: number, y: number) => {
-    const k = (26 - m) / 26;                     // 26 = its own half-height
-    return pt(CX + (x - CX) * k, 28 + (y - 28) * k);
+    const k = (30 - m) / 30;                     // 30 = its own half-height
+    return pt(CX + (x - CX) * k, 26 + (y - 26) * k);
   };
   return (
-    `M${pt(30 + m, 24)} L${P(32, 6)} L${P(41, 15)} L${P(50, 2)}` +
-    ` L${P(59, 15)} L${P(68, 6)} L${pt(70 - m, 24)} Z`
+    `M${pt(32 + m, 22)}` +
+    ` L${P(34, 8)} L${P(41, 15)} L${P(50, 0)} L${P(59, 15)} L${P(66, 8)}` +
+    ` L${pt(68 - m, 22)} Z`
   );
 }
 
@@ -210,29 +217,57 @@ function crown(m: number): string {
 export const crownInset = (m: number) => crown(m);
 
 /**
- * The halo — sixteen tapered spikes, from under the shield out past its edge.
+ * THE WREATH — and it replaces a sixteen-spike sunburst, deliberately.
  *
- * It starts at r 34, well inside the frame that covers it, so the visible length
- * of every spike is decided by the silhouette in front of it rather than by a
- * radius: they are long past the shield's waist, short past its shoulders, and
- * absent behind its point. That is what makes a burst look like it is BEHIND
- * something instead of arranged around it.
+ * The halo that was here read as cheap at the size it is actually drawn: sixteen
+ * tapered spikes at 50px are a fringe, and a reader's verdict on the whole top of
+ * the ladder was that the complex pins "look bad". §19 already learned exactly
+ * why, on a different mark: crossed swords behind a medal came out as "horns at
+ * 168px, mush at the 66px the badge grid actually draws", while "a laurel is a
+ * continuous curved mass, so being half-covered costs it nothing". A sunburst is
+ * the sword problem — it is nothing BUT tips, and the shield covers the half
+ * where they would have joined up.
+ *
+ * So the capstone is wreathed instead. Ten leaves a side on a stem that sweeps
+ * from under the point out and up to the shoulder, each leaf angled along the
+ * stem's own tangent so the branch reads as grown rather than assembled.
  */
-function rays(): string {
-  const N = 16;
-  const inner = 34;
-  const outer = 49;
-  const half = Math.PI / N / 2.3;
+function leaf(x: number, y: number, ang: number, len: number, wide: number): string {
+  const cos = Math.cos(ang), sin = Math.sin(ang);
+  // along the stem, and across it
+  const A = (u: number, v: number) => pt(x + u * cos - v * sin, y + u * sin + v * cos);
+  return (
+    `M${A(0, 0)}` +
+    ` C${A(len * 0.35, -wide)} ${A(len * 0.75, -wide * 0.8)} ${A(len, 0)}` +
+    ` C${A(len * 0.75, wide * 0.8)} ${A(len * 0.35, wide)} ${A(0, 0)} Z`
+  );
+}
+
+function branch(side: 1 | -1): string {
+  const N = 10;
   const out: string[] = [];
+  // The stem as a quadratic from the foot to the shoulder, sampled for both the
+  // leaf positions and the tangent each leaf sits on.
+  const P0 = { x: 50, y: 92 }, P1 = { x: 50 + side * 52, y: 78 }, P2 = { x: 50 + side * 44, y: 16 };
   for (let i = 0; i < N; i++) {
-    const a = (i * 2 * Math.PI) / N + Math.PI / N;
-    out.push(
-      `M${pt(CX + inner * Math.cos(a - half), CY + inner * Math.sin(a - half))}` +
-      ` L${pt(CX + outer * Math.cos(a), CY + outer * Math.sin(a))}` +
-      ` L${pt(CX + inner * Math.cos(a + half), CY + inner * Math.sin(a + half))} Z`,
-    );
+    const t = 0.10 + (i / (N - 1)) * 0.86;
+    const mt = 1 - t;
+    const x = mt * mt * P0.x + 2 * mt * t * P1.x + t * t * P2.x;
+    const y = mt * mt * P0.y + 2 * mt * t * P1.y + t * t * P2.y;
+    const dx = 2 * mt * (P1.x - P0.x) + 2 * t * (P2.x - P1.x);
+    const dy = 2 * mt * (P1.y - P0.y) + 2 * t * (P2.y - P1.y);
+    // Leaves point BACK down the stem, the way a laurel actually grows, and
+    // shorten toward the tip so the branch tapers instead of ending in a stub.
+    const ang = Math.atan2(dy, dx) + Math.PI + side * 0.55;
+    const k = 1 - i / (N + 5);
+    out.push(leaf(x, y, ang, 15 * k, 4.6 * k));
   }
   return out.join(' ');
+}
+
+/** Both branches. Drawn behind the shield, so the halves that meet are hidden. */
+function wreath(): string {
+  return `${branch(1)} ${branch(-1)}`;
 }
 
 
@@ -295,7 +330,10 @@ const WINGS = wingsInset(0);
 export const ORNAMENT: Record<FrameName, Ornament> = {
   disc: NONE, plate: NONE, hex: NONE, facet: NONE, shield: NONE, crest: NONE,
   winged: { wings: WINGS, crown: null, rays: null },
-  imperial: { wings: WINGS, crown: crown(0), rays: rays() },
+  // ONE SIGNATURE EACH. Amethyst keeps the wings; the capstone is crowned and
+  // wreathed and does NOT also wear them. Piling all three on one silhouette is
+  // what made the end of the ladder look worse than the middle.
+  imperial: { wings: null, crown: crown(0), rays: wreath() },
 };
 
 // ── what a renderer needs to know about a frame it has never seen ───────────
