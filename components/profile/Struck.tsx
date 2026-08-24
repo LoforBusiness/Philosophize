@@ -195,6 +195,100 @@ export function StruckNiche({
   );
 }
 
+// ── a raised panel, for a whole section ──────────────────────────────────────
+
+/**
+ * LETTERPRESS, AND WHY IT IS AN INK SHADOW RATHER THAN A PAPER HIGHLIGHT.
+ *
+ * The obvious emboss — a PAPER_LIT highlight under the glyph, type pressed INTO
+ * the sheet — cannot work on this palette. PAPER is #FAFAF7 and PAPER_LIT is
+ * #FFFFFF, a 2% swing, and §19 already measured what that looks like: nothing.
+ * So the type sits PROUD of the page instead and drops its shadow down-right,
+ * along the one light every other struck object in the app is lit by. Same
+ * direction as StruckTile's shadow, which is the point — a title that lifts off
+ * a card lit from somewhere else is two objects, not one.
+ *
+ * ONE OBJECT ON PURPOSE. `textShadow*` is on CLAUDE.md §12's deliberately
+ * un-swept deprecation list (a react-native-web warnOnce; Android supports it
+ * unwarned). Keeping every use of it in this file behind one exported style is
+ * what keeps that eventual sweep a one-line change rather than a hunt.
+ *
+ * Never put it on small type. Below about 13px the shadow stops reading as
+ * depth and starts reading as a rendering fault.
+ */
+export const EMBOSS = {
+  textShadowColor: 'rgba(26,26,26,0.20)',
+  textShadowOffset: { width: SHADOW.dx * 0.8, height: SHADOW.dy * 0.8 },
+  textShadowRadius: 1.6,
+} as const;
+
+/**
+ * A WHOLE SECTION ON A RAISED CARD, with its heading cut into the top of it.
+ *
+ * The paper counterpart to components/stats/Instrument.tsx. Insights had one
+ * instrument and then two bare runs of rows underneath it, so the tab went
+ * "object, object, page" — and the two readings that are most personal to the
+ * reader (who they read most, and which centuries they have actually met) were
+ * the two with no edges at all.
+ *
+ * THE HEAD IS A RECESS AND THE BODY IS THE FACE, and that is the whole of the
+ * depth. StruckNiche states the rule this obeys: a groove is bright where a dome
+ * is dark. So the band's gradient runs the OPPOSITE way to the card's, it takes
+ * the dark hairline along its top edge where the light cannot reach into the
+ * cut, and the pale one along the bottom where it catches the far wall. Reverse
+ * those two lines and the header stops being cut in and starts floating.
+ */
+export function StruckPanel({
+  title, subtitle, accent, right, children, style,
+}: {
+  title: string;
+  subtitle: string;
+  /** The printer's rule above the title. One colour per box — see the call site. */
+  accent?: string;
+  right?: React.ReactNode;
+  children: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+}) {
+  return (
+    <View style={[s.panelShadow, style]}>
+      <LinearGradient
+        // A TENTH OF A TILE'S FALL-OFF, and that ratio is the finding. StruckTile
+        // runs the full PAPER_LIT → PAPER_SHADE across about 80px and reads as a
+        // lit face; the identical three stops across a 350px card came out as a
+        // tan stain in the bottom corner — rendered and looked at, which is the
+        // only way that kind of thing is ever caught. A big flat surface lit from
+        // one side barely shades at all. Its depth comes from its EDGES: the lit
+        // rim along the top, the hairline rule, and the shadow it sits on.
+        colors={[PAPER_LIT, PAPER, mix(PAPER, PAPER_SHADE, 0.3)]}
+        locations={[0, 0.45, 1]}
+        start={LIGHT_START}
+        end={LIGHT_END}
+        style={s.panel}
+      >
+        <View pointerEvents="none" style={[s.panelRim, { backgroundColor: PAPER_LIT }]} />
+        <LinearGradient
+          colors={[mix(PAPER, PAPER_SHADE, 0.36), mix(PAPER, PAPER_SHADE, 0.1), PAPER]}
+          locations={[0, 0.55, 1]}
+          start={LIGHT_START}
+          end={LIGHT_END}
+          style={s.panelBand}
+        >
+          <View pointerEvents="none" style={[s.bandTop, { backgroundColor: mix(PAPER_SHADE, INK, 0.28) }]} />
+          <View style={s.bandBody}>
+            {accent ? <View style={[s.bandRule, { backgroundColor: accent }]} /> : null}
+            <Text style={[s.panelTitle, EMBOSS]}>{title}</Text>
+            <Text style={s.panelSub}>{subtitle}</Text>
+          </View>
+          {right}
+          <View pointerEvents="none" style={[s.bandFoot, { backgroundColor: PAPER_LIT }]} />
+        </LinearGradient>
+
+        <View style={s.panelBody}>{children}</View>
+      </LinearGradient>
+    </View>
+  );
+}
+
 // ── a struck plate in a metal ────────────────────────────────────────────────
 
 /**
@@ -334,6 +428,35 @@ const s = StyleSheet.create({
   nicheTop: { position: 'absolute', left: 0, right: 0, top: 0, height: 1.5 },
   nicheFoot: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 1 },
   nicheEmpty: { borderStyle: 'dashed', borderColor: GHOST, backgroundColor: 'transparent' },
+
+  // ── panel ──
+  panelShadow: {
+    borderRadius: 14,
+    shadowColor: INK,
+    shadowOffset: { width: SHADOW.dx, height: SHADOW.dy + 2 },
+    shadowOpacity: SHADOW.opacity + 0.04,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  panel: { borderRadius: 14, borderWidth: 1, borderColor: FAINT, overflow: 'hidden' },
+  panelRim: { position: 'absolute', left: 0, right: 0, top: 0, height: 1, zIndex: 2 },
+  panelBand: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    paddingHorizontal: SPACE[3],
+    paddingTop: SPACE[3],
+    paddingBottom: SPACE[2],
+  },
+  bandTop: { position: 'absolute', left: 0, right: 0, top: 0, height: 1.5 },
+  bandFoot: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 1 },
+  bandBody: { flex: 1 },
+  bandRule: { width: 26, height: 2, borderRadius: 1, marginBottom: 7 },
+  panelTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: INK },
+  panelSub: {
+    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
+    fontSize: 12, color: C.inkSoft, marginTop: 2,
+  },
+  panelBody: { paddingHorizontal: SPACE[3], paddingTop: SPACE[3] + 2, paddingBottom: SPACE[3] },
 
   // ── plate ──
   plateShadow: {

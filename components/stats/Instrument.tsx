@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, useAnimatedProps, withTiming, withDelay, Easing,
@@ -82,11 +82,13 @@ export function PanelRule() {
 
 export interface LegendRow { key: string; label: string; value: number; hue: string }
 
-export function Legend({ rows, total, selected, onSelect, grown, playToken, animate }: {
+export function Legend({ rows, total, selected, onSelect, grown, playToken, animate, entrance }: {
   rows: LegendRow[]; total: number; selected: string | null; onSelect: (k: string) => void;
   /** Keys whose value went up since the reader last looked. */
   grown: Set<string>;
   playToken: number; animate: boolean;
+  /** Arriving at the tab, or reacting while already on it. See InsightBoard. */
+  entrance: boolean;
 }) {
   return (
     <View style={s.legend}>
@@ -101,6 +103,7 @@ export function Legend({ rows, total, selected, onSelect, grown, playToken, anim
           pop={grown.has(r.key)}
           playToken={playToken}
           animate={animate}
+          entrance={entrance}
           onPress={() => onSelect(r.key)}
         />
       ))}
@@ -116,9 +119,10 @@ export function Legend({ rows, total, selected, onSelect, grown, playToken, anim
  * today, because there are always exactly six branches — which is precisely the
  * "fine until it isn't" the rule is about.
  */
-function LegendLine({ row: r, index, count, total, on, pop, playToken, animate, onPress }: {
+function LegendLine({ row: r, index, count, total, on, pop, playToken, animate, entrance, onPress }: {
   row: LegendRow; index: number; count: number; total: number;
-  on: boolean; pop: boolean; playToken: number; animate: boolean; onPress: () => void;
+  on: boolean; pop: boolean; playToken: number; animate: boolean;
+  entrance: boolean; onPress: () => void;
 }) {
   const g = glow(r.hue);
   const frac = total > 0 ? r.value / total : 0;
@@ -130,13 +134,25 @@ function LegendLine({ row: r, index, count, total, on, pop, playToken, animate, 
   // WIDTH rather than a transform — so the one row the reader had actually moved
   // stopped reacting, and only the dial popped. Measured in a browser: every
   // fill sat at a flat 0 to 1 through a real growth event.
-  const grow = useSharedValue(animate ? 0 : 1);
+  const grow = useSharedValue(animate && entrance ? 0 : 1);
+  const playedToken = useRef<number | null>(null);
   useEffect(() => {
+    const newPlay = playedToken.current !== playToken;
+    playedToken.current = playToken;
     if (!animate) { grow.value = 1; return; }
-    if (pop) { grow.value = 1; grow.value = bounceTo(1, 300, true); return; }
+    // See LedgerTile: an entrance is gated on a NEW PLAY, everywhere. These
+    // effects have no figure in their dependencies today, so the guard is
+    // currently free — which is the point of making it uniform. The one that did
+    // have a figure in its dependencies is the one that shipped the bug.
+    if (!newPlay) return;
+    if (pop) { grow.value = 1; grow.value = bounceTo(1, entrance ? 300 : 40, true); return; }
+    // A ROW THAT DID NOT MOVE DOES NOT MOVE. On a reaction the untouched rows
+    // hold exactly where they are — sweeping all six in again would say "here is
+    // your reading" when the reader asked "what did that do".
+    if (!entrance) { grow.value = 1; return; }
     grow.value = 0;
     grow.value = bounceTo(1, 120 + (index / Math.max(1, count)) * 260, false);
-  }, [playToken, animate, pop, index, count, grow]);
+  }, [playToken, animate, entrance, pop, index, count, grow]);
 
   const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: grow.value }] }));
 
@@ -188,6 +204,7 @@ export interface SparkProps {
   height?: number;
   playToken: number;
   animate: boolean;
+  entrance: boolean;
 }
 
 /**
@@ -199,7 +216,7 @@ export interface SparkProps {
  * a good Tuesday. The high day is marked, because on a thirty-point series the
  * peak is the one point anybody looks for.
  */
-export function SparkLine({ series, spanLabel, width, height = 108, playToken, animate }: SparkProps) {
+export function SparkLine({ series, spanLabel, width, height = 108, playToken, animate, entrance }: SparkProps) {
   const gold = METAL.GOLD;
   const n = series.length;
   const padT = 12;
@@ -244,12 +261,23 @@ export function SparkLine({ series, spanLabel, width, height = 108, playToken, a
   }, [series, n, width, plotH, max]);
 
   // The curtain: a flat block of the panel's own ground, slid off to the right.
-  const reveal = useSharedValue(animate ? 0 : 1);
+  const reveal = useSharedValue(animate && entrance ? 0 : 1);
+  const playedToken = useRef<number | null>(null);
   useEffect(() => {
-    if (!animate) { reveal.value = 1; return; }
+    const newPlay = playedToken.current !== playToken;
+    playedToken.current = playToken;
+    // The curtain is a REVEAL, so it can only happen once per arrival. Drawing
+    // it again over a chart the reader is already looking at wipes the month off
+    // the screen and paints it back — a reload, not a reaction.
+    if (!animate || !entrance) { reveal.value = 1; return; }
+    // See LedgerTile: an entrance is gated on a NEW PLAY, everywhere. These
+    // effects have no figure in their dependencies today, so the guard is
+    // currently free — which is the point of making it uniform. The one that did
+    // have a figure in its dependencies is the one that shipped the bug.
+    if (!newPlay) return;
     reveal.value = 0;
     reveal.value = withDelay(260, withTiming(1, { duration: 900, easing: Easing.out(Easing.cubic) }));
-  }, [playToken, animate, reveal]);
+  }, [playToken, animate, entrance, reveal]);
 
   const curtain = useAnimatedStyle(() => ({ transform: [{ translateX: reveal.value * width }] }));
 
@@ -297,27 +325,49 @@ export function SparkLine({ series, spanLabel, width, height = 108, playToken, a
 
 export interface Metric { key: string; label: string; value: number; suffix?: string }
 
-export function MetricStrip({ metrics, playToken, animate }: {
-  metrics: Metric[]; playToken: number; animate: boolean;
+export function MetricStrip({ metrics, playToken, animate, entrance }: {
+  metrics: Metric[]; playToken: number; animate: boolean; entrance: boolean;
 }) {
   return (
     <View style={s.metrics}>
       {metrics.map((m, i) => (
-        <MetricCell key={m.key} metric={m} index={i} playToken={playToken} animate={animate} last={i === metrics.length - 1} />
+        <MetricCell
+          key={m.key}
+          metric={m}
+          index={i}
+          playToken={playToken}
+          animate={animate}
+          entrance={entrance}
+          last={i === metrics.length - 1}
+        />
       ))}
     </View>
   );
 }
 
-function MetricCell({ metric, index, playToken, animate, last }: {
-  metric: Metric; index: number; playToken: number; animate: boolean; last: boolean;
+function MetricCell({ metric, index, playToken, animate, entrance, last }: {
+  metric: Metric; index: number; playToken: number;
+  animate: boolean; entrance: boolean; last: boolean;
 }) {
-  const n = useSharedValue(animate ? 0 : metric.value);
+  const n = useSharedValue(animate && entrance ? 0 : metric.value);
+  // `newPlay` for the reason LedgerTile spells out: `metric.value` is a
+  // dependency, meeting a thinker awards XP, and XP moves three of these four
+  // figures — so without it the strip re-counts from zero on a value change
+  // carrying the previous play's `entrance`.
+  const playedToken = useRef<number | null>(null);
   useEffect(() => {
+    const newPlay = playedToken.current !== playToken;
+    playedToken.current = playToken;
     if (!animate) { n.value = metric.value; return; }
+    if (!newPlay || !entrance) {
+      // Roll from what is on screen. Four figures dropping to zero and climbing
+      // back is the ledger's bug wearing smaller type.
+      n.value = withTiming(metric.value, { duration: 460, easing: Easing.out(Easing.cubic) });
+      return;
+    }
     n.value = 0;
     n.value = withDelay(420 + index * 90, withTiming(metric.value, { duration: 700, easing: Easing.out(Easing.cubic) }));
-  }, [playToken, animate, metric.value, index, n]);
+  }, [playToken, animate, entrance, metric.value, index, n]);
   const props = useAnimatedProps(() => ({ text: `${Math.round(n.value)}` }) as never);
 
   return (
@@ -327,7 +377,7 @@ function MetricCell({ metric, index, playToken, animate, last }: {
           editable={false}
           pointerEvents="none"
           underlineColorAndroid="transparent"
-          defaultValue={`${animate ? 0 : metric.value}`}
+          defaultValue={`${animate && entrance ? 0 : metric.value}`}
           style={[s.metricValue, counterStyle]}
           animatedProps={props}
         />

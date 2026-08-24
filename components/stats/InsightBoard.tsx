@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View, Text, Pressable, StyleSheet, AccessibilityInfo,
   type StyleProp, type ViewStyle,
@@ -11,9 +11,9 @@ import Animated, {
 import { MotiView } from 'moti';
 import { LinearGradient } from 'expo-linear-gradient';
 import ACounter, { counterStyle } from '@/components/shared/ACounter';
-import { StruckBar, StruckTile } from '@/components/profile/Struck';
+import { StruckBar, StruckTile, StruckPanel, EMBOSS } from '@/components/profile/Struck';
 import {
-  INK, PAPER, PAPER_LIT, MID, PANEL_BASE, PANEL_RULE, ramp, mix, glow, METAL,
+  INK, PAPER_LIT, MID, PANEL_BASE, ramp, mix, glow, METAL,
 } from '@/components/shared/tone';
 import { C } from '@/constants/design';
 import { milestoneFor, type StatElement, type Milestone } from '@/lib/utils/statsMilestone';
@@ -47,6 +47,38 @@ import { cue } from '@/lib/feedback';
 // decoration and stops meaning anything by the third visit; a bounce on the one
 // row the reader moved is feedback. `grownKeys` in statsMilestone.ts is what
 // knows which, and it gets it out of the fingerprint the tab already stores.
+//
+// ── AN ARRIVAL IS NOT A REACTION, AND CONFUSING THEM WAS A BUG ──────────────
+//
+//   > "sometimes if I'm in the statistics section and I click on a philosopher
+//   > ... and then go back. Sometimes the information will go blank on the very
+//   > top and will say zero lessons, zero thinkers, zero quotes, and zero days."
+//
+// Exactly what it says, and it was this file. Every animated part of the tab
+// treated a change in the fingerprint as an ENTRANCE: shared values reset to 0,
+// counters restarted from nothing, the ledger tiles dropped to `opacity: 0` and
+// `scale: 0` and then counted back up over about a second. That is the right
+// motion for arriving at the tab and completely wrong for anything that happens
+// while the reader is already looking at it.
+//
+// And meeting a thinker from inside Insights does change the fingerprint —
+// `recordPhilosopherView` increments the era's met count — so the reader's own
+// tap made the screen announce itself as new and wipe its own top row. Which
+// also explains the "sometimes": only a thinker they had NEVER MET moves a
+// counted number. Opening someone already met changes nothing and the tab holds
+// still, which is why it looked intermittent.
+//
+// So every animated part now takes `entrance`, and the two modes are:
+//
+//   entrance  — the reader has just arrived. Sweep in from nothing.
+//   reaction  — they were already here. NOTHING resets. Numbers roll from the
+//               value on screen to the new one, and only the rows that actually
+//               grew move at all.
+//
+// The screen decides which from whether the play landed on FOCUS or while
+// already focused; see app/(app)/stats/index.tsx. `scripts/check-stats.mjs`
+// asserts that no `playToken` effect in this folder zeroes a value without
+// consulting `entrance` first, because that is the whole defect in one line.
 //
 // ── THE HEADROOM IS 30% AND IT IS LOAD-BEARING ──────────────────────────────
 //
@@ -101,8 +133,9 @@ export interface LedgerItem { key: string; label: string; value: number; hue: st
  * a reader's achievement every time content ships, which is the complaint this
  * redesign started from. These are counts of things done, full stop.
  */
-export function Ledger({ items, playToken, animate, grown }: {
-  items: LedgerItem[]; playToken: number; animate: boolean; grown: Set<string>;
+export function Ledger({ items, playToken, animate, entrance, grown }: {
+  items: LedgerItem[]; playToken: number; animate: boolean; entrance: boolean;
+  grown: Set<string>;
 }) {
   return (
     <View style={s.ledger}>
@@ -113,6 +146,7 @@ export function Ledger({ items, playToken, animate, grown }: {
           index={i}
           playToken={playToken}
           animate={animate}
+          entrance={entrance}
           pop={grown.has(it.key)}
         />
       ))}
@@ -120,19 +154,51 @@ export function Ledger({ items, playToken, animate, grown }: {
   );
 }
 
-function LedgerTile({ item, index, playToken, animate, pop }: {
-  item: LedgerItem; index: number; playToken: number; animate: boolean; pop: boolean;
+function LedgerTile({ item, index, playToken, animate, entrance, pop }: {
+  item: LedgerItem; index: number; playToken: number;
+  animate: boolean; entrance: boolean; pop: boolean;
 }) {
   const r = ramp(item.hue);
-  const n = useSharedValue(animate ? 0 : item.value);
-  const rise = useSharedValue(animate ? 0 : 1);
+  const n = useSharedValue(animate && entrance ? 0 : item.value);
+  const rise = useSharedValue(animate && entrance ? 0 : 1);
+
+  // AN ENTRANCE BELONGS TO A PLAY, AND A PLAY HAPPENS ONCE.
+  //
+  // `item.value` has to be a dependency — the number must follow the store even
+  // when nothing bumps `playToken` — and that is exactly what made the first fix
+  // fail. Measured in a browser: meeting a thinker ran this effect FOUR times,
+  // and the third ran at `playToken` 1 with `entrance` still true, 71ms before
+  // the screen had worked out that this was a reaction. So the number moved, the
+  // effect fired on the value alone, and it replayed the arrival from zero using
+  // last play's answer.
+  //
+  // `newPlay` is the whole guard: an arrival is something the SCREEN announces,
+  // never something a changing figure can trigger by itself.
+  const playedToken = useRef<number | null>(null);
 
   useEffect(() => {
+    const newPlay = playedToken.current !== playToken;
+    playedToken.current = playToken;
+
     if (!animate) { n.value = item.value; rise.value = 1; return; }
-    n.value = 0; rise.value = 0;
-    rise.value = bounceTo(1, index * 70, pop);
-    n.value = withDelay(index * 70, withTiming(item.value, { duration: 760, easing: Easing.out(Easing.cubic) }));
-  }, [playToken, animate, item.value, index, pop, n, rise]);
+
+    if (newPlay && entrance) {
+      // ARRIVING. The four totals count up out of nothing, staggered — the one
+      // moment in the tab where starting from zero is the truth.
+      n.value = 0; rise.value = 0;
+      rise.value = bounceTo(1, index * 70, pop);
+      n.value = withDelay(index * 70, withTiming(item.value, { duration: 760, easing: Easing.out(Easing.cubic) }));
+      return;
+    }
+
+    // REACTING, or simply following a figure that moved between plays. Either
+    // way the reader is looking straight at these numbers, so they never leave
+    // the screen: the tile holds its size and its opacity, and the digits ROLL
+    // from whatever is displayed to the new total. A tile whose number did not
+    // move does not move either.
+    if (newPlay && pop) rise.value = bounceTo(1, 40, true);
+    n.value = withTiming(item.value, { duration: 460, easing: Easing.out(Easing.cubic) });
+  }, [playToken, animate, entrance, item.value, index, pop, n, rise]);
 
   const props = useAnimatedProps(() => ({ text: `${Math.round(n.value)}` }) as never);
   const style = useAnimatedStyle(() => ({
@@ -148,7 +214,7 @@ function LedgerTile({ item, index, playToken, animate, pop }: {
             editable={false}
             pointerEvents="none"
             underlineColorAndroid="transparent"
-            defaultValue={`${animate ? 0 : item.value}`}
+            defaultValue={`${animate && entrance ? 0 : item.value}`}
             style={[s.ledgerValue, { color: r.shade }, counterStyle]}
             animatedProps={props}
           />
@@ -179,29 +245,26 @@ export interface BarRow {
  * number already on the row. See lib/utils/statsDiscovery.ts for why.
  */
 export function RankedBars({
-  title, subtitle, rows, playToken, animate, grown, discoverFor, onOpenThinker, chart, hint, style,
+  title, subtitle, accent, rows, playToken, animate, entrance, grown,
+  discoverFor, onOpenThinker, hint, style,
 }: {
-  title: string; subtitle: string; rows: BarRow[];
+  title: string; subtitle: string;
+  /** The printer's rule in the panel head. */
+  accent?: string;
+  rows: BarRow[];
   playToken: number; animate: boolean;
+  /** Arriving at the tab, or reacting to something done while here. See the top. */
+  entrance: boolean;
   grown: Set<string>;
   discoverFor: (key: string) => Discovery | null;
   onOpenThinker: (id: string) => void;
-  /**
-   * An optional graph drawn ABOVE the rows, sharing their selection.
-   *
-   * A render prop rather than a child, because the chart has to know what is
-   * picked and be able to pick — the ring and the rows are two views of one
-   * choice, and threading that through a parent would put the selection in the
-   * screen, where three sections would then have to keep three copies of it.
-   */
-  chart?: (selected: string | null, onSelect: (key: string) => void) => React.ReactNode;
   /** Shown until a row is picked. One per screen — twice reads as a stutter. */
   hint?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
   const [sel, setSel] = useState<string | null>(null);
   const [reduce, setReduce] = useState(false);
-  const grow = useSharedValue(animate ? 0 : 1);
+  const grow = useSharedValue(animate && entrance ? 0 : 1);
 
   useEffect(() => {
     let alive = true;
@@ -209,11 +272,22 @@ export function RankedBars({
     return () => { alive = false; };
   }, []);
 
+  const playedToken = useRef<number | null>(null);
   useEffect(() => {
-    if (!animate || reduce) { grow.value = 1; return; }
+    const newPlay = playedToken.current !== playToken;
+    playedToken.current = playToken;
+    // The shared sweep belongs to the ENTRANCE only. On a reaction the bars are
+    // already drawn and already being read; re-running it from zero is the
+    // "rebuilt rather than reacting" defect this file names for the grown row.
+    if (!animate || reduce || !entrance) { grow.value = 1; return; }
+    // See LedgerTile: an entrance is gated on a NEW PLAY, everywhere. These
+    // effects have no figure in their dependencies today, so the guard is
+    // currently free — which is the point of making it uniform. The one that did
+    // have a figure in its dependencies is the one that shipped the bug.
+    if (!newPlay) return;
     grow.value = 0;
     grow.value = withDelay(140, withSpring(1, { damping: 13, stiffness: 150, mass: 0.9 }));
-  }, [playToken, animate, reduce, grow]);
+  }, [playToken, animate, entrance, reduce, grow]);
 
   const max = rows.reduce((a, r) => (r.value > a ? r.value : a), 0);
   const scale = Math.max(1, max * HEADROOM);
@@ -238,9 +312,7 @@ export function RankedBars({
   };
 
   return (
-    <View style={[s.section, style]}>
-      <SectionHead title={title} subtitle={subtitle} />
-      {chart ? <View style={s.chart}>{chart(sel, pick)}</View> : null}
+    <StruckPanel title={title} subtitle={subtitle} accent={accent} style={[s.section, style]}>
       {rows.map((r, i) => (
         <BarLine
           key={r.key}
@@ -252,6 +324,7 @@ export function RankedBars({
           reduce={reduce}
           playToken={playToken}
           animate={animate}
+          entrance={entrance}
           pop={grown.has(r.key)}
           selected={sel === r.key}
           ghost={sel === r.key && milestone && milestone.kind !== 'none'
@@ -267,16 +340,17 @@ export function RankedBars({
       ) : hint ? (
         <Text style={s.hint}>Tap a row to meet someone from it.</Text>
       ) : null}
-    </View>
+    </StruckPanel>
   );
 }
 
 function BarLine({
-  row, index, count, scale, grow, reduce, playToken, animate, pop,
+  row, index, count, scale, grow, reduce, playToken, animate, entrance, pop,
   selected, ghost, ghostTo, hintText, onPress,
 }: {
   row: BarRow; index: number; count: number; scale: number;
-  grow: SharedValue<number>; reduce: boolean; playToken: number; animate: boolean; pop: boolean;
+  grow: SharedValue<number>; reduce: boolean; playToken: number;
+  animate: boolean; entrance: boolean; pop: boolean;
   selected: boolean; ghost: number; ghostTo: number; hintText?: string; onPress: () => void;
 }) {
   const r = ramp(row.hue);
@@ -293,8 +367,9 @@ function BarLine({
   useEffect(() => {
     if (!pop) return;
     if (!animate || reduce) { solo.value = 1; return; }
-    solo.value = bounceTo(1, 260 + index * 60, true);
-  }, [playToken, animate, reduce, pop, index, solo]);
+    // On a reaction there is no sweep to wait behind, so the row answers at once.
+    solo.value = bounceTo(1, entrance ? 260 + index * 60 : 40, true);
+  }, [playToken, animate, entrance, reduce, pop, index, solo]);
 
   const fillStyle = useAnimatedStyle(() => {
     if (pop) return { transform: [{ scaleX: solo.value }] };
@@ -314,7 +389,7 @@ function BarLine({
       <View style={s.barTop}>
         <View style={[s.barChip, { backgroundColor: r.track, borderColor: r.base }]} />
         <Text style={[s.barLabel, selected && { color: r.shade }]} numberOfLines={1}>{row.label}</Text>
-        <Text style={[s.barValue, { color: r.base }]}>{row.value}</Text>
+        <Text style={[s.barValue, EMBOSS, { color: r.base }]}>{row.value}</Text>
       </View>
 
       {/* The track is always full width; only the FILL grows, so the groove is
@@ -446,28 +521,41 @@ export interface LeagueRow {
  * cannot tell you anything.
  */
 export function ThinkerLeague({
-  rows, playToken, animate, grown, discoverFor, onOpen, style,
+  rows, playToken, animate, entrance, grown, discoverFor, onOpen, style,
 }: {
-  rows: LeagueRow[]; playToken: number; animate: boolean;
+  rows: LeagueRow[]; playToken: number; animate: boolean; entrance: boolean;
   grown: Set<string>;
   discoverFor: (id: string) => Discovery | null;
   onOpen: (id: string) => void; style?: StyleProp<ViewStyle>;
 }) {
   const [sel, setSel] = useState<string | null>(null);
-  const grow = useSharedValue(animate ? 0 : 1);
+  const grow = useSharedValue(animate && entrance ? 0 : 1);
+  const playedToken = useRef<number | null>(null);
   useEffect(() => {
-    if (!animate) { grow.value = 1; return; }
+    const newPlay = playedToken.current !== playToken;
+    playedToken.current = playToken;
+    // See RankedBars: the sweep is the arrival, not the answer to a tap.
+    if (!animate || !entrance) { grow.value = 1; return; }
+    // See LedgerTile: an entrance is gated on a NEW PLAY, everywhere. These
+    // effects have no figure in their dependencies today, so the guard is
+    // currently free — which is the point of making it uniform. The one that did
+    // have a figure in its dependencies is the one that shipped the bug.
+    if (!newPlay) return;
     grow.value = 0;
     grow.value = withDelay(220, withSpring(1, { damping: 14, stiffness: 160 }));
-  }, [playToken, animate, grow]);
+  }, [playToken, animate, entrance, grow]);
 
   const max = rows.reduce((a, r) => (r.score > a ? r.score : a), 0) || 1;
   const discovery = useMemo(() => (sel == null ? null : discoverFor(sel)), [sel, discoverFor]);
   const selRow = rows.find((r) => r.id === sel);
 
   return (
-    <View style={[s.section, style]}>
-      <SectionHead title="Who You Read Most" subtitle="lessons about them, and quotes of theirs you kept" />
+    <StruckPanel
+      title="Who You Read Most"
+      subtitle="lessons about them, and quotes of theirs you kept"
+      accent={METAL.GOLD.base}
+      style={[s.section, style]}
+    >
       {rows.map((r, i) => (
         <LeagueLine
           key={r.id}
@@ -477,6 +565,7 @@ export function ThinkerLeague({
           max={max}
           grow={grow}
           animate={animate}
+          entrance={entrance}
           playToken={playToken}
           pop={grown.has(r.id)}
           selected={sel === r.id}
@@ -485,18 +574,20 @@ export function ThinkerLeague({
       ))}
       {discovery && selRow ? (
         <DiscoveryCard d={discovery} hue={selRow.hue} onOpen={onOpen} />
-      ) : null}
-    </View>
+      ) : (
+        <Text style={s.hint}>Tap a name for something you did not know about them.</Text>
+      )}
+    </StruckPanel>
   );
 }
 
 const PLACE_METAL = [METAL.GOLD, METAL.SILVER, METAL.BRONZE];
 
 function LeagueLine({
-  row, place, count, max, grow, animate, playToken, pop, selected, onPress,
+  row, place, count, max, grow, animate, entrance, playToken, pop, selected, onPress,
 }: {
   row: LeagueRow; place: number; count: number; max: number;
-  grow: SharedValue<number>; animate: boolean; playToken: number;
+  grow: SharedValue<number>; animate: boolean; entrance: boolean; playToken: number;
   pop: boolean; selected: boolean; onPress: () => void;
 }) {
   const r = ramp(row.hue);
@@ -507,8 +598,8 @@ function LeagueLine({
   useEffect(() => {
     if (!pop) return;
     if (!animate) { solo.value = 1; return; }
-    solo.value = bounceTo(1, 320 + place * 60, true);
-  }, [playToken, animate, pop, place, solo]);
+    solo.value = bounceTo(1, entrance ? 320 + place * 60 : 40, true);
+  }, [playToken, animate, entrance, pop, place, solo]);
 
   const fillStyle = useAnimatedStyle(() => {
     if (pop) return { transform: [{ scaleX: solo.value }] };
@@ -548,7 +639,7 @@ function LeagueLine({
 
       <View style={s.leagueBody}>
         <View style={s.leagueTop}>
-          <Text style={[s.leagueName, selected && { color: r.shade }]} numberOfLines={1}>{row.name}</Text>
+          <Text style={[s.leagueName, EMBOSS, selected && { color: r.shade }]} numberOfLines={1}>{row.name}</Text>
           <Text style={[s.leagueEra, { color: r.shade }]} numberOfLines={1}>{row.era}</Text>
         </View>
         <View style={s.leagueTrack}>
@@ -562,32 +653,9 @@ function LeagueLine({
   );
 }
 
-// ── shared ───────────────────────────────────────────────────────────────────
-
-export function SectionHead({ title, subtitle, right }: {
-  title: string; subtitle: string; right?: React.ReactNode;
-}) {
-  return (
-    <View style={s.head}>
-      <View style={{ flex: 1 }}>
-        <Text style={s.headTitle}>{title}</Text>
-        <Text style={s.headSub}>{subtitle}</Text>
-      </View>
-      {right}
-    </View>
-  );
-}
-
 const s = StyleSheet.create({
   section: { marginTop: 28 },
-  chart: { marginBottom: 18 },
 
-  head: { flexDirection: 'row', alignItems: 'flex-end', marginBottom: 14 },
-  headTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: INK },
-  headSub: {
-    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
-    fontSize: 12, color: C.inkSoft, marginTop: 2,
-  },
 
   // ── ledger ──
   ledger: { flexDirection: 'row', gap: 8, marginTop: 22 },
@@ -656,7 +724,26 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
   placePlain: { backgroundColor: PAPER_LIT, borderColor: C.hairline },
-  placeNum: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 14 },
+  // THE NUMERAL SITS IN THE MIDDLE OF THE DISC, and getting there took two
+  // properties rather than the flexbox centring that was already here.
+  //
+  // Horizontally: a Text is centred as a BOX, so where the glyph lands inside
+  // that box is the font's business. `width: '100%'` plus `textAlign: 'center'`
+  // hands the centring to the type engine instead, which is the only thing that
+  // knows the digit's side bearings.
+  //
+  // Vertically: `includeFontPadding` is the one that was actually wrong.
+  // Android's default adds the font's own top/bottom padding to the line box,
+  // and Playfair Display's is deep AND asymmetric — a tall ascent over a short
+  // descent — so flex centred the padded box while the reader saw the digit
+  // sitting low in the circle. Turning it off makes the line box the glyph's
+  // real ascent and descent, which is what flex should have been centring all
+  // along. No magic offset: an offset would only be right at this one size.
+  placeNum: {
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 14,
+    width: '100%', textAlign: 'center',
+    includeFontPadding: false, textAlignVertical: 'center',
+  },
   leagueBody: { flex: 1, minWidth: 0 },
   leagueTop: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   leagueName: { flex: 1, fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: INK },

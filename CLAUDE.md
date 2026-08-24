@@ -1487,6 +1487,102 @@ Measured in a browser rather than eyeballed: ring 0.82 → 1.07, the one grown r
 > bounced. The flag never needed clearing — children re-run on `playToken`, which
 > only moves when there is news.
 
+### An arrival is not a reaction, and the tab could not tell them apart
+
+> *"sometimes if I'm in the statistics section and I click on a philosopher …
+> and then go back. Sometimes the information will go blank on the very top and
+> will say zero lessons, zero thinkers, zero quotes, and zero days."*
+
+Exactly what it says, and it was the entrance animation firing at the wrong
+moment. **Every animated part of the tab treated a change in the fingerprint as
+an arrival** — shared values to 0, counters restarting from nothing, the four
+ledger tiles to `opacity: 0` and `scale: 0` and then a second of counting back
+up. Right for reaching the tab; completely wrong for anything that happens while
+the reader is already looking at it.
+
+And opening a thinker from inside Insights **does** move the fingerprint:
+`recordPhilosopherView` increments that era's met count. So the reader's own tap
+made the screen announce itself as new and wipe its own top row. That also
+explains the *"sometimes"* — only a thinker they had **never met** moves a
+counted number, and their message says so: *"it shows up a someone you have not
+met, and I click on that."* Meeting someone already met changes nothing and the
+tab holds perfectly still, which is what made it look intermittent.
+
+Two modes now, threaded to every animated child as `entrance`: an ARRIVAL sweeps
+in from nothing, a REACTION resets nothing at all — numbers roll from the figure
+on screen to the new one, and only the rows that actually grew move.
+
+**Telling them apart needs TWO focus effects, and that is the load-bearing
+part.** `useFocusEffect` re-runs its callback in place whenever the callback's
+identity changes, and this screen's changes with the fingerprint — so the flag
+that remembers "we have been here a while" must live in an effect whose deps are
+`[]`. Merge them and the flag is cleared by the very event it exists to detect.
+
+> **The first fix consulted `entrance` and still blanked the ledger.** These
+> effects also depend on the FIGURE they draw, because the number has to follow
+> the store even when nothing bumps `playToken` — so the store updates, the
+> effect fires on the value alone, and it reads the PREVIOUS play's `entrance`.
+> A probe in the browser: one tap ran the ledger effect four times, and the third
+> ran at play 1 with a stale `true`, 71ms before the screen had worked out that
+> this was a reaction. Hence `newPlay`, uniformly: **an entrance is something the
+> screen announces, never something a changing number can trigger by itself.**
+>
+> `check:stats` now reads the source for it — an effect that depends on
+> `playToken` and zeroes a value must mention both `entrance` and `newPlay` — and
+> it is counter-tested by putting all three defects back and watching it go red.
+> It strips comments first, for the reason §17's L8 gives.
+
+Measured through a real meet-a-thinker event, ledger tiles:
+
+| tile | reads | opacity floor | scale |
+|---|---|---|---|
+| LESSONS | 41 → 41 | 1 | still |
+| **THINKERS** | **14 → 15** | **1** | **0.82 → 1.07** |
+| QUOTES · DAYS | unchanged | 1 | still |
+
+### The two paper boxes, and why a tile's shading does not scale
+
+> *"for the who you read most and thinkers by era, I want this information to be
+> put in a box or boxes and to add some depth to the texts and to the box in
+> general."*
+
+`StruckPanel` in `components/profile/Struck.tsx` — the paper counterpart to the
+dark instrument. Insights read "object, object, page", and the two readings that
+are most personal to the reader were the two with no edges at all.
+
+- **The head is a RECESS and the body is the face.** That is the whole of the
+  depth, and it obeys the rule `StruckNiche` already states: a groove is bright
+  where a dome is dark. The band's gradient runs the opposite way to the card's,
+  takes the dark hairline along its top where light cannot reach into the cut and
+  the pale one along the bottom where it catches the far wall.
+- **A tile's shading does not survive being scaled up.** `StruckTile` runs the
+  full `PAPER_LIT → PAPER_SHADE` across about 80px and reads as a lit face; the
+  identical three stops across a 350px card came out as a **tan stain** in the
+  bottom corner. A big flat surface lit from one side barely shades at all — its
+  depth is in its EDGES. The panel runs a third of the fall-off and gets the rest
+  from a lit top rim, a hairline rule and the shadow it sits on.
+- **The emboss is an INK shadow, not a paper highlight.** The obvious letterpress
+  — type pressed into the sheet, lit from below — cannot work on this palette:
+  `PAPER` is `#FAFAF7` and `PAPER_LIT` is `#FFFFFF`, a 2% swing, and §19 already
+  measured what that looks like. So the type sits proud and drops its shadow
+  down-right along the one light. `EMBOSS` is one exported style so §12's
+  `textShadow*` sweep stays a one-line change, and it goes on display type only.
+- **`includeFontPadding` was why the league numeral sat low in its disc**, not
+  the flexbox centring, which was right all along. Android adds the font's own
+  top/bottom padding to the line box and Playfair Display's is deep and
+  asymmetric, so flex was centring a padded box while the reader saw a digit
+  sitting low. Turning it off makes the line box the glyph's real ascent and
+  descent. Measured on all five discs: **dx 0.00, dy 0.00**. No magic offset — an
+  offset would only be right at one size.
+
+> **And a numeral that looks sliced at 2× may be whole at 4×.** All five era
+> counts read as if their right sides had been cut off, and the measurement said
+> every one of them sat inside its row with zero overhang. One capture at device
+> scale 4 settled it: the numerals are complete and the reading of the smaller
+> picture was wrong. Trust the measurement, then go and look bigger — do not
+> "fix" a defect only a downscaled screenshot can see.
+
+
 ### The instrument, and what "cheap" actually was
 
 The tab was rebuilt again, and the brief looked contradictory: *"the whole tab

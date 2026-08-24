@@ -20,6 +20,14 @@
 //      and nothing stops that coming back except measuring it.
 //   5. EVERY COST IS REAL — at least one whole lesson or saved quote, never a
 //      target already reached.
+//   7. NOTHING RESETS TO ZERO EXCEPT ON AN ARRIVAL. The reader reported the
+//      four totals at the top of the tab going blank and reading zero after
+//      they opened a thinker and came back, and the cause was every animated
+//      part treating a fingerprint change as an entrance: shared values to 0,
+//      counters from nothing, tiles to opacity 0. Checked at SOURCE level,
+//      because it is a property of the effects rather than of any pure
+//      function - an effect that runs on `playToken` may not zero a value
+//      without consulting `entrance`.
 //   6. THE FINGERPRINT MOVES IF AND ONLY IF A DRAWN NUMBER MOVES. The entrance
 //      animation fires on change, so a fingerprint that folds in an unrelated
 //      field fires every time and the "something happened" meaning is gone —
@@ -290,6 +298,103 @@ ok(dOneNote === 0, 'different rows can say different things', dOneNote ? `${dOne
   ok(g('', f(1, 1, 1)) === '' && g(f(1, 1, 1), '') === '', 'a missing fingerprint bounces nothing');
   ok([...M.grownKeys(f(1, 1, 1), '2;ethics:1:0:0|logic:1:0:0|newbranch:2:0:0;;kant:1;;ANCIENT:1')].join(',') === 'newbranch',
     'a row that did not exist before counts as grown');
+}
+
+// ── nothing resets to zero except on an arrival ─────────────────────────────
+//
+// STRIP THE COMMENTS FIRST. §17's L8 is the whole reason: a detector that reads
+// raw source reports the paragraph EXPLAINING a defect as the defect, and the
+// first hardened checker in this repo did exactly that on its first run.
+function strip(src) {
+  const noBlock = src.replace(/\/\*[\s\S]*?\*\//g, '');
+  return noBlock.split('\n').map((line) => {
+    let q = null;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (q) {
+        if (c === '\\') { i++; continue; }
+        if (c === q) q = null;
+      } else if (c === '"' || c === "'" || c === '`') {
+        q = c;
+      } else if (c === '/' && line[i + 1] === '/') {
+        return line.slice(0, i);
+      }
+    }
+    return line;
+  }).join('\n');
+}
+
+/** Every `useEffect(() => { … }, [ … ])` in a file, as {body, deps}. */
+function effects(src) {
+  const out = [];
+  const open = /useEffect\(\s*\(\s*\)\s*=>\s*\{/g;
+  let m;
+  while ((m = open.exec(src))) {
+    let i = m.index + m[0].length;
+    let depth = 1;
+    for (; i < src.length && depth > 0; i++) {
+      if (src[i] === '{') depth++;
+      else if (src[i] === '}') depth--;
+    }
+    out.push({
+      body: src.slice(m.index + m[0].length, i - 1),
+      deps: (src.slice(i, i + 400).match(/^\s*,\s*\[([^\]]*)\]/) || [, ''])[1],
+    });
+  }
+  return out;
+}
+
+/**
+ * THE DEFECT: an effect that resets a value to zero on a play, without knowing
+ * both of the things it has to know.
+ *
+ * `entrance` alone is not enough, and that is the whole reason this predicate
+ * asks for two words rather than one. The first version of the fix consulted
+ * `entrance` and still blanked the ledger, because these effects also depend on
+ * the FIGURE they draw: the store updates, the effect fires on the value alone,
+ * and it reads the previous play's `entrance`. Browser probe, four runs for one
+ * tap, the third of them at play 1 with a stale `true`.
+ *
+ * So an entrance must be gated on `newPlay` as well — something the screen
+ * announces, never something a changing number can trigger by itself.
+ */
+function offenders(src) {
+  return effects(strip(src)).filter(
+    (e) => /\bplayToken\b/.test(e.deps)
+      && /\.value\s*=\s*0\b/.test(e.body)
+      && !(/\bentrance\b/.test(e.body) && /\bnewPlay\b/.test(e.body)),
+  ).length;
+}
+
+{
+  // COUNTER-TEST. A detector is only worth its green once it has been watched
+  // going red — so all three defects are put back here and must be seen.
+  const bad = 'useEffect(() => { n.value = 0; n.value = withTiming(v); }, [playToken, animate, n]);';
+  const stale = 'useEffect(() => { if (entrance) { n.value = 0; } }, [playToken, entrance, n, item.value]);';
+  const asks = 'useEffect(() => { const newPlay = t.current !== playToken; if (newPlay && entrance) { n.value = 0; } }, [playToken, entrance, n]);';
+  const commented = 'useEffect(() => { /* was: n.value = 0 */ n.value = withTiming(v); }, [playToken, n]);';
+  ok(offenders(bad) === 1, 'the reset detector sees the defect when it is put back');
+  ok(offenders(stale) === 1, 'and sees the one that asks but can be asking about the last play');
+  ok(offenders(asks) === 0, 'and holds its fire on an effect that asks about THIS play');
+  ok(offenders(commented) === 0, 'and reads the code rather than the comments about it');
+}
+
+{
+  const files = [
+    'components/stats/InsightBoard.tsx',
+    'components/stats/Instrument.tsx',
+    'components/stats/Donut.tsx',
+    'app/(app)/stats/index.tsx',
+  ];
+  let bad = 0;
+  const where = [];
+  for (const f of files) {
+    const n = offenders(readFileSync(path.join(REPO, f), 'utf8'));
+    if (n) { bad += n; where.push(`${f} (${n})`); }
+  }
+  ok(bad === 0,
+    'nothing on the tab resets to zero without asking whether the reader just arrived',
+    bad ? where.join(', ') : `${files.length} files clean`);
 }
 
 console.log(fails ? `\n${fails} problem(s).\n` : '\nall clear.\n');

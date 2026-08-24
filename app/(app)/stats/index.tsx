@@ -72,6 +72,22 @@ const ERA_NAME: Record<EraKey, string> = {
 // matter — turning the entire tab dark would make it a dashboard belonging to
 // some other product. One instrument on a page of paper is a plate in a book.
 //
+// ── AN ARRIVAL IS NOT A REACTION ────────────────────────────────────────────
+//
+// This screen decides which of the two every play is, and everything animated
+// under it obeys. The distinction is not a guess: an ARRIVAL is a play that
+// lands on FOCUS, a REACTION is one that lands while the reader is already
+// looking at the tab. `settled` is the whole mechanism, and it needs TWO focus
+// effects to work — the first has an empty dependency list so its cleanup only
+// runs on a real blur, while the second's identity changes with the fingerprint
+// and therefore re-runs in place. Merge them and the flag is cleared by every
+// change, which is precisely the case it exists to detect.
+//
+// What it fixes: opening a thinker from this tab calls `recordPhilosopherView`,
+// which moves the era counts, which moves the fingerprint — so the reader's own
+// tap used to replay the entrance and blank the four totals at the top of the
+// screen for about a second. See components/stats/InsightBoard.tsx.
+//
 // ── AND NO TARGET COMES FROM A TOTAL ────────────────────────────────────────
 //
 // lib/utils/statsMilestone.ts and statsDiscovery.ts hold that line: a tap names
@@ -206,14 +222,29 @@ export default function StatsScreen() {
 
   const [playToken, setPlayToken] = useState(0);
   const [animate, setAnimate] = useState(false);
+  // A fresh mount is an arrival by definition. See the note at the top.
+  const [entrance, setEntrance] = useState(true);
+  const settled = useRef(false);
   // WHICH rows the reader actually moved. Read out of the PREVIOUS fingerprint,
   // which is still in the store at the moment the effect runs — after
   // `markStatsSeen` it is gone, so the order inside the effect is load-bearing.
   const [grown, setGrown] = useState<Set<string>>(() => new Set());
   const armed = useRef<string | null>(null);
 
+  // FIRST, AND WITH NO DEPENDENCIES ON PURPOSE. Its callback identity never
+  // changes, so react-navigation runs it only on a real focus and tears it down
+  // only on a real blur — which is the one clock in this screen that a
+  // fingerprint change cannot touch.
+  useFocusEffect(useCallback(() => { settled.current = false; }, []));
+
   useFocusEffect(
     useCallback(() => {
+      // Read BEFORE the early returns: arriving with no news still counts as
+      // having arrived, or the reader's first tap afterwards would be mistaken
+      // for one. That case — land on Insights with nothing new, open a thinker
+      // you have never met, come back — is exactly the reported bug.
+      const arriving = !settled.current;
+      settled.current = true;
       // NO `setAnimate(false)` HERE, and that is a fix rather than an omission.
       // `markStatsSeen` writes the fingerprint, which re-renders, which changes
       // this callback's identity, which makes useFocusEffect run it AGAIN — and
@@ -231,21 +262,28 @@ export default function StatsScreen() {
       if (armed.current === fingerprint) return;
       armed.current = fingerprint;
       setGrown(grownKeys(seenFingerprint, fingerprint));
+      setEntrance(arriving);
       setAnimate(true);
       setPlayToken((n) => n + 1);
       markStatsSeen(fingerprint);
     }, [fingerprint, seenFingerprint, markStatsSeen]),
   );
 
-  // The dial squeezes and bounces on every visit that has news, which is what
-  // makes arriving at the tab feel like arriving at a scoreboard. One transform
-  // on one wrapper — the SVG under it never animates.
+  // The dial squeezes and bounces on every ARRIVAL that has news, which is what
+  // makes reaching the tab feel like reaching a scoreboard. One transform on one
+  // wrapper — the SVG under it never animates.
+  //
+  // On a reaction it moves only if the thing it draws moved. The dial is lessons
+  // by branch, and meeting a thinker is not a lesson, so the commonest reaction
+  // in the tab leaves it perfectly still — which is the difference between
+  // feedback and a screen that twitches whenever it is touched.
+  const branchGrew = useMemo(() => areaRows.some((r) => grown.has(r.key)), [areaRows, grown]);
   const dialPop = useSharedValue(1);
   useEffect(() => {
-    if (!animate) { dialPop.value = 1; return; }
+    if (!animate || (!entrance && !branchGrew)) { dialPop.value = 1; return; }
     dialPop.value = 1;
-    dialPop.value = bounceTo(1, 60, true);
-  }, [playToken, animate, dialPop]);
+    dialPop.value = bounceTo(1, entrance ? 60 : 20, true);
+  }, [playToken, animate, entrance, branchGrew, dialPop]);
 
   // ── the discovery pool ────────────────────────────────────────────────────
   const candidates: Candidate[] = useMemo(() => ALL_PHILOSOPHERS.map((p) => ({
@@ -335,7 +373,13 @@ export default function StatsScreen() {
 
           {showWidget ? <DailyQuoteWidget style={{ marginBottom: 20 }} /> : null}
 
-          <Ledger items={ledger} playToken={playToken} animate={animate} grown={ledgerGrown} />
+          <Ledger
+            items={ledger}
+            playToken={playToken}
+            animate={animate}
+            entrance={entrance}
+            grown={ledgerGrown}
+          />
 
           {/* ── the instrument ── */}
           <Instrument>
@@ -357,6 +401,7 @@ export default function StatsScreen() {
                 grown={grown}
                 playToken={playToken}
                 animate={animate}
+                entrance={entrance}
               />
             </View>
 
@@ -382,12 +427,13 @@ export default function StatsScreen() {
                 width={panelW}
                 playToken={playToken}
                 animate={animate}
+                entrance={entrance}
               />
             </View>
 
             <PanelRule />
 
-            <MetricStrip metrics={metrics} playToken={playToken} animate={animate} />
+            <MetricStrip metrics={metrics} playToken={playToken} animate={animate} entrance={entrance} />
           </Instrument>
 
           {league.length > 0 && (
@@ -395,6 +441,7 @@ export default function StatsScreen() {
               rows={league}
               playToken={playToken}
               animate={animate}
+              entrance={entrance}
               grown={grown}
               discoverFor={discoverThinker}
               onOpen={openPhilosopher}
@@ -404,9 +451,15 @@ export default function StatsScreen() {
           <RankedBars
             title="Thinkers by Era"
             subtitle="whose century you actually read"
+            // INK, NOT AN ERA HUE. The five colours in this box are labels for
+            // the five rows; a sixth one in the head would be a label for
+            // nothing, and picking the leading era's would make the box change
+            // colour as the reader reads.
+            accent={Ink}
             rows={eraRows}
             playToken={playToken}
             animate={animate}
+            entrance={entrance}
             grown={grown}
             discoverFor={discoverEra}
             onOpenThinker={openPhilosopher}
