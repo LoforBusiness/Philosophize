@@ -59,6 +59,38 @@ export const T_BOLT = 0.46; // and gone
 // when BEATS is built. `speak` is derived from the word count but CAPPED by the
 // beat's own slot, so a line that outgrows its slot doesn't throw — it silently
 // rushes. Lengthen a line and you must check it still fits.
+//
+// ── AND THE CAP USED TO EAT THE WHOLE LINE ─────────────────────────────────
+//
+// A reader: "there are some words that still get cut out." They were not being
+// clipped — nothing on this screen overflows anything, on any device size, which
+// is why looking for a clip found nothing. They were being taken away before
+// they could be read.
+//
+// `speak` was `words.length * 0.3 + 0.3`, which is how long the line takes to
+// WRITE ITSELF, and the beats are only about a second longer than that. Words
+// then fade out over the last 0.3s of the beat. Subtract the two and the time a
+// line spends COMPLETE AND FULLY OPAQUE was:
+//
+//     Think philosophy is boring…      0.74s
+//     Watch. Here's a real one.        0.36s     <- the whole line, for a third
+//     Is it ever right to lie?         0.45s        of a second
+//     You answer. Then Kant tells…     0.54s
+//     Philosophy has six branches.     0.87s
+//     …every one of the eleven under 1.3s, eight of them under a second.
+//
+// Nobody can read a sentence in a third of a second, so the last words of nearly
+// every line were arriving and immediately dissolving. That is what "cut out"
+// looks like from the outside.
+//
+// The reveal is a flourish; the dwell is the whole point of putting words on a
+// screen. So the flourish gets faster — 0.17s a word instead of 0.3 — and the
+// slot cap reserves a full second rather than half of one. The worst line now
+// holds complete for 0.96s and the median for 1.6s, on the same 42-second
+// timeline: nothing was lengthened, the writing just stopped taking all of it.
+//
+// `check-thinkers` re-derives every one of these windows, because this is
+// arithmetic nobody can see by reading the script.
 const SCRIPT: Array<[number, string, Visual | null, Gesture | null, number[]?]> = [
   [0.0, 'Think philosophy is boring, or too difficult?', null, 'point'],
   [3.4, "Watch. Here's a real one.", null, 'shrug'],
@@ -105,7 +137,7 @@ export const BEATS: Beat[] = SCRIPT.map(([t, text, visual, gesture, cues], i) =>
     t: t + SPEAK_T0,
     text,
     words,
-    speak: Math.max(0.5, Math.min(nextT - t - 0.5, words.length * 0.3 + 0.3)),
+    speak: Math.max(0.45, Math.min(nextT - t - 1.0, words.length * 0.17 + 0.2)),
     visual,
     gesture,
     cues: cues ?? [],

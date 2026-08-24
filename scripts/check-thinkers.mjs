@@ -217,5 +217,59 @@ ok(noBranch.length === 0, 'and at least one branch to chart',
     'the intro board derives its "and n more" rather than typing it');
 }
 
+// ── HOW LONG A LINE OF THE INTRO IS ACTUALLY READABLE ───────────────────────
+//
+// A reader: "there are some words that still get cut out." Nothing on that screen
+// overflows anything — a sweep of the whole timeline on two device sizes found no
+// clipped word at all. They were being taken away instead.
+//
+// Each line writes itself on word by word over `speak`, and then fades out over
+// the last 0.3s of its beat. The gap between those two is the only time the line
+// exists COMPLETE AND OPAQUE, and it was 0.36s at worst and under a second for
+// eight of the eleven lines. That is not a rendering fault and no clip test can
+// see it; it is arithmetic, which is why it is arithmetic that checks it.
+{
+  const rigSrc = readFileSync(path.join(REPO, 'components/welcome/rig.ts'), 'utf8');
+  // The script table and the two numbers that decide the schedule, read out of the
+  // file rather than restated — a copy here would drift the moment either moves.
+  const block = rigSrc.slice(rigSrc.indexOf('const SCRIPT'), rigSrc.indexOf('const SPEAK_END'));
+  const lines = [...block.matchAll(/\[\s*([\d.]+),\s*(['"])((?:\\.|(?!\2).)*)\2/g)]
+    .map((m) => [Number(m[1]), m[3].replace(/\\'/g, "'").replace(/\\"/g, '"')]);
+  const endM = rigSrc.match(/const SPEAK_END = ([\d.]+)/);
+  const speakM = rigSrc.match(/speak: Math\.max\(([\d.]+), Math\.min\(nextT - t - ([\d.]+), words\.length \* ([\d.]+) \+ ([\d.]+)\)\)/);
+  ok(lines.length >= 8, 'the intro script was found', `${lines.length} lines`);
+  ok(!!endM && !!speakM, 'the intro schedule was found',
+    speakM ? speakM.slice(1).join(' ') : '(speak formula changed shape — update this check)');
+
+  if (lines.length && endM && speakM) {
+    const [floor, reserve, per, base] = speakM.slice(1).map(Number);
+    const SPEAK_END = Number(endM[1]);
+    // The word's own fade-out lead, from WelcomeAnimation's Word component.
+    const wa = readFileSync(path.join(REPO, 'components/welcome/WelcomeAnimation.tsx'), 'utf8');
+    const outM = wa.match(/nextT - ([\d.]+)\)\) \/ ([\d.]+)\)/);
+    const lead = outM ? Number(outM[1]) : 0.3;
+    // …and the word's own fade-IN, so "fully up" means fully up.
+    const inM = wa.match(/clamp01\(\(age - at\) \/ ([\d.]+)\)\)/);
+    const rise = inM ? Number(inM[1]) : 0.16;
+
+    let worst = Infinity, worstLine = '';
+    for (let i = 0; i < lines.length; i++) {
+      const [t, text] = lines[i];
+      const nextT = i + 1 < lines.length ? lines[i + 1][0] : SPEAK_END;
+      const n = text.split(' ').length;
+      const speak = Math.max(floor, Math.min(nextT - t - reserve, n * per + base));
+      const full = t + 0.14 + speak * ((n - 1) / n) + rise;
+      const win = (nextT - lead) - full;
+      if (win < worst) { worst = win; worstLine = text; }
+    }
+    // A SECOND, and not a round number picked for tidiness: it is roughly what it
+    // takes to read six words that are already in front of you, and the shortest
+    // line on this screen is five. Below it the last words of a line are arriving
+    // and dissolving at the same time, which is the defect this exists to hold.
+    ok(worst >= 0.9, 'every line of the intro stands complete long enough to read',
+      `worst ${worst.toFixed(2)}s on "${worstLine}", floor 0.9`);
+  }
+}
+
 console.log(fails ? `\n${fails} problem(s).\n` : '\nall clear.\n');
 process.exit(fails ? 1 : 0);

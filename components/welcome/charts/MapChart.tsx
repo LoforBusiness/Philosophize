@@ -24,10 +24,28 @@ const APath = Animated.createAnimatedComponent(Path);
 const AG = Animated.createAnimatedComponent(G);
 
 // Chart space is 300 × 225 (see BOARDS in rig.ts). Two columns of three.
-// EPISTEMOLOGY is the widest name at 12 characters, so the left column sits far
-// enough in that it does not end up touching the edge of the phone.
-const COL = [86, 216];
-const ROW = [40, 108, 176];
+//
+// ── THE MIDDLE ROW USED TO READ "EPISTEMOLOGYAESTHETICS" ───────────────────
+//
+// A reader: "when it shows the 6 different branches I noticed the metaphysics
+// word was glitching." It was not glitching; it was TOUCHING. The columns sat
+// 130 units apart and at fontSize 17 the two widest neighbours measure 142 and
+// 118 — half-widths of 71 and 59, which is 130 exactly. Zero clearance, so the
+// two names met in the middle and read as one string. Nothing was out of the
+// viewBox and nothing threw, which is why it survived: a collision is invisible
+// to every check that measures a box against its frame rather than against its
+// neighbour.
+//
+// Wider columns AND a smaller name — both, because either alone is marginal.
+// The gap is measured in a browser now (scripts/check-intro.mjs) rather than
+// estimated from a character count, since the widths depend on the actual font
+// and the estimate is what put them at exactly zero.
+const COL = [80, 222];
+const ROW = [36, 106, 178];
+const NAME_SIZE = 16;
+const GLOSS_SIZE = 13.5;
+/** Leading between the two lines of a name that does not fit on one. */
+const LINE_H = 17;
 
 interface Cell {
   /** Split only where a name does not fit one line at this size. */
@@ -55,7 +73,7 @@ const CELLS: Cell[] = [
 const CUES = cueTimes('map');
 
 // A rule under each name, drawn on left-to-right with the name.
-const RULE_W = 116;
+const RULE_W = 108;
 const ruleD = (c: number, r: number) =>
   `M${COL[c] - RULE_W / 2} ${ROW[r] + 10} L${COL[c] + RULE_W / 2} ${ROW[r] + 10}`;
 
@@ -69,8 +87,15 @@ function Branch({
   /** When this one lands. NaN if the script has no cue for it. */
   at: number;
 }) {
-  const two = cell.lines.length > 1;
-  const baseY = ROW[cell.row] - (two ? 7 : 0);
+  // A TWO-LINE NAME GROWS UPWARD, so its LAST line always sits on the row and
+  // the rule and the gloss below it never have to move.
+  //
+  // It used to be centred on the row instead — `ROW - 7`, with the second line
+  // 18 below that — which put POLITICAL PHILOSOPHY's second baseline at 187 and
+  // its rule at 186. The rule was drawn straight through the word, and since it
+  // is the same ink at the same weight the word simply looked struck out. D31:
+  // nothing painted over a word, including the board's own furniture.
+  const baseY = ROW[cell.row] - (cell.lines.length - 1) * LINE_H;
 
   const nameProps = useAnimatedProps(() => {
     const a = easeOutCubic(clamp01((clock.value - at) / 0.34));
@@ -91,10 +116,10 @@ function Branch({
           <SvgText
             key={line}
             x={COL[cell.col]}
-            y={baseY + i * 18}
+            y={baseY + i * LINE_H}
             fill={INK}
             fontFamily="Inter_700Bold"
-            fontSize={17}
+            fontSize={NAME_SIZE}
             letterSpacing={0.4}
             textAnchor="middle"
           >
@@ -117,7 +142,7 @@ function Branch({
           y={ROW[cell.row] + 27}
           fill={SOFT}
           fontFamily="EBGaramond_400Regular_Italic"
-          fontSize={15}
+          fontSize={GLOSS_SIZE}
           textAnchor="middle"
         >
           {cell.gloss}

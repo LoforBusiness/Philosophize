@@ -48,6 +48,7 @@ import {
   CHAPTERS,
   T_FADE,
   T_BEGIN,
+  T_EXIT,
   T_HOLD,
   SPEAK_T0,
   STAGE_W,
@@ -336,6 +337,12 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
   const rootOpacity = useSharedValue(1);
   const rootStyle = useAnimatedStyle(() => ({ opacity: rootOpacity.value }));
 
+  // Skip fades out as the wordmark comes in, on the same curve the bubble and the
+  // board leave on, so the end card arrives as ONE clean composition.
+  const skipStyle = useAnimatedStyle(() => ({
+    opacity: 1 - easeOutCubic(clamp01((clock.value - T_EXIT) / 0.6)),
+  }));
+
   // The sky arrives with the wordmark and on the same curve — a shade slower, so the
   // ground settles under the word rather than racing it. Before T_BEGIN it is not
   // merely transparent, it is `display: none`: a full-screen image left mounted at
@@ -616,10 +623,19 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
         </View>
       </View>
 
-      {/* Skip — device space, clear of the notch, available the whole time */}
-      <Pressable onPress={leave} hitSlop={14} style={[styles.skip, { top: insets.top + 10, right: 16 }]}>
-        <Text style={styles.skipText}>Skip</Text>
-      </Pressable>
+      {/* SKIP — device space, clear of the notch, and it LEAVES WITH THE INTRO.
+          It used to stay up on the end card, which is wrong twice over. It is
+          redundant there — Begin is on screen and does the same thing, better —
+          and the end card is a photographic sky (§19), so a grey label sitting on
+          it takes its contrast from the artwork, which is the one thing that rule
+          forbids. Everything else on this screen dissolves at T_BEGIN; so does
+          this. `pointerEvents` follows the opacity so a faded control cannot
+          still be pressed. */}
+      <Animated.View style={[styles.skip, { top: insets.top + 10, right: 16 }, skipStyle]}>
+        <Pressable onPress={leave} hitSlop={14} disabled={endReady}>
+          <Text style={styles.skipText}>Skip</Text>
+        </Pressable>
+      </Animated.View>
     </Animated.View>
   );
 }

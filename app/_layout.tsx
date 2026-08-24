@@ -169,7 +169,6 @@ export default function RootLayout() {
   // stroke has finished drawing. This lives in uiStore rather than local state
   // because index.tsx mounts *underneath* this screen and the welcome animation
   // must not start its timeline until the launch screen has actually lifted.
-  const launchDone = useUIStore((s) => s.launchDone);
   const setLaunchDone = useUIStore((s) => s.setLaunchDone);
 
   // TAKE THE NEWEST BUNDLE BEFORE DECIDING WHAT A NEW READER SEES FIRST.
@@ -188,6 +187,24 @@ export default function RootLayout() {
   // time on the same cold start. Without this the reader's first ever launch
   // shows the ink scene, blinks, and shows it again, which reads as a crash.
   const [skipLaunchAnim, setSkipLaunchAnim] = useState(false);
+  // Local, not in the store: nothing outside this file needs to know the launch
+  // screen is still fading — what everything else wants is `launchDone`, which
+  // now means "the app underneath may start", and that is true a second earlier.
+  const [launchGone, setLaunchGone] = useState(false);
+  // …EXCEPT THAT `launchDone` IS ALSO THE HARNESS ESCAPE HATCH (§21). Every
+  // preview route in this repo releases the gate with
+  // `useUIStore.setState({ launchDone: true })`, and splitting lift from unmount
+  // silently took that away: the mount used to be gated on `launchDone` and is
+  // now gated on local state nothing outside can reach, so a preview would
+  // photograph the launch screen instead of the page under it — which is exactly
+  // what happened on the first run of the intro sweep. `liftedHere` is what tells
+  // the two cases apart: if the flag went true and it was not us who set it, this
+  // screen was never wanted.
+  const liftedHere = useRef(false);
+  const launchReleased = useUIStore((s) => s.launchDone);
+  useEffect(() => {
+    if (launchReleased && !liftedHere.current) setLaunchGone(true);
+  }, [launchReleased]);
   useEffect(() => {
     consumeReloadedFlag().then((did) => {
       if (did) setSkipLaunchAnim(true);
@@ -361,11 +378,18 @@ export default function RootLayout() {
       <LessonRewardHost />
       {/* Animated cold-start loading screen: ink scene + drawing stroke + quote.
           Sits over everything until the boot is ready and the count hits 100%. */}
-      {!launchDone && (
+      {!launchGone && (
         <LaunchScreen
           ready={authChecked && hasHydrated && accentFonts && updateSettled}
           skipAnimation={skipLaunchAnim}
-          onDone={() => setLaunchDone(true)}
+          // TWO SIGNALS, AND THEY ARE A SECOND APART. `onLift` says the screen
+          // underneath may start; `onDone` says this one has finished fading and
+          // can come out of the tree. They used to be one, which meant the welcome
+          // could not begin until the launch art was entirely gone — so it was
+          // revealed at clock zero, and the welcome at clock zero is a blank page
+          // for a full second while its host walks in from off-stage.
+          onLift={() => { liftedHere.current = true; setLaunchDone(true); }}
+          onDone={() => setLaunchGone(true)}
         />
       )}
       {/* The three welcome questions. Above the app, below UpdateGate — a binary

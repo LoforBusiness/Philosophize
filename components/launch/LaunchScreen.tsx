@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, memo } from 'react';
+import { useEffect, useMemo, useRef, useState, memo } from 'react';
 import { View, Text, StyleSheet, StatusBar, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
@@ -174,6 +174,25 @@ interface Props {
    * first. So it stands down to a plain hold and lifts as soon as boot is ready.
    */
   skipAnimation?: boolean;
+  /**
+   * THE SCREEN UNDERNEATH MAY START NOW — fired when the lift BEGINS, not when
+   * it ends, and the two are a second apart on purpose.
+   *
+   * A reader: "there is that other animation screen that shows up first and then
+   * after that is almost loaded it does that glitch." Measured, the glitch is a
+   * blank screen. `onDone` was the only signal this component gave, it fires
+   * after the fade, and it is what starts the welcome's clock — so the launch
+   * art dissolved away to reveal the welcome at clock ZERO, and the welcome at
+   * clock zero is EMPTY CREAM. Its host walks on from off-stage right and his
+   * first pixel does not cross the frame until t = 1.03s (measured against the
+   * real rig). Rich full-bleed illustration → 320ms fade → a second of nothing.
+   *
+   * So the screen underneath is told at the top of the outro instead. The 100%
+   * run, the hold and the fade together give it 1.04s of cover — just past 1.03
+   * — which means the launch art is dissolving over a host who is already
+   * walking, rather than off a blank page.
+   */
+  onLift?: () => void;
   onDone: () => void;
 }
 
@@ -183,7 +202,7 @@ interface Props {
 // short quote resting on a dark scrim at the bottom. Both ends of the screen are
 // fixed cream on a fixed scrim, so the scene underneath can be anything at all.
 // At 100% the screen lifts away.
-export default function LaunchScreen({ ready, skipAnimation = false, onDone }: Props) {
+export default function LaunchScreen({ ready, skipAnimation = false, onLift, onDone }: Props) {
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
@@ -250,13 +269,22 @@ export default function LaunchScreen({ ready, skipAnimation = false, onDone }: P
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // THE OUTRO, and its three durations are a budget rather than a taste.
+  //
+  // 280 + 240 + 520 = 1.04s of cover, against the 1.03s the welcome's host needs
+  // to walk into frame — see `onLift`. Shorten any of the three and the handover
+  // goes back to revealing an empty page; the hold at 100% is also what stops
+  // the count reading as a cut, which is the other half of what the reader saw.
+  const lifted = useRef(false);
   useEffect(() => {
-    if (!held || !ready) return;
+    if (!held || !ready || lifted.current) return;
+    lifted.current = true;
+    onLift?.();
     progress.value = withTiming(100, { duration: 280, easing: Easing.out(Easing.quad) }, (f) => {
       if (f) {
         screenOpacity.value = withDelay(
-          120,
-          withTiming(0, { duration: 320, easing: Easing.in(Easing.quad) }, (done) => {
+          240,
+          withTiming(0, { duration: 520, easing: Easing.in(Easing.quad) }, (done) => {
             if (done) runOnJS(onDone)();
           })
         );
