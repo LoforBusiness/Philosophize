@@ -93,6 +93,23 @@ const lesson: Lesson = {
       emoji: '🔀',
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'Kant will not lie to the murderer at the door. What is he actually claiming?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'You answer for your own act; the murderer answers for his', isCorrect: true },
+          { id: 'b', text: 'The death would not really be a bad thing', isCorrect: false },
+          { id: 'c', text: 'Lying never in fact saves anybody', isCorrect: false },
+          { id: 'd', text: 'The murderer has a right to the truth', isCorrect: false },
+        ],
+        explanation: 'That responsibility tracks your own freely chosen act. Kant does not deny the death is terrible — he denies that it lands on your account. The tempting answer is the caricature that he is indifferent to the killing, which is how he gets read as heartless when the argument is really about whose act it is.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

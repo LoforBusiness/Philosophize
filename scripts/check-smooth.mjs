@@ -283,13 +283,47 @@ ok('a step in the requested shot does not stutter the stage (L4)',
 const bare = [];
 const bags = [];
 for (const name of names) {
-  const src = readFileSync(path.join(CIN, `${name}Scene.tsx`), 'utf8');
+  // COMMENTS ARE NOT CODE, and this section reads for shapes that get WRITTEN
+  // ABOUT: the note explaining why a track had to be carried by hand quotes the
+  // very call it is explaining, and the scene reported itself as the defect.
+  const src = readFileSync(path.join(CIN, `${name}Scene.tsx`), 'utf8')
+    .replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, '');
   // A track lerp is specifically `lerp(NAME[p], NAME[n], …)` — the same array on
   // both sides. `lerp` for anything else (two constants, a pair of measured edges)
   // is ordinary arithmetic with no beat boundary in it and is left alone.
   const n = [...src.matchAll(/lerp\(\s*([A-Za-z_$][\w$]*)\[p\]\s*,\s*([A-Za-z_$][\w$]*)\[n\]/g)]
     .filter((m) => m[1] === m[2]).length;
   if (n) bare.push(`${name} (${n})`);
+
+  // ── AND THE SAME CALL WEARING A ONE-LETTER NAME ────────────────────────────
+  //
+  // The check above was green for months while 38 scenes and 169 tracks blended
+  // straight off T[p], because every one of them wrote
+  //
+  //     const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
+  //     …  boxesOn: L(BOXES[p], BOXES[n]),
+  //
+  // — the identical arithmetic behind a local alias, and two arguments instead of
+  // three, so neither this detector nor `carry-tracks.mjs` could see it. It was
+  // the CURRENT house idiom: the newest lesson in all six branches used it, so
+  // every lesson written by copying the best recent exemplar inherited the
+  // defect the exemplar was supposed to have fixed.
+  //
+  // So: no scene may declare a local lerp alias at all. There is no legitimate
+  // use — `carry` takes the same numbers — and a rule that can be renamed out of
+  // existence is not a rule.
+  if (/const\s+[A-Za-z_$][\w$]{0,3}\s*=\s*\([^)]*\)[\s\S]{0,60}?=>[\s\S]{0,90}?\blerp\(/.test(src)) {
+    bare.push(`${name} (a local lerp alias — write carry() directly)`);
+  }
+
+  // A track lerped out of an ARRAY-OF-ARRAYS or from endpoints DERIVED off the
+  // track (`lerp(P[p] > 0 ? 1 : 0, …)`) is the same defect in a shape no regex
+  // above matches. Five of those survived the codemod in two scenes and were
+  // carried by hand; this is what stops the sixth.
+  const shaped = [...src.matchAll(/\blerp\(\s*([A-Za-z_$][\w$]*)\[[pn]\]/g)].length;
+  const carried = [...src.matchAll(/\bcarry\(cv,\s*\d+,\s*n,\s*([A-Za-z_$][\w$]*)\[[pn]\]/g)].length;
+  if (shaped > 0) bare.push(`${name} (${shaped} track lerp(s) off a beat array)`);
+  void carried;
 
   // THE SLOTS MUST ACCOUNT FOR THEMSELVES. An undersized `useCarry(N)` does not
   // throw — it aliases two tracks onto one slot, so a prop starts each beat from
@@ -331,9 +365,19 @@ ok('every carry slot is declared and distinct (L5)', bags.length === 0,
 const player = readFileSync(path.join(REPO, 'components/lesson/cinematic/CinematicPlayer.tsx'), 'utf8');
 const kit = readFileSync(path.join(CIN, 'cinematicKit.tsx'), 'utf8');
 const iLower = player.indexOf('styles.lower');
-const iCards = player.indexOf('<ChoiceCards');
-const iDrag = player.indexOf('<DragScale');
 const iDeck = player.indexOf('styles.deck');
+// EVERY answer control, not just the two that existed when L6 was written. A
+// control rendered as a SIBLING of the stage takes its height out of the picture
+// on the frame a question mounts, and `fit` is min(w/STAGE_W, h/bandH) — so the
+// whole stage rescales about 12%, twice per question. The rule is only worth
+// having if it names all of them, which is L7 in its plainest form: the lessons
+// gained four new ways to be answered, so this gained four names in the same
+// commit.
+const CONTROLS = ['<ChoiceCards', '<DragScale', '<LeverPick', '<ShapePlot', '<SplitBar', '<FieldPick'];
+const strays = CONTROLS.filter((c) => {
+  const at = player.indexOf(c);
+  return at < 0 || at < iLower;
+});
 const weight = (n) => {
   const m = new RegExp(`\\b${n}:\\s*\\{[^}]*?flex:\\s*(\\d+)`, 's').exec(kit);
   return m ? +m[1] : null;
@@ -342,10 +386,33 @@ const wStage = weight('stageWrap'), wLower = weight('lower'), wTap = weight('tap
 
 console.log('\nTHE STAGE DOES NOT RESIZE UNDER A QUESTION\n');
 ok('the answer controls sit inside the deck\'s box, not the stage\'s (L6)',
-  iLower > 0 && iCards > iLower && iDrag > iLower && iDeck > iLower,
-  iLower > 0 && iCards > iLower && iDrag > iLower && iDeck > iLower
-    ? 'ChoiceCards, DragScale and the deck are all inside styles.lower'
-    : 'a control is a sibling of stageWrap again — it will take height out of the picture');
+  iLower > 0 && iDeck > iLower && strays.length === 0,
+  iLower > 0 && iDeck > iLower && strays.length === 0
+    ? `${CONTROLS.length} controls and the deck are all inside styles.lower`
+    : strays.length
+      ? `outside styles.lower (or missing): ${strays.join(', ')}`
+      : 'a control is a sibling of stageWrap again — it will take height out of the picture');
+// AND THE PROMPT'S HINT KNOWS WHICH KIND OF QUESTION IT IS.
+//
+// InteractPanel prints "tap one of the N outlined parts above" for a question
+// answered on the STAGE. A beat whose answer is a bar, a lever, a plot or a pad
+// has its own instruction under the picture, and pointing the reader back at the
+// scene sends them to targets that are mounted and disabled — a dead patch they
+// cannot tell from a frozen lesson. The flag exists because that already
+// happened once, to all 119 card lessons; this stops it happening again per
+// control.
+{
+  // Read by slicing rather than by regex: the expression spans lines and holds
+  // braces of its own, which no small pattern gets right.
+  const at = player.indexOf('inScene={');
+  const expr = at < 0 ? '' : player.slice(at, at + 420);
+  const missing = ['cards', 'drag', 'lever', 'plot', 'split', 'field']
+    .filter((k) => !expr.includes(`interact.${k}`));
+  ok('the prompt hint names every non-scene control (I)', at >= 0 && missing.length === 0,
+    at < 0 ? 'could not find the inScene expression'
+      : missing.length ? `not excluded: ${missing.join(', ')}` : 'all six accounted for');
+}
+
 ok('the stage keeps a fixed share of the body (L6)',
   wStage !== null && wLower !== null && wTap !== null && wStage + wLower + wTap === 100,
   wStage === null || wLower === null || wTap === null

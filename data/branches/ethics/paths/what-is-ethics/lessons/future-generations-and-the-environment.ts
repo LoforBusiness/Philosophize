@@ -59,6 +59,23 @@ const lesson: Lesson = {
       },
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'Should a government apply any discount at all to costs falling centuries from now?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Yes, for uncertainty and rising wealth — but not for the date itself', isCorrect: true },
+          { id: 'b', text: 'No, never discount anything for any reason', isCorrect: false },
+          { id: 'c', text: 'Yes, because distant people are less real to us', isCorrect: false },
+          { id: 'd', text: 'Yes, because they cannot vote in this election', isCorrect: false },
+        ],
+        explanation: 'Some discounting is defensible: a distant benefit is less certain, and later people may be richer, so a pound buys less good. Those are reasons with numbers behind them. What nobody has defended is a PURE time preference — a rate applied to the date alone. Parfit’s point is that when the future arrives, those costs will be no less real.',
+      },
+    },
+    {
       type: 'summary',
       title: 'How Far the Circle Has Widened',
       keyPoints: [

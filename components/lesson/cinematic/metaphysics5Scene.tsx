@@ -9,7 +9,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics5Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -72,19 +72,19 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics5'));
 
 export default function Metaphysics5Scene({ clock, bt, bi }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      stars: L(STARB[p], STARB[n]),
-      q: L(QB[p], QB[n]),
-      dasein: L(DAS[p], DAS[n]),
-      psr: L(PSR[p], PSR[n]),
+      stars: carry(cv, 0, n, STARB[p], STARB[n], tr),
+      q: carry(cv, 1, n, QB[p], QB[n], tr),
+      dasein: carry(cv, 2, n, DAS[p], DAS[n], tr),
+      psr: carry(cv, 3, n, PSR[p], PSR[n], tr),
       t,
     };
   });

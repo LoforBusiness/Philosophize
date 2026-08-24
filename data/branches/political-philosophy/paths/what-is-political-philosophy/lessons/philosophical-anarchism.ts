@@ -88,6 +88,23 @@ const lesson: Lesson = {
       xpValue: 5,
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'What would make staying in a country count as agreeing to its authority?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'A genuine, available option to refuse', isCorrect: true },
+          { id: 'b', text: 'Knowing that the laws exist', isCorrect: false },
+          { id: 'c', text: 'Having been born there', isCorrect: false },
+          { id: 'd', text: 'Voting in an election', isCorrect: false },
+        ],
+        explanation: 'Consent gets its force from the alternative being open — which is why a signature given under threat binds nobody. Leaving means money, papers, a language and another state at the far end, and every scrap of habitable land is already claimed. Hume’s peasant has no such option. Knowing a demand exists is not agreeing to it.',
+      },
+    },
+    {
       type: 'summary',
       title: 'The Anarchist Challenge',
       keyPoints: [

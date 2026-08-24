@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology36Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -64,11 +64,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology36'));
 
 export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(
@@ -78,13 +78,13 @@ export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick }
     ));
 
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      shelfOn: L(SHELF[p], SHELF[n]),
-      givenOn: L(GIVEN[p], GIVEN[n]),
-      realOn: L(REAL[p], REAL[n]),
+      shelfOn: carry(cv, 1, n, SHELF[p], SHELF[n], tr),
+      givenOn: carry(cv, 2, n, GIVEN[p], GIVEN[n], tr),
+      realOn: carry(cv, 3, n, REAL[p], REAL[n], tr),
       // The two cards do not blink at each other; the clash is that both are up.
-      clashOn: L(CLASH[p], CLASH[n]),
+      clashOn: carry(cv, 4, n, CLASH[p], CLASH[n], tr),
     };
   });
 

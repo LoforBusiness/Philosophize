@@ -67,6 +67,23 @@ const lesson: Lesson = {
       },
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'Five mornings running, the cockerel crows and then the sun rises. What has that established?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'They keep happening together, in that order', isCorrect: true },
+          { id: 'b', text: 'That the crow causes the sunrise', isCorrect: false },
+          { id: 'c', text: 'That the sunrise causes the crow', isCorrect: false },
+          { id: 'd', text: 'Nothing at all — five cases is too few', isCorrect: false },
+        ],
+        explanation: 'Only that they keep happening together. An order seen five times is a pattern, and a pattern is the thing you still have to explain. The dawn light is what wakes the bird, so if anything the sunrise is nearer to causing the crow. Five cases is plenty to establish a correlation; what it cannot do on its own is establish a direction.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

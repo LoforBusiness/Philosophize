@@ -83,6 +83,23 @@ const lesson: Lesson = {
       },
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'What makes a second report of a claim actually worth something?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'That it could have come out differently', isCorrect: true },
+          { id: 'b', text: 'That it comes from a bigger name', isCorrect: false },
+          { id: 'c', text: 'That it uses the same words as the first', isCorrect: false },
+          { id: 'd', text: 'That more people have now seen it', isCorrect: false },
+        ],
+        explanation: 'Independence. A second source counts when it had its own way of checking and might have said no. Four accounts that all trace back to one post carry exactly one report between them, however sincere each of them is. Repetition raises how often you hear a thing, not how likely it is to be true — and a feed is built to produce repetition.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

@@ -1,0 +1,113 @@
+import type { BaseBeat } from './cinematicKit';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Cinematic logic-arguments-17, "Who Said So, and Does It Matter?"
+// Theme: A CLAIM THAT CAN BE LIFTED OFF WHOEVER SAID IT, AND ONE THAT CANNOT.
+//
+// Most lessons on ad hominem stop at "attacking the person is not an argument",
+// which is true and leaves the reader worse off — because half the time the
+// person IS the whole of your evidence, and a rule that says otherwise makes
+// them credulous. So this one is built around the distinction rather than the
+// prohibition, and the picture is a physical test for it: pick the claim up.
+//
+// An ARGUMENT has its reasons printed underneath, so it stands on the table by
+// itself. A TESTIMONY has nothing under it but the speaker, so lifting it off is
+// the same as dropping it. Both are said by the same disliked man, which is what
+// makes the two columns comparable at all.
+//
+// GAMIFIED SHAPE:
+//   · beat 5  SCENE TARGETS — both claims are lifted and the reader taps the one
+//     still standing. The decoy is not a silly option: it is the claim you would
+//     believe from a friend, and the lesson is about when you should not.
+//   · beat 7  two CARDS — what you are actually relying on when an expert
+//     asserts something and gives you no reasons (H66: the rival view is the
+//     rational one, not a straw man).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface Log17Beat extends BaseBeat {
+  /** Figure gesture code. */ p?: number;
+  /** Both columns — speaker, plinth, claim — are drawn, 0…1. */ pair?: number;
+  /** The reasons printed under the left claim, 0…1. */ marks?: number;
+  /** The insult struck across both speakers, 0…1. */ slur?: number;
+  /** How far the claims have been lifted off their speakers, 0…1. */ lift?: number;
+  /** The unsupported claim coming apart in mid-air, 0…1. */ falls?: number;
+  /** 1 = the reader is answering on the stage this beat. */ live?: number;
+}
+
+export const BEATS: Log17Beat[] = [
+  {
+    p: 25, x: 200, pair: 1,
+    text: 'A man you cannot stand tells you two things. He really is dishonest, and you really do know it.',
+    dur: 4.2,
+  },
+  {
+    p: 2, x: 200, pair: 1, marks: 1,
+    text: 'Look at what is under each one. The left claim shows its reasons. The right claim says only that he saw it.',
+    cite: 'Two different objects',
+    dur: 4.6,
+  },
+  {
+    p: 45, x: 132, pair: 1, marks: 1, slur: 1,
+    text: 'So you go after the man. He lies, he has form, why would anyone listen. It feels like winning.',
+    dur: 4.4,
+  },
+  {
+    p: 13, x: 132, pair: 1, marks: 1, slur: 1,
+    text: 'The insult landed on both columns equally. Notice that it never touched a single reason.',
+    cite: 'Ad hominem',
+    dur: 4.0,
+  },
+  {
+    p: 137, x: 132, pair: 1, marks: 1, slur: 1,
+    quote: {
+      id: 'lq-logic-arguments-17-1',
+      text: 'A last trick is to become personal, insulting and rude. It is very popular, because everyone is able to carry it into effect.',
+      author: 'Arthur Schopenhauer',
+      work: 'The Art of Being Right',
+      era: '1831',
+      philosopherId: 'arthur-schopenhauer',
+      branchSlugs: ['logic'],
+    },
+    dur: 3.6,
+  },
+  {
+    p: 4, x: 132, pair: 1, marks: 1, slur: 1, lift: 1, live: 1,
+    interact: {
+      prompt: 'Lift both claims off their speaker. Tap the one still standing.',
+      explain: 'The one with its reasons printed under it. An argument carries its own support, so who says it changes nothing. The other was only ever the speaker\'s word, and a liar\'s word is worth less. That is not a fallacy, it is the difference.',
+      xp: 5,
+    },
+    dur: 1.0,
+  },
+  {
+    p: 21, x: 268, pair: 1, marks: 1, lift: 1, falls: 1,
+    text: 'One is a machine with parts you can inspect. The other is tipping over, because there was nothing under it.',
+    dur: 4.6,
+  },
+  {
+    p: 41, x: 268, pair: 1, marks: 1, lift: 1, falls: 1,
+    interact: {
+      prompt: 'An expert with no argument tells you a fact. What are you relying on?',
+      cards: [
+        { text: 'Their track record', correct: true },
+        { text: 'The reasons they gave', correct: false },
+      ],
+      explain: 'Their track record, because they gave you no reasons to check. That is testimony, and accepting it is perfectly rational. It is worth exactly what the source is worth. The mistake is using that move on an argument, which needs no source at all.',
+      xp: 5,
+    },
+    dur: 1.0,
+  },
+  {
+    summary: {
+      title: 'The Man and the Argument',
+      points: [
+        'Ad hominem answers the speaker instead of the reasons',
+        'An argument stands on what is printed under it',
+        'Testimony stands on the person, so the person is the evidence',
+        'Ask which kind you were given before deciding who to attack',
+      ],
+      closing: 'A liar can hand you a proof, and it will still be a proof.',
+    },
+    dur: 3.2,
+  },
+];

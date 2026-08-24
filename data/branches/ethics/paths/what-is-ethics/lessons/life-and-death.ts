@@ -87,6 +87,23 @@ const lesson: Lesson = {
       },
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'A competent adult refuses treatment that would save their life. What follows on Mill’s view?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Their refusal stands', isCorrect: true },
+          { id: 'b', text: 'Treat them, then ask afterwards', isCorrect: false },
+          { id: 'c', text: 'Treat them if the odds are good enough', isCorrect: false },
+          { id: 'd', text: 'Let the family decide instead', isCorrect: false },
+        ],
+        explanation: 'The refusal stands. This is the hardest case for the harm principle and Mill takes it: risk to yourself is never enough to hand the decision to somebody else. Overriding a competent refusal treats a person as a thing to be managed. The test is not how dangerous the choice is — it is whether anybody else is in it.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

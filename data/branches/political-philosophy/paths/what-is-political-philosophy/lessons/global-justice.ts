@@ -86,6 +86,23 @@ const lesson: Lesson = {
       },
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'What is the strongest objection to Singer’s principle?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'That it never lets you stop giving', isCorrect: true },
+          { id: 'b', text: 'That strangers are simply not your concern', isCorrect: false },
+          { id: 'c', text: 'That charity rarely reaches anybody', isCorrect: false },
+          { id: 'd', text: 'That distance obviously changes obligation', isCorrect: false },
+        ],
+        explanation: 'The demandingness objection. If you must give until you sacrifice something of comparable moral importance, there is always one more preventable death for the price of one more thing you own. A principle that is true but unlivable tends to get ignored entirely. Note that this concedes Singer’s point about distance — it objects to how far the conclusion runs, not to its starting move.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

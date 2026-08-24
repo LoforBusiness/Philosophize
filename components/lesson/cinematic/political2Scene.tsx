@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political2Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -86,6 +86,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political2'));
 
 export default function Political2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldRulerS = useHeld();
+  const cv = useCarry(2);
   const heldSubS = useHeld();
   const cur = BEATS[i];
   const showPick = !!cur.interact && !!cur.ledger;
@@ -95,21 +96,20 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick }: Sc
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const rulerS = keepHeld(heldRulerS, mixStance(carryFrom(heldRulerS, n, emoteHold(R_CODE[p], t)), emoteLive(R_CODE[n], t, bt.value), tr));
     const subS = keepHeld(heldSubS, mixStance(carryFrom(heldSubS, n, emoteHold(SUB_CODE[p], t)), emoteLive(SUB_CODE[n], t, bt.value), tr));
-    const pod = L(POD[p], POD[n]);
-    const led = L(LED[p], LED[n]);
+    const pod = carry(cv, 0, n, POD[p], POD[n], tr);
+    const led = carry(cv, 1, n, LED[p], LED[n], tr);
 
     return {
       ruler: pose(rulerS, RULER_X, GROUND - pod * PODIUM_H, K, 1, 1),
       subject: pose(subS, SUBJECT_X, GROUND, K, -1, 1 - led),
       pod,
       led,
-      rowP: L(clamp01(CHART[p]), clamp01(CHART[n])),
-      rowA: L(clamp01(CHART[p] - 1), clamp01(CHART[n] - 1)),
+      rowP: lerp(clamp01(CHART[p]), clamp01(CHART[n]), tr),
+      rowA: lerp(clamp01(CHART[p] - 1), clamp01(CHART[n] - 1), tr),
     };
   });
 

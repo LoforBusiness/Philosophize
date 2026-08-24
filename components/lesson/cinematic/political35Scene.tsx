@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political35Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -74,11 +74,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political35'));
 
 export default function Political35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(
@@ -88,14 +88,14 @@ export default function Political35Scene({ clock, bt, bi, qv, i, picked, onPick,
     ));
 
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      chairsOn: L(CHAIRS[p], CHAIRS[n]),
+      chairsOn: carry(cv, 1, n, CHAIRS[p], CHAIRS[n], tr),
       // The reader's thumb on its own beat, the script's track everywhere else.
-      weight: LIVE_W[n] === 1 ? clamp01(dragPos.value) : L(WEIGHT[p], WEIGHT[n]),
+      weight: LIVE_W[n] === 1 ? clamp01(dragPos.value) : carry(cv, 2, n, WEIGHT[p], WEIGHT[n], tr),
       // The occupants cross-fade between the two policies rather than teleporting:
       // the same three chairs cannot be both taken and not on one frame.
-      swap: L(SWAP[p], SWAP[n]),
+      swap: carry(cv, 3, n, SWAP[p], SWAP[n], tr),
     };
   });
 

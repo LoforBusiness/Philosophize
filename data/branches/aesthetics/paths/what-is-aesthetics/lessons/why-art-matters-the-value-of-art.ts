@@ -87,6 +87,23 @@ const lesson: Lesson = {
       },
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'Striking out three of four proposed purposes for art — does that settle what art is for?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'It narrows the field; it does not prove the survivor', isCorrect: true },
+          { id: 'b', text: 'Yes — only one reason is left standing', isCorrect: false },
+          { id: 'c', text: 'No, because eliminations never tell you anything', isCorrect: false },
+          { id: 'd', text: 'Yes, provided the three were the popular ones', isCorrect: false },
+        ],
+        explanation: 'An elimination shows which reasons cannot be the WHOLE story, not that the last one standing is the true account. Art may well instruct, decorate and record — a textbook, wallpaper and a camera simply do each of those more cheaply. The interesting question is what art does that nothing else can, and a particular way of seeing is the candidate with no substitute.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

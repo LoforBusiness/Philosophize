@@ -64,6 +64,23 @@ const lesson: Lesson = {
       },
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'If numbers exist but are nowhere in space or time, how could we ever know about them?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Nobody has a good answer — it is the strongest objection to Platonism', isCorrect: true },
+          { id: 'b', text: 'By looking at the world more carefully', isCorrect: false },
+          { id: 'c', text: 'By counting a very large number of things', isCorrect: false },
+          { id: 'd', text: 'We cannot, so mathematics is not knowledge', isCorrect: false },
+        ],
+        explanation: 'This is the access problem, and it is where Platonism is most vulnerable. Knowing something normally involves it reaching you somehow — light, sound, causation. An object outside space and time cannot send anything, so the nominalist asks how the contact is supposed to work. Nobody pretends it is settled, which is why the debate is still live.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

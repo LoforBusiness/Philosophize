@@ -23,6 +23,10 @@ import { cue, touch } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import ChoiceCards from './ChoiceCards';
 import DragScale from './DragScale';
+import LeverPick from './LeverPick';
+import ShapePlot from './ShapePlot';
+import SplitBar from './SplitBar';
+import FieldPick from './FieldPick';
 import { swishTrack } from './gestures';
 import { lessonHasSound } from './lessonSound';
 import { TargetCountProvider } from './Target';
@@ -80,6 +84,11 @@ export interface SceneApi {
    * the curve grows its wiggles, all on the UI thread under the reader's thumb.
    */
   dragPos: SharedValue<number>;
+  /**
+   * The second axis of a `field` question, 0..1 from the BOTTOM (./FieldPick).
+   * Meaningless on a beat with no `interact.field`, where it holds its last value.
+   */
+  dragPos2: SharedValue<number>;
   /**
    * Whether this lesson is allowed to make a noise (./lessonSound). The player
    * already sounds everything the SHELL owns — beats, answers, quotes, footfalls
@@ -250,6 +259,10 @@ export default function CinematicPlayer({
   // ./DragScale). Reset to the beat's declared start whenever a drag beat opens, or
   // the second drag question in a lesson would begin wherever the first was left.
   const dragPos = useSharedValue(0);
+  // THE SECOND AXIS, for `field` (see ./FieldPick). Two shared values rather
+  // than one packed coordinate: a scene that had to unpack a number would be
+  // doing arithmetic on the UI thread to undo a decision made in the control.
+  const dragPos2 = useSharedValue(0);
   // The foot-plant times for the walk into the current beat, how many have already
   // sounded, and when the walk comes to rest (−1 if it ends mid-stride). Numbers
   // only — a JS closure cannot cross into a worklet (§17).
@@ -836,12 +849,12 @@ export default function CinematicPlayer({
                       style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
                     >
                       <TargetCountProvider onCount={setTargetCount} onBox={onBox} host={camHost}>
-                        <Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                        <Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
                       </TargetCountProvider>
                     </Animated.View>
                   ) : (
                     <TargetCountProvider onCount={setTargetCount}>
-                      <Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                      <Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
                     </TargetCountProvider>
                   )}
                 </View>
@@ -898,6 +911,49 @@ export default function CinematicPlayer({
               picked={picked}
               onPick={(id, ok) => choose(id, ok, true)}
               pos={dragPos}
+            />
+          ) : null}
+
+          {/* FOUR MORE ANALOGUE ANSWERS, all in this same slot and for the same
+              reasons: inside `styles.lower` so the stage never resizes when a
+              question arrives (L6), and in deck coordinates rather than scene
+              ones so no lesson's camera can crop them (H60). Each is a different
+              QUESTION, not a different skin — see the block types in
+              ./cinematicKit. */}
+          {beat.interact?.lever && !gone ? (
+            <LeverPick
+              lever={beat.interact.lever}
+              picked={picked}
+              onPick={(id, ok) => choose(id, ok, true)}
+              pos={dragPos}
+            />
+          ) : null}
+
+          {beat.interact?.plot && !gone ? (
+            <ShapePlot
+              plot={beat.interact.plot}
+              picked={picked}
+              onPick={(id, ok) => choose(id, ok, true)}
+              pos={dragPos}
+            />
+          ) : null}
+
+          {beat.interact?.split && !gone ? (
+            <SplitBar
+              split={beat.interact.split}
+              picked={picked}
+              onPick={(id, ok) => choose(id, ok, true)}
+              pos={dragPos}
+            />
+          ) : null}
+
+          {beat.interact?.field && !gone ? (
+            <FieldPick
+              field={beat.interact.field}
+              picked={picked}
+              onPick={(id, ok) => choose(id, ok, true)}
+              pos={dragPos}
+              pos2={dragPos2}
             />
           ) : null}
 
@@ -968,7 +1024,18 @@ export default function CinematicPlayer({
                     // Cards and the drag rail are their own instruction and sit
                     // right below this panel; only a STAGE question needs telling
                     // where to look. See the prop's note in cinematicKit.
-                    inScene={!beat.interact.cards && !beat.interact.drag}
+                    // WHICH KIND OF QUESTION THIS IS, and the list has to name
+                    // every control. The panel prints "tap one of the N outlined
+                    // parts above" only for a question answered on the STAGE; a
+                    // beat whose answer is a bar, a lever, a plot or a pad has
+                    // its own instruction sitting directly under the picture, and
+                    // pointing the reader back at the scene sends them to targets
+                    // that are mounted and disabled. Same failure this flag was
+                    // added for, one control family later.
+                    inScene={
+                      !beat.interact.cards && !beat.interact.drag && !beat.interact.lever
+                      && !beat.interact.plot && !beat.interact.split && !beat.interact.field
+                    }
                     answered={picked !== null}
                     correct={pickedOk}
                   />

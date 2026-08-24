@@ -181,6 +181,110 @@ export interface DragBlock {
   zones: ScaleZone[];
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// FOUR MORE WAYS TO ANSWER, AND WHY A FIFTH SHAPE WAS WORTH BUILDING
+//
+// `drag` proved the point that a graded question does not have to be a pick: a
+// reader who has to FIND the boundary learns where it is, and a reader handed two
+// cards has had the interesting half answered for them. These extend the same
+// idea to four more question shapes philosophy actually asks, and they came from
+// the reader in as many words:
+//
+//   > "I want a similar way the learning app Brilliant does their questions. With
+//   >  interactive questions, leavers being moved, line graphs that you slide …
+//   >  lines that you slide a bar from one side to the other or the middle."
+//
+// Each one is a DIFFERENT QUESTION, not a different skin on the same one:
+//
+//   · `lever`  — which SETTING. Discrete, named, rotational. The reader swings an
+//     arm into a slot, so the choice feels like throwing a switch rather than
+//     landing on a number. For "what is punishment FOR", where the options are
+//     positions and not amounts.
+//   · `plot`   — what SHAPE. Five columns the reader draws a curve across with one
+//     finger; graded on the shape they drew, not on any single value. For "what
+//     happens to X as Y increases", which is a claim no pick can express.
+//   · `split`  — how it DIVIDES. One bar, two labelled sides, a seam the reader
+//     drags; the two numbers always sum to a hundred. For "how much of this is
+//     intended and how much merely foreseen", where the trade-off IS the lesson.
+//   · `field`  — where it sits in TWO dimensions at once. A pad with a labelled
+//     axis each way and four named quadrants. For the questions whose whole
+//     content is that two independent things are being confused — necessary
+//     against sufficient, interference against domination, past against future.
+//
+// ALL FOUR ARE ANALOGUE AND ALL FOUR DRIVE THE SCENE. Like `drag`, the control's
+// position is a shared value the PLAYER owns, so the picture moves under the
+// reader's thumb rather than sitting next to a widget (see SceneApi.dragPos, and
+// dragPos2 for the second axis a `field` needs).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** One named detent on a `lever`. */
+export interface LeverStop {
+  id: string;
+  /** The word under this slot, and what the readout says when the arm is in it. */
+  reads: string;
+  correct?: boolean;
+}
+
+/** A graded question answered by swinging an arm into one of a few named slots. */
+export interface LeverBlock {
+  /** Left to right, two to five of them. */ stops: LeverStop[];
+  /** Which slot the arm starts in. Keep it OFF the correct one. */ start: number;
+}
+
+/** One shape a `plot` will recognise, as a profile the drawn curve is matched to. */
+export interface PlotShape {
+  id: string;
+  /** One value per column, 0..1. Must be the same length as `cols`. */
+  profile: number[];
+  /** What the readout calls this shape while the drawn curve is nearest to it. */
+  reads: string;
+  correct?: boolean;
+}
+
+/** A graded question answered by drawing a curve across a few columns. */
+export interface PlotBlock {
+  /** The column labels, left to right. Three to six. */ cols: string[];
+  /** What the vertical axis measures, shown up its left side. */ axis: string;
+  /** Where each column starts, 0..1. Same length as `cols`. */ start: number[];
+  /** The shapes this question knows. The drawn curve is scored to the nearest. */
+  shapes: PlotShape[];
+}
+
+/** One region of a `split` bar, by where the seam sits. */
+export interface SplitZone {
+  id: string;
+  /** This zone's right-hand edge as a fraction of the bar. The last must be 1. */
+  upto: number;
+  /** The reading shown while the seam is in here. */ reads: string;
+  correct?: boolean;
+}
+
+/** A graded question answered by dividing one bar between two labelled sides. */
+export interface SplitBlock {
+  /** The left side's name. */ left: string;
+  /** The right side's name. */ right: string;
+  /** Where the seam starts, 0..1. Keep it OUT of the correct zone. */ start: number;
+  zones: SplitZone[];
+}
+
+/** One quadrant of a `field`, named by which half of each axis it occupies. */
+export interface FieldQuad {
+  id: string;
+  /** 0 = left half, 1 = right half. */ x: 0 | 1;
+  /** 0 = bottom half, 1 = top half. */ y: 0 | 1;
+  /** The reading shown while the token is in this quadrant. */ reads: string;
+  correct?: boolean;
+}
+
+/** A graded question answered by placing one token on a two-axis pad. */
+export interface FieldBlock {
+  /** The horizontal axis, low end then high end. */ xLo: string; xHi: string;
+  /** The vertical axis, low end then high end. */ yLo: string; yHi: string;
+  /** Where the token starts. Keep it OUT of the correct quadrant. */
+  start: [number, number];
+  /** All four quadrants, in any order. */ quads: FieldQuad[];
+}
+
 export interface InteractBlock {
   prompt: string; explain: string; xp?: number;
   /**
@@ -198,6 +302,14 @@ export interface InteractBlock {
    * `cards` in practice — a question is either "which of these" or "how much".
    */
   drag?: DragBlock;
+  /** An arm swung into a named slot (see ./LeverPick). */
+  lever?: LeverBlock;
+  /** A curve the reader draws across columns (see ./ShapePlot). */
+  plot?: PlotBlock;
+  /** One bar divided between two sides (see ./SplitBar). */
+  split?: SplitBlock;
+  /** A token placed on a two-axis pad (see ./FieldPick). */
+  field?: FieldBlock;
 }
 
 /** Every lesson's Beat extends this; the shell reads only these common fields. */

@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political37Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -75,11 +75,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political37'));
 
 export default function Political37Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(
@@ -89,17 +89,17 @@ export default function Political37Scene({ clock, bt, bi, i, picked, onPick, dra
     ));
 
     // Reader's thumb on the drag beat, the script's own track everywhere else.
-    const cap = LIVE_D[n] === 1 ? clamp01(dragPos.value) : L(CAP[p], CAP[n]);
+    const cap = LIVE_D[n] === 1 ? clamp01(dragPos.value) : carry(cv, 0, n, CAP[p], CAP[n], tr);
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      pairOn: L(PAIR[p], PAIR[n]),
-      hornsOn: L(HORNS[p], HORNS[n]),
+      pairOn: carry(cv, 2, n, PAIR[p], PAIR[n], tr),
+      hornsOn: carry(cv, 3, n, HORNS[p], HORNS[n], tr),
       cap,
       // The loud mouth shrinks toward the quiet one's width; it never goes below it,
       // and the quiet one never moves at all.
       loud: LOUD_MAX - (LOUD_MAX - QUIET_MOUTH) * cap,
-      labelsOn: L(LABELS[p], LABELS[n]),
+      labelsOn: carry(cv, 4, n, LABELS[p], LABELS[n], tr),
     };
   });
 

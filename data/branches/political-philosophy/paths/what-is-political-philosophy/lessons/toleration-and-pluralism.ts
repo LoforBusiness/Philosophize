@@ -67,6 +67,23 @@ const lesson: Lesson = {
       },
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'What does tolerating a view actually require of you?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Not reaching for coercive power against it', isCorrect: true },
+          { id: 'b', text: 'Believing that it might well be right', isCorrect: false },
+          { id: 'c', text: 'Keeping your own convictions private', isCorrect: false },
+          { id: 'd', text: 'Treating every view as equally reasonable', isCorrect: false },
+        ],
+        explanation: 'Restraint on force, not a change of mind. Toleration is only ever tested on views you think are wrong — you do not tolerate what you agree with. The tempting answer describes open-mindedness, which is a different virtue and costs nothing here. Public reason asks the same of the state: coercive law needs grounds the coerced could weigh without first joining you.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

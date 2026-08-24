@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics36Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -74,11 +74,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics36'));
 
 export default function Aesthetics36Scene({ clock, bt, bi, dragPos }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(
@@ -88,12 +88,12 @@ export default function Aesthetics36Scene({ clock, bt, bi, dragPos }: SceneApi) 
     ));
 
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      squareOn: L(SQUARE[p], SQUARE[n]),
+      squareOn: carry(cv, 1, n, SQUARE[p], SQUARE[n], tr),
       // The reader's thumb on the drag beat, the script's track everywhere else.
-      crop: LIVE_D[n] === 1 ? clamp01(dragPos.value) : L(CROP[p], CROP[n]),
-      printsOn: L(PRINTS[p], PRINTS[n]),
+      crop: LIVE_D[n] === 1 ? clamp01(dragPos.value) : carry(cv, 2, n, CROP[p], CROP[n], tr),
+      printsOn: carry(cv, 3, n, PRINTS[p], PRINTS[n], tr),
     };
   });
 

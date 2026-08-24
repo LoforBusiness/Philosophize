@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics35Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -63,11 +63,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics35'));
 
 export default function Aesthetics35Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const q = clamp01(qv.value);
 
@@ -80,15 +80,15 @@ export default function Aesthetics35Scene({ clock, bt, bi, qv, i, picked, onPick
     // The train runs on the beat that says it runs, and HOLDS at the far end after
     // — a train that slid back to the junction between beats would be telling the
     // reader the joke had un-happened.
-    const runNow = RUN[n] > 0 && RUN[p] === 0 ? ease01((bt.value - 0.2) / 1.3) : L(RUN[p], RUN[n]);
+    const runNow = RUN[n] > 0 && RUN[p] === 0 ? ease01((bt.value - 0.2) / 1.3) : carry(cv, 0, n, RUN[p], RUN[n], tr);
 
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      trackOn: L(TRACK[p], TRACK[n]),
-      splitOn: L(SPLIT[p], SPLIT[n]),
+      trackOn: carry(cv, 2, n, TRACK[p], TRACK[n], tr),
+      splitOn: carry(cv, 3, n, SPLIT[p], SPLIT[n], tr),
       run: runNow,
-      spoilOn: L(SPOIL[p], SPOIL[n]),
+      spoilOn: carry(cv, 4, n, SPOIL[p], SPOIL[n], tr),
       lit: LIVE[n] === 1 ? ease01(q) : 0,
     };
   });

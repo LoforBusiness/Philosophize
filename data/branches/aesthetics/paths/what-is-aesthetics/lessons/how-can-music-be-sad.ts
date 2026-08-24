@@ -65,6 +65,23 @@ const lesson: Lesson = {
       },
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'Sad music moves you. Where is the sadness?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'In the listener — the notes carry only a shape', isCorrect: true },
+          { id: 'b', text: 'Inside the music itself, which is sad', isCorrect: false },
+          { id: 'c', text: 'In the composer, at the moment of writing', isCorrect: false },
+          { id: 'd', text: 'Nowhere; people only say they are moved', isCorrect: false },
+        ],
+        explanation: 'In the listener. A tune has contour, pace and direction, and those resemble how a person behaves when sad — that is what you recognise. But there is nobody inside the notes to be having an experience. It also explains why sad music is bearable and even sought out: you get the shape of grief without anything having gone wrong in your life.',
+      },
+    },
+    {
       type: 'summary',
       title: 'Where the Sadness Lives',
       keyPoints: [

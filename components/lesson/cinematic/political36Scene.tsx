@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political36Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -79,11 +79,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political36'));
 
 export default function Political36Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(
@@ -93,14 +93,14 @@ export default function Political36Scene({ clock, bt, bi, i, picked, onPick, dra
     ));
 
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      streetOn: L(STREET[p], STREET[n]),
+      streetOn: carry(cv, 1, n, STREET[p], STREET[n], tr),
       // Reader's thumb on the drag beat, the script's track everywhere else.
-      watch: LIVE_D[n] === 1 ? clamp01(dragPos.value) : L(WATCH[p], WATCH[n]),
-      lampOn: L(LAMP[p], LAMP[n]),
-      emptyOn: L(EMPTY[p], EMPTY[n]),
-      picksOn: L(PICKS[p], PICKS[n]),
+      watch: LIVE_D[n] === 1 ? clamp01(dragPos.value) : carry(cv, 2, n, WATCH[p], WATCH[n], tr),
+      lampOn: carry(cv, 3, n, LAMP[p], LAMP[n], tr),
+      emptyOn: carry(cv, 4, n, EMPTY[p], EMPTY[n], tr),
+      picksOn: carry(cv, 5, n, PICKS[p], PICKS[n], tr),
       // The beam sweeps on the wall clock, not the beat clock, so it keeps moving
       // whatever the reader does — which is the point of it.
       sweep: Math.sin(t * 0.9) * 22,

@@ -9,7 +9,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './valid3Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -109,6 +109,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('valid3'));
 
 export default function Valid3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldInsp = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
   const showPick = !!cur.interact;
@@ -124,16 +125,15 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const grow = ease01(bt.value / 0.55);
 
     const insp = keepHeld(heldInsp, mixStance(carryFrom(heldInsp, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
       fig: pose(insp, FIG_X, GROUND, K, 1, 1),
-      link: L(LINK[p], LINK[n]),
-      stamp: L(STAMP[p], STAMP[n]),
-      flaw: L(FLAW[p], FLAW[n]),
+      link: carry(cv, 0, n, LINK[p], LINK[n], tr),
+      stamp: carry(cv, 1, n, STAMP[p], STAMP[n], tr),
+      flaw: carry(cv, 2, n, FLAW[p], FLAW[n], tr),
       words: swapped ? grow : 1,
       // The form and the ballot cross-fade: the form dissolves as the cards land,
       // and fades back in on the beat after, so neither ever pops.

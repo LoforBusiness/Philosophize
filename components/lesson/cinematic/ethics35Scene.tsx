@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics35Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -73,11 +73,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics35'));
 
 export default function Ethics35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const q = clamp01(qv.value);
 
@@ -92,13 +92,13 @@ export default function Ethics35Scene({ clock, bt, bi, qv, i, picked, onPick, dr
     const drag = TIP[n] === 1 ? clamp01(dragPos.value) : 0.5;
 
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      pairOn: L(PAIR[p], PAIR[n]),
-      beamOn: L(BEAM[p], BEAM[n]),
+      pairOn: carry(cv, 1, n, PAIR[p], PAIR[n], tr),
+      beamOn: carry(cv, 2, n, BEAM[p], BEAM[n], tr),
       // 0.5 is level; 0 tips toward "the same" and 1 toward "far worse".
       tilt: (drag - 0.5) * 2 * BEAM_MAX,
-      tags: L(TAGS[p], TAGS[n]),
+      tags: carry(cv, 3, n, TAGS[p], TAGS[n], tr),
       lit: LIVE[n] === 1 ? ease01(q) : 0,
     };
   });

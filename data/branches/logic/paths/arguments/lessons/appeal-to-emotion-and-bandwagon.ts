@@ -72,6 +72,23 @@ const lesson: Lesson = {
       xpValue: 5,
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'Is it always a fallacy to be moved by a story about one person?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'No — a case can be real evidence', isCorrect: true },
+          { id: 'b', text: 'Yes, feelings are never relevant to truth', isCorrect: false },
+          { id: 'c', text: 'Yes, unless the story is very common', isCorrect: false },
+          { id: 'd', text: 'No, because feelings are a kind of proof', isCorrect: false },
+        ],
+        explanation: 'No. One case can genuinely show that something is possible, or show what a policy does to a person, and that is evidence. The fallacy is using the feeling INSTEAD of a reason. Likewise for the crowd: how many people hold a view is a fact about the people, not about the claim.',
+      },
+    },
+    {
       type: 'summary',
       title: 'Feelings and the Crowd, Named',
       keyPoints: [

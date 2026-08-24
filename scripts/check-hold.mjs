@@ -27,6 +27,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import { claimRoute } from './lib/previewroute.mjs';
+import { ANSWER_CONTROL } from './lib/answerctl.mjs';
 
 const PORT = +(process.env.CDP_PORT || 9392);
 const WEB = +(process.env.WEB_PORT || 8852);
@@ -402,23 +403,11 @@ function allIds() {
         if (b) { b.dispatchEvent(new MouseEvent('click', {bubbles:true})); return 1; }
         return 0; })()`,
     );
-    // A drag question has no button anywhere on the beat, so a sweep without this
-    // stops at it and reports the beats it never reached as clean (§21).
-    const answerDrag = () => evaluate(
-      `(() => { const rail = document.getElementById('drag-strip');
-        if (!rail) return 0;
-        const r = rail.getBoundingClientRect();
-        const y = r.y + r.height / 2, x0 = r.x + r.width * 0.5;
-        const opt = { bubbles: true, pointerId: 1, pointerType: 'mouse', isPrimary: true, buttons: 1 };
-        rail.dispatchEvent(new PointerEvent('pointerdown', { ...opt, clientX: x0, clientY: y }));
-        for (let i = 1; i <= 8; i++) {
-          rail.dispatchEvent(new PointerEvent('pointermove',
-            { ...opt, clientX: x0 + i * 6, clientY: y }));
-        }
-        rail.dispatchEvent(new PointerEvent('pointerup',
-          { ...opt, buttons: 0, clientX: x0 + 48, clientY: y }));
-        return 1; })()`,
-    );
+    // Every analogue control — drag, lever, plot, split, field — has no button
+    // anywhere on its beat, so a sweep without this stops there and reports the
+    // beats it never reached as clean (§21). Shared, because four harnesses need
+    // the same sequence and four copies is four places to forget.
+    const answerDrag = () => evaluate(ANSWER_CONTROL);
     /**
      * WAIT FOR THE WHOLE FRAME TO STOP, not just the camera.
      *

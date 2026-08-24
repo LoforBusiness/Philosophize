@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic37Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -71,11 +71,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic37'));
 
 export default function Logic37Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(
@@ -85,12 +85,12 @@ export default function Logic37Scene({ clock, bt, bi, i, picked, onPick }: Scene
     ));
 
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      boxesOn: L(BOXES[p], BOXES[n]),
-      sorted: L(SORTED[p], SORTED[n]),
-      barberOn: L(BARBER[p], BARBER[n]),
-      setsOn: L(SETS[p], SETS[n]),
+      boxesOn: carry(cv, 1, n, BOXES[p], BOXES[n], tr),
+      sorted: carry(cv, 2, n, SORTED[p], SORTED[n], tr),
+      barberOn: carry(cv, 3, n, BARBER[p], BARBER[n], tr),
+      setsOn: carry(cv, 4, n, SETS[p], SETS[n], tr),
       // THE WALL CLOCK, NOT THE BEAT CLOCK. The barber has to keep failing to
       // settle for as long as he is on stage — a swing that finished would be a
       // picture of an answer arriving.

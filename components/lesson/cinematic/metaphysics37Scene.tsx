@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics37Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -71,11 +71,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics37'));
 
 export default function Metaphysics37Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(
@@ -88,16 +88,16 @@ export default function Metaphysics37Scene({ clock, bt, bi, i, picked, onPick, d
     // so it never re-swings behind the reader; the ward is the same.
     const swinging = SWING[n] > 0 && SWING[p] === 0;
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      shelfOn: L(SHELF[p], SHELF[n]),
-      hammerOn: L(HAMMER[p], HAMMER[n]),
-      swing: swinging ? ease01((bt.value - 0.3) / 0.9) : L(SWING[p], SWING[n]),
-      wardOn: L(WARD[p], WARD[n]),
-      labelsOn: L(LABELS[p], LABELS[n]),
+      shelfOn: carry(cv, 1, n, SHELF[p], SHELF[n], tr),
+      hammerOn: carry(cv, 2, n, HAMMER[p], HAMMER[n], tr),
+      swing: swinging ? ease01((bt.value - 0.3) / 0.9) : carry(cv, 3, n, SWING[p], SWING[n], tr),
+      wardOn: carry(cv, 4, n, WARD[p], WARD[n], tr),
+      labelsOn: carry(cv, 5, n, LABELS[p], LABELS[n], tr),
       // The rail reads the reader's thumb only on its own beat.
       grip: LIVE_D[n] === 1 ? clamp01(dragPos.value) : 0,
-      gripOn: L(LIVE_D[p], LIVE_D[n]),
+      gripOn: carry(cv, 6, n, LIVE_D[p], LIVE_D[n], tr),
     };
   });
 

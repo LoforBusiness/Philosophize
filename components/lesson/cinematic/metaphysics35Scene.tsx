@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics35Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -84,15 +84,15 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics35'));
 
 export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const q = clamp01(qv.value);
 
-    const x = L(X[p], X[n]);
+    const x = carry(cv, 0, n, X[p], X[n], tr);
     // Facing eased through zero rather than flipped (L3): he turns through a
     // profile on the way back down the line instead of mirroring between frames.
     const dir = facing(X[p] > X[n] ? -1 : 1, X[n] > X[p] ? 1 : X[n] < X[p] ? -1 : 1, bt.value);
@@ -109,14 +109,14 @@ export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPic
     return {
       fig: pose(figS, x, GROUND, K_FIG, dir, 1),
       t,
-      lineOn: L(LINE[p], LINE[n]),
-      arcOn: L(ARC_ON[p], ARC_ON[n]),
-      knotOn: L(KNOT[p], KNOT[n]),
+      lineOn: carry(cv, 1, n, LINE[p], LINE[n], tr),
+      arcOn: carry(cv, 2, n, ARC_ON[p], ARC_ON[n], tr),
+      knotOn: carry(cv, 3, n, KNOT[p], KNOT[n], tr),
       // The tie parts on the beat that snaps, and STAYS parted — a contradiction
       // that re-knots itself while the reader is still looking at it would undo the
       // one thing this beat is for.
       snap: SNAP[n] === 1 ? ease01((bt.value - 0.35) / 0.8) : 0,
-      branchOn: L(BRANCH[p], BRANCH[n]),
+      branchOn: carry(cv, 4, n, BRANCH[p], BRANCH[n], tr),
       // On the graded beat the surviving link closes as the answer lands.
       seal: LIVE[n] === 1 ? ease01(q) : 0,
     };

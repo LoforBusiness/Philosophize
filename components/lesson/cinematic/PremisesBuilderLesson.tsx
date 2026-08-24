@@ -249,7 +249,6 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
     const n = bi.value;
     const cur = SHOTS[n], prv = SHOTS[n > 0 ? n - 1 : 0];
     const tr = ease01(bt.value / cur.tr);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const p = n > 0 ? n - 1 : 0;
 
@@ -261,10 +260,10 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
     const aTo = APP_TALK[n] ? narratorLive(0, t, bt.value) : stand(t);
     const appS = mixStance(aFrom, aTo, tr);
 
-    const cs = L(prv.s, cur.s);
-    const ccx = L(prv.cx, cur.cx);
+    const cs = lerp(prv.s, cur.s, tr);
+    const ccx = lerp(prv.cx, cur.cx, tr);
     return {
-      cam: { s: cs, cx: ccx, cy: L(prv.cy, cur.cy) },
+      cam: { s: cs, cx: ccx, cy: lerp(prv.cy, cur.cy, tr) },
       master: pose(masterS, MASTER_X, GROUND, K_FIG, -1, 1),
       app: pose(appS, APP_X, GROUND, APP_K, 1, 1),
       // Screen x of each speaker's HEAD, so a bubble can sit over whoever is talking.

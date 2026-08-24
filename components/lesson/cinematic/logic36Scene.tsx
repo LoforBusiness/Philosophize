@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic36Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -70,11 +70,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic36'));
 
 export default function Logic36Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(
@@ -84,12 +84,12 @@ export default function Logic36Scene({ clock, bt, bi, i, picked, onPick, dragPos
     ));
 
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      roomOn: L(ROOM[p], ROOM[n]),
+      roomOn: carry(cv, 1, n, ROOM[p], ROOM[n], tr),
       // The reader's thumb on the drag beat, the script's own track everywhere else.
-      done: LIVE_D[n] === 1 ? clamp01(dragPos.value) : L(DONE[p], DONE[n]),
-      casesOn: L(CASES[p], CASES[n]),
+      done: LIVE_D[n] === 1 ? clamp01(dragPos.value) : carry(cv, 2, n, DONE[p], DONE[n], tr),
+      casesOn: carry(cv, 3, n, CASES[p], CASES[n], tr),
     };
   });
 

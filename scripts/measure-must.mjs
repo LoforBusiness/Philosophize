@@ -27,13 +27,23 @@
 //   npx expo start --web --port 8847 --clear
 //   chrome --headless=new --remote-debugging-port=9382 --user-data-dir=<tmp>
 //   node scripts/measure-must.mjs                 # writes components/.../mustBoxes.ts
-//   node scripts/measure-must.mjs ids.json        # a chosen list, printed not written
+//   node scripts/measure-must.mjs ids.json        # a chosen list — STILL WRITTEN.
+//                                                 Every id it does not measure is
+//                                                 carried forward from the sidecar,
+//                                                 so this is the cheap way to add a
+//                                                 round of new lessons: 18 loads, not
+//                                                 186. Pass a third argument to send
+//                                                 the table somewhere harmless instead.
+//   MUST_ROUTE=previewmust node scripts/measure-must.mjs …   # when a SECOND session is
+//                                                 live: it writes app/previewframe.tsx
+//                                                 too, and deletes it under you (§21).
 import http from 'node:http';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { STAGE_W, STAGE_H, mergeReadings, mustBox, renderTable } from './lib/mustrule.mjs';
 import { claimRoute } from './lib/previewroute.mjs';
+import { ANSWER_CONTROL } from './lib/answerctl.mjs';
 
 const PORT = +(process.env.CDP_PORT || 9382);
 const WEB = +(process.env.WEB_PORT || 8847);
@@ -228,42 +238,18 @@ const ANSWER_DECK = `(() => {
   return 0;
 })()`;
 
-// A FOURTH ANSWER MECHANISM, AND THE FIRST ONE THAT IS NOT A CLICK.
+// THE ANALOGUE ANSWERS, AND THEY ARE NOT CLICKS.
 //
-// `interact.drag` (components/lesson/cinematic/DragScale.tsx) is answered by
-// dragging a knob along a rail, so there is no button anywhere on the beat and
-// both snippets above find nothing. The first sweep of the twelve drag lessons
-// therefore measured 6 or 7 beats of 9 and reported them as measured — the exact
-// failure mode §21 already records twice, where a harness that cannot act on a
-// beat reports a short sweep as a clean one.
+// `drag`, `lever`, `plot`, `split` and `field` are all answered by dragging, so
+// there is no button anywhere on those beats and both snippets above find
+// nothing. The first sweep of the twelve drag lessons measured 6 or 7 beats of 9
+// and reported them as measured — the exact failure §21 records, where a harness
+// that cannot act on a beat reports a short sweep as a clean one.
 //
-// react-native-gesture-handler listens on POINTER events on the web, so a
-// MouseEvent does nothing here however carefully it is aimed. The sequence has to
-// be down / move / move / up with a live pointerId, and it needs at least two
-// moves: `onUpdate` integrates translationX, and a single jump from the press
-// point is indistinguishable from a tap to the pan recogniser's activation check.
-const ANSWER_DRAG = `(() => {
-  const strip = document.getElementById('drag-strip');
-  if (!strip) return 0;
-  const r = strip.getBoundingClientRect();
-  if (!(r.width > 20)) return 0;
-  const y = r.y + r.height / 2;
-  const x0 = r.x + 6;
-  // 0.55 across lands mid-rail, which is a legal answer on every zone layout the
-  // twelve use. WHERE it lands does not matter for measurement — the beat's own
-  // box is read before this runs; this only has to get the gate open.
-  const x1 = r.x + r.width * 0.55;
-  const opts = (x) => ({ bubbles: true, cancelable: true, composed: true,
-    clientX: x, clientY: y, pointerId: 1, pointerType: 'mouse', isPrimary: true, buttons: 1 });
-  try {
-    strip.dispatchEvent(new PointerEvent('pointerdown', opts(x0)));
-    for (let k = 1; k <= 6; k++) {
-      strip.dispatchEvent(new PointerEvent('pointermove', opts(x0 + (x1 - x0) * (k / 6))));
-    }
-    strip.dispatchEvent(new PointerEvent('pointerup', { ...opts(x1), buttons: 0 }));
-    return 1;
-  } catch (e) { return 0; }
-})()`;
+// The sequence lives in scripts/lib/answerctl.mjs now rather than here, because
+// four harnesses need it and four copies is four places to forget when a fifth
+// control arrives.
+const ANSWER_DRAG = ANSWER_CONTROL;
 
 const ROUTE = `app/${SLUG}.tsx`;
 const ROUTE_SRC = `// WRITTEN BY scripts/measure-must.mjs — deleted again when it finishes.
@@ -458,6 +444,14 @@ function stampFor(comp) {
   };
 
   const LANES = +(process.env.LANES || 6);
+// HOW LONG TO WAIT FOR A STAGE, in half-seconds. The defaults are what a healthy
+// machine needs. They are overridable because the number is about the ENVIRONMENT
+// rather than about the app: a Metro restarted with --clear, or a second dev
+// server on the same box, can take a page from 13s to past 180s — and then every
+// lesson reports NEVER RENDERED A STAGE, which reads exactly like 30 broken
+// lessons. Raise these before concluding anything about the scenes.
+const STAGE_FIRST = +(process.env.STAGE_TRIES_FIRST || 220);
+const STAGE_NEXT = +(process.env.STAGE_TRIES || 60);
 
   const expected = expectedBeats(map);
   const total = totalBeats(map);
@@ -486,7 +480,7 @@ function stampFor(comp) {
     // this script just wrote, which can take the better part of a minute; every
     // one after it is warm. A single patience figure has to be the slow one, and
     // then a genuinely broken lesson costs 90s to discover — so they differ.
-    const ready = await T.waitForStage(first ? 220 : 60);
+    const ready = await T.waitForStage(first ? STAGE_FIRST : STAGE_NEXT);
     if (!ready) { console.log(`  ${id.padEnd(32)} NEVER RENDERED A STAGE`); return null; }
     await wait(900);
 

@@ -71,6 +71,23 @@ const lesson: Lesson = {
       xpValue: 5,
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'Where can the simulation argument actually be resisted?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'By denying that such simulations ever get built', isCorrect: true },
+          { id: 'b', text: 'By pointing out how real the world feels', isCorrect: false },
+          { id: 'c', text: 'By showing that computers cannot think', isCorrect: false },
+          { id: 'd', text: 'By noting that we have never seen a glitch', isCorrect: false },
+        ],
+        explanation: 'Attack the count. The argument is about proportions: if huge numbers of simulated minds exist, a randomly chosen mind is probably simulated. Deny that anyone survives long enough to run them, or that anyone would want to, and the proportion never appears. How real it feels is no help at all, because a simulated mind would report exactly the same thing.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

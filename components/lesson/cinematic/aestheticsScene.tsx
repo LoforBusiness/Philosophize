@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './aestheticsScript';
 import {
   clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, SIGH, useHeld, carryFrom, keepHeld,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, SIGH, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -155,24 +155,24 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics'));
 
 export default function AestheticsScene({ clock, bt, bi, qv }: SceneApi) {
   const heldFigS = useHeld();
+  const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const q = clamp01(qv.value);
 
     const figS = keepHeld(heldFigS, mixStance(carryFrom(heldFigS, n,hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
     // On Q1 the reaching hand and the apple fall away — pleasure that wants nothing.
-    const appleOn = L(APPLE[p], APPLE[n]) * (Q1[n] === 1 ? 1 - ease01(q) : 1);
-    const glowOn = L(GLOW[p], GLOW[n]) * (Q1[n] === 1 ? 1 + 0.4 * ease01(q) : 1);
+    const appleOn = carry(cv, 0, n, APPLE[p], APPLE[n], tr, Q1[n] === 1 ? 1 - ease01(q) : 1);
+    const glowOn = carry(cv, 1, n, GLOW[p], GLOW[n], tr, Q1[n] === 1 ? 1 + 0.4 * ease01(q) : 1);
 
     return {
       fig: pose(figS, FIG_X, GROUND, K_FIG, -1, 1),
       appleOn, glowOn, t,
-      crowdOn: L(CROWD[p], CROWD[n]),
-      criticsOn: L(CRIT[p], CRIT[n]),
+      crowdOn: carry(cv, 2, n, CROWD[p], CROWD[n], tr),
+      criticsOn: carry(cv, 3, n, CRIT[p], CRIT[n], tr),
       // The verdicts slide together once the card has settled, and STAY together
       // while it fades out — a chart that un-converges on its way off stage would
       // undo the very point it just made.

@@ -61,6 +61,23 @@ const lesson: Lesson = {
       },
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'A single study contradicts a result that a thousand others support. What should you do?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Doubt the study first, and wait for replication', isCorrect: true },
+          { id: 'b', text: 'Drop the old result — new evidence wins', isCorrect: false },
+          { id: 'c', text: 'Ignore the study, since the matter is settled', isCorrect: false },
+          { id: 'd', text: 'Treat both as equally likely from now on', isCorrect: false },
+        ],
+        explanation: 'Doubt the study first, and that is not stubbornness. How far a fact should move you depends on how firmly the claim was already held — a result propped up by a thousand others is likelier to survive than one paper is to be right. If it replicates, the balance genuinely changes, and then so should you. Refusing to move at all would be the opposite error.',
+      },
+    },
+    {
       type: 'summary',
       title: 'Belief by Degrees',
       keyPoints: [

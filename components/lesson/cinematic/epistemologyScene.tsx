@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './epistemologyScript';
 import {
   clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -108,6 +108,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology'));
 
 export default function EpistemologyScene({ clock, bt, bi, qv, i, picked }: SceneApi) {
   const heldSeekerS = useHeld();
+  const cv = useCarry(4);
   const cur = BEATS[i];
   // Only the RIGHT answer turns the third bolt. A door that swings open on a wrong
   // pick would tell the reader "you know" at the exact moment they showed they
@@ -119,15 +120,19 @@ export default function EpistemologyScene({ clock, bt, bi, qv, i, picked }: Scen
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const q = clamp01(qv.value);
 
     const seekerS = keepHeld(heldSeekerS, mixStance(carryFrom(heldSeekerS, n,hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
 
-    const l1 = L(LOCKS[p][0], LOCKS[n][0]);
-    const l2 = L(LOCKS[p][1], LOCKS[n][1]);
-    let l3 = L(LOCKS[p][2], LOCKS[n][2]);
+    // Carried, like every other track (L5). The codemod could not reach these
+    // three: it matches `lerp(NAME[p], NAME[n], tr)` and these are indexed out of
+    // an array-of-arrays, so the shape never matched and three locks kept
+    // blending from where the previous beat was HEADING rather than from where
+    // they were drawn.
+    const l1 = carry(cv, 1, n, LOCKS[p][0], LOCKS[n][0], tr);
+    const l2 = carry(cv, 2, n, LOCKS[p][1], LOCKS[n][1], tr);
+    let l3 = carry(cv, 3, n, LOCKS[p][2], LOCKS[n][2], tr);
     if (turns === 1) l3 = lerp(l3, 1, ease01(q));
 
     // Stepped so a half-lit bolt never renders as a muddy grey plate.
@@ -154,7 +159,7 @@ export default function EpistemologyScene({ clock, bt, bi, qv, i, picked }: Scen
       wUntested: 1 - both,
       shake: Q2[n] === 1 ? Math.sin(q * 40) * (1 - q) * 3.4 : 0,
       stamp: RESTAMP[n] === 1 ? ease01(bt.value / 0.42) : 1,
-      keyed: L(KEYED[p], KEYED[n]),
+      keyed: carry(cv, 0, n, KEYED[p], KEYED[n], tr),
     };
   });
 

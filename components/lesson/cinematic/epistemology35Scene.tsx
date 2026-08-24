@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology35Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -72,11 +72,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology35'));
 
 export default function Epistemology35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const q = clamp01(qv.value);
 
@@ -92,12 +92,12 @@ export default function Epistemology35Scene({ clock, bt, bi, qv, i, picked, onPi
     const scan = SCAN[n] === 1 ? clamp01(dragPos.value) : 0;
 
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      pensOn: L(PENS[p], PENS[n]),
-      plaqOn: L(PLAQUES[p], PLAQUES[n]),
-      chainOn: L(CHAIN[p], CHAIN[n]),
-      fenceOn: L(SCAN[p], SCAN[n]),
+      pensOn: carry(cv, 1, n, PENS[p], PENS[n], tr),
+      plaqOn: carry(cv, 2, n, PLAQUES[p], PLAQUES[n], tr),
+      chainOn: carry(cv, 3, n, CHAIN[p], CHAIN[n], tr),
+      fenceOn: carry(cv, 4, n, SCAN[p], SCAN[n], tr),
       fenceX: FENCE_LO + (FENCE_HI - FENCE_LO) * scan,
       // The second link parts on the beat that shows the gap, and stays parted.
       gap: GAP[n] === 1 ? ease01((bt.value - 0.3) / 0.75) : 0,

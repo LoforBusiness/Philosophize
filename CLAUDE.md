@@ -257,8 +257,8 @@ When `CARD_BUDGET` reaches 0 the takeover is done, and `LessonRunner`, `cards/`,
 
 ### Shape today
 
-**Every branch holds exactly 37 lessons, of which exactly 25 are cinematic** —
-68% of the way through the takeover. Both numbers are deliberate invariants rather
+**Every branch holds exactly 37 lessons, of which exactly 28 are cinematic** —
+76% of the way through the takeover. Both numbers are deliberate invariants rather
 than where the counts happened to land: the totals were 27–30 and the cinematic
 share was 11–14, and both showed on the Learn cards. `check:cinematic` enforces
 that all six branches match on both.
@@ -276,23 +276,34 @@ They constrain each other, and there are exactly two moves that respect both:
   in one pass; three per branch, in three rounds of six, took 34/19 to 37/22 the
   same way. Adding one lesson to one branch breaks both at once.
 
-> **The round that took 22 to 25 also moved the FRONTIER by twenty-one, not by
-> three,** and that is worth expecting rather than being surprised by. The solid
-> front is the unbroken cinematic run at the START of a branch, so converting the
-> next three unconverted lessons in reading order also absorbs every already-
-> converted lesson sitting behind them: 79 → 100 across the six. `SOLID_FLOOR`
-> and `CARD_BUDGET` both have to be raised in the same commit, and
-> `check:cinematic` prints the numbers to put in them.
+> **AND EVERY NEW LESSON NOW HAS TO BE UNLIKE ITS NEIGHBOURS, MEASURABLY.** F43
+> has asked for that since the card era and nothing enforced it, so the corpus
+> stayed varied on the author's goodwill alone. `npm run check:echo` is group Q
+> of the rule book: adjacent lessons in reading order may share no more than half
+> their declared channels, no more than a fifth of their graded-prompt words, and
+> at most two nouns of the one-line `// Theme:` each script now states before its
+> beats. The thresholds are the corpus's own measured worst, not numbers picked
+> to feel strict — and the structure (H52's eight beats, two questions, one quote)
+> is deliberately NOT checked, because sameness of structure is what makes the
+> lessons one product and sameness of picture is what makes them a chore.
+
+> **A round of three per branch moves the FRONTIER by far more than eighteen,**
+> and that is worth expecting rather than being surprised by. The solid front is
+> the unbroken cinematic run at the START of a branch, so converting the next
+> three unconverted lessons in reading order also absorbs every already-converted
+> lesson sitting behind them. 22 → 25 took the front 79 → 100; 28 → 31 took it
+> 124 → 146. `SOLID_FLOOR` and `CARD_BUDGET` both have to be raised in the same
+> commit, and `check:cinematic` prints the numbers to put in them.
 
 | Branch | Units | Lessons | of which cinematic | card decks left |
 |---|---|---|---|---|
-| Metaphysics | 5 | 37 | 25 | 12 |
-| Epistemology | 5 | 37 | 25 | 12 |
-| Logic | 5 | 37 | 25 | 12 |
-| Ethics | 5 | 37 | 25 | 12 |
-| Aesthetics | 3 | 37 | 25 | 12 |
-| Political Philosophy | 5 | 37 | 25 | 12 |
-| **Total** | **28** | **222** | **150 (68%)** | **72** |
+| Metaphysics | 5 | 37 | 31 | 6 |
+| Epistemology | 5 | 37 | 31 | 6 |
+| Logic | 5 | 37 | 31 | 6 |
+| Ethics | 5 | 37 | 31 | 6 |
+| Aesthetics | 3 | 37 | 31 | 6 |
+| Political Philosophy | 5 | 37 | 31 | 6 |
+| **Total** | **28** | **222** | **186 (84%)** | **36** |
 
 > Numbers go stale; the check does not. `npm run check:cinematic` prints the live
 > figures and the next lesson to convert in each branch every time it runs.
@@ -553,7 +564,7 @@ A unit's `index.ts` exports an array of `Path` objects (the units); each needs a
 stable `id` — `lessonsByUnit` is keyed on it, so **renaming an id silently resets
 that unit's progress for every existing user.**
 
-**Keep every branch at 37, and at 25 cinematic (§5).** The counts were 27–30 and it
+**Keep every branch at 37, and at 31 cinematic (§5).** The counts were 27–30 and it
 showed on the Learn cards, so they were levelled deliberately; adding one lesson to
 one branch puts them back out. Add six, one per branch — and give each of the six a
 scene, or the cinematic invariant goes out instead of the lesson one.
@@ -577,13 +588,13 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **twenty-six** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **twenty-eight** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
-`check-routes` · `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-prompts` ·
+`check-routes` · `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-echo` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
-`check-camera` · `check-tour` · `check-streak` · `check-answers` · `check-mentions` ·
+`check-camera` · `check-tour` · `check-streak` · `check-answers` · `check-quotes` · `check-mentions` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
 `check-ui` · `check-thinkers` · `check-words` · `check-smooth` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
@@ -610,8 +621,10 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
   with bios, eras and **1,780 quotes** between them — and all 322 have exactly
   three "Did you know?" facts, with nothing missing.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
-  gating; **150 cinematic lessons** (animated stickman scenes, §17); animated
-  `LessonReward` with XP count-up, streak and rank-up.
+  gating; **186 cinematic lessons** (animated stickman scenes, §17), answered six
+  ways — scene targets, two cards, and the analogue family of `drag` · `lever` ·
+  `plot` · `split` · `field` (§17, group R); animated `LessonReward` with XP
+  count-up, streak and rank-up.
 - **Gamification:** 70 badges in 5 tiers, **48 ranks in 8 coloured orders, each
   order struck in its own silhouette** (§7), a conferred-rank ceremony that shows
   the pin they held handing over to the pin they just earned, a three-badge
@@ -631,8 +644,16 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
   mastheads, the launch screen and Quick Start (§19).
 
 **Known gaps / tech debt:**
-- **Card decks are now a minority** — 72 of 222. That is now the number
+- **Card decks are now a minority** — 36 of 222. That is now the number
   that matters; see the takeover rule at the top of §5.
+- **Six shipped lessons key two different quotations off one saveable id.**
+  `savedQuotes` dedups on the id alone, so the second quotation can never be
+  collected and renders as already held. Held at six by `npm run check:quotes`,
+  which may only go down. They are the six that are already committed — the rest
+  were fixed on sight. Fixing these is a small MIGRATION rather than an edit: a
+  reader who has already saved one keeps their copy under the old id and could
+  then save the identical text again under the new one. Do it when the saved
+  collection is next opened up, not before.
 - **`fill-blank` and `match` are closed as won't-do.** They were the oldest open
   item in this file. Finishing an interaction for the format being retired is work
   pointed the wrong way, so the stubs stay stubs.
@@ -675,13 +696,18 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 ## 13. Lesson Design Principles (north star)
 
 > ⚠️ **Before writing or changing any cinematic lesson, read [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md).**
-> That is the binding rule book — 93 numbered rules in eight groups (truth of the
+> That is the binding rule book — its numbered rules in groups A–R (truth of the
 > picture · the figure · motion · nothing hidden · questions · writing · engine · the
-> house shape), an authoring checklist, and the six exact verification checks. Groups
-> A–G each exist because a real lesson broke that rule and it was caught on a real
-> phone; group **H** is the reverse — the conventions all 48 built lessons already
-> share, counted out of the source, so a new one comes out a sibling rather than an odd
-> note. This section is the *why*; that file is the *how*, with the numbers.
+> house shape · being followable · the words · the tour · teleporting · the narrator ·
+> the vocabulary · answer-before-reveal · held objects · not repeating yourself ·
+> **answers that are a quantity rather than a pick**), an
+> authoring checklist, and the exact verification checks. Groups A–G each exist because
+> a real lesson broke that rule and it was caught on a real phone; group **H** is the
+> reverse — the conventions the built lessons already share, counted out of the source,
+> so a new one comes out a sibling rather than an odd note. Group **Q** is the newest
+> and it is about NEIGHBOURS rather than about any one lesson: what a reader meets when
+> they finish sixteen and open seventeen. This section is the *why*; that file is the
+> *how*, with the numbers.
 >
 > Rule A1 above all: **what the text says, the picture must do.** A lesson that says
 > someone is on the floor and draws them standing is not acceptable at any polish level.
@@ -771,7 +797,7 @@ in order, the full streak, XP, rank and badge systems, and all 322 thinkers.
 
 **P0 — Daily Review (spaced repetition).** The retention engine and the strongest reason to subscribe. Resurface concepts from completed lessons on a spacing schedule via quick `multiple-choice` / `true-false` / `reinforcement` prompts; add a "Review" entry on Home; completing a review counts toward the streak. Track per-concept last-seen + strength in `userDataStore`.
 
-**P0 — Convert the remaining 72 card decks (§5).** Six at a time, one per branch, so
+**P0 — Convert the remaining 36 card decks (§5).** Six at a time, one per branch, so
 the per-branch counts stay level, until `check:cinematic` reports 0 card decks left.
 Then `LessonRunner`, `cards/` and `interactions/` can go. Every lesson added along
 the way is cinematic.
@@ -820,7 +846,7 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**This is the format the app is converging on** — 132 of the 222 lessons are here
+**This is the format the app is converging on** — 186 of the 222 lessons are here
 already, and the card runner is what they are replacing (§5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
@@ -832,35 +858,78 @@ A cinematic lesson = a **script** (beats) + a **scene** component, played by
 `CinematicPlayer`. Two lessons predate the shared player and carry their own
 copies of it: `ArgumentFightLesson` and `PremisesBuilderLesson`.
 
-### Three ways to answer, and the third one moves the picture
+### Six ways to answer, and five of them can move the picture
 
-A graded beat carries `interact`, and that block now has three shapes. **Scene
+A graded beat carries `interact`, and that block now has six shapes. **Scene
 targets** (the original 82): the scene draws its own tap targets and calls
 `onPick`. **`cards`**: two short `ChoiceCards` under the art, which replaced the
-A/B/C/D deck. And **`drag`** (`components/lesson/cinematic/DragScale.tsx`), where
-the answer is a **position on a line** rather than a pick.
+A/B/C/D deck, and still the right answer for 155 lessons. And then the **analogue
+family** — `drag`, `lever`, `plot`, `split` and `field` — where the answer is a
+quantity, a setting, a shape, a division or a position rather than a pick.
 
-`drag` exists because "which of these" is the wrong shape for a large part of
-philosophy. How much may a society tolerate; how much of your income is required;
-how simple should an explanation be; how sure are you. Offer those as two cards
-and you have quietly answered the interesting half for the reader.
+The family exists because "which of these" is the wrong shape for a large part of
+philosophy, and because the product owner asked for the rest of it in as many
+words: *"leavers being moved, line graphs that you slide … lines that you slide a
+bar from one side to the other or the middle."* They are five controls, not five
+skins, and **group R of the rule book is how to tell which one a claim wants**:
 
-Two things make it teach rather than merely slide:
+| The claim is… | Control | It reads |
+|---|---|---|
+| one quantity on a scale | `drag` | a knob on a rail (`DragScale`) |
+| one of a few NAMED settings on a ladder | `lever` | an arm with detents (`LeverPick`) |
+| what happens to a thing AS another changes | `plot` | a curve you draw (`ShapePlot`) |
+| how one thing DIVIDES between two | `split` | a seam in one bar (`SplitBar`) |
+| two INDEPENDENT yes/no questions | `field` | a token on a pad (`FieldPick`) |
 
-- **The readout is the lesson.** A word above the knob changes as it travels —
-  "a hunch" → "a good bet" → "knowledge" — so the reader finds the boundary by
-  hunting for the flip. `ScaleZone.reads` is lesson copy under group J, not
-  scoring furniture.
-- **The scene reads the same value.** The knob lives on the player as
-  `dragPos` and reaches the scene through `SceneApi`, so the reader is not moving
-  a widget beside a picture, they are moving the picture: the tower comes apart,
-  the painting cleans, the crowd grows while every life in it shrinks. One
-  gesture, on the UI thread, with no React render in between.
+The distinctions are load-bearing rather than decorative. Three answers that are
+ORDERED lose the order the moment they become cards. "How the aura goes as the
+copies multiply" is a curve, and a rail cannot hold one. Presentism, the growing
+block and eternalism are three corners of one pad, and asking them as a pick
+quietly answers the interesting half — which of the two questions you were being
+asked.
 
-The twelve lessons numbered 33 and 34 are all built on it. A scene reads
-`dragPos` **only on its own drag beat** (`live`) and the script's own track
-everywhere else — one value, two sources, and the picture never disagrees with
-whichever is in charge.
+Three things make the whole family teach rather than merely slide:
+
+- **The readout is the lesson.** A word above the control changes as it travels —
+  "a hunch" → "a good bet" → "knowledge", or "the crank: all in, all kept" →
+  "hears everything, keeps almost none of it" — so the reader finds the boundary by
+  hunting for the flip. Every `reads` string is lesson copy under group J, not
+  scoring furniture, and the WRONG ones matter most: they are where the failure
+  modes get named.
+- **Nothing is graded on hitting a number.** A zone, a detent, a quadrant, or —
+  for `plot` — the nearest profile by RMS, so a reader who draws a cliff gets "a
+  cliff" whether it falls at 0.9 or 0.7. A tolerance dressed up as precision would
+  be a worse question, not a stricter one.
+- **The scene reads the same value.** The control lives on the player as `dragPos`
+  (and `dragPos2` for the pad's second axis) and reaches the scene through
+  `SceneApi`, so the reader is not moving a widget beside a picture, they are
+  moving the picture: the tower comes apart, the painting cleans, the crowd grows
+  while every life in it shrinks. One gesture, on the UI thread, with no React
+  render in between.
+
+Forty-four graded beats are on the analogue family now — 26 `drag`, 6 `lever`, and
+4 each of `plot`, `split` and `field` — and following the control is OPTIONAL, so
+check which a scene does before reasoning about it. The four newest that do are
+worth reading as the pattern: `metaphysics21` furnishes the two halves of a
+timeline off the pad's two axes, `political22` makes the pad BE the switch,
+`aesthetics22` drains a heart meter as the seam moves, and `political24` stands
+five generations of speakers back up as the lever travels. A scene reads `dragPos`
+**only on its own graded beat** and the script's own track everywhere else — one
+value, two sources, and the picture never disagrees with whichever is in charge.
+The flag is derived from the beat itself (`b.interact?.lever ? 1 : 0`) rather than
+declared as a channel, so it cannot fall out of step with the control and it costs
+`check:echo` nothing.
+
+> **Two things that cost a run each, and will again.** All six controls render
+> inside `styles.lower` with the deck, never as a sibling of the stage — that is
+> L6, and a control outside it does not merely move the picture, it **rescales**
+> it by about 12% on the frame a question mounts. And every control carries a
+> `nativeID` (`drag-strip`, `lever-arc`, `shape-plot`, `split-bar`, `field-pad`)
+> because a beat with no button on it is invisible to a harness that only knows
+> how to click: the first sweep of the twelve drag lessons measured 6 or 7 beats
+> of 9 and reported them as measured. All four harnesses drive them through one
+> shared snippet, `scripts/lib/answerctl.mjs`. **A new control is added to both
+> lists in the same commit** — `check:smooth` asserts both.
 
 **They all have the same shape, and `npm run check:cinematic` enforces it**: 7–11
 beats (8 is the mode), **exactly two graded questions**, one saveable quote on a rest
@@ -935,6 +1004,35 @@ neither of them was anything the checker could see.**
   A camera cut nobody wrote, moving every pixel at once. The control and the deck
   are one box now (`styles.lower`); every lesson reports a single stage-clip size
   for its whole run.
+
+### And L5 was itself renamed out of existence (L8)
+
+`check:smooth` printed **"148 scenes carry every track they interpolate"** and was
+wrong about 38 of them. Its detector matched `lerp(NAME[p], NAME[n], …)`; those 38
+scenes had all written the identical call behind a one-letter local alias —
+
+```ts
+const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
+…  boxesOn: L(BOXES[p], BOXES[n]),
+```
+
+— two arguments instead of three, so neither the checker nor `carry-tracks.mjs`
+could see it. **169 tracks across 38 scenes were blending straight off `T[p]`** for
+as long as the file claimed otherwise.
+
+The part worth remembering is not the regex. **It was the current house idiom**:
+the newest lesson in all six branches used the alias, so the correct instinct —
+copy the best recent exemplar — was propagating the exact defect the exemplar was
+supposed to have fixed. A defect that spreads by imitation outruns one that spreads
+by accident, and it looks like craft while it does it.
+
+Three shapes are caught now: the alias itself (no scene may declare one), a track
+lerped out of an array-of-arrays, and one lerped off endpoints derived from a track.
+The last two were five real sites the codemod could not express, carried by hand.
+And the hardened detector's first run reported a scene as defective because the
+comment explaining a hand-carried track quoted the call it was explaining — so it
+strips comments now, and **a detector is counter-tested by putting the defect back
+and watching it fail.**
 
 > And the lesson under both, which is the same one §21 keeps learning: **when a
 > lesson gains a new way to move, the checker gains one too, in the same commit.**
@@ -1348,96 +1446,6 @@ holds that a target never retreats as you work.
 > it has the identical problem for the identical reason. It was left alone only
 > because that file was being edited elsewhere at the time.
 
-Two things measured rather than judged:
-
-- **The bar headroom is 30% and it is load-bearing.** Bars draw against
-  `max × 1.3`, so the LEADER — the row a reader taps first — still has track left
-  to draw its ghost in. Re-scaling on selection instead would move every bar at
-  once, which is the camera cut group L is about.
-- **`ACounter` needs an explicit width and `counterStyle` cannot give it one.**
-  It is a `TextInput`, and an unstyled `<input>` claims ~20 characters of
-  intrinsic width, which silently eats a flex row. It squeezed a label with
-  plenty of room into "EPISTEMOL…" — invisible on a device, obvious in a browser.
-
-> The lesson deck's quote card (`cinematicKit.tsx`) is the one surface not yet
-> converted — see §17; it is the highest-traffic file in the repo and was being
-> refactored across ninety scenes at the time. It is a drop-in when that settles.
-
-**Verified without Metro.** `tone.ts` is zero-import, so a contact sheet of every
-era's plate — held, kept, featured, pressed — renders in plain Node against a
-headless Chrome, reading the palette from `tone.plate()` and the size table out
-of the component rather than retyping either. That is how both defects above were
-found. Two CDP traps cost an hour: `Page.captureScreenshot` with
-`captureBeyondViewport` + `clip` **hangs** in `--headless=new`, and attaching to
-`/json/list[0]` rather than a tab made by `PUT /json/new` makes `Page.navigate` a
-silent no-op — use `scripts/peek.mjs`'s pattern.
-
-**The welcome end card** (`assets/images/welcome/sky.jpg`) is the one background
-that is a *drawing* rather than a photograph, and it follows the same rule for the
-same reason: the ink hatching runs to near-black in places, so the wordmark's
-contrast is set by the scrim, not by the crop. Its scrim is shaped rather than flat
-— 72% through the band the type occupies (y 0.40–0.62) and 22% elsewhere, so the sky
-is plainly visible and the type still measures **8.7:1**. A flat 90% wash was tried
-first and erased the drawing, which defeated the point of having it.
-
-> **It used to reach new users only in a NEW BINARY, and that is now fixed.**
-> `hasSeenWelcome` persists and gates this screen to one showing per install, and a
-> fresh install runs the *embedded* bundle on its first launch — so whatever a
-> brand-new reader saw first was frozen at build time, and the flag was already set
-> by the time an OTA landed. Build 19 shipped a welcome that was rewritten the next
-> day: every new install played the OLD intro and then the NEW one on its second
-> launch.
->
-> `lib/updates/firstRun.ts` closes it. On a first run from the embedded bundle it
-> takes any waiting update and restarts into it BEFORE the first-run experience is
-> decided — bounded by `BUDGET_MS`, hidden behind the launch animation, and with a
-> loop guard for the rollback case. **It shipped in build 20**, so from that binary
-**The ring came back, and the tap stopped stating the obvious.** Two follow-up
-notes from the reader, both right:
-
-- *"I liked how that graphs looked before, I want more graphs like that look, but
-  redone in a way that is more visually pleasing."* A ranking answers "which is
-  biggest"; a ring answers "what is the shape of my reading", and those are
-  different questions. `components/stats/Donut.tsx` is the ring — the six BRANCH
-  hues, one light across the whole object, a groove behind it so an empty reader
-  still sees the shape, and the total in the hub. It shares its selection with
-  the bars under it, so the two are one chart rather than two views.
-- *"I dont like the obvious information ... like '5 more lessons and your at 20
-  lessons done' this is obvious and isnt informative."* Also right, and it was
-  the shape of a progress bar wearing words. `lib/utils/statsDiscovery.ts`
-  replaced it: tapping a branch or an era names a thinker from it the reader has
-  **never opened**, with their symbol, their dates and their idea in ten words;
-  tapping a thinker in the league gives one of their three "Did you know?" facts.
-  Every card ends in a door. `check:stats` asserts the complaint directly — no
-  card may ever contain "N more".
-
-**The bounce is feedback, not decoration, and that distinction is the design.**
-`bounceTo` squeezes to 0.82 and then springs past to about 1.07 — anticipation
-then overshoot, which is the whole reason a bounce reads as a thing *reacting*.
-It plays on the ring every visit that has news, and on rows **only where the
-reader's own number went up**: `grownKeys` recovers that from the previous
-fingerprint, which the tab already stores, so no new store key was needed. A
-grown row squeezes from its CURRENT length rather than from zero — reset it to
-zero first and the reader sees the bar being rebuilt, which reads as a reload.
-
-Measured in a browser rather than eyeballed: ring 0.82 → 1.07, the one grown row
-0.82 → 1.07, and all fifteen others 0 → 1 with no overshoot at all.
-
-> **The entrance was snapping to its end state, and nothing looked wrong.**
-> `markStatsSeen` writes the fingerprint, which re-renders, which changes the
-> focus callback's identity, which makes `useFocusEffect` run it AGAIN — and on
-> that pass the fingerprints match, so the old code called `setAnimate(false)`
-> while every spring was still travelling. Every child keys on `animate`, so all
-> of them jumped to the end. The instrument is what found it: the ring and all
-> seventeen bars sat at exactly 1.000 through a growth event that should have
-> bounced. The flag never needed clearing — children re-run on `playToken`, which
-> only moves when there is news.
-
-> on the welcome screen is updatable over the air like anything else. It had to be
-> in a binary once; it never has to be again.
-
----
-
 **The ring came back, and the tap stopped stating the obvious.** Two follow-up
 notes from the reader, both right:
 
@@ -1548,6 +1556,55 @@ wrong rather than colours:
 > the other session had swept `app/` while its own harness ran. Metro also wedged
 > and served nothing on a port that was still LISTENING. If a preview route stops
 > rendering for no reason, check that the file still exists before debugging the app.
+
+Two things measured rather than judged:
+
+- **The bar headroom is 30% and it is load-bearing.** Bars draw against
+  `max × 1.3`, so the LEADER — the row a reader taps first — still has track left
+  to draw its ghost in. Re-scaling on selection instead would move every bar at
+  once, which is the camera cut group L is about.
+- **`ACounter` needs an explicit width and `counterStyle` cannot give it one.**
+  It is a `TextInput`, and an unstyled `<input>` claims ~20 characters of
+  intrinsic width, which silently eats a flex row. It squeezed a label with
+  plenty of room into "EPISTEMOL…" — invisible on a device, obvious in a browser.
+
+> The lesson deck's quote card (`cinematicKit.tsx`) is the one surface not yet
+> converted — see §17; it is the highest-traffic file in the repo and was being
+> refactored across ninety scenes at the time. It is a drop-in when that settles.
+
+**Verified without Metro.** `tone.ts` is zero-import, so a contact sheet of every
+era's plate — held, kept, featured, pressed — renders in plain Node against a
+headless Chrome, reading the palette from `tone.plate()` and the size table out
+of the component rather than retyping either. That is how both defects above were
+found. Two CDP traps cost an hour: `Page.captureScreenshot` with
+`captureBeyondViewport` + `clip` **hangs** in `--headless=new`, and attaching to
+`/json/list[0]` rather than a tab made by `PUT /json/new` makes `Page.navigate` a
+silent no-op — use `scripts/peek.mjs`'s pattern.
+
+**The welcome end card** (`assets/images/welcome/sky.jpg`) is the one background
+that is a *drawing* rather than a photograph, and it follows the same rule for the
+same reason: the ink hatching runs to near-black in places, so the wordmark's
+contrast is set by the scrim, not by the crop. Its scrim is shaped rather than flat
+— 72% through the band the type occupies (y 0.40–0.62) and 22% elsewhere, so the sky
+is plainly visible and the type still measures **8.7:1**. A flat 90% wash was tried
+first and erased the drawing, which defeated the point of having it.
+
+> **It used to reach new users only in a NEW BINARY, and that is now fixed.**
+> `hasSeenWelcome` persists and gates this screen to one showing per install, and a
+> fresh install runs the *embedded* bundle on its first launch — so whatever a
+> brand-new reader saw first was frozen at build time, and the flag was already set
+> by the time an OTA landed. Build 19 shipped a welcome that was rewritten the next
+> day: every new install played the OLD intro and then the NEW one on its second
+> launch.
+>
+> `lib/updates/firstRun.ts` closes it. On a first run from the embedded bundle it
+> takes any waiting update and restarts into it BEFORE the first-run experience is
+> decided — bounded by `BUDGET_MS`, hidden behind the launch animation, and with a
+> loop guard for the rollback case. **It shipped in build 20**, so from that binary
+> on the welcome screen is updatable over the air like anything else. It had to be
+> in a binary once; it never has to be again.
+
+---
 
 ## 20. Forced Update Gate
 
@@ -1663,6 +1720,37 @@ browser at it; the first transform can take longer than a navigation timeout.
   `wrong(id)` helper. A grep therefore proves nothing here; only the rendered
   page does.
 
+  **A SECOND SESSION IS NOT COVERED BY THE LOCK, AND IT LOOKS LIKE A BUG IN THE
+  APP.** The lock stops two harnesses in one repo colliding. It does nothing about
+  a second Claude session driving its own Metro and its own Chrome against the
+  same working tree — and that session writes `app/previewframe.tsx` too, and
+  deletes it on the way out. Mid-run, a page that had been rendering lessons
+  started answering **"This screen doesn't exist"**, which reads exactly like a
+  broken route table and is really somebody else's cleanup. The escape is already
+  built: `MUST_ROUTE=previewmust` (and the same variable on the other harnesses)
+  gives a run its own file and its own URL. Use it whenever another session is
+  live — and note that three Metro instances on one machine take a page load from
+  ~13s to ~160s, so a sweep that used to take forty minutes will not finish.
+
+  **AND A SLOW MACHINE REPORTS ITSELF AS THIRTY BROKEN LESSONS.** `measure-must`
+  waited a fixed 110s for the stage on a lane's first lesson and 30s after that,
+  which is generous when a page loads in 13s and useless when it loads in 180 —
+  and what it prints when the wait runs out is `NEVER RENDERED A STAGE`, per
+  lesson, for all of them. Thirty of those in a column is indistinguishable from
+  thirty broken scenes, and the lessons it named had been watched playing in a
+  browser minutes earlier. The patience figures are `STAGE_TRIES_FIRST` and
+  `STAGE_TRIES` now, and `LANES` was already there. **Raise them before concluding
+  anything about the scenes** — and check a single page by hand first, because
+  that is the measurement that tells you which kind of failure you have.
+
+  It also puts a question against the rule directly below. `app/previewmust.tsx`
+  was created with Metro ALREADY UP and registered without a restart, so the route
+  context does hot-update at least in this version — which means the original
+  "doesn't exist" may have been this same deletion rather than an ordering
+  problem. Writing the route first is still free and still the advice; just do not
+  conclude from a missing screen that you started Metro in the wrong order until
+  you have checked the file is still on disk.
+
   **And it needs its preview route to exist BEFORE Metro starts.** Expo Router
   builds its route table at bundle time, so `app/previewframe.tsx` written after
   the dev server is up serves "This screen doesn't exist" — which renders no
@@ -1697,6 +1785,14 @@ browser at it; the first transform can take longer than a navigation timeout.
   The rule underneath all four: **when a lesson gains a new way to be answered, the
   harness gains one too, in the same commit.** Otherwise the next sweep quietly
   measures less and says nothing.
+
+  **That rule is now a shared file rather than four copies of a snippet.** Adding
+  `lever`, `plot`, `split` and `field` (§17) meant four more ways to answer arriving
+  at once, and four harnesses that each knew how to click and drag. They all import
+  `scripts/lib/answerctl.mjs` now: one `CONTROL_IDS` list, one `ANSWER_CONTROL`
+  expression that finds whichever control is on the beat by its `nativeID` and works
+  it with a pointer sequence. A fifth control is one line there, and every harness
+  gets it — which is the only version of this rule that survives being forgotten.
 
   **A fifth harness, and it is not about lessons.** `npm run sheet:pass` loads the
   three Scholar's Pass screens (§14) for real and reports whether React actually

@@ -76,7 +76,7 @@ const CROSS = BEATS.map((b) => (b.cross ?? 0));
 
 export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(4);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -109,8 +109,12 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: 
 
     return {
       fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      lit: lerp(PANELS[p] > 0 ? 1 : 0, PANELS[n] > 0 ? 1 : 0, tr) * (litFade ? grow : 1),
-      shut: lerp(PANELS[p] === 2 ? 1 : 0, PANELS[n] === 2 ? 1 : 0, tr),
+      // Carried (L5). Out of the codemod's reach because the endpoints are
+      // DERIVED from the track rather than being the track — same defect, same
+      // fix, and the multiplier goes inside so what is remembered is the value
+      // that reached the screen.
+      lit: carry(cv, 2, n, PANELS[p] > 0 ? 1 : 0, PANELS[n] > 0 ? 1 : 0, tr, litFade ? grow : 1),
+      shut: carry(cv, 3, n, PANELS[p] === 2 ? 1 : 0, PANELS[n] === 2 ? 1 : 0, tr),
       reach,
       t,
     };

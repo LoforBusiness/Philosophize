@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './metaphysicsScript';
 import {
   clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -116,16 +116,16 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics'));
 
 export default function MetaphysicsScene({ clock, bt, bi, qv }: SceneApi) {
   const heldFigS = useHeld();
+  const cv = useCarry(3);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const q = clamp01(qv.value);
 
     const figS = keepHeld(heldFigS, mixStance(carryFrom(heldFigS, n,hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
-    const erase = L(ERASE[p], ERASE[n]);
+    const erase = carry(cv, 0, n, ERASE[p], ERASE[n], tr);
 
     return {
       fig: pose(figS, FIG_X, GROUND, K_FIG, -1, 1),
@@ -133,10 +133,10 @@ export default function MetaphysicsScene({ clock, bt, bi, qv }: SceneApi) {
       // The stamp only lands once the sky is genuinely empty.
       voidStamp: clamp01((erase - 0.55) / 0.25),
       twinkle: t,
-      chainOn: L(CHAIN[p], CHAIN[n]),
+      chainOn: carry(cv, 1, n, CHAIN[p], CHAIN[n], tr),
       regress: QREG[n] === 1 ? ease01(q) : 0,
       intro: n === 0 ? ease01(bt.value / 0.55) : 1,
-      ruleOn: L(RULEON[p], RULEON[n]),
+      ruleOn: carry(cv, 2, n, RULEON[p], RULEON[n], tr),
       // The rule WRITES ITSELF on the beat that raises it: first line, then
       // second, then the arrow drops into the question. Every other beat these
       // sit at 1, so the card holds finished and fades out finished rather than

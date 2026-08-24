@@ -68,6 +68,23 @@ const lesson: Lesson = {
       xpValue: 5,
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'Two objects share every single property. Are they one thing or two?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Plainly two — and bundle theory struggles to say so', isCorrect: true },
+          { id: 'b', text: 'One, since there is nothing left to tell them apart', isCorrect: false },
+          { id: 'c', text: 'Two, and bundle theory explains it easily', isCorrect: false },
+          { id: 'd', text: 'The question is meaningless', isCorrect: false },
+        ],
+        explanation: 'Most people say two, and that is the bill bundle theory has to pay. If a thing just IS its properties, then two things with all the same properties are the same thing. Saying they are two means something beyond the properties is doing the distinguishing — which is exactly the bare substratum Locke could describe only as a something, he knew not what.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

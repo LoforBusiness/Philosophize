@@ -8,7 +8,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './ethicsScript';
 import {
   clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -187,18 +187,18 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics'));
 
 export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
   const heldHumanS = useHeld();
+  const cv = useCarry(3);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const cur = SHOTS[n], prv = SHOTS[p];
     const tr = ease01(bt.value / cur.tr);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const q = clamp01(qv.value);
 
     const humanS = keepHeld(heldHumanS, mixStance(carryFrom(heldHumanS, n,hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
-    const conOn = L(JUDGE[p], JUDGE[n]);
-    const critOn = L(CRITTER[p], CRITTER[n]);
+    const conOn = carry(cv, 0, n, JUDGE[p], JUDGE[n], tr);
+    const critOn = carry(cv, 1, n, CRITTER[p], CRITTER[n], tr);
 
     // On Q2 the animal ambles off — the point that only the human stops to judge.
     //
@@ -222,7 +222,7 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
     const askWas = was === 0 ? 1 : 0;
 
     return {
-      cam: { s: L(prv.s, cur.s), cx: L(prv.cx, cur.cx), cy: L(prv.cy, cur.cy) },
+      cam: { s: lerp(prv.s, cur.s, tr), cx: lerp(prv.cx, cur.cx, tr), cy: lerp(prv.cy, cur.cy, tr) },
       human: pose(humanS, HUMAN_X, GROUND, K_FIG, -1, 1),
       scaleOn: conOn,
       tip: Math.sin(t * 1.2) * 4 * conOn * (1 - (n === 6 ? q : 0)),  // settles level on a considered Q1
@@ -231,7 +231,7 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
       critGait: Q2[n] ? q : 0,
       ledOn: cnt > 0 ? (was > 0 ? 1 : write) : 0,
       r0: row(0), r1: row(1), r2: row(2),
-      plant: L(PLANT[p], PLANT[n]),
+      plant: carry(cv, 2, n, PLANT[p], PLANT[n], tr),
       grow: ease01(bt.value / 1.1),
       // the opening headline, assembling word by word
       askOn: askHere ? (askWas ? 1 : here) : askWas ? away : 0,

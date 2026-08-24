@@ -63,6 +63,23 @@ const lesson: Lesson = {
       emoji: '🔬',
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'An expert asserts a fact and gives you no argument for it. What are you actually relying on?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Their track record on that subject', isCorrect: true },
+          { id: 'b', text: 'The reasons they set out', isCorrect: false },
+          { id: 'c', text: 'Nothing — an assertion is worthless', isCorrect: false },
+          { id: 'd', text: 'The fact that nobody contradicted them', isCorrect: false },
+        ],
+        explanation: 'Their track record, because no reasons were offered for you to check. That is testimony, and accepting it is perfectly rational — it is worth what the source is worth. The ad hominem error is using an attack on the person against an ARGUMENT, which stands on its printed reasons no matter who said it.',
+      },
+    },
+    {
       type: 'summary',
       title: 'Authority, Weighed Correctly',
       keyPoints: [

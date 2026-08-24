@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle, type Stance } from
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics3Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -109,6 +109,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics3'));
 
 export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldD = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
   const showPick = !!cur.interact;
@@ -119,16 +120,15 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick }: Scene
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const grow = ease01(bt.value / 0.55);
 
     const d = keepHeld(heldD, mixStance(carryFrom(heldD, n, emoteHold(D_CODE[p], t)), emoteLive(D_CODE[n], t, bt.value), tr));
-    const lens = L(LENS[p], LENS[n]);
+    const lens = carry(cv, 0, n, LENS[p], LENS[n], tr);
     return {
       fig: pose(d, FIG_X, GROUND, K, 1, 1),
-      tx: L(TX[p], TX[n]),
-      pull: L(PULL[p], PULL[n]),
+      tx: carry(cv, 1, n, TX[p], TX[n], tr),
+      pull: carry(cv, 2, n, PULL[p], PULL[n], tr),
       wheel: (t * 200) % 360,
       // The verdict board and the plates cross-fade, so neither ever pops.
       board: showPick ? 1 - grow : leaving ? grow : 1,

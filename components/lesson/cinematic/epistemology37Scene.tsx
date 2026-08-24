@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology37Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -68,11 +68,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology37'));
 
 export default function Epistemology37Scene({ clock, bt, bi, dragPos }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(
@@ -83,20 +83,20 @@ export default function Epistemology37Scene({ clock, bt, bi, dragPos }: SceneApi
 
     // ONE VALUE, TWO SOURCES. On the drag beat the reader's bar quiets the doubts;
     // everywhere else the script's own track does. The cracks are the same cracks.
-    const quiet = LIVE_D[n] === 1 ? clamp01(dragPos.value) : L(QUIET[p], QUIET[n]);
+    const quiet = LIVE_D[n] === 1 ? clamp01(dragPos.value) : carry(cv, 0, n, QUIET[p], QUIET[n], tr);
 
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      hullOn: L(HULL[p], HULL[n]),
+      hullOn: carry(cv, 2, n, HULL[p], HULL[n], tr),
       // A HIGHER BAR MEANS MORE DOUBT SURVIVES. The rail runs from "a feeling will
       // do" to "survey every plank", so sliding RIGHT should leave the cracks in —
       // which is why this is 1 - quiet on the drag beat and quiet everywhere else,
       // where the script means "how many he has talked away".
       cracks: LIVE_D[n] === 1 ? quiet : 1 - quiet,
-      sailedOn: L(SAILED[p], SAILED[n]),
-      verdictOn: L(VERDICT[p], VERDICT[n]),
-      safeOn: L(SAFE[p], SAFE[n]),
+      sailedOn: carry(cv, 3, n, SAILED[p], SAILED[n], tr),
+      verdictOn: carry(cv, 4, n, VERDICT[p], VERDICT[n], tr),
+      safeOn: carry(cv, 5, n, SAFE[p], SAFE[n], tr),
     };
   });
 

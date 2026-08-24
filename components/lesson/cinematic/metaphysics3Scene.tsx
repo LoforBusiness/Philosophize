@@ -9,7 +9,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics3Script';
 import {
-  K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -80,6 +80,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics3'));
 
 export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const answered = picked !== null;
   const asking = !!cur.interact;
@@ -88,15 +89,14 @@ export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick }: 
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, 500, K_FIG, 1, 1),
-      shadow: L(SHADOW[p], SHADOW[n]),
-      form: L(FORMB[p], FORMB[n]),
-      apple: L(APPLEB[p], APPLEB[n]),
+      shadow: carry(cv, 0, n, SHADOW[p], SHADOW[n], tr),
+      form: carry(cv, 1, n, FORMB[p], FORMB[n], tr),
+      apple: carry(cv, 2, n, APPLEB[p], APPLEB[n], tr),
       t,
     };
   });

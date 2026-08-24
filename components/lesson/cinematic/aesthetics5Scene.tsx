@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics5Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -109,6 +109,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics5'));
 
 export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(4);
   const cur = BEATS[i];
   const showPick = !!cur.interact;
   const showWord = (cur.leaf ?? 0) > 0 && !cur.interact;
@@ -118,18 +119,17 @@ export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick }: S
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
-    const leaf = L(LEAF[p], LEAF[n]);
+    const leaf = carry(cv, 0, n, LEAF[p], LEAF[n], tr);
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      bird: L(BIRD[p], BIRD[n]),
-      ego: L(EGO[p], EGO[n]),
+      bird: carry(cv, 1, n, BIRD[p], BIRD[n], tr),
+      ego: carry(cv, 2, n, EGO[p], EGO[n], tr),
       leaf,
       // The mind's label is struck out AFTER the drawing has arrived, never with it.
       strike: clamp01((leaf - 0.3) / 0.6),
-      self: L(SELF[p], SELF[n]),
+      self: carry(cv, 3, n, SELF[p], SELF[n], tr),
       hover: Math.sin(t * 2.4) * 7,
       flap: Math.sin(t * 9) * 16,
       sway: Math.sin(t * 1.25) * 4,

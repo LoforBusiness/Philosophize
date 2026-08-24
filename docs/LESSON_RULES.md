@@ -2317,6 +2317,41 @@ If you add a track that is not `lerp`/`carry` over a `BEATS.map` array — a spr
 value read from a gesture, anything with its own clock — say so in the scene header and
 add the measurement in the same commit. A budget nobody executes is not a budget.
 
+### L8 · A rule that can be renamed out of existence is not a rule
+
+L5 shipped, reported **148 scenes carry every track they interpolate**, and was wrong
+about 38 of them. The detector matched `lerp(NAME[p], NAME[n], …)`; every one of those
+38 scenes had written
+
+```ts
+const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
+…
+boxesOn: L(BOXES[p], BOXES[n]),          // ← identical arithmetic, invisible
+```
+
+— the same call with two arguments instead of three and a one-letter name. Neither
+`check-smooth` nor `carry-tracks.mjs` could see it, and **169 tracks across 38 scenes
+were blending straight off `T[p]`** the whole time the file said they were not.
+
+Three things are worth taking from it, in order of how much they cost:
+
+- **It was the CURRENT house idiom.** The newest lesson in all six branches used the
+  alias, so anyone doing the right thing — copy the best recent exemplar — inherited
+  the exact defect the exemplar was supposed to have fixed. A defect that spreads by
+  imitation outruns one that spreads by accident.
+- **The detector must read the SHAPE, not the spelling.** No scene may declare a local
+  lerp alias at all now, and a track lerped out of an array-of-arrays
+  (`lerp(LOCKS[p][0], …)`) or off endpoints derived from a track
+  (`lerp(P[p] > 0 ? 1 : 0, …)`) is caught too. Five of those survived the codemod and
+  were carried by hand.
+- **Comments are not code.** The hardened detector's first run reported a scene as
+  defective because the note explaining why a track had been carried by hand *quoted
+  the call it was explaining*. Anything that greps for a shape has to strip comments
+  first, or it will eventually find itself.
+
+Counter-test a detector before trusting it: put the defect back, watch it fail, take
+it out again. A green checker and an absent one are indistinguishable from the outside.
+
 ---
 
 ## Group M — the narrator is a character, and the character is passive-aggressive
@@ -2683,6 +2718,241 @@ blindness that was its own.
 
 ---
 
+## Group Q — no lesson may read as the one before it
+
+Every other group in this book asks whether ONE lesson is right. This one is about
+the only thing a reader who works through a branch actually experiences, which is
+lesson 17 arriving straight after lesson 16.
+
+**F43 has asked for this since the card era** — *"don't let two consecutive lessons
+feel identical"* — and for its whole life it was a sentence with nothing behind it.
+It became a rule when it was asked for in the plainest possible terms:
+
+> *"no two lessons by each other can be the same … I always want lessons to present
+> information/animations/and everything else in lessons to be done in a unique way,
+> not just copying over and over again."*
+
+`npm run check:echo` measures three things, and each threshold below is the CURRENT
+MEASURED WORST rather than a number chosen to feel strict.
+
+### Q1 · Two neighbours may not be the same machine
+
+The channels a script declares ARE the scene's moving parts. `[p, x, rule, fact,
+concl, pick]` is a board being written on; `[p, hotel, shift, dbl, live]` is a
+building emptying. Adjacent lessons in reading order may share no more than
+**0.50** of their channel names by Jaccard overlap, which is where the corpus
+already sits (epistemology-31 → 32). Ordinary shared machinery — `p`, `x`, `live`,
+`pick` — costs about 0.2 on its own, so the budget is really "two distinctive
+channels in common, never three".
+
+The two pre-player lessons declare no beat interface at all and are exempt by
+having nothing to measure. Q1 asserts there are only ever two of them, so that
+cannot quietly become a way of opting out.
+
+### Q2 · Two neighbours may not ask the same question
+
+The content words of both graded prompts, compared the same way. Ceiling **0.20**.
+This is the axis the reader meets with their thumb rather than their eye: two
+lessons running "tap the claim that actually follows" back to back are one
+interaction wearing different nouns, however different the art above them is.
+
+### Q3 · Every lesson says what its picture is, and no two say the same
+
+H64 already requires the author to be able to finish *"the picture is X, and over
+the lesson X does Y"* **before** writing any beats. `// Theme:` is that sentence,
+in the file, on one line, in caps — so it can be compared with its neighbours
+instead of living in somebody's head.
+
+```ts
+// Cinematic logic-arguments-16, "After It Is Not Because Of It"
+// Theme: SIX MORNINGS IN A ROW, AND THE ONE WHERE NOBODY CROWED.
+```
+
+Three things are checked: the count only ever goes UP (`THEME_FLOOR`); no two
+lessons anywhere declare the same picture; and neighbouring pictures share at most
+**two** nouns. Two is a coincidence — "two", "line" and "one" turn up everywhere.
+Three is the same drawing described twice.
+
+### What Q deliberately does NOT check
+
+The house shape. 7–11 beats, exactly two graded questions, one quote, one summary
+and it is last (H52) are supposed to be identical everywhere, and
+`validate-cinematic` enforces them. **Sameness of STRUCTURE is what makes 168
+lessons one product; sameness of PICTURE is what makes them a chore.** A checker
+that confused the two would push authors to break the wrong thing.
+
+### The practical consequence when writing one
+
+Before the beats, read the lesson BEFORE yours and the lesson AFTER it in the same
+branch — `npm run check:echo` prints neither, so this is a real step. Write your
+`// Theme:` line first. If it shares its central noun with either neighbour, you
+have not got a new lesson yet, you have got a variation.
+
+---
+
+## Group R — when the answer is a quantity, not a pick
+
+`drag` (§17) opened this door and then stood in it alone for twelve lessons. The
+reader asked for the rest of the room in as many words:
+
+> *"I want to try out for these 3 new lessons that the questions below the stickman
+> have not just boxes that you tab, but I want a similar way the learning app
+> Brilliant does their questions. With interactive questions, leavers being moved,
+> line graphs that you slide … lines that you slide a bar from one side to the
+> other or the middle."*
+
+There are now **five** analogue controls beside the two-card deck, and they are not
+five skins on one widget. Each answers a differently SHAPED question, and picking
+the wrong one is the mistake this group exists to stop.
+
+### R1 · Pick the control from the shape of the claim, not from variety
+
+| The claim is… | Control | It reads |
+|---|---|---|
+| one quantity on a scale | `drag` | `DragScale` — a knob on a rail |
+| one of a few NAMED settings on a ladder | `lever` | `LeverPick` — an arm with detents |
+| what happens to a thing AS another changes | `plot` | `ShapePlot` — a curve you draw |
+| how one thing DIVIDES between two | `split` | `SplitBar` — a seam in one bar |
+| two INDEPENDENT yes/no questions | `field` | `FieldPick` — a token on a pad |
+| anything else, including most of them | `cards` | two `ChoiceCards` |
+
+Read the middle column as a set of tests, not a menu:
+
+- **`lever`, not `cards`,** when the answers are ORDERED — could not have · could,
+  if you had wanted to · could, full stop. Cards throw the order away, and the
+  order was half the content.
+- **`plot`, not `drag`,** when the reader believes something about a SHAPE. "How
+  much aura is left" is a number; "how the aura goes as the copies multiply" is a
+  curve, and a rail cannot hold one. Four cards describing four curves makes the
+  reader choose between four sentences instead of committing to a shape.
+- **`split`, not `drag`,** when giving one side more has to visibly take it off the
+  other. A rail with a label at each end says "more this way" and says nothing
+  about what you gave up.
+- **`field`, not two questions,** when the whole lesson is that the two questions
+  come apart. Presentism, the growing block and eternalism are three of four
+  corners; non-domination is the corner where "left alone" and "nobody holds that
+  power" disagree. Ask those as a pick and you have quietly answered the
+  interesting half.
+
+**`cards` is still the right answer most of the time — 155 lessons to 44.** An
+analogue control on a claim that genuinely has two sides is a worse question with
+more moving parts.
+
+### R2 · The readout is lesson copy, not scoring furniture
+
+Every one of the five carries a live word above it that changes as the reader
+moves: `reads` on a `ScaleZone`, `LeverStop`, `PlotShape`, `SplitZone` or
+`FieldQuad`. That string is under **group J** like any other sentence the reader
+sees — short, plain, one thought.
+
+It is what makes the control teach rather than merely slide. The reader hunts for
+the description that matches what they already believe, and finds out on the way
+that what they believed has a shape, a boundary or a price.
+
+So write the wrong readouts as carefully as the right one. "the crank: all in, all
+kept" and "the dogmatist: nothing gets a hearing" are the two failure modes of
+open-mindedness, named, and a reader who never lands on them has been taught less.
+
+### R3 · Grade by REGION, never by hitting a number
+
+None of the five compares a float to a target.
+
+- `drag`, `lever`, `split` — the value falls in a **zone** or on a **detent**.
+- `plot` — the drawn curve is scored to the **nearest profile** by RMS, so a reader
+  who draws a cliff gets "a cliff" whether it falls at 0.9 or at 0.7.
+- `field` — the token is in one of **four quadrants**.
+
+A tolerance dressed up as precision is a worse question, not a stricter one. The
+thing being tested is whether they think the value collapses, not whether they can
+place a thumb.
+
+### R4 · A wrong region has to be a position somebody holds
+
+H66 applies to every zone, stop, quadrant and profile, and it bites harder here
+because the reader can VISIT them. A quadrant labelled "nonsense" is a quarter of
+the pad that punishes exploring. Every wrong region should be somewhere a real
+argument lives — the happy slave, the shrinking tree, the crank, the sharp
+boundary nobody can locate — and the explanation should say what is wrong with it.
+
+### R5 · The control is part of the DECK, never a sibling of the stage
+
+All five render inside `styles.lower` in `CinematicPlayer`, with the choice deck.
+This is L6 and it is not negotiable: a control that is a sibling of the stage takes
+its height out of the stage's flex share, and the stage does not merely move when
+that happens — it **rescales**, because `fit` is computed from the measured box.
+The whole picture steps about 12% on the single frame a question mounts.
+
+`npm run check:smooth` asserts, by reading `CinematicPlayer.tsx`, that every one of
+the six control tags appears after `styles.lower`, and that the prompt hint names
+every one of them. Add a seventh control and add it to both lists in the same
+commit.
+
+### R6 · A new way to answer means a new way for the harness to answer
+
+This is the rule the browser harnesses have now learned four times (§21), and each
+time the failure looked identical: a sweep that measures less and says nothing.
+
+- CDP mouse events do not drive a React Native Web `Pressable`; only a synthetic
+  `click` does.
+- Deck choices are bare `Pressable`s, so `[role="button"]` alone finds half the
+  buttons in this app.
+- A `drag`, `lever`, `plot`, `split` or `field` beat has **no button anywhere**, so
+  a harness that only knows how to click measures 6 beats of 9 and reports them as
+  measured. A short sweep is indistinguishable from a clean one unless something
+  counts.
+- `react-native-gesture-handler` listens on POINTER events, and needs several
+  `pointermove`s rather than one jump — `onUpdate` integrates `translationX`, and a
+  single leap does not clear the pan recogniser activation check.
+
+So: every control carries a `nativeID` (`drag-strip`, `lever-arc`, `shape-plot`,
+`split-bar`, `field-pad`), and **all four harnesses share one snippet**,
+`scripts/lib/answerctl.mjs`, which knows how to work each of them. Adding a control
+means adding its id there, in the same commit as the control.
+
+### R7 · If the scene follows the control, it follows it only on its own beat
+
+The knob, seam, arm, curve mean and token live on the PLAYER as `dragPos` (and
+`dragPos2` for the pad's second axis) and reach the scene through `SceneApi`. A
+scene that reads them makes the reader move the picture rather than a widget beside
+one — the tower comes apart, the painting cleans, the crowd grows while every life
+in it shrinks. One gesture, on the UI thread, with no React render in between.
+
+The condition is the beat: the scene reads `dragPos` **only on its own graded beat**
+and the script's own track everywhere else. One value, two sources, and the picture
+never disagrees with whichever is in charge. Derive that flag from the beat rather
+than declaring a channel for it —
+
+```ts
+const PULL = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+```
+
+— so it cannot fall out of step with the control it is about, and it costs
+`check:echo` nothing.
+
+**Hand over THROUGH `carry`, not around it.** The obvious spelling is wrong:
+
+```ts
+pub: pulling ? dragPos.value : carry(cv, 2, n, PUB[p], PUB[n], tr),   // pops
+pub: carry(cv, 2, n, PUB[p], pulling ? dragPos.value : PUB[n], tr),   // hands over
+```
+
+The first swaps the value on the single frame the beat changes, from wherever the
+previous beat left the track to wherever the control happens to start — which is
+exactly the discontinuity L1 and L5 exist to stop, on a track with no limb attached
+for `check:smooth` to measure. The second eases from the remembered value into the
+live one over the transition and then tracks it exactly, and it keeps the carry slot
+written, so leaving the beat is smooth too.
+
+### R8 · Two graded beats, and they may not be the same control
+
+H52 still says exactly two graded questions per lesson. Group Q says neighbouring
+lessons may not ask the same question. Between them the working rule is simple:
+**a lesson's two questions use two different controls, and a lesson does not use
+the same control as either neighbour.** A branch that runs lever · lever · lever is
+back to boxes you tap, wearing a nicer hat.
+
+---
+
 ## Part 2 — Authoring checklist
 
 **Shape** — before writing a word, lay the beats out and count them (H52, H53).
@@ -2700,11 +2970,23 @@ blindness that was its own.
       lesson X does Y" (H64). If it won't fit in a sentence, the scene isn't found yet.
 - [ ] One question in the deck, one answered on the stage (H65); the distractors are
       real rival positions, not filler (H66).
+- [ ] **The control matches the shape of the claim** (R1): a scale is `drag`, an
+      ordered set of named settings is `lever`, a curve is `plot`, a division of one
+      thing is `split`, two independent yes/no questions are `field`, and everything
+      else is `cards` — which is still most of them. The two graded beats do not use
+      the same control, and neither does either neighbour (R8).
+- [ ] **Every `reads` string is lesson copy** (R2) and every wrong region is a
+      position somebody actually holds (R4). If a quadrant is filler, the pad is
+      punishing the reader for exploring it.
 - [ ] 7–11 beats; 8 unless there is a reason.
 - [ ] Exactly two graded questions (`mc` and/or `interact`); a third interaction is an
       ungraded `tap`, so the lesson still pays 60 like its siblings (H53).
 - [ ] Exactly one saveable quote, on a rest beat — never the hook, a question, or last
       (H52).
+- [ ] **That quote's `id` means ONE quotation.** Reuse the data file's id only when you
+      are quoting the same sentence; a different quotation takes a new suffix.
+      `savedQuotes` dedups on the id alone, so a second quotation under a borrowed id
+      can never be collected and renders as already held. `npm run check:quotes`.
 - [ ] Exactly one summary, and it is the final beat (H52).
 
 **Story and script**

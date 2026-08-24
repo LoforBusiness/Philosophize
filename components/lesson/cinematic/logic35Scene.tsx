@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic35Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -74,11 +74,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic35'));
 
 export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const q = clamp01(qv.value);
 
@@ -89,13 +89,13 @@ export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick }: S
     ));
 
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
       // Climbing on their own beat, held everywhere after it.
-      grow: CLIMB[n] === 1 ? ease01((bt.value - 0.2) / 1.5) : L(RISE[p], RISE[n]),
-      arrowOn: L(ARROW[p], ARROW[n]),
-      picksOn: L(PICKS[p], PICKS[n]),
-      underOn: L(UNDER[p], UNDER[n]),
+      grow: CLIMB[n] === 1 ? ease01((bt.value - 0.2) / 1.5) : carry(cv, 1, n, RISE[p], RISE[n], tr),
+      arrowOn: carry(cv, 2, n, ARROW[p], ARROW[n], tr),
+      picksOn: carry(cv, 3, n, PICKS[p], PICKS[n], tr),
+      underOn: carry(cv, 4, n, UNDER[p], UNDER[n], tr),
       cut: CUT[n] === 1 ? ease01((bt.value - 0.25) / 0.5) : 0,
       // The right candidate fills as the answer lands.
       lit: LIVE[n] === 1 ? ease01(q) : 0,

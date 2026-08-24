@@ -64,6 +64,23 @@ const lesson: Lesson = {
       emoji: '🧩',
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'A photograph can be printed many times from one negative. Which kind of work is it?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Arguably both, and that is exactly the trouble', isCorrect: true },
+          { id: 'b', text: 'Like the novel — the negative is its text', isCorrect: false },
+          { id: 'c', text: 'Like the painting — only the object counts', isCorrect: false },
+          { id: 'd', text: 'Neither; photographs are not artworks', isCorrect: false },
+        ],
+        explanation: 'Both, uncomfortably. The negative functions like a text, so any correct print carries the image — which is the mark of a work that survives losing every copy. Yet the market treats an early print signed by the photographer as THE object, which is how we treat paintings. Goodman’s distinction is real and its edges are genuinely contested.',
+      },
+    },
+    {
       type: 'summary',
       title: 'The Being of Artworks',
       keyPoints: [

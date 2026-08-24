@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics37Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -68,11 +68,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics37'));
 
 export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(
@@ -85,13 +85,13 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick }: Scen
     // obligation that faded in would be a picture of something gradual.
     const arriving = CORD[n] === 1 && CORD[p] === 0;
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      postsOn: L(POSTS[p], POSTS[n]),
-      cord: arriving ? ease01((bt.value - 0.25) / 0.7) : L(CORD[p], CORD[n]),
-      lean: L(LEAN[p], LEAN[n]),
-      fall: L(CUT[p], CUT[n]),
-      unseenOn: L(UNSEEN[p], UNSEEN[n]),
+      postsOn: carry(cv, 1, n, POSTS[p], POSTS[n], tr),
+      cord: arriving ? ease01((bt.value - 0.25) / 0.7) : carry(cv, 2, n, CORD[p], CORD[n], tr),
+      lean: carry(cv, 3, n, LEAN[p], LEAN[n], tr),
+      fall: carry(cv, 4, n, CUT[p], CUT[n], tr),
+      unseenOn: carry(cv, 5, n, UNSEEN[p], UNSEEN[n], tr),
     };
   });
 

@@ -31,6 +31,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { claimRoute } from './lib/previewroute.mjs';
+import { ANSWER_CONTROL } from './lib/answerctl.mjs';
 
 const CDP = +(process.env.CDP_PORT || 9382);
 const WEB = +(process.env.WEB_PORT || 8847);
@@ -175,20 +176,12 @@ const ANSWER = `(() => {
     const btn = ring.closest('[role="button"]') || ring.parentElement;
     if (btn) { btn.dispatchEvent(new MouseEvent('click', {bubbles:true})); return 'target'; }
   }
-  // THE DRAG IS TRIED BEFORE THE GENERIC BUTTON, and the order is the whole fix.
-  // A drag beat still has role=button elements on it that are not its answer, so
-  // the generic branch fired first, clicked something inert, reported success and
-  // left the lesson stuck on that beat forever.
-  const strip = document.getElementById('drag-strip');
-  if (strip) {
-    const r = strip.getBoundingClientRect();
-    const y = r.top + r.height / 2, x0 = r.left + 8, x1 = r.left + r.width * 0.6;
-    const opts = (x) => ({ bubbles: true, pointerId: 1, pointerType: 'mouse', isPrimary: true, clientX: x, clientY: y, buttons: 1 });
-    strip.dispatchEvent(new PointerEvent('pointerdown', opts(x0)));
-    for (let k = 1; k <= 6; k++) strip.dispatchEvent(new PointerEvent('pointermove', opts(x0 + (x1 - x0) * (k / 6))));
-    strip.dispatchEvent(new PointerEvent('pointerup', { ...opts(x1), buttons: 0 }));
-    return 'drag';
-  }
+  // THE ANALOGUE CONTROLS ARE TRIED BEFORE THE GENERIC BUTTON, and the order is
+  // the whole fix. A control beat still has role=button elements on it that are
+  // not its answer, so the generic branch fired first, clicked something inert,
+  // reported success and left the lesson stuck on that beat forever.
+  const drove = ${ANSWER_CONTROL};
+  if (drove) return drove;
   const b = [...document.querySelectorAll('[role="button"],[tabindex]')].find((e) => {
     const r = e.getBoundingClientRect();
     return r.width > 60 && r.height > 30 && r.top > innerHeight * 0.3;

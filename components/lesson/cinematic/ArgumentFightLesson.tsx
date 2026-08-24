@@ -511,7 +511,6 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     const cur = SHOTS[n];
     const prv = SHOTS[n > 0 ? n - 1 : 0];
     const tr = ease01(bt.value / cur.tr);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
 
     const t = clock.value;
 
@@ -566,26 +565,26 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
     // IN THE FIGHT the pair are placed from the choreography's own range track — they
     // close to trade and open to circle — rather than from two fixed marks in the
     // shot. Everywhere else (the act-4 rematch) the shot still owns their positions.
-    const rx = fightGap > 0 ? 200 - fightGap / 2 + redS.adv : L(prv.rx, cur.rx) + redS.adv;
-    const bx = fightGap > 0 ? 200 + fightGap / 2 - blueS.adv : L(prv.bx, cur.bx) - blueS.adv;
-    const nx = L(prv.nx, cur.nx);
-    const rOn = L(prv.rOn, cur.rOn), bOn = L(prv.bOn, cur.bOn);
+    const rx = fightGap > 0 ? 200 - fightGap / 2 + redS.adv : lerp(prv.rx, cur.rx, tr) + redS.adv;
+    const bx = fightGap > 0 ? 200 + fightGap / 2 - blueS.adv : lerp(prv.bx, cur.bx, tr) - blueS.adv;
+    const nx = lerp(prv.nx, cur.nx, tr);
+    const rOn = lerp(prv.rOn, cur.rOn, tr), bOn = lerp(prv.bOn, cur.bOn, tr);
     // He is SOLID before he is visible. Fading him up across the whole entrance
     // made him materialise out of the paper about two-thirds of the way in — a
     // ghost condensing beside the fight rather than someone walking on from the
     // wing. He starts at stage x −50, which is screen −185, so ramping the opacity
     // over the first fifth of the move finishes it while he is still off-stage and
     // the reader only ever sees a solid figure walk in.
-    const nOn = cur.nMode === 3 ? ease01(clamp01(tr / 0.2)) : L(prv.nOn, cur.nOn);
+    const nOn = cur.nMode === 3 ? ease01(clamp01(tr / 0.2)) : lerp(prv.nOn, cur.nOn, tr);
 
     // Interpolate the SCALE and derive the centre from it, so the ground pin
     // holds exactly at every instant of the move (see THE BAND). Lerping cy
     // independently made the floor sag a few units in the middle of every tap.
-    const cs = L(prv.s, cur.s);
-    const ccx = L(prv.cx, cur.cx);
+    const cs = lerp(prv.s, cur.s, tr);
+    const ccx = lerp(prv.cx, cur.cx, tr);
     return {
       cam: { s: cs, cx: ccx, cy: GROUND - (GROUND_Y - STAGE_H / 2) / cs },
-      ring: L(prv.ring, cur.ring),
+      ring: lerp(prv.ring, cur.ring, tr),
       // Where each speaker's HEAD actually is on screen, so a speech bubble can sit
       // over it. The figures ride the camera and the bubbles do not, so this is the
       // one number that keeps the two attached. Pointing at `rx` — the spot between

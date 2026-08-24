@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics37Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -66,11 +66,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics37'));
 
 export default function Aesthetics37Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(
@@ -83,13 +83,13 @@ export default function Aesthetics37Scene({ clock, bt, bi, i, picked, onPick, dr
     // beat clock — and held after, so it never un-plays itself between beats.
     const arriving = PLAYED[n] > 0 && PLAYED[p] === 0;
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      stavesOn: L(STAVES[p], STAVES[n]),
-      scoreOn: L(SCORE[p], SCORE[n]),
-      played: arriving ? ease01((bt.value - 0.2) / 1.6) : L(PLAYED[p], PLAYED[n]),
+      stavesOn: carry(cv, 1, n, STAVES[p], STAVES[n], tr),
+      scoreOn: carry(cv, 2, n, SCORE[p], SCORE[n], tr),
+      played: arriving ? ease01((bt.value - 0.2) / 1.6) : carry(cv, 3, n, PLAYED[p], PLAYED[n], tr),
       // Reader's thumb on the drag beat, the script's own track everywhere else.
-      lift: LIVE_D[n] === 1 ? clamp01(dragPos.value) : L(LIFTED[p], LIFTED[n]),
+      lift: LIVE_D[n] === 1 ? clamp01(dragPos.value) : carry(cv, 4, n, LIFTED[p], LIFTED[n], tr),
     };
   });
 

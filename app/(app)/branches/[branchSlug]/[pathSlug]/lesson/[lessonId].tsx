@@ -83,6 +83,42 @@ import { Political36Lesson } from '@/components/lesson/cinematic/political36Scen
 import { Metaphysics37Lesson } from '@/components/lesson/cinematic/metaphysics37Scene';
 import { Epistemology37Lesson } from '@/components/lesson/cinematic/epistemology37Scene';
 import { Logic37Lesson } from '@/components/lesson/cinematic/logic37Scene';
+import { Logic16Lesson } from '@/components/lesson/cinematic/logic16Scene';
+import { Logic17Lesson } from '@/components/lesson/cinematic/logic17Scene';
+import { Logic18Lesson } from '@/components/lesson/cinematic/logic18Scene';
+import { Ethics17Lesson } from '@/components/lesson/cinematic/ethics17Scene';
+import { Ethics19Lesson } from '@/components/lesson/cinematic/ethics19Scene';
+import { Ethics20Lesson } from '@/components/lesson/cinematic/ethics20Scene';
+import { Epistemology18Lesson } from '@/components/lesson/cinematic/epistemology18Scene';
+import { Epistemology19Lesson } from '@/components/lesson/cinematic/epistemology19Scene';
+import { Epistemology20Lesson } from '@/components/lesson/cinematic/epistemology20Scene';
+import { Metaphysics18Lesson } from '@/components/lesson/cinematic/metaphysics18Scene';
+import { Metaphysics19Lesson } from '@/components/lesson/cinematic/metaphysics19Scene';
+import { Metaphysics20Lesson } from '@/components/lesson/cinematic/metaphysics20Scene';
+import { Aesthetics18Lesson } from '@/components/lesson/cinematic/aesthetics18Scene';
+import { Aesthetics20Lesson } from '@/components/lesson/cinematic/aesthetics20Scene';
+import { Aesthetics21Lesson } from '@/components/lesson/cinematic/aesthetics21Scene';
+import { Political19Lesson } from '@/components/lesson/cinematic/political19Scene';
+import { Political20Lesson } from '@/components/lesson/cinematic/political20Scene';
+import { Political21Lesson } from '@/components/lesson/cinematic/political21Scene';
+import { Logic19Lesson } from '@/components/lesson/cinematic/logic19Scene';
+import { Logic20Lesson } from '@/components/lesson/cinematic/logic20Scene';
+import { Logic21Lesson } from '@/components/lesson/cinematic/logic21Scene';
+import { Ethics21Lesson } from '@/components/lesson/cinematic/ethics21Scene';
+import { Ethics22Lesson } from '@/components/lesson/cinematic/ethics22Scene';
+import { Ethics24Lesson } from '@/components/lesson/cinematic/ethics24Scene';
+import { Epistemology22Lesson } from '@/components/lesson/cinematic/epistemology22Scene';
+import { Epistemology23Lesson } from '@/components/lesson/cinematic/epistemology23Scene';
+import { Epistemology24Lesson } from '@/components/lesson/cinematic/epistemology24Scene';
+import { Metaphysics21Lesson } from '@/components/lesson/cinematic/metaphysics21Scene';
+import { Metaphysics22Lesson } from '@/components/lesson/cinematic/metaphysics22Scene';
+import { Metaphysics23Lesson } from '@/components/lesson/cinematic/metaphysics23Scene';
+import { Aesthetics22Lesson } from '@/components/lesson/cinematic/aesthetics22Scene';
+import { Aesthetics23Lesson } from '@/components/lesson/cinematic/aesthetics23Scene';
+import { Aesthetics24Lesson } from '@/components/lesson/cinematic/aesthetics24Scene';
+import { Political22Lesson } from '@/components/lesson/cinematic/political22Scene';
+import { Political23Lesson } from '@/components/lesson/cinematic/political23Scene';
+import { Political24Lesson } from '@/components/lesson/cinematic/political24Scene';
 import { Ethics37Lesson } from '@/components/lesson/cinematic/ethics37Scene';
 import { Aesthetics37Lesson } from '@/components/lesson/cinematic/aesthetics37Scene';
 import { Political37Lesson } from '@/components/lesson/cinematic/political37Scene';
@@ -252,6 +288,42 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   'metaphysics-being-37': Metaphysics37Lesson,
   'epistemology-knowledge-37': Epistemology37Lesson,
   'logic-arguments-37': Logic37Lesson,
+  'logic-arguments-16': Logic16Lesson,
+  'logic-arguments-17': Logic17Lesson,
+  'logic-arguments-18': Logic18Lesson,
+  'ethics-ethics-17': Ethics17Lesson,
+  'ethics-ethics-19': Ethics19Lesson,
+  'ethics-ethics-20': Ethics20Lesson,
+  'epistemology-knowledge-18': Epistemology18Lesson,
+  'epistemology-knowledge-19': Epistemology19Lesson,
+  'epistemology-knowledge-20': Epistemology20Lesson,
+  'metaphysics-being-18': Metaphysics18Lesson,
+  'metaphysics-being-19': Metaphysics19Lesson,
+  'metaphysics-being-20': Metaphysics20Lesson,
+  'aesthetics-aesthetics-18': Aesthetics18Lesson,
+  'aesthetics-aesthetics-20': Aesthetics20Lesson,
+  'aesthetics-aesthetics-21': Aesthetics21Lesson,
+  'political-political-19': Political19Lesson,
+  'political-political-20': Political20Lesson,
+  'political-political-21': Political21Lesson,
+  'logic-arguments-19': Logic19Lesson,
+  'logic-arguments-20': Logic20Lesson,
+  'logic-arguments-21': Logic21Lesson,
+  'ethics-ethics-21': Ethics21Lesson,
+  'ethics-ethics-22': Ethics22Lesson,
+  'ethics-ethics-24': Ethics24Lesson,
+  'epistemology-knowledge-22': Epistemology22Lesson,
+  'epistemology-knowledge-23': Epistemology23Lesson,
+  'epistemology-knowledge-24': Epistemology24Lesson,
+  'metaphysics-being-21': Metaphysics21Lesson,
+  'metaphysics-being-22': Metaphysics22Lesson,
+  'metaphysics-being-23': Metaphysics23Lesson,
+  'aesthetics-aesthetics-22': Aesthetics22Lesson,
+  'aesthetics-aesthetics-23': Aesthetics23Lesson,
+  'aesthetics-aesthetics-24': Aesthetics24Lesson,
+  'political-political-22': Political22Lesson,
+  'political-political-23': Political23Lesson,
+  'political-political-24': Political24Lesson,
   'ethics-ethics-37': Ethics37Lesson,
   'aesthetics-aesthetics-37': Aesthetics37Lesson,
   'political-political-37': Political37Lesson,

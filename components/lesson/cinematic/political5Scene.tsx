@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political5Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -103,6 +103,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political5'));
 
 export default function Political5Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const showPick = !!cur.interact;
   const answered = picked !== null;
@@ -111,14 +112,13 @@ export default function Political5Scene({ clock, bt, bi, i, picked, onPick }: Sc
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      city: L(CITY[p], CITY[n]),
-      veil: L(VEIL[p], VEIL[n]),
-      link: L(LINK[p], LINK[n]),
+      city: carry(cv, 0, n, CITY[p], CITY[n], tr),
+      veil: carry(cv, 1, n, VEIL[p], VEIL[n], tr),
+      link: carry(cv, 2, n, LINK[p], LINK[n], tr),
     };
   });
 

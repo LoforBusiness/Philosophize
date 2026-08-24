@@ -81,6 +81,23 @@ const lesson: Lesson = {
       emoji: '🔓',
     },
     {
+      // (E37c) The scene asks two graded questions; the data file has to ask the
+      // same two. This mirrors the deck question in components/lesson/cinematic.
+      type: 'question',
+      prompt: 'Two genuinely qualified experts on the same subject flatly disagree. What follows?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Look at where the weight of qualified opinion sits, and why', isCorrect: true },
+          { id: 'b', text: 'Nobody knows anything, so guess', isCorrect: false },
+          { id: 'c', text: 'Believe the more famous of the two', isCorrect: false },
+          { id: 'd', text: 'Believe whichever one you heard first', isCorrect: false },
+        ],
+        explanation: 'Weigh how many are on each side and what their reasons are. Disagreement at the frontier of a field is normal and says nothing about its settled middle. Treating one dissenter as proof that nothing is known is exactly how a genuine debate gets used to manufacture doubt — and it is the move that makes people give up on expertise altogether.',
+      },
+    },
+    {
       type: 'summary',
       title: 'The Skill of Trusting Well',
       keyPoints: [

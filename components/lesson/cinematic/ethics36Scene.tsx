@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics36Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -71,11 +71,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics36'));
 
 export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
   const heldFig = useHeld();
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
-    const L = (a: number, b: number) => { 'worklet'; return lerp(a, b, tr); };
     const t = clock.value;
     const q = clamp01(qv.value);
 
@@ -87,14 +87,14 @@ export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick }: 
 
     // The stroke is drawn ON the graded beat as the answer lands, and held after —
     // a cancellation that un-cancelled itself between beats would be nonsense.
-    const scripted = L(STRUCK[p], STRUCK[n]);
+    const scripted = carry(cv, 0, n, STRUCK[p], STRUCK[n], tr);
     return {
-      fig: pose(figS, L(X[p], X[n]), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       t,
-      bookOn: L(BOOK[p], BOOK[n]),
+      bookOn: carry(cv, 2, n, BOOK[p], BOOK[n], tr),
       strike: LIVE[n] === 1 && STRUCK[n] === 0 ? ease01(q) : scripted,
-      excuseOn: L(EXCUSE[p], EXCUSE[n]),
-      giftOn: L(GIFT[p], GIFT[n]),
+      excuseOn: carry(cv, 3, n, EXCUSE[p], EXCUSE[n], tr),
+      giftOn: carry(cv, 4, n, GIFT[p], GIFT[n], tr),
     };
   });
 
