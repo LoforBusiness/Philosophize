@@ -1807,6 +1807,36 @@ browser at it; the first transform can take longer than a navigation timeout.
   Its route source is `scripts/lib/previewpass.txt` rather than a template literal
   in the script, so JSX braces need no escaping. Ports 8853/9393.
 
+### And one class of defect a browser will always call clean
+
+`measureInWindow` is the load-bearing call in every "has the reader actually
+scrolled to this yet" guard, and **it answers for a view that is not attached to
+a window by handing back the window ORIGIN at the view's real size** — Android's
+`getLocationInWindow` short-circuits to (0, 0) when `mAttachInfo` is null. So the
+thing furthest from the screen produces the most convincingly *on screen* reading
+there is, and three ordinary situations produce it: the first layout pass, a tab
+`react-native-screens` has detached, and `removeClippedSubviews`, which Profile
+turns on for fling performance and which detaches every direct child of the
+scroll content outside the viewport.
+
+The rank climb's intro was gated on exactly that, latched at mount 900 points
+below the fold, spent its one animation on nobody and marked itself seen. **The
+guard did not fail to fire; it fired for the wrong reason and reported success.**
+
+The part worth carrying forward is not the null check. It is that **a browser
+measures a detached element correctly**, so no harness in §21 could ever have
+reproduced this, and adding one would not help. The arithmetic therefore lives in
+`lib/utils/inViewMath.ts` — zero imports, the same rule as `rig.ts` and `tone.ts`
+— and `check:ui` feeds it the exact reading that broke it. When the platform's
+answer is the thing that is wrong, the check has to be written against the
+answer, not against the screen.
+
+> A second thing was wrong in the same place and is worth separating: **the guard
+> latched for the lifetime of the screen, and a tab screen is mounted for the
+> whole session.** So "seen" quietly meant "seen once, ever" — one look disqualified
+> every look after it. `useInView` re-arms on the way out now. Any latch on a
+> mounted-forever screen wants that question asked of it.
+
 **On device**, `adb` lives in the session scratchpad. Applying an OTA takes two
 launches: force-stop → launch (downloads) → force-stop → launch (applies).
 Crashes: `adb logcat -d -b crash`.

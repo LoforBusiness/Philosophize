@@ -4,7 +4,7 @@ import Svg, {
   Path, Circle, Line as SvgLine, Defs, LinearGradient, Stop, G,
 } from 'react-native-svg';
 import Animated, {
-  useSharedValue, useAnimatedProps, useAnimatedStyle, withTiming, withDelay, runOnJS, Easing,
+  useSharedValue, useAnimatedProps, useAnimatedStyle, withTiming, withDelay, withSequence, runOnJS, Easing,
 } from 'react-native-reanimated';
 import { rankProgress } from '@/data/ranks';
 import ACounter, { counterStyle } from './ACounter';
@@ -40,12 +40,27 @@ const APath = Animated.createAnimatedComponent(Path);
  * of the band that has been earned — the line grows toward the far dot along
  * both axes at once, which is what makes progress read as travel.
  *
- * ── IT ONLY ANIMATES WHEN THERE IS SOMETHING NEW ────────────────────────────
+ * ── IT DRAWS ITSELF EVERY LOOK, AND TELLS THE LONGER STORY WHEN THERE IS ONE ─
  *
- * On arriving it draws itself to where it stood at `seenXP` — the total when the
- * reader last looked — holds for a beat, and then grows on to where it stands
- * now. Nothing earned since last time means it is simply there, finished and
- * still. An animation that replays on every visit stops meaning "you moved".
+ * Two different animations were confused into one here, and separating them is
+ * the fix for a reader who said, twice, that they could never catch it moving.
+ *
+ *   THE ENTRANCE — the line drawing itself in — belongs to every look. It is what
+ *   a chart does when it arrives, and withholding it does not preserve anything;
+ *   it just means the reader scrolls down to a finished picture and never learns
+ *   there was a chart being drawn.
+ *
+ *   THE RECAP — drawing to where it stood at `seenXP`, holding, and then growing
+ *   on — belongs only to a look where something has actually been earned since
+ *   last time. THAT is the animation that means "you moved", and replaying it
+ *   when nothing has changed is what would make it stop meaning anything.
+ *
+ * The old rule ("nothing new, so no animation at all") also ran into a second
+ * thing: `played` is a ref, and a tab screen is mounted for the entire session.
+ * So even a reader who DID earn something got the recap at most once, ever, and
+ * only if they happened to be looking at the right nine hundredth point of the
+ * page at the right moment. Both halves now reset whenever `active` goes false —
+ * see the effect below, and `rearm` in lib/utils/useInView.
  *
  * ── INK, NOT COLOUR (§19) ───────────────────────────────────────────────────
  *
@@ -157,46 +172,68 @@ export default function RankClimbChart({
   }, [events, totalXP, floor, ceil, width, height, seenXP]);
 
   const head = geo.pts[geo.pts.length - 1];
-  const fresh = totalXP > seenXP && geo.from < 1;
+  // IS THERE A RECAP WORTH PLAYING? Two ends of the range disqualify it, and the
+  // low end was found by watching the thing rather than by reading it: a reader
+  // whose last look predates this whole band has `from` at 0, so the recap drew
+  // NOTHING, then held on nothing, and the chart sat empty for a second and a
+  // half before the first mark appeared. A pause is anticipation only when there
+  // is something on screen to be paused on.
+  const RECAP_FLOOR = 0.06;
+  const fresh = totalXP > seenXP && geo.from >= RECAP_FLOOR && geo.from < 1;
 
   // ── the intro ──────────────────────────────────────────────────────────────
   //
-  // `drawFrom` IS a plain number, and that is the point: it is the initial value
-  // of the shared value below, so anything on the render path that needs "where
-  // the line starts" can read this instead of reaching into `draw.value`.
-  //
-  // The counter's `defaultValue` used to read `draw.value` directly, which fires
-  // Reanimated's strict-mode "reading from `value` during component render"
-  // warning on every screen this chart appears on — Home, Profile and Insights.
-  // The render was harmless (a snapshot used once, for one frame, before
-  // `countProps` takes the text over), but the warning is not: it is identical to
-  // the one a real stale-read produces, so three copies of it per screen is
-  // exactly the noise that hides the next genuine one.
-  const drawFrom = fresh ? geo.from : 1;
+  // It starts at nothing and draws in, so `drawFrom` is 0 — but it is still
+  // written down as a plain number rather than read back off the shared value,
+  // because the counter's `defaultValue` needs it during render. Reading
+  // `draw.value` there fires Reanimated's strict-mode "reading from `value`
+  // during component render" warning on every screen this chart appears on. The
+  // read was harmless (a snapshot used for one frame, before `countProps` takes
+  // the text over); the warning is not, because it is identical to the one a real
+  // stale read produces, and three copies per screen is the noise that hides the
+  // next genuine one.
+  const drawFrom = 0;
   const draw = useSharedValue(drawFrom);
-  const mark = useSharedValue(fresh ? 0 : 1);
+  const mark = useSharedValue(0);
   const played = useRef(false);
   const gained = Math.max(0, Math.min(totalXP, ceil) - floor);
 
   useEffect(() => {
-    if (!active || played.current) return;
+    // NOT ON SCREEN: put it back to nothing and let the next look have its own.
+    // `played` is a ref on a component that a tab screen keeps mounted all
+    // session, so without this line the chart animates once and is finished
+    // forever — which is exactly how it was reported.
+    if (!active) { played.current = false; draw.value = 0; mark.value = 0; return; }
+    if (played.current) return;
     played.current = true;
-    if (!fresh) {
-      draw.value = 1;
-      mark.value = withDelay(200, withTiming(1, { duration: 300 }));
-      onSeen?.();
-      return;
-    }
-    // A beat and a half to take in where you were, then the line grows.
-    const HOLD = 1500, GROW = 1600;
+    // LEAD is the short pause between the chart arriving and the line starting.
+    // Without it the draw is already under way by the time the reader's eye has
+    // landed on the thing, which is the difference between watching something
+    // happen and finding it half done.
+    const LEAD = 280;
     // `onSeen` rides the line's OWN completion rather than a timer that finished
     // at roughly the same moment.
     const finish = onSeen;
-    draw.value = withDelay(HOLD, withTiming(
-      1, { duration: GROW, easing: Easing.inOut(Easing.cubic) },
-      (ok) => { 'worklet'; if (ok && finish) runOnJS(finish)(); },
+    const land = (ok?: boolean) => { 'worklet'; if (ok && finish) runOnJS(finish)(); };
+
+    if (!fresh) {
+      const DRAW = 1150;
+      draw.value = withDelay(LEAD, withTiming(
+        1, { duration: DRAW, easing: Easing.inOut(Easing.cubic) }, land,
+      ));
+      mark.value = withDelay(LEAD + DRAW - 260, withTiming(1, { duration: 380 }));
+      return;
+    }
+    // Something has been earned since the last look, so the line is drawn in two
+    // parts: where you stood, a beat to take it in, then the ground you gained.
+    const RECAP = 620, HOLD = 620, GROW = 1300;
+    draw.value = withDelay(LEAD, withSequence(
+      withTiming(geo.from, { duration: RECAP, easing: Easing.out(Easing.cubic) }),
+      withDelay(HOLD, withTiming(
+        1, { duration: GROW, easing: Easing.inOut(Easing.cubic) }, land,
+      )),
     ));
-    mark.value = withDelay(HOLD + GROW - 250, withTiming(1, { duration: 380 }));
+    mark.value = withDelay(LEAD + RECAP + HOLD + GROW - 260, withTiming(1, { duration: 380 }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 

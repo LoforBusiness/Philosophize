@@ -1156,7 +1156,15 @@ export const useUserDataStore = create<UserDataState>()(
         });
       },
 
-      markChartSeen: () => set({ chartSeenXP: get().totalXP }),
+      // Same rule as `markStatsSeen` below, and it needs it now for the same
+      // reason: the rank chart draws itself on EVERY look rather than only on a
+      // look with news, so this is called every time the reader scrolls past it.
+      // Writing the identical number back still costs an AsyncStorage write and a
+      // cloud sync tick.
+      markChartSeen: () => {
+        const { chartSeenXP, totalXP } = get();
+        if (chartSeenXP !== totalXP) set({ chartSeenXP: totalXP });
+      },
 
       // Only writes when it actually differs, so re-focusing the tab does not
       // push an identical snapshot into AsyncStorage and the cloud on every visit.

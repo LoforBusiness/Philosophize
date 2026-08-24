@@ -125,11 +125,29 @@ export default function ProfileScreen() {
   // Is the rank chart itself on screen? See `useInView`, and the comment on the
   // chart below for why the focus flag alone was not enough.
   const climb = useInView();
+  const climbCheck = climb.check;
+  const climbRearm = climb.rearm;
   useFocusEffect(
     useCallback(() => {
       setFocused(true);
-      return () => setFocused(false);
-    }, []),
+      // COMING BACK IS A FRESH LOOK, AND IT HAS TO BE MEASURED LIKE ONE.
+      //
+      // react-navigation keeps this screen mounted and keeps the scroll position
+      // where it was, so on the way back the chart is either already on screen or
+      // nine hundred points away — and which of the two is not knowable without
+      // measuring. Hence the re-arm on the way out, and a short BURST of checks on
+      // the way in rather than a single one: react-native-screens detaches a
+      // blurred tab from the window, and a detached view cannot be measured at all
+      // (see `trustworthy`), so the first check after focus can legitimately
+      // arrive before there is anything to read. Three tries inside two-thirds of
+      // a second, and then it costs nothing for the rest of the visit.
+      const tries = [60, 240, 620].map((ms) => setTimeout(climbCheck, ms));
+      return () => {
+        tries.forEach(clearTimeout);
+        setFocused(false);
+        climbRearm();
+      };
+    }, [climbCheck, climbRearm]),
   );
 
   const lessonsDone = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
@@ -318,9 +336,16 @@ export default function ProfileScreen() {
         contentContainerStyle={{ paddingBottom: SPACE[5] }}
         showsVerticalScrollIndicator={false}
         // Only until the rank chart has been seen: `useInView` latches and then
-        // stops measuring, so this costs nothing for the rest of the session.
+        // stops measuring, so this costs nothing for the rest of the visit.
         onScroll={climb.check}
         scrollEventThrottle={64}
+        // The two ends of a gesture as well as the middle of it. `onScroll` is
+        // throttled and `removeClippedSubviews` below means the chart may only
+        // become measurable at all part-way through the flick that brings it in —
+        // so the cheapest insurance against a look that goes unnoticed is to ask
+        // again at the moments the reader has definitely stopped moving.
+        onScrollEndDrag={climb.check}
+        onMomentumScrollEnd={climb.check}
         // Fifty-one badges plus the ranks strip make this the longest fixed page in
         // the app. It is not worth virtualising — the content is a handful of
         // distinct sections rather than one repeating cell — but detaching the parts
@@ -616,7 +641,18 @@ export default function ProfileScreen() {
                 Ranks sheet sits near the top and animates perfectly, which is
                 exactly how the bug was reported: "I see it there, not here."
 
-                So it waits for the chart to actually be ON SCREEN. */}
+                So it waits for the chart to actually be ON SCREEN.
+
+                AND THE FIRST VERSION OF THAT DID NOT WORK, which is why the same
+                report came back a second time in the same words. Two reasons,
+                both written up where they belong: the guard believed a
+                measurement taken on a view that was not attached to the window
+                (`trustworthy`, lib/utils/inViewMath), so it latched at mount and
+                spent the animation anyway; and it latched for the lifetime of a
+                screen that is never unmounted, so one look used it up for the
+                whole session (`rearm`, lib/utils/useInView). What `active` means
+                now is "on screen, on this visit" — it goes false again on the way
+                out, and the chart draws itself for whoever comes back. */}
             <View ref={climb.ref} onLayout={climb.check} style={styles.rankChartWrap}>
               <RankClimbChart
                 rankIndex={rankIndex}

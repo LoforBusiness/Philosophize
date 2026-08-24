@@ -786,5 +786,63 @@ for (const [name, hue] of ERA_FACES) {
     `closest pair ${worstPair} at deltaE ${worst.toFixed(1)}, floor 24`);
 }
 
+// ── 9 · the animation nobody could catch: is it on screen, and will it replay? ─
+//
+// The rank climb on Profile is gated on `useInView`, and the reader reported
+// twice that they never saw it move. Both causes were invisible to every kind of
+// verification this repo has:
+//
+//   · a browser measures a DETACHED element correctly, so the reading that broke
+//     it — an unattached view answering (0, 0) at full size, which reads as
+//     perfectly in view — cannot be reproduced in a harness at all;
+//   · and "it played once and never again" is a fact about a screen's LIFETIME,
+//     which no single page load can observe.
+//
+// So the arithmetic lives in a zero-import module and is exercised here, and the
+// two behaviours around it are read out of the source.
+{
+  const V = await import(emit('lib/utils/inViewMath.ts', 'inviewmath.mjs'));
+  const VH = 844, H = 188;
+
+  // THE DEFECT ITSELF. An unattached view keeps its real size and answers at the
+  // window origin. Believing it is what spent the animation at mount.
+  ok(!V.trustworthy(0, 0, H), 'a view measured at the window origin is not believed',
+    `(0, 0, ${H}) — an unattached or clipped-away view`);
+  ok(V.seenEnough(0, H, VH, 0.65),
+    'and that reading WOULD have counted as seen, which is why it had to be caught',
+    'the guard is the only thing standing between it and a spent intro');
+
+  // …while the ordinary readings still behave.
+  ok(V.trustworthy(32, 400, H), 'a real reading is believed', 'x 32, y 400');
+  ok(V.trustworthy(32, 0, H), 'and so is one that legitimately sits at the top', 'x 32, y 0');
+  ok(V.seenEnough(400, H, VH, 0.65), 'an element in the middle of the window is seen');
+  ok(!V.seenEnough(900, H, VH, 0.65), 'one below the fold is not', 'y 900 of 844');
+  ok(!V.seenEnough(VH - 40, H, VH, 0.65), 'nor one with only its top edge showing',
+    `${Math.round(V.visibleHeight(VH - 40, H, VH))} of ${H} visible`);
+  // An element taller than the window can never satisfy a fraction of itself.
+  ok(V.seenEnough(0, 2000, VH, 0.65), 'an element taller than the window can still be seen',
+    'the requirement caps at most of a screenful');
+
+  const hook = fs.readFileSync(path.join(REPO, 'lib/utils/useInView.ts'), 'utf8');
+  ok(/trustworthy\(x, y, h\)/.test(hook) && hook.indexOf('trustworthy(x, y, h)') < hook.indexOf('seenEnough('),
+    'the hook asks whether the measurement is believable BEFORE asking what it says');
+  ok(/rearm\b/.test(hook) && /done\.current = false/.test(hook),
+    'and a look can be re-armed, so one is not the last one');
+
+  const prof = fs.readFileSync(path.join(REPO, 'app/(app)/profile/index.tsx'), 'utf8');
+  ok(/climbRearm\(\)/.test(prof), 'Profile re-arms the latch when the reader leaves');
+  ok(/onMomentumScrollEnd=\{climb\.check\}/.test(prof) && /onScrollEndDrag=\{climb\.check\}/.test(prof),
+    'and asks again at both ends of a gesture, not only mid-flick');
+
+  const climb = fs.readFileSync(path.join(REPO, 'components/shared/RankClimbChart.tsx'), 'utf8');
+  // The entrance belongs to every look; the recap belongs to a look with news.
+  ok(/if \(!active\) \{ played\.current = false;/.test(climb),
+    'the chart forgets it has played when it goes off screen',
+    '`played` is a ref on a component a tab keeps mounted all session');
+  ok(/const drawFrom = 0;/.test(climb), 'and it always starts from nothing and draws in');
+  ok(/const RECAP = /.test(climb) && /seenXP/.test(climb),
+    'while the two-part recap still needs something earned since the last look');
+}
+
 console.log(bad === 0 ? '\nui system: all clear.' : `\n${bad} ui check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);
