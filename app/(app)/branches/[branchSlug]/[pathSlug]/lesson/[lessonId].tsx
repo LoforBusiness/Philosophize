@@ -201,6 +201,7 @@ import { useUIStore } from '@/stores/uiStore';
 import DailyLimit from '@/components/paywall/DailyLimit';
 import LessonLocked from '@/components/paywall/LessonLocked';
 import { FREE_DAILY_LESSON_LIMIT } from '@/constants/subscription';
+import { openedLesson, closedLesson } from '@/lib/analytics/lessonClock';
 
 const Page = '#FAFAF7';
 
@@ -615,6 +616,11 @@ function StartedRunner({
       format,
       total_cards: lesson.cards.length,
     });
+    // AND START THE CLOCK. The reward screen is a global overlay and cannot see
+    // any of these four facts; the cleanup is what turns a missing completion
+    // into a reportable one — see lib/analytics/lessonClock.ts.
+    openedLesson({ lesson_id: lesson.id, branch_slug: branchSlug, unit_id: unitId, format });
+    return closedLesson;
     // Once per lesson, not once per re-render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson.id]);

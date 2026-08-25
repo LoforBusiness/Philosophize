@@ -67,6 +67,23 @@ export function identifyUser(distinctId: string, properties?: Record<string, any
   posthog?.identify(distinctId, properties);
 }
 
+/**
+ * WHAT A READER IS, as opposed to what they did.
+ *
+ * Every "broken down by" on the dashboard hangs off one of these, and the app set
+ * none of them: `identify()` went out with a Supabase id and a `signup_method`,
+ * so the comparison that decides whether the ads cost more engagement than they
+ * earn — free against Scholar's Pass — could not be drawn at all.
+ *
+ * `$set`, not `$set_once`: a tier changes, and the chart wants the current one.
+ * The scrubber in `before_send` runs over this bag too (that is what the `$set`
+ * entries in `stripPII`'s list are for), so a personal field cannot ride out here
+ * either.
+ */
+export function setPersonProperties(properties: Record<string, any>) {
+  posthog?.capture('$set', { $set: properties });
+}
+
 export function resetUser() {
   posthog?.reset();
 }

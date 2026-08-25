@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
+import { track } from '@/lib/posthog';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { MotiView } from 'moti';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -55,6 +56,23 @@ export default function LessonLocked({
 }) {
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
   const openPaywall = useUIStore((s) => s.openPaywall);
+
+  // WHY it is locked, which is the whole event. "Pay and this opens" and "finish
+  // the unit first" look identical on screen and are opposite facts: one is a
+  // conversion moment and the other is a reader who has simply run ahead of
+  // themselves. `gatedByPro` is the only half this component is told — the finer
+  // split (a finished lesson being re-opened, versus a unit jumped to) is decided
+  // by `lessonAccessibility` up in the route, and would have to be threaded down
+  // as a prop to be reported here.
+  useEffect(() => {
+    track('lesson_locked_viewed', {
+      reason: gatedByPro ? 'pro' : 'unreached',
+      branch_slug: branch.slug,
+      lesson_id: lesson.id,
+      gated_by_pro: gatedByPro,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const hue = BRANCH[branch.slug as BranchKey] ?? C.ink;
 

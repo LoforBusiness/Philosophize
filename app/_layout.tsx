@@ -36,19 +36,22 @@ import { useFonts } from 'expo-font';
 import { Stack, router, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef, useState } from 'react';
-import { View, ActivityIndicator, AppState } from 'react-native';
+import { View, ActivityIndicator, AppState, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PostHogProvider } from 'posthog-react-native';
 import { supabase } from '@/lib/supabase/client';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { posthog, setAnalyticsConsent, track } from '@/lib/posthog';
+import { posthog, setAnalyticsConsent, setPersonProperties, track } from '@/lib/posthog';
 import { useCloudSync } from '@/lib/supabase/useCloudSync';
 import { useReminders } from '@/lib/notifications/useReminders';
 import { consumeReloadedFlag, useFirstRunUpdate } from '@/lib/updates/firstRun';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { ads } from '@/lib/ads';
+import * as Application from 'expo-application';
+import { effectiveStreak, daysMissed } from '@/lib/utils/streak';
+import { restDaysHeld } from '@/constants/streak';
 import { prepareFeedback } from '@/lib/feedback';
 import { configureGoogleSignIn } from '@/lib/auth/social';
 import PhilosopherSheet from '@/components/shared/PhilosopherSheet';
@@ -245,9 +248,50 @@ export default function RootLayout() {
     }
     if (!openSent.current) {
       openSent.current = true;
-      track('app_opened');
+      // THE STREAK RIDES THE OPEN RATHER THAN BEING ITS OWN EVENT.
+      //
+      // "A streak broke" is the one thing in this app that nobody DOES — the
+      // reader's contribution to it is not coming back — so there is no moment to
+      // fire it at except the next time they appear. Which makes it a property of
+      // appearing, not an event: `app_opened where streak_alive is false and
+      // streak > 0` is the broken-streak cohort, and it needs no new stored flag
+      // to keep it from firing twice.
+      const st = useUserDataStore.getState();
+      const held = restDaysHeld(st.restDaysEarned, st.restDaysUsed);
+      track('app_opened', {
+        streak: st.streak,
+        days_missed: daysMissed(st.lastLessonDate),
+        streak_alive: effectiveStreak(st.streak, st.lastLessonDate, held) > 0,
+      });
     }
+
+    // WHO they are, so every chart can be broken down by it. Sent here rather
+    // than at identify(), because the tier is not known at sign-in and this is
+    // the first moment consent, hydration and the subscription are all settled.
+    setPersonProperties({
+      subscription_tier: useSubscriptionStore.getState().isPro ? 'scholars_pass' : 'free',
+      platform: Platform.OS,
+      app_build: Application.nativeBuildVersion ?? 'unknown',
+    });
   }, [hasHydrated, usageAnalytics, installReported, markInstallReported]);
+
+  // HOW LONG THEY STAYED.
+  //
+  // `app_opened` alone cannot answer it: PostHog's session length is stitched
+  // from event timestamps, so a reader who opens the app, reads one lesson and
+  // leaves looks identical to one who opened it and put the phone down. The pair
+  // of events is the only thing that closes a session honestly, and the seconds
+  // are counted here rather than derived because a backgrounded app stops sending
+  // anything at all.
+  const wokeAt = useRef(Date.now());
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (next) => {
+      if (next === 'active') { wokeAt.current = Date.now(); return; }
+      if (next !== 'background') return;
+      track('app_backgrounded', { seconds: Math.round((Date.now() - wokeAt.current) / 1000) });
+    });
+    return () => sub.remove();
+  }, []);
 
   // Local-first cloud sync: pull/merge/push progress while signed in.
   useCloudSync();

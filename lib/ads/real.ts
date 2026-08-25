@@ -8,6 +8,7 @@ import mobileAds, {
 } from 'react-native-google-mobile-ads';
 import type { AdsProvider } from './types';
 import { interstitialUnitId } from '@/constants/ads';
+import { track } from '@/lib/posthog';
 
 // Real AdMob-backed provider. Only ever loaded in a native build that has the
 // compiled module (dev client / TestFlight / store) — never on web or in Expo
@@ -99,8 +100,16 @@ export const realAds: AdsProvider = {
     if (!ad || !loaded) {
       // Nothing ready — make sure one is queued for next time, then proceed.
       if (canRequestAds && !ad) preload();
+      // FILL RATE, FROM THE APP'S SIDE. AdMob's own console reports what it
+      // served; this reports what the app ASKED for and did not get, which is
+      // the half that decides whether the free tier is actually being monetised
+      // or merely being interrupted. There is no `ad_clicked` and no
+      // `ad_reward_earned` here because there is no rewarded placement and the
+      // SDK does not hand a click back to the app at all.
+      track('ad_failed', { placement: 'after_lesson', reason: canRequestAds ? 'not_loaded' : 'no_consent' });
       return;
     }
+    track('ad_shown', { placement: 'after_lesson' });
     await new Promise<void>((resolve) => {
       let done = false;
       let offClosed: () => void = () => {};

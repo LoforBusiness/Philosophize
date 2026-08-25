@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
+import { track } from '@/lib/posthog';
 import { View, Text, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { MotiView } from 'moti';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -74,6 +75,19 @@ export default function DailyLimit({
   const restDaysEarned = useUserDataStore((s) => s.restDaysEarned);
   const restDaysUsed = useUserDataStore((s) => s.restDaysUsed);
   const openPaywall = useUIStore((s) => s.openPaywall);
+
+  // THE LOUDEST PRESSURE SIGNAL THE APP HAS, and nothing was listening to it.
+  // A reader who hits this is out of lessons for the day and standing in front
+  // of the offer; how often that happens, and on which branch, is the difference
+  // between a limit that converts and one that simply sends people away.
+  useEffect(() => {
+    track('daily_limit_reached', {
+      branch_slug: branch.slug,
+      lesson_id: lesson.id,
+      limit: FREE_DAILY_LESSON_LIMIT,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const rank = awardedRank(rankIndex, totalXP);
   const streak = effectiveStreak(

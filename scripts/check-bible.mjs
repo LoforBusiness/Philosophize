@@ -152,7 +152,13 @@ const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'e
   'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
   'seventeen', 'eighteen', 'nineteen', 'twenty', 'twenty-one', 'twenty-two',
   'twenty-three', 'twenty-four', 'twenty-five', 'twenty-six', 'twenty-seven',
-  'twenty-eight', 'twenty-nine', 'thirty', 'thirty-one', 'thirty-two'];
+  'twenty-eight', 'twenty-nine', 'thirty', 'thirty-one', 'thirty-two',
+  // Extended again, and the note above is the reason: the list ran out at
+  // thirty-two while the suite was already at thirty-four, so the assertion
+  // failed with `undefined` on the right-hand side — the shape of a checker
+  // breaking rather than a claim being wrong. Headroom is cheaper than that.
+  'thirty-three', 'thirty-four', 'thirty-five', 'thirty-six', 'thirty-seven',
+  'thirty-eight', 'thirty-nine', 'forty'];
 if (!WORDS[validators.length]) {
   console.log(`  FAIL  WORDS has no entry for ${validators.length} — extend it in this file`);
 }

@@ -622,7 +622,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **thirty-one** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **thirty-two** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -630,7 +630,7 @@ followed:
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
 `check-camera` · `check-tour` · `check-streak` · `check-answers` · `check-quotes` · `check-mentions` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
-`check-ui` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-smooth` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
+`check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-smooth` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
 figures and 6 hand-built ones, `check-moves` 6 head-clearance defects. A budget
 line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 222 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
@@ -674,8 +674,16 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
   reader's own account — their rank pin, six mastery bars, and the wait to finish
   the library drawn in real days. Every claim on them is derived from the gate
   that enforces it and re-checked by `check:pass` (§14).
-- **Infra:** Supabase auth + cloud sync; PostHog; EAS Build + EAS Update;
-  forced-update gate (§20).
+- **Infra:** Supabase auth + cloud sync; EAS Build + EAS Update; forced-update
+  gate (§20). **PostHog, and its events are a declared set** —
+  `lib/analytics/taxonomy.ts` holds all 29 with their properties and `npm run
+  check:events` fails the build if the app sends one that is not declared, or
+  declares one nothing sends, or declares a property the PII scrubber deletes in
+  flight. That last case is the dangerous one: the event still arrives, the
+  breakdown built on it is empty forever, and an empty chart reads as an answer.
+  `npm run sheet:events` prints the build sheet. Autocapture is OFF on both
+  channels — `$screen` is sent by hand because PostHog does not understand Expo
+  Router, and turning navigation autocapture on would double-count every screen.
 - **Identity:** hand-drawn black-and-white "paper-and-ink" editorial aesthetic,
   light theme only — with photographic backgrounds behind branch cards, branch
   mastheads, the launch screen and Quick Start (§19).

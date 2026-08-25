@@ -150,9 +150,20 @@ export default function LessonRunner({ lesson }: Props) {
       if (!recordedRef.current.has(cardIndex)) {
         recordedRef.current.add(cardIndex);
         recordAnswer({ ...result, cardIndex });
+        // `control` is HOW the question was answered, and it is the property
+        // that makes this event worth having across a corpus being converted
+        // from one format to another: a deck's multiple-choice and a scene's
+        // drag-scale are different questions, not the same question twice.
+        // The cards runner has three, all of them picks.
+        const card = lesson.cards[cardIndex];
         track('question_answered', {
           lesson_id: lesson.id,
-          card_type: lesson.cards[cardIndex]?.type,
+          branch_slug: found?.branch.slug ?? null,
+          format: 'cards',
+          card_type: card?.type,
+          control: card?.type === 'question'
+            ? (card as { interaction?: { type?: string } }).interaction?.type ?? 'unknown'
+            : card?.type === 'dilemma' ? 'dilemma' : 'unknown',
           correct: result.correct,
         });
       }

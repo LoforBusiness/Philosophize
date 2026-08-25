@@ -19,6 +19,7 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { ads } from '@/lib/ads';
 import { FREE_DAILY_LESSON_LIMIT } from '@/constants/subscription';
+import { bankedLesson } from '@/lib/analytics/lessonClock';
 import {
   XP_PER_LESSON_COMPLETION, XP_PER_CORRECT_ANSWER, XP_PER_PERFECT_LESSON,
 } from '@/constants/xp';
@@ -262,8 +263,14 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     const yesterday = dateStr(new Date(Date.now() - 86_400_000));
     bumpDailyLessons(today); // count this completion toward the free daily allowance
     const dayInfo = registerDailyActivity(today, yesterday, { isPro });
+    // The two facts this screen cannot derive: how long it took, and which
+    // format it was. Both are held by the route — see lib/analytics/lessonClock.
+    const clock = bankedLesson(lessonId);
     track('lesson_completed', {
       branch_slug: branchSlug,
+      lesson_id: lessonId,
+      format: clock.format,
+      seconds: clock.seconds,
       xp,
       correct,
       total,

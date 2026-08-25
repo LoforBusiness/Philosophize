@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Modal, View, Text, Pressable, StyleSheet, Linking, Platform } from 'react-native';
 import * as Application from 'expo-application';
+import { track } from '@/lib/posthog';
 import SketchIcon from '@/components/shared/SketchIcon';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -112,7 +113,13 @@ export default function UpdateGate() {
     // release to compare against.
     if (Platform.OS !== 'android') return;
     const build = installedBuild();
-    if (build !== null && build < MIN_VERSION_CODE) setStale(true);
+    if (build !== null && build < MIN_VERSION_CODE) {
+      setStale(true);
+      // HOW MANY PEOPLE A GATE RAISE IS ACTUALLY STOPPING. §20 says the raise is
+      // the one change in this file that can lock a reader out with no way back,
+      // and until now the only evidence either way was the absence of complaints.
+      track('update_required_shown', { build, minimum: MIN_VERSION_CODE });
+    }
   }, []);
 
   if (!stale) return null;
