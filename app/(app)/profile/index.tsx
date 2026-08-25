@@ -54,6 +54,11 @@ const TITLE: Record<string, string> = {
   'political-philosophy': 'THEORIST',
 };
 
+// FOUR CONSTANTS, BUILT ONCE. It sat inside the component, so every render made
+// a new object and handed it to three charts as a prop — which is enough on its
+// own to defeat any memo they might be given.
+const CHART_INK = { ink: C.ink, soft: C.inkSoft, faint: C.hairline, paper: C.paper };
+
 const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 
 function SectionLabel({ children }: { children: string }) {
@@ -178,7 +183,7 @@ export default function ProfileScreen() {
   // `done` and `total` ride along now, because the percentage was hiding them.
   // "68%" of an unknown number is not something a reader can act on; "23 of 34"
   // is, and it is the same fact with the denominator left in.
-  const mastery = ALL_BRANCHES.map((b) => {
+  const mastery = useMemo(() => ALL_BRANCHES.map((b) => {
     const total = b.paths.reduce((acc, p) => acc + p.lessons.length, 0);
     const done = Math.min(total, lessonsByBranch[b.slug] ?? 0);
     const pct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
@@ -191,7 +196,7 @@ export default function ProfileScreen() {
       total,
       pct,
     };
-  }).sort((a, b) => b.pct - a.pct);
+  }).sort((a, b) => b.pct - a.pct), [lessonsByBranch]);
   const branchesComplete = mastery.filter((m) => m.total > 0 && m.done >= m.total).length;
 
   const topBranch = (mastery[0]?.pct ?? 0) > 0 ? mastery[0].slug : null;
@@ -215,16 +220,16 @@ export default function ProfileScreen() {
   // something they said. Insights keeps the branch-weighted formula, which is
   // right for the question IT asks ("which thinkers surround what I read"). They
   // are now two different questions rather than one answered inconsistently.
-  const philScores = ALL_PHILOSOPHERS.map((p) => {
+  const philScores = useMemo(() => ALL_PHILOSOPHERS.map((p) => {
     const views = philosopherViews[p.id] ?? 0;
     const quotes = savedQuotes.filter((q) => q.philosopherId === p.id).length;
     return { name: p.name, score: views * 3 + quotes * 5, opened: views, kept: quotes };
   })
     .filter((p) => p.score > 0)
-    .sort((a, b) => b.score - a.score);
+    .sort((a, b) => b.score - a.score), [philosopherViews, savedQuotes]);
   const topPhilosopher = philScores[0] ?? null;
 
-  const branchInterest = ALL_BRANCHES.map((b) => {
+  const branchInterest = useMemo(() => ALL_BRANCHES.map((b) => {
     const lessons = lessonsByBranch[b.slug] ?? 0;
     const quotes = savedQuotes.filter((q) => q.branchSlugs.includes(b.slug)).length;
     const views = ALL_PHILOSOPHERS.filter((p) => p.branchSlugs.includes(b.slug)).reduce(
@@ -232,7 +237,7 @@ export default function ProfileScreen() {
       0
     );
     return { slug: b.slug, name: b.name, interactions: lessons + quotes + views };
-  }).sort((a, b) => b.interactions - a.interactions);
+  }).sort((a, b) => b.interactions - a.interactions), [lessonsByBranch, savedQuotes, philosopherViews]);
   const topInterest = (branchInterest[0]?.interactions ?? 0) > 0 ? branchInterest[0] : null;
 
   // ── what the three sections DRAW ──────────────────────────────────────────
@@ -241,30 +246,29 @@ export default function ProfileScreen() {
   // and a single fact has no shape. These are the same facts with their
   // proportions left in, which is the whole difference between "Nietzsche" and
   // "Nietzsche, and by how much".
-  const chartInk = { ink: C.ink, soft: C.inkSoft, faint: C.hairline, paper: C.paper };
-  const thinkerRows = philScores.slice(0, 4).map((ph) => ({
+  const thinkerRows = useMemo(() => philScores.slice(0, 4).map((ph) => ({
     label: ph.name,
     value: ph.score,
     detail: ph.opened > 0 || ph.kept > 0
       ? [ph.opened > 0 ? ph.opened + ' opened' : null, ph.kept > 0 ? ph.kept + ' saved' : null]
           .filter(Boolean).join(' · ')
       : undefined,
-  }));
-  const branchParts = branchInterest
+  })), [philScores]);
+  const branchParts = useMemo(() => branchInterest
     .filter((b) => b.interactions > 0)
     .map((b) => ({
       label: SHORT[b.slug] ?? b.name,
       value: b.interactions,
       color: BRANCH[b.slug as BranchKey],
-    }));
+    })), [branchInterest]);
   // A fortnight is long enough to show a habit and short enough that one good
   // Sunday does not flatten every other day into the baseline.
-  const xpDays = dailyXP(xpEvents, 14, Date.now());
+  const xpDays = useMemo(() => dailyXP(xpEvents, 14, Date.now()), [xpEvents]);
   const daysActive = activeDays(xpDays);
 
   // A fun, auto-written character sketch assembled from what the user actually
   // does — lessons taken, quotes saved, thinkers they keep opening.
-  const bio = generateUserBio(
+  const bio = useMemo(() => generateUserBio(
     {
       lessonsDone,
       streak: shownStreak,
@@ -275,7 +279,7 @@ export default function ProfileScreen() {
       topInterestSlug: topInterest?.slug ?? null,
     },
     bioSeed
-  );
+  ), [lessonsDone, shownStreak, quotesSaved, distinctViewed, topPhilosopher, topInterest, bioSeed]);
 
   // One shared computation — see `rankProgress`. This screen used to divide
   // totalXP by the next threshold, which counts from zero rather than from the
@@ -310,15 +314,17 @@ export default function ProfileScreen() {
   // good-enough "most recent". Falling back to canonical order if the store's
   // order is ever disturbed costs nothing, since either way these are all badges
   // they hold.
+  const badges = useMemo(() => {
   const earnedFirst = earnedBadges
     .slice()
     .reverse()
     .map((id) => BADGES.find((b) => b.id === id))
     .filter((b): b is (typeof BADGES)[number] => !!b);
   const upNext = BADGES.filter((b) => !earnedBadges.includes(b.id));
-  const badges = [...earnedFirst, ...upNext]
+  return [...earnedFirst, ...upNext]
     .slice(0, 8)
     .map((b) => ({ ...b, earned: earnedBadges.includes(b.id) }));
+  }, [earnedBadges]);
 
   function handleSignOut() {
     Alert.alert('Account', 'Sign out of Ashmere?', [
@@ -335,6 +341,33 @@ export default function ProfileScreen() {
     ]);
   }
 
+  // ── EVERY SECTION IS MEMOISED, AND THAT IS THE POINT OF THIS SHAPE ────────
+  //
+  // This screen is ~890 nodes and 45 SVGs in one component, so React reconciles
+  // all of it on every render — and it re-renders whenever any of the fifteen
+  // store fields it reads moves. Finishing a lesson moves six of them. Measured
+  // before this: one write cost about 190ms to the next paint, on a screen the
+  // reader may not even be looking at, because all five tabs are built at
+  // startup and stay mounted for the session.
+  //
+  // Wrapping each section in `useMemo` hands React the SAME ELEMENT back when
+  // that section's own inputs have not changed, and an unchanged element is a
+  // subtree React skips entirely. A write now costs the sections it actually
+  // touches: the badge shelf does not re-reconcile because the streak moved.
+  //
+  // TWO RULES, and this file will punish you for either:
+  //
+  //   · the dependency list must name everything the section reads. It is NOT
+  //     type-checked, and the failure it produces is a section that quietly
+  //     stops updating. What caught it during the split was an equivalence
+  //     harness that records the whole page before and after a store mutation —
+  //     a stale section is a row that did not change when it should have.
+  //   · these are hooks, so they run unconditionally and in order every render
+  //     (§17's rule 1). Never put one inside a condition or a `&&`.
+  //
+  // Nothing here changes what is drawn, and that was verified rather than
+  // assumed: 753 rows of element geometry, colour, font and text at three
+  // scroll positions, and the same again after a lesson was recorded.
   return (
     <ScreenTransition bg={palette.base}>
     <View style={styles.root}>
@@ -362,6 +395,9 @@ export default function ProfileScreen() {
         {/* The header wears the user's chosen artwork. Every colour in it comes
             from that art's tone palette, so a light engraving gets ink text and a
             dark one gets paper text — the words stay readable either way. */}
+        {/* header */}
+        {useMemo(() => (
+          <>
         <View style={[styles.header, { paddingTop: insets.top + SPACE[3] }]}>
           <ProfileArtFill />
 
@@ -419,6 +455,8 @@ export default function ProfileScreen() {
             </Pressable>
           )}
         </View>
+          </>
+        ), [insets.top, palette, displayName, nameFont, descriptor, joinedLabel, cur, profileQuote, openRanksBadges, openSavedQuotes, openPhilosopher])}
 
         {/* Body */}
         <View style={styles.body}>
@@ -430,6 +468,9 @@ export default function ProfileScreen() {
 
           {showWidget ? <DailyQuoteWidget style={{ marginBottom: SPACE[4] }} /> : null}
 
+          {/* insights */}
+          {useMemo(() => (
+            <>
           <SectionLabel>FROM YOUR INSIGHTS</SectionLabel>
           <Card>
             {/* A NAME IS A FACT WITH NO SHAPE. This said "TOP PHILOSOPHER —
@@ -440,7 +481,7 @@ export default function ProfileScreen() {
             {topPhilosopher ? (
               <View style={{ marginTop: SPACE[2] }}>
                 {/* Gold on the leader only — a placing rather than a longer bar. */}
-                <ShareBars rows={thinkerRows} c={chartInk} accent={METAL.GOLD.base} />
+                <ShareBars rows={thinkerRows} c={CHART_INK} accent={METAL.GOLD.base} />
               </View>
             ) : (
               <>
@@ -451,7 +492,12 @@ export default function ProfileScreen() {
               </>
             )}
           </Card>
+            </>
+          ), [topPhilosopher, thinkerRows])}
 
+          {/* becoming */}
+          {useMemo(() => (
+            <>
           <SectionLabel>WHO YOU'RE BECOMING</SectionLabel>
           <Card pad={4} style={styles.bioCard}>
             <View style={styles.bioQuill}>
@@ -466,12 +512,17 @@ export default function ProfileScreen() {
               <View style={styles.bioShape}>
                 <Text style={styles.insightLabel}>WHERE YOUR READING GOES</Text>
                 <View style={{ marginTop: SPACE[2] }}>
-                  <StackBar parts={branchParts} c={chartInk} />
+                  <StackBar parts={branchParts} c={CHART_INK} />
                 </View>
               </View>
             ) : null}
           </Card>
+            </>
+          ), [bio, branchParts])}
 
+          {/* glance */}
+          {useMemo(() => (
+            <>
           <SectionLabel>AT A GLANCE</SectionLabel>
           <View style={styles.glanceRow}>
             {/* `glanceCol` carries the flex that would otherwise land on Card's
@@ -512,12 +563,17 @@ export default function ProfileScreen() {
                     join the gaps and imply reading on days there was none — and the
                     gaps are the habit. */}
                 <View style={{ marginTop: SPACE[1] }}>
-                  <DayBars values={xpDays} c={chartInk} />
+                  <DayBars values={xpDays} c={CHART_INK} />
                 </View>
               </StruckTile>
             </View>
           </View>
+            </>
+          ), [lessonsDone, daysActive, totalXP, xpDays])}
 
+          {/* streak */}
+          {useMemo(() => (
+            <>
           <SectionLabel>DAILY STREAK</SectionLabel>
           {/* Tappable, and it was not before — the streak was the one number on this
               screen with nowhere to go. Both entry points (this and Home's habit
@@ -545,6 +601,8 @@ export default function ProfileScreen() {
               </View>
             </Card>
           </Pressable>
+            </>
+          ), [shownStreak, lastLessonDate, restHeld, restBridging, isPro])}
 
           <SectionLabel>PROGRESS TO NEXT RANK</SectionLabel>
           <Card>
@@ -679,6 +737,9 @@ export default function ProfileScreen() {
             </View>
           </Card>
 
+          {/* mastery */}
+          {useMemo(() => (
+            <>
           <SectionLabel>BRANCH MASTERY</SectionLabel>
           {/* SIX ROWS THAT ARE NO LONGER THE SAME ROW SIX TIMES.
               Each carries its branch's own hue — on the icon chip, on the fill,
@@ -705,7 +766,12 @@ export default function ProfileScreen() {
               />
             ))}
           </View>
+            </>
+          ), [mastery, branchesComplete])}
 
+          {/* quotes */}
+          {useMemo(() => (
+            <>
           <SectionLabel>SAVED QUOTES</SectionLabel>
           <Card onPress={openSavedQuotes} style={styles.quotesCard}>
             <View style={styles.quotesIcon}>
@@ -726,7 +792,12 @@ export default function ProfileScreen() {
               <SketchIcon name="back" size={14} color={C.inkSoft} />
             </View>
           </Card>
+            </>
+          ), [quotesSaved, savedQuotes, openSavedQuotes])}
 
+          {/* badges */}
+          {useMemo(() => (
+            <>
           <SectionLabel>BADGES EARNED</SectionLabel>
           {/* THE ONE QUESTION A CASE OF FIFTY RAISES. The grid showed eight
               medals and no total, so "how much of this is mine" — the only thing
@@ -751,6 +822,8 @@ export default function ProfileScreen() {
               </View>
             ))}
           </Pressable>
+            </>
+          ), [badges, earnedBadges, openRanksBadges])}
 
           {isSignedIn ? (
             <Button

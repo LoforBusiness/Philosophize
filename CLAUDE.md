@@ -703,11 +703,12 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
   item in this file. Finishing an interaction for the format being retired is work
   pointed the wrong way, so the stubs stay stubs.
 - **Built but not wired:** `story/` scenes, `KineticNarration` voice, `feedback/`
-- **Profile is one 961-line component of ~890 nodes**, so every store write
-  re-renders all of it — about 190ms to paint, unthrottled, on a screen the
-  reader may not even be looking at. The two triggers that made it a visible
-  stall are fixed and measured (§19); the underlying shape is not. Splitting it
-  into memoised sections is the fix.
+- **Profile's sections are memoised and its dependency lists are not
+  type-checked.** A missed one is a section that silently stops updating. The
+  equivalence harness in §19 is the only thing that catches it — record the page,
+  mutate the store, record it again — and it lives in a scratchpad rather than in
+  `npm run check`, because it needs Metro and a browser. Rebuild it before
+  touching that file.
   panels. Decide to ship or delete them.
 - **Daily Review / spaced repetition does not exist.** It is the headline
   Scholar's Pass promise in §14 and the P0 in §15, and nothing has been built.
@@ -1473,37 +1474,6 @@ Hard-won specifics:
   card. Replacing them with higher-resolution files needs no code change — same
   filenames in `assets/images/branches/` and `assets/images/quickstart/`.
 
-### Struck things are shaded, and that is not a second colour
-
-Rank pins and badges carry **tone**: a lit side, a shaded side and a small drop
-shadow, so a frame reads as an object rather than an outline. This does not bend
-the B&W rule, because there is no new hue in it — every value in
-`components/shared/tone.ts` is ink, grey, or the warm paper the app is already
-printed on. What changed is that those greys are now arranged as *lighting*.
-
-**One light, top-left, and it never moves.** The face gradient runs light→dark
-down-right, the rim highlight sits top-left, the shadow falls bottom-right.
-Seventy-five marks lit from one direction read as a set; lit from wherever suited
-each one, they read as clip art. `tone.ts` has zero imports for the same reason
-`rig.ts` does — a contact sheet of every pin and badge can be rendered and looked
-at in plain Node, which is how the first two attempts were caught.
-
-**Locked is flat and cool** (`GHOST`, a slate off the warm ramp), with no
-gradient and no shadow. "The same thing, dimmer" is indistinguishable from a
-rendering fault; unlit against lit is the reward for earning it.
-
-Two findings worth not rediscovering:
-
-- **A 7% tonal range is invisible.** The first pass ran `#FEFEFC`→`#DFDBD1` and
-  read as flat at every size. It needs a real swing (`#FFFFFF`→`#C6C0B2`) before
-  it registers as shading at all.
-- **A tone fitted for METAL is invisible on PAPER, and this has now caught three
-  different marks.** `on` and `rule` in `constants/insignia.ts` are toned for the
-  face they sit on — and `on` is `#FFFFFF` for all eight orders by construction,
-  while seven of the eight `rule` values fail 3:1 against paper. So: the rank
-  pin's ray halo was painted in `rule` and vanished; the badge case's **laurel
-  wreath was stroked in `on`, which meant every tier-III badge shipped a white
-  wreath on cream for months**; and then the capstone collar reached for `rule` on
 ### On a page this long, a `setState` is not a small thing
 
 > *"the app will begin to lag after completing a lesson and when I go to the
@@ -1588,6 +1558,56 @@ nothing changed about it when you kept it, and it was the one object in the app
 still drawn as an outline while every button, card and rank pin sat on a lip.
 
 `components/shared/QuotePlate.tsx` is the one object all of them use now, and
+> **AND THEN THE SCREEN WAS SPLIT, WHICH IS THE OTHER HALF.** The two fixes above
+> stopped Profile re-rendering for flags that were never its business. They could
+> not help with a write that genuinely changes what it shows — finishing a lesson
+> moves six of the fifteen store fields this screen reads — and every mounted tab
+> pays that, because all five are built at startup and stay mounted for the
+> session.
+>
+> Every section is wrapped in `useMemo` now, so React gets the SAME ELEMENT back
+> where that section's own inputs have not moved, and an unchanged element is a
+> subtree it skips. The derivations went the same way: `philScores` maps all 322
+> thinkers and filters the saved quotes for each, `branchInterest` does six passes
+> over the same 322, and both ran on every render including the ones that produced
+> an identical page. `chartInk` was four constants rebuilt per render and handed
+> to three charts as a fresh object, which is enough on its own to defeat any memo
+> those charts might be given.
+>
+> | | at the start | after the flags | after the split |
+> |---|---|---|---|
+> | first scroll through | 955ms | 233ms | **134ms** |
+> | the pass where the chart plays | 1774ms | 232ms | **64ms** |
+> | a fresh visit | 976ms | 371ms | **87ms** |
+> | one lesson-complete write, to paint | ~190ms | ~188ms | **86ms** |
+>
+> **The dependency lists are the danger and they are not type-checked.** A missed
+> one is a section that quietly stops updating, which no screenshot and no static
+> comparison can see. What made the refactor safe was an equivalence harness that
+> records every element's box, colour, font, weight, opacity and text at three
+> scroll positions — and then does it AGAIN after mutating the store the way a
+> finished lesson mutates it. A stale section shows up there as a row that did not
+> change when it should have. Six signatures, ~750 rows each, identical before and
+> after.
+>
+> **Its control run is the part worth copying.** Run before and after with NOTHING
+> changed, and it reported 1350 differing rows — the store persists to
+> localStorage, the browser profile survives between runs, so run two saw run
+> one's `chartSeenXP`, drew the recap instead of the entrance, and every y below
+> the chart moved 24px. An instrument that cannot repeat itself cannot judge a
+> refactor, and this one would have been believed. Pin the seed, clear the
+> storage, compare fixed scroll offsets rather than a clamped bottom, and ignore
+> anything with no area.
+>
+> **And the wrapping itself failed once, silently to the compiler.** The sections
+> were spliced back-to-front on the assumption that later indices stay valid —
+> but each section's end anchor is the next section's START, and once that next
+> section is wrapped the anchor sits inside its wrapper, so the block swallowed
+> the wrapper's opening lines and the hooks nested. `tsc` was perfectly happy;
+> React said "Do not call Hooks inside useMemo(...)" at runtime. Compute every
+> boundary on the pristine text first, then splice.
+
+
 `tone.plate(hue)` derives its five roles from a single hex by the same two mixes
 `ramp()` uses — so the light direction cannot drift between eras.
 
@@ -1598,6 +1618,37 @@ still drawn as an outline while every button, card and rank pin sat on a lip.
   pile.
 - **The identity does not bend.** The rim is ink and the quotation is ink. The
   era lives in the spine, the printer's mark, the byline and the ledge — edges
+### Struck things are shaded, and that is not a second colour
+
+Rank pins and badges carry **tone**: a lit side, a shaded side and a small drop
+shadow, so a frame reads as an object rather than an outline. This does not bend
+the B&W rule, because there is no new hue in it — every value in
+`components/shared/tone.ts` is ink, grey, or the warm paper the app is already
+printed on. What changed is that those greys are now arranged as *lighting*.
+
+**One light, top-left, and it never moves.** The face gradient runs light→dark
+down-right, the rim highlight sits top-left, the shadow falls bottom-right.
+Seventy-five marks lit from one direction read as a set; lit from wherever suited
+each one, they read as clip art. `tone.ts` has zero imports for the same reason
+`rig.ts` does — a contact sheet of every pin and badge can be rendered and looked
+at in plain Node, which is how the first two attempts were caught.
+
+**Locked is flat and cool** (`GHOST`, a slate off the warm ramp), with no
+gradient and no shadow. "The same thing, dimmer" is indistinguishable from a
+rendering fault; unlit against lit is the reward for earning it.
+
+Two findings worth not rediscovering:
+
+- **A 7% tonal range is invisible.** The first pass ran `#FEFEFC`→`#DFDBD1` and
+  read as flat at every size. It needs a real swing (`#FFFFFF`→`#C6C0B2`) before
+  it registers as shading at all.
+- **A tone fitted for METAL is invisible on PAPER, and this has now caught three
+  different marks.** `on` and `rule` in `constants/insignia.ts` are toned for the
+  face they sit on — and `on` is `#FFFFFF` for all eight orders by construction,
+  while seven of the eight `rule` values fail 3:1 against paper. So: the rank
+  pin's ray halo was painted in `rule` and vanished; the badge case's **laurel
+  wreath was stroked in `on`, which meant every tier-III badge shipped a white
+  wreath on cream for months**; and then the capstone collar reached for `rule` on
   and marks, never a flooded surface. That is `HUE`'s own rule applied to five
   hues, and it is why a shelf of these still reads as printed matter.
 - **Two states are worn by the OBJECT, not just the button.** Saved fills the
