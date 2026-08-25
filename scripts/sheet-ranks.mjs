@@ -15,6 +15,14 @@
 // plain data, scripts/lib/rasterpath.mjs turns path strings into pixels, and the
 // gradient below is the same three stops react-native-svg is handed on device.
 //
+// WHAT CHANGED, AND WHY THE SHEET IS READ THE OTHER WAY UP NOW. The frame used
+// to be chosen by ORDER, so a row of this sheet was six copies of one silhouette
+// and a column was the escalation. It is chosen by DEGREE now -- complexity
+// cycles inside a colour and resets at the next one -- so ACROSS is the shape
+// ladder and DOWN is the material ladder. The two questions this sheet has to
+// answer are therefore "is every step across visibly bigger than the last" and
+// "does every one of the six survive being struck in the drabbest order".
+//
 // The MARK is a stand-in — a triangle ring rather than the real Glyph, which is
 // a React component and cannot be rendered here. That is deliberate and it is
 // enough: what this sheet is for is the FRAME and the room it leaves, and a
@@ -49,7 +57,10 @@ const T = await import(emit('components/shared/tone.ts', 'tone.mjs'));
 
 const only = process.argv[2]?.toUpperCase() ?? null;
 const orders = only ? [only] : I.ORDERS;
-const PIN = only ? 300 : 104;                     // the pin's drawn size, in px
+// PIN=50 npm run sheet:ranks -- the size the ranks LADDER actually draws them at,
+// which is the size any question about legibility has to be asked at. 104 is the
+// hero on the ranks sheet and 56 is Profile's; the grid is 50.
+const PIN = Number(process.env.PIN) || (only ? 300 : 104);
 const PAD = only ? 24 : 13;
 const LABEL = 15;
 
@@ -131,9 +142,10 @@ function markPath(size, dy) {
 function pin(order, degree, box) {
   const cv = canvas(box, box, T.PAPER);
   const m = I.ORDER[order];
-  const frame = S.FRAMES[I.ORDERS.indexOf(order)];
+  // THE FRAME COMES FROM THE DEGREE. Read a column of this sheet and it is one
+  // token being worked harder; read a row and it is the same six struck better.
+  const frame = S.frameForDegree(degree);
   const g = S.frameGeom(frame);
-  const orn = S.ORNAMENT[frame];
   const fin = I.finishFor(degree);
   const k = box / 100;
 
@@ -144,23 +156,13 @@ function pin(order, degree, box) {
   // The shadow, under everything, exactly as RankSeal draws it.
   fill(cv, core, flatStops(T.INK), T.SHADOW.dx, T.SHADOW.dy, k, T.SHADOW.opacity);
 
-  if (orn.rays) fill(cv, orn.rays, [['0%', m.lit, 1], ['100%', m.base, 1]], 0, 0, k);
-  if (orn.wings) {
-    fill(cv, orn.wings, flatStops(m.rim), 0, 0, k);
-    fill(cv, S.wingsInset(1.3), [['0%', m.base, 1], ['100%', m.shade, 1]], 0, 0, k);
-  }
-  if (orn.crown) {
-    fill(cv, orn.crown, flatStops(m.rim), 0, 0, k);
-    fill(cv, S.crownInset(1.6), face, 0, 0, k);
-  }
-
   // THE COLLAR GOES DOWN FIRST. It is a STROKE outside the edge on device, and
   // the offline equivalent is a larger copy of the frame with the pin laid over
   // it — draw it afterwards and it paints the pin out, which is exactly what the
   // first sheet showed: a whole column of degree-5 pins reduced to studs on paper.
   if (fin.collar) {
-    fill(cv, S.CORE[frame](-3.6), flatStops(m.rule), 0, 0, k);
-    fill(cv, S.CORE[frame](-2.0), flatStops(T.PAPER), 0, 0, k);
+    fill(cv, S.CORE[frame](S.COLLAR - 1), flatStops(m.base), 0, 0, k);
+    fill(cv, S.CORE[frame](S.COLLAR + 1), flatStops(T.PAPER), 0, 0, k);
   }
 
   fill(cv, core, rim, 0, 0, k);                 // the turned edge…
@@ -196,7 +198,9 @@ const sheetW = PAD + cols * cellW;
 const sheetH = PAD + orders.length * cellH + LABEL;
 const sheet = canvas(sheetW, sheetH, '#EFEDE6');
 
-text(sheet, `${orders.length} ORDERS X ${cols} DEGREES`, PAD, 5, '#6B6B6B', 1);
+text(sheet,
+  `${orders.length} ORDERS (DOWN) X ${cols} DEGREES (ACROSS): ${S.FRAMES.join(' ').toUpperCase()}`,
+  PAD, 5, '#6B6B6B', 1);
 
 orders.forEach((order, r) => {
   const y = PAD + LABEL + r * cellH;
@@ -204,7 +208,7 @@ orders.forEach((order, r) => {
     const x = PAD + d * cellW;
     sheet.blit(pin(order, d, PIN), x, y);
     const id = r * cols + d + 1;
-    text(sheet, `${order} ${d} - RANK ${id}`, x, y + PIN + 3, '#4A4A4A', 1);
+    text(sheet, `${id} ${S.FRAMES[d].toUpperCase()}`, x, y + PIN + 3, '#4A4A4A', 1);
   }
 });
 

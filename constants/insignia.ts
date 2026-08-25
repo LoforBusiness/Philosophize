@@ -64,14 +64,24 @@
 //    grey — so a high pin has a bright line running inside its edge that the low
 //    orders simply do not have, and AURUM's is white outright.
 //
-// ── AND THE ORDER IS NOT THE ONLY THING THAT CHANGES ANY MORE ───────────────
+// ── COLOUR IS THE LADDER; SHAPE IS WHAT HAPPENS INSIDE ONE RUNG OF IT ───────
 //
 // Colour alone was not enough either, which the same reader said next: "the rank
 // icons are better, but they don't improve in look — the icons get prettier, and
-// more complex." So each order is also struck in its own SILHOUETTE, escalating
-// disc → plate → hexagon → gem → shield → crest → winged → crowned. That lives
-// in components/shared/rankShapes.ts, which is keyed on this file's `ORDERS`
-// array index for index.
+// more complex." That was answered by giving each ORDER its own silhouette, and
+// the answer was wrong in a way it took a second reading to see:
+//
+//   "it only becomes actually complex when the user is really far along. I want
+//    it to become complex when the user gets far on a certain colour, then the
+//    colour resets and so does the complexity … but even with the complexity
+//    gone down, the colour palette … will look better."
+//
+// So the two scales are separated. THIS FILE IS THE LONG ONE — eight materials,
+// each better than the last, and nothing about it resets. components/shared/
+// rankShapes.ts is the SHORT one: six frames, keyed on the degree, run through
+// again in every order. A reader always has a grander shape three ranks away
+// wherever they stand, and finishing an order buys the thing that never comes
+// round again, which is the metal.
 //
 // NO REACT AND NO IMPORTS IN THIS FILE, so scripts can render a contact sheet of
 // all forty-eight pins in plain Node and someone can LOOK at them (§21 —
@@ -203,10 +213,12 @@ export const ORDER_LABEL: Record<OrderName, string> = {
 /**
  * WHAT ESCALATES INSIDE AN ORDER.
  *
- * The order says WHAT a pin is made of and components/shared/rankShapes.ts says
- * what SHAPE it is — both change every six ranks. Between those, five promotions
- * would look identical, which is the exact complaint one rung down. So each order
- * also runs through six DEGREES of finish.
+ * The order says WHAT a pin is made of and it changes every six ranks. Inside
+ * those six, TWO things move together and they both reset at the next colour:
+ * the SILHOUETTE (components/shared/rankShapes.ts — disc, hexagon, plate,
+ * scallop, gem, rosette) and the FINISH below. Every rung of every order is a
+ * visible step up from the one under it, and none of the six is more than five
+ * steps from plain.
  *
  * This is ornament, and RankSeal's own header records that escalating ornament
  * was tried once and rejected as "so busy at 54px that it fought the glyph it
@@ -222,7 +234,8 @@ export const ORDER_LABEL: Record<OrderName, string> = {
  *   4  + all six
  *   5  + the collar: a second rule OUTSIDE the edge
  *
- * Degree 5 is the capstone of its order and is meant to look like one.
+ * Degree 5 is the capstone of its order and is meant to look like one: the
+ * finest edge in the set, every stud filled, and a ring around the whole thing.
  */
 export const DEGREES = 6;
 
@@ -310,28 +323,14 @@ export const insigniaRim = (m: Insignia): InsigniaStops => [
   ['100%', m.rim, 1],
 ];
 
-/**
- * A WING, which is the same material seen from BEHIND the pin.
- *
- * Base into shade rather than lit into shade: the whole reason a winged frame
- * reads as one object with something behind it, rather than as two objects, is
- * that the thing behind never catches the highlight.
- */
-export const insigniaWing = (m: Insignia): InsigniaStops => [
-  ['0%', m.base, 1],
-  ['100%', m.shade, 1],
-];
-
-/**
- * THE HALO, and the reason it is not painted in `rule` like every other piece
- * of finish on the pin.
- *
- * `rule` is the order's near-white, and AURUM's is `#FFFFFF` outright — so the
- * first halo was white rays on warm paper, and the contact sheet showed the top
- * rank of the whole ladder wearing an ornament nobody could see. A halo is
- * material, struck like the rest of it.
- */
-export const insigniaRay = (m: Insignia): InsigniaStops => [
-  ['0%', m.lit, 1],
-  ['100%', m.base, 1],
-];
+// THERE IS NO THIRD GRADIENT ANY MORE. `insigniaWing` and `insigniaRay` lived
+// here to light a pair of wings and a halo, and both are gone with the frames
+// that wore them — "looks like horns and then looks as if it gains wings. I
+// don't want this design at all." A pin is a face and a turned edge, and every
+// piece of finish on it is drawn in `rule`, which is the order's own near-white.
+//
+// Worth keeping the reason the halo needed its own ramp, because it is a trap
+// any future ornament walks into: it was first painted in `rule`, and AURUM's
+// `rule` is #FFFFFF outright — so the top rank of the whole ladder wore an
+// ornament nobody could see on warm paper. Anything drawn OUTSIDE the pin's edge
+// is sitting on paper, not on metal, and has to be toned for paper.

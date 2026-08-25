@@ -461,29 +461,63 @@ Index on (user_id, lesson_id).
 - **Badges** — **70** in `data/badges.ts`, each `{ id, name, glyph, family, tier,
   goal(stats), need }`; evaluated by `recomputeBadges()` and shown in
   `RanksBadgesSheet`. **Five tiers**, struck in four of the rank orders plus gold
-  (`constants/insignia.ts`), so both reward ladders speak one language. The ids
+  (`constants/insignia.ts`), so both reward ladders speak one language — **and
+  five MOUNTINGS**, one per tier: the medal alone, then a ribbon, then two laurel
+  sprigs, then the sprigs closing over the crown, then a collar struck outside the
+  edge. Tiers IV and V were added to the roll and given no furniture of their own,
+  so thirty-three badges — every one that takes months — were the tier-III object
+  in a different metal, which is the same fault the rank ladder was carrying at
+  the same time. **`npm run sheet:badges` draws the whole case in plain Node**;
+  that is what found it, and what found the wreath being drawn in white on cream
+  (see §19). The ids
   are FROZEN and `check:badges` holds the roll — the roll is a literal list in
   `validate-badges.mjs`, so **adding one is a deliberate two-file act**, which is
   what the last two (32,000 and 50,000 XP) were.
 - **Ranks** — **48** in `data/ranks.ts` (Novice → Grand Philosopher), in **eight
   orders of six**: clay, iron, bronze, jade, lapis, crimson, amethyst, aurum.
-  Three things change as you climb, and between them **no two consecutive
-  promotions look alike**:
-  - the **MATERIAL**, every six ranks (`constants/insignia.ts`, and the third
-    place §19 licenses colour);
-  - the **SHAPE**, every six ranks — `components/shared/rankShapes.ts` gives each
-    order its own silhouette, escalating by accretion: disc → cut plate →
-    hexagon → notched gem → shield → crested shield → winged → crowned. The
-    footprint grows from 66 to 96 units of a 100-unit tile while the mark's room
-    stays flat at 0.36–0.40, so everything the ladder gains it gains OUTSIDE the
-    glyph. That discipline is the whole reason it survives being drawn at 44px;
-  - the **FINISH**, every rank — inner rule, two/four/six studs, then the
-    capstone's outer collar.
+  **Two scales, one long and one short, and they cross at every sixth rank:**
+  - the **MATERIAL** is the long one. Eight orders, each better than the last,
+    and nothing about it ever resets (`constants/insignia.ts`, and the third
+    place §19 licenses colour). This is what finishing an order buys.
+  - the **SHAPE** is the short one, and it **CYCLES**. Six frames keyed on the
+    DEGREE — how far through its order a rank is — run again in every order:
+    disc → hexagon → plate → gem → scallop → rosette, plain to most worked, then
+    plain again in a better metal (`components/shared/rankShapes.ts`).
+  - the **FINISH** rides the degree with it — inner rule, two/four/six studs,
+    then the capstone's collar.
+
+  > **The cycle is a correction, and the reasoning is worth keeping.** The shape
+  > used to escalate ONCE across all forty-eight ranks, one silhouette per order,
+  > and a reader named both faults it had: *"it only becomes actually complex when
+  > the user is really far along … I want it to become complex when the user gets
+  > far on a certain colour, then the colour resets and so does the complexity"*,
+  > and *"the ranks that do get more complex … look like horns and then look as
+  > if [they gain] wings. I don't want this design at all."*
+  >
+  > Those are one fault seen twice. An escalation stretched over forty-eight rungs
+  > leaves most readers standing in the dull middle of it, and it runs out of edge
+  > to work long before it runs out of rungs — so it starts adding LIMBS. Shoulder
+  > spikes, wings and a coronet are what "keep adding" looks like. Cycling the
+  > shape gives everyone a grander pin three ranks away and means no frame is ever
+  > the eighth step of anything, so none of them needs a limb.
+  >
+  > **`check:ui` holds three things a picture cannot report:** that the shape comes
+  > from the degree and nothing else, that no frame declares a wing/crown/halo
+  > again, and that each rung covers more of the page than the one below it — the
+  > capstone is 1.51× the plain pin's area. That last one is measured as AREA
+  > rather than reach, because reach punishes a shape for being round: the hexagon
+  > reaches further than the octagon above it, and the gem spends a third of its
+  > outline in valleys.
+
+  The mark's room stays flat at 0.37–0.40 across all six while the drawn area
+  grows by half again, so everything a rung gains it gains OUTSIDE the glyph.
+  That discipline is the whole reason it survives being drawn at 44px.
 
   **`npm run sheet:ranks` renders all forty-eight in plain Node** and is how they
-  are judged; `check:ui` is what stops them breaking (a frame that outgrows the
-  viewBox is clipped silently on every screen at once). Two
-  functions, and the difference matters: `rankForXP(totalXP)` is what the XP
+  are judged — `PIN=50` draws them at the size the ladder actually uses, which is
+  the size any question about legibility has to be asked at. `check:ui` is what
+  stops them breaking (a frame that outgrows the viewBox is clipped silently on
+  every screen at once). Two functions, and the difference matters: `rankForXP(totalXP)` is what the XP
   alone would earn, while `awardedRank(rankIndex, totalXP)` is what has actually
   been *conferred*. `userDataStore.rankIndex` advances at most one tier per
   finished lesson, so a rank-up always lands on the reward screen
@@ -628,7 +662,8 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
   and every lesson but two has one (the two ask both their questions on the stage
   instead). Animated `LessonReward` with XP count-up, streak and rank-up.
 - **Gamification:** 70 badges in 5 tiers, **48 ranks in 8 coloured orders, each
-  order struck in its own silhouette** (§7), a conferred-rank ceremony that shows
+  order struck in a better material and six worked shapes cycling inside every
+  one of them** (§7), a conferred-rank ceremony that shows
   the pin they held handing over to the pin they just earned, a three-badge
   profile cabinet, XP + level curve, daily streak. Top rank at 50,000 XP.
 - **Screens:** Home (with Quick Start, §19), Learn → branch → unit accordion →
@@ -1449,6 +1484,17 @@ Two findings worth not rediscovering:
 - **A 7% tonal range is invisible.** The first pass ran `#FEFEFC`→`#DFDBD1` and
   read as flat at every size. It needs a real swing (`#FFFFFF`→`#C6C0B2`) before
   it registers as shading at all.
+- **A tone fitted for METAL is invisible on PAPER, and this has now caught three
+  different marks.** `on` and `rule` in `constants/insignia.ts` are toned for the
+  face they sit on — and `on` is `#FFFFFF` for all eight orders by construction,
+  while seven of the eight `rule` values fail 3:1 against paper. So: the rank
+  pin's ray halo was painted in `rule` and vanished; the badge case's **laurel
+  wreath was stroked in `on`, which meant every tier-III badge shipped a white
+  wreath on cream for months**; and then the capstone collar reached for `rule` on
+  both ladders at once. The moment a mark is drawn BEYOND an edge it is on paper
+  and needs a paper tone — the material's `base`, which clears 4.5:1 on every
+  order. `check:ui` §4d re-derives all sixteen values and asserts that neither the
+  collar, the laurel nor the ribbon reaches for a metal tone again.
 - **Crossed swords do not work behind a medal**, however heraldic the reference.
   The medal covers the crossing, so all that shows is two tips above and two
   hilts below — horns at 168px, mush at the 66px the badge grid actually draws.

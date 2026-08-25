@@ -117,10 +117,12 @@
     "check:launch": "node scripts/check-launch.mjs && node scripts/check-words.mjs",
     "sheet:launch": "node scripts/sheet-launch.mjs",
     "sheet:ranks": "node scripts/sheet-ranks.mjs",
+    "sheet:badges": "node scripts/sheet-badges.mjs",
     "camera:wins": "node scripts/camera-wins.mjs",
     "sound:cut": "node scripts/cut-sounds.mjs",
     "check:ui": "node scripts/check-ui.mjs",
-    "check:thinkers": "node scripts/check-thinkers.mjs"
+    "check:thinkers": "node scripts/check-thinkers.mjs",
+    "check:intro": "node scripts/check-intro.mjs"
   },
   "overrides": {
     "@expo/require-utils": "56.1.6"

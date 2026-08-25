@@ -342,12 +342,14 @@ export default function RanksBadgesSheet() {
                             <View style={[styles.branch, { backgroundColor: reached ? Ink : InkFaint }]} />
                             <View style={[styles.junction, { backgroundColor: reached ? Ink : InkFaint }]} />
                             <View style={styles.sealSlot}>
-                              {/* THE ORDER IS PASSED EVEN WHEN LOCKED. It decides
-                                  the frame as well as the material, and the whole
-                                  point of a ladder whose shape escalates is that
-                                  you can see the shape you are climbing toward.
-                                  RankSeal still withholds the MATERIAL — that is
-                                  the part that has to be earned. */}
+                              {/* BOTH ARE PASSED EVEN WHEN LOCKED, and they say
+                                  different things: `degree` is the SHAPE and
+                                  `order` is the MATERIAL. Reading this ladder
+                                  down the page is the one place the whole system
+                                  is visible at once — six shapes running again
+                                  and again while the metal changes under them.
+                                  RankSeal withholds only the material, because
+                                  that is the part that has to be earned. */}
                               <RankSeal glyph={r.glyph} state={st} size={50}
                                 order={rankOrder(i)} degree={rankDegree(i)} />
                             </View>

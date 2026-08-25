@@ -151,6 +151,20 @@ export const GLYPH_DY: Record<Family, number> = {
   lessons: 0.02, streak: -0.05, thinkers: 0, quotes: 0, xp: 0, mastery: -0.04,
 };
 
+/**
+ * HOW FAR OUTSIDE THE EDGE THE TOP TIER'S COLLAR SITS.
+ *
+ * Negative, because every `SHAPE` above is a function of its inset and a
+ * negative inset grows it — the same one-line trick `CORE` in rankShapes.ts uses
+ * for the sixth degree of a rank pin, and deliberately the same GESTURE too. A
+ * reader who has learnt that a ring around a pin means "as far as this material
+ * goes" should not have to learn a second vocabulary for the badge case.
+ *
+ * It is drawn inside the medal's own 0.74 transform, so 5 units here land as
+ * about 3.7 on the page — which is roughly where the pin's collar sits as well.
+ */
+export const COLLAR = -5;
+
 /** How far in the tier's inner rule sits. Tier I has none. */
 // Tiers IV and V share tier III's inset deliberately. The inset is what the
 // inner rule is drawn at, and validate-badges measures every mark against the
@@ -207,26 +221,21 @@ export function ribbonPaths(cy: number, halfW: number, h: number) {
   };
 }
 
-/**
- * A sword, pointing up, drawn about its own centreline at x.
- *
- * Deliberately plain — blade, guard, grip, pommel. The pair of these crossed
- * behind a medal is the tier-III flourish, and at the 28px a badge is drawn in a
- * grid anything more detailed turns to mud. What must survive that size is the
- * SILHOUETTE: a long thin blade and a wide crossguard.
- */
-export function swordPaths(x: number, tipY: number, len: number) {
-  const w = len * 0.055;          // blade half-width
-  const guardY = tipY + len * 0.72;
-  const guardW = len * 0.20;
-  const gripEnd = tipY + len;
-  return {
-    blade: `M${x} ${tipY} L${x + w} ${tipY + len * 0.10} L${x + w} ${guardY} L${x - w} ${guardY} L${x - w} ${tipY + len * 0.10} Z`,
-    guard: `M${x - guardW} ${guardY} L${x + guardW} ${guardY} L${x + guardW} ${guardY + len * 0.05} L${x - guardW} ${guardY + len * 0.05} Z`,
-    grip: `M${x - w * 0.7} ${guardY + len * 0.05} L${x + w * 0.7} ${guardY + len * 0.05} L${x + w * 0.7} ${gripEnd} L${x - w * 0.7} ${gripEnd} Z`,
-    pommel: { cx: x, cy: gripEnd + len * 0.035, r: len * 0.045 },
-  };
-}
+// THE SWORDS ARE GONE, and this is the note that replaces them.
+//
+// `swordPaths` was kept here for a year as a one-line way back to the tier-III
+// flourish that was tried first, on the grounds that the decision was worth
+// being able to revisit. It is not any more. §19 recorded why they failed —
+// "the medal covers the crossing, so all that shows is two tips above and two
+// hilts below … horns at 168px, mush at the 66px the badge grid actually draws"
+// — and the reader has since ruled on the entire family in as many words, about
+// the rank pins: "looks like horns and then looks as if it gains wings. I don't
+// want this design at all."
+//
+// A door nobody may walk through is not an option, it is a distraction. What
+// survives from that episode is the rule, and it is in `laurelSprig` below: a
+// flourish has to be a CONTINUOUS CURVED MASS, because half of it is always
+// behind the medal.
 
 /**
  * How much the medal shrinks to leave room for its flourish.
@@ -255,11 +264,29 @@ export const MEDAL_DY = -6;
  * `side` is -1 for the left sprig, +1 for the right. The stem is a quadratic arc
  * and the leaves are placed ALONG it by sampling the same curve, so a leaf can
  * never drift off its own branch.
+ *
+ * ── AND IT CAN CLOSE, WHICH IS WHAT TIER IV IS ──────────────────────────────
+ *
+ * The five badge tiers used to be three: I bare, II a ribbon, III a wreath —
+ * and then IV and V were added and given no furniture at all, so the top three
+ * tiers of the case were the same object in three metals. That is the same fault
+ * the rank ladder had, one cabinet over: everything interesting happens early
+ * and then the reader climbs for months to watch a colour change.
+ *
+ * An OPEN wreath leaves 54 units of paper between its tips and a CLOSED one
+ * meets over the medal's crown, which is a difference a reader can see in a grid
+ * at 52px without comparing anything to anything. It is also what an actual
+ * wreath is: the open sprigs are a laurel offered, the closed one is a laurel
+ * worn.
  */
-export function laurelSprig(side: -1 | 1, leaves = 7) {
+export function laurelSprig(side: -1 | 1, leaves = 7, closed = false) {
   const x0 = 50 + side * 11, y0 = 90;   // at the foot, near the ribbon
   const cx = 50 + side * 47, cy = 62;   // bowing outward
-  const x1 = 50 + side * 27, y1 = 20;   // tip, curling back in over the shoulder
+  // Open: the tip curls back in over the shoulder and tucks behind the medal.
+  // Closed: it carries on over the crown, where the two tips almost touch — they
+  // stop 12 units apart, because two tips that actually meet read as one ring
+  // that someone has drawn a gap in rather than as two branches tied together.
+  const x1 = 50 + side * (closed ? 6 : 27), y1 = closed ? 10 : 20;
   const at = (t: number) => {
     const u = 1 - t;
     return {
@@ -272,7 +299,7 @@ export function laurelSprig(side: -1 | 1, leaves = 7) {
   };
   const leaf: { cx: number; cy: number; rx: number; ry: number; rot: number }[] = [];
   for (let i = 0; i < leaves; i++) {
-    const t = 0.10 + (i / (leaves - 1)) * 0.82;
+    const t = 0.10 + (i / (leaves - 1)) * (closed ? 0.86 : 0.82);
     const p = at(t);
     const ang = (Math.atan2(p.dy, p.dx) * 180) / Math.PI;
     // Leaves shrink toward the tip, which is what makes a sprig read as growing

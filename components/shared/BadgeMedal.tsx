@@ -5,7 +5,7 @@ import Svg, { Path, Ellipse, ClipPath, Defs, G, LinearGradient, Stop } from 'rea
 import Animated, { useAnimatedProps, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import Glyph, { type GlyphName } from './Glyph';
 import {
-  SHAPE, LEN, GLYPH_SCALE, GLYPH_DY, INNER,
+  SHAPE, LEN, GLYPH_SCALE, GLYPH_DY, INNER, COLLAR,
   ribbonPaths, laurelSprig, MEDAL_SCALE, MEDAL_DY,
 } from './badgeShapes';
 // FACE / RIM / FAINT / PAPER_SHADE / MID are gone from this list on purpose:
@@ -38,15 +38,31 @@ import type { BadgeFamily, BadgeTier } from '@/data/badges';
 // distinguished only by a small mark inside says nothing at a glance, and the
 // whole reason the shapes exist is to be readable at a glance.
 //
-// ── TIER MOVED FROM THE EDGE TO THE FLOURISH ────────────────────────────────
+// ── TIER MOVED FROM THE EDGE TO THE FLOURISH, AND THEN RAN OUT ──────────────
 //
 // Tier used to be edge weight: I a hairline, II an inner rule, III a hatched band
 // between them. It worked and it was legible, but the hatch is a lot of ink at
-// 28px and it fights the tonal face below. So tier is now HERALDIC:
+// 28px and it fights the tonal face below. So tier became HERALDIC — the medal
+// alone, then a ribbon, then a wreath.
+//
+// Then two tiers were added to the case and given NO FURNITURE, because the
+// vocabulary had three steps in it and there were now five. Thirty-three of the
+// fifty-odd badges — every tier IV and V, the ones that take months — were the
+// tier-III object in a different metal. That is the same fault the rank ladder
+// was carrying at the same time, one cabinet over, and the reader named it
+// there: everything interesting happens early, and then you climb for a long
+// time to watch a colour change. Five tiers, five objects:
 //
 //   I    the medal alone
 //   II   + a ribbon banner beneath
-//   III  + a laurel wreath around it
+//   III  + two laurel sprigs, open at the top
+//   IV   the sprigs CLOSE over the crown — a laurel worn rather than offered
+//   V    + a collar struck outside the edge
+//
+// The collar is deliberately the SAME GESTURE as the sixth degree of a rank pin,
+// drawn by the same one-line trick (a negative inset on the shape's own
+// function). One vocabulary, used in both cabinets: a ring around a struck thing
+// means "this is as far as this material goes".
 //
 // It was CROSSED SWORDS at III first, since that is what the heraldic reference
 // uses, and a contact sheet killed them: the medal covers the crossing, so all
@@ -75,11 +91,11 @@ import type { BadgeFamily, BadgeTier } from '@/data/badges';
 // the second half is still right, which is why THE FLOURISH IS UNCHANGED —
 // ribbon at II, laurel at III, at exactly the geometry validate-badges measures.
 //
-// Tier is now said twice, in shape and in metal, and that is what struck sets
-// have always done. The flourish carries it for a reader looking at one badge;
-// the metal carries it for a reader scanning fifty, which is the case the
-// flourish alone was weakest at — a ribbon and a wreath are hard to tell apart
-// at the 28px a grid draws, and bronze from gold is not.
+// Tier is now said twice, in furniture and in metal, and that is what struck
+// sets have always done. The furniture carries it for a reader looking at one
+// badge; the metal carries it for a reader scanning fifty, which is the case the
+// furniture alone is weakest at — an open wreath and a closed one are close at
+// the 28px a grid draws, and bronze from gold is not.
 //
 // THE MARK STAYS INK ON EVERY METAL, and that is deliberate rather than lazy.
 // `metal.on` exists for TEXT printed on a plate and is held to 4.5:1; a glyph is
@@ -90,7 +106,9 @@ import type { BadgeFamily, BadgeTier } from '@/data/badges';
 //
 // The ORNAMENT stays ink as well, for a different reason: the laurel and the
 // ribbon tabs sit on PAPER, outside the medal, so they are lit by the page and
-// not by the metal.
+// not by the metal. That rule was written here and then quietly broken when the
+// metals arrived — see `edge` below, and the note on it, which is the whole
+// story of a wreath that was drawn in white on cream for months.
 //
 // LOCKED IS FLAT AND COOL. No gradient, no shadow, no flourish: the ornament
 // arrives when it is won, so a locked tier-III badge never carries more ink than
@@ -126,8 +144,12 @@ const grad = (id: string, stops: Stops) => (
 );
 
 // The furniture, in the OUTER box — the medal is inset to leave room for it.
+// Both wreaths are built once at module scope: they are pure geometry, fifty
+// medals can be on screen at a time, and re-deriving nine leaf placements per
+// badge per render is exactly the sort of thing memoising this component was for.
 const RIBBON = ribbonPaths(84, 34, 13);
-const LAUREL = [laurelSprig(-1), laurelSprig(1)];
+const LAUREL_OPEN = [laurelSprig(-1), laurelSprig(1)];
+const LAUREL_SHUT = [laurelSprig(-1, 9, true), laurelSprig(1, 9, true)];
 
 // MEMOISED. Every prop below is a primitive, so the comparison is exact and no
 // call site can defeat it with a fresh object (the trap Thinkers records for
@@ -152,6 +174,21 @@ export default memo(function BadgeMedal({
   // face was fitted so white clears 3:1 on its lit corner; ink on crimson is
   // the combination that disappears.
   const ink = earned ? ins.on : GHOST;
+  // ── AND THE FURNITURE IS INK, WHICH IT STOPPED BEING WITHOUT ANYONE NOTICING
+  //
+  // The header below this component has said for a long time that "the laurel and
+  // the ribbon tabs sit on PAPER, outside the medal, so they are lit by the page
+  // and not by the metal" — and then the metals arrived, `ink` became `ins.on`,
+  // and `ins.on` is #FFFFFF on every single order by construction (insignia.ts
+  // fitted all eight faces to carry ONE mark colour). So every tier-III badge in
+  // the case has been wearing a WHITE wreath on warm paper: drawn, laid out
+  // correctly, and invisible.
+  //
+  // Nothing could have caught it. The mark is supposed to be white, the laurel is
+  // supposed to take the mark's colour on a metal, and the two rules are correct
+  // separately. It took a contact sheet — scripts/sheet-badges.mjs, written for
+  // the tier redesign — where the wreath simply was not there.
+  const edge = earned ? INK : GHOST;
   const len = LEN[family];
   const outer = SHAPE[family](0);
   const inner = tier > 1 ? SHAPE[family](INNER[tier]) : null;
@@ -161,6 +198,9 @@ export default memo(function BadgeMedal({
   // when there were three tiers, and a set where the highest two carry LESS
   // furniture than the middle one reads as a mistake.
   const wreath = tier >= 3 && earned;
+  // …and from IV it closes over the crown, and at V the medal gains its collar.
+  const laurel = tier >= 4 ? LAUREL_SHUT : LAUREL_OPEN;
+  const collar = tier >= 5 && earned;
 
   // Per-instance, following the rule LoudnessChart wrote down: ClipPath and
   // gradient ids live in a global-ish namespace and two mounted at once must not
@@ -211,16 +251,16 @@ export default memo(function BadgeMedal({
             `swordPaths` is kept in badgeShapes so the choice is one line. */}
         {wreath && (
           <AG animatedProps={innerProps}>
-            {LAUREL.map((sprig, s) => (
+            {laurel.map((sprig, s) => (
               <G key={s}>
-                <Path d={sprig.stem} fill="none" stroke={ink} strokeWidth={2} strokeLinecap="round" />
+                <Path d={sprig.stem} fill="none" stroke={edge} strokeWidth={2} strokeLinecap="round" />
                 {sprig.leaf.map((l, k) => (
                   <Ellipse
                     key={k}
                     cx={l.cx} cy={l.cy} rx={l.rx} ry={l.ry}
                     transform={`rotate(${l.rot.toFixed(1)} ${l.cx.toFixed(2)} ${l.cy.toFixed(2)})`}
                     fill={PAPER}
-                    stroke={ink}
+                    stroke={edge}
                     strokeWidth={1.3}
                   />
                 ))}
@@ -264,6 +304,32 @@ export default memo(function BadgeMedal({
             strokeDasharray={len}
             animatedProps={outlineProps}
           />
+
+          {/* THE COLLAR — the top tier only, so it means "this is as far as this
+              material goes" rather than merely "this is a high tier". Drawn in
+              the metal's own body, because it sits on PAPER outside the medal
+              and everything paler than that vanishes there. It follows the
+              outline's own draw-in rather than appearing whole on a medal that
+              is still being struck. */}
+          {collar && (
+            <APath
+              d={SHAPE[family](COLLAR)}
+              // The metal's BODY. Tier V is aurum and `rule` is #FFFFFF there,
+              // so the near-white that is right for a line drawn ON the metal is
+              // invisible for one drawn on the paper beside it — see the note on
+              // the same ring in RankSeal.
+              stroke={ins.base}
+              // Weighted for the grid, not for the sheet: a badge is drawn at
+              // 52px in the profile cabinet and this stroke is inside the
+              // medal's own 0.74 transform, so 2.6 here lands as under a pixel
+              // and a half there.
+              strokeWidth={2.6}
+              strokeLinejoin="round"
+              fill="none"
+              opacity={0.95}
+              animatedProps={innerProps}
+            />
+          )}
         </G>
 
         {/* THE RIBBON — tier II and III. Over the medal's foot and the swords'
@@ -274,9 +340,9 @@ export default memo(function BadgeMedal({
             {/* The tabs are the band's own metal in shadow — they are the folds
                 BEHIND it, so they take the shaded end of the same ramp rather
                 than a paper grey that would read as a different material. */}
-            <Path d={RIBBON.tabL} fill={ins.shade} stroke={ink} strokeWidth={1.3} strokeLinejoin="round" />
-            <Path d={RIBBON.tabR} fill={ins.shade} stroke={ink} strokeWidth={1.3} strokeLinejoin="round" />
-            <Path d={RIBBON.band} fill={`url(#${face})`} stroke={ink} strokeWidth={1.6} strokeLinejoin="round" />
+            <Path d={RIBBON.tabL} fill={ins.shade} stroke={edge} strokeWidth={1.3} strokeLinejoin="round" />
+            <Path d={RIBBON.tabR} fill={ins.shade} stroke={edge} strokeWidth={1.3} strokeLinejoin="round" />
+            <Path d={RIBBON.band} fill={`url(#${face})`} stroke={edge} strokeWidth={1.6} strokeLinejoin="round" />
           </G>
         )}
       </Svg>

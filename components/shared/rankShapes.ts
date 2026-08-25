@@ -1,77 +1,102 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// THE EIGHT FRAMES — what a rank pin is SHAPED like, and why that changes.
+// THE SIX FRAMES — what a rank pin is SHAPED like, and why that RESETS.
 //
-// A reader, holding the coloured ladder that constants/insignia.ts had just
-// given them: "the rank icons are better, but they don't improve in look. This
-// is what I mean by the improvement in ranks — the icons get prettier, and more
-// complex."
+// ── WHAT THIS FILE USED TO DO, AND WHY IT WAS THE WRONG ANSWER ──────────────
 //
-// They were right and the reason is written into RankSeal's own header, which
-// said the frame does NOT escalate by tier: "a pin is ONE frame, repeated
-// exactly, with the mark inside doing all the distinguishing." That is a good
-// rule for a SET — forty siblings — and the wrong rule for a LADDER, where the
-// whole point is that the top is worth climbing to. Colour alone cannot say it:
-// a jade hexagon and a clay hexagon are the same object in two paints, and
-// paint is not an achievement.
+// It gave each of the eight ORDERS its own silhouette, escalating by accretion
+// all the way up the ladder: disc → plate → hexagon → gem → shield → crested
+// shield → winged → crowned. It answered the complaint it was written for ("the
+// icons get prettier, and more complex") and it created two new ones, both of
+// which the same reader then named:
 //
-// So the silhouette now changes every order, and it changes by ACCRETION —
-// each frame is the one below it plus one thing:
+//   "it only becomes actually complex when the user is really far along. I want
+//    it to become complex when the user gets far on a certain colour, then the
+//    colour resets and so does the complexity … also the ranks that do get more
+//    complex, I don't like that design, looks like horns and then looks as if it
+//    gains wings. I don't want this design at all."
 //
-//   CLAY      disc       a plain circle. The floor: nothing but the mark.
-//   IRON      plate      eight flat facets. The edge is cut for the first time.
-//   BRONZE    hex        six bolder ones. Fewer, larger, deliberate.
-//   JADE      facet      the hexagon notched into twelve points — a cut stone.
-//   LAPIS     shield     the silhouette gains a POINT and a peak. It is no
-//                        longer a token; it is armour, and it has a top.
-//   CRIMSON   crest      + two shoulder spikes. It is worn into an argument.
-//   AMETHYST  winged     + a pair of wings. The first frame wider than it is tall.
-//   AURUM     imperial   + a crown and a ray halo. There is nothing left to add.
+// Both halves are right, and they are the same fault seen from two sides.
+// Spreading ONE escalation over forty-eight ranks means thirty-six of them are
+// somewhere in the dull middle of it: a reader at rank 12 could see that pins
+// got grander later, and had nothing grander to reach in the next six months of
+// reading. And an escalation with forty-eight rungs to fill has to keep adding
+// LIMBS — shoulder spikes, wings, a coronet — long after the token itself has
+// run out of edge to work. Horns and wings are what "keep adding" looks like.
 //
-// ── THE ONE DISCIPLINE THAT MAKES IT SURVIVE 50px ───────────────────────────
+// ── SO COMPLEXITY IS A CYCLE, AND COLOUR IS THE LADDER ──────────────────────
 //
-// RankSeal's header also records what happened the FIRST time ornament
-// escalated here: "so busy at 54px that it fought the glyph it framed". That
-// verdict stands, and the fix is not restraint, it is DIRECTION —
+// The six frames below are keyed on the DEGREE — how far through its order a
+// rank is — not on the order. Every order runs the same six, so:
 //
-//   EVERYTHING ADDED GROWS OUTWARD. The mark's room is `markScale`, and it is
-//   flat across all eight frames (0.36–0.40 of the box). A crown, a wing, a
-//   spike and a ray all live in the margin the low frames simply leave empty:
-//   the disc is 66 units across in a 100-unit box, the imperial is 96. The
-//   ladder grows into its own frame rather than crowding its mark.
+//   · a reader always has a grander shape three ranks away, wherever they are;
+//   · the reward for finishing an order is a NEW MATERIAL, which is the thing
+//     constants/insignia.ts was built to escalate and the thing the reader said
+//     they liked ("the colour palette … will look better");
+//   · and no frame ever has to be the eighth step of anything, so none of them
+//     needs a limb. The whole ladder is one worked token.
 //
-// That is also why the footprint escalation is legible at any size — a reader
-// comparing two pins side by side sees one fill more of its slot, which no
-// amount of detail can say at 50px.
+//   0  DISC      a plain circle. Cast, uncut: nothing but the mark.
+//   1  HEX       six flats. The edge is cut for the first time.
+//   2  PLATE     eight. Finer work on the same idea.
+//   3  GEM       the flats are cut back into facets — six points, six valleys.
+//   4  SCALLOP   the edge stops being straight at all: eight bowed lobes.
+//   5  ROSETTE   twelve of them, the finest edge in the set, and a collar around
+//                the whole thing. The capstone of its colour.
+//
+// ANGULAR, THEN CURVED, and that order is not a preference. The first draft ran
+// disc · hex · plate · scallop · gem · rosette, and the contact sheet showed the
+// fault at once: a scalloped pin followed by a faceted one and then a scalloped
+// one again reads as the ladder changing its mind. Straight edges are worked
+// into more straight edges, then into curved ones, then into finer curved ones —
+// one direction, no doubling back.
+//
+// Read down a column of the contact sheet and it is one object being worked
+// harder; read across a row and it is the same six struck in a better material.
+//
+// ── THE TWO DISCIPLINES THAT MAKE IT SURVIVE 44px ───────────────────────────
+//
+// EVERYTHING GROWS OUTWARD. `markScale` is flat (0.37–0.40 of the box) across
+// all six while the drawn area grows by half again. A rank-6 pin is not a rank-1
+// pin with a smaller glyph in it, and RankSeal's oldest warning — ornament "so
+// busy that it fought the glyph it framed" — cannot recur, because nothing added
+// here is inside the mark's room.
+//
+// NOTHING IS MADE OF TIPS. §19 wrote this down about a different mark: crossed
+// swords behind a medal were "horns at 168px, mush at the 66px the badge grid
+// actually draws", while "a laurel is a continuous curved mass, so being
+// half-covered costs it nothing". A wing, a coronet and a sunburst are all the
+// sword problem. A lobe, a facet and a collar are the laurel one.
 //
 // ── ZERO IMPORTS, for the reason rig.ts and tone.ts have zero imports ───────
 //
-// scripts/sheet-ranks.mjs renders every frame in every order in plain Node and
-// writes a contact sheet, so all forty-eight pins can be LOOKED at without a
-// device (§21). Everything below that is written as a correction was found
-// there, before any of it reached a phone: two wings that were not wings, a halo
-// painted in a tone that happens to be white on the one order that has it, and a
-// coronet that vanished into the halo behind it. None of those is a defect a
-// number could have caught, and every number was already green.
+// scripts/sheet-ranks.mjs renders all forty-eight pins in plain Node and writes
+// a contact sheet, so they can be LOOKED at without a device (§21). That is how
+// the wing died twice and the coronet once, and it is how the numbers below were
+// settled.
 //
 // Geometry is a 100×100 viewBox centred on (50,50), y DOWN, and every path is
 // emitted with absolute M/L/C/Z only — scripts/lib/rasterpath.mjs understands
 // exactly that subset and no arcs at all.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type FrameName =
-  | 'disc' | 'plate' | 'hex' | 'facet' | 'shield' | 'crest' | 'winged' | 'imperial';
+export type FrameName = 'disc' | 'hex' | 'plate' | 'gem' | 'scallop' | 'rosette';
 
 /**
- * Bottom of the ladder to the top, ONE PER ORDER.
+ * ONE PER DEGREE, plainest first — NOT one per order.
  *
- * The index lines up with `ORDERS` in constants/insignia.ts, and
- * scripts/check-ui.mjs asserts the two arrays are the same length — a frame
- * list that falls out of step with the order list would silently strike a whole
- * order in the wrong shape.
+ * The index is the rank's position inside its own order (`degreeOf` in
+ * constants/insignia.ts), so this array is the same length as `DEGREES` and
+ * scripts/check-ui.mjs asserts it. A frame list that fell out of step with the
+ * degree count would leave one rung of every order unreachable, in every colour
+ * at once.
  */
-export const FRAMES: FrameName[] = [
-  'disc', 'plate', 'hex', 'facet', 'shield', 'crest', 'winged', 'imperial',
-];
+export const FRAMES: FrameName[] = ['disc', 'hex', 'plate', 'gem', 'scallop', 'rosette'];
+
+/** The frame a rank's degree is struck in. Clamped, so an over-run stays legal. */
+export function frameForDegree(degree: number): FrameName {
+  const d = Math.floor(degree) || 0;
+  return FRAMES[Math.max(0, Math.min(FRAMES.length - 1, d))];
+}
 
 /** How far inside the edge the inner rule is drawn. */
 export const INNER = 5;
@@ -97,12 +122,19 @@ function poly(r: number, sides: number, rot: number): string {
 /**
  * A notched polygon — `points` outer vertices with an inner vertex between each.
  *
- * A regular twelve-gon is the obvious way to say "more facets than a hexagon"
- * and it is the wrong one: at 50px a twelve-sided regular polygon has no corner
- * the eye can find, so the fourth rung of the ladder would have read as the
- * first — a disc. Notching it puts the corners back. The outline still turns
- * twelve times, but six of those turns are RE-ENTRANT, and a re-entrant corner
- * survives being small in a way a 150° one does not.
+ * A regular twelve-gon is the obvious way to say "more facets than an octagon"
+ * and it is the wrong one: at 44px a twelve-sided regular polygon has no corner
+ * the eye can find, so that rung would have read as the first — a disc. Notching
+ * it puts the corners back. The outline still turns twelve times, but six of
+ * those turns are RE-ENTRANT, and a re-entrant corner survives being small in a
+ * way a 150° one does not.
+ *
+ * HOW DEEP IS THE WHOLE QUESTION, and the contact sheet answered it twice. At a
+ * valley of 0.85 the notch does not even reach the flat it is cut into — a
+ * hexagon's own edge dips to cos(30°) = 0.866 of its radius at the midpoint — so
+ * the pin rendered as a slightly dented HEXAGON, which is the rung two below it
+ * in a brighter colour. At 0.74 it is a SHERIFF'S STAR: six long spikes, which is
+ * the family of shape this whole redesign exists to remove. 0.81 is a cut stone.
  */
 function notched(r: number, inner: number, points: number, rot: number): string {
   const p: string[] = [];
@@ -112,6 +144,33 @@ function notched(r: number, inner: number, points: number, rot: number): string 
     p.push(pt(CX + rr * Math.cos(a), CY + rr * Math.sin(a)));
   }
   return `M${p.join(' L')} Z`;
+}
+
+/**
+ * A CUSPED edge — `lobes` outward bows meeting at cusps on a smaller radius.
+ *
+ * This is the one primitive that is neither straight nor spiked, and it is what
+ * lets the ladder go on getting finer after the polygons have run out without
+ * turning into a fringe. Eight deep lobes read as scalloped; twelve shallow ones
+ * read as milled, the way a coin's edge is.
+ *
+ * Each lobe is ONE cubic, and the control radius is solved rather than guessed:
+ * a symmetric cubic's midpoint is (P0 + 3·P1 + 3·P2 + P3)/8, so projecting that
+ * onto the lobe's own axis and setting it equal to `r` gives the radius the two
+ * control points have to sit at. Nudging a control point by eye instead is how
+ * a lobe ends up not quite reaching the radius its neighbours were measured at.
+ */
+function cusped(r: number, inner: number, lobes: number): string {
+  const step = (2 * Math.PI) / lobes;
+  // The control radius that makes the bow's midpoint land exactly on `r`.
+  const rc = (8 * r - 2 * inner * Math.cos(step / 2)) / (6 * Math.cos(step / 6));
+  const at = (rad: number, a: number) => pt(CX + rad * Math.cos(a), CY + rad * Math.sin(a));
+  let d = `M${at(inner, -step / 2)}`;
+  for (let i = 0; i < lobes; i++) {
+    const a0 = -step / 2 + i * step;
+    d += ` C${at(rc, a0 + step / 3)} ${at(rc, a0 + (2 * step) / 3)} ${at(inner, a0 + step)}`;
+  }
+  return `${d} Z`;
 }
 
 /** A circle as the four cubics every renderer draws one with. */
@@ -126,214 +185,68 @@ function circle(r: number): string {
   );
 }
 
-/**
- * The shield family, authored once at k = 1 and scaled about the centre.
- *
- * `spikes` raises the two top corners into points and is the whole difference
- * between LAPIS and CRIMSON. The top edge carries a shallow peak either way:
- * a flat-topped heater shield reads as a tombstone, and the peak is what makes
- * it read as something with a front.
- */
-function shieldish(k: number, spikes: boolean): string {
-  const P = (x: number, y: number) => pt(CX + (x - CX) * k, CY + (y - CY) * k);
-  const top = spikes
-    ? `M${P(16, 22)} L${P(7, 11)} L${P(27, 17)} L${P(50, 10)} L${P(73, 17)} L${P(93, 11)} L${P(84, 22)}`
-    : `M${P(16, 17)} L${P(50, 12)} L${P(84, 17)}`;
-  return (
-    `${top} L${P(84, 48)}` +
-    ` C${P(84, 70)} ${P(68, 84)} ${P(50, 92)}` +
-    ` C${P(32, 84)} ${P(16, 70)} ${P(16, 48)} Z`
-  );
-}
+// ── the six ─────────────────────────────────────────────────────────────────
 
 /**
- * One wing, springing from the shield's shoulder and swept back and up.
+ * How far each frame reaches, and how deep its cusps or notches cut.
  *
- * THREE COVERTS, NOT A FEATHER FAN. The first attempt drew nine tapering
- * quills; at 50px they merged into a solid lobe with a fringe and the sheet's
- * verdict was written down as "a moustache". Three broad, overlapping coverts
- * survive being small, because each one is still several pixels deep when the
- * whole wing is twenty across.
- */
-function wing(side: 1 | -1, m = 0): string {
-  const k = (52 - m) / 52;                       // 52 = the wing's own reach
-  const P = (x: number, y: number) =>
-    pt(CX + (x - CX) * side * k, CY + (y - CY) * k);
-  return (
-    // The leading edge: one unbroken curve from a root hidden behind the shield,
-    // sweeping UP and OUT. THE TIP HAS TO FINISH HIGHER THAN THE ROOT. The
-    // second attempt at this ran level, out to the side, and read as a serrated
-    // collar — a wing is a diagonal before it is anything else.
-    `M${P(50, 60)}` +
-    ` C${P(62, 40)} ${P(80, 24)} ${P(96, 24)}` +
-    // …then the trailing edge back along the diagonal, four feathers deep. Each
-    // notch cuts in about six units and NONE of them reaches back past the
-    // leading edge — the first attempt let them, and what came out was not a
-    // feathered wing but three loose petals with daylight between them.
-    ` L${P(97, 37)} L${P(84, 31)}` +
-    ` L${P(89, 46)} L${P(75, 40)}` +
-    ` L${P(80, 55)} L${P(66, 50)}` +
-    ` L${P(71, 64)} L${P(57, 60)}` +
-    ` C${P(55, 61)} ${P(52, 61)} ${P(50, 60)} Z`
-  );
-}
-
-/** Both wings, pulled in — the renderer lays this over a full-size copy in the
- *  rim tone, because a dark wing against a dark shield on pale paper is one mass
- *  unless something turns its edge. Same trick the coronet needs. */
-export const wingsInset = (m: number) => `${wing(1, m)} ${wing(-1, m)}`;
-
-
-
-
-/**
- * A five-point coronet, sitting clear above the crest's peak.
- *
- * IT WAS A SAW, AND THE CAUSE WAS ACCRETION TAKEN LITERALLY. The rule this file
- * was built on — "each frame is the one below it plus one thing" — put wings AND
- * a crown AND a halo on the capstone, and at 2× the sheet showed the result
- * honestly: three ornaments arguing over the same silhouette, with the coronet's
- * points reading as the teeth of whatever was behind them. A reader had already
- * said it in fewer words: the complex pins at the end look worse.
- *
- * So the top two orders now own ONE signature each — amethyst the wings, aurum
- * the wreath — and the coronet is drawn to be read rather than to be counted:
- * five points instead of three-plus-fill, a tall centre, and its feet lifted off
- * the shield so paper shows between them.
- */
-function crown(m: number): string {
-  const P = (x: number, y: number) => {
-    const k = (30 - m) / 30;                     // 30 = its own half-height
-    return pt(CX + (x - CX) * k, 26 + (y - 26) * k);
-  };
-  return (
-    `M${pt(32 + m, 22)}` +
-    ` L${P(34, 8)} L${P(41, 15)} L${P(50, 0)} L${P(59, 15)} L${P(66, 8)}` +
-    ` L${pt(68 - m, 22)} Z`
-  );
-}
-
-/** The coronet pulled in, for the renderer to lay over the rimmed copy. */
-export const crownInset = (m: number) => crown(m);
-
-/**
- * THE WREATH — and it replaces a sixteen-spike sunburst, deliberately.
- *
- * The halo that was here read as cheap at the size it is actually drawn: sixteen
- * tapered spikes at 50px are a fringe, and a reader's verdict on the whole top of
- * the ladder was that the complex pins "look bad". §19 already learned exactly
- * why, on a different mark: crossed swords behind a medal came out as "horns at
- * 168px, mush at the 66px the badge grid actually draws", while "a laurel is a
- * continuous curved mass, so being half-covered costs it nothing". A sunburst is
- * the sword problem — it is nothing BUT tips, and the shield covers the half
- * where they would have joined up.
- *
- * So the capstone is wreathed instead. Ten leaves a side on a stem that sweeps
- * from under the point out and up to the shoulder, each leaf angled along the
- * stem's own tangent so the branch reads as grown rather than assembled.
- */
-function leaf(x: number, y: number, ang: number, len: number, wide: number): string {
-  const cos = Math.cos(ang), sin = Math.sin(ang);
-  // along the stem, and across it
-  const A = (u: number, v: number) => pt(x + u * cos - v * sin, y + u * sin + v * cos);
-  return (
-    `M${A(0, 0)}` +
-    ` C${A(len * 0.35, -wide)} ${A(len * 0.75, -wide * 0.8)} ${A(len, 0)}` +
-    ` C${A(len * 0.75, wide * 0.8)} ${A(len * 0.35, wide)} ${A(0, 0)} Z`
-  );
-}
-
-function branch(side: 1 | -1): string {
-  const N = 10;
-  const out: string[] = [];
-  // The stem as a quadratic from the foot to the shoulder, sampled for both the
-  // leaf positions and the tangent each leaf sits on.
-  const P0 = { x: 50, y: 92 }, P1 = { x: 50 + side * 52, y: 78 }, P2 = { x: 50 + side * 44, y: 16 };
-  for (let i = 0; i < N; i++) {
-    const t = 0.10 + (i / (N - 1)) * 0.86;
-    const mt = 1 - t;
-    const x = mt * mt * P0.x + 2 * mt * t * P1.x + t * t * P2.x;
-    const y = mt * mt * P0.y + 2 * mt * t * P1.y + t * t * P2.y;
-    const dx = 2 * mt * (P1.x - P0.x) + 2 * t * (P2.x - P1.x);
-    const dy = 2 * mt * (P1.y - P0.y) + 2 * t * (P2.y - P1.y);
-    // Leaves point BACK down the stem, the way a laurel actually grows, and
-    // shorten toward the tip so the branch tapers instead of ending in a stub.
-    const ang = Math.atan2(dy, dx) + Math.PI + side * 0.55;
-    const k = 1 - i / (N + 5);
-    out.push(leaf(x, y, ang, 15 * k, 4.6 * k));
-  }
-  return out.join(' ');
-}
-
-/** Both branches. Drawn behind the shield, so the halves that meet are hidden. */
-function wreath(): string {
-  return `${branch(1)} ${branch(-1)}`;
-}
-
-
-// ── the eight ───────────────────────────────────────────────────────────────
-
-/**
- * How wide the frame's core reaches, and the radius its own author drew it at.
- *
- * `outer` is the escalation: 33 units for clay, 42 for crimson. `authored` is
- * only bookkeeping — the shield family is drawn once at full size and scaled,
- * so an inset of `m` has to become a scale factor of (outer − m) / authored.
+ * THE LADDER IS MEASURED BY AREA, NOT BY REACH, and check-ui measures it that
+ * way for a reason this table makes plain: the hexagon reaches further than the
+ * octagon above it (37 against 34.2 at the tile edge) because it spends its
+ * reach on two points and leaves the rest of its slot empty. Reach punishes a
+ * shape for being round, and the gem — which spends nearly a third of its
+ * outline in the valleys between its points — would be punished hardest by it.
+ * Ink on the page is what a reader actually compares, so the drawn areas are the
+ * monotone series, and check-ui re-derives them: half again from bottom to top.
  */
 const OUTER: Record<FrameName, number> = {
-  // PLATE IS 37 TO BE BIGGER THAN A 33-UNIT DISC, which is not the arithmetic
-  // anyone expects. An octagon at this rotation presents its FLAT to the tile
-  // edge, and the flat of a circumradius-35 octagon is 32.3 — narrower than the
-  // disc below it on the ladder. check-ui caught it; a radius is not a footprint.
-  disc: 33, plate: 37, hex: 37, facet: 39,
-  // THE WINGED CORE IS SMALLER THAN THE CREST BELOW IT, on purpose. The footprint
-  // still grows — the wings take it from 86 units of the tile to 94 — but the
-  // shield has to step back or the wings are shoulder flaps. At 37 they stuck out
-  // eleven units either side and read as flares; at 34 they stick out sixteen and
-  // read as wings.
-  shield: 40, crest: 43, winged: 34, imperial: 34,
+  disc: 33, hex: 37, plate: 37, gem: 41, scallop: 40.5, rosette: 42,
 };
-const AUTHORED: Record<FrameName, number> = {
-  disc: 33, plate: 37, hex: 37, facet: 39,
-  shield: 40, crest: 43, winged: 43, imperial: 43,
+
+/**
+ * How far outside its own edge the capstone's collar is struck.
+ *
+ * 5, and it started at 3.4, which is what it was when a collar was the sixth
+ * step of an eight-frame ladder and nobody had drawn one at 44px. Count the
+ * pixels: the rim is a 2.4-wide stroke ON the edge, so it reaches 1.2 units
+ * out; the collar is 2 wide, so it reaches 1 unit in. At 3.4 that leaves 1.2
+ * units of paper between two dark rings — half a pixel on a Profile pin, which
+ * is not a gap, it is an edge that has got thicker. The top two frames gave up
+ * a unit and a half of reach to pay for this, and the area ladder is unchanged
+ * because area is not reach.
+ */
+export const COLLAR = -5;
+
+/**
+ * How far the valleys cut back, as a fraction of `OUTER`.
+ *
+ * THE GEM'S 0.74 IS THE ONE NUMBER HERE THAT WAS WRONG, and the contact sheet
+ * is what said so. It was 0.85, which sounds like a deep bite and is not one: a
+ * hexagon's own edge already dips to cos(30 deg) = 0.866 of its radius at the
+ * midpoint, so notching to 0.85 cut the outline back by six tenths of a unit and
+ * the fifth rung of every order rendered as a slightly dented HEXAGON — the
+ * second rung, one colour brighter. A notch has to clear the flat it is cut into
+ * before it is a notch at all.
+ */
+const VALLEY: Record<'gem' | 'scallop' | 'rosette', number> = {
+  gem: 0.81, scallop: 0.85, rosette: 0.90,
 };
 
 /**
  * THE CORE, as a function of how far it is pulled in from its own edge.
  *
  * The same signature `SHAPE` in badgeShapes.ts uses, and for the same reason:
- * a rim is this path at m = 0 with the face at m = 1.4 laid over it, and the
+ * a rim is this path at m = 0 with the face at m = 1.7 laid over it, and the
  * inner rule is it again at m = INNER. A NEGATIVE m grows it, which is how the
  * capstone's outer collar is drawn without a second set of geometry.
  */
 export const CORE: Record<FrameName, (m: number) => string> = {
   disc: (m) => circle(OUTER.disc - m),
-  plate: (m) => poly(OUTER.plate - m, 8, Math.PI / 8),
   hex: (m) => poly(OUTER.hex - m, 6, 0),
-  facet: (m) => notched(OUTER.facet - m, (OUTER.facet - m) * 0.79, 6, 0),
-  shield: (m) => shieldish((OUTER.shield - m) / AUTHORED.shield, false),
-  crest: (m) => shieldish((OUTER.crest - m) / AUTHORED.crest, true),
-  winged: (m) => shieldish((OUTER.winged - m) / AUTHORED.winged, true),
-  imperial: (m) => shieldish((OUTER.imperial - m) / AUTHORED.imperial, true),
-};
-
-/** Ornament that lives OUTSIDE the core, drawn behind it. Null for most frames. */
-export interface Ornament {
-  wings: string | null;
-  crown: string | null;
-  rays: string | null;
-}
-
-const NONE: Ornament = { wings: null, crown: null, rays: null };
-const WINGS = wingsInset(0);
-
-export const ORNAMENT: Record<FrameName, Ornament> = {
-  disc: NONE, plate: NONE, hex: NONE, facet: NONE, shield: NONE, crest: NONE,
-  winged: { wings: WINGS, crown: null, rays: null },
-  // ONE SIGNATURE EACH. Amethyst keeps the wings; the capstone is crowned and
-  // wreathed and does NOT also wear them. Piling all three on one silhouette is
-  // what made the end of the ladder look worse than the middle.
-  imperial: { wings: null, crown: crown(0), rays: wreath() },
+  plate: (m) => poly(OUTER.plate - m, 8, Math.PI / 8),
+  gem: (m) => notched(OUTER.gem - m, (OUTER.gem - m) * VALLEY.gem, 6, 0),
+  scallop: (m) => cusped(OUTER.scallop - m, (OUTER.scallop - m) * VALLEY.scallop, 8),
+  rosette: (m) => cusped(OUTER.rosette - m, (OUTER.rosette - m) * VALLEY.rosette, 12),
 };
 
 // ── what a renderer needs to know about a frame it has never seen ───────────
@@ -347,26 +260,18 @@ export interface FrameGeom {
   studs: [number, number][];
   /** The mark's size, as a fraction of the pin's drawn box. */
   markScale: number;
-  /** And how far above centre it sits — a shield's mass is not in its middle. */
+  /** And how far above centre it sits. Zero here — every frame is centred. */
   markDy: number;
 }
 
 /**
- * THE MARK'S ROOM IS ALMOST FLAT ACROSS THE LADDER, and that is the point.
+ * THE MARK'S ROOM IS ALMOST FLAT ACROSS THE SIX, and that is the point.
  *
- * 0.40 down to 0.36 — a 10% spread over eight frames that grow their footprint
- * by 45%. Everything the ladder gains it gains OUTSIDE the mark, so a
- * hierophant's pin is not a Grand Philosopher's pin with a smaller glyph in it.
+ * 0.40 down to 0.37 — an 8% spread over six frames whose drawn area grows by
+ * 54%. Everything a rung gains it gains OUTSIDE the mark.
  */
-const MARK: Record<FrameName, [number, number]> = {
-  disc: [0.40, 0],
-  plate: [0.40, 0],
-  hex: [0.39, 0],
-  facet: [0.37, 0],
-  shield: [0.37, -0.035],
-  crest: [0.37, -0.025],
-  winged: [0.36, -0.02],
-  imperial: [0.36, -0.02],
+const MARK: Record<FrameName, number> = {
+  disc: 0.40, hex: 0.39, plate: 0.39, gem: 0.37, scallop: 0.38, rosette: 0.37,
 };
 
 /**
@@ -377,9 +282,9 @@ const MARK: Record<FrameName, [number, number]> = {
  * so two studs, four studs and six studs are all balanced, and the pin never
  * looks knocked askew part-way through an order.
  *
- * Straight up and straight down are both deliberately empty. Down is where a
- * shield's point is and up is where its peak and its crown are — a stud there
- * would sit on the one part of the frame that is doing something else.
+ * Straight up and straight down are both deliberately empty — that is where a
+ * progress arc opens and closes, and a stud sitting on the seam would read as
+ * the arc having a defect.
  */
 const STUD_ANGLES = [180, 0, 235, 305, 125, 55];
 
@@ -409,19 +314,40 @@ export function frameGeom(name: FrameName): FrameGeom {
     return [CX + r * Math.cos(a), CY + r * Math.sin(a)] as [number, number];
   });
 
-  const [markScale, markDy] = MARK[name];
   const geom: FrameGeom = {
     outline: `M${rot.map(([x, y]) => pt(x, y)).join(' L')} Z`,
     perimeter,
     studs,
-    markScale,
-    markDy,
+    markScale: MARK[name],
+    markDy: 0,
   };
   CACHE.set(name, geom);
   return geom;
 }
 
-// ── the small amount of maths the two answers above need ────────────────────
+/**
+ * The area the frame actually covers, by the shoelace on its own flattened
+ * outline. This is the ladder's monotone quantity — see the note on `OUTER`.
+ */
+export function frameArea(name: FrameName): number {
+  const ring = flatten(CORE[name](0));
+  let a = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const [x1, y1] = ring[i];
+    const [x2, y2] = ring[(i + 1) % ring.length];
+    a += x1 * y2 - x2 * y1;
+  }
+  return Math.abs(a) / 2;
+}
+
+/** How far the frame reaches from centre, on the flattened outline. */
+export function frameReach(name: FrameName, m = 0): number {
+  return flatten(CORE[name](m)).reduce(
+    (far, [x, y]) => Math.max(far, Math.hypot(x - CX, y - CY)), 0,
+  );
+}
+
+// ── the small amount of maths the answers above need ────────────────────────
 
 /**
  * Absolute M / L / C / Z into a point list. Not a general SVG parser and not

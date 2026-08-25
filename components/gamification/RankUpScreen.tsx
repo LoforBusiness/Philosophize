@@ -23,11 +23,11 @@ import { LIP } from '@/constants/design';
 //
 // They were exactly right, and it was worse than merely plain. Every other place
 // a rank appears — Profile, the showcase, the ranks sheet — draws the real
-// struck PIN: its order's material, its order's silhouette, its degree of
+// struck PIN: its order's material, its degree's silhouette and its degree of
 // finish. This screen drew `<Glyph>` on paper inside a thin ink ring. So the one
 // moment in the whole app that exists to say "your rank changed" was the only
 // one that showed the reader nothing about what it changed TO, and a reader who
-// had just crossed from Lapis into Crimson — new colour, new shape — saw a black
+// had just crossed from Lapis into Crimson — a whole new material — saw a black
 // line drawing either side of the boundary.
 //
 // It shows both pins now, and the swap is the beat: the pin they HELD is on

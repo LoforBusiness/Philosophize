@@ -465,43 +465,65 @@ const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
 }
 
 
-// ── 4c · the eight FRAMES ────────────────────────────────────────────────────
+// ── 4c · the six FRAMES, and the direction they run in ───────────────────────
 //
-// components/shared/rankShapes.ts gives every order its own silhouette, because
-// a reader told us colour alone was not enough: "the rank icons are better, but
-// they don't improve in look — the icons get prettier, and more complex."
+// components/shared/rankShapes.ts gives every DEGREE its own silhouette — not
+// every order, which is what it used to do. A reader on that version: "it only
+// becomes actually complex when the user is really far along. I want it to
+// become complex when the user gets far on a certain colour, then the colour
+// resets and so does the complexity."
 //
 // scripts/sheet-ranks.mjs is how the shapes are JUDGED; this is what stops them
 // breaking. Everything below is a defect a picture cannot report:
 //
 //   · a frame that outgrows the 100x100 viewBox is CLIPPED, silently, on every
-//     screen at once. The wing tips and the crown sit within four units of the
-//     edge, so this has almost no slack left in it.
-//   · a footprint that does not grow up the ladder means an order that reads as
-//     a step BACKWARDS — the whole thing this file exists to prevent.
+//     screen at once — and the capstone's collar is drawn OUTSIDE its edge, so
+//     the top rung of every order is the one with the least slack;
+//   · a rung that does not cover more of the page than the rung below it reads
+//     as a step BACKWARDS, in all eight colours at once;
 //   · a mark that shrinks to make room for ornament is the failure RankSeal's
-//     header records from the last time ornament escalated here.
+//     header records from the first time ornament escalated here.
 {
   const frames = R.FRAMES;
-  ok(frames.length === I.ORDERS.length,
-    'one frame per order', `${frames.length} frames, ${I.ORDERS.length} orders`);
+  ok(frames.length === I.DEGREES,
+    'one frame per degree, not per order', `${frames.length} frames, ${I.DEGREES} degrees`);
   ok(new Set(frames).size === frames.length, 'no frame is used twice', frames.join(' '));
+  // The shape is chosen by the degree at the ONE place it is chosen. A frame
+  // list keyed on the degree that a renderer then indexes by order would put the
+  // whole redesign back exactly as it was, silently.
+  const seal = fs.readFileSync(path.join(REPO, 'components/shared/RankSeal.tsx'), 'utf8');
+  ok(/frameForDegree\(degree\)/.test(seal) && !/FRAMES\[/.test(seal),
+    'the pin takes its shape from the degree and nothing else');
 
-  // The extent of everything a frame can draw, ornament included.
-  const spanOf = (name) => {
-    const orn = R.ORNAMENT[name];
-    const d = [R.CORE[name](0), orn.wings, orn.crown, orn.rays].filter(Boolean).join(' ');
-    const nums = d.match(/-?\d*\.?\d+/g).map(Number);
-    let lo = Infinity, hi = -Infinity;
-    for (const v of nums) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
-    return [lo, hi];
-  };
+  // NO LIMBS. Wings, a coronet and a ray halo were the top three rungs of the old
+  // ladder and the reader ruled on all of them: "looks like horns and then looks
+  // as if it gains wings. I don't want this design at all." A frame is a worked
+  // edge; the moment something sprouts off one, this fails.
+  const shapes = fs.readFileSync(path.join(REPO, 'components/shared/rankShapes.ts'), 'utf8');
+  const limbs = ['wing', 'crown', 'coronet', 'spike', 'halo', 'wreath', 'sunburst'];
+  const declared = [...shapes.matchAll(/(?:export\s+)?(?:const|function)\s+([A-Za-z_]\w*)/g)]
+    .map((m) => m[1]);
+  const found = declared.filter((n) => limbs.some((w) => n.toLowerCase().includes(w)));
+  ok(found.length === 0, 'no frame grows a limb', found.length ? found.join(' ') : 'no wings, no coronet, no rays');
 
-  let prev = 0;
+  let prevArea = 0;
   for (const name of frames) {
-    const [lo, hi] = spanOf(name);
-    ok(lo >= 0 && hi <= 100, `frame ${name} stays inside the viewBox`,
-      `${lo.toFixed(1)} .. ${hi.toFixed(1)}, need 0 .. 100`);
+    // MEASURED ON THE FLATTENED OUTLINE, not on the raw path numbers. A cusped
+    // lobe's control points sit further out than the curve they steer — the
+    // rosette's are at radius 49 for an edge that reaches 43.5 — so reading the
+    // numbers out of the `d` string reports a frame as nearly clipped when it is
+    // nowhere near it.
+    const reach = R.frameReach(name);
+    // 49, not 50: the collar is stroked, so half its width lives outside the
+    // path it is drawn on.
+    ok(reach <= 49, `frame ${name} stays inside the viewBox`,
+      `reaches ${reach.toFixed(1)} of 50`);
+    // …and the capstone's collar, which is the same path grown outward.
+    const collar = R.frameReach(name, R.COLLAR);
+    ok(collar <= 49, `frame ${name}'s collar stays inside it too`,
+      `${collar.toFixed(1)} of 50`);
+    ok(collar > reach, `frame ${name}'s collar sits outside its edge`,
+      `${collar.toFixed(1)} vs ${reach.toFixed(1)}`);
 
     const g = R.frameGeom(name);
     ok(g.perimeter > 100, `frame ${name} has a measurable edge to run an arc along`,
@@ -514,30 +536,75 @@ const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
     ok(g.markScale >= 0.34 && g.markScale <= 0.42,
       `frame ${name} leaves the mark its room`, `markScale ${g.markScale}`);
 
-    // THE FOOTPRINT IS THE WHOLE OBJECT, ornament included, and it is measured
-    // as the tile it fills rather than as a radius. Two reasons, both of which
-    // this check found the hard way:
-    //   · an octagon presents its FLAT to the tile edge, so a circumradius that
-    //     is larger than the disc below it can still draw something narrower;
-    //   · the winged frames deliberately SHRINK their core to make room for the
-    //     wings, so a core-only measure reports the two grandest pins on the
-    //     ladder as a step backwards.
-    const span = Math.max(hi - 50, 50 - lo) * 2;
-    ok(span >= prev - 0.01, `frame ${name} is not smaller than the rung below it`,
-      `fills ${span.toFixed(1)} of 100, previous ${prev.toFixed(1)}`);
-    prev = span;
+    // THE LADDER IS MEASURED BY AREA, NOT BY REACH, and the table in rankShapes
+    // says why: reach punishes a shape for being ROUND. The hexagon reaches
+    // further than the octagon above it because it spends its reach on two
+    // points and leaves the rest of its slot empty, and the gem spends a third
+    // of its outline in valleys. Ink on the page is what a reader compares.
+    const area = R.frameArea(name);
+    ok(area > prevArea, `frame ${name} covers more of the page than the rung below`,
+      `${area.toFixed(0)} sq units, previous ${prevArea.toFixed(0)}`);
+    prevArea = area;
   }
 
-  // A negative inset GROWS the frame, which is how the capstone's collar is
-  // drawn. If that ever stops working the sixth rank of every order loses its
-  // one distinguishing mark and nothing else changes.
-  for (const name of frames) {
-    const grown = R.CORE[name](-3.4).match(/-?\d*\.?\d+/g).map(Number);
-    const tight = R.CORE[name](0).match(/-?\d*\.?\d+/g).map(Number);
-    const reach = (a) => Math.max(...a.map((v) => Math.abs(v - 50)));
-    ok(reach(grown) > reach(tight), `frame ${name}'s collar sits outside its edge`,
-      `${reach(grown).toFixed(1)} vs ${reach(tight).toFixed(1)}`);
+  // A capstone that is not half again the size of the plainest rung is not a
+  // capstone. This is the one number that says the CYCLE is worth climbing, as
+  // opposed to merely being ordered.
+  const grew = R.frameArea(frames[frames.length - 1]) / R.frameArea(frames[0]);
+  ok(grew >= 1.4, 'the capstone is visibly bigger than the plain pin',
+    `${grew.toFixed(2)}x the area, floor 1.4`);
+}
+
+
+// ── 4d · anything struck OUTSIDE an edge is sitting on PAPER ─────────────────
+//
+// This trap has now been walked into three times, in three different files, and
+// every time it looked like a different bug:
+//
+//   · the rank pin's ray halo, painted in the order's `rule` — and AURUM's
+//     `rule` is #FFFFFF, so the top rank of the ladder wore an ornament nobody
+//     could see (insignia.ts records the fix);
+//   · the badge case's laurel wreath, stroked in `ins.on` — which insignia.ts
+//     fitted to ONE value, #FFFFFF, for every order by construction. Every
+//     tier-III badge has been wearing a white wreath on cream;
+//   · and then the capstone collar, in `rule` again, on both ladders at once.
+//
+// The rule underneath all three: `on` and `rule` are toned for the METAL. The
+// moment a mark is drawn beyond the edge it is on PAPER, and paper needs its own
+// tone. So the collar takes the material's BODY, and this is what says so.
+{
+  const paper = lum(D.C.paper);
+  for (const name of I.ORDERS) {
+    const m = I.ORDER[name];
+    // 3:1 — a graphic, not text. Same floor the marks are held to.
+    ok(ratio(lum(m.base), paper) >= 3,
+      `${name}: its body reads on paper, so a collar drawn in it does too`,
+      `${ratio(lum(m.base), paper).toFixed(2)}:1, need 3`);
   }
+  // …and the tones that do NOT, which is what makes the line above worth having.
+  const blind = I.ORDERS.filter((n) => ratio(lum(I.ORDER[n].rule), paper) < 3);
+  ok(blind.length >= 4, 'and the near-whites genuinely would not have',
+    `${blind.length} of ${I.ORDERS.length} orders vanish on paper in their own rule: ${blind.join(' ')}`);
+
+  // ANCHORED ON THE THING THAT DRAWS IT, not on the word COLLAR — the first
+  // occurrence of that in both files is the import line, and a window measured
+  // from there reaches no code at all. The counter-test caught this: the guard
+  // reported clean with the defect deliberately put back.
+  for (const [file, what, anchor] of [
+    ['components/shared/RankSeal.tsx', 'the pin', 'fin.collar &&'],
+    ['components/shared/BadgeMedal.tsx', 'the medal', '{collar && ('],
+  ]) {
+    const src = fs.readFileSync(path.join(REPO, file), 'utf8');
+    const at = src.indexOf(anchor);
+    ok(at > 0, `${what} draws a collar at all`, anchor);
+    const collar = src.slice(at, at + 1200);
+    ok(!/stroke=\{ins\.rule\}/.test(collar) && !/stroke=\{ins \? ins\.rule/.test(collar),
+      `${what}'s collar is not drawn in a tone made for metal`);
+  }
+  // The badge's furniture sits on paper too, and it is what caught this.
+  const medal = fs.readFileSync(path.join(REPO, 'components/shared/BadgeMedal.tsx'), 'utf8');
+  ok(!/stroke=\{ink\}/.test(medal),
+    'and neither is the laurel or the ribbon', 'both take `edge`, which is ink');
 }
 
 

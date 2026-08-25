@@ -611,6 +611,12 @@ export default function ProfileScreen() {
                     state="locked"
                     size={44}
                     order={rankOrder(rankIndex + 1)}
+                    // AND THE DEGREE, which this was missing. The degree is the
+                    // SHAPE now, so without it every locked next-rank pin on this
+                    // screen was drawn as a plain disc — the reader could see the
+                    // rank they were climbing to and not what it looks like,
+                    // which is most of what a locked pin is for.
+                    degree={rankDegree(rankIndex + 1)}
                   />
                 </View>
               ) : (

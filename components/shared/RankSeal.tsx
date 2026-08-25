@@ -6,62 +6,66 @@ import Glyph, { type GlyphName } from './Glyph';
 import {
   INK, GHOST, FAINT, LIGHT, FACE, RIM, LOCKED_FACE, SHADOW, type Stops,
 } from './tone';
+import { CORE, COLLAR, INNER, frameForDegree, frameGeom } from './rankShapes';
 import {
-  CORE, ORNAMENT, FRAMES, INNER, frameGeom, crownInset, wingsInset, type FrameName,
-} from './rankShapes';
-import {
-  ORDER, ORDERS, insigniaFace, insigniaRim, insigniaWing, insigniaRay,
-  finishFor, type OrderName,
+  ORDER, insigniaFace, insigniaRim, finishFor, type OrderName,
 } from '@/constants/insignia';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// A RANK IS A STRUCK PIN, AND ITS SHAPE IS PART OF THE RANK.
+// -----------------------------------------------------------------------------
+// A RANK IS A STRUCK PIN. ITS COLOUR IS THE LADDER; ITS SHAPE IS THE RUNG.
 //
-// ── WHAT THIS HEADER USED TO SAY, AND WHY IT WAS HALF RIGHT ─────────────────
+// -- TWO EARLIER RULES, BOTH HALF RIGHT --------------------------------------
 //
-// "A pin is ONE frame, repeated exactly, with the mark inside doing all the
-// distinguishing. That is what makes a set feel collectible rather than
-// decorative, and it is why the frame does NOT escalate by tier."
+// The first said "a pin is ONE frame, repeated exactly, with the mark inside
+// doing all the distinguishing". That is a correct rule for a SET and the wrong
+// one for a LADDER: a jade hexagon and a clay hexagon are one object in two
+// paints, and paint is not an achievement.
 //
-// That is a correct rule for a SET — forty siblings you want to read as one
-// collection — and the wrong rule for a LADDER. A reader, on the version that
-// followed it: "the rank icons are better, but they don't improve in look. This
-// is what I mean by the improvement in ranks — the icons get prettier, and more
-// complex." Colour alone cannot answer that. A jade hexagon and a clay hexagon
-// are one object in two paints, and paint is not an achievement.
+// The second gave every ORDER its own frame and escalated them all the way up --
+// disc, plate, hexagon, gem, shield, crested shield, winged, crowned. It fixed
+// the first problem and bought two more, and the reader named both: "it only
+// becomes actually complex when the user is really far along", and "the ranks
+// that do get more complex ... look like horns and then look as if [they gain]
+// wings. I don't want this design at all."
 //
-// So there are eight frames now, one per order, and they escalate by accretion:
-// disc → cut plate → hexagon → notched gem → shield → crested shield → winged →
-// crowned. components/shared/rankShapes.ts holds the geometry and the reasoning,
-// and scripts/sheet-ranks.mjs renders all forty-eight in plain Node so they can
-// be LOOKED at (§21) — which is where two versions of the wing died.
+// One escalation stretched over forty-eight rungs leaves most readers standing
+// in the dull middle of it, and it runs out of edge to work long before it runs
+// out of rungs -- so it starts adding limbs. Both faults have one cause.
 //
-// The old header's real warning still stands, though, and it is the discipline
-// that makes this survive: ornament "so busy at 54px that it fought the glyph it
-// framed". Nothing added here is inside the mark's room. `markScale` is flat
-// (0.36–0.40) across all eight frames while the footprint grows 45%; a crown, a
-// wing, a spike and a halo all live in margin the low frames leave empty.
+// -- SO: SIX FRAMES, KEYED ON THE DEGREE, RUN AGAIN IN EVERY ORDER -----------
 //
-// ── A LOCKED PIN KEEPS ITS SHAPE AND LOSES ITS MATERIAL ─────────────────────
+// `degree` decides the SHAPE and `order` decides the MATERIAL. Inside a colour
+// the pin is worked from a plain disc up to a collared rosette; at the next
+// colour it starts plain again in a better metal. Nobody is ever more than three
+// ranks from a grander shape, and nothing has to grow a limb in order to be the
+// eighth step of anything. rankShapes.ts holds the geometry and the reasoning;
+// scripts/sheet-ranks.mjs draws all forty-eight in plain Node so they can be
+// LOOKED at (§21), which is where the wings died.
 //
-// The `order` prop is now passed for locked ranks too, which it was not before,
-// and the change is deliberate: a reader scrolling the ranks sheet should be
-// able to SEE that rank 44 is a winged thing and rank 4 is a disc. An escalating
-// ladder nobody can look up is just a surprise. What locking takes away is the
-// material — flat, cool `GHOST`, no gradient, no shadow — because the material
-// is the reward, and "the same pin, dimmer" is indistinguishable from a
-// rendering fault.
+// The oldest warning here still stands and is what keeps this honest: ornament
+// "so busy at 54px that it fought the glyph it framed". Nothing added is inside
+// the mark's room -- `markScale` is flat at 0.37-0.40 across all six frames while
+// the drawn area grows by half again.
 //
-// ── THE RING WAS THE PROGRESS TRACK, AND STILL IS ───────────────────────────
+// -- A LOCKED PIN KEEPS ITS SHAPE AND LOSES ITS MATERIAL ---------------------
+//
+// Both props are passed for locked ranks too, and the shape half matters more
+// than it used to: the next pin up the ladder is a visibly different object, so
+// a reader can see what the next promotion looks like before earning it. What
+// locking takes away is the material -- flat, cool `GHOST`, no gradient, no
+// shadow -- because the material is the reward, and "the same pin, dimmer" is
+// indistinguishable from a rendering fault.
+//
+// -- THE RING WAS THE PROGRESS TRACK, AND STILL IS ---------------------------
 //
 // The arc toward the next rank runs along the pin's OWN edge rather than on a
 // second concentric ring. That used to lean on a hexagon's perimeter being
-// exactly 6r; a shield's is not exactly anything, so `frameGeom` flattens each
+// exactly 6r; a rosette's is not exactly anything, so `frameGeom` flattens each
 // frame once and measures it, and hands back an outline that starts at top
 // centre so the arc always opens at twelve o'clock.
 //
-// Geometry lives in a 100×100 viewBox centred on (50,50).
-// ─────────────────────────────────────────────────────────────────────────────
+// Geometry lives in a 100x100 viewBox centred on (50,50).
+// -----------------------------------------------------------------------------
 
 export type SealState = 'earned' | 'current' | 'locked';
 
@@ -73,18 +77,18 @@ interface Props {
   /**
    * WHICH OF THE EIGHT ORDERS THE PIN BELONGS TO — see constants/insignia.ts.
    *
-   * It decides two separate things: the FRAME (always) and the MATERIAL (only
-   * when the rank is not locked). Pass it even for a locked rank; pass null only
-   * where there is no rank at all, such as the Scholar's Pass card.
+   * It decides the MATERIAL, and only that. Pass null where there is no rank at
+   * all, such as an unbought Scholar's Pass card; a locked rank still has an
+   * order and simply has not been struck in it yet.
    */
   order?: OrderName | null;
   /**
-   * HOW FINISHED THE STRIKING IS, 0–5 — the rank's position inside its order.
+   * HOW FAR THROUGH ITS ORDER THE RANK IS, 0–5 — and this is the SHAPE.
    *
-   * Six steps, resetting every order, and every one of them lands on the frame's
-   * own edge: the inner rule, then two, four and six studs, then the capstone's
-   * outer collar. No pin is ever more than five steps ornamented and none of the
-   * five is ever inside the mark.
+   * Six frames, plainest first, run again in every order: disc, hexagon, plate,
+   * scallop, gem, rosette. The finish rides the same number — the inner rule,
+   * then two, four and six studs, then the capstone's collar — and every step of
+   * it lands on the frame's own edge, never inside the mark.
    */
   degree?: number;
 }
@@ -98,13 +102,6 @@ const grad = (id: string, stops: Stops) => (
 );
 
 const flat = (hex: string): Stops => [['0%', hex, 1], ['100%', hex, 1]];
-
-/** The frame an order is struck in — index for index with `ORDERS`. */
-function frameFor(order: OrderName | null): FrameName {
-  if (!order) return 'hex';
-  const i = ORDERS.indexOf(order);
-  return FRAMES[i < 0 ? 2 : Math.min(FRAMES.length - 1, i)];
-}
 
 // MEMOISED. Every prop below is a primitive, so the comparison is exact and no
 // call site can defeat it with a fresh object (the trap Thinkers records for
@@ -130,14 +127,16 @@ export default memo(function RankSeal({
   // the frame and carries full weight.
   const trackOpacity = pct != null ? 0.22 : 1;
 
-  const frame = frameFor(order);
+  // THE SHAPE COMES FROM THE DEGREE, NOT THE ORDER. That one line is the whole
+  // redesign: complexity cycles inside a colour instead of climbing once across
+  // all forty-eight ranks and having to sprout limbs to get there.
+  const frame = frameForDegree(degree);
   const geom = frameGeom(frame);
-  const orn = ORNAMENT[frame];
 
   // useId, because two pins on one screen with the same gradient id would have
   // the second silently adopt the first's fill.
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
-  const face = `f${uid}`, rim = `r${uid}`, plume = `w${uid}`, halo = `h${uid}`;
+  const face = `f${uid}`, rim = `r${uid}`;
 
   const outer = CORE[frame](0);
 
@@ -147,46 +146,13 @@ export default memo(function RankSeal({
         <Defs>
           {grad(face, locked ? LOCKED_FACE : ins ? insigniaFace(ins) : FACE)}
           {grad(rim, locked ? flat(GHOST) : ins ? insigniaRim(ins) : RIM)}
-          {grad(plume, locked ? flat(GHOST) : ins ? insigniaWing(ins) : RIM)}
-          {grad(halo, locked ? flat(GHOST) : ins ? insigniaRay(ins) : FACE)}
         </Defs>
 
         {/* The pin sits ON the page, so it casts. Earned only: a locked pin is
-            drawn flat, and a shadow under a flat shape reads as a mistake.
-            The wings and the crown cast too — they are part of the object, and a
-            winged pin whose shadow is shield-shaped reads as a sticker. */}
+            drawn flat, and a shadow under a flat shape reads as a mistake. */}
         {!locked && (
           <G transform={`translate(${SHADOW.dx} ${SHADOW.dy})`} opacity={SHADOW.opacity}>
-            {orn.wings && <Path d={orn.wings} fill={INK} />}
-            {orn.crown && <Path d={orn.crown} fill={INK} />}
             <Path d={outer} fill={INK} />
-          </G>
-        )}
-
-        {/* THE HALO, behind everything, and only on the last order. */}
-        {orn.rays && <Path d={orn.rays} fill={`url(#${halo})`} opacity={locked ? 0.4 : 1} />}
-
-        {/* THE WINGS, behind the face and darker than it, so they read as being
-            behind rather than beside — and rimmed the same way the crown is,
-            by laying a pulled-in copy over a full-size one. Without that edge a
-            dark wing against a dark shield on pale paper is a single mass, which
-            is what the first browser load of this showed: shoulder flaps. */}
-        {orn.wings && (
-          <G>
-            <Path d={orn.wings} fill={locked ? GHOST : ins ? ins.rim : INK} />
-            <Path d={wingsInset(1.3)} fill={`url(#${plume})`} />
-          </G>
-        )}
-
-        {/* THE CROWN, rimmed by laying a smaller copy inside a larger one — a
-            gold coronet on a gold pin in front of a gold halo is one continuous
-            mass unless something turns its edge. */}
-        {orn.crown && (
-          // A <G>, not a fragment: react-native-svg walks its own children and a
-          // bare fragment is not reliably a node it recognises.
-          <G>
-            <Path d={orn.crown} fill={locked ? GHOST : ins ? ins.rim : INK} />
-            <Path d={crownInset(1.6)} fill={`url(#${face})`} />
           </G>
         )}
 
@@ -202,12 +168,23 @@ export default memo(function RankSeal({
             fraying it, and it costs one path. */}
         {!locked && fin.collar && (
           <Path
-            d={CORE[frame](-3.4)}
+            d={CORE[frame](COLLAR)}
             fill="none"
-            stroke={ins ? ins.rule : FAINT}
-            strokeWidth={1.6}
+            // THE MATERIAL'S BODY, NOT ITS RULE — because this ring is the one
+            // piece of the pin that is drawn on PAPER rather than on metal, and
+            // `rule` is the order's near-white. AURUM's is #FFFFFF outright, so
+            // the highest rank in the app wore a white ring on cream paper and
+            // there was nothing to see. Jade, lapis, crimson and amethyst were
+            // barely better. insignia.ts records the same trap catching a halo
+            // before this; that is twice, in the same place, for the same reason.
+            stroke={ins ? ins.base : FAINT}
+            // 3, not 2, and the arithmetic is the whole argument: a Profile pin
+            // is 56px on a 100-unit box, so two units of stroke is one pixel and
+            // change. The one mark that says "this is the top of your colour"
+            // cannot be the thinnest thing on the pin.
+            strokeWidth={3}
             strokeLinejoin="round"
-            opacity={0.9}
+            opacity={0.92}
           />
         )}
 
@@ -244,8 +221,9 @@ export default memo(function RankSeal({
             hexagon; `frameGeom` casts six rays out of the centre instead and
             stops short of whatever edge it finds, so the same six positions
             exist on a disc, a shield and a winged crest. Straight up and
-            straight down are deliberately empty — that is where a peak, a point
-            and a crown already are. */}
+            straight down are deliberately empty — that is where the progress
+            arc opens and closes, and a stud on that seam reads as a fault in
+            it. */}
         {!locked && fin.studs > 0 && geom.studs.slice(0, fin.studs).map(([sx, sy], i) => (
           // A rivet, not a dot: the dark seat under it is what makes it sit IN
           // the face rather than float on it, and it is also what keeps a stud
@@ -273,7 +251,7 @@ export default memo(function RankSeal({
       </Svg>
 
       {/* The mark, at the room its own frame leaves it — see `markScale` in
-          rankShapes.ts, which is nearly flat across the ladder on purpose.
+          rankShapes.ts, which is nearly flat across the six on purpose.
 
           THE zIndex IS FOR WEB, and it is not cosmetic there. React Native paints
           siblings in DOM order, so on a device the mark has always sat correctly
