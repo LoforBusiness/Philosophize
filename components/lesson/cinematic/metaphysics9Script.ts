@@ -62,12 +62,16 @@ export const BEATS: M9Beat[] = [
   {
     p: 4, x: 232, panels: 2,
     interact: {
-      prompt: 'Tap what Descartes is actually claiming about mind and body.',
-      cards: [
-        { text: 'Two distinct kinds of substance', correct: true },
-        { text: 'The mind is brain', correct: false },
-      ],
-      explain: 'Two different substances, not one. The trap is the other card: "the mind is part of the brain" sounds like a modest version of the same claim, and it is the view Descartes was arguing against.',
+      prompt: 'Set the lever to what Descartes claims about mind and body.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'same', reads: 'the mind is the brain: one kind of stuff' },
+          { id: 'does', reads: 'the mind is simply what the brain does' },
+          { id: 'two', reads: 'the mind is a second kind of thing entirely', correct: true },
+        ],
+      },
+      explain: 'The far setting. Two substances, not one. The trap is the setting next to it: the mind is what the brain does sounds like a modest version of the same idea, and it is exactly the view Descartes spent the Meditations arguing against.',
     },
     dur: 4.4,
   },

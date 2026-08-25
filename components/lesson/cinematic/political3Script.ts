@@ -88,12 +88,18 @@ export const BEATS: Pol3Beat[] = [
   {
     sub: 4, r: 0, scroll: 1, pair: 2, flow: 1, seal: 1,
     interact: {
-      prompt: 'Rousseau prized the general will. Does a bare majority vote always match it?',
-      cards: [
-        { text: 'No, a majority can err', correct: true },
-        { text: 'Yes, the majority decides', correct: false },
-      ],
-      explain: 'The trap: Rousseau split the "will of all" (the sum of private wants) from the "general will" (what serves the whole). Even a majority can be wrong.',
+      prompt: 'Drag to how close a majority vote gets to the general will.',
+      drag: {
+        lo: 'THEY ARE THE SAME THING',
+        hi: 'A VOTE NEVER REACHES IT',
+        start: 0,
+        zones: [
+          { id: 'same', upto: 0.3, reads: 'a majority simply is the general will' },
+          { id: 'often', upto: 0.74, reads: 'often close, and a majority can still be wrong', correct: true },
+          { id: 'never', upto: 1, reads: 'a vote cannot reach it at all' },
+        ],
+      },
+      explain: 'The middle. Rousseau splits the will of all — the sum of private wants — from the general will, which is what serves the whole. A show of hands measures the first and can miss the second entirely.',
       xp: 5,
     },
     dur: 1.0,

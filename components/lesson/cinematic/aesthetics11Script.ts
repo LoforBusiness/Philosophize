@@ -68,12 +68,16 @@ export const BEATS: Aes11Beat[] = [
   {
     p: 4, x: 124, frames: 1, plaques: 1, same: 1,
     interact: {
-      prompt: 'If the canvases match exactly, what could the human maker be adding?',
-      cards: [
-        { text: 'An intention it expresses', correct: true },
-        { text: 'Nothing, the canvases match', correct: false },
-      ],
-      explain: 'The trap is that "identical objects, identical value" sounds rigorous. The phrase assumes a work is only its surface. Tolstoy asks instead whether a feeling was passed on, and passing a feeling on takes a person who had one.',
+      prompt: 'Set the lever to what the human maker adds.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'nothing', reads: 'nothing; identical surfaces, identical works' },
+          { id: 'toil', reads: 'the hours it took out of a life' },
+          { id: 'feeling', reads: 'a feeling that was had, and then passed on', correct: true },
+        ],
+      },
+      explain: 'The far setting. Identical objects, identical value sounds strict, and it quietly assumes a work is only its surface. Tolstoy asks something else. Was a feeling carried across? Carrying one takes a person who had the feeling first.',
       xp: 5,
     },
     dur: 1.0,

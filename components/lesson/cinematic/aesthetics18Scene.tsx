@@ -3,7 +3,7 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, pose, travelStance, WALK, type Bundle } from './rig';
+import { clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics18Script';
 import {
@@ -39,7 +39,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // 103-unit figure at 37%.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const TR = 0.82;
+/** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const BASE_TR = 0.85;
 
 /** The shape, once. Both contours are drawn from this and nothing else. */
 const FALL = [0.86, 0.8, 0.66, 0.62, 0.44, 0.34, 0.3, 0.16, 0.06];
@@ -77,7 +78,10 @@ export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick }: 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / TR);
+    // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr). A fixed length
+    // here sprinted every long journey and left the footfalls — which the player
+    // computes from moveTr — arriving after the figure had stopped.
+    const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(

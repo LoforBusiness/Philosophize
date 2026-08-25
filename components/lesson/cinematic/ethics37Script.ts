@@ -49,12 +49,17 @@ export const BEATS: Ethics37Beat[] = [
   {
     p: 4, x: 54, posts: 1, cord: 1, lean: 1,
     interact: {
-      prompt: 'So where does the wrong of breaking it actually land?',
-      cards: [
-        { text: 'On whoever relied on you', correct: true },
-        { text: 'On the practice of promising', correct: false },
-      ],
-      explain: 'The practice matters, and the practice is the other main answer. But that answer makes your own friend an afterthought. Scanlon puts the friend first. She arranged her week around your word, and a broken promise leaves her standing there.',
+      prompt: 'Slide the seam to where the wrong actually lands.',
+      split: {
+        left: 'ON YOUR FRIEND', right: 'ON THE PRACTICE',
+        start: 0.04,
+        zones: [
+          { id: 'practice', upto: 0.3, reads: 'on the practice: one more crack in a shared thing' },
+          { id: 'both', upto: 0.66, reads: 'half on her, half on the practice' },
+          { id: 'friend', upto: 1, reads: 'on her; she arranged her week around your word', correct: true },
+        ],
+      },
+      explain: 'Nearly all of it on your friend. The practice does matter and it is the other main answer, but that answer makes the person you let down an afterthought. Scanlon puts her first: she relied on you, and the reliance is what you broke.',
       xp: 5,
     },
     dur: 1.0,

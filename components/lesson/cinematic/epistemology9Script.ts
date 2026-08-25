@@ -77,12 +77,16 @@ export const BEATS: Epistemology9Beat[] = [
   {
     p: 4, x: 148, land: 1, map: 1, link: 1,
     interact: {
-      prompt: 'You hold your map up to check it. What do you actually compare it against?',
-      cards: [
-        { text: 'Your own seeing, another belief', correct: true },
-        { text: 'The land itself, bare-handed', correct: false },
-      ],
-      explain: 'The trap: A feels obvious, because looking feels like touching the world bare-handed. But the instant you look, what you hold is your report of those hills — another belief. Every check compares a belief with a belief, and that gap is exactly why the next two theories exist.',
+      prompt: 'Set the lever to what you actually check the map against.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'land', reads: 'the land itself, with nothing in between' },
+          { id: 'seeing', reads: 'your own seeing, which is one more belief', correct: true },
+          { id: 'other', reads: 'a second map, drawn by somebody else' },
+        ],
+      },
+      explain: 'The middle. The first setting feels obvious, because looking feels like touching the world bare-handed. The instant you look, what you are holding is your report of those hills. Every check compares a belief with a belief, and that is the whole difficulty.',
       xp: 5,
     },
     dur: 1.0,

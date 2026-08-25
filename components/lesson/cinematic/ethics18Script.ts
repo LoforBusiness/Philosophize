@@ -67,12 +67,16 @@ export const BEATS: Ethics18Beat[] = [
   {
     p: 4, x: 124, line: 1, test: 2, wide: 1,
     interact: {
-      prompt: 'Tap the thing Singer says actually decides it.',
-      cards: [
-        { text: 'Whether it can suffer', correct: true },
-        { text: 'Whether it can reason', correct: false },
-      ],
-      explain: 'The other card is the old test, and it is a non sequitur as well as speciesism: reasoning has nothing to do with suffering. Infants cannot reason either, and plainly count.',
+      prompt: 'Set the lever to the test Singer says decides it.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'reason', reads: 'whether it can reason' },
+          { id: 'speak', reads: 'whether it can talk to us' },
+          { id: 'suffer', reads: 'whether it can suffer', correct: true },
+        ],
+      },
+      explain: 'The far setting, and Bentham got there first. The first is the old test and it does not even follow: reasoning has nothing to do with being hurt. Infants cannot reason either, and nobody proposes leaving them out.',
       xp: 5,
     },
     dur: 1.0,

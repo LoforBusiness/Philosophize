@@ -67,12 +67,18 @@ export const BEATS: Aes32Beat[] = [
     g: 11, rows: 3, mean: 1,
     dur: 1.0,
     interact: {
-      prompt: 'So what does that show about endings?',
-      cards: [
-        { text: 'Order carries its own value', correct: true },
-        { text: 'Only the total matters', correct: false },
-      ],
-      explain: 'The other card is the honest hard line, and it has to call the declining life exactly as good as the rising one. Almost nobody can. That reluctance is the evidence that the order carries value of its own.',
+      prompt: 'Draw the shape of the life you would rather have lived.',
+      plot: {
+        axis: 'HOW WELL IT GOES',
+        cols: ['YOUNG', 'THEN', 'LATER', 'OLD'],
+        start: [0.5, 0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'rise', profile: [0.15, 0.4, 0.7, 0.95], reads: 'it gets better as it goes', correct: true },
+          { id: 'fall', profile: [0.95, 0.7, 0.4, 0.15], reads: 'it gets worse as it goes' },
+          { id: 'flat', profile: [0.55, 0.55, 0.55, 0.55], reads: 'it stays about the same throughout' },
+        ],
+      },
+      explain: 'The rising one, and almost everybody draws it. The totals are identical, so the strict view has to call the declining life exactly as good. Almost nobody can, and that reluctance is the evidence: the order carries a value of its own.',
       xp: 5,
     },
   },

@@ -61,12 +61,16 @@ export const BEATS: Ethics12Beat[] = [
   {
     p: 4, x: 124, n: 12, word: 1,
     interact: {
-      prompt: 'Three of these are Kant’s test. Which one is really just counting outcomes?',
-      cards: [
-        { text: 'Break it, more end happy', correct: true },
-        { text: 'Never use someone as means', correct: false },
-      ],
-      explain: 'The trap: it sounds like plain decency, which hides that it is pure outcome-counting — Mill’s move, not Kant’s. Kant never adds up the happiness. He asks only whether the rule survives being made universal.',
+      prompt: 'Set the lever to the one that is really just counting outcomes.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'means', reads: 'never use another person merely as a means' },
+          { id: 'law', reads: 'act only on a rule everyone could follow' },
+          { id: 'happy', reads: 'break it when more people end up happy', correct: true },
+        ],
+      },
+      explain: 'The far setting, and it sounds like plain decency, which is what hides it. That is Mill counting, not Kant testing. Kant never adds the happiness up. He asks one thing: does the rule survive being handed to everybody at once?',
       xp: 5,
     },
     dur: 1.0,

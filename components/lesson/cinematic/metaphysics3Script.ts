@@ -68,12 +68,17 @@ export const BEATS: Meta3Beat[] = [
   {
     p: 4, shadow: 0.15, form: 1, apple: 1,
     interact: {
-      prompt: 'You can see and touch an apple but never a Form. So which does Plato call more real?',
-      cards: [
-        { text: 'The Form, knowable and unchanging', correct: true },
-        { text: 'The apple, we sense it', correct: false },
-      ],
-      explain: 'It feels backwards: Plato ranks the invisible Form above the touchable apple. Sensible things change and decay, so for him they have less being than the eternal Forms.',
+      prompt: 'Slide the seam to where Plato puts the reality.',
+      split: {
+        left: 'THE FORM', right: 'THE APPLE',
+        start: 0.5,
+        zones: [
+          { id: 'apple', upto: 0.34, reads: 'the thing you can hold is the real one' },
+          { id: 'even', upto: 0.62, reads: 'equally real, each in its own way' },
+          { id: 'form', upto: 1, reads: 'the Form is the real one; the apple only borrows it', correct: true },
+        ],
+      },
+      explain: 'Nearly all of it goes to the Form, and that is what feels backwards. Plato ranks the invisible above the touchable. Apples bruise and rot and stop being apples, so for him they hold less being than the one thing that never changes.',
       xp: 5,
     },
     dur: 1.0,

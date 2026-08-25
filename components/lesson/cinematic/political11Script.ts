@@ -72,12 +72,17 @@ export const BEATS: Political11Beat[] = [
   {
     p: 4, x: 120, dial: 1, set: 3, built: 3,
     interact: {
-      prompt: 'A friend says the three disagree because each simply wanted a different government. What is the deeper truth?',
-      cards: [
-        { text: 'They read human nature differently', correct: true },
-        { text: 'Each wanted a different government', correct: false },
-      ],
-      explain: 'The trap reverses cause and effect: it has each man choosing his conclusion first and reverse-engineering a premise to reach it. The argument runs the other way. Fix the reading of human nature and the state you are allowed to build is already decided.',
+      prompt: 'Slide the seam to which one comes first.',
+      split: {
+        left: 'THE READING OF HUMAN NATURE', right: 'THE GOVERNMENT WANTED',
+        start: 0.04,
+        zones: [
+          { id: 'gov', upto: 0.3, reads: 'each picked his government and worked backwards' },
+          { id: 'both', upto: 0.66, reads: 'the two shaped each other as they went' },
+          { id: 'nature', upto: 1, reads: 'fix the reading of human nature and the state follows', correct: true },
+        ],
+      },
+      explain: 'Nearly all of it on the reading. The other end reverses cause and effect: it has each man choosing his conclusion first and reverse-engineering a premise to reach it. Change what people are like in the state of nature and the government you are allowed changes with it.',
       xp: 5,
     },
     dur: 1.0,

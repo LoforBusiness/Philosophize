@@ -73,12 +73,18 @@ export const BEATS: Pol18Beat[] = [
     g: 41, lanes: 2, bikes: 1, ride: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Give two people identical incomes and you have made them equal. Right?',
-      cards: [
-        { text: 'Equal means, unequal freedom', correct: true },
-        { text: 'Money is what equality means', correct: false },
-      ],
-      explain: 'The other card mistakes the means for the end. Income is an input, and how much of a life it buys depends on health, on where you live, on what a body can do. Equal resources can leave real freedom deeply unequal, which is what the second lane is.',
+      prompt: 'Drag to what the same pay has really bought them.',
+      drag: {
+        lo: 'THEY ARE NOW EQUAL',
+        hi: 'INCOME SAYS NOTHING AT ALL',
+        start: 0,
+        zones: [
+          { id: 'equal', upto: 0.3, reads: 'equal now; money is what equality means' },
+          { id: 'means', upto: 0.74, reads: 'equal means, and freedom still deeply unequal', correct: true },
+          { id: 'nothing', upto: 1, reads: 'income has nothing to do with it whatever' },
+        ],
+      },
+      explain: 'The middle. The near end mistakes the means for the end: income is an input, and how much of a life it buys depends on health, on where you live, on what a body can do. Equal resources can leave real freedom a very long way apart.',
       xp: 5,
     },
   },

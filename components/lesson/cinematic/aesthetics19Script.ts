@@ -60,12 +60,18 @@ export const BEATS: Aes19Beat[] = [
   {
     p: 4, x: 124, row: 1, frame: 3, verdict: 2, know: 1,
     interact: {
-      prompt: 'Carlson says a pretty glance is enough for nature, since it is only scenery. True?',
-      cards: [
-        { text: 'False, knowledge guides appreciation', correct: true },
-        { text: 'True, it is only scenery', correct: false },
-      ],
-      explain: 'The trap is the scenery picture, where not knowing counts as not needing to know. Carlson says natural history does for a marsh what art history does for a painting: it tells you what you are looking at.',
+      prompt: 'Drag to what Carlson says a marsh needs from you.',
+      drag: {
+        lo: 'A PRETTY GLANCE',
+        hi: 'KNOWING WHAT IT IS',
+        start: 0,
+        zones: [
+          { id: 'glance', upto: 0.3, reads: 'a pretty glance; it is only scenery after all' },
+          { id: 'some', upto: 0.62, reads: 'a glance, helped along by a name or two' },
+          { id: 'know', upto: 1, reads: 'knowing what you are looking at, as with a painting', correct: true },
+        ],
+      },
+      explain: 'The far end. The scenery picture treats not knowing as not needing to know. A marsh breaks it: a wasteland, until somebody tells you what is going on in it. Natural history does for a marsh what art history does for a painting.',
       xp: 5,
     },
     dur: 1.0,

@@ -63,12 +63,17 @@ export const BEATS: Aes12Beat[] = [
   {
     p: 20, r: 4, rx: 224, ticks: 5, box: 1,
     interact: {
-      prompt: 'A reader insists: "The poem means whatever the author says he intended." What is wrong with that?',
-      cards: [
-        { text: 'Meaning lives in the text', correct: true },
-        { text: 'The author decides meaning', correct: false },
-      ],
-      explain: 'The trap is the genetic fallacy: taking how a work was made for what the work means. What the poet intended is private and cannot be checked, so it settles nothing in public. The poem is the one thing every reader can examine.',
+      prompt: 'Slide the seam to where the meaning lives.',
+      split: {
+        left: 'IN THE POEM', right: 'IN THE POET',
+        start: 0.04,
+        zones: [
+          { id: 'poet', upto: 0.3, reads: 'in the poet; he says what he meant and that settles it' },
+          { id: 'both', upto: 0.66, reads: 'half the poem, half the poet' },
+          { id: 'poem', upto: 1, reads: 'in the poem, which every reader can examine', correct: true },
+        ],
+      },
+      explain: 'Nearly all of it in the poem. Taking how a work was made for what the work means is the genetic fallacy. What the poet intended is private and cannot be checked, so it settles nothing in public — and the poem is the one thing everybody can point at.',
       xp: 5,
     },
     dur: 1.0,

@@ -68,12 +68,18 @@ export const BEATS: Meta31Beat[] = [
     g: 8, holes: 1, ticks: 3, chips: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Why does it matter what a hole is?',
-      cards: [
-        { text: 'We count and measure absences', correct: true },
-        { text: 'Just say perforated instead', correct: false },
-      ],
-      explain: 'The other card is respectable: paraphrase the hole-talk away and the problem dissolves. It only has to work — and "there are as many holes as pegs" has resisted paraphrase for fifty years. That is why this is still live.',
+      prompt: 'Drag to how well just say perforated actually works.',
+      drag: {
+        lo: 'ALWAYS, TRIVIALLY',
+        hi: 'NEVER, NOT ONCE',
+        start: 0,
+        zones: [
+          { id: 'easy', upto: 0.3, reads: 'always; say the cheese is perforated and the puzzle is gone' },
+          { id: 'mostly', upto: 0.74, reads: 'usually, and it sticks the moment you count them', correct: true },
+          { id: 'never', upto: 1, reads: 'never; nothing about holes can be said another way' },
+        ],
+      },
+      explain: 'Usually, and the failures are the whole reason this is still a live question. Paraphrase is a respectable move and it only has to work. There are as many holes as pegs has resisted it for fifty years, because counting absences is the one thing perforated cannot do.',
       xp: 5,
     },
   },

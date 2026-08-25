@@ -69,12 +69,19 @@ export const BEATS: Aes2Beat[] = [
   {
     a: 0, v: 22, felt: true, chain: 3,
     interact: {
-      prompt: 'Crying at a film about people you know never existed — what does this show?',
-      cards: [
-        { text: 'Real feeling for known fictions', correct: true },
-        { text: 'The tears are not real', correct: false },
-      ],
-      explain: 'The trap: fake people, so fake tears. The tears are real, and that is the puzzle. Radford called it the paradox of fiction, and nobody has settled it since.',
+      prompt: 'Place the token on what happens at a film.',
+      field: {
+        xLo: 'THE PEOPLE ARE REAL', xHi: 'THE PEOPLE NEVER EXISTED',
+        yLo: 'THE TEARS ARE PRETEND', yHi: 'THE TEARS ARE REAL',
+        start: [0.24, 0.24],
+        quads: [
+          { id: 'puzzle', x: 1, y: 1, reads: 'no such people, and the crying is real: the puzzle', correct: true },
+          { id: 'tidy', x: 1, y: 0, reads: 'no such people, and the crying is pretend too' },
+          { id: 'plain', x: 0, y: 1, reads: 'real people, real tears: nothing puzzling at all' },
+          { id: 'odd', x: 0, y: 0, reads: 'real people, pretend tears: a different problem' },
+        ],
+      },
+      explain: 'Top right, and nothing sits comfortably there. Fake people, so fake tears is the tidy corner and it is simply untrue: the tears are real, which is exactly the difficulty. Radford called it the paradox of fiction and nobody has settled it since.',
       xp: 5,
     },
     dur: 1.0,

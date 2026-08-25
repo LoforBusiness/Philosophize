@@ -79,12 +79,18 @@ export const BEATS: Logic35Beat[] = [
   {
     p: 45, x: 130, rise: 1, under: 1, cut: 1,
     interact: {
-      prompt: 'You cannot list every hidden cause. So how does a coin flip beat a longer list?',
-      cards: [
-        { text: 'Cuts links you never listed', correct: true },
-        { text: 'It makes the sample bigger', correct: false },
-      ],
-      explain: 'Size fixes noise, not bias — a huge biased study is confidently wrong. A coin decides who is treated, so nothing else can be deciding, and that covers the causes you never listed. Those are the ones that get you.',
+      prompt: 'Drag to what actually cuts the hidden causes.',
+      drag: {
+        lo: 'MAKE THE STUDY BIGGER',
+        hi: 'LET A COIN DECIDE WHO IS TREATED',
+        start: 0,
+        zones: [
+          { id: 'big', upto: 0.3, reads: 'more people, with the same hidden hand under all of them' },
+          { id: 'list', upto: 0.66, reads: 'list the causes you can think of and adjust for them' },
+          { id: 'coin', upto: 1, reads: 'a coin decides, so nothing else can be deciding', correct: true },
+        ],
+      },
+      explain: 'The far end. Size fixes noise, not bias: a huge biased study is confidently wrong. Listing causes only reaches the ones you thought of. A coin cuts every link at once, including the causes nobody has ever named — and those are the ones that get you.',
       xp: 5,
     },
     dur: 1.0,

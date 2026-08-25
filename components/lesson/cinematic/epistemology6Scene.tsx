@@ -98,7 +98,10 @@ export default function Epistemology6Scene({ clock, bt, bi }: SceneApi) {
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
-  const balStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.bal }));
+  // Twice the rate on the fade: one beat rests `bal` at 0.3, and FOR / AGAINST
+  // were reaching the reader at 1.9:1 there — a scale you can see with words you
+  // cannot read (D35). Everything else still runs on the raw track.
+  const balStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.bal * 2) }));
   const beamStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.tilt}deg` }] }));
   // A 2° tilt lifts a 92-long arm by 92·sin(2°) ≈ 3.2, so the pans ride that exact
   // amount and stay hung off the beam ends instead of drifting away from them.

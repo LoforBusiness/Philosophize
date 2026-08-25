@@ -72,12 +72,18 @@ export const BEATS: E10Beat[] = [
   {
     p: 21, x: 228, gauge: 1, band: 2, needle: 0.78,
     interact: {
-      prompt: 'A fallibilist says, "I might be wrong about this." Does that mean they do not really believe it?',
-      cards: [
-        { text: 'No, you can still act', correct: true },
-        { text: 'Yes, that is hedging', correct: false },
-      ],
-      explain: 'The trap is reading "I might be wrong" as hedging. It is not doubt about the claim, it is a standing invitation to evidence. You can commit fully, act on it, and still leave the door open.',
+      prompt: 'Drag to how firmly a fallibilist actually holds it.',
+      drag: {
+        lo: 'BARELY AT ALL',
+        hi: 'BEYOND ANY QUESTION',
+        start: 0,
+        zones: [
+          { id: 'hedge', upto: 0.28, reads: 'barely; it is a hedge rather than a belief' },
+          { id: 'firm', upto: 0.74, reads: 'fully, and still open to being shown wrong', correct: true },
+          { id: 'closed', upto: 1, reads: 'so firmly that no evidence could ever touch it' },
+        ],
+      },
+      explain: 'The middle, and the near end is the misreading. I might be wrong sounds like hedging and is not: it is a standing invitation to evidence. You can commit completely, act on it, and leave the door open at the same time.',
     },
     dur: 4.4,
   },

@@ -41,7 +41,10 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Script.ts')).sort(
     const re = new RegExp(`\\b${kind}:\\s*\\{\\s*[\\r\\n]+\\s*prompt:\\s*(['"])((?:(?!\\1)[\\s\\S])*)\\1`, 'g');
     for (const m of src.matchAll(re)) {
       // Does this block print its own answers? See the note on `vague` below.
-      const cards = /cards:\s*\[/.test(src.slice(m.index, m.index + 700));
+      // ANY of the six controls counts, not just the deck: `drag`, `lever`,
+      // `plot`, `split` and `field` all draw their labels and their live readout
+      // directly under the art, which is the whole basis of the exemption.
+      const cards = /\n\s{6}(?:cards|drag|lever|plot|split|field):\s*[[{]/.test(src.slice(m.index, m.index + 1400));
       rows.push({ name, kind, prompt: m[2], cards });
     }
   }
@@ -59,14 +62,20 @@ const long = rows.filter((r) => words(r.prompt) > MAX_WORDS);
 // "What follows about the rain?" is perfectly followable there — the answers are
 // the three things in front of you. Applying the rule to mc flagged three
 // perfectly clear questions and would have had them rewritten to say less.
-// AND NOT AN INTERACT THAT CARRIES ITS OWN CARDS, for exactly the reason given
+// AND NOT AN INTERACT THAT CARRIES ITS OWN CONTROL, for exactly the reason given
 // above for `mc`. `interact` used to mean one thing — find the target in the
-// scenery — and now means two: that, or two short choices printed under the art
-// (see ChoiceCards). The card kind puts the answers in front of the reader just
-// as the old A/B/C/D deck did, so "What follows about the rain?" is followable
-// there and naming a stage object is not required. Converting the deck brought
-// three such prompts under this rule and would have had them rewritten to say
-// less — which is the same mistake the mc exemption already records.
+// scenery — and now means several: that, or two short choices printed under the
+// art, or one of the four analogue controls. All of them put the answers in front
+// of the reader just as the old A/B/C/D deck did, so "What follows about the
+// rain?" is followable there and naming a stage object is not required.
+// Converting the deck brought three such prompts under this rule and would have
+// had them rewritten to say less — the same mistake the mc exemption records.
+//
+// The list started as `cards` alone, and stayed that way while `drag` was rare.
+// Converting 127 lessons is what exposed it: a `split` prints two named sides and
+// a live sentence above the seam, which is MORE on screen than a deck offers, and
+// two perfectly followable prompts were reported as pointing at nothing. When the
+// lessons gain a new way to answer, the rule about prompts gains one too (L7).
 const vague = rows.filter(
   (r) => r.kind === 'interact' && !r.cards && VAGUE.test(r.prompt) && !CONCRETE.test(r.prompt),
 );

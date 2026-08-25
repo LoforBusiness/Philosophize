@@ -104,7 +104,7 @@ export default function KnowHowScene({ clock, bt, bi, i, picked, onPick }: Scene
       done,
       // The column recedes as the box fills — the two are one movement, so the
       // reader reads it as a handover rather than as two things happening.
-      dim: 1 - 0.55 * done,
+      dim: 1 - 0.45 * done,
     };
   });
 

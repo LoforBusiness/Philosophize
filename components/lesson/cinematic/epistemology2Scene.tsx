@@ -213,7 +213,7 @@ function AuditRow({
   S, k, b,
 }: { S: SharedValue<any>; k: number; b: { text: string; th: number; strike: number } }) {
   // 0 while the belief still stands, 1 once the demon has faked it away.
-  const dim = useAnimatedStyle(() => ({ opacity: 1 - 0.55 * ease01(clamp01((S.value.doubt - b.th) / 0.12)) }));
+  const dim = useAnimatedStyle(() => ({ opacity: 1 - 0.45 * ease01(clamp01((S.value.doubt - b.th) / 0.12)) }));
   const cut = useAnimatedStyle(() => ({ transform: [{ scaleX: ease01(clamp01((S.value.doubt - b.th) / 0.12)) }] }));
   // The second stroke carries its own rotate: an animated `transform` REPLACES a
   // static one when styles flatten, so the tilt has to live inside this worklet.

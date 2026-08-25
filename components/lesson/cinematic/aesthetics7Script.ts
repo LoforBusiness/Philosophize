@@ -83,12 +83,17 @@ export const BEATS: Aesthetics7Beat[] = [
   {
     p: 4, x: 160, q: 39, art: 1, capt: 3, marks: 1,
     interact: {
-      prompt: '"Hume gave us a standard of taste. So is beauty a real property of the object?"',
-      cards: [
-        { text: 'False, beauty stays in response', correct: true },
-        { text: 'True, a standard measures it', correct: false },
-      ],
-      explain: 'The trap: "a standard" sounds like a ruler you hold against the canvas. Hume never put beauty back into the paint. He kept it in the response. And a response can be practised, compared, and free of grudges. That is why criticism is not just noise.',
+      prompt: 'Slide the seam to where Hume leaves beauty.',
+      split: {
+        left: 'IN THE RESPONSE', right: 'IN THE PAINT',
+        start: 0.04,
+        zones: [
+          { id: 'paint', upto: 0.3, reads: 'in the object; a standard measures a real property' },
+          { id: 'both', upto: 0.66, reads: 'half in the paint, half in the viewer' },
+          { id: 'resp', upto: 1, reads: 'in the response, which can still be trained', correct: true },
+        ],
+      },
+      explain: 'All of it in the response. A standard sounds like a ruler you hold against the canvas, and Hume never put beauty back into the paint. What he noticed is that a response can be practised, compared and freed of grudges — which is why some critics are worth reading.',
       xp: 5,
     },
     dur: 1.0,

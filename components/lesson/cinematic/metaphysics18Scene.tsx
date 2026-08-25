@@ -3,7 +3,7 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, pose, travelStance, WALK, type Bundle } from './rig';
+import { clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics18Script';
 import {
@@ -42,7 +42,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // was weak; a short one says it did not reach, which is the claim.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const TR = 0.82;
+/** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const BASE_TR = 0.85;
 
 const PL_Y = 288;
 const PL_W = 76;
@@ -78,7 +79,10 @@ export default function Metaphysics18Scene({ clock, bt, bi, i, picked, onPick }:
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / TR);
+    // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr). A fixed length
+    // here sprinted every long journey and left the footfalls — which the player
+    // computes from moveTr — arriving after the figure had stopped.
+    const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(

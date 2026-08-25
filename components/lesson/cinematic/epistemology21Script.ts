@@ -68,12 +68,18 @@ export const BEATS: Epi21Beat[] = [
   {
     p: 4, x: 124, dial: 1, will: 1, ev: 1,
     interact: {
-      prompt: 'So is what you believe entirely out of your hands?',
-      cards: [
-        { text: 'You choose what evidence to face', correct: true },
-        { text: 'Yes, belief is involuntary', correct: false },
-      ],
-      explain: 'The trap is "involuntary" sliding into "not my responsibility". Pascal saw the way out: you cannot will a belief, but you do choose the company, habits and reading that decide what reaches the tray.',
+      prompt: 'Drag to how much of what you believe is up to you.',
+      drag: {
+        lo: 'NONE OF IT',
+        hi: 'YOU SIMPLY DECIDE',
+        start: 0,
+        zones: [
+          { id: 'none', upto: 0.28, reads: 'none; belief happens to you and that is that' },
+          { id: 'inputs', upto: 0.74, reads: 'you cannot will a belief, but you choose what reaches you', correct: true },
+          { id: 'will', upto: 1, reads: 'you pick beliefs the way you pick what to wear' },
+        ],
+      },
+      explain: 'The middle. The near end slides from involuntary to not my responsibility, and Pascal saw the way past it: you cannot will yourself into believing, but you do choose the company, the habits and the reading that decide what ever reaches the tray.',
       xp: 5,
     },
     dur: 1.0,

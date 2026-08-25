@@ -73,12 +73,17 @@ export const BEATS: Eth14Beat[] = [
     g: 41, built: 5, door: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Hobbes and Locke both build the wall. What do they really disagree about?',
-      cards: [
-        { text: 'Whether you may ever resist it', correct: true },
-        { text: 'Whether to build it at all', correct: false },
-      ],
-      explain: 'The other card offers a split neither of them is on. Both want the wall, so "no wall at all" is nobody\'s position. The argument is about the door. Locke says a state that turns on you forfeits your obedience. Hobbes says a door leads back to the field.',
+      prompt: 'Slide the seam to where the real disagreement sits.',
+      split: {
+        left: 'MAY YOU EVER RESIST IT', right: 'SHOULD IT EXIST AT ALL',
+        start: 0.04,
+        zones: [
+          { id: 'build', upto: 0.3, reads: 'whether to have a state in the first place' },
+          { id: 'both', upto: 0.66, reads: 'half about building it, half about resisting it' },
+          { id: 'resist', upto: 1, reads: 'whether you may ever resist the one you built', correct: true },
+        ],
+      },
+      explain: 'All of it on the left. Both men want the wall, so no wall at all is nobody position in this argument. They fall out over the door. Locke says a state that turns on you forfeits your obedience; Hobbes says the alternative is worse than anything it does.',
       xp: 5,
     },
   },

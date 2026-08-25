@@ -67,12 +67,17 @@ export const BEATS: Epi5Beat[] = [
   {
     p: 25, star: 1, rungs: 5,
     interact: {
-      prompt: 'Where does curiosity come from? Were you taught to want to know, or did you arrive wanting it?',
-      cards: [
-        { text: 'It is woven into us', correct: true },
-        { text: 'It is taught to us', correct: false },
-      ],
-      explain: 'Aristotle puts it in the nature, not the upbringing. Nobody has to be trained to want to know what is behind a closed door.',
+      prompt: 'Slide the seam to where Aristotle puts the wanting to know.',
+      split: {
+        left: 'BORN WITH IT', right: 'TAUGHT IT',
+        start: 0.04,
+        zones: [
+          { id: 'taught', upto: 0.32, reads: 'trained into you by school and habit' },
+          { id: 'both', upto: 0.66, reads: 'a spark you are born with, then fanned' },
+          { id: 'born', upto: 1, reads: 'there from the start, in the nature', correct: true },
+        ],
+      },
+      explain: 'Nearly all of it is in the nature. Aristotle opens with all men by nature desire to know, and the middle is the tempting compromise. Nobody has to be trained to want to know what is behind a closed door.',
       xp: 5,
     },
     dur: 1.0,

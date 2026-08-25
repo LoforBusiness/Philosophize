@@ -74,12 +74,16 @@ export const BEATS: Met16Beat[] = [
     g: 41, panels: 2, crave: 1, second: 1,
     dur: 1.0,
     interact: {
-      prompt: 'A friend says Frankfurt shows we are free because our choices are uncaused.',
-      cards: [
-        { text: 'Freedom is in endorsing them', correct: true },
-        { text: 'He rejects every cause', correct: false },
-      ],
-      explain: 'The other card swaps Frankfurt for an easier opponent. He is a compatibilist: every desire on this stage can be fully caused and he does not mind. What he adds is a second question about those causes — whether you are behind what they produced.',
+      prompt: 'Set the lever to what Frankfurt adds to being free.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'uncaused', reads: 'free means the choice had no cause at all' },
+          { id: 'unforced', reads: 'free means nobody held a gun to your head' },
+          { id: 'endorsed', reads: 'free means you want to be moved by that desire', correct: true },
+        ],
+      },
+      explain: 'The far setting. The first swaps Frankfurt for an easier opponent: he is a compatibilist, so every desire here can be fully caused and he does not mind. What he adds is a second question — not where a desire came from, but whether you stand behind it.',
       xp: 5,
     },
   },

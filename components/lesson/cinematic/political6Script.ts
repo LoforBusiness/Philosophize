@@ -59,12 +59,17 @@ export const BEATS: Pol6Beat[] = [
   {
     p: 4, bars: 1, prin: 1,
     interact: {
-      prompt: 'Rawls protects the worst-off. So can his liberty principle be traded away to boost their wealth?',
-      cards: [
-        { text: 'No, basic liberties come first', correct: true },
-        { text: 'Yes, if the poorest gain', correct: false },
-      ],
-      explain: 'The trap: helping the poor sounds like grounds to trade liberty for cash. But Rawls gives the basic liberties strict priority; only once they are secured does the difference principle apply.',
+      prompt: 'Slide the seam to how Rawls orders the two.',
+      split: {
+        left: 'LIBERTIES SETTLED FIRST', right: 'TRADED FOR THE POOREST',
+        start: 0.04,
+        zones: [
+          { id: 'cash', upto: 0.3, reads: 'trade the liberties away whenever the poorest gain' },
+          { id: 'both', upto: 0.66, reads: 'weigh liberty against money case by case' },
+          { id: 'first', upto: 1, reads: 'liberties settled first, and only then the money', correct: true },
+        ],
+      },
+      explain: 'All the way over. Helping the poor sounds like grounds for a trade, and Rawls will not allow one: the basic liberties have strict priority. Only once they are secured for everybody does the difference principle get to speak about wealth.',
       xp: 5,
     },
     dur: 1.0,

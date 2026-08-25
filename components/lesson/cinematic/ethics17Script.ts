@@ -84,12 +84,17 @@ export const BEATS: Eth17Beat[] = [
   {
     p: 41, x: 268, maxim: 1, copies: 1, trust: 0.06,
     interact: {
-      prompt: 'Kant will not lie to the murderer. What is he actually claiming?',
-      cards: [
-        { text: 'You answer for your own act', correct: true },
-        { text: 'The death would not be bad', correct: false },
-      ],
-      explain: 'That you answer for your own act, and the murderer answers for his. Kant does not deny the death is terrible. He denies that it lands on your account. The other card is the caricature, and it is why people call him heartless.',
+      prompt: 'Slide the seam to where Kant puts the death.',
+      split: {
+        left: 'ON THE MURDERER', right: 'ON YOU, FOR ANSWERING',
+        start: 0.04,
+        zones: [
+          { id: 'you', upto: 0.3, reads: 'on you, for handing him the address' },
+          { id: 'both', upto: 0.66, reads: 'shared between the two of you' },
+          { id: 'him', upto: 1, reads: 'on him entirely; you answer for your own act', correct: true },
+        ],
+      },
+      explain: 'All the way to the murderer. Kant does not deny the death is terrible, which is the caricature and why people call him heartless. He denies that it lands on your account. You answer for the lie; he answers for the killing.',
       xp: 5,
     },
     dur: 1.0,

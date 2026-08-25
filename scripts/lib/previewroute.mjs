@@ -1,7 +1,7 @@
 // ONE LOCK FOR EVERY HARNESS THAT WRITES A ROUTE INTO app/.
 //
-// Four scripts drive the real app in a browser — measure-must, check-frame,
-// check-spoiler, check-cover — and each does it by writing a throwaway screen
+// Five scripts drive the real app in a browser — measure-must, check-frame,
+// check-spoiler, check-cover and check-readable — and each does it by writing a screen
 // into app/, because that is the only way to reach an authenticated screen by
 // URL (§21). They shared a Metro, a Chrome, and — fatally — a filename:
 // check-frame and check-spoiler both write app/previewframe.tsx, and only

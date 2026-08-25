@@ -87,12 +87,17 @@ export const BEATS: Log17Beat[] = [
   {
     p: 41, x: 268, pair: 1, marks: 1, lift: 1, falls: 1,
     interact: {
-      prompt: 'An expert with no argument tells you a fact. What are you relying on?',
-      cards: [
-        { text: 'Their track record', correct: true },
-        { text: 'The reasons they gave', correct: false },
-      ],
-      explain: 'Their track record, because they gave you no reasons to check. Bare testimony is worth exactly what the speaker is worth, so weighing the speaker is perfectly rational. The mistake is weighing the speaker when reasons are on the table.',
+      prompt: 'Slide the seam to divide what you are leaning on.',
+      split: {
+        left: 'WHO IS SPEAKING', right: 'THE REASONS GIVEN',
+        start: 0.04,
+        zones: [
+          { id: 'reasons', upto: 0.3, reads: 'the reasons, which you could check yourself' },
+          { id: 'both', upto: 0.66, reads: 'half the reasons, half the person' },
+          { id: 'who', upto: 1, reads: 'the person, because no reasons were offered', correct: true },
+        ],
+      },
+      explain: 'All of it on the speaker, because they handed you nothing else. Bare testimony is worth exactly what the speaker is worth, so weighing the speaker is the rational thing to do. The mistake is weighing the speaker when reasons are sitting there to be read.',
       xp: 5,
     },
     dur: 1.0,

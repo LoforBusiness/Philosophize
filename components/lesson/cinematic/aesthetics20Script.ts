@@ -82,12 +82,16 @@ export const BEATS: Aes20Beat[] = [
   {
     p: 41, x: 268, uses: 1, swaps: 1, struck: 1,
     interact: {
-      prompt: 'Does striking out three of the four settle anything?',
-      cards: [
-        { text: 'It narrows it, not proves it', correct: true },
-        { text: 'Yes, only one reason survives', correct: false },
-      ],
-      explain: 'The list narrows the field. Crossing answers out shows which reasons cannot be the whole story, but crossing out never proves the survivor true. Art may well teach and decorate and record. The question was what art does that nothing else can.',
+      prompt: 'Set the lever to what crossing three out has done.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'proved', reads: 'the survivor is proved; only one reason is left standing' },
+          { id: 'nothing', reads: 'nothing at all; crossing out never tells you anything' },
+          { id: 'narrow', reads: 'the field is narrower, and nothing is proved', correct: true },
+        ],
+      },
+      explain: 'The far setting. Crossing answers out shows which reasons cannot be the whole story, and it never makes the survivor true. Art may well teach and decorate and record. The question was what art does that nothing cheaper already does.',
       xp: 5,
     },
     dur: 1.0,

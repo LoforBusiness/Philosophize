@@ -274,7 +274,9 @@ const styles = StyleSheet.create({
   // inside a 65-unit interior, and a wrap would put a second line outside the
   // 26-tall plate. This keeps one comfortable line with room to spare.
   signNotText: {
-    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14.5, letterSpacing: 0.4, color: SOFT,
+    // INK: this sign rides a ghost road that fades away, and SOFT is 5.3:1 at full
+    // strength — under 3:1 the moment anything dims it (D35).
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14.5, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
 });

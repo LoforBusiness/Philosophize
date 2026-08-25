@@ -48,12 +48,17 @@ export const BEATS: Aes5Beat[] = [
   {
     p: 19, bird: 1, ego: 0, self: 0.06,
     interact: {
-      prompt: 'Tap what actually happened to her at that window.',
-      cards: [
-        { text: 'Something absorbs you completely', correct: true },
-        { text: 'A technique you perform', correct: false },
-      ],
-      explain: 'Unselfing is not something you do. It is something that happens to you, when a kestrel or a painting takes hold so completely that there is no room left for brooding.',
+      prompt: 'Slide the seam to divide who does the unselfing.',
+      split: {
+        left: 'IT HAPPENS TO YOU', right: 'YOU DO IT',
+        start: 0.04,
+        zones: [
+          { id: 'do', upto: 0.3, reads: 'a technique you practise and then perform' },
+          { id: 'both', upto: 0.66, reads: 'you set it up, and then it takes over' },
+          { id: 'happens', upto: 1, reads: 'it takes hold of you; there is no method', correct: true },
+        ],
+      },
+      explain: 'Almost all of it happens to you. Unselfing is not a technique. It arrives when a kestrel or a painting takes hold so completely that no room is left over for brooding. You can put yourself where unselfing might happen. You cannot perform it.',
       xp: 5,
     },
     dur: 1.0,

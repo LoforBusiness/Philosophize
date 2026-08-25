@@ -74,12 +74,17 @@ export const BEATS: Epi15Beat[] = [
     g: 41, cells: 4, dealt: 3, sum: 1,
     dur: 1.0,
     interact: {
-      prompt: 'A friend says knowing 7 + 5 = 12 without checking makes it an empty definition. Why not?',
-      cards: [
-        { text: 'Twelve is not inside them', correct: true },
-        { text: 'Because you checked once, long ago', correct: false },
-      ],
-      explain: 'The other card moves the sum into the box below and makes it something you learned by looking. Nobody counts to twelve on their fingers and calls it an experiment. Twelve is not contained in seven, five and plus. That is what makes the sum informative.',
+      prompt: 'Slide the seam to divide where twelve comes from.',
+      split: {
+        left: 'ALREADY INSIDE SEVEN AND FIVE', right: 'SOMETHING GENUINELY NEW',
+        start: 1,
+        zones: [
+          { id: 'new', upto: 0.32, reads: 'twelve is not in them; the sum adds it', correct: true },
+          { id: 'half', upto: 0.66, reads: 'half unpacking, half adding' },
+          { id: 'inside', upto: 1, reads: 'twelve was in there all along, waiting to be unpacked' },
+        ],
+      },
+      explain: 'Almost all of it is new, which is why the sum is not an empty definition. Turn seven, five and plus over as long as you like and twelve is not in any of them. Nor did you learn it by looking: nobody calls counting an experiment.',
       xp: 5,
     },
   },

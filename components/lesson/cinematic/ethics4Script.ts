@@ -66,12 +66,18 @@ export const BEATS: Ethics4Beat[] = [
   {
     a: 21, b: 0, floor: 1, rows: 3,
     interact: {
-      prompt: 'Tap the claim that goes past "cultures disagree" into "there is no fact of the matter".',
-      cards: [
-        { text: 'Truth is relative to group', correct: true },
-        { text: 'Cultures differ, truth remains', correct: false },
-      ],
-      explain: 'Metaethical relativism is more than the fact that cultures differ. It claims a judgment’s truth is relative to a group, with no culture-independent moral fact.',
+      prompt: 'Drag to what this kind of relativism claims.',
+      drag: {
+        lo: 'CULTURES SIMPLY DIFFER',
+        hi: 'NOTHING IS RIGHT OR WRONG',
+        start: 0,
+        zones: [
+          { id: 'differ', upto: 0.3, reads: 'cultures disagree, and one of them may still be right' },
+          { id: 'relative', upto: 0.74, reads: 'true for a group, with no view standing above them', correct: true },
+          { id: 'none', upto: 1, reads: 'nothing is right or wrong, even inside a group' },
+        ],
+      },
+      explain: 'The middle, and both ends are easy to mistake for it. The near end is only an observation about the world and anybody can agree with it. The far end is nihilism, which relativism is not: inside a group there are still right answers.',
       xp: 5,
     },
     dur: 1.0,

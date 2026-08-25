@@ -61,12 +61,18 @@ export const BEATS: Logic11Beat[] = [
   {
     p: 4, x: 116, steps: 4, base: 1, spine: 1,
     interact: {
-      prompt: 'A circular argument is logically VALID. Does that mean it proves its conclusion?',
-      cards: [
-        { text: 'No, it adds no support', correct: true },
-        { text: 'Yes, it is valid', correct: false },
-      ],
-      explain: 'The trap: validity feels like proof. All validity promises is that true premises could not give a false conclusion — and a circle clears that bar by helping itself to the conclusion. It never fails, and it never tells you anything.',
+      prompt: 'Drag to how much support a circle actually gives.',
+      drag: {
+        lo: 'NONE AT ALL',
+        hi: 'IT PROVES THE CONCLUSION',
+        start: 1,
+        zones: [
+          { id: 'none', upto: 0.3, reads: 'none; it helped itself to the answer', correct: true },
+          { id: 'some', upto: 0.7, reads: 'a little, by making the claim explicit' },
+          { id: 'proof', upto: 1, reads: 'it proves it, and the steps really are valid' },
+        ],
+      },
+      explain: 'None, and the knob starts on the trap. Validity feels like proof and is not. All it promises is that true premises could not give a false conclusion, and a circle clears that bar by putting the conclusion in the premises. It never fails and never tells you anything.',
       xp: 5,
     },
     dur: 1.0,

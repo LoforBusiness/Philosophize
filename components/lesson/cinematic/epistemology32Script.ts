@@ -65,12 +65,18 @@ export const BEATS: Epis32Beat[] = [
     g: 10, maps: 4,
     dur: 1.0,
     interact: {
-      prompt: 'So what kind of thing is a model?',
-      cards: [
-        { text: 'A deliberate simplification', correct: true },
-        { text: 'A map with too little detail', correct: false },
-      ],
-      explain: 'The other card calls a model a map with too little detail, and the fourth map refutes that. Add detail without limit and you get the coastline back at coastline size. Leaving things out is the job, not the shortfall.',
+      prompt: 'Drag to how much detail a good model keeps.',
+      drag: {
+        lo: 'ALMOST NONE',
+        hi: 'EVERY LAST THING',
+        start: 1,
+        zones: [
+          { id: 'bare', upto: 0.24, reads: 'almost nothing, so it explains almost nothing' },
+          { id: 'chosen', upto: 0.72, reads: 'the few things the question needs, and no more', correct: true },
+          { id: 'all', upto: 1, reads: 'everything, at which point it is the thing itself' },
+        ],
+      },
+      explain: 'The middle, and the far end is what the fourth map showed. Add detail without limit and you get the coastline back at coastline size, which is no use to anybody. Leaving things out is the job, not the shortfall.',
       xp: 5,
     },
   },

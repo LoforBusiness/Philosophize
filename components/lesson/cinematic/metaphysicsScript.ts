@@ -84,12 +84,18 @@ export const BEATS: MetaBeat[] = [
     chain: true,
     qregress: 'q2',
     interact: {
-      prompt: 'The Big Bang explains where the universe came from. Doesn’t that answer Leibniz’s question?',
-      cards: [
-        { text: 'No, it presupposes something existed', correct: true },
-        { text: 'Yes, that is the reason', correct: false },
-      ],
-      explain: 'The Big Bang describes how an existing universe evolved from a dense early state. It assumes that state already was — so it cannot say why there is anything rather than nothing.',
+      prompt: 'Drag to how far back the Big Bang story actually explains.',
+      drag: {
+        lo: 'LAST TUESDAY',
+        hi: 'WHY ANYTHING AT ALL',
+        start: 0,
+        zones: [
+          { id: 'stars', upto: 0.32, reads: 'how the galaxies and the stars formed' },
+          { id: 'early', upto: 0.72, reads: 'back to one hot dense beginning, and it stops there', correct: true },
+          { id: 'why', upto: 1, reads: 'why there is anything here to begin with' },
+        ],
+      },
+      explain: 'It reaches the beginning and stops. The Big Bang describes how an already existing universe grew out of a hot dense state. That state had to be there first. So the story runs out one step short of the question.',
       xp: 5,
     },
     dur: 1.0,

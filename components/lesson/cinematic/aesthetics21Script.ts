@@ -82,12 +82,17 @@ export const BEATS: Aes21Beat[] = [
   {
     p: 41, x: 268, works: 1, burn: 1, gone: 1,
     interact: {
-      prompt: 'A photograph prints many times. Which kind of work is it?',
-      cards: [
-        { text: 'Both, and that is the trouble', correct: true },
-        { text: 'Like the novel, plainly', correct: false },
-      ],
-      explain: 'Both, uncomfortably. The negative works like a text, so any print carries the image. But the market treats an early print signed by the photographer as the object, which is how we treat paintings. The rule is real and its edges are contested.',
+      prompt: 'Slide the seam to divide a photograph between the two kinds.',
+      split: {
+        left: 'LIKE A NOVEL', right: 'LIKE A PAINTING',
+        start: 0.04,
+        zones: [
+          { id: 'paint', upto: 0.3, reads: 'like a painting: the print on the wall is the work' },
+          { id: 'both', upto: 0.66, reads: 'both at once, and that is the trouble', correct: true },
+          { id: 'novel', upto: 1, reads: 'like a novel: the negative is the work and prints are copies' },
+        ],
+      },
+      explain: 'The middle, uncomfortably. The negative works like a text, so any print carries the image and burning one destroys nothing. And yet the market treats an early signed print as the object, which is how we treat paintings. The rule is real and photography sits across it.',
       xp: 5,
     },
     dur: 1.0,

@@ -69,12 +69,19 @@ export const BEATS: Pol32Beat[] = [
     g: 11, fill: 1, result: 1, mark: 1, labels: 1,
     dur: 1.0,
     interact: {
-      prompt: 'So is it rational to vote?',
-      cards: [
-        { text: 'Yes, for what it does', correct: true },
-        { text: 'No, one vote never decides', correct: false },
-      ],
-      explain: 'The classic slip is "but what if nobody voted". What everyone else does is already fixed, so that was never your choice. The other card is right that one vote rarely decides, and wrong that deciding is all a mark does.',
+      prompt: 'Place the token on why voting is still rational.',
+      field: {
+        xLo: 'YOUR VOTE WILL NOT DECIDE IT', xHi: 'YOUR VOTE MIGHT DECIDE IT',
+        yLo: 'A MARK DOES NOTHING ELSE', yHi: 'A MARK DOES OTHER THINGS',
+        start: [0.76, 0.24],
+        quads: [
+          { id: 'yes', x: 0, y: 1, reads: 'it will not decide, and the mark still does something', correct: true },
+          { id: 'no', x: 0, y: 0, reads: 'it will not decide, and that is all a mark is' },
+          { id: 'lucky', x: 1, y: 1, reads: 'it might decide, and it does other things too' },
+          { id: 'thin', x: 1, y: 0, reads: 'it might decide, and nothing besides' },
+        ],
+      },
+      explain: 'Top left. The classic slip is but what if nobody voted: what everyone else does is already fixed, so that was never the choice in front of you. Deciding the result is one thing a mark can do, and it was never the only one.',
       xp: 5,
     },
   },

@@ -85,12 +85,18 @@ export const BEATS: Eth19Beat[] = [
   {
     p: 41, x: 268, doc: 1, rows: 1, affects: 1,
     interact: {
-      prompt: 'Someone competent refuses treatment that would save them. What follows?',
-      cards: [
-        { text: 'Their refusal stands', correct: true },
-        { text: 'Save them, then ask', correct: false },
-      ],
-      explain: 'Their refusal stands. This is the hardest case for the harm principle, and Mill takes it anyway. A competent adult may make a choice that is plainly bad for them. Overriding the choice treats a person as a thing to be managed.',
+      prompt: 'Drag to what the harm principle actually allows here.',
+      drag: {
+        lo: 'THE REFUSAL STANDS',
+        hi: 'SAVE THEM ANYWAY',
+        start: 1,
+        zones: [
+          { id: 'stands', upto: 0.3, reads: 'their refusal stands, however bad the choice looks', correct: true },
+          { id: 'delay', upto: 0.66, reads: 'treat them now, and ask again once they are well' },
+          { id: 'save', upto: 1, reads: 'save them; nobody in their right mind refuses this' },
+        ],
+      },
+      explain: 'The near end, and this is the hardest case for the harm principle. Mill takes it anyway: a competent adult may make a choice that is plainly terrible for them and for nobody else. Overriding it treats a person as a thing to be managed.',
       xp: 5,
     },
     dur: 1.0,

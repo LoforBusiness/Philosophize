@@ -55,14 +55,18 @@ export const BEATS: Meta5Beat[] = [
   {
     p: 4, stars: 1, q: 0.4, psr: 1, dasein: 1,
     interact: {
-      prompt: 'So what opens this question in the first place — amazement, or doubt?',
-      cards: [
-        { text: 'Wonder at Being', correct: true },
-        { text: 'Cartesian doubt', correct: false },
-      ],
+      prompt: 'Set the lever to where Heidegger says this question starts.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'doubt', reads: 'doubt: can I trust anything I see?' },
+          { id: 'wonder', reads: 'wonder: why is any of this here at all?', correct: true },
+          { id: 'measure', reads: 'measurement: what is here, and how much of it?' },
+        ],
+      },
       // Was "the leap is Kierkegaard's, the absurd is Camus's" — a leftover list of
       // two options that no longer exist, naming two thinkers for nothing.
-      explain: 'Amazement that there is anything at all. Doubt is Descartes’s move, and it asks a different question — not whether anything exists, but whether you can trust what you see.',
+      explain: 'The middle setting. Amazement that there is anything, rather than suspicion about what you are looking at. Doubt is Descartes at the first setting, and it asks something else entirely: not whether the world is here, but whether your eyes are telling the truth about it.',
       xp: 5,
     },
     dur: 1.0,

@@ -628,6 +628,117 @@ head('every walker sounds, and nothing else does');
     lying.length ? lying.slice(0, 4).join('; ') : 'no false claims');
 }
 
+// ── 5b. THE WALK MUST TAKE AS LONG AS THE SOUND THINKS IT DOES ──────────────
+//
+// Section 5 checks WHO walks. This checks HOW LONG, and it is the half that was
+// missing while 54 scenes were wrong.
+//
+// The player schedules footfalls from `footfallTrack(walk)`, which uses
+// `footfallTimes`' default duration — `moveTr(x0, x1, 0.85)`, a walk that takes
+// as long as the distance needs at WALK_SPEED. The SCENE decides how long the
+// transition actually lasts, and nothing ever compared the two. Fifty-four scenes
+// wrote
+//
+//     const TR = 0.82;
+//     const tr = ease01(bt.value / TR);
+//
+// — a FIXED length, whatever the distance. That is precisely the defect `moveTr`
+// exists to prevent (read its comment: "a walk was being crammed into that same
+// 0.85s NO MATTER HOW FAR IT WENT… which is what reads as 'the stickman walks
+// over way too fast'"), and it reached a reader as both symptoms at once:
+//
+//   "the stickman will sometimes walk faster and now the sounds in lessons for
+//    walking is no longer lined up correctly"
+//
+// Worst case measured: a 202-unit journey played in 0.82s — 246 stage units a
+// second against an intended 56 — with its last footstep landing 2.79s after the
+// figure had already stopped.
+//
+// WHY NOTHING CAUGHT IT. Every sound check above loads `rig.ts` and
+// `footfalls.ts` and asks whether they agree with each other. They always did.
+// The disagreement was between footfalls.ts and the FIFTY-FOUR CALLERS, and a
+// checker that only models the shared code stays green through anything that is
+// not the shared code — the same blind spot as L5 and L8 in §17. So this reads
+// the scenes.
+head('a walk lasts as long as the footfalls assume');
+{
+  const dir = path.join(ROOT, 'components/lesson/cinematic');
+  const scenes = fs.readdirSync(dir).filter((f) => /Scene\.tsx$/.test(f));
+  /** Comments quote the very expressions this matches on — strip them (the L8 lesson). */
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+  const wrong = [], unread = [];
+  let judged = 0, worstFactor = 1, worstLate = 0, worstName = '';
+
+  for (const f of scenes) {
+    const raw = fs.readFileSync(path.join(dir, f), 'utf8');
+    if (!/\bwalk=\{/.test(raw)) continue;          // section 5 owns who qualifies
+    const src = strip(raw);
+
+    // The transition length the scene divides its beat clock by.
+    const tr = /const\s+tr\s*=\s*ease01\(\s*bt\.value\s*\/\s*([^)]*\)?[^;]*)\);/.exec(src);
+    if (!tr) { unread.push(`${f} (no tr expression)`); continue; }
+    const denom = tr[1].trim();
+
+    const mv = /^moveTr\(\s*(\w+)\[p\]\s*,\s*(\w+)\[n\]\s*,\s*([\w.]+)\s*\)$/.exec(denom);
+    if (!mv) { wrong.push(`${f.replace('Scene.tsx', '')} divides by \`${denom}\``); continue; }
+
+    // The same track the figure is walked along, or the length belongs to some
+    // other journey than the one being heard.
+    const trav = /travelStance\(\s*(\w+)\[p\]\s*,\s*(\w+)\[n\]/.exec(src);
+    if (!trav || trav[1] !== mv[1] || mv[1] !== mv[2]) {
+      wrong.push(`${f.replace('Scene.tsx', '')} times ${mv[1]} but walks ${trav ? trav[1] : '?'}`);
+      continue;
+    }
+
+    // The base, which only bites on walks shorter than WALK_SPEED * base.
+    let base = Number(mv[3]);
+    if (!Number.isFinite(base)) {
+      const c = new RegExp(`const\\s+${mv[3]}\\s*=\\s*([\\d.]+)\\s*;`).exec(src);
+      base = c ? Number(c[1]) : NaN;
+    }
+    if (!(Math.abs(base - 0.85) < 1e-9)) {
+      wrong.push(`${f.replace('Scene.tsx', '')} uses base ${mv[3]}=${base}, footfalls assume 0.85`);
+      continue;
+    }
+
+    // MEASURED, not merely matched: replay the scene's own x track and compare the
+    // two durations beat by beat. A pattern can be right and the numbers still
+    // disagree; the numbers are what the reader hears.
+    const script = path.join(dir, f.replace('Scene.tsx', 'Script.ts'));
+    if (!fs.existsSync(script)) { unread.push(`${f} (no script)`); continue; }
+    let BEATS;
+    try { ({ BEATS } = loadTS(path.relative(ROOT, script).replace(/\\/g, '/'))); }
+    catch (e) { unread.push(`${f} (${e.message})`); continue; }
+    const track = new RegExp(`const\\s+${mv[1]}\\s*=\\s*BEATS\\.map\\(\\([^)]*\\)\\s*=>\\s*\\w+\\.x\\s*\\?\\?\\s*([\\w.]+)\\)`).exec(src);
+    if (!track) { unread.push(`${f} (cannot read the ${mv[1]} track)`); continue; }
+    let dflt = Number(track[1]);
+    if (!Number.isFinite(dflt)) {
+      const c = new RegExp(`const\\s+${track[1]}\\s*=\\s*(-?[\\d.]+)\\s*;`).exec(src);
+      dflt = c ? Number(c[1]) : NaN;
+    }
+    if (!Number.isFinite(dflt)) { unread.push(`${f} (cannot resolve ${track[1]})`); continue; }
+
+    const xs = BEATS.map((b) => (b.x ?? dflt));
+    judged += 1;
+    for (let i = 1; i < xs.length; i += 1) {
+      if (Math.abs(xs[i] - xs[i - 1]) <= 1) continue;
+      const heard = rig.moveTr(xs[i - 1], xs[i], 0.85);   // what the player scheduled against
+      const seen = rig.moveTr(xs[i - 1], xs[i], base);    // what the scene will draw
+      const factor = heard / seen;
+      if (factor > worstFactor) { worstFactor = factor; worstLate = heard - seen; worstName = `${f.replace('Scene.tsx', '')} beat ${i}`; }
+      if (Math.abs(heard - seen) > 1e-6) wrong.push(`${f.replace('Scene.tsx', '')} beat ${i}: draws in ${seen.toFixed(2)}s, sounds over ${heard.toFixed(2)}s`);
+    }
+  }
+
+  // An under-measuring sweep must never read as a clean one (§21).
+  ok('every walking scene could be read', unread.length === 0,
+    unread.length ? unread.slice(0, 4).join('; ') : `${judged} scenes replayed`);
+  ok('the walk the reader sees is the walk the feet were timed for', wrong.length === 0,
+    wrong.length ? `${wrong.length} wrong — ${wrong.slice(0, 3).join('; ')}` : `worst drift ${((worstFactor - 1) * 100).toFixed(1)}% (${worstName || 'none'})`);
+  if (wrong.length) console.log(`        worst: ${worstName} runs ${worstFactor.toFixed(2)}x fast, last step ${worstLate.toFixed(2)}s late`);
+}
+
 // ── 6. THE FOOTFALL IS THE MOST REPEATED SOUND IN THE APP ───────────────────
 //
 // It fires ten to forty times in a lesson where an answer note fires twice, so

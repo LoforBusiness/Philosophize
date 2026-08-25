@@ -79,12 +79,17 @@ export const BEATS: Epistemology36Beat[] = [
   {
     p: 45, x: 128, shelf: 1, clash: 1,
     interact: {
-      prompt: 'So how much of knowing your own mind does this actually cost you?',
-      cards: [
-        { text: 'Causes, not feelings', correct: true },
-        { text: 'All of it, always', correct: false },
-      ],
-      explain: 'Being in pain and knowing it is untouched by any of this. What it undermines is the confident account of why you did something — a report about hidden machinery, delivered in the voice of a report about a feeling.',
+      prompt: 'Slide the seam to divide what the experiment actually takes.',
+      split: {
+        left: 'WHY YOU DID IT', right: 'WHAT YOU FEEL',
+        start: 0.04,
+        zones: [
+          { id: 'feel', upto: 0.3, reads: 'it takes the feelings and leaves the reasons standing' },
+          { id: 'both', upto: 0.66, reads: 'it takes about half of each' },
+          { id: 'why', upto: 1, reads: 'it takes the reasons and leaves the feelings alone', correct: true },
+        ],
+      },
+      explain: 'Nearly all of it lands on the why. Being in pain and knowing it is untouched by any of this. What goes is the confident account of why you did something — a report about hidden machinery, delivered in the voice of a report about a feeling.',
       xp: 5,
     },
     dur: 1.0,

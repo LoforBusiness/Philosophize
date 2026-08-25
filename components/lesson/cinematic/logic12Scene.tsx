@@ -169,7 +169,11 @@ function Door({
   const on = answered && d.correct;
 
   const wrap = useAnimatedStyle(() => ({
-    opacity: d.offered ? 1 : 0.16 + 0.84 * clamp01(SCENE.value.lit),
+    // 0.55, not 0.16. A door nobody offered you is the POINT of this lesson, and
+    // at 0.16 its label reached the reader at 1.4:1 — a ghost with an unreadable
+    // word on it, which is D35's smear rather than a hint. Half-strength still
+    // reads as "not on the table" and the words can be read.
+    opacity: d.offered ? 1 : 0.55 + 0.45 * clamp01(SCENE.value.lit),
   }));
   const leaf = useAnimatedStyle(() => ({
     transform: [{ scaleX: d.correct ? 1 - 0.82 * SCENE.value.swing : 1 }],

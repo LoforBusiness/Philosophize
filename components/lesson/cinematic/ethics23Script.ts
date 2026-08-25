@@ -67,12 +67,18 @@ export const BEATS: Ethics23Beat[] = [
   {
     p: 4, x: 124, gauges: 1, near: 1, far: 1,
     interact: {
-      prompt: 'Someone replies: "Thousands of others could help too, so the duty is not mine." Does that work?',
-      cards: [
-        { text: 'No, the child still dies', correct: true },
-        { text: 'Yes, responsibility is shared', correct: false },
-      ],
-      explain: 'The trap is the other card, and it has a name: diffusion of responsibility. At the pond you would not stroll past because a crowd was also watching. Others being able to act has never cancelled your being able to.',
+      prompt: 'Draw how much of the duty stays yours as the crowd grows.',
+      plot: {
+        axis: 'HOW MUCH IS YOURS',
+        cols: ['YOU ALONE', '10 OTHERS', '1000', 'A MILLION'],
+        start: [0.5, 0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'flat', profile: [0.95, 0.93, 0.92, 0.9], reads: 'it stays yours, whoever else is standing there', correct: true },
+          { id: 'fall', profile: [0.95, 0.5, 0.1, 0.02], reads: 'it thins out as the crowd grows' },
+          { id: 'share', profile: [0.95, 0.6, 0.35, 0.2], reads: 'it halves, and then halves again' },
+        ],
+      },
+      explain: 'Flat. The sloping answer has a name — diffusion of responsibility — and the pond is the test of it: you would not stroll past a drowning child because a crowd was also watching. Others being able to act has never once cancelled your being able to.',
       xp: 5,
     },
     dur: 1.0,

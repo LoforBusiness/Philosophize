@@ -65,7 +65,7 @@ export const BEATS: Ethics11Beat[] = [
     interact: {
       prompt: 'Cheap thrills sum to more raw pleasure than one symphony. For Mill, have they beaten it?',
       split: {
-        left: 'HOW MUCH', right: 'WHAT KIND',
+        left: 'WHAT KIND', right: 'HOW MUCH',
         start: 0.5,
         zones: [
           { id: 'amount', upto: 0.34, reads: 'add the pleasure up and the bigger pile wins' },

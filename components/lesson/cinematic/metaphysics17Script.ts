@@ -75,12 +75,17 @@ export const BEATS: Met17Beat[] = [
     g: 41, wall: 1, door: 1, card: 1,
     dur: 1.0,
     interact: {
-      prompt: 'She had every physical fact already. Does she learn anything at all?',
-      cards: [
-        { text: 'She learns what red is like', correct: true },
-        { text: 'She already knew everything', correct: false },
-      ],
-      explain: 'The other card treats "every physical fact" and "everything" as the same list, and that is the assumption the whole argument is aimed at. If she plainly learns something, and she already had every physical fact, then something is not on that list.',
+      prompt: 'Slide the seam to divide what there is to know about red.',
+      split: {
+        left: 'THE PHYSICAL FACTS', right: 'WHAT IT IS LIKE',
+        start: 1,
+        zones: [
+          { id: 'mind', upto: 0.3, reads: 'physics barely touches it; nearly all of it is left over' },
+          { id: 'most', upto: 0.74, reads: 'physics covers nearly all of it, and a sliver is left over', correct: true },
+          { id: 'all', upto: 1, reads: 'physics covers every last bit; she learns nothing at the door' },
+        ],
+      },
+      explain: 'Nearly all of it, and the sliver on the right is the whole argument. The far end treats every physical fact and everything as the same list, which is exactly what is in question. She had the first list complete and she still learns something the day the door opens.',
       xp: 5,
     },
   },

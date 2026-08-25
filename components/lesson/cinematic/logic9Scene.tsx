@@ -153,7 +153,9 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick }: SceneA
   const DF = useDerivedValue<Bundle>(() => SCENE.value.dod);
 
   const claimStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.claim }));
-  const smearStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.smear * (1 - SCENE.value.dim * 0.72) }));
+  const smearStyle = useAnimatedStyle(() => ({ // 0.45, not 0.72: at the old floor the quoted claim sat at 1.4:1, which is a
+    // shape rather than a sentence (D35). It still recedes.
+    opacity: SCENE.value.smear * (1 - SCENE.value.dim * 0.45) }));
   const strawStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.straw * (1 - SCENE.value.dim * 0.72),
     transform: [

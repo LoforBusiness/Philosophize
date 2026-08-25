@@ -121,11 +121,11 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: 
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
-  const litStyle = useAnimatedStyle(() => ({ opacity: 0.25 + 0.75 * SCENE.value.lit }));
+  const litStyle = useAnimatedStyle(() => ({ opacity: 0.55 + 0.45 * SCENE.value.lit }));
   // MIND slides right to meet BODY; that closing move IS the physicalist reply, so
   // it is the one thing on the stage allowed to move under its own text.
   const mindStyle = useAnimatedStyle(() => ({
-    opacity: 0.25 + 0.75 * SCENE.value.lit,
+    opacity: 0.55 + 0.45 * SCENE.value.lit,
     transform: [{ translateX: SCENE.value.shut * CLOSE }],
   }));
   const thoughtStyle = useAnimatedStyle(() => ({
@@ -204,7 +204,10 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   panelSub: {
-    fontFamily: 'Inter_400Regular', fontSize: 10.5, lineHeight: 15, color: SOFT,
+    // INK rather than SOFT: this sub rides a panel that rests at 0.55 while it
+    // waits, and SOFT is 5.3:1 on paper at full strength — 2.0:1 once dimmed,
+    // which is D35's smear. Size and weight carry the hierarchy.
+    fontFamily: 'Inter_400Regular', fontSize: 10.5, lineHeight: 15, color: INK,
     textAlign: 'center', marginTop: 6, includeFontPadding: false,
   },
 

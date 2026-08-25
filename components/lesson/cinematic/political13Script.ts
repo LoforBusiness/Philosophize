@@ -67,12 +67,19 @@ export const BEATS: Pol13Beat[] = [
   {
     p: 4, x: 124, steps: 3, tag: 1,
     interact: {
-      prompt: 'On Mill\'s view, what makes something harm rather than mere offence?',
-      cards: [
-        { text: 'It sets back another\'s interests', correct: true },
-        { text: 'It offends other people', correct: false },
-      ],
-      explain: 'The trap is the other card, because it feels democratic. But offence scales with how many people object, and harm does not — which is exactly why Mill will not let a headcount do the work of an injury.',
+      prompt: 'Place the token on something that is harm and not offence.',
+      field: {
+        xLo: 'NOBODY OBJECTS', xHi: 'A GREAT MANY OBJECT',
+        yLo: 'NOBODY IS SET BACK', yHi: 'SOMEONE IS SET BACK',
+        start: [0.76, 0.24],
+        quads: [
+          { id: 'harm', x: 0, y: 1, reads: 'nobody objects, and somebody is genuinely set back', correct: true },
+          { id: 'offence', x: 1, y: 0, reads: 'a great many object, and nobody is set back' },
+          { id: 'both', x: 1, y: 1, reads: 'many object, and somebody is set back: harm, loudly' },
+          { id: 'none', x: 0, y: 0, reads: 'nobody objects and nobody is hurt: nothing at all' },
+        ],
+      },
+      explain: 'Top left, and the axes are the point. Offence scales with how many people mind; harm does not move when the count does. That is exactly why Mill will not let a headcount stand in for an injury.',
       xp: 5,
     },
     dur: 1.0,

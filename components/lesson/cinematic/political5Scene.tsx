@@ -130,7 +130,11 @@ export default function Political5Scene({ clock, bt, bi, i, picked, onPick }: Sc
     transform: [{ translateY: (1 - SCENE.value.link) * -8 }],
   }));
   const veilStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.veil,
+    // Twice the rate on the fade, for the reason Tier gives: one beat rests the
+    // veil at 0.3 and the words under it were reaching the reader at 1.5:1. The
+    // DROP still runs on the raw track, and so does the strike-through inside
+    // `Hidden`, so nothing about how much the veil has covered changes.
+    opacity: clamp01(SCENE.value.veil * 2),
     transform: [{ translateY: (1 - SCENE.value.veil) * -VEIL_DROP }],
   }));
 
@@ -204,7 +208,11 @@ function Tier({ S, k }: { S: SharedValue<any>; k: number }) {
   const order = 2 - k;
   const st = useAnimatedStyle(() => {
     const v = clamp01((S.value.city - order * 0.18) / 0.46);
-    return { opacity: v, transform: [{ translateY: (1 - v) * 10 }] };
+    // The SLIDE keeps the stagger; the FADE runs at twice the rate and is done by
+    // halfway. A tier resting mid-build at v = 0.30 was drawing its words at 1.5:1
+    // — a box you can see with a word you cannot (D35) — and the stagger is worth
+    // keeping, so only the opacity is steepened.
+    return { opacity: clamp01(v * 2), transform: [{ translateY: (1 - v) * 10 }] };
   });
   return (
     <Animated.View
@@ -275,7 +283,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 17, letterSpacing: 1, color: INK,
     includeFontPadding: false,
   },
-  tierSub: { fontFamily: 'Inter_500Medium', fontSize: 10.5, lineHeight: 13, color: SOFT, includeFontPadding: false },
+  tierSub: { fontFamily: 'Inter_500Medium', fontSize: 10.5, lineHeight: 13, color: INK, includeFontPadding: false },
 
   // ── the veil ────────────────────────────────────────────────────────────────
   veil: {
@@ -290,7 +298,7 @@ const styles = StyleSheet.create({
   },
   hidRow: { position: 'absolute', left: 8, width: VEIL_W - 16, height: 14, alignItems: 'center', justifyContent: 'center' },
   hidWord: {
-    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.6, color: INK,
     includeFontPadding: false,
   },
   hidStrike: {

@@ -86,12 +86,18 @@ export const BEATS: Pol19Beat[] = [
   {
     p: 41, x: 268, axis: 1, cost: 1, pull: 1, mark: 1,
     interact: {
-      prompt: 'The strongest objection to Singer is not selfishness. What is it?',
-      cards: [
-        { text: 'It never lets you stop', correct: true },
-        { text: 'Strangers are not your problem', correct: false },
-      ],
-      explain: 'That the rule has no stopping point. A rule demanding everything down to your last spare pound may be true and still unlivable, and a morality nobody can follow gets ignored altogether. Singer knows the objection and takes it anyway.',
+      prompt: 'Draw how much the rule still asks as you keep giving.',
+      plot: {
+        axis: 'HOW MUCH IT STILL ASKS',
+        cols: ['A LITTLE', 'A LOT', 'HALF OF IT', 'NEARLY ALL'],
+        start: [0.5, 0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'flat', profile: [0.95, 0.93, 0.9, 0.86], reads: 'it keeps asking, however much you have given', correct: true },
+          { id: 'fall', profile: [0.9, 0.6, 0.3, 0.05], reads: 'it lets go once you have done your share' },
+          { id: 'stop', profile: [0.9, 0.9, 0.1, 0.04], reads: 'there is a line, and past it you are finished' },
+        ],
+      },
+      explain: 'Nearly flat, and that is the strongest objection — not selfishness. A rule that demands everything down to your last spare pound may be perfectly true and still unlivable, and a morality nobody can follow gets ignored instead of argued with. Singer knows, and takes the demand anyway.',
       xp: 5,
     },
     dur: 1.0,

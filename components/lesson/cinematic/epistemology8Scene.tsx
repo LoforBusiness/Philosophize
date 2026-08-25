@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   escOn: { backgroundColor: INK, borderColor: INK },
-  escDim: { borderColor: SOFT, opacity: 0.45 },
+  escDim: { borderColor: SOFT, opacity: 0.55 },
   escLabel: {
     flex: 1, marginLeft: 8,
     fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 15, letterSpacing: 0.3, color: INK,

@@ -47,12 +47,16 @@ export const BEATS: Pol5Beat[] = [
   {
     p: 4, veil: 1,
     interact: {
-      prompt: 'You pick the rules without knowing who you will turn out to be. Tap what that is for.',
-      cards: [
-        { text: 'Fair rules, hiding who you are', correct: true },
-        { text: 'To make everyone equal', correct: false },
-      ],
-      explain: 'The veil hides your race, your class and your talents, so the rules you pick stay fair. Equal liberties for all, and a gap in wealth only where the gap helps the worst off.',
+      prompt: 'Set the lever to what the veil is for.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'equal', reads: 'to make everybody come out equal' },
+          { id: 'rich', reads: 'to make the society as a whole richer' },
+          { id: 'fair', reads: 'to keep the rules fair by hiding who you are', correct: true },
+        ],
+      },
+      explain: 'The far setting. The veil hides your race, your class and your talents, so you cannot write the rules to suit the person you turn out to be. Equal liberties for everyone, and a gap in wealth only where the gap helps the worst off.',
       xp: 5,
     },
     dur: 1.0,

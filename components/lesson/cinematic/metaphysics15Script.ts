@@ -59,12 +59,18 @@ export const BEATS: Meta15Beat[] = [
   {
     p: 4, x: 124, balls: 1, gap: 1, found: 2,
     interact: {
-      prompt: '"We plainly observe the force that makes the effect follow." Where does Hume say that errs?',
-      cards: [
-        { text: 'They project a felt expectation', correct: true },
-        { text: 'Nothing really causes anything', correct: false },
-      ],
-      explain: 'The trap is the other card, which overshoots: Hume keeps the events, he only denies the visible necessity. Repeated pairing builds a habit of expectation, and we read that inner push back onto the world.',
+      prompt: 'Drag to how much of the cause you actually see.',
+      drag: {
+        lo: 'ONE THING, THEN ANOTHER',
+        hi: 'THE PUSH ITSELF, PLAINLY',
+        start: 1,
+        zones: [
+          { id: 'events', upto: 0.3, reads: 'nothing but one event, and then the other' },
+          { id: 'habit', upto: 0.74, reads: 'the two events, and your own habit of expecting the second', correct: true },
+          { id: 'force', upto: 1, reads: 'the force between them, there on the surface to be seen' },
+        ],
+      },
+      explain: 'The middle, and the extra part is inside you. Hume keeps the events and the pattern. What he denies is the far end: nobody has ever seen the push. Pair two things often enough, build a habit of expecting the second, and call that tug necessity.',
       xp: 5,
     },
     dur: 1.0,

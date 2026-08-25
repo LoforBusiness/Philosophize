@@ -69,12 +69,18 @@ export const BEATS: Ethics32Beat[] = [
     a: 35, b: 24, reasons: 3, card: 2, fresh: 1,
     dur: 1.0,
     interact: {
-      prompt: 'So should you ever defer to someone else on a moral question?',
-      cards: [
-        { text: 'Yes, a signal to look', correct: true },
-        { text: 'No, always work it alone', correct: false },
-      ],
-      explain: 'The trap is the other card: it flatters us and nobody lives that way. Testimony is excellent evidence that you have missed something. It is a poor replacement for going and seeing what you missed.',
+      prompt: 'Drag to how much weight another person can carry here.',
+      drag: {
+        lo: 'NONE; WORK IT OUT ALONE',
+        hi: 'TAKE THEIR WORD FOR IT',
+        start: 0,
+        zones: [
+          { id: 'never', upto: 0.3, reads: 'none; every moral question is yours to solve alone' },
+          { id: 'signal', upto: 0.74, reads: 'a sign you have missed something, then go and look', correct: true },
+          { id: 'take', upto: 1, reads: 'take the verdict and adopt it as your own' },
+        ],
+      },
+      explain: 'The middle. The near end flatters us and nobody lives that way. Testimony is excellent evidence that you have overlooked something, and a poor replacement for going and seeing what it was.',
       xp: 5,
     },
   },

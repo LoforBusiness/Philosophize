@@ -125,11 +125,26 @@ const bandOf = (comp) => {
   const m = fs.readFileSync(p, 'utf8').match(/band=\{\[(\d+),\s*(\d+)\]\}/);
   return m ? [+m[1], +m[2]] : null;
 };
+/**
+ * The ground line the camera is clamped against.
+ *
+ * DEFAULTS TO 500, because CinematicPlayer does (`ground = GROUND`) and no scene
+ * has ever passed the prop. Returning `undefined` here meant `fit()` dropped its
+ * ground clamp — the one that stops a push ending ABOVE the line the figure is
+ * standing on — so the GENERATOR was laying out stations for a camera the app
+ * does not have. check-tour uses 500, which is why the two disagreed about six
+ * stations that the generator was supposed to have dropped.
+ *
+ * The player's own comment records this exact bug on the other side of the fence:
+ * "the checker was resolving with the clamp and the app was resolving without it".
+ * A default that two of three callers already assume is not a default, it is a
+ * missing one — and this was the third caller.
+ */
 const groundOf = (comp) => {
   const p = scenePath(comp);
-  if (!fs.existsSync(p)) return null;
+  if (!fs.existsSync(p)) return 500;
   const m = fs.readFileSync(p, 'utf8').match(/ground=\{(\d+)\}/);
-  return m ? +m[1] : undefined;
+  return m ? +m[1] : 500;
 };
 
 // ── build ────────────────────────────────────────────────────────────────────
@@ -201,8 +216,16 @@ for (const [id, comp] of map) {
     // reason the two disagreed. A framing that cannot hold a word whole is not
     // worth holding, and the wide shot is clean by construction — so the beat
     // simply holds instead.
+    //
+    // AND IT IS TESTED ON THE ROUNDED BOX, which is the one that ships. The
+    // emitter writes `Math.round(n)` for every coordinate, so a station measured
+    // on the raw number can be a half-unit inside the line here and a half-unit
+    // outside it in tours.ts — which is exactly how six of them came back after
+    // the generator was taught to drop them. Same rule as the line above about
+    // verifying against the shipping maths rather than the intention.
+    const R = (n) => Math.round(n);
     const slices = t.some((st) => {
-      const w = visibleWindow(stationShot({ x: st.box[0], y: st.box[1], w: st.box[2], h: st.box[3] }, band, ground), band);
+      const w = visibleWindow(stationShot({ x: R(st.box[0]), y: R(st.box[1]), w: R(st.box[2]), h: R(st.box[3]) }, band, ground), band);
       return (words[k] ?? []).some((it) => {
         if (it.k !== 'text') return false;
         const [x, y, bw, bh] = it.b;

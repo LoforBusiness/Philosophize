@@ -62,12 +62,17 @@ export const BEATS: Ethics6Beat[] = [
   {
     d: 4, str: 0, tx: 180, card: 2, stamp: 1,
     interact: {
-      prompt: 'Why do most people permit the switch but refuse the footbridge shove?',
-      cards: [
-        { text: 'The shove uses a person', correct: true },
-        { text: 'The shove kills more', correct: false },
-      ],
-      explain: 'Both cases trade one life for five. What shifts is treating the stranger as a tool — which the doctrine of double effect and Foot both flag.',
+      prompt: 'Slide the seam to what actually changed between the two cases.',
+      split: {
+        left: 'HE IS USED AS A TOOL', right: 'THE NUMBER WHO DIE',
+        start: 0.04,
+        zones: [
+          { id: 'count', upto: 0.3, reads: 'the numbers changed, and that is what moved you' },
+          { id: 'both', upto: 0.66, reads: 'half the numbers, half the using' },
+          { id: 'tool', upto: 1, reads: 'the numbers are identical; the using is what moved you', correct: true },
+        ],
+      },
+      explain: 'All of it on the using, because the numbers never moved: one life for five, in both. What changes is that the man on the bridge becomes the instrument — the thing the doctrine of double effect flags, and what Foot built the case to isolate.',
       xp: 5,
     },
     dur: 1.0,

@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
 
   // ── a frame column: frame · mat · art · caption plate ───────────────────────
   col: { position: 'absolute', top: FR_T, width: FR_W, height: COL_H },
-  dim: { opacity: 0.45 },
+  dim: { opacity: 0.55 },
   frameBox: {
     position: 'absolute', left: 0, top: 0, width: FR_W, height: FR_H,
     borderWidth: 3, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
@@ -412,7 +412,9 @@ const styles = StyleSheet.create({
   },
   plateRight: { backgroundColor: INK, borderColor: INK },
   plateTag: {
-    fontFamily: 'Inter_700Bold', fontSize: 11.3, letterSpacing: 1.1, color: SOFT,
+    // INK, not SOFT: this caption rides a layer that fades, and SOFT does not
+    // survive any dimming at all — 5.3:1 on paper becomes 2.0:1 half-faded (D35).
+    fontFamily: 'Inter_700Bold', fontSize: 11.3, letterSpacing: 1.1, color: INK,
     textAlign: 'center', lineHeight: 14.2, marginBottom: 2, includeFontPadding: false,
   },
   plateTagOn: { color: RULE },

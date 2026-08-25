@@ -68,12 +68,17 @@ export const BEATS: Logic25Beat[] = [
   {
     p: 4, x: 124, result: 1, real: 1, fake: 1,
     interact: {
-      prompt: 'Steve is shy, tidy, and loves detail. Is he more likely a librarian or a farmer?',
-      cards: [
-        { text: 'Farmer, there are more', correct: true },
-        { text: 'Librarian, he fits', correct: false },
-      ],
-      explain: 'The trap is that the description sounds like a librarian. But farmers outnumber librarians many times over, so even a small share of tidy farmers outweighs every librarian alive. That is the case Kahneman and Tversky made.',
+      prompt: 'Slide the seam to divide the shy, tidy people between the two jobs.',
+      split: {
+        left: 'FARMERS', right: 'LIBRARIANS',
+        start: 0.04,
+        zones: [
+          { id: 'lib', upto: 0.34, reads: 'mostly librarians; he fits the description' },
+          { id: 'even', upto: 0.62, reads: 'about evenly split between the two' },
+          { id: 'farm', upto: 1, reads: 'mostly farmers; there are far more of them', correct: true },
+        ],
+      },
+      explain: 'Nearly all farmers, and the description does not save you. Farmers outnumber librarians many times over, so even a small share of shy, tidy farmers outweighs every librarian alive. That is the case Kahneman and Tversky made, and the seam is where the arithmetic lands.',
       xp: 5,
     },
     dur: 1.0,

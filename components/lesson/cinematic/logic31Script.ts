@@ -67,12 +67,18 @@ export const BEATS: Logic31Beat[] = [
     p: 3, flips: 7, scale: 1,
     dur: 1.0,
     interact: {
-      prompt: 'What exactly does the gambler\'s fallacy get wrong?',
-      cards: [
-        { text: 'It expects flips to balance', correct: true },
-        { text: 'It underrates long runs', correct: false },
-      ],
-      explain: 'The trap: the law of large numbers is real. Over millions of flips the ratio does settle near half — but it settles by SWAMPING the run, never by correcting it. The coin owes the average nothing.',
+      prompt: 'Draw how far from half the ratio sits as the flips pile up.',
+      plot: {
+        axis: 'HOW FAR FROM HALF',
+        cols: ['10 FLIPS', '100', '10,000', 'A MILLION'],
+        start: [0.5, 0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'swamp', profile: [0.85, 0.55, 0.2, 0.04], reads: 'the gap closes slowly, as the run gets swamped', correct: true },
+          { id: 'snap', profile: [0.85, 0.05, 0.05, 0.05], reads: 'the coin pays the run back straight away' },
+          { id: 'stay', profile: [0.85, 0.85, 0.85, 0.85], reads: 'the gap never closes at all' },
+        ],
+      },
+      explain: 'A slow slide, not a snap. The law of large numbers is real: over millions of flips the ratio does settle near half. It settles by drowning the run in new flips, never by correcting it. The coin has no memory and owes the average nothing.',
       xp: 5,
     },
   },

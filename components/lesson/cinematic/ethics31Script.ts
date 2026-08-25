@@ -71,12 +71,19 @@ export const BEATS: Ethics31Beat[] = [
     p: 3, rungs: 11, ladder: 1, duty: 0,
     dur: 1.0,
     interact: {
-      prompt: 'What does "ought implies can" NOT excuse?',
-      cards: [
-        { text: 'Inability you caused yourself', correct: true },
-        { text: 'Nothing, inability always excuses', correct: false },
-      ],
-      explain: 'The trap is the other card, which turns the principle into a blanket excuse. A driver who cannot brake because they chose to drink is still answerable: the inability is real, and they authored it.',
+      prompt: 'Place the token where ought implies can stops excusing you.',
+      field: {
+        xLo: 'YOU COULD HAVE DONE IT', xHi: 'YOU GENUINELY COULD NOT',
+        yLo: 'IT SIMPLY HAPPENED', yHi: 'YOU BROUGHT IT ON YOURSELF',
+        start: [0.76, 0.24],
+        quads: [
+          { id: 'own', x: 1, y: 1, reads: 'you could not, and you made sure you could not', correct: true },
+          { id: 'excused', x: 1, y: 0, reads: 'you could not, through nothing you did: excused' },
+          { id: 'plain', x: 0, y: 0, reads: 'you could have, and simply did not: answerable' },
+          { id: 'odd', x: 0, y: 1, reads: 'you could have, and undermined yourself anyway' },
+        ],
+      },
+      explain: 'Top right. Read as a blanket excuse the principle would clear anybody who arranges their own helplessness. A driver who cannot brake because they chose to drink is still answerable: the inability is entirely real, and they are its author.',
       xp: 5,
     },
   },

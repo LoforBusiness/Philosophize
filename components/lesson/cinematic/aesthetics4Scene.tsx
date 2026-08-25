@@ -173,7 +173,9 @@ function Card({
     const on = ease01(clamp01(S.value.test - k));
     // Once the verdict is in, the failing tests recede and the surviving one stays
     // full strength — the row reads as an answer, not three equal options.
-    const fade = pass ? 1 : 1 - 0.42 * ease01(S.value.verdict);
+    // 0.28, not 0.42. A failing row still has to be READ — it is what the verdict
+    // is a verdict about — and at 0.58 its wording landed at 2.3:1 (D35).
+    const fade = pass ? 1 : 1 - 0.28 * ease01(S.value.verdict);
     return { opacity: on * fade * S.value.testsOn, transform: [{ translateY: (1 - on) * -8 }] };
   });
   const box = useAnimatedStyle(() => ({
@@ -251,7 +253,10 @@ const styles = StyleSheet.create({
   },
   cardSub: {
     position: 'absolute', left: 0, top: 26, width: CARD_W - 4, textAlign: 'center',
-    fontFamily: 'Inter_400Regular', fontSize: 9.5, lineHeight: 12, letterSpacing: 0.2, color: SOFT,
+    // INK, not SOFT: a failing card fades to 0.72 once the verdict is in, and SOFT
+    // is only 5.3:1 on paper to begin with — 2.9:1 there, which is the smear D35 is
+    // about. The card still has to be READ; it is what the verdict is about.
+    fontFamily: 'Inter_400Regular', fontSize: 9.5, lineHeight: 12, letterSpacing: 0.2, color: INK,
     includeFontPadding: false,
   },
   mark: {
@@ -315,7 +320,9 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   placardS: {
-    fontFamily: 'Inter_500Medium', fontSize: 9, lineHeight: 11, letterSpacing: 0.8, color: RULE,
+    // INK, not RULE: RULE is the hairline colour, 1.15:1 on paper. It is legible
+    // only on an INK fill; on paper it is a line pretending to be a word (D35).
+    fontFamily: 'Inter_500Medium', fontSize: 9, lineHeight: 11, letterSpacing: 0.8, color: INK,
     marginTop: 2, includeFontPadding: false,
   },
 });

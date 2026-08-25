@@ -61,12 +61,17 @@ export const BEATS: KnowHowBeat[] = [
   {
     p: 4, x: 124, steps: 3, done: 1,
     interact: {
-      prompt: 'You have memorised every step perfectly. What exactly do you now have?',
-      cards: [
-        { text: 'Knowledge that, not how', correct: true },
-        { text: 'The skill itself', correct: false },
-      ],
-      explain: 'The trap is the other card, and it is a serious view — intellectualists argue skill just is knowing facts about how. Ryle\'s reply: the expert cannot state most of what they do, and does it anyway.',
+      prompt: 'Slide the seam to divide what memorising actually gave you.',
+      split: {
+        left: 'THE FACTS', right: 'THE SKILL',
+        start: 0.04,
+        zones: [
+          { id: 'skill', upto: 0.32, reads: 'the doing itself, now in the hands' },
+          { id: 'both', upto: 0.66, reads: 'half the facts, half the doing' },
+          { id: 'facts', upto: 1, reads: 'the facts about the steps, and none of the doing', correct: true },
+        ],
+      },
+      explain: 'Nearly all facts. The rival is a serious view — intellectualists argue a skill just is knowing enough facts about how — so the middle is not silly. Ryle answers with the expert who cannot state most of what they do and does it perfectly anyway.',
       xp: 5,
     },
     dur: 1.0,

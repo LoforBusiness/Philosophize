@@ -81,12 +81,18 @@ export const BEATS: Met20Beat[] = [
   {
     p: 41, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
     interact: {
-      prompt: 'Where can this argument actually be resisted?',
-      cards: [
-        { text: 'By denying the grid gets built', correct: true },
-        { text: 'By noting the world feels real', correct: false },
-      ],
-      explain: 'By attacking the count. If nobody ever runs those worlds, or nobody survives long enough to, the proportion never appears and the conclusion does not follow. How real it all feels is no help at all, because a simulated mind would report exactly that.',
+      prompt: 'Drag to the count that stops this argument.',
+      drag: {
+        lo: 'NONE ARE EVER BUILT',
+        hi: 'BILLIONS OF THEM RUN',
+        start: 1,
+        zones: [
+          { id: 'none', upto: 0.3, reads: 'none, so there is no proportion and no conclusion', correct: true },
+          { id: 'few', upto: 0.72, reads: 'a handful, still far fewer than the real one' },
+          { id: 'many', upto: 1, reads: 'billions, and you are almost certainly inside one' },
+        ],
+      },
+      explain: 'Attack the count. If nobody ever runs those worlds, or nobody lasts long enough to, the proportion never appears and the conclusion does not follow. How real it all feels is no help at all: a simulated morning would feel exactly like this one.',
       xp: 5,
     },
     dur: 1.0,

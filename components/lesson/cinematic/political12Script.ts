@@ -59,12 +59,16 @@ export const BEATS: Pol12Beat[] = [
   {
     p: 4, x: 124, door: 1, open: 1, neg: 1, posi: 1,
     interact: {
-      prompt: 'A regime removes your choices, saying it serves your real self. Which freedom does it claim?',
-      cards: [
-        { text: 'Positive liberty', correct: true },
-        { text: 'Negative liberty', correct: false },
-      ],
-      explain: 'The trap is the other card, which is the comfortable answer. Berlin\'s point is sharper and nastier: the claim is coherent. Once someone else defines your "real" self, they can shrink your choices in freedom\'s own name.',
+      prompt: 'Set the lever to the freedom the regime is claiming.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'neg', reads: 'negative liberty: nobody standing in your way' },
+          { id: 'none', reads: 'no kind of freedom at all; it is bare force' },
+          { id: 'pos', reads: 'positive liberty: being your own master', correct: true },
+        ],
+      },
+      explain: 'The far setting, and the comfortable answer is the middle. Berlin point is sharper and nastier than that: the claim is coherent. Once somebody else gets to define your real self, they can shrink your choices in the name of freedom and mean it.',
       xp: 5,
     },
     dur: 1.0,

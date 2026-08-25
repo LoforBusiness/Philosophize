@@ -81,12 +81,19 @@ export const BEATS: Epi20Beat[] = [
   {
     p: 41, x: 268, voices: 1, agree: 0.32, wires: 1,
     interact: {
-      prompt: 'What makes a second report worth anything?',
-      cards: [
-        { text: 'It could have come out differently', correct: true },
-        { text: 'It comes from a big name', correct: false },
-      ],
-      explain: 'That it could have come out differently. A second source counts when it had its own way of checking and might have said no. A big name repeating what somebody else posted adds reach, not evidence, and reach is what feels like confirmation.',
+      prompt: 'Place the token on the report that is actually worth something.',
+      field: {
+        xLo: 'REPEATS WHAT IT HEARD', xHi: 'COULD HAVE SAID NO',
+        yLo: 'NOBODY HAS HEARD OF THEM', yHi: 'A VERY BIG NAME',
+        start: [0.24, 0.76],
+        quads: [
+          { id: 'real', x: 1, y: 0, reads: 'checked it themselves, and unknown: this is evidence', correct: true },
+          { id: 'reach', x: 0, y: 1, reads: 'a big name passing on the first report: reach, not evidence' },
+          { id: 'both', x: 1, y: 1, reads: 'a big name who checked it themselves: evidence, plus reach' },
+          { id: 'noise', x: 0, y: 0, reads: 'an unknown account passing it on: nothing added at all' },
+        ],
+      },
+      explain: 'The bottom right, and the point is that the axis going up does nothing. What makes a second report count is that it had its own way of checking and might have come out differently. A big name repeating a post adds reach, and reach is what feels like evidence.',
       xp: 5,
     },
     dur: 1.0,

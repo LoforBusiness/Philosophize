@@ -70,12 +70,18 @@ export const BEATS: Political10Beat[] = [
   {
     p: 21, x: 108, tape: 1, ptr: 4, ruler: 1,
     interact: {
-      prompt: 'Locke defended private property. So did he hand owners an unlimited right to grab all they could reach?',
-      cards: [
-        { text: 'No, leave enough for others', correct: true },
-        { text: 'Yes, grab what you reach', correct: false },
-      ],
-      explain: 'The trap is that defending property sounds like defending endless grabbing. Locke built a brake into the theory instead. You may take from the common land only while enough, and as good, is left for everybody behind you.',
+      prompt: 'Drag to how much Locke lets you take from the common land.',
+      drag: {
+        lo: 'NOTHING AT ALL',
+        hi: 'ALL YOU CAN REACH',
+        start: 1,
+        zones: [
+          { id: 'none', upto: 0.26, reads: 'nothing; the common land stays common' },
+          { id: 'enough', upto: 0.74, reads: 'as much as leaves enough, and as good, for others', correct: true },
+          { id: 'all', upto: 1, reads: 'everything you can get your hands on' },
+        ],
+      },
+      explain: 'The middle. The brake is built into the theory, not bolted on later. Defending property sounds like defending endless grabbing. Locke allows the taking only while enough, and as good, is left for everybody behind you.',
       xp: 5,
     },
     dur: 1.0,

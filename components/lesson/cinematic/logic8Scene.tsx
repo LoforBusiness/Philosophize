@@ -156,6 +156,21 @@ export default function Logic8Scene({ clock, bt, bi, i, picked, onPick }: SceneA
   // The garden is drawn from beat one, but ghosted — it was always there, the
   // walker just wasn't looking. Noticing it is the only thing that "reveals" it.
   const gardenStyle = useAnimatedStyle(() => ({ opacity: 0.24 + 0.76 * SCENE.value.spr }));
+  // THE LABEL RIDES THE DRIVER, NOT THE DIMMED LAYER.
+  //
+  // Ghosting the art at 0.24 is the point. Ghosting the WORD is not: ink at 0.24
+  // over paper reaches the eye at 1.3:1, which is a grey smear the shape of a
+  // word — and a smear that will not resolve however hard you look is what the
+  // reader has been calling a blank box. §19 already says this about a locked
+  // rank pin: "the same thing, dimmer" is indistinguishable from a rendering
+  // fault.
+  //
+  // So the caption is either legible or absent, and `spr` gives that for free:
+  // it is 0 exactly when the layer is at its dim floor and 1 when the layer is
+  // full, so the label is gone while the garden is a hint and arrives with it.
+  // The unreadable band is crossed only while the fade is moving, which is what
+  // a fade is. It also stops the answer being named before the question (group O).
+  const gardenLabelStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.spr }));
   // The NO stamp lands: overshoot in scale, settle onto the card.
   const stampStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.cross,
@@ -201,6 +216,8 @@ export default function Logic8Scene({ clock, bt, bi, i, picked, onPick }: SceneA
         <View style={styles.collar} />
         <View style={styles.head} />
         <View style={styles.nozzle} />
+      </Animated.View>
+      <Animated.View style={[styles.layer, gardenLabelStyle]} pointerEvents="none">
         <Text style={styles.gardenLabel}>SPRINKLER</Text>
       </Animated.View>
 

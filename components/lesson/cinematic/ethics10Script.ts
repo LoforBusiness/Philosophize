@@ -71,12 +71,18 @@ export const BEATS: Et10Beat[] = [
   {
     p: 8, x: 268, wading: true, far: true,
     interact: {
-      prompt: 'Singer’s argument only works if you already accept utilitarianism, so everyone else can ignore it. True?',
-      cards: [
-        { text: 'False, the premise is modest', correct: true },
-        { text: 'True, it is utilitarian', correct: false },
-      ],
-      explain: 'The trap is knowing Singer IS a utilitarian and assuming the argument must be too. It needs far less: prevent something terrible at small cost to yourself. You need not be a utilitarian to agree — which is why it is so hard to put down.',
+      prompt: 'Drag to how much you must accept for the argument to work.',
+      drag: {
+        lo: 'ONE MODEST PREMISE',
+        hi: 'THE WHOLE OF UTILITARIANISM',
+        start: 1,
+        zones: [
+          { id: 'modest', upto: 0.3, reads: 'prevent something terrible at small cost to yourself', correct: true },
+          { id: 'mid', upto: 0.66, reads: 'weigh every consequence of everything you do' },
+          { id: 'all', upto: 1, reads: 'maximise the happiness of everyone, always' },
+        ],
+      },
+      explain: 'The near end, and it is why the argument is so hard to shake. Knowing Singer is a utilitarian makes it tempting to assume the argument must be one too. It needs far less than that, and almost nobody wants to deny the premise out loud.',
     },
     dur: 4.8,
   },

@@ -81,12 +81,18 @@ export const BEATS: Epi4Beat[] = [
   {
     e: 0, r: 4, glow: 1, bridge: 1,
     interact: {
-      prompt: 'Tap the claim a rationalist would actually make.',
-      cards: [
-        { text: 'Some truths need reason alone', correct: true },
-        { text: 'All truths come from reason', correct: false },
-      ],
-      explain: 'They say SOME truths come before experience. They do not say experience is worthless. The second claim is the overshoot, and no rationalist ever made it.',
+      prompt: 'Drag to how much a rationalist says comes before experience.',
+      drag: {
+        lo: 'NONE OF IT',
+        hi: 'ALL OF IT',
+        start: 1,
+        zones: [
+          { id: 'none', upto: 0.28, reads: 'nothing; every last thing is learned by looking' },
+          { id: 'some', upto: 0.72, reads: 'some of it, and the rest still comes from looking', correct: true },
+          { id: 'all', upto: 1, reads: 'all of it; experience teaches nothing' },
+        ],
+      },
+      explain: 'The middle. Rationalists say SOME truths come before experience, not that experience is worthless. The far end is the overshoot, and no rationalist ever made it. The near end is the empiricist standing on the other side of the room.',
       xp: 5,
     },
     dur: 1.0,

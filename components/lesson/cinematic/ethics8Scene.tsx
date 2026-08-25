@@ -218,7 +218,9 @@ const styles = StyleSheet.create({
   // ── the rule grid ───────────────────────────────────────────────────────────
   gridLabel: {
     position: 'absolute', left: 0, top: 46, width: STAGE_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 12.8, letterSpacing: 1.8, color: SOFT,
+    // INK, not SOFT: this caption rides a layer that fades, and SOFT does not
+    // survive any dimming at all — 5.3:1 on paper becomes 2.0:1 half-faded (D35).
+    fontFamily: 'Inter_700Bold', fontSize: 12.8, letterSpacing: 1.8, color: INK,
     includeFontPadding: false,
   },
   gridBox: {

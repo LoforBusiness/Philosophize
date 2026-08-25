@@ -72,12 +72,16 @@ export const BEATS: Log13Beat[] = [
     g: 41, steps: 4, joins: 1, honest: 1,
     dur: 1.0,
     interact: {
-      prompt: 'So what makes a slope fallacious?',
-      cards: [
-        { text: 'A link with no reason given', correct: true },
-        { text: 'An ending that is far-fetched', correct: false },
-      ],
-      explain: 'The other card is the one most people pick, and it is why the fallacy keeps working. An alarming ending is fine if the steps to it are shown, and a modest one is still a slope if they are not. The fault is in the joins.',
+      prompt: 'Set the lever to what makes a slope a fallacy.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'ending', reads: 'the ending is too far-fetched to take seriously' },
+          { id: 'length', reads: 'the chain simply has too many steps in it' },
+          { id: 'joins', reads: 'a step is asserted with no reason given', correct: true },
+        ],
+      },
+      explain: 'The far setting. The first is the one most people pick, and it is why the fallacy keeps working. An alarming ending is fine if every step to it is argued, and a modest ending is still a slope if they are not. The fault lives in the joins.',
       xp: 5,
     },
   },

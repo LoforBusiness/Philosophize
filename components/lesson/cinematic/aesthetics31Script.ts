@@ -69,12 +69,19 @@ export const BEATS: Aes31Beat[] = [
     g: 11, strings: 1, playing: 0, clapA: 1, clapB: 1,
     dur: 1.0,
     interact: {
-      prompt: 'So is the harder performance the better artwork?',
-      cards: [
-        { text: 'Not necessarily, two values', correct: true },
-        { text: 'Yes, difficulty is the point', correct: false },
-      ],
-      explain: 'Strict formalism says the making never mattered, and the spliced recording embarrasses it. If that were true, finding out would change nothing. But the other card goes too far the other way. Difficulty with nothing to show for it is only effort.',
+      prompt: 'Place the token on a performance that is difficult and says nothing.',
+      field: {
+        xLo: 'EASY TO PLAY', xHi: 'VERY HARD TO PLAY',
+        yLo: 'NOTHING TO SAY', yHi: 'SOMETHING TO SAY',
+        start: [0.24, 0.76],
+        quads: [
+          { id: 'stunt', x: 1, y: 0, reads: 'hard, and it says nothing: a stunt', correct: true },
+          { id: 'great', x: 1, y: 1, reads: 'hard, and it says something: both values at once' },
+          { id: 'gift', x: 0, y: 1, reads: 'easy, and it says something: it can still be great' },
+          { id: 'dull', x: 0, y: 0, reads: 'easy, and it says nothing at all' },
+        ],
+      },
+      explain: 'Bottom right, and it is a real place: difficulty with nothing to show for it. Strict formalism says the making never mattered, and the spliced recording embarrasses it — if that were true, finding out would change nothing. The two axes are separate, and neither alone is the work.',
       xp: 5,
     },
   },

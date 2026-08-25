@@ -85,7 +85,7 @@ export const BEATS: Aes18Beat[] = [
     interact: {
       prompt: 'Sad music moves you. Where is the sadness?',
       split: {
-        left: 'IN THE NOTES', right: 'IN THE LISTENER',
+        left: 'IN THE LISTENER', right: 'IN THE NOTES',
         start: 0.5,
         zones: [
           { id: 'notes', upto: 0.34, reads: 'the sadness sits in the sound' },

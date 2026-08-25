@@ -69,12 +69,16 @@ export const BEATS: Epi2Beat[] = [
   {
     d: 16, m: 15, doubt: 1.0, glow: true,
     interact: {
-      prompt: 'If the demon fakes everything, why can’t it fake "I exist" away?',
-      cards: [
-        { text: 'Being deceived needs a doubter', correct: true },
-        { text: 'It could fake that too', correct: false },
-      ],
-      explain: 'To be fooled, you must exist to be fooled. The very act of doubting proves a doubter is there.',
+      prompt: 'Set the lever to what the demon cannot reach.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'all', reads: 'nothing is out of reach; it can fake this too' },
+          { id: 'sums', reads: 'it can fake the world, but not arithmetic' },
+          { id: 'doubter', reads: 'it needs somebody there to be fooled', correct: true },
+        ],
+      },
+      explain: 'The far setting. To be fooled you have to exist to be fooled, so the harder the demon works the more certain the doubter becomes. Arithmetic is not safe — Descartes lets the demon have the sums. Only the doubter survives.',
       xp: 5,
     },
     dur: 1.0,

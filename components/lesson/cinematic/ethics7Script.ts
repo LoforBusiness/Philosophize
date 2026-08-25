@@ -64,12 +64,19 @@ export const BEATS: Ethics7Beat[] = [
   {
     p: 4, x: 90, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
     interact: {
-      prompt: 'Same choice, wildly different verdicts. Why does that unsettle philosophers?',
-      cards: [
-        { text: 'Only luck differed', correct: true },
-        { text: 'Driver B decided worse', correct: false },
-      ],
-      explain: 'The trap: it feels obvious that driver B "chose worse", because we read the choice backwards from the wreckage. Rewind the tape and the two choices match to the second. We say blame should track what you control — then punish one of them for the one thing neither controlled.',
+      prompt: 'Place the token on what happened to the two drivers.',
+      field: {
+        xLo: 'THE CHOICES DIFFERED', xHi: 'THE CHOICES WERE IDENTICAL',
+        yLo: 'THE SAME VERDICT', yHi: 'OPPOSITE VERDICTS',
+        start: [0.24, 0.24],
+        quads: [
+          { id: 'luck', x: 1, y: 1, reads: 'identical choices, opposite verdicts: only luck differed', correct: true },
+          { id: 'fair', x: 1, y: 0, reads: 'identical choices, one verdict: what we say we believe' },
+          { id: 'plain', x: 0, y: 1, reads: 'different choices, different verdicts: nothing strange' },
+          { id: 'odd', x: 0, y: 0, reads: 'different choices, one verdict: a different puzzle' },
+        ],
+      },
+      explain: 'Top right, and that corner should be empty. It feels obvious that the second driver chose worse, because we read the choice backwards from the wreckage. Rewind the tape and the two match to the second. We say blame tracks what you control, then judge the crash.',
       xp: 5,
     },
     dur: 1.0,

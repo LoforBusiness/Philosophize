@@ -68,12 +68,19 @@ export const BEATS: Aes13Beat[] = [
     g: 11, art: 1, chain: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Why does the strict formalist say the forgery is no worse to look at?',
-      cards: [
-        { text: 'Value lives in the form', correct: true },
-        { text: 'Because someone toiled harder', correct: false },
-      ],
-      explain: 'The other card tempts you into the genetic fallacy — judging a work by where it came from and how hard someone toiled. The formalist refuses that move in both directions: if the visible form is identical, so is the value, and provenance is only history.',
+      prompt: 'Place the token on the forgery.',
+      field: {
+        xLo: 'THE FORMS DIFFER', xHi: 'THE FORMS ARE IDENTICAL',
+        yLo: 'THE SAME HAND', yHi: 'DIFFERENT HANDS',
+        start: [0.24, 0.24],
+        quads: [
+          { id: 'forge', x: 1, y: 1, reads: 'identical to look at, different hands: equal, says the formalist', correct: true },
+          { id: 'twin', x: 1, y: 0, reads: 'identical, and by the same hand: plainly equal' },
+          { id: 'pair', x: 0, y: 1, reads: 'different to look at, different hands: an ordinary pair' },
+          { id: 'two', x: 0, y: 0, reads: 'different to look at, one hand: two works by one painter' },
+        ],
+      },
+      explain: 'Top right, and the formalist refuses to let the axis going up matter. Judging a work by where it came from is the genetic fallacy, and the refusal cuts both ways: if the visible form is identical, so is the value. Most people find they cannot go along with it.',
       xp: 5,
     },
   },

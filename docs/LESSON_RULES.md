@@ -33,7 +33,7 @@ units with the ground line at y = 500.
 > | Rule | Enforced by |
 > |---|---|
 > | a hand is never drawn inside the head disc (B11/B13) | `boxMove` → `clearHead`, `GLOVE_CLEAR` |
-> | a walk takes the time its distance needs (C17) | `moveTr` / `WALK_SPEED` |
+> | a walk takes the time its distance needs (C17) | `moveTr` / `WALK_SPEED`, **and `check:sound`, which is what makes it stick — see C17b** |
 > | a moved figure walks rather than slides (C18) | `travelStance` |
 > | two figures never move as one (B14) | the `seed` on `guard` / `strideStance` |
 > | a reader-facing XP figure matches the model (H63) | `CORRECT_LABEL` ← `XP_PER_CORRECT_ANSWER` |
@@ -573,12 +573,47 @@ scene, not just to glyphs.
 ### C. Motion and life
 
 **C17. Movement takes the time it actually needs.** A walk's duration comes from its
-distance (`moveTr`, ~74 units/second), never a flat crossfade. Every scene ran its
+distance (`moveTr`, ~56 units/second), never a flat crossfade. Every scene ran its
 transition over a fixed 0.85s no matter how far the figure walked, so a short
 sidestep looked fine and a hundred-unit crossing was sprinted. The feet never
 skated — it was purely a timing bug.
 
 > *"I dont want 'fast walking' … I always want this movements to look natural."*
+
+**C17b. And it came back in FIFTY-FOUR scenes, with the sound as its second
+symptom.** This rule was written, `moveTr` was built to enforce it, the table at
+the top of Part 1 listed it as enforced — and the newest lesson in every branch
+was written as
+
+```ts
+const TR = 0.82;
+const tr = ease01(bt.value / TR);        // a FIXED length, whatever the distance
+```
+
+which is the defect verbatim, in the file the next author would copy. 145 walking
+beats, every one of them too fast, the worst at **246 stage units a second against
+an intended 56**.
+
+The reader reported it as two things and they were one thing:
+
+> *"the stickman will sometimes walk faster and now the sounds in lessons for
+> walking is no longer lined up correctly"*
+
+The footfalls are scheduled by the PLAYER from `footfallTrack`, which uses
+`moveTr(x0, x1, 0.85)`. So a scene that draws the walk in 0.82s while the player
+sounds it over 4.79s does not merely look hurried: the last footstep lands **four
+seconds after the figure has stopped**. Sound and pace are the same bug seen from
+two sides.
+
+Two things follow, and the second is the general one:
+
+1. **The denominator is `moveTr(X[p], X[n], 0.85)`. Always, with base 0.85**, so
+   it agrees with what the player scheduled. `npm run check:sound` now re-derives
+   both durations from the scene's own x track and fails on any disagreement.
+2. **An enforcement that callers can decline is documentation.** `moveTr` could
+   only enforce C17 for scenes that called it, and nothing checked that they did.
+   A guard rail that lives in a helper needs a second check that the helper is on
+   the path — which is L7 with the words changed.
 
 **C18. A walk must be ≥ 60 stage units** (~1.5 strides) or it reads as a shuffle. If
 the beat doesn't need the distance, don't move the figure at all.
@@ -2155,6 +2190,30 @@ the same silent, dangerous direction.
 > rather than as findings, and expect K8's timings in particular to want tuning once
 > somebody has actually watched twenty lessons end to end.
 
+### K11 · The generator must model the camera the APP has, not one that resembles it
+
+Six stations kept cutting a word in half, and `make-tours` had already been taught
+to ask the real camera and drop any station that did. It dropped the wrong ones,
+because it was asking a camera nobody ships:
+
+```js
+const m = scene.match(/ground=\{(\d+)\}/);
+return m ? +m[1] : undefined;        // <- and NO scene passes the prop
+```
+
+`fit()` skips its ground clamp when `ground == null` — the clamp that stops a push
+ending the frame ABOVE the line the figure stands on. `CinematicPlayer` defaults
+`ground = GROUND` (500) and `check-tour` has always passed 500, so the generator
+was the only one of the three laying out for an unclamped camera. Defaulting it
+took the slicing stations from **6 to 0** and brought back 21 stations that had
+been demoted to holds.
+
+The player's own comment records this bug from the other side — *"the checker was
+resolving with the clamp and the app was resolving without it"* — which is what
+makes it worth its own rule. **When three programs share a geometry, an optional
+argument is a place for them to disagree in silence.** Give it one default, in one
+place, and let all three read it.
+
 ---
 
 ## Group L — nothing may teleport
@@ -2943,6 +3002,32 @@ for `check:smooth` to measure. The second eases from the remembered value into t
 live one over the transition and then tracks it exactly, and it keeps the carry slot
 written, so leaving the beat is smooth too.
 
+### R7b · The seam's position is the LEFT side's share, and six blocks read it backwards
+
+`SplitBar` prints `pos * 100` under `left` and `100 - pos * 100` under `right`. So
+a zone declared `upto: 0.34` is the region where the LEFT side holds about a third,
+and `upto: 1` is where the LEFT side holds nearly all of it. **Write the high-`upto`
+zone as the one where `left` wins.**
+
+Read it the other way round and the readout contradicts the two numbers printed
+directly beside it:
+
+```
+IN THE NOTES  34                    66  IN THE LISTENER
+         "the sadness sits in the sound"        <- says the opposite
+```
+
+Six shipped blocks did exactly that. What is worth remembering is not the
+convention but **why nothing caught it**: the types are satisfied, the control
+works, the zone boundaries are legal, `start` is properly outside the correct zone,
+and the lesson passes every check in Part 3. The only way to find it is to read the
+sentence against the number. Some defects are a checker's job and some are a
+reading's, and pretending the second kind does not exist is how they ship.
+
+The fix is to swap the two LABELS rather than rewrite the prose — the readings are
+usually right about the philosophy and wrong only about which end of the bar they
+are printed at.
+
 ### R8 · Two graded beats, and they may not be the same control
 
 H52 still says exactly two graded questions per lesson. Group Q says neighbouring
@@ -2967,19 +3052,33 @@ did not already do in lesson 16?
 
 - **The deck is not the default.** Two `ChoiceCards` was 47% of every question in
   the corpus, not because 47% of claims are either/or but because a deck is the
-  quickest thing to write. Ceiling 55%, and it should keep falling.
+  quickest thing to write. It is **10%** now — 36 of 368 — and the ceiling has
+  come down to 14% to hold it.
 - **Neighbours differ.** Two lessons running in reading order should not both be
-  answered by the same control. 133 pairs did; the budget only goes down.
+  answered by the same control. 133 pairs did, then 112; **27** now.
 - **One question stays on the STAGE.** H65 already said one in the deck and one
   above the figure, and **36 lessons ask both of theirs below it** — every one an
   early lesson, which is exactly where the picture most needs to be the thing
-  being answered. That budget is the "above the stickman" half of the work.
+  being answered. That budget is the "above the stickman" half of the work, and it
+  is the half still outstanding: a stage question needs the SCENE to draw targets,
+  so it is not a script-only edit like the ones below.
 
-**Converting one deck question is a small, self-contained job**, and the order to
-do them in is: take the next lesson whose neighbour shares its control, read the
-claim, pick the control from R1's table, and write the `reads` strings as lesson
-copy (R2). A conversion that reaches for a control the claim does not want is
-worse than leaving the deck alone.
+**The sweep is done: 127 lessons had no analogue control and 2 do now**, and both
+of those ask both their questions on the stage, which is the other thing the reader
+asked for. `node scripts/rotation-worklist.mjs --needed` prints whatever is left,
+and `--stageless` prints the other list.
+
+**Converting one deck question is a small, self-contained job** — script only, no
+scene change, because the player renders whichever control the beat declares. The
+order is: take the next lesson whose neighbour shares its control, read the claim,
+pick the control from R1's table, and write the `reads` strings as lesson copy
+(R2). Then rewrite the `explain`, because an explanation that says *"the other
+card"* names nothing once the cards are gone — that is J9, and a conversion is the
+commonest way to create one.
+
+A conversion that reaches for a control the claim does not want is worse than
+leaving the deck alone. The 36 decks that remain are the ones where a genuine
+either/or was the honest shape.
 
 ---
 
@@ -3047,6 +3146,61 @@ floor were raised, so a scene keeps its typographic hierarchy: in `logic8` that 
 two captions, and the 11.5–13pt body text was left alone. 338 labels across 147
 scenes needed it, which is to say **the house style itself was too small**, not
 one careless file.
+
+---
+
+### D35 · A word is legible or it is absent — never dimmed to a smear
+
+D34 fixed the SIZE and the reader came straight back:
+
+> *"I am still seeing that there are boxes that are blank and I cannot see what
+> is in them, this still needs to be fixed."*
+
+Size was one cause of three, and this is the second. Ghosting a whole layer to
+push it into the background is ordinary staging and the scenes are right to do
+it — but the layer usually has a caption inside it, and
+
+```ts
+opacity: 0.24 + 0.76 * spr        // the garden is a hint until it matters
+```
+
+puts INK on PAPER at **1.3:1**. That is a grey smear in the shape of a word which
+will not resolve however hard the reader looks, and §19 already names the failure
+in another part of the app: *"the same thing, dimmer is indistinguishable from a
+rendering fault"*. A locked rank pin is drawn FLAT AND COOL rather than faint, for
+exactly this reason.
+
+**The fix costs nothing, because the driver is already there.** The caption comes
+out of the dimmed layer into a sibling of its own, and rides the raw track instead
+of the composed opacity:
+
+```ts
+const gardenStyle      = useAnimatedStyle(() => ({ opacity: 0.24 + 0.76 * S.value.spr }));
+const gardenLabelStyle = useAnimatedStyle(() => ({ opacity: S.value.spr }));
+```
+
+`spr` is 0 exactly where the layer sits at its dim floor and 1 where the layer is
+full, so the word is **absent** while the art is a hint and **arrives with it** —
+and the unreadable band is crossed only while the fade is travelling, which is
+what a fade is. Two things come free: no step at the crossover (group L), and the
+answer stops being named before the question is asked (group O).
+
+**Measured, not judged.** `npm run check:readable` composites every word over what
+is actually behind it at the opacity it is actually drawn with, and then confirms
+each suspect against the PIXELS of a screenshot — because walking a word's
+ancestors for a background colour cannot see a sibling painted underneath, which
+is how a two-state label is normally built:
+
+```tsx
+<View style={bolt}>                     {/* backgroundColor: PAPER */}
+  <Animated.View style={boltFill} />    {/* backgroundColor: INK, grows */}
+  <Text style={{ color: PAPER }}>TRUE</Text>
+```
+
+Reading upward gives paper-on-paper at 1.0:1; on screen it is cream on solid ink
+and perfectly clear. A first pass called 205 words faint and the screen disagreed
+about most of them. **Where a measurement needs a theory of what is behind a
+pixel, take the picture.**
 
 ---
 

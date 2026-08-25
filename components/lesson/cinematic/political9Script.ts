@@ -66,12 +66,16 @@ export const BEATS: P9Beat[] = [
   {
     vote: 0, tally: true, advance: true, rights: true, one: 9,
     interact: {
-      prompt: 'What do Mill and Tocqueville mean by "the tyranny of the majority"?',
-      cards: [
-        { text: 'The majority oppressing a minority', correct: true },
-        { text: 'One ruler oppressing everyone', correct: false },
-      ],
-      explain: 'The danger is internal, which is what makes it hard to see. The trap is the other card: a tyrant is the picture the word brings up, and this tyrant is the electorate. No coup — just a majority closing in on the few.',
+      prompt: 'Set the lever to who the tyrant is here.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'one', reads: 'one ruler pressing down on everybody' },
+          { id: 'outside', reads: 'an outside power imposing its will' },
+          { id: 'many', reads: 'the many closing in on the few', correct: true },
+        ],
+      },
+      explain: 'The far setting, and that is what makes it so hard to see. A tyrant is the picture the word brings up, and this tyrant is the electorate. No coup, no soldiers — just a majority pressing on a minority, and every vote counted properly.',
     },
     dur: 4.6,
   },

@@ -80,12 +80,16 @@ export const BEATS: Ethics2Beat[] = [
   {
     p: 8, x: 262, g: -1, named: 1, lens: 3,
     interact: {
-      prompt: 'Almost everyone keeps small change they find, so keeping the wallet must be morally fine. Sound reasoning?',
-      cards: [
-        { text: 'False', correct: true },
-        { text: 'True', correct: false },
-      ],
-      explain: 'This is the is–ought gap Hume flagged in 1739: what people commonly do never, by itself, proves what is right.',
+      prompt: 'Set the lever to what most people doing it proves.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'common', reads: 'most people do it, so it must be fine' },
+          { id: 'legal', reads: 'nobody is arrested for it, so it must be fine' },
+          { id: 'neither', reads: 'neither one settles whether it is right', correct: true },
+        ],
+      },
+      explain: 'The far setting. This is the gap Hume pointed at in 1739: a description of what people do never turns by itself into a claim about what they ought to do. Both of the other settings quietly cross it and hope nobody notices.',
       xp: 5,
     },
     dur: 1.0,

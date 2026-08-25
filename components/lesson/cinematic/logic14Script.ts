@@ -71,12 +71,17 @@ export const BEATS: Log14Beat[] = [
     g: 41, lines: 3, mark: 1, gloss: 1,
     dur: 1.0,
     interact: {
-      prompt: 'So what actually failed?',
-      cards: [
-        { text: 'A word changed meaning', correct: true },
-        { text: 'The form was invalid', correct: false },
-      ],
-      explain: 'The other card blames the shape, and the shape is innocent — run it with a word that holds still and it works perfectly. That is the whole danger here. Validity is a promise about form, and it promises nothing at all once a term stops meaning one thing.',
+      prompt: 'Slide the seam to divide the blame.',
+      split: {
+        left: 'THE FORM', right: 'THE WORDS',
+        start: 1,
+        zones: [
+          { id: 'words', upto: 0.3, reads: 'the words moved; the shape was innocent', correct: true },
+          { id: 'both', upto: 0.66, reads: 'half the shape, half the words' },
+          { id: 'form', upto: 1, reads: 'the shape was invalid from the start' },
+        ],
+      },
+      explain: 'Almost all of it on the words. Run the same shape with a word that holds still and the argument works perfectly. That is what makes equivocation so dangerous. Validity is a promise about form, and the promise lapses once a word changes meaning halfway down.',
       xp: 5,
     },
   },

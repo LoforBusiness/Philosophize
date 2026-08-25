@@ -3,7 +3,7 @@ import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'r
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, lerp, pose, travelStance, WALK, type Bundle } from './rig';
+import { clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics35Script';
 import {
@@ -40,7 +40,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // actually reveals when (K3). The walk on beat 2 is what the follow is for.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const TR = 0.82;
+/** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const BASE_TR = 0.85;
 
 // the timeline
 const LINE_Y = 300;
@@ -88,7 +89,10 @@ export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPic
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / TR);
+    // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr). A fixed length
+    // here sprinted every long journey and left the footfalls — which the player
+    // computes from moveTr — arriving after the figure had stopped.
+    const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
     const q = clamp01(qv.value);
 

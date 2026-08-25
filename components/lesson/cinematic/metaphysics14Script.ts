@@ -73,12 +73,19 @@ export const BEATS: Met14Beat[] = [
     g: 41, rows: 4, marks: 1,
     dur: 1.0,
     interact: {
-      prompt: 'So what does "necessary" mean here?',
-      cards: [
-        { text: 'True in every possible world', correct: true },
-        { text: 'Impossible to doubt', correct: false },
-      ],
-      explain: 'The other card measures your confidence rather than the world. Water was H₂O in every world while people doubted it for centuries, and plenty of things nobody doubts could easily have gone another way. Necessity is about what could have been otherwise.',
+      prompt: 'Place the token on water being H2O.',
+      field: {
+        xLo: 'YOU COULD DOUBT IT', xHi: 'YOU COULD NOT DOUBT IT',
+        yLo: 'FALSE IN SOME WORLD', yHi: 'TRUE IN EVERY WORLD',
+        start: [0.76, 0.24],
+        quads: [
+          { id: 'water', x: 0, y: 1, reads: 'doubted for centuries, and true in every world', correct: true },
+          { id: 'obvious', x: 1, y: 1, reads: 'nobody doubts it, and true in every world' },
+          { id: 'sure', x: 1, y: 0, reads: 'nobody doubts it, and it could have gone otherwise' },
+          { id: 'open', x: 0, y: 0, reads: 'doubtable, and it could have gone otherwise' },
+        ],
+      },
+      explain: 'Top left, and the two axes are the whole lesson. One of them measures the world and the other measures you. Water was H2O in every world while people doubted it for centuries, and plenty of things nobody doubts could easily have gone another way.',
       xp: 5,
     },
   },

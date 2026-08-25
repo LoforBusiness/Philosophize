@@ -123,12 +123,17 @@ export const BEATS: AestheticsBeat[] = [
     critics: true,
     weigh: 'q2',
     interact: {
-      prompt: '"Beauty is just personal taste." Fine. Then calling a sunset beautiful asks nothing of anyone?',
-      cards: [
-        { text: 'Felt, yet claims everyone agrees', correct: true },
-        { text: 'It asks nothing of anyone', correct: false },
-      ],
-      explain: '"Feeling" sounds like "merely private". That is the slip. A judgment of taste is felt and still claims everyone. Look at the two rows. Liking needs one. Beautiful summons eight.',
+      prompt: 'Slide the seam to divide who a judgement of taste speaks for.',
+      split: {
+        left: 'EVERYBODY', right: 'ONLY YOURSELF',
+        start: 0.04,
+        zones: [
+          { id: 'you', upto: 0.3, reads: 'it speaks for you, and asks nothing of anyone else' },
+          { id: 'both', upto: 0.66, reads: 'half a report about you, half a demand on others' },
+          { id: 'all', upto: 1, reads: 'felt by you, and it summons everybody else', correct: true },
+        ],
+      },
+      explain: 'Nearly all the way over, which is the strange part. Felt sounds like merely private, and that is the slip. Look at the two rows: liking needs one person and beautiful summons eight. A judgement of taste is a feeling that behaves like a claim.',
       xp: 5,
     },
     dur: 1.0,

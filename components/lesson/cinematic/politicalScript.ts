@@ -71,12 +71,18 @@ export const BEATS: PoliticalBeat[] = [
     auth: 1,
     weigh: 'q2',
     interact: {
-      prompt: 'Hobbes’s sovereign keeps the peace — so surely he wanted citizens free to overthrow a bad one. Right?',
-      cards: [
-        { text: 'No, he feared chaos more', correct: true },
-        { text: 'Yes, against a bad ruler', correct: false },
-      ],
-      explain: 'Tempting, but it was Locke who defended resistance. Hobbes saw even a harsh sovereign as better than a return to the war of all against all.',
+      prompt: 'Drag to how much right to resist Hobbes allows.',
+      drag: {
+        lo: 'NONE AT ALL',
+        hi: 'WHENEVER HE RULES BADLY',
+        start: 1,
+        zones: [
+          { id: 'never', upto: 0.3, reads: 'none; even a harsh sovereign beats the war', correct: true },
+          { id: 'life', upto: 0.66, reads: 'only when he comes for your life directly' },
+          { id: 'bad', upto: 1, reads: 'whenever the ruler governs badly' },
+        ],
+      },
+      explain: 'The near end, and it is Locke who sits at the other one. Hobbes saw even a cruel sovereign as better than a return to the war of all against all, because the alternative to a bad ruler is not a good ruler. It is no arbiter at all.',
       xp: 5,
     },
     dur: 1.0,

@@ -65,12 +65,19 @@ export const BEATS: Aes6Beat[] = [
   {
     p: 15, vast: 1, split: 3, mind: 1,
     interact: {
-      prompt: 'Does the sublime just mean a very beautiful thing?',
-      cards: [
-        { text: 'No, awe and terror', correct: true },
-        { text: 'Yes, very beautiful', correct: false },
-      ],
-      explain: 'The trap: "sublime sounds like a fancy word for very beautiful." Burke set them apart — the sublime overwhelms with awe and terror; beauty pleases and soothes.',
+      prompt: 'Place the token on the sublime.',
+      field: {
+        xLo: 'SOOTHING', xHi: 'OVERWHELMING',
+        yLo: 'NOTHING TO FEAR', yHi: 'LACED WITH TERROR',
+        start: [0.24, 0.24],
+        quads: [
+          { id: 'sublime', x: 1, y: 1, reads: 'overwhelming, and shot through with terror', correct: true },
+          { id: 'beauty', x: 0, y: 0, reads: 'soothing, with nothing to fear: the beautiful' },
+          { id: 'grand', x: 1, y: 0, reads: 'overwhelming and not frightening: merely grand' },
+          { id: 'uneasy', x: 0, y: 1, reads: 'soothing and frightening at once: an odd corner' },
+        ],
+      },
+      explain: 'Top right, and the beautiful sits diagonally opposite. Sublime sounds like a fancy word for very beautiful, and Burke set them apart on purpose. The sublime works through vastness and power and stirs a delight with terror in it.',
       xp: 5,
     },
     dur: 1.0,

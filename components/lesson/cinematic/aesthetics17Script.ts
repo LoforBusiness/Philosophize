@@ -73,12 +73,16 @@ export const BEATS: Aes17Beat[] = [
     g: 41, x: 160, shape: 1, fear: 0.86, frame: 1,
     dur: 1.0,
     interact: {
-      prompt: 'A friend says horror fans must be faking the fear. Are they?',
-      cards: [
-        { text: 'No — real fear, no consequences', correct: true },
-        { text: 'Yes — nobody enjoys real fear', correct: false },
-      ],
-      explain: 'The other card offers two doors and insists you take one: either the fear is fake or the enjoyment is. There is a third. The fear is real and something else has been removed from it, which is what every serious answer here has in common.',
+      prompt: 'Set the lever to what is actually going on at a horror film.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'nofear', reads: 'the fear is faked' },
+          { id: 'nofun', reads: 'the enjoyment is faked' },
+          { id: 'real', reads: 'the fear is real, with the consequences taken out', correct: true },
+        ],
+      },
+      explain: 'The far setting. The first two are a pair of doors you are invited to pick between, and there is a third. The fear is genuine and something has been removed from it — which is what every serious answer to this puzzle has in common.',
       xp: 5,
     },
   },

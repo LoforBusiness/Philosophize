@@ -75,12 +75,18 @@ export const BEATS: Log15Beat[] = [
     g: 41, crowd: 1, sample: 1, leap: 1, claim: 1,
     dur: 1.0,
     interact: {
-      prompt: 'What would actually fix this argument?',
-      cards: [
-        { text: 'A bigger, fairer sample', correct: true },
-        { text: 'Being sure you saw it right', correct: false },
-      ],
-      explain: 'The other card offers more confidence about the same two people, and confidence was never what was short. You could be perfectly, provably right about both tourists and still know nothing whatever about the country they came from.',
+      prompt: 'Drag to what would actually fix this argument.',
+      drag: {
+        lo: 'BE SURER ABOUT THE TWO',
+        hi: 'ASK MANY MORE, CHOSEN FAIRLY',
+        start: 0,
+        zones: [
+          { id: 'sure', upto: 0.3, reads: 'be very sure indeed about the two you met' },
+          { id: 'more', upto: 0.66, reads: 'meet a few more of exactly the same sort' },
+          { id: 'fair', upto: 1, reads: 'many more, chosen so that they could disagree', correct: true },
+        ],
+      },
+      explain: 'The far end. The near end offers more confidence about the same two people, and confidence was never what was short. You could be provably right about both tourists and still know nothing whatever about the country they came from.',
       xp: 5,
     },
   },

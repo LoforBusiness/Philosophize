@@ -78,12 +78,18 @@ export const BEATS: Epi8Beat[] = [
   {
     p: 4, x: 176, esc: 1, land: 2,
     interact: {
-      prompt: 'The circle instead: beliefs propping each other up, nothing underneath. Is a loop of reasons worthless?',
-      cards: [
-        { text: 'A wide enough web holds', correct: true },
-        { text: 'Circles are always worthless', correct: false },
-      ],
-      explain: 'The trap: "circular reasoning" is a famous insult, so "always worthless" sounds obviously right. A two-step loop really is empty — but coherentists argue a huge, tightly knit web holds itself up. The sharper objection: a consistent web can still be false.',
+      prompt: 'Draw what happens to a loop of reasons as the web gets wider.',
+      plot: {
+        axis: 'HOW MUCH IT HOLDS UP',
+        cols: ['2 BELIEFS', '5', '20', '100', 'THOUSANDS'],
+        start: [0.5, 0.5, 0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'rise', profile: [0.04, 0.2, 0.5, 0.8, 0.95], reads: 'the wider the web, the more it holds', correct: true },
+          { id: 'flat', profile: [0.06, 0.06, 0.06, 0.06, 0.06], reads: 'a circle is worthless at any size' },
+          { id: 'fall', profile: [0.9, 0.7, 0.5, 0.3, 0.08], reads: 'the more beliefs, the shakier it gets' },
+        ],
+      },
+      explain: 'It climbs. A two-step loop really is empty, which is why circular reasoning is such a good insult. Coherentists argue a huge tightly knit web holds itself up. The sharper objection is not the shape but the drift: a perfect web can float free of the world.',
       xp: 5,
     },
     dur: 1.0,

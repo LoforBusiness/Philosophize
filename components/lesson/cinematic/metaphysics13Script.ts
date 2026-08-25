@@ -59,12 +59,17 @@ export const BEATS: Meta13Beat[] = [
   {
     p: 4, x: 124, track: 1, fork: 1, both: 1, stuck: 1,
     interact: {
-      prompt: 'In the fission case, exactly one of the two people must be the real you. True?',
-      cards: [
-        { text: 'False, both are equally continuous', correct: true },
-        { text: 'True, the one on Earth', correct: false },
-      ],
-      explain: 'The trap is that identity feels all-or-nothing, so one of them has to be the "real" one. Both branches are equally continuous. Parfit\'s answer: the question is empty, and what they share is what mattered.',
+      prompt: 'Slide the seam to divide you between the two of them.',
+      split: {
+        left: 'THE ONE WHO WOKE UP', right: 'THE ONE ON EARTH',
+        start: 0.04,
+        zones: [
+          { id: 'earth', upto: 0.3, reads: 'the one on Earth is you; the other is a copy' },
+          { id: 'both', upto: 0.7, reads: 'equally continuous with you, and the question is empty', correct: true },
+          { id: 'copy', upto: 1, reads: 'the new one is you; the old body was left behind' },
+        ],
+      },
+      explain: 'The middle, and being unable to settle it is the answer. Identity feels all or nothing, so one of them ought to be the real one. Both branches carry exactly what you carried. Parfit\'s move is to stop asking which is you and notice that what mattered survived twice.',
       xp: 5,
     },
     dur: 1.0,

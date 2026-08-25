@@ -61,12 +61,17 @@ export const BEATS: Logic6Beat[] = [
   {
     p: 4, link: 1, table: 1,
     interact: {
-      prompt: 'A conditional is true. Does that mean its antecedent is actually true?',
-      cards: [
-        { text: 'No, only the link', correct: true },
-        { text: 'Yes, the if is true', correct: false },
-      ],
-      explain: '"If pigs fly, the moon is cheese" can be accepted as true while pigs stay grounded — the conditional asserts only the connection.',
+      prompt: 'Slide the seam to divide what accepting a conditional commits you to.',
+      split: {
+        left: 'THE LINK ONLY', right: 'THE IF AS WELL',
+        start: 0.04,
+        zones: [
+          { id: 'both', upto: 0.32, reads: 'accepting it means signing up for flying pigs' },
+          { id: 'half', upto: 0.66, reads: 'the link, and some commitment to the if' },
+          { id: 'link', upto: 1, reads: 'the link, and nothing whatever about the if', correct: true },
+        ],
+      },
+      explain: 'All of it goes to the link. If pigs fly, the moon is cheese can be accepted as true while pigs stay firmly on the ground, because the sentence never claimed pigs fly. It claimed only that one would bring the other.',
       xp: 5,
     },
     dur: 1.0,

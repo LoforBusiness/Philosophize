@@ -84,12 +84,16 @@ export const BEATS: Pol21Beat[] = [
   {
     p: 41, x: 268, map: 1, claimed: 1, exit: 1,
     interact: {
-      prompt: 'What would make staying somewhere count as agreeing to it?',
-      cards: [
-        { text: 'A real option to refuse', correct: true },
-        { text: 'Knowing the law exists', correct: false },
-      ],
-      explain: 'A refusal you could actually take. Consent gets its force from the alternative being open, which is why a signature under threat binds nobody. The other card describes being informed, and being informed of a demand is not agreeing to it.',
+      prompt: 'Set the lever to what would make staying count as agreeing.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'know', reads: 'knowing that the law exists' },
+          { id: 'stay', reads: 'staying put rather than leaving' },
+          { id: 'refuse', reads: 'having a refusal you could actually take', correct: true },
+        ],
+      },
+      explain: 'The far setting. Consent gets its force from the alternative being genuinely open, which is why a signature under threat binds nobody. The first setting describes being informed, and being informed of a demand is not the same as accepting it.',
       xp: 5,
     },
     dur: 1.0,

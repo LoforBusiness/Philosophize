@@ -64,12 +64,19 @@ export const BEATS: Political8Beat[] = [
   {
     p: 4, x: 100, mode: 2, marks: 1, eyeline: 1,
     interact: {
-      prompt: 'The three of them now hold different numbers of crates. Does that make this arrangement unfair?',
-      cards: [
-        { text: 'No, equal shares still blocked', correct: true },
-        { text: 'Yes, the shares differ', correct: false },
-      ],
-      explain: 'The trap: "equal" and "identical" feel like the same word. But the identical crates were perfectly equal in resources and still left one person staring at wood. Equal shares and equal outcomes come apart — which is why the real argument is over equality OF WHAT.',
+      prompt: 'Place the token on what the same crates gave them.',
+      field: {
+        xLo: 'THE SHARES DIFFER', xHi: 'THE SHARES ARE IDENTICAL',
+        yLo: 'EVERYONE CAN SEE OVER', yHi: 'SOMEONE STILL CANNOT',
+        start: [0.24, 0.24],
+        quads: [
+          { id: 'crates', x: 1, y: 1, reads: 'identical crates, and one person staring at wood', correct: true },
+          { id: 'aim', x: 0, y: 0, reads: 'different shares, and everybody can see: the aim' },
+          { id: 'lucky', x: 1, y: 0, reads: 'identical shares that happened to work for all' },
+          { id: 'bad', x: 0, y: 1, reads: 'different shares, and somebody still cannot see' },
+        ],
+      },
+      explain: 'Top right. Equal and identical feel like the same word and they are not: the crates were perfectly equal in resources and left one person facing a plank. Equal shares and equal outcomes come apart, which is why the second arrangement is the fairer one.',
       xp: 5,
     },
     dur: 1.0,

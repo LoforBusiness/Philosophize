@@ -65,6 +65,15 @@ const NODE_H = 30;
 const RACK_L = 24;
 const RACK_W = 128;
 const RAIL_T = 264;
+/**
+ * How faint the empty slot on the rack is once a pair is being worn.
+ *
+ * It was 0.2, which put its SHAPES / FEELING label at 1.3:1 — a box with an
+ * unreadable word in it (D35). The slot still reads as vacant at 0.55, and the
+ * word telling you WHICH pair is off can be read, which is the whole use of it.
+ */
+const GHOST_ON_RACK = 0.55;
+
 const SPEC_A = 55;             // centre x of the SHAPES pair on the rack
 const SPEC_B = 121;            // centre x of the FEELING pair on the rack
 
@@ -110,8 +119,8 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick }: S
   const op1 = useSharedValue(M0 === 1 ? 1 : 0);   // form
   const op2 = useSharedValue(M0 === 2 ? 1 : 0);   // feeling
   const op3 = useSharedValue(M0 === 3 ? 1 : 0);   // both at once
-  const rackF = useSharedValue(L0 === 1 ? 0.2 : 1);
-  const rackL = useSharedValue(L0 === 2 ? 0.2 : 1);
+  const rackF = useSharedValue(L0 === 1 ? GHOST_ON_RACK : 1);
+  const rackL = useSharedValue(L0 === 2 ? GHOST_ON_RACK : 1);
 
   useEffect(() => {
     const cfg = { duration: 520, easing: Easing.inOut(Easing.quad) };
@@ -125,8 +134,8 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick }: S
   // hand without ever drawing glasses onto the figure's head.
   useEffect(() => {
     const cfg = { duration: 380, easing: Easing.out(Easing.quad) };
-    rackF.value = withTiming(lens === 1 ? 0.2 : 1, cfg);
-    rackL.value = withTiming(lens === 2 ? 0.2 : 1, cfg);
+    rackF.value = withTiming(lens === 1 ? GHOST_ON_RACK : 1, cfg);
+    rackL.value = withTiming(lens === 2 ? GHOST_ON_RACK : 1, cfg);
   }, [lens]);
 
   const SCENE = useDerivedValue(() => {
@@ -410,7 +419,9 @@ const styles = StyleSheet.create({
   specLabelWrap: { position: 'absolute', top: 304, width: 78 },
   specLabel: {
     textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 10.2, letterSpacing: 1.4,
-    color: SOFT, includeFontPadding: false, lineHeight: 12,
+    // INK, not SOFT: this label rides a slot that ghosts to 0.55, and SOFT does
+    // not survive any dimming — 5.3:1 on paper is 2.0:1 at 0.55 (D35).
+    color: INK, includeFontPadding: false, lineHeight: 12,
   },
 
   // ── Q1 cards ────────────────────────────────────────────────────────────────

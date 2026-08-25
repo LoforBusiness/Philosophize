@@ -623,8 +623,10 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
   gating; **186 cinematic lessons** (animated stickman scenes, §17), answered six
   ways — scene targets, two cards, and the analogue family of `drag` · `lever` ·
-  `plot` · `split` · `field` (§17, group R); animated `LessonReward` with XP
-  count-up, streak and rank-up.
+  `plot` · `split` · `field` (§17, group R). **The analogue family is now the
+  majority**: 182 graded beats against 150 on the stage and 36 left in the deck,
+  and every lesson but two has one (the two ask both their questions on the stage
+  instead). Animated `LessonReward` with XP count-up, streak and rank-up.
 - **Gamification:** 70 badges in 5 tiers, **48 ranks in 8 coloured orders, each
   order struck in its own silhouette** (§7), a conferred-rank ceremony that shows
   the pin they held handing over to the pin they just earned, a three-badge
@@ -715,6 +717,19 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 > reaching the reader at 5.1pt); **J10** reading ease at least 55 and at most
 > 12% of the words pointing rather than naming; **R9** the rotation — the deck
 > is not the default, neighbours differ, and one question stays on the stage.
+>
+> **The reader then said the boxes were STILL blank, and they were right: size
+> was one cause of three.** **D35** is the second — a word ghosted with its layer
+> reaches the eye at 1.3:1, which is a smear in the shape of a word, so a caption
+> now rides the raw driver track and is legible or absent rather than dim. The
+> third is plain clipping, a caption that outgrew its fixed-height box. Neither is
+> visible in the source, so `npm run check:readable` renders every lesson and
+> measures every word at the size, opacity and clipping it lands with — and
+> confirms each suspect against the PIXELS, because reading a word's ancestors for
+> a background cannot see a sibling painted underneath. **R7b** is the same lesson
+> in a smaller key: the seam of a `split` is the LEFT side's share, six blocks
+> read it backwards, and nothing could catch it but reading the sentence against
+> the number.
 >
 > Rule A1 above all: **what the text says, the picture must do.** A lesson that says
 > someone is on the floor and draws them standing is not acceptable at any polish level.
@@ -914,8 +929,19 @@ Three things make the whole family teach rather than merely slide:
   while every life in it shrinks. One gesture, on the UI thread, with no React
   render in between.
 
-Forty-four graded beats are on the analogue family now — 26 `drag`, 6 `lever`, and
-4 each of `plot`, `split` and `field` — and following the control is OPTIONAL, so
+**182 graded beats are on the analogue family now** — 65 `drag`, 50 `lever`, 34
+`split`, 22 `field` and 11 `plot` — against 36 left in the two-card deck, which is
+10% of all questions and is meant to stay a minority rather than reach zero
+(*"I still want a couple every now and then for the old way"*). It got there by
+conversion rather than by writing new lessons: **127 lessons had no analogue
+control at all and 2 do now**, and both of those ask both their questions on the
+stage instead. A conversion is a SCRIPT-ONLY edit — the player renders whichever
+control the beat declares — so it costs a control block, a rewritten `prompt` and
+a rewritten `explain` (an explanation that says "the other card" names nothing
+once the cards are gone, which is J9). `node scripts/rotation-worklist.mjs`
+prints what is left, with each claim, in reading order.
+
+Following the control is OPTIONAL, so
 check which a scene does before reasoning about it. The four newest that do are
 worth reading as the pattern: `metaphysics21` furnishes the two halves of a
 timeline off the pad's two axes, `political22` makes the pad BE the switch,
@@ -1065,6 +1091,41 @@ and watching it fail.**
 > lesson gains a new way to move, the checker gains one too, in the same commit.**
 > A checker that models only the figure will stay green through anything that is
 > not a figure, and say so confidently.
+
+### The walk was too fast in 54 scenes, and the footsteps were the tell
+
+> *"the stickman will sometimes walk faster and now the sounds in lessons for
+> walking is no longer lined up correctly"*
+
+Two symptoms, one cause, and the cause was a rule that had already been written
+down and already been "enforced". `rig.moveTr` exists so a walk takes as long as
+its distance needs at `WALK_SPEED`; the 46 older scenes call it. **The 54 newest
+scenes — the most recently written lesson in every branch — did this instead:**
+
+```ts
+const TR = 0.82;
+const tr = ease01(bt.value / TR);        // a FIXED length, whatever the distance
+```
+
+145 walking beats, every one too fast, the worst running **246 stage units a
+second against an intended 56**. And because the PLAYER schedules footfalls from
+`footfallTrack`, which uses `moveTr(x0, x1, 0.85)`, the sound was timed for a walk
+the scene never drew: on the worst beat the last footstep landed **four seconds
+after the figure had stopped**. Pace and sync are the same defect from two sides.
+
+Three things worth carrying:
+
+- **The fix is one expression**, `ease01(bt.value / moveTr(X[p], X[n], 0.85))`,
+  and the base must be 0.85 because that is what the player assumed.
+- **Nothing could have caught it.** Every sound check loaded `rig.ts` and
+  `footfalls.ts` and asked whether they agreed with each other; they always did.
+  The disagreement was between `footfalls.ts` and its fifty-four callers.
+  `check:sound` reads the scenes now and replays both durations beat by beat.
+- **The current house idiom was the defect** — the same shape as L8 below. The
+  newest lesson in all six branches was the wrong exemplar, so copying the best
+  recent work propagated it. That is the second time this has happened and it is
+  worth expecting a third: when a defect spreads by imitation it looks like craft
+  while it does it.
 
 **Rules that keep biting, in rough order of how often:**
 
@@ -1860,7 +1921,7 @@ browser at it; the first transform can take longer than a navigation timeout.
   find. When a real screen changes, load the real screen.
 - `jimp-compact` is available (via `@expo/image-utils`) for offline image work —
   resizing, desaturating, compositing icon layers, checking transparency.
-- **Four harnesses step the real lessons in a browser**, because some questions
+- **Five harnesses step the real lessons in a browser**, because some questions
   cannot be answered by arithmetic at all. **They share one lock**
   (`scripts/lib/previewroute.mjs`) because they also share a Metro, a Chrome and —
   fatally — a filename: `check-frame` and `check-spoiler` both write
@@ -1878,7 +1939,15 @@ browser at it; the first transform can take longer than a navigation timeout.
   and writes `components/lesson/cinematic/mustBoxes.ts`, which is what stops the
   camera cropping it (H60c); `npm run check:spoiler` reads the whole visible page
   at every graded beat BEFORE answering it and fails if any of the reveal is
-  already legible (group O). All three want Metro on 8847 and a headless Chrome
+  already legible (group O). **`npm run check:readable` is the newest, and it is
+  the one that answers "is this box blank"** — it measures every word a scene
+  draws at the size, the opacity and the clipping it actually lands with, and its
+  second stage is a SCREENSHOT: a suspect is only a finding once the pixels agree.
+  That stage exists because reading a word's ancestors for a background colour
+  cannot see a sibling painted underneath, and a two-state label is normally built
+  exactly that way — a first pass called 205 words faint and the screen disagreed
+  about most of them. It runs on its own ports (8861/9391) so it never contends
+  with the other four. All three want Metro on 8847 and a headless Chrome
   on 9382 — the header of each script has the exact commands.
 
   **`check:spoiler` exists because reading the source said the app was clean and

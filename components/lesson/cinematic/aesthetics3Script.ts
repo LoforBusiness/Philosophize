@@ -84,12 +84,18 @@ export const BEATS: Aes3Beat[] = [
   {
     p: 3, modes: 1, cut: 1, will: 1,
     interact: {
-      prompt: 'Plato thought music was dangerous. Tap what he actually did about it.',
-      cards: [
-        { text: 'He regulated the modes', correct: true },
-        { text: 'He banned all music', correct: false },
-      ],
-      explain: 'He regulated rather than abolished. The steadfast modes stayed and the soft ones went, because he thought music shapes a character before you get a chance to argue with it.',
+      prompt: 'Drag to what Plato actually did about music.',
+      drag: {
+        lo: 'LEFT IT ALONE',
+        hi: 'BANNED EVERY NOTE',
+        start: 1,
+        zones: [
+          { id: 'free', upto: 0.28, reads: 'left it alone; music is only decoration' },
+          { id: 'modes', upto: 0.74, reads: 'kept the steadfast modes and removed the soft ones', correct: true },
+          { id: 'ban', upto: 1, reads: 'banned every note of it from the city' },
+        ],
+      },
+      explain: 'The middle. He regulated rather than abolished, and the reason is the interesting part: he thought music shapes a character before you get the chance to argue with it. You cannot reason your way out of a tune you grew up inside.',
       xp: 5,
     },
     dur: 1.0,

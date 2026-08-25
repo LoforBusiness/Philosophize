@@ -81,12 +81,18 @@ export const BEATS: EpistBeat[] = [
     locks: [1, 1, 0],
     qkey: 'q2',
     interact: {
-      prompt: 'You are 100% certain it will rain tomorrow, and it does. Did you KNOW it would rain?',
-      cards: [
-        { text: 'Only with good reasons', correct: true },
-        { text: 'Yes, you were certain', correct: false },
-      ],
-      explain: 'Certainty is a feeling, not justification. True and believed, but the reasons lock never turned — being right without reasons is luck, and the door stays shut.',
+      prompt: 'Drag to what turns a true belief into knowledge.',
+      drag: {
+        lo: 'NO REASONS AT ALL',
+        hi: 'REASONS ANYONE COULD CHECK',
+        start: 0,
+        zones: [
+          { id: 'hunch', upto: 0.3, reads: 'a hunch that happened to land: lucky, not knowledge' },
+          { id: 'sure', upto: 0.66, reads: 'a strong feeling, which is not a reason at all' },
+          { id: 'know', upto: 1, reads: 'reasons anyone could check, and now it is knowledge', correct: true },
+        ],
+      },
+      explain: 'Only the far end. Notice what never moved the knob: being a hundred per cent certain. Certainty is a feeling and the third lock takes reasons. True, believed, and right by luck leaves the door shut.',
       xp: 5,
     },
     dur: 1.0,

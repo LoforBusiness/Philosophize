@@ -123,12 +123,16 @@ export const BEATS: Meta2Beat[] = [
   {
     e: 178, x: 236, gone: 0.95, pr: 1,
     interact: {
-      prompt: 'Both men end up defending being. Which one thinks it had a rival to beat?',
-      cards: [
-        { text: 'Leibniz', correct: true },
-        { text: 'Parmenides', correct: false },
-      ],
-      explain: 'Leibniz asks why something won, so nothing was a live option that needed ruling out. Parmenides says nothing was never on the table — so being never had to beat anything to be here.',
+      prompt: 'Set the lever to the view that makes Leibniz ask his question.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'never', reads: 'nothing was never possible, so there is nothing to explain' },
+          { id: 'lost', reads: 'nothing was possible, and something won anyway', correct: true },
+          { id: 'must', reads: 'something had to exist; there was never a contest' },
+        ],
+      },
+      explain: 'The middle setting. Leibniz asks why something won, so nothing had to be a real option for it to beat. Parmenides sits at the first setting: nothing was never on the table, so being never had a rival and the question never opens.',
       xp: 5,
     },
     dur: 1.0,

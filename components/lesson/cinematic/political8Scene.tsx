@@ -255,7 +255,7 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
       {/* TALLEST — h 118, so head top y = 500 − 118 − 32 + 32 = 382 with no crate. */}
       <Animated.View style={[styles.folk, { left: 242, top: 350, height: 150 }, riseT]} pointerEvents="none">
         <Animated.View style={[styles.badge, sees[0] && styles.badgeOn, badgeStyle]}>
-          <Text style={[styles.badgeText, sees[0] && styles.badgeTextOn]}>{sees[0] ? 'SEES' : 'BLOCKED'}</Text>
+          <Text style={[styles.badgeText, sees[0] && styles.badgeTextOn]}>{sees[0] ? 'SEES' : 'CANNOT'}</Text>
         </Animated.View>
         <View style={styles.folkHead} />
         <View style={[styles.folkTorso, { height: 74 }]} />
@@ -266,7 +266,7 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
       {/* MIDDLE — h 96: one crate brings the head to 382. */}
       <Animated.View style={[styles.folk, { left: 290, top: 372, height: 128 }, riseM]} pointerEvents="none">
         <Animated.View style={[styles.badge, sees[1] && styles.badgeOn, badgeStyle]}>
-          <Text style={[styles.badgeText, sees[1] && styles.badgeTextOn]}>{sees[1] ? 'SEES' : 'BLOCKED'}</Text>
+          <Text style={[styles.badgeText, sees[1] && styles.badgeTextOn]}>{sees[1] ? 'SEES' : 'CANNOT'}</Text>
         </Animated.View>
         <View style={styles.folkHead} />
         <View style={[styles.folkTorso, { height: 52 }]} />
@@ -277,7 +277,7 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
       {/* SHORTEST — h 74: needs TWO crates to reach the same 382. */}
       <Animated.View style={[styles.folk, { left: 336, top: 394, height: 106 }, riseS]} pointerEvents="none">
         <Animated.View style={[styles.badge, sees[2] && styles.badgeOn, badgeStyle]}>
-          <Text style={[styles.badgeText, sees[2] && styles.badgeTextOn]}>{sees[2] ? 'SEES' : 'BLOCKED'}</Text>
+          <Text style={[styles.badgeText, sees[2] && styles.badgeTextOn]}>{sees[2] ? 'SEES' : 'CANNOT'}</Text>
         </Animated.View>
         <View style={styles.folkHead} />
         <View style={[styles.folkTorso, { height: 30 }]} />
@@ -403,12 +403,24 @@ const styles = StyleSheet.create({
   // ── the three onlookers ─────────────────────────────────────────────────────
   folk: { position: 'absolute', width: 60 },
   badge: {
-    position: 'absolute', left: 8, top: 0, width: 44, height: 16,
+    // 52 WIDE, NOT 44, AND THE LONGER WORD IS SHORTER.
+    //
+    // The pair used to be SEES / BLOCKED. At 12.6 with letter-spacing that is about
+    // sixty units of lettering in a forty-four-unit badge, so BLOCKED was trimmed at
+    // both ends and `check:readable` measured a seventh of it reaching the reader.
+    // The type cannot come down to meet it: this scene's band is 460 units, so `fit`
+    // is 0.64 and 12.6 already lands at 8.1pt, a tenth of a point above D34's floor.
+    //
+    // So the BOX grew to the width `folk` allows and the WORD came down to fit it.
+    // SEES / CANNOT is the same claim in the same shape, and it is the one the badge
+    // can actually hold. A box is sized to its longest label, and when it cannot be,
+    // the label is the thing that gives.
+    position: 'absolute', left: 4, top: 0, width: 52, height: 16,
     borderWidth: 1.5, borderColor: SOFT, borderRadius: 8, backgroundColor: PAPER,
     alignItems: 'center', justifyContent: 'center',
   },
   badgeOn: { borderColor: INK, backgroundColor: INK },
-  badgeText: { fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 0.8, color: SOFT,
+  badgeText: { fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 0.4, color: SOFT,
     includeFontPadding: false,
   },
   badgeTextOn: { color: PAPER },

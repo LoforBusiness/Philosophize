@@ -62,12 +62,17 @@ export const BEATS: Metaphysics11Beat[] = [
   {
     p: 8, c: 31, tok: 1,
     interact: {
-      prompt: 'The memories moved and the bodies did not. Tap what Locke says carries the person.',
-      cards: [
-        { text: 'The consciousness reaching back', correct: true },
-        { text: 'The same living body', correct: false },
-      ],
-      explain: 'The trap: the bodily answer is the one you would give a court, and it feels safest. But a body replaces nearly all its matter over a lifetime — it is the Ship of Theseus wearing your face. Locke hangs identity on the thread of consciousness instead.',
+      prompt: 'Slide the seam to where Locke hangs the person.',
+      split: {
+        left: 'MEMORY REACHING BACK', right: 'THE SAME BODY',
+        start: 0.04,
+        zones: [
+          { id: 'body', upto: 0.32, reads: 'the body carries you, which is what a court would say' },
+          { id: 'both', upto: 0.64, reads: 'both together, and neither one on its own' },
+          { id: 'mind', upto: 1, reads: 'the thread of consciousness, wherever it wakes up', correct: true },
+        ],
+      },
+      explain: 'Almost all of it goes to memory. The bodily answer feels safest and a court wants it, but a body swaps nearly all its matter over a lifetime — the Ship of Theseus wearing your face. Locke hangs the person on the thread instead.',
       xp: 5,
     },
     dur: 1.0,

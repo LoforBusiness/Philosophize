@@ -73,12 +73,18 @@ export const BEATS: Metaphysics7Beat[] = [
   {
     p: 12, x: 200, line: 1, solid: 1,
     interact: {
-      prompt: 'If every moment already exists, has the block universe just declared change to be a lie?',
-      cards: [
-        { text: 'No, the flow is you', correct: true },
-        { text: 'Yes, nothing really changes', correct: false },
-      ],
-      explain: 'The trap: "already there" sounds exactly like "frozen". But the block is full of differences between its slices, and that IS change. What it denies is a magic spotlight sweeping along the line. The thing that moves is you.',
+      prompt: 'Drag to how much change the block leaves standing.',
+      drag: {
+        lo: 'NOTHING CHANGES',
+        hi: 'A SPOTLIGHT SWEEPS THE LINE',
+        start: 0,
+        zones: [
+          { id: 'frozen', upto: 0.3, reads: 'nothing changes; the block is one still photograph' },
+          { id: 'differ', upto: 0.74, reads: 'the slices differ, and that difference is what change is', correct: true },
+          { id: 'flow', upto: 1, reads: 'a moving now travels along the line, lighting each slice' },
+        ],
+      },
+      explain: 'The middle. Already there sounds exactly like frozen, and it is not: the block is packed with differences between one slice and the next, and that is all change ever was. What the block denies is the far end — a travelling spotlight. The thing that moves is you.',
       xp: 5,
     },
     dur: 1.0,

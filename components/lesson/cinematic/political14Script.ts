@@ -66,12 +66,16 @@ export const BEATS: Pol14Beat[] = [
     g: 11, rows: 3,
     dur: 1.0,
     interact: {
-      prompt: 'So what is the Wilt Chamberlain case meant to show?',
-      cards: [
-        { text: 'Patterns interrupt voluntary transfers', correct: true },
-        { text: 'Sport pays far too much', correct: false },
-      ],
-      explain: 'Not the other card: the argument bites on ANY pattern, equal or not, and says nothing about what a sportsman deserves. Rawls\'s reply is that the target was never one distribution — it is the basic structure, the rules of property and tax running over time.',
+      prompt: 'Set the lever to what the case is meant to show.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'pay', reads: 'that sportsmen are paid far too much' },
+          { id: 'equal', reads: 'that only equal distributions are fair' },
+          { id: 'pattern', reads: 'that holding any pattern means stopping free exchanges', correct: true },
+        ],
+      },
+      explain: 'The far setting. The argument bites on ANY pattern, equal or not, and says nothing whatever about what a sportsman deserves. The reply from Rawls is that the target was never one distribution: it is the basic structure, the rules the exchanges run inside.',
       xp: 5,
     },
   },

@@ -86,12 +86,16 @@ export const BEATS: Met19Beat[] = [
   {
     p: 41, x: 268, props: 1, peg: 0.4, twin: 1,
     interact: {
-      prompt: 'Two things share every property. Are they one thing or two?',
-      cards: [
-        { text: 'Two, and bundles cannot say so', correct: true },
-        { text: 'One, since nothing differs', correct: false },
-      ],
-      explain: 'Plainly two, and that is the bill bundle theory has to pay. If a thing just is its properties, two things with all the same properties are the same thing. Saying they are two means something beyond the properties is doing the distinguishing.',
+      prompt: 'Set the lever to how many things are standing there.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'one', reads: 'one thing; the same properties means the same thing' },
+          { id: 'two', reads: 'two things, and the bundle cannot say what makes them two', correct: true },
+          { id: 'never', reads: 'the case cannot arise, so there is nothing to answer' },
+        ],
+      },
+      explain: 'Two, plainly, and that is the bill bundle theory has to pay. If a thing simply is its properties, two with all the same properties are one thing. Saying they are two means something beyond the properties is counting — the peg the theory threw away.',
       xp: 5,
     },
     dur: 1.0,

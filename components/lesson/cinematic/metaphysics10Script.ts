@@ -71,12 +71,18 @@ export const BEATS: Metaphysics10Beat[] = [
   {
     p: 4, x: 124, frame: 1, str: 1,
     interact: {
-      prompt: 'Aristotle kept universals real. Did he agree with Plato that they live in their own realm?',
-      cards: [
-        { text: 'No, real inside the things', correct: true },
-        { text: 'Yes, both put them beyond', correct: false },
-      ],
-      explain: 'The trap: treating realism and Plato’s realm as one package deal. Aristotle took the card off the wall and pinned it to the things — redness is fully real, but never floating free of some red object.',
+      prompt: 'Drag to where Aristotle puts redness.',
+      drag: {
+        lo: 'ONLY A WORD WE USE',
+        hi: 'IN A REALM OF ITS OWN',
+        start: 1,
+        zones: [
+          { id: 'word', upto: 0.28, reads: 'nothing shared out there; just a handy label' },
+          { id: 'things', upto: 0.72, reads: 'fully real, and only ever inside a red thing', correct: true },
+          { id: 'realm', upto: 1, reads: 'in a realm of its own, above every red thing' },
+        ],
+      },
+      explain: 'The middle, and the two ends are the views he is between. Aristotle keeps universals real, so the first zone is not his. But he takes redness off the wall and pins it to the things: fully real, never free of some red object.',
       xp: 5,
     },
     dur: 1.0,

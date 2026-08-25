@@ -74,12 +74,17 @@ export const BEATS: Pol4Beat[] = [
   {
     p: 4, walls: 0, harm: 0, panel: 2,
     interact: {
-      prompt: 'Berlin championed positive liberty, so he surely wanted the state to force people toward their "real" freedom. Right?',
-      cards: [
-        { text: 'No, he feared its abuse', correct: true },
-        { text: 'Yes, he championed it', correct: false },
-      ],
-      explain: 'The trap: Berlin valued positive liberty but warned it can be twisted, letting rulers coerce you in the name of your "real self." He guarded a core of negative liberty.',
+      prompt: 'Slide the seam to what Berlin actually guards.',
+      split: {
+        left: 'A CORE OF NEGATIVE LIBERTY', right: 'POSITIVE LIBERTY',
+        start: 0.04,
+        zones: [
+          { id: 'pos', upto: 0.3, reads: 'positive first; the state should free your real self' },
+          { id: 'both', upto: 0.66, reads: 'both valued, and neither one protected' },
+          { id: 'neg', upto: 1, reads: 'a core of being left alone, guarded against the other', correct: true },
+        ],
+      },
+      explain: 'Nearly all of it. Berlin valued positive liberty and spent his essay warning what happens when it is handed to a state: rulers get to coerce you in the name of your real self. So he fences off a core that nobody may enter for your own good.',
       xp: 5,
     },
     dur: 1.0,

@@ -27,10 +27,22 @@ const DIR = 'components/lesson/cinematic';
 /** Below the figure: the deck and the five analogue controls. */
 const BELOW = ['cards', 'drag', 'lever', 'plot', 'split', 'field'];
 
-/** The deck is right sometimes and not most of the time. */
-const DECK_CEIL = 0.55;
+/**
+ * The deck is right sometimes and not most of the time.
+ *
+ * 55% was the ceiling while the deck WAS the default. It is 10% now — 36 of 368
+ * questions — because every lesson that could take an analogue control was given
+ * one. The reader asked for exactly that, and for the deck to survive:
+ *
+ *   "I still want a couple every now and then for the old way of answering below
+ *    the stickman"
+ *
+ * So this is a ceiling, not a target. A claim that is genuinely either/or should
+ * still be two cards; forcing a control onto one is worse than leaving it (R1).
+ */
+const DECK_CEIL = 0.14;
 /** Neighbouring lessons answered the same way. High-water mark; may only go DOWN. */
-const SAME_BUDGET = 112;
+const SAME_BUDGET = 27;
 /** Lessons asking both questions below the figure. High-water mark; may only go DOWN. */
 const STAGELESS_BUDGET = 36;
 

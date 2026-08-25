@@ -79,12 +79,16 @@ export const BEATS: Aes4Beat[] = [
   {
     a: 0, v: 8, test: 3, verdict: 1, signed: 1, art: 1,
     interact: {
-      prompt: 'A urinal in a gallery is art. Does that make anything art if you call it art?',
-      cards: [
-        { text: 'No, it took the artworld', correct: true },
-        { text: 'Yes, anything you call art', correct: false },
-      ],
-      explain: 'The trap: "anything goes." Danto and Dickie say it took theory, history, and the artworld — not a private label — to make the choice register as art.',
+      prompt: 'Set the lever to what it takes to make a chosen object art.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'label', reads: 'anything at all, so long as you say the word' },
+          { id: 'skill', reads: 'only what took real skill to make' },
+          { id: 'world', reads: 'a tradition and an artworld taking it up', correct: true },
+        ],
+      },
+      explain: 'The far setting. The first is the anything goes reading and it is not what Dickie or Danto said. It took theory, history and an artworld for the choice to register at all — which is why the identical urinal in a plumbing shop stayed plumbing.',
       xp: 5,
     },
     dur: 1.0,

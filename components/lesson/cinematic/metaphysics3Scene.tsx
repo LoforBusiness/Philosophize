@@ -109,9 +109,9 @@ export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick }: 
   const wall2 = useAnimatedStyle(() => ({ opacity: SCENE.value.shadow * (0.45 + 0.55 * Math.abs(Math.sin(SCENE.value.t * 2.3 + 1))) }));
 
   // Tier frames light with the value they carry: the Forms come up, the shadows recede.
-  const formTier = useAnimatedStyle(() => ({ opacity: 0.3 + 0.7 * SCENE.value.form }));
-  const shadeTier = useAnimatedStyle(() => ({ opacity: 0.35 + 0.65 * SCENE.value.shadow }));
-  const thingTier = useAnimatedStyle(() => ({ opacity: 0.35 + 0.65 * SCENE.value.apple }));
+  const formTier = useAnimatedStyle(() => ({ opacity: 0.55 + 0.45 * SCENE.value.form }));
+  const shadeTier = useAnimatedStyle(() => ({ opacity: 0.55 + 0.45 * SCENE.value.shadow }));
+  const thingTier = useAnimatedStyle(() => ({ opacity: 0.55 + 0.45 * SCENE.value.apple }));
 
   const formDisc = useAnimatedStyle(() => {
     const pulse = 0.9 + 0.1 * Math.sin(SCENE.value.t * 2.2);
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   iconCell: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
   tierText: { flex: 1 },
   tierT: { fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 14, letterSpacing: 0.5, color: INK, includeFontPadding: false },
-  tierSub: { fontFamily: 'Inter_400Regular', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.2, color: SOFT, includeFontPadding: false },
+  tierSub: { fontFamily: 'Inter_400Regular', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.2, color: INK, includeFontPadding: false },
 
   meterRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
   meterTrack: {
@@ -282,7 +282,11 @@ const styles = StyleSheet.create({
   },
   meterWord: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8,
-    color: SOFT, includeFontPadding: false,
+    // INK, not SOFT: this word rides a tier that dims to 0.55 while it waits its
+    // turn, and SOFT survives no dimming at all — 5.3:1 on paper becomes 2.0:1 at
+    // 0.55, which is D35's smear. Ink holds 3.8:1 there. Size and weight carry
+    // the hierarchy instead of tone.
+    color: INK, includeFontPadding: false,
   },
 
   formDisc: { position: 'absolute', width: 26, height: 26, borderRadius: 13, backgroundColor: INK },

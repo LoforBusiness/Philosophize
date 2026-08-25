@@ -77,12 +77,17 @@ export const BEATS: Ethics3Beat[] = [
   {
     d: 21, tx: 196, lens: 0,
     interact: {
-      prompt: 'Tap the theory that judges an act by nothing but what happens next.',
-      cards: [
-        { text: 'Consequentialism', correct: true },
-        { text: 'Deontology', correct: false },
-      ],
-      explain: 'Consequentialism, and its famous form utilitarianism, weigh an act only by what the act brings about. Above all, by how much happiness comes of it.',
+      prompt: 'Slide the seam to what a consequentialist actually weighs.',
+      split: {
+        left: 'WHAT HAPPENS NEXT', right: 'THE RULE YOU FOLLOWED',
+        start: 0.04,
+        zones: [
+          { id: 'rule', upto: 0.3, reads: 'the rule counts; how it turns out is not your business' },
+          { id: 'both', upto: 0.66, reads: 'the rule and the outcome, weighed against each other' },
+          { id: 'out', upto: 1, reads: 'the outcome alone, and nothing else whatever', correct: true },
+        ],
+      },
+      explain: 'All the way over. Consequentialism, and its famous form utilitarianism, weigh an act by what the act brings about, and above all by how much happiness comes of it. The other end of the bar is Kant, who does not look at the ending at all.',
       xp: 5,
     },
     dur: 1.0,

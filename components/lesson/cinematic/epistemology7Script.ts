@@ -64,12 +64,18 @@ export const BEATS: Epi7Beat[] = [
   {
     p: 8, days: 4, twist: 1,
     interact: {
-      prompt: 'Hume showed induction is unprovable. So should we stop relying on it?',
-      cards: [
-        { text: 'No, habit makes it unavoidable', correct: true },
-        { text: 'Yes, it has no proof', correct: false },
-      ],
-      explain: 'Hume says induction has no logical proof, yet habit makes it unavoidable. We live by custom, not airtight reasoning.',
+      prompt: 'Drag to what Hume says we should do about induction.',
+      drag: {
+        lo: 'STOP USING IT',
+        hi: 'CALL IT PROVED',
+        start: 0,
+        zones: [
+          { id: 'stop', upto: 0.28, reads: 'drop it; with no proof behind it, it is worthless' },
+          { id: 'habit', upto: 0.74, reads: 'keep using it, because habit leaves you no choice', correct: true },
+          { id: 'proved', upto: 1, reads: 'keep it, and say it has been proved after all' },
+        ],
+      },
+      explain: 'The middle, and it is the odd part of Hume. He shows there is no logical proof and then says we will go on anyway, because custom is stronger than argument. Neither end is his: he does not drop it and he does not rescue it.',
       xp: 5,
     },
     dur: 1.0,

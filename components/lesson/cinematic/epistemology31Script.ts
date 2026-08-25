@@ -66,12 +66,16 @@ export const BEATS: Epis31Beat[] = [
     g: 11, open: 3,
     dur: 1.0,
     interact: {
-      prompt: 'So how should you hold what you remember?',
-      cards: [
-        { text: 'Trust it until given reason', correct: true },
-        { text: 'Check it against something independent', correct: false },
-      ],
-      explain: 'The trap is the other card. Nothing outside memory is available, because any check you make is remembered too. Memory is a floor to stand on, not a conclusion to prove. So the fair rule is to trust memory until something specific goes wrong.',
+      prompt: 'Set the lever to how you should hold a memory.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'prove', reads: 'prove it first, against something outside memory' },
+          { id: 'trust', reads: 'trust it until something gives you a reason not to', correct: true },
+          { id: 'doubt', reads: 'treat every memory as suspect until it is confirmed' },
+        ],
+      },
+      explain: 'The middle. The first setting cannot be carried out: nothing outside memory is available to you, because any check you make is itself remembered a moment later. Memory is a floor to stand on rather than a conclusion to prove.',
       xp: 5,
     },
   },

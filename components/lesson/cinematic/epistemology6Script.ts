@@ -69,12 +69,16 @@ export const BEATS: Epi6Beat[] = [
   {
     p: 4, crack: 1, route: 3,
     interact: {
-      prompt: 'A skeptic insists: "I know for certain that nobody can know anything." What’s wrong?',
-      cards: [
-        { text: 'It undercuts itself', correct: true },
-        { text: 'Nothing, it is consistent', correct: false },
-      ],
-      explain: 'Saying you know for certain that nobody can know anything defeats itself. The claim asserts the very thing it denies.',
+      prompt: 'Set the lever to what is wrong with saying it.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'fine', reads: 'nothing; the claim is perfectly consistent' },
+          { id: 'bold', reads: 'it is too strong, but it is not self-defeating' },
+          { id: 'eats', reads: 'it asserts the very thing it denies', correct: true },
+        ],
+      },
+      explain: 'The far setting, and it is the trap the whole school walks into. Knowing for certain that nobody can know anything is itself a certain piece of knowledge. Pyrrho avoids it by claiming nothing at all — which is why he suspends rather than argues.',
       xp: 5,
     },
     dur: 1.0,

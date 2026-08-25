@@ -79,12 +79,17 @@ export const BEATS: Aes15Beat[] = [
     g: 41, rose: 1, tags: 5, cut: 1,
     dur: 1.0,
     interact: {
-      prompt: 'So is Kant saying beauty leaves you cold?',
-      cards: [
-        { text: 'No — only the self-interest goes', correct: true },
-        { text: 'Yes — the pleasure goes too', correct: false },
-      ],
-      explain: 'The other card hears "disinterested" as "uninterested", and they are not the same word. Kant keeps the delight and removes only your stake in it. The pleasure is the whole point; it just is not about you.',
+      prompt: 'Slide the seam to what survives being disinterested.',
+      split: {
+        left: 'THE DELIGHT', right: 'YOUR STAKE IN IT',
+        start: 0.04,
+        zones: [
+          { id: 'none', upto: 0.3, reads: 'both go, and beauty leaves you cold' },
+          { id: 'half', upto: 0.66, reads: 'some of the pleasure survives, thinned out' },
+          { id: 'keep', upto: 1, reads: 'the delight stays; only your stake is removed', correct: true },
+        ],
+      },
+      explain: 'All the delight stays. Disinterested and uninterested are two different words, and hearing the first as the second is what makes Kant sound cold. He removes your stake and keeps the pleasure. The pleasure is the whole point; it simply is not about you.',
       xp: 5,
     },
   },

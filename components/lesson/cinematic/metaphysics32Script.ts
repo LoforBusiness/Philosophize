@@ -67,12 +67,19 @@ export const BEATS: Meta32Beat[] = [
     g: 11, orbs: 1, tether: 1, tag: 0,
     dur: 1.0,
     interact: {
-      prompt: 'So what could still tell the two spheres apart?',
-      cards: [
-        { text: 'Where each one is', correct: true },
-        { text: 'Nothing, they are one sphere', correct: false },
-      ],
-      explain: 'The other card is ruled out by the setup, since they are plainly two. The live reply is position. If space is real rather than just a pattern of relations, being here rather than there is a second fact about each sphere.',
+      prompt: 'Place the token where the two spheres actually sit.',
+      field: {
+        xLo: 'THEY DIFFER SOMEHOW', xHi: 'EVERY PROPERTY THE SAME',
+        yLo: 'THE SAME PLACE', yHi: 'DIFFERENT PLACES',
+        start: [0.24, 0.24],
+        quads: [
+          { id: 'one', x: 1, y: 0, reads: 'same properties, same place: one sphere counted twice' },
+          { id: 'two', x: 1, y: 1, reads: 'same properties, different places: two spheres', correct: true },
+          { id: 'easy', x: 0, y: 1, reads: 'they differ, and they are apart: an ordinary pair' },
+          { id: 'odd', x: 0, y: 0, reads: 'they differ but share a place: not a case at all' },
+        ],
+      },
+      explain: 'Top right, and the pad is the argument. They are plainly two, so the bottom row is ruled out by the setup. The only thing holding them apart is the axis going up: where each one is. If space is real, being here is a second fact about a sphere.',
       xp: 5,
     },
   },

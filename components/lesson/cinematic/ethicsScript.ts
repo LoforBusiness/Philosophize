@@ -97,12 +97,18 @@ export const BEATS: EthicsBeat[] = [
     judge: true,
     weigh: 'q2',
     interact: {
-      prompt: 'Apes show empathy and fairness — so they must have a conscience just like ours. True or false?',
-      cards: [
-        { text: 'False', correct: true },
-        { text: 'True', correct: false },
-      ],
-      explain: 'They share the building blocks, but conscience adds the reflective step — judging yourself, in words. The animal cares; only you step out and ask "was that right?"',
+      prompt: 'Drag to how much of a conscience the apes already have.',
+      drag: {
+        lo: 'NONE OF IT',
+        hi: 'THE WHOLE THING',
+        start: 1,
+        zones: [
+          { id: 'none', upto: 0.26, reads: 'none at all; they feel nothing like it' },
+          { id: 'parts', upto: 0.72, reads: 'the feelings, and not the stepping back', correct: true },
+          { id: 'all', upto: 1, reads: 'the whole thing, judgement included' },
+        ],
+      },
+      explain: 'Most of the way, and the last stretch is the difference. Apes have the building blocks — empathy, a keen sense of fairness, distress at cruelty. What is missing is the step out: putting it in words and asking yourself whether that was right.',
       xp: 5,
     },
     dur: 1.0,

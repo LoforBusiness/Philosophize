@@ -79,12 +79,16 @@ export const BEATS: Strong4Beat[] = [
   {
     p: 4, fill: 0.78, dice: 1, verdict: 1, lens: 2,
     interact: {
-      prompt: 'You call a strong inductive argument "invalid" because its conclusion isn’t guaranteed. Right?',
-      cards: [
-        { text: 'No, wrong ruler for induction', correct: true },
-        { text: 'Yes, it is not guaranteed', correct: false },
-      ],
-      explain: 'Validity is a deductive word, and induction was never trying to be valid. It never promised certainty, so failing to deliver certainty is not a fault in it.',
+      prompt: 'Set the lever to the right verdict on a strong inductive argument.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'invalid', reads: 'invalid: it did not guarantee the conclusion' },
+          { id: 'weak', reads: 'weak: the evidence does not do very much' },
+          { id: 'wrong', reads: 'neither; validity is the wrong ruler for it', correct: true },
+        ],
+      },
+      explain: 'The far setting. Validity is a deductive word, and induction never set out to be valid. It promised likelihood and delivered likelihood. Calling that a failure is like calling a hammer a bad screwdriver.',
       xp: 5,
     },
     dur: 1.0,

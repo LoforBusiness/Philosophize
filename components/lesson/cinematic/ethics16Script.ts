@@ -74,12 +74,18 @@ export const BEATS: Eth16Beat[] = [
     g: 41, causes: 1, knife: 0, money: 1, repaid: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Does a settled future mean nobody is ever to blame?',
-      cards: [
-        { text: 'False — they keep responsibility', correct: true },
-        { text: 'True — causes end all blame', correct: false },
-      ],
-      explain: 'The other card is hard determinism under a borrowed name. Compatibilists accept the causes and keep the blame, because they have moved what freedom means — from "uncaused" to "uncoerced". Whether that is a solution or a change of subject is the live argument.',
+      prompt: 'Drag to what a settled future does to blame.',
+      drag: {
+        lo: 'NOBODY IS EVER TO BLAME',
+        hi: 'BLAME IS UNTOUCHED',
+        start: 0,
+        zones: [
+          { id: 'none', upto: 0.3, reads: 'the causes settle it; blame is a leftover superstition' },
+          { id: 'weak', upto: 0.62, reads: 'blame survives, but only as a useful fiction' },
+          { id: 'keep', upto: 1, reads: 'the causes stand, and the blame stands with them', correct: true },
+        ],
+      },
+      explain: 'The far end. The near end is hard determinism under a borrowed name. Compatibilists accept every cause and keep the blame, because they have moved what freedom means: from uncaused to uncoerced. Whether that is a solution or a change of subject is the live fight.',
       xp: 5,
     },
   },

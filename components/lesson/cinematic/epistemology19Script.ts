@@ -83,12 +83,16 @@ export const BEATS: Epi19Beat[] = [
   {
     p: 41, x: 268, doors: 1, split: 1,
     interact: {
-      prompt: 'Two real experts on the same subject disagree. What follows?',
-      cards: [
-        { text: 'Go with the wider agreement', correct: true },
-        { text: 'Nobody knows, so guess', correct: false },
-      ],
-      explain: 'Look at how many are on each side, and why. Disagreement at the edge of a field is normal and does not touch its settled middle. Treating one dissenter as proof that nothing is known is how a real debate gets used to sell doubt.',
+      prompt: 'Set the lever to what the disagreement really shows.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'guess', reads: 'nobody knows anything; pick whichever you prefer' },
+          { id: 'loud', reads: 'follow whichever one sounds the most certain' },
+          { id: 'weight', reads: 'look at how many are on each side, and why', correct: true },
+        ],
+      },
+      explain: 'The far setting. Disagreement at the edge of a field is normal and does not touch its settled middle. The first setting is how a real debate gets used to sell a false one: hold up one dissenter, call the whole subject unsettled.',
       xp: 5,
     },
     dur: 1.0,

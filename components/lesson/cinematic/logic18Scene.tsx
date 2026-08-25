@@ -3,7 +3,7 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, pose, travelStance, WALK, type Bundle } from './rig';
+import { clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic18Script';
 import {
@@ -37,8 +37,15 @@ import { followMoves, kindOf, seedOf } from './camera';
 // · the FIGURE walks x 200 → 128 → 268 on GROUND 500; crown ≈ 397, and the lowest
 //   machine ink is the gauge at 356, so 41 units stay clear.
 //
-// Ink runs y 236 (the crowd) … y 500. BAND 230…512 = 282, two past the free line,
-// with the 103-unit figure at 37%.
+// Ink runs y 222 (HOW MANY SAY SO, at CROWD_Y − 14) … y 500. BAND 218…512 = 294,
+// with the 103-unit figure at 35%.
+//
+// The band said 230 and the caption is drawn at 222, so eight units of the only
+// words on the beat were outside the picture — `check:readable` measured one fifth
+// of that caption reaching the reader. The old comment counted the crowd at 236 as
+// the highest ink and forgot the label sitting above it, which is exactly the
+// arithmetic H59 exists to make somebody redo: the band must contain every pixel a
+// beat can draw, and a caption is a pixel.
 //
 // THE NEEDLE IS DRIVEN BY THE SCRIPT, NEVER BY THE DRAG, and that is the whole
 // point of the scene rather than an implementation detail: `needle` is a track
@@ -46,7 +53,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // that let the drag touch the needle would be arguing the opposite case.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const TR = 0.82;
+/** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const BASE_TR = 0.85;
 
 const CROWD_Y = 236;
 const CROWD_N = 24;
@@ -91,7 +99,10 @@ export default function Logic18Scene({ clock, bt, bi, dragPos }: SceneApi) {
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / TR);
+    // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr). A fixed length
+    // here sprinted every long journey and left the footfalls — which the player
+    // computes from moveTr — arriving after the figure had stopped.
+    const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
 
     const figS = keepHeld(heldFig, travelStance(
@@ -237,5 +248,5 @@ const styles = StyleSheet.create({
 });
 
 export function Logic18Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Logic18Scene} band={[230, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Logic18Scene} band={[218, 512]} camera={CAM} />;
 }

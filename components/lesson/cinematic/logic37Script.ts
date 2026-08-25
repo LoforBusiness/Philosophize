@@ -75,12 +75,16 @@ export const BEATS: Logic37Beat[] = [
   {
     p: 35, x: 128, boxes: 1, barber: 1, sets: 1,
     interact: {
-      prompt: 'You can shrug at the barber. Why could nobody shrug at the set?',
-      cards: [
-        { text: 'The axioms allowed it', correct: true },
-        { text: 'Sets are harder than barbers', correct: false },
-      ],
-      explain: 'With the barber you say there is no such man and walk off. The axioms of the day said any condition you can state determines a set, so this one was a legal object — and Frege\'s foundation had it inside.',
+      prompt: 'Set the lever to why nobody could shrug at the set.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'hard', reads: 'sets are simply harder to think about than barbers' },
+          { id: 'words', reads: 'it is a trick of language, exactly like the barber' },
+          { id: 'axioms', reads: 'the rules of the day said this set had to exist', correct: true },
+        ],
+      },
+      explain: 'The far setting. With the barber you say there is no such man and walk away. The axioms of the day said any condition you can state determines a set, so this one was a legal object — and it was sitting inside the foundation of arithmetic.',
       xp: 5,
     },
     dur: 1.0,

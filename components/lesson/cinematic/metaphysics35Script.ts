@@ -90,12 +90,18 @@ export const BEATS: Metaphysics35Beat[] = [
   {
     p: 35, x: 210, line: 1, branch: 1,
     interact: {
-      prompt: 'The gun jams every single time. Is something protecting the past?',
-      cards: [
-        { text: 'No — it simply never happened', correct: true },
-        { text: 'Yes, time pushes back', correct: false },
-      ],
-      explain: 'Nothing has to push. The past already went one way, so every attempt to make it go otherwise fails, and each failure has its own dull local cause. A jam. A slip. The wrong street. No guardian required.',
+      prompt: 'Drag to what is actually stopping you.',
+      drag: {
+        lo: 'NOTHING IS STOPPING YOU',
+        hi: 'SOMETHING PUSHES BACK',
+        start: 1,
+        zones: [
+          { id: 'never', upto: 0.32, reads: 'nothing pushes; it simply never happened', correct: true },
+          { id: 'luck', upto: 0.72, reads: 'a run of bad luck, oddly reliable' },
+          { id: 'guard', upto: 1, reads: 'time itself steps in and stops you' },
+        ],
+      },
+      explain: 'Nothing has to push. The past already went one way, so every attempt to make it go otherwise fails, and each failure has its own dull local cause. A jam. A slip. The wrong street. Reliable failure looks like a guardian and needs none.',
       xp: 5,
     },
     dur: 1.0,

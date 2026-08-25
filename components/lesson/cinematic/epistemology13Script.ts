@@ -60,12 +60,18 @@ export const BEATS: Epi13Beat[] = [
   {
     p: 4, x: 124, grid: 1, off: 2, winner: 1,
     interact: {
-      prompt: 'Every verdict is reasonable, yet together they are false. What gives?',
-      cards: [
-        { text: 'Each is not all', correct: true },
-        { text: 'One verdict must fail', correct: false },
-      ],
-      explain: 'The other card looks decisive and cannot deliver. The card says one verdict must fail, and can never say WHICH verdict, because every ticket carries exactly the same case against it.',
+      prompt: 'Draw how reasonable this ticket loses gets as tickets are added.',
+      plot: {
+        axis: 'HOW REASONABLE',
+        cols: ['2 TICKETS', '10', '100', '1000', 'A MILLION'],
+        start: [0.5, 0.5, 0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'rise', profile: [0.1, 0.4, 0.72, 0.9, 0.98], reads: 'the more tickets, the safer each verdict', correct: true },
+          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5, 0.5], reads: 'the count makes no difference at all' },
+          { id: 'fall', profile: [0.95, 0.7, 0.4, 0.2, 0.05], reads: 'the more tickets, the weaker each verdict' },
+        ],
+      },
+      explain: 'It climbs, and that is the sting. Every verdict gets MORE reasonable as tickets are added, and the whole set gets more certainly false, because one of them wins. Each is not all. And nothing can say which verdict fails: every ticket carries the same case.',
       xp: 5,
     },
     dur: 1.0,

@@ -257,7 +257,14 @@ if (k6) fails++; else ok('no graded, drag or summary beat carries a tour (K6)');
     // a box lowers its scale, which widens the window, which can newly clip something
     // that was wholly outside it a moment earlier. They are all a label sitting a unit
     // or two over one edge. Lower this number when they are fixed; do not raise it.
-    const SLICE_BUDGET = 5;
+    // AND IT IS ZERO NOW. The last six were not framings at all: `make-tours`
+    // read the scene's `ground=` prop and passed `undefined` when there was none —
+    // which is every scene — so `fit()` dropped its ground clamp and the GENERATOR
+    // was laying out stations for a camera the app does not have. The player
+    // defaults `ground = GROUND` and this file has always used 500. Giving the
+    // generator the same default took it from 6 to 0, and 21 stations that had
+    // been demoted to holds came back.
+    const SLICE_BUDGET = 0;
     if (sliced > SLICE_BUDGET) bad(`${sliced} of ${seen} stations cut a word in half, budget ${SLICE_BUDGET} — a held framing is the picture, not a moment (D)`);
     else ok(`no more than ${SLICE_BUDGET} stations cut a word in half (D)`, `${sliced} of ${seen}`);
   }

@@ -265,7 +265,10 @@ function Bar({ S, k, label }: { S: SharedValue<any>; k: number; label: string })
     };
   });
   const labelStyle = useAnimatedStyle(() => ({
-    opacity: S.value.meterOn * (1 - 0.55 * (cut ? S.value.cut : 0)),
+    // 0.45, not 0.55, and the label is INK below: a mode Plato REGULATED still has
+    // to be named, and at 0.45 with SOFT type it reached the reader at 1.9:1 —
+    // the cross through it is the signal, not an unreadable word (D35).
+    opacity: S.value.meterOn * (1 - 0.45 * (cut ? S.value.cut : 0)),
   }));
   const crossStyle = useAnimatedStyle(() => ({
     opacity: cut ? S.value.meterOn * ease01(S.value.cut) : 0,
@@ -383,7 +386,7 @@ const styles = StyleSheet.create({
   // and that buys the 4 units of air between them.
   barLabel: {
     position: 'absolute', top: BAR_BASE + 4, width: BAR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 11, letterSpacing: 0.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 11, letterSpacing: 0.6, color: INK,
     includeFontPadding: false,
   },
   cross: { position: 'absolute', top: 426, width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },

@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   },
   lampOff: {
     position: 'absolute',
-    fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 3, color: RULE,
+    fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 3, color: SOFT,
     includeFontPadding: false,
   },
 

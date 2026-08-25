@@ -57,12 +57,16 @@ export const BEATS: Logic26Beat[] = [
   {
     p: 4, x: 124, links: 4, snap: 1,
     interact: {
-      prompt: 'In a reductio, you reach a contradiction from your assumption. What follows?',
-      cards: [
-        { text: 'The assumption was false', correct: true },
-        { text: 'The argument proves nothing', correct: false },
-      ],
-      explain: 'The trap: a contradiction feels like the argument collapsing. It is the goal. If valid steps ran from your assumption to absurdity, the assumption is the only thing left to blame.',
+      prompt: 'Set the lever to what a contradiction actually proves.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'nothing', reads: 'nothing; the argument has fallen apart' },
+          { id: 'step', reads: 'one of the steps along the way was wrong' },
+          { id: 'assume', reads: 'the assumption you started from was false', correct: true },
+        ],
+      },
+      explain: 'The far setting, and the contradiction is the goal rather than the wreckage. If every step from your assumption was valid, the assumption is the only thing left to blame. The first setting is the instinct this whole method is built to overturn.',
       xp: 5,
     },
     dur: 1.0,

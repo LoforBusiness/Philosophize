@@ -75,12 +75,17 @@ export const BEATS: Meta6Beat[] = [
   {
     p: 5, swap: 0.4, two: 1, orig: 0,
     interact: {
-      prompt: 'The old planks are rebuilt into a second ship. Which one is the real Ship of Theseus?',
-      cards: [
-        { text: 'No automatic answer', correct: true },
-        { text: 'The one still sailing', correct: false },
-      ],
-      explain: 'Each ship has a strong claim. One keeps the original wood. The other keeps unbroken use. So the answer turns on which test you pick, not on a hidden fact.',
+      prompt: 'Slide the seam to divide the claim between the two ships.',
+      split: {
+        left: 'UNBROKEN USE', right: 'THE ORIGINAL PLANKS',
+        start: 0.04,
+        zones: [
+          { id: 'wood', upto: 0.3, reads: 'the rebuilt one; it is made of the very same wood' },
+          { id: 'both', upto: 0.7, reads: 'neither test wins, and the answer follows the test you pick', correct: true },
+          { id: 'use', upto: 1, reads: 'the one still sailing; it never stopped being the ship' },
+        ],
+      },
+      explain: 'The seam belongs in the middle. Each ship holds one half of what we mean by the same ship: one keeps the wood, the other keeps the unbroken use. Push it to either end and you have not found the answer, you have chosen which test counts.',
       xp: 5,
     },
     dur: 1.0,

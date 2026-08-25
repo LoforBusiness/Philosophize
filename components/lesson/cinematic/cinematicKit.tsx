@@ -250,10 +250,28 @@ export interface PlotBlock {
   shapes: PlotShape[];
 }
 
-/** One region of a `split` bar, by where the seam sits. */
+/**
+ * One region of a `split` bar, by where the seam sits.
+ *
+ * ── THE SEAM'S POSITION IS THE **LEFT** SIDE'S SHARE ────────────────────────
+ *
+ * `SplitBar` prints `pos * 100` under `left` and `100 - pos * 100` under `right`.
+ * So `upto: 0.34` is the zone where the LEFT side holds about a third and the
+ * RIGHT side holds two thirds, and `upto: 1` is where the LEFT side holds nearly
+ * all of it. Read it the other way round and the readout ends up in flat
+ * contradiction with the two numbers printed beside it:
+ *
+ *     IN THE NOTES  34        66  IN THE LISTENER
+ *              "the sadness sits in the sound"        <- says the opposite
+ *
+ * Six blocks shipped that way, because this line did not used to say so. Nothing
+ * catches it: the types are satisfied, the control works, the zone boundaries are
+ * legal, and only reading the sentence against the number finds it. **Write the
+ * high-`upto` zone as the one where `left` wins**, then read all three back.
+ */
 export interface SplitZone {
   id: string;
-  /** This zone's right-hand edge as a fraction of the bar. The last must be 1. */
+  /** This zone's right-hand edge as a fraction of the bar — see above: it is the LEFT side's share. */
   upto: number;
   /** The reading shown while the seam is in here. */ reads: string;
   correct?: boolean;
@@ -261,8 +279,8 @@ export interface SplitZone {
 
 /** A graded question answered by dividing one bar between two labelled sides. */
 export interface SplitBlock {
-  /** The left side's name. */ left: string;
-  /** The right side's name. */ right: string;
+  /** The left side's name. A HIGH seam means THIS side has nearly all of it. */ left: string;
+  /** The right side's name. A LOW seam means THIS side has nearly all of it. */ right: string;
   /** Where the seam starts, 0..1. Keep it OUT of the correct zone. */ start: number;
   zones: SplitZone[];
 }

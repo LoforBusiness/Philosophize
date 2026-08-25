@@ -73,12 +73,18 @@ export const BEATS: Meta4Beat[] = [
   {
     p: 13, tokens: 3, barred: 1, frozen: 1,
     interact: {
-      prompt: 'Physics talks about vacuums and empty space. Doesn’t that prove "nothing" really exists?',
-      cards: [
-        { text: 'No, a vacuum is something', correct: true },
-        { text: 'Yes, a vacuum is nothing', correct: false },
-      ],
-      explain: 'A vacuum is empty space — still a something with dimensions and quantum fields. Parmenides’ "nothing" is the total absence of any thing, which a vacuum never delivers.',
+      prompt: 'Drag to how empty a physicist\'s vacuum really is.',
+      drag: {
+        lo: 'FULL OF STUFF',
+        hi: 'ABSOLUTELY NOTHING',
+        start: 0,
+        zones: [
+          { id: 'air', upto: 0.3, reads: 'air, dust, light — plainly something' },
+          { id: 'vacuum', upto: 0.74, reads: 'no matter left, but still space and still fields', correct: true },
+          { id: 'none', upto: 1, reads: 'no space, no fields, no anything — never once seen' },
+        ],
+      },
+      explain: 'A vacuum lands short of the far end, and the gap is the point. Empty space still has dimensions and quantum fields, so it is a something with very little in it. The nothing Parmenides means is the far end of the rail, and no experiment has gone there.',
       xp: 5,
     },
     dur: 1.0,

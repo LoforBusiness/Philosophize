@@ -75,12 +75,18 @@ export const BEATS: Epi17Beat[] = [
     g: 41, facts: 1, frame: 1, odd: 3, shift: 1,
     dur: 1.0,
     interact: {
-      prompt: 'What comes between normal science and a revolution?',
-      cards: [
-        { text: 'Anomalies piling into a crisis', correct: true },
-        { text: 'One decisive experiment', correct: false },
-      ],
-      explain: 'The other card is the version everybody is taught, and Kuhn spent a book arguing against it. Single experiments are absorbed, explained away or set aside for later. What ends a paradigm is the weight of everything it could not fit, over years.',
+      prompt: 'Drag to what it takes to end a paradigm.',
+      drag: {
+        lo: 'ONE DECISIVE RESULT',
+        hi: 'YEARS OF THEM PILING UP',
+        start: 0,
+        zones: [
+          { id: 'one', upto: 0.3, reads: 'a single experiment settles it and the theory falls' },
+          { id: 'few', upto: 0.6, reads: 'a handful, and each gets explained away' },
+          { id: 'crisis', upto: 1, reads: 'enough of them, for long enough, to become a crisis', correct: true },
+        ],
+      },
+      explain: 'The far end. The near end is the version everybody is taught, and Kuhn wrote a book against it. Single results get absorbed, explained away, or set aside for later. What ends a paradigm is the accumulated weight of everything it could not explain.',
       xp: 5,
     },
   },

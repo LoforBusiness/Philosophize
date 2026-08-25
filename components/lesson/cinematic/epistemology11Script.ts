@@ -70,12 +70,17 @@ export const BEATS: Epistemology11Beat[] = [
   {
     p: 4, x: 226, real: 350,
     interact: {
-      prompt: 'Which of the three conditions — belief, truth, justification — does the stopped-clock case actually fail?',
-      cards: [
-        { text: 'None, it passes all three', correct: true },
-        { text: 'Justification, the clock broke', correct: false },
-      ],
-      explain: 'The trap: a broken clock feels like a broken condition. It is not. You believed it, it was true, and a clock on the wall is an ordinary reason to trust. All three are met, and it is still not knowledge — which is what Gettier’s three pages showed.',
+      prompt: 'Set the lever to the condition the stopped clock breaks.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'belief', reads: 'belief: you did not really believe it' },
+          { id: 'truth', reads: 'truth: the time on the wall was wrong' },
+          { id: 'reason', reads: 'justification: a broken clock is no reason' },
+          { id: 'none', reads: 'none of them; all three are met', correct: true },
+        ],
+      },
+      explain: 'None of them, and that is the whole of Gettier. A broken clock feels like a broken condition and it is not. You believed it, it was true, and a clock on a wall is an ordinary reason to trust. All three met, and still not knowledge.',
       xp: 5,
     },
     dur: 1.0,

@@ -75,12 +75,16 @@ export const BEATS: Eth15Beat[] = [
     g: 41, plain: 1, moral: 1, tilt: 0, doubt: 1,
     dur: 1.0,
     interact: {
-      prompt: 'If emotivism is right, what is "cruelty is wrong"?',
-      cards: [
-        { text: 'Neither true nor false', correct: true },
-        { text: 'True whenever people feel it', correct: false },
-      ],
-      explain: 'The other card is a different theory wearing this one\'s coat. That theory makes the sentence true or false depending on feeling, so the sentence stays a report. Emotivism will not allow even that. A boo is not false, and could not be.',
+      prompt: 'Set the lever to what emotivism makes of cruelty is wrong.',
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'fact', reads: 'a claim about the world, true or false' },
+          { id: 'report', reads: 'a report of how people feel, true or false' },
+          { id: 'boo', reads: 'a boo, and a boo is neither', correct: true },
+        ],
+      },
+      explain: 'The far setting. The middle is a different theory wearing this one coat: it makes the sentence true or false depending on what people feel, so the sentence is still a report. Emotivism will not allow even that. A boo cannot be false, and it cannot be checked.',
       xp: 5,
     },
   },

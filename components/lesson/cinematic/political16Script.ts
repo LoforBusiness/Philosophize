@@ -72,12 +72,17 @@ export const BEATS: Pol16Beat[] = [
     g: 41, cords: 4, cut: 4,
     dur: 1.0,
     interact: {
-      prompt: 'A friend says alienation is just low pay, so a raise would fix it.',
-      cards: [
-        { text: 'It is about ownership', correct: true },
-        { text: 'It is a pay problem', correct: false },
-      ],
-      explain: 'The other card collapses four severings into the one that is easiest to picture. Look at the cords a raise would reconnect. A better-paid worker still does not own the car, still cannot stop the line, and still competes with the person next to him.',
+      prompt: 'Slide the seam to what alienation is actually about.',
+      split: {
+        left: 'OWNERSHIP AND CONTROL', right: 'THE SIZE OF THE WAGE',
+        start: 0.04,
+        zones: [
+          { id: 'pay', upto: 0.3, reads: 'a pay problem; a raise would settle it' },
+          { id: 'both', upto: 0.66, reads: 'half the wage, half the ownership' },
+          { id: 'own', upto: 1, reads: 'ownership; a raise reconnects none of the cords', correct: true },
+        ],
+      },
+      explain: 'Almost all of it on ownership. Calling it low pay collapses four severings into the one that is easiest to picture. Look at what a raise would reconnect: a better-paid worker still does not own the car, still cannot stop the line, and still competes with the man beside him.',
       xp: 5,
     },
   },
