@@ -893,17 +893,37 @@ for (const [name, hue] of ERA_FACES) {
   const hook = fs.readFileSync(path.join(REPO, 'lib/utils/useInView.ts'), 'utf8');
   ok(/trustworthy\(x, y, h\)/.test(hook) && hook.indexOf('trustworthy(x, y, h)') < hook.indexOf('seenEnough('),
     'the hook asks whether the measurement is believable BEFORE asking what it says');
-  ok(/rearm\b/.test(hook) && /done\.current = false/.test(hook),
+  ok(/setActive\b/.test(hook) && /done\.current = false/.test(hook),
     'and a look can be re-armed, so one is not the last one');
+  // ── AND THE FLAG DOES NOT LIVE IN THE SCREEN ────────────────────────────────
+  //
+  // A performance invariant with a measured price, not a style. Profile is one
+  // component of ~890 nodes, so a `useState` here costs a full blocking
+  // re-render of all of them every time the flag moves: bisected at 976ms
+  // against 23ms with the update suppressed and everything else identical. The
+  // hook publishes through a subscription and the CHART holds the state.
+  // A CALL, NOT THE WORD. §17's L8 in one line: this file's own comment explains
+  // what `useState` used to cost here, and a detector that reads prose reports
+  // the explanation as the defect.
+  ok(!/useState[(<]/.test(hook),
+    'the watcher holds no React state — a re-render here would be the whole screen');
+  ok(/useSyncExternalStore/.test(hook) && /export function useSeen/.test(hook),
+    'it publishes instead, so whoever needs the flag pays for it');
 
   const prof = fs.readFileSync(path.join(REPO, 'app/(app)/profile/index.tsx'), 'utf8');
-  ok(/climbRearm\(\)/.test(prof), 'Profile re-arms the latch when the reader leaves');
+  ok(/climbSet\(false\)/.test(prof), 'Profile re-arms the latch when the reader leaves');
+  // The same invariant from the other end. Profile had exactly two `useState`s —
+  // "is the tab focused" and "is the chart on screen" — and both existed only to
+  // compute ONE boolean for ONE child, at the price of a blocking second each.
+  // Anything added here is paid for by the whole page.
+  ok(!/useState[(<]/.test(prof),
+    'and holds no state of its own: on a page this size every setState is ~890 nodes');
   ok(/onMomentumScrollEnd=\{climb\.check\}/.test(prof) && /onScrollEndDrag=\{climb\.check\}/.test(prof),
     'and asks again at both ends of a gesture, not only mid-flick');
 
   const climb = fs.readFileSync(path.join(REPO, 'components/shared/RankClimbChart.tsx'), 'utf8');
   // The entrance belongs to every look; the recap belongs to a look with news.
-  ok(/if \(!active\) \{ played\.current = false;/.test(climb),
+  ok(/if \(!live\) \{ played\.current = false;/.test(climb),
     'the chart forgets it has played when it goes off screen',
     '`played` is a ref on a component a tab keeps mounted all session');
   ok(/const drawFrom = 0;/.test(climb), 'and it always starts from nothing and draws in');

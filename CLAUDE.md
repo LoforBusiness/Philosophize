@@ -695,6 +695,11 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
   item in this file. Finishing an interaction for the format being retired is work
   pointed the wrong way, so the stubs stay stubs.
 - **Built but not wired:** `story/` scenes, `KineticNarration` voice, `feedback/`
+- **Profile is one 961-line component of ~890 nodes**, so every store write
+  re-renders all of it — about 190ms to paint, unthrottled, on a screen the
+  reader may not even be looking at. The two triggers that made it a visible
+  stall are fixed and measured (§19); the underlying shape is not. Splitting it
+  into memoised sections is the fix.
   panels. Decide to ship or delete them.
 - **Daily Review / spaced repetition does not exist.** It is the headline
   Scholar's Pass promise in §14 and the P0 in §15, and nothing has been built.
@@ -1491,6 +1496,69 @@ Two findings worth not rediscovering:
   pin's ray halo was painted in `rule` and vanished; the badge case's **laurel
   wreath was stroked in `on`, which meant every tier-III badge shipped a white
   wreath on cream for months**; and then the capstone collar reached for `rule` on
+### On a page this long, a `setState` is not a small thing
+
+> *"the app will begin to lag after completing a lesson and when I go to the
+> profile and scroll, it lags a lot … this may not happen every time but it
+> happens a good amount. I need this to be compltely fixed."*
+
+Profile is ONE component of **~890 nodes and 45 SVGs**, so any state change
+re-renders all of it in a single blocking commit. That is the whole finding, and
+every symptom above is a consequence of it.
+
+**Measured, not guessed.** Step the whole page at 6× CPU throttle, sample every
+frame, and split the bill with Chrome's own counters (script / layout / style).
+Two triggers were found, and each was confirmed by a bisect that changed ONE
+variable — same remount, same first paint, same measure calls:
+
+| | worst frame | script |
+|---|---|---|
+| the in-view flag firing | **976ms** | 1148ms |
+| …with that one update suppressed | **23ms** | 88ms |
+| the chart recording it was seen | **1774ms** | 2142ms |
+| …with that one write suppressed | **64ms** | 220ms |
+
+Both were the same shape: **a boolean that gated a child's animation was being
+kept by the screen.** Profile had exactly two `useState`s — "is the tab focused"
+and "is the chart on screen" — and both existed only to compute ONE prop for ONE
+child. `chartSeenXP` was the same mistake wearing a store: Profile supplied it
+AND subscribed to it, so the chart finishing its own intro re-rendered the page.
+
+So the rule, and it is now checked by `check:ui` from both ends: **a flag that
+gates a child belongs to the child.** `useInView` keeps its state in refs and
+publishes it (`useSeen`, a `useSyncExternalStore` subscription); `RankClimbChart`
+reads and writes `chartSeenXP` itself under `selfSeen`. Profile holds no state at
+all now. After both fixes, on the same instrument:
+
+    scrolling the whole page, steady          27ms → 22ms
+    a fresh visit (worst case, a remount)    976ms → 371ms
+    the pass where the chart plays          1774ms → 232ms
+
+> **Three theories died before the right one, and the instrument killed all
+> three.** An uncancelled `withRepeat(-1)` in `TapNudge` looked certain — a lesson
+> starts it, nothing cancels it, and `HomeHeader` already carries a comment about
+> exactly that costing "a small cost and a permanent one". Mounting 24 of them and
+> taking them out again returned **100% of the cost**: Reanimated does clean up on
+> unmount, and the whole accumulation story was wrong. Then the first scroll
+> measurements said Profile got FASTER after a lesson — because passes 1 and 2 are
+> one-time work and pass 3 is the truth, so comparing a cold pass with a warm one
+> blames the lesson for the page merely having been new. And finishing a lesson
+> costs **1ms of JS**; it was never the lesson.
+>
+> Which is the point: this is a symptom people describe by what they were doing
+> when they noticed it, and what they were doing is not the cause. Measure the
+> steady state, bisect one variable, and believe the number.
+
+**What is still true, and is the next thing to do.** Every mounted tab re-renders
+on every store write, and all five are built at startup — so an XP write during a
+lesson re-renders Profile's 890 nodes even though Profile is nowhere on screen.
+Measured at **~190ms to the next paint, unthrottled**, per write. It is off the
+critical path for Profile itself but it lands on whatever IS on screen, which
+after a lesson is the reward. The real fix is to stop Profile being one component
+— split it into memoised sections so a write costs only the section that changed
+— and that is a refactor of a 961-line file, not a patch.
+
+
   both ladders at once. The moment a mark is drawn BEYOND an edge it is on paper
   and needs a paper tone — the material's `base`, which clears 4.5:1 on every
   order. `check:ui` §4d re-derives all sixteen values and asserts that neither the

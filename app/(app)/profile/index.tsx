@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { View, Text, Pressable, ScrollView, Alert, StyleSheet, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
@@ -96,8 +96,9 @@ export default function ProfileScreen() {
   const xp = useUserDataStore((s) => s.totalXP);
   const rankIndex = useUserDataStore((s) => s.rankIndex);
   const xpEvents = useUserDataStore((s) => s.xpEvents);
-  const chartSeenXP = useUserDataStore((s) => s.chartSeenXP);
-  const markChartSeen = useUserDataStore((s) => s.markChartSeen);
+  // NOT SUBSCRIBED HERE. `chartSeenXP` is read and written by the chart itself
+  // now — see `selfSeen` in RankClimbChart. Subscribing to it from a screen this
+  // large meant the chart finishing its own intro cost a full re-render.
   const nameFont = useUserDataStore((s) => s.nameFont);
   const { palette } = useProfileArt();
   const earnedBadges = useUserDataStore((s) => s.earnedBadges);
@@ -121,15 +122,22 @@ export default function ProfileScreen() {
   // its intro to a Profile tab the reader is nowhere near, spend the one animation
   // it had, and mark the XP as seen. So the chart is told when the tab is focused
   // and not before.
-  const [focused, setFocused] = useState(false);
-  // Is the rank chart itself on screen? See `useInView`, and the comment on the
-  // chart below for why the focus flag alone was not enough.
+  // NEITHER OF THESE IS SCREEN STATE ANY MORE, AND THAT IS THE PERFORMANCE FIX.
+  //
+  // This component is ~890 nodes and 45 SVGs, so one `setState` here re-renders
+  // all of it in a single blocking commit — measured at 976ms against 23ms with
+  // the update suppressed and everything else identical. It had exactly two
+  // pieces of state, "is the tab focused" and "is the chart on screen", and both
+  // existed only to compute ONE boolean for ONE child. So the watcher keeps them
+  // in refs and publishes them, and the chart subscribes; see lib/utils/useInView
+  // for the numbers and the bisect. Profile now re-renders only when the reader's
+  // own data changes.
   const climb = useInView();
+  const climbSet = climb.setActive;
   const climbCheck = climb.check;
-  const climbRearm = climb.rearm;
   useFocusEffect(
     useCallback(() => {
-      setFocused(true);
+      climbSet(true);
       // COMING BACK IS A FRESH LOOK, AND IT HAS TO BE MEASURED LIKE ONE.
       //
       // react-navigation keeps this screen mounted and keeps the scroll position
@@ -144,10 +152,9 @@ export default function ProfileScreen() {
       const tries = [60, 240, 620].map((ms) => setTimeout(climbCheck, ms));
       return () => {
         tries.forEach(clearTimeout);
-        setFocused(false);
-        climbRearm();
+        climbSet(false);
       };
-    }, [climbCheck, climbRearm]),
+    }, [climbCheck, climbSet]),
   );
 
   const lessonsDone = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
@@ -666,9 +673,8 @@ export default function ProfileScreen() {
                 events={xpEvents}
                 width={SW - 64}
                 height={188}
-                seenXP={chartSeenXP}
-                active={focused && climb.inView}
-                onSeen={markChartSeen}
+                view={climb}
+                selfSeen
               />
             </View>
           </Card>

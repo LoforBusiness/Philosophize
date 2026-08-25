@@ -9,7 +9,8 @@ import Animated, {
 import { rankProgress } from '@/data/ranks';
 import ACounter, { counterStyle } from './ACounter';
 import { INK, MID, PAPER, PAPER_SHADE, FAINT } from './tone';
-import type { XpEvent } from '@/stores/userDataStore';
+import { useUserDataStore, type XpEvent } from '@/stores/userDataStore';
+import { useSeen, NO_VIEW, type InView } from '@/lib/utils/useInView';
 
 const APath = Animated.createAnimatedComponent(Path);
 // The counter — a TextInput whose `text` is written from the UI thread — moved to
@@ -78,6 +79,28 @@ export interface RankClimbProps {
   seenXP?: number;
   /** False while the screen is not in front of the reader — holds the intro. */
   active?: boolean;
+  /**
+   * THE WATCHER, SUBSCRIBED TO HERE RATHER THAN READ BY THE SCREEN.
+   *
+   * `useInView` used to hand its flag back as screen state, and Profile is one
+   * component of ~890 nodes — so the single boolean that says "the chart is on
+   * screen now" cost a blocking second every visit. Measured both ways in
+   * lib/utils/useInView.ts. Passing the watcher instead of its answer keeps the
+   * re-render inside this component, where it is one chart.
+   */
+  view?: InView;
+  /**
+   * THE CHART REMEMBERS BEING SEEN, INSTEAD OF THE SCREEN REMEMBERING FOR IT.
+   *
+   * `chartSeenXP` is written the moment this intro finishes, and Profile used to
+   * both supply it and subscribe to it — so the write landed as a re-render of
+   * all ~890 of Profile's nodes, right after the animation, while the reader was
+   * still scrolling. Bisected: 1774ms worst frame with that write, 64ms with it
+   * suppressed and nothing else changed. Owning the fact here keeps the re-render
+   * to one chart. `RanksBadgesSheet` passes `seenXP`/`onSeen` instead and is
+   * unaffected.
+   */
+  selfSeen?: boolean;
   /** Called once the intro has been shown, so it is not shown again unearned. */
   onSeen?: () => void;
   height?: number;
@@ -109,8 +132,20 @@ export function bandNodes(events: XpEvent[], totalXP: number, floor: number, cei
 }
 
 export default function RankClimbChart({
-  rankIndex, totalXP, events, width, seenXP = 0, active = true, onSeen, height = 200,
+  rankIndex, totalXP, events, width, seenXP = 0, active = true, view, selfSeen, onSeen,
+  height = 200,
 }: RankClimbProps) {
+  // Unconditional, as every hook must be (§17's rule 1). A caller that does not
+  // want them simply does not read them.
+  const storeSeen = useUserDataStore((s) => s.chartSeenXP);
+  const storeMark = useUserDataStore((s) => s.markChartSeen);
+  const seenAt = selfSeen ? storeSeen : seenXP;
+  const markSeen = selfSeen ? storeMark : onSeen;
+  // ABOVE EVERYTHING ELSE, and never inside a branch — §17's rule 1. `useSeen`
+  // is a hook, `view` is optional, and a hook that only runs when a prop is
+  // present is a hook count that changes between renders.
+  const seen = useSeen(view ?? NO_VIEW);
+  const live = active && (view ? seen : true);
   const { current, next, pct, toNext, pending } = rankProgress(rankIndex, totalXP);
 
   const padL = 40, padR = 14, padTop = 18, padBottom = 24;
@@ -179,7 +214,7 @@ export default function RankClimbChart({
   // half before the first mark appeared. A pause is anticipation only when there
   // is something on screen to be paused on.
   const RECAP_FLOOR = 0.06;
-  const fresh = totalXP > seenXP && geo.from >= RECAP_FLOOR && geo.from < 1;
+  const fresh = totalXP > seenAt && geo.from >= RECAP_FLOOR && geo.from < 1;
 
   // ── the intro ──────────────────────────────────────────────────────────────
   //
@@ -203,7 +238,7 @@ export default function RankClimbChart({
     // `played` is a ref on a component that a tab screen keeps mounted all
     // session, so without this line the chart animates once and is finished
     // forever — which is exactly how it was reported.
-    if (!active) { played.current = false; draw.value = 0; mark.value = 0; return; }
+    if (!live) { played.current = false; draw.value = 0; mark.value = 0; return; }
     if (played.current) return;
     played.current = true;
     // LEAD is the short pause between the chart arriving and the line starting.
@@ -213,7 +248,7 @@ export default function RankClimbChart({
     const LEAD = 280;
     // `onSeen` rides the line's OWN completion rather than a timer that finished
     // at roughly the same moment.
-    const finish = onSeen;
+    const finish = markSeen;
     const land = (ok?: boolean) => { 'worklet'; if (ok && finish) runOnJS(finish)(); };
 
     if (!fresh) {
@@ -235,7 +270,7 @@ export default function RankClimbChart({
     ));
     mark.value = withDelay(LEAD + RECAP + HOLD + GROW - 260, withTiming(1, { duration: 380 }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active]);
+  }, [live]);
 
   const lineProps = useAnimatedProps(() => ({ strokeDashoffset: (1 - draw.value) * geo.len }));
   const countProps = useAnimatedProps(() => ({ text: `+${Math.round(draw.value * gained)} XP` }) as never);
