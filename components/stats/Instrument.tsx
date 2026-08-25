@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
-  useSharedValue, useAnimatedStyle, useAnimatedProps, withTiming, withDelay, Easing,
+  useSharedValue, useAnimatedStyle, useAnimatedProps,
+  withTiming, withDelay, withSpring, Easing,
 } from 'react-native-reanimated';
 import { bounceTo } from '@/components/stats/InsightBoard';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -349,7 +350,12 @@ function MetricCell({ metric, index, playToken, animate, entrance, last }: {
   metric: Metric; index: number; playToken: number;
   animate: boolean; entrance: boolean; last: boolean;
 }) {
-  const n = useSharedValue(animate && entrance ? 0 : metric.value);
+  // NEVER ZERO — the same rule the ledger states at length. These four are the
+  // reader's month, and a strip reading 0 / 0 / 0 / 0 while it climbs is one of
+  // the two things they reported seeing. The CELL arrives; the figure is true
+  // from the first frame it is drawn.
+  const n = useSharedValue(metric.value);
+  const rise = useSharedValue(animate && entrance ? 0 : 1);
   // `newPlay` for the reason LedgerTile spells out: `metric.value` is a
   // dependency, meeting a thinker awards XP, and XP moves three of these four
   // figures — so without it the strip re-counts from zero on a value change
@@ -358,33 +364,44 @@ function MetricCell({ metric, index, playToken, animate, entrance, last }: {
   useEffect(() => {
     const newPlay = playedToken.current !== playToken;
     playedToken.current = playToken;
-    if (!animate) { n.value = metric.value; return; }
-    if (!newPlay || !entrance) {
-      // Roll from what is on screen. Four figures dropping to zero and climbing
-      // back is the ledger's bug wearing smaller type.
-      n.value = withTiming(metric.value, { duration: 460, easing: Easing.out(Easing.cubic) });
+    if (!animate) { n.value = metric.value; rise.value = 1; return; }
+    if (newPlay && entrance) {
+      n.value = metric.value;
+      rise.value = 0;
+      rise.value = withDelay(360 + index * 80, withSpring(1, { damping: 15, stiffness: 170 }));
       return;
     }
-    n.value = 0;
-    n.value = withDelay(420 + index * 90, withTiming(metric.value, { duration: 700, easing: Easing.out(Easing.cubic) }));
-  }, [playToken, animate, entrance, metric.value, index, n]);
+    // Roll from what is on screen to the new figure.
+    n.value = withTiming(metric.value, { duration: 460, easing: Easing.out(Easing.cubic) });
+  }, [playToken, animate, entrance, metric.value, index, n, rise]);
   const props = useAnimatedProps(() => ({ text: `${Math.round(n.value)}` }) as never);
+  const cell = useAnimatedStyle(() => ({
+    opacity: Math.min(1, rise.value * 1.7),
+    transform: [{ translateY: (1 - rise.value) * 8 }],
+  }));
 
   return (
-    <View style={[s.metricCell, !last && s.metricDivide]}>
+    <Animated.View style={[s.metricCell, !last && s.metricDivide, cell]}>
       <View style={s.metricValueRow}>
         <ACounter
           editable={false}
           pointerEvents="none"
           underlineColorAndroid="transparent"
-          defaultValue={`${animate && entrance ? 0 : metric.value}`}
+          defaultValue={`${metric.value}`}
           style={[s.metricValue, counterStyle]}
           animatedProps={props}
         />
         {metric.suffix ? <Text style={s.metricSuffix}>{metric.suffix}</Text> : null}
       </View>
-      <Text style={s.metricLabel} numberOfLines={1}>{metric.label}</Text>
-    </View>
+      {/* TWO LINES, AND THE SAME BOX ON ALL FOUR. At one line "PER ACTIVE DAY"
+          was the one caption in the app a reader could not read — fourteen
+          tracked characters at 7.5px in a cell about 78px wide, cut to an
+          ellipsis. Letting it wrap and giving every cell an identical two-line
+          box keeps the strip's foot even while the long one takes its second
+          line. Shortening it was the other option and it loses the meaning:
+          this is XP per day ACTIVE, which is not XP per day. */}
+      <Text style={s.metricLabel} numberOfLines={2}>{metric.label}</Text>
+    </Animated.View>
   );
 }
 
@@ -435,8 +452,8 @@ const s = StyleSheet.create({
   axisLabel: { fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: C.dim },
 
   // ── metrics ──
-  metrics: { flexDirection: 'row', marginTop: 2 },
-  metricCell: { flex: 1, alignItems: 'center', paddingVertical: 2 },
+  metrics: { flexDirection: 'row', marginTop: 2, alignItems: 'stretch' },
+  metricCell: { flex: 1, alignItems: 'center', paddingVertical: 2, paddingHorizontal: 2 },
   metricDivide: { borderRightWidth: 1, borderRightColor: PANEL_RULE },
   metricValueRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center' },
   metricValue: {
@@ -445,7 +462,7 @@ const s = StyleSheet.create({
   },
   metricSuffix: { fontFamily: 'Inter_500Medium', fontSize: 9, color: C.dim, marginLeft: -8 },
   metricLabel: {
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.1,
-    color: C.dim, marginTop: 2,
+    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.7,
+    lineHeight: 10, height: 20, color: C.dim, marginTop: 2, textAlign: 'center',
   },
 });

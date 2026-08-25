@@ -379,22 +379,78 @@ function offenders(src) {
   ok(offenders(commented) === 0, 'and reads the code rather than the comments about it');
 }
 
+const TAB_FILES = [
+  'components/stats/InsightBoard.tsx',
+  'components/stats/Instrument.tsx',
+  'components/stats/Donut.tsx',
+  'app/(app)/stats/index.tsx',
+];
+
 {
-  const files = [
-    'components/stats/InsightBoard.tsx',
-    'components/stats/Instrument.tsx',
-    'components/stats/Donut.tsx',
-    'app/(app)/stats/index.tsx',
-  ];
   let bad = 0;
   const where = [];
-  for (const f of files) {
+  for (const f of TAB_FILES) {
     const n = offenders(readFileSync(path.join(REPO, f), 'utf8'));
     if (n) { bad += n; where.push(`${f} (${n})`); }
   }
   ok(bad === 0,
     'nothing on the tab resets to zero without asking whether the reader just arrived',
-    bad ? where.join(', ') : `${files.length} files clean`);
+    bad ? where.join(', ') : `${TAB_FILES.length} files clean`);
+}
+
+/**
+ * AND A FIGURE THE READER CAN READ IS NEVER ANIMATED THROUGH ZERO AT ALL.
+ *
+ * The rule above governs bars, curtains and sweeps, which may legitimately grow
+ * out of nothing — a bar at zero length is a bar, not a claim. A NUMBER at zero
+ * is a claim, and it is the one this readout must never make by accident: the
+ * reader saw their four totals and their four metrics reading zero and said so
+ * twice. The first time it was the entrance replaying on a tap. The second time
+ * it was the entrance doing exactly what it was written to do.
+ *
+ * So the count-up is gone and this is what keeps it gone. Every shared value
+ * that ends up in an `ACounter`'s `text` must start at its real figure and must
+ * never be assigned 0 — the tiles do the arriving, the digits only move when the
+ * figure behind them moves.
+ */
+function counterZeros(src) {
+  const clean = strip(src);
+  const names = new Set();
+  const re = /useAnimatedProps\([^\n]*?text:[^\n]*?\b([A-Za-z_$][\w$]*)\.value/g;
+  let m;
+  while ((m = re.exec(clean))) names.add(m[1]);
+  const bad = [];
+  for (const n of names) {
+    if (new RegExp(`\\b${n}\\.value\\s*=\\s*0\\b`).test(clean)) bad.push(`${n}.value = 0`);
+    const init = clean.match(new RegExp(`\\b${n}\\s*=\\s*useSharedValue\\(([^;]*)\\)`));
+    if (init && /\b0\b/.test(init[1])) bad.push(`${n} starts at 0`);
+  }
+  return { seen: names.size, bad };
+}
+
+{
+  // COUNTER-TEST, both directions.
+  const good = 'const n = useSharedValue(item.value);\nconst p = useAnimatedProps(() => ({ text: `${Math.round(n.value)}` }) as never);';
+  const zeroed = `${good}\nn.value = 0;`;
+  const born = 'const n = useSharedValue(animate ? 0 : item.value);\nconst p = useAnimatedProps(() => ({ text: `${Math.round(n.value)}` }) as never);';
+  ok(counterZeros(good).seen === 1, 'the counter detector finds the value behind an ACounter');
+  ok(counterZeros(good).bad.length === 0, 'and passes one that starts true and stays true');
+  ok(counterZeros(zeroed).bad.length === 1, 'and catches one assigned zero');
+  ok(counterZeros(born).bad.length === 1, 'and catches one BORN at zero, which no effect can undo');
+}
+
+{
+  let bad = [];
+  let seen = 0;
+  for (const f of TAB_FILES) {
+    const r = counterZeros(readFileSync(path.join(REPO, f), 'utf8'));
+    seen += r.seen;
+    bad = bad.concat(r.bad.map((b) => `${f}: ${b}`));
+  }
+  ok(seen >= 2, 'the tab still has counters to check', `${seen} found`);
+  ok(bad.length === 0,
+    'no figure the reader can read is ever animated through zero',
+    bad.length ? bad.join(', ') : `${seen} counters start true and only move when the figure does`);
 }
 
 console.log(fails ? `\n${fails} problem(s).\n` : '\nall clear.\n');

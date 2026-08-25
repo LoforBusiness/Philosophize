@@ -132,6 +132,23 @@ export interface LedgerItem { key: string; label: string; value: number; hue: st
  * Deliberately not "12 of 34": a denominator drawn from the curriculum shrinks
  * a reader's achievement every time content ships, which is the complaint this
  * redesign started from. These are counts of things done, full stop.
+ *
+ * ── AND NONE OF THEM IS EVER ANIMATED THROUGH ZERO ─────────────────────────
+ *
+ * They used to count up from 0 on arrival, and the reader reported seeing the
+ * zeros twice. The first report was a real defect — the entrance replaying on
+ * a tap — and it was found and fixed and measured. The second was the ARRIVAL
+ * ITSELF: re-enter the tab with anything new and all four totals plus the four
+ * metrics legitimately read zero for up to a second and a half while they climb,
+ * and to the person whose progress it is that is indistinguishable from a bug.
+ *
+ * It is not worth defending. A count-up is a flourish; "your figures are gone"
+ * is a fright, and it is the ONE failure this readout can have. So the number
+ * on a tile is true from the first frame it is drawn, the TILE does the
+ * arriving, and the digits move only when the figure behind them actually
+ * moves — which is also the only time a moving number tells the reader
+ * anything. `check:stats` holds it: nothing that feeds a counter may be
+ * assigned 0.
  */
 export function Ledger({ items, playToken, animate, entrance, grown }: {
   items: LedgerItem[]; playToken: number; animate: boolean; entrance: boolean;
@@ -159,8 +176,17 @@ function LedgerTile({ item, index, playToken, animate, entrance, pop }: {
   animate: boolean; entrance: boolean; pop: boolean;
 }) {
   const r = ramp(item.hue);
-  const n = useSharedValue(animate && entrance ? 0 : item.value);
+  // NEVER ZERO. See the note above the component.
+  const n = useSharedValue(item.value);
   const rise = useSharedValue(animate && entrance ? 0 : 1);
+  // TWO SCALES, MULTIPLIED, because they are two different statements and one
+  // shared value cannot make both. `rise` is the arrival and runs 0.72→1 — a
+  // tile settling into place. `beat` is the FEEDBACK and runs 0.82→1.07 about
+  // whatever `rise` has reached — a squeeze and an overshoot, which is the
+  // motion the reader asked for and only means anything on the one tile whose
+  // number just moved. Folding the beat into the rise flattened it to 0.95→1.02,
+  // measured, which is not a bounce.
+  const beat = useSharedValue(1);
 
   // AN ENTRANCE BELONGS TO A PLAY, AND A PLAY HAPPENS ONCE.
   //
@@ -183,11 +209,10 @@ function LedgerTile({ item, index, playToken, animate, entrance, pop }: {
     if (!animate) { n.value = item.value; rise.value = 1; return; }
 
     if (newPlay && entrance) {
-      // ARRIVING. The four totals count up out of nothing, staggered — the one
-      // moment in the tab where starting from zero is the truth.
-      n.value = 0; rise.value = 0;
+      // ARRIVING. The TILE rises; the figure on it is already true.
+      n.value = item.value;
+      rise.value = 0;
       rise.value = bounceTo(1, index * 70, pop);
-      n.value = withDelay(index * 70, withTiming(item.value, { duration: 760, easing: Easing.out(Easing.cubic) }));
       return;
     }
 
@@ -196,14 +221,18 @@ function LedgerTile({ item, index, playToken, animate, entrance, pop }: {
     // the screen: the tile holds its size and its opacity, and the digits ROLL
     // from whatever is displayed to the new total. A tile whose number did not
     // move does not move either.
-    if (newPlay && pop) rise.value = bounceTo(1, 40, true);
+    if (newPlay && pop) beat.value = bounceTo(1, 40, true);
     n.value = withTiming(item.value, { duration: 460, easing: Easing.out(Easing.cubic) });
-  }, [playToken, animate, entrance, item.value, index, pop, n, rise]);
+  }, [playToken, animate, entrance, item.value, index, pop, n, rise, beat]);
 
   const props = useAnimatedProps(() => ({ text: `${Math.round(n.value)}` }) as never);
+  // FROM 0.72, NOT FROM 0. A tile that grows out of a speck reads as being
+  // BUILT, which is half of what "it goes blank" meant; from 0.72 it reads as
+  // settling into place, and a mistimed one is barely noticeable rather than
+  // alarming. The opacity still runs the full fade, so the arrival is not lost.
   const style = useAnimatedStyle(() => ({
     opacity: Math.min(1, rise.value * 1.6),
-    transform: [{ scale: rise.value }],
+    transform: [{ scale: (0.72 + rise.value * 0.28) * beat.value }],
   }));
 
   return (
@@ -214,7 +243,7 @@ function LedgerTile({ item, index, playToken, animate, entrance, pop }: {
             editable={false}
             pointerEvents="none"
             underlineColorAndroid="transparent"
-            defaultValue={`${animate && entrance ? 0 : item.value}`}
+            defaultValue={`${item.value}`}
             style={[s.ledgerValue, { color: r.shade }, counterStyle]}
             animatedProps={props}
           />

@@ -1567,6 +1567,51 @@ Measured through a real meet-a-thinker event, ledger tiles:
 | **THINKERS** | **14 → 15** | **1** | **0.82 → 1.07** |
 | QUOTES · DAYS | unchanged | 1 | still |
 
+> **AND THEN THE READER SAW ZEROS AGAIN, AND THE SECOND ONE WAS NOT A BUG.**
+> Driven through every tap a reader can make in the tab — legend rows, era rows,
+> league names, the discovery CTA, meeting someone never met — 651 samples of all
+> eight counters came back with **zero zeros** and no remounts. The remaining way
+> to see zeros was the ARRIVAL doing exactly what it was written to do: re-enter
+> the tab with anything new and the four totals and the four metrics all read
+> zero for up to a second and a half while they climbed.
+>
+> **A count-up is a flourish; "your figures are gone" is a fright**, and it is the
+> only failure this readout can have. So no figure the reader can read is
+> animated through zero any more. The number on a tile is true from the first
+> frame it is drawn, the TILE does the arriving (fade, and 0.72 → 1 rather than
+> out of a speck, so nothing ever fully disappears), and the digits move only
+> when the figure behind them moves — which is also the only time a moving number
+> tells anyone anything. `check:stats` reads the source for it: every shared
+> value that reaches an `ACounter`'s `text` must start at its real figure and
+> must never be assigned 0, counter-tested in both directions including the one
+> BORN at zero, which no effect can undo.
+>
+> **The bounce needed its own scale to survive that.** Folding the feedback beat
+> into the arrival's 0.72 → 1 ramp flattened the squeeze from 0.82 → 1.07 to
+> 0.95 → 1.02 — measured, and not a bounce. They are two statements and one
+> shared value cannot make both, so `rise` and `beat` multiply. Final reading
+> through a real meet-a-thinker event: the three untouched tiles dead still at
+> opacity 1, the one that moved at **0.82 → 1.07**, every figure true throughout.
+>
+> **And the harness lied first, in the way §21 warns about.** A fixed three-second
+> wait before marking the end of the arrival was enough when the page loaded in
+> two seconds and not when it loaded in four — so the arrival got labelled as the
+> reaction and the summary showed tiles fading to zero opacity on a tap, which
+> reads exactly like the bug being back. It settles on the data now. Before
+> believing an instrument that says the defect returned, check that it is
+> measuring the window it claims to be.
+
+> **"PER ACTIVE DAY" was the one caption in the app nobody could read.** Fourteen
+> tracked characters at 7.5px in a metric cell about 78px wide, cut to an
+> ellipsis, and the reader said so: *"I cannot read what the other one says."*
+> Tightened to 0.7 letter-spacing and given a two-line box that all four cells
+> share, so the long one wraps rather than truncates and the strip's foot stays
+> level. Measured unclipped at both 390dp and **360dp**, where it wraps — check
+> the narrow phone, because that is the one the caption breaks on. Shortening the
+> label was the other option and it loses the meaning: this is XP per day ACTIVE,
+> which is not XP per day.
+
+
 ### The two paper boxes, and why a tile's shading does not scale
 
 > *"for the who you read most and thinkers by era, I want this information to be
