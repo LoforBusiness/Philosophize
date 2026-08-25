@@ -52,7 +52,10 @@ interface Thinker {
  * it is labelled, because it is the most interesting thing on the chart.
  *
  * "BEAUVOIR" rather than "DE BEAUVOIR": the full form is 11 characters and
- * overruns the board. The host says her name in full.
+ * overruns the board. The SPOKEN line says "Beauvoir." too now — it used to say
+ * the name in full, which put a third line in the speech bubble holding nothing
+ * but the surname, and meant the board and the host were saying different words
+ * at the same moment. See the note on that beat in ../rig.ts.
  */
 // The five drawn here are subtracted from the real roll for the footer, so the
 // board cannot disagree with the app about how many thinkers there are. It said

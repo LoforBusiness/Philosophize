@@ -17,6 +17,27 @@ export const INK = '#1A1A1A';
 export const CREAM = '#F4F1EA';
 
 /**
+ * THE COLOUR THE APP IS ALREADY SHOWING WHEN THIS SCREEN MOUNTS.
+ *
+ * It is `expo-splash-screen`'s `backgroundColor` in app.json, and it must stay
+ * equal to it — `check-launch.mjs` reads both and compares them, because the two
+ * live in different files and only one of them can be changed over the air.
+ *
+ * A launch screen whose first painted frame is its OWN ground cuts from this pale
+ * grey to `PALETTES[scene].steps[0]`, and every one of the six is near-black:
+ * #3A2A26, #2E2B25, #1E232A, #122A25, #12161F, #2A1E28. `hideAsync()` does not
+ * fade, so that is a hard light-to-dark flash on the first frame of the app,
+ * followed by the scene fading up out of it — which is exactly what a reader
+ * means by a glitchy start. The ground starts HERE and deepens into the scene
+ * instead, so the hand-off from the native splash is invisible.
+ *
+ * The splash colour itself is a COMPILED resource (§18) and cannot be changed by
+ * an update. This side can. That asymmetry is the whole reason the constant lives
+ * here rather than the other way round.
+ */
+export const SPLASH_BG = '#E4E4DF';
+
+/**
  * The ONE dark the two scrims are mixed from. Declared here, not in the
  * renderer — LaunchScreen.tsx builds its gradient `<Stop>`s from these exports
  * and check-launch.mjs measures contrast against the same numbers, so tuning

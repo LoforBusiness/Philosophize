@@ -7,6 +7,7 @@ import Animated, {
   useAnimatedStyle,
   useAnimatedProps,
   useAnimatedReaction,
+  interpolateColor,
   withTiming,
   withDelay,
   Easing,
@@ -21,7 +22,7 @@ import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 import {
-  PALETTES, CREAM, SCRIM_RGB, SCRIM_STOPS,
+  PALETTES, CREAM, SPLASH_BG, SCRIM_RGB, SCRIM_STOPS,
   TOP_SCRIM_STOPS, topScrimHeight,
 } from './launchArt';
 
@@ -252,7 +253,13 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
     if (skipAnimation) {
       // Straight to held: no draw-on, no counting, no second performance. The
       // `ready` effect below still governs the lift, so boot order is unchanged.
-      introFade.value = 1;
+      //
+      // It still FADES, briefly, and that is not a second performance — it is the
+      // hand-off from the native splash. This path restarts the app into a new
+      // bundle, so there is a fresh splash in front of it, and snapping the
+      // ground straight to a near-black scene is the flash SPLASH_BG exists to
+      // remove. 260ms buys that and nothing else.
+      introFade.value = withTiming(1, { duration: 260 });
       progress.value = 92;
       setHeld(true);
       return;
@@ -293,7 +300,33 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [held, ready]);
 
+  // THE STATUS BAR HAS TO CROSS WITH THE PICTURE, NOT WITH THE UNMOUNT.
+  //
+  // This screen is the only thing in the app that sets `barStyle` at all, and it
+  // sets it light because the illustration behind it is near-black. It then held
+  // light for the whole 520ms dissolve onto a cream welcome page — white icons on
+  // cream, which is to say no icons — and snapped back to the platform default
+  // when the component finally left the tree. A clock and a battery blinking out
+  // and back at the exact moment of the hand-off is the other half of what a
+  // reader means by a glitchy start.
+  //
+  // It flips when the composite is half-way across instead. `screenOpacity` is
+  // the fade itself, so the icons change on the frame the ground they sit on
+  // does — no timer to drift, and nothing to keep in step with the duration.
+  const [barDark, setBarDark] = useState(false);
+  useAnimatedReaction(
+    () => screenOpacity.value < 0.5,
+    (past, was) => { if (past && !was) runOnJS(setBarDark)(true); }
+  );
+
   const rootStyle = useAnimatedStyle(() => ({ opacity: screenOpacity.value }));
+  // THE GROUND STARTS WHERE THE SPLASH LEFT OFF. See SPLASH_BG in launchArt.ts:
+  // the alternative is a hard cut from pale grey to near-black on the app's very
+  // first frame. It deepens on the same curve the art arrives on, so the reader
+  // sees one continuous surface rather than a hand-off.
+  const groundStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(introFade.value, [0, 1], [SPLASH_BG, base]),
+  }));
   // The scene breathes very slightly as it loads. Scaled about its centre, so the
   // picture grows into the frame instead of creeping off one corner.
   const stageStyle = useAnimatedStyle(() => ({
@@ -310,11 +343,13 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
 
   return (
     <Animated.View
-      style={[StyleSheet.absoluteFill, styles.root, { backgroundColor: base }, rootStyle]}
+      style={[StyleSheet.absoluteFill, styles.root, groundStyle, rootStyle]}
     >
-      {/* Always light: the status bar sits inside the top scrim's full-alpha
-          run on every device, whatever scene came up behind it. */}
-      <StatusBar barStyle="light-content" />
+      {/* Light while the illustration is up — the status bar sits inside the top
+          scrim's full-alpha run on every device, whatever scene came up behind
+          it — and dark from the moment the dissolve is more welcome than launch.
+          See `barDark`. */}
+      <StatusBar barStyle={barDark ? 'dark-content' : 'light-content'} />
 
       {/* The scene: inert SVG art with the figure moving on top of it, both in
           stage coordinates. needsOffscreenAlphaCompositing so the intro fade

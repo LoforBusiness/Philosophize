@@ -1856,6 +1856,90 @@ found. Two CDP traps cost an hour: `Page.captureScreenshot` with
 `/json/list[0]` rather than a tab made by `PUT /json/new` makes `Page.navigate` a
 silent no-op — use `scripts/peek.mjs`'s pattern.
 
+### The first four seconds, and the two cuts hiding in them
+
+> *"it still has that glitchy start … if there are any other glitches or not
+> smooth things in this beggining start screen, fix them."*
+
+Two hard cuts, both at the seams where one thing hands over to another, and
+neither of them visible in a browser — the first because the browser has no
+native splash, the second because it is a status bar.
+
+- **The app's first frame was a light-to-dark flash.** `expo-splash-screen`
+  paints `#E4E4DF` and `hideAsync()` does not fade; `LaunchScreen`'s root painted
+  `PALETTES[scene].steps[0]`, and all six of those are near-black. Measured, the
+  mildest of the six is a **10.7:1 luminance step** on the very first frame of the
+  app, followed by the scene fading up out of it. The ground starts on
+  `SPLASH_BG` now and deepens into the scene on the same curve the art arrives
+  on. The splash colour is a COMPILED resource (§18) and this side is not, which
+  is exactly why the constant lives in `launchArt.ts` and `check-launch` compares
+  the two — a pair in two files where only one half can be changed over the air
+  is a pair that drifts.
+- **The status bar crossed on the UNMOUNT rather than on the picture.**
+  `LaunchScreen` is the only thing in the app that sets `barStyle`, and it sets it
+  light for the near-black illustration. It then held light through the whole
+  520ms dissolve onto a cream welcome page — white icons on cream, which is to say
+  no icons — and snapped back when the component finally left the tree. A clock
+  and a battery blinking out and back at the moment of the hand-off is the other
+  half of what a reader means by a glitchy start. It flips at `screenOpacity < 0.5`
+  now, so the icons change on the frame the ground under them does.
+
+### The words were too fast, and the line broke in the wrong place
+
+> *"slow down the words being spoken a little bit … when it shows different
+> philosophers names, the simine de beuvior, his last name goes too far under it,
+> that doesnt look good."*
+
+Both measured in a browser rather than argued about, which is the only way either
+one is a number: the words were arriving every **190–210ms** and are now at
+**259–284ms**.
+
+**The surprise is what that cost: +0.5 seconds over the whole intro.** Per-word
+reveal went 0.17 → 0.24, and most beats already had enough slot to pay for it —
+only four needed widening. The floor that protects the other end is
+`check-thinkers`, which re-derives how long every line stands COMPLETE before it
+dissolves; the worst line went **0.96s → 1.13s** in the same change. Slower words
+and a longer read, on a timeline half a second longer.
+
+**The line break was not a wrap bug.** 322 units of bubble at 27px Playfair Bold
+cannot hold four names when one of them is three words, so
+"Socrates. Kant. Nietzsche. Simone de Beauvoir." broke as
+
+    Socrates. Kant.  /  Nietzsche. Simone de  /  Beauvoir.
+
+— a third line holding one word, and that word the surname of the only woman on
+the board. The line says what the BOARD says now: `ThinkersChart` draws BEAUVOIR
+(it has to — the full form overruns 300 units) and the host was saying something
+else over the top of it, which is rule A1 read backwards. Naming all four by
+surname is also the only reading in which the four are treated alike.
+
+The sweep found **a second one nobody had reported**: "A little every day. It adds
+up." broke as "…It adds / up.", cutting a phrasal verb in half. A comma gives the
+wrap somewhere sensible to fall.
+
+> **`npm run check:intro` is the harness, and the file already had a name.**
+> `MapChart.tsx` has pointed at `scripts/check-intro.mjs` since the branch names
+> were fixed, and no such file existed — a citation to a check nobody could run.
+> It exists now, and it holds seven things: two rows and never three, no line
+> ending on a stranded scrap, nothing lit clipped by the bubble, no beat coming up
+> wordless, no two names on a board touching, and a **floor under the reveal
+> pace** — because a reader has now asked about that pace twice, in opposite
+> directions, and the second answer needs a ratchet.
+>
+> It has to be a browser: where a line breaks depends on the real widths of real
+> glyphs, and `MapChart` already records what estimating those costs.
+>
+> **Two of its rules were wrong before they were right, and both in the same
+> direction — a checker that cannot tell the design from the defect.** Testing
+> every word for clipping reported all eleven lines as broken, because the bubble
+> hides the line he has not reached YET on purpose; only a lit word can be said to
+> be cut off. And "boxes that overlap vertically must not overlap horizontally"
+> reported the growth board's kicker and its headline as 103px through one another
+> — an SVG text's rect is its em box, so two labels stacked a comfortable 19px
+> apart still graze. Compare baselines, not edges. The tightest real pair on any
+> board is DESCARTES/NIETZSCHE at **9.4px**.
+
+
 **The welcome end card** (`assets/images/welcome/sky.jpg`) is the one background
 that is a *drawing* rather than a photograph, and it follows the same rule for the
 same reason: the ink hatching runs to near-black in places, so the wordmark's
@@ -1979,7 +2063,10 @@ browser at it; the first transform can take longer than a navigation timeout.
   same millisecond cannot both win; and **a dead owner is not an owner** — stopping
   a background task does not always kill the node process under it, so a lock whose
   pid has gone is taken over rather than obeyed, and the orphaned route it left
-  behind is deleted on the way past. `npm run check:frame` measures every
+  behind is deleted on the way past. `npm run check:intro` plays the WELCOME
+  screen and measures where its lines break, how fast its words arrive and
+  whether any two names on a board touch (8856/9396 — see §19).
+  `npm run check:frame` measures every
   element a scene draws against the stage's own crop and reports what the camera
   is cutting in half; `npm run measure:must` records what each beat has on stage
   and writes `components/lesson/cinematic/mustBoxes.ts`, which is what stops the

@@ -91,16 +91,31 @@ export const T_BOLT = 0.46; // and gone
 //
 // `check-thinkers` re-derives every one of these windows, because this is
 // arithmetic nobody can see by reading the script.
+//
+// ── AND THEN IT WAS TOO FAST THE OTHER WAY ──────────────────────────────────
+//
+// The same reader, on the same screen: "slow down the words being spoken a
+// little bit." Measured in a browser, the words were landing every 190-210ms,
+// which is quicker than anyone reads and quicker than anyone speaks.
+//
+// 0.17 -> 0.24 a word, and the slots widened to pay for it. The surprise is how
+// little that cost: the table already had room in most beats, so 41% slower
+// words came to +0.5s over the whole intro. Every slot below is at least
+//
+//     0.14 (lead) + speak*(n-1)/n + 0.16 (rise) + 0.3 (fade-out) + 0.9 (read)
+//
+// and `check-thinkers` re-derives exactly that and holds the 0.9. Widen a line
+// and the arithmetic is what tells you, not the screen.
 const SCRIPT: Array<[number, string, Visual | null, Gesture | null, number[]?]> = [
   [0.0, 'Think philosophy is boring, or too difficult?', null, 'point'],
   [3.4, "Watch. Here's a real one.", null, 'shrug'],
-  [5.8, 'Is it ever right to lie?', 'lesson', null],
-  [8.6, 'You answer. Then Kant tells you why.', 'lesson', null],
-  [11.8, 'Philosophy has six branches.', 'map', null],
+  [6.25, 'Is it ever right to lie?', 'lesson', null],
+  [9.35, 'You answer. Then Kant tells you why.', 'lesson', null],
+  [12.7, 'Philosophy has six branches.', 'map', null],
   // Three names per line, in the order the board draws them (A1: what the text
   // says, the picture must do). The cues are the words each name lands on.
-  [14.4, 'What is real. How you know. What follows.', 'map', null, [2, 5, 7]],
-  [18.0, 'How to live. What is beautiful. Who rules.', 'map', null, [2, 5, 7]],
+  [15.3, 'What is real. How you know. What follows.', 'map', null, [2, 5, 7]],
+  [18.9, 'How to live. What is beautiful. Who rules.', 'map', null, [2, 5, 7]],
   // THE EXACT FIGURE, because it is more impressive than the round one — and it
   // has to be the RIGHT exact figure. This said "two hundred and twenty-three"
   // for as long as the intro has existed; there are 322. A wrong number is worse
@@ -109,16 +124,35 @@ const SCRIPT: Array<[number, string, Visual | null, Gesture | null, number[]?]> 
   //
   // `check-thinkers` now compares this line and the board's "AND n MORE" against
   // ALL_PHILOSOPHERS.length, so the next person to add a thinker is told.
-  [21.8, 'Three hundred and twenty-two thinkers.', 'thinkers', null],
-  [25.0, 'Socrates. Kant. Nietzsche. Simone de Beauvoir.', 'thinkers', null],
+  [22.7, 'Three hundred and twenty-two thinkers.', 'thinkers', null],
+  // ── FOUR SURNAMES, AND THE FOURTH ONE USED TO FALL OFF THE LINE ───────────
+  //
+  // A reader: "the simone de beauvoir, his last name goes too far under it,
+  // that doesnt look good." Measured, the bubble broke the line
+  //
+  //     Socrates. Kant.  /  Nietzsche. Simone de  /  Beauvoir.
+  //
+  // — a third line holding one word, and that word the surname of the only
+  // woman on the board. 322 units of bubble at 27px Playfair cannot hold four
+  // names when one of them is three words; nothing about the wrap was wrong.
+  //
+  // So the line says what the BOARD says. ThinkersChart draws BEAUVOIR — it has
+  // to, the full form overruns 300 units — and the host was saying something
+  // else over the top of it, which is rule A1 read backwards. Naming all four by
+  // surname is also the only reading in which the four are treated alike: the
+  // other three were surnames already.
+  [25.9, 'Socrates. Kant. Nietzsche. Beauvoir.', 'thinkers', null],
   // The bars and the rank line. This beat exists because the intro said what
   // philosophy IS and never what a habit of it adds up to — and the board column
   // sat empty through both closing lines anyway.
-  [28.6, 'A little every day. It adds up.', 'growth', null],
-  [34.2, 'Ready to think differently?', null, 'open'],
+  // "It adds up." broke as "…It adds / up." — a phrasal verb cut in half, which
+  // is the same defect as the surname above and reads worse for being a joinable
+  // pair. The comma gives the wrap somewhere sensible to fall.
+  [29.1, 'A little every day, and it adds up.', 'growth', null],
+  [34.7, 'Ready to think differently?', null, 'open'],
 ];
 
-const SPEAK_END = 37.0; // relative — he stops talking here
+const SPEAK_END = 37.5; // relative — he stops talking here
 
 export const T_FADE = SPEAK_T0 + SPEAK_END; // bubble + board dissolve
 export const T_EXIT = T_FADE; // …and he starts turning to leave
@@ -137,7 +171,7 @@ export const BEATS: Beat[] = SCRIPT.map(([t, text, visual, gesture, cues], i) =>
     t: t + SPEAK_T0,
     text,
     words,
-    speak: Math.max(0.45, Math.min(nextT - t - 1.0, words.length * 0.17 + 0.2)),
+    speak: Math.max(0.45, Math.min(nextT - t - 1.0, words.length * 0.24 + 0.2)),
     visual,
     gesture,
     cues: cues ?? [],

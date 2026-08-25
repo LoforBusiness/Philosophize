@@ -733,6 +733,37 @@ ok(!/D\s*E\s*E\s*P\s*L\s*Y/.test(screen), 'the Deeply wordmark is gone');
 // was permanently green. Matched the same way the DEEPLY check above does.
 ok(!/P\s*H\s*I\s*L\s*O\s*S\s*O\s*P\s*H\s*I\s*Z\s*E/.test(screen), 'the old wordmark is gone');
 
+// ── the hand-off from the native splash ──────────────────────────────────────
+//
+// The app's FIRST frame is the native splash, and the second is this screen. If
+// they are different colours the reader gets a flash before anything has begun,
+// because `hideAsync()` does not fade — and every one of the six scene grounds
+// is near-black against a pale grey splash. LaunchScreen starts on SPLASH_BG and
+// deepens into the scene, so the only thing that can put the flash back is the
+// two constants drifting apart. They live in different files and only one of them
+// can be changed over the air (§18), which is exactly when a pair drifts.
+{
+  const cfg = JSON.parse(fs.readFileSync('app.json', 'utf8')).expo;
+  const plug = (cfg.plugins ?? []).find((p) => Array.isArray(p) && p[0] === 'expo-splash-screen');
+  const declared = plug?.[1]?.backgroundColor ?? cfg.splash?.backgroundColor ?? null;
+  ok(!!declared, 'app.json declares a splash background', String(declared));
+  ok(
+    !!declared && declared.toUpperCase() === A.SPLASH_BG.toUpperCase(),
+    'the launch ground starts on the splash colour',
+    `app.json ${declared} · launchArt ${A.SPLASH_BG}`,
+  );
+  // And the flash it prevents is real: say so with the numbers, so nobody
+  // "simplifies" the interpolation away on the grounds that it looks like a no-op.
+  const swing = A.SCENE_KEYS.map((k) => {
+    const a = lum(declared);
+    const b = lum(A.PALETTES[k].steps[0]);
+    return ratio(a, b);
+  });
+  ok(Math.min(...swing) > 4,
+    'and the cut it removes would have been a real one',
+    `splash → scene ground is ${Math.min(...swing).toFixed(1)}:1 at its mildest`);
+}
+
 // Read from launchArt.ts, not typed here a second time — LaunchScreen.tsx
 // builds its gradient <Stop>s from the same export, so this measures what
 // actually renders rather than a copy that can drift out of step with it.

@@ -56,6 +56,7 @@ import RanksBadgesSheet from '@/components/shared/RanksBadgesSheet';
 import SavedQuotesSheet from '@/components/shared/SavedQuotesSheet';
 import PaywallSheet from '@/components/shared/PaywallSheet';
 import LaunchScreen from '@/components/launch/LaunchScreen';
+import { SPLASH_BG } from '@/components/launch/launchArt';
 import UpdateGate from '@/components/shared/UpdateGate';
 import OnboardingGate from '@/components/welcome/OnboardingGate';
 import LessonReward from '@/components/lesson/LessonReward';
@@ -355,8 +356,13 @@ export default function RootLayout() {
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
+    // SPLASH_BG, not paper. The native splash is still up while this renders —
+    // `hideAsync` is gated on the same flag — so nobody should ever see it. But
+    // it is on the boot path, it is one frame from being visible if that order
+    // ever changes, and a cream rectangle behind the pale-grey splash is the
+    // same flash the launch ground was just taught to avoid.
     return (
-      <View style={{ flex: 1, backgroundColor: '#FAFAF7', alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: SPLASH_BG, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator color="#1A1A1A" />
       </View>
     );
