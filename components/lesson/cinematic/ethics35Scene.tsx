@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 178, top: CAP_T, width: 210,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
   },
 
   post: { position: 'absolute', left: PIVOT_X - 2, top: PIVOT_Y, width: 4, height: 34, backgroundColor: SOFT },
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   armIn: { left: PANEL_W / 2, transform: [{ rotate: '150deg' }] },
   panelCap: {
     position: 'absolute', left: 0, top: PANEL_H - 20, width: PANEL_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
 
   tag: { position: 'absolute', left: TAG_X, width: 190, height: 18 },
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   },
   tagText: {
     position: 'absolute', left: 0, top: 5, width: 190, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK, includeFontPadding: false,
   },
   tagHit: { position: 'absolute', left: TAG_X, width: 190, height: 18 },
   tagHitBox: { position: 'absolute', left: 0, top: 0, width: 190, height: 18, borderRadius: 3 },

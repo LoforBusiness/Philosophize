@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   },
   panelLabel: {
     position: 'absolute', left: 0, right: 0, top: 8, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
   panelLine: {
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   },
   boardTextOn: { color: PAPER },
   boardCap: {
-    marginTop: 4, fontFamily: 'Inter_500Medium', fontSize: 8.5, letterSpacing: 1, color: SOFT,
+    marginTop: 4, fontFamily: 'Inter_500Medium', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     includeFontPadding: false,
   },
   boardCapOn: { color: PAPER },

@@ -45,7 +45,7 @@ export const BEATS: Aes22Beat[] = [
   },
   {
     p: 45, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
-    text: 'Three things all seem true. You feel it. Feeling needs belief. You believe none of it.',
+    text: 'Three claims all seem true. You feel real fear. Feeling needs belief. You believe none of the film.',
     cite: 'The paradox of fiction',
     dur: 4.4,
   },
@@ -60,7 +60,7 @@ export const BEATS: Aes22Beat[] = [
   },
   {
     p: 21, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
-    text: 'One answer says you were never afraid. You were playing a game, and inside it, it is true that you were.',
+    text: 'One answer says you were never afraid. You were playing a game, and inside the game your fear is fictional.',
     cite: 'Make-believe',
     dur: 4.8,
   },
@@ -108,7 +108,7 @@ export const BEATS: Aes22Beat[] = [
         'Make-believe says the feeling is played, not felt',
         'Thought theory says imagining vividly is enough',
       ],
-      closing: 'Whatever it is, it is the reason anybody reads a novel twice.',
+      closing: 'Whatever the feeling turns out to be, the feeling is why anybody reads a novel twice.',
     },
     dur: 3.4,
   },

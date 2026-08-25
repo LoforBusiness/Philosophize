@@ -35,12 +35,12 @@ export interface Eth20Beat extends BaseBeat {
 export const BEATS: Eth20Beat[] = [
   {
     p: 25, x: 200, blocks: 1, rate: 0,
-    text: 'Seven harms, all the same size. The only difference between them is when they happen.',
+    text: 'Seven harms, all the same size. The only difference is when each one happens.',
     dur: 4.0,
   },
   {
     p: 45, x: 200, blocks: 1, rate: 0.72,
-    text: 'Every government does this to them first. A cost in two hundred years is written down until it is almost nothing.',
+    text: 'Every government discounts the far harms first. A cost two hundred years out is written down until almost nothing is left.',
     cite: 'Discounting',
     dur: 4.8,
   },
@@ -114,7 +114,7 @@ export const BEATS: Eth20Beat[] = [
         'Pure time preference is a rate on the date alone',
         'Nobody has defended treating a later person as worth less',
       ],
-      closing: 'They cannot vote, they cannot argue, and they will be as real as you are.',
+      closing: 'The people two centuries out cannot vote and cannot argue. They will be as real as you are.',
     },
     dur: 3.4,
   },

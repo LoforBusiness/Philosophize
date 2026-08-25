@@ -71,7 +71,7 @@ export const BEATS: EpistBeat[] = [
         { text: 'Justified true belief', correct: true },
         { text: 'Confident, popular, and true', correct: false },
       ],
-      explain: 'The recipe is justified true belief. Confidence and popularity are not justification, however convincing they feel — only reasons turn the third lock.',
+      explain: 'The recipe is justified true belief. Feeling sure is not a reason, and neither is a crowd agreeing. Only reasons turn the third lock.',
       xp: 5,
     },
     dur: 1.0,

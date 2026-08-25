@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
 
   badge: {
     position: 'absolute', left: 20, top: 258, width: 360,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
 
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   },
   kicker: {
     position: 'absolute', left: 10, top: 4,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
   bar: {

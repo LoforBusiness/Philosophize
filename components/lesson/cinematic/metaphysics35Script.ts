@@ -36,7 +36,7 @@ export interface Metaphysics35Beat extends BaseBeat {
 export const BEATS: Metaphysics35Beat[] = [
   {
     p: 25, x: 322, line: 1,
-    text: 'Here is your life on a line. You are standing at this end of it.',
+    text: 'Here is your life drawn as a line. You are standing at the near end.',
     dur: 3.2,
   },
   {
@@ -90,7 +90,7 @@ export const BEATS: Metaphysics35Beat[] = [
   {
     p: 35, x: 210, line: 1, branch: 1,
     interact: {
-      prompt: 'The gun jams every single time. Is something protecting the timeline?',
+      prompt: 'The gun jams every single time. Is something protecting the past?',
       cards: [
         { text: 'No — it simply never happened', correct: true },
         { text: 'Yes, time pushes back', correct: false },

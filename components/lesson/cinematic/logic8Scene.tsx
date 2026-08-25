@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
   dropletB: { position: 'absolute', left: PUD_L + 56, top: PUD_T + 26, width: 12, height: 5, borderRadius: 3, borderWidth: 1.5, borderColor: SOFT },
   puddleLabel: {
     position: 'absolute', left: PUD_L, top: 464, width: PUD_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
   nozzle: { position: 'absolute', left: 324, top: 392, width: 10, height: 6, borderRadius: 2, backgroundColor: INK },
   gardenLabel: {
     position: 'absolute', left: GDN_L, top: 366, width: GDN_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },
   dash: {
@@ -342,17 +342,17 @@ const styles = StyleSheet.create({
   },
 
   // ── the two pinned cards ─────────────────────────────────────────────────────
-  cardLabel: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.6, color: SOFT, marginBottom: 5,
+  cardLabel: { fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 1.6, color: SOFT, marginBottom: 5,
     includeFontPadding: false,
   },
   ruleBox: {
     position: 'absolute', left: 22, top: 32, width: 176, height: 78,
     borderWidth: 2, borderColor: INK, borderRadius: 5, paddingTop: 8, alignItems: 'center',
   },
-  ruleLine: { fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 16, color: INK,
+  ruleLine: { fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 16, color: INK,
     includeFontPadding: false,
   },
-  ruleArrow: { fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 14, color: INK,
+  ruleArrow: { fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 16.9, color: INK,
     includeFontPadding: false,
   },
   trapBox: {
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: SOFT, borderRadius: 5,
     paddingTop: 8, paddingLeft: 10, paddingRight: 46,
   },
-  trapText: { fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 0.2, color: INK,
+  trapText: { fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 16.9, letterSpacing: 0.2, color: INK,
     includeFontPadding: false,
   },
   stamp: { position: 'absolute', left: 158, top: 135, width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
 
   // ── Q1 answer cards ──────────────────────────────────────────────────────────
   pickLabelWrap: { position: 'absolute', left: CARD_L, top: 188, width: CARD_W + 60 },
-  pickLabel: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.5, color: SOFT,
+  pickLabel: { fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 1.5, color: SOFT,
     includeFontPadding: false,
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
   },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT, opacity: 0.45 },
-  pickText: { fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 0.3, color: INK,
+  pickText: { fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 0.3, color: INK,
     includeFontPadding: false,
   },
   pickTextOn: { color: PAPER },

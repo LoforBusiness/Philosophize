@@ -131,12 +131,12 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: 120, top: KICK_T, width: 160,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
   rev: {
     position: 'absolute', left: 120, top: KICK_T + 12, width: 160,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
 

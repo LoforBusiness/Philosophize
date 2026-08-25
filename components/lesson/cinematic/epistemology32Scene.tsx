@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: COL[0], top: KICK_T, width: COL[1] + PAN_W - COL[0],
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
 
@@ -223,11 +223,11 @@ const styles = StyleSheet.create({
 
   labels: { position: 'absolute', left: PAD, right: PAD, top: 60, alignItems: 'center' },
   scaleText: {
-    fontFamily: 'Inter_500Medium', fontSize: 6.5, letterSpacing: 0.8, color: SOFT,
+    fontFamily: 'Inter_500Medium', fontSize: 8.6, letterSpacing: 0.8, color: SOFT,
     includeFontPadding: false,
   },
   nameText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.4, color: INK, marginTop: 2,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, marginTop: 2,
     includeFontPadding: false,
   },
 

@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   // "ACQUIRED" is the longest mark: 8 caps at 8pt measures about 43 of the cell's
   // 54, which leaves ~5 units — 4.8dp at this lesson's fit — either side (D31b).
   mark: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
   postL: { position: 'absolute', left: 192, top: TAPE_T + TAPE_H - 2, width: 2.5, height: GROUND - TAPE_T - TAPE_H + 2, backgroundColor: SOFT },

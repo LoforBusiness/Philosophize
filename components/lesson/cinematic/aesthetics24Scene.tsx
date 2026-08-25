@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   },
   plateText: {
     position: 'absolute', top: PL_Y + 10, width: PL_W, textAlign: 'center', lineHeight: 11,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', top: PL_Y, width: PL_W, height: PL_H },

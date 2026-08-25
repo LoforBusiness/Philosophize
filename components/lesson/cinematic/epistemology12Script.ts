@@ -74,10 +74,14 @@ export const BEATS: Epistemology12Beat[] = [
     p: 21, x: 124, pipes: 3,
     interact: {
       prompt: 'Rain felt, toast remembered, a wall you were told about. Which route is least direct?',
-      cards: [
-        { text: 'Testimony', correct: true },
-        { text: 'Memory', correct: false },
-      ],
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'senses', reads: 'the world, then you' },
+          { id: 'memory', reads: 'the world, then you, then you again' },
+          { id: 'told', reads: 'the world, then somebody else, then you', correct: true },
+        ],
+      },
       explain: 'The trap: swapping DIRECT for RELIABLE. Senses misfire and memory fades, but both run straight from the world to you. Testimony detours through another mind that had to see it, keep it, and choose to pass it on.',
       xp: 5,
     },

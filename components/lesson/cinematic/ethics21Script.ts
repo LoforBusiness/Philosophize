@@ -45,7 +45,7 @@ export const BEATS: Eth21Beat[] = [
   },
   {
     p: 45, x: 132, act: 1, arms: 1, aim: 1,
-    text: 'Aquinas noticed that we treat those two differently, and we do it everywhere, not just in hospitals.',
+    text: 'Aquinas saw that we judge the two arrows in different ways. We do so everywhere, not just in hospitals.',
     dur: 4.4,
   },
   {

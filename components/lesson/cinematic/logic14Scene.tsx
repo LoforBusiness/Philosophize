@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   },
   gloss: {
     position: 'absolute', left: 10, right: 10, top: 34,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.9, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT,
     includeFontPadding: false,
   },
 

@@ -32,7 +32,7 @@ export interface Epistemology36Beat extends BaseBeat {
 export const BEATS: Epistemology36Beat[] = [
   {
     p: 25, x: 56, shelf: 1,
-    text: 'A counter with four pairs of stockings on it. They are the same pair, four times. Nobody is told that.',
+    text: 'A counter with four pairs of stockings laid out. All four pairs are identical. Nobody buying is told so.',
     dur: 3.8,
   },
   {
@@ -51,7 +51,7 @@ export const BEATS: Epistemology36Beat[] = [
   },
   {
     p: 21, x: 56, shelf: 1, given: 1, real: 1,
-    text: 'The cause was position. Told so, they said no. Not defensively, not caught out — they simply could not see it from inside.',
+    text: 'The cause was position on the counter. Told as much, the shoppers said no. Not defensively, not caught out. The reason was simply invisible from the inside.',
     dur: 4.6,
   },
   {
@@ -68,7 +68,7 @@ export const BEATS: Epistemology36Beat[] = [
   },
   {
     p: 35, x: 56, shelf: 1, given: 1, real: 1, clash: 1,
-    text: 'They were not lying and they were not confused. They knew which pair they liked. What they had no window onto was why.',
+    text: 'The shoppers were not lying and were not confused. Each one knew which pair she preferred. The reason for the preference was the part nobody could see.',
     dur: 4.4,
   },
   {
@@ -98,7 +98,7 @@ export const BEATS: Epistemology36Beat[] = [
         'The gap fills with a plausible story',
         'The story arrives feeling like a memory',
       ],
-      closing: 'The unsettling part is not that they were wrong. It is that being wrong felt exactly like being right, which leaves nothing to watch out for.',
+      closing: 'The unsettling part is not the mistake. Being wrong felt exactly like being right, and that leaves a reader nothing to watch out for.',
     },
     dur: 3.2,
   },

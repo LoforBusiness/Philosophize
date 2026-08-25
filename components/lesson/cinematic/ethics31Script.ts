@@ -63,7 +63,7 @@ export const BEATS: Ethics31Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Take the reach away again. Tap the thing that has to give.',
-      explain: 'The obligation. It cannot be the shelf, which is where it is, and it cannot be your reach, which is what it is. Kant\'s point is that a duty nobody could meet was never a duty.',
+      explain: 'The obligation has to give. The shelf is where the shelf is, and your reach is what your reach is. Kant\'s point is that a duty nobody could meet was never a duty.',
       xp: 5,
     },
   },
@@ -89,7 +89,7 @@ export const BEATS: Ethics31Beat[] = [
         'Give the ability and the duty reappears',
         'Inability you caused excuses nothing',
       ],
-      closing: 'Before asking whether someone should have, ask whether they could have. That question comes first.',
+      closing: 'Before asking whether someone should have acted, ask whether they could have. The second question comes first.',
     },
     dur: 3.0,
   },

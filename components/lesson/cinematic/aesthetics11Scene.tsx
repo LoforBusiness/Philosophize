@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   plaqueText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.8, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
     includeFontPadding: false,
   },
 
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   sameText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1, color: PAPER,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: PAPER,
     includeFontPadding: false,
   },
 

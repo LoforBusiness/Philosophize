@@ -33,7 +33,7 @@ export interface Met20Beat extends BaseBeat {
 export const BEATS: Met20Beat[] = [
   {
     p: 25, x: 200, outer: 1,
-    text: 'One world, and it is the real one. Nothing in this lesson denies that it exists.',
+    text: 'One world, and the world is real. Nothing here denies the world exists.',
     dur: 4.0,
   },
   {
@@ -43,13 +43,13 @@ export const BEATS: Met20Beat[] = [
   },
   {
     p: 45, x: 132, outer: 1, nest: 1, tally: 1,
-    text: 'Count the minds. Almost all of them are now inside a machine, and every one of them thinks it is outside.',
+    text: 'Count the minds. Almost all the minds now sit inside a machine, and every mind believes otherwise.',
     cite: 'Bostrom, 2003',
     dur: 4.8,
   },
   {
     p: 13, x: 132, outer: 1, nest: 1, tally: 1, token: 1,
-    text: 'Here is your token. Nobody aimed it. It landed where most of the minds are.',
+    text: 'Here is your token. Nobody aimed the token. It landed where most of the minds are.',
     dur: 3.8,
   },
   {

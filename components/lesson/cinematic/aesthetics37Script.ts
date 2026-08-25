@@ -38,7 +38,7 @@ export const BEATS: Aesthetics37Beat[] = [
   },
   {
     p: 2, x: 54, staves: 1, score: 1, played: 1,
-    text: 'The bottom one is a solo. Watch it arrive. Nothing above it. Nothing to compare it against.',
+    text: 'The bottom line is a solo. Watch the line arrive with nothing above it and nothing to compare it against.',
     dur: 4.2,
   },
   {
@@ -93,7 +93,7 @@ export const BEATS: Aesthetics37Beat[] = [
   },
   {
     p: 35, x: 126, staves: 1, score: 1, lift: 1,
-    text: 'So the same sounds are a different kind of thing depending on whether anything stood behind them. Not how they sound. What they are.',
+    text: 'So the same sounds become a different kind of thing depending on what stood behind them. Not how the sounds strike the ear. What the sounds are.',
     dur: 4.8,
   },
   {

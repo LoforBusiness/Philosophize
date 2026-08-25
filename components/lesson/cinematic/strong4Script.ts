@@ -98,7 +98,7 @@ export const BEATS: Strong4Beat[] = [
         'Strong is to induction what valid is to deduction',
         'Strong plus true premises is cogent',
       ],
-      closing: 'Inductive strength is defeasible — new evidence can topple it; deductive validity cannot.',
+      closing: 'A strong inductive case can still be toppled by new evidence. A valid deduction cannot.',
     },
     dur: 2.8,
   },

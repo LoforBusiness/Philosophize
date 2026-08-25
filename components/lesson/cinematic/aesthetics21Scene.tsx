@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', top: 234, width: COL_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
   },
   slab: {
     position: 'absolute', width: COL_W,
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   plateGone: { borderColor: INK, borderWidth: 2, backgroundColor: INK },
   plateText: {
     position: 'absolute', top: PLATE_Y + 7, width: COL_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
   plateTextGone: { color: PAPER },
 

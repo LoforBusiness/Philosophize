@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
 
   caption: {
     position: 'absolute', left: ST_L, top: CAP_Y,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
   plate: {
     position: 'absolute', top: PL_Y, width: PL_W, height: PL_H,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   plateOpen: { borderStyle: 'dashed', borderWidth: 1.5, borderColor: SOFT },
   plateText: {
     position: 'absolute', top: PL_Y + 12, width: PL_W, textAlign: 'center', lineHeight: 11,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
 
   arrow: { position: 'absolute', left: 0, top: AR_TOP, width: 0, height: 0 },

@@ -37,7 +37,7 @@ export const BEATS: Aes21Beat[] = [
   },
   {
     p: 45, x: 200, works: 1, burn: 0.5,
-    text: 'Now start destroying. Every copy of the novel, every recording of the symphony, and the painting itself.',
+    text: 'Now start burning. Every copy of the novel, every recording of the symphony, and the painting on the wall.',
     cite: 'The test',
     dur: 4.4,
   },

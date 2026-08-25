@@ -38,13 +38,13 @@ export const BEATS: Epi19Beat[] = [
   },
   {
     p: 2, x: 200, doors: 1, chip: 1,
-    text: 'A question turns up. It is cut for exactly one of these doors, and standing at the wrong one will not open it.',
+    text: 'A question turns up, cut to fit exactly one of these doors. Standing at the wrong door will open nothing.',
     cite: 'Expertise is a relation',
     dur: 4.8,
   },
   {
     p: 45, x: 132, doors: 1, chip: 1, stray: 1,
-    text: 'This is the everyday failure. A famous physician is asked about diet on television, and answers.',
+    text: 'Here is the everyday failure. A famous heart doctor is asked about diet on television, and answers.',
     dur: 4.2,
   },
   {
@@ -102,7 +102,7 @@ export const BEATS: Epi19Beat[] = [
         'Trusting testimony is rational, and it is still a check',
         'Disagreement at the edge is not ignorance at the centre',
       ],
-      closing: 'The question was never whether they are clever. It is what they are clever about.',
+      closing: 'The question was never whether the expert is clever. The question is what the expert is clever about.',
     },
     dur: 3.4,
   },

@@ -35,7 +35,7 @@ export const BEATS: Ethics32Beat[] = [
   {
     a: 30, b: 31, reasons: 3, card: 2,
     dur: 4.4,
-    text: 'The card hands across perfectly. Both of them now hold the same true verdict, and the stack behind it does not come with it.',
+    text: 'The card hands across perfectly. Both people now hold the same true verdict, and the reasons behind the verdict stay where they were.',
     cite: 'Handed over',
   },
   {

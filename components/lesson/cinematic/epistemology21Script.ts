@@ -23,7 +23,7 @@ export interface Epi21Beat extends BaseBeat {
 export const BEATS: Epi21Beat[] = [
   {
     p: 25, x: 70,
-    text: 'Right now, believe it is raining. Not picture it, not say it — believe it. Take a moment and genuinely try.',
+    text: 'Right now, believe that rain is falling outside. Not picture rain, not say the words. Believe. Take a moment and genuinely try.',
     dur: 4.0,
   },
   {
@@ -34,7 +34,7 @@ export const BEATS: Epi21Beat[] = [
   },
   {
     p: 29, x: 124, dial: 1, will: 1,
-    text: 'Load the first tray with everything you have — wanting it, deciding it, repeating it, a fortune riding on it. The tray fills. The needle does not move.',
+    text: 'Load the first tray with everything you have. Wanting rain. Deciding on rain. Saying the words again. A fortune riding on the answer. The tray fills and the needle does not move.',
     cite: 'Effort',
     dur: 5.0,
   },
@@ -60,7 +60,7 @@ export const BEATS: Epi21Beat[] = [
     p: 6, x: 124, dial: 1, will: 1, ev: 1, pick: 1,
     interact: {
       prompt: 'One tray moved the needle and one did not. Tap the one that moved it.',
-      explain: 'Belief tracks how things seem, not how much you would like them to be. That is why trying is the one thing that never works here — and why it feels so strange that it does not.',
+      explain: 'Belief tracks how the world seems, not how much you want the world to be that way. Trying is the one move that never works here, and the failure of trying is the strange part.',
       xp: 5,
     },
     dur: 1.0,
@@ -87,7 +87,7 @@ export const BEATS: Epi21Beat[] = [
         'You do choose what evidence you meet',
         'That is where the responsibility lives',
       ],
-      closing: 'Nobody chooses a belief directly. Everybody chooses what they read.',
+      closing: 'Nobody picks a belief the way you pick a shirt. But everybody picks what they read.',
     },
     dur: 3.0,
   },

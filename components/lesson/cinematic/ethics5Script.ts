@@ -87,7 +87,7 @@ export const BEATS: Ethics5Beat[] = [
     x: 265, soc: 4, balance: 1,
     interact: {
       prompt: 'The "Axial Age" — tip the scale. Is it a proven fact, or an interpretive thesis?',
-      explain: 'It sounds like a fact with a date on it. It is a reading of history. Jaspers noticed three places changing at once and proposed that the timing meant something, and historians have argued about it ever since.',
+      explain: 'The claim sounds like a fact with a date on it, and is really a reading of history. Jaspers noticed three places changing at once and argued that the timing meant something. Historians have argued back ever since.',
       xp: 5,
     },
     dur: 1.0,
@@ -101,7 +101,7 @@ export const BEATS: Ethics5Beat[] = [
         'Dharma tied right action to duty and role',
         'Confucius rooted ethics in humane relationships',
       ],
-      closing: 'None of these founders wrote for us; their pupils carried the questions forward.',
+      closing: 'Not one of these thinkers wrote a word for us. Their pupils carried the questions forward anyway.',
     },
     dur: 2.8,
   },

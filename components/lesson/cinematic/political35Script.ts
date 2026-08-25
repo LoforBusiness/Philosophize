@@ -58,12 +58,12 @@ export const BEATS: Political35Beat[] = [
   },
   {
     p: 13, x: 52, chairs: 1, weight: 0.5,
-    text: 'So far this is just hard. Now here is the part that is strange.',
+    text: 'So far the choice is merely hard. Now comes the strange part.',
     dur: 3.0,
   },
   {
     p: 2, x: 52, chairs: 1, weight: 0.5,
-    text: 'Pick the reckless policy and the world runs differently. Different jobs, different journeys, different couples meeting. Different children.',
+    text: 'Pick the reckless policy and the world runs another way. Other jobs, other journeys, other couples meeting. Other children.',
     dur: 4.6,
   },
   {
@@ -75,7 +75,7 @@ export const BEATS: Political35Beat[] = [
     p: 4, x: 52, chairs: 1, weight: 0.5, swap: 1, live: 1,
     interact: {
       prompt: 'The future is worse. Tap the person we made worse off.',
-      explain: 'There is nobody to tap, and that is the lesson. Everyone in the worse world owes their existence to the choice that made it worse, so not one of them can say they would have been better off. The wrong is obvious and the victim is missing.',
+      explain: 'There is nobody to tap, and the absence is the lesson. Everyone in the worse world owes their existence to the reckless choice, so no one there can say they would have been better off. The wrong is obvious and the victim is missing.',
       xp: 5,
     },
     dur: 1.0,

@@ -41,7 +41,7 @@ export const BEATS: Aes4Beat[] = [
   },
   {
     a: 36, v: 15, test: 2, signed: 1,
-    text: 'Duchamp laid a urinal on its back, signed it "R. Mutt 1917," and submitted it. The committee suppressed it. An anonymous defense replied: it does not matter who made it — "He CHOSE it."',
+    text: 'Duchamp laid a urinal on its back, signed it R. Mutt 1917, and sent the thing in. The committee hid the piece. An unsigned defence replied that the maker did not matter. He chose the object, and choosing was the work.',
     cite: 'The Richard Mutt Case, 1917',
     dur: 5.2,
   },

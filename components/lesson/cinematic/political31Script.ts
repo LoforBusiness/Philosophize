@@ -69,10 +69,14 @@ export const BEATS: Pol31Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'So what actually fixes it?',
-      cards: [
-        { text: 'Change the arithmetic', correct: true },
-        { text: 'Ask people to restrain themselves', correct: false },
-      ],
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'ask', reads: 'ask each herder to take less' },
+          { id: 'shame', reads: 'shame the ones who take too much' },
+          { id: 'rules', reads: 'change what taking too much costs', correct: true },
+        ],
+      },
       explain: 'The other card fails on its own terms, because whoever complies simply loses and the field dies anyway. Despair was Hardin\'s own pessimism — Elinor Ostrom won a Nobel documenting commons that never collapsed, each binding its users to a limit they helped set.',
       xp: 5,
     },
@@ -86,7 +90,7 @@ export const BEATS: Pol31Beat[] = [
         'Restraint alone does not save a commons',
         'Ostrom: real communities fix it by binding themselves',
       ],
-      closing: 'When everyone behaves reasonably and the result is a disaster, stop looking at the people and look at the payoffs.',
+      closing: 'When everyone acts sensibly and the result is a disaster, stop looking at the people and look at the payoffs.',
     },
     dur: 3.0,
   },

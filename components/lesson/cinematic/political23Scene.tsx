@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
 
   tagCap: {
     position: 'absolute', left: TAG_X, top: CAP_Y, width: TAG_W,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
   },
   tag: {
     position: 'absolute', left: TAG_X, width: TAG_W, height: TAG_H,
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
 
   boxCap: {
     position: 'absolute', left: BOX_X, top: CAP_Y, width: BOX_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
   },
   box: {
     position: 'absolute', left: BOX_X, top: BOX_Y, width: BOX_W, height: BOX_H,

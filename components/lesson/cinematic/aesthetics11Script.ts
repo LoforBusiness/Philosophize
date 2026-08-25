@@ -34,7 +34,7 @@ export const BEATS: Aes11Beat[] = [
   },
   {
     p: 47, x: 124, frames: 1, plaques: 1,
-    text: 'Only the plaques tell them apart. Cover those and no visitor, curator or critic has ever reliably sorted them.',
+    text: 'Only the plaques tell the two apart. Cover the plaques and no visitor, curator or critic has ever sorted them reliably.',
     cite: 'The plaques',
     dur: 4.4,
   },
@@ -73,7 +73,7 @@ export const BEATS: Aes11Beat[] = [
         { text: 'An intention it expresses', correct: true },
         { text: 'Nothing, the canvases match', correct: false },
       ],
-      explain: 'The trap: "identical objects, identical value" sounds like rigour. It assumes art is only its surface — and Tolstoy\'s test is transmission, which needs somebody with something to transmit.',
+      explain: 'The trap is that "identical objects, identical value" sounds rigorous. The phrase assumes a work is only its surface. Tolstoy asks instead whether a feeling was passed on, and passing a feeling on takes a person who had one.',
       xp: 5,
     },
     dur: 1.0,

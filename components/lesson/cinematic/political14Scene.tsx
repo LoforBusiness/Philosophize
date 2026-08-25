@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   },
   name: {
     position: 'absolute', left: 10, top: 17, width: 70,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
   bar: { position: 'absolute', bottom: 8, width: BAR_W, backgroundColor: INK },

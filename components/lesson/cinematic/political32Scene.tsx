@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
 
   rowLabel: {
     position: 'absolute', left: BAR_L, width: 90,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
   tick: { position: 'absolute', width: TICK_W, height: TICK_H, backgroundColor: INK },
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   mark: { width: 3.5, height: 22, backgroundColor: INK },
   markText: {
     marginTop: 4,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   boxText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
 

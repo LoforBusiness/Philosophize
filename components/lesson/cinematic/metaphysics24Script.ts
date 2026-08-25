@@ -58,10 +58,16 @@ export const BEATS: Meta24Beat[] = [
     p: 4, x: 124, grains: 1, lamp: 1,
     interact: {
       prompt: 'A friend says: "Just define a heap as 100 grains or more. Solved." Why does that dodge it?',
-      cards: [
-        { text: 'A cut-off would be arbitrary', correct: true },
-        { text: 'Correct, vagueness is sloppiness', correct: false },
-      ],
+      plot: {
+        axis: 'HOW MUCH A HEAP',
+        cols: ['1 GRAIN', '10', '100', '1000', '10000'],
+        start: [0.5, 0.5, 0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'slope', profile: [0.02, 0.2, 0.55, 0.85, 0.98], reads: 'it becomes a heap by degrees', correct: true },
+          { id: 'step', profile: [0, 0, 1, 1, 1], reads: 'one grain flips it, exactly at a hundred' },
+          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5, 0.5], reads: 'the word never settles at all' },
+        ],
+      },
       explain: 'The trap is false precision. It makes 99 a non-heap and 100 a heap with no real difference between them, and it quietly replaces our vague word instead of explaining why the vague word resists a line.',
       xp: 5,
     },
@@ -85,7 +91,7 @@ export const BEATS: Meta24Beat[] = [
         'Epistemicism: a hidden sharp line we cannot know',
         'Other views: truth-gaps, or degrees of truth',
       ],
-      closing: 'Almost every useful word you own has an edge like this. They work anyway, which is the strange part.',
+      closing: 'Almost every useful word you own has a blurred edge like this one. The words work anyway, and that is the strange part.',
     },
     dur: 3.0,
   },

@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 146, top: CAP_T, width: 240,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
   },
 
   ballot: {
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   labelWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   labelText: {
     position: 'absolute', left: 0, top: 6, width: 96, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK, includeFontPadding: false,
   },
 
   speech: { position: 'absolute', left: 206, top: 262, width: 88, height: 22 },
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   },
   speechText: {
     position: 'absolute', left: 0, top: 6, width: 88, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.1, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: INK, includeFontPadding: false,
   },
 });
 

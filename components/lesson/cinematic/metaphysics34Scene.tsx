@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: 118, top: KICK_T, width: 250,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   },
   layerName: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
 
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
 
   ask: {
     position: 'absolute', left: FRAME_L, top: FRAME_T + FRAME_H + 10, width: FRAME_W,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
 });

@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
 
   head: {
     position: 'absolute', left: ST_L, top: HEAD_T, width: ST_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   },
   nightLab: {
     position: 'absolute', left: ST_L - 8, top: STG_T + 3 * STG_PITCH - 6, width: 90,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   stageText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
   onInk: { color: PAPER },

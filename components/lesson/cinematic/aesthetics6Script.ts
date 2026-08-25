@@ -65,7 +65,7 @@ export const BEATS: Aes6Beat[] = [
   {
     p: 15, vast: 1, split: 3, mind: 1,
     interact: {
-      prompt: '"The sublime just means something extremely beautiful." Accurate?',
+      prompt: 'Does the sublime just mean a very beautiful thing?',
       cards: [
         { text: 'No, awe and terror', correct: true },
         { text: 'Yes, very beautiful', correct: false },

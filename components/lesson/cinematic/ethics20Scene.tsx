@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 40, top: CAP_Y, width: 260,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
   horizon: { position: 'absolute', left: 30, top: HORIZON, width: 344, height: 1.5, backgroundColor: INK },
 
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   },
   year: {
     position: 'absolute', top: HORIZON + 6, width: BLOCK_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.6, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: SOFT, includeFontPadding: false,
   },
 });
 

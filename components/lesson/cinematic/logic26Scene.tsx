@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   falseTag: {
     position: 'absolute', left: CH_L, top: LINK_T - 13, width: CH_W, textAlign: 'right',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: INK,
     includeFontPadding: false,
   },
 

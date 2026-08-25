@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: WALL_L, top: KICK_T, width: WALL_R - WALL_L,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
   wall: { position: 'absolute', left: WALL_L, top: WALL_T, width: WALL_R - WALL_L, height: 8, backgroundColor: INK },
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', paddingTop: 12, transformOrigin: '0% 50%',
   },
   doorText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, lineHeight: 10.5, letterSpacing: 0.3, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10.5, letterSpacing: 0.3, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
   knob: { position: 'absolute', right: 7, top: DOOR_H / 2 - 12, width: 7, height: 7, borderRadius: 4, backgroundColor: INK },

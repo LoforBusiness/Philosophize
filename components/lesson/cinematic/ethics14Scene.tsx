@@ -102,7 +102,7 @@ export default function Ethics14Scene({ clock, bt, bi, i, picked, onPick }: Scen
       {[0, 1, 2, 3, 4].map((k) => <Block key={k} k={k} SCENE={SCENE} />)}
 
       {/* ── THE WALL ─────────────────────────────────────────────────────── */}
-      <Text style={styles.wallLabel} numberOfLines={1}>WHAT COMES BACK OVER IT</Text>
+      <Text style={styles.wallLabel} numberOfLines={2}>WHAT COMES BACK OVER IT</Text>
       {[0, 1, 2, 3, 4].map((k) => <Course key={k} k={k} SCENE={SCENE} />)}
       <Doorway SCENE={SCENE} />
 
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   },
   wallLabel: {
     position: 'absolute', left: WALL_L, top: 292, width: WALL_W,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
 
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   boardText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.9, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
 

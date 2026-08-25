@@ -37,13 +37,13 @@ export const BEATS: Aes20Beat[] = [
   },
   {
     p: 45, x: 200, uses: 1, swaps: 0.5, struck: 0.5,
-    text: 'It teaches you things. So does a textbook, faster and with fewer mistakes in it.',
+    text: 'Art teaches you things. So does a textbook, faster and with fewer mistakes.',
     cite: 'Instruction',
     dur: 4.2,
   },
   {
     p: 2, x: 132, uses: 1, swaps: 1, struck: 1,
-    text: 'It records how things looked. A camera does that. It decorates a room, and wallpaper is cheaper.',
+    text: 'Art records how the world looked. A camera does the same. Art decorates a room, and wallpaper is cheaper.',
     dur: 4.4,
   },
   {
@@ -87,7 +87,7 @@ export const BEATS: Aes20Beat[] = [
         { text: 'It narrows it, not proves it', correct: true },
         { text: 'Yes, only one reason survives', correct: false },
       ],
-      explain: 'It narrows the field. An elimination shows which reasons cannot be the whole story, not that the survivor is the true one. Art may well teach and decorate and record. The question was what it does that nothing else can.',
+      explain: 'The list narrows the field. Crossing answers out shows which reasons cannot be the whole story, but crossing out never proves the survivor true. Art may well teach and decorate and record. The question was what art does that nothing else can.',
       xp: 5,
     },
     dur: 1.0,

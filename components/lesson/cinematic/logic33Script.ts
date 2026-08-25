@@ -27,7 +27,7 @@ export const BEATS: Logic33Beat[] = [
   },
   {
     p: 47, x: 52, bend: 0.5,
-    text: 'Give the line a couple of bends and it starts to behave. Now it is near enough to every dot, and it still looks like it means something.',
+    text: 'Give the line a couple of bends and the line starts to behave. Now the line runs near every dot, and still looks like a finding.',
     cite: 'A couple of bends',
     dur: 4.4,
   },

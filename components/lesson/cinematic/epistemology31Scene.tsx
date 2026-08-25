@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: CAB_L, top: KICK_T, width: CAB_W,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', paddingLeft: 10, paddingRight: 26,
   },
   drawerText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, lineHeight: 11, letterSpacing: 0.3, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.3, color: INK,
     includeFontPadding: false,
   },
   // The handle, so a closed blank drawer still reads as a drawer.
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', paddingTop: 8,
   },
   doorText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
   knob: { position: 'absolute', right: 8, top: 74, width: 8, height: 8, borderRadius: 4, backgroundColor: INK },

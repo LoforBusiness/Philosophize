@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   },
   actText: {
     position: 'absolute', left: ACT_X, top: ACT_Y + 10, width: ACT_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK, includeFontPadding: false,
   },
 
   stem: { position: 'absolute', left: 199, top: ACT_Y + ACT_H, width: 2, height: ELBOW_Y - ACT_Y - ACT_H, backgroundColor: SOFT },
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   mUp: { position: 'absolute', left: 100, top: OUT_Y + OUT_H, width: 2.5, height: MEANS_Y - OUT_Y - OUT_H, backgroundColor: INK },
   mCap: {
     position: 'absolute', left: 110, top: MEANS_Y + 4, width: 250,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', top: OUT_Y, width: OUT_W, height: OUT_H },

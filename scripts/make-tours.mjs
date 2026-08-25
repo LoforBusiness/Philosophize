@@ -31,7 +31,7 @@ const ROUTE = 'app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx'
 const dry = process.argv.includes('--dry');
 const stats = process.argv.includes('--stats');
 
-const { checkTour } = await loadTs(path.join(DIR, 'camera.ts'));
+const { checkTour, stationShot, visibleWindow } = await loadTs(path.join(DIR, 'camera.ts'));
 const side = JSON.parse(fs.readFileSync(SIDECAR, 'utf8'));
 
 // DOES THIS SWEEP KNOW WHEN THINGS APPEARED? Asked once, of the whole sidecar,
@@ -188,6 +188,35 @@ for (const [id, comp] of map) {
       ground,
     );
     if (bad.length) { problems.push(`${id} beat ${k}: ${bad.join('; ')}`); per.push(null); continue; }
+
+    // A STATION THAT CUTS A WORD IN HALF IS NOT A STATION.
+    //
+    // `cleanEdges` grows a framing until nothing is half in frame, and it cannot
+    // always converge: widening a box lowers its scale, which widens the window,
+    // which can newly clip something that was wholly outside it a moment before.
+    // Six stations survived that oscillation for a long time, and raising the type
+    // in every scene (D34) made it eight.
+    //
+    // The generator models the camera; this asks the REAL one, which is the whole
+    // reason the two disagreed. A framing that cannot hold a word whole is not
+    // worth holding, and the wide shot is clean by construction — so the beat
+    // simply holds instead.
+    const slices = t.some((st) => {
+      const w = visibleWindow(stationShot({ x: st.box[0], y: st.box[1], w: st.box[2], h: st.box[3] }, band, ground), band);
+      return (words[k] ?? []).some((it) => {
+        if (it.k !== 'text') return false;
+        const [x, y, bw, bh] = it.b;
+        // Text outside the band is unreachable at any shot — an H59 fault in the
+        // scene rather than a framing the camera chose.
+        if (y < band[0] - 0.5 || y + bh > band[1] + 0.5) return false;
+        const over = x < w.right && x + bw > w.left && y < w.bottom && y + bh > w.top;
+        const whole = x >= w.left - 0.5 && x + bw <= w.right + 0.5
+          && y >= w.top - 0.5 && y + bh <= w.bottom + 0.5;
+        return over && !whole;
+      });
+    });
+    if (slices) { per.push(null); continue; }
+
     per.push(t);
     toured++;
     nToured++;

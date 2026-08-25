@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: MAP_X, top: 234, width: 260,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
   },
 
   cell: {
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     position: 'absolute', width: CELL_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: INK, includeFontPadding: false,
   },
-  seaMark: { fontSize: 7.5, letterSpacing: 0.8, color: SOFT },
+  seaMark: { fontSize: 8.6, letterSpacing: 0.8, color: SOFT },
 
   exit: {
     position: 'absolute', width: 14, height: 14, borderRadius: 7,

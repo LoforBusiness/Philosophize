@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   stuckText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.6, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK,
     includeFontPadding: false,
   },
 
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
   onInk: { color: PAPER },

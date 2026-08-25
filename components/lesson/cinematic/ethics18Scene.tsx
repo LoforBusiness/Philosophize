@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   board: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   head: {
     position: 'absolute', top: HEAD_T, width: BD_W,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
   chip: {
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   testKicker: {
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },
   testText: {
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
   onInk: { color: PAPER },

@@ -25,7 +25,7 @@ export interface Aesthetics7Beat extends BaseBeat {
 export const BEATS: Aesthetics7Beat[] = [
   {
     p: 25, x: 90, q: 8, art: 1, capt: 0,
-    text: 'Someone glances at the scribble on this wall, then at the painting beside it, and says the scribble is better. You want to tell them they are wrong. On what grounds?',
+    text: 'Someone glances at the scribble, then at the painting, and says the scribble is better. You want to say that is wrong. On what grounds?',
     dur: 4.0,
   },
   {
@@ -102,7 +102,7 @@ export const BEATS: Aesthetics7Beat[] = [
         'Practice, comparison, no prejudice, good sense',
         'Subjective still leaves room for better and worse',
       ],
-      closing: 'Next time someone shrugs "it is all opinion" — ask how many they have seen.',
+      closing: 'Next time someone shrugs that taste is all opinion, ask how many paintings they have looked at.',
     },
     dur: 3.0,
   },

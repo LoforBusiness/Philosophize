@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
 
   mLabel: {
     position: 'absolute', left: M_X, width: M_W,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
   },
   track: {
     position: 'absolute', left: M_X, width: M_W, height: M_H,

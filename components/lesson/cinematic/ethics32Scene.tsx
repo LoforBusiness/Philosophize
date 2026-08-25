@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   newCaseKicker: {
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },
   newCaseText: {
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   plateText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
   onInk: { color: PAPER },

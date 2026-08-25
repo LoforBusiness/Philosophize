@@ -40,13 +40,13 @@ export const BEATS: Pol22Beat[] = [
   },
   {
     p: 2, x: 200, switchOn: 1, tiles: 1, reach: 1,
-    text: 'The switch is on his wall, and only he can reach it. That does not go away while he leaves it alone.',
+    text: 'The switch is on his wall, and only he can reach the switch. His reach does not go away while he leaves the lever alone.',
     cite: 'Domination',
     dur: 4.8,
   },
   {
     p: 45, x: 132, switchOn: 1, tiles: 1, reach: 1, flip: 1,
-    text: 'If he ever felt like it, this is what happens, and there is nothing whatever she could do about it.',
+    text: 'If he ever felt like it, here is what happens, and there is nothing whatever she could do.',
     dur: 4.6,
   },
   {

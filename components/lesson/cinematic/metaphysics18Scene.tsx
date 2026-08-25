@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 30, top: 230, width: 200,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
 
   stem: { position: 'absolute', top: ARROW_TOP, width: 2, backgroundColor: INK },
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   },
   plinthCap: {
     position: 'absolute', top: PL_Y + 13, width: PL_W, textAlign: 'center', lineHeight: 10,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.7, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.7, color: INK, includeFontPadding: false,
   },
 
   beyStem: {
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   },
   beyondText: {
     position: 'absolute', left: BEY_X, top: BEY_Y + 8, width: BEY_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', top: PL_Y, width: PL_W, height: PL_H },

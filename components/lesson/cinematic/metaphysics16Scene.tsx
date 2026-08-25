@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
 
   label: {
     position: 'absolute', left: 20, top: LABEL_T, width: 360,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
 
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   },
   tag: {
     position: 'absolute', left: 0, right: 0, top: 88,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.9, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
 
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   doseOn: { backgroundColor: INK, borderColor: PAPER },
   doseText: {
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.6, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK,
     includeFontPadding: false,
   },
 

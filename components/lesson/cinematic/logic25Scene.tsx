@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
 
   barLab: {
     position: 'absolute', left: CH_L, width: CH_W,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     includeFontPadding: false,
   },
   bar: { position: 'absolute', left: CH_L, height: BAR_H, backgroundColor: INK, borderRadius: 1 },
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
   onInk: { color: PAPER },

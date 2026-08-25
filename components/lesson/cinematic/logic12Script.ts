@@ -31,7 +31,7 @@ export const BEATS: Logic12Beat[] = [
   {
     g: 2, lit: 0,
     dur: 4.6,
-    text: 'The trick is the claim that these are the only two. That is not an argument you were given; it is a room you were put in.',
+    text: 'The trick is the claim that only two doors exist. Nobody argued for that claim. You were simply put in a room with two doors.',
     cite: 'The claim about the room',
   },
   {
@@ -66,10 +66,14 @@ export const BEATS: Logic12Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'So when is an either/or fair?',
-      cards: [
-        { text: 'When nothing is left out', correct: true },
-        { text: 'Never, all are fallacies', correct: false },
-      ],
+      lever: {
+        start: 2,
+        stops: [
+          { id: 'exhaustive', reads: 'fair when the two doors are the only doors', correct: true },
+          { id: 'popular', reads: 'fair when most people accept the two' },
+          { id: 'never', reads: 'never fair, every either-or is a trick' },
+        ],
+      },
       explain: 'The other card over-corrects, and the light switch refutes it: on or off leaves nothing out and is perfectly good reasoning. What makes a disjunction legitimate is that its options are exhaustive — not how they are offered, or by whom.',
       xp: 5,
     },

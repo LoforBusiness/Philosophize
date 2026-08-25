@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
   // ── the pile ────────────────────────────────────────────────────────────────
   pileLabel: {
     position: 'absolute', left: PILE_L - 1, top: 434, width: PILE_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 1.1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 9.8, letterSpacing: 1.1, color: SOFT,
     includeFontPadding: false,
   },
   pileBlock: {
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
   // ── the tower ───────────────────────────────────────────────────────────────
   towerLabel: {
     position: 'absolute', left: TOWER_L, top: 170, width: TOWER_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 9.8, letterSpacing: 1.6, color: SOFT,
     includeFontPadding: false,
   },
   row: {
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   },
   rowClaim: { backgroundColor: INK, borderColor: INK },
   rowGhost: { borderColor: SOFT, backgroundColor: PAPER },
-  rowLab: { fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.3, color: SOFT, marginBottom: 2, includeFontPadding: false },
+  rowLab: { fontFamily: 'Inter_700Bold', fontSize: 9.8, letterSpacing: 1.3, color: SOFT, marginBottom: 2, includeFontPadding: false },
   rowLabOn: { color: PAPER, opacity: 0.75 },
   rowTxt: { fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 14, color: INK, includeFontPadding: false },
   rowTxtOn: { color: PAPER },
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   // ── the three escapes ───────────────────────────────────────────────────────
   escHead: {
     position: 'absolute', left: ESC_L, top: 170, width: ESC_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 9.8, letterSpacing: 1.6, color: SOFT,
     includeFontPadding: false,
   },
   escWrap: { position: 'absolute', left: ESC_L, width: ESC_W },
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
   // overflow. At 7.5px the difference between 0 and 1.1 is invisible, and 0 leaves
   // 11.8% margin — where 0.2 would leave 8.3%, which is too thin to absorb whatever
   // Android's metrics do to it. The tower labels keep their tracking; they have room.
-  carryText: { fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0, color: INK,
+  carryText: { fontFamily: 'Inter_700Bold', fontSize: 9.8, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
 });

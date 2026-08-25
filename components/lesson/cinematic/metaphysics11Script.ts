@@ -36,7 +36,7 @@ export const BEATS: Metaphysics11Beat[] = [
   },
   {
     p: 30, c: 44, tok: 0,
-    text: 'The plate above the prince is everything he can remember doing: every room, every promise, the whole thread running back to his childhood.',
+    text: 'The plate above the prince holds all he can remember doing. Every room, every promise, the whole thread running back to his childhood.',
     cite: 'What hangs above him',
     dur: 4.2,
   },

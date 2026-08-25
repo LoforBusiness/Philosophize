@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
 
   plate: {
     position: 'absolute', top: CAP_T, width: 200,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
 
   chair: { position: 'absolute', width: SEAT_W, height: 46 },

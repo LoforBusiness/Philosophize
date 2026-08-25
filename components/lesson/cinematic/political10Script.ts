@@ -75,7 +75,7 @@ export const BEATS: Political10Beat[] = [
         { text: 'No, leave enough for others', correct: true },
         { text: 'Yes, grab what you reach', correct: false },
       ],
-      explain: 'The trap: defending property sounds like endorsing limitless grabbing. Locke built the brake into the theory instead — you may take from the common only while enough, and as good, is still left for everybody behind you.',
+      explain: 'The trap is that defending property sounds like defending endless grabbing. Locke built a brake into the theory instead. You may take from the common land only while enough, and as good, is left for everybody behind you.',
       xp: 5,
     },
     dur: 1.0,

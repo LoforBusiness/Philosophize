@@ -90,7 +90,7 @@ export default function Epistemology34Scene({ clock, bt, bi, i, dragPos }: Scene
 
   return (
     <Animated.View style={styles.scene}>
-      <Text style={styles.kicker} numberOfLines={1}>WHAT YOU SAY   ·   WHAT HOLDS</Text>
+      <Text style={styles.kicker} numberOfLines={2}>WHAT YOU SAY   ·   WHAT HOLDS</Text>
 
       <Animated.View style={[styles.claim, claimStyle]} pointerEvents="none" />
       <Animated.View style={[styles.hold, holdStyle]} pointerEvents="none" />
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: 130, top: CAP_T, width: 200,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
 

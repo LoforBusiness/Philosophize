@@ -52,7 +52,7 @@ export const BEATS: Pol5Beat[] = [
         { text: 'Fair rules, hiding who you are', correct: true },
         { text: 'To make everyone equal', correct: false },
       ],
-      explain: 'The veil hides your race, class, and talents, so your chosen principles stay impartial: equal liberties, plus inequalities only if they help the least advantaged.',
+      explain: 'The veil hides your race, your class and your talents, so the rules you pick stay fair. Equal liberties for all, and a gap in wealth only where the gap helps the worst off.',
       xp: 5,
     },
     dur: 1.0,

@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 34, top: 236, width: 240,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
   },
 
   board: {

@@ -33,7 +33,7 @@ export const BEATS: Aes15Beat[] = [
   {
     g: 13, rose: 1, tags: 5,
     dur: 4.8,
-    text: 'Kant is not asking which of them is true. He wants to know which one is a judgement of beauty at all.',
+    text: 'Kant is not asking which of the five claims is true. He wants to know which one is a judgement of beauty at all.',
     cite: 'Not whether you like it',
   },
   {
@@ -45,7 +45,7 @@ export const BEATS: Aes15Beat[] = [
   {
     g: 3, rose: 1, tags: 5,
     dur: 4.6,
-    text: 'A stake is anything you want from the thing. To hold it, to sell it, to furnish a room with it, to be seen beside it.',
+    text: 'A stake is anything you want from the painting. To own the painting. To sell it. To furnish a room. To be seen standing beside it.',
   },
   {
     g: 137, rose: 1, tags: 5,
@@ -65,7 +65,7 @@ export const BEATS: Aes15Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Four of these want something from the rose. Tap the one that does not.',
-      explain: 'Telling someone else to look. The other four are all appetites wearing different clothes — holding it, selling it, decorating with it, being admired next to it. Take any of those away and what you wanted goes with it. Take the looking away and there is nothing left to take.',
+      explain: 'Telling someone else to look. The other four are appetites wearing different clothes: owning, selling, decorating, being admired. Take the appetite away and the wanting goes too. Take the looking away and nothing is left to take.',
       xp: 5,
     },
   },

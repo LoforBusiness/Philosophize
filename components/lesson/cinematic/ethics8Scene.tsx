@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   // ── the rule grid ───────────────────────────────────────────────────────────
   gridLabel: {
     position: 'absolute', left: 0, top: 46, width: STAGE_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 12.8, letterSpacing: 1.8, color: SOFT,
     includeFontPadding: false,
   },
   gridBox: {
@@ -243,14 +243,14 @@ const styles = StyleSheet.create({
   stemFar: { position: 'absolute', left: 3.5, top: 7.5, width: 2, height: 36, backgroundColor: INK, borderRadius: 1 },
   threadLabelWrap: { position: 'absolute', left: 150, top: 352, width: 200 },
   threadLabel: {
-    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT,
+    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 12.8, letterSpacing: 1.8, color: SOFT,
     includeFontPadding: false,
   },
 
   // ── Q1 cards ────────────────────────────────────────────────────────────────
   pickLabelWrap: { position: 'absolute', left: 0, top: 152, width: STAGE_W },
   pickLabel: {
-    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 2, color: SOFT,
+    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 12.8, letterSpacing: 2, color: SOFT,
     includeFontPadding: false,
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },

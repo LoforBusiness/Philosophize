@@ -495,13 +495,13 @@ const styles = StyleSheet.create({
   },
   origHead: {
     position: 'absolute', left: 0, right: 0, top: 5, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.3, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.3, color: SOFT,
     includeFontPadding: false,
   },
   origRule: { position: 'absolute', left: 0, right: 0, top: 19, height: 1, backgroundColor: RULE },
   origRow: { position: 'absolute', left: 0, right: 0, height: 33, alignItems: 'center', justifyContent: 'center' },
   origWho: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
   origFrom: {

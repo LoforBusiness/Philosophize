@@ -24,7 +24,7 @@ export interface A9Beat extends BaseBeat {
 export const BEATS: A9Beat[] = [
   {
     p: 25, x: 80, boxes: true, crown: true,
-    text: 'For most of the history of art, one word did the deciding. If it was beautiful it was art, and if it was not, it was something else.',
+    text: 'For most of the history of art, one word did the deciding. Beautiful things were art. Everything else was something else.',
     dur: 3.8,
   },
   {
@@ -54,7 +54,7 @@ export const BEATS: A9Beat[] = [
   },
   {
     p: 5, x: 208, boxes: true, stands: true,
-    text: 'So the difference is not in the object. It is in what the object is doing. The argument it makes, the moment it makes it in, the history it answers. Beauty came off the throne and became one option among many.',
+    text: 'So the difference is not in the object. The difference is in what the object does: the argument the work makes, the moment it lands in, the history it answers. Beauty came off the throne and became one option among many.',
     cite: 'Beauty dethroned',
     dur: 5.0,
   },
@@ -62,10 +62,14 @@ export const BEATS: A9Beat[] = [
     p: 3, x: 208, boxes: true, stands: true,
     interact: {
       prompt: 'So where does beauty stand now — required, or optional?',
-      cards: [
-        { text: 'An option, not a requirement', correct: true },
-        { text: 'Beauty was banned from art', correct: false },
-      ],
+      lever: {
+        start: 0,
+        stops: [
+          { id: 'must', reads: 'a work must be beautiful to count' },
+          { id: 'may', reads: 'a work may be beautiful, and need not be', correct: true },
+          { id: 'never', reads: 'beauty was thrown out altogether' },
+        ],
+      },
       explain: 'An option, not a condition. The trap is hearing "dethroned" as "banned." A work can still be beautiful, it just no longer has to be, because what made it art was never the beauty.',
     },
     dur: 4.6,

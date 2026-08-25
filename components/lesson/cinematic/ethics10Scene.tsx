@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   dash: { position: 'absolute', top: FAR_G - 1, width: 10, height: 1.5, backgroundColor: RULE },
   farLabel: {
     position: 'absolute', left: 88, top: FAR_G + 8, width: 120,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.6, color: SOFT,
     includeFontPadding: false,
   },
 

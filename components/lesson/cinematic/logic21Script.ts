@@ -40,7 +40,7 @@ export const BEATS: Log21Beat[] = [
   },
   {
     p: 2, x: 200, chips: 1, bench: 1, under: 0,
-    text: 'Two tests, and they are different questions. Take it away and see. Then put it in on its own and see.',
+    text: 'Two tests, and they ask different questions. Take the lamp away and see. Then switch that lamp on alone and see.',
     cite: 'The bench',
     dur: 4.8,
   },
@@ -53,7 +53,7 @@ export const BEATS: Log21Beat[] = [
     p: 4, x: 132, chips: 1, bench: 1, under: 0, live: 1,
     interact: {
       prompt: 'Tap the one you must have, which is still not enough.',
-      explain: 'Oxygen. Take it away and nothing burns, so it is required. Fill a room with it and nothing happens either, so it is not enough. Those two facts are independent, which is the whole reason the words are worth keeping apart.',
+      explain: 'Oxygen. Take oxygen away and nothing burns, so oxygen is required. Fill a room with oxygen and nothing happens, so oxygen is not enough on its own. Those two facts are independent, and that is why the words are worth keeping apart.',
       xp: 5,
     },
     dur: 1.0,
@@ -111,7 +111,7 @@ export const BEATS: Log21Beat[] = [
         'A condition can be either, both, or neither',
         'Most confusions here have put something in the wrong box',
       ],
-      closing: 'Take it away, then put it in alone. Two tests, and they can disagree.',
+      closing: 'Take the thing away, then try the thing alone. Two tests, and the answers can disagree.',
     },
     dur: 3.4,
   },

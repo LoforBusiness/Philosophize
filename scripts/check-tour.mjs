@@ -249,12 +249,15 @@ if (k6) fails++; else ok('no graded, drag or summary beat carries a tour (K6)');
         }
       });
     }
-    // A BUDGET, AND IT IS A DEBT. 6 of 294 survive `cleanEdges`, and more passes do
+    // A BUDGET, AND IT IS A DEBT. It was 6, and raising the type across every scene
+    // (D34) took it to 8 — so `make-tours` now asks the REAL camera whether a station
+    // slices a word and simply does not emit one that does. That took it to 5, at the
+    // cost of 21 stations that are now holds. What is left: `cleanEdges` and more passes do
     // not shift them — the growth oscillates rather than converging, because widening
     // a box lowers its scale, which widens the window, which can newly clip something
     // that was wholly outside it a moment earlier. They are all a label sitting a unit
     // or two over one edge. Lower this number when they are fixed; do not raise it.
-    const SLICE_BUDGET = 6;
+    const SLICE_BUDGET = 5;
     if (sliced > SLICE_BUDGET) bad(`${sliced} of ${seen} stations cut a word in half, budget ${SLICE_BUDGET} — a held framing is the picture, not a moment (D)`);
     else ok(`no more than ${SLICE_BUDGET} stations cut a word in half (D)`, `${sliced} of ${seen}`);
   }

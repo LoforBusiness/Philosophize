@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   shelfText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK,
     includeFontPadding: false,
   },
 
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   topRungText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK,
     includeFontPadding: false,
   },
 

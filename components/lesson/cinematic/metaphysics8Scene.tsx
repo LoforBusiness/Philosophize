@@ -233,19 +233,19 @@ const styles = StyleSheet.create({
   // ── the captions at the two ends of the line ────────────────────────────────
   capPast: {
     position: 'absolute', left: 226, top: 276, width: 160, textAlign: 'right',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1.6, color: SOFT,
     includeFontPadding: false,
   },
   capNext: {
     position: 'absolute', left: 14, top: 252, width: 150, textAlign: 'left',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1.6, color: SOFT,
     includeFontPadding: false,
   },
 
   // ── the YOUR CHOICE tag, tethered to domino 3 ───────────────────────────────
   markLabel: {
     position: 'absolute', left: MARK_X - 55, top: 276, width: 120, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.8, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1.8, color: INK,
     includeFontPadding: false,
   },
   markTick: { position: 'absolute', left: MARK_X + 4, top: 291, width: 2, height: 15, backgroundColor: INK },
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   // ── Q1 cards ────────────────────────────────────────────────────────────────
   pickLabelWrap: { position: 'absolute', left: 0, top: 134, width: STAGE_W },
   pickLabel: {
-    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 2, color: SOFT,
+    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 2, color: SOFT,
     includeFontPadding: false,
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },

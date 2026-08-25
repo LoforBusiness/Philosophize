@@ -92,10 +92,6 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
   const held = useSharedValue(0);           // 0 released · 1 finger down
   const done = useSharedValue(0);           // 0 open · 1 answered and revealed
   const lastZone = useSharedValue(-1);      // for the tick as a boundary is crossed
-  // Where the knob was when this drag began. `translationX` is cumulative from the
-  // press, so integrating a per-frame delta instead drifts; this version of
-  // gesture-handler has no `changeX` to integrate anyway.
-  const grabbed = useSharedValue(drag.start);
 
   // DECLARED BEFORE EVERY WORKLET THAT CALLS IT. The babel plugin rewrites a
   // 'worklet' function into a const and builds closures at module scope, so a
@@ -118,20 +114,38 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
     done.value = withDelay(140, withTiming(1, { duration: REVEAL, easing: Easing.out(Easing.cubic) }));
   }, [answered, done]);
 
+  // THE VALUE FOLLOWS WHERE THE FINGER IS, NOT HOW FAR IT HAS MOVED.
+  //
+  // This integrated `translationX / width`, which means the full range cost a
+  // full WIDTH of travel — and the reader reported the consequence exactly:
+  // "my finger gets to the end of the screen and I'll answer wrong because I
+  // can't move it enough". Starting anywhere but the far edge, the far end was
+  // literally unreachable inside the screen.
+  //
+  // Absolute placement removes the failure instead of retuning it: touch the far
+  // end and you ARE at the far end, a tap sets the value, and there is no gain to
+  // get wrong. `FieldPick` and `ShapePlot` were built this way and are the two
+  // nobody complained about.
+  const setAt = useCallback((x: number) => {
+    'worklet';
+    const p = x / railW.value;
+    pos.value = p < 0 ? 0 : p > 1 ? 1 : p;
+    const z = zoneAt(pos.value);
+    if (z !== lastZone.value) { lastZone.value = z; runOnJS(touch)(); }
+  }, [railW, pos, zoneAt, lastZone]);
+
   const pan = Gesture.Pan()
     .enabled(!answered)
-    .onBegin(() => {
+    .minDistance(0)
+    .onBegin((e) => {
       held.value = withTiming(1, { duration: 120 });
-      grabbed.value = pos.value;
       lastZone.value = zoneAt(pos.value);
+      setAt(e.x);
     })
     .onUpdate((e) => {
-      const raw = grabbed.value + e.translationX / railW.value;
-      pos.value = raw < 0 ? 0 : raw > 1 ? 1 : raw;
-      // A tick as the verdict word flips. This is the whole feel of the control:
-      // the reader hunts the boundary by touch as much as by reading.
-      const z = zoneAt(pos.value);
-      if (z !== lastZone.value) { lastZone.value = z; runOnJS(touch)(); }
+      setAt(e.x);
+      // The tick as the verdict word flips lives in `setAt` — it is the whole
+      // feel of the control, and it has to fire on a tap as well as a drag.
     })
     .onEnd(() => {
       held.value = withTiming(0, { duration: 160 });

@@ -32,7 +32,7 @@ export const BEATS: Eth14Beat[] = [
   {
     g: 13, built: 0,
     dur: 4.8,
-    text: 'That last sentence is the whole problem. The case for leaving is not that freedom is bad. It is that everyone else has it too.',
+    text: 'That last sentence is the whole problem. The case for leaving is not that freedom is bad. The case is that everyone else has freedom too.',
     cite: 'The state of nature',
   },
   {
@@ -91,7 +91,7 @@ export const BEATS: Eth14Beat[] = [
         'Hobbes seals the wall; Locke leaves a door',
         'Rawls asks you to choose the rules blind to your place',
       ],
-      closing: 'You never signed it, and you are living behind it. Would you have?',
+      closing: 'You never signed the wall, and you live behind it anyway. Would you have signed?',
     },
     dur: 3.0,
   },

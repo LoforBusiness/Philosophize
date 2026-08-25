@@ -102,7 +102,7 @@ export const BEATS: Logic36Beat[] = [
         'A token search makes it worth nothing',
         'The slogan is true of bad searches only',
       ],
-      closing: 'The question is never whether they found it. It is whether they would have, and that one usually has an answer you can work out.',
+      closing: 'The question is never whether the searcher found the thing. The question is whether the searcher would have found it, and that question usually has an answer you can work out.',
     },
     dur: 3.2,
   },

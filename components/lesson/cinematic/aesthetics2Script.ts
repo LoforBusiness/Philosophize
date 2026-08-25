@@ -25,13 +25,13 @@ export const BEATS: Aes2Beat[] = [
   },
   {
     a: 7, v: 0, wave: true, felt: true, chain: 3,
-    text: 'Forget beauty and forget skill. Tolstoy’s word for art is infection. The maker feels something, puts it into the work, and you catch it off them. Collingwood adds that they often do not know the feeling until it is made.',
+    text: 'Forget beauty and forget skill. Tolstoy calls art an infection. The maker feels something, puts the feeling into the work, and you catch the feeling off the work. Collingwood adds that makers often do not know the feeling until the work is finished.',
     cite: 'Expression theory',
     dur: 5.0,
   },
   {
     a: 15, v: 15, wave: true, felt: true, chain: 3,
-    text: 'A boy who once met a wolf tells it so well that the room is frightened too. That is art, Tolstoy says, and it only works if he means it.',
+    text: 'A boy who once met a wolf tells the story so well that the room is frightened too. Tolstoy calls that art, and says the telling only works if the boy means every word.',
     cite: 'Tolstoy, What Is Art?, 1897',
     dur: 4.8,
   },

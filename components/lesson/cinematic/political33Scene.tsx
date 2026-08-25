@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: WALL_L, top: CAP_T, width: 230,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
 

@@ -84,10 +84,15 @@ export const BEATS: Aes18Beat[] = [
     p: 41, x: 268, curve: 1, body: 1, empty: 1,
     interact: {
       prompt: 'Sad music moves you. Where is the sadness?',
-      cards: [
-        { text: 'In the listener, not the notes', correct: true },
-        { text: 'Inside the music itself', correct: false },
-      ],
+      split: {
+        left: 'IN THE NOTES', right: 'IN THE LISTENER',
+        start: 0.5,
+        zones: [
+          { id: 'notes', upto: 0.34, reads: 'the sadness sits in the sound' },
+          { id: 'both', upto: 0.66, reads: 'half in the sound, half in you' },
+          { id: 'you', upto: 1, reads: 'the notes carry a shape, you do the feeling', correct: true },
+        ],
+      },
       explain: 'In the listener. The notes carry a shape, you recognise it, and the feeling happens in you. That is also why it is bearable: nothing has actually gone wrong in your life, so you get the shape of grief without the loss.',
       xp: 5,
     },

@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 150, top: CAP_T, width: 240,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
   },
 
   water: { position: 'absolute', left: 128, top: WATER_Y, width: 260, height: 2, backgroundColor: INK },
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   tickTail: { position: 'absolute', left: 208, top: 406, width: 3, height: 7, backgroundColor: INK, transform: [{ rotate: '40deg' }] },
   tickLabel: {
     position: 'absolute', left: 178, top: 420, width: 68, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
 
   card: {
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   },
   cardText: {
     position: 'absolute', left: CARD_X, top: CARD_Y + 11, width: 116, textAlign: 'center', lineHeight: 11,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK, includeFontPadding: false,
   },
 });
 

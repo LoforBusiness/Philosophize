@@ -33,7 +33,7 @@ export const BEATS: Metaphysics33Beat[] = [
   },
   {
     p: 47, x: 62, fall: 1,
-    text: 'Now it falls. You have watched that a thousand times and it needs no explaining.',
+    text: 'Now the cup falls. You have watched a cup fall a thousand times and it needs no explaining.',
     cite: 'The tower goes over',
     dur: 3.4,
   },
@@ -97,7 +97,7 @@ export const BEATS: Metaphysics33Beat[] = [
         { text: 'From how it all started', correct: true },
         { text: 'From the equations', correct: false },
       ],
-      explain: 'The other card cannot be right. The equations run backwards perfectly well, which is what the reversed film showed. So the asymmetry has to sit in the starting conditions, and the universe began extraordinarily ordered.',
+      explain: 'The other card cannot be right. The equations run backwards perfectly well, as the reversed film showed. So the one-way feel has to come from the starting conditions, and the universe began in a very tidy state.',
       xp: 5,
     },
     dur: 1.0,

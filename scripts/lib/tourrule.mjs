@@ -274,6 +274,35 @@ export function cleanEdges(box, band, all, ground) {
   return out;
 }
 
+/**
+ * Does this framing still cut a word in half?
+ *
+ * `cleanEdges` grows a box until nothing is half in frame, and it does not always
+ * converge: widening a box lowers its scale, which widens the window, which can
+ * newly clip something that was wholly outside it a moment earlier. Six stations
+ * survived that oscillation for a long time, and raising the type in every scene
+ * (D34) made it eight.
+ *
+ * The answer is not a bigger budget. A framing that cannot hold a word whole is
+ * not worth holding, and the wide shot is always clean — so the caller drops the
+ * station rather than shipping a station that slices a label.
+ */
+export function slicesWord(box, band, all, ground) {
+  const w = windowOf(box, band, ground);
+  for (const it of all ?? []) {
+    if (it.k !== 'text') continue;
+    const [x, y, bw, bh] = it.b;
+    // Text outside the band is unreachable at any shot — an H59 fault in the
+    // scene, not a framing the camera chose (same reason `cleanEdges` skips it).
+    if (y < band[0] - 0.5 || y + bh > band[1] + 0.5) continue;
+    const overlaps = x < w.right && x + bw > w.left && y < w.bottom && y + bh > w.top;
+    const whole = x >= w.left - 0.5 && x + bw <= w.right + 0.5
+      && y >= w.top - 0.5 && y + bh <= w.bottom + 0.5;
+    if (overlaps && !whole) return true;
+  }
+  return false;
+}
+
 /** Is an item's box wholly inside `o`? Half a unit of slack for rounding. */
 const inside = (b, o) =>
   b[0] >= o[0] - 0.5 && b[1] >= o[1] - 0.5 &&
@@ -383,6 +412,10 @@ export function lessonTours(beats, band, ground) {
     if (!fresh.length) { out.push(null); continue; }              // nothing happens: hold
     const need = clampToBand(union(fresh), band);
     const box = cleanEdges(need, band, raw, ground);
+
+    // A STATION THAT STILL CUTS A WORD IS NOT A STATION — hold the wide shot,
+    // which frames everything whole by construction. See `slicesWord`.
+    if (slicesWord(box, band, raw, ground)) { out.push(null); continue; }
 
     // ── THE REASON TO MOVE IS EMPHASIS, NOT VISIBILITY ───────────────────────
     //

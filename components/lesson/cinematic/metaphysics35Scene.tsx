@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   ringWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   linkLabel: {
     position: 'absolute', left: -24, top: KNOT_R * 2 + 4, width: 76, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
 
   tieHalf: { position: 'absolute', top: KNOT_Y - 1, width: 66, height: 2, backgroundColor: INK },
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   branchRun: { position: 'absolute', left: 200, top: 344, width: 160, height: 2, backgroundColor: SOFT },
   branchLabel: {
     position: 'absolute', left: 206, top: 350, width: 160,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
 });
 

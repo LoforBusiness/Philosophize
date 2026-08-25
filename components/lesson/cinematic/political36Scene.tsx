@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 118, top: CAP_T, width: 270,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
   },
 
   winFrame: {
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   guardLabel: {
     position: 'absolute', left: 188, top: 270, width: 44, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
   },
 
   pick: { position: 'absolute', height: 24 },
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   pickWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   pickText: {
     position: 'absolute', left: 0, top: 7, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK, includeFontPadding: false,
   },
 });
 

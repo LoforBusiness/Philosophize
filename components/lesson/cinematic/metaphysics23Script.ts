@@ -58,7 +58,7 @@ export const BEATS: Met23Beat[] = [
   },
   {
     p: 21, x: 132, ships: 1, swap: 1, built: 1,
-    text: 'Two criteria that normally agree. Unbroken use points left. Original matter points right. Nothing decides between them.',
+    text: 'Two tests that normally agree. Unbroken use points left. Original wood points right. Nothing on the stage decides between the two.',
     cite: 'Two readings of same',
     dur: 4.4,
   },

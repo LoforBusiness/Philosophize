@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     width: LINK_BOX, alignItems: 'center',
   },
   linkCap: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, lineHeight: 12, letterSpacing: 1.2,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 12, letterSpacing: 1.2,
     color: INK, includeFontPadding: false,
   },
   linkLine: { width: LINK_W, height: 2, backgroundColor: INK, marginTop: LINK_Y - LINK_CAP_T - 12 },
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
     color: INK, includeFontPadding: false,
   },
   pickNote: {
-    fontFamily: 'Inter_500Medium', fontSize: 8.5, lineHeight: 12, letterSpacing: 0.6,
+    fontFamily: 'Inter_500Medium', fontSize: 8.6, lineHeight: 12, letterSpacing: 0.6,
     color: SOFT, marginTop: 2, includeFontPadding: false,
   },
   pickTextOn: { color: PAPER },

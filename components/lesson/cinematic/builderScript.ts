@@ -116,7 +116,7 @@ export const BEATS: Beat[] = [
     act: 2,
     build: { p1: '', p2: '', key: '', tags: true },
     gest: 6,                                        // point up at the keystone
-    text: 'The stone they hold up is the conclusion — what Aristotle called the claim that "follows of necessity." Therefore, so and thus flag it.',
+    text: 'The stone on top is the conclusion. Aristotle called it the claim that must follow. The words therefore, so and thus all flag one.',
     cite: 'Aristotle, Prior Analytics',
     dur: 4.4,
   },

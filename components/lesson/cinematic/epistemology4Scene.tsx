@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   },
   tiny: {
     position: 'absolute', textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 100, top: 286, width: 200, height: 56,
     borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER, alignItems: 'center',
   },
-  kantTag: { marginTop: 4, fontFamily: 'Inter_700Bold', fontSize: 8, lineHeight: 11, letterSpacing: 1.6, color: SOFT, includeFontPadding: false },
+  kantTag: { marginTop: 4, fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 1.6, color: SOFT, includeFontPadding: false },
   kantA: { marginTop: 3, fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 0.4, color: INK, includeFontPadding: false },
   kantB: { marginTop: 3, fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 15, letterSpacing: 0.6, color: INK, includeFontPadding: false },
 

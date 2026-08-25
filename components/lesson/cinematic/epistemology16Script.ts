@@ -75,10 +75,16 @@ export const BEATS: Epi16Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'A theory that fits every possible outcome. Strength or flaw?',
-      cards: [
-        { text: 'A flaw — it forbids nothing', correct: true },
-        { text: 'A strength — nothing refutes it', correct: false },
-      ],
+      drag: {
+        lo: 'FORBIDS NOTHING',
+        hi: 'FORBIDS ALMOST ALL',
+        start: 0,
+        zones: [
+          { id: 'safe', upto: 0.3, reads: 'fits every outcome, so it risks nothing' },
+          { id: 'good', upto: 0.72, reads: 'rules out a great deal, and could be caught', correct: true },
+          { id: 'wild', upto: 1, reads: 'rules out so much it is already refuted' },
+        ],
+      },
       explain: 'The other card is what almost everyone says first, and it is why bad theories survive so long. Being unrefutable sounds like being unbeaten. It is closer to never having entered: a claim that rules out no result tells you nothing about which result you will get.',
       xp: 5,
     },
@@ -92,7 +98,7 @@ export const BEATS: Epi16Beat[] = [
         'Fitting every outcome is emptiness, not strength',
         'Einstein named the result that would have killed his theory',
       ],
-      closing: 'The strength of a real theory is its vulnerability. It dares the world to prove it wrong.',
+      closing: 'A real theory is strong because it can be broken. The theory dares the world to prove it wrong.',
     },
     dur: 3.0,
   },

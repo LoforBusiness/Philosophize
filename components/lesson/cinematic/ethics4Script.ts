@@ -79,7 +79,7 @@ export const BEATS: Ethics4Beat[] = [
   {
     a: 8, b: 4, floor: 1, rows: 3,
     interact: {
-      prompt: 'If relativism is true, then everyone is obligated to tolerate every other culture. Does that follow?',
+      prompt: 'If every culture sets its own rules, must each one tolerate the rest?',
       explain:
         'It sounds open-minded, but it backfires: if all values are merely local, "tolerance suits us" cannot become "everyone must tolerate." Relativism cannot ground a universal duty.',
       xp: 5,
@@ -95,7 +95,7 @@ export const BEATS: Ethics4Beat[] = [
         'Brown found a shared moral floor',
         'Tolerance does not follow from relativism',
       ],
-      closing: 'Understanding a culture is not surrendering judgment; it is judging with open eyes.',
+      closing: 'Understanding a culture is not giving up judgement. It is judging with open eyes and a longer look.',
     },
     dur: 2.8,
   },

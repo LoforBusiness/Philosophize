@@ -40,7 +40,7 @@ export const BEATS: Political11Beat[] = [
   },
   {
     p: 35, x: 120, dial: 1, set: 1, built: 1,
-    text: 'Hobbes turns it to FEARFUL. Everyone is roughly equal, so everyone can kill everyone, so everyone strikes first. Only a power above the whole quarrel can end it — and it must be tall enough that nobody can reach over it.',
+    text: 'Hobbes turns the dial to FEARFUL. Everyone is roughly equal, so everyone can kill everyone, so everyone strikes first. Only a power standing above the quarrel can stop it, and that power must be too tall to reach over.',
     cite: 'Hobbes · the war of all against all',
     dur: 5.0,
   },
@@ -101,7 +101,7 @@ export const BEATS: Political11Beat[] = [
         'Each reading demands a different contract',
         'Argue the premise before you argue the cure',
       ],
-      closing: 'Every argument about government begins, quietly, with a claim about who we are.',
+      closing: 'Every argument about government starts with a quiet claim about what we are like.',
     },
     dur: 3.0,
   },

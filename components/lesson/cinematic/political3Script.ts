@@ -50,7 +50,7 @@ export const BEATS: Pol3Beat[] = [
   },
   {
     sub: 0, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
-    text: 'Locke said we set up government to guard our rights, holding power only in trust. Break that trust and it forfeits its rule. America’s founders drew on these Lockean ideas in 1776.',
+    text: 'Locke said we set up a government to guard our rights, and it holds power only in trust. Break the trust and the government forfeits its right to rule. The American founders leaned on Locke in 1776.',
     cite: 'Locke, 1689',
     dur: 5.0,
   },
@@ -88,7 +88,7 @@ export const BEATS: Pol3Beat[] = [
   {
     sub: 4, r: 0, scroll: 1, pair: 2, flow: 1, seal: 1,
     interact: {
-      prompt: 'Rousseau prized the general will, so a 51% majority vote must always equal it. Correct?',
+      prompt: 'Rousseau prized the general will. Does a bare majority vote always match it?',
       cards: [
         { text: 'No, a majority can err', correct: true },
         { text: 'Yes, the majority decides', correct: false },
@@ -107,7 +107,7 @@ export const BEATS: Pol3Beat[] = [
         'Rousseau: law must serve the general will',
         'Democracy fuses rights and popular sovereignty',
       ],
-      closing: 'Every election whispers it: rulers answer to the ruled.',
+      closing: 'Every election says the same quiet thing. Rulers answer to the ruled.',
     },
     dur: 2.8,
   },

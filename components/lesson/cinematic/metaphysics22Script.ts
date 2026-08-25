@@ -77,7 +77,7 @@ export const BEATS: Met22Beat[] = [
   },
   {
     p: 13, x: 268, track: 1, runs: 1, open: 1,
-    text: 'Libertarians want a replay that really could go the other way. But then nothing about you settles which way it goes.',
+    text: 'Libertarians want a replay that really could go the other way. But then nothing about you settles which branch the run takes.',
     cite: 'The luck problem',
     dur: 4.8,
   },

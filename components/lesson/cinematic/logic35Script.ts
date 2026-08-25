@@ -32,7 +32,7 @@ export interface Logic35Beat extends BaseBeat {
 export const BEATS: Logic35Beat[] = [
   {
     p: 25, x: 62, rise: 0,
-    text: 'Two things, measured all summer. Watch them.',
+    text: 'Two things, measured all summer. Watch the two lines move.',
     dur: 2.8,
   },
   {
@@ -73,7 +73,7 @@ export const BEATS: Logic35Beat[] = [
   },
   {
     p: 35, x: 130, rise: 1, under: 1, cut: 1,
-    text: 'It is rarely this obvious. Children with bigger feet read better, and the whole of it is age. Coffee looked deadly for years because smokers drank it.',
+    text: 'The link is rarely this obvious. Children with bigger feet read better, and the whole cause is age. Coffee looked deadly for years because smokers drank coffee.',
     dur: 4.8,
   },
   {

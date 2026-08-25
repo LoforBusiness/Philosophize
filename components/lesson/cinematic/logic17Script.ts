@@ -42,7 +42,7 @@ export const BEATS: Log17Beat[] = [
   },
   {
     p: 2, x: 200, pair: 1, marks: 1,
-    text: 'Look at what is under each one. The left claim shows its reasons. The right claim says only that he saw it.',
+    text: 'Look at what sits under each column. The left claim prints its reasons. The right claim rests on nothing but the speaker\'s word.',
     cite: 'Two different objects',
     dur: 4.6,
   },
@@ -53,7 +53,7 @@ export const BEATS: Log17Beat[] = [
   },
   {
     p: 13, x: 132, pair: 1, marks: 1, slur: 1,
-    text: 'The insult landed on both columns equally. Notice that it never touched a single reason.',
+    text: 'The insult landed on both columns equally. Notice how the insult never touched a single reason.',
     cite: 'Ad hominem',
     dur: 4.0,
   },
@@ -74,7 +74,7 @@ export const BEATS: Log17Beat[] = [
     p: 4, x: 132, pair: 1, marks: 1, slur: 1, lift: 1, live: 1,
     interact: {
       prompt: 'Lift both claims off their speaker. Tap the one still standing.',
-      explain: 'The one with its reasons printed under it. An argument carries its own support, so who says it changes nothing. The other was only ever the speaker\'s word, and a liar\'s word is worth less. That is not a fallacy, it is the difference.',
+      explain: 'The column with reasons printed under it. An argument carries its own support, so the speaker\'s character changes nothing. The other column was only ever the speaker\'s word, and a liar\'s word is worth less. Noticing that difference is not a fallacy.',
       xp: 5,
     },
     dur: 1.0,
@@ -92,7 +92,7 @@ export const BEATS: Log17Beat[] = [
         { text: 'Their track record', correct: true },
         { text: 'The reasons they gave', correct: false },
       ],
-      explain: 'Their track record, because they gave you no reasons to check. That is testimony, and accepting it is perfectly rational. It is worth exactly what the source is worth. The mistake is using that move on an argument, which needs no source at all.',
+      explain: 'Their track record, because they gave you no reasons to check. Bare testimony is worth exactly what the speaker is worth, so weighing the speaker is perfectly rational. The mistake is weighing the speaker when reasons are on the table.',
       xp: 5,
     },
     dur: 1.0,

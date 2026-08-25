@@ -20,7 +20,7 @@ export interface Pol15Beat extends BaseBeat {
 export const BEATS: Pol15Beat[] = [
   {
     p: 25, x: 70,
-    text: 'Breaking the law can be the most law-respecting thing a person does — but only under conditions strict enough that most lawbreaking fails them.',
+    text: 'Breaking a law can be the most law-respecting thing a person does. But the conditions are strict, and most lawbreaking fails them.',
     dur: 4.6,
   },
   {
@@ -57,10 +57,17 @@ export const BEATS: Pol15Beat[] = [
     p: 4, x: 124, stages: 4, night: 1,
     interact: {
       prompt: 'A protester smashes windows by night and hides from the police. Civil disobedience?',
-      cards: [
-        { text: 'No, it fails every condition', correct: true },
-        { text: 'Yes, it protests injustice', correct: false },
-      ],
+      field: {
+        xLo: 'HIDDEN', xHi: 'DONE IN THE OPEN',
+        yLo: 'TAKES THE PENALTY', yHi: 'RUNS FROM IT',
+        start: [0.24, 0.24],
+        quads: [
+          { id: 'crime', x: 0, y: 0, reads: 'hidden, and no penalty taken: a crime' },
+          { id: 'open', x: 1, y: 0, reads: 'open, and the penalty accepted', correct: true },
+          { id: 'riot', x: 0, y: 1, reads: 'hidden, and running: still just a crime' },
+          { id: 'stunt', x: 1, y: 1, reads: 'open, but running from the cost' },
+        ],
+      },
       explain: 'The trap is the other card, which is how the phrase is usually used. King and Rawls set a much narrower bar: public, nonviolent, penalty-accepting. Strip those and what is left is ordinary crime with a motive.',
       xp: 5,
     },

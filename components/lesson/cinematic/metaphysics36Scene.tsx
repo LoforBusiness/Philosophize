@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 110, top: CAP_T, width: 260,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
   },
 
   door: { position: 'absolute', width: DOOR_W, height: DOOR_H + 12 },
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   },
   doorNo: {
     position: 'absolute', left: 0, top: DOOR_H + 1, width: DOOR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.3, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.3, color: SOFT, includeFontPadding: false,
   },
   guest: { position: 'absolute', width: DOOR_W - 16, height: DOOR_H - 16, borderRadius: 3, backgroundColor: INK },
 
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   },
   deskLabel: {
     position: 'absolute', left: 22, top: 412, width: 78, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', width: DOOR_W, height: DOOR_H },

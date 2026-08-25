@@ -86,7 +86,7 @@ export const BEATS: Epi4Beat[] = [
         { text: 'Some truths need reason alone', correct: true },
         { text: 'All truths come from reason', correct: false },
       ],
-      explain: 'They say SOME truths come before experience. Not that experience is worthless — that is the overshoot, and no rationalist ever held it.',
+      explain: 'They say SOME truths come before experience. They do not say experience is worthless. The second claim is the overshoot, and no rationalist ever made it.',
       xp: 5,
     },
     dur: 1.0,

@@ -29,7 +29,7 @@ export const BEATS: Aes31Beat[] = [
   {
     g: 40, strings: 4, playing: 1, clapA: 1, clapB: 0,
     dur: 3.8,
-    text: 'Polite applause. Nobody stands up.',
+    text: 'The applause is polite. Nobody stands up.',
     cite: 'The first time',
   },
   {
@@ -53,7 +53,7 @@ export const BEATS: Aes31Beat[] = [
   {
     g: 40, strings: 1, playing: 1, clapA: 1, clapB: 1,
     dur: 4.6,
-    text: 'And the room is on its feet. Nothing that reached anybody\'s ears was different. The meter is the only thing in this picture that moved.',
+    text: 'And the room is on its feet. Not one sound reaching anybody\'s ears had changed. The meter is the only thing on stage that moved.',
     cite: 'The second time',
   },
   {

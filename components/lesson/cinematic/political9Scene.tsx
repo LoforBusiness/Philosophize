@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', paddingVertical: 7,
   },
   tallyTag: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.8, color: SOFT,
     includeFontPadding: false,
   },
   tallyRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 2 },

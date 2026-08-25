@@ -89,7 +89,7 @@ export const BEATS: Meta5Beat[] = [
         'Dasein: a being whose being is in question',
         'Wonder is where metaphysics catches fire',
       ],
-      closing: 'You belong to a universe that can ask why it exists — so go ahead and ask.',
+      closing: 'You belong to a universe that can ask why there is anything. So go ahead and ask.',
     },
     dur: 2.8,
   },

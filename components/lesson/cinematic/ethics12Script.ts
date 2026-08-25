@@ -35,7 +35,7 @@ export const BEATS: Ethics12Beat[] = [
   },
   {
     p: 26, x: 124, n: 3, word: 0.55,
-    text: 'Kant never asks what it costs you. He asks whether your maxim could be a law that everyone follows — so hand it to the whole world and run it.',
+    text: 'Kant never asks what the act costs you. He asks whether your rule could be a law that everyone follows. So hand the rule to the whole world and run it.',
     cite: 'The test',
     dur: 4.8,
   },

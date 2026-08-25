@@ -57,7 +57,7 @@ export const BEATS: Pol21Beat[] = [
     p: 4, x: 132, map: 1, claimed: 1, exit: 1, live: 1,
     interact: {
       prompt: 'Tap the only ground no state claims.',
-      explain: 'The open sea, and it is not a consolation. A choice counts as agreement when refusing was genuinely available. Leaving means money, papers, a language and another state at the far end, so staying is what almost everybody does whatever they think.',
+      explain: 'The open sea, and the sea is no comfort. A choice counts as agreement only when refusing was really open to you. Leaving takes money, papers, a new language and another state at the far end. So almost everybody stays, whatever they think.',
       xp: 5,
     },
     dur: 1.0,
@@ -77,7 +77,7 @@ export const BEATS: Pol21Beat[] = [
   },
   {
     p: 21, x: 268, map: 1, claimed: 1, exit: 1,
-    text: 'Philosophical anarchism stops right there. It does not say to riot. It says the state has never earned the authority it claims.',
+    text: 'Philosophical anarchism stops right there. The view does not call for a riot. The view says the state never earned the authority it claims.',
     cite: 'The modest conclusion',
     dur: 4.8,
   },

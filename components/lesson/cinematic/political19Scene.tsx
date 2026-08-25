@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: PAN_X, width: PAN_W,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
   panel: {
     position: 'absolute', left: PAN_X, width: PAN_W, height: PAN_H,
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   axis: { position: 'absolute', left: PAN_X, top: AXIS_Y, width: PAN_W, height: 1.5, backgroundColor: INK },
   axisLab: {
     position: 'absolute', top: AXIS_Y + 5, width: 100,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.7, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.7, color: SOFT, includeFontPadding: false,
   },
 
   markLine: {
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   markCap: {
     position: 'absolute', left: MARK_X - 14, top: PAN_TOP[0] - 12, width: 30, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.8, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', left: PAN_X, width: PAN_W, height: PAN_H },

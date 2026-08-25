@@ -244,13 +244,13 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   gapText: {
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.3, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.3, color: INK,
     includeFontPadding: false,
   },
 
   kicker: {
     position: 'absolute', left: SLAB_L, top: KICK_T, width: KICK_W,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
   tick: { position: 'absolute', top: TICK_T, width: 3, height: 14, backgroundColor: INK },
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   chipText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
 

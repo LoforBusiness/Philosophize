@@ -36,7 +36,7 @@ export interface Metaphysics37Beat extends BaseBeat {
 export const BEATS: Metaphysics37Beat[] = [
   {
     p: 25, x: 56, shelf: 1,
-    text: 'One glass, one shelf, ninety years. It was never knocked, never dropped, and it never broke.',
+    text: 'One glass, one shelf, ninety years. The glass was never knocked, never dropped, and never broke.',
     dur: 3.6,
   },
   {

@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   },
   boxCap: {
     position: 'absolute', top: BOX_Y + 7, width: BOX_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.7, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.7, color: INK, includeFontPadding: false,
   },
   said: { position: 'absolute', top: BOX_Y + 23, width: 28, height: 3, backgroundColor: SOFT, borderRadius: 1.5 },
 
@@ -196,12 +196,12 @@ const styles = StyleSheet.create({
   },
   originText: {
     position: 'absolute', top: ORIGIN_Y + 7, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.8, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
 
   barCap: {
     position: 'absolute', left: BAR_X, top: BAR_Y - 12, width: 240,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
   },
   barBox: {
     position: 'absolute', left: BAR_X, top: BAR_Y, width: BAR_W, height: BAR_H,

@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   trBroken: { backgroundColor: INK },
   cell: { alignItems: 'center', justifyContent: 'center' },
   cellDiv: { borderRightWidth: 1.5, borderRightColor: RULE },
-  th: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1, color: SOFT, includeFontPadding: false },
+  th: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false },
   td: { fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.6, color: INK, includeFontPadding: false },
 });
 

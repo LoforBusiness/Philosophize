@@ -55,7 +55,7 @@ export const BEATS: Pol2Beat[] = [
   },
   {
     r: 3, sub: 0, podium: true, chart: 2, ledger: true,
-    text: 'Weber sorted legitimacy into three sources. Traditional authority leans on custom and bloodline. Charismatic runs on devotion to one person. Rational-legal rests on rules and offices, where the power sits in the job rather than the holder.',
+    text: 'Weber sorted legitimacy into three sources. Tradition leans on custom and bloodline. Charisma runs on devotion to one person. The third kind rests on rules and offices, where power sits in the job rather than the holder.',
     cite: 'Weber’s three types',
     dur: 4.8,
   },
@@ -74,7 +74,7 @@ export const BEATS: Pol2Beat[] = [
   {
     r: 16, sub: 19, podium: true, chart: 2, ledger: true,
     interact: {
-      prompt: 'A wildly popular, magnetic leader wins a landslide election. Which authority makes their commands legitimate?',
+      prompt: 'A magnetic leader wins a landslide. Which source makes their commands legitimate?',
       cards: [
         { text: 'Rational-legal, from the office', correct: true },
         { text: 'Charismatic, from the person', correct: false },
@@ -94,7 +94,7 @@ export const BEATS: Pol2Beat[] = [
         'They are ideal types; real regimes blend them',
         'Charisma is unstable until routinized into law',
       ],
-      closing: 'Lasting rule rests on accepted legitimacy, not sheer force alone.',
+      closing: 'Rule that lasts rests on being accepted, not on force alone.',
     },
     dur: 2.8,
   },

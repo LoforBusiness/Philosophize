@@ -67,11 +67,17 @@ export const BEATS: Ethics13Beat[] = [
     g: 26, pos: 2, habit: 1,
     dur: 1.0,
     interact: {
-      prompt: 'So what makes someone courageous?',
-      cards: [
-        { text: 'A settled habit', correct: true },
-        { text: 'Feeling no fear', correct: false },
-      ],
+      prompt: 'So what makes a person courageous?',
+      drag: {
+        lo: 'NO FEAR AT ALL',
+        hi: 'FEAR OF EVERYTHING',
+        start: 0,
+        zones: [
+          { id: 'rash', upto: 0.3, reads: 'rash: feels no fear and should' },
+          { id: 'brave', upto: 0.7, reads: 'brave: the right amount, as a habit', correct: true },
+          { id: 'timid', upto: 1, reads: 'timid: afraid of what cannot hurt you' },
+        ],
+      },
       explain: 'The other card is the trap: no fear at all is the far left of this rail, not the middle. Courage is a settled habit of the right amount — and Aristotle\'s reply is that anyone still consulting the rule has not yet become the person the rule describes.',
       xp: 5,
     },

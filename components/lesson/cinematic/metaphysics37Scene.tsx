@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 128, top: CAP_T, width: 256,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
   },
 
   shelf: { position: 'absolute', left: 128, top: SHELF_Y, width: 256, height: 3, backgroundColor: INK },
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   labelWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   labelText: {
     position: 'absolute', left: 0, top: 7, width: 150, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK, includeFontPadding: false,
   },
 });
 

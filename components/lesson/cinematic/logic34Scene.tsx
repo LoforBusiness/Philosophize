@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: SCL_L - 16, top: CAP_T, width: 240,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   },
   trueLabel: {
     position: 'absolute', left: SCL_L + TRUE_AT * SCL_W - 20, top: BAND_T + BAND_H + 6, width: 40,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
 
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   est: { position: 'absolute', top: BAND_T - 10, width: 3, height: BAND_H + 20, backgroundColor: INK },
   estLabel: {
     position: 'absolute', top: BAND_T - 24, width: 80,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 1, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
 });

@@ -160,13 +160,13 @@ const styles = StyleSheet.create({
   },
   evText: {
     position: 'absolute', left: EV_X, top: EV_Y + 4, width: EV_W, textAlign: 'center', lineHeight: 9,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
   evStem: { position: 'absolute', left: EV_X + EV_W / 2 - 1, top: EV_Y + EV_H, width: 2, height: 22, backgroundColor: SOFT },
 
   claim: {
     position: 'absolute', left: RAIL_X, width: RAIL_W,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
   },
   rail: { position: 'absolute', left: RAIL_X, width: RAIL_W, height: 2, backgroundColor: SOFT },
   tether: { position: 'absolute', left: RAIL_X, backgroundColor: INK, borderRadius: 1 },
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   },
   end: {
     position: 'absolute', top: 302, width: 30,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
   },
 });
 

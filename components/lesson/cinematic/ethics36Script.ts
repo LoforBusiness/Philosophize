@@ -48,7 +48,7 @@ export const BEATS: Ethics36Beat[] = [
   },
   {
     p: 21, x: 56, book: 1, struck: 1, excuse: 1,
-    text: 'That is the line between forgiving and excusing, and people slide across it constantly. Excusing says they could not help it. Forgiving says they could.',
+    text: 'That line runs between forgiving and excusing, and people slide across the line constantly. Excusing says the person could not help it. Forgiving says the person could.',
     dur: 4.8,
   },
   {
@@ -65,7 +65,7 @@ export const BEATS: Ethics36Beat[] = [
   },
   {
     p: 35, x: 130, book: 1, struck: 1, gift: 1,
-    text: 'Which makes it a gift, and gifts have an owner. The resentment was yours by right. Giving it up is yours to do.',
+    text: 'Forgiveness is a gift, and a gift has an owner. The resentment was yours by right. Giving the resentment up is yours to do.',
     dur: 4.4,
   },
   {
@@ -83,7 +83,7 @@ export const BEATS: Ethics36Beat[] = [
   },
   {
     p: 45, x: 130, book: 1, struck: 1, gift: 1,
-    text: 'None of which makes it easy, or owed, or always right. It makes it one of the few things a wronged person still has.',
+    text: 'None of that makes forgiveness easy, or owed, or always right. Forgiveness is simply one of the few things a wronged person still holds.',
     dur: 4.4,
   },
   {
@@ -95,7 +95,7 @@ export const BEATS: Ethics36Beat[] = [
         'It gives up resentment you are entitled to',
         'Forgiveness that is owed is not forgiveness',
       ],
-      closing: 'It changes nothing about what happened. That is precisely why it belongs to the person wronged and to nobody who is waiting for it.',
+      closing: 'Forgiving changes nothing about what happened. That is exactly why the choice belongs to the person wronged, and to nobody waiting on them.',
     },
     dur: 3.2,
   },

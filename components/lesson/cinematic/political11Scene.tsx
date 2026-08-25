@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: DIAL_L, top: DIAL_T, width: DIAL_W, alignItems: 'center',
   },
   dialTag: {
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: SOFT,
     includeFontPadding: false,
   },
   track: {
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   },
   dialSlot: { position: 'absolute', top: TRACK_Y + 11, width: 52, alignItems: 'center' },
   dialLabel: {
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.5, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK,
     includeFontPadding: false,
   },
 
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
   // characters × 0.2 = 1.8 units and takes it to 10.8%. Widening the plate is not an
   // option: PLOT_PITCH leaves a 4-unit gutter that is tap-target slop (PLOT_SLOP).
   plateText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0, color: INK, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: INK, textAlign: 'center',
     includeFontPadding: false,
   },
   plateTextOn: { color: PAPER },

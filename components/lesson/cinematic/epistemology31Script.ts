@@ -57,7 +57,7 @@ export const BEATS: Epis31Beat[] = [
     g: 2, open: 3, pick: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Tap whatever could check the memory from outside memory.',
+      prompt: 'Tap the card that could check a memory from outside memory.',
       explain: 'The door. Every drawer in that cabinet is another memory, and a memory cannot certify itself. Only the world breaks the circle — and a minute after you look, that too is a memory.',
       xp: 5,
     },
@@ -71,7 +71,7 @@ export const BEATS: Epis31Beat[] = [
         { text: 'Trust it until given reason', correct: true },
         { text: 'Check it against something independent', correct: false },
       ],
-      explain: 'The trap is the other card: nothing independent is available, because the confirmation is remembered too. Memory is a floor rather than a conclusion, so the reasonable stance is trust until something specific goes wrong.',
+      explain: 'The trap is the other card. Nothing outside memory is available, because any check you make is remembered too. Memory is a floor to stand on, not a conclusion to prove. So the fair rule is to trust memory until something specific goes wrong.',
       xp: 5,
     },
   },

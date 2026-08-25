@@ -39,7 +39,7 @@ export const BEATS: Eth17Beat[] = [
   },
   {
     p: 45, x: 200, maxim: 1, trust: 1,
-    text: 'That looks monstrous, and Kant knew it. His reason is not that lying is distasteful. It is that it cannot be made a rule.',
+    text: 'That looks monstrous, and Kant knew so. His reason is not that lying is ugly. His reason is that lying cannot be made a rule for all.',
     dur: 4.8,
   },
   {

@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
 
   rowCap: {
     position: 'absolute', left: SYS_X, width: 240,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
 
   staveLine: { position: 'absolute', left: SYS_X, width: SYS_W, height: 1, backgroundColor: SOFT },

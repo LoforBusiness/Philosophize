@@ -60,7 +60,7 @@ export const BEATS: Epistemology35Beat[] = [
   },
   {
     p: 13, x: 58, pens: 1, plaques: 1, chain: 1,
-    text: 'Here is the rule that makes it awkward. Know a thing. Know what it rules out. You should know that too. Philosophers call it closure.',
+    text: 'Here is the rule that makes the puzzle awkward. Know a thing. Know what the thing rules out. You should know the second thing as well. Philosophers call the rule closure.',
     dur: 4.4,
   },
   {

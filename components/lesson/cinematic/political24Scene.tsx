@@ -182,13 +182,13 @@ const styles = StyleSheet.create({
   },
   kicker: {
     position: 'absolute', top: PL_Y + 8, width: PL_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
   word: { position: 'absolute', height: 5, backgroundColor: INK, borderRadius: 2 },
 
   caption: {
     position: 'absolute', left: BAR_X[0], top: CAP_Y,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
   },
   bar: { position: 'absolute', width: BAR_W, backgroundColor: INK, borderTopLeftRadius: 3, borderTopRightRadius: 3 },
 

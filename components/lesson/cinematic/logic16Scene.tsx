@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   },
   day: {
     position: 'absolute', top: PANEL_Y + PANEL_H + 4, width: PANEL_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
 
   cand: { position: 'absolute', top: CAND_Y, width: CAND_W, height: PANEL_H },
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   },
   candTopOn: { color: PAPER },
   candSub: {
-    fontFamily: 'Inter_400Regular', fontSize: 8, lineHeight: 11, color: SOFT,
+    fontFamily: 'Inter_400Regular', fontSize: 8.6, lineHeight: 11, color: SOFT,
     textAlign: 'center', marginTop: 5, includeFontPadding: false,
   },
   candSubOn: { color: PAPER },

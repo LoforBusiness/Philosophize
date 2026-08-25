@@ -75,10 +75,16 @@ export const BEATS: Aes14Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tastes differ. Does that make every verdict as good as the next?',
-      cards: [
-        { text: 'Some palates are better placed', correct: true },
-        { text: 'They are all just opinions', correct: false },
-      ],
+      drag: {
+        lo: 'EVERY VERDICT EQUAL',
+        hi: 'ONE RIGHT ANSWER',
+        start: 0,
+        zones: [
+          { id: 'flat', upto: 0.3, reads: 'every verdict is worth the same' },
+          { id: 'placed', upto: 0.7, reads: 'some judges are better placed than others', correct: true },
+          { id: 'fixed', upto: 1, reads: 'one verdict is simply correct' },
+        ],
+      },
       explain: 'The other card slides from "tastes differ" to "so all tastes are equal", and that one step is doing all the work. Hume grants the first sentence and denies the second. A whole room found nothing in that cask.',
       xp: 5,
     },

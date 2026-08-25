@@ -77,17 +77,21 @@ export const BEATS: Pol20Beat[] = [
   },
   {
     p: 21, x: 268, stacks: 1, shelf: 1, cands: 1, landed: 1,
-    text: 'Look at the size of it. Almost everything either of them cares about stayed in their own stack.',
+    text: 'Look at the size of the shelf. Almost everything either side cares about stayed in its own stack.',
     dur: 4.2,
   },
   {
     p: 41, x: 268, stacks: 1, shelf: 1, cands: 1, landed: 1,
     interact: {
       prompt: 'What does tolerating a view actually require of you?',
-      cards: [
-        { text: 'Not using power against it', correct: true },
-        { text: 'Believing it might be right', correct: false },
-      ],
+      lever: {
+        start: 2,
+        stops: [
+          { id: 'power', reads: 'do not reach for the law against it', correct: true },
+          { id: 'quiet', reads: 'keep your objection to yourself' },
+          { id: 'agree', reads: 'allow that the view might be right' },
+        ],
+      },
       explain: 'Not reaching for the law. Toleration is a restraint on force, not a change of mind, and it is only ever tested on views you think are wrong. The other card describes open-mindedness, which is a different virtue and costs nothing here.',
       xp: 5,
     },

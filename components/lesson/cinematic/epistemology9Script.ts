@@ -109,7 +109,7 @@ export const BEATS: Epistemology9Beat[] = [
         'Coherence: it fits everything else you hold',
         'Pragmatism: it keeps on working',
       ],
-      closing: 'You cannot know something false — so every theory of knowledge is quietly a theory of truth.',
+      closing: 'You cannot know a thing that is false. So every theory of knowledge is quietly a theory of truth.',
     },
     dur: 3.0,
   },

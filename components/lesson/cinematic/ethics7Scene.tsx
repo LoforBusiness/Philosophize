@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   tick: { position: 'absolute', width: 1.5, height: 6, backgroundColor: RULE },
   laneTag: {
     position: 'absolute', left: 16,
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 1.6, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -337,10 +337,10 @@ const styles = StyleSheet.create({
 
   // ── Q1: the verdict row ────────────────────────────────────────────────────
   vHead: { position: 'absolute', left: 0, top: 228, width: STAGE_W, alignItems: 'center' },
-  vTag: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 2, color: INK,
+  vTag: { fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 2, color: INK,
     includeFontPadding: false,
   },
-  vSub: { fontFamily: 'Inter_500Medium', fontSize: 9, letterSpacing: 1.2, color: SOFT, marginTop: 3,
+  vSub: { fontFamily: 'Inter_500Medium', fontSize: 12.6, letterSpacing: 1.2, color: SOFT, marginTop: 3,
     includeFontPadding: false,
   },
   vCard: { position: 'absolute', top: V_TOP, width: V_W },
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   vRight: { backgroundColor: INK, borderColor: INK },
   vWrong: { borderColor: SOFT, opacity: 0.45 },
   vText: {
-    fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.3, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 0.3, color: INK,
     textAlign: 'center', lineHeight: 16,
     includeFontPadding: false,
   },

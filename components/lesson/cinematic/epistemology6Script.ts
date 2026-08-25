@@ -50,7 +50,7 @@ export const BEATS: Epi6Beat[] = [
   {
     p: 22, bal: 1, route: 3,
     interact: {
-      prompt: 'Refusing to decide anything sounds miserable. Tap what Pyrrho says it actually gets you.',
+      prompt: 'Refusing to decide sounds miserable. Tap what Pyrrho says the refusing gets you.',
       cards: [
         { text: 'Peace of mind', correct: true },
         { text: 'Certainty at last', correct: false },
@@ -74,7 +74,7 @@ export const BEATS: Epi6Beat[] = [
         { text: 'It undercuts itself', correct: true },
         { text: 'Nothing, it is consistent', correct: false },
       ],
-      explain: 'Claiming certain knowledge that knowledge is impossible is self-defeating — it asserts the very thing it denies.',
+      explain: 'Saying you know for certain that nobody can know anything defeats itself. The claim asserts the very thing it denies.',
       xp: 5,
     },
     dur: 1.0,

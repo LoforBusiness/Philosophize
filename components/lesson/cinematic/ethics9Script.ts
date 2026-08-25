@@ -89,7 +89,7 @@ export const BEATS: Ethics9Beat[] = [
         'What survives the choice is moral residue',
         'Regret can be the accurate response',
       ],
-      closing: 'When a choice still hurts after you got it right, that is not weakness — it is accuracy.',
+      closing: 'When a choice still hurts after you got it right, the ache is not weakness. The ache is accuracy.',
     },
     dur: 3.0,
   },

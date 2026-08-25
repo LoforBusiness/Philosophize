@@ -54,7 +54,7 @@ export const BEATS: Aes24Beat[] = [
     p: 4, x: 132, panel: 1, copies: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what a perfect scan does not copy.',
-      explain: 'The history of being here. A scan takes the brushstrokes and the colours down to the cracks, which is why people reach for something visual and find nothing. What it cannot take is that this object stood in this room through everything that happened.',
+      explain: 'The history of being here. A scan takes the brushstrokes and the colours down to the cracks, so people reach for something visual and find nothing. What no scan can take is that this panel stood in this room through everything that happened.',
       xp: 5,
     },
     dur: 1.0,

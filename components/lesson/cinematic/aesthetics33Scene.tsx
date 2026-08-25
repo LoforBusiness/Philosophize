@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: FR_L - 20, top: CAP_T, width: 250,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
 
   layerCol: { position: 'absolute', left: FR_L + FR_W + 6, top: FR_T + 8, width: 58, gap: 12 },
   layerName: {
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     includeFontPadding: false,
   },
 });

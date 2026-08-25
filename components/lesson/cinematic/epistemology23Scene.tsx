@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   },
   hopText: {
     position: 'absolute', left: HOP_X, top: HOP_Y + 10, width: HOP_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
   },
 
   wallL: { position: 'absolute', left: SIEVE_X, top: MOUTH_Y, width: 2, height: SIEVE_BOT - MOUTH_Y, backgroundColor: INK },
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   meshBar: { position: 'absolute', top: MESH_Y, width: 2, height: 14, backgroundColor: INK },
   partCap: {
     position: 'absolute', left: SIEVE_X, width: SIEVE_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
   },
 
   drop: { position: 'absolute', width: DOT, height: DOT, borderRadius: DOT / 2, backgroundColor: INK },
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   trayText: {
     position: 'absolute', left: TRAY_X, top: TRAY_Y + 8, width: TRAY_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', left: SIEVE_X - 4, width: SIEVE_W + 8 },

@@ -24,7 +24,7 @@ export interface Logic11Beat extends BaseBeat {
 export const BEATS: Logic11Beat[] = [
   {
     p: 25, x: 48, steps: 1,
-    text: 'A proof has to rest on something outside itself. Watch this one stop doing that — without a single step of it going wrong.',
+    text: 'A proof has to rest on something outside itself. Watch this proof stop doing so, without a single step going wrong.',
     dur: 3.8,
   },
   {
@@ -54,7 +54,7 @@ export const BEATS: Logic11Beat[] = [
   },
   {
     p: 9, x: 116, steps: 4, base: 1, spine: 1,
-    text: 'Now test it. Every link holds — step to step to step, nothing missing, nothing limping. That soundness is exactly what makes it dangerous.',
+    text: 'Now test the chain. Every link holds, step after step, nothing missing and nothing limping. A chain that sound is exactly what makes the trap dangerous.',
     cite: 'Every link holds',
     dur: 5.0,
   },

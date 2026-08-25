@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   },
   concText: {
     position: 'absolute', left: L_X + 6, top: CONC_Y + 5, width: L_W - 12,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.8, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
 
   rung: {
@@ -191,8 +191,8 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: PAPER,
   },
   rungText: {
-    position: 'absolute', left: L_X + 6, width: L_W - 12, lineHeight: 9,
-    fontFamily: 'Inter_400Regular', fontSize: 7.5, color: INK, includeFontPadding: false,
+    position: 'absolute', left: L_X + 6, width: L_W - 12, lineHeight: 10.8,
+    fontFamily: 'Inter_400Regular', fontSize: 8.6, color: INK, includeFontPadding: false,
   },
 
   bar: { position: 'absolute', height: 4, backgroundColor: INK, borderRadius: 2 },

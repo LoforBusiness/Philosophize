@@ -56,7 +56,7 @@ export const BEATS: Epi7Beat[] = [
         { text: 'No proof the future matches', correct: true },
         { text: 'Nature has been proven uniform', correct: false },
       ],
-      explain: 'Induction assumes nature stays uniform, but that assumption itself rests only on past experience — which is circular.',
+      explain: 'Induction assumes nature keeps behaving the same way. But the only reason to assume so is that nature has done so before, which is a circle.',
       xp: 5,
     },
     dur: 1.0,

@@ -68,7 +68,7 @@ export const BEATS: Aes13Beat[] = [
     g: 11, art: 1, chain: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Why does the strict formalist deny the perfect forgery is aesthetically lesser?',
+      prompt: 'Why does the strict formalist say the forgery is no worse to look at?',
       cards: [
         { text: 'Value lives in the form', correct: true },
         { text: 'Because someone toiled harder', correct: false },

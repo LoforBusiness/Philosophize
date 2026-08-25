@@ -2953,6 +2953,103 @@ back to boxes you tap, wearing a nicer hat.
 
 ---
 
+### R9 · The rotation: what a thumb is asked to do, lesson after lesson
+
+R1 picks the control for one CLAIM. This is the other question, and only a reader
+working through a branch ever feels it — does lesson 17 ask for anything my thumb
+did not already do in lesson 16?
+
+> *"I want that to be implemented into all the lessons on a good rotation. I still
+> want a couple every now and then for the old way of answering below the
+> stickman, and I also want ways to answer above the stickman too."*
+
+`npm run check:rotation` measures three things, and each is a high-water mark:
+
+- **The deck is not the default.** Two `ChoiceCards` was 47% of every question in
+  the corpus, not because 47% of claims are either/or but because a deck is the
+  quickest thing to write. Ceiling 55%, and it should keep falling.
+- **Neighbours differ.** Two lessons running in reading order should not both be
+  answered by the same control. 133 pairs did; the budget only goes down.
+- **One question stays on the STAGE.** H65 already said one in the deck and one
+  above the figure, and **36 lessons ask both of theirs below it** — every one an
+  early lesson, which is exactly where the picture most needs to be the thing
+  being answered. That budget is the "above the stickman" half of the work.
+
+**Converting one deck question is a small, self-contained job**, and the order to
+do them in is: take the next lesson whose neighbour shares its control, read the
+claim, pick the control from R1's table, and write the `reads` strings as lesson
+copy (R2). A conversion that reaches for a control the claim does not want is
+worse than leaving the deck alone.
+
+---
+
+### J10 · Plain enough to read on a bus
+
+J1–J9 cap how LONG a sentence is, and the corpus passed all of them while being
+unreadable:
+
+> *"the wording in lessons it seems to be difficult to understand what I'm
+> reading. It's a bit too cryptic and advanced… I like a philosophical text, but
+> also simple to read, not something that takes a lot of effort to even try
+> understand"*
+
+Short sentences made of long words are still heavy, and — the bigger half — short
+sentences made of SHORT words can point at nothing you can name. `npm run
+check:plain` measures both, and both are arithmetic rather than taste.
+
+- **Reading ease at least 55.** Standard Flesch. A named position counts as two
+  syllables rather than five, because a reader learns `compatibilism` once and
+  then reads it as one token; so does a philosopher's name. What the score then
+  measures is everything else the sentence is doing. The corpus sits at 82.
+- **At most 12% pointers.** `it · that · this · they · these · which` are how a
+  sentence refers to something without naming it. A few are ordinary English.
+  Above one word in eight the reader is holding a stack of unnamed things:
+
+  > "Both of them arrived. Only one of them can find it again."
+
+  Nothing in that is a hard word and nothing in it is nameable either. **The fix
+  is never a longer sentence. It is to say the noun.** 218 pieces failed one test
+  or the other; rewriting them moved nothing about what the lessons claim, which
+  matters, because the picture has to keep doing what the text says (A1).
+
+  A **prompt is exempt**, deliberately: I71 requires a question to point at
+  something on the stage, and "Tap the one it changed" is doing its job. Pointing
+  is a fault only when there is nothing to point at.
+
+---
+
+### D34 · No word on the stage may be too small to read
+
+The stage fits a 400-wide design space into the box the player gives it:
+
+```
+fit = min(stageW / STAGE_W, stageH / bandH)
+```
+
+On a 390-wide phone the WIDTH binds at about 0.935 for most lessons — but a
+lesson with a tall band is bound by its HEIGHT instead, and then everything it
+draws shrinks, labels included. `logic-arguments-8` declared 8.5pt captions in a
+493-unit band and they reached the reader at **5.1pt**.
+
+That is not a small caption. It is what the reader reported as:
+
+> *"the words in questions or the words in boxes or words in general above the
+> stickman aren't visible. It's just blank boxes."*
+
+**Nothing in the repo could see it.** The must-see sweep records every word that
+reached the screen, so it reported those lessons as fully lettered — the words
+WERE there, at a size that is a grey texture rather than a word. A checker that
+asks "is there text" passes this every time; the question has to be **how big is
+it when it lands**.
+
+`npm run check:legible` enforces `declared × fit ≥ 8pt`. Only the sizes under the
+floor were raised, so a scene keeps its typographic hierarchy: in `logic8` that is
+two captions, and the 11.5–13pt body text was left alone. 338 labels across 147
+scenes needed it, which is to say **the house style itself was too small**, not
+one careless file.
+
+---
+
 ## Part 2 — Authoring checklist
 
 **Shape** — before writing a word, lay the beats out and count them (H52, H53).
@@ -2975,6 +3072,14 @@ back to boxes you tap, wearing a nicer hat.
       thing is `split`, two independent yes/no questions are `field`, and everything
       else is `cards` — which is still most of them. The two graded beats do not use
       the same control, and neither does either neighbour (R8).
+- [ ] **The rotation holds** (R9): the control differs from the lesson before it,
+      one question is still answered on the STAGE, and the deck is not the default.
+      `npm run check:rotation`.
+- [ ] **It reads plainly** (J10): reading ease 55 or better, and under 12% of the
+      words are `it · that · this · they · these · which`. Say the noun.
+      `npm run check:plain`.
+- [ ] **Every label lands at 8pt or more** (D34) — `declared × fit`, where a tall
+      band shrinks everything. `npm run check:legible`.
 - [ ] **Every `reads` string is lesson copy** (R2) and every wrong region is a
       position somebody actually holds (R4). If a quadrant is filler, the pad is
       punishing the reader for exploring it.

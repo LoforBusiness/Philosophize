@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   },
   realText: {
     position: 'absolute', left: 236, top: 417, width: 128, textAlign: 'center', lineHeight: 10,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.8, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
 
   givenCard: {
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   },
   givenText: {
     position: 'absolute', left: 236, top: CAP_T + 6, width: 128, textAlign: 'center', lineHeight: 11,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
   },
 
   // The one mark that says the two accounts do not meet: a stroke down the gap

@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 34, top: CROWD_Y - 14, width: 200,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
   tick: {
     position: 'absolute', top: CROWD_Y, width: TICK_W, height: TICK_H, backgroundColor: INK,
@@ -201,8 +201,8 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
   },
   evText: {
-    position: 'absolute', left: EV_X, top: EV_Y + 5, width: EV_W, textAlign: 'center', lineHeight: 9,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.8, color: INK, includeFontPadding: false,
+    position: 'absolute', left: EV_X, top: EV_Y + 5, width: EV_W, textAlign: 'center', lineHeight: 10.8,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
   evRod: { position: 'absolute', left: EV_X + EV_W, top: EV_ROD_Y, width: 156, height: 3, backgroundColor: INK },
 
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   cap2: { position: 'absolute', top: SHAFT_Y - 4, width: 2, height: 11, backgroundColor: INK },
   gapCap: {
     position: 'absolute', left: 152, top: SHAFT_Y + 12, width: 70, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
   },
 
   crank: {
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   track: { position: 'absolute', left: 0, top: G_TRACK_Y - 300, width: G_W, height: 2, backgroundColor: SOFT },
   end: {
     position: 'absolute', top: 6, width: 34, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.7, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.7, color: SOFT, includeFontPadding: false,
   },
   needle: {
     position: 'absolute', left: G_X + 11, top: G_TRACK_Y - 9, width: 3, height: 20, backgroundColor: INK,

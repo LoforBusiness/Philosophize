@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
   // ── the match beyond the fence ──────────────────────────────────────────────
   matchLabel: {
     position: 'absolute', left: 236, top: 62, width: 160, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 1.8, color: SOFT,
     includeFontPadding: false,
   },
   crossbar: { position: 'absolute', left: 288, top: 86, width: 84, height: 4, backgroundColor: INK, borderRadius: 2 },
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   dash: { position: 'absolute', top: EYE_Y, width: 6, height: 2, backgroundColor: INK, borderRadius: 1 },
   eyeLabel: {
     position: 'absolute', left: 236, top: 372, width: 160, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 1.8, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   badgeOn: { borderColor: INK, backgroundColor: INK },
-  badgeText: { fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.8, color: SOFT,
+  badgeText: { fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 0.8, color: SOFT,
     includeFontPadding: false,
   },
   badgeTextOn: { color: PAPER },
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
   // ── Q1 cards ────────────────────────────────────────────────────────────────
   pickLabelWrap: { position: 'absolute', left: 0, top: 184, width: STAGE_W },
   pickLabel: {
-    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 2, color: SOFT,
+    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 2, color: SOFT,
     includeFontPadding: false,
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },

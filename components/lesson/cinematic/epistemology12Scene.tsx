@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
   bandTest: { top: T_TEST, height: H_TEST, backgroundColor: INK },
   bandLabel: {
     position: 'absolute', left: IN_L, width: IN_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.1, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: INK,
     includeFontPadding: false,
   },
   bandLabelOn: {

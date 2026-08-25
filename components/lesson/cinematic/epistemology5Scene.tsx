@@ -237,12 +237,12 @@ const styles = StyleSheet.create({
   rungNumT: { fontFamily: 'Inter_700Bold', fontSize: 9, color: PAPER, includeFontPadding: false },
   rungTextWrap: { flex: 1 },
   rungT: { fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 13, letterSpacing: 0.6, color: INK, includeFontPadding: false },
-  rungSub: { fontFamily: 'Inter_400Regular', fontSize: 8, lineHeight: 9, letterSpacing: 0.3, color: SOFT, includeFontPadding: false },
+  rungSub: { fontFamily: 'Inter_400Regular', fontSize: 8.6, lineHeight: 10.8, letterSpacing: 0.3, color: SOFT, includeFontPadding: false },
   // Parked in the empty wedge left of the staircase — clear of the rungs (x ≥ 140),
   // clear of Bacon's box, and well above the figure's crown at y ≈ 354.
   ladderTag: {
     position: 'absolute', left: 18, top: 300, width: 116,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.2, lineHeight: 12,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, lineHeight: 12,
     color: SOFT, includeFontPadding: false,
   },
 
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   baconT: { fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 15, letterSpacing: 0.8, color: INK, includeFontPadding: false },
-  baconSub: { fontFamily: 'Inter_700Bold', fontSize: 7.5, lineHeight: 10, letterSpacing: 1.1, color: SOFT, includeFontPadding: false },
+  baconSub: { fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 1.1, color: SOFT, includeFontPadding: false },
 
   askLabel: {
     position: 'absolute', left: PLATE_X, top: 300, width: PLATE_W, textAlign: 'left',

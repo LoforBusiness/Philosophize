@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: 156, top: CAP_T, width: 200,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
 
   arrows: { position: 'absolute', left: 150, top: 248, width: 190, gap: 4 },
   arrowLine: {
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT,
     includeFontPadding: false,
   },
 });

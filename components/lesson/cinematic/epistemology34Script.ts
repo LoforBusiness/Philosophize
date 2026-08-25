@@ -25,7 +25,7 @@ export const BEATS: Epistemology34Beat[] = [
   },
   {
     p: 47, x: 54, claim: 0.3,
-    text: 'Down here they agree. Call something a coin flip and it lands about half the time. Nobody has ever been badly wrong that way.',
+    text: 'Down here the two lines agree. Call a thing a coin flip and it lands heads about half the time. Nobody goes badly wrong there.',
     cite: 'Low down, they agree',
     dur: 4.4,
   },

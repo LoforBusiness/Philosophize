@@ -55,7 +55,7 @@ export const BEATS: Epi8Beat[] = [
   },
   {
     p: 47, x: 98, tower: 0, pile: 1, esc: 1,
-    text: 'There are only three places this can end. It never ends. It curls into a circle, and the blocks lean on each other. Or it strikes something that needs nothing beneath it.',
+    text: 'The chain of reasons can end in only three ways. The chain runs on for ever. The chain curls into a circle, each block leaning on the next. Or the chain lands on something that needs nothing beneath.',
     cite: 'Three ways out',
     dur: 5.0,
   },

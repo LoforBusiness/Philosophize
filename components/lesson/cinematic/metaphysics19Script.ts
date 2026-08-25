@@ -46,7 +46,7 @@ export const BEATS: Met19Beat[] = [
   },
   {
     p: 45, x: 132, props: 1, peg: 0.16, strip: 1,
-    text: 'That was the last one. Something is either standing there or it is not, and philosophers have never agreed which.',
+    text: 'That was the last plank. Either something stands there or nothing does, and philosophers have never agreed which.',
     dur: 4.6,
   },
   {

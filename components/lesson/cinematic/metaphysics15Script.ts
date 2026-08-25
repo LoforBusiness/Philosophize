@@ -52,7 +52,7 @@ export const BEATS: Meta15Beat[] = [
   },
   {
     p: 34, x: 168, balls: 1, gap: 1, found: 1,
-    text: 'Nothing. Succession, and constant conjunction, and no glue anywhere. Hume\'s answer is that the glue is real, and that it is not out there.',
+    text: 'Nothing. One thing after another, over and over, and no glue anywhere. Hume answers that the glue is real, and that the glue is in you.',
     cite: 'Not found',
     dur: 4.6,
   },

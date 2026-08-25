@@ -51,7 +51,7 @@ export const BEATS: Meta32Beat[] = [
   {
     g: 1, orbs: 1, tether: 1, tag: 1,
     dur: 4.6,
-    text: 'We can point at one and call it A. But that label came from outside — we brought it in with us. Take it away again and the universe is exactly as it was.',
+    text: 'We can point at one sphere and call it A. But the label came from outside, carried in by us. Take the label away again and the universe is exactly as before.',
     cite: 'The label is ours',
   },
   {

@@ -27,7 +27,7 @@ export interface Aes12Beat extends BaseBeat {
 export const BEATS: Aes12Beat[] = [
   {
     p: 35, r: 0, rx: 456, ticks: 0, box: 0,
-    text: 'A poem hangs where anyone can read it. Its author stands across the square and says every single person who reads it has got it wrong.',
+    text: 'A poem hangs where anyone can read it. The poet stands across the square and says every reader has got the poem wrong.',
     dur: 4.2,
   },
   {
@@ -68,7 +68,7 @@ export const BEATS: Aes12Beat[] = [
         { text: 'Meaning lives in the text', correct: true },
         { text: 'The author decides meaning', correct: false },
       ],
-      explain: 'The trap is the genetic fallacy: mistaking how a work was made for what it means. Intention is private and unverifiable, so it cannot settle a public dispute — the poem is the one thing every reader can actually examine.',
+      explain: 'The trap is the genetic fallacy: taking how a work was made for what the work means. What the poet intended is private and cannot be checked, so it settles nothing in public. The poem is the one thing every reader can examine.',
       xp: 5,
     },
     dur: 1.0,

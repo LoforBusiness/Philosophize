@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
 
   label: {
     position: 'absolute', left: 20, top: LABEL_T, width: 360,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
 
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   boardText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.8, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
 
@@ -211,13 +211,13 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   panText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, lineHeight: 11, letterSpacing: 0.6, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.6, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
 
   doubt: {
     position: 'absolute', left: 140, top: 484, width: 240,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
 

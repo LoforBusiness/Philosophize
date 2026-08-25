@@ -47,7 +47,7 @@ export const BEATS: Epi20Beat[] = [
   },
   {
     p: 13, x: 132, voices: 1, agree: 0.32, wires: 1,
-    text: 'Nobody retracted anything. They all still say it. The count was never four.',
+    text: 'Nobody retracted anything. All four still say the same thing. The count was never really four.',
     cite: 'One source, echoed',
     dur: 4.0,
   },
@@ -55,7 +55,7 @@ export const BEATS: Epi20Beat[] = [
     p: 4, x: 132, voices: 1, agree: 0.32, wires: 1, live: 1,
     interact: {
       prompt: 'Tap the source that actually adds something.',
-      explain: 'The one whose wire goes somewhere else. The other three are equally sincere and equally confident, and between them they carry exactly one report. Agreement is only evidence when the people agreeing could have found out separately.',
+      explain: 'The speaker whose wire runs somewhere else. The other three are just as sincere and just as sure, and between them they carry a single report. Agreement is evidence only when each person could have found out alone.',
       xp: 5,
     },
     dur: 1.0,

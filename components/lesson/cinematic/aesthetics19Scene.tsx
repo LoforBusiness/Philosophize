@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
 
   head: {
     position: 'absolute', left: RW_L, top: HEAD_T, width: RW_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },
   item: {
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   itemText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT,
     includeFontPadding: false,
   },
   frame: {
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', paddingLeft: 8,
   },
   knowText: {
-    fontFamily: 'Inter_500Medium', fontSize: 8.5, letterSpacing: 0.6, color: SOFT,
+    fontFamily: 'Inter_500Medium', fontSize: 8.6, letterSpacing: 0.6, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
   onInk: { color: PAPER },

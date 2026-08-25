@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     position: 'absolute', top: CHIP_Y + 5, width: CHIP_W, textAlign: 'center', lineHeight: 9,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.5, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,
   },
 
   pointer: {
@@ -204,8 +204,8 @@ const styles = StyleSheet.create({
     backgroundColor: RULE,
   },
   test: {
-    position: 'absolute', top: BENCH_Y + 8, width: BENCH_W / 2, textAlign: 'center', lineHeight: 9,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.6, color: SOFT, includeFontPadding: false,
+    position: 'absolute', top: BENCH_Y + 8, width: BENCH_W / 2, textAlign: 'center', lineHeight: 10.8,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: SOFT, includeFontPadding: false,
   },
   lamp: {
     position: 'absolute', top: BENCH_Y + 40, width: LAMP_D, height: LAMP_D, borderRadius: LAMP_D / 2,

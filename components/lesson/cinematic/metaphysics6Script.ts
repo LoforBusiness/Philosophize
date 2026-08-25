@@ -80,7 +80,7 @@ export const BEATS: Meta6Beat[] = [
         { text: 'No automatic answer', correct: true },
         { text: 'The one still sailing', correct: false },
       ],
-      explain: 'Each ship has a strong claim — one keeps the original matter, the other unbroken continuity — so identity depends on which criterion we choose, not on a single fact.',
+      explain: 'Each ship has a strong claim. One keeps the original wood. The other keeps unbroken use. So the answer turns on which test you pick, not on a hidden fact.',
       xp: 5,
     },
     dur: 1.0,

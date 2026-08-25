@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', paddingLeft: 8,
   },
   factText: {
-    fontFamily: 'Inter_500Medium', fontSize: 8.5, letterSpacing: 0.6, color: SOFT,
+    fontFamily: 'Inter_500Medium', fontSize: 8.6, letterSpacing: 0.6, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   // so the whole string must fit, not its longest word. The house size for a
   // three-across answer row (D30).
   ansText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
   onInk: { color: PAPER },

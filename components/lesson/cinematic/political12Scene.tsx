@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
 
   head: {
     position: 'absolute', left: DW_L, top: HEAD_T, width: DW_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },
   door: {
@@ -198,11 +198,11 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   lampText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: SOFT,
     includeFontPadding: false,
   },
   lampTextLit: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: PAPER,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: PAPER,
     includeFontPadding: false,
   },
 

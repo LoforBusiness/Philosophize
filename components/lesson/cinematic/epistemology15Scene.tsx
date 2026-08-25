@@ -160,12 +160,12 @@ const styles = StyleSheet.create({
 
   colHead: {
     position: 'absolute', top: HEAD_T, width: CELL_W,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, lineHeight: 9, letterSpacing: 1.1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10.8, letterSpacing: 1.1, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
   rowHead: {
     position: 'absolute', left: ROWH_L, width: ROWH_W,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, lineHeight: 9, letterSpacing: 1.1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10.8, letterSpacing: 1.1, color: SOFT,
     textAlign: 'left', includeFontPadding: false,
   },
 
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   note: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, lineHeight: 11, letterSpacing: 0.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.8, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
   sum: {

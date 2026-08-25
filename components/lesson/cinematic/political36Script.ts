@@ -34,7 +34,7 @@ export interface Political36Beat extends BaseBeat {
 export const BEATS: Political36Beat[] = [
   {
     p: 25, x: 52, street: 1,
-    text: 'A street at night. Every lit window is somebody doing something ordinary and entirely legal.',
+    text: 'A street at night. Behind every lit window a person is doing something plain and legal.',
     dur: 3.6,
   },
   {
@@ -94,7 +94,7 @@ export const BEATS: Political36Beat[] = [
   },
   {
     p: 45, x: 126, street: 1, watch: 0.6, lamp: 1,
-    text: 'Which is why privacy is not really about secrets. It is about how much room a person has when nobody is deciding whether they deserve it.',
+    text: 'So privacy is not really about secrets. Privacy is how much room a person has when nobody is judging them.',
     dur: 4.8,
   },
   {
@@ -106,7 +106,7 @@ export const BEATS: Political36Beat[] = [
         'It works with nobody behind the glass',
         'What shrinks is what people are willing to try',
       ],
-      closing: 'A society can be free on paper and quietly narrower in practice, and the narrowing appears in nobody\'s figures.',
+      closing: 'A society can be free on paper and quietly narrower in daily life. The narrowing shows up in nobody\'s figures.',
     },
     dur: 3.2,
   },

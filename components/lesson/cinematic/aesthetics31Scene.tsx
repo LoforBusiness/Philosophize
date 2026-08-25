@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', paddingTop: 8,
   },
   instText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, lineHeight: 10.5, letterSpacing: 0.3, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10.5, letterSpacing: 0.3, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
   strand: { position: 'absolute', top: STRING_T, width: 3, height: STRING_H, backgroundColor: INK },
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end', paddingBottom: 5,
   },
   melText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
   note: {
@@ -240,13 +240,13 @@ const styles = StyleSheet.create({
 
   clapKick: {
     position: 'absolute', left: 190, top: 378, width: 128,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
   clapBar: { position: 'absolute', width: 44, backgroundColor: INK, transformOrigin: '50% 100%' },
   clapLabel: {
     position: 'absolute', top: 476, width: 56,
-    fontFamily: 'Inter_500Medium', fontSize: 7, letterSpacing: 0.6, color: SOFT,
+    fontFamily: 'Inter_500Medium', fontSize: 8.6, letterSpacing: 0.6, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
 
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   plateText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
 

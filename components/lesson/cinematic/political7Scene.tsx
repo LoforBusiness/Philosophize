@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   chRule: { width: 124, height: 1, backgroundColor: RULE, marginTop: 6 },
-  chArticle: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 2, color: SOFT, marginTop: 8,
+  chArticle: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 2, color: SOFT, marginTop: 8,
     includeFontPadding: false,
   },
   chBody: {
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   sigLine: { position: 'absolute', left: 0, top: 17, width: 58, height: 1.5, backgroundColor: INK },
   sigLabel: {
     position: 'absolute', left: 0, top: 20, fontFamily: 'Inter_700Bold',
-    fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontSize: 11.5, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
   seal: {

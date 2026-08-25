@@ -33,7 +33,7 @@ export const BEATS: Logic25Beat[] = [
   },
   {
     p: 40, x: 168, result: 1, real: 1,
-    text: 'One of them actually has it, and the test almost certainly catches them. There is that person — a bar one unit wide.',
+    text: 'One person in the crowd really is ill, and the test almost certainly catches them. There they are, a bar one unit wide.',
     cite: 'The one real case',
     dur: 4.0,
   },
@@ -73,7 +73,7 @@ export const BEATS: Logic25Beat[] = [
         { text: 'Farmer, there are more', correct: true },
         { text: 'Librarian, he fits', correct: false },
       ],
-      explain: 'The trap: the profile screams librarian. But farmers outnumber librarians many times over, so even a small fraction of tidy farmers dwarfs every librarian there is. Kahneman and Tversky\'s case.',
+      explain: 'The trap is that the description sounds like a librarian. But farmers outnumber librarians many times over, so even a small share of tidy farmers outweighs every librarian alive. That is the case Kahneman and Tversky made.',
       xp: 5,
     },
     dur: 1.0,

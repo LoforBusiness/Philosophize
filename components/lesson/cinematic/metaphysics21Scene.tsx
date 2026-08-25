@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   },
   label: {
     position: 'absolute', top: LABEL_Y,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
   },
   labelR: { left: LINE_R - 60, width: 56, textAlign: 'right' },
 
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   },
   nowText: {
     position: 'absolute', left: NOW_X, top: NOW_Y + 23, width: NOW_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', top: BOX_Y, height: BOX_H },

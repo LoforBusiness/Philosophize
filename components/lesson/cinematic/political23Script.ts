@@ -54,7 +54,7 @@ export const BEATS: Pol23Beat[] = [
     p: 4, x: 132, tags: 1, box: 1, left: 1, live: 1,
     interact: {
       prompt: 'Tap the tie you did not choose.',
-      explain: 'Being a daughter. You can leave a club and change careers, and no act of yours started the first one. The point is not that it binds harder. It is that you found yourself already in it, so it was there before any choosing was.',
+      explain: 'Being a daughter. You can leave a club and change careers, and no act of yours began the first tie. The point is not that the tie binds harder. The point is that you found yourself already inside it, before any choosing began.',
       xp: 5,
     },
     dur: 1.0,

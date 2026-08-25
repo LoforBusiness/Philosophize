@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   baseText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.8, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
     includeFontPadding: false,
   },
 });

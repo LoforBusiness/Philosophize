@@ -31,7 +31,7 @@ export const BEATS: Logic7Beat[] = [
   },
   {
     p: 40, x: 168, rule: 1, fact: 1,
-    text: 'Now add one fact. You glance outside: it is raining. Watch what that single fact unlocks.',
+    text: 'Now add one fact. You glance outside and rain is falling. Watch what that single fact unlocks.',
     cite: 'The fact',
     dur: 4.0,
   },
@@ -96,7 +96,7 @@ export const BEATS: Logic7Beat[] = [
         'Both give certainty, not a good guess',
         'Detectives run on the second one',
       ],
-      closing: 'Two moves that never fail — and next, the two fakes that copy them.',
+      closing: 'Two moves that never fail. Next come two fakes built to look just the same.',
     },
     dur: 3.0,
   },

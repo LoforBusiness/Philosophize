@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 150, top: CAP_T, width: 240,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
   },
 
   setup: { position: 'absolute', left: SETUP_L, top: JUNC_Y, width: JUNC_X - SETUP_L, height: 2, backgroundColor: INK },
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   plateWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   plateText: {
     position: 'absolute', left: 2, top: 8, width: PLATE_W - 4, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
 });
 

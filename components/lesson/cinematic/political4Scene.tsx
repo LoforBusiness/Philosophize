@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   testHarm: { backgroundColor: INK },
   testAct: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.2, color: INK, includeFontPadding: false },
   testVerdict: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     marginTop: 3, includeFontPadding: false,
   },
 

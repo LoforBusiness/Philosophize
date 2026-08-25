@@ -40,7 +40,7 @@ export const BEATS: Log18Beat[] = [
   },
   {
     p: 2, x: 200, crowd: 1, needle: 0.5,
-    text: 'Now the whole town says it. Every single one of them, loudly, and some of them are upset with you for asking.',
+    text: 'Now the whole town says the same thing. Every voice, loudly, and a few are upset with you for asking.',
     dur: 4.6,
   },
   {
@@ -75,7 +75,7 @@ export const BEATS: Log18Beat[] = [
   },
   {
     p: 21, x: 128, crowd: 1, gap: 1, meshed: 1, needle: 0.78,
-    text: 'This is the other linkage. Somebody tested the water, and that shaft has no hole in it.',
+    text: 'Here is the other kind of link. Somebody tested the water, and this shaft has no hole in it.',
     cite: 'What does reach it',
     dur: 4.2,
   },

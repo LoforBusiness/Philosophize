@@ -187,14 +187,14 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 150, top: CAP_T, width: 240,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
   },
 
   baseLine: { position: 'absolute', left: 150, top: BASE_Y, width: 232, height: 2, backgroundColor: INK },
   column: { width: COL_W, borderWidth: 2, borderColor: INK, backgroundColor: INK, borderRadius: 2 },
   colLabel: {
     position: 'absolute', left: -12, top: COL_H + 6, width: COL_W + 24, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
   },
 
   arrowBar: { position: 'absolute', left: 190, top: ARROW_Y, width: 84, height: 2, backgroundColor: INK },
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   },
   arrowLabel: {
     position: 'absolute', left: 178, top: ARROW_Y - 18, width: 108, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
   // The one mark in the scene that means "no": a stroke, never a colour.
   cutMark: { position: 'absolute', left: 231, top: ARROW_Y - 12, width: 3, height: 26, backgroundColor: INK, borderRadius: 2 },
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   candWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   candText: {
     position: 'absolute', left: 2, top: 8, width: 96, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
 
   thirdBox: {
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   },
   thirdText: {
     position: 'absolute', left: THIRD_X, top: THIRD_Y + 11, width: 96, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.8, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
   feedArm: { position: 'absolute', top: BASE_Y + 4, width: 2, height: 34, backgroundColor: INK, transformOrigin: '50% 100%' },
 });

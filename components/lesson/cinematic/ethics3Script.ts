@@ -82,7 +82,7 @@ export const BEATS: Ethics3Beat[] = [
         { text: 'Consequentialism', correct: true },
         { text: 'Deontology', correct: false },
       ],
-      explain: 'Consequentialism, and its famous form utilitarianism, pins an action’s worth entirely on its results — above all the happiness produced.',
+      explain: 'Consequentialism, and its famous form utilitarianism, weigh an act only by what the act brings about. Above all, by how much happiness comes of it.',
       xp: 5,
     },
     dur: 1.0,

@@ -24,7 +24,7 @@ export interface Political33Beat extends BaseBeat {
 export const BEATS: Political33Beat[] = [
   {
     p: 25, x: 52, open: 0.55,
-    text: 'A society decides what it lets in. These doors are that decision, and right now they are open to most things.',
+    text: 'A society decides which ideas to let in. The doors are that decision, and right now the doors stand open to most things.',
     dur: 3.8,
   },
   {
@@ -41,7 +41,7 @@ export const BEATS: Political33Beat[] = [
   },
   {
     p: 4, x: 52, open: 0.1, threat: 1,
-    text: 'So shut them. Now look at what you have. A society that decides in advance which arguments may be heard. Which is the thing you were trying not to become.',
+    text: 'So shut the doors. Now look at what you have built. A society that decides in advance which arguments may be heard. That is the very thing you were trying not to become.',
     cite: 'The other horn',
     dur: 5.0,
   },
@@ -71,7 +71,7 @@ export const BEATS: Political33Beat[] = [
           { id: 'all', upto: 1, reads: 'open to those who will shut it', correct: false },
         ],
       },
-      explain: 'Read the line and it is narrower than its reputation. Popper does not say suppress the intolerant. He says argue with them for as long as they will argue. Claim the right to force only once they have refused to.',
+      explain: 'Read the line closely. Popper\'s claim is narrower than its reputation. He does not say silence the intolerant. He says argue with them for as long as they will argue, and claim the right to force only once they refuse.',
       xp: 5,
     },
     dur: 1.0,
@@ -85,12 +85,12 @@ export const BEATS: Political33Beat[] = [
   {
     p: 45, x: 52, open: 0.5,
     interact: {
-      prompt: '"We only suppress the intolerant." Why is that rule dangerous in practice?',
+      prompt: '"We only suppress the intolerant." Why is the rule on the doors dangerous in practice?',
       cards: [
         { text: 'Someone decides who counts', correct: true },
         { text: 'Nothing, it limits itself', correct: false },
       ],
-      explain: 'It sounds self-limiting and is not, because it hands somebody the power to apply the label. Every government that has silenced an opposition has described it as a threat to the very order it was protecting.',
+      explain: 'The rule sounds self-limiting and is not. Somebody has to decide who counts as intolerant, and whoever decides now holds real power. Every government that has silenced its critics called them a danger to public order.',
       xp: 5,
     },
     dur: 1.0,

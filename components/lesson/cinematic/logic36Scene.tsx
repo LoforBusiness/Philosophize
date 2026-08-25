@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 128, top: CAP_T, width: 260,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
   },
 
   cell: {
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   },
   caseFoot: {
     position: 'absolute', left: 0, top: 32, width: CASE_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
   },
 });
 

@@ -53,7 +53,7 @@ export const BEATS: Log20Beat[] = [
     p: 4, x: 132, boards: 1, struts: 1, live: 1,
     interact: {
       prompt: 'Tap the version a straw man goes after.',
-      explain: 'The one on a single leg. It falls over the moment anything touches it, which is why it is tempting and why beating it settles nothing. The other two are still standing and neither has been answered.',
+      explain: 'The board on a single leg. That board falls the moment anything touches it, which is why knocking it down is tempting and why the win settles nothing. The other two boards are still standing, and neither has been answered.',
       xp: 5,
     },
     dur: 1.0,
@@ -109,7 +109,7 @@ export const BEATS: Log20Beat[] = [
         'Beating it leaves the real argument untouched',
         'Steelmanning takes on the strongest version available',
       ],
-      closing: 'If you cannot state their case better than they did, you are not ready to answer it.',
+      closing: 'If you cannot state the other side\'s case better than they did, you are not ready to answer it.',
     },
     dur: 3.4,
   },

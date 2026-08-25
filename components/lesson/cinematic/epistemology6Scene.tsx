@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   boxSub: {
     marginTop: 2,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     includeFontPadding: false, lineHeight: 11,
   },
   arrowWrap: { position: 'absolute', top: BOX_T + BOX_H / 2 - 5, width: 20, height: 10, flexDirection: 'row', alignItems: 'center' },

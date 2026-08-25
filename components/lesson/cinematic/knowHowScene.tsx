@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
   },
   boxLabel: {
     position: 'absolute', left: BOX_L, top: BOX_T - 14, width: BOX_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   // so the whole string must fit, not its longest word. The house size for a
   // three-across answer row (D30).
   ansText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
   onInk: { color: PAPER },

@@ -74,7 +74,7 @@ export const BEATS: Eth16Beat[] = [
     g: 41, causes: 1, knife: 0, money: 1, repaid: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Compatibilists say determinism means nobody is ever responsible.',
+      prompt: 'Does a settled future mean nobody is ever to blame?',
       cards: [
         { text: 'False — they keep responsibility', correct: true },
         { text: 'True — causes end all blame', correct: false },

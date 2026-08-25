@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     color: INK, includeFontPadding: false,
   },
   tokenSub: {
-    fontFamily: 'Inter_400Regular', fontSize: 7, lineHeight: 10, marginTop: 2,
+    fontFamily: 'Inter_400Regular', fontSize: 8.6, lineHeight: 10, marginTop: 2,
     color: SOFT, includeFontPadding: false,
   },
   tokenOn: { color: PAPER },
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   ledgerCap: {
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, lineHeight: 10, letterSpacing: 1.2,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 1.2,
     color: SOFT, includeFontPadding: false,
   },
   ledgerSum: {

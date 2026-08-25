@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   boxSmall: {
-    fontFamily: 'Inter_400Regular', fontSize: 6.5, letterSpacing: 0.6, color: SOFT,
+    fontFamily: 'Inter_400Regular', fontSize: 8.7, letterSpacing: 0.6, color: SOFT,
     marginTop: 3, includeFontPadding: false,
   },
 
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   // goes, and a caption there would be the D31 collision wearing a name badge.
   standTag: {
     position: 'absolute', top: 214, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.7, letterSpacing: 1.6, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   labelRight: { backgroundColor: INK, borderColor: INK },
   labelWrong: { borderColor: SOFT, opacity: 0.45 },
   labelText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.3, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.7, letterSpacing: 0.3, color: INK,
     includeFontPadding: false,
   },
   labelTextOn: { color: PAPER },

@@ -112,7 +112,7 @@ export const BEATS: Epi23Beat[] = [
         'Rigour with no openness never tests anything new',
         'The virtue is holding both at once, and it is uncomfortable',
       ],
-      closing: 'Hear everything and keep almost none of it. That is harder than either half alone.',
+      closing: 'Hear everything, then keep almost none of what you hear. Doing both is harder than doing either.',
     },
     dur: 3.4,
   },

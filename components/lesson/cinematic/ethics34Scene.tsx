@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: GRID_L - 8, top: CAP_T, width: 220,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   },
   avgLabel: {
     position: 'absolute', left: GRID_L + BAR_W - 40, top: AVG_Y - 11, width: 60,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     textAlign: 'right', includeFontPadding: false,
   },
 
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   bar: { position: 'absolute', left: BAR_L, top: BAR_T, height: 8, borderRadius: 4, backgroundColor: INK },
   barLabel: {
     position: 'absolute', left: BAR_L, top: BAR_T - 12, width: BAR_W,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     includeFontPadding: false,
   },
 });

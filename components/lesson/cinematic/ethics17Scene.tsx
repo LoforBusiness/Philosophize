@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
 
   barCap: {
     position: 'absolute', left: BAR_X, top: BAR_Y - 12, width: 200,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
   barHit: { position: 'absolute', left: BAR_X, top: BAR_Y, width: BAR_W, height: BAR_H },
   barBox: {

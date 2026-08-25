@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   cellText: {
-    fontFamily: 'Inter_500Medium', fontSize: 7, letterSpacing: 0, color: SOFT,
+    fontFamily: 'Inter_500Medium', fontSize: 8.6, letterSpacing: 0, color: SOFT,
     includeFontPadding: false,
   },
   strike: {
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   // so the whole string must fit, not its longest word. The house size for a
   // three-across answer row (D30).
   ansText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
   onInk: { color: PAPER },

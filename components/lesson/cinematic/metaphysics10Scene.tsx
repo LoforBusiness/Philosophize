@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   // the shelf — 48 units wide, so four capitals never wrap (D30).
   plate: {
     position: 'absolute', top: PLANK_T + 5, width: 48, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
 

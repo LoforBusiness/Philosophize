@@ -34,7 +34,7 @@ export const BEATS: Metaphysics10Beat[] = [
   },
   {
     p: 47, x: 124, card: 1,
-    text: 'Whatever the three of them share, give it a card of its own: REDNESS. Now the awkward part. Where does the card go?',
+    text: 'Whatever the three things share, give the shared part a card of its own: REDNESS. Now the awkward question. Where does the card go?',
     cite: 'The one in the many',
     dur: 4.4,
   },

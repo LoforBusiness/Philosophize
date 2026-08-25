@@ -29,7 +29,7 @@ export const BEATS: Eth15Beat[] = [
   {
     g: 25, plain: 1, tilt: 0,
     dur: 4.2,
-    text: 'Here is a plain report of something that happened. You stole that money. Anyone can hold it up against the world and check.',
+    text: 'Here is a plain report of something that happened. You stole that money. Anyone can hold the sentence up against the world and check.',
   },
   {
     g: 45, plain: 1, moral: 1, tilt: 0,
@@ -80,7 +80,7 @@ export const BEATS: Eth15Beat[] = [
         { text: 'Neither true nor false', correct: true },
         { text: 'True whenever people feel it', correct: false },
       ],
-      explain: 'The other card is a different theory in this one\'s coat. It makes the sentence true or false depending on feeling, so it is still a report. Emotivism will not give it that. A boo is not false. It is not the sort of thing that could be.',
+      explain: 'The other card is a different theory wearing this one\'s coat. That theory makes the sentence true or false depending on feeling, so the sentence stays a report. Emotivism will not allow even that. A boo is not false, and could not be.',
       xp: 5,
     },
   },

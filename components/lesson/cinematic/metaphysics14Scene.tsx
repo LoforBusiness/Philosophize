@@ -91,7 +91,7 @@ export default function Metaphysics14Scene({ clock, bt, bi, i, picked, onPick }:
 
   return (
     <Animated.View style={styles.scene}>
-      <Text style={styles.head} numberOfLines={1}>FIVE WAYS THE WORLD COULD HAVE GONE</Text>
+      <Text style={styles.head} numberOfLines={2}>FIVE WAYS THE WORLD COULD HAVE GONE</Text>
 
       {CLAIMS.map((c, k) => (
         <Claim key={c.id} k={k} SCENE={SCENE} live={live} answered={answered} picked={picked} onPick={onPick} />
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
 
   head: {
     position: 'absolute', left: 180, top: HEAD_T, width: 210,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     textAlign: 'right', includeFontPadding: false,
   },
 
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   claimText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, lineHeight: 11, letterSpacing: 0.8, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.8, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
 

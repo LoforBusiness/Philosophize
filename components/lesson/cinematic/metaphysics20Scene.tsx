@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   },
   outCap: {
     position: 'absolute', left: OUT_X + 6, top: OUT_Y - 12, width: 140,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
   },
   cell: {
     position: 'absolute', width: CELL_W, height: CELL_H,

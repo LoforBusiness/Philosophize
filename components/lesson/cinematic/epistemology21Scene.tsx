@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   gauge: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   end: {
     position: 'absolute', top: LAB_T, width: GA_W,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
   track: {
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   trayFill: { width: '100%', backgroundColor: INK, borderRadius: 1 },
   trayLabel: {
     position: 'absolute', top: TRAY_T + TRAY_H + 4, width: TRAY_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: INK,
     includeFontPadding: false,
   },
 
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   // margin, which under numberOfLines={1} ellipsises rather than wraps. D30 says
   // spend tracking before geometry, and tracking alone only got it to 6%.
   ansText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
   onInk: { color: PAPER },

@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   },
   boxKick: {
     position: 'absolute', top: 5, left: 4, right: 4,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
   boxBig: {
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
 
   plate: { position: 'absolute', ...PLATE },
   plateText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
 

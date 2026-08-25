@@ -34,7 +34,7 @@ export const BEATS: Meta31Beat[] = [
   {
     g: 3, holes: 1, ticks: 3, chips: 0,
     dur: 4.6,
-    text: 'You can count them. You can measure one, say it is deeper than that one, and be right. Everything we do with objects, we do with these.',
+    text: 'You can count holes. You can measure one, call it deeper than the next, and be right. Everything we do with objects, we do with holes.',
     cite: 'One, two, three',
   },
   {
@@ -86,7 +86,7 @@ export const BEATS: Meta31Beat[] = [
         'One tidy answer: a hole is its lining, a material thing',
         'Paraphrasing absences away is harder than it sounds',
       ],
-      closing: 'Metaphysics is mostly this: taking an ordinary sentence seriously enough to ask what would have to exist for it to be true.',
+      closing: 'Metaphysics is mostly one move. Take an ordinary sentence seriously, then ask what would have to exist for the sentence to be true.',
     },
     dur: 3.0,
   },

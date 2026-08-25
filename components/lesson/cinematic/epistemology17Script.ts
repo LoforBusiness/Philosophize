@@ -34,7 +34,7 @@ export const BEATS: Epi17Beat[] = [
   {
     g: 45, facts: 1, frame: 1, odd: 3,
     dur: 4.8,
-    text: 'Then the awkward ones collect outside it. Nobody abandons the frame. They patch it, and add a circle, and patch it again.',
+    text: 'Then the awkward results pile up outside the frame. Nobody throws the frame away. They patch the frame, add a circle, and patch it again.',
     cite: 'Anomalies',
   },
   {

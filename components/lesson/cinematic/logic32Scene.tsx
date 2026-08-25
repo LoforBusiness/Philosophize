@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   hiddenText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.6, color: PAPER,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: PAPER,
     includeFontPadding: false,
   },
 

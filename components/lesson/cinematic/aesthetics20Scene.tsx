@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', top: 232,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
 
   claim: {
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', paddingHorizontal: 7,
   },
   claimText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.7, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.7, color: INK, includeFontPadding: false,
   },
   sub: {
     position: 'absolute', left: SUB_X, width: SUB_W, height: ROW_H,

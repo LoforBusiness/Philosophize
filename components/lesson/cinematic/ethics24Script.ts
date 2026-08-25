@@ -76,7 +76,7 @@ export const BEATS: Eth24Beat[] = [
   },
   {
     p: 21, x: 268, slab: 1, names: 1, gone: 1,
-    text: 'The other side has a case that runs the same trick backwards. It is the reason nobody holds deterrence on its own.',
+    text: 'The other side runs the same trick backwards, and that reply is why nobody holds deterrence on its own.',
     cite: 'The other direction',
     dur: 4.6,
   },

@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   },
   label: {
     position: 'absolute', top: LABEL_Y, width: HULL_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', top: HULL_Y, height: HULL_H },

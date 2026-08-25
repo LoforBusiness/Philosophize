@@ -88,7 +88,7 @@ export const BEATS: Epi2Beat[] = [
         'Doubt can be a method, not despair',
         '"I am, I exist" outlasts every doubt',
       ],
-      closing: 'Doubting boldly is no weakness. It is the first honest stride toward knowledge that holds.',
+      closing: 'Bold doubt is not weakness. Doubt is the first honest step towards knowledge that holds.',
     },
     dur: 2.8,
   },

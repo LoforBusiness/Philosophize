@@ -79,7 +79,7 @@ export const BEATS: Aesthetics36Beat[] = [
   {
     p: 35, x: 128, square: 1, crop: 0.5, prints: 1,
     interact: {
-      prompt: 'So does heavy editing turn a photograph into something else?',
+      prompt: 'Does heavy editing make the photo a different kind of picture?',
       cards: [
         { text: 'No line — only the promise', correct: true },
         { text: 'Yes, any edit at all', correct: false },

@@ -54,7 +54,7 @@ export const BEATS: Log19Beat[] = [
     p: 4, x: 132, rule: 1, cards: 1, live: 1,
     interact: {
       prompt: 'Tap the card that could still break the rule.',
-      explain: 'The seven. Turning it is the only move that can come back with bad news. A test that cannot fail is not a test. The four is safe whatever is behind it, which is exactly why people reach for it.',
+      explain: 'The seven. Turning the seven is the only move that can come back with bad news, and a test that cannot fail is not a test. The four is safe whatever lies behind it, which is exactly why people reach for the four.',
       xp: 5,
     },
     dur: 1.0,
@@ -67,7 +67,7 @@ export const BEATS: Log19Beat[] = [
   },
   {
     p: 13, x: 268, rule: 1, cards: 1, turned: 1,
-    text: 'You went looking for the card that would say yes. The card that could say no is the one that tests anything.',
+    text: 'You went looking for the card that would say yes. Only the card that can say no is really a test.',
     dur: 4.6,
   },
   {

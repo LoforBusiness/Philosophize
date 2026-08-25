@@ -29,7 +29,7 @@ export const BEATS: Aes19Beat[] = [
   },
   {
     p: 41, x: 168, row: 1, frame: 1,
-    text: 'A drainpipe. Nobody hung it, nobody signed it, and it has a shape, a rhythm and a set of stains. Put a frame round it and you will look at it properly for the first time.',
+    text: 'A drainpipe. Nobody hung it and nobody signed it, and still the pipe has a shape, a rhythm and a set of stains. Put a frame round the pipe and you will look at it properly for the first time.',
     cite: 'A drainpipe',
     dur: 5.2,
   },

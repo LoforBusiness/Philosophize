@@ -214,11 +214,11 @@ const styles = StyleSheet.create({
   },
   state: {
     position: 'absolute', left: 244, width: 54, lineHeight: 9,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: SOFT, includeFontPadding: false,
   },
   caption: {
     position: 'absolute', left: H_X, top: CAP_Y, width: H_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK, includeFontPadding: false,
   },
 
   tile: {

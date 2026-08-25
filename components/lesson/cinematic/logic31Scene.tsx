@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   },
   scaleLab: {
     position: 'absolute', left: SC_L, top: SC_T - 18, width: SC_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     includeFontPadding: false,
   },
 

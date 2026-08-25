@@ -52,7 +52,7 @@ export const BEATS: Logic37Beat[] = [
   },
   {
     p: 21, x: 56, boxes: 1, sorted: 1, barber: 1,
-    text: 'That is the whole result, and it is stronger than it looks. A sentence can be perfectly well formed and describe nothing that could exist.',
+    text: 'That is the whole result, and the result bites harder than you would think. A sentence can be built perfectly and still describe nothing that could exist.',
     dur: 4.6,
   },
   {

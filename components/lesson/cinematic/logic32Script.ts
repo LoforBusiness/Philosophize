@@ -29,13 +29,13 @@ export const BEATS: Logic32Beat[] = [
   {
     a: 13, b: 45, q: 1,
     dur: 4.2,
-    text: '"Have you stopped cheating at cards?" It sounds like an ordinary yes-or-no. It is not one.',
+    text: '"Have you stopped cheating at cards?" The question sounds like an ordinary yes-or-no, and is not one.',
     cite: 'The question',
   },
   {
     a: 28, b: 4, q: 1, tried: 1,
     dur: 4.4,
-    text: 'Try yes. Yes, you stopped — which means you were doing it. The accusation is now on the record and nobody ever made it.',
+    text: 'Try yes. Yes, you stopped, which means you were cheating before. The accusation now stands on the record, and nobody ever made the accusation.',
     cite: 'Answer: yes',
   },
   {
@@ -61,7 +61,7 @@ export const BEATS: Logic32Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'One word smuggled the accusation in. Tap it.',
-      explain: '"Stopped" can only be true if you started, so it carries the charge without ever stating it. "Cheating" is out in the open — that is exactly why it is not the problem. You can see it and dispute it.',
+      explain: '"Stopped" can only be true if you started, so the word carries the charge without ever stating the charge. "Cheating" is out in the open — that is exactly why it is not the problem. You can see it and dispute it.',
       xp: 5,
     },
   },

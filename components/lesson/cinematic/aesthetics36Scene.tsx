@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 104, top: CAP_T, width: 288,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
   },
 
   pave: { position: 'absolute', left: 104, top: PAVE_Y, width: 288, height: 2, backgroundColor: INK },
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   markSmall: { width: 3, height: 16, borderRadius: 1.5, backgroundColor: INK },
   printCap: {
     position: 'absolute', top: PRINT_Y + PRINT_H + 4, width: PRINT_W + 12, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
   },
 });
 

@@ -86,7 +86,7 @@ export const BEATS: Ethics23Beat[] = [
         'Effective altruism asks: most good per pound',
         'Critics worry the demand swallows your life',
       ],
-      closing: 'The uncomfortable part is not that the argument is clever. It is that nobody has found the flaw.',
+      closing: 'The uncomfortable part is not how clever the argument is. The uncomfortable part is that nobody has found the flaw.',
     },
     dur: 3.0,
   },

@@ -23,7 +23,7 @@ export interface Pol12Beat extends BaseBeat {
 export const BEATS: Pol12Beat[] = [
   {
     p: 25, x: 70,
-    text: 'Rousseau wrote that a people can be forced to be free. It sounds like nonsense, and Isaiah Berlin spent an essay explaining why it is not — and why that is worse.',
+    text: 'Rousseau wrote that a people can be forced to be free. The phrase sounds like nonsense. Isaiah Berlin spent an essay explaining why the phrase makes sense, and why that is worse.',
     dur: 5.0,
   },
   {
@@ -52,7 +52,7 @@ export const BEATS: Pol12Beat[] = [
   },
   {
     p: 29, x: 168, door: 1, open: 1, neg: 1, posi: 1,
-    text: 'Here is Berlin\'s worry. A regime announces that your real self wants its plan. It lights the second lamp on your behalf and shuts the door. Then it calls that freedom.',
+    text: 'Here is Berlin\'s worry. A regime announces that your real self wants the regime\'s plan. The regime lights the second lamp on your behalf, shuts the door, and calls the result freedom.',
     cite: 'The second lamp',
     dur: 5.2,
   },
@@ -73,7 +73,7 @@ export const BEATS: Pol12Beat[] = [
     p: 6, x: 124, door: 1, open: 1, neg: 1, posi: 1, pick: 1,
     interact: {
       prompt: 'The door is wide open and you still cannot choose. Tap the lamp that is lying.',
-      explain: 'The second one. Negative liberty is honestly satisfied — nobody is in the doorway. Self-mastery cannot be switched on for you by somebody else; that is the whole force of Berlin\'s warning.',
+      explain: 'The second lamp. Negative liberty is honestly satisfied, because nobody stands in the doorway. But self-mastery cannot be switched on for you by somebody else, and that is the whole force of Berlin\'s warning.',
       xp: 5,
     },
     dur: 1.0,

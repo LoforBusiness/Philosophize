@@ -588,7 +588,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **twenty-eight** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **thirty-one** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -596,7 +596,7 @@ followed:
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
 `check-camera` · `check-tour` · `check-streak` · `check-answers` · `check-quotes` · `check-mentions` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
-`check-ui` · `check-thinkers` · `check-words` · `check-smooth` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
+`check-ui` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-smooth` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
 figures and 6 hand-built ones, `check-moves` 6 head-clearance defects. A budget
 line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 222 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
@@ -708,6 +708,13 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 > and it is about NEIGHBOURS rather than about any one lesson: what a reader meets when
 > they finish sixteen and open seventeen. This section is the *why*; that file is the
 > *how*, with the numbers.
+>
+> Three rules were added the day a reader said the lessons were unreadable, and
+> all three are arithmetic rather than taste: **D34** no word on the stage may
+> land under 8pt (a tall band shrinks every label, and `logic8`'s captions were
+> reaching the reader at 5.1pt); **J10** reading ease at least 55 and at most
+> 12% of the words pointing rather than naming; **R9** the rotation — the deck
+> is not the default, neighbours differ, and one question stays on the stage.
 >
 > Rule A1 above all: **what the text says, the picture must do.** A lesson that says
 > someone is on the floor and draws them standing is not acceptable at any polish level.
@@ -920,6 +927,16 @@ The flag is derived from the beat itself (`b.interact?.lever ? 1 : 0`) rather th
 declared as a channel, so it cannot fall out of step with the control and it costs
 `check:echo` nothing.
 
+> **THE READER COULD NOT MOVE THE LEVER FAR ENOUGH, AND THE CAUSE WAS THE GAIN.**
+> `DragScale`, `SplitBar` and `LeverPick` all integrated `translationX / width`,
+> so the full range cost a full WIDTH of finger travel — and the reader reported
+> the consequence exactly: *"my finger gets to the end of the screen, and I'll
+> answer wrong because I can't move it enough."* From anywhere but the far edge,
+> the far end was literally unreachable inside the screen. All three place the
+> value at WHERE THE FINGER IS now, which also makes a tap work and leaves no gain
+> to get wrong. `FieldPick` and `ShapePlot` were built that way and are the two
+> nobody complained about.
+
 > **Two things that cost a run each, and will again.** All six controls render
 > inside `styles.lower` with the deck, never as a sibling of the stage — that is
 > L6, and a control outside it does not merely move the picture, it **rescales**
@@ -930,6 +947,16 @@ declared as a channel, so it cannot fall out of step with the control and it cos
 > of 9 and reported them as measured. All four harnesses drive them through one
 > shared snippet, `scripts/lib/answerctl.mjs`. **A new control is added to both
 > lists in the same commit** — `check:smooth` asserts both.
+
+**AND THE ROTATION IS ITS OWN RULE (R9).** Which control a CLAIM wants is R1;
+what a reader's thumb is asked to do lesson after lesson is R9, and only the
+second one is felt by somebody working through a branch. `npm run check:rotation`
+holds three high-water marks: the two-card deck is at most 55% of all questions
+(it was 47% and falling), neighbouring lessons do not both use the same control
+(133 pairs did, now 112), and **36 lessons ask both of their questions BELOW the
+figure** — every one an early lesson, which is exactly where the picture most
+needs to be the thing being answered. That last budget is the "above the
+stickman" half of the work, and converting one is a self-contained job.
 
 **They all have the same shape, and `npm run check:cinematic` enforces it**: 7–11
 beats (8 is the mode), **exactly two graded questions**, one saveable quote on a rest

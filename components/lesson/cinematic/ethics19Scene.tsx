@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   headRule: { position: 'absolute', left: FORM_X, top: FORM_Y + 20, width: FORM_W, height: 2, backgroundColor: INK },
   head: {
     position: 'absolute', top: FORM_Y + 6,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
 
   rowRule: { position: 'absolute', left: FORM_X, width: FORM_W, height: 1, backgroundColor: RULE },
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: SOFT, borderRadius: 2, backgroundColor: PAPER,
   },
   sigText: {
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.7, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.7, color: SOFT, includeFontPadding: false,
   },
   sigMine: { color: INK },
 

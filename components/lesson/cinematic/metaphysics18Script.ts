@@ -35,7 +35,7 @@ export interface Met18Beat extends BaseBeat {
 export const BEATS: Met18Beat[] = [
   {
     p: 25, x: 200, shelf: 1,
-    text: 'Four things. Three of them are somewhere.',
+    text: 'Four things on the table. Three of them sit somewhere you can point to.',
     dur: 3.2,
   },
   {
@@ -51,7 +51,7 @@ export const BEATS: Met18Beat[] = [
   },
   {
     p: 13, x: 132, shelf: 1, aim: 1, hang: 1,
-    text: 'And yet it is true that three is prime, and it was true before anybody counted anything.',
+    text: 'And yet three is a prime number, and three was prime before anybody counted anything.',
     dur: 4.2,
   },
   {
@@ -65,7 +65,7 @@ export const BEATS: Met18Beat[] = [
   },
   {
     p: 21, x: 132, shelf: 1, aim: 1, hang: 1, beyond: 1,
-    text: 'Plato takes the obvious way out. It exists, and it does not live here.',
+    text: 'Plato takes the obvious way out. The number exists, and the number does not live here.',
     cite: 'Platonism',
     dur: 4.0,
   },

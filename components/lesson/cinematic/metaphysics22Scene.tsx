@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   runup: { position: 'absolute', left: RAIL_L, top: RAIL_Y, width: J_X - RAIL_L, height: 3, backgroundColor: INK },
   before: {
     position: 'absolute', left: RAIL_L, top: 310, width: 150,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
 
   junction: {

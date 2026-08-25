@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   },
   who: {
     position: 'absolute', top: PLINTH_Y + 17, width: COL_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
   slur: {
     position: 'absolute', left: 34, top: SLUR_Y, width: 332, height: 3, backgroundColor: INK,
@@ -208,14 +208,14 @@ const styles = StyleSheet.create({
     textAlign: 'center', includeFontPadding: false,
   },
   cardSub: {
-    fontFamily: 'Inter_400Regular', fontSize: 8.5, color: SOFT,
+    fontFamily: 'Inter_400Regular', fontSize: 8.6, color: SOFT,
     textAlign: 'center', marginTop: 4, includeFontPadding: false,
   },
   onInk: { color: PAPER },
 
   reason: {
     position: 'absolute', width: COL_W - 12,
-    fontFamily: 'Inter_400Regular', fontSize: 8, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_400Regular', fontSize: 8.6, color: INK, includeFontPadding: false,
   },
 });
 

@@ -34,7 +34,7 @@ export const BEATS: Logic22Beat[] = [
   },
   {
     p: 13, x: 124, claim: 1, field: 1,
-    text: 'A universal claim is a promise about every single member. It is enormously useful and enormously fragile — it stakes everything on there being no exceptions.',
+    text: 'A universal claim is a promise about every single member. The promise is worth a lot and breaks easily, because one exception breaks all of it.',
     cite: 'What "all" costs',
     dur: 4.6,
   },
@@ -70,10 +70,14 @@ export const BEATS: Logic22Beat[] = [
     p: 4, x: 124, claim: 1, field: 1, odd: 1, dead: 1,
     interact: {
       prompt: 'Which single fact proves "All cats are black" false?',
-      cards: [
-        { text: 'One cat that isn\'t', correct: true },
-        { text: 'Prove no cats are black', correct: false },
-      ],
+      lever: {
+        start: 2,
+        stops: [
+          { id: 'one', reads: 'one cat that is not black', correct: true },
+          { id: 'many', reads: 'a good many cats that are not' },
+          { id: 'all', reads: 'prove that no cat is black' },
+        ],
+      },
       explain: 'The trap is reaching for the sweeping opposite, "No cats are black" — a much stronger and separate claim. The contradictory of "all are" is only "some are not". One cat does it.',
       xp: 5,
     },

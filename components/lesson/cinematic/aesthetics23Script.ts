@@ -61,7 +61,7 @@ export const BEATS: Aes23Beat[] = [
   },
   {
     p: 21, x: 132, stave: 1, plates: 1, point: 1, aim: 2,
-    text: 'Most instrumental music is like that. It is not about anything. It is a structure of tones unfolding.',
+    text: 'Most instrumental music works this way. The music is not about anything. The music is a shape made of tones.',
     cite: 'Absolute music',
     dur: 4.4,
   },
@@ -108,7 +108,7 @@ export const BEATS: Aes23Beat[] = [
         'Most instrumental music does the first and not the second',
         'Titles carry far more of the pointing than the notes do',
       ],
-      closing: 'It moves you and it is about nothing. That is the interesting part, not a shortfall.',
+      closing: 'Music moves you and is about nothing. Take that as the interesting part, not as a shortfall.',
     },
     dur: 3.6,
   },

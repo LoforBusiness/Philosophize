@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 100, top: 236, width: 260,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
   },
 
   peg: { position: 'absolute', left: PEG_X, top: PEG_Y, width: 6, height: PEG_H, backgroundColor: INK, borderRadius: 2 },
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', paddingLeft: 8,
   },
   cardText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK, includeFontPadding: false,
   },
 
   twinPeg: { position: 'absolute', left: TWIN_X + 24, top: PEG_Y, width: 6, height: PEG_H, backgroundColor: INK, borderRadius: 2 },
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', paddingLeft: 6,
   },
   twinText: {
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.7, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.7, color: INK, includeFontPadding: false,
   },
 
   pegHit: { position: 'absolute', left: PEG_X - 16, top: PEG_Y, width: 38, height: PEG_H },

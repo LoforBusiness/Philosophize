@@ -28,7 +28,7 @@ export const BEATS: Metaphysics34Beat[] = [
   },
   {
     p: 4, x: 58, depth: 0, ask: 1,
-    text: 'Not what made it, and not who owns it. What holds it up? Not its legs — what makes it a table at all.',
+    text: 'Not what made the table, and not who owns the table. What holds a table up? Not the legs. What makes the thing a table at all.',
     cite: 'What holds this up?',
     dur: 4.2,
   },

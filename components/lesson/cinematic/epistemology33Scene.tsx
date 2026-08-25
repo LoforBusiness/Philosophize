@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: COL_L - 30, top: COL_TOP - 16, width: COL_W + 60,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
 
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
 
   barWrap: { position: 'absolute', left: BAR_L, top: BAR_HIGH, width: BAR_W },
   barLabel: {
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: INK,
     textAlign: 'center', includeFontPadding: false, marginBottom: 4,
   },
   bar: { height: 4, backgroundColor: INK },

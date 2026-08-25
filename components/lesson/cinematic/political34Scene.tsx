@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: 156, top: CAP_T, width: 200,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
 
   labels: { position: 'absolute', left: 108, top: 300, width: 46, gap: 10 },
   label: {
-    fontFamily: 'Inter_700Bold', fontSize: 6.5, letterSpacing: 0.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT,
     includeFontPadding: false,
   },
 });

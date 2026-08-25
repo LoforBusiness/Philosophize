@@ -31,7 +31,7 @@ export const BEATS: Ethics33Beat[] = [
   },
   {
     p: 47, x: 48, give: 0.15,
-    text: 'So you give something, and it plainly helps. That much is easy, and almost every view of ethics agrees about it.',
+    text: 'So you give something, and the giving plainly helps. That much is easy, and almost every view of ethics agrees.',
     cite: 'The easy part',
     dur: 4.0,
   },
@@ -43,7 +43,7 @@ export const BEATS: Ethics33Beat[] = [
   },
   {
     p: 4, x: 48, give: 0.9, more: 1,
-    text: 'Follow it honestly and it does not stop until the two columns are level. Peter Singer thought that was the right answer and we had simply been ignoring it.',
+    text: 'Follow the rule honestly and the giving does not stop until the two columns are level. Peter Singer thought that was the right answer and that we had simply been looking away.',
     cite: 'Singer bites the bullet',
     dur: 5.0,
   },

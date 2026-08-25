@@ -85,7 +85,7 @@ export const BEATS: Logic26Beat[] = [
         'The contradiction kills the assumption, not the logic',
         'Therefore the original claim must be true',
       ],
-      closing: 'The only move you did not have to make was the first one. That is why it is the one that breaks.',
+      closing: 'The only move you were free to refuse was the first one. So the first move is the one that breaks.',
     },
     dur: 3.0,
   },

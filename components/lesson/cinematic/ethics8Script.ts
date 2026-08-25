@@ -61,7 +61,7 @@ export const BEATS: Ethics8Beat[] = [
   },
   {
     p: 39, x: 182, grid: 0.5, oth: 1, thread: 1,
-    text: 'That move has a name. Carol Gilligan kept hearing people reason exactly like this — through bonds and responsibility — while the textbooks had no word for it. She called it a different voice.',
+    text: 'That move has a name. Carol Gilligan kept hearing people reason through bonds and care, and the textbooks had no word for it. She called the pattern a different voice.',
     cite: 'Carol Gilligan · 1982',
     dur: 5.2,
   },

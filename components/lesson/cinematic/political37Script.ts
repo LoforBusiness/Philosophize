@@ -56,7 +56,7 @@ export const BEATS: Political37Beat[] = [
           { id: 'hard', upto: 1, reads: 'nobody may amplify anything' },
         ],
       },
-      explain: 'Notice the smaller horn never grew. A cap does not give the quieter citizen more voice; it takes reach off the louder one. That may still be right, and it is worth being clear that it is what you just did.',
+      explain: 'Notice how the smaller horn never grew. A cap does not give the quieter citizen more voice. A cap takes reach away from the louder one. That may still be the right move, and it is worth being clear about the move you just made.',
       xp: 5,
     },
     dur: 1.0,
@@ -89,12 +89,12 @@ export const BEATS: Political37Beat[] = [
   },
   {
     p: 35, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
-    text: 'Which is why it never settles. One side is defending the right to be heard. So is the other. They disagree about whose.',
+    text: 'So the argument never settles. One side defends the right to be heard. So does the other. The two sides disagree about whose right it is.',
     dur: 4.6,
   },
   {
     p: 45, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
-    text: 'Every democracy draws this line somewhere, usually without announcing it. Where it lands tells you what that country thinks a vote is for.',
+    text: 'Every democracy draws the line somewhere, usually without announcing it. Where the line lands tells you what a country thinks a vote is for.',
     dur: 4.8,
   },
   {

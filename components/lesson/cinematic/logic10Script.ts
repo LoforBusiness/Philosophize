@@ -56,7 +56,7 @@ export const BEATS: Logic10Beat[] = [
   },
   {
     p: 30, x: 158, arg: 1, slot: 1, hid: 2,
-    text: 'So say it yourself — all rich people are happy — and up it comes through the line. Now that you can read it, you can see it is rubbish.',
+    text: 'So say the claim out loud. All rich people are happy. Up it comes through the line, and once you can read the words you can see they are rubbish.',
     cite: 'Into the light',
     dur: 4.8,
   },

@@ -32,7 +32,7 @@ export const BEATS: Logic6Beat[] = [
   },
   {
     p: 13, link: 1, rain: 1, table: 1,
-    text: '"If it rains, the streets get wet." This does not say it IS raining. It claims only a link: should rain come, wet streets follow. A sunny day leaves the promise unbroken.',
+    text: '"If it rains, the streets get wet." The sentence does not say rain IS falling. The sentence claims only a link: if rain comes, wet streets follow. A sunny day leaves the promise unbroken.',
     cite: 'A promise, not a fact',
     dur: 5.0,
   },

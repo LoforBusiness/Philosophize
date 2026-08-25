@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 130, top: CAP_T, width: 260,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
   },
 
   book: {
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   },
   exCap: {
     position: 'absolute', left: EX_X, top: EX_Y + 7, width: 108, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
   exRow: { position: 'absolute', left: EX_X + 14, width: 80, height: 8, borderWidth: 1, borderColor: SOFT, borderRadius: 2 },
   exStrike: { position: 'absolute', left: EX_X + 18, top: EX_Y + 46, width: 72, height: 2, backgroundColor: INK },
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   giftArm: { position: 'absolute', left: BOOK_X + BOOK_W, top: 375, width: 20, height: 2, backgroundColor: INK },
   giftLabel: {
     position: 'absolute', left: BOOK_X + BOOK_W - 4, top: 340, width: 44, textAlign: 'center', lineHeight: 10,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
   },
 });
 

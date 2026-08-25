@@ -22,7 +22,7 @@ export interface Aes16Beat extends BaseBeat {
 export const BEATS: Aes16Beat[] = [
   {
     p: 25, x: 70,
-    text: 'You have stood in front of this painting three times and liked it more each time. Today you read the label beside it.',
+    text: 'You have stood in front of this painting three times and liked it more each time. Today you read the label on the wall.',
     dur: 4.0,
   },
   {
@@ -63,7 +63,7 @@ export const BEATS: Aes16Beat[] = [
         { text: 'Nothing, but your experience did', correct: true },
         { text: 'It ruins the work', correct: false },
       ],
-      explain: 'The trap is that both extremes feel principled. "It ruins the work" and "it is simply irrelevant" each dodge the honest answer: the object is untouched and your experience of it is not.',
+      explain: 'The trap is that both extremes feel principled. "The label ruins the work" and "the label is irrelevant" both dodge the honest answer. The painting is untouched. Your experience of the painting is not.',
       xp: 5,
     },
     dur: 1.0,

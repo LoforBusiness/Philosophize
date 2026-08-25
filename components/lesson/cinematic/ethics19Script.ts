@@ -64,7 +64,7 @@ export const BEATS: Eth19Beat[] = [
   },
   {
     p: 2, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
-    text: 'Three of those signatures do not belong to the person who wrote them. One of them does.',
+    text: 'Three of these signatures were not written freely. The fourth one was.',
     dur: 4.0,
   },
   {
@@ -90,7 +90,7 @@ export const BEATS: Eth19Beat[] = [
         { text: 'Their refusal stands', correct: true },
         { text: 'Save them, then ask', correct: false },
       ],
-      explain: 'Their refusal stands. This is the hardest case for the harm principle, and Mill takes it. A competent adult may make a choice that is plainly bad for them. Overriding it treats a person as a thing to be managed.',
+      explain: 'Their refusal stands. This is the hardest case for the harm principle, and Mill takes it anyway. A competent adult may make a choice that is plainly bad for them. Overriding the choice treats a person as a thing to be managed.',
       xp: 5,
     },
     dur: 1.0,

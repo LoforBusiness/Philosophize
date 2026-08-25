@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   landWrap: { position: 'absolute', left: LAND_L, top: LAND_T, width: LAND_W, height: LAND_H },
   landLabel: {
     position: 'absolute', left: 100, top: 108, width: 100, textAlign: 'right',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1.6, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
   },
   boardLabel: {
     position: 'absolute', left: 0, right: 0, top: 9, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1.6, color: SOFT,
     includeFontPadding: false,
   },
   mapArea: { position: 'absolute', left: 9, top: 30, width: 110, height: 90 },
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
     justifyContent: 'center', paddingHorizontal: 9,
   },
-  placardHead: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: SOFT,
+  placardHead: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },
   placardBody: { fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, marginTop: 2,
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
   cardLabelOn: { color: PAPER },
   tapLabel: {
     position: 'absolute', left: CARD_A_L, top: 334, width: CARD_B_L + CARD_W - CARD_A_L, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.6, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1.6, color: INK,
     includeFontPadding: false,
   },
 });

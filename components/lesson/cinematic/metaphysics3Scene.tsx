@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   },
   caveCap: {
     position: 'absolute', left: CAVE_L - 6, top: 310, width: CAVE_W + 12, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, lineHeight: 11, letterSpacing: 1.1,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 1.1,
     color: SOFT, includeFontPadding: false,
   },
   wallShade: { position: 'absolute', borderRadius: 12, backgroundColor: SOFT },
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   iconCell: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
   tierText: { flex: 1 },
   tierT: { fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 14, letterSpacing: 0.5, color: INK, includeFontPadding: false },
-  tierSub: { fontFamily: 'Inter_400Regular', fontSize: 8.5, lineHeight: 11, letterSpacing: 0.2, color: SOFT, includeFontPadding: false },
+  tierSub: { fontFamily: 'Inter_400Regular', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.2, color: SOFT, includeFontPadding: false },
 
   meterRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
   meterTrack: {
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     backgroundColor: INK, transformOrigin: '0% 50%',
   },
   meterWord: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.8,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8,
     color: SOFT, includeFontPadding: false,
   },
 

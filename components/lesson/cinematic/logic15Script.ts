@@ -67,7 +67,7 @@ export const BEATS: Log15Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Every part of this is true. Tap the part that has not been earned.',
-      explain: 'The step. The two ringed dots are honest evidence and nobody is disputing them, and the conclusion is not even false yet — it might be true, and you still would not know it. What has no support under it is the move from that width to this one.',
+      explain: 'The step. The two ringed dots are honest evidence and nobody disputes them, and the conclusion may even be true. You still would not know so. What has nothing underneath is the jump from the narrow width to the wide one.',
       xp: 5,
     },
   },

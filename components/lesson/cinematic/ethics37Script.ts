@@ -32,12 +32,12 @@ export interface Ethics37Beat extends BaseBeat {
 export const BEATS: Ethics37Beat[] = [
   {
     p: 25, x: 54, posts: 1,
-    text: 'Two people, standing apart, owing each other nothing in particular. An ordinary Tuesday.',
+    text: 'Two people stand apart on an ordinary Tuesday. Neither owes the other a thing.',
     dur: 3.4,
   },
   {
     p: 2, x: 54, posts: 1, cord: 1,
-    text: 'Now one of them says four words. I promise I will. Watch what appears between them.',
+    text: 'Now one speaker says four words. I promise I will. Watch the cord appear between the two.',
     dur: 4.0,
   },
   {
@@ -54,14 +54,14 @@ export const BEATS: Ethics37Beat[] = [
         { text: 'On whoever relied on you', correct: true },
         { text: 'On the practice of promising', correct: false },
       ],
-      explain: 'The practice matters and it is the other main answer, but it makes your particular friend an afterthought. Scanlon puts them first: they arranged things around your word, and breaking it leaves them standing there.',
+      explain: 'The practice matters, and the practice is the other main answer. But that answer makes your own friend an afterthought. Scanlon puts the friend first. She arranged her week around your word, and a broken promise leaves her standing there.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 21, x: 54, posts: 1, cord: 1, lean: 1,
-    text: 'Look what is leaning on the cord now. They cancelled something. They told someone else. They stopped looking for another way.',
+    text: 'Look what is leaning on the cord now. The other person cancelled a plan. Told a friend. Stopped hunting for another way.',
     dur: 4.6,
   },
   {
@@ -99,7 +99,7 @@ export const BEATS: Ethics37Beat[] = [
         'Scanlon: the wrong is to whoever relied on you',
         'Secrecy does not repair it',
       ],
-      closing: 'The strangest part is how ordinary it feels. You do it most weeks and it never once seems remarkable that it works.',
+      closing: 'The strangest part is how ordinary a promise feels. You make one most weeks and never once stop to find that remarkable.',
     },
     dur: 3.2,
   },

@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', top: 236, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
   panel: {
     position: 'absolute', top: PAN_Y, height: PAN_H,

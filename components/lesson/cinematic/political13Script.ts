@@ -22,7 +22,7 @@ export interface Pol13Beat extends BaseBeat {
 export const BEATS: Pol13Beat[] = [
   {
     p: 25, x: 70,
-    text: 'Mill gives exactly one reason for using power over someone against their will: to stop them harming another person. Not for their own good, and not because you dislike it.',
+    text: 'Mill gives exactly one reason for using power over a person against their will. To stop them harming somebody else. Not for their own good, and not because you dislike the choice.',
     dur: 5.2,
   },
   {

@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   boardTag: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.6, color: SOFT,
     marginBottom: 3, includeFontPadding: false,
   },
   boardText: {

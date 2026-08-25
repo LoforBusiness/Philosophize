@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 116, top: CAP_T, width: 260,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
   },
 
   plate: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   plateWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   plateText: {
     position: 'absolute', left: 4, top: 11, width: PLATE_W - 8, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.5, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,
   },
   // Scaled about its LEFT end, so the gap opens at the plate the chain fails to reach.
   link: { position: 'absolute', top: PLATE_Y + PLATE_H / 2 - 1, width: 8, height: 2, backgroundColor: INK, transformOrigin: '0% 50%' },
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   fencePost: { position: 'absolute', left: 0, top: 0, width: 3, height: 120, backgroundColor: INK },
   fenceLabel: {
     position: 'absolute', left: -26, top: 122, width: 56, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
 });
 

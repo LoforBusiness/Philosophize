@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
   },
   plate: {
     position: 'absolute', left: 0, right: 0, bottom: 6, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 10.2, letterSpacing: 1.8, color: SOFT,
     includeFontPadding: false, lineHeight: 13,
   },
 
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
   // ── the lens rack ───────────────────────────────────────────────────────────
   rackTitleWrap: { position: 'absolute', left: RACK_L, top: 246, width: RACK_W },
   rackTitle: {
-    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6,
+    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 10.2, letterSpacing: 1.6,
     color: SOFT, includeFontPadding: false, lineHeight: 13,
   },
   rail: { position: 'absolute', left: RACK_L, top: RAIL_T, width: RACK_W, height: 3, borderRadius: 2, backgroundColor: INK },
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
   specBridge: { width: 6, height: 2.2, backgroundColor: INK },
   specLabelWrap: { position: 'absolute', top: 304, width: 78 },
   specLabel: {
-    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.4,
+    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 10.2, letterSpacing: 1.4,
     color: SOFT, includeFontPadding: false, lineHeight: 12,
   },
 

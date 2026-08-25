@@ -124,12 +124,12 @@ const styles = StyleSheet.create({
 
   kicker: {
     position: 'absolute', left: LEFT_X - 10, top: CAP_T, width: 200,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
   more: {
     position: 'absolute', left: RIGHT_X - 6, top: 278, width: 130,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.1, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: INK,
     includeFontPadding: false,
   },
 

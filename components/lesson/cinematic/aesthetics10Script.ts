@@ -99,7 +99,7 @@ export const BEATS: Aes10Beat[] = [
         'Ethicism: a moral flaw can be an artistic flaw',
         'The skill was never what was in dispute',
       ],
-      closing: 'Beauty and goodness can pull apart — and that is the part that unsettles us.',
+      closing: 'Beauty and goodness can pull apart, and the gap between them is the unsettling part.',
     },
     dur: 3.2,
   },

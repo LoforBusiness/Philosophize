@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
   // ── the shared top strip ────────────────────────────────────────────────────
   stripHead: {
     position: 'absolute', left: 0, top: TOP_T, width: STAGE_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 11.3, letterSpacing: 1.8, color: SOFT,
     includeFontPadding: false, lineHeight: 13,
   },
 
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
   chRow: { position: 'absolute', left: 0, width: STAGE_W, height: 16, flexDirection: 'row', alignItems: 'center' },
   chLabel: {
     position: 'absolute', left: CH_L, width: CH_LABEL_W, textAlign: 'right',
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.3, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 11.3, letterSpacing: 0.3, color: INK,
     includeFontPadding: false, lineHeight: 13,
   },
   chTrack: {
@@ -343,8 +343,8 @@ const styles = StyleSheet.create({
   chFill: { height: 7, marginLeft: 1.5, backgroundColor: INK, borderRadius: 1, transformOrigin: '0% 50%' },
   chNote: {
     position: 'absolute', left: CH_NOTE_L, width: 68,
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.6, color: SOFT,
-    includeFontPadding: false, lineHeight: 12,
+    fontFamily: 'Inter_700Bold', fontSize: 11.3, letterSpacing: 0.6, color: SOFT,
+    includeFontPadding: false, lineHeight: 14.2,
   },
 
   // the four marks of a trained eye
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2,
   },
   mkText: {
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.1, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 11.3, letterSpacing: 0.1, color: INK,
     textAlign: 'center', lineHeight: 13, includeFontPadding: false,
   },
 
@@ -412,8 +412,8 @@ const styles = StyleSheet.create({
   },
   plateRight: { backgroundColor: INK, borderColor: INK },
   plateTag: {
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.1, color: SOFT,
-    textAlign: 'center', lineHeight: 12, marginBottom: 2, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 11.3, letterSpacing: 1.1, color: SOFT,
+    textAlign: 'center', lineHeight: 14.2, marginBottom: 2, includeFontPadding: false,
   },
   plateTagOn: { color: RULE },
   plateLabel: {
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   // ── Q1: the whole frame column is the tap target ────────────────────────────
   qHead: { position: 'absolute', left: 20, top: 130, width: 360 },
   qTag: {
-    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.4,
+    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 11.3, letterSpacing: 1.4,
     color: SOFT, lineHeight: 15, includeFontPadding: false,
   },
   hit: { position: 'absolute', top: FR_T - 4, width: FR_W + 8, height: COL_H + 8 },

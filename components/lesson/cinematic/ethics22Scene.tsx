@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   },
   colCap: {
     position: 'absolute', top: COL_Y + 8, width: COL_W, textAlign: 'center', lineHeight: 10,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', top: COL_Y, width: COL_W, height: COL_H },

@@ -52,7 +52,7 @@ export const BEATS: Pol19Beat[] = [
   },
   {
     p: 13, x: 132, axis: 1, cost: 1, pull: 1, mark: 1,
-    text: 'Same child, same money, same certainty that it works. The only thing that changed is where you are standing.',
+    text: 'Same child, same money, same certainty that the money helps. The only thing that changed is where you are standing.',
     dur: 4.6,
   },
   {
@@ -91,7 +91,7 @@ export const BEATS: Pol19Beat[] = [
         { text: 'It never lets you stop', correct: true },
         { text: 'Strangers are not your problem', correct: false },
       ],
-      explain: 'That it has no stopping point. A principle demanding everything down to your last comparable sacrifice may be true and still be unlivable, and a morality nobody can follow gets ignored entirely. Singer knows this and bites the bullet.',
+      explain: 'That the rule has no stopping point. A rule demanding everything down to your last spare pound may be true and still unlivable, and a morality nobody can follow gets ignored altogether. Singer knows the objection and takes it anyway.',
       xp: 5,
     },
     dur: 1.0,

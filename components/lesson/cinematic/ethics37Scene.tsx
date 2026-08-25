@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 150, top: CAP_T, width: 240,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.5, color: SOFT, includeFontPadding: false,
   },
 
   base: { position: 'absolute', left: 136, top: BASE_Y, width: 244, height: 2, backgroundColor: INK },
@@ -200,8 +200,8 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: PAPER,
   },
   curtainLabel: {
-    position: 'absolute', left: 348, top: 396, width: 54, textAlign: 'center', lineHeight: 9,
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
+    position: 'absolute', left: 348, top: 396, width: 54, textAlign: 'center', lineHeight: 10.8,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
   },
 
   hitPlans: { position: 'absolute', left: 180, top: 336, width: 166, height: 58 },

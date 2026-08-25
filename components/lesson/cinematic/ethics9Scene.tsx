@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   noteKicker: {
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: SOFT, marginBottom: 4,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, marginBottom: 4,
     includeFontPadding: false,
   },
   // Hand-broken to one short word a line (D32b): the inner width is 78 − 4 border
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   },
   actedTag: {
     position: 'absolute', left: NOTE_RX, top: NOTE_T + NOTE_H + 10, width: NOTE_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.2, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: INK,
     includeFontPadding: false,
   },
 
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   owedText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK,
     includeFontPadding: false,
   },
 

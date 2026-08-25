@@ -42,7 +42,7 @@ export const BEATS: Ethics34Beat[] = [
   },
   {
     p: 4, x: 46, pop: 1,
-    text: 'Derek Parfit called that the repugnant conclusion. He could not accept it, and he spent the rest of his life failing to refute it.',
+    text: 'Derek Parfit called the ending repugnant. He could not accept it, and spent the rest of his life failing to refute it.',
     cite: 'Parfit',
     dur: 4.4,
   },

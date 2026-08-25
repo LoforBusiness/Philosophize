@@ -64,10 +64,15 @@ export const BEATS: Ethics11Beat[] = [
     p: 4, x: 126, tok: 1, led: 1, shelf: 1,
     interact: {
       prompt: 'Cheap thrills sum to more raw pleasure than one symphony. For Mill, have they beaten it?',
-      cards: [
-        { text: 'No, some pleasures rank higher', correct: true },
-        { text: 'Yes, the bigger total wins', correct: false },
-      ],
+      split: {
+        left: 'HOW MUCH', right: 'WHAT KIND',
+        start: 0.5,
+        zones: [
+          { id: 'amount', upto: 0.34, reads: 'add the pleasure up and the bigger pile wins' },
+          { id: 'both', upto: 0.66, reads: 'the amount matters, and so does the kind' },
+          { id: 'kind', upto: 1, reads: 'some kinds outrank any amount of the others', correct: true },
+        ],
+      },
       explain: 'The trap: reading Mill as Bentham with better manners. He broke the ledger. Higher pleasures differ in KIND, and judges who have tasted both prefer them — so a taller pile of lower ones does not simply outvote them.',
       xp: 5,
     },

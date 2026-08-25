@@ -85,7 +85,7 @@ export const BEATS: Political34Beat[] = [
   {
     p: 45, x: 50, level: 0.72, reach: 0.72,
     interact: {
-      prompt: 'Someone says everything should be decided as locally as possible. Wrong how?',
+      prompt: 'Someone says every choice should be made as locally as possible. Wrong how?',
       cards: [
         { text: 'It drops the second half', correct: true },
         { text: 'Nothing, local is better', correct: false },

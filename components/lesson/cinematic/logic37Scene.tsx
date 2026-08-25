@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: 136, top: CAP_T, width: 240,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
 
   box: {
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   },
   boxCap: {
     position: 'absolute', top: BOX_Y - 16, width: BOX_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
 
   token: { width: TOKEN, height: TOKEN, borderRadius: TOKEN / 2, backgroundColor: INK },
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   },
   setText: {
     position: 'absolute', left: SET_X, top: SET_Y + 12, width: 236, textAlign: 'center', lineHeight: 11,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', top: BOX_Y, width: BOX_W, height: BOX_H },

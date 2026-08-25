@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   link: { position: 'absolute', top: SPINE_Y - 4, width: 9, height: 9, borderRadius: 5, backgroundColor: INK },
   date: {
     position: 'absolute', top: 38,
-    fontFamily: 'Inter_500Medium', fontSize: 7, letterSpacing: 0.6, color: SOFT,
+    fontFamily: 'Inter_500Medium', fontSize: 8.6, letterSpacing: 0.6, color: SOFT,
     includeFontPadding: false,
   },
   // The strip is too big to fill without swallowing its own links, so the tab at the
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   tabText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
 

@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
 
   stackCap: {
     position: 'absolute', top: 232, width: STACK_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
   block: {
     position: 'absolute', width: STACK_W, height: BLOCK_H,
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', paddingHorizontal: 6,
   },
   blockText: {
-    fontFamily: 'Inter_400Regular', fontSize: 8, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_400Regular', fontSize: 8.6, color: INK, includeFontPadding: false,
   },
 
   shelfTop: { position: 'absolute', left: MID_X, top: SHELF_Y, width: MID_W, height: 2.5, backgroundColor: INK },
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   },
   shelfCap: {
     position: 'absolute', left: MID_X, top: SHELF_Y + SHELF_H + 3, width: MID_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
   },
 
   candHit: { position: 'absolute', left: MID_X, width: MID_W, height: CAND_H },
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   candRight: { backgroundColor: INK },
   candWrong: { borderColor: SOFT, opacity: 0.45 },
   candText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.8, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
   onInk: { color: PAPER },
 });

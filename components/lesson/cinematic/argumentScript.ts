@@ -71,21 +71,21 @@ export const BEATS: Beat[] = [
   {
     act: 1,
     vol: 3, reasons: 0,
-    text: 'Two people. One disagreement.',
+    text: 'Two people who do not agree.',
     dur: 2.2,
   },
   {
     act: 1,
     vol: 6, reasons: 0,
     say: [{ who: 'red', text: "YOU'RE WRONG!" }],
-    text: 'Watch closely — not how loud they are. What they actually say.',
+    text: 'Watch closely. Not how loud the voices get, but what the words actually say.',
     dur: 2.6,
   },
   {
     act: 1,
     vol: 8, reasons: 0,
     say: [{ who: 'blue', text: "NO — YOU'RE WRONG!" }],
-    text: 'That is not a counter-argument. It is the same noise, pointed back.',
+    text: 'Shouting back is not a counter-argument. A raised voice is the same noise aimed the other way.',
     dur: 2.6,
   },
   {
@@ -104,7 +104,7 @@ export const BEATS: Beat[] = [
     act: 2,
     narr: 0,                                       // open hand, back toward the fight
     vol: 10, reasons: 0,
-    text: 'This is what most people picture when they hear the word "argument".',
+    text: 'Most people picture a shouting match when they hear the word argument.',
     dur: 3.4,
   },
   {
@@ -208,7 +208,7 @@ export const BEATS: Beat[] = [
     act: 3,
     board: 'tworoads',
     narr: 5,                                       // sweep across the fork
-    text: 'Schopenhauer noticed that people argue for two completely different reasons.',
+    text: 'People argue with two very different aims in view, as Schopenhauer saw.',
     dur: 4.4,
   },
   {
@@ -246,7 +246,7 @@ export const BEATS: Beat[] = [
     act: 4,
     vol: 3, reasons: 1,
     say: [{ who: 'red', text: 'Rents rose 40%. Wages did not.' }],
-    text: 'A premise. Something that can be checked.',
+    text: 'A premise is a claim you can go and check.',
     dur: 3.0,
   },
   {

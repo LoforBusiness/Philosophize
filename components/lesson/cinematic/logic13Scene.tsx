@@ -107,7 +107,7 @@ export default function Logic13Scene({ clock, bt, bi, i, picked, onPick }: Scene
 
       {/* ── THE SLOPE THAT DOES HOLD, FOR COMPARISON ─────────────────────── */}
       <Animated.View style={[styles.honest, honest]} pointerEvents="none">
-        <Text style={styles.honestCap} numberOfLines={2}>A SLOPE WITH ITS REASONS</Text>
+        <Text style={styles.honestCap} numberOfLines={3}>A SLOPE WITH ITS REASONS</Text>
         {HON_T.map((t, k) => (
           <View key={k} style={[styles.honMark, { top: t - 244 }]}>
             <View style={styles.honDot} />
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   stepText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, lineHeight: 10, letterSpacing: 0.7, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.7, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
 
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   honest: { position: 'absolute', left: HON_L, top: 244, width: HON_W, height: 176 },
   honestCap: {
     position: 'absolute', left: 0, top: 0, width: HON_W,
-    fontFamily: 'Inter_700Bold', fontSize: 7, lineHeight: 9, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10.8, letterSpacing: 1, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
   honMark: { position: 'absolute', left: HON_W / 2 - 7, width: 14, height: 60, alignItems: 'center' },

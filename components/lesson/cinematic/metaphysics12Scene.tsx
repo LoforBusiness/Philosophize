@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   dotOnInk: { backgroundColor: PAPER },
   streamText: {
     position: 'absolute', left: 0, right: 0, top: 46,
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
 
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', paddingTop: 7,
   },
   ownText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
 

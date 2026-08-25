@@ -60,7 +60,6 @@ export default function SplitBar({ split, picked, onPick, pos }: Props) {
   const held = useSharedValue(0);
   const done = useSharedValue(0);
   const lastZone = useSharedValue(-1);
-  const grabbed = useSharedValue(split.start);
 
   // Declared before every worklet that calls it (§17 rule 2).
   const zoneAt = useCallback((p: number) => {
@@ -81,21 +80,37 @@ export default function SplitBar({ split, picked, onPick, pos }: Props) {
     done.value = withDelay(140, withTiming(1, { duration: REVEAL, easing: Easing.out(Easing.cubic) }));
   }, [answered, done]);
 
+  // THE VALUE FOLLOWS WHERE THE FINGER IS, NOT HOW FAR IT HAS MOVED.
+  //
+  // This integrated `translationX / width`, which means the full range cost a
+  // full WIDTH of travel — and the reader reported the consequence exactly:
+  // "my finger gets to the end of the screen and I'll answer wrong because I
+  // can't move it enough". Starting anywhere but the far edge, the far end was
+  // literally unreachable inside the screen.
+  //
+  // Absolute placement removes the failure instead of retuning it: touch the far
+  // end and you ARE at the far end, a tap sets the value, and there is no gain to
+  // get wrong. `FieldPick` and `ShapePlot` were built this way and are the two
+  // nobody complained about.
+  const setAt = useCallback((x: number) => {
+    'worklet';
+    const p = x / barW.value;
+    // Never all the way to an end: a split with nothing on one side is not a
+    // split, and the two labels would have nothing to sit under.
+    pos.value = p < 0.06 ? 0.06 : p > 0.94 ? 0.94 : p;
+    const z = zoneAt(pos.value);
+    if (z !== lastZone.value) { lastZone.value = z; runOnJS(touch)(); }
+  }, [barW, pos, zoneAt, lastZone]);
+
   const pan = Gesture.Pan()
     .enabled(!answered)
-    .onBegin(() => {
+    .minDistance(0)
+    .onBegin((e) => {
       held.value = withTiming(1, { duration: 120 });
-      grabbed.value = pos.value;
       lastZone.value = zoneAt(pos.value);
+      setAt(e.x);
     })
-    .onUpdate((e) => {
-      const raw = grabbed.value + e.translationX / barW.value;
-      // Never all the way to an end: a split with nothing on one side is not a
-      // split, and the two labels would have nothing to sit under.
-      pos.value = raw < 0.06 ? 0.06 : raw > 0.94 ? 0.94 : raw;
-      const z = zoneAt(pos.value);
-      if (z !== lastZone.value) { lastZone.value = z; runOnJS(touch)(); }
-    })
+    .onUpdate((e) => { setAt(e.x); })
     .onEnd(() => {
       held.value = withTiming(0, { duration: 160 });
       const k = zoneAt(pos.value);

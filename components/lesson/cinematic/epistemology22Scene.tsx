@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
 
   destCap: {
     position: 'absolute', left: DEST_X, top: 252, width: DEST_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
   },
   dest: {
     position: 'absolute', left: DEST_X, top: DEST_Y, width: DEST_W, height: DEST_H,
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
 
   lane: {
     position: 'absolute', left: START_X, width: 240,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
   },
   road: {
     position: 'absolute', left: START_X, top: ROAD_Y - 2, width: END_X - START_X, height: 4,

@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
 
   cap: {
     position: 'absolute', left: SLAB_X, top: 226, width: 200,
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
 
   slab: {
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   pilCap: {
     position: 'absolute', top: 344, width: PIL_W + 24, textAlign: 'center', lineHeight: 10,
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.6, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: SOFT, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', top: PIL_TOP, width: PIL_W + 16, height: PIL_H + 20 },

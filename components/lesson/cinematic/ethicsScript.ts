@@ -35,7 +35,7 @@ export interface EthicsBeat extends BaseBeat {
 export const BEATS: EthicsBeat[] = [
   {
     hpose: 1,                                        // act — a deed is done
-    text: 'You did something. A moment later, a question arrives on its own: was it right?',
+    text: 'You act. A moment later a question arrives on its own. Was the act right?',
     dur: 3.0,
   },
   {
@@ -82,7 +82,7 @@ export const BEATS: EthicsBeat[] = [
     judge: true,
     weigh: 'q1',
     interact: {
-      prompt: 'What most clearly sets human moral life apart from other social animals?',
+      prompt: 'What sets a person apart from other social animals?',
       cards: [
         { text: 'We judge and give reasons', correct: true },
         { text: 'Only humans feel empathy', correct: false },
@@ -122,7 +122,7 @@ export const BEATS: EthicsBeat[] = [
         'Where conscience comes from is still debated',
         'Aristotle: ethics is flourishing, not rules',
       ],
-      closing: 'Asking "was that right?" is where ethics begins.',
+      closing: 'Asking whether an act was right is where ethics begins.',
     },
     dur: 2.8,
   },

@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
 
   head: {
     position: 'absolute', left: AR_L, top: HEAD_T, width: AR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },
 
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   stepText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
   onInk: { color: PAPER },
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   tagText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK,
     includeFontPadding: false,
   },
 });

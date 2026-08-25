@@ -38,7 +38,7 @@ export const BEATS: Aes17Beat[] = [
   {
     g: 13, x: 160, shape: 1, fear: 0.86, frame: 1,
     dur: 4.6,
-    text: 'Nothing has been turned down. The meter does not care that this one arrived with a frame around it.',
+    text: 'Nothing has been turned down. The meter does not care that this sound arrived inside a frame.',
     cite: 'The fear is the same fear',
   },
   {
@@ -91,7 +91,7 @@ export const BEATS: Aes17Beat[] = [
         'A frame removes the consequence, not the fear',
         'Purged, converted, or paid for — every answer keeps the fear',
       ],
-      closing: 'Nothing was following it. That turns out to be worth the price of a ticket.',
+      closing: 'Nothing followed the sound at all. Listening turns out to be worth the price of a ticket.',
     },
     dur: 3.0,
   },

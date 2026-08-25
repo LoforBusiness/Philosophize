@@ -58,7 +58,7 @@ export const BEATS: Epi22Beat[] = [
   },
   {
     p: 21, x: 132, routes: 1, run: 1, gaps: 1,
-    text: 'Plato asked this about statues that run away if you do not tie them down. A tethered opinion stays put.',
+    text: 'Plato asked the same about statues that run away unless you tie them down. A tethered opinion stays put.',
     cite: 'The Meno',
     dur: 4.8,
   },
@@ -108,7 +108,7 @@ export const BEATS: Epi22Beat[] = [
         'Plato called it tethering the opinion down',
         'The extra value shows up over repeats, not in the single case',
       ],
-      closing: 'Both of them arrived. Only one of them can find it again.',
+      closing: 'Both travellers arrived. Only one of them can find the road again.',
     },
     dur: 3.4,
   },

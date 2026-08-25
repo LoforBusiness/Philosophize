@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   },
   plateText: {
     position: 'absolute', left: PLATE_X, top: PLATE_Y + 11, width: PLATE_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK, includeFontPadding: false,
   },
 
   card: {

@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   },
   doorCap: {
     position: 'absolute', top: DOOR_Y + 8, width: DOOR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
   standing: { position: 'absolute', top: DOOR_Y + DOOR_H - 14, height: 4, backgroundColor: SOFT, borderRadius: 2 },
   claimMark: { position: 'absolute', width: DOOR_W - 20, height: 3, backgroundColor: INK, borderRadius: 1 },

@@ -26,7 +26,7 @@ export const BEATS: Epis14Beat[] = [
   {
     g: 2, vat: 0, leap: 0,
     dur: 4.4,
-    text: 'Everything you have ever checked, you checked by looking. Which means you checked it here, on this side — never against the world directly.',
+    text: 'Everything you have ever checked, you checked by looking. So every check happened here, on this side of the glass, and never against the world itself.',
     cite: 'What you can check',
   },
   {

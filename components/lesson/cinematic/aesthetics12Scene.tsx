@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
 
   boardTag: {
     position: 'absolute', left: POEM_L, top: 232, width: POEM_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.6, color: SOFT,
     includeFontPadding: false,
   },
   poemLine: {
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   divider: { position: 'absolute', left: POEM_L + 10, top: 302, width: POEM_W - 20, height: 1.5, backgroundColor: RULE },
   verdictTag: {
     position: 'absolute', left: POEM_L, top: 308, width: POEM_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, lineHeight: 9, letterSpacing: 1.5, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10.8, letterSpacing: 1.5, color: SOFT,
     includeFontPadding: false,
   },
   verdictWord: {
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   sealText: {
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, lineHeight: 9, letterSpacing: 1.4, color: PAPER,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10.8, letterSpacing: 1.4, color: PAPER,
     includeFontPadding: false,
   },
 
