@@ -139,41 +139,66 @@ function markPath(size, dy) {
 }
 
 // ── one pin ────────────────────────────────────────────────────────────────
+//
+// The paint order IS the design, and it is the same order RankSeal uses:
+// underplate, shadow, core, facets, rule, bevel, studs, collar, mark. Two of
+// those are drawn the hard way here because the rasteriser fills and does not
+// stroke — a stroke is faked as a larger fill with a smaller one laid over it.
 function pin(order, degree, box) {
   const cv = canvas(box, box, T.PAPER);
   const m = I.ORDER[order];
-  // THE FRAME COMES FROM THE DEGREE. Read a column of this sheet and it is one
-  // token being worked harder; read a row and it is the same six struck better.
-  const frame = S.frameForDegree(degree);
-  const g = S.frameGeom(frame);
-  const fin = I.finishFor(degree);
+  const oi = I.ORDERS.indexOf(order);
+  const p = S.pinFor(oi, degree);
   const k = box / 100;
 
   const face = I.insigniaFace(m);
   const rim = I.insigniaRim(m);
-  const core = S.CORE[frame](0);
+  const core = p.core(0);
 
-  // The shadow, under everything, exactly as RankSeal draws it.
+  // 1 · THE UNDERPLATE, counter-rotated, in the material's shaded end so it
+  //     reads as being BEHIND rather than beside. Its own rim first, so the tips
+  //     showing through the core's valleys have an edge on them.
+  if (p.under) {
+    fill(cv, p.under, flatStops(m.rim), T.SHADOW.dx * 0.6, T.SHADOW.dy * 0.6, k);
+    fill(cv, p.under, I.insigniaUnder(m), 0, 0, k);
+  }
+
+  // 2 · the shadow the whole object casts on the page
   fill(cv, core, flatStops(T.INK), T.SHADOW.dx, T.SHADOW.dy, k, T.SHADOW.opacity);
 
-  // THE COLLAR GOES DOWN FIRST. It is a STROKE outside the edge on device, and
-  // the offline equivalent is a larger copy of the frame with the pin laid over
-  // it — draw it afterwards and it paints the pin out, which is exactly what the
-  // first sheet showed: a whole column of degree-5 pins reduced to studs on paper.
-  if (fin.collar) {
-    fill(cv, S.CORE[frame](S.COLLAR - 1), flatStops(m.base), 0, 0, k);
-    fill(cv, S.CORE[frame](S.COLLAR + 1), flatStops(T.PAPER), 0, 0, k);
+  // 3 · THE COLLAR GOES DOWN BEFORE THE PIN. It is a stroke on device and two
+  //     fills here, and the outer of those two is BIGGER than the core — laid
+  //     down afterwards the paper one paints the pin out, which is exactly what
+  //     an early run of this sheet showed: a column of degree-5 pins reduced to
+  //     an empty ring.
+  if (p.build.collar) {
+    fill(cv, p.core(S.COLLAR - 1.5), flatStops(m.base), 0, 0, k);
+    fill(cv, p.core(S.COLLAR + 1.5), flatStops(T.PAPER), 0, 0, k);
   }
 
-  fill(cv, core, rim, 0, 0, k);                 // the turned edge…
-  fill(cv, S.CORE[frame](1.7), face, 0, 0, k);  // …with the face laid inside it
+  // 4 · the turned edge, with the face laid inside it
+  fill(cv, core, I.insigniaBevel(m), 0, 0, k);
+  fill(cv, p.core(2.2), face, 0, 0, k);
 
-  if (fin.rule) {
-    fill(cv, S.CORE[frame](S.INNER), flatStops(m.rule), 0, 0, k);
-    fill(cv, S.CORE[frame](S.INNER + 1.1), face, 0, 0, k);
+  // 5 · the inner rule
+  if (p.build.rule) {
+    fill(cv, p.core(S.INNER), flatStops(m.rule), 0, 0, k);
+    fill(cv, p.core(S.INNER + 1.1), face, 0, 0, k);
   }
-  for (let i = 0; i < fin.studs; i++) {
-    const [sx, sy] = g.studs[i];
+
+  // 6 · THE FACETS. Each wedge is lifted by how squarely it faces the lamp —
+  //     white over the ones pointing into it, ink over the ones pointing away.
+  //     This is what stops a pin reading as a coloured shape with a gradient.
+  for (const f of p.facets) {
+    const { end, opacity } = S.facetPaint(f.lift);
+    if (opacity < 0.02) continue;
+    fill(cv, f.d, flatStops(m[end]), 0, 0, k, opacity);
+  }
+
+  // 7 · the studs — a rivet, not a dot: the dark seat under it is what makes it
+  //     sit IN the face rather than float on it.
+  for (let i = 0; i < p.build.studs; i++) {
+    const [sx, sy] = p.studs[i];
     const dot = (rr, hex) => fill(
       cv,
       `M${sx - rr} ${sy} C${sx - rr} ${sy - rr * 0.55} ${sx - rr * 0.55} ${sy - rr} ${sx} ${sy - rr}` +
@@ -186,12 +211,12 @@ function pin(order, degree, box) {
     dot(2.4, m.rule);
   }
 
-  fill(cv, markPath(g.markScale, g.markDy), flatStops(m.on), 0, 0, k);
+  fill(cv, markPath(p.markScale, 0), flatStops(m.on), 0, 0, k);
   return cv;
 }
 
 // ── the sheet ──────────────────────────────────────────────────────────────
-const cols = I.DEGREES;
+const cols = 6;
 const cellW = PIN + PAD;
 const cellH = PIN + PAD + LABEL;
 const sheetW = PAD + cols * cellW;
@@ -199,7 +224,8 @@ const sheetH = PAD + orders.length * cellH + LABEL;
 const sheet = canvas(sheetW, sheetH, '#EFEDE6');
 
 text(sheet,
-  `${orders.length} ORDERS (DOWN) X ${cols} DEGREES (ACROSS): ${S.FRAMES.join(' ').toUpperCase()}`,
+  `${orders.length} ORDERS DOWN X ${cols} DEGREES ACROSS - EACH ORDER ITS OWN SHAPE: ` +
+  S.VOCAB.map((v) => v.label).join(' ').toUpperCase(),
   PAD, 5, '#6B6B6B', 1);
 
 orders.forEach((order, r) => {
@@ -207,8 +233,8 @@ orders.forEach((order, r) => {
   for (let d = 0; d < cols; d++) {
     const x = PAD + d * cellW;
     sheet.blit(pin(order, d, PIN), x, y);
-    const id = r * cols + d + 1;
-    text(sheet, `${id} ${S.FRAMES[d].toUpperCase()}`, x, y + PIN + 3, '#4A4A4A', 1);
+    const id = I.ORDERS.indexOf(order) * cols + d + 1;
+    text(sheet, `${id} ${S.VOCAB[I.ORDERS.indexOf(order)].label.toUpperCase()}`, x, y + PIN + 3, '#4A4A4A', 1);
   }
 });
 

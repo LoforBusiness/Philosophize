@@ -1,105 +1,72 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// THE SIX FRAMES — what a rank pin is SHAPED like, and why that RESETS.
+// FORTY-EIGHT PINS, NO TWO ALIKE — and why this is the third attempt.
 //
-// ── WHAT THIS FILE USED TO DO, AND WHY IT WAS THE WRONG ANSWER ──────────────
+// ── THE TWO FAILURES THIS ONE HAS TO ANSWER AT THE SAME TIME ────────────────
 //
-// It gave each of the eight ORDERS its own silhouette, escalating by accretion
-// all the way up the ladder: disc → plate → hexagon → gem → shield → crested
-// shield → winged → crowned. It answered the complaint it was written for ("the
-// icons get prettier, and more complex") and it created two new ones, both of
-// which the same reader then named:
+// FIRST it escalated once across the whole ladder, one silhouette per ORDER:
+// disc → plate → hexagon → gem → shield → crested shield → winged → crowned.
+// The reader: "it only becomes actually complex when the user is really far
+// along … also the ranks that do get more complex, I don't like that design,
+// looks like horns and then looks as if it gains wings."
 //
-//   "it only becomes actually complex when the user is really far along. I want
-//    it to become complex when the user gets far on a certain colour, then the
-//    colour resets and so does the complexity … also the ranks that do get more
-//    complex, I don't like that design, looks like horns and then looks as if it
-//    gains wings. I don't want this design at all."
+// THEN it cycled six shapes inside every order, the same six each time. That
+// fixed the pacing and broke something else, which the same reader named:
+// "especially for the more complex ones for each colour, they are all the same,
+// I want uniqueness … and for the really far ranks they must be extremely
+// complex and look very good."
 //
-// Both halves are right, and they are the same fault seen from two sides.
-// Spreading ONE escalation over forty-eight ranks means thirty-six of them are
-// somewhere in the dull middle of it: a reader at rank 12 could see that pins
-// got grander later, and had nothing grander to reach in the next six months of
-// reading. And an escalation with forty-eight rungs to fill has to keep adding
-// LIMBS — shoulder spikes, wings, a coronet — long after the token itself has
-// run out of edge to work. Horns and wings are what "keep adding" looks like.
+// Both notes are right and they do not conflict, which took a while to see.
+// Cycling is about PACING — a reader should always have a grander pin within
+// reach. Uniqueness is about VOCABULARY — the grand pin of the clay order and
+// the grand pin of the aurum order must not be one drawing in two paints. The
+// first two attempts each fixed one and broke the other, because both treated
+// complexity as a single number.
 //
-// ── SO COMPLEXITY IS A CYCLE, AND COLOUR IS THE LADDER ──────────────────────
+// ── SO IT IS A SAWTOOTH THAT CLIMBS ─────────────────────────────────────────
 //
-// The six frames below are keyed on the DEGREE — how far through its order a
-// rank is — not on the order. Every order runs the same six, so:
+// Complexity resets at every colour, and each reset lands higher than the last:
 //
-//   · a reader always has a grander shape three ranks away, wherever they are;
-//   · the reward for finishing an order is a NEW MATERIAL, which is the thing
-//     constants/insignia.ts was built to escalate and the thing the reader said
-//     they liked ("the colour palette … will look better");
-//   · and no frame ever has to be the eighth step of anything, so none of them
-//     needs a limb. The whole ladder is one worked token.
+//        ▁▂▃▄▅▆   ▂▃▄▅▆▇   ▃▄▅▆▇█   ▄▅▆▇██   …
+//         clay      iron     bronze    jade
 //
-//   0  DISC      a plain circle. Cast, uncut: nothing but the mark.
-//   1  HEX       six flats. The edge is cut for the first time.
-//   2  PLATE     eight. Finer work on the same idea.
-//   3  GEM       the flats are cut back into facets — six points, six valleys.
-//   4  SCALLOP   the edge stops being straight at all: eight bowed lobes.
-//   5  ROSETTE   twelve of them, the finest edge in the set, and a collar around
-//                the whole thing. The capstone of its colour.
+// Every order runs the same six-STEP build — core, rule, studs, underplate,
+// facets, collar — but each step is drawn in that order's own vocabulary, and
+// the vocabulary gets richer as the ladder climbs. Clay's rung 6 is a plain disc
+// with a square behind it. Aurum's rung 6 is a sixteen-lobe rosette on a
+// counter-rotated sixteen-point star, cut into sixteen facets and ringed twice.
+// Same six steps; nothing whatever in common to look at.
 //
-// ANGULAR, THEN CURVED, and that order is not a preference. The first draft ran
-// disc · hex · plate · scallop · gem · rosette, and the contact sheet showed the
-// fault at once: a scalloped pin followed by a faceted one and then a scalloped
-// one again reads as the ladder changing its mind. Straight edges are worked
-// into more straight edges, then into curved ones, then into finer curved ones —
-// one direction, no doubling back.
+// ── WHAT MAKES ONE LOOK GOOD, WHICH IS THE OTHER HALF OF THE NOTE ───────────
 //
-// Read down a column of the contact sheet and it is one object being worked
-// harder; read across a row and it is the same six struck in a better material.
+// "The design just isn't cool looking." It was a flat polygon with one gradient
+// across it, and three things fix that without adding a single limb:
 //
-// ── THE TWO DISCIPLINES THAT MAKE IT SURVIVE 44px ───────────────────────────
+//   THE UNDERPLATE — a counter-rotated shape behind the core, showing only in the
+//   gaps between the core's points. It is the classic struck-badge move and it is
+//   pure silhouette: legible at 44px, symmetric all the way round, and incapable
+//   of becoming a horn, because it has no direction.
 //
-// EVERYTHING GROWS OUTWARD. `markScale` is flat (0.37–0.40 of the box) across
-// all six while the drawn area grows by half again. A rank-6 pin is not a rank-1
-// pin with a smaller glyph in it, and RankSeal's oldest warning — ornament "so
-// busy that it fought the glyph it framed" — cannot recur, because nothing added
-// here is inside the mark's room.
+//   FACETS — the face is CUT rather than filled. Each wedge takes its own lift
+//   from the angle between its own centre and the light, so a pin reads as a
+//   struck object catching a lamp instead of as a coloured shape with a gradient
+//   on it. This is the biggest single change to how they look, and it costs one
+//   extra path per wedge.
 //
-// NOTHING IS MADE OF TIPS. §19 wrote this down about a different mark: crossed
-// swords behind a medal were "horns at 168px, mush at the 66px the badge grid
-// actually draws", while "a laurel is a continuous curved mass, so being
-// half-covered costs it nothing". A wing, a coronet and a sunburst are all the
-// sword problem. A lobe, a facet and a collar are the laurel one.
+//   A REAL BEVEL — the rim carries a bright arc on the lit side and a dark one on
+//   the shaded side, rather than one flat outline all the way round.
+//
+// All three obey the rule the earlier versions were right about: EVERYTHING GROWS
+// OUTWARD. `markScale` stays flat while the drawn area doubles, so a grand pin is
+// never a plain pin with a smaller glyph in it.
 //
 // ── ZERO IMPORTS, for the reason rig.ts and tone.ts have zero imports ───────
 //
-// scripts/sheet-ranks.mjs renders all forty-eight pins in plain Node and writes
-// a contact sheet, so they can be LOOKED at without a device (§21). That is how
-// the wing died twice and the coronet once, and it is how the numbers below were
-// settled.
+// scripts/sheet-ranks.mjs renders all forty-eight in plain Node (§21). Every
+// correction written up here was found there before it reached a phone.
 //
-// Geometry is a 100×100 viewBox centred on (50,50), y DOWN, and every path is
-// emitted with absolute M/L/C/Z only — scripts/lib/rasterpath.mjs understands
-// exactly that subset and no arcs at all.
+// Geometry is a 100×100 viewBox centred on (50,50), y DOWN, absolute M/L/C/Z
+// only — the subset scripts/lib/rasterpath.mjs reads, and no arcs at all.
 // ─────────────────────────────────────────────────────────────────────────────
-
-export type FrameName = 'disc' | 'hex' | 'plate' | 'gem' | 'scallop' | 'rosette';
-
-/**
- * ONE PER DEGREE, plainest first — NOT one per order.
- *
- * The index is the rank's position inside its own order (`degreeOf` in
- * constants/insignia.ts), so this array is the same length as `DEGREES` and
- * scripts/check-ui.mjs asserts it. A frame list that fell out of step with the
- * degree count would leave one rung of every order unreachable, in every colour
- * at once.
- */
-export const FRAMES: FrameName[] = ['disc', 'hex', 'plate', 'gem', 'scallop', 'rosette'];
-
-/** The frame a rank's degree is struck in. Clamped, so an over-run stays legal. */
-export function frameForDegree(degree: number): FrameName {
-  const d = Math.floor(degree) || 0;
-  return FRAMES[Math.max(0, Math.min(FRAMES.length - 1, d))];
-}
-
-/** How far inside the edge the inner rule is drawn. */
-export const INNER = 5;
 
 const CX = 50;
 const CY = 50;
@@ -107,9 +74,26 @@ const CY = 50;
 const n2 = (v: number) => String(Math.round(v * 100) / 100);
 const pt = (x: number, y: number) => `${n2(x)} ${n2(y)}`;
 
+/** How far inside the edge the inner rule is drawn. */
+export const INNER = 5;
+/** How far outside its own edge the capstone's collar is struck. */
+export const COLLAR = -5;
+
 // ── the primitives ──────────────────────────────────────────────────────────
 
-/** A regular polygon, listed clockwise on screen (y is down). */
+/** A circle as the four cubics every renderer draws one with. */
+function circle(r: number): string {
+  const k = 0.5523 * r;
+  return (
+    `M${pt(CX - r, CY)}` +
+    ` C${pt(CX - r, CY - k)} ${pt(CX - k, CY - r)} ${pt(CX, CY - r)}` +
+    ` C${pt(CX + k, CY - r)} ${pt(CX + r, CY - k)} ${pt(CX + r, CY)}` +
+    ` C${pt(CX + r, CY + k)} ${pt(CX + k, CY + r)} ${pt(CX, CY + r)}` +
+    ` C${pt(CX - k, CY + r)} ${pt(CX - r, CY + k)} ${pt(CX - r, CY)} Z`
+  );
+}
+
+/** A regular polygon, clockwise on screen (y is down). */
 function poly(r: number, sides: number, rot: number): string {
   const p: string[] = [];
   for (let i = 0; i < sides; i++) {
@@ -120,21 +104,15 @@ function poly(r: number, sides: number, rot: number): string {
 }
 
 /**
- * A notched polygon — `points` outer vertices with an inner vertex between each.
+ * A notched polygon — `points` outer vertices with an inner one between each.
  *
- * A regular twelve-gon is the obvious way to say "more facets than an octagon"
- * and it is the wrong one: at 44px a twelve-sided regular polygon has no corner
- * the eye can find, so that rung would have read as the first — a disc. Notching
- * it puts the corners back. The outline still turns twelve times, but six of
- * those turns are RE-ENTRANT, and a re-entrant corner survives being small in a
- * way a 150° one does not.
- *
- * HOW DEEP IS THE WHOLE QUESTION, and the contact sheet answered it twice. At a
- * valley of 0.85 the notch does not even reach the flat it is cut into — a
- * hexagon's own edge dips to cos(30°) = 0.866 of its radius at the midpoint — so
- * the pin rendered as a slightly dented HEXAGON, which is the rung two below it
- * in a brighter colour. At 0.74 it is a SHERIFF'S STAR: six long spikes, which is
- * the family of shape this whole redesign exists to remove. 0.81 is a cut stone.
+ * HOW DEEP IS THE WHOLE QUESTION, and the contact sheet answered it twice. A
+ * hexagon's own edge already dips to cos(30°) = 0.866 of its radius at the
+ * midpoint, so a valley shallower than that does not clear the flat it is cut
+ * into and the pin renders as a slightly dented hexagon. Go the other way, past
+ * about 0.75 on six points, and it is a sheriff's star — long spikes, which is
+ * the family of shape this redesign exists to remove. The more points there are
+ * the deeper the valley may safely go, because each spike gets shorter.
  */
 function notched(r: number, inner: number, points: number, rot: number): string {
   const p: string[] = [];
@@ -149,202 +127,319 @@ function notched(r: number, inner: number, points: number, rot: number): string 
 /**
  * A CUSPED edge — `lobes` outward bows meeting at cusps on a smaller radius.
  *
- * This is the one primitive that is neither straight nor spiked, and it is what
- * lets the ladder go on getting finer after the polygons have run out without
- * turning into a fringe. Eight deep lobes read as scalloped; twelve shallow ones
- * read as milled, the way a coin's edge is.
- *
- * Each lobe is ONE cubic, and the control radius is solved rather than guessed:
- * a symmetric cubic's midpoint is (P0 + 3·P1 + 3·P2 + P3)/8, so projecting that
- * onto the lobe's own axis and setting it equal to `r` gives the radius the two
- * control points have to sit at. Nudging a control point by eye instead is how
- * a lobe ends up not quite reaching the radius its neighbours were measured at.
+ * The one primitive that is neither straight nor spiked, and what lets the
+ * ladder keep getting finer after the polygons have run out without turning into
+ * a fringe. The control radius is SOLVED rather than guessed: a symmetric cubic's
+ * midpoint is (P0 + 3·P1 + 3·P2 + P3)/8, so projecting that onto the lobe's own
+ * axis and setting it equal to `r` gives where the controls have to sit. Nudging
+ * them by eye is how one lobe ends up not quite reaching the radius its
+ * neighbours were measured at.
  */
-function cusped(r: number, inner: number, lobes: number): string {
+function cusped(r: number, inner: number, lobes: number, rot = 0): string {
   const step = (2 * Math.PI) / lobes;
-  // The control radius that makes the bow's midpoint land exactly on `r`.
   const rc = (8 * r - 2 * inner * Math.cos(step / 2)) / (6 * Math.cos(step / 6));
   const at = (rad: number, a: number) => pt(CX + rad * Math.cos(a), CY + rad * Math.sin(a));
-  let d = `M${at(inner, -step / 2)}`;
+  let d = `M${at(inner, rot - step / 2)}`;
   for (let i = 0; i < lobes; i++) {
-    const a0 = -step / 2 + i * step;
+    const a0 = rot - step / 2 + i * step;
     d += ` C${at(rc, a0 + step / 3)} ${at(rc, a0 + (2 * step) / 3)} ${at(inner, a0 + step)}`;
   }
   return `${d} Z`;
 }
 
-/** A circle as the four cubics every renderer draws one with. */
-function circle(r: number): string {
-  const k = 0.5523 * r;
-  return (
-    `M${pt(CX - r, CY)}` +
-    ` C${pt(CX - r, CY - k)} ${pt(CX - k, CY - r)} ${pt(CX, CY - r)}` +
-    ` C${pt(CX + k, CY - r)} ${pt(CX + r, CY - k)} ${pt(CX + r, CY)}` +
-    ` C${pt(CX + r, CY + k)} ${pt(CX + k, CY + r)} ${pt(CX, CY + r)}` +
-    ` C${pt(CX - k, CY + r)} ${pt(CX - r, CY + k)} ${pt(CX - r, CY)} Z`
-  );
+// ── the eight vocabularies ──────────────────────────────────────────────────
+
+export type Edge = 'round' | 'flat' | 'notch' | 'cusp';
+
+export interface Vocab {
+  /** The order's own name for its shape — for the contact sheet and the checks. */
+  label: string;
+  /** Outer feature count. 0 means a circle. */
+  points: number;
+  edge: Edge;
+  /** How far the valleys cut back, as a fraction of the radius. */
+  valley: number;
+  /** How far the core reaches. */
+  outer: number;
+  /** The counter-rotated plate behind it. */
+  under: { points: number; edge: Edge; reach: number; valley: number };
+  /** How many wedges the face is cut into. */
+  facets: number;
+  /** The mark's room, as a fraction of the box. */
+  mark: number;
 }
 
-// ── the six ─────────────────────────────────────────────────────────────────
+/**
+ * BOTTOM TO TOP, and every row differs from every other in at least three of the
+ * six columns. That is what "uniqueness" means here, and `check:ui` measures it
+ * on the DRAWINGS rather than on the numbers.
+ *
+ * The core counts climb 0 · 6 · 8 · 6 · 8 · 10 · 12 · 8, and the dips are
+ * deliberate, because POINT COUNT IS NOT GRANDEUR. Jade drops from bronze's
+ * eight flats to six NOTCHES: the edge changes character there, and a cut stone
+ * with six deep facets is a richer object than an octagon with eight shallow
+ * ones. Aurum drops all the way to eight lobes and puts a SIXTEEN-POINT BURST
+ * behind them — the top of the ladder is the most layered pin, not the one with
+ * the most edges. Sixteen lobes on the core was tried and read as a bottle cap.
+ *
+ * THE UNDERPLATE ALWAYS REACHES PAST THE CORE, by 4 units at clay and 11 at
+ * aurum. The first draft had jade's plate at 37.5 behind a core of 40 — entirely
+ * hidden, so three of that order's six rungs were identical. An underplate that
+ * does not clear the core is not an underplate, it is a wasted path.
+ */
+export const VOCAB: Vocab[] = [
+  { // CLAY — fired earth. A plain round token on a square plate: the floor.
+    label: 'disc', points: 0, edge: 'round', valley: 1, outer: 32,
+    under: { points: 4, edge: 'flat', reach: 39, valley: 1 }, facets: 6, mark: 0.40,
+  },
+  { // IRON — cold and hard. The edge is cut for the first time, over a triangle.
+    label: 'hex', points: 6, edge: 'flat', valley: 1, outer: 35,
+    under: { points: 3, edge: 'flat', reach: 43, valley: 1 }, facets: 6, mark: 0.39,
+  },
+  { // BRONZE — the first thing worth polishing. Finer work, and a cross behind.
+    label: 'plate', points: 8, edge: 'flat', valley: 1, outer: 35.5,
+    under: { points: 4, edge: 'notch', reach: 45, valley: 0.52 }, facets: 8, mark: 0.39,
+  },
+  { // JADE — the ladder turns precious and the edge stops being straight.
+    label: 'gem', points: 6, edge: 'notch', valley: 0.79, outer: 38,
+    under: { points: 6, edge: 'notch', reach: 45, valley: 0.60 }, facets: 6, mark: 0.37,
+  },
+  { // LAPIS — ground stone. Bowed lobes over an eight-point star.
+    label: 'scallop', points: 8, edge: 'cusp', valley: 0.84, outer: 38,
+    under: { points: 8, edge: 'notch', reach: 46, valley: 0.64 }, facets: 8, mark: 0.38,
+  },
+  { // CRIMSON — the dye a city went bankrupt over. Ten points over five.
+    label: 'star', points: 10, edge: 'notch', valley: 0.78, outer: 39,
+    under: { points: 5, edge: 'notch', reach: 47, valley: 0.50 }, facets: 10, mark: 0.36,
+  },
+  { // AMETHYST — a twelve-point star with twelve lobes flaring behind it.
+    label: 'coronet', points: 12, edge: 'notch', valley: 0.80, outer: 39,
+    under: { points: 12, edge: 'cusp', reach: 47, valley: 0.80 }, facets: 12, mark: 0.36,
+  },
+  { // AURUM — a jewel in a sunburst. There is nothing above it and it should
+    //   look like it: a compact eight-lobe rosette sitting inside a
+    //   sixteen-point burst, which is the most LAYERED object on the ladder
+    //   rather than the one with the most edges. Sixteen lobes on the core was
+    //   tried first and read as a bottle cap — past about twelve, more edges
+    //   stop adding grandeur and start subtracting legibility.
+    label: 'sunburst', points: 8, edge: 'cusp', valley: 0.82, outer: 36,
+    under: { points: 16, edge: 'notch', reach: 47.5, valley: 0.68 }, facets: 8, mark: 0.37,
+  },
+];
+
+/** One shape from an edge style. `m` pulls it in; a negative `m` grows it. */
+function shape(edge: Edge, points: number, r: number, valley: number, rot: number): string {
+  if (edge === 'round' || points < 3) return circle(r);
+  if (edge === 'flat') return poly(r, points, rot);
+  if (edge === 'notch') return notched(r, r * valley, points, rot);
+  return cusped(r, r * valley, points, rot);
+}
+
+// ── the six steps, which are the same six in every order ────────────────────
 
 /**
- * How far each frame reaches, and how deep its cusps or notches cut.
+ * WHAT EACH RUNG ADDS. The steps never change; what they are drawn in does.
  *
- * THE LADDER IS MEASURED BY AREA, NOT BY REACH, and check-ui measures it that
- * way for a reason this table makes plain: the hexagon reaches further than the
- * octagon above it (37 against 34.2 at the tile edge) because it spends its
- * reach on two points and leaves the rest of its slot empty. Reach punishes a
- * shape for being round, and the gem — which spends nearly a third of its
- * outline in the valleys between its points — would be punished hardest by it.
- * Ink on the page is what a reader actually compares, so the drawn areas are the
- * monotone series, and check-ui re-derives them: half again from bottom to top.
+ *   0  the core, plain
+ *   1  + the inner rule
+ *   2  + the facets — the face stops being filled and starts being CUT
+ *   3  + the underplate, counter-rotated behind it
+ *   4  + the studs
+ *   5  + the collar, struck outside the edge
+ *
+ * FIVE ADDITIONS FOR FIVE RUNGS, one each, and that is the correction. The first
+ * draft spent rungs 2, 3 and 4 on two studs, then four, then six — three steps of
+ * the same quiet thing — and put the facets last but one. At 44px the result was
+ * that rungs 0, 1 and 2 of every order were indistinguishable, which is the
+ * pacing complaint again three ranks lower down. Facets are the loudest of the
+ * five, so they come early; the studs are the quietest, so they arrive as one
+ * step rather than three.
  */
-const OUTER: Record<FrameName, number> = {
-  disc: 33, hex: 37, plate: 37, gem: 41, scallop: 40.5, rosette: 42,
-};
+export interface Build {
+  rule: boolean;
+  studs: number;
+  under: boolean;
+  facets: boolean;
+  collar: boolean;
+}
+
+export function buildFor(degree: number): Build {
+  const d = Math.max(0, Math.min(5, Math.floor(degree) || 0));
+  return {
+    rule: d >= 1,
+    facets: d >= 2,
+    under: d >= 3,
+    studs: d >= 4 ? 6 : 0,
+    collar: d >= 5,
+  };
+}
+
+// ── one pin ─────────────────────────────────────────────────────────────────
+
+export interface Facet {
+  d: string;
+  /** −1 (deepest shade) … +1 (brightest), from the angle to the light. */
+  lift: number;
+}
 
 /**
- * How far outside its own edge the capstone's collar is struck.
+ * HOW A FACET IS PAINTED, so the two renderers cannot drift apart.
  *
- * 5, and it started at 3.4, which is what it was when a collar was the sixth
- * step of an eight-frame ladder and nobody had drawn one at 44px. Count the
- * pixels: the rim is a 2.4-wide stroke ON the edge, so it reaches 1.2 units
- * out; the collar is 2 wide, so it reaches 1 unit in. At 3.4 that leaves 1.2
- * units of paper between two dark rings — half a pixel on a Profile pin, which
- * is not a gap, it is an edge that has got thicker. The top two frames gave up
- * a unit and a half of reach to pay for this, and the area ladder is unchanged
- * because area is not reach.
+ * The material's OWN extremes, not white and black. The first draft laid pure
+ * `#FFFFFF` over the lit wedges at 0.46 and every faceted pin came out visibly
+ * desaturated — a jade gem went pale mint, a crimson star went pink, and the
+ * middle rung of each order looked like a washed copy of the rung below it
+ * rather than a richer one. White does not light a coloured surface, it removes
+ * the colour from it. `lit` and `rim` are the same face's own ends, so the
+ * wedges read as planes of one material catching a lamp at different angles,
+ * which is what a cut stone actually is.
  */
-export const COLLAR = -5;
+export function facetPaint(lift: number): { end: 'lit' | 'rim'; opacity: number } {
+  return { end: lift > 0 ? 'lit' : 'rim', opacity: Math.min(0.62, Math.abs(lift) * 0.62) };
+}
 
-/**
- * How far the valleys cut back, as a fraction of `OUTER`.
- *
- * THE GEM'S 0.74 IS THE ONE NUMBER HERE THAT WAS WRONG, and the contact sheet
- * is what said so. It was 0.85, which sounds like a deep bite and is not one: a
- * hexagon's own edge already dips to cos(30 deg) = 0.866 of its radius at the
- * midpoint, so notching to 0.85 cut the outline back by six tenths of a unit and
- * the fifth rung of every order rendered as a slightly dented HEXAGON — the
- * second rung, one colour brighter. A notch has to clear the flat it is cut into
- * before it is a notch at all.
- */
-const VALLEY: Record<'gem' | 'scallop' | 'rosette', number> = {
-  gem: 0.81, scallop: 0.85, rosette: 0.90,
-};
-
-/**
- * THE CORE, as a function of how far it is pulled in from its own edge.
- *
- * The same signature `SHAPE` in badgeShapes.ts uses, and for the same reason:
- * a rim is this path at m = 0 with the face at m = 1.7 laid over it, and the
- * inner rule is it again at m = INNER. A NEGATIVE m grows it, which is how the
- * capstone's outer collar is drawn without a second set of geometry.
- */
-export const CORE: Record<FrameName, (m: number) => string> = {
-  disc: (m) => circle(OUTER.disc - m),
-  hex: (m) => poly(OUTER.hex - m, 6, 0),
-  plate: (m) => poly(OUTER.plate - m, 8, Math.PI / 8),
-  gem: (m) => notched(OUTER.gem - m, (OUTER.gem - m) * VALLEY.gem, 6, 0),
-  scallop: (m) => cusped(OUTER.scallop - m, (OUTER.scallop - m) * VALLEY.scallop, 8),
-  rosette: (m) => cusped(OUTER.rosette - m, (OUTER.rosette - m) * VALLEY.rosette, 12),
-};
-
-// ── what a renderer needs to know about a frame it has never seen ───────────
-
-export interface FrameGeom {
-  /** The core as a closed polyline starting at TOP CENTRE, clockwise. */
-  outline: string;
-  /** Its length, so a progress arc's dasharray is exact rather than estimated. */
-  perimeter: number;
-  /** Six points on the face for the finish's studs, in the order they appear. */
+export interface Pin {
+  /** The core, as a function of how far it is pulled in from its own edge. */
+  core: (m: number) => string;
+  /** The counter-rotated plate behind it, or null below degree 3. */
+  under: string | null;
+  /** Wedges cut into the face. Empty below degree 4. */
+  facets: Facet[];
+  /** Six points on the face for the studs, in the order they are filled. */
   studs: [number, number][];
-  /** The mark's size, as a fraction of the pin's drawn box. */
+  /** The core flattened, starting at top centre, for the progress arc. */
+  outline: string;
+  perimeter: number;
   markScale: number;
-  /** And how far above centre it sits. Zero here — every frame is centred. */
-  markDy: number;
+  label: string;
+  build: Build;
 }
 
 /**
- * THE MARK'S ROOM IS ALMOST FLAT ACROSS THE SIX, and that is the point.
+ * THE LIGHT, and it is the one every struck thing in this app shares.
  *
- * 0.40 down to 0.37 — an 8% spread over six frames whose drawn area grows by
- * 54%. Everything a rung gains it gains OUTSIDE the mark.
+ * tone.ts puts it top-left and never moves it; `LIGHT` there is an
+ * objectBoundingBox gradient running (0,0) → (1,1). In polar terms that is a ray
+ * pointing down-right, so a face is brightest where its own normal points back
+ * up-LEFT — which is −135° in a y-down world.
  */
-const MARK: Record<FrameName, number> = {
-  disc: 0.40, hex: 0.39, plate: 0.39, gem: 0.37, scallop: 0.38, rosette: 0.37,
-};
+const LIGHT_ANGLE = (-135 * Math.PI) / 180;
 
-/**
- * WHERE THE STUDS GO, as angles rather than vertices.
- *
- * They used to be the hexagon's own six corners, which cannot survive a frame
- * that is not a hexagon. Angles can: each pair is symmetric about the vertical,
- * so two studs, four studs and six studs are all balanced, and the pin never
- * looks knocked askew part-way through an order.
- *
- * Straight up and straight down are both deliberately empty — that is where a
- * progress arc opens and closes, and a stud sitting on the seam would read as
- * the arc having a defect.
- */
-const STUD_ANGLES = [180, 0, 235, 305, 125, 55];
+/** A wedge from the centre out to two adjacent points of the outline. */
+function wedge(a0: number, a1: number, rEdge: number, rTip: number): string {
+  const P = (r: number, a: number) => pt(CX + r * Math.cos(a), CY + r * Math.sin(a));
+  return `M${pt(CX, CY)} L${P(rEdge, a0)} L${P(rTip, (a0 + a1) / 2)} L${P(rEdge, a1)} Z`;
+}
 
-/** How far inside the edge a stud sits. */
-const STUD_INSET = 6.5;
+const CACHE = new Map<string, Pin>();
 
-const CACHE = new Map<FrameName, FrameGeom>();
-
-export function frameGeom(name: FrameName): FrameGeom {
-  const hit = CACHE.get(name);
+export function pinFor(orderIndex: number, degree: number): Pin {
+  const oi = Math.max(0, Math.min(VOCAB.length - 1, Math.floor(orderIndex) || 0));
+  const dg = Math.max(0, Math.min(5, Math.floor(degree) || 0));
+  const key = `${oi}:${dg}`;
+  const hit = CACHE.get(key);
   if (hit) return hit;
 
-  const ring = flatten(CORE[name](0));
+  const v = VOCAB[oi];
+  const build = buildFor(dg);
+  // A FLAT AT THE TOP on the polygons: a vertex straight up puts a point exactly
+  // where the progress arc opens, and the arc then appears to start off-centre.
+  const rot = v.edge === 'flat' && v.points >= 3 ? Math.PI / v.points : 0;
+  const core = (m: number) => shape(v.edge, v.points, v.outer - m, v.valley, rot);
+
+  // THE UNDERPLATE IS COUNTER-ROTATED BY HALF A STEP, which is the whole trick:
+  // its points land in the core's valleys, so it reads as a ring of tips showing
+  // through the gaps rather than as a second shape parked behind a first.
+  const uStep = v.under.points >= 3 ? Math.PI / v.under.points : 0;
+  const under = build.under
+    ? shape(v.under.edge, v.under.points, v.under.reach, v.under.valley, rot + uStep)
+    : null;
+
+  const ring = flatten(core(0));
   const start = topmost(ring);
-  const rot = ring.slice(start).concat(ring.slice(0, start));
+  const rotated = ring.slice(start).concat(ring.slice(0, start));
 
   let perimeter = 0;
-  for (let i = 0; i < rot.length; i++) {
-    const a = rot[i];
-    const b = rot[(i + 1) % rot.length];
+  for (let i = 0; i < rotated.length; i++) {
+    const a = rotated[i];
+    const b = rotated[(i + 1) % rotated.length];
     perimeter += Math.hypot(b[0] - a[0], b[1] - a[1]);
   }
 
+  // ── the facets ────────────────────────────────────────────────────────────
+  //
+  // One wedge per outer feature, each lifted by how squarely it faces the lamp.
+  // The cosine of the angle between the wedge's own centre and the light runs +1
+  // to −1, and that IS the lift: the wedge pointing up-left is brightest, the one
+  // opposite is deepest, everything between shades smoothly. Nothing is
+  // hand-tuned, so a sixteen-facet pin lights identically to a six-facet one.
+  const facets: Facet[] = [];
+  if (build.facets && v.facets >= 3) {
+    const step = (2 * Math.PI) / v.facets;
+    const rEdge = v.edge === 'flat' || v.edge === 'round' ? v.outer * 0.94 : v.outer * v.valley;
+    for (let i = 0; i < v.facets; i++) {
+      const a0 = rot + i * step - step / 2;
+      const a1 = a0 + step;
+      facets.push({
+        d: wedge(a0, a1, rEdge, v.outer * 0.97),
+        lift: Math.cos((a0 + a1) / 2 - LIGHT_ANGLE),
+      });
+    }
+  }
+
+  // ── the studs ─────────────────────────────────────────────────────────────
+  //
+  // Angles rather than vertices, so two, four and six are all symmetric about the
+  // vertical whatever the frame is. Straight up and straight down stay empty:
+  // that is where the progress arc opens and closes, and a stud on the seam reads
+  // as a fault in it.
+  const STUD_ANGLES = [180, 0, 235, 305, 125, 55];
   const studs = STUD_ANGLES.map((deg) => {
     const a = (deg * Math.PI) / 180;
-    const r = Math.max(0, rayHit(rot, a) - STUD_INSET);
+    const r = Math.max(0, rayHit(rotated, a) - 6.5);
     return [CX + r * Math.cos(a), CY + r * Math.sin(a)] as [number, number];
   });
 
-  const geom: FrameGeom = {
-    outline: `M${rot.map(([x, y]) => pt(x, y)).join(' L')} Z`,
+  const pin: Pin = {
+    core, under, facets, studs,
+    outline: `M${rotated.map(([x, y]) => pt(x, y)).join(' L')} Z`,
     perimeter,
-    studs,
-    markScale: MARK[name],
-    markDy: 0,
+    markScale: v.mark,
+    label: v.label,
+    build,
   };
-  CACHE.set(name, geom);
-  return geom;
+  CACHE.set(key, pin);
+  return pin;
 }
 
 /**
- * The area the frame actually covers, by the shoelace on its own flattened
- * outline. This is the ladder's monotone quantity — see the note on `OUTER`.
+ * How much ink the pin puts on the page. The union of the core and whatever the
+ * underplate shows past it — approximated, because the question this answers is
+ * only ever "is this rung bigger than the one below it".
  */
-export function frameArea(name: FrameName): number {
-  const ring = flatten(CORE[name](0));
-  let a = 0;
-  for (let i = 0; i < ring.length; i++) {
-    const [x1, y1] = ring[i];
-    const [x2, y2] = ring[(i + 1) % ring.length];
-    a += x1 * y2 - x2 * y1;
-  }
-  return Math.abs(a) / 2;
+export function pinArea(orderIndex: number, degree: number): number {
+  const p = pinFor(orderIndex, degree);
+  const area = (d: string) => {
+    const ring = flatten(d);
+    let a = 0;
+    for (let i = 0; i < ring.length; i++) {
+      const [x1, y1] = ring[i];
+      const [x2, y2] = ring[(i + 1) % ring.length];
+      a += x1 * y2 - x2 * y1;
+    }
+    return Math.abs(a) / 2;
+  };
+  const core = area(p.core(0));
+  const under = p.under ? area(p.under) : 0;
+  return Math.max(core, under) + Math.min(core, under) * 0.14;
 }
 
-/** How far the frame reaches from centre, on the flattened outline. */
-export function frameReach(name: FrameName, m = 0): number {
-  return flatten(CORE[name](m)).reduce(
-    (far, [x, y]) => Math.max(far, Math.hypot(x - CX, y - CY)), 0,
-  );
+/** How far the pin reaches from centre, underplate included. */
+export function pinReach(orderIndex: number, degree: number, m = 0): number {
+  const p = pinFor(orderIndex, degree);
+  const far = (d: string) =>
+    flatten(d).reduce((k, [x, y]) => Math.max(k, Math.hypot(x - CX, y - CY)), 0);
+  return Math.max(far(p.core(m)), p.under ? far(p.under) : 0);
 }
 
 // ── the small amount of maths the answers above need ────────────────────────
@@ -383,7 +478,7 @@ function flatten(d: string, steps = 16): [number, number][] {
   return out;
 }
 
-/** The index of the point nearest the top centre — where a progress arc starts. */
+/** The index of the point nearest top centre — where a progress arc starts. */
 function topmost(ring: [number, number][]): number {
   let best = 0;
   let score = Infinity;

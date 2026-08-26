@@ -465,94 +465,135 @@ const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
 }
 
 
-// ── 4c · the six FRAMES, and the direction they run in ───────────────────────
+// ── 4c · forty-eight pins on two axes ────────────────────────────────────────
 //
-// components/shared/rankShapes.ts gives every DEGREE its own silhouette — not
-// every order, which is what it used to do. A reader on that version: "it only
-// becomes actually complex when the user is really far along. I want it to
-// become complex when the user gets far on a certain colour, then the colour
-// resets and so does the complexity."
+// The ladder moves in two directions at once and a reader has complained when
+// either one stopped:
 //
-// scripts/sheet-ranks.mjs is how the shapes are JUDGED; this is what stops them
-// breaking. Everything below is a defect a picture cannot report:
+//   ALONG a colour, complexity must BUILD — "it only becomes actually complex
+//   when the user is really far along. I want it to become complex when the user
+//   gets far on a certain colour, then the colour resets."
 //
-//   · a frame that outgrows the 100x100 viewBox is CLIPPED, silently, on every
-//     screen at once — and the capstone's collar is drawn OUTSIDE its edge, so
-//     the top rung of every order is the one with the least slack;
-//   · a rung that does not cover more of the page than the rung below it reads
-//     as a step BACKWARDS, in all eight colours at once;
-//   · a mark that shrinks to make room for ornament is the failure RankSeal's
-//     header records from the first time ornament escalated here.
+//   ACROSS the colours, the vocabulary must DIFFER — "especially for the more
+//   complex ones for each colour, they are all the same, I want uniqueness …
+//   and for the really far ranks they must be extremely complex."
+//
+// Both were satisfied separately by two earlier versions and each broke the
+// other, so this block asserts them together. scripts/sheet-ranks.mjs is how the
+// pins are JUDGED; these are the things a picture cannot report.
 {
-  const frames = R.FRAMES;
-  ok(frames.length === I.DEGREES,
-    'one frame per degree, not per order', `${frames.length} frames, ${I.DEGREES} degrees`);
-  ok(new Set(frames).size === frames.length, 'no frame is used twice', frames.join(' '));
-  // The shape is chosen by the degree at the ONE place it is chosen. A frame
-  // list keyed on the degree that a renderer then indexes by order would put the
-  // whole redesign back exactly as it was, silently.
-  const seal = fs.readFileSync(path.join(REPO, 'components/shared/RankSeal.tsx'), 'utf8');
-  ok(/frameForDegree\(degree\)/.test(seal) && !/FRAMES\[/.test(seal),
-    'the pin takes its shape from the degree and nothing else');
+  const V = R.VOCAB;
+  ok(V.length === I.ORDERS.length, 'one vocabulary per order',
+    `${V.length} vocabularies, ${I.ORDERS.length} orders`);
+  ok(new Set(V.map((v) => v.label)).size === V.length,
+    'no two orders share a shape name', V.map((v) => v.label).join(' '));
 
-  // NO LIMBS. Wings, a coronet and a ray halo were the top three rungs of the old
-  // ladder and the reader ruled on all of them: "looks like horns and then looks
-  // as if it gains wings. I don't want this design at all." A frame is a worked
-  // edge; the moment something sprouts off one, this fails.
+  // NO LIMBS. Wings, a coronet and a ray halo were the top three rungs of the
+  // first ladder and the reader ruled on all of them: "looks like horns and then
+  // looks as if it gains wings. I don't want this design at all."
   const shapes = fs.readFileSync(path.join(REPO, 'components/shared/rankShapes.ts'), 'utf8');
-  const limbs = ['wing', 'crown', 'coronet', 'spike', 'halo', 'wreath', 'sunburst'];
+  const limbs = ['wing', 'coronetPath', 'spike', 'halo', 'wreath', 'sunburstRay'];
   const declared = [...shapes.matchAll(/(?:export\s+)?(?:const|function)\s+([A-Za-z_]\w*)/g)]
     .map((m) => m[1]);
-  const found = declared.filter((n) => limbs.some((w) => n.toLowerCase().includes(w)));
-  ok(found.length === 0, 'no frame grows a limb', found.length ? found.join(' ') : 'no wings, no coronet, no rays');
+  const grown = declared.filter((n) => limbs.some((w) => n.toLowerCase().includes(w.toLowerCase())));
+  ok(grown.length === 0, 'no pin grows a limb', grown.length ? grown.join(' ') : 'none declared');
 
-  let prevArea = 0;
-  for (const name of frames) {
-    // MEASURED ON THE FLATTENED OUTLINE, not on the raw path numbers. A cusped
-    // lobe's control points sit further out than the curve they steer — the
-    // rosette's are at radius 49 for an edge that reaches 43.5 — so reading the
-    // numbers out of the `d` string reports a frame as nearly clipped when it is
-    // nowhere near it.
-    const reach = R.frameReach(name);
-    // 49, not 50: the collar is stroked, so half its width lives outside the
-    // path it is drawn on.
-    ok(reach <= 49, `frame ${name} stays inside the viewBox`,
-      `reaches ${reach.toFixed(1)} of 50`);
-    // …and the capstone's collar, which is the same path grown outward.
-    const collar = R.frameReach(name, R.COLLAR);
-    ok(collar <= 49, `frame ${name}'s collar stays inside it too`,
-      `${collar.toFixed(1)} of 50`);
-    ok(collar > reach, `frame ${name}'s collar sits outside its edge`,
-      `${collar.toFixed(1)} vs ${reach.toFixed(1)}`);
-
-    const g = R.frameGeom(name);
-    ok(g.perimeter > 100, `frame ${name} has a measurable edge to run an arc along`,
-      `${g.perimeter.toFixed(0)} units`);
-    ok(g.studs.length === 6, `frame ${name} offers six stud positions`, `${g.studs.length}`);
-    for (const [sx, sy] of g.studs) {
-      const r = Math.hypot(sx - 50, sy - 50);
-      ok(r > 8, `frame ${name}'s studs clear the mark`, `${r.toFixed(1)} units from centre`);
+  // ALONG a colour: every rung draws strictly MORE than the one below it.
+  //
+  // Counted as elements rather than as area, and that is the honest measure. The
+  // silhouette only grows once per order — at the rung the underplate arrives —
+  // and after that the build is carried by finish. Asserting area would either
+  // pass vacuously or force a footprint change nobody wants, which is exactly
+  // how an earlier version ended up with an octagon narrower than the hexagon
+  // below it.
+  const elements = (o, d) => {
+    const p = R.pinFor(o, d);
+    return (p.build.rule ? 1 : 0) + p.facets.length + (p.under ? 1 : 0)
+      + p.build.studs + (p.build.collar ? 1 : 0);
+  };
+  for (let o = 0; o < V.length; o++) {
+    let prev = -1, rising = true, seq = [];
+    for (let d = 0; d < 6; d++) {
+      const n = elements(o, d);
+      seq.push(n);
+      if (n <= prev) rising = false;
+      prev = n;
     }
-    ok(g.markScale >= 0.34 && g.markScale <= 0.42,
-      `frame ${name} leaves the mark its room`, `markScale ${g.markScale}`);
-
-    // THE LADDER IS MEASURED BY AREA, NOT BY REACH, and the table in rankShapes
-    // says why: reach punishes a shape for being ROUND. The hexagon reaches
-    // further than the octagon above it because it spends its reach on two
-    // points and leaves the rest of its slot empty, and the gem spends a third
-    // of its outline in valleys. Ink on the page is what a reader compares.
-    const area = R.frameArea(name);
-    ok(area > prevArea, `frame ${name} covers more of the page than the rung below`,
-      `${area.toFixed(0)} sq units, previous ${prevArea.toFixed(0)}`);
-    prevArea = area;
+    ok(rising, `${V[o].label}: every rung adds something`, seq.join(' → '));
   }
 
-  // A capstone that is not half again the size of the plainest rung is not a
-  // capstone. This is the one number that says the CYCLE is worth climbing, as
-  // opposed to merely being ordered.
-  const grew = R.frameArea(frames[frames.length - 1]) / R.frameArea(frames[0]);
-  ok(grew >= 1.4, 'the capstone is visibly bigger than the plain pin',
-    `${grew.toFixed(2)}x the area, floor 1.4`);
+  // ACROSS the colours: the ceiling climbs, and the top is a bigger object than
+  // the bottom by a margin a reader can see side by side.
+  let prevReach = 0, climbs = true;
+  const reaches = [];
+  for (let o = 0; o < V.length; o++) {
+    const r = R.pinReach(o, 5);
+    reaches.push(Math.round(r * 10) / 10);
+    if (r < prevReach - 0.01) climbs = false;
+    prevReach = r;
+  }
+  ok(climbs, "each order's capstone reaches at least as far as the last", reaches.join(' '));
+  const spread = R.pinReach(V.length - 1, 5) / R.pinReach(0, 5);
+  ok(spread >= 1.18, 'and the top of the ladder is visibly a bigger object',
+    `${spread.toFixed(2)}x the bottom, floor 1.18`);
+
+  // UNIQUENESS, measured on the DRAWINGS. Two pins whose numbers differ but whose
+  // paths do not are the failure this exists to catch.
+  const sigs = new Map();
+  for (let o = 0; o < V.length; o++) {
+    for (let d = 0; d < 6; d++) {
+      const p = R.pinFor(o, d);
+      const sig = [p.core(0), p.under ?? '', p.facets.length, p.build.studs,
+        p.build.rule, p.build.collar].join('|');
+      if (!sigs.has(sig)) sigs.set(sig, []);
+      sigs.get(sig).push(`${V[o].label}/${d}`);
+    }
+  }
+  const dupes = [...sigs.values()].filter((g) => g.length > 1);
+  ok(dupes.length === 0, 'no two of the forty-eight draw the same thing',
+    dupes.length ? dupes.map((g) => g.join('=')).join(' ') : `${sigs.size} distinct of 48`);
+
+  // AN UNDERPLATE THAT DOES NOT CLEAR THE CORE IS A WASTED PATH. The first draft
+  // put jade's plate at 37.5 behind a core of 40 — entirely hidden, so three of
+  // that order's six rungs rendered identically.
+  for (const v of V) {
+    const past = v.under.reach - v.outer;
+    ok(past >= 4, `${v.label}: its underplate shows past the core`,
+      `${past.toFixed(1)} units, floor 4`);
+  }
+
+  for (let o = 0; o < V.length; o++) {
+    const v = V[o];
+    // 49, not 50: the collar is stroked, so half its width lives outside the
+    // path it is drawn on.
+    const reach = R.pinReach(o, 5, R.COLLAR);
+    ok(reach <= 49, `${v.label} stays inside the viewBox`, `reaches ${reach.toFixed(1)} of 50`);
+
+    const p = R.pinFor(o, 5);
+    ok(p.perimeter > 100, `${v.label} has a measurable edge to run an arc along`,
+      `${p.perimeter.toFixed(0)} units`);
+    ok(p.studs.length === 6, `${v.label} offers six stud positions`);
+    const near = Math.min(...p.studs.map(([x, y]) => Math.hypot(x - 50, y - 50)));
+    ok(near > 8, `${v.label}'s studs clear the mark`, `nearest ${near.toFixed(1)} from centre`);
+    ok(v.mark >= 0.34 && v.mark <= 0.42, `${v.label} leaves the mark its room`,
+      `markScale ${v.mark}`);
+  }
+
+  // The facets are lit by ONE rule, from the angle to the lamp, and painted in
+  // the material's own ends. White over a coloured face desaturates it — the
+  // first draft did exactly that and every faceted pin came out a washed copy of
+  // the rung below it.
+  const lit = R.pinFor(7, 5).facets;
+  ok(lit.length > 0, 'the capstone is faceted', `${lit.length} wedges`);
+  ok(lit.some((f) => f.lift > 0.5) && lit.some((f) => f.lift < -0.5),
+    'and the facets run from full light to full shade',
+    `${Math.min(...lit.map((f) => f.lift)).toFixed(2)} … ${Math.max(...lit.map((f) => f.lift)).toFixed(2)}`);
+  ok(!/'#FFFFFF'|"#FFFFFF"/.test(shapes.slice(shapes.indexOf('facetPaint'), shapes.indexOf('facetPaint') + 400)),
+    'and they are painted in the material, not in white');
+
+  const seal = fs.readFileSync(path.join(REPO, 'components/shared/RankSeal.tsx'), 'utf8');
+  ok(/pinFor\(oi, degree\)/.test(seal),
+    'the pin is built from BOTH axes — the order and the degree');
 }
 
 

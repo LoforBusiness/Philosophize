@@ -239,24 +239,11 @@ export const ORDER_LABEL: Record<OrderName, string> = {
  */
 export const DEGREES = 6;
 
-export interface Finish {
-  /** Draw the hairline inside the edge. */
-  rule: boolean;
-  /** How many of the frame's six stud positions are filled. */
-  studs: number;
-  /** The capstone's outer collar. */
-  collar: boolean;
-}
-
-export function finishFor(degree: number): Finish {
-  const d = Math.max(0, Math.min(DEGREES - 1, Math.floor(degree) || 0));
-  return {
-    rule: d >= 1,
-    studs: d >= 4 ? 6 : d >= 3 ? 4 : d >= 2 ? 2 : 0,
-    collar: d >= 5,
-  };
-}
-
+// `Finish` AND `finishFor` LIVED HERE AND HAVE MOVED to `buildFor` in
+// components/shared/rankShapes.ts, beside the geometry they gate. They were
+// split across two files while the finish was the only thing a degree changed;
+// a degree now also picks the silhouette, the underplate and the facets, and one
+// number deciding five things from two files is how the five drift apart.
 /** The order a rank index (0-based) belongs to. */
 export function orderOf(index: number): OrderName {
   const i = Math.max(0, Math.floor(index) || 0);
@@ -320,6 +307,29 @@ export const insigniaFace = (m: Insignia): InsigniaStops => [
 export const insigniaRim = (m: Insignia): InsigniaStops => [
   ['0%', m.shade, 1],
   ['45%', m.rim, 1],
+  ['100%', m.rim, 1],
+];
+
+/**
+ * THE BEVEL — the edge as a turned surface rather than as an outline.
+ *
+ * `insigniaRim` is dark all the way round, which is correct for a line drawn ON
+ * the edge and wrong for the edge itself: a struck object's rim catches the lamp
+ * on the side facing it and falls away on the other. Running lit → shade → rim
+ * along the same diagonal every other face uses puts a bright arc top-left and a
+ * dark one bottom-right, and that one change is most of the difference between a
+ * pin that looks pressed and a pin that looks printed.
+ */
+export const insigniaBevel = (m: Insignia): InsigniaStops => [
+  ['0%', m.lit, 1],
+  ['38%', m.shade, 1],
+  ['100%', m.rim, 1],
+];
+
+/** The underplate: the same material seen from BEHIND, so it never catches the
+ *  highlight — which is what makes it read as being behind rather than beside. */
+export const insigniaUnder = (m: Insignia): InsigniaStops => [
+  ['0%', m.base, 1],
   ['100%', m.rim, 1],
 ];
 

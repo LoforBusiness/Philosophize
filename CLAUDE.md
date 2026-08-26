@@ -475,47 +475,69 @@ Index on (user_id, lesson_id).
   what the last two (32,000 and 50,000 XP) were.
 - **Ranks** — **48** in `data/ranks.ts` (Novice → Grand Philosopher), in **eight
   orders of six**: clay, iron, bronze, jade, lapis, crimson, amethyst, aurum.
-  **Two scales, one long and one short, and they cross at every sixth rank:**
-  - the **MATERIAL** is the long one. Eight orders, each better than the last,
-    and nothing about it ever resets (`constants/insignia.ts`, and the third
-    place §19 licenses colour). This is what finishing an order buys.
-  - the **SHAPE** is the short one, and it **CYCLES**. Six frames keyed on the
-    DEGREE — how far through its order a rank is — run again in every order:
-    disc → hexagon → plate → gem → scallop → rosette, plain to most worked, then
-    plain again in a better metal (`components/shared/rankShapes.ts`).
-  - the **FINISH** rides the degree with it — inner rule, two/four/six studs,
-    then the capstone's collar.
+  **TWO AXES, and a pin is the pair.** `order` picks the MATERIAL and the
+  VOCABULARY; `degree` picks how much of that vocabulary is built. No two of the
+  forty-eight draw the same thing, and `check:ui` measures that on the paths
+  rather than on the numbers.
+  - the **VOCABULARY** is per order and never repeats: disc · hex · plate · gem ·
+    scallop · star · coronet · sunburst. Each is a core shape, a counter-rotated
+    UNDERPLATE behind it, and a facet count (`VOCAB` in
+    `components/shared/rankShapes.ts`).
+  - the **BUILD** is the same six steps in every order, and it RESETS at each new
+    colour: core → inner rule → facets → underplate → studs → collar. Five
+    additions for five rungs, one each.
+  - so complexity is a **sawtooth that climbs**. Clay's capstone is a disc on a
+    square plate; aurum's is an eight-lobe rosette inside a sixteen-point burst,
+    cut into facets and ringed twice. Same six steps, nothing in common to look
+    at, and the capstone reach climbs 39 → 47.5 across the ladder.
 
-  > **The cycle is a correction, and the reasoning is worth keeping.** The shape
-  > used to escalate ONCE across all forty-eight ranks, one silhouette per order,
-  > and a reader named both faults it had: *"it only becomes actually complex when
-  > the user is really far along … I want it to become complex when the user gets
-  > far on a certain colour, then the colour resets and so does the complexity"*,
-  > and *"the ranks that do get more complex … look like horns and then look as
-  > if [they gain] wings. I don't want this design at all."*
+  > **This is the third attempt and the first two each fixed half of it.** The
+  > shape used to escalate ONCE across all forty-eight ranks, one silhouette per
+  > order, and the reader named two faults: *"it only becomes actually complex
+  > when the user is really far along … I want it to become complex when the user
+  > gets far on a certain colour, then the colour resets"*, and *"the ranks that
+  > do get more complex … look like horns and then look as if [they gain] wings.
+  > I don't want this design at all."* An escalation with forty-eight rungs to
+  > fill runs out of edge to work long before it runs out of rungs, so it starts
+  > adding LIMBS.
   >
-  > Those are one fault seen twice. An escalation stretched over forty-eight rungs
-  > leaves most readers standing in the dull middle of it, and it runs out of edge
-  > to work long before it runs out of rungs — so it starts adding LIMBS. Shoulder
-  > spikes, wings and a coronet are what "keep adding" looks like. Cycling the
-  > shape gives everyone a grander pin three ranks away and means no frame is ever
-  > the eighth step of anything, so none of them needs a limb.
+  > Cycling six shapes inside every order fixed the pacing and broke the other
+  > half — *"especially for the more complex ones for each colour, they are all
+  > the same, I want uniqueness"* — because the capstone of clay and the capstone
+  > of aurum were then one drawing in two paints, which is where the whole thing
+  > came in. **Cycling is about PACING; uniqueness is about VOCABULARY.** Treating
+  > complexity as one number is what made them look like a trade-off.
   >
-  > **`check:ui` holds three things a picture cannot report:** that the shape comes
-  > from the degree and nothing else, that no frame declares a wing/crown/halo
-  > again, and that each rung covers more of the page than the one below it — the
-  > capstone is 1.51× the plain pin's area. That last one is measured as AREA
-  > rather than reach, because reach punishes a shape for being round: the hexagon
-  > reaches further than the octagon above it, and the gem spends a third of its
-  > outline in valleys.
+  > **And "the design just isn't cool looking" was the other half of the note.**
+  > It was a flat polygon with one gradient across it. Three things fix that
+  > without a limb: the **underplate** (pure silhouette, symmetric, cannot become
+  > a horn); **facets**, where the face is CUT — each wedge lit by the cosine of
+  > its own angle to the lamp, so a pin reads as one material catching light at a
+  > dozen angles; and a **bevel band** instead of an outline, so the edge is
+  > brighter on the side the lamp is on.
+  >
+  > Two things the contact sheet caught that no number would have. The facets
+  > were being **painted out** by the inner rule, which the offline renderer fakes
+  > as two fills — three renders came back identical before anyone asked why. And
+  > painting them in **white** desaturated every faceted pin, so the middle rung
+  > of each order looked like a washed copy of the rung below rather than a richer
+  > one; they take the material's own `lit` and `rim` now.
 
-  The mark's room stays flat at 0.37–0.40 across all six while the drawn area
+  **`check:ui` holds six things a picture cannot report:** that every rung adds an
+  element, that each order's capstone reaches at least as far as the last, that
+  all forty-eight drawings are distinct, that every underplate clears its own core
+  by 4 units, that nothing declares a wing or a coronet again, and that the facets
+  are painted in the material. Every one was confirmed by putting the defect back
+  and watching it fail.
+
+  The mark's room stays flat at 0.36–0.40 across all eight while the drawn area
   grows by half again, so everything a rung gains it gains OUTSIDE the glyph.
   That discipline is the whole reason it survives being drawn at 44px.
 
   **`npm run sheet:ranks` renders all forty-eight in plain Node** and is how they
-  are judged — `PIN=50` draws them at the size the ladder actually uses, which is
-  the size any question about legibility has to be asked at. `check:ui` is what
+  are judged — `PIN=50` draws them at the size the ladder actually uses, and
+  `sheet:ranks jade` draws one order large. It is the only instrument this
+  project has for "does it look good", and every correction above came from it. `check:ui` is what
   stops them breaking (a frame that outgrows the viewBox is clipped silently on
   every screen at once). Two functions, and the difference matters: `rankForXP(totalXP)` is what the XP
   alone would earn, while `awardedRank(rankIndex, totalXP)` is what has actually

@@ -6,9 +6,10 @@ import Glyph, { type GlyphName } from './Glyph';
 import {
   INK, GHOST, FAINT, LIGHT, FACE, RIM, LOCKED_FACE, SHADOW, type Stops,
 } from './tone';
-import { CORE, COLLAR, INNER, frameForDegree, frameGeom } from './rankShapes';
+import { COLLAR, INNER, facetPaint, pinFor } from './rankShapes';
 import {
-  ORDER, insigniaFace, insigniaRim, finishFor, type OrderName,
+  ORDER, insigniaFace, insigniaRim, insigniaBevel, insigniaUnder, ORDERS,
+  type OrderName,
 } from '@/constants/insignia';
 
 // -----------------------------------------------------------------------------
@@ -32,15 +33,22 @@ import {
 // in the dull middle of it, and it runs out of edge to work long before it runs
 // out of rungs -- so it starts adding limbs. Both faults have one cause.
 //
-// -- SO: SIX FRAMES, KEYED ON THE DEGREE, RUN AGAIN IN EVERY ORDER -----------
+// -- AND THEN THE CYCLE ITSELF WAS TOO UNIFORM ------------------------------
 //
-// `degree` decides the SHAPE and `order` decides the MATERIAL. Inside a colour
-// the pin is worked from a plain disc up to a collared rosette; at the next
-// colour it starts plain again in a better metal. Nobody is ever more than three
-// ranks from a grander shape, and nothing has to grow a limb in order to be the
-// eighth step of anything. rankShapes.ts holds the geometry and the reasoning;
+// Six frames keyed on the degree, the same six in every order, fixed the pacing
+// and broke the other half: "especially for the more complex ones for each
+// colour, they are all the same, I want uniqueness ... and for the really far
+// ranks they must be extremely complex and look very good."
+//
+// So BOTH axes move. `degree` decides how far through the build a pin is -- core,
+// rule, facets, underplate, studs, collar -- and `order` decides the MATERIAL
+// *and the vocabulary every one of those steps is drawn in*. Clay's capstone is a
+// disc on a square. Aurum's is an eight-lobe rosette inside a sixteen-point
+// burst, cut into facets and ringed twice. Same six steps, no two of the
+// forty-eight alike. rankShapes.ts holds the geometry and the reasoning;
 // scripts/sheet-ranks.mjs draws all forty-eight in plain Node so they can be
-// LOOKED at (§21), which is where the wings died.
+// LOOKED at (§21), which is where the wings died and where the facets were
+// found to be painting themselves out.
 //
 // The oldest warning here still stands and is what keeps this honest: ornament
 // "so busy at 54px that it fought the glyph it framed". Nothing added is inside
@@ -121,24 +129,24 @@ export default memo(function RankSeal({
   // face was fitted so white clears 3:1 on its lit corner (insignia.ts); ink on
   // a crimson or amethyst face would be the one that vanishes.
   const ink = locked ? GHOST : ins ? ins.on : INK;
-  const fin = finishFor(degree);
   const pct = progress == null ? null : Math.max(0, Math.min(1, progress));
   // With an arc over it the edge becomes a track and steps back; on its own it is
   // the frame and carries full weight.
   const trackOpacity = pct != null ? 0.22 : 1;
 
-  // THE SHAPE COMES FROM THE DEGREE, NOT THE ORDER. That one line is the whole
-  // redesign: complexity cycles inside a colour instead of climbing once across
-  // all forty-eight ranks and having to sprout limbs to get there.
-  const frame = frameForDegree(degree);
-  const geom = frameGeom(frame);
+  // BOTH AXES AT ONCE: the order picks the vocabulary, the degree picks how much
+  // of it is built. One call, cached, and it is the only thing that decides what
+  // this pin looks like.
+  const oi = order ? Math.max(0, ORDERS.indexOf(order)) : 0;
+  const pin = pinFor(oi, degree);
+  const fin = pin.build;
 
   // useId, because two pins on one screen with the same gradient id would have
   // the second silently adopt the first's fill.
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
-  const face = `f${uid}`, rim = `r${uid}`;
+  const face = `f${uid}`, rim = `r${uid}`, bevel = `b${uid}`, plate = `p${uid}`;
 
-  const outer = CORE[frame](0);
+  const outer = pin.core(0);
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
@@ -146,7 +154,23 @@ export default memo(function RankSeal({
         <Defs>
           {grad(face, locked ? LOCKED_FACE : ins ? insigniaFace(ins) : FACE)}
           {grad(rim, locked ? flat(GHOST) : ins ? insigniaRim(ins) : RIM)}
+          {grad(bevel, locked ? flat(GHOST) : ins ? insigniaBevel(ins) : RIM)}
+          {grad(plate, locked ? flat(GHOST) : ins ? insigniaUnder(ins) : RIM)}
         </Defs>
+
+        {/* THE UNDERPLATE, counter-rotated so its points land in the core's
+            valleys — it reads as a ring of tips showing THROUGH the gaps rather
+            than as a second shape parked behind a first. Painted base→rim, never
+            lit→shade: the thing behind must not catch the highlight, or the two
+            plates read as side by side. */}
+        {pin.under && (
+          <G>
+            <G transform={`translate(${SHADOW.dx * 0.6} ${SHADOW.dy * 0.6})`} opacity={locked ? 0 : SHADOW.opacity}>
+              <Path d={pin.under} fill={INK} />
+            </G>
+            <Path d={pin.under} fill={`url(#${plate})`} />
+          </G>
+        )}
 
         {/* The pin sits ON the page, so it casts. Earned only: a locked pin is
             drawn flat, and a shadow under a flat shape reads as a mistake. */}
@@ -156,49 +180,43 @@ export default memo(function RankSeal({
           </G>
         )}
 
-        {/* THE CAPSTONE'S COLLAR — a second rule OUTSIDE the edge, and only on
-            the sixth rank of an order, so it means "this is as far as this
-            material goes" rather than merely "this is a high rank".
+        {/* THE CAPSTONE'S COLLAR — a second rule OUTSIDE the edge, on the sixth
+            rank of an order only, so it means "this is as far as this material
+            goes" rather than merely "this is a high rank".
 
-            It was six rays off the flat edges first, and on a contact sheet of
-            all forty they read as whiskers — stray marks escaping the pin rather
-            than an honour added to it, worst on clay and iron where a thin dark
-            spoke on a drab face just looks like damage. A rule outside the edge
-            is the same idea done as framing: it closes the pin instead of
-            fraying it, and it costs one path. */}
+            The material's BODY, not its `rule`: this ring is the one part of the
+            pin drawn on PAPER rather than on metal, and `rule` is the order's
+            near-white — AURUM's is #FFFFFF outright, so the highest rank in the
+            app wore a white ring on cream and there was nothing to see. Seven of
+            the eight orders failed that way. check-ui §4d holds it now. */}
         {!locked && fin.collar && (
           <Path
-            d={CORE[frame](COLLAR)}
+            d={pin.core(COLLAR)}
             fill="none"
-            // THE MATERIAL'S BODY, NOT ITS RULE — because this ring is the one
-            // piece of the pin that is drawn on PAPER rather than on metal, and
-            // `rule` is the order's near-white. AURUM's is #FFFFFF outright, so
-            // the highest rank in the app wore a white ring on cream paper and
-            // there was nothing to see. Jade, lapis, crimson and amethyst were
-            // barely better. insignia.ts records the same trap catching a halo
-            // before this; that is twice, in the same place, for the same reason.
             stroke={ins ? ins.base : FAINT}
-            // 3, not 2, and the arithmetic is the whole argument: a Profile pin
-            // is 56px on a 100-unit box, so two units of stroke is one pixel and
-            // change. The one mark that says "this is the top of your colour"
-            // cannot be the thinnest thing on the pin.
             strokeWidth={3}
             strokeLinejoin="round"
             opacity={0.92}
           />
         )}
 
-        <Path d={outer} fill={`url(#${face})`} />
+        {/* THE BEVEL, and it is a BAND rather than a stroke: the core filled with
+            a lit→shade→rim ramp, with the face laid inside it. A stroke is the
+            same dark line all the way round, which is right for an outline and
+            wrong for an edge — a struck object catches the lamp on the side
+            facing it. This one change is most of the difference between a pin
+            that looks pressed and one that looks printed. */}
+        <Path d={outer} fill={`url(#${bevel})`} />
+        <Path d={pin.core(2.2)} fill={`url(#${face})`} />
 
         {/* THE INNER RULE — the first step of finish, and the reason a rank 2
-            pin already looks different from a rank 1 in the same order.
-            `FAINT` is a warm paper grey and disappears on a coloured face, so a
-            struck pin uses its order's own `rule` tone: a warm line low on the
-            ladder, a near-white one from jade up. That white line is what the
-            reader meant by "green with white, red with white". */}
+            pin already looks different from a rank 1 in the same order. `FAINT`
+            is a warm paper grey and disappears on a coloured face, so a struck
+            pin uses its order's own `rule` tone: a warm line low on the ladder,
+            a near-white one from jade up. */}
         {(fin.rule || locked) && (
           <Path
-            d={CORE[frame](INNER)}
+            d={pin.core(INNER)}
             fill="none"
             stroke={locked ? GHOST : ins ? ins.rule : FAINT}
             strokeWidth={1}
@@ -206,29 +224,38 @@ export default memo(function RankSeal({
           />
         )}
 
+        {/* THE FACETS — the face CUT rather than filled. Each wedge takes its own
+            lift from the angle between its centre and the light, so the pin reads
+            as one material catching a lamp at a dozen angles.
+
+            AFTER the rule, not before, and that ordering is load-bearing: the
+            offline sheet fakes the rule as two fills and the inner of the two
+            repaints the middle of the pin, which painted every facet out. Three
+            renders came back identical before anyone looked at why. */}
+        {!locked && pin.facets.map((f, i) => {
+          const { end, opacity } = facetPaint(f.lift);
+          if (!ins || opacity < 0.02) return null;
+          return <Path key={i} d={f.d} fill={ins[end]} opacity={opacity} />;
+        })}
+
         {/* The edge itself — and the progress track when there is an arc. */}
         <Path
           d={outer}
           fill="none"
           stroke={`url(#${rim})`}
-          strokeWidth={2.4}
+          strokeWidth={1.6}
           strokeLinejoin="round"
           opacity={trackOpacity}
         />
 
-        {/* THE STUDS — two, four, then all six. They used to sit on the
-            hexagon's own vertices, which cannot survive a frame that is not a
-            hexagon; `frameGeom` casts six rays out of the centre instead and
-            stops short of whatever edge it finds, so the same six positions
-            exist on a disc, a shield and a winged crest. Straight up and
-            straight down are deliberately empty — that is where the progress
-            arc opens and closes, and a stud on that seam reads as a fault in
-            it. */}
-        {!locked && fin.studs > 0 && geom.studs.slice(0, fin.studs).map(([sx, sy], i) => (
+        {/* THE STUDS. Angles rather than vertices, so two, four and six are all
+            symmetric about the vertical whatever the frame is. Straight up and
+            straight down are deliberately empty — that is where the progress arc
+            opens and closes, and a stud on that seam reads as a fault in it. */}
+        {!locked && fin.studs > 0 && pin.studs.slice(0, fin.studs).map(([sx, sy], i) => (
           // A rivet, not a dot: the dark seat under it is what makes it sit IN
           // the face rather than float on it, and it is also what keeps a stud
-          // legible on the pale orders, where the bright fill alone was
-          // invisible against its own lit corner.
+          // legible on the pale orders.
           <G key={i}>
             <Circle cx={sx} cy={sy} r={3.5} fill={ins ? ins.rim : INK} opacity={0.55} />
             <Circle cx={sx} cy={sy} r={2.5} fill={ins ? ins.rule : FAINT} />
@@ -239,13 +266,13 @@ export default memo(function RankSeal({
           // `geom.outline` is the frame flattened and rotated to begin at top
           // centre, so a nearly-full band closes at the point it began.
           <Path
-            d={geom.outline}
+            d={pin.outline}
             fill="none"
             stroke={ink}
             strokeWidth={3.4}
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeDasharray={`${(pct * geom.perimeter).toFixed(2)} ${geom.perimeter.toFixed(2)}`}
+            strokeDasharray={`${(pct * pin.perimeter).toFixed(2)} ${pin.perimeter.toFixed(2)}`}
           />
         )}
       </Svg>
@@ -261,8 +288,8 @@ export default memo(function RankSeal({
           rendered as an EMPTY hexagon in a browser — Profile and the Ranks sheet
           included. Harmless on native, and it restores the one channel this
           project can actually look at its own UI through (§21). */}
-      <View style={{ zIndex: 1, transform: [{ translateY: geom.markDy * size }] }}>
-        <Glyph name={glyph} size={size * geom.markScale} color={ink} />
+      <View style={{ zIndex: 1 }}>
+        <Glyph name={glyph} size={size * pin.markScale} color={ink} />
       </View>
     </View>
   );
