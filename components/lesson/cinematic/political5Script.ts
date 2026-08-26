@@ -87,7 +87,7 @@ export const BEATS: Pol5Beat[] = [
         'Rawls protects the worst-off',
         'These questions still fuel debate today',
       ],
-      closing: 'Political philosophy is not dusty history; it shapes your world now.',
+      closing: 'Political philosophy is not dusty history. These arguments shape the world you live in now.',
     },
     dur: 2.8,
   },

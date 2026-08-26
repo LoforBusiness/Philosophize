@@ -74,7 +74,7 @@ export const BEATS: Aes13Beat[] = [
         yLo: 'THE SAME HAND', yHi: 'DIFFERENT HANDS',
         start: [0.24, 0.24],
         quads: [
-          { id: 'forge', x: 1, y: 1, reads: 'identical to look at, different hands: equal, says the formalist', correct: true },
+          { id: 'forge', x: 1, y: 1, reads: 'same to look at, different painters — equal, if only the surface counts', correct: true },
           { id: 'twin', x: 1, y: 0, reads: 'identical, and by the same hand: plainly equal' },
           { id: 'pair', x: 0, y: 1, reads: 'different to look at, different hands: an ordinary pair' },
           { id: 'two', x: 0, y: 0, reads: 'different to look at, one hand: two works by one painter' },

@@ -95,7 +95,7 @@ export const BEATS: Aes24Beat[] = [
           { id: 'gone', profile: [1, 0.05, 0.04, 0.03, 0.02], reads: 'the first copy destroys it' },
         ],
       },
-      explain: 'It withers, and the first copy does not finish it. The word chosen was withering, not killing. There is no mourning in it either. Cut loose from one room, art reaches everybody, and that is counted as a gain.',
+      explain: 'It withers, and the first copy does not finish it. Benjamin chose the word withering, not killing, and he was not mourning either. Cut loose from one room, art reaches everybody, and that is counted as a gain.',
       xp: 5,
     },
     dur: 1.0,

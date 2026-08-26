@@ -73,7 +73,7 @@ export const BEATS: Pol13Beat[] = [
         yLo: 'NOBODY IS SET BACK', yHi: 'SOMEONE IS SET BACK',
         start: [0.76, 0.24],
         quads: [
-          { id: 'harm', x: 0, y: 1, reads: 'nobody objects, and somebody is genuinely set back', correct: true },
+          { id: 'harm', x: 0, y: 1, reads: 'nobody agreed to it, and somebody is really harmed', correct: true },
           { id: 'offence', x: 1, y: 0, reads: 'a great many object, and nobody is set back' },
           { id: 'both', x: 1, y: 1, reads: 'many object, and somebody is set back: harm, loudly' },
           { id: 'none', x: 0, y: 0, reads: 'nobody objects and nobody is hurt: nothing at all' },

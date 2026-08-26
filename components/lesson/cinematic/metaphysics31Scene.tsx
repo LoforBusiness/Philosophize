@@ -11,7 +11,8 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics31Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, STONE, SHADE,
+  useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -43,29 +44,51 @@ import { followMoves, kindOf, seedOf } from './camera';
 // the three rings stay behind at full ink. What you counted is still there when the
 // cheese is gone (H64).
 
-const SLAB_L = 96;
-const SLAB_T = 364;
-const SLAB_W = 260;
-const SLAB_H = 136;
+// ── THE BLOCK ───────────────────────────────────────────────────────────────
+// Front face and a skewed top face, standing on the ground line. The top face is
+// SHORT (22 against 118) on purpose: a deep one reads as looking down into a box,
+// and this is meant to be a block on a board at eye height.
+const CH_L = 92;
+const CH_W = 256;
+const FACE_T = 380;
+const FACE_H = 120;                 // 380 → 500, standing on GROUND
+const TOP_H = 24;
+const TOP_SKEW = '-28deg';
+// The skew leans the top face right by h·tan(28°) ≈ 12.8, so it is drawn back by
+// half that to keep the block centred over its own base.
+const TOP_L = CH_L + 7;
 
-const BIG_L = 222;                  // 270 − 48
-const BIG_T = 384;                  // 432 − 48
-const OUT_D = 96;
-const IN_OFF = 20;                  // 48 − 28
-const IN_D = 56;
+const RIND_H = 7;                   // the darker band along the top of the face
+
+// ── THE HOLES ───────────────────────────────────────────────────────────────
+// Three, unevenly placed and unevenly sized, which is what makes it cheese
+// rather than a punch-card. The big one is the one under the microscope: it is
+// the only one drawn with a visible RIM band, because three of those at this
+// size would be fussy (A5).
+const BIG_CX = 268;
+const BIG_CY = 448;                 // clear of the rind at 389 and the foot at 500
+const BIG_R = 42;                   // the outer edge of the ring of cheese
+const GAP_R = 25;                   // the empty middle
+// 17 units of cheese between them. The ring is the CORRECT answer, so it has to
+// be plainly a thing — it takes the lit tone the top face uses, edged in ink on
+// both sides, and reads as a bit of cheese bent round the gap.
 
 const SMALL = [
-  { left: 123, top: 379, d: 34 },
-  { left: 174, top: 382, d: 24 },
+  { cx: 146, cy: 424, r: 16 },
+  { cx: 196, cy: 470, r: 10 },
 ];
 
-const KICK_T = 336;
-const KICK_W = 60;                  // 54 left "COUNTING" only 6% of margin (D30)
-const TICK_X = 164;
-const TICK_T = 338;
+// ── THE THREE ANSWERS ───────────────────────────────────────────────────────
+// One row of identical tabs, each on a leader to its own referent. Three tabs,
+// three answers, and nothing else on the stage is tappable.
+const TAB_H = 24;
+const TAB_CHEESE = { left: 70, top: 336, width: 86 };
+const TAB_RIM = { left: 196, top: 336, width: 62 };
+const TAB_GAP = { left: 276, top: 336, width: 62 };
 
-const CHIP_RIM = { left: 236, top: 336, width: 70 };
-const CHIP_CHEESE = { left: 106, top: 464, width: 92 };
+const KICK_T = 306;
+const TICK_X = 160;
+const TICK_T = 308;
 
 const FIG_X = 46;
 
@@ -135,37 +158,29 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
 
   return (
     <Animated.View style={styles.scene}>
-      {/* the slab, which dissolves once the question is answered */}
-      <Animated.View style={[styles.slab, slabStyle]} pointerEvents="none">
-        {[0, 1, 2, 3, 4].map((k) => (
-          <View key={k} style={[styles.hatch, { top: 22 + k * 22 }]} />
-        ))}
+      {/* THE BLOCK. It dissolves once the question is answered, and the rings
+          stay behind at full ink — what you counted is still there when the
+          cheese is gone (H64). */}
+      <Animated.View style={slabStyle} pointerEvents="none">
+        <View style={styles.topFace} />
+        <View style={styles.face} />
+        <View style={styles.rind} />
       </Animated.View>
-      <Target id={'cheese'} correct={false} picked={picked} onPick={onPick}
-        style={styles.slabHit}
-        disabled={!live || answered}
-      />
 
-      {SMALL.map((s, k) => (
-        <Hole key={k} index={k} left={s.left} top={s.top} d={s.d} SCENE={SCENE} />
+      {/* the two plain holes */}
+      {SMALL.map((h, k) => (
+        <Hole key={k} index={k} cx={h.cx} cy={h.cy} r={h.r} SCENE={SCENE} />
       ))}
 
-      {/* the big hole: an outer ring (THE RIM) with its empty middle (THE GAP) on top */}
-      <Animated.View style={[styles.bigWrap, bigStyle]}>
-        <Target id={'rim'} correct={true} picked={picked} onPick={onPick}
-          style={styles.rim}
-          disabled={!live || answered}
-        >
-          <View style={[styles.rimInner, rimOn && styles.pickRight]} />
-        </Target>
-        <Target id={'gap'} correct={false} picked={picked} onPick={onPick}
-          style={styles.gap}
-          disabled={!live || answered}
-        >
-          <View style={[styles.gapInner, wrong('gap') && styles.pickWrong]}>
-            <Text style={styles.gapText} numberOfLines={1}>THE GAP</Text>
-          </View>
-        </Target>
+      {/* THE BIG HOLE — a ring of cheese around an empty middle, drawn one
+          inside the other. It is the PICTURE of the distinction; the tabs below
+          are how the reader answers it. */}
+      <Animated.View style={[styles.bigWrap, bigStyle]} pointerEvents="none">
+        <View style={[styles.gapCavity, wrong('gap') && styles.dim]}>
+          <View style={[styles.cavityLit, { borderRadius: GAP_R }]} />
+        </View>
+        <View style={[styles.rimBand, rimOn && styles.rimPicked]} />
+        <View style={styles.rimEdge} />
       </Animated.View>
 
       {/* the count */}
@@ -174,25 +189,41 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
         <Tick key={j} j={j} SCENE={SCENE} />
       ))}
 
-      {/* the two labels that sit outside their shapes, and tap through to them */}
-      <Animated.View style={[styles.leader, chipStyle]} pointerEvents="none" />
-      <Animated.View style={[styles.chip, CHIP_RIM, chipStyle]}>
-        <Target id={'rim'} correct={true} picked={picked} onPick={onPick}
-          style={styles.fill}
-          disabled={!live || answered}
-        >
-          <View style={[styles.chipInner, rimOn && styles.pickRight]}>
-            <Text style={[styles.chipText, rimOn && styles.onInk]} numberOfLines={1}>THE RIM</Text>
-          </View>
-        </Target>
-      </Animated.View>
-      <Animated.View style={[styles.chip, CHIP_CHEESE, chipStyle]}>
+      {/* the three leaders, each running from a tab to what it names */}
+      <Animated.View style={[styles.leadCheese, chipStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.leadRim, chipStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.leadGapDown, chipStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.leadGapIn, chipStyle]} pointerEvents="none" />
+
+      <Animated.View style={[styles.tab, TAB_CHEESE, chipStyle]}>
         <Target id={'cheese'} correct={false} picked={picked} onPick={onPick}
           style={styles.fill}
           disabled={!live || answered}
         >
-          <View style={[styles.chipInner, wrong('cheese') && styles.pickWrong]}>
-            <Text style={styles.chipText} numberOfLines={1}>THE CHEESE</Text>
+          <View style={[styles.tabInner, wrong('cheese') && styles.dim]}>
+            <Text style={styles.tabText} numberOfLines={1}>THE CHEESE</Text>
+          </View>
+        </Target>
+      </Animated.View>
+
+      <Animated.View style={[styles.tab, TAB_RIM, chipStyle]}>
+        <Target id={'rim'} correct={true} picked={picked} onPick={onPick}
+          style={styles.fill}
+          disabled={!live || answered}
+        >
+          <View style={[styles.tabInner, rimOn && styles.tabPicked]}>
+            <Text style={[styles.tabText, rimOn && styles.onInk]} numberOfLines={1}>THE RIM</Text>
+          </View>
+        </Target>
+      </Animated.View>
+
+      <Animated.View style={[styles.tab, TAB_GAP, chipStyle]}>
+        <Target id={'gap'} correct={false} picked={picked} onPick={onPick}
+          style={styles.fill}
+          disabled={!live || answered}
+        >
+          <View style={[styles.tabInner, wrong('gap') && styles.dim]}>
+            <Text style={styles.tabText} numberOfLines={1}>THE GAP</Text>
           </View>
         </Target>
       </Animated.View>
@@ -203,11 +234,18 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
   );
 }
 
-/** One of the two plain holes. Opens with the others, then holds (C20c). */
+/**
+ * ONE HOLE, AND WHY IT IS TWO VIEWS.
+ *
+ * A hole the colour of the page is a dot. A cavity is DARK at its mouth with a
+ * lit crescent low and to the right inside it — because the light in this app
+ * comes from the top left and never moves (tone.ts), so the wall that catches it
+ * is the far one. Two circles, one offset, and the disc becomes a void.
+ */
 function Hole({
-  index, left, top, d, SCENE,
+  index, cx, cy, r, SCENE,
 }: {
-  index: number; left: number; top: number; d: number;
+  index: number; cx: number; cy: number; r: number;
   SCENE: { value: { holes: number } };
 }) {
   const st = useAnimatedStyle(() => {
@@ -216,9 +254,15 @@ function Hole({
   });
   return (
     <Animated.View
-      style={[styles.small, { left, top, width: d, height: d, borderRadius: d / 2 }, st]}
+      style={[
+        styles.cavity,
+        { left: cx - r, top: cy - r, width: r * 2, height: r * 2, borderRadius: r },
+        st,
+      ]}
       pointerEvents="none"
-    />
+    >
+      <View style={[styles.cavityLit, { borderRadius: r }]} />
+    </Animated.View>
   );
 }
 
@@ -233,51 +277,89 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
   fill: { flex: 1 },
 
-  slab: {
-    position: 'absolute', left: SLAB_L, top: SLAB_T, width: SLAB_W, height: SLAB_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+  // ── the block ─────────────────────────────────────────────────────────────
+  // STONE for the body. This is the tone the flat scenes were missing: an
+  // outline occupies no space on the page, and a filled mass does.
+  face: {
+    position: 'absolute', left: CH_L, top: FACE_T, width: CH_W, height: FACE_H,
+    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
   },
-  slabHit: { position: 'absolute', left: SLAB_L, top: SLAB_T, width: SLAB_W, height: SLAB_H },
-  hatch: { position: 'absolute', left: 10, right: 10, height: 1, backgroundColor: RULE },
-
-  small: { position: 'absolute', borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER },
-
-  bigWrap: { position: 'absolute', left: BIG_L, top: BIG_T, width: OUT_D, height: OUT_D },
-  rim: { position: 'absolute', left: 0, top: 0, width: OUT_D, height: OUT_D },
-  rimInner: {
-    flex: 1, borderRadius: OUT_D / 2, borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
+  // The lit face, skewed back. RULE rather than PAPER so it is plainly the same
+  // material catching light rather than a different object.
+  topFace: {
+    position: 'absolute', left: TOP_L, top: FACE_T - TOP_H, width: CH_W, height: TOP_H,
+    backgroundColor: RULE, borderWidth: 2, borderColor: INK,
+    transform: [{ skewX: TOP_SKEW }],
   },
-  gap: { position: 'absolute', left: IN_OFF, top: IN_OFF, width: IN_D, height: IN_D },
-  gapInner: {
-    flex: 1, borderRadius: IN_D / 2, borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  gapText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.3, color: INK,
-    includeFontPadding: false,
+  // The rind: a darker band where the top face meets the front one.
+  rind: {
+    position: 'absolute', left: CH_L + 2, top: FACE_T + 2, width: CH_W - 4, height: RIND_H,
+    backgroundColor: SHADE,
   },
 
+  // ── a hole ────────────────────────────────────────────────────────────────
+  cavity: { position: 'absolute', backgroundColor: SHADE, borderWidth: 2, borderColor: INK, overflow: 'hidden' },
+  // The far wall, low and right, catching the light that falls from top left.
+  cavityLit: {
+    position: 'absolute', left: '22%', top: '30%', right: '-6%', bottom: '-6%',
+    backgroundColor: STONE,
+  },
+
+  bigWrap: { position: 'absolute', left: BIG_CX - BIG_R, top: BIG_CY - BIG_R, width: BIG_R * 2, height: BIG_R * 2 },
+  // The ring of cheese itself — the lining, which is the correct answer. It is
+  // drawn as a band rather than an outline so that it is a THING you can point
+  // at, which is the entire claim the lesson is testing.
+  rimBand: {
+    flex: 1, borderRadius: BIG_R,
+    borderWidth: BIG_R - GAP_R, borderColor: RULE,
+    backgroundColor: 'transparent',
+  },
+  // The outer edge of the ring, so the band has a boundary against the face.
+  rimEdge: {
+    position: 'absolute', left: 0, top: 0, right: 0, bottom: 0,
+    borderRadius: BIG_R, borderWidth: 2, borderColor: INK,
+  },
+  rimPicked: { borderColor: INK },
+
+
+  gapCavity: {
+    position: 'absolute', left: BIG_R - GAP_R, top: BIG_R - GAP_R,
+    width: GAP_R * 2, height: GAP_R * 2, borderRadius: GAP_R,
+    backgroundColor: SHADE, borderWidth: 2, borderColor: INK, overflow: 'hidden',
+  },
+
+
+  // ── the count ─────────────────────────────────────────────────────────────
   kicker: {
-    position: 'absolute', left: SLAB_L, top: KICK_T, width: KICK_W,
+    position: 'absolute', left: 96, top: KICK_T, width: 60,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
   tick: { position: 'absolute', top: TICK_T, width: 3, height: 14, backgroundColor: INK },
 
-  leader: { position: 'absolute', left: 269, top: 356, width: 2, height: 28, backgroundColor: INK },
-  chip: { position: 'absolute', height: 24 },
-  chipInner: {
+  // ── the three answers ─────────────────────────────────────────────────────
+  // Each leader stops ON its referent and nowhere else. The cheese line runs down
+  // bare cheese at x 112 — the small hole spans 130…162, so a line at 138 would
+  // have ended INSIDE a gap, pointing at the one part of the picture that is not
+  // cheese (A1). The gap's leader turns a corner rather than running straight
+  // down beside the rim's: two vertical lines twelve units apart, one meaning the
+  // ring and one meaning the middle, is the ambiguity this layout exists to end.
+  leadCheese: { position: 'absolute', left: 112, top: 360, width: 2, height: 62, backgroundColor: INK },
+  leadRim: { position: 'absolute', left: 226, top: 360, width: 2, height: 76, backgroundColor: INK },
+  leadGapDown: { position: 'absolute', left: 306, top: 360, width: 2, height: 88, backgroundColor: INK },
+  leadGapIn: { position: 'absolute', left: BIG_CX + GAP_R, top: 447, width: 306 - (BIG_CX + GAP_R), height: 2, backgroundColor: INK },
+  tab: { position: 'absolute', height: TAB_H },
+  tabInner: {
     flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
     alignItems: 'center', justifyContent: 'center',
   },
-  chipText: {
+  tabText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
-
+  tabPicked: { backgroundColor: INK, borderColor: INK },
   onInk: { color: PAPER },
-  pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  dim: { opacity: 0.4 },
 });
 
 // Ink runs from the kicker row (336) to the ground line (500). Band 330…512 = 182 (H59).

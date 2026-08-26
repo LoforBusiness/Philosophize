@@ -60,7 +60,7 @@ export const BEATS: Epi13Beat[] = [
   {
     p: 4, x: 124, grid: 1, off: 2, winner: 1,
     interact: {
-      prompt: 'Draw how reasonable this ticket loses gets as tickets are added.',
+      prompt: 'Draw how reasonable "this ticket loses" gets as more tickets are added.',
       plot: {
         axis: 'HOW REASONABLE',
         cols: ['2 TICKETS', '10', '100', '1000', 'A MILLION'],
@@ -71,7 +71,7 @@ export const BEATS: Epi13Beat[] = [
           { id: 'fall', profile: [0.95, 0.7, 0.4, 0.2, 0.05], reads: 'the more tickets, the weaker each verdict' },
         ],
       },
-      explain: 'It climbs, and that is the sting. Every verdict gets MORE reasonable as tickets are added, and the whole set gets more certainly false, because one of them wins. Each is not all. And nothing can say which verdict fails: every ticket carries the same case.',
+      explain: 'It climbs, and that is the sting. Every verdict gets MORE reasonable as tickets are added, and the whole set gets more certainly false, because one ticket wins. Believing each is not believing all. And nothing says which belief is wrong.',
       xp: 5,
     },
     dur: 1.0,

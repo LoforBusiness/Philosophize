@@ -46,7 +46,7 @@ export const BEATS: Aes6Beat[] = [
   {
     p: 25, vast: 1, split: 3,
     interact: {
-      prompt: 'Tap the feeling that separates the sublime from the merely beautiful.',
+      prompt: 'Tap the feeling that makes something sublime rather than just beautiful.',
       cards: [
         { text: 'Delight mixed with terror', correct: true },
         { text: 'A gentle, pleasing calm', correct: false },

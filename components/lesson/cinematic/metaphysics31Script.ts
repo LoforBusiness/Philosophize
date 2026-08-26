@@ -28,7 +28,7 @@ export const BEATS: Meta31Beat[] = [
   {
     g: 45, holes: 1, ticks: 0, chips: 0,
     dur: 4.2,
-    text: 'Now three holes. Nothing has been added to the slab. Something has been taken out of it. And yet the picture plainly holds three more things than it did.',
+    text: 'Now three holes. Nothing was added to the cheese. Something was taken away. And yet there are three more things here than before.',
     cite: 'Three more things',
   },
   {
@@ -52,7 +52,7 @@ export const BEATS: Meta31Beat[] = [
   {
     g: 4, holes: 1, ticks: 3, chips: 1,
     dur: 4.8,
-    text: 'So say what you counted. There are only three candidates. The cheese, the ring of cheese bent around each gap, and the gap in the middle.',
+    text: 'So what did you count? There are only three things it could be. The cheese, the ring of cheese around each gap, or the empty gap itself.',
     cite: 'Three candidates',
   },
   {
@@ -60,7 +60,7 @@ export const BEATS: Meta31Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap whatever it is you counted when you counted three.',
-      explain: 'The rim. Argle\'s answer, from a famous 1970 dialogue: a hole just is its lining, a bit of cheese bent into a ring. Count the linings and you have counted the holes without adding one immaterial thing to the world.',
+      explain: 'The rim. Argle\'s answer, from a famous 1970 dialogue: a hole just is its rim, a bit of cheese bent into a ring. Count the rings and you have counted the holes, and nothing new had to exist.',
       xp: 5,
     },
   },
@@ -68,18 +68,18 @@ export const BEATS: Meta31Beat[] = [
     g: 8, holes: 1, ticks: 3, chips: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Drag to how well just say perforated actually works.',
+      prompt: 'Drag to how often rewording can make a hole go away.',
       drag: {
         lo: 'ALWAYS, TRIVIALLY',
         hi: 'NEVER, NOT ONCE',
         start: 0,
         zones: [
-          { id: 'easy', upto: 0.3, reads: 'always; say the cheese is perforated and the puzzle is gone' },
-          { id: 'mostly', upto: 0.74, reads: 'usually, and it sticks the moment you count them', correct: true },
-          { id: 'never', upto: 1, reads: 'never; nothing about holes can be said another way' },
+          { id: 'easy', upto: 0.3, reads: 'always — call the cheese holey, and the puzzle is gone' },
+          { id: 'mostly', upto: 0.74, reads: 'usually — but it gets stuck the moment you count them', correct: true },
+          { id: 'never', upto: 1, reads: 'never — nothing about holes can be put another way' },
         ],
       },
-      explain: 'Usually, and the failures are the whole reason this is still a live question. Paraphrase is a respectable move and it only has to work. There are as many holes as pegs has resisted it for fifty years, because counting absences is the one thing perforated cannot do.',
+      explain: 'Usually — and the failures are why this is still argued about. Rewording is a fair move, but it has to work every time. Try it on "there are as many holes as pegs" and it breaks. Counting is the one thing "holey" cannot do.',
       xp: 5,
     },
   },
@@ -87,10 +87,10 @@ export const BEATS: Meta31Beat[] = [
     summary: {
       title: 'Counting Nothing',
       points: [
-        'We quantify over absences constantly and never notice',
+        'We count absences all the time and never notice',
         'A hole can be counted, measured and compared',
-        'One tidy answer: a hole is its lining, a material thing',
-        'Paraphrasing absences away is harder than it sounds',
+        'One tidy answer: a hole is its rim, which is real cheese',
+        'Rewording an absence away is harder than it sounds',
       ],
       closing: 'Metaphysics is mostly one move. Take an ordinary sentence seriously, then ask what would have to exist for the sentence to be true.',
     },

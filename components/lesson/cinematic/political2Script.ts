@@ -66,7 +66,7 @@ export const BEATS: Pol2Beat[] = [
     interact: {
       prompt: 'Which type of authority best fits an elected president?',
       explain:
-        'A president commands through a constitutional office and a lawful vote, not inherited custom or personal magnetism. That is Weber’s rational-legal authority.',
+        'A president is obeyed because of the office and the vote that put them in it. Not because of family, and not because of charm. Weber called that rational-legal authority.',
       xp: 5,
     },
     dur: 1.0,

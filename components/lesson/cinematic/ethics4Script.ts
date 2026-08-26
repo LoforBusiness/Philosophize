@@ -77,7 +77,7 @@ export const BEATS: Ethics4Beat[] = [
           { id: 'none', upto: 1, reads: 'nothing is right or wrong, even inside a group' },
         ],
       },
-      explain: 'The middle, and both ends are easy to mistake for it. The near end is only an observation about the world and anybody can agree with it. The far end is nihilism, which relativism is not: inside a group there are still right answers.',
+      explain: 'The middle, and both ends are easy to mistake for it. The near end is just an observation, and anybody can agree with it. The far end says nothing is ever right or wrong. This view does not: inside a group there are still right answers.',
       xp: 5,
     },
     dur: 1.0,
@@ -87,7 +87,7 @@ export const BEATS: Ethics4Beat[] = [
     interact: {
       prompt: 'If every culture sets its own rules, must each one tolerate the rest?',
       explain:
-        'It sounds open-minded, but it backfires: if all values are merely local, "tolerance suits us" cannot become "everyone must tolerate." Relativism cannot ground a universal duty.',
+        'It sounds open-minded, and it backfires. If every value is only local, then "tolerance suits us" can never grow into "everyone must be tolerant." A rule for everybody is exactly what this view cannot give you.',
       xp: 5,
     },
     dur: 1.0,

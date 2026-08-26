@@ -100,6 +100,7 @@
     "check:answers": "node scripts/check-answers.mjs",
     "check:quips": "node scripts/check-quips.mjs",
     "check:quotes": "node scripts/check-quotes.mjs",
+    "check:words": "node scripts/check-words.mjs",
     "check:legible": "node scripts/check-legible.mjs",
     "check:plain": "node scripts/check-plain.mjs",
     "check:rotation": "node scripts/check-rotation.mjs",

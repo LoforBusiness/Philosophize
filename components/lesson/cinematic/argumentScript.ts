@@ -118,7 +118,7 @@ export const BEATS: Beat[] = [
     act: 2,
     board: 'anatomy',
     narr: 2,                                       // present the board
-    text: 'Philosophy means something completely different by the word. An argument is a machine with parts.',
+    text: 'Philosophy means something else by the word. An argument is a machine with parts.',
     dur: 4.2,
   },
   {
