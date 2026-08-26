@@ -972,5 +972,75 @@ for (const [name, hue] of ERA_FACES) {
     'while the two-part recap still needs something earned since the last look');
 }
 
+// -- 10 . nothing heavy is built while the launch animation is playing --------
+//
+// The five tabs used to be built eagerly, at mount, deliberately -- "there is
+// already a launch animation sitting over the app ... and it runs on the UI
+// thread, so JS mounting screens underneath does not stutter it." Measured
+// against the real app in a browser, same URL, one variable, that sentence was
+// worth about a second: twelve to seventeen stalls inside the 3.8s the launch
+// screen is up, 837-1101ms of frames lost, and a percentage that sat on 0 for
+// four tenths of a second and then jumped to 19. Staggered afterwards instead:
+// two stalls, ~150ms.
+//
+// A mount is not only JS -- the views are created and measured on the UI thread,
+// which is the thread Reanimated animates on -- and the percentage is React
+// state set through runOnJS, so it queues behind the mount on any platform.
+//
+// STRIP THE COMMENTS FIRST, and this section is its own worked example: the
+// paragraph above contains the exact string the first test forbids. A detector
+// that reads raw source reports the explanation as the defect (SS17, L8).
+function stripJs(src) {
+  const noBlock = src.replace(/\/\*[\s\S]*?\*\//g, '');
+  return noBlock.split('\n').map((line) => {
+    let q = null;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (q) {
+        if (c === '\\') { i++; continue; }
+        if (c === q) q = null;
+      } else if (c === '"' || c === "'" || c === '`') {
+        q = c;
+      } else if (c === '/' && line[i + 1] === '/') {
+        return line.slice(0, i);
+      }
+    }
+    return line;
+  }).join('\n');
+}
+
+{
+  const lay = stripJs(fs.readFileSync(path.join(REPO, 'app/(app)/_layout.tsx'), 'utf8'));
+
+  // No screen may be built at mount time. `lazy: false` in `screenOptions` is
+  // the whole defect in one line, and it is one keystroke away from coming back.
+  ok(!/screenOptions=\{\{[\s\S]*?\n\s*lazy: false,/.test(lay),
+    'no tab is built while the launch screen is still animating',
+    'screenOptions must not turn lazy off for every screen at once');
+  ok(/const WARM = \[[^\]]*'index'[^\]]*'branches'[^\]]*'philosophers'[^\]]*'stats'[^\]]*'profile'/.test(lay),
+    'all five are still built without being visited, just later',
+    'a tab that never warms is the "first switch is slow" complaint back again');
+  ok(/useUIStore\(\(s\) => s\.launchDone\)/.test(lay),
+    'and the warm-up waits on the launch screen rather than on a bare timer');
+  ok(/InteractionManager\.runAfterInteractions/.test(lay),
+    'and yields to a tap or an animation in flight before each step');
+
+  // THE PAIR THAT DRIFTS. `launchDone` fires when the launch screen begins to
+  // LIFT, and its outro runs on well past that -- 100% over 280ms, a 240ms hold,
+  // then a 520ms dissolve. Warming inside that window puts the stall back on an
+  // animation, just a different one, and neither file would look wrong. Both
+  // numbers are READ from the source rather than restated here, which is the
+  // rule check-launch already applies to SPLASH_BG.
+  const launch = stripJs(fs.readFileSync(path.join(REPO, 'components/launch/LaunchScreen.tsx'), 'utf8'));
+  const outro = launch.slice(launch.indexOf('lifted.current = true;'));
+  const durations = [...outro.matchAll(/duration: (\d+)/g)].map((m) => +m[1]);
+  const delays = [...outro.matchAll(/withDelay\(\s*(\d+)/g)].map((m) => +m[1]);
+  const total = [...durations.slice(0, 2), ...delays.slice(0, 1)].reduce((a, b) => a + b, 0);
+  const settle = +(lay.match(/const SETTLE_MS = (\d+);/)?.[1] ?? 0);
+  ok(total > 0 && settle > total,
+    'and starts only after the last frame of that screen has been painted',
+    `SETTLE_MS ${settle} against an outro of ${total}ms`);
+}
+
 console.log(bad === 0 ? '\nui system: all clear.' : `\n${bad} ui check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);

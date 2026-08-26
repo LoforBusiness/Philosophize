@@ -2191,6 +2191,69 @@ native splash, the second because it is a status bar.
   half of what a reader means by a glitchy start. It flips at `screenOpacity < 0.5`
   now, so the icons change on the frame the ground under them does.
 
+### And the third thing in those four seconds was the app building itself
+
+> *"the first screen stutter … I believe it has been diagnosed, but I don't
+> think it has been fixed yet."*
+
+They were right on both counts. The diagnosis was in the repo, in
+`app/(app)/_layout.tsx`, written as a REASON TO DO IT:
+
+> *"There is already a launch animation sitting over the app for a couple of
+> seconds while auth and hydration finish, and it runs on the UI thread, so JS
+> mounting screens underneath does not stutter it."*
+
+That is what `lazy: false` on the tab navigator was for, and the goal was right
+— tabs lazy-mount, so the first visit to each one used to pay for its whole
+tree just as the reader arrived. The sentence justifying WHERE the cost went is
+what was wrong. Measured against the real app in a browser, same URL, two runs
+each, one variable:
+
+| | `lazy: false` | staggered |
+|---|---|---|
+| stalls while the launch screen is up | 12 · 17 | **2 · 2** |
+| frames lost in that window | 837ms · 1101ms | **175ms · 162ms** |
+| 99th-percentile frame gap | 78ms · 92ms | **29ms · 27ms** |
+| the percentage opens | 0% held 392ms, **jumps to 19** | 0% held 229ms, then 11 |
+
+**Two things put those stalls on the animation, and only one of them is
+arguable.** A mount is not only JS: the views are created and measured on the UI
+thread, which is the thread Reanimated animates on, so five screens being built
+is not something an animation can be insulated from. And the percentage IS JS —
+React state, set from a worklet through `runOnJS` — so it queues behind the mount
+on every platform there is. That second one is the half a reader sees, and it is
+why this reads as a stutter rather than as a slow boot: the count sticks on zero
+and then jumps twenty.
+
+So the cost is paid AFTERWARDS, one screen at a time, gated on `launchDone` and
+yielding to `InteractionManager` at every step. `lazy` is read per screen on
+every render — `BottomTabView` checks the descriptor each pass, not a mount-time
+snapshot — so turning it off later is what builds that tab, and all five are
+still built without ever being visited.
+
+**`SETTLE_MS` and the launch screen's outro are a pair in two files, and
+`check:ui` §10 re-derives both.** `launchDone` fires when the screen begins to
+LIFT, and its outro runs on for 280 + 240 + 520 = 1040ms after that — so the
+first draft's 900 warmed a tab 140ms before the last frame of the dissolve, which
+is the same stall on a different animation and would look wrong in neither file.
+The check reads the three durations out of `LaunchScreen.tsx` rather than
+restating them, the same rule `check:launch` applies to `SPLASH_BG`, and it is
+counter-tested from both sides.
+
+> **The instrument mattered more than the fix, and its first two numbers were
+> useless.** Total frames lost across a boot swings by seconds between runs on a
+> dev server, because most of it is bundle delivery — comparing totals compares
+> Metro, not the app. What is comparable is the window the reader is actually
+> watching an animation in, so the probe marks when the launch screen appears and
+> when it goes, and counts only the stalls between. That number was stable to
+> within 13ms across repeated runs and is what the table above reports.
+>
+> It also cleared two suspects. The WELCOME intro plays with **zero** frame gaps
+> over 50ms across its whole 25 seconds, and the landing path — same boot, no tab
+> shell — loses one 48ms frame. Neither is the stutter; both would have been
+> plausible places to go looking.
+
+
 ### The words were too fast, and the line broke in the wrong place
 
 > *"slow down the words being spoken a little bit … when it shows different
