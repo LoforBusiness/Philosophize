@@ -139,7 +139,7 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
           disabled={!live || answered}
           style={styles.hitPlans}
         >
-          <View style={styles.hitBox} pointerEvents="none" />
+          <View style={[styles.hitBox, live && !answered && styles.hitLive]} pointerEvents="none" />
         </Target>
         <Target
           id="cord"
@@ -149,7 +149,7 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
           disabled={!live || answered}
           style={styles.hitCord}
         >
-          <View style={[styles.hitBox, answered && picked === 'cord' && styles.hitWrong]} pointerEvents="none" />
+          <View style={[styles.hitBox, live && !answered && styles.hitLive, answered && picked === 'cord' && styles.hitWrong]} pointerEvents="none" />
         </Target>
         <Target
           id="posts"
@@ -159,7 +159,7 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
           disabled={!live || answered}
           style={styles.hitPosts}
         >
-          <View style={[styles.hitBox, answered && picked === 'posts' && styles.hitWrong]} pointerEvents="none" />
+          <View style={[styles.hitBox, live && !answered && styles.hitLive, answered && picked === 'posts' && styles.hitWrong]} pointerEvents="none" />
         </Target>
       </Animated.View>
 
@@ -221,6 +221,14 @@ const styles = StyleSheet.create({
   hitCord: { position: 'absolute', left: 156, top: 288, width: 188, height: 26 },
   hitPosts: { position: 'absolute', left: 142, top: 316, width: 26, height: 76 },
   hitBox: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: 4 },
+  /** WHAT "TAP ONE OF THESE" LOOKS LIKE WHILE THE QUESTION IS OPEN.
+   *
+   * These hit boxes took a border only once the answer was IN, so up to that moment
+   * the reader was choosing between regions with no edges — the complaint exactly:
+   * "blank boxes that you cannot read so it is a guess for which one to press". The
+   * outline says where the choices are; the picture under each one says what it is.
+   */
+  hitLive: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
   hitWrong: { borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed' },
 });
 

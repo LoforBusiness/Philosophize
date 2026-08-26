@@ -135,24 +135,48 @@ export default function Metaphysics19Scene({ clock, bt, bi, i, picked, onPick, d
         ))}
       </Animated.View>
 
-      {/* THE THREE ANSWERS, all of them already on the stage. */}
+      {/* THE THREE ANSWERS, all of them already on the stage.
+          OUTLINED AND NAMED WHILE THE QUESTION IS LIVE. The prompt says "tap one of
+          the 3 outlined parts above" and, until now, nothing was outlined: the hit
+          boxes took a border only once the answer was IN, and none of them carried
+          a word. So the reader was asked to choose between three invisible
+          rectangles, which is the complaint exactly — "blank boxes that you cannot
+          read so it is a guess for which one to press".
+          The AIR is still never drawn as a thing, because standing for nothing is
+          its whole job (A1); what it gets is an edge and a name, which is what makes
+          it choosable rather than guessable. */}
       <Target
         id="peg" correct picked={picked} onPick={onPick}
         disabled={!live || answered} style={styles.pegHit}
       >
-        <View style={[styles.pegHitBox, answered && picked === 'peg' && styles.right]} pointerEvents="none" />
+        <View
+          style={[styles.pegHitBox, live && !answered && styles.hitLive,
+            answered && picked === 'peg' && styles.right]}
+          pointerEvents="none"
+        />
+        {live ? <Text style={styles.hitCap} numberOfLines={1}>THE PEG</Text> : null}
       </Target>
       <Target
         id="pile" correct={false} picked={picked} onPick={onPick}
         disabled={!live || answered} style={styles.pileHit}
       >
-        <View style={[styles.pileHitBox, answered && picked === 'pile' && styles.wrong]} pointerEvents="none" />
+        <View
+          style={[styles.pileHitBox, live && !answered && styles.hitLive,
+            answered && picked === 'pile' && styles.wrong]}
+          pointerEvents="none"
+        />
+        {live ? <Text style={[styles.hitCap, styles.hitCapTop]} numberOfLines={1}>THE PILE</Text> : null}
       </Target>
       <Target
         id="air" correct={false} picked={picked} onPick={onPick}
         disabled={!live || answered} style={styles.airHit}
       >
-        <View style={[styles.airHitBox, answered && picked === 'air' && styles.wrong]} pointerEvents="none" />
+        <View
+          style={[styles.airHitBox, live && !answered && styles.hitLive,
+            answered && picked === 'air' && styles.wrong]}
+          pointerEvents="none"
+        />
+        {live ? <Text style={styles.hitCap} numberOfLines={1}>NOTHING</Text> : null}
       </Target>
 
       <View style={styles.ground} pointerEvents="none" />
@@ -214,12 +238,33 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.7, color: INK, includeFontPadding: false,
   },
 
-  pegHit: { position: 'absolute', left: PEG_X - 16, top: PEG_Y, width: 38, height: PEG_H },
-  pegHitBox: { width: 38, height: PEG_H, borderRadius: 4 },
+  // THREE BOXES THAT DO NOT OVERLAP, because two of them used to.
+  //
+  // The air was the whole vacated column (x 126…232) and the peg sat INSIDE it, so
+  // the two hit areas were nested: the reader could not aim at one without being
+  // over the other, and once both carried a name the two names printed on top of
+  // each other. They divide the column now — the peg with its post, the air the
+  // clear space beside it — which is also the honest picture, since the question is
+  // whether anything is there when the cards have gone.
+  pegHit: { position: 'absolute', left: PEG_X - 28, top: PEG_Y, width: 56, height: PEG_H },
+  pegHitBox: { width: 56, height: PEG_H, borderRadius: 4 },
   pileHit: { position: 'absolute', left: PILE_X, top: 294, width: PILE_W, height: 60 },
   pileHitBox: { width: PILE_W, height: 60, borderRadius: 4 },
-  airHit: { position: 'absolute', left: CARD_X + 26, top: PEG_Y, width: CARD_W - 26, height: PEG_H },
-  airHitBox: { width: CARD_W - 26, height: PEG_H, borderRadius: 4 },
+  airHit: { position: 'absolute', left: PEG_X + 32, top: PEG_Y, width: CARD_X + CARD_W - (PEG_X + 32), height: PEG_H },
+  airHitBox: { width: CARD_X + CARD_W - (PEG_X + 32), height: PEG_H, borderRadius: 4 },
+
+  /** What "outlined" in the prompt actually means, while the question is open. */
+  hitLive: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
+  /** The name, at the foot of its own box so it cannot be mistaken for a neighbour's. */
+  hitCap: {
+    position: 'absolute', left: 0, right: 0, bottom: 3, textAlign: 'center',
+    // 8.8, not 8.5: this band is 282 and fits at 0.94, so 8.5 reaches the reader at
+    // 7.9pt — under the floor, which is the very defect this caption exists to fix.
+    fontFamily: 'Inter_700Bold', fontSize: 8.8, letterSpacing: 0.4, color: SOFT,
+    includeFontPadding: false,
+  },
+  /** The heap's own rows fill the bottom of its box, so its name sits above them. */
+  hitCapTop: { bottom: undefined, top: 3 },
 
   right: { borderWidth: 3, borderColor: INK },
   wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },

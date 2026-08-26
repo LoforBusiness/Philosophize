@@ -135,7 +135,7 @@ export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick, 
             style={[styles.hit, { left: px }]}
           >
             <View
-              style={[styles.hitBox, answered && picked === PAIR_ID[k] && k !== 3 && styles.hitWrong]}
+              style={[styles.hitBox, live && !answered && styles.hitLive, answered && picked === PAIR_ID[k] && k !== 3 && styles.hitWrong]}
               pointerEvents="none"
             />
           </Target>
@@ -205,6 +205,14 @@ const styles = StyleSheet.create({
 
   hit: { position: 'absolute', top: PAIR_Y, width: PAIR_W, height: PAIR_H },
   hitBox: { position: 'absolute', left: 0, top: 0, width: PAIR_W, height: PAIR_H, borderRadius: 6 },
+  /** WHAT "TAP ONE OF THESE" LOOKS LIKE WHILE THE QUESTION IS OPEN.
+   *
+   * These hit boxes took a border only once the answer was IN, so up to that moment
+   * the reader was choosing between regions with no edges — the complaint exactly:
+   * "blank boxes that you cannot read so it is a guess for which one to press". The
+   * outline says where the choices are; the picture under each one says what it is.
+   */
+  hitLive: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
   hitWrong: { borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed' },
 });
 

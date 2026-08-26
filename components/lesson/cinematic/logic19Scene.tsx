@@ -125,7 +125,7 @@ export default function Logic19Scene({ clock, bt, bi, i, picked, onPick }: Scene
         >
           <View
             style={[
-              styles.hitBox,
+              styles.hitBox, live && !answered && styles.hitLive,
               answered && CARD_ID[k] === 'odd' && styles.right,
               answered && picked === CARD_ID[k] && CARD_ID[k] !== 'odd' && styles.wrong,
             ]}
@@ -205,6 +205,14 @@ const styles = StyleSheet.create({
 
   hit: { position: 'absolute', top: CARD_Y, width: CARD_W, height: CARD_H },
   hitBox: { width: CARD_W, height: CARD_H, borderRadius: 5 },
+  /** WHAT "TAP ONE OF THESE" LOOKS LIKE WHILE THE QUESTION IS OPEN.
+   *
+   * These hit boxes took a border only once the answer was IN, so up to that moment
+   * the reader was choosing between regions with no edges — the complaint exactly:
+   * "blank boxes that you cannot read so it is a guess for which one to press". The
+   * outline says where the choices are; the picture under each one says what it is.
+   */
+  hitLive: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
   right: { borderWidth: 3, borderColor: INK },
   wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
 });

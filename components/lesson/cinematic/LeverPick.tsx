@@ -216,7 +216,12 @@ function Label({
   const st = useAnimatedStyle(() => ({ opacity: right ? 0.62 + 0.38 * done.value : 0.62 }));
   return (
     <View style={styles.labelCell}>
-      <Animated.Text style={[styles.label, right && styles.labelRight, st]} numberOfLines={2}>
+      {/* FOUR LINES AT 8.5, NOT TWO AT 9.5. Each cell is a third or a quarter of
+          the row and holds a whole `reads` sentence — "nothing was never possible,
+          so there is nothing to explain" is 292dp of lettering in 99dp of cell.
+          Two lines cut every one of them off. Same vertical room, more of it used
+          by the words; 8.5 clears the 8pt floor (D34). */}
+      <Animated.Text style={[styles.label, right && styles.labelRight, st]} numberOfLines={4}>
         {text}
       </Animated.Text>
     </View>
@@ -253,7 +258,7 @@ const styles = StyleSheet.create({
   labelRow: { flexDirection: 'row', marginTop: 4 },
   labelCell: { flex: 1, paddingHorizontal: 2 },
   label: {
-    fontFamily: 'Inter_500Medium', fontSize: 9.5, lineHeight: 12,
+    fontFamily: 'Inter_500Medium', fontSize: 8.5, lineHeight: 11,
     // INK, not SOFT: SOFT is 5.3:1 at full strength and these are drawn at 0.62,
     // which would put them at 2.0. Weight carries the hierarchy instead of tone.
     color: INK, textAlign: 'center',

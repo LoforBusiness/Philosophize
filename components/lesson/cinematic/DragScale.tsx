@@ -223,9 +223,14 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
         </View>
       </GestureDetector>
 
+      {/* HALF THE ROW EACH, AND TWO LINES. `space-between` with no width on either
+          label means a long pair simply pushes past both edges of the screen, which
+          is what a reader reported twice: "words are cut off the screen from the
+          left and the right". LET A COIN DECIDE WHO IS TREATED is 218dp of
+          lettering and the row is 308. */}
       <View style={styles.ends} pointerEvents="none">
-        <Text style={styles.end}>{drag.lo}</Text>
-        <Text style={styles.end}>{drag.hi}</Text>
+        <Text style={styles.end} numberOfLines={2}>{drag.lo}</Text>
+        <Text style={[styles.end, styles.endRight]} numberOfLines={2}>{drag.hi}</Text>
       </View>
     </View>
   );
@@ -267,9 +272,13 @@ const styles = StyleSheet.create({
   knobCore: { width: 8, height: 8, borderRadius: 4, backgroundColor: INK },
   ends: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 },
   end: {
+    flex: 1,
+    paddingHorizontal: 3,
     fontFamily: 'Inter_600SemiBold',
     fontSize: 10,
+    lineHeight: 12.5,
     letterSpacing: 1.1,
     color: SOFT,
   },
+  endRight: { textAlign: 'right' },
 });

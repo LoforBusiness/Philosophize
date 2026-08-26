@@ -151,21 +151,21 @@ export default function Aesthetics22Scene({
         disabled={!live || answered}
         style={[styles.hit, { left: SC_X, top: SC_Y, width: SC_W, height: SC_H }]}
       >
-        <View style={[styles.hitBox, { width: SC_W, height: SC_H }, answered && picked === 'screen' && styles.wrong]} pointerEvents="none" />
+        <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: SC_W, height: SC_H }, answered && picked === 'screen' && styles.wrong]} pointerEvents="none" />
       </Target>
       <Target
         id="heart" correct={false} picked={picked} onPick={onPick}
         disabled={!live || answered}
         style={[styles.hit, { left: M_X, top: HEART_Y, width: M_W, height: M_H }]}
       >
-        <View style={[styles.hitBox, { width: M_W, height: M_H }, answered && picked === 'heart' && styles.wrong]} pointerEvents="none" />
+        <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: M_W, height: M_H }, answered && picked === 'heart' && styles.wrong]} pointerEvents="none" />
       </Target>
       <Target
         id="belief" correct picked={picked} onPick={onPick}
         disabled={!live || answered}
         style={[styles.hit, { left: M_X, top: BELIEF_Y, width: M_W, height: M_H }]}
       >
-        <View style={[styles.hitBox, { width: M_W, height: M_H }, answered && styles.right]} pointerEvents="none" />
+        <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: M_W, height: M_H }, answered && styles.right]} pointerEvents="none" />
       </Target>
 
       <View style={styles.ground} pointerEvents="none" />
@@ -210,6 +210,14 @@ const styles = StyleSheet.create({
 
   hit: { position: 'absolute' },
   hitBox: { borderRadius: 4 },
+  /** WHAT "TAP ONE OF THESE" LOOKS LIKE WHILE THE QUESTION IS OPEN.
+   *
+   * These hit boxes took a border only once the answer was IN, so up to that moment
+   * the reader was choosing between regions with no edges — the complaint exactly:
+   * "blank boxes that you cannot read so it is a guess for which one to press". The
+   * outline says where the choices are; the picture under each one says what it is.
+   */
+  hitLive: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
   right: { borderWidth: 3, borderColor: INK },
   wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
 });

@@ -122,6 +122,10 @@ export default function Metaphysics21Scene({
       <Animated.View style={[StyleSheet.absoluteFill, lineStyle]} pointerEvents="none">
         <View style={styles.rule} />
         <Text style={[styles.label, { left: LINE_L + 4 }]}>THE PAST</Text>
+        {/* NOW IS NAMED TOO. The timeline labelled its two ends and left the present
+            moment blank — and the present moment is the answer, so the reader was
+            asked to tap the one part of the picture with nothing written on it. */}
+        <Text style={[styles.label, styles.labelNow]}>NOW</Text>
         <Text style={[styles.label, styles.labelR]}>THE FUTURE</Text>
 
         {/* Where a moment WOULD be — always drawn. */}
@@ -182,6 +186,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
   },
   labelR: { left: LINE_R - 60, width: 56, textAlign: 'right' },
+  labelNow: { left: NOW_X - 12, width: NOW_W + 24, textAlign: 'center' },
 
   box: {
     position: 'absolute', top: BOX_Y, width: BOX_W, height: BOX_H,

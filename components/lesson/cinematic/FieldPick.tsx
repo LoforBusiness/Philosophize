@@ -200,14 +200,16 @@ const styles = StyleSheet.create({
     fontSize: 16, lineHeight: 21, color: INK, textAlign: 'center', marginBottom: 3,
   },
 
-  row: { flexDirection: 'row', alignItems: 'center', paddingLeft: 56 },
+  // 68, NOT 56: the gutter below has to clear the widest single word an axis label
+  // can carry, and CONCLUSION is 56dp on its own.
+  row: { flexDirection: 'row', alignItems: 'center', paddingLeft: 68 },
   yHi: {
-    position: 'absolute', left: 0, top: 0, width: 52,
+    position: 'absolute', left: 0, top: 0, width: 64,
     fontFamily: 'Inter_700Bold', fontSize: 8, lineHeight: 10, letterSpacing: 0.6,
     color: SOFT, textAlign: 'right',
   },
   yLo: {
-    position: 'absolute', left: 0, bottom: 0, width: 52,
+    position: 'absolute', left: 0, bottom: 0, width: 64,
     fontFamily: 'Inter_700Bold', fontSize: 8, lineHeight: 10, letterSpacing: 0.6,
     color: SOFT, textAlign: 'right',
   },
@@ -229,7 +231,7 @@ const styles = StyleSheet.create({
   },
   tokenCore: { width: 8, height: 8, borderRadius: 4, backgroundColor: INK },
 
-  xRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 3, paddingLeft: 56 },
+  xRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 3, paddingLeft: 68 },
   xEnd: {
     flex: 1, fontFamily: 'Inter_700Bold', fontSize: 8.5, lineHeight: 10.5,
     letterSpacing: 0.8, color: SOFT,

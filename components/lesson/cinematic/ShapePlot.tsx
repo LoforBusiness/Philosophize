@@ -228,8 +228,12 @@ const styles = StyleSheet.create({
 
   row: { flexDirection: 'row', alignItems: 'flex-end' },
   axis: {
-    width: 26, fontFamily: 'Inter_700Bold', fontSize: 8, lineHeight: 10,
-    letterSpacing: 0.6, color: SOFT, textAlign: 'right', paddingRight: 5, paddingBottom: 2,
+    // 64 WIDE, NOT 26. The axis label is a whole question — HOW MUCH IT STILL ASKS
+    // is 118dp of lettering, and REASONABLE alone is 55 — so a 21dp column of text
+    // could not hold one WORD of it, at any number of lines. The pad is flex, so
+    // this comes out of the drawing area rather than off the screen.
+    width: 70, fontFamily: 'Inter_700Bold', fontSize: 8, lineHeight: 10,
+    letterSpacing: 0.6, color: SOFT, textAlign: 'right', paddingRight: 6, paddingBottom: 2,
   },
   pad: {
     flex: 1, height: H, borderBottomWidth: 2, borderBottomColor: INK,

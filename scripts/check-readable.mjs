@@ -382,6 +382,60 @@ const PROBE = `(() => {
       over: overhang.map((v) => Math.round(v * 10) / 10) });
   }
 
+  // ── A THING YOU ARE ASKED TO TAP MUST SAY WHAT IT IS ──────────────────────
+  //
+  // REPORTED, NOT GATED, and the distinction is the honest part. This found two
+  // real defects — metaphysics-19 drew three unnamed rectangles for "tap one of the
+  // 3 outlined parts above", and metaphysics-21 labelled its timeline's two ends and
+  // left NOW, which was the answer, blank. It also flags logic-19, whose four cards
+  // are plainly lettered E · K · 4 · 7 and which a screenshot shows is fine. Until
+  // the disagreement is understood, a BLANK is a place to LOOK rather than a fact.
+  //
+  // Everything above measures words. It is blind, by construction, to the defect a
+  // reader kept reporting:
+  //
+  //   "there are still lessons that have blank boxes that you cannot read so it is
+  //    a guess for which one to press to answer"
+  //
+  // A box with no words in it has nothing to measure. metaphysics-19 asks the reader
+  // to "tap one of the 3 outlined parts above" and draws all three as bare
+  // rectangles; every word on the page was legible and the sweep said so.
+  //
+  // Asked here rather than in the source because the label is very often a SIBLING
+  // of the tap target rather than a child — the scene draws a caption under a panel
+  // and lays a hit box over it. Only the rendered page knows which words land inside
+  // which box. The legible-word list above already holds every word and its rect.
+  const blanks = [];
+  try {
+    for (const el of clipEl.querySelectorAll('[role="button"]')) {
+      const r = el.getBoundingClientRect();
+      if (r.width < 8 || r.height < 8) continue;
+      const cs = getComputedStyle(el);
+      if (cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity < 0.2) continue;
+      // ONLY WHAT THE READER IS ACTUALLY ASKED TO PRESS. A scene draws its answer
+      // targets from the first beat and disables them until the question is live —
+      // React Native Web writes that as aria-disabled — so counting those reports
+      // every lesson as full of blank boxes on beats that ask nothing.
+      if (el.getAttribute('aria-disabled') === 'true' || cs.pointerEvents === 'none') continue;
+      // A CAPTION DIRECTLY ABOVE ITS STRIP IS ITS NAME. metaphysics-21 writes THE
+      // PAST and THE FUTURE just over the two halves of its timeline and lays the
+      // hit boxes on the strip itself; the words are outside the box by a few
+      // pixels and name it perfectly well. So the test allows a caption's height
+      // either side, and nothing further — a word across the stage is not a label.
+      // 34, measured rather than guessed: metaphysics-21 sets its timeline captions
+      // a line-gap above the strips they name — 28px on a 390-wide phone — and they
+      // plainly name them. Wider than this and a caption from the other half of the
+      // stage would start counting, which is the direction that hides the defect.
+      const NEAR = 34;
+      const named = seenWords.some((w) => {
+        const cx = (w.r[0] + w.r[2]) / 2, cy = (w.r[1] + w.r[3]) / 2;
+        return cx >= r.left - 4 && cx <= r.right + 4
+          && cy >= r.top - NEAR && cy <= r.bottom + NEAR;
+      });
+      if (!named) blanks.push([Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]);
+    }
+  } catch (e) {}
+
   // ── A WORD DRAWN TWICE IN ONE PLACE IS ONE WORD IN TWO STATES ─────────────
   //
   // The house pattern for a label that can be lit stacks two copies: an INK one on
@@ -443,7 +497,7 @@ const PROBE = `(() => {
     if (bar) { const tf = getComputedStyle(bar).transform; if (tf && tf !== 'none') prog = new DOMMatrixReadOnly(tf).a; }
   } catch (e) {}
   hitStyle.remove();
-  return JSON.stringify({ out: kept, done: prog >= 0.999 });
+  return JSON.stringify({ out: kept, blanks, done: prog >= 0.999 });
 })()`;
 
 const ROUTE = `app/${ROUTE_NAME}.tsx`;
@@ -693,6 +747,13 @@ function allIds() {
         return Math.abs((then.keep ?? 1) - (h.keep ?? 1)) <= SETTLED;
       });
       const got = { done: a.done || c.done };
+      // A TAP TARGET WITH NOTHING IN IT, on both reads — the reader's "blank boxes
+      // that you cannot read so it is a guess for which one to press".
+      if ((a.blanks ?? []).length && (c.blanks ?? []).length) {
+        const n = Math.min(a.blanks.length, c.blanks.length);
+        hits.push({ why: 'BLANK', t: `${n} unnamed tap target${n > 1 ? 's' : ''}`,
+          size: 99, keep: 1, con: 99, a: 1, r: a.blanks[0], over: [0, 0, 0, 0] });
+      }
 
       // CONFIRM EVERY FAINT AGAINST THE PIXELS, and drop the ones the screen
       // disagrees with. One screenshot per beat that has a suspect — a cheap
@@ -839,7 +900,7 @@ function allIds() {
   }
   const count = (k) => report.reduce((a, r) => a + r.beats.reduce((b, x) => b + x.hits.filter((h) => h.why.includes(k)).length, 0), 0);
   const lessons = (k) => report.filter((r) => r.beats.some((x) => x.hits.some((h) => h.why.includes(k)))).length;
-  for (const k of ['TINY', 'CUT', 'FAINT']) {
+  for (const k of ['TINY', 'CUT', 'FAINT', 'BLANK']) {
     console.log(`    ${k.padEnd(6)} ${String(count(k)).padStart(4)} words  (${lessons(k)} lessons)`);
   }
   const worst = [];
