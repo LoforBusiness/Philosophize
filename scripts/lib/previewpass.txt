@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import PaywallContent from '@/components/shared/PaywallContent';
 import PassTab from '@/app/(app)/pass';
+import SettingsScreen from '@/app/(app)/settings';
 import DailyLimit from '@/components/paywall/DailyLimit';
 import LessonLocked from '@/components/paywall/LessonLocked';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -88,7 +89,13 @@ export default function PreviewPass() {
   const unit1 = branch.paths[1];
 
   let body = null;
-  if (s === 'tab') {
+  if (s === 'settings') {
+    // THE REAL SETTINGS SCREEN, opened on its Subscription section. It is a
+    // route like the tab is, and renders outside a navigator for the same
+    // reason. The section is reached by the screen's own rail rather than by a
+    // prop, so the harness clicks it — see sheet-pass.mjs.
+    body = <SettingsScreen />;
+  } else if (s === 'tab') {
     // THE REAL TAB SCREEN, imported as a component. It is a route, so it renders
     // perfectly well outside the navigator — the only thing it needs from one is
     // `useFocusEffect`, which no-ops without a focus context, and the analytics

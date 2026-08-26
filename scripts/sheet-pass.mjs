@@ -30,6 +30,10 @@ import { claimRoute } from './lib/previewroute.mjs';
 const CDP = +(process.env.CDP_PORT || 9393);
 const WEB = +(process.env.WEB_PORT || 8853);
 const OUT = process.env.OUT_DIR || 'scripts/.pass-shots';
+/** Quarter-second polls waiting for the screen to appear. 80 = 20s. */
+const MOUNT_TRIES = +(process.env.MOUNT_TRIES || 240);
+/** The phone width to render at. 320 is the narrowest the app supports. */
+const DEVICE_W = +(process.env.DEVICE_W || 390);
 
 const ROUTE = 'app/previewpass.tsx';
 const SRC = fs.readFileSync(path.join(process.cwd(), 'scripts/lib/previewpass.txt'), 'utf8');
@@ -54,6 +58,7 @@ const PROBE = `(() => {
   const seen = new Set();
   const overflow = [];
   const clipped = [];
+  const truncated = [];
 
   for (const el of root.querySelectorAll('*')) {
     const s = getComputedStyle(el);
@@ -82,13 +87,32 @@ const PROBE = `(() => {
       }
     }
 
-    // A <Text> whose content does not fit the box it was given. numberOfLines
-    // truncates with an ellipsis, which is deliberate; a horizontal overflow of
-    // a single line is not.
+    // A <Text> whose content does not fit the box it was given. A horizontal
+    // overflow of a single line is a lost word.
     if (el.childElementCount === 0 && (el.textContent || '').trim()) {
       const over = el.scrollWidth - el.clientWidth;
       if (over > 1 && s.overflow !== 'hidden' && s.textOverflow !== 'ellipsis') {
         clipped.push({ text: el.textContent.trim().slice(0, 40), over: Math.round(over) });
+      }
+
+      // —— AND A LINE CLAMP THAT ACTUALLY BITES ———————————————————————
+      //
+      // This used to say "numberOfLines truncates with an ellipsis, which is
+      // deliberate" and skip it, and that is only half true. Declaring a clamp
+      // IS deliberate; running out of lines inside one is a word the reader
+      // does not get. At 320dp the settings certificate rendered "Replay what
+      // you …" and "Rest days for your …" and this probe called the screen
+      // clean — the same distinction check-readable draws with SPILL (§21).
+      //
+      // A clamp that is NOT biting measures scrollHeight === clientHeight, so
+      // the deliberate case still costs nothing.
+      const clamp = +s.webkitLineClamp || 0;
+      if (clamp > 0 && el.scrollHeight > el.clientHeight + 1) {
+        truncated.push({
+          text: el.textContent.trim().slice(0, 40),
+          lines: clamp,
+          over: Math.round(el.scrollHeight - el.clientHeight),
+        });
       }
     }
   }
@@ -107,7 +131,7 @@ const PROBE = `(() => {
     content: Math.max(...[...root.querySelectorAll('*')]
       .map((e) => (e.scrollHeight > e.clientHeight + 1 ? e.scrollHeight : 0)), 0),
     marks: [...seen],
-    overflow, clipped,
+    overflow, clipped, truncated,
     text: text.slice(0, 6000),
   });
 })()`;
@@ -147,6 +171,31 @@ const SCREENS = [
   // The one money cannot fix: no paywall, and the lesson they should open named.
   { key: 'locked-unreached', q: 's=locked&k=unreached',
     want: ['Not yet', 'OPEN THIS ONE INSTEAD'], notWant: ['WHAT THE PASS OPENS'] },
+
+  // ── SETTINGS › SUBSCRIPTION ────────────────────────────────────
+  //
+  // The sixth member of the family, and the one that was NOT part of it: two
+  // hand-written pricing cards claiming fifty badges against a case of seventy,
+  // and missing two of the five things the Pass adds. It is the compact
+  // certificate now, and it is here for the same reason the tab is — the frame
+  // is an SVG sized from onLayout, so a mistake in it renders wrong rather than
+  // failing a type check.
+  //
+  // `click` names a section on the settings rail, because the section is reached
+  // by pressing it rather than by a prop.
+  { key: 'settings-sub', q: 's=settings', click: 'Subscription',
+    want: ['THE DAY PASS', 'WHERE IT STOPS', 'Replay what you finished',
+           'Rest days for your streak', 'Take the Scholar\u2019s Pass',
+           'See everything it includes'],
+    // "All 50 badges" was the old card's own claim against a case of seventy.
+    // The PRICE is not tested here and must not be: `$6.99` is FALLBACK_PRICE,
+    // which is correct on web and before RevenueCat answers. Whether a price is
+    // TYPED is a question about the source, and check-pass §7 asks it there.
+    notWant: ['All 50 badges'] },
+  { key: 'settings-sub-pro', q: 's=settings&pro=1', click: 'Subscription',
+    want: ['THE SCHOLAR\u2019S PASS', 'WHAT IT GRANTS YOU', 'ACTIVE',
+           'Cancel subscription', 'Any lesson, any time'],
+    notWant: ['Take the Scholar\u2019s Pass'] },
 ];
 
 const { release } = claimRoute({ route: ROUTE, src: SRC, owner: 'sheet-pass', keep: !!process.env.PASS_KEEP });
@@ -181,11 +230,28 @@ try {
   // fires its ResizeObserver, so every rect comes back zero (measure-must).
   await send('Emulation.setFocusEmulationEnabled', { enabled: true });
   await send('Page.setWebLifecycleState', { state: 'active' }).catch(() => {});
+  // 390 IS THE REFERENCE, NOT THE ONLY ONE THAT MATTERS. The certificate's title
+  // has broken on the NARROW phone twice — measured fine at 390 and truncated at
+  // 320/360 both times (§14, and §19 for "PER ACTIVE DAY" before it). check-pass
+  // does the arithmetic at every width; this is how the render gets looked at.
+  //   DEVICE_W=320 node scripts/sheet-pass.mjs
   await send('Emulation.setDeviceMetricsOverride', {
-    width: 390, height: 844, deviceScaleFactor: 2, mobile: true,
+    width: DEVICE_W, height: 844, deviceScaleFactor: 2, mobile: true,
   });
 
-  for (const sc of SCREENS) {
+  // ONE SCREEN AT A TIME WHILE ITERATING, and it is not just convenience: a
+  // second session on this machine can have two Metros of its own up, and a
+  // third takes a page load from ~13s to ~160s (SS21). Nine screens at that rate
+  // does not finish; two does.
+  //   ONLY=settings-sub node scripts/sheet-pass.mjs
+  const only = (process.env.ONLY || '').split(',').filter(Boolean);
+  const list = only.length ? SCREENS.filter((s) => only.includes(s.key)) : SCREENS;
+  if (only.length && list.length !== only.length) {
+    console.log(`unknown screen(s): ${only.filter((k) => !SCREENS.some((s) => s.key === k)).join(" ")}`);
+    process.exit(1);
+  }
+
+  for (const sc of list) {
     console.log(`\n${sc.key}`);
     await send('Page.navigate', { url: `http://localhost:${WEB}/previewpass?${sc.q}` });
 
@@ -195,7 +261,14 @@ try {
     // real intermittent bug and is not one. Metro compiles the first navigation
     // to a route variant, so the honest condition is "is it on the page yet".
     let up = false;
-    for (let i = 0; i < 80 && !up; i++) {
+    // …AND HOW LONG TO POLL IS NOT A CONSTANT, because it is not about this
+    // app. A second session on this machine can have two Metros of its own up,
+    // and a third takes a page load from ~13s to ~160s (§21) — at which point a
+    // fixed 20s gives up and prints "no #pass-root — a module or render fault",
+    // which is indistinguishable from a broken screen and was exactly wrong
+    // about a screen that had just been watched rendering. Raise it before
+    // concluding anything.
+    for (let i = 0; i < MOUNT_TRIES && !up; i++) {
       const probe = await send('Runtime.evaluate', {
         expression: `(() => { const e = document.getElementById('pass-root');
           return e ? e.getBoundingClientRect().height : 0; })()`,
@@ -206,6 +279,40 @@ try {
     }
     // Fonts, and Moti's enter animations, once it is actually there.
     await wait(1200);
+
+    // ── A SECTION THAT HAS TO BE PRESSED ────────────────────────────────
+    //
+    // Settings picks its section from a rail, so the subscription certificate is
+    // not on the page until something taps 'Subscription'. Two things about that
+    // tap, both learned by other harnesses in this repo (§21):
+    //
+    //   · A SYNTHETIC `click` IS THE ONLY THING A Pressable HEARS on
+    //     react-native-web. CDP's Input.dispatchMouseEvent does nothing at all.
+    //   · The rail's items are bare Pressables, so they carry a tabindex and no
+    //     role — selecting on [role="button"] finds half the buttons in this app.
+    //     Matched on the label's text instead, walked up to the pressable.
+    if (sc.click) {
+      const hit = await send('Runtime.evaluate', {
+        expression: `(() => {
+          const want = ${JSON.stringify(sc.click)};
+          for (const el of document.querySelectorAll('div,span')) {
+            if (el.children.length || (el.textContent || '').trim() !== want) continue;
+            let n = el;
+            for (let i = 0; i < 6 && n; i++, n = n.parentElement) {
+              if (n.tabIndex >= 0 || n.getAttribute('role') === 'button') {
+                n.click();
+                return 'clicked';
+              }
+            }
+          }
+          return 'not found';
+        })()`,
+        returnByValue: true,
+      });
+      ok(hit?.result?.value === 'clicked', `it can open the ${sc.click} section`,
+        String(hit?.result?.value));
+      await wait(900);
+    }
 
     const { result } = await send('Runtime.evaluate', { expression: PROBE, returnByValue: true });
     let r;
@@ -220,6 +327,8 @@ try {
       r.overflow.slice(0, 3).map((o) => `${o.tag} "${o.text}" ${o.left}–${o.right}`).join(' · ') || 'clear');
     ok(r.clipped.length === 0, 'no line of text is cut off inside its own box',
       r.clipped.slice(0, 3).map((c) => `"${c.text}" +${c.over}px`).join(' · ') || 'clear');
+    ok((r.truncated ?? []).length === 0, 'and nothing runs out of the lines it was allowed',
+      (r.truncated ?? []).slice(0, 3).map((c) => `"${c.text}" clamped at ${c.lines}, +${c.over}px`).join(' · ') || 'clear');
 
     for (const w of sc.want) {
       ok(r.text.includes(w), `it says "${w}"`,
@@ -236,7 +345,7 @@ try {
     // shot and putting it back is the same picture with no trap in it. The
     // measurements above were all taken at 844, which is the height that matters.
     await send('Emulation.setDeviceMetricsOverride', {
-      width: 390, height: Math.min(6000, Math.max(900, (r.content || r.height) + 120)),
+      width: DEVICE_W, height: Math.min(6000, Math.max(900, (r.content || r.height) + 120)),
       deviceScaleFactor: 2, mobile: true,
     });
     await wait(700);

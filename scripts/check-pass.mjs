@@ -455,6 +455,65 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
   // five rows with the other column's values, which is what makes the pair
   // comparable at a glance instead of two unrelated brochures. If one of them
   // ever renders a subset, they stop being a comparison.
+  // -- AND SETTINGS IS THE SIXTH MEMBER OF THE FAMILY --------------------------
+  //
+  // It was not, and that is why this block exists. Settings > Subscription spent
+  // its whole life as two hand-written pricing cards, and every failure mode this
+  // section was built to catch was sitting in it at once:
+  //
+  //   . "All 50 badges", against a roll of seventy.
+  //   . Two of the five things the Pass adds, with replay and jumping ahead --
+  //     the two biggest -- simply absent. The same silence the paywall kept.
+  //   . "$6.99" typed twice, in dollars, on a screen that ships to every
+  //     currency Play sells in.
+  //
+  // None of it could fail anything: a stale claim still typechecks and still
+  // renders. So the section is held to the same three rules the tab is.
+  const set = read('app/(app)/settings.tsx')
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  const secStart = set.indexOf('function SubscriptionSection()');
+  const secEnd = set.indexOf('function DangerSection()');
+  ok(secStart > 0 && secEnd > secStart, 'the settings subscription section is findable');
+  const sec = set.slice(secStart, secEnd);
+
+  ok(/PASS_LINES\.map\(/.test(sec),
+    'settings draws its schedule from PASS_LINES rather than from a typed list',
+    'the two pricing cards listed two of the five and got the badge count wrong');
+  ok(/<Certificate/.test(sec) && /compact/.test(sec),
+    'and it is the certificate, issued small \u2014 one object, not a second design');
+  ok(/monthly\?\.priceString \?\? FALLBACK_PRICE/.test(sec),
+    'and the price is the store\u2019s own string with the shared fallback',
+    'a typed price is wrong in every currency but one');
+
+  // THE SAME BALANCED-BRACE STRIP the tab gets. Every attribute value and every
+  // interpolation in JSX lives inside {...}; take those out and what is left of
+  // the render is tag names and literal text. Tag names carry no digits, so
+  // anything remaining that does is copy somebody typed by hand.
+  const secRender = sec.slice(sec.indexOf('return ('));
+  let secLit = '', secDepth = 0;
+  for (const ch of secRender) {
+    if (ch === '{') secDepth++;
+    else if (ch === '}') secDepth = Math.max(0, secDepth - 1);
+    else if (secDepth === 0) secLit += ch;
+  }
+  const secTyped = [...secLit.matchAll(/[^\s<>/]*\d[^\s<>/]*/g)].map((m) => m[0]);
+  ok(secTyped.length === 0, 'and no figure is typed into it either',
+    secTyped.slice(0, 3).map((t) => JSON.stringify(t)).join(' ') || 'every number derived');
+
+  // ONE CERTIFICATE, THE ONE THEY HOLD. The tab shows both because it is a shop;
+  // this screen shows what the reader has, and the button acts on it. A second
+  // certificate here is 300pt of engraving between them and that button, which is
+  // the whole complaint this redesign answered.
+  // ONE PER TIER, AND BOTH OF THEM COMPACT. Counting `<Certificate` alone was
+  // not enough: a counter-test that swapped one branch back to a plain card came
+  // back MISSED, because the OTHER branch still supplied the tag the count was
+  // looking for. Count the compact ones — the full-size object is precisely
+  // what this screen is trying not to be.
+  const certs = (sec.match(/<Certificate\s*\n\s*compact\b/g) || []).length;
+  ok(certs === 2, 'it renders one compact certificate per tier, never both at once',
+    `${certs} of 2 — the pro branch and the free branch`);
+  ok(/isPro \? \(/.test(sec), 'and picks between them on the tier the reader holds');
+
   const scholarRows = /PASS_LINES\.map\([\s\S]*?grade="granted"/.test(tab);
   const freeRows = /PASS_LINES\.map\([\s\S]*?grade="limit"/.test(tab);
   const included = (tab.match(/included\.map\(/g) || []).length;
@@ -520,7 +579,32 @@ head('8 · THE CERTIFICATE\'S NAME FITS THE CERTIFICATE');
   ok(Number.isFinite(headPad), 'the head\'s padding is readable from the component', `${headPad}pt a side`);
 
   const FULL_W = +/const TITLE_FULL_W = (\d+)/.exec(cert)[1];
-  const titleSize = (w) => (w >= FULL_W ? 21 : Math.max(16, Math.round(w * 0.062)));
+  // BOTH FORMATS, and the pocket one is the tighter case: it sets four points
+  // smaller, but it is drawn inside a settings CARD beside a labelled rail, so
+  // it has barely half the width to set in. Fitting at full size proves nothing
+  // about it.
+  //
+  // EVERY NUMBER IS READ OUT OF THE COMPONENT, and this block is why. The first
+  // version restated the sizes here — `compact ? 17 : 21`, `compact ? 12 : 16`
+  // — and a counter-test that raised the component's floor to 14 came back
+  // MISSED: the checker was measuring its own copy and had quietly stopped
+  // tracking the thing it was checking. That is the fault §19 records for
+  // SPLASH_BG and §21 for the must-boxes probe, arriving by a third route, and
+  // it is silent in both directions.
+  const num = (re, what) => {
+    const m = re.exec(cert);
+    ok(!!m, `the title's ${what} is readable from the component`,
+      m ? m.slice(1).join(' / ') : 'NOT FOUND — this checker has stopped tracking it');
+    return m ? m.slice(1).map(Number) : [NaN, NaN];
+  };
+  const [fullSm, fullLg] = num(/const full = compact \? ([\d.]+) : ([\d.]+);/, 'full size');
+  const [floorSm, floorLg] = num(/const floor = compact \? ([\d.]+) : ([\d.]+);/, 'floor');
+  const [ratioSm, ratioLg] = num(/width \* \(compact \? ([\d.]+) : ([\d.]+)\)/, 'ratio');
+  const titleSize = (w, compact) => (
+    w >= FULL_W
+      ? (compact ? fullSm : fullLg)
+      : Math.max(compact ? floorSm : floorLg, Math.round(w * (compact ? ratioSm : ratioLg)))
+  );
 
   // The longest single WORD-RUN that must sit on one line. A title breaks between
   // words, so what has to fit is the widest line the wrap can produce — for both
@@ -528,18 +612,39 @@ head('8 · THE CERTIFICATE\'S NAME FITS THE CERTIFICATE');
   const TITLES = [['THE SCHOLAR’S PASS', 'THE SCHOLAR’S'], ['THE DAY PASS', 'THE DAY PASS']];
   const PAGE_PAD = SPACE[4];   // the Pass tab's own horizontal padding
 
+  // THE SETTINGS CARD IS THE NARROW CASE, and it is not the page width. That
+  // screen is a labelled RAIL beside a card, so the certificate gets what is left
+  // after the rail, the page padding and the card's own padding — measured in a
+  // browser at 390dp it comes out at about 225. Modelled here as a fraction so a
+  // rail that gets wider is caught rather than assumed away.
+  const headPadSm = (() => {
+    const m = /headSm: \{[\s\S]*?paddingHorizontal: SPACE\[(\d)\]/.exec(cert);
+    return m ? SPACE[+m[1]] : NaN;
+  })();
+  ok(Number.isFinite(headPadSm), 'the pocket head\'s padding is readable too', `${headPadSm}pt a side`);
+
   let worst = Infinity, worstAt = '';
   for (const dp of [320, 360, 390, 412, 430]) {
-    const cardW = dp - PAGE_PAD * 2;
-    const avail = cardW - headPad * 2;
-    const size = titleSize(cardW);
-    for (const [full, line] of TITLES) {
-      // Tracking is applied per character by the component (fontSize * 0.124).
-      const w = CINZEL.width(line, size) + line.length * size * 0.124;
-      const slack = avail - w;
-      if (slack < worst) { worst = slack; worstAt = `${dp}dp · ${size}px · "${line}"`; }
-      if (slack < 0) {
-        ok(false, `"${full}" fits at ${dp}dp`, `${w.toFixed(0)}pt into ${avail}pt — it will truncate`);
+    for (const compact of [false, true]) {
+      // The tab's certificate spans the page inside its own padding. The pocket
+      // one loses the rail and a second card's padding on top of that; 0.58 of
+      // the page is what the browser measures at 390 and it is the tighter end
+      // of what the rail can leave.
+      const cardW = compact
+        ? Math.round((dp - PAGE_PAD * 2) * 0.58)
+        : dp - PAGE_PAD * 2;
+      const pad = compact ? headPadSm : headPad;
+      const avail = cardW - pad * 2;
+      const size = titleSize(cardW, compact);
+      for (const [full, line] of TITLES) {
+        // Tracking is applied per character by the component (fontSize * 0.124).
+        const w = CINZEL.width(line, size) + line.length * size * 0.124;
+        const slack = avail - w;
+        const where = `${dp}dp${compact ? ' settings' : ''} · ${size}px · "${line}"`;
+        if (slack < worst) { worst = slack; worstAt = where; }
+        if (slack < 0) {
+          ok(false, `"${full}" fits at ${where}`, `${w.toFixed(0)}pt into ${avail}pt — it will truncate`);
+        }
       }
     }
   }
@@ -551,8 +656,13 @@ head('8 · THE CERTIFICATE\'S NAME FITS THE CERTIFICATE');
   // Fitting the title is only half of it: the head was a FIXED 96pt, so a title
   // that wrapped to three lines was sliced along its top edge instead. Both
   // halves have to hold, and only one of them is arithmetic.
-  ok(/minHeight: HEAD_MIN/.test(cert),
+  // `headMin`, not `HEAD_MIN`: there are two resting heights now, one per
+  // format, and the head is given whichever applies rather than a constant.
+  ok(/minHeight: headMin/.test(cert),
     'the head grows with its title rather than clipping it');
+  ok(/const HEAD_MIN_SM = (\d+)/.test(cert),
+    'and the pocket copy has a resting height of its own',
+    `${/const HEAD_MIN_SM = (\d+)/.exec(cert)?.[1]}pt against the full ${/const HEAD_MIN = (\d+)/.exec(cert)?.[1]}`);
   ok(/numberOfLines=\{3\}/.test(cert),
     'and the title is allowed the third line it sometimes needs');
 }

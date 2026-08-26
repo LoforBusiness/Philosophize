@@ -1069,6 +1069,44 @@ and fails on any digit left in literal text.
 > 390 and broken at 360. The head grows now, the title scales, and `check:pass`
 > measures both against Cinzel's own `.ttf` at every width the app supports.
 
+> **AND THE SIXTH SURFACE WAS NOT IN THE FAMILY AT ALL.** Settings › Subscription
+> spent its whole life as two hand-written pricing cards, and every failure this
+> section exists to prevent was sitting in it at once: **"All 50 badges"** against
+> a roll of seventy, **two of the five things the Pass adds** with replay and
+> jumping ahead simply absent, and **the price typed twice, in dollars**, on a
+> screen that ships to every currency Play sells in. Nothing could fail: a stale
+> claim still typechecks and still renders.
+>
+> It is the same certificate now, issued small — `Certificate` with `compact`,
+> the same `PASS_LINES`, the same struck rows. **A claim cannot be true on one
+> screen and stale on the other, because there is only one claim**, and
+> `check:pass` §7 now reads the settings section for all three rules the tab is
+> held to.
+>
+> **ONE certificate there, not two.** The tab is a shop and shows the offer and
+> then the comparison; Settings is where a reader goes to do one thing, and a
+> second certificate is 300pt of engraving between them and the button that does
+> it. A Scholar sees the SCHOLAR'S PASS with its ACTIVE plate; everybody else
+> sees THE DAY PASS and where it stops. Measured in the real screen, the whole
+> section went from 859pt (which scrolls on a 390×844 phone) to 844 (which does
+> not), and the button from y 646 to y 601.
+>
+> **A POCKET COPY IS NOT A SMALLER RENDER, IT IS A DIFFERENT SET OF DECISIONS**,
+> and three of them cost a browser run each. Setting the holder's note beside
+> their name to save a line rendered **"Lan…"** — the title's own failure, one
+> row down. The title's floor had to come down to 12px, because the settings card
+> is about half the page and 13 needed 130pt into 126. And the schedule's labels
+> are written for the tab's full width, so at 320dp two of them clamped to
+> **"Replay what you …"** — they get a third line on the small copy.
+>
+> That last one is the instrument's lesson rather than the design's: `sheet:pass`
+> skipped every `numberOfLines` clamp on the correct reasoning that a declared
+> clamp is deliberate, and so reported a screen with two truncated entitlements
+> on it as clean. **Declaring a clamp is deliberate; running out of lines inside
+> one is a word the reader does not get** — the distinction `check:readable`
+> already draws as SPILL (§21). It measures `scrollHeight` against the clamp now,
+> and `DEVICE_W=320` renders the width that has broken this object twice.
+
 > **The sixth tab, and the note that argued against one.** `_layout.tsx` rejected
 > a streak tab because "at 390pt that is ~62pt a tab and the labels clip". Sound,
 > and it does not apply: `tabBarShowLabel` is false, so there is nothing to clip.

@@ -231,17 +231,44 @@ export interface CertificateProps {
   /** Anything below the schedule — a price, a button, the terms. */
   footer?: React.ReactNode;
   width: number;
+  /**
+   * THE POCKET COPY — same object, less of it.
+   *
+   * Settings is not a shop. A reader who opens Settings › Subscription is there
+   * to do ONE thing — subscribe, or cancel — and the full-page certificate put
+   * that button below about 700pt of engraving. So the same certificate is
+   * issued in a smaller format: shorter head, smaller title, tighter schedule.
+   *
+   * A PROP RATHER THAN A SECOND COMPONENT, and that is the whole point. §14's
+   * rule is that the offer is ONE family, because the moment there are two of
+   * them one starts telling a reader something the other does not. Every claim,
+   * every tone and every measured rule in this file is shared; the only thing
+   * `compact` changes is how much room the object takes.
+   */
+  compact?: boolean;
 }
 
 /** The head's resting height. It grows from here; it never shrinks below it. */
 const HEAD_MIN = 96;
+/**
+ * And the pocket copy's.
+ *
+ * 62 is not a taste: the head has to hold the title's line box plus the rule and
+ * the motto. At the compact title size the title sets on one line down to 320dp
+ * (check:pass §8 measures it against Cinzel's own .ttf at every width), and 62
+ * leaves that line, the 7pt rule row and the motto's 16pt line their room with
+ * the same paddings the full head uses at SPACE[2].
+ */
+const HEAD_MIN_SM = 62;
 /** Above this card width the title sets at its full 21px. Measured — see below. */
 const TITLE_FULL_W = 300;
 
 export default function Certificate({
   variant, title, motto, holder, holderNote, seal, flag, children, footer, width,
+  compact = false,
 }: CertificateProps) {
   const d = dressing(variant);
+  const headMin = compact ? HEAD_MIN_SM : HEAD_MIN;
 
   // ── THE FRAME NEEDS THE HEIGHT, AND ONLY LAYOUT KNOWS IT ──────────────────
   //
@@ -271,7 +298,7 @@ export default function Certificate({
   // phone, which is §19's own lesson about "PER ACTIVE DAY" arriving again.
   //
   // So the head grows and the ground follows it.
-  const [headH, setHeadH] = useState(HEAD_MIN);
+  const [headH, setHeadH] = useState(headMin);
   const onHead = (e: LayoutChangeEvent) => {
     const next = Math.round(e.nativeEvent.layout.height);
     if (next !== headH) setHeadH(next);
@@ -287,7 +314,15 @@ export default function Certificate({
   //
   // Below about 300pt of card the type steps down. `check:pass` re-derives the
   // fit at every width from the same font file.
-  const titleSize = width >= TITLE_FULL_W ? 21 : Math.max(16, Math.round(width * 0.062));
+  // The pocket copy sets four points smaller and keeps the same rule: below
+  // TITLE_FULL_W it steps down with the card rather than truncating.
+  const full = compact ? 17 : 21;
+  // 12, NOT 13, and check-pass is why. At 320dp the settings card is about
+  // 161pt wide, and "THE SCHOLAR'S" at 13px with its tracking needs 130 into
+  // 126 -- an ellipsis where the name of the product goes, on the narrow phone,
+  // exactly as the full-size title did before it was measured. 12 clears it.
+  const floor = compact ? 12 : 16;
+  const titleSize = width >= TITLE_FULL_W ? full : Math.max(floor, Math.round(width * (compact ? 0.05 : 0.062)));
 
   return (
     <View style={[s.shadow, { width }]} onLayout={onLayout}>
@@ -305,11 +340,11 @@ export default function Certificate({
         <View pointerEvents="none" style={[s.rim, { backgroundColor: PAPER_LIT }]} />
 
         {/* ── the head ─────────────────────────────────────────────────────── */}
-        <View style={[s.head, { minHeight: HEAD_MIN }]} onLayout={onHead}>
+        <View style={[s.head, compact && s.headSm, { minHeight: headMin }]} onLayout={onHead}>
           <Guilloche w={width - 2} h={headH} variant={variant} />
-          <View style={s.corners} pointerEvents="none">
-            <Rosette size={16} color={d.inner} />
-            <Rosette size={16} color={d.inner} />
+          <View style={[s.corners, compact && s.cornersSm]} pointerEvents="none">
+            <Rosette size={compact ? 12 : 16} color={d.inner} />
+            <Rosette size={compact ? 12 : 16} color={d.inner} />
           </View>
           <Text
             style={[
@@ -325,23 +360,35 @@ export default function Certificate({
           >
             {title}
           </Text>
-          <View style={s.ruleRow}>
-            <View style={[s.ruleLine, { backgroundColor: d.rule }]} />
+          <View style={[s.ruleRow, compact && s.ruleRowSm]}>
+            <View style={[s.ruleLine, compact && s.ruleLineSm, { backgroundColor: d.rule }]} />
             <View style={[s.ruleDot, { backgroundColor: d.rule }]} />
-            <View style={[s.ruleLine, { backgroundColor: d.rule }]} />
+            <View style={[s.ruleLine, compact && s.ruleLineSm, { backgroundColor: d.rule }]} />
           </View>
-          <Text style={s.motto} numberOfLines={2}>{motto}</Text>
+          <Text style={[s.motto, compact && s.mottoSm]} numberOfLines={2}>{motto}</Text>
           {flag ? <View style={s.flag}>{flag}</View> : null}
         </View>
 
         {/* ── the holder ───────────────────────────────────────────────────── */}
         {holder ? (
-          <View style={s.holderRow}>
-            {seal ? <View style={s.sealBox}>{seal}</View> : null}
+          <View style={[s.holderRow, compact && s.holderRowSm]}>
+            {seal ? <View style={[s.sealBox, compact && s.sealBoxSm]}>{seal}</View> : null}
             <View style={s.holderBody}>
-              <Text style={s.issued}>ISSUED TO</Text>
-              <Text style={s.holderName} numberOfLines={1}>{holder}</Text>
-              {holderNote ? (
+              {/* THE KICKER AND THE NOTE COME OFF THE POCKET COPY. Both earn
+                  their room at full size: a certificate says who it was issued
+                  to and on what terms. On the small one they are three lines of
+                  a three-hundred-point object, on a screen that has already said
+                  the tier in its own subtitle and says the renewal in the note
+                  under the button.
+
+                  Setting the note BESIDE the name was tried first and is why
+                  this is worth a paragraph: at a card width of ~225 the note
+                  took its half and "Landy" rendered as "Lan…". A truncated
+                  holder is the same failure §14 records for the title, one line
+                  down — so the name gets the row to itself. */}
+              {compact ? null : <Text style={s.issued}>ISSUED TO</Text>}
+              <Text style={[s.holderName, compact && s.holderNameSm]} numberOfLines={1}>{holder}</Text>
+              {holderNote && !compact ? (
                 <Text style={s.holderNote} numberOfLines={2}>{holderNote}</Text>
               ) : null}
             </View>
@@ -349,9 +396,9 @@ export default function Certificate({
         ) : null}
 
         {/* ── the schedule ─────────────────────────────────────────────────── */}
-        <View style={s.body}>{children}</View>
+        <View style={[s.body, compact && s.bodySm]}>{children}</View>
 
-        {footer ? <View style={s.footer}>{footer}</View> : null}
+        {footer ? <View style={[s.footer, compact && s.footerSm]}>{footer}</View> : null}
       </LinearGradient>
       {/* OVER the face, not under it — the frame is printed on the card. Drawn
           only once the height is known, so it never appears at the wrong size. */}
@@ -385,10 +432,16 @@ const s = StyleSheet.create({
     paddingHorizontal: SPACE[4],
     paddingTop: SPACE[3], paddingBottom: SPACE[2],
   },
+  // SPACE[2] a side, not SPACE[3]: the pocket copy is drawn beside a labelled
+  // rail, so it has roughly half the tab's width to set an inscriptional title
+  // in, and the four points either way are the difference between one line and
+  // an ellipsis on a 320dp phone. Same trade the full head records at SPACE[4].
+  headSm: { paddingTop: SPACE[2], paddingBottom: SPACE[2], paddingHorizontal: SPACE[2] },
   corners: {
     position: 'absolute', left: SPACE[3], right: SPACE[3], top: SPACE[2],
     flexDirection: 'row', justifyContent: 'space-between',
   },
+  cornersSm: { left: SPACE[2], right: SPACE[2], top: SPACE[1] },
   title: {
     // Cinzel — Roman inscriptional capitals, which is what a certificate's name
     // is actually cut in. Size, tracking and leading are all set per card at the
@@ -398,7 +451,9 @@ const s = StyleSheet.create({
     includeFontPadding: false,
   },
   ruleRow: { flexDirection: 'row', alignItems: 'center', marginTop: 7, gap: 6 },
+  ruleRowSm: { marginTop: 5 },
   ruleLine: { width: 34, height: 1 },
+  ruleLineSm: { width: 24 },
   ruleDot: { width: 4, height: 4, borderRadius: 2, transform: [{ rotate: '45deg' }] },
   motto: {
     fontFamily: 'EBGaramond_400Regular_Italic',
@@ -408,13 +463,19 @@ const s = StyleSheet.create({
     textAlign: 'center',
     marginTop: 6,
   },
+  mottoSm: { fontSize: 12, lineHeight: 16, marginTop: 4 },
   flag: { position: 'absolute', right: SPACE[3], bottom: -11 },
 
   holderRow: {
     flexDirection: 'row', alignItems: 'center', gap: SPACE[3],
     paddingHorizontal: SPACE[4], paddingTop: SPACE[3], paddingBottom: SPACE[2],
   },
+  holderRowSm: {
+    paddingHorizontal: SPACE[3], paddingTop: SPACE[2], paddingBottom: 0, gap: SPACE[2],
+  },
+
   sealBox: { width: 54, alignItems: 'center' },
+  sealBoxSm: { width: 38 },
   holderBody: { flex: 1, minWidth: 0 },
   issued: {
     fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.6, color: MID,
@@ -423,12 +484,15 @@ const s = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 20, color: INK, marginTop: 1,
     includeFontPadding: false,
   },
+  holderNameSm: { fontSize: 16 },
   holderNote: {
     fontFamily: 'Inter_400Regular', fontSize: 11.5, lineHeight: 15, color: MID, marginTop: 2,
   },
 
   body: { paddingHorizontal: SPACE[4], paddingTop: SPACE[2] },
+  bodySm: { paddingHorizontal: SPACE[3], paddingTop: SPACE[1] },
   footer: { paddingHorizontal: SPACE[4], paddingTop: SPACE[3] },
+  footerSm: { paddingHorizontal: SPACE[3], paddingTop: SPACE[2] },
 });
 
 // ── the schedule ─────────────────────────────────────────────────────────────
@@ -440,10 +504,10 @@ const s = StyleSheet.create({
  * headings are engraved rules with a word sitting in them, and because the
  * schedule below has two kinds of row that must stay clearly separated.
  */
-export function ScheduleHead({ label, tint }: { label: string; tint?: string }) {
+export function ScheduleHead({ label, tint, compact = false }: { label: string; tint?: string; compact?: boolean }) {
   const color = tint ?? mix(PAPER_SHADE, INK, 0.5);
   return (
-    <View style={r.headRow}>
+    <View style={[r.headRow, compact && r.headRowSm]}>
       <Text style={[r.headLabel, { color }]}>{label}</Text>
       <View style={[r.headRule, { backgroundColor: mix(color, PAPER, 0.55) }]} />
     </View>
@@ -473,47 +537,64 @@ export function ScheduleHead({ label, tint }: { label: string; tint?: string }) 
 export type RowGrade = 'granted' | 'included' | 'limit';
 
 export function ScheduleRow({
-  grade, label, detail, last = false,
+  grade, label, detail, last = false, compact = false,
 }: {
   grade: RowGrade;
   label: string;
   /** The value, or null — which draws the em-rule: not at all. */
   detail: string | null;
   last?: boolean;
+  /**
+   * The pocket copy's row. Same three grades, same marks, same tones — tighter
+   * padding and a step down in type. Five rows is where a certificate's height
+   * actually goes, so this is most of what makes the small one small.
+   */
+  compact?: boolean;
 }) {
   const granted = grade === 'granted';
 
   const body = (
-    <View style={[r.row, granted && r.rowGranted]}>
-      <View style={r.markBox}>
+    <View style={[r.row, granted && r.rowGranted, compact && (granted ? r.rowGrantedSm : r.rowSm)]}>
+      <View style={[r.markBox, compact && r.markBoxSm]}>
         {granted ? (
           <LinearGradient
             colors={[METAL.GOLD.lit, METAL.GOLD.base, METAL.GOLD.shade]}
             start={LIGHT_START}
             end={LIGHT_END}
-            style={[r.mark, { borderColor: METAL.GOLD.rim }]}
+            style={[r.mark, compact && r.markSm, { borderColor: METAL.GOLD.rim }]}
           >
             <View style={[r.tickShort, { backgroundColor: METAL.GOLD.on }]} />
             <View style={[r.tickLong, { backgroundColor: METAL.GOLD.on }]} />
           </LinearGradient>
         ) : grade === 'included' ? (
-          <View style={[r.mark, { borderColor: mix(PAPER_SHADE, INK, 0.45) }]}>
+          <View style={[r.mark, compact && r.markSm, { borderColor: mix(PAPER_SHADE, INK, 0.45) }]}>
             <View style={[r.tickShort, { backgroundColor: INK }]} />
             <View style={[r.tickLong, { backgroundColor: INK }]} />
           </View>
         ) : (
           // A LIMIT IS NOT A TICK. An open square with a bar across it: the shape
           // says "bounded", which is the honest drawing for "one a day".
-          <View style={[r.mark, { borderColor: mix(PAPER_SHADE, INK, 0.32) }]}>
+          <View style={[r.mark, compact && r.markSm, { borderColor: mix(PAPER_SHADE, INK, 0.32) }]}>
             <View style={[r.bar, { backgroundColor: mix(PAPER_SHADE, INK, 0.55) }]} />
           </View>
         )}
       </View>
 
       <View style={r.textBox}>
-        <Text style={[r.label, granted && r.labelGranted]} numberOfLines={2}>{label}</Text>
+        {/* THREE LINES ON THE POCKET COPY. `PASS_LINES`' labels are written for
+            the tab's full-width certificate, where two is plenty; the small one
+            is drawn beside a settings rail and at 320dp has about 105pt for
+            them, which turned "Replay what you finished" into "Replay what you
+            …". A row that grows a line on a narrow phone costs nothing. A
+            truncated entitlement is a claim the reader cannot read. */}
         <Text
-          style={[r.detail, granted && r.detailGranted, detail === null && r.detailNone]}
+          style={[r.label, granted && r.labelGranted, compact && r.labelSm]}
+          numberOfLines={compact ? 3 : 2}
+        >
+          {label}
+        </Text>
+        <Text
+          style={[r.detail, granted && r.detailGranted, detail === null && r.detailNone, compact && r.detailSm]}
           numberOfLines={2}
         >
           {detail ?? 'not at all'}
@@ -535,7 +616,7 @@ export function ScheduleRow({
           locations={[0, 0.45, 1]}
           start={LIGHT_START}
           end={LIGHT_END}
-          style={r.niche}
+          style={[r.niche, compact && r.nicheSm]}
         >
           <View pointerEvents="none" style={[r.nicheTop, { backgroundColor: mix(PAPER_SHADE, INK, 0.26) }]} />
           <LinearGradient
@@ -552,7 +633,7 @@ export function ScheduleRow({
         body
       )}
       {!last && !granted ? (
-        <View style={[r.hair, { backgroundColor: mix(PAPER_SHADE, PAPER, 0.35) }]} />
+        <View style={[r.hair, compact && r.hairSm, { backgroundColor: mix(PAPER_SHADE, PAPER, 0.35) }]} />
       ) : null}
     </View>
   );
@@ -563,10 +644,12 @@ const r = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: SPACE[2],
     marginTop: SPACE[3], marginBottom: SPACE[1],
   },
+  headRowSm: { marginTop: SPACE[2], marginBottom: 0 },
   headLabel: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.7 },
   headRule: { flex: 1, height: 1 },
 
   niche: { borderRadius: 3, overflow: 'hidden', marginVertical: 3 },
+  nicheSm: { marginVertical: 2 },
   nicheTop: { position: 'absolute', left: 0, right: 0, top: 0, height: 1 },
   nicheFoot: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 1 },
   // 3pt of metal down the cut edge. Wider reads as a highlighter pen, which is
@@ -575,12 +658,18 @@ const r = StyleSheet.create({
 
   row: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2], paddingVertical: 7 },
   rowGranted: { paddingLeft: SPACE[2] + 3, paddingRight: SPACE[2], paddingVertical: 9 },
+  rowSm: { paddingVertical: 4, gap: SPACE[1] + 2 },
+  rowGrantedSm: { paddingVertical: 5.5, gap: SPACE[1] + 2 },
 
   markBox: { width: 20, alignItems: 'center' },
+  markBoxSm: { width: 16 },
   mark: {
     width: 17, height: 17, borderRadius: 2, borderWidth: 1,
     alignItems: 'center', justifyContent: 'center',
   },
+  // 15, not smaller: the tick inside it is two 1.8pt bars, and below about 14
+  // they merge into a blot rather than reading as a mark.
+  markSm: { width: 15, height: 15 },
   // The tick is two bars rather than a glyph: at 17px an icon font's checkmark
   // is a smudge, and two rotated rectangles are exact at any size.
   tickShort: {
@@ -595,6 +684,7 @@ const r = StyleSheet.create({
 
   textBox: { flex: 1, minWidth: 0 },
   label: { fontFamily: 'Inter_500Medium', fontSize: 13, color: INK, lineHeight: 17 },
+  labelSm: { fontSize: 12.5, lineHeight: 15 },
   labelGranted: { fontFamily: 'Inter_700Bold' },
   detail: { fontFamily: 'Inter_400Regular', fontSize: 11.5, lineHeight: 15, color: MID, marginTop: 1 },
   // INK, NOT MID, on a granted row. `MID` is 5.3:1 on paper and about 3.1:1 in
@@ -603,6 +693,8 @@ const r = StyleSheet.create({
   // struck surface, so its secondary text takes the darker tone.
   detailGranted: { color: INK, fontFamily: 'Inter_500Medium' },
   detailNone: { fontFamily: 'EBGaramond_400Regular_Italic', fontSize: 12.5 },
+  detailSm: { fontSize: 11, lineHeight: 13.5, marginTop: 0 },
 
   hair: { height: 1, marginLeft: 20 + SPACE[2] },
+  hairSm: { marginLeft: 16 + SPACE[1] + 2 },
 });

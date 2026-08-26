@@ -11,6 +11,7 @@ import {
   StyleSheet,
   AppState,
   useWindowDimensions,
+  type LayoutChangeEvent,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Application from 'expo-application';
@@ -45,7 +46,13 @@ import { ads } from '@/lib/ads';
 import { notifications } from '@/lib/notifications';
 import { sound } from '@/lib/sound';
 import { cue, soundSupported } from '@/lib/feedback';
-import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
+import { FALLBACK_PRICE, BILLING_PERIOD_LABEL } from '@/constants/subscription';
+import Certificate, { ScheduleHead, ScheduleRow } from '@/components/paywall/Certificate';
+import RankSeal from '@/components/shared/RankSeal';
+import { MetalPlate } from '@/components/profile/Struck';
+import { METAL, MID, INK, mix } from '@/components/shared/tone';
+import { rankOrder, rankDegree } from '@/data/ranks';
+import { PASS_LINES, longFree, longPass } from '@/lib/utils/passValue';
 import { effectiveStreak } from '@/lib/utils/streak';
 import { restDaysHeld } from '@/constants/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
@@ -256,16 +263,12 @@ function Segmented({ value, options, onChange }: { value: string; options: { key
   );
 }
 
-function Check({ label }: { label: string }) {
-  return (
-    <View style={styles.checkRow}>
-      <View style={styles.checkBox}>
-        <Text style={styles.checkMark}>✓</Text>
-      </View>
-      <Text style={styles.checkLabel}>{label}</Text>
-    </View>
-  );
-}
+// `Check` LIVED HERE and is gone with the two pricing cards it was built for.
+// Its replacement is `ScheduleRow` in components/paywall/Certificate.tsx, which
+// draws three grades rather than one — granted, included and LIMIT — and that
+// third one is the whole reason: a tick beside "Lessons a day: 1" says the free
+// tier HAS the thing, which is the kind of half-true a screen that takes money
+// must not print. A bounded square with a bar across it says what is true.
 
 /* ---------------- Section router ---------------- */
 
@@ -945,14 +948,77 @@ function VersionLine() {
 
 /* ---------------- Subscription ---------------- */
 
+// ---------------------------------------------------------------------------
+// THE POCKET CERTIFICATE, AND WHY THIS SCREEN SHOWS ONE AND NOT TWO.
+//
+// This section used to be two hand-written pricing cards, and it was carrying
+// exactly the fault §14 exists to prevent. It claimed "All 50 badges" against a
+// case of seventy. It listed two of the five things the Pass actually adds —
+// replay and jumping ahead, the two biggest, were simply missing, which is the
+// same silence §14 records the paywall keeping for its whole life. And it typed
+// the price twice, in dollars, on a screen that ships to every currency Play
+// sells in.
+//
+// So it is the same object as the Pass tab now, issued small: `Certificate` with
+// `compact`, the same `PASS_LINES`, the same struck rows, the same rank seal. A
+// claim cannot be true on one screen and stale on the other, because there is
+// only one claim.
+//
+// ONE CERTIFICATE, THE ONE YOU HOLD. The tab is a shop and shows both — the
+// offer, then the comparison. Settings is not a shop: a reader who opens
+// Settings › Subscription came to do one thing, and a second certificate is
+// 300pt of engraving between them and the button that does it. A Scholar sees
+// the SCHOLAR'S PASS with its ACTIVE plate and what it grants them; everybody
+// else sees THE DAY PASS and where it stops. Either way it is what they hold,
+// which is what a settings screen is for.
+//
+// AND THE SCHEDULE IS THE SHORT ONE. The tab prints the five differences AND the
+// six things both tiers include; here only the five. The six are not in question
+// on this screen, and they are most of what makes the tab's certificate long.
+// ---------------------------------------------------------------------------
+
 function SubscriptionSection() {
-  const { width } = useWindowDimensions();
-  const wide = width >= 720;
   const isPro = useSubscriptionStore((s) => s.isPro);
+  const monthly = useSubscriptionStore((s) => s.monthly);
+  const displayName = useUserDataStore((s) => s.displayName);
+  const rankIndex = useUserDataStore((s) => s.rankIndex);
+  const totalXP = useUserDataStore((s) => s.totalXP);
   const [confirmCancel, setConfirmCancel] = useState(false);
   useEffect(() => {
     track('paywall_viewed', { source: 'settings' });
   }, []);
+
+  // The localized string from the store, and the fallback on web, in Expo Go and
+  // before RevenueCat answers — the same pair the Pass tab uses. `SubPackage`
+  // also carries a numeric `price`; that one is for analytics, which cannot add
+  // labels up, and must never reach a screen.
+  const price = monthly?.priceString ?? FALLBACK_PRICE;
+  const period = BILLING_PERIOD_LABEL;
+
+  const rank = awardedRank(rankIndex, totalXP);
+
+  // ── THE WIDTH IS MEASURED, NOT COMPUTED ────────────────────────────
+  //
+  // The certificate draws its frame at a real pixel width — it has to be TOLD
+  // one rather than stretched, because a cut-corner rule scaled with
+  // preserveAspectRatio="none" skews its notches into parallelograms.
+  //
+  // The first version worked that width out from the window, and it was wrong on
+  // the first render: this screen is a LABELLED RAIL beside a card, so the card
+  // is nowhere near the window's width, and the certificate hung over both edges
+  // of it and across the rail. Arithmetic cannot know about the rail, the card's
+  // padding, or the wide layout; `onLayout` already does.
+  //
+  // The state lives on the section rather than on the page, which is §19's rule
+  // from the Profile work — a flag that gates a child belongs to the child.
+  const [certW, setCertW] = useState(0);
+  const onCertBox = (e: LayoutChangeEvent) => {
+    const next = Math.round(e.nativeEvent.layout.width);
+    // Rounded and compared before setting, the same guard the certificate uses
+    // for its own height: a fractional width that jitters between passes would
+    // loop this forever.
+    if (next !== certW) setCertW(next);
+  };
 
   // Google Play / the App Store owns cancellation — an app can't cancel a store
   // subscription itself. Send the user to the store's manage-subscription page
@@ -973,83 +1039,134 @@ function SubscriptionSection() {
     }
     Linking.openURL(url).catch(() => {});
   };
+
   return (
     <Card>
-      <Header title="Subscription" sub={isPro ? 'You have Scholar’s Pass.' : 'You are on the Free plan.'} />
+      <Header
+        title="Subscription"
+        sub={isPro ? 'You have Scholar’s Pass.' : 'You are on the Free plan.'}
+      />
       <View style={styles.hr} />
-      <View style={[styles.planRow, !wide && { flexDirection: 'column' }]}>
-        {/* Free */}
-        {/* `planCol` carries the flex that `planCard` used to, because the
-            shared Card puts a `style` prop on its FACE, not on the box that
-            has to share the row. */}
-        <View style={styles.planCol}>
-          <UICard pad={3}>
-            {!isPro && (
-              <View style={styles.currentTag}>
-                <Text style={styles.currentTagText}>CURRENT</Text>
-              </View>
-            )}
-            <Text style={styles.planName}>FREE</Text>
-            <Text style={styles.planPrice}>$0</Text>
-            <Text style={styles.planNote}>Forever free</Text>
-            <View style={{ marginTop: SPACE[2], gap: SPACE[1] }}>
-              <Check label={`${FREE_DAILY_LESSON_LIMIT} free ${lessonsWord(FREE_DAILY_LESSON_LIMIT)} per day`} />
-              <Check label="Unlimited saved quotes" />
-              <Check label="Full rank progression" />
-              <Check label="All 50 badges" />
-              <Check label="Philosopher bios" />
-            </View>
-            {!isPro && <Text style={styles.planFoot}>Your current plan</Text>}
-          </UICard>
-        </View>
 
-        {/* Scholar's Pass */}
-        <View style={styles.planCol}>
-          <UICard pad={3}>
-            {isPro && (
-              <View style={styles.currentTag}>
-                <Text style={styles.currentTagText}>CURRENT</Text>
-              </View>
-            )}
-            <Text style={styles.proKicker}>SCHOLAR'S PASS</Text>
-            <Text style={styles.planPrice}>
-              $6.99 <Text style={styles.perMo}>/month</Text>
-            </Text>
-            <Text style={styles.planNote}>Billed monthly · cancel anytime</Text>
-            <View style={{ marginTop: SPACE[2], gap: SPACE[1] }}>
-              <Check label="Everything in Free" />
-              <View style={styles.andMore}>
-                <View style={styles.andLine} />
-                <Text style={styles.andMoreText}>& more</Text>
-                <View style={styles.andLine} />
-              </View>
-              <Check label="Unlimited lessons per day" />
-              <Check label="Ad-free experience" />
-            </View>
-            {isPro ? (
-              <Text style={styles.planFoot}>Active — thank you for your support</Text>
-            ) : (
-              <Button
-                label="Upgrade — $6.99 / mo"
-                onPress={() => router.push('/(app)/paywall')}
-                size="lg"
-                style={{ marginTop: SPACE[3] }}
+      {/* nativeID so a harness can measure the object rather than guess at it —
+          the same reason every answer control in a lesson carries one (§21). */}
+      <View nativeID="sub-cert" style={styles.certWrap} onLayout={onCertBox}>
+        {certW <= 0 ? null : isPro ? (
+          <Certificate
+            compact
+            variant="scholar"
+            width={certW}
+            title="THE SCHOLAR’S PASS"
+            // A TERSER INSCRIPTION ON A SMALLER OBJECT, which is what a pocket
+            // copy of anything does. The tab's line — "Admits the bearer to the
+            // whole library, without limit" — wraps to two at this width, and the
+            // motto is the certificate's voice rather than one of its claims, so
+            // shortening it costs nothing that check-pass is holding.
+            motto="The whole library, without limit"
+            holder={displayName || 'Philosopher'}
+            seal={
+              <RankSeal
+                glyph={rank.current.glyph}
+                state="current"
+                size={34}
+                order={rankOrder(rank.index)}
+                degree={rankDegree(rank.index)}
               />
-            )}
-          </UICard>
-        </View>
+            }
+            flag={<MetalPlate metal={METAL.GOLD} label="ACTIVE" />}
+          >
+            <ScheduleHead compact label="WHAT IT GRANTS YOU" tint={mix(METAL.GOLD.base, INK, 0.34)} />
+            {PASS_LINES.map((l, i) => (
+              <ScheduleRow
+                compact
+                key={l.id}
+                grade="granted"
+                label={l.label}
+                detail={longPass(l)}
+                last={i === PASS_LINES.length - 1}
+              />
+            ))}
+          </Certificate>
+        ) : (
+          <Certificate
+            compact
+            variant="free"
+            width={certW}
+            title="THE DAY PASS"
+            motto="Free — one sitting at a time"
+            holder={displayName || 'Philosopher'}
+            seal={
+              <RankSeal
+                glyph={rank.current.glyph}
+                state="current"
+                size={30}
+                order={null}
+                degree={0}
+              />
+            }
+          >
+            {/* THE SAME FIVE ROWS AS THE TAB, showing the free column. Not a
+                list of things being withheld — the schedule of what this
+                certificate actually admits you to, which is the honest reading
+                and the one that makes the button underneath make sense. */}
+            <ScheduleHead compact label="WHERE IT STOPS" />
+            {PASS_LINES.map((l, i) => (
+              <ScheduleRow
+                compact
+                key={l.id}
+                grade="limit"
+                label={l.label}
+                detail={longFree(l)}
+                last={i === PASS_LINES.length - 1}
+              />
+            ))}
+          </Certificate>
+        )}
       </View>
-      {isPro && (
+
+      {/* THE ACTION, DIRECTLY UNDER THE OBJECT. Not sticky and not buried: the
+          certificate above it is the compact one precisely so that this is on
+          screen at the same time as the thing it acts on. */}
+      {isPro ? (
         <Button
           label="Cancel subscription"
           onPress={() => setConfirmCancel(true)}
           variant="destructive"
-          style={{ alignSelf: 'flex-start', marginTop: SPACE[3] }}
+          size="lg"
+          style={{ marginTop: SPACE[3] }}
         />
+      ) : (
+        <>
+          <View style={styles.priceRow}>
+            <Text style={styles.price}>{price}</Text>
+            <Text style={styles.per}>/ {period}</Text>
+          </View>
+          <Button
+            label="Take the Scholar’s Pass"
+            icon="star"
+            size="lg"
+            onPress={() => {
+              track('subscribe_clicked', { plan: 'monthly', billing: 'monthly', source: 'settings' });
+              router.push('/(app)/paywall');
+            }}
+            style={{ marginTop: SPACE[2] }}
+          />
+          {/* The full comparison — both certificates, the wall, everything both
+              tiers include — lives one tap away rather than on this screen,
+              which is the whole reason this one is short. */}
+          <Button
+            label="See everything it includes"
+            variant="ghost"
+            onPress={() => router.push('/(app)/pass')}
+            style={{ marginTop: SPACE[1] }}
+          />
+        </>
       )}
 
       <Text style={styles.footNote}>
-        Subscriptions renew monthly. Cancelling is done through {storeName}; your Scholar’s Pass stays active until the end of the current billing period.
+        {isPro
+          ? `Your Scholar’s Pass renews every ${period}. Cancelling is done through ${storeName}; it stays active until the end of the current billing period.`
+          : `The Scholar’s Pass renews every ${period} until cancelled, through ${storeName}.`}
       </Text>
 
       <ConfirmModal
@@ -1358,10 +1475,6 @@ const styles = StyleSheet.create({
   segText: { ...role('label'), color: C.ink },
 
   // Check rows
-  checkRow: { flexDirection: 'row', alignItems: 'center', gap: SPACE[1] },
-  checkBox: { width: 18, height: 18, borderWidth: 2, borderColor: C.HUE, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center' },
-  checkMark: { ...role('micro'), letterSpacing: 0, color: C.ink },
-  checkLabel: { flex: 1, ...role('label'), color: C.ink },
 
   // Profile
   identity: { flexDirection: 'row', alignItems: 'center' },
@@ -1456,21 +1569,25 @@ const styles = StyleSheet.create({
   },
   sceneNameOn: { fontFamily: 'Inter_700Bold', color: C.ink },
 
-  // Subscription. The two plan panels are `components/ui/Card` now; `planCol`
-  // is what is left of `planCard` — the flex that made them share the row.
-  planRow: { flexDirection: 'row', gap: SPACE[2] },
-  planCol: { flex: 1 },
-  currentTag: { position: 'absolute', top: SPACE[1], right: SPACE[1], backgroundColor: C.ink, borderRadius: RADIUS.pill, paddingHorizontal: SPACE[1], paddingVertical: SPACE[0] },
-  currentTagText: { ...role('micro'), color: C.paper },
-  proKicker: { ...role('micro'), color: C.ink },
-  planName: { ...role('micro'), color: C.inkSoft },
-  planPrice: { ...role('display'), color: C.ink, marginTop: SPACE[0] },
-  perMo: { ...role('label'), color: C.inkSoft },
-  planNote: { ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic', color: C.inkSoft, marginTop: SPACE[0] },
-  planFoot: { ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic', color: C.inkSoft, textAlign: 'center', marginTop: SPACE[3] },
-  andMore: { flexDirection: 'row', alignItems: 'center', gap: SPACE[1], marginVertical: SPACE[0] },
-  andLine: { flex: 1, height: 1, backgroundColor: C.hairline },
-  andMoreText: { ...role('micro'), letterSpacing: 0, fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic', color: C.inkSoft },
+  // Subscription. THIRTEEN STYLES WENT WITH THE TWO PRICING CARDS — planRow,
+  // planCol, currentTag, proKicker, planName, planPrice, perMo, planNote,
+  // planFoot and the "& more" divider. What replaces them is a certificate that
+  // brings its own everything, so all this screen owns is the box it sits in and
+  // the price above the button.
+  // `stretch`, not `center`: the box has to take the card's full content width
+  // for onLayout to report it, and the certificate is then drawn at exactly that.
+  certWrap: { alignSelf: 'stretch', marginTop: SPACE[3] },
+  // The Pass tab's `priceRow` at the same sizes, deliberately: two screens that
+  // print the same price should agree about what a price looks like.
+  priceRow: {
+    flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center',
+    gap: 4, marginTop: SPACE[2],
+  },
+  price: {
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: C.ink,
+    includeFontPadding: false,
+  },
+  per: { fontFamily: 'Inter_400Regular', fontSize: 12.5, color: MID },
 
   // An inline note that a control is currently unable to do its job (permission
   // refused, backup switched off). Ink on a tinted panel, not red — it is a state
