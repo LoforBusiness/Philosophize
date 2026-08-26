@@ -36,6 +36,7 @@ export type SketchIconName =
   | 'database'
   | 'warning'
   | 'pencil'
+  | 'pass'
   | 'check';
 
 interface Props {
@@ -312,6 +313,21 @@ export default memo(function SketchIcon({ name, color = '#1A1A1A', size = 28 }: 
           <Path d="M9 15.2 L9 21 C9 23.2 23 23.2 23 21 L23 15.2" {...s} />
           <Path d="M27 13 L27 20.5" {...s} />
           <Circle cx="27" cy="21.5" r="1.3" {...s} fill={color} />
+        </>
+      )}
+
+      {/* THE PASS — an admission card with a struck seal on it.
+          Not 'star' and not 'grad': star is what every app uses for premium and
+          says nothing about what this one sells, and grad is one hat away from
+          the Thinkers tab. A ruled card with a seal is the object the tab
+          actually contains, which is what an icon is supposed to be. */}
+      {name === 'pass' && (
+        <>
+          <Path d="M4 8 L25 8 L28 11 L28 24 L7 24 L4 21 Z" {...s} />
+          <Path d="M8 13 L18 13" {...s} />
+          <Path d="M8 17.5 L15 17.5" {...s} />
+          <Circle cx="23" cy="17.5" r="3.6" {...s} />
+          <Path d="M23 21.1 L21.4 24.6 L23 23.7 L24.6 24.6 Z" {...s} />
         </>
       )}
 

@@ -106,8 +106,9 @@ Philosophize/
 │   ├── index.tsx                # Landing / onboarding
 │   ├── sign-in.tsx              # Modal presentation
 │   ├── thinker/[id].tsx         # Deep-link target (philosophize://thinker/<id>)
-│   └── (app)/                   # Authenticated tab shell (5 tabs)
-│       ├── _layout.tsx          # Tabs: Home · Learn · Thinkers · Stats · Profile
+│   └── (app)/                   # Authenticated tab shell (6 tabs)
+│       ├── _layout.tsx          # Tabs: Home · Learn · Thinkers · Insights ·
+│       │                        #   Pass · Profile
 │       │                        #   animation:'fade' cross-dissolve, 340ms (§19)
 │       ├── index.tsx            # Home: reflection → QuickStart → actions → streak
 │       ├── branches/            # _layout (fade_from_bottom push) → index (Learn)
@@ -122,6 +123,9 @@ Philosophize/
 │       │                        #   Display · Privacy · Feedback · Subscription ·
 │       │                        #   Danger Zone. Notifications only when §22 says
 │       │                        #   the binary can schedule one
+│       ├── pass.tsx             # THE PASS TAB — two certificates and a herald
+│       │                        #   (§14). The only permanent address the offer
+│       │                        #   has; the rest of the family are interruptions
 │       └── paywall.tsx          # Hidden route — hosts PaywallContent full-screen
 ├── components/
 │   ├── lesson/                  # LessonRunner, CardShell, LessonReward, LessonLoader
@@ -142,7 +146,9 @@ Philosophize/
 │   ├── home/                    # QuickStartCard, StickmanStroll
 │   ├── paywall/                 # THE PASS FAMILY — PassParts (the reader's
 │   │                            #   standing, the wall in days, the five-row
-│   │                            #   comparison), DailyLimit, LessonLocked (§14)
+│   │                            #   comparison), DailyLimit, LessonLocked,
+│   │                            #   Certificate (the engraved object + its
+│   │                            #   schedule rows), PassHerald (§14)
 │   ├── gamification/            # StreakBook, StreakWeek, RankUpScreen
 │   ├── widget/                  # Android home-screen widget surface
 │   └── shared/                  # SketchIcon, Glyph, PhilosopherSheet, RanksBadgesSheet,
@@ -772,7 +778,8 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
   the pin they held handing over to the pin they just earned, a three-badge
   profile cabinet, XP + level curve, daily streak. Top rank at 50,000 XP.
 - **Screens:** Home (with Quick Start, §19), Learn → branch → unit accordion →
-  lesson, Thinkers, Stats, Profile, Settings, paywall, widget, saved quotes.
+  lesson, Thinkers, Insights, **Pass**, Profile, Settings, paywall, widget,
+  saved quotes. Six tabs since the Pass got one of its own (§14).
 - **Money:** RevenueCat `scholars_pass` entitlement; AdMob interstitial after a
   free user's lesson; free daily lesson limit. The offer, the daily limit and the
   locked lesson are **one family** (`components/paywall/`) built out of the
@@ -956,6 +963,71 @@ Five things differ by tier, and all five are enforced in code:
 the two biggest things the Pass buys were being given away for nothing. That is
 the failure mode a hand-written benefit list has in the direction nobody watches
 for — everyone guards against over-promising, and nothing guards against silence.
+
+### The Pass has a tab now, and it is a shop rather than an ambush
+
+Every other member of this family is an INTERRUPTION — the daily limit, the
+locked lesson, the sheet after a lesson. All three arrive when a reader has just
+been stopped, which is the worst moment to ask somebody to read a price. So the
+offer also has a permanent address between Insights and Profile, which is the
+shape Duolingo and Brilliant both use and the reason is not imitation: a reader
+can walk in, read the terms at their own pace, and walk out again.
+
+**Two certificates, and the second one is the argument.** The SCHOLAR'S PASS is
+engraved in gold and carries everything — the five things the Pass adds, struck
+and recessed and railed, then the six things every reader already has, flat.
+Below it, in paper instead of gold, the DAY PASS says what the free tier really
+gives: the same six included rows, then the identical five rows showing the other
+column. They are the same object in two materials, so the comparison needs no
+explaining.
+
+- **The highlight is a MATERIAL, not a colour.** The obvious way to mark the Pass
+  rows is a tint behind them, and §19 records that exact move — large saturated
+  fills on paper — as what made Insights read cheap. A `granted` row is instead
+  CUT INTO the page: a recess running StruckNiche's gradient backwards, a 3pt
+  gold rail down the cut edge, a gold-rimmed tick. It differs from its neighbours
+  by depth and by metal, which is how every other reward in this app already
+  differs from the thing below it.
+- **A limit is not a tick.** The free certificate's rows carry an open square with
+  a bar across it. A tick meaning "you have this, but only a bit of it" is the
+  kind of half-true a screen that takes money must not print.
+- **The guilloché is what makes it read as a document.** Two sine trains at a
+  1:1.618 beat, sampled as polylines, at 0.5px. It is the strongest "this is a
+  certificate" signal available and it costs no colour at all. It stops above the
+  motto — drawn full-bleed it ran behind the one line set in a light italic,
+  which is the type least able to hold its own against texture.
+- **The herald stands ON the certificate's top edge**, not beside it. The literal
+  layout was drawn and does not survive a narrow phone: at 320dp a 96pt figure
+  leaves 184pt for a certificate carrying eleven ruled rows, which stops being a
+  certificate and becomes a receipt.
+
+**AND EVERY FIGURE ON BOTH CERTIFICATES IS COUNTED, INCLUDING THE ONES THAT ARE
+NOT GATES.** `PASS_LINES` already held the five differences; `includedLines()`
+now counts the library, the thinkers, the saveable quotes, the ranks and the
+badges out of the tree, and `check:pass` re-derives every one of them by counting
+again independently. This is not fussiness — the curriculum has gone 60 → 192 →
+222 lessons, and CLAUDE.md was still saying 132 saveable quotes when the real
+figure was **228**. A number typed onto a certificate is a number nobody
+re-derives. The check also reads the tab's source with the JSX braces stripped
+and fails on any digit left in literal text.
+
+> **THE NARROW PHONE BROKE IT AGAIN, AND THAT IS TWICE NOW.** The title sets in
+> Cinzel capitals with tracking: "THE SCHOLAR’S" is 210pt wide at 21px, against
+> 208pt of room inside the head at 320dp. Two points. It passed a type check, a
+> contact sheet and a mounted-and-measured browser sweep at 390dp, and on the
+> narrow phone it rendered as **"THE SCHOLAR’S …"** — an ellipsis where the name
+> of the product goes — with its first line sliced off by a head that was a fixed
+> 96pt. §19 records the identical shape for "PER ACTIVE DAY", measured fine at
+> 390 and broken at 360. The head grows now, the title scales, and `check:pass`
+> measures both against Cinzel's own `.ttf` at every width the app supports.
+
+> **The sixth tab, and the note that argued against one.** `_layout.tsx` rejected
+> a streak tab because "at 390pt that is ~62pt a tab and the labels clip". Sound,
+> and it does not apply: `tabBarShowLabel` is false, so there is nothing to clip.
+> Measured in the real navigator at 320dp — six icons, 30pt each, centres 53pt
+> apart, which is a 53pt slot against the 44pt both stores ask for. What did have
+> to be re-argued is whether a sixth destination earns the room, and the streak
+> still does not: it is already one tap from every screen that shows the count.
 
 **Free tier** — enough to fall in love: a lesson a day, every branch's first unit
 in order, the full streak, XP, rank and badge systems, and all 322 thinkers.
@@ -2620,7 +2692,8 @@ browser at it; the first transform can take longer than a navigation timeout.
   gets it — which is the only version of this rule that survives being forgotten.
 
   **A fifth harness, and it is not about lessons.** `npm run sheet:pass` loads the
-  three Scholar's Pass screens (§14) for real and reports whether React actually
+  Scholar's Pass screens (§14) — the tab, the offer, the daily limit and the three
+  locked readings, eight in all — for real and reports whether React actually
   mounted, whether anything sticks out past the viewport, and whether any line of
   text is cut off inside its own box — then writes a PNG of each so they can be
   looked at. Its own two lessons, both of which cost a run:

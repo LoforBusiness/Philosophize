@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import PaywallContent from '@/components/shared/PaywallContent';
+import PassTab from '@/app/(app)/pass';
 import DailyLimit from '@/components/paywall/DailyLimit';
 import LessonLocked from '@/components/paywall/LessonLocked';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -87,7 +88,13 @@ export default function PreviewPass() {
   const unit1 = branch.paths[1];
 
   let body = null;
-  if (s === 'limit') {
+  if (s === 'tab') {
+    // THE REAL TAB SCREEN, imported as a component. It is a route, so it renders
+    // perfectly well outside the navigator — the only thing it needs from one is
+    // `useFocusEffect`, which no-ops without a focus context, and the analytics
+    // call behind it is a stub on web.
+    body = <PassTab />;
+  } else if (s === 'limit') {
     body = <DailyLimit lesson={unit0.lessons[2]} branch={branch} onExit={() => {}} />;
   } else if (s === 'locked') {
     const unit = kind === 'ahead' ? unit1 : unit0;

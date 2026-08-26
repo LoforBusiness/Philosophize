@@ -1,8 +1,23 @@
 import { ALL_BRANCHES } from '@/data';
+import { ALL_PHILOSOPHERS } from '@/data/philosophers';
+import { RANKS } from '@/data/ranks';
+import { BADGES } from '@/data/badges';
+import { ORDERS } from '@/constants/insignia';
 import { FREE_DAILY_LESSON_LIMIT, lessonsWord } from '@/constants/subscription';
 import {
   REST_CAP_FREE, REST_CAP_PRO, REST_EARN_EVERY_FREE, REST_EARN_EVERY_PRO,
 } from '@/constants/streak';
+
+// COUNTED ONCE AT MODULE LOAD, not per render. These four arrays are the four
+// biggest in the app — 322 thinkers, 48 ranks, 70 badges, six branches of
+// lessons — and a certificate that recounted them on every frame would be doing
+// the most expensive thing on the screen for a figure that cannot change.
+const PHILOSOPHER_COUNT = ALL_PHILOSOPHERS.length;
+const RANK_COUNT = RANKS.length;
+const ORDER_COUNT = ORDERS.length;
+const BADGE_COUNT = BADGES.length;
+/** Tiers actually struck in the roll, rather than a number remembered from §7. */
+const BADGE_TIERS = new Set(BADGES.map((b) => b.tier)).size;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHAT THE PASS IS ACTUALLY WORTH, DERIVED RATHER THAN TYPED.
@@ -81,6 +96,38 @@ export const PASS_LINES: readonly PassLine[] = [
     pass: `${REST_CAP_PRO} held · 1 per ${REST_EARN_EVERY_PRO}`,
   },
 ] as const;
+
+/**
+ * A `PASS_LINES` value said as a whole phrase.
+ *
+ * THE TABLE'S VALUES ARE COLUMN CELLS, and the certificate is not a table. In the
+ * paywall's three-column rule the lessons row reads "Lessons a day | 1 | As many
+ * as you like" and the column heading supplies the unit. Printed on a ruled
+ * certificate under the label, the same cell is a line that says "1" — which is
+ * not a sentence and not an amount.
+ *
+ * So the expansion lives here rather than in the screen, and it is still derived
+ * from the same constant: `allowanceLabel()` reads `FREE_DAILY_LESSON_LIMIT`, the
+ * number the gate itself enforces. Retuning the allowance moves the table, the
+ * certificate and this phrase in one commit, which is the whole point of §14.
+ */
+export function longFree(line: PassLine): string | null {
+  // "1 lesson", not `allowanceLabel()`'s "1 lesson a day": the certificate prints
+  // the label directly above the value, and that label already IS "Lessons a
+  // day". Rendered together the fuller phrase read "Lessons a day / 1 lesson a
+  // day", which is the sort of thing that only shows up once it is on a screen.
+  if (line.id === 'lessons') {
+    return line.free === null
+      ? null
+      : `${FREE_DAILY_LESSON_LIMIT} ${lessonsWord(FREE_DAILY_LESSON_LIMIT)}`;
+  }
+  return line.free;
+}
+
+/** The Pass side of the same row. Nothing needs expanding on this side today. */
+export function longPass(line: PassLine): string {
+  return line.pass;
+}
 
 // ── the library, and how long it takes at one a day ──────────────────────────
 
@@ -192,4 +239,102 @@ export function renewalLabel(ms: number): string {
 /** "1 lesson a day" / "3 lessons a day" — the free allowance, said in words. */
 export function allowanceLabel(): string {
   return `${FREE_DAILY_LESSON_LIMIT} ${lessonsWord(FREE_DAILY_LESSON_LIMIT)} a day`;
+}
+
+// ── WHAT EVERY READER ALREADY HAS ────────────────────────────────────────────
+
+/**
+ * THE OTHER HALF OF THE CERTIFICATE, and it is the half that is easy to get
+ * wrong in the direction nobody checks.
+ *
+ * `PASS_LINES` above is the DIFFERENCE — the five things that change when you
+ * pay. That is the right shape for a paywall someone has just walked into, and
+ * the wrong shape for a certificate, which has to say what the reader is
+ * actually holding. A subscription screen listing only what you do not have
+ * reads as a list of things being withheld.
+ *
+ * So these are the things that are the same on both tiers, and every figure is
+ * COUNTED OUT OF THE TREE rather than typed. That is not fussiness: the library
+ * has gone 60 → 192 → 222 lessons and the quote count in CLAUDE.md was still
+ * saying 132 when the real figure was 228. A number typed onto a certificate is
+ * a number that goes quietly stale, and this is the one screen in the app where
+ * somebody is about to be charged.
+ *
+ * A LINE EARNS ITS PLACE THE SAME WAY §22's SETTINGS KEYS DO: it names something
+ * the app really contains, and `check:pass` re-derives every figure.
+ */
+export interface IncludedLine {
+  /** Stable id — `check-pass` names its assertions by these. */
+  id: 'library' | 'thinkers' | 'quotes' | 'ranks' | 'badges' | 'streak';
+  /** Short — it sits in a ruled list on a certificate. */
+  label: string;
+  /** The figure, said the way a person would say it. */
+  detail: string;
+}
+
+/** Every lesson, unit and branch in the app, counted rather than remembered. */
+export function libraryShape(): { branches: number; units: number; lessons: number } {
+  let units = 0;
+  let lessons = 0;
+  for (const b of ALL_BRANCHES) {
+    units += b.paths.length;
+    for (const u of b.paths) lessons += u.lessons.length;
+  }
+  return { branches: ALL_BRANCHES.length, units, lessons };
+}
+
+/** How many quotations in the whole curriculum can be kept. */
+export function saveableQuotes(): number {
+  let n = 0;
+  for (const b of ALL_BRANCHES) {
+    for (const u of b.paths) {
+      for (const l of u.lessons) {
+        for (const c of l.cards) if (c.type === 'quote') n++;
+      }
+    }
+  }
+  return n;
+}
+
+/**
+ * What both tiers include. Free and Pass readers get all of it.
+ *
+ * ORDERED BY WHAT A READER WOULD MISS MOST if it were taken away, which puts the
+ * library first and the two reward ladders last — not by which number is biggest,
+ * which would open on 322 thinkers and make the app look like a reference book.
+ */
+export function includedLines(): readonly IncludedLine[] {
+  const lib = libraryShape();
+  return [
+    {
+      id: 'library',
+      label: 'The whole library',
+      detail: `${lib.lessons} lessons · ${lib.units} units · ${lib.branches} branches`,
+    },
+    {
+      id: 'thinkers',
+      label: 'Every thinker',
+      detail: `${PHILOSOPHER_COUNT} philosophers, with their lives and their lines`,
+    },
+    {
+      id: 'quotes',
+      label: 'Quotes worth keeping',
+      detail: `${saveableQuotes()} to collect across the curriculum`,
+    },
+    {
+      id: 'ranks',
+      label: 'The full ladder',
+      detail: `${RANK_COUNT} ranks in ${ORDER_COUNT} orders`,
+    },
+    {
+      id: 'badges',
+      label: 'The whole case',
+      detail: `${BADGE_COUNT} badges in ${BADGE_TIERS} tiers`,
+    },
+    {
+      id: 'streak',
+      label: 'Streaks, XP and rest days',
+      detail: 'The habit, in full — nothing here is held back',
+    },
+  ] as const;
 }

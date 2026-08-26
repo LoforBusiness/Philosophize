@@ -56,7 +56,7 @@ import { useUIStore } from '@/stores/uiStore';
  * out means the one tab a reader is certain to press next is the one still
  * unbuilt. It is first for the same reason.
  */
-const WARM = ['index', 'branches', 'philosophers', 'stats', 'profile'] as const;
+const WARM = ['index', 'branches', 'philosophers', 'stats', 'pass', 'profile'] as const;
 
 // `launchDone` fires when the launch screen starts to LIFT, not when it leaves:
 // its own art still has a 520ms dissolve to run, and Home's arrival stagger
@@ -193,6 +193,23 @@ export default function AppLayout() {
         name="stats"
         options={{ title: 'Stats', tabBarIcon: tab('frame'), lazy: !built('stats') }}
       />
+      {/* ── THE SIXTH TAB, AND THE NOTE BELOW USED TO ARGUE AGAINST ONE ─────
+          The streak was considered for a sixth slot and rejected because "at
+          390pt that is ~62pt a tab and the labels clip". That reasoning was
+          sound and it does not apply here: `tabBarShowLabel` is false, so there
+          are no labels to clip — the bar carries 26pt icons that grow to about
+          30 when focused. Six of those on the narrowest phone this app supports
+          is 60pt a tab, which is twice the icon.
+
+          What DID have to be re-checked is the thing the old note was really
+          about: whether a sixth destination earns the room. It does, and for a
+          reason the streak did not have — a paywall that only appears when a
+          reader is BLOCKED is an ambush, and one at a permanent address is a
+          shop they can walk out of. */}
+      <Tabs.Screen
+        name="pass"
+        options={{ title: 'Pass', tabBarIcon: tab('pass'), lazy: !built('pass') }}
+      />
       <Tabs.Screen
         name="profile"
         options={{ title: 'Profile', tabBarIcon: tab('person'), lazy: !built('profile') }}
@@ -201,9 +218,11 @@ export default function AppLayout() {
       <Tabs.Screen name="settings" options={{ href: null }} />
       {/* Paywall — pushed from Settings and the daily-limit gate, hidden from tabs */}
       <Tabs.Screen name="paywall" options={{ href: null }} />
-      {/* The streak, pushed from wherever the count appears. A sixth tab was the
-          obvious home and is the wrong one: at 390pt that is ~62pt a tab and the
-          labels clip, and the streak does not need to outrank Learn to matter. */}
+      {/* The streak, pushed from wherever the count appears. A tab of its own was
+          the obvious home and is still the wrong one — the streak does not need
+          to outrank Learn to matter, and it is already one tap from every screen
+          that shows the count. (The bar does now carry six; see the Pass note
+          above for why that one earned the room and this one does not.) */}
       <Tabs.Screen name="streak" options={{ href: null }} />
       {/* The lesson tester. Hidden from the tab bar AND gated inside the screen —
           a route can always be reached by URL, so the tab config is not the lock. */}

@@ -3,11 +3,12 @@
 //
 //   node scripts/check-quips.mjs          (npm run check:quips)
 //
-// Three pools of hand-written lines, and until this file existed nothing checked
+// Four pools of hand-written lines, and until this file existed nothing checked
 // any of them for the one thing that can actually break:
 //
 //   · LOAFER_LINES        — the thought cloud on the reward screen
 //   · streakMood's LINES  — what the mascot says on the streak tab
+//   · passQuips           — what the herald says beside the Pass certificate
 //   · userBio's pools     — the "who you're becoming" sentence on Profile
 //
 // ── WHY A CHECKER, FOR PROSE ────────────────────────────────────────────────
@@ -72,11 +73,23 @@ function strings(src) {
   return out;
 }
 
+/**
+ * The app's spacing scale, read out of the file that defines it.
+ *
+ * Needed because a StyleSheet writes `paddingHorizontal: SPACE[3]`, not `12` —
+ * so a regex looking for a bare number finds nothing, `num()` returns NaN, and
+ * the NaN propagates into a width budget that then reports every line in the
+ * pool as eleven rows long. That happened on this checker's first run against
+ * the herald, and the tell was that the failures were ABSURD rather than
+ * marginal. An absurd measurement is a broken instrument, not a broken corpus.
+ */
+const SPACE = JSON.parse(/export const SPACE = (\[[^\]]*\])/.exec(read('constants/design.ts'))[1]);
+
 /** A number out of a StyleSheet, so the budgets track the components. */
 function num(src, key, where) {
-  const m = new RegExp(`${key}:\\s*(-?[\\d.]+)`).exec(src);
+  const m = new RegExp(`${key}:\\s*(SPACE\\[(\\d)\\]|-?[\\d.]+)`).exec(src);
   if (!m) { bad(`could not read ${key} from ${where}`); return NaN; }
-  return parseFloat(m[1]);
+  return m[2] !== undefined ? SPACE[+m[2]] : parseFloat(m[1]);
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -255,7 +268,132 @@ console.log('\nthe streak mascot\n');
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// 3. HE NEEDLES ATTENDANCE, NEVER ABILITY — ACROSS ALL THREE POOLS
+// 3. THE HERALD, BESIDE THE CERTIFICATE
+// ═════════════════════════════════════════════════════════════════════════════
+console.log('\nthe herald (Pass tab)\n');
+{
+  const src = read('lib/utils/passQuips.ts');
+  const herald = read('components/paywall/PassHerald.tsx');
+
+  const pools = [
+    ['free', 'export const FREE_QUIPS'],
+    ['pro', 'export const PRO_QUIPS'],
+  ];
+
+  // ── THE BUBBLE, DERIVED FROM THE COMPONENT ────────────────────────────────
+  //
+  // The band is `width` wide and the figure takes `W` of it; the bubble takes
+  // the rest, pulled 6 back over him, less its padding and its two borders. Every
+  // one of those is read out of PassHerald rather than retyped, so a change to
+  // the layout moves this budget with it.
+  //
+  // AND IT IS MEASURED ON A 320dp PHONE. §19's own lesson, which cost a real
+  // defect: "PER ACTIVE DAY" measured fine at 390 and truncated at 360. The
+  // narrow phone is the one text breaks on, so the narrow phone is the budget.
+  const figW = parseFloat(/const W = ([\d.]+)/.exec(herald)[1]);
+  const said = herald.slice(herald.indexOf('said: {'));
+  const size = num(said, 'fontSize', 'the herald bubble');
+  const bubble = herald.slice(herald.indexOf('bubble: {'));
+  const padX = num(bubble, 'paddingHorizontal', 'the herald bubble');
+  const border = num(bubble, 'borderWidth', 'the herald bubble');
+  const wrapPull = 6;   // bubbleWrap's negative marginLeft, back over the figure
+  const NARROW_DP = 320;
+  const pagePad = 24;   // SPACE[4], the Pass tab's own horizontal padding
+  const contentW = NARROW_DP - pagePad * 2;
+  const inner = contentW - figW + wrapPull - padX * 2 - border * 2;
+
+  const MAX_ROWS = 3;
+  const all = [];
+  for (const [name, decl] of pools) {
+    const start = src.indexOf(decl);
+    const block = src.slice(start, src.indexOf('\n];', start));
+    // Only the `line:` values — the pose names are quoted strings too, and a
+    // detector that swept every string in the block would measure 'point' as a
+    // line and report the pool as twice its real size.
+    const lines = [...block.matchAll(/line:\s*(['"])((?:\\.|(?!\1)[^\\])*)\1/g)]
+      .map((m) => m[2].replace(/\\'/g, "'").replace(/\\"/g, '"'));
+    all.push(...lines);
+    const floor = name === 'free' ? 30 : 12;
+    if (lines.length >= floor) ok(`${name}: ${lines.length} lines`);
+    else bad(`${name}: only ${lines.length} lines`, `a reader can meet this pool every day; ${floor} is the floor`);
+  }
+
+  if (new Set(all).size === all.length) ok('no herald line appears twice');
+  else {
+    const seen = new Set(), dupes = [];
+    for (const l of all) { if (seen.has(l)) dupes.push(l); seen.add(l); }
+    bad(`${dupes.length} duplicate herald line(s)`, JSON.stringify(dupes[0]));
+  }
+
+  const long = [];
+  let worst = 0, worstLine = '';
+  for (const l of all) {
+    const rows = wrap(l, size, inner, CAVEAT);
+    if (rows.length > worst) { worst = rows.length; worstLine = l; }
+    if (rows.length > MAX_ROWS) long.push([l, rows.length]);
+  }
+  if (!long.length) {
+    ok(`every line fits ${MAX_ROWS} rows in the ${Math.round(inner)}px bubble`,
+      `at 320dp · worst ${worst} — ${JSON.stringify(worstLine)}`);
+  } else {
+    bad(`${long.length} line(s) wrap past ${MAX_ROWS} rows beside a ${figW}pt figure`);
+    for (const [l, n] of long) console.log(`          ${n} rows  ${JSON.stringify(l)}`);
+  }
+
+  const gaps = new Set();
+  for (const l of all) for (const ch of CAVEAT.missing(l)) gaps.add(ch);
+  if (!gaps.size) ok('every character exists in Caveat');
+  else bad(`${gaps.size} character(s) Caveat has no glyph for`, [...gaps].map((c) => JSON.stringify(c)).join(' '));
+
+  // ── NO LINE MAY CARRY A FIGURE ────────────────────────────────────────────
+  //
+  // passQuips states this as its own rule and it is the one that matters on a
+  // screen that takes money. Every number on this tab is derived — the library
+  // is counted out of the tree, the rest-day caps come from constants/streak,
+  // the price comes from the store — and a number typed into a joke is a number
+  // nobody will ever re-derive. CLAUDE.md was claiming 132 saveable quotes when
+  // the real figure was 228.
+  //
+  // Spelled-out small numbers are allowed: "one lesson a day" is the allowance
+  // said in English, and `allowanceLabel()` says the same thing. What is banned
+  // is a DIGIT, a price, or a spelled-out figure large enough to be a count.
+  const FIGURE = /\b\d/;
+  const SPELLED = /\b(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand)\b/i;
+  const numbered = all.filter((l) => FIGURE.test(l) || SPELLED.test(l));
+  if (!numbered.length) ok('no line carries a figure — every number on this screen is derived');
+  else {
+    bad(`${numbered.length} line(s) type a figure that is derived elsewhere`);
+    for (const l of numbered.slice(0, 5)) console.log(`          ${JSON.stringify(l)}`);
+  }
+
+  // ── EVERY POSE EXISTS, AND WAS DRAWN BEFORE IT WAS CHOSEN ─────────────────
+  //
+  // streakMood's finding, held here too: the rig draws in PROFILE with 11-unit
+  // limbs against a 12-unit torso, so a pose that folds an arm against the body
+  // merges into one mass and nothing numeric catches it. The three codes named
+  // below are the ones that were contact-sheeted and failed.
+  const poseBlock = src.slice(src.indexOf('export const POSE'), src.indexOf('} as const;', src.indexOf('export const POSE')));
+  const codes = [...poseBlock.matchAll(/(\w+):\s*(\d+)/g)].map((m) => [m[1], +m[2]]);
+  const rig = read('components/lesson/cinematic/rig.ts');
+  const table = rig.slice(rig.indexOf('* The settled pose for gesture'), rig.indexOf('export function emoteHold'));
+  const missingPose = codes.filter(([, c]) => !new RegExp(`\\b${c} [a-z]`).test(table));
+  if (!missingPose.length) ok(`all ${codes.length} poses name a real gesture in the rig`);
+  else bad(`${missingPose.length} pose(s) name no gesture`, missingPose.map(([n, c]) => `${n}=${c}`).join(' '));
+
+  const BLOBS = { 9: 'hand-on-hip', 10: 'arms-crossed', 28: 'power-pose' };
+  const blobbed = codes.filter(([, c]) => BLOBS[c]);
+  if (!blobbed.length) ok('no pose is one of the three that sheet as a solid mass');
+  else bad(`${blobbed.length} pose(s) merge the arm into the torso`, blobbed.map(([n, c]) => `${n}=${BLOBS[c]}`).join(' '));
+
+  // Every pose declared should be USED, or it is a name nobody chose.
+  const used = new Set([...src.matchAll(/pose:\s*'(\w+)'/g)].map((m) => m[1]));
+  const unused = codes.map(([n]) => n).filter((n) => !used.has(n));
+  if (!unused.length) ok(`all ${codes.length} poses are actually used by a line`);
+  else bad(`${unused.length} pose(s) declared and never used`, unused.join(' '));
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// 4. HE NEEDLES ATTENDANCE, NEVER ABILITY — ACROSS ALL FOUR POOLS
 // ═════════════════════════════════════════════════════════════════════════════
 //
 // check-streak already held this over streakMood. It never covered the reward
@@ -268,6 +406,7 @@ console.log('\nthe one hard line\n');
     ['the thought cloud', 'components/gamification/RewardLoafer.tsx', 'export const LOAFER_LINES', '];'],
     ['the mascot', 'lib/utils/streakMood.ts', 'const LINES', 'export function lineFor'],
     ['the bio', 'lib/utils/userBio.ts', 'const ARCHETYPE', 'export function generateUserBio'],
+    ['the herald', 'lib/utils/passQuips.ts', 'export const FREE_QUIPS', 'export function quipFor'],
   ];
   let hits = 0;
   for (const [name, file, from, to] of pools) {
@@ -277,11 +416,11 @@ console.log('\nthe one hard line\n');
     const offenders = strings(block).filter((l) => l.length > 6 && BANNED.test(l));
     if (offenders.length) { hits++; bad(`${name}: ${offenders.length} line(s) attack ability, not attendance`, JSON.stringify(offenders[0])); }
   }
-  if (!hits) ok('every line in all three pools needles attendance, not ability');
+  if (!hits) ok('every line in all four pools needles attendance, not ability');
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// 4. THE BIO'S POOLS
+// 5. THE BIO'S POOLS
 // ═════════════════════════════════════════════════════════════════════════════
 //
 // No box to overflow here — the card grows — so the only thing worth holding is

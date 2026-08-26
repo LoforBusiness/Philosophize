@@ -117,6 +117,20 @@ const SCREENS = [
   // Each `want` names a part that has to have PAINTED, not a phrase that happens
   // to be in the file — the point of loading the real screen is that a component
   // can be imported, typechecked and still render nothing.
+  // ── THE PASS TAB ─────────────────────────────────────────────────────────
+  //
+  // Two certificates, a stickman and a frame drawn from a measured height. That
+  // last one is why this screen has to be LOADED rather than reasoned about: the
+  // frame is an SVG sized from onLayout, so a mistake in it does not fail a type
+  // check or a contact sheet — it renders at the wrong size, or not at all.
+  { key: 'pass-tab', q: 's=tab',
+    want: ['THE SCHOLAR’S PASS', 'WHAT THE PASS ADDS', 'AND EVERYTHING BELOW, AS ALWAYS',
+           'ISSUED TO', 'THE DAY PASS', 'WHAT YOU HOLD TODAY', 'WHERE IT STOPS',
+           'The whole library', 'Replay what you finished'] },
+  { key: 'pass-tab-new', q: 's=tab&seed=new',
+    want: ['THE SCHOLAR’S PASS', 'THE DAY PASS'] },
+  { key: 'pass-tab-pro', q: 's=tab&pro=1',
+    want: ['THE SCHOLAR’S PASS', 'Yours already'] },
   { key: 'paywall', q: 's=paywall',
     want: ['ADMIT THE BEARER', 'FREE AGAINST THE PASS', 'WHERE YOU ARE',
            'AT 1 LESSON A DAY', 'no wait at all', 'Start —'] },

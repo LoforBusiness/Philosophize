@@ -159,9 +159,9 @@ export const EVENTS = {
 
   // ── money ─────────────────────────────────────────────────────────────────
   paywall_viewed: {
-    note: 'The offer was shown. `source` is the moment that raised it and is the whole point of the event.',
+    note: 'The offer was shown. `source` is the moment that raised it and is the whole point of the event — `pass_tab` is somebody who WENT LOOKING, which is a different intention from every other source and the only one that is not a wall.',
     props: ['source', 'available'],
-    where: 'components/shared/PaywallContent.tsx, app/(app)/settings.tsx',
+    where: 'components/shared/PaywallContent.tsx, app/(app)/settings.tsx, app/(app)/pass.tsx',
   },
   daily_limit_reached: {
     note: 'A free reader ran out of lessons for the day. The loudest pressure signal the app has.',
@@ -176,7 +176,7 @@ export const EVENTS = {
   subscribe_clicked: {
     note: 'The purchase sheet was opened.',
     props: ['plan', 'billing', 'source'],
-    where: 'components/shared/PaywallContent.tsx',
+    where: 'components/shared/PaywallContent.tsx, app/(app)/pass.tsx',
   },
   subscribe_succeeded: {
     note: 'The entitlement went live. `$revenue` is the property PostHog revenue views read.',

@@ -22,6 +22,7 @@
 // the shaded corner of a struck tile.
 import fs from 'node:fs';
 import path from 'node:path';
+import { loadFont } from './lib/ttfwidth.mjs';
 
 const REPO = process.cwd();
 const read = (rel) => fs.readFileSync(path.join(REPO, rel), 'utf8');
@@ -342,6 +343,220 @@ head('5 · THE SCREENS ARE WIRED TO THE TABLE, NOT TO A COPY OF IT');
   ok(/kind !== 'unreached'/.test(locked),
     'and shows no paywall for the one money cannot fix');
 }
+
+// ═════════════════════════════════════════════════════════════════════════════
+head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
+//
+// The Pass tab prints two certificates, and the second half of each is a list of
+// what a reader ALREADY has — the library, the thinkers, the quotes, the ranks,
+// the badges. Those are not gates, so section 1 above cannot hold them; they are
+// counts, and a count typed onto a screen that takes money is the exact failure
+// §14 exists to prevent. CLAUDE.md was still claiming 132 saveable quotes when
+// the tree held 228.
+//
+// So each one is re-derived here from the data itself, by a second count written
+// independently of the one in passValue.
+{
+  const PH = await import('@/data/philosophers');
+  const RK = await import('@/data/ranks');
+  const BG = await import('@/data/badges');
+  const INS = await import('@/constants/insignia');
+
+  const lines = V.includedLines();
+  const byId = (id) => lines.find((l) => l.id === id);
+  const IDS = ['library', 'thinkers', 'quotes', 'ranks', 'badges', 'streak'];
+
+  ok(lines.length === IDS.length, 'the schedule has one row per included id',
+    `${lines.length} rows`);
+  ok(IDS.every((i) => byId(i)), 'every id is present',
+    IDS.filter((i) => !byId(i)).join(' ') || 'all present');
+  ok(new Set(lines.map((l) => l.id)).size === lines.length, 'no id appears twice');
+
+  // ── the library ───────────────────────────────────────────────────────────
+  let lessons = 0, units = 0;
+  for (const b of DATA.ALL_BRANCHES) {
+    units += b.paths.length;
+    for (const u of b.paths) lessons += u.lessons.length;
+  }
+  const lib = byId('library').detail;
+  ok(lib.includes(String(lessons)), 'the library row counts the real lessons', `${lessons} — "${lib}"`);
+  ok(lib.includes(String(units)), 'and the real units', `${units}`);
+  ok(lib.includes(String(DATA.ALL_BRANCHES.length)), 'and the real branches',
+    `${DATA.ALL_BRANCHES.length}`);
+  ok(V.libraryTotal() === lessons, '`libraryTotal` agrees with this count', `${V.libraryTotal()}`);
+
+  // ── the thinkers ──────────────────────────────────────────────────────────
+  const th = byId('thinkers').detail;
+  ok(th.includes(String(PH.ALL_PHILOSOPHERS.length)),
+    'the thinkers row counts ALL_PHILOSOPHERS', `${PH.ALL_PHILOSOPHERS.length} — "${th}"`);
+
+  // ── the quotes ────────────────────────────────────────────────────────────
+  //
+  // Counted a second time, here, rather than trusting `saveableQuotes()` — the
+  // point of this file is that the screen's arithmetic is checked BY different
+  // arithmetic, not restated by it.
+  let quotes = 0;
+  for (const b of DATA.ALL_BRANCHES) {
+    for (const u of b.paths) {
+      for (const l of u.lessons) {
+        for (const c of l.cards) if (c.type === 'quote') quotes++;
+      }
+    }
+  }
+  const qd = byId('quotes').detail;
+  ok(V.saveableQuotes() === quotes, '`saveableQuotes` counts every quote card', `${quotes}`);
+  ok(qd.includes(String(quotes)), 'and the quotes row prints that figure', `"${qd}"`);
+
+  // ── the two ladders ───────────────────────────────────────────────────────
+  const rk = byId('ranks').detail;
+  ok(rk.includes(String(RK.RANKS.length)), 'the ranks row counts the real ladder',
+    `${RK.RANKS.length} — "${rk}"`);
+  ok(rk.includes(String(INS.ORDERS.length)), 'and the real number of orders',
+    `${INS.ORDERS.length}`);
+
+  const bg = byId('badges').detail;
+  const tiers = new Set(BG.BADGES.map((b) => b.tier)).size;
+  ok(bg.includes(String(BG.BADGES.length)), 'the badges row counts the real roll',
+    `${BG.BADGES.length} — "${bg}"`);
+  ok(bg.includes(String(tiers)), 'and the tiers actually struck in it', `${tiers}`);
+
+  // ── NOTHING ON THE CERTIFICATE IS TYPED ───────────────────────────────────
+  //
+  // The counts above could all be right and the SCREEN could still print a
+  // number of its own. So the tab's source is read for a bare figure outside a
+  // style block — the same shape of rule §17 uses for a typed XP figure in a
+  // cinematic string, and for the same reason: a hard-coded number is a claim
+  // nobody will re-derive.
+  const tab = read('app/(app)/pass.tsx').replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  //
+  // A REGEX CANNOT FIND A JSX TEXT NODE, and the first draft of this rule proved
+  // it. `>\s*([^<>{}]*?)\s*<` matched `lib.left > 0 ? (` — a comparison operator
+  // and an opening paren — and reported the screen as printing the figure "0".
+  //
+  // Balanced braces CAN be stripped, and that is exact. Every attribute value and
+  // every interpolation in JSX lives inside `{...}`; take those out, along with
+  // the StyleSheet block, and what is left of the render is tag names and literal
+  // text. Tag names carry no digits, so anything remaining that does is copy
+  // somebody typed by hand.
+  const render = tab.slice(tab.indexOf('return ('), tab.indexOf('const st = StyleSheet.create'));
+  let literal = '', depth = 0;
+  for (const ch of render) {
+    if (ch === '{') depth++;
+    else if (ch === '}') depth = Math.max(0, depth - 1);
+    else if (depth === 0) literal += ch;
+  }
+  const typedNumber = [...literal.matchAll(/[^\s<>/]*\d[^\s<>/]*/g)].map((m) => m[0]);
+  ok(typedNumber.length === 0, 'no figure is typed into the Pass tab',
+    typedNumber.slice(0, 3).map((t) => JSON.stringify(t)).join(' ') || 'every number derived');
+
+  // ── AND THE TWO CERTIFICATES SHOW THE SAME SCHEDULE ───────────────────────
+  //
+  // The free certificate is not a second list of features — it is the identical
+  // five rows with the other column's values, which is what makes the pair
+  // comparable at a glance instead of two unrelated brochures. If one of them
+  // ever renders a subset, they stop being a comparison.
+  const scholarRows = /PASS_LINES\.map\([\s\S]*?grade="granted"/.test(tab);
+  const freeRows = /PASS_LINES\.map\([\s\S]*?grade="limit"/.test(tab);
+  const included = (tab.match(/included\.map\(/g) || []).length;
+  ok(scholarRows, 'the Scholar certificate renders every row of PASS_LINES as granted');
+  ok(freeRows, 'and the free certificate renders every one of them as a limit');
+  ok(included === 2, 'both certificates print the whole included schedule', `${included} of 2`);
+
+  // ── NO COLOUR IS DECLARED IN THE NEW FILES ────────────────────────────────
+  //
+  // Same rule section 5 holds the rest of the family to. `mix()` of two tones is
+  // fine and is how the certificate derives its gold rules; a raw hex is not.
+  for (const f of ['components/paywall/Certificate.tsx', 'components/paywall/PassHerald.tsx', 'app/(app)/pass.tsx']) {
+    const src = read(f).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+    const hexes = [...src.matchAll(/#[0-9a-fA-F]{3,8}\b/g)].map((m) => m[0]);
+    ok(hexes.length === 0, `${f.split('/').pop()} declares no colour of its own`,
+      hexes.slice(0, 3).join(' ') || 'every value from tone/METAL/mix');
+  }
+
+  // ── GOLD ON PAPER, MEASURED ───────────────────────────────────────────────
+  //
+  // PassParts records that `METAL.GOLD.base` is 2.51:1 on paper — fine inside a
+  // rim on a medal, invisible as a hairline standing alone on a page. The
+  // certificate's frame and its section headings are exactly that: rules and
+  // small caps on bare paper. `INK_GOLD` is the derived tone they use instead,
+  // and this asserts it actually clears the floor rather than merely looking
+  // darker.
+  const INK_GOLD = T.mix(T.METAL.GOLD.base, T.INK, 0.34);
+  const onPaper = ratio(INK_GOLD, D.C.paper);
+  ok(onPaper >= 4.5, 'the certificate\'s gold clears 4.5:1 on paper',
+    `${onPaper.toFixed(2)}:1 (raw gold base is ${ratio(T.METAL.GOLD.base, D.C.paper).toFixed(2)}:1)`);
+
+  // The label inside a gold plate takes the metal's own `on`, which check-ui
+  // owns — but the plate on this certificate is the ACTIVE flag, so it is worth
+  // asserting here too rather than assuming.
+  const onPlate = ratio(T.METAL.GOLD.on, T.METAL.GOLD.base);
+  ok(onPlate >= 3, 'the ACTIVE plate\'s label reads on its own metal', `${onPlate.toFixed(2)}:1`);
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+head('8 · THE CERTIFICATE\'S NAME FITS THE CERTIFICATE');
+//
+// The one thing on this screen that cannot be allowed to truncate. The title is
+// set in Cinzel capitals with tracking, and at 21px "THE SCHOLAR’S" is 210pt
+// wide — against 208pt of room inside the head on a 320dp phone. Two points.
+//
+// It shipped past a type check, a contact sheet and a mounted-and-measured
+// browser sweep at 390dp, and appeared on the narrow phone as "THE SCHOLAR’S …":
+// an ellipsis where the name of the product should be. §19 records the identical
+// failure for "PER ACTIVE DAY" — measured fine at 390, broke at 360 — so this is
+// the second time the narrow phone has been the one that mattered.
+//
+// Measured against Cinzel's own .ttf in plain Node, at every width the app
+// supports, with the head's real padding read out of the component.
+{
+  const CINZEL = loadFont('node_modules/@expo-google-fonts/cinzel/700Bold/Cinzel_700Bold.ttf');
+  const cert = read('components/paywall/Certificate.tsx');
+
+  const SPACE = JSON.parse(/export const SPACE = (\[[^\]]*\])/.exec(read('constants/design.ts'))[1]);
+  const headPad = (() => {
+    const m = /head: \{[\s\S]*?paddingHorizontal: SPACE\[(\d)\]/.exec(cert);
+    return m ? SPACE[+m[1]] : NaN;
+  })();
+  ok(Number.isFinite(headPad), 'the head\'s padding is readable from the component', `${headPad}pt a side`);
+
+  const FULL_W = +/const TITLE_FULL_W = (\d+)/.exec(cert)[1];
+  const titleSize = (w) => (w >= FULL_W ? 21 : Math.max(16, Math.round(w * 0.062)));
+
+  // The longest single WORD-RUN that must sit on one line. A title breaks between
+  // words, so what has to fit is the widest line the wrap can produce — for both
+  // certificates that is the first line.
+  const TITLES = [['THE SCHOLAR’S PASS', 'THE SCHOLAR’S'], ['THE DAY PASS', 'THE DAY PASS']];
+  const PAGE_PAD = SPACE[4];   // the Pass tab's own horizontal padding
+
+  let worst = Infinity, worstAt = '';
+  for (const dp of [320, 360, 390, 412, 430]) {
+    const cardW = dp - PAGE_PAD * 2;
+    const avail = cardW - headPad * 2;
+    const size = titleSize(cardW);
+    for (const [full, line] of TITLES) {
+      // Tracking is applied per character by the component (fontSize * 0.124).
+      const w = CINZEL.width(line, size) + line.length * size * 0.124;
+      const slack = avail - w;
+      if (slack < worst) { worst = slack; worstAt = `${dp}dp · ${size}px · "${line}"`; }
+      if (slack < 0) {
+        ok(false, `"${full}" fits at ${dp}dp`, `${w.toFixed(0)}pt into ${avail}pt — it will truncate`);
+      }
+    }
+  }
+  ok(worst >= 0, 'every certificate title fits at every width the app supports',
+    `tightest ${worst.toFixed(0)}pt of slack — ${worstAt}`);
+
+  // ── AND THE HEAD CAN GROW ─────────────────────────────────────────────────
+  //
+  // Fitting the title is only half of it: the head was a FIXED 96pt, so a title
+  // that wrapped to three lines was sliced along its top edge instead. Both
+  // halves have to hold, and only one of them is arithmetic.
+  ok(/minHeight: HEAD_MIN/.test(cert),
+    'the head grows with its title rather than clipping it');
+  ok(/numberOfLines=\{3\}/.test(cert),
+    'and the title is allowed the third line it sometimes needs');
+}
+
 
 console.log(bad === 0 ? '\nPASS — the paywall says only what the code enforces.\n'
                       : `\nFAILED — ${bad} problem(s).\n`);
