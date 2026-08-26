@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import React, { useId } from 'react';
 import { View } from 'react-native';
-import Svg, { Path, Ellipse, ClipPath, Defs, G, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Path, Ellipse, Circle, ClipPath, Defs, G, LinearGradient, Stop } from 'react-native-svg';
 import Animated, { useAnimatedProps, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import Glyph, { type GlyphName } from './Glyph';
 import {
@@ -56,8 +56,18 @@ import type { BadgeFamily, BadgeTier } from '@/data/badges';
 //   I    the medal alone
 //   II   + a ribbon banner beneath
 //   III  + two laurel sprigs, open at the top
-//   IV   the sprigs CLOSE over the crown — a laurel worn rather than offered
+//   IV   the sprigs GROW — wider, taller, nine leaves apiece, and in fruit
 //   V    + a collar struck outside the edge
+//
+// IV USED TO CLOSE THE SPRIGS OVER THE CROWN, and that is the one of the five
+// that has been redrawn. Closing an arc means bending it inward, and inward is
+// where the medal is: eight of the closed wreath's eighteen leaves sat entirely
+// behind a medal and the whole thing reached LESS FAR than tier III's, so the
+// higher tier wore the smaller wreath and all a reader could see of it was two
+// tips over the crown. Which is the swords, again, exactly as described four
+// paragraphs down. The reader caught it: "for the red badges … those white
+// things on the side to be out more instead of behind, like what the green badge
+// looks like". badgeShapes' `laurelSprig` carries the measurements.
 //
 // The collar is deliberately the SAME GESTURE as the sixth degree of a rank pin,
 // drawn by the same one-line trick (a negative inset on the shape's own
@@ -149,7 +159,7 @@ const grad = (id: string, stops: Stops) => (
 // badge per render is exactly the sort of thing memoising this component was for.
 const RIBBON = ribbonPaths(84, 34, 13);
 const LAUREL_OPEN = [laurelSprig(-1), laurelSprig(1)];
-const LAUREL_SHUT = [laurelSprig(-1, 9, true), laurelSprig(1, 9, true)];
+const LAUREL_FULL = [laurelSprig(-1, 'full'), laurelSprig(1, 'full')];
 
 // MEMOISED. Every prop below is a primitive, so the comparison is exact and no
 // call site can defeat it with a fresh object (the trap Thinkers records for
@@ -198,8 +208,12 @@ export default memo(function BadgeMedal({
   // when there were three tiers, and a set where the highest two carry LESS
   // furniture than the middle one reads as a mistake.
   const wreath = tier >= 3 && earned;
-  // …and from IV it closes over the crown, and at V the medal gains its collar.
-  const laurel = tier >= 4 ? LAUREL_SHUT : LAUREL_OPEN;
+  // …and from IV the same sprigs are grown rather than bent: further out, up to
+  // the crown's own height, nine leaves instead of seven, and berries between
+  // them. Measured against all six silhouettes it reaches 45.4 units where the
+  // plain sprig reaches 40.2 and NOTHING of it is behind a medal — which is what
+  // the version before it got wrong, and got wrong invisibly.
+  const laurel = tier >= 4 ? LAUREL_FULL : LAUREL_OPEN;
   const collar = tier >= 5 && earned;
 
   // Per-instance, following the rule LoudnessChart wrote down: ClipPath and
@@ -241,14 +255,16 @@ export default memo(function BadgeMedal({
           {grad(rim, earned ? insigniaRim(ins) : [['0%', GHOST, 1], ['100%', GHOST, 1]])}
         </Defs>
 
-        {/* THE LAUREL, behind everything — tier III.
+        {/* THE LAUREL, behind everything — tier III up.
             Crossed swords were drawn first, because that is what the heraldic
             reference uses, and they were rejected on the evidence: at 168px the
             medal covers the crossing so only the tips and hilts show, which reads
             as horns above and blobs below, and at the 66px of the badge grid it
             is mush. A laurel is a continuous curved mass, so being half-covered
             costs it nothing — and it is what a philosopher is crowned with.
-            `swordPaths` is kept in badgeShapes so the choice is one line. */}
+            The closed tier-IV wreath then made the identical mistake in a
+            different disguise; badgeShapes carries that story and check:badges §4
+            carries the measurement. */}
         {wreath && (
           <AG animatedProps={innerProps}>
             {laurel.map((sprig, s) => (
@@ -262,6 +278,26 @@ export default memo(function BadgeMedal({
                     fill={PAPER}
                     stroke={edge}
                     strokeWidth={1.3}
+                  />
+                ))}
+                {/* THE BERRIES — tier IV up. Drawn exactly as a leaf is, paper
+                    inside an ink edge, because they have to read as the SAME
+                    plant: filled solid they came out as four dark specks and the
+                    render looked like dirt on the sheet rather than fruit on a
+                    branch. Round among ellipses is enough of a difference.
+
+                    They sit in the scallops the leaf chain leaves along its outer
+                    edge. On the branch itself — where a real laurel carries them —
+                    is the one place they cannot be seen at all: the stem is
+                    stroked in the same ink the berry is drawn in, and the first
+                    pass rendered eight of them into it and showed nothing. */}
+                {sprig.berry.map((b, k) => (
+                  <Circle
+                    key={`b${k}`}
+                    cx={b.cx} cy={b.cy} r={b.r}
+                    fill={PAPER}
+                    stroke={edge}
+                    strokeWidth={1.1}
                   />
                 ))}
               </G>

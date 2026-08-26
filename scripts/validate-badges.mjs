@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // THE BADGE CHECKS.
 //
-// Three things that are invisible until someone is looking at the wrong pixel:
+// Four things that are invisible until someone is looking at the wrong pixel:
 //
 //   1. THE IDS ARE FROZEN. They are persisted in `earnedBadges` and merged as a
 //      UNION with the Supabase snapshot on sign-in, so renaming one does not
@@ -17,7 +17,12 @@
 //      module the renderer draws from, so the check cannot pass a shape that has
 //      since moved.
 //
-//   3. THE OUTLINE LENGTH IS NOT SHORT. `LEN` is the dasharray the draw-on
+//   3. THE FLOURISH IS OUTSIDE THE MEDAL. Tier IV's wreath spent its whole life
+//      curled behind the medal — eight of eighteen leaves invisible, and the
+//      wreath smaller than the tier below it. Every check in this file was green
+//      the entire time. See section 4.
+//
+//   4. THE OUTLINE LENGTH IS NOT SHORT. `LEN` is the dasharray the draw-on
 //      animation runs against; if it is under the true perimeter then part of
 //      the medal is already inked on the first frame, which reads as a bug
 //      rather than as a flourish.
@@ -167,6 +172,97 @@ for (const f of FAMILIES) {
     }
   }
   console.log(`  ${f.padEnd(12)}${cells.map((c) => c.toFixed(1).padStart(6)).join('   ')}`);
+}
+
+// ─── 4. the flourish is OUTSIDE the medal, and the higher tier's is bigger ───
+//
+// WHAT THIS EXISTS FOR. Tier IV's wreath used to CLOSE over the medal's crown —
+// both stems carried on over the top, where the tips almost met. Closing an arc
+// means bending it inward, and inward is where the medal is: eight of that
+// wreath's eighteen leaves sat entirely behind a medal, and the whole thing
+// reached 34.7 units from the centre where tier III's open sprigs reach 40.2.
+// So the higher tier wore the SMALLER wreath, and the only part of it a reader
+// could see was two leaf tips over the crown.
+//
+// It is the same failure the crossed swords had, for the reason badgeShapes has
+// recorded since the swords died: a flourish only counts if it is outside the
+// medal, because the part behind the medal is not subtle, it is absent — and the
+// fragment that does show reads as a fault rather than as furniture. Nothing
+// caught it either time. Every number in this file was green; the mark still fit,
+// the roll had not moved, the outline was the right length. It took a contact
+// sheet, and then a reader: "for the red badges … those white things on the side
+// to be out more instead of behind, like what the green badge looks like."
+//
+// So the arithmetic that answers it lives here now rather than in a scratch file.
+// It is exact — the medal's own transform applied to the medal's own outline —
+// and it is counter-tested by putting the closed wreath back and watching this
+// go red.
+console.log('\nthe flourish, against all six medals:\n');
+console.log('  wreath   marks   behind a medal   worst clearance   reach / 48   top edge');
+{
+  const MS = mod.MEDAL_SCALE, DY = mod.MEDAL_DY;
+  const off = 50 - 50 * MS;
+  const medals = FAMILIES.map((f) => [f, mod.outlinePoints(f, 0).map(([x, y]) => [off + MS * x, off + DY + MS * y])]);
+
+  const measure = (kind) => {
+    const sprigs = [mod.laurelSprig(-1, kind), mod.laurelSprig(1, kind)];
+    // A leaf is an ellipse and a berry is a circle; both reduce to a centre and
+    // a half-extent, and the half-extent has to account for the leaf's rotation
+    // or the reach comes out short by up to its whole length.
+    const marks = [];
+    for (const s of sprigs) {
+      for (const l of s.leaf) marks.push({ ...l, what: 'leaf' });
+      for (const b of s.berry) marks.push({ cx: b.cx, cy: b.cy, rx: b.r, ry: b.r, rot: 0, what: 'berry' });
+    }
+    // Counted as MARKS and not as mark-family pairs: one leaf behind five of the
+    // six silhouettes is one leaf, and a number six times the truth is the kind
+    // of thing that gets an error message disbelieved.
+    const hiddenMarks = new Set();
+    let worst = Infinity, where = '', reach = 0, top = 100;
+    for (const [i, m] of marks.entries()) {
+      const a = (m.rot * Math.PI) / 180;
+      reach = Math.max(reach, Math.abs(m.cx - 50) + Math.hypot(m.rx * Math.cos(a), m.ry * Math.sin(a)));
+      top = Math.min(top, m.cy - Math.hypot(m.rx * Math.sin(a), m.ry * Math.cos(a)));
+      for (const [f, poly] of medals) {
+        const d = edgeDist(poly, m.cx, m.cy);
+        const clear = inside(poly, m.cx, m.cy) ? -d : d;
+        if (clear < 0) hiddenMarks.add(i);
+        if (clear < worst) { worst = clear; where = `${m.what} on ${f}`; }
+      }
+    }
+    return { marks: marks.length, hidden: hiddenMarks.size, worst, where, reach, top };
+  };
+
+  const open = measure('open');
+  const full = measure('full');
+  for (const [name, r] of [['open', open], ['full', full]]) {
+    console.log(
+      `  ${name.padEnd(9)}${String(r.marks).padStart(4)}${String(r.hidden).padStart(15)}` +
+      `${r.worst.toFixed(1).padStart(18)}${r.reach.toFixed(1).padStart(13)}${r.top.toFixed(1).padStart(11)}`,
+    );
+    if (r.hidden > 0) {
+      errs.push(
+        `the ${name} wreath has ${r.hidden} mark${r.hidden === 1 ? '' : 's'} behind a medal ` +
+        `(worst: ${r.where}) — a flourish drawn behind the medal is not subtle, it is absent`,
+      );
+    }
+    // 48, not 50: the leaf is drawn with a 1.3-wide stroke, so half of it lives
+    // outside the ellipse the reach is measured on.
+    if (r.reach > 48) errs.push(`the ${name} wreath reaches ${r.reach.toFixed(1)} of the 48 the 100-box allows — it will be clipped`);
+  }
+  // TIER IV MUST OUTRANK TIER III AS AN OBJECT, not merely as a colour. Both of
+  // these were false of the closed wreath, which is how it shipped: it carried
+  // more leaves than the open one and still drew a smaller wreath, because most
+  // of them were behind the medal.
+  if (full.marks <= open.marks) {
+    errs.push(`the full wreath carries ${full.marks} marks against the open one's ${open.marks} — tier IV must be more furniture than tier III`);
+  }
+  if (full.reach <= open.reach) {
+    errs.push(`the full wreath reaches ${full.reach.toFixed(1)} against the open one's ${open.reach.toFixed(1)} — tier IV must be the bigger object`);
+  }
+  if (full.top >= open.top) {
+    errs.push(`the full wreath tops out at y ${full.top.toFixed(1)}, no higher than the open one's ${open.top.toFixed(1)} — tier IV must stand taller`);
+  }
 }
 
 // The dasharray must be at least the true perimeter, or the shape is partly

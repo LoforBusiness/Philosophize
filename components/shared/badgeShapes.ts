@@ -250,13 +250,15 @@ export const MEDAL_SCALE = 0.74;
 /** Pulled up a touch, because the flourish hangs below and wants the room. */
 export const MEDAL_DY = -6;
 
+
 /**
- * A laurel sprig hugging one side of the medal — the alternative tier-III flourish.
+ * A laurel sprig hugging one side of the medal — the tier-III flourish and, in
+ * its `full` form, the tier-IV and V one.
  *
- * WHY THIS EXISTS BESIDE THE SWORDS. Crossed swords are the obvious heraldic
- * choice and they were tried first: at the size a badge is actually drawn the
- * medal covers the crossing, so all that shows is two pointed tips above and two
- * dark hilts below, which reads as ears rather than as weapons. A laurel is a
+ * WHY A LAUREL AND NOT SWORDS. Crossed swords are the obvious heraldic choice
+ * and they were tried first: at the size a badge is actually drawn the medal
+ * covers the crossing, so all that shows is two pointed tips above and two dark
+ * hilts below, which reads as ears rather than as weapons. A laurel is a
  * CONTINUOUS CURVED MASS rather than a thin straight line, so it survives being
  * half-covered — and a wreath is what a philosopher is crowned with, where a
  * sword belongs to somebody else's app.
@@ -265,28 +267,84 @@ export const MEDAL_DY = -6;
  * and the leaves are placed ALONG it by sampling the same curve, so a leaf can
  * never drift off its own branch.
  *
- * ── AND IT CAN CLOSE, WHICH IS WHAT TIER IV IS ──────────────────────────────
+ * ── AND THEN TIER IV CLOSED IT OVER THE CROWN, WHICH WAS THE SWORDS AGAIN ───
  *
- * The five badge tiers used to be three: I bare, II a ribbon, III a wreath —
- * and then IV and V were added and given no furniture at all, so the top three
- * tiers of the case were the same object in three metals. That is the same fault
- * the rank ladder had, one cabinet over: everything interesting happens early
- * and then the reader climbs for months to watch a colour change.
+ * The five badge tiers used to be three: I bare, II a ribbon, III a wreath — and
+ * then IV and V were added and given no furniture at all, so the top three tiers
+ * of the case were the same object in three metals. The answer at the time was
+ * to CLOSE the wreath at IV: carry both stems on over the medal's crown, where
+ * the tips almost meet. A laurel offered at III, a laurel worn at IV.
  *
- * An OPEN wreath leaves 54 units of paper between its tips and a CLOSED one
- * meets over the medal's crown, which is a difference a reader can see in a grid
- * at 52px without comparing anything to anything. It is also what an actual
- * wreath is: the open sprigs are a laurel offered, the closed one is a laurel
- * worn.
+ * It is a nice idea and it drew the exact failure the swords drew, for the exact
+ * reason this comment already gives three paragraphs above. Closing the arc
+ * means bending it INWARD, and inward is where the medal is. Measured against
+ * all six silhouettes: EIGHT of the closed wreath's eighteen leaves were
+ * entirely behind a medal, and the whole thing reached 34.7 units from the
+ * centre where the OPEN one reaches 40.2. So tier IV wore a wreath that was
+ * smaller than tier III's and mostly invisible, and what a reader could actually
+ * see of it was two leaf tips poking over the crown — horns, one more time. They
+ * said so: "for the red badges … those white things on the side to be out more
+ * instead of behind, like what the green badge looks like".
+ *
+ * ── SO THE STEP UP IS OUTWARD, NOT INWARD ───────────────────────────────────
+ *
+ * `full` is the same gesture as `open`, grown: it bows further out, climbs past
+ * the medal's shoulder to the height of its crown, carries nine leaves instead
+ * of seven, and each leaf is bigger. Berries fill the stem between them, which
+ * is what a laurel in fruit looks like and what the plain sprig has no room for.
+ *
+ * Measured the same way, and scripts/validate-badges.mjs §4 re-derives all of it
+ * on every run: TWENTY-SIX marks against the open sprig's fourteen, 45.5 units of
+ * reach against 40.2, a top edge at y 11.8 against 22.6, and NOT ONE of them
+ * behind a medal on any of the six families. It is unambiguously the bigger
+ * object at a glance, which is the whole job: "make the red badges a bit more
+ * complex too signifying they are better than the green ones."
+ *
+ * THE RULE UNDER BOTH EPISODES, and it is the third time this file has paid for
+ * it: a flourish only counts if it is OUTSIDE the medal. Anything drawn behind
+ * the medal is not subtle, it is absent — and the part that does show is a
+ * fragment, which reads as a fault rather than as furniture. scripts/
+ * sheet-badges.mjs is what shows this, and it is where both were caught.
  */
-export function laurelSprig(side: -1 | 1, leaves = 7, closed = false) {
-  const x0 = 50 + side * 11, y0 = 90;   // at the foot, near the ribbon
-  const cx = 50 + side * 47, cy = 62;   // bowing outward
-  // Open: the tip curls back in over the shoulder and tucks behind the medal.
-  // Closed: it carries on over the crown, where the two tips almost touch — they
-  // stop 12 units apart, because two tips that actually meet read as one ring
-  // that someone has drawn a gap in rather than as two branches tied together.
-  const x1 = 50 + side * (closed ? 6 : 27), y1 = closed ? 10 : 20;
+export type LaurelKind = 'open' | 'full';
+
+interface Sprig {
+  /** How far the foot sits from the centre, and how low. */
+  x0: number; y0: number;
+  /** The control point — how far the branch bows out, and at what height. */
+  cx: number; cy: number;
+  /** The tip. */
+  x1: number; y1: number;
+  /** Leaf count, where they start and stop along the curve, and how they shrink. */
+  n: number; t0: number; span: number; taper: number;
+  /** Leaf size and how far it sits off its own branch. */
+  rx: number; ry: number; off: number;
+  /** Berries between the leaves. `full` only. */
+  berries: number;
+}
+
+const SPRIG: Record<LaurelKind, Sprig> = {
+  open: {
+    x0: 11, y0: 90, cx: 47, cy: 62, x1: 27, y1: 20,
+    n: 7, t0: 0.10, span: 0.82, taper: 0.35, rx: 6.4, ry: 2.9, off: 3.5, berries: 0,
+  },
+  full: {
+    // Every number here is larger than its `open` counterpart except the taper,
+    // which is gentler so the leaves stay big further up the branch. The tip at
+    // (±28, 13) is the one that was tuned rather than chosen: at ±24 the topmost
+    // leaf grazes the ex-libris's flat top by 1.4 units, and at ±30 the whole
+    // sprig reaches 46 of the 48 the 100-box allows. 28 clears by 5 and reaches
+    // 45.4, which is room at both ends.
+    x0: 13, y0: 90, cx: 55, cy: 57, x1: 28, y1: 13,
+    n: 9, t0: 0.08, span: 0.88, taper: 0.32, rx: 6.9, ry: 3.2, off: 3.5, berries: 4,
+  },
+};
+
+export function laurelSprig(side: -1 | 1, kind: LaurelKind = 'open') {
+  const s = SPRIG[kind];
+  const x0 = 50 + side * s.x0, y0 = s.y0;
+  const cx = 50 + side * s.cx, cy = s.cy;
+  const x1 = 50 + side * s.x1, y1 = s.y1;
   const at = (t: number) => {
     const u = 1 - t;
     return {
@@ -297,21 +355,37 @@ export function laurelSprig(side: -1 | 1, leaves = 7, closed = false) {
       dy: 2 * u * (cy - y0) + 2 * t * (y1 - cy),
     };
   };
+  const size = (i: number) => 1 - s.taper * (i / (s.n - 1));
   const leaf: { cx: number; cy: number; rx: number; ry: number; rot: number }[] = [];
-  for (let i = 0; i < leaves; i++) {
-    const t = 0.10 + (i / (leaves - 1)) * (closed ? 0.86 : 0.82);
+  for (let i = 0; i < s.n; i++) {
+    const t = s.t0 + (i / (s.n - 1)) * s.span;
     const p = at(t);
     const ang = (Math.atan2(p.dy, p.dx) * 180) / Math.PI;
     // Leaves shrink toward the tip, which is what makes a sprig read as growing
     // rather than as a row of identical blobs.
-    const k = 1 - 0.35 * (i / (leaves - 1));
+    const k = size(i);
     leaf.push({
-      cx: p.x + side * 3.5 * k,
+      cx: p.x + side * s.off * k,
       cy: p.y,
-      rx: 6.4 * k,
-      ry: 2.9 * k,
+      rx: s.rx * k,
+      ry: s.ry * k,
       rot: ang + side * 34,
     });
   }
-  return { stem: `M${x0} ${y0} Q${cx} ${cy} ${x1} ${y1}`, leaf };
+  // IN THE NOTCHES BETWEEN THE LEAVES, not on the branch. On the branch is where
+  // a real laurel carries them and it is the one place they cannot be seen: the
+  // stem is stroked in the same ink the berry is filled with, so the first pass
+  // drew eight of them and rendered nothing. Set out level with the leaves they
+  // land on paper, in the scallops the leaf chain leaves along its outer edge —
+  // and they cost the silhouette nothing, because a leaf already reaches further
+  // out than this from the same point on the branch.
+  const berry: { cx: number; cy: number; r: number }[] = [];
+  for (let i = 0; i < s.berries; i++) {
+    const j = 1 + i * 2;                       // between leaves 1-2, 3-4, 5-6, 7-8
+    const t = s.t0 + ((j + 0.5) / (s.n - 1)) * s.span;
+    const p = at(t);
+    const k = size(j);
+    berry.push({ cx: p.x + side * (s.off + 3.4) * k, cy: p.y, r: 2.3 * k });
+  }
+  return { stem: `M${x0} ${y0} Q${cx} ${cy} ${x1} ${y1}`, leaf, berry };
 }

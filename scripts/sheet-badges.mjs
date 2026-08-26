@@ -176,7 +176,7 @@ const path2 = (family, m) =>
 
 const RIBBON = B.ribbonPaths(84, 34, 13);
 const LAUREL_OPEN = [B.laurelSprig(-1), B.laurelSprig(1)];
-const LAUREL_SHUT = [B.laurelSprig(-1, 9, true), B.laurelSprig(1, 9, true)];
+const LAUREL_FULL = [B.laurelSprig(-1, 'full'), B.laurelSprig(1, 'full')];
 
 // ── one badge ──────────────────────────────────────────────────────────────
 function badge(family, tier, earned, box) {
@@ -201,11 +201,15 @@ function badge(family, tier, earned, box) {
   // 1 · the laurel, behind everything. Paper leaves with an ink edge, faked as
   //     a bigger ink copy under a smaller paper one.
   if (earned && tier >= 3) {
-    for (const sprig of tier >= 4 ? LAUREL_SHUT : LAUREL_OPEN) {
+    for (const sprig of tier >= 4 ? LAUREL_FULL : LAUREL_OPEN) {
       fill(cv, stemPath(sprig.stem), flatStops(T.INK), 0, 0, k);
       for (const l of sprig.leaf) {
         fill(cv, ellipsePath(l.cx, l.cy, l.rx + 0.65, l.ry + 0.65, l.rot), flatStops(T.INK), 0, 0, k);
         fill(cv, ellipsePath(l.cx, l.cy, l.rx - 0.65, l.ry - 0.65, l.rot), flatStops(T.PAPER), 0, 0, k);
+      }
+      for (const b of sprig.berry) {
+        fill(cv, ellipsePath(b.cx, b.cy, b.r + 0.55, b.r + 0.55, 0), flatStops(T.INK), 0, 0, k);
+        fill(cv, ellipsePath(b.cx, b.cy, b.r - 0.55, b.r - 0.55, 0), flatStops(T.PAPER), 0, 0, k);
       }
     }
   }

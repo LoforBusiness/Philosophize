@@ -463,13 +463,34 @@ Index on (user_id, lesson_id).
   `RanksBadgesSheet`. **Five tiers**, struck in four of the rank orders plus gold
   (`constants/insignia.ts`), so both reward ladders speak one language — **and
   five MOUNTINGS**, one per tier: the medal alone, then a ribbon, then two laurel
-  sprigs, then the sprigs closing over the crown, then a collar struck outside the
-  edge. Tiers IV and V were added to the roll and given no furniture of their own,
-  so thirty-three badges — every one that takes months — were the tier-III object
-  in a different metal, which is the same fault the rank ladder was carrying at
-  the same time. **`npm run sheet:badges` draws the whole case in plain Node**;
-  that is what found it, and what found the wreath being drawn in white on cream
-  (see §19). The ids
+  sprigs, then the SAME SPRIGS GROWN — wider, taller, nine leaves apiece and in
+  fruit — then a collar struck outside the edge. Tiers IV and V were added to the
+  roll and given no furniture of their own, so thirty-three badges — every one
+  that takes months — were the tier-III object in a different metal, which is the
+  same fault the rank ladder was carrying at the same time. **`npm run
+  sheet:badges` draws the whole case in plain Node**; that is what found it, and
+  what found the wreath being drawn in white on cream (see §19).
+
+  > **AND THE FIRST ANSWER FOR TIER IV WAS TO CLOSE THE WREATH OVER THE CROWN,
+  > WHICH IS THE CROSSED SWORDS AGAIN.** Closing an arc means bending it INWARD,
+  > and inward is where the medal is: eight of that wreath's eighteen leaves sat
+  > entirely behind a medal and the whole thing reached 34.7 units from the centre
+  > where tier III's OPEN sprigs reach 40.2. So the higher tier wore the smaller
+  > wreath, and all a reader could see of it was two leaf tips over the crown.
+  > They said so — *"for the red badges … those white things on the side to be out
+  > more instead of behind, like what the green badge looks like"* — which is
+  > almost word for word why the swords were rejected years earlier.
+  >
+  > **A flourish only counts if it is OUTSIDE the medal**, because the part behind
+  > it is not subtle, it is absent, and the fragment that does show reads as a
+  > fault. So the step up is outward: 26 marks against 14, 45.5 units of reach
+  > against 40.2, a top edge at y 11.8 against 22.6, and nothing behind a medal on
+  > any of the six silhouettes. **`check:badges` §4 re-derives every one of those
+  > numbers**, and it is the ratchet that was missing both times — every check in
+  > that file was green for the whole life of the closed wreath, because the mark
+  > still fitted, the roll had not moved and the outline was the right length.
+
+  The ids
   are FROZEN and `check:badges` holds the roll — the roll is a literal list in
   `validate-badges.mjs`, so **adding one is a deliberate two-file act**, which is
   what the last two (32,000 and 50,000 XP) were.
