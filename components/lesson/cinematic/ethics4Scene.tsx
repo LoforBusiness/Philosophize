@@ -9,7 +9,8 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics4Script';
 import {
-  K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry,
+  carry, STONE,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -225,9 +226,14 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   tablet: {
     position: 'absolute', top: TAB_T, width: TAB_W, height: TAB_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   tabHead: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 10, paddingTop: 6 },
   tabName: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
@@ -265,7 +271,7 @@ const styles = StyleSheet.create({
   },
   barTrack: {
     position: 'absolute', left: BAR_L, width: BAR_W, height: BAR_H,
-    borderWidth: 1, borderColor: RULE, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 1, borderColor: RULE, backgroundColor: RULE, overflow: 'hidden',
   },
   barFill: {
     position: 'absolute', left: 0, top: 0, width: '100%', height: '100%',

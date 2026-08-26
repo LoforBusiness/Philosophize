@@ -10,7 +10,9 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics9Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  facing, useCarry, carry, STONE,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -259,9 +261,14 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   owedTag: {
     position: 'absolute', left: NOTE_LX, top: OWED_T, width: NOTE_W, height: OWED_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   owedText: {
@@ -271,7 +278,7 @@ const styles = StyleSheet.create({
 
   third: { position: 'absolute', left: THIRD_L, top: THIRD_T, width: THIRD_W },
   thirdInner: {
-    height: THIRD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: THIRD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
     alignItems: 'center', justifyContent: 'center',
   },
   thirdText: {

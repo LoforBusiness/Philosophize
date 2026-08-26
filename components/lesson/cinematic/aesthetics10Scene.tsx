@@ -10,7 +10,9 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics10Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  facing, useCarry, carry, STONE,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -241,8 +243,13 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 24, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
 
   screen: {
+    // RULE: the projector housing is the biggest surface in the picture and it was
+    // white, so the five white filmstrip cells inside it had nothing to sit
+    // against. A light mass behind white cards is what `political7` does with its
+    // stone tablet, and it is the reason that scene reads as objects rather than a
+    // diagram. The cells stay PAPER — the contrast is the point, not the darkness.
     position: 'absolute', left: COL_L, top: SCR_T, width: COL_W, height: SCR_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
   },
   screenLabel: {
     position: 'absolute', left: 0, right: 0, top: 9, textAlign: 'center',
@@ -275,9 +282,14 @@ const styles = StyleSheet.create({
     backgroundColor: INK, transform: [{ rotate: '45deg' }],
   },
 
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   panel: {
     position: 'absolute', left: COL_L, top: PAN_T, width: COL_W, height: PAN_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
   },
   panelLabel: {
     position: 'absolute', left: 0, right: 0, top: 8, textAlign: 'center',
@@ -298,12 +310,12 @@ const styles = StyleSheet.create({
   slat: { position: 'absolute', left: 26, right: 10, height: 2, backgroundColor: PAPER, opacity: 0.5 },
   rail: {
     position: 'absolute', left: RAIL_L, top: 8, width: RAIL_W, height: PAN_H - 16,
-    borderRadius: 3, backgroundColor: PAPER,
+    borderRadius: 3, backgroundColor: STONE,
   },
 
   board: { position: 'absolute', left: BRD_L, width: BRD_W },
   boardInner: {
-    height: BRD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: BRD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   boardRight: { backgroundColor: INK, borderColor: INK },

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-  Easing, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue,
+  Easing, runOnJS, useAnimatedStyle, useDerivedValue, useSharedValue,
   withDelay, withTiming, type SharedValue,
 } from 'react-native-reanimated';
 import { touch } from '@/lib/feedback';
@@ -96,11 +96,14 @@ export default function ShapePlot({ plot, picked, onPick, pos }: Props) {
   }, [reads.length, n, flat, cols]);
 
 
-  // WHICH READING IS SHOWING — REACT STATE, AND THAT IS NOT A REGRESSION.
-  // See ./ControlRead: this index changes on the same boundary crossing that
-  // already fires the haptic tick, so a wrapping <Text> costs a handful of renders
-  // of one leaf, and the <input> it replaces could not wrap at all.
-  const [shape, setShape] = useState(0);
+  // WHICH READING IS SHOWING — A DERIVED VALUE, NOT REACT STATE.
+  //
+  // It WAS state, and on a rail that stuttered: a thumb crossing four zones in a
+  // few hundred milliseconds meant four hard cuts, four re-centrings of the box,
+  // and four re-renders of a component that builds its Gesture inline while a
+  // finger is down on it. ControlRead's header sets all three out. Derived here
+  // and read on the UI thread, the reading costs no render at all.
+  const shape = useDerivedValue(() => readAt());
   // HAS THE READER DRAWN ANYTHING YET. Gates the SET button, so an idle tap on the
   // pad cannot answer a question the reader has not thought about.
   const [drawn, setDrawn] = useState(false);
@@ -137,7 +140,7 @@ export default function ShapePlot({ plot, picked, onPick, pos }: Props) {
     for (let j = 0; j < n; j += 1) m += cols[j].value;
     pos.value = m / n;
     const s = readAt();
-    if (s !== lastShape.value) { lastShape.value = s; runOnJS(touch)(); runOnJS(setShape)(s); }
+    if (s !== lastShape.value) { lastShape.value = s; runOnJS(touch)(); }
     if (!anyDraw.value) { anyDraw.value = 1; runOnJS(setDrawn)(true); }
   }, [n, padW, cols, pos, readAt, lastShape, anyDraw]);
 
@@ -169,7 +172,7 @@ export default function ShapePlot({ plot, picked, onPick, pos }: Props) {
 
   return (
     <View style={styles.wrap} pointerEvents="box-none">
-      <ControlRead text={reads[shape] ?? reads[0]} />
+      <ControlRead texts={reads} idx={shape} />
 
       <View style={styles.row}>
         {/* The left gutter holds BOTH the axis label and the commit, so the button

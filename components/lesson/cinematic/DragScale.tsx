@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-  Easing, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue,
+  Easing, runOnJS, useAnimatedStyle, useDerivedValue, useSharedValue,
   withDelay, withSpring, withTiming, type SharedValue,
 } from 'react-native-reanimated';
 import { touch } from '@/lib/feedback';
@@ -105,15 +105,14 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
   }, [uptos]);
 
 
-  // WHICH ZONE THE READING IS SHOWING — REACT STATE, AND THAT IS NOT A REGRESSION.
+  // WHICH READING IS SHOWING — A DERIVED VALUE, NOT REACT STATE.
   //
-  // The reading used to be an ACounter written from the UI thread, which cost zero
-  // renders and could not WRAP, so a third of the corpus's readings ran off the
-  // right of the screen. See ./ControlRead for the whole argument. The short of it:
-  // this index changes when the value crosses a boundary, which is the same event
-  // that already fires the haptic tick — a handful of times per gesture, not sixty
-  // times a second — so a wrapping <Text> costs about four renders of one leaf.
-  const [zone, setZone] = useState(() => zoneAt(drag.start));
+  // It WAS state, and on a rail that stuttered: a thumb crossing four zones in a
+  // few hundred milliseconds meant four hard cuts, four re-centrings of the box,
+  // and four re-renders of a component that builds its Gesture inline while a
+  // finger is down on it. ControlRead's header sets all three out. Derived here
+  // and read on the UI thread, the reading costs no render at all.
+  const zone = useDerivedValue(() => zoneAt(pos.value));
 
   const commit = useCallback((k: number) => {
     const z = drag.zones[k];
@@ -121,8 +120,8 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
   }, [drag.zones, onPick]);
 
   // A SECOND DRAG BEAT MUST NOT OPEN ON THE FIRST ONE'S ANSWER. The player resets
-  // `dragPos` to the beat's own start; this is the reading's half of that.
-  useEffect(() => { setZone(zoneAt(drag.start)); lastZone.value = zoneAt(drag.start); }, [drag, zoneAt, lastZone]);
+  // `dragPos` to the beat's own start, and the reading follows it for free now.
+  useEffect(() => { lastZone.value = zoneAt(drag.start); }, [drag, zoneAt, lastZone]);
 
   useEffect(() => {
     if (!answered) { done.value = 0; return; }
@@ -146,7 +145,7 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
     const p = x / railW.value;
     pos.value = p < 0 ? 0 : p > 1 ? 1 : p;
     const z = zoneAt(pos.value);
-    if (z !== lastZone.value) { lastZone.value = z; runOnJS(touch)(); runOnJS(setZone)(z); }
+    if (z !== lastZone.value) { lastZone.value = z; runOnJS(touch)(); }
   }, [railW, pos, zoneAt, lastZone]);
 
   const pan = Gesture.Pan()
@@ -193,7 +192,7 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
 
   return (
     <View style={styles.wrap} pointerEvents="box-none">
-      <ControlRead text={reads[zone] ?? reads[0]} />
+      <ControlRead texts={reads} idx={zone} />
 
       <GestureDetector gesture={pan}>
         {/* The touch target is the whole strip, not the 30px knob — a knob-sized

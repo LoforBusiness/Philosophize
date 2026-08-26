@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useAnimatedStyle, withTiming, type SharedValue } from 'react-native-reanimated';
 import { INK } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -24,32 +25,44 @@ import { INK } from './cinematicKit';
 // so Reanimated could write it from the UI thread and the drag would cost zero
 // React renders. That reasoning is sound for a NUMBER (see ACounter's header, and
 // SplitBar still uses it for its two running percentages, which genuinely do move
-// every frame). It is wrong for a sentence, for two separate reasons:
-//
-//   1. AN <input> CANNOT WRAP. There is no second line for a long reading to go
-//      to, so it can only be clipped. No amount of tuning fixes that.
-//   2. THE READING DOES NOT CHANGE EVERY FRAME. It changes when the value crosses
-//      into a new ZONE — a stop, a quadrant, a nearest profile. All five controls
-//      were already detecting that crossing, because that is when they fire the
-//      haptic tick. So the value that needs to reach React changes a handful of
-//      times per gesture, not sixty times a second, and a `<Text>` driven by
-//      state on the same crossing costs about four renders of one small leaf.
-//
-// So the performance argument that made it a TextInput never applied to it. What
-// it bought was one clipped line where two wrapped ones were free.
+// every frame). It is wrong for a sentence, because AN <input> CANNOT WRAP. There
+// is no second line for a long reading to go to, so it can only be clipped.
 //
 // ── AND IT WAS INVISIBLE TO BOTH INSTRUMENTS AT ONCE ────────────────────────
 //
-// This is the part worth carrying. `check-controls` measures every label a control
-// draws and did not list the readout. `check-readable` DOES scan the lower deck —
-// it was extended to do exactly that after the last report — but it walks
-// `div,span`, and an `<input>` is neither. Two checks, one blind spot each, and
-// the two lined up precisely on the biggest word on the beat. Both green, for
-// months, over a defect the reader could see from across the room.
+// `check-controls` measures every label a control draws and did not list the
+// readout. `check-readable` DOES scan the lower deck — it was extended to do
+// exactly that after an earlier report — but it walks `div,span`, and an `<input>`
+// is neither. Two checks, one blind spot each, and the two lined up precisely on
+// the biggest word on the beat. Both green, for months, over a defect the reader
+// could see from across the room. That is group S6 in the rule book.
 //
-// The general form, which §21 keeps relearning: A CHECK THAT WALKS A LIST OF
-// ELEMENT KINDS IS A CHECK THAT CANNOT SEE A NEW KIND. Both are fixed — the slot
-// is in `check-controls` now, and `check-readable` walks inputs too.
+// ── THE FIRST FIX MADE IT WRAP AND MADE IT STUTTER ──────────────────────────
+//
+//   "when you start to move them, the words above it that change as you move it
+//    start to stutter and start to glitch, and you can't even read what's going
+//    on … the lever looks okay … it's a lot with the line when you slide it"
+//
+// Right on both counts, and the difference between the two controls is the whole
+// diagnosis. The first fix drove the reading from REACT STATE, updated on each
+// boundary crossing. A lever has three or four detents, so a sweep crosses two or
+// three of them and the reading changes two or three times. A RAIL is continuous:
+// `drag` and `split` divide 0…1 into zones and a thumb travelling the width can
+// cross every one of them in a few hundred milliseconds. Three faults, all
+// hidden by the lever's coarseness:
+//
+//   1. EACH CHANGE WAS A HARD CUT. A whole sentence at 15pt replaced between one
+//      frame and the next, several times a second, directly above the thumb.
+//   2. THE BOX RE-CENTRED. One-line and two-line readings centre at different
+//      heights, so the words also JUMPED vertically on every swap.
+//   3. IT RE-RENDERED THE CONTROL MID-GESTURE. `DragScale` builds its `Gesture.Pan`
+//      inline, so every reading change handed `GestureDetector` a new gesture
+//      object while a finger was down on it.
+//
+// So the reading does not go through React at all any more. Every possible
+// reading is mounted at once, stacked in one fixed box, and an index SharedValue
+// cross-fades between them on the UI thread — no re-render, no cut, no jump, and
+// the drag keeps the same gesture object for its whole life.
 //
 // ── THE HEIGHT IS FIXED, AND THAT IS NOT A DETAIL ───────────────────────────
 //
@@ -64,16 +77,63 @@ import { INK } from './cinematicKit';
 const LINE = 19;
 export const READ_H = LINE * 2;
 
-export default function ControlRead({ text }: { text: string }) {
+/**
+ * How long one reading takes to hand over to the next.
+ *
+ * 130ms: long enough to read as a dissolve rather than a cut, short enough that a
+ * thumb crossing three zones does not leave three readings on screen at once. The
+ * deck's own crossfade is the same order, so the two agree.
+ */
+const XFADE = 130;
+
+interface Props {
+  /** Every reading this control can show, in the control's own index order. */
+  texts: string[];
+  /**
+   * Which one is current, 0-based — a SharedValue, NOT a number.
+   *
+   * That is the fix rather than an implementation detail: a number would arrive
+   * through a React render, which is what was stuttering. This is read on the UI
+   * thread by each layer's own animated style.
+   */
+  idx: SharedValue<number>;
+}
+
+export default function ControlRead({ texts, idx }: Props) {
   return (
-    <View style={styles.box} pointerEvents="none">
-      <Text style={styles.word} numberOfLines={2}>{text}</Text>
+    // `nativeID` for the same reason every control carries one (S6): a harness
+    // that has to guess which box is the reading will eventually guess a
+    // neighbouring one and report a measurement of something else.
+    <View style={styles.box} nativeID="control-read" pointerEvents="none">
+      {texts.map((t, i) => (
+        // Keyed on BOTH so a beat whose readings change length remounts cleanly,
+        // and a beat that merely reorders them does not.
+        <Layer key={`${i}:${t}`} text={t} i={i} idx={idx} />
+      ))}
     </View>
   );
 }
 
+/** One reading, faded in when it is the current one. */
+function Layer({ text, i, idx }: { text: string; i: number; idx: SharedValue<number> }) {
+  const st = useAnimatedStyle(() => ({
+    opacity: withTiming(Math.round(idx.value) === i ? 1 : 0, { duration: XFADE }),
+  }));
+  return (
+    <Animated.View style={[styles.layer, st]} pointerEvents="none">
+      <Text style={styles.word} numberOfLines={2}>{text}</Text>
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
-  box: { height: READ_H, justifyContent: 'center', marginBottom: 2 },
+  box: { height: READ_H, marginBottom: 2, justifyContent: 'center' },
+  // Every reading occupies the whole box and centres inside it, so the one that
+  // arrives is already where the one that is leaving was.
+  layer: {
+    position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
+    justifyContent: 'center',
+  },
   word: {
     // 15, NOT 17. Two lines of 17 would have cost the deck 44px of the room its
     // prompt and explanation live in, and that box is `overflow: hidden`. At 15

@@ -9,7 +9,8 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology4Script';
 import {
-  K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry,
+  carry, STONE,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -224,9 +225,14 @@ const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 24, right: 24, top: 500, height: 1.5, backgroundColor: RULE },
 
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   panel: {
     position: 'absolute', top: PAN_T, width: PAN_W, height: PAN_H,
-    borderWidth: 1.5, borderColor: RULE, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: RULE, borderRadius: 5, backgroundColor: RULE,
   },
   // Sits at 201–214. The rationalist's aura ring starts at 216, so the ring no longer
   // slices through the header the way it did at top 212.
@@ -266,7 +272,7 @@ const styles = StyleSheet.create({
   },
   mind: {
     position: 'absolute', width: PAN_W - 24, height: 52,
-    borderWidth: 2, borderColor: INK, borderRadius: 26, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 26, backgroundColor: STONE,
   },
   axRow: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
   // 3 / 17 / 31 with a 14-unit line: the last axiom ends at 45, inside the pill's

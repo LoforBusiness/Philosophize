@@ -731,18 +731,19 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **thirty-six** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **thirty-seven** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
 `check-routes` · `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-echo` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
-`check-camera` · `check-tour` · `check-space` · `check-controls` · `check-streak` · `check-quips` ·
+`check-camera` · `check-tour` · `check-space` · `check-controls` · `check-shade` · `check-streak` · `check-quips` ·
 `check-answers` · `check-quotes` · `check-mentions` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
 `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-react` · `check-smooth` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
-figures and 6 hand-built ones, `check-moves` 6 head-clearance defects. A budget
+figures and 6 hand-built ones, `check-moves` 6 head-clearance defects, `check-shade`
+112 flat scenes. A budget
 line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 222 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
 
 > **`check-moves` was the last one on that list to actually run, and for a long
@@ -1218,6 +1219,24 @@ declared as a channel, so it cannot fall out of step with the control and it cos
 > value at WHERE THE FINGER IS now, which also makes a tap work and leaves no gain
 > to get wrong. `FieldPick` and `ShapePlot` were built that way and are the two
 > nobody complained about.
+
+> **AND THE READING STUTTERED ON A RAIL WHILE LOOKING FINE ON A LEVER (S7).**
+> Wrapping it meant driving it from React state on each zone crossing, which is
+> two or three changes on a lever and *every zone in a few hundred milliseconds*
+> on a rail — the reader reported exactly that split: *"the lever, I think, looks
+> okay … it's a lot with the line when you slide it."* Three faults the lever's
+> coarseness hid: each change was a hard cut, the box re-centred between one-line
+> and two-line readings, and the re-render handed `GestureDetector` a new gesture
+> object with a finger down on it. Every reading is mounted at once now and an
+> index shared value cross-fades between them on the UI thread. Measured on a real
+> sweep, the worst one-frame opacity step went **1.000 → 0.226** and the box never
+> moves. `node scripts/sweep-read.mjs` is that measurement;
+> `check:controls` is the offline ratchet, because a rule that needs Metro is a
+> rule nobody runs.
+>
+> **The general form: a coarse control hides a continuous defect.** Three changes
+> per gesture and thirty are not the same thing, and testing the first says
+> nothing about the second.
 
 > **AND THE GAIN WAS ONLY HALF OF IT — THE PICTURE HAD IT TOO.** The reader came
 > back: *"make it so the lever moves easier instead of it feeling like a struggle

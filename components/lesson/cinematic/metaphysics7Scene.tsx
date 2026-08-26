@@ -10,7 +10,9 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics7Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  facing, useCarry, carry, STONE,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -240,9 +242,14 @@ const styles = StyleSheet.create({
   },
 
   sliceWrap: { position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H },
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   slice: {
     width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: RULE,
     alignItems: 'center', justifyContent: 'center',
   },
   // Insets by the border width so an inked slice reads as one solid block.
@@ -283,7 +290,7 @@ const styles = StyleSheet.create({
   },
   allWrap: { position: 'absolute', left: ALL_L, top: ALL_T, width: ALL_W },
   allBox: {
-    height: 44, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    height: 44, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   allRight: { backgroundColor: INK, borderColor: INK },

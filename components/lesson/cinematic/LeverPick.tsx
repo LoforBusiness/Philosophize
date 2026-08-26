@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-  Easing, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue,
+  Easing, runOnJS, useAnimatedStyle, useDerivedValue, useSharedValue,
   withDelay, withSpring, withTiming, type SharedValue,
 } from 'react-native-reanimated';
 import { touch } from '@/lib/feedback';
@@ -110,11 +110,14 @@ export default function LeverPick({ lever, picked, onPick, pos }: Props) {
   }, [n]);
 
 
-  // WHICH READING IS SHOWING — REACT STATE, AND THAT IS NOT A REGRESSION.
-  // See ./ControlRead: this index changes on the same boundary crossing that
-  // already fires the haptic tick, so a wrapping <Text> costs a handful of renders
-  // of one leaf, and the <input> it replaces could not wrap at all.
-  const [stop, setStop] = useState(lever.start);
+  // WHICH READING IS SHOWING — A DERIVED VALUE, NOT REACT STATE.
+  //
+  // It WAS state, and on a rail that stuttered: a thumb crossing four zones in a
+  // few hundred milliseconds meant four hard cuts, four re-centrings of the box,
+  // and four re-renders of a component that builds its Gesture inline while a
+  // finger is down on it. ControlRead's header sets all three out. Derived here
+  // and read on the UI thread, the reading costs no render at all.
+  const stop = useDerivedValue(() => stopAt(pos.value));
 
   const commit = useCallback((k: number) => {
     const st = lever.stops[k];
@@ -126,7 +129,6 @@ export default function LeverPick({ lever, picked, onPick, pos }: Props) {
     // lesson must not begin wherever the first was left.
     pos.value = n > 1 ? lever.start / (n - 1) : 0;
     lastStop.value = lever.start;
-    setStop(lever.start);
   }, [lever, lever.start, n, pos, lastStop]);
 
   useEffect(() => {
@@ -153,7 +155,7 @@ export default function LeverPick({ lever, picked, onPick, pos }: Props) {
     const k = stopAt(pos.value);
     // The clunk. It fires as the arm passes into a slot's half, which is what
     // makes the row of settings something you can find without looking.
-    if (k !== lastStop.value) { lastStop.value = k; runOnJS(touch)(); runOnJS(setStop)(k); }
+    if (k !== lastStop.value) { lastStop.value = k; runOnJS(touch)(); }
   }, [padW, pos, stopAt, lastStop]);
 
   const pan = Gesture.Pan()
@@ -168,7 +170,6 @@ export default function LeverPick({ lever, picked, onPick, pos }: Props) {
       held.value = withTiming(0, { duration: 160 });
       const k = stopAt(pos.value);
       pos.value = withSpring(n > 1 ? k / (n - 1) : 0, SETTLE);
-      runOnJS(setStop)(k);
       runOnJS(commit)(k);
     });
 
@@ -195,7 +196,7 @@ export default function LeverPick({ lever, picked, onPick, pos }: Props) {
 
   return (
     <View style={styles.wrap} pointerEvents="box-none">
-      <ControlRead text={reads[stop] ?? reads[0]} />
+      <ControlRead texts={reads} idx={stop} />
 
       <GestureDetector gesture={pan}>
         {/* The whole strip is the target, not the arm — see DragScale on why a

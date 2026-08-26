@@ -9,7 +9,8 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics5Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  useCarry, carry, STONE,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -194,10 +195,15 @@ const styles = StyleSheet.create({
   },
   // borderRadius stays 0 on the dashed frame: Android silently falls back to a
   // SOLID border when a dashed one is rounded, and the dashes are the whole point.
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   panelEmpty: {
     position: 'absolute', top: PAN_T, width: PAN_W, height: PAN_H,
     borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 0,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: RULE, alignItems: 'center', justifyContent: 'center',
   },
   nilRing: { width: 34, height: 34, borderRadius: 17, borderWidth: 2, borderColor: SOFT },
   nilSlash: { position: 'absolute', width: 44, height: 2, backgroundColor: SOFT, transform: [{ rotate: '-45deg' }] },
@@ -205,7 +211,7 @@ const styles = StyleSheet.create({
   panelFull: {
     position: 'absolute', top: PAN_T, width: PAN_W, height: PAN_H,
     borderWidth: 2.5, borderColor: INK, borderRadius: 3,
-    backgroundColor: PAPER, overflow: 'hidden',
+    backgroundColor: RULE, overflow: 'hidden',
   },
   star: { position: 'absolute', backgroundColor: INK },
   spark: { position: 'absolute', width: 16, height: 16, alignItems: 'center', justifyContent: 'center' },
@@ -246,7 +252,7 @@ const styles = StyleSheet.create({
   // ── the Dasein tag ──────────────────────────────────────────────────────────
   tag: {
     position: 'absolute', left: 4, top: 296, width: 114, height: 44,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   tagWord: { fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 2, color: INK, includeFontPadding: false },

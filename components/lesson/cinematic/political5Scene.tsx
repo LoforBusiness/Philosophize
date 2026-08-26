@@ -9,7 +9,8 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political5Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  useCarry, carry, STONE,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -139,7 +140,17 @@ export default function Political5Scene({ clock, bt, bi, i, picked, onPick, drag
   // them at 2.4:1. Dimming cannot be tuned here — the caption's paper fades at the
   // same rate as its ink — so the words ride their own track and are legible or
   // absent.
-  const capTextStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.city * 2.5) }));
+  // × 2.5 WAS TUNED FOR `city` RESTING AT 0.6, AND IT GOES LOWER THAN THAT. On the
+  // beat the veil comes down the city sits at 0.14, which × 2.5 is 0.35 and reaches
+  // the eye at 1.6:1 — the same smear the note above is about, one rest value
+  // further down. Shifted and steepened instead of scaled: absent below 0.15, whole
+  // by 0.35, so there is no value the caption can rest at and be unreadable.
+  const capTextStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.city - 0.15) * 5) }));
+  // AND ITS WORDS RIDE THEIR OWN TRACK, for the reason two lines above. `link`
+  // rests at 0.26 while the timeline sits behind the city, which reaches the eye
+  // at 1.7:1 — a smear in the shape of four names, and worse now the tiers behind
+  // them are a tone rather than paper. Same fix as the caption: legible or absent.
+  const linkTextStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.link * 2.5) }));
   const linkStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.link,
     transform: [{ translateY: (1 - SCENE.value.link) * -8 }],
@@ -163,8 +174,14 @@ export default function Political5Scene({ clock, bt, bi, i, picked, onPick, drag
         <View style={styles.tlHead} />
         {STOPS.map((s) => (
           <View key={s.name} style={styles.layer}>
-            <Text style={[styles.tlName, { left: s.x - STOP_W / 2 }]}>{s.name}</Text>
             <View style={[styles.tlTick, { left: s.x - 1 }]} />
+          </View>
+        ))}
+      </Animated.View>
+      <Animated.View style={[styles.layer, linkTextStyle]} pointerEvents="none">
+        {STOPS.map((s) => (
+          <View key={s.name} style={styles.layer}>
+            <Text style={[styles.tlName, { left: s.x - STOP_W / 2 }]}>{s.name}</Text>
             <Text style={[styles.tlSub, { left: s.x - STOP_W / 2 }]}>{s.q}</Text>
           </View>
         ))}
@@ -291,9 +308,14 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   tier: {
     position: 'absolute', height: TIER_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   tierTitle: {
@@ -305,7 +327,7 @@ const styles = StyleSheet.create({
   // ── the veil ────────────────────────────────────────────────────────────────
   veil: {
     position: 'absolute', left: VEIL_L, top: VEIL_T, width: VEIL_W, height: VEIL_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
     alignItems: 'center',
   },
   veilRod: { position: 'absolute', top: -4, left: -10, right: -10, height: 6, backgroundColor: INK, borderRadius: 3 },

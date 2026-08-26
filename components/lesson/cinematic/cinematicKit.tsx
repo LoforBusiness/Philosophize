@@ -24,6 +24,61 @@ export const PAPER = '#FAFAF7';
 export const SOFT = '#6B6B6B';
 export const RULE = '#E4E1D8';
 
+// ── THE TONAL RAMP: THREE GREYS THAT DID NOT EXIST, AND WHY THEY DO NOW ──────
+//
+// A reader named two lessons — `political7` (Where Rights Come From) and
+// `political8` (the fence) — and asked for what they have:
+//
+//   "I really like all the animations, all of the artwork … the idea of adding
+//    different dark shading in there that the political philosophy lesson has. It
+//    looks really good when there's different contrasts of darker shading."
+//
+// Counted out of the source, the difference is exact and it is not about
+// animation at all. Those two scenes lay down SEVEN and TEN filled tonal masses;
+// **81 of the 184 scenes use exactly one, and 48 use two.** A lesson with one tone
+// is an outline diagram on white — two values, no depth — and that is what most
+// of the corpus was. political7 puts a light-grey stone slab, a white card and a
+// dark seal in the same picture, and it reads as objects standing in a space.
+//
+// The palette could not express that. It ran PAPER · RULE · SOFT · INK, and the
+// step from RULE to SOFT is the whole middle of the range in one jump: there was
+// nowhere to put a mass that is plainly darker than the paper but plainly not ink.
+// These two fill it, and they are still greys — no hue, so §19's rule that the
+// identity does not bend is untouched.
+//
+// ── WHAT MAY SIT ON THEM, MEASURED ──────────────────────────────────────────
+//
+//   tone            INK on it     SOFT on it
+//   RULE  #E4E1D8     13.31           4.08     ← the light mass, already here
+//   STONE #CFCABC     10.63           3.26     ← SOFT fails here
+//   SHADE #A8A296      6.86           2.10     ← and here, badly
+//
+// So the rule that comes with them, and `check:shade` enforces it: **type on a
+// tone is INK.** SOFT is a 5.1:1 grey on paper and it does not survive being put
+// on a grey — the identical trap §19 records three times over for metal tones
+// reaching onto paper. Below RULE, ink is the only text colour.
+//
+// ── AND ONE LIGHT, AS EVERYWHERE ELSE ───────────────────────────────────────
+//
+// If a mass takes two tones to read as solid, the lighter one goes on the
+// top-left face and the darker on the bottom-right, exactly as `tone.ts` lights
+// every rank pin and badge. Seventy-five marks lit from one direction read as a
+// set; lit from wherever suited each one they read as clip art, and a stage full
+// of props is no different.
+// THERE IS NO TONE BETWEEN PAPER AND RULE, AND THAT WAS TRIED.
+//
+// A `WASH` at #EFEDE6 was added here first, as "a breath above the paper". It was
+// applied to eighteen scenes, rendered, and photographed — and it is WHITE. §19
+// had already measured why and the note was not read: "a 7% tonal range is
+// invisible", and paper to wash is 11%. RULE is the light mass, it is 21% off the
+// paper, and `political7` fills its tablet with it precisely because that reads.
+// A tone nobody can see is worse than no tone: it is a trap for the next author,
+// who will believe the source and not the screen.
+/** A true light-mid — slabs, tablets, walls, anything meant to read as a mass. */
+export const STONE = '#CFCABC';
+/** A real mid — the shaded side of a mass, or a heavier object behind a lighter one. */
+export const SHADE = '#A8A296';
+
 // ── THE ANSWER STATES, AND WHY THIS IS NOT A NEW COLOUR ──────────────────────
 //
 // H60 says a SCENE gets four colours and no more, and that stands — the picture

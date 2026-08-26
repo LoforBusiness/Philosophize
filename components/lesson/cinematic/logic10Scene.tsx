@@ -10,7 +10,9 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic10Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  facing, useCarry, carry, STONE,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -288,9 +290,14 @@ const styles = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: SOFT, includeFontPadding: false,
   },
 
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   hidCard: {
     position: 'absolute', left: CARD_L, top: HID_T, width: CARD_W, height: SLOT_H,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
+    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   frame: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
   frameDash: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 0 },

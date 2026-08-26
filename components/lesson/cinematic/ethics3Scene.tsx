@@ -9,7 +9,8 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle, type Stance } from
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics3Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  useCarry, carry, STONE,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -302,7 +303,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
   },
   oneLab: {
-    position: 'absolute', left: 276, top: 348, width: 56, textAlign: 'center',
+    // y 430, NOT 348. The two TRUE / FALSE plates fill y 252…368 across the whole
+    // width when the question opens, so at 348 this label was printed UNDER the
+    // second plate on both of the beats it matters — measured at 5.1:1 against a
+    // ground it no longer reached (D31). At 430 it sits 30 above its own bound on
+    // the branch and 23 clear of FIVE, and the plates end 50 above it.
+    position: 'absolute', left: 276, top: 430, width: 56, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
   },
 
@@ -314,9 +320,14 @@ const styles = StyleSheet.create({
   // x 118 and up, well clear of the decider's x 20–96.
   trolley: { position: 'absolute', left: 0, top: GROUND - 74, width: 84, height: 74 },
   roof: { position: 'absolute', left: 9, top: 6, width: 65, height: 9, backgroundColor: INK, borderRadius: 3 },
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   car: {
     position: 'absolute', left: 0, top: 16, width: 84, height: 47,
-    borderWidth: 3, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
+    borderWidth: 3, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
   },
   window: {
     position: 'absolute', top: 25, width: 20, height: 17,
@@ -374,6 +385,11 @@ const styles = StyleSheet.create({
   // any of these lessons, because a true/false call should be unmissable.
   plateSlot: { position: 'absolute', left: 0, width: BAL_W, height: BAL_H },
   plate: {
+    // PAPER, NOT A TONE — this is one of the two answer plates, so it CARRIES THE
+    // MESSAGE and T2 says it stays white. Toning it also put a solid ground over
+    // the ONE label on the branch, which `check:readable` reported as UNDER the
+    // moment the fill changed. The car is the mass in this picture; a card the
+    // reader is being asked to read is not.
     width: BAL_W, height: BAL_H, borderWidth: 2.5, borderColor: INK, borderRadius: 5,
     backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
   },

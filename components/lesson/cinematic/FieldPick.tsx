@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-  Easing, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue,
+  Easing, runOnJS, useAnimatedStyle, useDerivedValue, useSharedValue,
   withDelay, withSpring, withTiming, type SharedValue,
 } from 'react-native-reanimated';
 import { touch } from '@/lib/feedback';
@@ -82,11 +82,14 @@ export default function FieldPick({ field, picked, onPick, pos, pos2 }: Props) {
   }, []);
 
 
-  // WHICH READING IS SHOWING — REACT STATE, AND THAT IS NOT A REGRESSION.
-  // See ./ControlRead: this index changes on the same boundary crossing that
-  // already fires the haptic tick, so a wrapping <Text> costs a handful of renders
-  // of one leaf, and the <input> it replaces could not wrap at all.
-  const [quad, setQuad] = useState(() => quadAt(field.start[0], field.start[1]));
+  // WHICH READING IS SHOWING — A DERIVED VALUE, NOT REACT STATE.
+  //
+  // It WAS state, and on a rail that stuttered: a thumb crossing four zones in a
+  // few hundred milliseconds meant four hard cuts, four re-centrings of the box,
+  // and four re-renders of a component that builds its Gesture inline while a
+  // finger is down on it. ControlRead's header sets all three out. Derived here
+  // and read on the UI thread, the reading costs no render at all.
+  const quad = useDerivedValue(() => quadAt(pos.value, pos2.value));
 
   const commit = useCallback((at: number) => {
     onPick(ids[at], oks[at] === 1);
@@ -96,7 +99,6 @@ export default function FieldPick({ field, picked, onPick, pos, pos2 }: Props) {
   useEffect(() => {
     pos.value = field.start[0];
     pos2.value = field.start[1];
-    setQuad(quadAt(field.start[0], field.start[1]));
     lastQ.value = quadAt(field.start[0], field.start[1]);
   }, [field, field.start, pos, pos2, quadAt, lastQ]);
 
@@ -115,7 +117,7 @@ export default function FieldPick({ field, picked, onPick, pos, pos2 }: Props) {
     pos.value = px;
     pos2.value = py;
     const q = quadAt(px, py);
-    if (q !== lastQ.value) { lastQ.value = q; runOnJS(touch)(); runOnJS(setQuad)(q); }
+    if (q !== lastQ.value) { lastQ.value = q; runOnJS(touch)(); }
   }, [padW, pos, pos2, quadAt, lastQ]);
 
   const pan = Gesture.Pan()
@@ -126,7 +128,6 @@ export default function FieldPick({ field, picked, onPick, pos, pos2 }: Props) {
     .onEnd(() => {
       held.value = withTiming(0, { duration: 160 });
       const q = quadAt(pos.value, pos2.value);
-      runOnJS(setQuad)(q);
       // Settle to the middle of the quadrant it landed in, so the commitment is
       // legible rather than balanced on a line.
       pos.value = withSpring((q % 2 === 1 ? 0.75 : 0.25), SETTLE);
@@ -145,7 +146,7 @@ export default function FieldPick({ field, picked, onPick, pos, pos2 }: Props) {
 
   return (
     <View style={styles.wrap} pointerEvents="box-none">
-      <ControlRead text={reads[quad] ?? reads[0]} />
+      <ControlRead texts={reads} idx={quad} />
 
       <View style={styles.row}>
         {/* THREE LINES, NOT TWO — and two on the x ends rather than one.

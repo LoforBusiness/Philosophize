@@ -9,7 +9,9 @@ import { climb, ease01, lerp, mixStance, pose, type Bundle, type Stance } from '
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic5Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  useCarry, carry, STONE,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -378,9 +380,14 @@ const styles = StyleSheet.create({
     position: 'absolute', width: STAIR_W, height: STAIR_TAG_H, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.4, color: SOFT, includeFontPadding: false,
   },
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   stair: {
     position: 'absolute', width: STAIR_W, borderWidth: 2.5, borderColor: INK,
-    backgroundColor: PAPER, alignItems: 'center', paddingTop: 5,
+    backgroundColor: STONE, alignItems: 'center', paddingTop: 5,
   },
   stairNum: { fontFamily: 'Inter_700Bold', fontSize: 14, color: INK, includeFontPadding: false },
 
@@ -442,7 +449,7 @@ const styles = StyleSheet.create({
   binHit: { position: 'absolute', left: COL_L, width: COL_W },
   bin: {
     width: COL_W, height: BIN_H, borderWidth: 3, borderColor: INK, borderRadius: 8,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: RULE, alignItems: 'center', justifyContent: 'center',
   },
   binRight: { backgroundColor: INK, borderColor: INK },
   binWrong: { borderColor: SOFT, opacity: 0.45 },

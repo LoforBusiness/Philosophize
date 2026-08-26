@@ -10,7 +10,9 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic9Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  useCarry, carry, STONE,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -231,9 +233,14 @@ const styles = StyleSheet.create({
 
   // The claim is the only thing on stage with a heavy border and legs under it —
   // it is a board that has been PUT UP, so knocking it over would be visible.
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   board: {
     position: 'absolute', left: BOARD_L, top: BOARD_T, width: BOARD_W, height: BOARD_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
     alignItems: 'center', justifyContent: 'center',
   },
   boardTag: {
@@ -252,7 +259,7 @@ const styles = StyleSheet.create({
   // look like the board. The straw one tips; the smear just hangs there.
   tag: {
     position: 'absolute', borderWidth: 1.5, borderColor: SOFT, borderRadius: 3,
-    backgroundColor: PAPER, paddingVertical: 5, paddingHorizontal: 6, alignItems: 'center',
+    backgroundColor: STONE, paddingVertical: 5, paddingHorizontal: 6, alignItems: 'center',
   },
   /** The tag's box without its furniture, for words that must not dim with it. */
   tagBare: { borderColor: 'transparent', backgroundColor: 'transparent' },
@@ -260,7 +267,11 @@ const styles = StyleSheet.create({
   strawTag: { left: STRAW_L, top: STRAW_T, width: STRAW_W },
   tagText: {
     fontFamily: 'Inter_500Medium', fontSize: 9.5, lineHeight: 12.5, letterSpacing: 0.4,
-    color: SOFT, textAlign: 'center', includeFontPadding: false,
+    // INK, NOT SOFT, because the tag behind it is a tone now. SOFT is a 5.1:1 grey
+    // on paper and 3.26:1 on STONE — under the floor, on a colour that passed its
+    // own check. Type on a tone is ink (see cinematicKit's ramp); `check:shade`
+    // caught this the moment the fill changed, which is what it is for.
+    color: INK, textAlign: 'center', includeFontPadding: false,
   },
 
   replySlot: { position: 'absolute', left: REPLY_L, width: REPLY_W },

@@ -9,7 +9,8 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political4Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  useCarry, carry, STONE,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -274,9 +275,14 @@ const styles = StyleSheet.create({
   measCap: { position: 'absolute', top: MEAS_Y - 8, width: 2, height: 18, backgroundColor: INK },
 
   // ── Mill's test ────────────────────────────────────────────────────────────
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   testCell: {
     position: 'absolute', top: TEST_T, height: TEST_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
     alignItems: 'center', justifyContent: 'center',
   },
   testHarm: { backgroundColor: INK },
@@ -291,7 +297,7 @@ const styles = StyleSheet.create({
     position: 'absolute', top: WALL_T, width: WALL_W, height: WALL_H,
     backgroundColor: INK, borderRadius: 2, overflow: 'hidden',
   },
-  course: { position: 'absolute', left: 0, width: WALL_W, height: 1.5, backgroundColor: PAPER, opacity: 0.55 },
+  course: { position: 'absolute', left: 0, width: WALL_W, height: 1.5, backgroundColor: STONE, opacity: 0.55 },
   joint: { position: 'absolute', width: 1.5, height: 26, backgroundColor: PAPER, opacity: 0.4 },
 
   // ── the harm boundary + the other person ───────────────────────────────────

@@ -9,7 +9,8 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political2Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  useCarry, carry, STONE,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -248,7 +249,7 @@ const styles = StyleSheet.create({
   },
   barTrack: {
     position: 'absolute', top: 0, width: BAR_W, height: BAR_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: RULE, overflow: 'hidden',
   },
   tick: { position: 'absolute', top: 0, bottom: 0, width: 1.5, backgroundColor: RULE },
   barFill: {
@@ -273,9 +274,14 @@ const styles = StyleSheet.create({
     position: 'absolute', left: RULER_X - PODIUM_W / 2 - 7, top: GROUND - PODIUM_H,
     width: PODIUM_W + 14, height: PODIUM_H, transformOrigin: '50% 100%',
   },
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   podBox: {
     position: 'absolute', left: 7, top: 0, width: PODIUM_W, height: PODIUM_H,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
   },
   podCap: { position: 'absolute', left: 0, top: 0, width: PODIUM_W + 14, height: 5, backgroundColor: INK },
   podLab: {

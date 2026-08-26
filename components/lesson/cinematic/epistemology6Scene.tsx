@@ -9,7 +9,8 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology6Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  useCarry, carry, STONE,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -218,7 +219,7 @@ const styles = StyleSheet.create({
   },
   box: {
     position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
     alignItems: 'center', justifyContent: 'center',
   },
   boxHead: {
@@ -252,11 +253,16 @@ const styles = StyleSheet.create({
   hang: { position: 'absolute', top: 0, width: 2, height: 26, backgroundColor: SOFT },
   // A pan is 66×36: big enough to hold a word AND its three tally blocks, which is
   // what turns "an equal argument is opposed" into something you can count.
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   pan: {
     position: 'absolute', top: PAN_T, width: PAN_W, height: PAN_H,
     borderWidth: 2.5, borderColor: INK, borderTopWidth: 0,
     borderBottomLeftRadius: 8, borderBottomRightRadius: 8,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
   },
   panT: {
     fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 0.4, color: INK, includeFontPadding: false,

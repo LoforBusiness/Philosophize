@@ -4213,3 +4213,134 @@ red. `check-readable` reported all 186 lessons clean for a whole run once becaus
 its probe threw on the first word of the first beat — a null read was treated
 exactly like a finished lesson. **A harness that measures nothing must not look
 clean.**
+
+### S7 · The reading may not go through React — a rail is not a lever
+
+S3 made the reading wrap by taking it off the `<input>` and driving it from React
+state, updated on each boundary crossing. The reader came straight back:
+
+> "when you start to move them, the words above it that change as you move it
+>  start to stutter and start to glitch, and you can't even read what's going on
+>  when you do that … Actually, the lever, I think, looks okay … It's a lot with
+>  the line when you slide it."
+
+Both halves of that are exactly right, and the difference between the two controls
+is the whole diagnosis. **A lever has three or four detents**, so a sweep crosses
+two or three of them and the reading changes two or three times. **A rail is
+continuous** — `drag` and `split` divide 0…1 into zones and a thumb travelling the
+width crosses every one in a few hundred milliseconds. That coarseness hid three
+faults at once:
+
+1. **Each change was a hard cut** — a whole sentence at 15pt replaced between one
+   frame and the next, several times a second, directly above the thumb.
+2. **The box re-centred.** One-line and two-line readings centre at different
+   heights, so the words jumped vertically on every swap.
+3. **It re-rendered the control mid-gesture.** `DragScale` builds its `Gesture.Pan`
+   inline, so every reading change handed `GestureDetector` a new gesture object
+   while a finger was down on it.
+
+So every possible reading is mounted at once, stacked in one fixed-height box, and
+an index **SharedValue** cross-fades between them on the UI thread. No render, no
+cut, no jump, and the drag keeps one gesture object for its whole life.
+
+Measured on a real 1.5-second sweep, sampling every animation frame:
+
+| | before | after |
+|---|---|---|
+| biggest opacity step between two frames | 1.000 | **0.226** |
+| distinct box tops during the sweep | several | **1** (0.0px spread) |
+
+`node scripts/sweep-read.mjs <lessonId>` is that measurement, and it was
+counter-tested by setting the crossfade to 0 and watching the step go back to
+1.000. It needs Metro and a browser, so the rule it protects is ratcheted offline
+instead: **`check:controls` fails if any control holds React state, or hands
+`ControlRead` anything but a shared value.** One allowance is listed by name —
+`ShapePlot`'s `drawn`, which flips once per question and gates the commit button
+rather than the reading.
+
+**The general form: coarse controls hide continuous defects.** A thing that
+changes three times per gesture and a thing that changes thirty times are not the
+same thing, and testing only the first will tell you the second is fine.
+
+---
+
+## Group T — a scene needs mass, not just outlines
+
+### T1 · Two values is a diagram; four is a picture
+
+A reader named the two lessons they liked best and asked for what those have:
+
+> "for the lesson where rights come from in political philosophy, I really, really
+>  like all the animations, all of the artwork and everything that moves … There's
+>  also a lesson where it has three figures and a fence … I really like how those
+>  two lessons have done it … like the idea of adding different dark shading in
+>  there that the political philosophy lesson has. It looks really good when
+>  there's different contrasts of darker shading."
+
+Counted out of the source, the difference is exact — and it is not about animation
+at all. `political7` lays down **ten** filled tonal masses and `political8`
+**seven**. Across the corpus, **81 of 184 scenes use exactly one and 48 use two**,
+and that one is usually the ground's own hairline. A scene with one tone is an
+outline diagram on white: two values, no depth. Rendered side by side, the flat
+one reads as a wiring diagram and the praised one reads as objects standing in a
+room, and nothing else about them differs.
+
+`npm run check:shade` counts it, prints the flattest lessons so the work is
+pickable, and ratchets — the number of scenes below the floor may only go DOWN,
+the same shape as `CARD_BUDGET` and `SOLID_FLOOR`.
+
+### T2 · The recipe: the big surface takes the tone, the message stays white
+
+This is not "everything a shade darker", which would be a worse picture, not a
+better one. What `political7` actually does is put **things at different values**:
+a light stone tablet, a WHITE charter hanging in front of it, and a dark seal.
+Take the white away and the contrast that makes it read goes with it.
+
+So, per scene:
+
+- the **structural mass** — the plinth, the housing, the wall, the podium, the
+  thing the picture is built on — takes `STONE`;
+- a **secondary surface** takes `RULE`, the light mass;
+- whatever **carries the message** stays `PAPER`;
+- where a mass has two faces, the upper one is the lighter — one light, from the
+  top left, the same one `tone.ts` uses for every rank pin and badge (§19).
+
+Verified by rendering: `aesthetics10`'s projector housing was white with five
+white filmstrip cells inside it, and the cells had nothing to sit against. One
+`RULE` fill on the housing and the picture has a foreground and a background.
+
+**And the biggest box is not always the right one.** A first pass picked the
+largest bordered surface in each scene automatically; in `aesthetics10` that is
+the *answer card*, and toning it would have removed exactly the white the tablet
+needs to be seen against. In `aesthetics10` it also picked a panel that spends
+most of the lesson hidden behind a shutter, so the change was invisible to a
+reader. Pick by what the scene is BUILT ON, and confirm by rendering it.
+
+### T3 · Type on a tone is INK
+
+The one way these greys can make a lesson worse. Measured:
+
+| tone | INK on it | SOFT on it |
+|---|---|---|
+| `RULE` #E4E1D8 | 13.31 | 4.08 |
+| `STONE` #CFCABC | 10.63 | **3.26** |
+| `SHADE` #A8A296 | 6.86 | **2.10** |
+
+`SOFT` is a 5.1:1 grey on paper and does not survive being put on a grey — the
+identical trap §19 records three times over for metal tones reaching onto paper.
+`check:shade` catches it, and it caught one the moment this batch landed:
+`logic9`'s tag became `STONE` while its label was still `SOFT`.
+
+### T4 · A tone nobody can see is worse than no tone
+
+A `WASH` at `#EFEDE6` was added to the ramp first, as "a breath above the paper",
+applied to eighteen scenes, and rendered. **It is white.** §19 had already measured
+why — *"a 7% tonal range is invisible"* — and paper to wash is 11%. `RULE` is 21%
+off the paper, which is why `political7` fills its tablet with it and why that
+tablet reads.
+
+It was deleted rather than kept "for subtle work". A tone that does not register
+is a trap for the next author, who will believe the source and not the screen —
+and the source is where the wrong number gets written down. `epistemology8`'s
+comment claiming `BECAUSE` was 35.3dp when it is 46.1 is the same failure in a
+different measurement.

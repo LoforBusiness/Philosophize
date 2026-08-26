@@ -9,7 +9,8 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology5Script';
 import {
-  K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry,
+  carry, STONE,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -234,9 +235,14 @@ const styles = StyleSheet.create({
   rays: { position: 'absolute', width: 68, height: 68, alignItems: 'center', justifyContent: 'center', transformOrigin: '50% 50%' },
   ray: { position: 'absolute', width: 68, height: 2, backgroundColor: INK, borderRadius: 2 },
 
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   rung: {
     position: 'absolute', width: RUNG_W, height: RUNG_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     flexDirection: 'row', alignItems: 'center', paddingLeft: 6, gap: 7,
   },
   rungNum: {
@@ -274,7 +280,7 @@ const styles = StyleSheet.create({
   },
   plateHit: { position: 'absolute', left: PLATE_X, width: PLATE_W },
   plate: {
-    height: 42, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    height: 42, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: RULE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },

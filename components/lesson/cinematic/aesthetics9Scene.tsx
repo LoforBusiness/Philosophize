@@ -10,7 +10,9 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics9Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  facing, useCarry, carry, STONE,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -223,9 +225,14 @@ const styles = StyleSheet.create({
   // y 386, above the crown of a figure standing in front of them.
   shelf: { position: 'absolute', top: BOX_T + BOX_H, width: BOX_W + 24, height: 4, backgroundColor: INK },
   shelfLeg: { position: 'absolute', top: BOX_T + BOX_H + 4, width: 3, height: STAND_B - (BOX_T + BOX_H + 4), backgroundColor: SOFT },
+  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
+  // values and no depth, which is the flat case `check:shade` exists to find.
+  // The structural mass takes STONE, a secondary surface takes RULE, and what
+  // carries the message stays PAPER, so the picture has things at different
+  // values rather than everything a shade darker. See cinematicKit's ramp.
   plinth: {
     position: 'absolute', top: BOX_T + BOX_H, width: BOX_W - 20, height: STAND_B - (BOX_T + BOX_H),
-    borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
   },
   // ABOVE the box, not under the stand — under the stand is where the figure's head
   // goes, and a caption there would be the D31 collision wearing a name badge.
@@ -244,7 +251,7 @@ const styles = StyleSheet.create({
 
   labelSlot: { position: 'absolute', left: LABEL_L, width: LABEL_W },
   label: {
-    height: LABEL_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: LABEL_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   labelRight: { backgroundColor: INK, borderColor: INK },
