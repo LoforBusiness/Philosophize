@@ -128,7 +128,9 @@ const styles = StyleSheet.create({
     marginTop: -300,
   },
 
-  labels: { position: 'absolute', left: 108, top: 300, width: 46, gap: 10 },
+  // 60 WIDE, NOT 46: EVERYONE is 53dp with its tracking and was losing its tail on
+  // every beat — and it is the outermost ring, the whole point of the question.
+  labels: { position: 'absolute', left: 108, top: 300, width: 60, gap: 10 },
   label: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT,
     includeFontPadding: false,

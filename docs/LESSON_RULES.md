@@ -4042,3 +4042,174 @@ scene's layout.**
 lines, an unlabelled prop the narration points at, a bar that fills — none of those
 carry text, so none of them are in the table. If a beat's text names something the
 scene draws without words, give that beat a `must` by hand.
+
+---
+
+## Group S — a word must fit the box it is in, and nothing may be laid over it
+
+Everything above this group is about the STAGE — what the scene draws, what the
+camera can crop, whether a caption is big enough or dark enough. Group S is about
+something smaller and, it turns out, commoner: a box that is not as wide or as tall
+as the words inside it.
+
+It exists because the reader has now reported the same defect four separate times,
+in four different places, and every check in the suite was green through all four:
+
+> "still words are cut off the screen from the left and the right"
+> "letters are cut off to the right"
+> "there are plenty of words that arent correctly in their boxes, and words get
+>  covered by other things … look at all other cinimatic lessons for this too"
+> "many words are cut off from all of the 4 new ways to asnwer questions"
+
+### S1 · A word may not overflow its own box — measured on the box, not on the crop
+
+`check-readable`'s KEEP measures a word against whatever is **clipping** it, which
+in a scene is almost always the stage crop. That is the right question for a
+caption drifting off the edge and completely the wrong one for a label that
+overruns its own little plate three hundred pixels inside the frame. The plate is
+not clipping anything; it is simply too small, and the word hangs out of it or is
+truncated by a `numberOfLines` cap.
+
+The element's own scroll box answers directly, so **SPILL** is now a finding:
+`scrollWidth > clientWidth` or `scrollHeight > clientHeight`, on every word in the
+stage and the deck, with 2px of slack for sub-pixel rounding. React Native's
+`numberOfLines` is a line clamp with `overflow: hidden`, so a truncated label
+arrives here as extra scrollHeight — which makes this the general form of every
+"cut off" the reader has described.
+
+`logic8` is the worked example, and it is worth reading because every one of its
+four faults was invisible to arithmetic done by eye on the source:
+
+| box | column | needed | what the reader saw |
+|---|---|---|---|
+| `THE TEMPTING MOVE` | 120 | 173dp | three lines in a 17-unit slot |
+| the trap sentence | 120 | 223dp | three lines in a 34-unit slot, cut |
+| `WHAT THE WET STREET PROVES · TAP ONE` | 256 | 343dp | second line printed across the first answer card |
+| `WET PATCH` | 76 | 92dp | second line printed across the puddle it names |
+
+A lesson called *Two Tempting Traps* in which the second trap was sliced in half.
+
+**How to answer it without a browser.** Widths are one component times a list of
+strings, so measure them offline with the real face — `scripts/check-controls.mjs`
+does exactly this for the controls and takes two minutes for 1,127 labels with no
+Metro at all. For a scene, hand the same measurement a list of `{text, font, size,
+track, room}` read off the stylesheet. Guessing at 8dp a character will be wrong by
+a third, and in the wrong direction.
+
+### S2 · Nothing may be painted on top of a word — and that is now measured
+
+D31 and D33 already say this. Nothing enforced it, and the reason is worth
+knowing: `check-readable` decides what a word sits on with `elementsFromPoint` and
+then scans **downward** from the word for a background colour. That is exactly
+right for contrast — what is behind the glyph is what it has to contrast with —
+and it means anything painted **over** the word was skipped entirely. A caption
+with an opaque panel across it measured a perfect contrast against a ground it no
+longer reaches.
+
+**UNDER** is the other half: any element ABOVE the word in the same paint stack,
+which is not one of its own ancestors, with a composited alpha of 0.6 or more.
+Ancestors are excluded and they are most of the stack — an ancestor with a
+background paints behind its own text, never over it. What is left is a sibling or
+a cousin drawn later, which is the defect.
+
+Half-covered is covered. A wash at 0.6 over a word is a word nobody reads; anything
+thinner is legitimate scrim.
+
+### S3 · A control's readout is the biggest word on the beat, and it must wrap
+
+The reading above an analogue control — the sentence that changes as the reader
+moves it — was an `ACounter`, which is `Animated(TextInput)`, which on the web is
+an `<input>`. **An `<input>` cannot wrap.** So 285 of the 1,127 readings in the
+corpus ran off the right-hand edge, some of them by a third of the sentence, at
+17pt, dead centre, on the most important line of the beat.
+
+The TextInput was chosen so Reanimated could write it from the UI thread and the
+drag would cost zero React renders. That reasoning is sound for a NUMBER —
+SplitBar's two running percentages are still ACounters and must be. It never
+applied to the reading, because **the reading does not change every frame**: it
+changes when the value crosses into a new zone, stop, quadrant or nearest profile,
+which is the same event that already fires the haptic tick. A wrapping `<Text>`
+driven by state on that crossing costs about four renders of one small leaf per
+gesture.
+
+Two things follow, and both are load-bearing:
+
+- **The height is fixed at two lines, always**, whether the reading uses one or
+  two. The reading changes under the reader's thumb, so a content-sized box would
+  resize the deck mid-drag — and the deck's height is what `styles.lower` hands
+  out, so the stage would rescale on the frame a word got longer. That is L6, the
+  camera cut nobody wrote, arriving through a text box instead of a control.
+- **15pt, not 17.** Two lines of 17 would have taken 44px out of the deck, which is
+  `overflow: hidden` and holds the prompt and the explanation. At 15 every reading
+  in the corpus fits two lines at 360dp, measured with the real face.
+
+### S4 · Lifting a finger is only an answer when the control has one value
+
+Four of the five analogue controls hold a single number, so release-is-commit is
+right for them: when the finger comes up there is nothing left to say.
+
+**A plot holds one value per column**, and the only way to set four of them is to
+lift between them. `ShapePlot` committed in `onEnd` anyway, so the reader set the
+first column, lifted to reach the second, and the question was already over:
+
+> "when you move one up or down then want to go to the next it simply thinks your
+>  done and doesnt let you finish"
+
+A drag straight across still sets every column and still works. What has gone is
+the assumption that it was the only way anybody would do it. The commit is a button
+now — flat and cool until there is something to commit, in the left gutter the axis
+label already occupies, so it costs the deck no height at all.
+
+**The general form: a control's commit gesture is derived from how many values it
+holds, never copied from the control next to it.**
+
+### S5 · The grip goes where the finger is — 1:1, not merely in the right direction
+
+`DragScale`, `SplitBar` and `LeverPick` were fixed once already, when the reader
+said the far end was unreachable: they had integrated `translationX / width`, so a
+full sweep cost a full width of travel. All five place the value at **where the
+finger is** now.
+
+The lever was still wrong, and the reader said so: *"make it so the lever moves
+easier instead of it feeling like a struggle to move over."* The VALUE was
+absolute; the PICTURE was not. The arm was 52 long swinging ±52°, so its grip
+travelled 82dp while the finger travelled the pad's full 308 — a gain of 0.27. The
+control had already obeyed the gesture and was visibly refusing it, which is
+precisely what "a struggle" describes.
+
+A rotating arm can only span the pad if it is long enough, and an arm 231 tall does
+not fit in a 70-tall control. So it is **dropped**: the pivot sits 190 below the
+pad, the pad clips, and the reader sees the top 56 of a big lever whose fulcrum is
+off-stage. The angle is `asin(dx / ARM_LEN)`, which puts the grip exactly under the
+thumb at every position, and a full sweep is 42° of real tilt.
+
+**When a control's value tracks the finger, check that its DRAWING does too.** They
+are two different things and only the second one is felt.
+
+### S6 · A check that walks a list of element kinds cannot see a new kind
+
+This is the meta-rule, and it is why S1–S3 survived for months with a full green
+suite.
+
+`check-controls` measures every label a control draws — and did not list the
+readout. `check-readable` scans the lower deck as well as the stage — and walks
+`div,span`, so an `<input>` was never once read. **Two instruments, one blind spot
+each, and the two lined up exactly on the largest word on the beat.**
+
+It is the same shape as L7 and R6, which say that a new way to MOVE and a new way
+to ANSWER each need the checker to gain one in the same commit. S6 is the third
+face of it: a new kind of ELEMENT does too.
+
+So, when adding to a control or a scene:
+
+- a new **element type** (an input, a canvas, an SVG text) → add it to
+  `check-readable`'s node walk in the same commit;
+- a new **label slot** on a control → add it to `SLOTS` in `check-controls`;
+- a new **control** → add it to `CONTROL_IDS` in `scripts/lib/answerctl.mjs`, and
+  if it does not commit on release, teach that snippet how it does commit.
+
+And counter-test every one of them by putting the defect back and watching it go
+red. `check-readable` reported all 186 lessons clean for a whole run once because
+its probe threw on the first word of the first beat — a null read was treated
+exactly like a finished lesson. **A harness that measures nothing must not look
+clean.**

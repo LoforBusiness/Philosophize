@@ -41,7 +41,11 @@ import { followMoves, kindOf, seedOf } from './camera';
 const BASE_TR = 0.85;
 
 const STACK_X = [30, 274];
-const STACK_W = 96;
+// 108, NOT 96. "his sense of freedom" overran the block's 81-unit content box, so
+// the fourth thing on the liberal's shelf was the one the reader could not read.
+// The right stack runs 274…382 and the left 30…138, which still clears the middle
+// shelf at x 146.
+const STACK_W = 108;
 const BLOCK_H = 22;
 const STACK_TOP = [244, 270, 296, 322];
 const STACK_CAP = ['HER VIEW OF LIFE', 'HIS VIEW OF LIFE'];

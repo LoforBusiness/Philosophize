@@ -51,7 +51,13 @@ const ANS_W = (GRID_W - 2 * ANS_GAP) / 3;
 
 // Ticket numbers, fixed rather than generated, so the picture is identical on every
 // run and a reader who replays sees the same draw.
-const TICKETS = Array.from({ length: COLS * ROWS }, (_, k) => 400_001 + k * 7919);
+// FIVE DIGITS, NOT SIX. The grid is pinned to x 216…392 exactly and a cell's
+// content box is 29 units, which a six-digit number overruns by 3.7 — every one of
+// the twenty tickets losing its last digit. The grid cannot widen (five more units
+// a cell would put its right edge past the stage) and the type cannot shrink (8.6
+// lands at 8.4 and the floor is 8, D34), so the number gives. A ticket number is
+// arbitrary by construction; how many digits it has teaches nothing.
+const TICKETS = Array.from({ length: COLS * ROWS }, (_, k) => 40_001 + k * 791);
 
 // The third option is the honest one, and the two decoys are the two things people
 // actually reach for: pick any ticket, or pick the one you did not buy (H66).

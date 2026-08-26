@@ -139,10 +139,10 @@ export default function Political12Scene({ clock, bt, bi, i, picked, onPick, dra
 
         {/* lamp two: switched on by somebody else */}
         <View style={[styles.lamp, { left: DW_L + LAMP_W + LAMP_GAP }]}>
-          <Text style={styles.lampText} numberOfLines={1}>MASTER OF MYSELF</Text>
+          <Text style={styles.lampText} numberOfLines={2}>MASTER OF MYSELF</Text>
         </View>
         <Animated.View style={[styles.lampLit, { left: DW_L + LAMP_W + LAMP_GAP }, posStyle]}>
-          <Text style={styles.lampTextLit} numberOfLines={1}>MASTER OF MYSELF</Text>
+          <Text style={styles.lampTextLit} numberOfLines={2}>MASTER OF MYSELF</Text>
         </Animated.View>
       </Animated.View>
 
@@ -207,6 +207,11 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   lampText: {
+    // AND TWO LINES, because losing the tracking was not enough. At 8.6 the label
+    // is 87.3dp and the lamp's content box is 81 — six units short, so its last
+    // letters were cut on every beat. The lamp is 36 tall and two 11-unit lines fit
+    // inside it with room over; widening the lamp instead would have meant widening
+    // the doorway, which is the composition.
     // NO TRACKING. MASTER OF MYSELF is sixteen characters, and at 0.4 they add 6.4
     // units to a label that was already wider than its 85-unit lamp — enough to put
     // its right end 2.7 units past the stage. Tracking is the cheapest thing in the

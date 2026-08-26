@@ -74,6 +74,29 @@ export const ANSWER_CONTROL = `(() => {
           opts(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, true)));
       }
       el.dispatchEvent(new PointerEvent('pointerup', opts(x1, y1, false)));
+
+      // A PLOT DOES NOT COMMIT ON RELEASE, AND NOTHING ELSE HERE IS LIKE THAT.
+      //
+      // Every other control has one value, so lifting the finger IS the answer.
+      // A plot has one per column, and committing on release meant a reader who
+      // lifted to reach the second column had already answered — the defect
+      // ShapePlot's header sets out. The commit is a button now, so the sequence
+      // is drag THEN press, and a harness that stops at the drag leaves the lesson
+      // parked on that beat and calls the short run a clean one (§21).
+      // AND IT IS PRESSED TWICE, LATE AS WELL AS AT ONCE. The button is disabled
+      // until the reader has actually drawn something, and "has drawn something"
+      // reaches React through runOnJS — so a click dispatched on the same tick as
+      // the pointerup lands on a button that is still inert. One immediate press
+      // for the common case, one after the state has settled for the race; the
+      // second is a no-op once the beat has moved on.
+      if (id === 'shape-plot') {
+        const press = () => {
+          const set = document.getElementById('plot-set');
+          if (set) set.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
+        };
+        press();
+        setTimeout(press, 260);
+      }
       return id;
     } catch (e) { return ''; }
   }

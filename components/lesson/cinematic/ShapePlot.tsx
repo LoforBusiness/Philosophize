@@ -1,12 +1,12 @@
-import { useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue,
   withDelay, withTiming, type SharedValue,
 } from 'react-native-reanimated';
-import ACounter, { counterStyle } from '@/components/shared/ACounter';
 import { touch } from '@/lib/feedback';
+import ControlRead from './ControlRead';
 import { INK, PAPER, RULE, SOFT } from './cinematicKit';
 import type { PlotBlock } from './cinematicKit';
 
@@ -76,6 +76,7 @@ export default function ShapePlot({ plot, picked, onPick, pos }: Props) {
   const held = useSharedValue(0);
   const done = useSharedValue(0);
   const lastShape = useSharedValue(-1);
+  const anyDraw = useSharedValue(0);
 
   const readAt = useCallback(() => {
     'worklet';
@@ -93,6 +94,16 @@ export default function ShapePlot({ plot, picked, onPick, pos }: Props) {
     }
     return best;
   }, [reads.length, n, flat, cols]);
+
+
+  // WHICH READING IS SHOWING — REACT STATE, AND THAT IS NOT A REGRESSION.
+  // See ./ControlRead: this index changes on the same boundary crossing that
+  // already fires the haptic tick, so a wrapping <Text> costs a handful of renders
+  // of one leaf, and the <input> it replaces could not wrap at all.
+  const [shape, setShape] = useState(0);
+  // HAS THE READER DRAWN ANYTHING YET. Gates the SET button, so an idle tap on the
+  // pad cannot answer a question the reader has not thought about.
+  const [drawn, setDrawn] = useState(false);
 
   const commit = useCallback((k: number) => {
     const sh = plot.shapes[k];
@@ -126,37 +137,61 @@ export default function ShapePlot({ plot, picked, onPick, pos }: Props) {
     for (let j = 0; j < n; j += 1) m += cols[j].value;
     pos.value = m / n;
     const s = readAt();
-    if (s !== lastShape.value) { lastShape.value = s; runOnJS(touch)(); }
-  }, [n, padW, cols, pos, readAt, lastShape]);
+    if (s !== lastShape.value) { lastShape.value = s; runOnJS(touch)(); runOnJS(setShape)(s); }
+    if (!anyDraw.value) { anyDraw.value = 1; runOnJS(setDrawn)(true); }
+  }, [n, padW, cols, pos, readAt, lastShape, anyDraw]);
 
+  // ── LIFTING YOUR FINGER IS NOT AN ANSWER, AND IT USED TO BE ────────────────
+  //
+  // This committed in `onEnd`. Every other control in the family has ONE value, so
+  // release-is-commit is right for them: there is nothing left to say. A plot has
+  // one value PER COLUMN, and the only way to set four of them is to lift between
+  // them — so the reader set the first column, lifted to reach the second, and the
+  // question was over. They reported it exactly:
+  //
+  //   "when you move one up or down then want to go to the next it simply thinks
+  //    your done and doesnt let you finish"
+  //
+  // A drag straight across still works and still sets every column; what has gone
+  // is the assumption that it was the only way anyone would do it. The commit is
+  // now a deliberate act, which is also the honest shape for a question whose
+  // answer the reader has to BUILD rather than land on.
   const pan = Gesture.Pan()
     .enabled(!answered)
     .minDistance(0)
     .onBegin((e) => { held.value = withTiming(1, { duration: 110 }); paint(e.x, e.y); })
     .onUpdate((e) => { paint(e.x, e.y); })
-    .onEnd(() => {
-      held.value = withTiming(0, { duration: 160 });
-      runOnJS(commit)(readAt());
-    });
+    .onEnd(() => { held.value = withTiming(0, { duration: 160 }); });
 
-  const wordProps = useAnimatedProps(() => ({ text: reads[readAt()] } as never));
   const padStyle = useAnimatedStyle(() => ({ opacity: 1 - 0.06 * held.value }));
 
   const idx = plot.cols.map((_, k) => k);
 
   return (
     <View style={styles.wrap} pointerEvents="box-none">
-      <ACounter
-        style={[styles.word, counterStyle]}
-        animatedProps={wordProps}
-        defaultValue={reads[0]}
-        editable={false}
-        pointerEvents="none"
-        accessibilityLabel="the shape you have drawn"
-      />
+      <ControlRead text={reads[shape] ?? reads[0]} />
 
       <View style={styles.row}>
-        <Text style={styles.axis} numberOfLines={3}>{plot.axis}</Text>
+        {/* The left gutter holds BOTH the axis label and the commit, so the button
+            costs the deck no height at all — the column is already 70 x 84 and the
+            label uses the top third of it. */}
+        <View style={styles.gutter}>
+          <Text style={styles.axis} numberOfLines={3}>{plot.axis}</Text>
+          {!answered ? (
+            <Pressable
+              nativeID="plot-set"
+              accessibilityRole="button"
+              accessibilityLabel="set this shape"
+              disabled={!drawn}
+              onPress={() => { touch(); commit(readAt()); }}
+              style={({ pressed }) => [styles.set, drawn && styles.setOn, pressed && styles.setDown]}
+            >
+              <Text style={[styles.setText, drawn && styles.setTextOn]}>
+                {drawn ? 'SET' : 'DRAW IT'}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
 
         <GestureDetector gesture={pan}>
           {/* `nativeID` for the browser harnesses — see DragScale on why an
@@ -220,13 +255,10 @@ function Ghost({
 }
 
 const styles = StyleSheet.create({
-  wrap: { paddingHorizontal: 24, marginTop: 4 },
-  word: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 17, lineHeight: 22, color: INK, textAlign: 'center', marginBottom: 4,
-  },
+  wrap: { paddingHorizontal: 24, marginTop: 0 },
 
   row: { flexDirection: 'row', alignItems: 'flex-end' },
+  gutter: { width: 70, height: H, justifyContent: 'space-between', alignItems: 'flex-end' },
   axis: {
     // 64 WIDE, NOT 26. The axis label is a whole question — HOW MUCH IT STILL ASKS
     // is 118dp of lettering, and REASONABLE alone is 55 — so a 21dp column of text
@@ -235,6 +267,22 @@ const styles = StyleSheet.create({
     width: 70, fontFamily: 'Inter_700Bold', fontSize: 8, lineHeight: 10,
     letterSpacing: 0.6, color: SOFT, textAlign: 'right', paddingRight: 6, paddingBottom: 2,
   },
+
+  /** The commit. Flat and cool until there is something to commit, exactly the way
+   *  a locked rank pin is flat and cool (§19) — "the same thing, dimmer" reads as a
+   *  rendering fault, so an unavailable control says what it wants instead. */
+  set: {
+    marginRight: 6, marginBottom: 2, paddingHorizontal: 7, height: 24,
+    borderRadius: 12, borderWidth: 1.5, borderColor: RULE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  setOn: { borderColor: INK, backgroundColor: INK },
+  setDown: { opacity: 0.72 },
+  setText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.9, color: SOFT,
+    includeFontPadding: false,
+  },
+  setTextOn: { color: PAPER },
   pad: {
     flex: 1, height: H, borderBottomWidth: 2, borderBottomColor: INK,
     backgroundColor: PAPER, justifyContent: 'flex-end',
@@ -253,7 +301,11 @@ const styles = StyleSheet.create({
     borderTopWidth: 2, borderStyle: 'dashed', borderColor: INK,
   },
 
-  labels: { flexDirection: 'row', marginTop: 3, paddingLeft: 26 },
+  // 70, MATCHING THE GUTTER. This was 26 because the axis column used to be 26
+  // wide; widening that to 70 left every column label sitting 44 units to the LEFT
+  // of the column it names — the reader was reading "10 FLIPS" under nothing and
+  // the last column had no label under it at all.
+  labels: { flexDirection: 'row', marginTop: 3, paddingLeft: 70 },
   label: {
     flex: 1, fontFamily: 'Inter_500Medium', fontSize: 8.5, lineHeight: 11,
     color: SOFT, textAlign: 'center', paddingHorizontal: 1,

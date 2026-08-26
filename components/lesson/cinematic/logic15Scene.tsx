@@ -43,7 +43,11 @@ const CLAIM_T = 252;
 const CLAIM_H = 44;
 
 const LEAP_L = 150;
-const LEAP_W = 140;
+// 180, NOT 140. THEREFORE ALL OF THEM is 134dp at 9pt with 0.9 of tracking, and
+// the card's content box was 120 after its border and padding — so the claim the
+// whole lesson turns on lost its last word and a half. At 180 the column is 160
+// and it sits on one line, and the card still ends at x 330, well inside the stage.
+const LEAP_W = 180;
 const LEAP_T = 308;
 const LEAP_H = 40;
 

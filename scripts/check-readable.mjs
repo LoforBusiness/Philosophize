@@ -198,10 +198,23 @@ const PROBE = `(() => {
   const lowerEl = document.getElementById('lower-deck');
   if (lowerEl) roots.push(lowerEl);
   const nodes = [];
-  for (const root of roots) for (const el of root.querySelectorAll('div,span')) nodes.push(el);
+  // AND INPUTS, WHICH IS NOT A DETAIL — see components/lesson/cinematic/ControlRead.
+  //
+  // This walked 'div,span'. The reading above every analogue control was an
+  // ACounter, which is an Animated(TextInput), which on the web is an <input> —
+  // neither a div nor a span, so the biggest word on the beat was never once
+  // measured here. 285 of 1,127 readings were running off the right-hand edge
+  // while this file reported the lower deck clean.
+  //
+  // A CHECK THAT WALKS A LIST OF ELEMENT KINDS CANNOT SEE A NEW KIND. The readings
+  // are wrapping <Text> now so they arrive as divs anyway; inputs stay on the list
+  // because SplitBar's two running percentages are still ACounters and legitimately
+  // must be, and because the next component to reach for one should not be able to
+  // disappear from this sweep by doing so.
+  for (const root of roots) for (const el of root.querySelectorAll('div,span,input')) nodes.push(el);
   for (const d of nodes) {
     if (d.children.length !== 0) continue;
-    const txt = (d.textContent || '').trim();
+    const txt = (d.tagName === 'INPUT' ? (d.value || '') : (d.textContent || '')).trim();
     if (txt.length < 2) continue;
     const s = getComputedStyle(d);
     if (s.display === 'none' || s.visibility === 'hidden') continue;
@@ -257,18 +270,40 @@ const PROBE = `(() => {
     // of 186 lessons as ONLY 1 BEAT REACHED. It printed no error while doing it:
     // a null read is treated exactly like a finished lesson.
     let overhang = [0, 0, 0, 0];
+    let tight = null;
     for (const c of clips) {
       const w = Math.min(r.right, c.right) - Math.max(r.left, c.left);
       const h = Math.min(r.bottom, c.bottom) - Math.max(r.top, c.top);
       const f = w > 0 && h > 0 ? (w * h) / (r.width * r.height) : 0;
       if (f < keep) {
         keep = f;
+        tight = c;
         overhang = [
           Math.max(0, c.top - r.top), Math.max(0, r.right - c.right),
           Math.max(0, r.bottom - c.bottom), Math.max(0, c.left - r.left),
         ];
       }
     }
+    // A BOX THAT ATE ITS OWN WORD, which the bail below would otherwise excuse.
+    //
+    // logic8 is the case. Its tempting-move card is 64 tall; the heading inside it
+    // needed three lines instead of one, so the trap sentence under the heading
+    // started at y 64 and was clipped away ENTIRELY — a lesson called Two Tempting
+    // Traps whose second trap did not appear on screen at all. Neither existing
+    // rule saw it. CUT wants a word to be PARTLY clipped, and this one is wholly
+    // gone; SPILL asks the word about its own scroll box, and the word is fine —
+    // it is its PARENT that is too small.
+    //
+    // The bail on the next line is what excused it: a word its clip has removed
+    // entirely is normally a prop waiting in the wings. Two conditions separate
+    // the two cases and both are necessary. The word is at FULL OPACITY, so it is
+    // not parked and fading; and the thing clipping it is SMALL — a plate, a card,
+    // a caption box — rather than the stage crop, because a word outside the stage
+    // is check-frame and check-space's business and they say so in scene units.
+    const stageBox = clipEl.getBoundingClientRect();
+    const eaten = keep < 0.02 && alpha > 0.9 && tight
+      && (tight.width * tight.height) < 0.5 * (stageBox.width * stageBox.height);
+
     // NOT ON SCREEN AT ALL IS NOT A BLANK BOX.
     //
     // A scene parks labels off and fades them in, and a word at 3% opacity is not
@@ -283,7 +318,7 @@ const PROBE = `(() => {
     // the wings, which is the distinction check-frame draws between straddling
     // the crop and sitting outside it. Asking the paint stack about a point that
     // is not being drawn would also answer about the wrong element.
-    if (alpha <= 0.2 || keep <= 0.02) continue;
+    if (!eaten && (alpha <= 0.2 || keep <= 0.02)) continue;
 
     // ── and what is actually BEHIND it ──────────────────────────────────────
     //
@@ -366,8 +401,67 @@ const PROBE = `(() => {
     // about the LEGIBLE copy of a word, and a legible copy is never a finding.
     seenWords.push({ t: txt, con, r: [r.left, r.top, r.right, r.bottom] });
 
+    // ── DOES IT FIT ITS OWN BOX ────────────────────────────────────────────
+    //
+    //   "there are plenty of words that arent correctly in their boxes"
+    //
+    // KEEP measures a word against whatever is CLIPPING it, which is usually the
+    // stage crop — so a label that overruns its own little plate, or a caption
+    // capped at two lines that needs three, is invisible to it. The element's own
+    // scroll box answers directly: content wider or taller than the box is content
+    // the box is not showing. A React Native numberOfLines is a line-clamp with
+    // overflow hidden, so a truncated label lands here as extra scrollHeight, which
+    // is the general form of every "cut off" the reader has reported.
+    const cw = d.clientWidth, ch = d.clientHeight;
+    const spillX = cw > 2 ? d.scrollWidth - cw : 0;
+    const spillY = ch > 2 ? d.scrollHeight - ch : 0;
+    // 2px of slack: sub-pixel line boxes and a scaled stage both round against us,
+    // and a word half a pixel over its plate is not what anybody is reporting.
+    // TWO AXES, TWO THRESHOLDS, and the vertical one has to be loose.
+    //
+    // Content WIDER than its box is always a cut letter: 2px of slack for
+    // sub-pixel rounding and no more. Content TALLER is not, because a line box
+    // shorter than the face's own ascent-plus-descent overflows by a pixel or
+    // three on perfectly ordinary type — every one of these scenes sets an
+    // explicit lineHeight tighter than the font's natural one. Half a line is the
+    // smallest overflow that can actually be a lost line of text, so 6.
+    const spill = eaten ? 999 : (spillX > 2 ? spillX : (spillY > 6 ? spillY : 0));
+
+    // ── IS SOMETHING PAINTED ON TOP OF IT ──────────────────────────────────
+    //
+    //   "words get covered by other things"
+    //
+    // groundAt above scans DOWNWARD from the word for what is behind it, which
+    // is the right question for contrast and the wrong one for this. Anything
+    // painted OVER the word sits ABOVE it in the same stack and was skipped
+    // entirely, so a caption with an opaque panel laid across it measured a
+    // perfect contrast against the ground it no longer reaches.
+    //
+    // Ancestors are excluded, and they are most of the stack: an ancestor with a
+    // background paints BEHIND its own text, never over it. What is left is a
+    // sibling or a cousin drawn later, which is exactly the defect.
+    let coveredBy = '';
+    try {
+      const stack = document.elementsFromPoint(cx, cy) || [];
+      const me = stack.indexOf(d);
+      for (let q = 0; q < (me < 0 ? 0 : me); q += 1) {
+        const el = stack[q];
+        if (el.contains(d)) continue;
+        const cs = getComputedStyle(el);
+        const c = rgb(cs.backgroundColor);
+        if (!c) continue;
+        let ea = 1, n3 = el;
+        while (n3 && n3 !== document.body) { ea *= parseFloat(getComputedStyle(n3).opacity); n3 = n3.parentElement; }
+        // Half-covered is covered: a wash at 0.6 over a word is a word nobody
+        // reads, and everything thinner than that is legitimate scrim.
+        if (ea * (c.a ?? 1) >= 0.6) { coveredBy = (el.className || el.tagName || '').toString().slice(0, 20) || 'a panel'; break; }
+      }
+    } catch (e) { coveredBy = ''; }
+
     const why = [];
     if (size < FLOOR) why.push('TINY');
+    if (spill) why.push('SPILL');
+    if (coveredBy) why.push('UNDER');
     // A word entirely outside its clip is a prop waiting in the wings; a word
     // PARTLY cut is a word being sliced. Same distinction check-frame draws.
     if (keep < KEEP) why.push("CUT");
@@ -378,6 +472,7 @@ const PROBE = `(() => {
     out.push({ why: why.join('+'), t: txt.slice(0, 34), full: txt,
       box: [r.left, r.top, r.right, r.bottom], size: +size.toFixed(1),
       keep: +keep.toFixed(2), con: +con.toFixed(1), a: +alpha.toFixed(2),
+      spill: Math.round(spill), sx: Math.round(spillX), sy: Math.round(spillY), coveredBy,
       r: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)],
       over: overhang.map((v) => Math.round(v * 10) / 10) });
   }
@@ -758,13 +853,26 @@ function allIds() {
       // CONFIRM EVERY FAINT AGAINST THE PIXELS, and drop the ones the screen
       // disagrees with. One screenshot per beat that has a suspect — a cheap
       // filter in front of an expensive check, rather than 1591 screenshots.
-      if (hits.some((h) => h.why.includes('FAINT'))) {
+      // UNDER JOINS FAINT AT THE PIXELS, and for a stronger reason than FAINT has.
+      //
+      // The paint stack says a word has something opaque above it. It cannot say
+      // whether that something is actually hiding it — and this codebase has at
+      // least two shapes where it is not. political-7 hangs a charter that TEARS
+      // by drawing the SAME SHEET in two clipped windows, so every word across the
+      // seam is half in each and each half sits under the other's container. A
+      // two-state label is built the same way on purpose.
+      //
+      // A word genuinely under an opaque panel has no contrast in its own
+      // rectangle, and that is a fact about the screen rather than a theory about
+      // z-order. So the suspects are shot with the FAINT ones and cleared when the
+      // pixels disagree — the same instrument, the same argument, one more class.
+      if (hits.some((h) => h.why.includes('FAINT') || h.why.includes('UNDER'))) {
         // CLIP THE CAPTURE TO THE SUSPECTS. A full 780x1688 frame has to be
         // PNG-decoded on the one Node thread, which serialises every lane and
         // made the sweep three times slower. The union of the suspect words is
         // usually a few thousand pixels. (`clip` alone is fine; it is `clip`
         // PLUS captureBeyondViewport that hangs in --headless=new, §19.)
-        const sus = hits.filter((h) => h.why.includes('FAINT'));
+        const sus = hits.filter((h) => h.why.includes('FAINT') || h.why.includes('UNDER'));
         const pad = 2;
         const bx = Math.max(0, Math.min(...sus.map((h) => h.r[0])) - pad);
         const byy = Math.max(0, Math.min(...sus.map((h) => h.r[1])) - pad);
@@ -782,13 +890,15 @@ function allIds() {
         const px = shot ? shot.bitmap.width / Math.max(1, bw) : 1;
         if (shot) {
           hits = hits.map((h) => {
-            if (!h.why.includes('FAINT')) return h;
+            const suspect = h.why.includes('FAINT') || h.why.includes('UNDER');
+            if (!suspect) return h;
             const real = inkRange(shot, (h.r[0] - bx) * px, (h.r[1] - byy) * px, h.r[2] * px, h.r[3] * px);
             if (real === null) return h;
             h.px = +real.toFixed(1);
-            // The screen wins. Ancestor colours are a guess; this is the page.
+            // The screen wins. Ancestor colours and paint order are both guesses;
+            // this is the page.
             if (real >= CONTRAST) {
-              const rest = h.why.split('+').filter((w) => w !== 'FAINT');
+              const rest = h.why.split('+').filter((w) => w !== 'FAINT' && w !== 'UNDER');
               return rest.length ? { ...h, why: rest.join('+') } : null;
             }
             return h;
@@ -837,8 +947,12 @@ function allIds() {
             // text in the deck and only exists after the pick, so this second read
             // is here for exactly one thing: whether the words that arrive to
             // explain the answer fit the room a control left them.
+            // SPILL joins CUT here for the same reason: a box too small for its
+            // own words is a defect whenever it appears, and the explanation only
+            // appears after the pick. UNDER does not — the reveal deliberately
+            // lays the verdict over the option it is rejecting.
             const extra = post.out
-              .filter((h) => h.why.indexOf('CUT') >= 0)
+              .filter((h) => h.why.indexOf('CUT') >= 0 || h.why.indexOf('SPILL') >= 0)
               .filter((h) => !seen.has(`${h.why}|${h.t}`));
             if (extra.length) {
               const at = beats.find((x) => x.beat === b);
@@ -900,7 +1014,7 @@ function allIds() {
   }
   const count = (k) => report.reduce((a, r) => a + r.beats.reduce((b, x) => b + x.hits.filter((h) => h.why.includes(k)).length, 0), 0);
   const lessons = (k) => report.filter((r) => r.beats.some((x) => x.hits.some((h) => h.why.includes(k)))).length;
-  for (const k of ['TINY', 'CUT', 'FAINT', 'BLANK']) {
+  for (const k of ['TINY', 'CUT', 'FAINT', 'SPILL', 'UNDER', 'BLANK']) {
     console.log(`    ${k.padEnd(6)} ${String(count(k)).padStart(4)} words  (${lessons(k)} lessons)`);
   }
   const worst = [];
@@ -908,7 +1022,27 @@ function allIds() {
   worst.sort((a, b) => (a.size - b.size) || (a.keep - b.keep));
   console.log('\n  the twenty least readable:');
   for (const w of worst.slice(0, 20)) {
-    console.log(`    ${w.why.padEnd(11)} ${w.size.toFixed(1).padStart(5)}px keep ${w.keep.toFixed(2)} con ${String(w.con).padStart(4)} a ${w.a}  ${w.id} b${w.beat}  "${w.t}"`);
+    console.log(`    ${w.why.padEnd(17)} ${w.size.toFixed(1).padStart(5)}px keep ${w.keep.toFixed(2)} con ${String(w.con).padStart(4)} a ${w.a}  ${w.id} b${w.beat}  "${w.t}"`);
+  }
+
+  // THE TWO THE READER NAMED, LISTED BY LESSON RATHER THAN BY SEVERITY.
+  //
+  // "plenty of words that arent correctly in their boxes, and words get covered by
+  // other things … look at all other cinematic lessons for this too". A ranking by
+  // size answers "which is worst"; this answers "which lesson do I open", which is
+  // the question an author actually has.
+  for (const k of ['SPILL', 'UNDER']) {
+    const rows = worst.filter((w) => w.why.includes(k));
+    if (!rows.length) continue;
+    const by = new Map();
+    for (const w of rows) { if (!by.has(w.id)) by.set(w.id, []); by.get(w.id).push(w); }
+    console.log(`\n  ${k} — ${rows.length} words across ${by.size} lessons:`);
+    for (const [id, list] of [...by.entries()].sort((x, y) => y[1].length - x[1].length).slice(0, 14)) {
+      const ex = list[0];
+      const how = k === 'SPILL' ? `${ex.spill}px past its box` : `under ${ex.coveredBy}`;
+      console.log(`      ${id.padEnd(30)} ${String(list.length).padStart(3)}  b${ex.beat} ${how}  "${ex.t}"`);
+    }
+    if (by.size > 14) console.log(`      … and ${by.size - 14} more lessons`);
   }
 
   const dead = report.filter((r) => r.dead);

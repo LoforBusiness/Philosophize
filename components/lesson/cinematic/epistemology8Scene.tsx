@@ -67,7 +67,7 @@ const ESCAPES = [
 ];
 
 // ── the block in the figure's hands ──────────────────────────────────────────
-const CARRY_W = 44;
+const CARRY_W = 56;
 const CARRY_H = 26;
 const CARRY_TOP = 442;                  // hand height for gestures 42 / 31 / 43 / 27
 
@@ -405,15 +405,19 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
     alignItems: 'center', justifyContent: 'center',
   },
-  // D30 — letterSpacing 0, where the house style for a caps label is 1.2–1.6 and the
-  // tower's own rowLab is 1.3. This block is the exception because it is the narrowest
-  // box in the lesson: 44 wide less two 2-unit borders leaves 40, and "BECAUSE" at 1.1
-  // of tracking measured 43 — it OVERFLOWED by 3, and with no numberOfLines the word
-  // was broken rather than clipped, so the carried block read BECAUS / E on two lines.
-  // The glyphs alone are only 35.3; the seven characters of tracking were the entire
-  // overflow. At 7.5px the difference between 0 and 1.1 is invisible, and 0 leaves
-  // 11.8% margin — where 0.2 would leave 8.3%, which is too thin to absorb whatever
-  // Android's metrics do to it. The tower labels keep their tracking; they have room.
+  // 56 WIDE, AND THE COMMENT THAT USED TO BE HERE WAS WRONG BY A THIRD.
+  //
+  // It said "the glyphs alone are only 35.3" and set the box to 44 on that basis.
+  // BECAUSE at Inter 700 9.8 with no tracking is 46.1dp, measured against the real
+  // face — so the word overran its 40 units of content by 6.1 and had been doing it
+  // since the box was tuned. `check-readable` reported exactly 6px past its box,
+  // which is how the number was found.
+  //
+  // That is the whole argument for group S in one label: an estimate stated as a
+  // measurement, written down in a comment, and believed for as long as nothing
+  // could contradict it. Tracking stays at 0 — the tower's own labels keep theirs
+  // and have the room for them — and 52 units of content leaves 12% of margin,
+  // which is what D30 asks for.
   carryText: { fontFamily: 'Inter_700Bold', fontSize: 9.8, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },

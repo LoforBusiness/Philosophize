@@ -1,12 +1,12 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue,
   withDelay, withSpring, withTiming, type SharedValue,
 } from 'react-native-reanimated';
-import ACounter, { counterStyle } from '@/components/shared/ACounter';
 import { touch } from '@/lib/feedback';
+import ControlRead from './ControlRead';
 import { INK, PAPER, RULE, SOFT } from './cinematicKit';
 import type { LeverBlock } from './cinematicKit';
 
@@ -47,10 +47,42 @@ interface Props {
   pos: SharedValue<number>;
 }
 
-/** How far the arm swings, end to end. */
-const SPREAD = 104;
-const ARM = 52;
-const PIVOT = 15;
+// ── THE GRIP TRACKS THE FINGER 1:1, AND UNTIL NOW IT MOVED A QUARTER AS FAR ──
+//
+// The reader: "make it so the lever moves easier instead of it feeling like a
+// struggle to move over."
+//
+// The VALUE was already absolute — touch the far end and you are at the far end,
+// which is the fix DragScale's header describes. What was not absolute was the
+// PICTURE. The arm was 52 long swinging +-52deg, so its grip travelled
+// 2 x 52 x sin(52) = 82dp while the finger travelled the pad's full 308. Pull all
+// the way across and the handle tilts a little: a control that has already obeyed
+// the gesture while visibly refusing it. Only the second half is felt.
+//
+// ── WHY A RIGID ARM CANNOT BE THE ANSWER, MEASURED ──────────────────────────
+//
+// The obvious fix is a LONGER arm on a pivot dropped below the control, so a small
+// angle covers the whole width. It was built, and the rendered DOM said it cannot
+// work: a rigid arm's tip traces a CIRCLE, so it sinks by L(1 - cos t) as it
+// swings. Spanning 308 at 42deg needs L = 230, and 230 x (1 - cos 42) = 59 units of
+// sink in a control that is 70 tall. The arm left the box entirely at the ends —
+// the tilted tip measured at y 501 against a pad ending at 485.
+//
+// ── SO IT IS A LEVER IN A STRAIGHT GATE ─────────────────────────────────────
+//
+// The grip rides a horizontal GATE at a constant height, and the arm runs from a
+// fixed fulcrum up to wherever the grip is, lengthening as it leans. That is what
+// a gear lever in a straight gate actually does, it is one drawing rather than
+// two, and it makes the arithmetic exact rather than approximate:
+//
+//     L = hypot(dx, dy)        the arm's drawn length
+//     angle = atan2(dx, dy)    measured from straight up
+//
+// Rotating a bar of length L about its foot by that angle puts its tip at exactly
+// (dx, dy) — under the thumb, on the gate, at every position, with no gain to tune
+// and nothing that can fall out of the box.
+const PIVOT_Y = 8;    // the fulcrum, above the pad floor
+const GATE_Y = 58;    // the gate the grip rides, above the pad floor
 const REVEAL = 420;
 const SETTLE = { damping: 14, stiffness: 190 } as const;
 
@@ -77,6 +109,13 @@ export default function LeverPick({ lever, picked, onPick, pos }: Props) {
     return k < 0 ? 0 : k > n - 1 ? n - 1 : k;
   }, [n]);
 
+
+  // WHICH READING IS SHOWING — REACT STATE, AND THAT IS NOT A REGRESSION.
+  // See ./ControlRead: this index changes on the same boundary crossing that
+  // already fires the haptic tick, so a wrapping <Text> costs a handful of renders
+  // of one leaf, and the <input> it replaces could not wrap at all.
+  const [stop, setStop] = useState(lever.start);
+
   const commit = useCallback((k: number) => {
     const st = lever.stops[k];
     onPick(st.id, Boolean(st.correct));
@@ -87,7 +126,8 @@ export default function LeverPick({ lever, picked, onPick, pos }: Props) {
     // lesson must not begin wherever the first was left.
     pos.value = n > 1 ? lever.start / (n - 1) : 0;
     lastStop.value = lever.start;
-  }, [lever.start, n, pos, lastStop]);
+    setStop(lever.start);
+  }, [lever, lever.start, n, pos, lastStop]);
 
   useEffect(() => {
     if (!answered) { done.value = 0; return; }
@@ -113,7 +153,7 @@ export default function LeverPick({ lever, picked, onPick, pos }: Props) {
     const k = stopAt(pos.value);
     // The clunk. It fires as the arm passes into a slot's half, which is what
     // makes the row of settings something you can find without looking.
-    if (k !== lastStop.value) { lastStop.value = k; runOnJS(touch)(); }
+    if (k !== lastStop.value) { lastStop.value = k; runOnJS(touch)(); runOnJS(setStop)(k); }
   }, [padW, pos, stopAt, lastStop]);
 
   const pan = Gesture.Pan()
@@ -128,31 +168,34 @@ export default function LeverPick({ lever, picked, onPick, pos }: Props) {
       held.value = withTiming(0, { duration: 160 });
       const k = stopAt(pos.value);
       pos.value = withSpring(n > 1 ? k / (n - 1) : 0, SETTLE);
+      runOnJS(setStop)(k);
       runOnJS(commit)(k);
     });
 
-  const armStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: ARM / 2 },
-      { rotate: `${(pos.value - 0.5) * SPREAD}deg` },
-      { translateY: -ARM / 2 },
-      { scaleX: 1 + 0.05 * held.value },
-    ],
-  }));
-  const wordProps = useAnimatedProps(() => ({ text: reads[stopAt(pos.value)] } as never));
+  // The arm reaches from the fulcrum to the grip, so both its length and its angle
+  // come out of one offset. Rotation is about the wrap's own foot: its centre is
+  // L/2 above that, hence the two translates around the rotate.
+  const armStyle = useAnimatedStyle(() => {
+    const dx = (pos.value - 0.5) * padW.value;
+    const dy = GATE_Y - PIVOT_Y;
+    const L = Math.sqrt(dx * dx + dy * dy);
+    const deg = (Math.atan2(dx, dy) * 180) / Math.PI;
+    return {
+      height: L,
+      transform: [
+        { translateY: L / 2 },
+        { rotate: `${deg}deg` },
+        { translateY: -L / 2 },
+        { scaleX: 1 + 0.06 * held.value },
+      ],
+    };
+  });
 
   const slots = lever.stops.map((_, k) => k);
 
   return (
     <View style={styles.wrap} pointerEvents="box-none">
-      <ACounter
-        style={[styles.word, counterStyle]}
-        animatedProps={wordProps}
-        defaultValue={reads[lever.start] ?? reads[0]}
-        editable={false}
-        pointerEvents="none"
-        accessibilityLabel="current setting"
-      />
+      <ControlRead text={reads[stop] ?? reads[0]} />
 
       <GestureDetector gesture={pan}>
         {/* The whole strip is the target, not the arm — see DragScale on why a
@@ -165,7 +208,9 @@ export default function LeverPick({ lever, picked, onPick, pos }: Props) {
           nativeID="lever-arc"
           onLayout={(e) => { padW.value = e.nativeEvent.layout.width; }}
         >
-          {/* The slots, drawn before the arm so the arm sits over them. */}
+          {/* The gate the grip rides, and the slots cut into it. Drawn before the
+              arm so the arm sits over them. */}
+          <View style={styles.gate} pointerEvents="none" />
           <View style={styles.slotRow} pointerEvents="none">
             {slots.map((k) => (
               <View key={k} style={styles.slotCell}>
@@ -174,14 +219,13 @@ export default function LeverPick({ lever, picked, onPick, pos }: Props) {
             ))}
           </View>
 
-          <View style={styles.plate} pointerEvents="none" />
-
           <Animated.View style={[styles.armWrap, armStyle]} pointerEvents="none">
             <View style={styles.arm} />
             <View style={styles.grip} />
           </Animated.View>
 
           <View style={styles.pivot} pointerEvents="none" />
+
         </View>
       </GestureDetector>
 
@@ -229,29 +273,33 @@ function Label({
 }
 
 const styles = StyleSheet.create({
-  wrap: { paddingHorizontal: 26, marginTop: 6 },
-  word: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 17, lineHeight: 22, color: INK, textAlign: 'center', marginBottom: 4,
-  },
+  // See DragScale on why the top margin pays for the reading's second line.
+  wrap: { paddingHorizontal: 26, marginTop: 2 },
 
+  // NOT overflow hidden. The grip is 22 across and centres on the far end of the
+  // gate, so half of it sits outside the pad — and the wrap's own 26 of padding is
+  // there to receive it.
   pad: { height: 70, justifyContent: 'flex-end', alignItems: 'center' },
+  // Centred on the gate: a notch spans 6…17 from the top of a 70-tall pad, whose
+  // middle is 11.5 — and the grip's centre rides at 70 − 58 = 12. They line up, so
+  // the arm clunks into a slot the reader can watch it entering.
   slotRow: { position: 'absolute', left: 0, right: 0, top: 6, flexDirection: 'row' },
   slotCell: { flex: 1, alignItems: 'center' },
   notch: { width: 2, height: 11, backgroundColor: SOFT, borderRadius: 1 },
   notchRight: { backgroundColor: INK, width: 3 },
 
-  /** The bed the arm swings over. */
-  plate: { position: 'absolute', left: 0, right: 0, bottom: PIVOT, height: 2, backgroundColor: RULE },
+  /** The gate the grip runs along — the track, at the grip's own height. */
+  gate: { position: 'absolute', left: 0, right: 0, bottom: GATE_Y - 1, height: 2, backgroundColor: RULE },
 
-  armWrap: { position: 'absolute', bottom: PIVOT - 2, alignItems: 'center', height: ARM },
-  arm: { width: 5, height: ARM, borderRadius: 3, backgroundColor: INK },
+  armWrap: { position: 'absolute', bottom: PIVOT_Y, alignItems: 'center' },
+  arm: { width: 5, height: '100%', borderRadius: 3, backgroundColor: INK },
   grip: {
-    position: 'absolute', top: -7, width: 20, height: 20, borderRadius: 10,
+    position: 'absolute', top: -11, width: 22, height: 22, borderRadius: 11,
     borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
   },
+  /** The fulcrum, so the arm reads as hinged rather than floating. */
   pivot: {
-    position: 'absolute', bottom: PIVOT - 7, width: 14, height: 14, borderRadius: 7,
+    position: 'absolute', bottom: PIVOT_Y - 6, width: 12, height: 12, borderRadius: 6,
     backgroundColor: INK,
   },
 

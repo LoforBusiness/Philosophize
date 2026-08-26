@@ -87,7 +87,10 @@ const CARD_GAP = 66;
 // this is here to remove, not to introduce.
 const CARD_SLOP = (CARD_GAP - CARD_H) / 2;
 
-const STARS: number[][] = [[236, 44], [286, 96], [382, 116], [252, 130], [306, 38]];
+// [252, 130] moved to [246, 96]: the tempting-move card now reaches x = 272, and
+// that star sat inside it. The card has no fill, so it showed through as a speck
+// in the middle of the sentence.
+const STARS: number[][] = [[236, 44], [286, 96], [382, 116], [246, 96], [306, 38]];
 
 const TRAPS = ['', 'WET STREETS → SO IT RAINED', 'NO RAIN → SO NO WET STREETS'];
 
@@ -333,7 +336,13 @@ const styles = StyleSheet.create({
   dropletA: { position: 'absolute', left: PUD_L + 4, top: PUD_T - 10, width: 15, height: 6, borderRadius: 3, borderWidth: 1.5, borderColor: SOFT },
   dropletB: { position: 'absolute', left: PUD_L + 56, top: PUD_T + 26, width: 12, height: 5, borderRadius: 3, borderWidth: 1.5, borderColor: SOFT },
   puddleLabel: {
-    position: 'absolute', left: PUD_L, top: 464, width: PUD_W, textAlign: 'center',
+    // 104 WIDE, NOT 76. WET PATCH is 92.2dp of lettering at 13.5 with 1.4 of
+    // tracking, so in the puddle's own 76 it wrapped to two lines and the second
+    // one landed ON the puddle at y 486 — the reader's "words get covered by other
+    // things", printed by the label over the thing it was naming. It runs
+    // 6 … 110 now, still centred on the puddle at 58 and still clear of the
+    // figure, who never stands left of x = 104.
+    position: 'absolute', left: PUD_L - 14, top: 464, width: PUD_W + 28, textAlign: 'center',
     // INK, not SOFT: a control drives this layer, so it rests at values SOFT does
     // not survive — 5.3:1 on paper is 2.3:1 at 0.57 (D35, R7c).
     fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 1.4, color: INK,
@@ -383,20 +392,42 @@ const styles = StyleSheet.create({
   ruleArrow: { fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 16.9, color: INK,
     includeFontPadding: false,
   },
+  // 250 WIDE, NOT 176 — AND IT COULD NOT GET TALLER.
+  //
+  // The text column was 120 units (176 less 10 of padding and 46 held back for the
+  // stamp), and nothing in this card fitted it: THE TEMPTING MOVE is 173dp and took
+  // THREE lines, NO RAIN -> SO NO WET STREETS is 223dp and took three more. A 64-tall
+  // box was being asked to hold 101 units of lettering, so most of the second trap
+  // was simply cut off — this lesson is called Two Tempting Traps and the reader
+  // could not read the second one.
+  //
+  // Growing it DOWNWARD was not available: beat 4 draws this card and the Q1
+  // answer cards at the same time, and their kicker starts at y 188, four units
+  // below this box's foot. So it grows sideways, into the empty right half of the
+  // sky, and the stamp moves to the far end with it. At 184 of column the label is
+  // one line and each trap is two, which is exactly the 17 + 5 + 34 the box holds.
   trapBox: {
-    position: 'absolute', left: 22, top: 120, width: 176, height: 64,
+    position: 'absolute', left: 22, top: 120, width: 250, height: 64,
     borderWidth: 2, borderColor: SOFT, borderRadius: 5,
-    paddingTop: 8, paddingLeft: 10, paddingRight: 46,
+    paddingTop: 8, paddingLeft: 10, paddingRight: 56,
   },
   trapText: { fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 16.9, letterSpacing: 0.2, color: INK,
     includeFontPadding: false,
   },
-  stamp: { position: 'absolute', left: 158, top: 135, width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
+  // Follows the card's right edge (22 + 250 − 56 + 12), so it still lands ON the
+  // move it is cancelling rather than beside it.
+  stamp: { position: 'absolute', left: 228, top: 135, width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
   stampRing: { position: 'absolute', width: 34, height: 34, borderRadius: 17, borderWidth: 3, borderColor: INK },
   stampSlash: { position: 'absolute', width: 34, height: 3.4, borderRadius: 2, backgroundColor: INK, transform: [{ rotate: '-45deg' }] },
 
   // ── Q1 answer cards ──────────────────────────────────────────────────────────
-  pickLabelWrap: { position: 'absolute', left: CARD_L, top: 188, width: CARD_W + 60 },
+  // 354 WIDE, NOT 256. WHAT THE WET STREET PROVES · TAP ONE is 343.5dp and wrapped
+  // to two lines in 256 — and there are only 18 units between this kicker and the
+  // first answer card, so the second line was printed straight across the card the
+  // reader was being asked to tap. Nothing painted over a word is acceptable (D31),
+  // and a word painted over a BUTTON is worse: it is the instruction obscuring the
+  // thing it is instructing you to press.
+  pickLabelWrap: { position: 'absolute', left: CARD_L, top: 188, width: 354 },
   pickLabel: { fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 1.5, color: SOFT,
     includeFontPadding: false,
   },

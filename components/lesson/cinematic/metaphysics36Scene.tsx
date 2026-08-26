@@ -26,10 +26,12 @@ import { followMoves, kindOf, seedOf } from './camera';
 // · a GUEST is a 15-wide dark block inside a door, inset 8 from each edge. It
 //   TRANSLATES to its new door rather than being redrawn there, so a shift is one
 //   animated property and the reader can see who went where.
-// · the LOBBY DESK is 78×30 at x 22, y 402…432, with the arriving guest beside it
-//   at x 106 — outside the block, so nothing overlaps a door.
+// · the LOBBY DESK is 78×30 at x 176, y 402…432 — past the end of the walk, so the
+//   figure arrives at it rather than standing on it. It was at x 22 and he stood
+//   at 54, which put his ink over the word DESK on five beats of eight.
 // · the figure stands at x 54 and walks to 128. His crown reaches ~397, which is
-//   below the door block's floor at 368 and beside the desk rather than over it.
+//   below the door block's floor at 368, and his reach ends about 168 — eight
+//   units short of the desk.
 //
 // Ink runs y 240 (caption) … y 500 (ground). BAND 234…512 = 278 (H59), and the
 // 103-unit figure is 37% of it — inside H58's 38% with nothing to spare, which is
@@ -210,11 +212,23 @@ const styles = StyleSheet.create({
   },
 
   desk: {
-    position: 'absolute', left: 22, top: 402, width: 78, height: 30,
+    // MOVED FROM x 22 TO x 176, because the figure was standing on it.
+    //
+    // The header above claimed he stood "beside the desk rather than over it". He
+    // did not: he stands at x 54 and the desk ran 22…100, so his ink covered the
+    // word DESK on five of the eight beats — measured at a contrast of 1.0, which
+    // is to say the word was not there at all. Rule A1 read in reverse, and the
+    // sort of thing only a rendered measurement catches, since the source says the
+    // opposite in a comment.
+    //
+    // He walks 54 → 128, so the desk now sits just past the end of his walk and he
+    // arrives AT reception, which is a better reading of the beat as well. Nothing
+    // else occupies y 402…432 right of the doors, which stop at y 368.
+    position: 'absolute', left: 176, top: 402, width: 78, height: 30,
     borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
   },
   deskLabel: {
-    position: 'absolute', left: 22, top: 412, width: 78, textAlign: 'center',
+    position: 'absolute', left: 176, top: 412, width: 78, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
 

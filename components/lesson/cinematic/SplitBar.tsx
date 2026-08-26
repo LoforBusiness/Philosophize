@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -7,6 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import ACounter, { counterStyle } from '@/components/shared/ACounter';
 import { touch } from '@/lib/feedback';
+import ControlRead from './ControlRead';
 import { INK, PAPER, RULE, SOFT } from './cinematicKit';
 import type { SplitBlock } from './cinematicKit';
 
@@ -68,12 +69,26 @@ export default function SplitBar({ split, picked, onPick, pos }: Props) {
     return uptos.length - 1;
   }, [uptos]);
 
+
+  // WHICH ZONE THE READING IS SHOWING — REACT STATE, AND THAT IS NOT A REGRESSION.
+  //
+  // The reading used to be an ACounter written from the UI thread, which cost zero
+  // renders and could not WRAP, so a third of the corpus's readings ran off the
+  // right of the screen. See ./ControlRead for the whole argument. The short of it:
+  // this index changes when the value crosses a boundary, which is the same event
+  // that already fires the haptic tick — a handful of times per gesture, not sixty
+  // times a second — so a wrapping <Text> costs about four renders of one leaf.
+  const [zone, setZone] = useState(() => zoneAt(split.start));
+
   const commit = useCallback((k: number) => {
     const z = split.zones[k];
     onPick(z.id, Boolean(z.correct));
   }, [split.zones, onPick]);
 
   useEffect(() => { pos.value = split.start; }, [split.start, pos]);
+  // The reading's half of the same reset — a second split beat opens on its own
+  // start, not on wherever the last one was answered.
+  useEffect(() => { setZone(zoneAt(split.start)); lastZone.value = zoneAt(split.start); }, [split, zoneAt, lastZone]);
 
   useEffect(() => {
     if (!answered) { done.value = 0; return; }
@@ -99,7 +114,7 @@ export default function SplitBar({ split, picked, onPick, pos }: Props) {
     // split, and the two labels would have nothing to sit under.
     pos.value = p < 0.06 ? 0.06 : p > 0.94 ? 0.94 : p;
     const z = zoneAt(pos.value);
-    if (z !== lastZone.value) { lastZone.value = z; runOnJS(touch)(); }
+    if (z !== lastZone.value) { lastZone.value = z; runOnJS(touch)(); runOnJS(setZone)(z); }
   }, [barW, pos, zoneAt, lastZone]);
 
   const pan = Gesture.Pan()
@@ -124,7 +139,6 @@ export default function SplitBar({ split, picked, onPick, pos }: Props) {
   const seamStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: pos.value * barW.value - SEAM / 2 }, { scaleY: 1 + 0.12 * held.value }],
   }));
-  const wordProps = useAnimatedProps(() => ({ text: reads[zoneAt(pos.value)] } as never));
   const lProps = useAnimatedProps(() => ({ text: `${Math.round(pos.value * 100)}` } as never));
   const rProps = useAnimatedProps(() => ({ text: `${100 - Math.round(pos.value * 100)}` } as never));
 
@@ -136,14 +150,7 @@ export default function SplitBar({ split, picked, onPick, pos }: Props) {
 
   return (
     <View style={styles.wrap} pointerEvents="box-none">
-      <ACounter
-        style={[styles.word, counterStyle]}
-        animatedProps={wordProps}
-        defaultValue={reads[Math.max(0, zoneAt(split.start))]}
-        editable={false}
-        pointerEvents="none"
-        accessibilityLabel="current division"
-      />
+      <ControlRead text={reads[zone] ?? reads[0]} />
 
       <GestureDetector gesture={pan}>
         {/* `nativeID` for the browser harnesses (§21). */}
@@ -196,11 +203,8 @@ export default function SplitBar({ split, picked, onPick, pos }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { paddingHorizontal: 26, marginTop: 6 },
-  word: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 17, lineHeight: 22, color: INK, textAlign: 'center', marginBottom: 6,
-  },
+  // See DragScale on why the top margin pays for the reading's second line.
+  wrap: { paddingHorizontal: 26, marginTop: 2 },
 
   strip: { height: 42, justifyContent: 'center' },
   bar: {

@@ -81,7 +81,9 @@ export const BEATS: Epi8Beat[] = [
       prompt: 'Draw what happens to a loop of reasons as the web gets wider.',
       plot: {
         axis: 'HOW MUCH IT HOLDS UP',
-        cols: ['2 BELIEFS', '5', '20', '100', 'THOUSANDS'],
+        // THOUSANDS is 54dp of lettering in a 46dp column and was losing its tail.
+        // Its neighbours are all figures, so a figure is what it wanted anyway.
+        cols: ['2 BELIEFS', '5', '20', '100', '1,000s'],
         start: [0.5, 0.5, 0.5, 0.5, 0.5],
         shapes: [
           { id: 'rise', profile: [0.04, 0.2, 0.5, 0.8, 0.95], reads: 'the wider the web, the more it holds', correct: true },

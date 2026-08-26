@@ -1147,6 +1147,51 @@ declared as a channel, so it cannot fall out of step with the control and it cos
 > to get wrong. `FieldPick` and `ShapePlot` were built that way and are the two
 > nobody complained about.
 
+> **AND THE GAIN WAS ONLY HALF OF IT — THE PICTURE HAD IT TOO.** The reader came
+> back: *"make it so the lever moves easier instead of it feeling like a struggle
+> to move over."* The VALUE was already absolute; the DRAWING was not. `LeverPick`
+> swung a 52-long arm through ±52°, so its grip travelled 82dp while the finger
+> travelled the pad's full 308 — a control that had already obeyed the gesture
+> while visibly refusing it, and only the second half is felt.
+>
+> The obvious fix, a long arm on a pivot dropped below the control, was built and
+> then measured in the rendered DOM: **a rigid arm's tip traces a circle**, so it
+> sinks by `L(1 − cos θ)`. Spanning 308 at 42° needs L = 230, and 230 × (1 − cos 42°)
+> is 59 units of sink inside a control 70 tall — the tilted tip measured at y 501
+> against a pad ending at 485, off the box entirely. So it is a **lever in a
+> straight gate** now: the grip rides a horizontal gate at a constant height and
+> the arm runs from a fixed fulcrum up to it, lengthening as it leans, with
+> `L = hypot(dx, dy)` and `angle = atan2(dx, dy)`. Exact, one drawing, and nothing
+> that can fall out of the box.
+
+> **A PLOT DOES NOT COMMIT ON RELEASE, AND FOR FOUR YEARS OF CONTROLS IT DID.**
+> Four of the five analogue controls hold ONE value, so lifting the finger is the
+> answer. A plot holds one per column and the only way to set four is to lift
+> between them — so `ShapePlot`'s `onEnd` ended the question on the first lift:
+> *"when you move one up or down then want to go to the next it simply thinks your
+> done and doesnt let you finish."* The commit is a button now, in the left gutter
+> the axis label already occupies, so it costs the deck no height. **A control's
+> commit gesture is derived from how many values it holds, never copied from the
+> control beside it** (S4).
+
+> **THE READING ABOVE EVERY CONTROL WAS AN `<input>`, AND AN `<input>` CANNOT
+> WRAP.** It was an `ACounter` so Reanimated could write it from the UI thread —
+> right for a NUMBER (SplitBar's two percentages still are), wrong for a sentence,
+> because **the reading does not change every frame**: it changes when the value
+> crosses into a new zone, which is the same event that already fires the haptic
+> tick. So it cost nothing to make it a wrapping `<Text>` driven by state on that
+> crossing, and until it was, **285 of the 1,127 readings in the corpus ran off the
+> right-hand edge** — some by a third of the sentence, at 17pt, dead centre.
+>
+> It survived because **two instruments had one blind spot each and the two lined
+> up on it**: `check:controls` measures every label a control draws and did not
+> list the readout, and `check:readable` scans the lower deck but walks
+> `div,span`. That is S6, and it is the third face of L7 and R6 — a new kind of
+> ELEMENT needs the checker to gain one, exactly as a new way to move or to answer
+> does. The reading is `components/lesson/cinematic/ControlRead.tsx`, fixed at two
+> lines tall because a box that grew under the reader's thumb would resize the
+> deck and rescale the stage (L6).
+
 > **Two things that cost a run each, and will again.** All six controls render
 > inside `styles.lower` with the deck, never as a sibling of the stage — that is
 > L6, and a control outside it does not merely move the picture, it **rescales**
@@ -2445,6 +2490,33 @@ browser at it; the first transform can take longer than a navigation timeout.
   which reads exactly like progress. **Whenever a checker gets better at seeing,
   ask what its stored answers were derived from, and whether anything invalidates
   them.**
+
+  **`check:readable` answers two more questions now, and both came from the
+  reader.** *"there are plenty of words that arent correctly in their boxes, and
+  words get covered by other things."* **SPILL** is a word whose own scroll box
+  overflows — `scrollWidth > clientWidth`, or a `numberOfLines` clamp truncating —
+  which KEEP could never see, because KEEP measures a word against what is
+  CLIPPING it and that is almost always the stage crop rather than the little
+  plate the word is actually too big for. **UNDER** is anything opaque painted ON
+  TOP of a word: `groundAt` scans DOWNWARD from the glyph for its background, so
+  everything above it was skipped by construction, and a caption with a panel
+  across it measured a perfect contrast against a ground it no longer reached.
+  Across the corpus: 57 SPILL and 94 UNDER on the first sweep.
+
+  **UNDER is confirmed against the PIXELS, and that is what makes it usable.** The
+  paint stack can say something opaque is above a word; it cannot say the word is
+  hidden, and this codebase has at least two shapes where it is not — `political-7`
+  hangs a charter that TEARS by drawing the same sheet in two clipped windows, so
+  every word across the seam sits under its own twin, and a two-state label is
+  built the same way on purpose. Shooting each suspect's rectangle and measuring
+  its real contrast took UNDER from **94 words in 17 lessons to 6 in 2**. Same
+  instrument, same argument, one more class — see FAINT above.
+
+  **And the vertical threshold has to be loose while the horizontal one is tight.**
+  Content wider than its box is always a cut letter, so 2px of slack. Content
+  TALLER is not: every scene sets a lineHeight tighter than its face's natural
+  one, and that overflows by a pixel or three on perfectly ordinary type. Half a
+  line — 6px — is the smallest overflow that can be a lost line.
 
   `npm run check:space` is the other half of the same finding: the tour generator
   deliberately ignores a word outside the band, on the correct reasoning that no

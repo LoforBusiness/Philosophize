@@ -1,13 +1,13 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue,
   withDelay, withSpring, withTiming, type SharedValue,
 } from 'react-native-reanimated';
-import ACounter, { counterStyle } from '@/components/shared/ACounter';
 import { touch } from '@/lib/feedback';
-import { INK, PAPER, RULE, SOFT } from './cinematicKit';
+import ControlRead from './ControlRead';
+import { PAPER, RULE, SOFT, INK } from './cinematicKit';
 import type { DragBlock } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -104,10 +104,25 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
     return uptos.length - 1;
   }, [uptos]);
 
+
+  // WHICH ZONE THE READING IS SHOWING — REACT STATE, AND THAT IS NOT A REGRESSION.
+  //
+  // The reading used to be an ACounter written from the UI thread, which cost zero
+  // renders and could not WRAP, so a third of the corpus's readings ran off the
+  // right of the screen. See ./ControlRead for the whole argument. The short of it:
+  // this index changes when the value crosses a boundary, which is the same event
+  // that already fires the haptic tick — a handful of times per gesture, not sixty
+  // times a second — so a wrapping <Text> costs about four renders of one leaf.
+  const [zone, setZone] = useState(() => zoneAt(drag.start));
+
   const commit = useCallback((k: number) => {
     const z = drag.zones[k];
     onPick(z.id, Boolean(z.correct));
   }, [drag.zones, onPick]);
+
+  // A SECOND DRAG BEAT MUST NOT OPEN ON THE FIRST ONE'S ANSWER. The player resets
+  // `dragPos` to the beat's own start; this is the reading's half of that.
+  useEffect(() => { setZone(zoneAt(drag.start)); lastZone.value = zoneAt(drag.start); }, [drag, zoneAt, lastZone]);
 
   useEffect(() => {
     if (!answered) { done.value = 0; return; }
@@ -131,7 +146,7 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
     const p = x / railW.value;
     pos.value = p < 0 ? 0 : p > 1 ? 1 : p;
     const z = zoneAt(pos.value);
-    if (z !== lastZone.value) { lastZone.value = z; runOnJS(touch)(); }
+    if (z !== lastZone.value) { lastZone.value = z; runOnJS(touch)(); runOnJS(setZone)(z); }
   }, [railW, pos, zoneAt, lastZone]);
 
   const pan = Gesture.Pan()
@@ -165,8 +180,6 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
   // The rail lifts a little under the thumb, so the control reads as picked up.
   const railStyle = useAnimatedStyle(() => ({ transform: [{ scaleY: 1 + 0.6 * held.value }] }));
 
-  const wordProps = useAnimatedProps(() => ({ text: reads[zoneAt(pos.value)] } as never));
-
   // WHERE THE RIGHT ANSWER WAS. Marked only once answered, and marked even when the
   // reader got it right — the band is the teaching, not the score. Same reasoning
   // as ChoiceCards lifting the correct card nobody took.
@@ -180,14 +193,7 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
 
   return (
     <View style={styles.wrap} pointerEvents="box-none">
-      <ACounter
-        style={[styles.word, counterStyle]}
-        animatedProps={wordProps}
-        defaultValue={reads[Math.max(0, zoneAt(drag.start))]}
-        editable={false}
-        pointerEvents="none"
-        accessibilityLabel="current reading"
-      />
+      <ControlRead text={reads[zone] ?? reads[0]} />
 
       <GestureDetector gesture={pan}>
         {/* The touch target is the whole strip, not the 30px knob — a knob-sized
@@ -237,15 +243,10 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { paddingHorizontal: 26, marginTop: 8 },
-  word: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 17,
-    lineHeight: 22,
-    color: INK,
-    textAlign: 'center',
-    marginBottom: 6,
-  },
+  // 4, NOT 8. The reading is two lines tall now instead of one, and the deck below
+  // is `overflow: hidden` — so what the box gains has to come from somewhere, and
+  // the margins are the only place it can come from that is not a word.
+  wrap: { paddingHorizontal: 26, marginTop: 4 },
   // Tall enough to catch a thumb that lands near the rail rather than on it.
   strip: { height: 44, justifyContent: 'center' },
   rail: { height: KNOB, justifyContent: 'center' },

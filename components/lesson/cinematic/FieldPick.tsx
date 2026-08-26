@@ -1,12 +1,12 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue,
   withDelay, withSpring, withTiming, type SharedValue,
 } from 'react-native-reanimated';
-import ACounter, { counterStyle } from '@/components/shared/ACounter';
 import { touch } from '@/lib/feedback';
+import ControlRead from './ControlRead';
 import { INK, PAPER, RULE, SOFT } from './cinematicKit';
 import type { FieldBlock } from './cinematicKit';
 
@@ -81,6 +81,13 @@ export default function FieldPick({ field, picked, onPick, pos, pos2 }: Props) {
     return (y >= 0.5 ? 1 : 0) * 2 + (x >= 0.5 ? 1 : 0);
   }, []);
 
+
+  // WHICH READING IS SHOWING — REACT STATE, AND THAT IS NOT A REGRESSION.
+  // See ./ControlRead: this index changes on the same boundary crossing that
+  // already fires the haptic tick, so a wrapping <Text> costs a handful of renders
+  // of one leaf, and the <input> it replaces could not wrap at all.
+  const [quad, setQuad] = useState(() => quadAt(field.start[0], field.start[1]));
+
   const commit = useCallback((at: number) => {
     onPick(ids[at], oks[at] === 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,7 +96,9 @@ export default function FieldPick({ field, picked, onPick, pos, pos2 }: Props) {
   useEffect(() => {
     pos.value = field.start[0];
     pos2.value = field.start[1];
-  }, [field.start, pos, pos2]);
+    setQuad(quadAt(field.start[0], field.start[1]));
+    lastQ.value = quadAt(field.start[0], field.start[1]);
+  }, [field, field.start, pos, pos2, quadAt, lastQ]);
 
   useEffect(() => {
     if (!answered) { done.value = 0; return; }
@@ -106,7 +115,7 @@ export default function FieldPick({ field, picked, onPick, pos, pos2 }: Props) {
     pos.value = px;
     pos2.value = py;
     const q = quadAt(px, py);
-    if (q !== lastQ.value) { lastQ.value = q; runOnJS(touch)(); }
+    if (q !== lastQ.value) { lastQ.value = q; runOnJS(touch)(); runOnJS(setQuad)(q); }
   }, [padW, pos, pos2, quadAt, lastQ]);
 
   const pan = Gesture.Pan()
@@ -117,6 +126,7 @@ export default function FieldPick({ field, picked, onPick, pos, pos2 }: Props) {
     .onEnd(() => {
       held.value = withTiming(0, { duration: 160 });
       const q = quadAt(pos.value, pos2.value);
+      runOnJS(setQuad)(q);
       // Settle to the middle of the quadrant it landed in, so the commitment is
       // legible rather than balanced on a line.
       pos.value = withSpring((q % 2 === 1 ? 0.75 : 0.25), SETTLE);
@@ -131,19 +141,11 @@ export default function FieldPick({ field, picked, onPick, pos, pos2 }: Props) {
       { scale: 1 + 0.12 * held.value },
     ],
   }));
-  const wordProps = useAnimatedProps(() => ({ text: reads[quadAt(pos.value, pos2.value)] } as never));
   const ringStyle = useAnimatedStyle(() => ({ opacity: done.value }));
 
   return (
     <View style={styles.wrap} pointerEvents="box-none">
-      <ACounter
-        style={[styles.word, counterStyle]}
-        animatedProps={wordProps}
-        defaultValue={reads[quadAt(field.start[0], field.start[1])]}
-        editable={false}
-        pointerEvents="none"
-        accessibilityLabel="where you have placed it"
-      />
+      <ControlRead text={reads[quad] ?? reads[0]} />
 
       <View style={styles.row}>
         {/* THREE LINES, NOT TWO — and two on the x ends rather than one.
@@ -194,11 +196,7 @@ export default function FieldPick({ field, picked, onPick, pos, pos2 }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { paddingHorizontal: 22, marginTop: 2 },
-  word: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 16, lineHeight: 21, color: INK, textAlign: 'center', marginBottom: 3,
-  },
+  wrap: { paddingHorizontal: 22, marginTop: 0 },
 
   // 68, NOT 56: the gutter below has to clear the widest single word an axis label
   // can carry, and CONCLUSION is 56dp on its own.
