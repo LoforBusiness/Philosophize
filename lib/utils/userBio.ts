@@ -29,15 +29,29 @@ const ARCHETYPE: Record<string, string[]> = {
     'A connoisseur of the well-formed argument',
     'Forever asking “but does that follow?”',
     'On a personal crusade against the non-sequitur',
+    'Reads the terms and conditions for the reasoning',
+    'Keeps a mental red pen for loose premises',
+    'The friend who says “that is not what that means”',
+    'A quiet menace at the end of an argument',
+    'Structurally unable to let a bad inference past',
+    'Happiest when a chain of reasoning holds',
+    'Has started noticing when the adverts cheat',
   ],
   ethics: [
     'A part-time moral compass',
-    "Quietly auditing everyone's choices",
+    'Quietly auditing everyone\'s choices',
     'Losing sleep over the right thing to do',
     'A reluctant referee of right and wrong',
     'Taking the hard questions personally',
     'Weighing every “should” twice',
     'On first-name terms with the guilty conscience',
+    'Turning small decisions into large questions',
+    'A conscience with a reading habit',
+    'Suspicious of any easy answer about the right thing',
+    'Keeping a running tally of what we owe each other',
+    'Reads the trolley problem as a personal challenge',
+    'Never once let a “well, it depends” go unexamined',
+    'Building a moral spine, one lesson at a time',
   ],
   epistemology: [
     'Professionally unsure of everything',
@@ -47,6 +61,13 @@ const ARCHETYPE: Record<string, string[]> = {
     'A devoted doubter',
     'Forever asking how we could possibly know',
     'Holding every certainty up to the light',
+    'On excellent terms with the word “probably”',
+    'Auditing the difference between believing and knowing',
+    'Keeps asking how anybody could be sure of that',
+    'Fond of a good reason, wary of a good feeling',
+    'Not convinced, and enjoying it',
+    'Treats “everyone knows” as a red flag',
+    'A careful sceptic with a soft spot for evidence',
   ],
   metaphysics: [
     'Comfortable asking what “real” even means',
@@ -56,15 +77,29 @@ const ARCHETYPE: Record<string, string[]> = {
     'Endlessly poking at what exists',
     'Happily lost in first questions',
     'Always one “why” deeper than strictly necessary',
+    'Keeps wandering off the edge of the obvious',
+    'Has strong feelings about whether time is real',
+    'Asks what a thing is before asking what it does',
+    'Comfortable with questions that have no floor',
+    'A tourist in the deepest part of the map',
+    'Quietly wondering whether any of this is here',
+    'Collects impossible questions the way others collect stamps',
   ],
   aesthetics: [
-    "Has opinions about beauty and isn't sorry",
+    'Has opinions about beauty and isn\'t sorry',
     'Out here taking taste seriously',
     'A self-appointed curator of the sublime',
     'Forever asking why that moves us',
     'Keeps catching beauty in the act',
     'Treats a good sunset as a research problem',
     'Fluent in the language of the beautiful',
+    'Argues about taste, and enjoys it enormously',
+    'Takes a good painting personally',
+    'Wants to know why that chord did that',
+    'A serious student of the merely lovely',
+    'Refuses to let “I just like it” be the end of it',
+    'Chasing the reason a thing moves us',
+    'On the trail of what makes something good',
   ],
   'political-philosophy': [
     'Redesigning society before breakfast',
@@ -74,6 +109,13 @@ const ARCHETYPE: Record<string, string[]> = {
     'Forever litigating the common good',
     'A constitution-drafter at heart',
     'Takes “what do we owe each other?” personally',
+    'Auditing the social contract in their spare time',
+    'Has views on power, and they are getting sharper',
+    'Asking who decides, and by what right',
+    'Rebuilding the just city from the foundations',
+    'Taking the question of fairness carefully apart',
+    'A quiet radical with footnotes',
+    'Reads the news as a philosophy problem',
   ],
 };
 const ARCHETYPE_GENERIC = [
@@ -85,6 +127,12 @@ const ARCHETYPE_GENERIC = [
   'A devout questioner of everything',
   'A restless, well-read sort',
   'A collector of beautiful problems',
+  'A restless mind with a reading habit',
+  'Chronically unable to leave a question alone',
+  'A quiet accumulator of dangerous ideas',
+  'Halfway to insufferable, in the best way',
+  'A serious person about unserious hours',
+  'Building an argument out of spare evenings',
 ];
 
 const MICRO = [
@@ -95,6 +143,13 @@ const MICRO = [
   'Honestly, a little intimidating.',
   'Going places — probably ancient Greece.',
   'Frankly, showing off.',
+  'Genuinely alarming.',
+  'Somebody stop them.',
+  'A menace at dinner parties.',
+  'Nobody is safe.',
+  'The good kind of trouble.',
+  'Formidable, quietly.',
+  'A work in progress, and progressing.',
 ];
 
 const BLANK_SLATE = [
@@ -102,6 +157,11 @@ const BLANK_SLATE = [
   'Freshly arrived and suspiciously curious. The examined life starts right about now.',
   'No lessons yet, but the eyebrow is already raised. Watch this space.',
   'A clean slate and an itch to ask why. The good trouble begins shortly.',
+  'Nothing on the record yet. The first question is always the hardest one to ask.',
+  'An empty shelf and every intention of filling it. Start with something impossible.',
+  'Day zero. Twenty-four centuries of argument waiting, and none of it read yet.',
+  'Unwritten — which is, philosophically, the most interesting state to be in.',
+  'No lessons, no quotes, no thinkers. Just the itch. That is where every one of them started.',
 ];
 
 // Small, fast, well-distributed PRNG so one integer seed drives many independent
@@ -163,34 +223,80 @@ export function generateUserBio(input: BioInput, seed = 0): string {
   if (lessonsDone > 0) {
     receipts.push(
       lessonsDone === 1
-        ? pick(['1 lesson in', 'one lesson down', 'fresh off lesson one'])
+        ? pick([
+            '1 lesson in',
+            'one lesson down',
+            'fresh off lesson one',
+            'one lesson old',
+            'exactly one lesson wiser',
+            'off the mark by one lesson',
+          ])
         : pick([
             `${lessonsDone} lessons deep`,
             `${lessonsDone} lessons in`,
             `${lessonsDone} lessons down`,
             `${lessonsDone} lessons behind them`,
+            `${lessonsDone} lessons to their name`,
+            `${lessonsDone} lessons of evidence`,
+            `${lessonsDone} lessons and no sign of stopping`,
+            `${lessonsDone} lessons read properly`,
+            `${lessonsDone} lessons on the counter`,
+            `${lessonsDone} lessons already argued through`,
           ])
     );
   }
   if (streak >= 2) {
     receipts.push(
-      pick([`${streak} days unbroken`, `riding a ${streak}-day streak`, `${streak} days running`, `a ${streak}-day streak and counting`])
+      pick([
+        `${streak} days unbroken`,
+        `riding a ${streak}-day streak`,
+        `${streak} days running`,
+        `a ${streak}-day streak and counting`,
+        `${streak} days without missing`,
+        `${streak} days of turning up`,
+        `${streak} straight days`,
+        `${streak} days into the habit`,
+        `holding a ${streak}-day line`,
+        `${streak} days, no gaps`,
+      ])
     );
   }
   if (quotesSaved >= 1) {
     receipts.push(
       quotesSaved === 1
-        ? pick(['a quote in the pocket', 'one line worth keeping', 'a single quote bookmarked'])
+        ? pick([
+            'a quote in the pocket',
+            'one line worth keeping',
+            'a single quote bookmarked',
+            'one sentence saved from the wreck',
+            'exactly one line they could not leave',
+          ])
         : pick([
             `${quotesSaved} quotes in the pocket`,
             `${quotesSaved} quotes bookmarked`,
             `${quotesSaved} lines worth keeping`,
             `${quotesSaved} quotes squirrelled away`,
+            `${quotesSaved} lines they refused to lose`,
+            `${quotesSaved} quotes filed for later`,
+            `${quotesSaved} sentences kept on purpose`,
+            `a shelf of ${quotesSaved} quotes`,
+            `${quotesSaved} lines stolen fair and square`,
           ])
     );
   }
   if (distinctViewed >= 2) {
-    receipts.push(pick([`${distinctViewed} thinkers met`, `${distinctViewed} minds visited`, `${distinctViewed} thinkers in the rolodex`]));
+    receipts.push(
+      pick([
+        `${distinctViewed} thinkers met`,
+        `${distinctViewed} minds visited`,
+        `${distinctViewed} thinkers in the rolodex`,
+        `${distinctViewed} thinkers looked up`,
+        `on nodding terms with ${distinctViewed} thinkers`,
+        `${distinctViewed} dead philosophers consulted`,
+        `${distinctViewed} names that used to mean nothing`,
+        `${distinctViewed} thinkers introduced`,
+      ])
+    );
   }
 
   shuffle(receipts);
@@ -210,19 +316,43 @@ export function generateUserBio(input: BioInput, seed = 0): string {
       `${P} would approve.`,
       `Reads a suspicious amount of ${P}.`,
       `Lately, it’s all ${P}.`,
+      `Cannot seem to get past ${P}.`,
+      `${P} has become a bit of a habit.`,
+      `Keeps ending up back at ${P}.`,
+      `Would defend ${P} at a dinner table.`,
+      `On a first-name basis with ${P} by now.`,
+      `${P} gets the most of their attention.`,
+      `Has clearly taken a side, and it is ${P}.`,
+      `Something about ${P} keeps pulling them back.`,
     ];
     if (quotesSaved >= 4) {
-      base.push(`Has bookmarked more ${P} than is strictly healthy.`, `Suspiciously well-read on ${P}.`);
+      base.push(
+        `Has bookmarked more ${P} than is strictly healthy.`,
+        `Suspiciously well-read on ${P}.`,
+        `Owns rather a lot of ${P} in quotation form.`,
+        `Could probably quote ${P} unprompted. Probably will.`,
+      );
     }
     flourish = pick(base);
   } else if (distinctViewed >= 3) {
     flourish = pick([
       `Already on a first-name basis with ${distinctViewed} thinkers.`,
       `Making the rounds — ${distinctViewed} thinkers and counting.`,
+      `No favourites yet. ${distinctViewed} thinkers and still browsing.`,
+      `Casting a wide net — ${distinctViewed} minds so far.`,
+      `Sampling broadly. ${distinctViewed} thinkers in, no allegiances.`,
     ]);
   } else if (topInterestName) {
     const a = topInterestName.toLowerCase();
-    flourish = pick([`Increasingly at home in ${a}.`, `${capitalize(a)} has its hooks in.`, `Drifting steadily toward ${a}.`]);
+    flourish = pick([
+      `Increasingly at home in ${a}.`,
+      `${capitalize(a)} has its hooks in.`,
+      `Drifting steadily toward ${a}.`,
+      `${capitalize(a)} is winning, for now.`,
+      `Keeps coming back to ${a}.`,
+      `Settling in nicely to ${a}.`,
+      `${capitalize(a)} seems to be the one.`,
+    ]);
   }
 
   // Compose: the opener, the receipts and the flourish are each complete

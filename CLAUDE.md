@@ -453,6 +453,66 @@ Index on (user_id, lesson_id).
 > contains, 50,000 is what the LADDER costs, and they are not the same kind of
 > number.
 
+### The stickman talks, and three boxes have to hold it
+
+He has a voice in three places, and it is one character in all of them: smug when
+you are winning, pointed when you are late, wounded once you have actually lost
+something. **He needles ATTENDANCE, never ABILITY** — "you did not come" is a fact
+and a fair thing to nag about; "you are bad at this" is the sentence most likely to
+make a beginner leave, and `check:quips` makes it unsayable in all three pools.
+
+| where | file | pool |
+|---|---|---|
+| the streak tab | `lib/utils/streakMood.ts` | 92 lines across six moods |
+| the reward screen | `components/gamification/RewardLoafer.tsx` | 217 thoughts in the cloud |
+| Profile's "who you're becoming" | `lib/utils/userBio.ts` | 84 openers + assembled receipts |
+
+**Which line shows is derived, never random**, and the three do it differently for
+three reasons. The mascot picks from the DAY, so a reader who opens the app twice
+is not talking to two different people. The cloud picks from `${lessonId}:${streak}`
+through a Murmur finaliser — a plain `h·31 + c` left the low bits dominated by the
+characters every seed on a given day shares, and two lessons back to back repeated
+**8% of the time**. The bio reseeds on every lesson and every launch, and takes
+~527 refreshes to repeat.
+
+**THE POOL SIZE THAT MATTERS IS THE ONE A READER ACTUALLY DRAWS FROM.** The bio's
+openers looked like a pool of 50; they are six pools of 14, because a reader whose
+top interest is ethics never sees another branch's. The mascot's 92 are six pools,
+and a reader stuck in `urgent` for a week only ever meets `urgent`. Count per
+bucket, not per file.
+
+**And `npm run check:quips` measures the boxes, because two of the three cannot
+grow.** `scripts/lib/ttfwidth.mjs` reads the real advance widths out of the real
+`.ttf` in plain Node — the same zero-import rule as `rig.ts` and `tone.ts`, so this
+costs milliseconds rather than a Metro and a browser. What it holds:
+
+- **A CHARACTER COUNT IS NOT A WIDTH.** `RewardLoafer` states its budget as "about
+  nineteen characters", but in Inter 12.5 "Wittgenstein" is 78px and "illiterate,"
+  is 51. The widest row that fits is 22 characters and the narrowest that does not
+  is 20, so a rule counted in characters either lets a line overflow or forbids a
+  good one. The 112 lines added in the second pass were written FLAT and broken by
+  a scorer — fewest rows first, then the most even, then the ones landing on a full
+  stop — rather than typed with `\n` by eye.
+- **The cloud is anchored from its BOTTOM**, so that it hangs at his head. A row
+  too many therefore does not push anything down; it grows UP, off the top of the
+  block. Three rows clear it by 6px and a fourth does not.
+- **A missing glyph is invisible to a width test**, because `.notdef` is narrow —
+  a row of tofu measures comfortably inside budget and passes. All three faces are
+  checked for coverage.
+- **The orphan rule had to learn the difference between the design and the
+  defect**, which is the trap §21 records `check-intro` falling into. Any short
+  final row flagged "This is not a / personality. / Yet." — which is the punchline,
+  and most of this character's timing. A tail is only orphaned when the row above
+  does not END a sentence. Re-scoped, it immediately found a real one that had
+  shipped: `"Epictetus was a / slave. You are / tired."`, where the joined line
+  fits at 119.4px.
+
+> **One counter-test failed before it passed, and the checker was right.** Cyrillic
+> was staged as "something a handwriting face obviously will not have" — and Caveat
+> ships Cyrillic. A counter-test that stages the wrong defect proves nothing in
+> either direction, so check what the font actually has before concluding the
+> detector is blind.
+
 **Streak:** Maintained by completing at least one lesson per calendar day. Alive if the last activity is today or yesterday (`lib/utils/streak.ts`). Stored in `userDataStore`.
 
 **Stars:** 100% score = 3 stars. ≥70% = 2 stars. Any completion = 1 star.
@@ -665,13 +725,14 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **thirty-four** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **thirty-six** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
 `check-routes` · `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-echo` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
-`check-camera` · `check-tour` · `check-space` · `check-streak` · `check-answers` · `check-quotes` · `check-mentions` ·
+`check-camera` · `check-tour` · `check-space` · `check-controls` · `check-streak` · `check-quips` ·
+`check-answers` · `check-quotes` · `check-mentions` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
 `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-react` · `check-smooth` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
