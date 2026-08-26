@@ -15,9 +15,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
 import { loadTs } from './lib/loadts.mjs';
 import { CAP, scaleFor } from './lib/tourrule.mjs';
+import { MEASURE } from './lib/mustprobe.mjs';
+import { mustStamp } from './lib/muststamp.mjs';
 
 const DIR = 'components/lesson/cinematic';
 const ROUTE = 'app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx';
@@ -55,14 +56,12 @@ const readScene = (comp) => {
   const p = path.join(DIR, `${lower(comp)}Scene.tsx`);
   return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null;
 };
-const shaOf = (comp) => {
-  const files = [`${lower(comp)}Scene.tsx`, `${lower(comp)}Script.ts`, `${comp}.tsx`]
-    .map((f) => path.join(DIR, f)).filter((p) => fs.existsSync(p)).sort();
-  if (!files.length) return null;
-  const h = crypto.createHash('sha1');
-  for (const p of files) h.update(fs.readFileSync(p));
-  return h.digest('hex').slice(0, 12);
-};
+// THE FOURTH COPY OF THIS HASH, and now there are none: measure-must writes it,
+// make-tours decides what to tour from it, validate-cinematic judges the boxes and
+// this judges the tours. All four read scripts/lib/muststamp.mjs. Four copies of a
+// number that must agree is four chances to disagree in the direction nobody is
+// watching, and one of them already had.
+const shaOf = (comp) => mustStamp(DIR, comp, MEASURE);
 
 console.log('\nGROUP K — THE TOUR\n');
 

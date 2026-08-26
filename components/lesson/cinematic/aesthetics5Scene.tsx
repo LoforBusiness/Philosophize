@@ -105,9 +105,15 @@ const SELF = BEATS.map((b) => b.self ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics5'));
 
-export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -129,7 +135,10 @@ export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick }: S
       leaf,
       // The mind's label is struck out AFTER the drawing has arrived, never with it.
       strike: clamp01((leaf - 0.3) / 0.6),
-      self: carry(cv, 3, n, SELF[p], SELF[n], tr),
+      // R7b — the seam is the ATTENTION meter. Give the bar to YOU DO IT and the self
+      // takes the meter back; give it to IT HAPPENS TO YOU and the self empties out of
+      // it, which is what unselfing means and what it feels like.
+      self: carry(cv, 3, n, SELF[p], reacting ? 1 - dragPos.value : SELF[n], tr),
       hover: Math.sin(t * 2.4) * 7,
       flap: Math.sin(t * 9) * 16,
       sway: Math.sin(t * 1.25) * 4,

@@ -29,7 +29,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 //   sit side by side and can be compared rather than described.
 // · the GIFT MARK is a 2-thick arm from the ledger's right edge (x 378, y 375)
 //   out to x 398 — small, and pointing away from the book, because the thing being
-//   handed over leaves the page.
+//   handed over leaves the page. Its label sits UNDER the ledger at y 394…414,
+//   right-aligned to x 396, because beside the arm there are only 22 units left.
 // · the figure stands at x 56 and walks to 130; crown ~397, and the ledger begins
 //   at x 130, so he stands beside it.
 //
@@ -68,9 +69,15 @@ const EXCUSE = BEATS.map((b) => (b.excuse ? 1 : 0));
 const GIFT = BEATS.map((b) => (b.gift ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics36'));
 
-export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -98,7 +105,10 @@ export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick }: 
       bookOn: carry(cv, 2, n, BOOK[p], BOOK[n], tr),
       strike: LIVE[n] === 1 && STRUCK[n] === 0 ? ease01(q) : scripted,
       excuseOn: carry(cv, 3, n, EXCUSE[p], EXCUSE[n], tr),
-      giftOn: carry(cv, 4, n, GIFT[p], GIFT[n], tr),
+      // R7b — the arm hands the gift over. Move it to the far setting and the thing
+      // that was the wronged person's to give appears in somebody else's hand, which
+      // is the whole objection.
+      giftOn: carry(cv, 4, n, GIFT[p], reacting ? dragPos.value : GIFT[n], tr),
     };
   });
 
@@ -209,8 +219,19 @@ const styles = StyleSheet.create({
   gift: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   giftArm: { position: 'absolute', left: BOOK_X + BOOK_W, top: 375, width: 20, height: 2, backgroundColor: INK },
   giftLabel: {
-    position: 'absolute', left: BOOK_X + BOOK_W - 4, top: 340, width: 44, textAlign: 'center', lineHeight: 10,
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
+    // UNDER THE LEDGER, RIGHT-ALIGNED TO 396 — not beside the arm.
+    //
+    // There is no room beside the arm: the ledger ends at x 378 and the stage ends
+    // at 400, so a two-line label of about forty-six units could only ever hang off
+    // the edge, and it did — measured 16.5 units past it, with TO GIVE trimmed at
+    // both ends on every beat the gift is up. Widening the box made the overhang
+    // worse rather than better, which is the tell that the position was wrong and
+    // not the size. It sits in the clear band below the ledger's floor (390) now.
+    // The EXCUSING panel shares that corner but never shares a beat with the gift.
+    position: 'absolute', left: 334, top: 394, width: 62, textAlign: 'right', lineHeight: 10,
+    // INK, not SOFT: a control drives this layer, so it rests at values SOFT does
+    // not survive — 5.3:1 on paper is 2.3:1 at 0.57 (D35, R7c).
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK, includeFontPadding: false,
   },
 });
 

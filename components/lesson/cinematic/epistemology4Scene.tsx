@@ -68,9 +68,15 @@ const BRIDGE = BEATS.map((b) => b.bridge ?? 0);
 // Two figures at 96 and 296, so the track is the point BETWEEN them (196) — following
 // either one alone would frame the other out, and here the pair is the subject.
 const X = BEATS.map((b) => b.x ?? 196);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology4'));
 
-export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldE = useHeld();
   const cv = useCarry(3);
   const heldR = useHeld();
@@ -90,7 +96,10 @@ export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick }:
       e: pose(e, E_X, 500, K_FIG, 1, 1),
       r: pose(r, R_X, 500, K_FIG, -1, 1),
       fill: carry(cv, 0, n, FILL[p], FILL[n], tr),
-      glow: carry(cv, 1, n, GLOW[p], GLOW[n], tr),
+      // R7b — the knob raises the innate glow. The rail runs from none of it comes
+      // before experience to all of it, and the rationalist's light on the slate rises
+      // with it, so the reader sees the claim they are settling on.
+      glow: carry(cv, 1, n, GLOW[p], reacting ? dragPos.value : GLOW[n], tr),
       bridge: carry(cv, 2, n, BRIDGE[p], BRIDGE[n], tr),
       t,
     };

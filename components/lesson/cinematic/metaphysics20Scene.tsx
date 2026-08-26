@@ -70,9 +70,15 @@ const TALLY = BEATS.map((b) => b.tally ?? 0);
 const TOKEN = BEATS.map((b) => b.token ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics20'));
 
-export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -93,7 +99,10 @@ export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick }:
     return {
       fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       outer: carry(cv, 1, n, OUTER[p], OUTER[n], tr),
-      nest: carry(cv, 2, n, NEST[p], NEST[n], tr),
+      // R7b — the knob runs the simulations. Drag from none are ever built toward
+      // billions and the inner grid fills with them, so the reader builds the very
+      // count the argument turns on.
+      nest: carry(cv, 2, n, NEST[p], reacting ? dragPos.value : NEST[n], tr),
       tally: carry(cv, 3, n, TALLY[p], TALLY[n], tr),
       token: carry(cv, 4, n, TOKEN[p], TOKEN[n], tr),
       t,

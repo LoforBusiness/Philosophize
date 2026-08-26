@@ -94,9 +94,15 @@ const RUNGN = BEATS.map((b) => b.rungs ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology5'));
 
-export default function Epistemology5Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology5Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -112,7 +118,10 @@ export default function Epistemology5Scene({ clock, bt, bi, i, picked, onPick }:
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, 500, K_FIG, 1, 1),
-      star: carry(cv, 0, n, STARB[p], STARB[n], tr),
+      // R7b — the seam brightens the star. Slide toward BORN WITH IT and the spark
+      // Aristotle says everybody starts with burns harder; slide to TAUGHT IT and it
+      // dims to whatever a schoolroom put there.
+      star: carry(cv, 0, n, STARB[p], reacting ? dragPos.value : STARB[n], tr),
       power: carry(cv, 1, n, POWER[p], POWER[n], tr),
       rungs: carry(cv, 2, n, RUNGN[p], RUNGN[n], tr),
       t,

@@ -74,9 +74,15 @@ const FRZ = BEATS.map((b) => b.frozen ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics4'));
 
-export default function Metaphysics4Scene({ clock, bt, bi, i }: SceneApi) {
+export default function Metaphysics4Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -91,7 +97,10 @@ export default function Metaphysics4Scene({ clock, bt, bi, i }: SceneApi) {
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, -1, 1),
       rows: carry(cv, 0, n, TOK[p], TOK[n], tr),
-      barred: carry(cv, 1, n, BAR[p], BAR[n], tr),
+      // R7b — the knob draws the bar across the void. The further the reader drags
+      // toward ABSOLUTELY NOTHING, the more firmly Parmenides' prohibition is struck
+      // over the second way: the end of the rail is the end he says cannot be gone to.
+      barred: carry(cv, 1, n, BAR[p], reacting ? dragPos.value : BAR[n], tr),
       frozen: carry(cv, 2, n, FRZ[p], FRZ[n], tr),
       t,
     };

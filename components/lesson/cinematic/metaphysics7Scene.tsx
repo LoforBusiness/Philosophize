@@ -71,7 +71,13 @@ const LINE = BEATS.map((b) => b.line ?? 0);
 const SOLID = BEATS.map((b) => b.solid ?? 0);
 const SPOT = BEATS.map((b) => b.spot ?? 0);
 
-export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+
+export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -98,7 +104,10 @@ export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick }: 
       fx,
       line: carry(cv, 1, n, LINE[p], LINE[n], tr, lineFade ? grow : 1),
       solid: carry(cv, 2, n, SOLID[p], SOLID[n], tr),
-      spot: carry(cv, 3, n, SPOT[p], SPOT[n], tr),
+      // R7b — the knob lights the moving now. Drag toward A SPOTLIGHT SWEEPS THE LINE
+      // and the travelling YOUR NOW ring appears on the timeline: the reader turns on
+      // the very thing the block universe says is not there.
+      spot: carry(cv, 3, n, SPOT[p], reacting ? dragPos.value : SPOT[n], tr),
       t,
     };
   });

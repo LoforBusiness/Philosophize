@@ -75,7 +75,13 @@ const GRIDV = BEATS.map((b) => b.grid ?? 0);
 const OTHV = BEATS.map((b) => b.oth ?? 0);
 const THRV = BEATS.map((b) => b.thread ?? 0);
 
-export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+
+export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -109,7 +115,10 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick }: Scene
       fx,
       oth,
       thread,
-      grid: carry(cv, 3, n, GRIDV[p], GRIDV[n], tr),
+      // R7b — the knob rebuilds the rule grid. Drag toward A METHOD WITH STANDARDS
+      // and the rigid boxes come back overhead: care with demands in it looks like
+      // the thing it was being contrasted with, which is the argument.
+      grid: carry(cv, 3, n, GRIDV[p], reacting ? dragPos.value : GRIDV[n], tr),
     };
   });
 
@@ -117,6 +126,10 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick }: Scene
   const DO = useDerivedValue<Bundle>(() => SCENE.value.other);
 
   const gridStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.grid }));
+  // THE GRID SITS BACK, ITS HEADER DOES NOT (D35). `grid` rests at 0.3 once the
+  // rules are meant to be overhead rather than the subject, which put
+  // RULES · RIGHTS · TOTALS on the stage at 1.9:1 and left it there.
+  const gridTextStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.grid * 3) }));
   const bedStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.oth }));
   // The thread is anchored to the narrator's LIVE x and grows toward the other
   // head, so it stays a line between two people even when he steps back.
@@ -140,8 +153,10 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick }: Scene
   return (
     <Animated.View style={styles.scene}>
       {/* ── the rigid grid of rule-boxes, high above everyone ───────────────── */}
-      <Animated.View style={[styles.layer, gridStyle]} pointerEvents="none">
+      <Animated.View style={[styles.layer, gridTextStyle]} pointerEvents="none">
         <Text style={styles.gridLabel}>RULES  ·  RIGHTS  ·  TOTALS</Text>
+      </Animated.View>
+      <Animated.View style={[styles.layer, gridStyle]} pointerEvents="none">
         {GRID_X.map((gx) => (
           <View key={gx} style={[styles.gridBox, { left: gx }]}>
             <View style={styles.gridSlot} />

@@ -151,9 +151,15 @@ function hLive(code: number, t: number, bt: number): Stance {
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics'));
 
-export default function AestheticsScene({ clock, bt, bi, qv }: SceneApi) {
+export default function AestheticsScene({ clock, bt, bi, qv, dragPos, i }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFigS = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -171,7 +177,10 @@ export default function AestheticsScene({ clock, bt, bi, qv }: SceneApi) {
     return {
       fig: pose(figS, FIG_X, GROUND, K_FIG, -1, 1),
       appleOn, glowOn, t,
-      crowdOn: carry(cv, 2, n, CROWD[p], CROWD[n], tr),
+      // R7b — the seam summons the crowd. Give the bar to EVERYBODY and the other
+      // eight appear behind the judgement; give it back to ONLY YOURSELF and they go,
+      // leaving one person liking something. That is the whole of Kant's oddity.
+      crowdOn: carry(cv, 2, n, CROWD[p], reacting ? dragPos.value : CROWD[n], tr),
       criticsOn: carry(cv, 3, n, CRIT[p], CRIT[n], tr),
       // The verdicts slide together once the card has settled, and STAY together
       // while it fades out — a chart that un-converges on its way off stage would

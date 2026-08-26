@@ -69,7 +69,13 @@ const DIR = dirsFrom(X, 1);
 const ROW = BEATS.map((b) => b.row ?? 0);
 const FRAME = BEATS.map((b) => b.frame ?? 0);
 
-export default function Aesthetics19Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+
+export default function Aesthetics19Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -101,7 +107,9 @@ export default function Aesthetics19Scene({ clock, bt, bi, i, picked, onPick }: 
       frameOn: f > 0 ? 1 : 0,
       frameX: lerp(ITEM_X[0], ITEM_X[2], slot / 2),
       verdict: verOn ? (verFade ? grow : 1) : 0,
-      know: knowOn ? (knowFade ? grow : 1) : 0,
+      // R7c — the ecology card IS what the drag asks for. A pretty glance and it slides
+      // out; 'knowing what you are looking at' and it is back beside the marsh.
+      know: (knowOn ? (knowFade ? grow : 1) : 0) * (reacting ? 1 - (1 - dragPos.value) * tr : 1),
     };
   });
 

@@ -103,6 +103,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic10'));
 const DIR = dirsFrom(X, 1);
 const SLOTV = BEATS.map((b) => b.slot ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
 // Where the missing premise sits, and how solid it is, on every beat. A beat that
 // does not show it CARRIES FORWARD the last position and solidity, so it fades out
 // where it stands instead of sliding back under the line as it goes (C20c).
@@ -122,7 +127,8 @@ const HIDSOL: number[] = [];
   }
 }
 
-export default function Logic10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Logic10Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
   const cur = BEATS[i];
@@ -157,7 +163,10 @@ export default function Logic10Scene({ clock, bt, bi, i, picked, onPick }: Scene
       arg: argFade ? grow : 1,
       slot: carry(cv, 1, n, SLOTV[p], SLOTV[n], tr, slotFade ? grow : 1),
       rise: carry(cv, 2, n, HIDTOP[p], HIDTOP[n], tr) - HID_T,
-      hid: carry(cv, 3, n, HIDOP[p], HIDOP[n], tr),
+      // R7b — the arm hauls the unsaid premise up. It runs from absent, through
+      // dashed below the line, to sitting in the socket: the reader drags the thing
+      // nobody said into the open, which is the only way to check whether it is true.
+      hid: carry(cv, 3, n, HIDOP[p], reacting ? dragPos.value * 2 : HIDOP[n], tr),
       sol: carry(cv, 4, n, HIDSOL[p], HIDSOL[n], cross),
     };
   });

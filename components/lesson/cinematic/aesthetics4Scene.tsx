@@ -76,9 +76,15 @@ const ART = BEATS.map((b) => b.art ?? 0);
 // Two figures at 104 and 334, so the track is the point BETWEEN them (219) — following
 // either one alone would frame the other out, and here the pair is the subject.
 const X = BEATS.map((b) => b.x ?? 219);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics4'));
 
-export default function Aesthetics4Scene({ clock, bt, bi }: SceneApi) {
+export default function Aesthetics4Scene({ clock, bt, bi, dragPos, i }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldA = useHeld();
   const cv = useCarry(5);
   const heldV = useHeld();
@@ -102,7 +108,10 @@ export default function Aesthetics4Scene({ clock, bt, bi }: SceneApi) {
       test: carry(cv, 1, n, TEST[p], TEST[n], tr),
       verdict: carry(cv, 2, n, VERD[p], VERD[n], tr),
       signed: carry(cv, 3, n, SIGNED[p], SIGNED[n], tr),
-      art: carry(cv, 4, n, ART[p], ART[n], tr),
+      // R7b — the arm hangs the ART placard. Only the far setting can put it there:
+      // saying the word does not, and skill does not, and the placard appears exactly
+      // when the reader reaches the artworld.
+      art: carry(cv, 4, n, ART[p], reacting ? dragPos.value : ART[n], tr),
       askOn: ease01(clamp01((ask - 0.55) / 0.45)),
       testsOn: ease01(clamp01((1 - ask - 0.55) / 0.45)),
     };

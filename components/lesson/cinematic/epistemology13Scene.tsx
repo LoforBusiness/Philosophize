@@ -71,10 +71,16 @@ const DIR = dirsFrom(X, 1);
 const GRIDV = BEATS.map((b) => b.grid ?? 0);
 const OFF = BEATS.map((b) => b.off ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
+
 function cellLeft(k: number) { return GRID_L + (k % COLS) * (CELL_W + CELL_GX); }
 function cellTop(k: number) { return GRID_T + Math.floor(k / COLS) * (CELL_H + CELL_GY); }
 
-export default function Epistemology13Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology13Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -102,7 +108,10 @@ export default function Epistemology13Scene({ clock, bt, bi, i, picked, onPick }
       fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       grid: carry(cv, 1, n, GRIDV[p], GRIDV[n], tr, gridFade ? grow : 1),
       // How far the strike-through has spread, 0…2, so a cell can read its own share.
-      strike: carry(cv, 2, n, OFF[p], OFF[n], grow),
+      // R7b — the drawn curve strikes the tickets out. The higher the reader draws
+      // the line, the more of the grid goes: every verdict getting safer is exactly
+      // the shape of the paradox, and they watch the whole draw disappear under it.
+      strike: carry(cv, 2, n, OFF[p], reacting ? dragPos.value * 2 : OFF[n], grow),
       winner: winOn ? (winFade ? grow : 1) : 0,
     };
   });

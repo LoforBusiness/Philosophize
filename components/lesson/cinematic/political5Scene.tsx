@@ -99,9 +99,15 @@ const LINK = BEATS.map((b) => b.link ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political5'));
 
-export default function Political5Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Political5Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -117,7 +123,10 @@ export default function Political5Scene({ clock, bt, bi, i, picked, onPick }: Sc
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       city: carry(cv, 0, n, CITY[p], CITY[n], tr),
-      veil: carry(cv, 1, n, VEIL[p], VEIL[n], tr),
+      // R7b — the arm draws the veil. Only the far setting is what the veil is for,
+      // and it comes down over the figure as the reader reaches it: the device appears
+      // when its reason does.
+      veil: carry(cv, 1, n, VEIL[p], reacting ? dragPos.value : VEIL[n], tr),
       link: carry(cv, 2, n, LINK[p], LINK[n], tr),
     };
   });
@@ -125,6 +134,12 @@ export default function Political5Scene({ clock, bt, bi, i, picked, onPick }: Sc
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
 
   const capStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.city }));
+  // THE CITY RECEDES, ITS CAPTION DOES NOT (D35). `city` rests at 0.6 on the beats
+  // that push the tiers into the background, and EACH PART ITS OWN WORK went with
+  // them at 2.4:1. Dimming cannot be tuned here — the caption's paper fades at the
+  // same rate as its ink — so the words ride their own track and are legible or
+  // absent.
+  const capTextStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.city * 2.5) }));
   const linkStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.link,
     transform: [{ translateY: (1 - SCENE.value.link) * -8 }],
@@ -156,8 +171,10 @@ export default function Political5Scene({ clock, bt, bi, i, picked, onPick }: Sc
       </Animated.View>
 
       {/* ── PLATO'S CITY: three parts, each doing its own work ───────────────── */}
-      <Animated.View style={[styles.layer, capStyle]} pointerEvents="none">
+      <Animated.View style={[styles.layer, capTextStyle]} pointerEvents="none">
         <Text style={styles.cityCap}>EACH PART ITS OWN WORK</Text>
+      </Animated.View>
+      <Animated.View style={[styles.layer, capStyle]} pointerEvents="none">
       </Animated.View>
       {TIERS.map((tier, k) => (
         <Tier key={tier.title} S={SCENE} k={k} />

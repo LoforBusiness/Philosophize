@@ -67,12 +67,18 @@ const MATCH = BEATS.map((b) => b.match ?? 0);
 const EMPTY = BEATS.map((b) => b.empty ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics18'));
 
 /** y of value v inside a panel. */
 const rowY = (v: number) => PAN_Y + 9 + (1 - v) * (PAN_H - 26);
 
-export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -93,7 +99,9 @@ export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick }: 
     return {
       fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       curve: carry(cv, 1, n, CURVE[p], CURVE[n], tr),
-      body: carry(cv, 2, n, BODY[p], BODY[n], tr),
+      // R7c — the seam is the LISTENER's share, and the posture panel is the listener.
+      // Slide it their way and the shoulder that does the feeling is drawn in.
+      body: carry(cv, 2, n, BODY[p], reacting ? dragPos.value : BODY[n], tr),
       match: carry(cv, 3, n, MATCH[p], MATCH[n], tr),
       empty: carry(cv, 4, n, EMPTY[p], EMPTY[n], tr),
       t,
@@ -105,7 +113,12 @@ export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick }: 
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.cards && LIVE[i] === 1;
 
   const curveStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.curve }));
-  const bodyStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.body }));
+  const bodyStyle = useAnimatedStyle(() => ({
+    // A STEEP RAMP, NOT THE RAW VALUE (D35). The seam drives `body` on the graded
+    // beat and starts at the middle, so A PERSON sat at 2:1 until the reader moved.
+    // The panel still fills across the whole range; it is legible from a third.
+    opacity: clamp01(SCENE.value.body * 3),
+  }));
   const matchStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.match }));
   const emptyStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.empty }));
 

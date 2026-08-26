@@ -56,9 +56,15 @@ const CUT = BEATS.map((b) => b.cut ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political16'));
 
-export default function Political16Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Political16Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -82,7 +88,10 @@ export default function Political16Scene({ clock, bt, bi, i, picked, onPick }: S
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       cords: carry(cv, 0, n, CORDN[p], CORDN[n], grow),
-      cut: carry(cv, 1, n, CUT[p], CUT[n], part),
+      // R7b — the seam cuts the cords. Give the bar to OWNERSHIP AND CONTROL and the
+      // four severings open one after another; give it to the wage and they close, and
+      // the reader can see how little a raise actually reconnects.
+      cut: carry(cv, 1, n, CUT[p], reacting ? dragPos.value * 4 : CUT[n], part),
       pick: carry(cv, 2, n, PICKV[p], PICKV[n], grow),
     };
   });

@@ -69,9 +69,15 @@ const TAG = BEATS.map((b) => b.tag ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics32'));
 
-export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -86,9 +92,14 @@ export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick }:
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       theta: t * 0.28,
-      orbs: carry(cv, 0, n, ORBS[p], ORBS[n], grow),
+      // R7b — the pad puts the second sphere in the universe. Up the y axis, from one
+      // place to two, the pair appears.
+      orbs: carry(cv, 0, n, ORBS[p], reacting ? dragPos2.value : ORBS[n], grow),
       tether: carry(cv, 1, n, TETHER[p], TETHER[n], grow),
-      tag: carry(cv, 2, n, TAG[p], TAG[n], grow),
+      // And across: drag left, toward they differ somehow, and a label goes on one of
+      // them — which is the move the case forbids. Both axes, and the interesting
+      // corner is the one where the tag is gone and there are still two.
+      tag: carry(cv, 2, n, TAG[p], reacting ? 1 - dragPos.value : TAG[n], grow),
     };
   });
 

@@ -64,9 +64,15 @@ const NAMES = BEATS.map((b) => b.names ?? 0);
 const GONE = BEATS.map((b) => b.gone ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics24'));
 
-export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -88,7 +94,10 @@ export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick }: Scen
       fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       slab: carry(cv, 1, n, SLAB[p], SLAB[n], tr),
       names: carry(cv, 2, n, NAMES[p], NAMES[n], tr),
-      gone: carry(cv, 3, n, GONE[p], GONE[n], tr),
+      // R7b — the arm takes the pillars away. Each setting is a different account of
+      // what punishment is for, and the test case knocks out whichever pillars that
+      // account cannot hold up, so the reader watches the cost of each answer.
+      gone: carry(cv, 3, n, GONE[p], reacting ? dragPos.value : GONE[n], tr),
       t,
     };
   });

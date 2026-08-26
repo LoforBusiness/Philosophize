@@ -36,7 +36,12 @@ export const BEATS: Aes20Beat[] = [
     dur: 3.8,
   },
   {
-    p: 45, x: 200, uses: 1, swaps: 0.5, struck: 0.5,
+    // 0.34, NOT 0.5. Three rows take a substitute, so 0.5 is one and a HALF of
+    // them — and half a row is a half-drawn A CAMERA at 2:1, which is the blank box
+    // the reader complained about (D35). It was also half an argument: this
+    // sentence names one substitution, the textbook, and the picture should show
+    // exactly that (A1).
+    p: 45, x: 200, uses: 1, swaps: 0.34, struck: 0.34,
     text: 'Art teaches you things. So does a textbook, faster and with fewer mistakes.',
     cite: 'Instruction',
     dur: 4.2,

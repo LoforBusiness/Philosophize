@@ -75,7 +75,13 @@ const DIR = dirsFrom(X, 1);
 const LINEV = BEATS.map((b) => b.line ?? 0);
 const WIDE = BEATS.map((b) => b.wide ?? 0);
 
-export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
+export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -101,7 +107,10 @@ export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick }: Scen
     const wide = carry(cv, 0, n, WIDE[p], WIDE[n], wideFade ? grow : tr);
     return {
       fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      board: carry(cv, 2, n, LINEV[p], LINEV[n], tr, lineFade ? grow : 1),
+      // R7b — the arm moves the line. Each setting is a different test for who
+      // counts, and the line on the board travels with it, so the reader can see
+      // who each criterion leaves outside before they commit to one.
+      board: carry(cv, 2, n, LINEV[p], reacting ? dragPos.value : LINEV[n], tr, lineFade ? grow : 1),
       wide,
       line: lerp(LINE_NARROW, LINE_WIDE, wide),
       test: testOn ? (testFade ? grow : 1) : 0,

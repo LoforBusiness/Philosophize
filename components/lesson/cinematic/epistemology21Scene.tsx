@@ -75,7 +75,13 @@ const DIALV = BEATS.map((b) => b.dial ?? 0);
 const WILLV = BEATS.map((b) => b.will ?? 0);
 const EVV = BEATS.map((b) => b.ev ?? 0);
 
-export default function Epistemology21Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+
+export default function Epistemology21Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -99,7 +105,10 @@ export default function Epistemology21Scene({ clock, bt, bi, i, picked, onPick }
     return {
       fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       dial: carry(cv, 2, n, DIALV[p], DIALV[n], tr, dialFade ? grow : 1),
-      will: carry(cv, 3, n, WILLV[p], WILLV[n], grow),
+      // R7b — the knob loads the WILL tray. Drag toward you simply decide and the
+      // effort piles on — and the needle does not move, which is the point: you
+      // cannot will a belief however hard you push.
+      will: carry(cv, 3, n, WILLV[p], reacting ? dragPos.value : WILLV[n], grow),
       ev,
       // The needle. `will` is deliberately not in this expression.
       needle: lerp(NEEDLE_L, NEEDLE_R, ev),

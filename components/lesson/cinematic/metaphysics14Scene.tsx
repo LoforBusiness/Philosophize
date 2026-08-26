@@ -56,9 +56,15 @@ const MARKS = BEATS.map((b) => b.marks ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics14'));
 
-export default function Metaphysics14Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Metaphysics14Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -82,7 +88,10 @@ export default function Metaphysics14Scene({ clock, bt, bi, i, picked, onPick }:
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       rows: carry(cv, 0, n, ROWS[p], ROWS[n], grow),
-      marks: carry(cv, 1, n, MARKS[p], MARKS[n], fill),
+      // R7b — the pad fills the world marks. Up the y axis, from false in some world
+      // to true in every world, the marks beside each claim fill in. The x axis is
+      // about the reader rather than the worlds, and it deliberately moves nothing.
+      marks: carry(cv, 1, n, MARKS[p], reacting ? dragPos2.value : MARKS[n], fill),
       pick: carry(cv, 2, n, PICKV[p], PICKV[n], grow),
     };
   });

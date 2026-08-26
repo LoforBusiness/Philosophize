@@ -56,9 +56,15 @@ const SUM = BEATS.map((b) => b.sum ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology15'));
 
-export default function Epistemology15Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology15Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -81,7 +87,10 @@ export default function Epistemology15Scene({ clock, bt, bi, i, picked, onPick }
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       cells: carry(cv, 0, n, CELLN[p], CELLN[n], grow),
       dealt: carry(cv, 1, n, DEALT[p], DEALT[n], deal),
-      sum: carry(cv, 2, n, SUM[p], SUM[n], grow),
+      // R7b — the seam puts twelve in the fourth cell. Slide toward SOMETHING
+      // GENUINELY NEW and the sum arrives from outside the row; slide back and it
+      // sinks into what was already there.
+      sum: carry(cv, 2, n, SUM[p], reacting ? 1 - dragPos.value : SUM[n], grow),
     };
   });
 

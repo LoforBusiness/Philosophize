@@ -143,5 +143,5 @@ const styles = StyleSheet.create({
 });
 
 export function Aesthetics34Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics34Scene} band={[224, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics34Scene} band={[216, 512]} camera={CAM} />;
 }

@@ -90,9 +90,15 @@ const POS = BEATS.map((b) => ((b.panel ?? 0) === 2 ? 1 : 0));
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political4'));
 
-export default function Political4Scene({ clock, bt, bi }: SceneApi) {
+export default function Political4Scene({ clock, bt, bi, dragPos, i }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -107,8 +113,13 @@ export default function Political4Scene({ clock, bt, bi }: SceneApi) {
       walls: carry(cv, 0, n, WALLS[p], WALLS[n], tr),
       harm: carry(cv, 1, n, HARM[p], HARM[n], tr),
       test: carry(cv, 2, n, TEST[p], TEST[n], tr),
-      neg: carry(cv, 3, n, NEG[p], NEG[n], tr),
-      pos: carry(cv, 4, n, POS[p], POS[n], tr),
+      // R7b — the seam trades the two liberties against each other. Give the bar to
+      // A CORE OF NEGATIVE LIBERTY and the space nobody may enter grows…
+      neg: carry(cv, 3, n, NEG[p], reacting ? dragPos.value : NEG[n], tr),
+      // …and positive liberty takes what is left. Berlin's warning is that the second
+      // one eats the first when a state is holding it, and the bar is the only place
+      // in the lesson where the reader can watch that happen to them.
+      pos: carry(cv, 4, n, POS[p], reacting ? 1 - dragPos.value : POS[n], tr),
     };
   });
 

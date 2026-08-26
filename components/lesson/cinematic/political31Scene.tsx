@@ -90,9 +90,15 @@ const SUMS = BEATS.map((b) => b.sums ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political31'));
 
-export default function Political31Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Political31Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -109,7 +115,9 @@ export default function Political31Scene({ clock, bt, bi, i, picked, onPick }: S
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      grass: carry(cv, 0, n, GRASS[p], GRASS[n], fall),
+      // R7c — the field is the answer. A remedy that asks nicely leaves it bare; one
+      // that changes what taking too much COSTS grows it back under the reader's thumb.
+      grass: carry(cv, 0, n, GRASS[p], reacting ? 0.18 + 0.82 * dragPos.value : GRASS[n], fall),
       // A living field: every blade leans on its own two frequencies, so the mass
       // never reads as one shape breathing (H67).
       sway: t,

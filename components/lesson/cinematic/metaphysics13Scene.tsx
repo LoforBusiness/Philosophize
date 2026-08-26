@@ -73,7 +73,13 @@ const TRACK = BEATS.map((b) => b.track ?? 0);
 const FORK = BEATS.map((b) => b.fork ?? 0);
 const BOTH = BEATS.map((b) => b.both ?? 0);
 
-export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+
+export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -101,7 +107,10 @@ export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick }:
       fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       track: carry(cv, 1, n, TRACK[p], TRACK[n], tr, trFade ? grow : 1),
       fork: carry(cv, 2, n, FORK[p], FORK[n], fkFade ? grow : tr),
-      both: carry(cv, 3, n, BOTH[p], BOTH[n], boFade ? grow : tr),
+      // R7b — the seam fills the two branches, and it peaks in the MIDDLE. Push it to
+      // either end and one destination empties; the only place both are equally there
+      // is halfway, which is the answer and also why the question is empty.
+      both: carry(cv, 3, n, BOTH[p], reacting ? 1 - Math.abs(dragPos.value * 2 - 1) : BOTH[n], boFade ? grow : tr),
       stuck: stuckOn ? (stuckFade ? grow : 1) : 0,
     };
   });

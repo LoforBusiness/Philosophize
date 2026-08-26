@@ -73,9 +73,15 @@ const AGREE = BEATS.map((b) => b.agree ?? 0);
 const WIRES = BEATS.map((b) => b.wires ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology20'));
 
-export default function Epistemology20Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology20Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -97,7 +103,11 @@ export default function Epistemology20Scene({ clock, bt, bi, i, picked, onPick }
       fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       voices: carry(cv, 1, n, VOICES[p], VOICES[n], tr),
       agree: carry(cv, 2, n, AGREE[p], AGREE[n], tr),
-      wires: carry(cv, 3, n, WIRES[p], WIRES[n], tr),
+      // R7b — the pad draws the wires. Left along the x axis is a source repeating
+      // what it heard, and the wiring behind the four appears: four voices, one
+      // origin. The y axis is deliberately left dead, because it is the axis that
+      // does nothing — a big name adds reach, not evidence.
+      wires: carry(cv, 3, n, WIRES[p], reacting ? 1 - dragPos.value : WIRES[n], tr),
       t,
     };
   });

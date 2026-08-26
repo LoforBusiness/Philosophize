@@ -112,9 +112,15 @@ function hLive(code: number, t: number, bt: number) { 'worklet'; return code ===
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics'));
 
-export default function MetaphysicsScene({ clock, bt, bi, qv }: SceneApi) {
+export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, i }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFigS = useHeld();
   const cv = useCarry(3);
   const SCENE = useDerivedValue(() => {
@@ -133,7 +139,10 @@ export default function MetaphysicsScene({ clock, bt, bi, qv }: SceneApi) {
       // The stamp only lands once the sky is genuinely empty.
       voidStamp: clamp01((erase - 0.55) / 0.25),
       twinkle: t,
-      chainOn: carry(cv, 1, n, CHAIN[p], CHAIN[n], tr),
+      // R7b — the knob runs the chain back. Drag from last Tuesday toward why
+      // anything at all and the chain of explanation extends behind the reader, until
+      // it reaches the end of what it can reach.
+      chainOn: carry(cv, 1, n, CHAIN[p], reacting ? dragPos.value : CHAIN[n], tr),
       regress: QREG[n] === 1 ? ease01(q) : 0,
       intro: n === 0 ? ease01(bt.value / 0.55) : 1,
       ruleOn: carry(cv, 2, n, RULEON[p], RULEON[n], tr),

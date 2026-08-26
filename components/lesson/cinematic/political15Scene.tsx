@@ -59,7 +59,13 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political15'));
 const DIR = dirsFrom(X, 1);
 const NSTAGES = BEATS.map((b) => b.stages ?? 0);
 
-export default function Political15Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+
+export default function Political15Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -85,7 +91,9 @@ export default function Political15Scene({ clock, bt, bi, i, picked, onPick }: S
     return {
       fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       fill: carry(cv, 1, n, NSTAGES[p], NSTAGES[n], grow),
-      night: nightOn ? (nightFade ? grow : 1) : 0,
+      // R7c — the pad's x axis runs HIDDEN → DONE IN THE OPEN, and the night laid over
+      // the stair is what hidden looks like. Move the token right and it lifts.
+      night: (nightOn ? (nightFade ? grow : 1) : 0) * (reacting ? 1 - dragPos.value * tr : 1),
     };
   });
 

@@ -156,8 +156,14 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick }: SceneA
   const smearStyle = useAnimatedStyle(() => ({ // 0.45, not 0.72: at the old floor the quoted claim sat at 1.4:1, which is a
     // shape rather than a sentence (D35). It still recedes.
     opacity: SCENE.value.smear * (1 - SCENE.value.dim * 0.45) }));
+  // THE TAG RECEDES, ITS WORDS DO NOT (D35). Lowering the dim floor from 0.72 to
+  // 0.45 took the quoted claim from 1.4:1 to 2.2:1, which is still not a sentence —
+  // and it never could be, because the tag's paper fades at the same rate as the
+  // ink on it. The recede belongs to the furniture; the words are legible while the
+  // tag is on stage at all, and gone when it is.
+  const strawTextStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.straw }));
   const strawStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.straw * (1 - SCENE.value.dim * 0.72),
+    opacity: SCENE.value.straw * (1 - SCENE.value.dim * 0.45),
     transform: [
       { translateY: SCENE.value.tip * 9 },
       { rotate: `${SCENE.value.tip * 16}deg` },
@@ -183,7 +189,8 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       </Animated.View>
 
       {/* dodge two: a flimsy copy, and then it is on the floor */}
-      <Animated.View style={[styles.tag, styles.strawTag, strawStyle]} pointerEvents="none">
+      <Animated.View style={[styles.tag, styles.strawTag, strawStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.tag, styles.strawTag, styles.tagBare, strawTextStyle]} pointerEvents="none">
         <Text style={styles.tagText}>“NOBODY{'\n'}SHOULD PAY{'\n'}FOR ANYTHING”</Text>
       </Animated.View>
 
@@ -247,6 +254,8 @@ const styles = StyleSheet.create({
     position: 'absolute', borderWidth: 1.5, borderColor: SOFT, borderRadius: 3,
     backgroundColor: PAPER, paddingVertical: 5, paddingHorizontal: 6, alignItems: 'center',
   },
+  /** The tag's box without its furniture, for words that must not dim with it. */
+  tagBare: { borderColor: 'transparent', backgroundColor: 'transparent' },
   smear: { left: SMEAR_L, top: SMEAR_T, width: SMEAR_W },
   strawTag: { left: STRAW_L, top: STRAW_T, width: STRAW_W },
   tagText: {

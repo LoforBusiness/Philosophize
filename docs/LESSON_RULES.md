@@ -2216,6 +2216,67 @@ place, and let all three read it.
 
 ---
 
+### K12 · A station answers for every word it can reach, not just the ones beside it
+
+K11 fixed the camera the generator was modelling. This is about the WORDS it was
+modelling, and it is three separate mistakes with one shape: each drew the circle
+of "what this station could possibly cut" too small, and every one of them shipped
+half-cut words while `check-tour` read **0 of 359 stations cut a word in half**.
+
+**1 · The words it could see.** The list of what a beat has on stage is measured
+and stored, and the stamp that says whether it is fresh did not cover the probe
+that measured it (D36's neighbour — see `scripts/lib/muststamp.mjs`). An older
+probe had recorded roughly one word a beat. A station is refused only when it can
+see a word being sliced, so with those lists it saw nothing and pushed to 1.68×
+over labels it had no record of. `ethics-13` drew COWARD seventeen pixels off the
+left of the screen and RECKLESS forty-two off the right, on three consecutive
+beats, for as long as the file had existed.
+
+**2 · Both ends of a FOLLOW.** A follow's window SLIDES, and only its start was
+tested. `political-8`'s EYE LINE sat 48 units clear of the opening framing and 12
+units INSIDE the closing one. The window travels monotonically, so the swept
+region is the union of the two ends and the always-visible region is their
+intersection: **a word is safe when it is wholly inside the intersection or wholly
+outside the union, and sliced anywhere between.**
+
+**3 · Every beat it REACHES.** This is the one worth remembering, because nothing
+in the tour's own vocabulary suggests it. A beat with no camera move of its own
+keeps the framing it was handed — so a station's push does not end when its beat
+does. `metaphysics-8` has stations on beats 1, 3 and 5, and beats 2 and 4 sit at
+1.72× with nothing of their own, slicing captions no station was ever asked about.
+**The station caused it, so the station answers for it.**
+
+Testing the next beat alone was the first guess and it was short by three:
+`political-18` has ONE station, and its framing held across four beats, shaving
+the top off SAME BICYCLE · SAME MONEY on every one of them. The reach ends at the
+next beat with a station of its own, since that is what re-frames.
+
+**And it has to be a FIXPOINT, because dropping a station lengthens the reach of
+the one before it.** Deciding beats in order can only consult the CANDIDATE list,
+and `aesthetics-7`'s single station was judged against a reach that stopped at
+three candidates which were then all dropped — so its 1.72× actually ran four
+beats past where it had been tested, and cut A MASTERWORK down to 4% of itself on
+every one of them. The generator now re-tests what survived against what survived,
+and repeats until nothing changes. It settles quickly: a pass either removes a
+station or removes none.
+
+**And a station needs CLEARANCE, both ways.** Sitting on the line is where the
+generator and the app disagree — the boxes come from one instant and the reader
+sees every instant, and the resolved scale drifts about a percent. Judged on the
+raw numbers, `political-14`'s THE TRADES cleared its window by 1.1 units and
+reached the reader as a sliver; `epistemology-13` ranked its numbers at exactly a
+station's top edge, passed as *wholly inside* by half a unit, and reached the
+reader with 5.5 units shaved off each one. The two margins are different numbers
+on purpose: widening the union only ever refuses a station, so it is generous at
+10 units, while shrinking the intersection refuses one for every word near an
+edge — 10 there cost 55% of the tour and 6 costs 20%, for the same defects caught.
+
+The tour is worth 447 → 224 stations to get this right, and that is the trade the
+group already states: **a framing that cannot hold a word whole is not worth
+holding, and the wide shot is clean by construction.**
+
+---
+
 ## Group L — nothing may teleport
 
 A reader watching real lessons on a real phone: *"in changing of scenes, an answered
@@ -3002,6 +3063,85 @@ for `check:smooth` to measure. The second eases from the remembered value into t
 live one over the transition and then tracks it exactly, and it keeps the carry slot
 written, so leaving the beat is smooth too.
 
+### R7c · The stage MOVES with the control — it is not optional any more
+
+R7 says that if a scene follows the control it follows it only on its own beat.
+For a long time that was the whole of it, and following was a nicety: **30 scenes
+of 186 moved**, and the other 150 held perfectly still while the reader dragged a
+knob underneath them. The reader found the difference and named it:
+
+> *"I want something to change within the animation above the stickman, like it
+> reacts during the user moving something, I saw you did this for one lesson and
+> it makes the lessons better."*
+
+That is the difference between moving a WIDGET and moving the PICTURE. A control
+with a dead stage is a slider with a lesson printed next to it. `npm run
+check:react` counts it, and the budget only goes down.
+
+**The wiring is three lines, and the judgement is one.** The boilerplate:
+
+```ts
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));   // beat-derived (R7)
+…
+const reacting = REACT[i] === 1;
+```
+
+and then the one decision — **which track the control drives**:
+
+```ts
+door: carry(cv, 1, n, DOOR[p], reacting ? dragPos.value : DOOR[n], grow),
+```
+
+Four things make this cheap and safe rather than a rebuild:
+
+- **Use a track the scene ALREADY carries.** Almost every scene has one whose 0→1
+  means roughly what the control's 0→1 means — a door, a meter, a needle, a bar,
+  how many of something are drawn. New art is rarely needed; ethics-14's seam cuts
+  a doorway through the wall both men built, and the wall was already there.
+- **Hand it over THROUGH `carry`, never around it**, for the reason R7 already
+  gives: `reacting ? dragPos.value : X[n]` inside the carry eases in over the
+  transition, and outside it swaps on the single frame the beat opens (L1/L5).
+- **The mapping may be inverted, or a tent.** Drag toward *nothing is right or
+  wrong* and the shared moral floor goes OUT (`1 - dragPos`). A lever whose MIDDLE
+  setting is the case gets `1 - Math.abs(dragPos * 2 - 1)`, so the second apple
+  exists only at the setting that says there are two of them.
+- **A `field` should drive BOTH axes**, or the pad is a rail with a spare
+  dimension. epistemology-23 is the model: the mouth of the hopper opens across,
+  the mesh tightens up, and the reader builds the machine the lesson is about.
+
+**Some lessons should NOT do this, and that is a finding rather than a gap.**
+aesthetics-16 asks what changed when you learned the painter was cruel, and the
+answer is *the painting did not*. Wiring the canvas to the knob would teach the
+opposite of the lesson — A1 outranks this rule.
+
+**149 of 182 now.** The first pass took it from 30 to 123 and stopped at the
+scenes that looked hard; going back through the remaining 59 one at a time found
+that most of them were not hard at all, because the scene had already drawn the
+thing the control is about and simply was not letting the reader touch it —
+political-31's field is bare at *ask each herder to take less* and grows back at
+*change what taking too much costs*; epistemology-12's three pipes ARE the lever's
+three stops; aesthetics-31 takes strings off the instrument as the token moves
+toward *very hard to play*; political-15's night lifts off the stair as it moves
+toward *done in the open*.
+
+**What is left is genuinely left.** Three shapes, and it is worth being able to
+name which one a lesson is before deciding it is a gap:
+
+1. **A ladder that is not a scale.** A lever whose stops are three unrelated
+   diagnoses — *one ruler pressing down* · *an outside power* · *the many closing
+   in* — has no quantity behind it, so any monotone track lies at two of the three
+   settings. That is A1, and A1 wins.
+2. **A track that is deliberately monotone.** metaphysics-2's `gone` carries a
+   comment saying it may never come back, because a road the lesson has just
+   finished proving is not there must not quietly return. Driving it would undo a
+   fix.
+3. **Nothing but the figure's own x**, where there is honestly nothing to move.
+
+A fourth was tempting and is a trap: driving a value that a `withTiming` owns on
+the JS side rather than a track the scene carries. aesthetics-8's canvas mode is
+the case — the mapping is perfect (three stops, three renderings) and the plumbing
+is a rebuild, not a wiring.
+
 ### R7b · The seam's position is the LEFT side's share, and six blocks read it backwards
 
 `SplitBar` prints `pos * 100` under `left` and `100 - pos * 100` under `right`. So
@@ -3202,6 +3342,107 @@ and perfectly clear. A first pass called 205 words faint and the screen disagree
 about most of them. **Where a measurement needs a theory of what is behind a
 pixel, take the picture.**
 
+**And it measures the QUESTION as well as the picture, which it did not at first.**
+The check scanned `#stage-clip` only — so it never once looked at the half of the
+screen the reader answers with: the control's own labels, its live readout, the
+prompt, the explanation. The reader read that half:
+
+> *"for the new answering of questions, I have noticed a lot of the words are cut
+> off from there"*
+
+And there is a mechanism waiting for exactly that. A control takes its natural
+height off the top of the lower box and the deck below it is `overflow: hidden`,
+so a tall control eats the room the words were given. D27 caps an explanation at
+290 characters on the reasoning that *"the deck holds ~290"*, and that figure was
+worked out for a deck with nothing above it.
+
+**Two reads per graded beat, and they count different things.** Before the pick,
+everything: size, fade, clipping. After it, **clipping only** — because once a
+question is answered the deck is choreographing. The rejected card crumples away
+at 0.14, layers dim to make room for the reveal, the wrong option recedes. Those
+are words deliberately on their way out, and counting them turned 11 findings into
+147, every one of them something the scene meant to discard. A box too small is
+not choreography, and the explanation only exists after the pick, so that is the
+one thing the second read is for.
+
+**And the first thing that half of the screen gave up was in a CONTROL rather than
+a lesson.** `FieldPick` gives its y axis a 52-unit gutter and capped it at two
+lines, and its x ends one line each. An axis label is a whole claim — SOMETHING
+FORCED YOUR HAND, YOU ACTED FROM YOUR OWN WANTS — which is three lines in that
+gutter and two across that end, so everything past the cap was cut off, in every
+`field` lesson at once. **A control's own labels are lesson copy** and are measured
+like any other words. The pad is 104 tall, so three 10pt lines at each end use 60
+of it and never meet in the middle.
+
+**A DIM CANNOT BE TUNED, BECAUSE THE GROUND FADES WITH THE INK.** The obvious
+repair to a ghosted caption is a shallower floor, and it does not work: the box's
+paper fades at the same rate as the ink on it, so the contrast between them falls
+however gently you fade. Measured, ink on paper needs about **0.84 opacity** to
+hold 3:1 — which is not a dim at all. `logic-9` had already had one tag's floor
+lifted from 0.72 to 0.45 with a comment citing this rule, and its quoted claim
+still only reached 2.2:1.
+
+So the two are separated rather than balanced. **The furniture recedes and the
+words do not**: the frame keeps the fade, the text becomes a sibling on its own
+track, and the reader gets an unlit card with a legible line on it. That is §19's
+locked-pin rule in another place — unlit against lit, never the same thing dimmer.
+Four scenes carried this fault (`logic-9`, `ethics-11`, `aesthetics-18`,
+`epistemology-14`), and two of them were a CONTROL driving the opacity, which is
+the version to watch for: a reaction wired to a layer's opacity rests wherever the
+reader leaves the knob, so the word is dim for exactly as long as they are
+thinking about it (R7c).
+
+**And half a thing is half a word.** `aesthetics-20` staged its substitutes as
+`swaps: 0.5` across three rows — one and a half of them, and the half was a
+half-drawn A CAMERA at 2:1. It was also half an argument: the sentence names one
+substitution. A staged fraction should land on a whole row.
+
+**And a word drawn twice in one place is one word in two states.** The pattern
+above — an INK-filled overlay carrying PAPER letters over a paper plate carrying
+INK ones — leaves the covered copy sitting on a fill of its own colour. It
+measures at exactly 1.0:1 and is perfectly legible on screen, because its twin is
+the thing being read. Walking the paint stack cannot see it: `elementsFromPoint`
+skips anything with `pointerEvents="none"`, and a scene sets that on nearly
+everything it draws. So the check judges the PAIR — same string, same place, one
+copy above the floor, no finding — which is the same shape as the rule that keeps
+political-7's torn charter from reading as thirty-three sliced words.
+
+---
+
+### D36 · A word outside the stage or the band is unreachable at any shot
+
+The camera moves the scene under a fixed crop; it never widens it, and a shot may
+never scale below 1 — that is the whole safety story of `camera.ts`. So a word
+drawn beyond x 0…400, or above the band's top, or below its bottom, is cut on
+**every beat of every play**, and nothing downstream can rescue it.
+
+That much is obvious. What was not obvious is that the check standing nearest to
+it was written to look away:
+
+```js
+// Text outside the band is unreachable at any shot — an H59 fault in the
+// scene rather than a framing the camera chose.
+if (y < band[0] - 0.5 || y + bh > band[1] + 0.5) return false;
+```
+
+The tour generator refuses a station that cuts a word in half, and it correctly
+declines to blame the camera for a word the camera could never have held. The
+reasoning is right; the consequence was that nobody held it at all. Four words had
+been drawn outside the space for months — `epistemology35`'s third plate twenty
+units past the right edge, `ethics36`'s gift label sixteen, `logic35`'s CAUSES?
+two units above its own band — and every validator was green.
+
+`npm run check:space` is the missing half. It reads the measurements already on
+disk, so it costs milliseconds and needs no browser, and it prints the overhang in
+units, so the edit is a subtraction rather than a judgement.
+
+Two things it teaches about bands. **A band is a declaration, and nothing was
+reading the art back into it** — `logic35`'s header said "ink runs y 240" while
+its arrow label started at 232, and both had been true-looking for months. And
+**widening the band is usually the better fix than moving the word**: it costs a
+few percent of scale and no composition at all, where moving a label out of one
+crop generally pushes it into something else.
+
 ---
 
 ## Part 2 — Authoring checklist
@@ -3226,6 +3467,9 @@ pixel, take the picture.**
       thing is `split`, two independent yes/no questions are `field`, and everything
       else is `cards` — which is still most of them. The two graded beats do not use
       the same control, and neither does either neighbour (R8).
+- [ ] **Nothing is drawn where no shot can reach it** (D36): every word inside
+      x 0…400 and inside the declared band. `npm run check:space` — offline, and it
+      prints the overhang in units.
 - [ ] **The rotation holds** (R9): the control differs from the lesson before it,
       one question is still answered on the STAGE, and the deck is not the default.
       `npm run check:rotation`.

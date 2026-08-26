@@ -4,8 +4,7 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import {
-  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
+import { clamp01, WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
@@ -131,7 +130,13 @@ const UPV = BEATS.map((b) => b.up ?? 0);
 // across it (D31).
 const LEDV = BEATS.map((b) => (b.led === 2 ? 0.3 : b.led === 1 ? 1 : 0));
 
-export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+
+export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
   const cur = BEATS[i];
@@ -160,7 +165,10 @@ export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick }: 
       tok: carry(cv, 1, n, TOKV[p], TOKV[n], tr),
       shelf: carry(cv, 2, n, SHELFV[p], SHELFV[n], tr),
       led: carry(cv, 3, n, LEDV[p], LEDV[n], tr),
-      rise: riseNow ? ease01(qv.value) : carry(cv, 4, n, UPV[p], UPV[n], tr),
+      // R7b — the seam lifts the symphony. Slide toward WHAT KIND and the token
+      // climbs to the higher shelf; slide back to HOW MUCH and it drops among the
+      // cheap thrills to be counted with them. Mill's whole claim, under a thumb.
+      rise: riseNow ? ease01(qv.value) : carry(cv, 4, n, UPV[p], reacting ? dragPos.value : UPV[n], tr),
     };
   });
 
@@ -168,6 +176,19 @@ export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick }: 
   const tokStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tok }));
   const shelfStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.shelf }));
   const ledStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.led }));
+  // THE FRAME RECEDES, THE WORDS DO NOT (D35).
+  //
+  // `led: 2` in the script means "still there, no longer the point", and LEDV turns
+  // that into an opacity of 0.3 for the whole box — which put BENTHAM'S LEDGER on
+  // the stage at 1.5:1 and held it there for two beats. Dimming cannot work on a
+  // box with words in it: the text and its paper fade together, so the contrast
+  // between them collapses at exactly the same rate. Measured, ink on paper needs
+  // about 0.84 opacity to hold 3:1, which is not a dim at all.
+  //
+  // So the two are separated. The frame keeps the recede; the lines ride a track
+  // that is legible or absent, which is what §19 already says about a locked pin:
+  // unlit against lit, never the same thing dimmer.
+  const ledTextStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.led * 3) }));
   const riseStyle = useAnimatedStyle(() => {
     const r = SCENE.value.rise;
     return {
@@ -193,7 +214,8 @@ export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick }: 
       <View style={styles.plank} pointerEvents="none" />
       <View style={[styles.leg, { left: LEG_LX }]} pointerEvents="none" />
       <View style={[styles.leg, { left: LEG_RX }]} pointerEvents="none" />
-      <Animated.View style={[styles.ledger, ledStyle]} pointerEvents="none">
+      <Animated.View style={[styles.ledger, ledStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.ledgerText, ledTextStyle]} pointerEvents="none">
         <Text style={styles.ledgerCap}>BENTHAM’S LEDGER</Text>
         <Text style={styles.ledgerSum}>1 + 1 + 1 = 3</Text>
       </Animated.View>
@@ -295,6 +317,10 @@ const styles = StyleSheet.create({
   ledger: {
     position: 'absolute', left: LED_L, top: LED_T, width: LED_W, height: LED_H,
     borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+  },
+  /** The same box, without the furniture — see ledTextStyle. */
+  ledgerText: {
+    position: 'absolute', left: LED_L, top: LED_T, width: LED_W, height: LED_H,
     alignItems: 'center', justifyContent: 'center',
   },
   ledgerCap: {

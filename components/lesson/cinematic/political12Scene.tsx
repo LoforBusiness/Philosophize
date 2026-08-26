@@ -68,7 +68,13 @@ const OPEN = BEATS.map((b) => b.open ?? 0);
 const NEG = BEATS.map((b) => b.neg ?? 0);
 const POS = BEATS.map((b) => b.posi ?? 0);
 
-export default function Political12Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
+export default function Political12Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
   const cur = BEATS[i];
@@ -96,7 +102,10 @@ export default function Political12Scene({ clock, bt, bi, i, picked, onPick }: S
       door: carry(cv, 1, n, DOORV[p], DOORV[n], tr, dFade ? grow : 1),
       open: carry(cv, 2, n, OPEN[p], OPEN[n], oFade ? grow : tr),
       neg: carry(cv, 3, n, NEG[p], NEG[n], nFade ? grow : tr),
-      pos: carry(cv, 4, n, POS[p], POS[n], pFade ? grow : tr),
+      // R7b — the arm lights the lamp the regime is claiming. The far setting is
+      // positive liberty, and its lamp comes up as the reader arrives there — over a
+      // door that is still barred, which is Berlin's whole warning.
+      pos: carry(cv, 4, n, POS[p], reacting ? dragPos.value : POS[n], pFade ? grow : tr),
     };
   });
 
@@ -198,11 +207,17 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   lampText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: SOFT,
+    // NO TRACKING. MASTER OF MYSELF is sixteen characters, and at 0.4 they add 6.4
+    // units to a label that was already wider than its 85-unit lamp — enough to put
+    // its right end 2.7 units past the stage. Tracking is the cheapest thing in the
+    // line to give up; the size is not (D34).
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: SOFT,
     includeFontPadding: false,
   },
   lampTextLit: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: PAPER,
+    // Same tracking as `lampText` — the two are the same word in two states and a
+    // different width would slide it sideways as the lamp comes on.
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: PAPER,
     includeFontPadding: false,
   },
 

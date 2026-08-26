@@ -80,9 +80,15 @@ const BALUSTERS = [110, 138, 166, 194, 222, 250];
 // Two figures at 150 and 216, so the track is the point BETWEEN them (183) — following
 // either one alone would frame the other out, and here the pair is the subject.
 const X = BEATS.map((b) => b.x ?? 183);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics6'));
 
-export default function Ethics6Scene({ clock, bt, bi }: SceneApi) {
+export default function Ethics6Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldD = useHeld();
   const cv = useCarry(4);
   const heldStr = useHeld();
@@ -97,7 +103,10 @@ export default function Ethics6Scene({ clock, bt, bi }: SceneApi) {
       dec: pose(d, DEC_X, BRIDGE_Y, K_FIG, 1, 1),
       str: pose(str, STR_X, BRIDGE_Y, K_FIG * 1.16, -1, 1),
       tx: carry(cv, 0, n, TX[p], TX[n], tr),
-      shove: carry(cv, 1, n, SHOVE[p], SHOVE[n], tr),
+      // R7b — the seam draws the shove. Slide toward HE IS USED AS A TOOL and the
+      // fall line off the bridge tightens; the numbers never move, which is the whole
+      // point of the pair.
+      shove: carry(cv, 1, n, SHOVE[p], reacting ? dragPos.value : SHOVE[n], tr),
       card: carry(cv, 2, n, CARD[p], CARD[n], tr),
       stamp: carry(cv, 3, n, STAMP[p], STAMP[n], tr),
       wheel: (t * 220) % 360,

@@ -78,9 +78,15 @@ const CB = BEATS.map((b) => b.clapB ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics31'));
 
-export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -98,7 +104,9 @@ export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick }: 
       // through a beat never restarts the phrase mid-bar.
       play: (t * 0.385) % 1,
       playing: carry(cv, 0, n, PLAY[p], PLAY[n], grow),
-      strings: carry(cv, 1, n, STR[p], STR[n], grow),
+      // R7c — the pad's x axis is how hard it is to play, and the instrument is what
+      // makes it hard: strings drop away as the reader moves the token right.
+      strings: carry(cv, 1, n, STR[p], reacting ? 4 - dragPos.value * 3 : STR[n], grow),
       clapA: carry(cv, 2, n, CA[p], CA[n], grow),
       clapB: carry(cv, 3, n, CB[p], CB[n], grow),
     };

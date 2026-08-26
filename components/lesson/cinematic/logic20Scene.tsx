@@ -63,9 +63,15 @@ const STRUTS = BEATS.map((b) => b.struts ?? 0);
 const STRIKE = BEATS.map((b) => b.strike ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic20'));
 
-export default function Logic20Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Logic20Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -86,7 +92,10 @@ export default function Logic20Scene({ clock, bt, bi, i, picked, onPick }: Scene
     return {
       fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       boards: carry(cv, 1, n, BOARDS[p], BOARDS[n], tr),
-      struts: carry(cv, 2, n, STRUTS[p], STRUTS[n], tr),
+      // R7c — the theme is how many legs each version stands on, so the supports are
+      // what the lever moves: none under the version nobody holds, all of them under
+      // the best case there is.
+      struts: carry(cv, 2, n, STRUTS[p], reacting ? dragPos.value : STRUTS[n], tr),
       strike: carry(cv, 3, n, STRIKE[p], STRIKE[n], tr),
       t,
     };

@@ -60,9 +60,15 @@ const CHAIN = BEATS.map((b) => b.chain ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics13'));
 
-export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -79,7 +85,10 @@ export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick }: 
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       art: carry(cv, 0, n, ART[p], ART[n], ease01(bt.value / 0.9)),
-      chain: carry(cv, 1, n, CHAIN[p], CHAIN[n], draw),
+      // R7b — the pad draws the provenance. Up the y axis, from the same hand to
+      // different hands, the chain behind the canvases is traced back — and the x axis
+      // can hold the two forms identical while it happens, which is the whole case.
+      chain: carry(cv, 1, n, CHAIN[p], reacting ? dragPos2.value : CHAIN[n], draw),
     };
   });
 

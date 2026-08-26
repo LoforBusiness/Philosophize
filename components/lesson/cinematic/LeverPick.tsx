@@ -201,7 +201,19 @@ export default function LeverPick({ lever, picked, onPick, pos }: Props) {
 function Label({
   text, right, done,
 }: { text: string; right: boolean; done: SharedValue<number> }) {
-  const st = useAnimatedStyle(() => ({ opacity: right ? 0.45 + 0.55 * done.value : 0.45 }));
+  // 0.62, NOT 0.45, AND THE TYPE IS INK (D35).
+  //
+  // Every stop on every lever was drawn in SOFT at 0.45, which reaches the reader
+  // at 1.7:1 — a grey smudge in the shape of a word. These are not decoration:
+  // they are the OPTIONS, the thing the reader is choosing between, and there are
+  // fifty lever questions. It is what the reader meant by
+  //
+  //   "for the new answering of questions, I have noticed a lot of the words are
+  //    cut off from there"
+  //
+  // Ink at 0.62 measures 4.8:1 and the chosen one still steps out at full strength
+  // in bold, so the hierarchy survives being legible.
+  const st = useAnimatedStyle(() => ({ opacity: right ? 0.62 + 0.38 * done.value : 0.62 }));
   return (
     <View style={styles.labelCell}>
       <Animated.Text style={[styles.label, right && styles.labelRight, st]} numberOfLines={2}>
@@ -242,7 +254,9 @@ const styles = StyleSheet.create({
   labelCell: { flex: 1, paddingHorizontal: 2 },
   label: {
     fontFamily: 'Inter_500Medium', fontSize: 9.5, lineHeight: 12,
-    color: SOFT, textAlign: 'center',
+    // INK, not SOFT: SOFT is 5.3:1 at full strength and these are drawn at 0.62,
+    // which would put them at 2.0. Weight carries the hierarchy instead of tone.
+    color: INK, textAlign: 'center',
   },
   labelRight: { fontFamily: 'Inter_700Bold', color: INK },
 });

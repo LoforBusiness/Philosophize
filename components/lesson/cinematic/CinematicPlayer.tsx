@@ -886,7 +886,11 @@ export default function CinematicPlayer({
             deck's 50 instead — where it costs ~34px of text room on the one kind
             of beat whose deck holds a prompt rather than narration, and where
             nothing is measured against anything. */}
-        <View style={styles.lower}>
+        {/* nativeID so a harness can measure what is in here without guessing which
+            View it is — the same reason #stage-clip and the controls carry one
+            (§21). `check:readable` scans this box as well as the stage, because
+            the words the reader could not read turned out to be in BOTH. */}
+        <View style={styles.lower} nativeID="lower-deck">
           {/* THE TWO CHOICES — directly under the art, above the prompt.
               Not in scene coordinates (every lesson crops its band differently and
               a camera push would cut them in half, H60) and not pinned over the

@@ -61,9 +61,15 @@ const REAL = BEATS.map((b) => (b.real ? 1 : 0));
 const CLASH = BEATS.map((b) => (b.clash ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology36'));
 
-export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -88,7 +94,10 @@ export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick }
       givenOn: carry(cv, 2, n, GIVEN[p], GIVEN[n], tr),
       realOn: carry(cv, 3, n, REAL[p], REAL[n], tr),
       // The two cards do not blink at each other; the clash is that both are up.
-      clashOn: carry(cv, 4, n, CLASH[p], CLASH[n], tr),
+      // R7b — the seam opens the clash. Slide toward WHY YOU DID IT and the gap
+      // between the reason given and the cause actually at work is drawn; the feeling
+      // side of the bar leaves it untouched, which is the finding.
+      clashOn: carry(cv, 4, n, CLASH[p], reacting ? dragPos.value : CLASH[n], tr),
     };
   });
 

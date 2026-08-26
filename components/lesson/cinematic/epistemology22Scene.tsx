@@ -66,9 +66,15 @@ const RUN = BEATS.map((b) => b.run ?? 0);
 const GAPS = BEATS.map((b) => b.gaps ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology22'));
 
-export default function Epistemology22Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology22Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -90,7 +96,9 @@ export default function Epistemology22Scene({ clock, bt, bi, i, picked, onPick }
       fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       routes: carry(cv, 1, n, ROUTES[p], ROUTES[n], tr),
       run: carry(cv, 2, n, RUN[p], RUN[n], tr),
-      gaps: carry(cv, 3, n, GAPS[p], GAPS[n], tr),
+      // R7c — `pos` is the MEAN of the drawn curve, which is how often the guesser
+      // arrives. Draw a high one and the gaps under the lucky route close.
+      gaps: carry(cv, 3, n, GAPS[p], reacting ? 1 - dragPos.value : GAPS[n], tr),
       t,
     };
   });

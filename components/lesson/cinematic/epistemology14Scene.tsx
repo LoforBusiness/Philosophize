@@ -3,9 +3,7 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import {
-  ease01, lerp, mixStance, pose, type Bundle,
-} from './rig';
+import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
@@ -60,9 +58,15 @@ const LEAP = BEATS.map((b) => b.leap ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology14'));
 
-export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -79,8 +83,12 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick }
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      vat: carry(cv, 0, n, VAT[p], VAT[n], swap),
-      leap: carry(cv, 1, n, LEAP[p], LEAP[n], grow),
+      // R7b — the pad decides what is behind the screen. Up the y axis, from one
+      // world to two, the real world becomes a vat.
+        vat: carry(cv, 0, n, VAT[p], reacting ? dragPos2.value : VAT[n], swap),
+      // And across: the more the two experiences match, the further the leap between
+      // them has to be drawn. Both axes move something, which is what a pad is for.
+      leap: carry(cv, 1, n, LEAP[p], reacting ? dragPos.value : LEAP[n], grow),
     };
   });
 
@@ -88,7 +96,11 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick }
   const realStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.vat }));
   const vatStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.vat }));
   const leapStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.leap,
+    // A STEEP RAMP, NOT THE RAW VALUE (D35). On the graded beat `leap` IS the
+    // control, so it rests wherever the reader leaves the knob — and THE LEAP
+    // BETWEEN sat at 1.7:1 for as long as they thought about it. The rise still
+    // carries the whole range; only the legibility is taken off the bottom of it.
+    opacity: clamp01(SCENE.value.leap * 3),
     transform: [{ translateY: (1 - SCENE.value.leap) * -6 }],
   }));
 

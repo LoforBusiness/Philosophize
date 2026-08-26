@@ -104,9 +104,15 @@ function hLive(code: number, t: number, bt: number): Stance {
 // summary — the beats the reader has to read and act on.
 // Beats that do not set `x` stand at SEEKER_X.
 const X = BEATS.map((b) => b.x ?? SEEKER_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology'));
 
-export default function EpistemologyScene({ clock, bt, bi, qv, i, picked }: SceneApi) {
+export default function EpistemologyScene({ clock, bt, bi, qv, i, picked, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldSeekerS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -159,7 +165,10 @@ export default function EpistemologyScene({ clock, bt, bi, qv, i, picked }: Scen
       wUntested: 1 - both,
       shake: Q2[n] === 1 ? Math.sin(q * 40) * (1 - q) * 3.4 : 0,
       stamp: RESTAMP[n] === 1 ? ease01(bt.value / 0.42) : 1,
-      keyed: carry(cv, 0, n, KEYED[p], KEYED[n], tr),
+      // R7b — the knob reaches for the key. The gate has three locks and the third
+      // one takes reasons, so dragging along the rail brings the hand to it: the
+      // reader turns the lock they are being asked about.
+      keyed: carry(cv, 0, n, KEYED[p], reacting ? dragPos.value : KEYED[n], tr),
     };
   });
 

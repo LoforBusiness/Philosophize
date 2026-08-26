@@ -622,15 +622,15 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **thirty-two** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **thirty-four** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
 `check-routes` · `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-echo` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
-`check-camera` · `check-tour` · `check-streak` · `check-answers` · `check-quotes` · `check-mentions` ·
+`check-camera` · `check-tour` · `check-space` · `check-streak` · `check-answers` · `check-quotes` · `check-mentions` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
-`check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-smooth` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
+`check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-react` · `check-smooth` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
 figures and 6 hand-built ones, `check-moves` 6 head-clearance defects. A budget
 line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 222 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
@@ -660,7 +660,8 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
   `plot` · `split` · `field` (§17, group R). **The analogue family is now the
   majority**: 182 graded beats against 150 on the stage and 36 left in the deck,
   and every lesson but two has one (the two ask both their questions on the stage
-  instead). Animated `LessonReward` with XP count-up, streak and rank-up.
+  instead). **149 of those 182 move the picture as the reader moves the control**
+  (R7c, §17). Animated `LessonReward` with XP count-up, streak and rank-up.
 - **Gamification:** 70 badges in 5 tiers, **48 ranks in 8 coloured orders, each
   order struck in a better material and six worked shapes cycling inside every
   one of them** (§7), a conferred-rank ceremony that shows
@@ -702,13 +703,13 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 - **`fill-blank` and `match` are closed as won't-do.** They were the oldest open
   item in this file. Finishing an interaction for the format being retired is work
   pointed the wrong way, so the stubs stay stubs.
-- **Built but not wired:** `story/` scenes, `KineticNarration` voice, `feedback/`
 - **Profile's sections are memoised and its dependency lists are not
   type-checked.** A missed one is a section that silently stops updating. The
   equivalence harness in §19 is the only thing that catches it — record the page,
   mutate the store, record it again — and it lives in a scratchpad rather than in
   `npm run check`, because it needs Metro and a browser. Rebuild it before
   touching that file.
+- **Built but not wired:** `story/` scenes, `KineticNarration` voice, `feedback/`
   panels. Decide to ship or delete them.
 - **Daily Review / spaced repetition does not exist.** It is the headline
   Scholar's Pass promise in §14 and the P0 in §15, and nothing has been built.
@@ -990,8 +991,38 @@ a rewritten `explain` (an explanation that says "the other card" names nothing
 once the cards are gone, which is J9). `node scripts/rotation-worklist.mjs`
 prints what is left, with each claim, in reading order.
 
-Following the control is OPTIONAL, so
-check which a scene does before reasoning about it. The four newest that do are
+**THE SCENE FOLLOWING THE CONTROL IS NO LONGER OPTIONAL (R7c).** It used to be:
+30 scenes of 186 moved and the other 150 held still while the reader dragged a
+knob under them. **149 of 182 do now**, because the reader said what the
+difference was — *"I want something to change within the animation above the
+stickman, like it reacts during the user moving something"* — and it is the
+difference between moving a widget and moving the picture. The wiring is a
+beat-derived flag and one changed argument inside an existing `carry`, and the
+judgement is which track: almost every scene already has one whose 0→1 means what
+the control's 0→1 means. `npm run check:react` counts it and prints, for each
+lesson still unwired, the tracks it could use.
+
+**The second pass is the one worth reading, because the first stopped early.**
+30 → 123 took the scenes where the mapping was obvious and left 59 that "looked
+hard". Going back through those one at a time, most were not hard: the scene had
+already drawn the thing the control is about and simply was not letting the reader
+touch it. `political31`'s field is bare at *ask each herder to take less* and grows
+back at *change what taking too much costs*; `epistemology12`'s three pipes ARE the
+lever's three stops; `aesthetics31` takes strings off the instrument as the token
+moves toward *very hard to play*; `political15`'s night lifts off the stair as it
+moves toward *done in the open*; `metaphysics11`'s MEMORIES plate rides across to
+whoever woke up with the recollections as the seam gives memory more of the person.
+**"It looks hard" is a description of the reader's attention, not of the scene.**
+
+The 33 left are three shapes, and naming which one a lesson is comes before calling
+it a gap. **A ladder that is not a scale** — a lever whose stops are *one ruler
+pressing down* · *an outside power* · *the many closing in* has no quantity behind
+it, so any monotone track lies at two of the three settings, and A1 outranks R7c.
+**A track that is deliberately monotone** — `metaphysics2`'s `gone` carries a
+comment saying it may never come back, so driving it would undo a fix. **Nothing
+but the figure's own x.** Plus `aesthetics16`, which must NOT do it, because its
+answer is that the painting did not change. Check which a scene is before reasoning
+about it. Four of the earlier ones are still the pattern to copy:
 worth reading as the pattern: `metaphysics21` furnishes the two halves of a
 timeline off the pad's two axes, `political22` makes the pad BE the switch,
 `aesthetics22` drains a heart meter as the seam moves, and `political24` stands
@@ -1527,37 +1558,6 @@ all now. After both fixes, on the same instrument:
 > when they noticed it, and what they were doing is not the cause. Measure the
 > steady state, bisect one variable, and believe the number.
 
-**What is still true, and is the next thing to do.** Every mounted tab re-renders
-on every store write, and all five are built at startup — so an XP write during a
-lesson re-renders Profile's 890 nodes even though Profile is nowhere on screen.
-Measured at **~190ms to the next paint, unthrottled**, per write. It is off the
-critical path for Profile itself but it lands on whatever IS on screen, which
-after a lesson is the reward. The real fix is to stop Profile being one component
-— split it into memoised sections so a write costs only the section that changed
-— and that is a refactor of a 961-line file, not a patch.
-
-
-  both ladders at once. The moment a mark is drawn BEYOND an edge it is on paper
-  and needs a paper tone — the material's `base`, which clears 4.5:1 on every
-  order. `check:ui` §4d re-derives all sixteen values and asserts that neither the
-  collar, the laurel nor the ribbon reaches for a metal tone again.
-- **Crossed swords do not work behind a medal**, however heraldic the reference.
-  The medal covers the crossing, so all that shows is two tips above and two
-  hilts below — horns at 168px, mush at the 66px the badge grid actually draws.
-  A laurel is a continuous curved mass, so being half-covered costs it nothing.
-  `swordPaths` is kept in `badgeShapes.ts` so the decision is one line to revisit.
-
-### A quote is a struck thing too, and its metal is the era
-
-Quotes were the flattest surface in the app, and the cause was structural rather
-than a matter of taste: **four screens each drew their own rectangle** — Quote of
-the Day, the saved collection, a thinker's profile, and the lesson deck — a
-hairline border, italic Playfair, the same two greys, in four files that had
-never been reconciled. So a quotation said nothing about who wrote it or when,
-nothing changed about it when you kept it, and it was the one object in the app
-still drawn as an outline while every button, card and rank pin sat on a lip.
-
-`components/shared/QuotePlate.tsx` is the one object all of them use now, and
 > **AND THEN THE SCREEN WAS SPLIT, WHICH IS THE OTHER HALF.** The two fixes above
 > stopped Profile re-rendering for flags that were never its business. They could
 > not help with a write that genuinely changes what it shows — finishing a lesson
@@ -1608,16 +1608,16 @@ still drawn as an outline while every button, card and rank pin sat on a lip.
 > boundary on the pristine text first, then splice.
 
 
-`tone.plate(hue)` derives its five roles from a single hex by the same two mixes
-`ramp()` uses — so the light direction cannot drift between eras.
+**What is still true, and is the next thing to do.** Every mounted tab re-renders
+on every store write, and all five are built at startup — so an XP write during a
+lesson re-renders Profile's 890 nodes even though Profile is nowhere on screen.
+Measured at **~190ms to the next paint, unthrottled**, per write. It is off the
+critical path for Profile itself but it lands on whatever IS on screen, which
+after a lesson is the reward. The real fix is to stop Profile being one component
+— split it into memoised sections so a write costs only the section that changed
+— and that is a refactor of a 961-line file, not a patch.
 
-- **The colour is a LABEL and it already existed.** `ERA` in `constants/design.ts`
-  is the licensed "one place a hue means something", keyed on the five groups
-  `data/philosophers.ts` already sorts 322 thinkers by. Five recognisable colours
-  is what makes a list of twenty quotes scannable; one tone is what made it a
-  pile.
-- **The identity does not bend.** The rim is ink and the quotation is ink. The
-  era lives in the spine, the printer's mark, the byline and the ledge — edges
+
 ### Struck things are shaded, and that is not a second colour
 
 Rank pins and badges carry **tone**: a lit side, a shaded side and a small drop
@@ -1649,6 +1649,37 @@ Two findings worth not rediscovering:
   pin's ray halo was painted in `rule` and vanished; the badge case's **laurel
   wreath was stroked in `on`, which meant every tier-III badge shipped a white
   wreath on cream for months**; and then the capstone collar reached for `rule` on
+  both ladders at once. The moment a mark is drawn BEYOND an edge it is on paper
+  and needs a paper tone — the material's `base`, which clears 4.5:1 on every
+  order. `check:ui` §4d re-derives all sixteen values and asserts that neither the
+  collar, the laurel nor the ribbon reaches for a metal tone again.
+- **Crossed swords do not work behind a medal**, however heraldic the reference.
+  The medal covers the crossing, so all that shows is two tips above and two
+  hilts below — horns at 168px, mush at the 66px the badge grid actually draws.
+  A laurel is a continuous curved mass, so being half-covered costs it nothing.
+  `swordPaths` is kept in `badgeShapes.ts` so the decision is one line to revisit.
+
+### A quote is a struck thing too, and its metal is the era
+
+Quotes were the flattest surface in the app, and the cause was structural rather
+than a matter of taste: **four screens each drew their own rectangle** — Quote of
+the Day, the saved collection, a thinker's profile, and the lesson deck — a
+hairline border, italic Playfair, the same two greys, in four files that had
+never been reconciled. So a quotation said nothing about who wrote it or when,
+nothing changed about it when you kept it, and it was the one object in the app
+still drawn as an outline while every button, card and rank pin sat on a lip.
+
+`components/shared/QuotePlate.tsx` is the one object all of them use now, and
+`tone.plate(hue)` derives its five roles from a single hex by the same two mixes
+`ramp()` uses — so the light direction cannot drift between eras.
+
+- **The colour is a LABEL and it already existed.** `ERA` in `constants/design.ts`
+  is the licensed "one place a hue means something", keyed on the five groups
+  `data/philosophers.ts` already sorts 322 thinkers by. Five recognisable colours
+  is what makes a list of twenty quotes scannable; one tone is what made it a
+  pile.
+- **The identity does not bend.** The rim is ink and the quotation is ink. The
+  era lives in the spine, the printer's mark, the byline and the ledge — edges
   and marks, never a flooded surface. That is `HUE`'s own rule applied to five
   hues, and it is why a shelf of these still reads as printed matter.
 - **Two states are worn by the OBJECT, not just the button.** Saved fills the
@@ -2282,6 +2313,64 @@ browser at it; the first transform can take longer than a navigation timeout.
   The rule underneath all four: **when a lesson gains a new way to be answered, the
   harness gains one too, in the same commit.** Otherwise the next sweep quietly
   measures less and says nothing.
+
+  **AND A MEASUREMENT IS ONLY AS GOOD AS THE PROBE THAT TOOK IT — WHICH NOTHING
+  WAS WATCHING.** `measure-must` records what each beat has on stage and stamps it
+  with a hash, and `validate-cinematic` re-derives that hash so a scene edited
+  without re-measuring is an error rather than a silent crop. The stamp covered the
+  scene and the script. It did not cover the PROBE.
+
+  So when the probe was improved, every stamp stayed green and every stored
+  measurement stayed stale. An older collector had recorded roughly **one word a
+  beat**; the tour generator (§17, group K) drops a station only when it can see a
+  word being sliced, so with those lists it saw nothing to protect and pushed to
+  **1.68×** straight over labels it had no record of. `ethics-ethics-13` drew its
+  five-name rail with COWARD seventeen pixels off the left of the screen and
+  RECKLESS forty-two off the right, on three consecutive beats, for as long as the
+  file has existed. Forty-nine cut words across twenty-four lessons, and every
+  check in the suite green.
+
+  The fix is one line and the lesson is general: **the apparatus goes in the hash.**
+  `scripts/lib/muststamp.mjs` hashes the scene, the script AND the probe, and the
+  probe lives in `scripts/lib/mustprobe.mjs` so the harness that runs it and the
+  validator that judges it read the same text rather than two copies of it. Change
+  the probe and all 186 lessons are stale at once, which is the truth.
+
+  Rot in a scene announces itself, because a scene is what everyone is looking at.
+  Rot in the thing doing the measuring does not — it makes the reports *quieter*,
+  which reads exactly like progress. **Whenever a checker gets better at seeing,
+  ask what its stored answers were derived from, and whether anything invalidates
+  them.**
+
+  `npm run check:space` is the other half of the same finding: the tour generator
+  deliberately ignores a word outside the band, on the correct reasoning that no
+  shot could ever have held it — which left nobody at all holding it (D36). It
+  reads the measurements already on disk, so it costs milliseconds and no browser.
+
+  **A HARNESS THAT MEASURES NOTHING MUST NOT LOOK CLEAN, AND THIS ONE DID.**
+  `check-readable` treated a probe that THREW exactly like a lesson that had
+  finished — `if (!a) break`. So when one variable in the probe shadowed another
+  (a per-edge `over` over the colour-compositing helper of the same name), the page
+  threw on the first word of the first beat and all 186 lessons came back "ONLY 1
+  BEAT REACHED", zero findings, exit 0. It reads as a clean sweep. It is the same
+  failure §21 already records three times over, arriving by a fourth route.
+  A dead probe is a finding now: the lesson is marked, the summary says so, and the
+  run exits non-zero. `READ_DEBUG=1` prints what the page actually threw.
+
+  **A RULE THAT REMOVES EVIDENCE CAN BREAK A RULE THAT COUNTS IT.** The same file
+  had a guard that dropped a word outright when the paint stack put another word
+  above it — right for the two-state label it was written for, and quietly fatal
+  next door. `political-7` hangs a charter that TEARS by drawing the same sheet in
+  two clipped windows, so every word across the seam is half in each and whole only
+  when the two halves are added together; dropping one half made the sum 0.5 and
+  twelve intact words read as sliced. It is gone, replaced by a rule that compares
+  the two copies' CONTRAST instead of deleting one of them.
+
+  **And a defect is a defect a second later AT THE SAME VALUE.** Two reads are
+  taken per beat and only what survives both is a finding — but `settle` waits for
+  the camera, and a scene's own transitions outlast it, so a label fading out over
+  a four-second walk is still fading at both reads and looks like a label resting
+  at 0.58. The two readings are compared by value now, not just by name.
 
   **That rule is now a shared file rather than four copies of a snippet.** Adding
   `lever`, `plot`, `split` and `field` (§17) meant four more ways to answer arriving

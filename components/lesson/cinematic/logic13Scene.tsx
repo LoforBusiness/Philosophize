@@ -62,9 +62,15 @@ const JOINS = BEATS.map((b) => b.joins ?? 0);
 const HONEST = BEATS.map((b) => b.honest ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic13'));
 
-export default function Logic13Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Logic13Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -89,7 +95,10 @@ export default function Logic13Scene({ clock, bt, bi, i, picked, onPick }: Scene
       // He faces LEFT, up the hill he is being told he will fall down.
       fig: pose(s, FIG_X, GROUND, K_FIG, -1, 1),
       steps: carry(cv, 0, n, STEPN[p], STEPN[n], fall),
-      joins: carry(cv, 1, n, JOINS[p], JOINS[n], grow),
+      // R7b — the arm opens the joins. The far setting says the fault is a step
+      // asserted with no reason, and the gaps between the steps yawn as the reader
+      // reaches it: the defect is drawn rather than named.
+      joins: carry(cv, 1, n, JOINS[p], reacting ? dragPos.value : JOINS[n], grow),
       honest: carry(cv, 2, n, HONEST[p], HONEST[n], grow),
     };
   });

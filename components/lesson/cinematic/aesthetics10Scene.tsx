@@ -105,7 +105,13 @@ const PANELV = BEATS.map((b) => b.panel ?? 0);
 const SHUT = BEATS.map((b) => b.shut ?? 0);
 const LINKV = BEATS.map((b) => b.link ?? 0);
 
-export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+
+export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
   const cur = BEATS[i];
@@ -137,7 +143,10 @@ export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick }: 
       panel: carry(cv, 2, n, PANELV[p], PANELV[n], tr, panelFade ? grow : 1),
       // The shutter runs over the LAST 60% of the transition, so on the beat he
       // walks in he arrives at the jamb first and draws it across after.
-      shut: carry(cv, 3, n, SHUT[p], SHUT[n], ease01(seg(tr, 0.4, 1))),
+      // R7b — the knob closes the shutter. Drag toward THE CITY ABOVE ALL and it
+      // comes down over what the work asks you to feel; drag back to beauty and it
+      // runs off. The reader does the censoring, which is what Plato was proposing.
+      shut: carry(cv, 3, n, SHUT[p], reacting ? dragPos.value : SHUT[n], ease01(seg(tr, 0.4, 1))),
       link: carry(cv, 4, n, LINKV[p], LINKV[n], tr, linkFade ? grow : 1),
       verdict: verdictOn ? (verdictFade ? grow : 1) : 0,
     };

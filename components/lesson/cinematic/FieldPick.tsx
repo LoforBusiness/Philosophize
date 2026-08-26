@@ -146,8 +146,15 @@ export default function FieldPick({ field, picked, onPick, pos, pos2 }: Props) {
       />
 
       <View style={styles.row}>
-        <Text style={styles.yHi} numberOfLines={2}>{field.yHi}</Text>
-        <Text style={styles.yLo} numberOfLines={2}>{field.yLo}</Text>
+        {/* THREE LINES, NOT TWO — and two on the x ends rather than one.
+            An axis label is a whole claim (SOMETHING FORCED YOUR HAND, YOU ACTED
+            FROM YOUR OWN WANTS), and at 8pt in a 52-wide gutter that is three
+            lines of lettering. Capped at two it was simply cut off, which is the
+            half of the screen the reader meant by "the words are cut off from
+            there". The pad is 104 tall, so three 10pt lines at each end use 60 of
+            it and never meet in the middle. */}
+        <Text style={styles.yHi} numberOfLines={3}>{field.yHi}</Text>
+        <Text style={styles.yLo} numberOfLines={3}>{field.yLo}</Text>
 
         <GestureDetector gesture={pan}>
           {/* `nativeID` for the browser harnesses (§21). */}
@@ -179,8 +186,8 @@ export default function FieldPick({ field, picked, onPick, pos, pos2 }: Props) {
       </View>
 
       <View style={styles.xRow} pointerEvents="none">
-        <Text style={styles.xEnd} numberOfLines={1}>{field.xLo}</Text>
-        <Text style={[styles.xEnd, styles.xRight]} numberOfLines={1}>{field.xHi}</Text>
+        <Text style={styles.xEnd} numberOfLines={2}>{field.xLo}</Text>
+        <Text style={[styles.xEnd, styles.xRight]} numberOfLines={2}>{field.xHi}</Text>
       </View>
     </View>
   );
@@ -224,7 +231,8 @@ const styles = StyleSheet.create({
 
   xRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 3, paddingLeft: 56 },
   xEnd: {
-    flex: 1, fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.8, color: SOFT,
+    flex: 1, fontFamily: 'Inter_700Bold', fontSize: 8.5, lineHeight: 10.5,
+    letterSpacing: 0.8, color: SOFT,
   },
   xRight: { textAlign: 'right' },
 });

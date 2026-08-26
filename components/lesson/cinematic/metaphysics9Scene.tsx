@@ -74,7 +74,13 @@ const DIR = dirsFrom(X, 1);
 const PANELS = BEATS.map((b) => b.panels ?? 0);
 const CROSS = BEATS.map((b) => (b.cross ?? 0));
 
-export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
+export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -114,7 +120,10 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick }: 
       // fix, and the multiplier goes inside so what is remembered is the value
       // that reached the screen.
       lit: carry(cv, 2, n, PANELS[p] > 0 ? 1 : 0, PANELS[n] > 0 ? 1 : 0, tr, litFade ? grow : 1),
-      shut: carry(cv, 3, n, PANELS[p] === 2 ? 1 : 0, PANELS[n] === 2 ? 1 : 0, tr),
+      // R7b — the arm parts the two panels. The settings run from the mind IS the
+      // brain to the mind is a second kind of thing, and MIND and BODY come apart on
+      // stage as the reader travels between them.
+      shut: carry(cv, 3, n, PANELS[p] === 2 ? 1 : 0, reacting ? dragPos.value : (PANELS[n] === 2 ? 1 : 0), tr),
       reach,
       t,
     };

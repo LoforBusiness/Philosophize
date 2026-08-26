@@ -68,12 +68,18 @@ const CLAIMED = BEATS.map((b) => b.claimed ?? 0);
 const EXIT = BEATS.map((b) => b.exit ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political21'));
 
 const cellX = (i: number) => MAP_X + (i % COLS) * (CELL_W + GAP);
 const cellY = (i: number) => MAP_Y + Math.floor(i / COLS) * (CELL_H + GAP);
 
-export default function Political21Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Political21Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -95,7 +101,9 @@ export default function Political21Scene({ clock, bt, bi, i, picked, onPick }: S
       fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       map: carry(cv, 1, n, MAP[p], MAP[n], tr),
       claimed: carry(cv, 2, n, CLAIMED[p], CLAIMED[n], tr),
-      exit: carry(cv, 3, n, EXIT[p], EXIT[n], tr),
+      // R7c — the leaving arrow IS the lever's top stop. Nothing to take at 'knowing
+      // the law exists', a real way out at 'a refusal you could actually take'.
+      exit: carry(cv, 3, n, EXIT[p], reacting ? dragPos.value : EXIT[n], tr),
       t,
     };
   });

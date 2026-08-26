@@ -108,7 +108,13 @@ const WETV = BEATS.map((b) => b.wet ?? 0);
 const RULEV = BEATS.map((b) => b.rule ?? 0);
 const SPRV = BEATS.map((b) => b.spr ?? 0);
 
-export default function Logic8Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+
+export default function Logic8Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -137,7 +143,10 @@ export default function Logic8Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     ));
     return {
       fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      wet: carry(cv, 1, n, WETV[p], WETV[n], tr, wetFade ? grow : 1),
+      // R7b — the knob wets the pavement. The rail runs from they must be dry to they
+      // must be wet and the patch on the street follows it exactly, so the reader can
+      // put the street in either state and see that the rule permits both.
+      wet: carry(cv, 1, n, WETV[p], reacting ? dragPos.value : WETV[n], tr, wetFade ? grow : 1),
       rule: carry(cv, 2, n, RULEV[p], RULEV[n], tr, ruleFade ? grow : 1),
       spr: carry(cv, 3, n, SPRV[p], SPRV[n], tr),
       trap: trapOn ? (trapFade ? grow : 1) : 0,
@@ -325,7 +334,9 @@ const styles = StyleSheet.create({
   dropletB: { position: 'absolute', left: PUD_L + 56, top: PUD_T + 26, width: 12, height: 5, borderRadius: 3, borderWidth: 1.5, borderColor: SOFT },
   puddleLabel: {
     position: 'absolute', left: PUD_L, top: 464, width: PUD_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 1.4, color: SOFT,
+    // INK, not SOFT: a control drives this layer, so it rests at values SOFT does
+    // not survive — 5.3:1 on paper is 2.3:1 at 0.57 (D35, R7c).
+    fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 1.4, color: INK,
     includeFontPadding: false,
   },
 

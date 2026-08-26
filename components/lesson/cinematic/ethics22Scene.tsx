@@ -65,9 +65,15 @@ const MACHINE = BEATS.map((b) => b.machine ?? 0);
 const CABLE = BEATS.map((b) => b.cable ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics22'));
 
-export default function Ethics22Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Ethics22Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -87,7 +93,10 @@ export default function Ethics22Scene({ clock, bt, bi, i, picked, onPick }: Scen
 
     return {
       fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
-      wants: carry(cv, 1, n, WANTS[p], WANTS[n], tr),
+      // R7b — the drawn curve raises the five wants. `pos` on a plot is the MEAN
+      // height of what the reader drew (see ShapePlot), so the columns on stage rise
+      // and fall with their own line: they are drawing the wants, not a graph of them.
+      wants: carry(cv, 1, n, WANTS[p], reacting ? dragPos.value : WANTS[n], tr),
       machine: carry(cv, 2, n, MACHINE[p], MACHINE[n], tr),
       cable: carry(cv, 3, n, CABLE[p], CABLE[n], tr),
       t,

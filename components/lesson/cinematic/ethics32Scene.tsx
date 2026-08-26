@@ -72,9 +72,15 @@ const CARD = BEATS.map((b) => b.card ?? 0);
 // Two figures at 82 and 300, so the track is the point BETWEEN them (191) — following
 // either one alone would frame the other out, and here the pair is the subject.
 const X = BEATS.map((b) => b.x ?? 191);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics32'));
 
-export default function Ethics32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Ethics32Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldSb = useHeld();
   const cv = useCarry(1);
   const heldSa = useHeld();
@@ -98,7 +104,10 @@ export default function Ethics32Scene({ clock, bt, bi, i, picked, onPick }: Scen
       emoteHold(B[p], t + B_CLOCK)),
       emoteLive(B[n], t + B_CLOCK, bt.value),
       tr));
-    const card = carry(cv, 0, n, CARD[p], CARD[n], tr);
+    // R7c — the verdict card is the weight being handed over. At 'none; work it out
+    // alone' it stays with the knower; at 'take their word for it' both hold it, and
+    // the reader carries it across themselves.
+    const card = carry(cv, 0, n, CARD[p], reacting ? 1 + dragPos.value : CARD[n], tr);
     return {
       know: pose(sa, A_X, GROUND, K_FIG, 1, 1),
       borr: pose(sb, B_X, GROUND, K_FIG, -1, 1),

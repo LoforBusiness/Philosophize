@@ -64,7 +64,13 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic7'));
 const DIR = dirsFrom(X, 1);
 const RULEV = BEATS.map((b) => b.rule ?? 0);
 
-export default function Logic7Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
+export default function Logic7Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -92,7 +98,10 @@ export default function Logic7Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     ));
     return {
       fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      rule: carry(cv, 1, n, RULEV[p], RULEV[n], tr, ruleFade ? grow : 1),
+      // R7b — the arm leans on the rule. The far setting says the dry street settles
+      // it outright, and it is the rule on the board that licenses that, so the rule
+      // firms up as the reader arrives at the verdict it makes possible.
+      rule: carry(cv, 1, n, RULEV[p], reacting ? dragPos.value : RULEV[n], tr, ruleFade ? grow : 1),
       fact: factOn ? (factFade ? grow : 1) : 0,
       concl: conclOn ? (conclFade ? grow : 1) : 0,
       t,

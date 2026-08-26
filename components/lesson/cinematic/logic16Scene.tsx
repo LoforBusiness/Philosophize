@@ -77,9 +77,15 @@ const CANDS = BEATS.map((b) => b.cands ?? 0);
 const SILENT = BEATS.map((b) => b.silent ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic16'));
 
-export default function Logic16Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Logic16Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -99,8 +105,13 @@ export default function Logic16Scene({ clock, bt, bi, i, picked, onPick }: Scene
 
     return {
       fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
-      dawns: carry(cv, 1, n, DAWNS[p], DAWNS[n], tr),
-      arrow: carry(cv, 2, n, ARROW[p], ARROW[n], tr),
+      // R7b — the pad plays the mornings. Up the y axis, from seen once to seen five
+      // times, the strip fills in one dawn at a time.
+      dawns: carry(cv, 1, n, DAWNS[p], reacting ? dragPos2.value * 6 : DAWNS[n], tr),
+      // And across: the CROW → SUN arrow only appears as the token moves right, from
+      // they merely pair up to one makes the other happen. The reader can pile up
+      // mornings without ever earning the arrow, which is the whole lesson.
+      arrow: carry(cv, 2, n, ARROW[p], reacting ? dragPos.value : ARROW[n], tr),
       cands: carry(cv, 3, n, CANDS[p], CANDS[n], tr),
       silent: carry(cv, 4, n, SILENT[p], SILENT[n], tr),
       t,

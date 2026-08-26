@@ -100,6 +100,11 @@ const BASEV = BEATS.map((b) => b.base ?? 0);
 const SPINEV = BEATS.map((b) => b.spine ?? 0);
 const ARCV = BEATS.map((b) => b.arc ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+
 /**
  * One card's opacity. It is SOLID once it is up and fades in only on the beat that
  * actually adds it, so tapping forward never re-reveals the stack (C20c).
@@ -112,7 +117,8 @@ function stepOp(k: number, p: number, n: number, grow: number) {
   return STEPS[p] > k ? 1 : grow;
 }
 
-export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -154,7 +160,10 @@ export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick }: S
     return {
       fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       base: carry(cv, 1, n, BASEV[p], BASEV[n], tr, baseFade ? grow : 1),
-      spine: carry(cv, 2, n, SPINEV[p], SPINEV[n], tr, spineFade ? grow : 1),
+      // R7b — the knob draws the chain of support. Drag toward IT PROVES THE
+      // CONCLUSION and the stubs down the stack's left appear — and the reader can see
+      // the top one running back into the bottom, which is the circle.
+      spine: carry(cv, 2, n, SPINEV[p], reacting ? dragPos.value : SPINEV[n], tr, spineFade ? grow : 1),
       s0: stepOp(0, p, n, grow) * (wrongIdx === 0 ? 0.45 : 1),
       s1: stepOp(1, p, n, grow) * (wrongIdx === 1 ? 0.45 : 1),
       s2: stepOp(2, p, n, grow) * (wrongIdx === 2 ? 0.45 : 1),

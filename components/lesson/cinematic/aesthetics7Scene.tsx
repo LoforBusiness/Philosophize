@@ -114,7 +114,13 @@ const MKV = BEATS.map((b) => b.marks ?? 0);
 // plates become viewers the strip belongs to the question, then to the marks.
 const CHV = BEATS.map((b) => (b.summary ? 0 : (b.capt ?? 0) <= 1 ? 1 : 0));
 
-export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+
+export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const heldC = useHeld();
@@ -152,7 +158,10 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick }: S
       comp: pose(c, COMP_X, GROUND, K_FIG, -1, 1),
       art: carry(cv, 1, n, ARTV[p], ARTV[n], tr),
       capt: captOn ? (captFade ? grow : 1) : 0,
-      marks: carry(cv, 2, n, MKV[p], MKV[n], tr, marksFade ? grow : 1),
+      // R7b — the seam trains the critic. Give the bar to IN THE RESPONSE and Hume's
+      // four marks appear: if beauty lives in the response then the response is the
+      // thing that can be practised, and the reader watches that follow.
+      marks: carry(cv, 2, n, MKV[p], reacting ? dragPos.value : MKV[n], tr, marksFade ? grow : 1),
       chart: carry(cv, 3, n, CHV[p], CHV[n], tr, chartFade ? grow : 1),
     };
   });

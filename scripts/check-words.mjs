@@ -101,7 +101,7 @@ const MAX_NAMES_MID = 2;
 const NAME_STUFF_BUDGET = 4;
 // J8  RECALL-SHAPED PROMPTS: a budget, falling. "Who said 'knowledge itself is power'?"
 //     is a memory test of the previous slide, not a question about the idea.
-const RECALL_BUDGET = 2;
+const RECALL_BUDGET = 1;
 // J9  AN EXPLANATION POINTS AT SOMETHING THE READER CAN SEE. This one is a zero, and
 //     it is here because 27 explanations failed it silently. They said "the trap is B"
 //     and "C over-corrects" and "Not B or D" — written when questions had four lettered
@@ -115,7 +115,7 @@ const RECALL_BUDGET = 2;
 // is a high-water mark that may only ever go DOWN, exactly like CARD_BUDGET and
 // MC_BUDGET. Writing a new over-long sentence raises it and fails the build.
 // The other three are zeroes: they were nearly clean already.
-const LONG_SENTENCE_BUDGET = 34;
+const LONG_SENTENCE_BUDGET = 30;
 
 let fails = 0;
 const ok = (label, pass, detail) => {

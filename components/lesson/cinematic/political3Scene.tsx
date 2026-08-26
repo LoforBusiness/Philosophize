@@ -107,9 +107,15 @@ const PAIR_MODE = (() => {
 // Two figures at 66 and 334, so the track is the point BETWEEN them (200) — following
 // either one alone would frame the other out, and here the pair is the subject.
 const X = BEATS.map((b) => b.x ?? 200);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political3'));
 
-export default function Political3Scene({ clock, bt, bi, i }: SceneApi) {
+export default function Political3Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldSub = useHeld();
   const cv = useCarry(5);
   const heldR = useHeld();
@@ -132,7 +138,10 @@ export default function Political3Scene({ clock, bt, bi, i }: SceneApi) {
       // is still near the subject's end of the rail at the moment the circuit
       // becomes visible — otherwise it would pop into view already delivered.
       scroll: ease01(clamp01((carry(cv, 0, n, SCROLL[p], SCROLL[n], tr) - 0.45) / 0.55)),
-      seal: carry(cv, 1, n, SEAL[p], SEAL[n], tr),
+      // R7c — the HELD IN TRUST stamp is exactly what the drag is about: at 'they are
+      // the same thing' it is struck across the circuit, and it lifts as the reader
+      // says a vote reaches less and less of the general will.
+      seal: carry(cv, 1, n, SEAL[p], reacting ? 1 - dragPos.value : SEAL[n], tr),
       pair: carry(cv, 2, n, PAIR_ON[p], PAIR_ON[n], tr),
       // The corridor's two diagrams hand over in stages: force is off the rails by
       // 45% of the transition, the circuit goes up from 55%, and the corridor is

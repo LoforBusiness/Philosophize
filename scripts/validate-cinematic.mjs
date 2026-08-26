@@ -15,7 +15,8 @@
 // Run: node scripts/validate-cinematic.mjs
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
+import { MEASURE } from './lib/mustprobe.mjs';
+import { mustStamp } from './lib/muststamp.mjs';
 
 const DIR = path.join(process.cwd(), 'components', 'lesson', 'cinematic');
 
@@ -622,13 +623,12 @@ console.log(
   );
   const shaOf = (comp) => {
     const base = comp.replace(/Lesson$/, '');
-    const lower = `${base[0].toLowerCase()}${base.slice(1)}`;
-    const files = [`${lower}Scene.tsx`, `${lower}Script.ts`, `${comp}.tsx`]
-      .map((f) => path.join(DIR, f)).filter((p) => fs.existsSync(p)).sort();
-    if (!files.length) return null;
-    const h = crypto.createHash('sha1');
-    for (const p of files) h.update(fs.readFileSync(p));
-    return h.digest('hex').slice(0, 12);
+    // ONE DEFINITION, shared with measure-must — see scripts/lib/muststamp.mjs.
+    // Re-deriving it here was fine while the only inputs were the scene and the
+    // script; it stopped being fine the moment the PROBE became an input too, and
+    // two copies of a hash that must agree is the kind of thing that only ever
+    // disagrees in the direction nobody is looking.
+    return mustStamp(DIR, comp, MEASURE);
   };
   const stale = [];
   for (const [id, want] of stamps) {

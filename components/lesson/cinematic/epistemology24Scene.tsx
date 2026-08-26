@@ -72,9 +72,15 @@ const HAND = BEATS.map((b) => b.hand ?? 0);
 const GIVE = BEATS.map((b) => b.give ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology24'));
 
-export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -97,7 +103,10 @@ export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick }
       ladder: carry(cv, 1, n, LADDER[p], LADDER[n], tr),
       sure: carry(cv, 2, n, SURE[p], SURE[n], tr),
       hand: carry(cv, 3, n, HAND[p], HAND[n], tr),
-      give: carry(cv, 4, n, GIVE[p], GIVE[n], tr),
+      // R7b — the arm marks the rung that gives way. Each setting is a different
+      // thing to give up when a valid argument reaches a conclusion you cannot accept,
+      // and the mark travels to whichever rung the reader is naming.
+      give: carry(cv, 4, n, GIVE[p], reacting ? dragPos.value : GIVE[n], tr),
       t,
     };
   });

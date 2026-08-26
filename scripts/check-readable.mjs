@@ -163,8 +163,43 @@ const PROBE = `(() => {
     return d.getBoundingClientRect();
   };
 
+  // MAKE EVERYTHING HIT-TESTABLE FOR THE DURATION OF THE READ.
+  //
+  // Every question about what is BEHIND a word goes through elementsFromPoint, and
+  // elementsFromPoint skips anything with pointer-events: none. A scene sets that on
+  // very nearly everything it draws, because none of it is meant to be tappable — so
+  // the probe was blind to exactly the fills that matter. A PAPER word on an INK
+  // badge measured as paper on paper: 1.0:1, reported as a blank box, and perfectly
+  // clear on screen. political-8's SEES badge is the case that made it obvious.
+  //
+  // One stylesheet, added before the scan and removed after, rather than a guess per
+  // word. It changes nothing the reader sees: pointer-events has no paint.
+  const hitStyle = document.createElement('style');
+  hitStyle.textContent = '*{pointer-events:auto!important}';
+  document.head.appendChild(hitStyle);
+
   const out = [];
-  for (const d of clipEl.querySelectorAll('div,span')) {
+  const seenWords = [];
+  // BOTH BOXES, NOT JUST THE STAGE.
+  //
+  // The first version of this scanned #stage-clip only, so it never once looked at
+  // the half of the screen the reader answers with — the control's own labels, its
+  // live readout, the prompt and the explanation. The reader found that half by
+  // reading it:
+  //
+  //   "for the new answering of questions, I have noticed a lot of the words are
+  //    cut off from there"
+  //
+  // And they would be: the control takes its natural height off the top of the
+  // lower box, and the deck below it is overflow:hidden, so a tall control eats the room the
+  // words were supposed to have. A harness that measures the picture and not the
+  // question measures the half that was already fine.
+  const roots = [clipEl];
+  const lowerEl = document.getElementById('lower-deck');
+  if (lowerEl) roots.push(lowerEl);
+  const nodes = [];
+  for (const root of roots) for (const el of root.querySelectorAll('div,span')) nodes.push(el);
+  for (const d of nodes) {
     if (d.children.length !== 0) continue;
     const txt = (d.textContent || '').trim();
     if (txt.length < 2) continue;
@@ -209,23 +244,46 @@ const PROBE = `(() => {
       top: raw.top + trim, bottom: raw.bottom - trim, height: raw.height - trim * 2,
     };
     let keep = 1;
+    // WHICH EDGE, AND BY HOW MUCH. A keep fraction says a word is being sliced; it
+    // does not say where to move it, and 0.6 is the same number whether a caption
+    // has run off the right of the stage or sits three units above the band. over
+    // overhang is the distance past the tightest clip in screen px, in CSS order,
+    // and divided by the scene's own scale it IS the edit.
+    //
+    // NOT NAMED over. That is the colour-compositing helper this file has had all
+    // along, and a let-over inside the per-word loop shadows it for the whole
+    // body — so groundAt threw "over is not a function" on the FIRST word of the
+    // FIRST beat, the probe returned nothing, and the harness recorded every one
+    // of 186 lessons as ONLY 1 BEAT REACHED. It printed no error while doing it:
+    // a null read is treated exactly like a finished lesson.
+    let overhang = [0, 0, 0, 0];
     for (const c of clips) {
       const w = Math.min(r.right, c.right) - Math.max(r.left, c.left);
       const h = Math.min(r.bottom, c.bottom) - Math.max(r.top, c.top);
       const f = w > 0 && h > 0 ? (w * h) / (r.width * r.height) : 0;
-      if (f < keep) keep = f;
+      if (f < keep) {
+        keep = f;
+        overhang = [
+          Math.max(0, c.top - r.top), Math.max(0, r.right - c.right),
+          Math.max(0, r.bottom - c.bottom), Math.max(0, c.left - r.left),
+        ];
+      }
     }
     // NOT ON SCREEN AT ALL IS NOT A BLANK BOX.
     //
     // A scene parks labels off and fades them in, and a word at 3% opacity is not
     // a smear the reader strains at — it is a word that has not arrived. The
-    // threshold is 6% rather than 0 because that is roughly where ink on paper
-    // stops being a tint and starts being a mark. The clip test is the same argument in
+    // threshold is a FIFTH rather than 0, and the difference is the BOX: at 6% a
+    // caption is invisible and so is the frame around it, which is an empty stage
+    // rather than a blank box — and a control-driven layer on its way out passes
+    // through there legitimately. By 20% the frame is a ghost too. What the reader
+    // complained about is a box they can SEE with words they cannot read, and that
+    // needs both halves present. The clip test is the same argument in
     // the other axis: a word its clip has removed entirely is a prop waiting in
     // the wings, which is the distinction check-frame draws between straddling
     // the crop and sitting outside it. Asking the paint stack about a point that
     // is not being drawn would also answer about the wrong element.
-    if (alpha <= 0.06 || keep <= 0.02) continue;
+    if (alpha <= 0.2 || keep <= 0.02) continue;
 
     // ── and what is actually BEHIND it ──────────────────────────────────────
     //
@@ -242,6 +300,25 @@ const PROBE = `(() => {
     // under the word with a ground of its own IS the ground — sibling or ancestor,
     // in the right order, with no theory required.
     const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+
+    // A WORD UNDER ANOTHER WORD IS NOT A BLANK BOX — AND IT IS NOT SKIPPED HERE.
+    //
+    // There used to be a guard on this spot that dropped a word outright when the
+    // paint stack put another word above it, for the two-state label the note above
+    // describes. It has been replaced by the pair rule further down, which reaches
+    // the same verdict by a better route: it compares the two copies' CONTRAST and
+    // clears the buried one only when its twin is genuinely legible.
+    //
+    // The difference is not academic. Dropping a word here removes it from the
+    // findings entirely, and the political-7 exemption sums over those — that scene
+    // hangs a charter that TEARS by drawing the same sheet in two clipped windows,
+    // so every word across the seam is half in each and only complete when the two
+    // halves are added together. Skip one half and the sum is 0.5, the exemption
+    // does not fire, and twelve perfectly whole words are reported as sliced.
+    //
+    // Once the hit test could see through pointer-events (see the stylesheet above)
+    // it started firing on exactly those halves, which is how this was found.
+    // A rule that removes evidence can break a rule that counts it.
     const PAPER_BG = { r: 250, g: 250, b: 247 };
     const groundAt = (x, y) => {
       let stack;
@@ -285,6 +362,10 @@ const PROBE = `(() => {
     // against the empty paper behind it and reported as unreadable.
     if (keep <= 0.02) continue;
 
+    // Kept whether or not it is a finding: the two-state rule below has to know
+    // about the LEGIBLE copy of a word, and a legible copy is never a finding.
+    seenWords.push({ t: txt, con, r: [r.left, r.top, r.right, r.bottom] });
+
     const why = [];
     if (size < FLOOR) why.push('TINY');
     // A word entirely outside its clip is a prop waiting in the wings; a word
@@ -294,9 +375,42 @@ const PROBE = `(() => {
     if (!why.length) continue;
     // The rect is carried so a FAINT can be confirmed against real PIXELS — see
     // the pixel confirmation at the top of this file. Ancestor colours are a guess.
-    out.push({ why: why.join('+'), t: txt.slice(0, 34), size: +size.toFixed(1),
+    out.push({ why: why.join('+'), t: txt.slice(0, 34), full: txt,
+      box: [r.left, r.top, r.right, r.bottom], size: +size.toFixed(1),
       keep: +keep.toFixed(2), con: +con.toFixed(1), a: +alpha.toFixed(2),
-      r: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)] });
+      r: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)],
+      over: overhang.map((v) => Math.round(v * 10) / 10) });
+  }
+
+  // ── A WORD DRAWN TWICE IN ONE PLACE IS ONE WORD IN TWO STATES ─────────────
+  //
+  // The house pattern for a label that can be lit stacks two copies: an INK one on
+  // the paper plate, and a PAPER one inside an INK fill that crossfades over it.
+  // Both are in the DOM the whole time, so the hidden half is a real word sitting
+  // under a fill of its own colour — arithmetically 1.0:1, and perfectly legible on
+  // screen, because its twin is the thing the reader is looking at.
+  //
+  // groundAt cannot see this. It reads the paint stack with elementsFromPoint,
+  // which SKIPS anything with pointer-events none — and a scene sets that on very
+  // nearly everything it draws, because none of it is meant to be tappable. So the
+  // covering fill is invisible to the probe and the buried copy measures as ink on
+  // ink, at exactly 1.0:1, which is the signature these hits all carried.
+  //
+  // The rule has the same shape as the political-7 one below: judge the PAIR. If
+  // the same string is drawn in the same place and one copy clears the floor, the
+  // reader can read that word, and neither copy is a finding.
+  const OVERLAP = 0.6;
+  for (const h of out) {
+    if (h.why.indexOf('FAINT') < 0) continue;
+    const twin = seenWords.some((w) => {
+      if (w.con < CONTRAST || w.t !== h.full) return false;
+      const iw = Math.min(w.r[2], h.box[2]) - Math.max(w.r[0], h.box[0]);
+      const ih = Math.min(w.r[3], h.box[3]) - Math.max(w.r[1], h.box[1]);
+      if (iw <= 0 || ih <= 0) return false;
+      const mine = (h.box[2] - h.box[0]) * (h.box[3] - h.box[1]);
+      return mine > 0 && (iw * ih) / mine >= OVERLAP;
+    });
+    if (twin) h.why = h.why.split('+').filter((w) => w !== 'FAINT').join('+');
   }
 
   // ── TWO WINDOWS ONTO ONE SHEET IS NOT A CUT WORD ──────────────────────────
@@ -317,13 +431,18 @@ const PROBE = `(() => {
     if (h.why.indexOf('CUT') < 0 || share[h.t] < KEEP) continue;
     h.why = h.why.split('+').filter((w) => w !== 'CUT').join('+');
   }
-  const kept = out.filter((h) => h.why.length > 0);
+  // full and box exist only for the two rules above — the report carries the
+  // truncated string and the rounded rect.
+  const kept = out.filter((h) => h.why.length > 0).map((h) => {
+    const { full, box, ...rest } = h; return rest;
+  });
 
   const bar = document.getElementById('beat-progress');
   let prog = -1;
   try {
     if (bar) { const tf = getComputedStyle(bar).transform; if (tf && tf !== 'none') prog = new DOMMatrixReadOnly(tf).a; }
   } catch (e) {}
+  hitStyle.remove();
   return JSON.stringify({ out: kept, done: prog >= 0.999 });
 })()`;
 
@@ -382,6 +501,9 @@ function allIds() {
 
     const evaluate = async (expr) => {
       const r = await send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true });
+      if (process.env.READ_DEBUG && r?.exceptionDetails) {
+        console.log(`      [dbg] THREW: ${r.exceptionDetails.exception?.description ?? JSON.stringify(r.exceptionDetails)}`.slice(0, 600));
+      }
       return r?.result?.value;
     };
     // A synthetic `click`, because CDP's dispatchMouseEvent does not drive a React
@@ -471,6 +593,25 @@ function allIds() {
     return { evaluate, send, tap, answerScene, answerDeck, answerControl, stamp, settle, shoot, close: () => { try { ws.close(); } catch {} } };
   };
 
+  // ── A WORD THE LESSON IS ABOUT FADING ─────────────────────────────────────
+  //
+  // D35 says a word is legible or absent, never dimmed to a smear. A1 outranks it,
+  // and there is exactly one place where the two meet: a lesson whose ARGUMENT is
+  // that a word goes pale.
+  //
+  // ethics-12 is Kant's universalisability, staged as a press that stamps I PROMISE
+  // over and over — and as the copies multiply the word fades on every one of them
+  // until the board is blank. That is the whole point: universalise the maxim and
+  // it eats the practice it depends on. Making PROMISE legible throughout would
+  // teach the opposite, exactly as wiring aesthetics-16's canvas to the control
+  // would (R7c).
+  //
+  // Named rather than budgeted, so it explains itself and so a NEW faint word in
+  // the same lesson still shows.
+  const FADES_ON_PURPOSE = {
+    'ethics-ethics-12': ['PROMISE'],
+  };
+
   const nBeatsOf = (() => {
     const src = fs.readFileSync('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx', 'utf8');
     const comps = new Map([...src.matchAll(/^\s*'([a-z0-9-]+)':\s*(\w+),/gm)].map((m) => [m[1], m[2]]));
@@ -503,6 +644,7 @@ function allIds() {
     const beats = [];
     let stepped = 0;
     let last = -1;
+    let dead = false;
     for (let b = 0; b < 14; b += 1) {
       await settle();
       // TWO READINGS, AND ONLY WHAT SURVIVES BOTH.
@@ -517,15 +659,39 @@ function allIds() {
         const raw = await evaluate(PROBE);
         return raw ? JSON.parse(raw) : null;
       };
+      // A PROBE THAT THREW IS NOT A LESSON THAT ENDED.
+      //
+      // These two used to be a bare `break`, which is right for a page that has
+      // finished and catastrophic for a page that errored: a syntax fault in the
+      // probe reads as every lesson stopping after one beat, and the sweep prints
+      // a summary with zero findings and exits 0. It happened — a `let over` in
+      // the word loop shadowed the colour helper of the same name, and 186
+      // lessons came back "ONLY 1 BEAT REACHED" with no error anywhere. Run with
+      // READ_DEBUG=1 to see what the page actually threw.
       const a = await read();
-      if (!a) break;
+      if (!a) { dead = true; break; }
       if (a.none) break;
       await wait(1400);
       const c = await read();
-      if (!c) break;
+      if (!c) { dead = true; break; }
+      // AND ONLY WHAT SURVIVES BOTH AT THE SAME VALUE.
+      //
+      // Matching on the finding alone is not enough. `settle` waits for the CAMERA,
+      // and a scene's own transitions outlast it — a beat that walks takes as long
+      // as the walk needs, so a label fading out over four seconds is still fading
+      // at both reads and looks like a label resting at 0.58. metaphysics-8's
+      // BEFORE YOU WERE BORN is exactly that, and it is not a defect: it is a word
+      // leaving. A word that is genuinely too faint or too clipped reads the SAME a
+      // second and a half later; a word in transit does not.
       const key = (h) => `${h.why}|${h.t}`;
-      const still = new Set((c.out ?? []).map(key));
-      let hits = (a.out ?? []).filter((h) => still.has(key(h)));
+      const SETTLED = 0.04;
+      const later = new Map((c.out ?? []).map((h) => [key(h), h]));
+      let hits = (a.out ?? []).filter((h) => {
+        const then = later.get(key(h));
+        if (!then) return false;
+        if (Math.abs((then.a ?? 1) - (h.a ?? 1)) > SETTLED) return false;
+        return Math.abs((then.keep ?? 1) - (h.keep ?? 1)) <= SETTLED;
+      });
       const got = { done: a.done || c.done };
 
       // CONFIRM EVERY FAINT AGAINST THE PIXELS, and drop the ones the screen
@@ -568,18 +734,65 @@ function allIds() {
           }).filter(Boolean);
         }
       }
+      const spared = FADES_ON_PURPOSE[id];
+      if (spared) {
+        hits = hits.map((h) => {
+          if (!h.why.includes('FAINT') || !spared.includes(h.t)) return h;
+          const rest = h.why.split('+').filter((w) => w !== 'FAINT').join('+');
+          return rest ? { ...h, why: rest } : null;
+        }).filter(Boolean);
+      }
       if (hits.length) beats.push({ beat: b, hits });
       if (got.done) break;
       let moved = false;
+      // READ AGAIN ONCE THE QUESTION IS ANSWERED.
+      //
+      // The explanation is the longest text in the deck and it does not exist until
+      // the reader picks — so a sweep that only reads BEFORE answering never sees
+      // the one piece of writing most likely to be clipped. D27 caps it at 290
+      // characters on the reasoning that "the deck holds ~290", and that figure was
+      // worked out for a deck with nothing above it. A control takes its height off
+      // the top of the same box.
+      let answered = false;
       for (let attempt = 0; attempt < 4 && !moved; attempt += 1) {
-        if (attempt === 1) { await answerControl(); await wait(700); }
-        if (attempt === 2) { await answerScene(); await wait(700); }
-        if (attempt === 3) { await answerDeck(); await wait(700); }
+        if (attempt >= 1 && !answered) {
+          if (attempt === 1) { await answerControl(); await wait(700); }
+          if (attempt === 2) { await answerScene(); await wait(700); }
+          if (attempt === 3) { await answerDeck(); await wait(700); }
+          answered = true;
+          await settle();
+          const post = await read();
+          if (post && post.out && post.out.length) {
+            const seen = new Set(hits.map((h) => `${h.why}|${h.t}`));
+            // CLIPPING ONLY, ONCE THE QUESTION IS ANSWERED.
+            //
+            // After a pick the deck is choreographing: the rejected card crumples
+            // away at 0.14, layers dim to make room for the reveal, the wrong
+            // option recedes. Every one of those is a word deliberately on its way
+            // out, and counting them turned 11 findings into 147 — all of them
+            // things the scene meant to discard.
+            //
+            // A BOX TOO SMALL is not choreography. The explanation is the longest
+            // text in the deck and only exists after the pick, so this second read
+            // is here for exactly one thing: whether the words that arrive to
+            // explain the answer fit the room a control left them.
+            const extra = post.out
+              .filter((h) => h.why.indexOf('CUT') >= 0)
+              .filter((h) => !seen.has(`${h.why}|${h.t}`));
+            if (extra.length) {
+              const at = beats.find((x) => x.beat === b);
+              if (at) at.hits.push(...extra);
+              else beats.push({ beat: b, hits: extra });
+            }
+          }
+          answered = false;
+        }
         await tap();
         await wait(2600);
         for (let t = 0; t < 12 && !moved; t += 1) {
           const now = await stamp();
           const idx = now < 0 || !nBeats ? -1 : Math.round(now * nBeats) - 1;
+          if (process.env.READ_DEBUG) console.log(`      [dbg] b${b} prog=${now} nBeats=${nBeats} idx=${idx} last=${last}`);
           if (idx < 0 || idx > last) { last = idx; moved = true; break; }
           await wait(250);
         }
@@ -587,7 +800,7 @@ function allIds() {
       if (!moved) break;
       stepped += 1;
     }
-    report.push({ id, beats, stepped });
+    report.push({ id, beats, stepped, ...(dead ? { dead: true } : {}) });
     done += 1;
     const n = (k) => beats.reduce((a, x) => a + x.hits.filter((h) => h.why.includes(k)).length, 0);
     const note = stepped < 2 ? `ONLY ${stepped + 1} BEAT REACHED`
@@ -637,7 +850,14 @@ function allIds() {
     console.log(`    ${w.why.padEnd(11)} ${w.size.toFixed(1).padStart(5)}px keep ${w.keep.toFixed(2)} con ${String(w.con).padStart(4)} a ${w.a}  ${w.id} b${w.beat}  "${w.t}"`);
   }
 
+  const dead = report.filter((r) => r.dead);
+  if (dead.length) {
+    console.log(`\n  ${dead.length} lesson(s) STOPPED BECAUSE THE PROBE THREW — this sweep measured nothing there.`);
+    console.log(`      ${dead.slice(0, 8).map((r) => r.id).join(', ')}${dead.length > 8 ? ', …' : ''}`);
+    console.log('      READ_DEBUG=1 prints what the page threw. A zero here is not a pass.');
+  }
+
   if (outPath) fs.writeFileSync(outPath, JSON.stringify(report, null, 1));
   cleanup();
-  process.exit(0);
+  process.exit(dead.length ? 1 : 0);
 })();

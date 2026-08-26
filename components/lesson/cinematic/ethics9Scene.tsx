@@ -60,6 +60,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics9'));
 const DIR = dirsFrom(X, 1);
 const NOTES = BEATS.map((b) => b.notes ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
 // The three targets for Q1. The left note is the claim he did NOT meet, so it is
 // the one still owed an account; the third card is the tempting "nothing is owed",
 // which is the position the whole lesson is arguing against (H66).
@@ -69,7 +74,8 @@ const TARGETS = [
   { id: 'neither', correct: false },
 ];
 
-export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -99,7 +105,10 @@ export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick }: Scene
       fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       notes: carry(cv, 1, n, NOTES[p], NOTES[n], tr, notesFade ? grow : 1),
       taken: takenOn ? (takenFade ? grow : 1) : 0,
-      owed: owedOn ? (owedFade ? grow : 1) : 0,
+      // R7c — the STILL OWED tag is the residue the lever is about. Say nothing was
+      // missed and there is nothing under the claim; say a real duty went unmet and it
+      // is written there. `* tr` so the tag grows out of what the last beat drew (L5).
+      owed: reacting ? dragPos.value * tr : owedOn ? (owedFade ? grow : 1) : 0,
     };
   });
 

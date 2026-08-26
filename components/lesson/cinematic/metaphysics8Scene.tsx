@@ -76,6 +76,11 @@ const FRONTV = BEATS.map((b) => b.front ?? DOM_N);
 const TAGSV = BEATS.map((b) => b.tags ?? 0);
 const MARKV = BEATS.map((b) => b.mark ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+
 /**
  * One domino. It reads the shared topple FRONT and works out its own angle, so
  * thirteen props are driven by a single number computed once in the scene's
@@ -101,7 +106,8 @@ function Domino({
   );
 }
 
-export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
   const cur = BEATS[i];
@@ -129,11 +135,17 @@ export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick }: 
     ));
     return {
       fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      chain: carry(cv, 1, n, CHAINV[p], CHAINV[n], tr, chainFade ? grow : 1),
+      // R7b — the pad IS the two questions. Across: the further right, the more of
+      // the domino run is there, because that axis runs from the chain breaks to
+      // every link holds.
+      chain: carry(cv, 1, n, CHAINV[p], reacting ? dragPos.value : CHAINV[n], tr, chainFade ? grow : 1),
       // ONE number for the whole cascade: every domino at or right of it is down.
       wave: carry(cv, 2, n, FRONTV[p], FRONTV[n], tr),
       tags: carry(cv, 3, n, TAGSV[p], TAGSV[n], tr),
-      mark: carry(cv, 4, n, MARKV[p], MARKV[n], tr),
+      // And up: the YOUR CHOICE tag over domino three lights as the token rises
+      // toward people are free. The reader can put the tag on a chain that is
+      // complete, which is the compatibilist corner and the whole lesson.
+      mark: carry(cv, 4, n, MARKV[p], reacting ? dragPos2.value : MARKV[n], tr),
     };
   });
 
@@ -143,7 +155,12 @@ export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick }: 
   const chainStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.chain }));
   const tagsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tags }));
   const markStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.mark,
+    // A STEEP RAMP, NOT THE RAW VALUE (D35). `mark` is the pad's second axis on the
+    // graded beat, so it RESTS wherever the token is — and the token starts at 0.24,
+    // which put YOUR CHOICE on the stage at 1.7:1 and held it there until the reader
+    // moved. A word is legible or absent; the rise is what carries the value, and it
+    // still runs the whole range.
+    opacity: clamp01(SCENE.value.mark * 3),
     transform: [{ translateY: (1 - SCENE.value.mark) * -8 }],
   }));
 

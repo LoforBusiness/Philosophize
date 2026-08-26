@@ -82,9 +82,15 @@ const TR = 0.85;
 // Two figures at 96 and 252, so the track is the point BETWEEN them (174) — following
 // either one alone would frame the other out, and here the pair is the subject.
 const X = BEATS.map((b) => b.x ?? 174);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political2'));
 
-export default function Political2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Political2Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldRulerS = useHeld();
   const cv = useCarry(2);
   const heldSubS = useHeld();
@@ -109,7 +115,10 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick }: Sc
       pod,
       led,
       rowP: lerp(clamp01(CHART[p]), clamp01(CHART[n]), tr),
-      rowA: lerp(clamp01(CHART[p] - 1), clamp01(CHART[n] - 1), tr),
+      // R7c — the AUTHORITY row is what the lever is about. Magnetism and habit fill
+      // the POWER row and leave this one empty; the lawful office is the only stop that
+      // writes anything here.
+      rowA: lerp(clamp01(CHART[p] - 1), reacting ? dragPos.value : clamp01(CHART[n] - 1), tr),
     };
   });
 

@@ -75,9 +75,15 @@ const ROUTE = BEATS.map((b) => b.route ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology6'));
 
-export default function Epistemology6Scene({ clock, bt, bi }: SceneApi) {
+export default function Epistemology6Scene({ clock, bt, bi, dragPos, i }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const SCENE = useDerivedValue(() => {
@@ -89,7 +95,10 @@ export default function Epistemology6Scene({ clock, bt, bi }: SceneApi) {
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       bal: carry(cv, 0, n, BAL[p], BAL[n], tr),
-      crack: carry(cv, 1, n, CRACK[p], CRACK[n], tr),
+      // R7b — the arm cracks the block. The far setting says the claim asserts what
+      // it denies, and the block carrying that claim splits as the reader arrives at
+      // it: the sentence coming apart is the argument.
+      crack: carry(cv, 1, n, CRACK[p], reacting ? dragPos.value : CRACK[n], tr),
       route: carry(cv, 2, n, ROUTE[p], ROUTE[n], tr),
       // the beam quivers a hair but never commits — suspended judgment
       tilt: Math.sin(t * 1.1) * 2,
@@ -109,7 +118,12 @@ export default function Epistemology6Scene({ clock, bt, bi }: SceneApi) {
   const panR = useAnimatedStyle(() => ({ transform: [{ translateY: -SCENE.value.tilt * 1.6 }] }));
   const routeStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.route * 2) }));
   const crackStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.crack,
+    // A STEEP RAMP ON THE OPACITY, the raw value everywhere else (D35). The box
+    // rests part-arrived on the beat that questions it, and …INCLUDING THAT? — the
+    // line the whole lesson turns on — reached the reader at 1.4:1. The rise and
+    // the wobble still run the full range; only the legibility comes off the
+    // bottom of it.
+    opacity: clamp01(SCENE.value.crack * 3),
     transform: [
       { translateY: (1 - SCENE.value.crack) * -8 },
       { rotate: `${Math.sin(SCENE.value.t * 9) * SCENE.value.crack * 1.2}deg` },

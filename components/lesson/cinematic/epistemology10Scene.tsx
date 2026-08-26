@@ -60,10 +60,16 @@ const GAUGE = BEATS.map((b) => b.gauge ?? 0);
 const BAND = BEATS.map((b) => b.band ?? 0);
 const NEEDLE = BEATS.map((b) => b.needle ?? 0.5);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+
 // Where the shaded band starts, per state: nothing · the last sliver · most of it.
 const BAND_L = [0.98, 0.93, 0.34];
 
-export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -97,7 +103,10 @@ export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick }
       bandOn: bandOn ? 1 : 0,
       // The needle takes its own unhurried time to travel, so the beat where the
       // evidence arrives reads as a movement rather than a cut.
-      needle: SC_L + carry(cv, 2, n, NEEDLE[p], NEEDLE[n], ease01(clamp01(bt.value / 1.4)), SC_W),
+      // R7b — the knob IS the needle. The rail runs from barely believed to beyond
+      // question and so does the gauge on stage, so the reader sets the confidence
+      // they are being asked about rather than reading about it.
+      needle: SC_L + carry(cv, 2, n, NEEDLE[p], reacting ? dragPos.value : NEEDLE[n], ease01(clamp01(bt.value / 1.4)), SC_W),
       t,
     };
   });

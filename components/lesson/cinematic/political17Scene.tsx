@@ -64,9 +64,15 @@ const TAKEN = BEATS.map((b) => b.taken ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political17'));
 
-export default function Political17Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Political17Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
   const cur = BEATS[i];
@@ -90,7 +96,10 @@ export default function Political17Scene({ clock, bt, bi, i, picked, onPick }: S
       well: carry(cv, 0, n, WELL[p], WELL[n], grow),
       turns: carry(cv, 1, n, TURNS[p], TURNS[n], slow),
       blank: carry(cv, 2, n, BLANK[p], BLANK[n], grow),
-      taken: carry(cv, 3, n, TAKEN[p], TAKEN[n], slow),
+      // R7b — the arm fills his cup. The far setting says taking the benefit is what
+      // binds you, and the cup fills as the reader reaches it: the duty and the
+      // drinking arrive together, with no signature anywhere.
+      taken: carry(cv, 3, n, TAKEN[p], reacting ? dragPos.value : TAKEN[n], slow),
       boards: carry(cv, 4, n, PICKV[p], PICKV[n], grow),
     };
   });

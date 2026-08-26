@@ -72,7 +72,13 @@ const RES = BEATS.map((b) => b.result ?? 0);
 const REAL = BEATS.map((b) => b.real ?? 0);
 const FAKE = BEATS.map((b) => b.fake ?? 0);
 
-export default function Logic25Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+
+export default function Logic25Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -98,7 +104,10 @@ export default function Logic25Scene({ clock, bt, bi, i, picked, onPick }: Scene
       fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       result: carry(cv, 1, n, RES[p], RES[n], tr, resFade ? grow : 1),
       real: carry(cv, 2, n, REAL[p], REAL[n], realFade ? grow : tr),
-      fake: carry(cv, 3, n, FAKE[p], FAKE[n], fakeFade ? grow : tr),
+      // R7b — the seam grows the false-positive bar. The more of the population the
+      // reader gives to the larger group, the taller the pile of people who fit the
+      // description and are not what it suggests. Base rates, drawn.
+      fake: carry(cv, 3, n, FAKE[p], reacting ? dragPos.value : FAKE[n], fakeFade ? grow : tr),
     };
   });
 

@@ -67,9 +67,15 @@ const DOUBT = BEATS.map((b) => b.doubt ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics15'));
 
-export default function Ethics15Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Ethics15Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
   const cur = BEATS[i];
@@ -95,7 +101,11 @@ export default function Ethics15Scene({ clock, bt, bi, i, picked, onPick }: Scen
       // reader is meant to be able to see that the beam COULD move (A1), and the
       // next author is meant to see that nothing here ever moves it.
       tilt: carry(cv, 2, n, TILT[p], TILT[n], grow),
-      doubt: carry(cv, 3, n, DOUBT[p], DOUBT[n], grow),
+      // R7b — the arm raises the doubt under the fulcrum. Move it toward the boo
+      // and the question mark under the balance grows: a boo cannot be weighed, so
+      // the instrument itself comes into question. The beam's tilt stays at 0 —
+      // that is the scene's own point and the control does not touch it.
+      doubt: carry(cv, 3, n, DOUBT[p], reacting ? dragPos.value : DOUBT[n], grow),
       boards: carry(cv, 4, n, PICKV[p], PICKV[n], grow),
     };
   });

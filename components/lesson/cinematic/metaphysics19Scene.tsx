@@ -70,9 +70,15 @@ const PEG = BEATS.map((b) => b.peg ?? 0);
 const TWIN = BEATS.map((b) => b.twin ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics19'));
 
-export default function Metaphysics19Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Metaphysics19Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -95,7 +101,10 @@ export default function Metaphysics19Scene({ clock, bt, bi, i, picked, onPick }:
       props: carry(cv, 1, n, PROPS[p], PROPS[n], tr),
       strip: carry(cv, 2, n, STRIP[p], STRIP[n], tr),
       peg: carry(cv, 3, n, PEG[p], PEG[n], tr),
-      twin: carry(cv, 4, n, TWIN[p], TWIN[n], tr),
+      // R7b — the arm makes the second apple. It peaks at the middle setting, because
+      // that is the one that says there are two of them; at either end there is one
+      // thing, or no case at all.
+      twin: carry(cv, 4, n, TWIN[p], reacting ? 1 - Math.abs(dragPos.value * 2 - 1) : TWIN[n], tr),
       t,
     };
   });

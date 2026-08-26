@@ -79,7 +79,13 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology9'));
 const DIR = dirsFrom(X, 1);
 const THEORY = BEATS.map((b) => b.theory ?? 0);
 
-export default function Epistemology9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
+export default function Epistemology9Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -116,7 +122,10 @@ export default function Epistemology9Scene({ clock, bt, bi, i, picked, onPick }:
       map: mapOn ? (mapFade ? grow : 1) : 0,
       link: linkOn ? (linkFade ? grow : 1) : 0,
       cards: cardsOn ? (cardsFade ? grow : 1) : 0,
-      theory: carry(cv, 1, n, THEORY[p], THEORY[n], tr),
+      // R7b — the arm changes what is placarded on the right. Each setting is a
+      // different account of what the map gets checked against, and the rival theories
+      // come and go with it.
+      theory: carry(cv, 1, n, THEORY[p], reacting ? dragPos.value * 2 : THEORY[n], tr),
       t,
     };
   });

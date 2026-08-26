@@ -82,7 +82,13 @@ const DIR = dirsFrom(X, 1);
 const GRAINS = BEATS.map((b) => b.grains ?? 0);
 const LAMP = BEATS.map((b) => b.lamp ?? 0);
 
-export default function Metaphysics24Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
+
+export default function Metaphysics24Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -108,7 +114,10 @@ export default function Metaphysics24Scene({ clock, bt, bi, i, picked, onPick }:
       // Fractional so grains leave one at a time across the transition rather than
       // the pile jumping between two counts.
       left: carry(cv, 1, n, GRAINS[p], GRAINS[n], grow),
-      lamp: carry(cv, 2, n, LAMP[p], LAMP[n], lampFade ? grow : tr),
+      // R7b — the drawn curve lights the HEAP lamp. `pos` on a plot is the mean height
+      // of the reader's line, so the verdict brightens with how much of a heap they
+      // have said it is — and the vague middle is exactly where it half-glows.
+      lamp: carry(cv, 2, n, LAMP[p], reacting ? dragPos.value : LAMP[n], lampFade ? grow : tr),
     };
   });
 

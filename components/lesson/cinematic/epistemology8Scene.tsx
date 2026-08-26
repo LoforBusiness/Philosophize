@@ -82,7 +82,13 @@ const TOWER = BEATS.map((b) => b.tower ?? 0);
 const PILE = BEATS.map((b) => b.pile ?? 0);
 const HOLD = BEATS.map((b) => b.hold ?? 0);
 
-export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
+
+export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
   const cur = BEATS[i];
@@ -122,7 +128,10 @@ export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick }:
       carryX: fx + carry(cv, 1, n, DIR[p], DIR[n], tr) * 12,
       hold: carry(cv, 2, n, HOLD[p], HOLD[n], seg(tr, 0.78, 1)),
       pile: carry(cv, 3, n, PILE[p], PILE[n], seg(tr, 0.6, 0.92), open),
-      tower: carry(cv, 4, n, TOWER[p], TOWER[n], tr, open),
+      // R7b — the drawn curve builds the tower. `pos` on a plot is the MEAN height of
+      // the line (see ShapePlot), and the question is how much a loop of reasons holds
+      // up as the web widens — so the reader's own curve is how many rows stand.
+      tower: carry(cv, 4, n, TOWER[p], reacting ? 1 + dragPos.value * 3 : TOWER[n], tr, open),
       esc: escOn ? (escFade ? grow : 1) : 0,
     };
   });

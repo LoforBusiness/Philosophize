@@ -66,7 +66,13 @@ const GAUGES = BEATS.map((b) => b.gauges ?? 0);
 const NEAR = BEATS.map((b) => b.near ?? 0);
 const FAR = BEATS.map((b) => b.far ?? 0);
 
-export default function Ethics23Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
+
+export default function Ethics23Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -92,7 +98,10 @@ export default function Ethics23Scene({ clock, bt, bi, i, picked, onPick }: Scen
       fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       board: carry(cv, 1, n, GAUGES[p], GAUGES[n], tr, gFade ? grow : 1),
       near: carry(cv, 2, n, NEAR[p], NEAR[n], nFade ? grow : tr),
-      far: carry(cv, 3, n, FAR[p], FAR[n], fFade ? grow : tr),
+      // R7b — the drawn curve fills the FAR gauge. The plot asks what happens to the
+      // duty as the distance grows, and the mean of the line the reader draws is
+      // exactly how full that far-away obligation reads.
+      far: carry(cv, 3, n, FAR[p], reacting ? dragPos.value : FAR[n], fFade ? grow : tr),
     };
   });
 

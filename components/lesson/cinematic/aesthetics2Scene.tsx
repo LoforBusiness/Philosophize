@@ -90,9 +90,15 @@ const FLOOR = [52, 104, 156, 208, 260, 312, 364];
 // Two figures at 112 and 292, so the track is the point BETWEEN them (202) — following
 // either one alone would frame the other out, and here the pair is the subject.
 const X = BEATS.map((b) => b.x ?? 202);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics2'));
 
-export default function Aesthetics2Scene({ clock, bt, bi }: SceneApi) {
+export default function Aesthetics2Scene({ clock, bt, bi, dragPos, dragPos2, i }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldArtistS = useHeld();
   const cv = useCarry(2);
   const heldViewerS = useHeld();
@@ -113,7 +119,10 @@ export default function Aesthetics2Scene({ clock, bt, bi }: SceneApi) {
       viewer: pose(viewerS, VIEWER_X, GROUND, K_FIG, -1, 1),
       waveX: lerp(ARTIST_X + 46, VIEWER_X - 46, ease01(cross)),
       waveVis: WAVE[n] * Math.sin(Math.PI * cross),
-      felt: carry(cv, 0, n, FELT[p], FELT[n], tr),
+      // R7b — the pad lights the viewer's chest. Up the y axis, from the tears are
+      // pretend to the tears are real, the feeling arrives in the person watching —
+      // and the x axis can say the people never existed while it does.
+      felt: carry(cv, 0, n, FELT[p], reacting ? dragPos2.value : FELT[n], tr),
       // A single continuous 1→3 value: panel j fills as it crosses j + 1.
       chain: carry(cv, 1, n, CHAIN[p], CHAIN[n], tr),
       t,

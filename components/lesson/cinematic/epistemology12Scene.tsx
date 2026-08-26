@@ -152,7 +152,13 @@ const DIR = dirsFrom(X, 1);
 const PIPES = BEATS.map((b) => b.pipes ?? 0);
 const TOK = BEATS.map((b) => b.token ?? 0);
 
-export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
+export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -166,7 +172,10 @@ export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick }
     // ONE channel drives all three pipes. `pv` blends the previous beat's count into
     // this one's, so a pipe that is already laid simply HOLDS at 1 instead of
     // redrawing itself every time the reader taps forward (C20c / H58).
-    const pv = carry(cv, 0, n, PIPES[p], PIPES[n], tr);
+    // R7c — the lever's three stops ARE the three pipes, so it lays and lifts them:
+    // one for the world reaching you directly, three for the world reaching somebody
+    // else first. The route the reader picks is the route the tank is fed by.
+    const pv = carry(cv, 0, n, PIPES[p], reacting ? 1 + dragPos.value * 2 : PIPES[n], tr);
     const perc = clamp01(pv);
     const mem = clamp01(pv - 1);
     const test = clamp01(pv - 2);

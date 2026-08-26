@@ -19,9 +19,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
 import { loadTs } from './lib/loadts.mjs';
 import { lessonTours, CAP, scaleFor } from './lib/tourrule.mjs';
+import { MEASURE } from './lib/mustprobe.mjs';
+import { mustStamp } from './lib/muststamp.mjs';
 
 const DIR = 'components/lesson/cinematic';
 const SIDECAR = path.join(DIR, 'mustBoxes.ts.json');
@@ -110,14 +111,12 @@ function durs(comp) {
  * skipped, rather than silently baked into the table at whatever state they were
  * caught in.
  */
-const stampOf = (comp) => {
-  const files = [scenePath(comp), scriptPath(comp), path.join(DIR, `${comp}.tsx`)]
-    .filter((p) => fs.existsSync(p)).sort();
-  if (!files.length) return null;
-  const h = crypto.createHash('sha1');
-  for (const p of files) h.update(fs.readFileSync(p));
-  return h.digest('hex').slice(0, 12);
-};
+// THE THIRD COPY OF THIS HASH, and now there are none: measure-must writes it,
+// validate-cinematic judges it and this decides what to tour from, so all three
+// read scripts/lib/muststamp.mjs. Three copies of a number that must agree is
+// three chances to disagree in the direction nobody is watching — which is
+// exactly what happened when the PROBE became one of its inputs.
+const stampOf = (comp) => mustStamp(DIR, comp, MEASURE);
 
 const bandOf = (comp) => {
   const p = scenePath(comp);
@@ -148,6 +147,65 @@ const groundOf = (comp) => {
 };
 
 // ── build ────────────────────────────────────────────────────────────────────
+// HOW FAR A STATION'S FRAMING REACHES, and whether it cuts a word anywhere in it.
+//
+// MARGIN and INSET are clearance, and they are different numbers on purpose.
+// MARGIN widens the union and only ever refuses a station, so it is generous.
+// INSET shrinks the intersection and refuses one for every word near an edge,
+// which is most of them — 10 there cost 55% of the tour and 6 costs 20%, for the
+// same defects caught. Measured, not guessed: the worst real shave was 5.5 units.
+// The emitter writes Math.round for every coordinate, so a station is judged on
+// the number that SHIPS rather than the one it was derived from.
+const R = (n) => Math.round(n);
+
+const MARGIN = 10;
+const INSET = 6;
+
+/**
+ * BOTH ENDS OF A FOLLOW. A follow's window SLIDES, and only its start used to be
+ * tested — political-8's EYE LINE sat 48 units clear of the opening framing and 12
+ * units INSIDE the closing one. The window travels monotonically, so the swept
+ * region is the UNION of the two ends and the always-visible region is their
+ * INTERSECTION: a word is safe wholly inside the intersection or wholly outside
+ * the union, and sliced anywhere between.
+ */
+function slicesWithin(t, k, holds, words, band, ground) {
+  const winOf = (b4) => visibleWindow(
+    stationShot({ x: R(b4[0]), y: R(b4[1]), w: R(b4[2]), h: R(b4[3]) }, band, ground), band,
+  );
+  return t.some((st) => {
+    const wins = [winOf(st.box), ...(st.to ? [winOf(st.to)] : [])];
+    const union = {
+      left: Math.min(...wins.map((w) => w.left)), right: Math.max(...wins.map((w) => w.right)),
+      top: Math.min(...wins.map((w) => w.top)), bottom: Math.max(...wins.map((w) => w.bottom)),
+    };
+    const inter = {
+      left: Math.max(...wins.map((w) => w.left)), right: Math.min(...wins.map((w) => w.right)),
+      top: Math.max(...wins.map((w) => w.top)), bottom: Math.min(...wins.map((w) => w.bottom)),
+    };
+    // EVERY BEAT IT REACHES. A beat with no move of its own keeps the framing it
+    // was handed, so the push carries forward until something re-frames. `holds`
+    // is what actually re-frames — see the fixpoint below.
+    const reach = [];
+    for (let j = k; j < words.length; j += 1) {
+      if (j > k && holds[j]) break;
+      reach.push(...(words[j] ?? []));
+    }
+    return reach.some((it) => {
+      if (it.k !== 'text') return false;
+      const [x, y, bw, bh] = it.b;
+      // Text outside the band is unreachable at any shot — an H59 fault in the
+      // scene rather than a framing the camera chose. check-space holds that.
+      if (y < band[0] - 0.5 || y + bh > band[1] + 0.5) return false;
+      const over = x < union.right + MARGIN && x + bw > union.left - MARGIN
+        && y < union.bottom + MARGIN && y + bh > union.top - MARGIN;
+      const whole = x >= inter.left + INSET && x + bw <= inter.right - INSET
+        && y >= inter.top + INSET && y + bh <= inter.bottom - INSET;
+      return over && !whole;
+    });
+  });
+}
+
 const tours = {};
 const stamps = {};
 const problems = [];
@@ -172,6 +230,12 @@ for (const [id, comp] of map) {
   const per = [];
   let toured = 0;
   let tightest = 1;
+  // WHERE THE CAMERA WAS LEFT, so a beat does not travel to the framing it is
+  // already in. K3 has always forbidden that and the generator never checked it —
+  // it happened not to occur, which is not the same thing, and the first honest set
+  // of word boxes produced one straight away (ethics-ethics-6 beat 3). A move to
+  // where you already are is a beat of nothing, and reads as the tap having failed.
+  let lastBox = null;
   // THE WHOLE LESSON AT ONCE, because the camera has a memory now: a beat's framing
   // depends on where the previous beats left it, so it cannot be decided one beat at
   // a time (see lessonTours). Reveal order is still required for a FOLLOW; without it
@@ -223,22 +287,24 @@ for (const [id, comp] of map) {
     // outside it in tours.ts — which is exactly how six of them came back after
     // the generator was taught to drop them. Same rule as the line above about
     // verifying against the shipping maths rather than the intention.
-    const R = (n) => Math.round(n);
-    const slices = t.some((st) => {
-      const w = visibleWindow(stationShot({ x: R(st.box[0]), y: R(st.box[1]), w: R(st.box[2]), h: R(st.box[3]) }, band, ground), band);
-      return (words[k] ?? []).some((it) => {
-        if (it.k !== 'text') return false;
-        const [x, y, bw, bh] = it.b;
-        // Text outside the band is unreachable at any shot — an H59 fault in the
-        // scene rather than a framing the camera chose.
-        if (y < band[0] - 0.5 || y + bh > band[1] + 0.5) return false;
-        const over = x < w.right && x + bw > w.left && y < w.bottom && y + bh > w.top;
-        const whole = x >= w.left - 0.5 && x + bw <= w.right + 0.5
-          && y >= w.top - 0.5 && y + bh <= w.bottom + 0.5;
-        return over && !whole;
-      });
-    });
+    const slices = slicesWithin(t, k, decided, words, band, ground);
     if (slices) { per.push(null); continue; }
+
+    // A MOVE THAT LANDS WHERE THE CAMERA ALREADY WAS IS NOT A MOVE (K3).
+    //
+    // The framing a beat ENDS in is what the next one is compared against, and for
+    // a station that follows its subject that is the end of the follow rather than
+    // its start — the same reading check-tour takes. Within twelve units on all
+    // four numbers is the same shot, and holding wide instead is clean by
+    // construction, so the beat simply holds.
+    const end = t[t.length - 1];
+    const box = end.to ?? end.box;
+    if (lastBox && Math.abs(lastBox[0] - box[0]) < 12 && Math.abs(lastBox[1] - box[1]) < 12
+      && Math.abs(lastBox[2] - box[2]) < 12 && Math.abs(lastBox[3] - box[3]) < 12) {
+      per.push(null);
+      continue;
+    }
+    lastBox = box;
 
     per.push(t);
     toured++;
@@ -246,6 +312,29 @@ for (const [id, comp] of map) {
     nStations += t.length;
     for (const s of t) tightest = Math.max(tightest, Math.min(CAP, scaleFor(s.box, band)));
   }
+  // A DROPPED STATION DOES NOT RE-FRAME, so dropping one LENGTHENS the reach of the
+  // one before it. Deciding beats in order cannot see that: `decided` is the list
+  // of candidates, and aesthetics-7's single station was judged against a reach
+  // that stopped at three candidates which were then all dropped — so its 1.72x
+  // actually ran four beats past where it was tested, and cut A MASTERWORK down to
+  // 4% of itself on every one of them.
+  //
+  // Re-test what survived, against what survived. Dropping only ever lengthens a
+  // reach, so this settles: each pass removes at least one station or none at all.
+  for (let pass = 0; pass < 8; pass += 1) {
+    let changed = false;
+    for (let k = 0; k < per.length; k += 1) {
+      if (!per[k]) continue;
+      if (!slicesWithin(per[k], k, per, words, band, ground)) continue;
+      nStations -= per[k].length;
+      per[k] = null;
+      toured -= 1;
+      nToured -= 1;
+      changed = true;
+    }
+    if (!changed) break;
+  }
+
   if (per.some(Boolean)) {
     tours[id] = per;
     // The same fingerprint the boxes carry: a tour derived from a scene that has

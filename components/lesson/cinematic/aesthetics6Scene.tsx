@@ -80,9 +80,15 @@ const SCREE = [
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics6'));
 
-export default function Aesthetics6Scene({ clock, bt, bi }: SceneApi) {
+export default function Aesthetics6Scene({ clock, bt, bi, dragPos, dragPos2, i }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -93,8 +99,13 @@ export default function Aesthetics6Scene({ clock, bt, bi }: SceneApi) {
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      vast: carry(cv, 0, n, VAST[p], VAST[n], tr),
-      flower: carry(cv, 1, n, FLOWER[p], FLOWER[n], tr),
+      // R7b — the pad raises the mountain. Across, from soothing to overwhelming, the
+      // vastness grows over the stage.
+      vast: carry(cv, 0, n, VAST[p], reacting ? dragPos.value : VAST[n], tr),
+      // And down the y axis, where there is nothing to fear, the little flower is
+      // there instead. Two axes, two of Burke's categories, and the reader finds the
+      // corner where the two are furthest apart.
+      flower: carry(cv, 1, n, FLOWER[p], reacting ? 1 - dragPos2.value : FLOWER[n], tr),
       split: carry(cv, 2, n, SPLIT[p], SPLIT[n], tr),
       mind: carry(cv, 3, n, MIND[p], MIND[n], tr),
       t,

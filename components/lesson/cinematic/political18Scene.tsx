@@ -61,9 +61,15 @@ const RIDE = BEATS.map((b) => b.ride ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political18'));
 
-export default function Political18Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Political18Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -88,7 +94,10 @@ export default function Political18Scene({ clock, bt, bi, i, picked, onPick }: S
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       lanes: carry(cv, 0, n, LANES[p], LANES[n], grow),
       bikes: carry(cv, 1, n, BIKES[p], BIKES[n], grow),
-      ride: carry(cv, 2, n, RIDE[p], RIDE[n], roll),
+      // R7b — the knob rides the bicycles. At the near end the two riders are called
+      // equal and go nowhere; drag toward income says nothing and they travel their
+      // own very different distances on identical machines.
+      ride: carry(cv, 2, n, RIDE[p], reacting ? dragPos.value : RIDE[n], roll),
       boards: carry(cv, 3, n, PICKV[p], PICKV[n], grow),
     };
   });

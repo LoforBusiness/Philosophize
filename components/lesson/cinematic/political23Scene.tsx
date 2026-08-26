@@ -67,9 +67,15 @@ const BOX = BEATS.map((b) => b.box ?? 0);
 const LEFT = BEATS.map((b) => b.left ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political23'));
 
-export default function Political23Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Political23Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -92,7 +98,9 @@ export default function Political23Scene({ clock, bt, bi, i, picked, onPick }: S
       tags: carry(cv, 1, n, TAGS[p], TAGS[n], tr),
       strip: carry(cv, 2, n, STRIP[p], STRIP[n], tr),
       box: carry(cv, 3, n, BOX[p], BOX[n], tr),
-      left: carry(cv, 4, n, LEFT[p], LEFT[n], tr),
+      // R7c — the seam is how much was HANDED to you, so the chooser said to be left
+      // in the box thins out as it travels right. The reader empties the box themselves.
+      left: carry(cv, 4, n, LEFT[p], reacting ? 1 - dragPos.value : LEFT[n], tr),
       t,
     };
   });

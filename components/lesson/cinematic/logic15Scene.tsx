@@ -66,9 +66,15 @@ const CLAIM = BEATS.map((b) => b.claim ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic15'));
 
-export default function Logic15Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Logic15Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
   const cur = BEATS[i];
@@ -91,7 +97,10 @@ export default function Logic15Scene({ clock, bt, bi, i, picked, onPick }: Scene
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       crowd: carry(cv, 0, n, CROWD[p], CROWD[n], grow),
       sample: carry(cv, 1, n, SAMPLE[p], SAMPLE[n], grow),
-      leap: carry(cv, 2, n, LEAP[p], LEAP[n], grow),
+      // R7b — the knob closes the leap. At the near end the reader is only being
+      // surer about two people and the step to the whole crowd is enormous; drag
+      // toward asking many more and it shortens until it is a step you could take.
+      leap: carry(cv, 2, n, LEAP[p], reacting ? 1 - dragPos.value : LEAP[n], grow),
       // The claim opens sideways from the sample's own width, so the reader watches
       // two dots' worth of evidence stretch to cover the whole crowd.
       claim: carry(cv, 3, n, CLAIM[p], CLAIM[n], wide),

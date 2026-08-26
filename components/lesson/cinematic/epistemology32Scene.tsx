@@ -73,9 +73,15 @@ const G = BEATS.map((b) => b.g ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology32'));
 
-export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
@@ -93,7 +99,10 @@ export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick }
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      maps: lerp(prevMaps, shownMaps, draw),
+      // R7c — the four panels ARE the detail the drag is about, so they fill and empty
+      // under the reader's thumb: almost nothing at one end, the thing itself at the
+      // other.
+      maps: lerp(prevMaps, reacting ? dragPos.value * 4 : shownMaps, draw),
     };
   });
 

@@ -53,9 +53,15 @@ const SHAPE = BEATS.map((b) => b.shape ?? 0);
 const FEAR = BEATS.map((b) => b.fear ?? 0);
 const FRAME = BEATS.map((b) => b.frame ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics17'));
 
-export default function Aesthetics17Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Aesthetics17Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -77,7 +83,10 @@ export default function Aesthetics17Scene({ clock, bt, bi, i, picked, onPick }: 
     return {
       fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       shape: carry(cv, 1, n, SHAPE[p], SHAPE[n], grow),
-      fear: carry(cv, 2, n, FEAR[p], FEAR[n], grow),
+      // R7b — the arm sets the fear meter. The far setting says the fear is real with
+      // the consequences taken out, and the meter stands up as the reader reaches it:
+      // the frame stays, and the reading climbs anyway.
+      fear: carry(cv, 2, n, FEAR[p], reacting ? dragPos.value : FEAR[n], grow),
       frame: carry(cv, 3, n, FRAME[p], FRAME[n], grow),
     };
   });

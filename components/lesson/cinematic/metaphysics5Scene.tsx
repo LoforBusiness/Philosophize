@@ -68,9 +68,15 @@ const PSR = BEATS.map((b) => b.psr ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics5'));
 
-export default function Metaphysics5Scene({ clock, bt, bi }: SceneApi) {
+export default function Metaphysics5Scene({ clock, bt, bi, dragPos, i }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -82,7 +88,10 @@ export default function Metaphysics5Scene({ clock, bt, bi }: SceneApi) {
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       stars: carry(cv, 0, n, STARB[p], STARB[n], tr),
-      q: carry(cv, 1, n, QB[p], QB[n], tr),
+      // R7b — the arm raises the question mark. Only one of the three settings opens
+      // this question at all, and the great ? between NOTHING and SOMETHING grows as
+      // the reader arrives at it.
+      q: carry(cv, 1, n, QB[p], reacting ? dragPos.value : QB[n], tr),
       dasein: carry(cv, 2, n, DAS[p], DAS[n], tr),
       psr: carry(cv, 3, n, PSR[p], PSR[n], tr),
       t,

@@ -19,8 +19,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE COMPOSITION, IN NUMBERS (H56).
 //
 // · the CHAIN of three plates runs across the top: each 96×34 at y 244…278, at
-//   x 116, 220, 324, with a 2-thick link between them along y 261 (x 212…220 and
-//   x 316…324). It is the argument, drawn as an argument.
+//   x 88, 192, 296, with a 2-thick link between them along y 261 (x 184…192 and
+//   x 288…296), ending at 392 — level with the fence. It is the argument, drawn as
+//   an argument.
 // · the two PENS sit at y 330…434: rails at x 116…236 and x 260…380, each a
 //   3-thick frame. Inside each, an animal 76 wide × 46 tall at y 356 — SAME
 //   shape, SAME stripes in both, because the reader's evidence does not tell
@@ -44,7 +45,12 @@ const BASE_TR = 0.85;
 const PLATE_W = 96;
 const PLATE_H = 34;
 const PLATE_Y = 244;
-const PLATE_X = [116, 220, 324];
+// 88 · 192 · 296, NOT 116 · 220 · 324. The chain is 3 x 96 plus two 8-unit links
+// = 304 wide, and from x 116 its last plate ended at 420 — twenty units past the
+// 400 the stage HAS, so NOT A PAINTED MULE was drawn with its right-hand third
+// off the edge and the plate itself missing a side. It now ends at 392, level
+// with the relevance fence, which is where it always read as belonging.
+const PLATE_X = [88, 192, 296];
 const PLATE_TEXT = ['IT IS A ZEBRA', 'ZEBRAS ARE NOT MULES', 'NOT A PAINTED MULE'];
 
 const PEN_Y = 330;
@@ -212,7 +218,10 @@ const styles = StyleSheet.create({
   },
   plateWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   plateText: {
-    position: 'absolute', left: 4, top: 11, width: PLATE_W - 8, textAlign: 'center',
+    // top 7, not 11: the longest of the three plate texts wraps to two lines, and
+    // from 11 the second line's descender ran past the plate's own 34-unit floor.
+    // The other two are one line and sit slightly higher, which nothing notices.
+    position: 'absolute', left: 4, top: 7, width: PLATE_W - 8, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,
   },
   // Scaled about its LEFT end, so the gap opens at the plate the chain fails to reach.

@@ -61,9 +61,15 @@ const NONES = BEATS.map((b) => b.none ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics12'));
 
-export default function Metaphysics12Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Metaphysics12Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -78,7 +84,10 @@ export default function Metaphysics12Scene({ clock, bt, bi, i, picked, onPick }:
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       flow: (t * SPEED) % SPAN,
-      owner: carry(cv, 0, n, OWNER[p], OWNER[n], grow),
+      // R7b — the knob draws the owner's box. Drag toward ONE UNCHANGING SOUL and a
+      // container appears behind the stream of experiences; drag back and it goes,
+      // leaving the stream to run with nobody holding it.
+      owner: carry(cv, 0, n, OWNER[p], reacting ? dragPos.value : OWNER[n], grow),
       none: carry(cv, 1, n, NONES[p], NONES[n], grow),
     };
   });

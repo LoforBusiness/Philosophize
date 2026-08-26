@@ -98,6 +98,13 @@ export default function Epistemology18Scene({ clock, bt, bi, dragPos }: SceneApi
       rails: carry(cv, 2, n, RAILS[p], RAILS[n], tr),
       grip: carry(cv, 3, n, GRIPV[p], GRIPV[n], tr),
       ev: LIVE_D[n] === 1 ? clamp01(dragPos.value) : scripted,
+      // WHETHER THE CHIP IS THERE, which is not the same question as how much it
+      // weighs. On the graded beat `ev` IS the reader's setting, so tying the chip's
+      // opacity to it faded SOMEONE YOU TRUST / SAYS OTHERWISE down with the answer —
+      // measured at 0.36, which is 2.2:1 and a smear in the shape of a word (D35).
+      // The weight is carried by the two marks travelling along their rails, which is
+      // where the lesson is anyway.
+      evShow: LIVE_D[n] === 1 ? 1 : clamp01(scripted * 3),
       t,
     };
   });
@@ -105,7 +112,7 @@ export default function Epistemology18Scene({ clock, bt, bi, dragPos }: SceneApi
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
 
   const railsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.rails }));
-  const evStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.ev * 3) }));
+  const evStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.evShow }));
 
   return (
     <View style={styles.scene}>

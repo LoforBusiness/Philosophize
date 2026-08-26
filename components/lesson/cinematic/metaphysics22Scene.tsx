@@ -71,9 +71,15 @@ const RUNS = BEATS.map((b) => b.runs ?? 0);
 const OPEN = BEATS.map((b) => b.open ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics22'));
 
-export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -95,7 +101,10 @@ export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick }:
       fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       track: carry(cv, 1, n, TRACK[p], TRACK[n], tr),
       runs: carry(cv, 2, n, RUNS[p], RUNS[n], tr),
-      open: carry(cv, 3, n, OPEN[p], OPEN[n], tr),
+      // R7b — the arm fades the untaken branch. Each setting is a different account of
+      // what could have happened, and the road nobody went down grows fainter or
+      // firmer as the reader travels between them.
+      open: carry(cv, 3, n, OPEN[p], reacting ? dragPos.value : OPEN[n], tr),
       t,
     };
   });

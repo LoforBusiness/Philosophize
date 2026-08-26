@@ -67,7 +67,13 @@ const HT = BEATS.map((b) => b.hit ?? 0);
 const GL = BEATS.map((b) => b.glance ?? 0);
 const CB = BEATS.map((b) => b.carB ?? -70);
 
-export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+
+export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick, dragPos, dragPos2 }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -137,7 +143,10 @@ export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick }
       laneB: laneBOn ? (laneBFade ? grow : 1) : 0,
       kid: kidOn ? (kidFade ? grow : 1) : 0,
       hit: hitOn ? (hitFade ? grow : 1) : 0,
-      glance: glanceOn ? (glanceFade ? grow : 1) : 0,
+      // R7c — the pad's x axis is whether the two drivers CHOSE the same thing, and
+      // the glance badge over both cars is what says they did. Slide right and the
+      // second badge is drawn; slide left and only one driver was looking away.
+      glance: (glanceOn ? (glanceFade ? grow : 1) : 0) * (reacting ? 1 - (1 - dragPos.value) * tr : 1),
       xa,
       xb,
       // Wheels spin off DISTANCE, not time, so a parked car's wheels are still.

@@ -124,7 +124,13 @@ const DROP_PT = { x: 206, y: GROUND };
 const MARKV = BEATS.map((b) => b.marks ?? 0);
 const EYEV = BEATS.map((b) => b.eyeline ?? 0);
 
-export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+
+export default function Political8Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(8);
   const cur = BEATS[i];
@@ -172,8 +178,13 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
       // Between its resting place and his hands. Never an opacity.
       crateX: lerp(rest.x, grip.x, held),
       crateY: lerp(rest.y, grip.y, held),
-      pile: carry(cv, 2, n, PILEV[p], PILEV[n], tr),
-      marks: carry(cv, 3, n, MARKV[p], MARKV[n], tr, modeFade ? grow : 1),
+      // R7b — the pad IS the crates. Across, toward identical shares, the spare boxes
+      // stay stacked where they are instead of going to whoever needs them.
+      pile: carry(cv, 2, n, PILEV[p], reacting ? dragPos.value : PILEV[n], tr),
+      // And up, toward someone still cannot see, the badges come out over the three.
+      // The corner the reader is looking for has identical shares AND somebody still
+      // facing a plank, which is the difference between equal and fair.
+      marks: carry(cv, 3, n, MARKV[p], reacting ? dragPos2.value : MARKV[n], tr, modeFade ? grow : 1),
       eye: carry(cv, 4, n, EYEV[p], EYEV[n], tr),
       // Crate counts lerp, so an onlooker RISES smoothly as a crate slides under
       // them and the crate itself fades in beneath their feet.
@@ -192,7 +203,14 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick }: Sc
   const crateM = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.n1) }));
   const crateS0 = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.n2) }));
   const crateS1 = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.n2 - 1) }));
-  const badgeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.marks }));
+  const badgeStyle = useAnimatedStyle(() => ({
+    // A STEEP RAMP, NOT THE RAW VALUE (D35). `marks` is the pad's y axis on the
+    // graded beat, so it RESTS wherever the reader's token is — and the token starts
+    // at 0.24, which put SEES and CANNOT on stage at 1.1:1 and held them there. A
+    // word is legible or absent; the badges still arrive with the axis, over its
+    // first third instead of all of it.
+    opacity: clamp01(SCENE.value.marks * 3),
+  }));
   const pileStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pile }));
   const eyeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.eye }));
   const carryStyle = useAnimatedStyle(() => ({

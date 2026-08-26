@@ -124,9 +124,15 @@ function crownOf(tilt: number, neck: number, bob: number, x: number, dir: number
 // summary — the beats the reader has to read and act on.
 // Beats that do not set `x` stand at PRI_X.
 const X = BEATS.map((b) => b.x ?? PRI_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics11'));
 
-export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldCS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -176,7 +182,11 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick }:
     // unhurried 1.6s to cross rather than the beat's transition.
     const cr0 = crownOf(pS.tilt, pS.neck, pS.bob, PRI_X, 1);
     const cr1 = crownOf(cS.tilt, cS.neck, cS.bob, cx, CDIR[n]);
-    const u = TOK[p] === TOK[n] ? TOK[n] : carry(cv, 1, n, TOK[p], TOK[n], ease01(clamp01(bt.value / 1.6)));
+    // R7c — the seam is MEMORY's share of the person, and the MEMORIES plate is
+    // memory. Slide it right and the plate rides across to whoever woke up with the
+    // recollections; slide it left and it stays over the body it started in.
+    const uTo = reacting ? dragPos.value : TOK[n];
+    const u = TOK[p] === uTo ? uTo : carry(cv, 1, n, TOK[p], uTo, ease01(clamp01(bt.value / 1.6)));
 
     // The names cross a beat later, and start a touch after the line does, so the
     // reader is looking at the floor by the time they move (C22c).

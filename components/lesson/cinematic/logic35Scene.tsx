@@ -34,7 +34,13 @@ import { followMoves, kindOf, seedOf } from './camera';
 // · the figure stands at x 62 and walks to 130; crown ~397, clear of the columns
 //   which start at x 168.
 //
-// Ink runs y 240 (caption) … y 500 (ground). BAND 234…512 = 278 (H59).
+// Ink runs y 232 (the arrow's CAUSES? label) … y 500 (ground). BAND 226…512 = 286.
+//
+// 226, NOT 234. The band was written for the caption at y 240 and the label above
+// the arrow starts at 232, so its top two units were outside the crop on every
+// beat — the one place a band can be wrong without anything failing, because a
+// band is a declaration and nothing was reading the art back. Lowering the label
+// instead would put it into the cut mark, which runs y 238…264 (H59).
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
@@ -66,6 +72,11 @@ const PICKS = BEATS.map((b) => (b.picks ? 1 : 0));
 const UNDER = BEATS.map((b) => (b.under ? 1 : 0));
 const CUT = BEATS.map((b) => (b.cut ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 // The columns only GROW on the beat that raises them; on every later beat they
 // hold their height, so they never re-climb behind the reader's back (the prop
 // rule that aesthetics-1's apple taught).
@@ -73,7 +84,8 @@ const CLIMB = RISE.map((v, k) => (v > 0 && (k === 0 || RISE[k - 1] === 0) ? 1 : 
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic35'));
 
-export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -99,7 +111,9 @@ export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick }: S
       grow: CLIMB[n] === 1 ? ease01((bt.value - 0.2) / 1.5) : carry(cv, 1, n, RISE[p], RISE[n], tr),
       arrowOn: carry(cv, 2, n, ARROW[p], ARROW[n], tr),
       picksOn: carry(cv, 3, n, PICKS[p], PICKS[n], tr),
-      underOn: carry(cv, 4, n, UNDER[p], UNDER[n], tr),
+      // R7c — the hidden hand under both columns is the thing being cut. A bigger
+      // study leaves it exactly where it was; a coin takes it away.
+      underOn: carry(cv, 4, n, UNDER[p], reacting ? 1 - dragPos.value : UNDER[n], tr),
       cut: CUT[n] === 1 ? ease01((bt.value - 0.25) / 0.5) : 0,
       // The right candidate fills as the answer lands.
       lit: LIVE[n] === 1 ? ease01(q) : 0,
@@ -240,5 +254,5 @@ const styles = StyleSheet.create({
 });
 
 export function Logic35Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Logic35Scene} band={[234, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Logic35Scene} band={[226, 512]} camera={CAM} />;
 }

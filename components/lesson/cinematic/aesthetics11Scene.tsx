@@ -74,6 +74,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics11'));
 const DIR = dirsFrom(X, 1);
 const FRAMES = BEATS.map((b) => b.frames ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
 function Canvas({ left }: { left: number }) {
   return (
     <View style={[styles.frameInner, { left }]} pointerEvents="none">
@@ -84,7 +89,8 @@ function Canvas({ left }: { left: number }) {
   );
 }
 
-export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -112,7 +118,10 @@ export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick }: 
       fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       frames: carry(cv, 1, n, FRAMES[p], FRAMES[n], tr, framesFade ? grow : 1),
       plaques: plaqOn ? (plaqFade ? grow : 1) : 0,
-      same: sameOn ? (sameFade ? grow : 1) : 0,
+      // R7c — the IDENTICAL tag across both frames is the claim the lever answers.
+      // At 'nothing; identical surfaces, identical works' it stays struck; it lifts as
+      // the reader says the maker put something in.
+      same: (sameOn ? (sameFade ? grow : 1) : 0) * (reacting ? 1 - dragPos.value * tr : 1),
     };
   });
 

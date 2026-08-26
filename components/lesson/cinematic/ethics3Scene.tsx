@@ -105,9 +105,15 @@ const TR = 0.85;
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics3'));
 
-export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldD = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -128,7 +134,11 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick }: Scene
     return {
       fig: pose(d, FIG_X, GROUND, K, 1, 1),
       tx: carry(cv, 1, n, TX[p], TX[n], tr),
-      pull: carry(cv, 2, n, PULL[p], PULL[n], tr),
+      // R7b — the seam throws the lever. Slide toward WHAT HAPPENS NEXT and the
+      // points switch: a consequentialist acts on the outcome, and the reader is the
+      // one acting. Handed over THROUGH carry so it eases in rather than swapping on
+      // the frame the beat opens (R7).
+      pull: carry(cv, 2, n, PULL[p], reacting ? dragPos.value : PULL[n], tr),
       wheel: (t * 200) % 360,
       // The verdict board and the plates cross-fade, so neither ever pops.
       board: showPick ? 1 - grow : leaving ? grow : 1,
@@ -338,7 +348,9 @@ const styles = StyleSheet.create({
   //
   // At 0.2 the word measures 90.8 in 100 — 9.2% — and numberOfLines={1} on the label
   // means it cannot break even if Android's metrics run wider than the browser's.
-  lens: { fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 15, letterSpacing: 0.2, color: SOFT, includeFontPadding: false },
+  // INK, not SOFT: the seam drives the verdict board, so these rest part-faded
+  // and SOFT does not survive it (D35, R7c).
+  lens: { fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 15, letterSpacing: 0.2, color: INK, includeFontPadding: false },
   rule: {
     marginTop: 6, height: 24, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
     alignItems: 'center', justifyContent: 'center', backgroundColor: PAPER, overflow: 'hidden',

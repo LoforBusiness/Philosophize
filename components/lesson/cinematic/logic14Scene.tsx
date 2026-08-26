@@ -66,9 +66,15 @@ const GLOSS = BEATS.map((b) => b.gloss ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic14'));
 
-export default function Logic14Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Logic14Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -91,7 +97,10 @@ export default function Logic14Scene({ clock, bt, bi, i, picked, onPick }: Scene
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       lines: carry(cv, 0, n, LINES[p], LINES[n], grow),
       mark: carry(cv, 1, n, MARK[p], MARK[n], grow),
-      gloss: carry(cv, 2, n, GLOSS[p], GLOSS[n], write),
+      // R7b — the seam writes the two meanings. Give the bar to THE WORDS and the
+      // glosses appear under the ringed term; give it to THE FORM and they vanish,
+      // leaving a shape that looks perfectly valid.
+      gloss: carry(cv, 2, n, GLOSS[p], reacting ? 1 - dragPos.value : GLOSS[n], write),
       chips: carry(cv, 3, n, PICKV[p], PICKV[n], grow),
     };
   });

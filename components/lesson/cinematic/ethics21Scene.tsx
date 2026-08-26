@@ -70,9 +70,15 @@ const AIM = BEATS.map((b) => b.aim ?? 0);
 const MEANS = BEATS.map((b) => b.means ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics21'));
 
-export default function Ethics21Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Ethics21Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -94,7 +100,10 @@ export default function Ethics21Scene({ clock, bt, bi, i, picked, onPick }: Scen
       fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
       act: carry(cv, 1, n, ACT[p], ACT[n], tr),
       arms: carry(cv, 2, n, ARMS[p], ARMS[n], tr),
-      aim: carry(cv, 3, n, AIM[p], AIM[n], tr),
+      // R7b — the seam moves the sight-mark. Slide toward INTENDED and the mark
+      // settles onto the outcome that was aimed at; slide the other way and it lifts
+      // off, leaving the death merely foreseen.
+      aim: carry(cv, 3, n, AIM[p], reacting ? dragPos.value : AIM[n], tr),
       means: carry(cv, 4, n, MEANS[p], MEANS[n], tr),
       t,
     };

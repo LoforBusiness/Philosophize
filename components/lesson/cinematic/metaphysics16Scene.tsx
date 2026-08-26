@@ -53,9 +53,15 @@ const SECOND = BEATS.map((b) => b.second ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics16'));
 
-export default function Metaphysics16Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Metaphysics16Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -77,7 +83,10 @@ export default function Metaphysics16Scene({ clock, bt, bi, i, picked, onPick }:
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       panels: carry(cv, 0, n, PANELN[p], PANELN[n], grow),
       crave: carry(cv, 1, n, CRAVE[p], CRAVE[n], grow),
-      second: carry(cv, 2, n, SECOND[p], SECOND[n], grow),
+      // R7b — the arm raises the second-order arrows. The far setting is exactly the
+      // question Frankfurt adds on top of the wanting, so the reader draws it in by
+      // arriving at it.
+      second: carry(cv, 2, n, SECOND[p], reacting ? dragPos.value : SECOND[n], grow),
       pick: carry(cv, 3, n, PICKV[p], PICKV[n], grow),
     };
   });

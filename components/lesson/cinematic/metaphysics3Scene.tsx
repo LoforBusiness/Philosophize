@@ -76,9 +76,15 @@ const APPLEB = BEATS.map((b) => b.apple ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics3'));
 
-export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -95,8 +101,13 @@ export default function Metaphysics3Scene({ clock, bt, bi, i, picked, onPick }: 
     return {
       fig: pose(s, FIG_X, 500, K_FIG, 1, 1),
       shadow: carry(cv, 0, n, SHADOW[p], SHADOW[n], tr),
-      form: carry(cv, 1, n, FORMB[p], FORMB[n], tr),
-      apple: carry(cv, 2, n, APPLEB[p], APPLEB[n], tr),
+      // R7b — the seam trades brightness between the two. Slide toward THE FORM and
+      // it burns overhead…
+      form: carry(cv, 1, n, FORMB[p], reacting ? dragPos.value : FORMB[n], tr),
+      // …and the apple on the table fades in step. One bar, two things, and the
+      // reader watching reality move from the one they can touch to the one they
+      // cannot: Plato's ranking, done rather than asserted.
+      apple: carry(cv, 2, n, APPLEB[p], reacting ? 1 - dragPos.value : APPLEB[n], tr),
       t,
     };
   });

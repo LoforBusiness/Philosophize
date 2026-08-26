@@ -81,9 +81,15 @@ const CHIPS = BEATS.map((b) => b.chips ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics31'));
 
-export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -98,7 +104,10 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
-      holes: carry(cv, 0, n, HOLES[p], HOLES[n], grow),
+      // R7b — the knob opens the holes. The further the reader drags toward NEVER,
+      // NOT ONCE, the more plainly the absences are there to be counted, which is the
+      // thing paraphrase keeps failing to talk away.
+      holes: carry(cv, 0, n, HOLES[p], reacting ? dragPos.value : HOLES[n], grow),
       ticks: carry(cv, 1, n, TICKS[p], TICKS[n], grow),
       chips: carry(cv, 2, n, CHIPS[p], CHIPS[n], grow),
       // The reveal rides the ANSWER, not the beat: the cheese dissolves as the

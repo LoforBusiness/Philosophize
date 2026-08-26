@@ -68,9 +68,15 @@ const BARBER = BEATS.map((b) => (b.barber ? 1 : 0));
 const SETS = BEATS.map((b) => (b.sets ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic37'));
 
-export default function Logic37Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Logic37Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -94,7 +100,10 @@ export default function Logic37Scene({ clock, bt, bi, i, picked, onPick }: Scene
       boxesOn: carry(cv, 1, n, BOXES[p], BOXES[n], tr),
       sorted: carry(cv, 2, n, SORTED[p], SORTED[n], tr),
       barberOn: carry(cv, 3, n, BARBER[p], BARBER[n], tr),
-      setsOn: carry(cv, 4, n, SETS[p], SETS[n], tr),
+      // R7b — the arm brings the sets in. The far setting is the one that says the
+      // axioms of the day made this object legal, and the set-theoretic version of the
+      // barber assembles as the reader arrives there.
+      setsOn: carry(cv, 4, n, SETS[p], reacting ? dragPos.value : SETS[n], tr),
       // THE WALL CLOCK, NOT THE BEAT CLOCK. The barber has to keep failing to
       // settle for as long as he is on stage — a swing that finished would be a
       // picture of an answer arriving.

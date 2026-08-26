@@ -63,9 +63,15 @@ const HABIT = BEATS.map((b) => b.habit ?? 0);
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics13'));
 
-export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -80,7 +86,11 @@ export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick }: 
     // travels at a readable rate rather than teleporting (C17).
     const slide = ease01(bt.value / 1.2);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
-    const base = carry(cv, 0, n, POS[p], POS[n], slide);
+    // R7b — the knob IS the marker. The rail runs from no fear to fear of
+    // everything and so does the spectrum on stage, so the reader slides the mark
+    // along Aristotle's line themselves. It still travels to the mean on the
+    // reveal, so nothing is given away before they choose.
+    const base = carry(cv, 0, n, POS[p], reacting ? dragPos.value * 4 : POS[n], slide);
     return {
       fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
       // On the question beat the marker waits at the far end and only travels to the

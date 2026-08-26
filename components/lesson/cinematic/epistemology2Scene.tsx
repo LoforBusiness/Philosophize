@@ -85,9 +85,15 @@ const RUBBLE = [
 // Two figures at 272 and 96, so the track is the point BETWEEN them (184) — following
 // either one alone would frame the other out, and here the pair is the subject.
 const X = BEATS.map((b) => b.x ?? 184);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology2'));
 
-export default function Epistemology2Scene({ clock, bt, bi }: SceneApi) {
+export default function Epistemology2Scene({ clock, bt, bi, dragPos, i }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldDemonS = useHeld();
   const cv = useCarry(3);
   const heldDoubterS = useHeld();
@@ -108,7 +114,10 @@ export default function Epistemology2Scene({ clock, bt, bi }: SceneApi) {
       doubter: pose(doubterS, DOUBT_X, GROUND, K_FIG, -1, 1),
       demon: pose(demonS, DEMON_X, GROUND, K_FIG, 1, mOn),
       demonOn: mOn,
-      doubt: carry(cv, 1, n, DOUBT[p], DOUBT[n], tr),
+      // R7b — the arm sets how much the demon has faked away. Push it along and the
+      // rows go one by one; the point of the lesson is which one will not go, and the
+      // reader gets to try to take it.
+      doubt: carry(cv, 1, n, DOUBT[p], reacting ? dragPos.value : DOUBT[n], tr),
       glow: carry(cv, 2, n, GLOW[p], GLOW[n], tr),
       t,
     };

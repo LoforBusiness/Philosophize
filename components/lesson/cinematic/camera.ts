@@ -524,6 +524,14 @@ export function checkShots(
 // "per beat" to "per instant", because at any instant the only thing that has to
 // fit is the thing being shown now — and the same 884 beats then support 1.671×.
 //
+// WHAT IT ACTUALLY COSTS, once the guarantee is honest: 199 stations over 13% of
+// beats, down from 447 over 30%. The difference is not a change of policy but the
+// generator learning what a station can reach — the words it could not see, both
+// ends of a follow, and the beat AFTER it, which inherits the push. See K12 in
+// docs/LESSON_RULES.md. A framing that cannot hold a word whole is not worth
+// holding, so the beat holds wide instead, and the wide shot is clean by
+// construction.
+//
 // THE CLOCK IS THE OTHER HALF, and it is the half that makes it teach rather than
 // merely swoop. Scene time does not advance while the camera is in transit (K1),
 // so an animation cannot play to a frame that is pointed somewhere else. A scene

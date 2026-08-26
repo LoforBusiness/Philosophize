@@ -79,9 +79,15 @@ const HOLD: Record<number, number> = { 0: 0, 1: 41, 2: 46, 3: 25 };
 // `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
+
+// R7b — the stage follows the control on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics31'));
 
-export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -114,8 +120,14 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick }: Scen
       // The rungs slide by exactly the distance the legs walked, then wrap — every
       // rung is identical, so the wrap is invisible and the climb never ends.
       scroll: (travelled * RUNG_SP) % RUNG_SP,
-      ladder: carry(cv, 1, n, LADDER[p], LADDER[n], tr, ladderFade ? grow : 1),
-      duty: carry(cv, 2, n, DUTY[p], DUTY[n], dutyFade ? grow : tr),
+      // R7b — the pad IS the ladder and the lamp. Across: the further right the
+      // token goes, the less of a ladder there is, because that axis runs from you
+      // could have done it to you genuinely could not.
+      ladder: carry(cv, 1, n, LADDER[p], reacting ? (1 - dragPos.value) * 2 : LADDER[n], tr, ladderFade ? grow : 1),
+      // And up: the DUTY lamp stays lit as the token rises toward you brought it on
+      // yourself. Both axes drive something, which is what a pad is for — the reader
+      // finds the corner where the ladder is gone and the lamp is still burning.
+      duty: carry(cv, 2, n, DUTY[p], reacting ? dragPos2.value : DUTY[n], dutyFade ? grow : tr),
     };
   });
 
