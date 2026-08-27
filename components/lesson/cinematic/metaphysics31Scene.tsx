@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
   dim: { opacity: 0.4 },
 });
 
-// Ink runs from the kicker row (336) to the ground line (500). Band 330…512 = 182 (H59).
+// Ink runs from the kicker row (306) to the ground line (500). Band 306…512 = 206 (H59).
 export function Metaphysics31Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics31Scene} band={[330, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics31Scene} band={[306, 512]} camera={CAM} />;
 }

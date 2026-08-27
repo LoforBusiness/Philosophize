@@ -1577,8 +1577,10 @@ const styles = StyleSheet.create({
   // `stretch`, not `center`: the box has to take the card's full content width
   // for onLayout to report it, and the certificate is then drawn at exactly that.
   certWrap: { alignSelf: 'stretch', marginTop: SPACE[3] },
-  // The Pass tab's `priceRow` at the same sizes, deliberately: two screens that
-  // print the same price should agree about what a price looks like.
+  // The Pass tab's `priceRow`, deliberately: two screens that print the same
+  // price should agree about what a price looks like. The unit takes the scale's
+  // own `label` size rather than the tab's 12.5 — this file is held to the type
+  // scale (check:ui) and the tab is not, and half a point is not worth an exemption.
   priceRow: {
     flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center',
     gap: 4, marginTop: SPACE[2],
@@ -1587,7 +1589,7 @@ const styles = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: C.ink,
     includeFontPadding: false,
   },
-  per: { fontFamily: 'Inter_400Regular', fontSize: 12.5, color: MID },
+  per: { fontFamily: 'Inter_400Regular', fontSize: 13, color: MID },
 
   // An inline note that a control is currently unable to do its job (permission
   // refused, backup switched off). Ink on a tinted panel, not red — it is a state

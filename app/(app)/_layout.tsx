@@ -160,6 +160,27 @@ export default function AppLayout() {
         // virtualised — it used to build ~3,100 views on mount, and paying that
         // eagerly would have traded one stall for a worse one.
         lazy: true,
+        // ── AND A BUILT TAB STOPS RE-RENDERING WHILE YOU ARE NOT ON IT ────────
+        //
+        // Building every tab is what makes the first visit instant; leaving all
+        // six RENDERING for the rest of the session is what made the app go
+        // sticky. Measured in the browser: Home alone is 383 nodes and the six
+        // warmed tabs are 2,472 — so a single `set()` on the store, which is what
+        // finishing a lesson or meeting a thinker does, walked 2,089 nodes nobody
+        // was looking at.
+        //
+        // `freezeOnBlur` suspends a blurred screen's renders without unmounting
+        // it, so the warm-up's whole point survives — nothing is rebuilt on the
+        // way back, it just renders once with current data. This is the systemic
+        // version of a guard three components had already hand-rolled one at a
+        // time: `BranchWorld`'s frame callback says in as many words that "the
+        // branches stack is a plain <Stack>, nothing calls enableFreeze or
+        // freezeOnBlur, so pushing a lesson leaves the whole world mounted and
+        // animating UNDERNEATH it", and names `StickmanStroll` and `HomeHeader` as
+        // the same defect found twice before. Those guards stay — freezing is a
+        // React-render concern and a UI-thread animation runs regardless — but
+        // nothing else now has to remember.
+        freezeOnBlur: true,
         tabBarStyle: inLesson
           // `display: 'none'` rather than a zero height: a 0-height bar still
           // takes hit-testing space at the bottom edge on Android, which is the

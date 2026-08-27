@@ -731,11 +731,11 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **thirty-seven** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **thirty-eight** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
-`check-routes` · `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-echo` · `check-prompts` ·
+`check-routes` · `check-nav` · `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-echo` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` ·
 `check-camera` · `check-tour` · `check-space` · `check-controls` · `check-shade` · `check-streak` · `check-quips` ·
 `check-answers` · `check-quotes` · `check-mentions` ·
@@ -895,53 +895,6 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 >
 > Rule A1 above all: **what the text says, the picture must do.** A lesson that says
 > someone is on the floor and draws them standing is not acceptable at any polish level.
-
-> **AND "THE PICTURE MUST DO IT" HAS A SECOND HALF NOBODY WAS CHECKING: the
-> picture must BE the thing it names.** A reader went through the corpus and
-> stopped on `metaphysics31`: *"nothing looks like cheese ... if it is supposed
-> to look like cheese, it needs to actually look like cheese and to have some
-> depth."* They were right, and the source says why in one line — the cheese was
-> a PAPER rectangle with an ink border and five horizontal RULE rules across it,
-> and the holes were PAPER-filled circles sitting on top of it. Every part of
-> that is an OUTLINE OF A DIAGRAM rather than a drawing of an object: the rules
-> read as ruled paper, and a hole the same colour as the page is not a hole, it
-> is a dot. A1 was satisfied the whole time — the text said cheese and a thing
-> labelled cheese was on the stage.
->
-> What it takes, and none of it is expensive: a filled mass rather than an
-> outline (STONE, the tone added for this); a second face so a block is a BLOCK;
-> a rind where the two faces meet; and cavities instead of discs — a dark mouth
-> with a lit crescent low and right inside it, because the light in this app
-> falls from the top left and never moves. Two Views per hole, and it is the
-> whole difference between a dot and a void.
->
-> **The answering was the other half of the same complaint** — *"when you tap on
-> an answer, it's kind of confusing"* — and the rendered page said it out loud:
-> the question offered FOUR outlined parts for THREE answers, because the rim
-> had both a labelled tab and the ring itself, and the ring's target sat
-> concentric inside the gap's. The panel underneath counted them: "Tap one of
-> the 4 outlined parts above." Three answers are three IDENTICAL controls now,
-> each on a leader to what it names. `Target` has taken a `radius` all along —
-> "so the ring does not square off a round thing" — and nobody had passed it, so
-> a circular hole arrived wearing two nested squares.
-
-> **`node scripts/survey-lessons.mjs` is the instrument, and it RANKS rather than
-> judges.** `check-words` already holds sentence length, beat length and reading
-> density, and it PASSED on the very lesson the complaint was about: "Drag to how
-> well just say perforated actually works" is nine words with no long ones.
-> Nothing counted can tell you that sentence is broken English. So the survey
-> finds the cells worth looking at — Flesch reading ease per piece, a technical
-> term used in a question the lesson never taught, and a clause used as a noun
-> with no quotation marks around it — and a person reads them. Across 186 lessons
-> it found **37 pieces**, which is small enough to fix by hand and was.
->
-> Its first two drafts were both wrong in the direction §21 keeps recording.
-> Flagging any uncommon eight-letter word reported 885 findings — "observation",
-> "judgement", "tolerate" — and the noise buried the real hits. And its picture
-> metric ranked `political8`, the lesson the reader holds up as the standard, as
-> the MOST box-built scene in the app: 186 of 186 scenes draw no vector path at
-> all, so "it is made of boxes" cannot be the defect. The visual axis that does
-> separate them is tonal mass, which `check:shade` already owns.
 
 Lessons are the product. They must *look*, *feel*, and *teach* well enough that a curious beginner would pay to keep going. Every lesson should honor:
 
@@ -2838,21 +2791,6 @@ answer, not against the screen.
 > whole session.** So "seen" quietly meant "seen once, ever" — one look disqualified
 > every look after it. `useInView` re-arms on the way out now. Any latch on a
 > mounted-forever screen wants that question asked of it.
-
-> **A CHECKER CAN BE BLINDED BY A LINE ENDING, AND IT LOOKS LIKE PROGRESS.**
-> `validate-cinematic` splits a script into beats on the literal string
-> `'\n  {\n'`. Ten scripts edited from a Python helper came back with CRLF —
-> `io.open(p, 'w')` translates on Windows — so every one of them reported **zero
-> beats**, every finding inside them silently vanished, and the suite got
-> QUIETER. Two budgets were then ratcheted down against that reading, which is
-> the worst possible outcome: a tighter number recorded on a partly blind
-> instrument. `tsc` passed throughout, because CRLF is perfectly valid
-> TypeScript.
->
-> Two rules out of it. **Write files with `newline='\n'` explicitly** — the
-> repo is LF and git's autocrlf hides the difference until something parses by
-> hand. And **a budget that improves without a change that should have improved
-> it is a measurement to distrust**, not a win to bank.
 
 **On device**, `adb` lives in the session scratchpad. Applying an OTA takes two
 launches: force-stop → launch (downloads) → force-stop → launch (applies).

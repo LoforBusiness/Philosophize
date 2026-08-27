@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, useWindowDimensions, Linking,
 } from 'react-native';
@@ -108,13 +108,18 @@ export default function PassTab() {
   const terms = TERMS_URL;
   const privacy = PRIVACY_URL;
 
-  const [seen, setSeen] = useState(false);
+  // A REF, NOT STATE. This flag exists only to fire one analytics event once per
+  // visit to the app — nothing on screen depends on it — and as state it caused a
+  // full re-render of this whole tree (two engraved certificates, the herald, the
+  // eleven ruled rows) on the frame the reader arrives, which is the frame they
+  // are least able to spare. A ref remembers just as well and renders nothing.
+  const seen = useRef(false);
   useFocusEffect(
     useCallback(() => {
-      if (seen) return;
-      setSeen(true);
+      if (seen.current) return;
+      seen.current = true;
       track('paywall_viewed', { available, source: 'pass_tab' });
-    }, [seen, available]),
+    }, [available]),
   );
 
   const included = useMemo(() => includedLines(), []);
