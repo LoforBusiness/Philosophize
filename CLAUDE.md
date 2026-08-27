@@ -169,7 +169,7 @@ Philosophize/
 │   ├── ranks.ts                 # 40 ranks in 8 orders of 5; rankForXP(),
 │   │                            #   awardedRank(), rankOrder(), rankDegree()
 │   ├── rankLore.ts              # the 8 Circles + a one-line epithet per rank
-│   └── badges.ts                # 68 badges, 5 tiers + goal(stats)/need pairs
+│   └── badges.ts                # 70 badges, 5 tiers + goal(stats)/need pairs
 ├── stores/                      # Zustand: lessonStore, uiStore, subscriptionStore,
 │                                #   userDataStore (persisted + cloud-synced)
 ├── lib/
@@ -811,8 +811,7 @@ followed:
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
 `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-react` · `check-smooth` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
-figures and 6 hand-built ones, `check-moves` 6 head-clearance defects, `check-shade`
-112 flat scenes. A budget
+figures and 6 hand-built ones, and `check-moves` 6 head-clearance defects. A budget
 line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 222 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
 
 > **`check-moves` was the last one on that list to actually run, and for a long
@@ -822,6 +821,39 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 > seventh would have shipped in silence. A budget nobody executes is not a budget.
 > If you add a validator, add it to `check` in the same commit, and name it above:
 > `check:bible` compares this list against `package.json` and will tell you.
+
+**Five of those validators are named above and explained nowhere, and each one
+is a RULE rather than a chore.** They were added a fortnight after the groups
+they belong to, so the rule book has them and this file did not:
+
+- **E39 · `check:lift` — the thing that moves must be the thing that was
+  chosen.** A reveal that animates the whole row, or a `<Target … />` that
+  reacts to nothing, tells the reader their tap did something it did not. The
+  fix always SIMPLIFIES the scene — one loop instead of two — and it is a
+  high-water mark like `CARD_BUDGET`.
+- **S8 · `check:fits` — no word on the stage may be cut off by its own box.**
+  S1 already forbade the overflow; what was missing was anything that measured
+  it. This one is OFFLINE: `scripts/lib/ttfwidth.mjs` reads real advance widths
+  out of the real `.ttf`, so it costs milliseconds rather than a Metro and a
+  browser. `check:readable` finds the same class in a rendered page; this finds
+  it before the page exists.
+- **J11 · `check:plainwords` — a word the lesson is not teaching must be one the
+  reader already has.** `check-words` measures sentence LENGTH and was green
+  through the complaint that prompted this. They fail differently: a long
+  sentence loses the thread, a hard word stops the reader dead on one token with
+  nothing to recover on. A long word the lesson is ABOUT is the lesson and is
+  never flagged.
+- **`check:shape` (`check-answers-shape`) — a thing the reader taps must look
+  like what it is.** `Target` has taken a `radius` all along and scenes were not
+  passing it, so a circular hole arrived wearing a square. It also counts the
+  mounted targets against what the question panel says out loud, which is how
+  "tap one of the 4 outlined parts" was found sitting over three answers.
+- **`check:nav` — a nested stack that can be entered deep must declare its
+  `anchor`.** Expo Router builds the stack from the href you enter by, so a tab
+  entered from outside itself has nothing beneath it: `router.back()` hands the
+  press to the tab navigator and the reader lands on Home with the tab still
+  holding the screen they left. The root stack is exempt on purpose — read the
+  script's header before "fixing" that.
 
 **Cinematic lessons have their own rule book:** [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md) — figure scale and proportion, reach and joint rules, motion and end-poses, band/deck/box/wrap clipping, and the text-must-match-the-picture rule. Read it before authoring a cinematic lesson and run its Part 3 checks before calling one done.
 
@@ -898,9 +930,9 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
   encode the *old* per-branch model. The live gate is
   `lessonAccessibility()` in `data/index.ts`. Don't call the old ones.
 - Aesthetics has 3 units where the others have 5.
-- **Deprecated RN style APIs — a KNOWN and deliberately un-swept debt.** ~1,000
-  `pointerEvents=` props, 48 `shadow*` declarations across 11 files, and
-  `textShadow*` in 9. All three are deprecated, and the decision is to leave them
+- **Deprecated RN style APIs — a KNOWN and deliberately un-swept debt.** ~1,400
+  `pointerEvents=` props, 60 `shadow*` declarations across 13 files, and
+  `textShadow*` in 10. All three are deprecated, and the decision is to leave them
   until someone can do it with a device attached. The reasoning, because it is
   the sort of thing that gets "tidied" by the next reader:
   - **Both warnings come from `react-native-web`, not React Native.**
@@ -1556,9 +1588,10 @@ declared as a channel, so it cannot fall out of step with the control and it cos
 **AND THE ROTATION IS ITS OWN RULE (R9).** Which control a CLAIM wants is R1;
 what a reader's thumb is asked to do lesson after lesson is R9, and only the
 second one is felt by somebody working through a branch. `npm run check:rotation`
-holds three high-water marks: the two-card deck is at most 55% of all questions
-(it was 47% and falling), neighbouring lessons do not both use the same control
-(133 pairs did, now 112), and **36 lessons ask both of their questions BELOW the
+holds three high-water marks: the two-card deck is at most 14% of all questions
+(it is 10% now, and the floor came down from 55% as the analogue family took
+over), neighbouring lessons do not both use the same control (133 pairs did, now
+27), and **36 lessons ask both of their questions BELOW the
 figure** — every one an early lesson, which is exactly where the picture most
 needs to be the thing being answered. That last budget is the "above the
 stickman" half of the work, and converting one is a self-contained job.
