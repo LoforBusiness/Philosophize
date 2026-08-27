@@ -158,7 +158,12 @@ const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'e
   // failed with `undefined` on the right-hand side — the shape of a checker
   // breaking rather than a claim being wrong. Headroom is cheaper than that.
   'thirty-three', 'thirty-four', 'thirty-five', 'thirty-six', 'thirty-seven',
-  'thirty-eight', 'thirty-nine', 'forty'];
+  'thirty-eight', 'thirty-nine', 'forty',
+  // And again at forty-one. The list runs well past the suite on purpose now:
+  // running out produces `undefined` on the right of the assertion, which reads
+  // like the checker breaking rather than like a claim being stale.
+  'forty-one', 'forty-two', 'forty-three', 'forty-four', 'forty-five',
+  'forty-six', 'forty-seven', 'forty-eight', 'forty-nine', 'fifty'];
 if (!WORDS[validators.length]) {
   console.log(`  FAIL  WORDS has no entry for ${validators.length} — extend it in this file`);
 }
