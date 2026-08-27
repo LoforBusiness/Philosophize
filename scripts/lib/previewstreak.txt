@@ -1,0 +1,129 @@
+// TEMPORARY — DELETE BEFORE COMMITTING. Any file in app/ is a real route (§21).
+// Written and removed by scripts/sheet-streak.mjs; check-routes.mjs blocks a
+// build if one is left behind.
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import StreakPanel from '@/components/gamification/StreakPanel';
+import StreakCalendar from '@/components/gamification/StreakCalendar';
+import StreakTab from '@/app/(app)/streak';
+import StreakCelebration from '@/components/gamification/StreakCelebration';
+import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
+
+const q = (k: string) =>
+  typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(k);
+
+/** A run of days ending today, with a couple of gaps further back. */
+function seedDays(today: Date, run: number) {
+  const active: string[] = [];
+  const rest: string[] = [];
+  const key = (d: Date) => d.toISOString().slice(0, 10);
+  for (let i = 0; i < run; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    active.push(key(d));
+  }
+  // one rest day bridging a gap, and a scatter before the run
+  for (const back of [run + 1, run + 4, run + 5, run + 8, run + 12, run + 13, run + 14]) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - back);
+    if (back === run + 1) rest.push(key(d));
+    else active.push(key(d));
+  }
+  return { active, rest };
+}
+
+export default function PreviewStreak() {
+  const [ready, setReady] = useState(false);
+  const today = new Date();
+  const todayKey = today.toISOString().slice(0, 10);
+  const run = +(q('run') ?? 12);
+  const { active, rest } = seedDays(today, run);
+
+  useEffect(() => {
+    const since = new Date(today);
+    since.setDate(since.getDate() - 90);
+    useUserDataStore.setState({
+      _hasHydrated: true,
+      displayName: 'Landy',
+      totalXP: 1240,
+      rankIndex: 6,
+      streak: run,
+      lastLessonDate: q('lapsed') === '1' ? '2026-01-01' : todayKey,
+      activeDays: active,
+      restDays: rest,
+      restDaysEarned: 2,
+      restDaysUsed: 1,
+      joinedAt: since.getTime(),
+    } as never);
+    useUIStore.setState({ launchDone: true } as never);
+    useSubscriptionStore.setState({
+      ready: true, available: false, isPro: false, monthly: null, refresh: async () => {},
+    } as never);
+    setReady(true);
+  }, []);
+
+  if (!ready) return <View style={{ flex: 1 }} nativeID="streak-boot" />;
+
+  const s = q('s') ?? 'tab';
+  let body = null;
+  if (s === 'tab') {
+    body = <StreakTab />;
+  } else if (s === 'celebrate') {
+    body = (
+      <View style={{ padding: 16, backgroundColor: '#FAFAF7' }}>
+        <StreakCelebration
+          streak={run}
+          prevStreak={run - 1}
+          restSpent={0}
+          activeDays={active}
+          restDays={rest}
+          today={todayKey}
+          since={null}
+        />
+      </View>
+    );
+  } else if (s === 'panel') {
+    body = (
+      <View style={{ padding: 16, gap: 16, backgroundColor: '#FAFAF7' }}>
+        <View style={{ backgroundColor: '#1A1A1A', borderRadius: 14, padding: 16 }}>
+          <StreakPanel
+            streak={run}
+            lastLessonDate={todayKey}
+            restHeld={1}
+            restMax={2}
+            restBridging={false}
+            onInk
+          />
+        </View>
+        <View style={{ backgroundColor: '#FAFAF7', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#E7E3DA' }}>
+          <StreakPanel
+            streak={run}
+            lastLessonDate={todayKey}
+            restHeld={1}
+            restMax={2}
+            restBridging={false}
+          />
+        </View>
+      </View>
+    );
+  } else {
+    body = (
+      <View style={{ padding: 16, backgroundColor: '#FAFAF7' }}>
+        <StreakCalendar
+          activeDays={active}
+          restDays={rest}
+          today={todayKey}
+          since={null}
+        />
+      </View>
+    );
+  }
+
+  return (
+    <View nativeID="streak-root" style={{ flex: 1, backgroundColor: '#FAFAF7' }}>
+      {body}
+    </View>
+  );
+}

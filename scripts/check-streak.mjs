@@ -44,27 +44,27 @@ const INK = '#1A1A1A';
 const streak = await loadTs(path.join('constants', 'streak.ts'));
 const mood = await loadTs(path.join('lib', 'utils', 'streakMood.ts'));
 
-head('THE EMBER, MEASURED');
+head('THE PATINA, MEASURED');
 {
   // The numbers written into constants/streak.ts's comments, re-derived. A comment
   // that states a ratio is a claim; this is the check that it is still true.
   const claims = [
-    ['EMBER on paper', streak.EMBER, PAPER, 4.5],
-    ['EMBER_DEEP on paper', streak.EMBER_DEEP, PAPER, 4.5],
-    ['EMBER_DEEP carrying cream', streak.EMBER_DEEP, CREAM, 4.5],
-    ['ink on EMBER_SOFT', INK, streak.EMBER_SOFT, 4.5],
-    ['ASH on paper', streak.ASH, PAPER, 4.5],
+    ['PATINA on paper', streak.PATINA, PAPER, 4.5],
+    ['PATINA_DEEP on paper', streak.PATINA_DEEP, PAPER, 4.5],
+    ['PATINA_DEEP carrying cream', streak.PATINA_DEEP, CREAM, 4.5],
+    ['ink on PATINA_SOFT', INK, streak.PATINA_SOFT, 4.5],
+    ['SLATE on paper', streak.SLATE, PAPER, 4.5],
     // THE OTHER PRINTING. Home's habit panel is on ink, and the paper values do
-    // not survive the move: EMBER reads 3.50:1 there and ASH 3.31:1, both under
+    // not survive the move: PATINA reads 3.50:1 there and SLATE 3.31:1, both under
     // the floor for the number they colour. These two exist for that ground and
     // are checked against it, never against paper.
-    ['EMBER_LIT on ink', streak.EMBER_LIT, INK, 4.5],
-    ['ASH_LIT on ink', streak.ASH_LIT, INK, 4.5],
+    ['PATINA_LIT on ink', streak.PATINA_LIT, INK, 4.5],
+    ['SLATE_LIT on ink', streak.SLATE_LIT, INK, 4.5],
   ];
   for (const [name, fg, bg, floor] of claims) {
     const r = ratio(fg, bg);
     if (r >= floor) ok(`${name} is ${r.toFixed(2)}:1`, `floor ${floor}`);
-    else bad(`${name} is only ${r.toFixed(2)}:1`, `needs ${floor} — see the ASH note`);
+    else bad(`${name} is only ${r.toFixed(2)}:1`, `needs ${floor} — see the SLATE note`);
   }
   // A LAPSED STREAK MUST NOT READ AS A DIM LIVE ONE — and the first version of this
   // check measured the wrong thing, which is worth keeping written down because the
@@ -89,21 +89,21 @@ head('THE EMBER, MEASURED');
     const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
     return [116 * f(Y) - 16, 500 * (f(X) - f(Y)), 200 * (f(Y) - f(Z))];
   };
-  const [L1, a1, b1] = lab(streak.EMBER);
-  const [L2, a2, b2] = lab(streak.ASH);
+  const [L1, a1, b1] = lab(streak.PATINA);
+  const [L2, a2, b2] = lab(streak.SLATE);
   const dE = Math.hypot(L1 - L2, a1 - a2, b1 - b2);
-  if (dE > 20) ok('ember and ash are different colours, not two brightnesses',
+  if (dE > 20) ok('patina and slate are different colours, not two brightnesses',
     `ΔE ${dE.toFixed(1)}, and only ${Math.abs(L1 - L2).toFixed(1)} of it is lightness`);
-  else bad('ember and ash are too close to tell apart', `ΔE ${dE.toFixed(1)}`);
+  else bad('patina and slate are too close to tell apart', `ΔE ${dE.toFixed(1)}`);
 
   // AND THE SAME MUST HOLD IN THE OTHER PRINTING. The habit panel inverts — ink
   // on Home, paper on Profile — and a pair that separates on one ground and not
   // the other means the panel silently stops reporting its own state on one of
   // the two screens it lives on.
-  const [L3, a3, b3] = lab(streak.EMBER_LIT);
-  const [L4, a4, b4] = lab(streak.ASH_LIT);
+  const [L3, a3, b3] = lab(streak.PATINA_LIT);
+  const [L4, a4, b4] = lab(streak.SLATE_LIT);
   const dLit = Math.hypot(L3 - L4, a3 - a4, b3 - b4);
-  if (dLit > 20) ok('ember and ash stay different on a dark ground too',
+  if (dLit > 20) ok('patina and slate stay different on a dark ground too',
     `ΔE ${dLit.toFixed(1)}`);
   else bad('the on-ink pair is too close to tell apart', `ΔE ${dLit.toFixed(1)}`);
 
@@ -149,6 +149,73 @@ head('THE WEEK ROW, BOTH WAYS UP');
     const step = ratio(on, off) / ratio(offHex, off);
     if (step >= 2) ok(`earned and unearned are a real step apart on ${ground}`, `${step.toFixed(1)}x`);
     else bad(`earned and unearned look the same on ${ground}`, `${step.toFixed(1)}x, need 2`);
+  }
+}
+
+head('THE MONTH GRID');
+//
+// The calendar was rebuilt because a reader called it "a half hard design", and
+// two of the three faults were things no check could have seen. This is the one
+// that could, and the one that came back.
+//
+// THE RAIL WAS DRAWN IN `PATINA_SOFT` AND COULD NOT BE SEEN. That tone measures
+// 1.24:1 on paper -- the floor for a faint FILL, and design.ts records what
+// living at that floor costs (`HUE_SOFT` at 1.04:1, and six mastery bars with no
+// visible remainder at all). It is the wrong floor for this object: a progress
+// track may be faint because it is the part that has not happened, and this rail
+// IS the streak. Measured after the rebuild, the run read across every row and
+// showed as nothing.
+{
+  const cal = fs.readFileSync(path.join('components', 'gamification', 'StreakCalendar.tsx'), 'utf8');
+  const t = /const RAIL = mix\(PATINA, PAPER, ([\d.]+)\);/.exec(cal);
+  if (!t) {
+    bad('the rail derives its tone from the material', 'RAIL not found -- this check has stopped tracking it');
+  } else {
+    // mix() is tone.ts's, re-derived here rather than imported so this file
+    // keeps measuring the value the component actually ships.
+    const mix = (a, b, k) => {
+      const px = (h) => [0, 2, 4].map((i) => parseInt(h.replace('#', '').slice(i, i + 2), 16));
+      const [A, B] = [px(a), px(b)];
+      return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, '0').toUpperCase()).join('');
+    };
+    const rail = mix(streak.PATINA, PAPER, +t[1]);
+    const r = ratio(rail, PAPER);
+    if (r >= 1.5) ok(`the run's rail is a band on paper, not a rumour`, `${r.toFixed(2)}:1, floor 1.5 — PATINA_SOFT was 1.24`);
+    else bad(`the run's rail is only ${r.toFixed(2)}:1 on paper`, 'needs 1.5 — it will read as nothing');
+    // ...and it must stay UNDER the lit token, or the chain competes with the
+    // days it is joining.
+    const vsToken = ratio(rail, streak.PATINA);
+    if (vsToken >= 2) ok('and the tokens still out-rank it', `${vsToken.toFixed(2)}x`);
+    else bad('the rail is as loud as the days it joins', `${vsToken.toFixed(2)}x`);
+  }
+
+  // ONE ELEMENT PER RUN, MEASURED ACROSS THE ROW. The old grid drew a stub per
+  // cell, inset a quarter of a cell and pulled 6pt past its own edge -- which is
+  // what produced the pale tabs poking into empty paper, and what made wrapping
+  // impossible. Both are structural, so both are asserted on the source.
+  const perRun = /spansIn\(row\)\.map\(/.test(cal);
+  if (perRun) ok('the rail is one element per RUN, not a stub per cell');
+  else bad('the rail is drawn per cell again', 'that is the design the reader called half-hard');
+
+  const wraps = /const openL = a === 0 && !!prevRowEnd\?\.inRun;/.test(cal)
+    && /const openR = b === 6 && !!nextRowStart\?\.inRun;/.test(cal);
+  if (wraps) ok('and a run that crosses a week boundary runs off the row edge');
+  else bad('the rail stops at the row edge again', 'a run is one thing; the week break is not');
+
+  // THE GRID MEASURES ITSELF. Every rail, cap and collar is arithmetic from one
+  // onLayout; a version that guesses a cell centre can only draw stubs.
+  if (/const pitch = gridW > 0 \? gridW \/ 7 : 0;/.test(cal)) {
+    ok('and every position comes from one measured pitch');
+  } else {
+    bad('the grid no longer measures itself', 'a cell centre cannot be guessed inside a flex row');
+  }
+
+  // MILESTONES ARE MARKED. STREAK_MILESTONES existed for the whole life of the
+  // old grid and it was blind to them.
+  if (/milestone\.has\(c\.key\)/.test(cal) && /STREAK_MILESTONES/.test(cal)) {
+    ok('a landmark day wears a collar', `${streak.STREAK_MILESTONES.join(' · ')}`);
+  } else {
+    bad('the grid no longer marks its milestones');
   }
 }
 
@@ -232,18 +299,18 @@ head('THE MASCOT');
   if (distinct.size >= 5) ok('the ladder looks different at each rung');
   else bad(`only ${distinct.size} distinct poses across ${named.size} moods`);
 
-  // THE EMBER DECAYS, AND NEVER TO NOTHING WHILE THE STREAK LIVES. A flame that
+  // THE PATINA DECAYS, AND NEVER TO NOTHING WHILE THE STREAK LIVES. A flame that
   // looks dead while it is still savable costs the reader the streak it was meant
   // to protect.
-  const at = (hour) => mood.emberFor({ streak: 5, alive: true, fedToday: false, hour, restSpent: 0, dayKey: 'x' });
+  const at = (hour) => mood.glowFor({ streak: 5, alive: true, fedToday: false, hour, restSpent: 0, dayKey: 'x' });
   let falling = true;
   for (let h = mood.EVENING_HOUR; h < 23; h++) if (at(h + 1) > at(h) + 1e-9) falling = false;
-  if (falling && at(23) < at(mood.EVENING_HOUR)) ok('the ember sinks across the evening',
+  if (falling && at(23) < at(mood.EVENING_HOUR)) ok('the glow sinks across the evening',
     `${at(mood.EVENING_HOUR).toFixed(2)} at ${mood.EVENING_HOUR}:00 → ${at(23).toFixed(2)} at 23:00`);
-  else bad('the ember does not decay across the evening');
-  if (at(23) >= mood.EMBER_FLOOR - 1e-9) ok('and never below the floor while alive', `floor ${mood.EMBER_FLOOR}`);
-  else bad('the ember falls below its floor while the streak is still alive');
-  const dead = mood.emberFor({ streak: 5, alive: false, fedToday: false, hour: 12, restSpent: 0, dayKey: 'x' });
+  else bad('the glow does not decay across the evening');
+  if (at(23) >= mood.PATINA_FLOOR - 1e-9) ok('and never below the floor while alive', `floor ${mood.PATINA_FLOOR}`);
+  else bad('the glow falls below its floor while the streak is still alive');
+  const dead = mood.glowFor({ streak: 5, alive: false, fedToday: false, hour: 12, restSpent: 0, dayKey: 'x' });
   if (dead === 0) ok('a lapsed streak is out, not dim'); else bad('a lapsed streak still glows', String(dead));
 
   // A LINE IS STABLE WITHIN A DAY AND MOVES BETWEEN DAYS. Re-rolling on every render

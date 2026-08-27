@@ -43,7 +43,7 @@ export interface MoodState {
    * that LOOKS dead while it is still savable is a lie that costs the reader the
    * streak — the floor is dim enough to be alarming and bright enough to be alive.
    */
-  ember: number;
+  glow: number;
 }
 
 // ── THE POSES, CHOSEN BY LOOKING AT THEM ────────────────────────────────────
@@ -234,7 +234,7 @@ export const EVENING_HOUR = 18;
 export const LATE_HOUR = 21;
 
 /** The floor the ember decays to while a streak is alive but unfed. */
-export const EMBER_FLOOR = 0.34;
+export const PATINA_FLOOR = 0.34;
 
 export function moodFor(input: MoodInput): MoodState {
   const { alive, fedToday, hour, restSpent, dayKey } = input;
@@ -246,7 +246,7 @@ export function moodFor(input: MoodInput): MoodState {
     : hour >= EVENING_HOUR ? 'impatient'
     : 'waiting';
 
-  return { mood, pose: POSE[mood], line: lineFor(mood, dayKey), ember: emberFor(input) };
+  return { mood, pose: POSE[mood], line: lineFor(mood, dayKey), glow: glowFor(input) };
 }
 
 /**
@@ -258,10 +258,10 @@ export function moodFor(input: MoodInput): MoodState {
  * a nearly-dead flame. It starts falling at EVENING_HOUR and reaches the floor at
  * midnight, which is also exactly when the thing it represents runs out.
  */
-export function emberFor({ alive, fedToday, hour, restSpent }: MoodInput): number {
+export function glowFor({ alive, fedToday, hour, restSpent }: MoodInput): number {
   if (!alive) return 0;
   if (fedToday || restSpent > 0) return 1;
   if (hour < EVENING_HOUR) return 1;
   const through = (hour - EVENING_HOUR) / (24 - EVENING_HOUR);
-  return 1 - (1 - EMBER_FLOOR) * Math.min(1, Math.max(0, through));
+  return 1 - (1 - PATINA_FLOOR) * Math.min(1, Math.max(0, through));
 }

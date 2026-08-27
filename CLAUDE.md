@@ -521,6 +521,74 @@ costs milliseconds rather than a Metro and a browser. What it holds:
 
 **Streak:** Maintained by completing at least one lesson per calendar day. Alive if the last activity is today or yesterday (`lib/utils/streak.ts`). Stored in `userDataStore`.
 
+> **THE ONE COLOUR WAS AN ORANGE, AND AN ORANGE IS A SEASON.** `constants/streak.ts`
+> licensed a single hue for the whole app on the grounds that a streak has to say
+> ALIVE or ABOUT TO DIE from across a room, and every contrast floor in it was
+> measured and cleared. The reader looked at it: *"it just looks like it is fall
+> or it's Halloween … the orange just looks like a festive colour."* They were
+> right, and the ratios were never the thing — a palette can be entirely correct
+> and still be about October.
+>
+> It is **verdigris** now, `PATINA #068177`, the green a bronze takes from being
+> left out in the weather, against `SLATE` for a run that has gone out. The
+> object is better than the ember was: an ember is something you are about to
+> lose, a patina is proof of time already served, and a streak is the second one.
+>
+> **TWO SEARCHES CAME BACK WRONG BEFORE THE THIRD, and both are the obvious
+> thing to do.** Maximising CIELAB distance from slate returned `#11BE84` and
+> `#64F2C2` — electric mint, the exact corner `design.ts` records its own colour
+> search falling into. Then matching the ember's own chroma returned `#048544`, a
+> vivid emerald: **equal chroma is not equal loudness across hues**, because the
+> eye peaks in the green-yellow band, so an orange at chroma 59 reads as warm
+> where a green at 53 reads as a highlighter. The anchor that works is what this
+> app already ships in that hue — JADE's base at 32, LAPIS at 37.
+>
+> The separation from slate falls 56.2 → 32.1 ΔE and that is arithmetic rather
+> than a regression: a teal and a warm grey are genuinely nearer in Lab than an
+> orange and a warm grey. The floor is 20, and the state is still carried by HUE
+> — 2.8 L apart — which is the property that matters and the one checked.
+>
+> **The flame went with it.** `StreakCelebration` drew a literal one, right while
+> the streak was an ember and a metaphor arguing with itself once it was not. It
+> is the calendar's own struck token now, held up large, wearing the milestone
+> collar on a landmark day — so the reward screen and the grid agree about which
+> days were the big ones instead of each having a private opinion.
+
+> **AND THE MONTH GRID WAS "A HALF HARD DESIGN", WHICH IT WAS.** Three faults,
+> and the first is what made it read as unfinished:
+>
+> - **The connecting rail was drawn PER CELL** — each day painted its own stub,
+>   inset a quarter of a cell and pulled 6pt past its own edge to meet its
+>   neighbour's. Where two lit days sat side by side that worked; everywhere else
+>   it left a pale tab poking out of a disc into empty paper. It is one element
+>   per RUN now, measured across the row.
+> - **It could not wrap.** The joins were explicitly disabled at row edges —
+>   correct given stubs — so a run crossing a Sunday stopped and started again
+>   with nothing said. A run is one thing; the week break is an accident of how
+>   weeks are printed.
+> - **Every day was the same flat circle**, in an app where the rank pins, the
+>   badges, the certificates and the quote plates are all struck off one light.
+>
+> Plus two things it never said at all: `STREAK_MILESTONES` existed and the grid
+> was blind to them (a landmark day wears a **collar** now, the same ring a
+> capstone pin and a tier-V badge wear), and TODAY-unfed was a hollow ring
+> quieter than a lit day, in the one cell the reader can still do something
+> about. It breathes.
+>
+> **THE RAIL WAS THEN INVISIBLE, AND THE SCREENSHOT LIED ABOUT WHY.** Drawn in
+> `PATINA_SOFT` it measures 1.24:1 on paper — the floor for a faint FILL, which
+> is the wrong floor for the one object in the grid the reader came to look at.
+> Reading the render, it looked like the wrap had failed; measuring the DOM, all
+> three spans were exactly where they should be (x 348→374, then 16→374, then
+> 16→195) and simply could not be seen. **Measure before concluding the geometry
+> is wrong.**
+>
+> `npm run check:streak` holds the palette, the rail's tone and all four
+> structural properties, counter-tested six ways. **`npm run sheet:streak` is
+> what the numbers cannot do**: it loads all five surfaces — Home's panel, the
+> tab, the grid, the celebration and a lapsed streak — and reports where the rail
+> actually runs. `DEVICE_W=320` renders the narrow phone.
+
 **Stars:** 100% score = 3 stars. ≥70% = 2 stars. Any completion = 1 star.
 
 **Progression systems (live):**

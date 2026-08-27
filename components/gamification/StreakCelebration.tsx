@@ -9,8 +9,9 @@ import Animated, {
   withDelay,
   Easing,
 } from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
-import { EMBER, EMBER_DEEP, EMBER_SOFT, ASH, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ramp, rampFace } from '@/components/shared/tone';
+import { PATINA, PATINA_DEEP, PATINA_SOFT, SLATE, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
 import { buildWeek } from '@/lib/utils/streakCalendar';
 
 const INK = '#1A1A1A';
@@ -25,7 +26,7 @@ const FAINT = '#E4E1D8';
 // decides whether somebody comes back tomorrow. It is built to a shape borrowed
 // from Duolingo, and the shape matters more than the polish:
 //
-//   1. THE FLAME IGNITES  — overshoots to 1.18 and settles. A thing that arrives
+//   1. THE SEAL IS STRUCK  — overshoots to 1.18 and settles. A thing that arrives
 //                           at its final size directly reads as a page element;
 //                           a thing that overshoots reads as an event.
 //   2. THE NUMBER COUNTS  — from the OLD streak to the new one, not from zero.
@@ -44,16 +45,27 @@ const FAINT = '#E4E1D8';
 // Reanimated cannot drive a Text's CONTENT from the UI thread — only its style.
 // A count-up therefore has to cross to JS anyway, so it is an interval rather
 // than a shared value pretending. It runs for at most ~700ms and ticks at most
-// a dozen times, which is nothing; the flame and the discs, which animate every
+// a dozen times, which is nothing; the seal and the discs, which animate every
 // frame, stay on the UI thread where they belong.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const OUTER =
-  'M12.6 0.8 C12.9 4.3 11.4 6.4 9.7 8.6 C8.2 10.5 6.6 12.4 6.6 14.9 C6.6 16.4 7.1 17.6 7.9 18.5 C7.2 17.4 7.0 16.1 7.4 14.9 C8.0 12.9 9.9 11.6 10.8 9.8 C11.5 11.6 11.3 13.3 10.7 15.0 C10.1 16.6 9.4 18.2 10.0 19.9 C10.5 21.3 11.8 22.2 13.3 22.2 C15.9 22.2 18.0 20.1 18.0 17.2 C18.0 13.0 15.1 11.0 14.6 7.6 C14.2 4.9 15.0 3.3 15.0 3.3 C13.8 3.6 12.9 2.6 12.6 0.8 Z';
-const INNER =
-  'M13.0 22.2 C11.2 22.2 10.0 20.9 10.0 19.2 C10.0 17.3 11.4 16.2 12.2 14.3 C12.6 13.3 12.8 12.3 12.7 11.4 C14.4 13.2 16.1 15.5 16.1 18.0 C16.1 20.4 14.8 22.2 13.0 22.2 Z';
+// ── THE FLAME IS GONE, AND SO IS THE FIRE ──────────────────────────
+//
+// This drew a literal seal in two paths, and it was right while the streak was
+// an EMBER. The streak is a verdigris now — the green a bronze takes from being
+// kept (constants/streak.ts) — and a teal seal is a metaphor arguing with
+// itself. Nothing needed inventing to replace it: the calendar strikes a token
+// for every day of the run, and the thing to hold up at the end of a lesson is
+// THAT token, struck large, with the count beside it.
+//
+// It also inherits the calendar's milestone rule for free: a landmark day wears
+// a COLLAR, the same ring a capstone rank pin and a tier-V badge wear (§7), so
+// the reward screen and the grid agree about which days were the big ones
+// instead of each having a private opinion.
+const METAL = ramp(PATINA);
+const FACE = rampFace(METAL);
 
-const IGNITE_AT = 260;   // ms — the flame arrives
+const STRIKE_AT = 260;   // ms — the seal is struck
 const COUNT_AT = 620;    // …then the number starts moving
 const COUNT_MS = 680;
 const WEEK_AT = 1180;    // …and the day lands last
@@ -74,11 +86,11 @@ export default function StreakCelebration({
   streak, prevStreak, restSpent, activeDays, restDays, pendingRest, today, since,
 }: Props) {
   const [shown, setShown] = useState(prevStreak);
-  const flame = useSharedValue(0);
+  const seal = useSharedValue(0);
 
   useEffect(() => {
-    flame.value = withDelay(
-      IGNITE_AT,
+    seal.value = withDelay(
+      STRIKE_AT,
       // Overshoot and settle. Easing.out on the rise so it snaps in, a slower
       // settle back so it does not look like a bounce toy.
       withSequence(
@@ -86,7 +98,7 @@ export default function StreakCelebration({
         withTiming(1, { duration: 300, easing: Easing.out(Easing.quad) }),
       ),
     );
-  }, [flame]);
+  }, [seal]);
 
   useEffect(() => {
     if (streak === prevStreak) { setShown(streak); return; }
@@ -104,9 +116,9 @@ export default function StreakCelebration({
     return () => clearTimeout(start);
   }, [streak, prevStreak]);
 
-  const flameStyle = useAnimatedStyle(() => ({
-    opacity: Math.min(1, flame.value * 2),
-    transform: [{ scale: flame.value }],
+  const sealStyle = useAnimatedStyle(() => ({
+    opacity: Math.min(1, seal.value * 2),
+    transform: [{ scale: seal.value }],
   }));
 
   // TODAY IS UNIONED IN, and this is not a nicety.
@@ -139,12 +151,17 @@ export default function StreakCelebration({
         </Text>
       </MotiView>
 
-      <View style={styles.flameRow}>
-        <Animated.View style={[{ width: 62, height: 62 }, flameStyle]}>
-          <Svg width={62} height={62} viewBox="0 0 24 24">
-            <Path d={OUTER} fill={EMBER} />
-            <Path d={INNER} fill={EMBER_DEEP} opacity={0.55} />
-          </Svg>
+      <View style={styles.sealRow}>
+        <Animated.View style={[styles.seal, sealStyle]}>
+          {/* The collar, outside the disc — a landmark day only. */}
+          {hitMilestone ? <View pointerEvents="none" style={styles.sealCollar} /> : null}
+          <LinearGradient
+            colors={[FACE[0][1], FACE[1][1], FACE[2][1]]}
+            locations={[0, 0.52, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={styles.sealFace}
+          />
         </Animated.View>
         <Text style={styles.count}>{shown}</Text>
       </View>
@@ -215,11 +232,20 @@ const styles = StyleSheet.create({
   wrap: { alignItems: 'center', marginTop: 22 },
   heading: { fontFamily: 'Inter_700Bold', fontSize: 10.5, color: INK_SOFT, letterSpacing: 2.6 },
 
-  flameRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
+  sealRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 10 },
+  seal: { width: 62, height: 62, alignItems: 'center', justifyContent: 'center' },
+  sealFace: {
+    width: 54, height: 54, borderRadius: 27,
+    borderWidth: 1, borderColor: METAL.rim,
+  },
+  sealCollar: {
+    position: 'absolute', width: 62, height: 62, borderRadius: 31,
+    borderWidth: 2, borderColor: PATINA_DEEP,
+  },
   count: {
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 62,
-    color: EMBER,
+    color: PATINA,
     marginLeft: 10,
     includeFontPadding: false,
   },
@@ -239,11 +265,11 @@ const styles = StyleSheet.create({
   dayLabel: { fontFamily: 'Inter_500Medium', fontSize: 9.5, color: INK_SOFT, marginBottom: 6 },
   dayLabelOn: { color: INK, fontFamily: 'Inter_700Bold' },
   disc: { width: 22, height: 22, borderRadius: 11 },
-  done: { backgroundColor: EMBER },
-  rested: { backgroundColor: EMBER_SOFT },
+  done: { backgroundColor: PATINA },
+  rested: { backgroundColor: PATINA_SOFT },
   missed: { borderWidth: 1.5, borderColor: FAINT },
   future: { borderWidth: 1.5, borderColor: FAINT, opacity: 0.55 },
 
-  milestone: { fontFamily: 'Inter_700Bold', fontSize: 11, color: EMBER, letterSpacing: 2.4, marginTop: 20 },
+  milestone: { fontFamily: 'Inter_700Bold', fontSize: 11, color: PATINA, letterSpacing: 2.4, marginTop: 20 },
   toGo: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13.5, color: INK_SOFT, marginTop: 20 },
 });

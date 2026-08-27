@@ -8,7 +8,7 @@ import Animated, {
 import Stickman from '@/components/lesson/cinematic/Stickman';
 import { pose, type Bundle } from '@/components/lesson/cinematic/rig';
 import { emoteAnyLive } from '@/components/lesson/cinematic/moves';
-import { EMBER, ASH } from '@/constants/streak';
+import { PATINA, SLATE } from '@/constants/streak';
 import type { MoodState } from '@/lib/utils/streakMood';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -111,7 +111,7 @@ export default function StreakMascot({ mood, alive, delay = 0 }: Props) {
     <View style={styles.wrap} pointerEvents="none">
       <Animated.View style={[styles.stage, figStyle]}>
         {/* THE GROUND IS THE FUEL GAUGE, and it is where the decay is made visible.
-            `mood.ember` is full while the streak has been fed and sinks across the
+            `mood.glow` is full while the streak has been fed and sinks across the
             evening toward its floor (lib/utils/streakMood.ts) — so the reader can
             see the thing running out without a word being written.
 
@@ -127,12 +127,12 @@ export default function StreakMascot({ mood, alive, delay = 0 }: Props) {
           style={[
             styles.floor,
             {
-              backgroundColor: alive ? EMBER : ASH,
-              opacity: alive ? 0.25 + 0.55 * mood.ember : 0.4,
+              backgroundColor: alive ? PATINA : SLATE,
+              opacity: alive ? 0.25 + 0.55 * mood.glow : 0.4,
               // It also SHORTENS, so the change survives a reader who cannot see
               // the colour shift at all.
-              width: 40 + 28 * (alive ? mood.ember : 1),
-              left: W / 2 - (40 + 28 * (alive ? mood.ember : 1)) / 2,
+              width: 40 + 28 * (alive ? mood.glow : 1),
+              left: W / 2 - (40 + 28 * (alive ? mood.glow : 1)) / 2,
             },
           ]}
         />

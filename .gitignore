@@ -59,4 +59,5 @@ components/lesson/cinematic/.measure-must.lock
 scripts/.preview-*.lock
 # sheet-pass.mjs writes its screenshots here to be looked at, not kept
 scripts/.pass-shots/
+scripts/.streak-shots/
 scripts/.lesson-shots/

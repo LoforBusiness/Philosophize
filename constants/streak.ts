@@ -38,7 +38,7 @@ export function restDaysHeld(earned: number, used: number): number {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// THE EMBER — the one colour in a black-and-white app, and where it may go.
+// THE PATINA — the one colour in a black-and-white app, and where it may go.
 //
 // §19 bends the strict B&W identity exactly once, for desaturated photographs,
 // and says why: nothing may take its contrast from artwork. This is the second
@@ -48,69 +48,87 @@ export function restDaysHeld(earned: number, used: number): number {
 // at a glance, from across a room, before the reader has decided whether to open
 // the app. In ink that distinction can only be carried by tone — a fuller disc, a
 // heavier ring — and tone reads as "more of the same thing", not as a state
-// change. Duolingo's streak works substantially because the flame is orange and
+// change. Duolingo's streak works substantially because the flame is coloured and
 // a dead one is grey, and that is the specific mechanism being borrowed.
 //
 // WHERE IT MAY APPEAR, and nowhere else:
-//   · the streak flame, when the streak is alive
+//   · the streak mark, when the streak is alive
 //   · a completed day in the streak calendar
-//   · the count-up and ignite on the reward screen
-//   · THE HABIT PANEL, on Home and on Profile — added deliberately, see below
+//   · the count-up on the reward screen
+//   · the habit panel, on Home and on Profile
 //
 // It may NOT appear on: lesson art, badges, ranks, buttons, the paywall, or any
 // other counter. One colour used in one place is a signal. The same colour used
 // in six places is a theme, and then it signals nothing.
 //
-// ── WHY THE HABIT PANEL WAS ADDED TO THAT LIST ──────────────────────────────
+// ── IT WAS AN EMBER, AND AN EMBER IS A SEASON ─────────────────────────
 //
-// The list above was written when the flame lived in Home's header, and it went
-// stale the day the flame came out of the header and the habit card took over.
-// The result was that the two screens a reader actually looks at — Home's streak
-// panel and Profile's — drew the streak in flat ink and cream, while the app
-// carried a measured ember whose stated purpose is to say ALIVE or ABOUT TO DIE
-// "before the reader has decided whether to open the app". The one colour in the
-// app existed for exactly this object and was not on it.
+// `#B4541E` with a `#F0DCCB` wash under it, on cream. Every contrast floor in
+// this file was cleared and the reader still said what a burnt orange on cream
+// actually looks like: *"it just looks like it is fall or it's Halloween … the
+// orange just looks like a festive colour."* They are right, and no amount of
+// measuring answers it — the ratios were never the problem. A palette can be
+// correct and still be about October.
 //
-// It is still one signal in one place: the streak, wherever the streak is drawn.
+// So the streak is VERDIGRIS now: the green a bronze takes from being left out
+// in the weather. It is the right object for the idea. An ember is something you
+// are about to lose; a patina is proof of time already served, and a streak is
+// the second thing rather than the first. It is also the only kind of colour a
+// black-and-white app can afford — a metal's own oxide rather than a paint.
 //
-// ── AND A COLOUR MEASURED ON ONE GROUND DOES NOT SURVIVE ANOTHER ────────────
+// ── THE VALUES WERE SEARCHED, AND THE FIRST TWO SEARCHES WERE WRONG ───────
 //
-// Home's panel is printed on INK, and every value below was fitted against
-// paper. `EMBER` measures 3.50:1 on ink and `ASH` 3.31:1 — both under the 4.5:1
-// floor for the number they are supposed to be colouring. That is the same
-// finding tone.ts records for the era plates ("all five clear 4.5:1 on paper by
-// construction, but the byline sits in the plate's SHADED corner"), and the same
-// reason constants/design.ts carries `paperSoft` and `dim` as separate tokens
-// from `inkSoft`: a dark ground needs its own secondary values, not a borrowed
-// one.
+// Both failures are worth keeping, because both are the obvious thing to do.
 //
-// So there are two of each, and `npm run check:streak` measures both pairs.
+// MAXIMISING DISTANCE FROM SLATE returned `#11BE84` and `#64F2C2` — electric
+// mint. Separation is a FLOOR, not an objective, and design.ts records its own
+// colour search falling into exactly that corner ("#41DCA5 neon mint").
 //
-// THE VALUES ARE MEASURED, not picked, and `npm run check:streak` re-derives
-// every one of them so this comment cannot drift into fiction.
-export const EMBER = '#B4541E';       // 4.75:1 on paper — safe for the number
-export const EMBER_DEEP = '#8A3F16';  // 7.16:1 on paper, carries cream at 6.64:1
-export const EMBER_SOFT = '#F0DCCB';  // wash only; ink on it is 13.10:1
-/** The ember on a DARK ground — Home's habit panel. 5.46:1 on ink. */
-export const EMBER_LIT = '#DC7434';
+// MATCHING THE EMBER'S CHROMA returned `#048544`, a vivid emerald. Equal chroma
+// is not equal loudness across hues: the eye peaks in the green-yellow band, so
+// an orange at chroma 59 reads as warm where a green at 53 reads as a
+// highlighter. The honest anchor is what this app already ships IN THIS HUE —
+// JADE's base sits at chroma 32 and LAPIS at 37, and both read as materials.
+//
+// So: chroma 32, hue 185, which is C.HUE's own neighbourhood worked up to a
+// value that can carry a number. `npm run check:streak` re-derives every ratio
+// and both CIELAB separations, so none of this can drift into fiction.
+export const PATINA = '#068177';       // 4.55:1 on paper — safe for the number
+export const PATINA_DEEP = '#036054';  // 7.16:1 on paper, carries cream at 6.64:1
+export const PATINA_SOFT = '#CBE8E9';  // wash only; ink on it is 13.47:1
+/** The patina on a DARK ground — Home's habit panel. 6.32:1 on ink. */
+export const PATINA_LIT = '#2BACB0';
 
 /**
- * A lapsed streak is not a dimmer ember, it is ash — cool, flat, obviously off.
+ * A lapsed streak is not a duller patina, it is bare SLATE — cool, flat, dead.
+ *
+ * The value is unchanged from when this was called ASH, and it still passes: a
+ * warm grey is what an unkept bronze looks like as much as what a cold fire
+ * does. The name moved with the metaphor, because a file carrying `PATINA` and
+ * `ASH` side by side is two stories about one pair, and design.ts already
+ * records what that costs ("two names for one grey, so nothing could tell you
+ * whether a difference was meant").
  *
  * #B8B5AC was the first choice and it FAILED at 1.96:1. The mistake is worth
- * keeping written down because it is the natural one: ash is a pale, dead thing,
+ * keeping written down because it is the natural one: a dead thing feels pale,
  * so a pale grey feels right, and a pale grey cannot carry the number it is
  * supposed to be colouring. A lapsed streak still has to say what it lapsed
- * FROM; that is the number the reader needs most. Cool and DARK is the honest
- * reading of "burnt out" anyway.
+ * FROM; that is the number the reader needs most.
  */
-export const ASH = '#6E6C64';         // 5.03:1 on paper
+export const SLATE = '#6E6C64';       // 5.03:1 on paper
 /**
- * And ash on a dark ground. 5.60:1 on ink, and ΔE 59.6 from `EMBER_LIT` — the
+ * And slate on a dark ground. 5.60:1 on ink, and ΔE 35.7 from `PATINA_LIT` — the
  * pair has to stay tellable apart in BOTH printings or the panel that inverts
  * loses the only state it exists to report.
+ *
+ * THE SEPARATION IS SMALLER THAN THE EMBER'S WAS (56.2 → 32.1 on paper) and that
+ * is arithmetic, not a regression: a teal and a warm grey are genuinely nearer
+ * in Lab than an orange and a warm grey, because orange sits on the opposite
+ * side of neutral from both. The floor this has to clear is 20, and the state is
+ * still carried by hue rather than by lightness — 2.8 L apart, which is the
+ * property that actually matters and the one the check measures.
  */
-export const ASH_LIT = '#95928A';
+export const SLATE_LIT = '#95928A';
 
 /**
  * Milestones the calendar marks and the reward screen celebrates.

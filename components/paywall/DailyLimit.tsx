@@ -46,7 +46,7 @@ import type { Branch, Lesson } from '@/data/types';
 // different one would be answering a question nobody asked — the reader would
 // have to work out whether their choice had been overridden or simply lost.
 //
-// NO EMBER ON THIS SCREEN, and that is deliberate rather than an oversight.
+// NO PATINA ON THIS SCREEN, and that is deliberate rather than an oversight.
 // `constants/streak.ts` licenses the one colour in three places, and a gate is
 // not among them; `StreakWeek` is drawn here in its ink default, which is the
 // same row the reward screen and Profile already show.
