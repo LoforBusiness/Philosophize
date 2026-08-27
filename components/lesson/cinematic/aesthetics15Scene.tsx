@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
 
   tag: { position: 'absolute', left: TAG_L, width: TAG_W, height: TAG_H },
   tagInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   tagText: {

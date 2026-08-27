@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     // 56 WIDE, NOT 44: TAKES IT is 43.4dp and the content box was 40, so the label
     // on the control the reader is watching lost its last letters.
     position: 'absolute', left: PANEL_W / 2 - 28, top: 158, width: 56, height: 30,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   doseOn: { backgroundColor: INK, borderColor: PAPER },

@@ -12,7 +12,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics8Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   // ── the branching diagram ───────────────────────────────────────────────────
   nodeA: {
     position: 'absolute', left: NODE_A_L, top: NODE_A_T, width: NODE_A_W, height: 28,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   nodeAText: {
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   },
   node: {
     position: 'absolute', top: NODE_T, width: NODE_W, height: NODE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   nodeOn: { backgroundColor: INK, borderColor: INK },
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, gap: 12,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },

@@ -1,17 +1,17 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  ease01, lerp, mixStance, pose, type Bundle,
-} from './rig';
+  ease01, lerp, mixStance, pose, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics13Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   tick: { position: 'absolute', top: 20, width: 3, height: 20, backgroundColor: INK },
   plate: {
     position: 'absolute', left: 0, right: 0, top: 46, height: 32,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   plateText: {

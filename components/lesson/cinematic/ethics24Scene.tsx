@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   },
   pilCap: {
     position: 'absolute', top: 344, width: PIL_W + 24, textAlign: 'center', lineHeight: 10,
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.1, color: SOFT, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', top: PIL_TOP, width: PIL_W + 16, height: PIL_H + 20 },

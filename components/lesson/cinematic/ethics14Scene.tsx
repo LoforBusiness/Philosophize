@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   },
   course: {
     position: 'absolute', left: WALL_L, width: WALL_W, height: COURSE_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
   },
   // The vertical joint, so a course reads as masonry rather than a bar.
   mortar: { position: 'absolute', left: WALL_W / 2 - 1, top: 0, bottom: 0, width: 2, backgroundColor: RULE },
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
 
   board: { position: 'absolute', left: BOARD_L, width: BOARD_W, height: BOARD_H },
   boardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   boardText: {

@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
   // ── pipeline ───────────────────────────────────────────────────────────────
   pipeBox: {
     position: 'absolute', left: COL_L, width: COL_W, height: PIPE_BOX_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   pipeOut: { backgroundColor: INK },
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
   press: { width: '100%' },
   card: {
     width: COL_W, height: CARD_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6,
-    backgroundColor: PAPER, overflow: 'hidden',
+    backgroundColor: STONE, overflow: 'hidden',
   },
   cardWrong: { borderColor: SOFT, opacity: 0.45 },
   cardFill: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: INK },
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
 
   proof: {
     position: 'absolute', left: MID - 90, top: PROOF_T, width: 180, height: PROOF_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   proofTag: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT, includeFontPadding: false },

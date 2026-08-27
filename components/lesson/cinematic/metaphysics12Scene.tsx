@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
 
   stream: { position: 'absolute', left: STR_L, top: STR_T, width: STR_W, height: STR_H },
   streamInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     overflow: 'hidden',
   },
   tile: {
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   own: { position: 'absolute', ...OWN },
   // Empty by design: the label at the top and clear paper below it is the argument.
   ownInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', paddingTop: 7,
   },
   ownText: {
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
 
   none: { position: 'absolute', ...NONE },
   noneInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
 

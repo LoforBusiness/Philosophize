@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   ledSlot: { position: 'absolute', left: 0, width: LG_W, height: LG_H },
   ledRow: {
     width: LG_W, height: LG_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: PAPER, justifyContent: 'center', paddingHorizontal: 10,
+    backgroundColor: STONE, justifyContent: 'center', paddingHorizontal: 10,
   },
   ledRight: { backgroundColor: INK, borderColor: INK },
   ledWrong: { borderColor: SOFT, opacity: 0.45 },

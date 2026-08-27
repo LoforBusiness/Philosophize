@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics8Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import type { Shot } from './camera';
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   pickRight: { backgroundColor: INK, borderColor: INK },

@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
 
   card: {
     position: 'absolute', left: CARD_X, top: CARD_Y, width: 116, height: 44,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   cardText: {
     position: 'absolute', left: CARD_X, top: CARD_Y + 11, width: 116, textAlign: 'center', lineHeight: 11,

@@ -11,8 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic8Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  facing, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -435,7 +434,7 @@ const styles = StyleSheet.create({
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
-    height: CARD_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
+    height: CARD_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },

@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     backgroundColor: INK, borderRadius: 4,
   },
   state: {
-    position: 'absolute', left: 244, width: 54, lineHeight: 9,
+    position: 'absolute', left: 244, width: 66, lineHeight: 9,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: SOFT, includeFontPadding: false,
   },
   caption: {
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
 
   tile: {
     position: 'absolute', top: T_Y, width: T_W, height: T_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   tileText: {
     position: 'absolute', top: T_Y + 15, width: T_W, textAlign: 'center',

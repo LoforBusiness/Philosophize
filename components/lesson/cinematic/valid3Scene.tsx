@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
 
   row: {
     position: 'absolute', left: BX, width: BW, height: ROW_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     justifyContent: 'center', paddingHorizontal: 10,
   },
   concl: { borderWidth: 2.5 },
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   },
   vdBox: {
     marginTop: 1, height: VD_BOX_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
+    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   vdLine: {
     fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 15, color: INK,
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
   balSlot: { position: 'absolute', left: 0, width: BAL_W, height: BAL_H },
   balCard: {
     width: BAL_W, height: BAL_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: PAPER, justifyContent: 'center', paddingHorizontal: 12,
+    backgroundColor: STONE, justifyContent: 'center', paddingHorizontal: 12,
   },
   balRight: { backgroundColor: INK, borderColor: INK },
   balWrong: { borderColor: SOFT, opacity: 0.45 },

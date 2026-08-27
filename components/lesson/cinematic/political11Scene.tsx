@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political11Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
   // ── the label plate, which is also the answer target ────────────────────────
   plate: { position: 'absolute', top: PLATE_T, width: PLOT_W },
   plateInner: {
-    height: PLATE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: PLATE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },

@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -7,8 +8,7 @@ import { clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from '
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology18Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
 
   evBox: {
     position: 'absolute', left: EV_X, top: EV_Y, width: EV_W, height: EV_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   evText: {
     position: 'absolute', left: EV_X, top: EV_Y + 4, width: EV_W, textAlign: 'center', lineHeight: 9,

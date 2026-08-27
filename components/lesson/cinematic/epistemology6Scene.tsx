@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   // ── the boast that breaks itself ────────────────────────────────────────────
   claim: {
     position: 'absolute', left: 240, top: 402, width: 152, height: 60,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   claimT: {

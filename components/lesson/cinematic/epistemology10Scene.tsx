@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology10Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   flagSlot: { position: 'absolute', top: SC_Y + 12, width: FLAG_W, alignItems: 'center' },
   stem: { width: 2, height: FLAG_T - (SC_Y + 12), backgroundColor: SOFT },
   flag: {
-    width: FLAG_W, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    width: FLAG_W, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     paddingVertical: 5, paddingHorizontal: 4, alignItems: 'center',
   },
   flagRight: { backgroundColor: INK, borderColor: INK },

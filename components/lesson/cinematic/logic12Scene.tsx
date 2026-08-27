@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
 
   door: { position: 'absolute', top: DOOR_T, width: DOOR_W, height: DOOR_H },
   frame: {
-    flex: 1, borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, backgroundColor: STONE,
   },
   // Hinged on its LEFT edge, so scaleX reads as swinging rather than shrinking.
   leaf: {

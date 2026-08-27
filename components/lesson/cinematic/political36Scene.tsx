@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
 
   winFrame: {
     position: 'absolute', left: 0, top: 0, width: WIN_W, height: WIN_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
   },
   winLit: { position: 'absolute', left: 3, top: 3, width: WIN_W - 6, height: WIN_H - 6, backgroundColor: INK, borderRadius: 1 },
 

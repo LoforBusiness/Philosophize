@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics7Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   // ── the shared top strip ────────────────────────────────────────────────────
   stripHead: {
     position: 'absolute', left: 0, top: TOP_T, width: STAGE_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 11.3, letterSpacing: 1.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 11.3, letterSpacing: 1.8, color: INK,
     includeFontPadding: false, lineHeight: 13,
   },
 
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   // the four marks of a trained eye
   mkChip: {
     position: 'absolute', top: MK_T, width: MK_W, height: MK_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2,
   },
   mkText: {
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   // ── the caption plate under each frame ──────────────────────────────────────
   plate: {
     position: 'absolute', left: 0, top: CAP_T, width: FR_W, height: CAP_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },

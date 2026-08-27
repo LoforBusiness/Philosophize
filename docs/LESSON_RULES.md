@@ -4604,3 +4604,96 @@ correctable is the method working, not a confession"* — and one clause that wa
 simply not English: `political9` had *"steering a ship takes a pilot, not a show
 of hands, and govern by popularity and flattery beats wisdom."* **Look for the
 sentence that cannot be read aloud, not the long word.**
+
+---
+
+## S8 · No word is cut off by its own box, and this one is checked offline
+
+The reader found one and named the failure of process, not just the pixel:
+
+> *"It has a word that is cut off in a box. This is directly against what I have
+> said before … I want to make sure this is a rule that is made so that when
+> lessons are created and all current lessons … no words like this are cut off."*
+
+**S1 already said this. What was missing was a check anybody runs.** `check:readable`
+measures it correctly and needs Metro and a headless Chrome, so it is not in
+`npm run check` — which is exactly the shape §11 records as *"a budget nobody
+executes is not a budget"*. A word therefore shipped cut off with a green suite.
+
+`npm run check:fits` is the offline half. `scripts/lib/ttfwidth.mjs` reads real
+advance widths out of the real `.ttf` in plain Node — the instrument `check:quips`
+already uses — so the rule costs milliseconds and can live in the suite forever.
+
+**Three ways a word gets cut, and they are not the same test.**
+
+1. **`numberOfLines={1}` and the string is wider than the box.** There is no
+   second line to escape onto, so it ellipsises. `political22`'s INTERFERES was
+   56.9px into 54 — one word, `numberOfLines={2}`, and nowhere to break.
+2. **A single word wider than the box, with or without a clamp.** React Native
+   breaks between words, so a sentence is safe and an unbreakable word is not.
+3. **The whole label wraps, and the extra lines do not fit the plate.** This is
+   the one the reader found, and neither of the others sees it: `epistemology20`'s
+   *OWN LEGWORK* is **76.07px into 76**, so every WORD fits and the STRING does
+   not. It wraps to a second line, and the plate under it is 24 tall with the
+   caption starting 7 down — 22.4 of text into 17 of room, so the second line
+   lands below the box.
+
+**Wrapping is not the defect; running out of HEIGHT is.** A first version of rule 3
+treated every centred caption as a one-liner and reported 21 findings, most of
+them deliberate: `logic21` draws *A MATCH IN / PETROL* across two lines inside its
+chip and it reads perfectly. So the rule pairs the caption with the plate whose
+vertical span contains it and asks whether the wrapped lines fit between the
+caption's top and the plate's bottom.
+
+**A label that exactly fills its box has already failed.** 76.07 into 76 was
+swallowed by a 0.5px tolerance. Text measurement is not bit-identical across
+platforms, so a string with no slack wraps on whichever engine rounds a hair
+wider and the author cannot know which. One pixel of headroom is the difference
+between *fits* and *fits here*.
+
+**And it reports what it could not read.** 645 of 1,056 strings cannot be resolved
+statically — dynamic content, or a box whose size comes from the tree. Those are
+printed as UNREAD rather than counted as passes, because a checker that measures
+nothing must not look clean (U2). `check:readable` covers them in a browser.
+
+**Fixing one is a choice between three moves**, and which is right depends on what
+is next to it: widen the box where there is room (`epistemology20`'s OWN_W went
+76 → 92, and the next plate starts at 150); tighten the tracking where widening
+would run into a neighbour (`ethics24`'s pillars are 80 apart and the captions are
+70 wide, so letter-spacing went 0.6 → 0.1); or shorten the words. Never drop the
+clamp and let it wrap unless the plate has the height for it.
+
+---
+
+## T5 · A labelled box on the stage takes the tone; the paper stays paper
+
+The reader looked at `epistemology19` — five doors, each a STONE plate with its
+subject printed across it in INK — and asked for that everywhere:
+
+> *"I want this shading for all lessons for the boxes above the stickman."*
+
+So: **a drawn box that carries a word is a plate, and a plate is shaded.** What
+gives a stage depth is the box being darker than the page, not the page being
+darker; tone the plates and leave the ground white and the stage reads as objects
+standing on paper rather than as a grey wash.
+
+**This does not contradict T2, and the boundary is SIZE.** T2 says the message
+stays white, and it is right: `political7` works because a WHITE charter hangs in
+front of a STONE tablet, and toning that charter would wreck the one lesson the
+reader holds up as the standard. The distinction is that a charter is a *surface
+you read*, and a plate is a *thing with a name on it*. Measured: everything under
+about 8,000 square units and 100 tall is a plate — a chip, a card, a tile, a tag,
+a badge, a stamp. `logic7`'s 180×256 board, `aesthetics5`'s 240×164 frame and
+`political7`'s 148×156 charter are all message surfaces, and all stay white.
+
+**And a plate is not any box that happens to be big enough.** The test is that a
+word sits on it. `aesthetics`'s sun is 46×46 with a caption near it and is the one
+luminous thing on that stage; toning it says the opposite of what the lesson is
+about. A rule that picks by geometry alone will find it — look before applying.
+
+**Toning a plate makes what was already on it visible.** A caption in `SOFT` over
+`PAPER` was quietly poor and over `STONE` is 3.26:1, which is under the floor —
+four turned up the moment the plates were shaded, and T3 is the fix: type on a
+tone is INK. Worse, an overlap that was invisible white-on-white becomes an opaque
+plate sitting on somebody else's word. **Shading is not only a paint change; it is
+a reveal.** Render the batch and look at it (U3).

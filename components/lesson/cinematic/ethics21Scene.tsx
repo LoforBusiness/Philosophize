@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -7,8 +8,7 @@ import { ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics21Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
 
   act: {
     position: 'absolute', left: ACT_X, top: ACT_Y, width: ACT_W, height: ACT_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   actText: {
     position: 'absolute', left: ACT_X, top: ACT_Y + 10, width: ACT_W, textAlign: 'center',
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
 
   out: {
     position: 'absolute', top: OUT_Y, width: OUT_W, height: OUT_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   outText: {
     position: 'absolute', top: OUT_Y + 17, width: OUT_W, textAlign: 'center',

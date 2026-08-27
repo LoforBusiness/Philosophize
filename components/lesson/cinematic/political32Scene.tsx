@@ -216,13 +216,13 @@ const styles = StyleSheet.create({
   margin: { position: 'absolute', ...MARGIN },
   nothing: { position: 'absolute', ...NOTHING },
   box: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   // The margin's target is TALL — its lower half is the empty tap area over the
   // overhang — so only the chip at the top carries the answer state.
   chip: {
-    height: 30, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: 30, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   boxText: {

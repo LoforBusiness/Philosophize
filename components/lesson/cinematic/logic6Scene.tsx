@@ -1,4 +1,5 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -9,7 +10,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic6Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -218,7 +219,7 @@ const styles = StyleSheet.create({
   boxHit: { position: 'absolute', left: COL_L, width: COL_W },
   box: {
     width: COL_W, height: BOX_H, borderWidth: 3, borderColor: INK, borderRadius: 9,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
   boxRight: { borderColor: INK, backgroundColor: INK },
   boxWrong: { borderColor: SOFT, opacity: 0.45 },
@@ -246,7 +247,7 @@ const styles = StyleSheet.create({
   // ── the promise table ──────────────────────────────────────────────────────
   table: {
     position: 'absolute', left: COL_L, top: TBL_T, width: COL_W, height: TBL_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, overflow: 'hidden',
   },
   trHead: { flexDirection: 'row', height: 20 },
   tr: { flexDirection: 'row', height: 20, borderTopWidth: 1.5, borderTopColor: RULE },

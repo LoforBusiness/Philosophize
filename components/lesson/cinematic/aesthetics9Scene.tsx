@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
 
   box: {
     position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5,
   },
   boxBrand: {

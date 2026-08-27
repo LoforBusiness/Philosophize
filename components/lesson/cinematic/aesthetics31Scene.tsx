@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
 
   mel: { position: 'absolute', ...MEL },
   melInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     justifyContent: 'flex-end', paddingBottom: 5,
   },
   melText: {
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
 
   plate: { position: 'absolute', ...PLATE },
   plateInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   plateText: {

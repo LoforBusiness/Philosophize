@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
 
   chip: {
     position: 'absolute', top: CHIP_Y, width: CHIP_W, height: CHIP_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 13, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 13, backgroundColor: STONE,
   },
   chipText: {
     position: 'absolute', top: CHIP_Y + 5, width: CHIP_W, textAlign: 'center', lineHeight: 9,

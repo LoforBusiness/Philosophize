@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
 
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W },
   card: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },

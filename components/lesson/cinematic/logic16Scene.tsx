@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   cand: { position: 'absolute', top: CAND_Y, width: CAND_W, height: PANEL_H },
   candBox: {
     width: CAND_W, height: PANEL_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
+    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   candRight: { backgroundColor: INK },
   candWrong: { borderColor: SOFT, opacity: 0.45 },

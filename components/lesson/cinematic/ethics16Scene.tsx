@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
 
   board: { position: 'absolute', top: BOARD_T, width: BOARD_W, height: BOARD_H },
   boardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   boardText: {

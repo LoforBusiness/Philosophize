@@ -1,4 +1,5 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -9,7 +10,7 @@ import { WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, strideStance, typ
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics5Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -359,7 +360,7 @@ const styles = StyleSheet.create({
   signHit: { position: 'absolute', top: SIGN_T, width: SIGN_W },
   sign: {
     width: SIGN_W, height: SIGN_H, borderWidth: 2.5, borderColor: INK, borderRadius: 5,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
   },
   signRight: { backgroundColor: INK, borderColor: INK },
   signWrong: { borderColor: SOFT, opacity: 0.45 },
@@ -383,7 +384,7 @@ const styles = StyleSheet.create({
   panHit: { position: 'absolute', top: PAN_T, width: PAN_W },
   pan: {
     width: PAN_W, height: PAN_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
   },
   panRight: { backgroundColor: INK, borderColor: INK },
   panWrong: { borderColor: SOFT, opacity: 0.45 },

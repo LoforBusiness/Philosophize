@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
 
   drawer: { position: 'absolute', left: DRW_L, width: DRW_W, height: DRW_H },
   drawerInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     justifyContent: 'center', paddingLeft: 10, paddingRight: 26,
   },
   drawerText: {
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
 
   door: { position: 'absolute', left: DOOR_L, top: DOOR_T, width: DOOR_W, height: DOOR_H },
   doorInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', paddingTop: 8,
   },
   doorText: {

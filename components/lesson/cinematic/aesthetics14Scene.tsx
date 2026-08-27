@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
 
   card: { position: 'absolute', left: BOARD_L, width: BOARD_W, height: CARD_H },
   cardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardText: {

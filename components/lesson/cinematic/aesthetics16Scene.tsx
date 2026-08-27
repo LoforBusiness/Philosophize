@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   // 9/0 rather than 9.5/0.3: these chips are ~52 units of inner width on ONE line,

@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   plate: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plateBox: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   plateLit: {
     position: 'absolute', left: 3, top: 3, width: PLATE_W - 6, height: PLATE_H - 6,

@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -7,8 +8,7 @@ import { clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from '
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology20Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -57,7 +57,7 @@ const ORIGIN_Y = 306;
 const SHARED_X = 150;
 const SHARED_W = 100;
 const OWN_X = 30;
-const OWN_W = 76;
+const OWN_W = 92;
 
 const BAR_X = 30;
 const BAR_Y = 350;
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
 
   box: {
     position: 'absolute', top: BOX_Y, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   boxCap: {
     position: 'absolute', top: BOX_Y + 7, width: BOX_W, textAlign: 'center',
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   },
   barBox: {
     position: 'absolute', left: BAR_X, top: BAR_Y, width: BAR_W, height: BAR_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     justifyContent: 'center', paddingHorizontal: 2,
   },
   barFill: { height: BAR_H - 8, backgroundColor: INK, borderRadius: 1 },

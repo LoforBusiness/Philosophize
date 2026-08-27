@@ -240,13 +240,15 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   winText: {
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.8, color: PAPER,
+    // 26 tracked characters at 9px came to 173.2 into the 172 this bar has inside
+    // its own border, so the clamp ellipsised the last word of the payoff line.
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.3, color: PAPER,
     includeFontPadding: false,
   },
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   // 9/0 rather than 9.5/0.3: these chips are ~52 units of inner width on ONE line,

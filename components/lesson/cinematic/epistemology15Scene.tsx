@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
 
   cell: { position: 'absolute', width: CELL_W, height: CELL_H },
   cellInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   note: {

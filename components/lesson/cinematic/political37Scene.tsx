@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   label: { position: 'absolute', top: LABEL_Y, width: 96, height: 22 },
   labelBox: {
     position: 'absolute', left: 0, top: 0, width: 96, height: 22,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   labelWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   labelText: {
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   speech: { position: 'absolute', left: 206, top: 262, width: 88, height: 22 },
   speechBox: {
     position: 'absolute', left: 0, top: 0, width: 88, height: 22,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   speechText: {
     position: 'absolute', left: 0, top: 6, width: 88, textAlign: 'center',

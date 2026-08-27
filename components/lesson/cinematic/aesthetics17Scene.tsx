@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
 
   panel: { position: 'absolute', left: PANEL_L, width: PANEL_W, height: PANEL_H },
   panelInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 9, gap: 8,
   },
   panelText: {
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   shapeBody: {
     flex: 1, borderWidth: 2.5, borderColor: INK, borderTopLeftRadius: 6, borderTopRightRadius: 6,
-    backgroundColor: PAPER,
+    backgroundColor: STONE,
   },
   spike: {
     position: 'absolute', top: -18, width: 14, height: 20,

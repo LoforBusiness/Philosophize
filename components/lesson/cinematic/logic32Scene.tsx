@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
 
   word: { position: 'absolute', height: WORD_H },
   wordInner: {
-    height: WORD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: WORD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   wordText: {

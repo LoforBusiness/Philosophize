@@ -1,4 +1,5 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -9,7 +10,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology14Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -182,7 +183,7 @@ const styles = StyleSheet.create({
 
   screen: { position: 'absolute', left: SCR_L, top: BOX_T, width: SCR_W, height: BOX_H },
   world: { position: 'absolute', left: WOR_L, top: BOX_T, width: WOR_W, height: BOX_H },
-  box: { flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER, overflow: 'hidden' },
+  box: { flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, overflow: 'hidden' },
   layer: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
 
   horizon: { position: 'absolute', left: 0, right: 0, top: 96, height: 1.5, backgroundColor: SOFT },
@@ -199,7 +200,7 @@ const styles = StyleSheet.create({
   // whose contents are drawn in INK puts ink on ink and erases the picture (H61).
   label: { position: 'absolute', top: LAB_T, height: 30 },
   labelInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   labelText: {
@@ -212,7 +213,7 @@ const styles = StyleSheet.create({
   leader: { position: 'absolute', left: 244, top: 320, width: 2, height: 68, backgroundColor: SOFT },
   chip: { position: 'absolute', left: CHIP_L, top: CHIP_T, width: CHIP_W, height: CHIP_H },
   chipInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   chipText: {

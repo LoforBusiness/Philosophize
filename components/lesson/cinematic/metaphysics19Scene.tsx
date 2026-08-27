@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   twinPeg: { position: 'absolute', left: TWIN_X + 24, top: PEG_Y, width: 6, height: PEG_H, backgroundColor: INK, borderRadius: 2 },
   twinCard: {
     position: 'absolute', left: TWIN_X, width: PILE_W, height: CARD_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
     justifyContent: 'center', paddingLeft: 6,
   },
   twinText: {

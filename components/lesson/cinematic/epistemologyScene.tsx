@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
 
   bolt: {
     position: 'absolute', left: BOLT_X, width: BOLT_W, height: BOLT_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, overflow: 'hidden',
   },
   boltFill: { backgroundColor: INK },
   stud: {
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
 
   vp: {
     position: 'absolute', left: VP_L, top: VP_T, width: VP_W, height: VP_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
   },
   vpCap: {
     position: 'absolute', top: 8, left: 0, right: 0, textAlign: 'center',
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   },
   pip: {
     width: 16, height: 16, borderRadius: 3, borderWidth: 2, borderColor: INK,
-    backgroundColor: PAPER, marginLeft: 7,
+    backgroundColor: STONE, marginLeft: 7,
   },
   pipFill: { backgroundColor: INK, borderRadius: 1 },
 

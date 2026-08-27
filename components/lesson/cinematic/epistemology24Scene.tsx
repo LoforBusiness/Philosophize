@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
 
   conc: {
     position: 'absolute', left: L_X, top: CONC_Y, width: L_W, height: CONC_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   concText: {
     position: 'absolute', left: L_X + 6, top: CONC_Y + 5, width: L_W - 12,

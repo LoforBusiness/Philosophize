@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -6,12 +7,11 @@ import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import { BEATS } from './metaphysics2Script';
 import {
-  WALK, ease01, lerp, mixStance, moveTr, pose, strideStance, type Bundle,
-} from './rig';
+  WALK, ease01, lerp, mixStance, moveTr, pose, strideStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
 
   qBox: {
     position: 'absolute', left: 40, top: 236, width: 320, height: 28,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   qText: {
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   // answer UI, however different the thing being tapped is.
   claim: { position: 'absolute', top: CLAIM_T, width: CLAIM_W },
   claimInner: {
-    height: CLAIM_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: CLAIM_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   claimRight: { backgroundColor: INK, borderColor: INK },
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   postIs: { position: 'absolute', left: SIGN_IS_X - 1.5, top: 382, width: 3, height: GROUND - 382, backgroundColor: INK },
   signIs: {
     position: 'absolute', left: SIGN_IS_X - 30, top: 356, width: 60, height: 26,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   signIsText: {

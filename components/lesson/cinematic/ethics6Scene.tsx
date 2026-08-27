@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -9,7 +10,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle, type Stance } from
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics6Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -281,7 +282,7 @@ const styles = StyleSheet.create({
   window: { position: 'absolute', top: 22, width: 14, height: 16, backgroundColor: INK, borderRadius: 2 },
   wheel: {
     position: 'absolute', top: 54, width: 24, height: 24, borderRadius: 12,
-    borderWidth: 3, borderColor: INK, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 3, borderColor: INK, backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
   },
   spoke: { width: 3, height: 16, backgroundColor: INK },
   streak: { position: 'absolute', height: 1.5, backgroundColor: SOFT, borderRadius: 1 },
@@ -310,7 +311,7 @@ const styles = StyleSheet.create({
   // wider box would be brushed by a hand on the last question beat.
   stamp: {
     position: 'absolute', left: 12, top: 292, width: 92, height: 60,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   stampT: {
@@ -339,7 +340,7 @@ const styles = StyleSheet.create({
   },
   chFoot: {
     position: 'absolute', left: CH_L, top: 370, width: CH_W, height: 22,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   chFootT: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.6, color: INK, includeFontPadding: false },

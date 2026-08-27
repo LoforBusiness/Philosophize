@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
 
   stuckTag: {
     position: 'absolute', left: MID - 52, top: BAR_T - 26, width: 104, height: 20,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   stuckText: {
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {

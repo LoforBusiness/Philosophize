@@ -134,7 +134,7 @@ export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick, d
 
       <Animated.View style={[styles.verdict, verStyle]} pointerEvents="none">
         <Text style={styles.verdictText} numberOfLines={1}>
-          {found >= 2 ? 'THE CONNECTION  ·  HERE' : 'THE CONNECTION  ·  NOT FOUND'}
+          {found >= 2 ? 'THE CONNECTION  ·  HERE' : 'THE CONNECTION  ·  NOT YET'}
         </Text>
       </Animated.View>
 
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
 
   verdict: {
     position: 'absolute', top: VER_T, width: VER_W, height: VER_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   verdictText: {
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {

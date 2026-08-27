@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   askWrap: { position: 'absolute', left: ASK_L, top: CARD_T - TACK_H, width: ASK_W, height: CARD_H + TACK_H },
   askCard: {
     position: 'absolute', left: 0, top: TACK_H, width: ASK_W, height: CARD_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   askText: {
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   },
   card: {
     position: 'absolute', left: 0, top: TACK_H, width: CARD_W, height: CARD_H,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE,
   },
   cardName: {
     position: 'absolute', left: 0, top: 7, width: CARD_W - 4, textAlign: 'center',

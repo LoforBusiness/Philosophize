@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './aestheticsScript';
 import {
   clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, SIGH, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, SIGH, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   },
   frame: {
     position: 'absolute', left: FRAME_L, top: FRAME_T, width: FRAME_W, height: FRAME_H,
-    borderWidth: 3, borderColor: INK, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 3, borderColor: INK, backgroundColor: STONE, overflow: 'hidden',
   },
   frameLabel: {
     position: 'absolute', left: FRAME_L, top: FRAME_T + FRAME_H + 5, width: FRAME_W, textAlign: 'center',
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
 
   critCard: {
     position: 'absolute', left: CR_L, top: CR_T, width: CR_W, height: CR_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
   },
   critCap: {
     position: 'absolute', left: 12, top: 7,
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
 
   panel: {
     position: 'absolute', left: P_L, top: P_T, width: P_W, height: P_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
   },
   panelCap: {
     position: 'absolute', left: 12, top: 8,
@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
   },
   track: {
     width: TRACK_W, height: 16, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
-    backgroundColor: PAPER, overflow: 'hidden', justifyContent: 'center',
+    backgroundColor: STONE, overflow: 'hidden', justifyContent: 'center',
   },
   trackFill: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: INK },
   trackNote: {

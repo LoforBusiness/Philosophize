@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -7,7 +8,7 @@ import { clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type Bundle } 
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics35Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
   plate: { position: 'absolute', left: PLATE_X, width: PLATE_W, height: 26 },
   plateBox: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: 26,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   plateLit: {
     position: 'absolute', left: 3, top: 3, width: PLATE_W - 6, height: 20,

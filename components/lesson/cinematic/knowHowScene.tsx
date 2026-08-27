@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   column: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   step: {
     position: 'absolute', left: WALL_L, width: WALL_W, height: STEP_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, gap: 8,
   },
   stepNum: {
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   // 9/0 rather than 9.5/0.3: these chips are ~52 units of inner width on ONE line,

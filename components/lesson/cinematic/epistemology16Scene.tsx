@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
 
   bar: { position: 'absolute', height: BAR_H, transformOrigin: '0% 50%' },
   barInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   barText: {

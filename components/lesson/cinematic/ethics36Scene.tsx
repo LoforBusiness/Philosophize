@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   row: { position: 'absolute', left: ROW_X, width: ROW_W, height: ROW_H },
   rowBox: {
     position: 'absolute', left: 0, top: 0, width: ROW_W, height: ROW_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   rowWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   rowText: {

@@ -356,11 +356,11 @@ const styles = StyleSheet.create({
 
   flowBox: { position: 'absolute', top: FLOW_T, width: FLOW_W, height: FLOW_H },
   flowFixed: {
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   flowOff: {
-    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   flowOn: {

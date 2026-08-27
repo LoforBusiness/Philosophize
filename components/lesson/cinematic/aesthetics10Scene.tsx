@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
 
   verdict: {
     position: 'absolute', left: VRD_L, top: VRD_T, width: VRD_W, height: VRD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   verdictText: {

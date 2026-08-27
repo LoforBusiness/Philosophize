@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   // flush with its top — and the whole thing can then be lifted as one object.
   nowIn: {
     position: 'absolute', left: 2, top: 0, width: NOW_W, height: NOW_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   nowTextIn: {
     position: 'absolute', left: 2, top: 23, width: NOW_W, textAlign: 'center',

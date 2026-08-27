@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
 
   tier: {
     position: 'absolute', left: COL_L, width: COL_W, height: TIER_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     flexDirection: 'row', alignItems: 'center', paddingLeft: 8, gap: 8,
   },
   iconCell: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   meterRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
   meterTrack: {
     width: 56, height: 6, borderWidth: 1, borderColor: RULE,
-    backgroundColor: PAPER, overflow: 'hidden',
+    backgroundColor: STONE, overflow: 'hidden',
   },
   meterFill: {
     position: 'absolute', left: 0, top: 0, width: '100%', height: '100%',
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   },
   cardHit: { position: 'absolute', left: COL_L, width: COL_W },
   card: {
-    height: 40, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    height: 40, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },

@@ -1,14 +1,14 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './ethics2Script';
 import {
-  BLANK, WALK, clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, moveTr, pose, strideStance, type Bundle,
-} from './rig';
+  BLANK, WALK, clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, moveTr, pose, strideStance, type Bundle, } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
 
   row: {
     position: 'absolute', left: BOARD_L, width: BOARD_W, height: ROW_H,
-    borderWidth: 1.5, borderColor: RULE, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: RULE, borderRadius: 4, backgroundColor: STONE,
   },
   rowLit: {
     position: 'absolute', left: -1.5, top: -1.5, right: -1.5, bottom: -1.5,
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
   wallet: {
     position: 'absolute', left: WALLET_X - 37, top: GROUND - 40, width: 74, height: 40, borderRadius: 4,
-    borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
   },
   stitch: { position: 'absolute', top: 5, width: 6, height: 1.5, backgroundColor: RULE },
   walletFold: { position: 'absolute', left: 0, right: 0, top: 16, height: 1.5, backgroundColor: SOFT },

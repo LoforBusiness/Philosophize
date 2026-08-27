@@ -209,10 +209,10 @@ const styles = StyleSheet.create({
   sig: {
     position: 'absolute', left: COL_SIG, width: 58, height: 16,
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: SOFT, borderRadius: 2, backgroundColor: PAPER,
+    borderWidth: 1, borderColor: SOFT, borderRadius: 2, backgroundColor: STONE,
   },
   sigText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.7, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.7, color: INK, includeFontPadding: false,
   },
   sigMine: { color: INK },
 

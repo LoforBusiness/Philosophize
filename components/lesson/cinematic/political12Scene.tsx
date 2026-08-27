@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
 
   lamp: {
     position: 'absolute', top: LAMP_T, width: LAMP_W, height: LAMP_H,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   lampLit: {
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     // units to a label that was already wider than its 85-unit lamp — enough to put
     // its right end 2.7 units past the stage. Tracking is the cheapest thing in the
     // line to give up; the size is not (D34).
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: INK,
     includeFontPadding: false,
   },
   lampTextLit: {
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', left: DW_L, width: DW_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {

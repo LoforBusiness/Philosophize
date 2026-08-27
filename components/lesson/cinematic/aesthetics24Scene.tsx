@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
 
   plate: {
     position: 'absolute', top: PL_Y, width: PL_W, height: PL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   plateText: {
     position: 'absolute', top: PL_Y + 10, width: PL_W, textAlign: 'center', lineHeight: 11,

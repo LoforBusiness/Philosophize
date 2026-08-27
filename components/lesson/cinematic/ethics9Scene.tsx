@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
 
   note: { position: 'absolute', top: NOTE_T, width: NOTE_W },
   noteInner: {
-    height: NOTE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: NOTE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   noteKicker: {

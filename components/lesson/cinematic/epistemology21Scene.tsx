@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
 
   tray: {
     position: 'absolute', top: TRAY_T, width: TRAY_W, height: TRAY_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     justifyContent: 'flex-end', padding: 3,
   },
   trayFill: { width: '100%', backgroundColor: INK, borderRadius: 1 },
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   // 9 rather than the 9.5 its siblings use, with the tracking spent: "EVIDENCE" is

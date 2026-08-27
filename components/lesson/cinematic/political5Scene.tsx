@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W, height: CARD_H },
   card: {
     width: CARD_W, height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: PAPER, justifyContent: 'center', paddingHorizontal: 10,
+    backgroundColor: STONE, justifyContent: 'center', paddingHorizontal: 10,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },
   cardWrong: { borderColor: SOFT, opacity: 0.45 },

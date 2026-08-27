@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -7,7 +8,7 @@ import { clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type Bundle } 
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology36Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
 
   realCard: {
     position: 'absolute', left: 236, top: 412, width: 128, height: 30,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   realText: {
     position: 'absolute', left: 236, top: 417, width: 128, textAlign: 'center', lineHeight: 10,
@@ -192,11 +193,11 @@ const styles = StyleSheet.create({
 
   givenCard: {
     position: 'absolute', left: 236, top: CAP_T, width: 128, height: 46,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 4, backgroundColor: STONE,
   },
   givenText: {
     position: 'absolute', left: 236, top: CAP_T + 6, width: 128, textAlign: 'center', lineHeight: 11,
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
 
   // The one mark that says the two accounts do not meet: a stroke down the gap

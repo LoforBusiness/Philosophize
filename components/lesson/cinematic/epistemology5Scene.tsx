@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
   },
   baconBox: {
     position: 'absolute', left: 140, top: BACON_T, width: 238, height: 34,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   baconT: { fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 15, letterSpacing: 0.8, color: INK, includeFontPadding: false },

@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   // ── comparison cards ───────────────────────────────────────────────────────
   card: {
     position: 'absolute', top: CARD_T, width: CARD_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, overflow: 'hidden',
   },
   cardFill: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: INK, transformOrigin: '0% 50%' },
   cardText: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },

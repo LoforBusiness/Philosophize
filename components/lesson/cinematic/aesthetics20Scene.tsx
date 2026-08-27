@@ -188,11 +188,11 @@ const styles = StyleSheet.create({
   },
   sub: {
     position: 'absolute', left: SUB_X, width: SUB_W, height: ROW_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
     justifyContent: 'center', paddingHorizontal: 7,
   },
   subText: {
-    fontFamily: 'Inter_400Regular', fontSize: 9, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_400Regular', fontSize: 9, color: INK, includeFontPadding: false,
   },
   arrow: {
     position: 'absolute', left: 191, width: 18, textAlign: 'center',

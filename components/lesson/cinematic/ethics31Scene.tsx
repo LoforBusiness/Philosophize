@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
 
   topRung: { position: 'absolute', left: 216, top: TOPRUNG_T, width: 176 },
   topRungInner: {
-    height: TOPRUNG_H, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    height: TOPRUNG_H, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   topRungText: {
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
 
   lamp: { position: 'absolute', left: LAMP_L, top: LAMP_T, width: LAMP_W },
   lampBox: {
-    height: LAMP_H, borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: LAMP_H, borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   lampOn: {

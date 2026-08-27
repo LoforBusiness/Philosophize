@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology12Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
   // ── the belief that lands on Q2 ─────────────────────────────────────────────
   token: {
     position: 'absolute', left: 259, top: 276, width: 112, height: 36,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   tokenText: {
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   // ── the plates ──────────────────────────────────────────────────────────────
   plateBox: { position: 'absolute', width: PLATE_W },
   plate: {
-    height: PLATE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: PLATE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   plateRight: { backgroundColor: INK, borderColor: INK },

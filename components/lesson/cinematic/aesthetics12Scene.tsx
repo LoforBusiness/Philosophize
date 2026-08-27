@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   tether: { position: 'absolute', left: 0, top: 0, width: 6, height: 6, borderRadius: 3, backgroundColor: INK },
   box: {
     position: 'absolute', left: 0, top: 0, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center',
   },
   lid: { width: BOX_W - 4, height: 3.5, backgroundColor: INK },
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
 
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W },
   card: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },

@@ -1,17 +1,17 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  clamp01, ease01, lerp, mixStance, pose, type Bundle,
-} from './rig';
+  clamp01, ease01, lerp, mixStance, pose, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics13Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   // top carries the answer state instead (H61).
   tab: {
     position: 'absolute', left: 82, top: 52, width: 120, height: 22,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   tabText: {

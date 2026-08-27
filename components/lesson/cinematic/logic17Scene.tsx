@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: CARD_Y, width: COL_W, height: CARD_H },
   card: {
     width: COL_W, height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
+    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK },
   cardWrong: { borderColor: SOFT, opacity: 0.45 },

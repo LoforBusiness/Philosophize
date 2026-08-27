@@ -8,7 +8,7 @@ import { BEATS } from './epistemology2Script';
 import {
   clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle, } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
   },
   meter: {
     position: 'absolute', left: LIST_L, top: METER_T, width: LIST_W, height: METER_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, overflow: 'hidden',
   },
   meterFill: {
     position: 'absolute', left: 0, top: 0, bottom: 0, width: LIST_W,
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
 
   row: {
     position: 'absolute', left: LIST_L, width: LIST_W, height: ROW_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   belief: {
     position: 'absolute', left: 14, top: 4,

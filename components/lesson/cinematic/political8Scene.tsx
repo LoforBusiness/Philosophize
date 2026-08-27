@@ -13,7 +13,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 // he fetches comes from these two — see the header of interact.ts.
 import { carryHands, gripAt } from './interact';
 import { BEATS } from './political8Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -206,7 +206,7 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick, drag
   const badgeStyle = useAnimatedStyle(() => ({
     // A STEEP RAMP, NOT THE RAW VALUE (D35). `marks` is the pad's y axis on the
     // graded beat, so it RESTS wherever the reader's token is — and the token starts
-    // at 0.24, which put SEES and CANNOT on stage at 1.1:1 and held them there. A
+    // at 0.24, which put SEES and BLIND on stage at 1.1:1 and held them there. A
     // word is legible or absent; the badges still arrive with the axis, over its
     // first third instead of all of it.
     opacity: clamp01(SCENE.value.marks * 3),
@@ -273,7 +273,7 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick, drag
       {/* TALLEST — h 118, so head top y = 500 − 118 − 32 + 32 = 382 with no crate. */}
       <Animated.View style={[styles.folk, { left: 242, top: 350, height: 150 }, riseT]} pointerEvents="none">
         <Animated.View style={[styles.badge, sees[0] && styles.badgeOn, badgeStyle]}>
-          <Text style={[styles.badgeText, sees[0] && styles.badgeTextOn]}>{sees[0] ? 'SEES' : 'CANNOT'}</Text>
+          <Text style={[styles.badgeText, sees[0] && styles.badgeTextOn]}>{sees[0] ? 'SEES' : 'BLIND'}</Text>
         </Animated.View>
         <View style={styles.folkHead} />
         <View style={[styles.folkTorso, { height: 74 }]} />
@@ -284,7 +284,7 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick, drag
       {/* MIDDLE — h 96: one crate brings the head to 382. */}
       <Animated.View style={[styles.folk, { left: 290, top: 372, height: 128 }, riseM]} pointerEvents="none">
         <Animated.View style={[styles.badge, sees[1] && styles.badgeOn, badgeStyle]}>
-          <Text style={[styles.badgeText, sees[1] && styles.badgeTextOn]}>{sees[1] ? 'SEES' : 'CANNOT'}</Text>
+          <Text style={[styles.badgeText, sees[1] && styles.badgeTextOn]}>{sees[1] ? 'SEES' : 'BLIND'}</Text>
         </Animated.View>
         <View style={styles.folkHead} />
         <View style={[styles.folkTorso, { height: 52 }]} />
@@ -295,7 +295,7 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick, drag
       {/* SHORTEST — h 74: needs TWO crates to reach the same 382. */}
       <Animated.View style={[styles.folk, { left: 336, top: 394, height: 106 }, riseS]} pointerEvents="none">
         <Animated.View style={[styles.badge, sees[2] && styles.badgeOn, badgeStyle]}>
-          <Text style={[styles.badgeText, sees[2] && styles.badgeTextOn]}>{sees[2] ? 'SEES' : 'CANNOT'}</Text>
+          <Text style={[styles.badgeText, sees[2] && styles.badgeTextOn]}>{sees[2] ? 'SEES' : 'BLIND'}</Text>
         </Animated.View>
         <View style={styles.folkHead} />
         <View style={[styles.folkTorso, { height: 30 }]} />
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
   // ── crates ──────────────────────────────────────────────────────────────────
   crate: {
     position: 'absolute', width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
   },
   brace: { position: 'absolute', left: 5, top: 8, width: 26, height: 1.5, backgroundColor: SOFT },
   // Centred on x = 0 so a plain translateX puts it at his hands.
@@ -430,15 +430,20 @@ const styles = StyleSheet.create({
     // is 0.64 and 12.6 already lands at 8.1pt, a tenth of a point above D34's floor.
     //
     // So the BOX grew to the width `folk` allows and the WORD came down to fit it.
-    // SEES / CANNOT is the same claim in the same shape, and it is the one the badge
+    // SEES / BLIND is the same claim in the same shape, and it is the one the badge
     // can actually hold. A box is sized to its longest label, and when it cannot be,
     // the label is the thing that gives.
+    //
+    // AND THE FIRST GO AT THAT WAS COUNTED, NOT MEASURED. CANNOT is six characters
+    // where BLOCKED was seven, so it looked like a fix; it is 58.1px into the 49
+    // this badge has inside its border, and it shipped clipped. BLIND is 39.3.
+    // That is the whole of why check:fits exists (S8).
     position: 'absolute', left: 4, top: 0, width: 52, height: 16,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 8, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 8, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   badgeOn: { borderColor: INK, backgroundColor: INK },
-  badgeText: { fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 0.4, color: SOFT,
+  badgeText: { fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
   badgeTextOn: { color: PAPER },
@@ -460,7 +465,7 @@ const styles = StyleSheet.create({
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   pickBar: { position: 'absolute', left: 18, bottom: 5, width: 6, backgroundColor: INK, borderRadius: 1 },

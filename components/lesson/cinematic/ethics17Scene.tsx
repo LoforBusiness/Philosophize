@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   maximHit: { position: 'absolute', left: MAXIM_X, top: MAXIM_Y, width: MAXIM_W, height: MAXIM_H },
   maxim: {
     width: MAXIM_W, height: MAXIM_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
   },
   maximText: {
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1, color: INK, includeFontPadding: false,

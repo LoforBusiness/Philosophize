@@ -8,7 +8,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './ethicsScript';
 import {
   clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
   // ── ledger ──────────────────────────────────────────────────────────────────
   ledger: {
     position: 'absolute', left: LED_X, top: LED_T, width: LED_W, height: LED_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   vRule: { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: RULE },
   hRule: { position: 'absolute', left: 0, right: 0, top: LED_HEAD_H, height: 1, backgroundColor: RULE },

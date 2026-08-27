@@ -1,4 +1,5 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -9,7 +10,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics5Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
   },
   metBar: {
     position: 'absolute', left: MET_L, top: MET_BAR_T, width: MET_W, height: MET_BAR_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, overflow: 'hidden',
   },
   metTick: { position: 'absolute', top: 0, bottom: 0, width: 1.5, backgroundColor: RULE },
   metFill: {
@@ -328,7 +329,7 @@ const styles = StyleSheet.create({
   ego: { position: 'absolute', left: EGO_L, top: EGO_T, width: EGO_W, height: EGO_H },
   egoBubble: {
     position: 'absolute', left: 0, top: 0, width: EGO_W, height: 46,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 23, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 23, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   egoText: {
@@ -378,7 +379,7 @@ const styles = StyleSheet.create({
   // ── the mind's label, struck out ────────────────────────────────────────────
   wordBox: {
     position: 'absolute', left: WORD_L, top: WORD_T, width: WORD_W, height: WORD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   wordText: {
@@ -394,7 +395,7 @@ const styles = StyleSheet.create({
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W, height: CARD_H },
   card: {
     width: CARD_W, height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: PAPER, justifyContent: 'center', paddingHorizontal: 9,
+    backgroundColor: STONE, justifyContent: 'center', paddingHorizontal: 9,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },
   cardWrong: { borderColor: SOFT, opacity: 0.45 },

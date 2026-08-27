@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
 
   coin: {
     position: 'absolute', top: COIN_T, width: COIN, height: COIN, borderRadius: COIN / 2,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   coinText: {
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
 
   tick: { position: 'absolute', top: TICK_T, width: TICK_W },
   tickInner: {
-    height: TICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: TICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   tickText: {

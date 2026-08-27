@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
 
   pickSlot: { position: 'absolute', top: PICK_T, width: PICK_W },
   pickInner: {
-    height: PICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: PICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },

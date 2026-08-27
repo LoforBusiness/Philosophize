@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   tag: { position: 'absolute', left: TAG_X, width: 190, height: 18 },
   tagBox: {
     position: 'absolute', left: 0, top: 0, width: 190, height: 18,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   tagText: {
     position: 'absolute', left: 0, top: 5, width: 190, textAlign: 'center',

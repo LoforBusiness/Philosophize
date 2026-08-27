@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   label: { position: 'absolute', left: LABEL_X, width: 150, height: 24 },
   labelBox: {
     position: 'absolute', left: 0, top: 0, width: 150, height: 24,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   labelWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   labelText: {

@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   // ── the ranked principles ───────────────────────────────────────────────────
   chip: {
     position: 'absolute', top: PRIN_T, height: PRIN_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   chipA: { left: CH_L, width: 130 },

@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   },
   plate: {
     position: 'absolute', top: PL_Y, width: PL_W, height: PL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   plateOpen: { borderStyle: 'dashed', borderWidth: 1.5, borderColor: SOFT },
   plateText: {

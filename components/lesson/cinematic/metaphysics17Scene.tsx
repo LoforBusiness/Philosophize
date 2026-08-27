@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
 
   board: { position: 'absolute', top: BOARD_T, width: BOARD_W, height: BOARD_H },
   boardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   boardText: {
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
 
   wall: {
     position: 'absolute', left: WALL_L, top: WALL_T, width: WALL_W, height: WALL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   tick: { position: 'absolute', width: 18, height: 8, borderRadius: 2, backgroundColor: SOFT },
 

@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -9,7 +10,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics3Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -341,7 +342,7 @@ const styles = StyleSheet.create({
   },
   fromBox: {
     position: 'absolute', left: FROM_L, width: FROM_W, height: RUNG_H,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   fromBoxOn: { borderWidth: 2.5, borderColor: INK, backgroundColor: INK },
@@ -358,7 +359,7 @@ const styles = StyleSheet.create({
   },
   toBox: {
     position: 'absolute', left: TO_L, width: TO_W, height: RUNG_H,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   toBoxOn: { borderWidth: 2.5, borderColor: INK },
@@ -417,7 +418,7 @@ const styles = StyleSheet.create({
   },
   mask: {
     position: 'absolute', left: 18, top: 18, width: 84, height: 100,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
     borderTopLeftRadius: 42, borderTopRightRadius: 42,
     borderBottomLeftRadius: 38, borderBottomRightRadius: 38,
   },

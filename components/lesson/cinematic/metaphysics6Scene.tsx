@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -9,7 +10,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics6Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -310,7 +311,7 @@ const styles = StyleSheet.create({
   },
   tickR: {
     position: 'absolute', left: 240, top: 334, width: 134, textAlign: 'right',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: INK, includeFontPadding: false,
   },
 
   ghostBar: { position: 'absolute', height: 2, backgroundColor: RULE },
@@ -355,7 +356,7 @@ const styles = StyleSheet.create({
   // ship one's prow / ship two's stern post below (both start at 406).
   ask: {
     position: 'absolute', left: 243, top: 364, width: 40, height: 40, borderRadius: 20,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
   },
   askT: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, lineHeight: 29, color: INK, includeFontPadding: false },
 
@@ -365,7 +366,7 @@ const styles = StyleSheet.create({
   // right-aligned 300-YEARS-ON tick (whose glyphs start ≈ 300).
   youTag: {
     position: 'absolute', left: 124, top: 331, width: 116, height: 18,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   youT: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.8, color: INK, includeFontPadding: false },

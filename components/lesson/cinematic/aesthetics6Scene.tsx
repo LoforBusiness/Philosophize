@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -9,7 +10,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics6Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -313,7 +314,7 @@ const styles = StyleSheet.create({
 
   tagWrap: { position: 'absolute', left: 132, top: 400, width: 80, alignItems: 'center' },
   tagBox: {
-    width: 80, height: 22, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    width: 80, height: 22, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   tagT: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: INK, includeFontPadding: false },
@@ -346,7 +347,7 @@ const styles = StyleSheet.create({
   // reads at a glance. Card x 236–384, y 294–372, clear of the table (ends x 186).
   mindCard: {
     position: 'absolute', left: 236, top: 294, width: 148, height: 78,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
   },
   // 143, not 148: an absolutely-positioned child sits inside the border box, so a
   // child given the card's OUTER width overhangs it by the two 2.5-unit borders —

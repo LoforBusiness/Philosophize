@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
 
   card: {
     position: 'absolute', left: CARD_L, width: CARD_W, height: SAID_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   cardA: { top: SAID_A_T },
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   pickSlot: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
     height: PICK_H, borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 0,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
+    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   pickRight: { backgroundColor: INK, borderColor: INK, borderStyle: 'solid' },
   pickWrong: { borderColor: RULE, opacity: 0.45 },

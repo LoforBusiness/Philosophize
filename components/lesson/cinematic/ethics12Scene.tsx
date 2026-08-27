@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   // ── Q2 targets: the deck's option, on the stage (H61) ───────────────────────
   pickSlot: { position: 'absolute', left: PICK_L, width: PICK_W },
   pickInner: {
-    height: PICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: PICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
   },
   base: {
     position: 'absolute', left: PRESS_L, top: 476, width: PRESS_W, height: 24,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   baseText: {

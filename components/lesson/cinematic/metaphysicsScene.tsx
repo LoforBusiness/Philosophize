@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   star: { position: 'absolute', backgroundColor: INK },
   stillPlate: {
     position: 'absolute', left: 92, top: 26, width: 168, height: 32,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   stillText: {
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
 
   ruleCard: {
     position: 'absolute', left: RULE_L, top: RULE_T, width: RULE_W, height: RULE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
   },
   ruleCap: {
     position: 'absolute', left: 12, top: 7,
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
 
   nothCard: {
     position: 'absolute', left: RULE_L, top: RULE_T, width: RULE_W, height: RULE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
   },
   nothCap: {
     position: 'absolute', left: 12, top: 7,
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
 
   qbox: {
     position: 'absolute', top: CH_T, width: 32, height: CH_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   qboxText: {
@@ -418,12 +418,12 @@ const styles = StyleSheet.create({
   },
   chainCap: {
     position: 'absolute', left: 24, top: CH_T + 42,
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: INK, includeFontPadding: false,
   },
 
   qPlate: {
     position: 'absolute', left: 24, top: 428, width: 252, height: 44,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   qPlateText: {

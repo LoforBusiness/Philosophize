@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
 
   // ── the pile ────────────────────────────────────────────────────────────────
   pileLabel: {
-    position: 'absolute', left: PILE_L - 1, top: 434, width: PILE_W, textAlign: 'center',
+    position: 'absolute', left: 0, top: 434, width: 70, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9.8, letterSpacing: 1.1, color: SOFT,
     includeFontPadding: false,
   },
@@ -348,11 +348,11 @@ const styles = StyleSheet.create({
   },
   row: {
     position: 'absolute', left: TOWER_L, width: TOWER_W, height: ROW_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     paddingHorizontal: 7, paddingTop: 5, justifyContent: 'flex-start',
   },
   rowClaim: { backgroundColor: INK, borderColor: INK },
-  rowGhost: { borderColor: SOFT, backgroundColor: PAPER },
+  rowGhost: { borderColor: SOFT, backgroundColor: STONE },
   rowLab: { fontFamily: 'Inter_700Bold', fontSize: 9.8, letterSpacing: 1.3, color: SOFT, marginBottom: 2, includeFontPadding: false },
   rowLabOn: { color: PAPER, opacity: 0.75 },
   rowTxt: { fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 14, color: INK, includeFontPadding: false },
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   escWrap: { position: 'absolute', left: ESC_L, width: ESC_W },
   escCard: {
     flexDirection: 'row', alignItems: 'center', height: ESC_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     paddingHorizontal: 8,
   },
   escOn: { backgroundColor: INK, borderColor: INK },
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
   // ── the carried block ───────────────────────────────────────────────────────
   carry: {
     position: 'absolute', left: 0, top: CARRY_TOP, width: CARRY_W, height: CARRY_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   // 56 WIDE, AND THE COMMENT THAT USED TO BE HERE WAS WRONG BY A THIRD.

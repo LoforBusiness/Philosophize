@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
 
   frame: {
     position: 'absolute', left: FR_L, top: FR_T, width: FR_W, height: FR_H,
-    borderWidth: 4, borderColor: INK, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 4, borderColor: INK, backgroundColor: STONE, overflow: 'hidden',
   },
 
   horizon: { position: 'absolute', left: 0, right: 0, top: 74, height: 1.5, backgroundColor: SOFT },

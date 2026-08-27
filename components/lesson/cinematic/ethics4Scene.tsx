@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
   },
   vHit: { position: 'absolute', width: TAB_W },
   vBox: {
-    height: 48, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    height: 48, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   vRight: { backgroundColor: INK, borderColor: INK },

@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
 
   plate: { position: 'absolute', top: PLATE_T, width: PLATE_W, height: PLATE_H },
   plateInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   plateText: {

@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   leadGapIn: { position: 'absolute', left: BIG_CX + GAP_R, top: 447, width: 306 - (BIG_CX + GAP_R), height: 2, backgroundColor: INK },
   tab: { position: 'absolute', height: TAB_H },
   tabInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   tabText: {

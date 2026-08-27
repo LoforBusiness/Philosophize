@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
 
   card: {
     position: 'absolute', left: LINE_L, width: LINE_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     paddingHorizontal: 10, paddingTop: 7,
   },
   cardText: {
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
 
   chip: { position: 'absolute', top: CHIP_T, width: CHIP_W, height: CHIP_H },
   chipInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5,
   },
   chipText: {

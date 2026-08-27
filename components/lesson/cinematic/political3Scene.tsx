@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -9,7 +10,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political3Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
   },
   box: {
     position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
   },
   boxName: {
     position: 'absolute', left: 0, top: 9, width: BOX_W - 4, textAlign: 'center',
@@ -285,10 +286,10 @@ const styles = StyleSheet.create({
   divider: { position: 'absolute', left: 199.25, top: 250, width: 1.5, height: 62, backgroundColor: RULE },
   chip: {
     position: 'absolute', left: 185, top: 271, width: 30, height: 20, borderRadius: 3,
-    borderWidth: 1.5, borderColor: SOFT, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: SOFT, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
-  chipText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1, color: SOFT, includeFontPadding: false },
+  chipText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1, color: INK, includeFontPadding: false },
 
   arrowRow: { position: 'absolute', left: 9, top: 56, width: BOX_W - 22, height: 18 },
   arrow: { position: 'absolute', top: 3, width: 21, height: 12 },
@@ -369,7 +370,7 @@ const styles = StyleSheet.create({
 
   seal: {
     position: 'absolute', left: 142, top: 406, width: 116, height: 40,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   sealText: { fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 1, color: INK, includeFontPadding: false },

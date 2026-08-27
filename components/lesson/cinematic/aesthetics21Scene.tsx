@@ -193,12 +193,12 @@ const styles = StyleSheet.create({
 
   plate: {
     position: 'absolute', top: PLATE_Y, width: COL_W, height: 22,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
   },
   plateGone: { borderColor: INK, borderWidth: 2, backgroundColor: INK },
   plateText: {
     position: 'absolute', top: PLATE_Y + 7, width: COL_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK, includeFontPadding: false,
   },
   plateTextGone: { color: PAPER },
 

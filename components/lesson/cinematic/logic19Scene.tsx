@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
 
   card: {
     position: 'absolute', top: CARD_Y, width: CARD_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   face: {

@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic7Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
 
   conclCard: {
     position: 'absolute', left: BOARD_L + PADX, top: CONCL_T, width: CARD_W, height: ROW_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   conclText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.3, color: INK,
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
 
   pickCard: { position: 'absolute', left: BOARD_L + PADX, width: CARD_W },
   pickInner: {
-    height: ROW_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: ROW_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   pickRight: { backgroundColor: INK, borderColor: INK },

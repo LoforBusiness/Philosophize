@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
   },
   wheel: {
     position: 'absolute', bottom: -5, width: 25, height: 25, borderRadius: 13,
-    borderWidth: 3.5, borderColor: INK, backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 3.5, borderColor: INK, backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
   },
   spoke: { width: 3.5, height: 15, backgroundColor: INK },
 
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   board: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   card: {
     position: 'absolute', top: CARD_TOP, width: CARD_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
     paddingHorizontal: 7, paddingTop: 8, overflow: 'hidden',
   },
   cardOn: { position: 'absolute', left: 0, top: 0, right: 0, height: 4, backgroundColor: INK },
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   lens: { fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 15, letterSpacing: 0.2, color: INK, includeFontPadding: false },
   rule: {
     marginTop: 6, height: 24, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
-    alignItems: 'center', justifyContent: 'center', backgroundColor: PAPER, overflow: 'hidden',
+    alignItems: 'center', justifyContent: 'center', backgroundColor: STONE, overflow: 'hidden',
   },
   ruleOn: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: INK },
   ruleT: {
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     // moment the fill changed. The car is the mass in this picture; a card the
     // reader is being asked to read is not.
     width: BAL_W, height: BAL_H, borderWidth: 2.5, borderColor: INK, borderRadius: 5,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
   },
   plateRight: { backgroundColor: INK, borderColor: INK },
   plateWrong: { borderColor: SOFT, opacity: 0.45 },

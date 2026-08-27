@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   plaqWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   plaque: {
     position: 'absolute', top: PLAQUE_T, width: FRAME_W, height: PLAQUE_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   plaqueText: {
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
 
   card: { position: 'absolute', left: WALL_L, width: WALL_R - WALL_L },
   cardInner: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   cardText: {

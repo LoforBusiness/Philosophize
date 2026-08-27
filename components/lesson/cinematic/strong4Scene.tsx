@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
   gaugeLabT: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT, includeFontPadding: false },
   track: {
     position: 'absolute', left: G_L, top: G_Y, width: G_W, height: G_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, overflow: 'hidden',
   },
   tick: { position: 'absolute', top: 0, bottom: 0, width: 1.5, backgroundColor: RULE },
   fill: {
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   cards: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   card: {
     position: 'absolute', left: COL_L, width: COL_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, overflow: 'hidden',
   },
   cardHead: { height: 23, justifyContent: 'center', paddingHorizontal: 10, borderBottomWidth: 1.5, borderBottomColor: RULE },
   cardHeadOn: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: INK },
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   chipSlot: { position: 'absolute', left: 0, width: COL_W, height: CHIP_H },
   chip: {
     width: COL_W, height: CHIP_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12,
+    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12,
   },
   chipRight: { backgroundColor: INK, borderColor: INK },
   chipWrong: { borderColor: SOFT, opacity: 0.45 },

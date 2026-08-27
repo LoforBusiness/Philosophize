@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   // 51 units of interior.
   kant: {
     position: 'absolute', left: 100, top: 286, width: 200, height: 56,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER, alignItems: 'center',
+    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, alignItems: 'center',
   },
   kantTag: { marginTop: 4, fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 1.6, color: SOFT, includeFontPadding: false },
   kantA: { marginTop: 3, fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 0.4, color: INK, includeFontPadding: false },
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   },
   plateHit: { position: 'absolute', width: PAN_W },
   plate: {
-    height: 44, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    height: 44, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },

@@ -224,14 +224,14 @@ const styles = StyleSheet.create({
   shaft: { position: 'absolute', top: SHAFT_Y, height: 3, backgroundColor: INK },
   cap2: { position: 'absolute', top: SHAFT_Y - 4, width: 2, height: 11, backgroundColor: INK },
   gapCap: {
-    position: 'absolute', left: 152, top: SHAFT_Y + 12, width: 70, textAlign: 'center',
+    position: 'absolute', left: 139, top: SHAFT_Y + 12, width: 96, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
   },
 
   crank: {
     position: 'absolute', left: CRANK_CX - CRANK_R, top: CRANK_CY - CRANK_R,
     width: CRANK_R * 2, height: CRANK_R * 2, borderRadius: CRANK_R,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
   },
   handleWrap: {
     position: 'absolute', left: CRANK_CX - CRANK_R, top: CRANK_CY - CRANK_R,

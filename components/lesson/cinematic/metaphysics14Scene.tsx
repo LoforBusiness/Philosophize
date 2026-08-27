@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
 
   claim: { position: 'absolute', left: CLAIM_L, width: CLAIM_W, height: CLAIM_H },
   claimInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   claimText: {

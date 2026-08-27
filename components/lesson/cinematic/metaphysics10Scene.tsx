@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics10Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
 
   plank: {
     position: 'absolute', left: SLOT_L, top: PLANK_T, width: SLOT_W, height: PLANK_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   bracket: { position: 'absolute', top: PLANK_T + PLANK_H, width: 12, height: 14, backgroundColor: SOFT, borderRadius: 2 },
   bracketL: { left: SLOT_L + 8 },
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   tagWrap: { position: 'absolute', top: TAG_T, width: TAG_W, alignItems: 'center' },
   tag: {
     width: TAG_W, height: TAG_H, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
-    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
   },
   tagText: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.6, color: INK, includeFontPadding: false },
   /** The pin that fixes the tag to the thing under it — 6 units down to the object. */
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
 
   slotWrap: { position: 'absolute', left: SLOT_L, width: SLOT_W },
   slot: {
-    height: SLOT_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: SLOT_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   slotRight: { backgroundColor: INK, borderColor: INK },

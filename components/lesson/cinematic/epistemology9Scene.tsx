@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology9Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
   legR: { position: 'absolute', left: 88, top: 448, width: 3, height: 56, backgroundColor: SOFT, transform: [{ rotate: '-12deg' }] },
   board: {
     position: 'absolute', left: BOARD_L, top: BOARD_T, width: BOARD_W, height: BOARD_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   boardLabel: {
     position: 'absolute', left: 0, right: 0, top: 9, textAlign: 'center',
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   dash: { position: 'absolute', top: 24, width: 6, height: 2, backgroundColor: SOFT },
   badge: {
     position: 'absolute', left: 36, top: 2, width: 48, height: 48, borderRadius: 24,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   badgeMark: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: INK, lineHeight: 32,
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   // ── rival theories ─────────────────────────────────────────────────────────
   placard: {
     position: 'absolute', left: 276, width: 118, height: 44,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     justifyContent: 'center', paddingHorizontal: 9,
   },
   placardHead: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1.4, color: SOFT,

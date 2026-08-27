@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   gain: { position: 'absolute', ...GAIN },
   cost: { position: 'absolute', ...COST },
   box: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   boxKick: {

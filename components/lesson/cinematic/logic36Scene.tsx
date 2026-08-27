@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   case: { position: 'absolute', top: CASE_Y, width: CASE_W, height: CASE_H },
   caseBox: {
     position: 'absolute', left: 0, top: 0, width: CASE_W, height: CASE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   caseWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   caseTop: {

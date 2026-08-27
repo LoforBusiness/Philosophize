@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   cand: { position: 'absolute', left: CAND_X, width: 100, height: 26 },
   candBox: {
     position: 'absolute', left: 0, top: 0, width: 100, height: 26,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   candLit: {
     position: 'absolute', left: 3, top: 3, width: 94, height: 20,
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   candWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   candText: {
     position: 'absolute', left: 2, top: 8, width: 96, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.1, color: INK, includeFontPadding: false,
   },
 
   thirdBox: {

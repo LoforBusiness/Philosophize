@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
 
   replySlot: { position: 'absolute', left: REPLY_L, width: REPLY_W },
   reply: {
-    height: REPLY_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    height: REPLY_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   replyRight: { backgroundColor: INK, borderColor: INK },
