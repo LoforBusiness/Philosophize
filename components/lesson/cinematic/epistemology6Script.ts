@@ -41,6 +41,7 @@ export const BEATS: Epi6Beat[] = [
       id: 'lq-epistemology-knowledge-6-1',
       text: 'To every argument an equal argument is opposed.',
       author: 'Sextus Empiricus',
+      philosopherId: 'sextus-empiricus',
       work: 'Outlines of Pyrrhonism',
       era: 'c. 200 CE',
       branchSlugs: ['epistemology'],

@@ -83,6 +83,7 @@ export const BEATS: AestheticsBeat[] = [
       id: 'lq-aesthetics-aesthetics-1-1',
       text: 'The beautiful is that which pleases universally without a concept.',
       author: 'Immanuel Kant',
+      philosopherId: 'immanuel-kant',
       work: 'Critique of the Power of Judgment',
       era: '1790',
       branchSlugs: ['aesthetics'],

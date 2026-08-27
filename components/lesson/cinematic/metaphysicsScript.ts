@@ -45,6 +45,7 @@ export const BEATS: MetaBeat[] = [
       id: 'lq-metaphysics-being-1-1',
       text: 'Why is there something rather than nothing? For nothing is simpler and easier than something.',
       author: 'Gottfried Leibniz',
+      philosopherId: 'gottfried-leibniz',
       work: 'Principles of Nature and Grace',
       era: '1714',
       branchSlugs: ['metaphysics'],

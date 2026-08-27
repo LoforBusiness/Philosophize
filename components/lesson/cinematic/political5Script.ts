@@ -32,6 +32,7 @@ export const BEATS: Pol5Beat[] = [
       id: 'lq-political-political-5-1',
       text: 'Man is by nature a political animal.',
       author: 'Aristotle',
+      philosopherId: 'aristotle',
       work: 'Politics',
       era: 'c. 350 BCE',
       branchSlugs: ['political-philosophy'],

@@ -43,6 +43,7 @@ export const BEATS: Pol13Beat[] = [
       id: 'lq-political-political-13-1',
       text: 'The only purpose for which power can be rightfully exercised over any member of a civilized community, against his will, is to prevent harm to others.',
       author: 'John Stuart Mill',
+      philosopherId: 'john-stuart-mill',
       work: 'On Liberty',
       era: '1859',
       branchSlugs: ['political-philosophy'],

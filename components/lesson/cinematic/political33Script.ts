@@ -51,6 +51,7 @@ export const BEATS: Political33Beat[] = [
       id: 'lq-political-political-33-1',
       text: 'We should claim the right to suppress them if necessary even by force; for it may easily turn out that they are not prepared to meet us on the level of rational argument.',
       author: 'Karl Popper',
+      philosopherId: 'karl-popper',
       work: 'The Open Society and Its Enemies',
       era: '1945',
       branchSlugs: ['political-philosophy'],

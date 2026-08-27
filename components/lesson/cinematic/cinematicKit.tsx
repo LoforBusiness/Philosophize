@@ -5,6 +5,8 @@ import Animated, {
   makeMutable, Easing, FadeInDown, LinearTransition, runOnJS, type SharedValue,
 } from 'react-native-reanimated';
 import SketchIcon from '@/components/shared/SketchIcon';
+import QuotePlate from '@/components/shared/QuotePlate';
+import { eraGroupOfDate } from '@/data/philosophers';
 import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import { C, RADIUS, LIP } from '@/constants/design';
 import { ease01, seg, type Stance } from './rig';
@@ -936,26 +938,47 @@ export function InteractPanel({
 //
 export const NARR_SIZE = 18;
 // ── quote + summary ───────────────────────────────────────────────────────────
+/**
+ * THE SAME PLATE THE THINKER'S PROFILE DRAWS.
+ *
+ * This was the last surface still drawing its own rectangle for a quotation — a
+ * hairline border, italic Playfair, two greys — while Quote of the Day, the saved
+ * collection and every thinker's profile had moved to `QuotePlate`. §19 recorded
+ * it as "the one surface not yet converted … a drop-in when that settles", and
+ * the reader asked for it directly: a quote from Socrates in a lesson should look
+ * like the same quote in his profile.
+ *
+ * THE COLOUR COMES FROM THE THINKER, and that is why it matches. `QuotePlate`
+ * strikes the plate in the metal of the era its author wrote in, read from
+ * `philosopherId` — the same fact the profile uses, so the two cannot drift.
+ *
+ * WHERE THERE IS NO THINKER ON RECORD the era is read from the quotation's own
+ * DATE instead (`eraGroupOfDate`). Forty-two of the corpus's quotations are by
+ * people the 322-thinker roster does not carry — Lewis Carroll, Max Weber — and
+ * leaving those on the structural accent would put grey plates on a shelf where
+ * everything else is coloured, which is the "twenty identical boxes" this object
+ * exists to end.
+ */
 export function QuoteCard({
   q, saved, onToggle,
 }: {
-  q: { text: string; author: string; work: string; era: string };
+  q: { text: string; author: string; work: string; era: string; philosopherId?: string };
   saved: boolean;
   onToggle: () => void;
 }) {
   return (
-    <View style={styles.quoteCard}>
-      <Text style={styles.quoteMark}>“</Text>
-      <Text style={styles.quoteText}>{q.text}</Text>
-      <View style={styles.quoteFoot}>
-        <Pressable onPress={onToggle} hitSlop={12}>
-          <SketchIcon name={saved ? 'bookmark-filled' : 'bookmark'} size={18} color={saved ? INK : SOFT} />
-        </Pressable>
-        <Text style={styles.quoteBy}>
-          {q.author.toUpperCase()}  ·  {q.work}, {q.era}
-        </Text>
-      </View>
-    </View>
+    <QuotePlate
+      text={q.text}
+      author={q.author}
+      meta={q.work ? `${q.work}, ${q.era}` : q.era}
+      philosopherId={q.philosopherId ?? null}
+      // Only consulted when there is no thinker: QuotePlate prefers eraGroup, so
+      // passing it unconditionally would override the thinker with a guess.
+      eraGroup={q.philosopherId ? null : eraGroupOfDate(q.era)}
+      saved={saved}
+      onToggleSave={onToggle}
+      style={styles.quotePlate}
+    />
   );
 }
 
@@ -1194,14 +1217,12 @@ export const styles = StyleSheet.create({
   explainHeadWrong: { color: WRONG },
   explainText: { fontFamily: 'Inter_400Regular', fontSize: 13.5, color: INK, lineHeight: 20, opacity: 0.82 },
 
-  quoteCard: { borderWidth: 1.5, borderColor: INK, borderRadius: 3, padding: 18, marginTop: 2 },
-  quoteMark: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 40, color: INK, height: 26, lineHeight: 36 },
-  quoteText: {
-    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
-    fontSize: 20, lineHeight: 30, color: INK, marginTop: 8,
-  },
-  quoteFoot: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 16 },
-  quoteBy: { fontFamily: 'Inter_500Medium', fontSize: 11, letterSpacing: 1.4, color: SOFT, flex: 1 },
+  // The plate brings its own rim, type, byline and bookmark, so the deck supplies
+  // only the gap the old card had. The five styles that drew a quotation by hand
+  // here — the big Playfair open-quote, the italic body, the footer rule and its
+  // byline — are gone: keeping a dead copy of a thing that now lives in one place
+  // is how the four surfaces drifted apart in the first place.
+  quotePlate: { marginTop: 2 },
 
   sumWrap: { marginTop: 2 },
   sumTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: INK, marginBottom: 12 },

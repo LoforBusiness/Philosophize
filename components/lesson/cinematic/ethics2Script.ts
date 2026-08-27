@@ -45,6 +45,7 @@ export const BEATS: Ethics2Beat[] = [
       id: 'lq-ethics-ethics-2-1',
       text: 'Actions are right in proportion as they tend to promote happiness, wrong as they tend to produce the reverse of happiness.',
       author: 'John Stuart Mill',
+      philosopherId: 'john-stuart-mill',
       work: 'Utilitarianism',
       era: '1863',
       branchSlugs: ['ethics'],

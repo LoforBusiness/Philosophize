@@ -474,3 +474,30 @@ export function eraGroupOfId(id: string): EraGroup | null {
   const p = getPhilosopherById(id);
   return p ? eraGroupOf(p) : null;
 }
+
+/**
+ * THE ERA OF A QUOTATION THAT HAS NO THINKER ON RECORD.
+ *
+ * `QuotePlate` takes its metal from the era its author wrote in, and it reads
+ * that from the thinker. But a lesson may quote someone the 322-thinker roster
+ * does not carry — Lewis Carroll, Max Weber, Frederick Schauer — and 42 of the
+ * corpus's quotations do. Falling back to the structural accent would leave them
+ * grey on a shelf where every other plate is coloured, which is exactly the
+ * "twenty identical boxes" QuotePlate exists to end.
+ *
+ * A quote block already states its own date, so the era is derivable. The
+ * boundaries are the ones the roster itself uses. EASTERN is deliberately not
+ * derivable: it is a tradition, not a date, and guessing it from a year would put
+ * Confucius and Heraclitus in the same metal.
+ */
+export function eraGroupOfDate(era: string | undefined): EraGroup | null {
+  if (!era) return null;
+  const bce = /\bB\.?C\.?E?\b/i.test(era);
+  const m = /(\d{1,4})/.exec(era);
+  if (!m) return null;
+  const y = bce ? -Number(m[1]) : Number(m[1]);
+  if (y < 500) return 'ANCIENT';
+  if (y < 1500) return 'MEDIEVAL';
+  if (y < 1900) return 'MODERN';
+  return 'CONTEMPORARY';
+}

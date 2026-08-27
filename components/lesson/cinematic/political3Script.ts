@@ -60,6 +60,7 @@ export const BEATS: Pol3Beat[] = [
       id: 'lq-political-political-3-1',
       text: 'Men being by nature all free, equal and independent, no one can be subjected to the political power of another without his own consent.',
       author: 'John Locke',
+      philosopherId: 'john-locke',
       work: 'Two Treatises of Government',
       era: '1689',
       branchSlugs: ['political-philosophy'],

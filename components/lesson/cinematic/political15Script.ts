@@ -41,6 +41,7 @@ export const BEATS: Pol15Beat[] = [
       id: 'lq-political-political-15-1',
       text: 'One who breaks an unjust law must do it openly, lovingly, and with a willingness to accept the penalty.',
       author: 'Martin Luther King Jr.',
+      philosopherId: 'martin-luther-king-jr',
       work: 'Letter from Birmingham Jail',
       era: '1963',
       branchSlugs: ['political-philosophy'],

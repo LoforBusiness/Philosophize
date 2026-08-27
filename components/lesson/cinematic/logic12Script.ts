@@ -41,6 +41,7 @@ export const BEATS: Logic12Beat[] = [
       id: 'lq-logic-arguments-12-1',
       text: 'Mankind likes to think in terms of extreme opposites, in terms of Either-Or, between which it recognizes no intermediate possibilities.',
       author: 'John Dewey',
+      philosopherId: 'john-dewey',
       work: 'Experience and Education',
       era: '1938',
       branchSlugs: ['logic'],

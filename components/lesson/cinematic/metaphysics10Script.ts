@@ -56,6 +56,7 @@ export const BEATS: Metaphysics10Beat[] = [
       id: 'lq-metaphysics-being-10-1',
       text: 'The universal is common, since that is called universal which is such as to belong to more than one thing.',
       author: 'Aristotle',
+      philosopherId: 'aristotle',
       work: 'Metaphysics, Book VII',
       era: 'c. 350 BCE',
       branchSlugs: ['metaphysics'],

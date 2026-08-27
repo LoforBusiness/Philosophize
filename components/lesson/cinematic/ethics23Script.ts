@@ -43,6 +43,7 @@ export const BEATS: Ethics23Beat[] = [
       id: 'lq-ethics-ethics-23-1',
       text: 'If it is in our power to prevent something bad from happening, without sacrificing anything of comparable moral importance, we ought, morally, to do it.',
       author: 'Peter Singer',
+      philosopherId: 'peter-singer',
       work: 'Famine, Affluence, and Morality',
       era: '1972',
       branchSlugs: ['ethics'],

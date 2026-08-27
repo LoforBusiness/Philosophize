@@ -43,6 +43,7 @@ export const BEATS: Meta3Beat[] = [
       id: 'lq-metaphysics-being-3-1',
       text: 'The soul is most like the divine, deathless, intelligible, uniform, indissoluble, always the same as itself.',
       author: 'Plato',
+      philosopherId: 'plato',
       work: 'Phaedo, 80a',
       era: 'c. 380 BCE',
       branchSlugs: ['metaphysics'],

@@ -71,6 +71,7 @@ export const BEATS: Ethics8Beat[] = [
       id: 'lq-ethics-ethics-8-1',
       text: 'The moral problem arises from conflicting responsibilities rather than from competing rights.',
       author: 'Carol Gilligan',
+      philosopherId: 'carol-gilligan',
       work: 'In a Different Voice',
       era: '1982',
       branchSlugs: ['ethics'],

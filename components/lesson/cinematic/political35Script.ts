@@ -86,6 +86,7 @@ export const BEATS: Political35Beat[] = [
       id: 'lq-political-political-35-1',
       text: 'We are the trustees of the earth, not its owners.',
       author: 'Edmund Burke',
+      philosopherId: 'edmund-burke',
       work: 'Reflections on the Revolution in France',
       era: '1790',
       branchSlugs: ['political-philosophy'],

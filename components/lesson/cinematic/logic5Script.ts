@@ -49,6 +49,7 @@ export const BEATS: Logic5Beat[] = [
       id: 'lq-logic-arguments-5',
       text: 'Divide each of the difficulties under examination into as many parts as possible, as might be necessary for its solution.',
       author: 'René Descartes',
+      philosopherId: 'rene-descartes',
       work: 'Discourse on the Method',
       era: '1637',
       branchSlugs: ['logic'],

@@ -55,6 +55,7 @@ export const BEATS: Political10Beat[] = [
       id: 'lq-political-political-10-1',
       text: 'Taxation of earnings from labor is on a par with forced labor.',
       author: 'Robert Nozick',
+      philosopherId: 'robert-nozick',
       work: 'Anarchy, State, and Utopia',
       era: '1974',
       branchSlugs: ['political-philosophy'],

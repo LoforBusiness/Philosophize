@@ -55,7 +55,7 @@ export interface Beat {
    */
   stack?: number;
   /** A saveable quote card. */
-  quote?: { id: string; text: string; author: string; work: string; era: string };
+  quote?: { id: string; text: string; author: string; work: string; era: string; philosopherId?: string };
   /** Teaching tap — no XP, immediate feedback. */
   tap?: { prompt: string; options: Choice[]; explain: string };
   /** Graded question — awards XP, exactly as the card runner does. */
@@ -277,6 +277,7 @@ export const BEATS: Beat[] = [
       id: 'lq-logic-arguments-1',
       text: 'The law is reason, free from passion.',
       author: 'Aristotle',
+      philosopherId: 'aristotle',
       work: 'Politics',
       era: 'c. 350 BCE',
     },

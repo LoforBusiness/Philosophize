@@ -43,6 +43,7 @@ export const BEATS: Meta32Beat[] = [
       id: 'lq-metaphysics-being-32-1',
       text: 'There are never two beings in nature that are perfectly alike.',
       author: 'Gottfried Wilhelm Leibniz',
+      philosopherId: 'gottfried-leibniz',
       work: 'Monadology',
       era: '1714',
       branchSlugs: ['metaphysics'],

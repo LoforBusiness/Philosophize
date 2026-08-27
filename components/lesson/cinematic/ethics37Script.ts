@@ -75,6 +75,7 @@ export const BEATS: Ethics37Beat[] = [
       id: 'lq-ethics-ethics-37-1',
       text: 'A promise would not be intelligible before human conventions had established it.',
       author: 'David Hume',
+      philosopherId: 'david-hume',
       work: 'A Treatise of Human Nature',
       era: '1740',
       branchSlugs: ['ethics'],

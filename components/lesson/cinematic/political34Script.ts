@@ -51,6 +51,7 @@ export const BEATS: Political34Beat[] = [
       id: 'lq-political-political-34-1',
       text: 'It is an injustice to assign to a greater and higher association what lesser and subordinate organizations can do.',
       author: 'Pius XI',
+      philosopherId: 'zhu-xi',
       work: 'Quadragesimo Anno',
       era: '1931',
       branchSlugs: ['political-philosophy'],

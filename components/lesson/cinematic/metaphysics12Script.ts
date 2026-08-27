@@ -43,6 +43,7 @@ export const BEATS: Meta12Beat[] = [
       id: 'lq-metaphysics-being-12-2',
       text: 'I never can catch myself at any time without a perception, and never can observe anything but the perception.',
       author: 'David Hume',
+      philosopherId: 'david-hume',
       work: 'A Treatise of Human Nature',
       era: '1739',
       branchSlugs: ['metaphysics'],

@@ -52,6 +52,7 @@ export const BEATS: Valid3Beat[] = [
       id: 'lq-logic-arguments-3',
       text: 'Mathematics may be defined as the subject in which we never know what we are talking about, nor whether what we are saying is true.',
       author: 'Bertrand Russell',
+      philosopherId: 'bertrand-russell',
       work: 'Mysticism and Logic',
       era: '1901',
       branchSlugs: ['logic'],

@@ -45,6 +45,7 @@ export const BEATS: Meta4Beat[] = [
       id: 'lq-metaphysics-being-4-1',
       text: 'You cannot know what is not — that is impossible — nor utter it.',
       author: 'Parmenides',
+      philosopherId: 'parmenides',
       work: 'On Nature, fragment 2',
       era: 'c. 475 BCE',
       branchSlugs: ['metaphysics'],

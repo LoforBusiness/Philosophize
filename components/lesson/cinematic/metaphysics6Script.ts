@@ -41,6 +41,7 @@ export const BEATS: Meta6Beat[] = [
       id: 'lq-metaphysics-being-6-1',
       text: 'All things move and nothing remains still; you cannot step twice into the same stream.',
       author: 'Heraclitus',
+      philosopherId: 'heraclitus',
       work: 'Plato, Cratylus 402a',
       era: 'c. 500 BCE',
       branchSlugs: ['metaphysics'],

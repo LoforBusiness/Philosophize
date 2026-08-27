@@ -50,7 +50,7 @@ export const BEATS: Logic33Beat[] = [
       text: 'Everything should be made as simple as possible, but not simpler.',
       author: 'Albert Einstein',
       work: 'attributed',
-      era: 'attributed',
+      era: '1900s',
       branchSlugs: ['logic'],
     },
     dur: 3.4,

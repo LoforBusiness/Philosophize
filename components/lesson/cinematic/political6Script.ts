@@ -35,6 +35,7 @@ export const BEATS: Pol6Beat[] = [
       id: 'lq-political-political-6-1',
       text: 'Justice is the first virtue of social institutions, as truth is of systems of thought.',
       author: 'John Rawls',
+      philosopherId: 'john-rawls',
       work: 'A Theory of Justice',
       era: '1971',
       branchSlugs: ['political-philosophy'],

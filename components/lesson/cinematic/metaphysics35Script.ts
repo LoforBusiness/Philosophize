@@ -67,6 +67,7 @@ export const BEATS: Metaphysics35Beat[] = [
       id: 'lq-metaphysics-being-35-1',
       text: 'Time travel, I maintain, is possible. The paradoxes are oddities, not impossibilities.',
       author: 'David Lewis',
+      philosopherId: 'david-lewis',
       work: 'The Paradoxes of Time Travel',
       era: '1976',
       branchSlugs: ['metaphysics'],

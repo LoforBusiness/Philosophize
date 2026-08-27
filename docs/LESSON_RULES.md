@@ -4828,3 +4828,66 @@ the answer. The row and both its lines had plainly risen.
 He carries `testID="figure"` for precisely this sort of question, and the harness
 skips anything inside it. **A geometric rule needs to know what is scenery, what is
 an answer, and what is a person** — and the person is never part of an answer.
+
+---
+
+## Q4 · A quotation is one object, and the lesson draws the same one as the profile
+
+The reader asked for it in the plainest possible terms:
+
+> *"a quote from Socrates in a lesson will look like the quote if you look on
+> Socrates in his profile … make sure the color and the design matches what is in
+> the thinker's profile."*
+
+`components/shared/QuotePlate.tsx` has been that object since §19 — a struck plate
+whose **metal is the era its author wrote in** — and Quote of the Day, the saved
+collection and every thinker's profile were converted to it. **The lesson deck was
+not.** §19 recorded it as *"the one surface not yet converted … a drop-in when
+that settles"*, and it stayed a hairline rectangle with italic Playfair and two
+greys for as long as that note existed.
+
+It is the same object on both surfaces now. `QuoteCard` in `cinematicKit.tsx`
+renders `QuotePlate`, and the five styles that drew a quotation by hand there are
+deleted rather than left behind — **keeping a dead copy of a thing that now lives
+in one place is exactly how the four surfaces drifted apart in the first place.**
+
+### The colour has to be DERIVABLE, and that is the part with a rule on it
+
+`QuotePlate` reads the era from `philosopherId`. Only **141 of 255** lesson
+quotations carried one, so the rest would have fallen back to the structural
+accent — grey plates on a shelf where everything else is coloured, which is the
+"twenty identical boxes" the plate exists to end, reintroduced by the very change
+meant to fix it.
+
+Two things close that, and both are permanent:
+
+1. **`scripts/link-quote-thinkers.mjs` backfilled 72** by matching each quote's
+   `author` to the roster — full name first, then an unambiguous surname. Written
+   into the script rather than looked up at runtime, because a name is spelled
+   several ways ("Laozi" / "Lao Tzu") and a lookup that silently misses gives a
+   grey plate with nothing to tell anyone it failed.
+2. **`eraGroupOfDate` reads the era off the quotation's own date** for the 42
+   authors the 322-thinker roster does not carry — Lewis Carroll, Max Weber,
+   Frederick Schauer. Schauer's 1985 gives him CONTEMPORARY plum, which is right,
+   and is the same plum his profile would give him if he had one.
+
+**EASTERN is deliberately not derivable from a date.** It is a tradition, not a
+period, and guessing it from a year would strike Confucius and Heraclitus in the
+same metal. A thinker in that tradition must be linked by id.
+
+### The rule
+
+**Every lesson quotation must resolve to an era** — a `philosopherId` that the
+roster carries, or a year in its own `era` field. `check:quotes` counts the ones
+that do not and is a ratchet at zero.
+
+It found exactly one: `logic33` quoting Einstein with `era: 'attributed'`. The
+saying is a later paraphrase of a 1933 lecture, so naming a work or a year would
+be a **false citation**, and §13 cares far more about that than about a grey
+plate. It says `1900s` — true, sufficient for the metal, and claiming nothing it
+cannot support.
+
+**A checker cannot see this failure any other way.** A quote with no era still
+typechecks, still renders, and still looks like a plate — just a plate that says
+nothing about who wrote it, on the one surface where the reader is most likely to
+be meeting that person for the first time.

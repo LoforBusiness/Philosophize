@@ -58,6 +58,7 @@ export const BEATS: Strong4Beat[] = [
       id: 'lq-logic-arguments-4',
       text: 'Custom, then, is the great guide of human life.',
       author: 'David Hume',
+      philosopherId: 'david-hume',
       work: 'An Enquiry Concerning Human Understanding',
       era: '1748',
       branchSlugs: ['logic'],

@@ -68,6 +68,7 @@ export const BEATS: Ethics3Beat[] = [
       id: 'lq-ethics-ethics-3-1',
       text: 'Act only according to that maxim whereby you can at the same time will that it should become a universal law.',
       author: 'Immanuel Kant',
+      philosopherId: 'immanuel-kant',
       work: 'Groundwork of the Metaphysics of Morals',
       era: '1785',
       branchSlugs: ['ethics'],

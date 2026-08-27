@@ -42,6 +42,7 @@ export const BEATS: Epis31Beat[] = [
       id: 'lq-epistemology-knowledge-31-1',
       text: 'Great is the power of memory, a fearful thing, O my God, a deep and boundless manifoldness.',
       author: 'Augustine of Hippo',
+      philosopherId: 'augustine',
       work: 'Confessions',
       era: '397 AD',
       branchSlugs: ['epistemology'],

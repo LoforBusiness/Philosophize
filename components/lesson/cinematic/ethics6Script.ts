@@ -53,6 +53,7 @@ export const BEATS: Ethics6Beat[] = [
       id: 'lq-ethics-ethics-6-1',
       text: 'It takes more to justify an interference than to justify the withholding of goods and service.',
       author: 'Philippa Foot',
+      philosopherId: 'philippa-foot',
       work: 'Killing and Letting Die',
       era: '1984',
       branchSlugs: ['ethics'],

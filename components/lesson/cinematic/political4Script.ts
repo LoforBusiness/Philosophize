@@ -45,6 +45,7 @@ export const BEATS: Pol4Beat[] = [
       id: 'lq-political-political-4-1',
       text: 'Over himself, over his own body and mind, the individual is sovereign.',
       author: 'John Stuart Mill',
+      philosopherId: 'john-stuart-mill',
       work: 'On Liberty',
       era: '1859',
       branchSlugs: ['political-philosophy'],

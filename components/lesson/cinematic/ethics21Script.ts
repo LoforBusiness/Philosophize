@@ -74,6 +74,7 @@ export const BEATS: Eth21Beat[] = [
       id: 'lq-ethics-ethics-21-1',
       text: 'Nothing hinders one act from having two effects, only one of which is intended, while the other is beside the intention.',
       author: 'Thomas Aquinas',
+      philosopherId: 'thomas-aquinas',
       work: 'Summa Theologiae',
       era: '1274',
       branchSlugs: ['ethics'],

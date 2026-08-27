@@ -52,6 +52,7 @@ export const BEATS: Ethics34Beat[] = [
       id: 'lq-ethics-ethics-34-1',
       text: 'For any possible population of at least ten billion people, all with a very high quality of life, there must be some much larger imaginable population whose existence would be better, even though its members have lives that are barely worth living.',
       author: 'Derek Parfit',
+      philosopherId: 'derek-parfit',
       work: 'Reasons and Persons',
       era: '1984',
       branchSlugs: ['ethics'],

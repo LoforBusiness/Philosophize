@@ -75,6 +75,7 @@ export const BEATS: Aes3Beat[] = [
       id: 'lq-aesthetics-aesthetics-3-1',
       text: 'Music is not, like the other arts, a copy of the Ideas, but a copy of the will itself.',
       author: 'Arthur Schopenhauer',
+      philosopherId: 'arthur-schopenhauer',
       work: 'The World as Will and Representation',
       era: '1818',
       branchSlugs: ['aesthetics'],

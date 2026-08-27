@@ -44,6 +44,7 @@ export const BEATS: Aes13Beat[] = [
       id: 'lq-aesthetics-aesthetics-13-2',
       text: 'The pictures differ aesthetically even if no one will ever be able to tell them apart merely by looking at them.',
       author: 'Nelson Goodman',
+      philosopherId: 'nelson-goodman',
       work: 'Languages of Art',
       era: '1968',
       branchSlugs: ['aesthetics'],

@@ -44,6 +44,7 @@ export const BEATS: Logic22Beat[] = [
       id: 'lq-logic-arguments-22-1',
       text: 'It is the mark of an educated mind to rest satisfied with the degree of precision which the nature of the subject admits.',
       author: 'Aristotle',
+      philosopherId: 'aristotle',
       work: 'Nicomachean Ethics',
       era: 'c. 350 BCE',
       branchSlugs: ['logic'],

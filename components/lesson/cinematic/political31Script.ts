@@ -44,6 +44,7 @@ export const BEATS: Pol31Beat[] = [
       id: 'lq-political-political-31-1',
       text: 'That which is common to the greatest number has the least care bestowed upon it.',
       author: 'Aristotle',
+      philosopherId: 'aristotle',
       work: 'Politics',
       era: 'c. 350 BC',
       branchSlugs: ['political-philosophy'],

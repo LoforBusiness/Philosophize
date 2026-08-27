@@ -43,6 +43,7 @@ export const BEATS: Ethics18Beat[] = [
       id: 'lq-ethics-ethics-18-1',
       text: 'The question is not, Can they reason? nor, Can they talk? but, Can they suffer?',
       author: 'Jeremy Bentham',
+      philosopherId: 'jeremy-bentham',
       work: 'An Introduction to the Principles of Morals and Legislation',
       era: '1789',
       branchSlugs: ['ethics'],

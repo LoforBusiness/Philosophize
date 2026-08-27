@@ -63,7 +63,7 @@ export interface Beat {
    *  · 5 sweep · 6 point-up · 7 LAY A BRICK. Matched to the line. */
   gest?: number;
   /** Saveable quote card. */
-  quote?: { id: string; text: string; author: string; work: string; era: string };
+  quote?: { id: string; text: string; author: string; work: string; era: string; philosopherId?: string };
   /** Teaching tap — no XP, immediate feedback. */
   tap?: { prompt: string; options: Choice[]; explain: string };
   /** Graded question — awards XP exactly as the card runner does. */
@@ -209,6 +209,7 @@ export const BEATS: Beat[] = [
       id: 'lq-logic-arguments-2',
       text: 'A deduction is a discourse in which, certain things being stated, something other than what is stated follows of necessity.',
       author: 'Aristotle',
+      philosopherId: 'aristotle',
       work: 'Prior Analytics',
       era: 'c. 350 BCE',
     },

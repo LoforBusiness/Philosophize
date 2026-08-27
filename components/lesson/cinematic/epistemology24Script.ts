@@ -64,6 +64,7 @@ export const BEATS: Epi24Beat[] = [
       id: 'lq-epistemology-knowledge-24-2',
       text: 'I can know things which I cannot prove; and among things which I certainly did know, even if I could not prove them, were the premisses of my proof.',
       author: 'G.E. Moore',
+      philosopherId: 'ge-moore',
       work: 'Proof of an External World',
       era: '1939',
       branchSlugs: ['epistemology'],

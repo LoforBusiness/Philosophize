@@ -53,6 +53,7 @@ export const BEATS: Aesthetics34Beat[] = [
       id: 'lq-aesthetics-aesthetics-34-1',
       text: 'Denotation is the core of representation and is independent of resemblance.',
       author: 'Nelson Goodman',
+      philosopherId: 'nelson-goodman',
       work: 'Languages of Art',
       era: '1968',
       branchSlugs: ['aesthetics'],

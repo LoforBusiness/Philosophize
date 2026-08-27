@@ -42,6 +42,7 @@ export const BEATS: Pol14Beat[] = [
       id: 'lq-political-political-14-2',
       text: 'Whatever arises from a just situation by just steps is itself just.',
       author: 'Robert Nozick',
+      philosopherId: 'robert-nozick',
       work: 'Anarchy, State, and Utopia',
       era: '1974',
       branchSlugs: ['political-philosophy'],

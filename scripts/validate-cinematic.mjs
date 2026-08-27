@@ -60,6 +60,37 @@ function beatsOf(src) {
   return src.split('\n  {\n').slice(1).map((chunk) => chunk.split('\n  }')[0]);
 }
 
+// ── A CARRIAGE RETURN BLINDS THIS FILE, SO IT IS THE FIRST THING CHECKED ─────
+//
+// `beatsOf` splits on the literal '\n  {\n'. In a CRLF file that pattern does not
+// occur, so every script reports ZERO beats — and every rule inside them silently
+// stops being applied. It does not read as a parse failure; it reads as a lesson
+// with no questions, which is a sentence about the CONTENT and sends the reader
+// looking in the wrong place entirely. tsc stays green throughout, because CRLF is
+// perfectly valid TypeScript.
+//
+// This has now happened twice. The first time, two budgets were ratcheted DOWN
+// against the blind reading before anyone noticed. The second time it was a
+// `git checkout` of files this repo stores as LF: with core.autocrlf=true git
+// writes CRLF on checkout, so undoing a bad edit re-materialised 70 scripts in the
+// ending that switches the checker off.
+//
+// So: refuse to run rather than run blind.
+{
+  const cr = fs.readdirSync(DIR)
+    .filter((n) => n.endsWith('.ts') || n.endsWith('.tsx'))
+    .filter((n) => fs.readFileSync(path.join(DIR, n)).includes(13));
+  if (cr.length) {
+    console.log('\n✗ CARRIAGE RETURNS in ' + cr.length + ' cinematic file(s):');
+    for (const n of cr.slice(0, 10)) console.log('    ' + n);
+    if (cr.length > 10) console.log('    … and ' + (cr.length - 10) + ' more');
+    console.log('\n  This file splits beats on a literal LF pattern, so a CRLF script');
+    console.log('  reports ZERO beats and every rule inside it stops applying — quietly.');
+    console.log('  Normalise them to LF before anything here can be believed.\n');
+    process.exit(1);
+  }
+}
+
 // ── scripts ───────────────────────────────────────────────────────────────────
 for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Script.ts')).sort()) {
   const name = f.replace('Script.ts', '');

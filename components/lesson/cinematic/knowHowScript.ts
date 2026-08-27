@@ -46,6 +46,7 @@ export const BEATS: KnowHowBeat[] = [
       id: 'lq-epistemology-knowledge-2-1',
       text: 'We learn how by practice, schooled indeed by criticism and example, but often quite unaided by any lesson in the theory.',
       author: 'Gilbert Ryle',
+      philosopherId: 'gilbert-ryle',
       work: 'The Concept of Mind',
       era: '1949',
       branchSlugs: ['epistemology'],

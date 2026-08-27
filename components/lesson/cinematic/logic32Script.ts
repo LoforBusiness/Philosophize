@@ -51,6 +51,7 @@ export const BEATS: Logic32Beat[] = [
       id: 'lq-logic-arguments-32-1',
       text: 'Judge a man by his questions rather than by his answers.',
       author: 'Voltaire',
+      philosopherId: 'voltaire',
       work: 'Attributed',
       era: 'c. 1770',
       branchSlugs: ['logic'],

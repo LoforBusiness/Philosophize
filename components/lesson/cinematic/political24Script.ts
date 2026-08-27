@@ -68,6 +68,7 @@ export const BEATS: Pol24Beat[] = [
       id: 'lq-political-political-24-2',
       text: 'Nonrecognition or misrecognition can inflict harm, can be a form of oppression, imprisoning someone in a false, distorted, and reduced mode of being.',
       author: 'Charles Taylor',
+      philosopherId: 'charles-taylor',
       work: 'The Politics of Recognition',
       era: '1992',
       branchSlugs: ['political-philosophy'],

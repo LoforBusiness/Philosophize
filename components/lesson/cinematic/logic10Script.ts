@@ -48,6 +48,7 @@ export const BEATS: Logic10Beat[] = [
       id: 'lq-logic-arguments-10',
       text: 'The enthymeme is a kind of syllogism, and the body of all proof.',
       author: 'Aristotle',
+      philosopherId: 'aristotle',
       work: 'Rhetoric',
       era: 'c. 350 BCE',
       branchSlugs: ['logic'],

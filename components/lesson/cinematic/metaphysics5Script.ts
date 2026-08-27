@@ -40,6 +40,7 @@ export const BEATS: Meta5Beat[] = [
       id: 'lq-metaphysics-being-5-1',
       text: 'Why are there beings at all instead of nothing? That is the question.',
       author: 'Martin Heidegger',
+      philosopherId: 'martin-heidegger',
       work: 'Introduction to Metaphysics',
       era: '1935',
       branchSlugs: ['metaphysics'],

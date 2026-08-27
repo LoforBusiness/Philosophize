@@ -39,6 +39,7 @@ export const BEATS: Aes5Beat[] = [
       id: 'lq-aesthetics-aesthetics-5-1',
       text: 'I observe a hovering kestrel. In a moment everything is altered. The brooding self with its hurt vanity has disappeared.',
       author: 'Iris Murdoch',
+      philosopherId: 'iris-murdoch',
       work: 'The Sovereignty of Good',
       era: '1970',
       branchSlugs: ['aesthetics'],

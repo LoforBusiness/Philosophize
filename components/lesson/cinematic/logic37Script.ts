@@ -66,6 +66,7 @@ export const BEATS: Logic37Beat[] = [
       id: 'lq-logic-arguments-37-1',
       text: 'Arithmetic totters.',
       author: 'Gottlob Frege',
+      philosopherId: 'gottlob-frege',
       work: 'letter to Russell',
       era: '1902',
       branchSlugs: ['logic'],

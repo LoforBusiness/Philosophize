@@ -93,6 +93,7 @@ export const BEATS: Meta2Beat[] = [
       id: 'lq-metaphysics-being-2-1',
       text: 'The same thing is there for thinking and for being.',
       author: 'Parmenides',
+      philosopherId: 'parmenides',
       work: 'On Nature, fragment 3',
       era: 'c. 475 BCE',
       branchSlugs: ['metaphysics'],

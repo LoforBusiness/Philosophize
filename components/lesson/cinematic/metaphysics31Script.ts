@@ -44,6 +44,7 @@ export const BEATS: Meta31Beat[] = [
       id: 'lq-metaphysics-being-31-1',
       text: 'Shape clay into a vessel; it is the space within that makes it useful.',
       author: 'Laozi',
+      philosopherId: 'laozi',
       work: 'Tao Te Ching',
       era: 'c. 400 BC',
       branchSlugs: ['metaphysics'],

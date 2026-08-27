@@ -45,6 +45,7 @@ export const BEATS: Pol32Beat[] = [
       id: 'lq-political-political-32-1',
       text: 'The punishment which the wise suffer who refuse to take part in government, is to live under the government of worse men.',
       author: 'Plato',
+      philosopherId: 'plato',
       work: 'Republic',
       era: 'c. 375 BC',
       branchSlugs: ['political-philosophy'],

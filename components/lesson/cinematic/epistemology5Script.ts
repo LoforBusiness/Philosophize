@@ -58,6 +58,7 @@ export const BEATS: Epi5Beat[] = [
       id: 'lq-epistemology-knowledge-5-1',
       text: 'Knowledge itself is power.',
       author: 'Francis Bacon',
+      philosopherId: 'francis-bacon',
       work: 'Meditationes Sacrae',
       era: '1597',
       branchSlugs: ['epistemology'],

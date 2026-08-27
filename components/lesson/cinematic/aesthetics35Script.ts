@@ -60,6 +60,7 @@ export const BEATS: Aesthetics35Beat[] = [
       id: 'lq-aesthetics-aesthetics-35-1',
       text: 'Laughter is an affection arising from a strained expectation being suddenly reduced to nothing.',
       author: 'Immanuel Kant',
+      philosopherId: 'immanuel-kant',
       work: 'Critique of the Power of Judgment',
       era: '1790',
       branchSlugs: ['aesthetics'],

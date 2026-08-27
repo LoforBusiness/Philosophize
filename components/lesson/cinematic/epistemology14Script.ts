@@ -42,6 +42,7 @@ export const BEATS: Epis14Beat[] = [
       id: 'lq-epistemology-knowledge-14-2',
       text: 'In one sense it must be admitted that we can never prove the existence of things other than ourselves and our experiences.',
       author: 'Bertrand Russell',
+      philosopherId: 'bertrand-russell',
       work: 'The Problems of Philosophy',
       era: '1912',
       branchSlugs: ['epistemology'],

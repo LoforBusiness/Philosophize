@@ -68,6 +68,7 @@ export const BEATS: Ethics5Beat[] = [
       id: 'lq-ethics-ethics-5-1',
       text: 'Do not impose on others what you yourself do not desire.',
       author: 'Confucius',
+      philosopherId: 'confucius',
       work: 'The Analects, 15.24',
       era: 'c. 5th c. BCE',
       branchSlugs: ['ethics'],

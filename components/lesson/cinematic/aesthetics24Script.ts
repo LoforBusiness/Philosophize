@@ -70,6 +70,7 @@ export const BEATS: Aes24Beat[] = [
       id: 'lq-aesthetics-aesthetics-24-2',
       text: 'That which withers in the age of mechanical reproduction is the aura of the work of art.',
       author: 'Walter Benjamin',
+      philosopherId: 'walter-benjamin',
       work: 'The Work of Art in the Age of Mechanical Reproduction',
       era: '1935',
       branchSlugs: ['aesthetics'],

@@ -42,6 +42,7 @@ export const BEATS: PoliticalBeat[] = [
       id: 'lq-political-political-1-1',
       text: 'Covenants, without the sword, are but words, and of no strength to secure a man at all.',
       author: 'Thomas Hobbes',
+      philosopherId: 'thomas-hobbes',
       work: 'Leviathan',
       era: '1651',
       branchSlugs: ['political-philosophy'],

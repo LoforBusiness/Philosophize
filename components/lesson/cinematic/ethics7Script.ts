@@ -93,6 +93,7 @@ export const BEATS: Ethics7Beat[] = [
       id: 'lq-ethics-ethics-7-1',
       text: 'Prior to reflection it is intuitively plausible that people cannot be morally assessed for what is not their fault, or for what is due to factors beyond their control.',
       author: 'Thomas Nagel',
+      philosopherId: 'thomas-nagel',
       work: 'Moral Luck',
       era: '1979',
       branchSlugs: ['ethics'],

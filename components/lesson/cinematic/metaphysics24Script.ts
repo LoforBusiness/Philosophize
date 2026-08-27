@@ -42,6 +42,7 @@ export const BEATS: Meta24Beat[] = [
       id: 'lq-metaphysics-being-24-1',
       text: 'Everything is vague to a degree you do not realize till you have tried to make it precise.',
       author: 'Bertrand Russell',
+      philosopherId: 'bertrand-russell',
       work: 'The Philosophy of Logical Atomism',
       era: '1918',
       branchSlugs: ['metaphysics'],

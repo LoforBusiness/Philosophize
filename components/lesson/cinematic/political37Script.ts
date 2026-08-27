@@ -72,6 +72,7 @@ export const BEATS: Political37Beat[] = [
       id: 'lq-political-political-37-1',
       text: 'The liberties protected by the principle of participation lose much of their value whenever those with greater means control the course of public debate.',
       author: 'John Rawls',
+      philosopherId: 'john-rawls',
       work: 'A Theory of Justice',
       era: '1971',
       branchSlugs: ['political-philosophy'],

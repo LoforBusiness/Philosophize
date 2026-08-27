@@ -72,6 +72,7 @@ export const BEATS: Political36Beat[] = [
       id: 'lq-political-political-36-1',
       text: 'Visibility is a trap.',
       author: 'Michel Foucault',
+      philosopherId: 'michel-foucault',
       work: 'Discipline and Punish',
       era: '1975',
       branchSlugs: ['political-philosophy'],

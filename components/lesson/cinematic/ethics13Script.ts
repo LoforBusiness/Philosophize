@@ -43,6 +43,7 @@ export const BEATS: Ethics13Beat[] = [
       id: 'lq-ethics-ethics-13-2',
       text: 'The good has rightly been declared to be that at which all things aim.',
       author: 'Aristotle',
+      philosopherId: 'aristotle',
       work: 'Nicomachean Ethics',
       era: 'c. 340 BC',
       branchSlugs: ['ethics'],

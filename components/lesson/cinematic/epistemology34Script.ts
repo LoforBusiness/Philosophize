@@ -47,6 +47,7 @@ export const BEATS: Epistemology34Beat[] = [
       id: 'lq-epistemology-knowledge-34-1',
       text: 'The whole problem with the world is that fools and fanatics are always so certain of themselves, and wiser people so full of doubts.',
       author: 'Bertrand Russell',
+      philosopherId: 'bertrand-russell',
       work: 'Mortals and Others',
       era: '1933',
       branchSlugs: ['epistemology'],

@@ -70,6 +70,7 @@ export const BEATS: Aesthetics36Beat[] = [
       id: 'lq-aesthetics-aesthetics-36-1',
       text: 'The photograph is literally an emanation of the referent.',
       author: 'Roland Barthes',
+      philosopherId: 'roland-barthes',
       work: 'Camera Lucida',
       era: '1980',
       branchSlugs: ['aesthetics'],

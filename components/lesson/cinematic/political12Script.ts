@@ -44,6 +44,7 @@ export const BEATS: Pol12Beat[] = [
       id: 'lq-political-political-12-1',
       text: 'The positive sense of the word liberty derives from the wish on the part of the individual to be his own master.',
       author: 'Isaiah Berlin',
+      philosopherId: 'isaiah-berlin',
       work: 'Two Concepts of Liberty',
       era: '1958',
       branchSlugs: ['political-philosophy'],

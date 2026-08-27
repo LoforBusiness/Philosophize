@@ -44,6 +44,7 @@ export const BEATS: Epi4Beat[] = [
       id: 'lq-epistemology-knowledge-4-1',
       text: 'Let us suppose the mind to be white paper, void of all characters, without any ideas. How comes it to be furnished?',
       author: 'John Locke',
+      philosopherId: 'john-locke',
       work: 'An Essay Concerning Human Understanding',
       era: '1689',
       branchSlugs: ['epistemology'],
