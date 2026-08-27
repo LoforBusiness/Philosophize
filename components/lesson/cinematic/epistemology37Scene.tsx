@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -7,7 +8,7 @@ import { clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type Bundle } 
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology37Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -163,7 +164,7 @@ const styles = StyleSheet.create({
   water: { position: 'absolute', left: 128, top: WATER_Y, width: 260, height: 2, backgroundColor: INK },
   hull: {
     position: 'absolute', left: HULL_X, top: HULL_Y, width: HULL_W, height: HULL_H,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
     borderBottomLeftRadius: 26, borderBottomRightRadius: 26,
   },
   deck: { position: 'absolute', left: HULL_X + 6, top: HULL_Y + 10, width: HULL_W - 12, height: 1.5, backgroundColor: SOFT },

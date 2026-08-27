@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   colHdrRow: { position: 'absolute', left: 0, top: HDR_Y, width: STAGE_W, height: 15 },
   rowHdr: {
     position: 'absolute', left: LAB_L, top: 0, width: LAB_W, textAlign: 'right',
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 1.4, color: INK,
     includeFontPadding: false,
   },
   colHdr: {
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   podCap: { position: 'absolute', left: 0, top: 0, width: PODIUM_W + 14, height: 5, backgroundColor: INK },
   podLab: {
     position: 'absolute', left: 7, top: 11, width: PODIUM_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.2, color: INK, includeFontPadding: false,
   },
 
   // ── ledger ────────────────────────────────────────────────────────────────

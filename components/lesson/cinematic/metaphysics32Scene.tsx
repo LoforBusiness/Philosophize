@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics32Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -177,6 +177,10 @@ export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick, d
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   kicker: {
     position: 'absolute', left: 20, top: 288, width: 360,
@@ -197,7 +201,7 @@ const styles = StyleSheet.create({
   orb: {
     position: 'absolute',
     left: UNI_CX - SPH_R, top: UNI_CY - SPH_R, width: SPH_R * 2, height: SPH_R * 2,
-    borderRadius: SPH_R, borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+    borderRadius: SPH_R, borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   tag: {

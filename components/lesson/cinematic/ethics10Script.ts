@@ -74,7 +74,7 @@ export const BEATS: Et10Beat[] = [
       prompt: 'Drag to how much you must accept for the argument to work.',
       drag: {
         lo: 'ONE MODEST PREMISE',
-        hi: 'THE WHOLE OF UTILITARIANISM',
+        hi: 'ALL OF SINGER’S ETHICS',
         start: 1,
         zones: [
           { id: 'modest', upto: 0.3, reads: 'prevent something terrible at small cost to yourself', correct: true },

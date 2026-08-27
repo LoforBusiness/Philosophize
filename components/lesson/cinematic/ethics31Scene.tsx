@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import {
   climb, ease01, emoteHold, lerp, mixStance, pose, type Bundle, } from './rig';
 import { BEATS } from './ethics31Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -147,6 +147,7 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick, dragPo
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* the thing on the shelf — target one */}
       <Target id={'shelf'} correct={false} picked={picked} onPick={onPick}
               style={styles.shelf} disabled={!live || answered}>
@@ -205,10 +206,14 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick, dragPo
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 24, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   shelf: { position: 'absolute', left: SHELF_L, top: SHELF_T, width: SHELF_W },
   shelfInner: {
-    height: SHELF_H, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    height: SHELF_H, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
   shelfText: {

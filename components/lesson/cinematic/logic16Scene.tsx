@@ -7,7 +7,7 @@ import { clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from '
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic16Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -216,6 +216,10 @@ function Morning({ S, index }: { S: SharedValue<any>; index: number }) {
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   claim: {
     position: 'absolute', top: CLAIM_Y, width: 60, textAlign: 'center',
@@ -229,7 +233,7 @@ const styles = StyleSheet.create({
 
   panel: {
     position: 'absolute', top: PANEL_Y, width: PANEL_W, height: PANEL_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
   },
   horizon: { position: 'absolute', top: HORIZON, width: PANEL_W - 12, height: 1, backgroundColor: RULE },
   sun: {

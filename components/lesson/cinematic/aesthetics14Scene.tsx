@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
@@ -7,8 +8,7 @@ import { clamp01, ease01, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics14Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   cask: {
     position: 'absolute', left: CASK_L, top: CASK_T, width: CASK_W, height: CASK_H,
     borderWidth: CASK_WALL, borderColor: INK, borderRadius: 12,
-    backgroundColor: PAPER, overflow: 'hidden',
+    backgroundColor: STONE, overflow: 'hidden',
   },
   wine: {
     position: 'absolute', left: 0, right: 0, bottom: 0, top: IN_T - CASK_T,

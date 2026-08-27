@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type Bundle } 
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology35Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -201,6 +201,10 @@ function Chain({
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   cap: {
     position: 'absolute', left: 116, top: CAP_T, width: 260,
@@ -229,11 +233,11 @@ const styles = StyleSheet.create({
 
   pen: {
     position: 'absolute', top: PEN_Y, width: PEN_W, height: PEN_H,
-    borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   animalBody: {
     position: 'absolute', left: 22, top: ANIMAL_Y - PEN_Y, width: 76, height: 46,
-    borderRadius: 10, borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+    borderRadius: 10, borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
   },
   stripe: { position: 'absolute', top: ANIMAL_Y - PEN_Y + 6, width: 5, height: 34, backgroundColor: INK, borderRadius: 2 },
 
@@ -245,7 +249,7 @@ const styles = StyleSheet.create({
   fence: { position: 'absolute', left: 0, top: 320, width: 3, height: 120 },
   fencePost: { position: 'absolute', left: 0, top: 0, width: 3, height: 120, backgroundColor: INK },
   fenceLabel: {
-    position: 'absolute', left: -26, top: 122, width: 56, textAlign: 'center',
+    position: 'absolute', left: -26, top: 140, width: 56, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
 });

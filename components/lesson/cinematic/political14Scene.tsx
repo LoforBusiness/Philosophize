@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political14Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -94,6 +94,7 @@ export default function Political14Scene({ clock, bt, bi, i, picked, onPick }: S
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {STAGES.map((s, k) => (
         <Stage
           key={s.id}
@@ -184,11 +185,15 @@ function Coin({ j, onInk, SCENE }: { j: number; onInk: boolean; SCENE: { value: 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
   fill: { flex: 1 },
 
   row: { position: 'absolute', left: ROW_L, width: ROW_W, height: ROW_H },
   rowInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   name: {
     position: 'absolute', left: 10, top: 17, width: 70,

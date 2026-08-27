@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   // rounded blob.
   readymade: {
     position: 'absolute', left: PED_X - 48, top: 316, width: 96, height: 72,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
     borderTopLeftRadius: 48, borderTopRightRadius: 48,
     borderBottomLeftRadius: 11, borderBottomRightRadius: 11,
   },

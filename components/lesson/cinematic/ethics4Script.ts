@@ -29,7 +29,7 @@ export const BEATS: Ethics4Beat[] = [
   },
   {
     a: 2, b: 10, rows: 2,
-    text: 'First the harmless fact. Societies really do hold very different codes. The bold claim goes further. Whether something is right depends on the group asking, and there is no answer underneath. Sliding from the first to the second is the classic mistake.',
+    text: 'First the harmless fact. Societies really do hold different codes. The bold claim — moral relativism — goes further. Whether something is right depends on the group asking, and there is no answer underneath. Sliding from the first to the second is the classic mistake.',
     cite: 'Two kinds of relativism',
     dur: 5.4,
   },

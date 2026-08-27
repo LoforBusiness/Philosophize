@@ -198,11 +198,12 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   itemText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
     includeFontPadding: false,
   },
   frame: {
     position: 'absolute', top: ITEM_T - 5, width: ITEM_W + 10, height: ITEM_H + 10,
+    backgroundColor: STONE,
     borderWidth: 3, borderColor: INK, borderRadius: 3,
   },
 

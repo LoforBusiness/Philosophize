@@ -7,7 +7,7 @@ import { ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political23Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -178,6 +178,10 @@ function Tag({ S, k }: { S: { value: { tags: number; strip: number } }; k: numbe
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   tagCap: {
     position: 'absolute', left: TAG_X, top: CAP_Y, width: TAG_W,
@@ -187,7 +191,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: TAG_X, width: TAG_W, height: TAG_H,
     borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
   },
-  spine: { position: 'absolute', left: TAG_X, width: 5, height: TAG_H, backgroundColor: INK, borderRadius: 2 },
+  spine: { position: 'absolute', left: TAG_X, width: 5, height: TAG_H, backgroundColor: STONE, borderRadius: 2 },
   tagText: {
     position: 'absolute', left: TAG_X + 14, width: TAG_W - 20,
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.7, color: INK, includeFontPadding: false,
@@ -199,8 +203,7 @@ const styles = StyleSheet.create({
   },
   box: {
     position: 'absolute', left: BOX_X, top: BOX_Y, width: BOX_W, height: BOX_H,
-    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 5, backgroundColor: PAPER,
-  },
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 5 },
   disc: {
     position: 'absolute', left: BOX_X + BOX_W / 2 - DISC / 2, top: BOX_Y + BOX_H / 2 - DISC / 2,
     width: DISC, height: DISC, borderRadius: DISC / 2, borderWidth: 2.5, borderColor: INK,

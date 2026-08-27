@@ -7,7 +7,7 @@ import { clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from '
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics17Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -198,6 +198,10 @@ function Copy({ S, index }: { S: { value: { copies: number } }; index: number })
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   maximHit: { position: 'absolute', left: MAXIM_X, top: MAXIM_Y, width: MAXIM_W, height: MAXIM_H },
   maxim: {
@@ -210,7 +214,7 @@ const styles = StyleSheet.create({
 
   copy: {
     position: 'absolute', width: COPY_W, height: COPY_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 2, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 2, backgroundColor: STONE,
   },
   copyHit: { position: 'absolute', top: COPY_Y, width: COPY_W, height: COPY_H },
   copyHitBox: { width: COPY_W, height: COPY_H, borderRadius: 2 },

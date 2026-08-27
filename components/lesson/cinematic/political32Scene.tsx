@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political32Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -184,6 +184,10 @@ export default function Political32Scene({ clock, bt, bi, i, picked, onPick }: S
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
   fill: { flex: 1 },
 
   rowLabel: {
@@ -193,7 +197,7 @@ const styles = StyleSheet.create({
   },
   tick: { position: 'absolute', width: TICK_W, height: TICK_H, backgroundColor: INK },
   // Retreats to the right as the count comes in, so the ticks themselves never move.
-  cover: { position: 'absolute', height: TICK_H + 8, backgroundColor: PAPER, transformOrigin: '100% 50%' },
+  cover: { position: 'absolute', height: TICK_H + 8, backgroundColor: STONE, transformOrigin: '100% 50%' },
 
   markWrap: { position: 'absolute', left: MARK_X - 28, top: 418, width: 56, alignItems: 'center' },
   markLead: { width: 1.5, height: 12, backgroundColor: SOFT },

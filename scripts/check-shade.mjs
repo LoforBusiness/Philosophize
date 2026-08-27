@@ -32,6 +32,7 @@
 // better, so it is checked rather than remembered.
 import fs from 'node:fs';
 import path from 'node:path';
+import { softOnToneByBox } from './lib/tonefit.mjs';
 
 const DIR = 'components/lesson/cinematic';
 
@@ -58,7 +59,7 @@ const TOO_DARK_FOR_SOFT = ['STONE', 'SHADE', 'SOFT', 'INK'];
  * took it to 112.
  */
 const MIN_MASSES = 3;
-const FLAT_BUDGET = 104;
+const FLAT_BUDGET = 0;
 
 const files = fs.readdirSync(DIR).filter((f) => f.endsWith('Scene.tsx')).sort();
 
@@ -92,6 +93,14 @@ for (const f of files) {
     if (h && +h[1] < 12) continue;
     const sib = new RegExp(`${m[1]}Text:\\s*\\{[^{}]*color:\\s*SOFT`, 'm');
     if (sib.test(src)) softOnTone.push(`${f}  ${m[1]} is ${m[3]} and ${m[1]}Text is SOFT`);
+  }
+
+  // AND THE SAME RULE BY GEOMETRY, because the pairing above depends on somebody
+  // naming the caption after the fill. epistemology23 calls the hopper caption
+  // `hopText`, so toning the hopper produced a 3.26:1 caption that this file
+  // called clean. Overlap is what is actually true.
+  for (const hit of softOnToneByBox(fs.readFileSync(path.join(DIR, f), 'utf8'), f)) {
+    if (!softOnTone.some((x) => x.startsWith(hit.split('  ')[0]) && x.includes(hit.split(' is ')[0].split('  ').pop()))) softOnTone.push(hit);
   }
 }
 

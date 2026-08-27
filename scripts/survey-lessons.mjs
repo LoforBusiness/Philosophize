@@ -82,6 +82,8 @@ function fields(block) {
 
 // Only what the reader actually reads. `id`, `cite` and the like are furniture.
 const READ_KEYS = new Set(['text', 'prompt', 'explain', 'reads', 'lo', 'hi', 'closing', 'title']);
+/** Of those, the ones the reader has to ACT on rather than merely read. */
+const ACT_KEYS = new Set(['prompt', 'reads', 'lo', 'hi']);
 
 // ── reading ease ────────────────────────────────────────────────────────────
 const SYL = (w) => {
@@ -190,10 +192,12 @@ for (const f of fs.readdirSync(CIN).filter((n) => n.endsWith('Script.ts')).sort(
   const narration = [];
   for (const b of beatsOf(src)) {
     const isQuote = /^\s*quote:\s*\{/m.test(b);
+    // Does this beat answer with two unlabelled cards?
+    const deck = /\n\s*cards:\s*\[/.test(b);
     for (const [k, v] of fields(b)) {
       if (!READ_KEYS.has(k)) continue;
       if (isQuote && k === 'text') continue;      // a quotation is exempt (J-note)
-      pieces.push({ kind: k, text: v });
+      pieces.push({ kind: k, text: v, deck });
       if (k === 'text') narration.push(v);
     }
   }
@@ -210,11 +214,25 @@ for (const f of fs.readdirSync(CIN).filter((n) => n.endsWith('Script.ts')).sort(
     if (p.kind === 'prompt' && BROKEN_PROMPT.some((r) => r.test(p.text))) {
       findings.push({ why: 'BROKEN', n: 0, kind: p.kind, text: p.text });
     }
-    if (p.kind === 'explain' && DANGLING.test(p.text)) {
+    // A DEMONSTRATIVE IS ONLY DANGLING IF NOTHING NAMED IT. After a `drag` or a
+    // `plot` the prompt says what is being moved — "Draw how the aura goes as the
+    // copies multiply" — so "It withers" has a perfectly good referent one line
+    // up. The case that genuinely names nothing is the two-card deck, which is
+    // J9's rule in pronoun form: the reader tapped one of two unlabelled cards
+    // and the explanation has to say WHICH.
+    if (p.kind === 'explain' && DANGLING.test(p.text) && p.deck) {
       findings.push({ why: 'DANGLES', n: 0, kind: p.kind, text: p.text });
     }
     // A jargon word introduced inside something the reader must ACT on.
-    if (p.kind !== 'text') {
+    //
+    // ONLY A CONTROL COUNTS, and that narrowing is the second time this detector
+    // has had to learn the difference between the rule and the noise. An
+    // `explain` that says "Consequentialism, and its famous form utilitarianism,
+    // weigh an act by..." is DEFINING the word as it uses it, which is teaching;
+    // a `closing` is a sign-off after the lesson is over. The thing that actually
+    // costs a reader is a term doing load-bearing work in something they have to
+    // act on, having never been shown it.
+    if (ACT_KEYS.has(p.kind)) {
       for (const w of words(p.text)) {
         if (!isJargon(w)) continue;
         const bare = w.toLowerCase().replace(/[^a-z-]/g, '');

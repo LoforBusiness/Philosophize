@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type Bundle } 
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics35Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -183,6 +183,10 @@ function Tag({ S, k, top }: { S: SharedValue<any>; k: number; top: number }) {
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   cap: {
     position: 'absolute', left: 178, top: CAP_T, width: 210,
@@ -198,7 +202,7 @@ const styles = StyleSheet.create({
 
   panel: {
     position: 'absolute', top: PANEL_Y, width: PANEL_W, height: PANEL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   torso: { position: 'absolute', left: PANEL_W / 2 - 3, top: 22, width: 6, height: 52, backgroundColor: INK, borderRadius: 3 },
   arm: { position: 'absolute', top: 34, width: 40, height: 5, backgroundColor: INK, borderRadius: 3, transformOrigin: '0% 50%' },

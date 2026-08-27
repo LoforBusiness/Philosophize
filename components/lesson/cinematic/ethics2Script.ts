@@ -72,7 +72,7 @@ export const BEATS: Ethics2Beat[] = [
         { text: 'Which brings most happiness', correct: true },
         { text: 'Could everyone follow it', correct: false },
       ],
-      explain: 'It weighs results, and nothing else — whose life got better, whose got worse. The other card is Kant’s question, and it does not care how the story ends.',
+      explain: '“Which brings most happiness.” That question weighs results and nothing else — whose life got better, whose got worse. The other card is Kant’s question, and it does not care how the story ends.',
       xp: 5,
     },
     dur: 1.0,

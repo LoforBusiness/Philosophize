@@ -13,7 +13,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { propAct } from './interact';
 import { BEATS } from './logic12Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -142,6 +142,7 @@ export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick, dra
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.kicker} numberOfLines={1}>THE ROOM YOU WERE OFFERED</Text>
       <View style={styles.wall} pointerEvents="none" />
 
@@ -212,6 +213,10 @@ function Door({
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
   fill: { flex: 1 },
 
   kicker: {
@@ -219,7 +224,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
-  wall: { position: 'absolute', left: WALL_L, top: WALL_T, width: WALL_R - WALL_L, height: 8, backgroundColor: INK },
+  wall: { position: 'absolute', left: WALL_L, top: WALL_T, width: WALL_R - WALL_L, height: 8, backgroundColor: STONE },
 
   door: { position: 'absolute', top: DOOR_T, width: DOOR_W, height: DOOR_H },
   frame: {

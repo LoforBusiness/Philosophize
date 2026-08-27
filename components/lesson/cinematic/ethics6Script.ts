@@ -43,7 +43,7 @@ export const BEATS: Ethics6Beat[] = [
   },
   {
     d: 22, str: 18, tx: 180, card: 2, stamp: 1,
-    text: 'The arithmetic is identical — five lives for one. Yet the switch and the shove split us. Foot: diverting redirects a threat; shoving makes a person your instrument.',
+    text: 'The arithmetic is identical — five lives for one, which is all a utilitarian counts. Yet the switch and the shove split us. Foot: diverting redirects a threat; shoving makes a person your instrument.',
     cite: 'Doing vs using',
     dur: 4.8,
   },
@@ -85,7 +85,7 @@ export const BEATS: Ethics6Beat[] = [
         { text: 'True', correct: true },
         { text: 'False', correct: false },
       ],
-      explain: 'It feels off, but pure utilitarianism counts only outcomes: five saved for one lost is identical in both, so the cases get the same verdict.',
+      explain: 'True, and it feels wrong. Pure utilitarianism counts only outcomes: five saved for one lost is identical in both, so the cases get the same verdict.',
       xp: 5,
     },
     dur: 1.0,

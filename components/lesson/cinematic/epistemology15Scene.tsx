@@ -7,7 +7,7 @@ import { clamp01, ease01, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology15Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -101,6 +101,7 @@ export default function Epistemology15Scene({ clock, bt, bi, i, picked, onPick, 
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={[styles.colHead, { left: COL_X[0] }]} numberOfLines={2}>UNPACKS A{'\n'}DEFINITION</Text>
       <Text style={[styles.colHead, { left: COL_X[1] }]} numberOfLines={2}>ADDS{'\n'}SOMETHING</Text>
       <Text style={[styles.rowHead, { top: ROW_Y[0] + 30 }]} numberOfLines={3}>BEFORE YOU LOOK</Text>
@@ -165,6 +166,10 @@ function Cell({
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
   fill: { flex: 1 },
 
   colHead: {
@@ -175,8 +180,7 @@ const styles = StyleSheet.create({
   rowHead: {
     position: 'absolute', left: ROWH_L, width: ROWH_W,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10.8, letterSpacing: 1.1, color: SOFT,
-    textAlign: 'left', includeFontPadding: false,
-  },
+    textAlign: 'left', includeFontPadding: false, backgroundColor: STONE },
 
   cell: { position: 'absolute', width: CELL_W, height: CELL_H },
   cellInner: {

@@ -896,6 +896,158 @@ line that still says the same number is not a pass, it is a debt.) `check:cards`
 > Rule A1 above all: **what the text says, the picture must do.** A lesson that says
 > someone is on the floor and draws them standing is not acceptable at any polish level.
 
+> **AND "THE PICTURE MUST DO IT" HAS A SECOND HALF NOBODY WAS CHECKING: the
+> picture must BE the thing it names.** A reader went through the corpus and
+> stopped on `metaphysics31`: *"nothing looks like cheese ... if it is supposed
+> to look like cheese, it needs to actually look like cheese and to have some
+> depth."* They were right, and the source says why in one line — the cheese was
+> a PAPER rectangle with an ink border and five horizontal RULE rules across it,
+> and the holes were PAPER-filled circles sitting on top of it. Every part of
+> that is an OUTLINE OF A DIAGRAM rather than a drawing of an object: the rules
+> read as ruled paper, and a hole the same colour as the page is not a hole, it
+> is a dot. A1 was satisfied the whole time — the text said cheese and a thing
+> labelled cheese was on the stage.
+>
+> What it takes, and none of it is expensive: a filled mass rather than an
+> outline (STONE, the tone added for this); a second face so a block is a BLOCK;
+> a rind where the two faces meet; and cavities instead of discs — a dark mouth
+> with a lit crescent low and right inside it, because the light in this app
+> falls from the top left and never moves. Two Views per hole, and it is the
+> whole difference between a dot and a void.
+>
+> **The answering was the other half of the same complaint** — *"when you tap on
+> an answer, it's kind of confusing"* — and the rendered page said it out loud:
+> the question offered FOUR outlined parts for THREE answers, because the rim
+> had both a labelled tab and the ring itself, and the ring's target sat
+> concentric inside the gap's. The panel underneath counted them: "Tap one of
+> the 4 outlined parts above." Three answers are three IDENTICAL controls now,
+> each on a leader to what it names. `Target` has taken a `radius` all along —
+> "so the ring does not square off a round thing" — and nobody had passed it, so
+> a circular hole arrived wearing two nested squares.
+
+> **`node scripts/survey-lessons.mjs` is the instrument, and it RANKS rather than
+> judges.** `check-words` already holds sentence length, beat length and reading
+> density, and it PASSED on the very lesson the complaint was about: "Drag to how
+> well just say perforated actually works" is nine words with no long ones.
+> Nothing counted can tell you that sentence is broken English. So the survey
+> finds the cells worth looking at — Flesch reading ease per piece, a technical
+> term used in a question the lesson never taught, and a clause used as a noun
+> with no quotation marks around it — and a person reads them. Across 186 lessons
+> it found **37 pieces**, which is small enough to fix by hand and was.
+>
+> Its first two drafts were both wrong in the direction §21 keeps recording.
+> Flagging any uncommon eight-letter word reported 885 findings — "observation",
+> "judgement", "tolerate" — and the noise buried the real hits. And its picture
+> metric ranked `political8`, the lesson the reader holds up as the standard, as
+> the MOST box-built scene in the app: 186 of 186 scenes draw no vector path at
+> all, so "it is made of boxes" cannot be the defect. The visual axis that does
+> separate them is tonal mass, which `check:shade` already owns.
+
+> **AND THEN EVERY FLAT SCENE GOT ITS MASS: 111 → 0.** The axis that separates
+> the two lessons the reader holds up from the rest was already measured —
+> `check:shade` counts filled tonal masses per scene, and 111 of 184 drew fewer
+> than three while `political7` draws ten. What was missing was a way to work
+> through them that was not one screenshot at a time.
+>
+> - **`scripts/sheet-lessons.mjs`** renders many lessons and stitches their
+>   stages into one grid. Comparison is the point: a flat scene looks fine on its
+>   own and obviously empty beside one that is not. Its first version cropped to
+>   the TEXT DECK on every lesson and returned eight paragraphs of narration; it
+>   anchors on the scene's own `transformOrigin` now, which is exact.
+> - **A FLOOR, NOT A HAIRLINE.** Every scene drew its ground as 1.5pt of rule and
+>   nothing else, so the figure and everything it looked at stood on bare page.
+>   One View — `top: GROUND, bottom: 0`, drawn first so it sits behind everything,
+>   clipped by the band — lifted more scenes off the list than anything else.
+> - **A picker that EXCLUDES rather than ranks.** The previous automatic attempt
+>   failed by toning the largest box, which in several scenes is the answer card.
+>   This one never considers a style used inside a `<Target>`, anything named like
+>   furniture, anything under 26 units on either axis, or anything drawn with a
+>   dashed border — a dashed outline is a BOUNDARY, and filling `political34`'s
+>   "reach" turned how far something extends into a slab.
+>
+> **Every batch was then looked at, and that is not ceremony.** The sheets caught
+> the three reverts above and five scenes where the fill was right and the caption
+> on it was `SOFT` — 3.26:1 on STONE, under the floor, which is the trap §19
+> records three separate marks falling into.
+
+> **The tap targets got their own check, and it is cheap.** `npm run check:shape`
+> holds two things the cheese rebuild turned up, both invisible everywhere else
+> because both are about the AFFORDANCE rather than the art: a round target
+> wearing a square ring (`Target` has taken a `radius` all along — "so the ring
+> does not square off a round thing" — and two scenes never passed it), and a
+> scene offering one answer through two targets. The question panel COUNTS the
+> mounted targets and prints the number, so `epistemology14` was telling the
+> reader there were five choices when there were three. Three hits corpus-wide,
+> so the cheese was an outlier rather than typical.
+
+> **CLEARING THE FLOOR IS NOT REACHING THE STANDARD, AND THE HISTOGRAM SAYS SO.**
+> The pass above took the flat count to zero, and zero is measured against
+> `MIN_MASSES = 3`. Print the distribution instead of the failures and the real
+> picture arrives: **115 of 184 scenes sit at exactly three**, which is the floor,
+> while the two lessons the reader actually named sit at ten and seven. A ratchet
+> that has reached its budget is telling you the debt stopped growing, not that it
+> is paid.
+>
+> **What the extra seven are is now settled by looking rather than by arguing.**
+> Rendered side by side, every scene that reads as well as `political7` has the
+> same shape in it: **a WHITE message-carrier sitting on a STONE mass.** The gate
+> of knowing with its TRUE · BELIEF · REASONS plates, the cave wall, the hull, the
+> bench under its chips, the poem board, Duchamp's readymade on its plinth. That
+> is T2 stated as a composition instead of as a colour rule, and it is why
+> "everything darker" fails: the tone is there to be the thing the white is read
+> against.
+>
+> Two the sheet also settled in the other direction. `aesthetics33`'s frame
+> CONTAINS the painting whose sky the lesson spends eight beats cleaning, so
+> filling it fights the lesson — its `hill` is the mass. And `aesthetics14`'s cask
+> is full of wine at the beat that matters, so toning it buys nothing. **Neither is
+> visible in the source, and no counting rule would ever have caught either.**
+
+> **FOUR PROBES IN A ROW REPORTED A CLEAN CORPUS, AND ALL FOUR WERE BLIND.** Every
+> `new RegExp('\\b' + name + ':\\s*…')` written into a scratch file here came back
+> with its escapes halved before node ever read it, so the pattern was `\b`
+> (backspace) followed by `s*`, and it matched nothing. The reports were not wrong
+> in the ordinary way — they said **0 scenes have an unpainted structural surface**,
+> three times, with increasing confidence, while 38 of them did.
+>
+> The tell was that a filter which should have been loose was returning nothing at
+> all. **Print what each stage of a probe rejected before believing the total**, and
+> in this toolchain build patterns as regex LITERALS — a literal's single
+> backslashes survive, a string's doubled ones do not. `scripts/lib/tonefit.mjs`
+> carries that warning at the top because the next person will write the string
+> version, and it will look right.
+
+> **AND `check:shade`'S CONTRAST RULE HAD A HOLE THE SIZE OF AN ABBREVIATION.** It
+> paired a fill with its caption by NAME — `slab` with `slabText` — which is the
+> house convention and therefore invisible when somebody does not follow it.
+> `epistemology23` calls the hopper's caption `hopText`, so giving the hopper STONE
+> produced a 3.26:1 caption that the file itself declared clean.
+>
+> It pairs by BOX as well now (`softOnToneByBox`), and the first run found **eleven**
+> real failures, six of them left behind by the previous tonal pass and passing
+> every check since. Two guards were needed before it could be trusted, and both
+> came from false positives it reported: a fill under 24×12 is a cap rule and
+> carries no word, and a style at `left: 0, top: 0` is almost always somebody's
+> child, so comparing it against stage space pairs two things that are nowhere near
+> each other. Counter-tested four ways — clean, defect, defect with the name rule
+> deliberately blinded, and a 5px cap rule that must stay silent.
+>
+> **The direction of the fix is not constant, which is the part worth remembering.**
+> Type on STONE goes to INK; type on INK goes light. SOFT fails both at 3.26:1 and
+> 3.36:1, so a rule that always answers "use INK" would have painted three labels
+> invisibly onto a night sky.
+
+> **One metric was built, checked, and thrown away, and that is the cheapest thing
+> that happened all day.** Counting how many of a scene's drawn elements are plain
+> rectangles looked like a way to find "labelled diagram" scenes — until it ranked
+> `political7`, the reader's own good example, at the median, and nominated three
+> scenes that draw nested rings and a tower that scatters. It reads only
+> `StyleSheet` entries, so it is blind to every shape carried in a
+> `useAnimatedStyle` — which is exactly the animated half. **Check a new metric
+> against the examples whose answer you already know, and delete it when it
+> disagrees with them** rather than acting on it and calling the result a finding.
+
+
 Lessons are the product. They must *look*, *feel*, and *teach* well enough that a curious beginner would pay to keep going. Every lesson should honor:
 
 - **Teach, don't lecture.** One idea per card; concrete example before the abstract
@@ -2791,6 +2943,30 @@ answer, not against the screen.
 > whole session.** So "seen" quietly meant "seen once, ever" — one look disqualified
 > every look after it. `useInView` re-arms on the way out now. Any latch on a
 > mounted-forever screen wants that question asked of it.
+
+> **A CHECKER CAN BE BLINDED BY A LINE ENDING, AND IT LOOKS LIKE PROGRESS.**
+> `validate-cinematic` splits a script into beats on the literal string
+> `'\n  {\n'`. Ten scripts edited from a Python helper came back with CRLF —
+> `io.open(p, 'w')` translates on Windows — so every one of them reported **zero
+> beats**, every finding inside them silently vanished, and the suite got
+> QUIETER. Two budgets were then ratcheted down against that reading, which is
+> the worst possible outcome: a tighter number recorded on a partly blind
+> instrument. `tsc` passed throughout, because CRLF is perfectly valid
+> TypeScript.
+>
+> Two rules out of it. **Write files with `newline='\n'` explicitly** — the
+> repo is LF and git's autocrlf hides the difference until something parses by
+> hand. And **a budget that improves without a change that should have improved
+> it is a measurement to distrust**, not a win to bank.
+
+> **AND ONE OF THESE NOTES WENT MISSING BETWEEN TWO COMMITS.** Both sessions
+> working in this repo isolate a shared file the same way — rebuild it from
+> `HEAD` plus your own edits, stage that, put the shared copy back — which keeps
+> each commit clean. It is only safe while HEAD is still what you branched your
+> edit from. A rebuild taken from a base two commits stale silently dropped 64
+> lines of somebody else's section, and nothing failed: the file was valid, the
+> checks were green, and the only tell was a `grep` returning zero. **Re-read the
+> file you are about to rebuild, not the one you remember.**
 
 **On device**, `adb` lives in the session scratchpad. Applying an OTA takes two
 launches: force-stop → launch (downloads) → force-stop → launch (applies).

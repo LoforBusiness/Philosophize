@@ -190,6 +190,7 @@ export default function Logic10Scene({ clock, bt, bi, i, picked, onPick, dragPos
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* ── the line between what was said and what was not ──────────────────── */}
       <View style={styles.saidRule} pointerEvents="none" />
       <View style={styles.tagSaid} pointerEvents="none">
@@ -257,6 +258,10 @@ export default function Logic10Scene({ clock, bt, bi, i, picked, onPick, dragPos
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 14, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   // The one line the whole lesson is about, so it is the heaviest stroke on stage.
   saidRule: { position: 'absolute', left: 14, right: 10, top: LINE_Y, height: 2, backgroundColor: INK },
@@ -300,7 +305,7 @@ const styles = StyleSheet.create({
     backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   frame: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
-  frameDash: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 0 },
+  frameDash: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 0, backgroundColor: STONE },
   frameSolid: { borderWidth: 2, borderColor: INK, borderRadius: 4 },
   hidText: {
     fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 0.4,

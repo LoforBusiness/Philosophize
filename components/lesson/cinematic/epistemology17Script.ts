@@ -40,7 +40,7 @@ export const BEATS: Epi17Beat[] = [
   {
     g: 13, facts: 1, frame: 1, odd: 3,
     dur: 4.6,
-    text: 'Kuhn looked at what actually happened in history. Most of science is not testing the frame. It is working comfortably inside one.',
+    text: 'Kuhn looked at what actually happened in history. Most of science is not testing the frame. It is working comfortably inside one. He called that frame a paradigm.',
     cite: 'Normal science',
   },
   {

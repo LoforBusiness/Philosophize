@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
 
   gearBox: {
     position: 'absolute', left: GEAR_L, top: GEAR_T, width: GEAR_W, height: GEAR_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PAPER, alignItems: 'center', paddingTop: 5,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, alignItems: 'center', paddingTop: 5,
   },
   gearLabel: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: SOFT, includeFontPadding: false },
   gear: {

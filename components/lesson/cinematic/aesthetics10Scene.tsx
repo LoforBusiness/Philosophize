@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   },
   screenLabel: {
     position: 'absolute', left: 0, right: 0, top: 9, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: INK,
     includeFontPadding: false,
   },
   strip: {
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   },
   panelLabel: {
     position: 'absolute', left: 0, right: 0, top: 8, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: INK,
     includeFontPadding: false,
   },
   panelLine: {

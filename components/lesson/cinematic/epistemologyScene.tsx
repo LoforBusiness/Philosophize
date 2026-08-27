@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './epistemologyScript';
 import {
   clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -295,6 +295,10 @@ function Verdict({ S }: { S: SharedValue<any> }) {
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 24, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   halo: {
     position: 'absolute', left: GATE_L - 14, top: GATE_T - 14,
@@ -305,15 +309,15 @@ const styles = StyleSheet.create({
   gateSlab: {
     position: 'absolute', left: 0, top: 0, width: GATE_W, height: GATE_H,
     borderTopLeftRadius: ARCH, borderTopRightRadius: ARCH,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
   },
   gateLabel: {
     position: 'absolute', top: 30, left: 0, right: 0, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 2.2, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 2.2, color: INK, includeFontPadding: false,
   },
   gateDoor: {
     position: 'absolute', left: DOOR_X, top: DOOR_T, width: DOOR_W, height: DOOR_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, overflow: 'hidden',
   },
   gateKnob: {
     position: 'absolute', left: 5, top: 78, width: 8, height: 8, borderRadius: 4,
@@ -345,7 +349,7 @@ const styles = StyleSheet.create({
   },
   vpCap: {
     position: 'absolute', top: 8, left: 0, right: 0, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.8, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.8, color: INK, includeFontPadding: false,
   },
   vpWord: { position: 'absolute', top: 24, left: 0, right: 0, height: 28 },
   vpCenter: { alignItems: 'center', justifyContent: 'center' },

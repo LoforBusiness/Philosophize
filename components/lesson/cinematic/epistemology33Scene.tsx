@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology33Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -111,6 +111,10 @@ function Brick({ k, SCENE }: { k: number; SCENE: { value: { ev: number } } }) {
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   kicker: {
     position: 'absolute', left: COL_L - 30, top: COL_TOP - 16, width: COL_W + 60,
@@ -120,7 +124,7 @@ const styles = StyleSheet.create({
 
   brick: {
     position: 'absolute', left: COL_L, width: COL_W, height: BRICK_H,
-    borderWidth: 1.5, borderColor: INK,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE,
   },
 
   barWrap: { position: 'absolute', left: BAR_L, top: BAR_HIGH, width: BAR_W },

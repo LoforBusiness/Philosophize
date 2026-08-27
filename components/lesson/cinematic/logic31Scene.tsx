@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import {
   ease01, lerp, mixStance, pose, seated, type Bundle, type Stance, } from './rig';
 import { BEATS } from './logic31Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -186,6 +186,10 @@ function Coin({ index, SCENE }: { index: number; SCENE: { value: { flips: number
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 24, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   coin: {
     position: 'absolute', top: COIN_T, width: COIN, height: COIN, borderRadius: COIN / 2,
@@ -200,7 +204,7 @@ const styles = StyleSheet.create({
   scaleWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   track: {
     position: 'absolute', left: SC_L, top: SC_T, width: SC_W, height: SC_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   needle: {
     position: 'absolute', top: SC_T - 4, width: 6, height: SC_H + 8,

@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political31Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -239,6 +239,10 @@ function Cell({ j, onInk, SCENE }: { j: number; onInk: boolean; SCENE: { value: 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
   fill: { flex: 1 },
 
   blade: { position: 'absolute', width: GRASS_W, backgroundColor: INK, transformOrigin: '50% 100%' },
@@ -254,7 +258,7 @@ const styles = StyleSheet.create({
   // dying is the one thing this scene has to show.
   body: {
     position: 'absolute', left: 3, top: 0, width: BODY_W, height: BODY_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 7, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 7, backgroundColor: STONE,
   },
   // Carried LOW — cattle on a common are eating it, and a head at grazing height
   // also keeps the ear and the muzzle down among the blades where the outline has
@@ -280,7 +284,7 @@ const styles = StyleSheet.create({
   },
   boxKick: {
     position: 'absolute', top: 5, left: 4, right: 4,
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
   boxBig: {

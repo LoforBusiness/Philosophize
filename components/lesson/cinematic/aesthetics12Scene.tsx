@@ -10,7 +10,7 @@ import {
 // exactly rig's and mean what they always did, 100+ reach moves.ts (see emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics12Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
 
   board: {
     position: 'absolute', left: BOARD_L, top: BOARD_T, width: BOARD_W, height: BOARD_B - BOARD_T,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   post: { position: 'absolute', top: BOARD_B - 2, width: 2.5, height: 18, backgroundColor: SOFT },
   postL: { left: BOARD_L + 26 },
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
 
   boardTag: {
     position: 'absolute', left: POEM_L, top: 232, width: POEM_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.6, color: INK,
     includeFontPadding: false,
   },
   poemLine: {
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   divider: { position: 'absolute', left: POEM_L + 10, top: 302, width: POEM_W - 20, height: 1.5, backgroundColor: RULE },
   verdictTag: {
     position: 'absolute', left: POEM_L, top: 308, width: POEM_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10.8, letterSpacing: 1.5, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10.8, letterSpacing: 1.5, color: INK,
     includeFontPadding: false,
   },
   verdictWord: {

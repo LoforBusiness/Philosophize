@@ -23,7 +23,7 @@ export interface Epi4Beat extends BaseBeat {
 export const BEATS: Epi4Beat[] = [
   {
     e: 8, r: 4, fill: 0, glow: 0, bridge: 0,
-    text: 'Blank mind at birth, or already primed? Two camps, and they have never once stopped arguing about it.',
+    text: 'Blank mind at birth, or already primed? Two camps — empiricists and rationalists — and they have never once stopped arguing about it.',
     dur: 3.4,
   },
   {

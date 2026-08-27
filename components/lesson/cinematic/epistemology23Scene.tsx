@@ -7,7 +7,7 @@ import { clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from '
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology23Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -142,7 +142,7 @@ export default function Epistemology23Scene({ clock, bt, bi, i, picked, onPick, 
       <Animated.View style={[StyleSheet.absoluteFill, allStyle]} pointerEvents="none">
         <Animated.View style={[styles.shutter, { left: SIEVE_X }, lShut]} />
         <Animated.View style={[styles.shutterR, rShut]} />
-        <Text style={[styles.partCap, { top: MOUTH_Y - 13 }]}>THE MOUTH</Text>
+        <Text style={[styles.partCap, { top: MOUTH_Y - 7 }]}>THE MOUTH</Text>
 
         {bars.map((k) => <MeshBar key={k} S={SCENE} index={k} />)}
         <Text style={[styles.partCap, { top: MESH_Y + 18 }]}>THE MESH</Text>
@@ -210,14 +210,18 @@ function Drop({ S, index }: { S: { value: { mouth: number; mesh: number; fall: n
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   hopper: {
     position: 'absolute', left: HOP_X, top: HOP_Y, width: HOP_W, height: HOP_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
   },
   hopText: {
     position: 'absolute', left: HOP_X, top: HOP_Y + 10, width: HOP_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK, includeFontPadding: false,
   },
 
   wallL: { position: 'absolute', left: SIEVE_X, top: MOUTH_Y, width: 2, height: SIEVE_BOT - MOUTH_Y, backgroundColor: INK },
@@ -235,7 +239,7 @@ const styles = StyleSheet.create({
 
   tray: {
     position: 'absolute', left: TRAY_X, top: TRAY_Y, width: TRAY_W, height: TRAY_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   trayText: {
     position: 'absolute', left: TRAY_X, top: TRAY_Y + 8, width: TRAY_W, textAlign: 'center',

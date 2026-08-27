@@ -46,7 +46,7 @@ export const BEATS: Ethics3Beat[] = [
   },
   {
     d: 13, tx: 196, pull: 1, lens: 1,
-    text: 'John Stuart Mill would pull. The right act promotes the most happiness, counting each person equally. Five lives saved outweigh one lost.',
+    text: 'John Stuart Mill would pull. The right act promotes the most happiness, counting each person equally. Five lives saved outweigh one lost. People who judge an act this way are called utilitarians.',
     cite: 'Consequentialism — the outcome',
     dur: 4.6,
   },

@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './politicalScript';
 import {
   boxMove, clamp01, ease01, lerp, mixStance, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -325,6 +325,10 @@ function Spark({ S, x }: { S: SharedValue<any>; x: number }) {
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 56, right: 56, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
   pedestal: {
     position: 'absolute', left: SOV_X - 28, top: GROUND - PED, width: 56, height: PED,
     backgroundColor: PAPER, borderWidth: 2, borderColor: INK,
@@ -385,7 +389,7 @@ const styles = StyleSheet.create({
   },
   meterTrack: {
     position: 'absolute', top: MTR_T, width: MTR_W, height: MTR_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, overflow: 'hidden',
   },
   meterFill: {
     position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,

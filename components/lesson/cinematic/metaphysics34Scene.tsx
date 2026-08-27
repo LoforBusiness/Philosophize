@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics34Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -146,6 +146,10 @@ function Layer({ k, SCENE }: { k: number; SCENE: { value: { depth: number } } })
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   kicker: {
     position: 'absolute', left: 118, top: KICK_T, width: 250,
@@ -158,8 +162,8 @@ const styles = StyleSheet.create({
 
   frame: {
     position: 'absolute', left: FRAME_L, top: FRAME_T, width: FRAME_W, height: FRAME_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
-  },
+    backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK },
   plinth: {
     position: 'absolute', left: FRAME_L + 30, top: FRAME_T + FRAME_H, width: FRAME_W - 60, height: 6,
     backgroundColor: INK,

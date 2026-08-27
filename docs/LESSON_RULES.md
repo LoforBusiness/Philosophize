@@ -3445,6 +3445,24 @@ crop generally pushes it into something else.
 
 ---
 
+### T4 · The ring has to match the shape, and the count has to match the answers
+
+`Target` draws a breathing ink ring on its own bounds — that is what tells a
+reader which parts of the picture are the buttons. Two things about it are easy
+to get wrong and impossible to see in the source:
+
+- **It takes a `radius`, and its own comment says why**: "Match the target's own
+  corner, so the ring does not square off a round thing." A target wrapping a
+  circle and not passing it draws a SQUARE around a disc. `metaphysics31`'s hole
+  arrived wearing two nested squares, and the reader's report was "when you tap
+  on an answer, it's kind of confusing."
+- **The question panel COUNTS the mounted targets** and prints the number —
+  "tap one of the 3 marked parts above". So offering one answer through two
+  targets (a labelled tab AND the thing it labels) tells the reader there are
+  more choices than there are. `epistemology14` said five for three.
+
+`npm run check:shape` holds both, and it is cheap — no browser, no Metro.
+
 ## Part 2 — Authoring checklist
 
 **Shape** — before writing a word, lay the beats out and count them (H52, H53).
@@ -4315,6 +4333,43 @@ the *answer card*, and toning it would have removed exactly the white the tablet
 needs to be seen against. In `aesthetics10` it also picked a panel that spends
 most of the lesson hidden behind a shutter, so the change was invisible to a
 reader. Pick by what the scene is BUILT ON, and confirm by rendering it.
+
+### T2b · The ground line is not the ground
+
+Every scene draws its ground as a 1.5pt rule and, until this pass, nothing else —
+so the figure and everything it is looking at stood on bare page. Both of the
+lessons the reader holds up put their subject on a filled mass, and the cheapest
+version of that is one View:
+
+```ts
+floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+```
+
+Drawn FIRST inside the scene root, so it sits behind every other layer, and
+clipped by the band — a lesson whose band ends at 512 gets twelve points of floor
+and one that runs deeper gets more. It is the single change that lifted the most
+scenes off the flat list, and it costs nothing to author.
+
+### T2c · A pip is not a mass, and a control is not scenery
+
+Two failures the automatic pass made, and both are the same mistake wearing
+different clothes: treating a box's presence as evidence that it is what the
+picture is built on.
+
+- **`ethics19.affSelf` is a 10×10 dot.** It was the only bordered box left in the
+  scene that was not an answer, so the fallback toned it. A marker, a stud, a pip
+  or a tick is never the mass — anything under about 26 on either axis is
+  furniture, whatever it is called.
+- **A style used inside a `<Target>` is a CONTROL.** Toning one removes exactly
+  the white the tone exists to contrast against, and an answer that arrives
+  already filled reads as pre-selected. Where the only bordered boxes in a scene
+  are its answer cards, the right move is to tone NOTHING and add the floor.
+
+The corpus went from 111 flat scenes to 0 with those two exclusions plus the
+name test in T2, and every batch was checked on a contact sheet afterwards —
+`node scripts/sheet-lessons.mjs a b c …` renders many lessons and stitches their
+stages into one grid, because a flat scene looks fine on its own and obviously
+empty beside one that is not.
 
 ### T3 · Type on a tone is INK
 

@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology32Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -113,6 +113,7 @@ export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick, 
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.kicker} numberOfLines={1}>THE SAME COAST, FOUR TIMES</Text>
 
       {MAPS.map((m, k) => (
@@ -215,6 +216,10 @@ function Bar({
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 14, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
+  // figure and everything it is looking at standing on bare page;
+  // political7 and political8 both stand their subject on a filled mass.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   kicker: {
     position: 'absolute', left: COL[0], top: KICK_T, width: COL[1] + PAN_W - COL[0],
@@ -224,7 +229,7 @@ const styles = StyleSheet.create({
 
   panel: { position: 'absolute', width: PAN_W, height: PAN_H },
   panelInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   art: { position: 'absolute', left: PAD, top: PAD, width: ART_W, height: ART_H },
   bar: { position: 'absolute', bottom: 0, backgroundColor: INK, transformOrigin: '50% 100%' },
