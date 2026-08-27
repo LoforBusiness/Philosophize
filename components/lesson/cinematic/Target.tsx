@@ -73,6 +73,89 @@ const BREATH_MS = 1100;
  *  question formats reply at one tempo rather than at two. */
 const REACT_MS = 460;
 
+
+// THE DRIVERS BEHIND THAT CURVE, for a scene whose art wrapper ALREADY carries a
+// transform of its own. Two animated styles on one View do not compose — the
+// later transform replaces the earlier one — and political7's stone is already
+// sliding in on `SCENE.value.stone`. So a scene that must fold the lift into an
+// existing transform reads these two values instead of taking the finished style.
+//
+//   const stone = useAnswerLiftValues(picked, 'stone', true);
+//   … transform: [{ translateY: base - 10 * stone.lift.value },
+//                  { scale: 1 + 0.06 * stone.lift.value }]
+export function useAnswerLiftValues(picked: string | null, id: string, correct: boolean) {
+  const answered = picked !== null;
+  const react = useSharedValue(0);
+  const lift = useSharedValue(0);
+  useEffect(() => {
+    if (!answered) { react.value = 0; lift.value = 0; return; }
+    react.value = withDelay(60, withTiming(1, { duration: REACT_MS, easing: Easing.out(Easing.cubic) }));
+    if (correct) {
+      lift.value = withDelay(60, withSequence(
+        withTiming(1.14, { duration: 250, easing: Easing.out(Easing.cubic) }),
+        withSpring(1, { damping: 13, stiffness: 190 }),
+      ));
+    }
+  }, [answered, correct, react, lift]);
+  return { react, lift, mine: picked === id, answered };
+}
+// AND A RISE WITH NO SCALE, for art that is not gathered into one box.
+//
+// metaphysics20 answers with a 24-cell grid and aesthetics18 with a panel plus
+// its bars; the pieces are positioned individually in SCENE space, so scaling
+// each about its own centre would pull the group apart while scaling their
+// shared full-stage wrapper would scale the whole picture. A pure translate is
+// identical for every piece, so the answer rises as ONE THING — which is what
+// the reader asked for — and nothing drifts.
+//
+// Use it on the wrapper that already holds exactly the answer's art. Prefer
+// useAnswerLift where the art can simply live inside the Target: a lift that
+// also swells reads as more physical, and that is the house default.
+export function useAnswerRise(picked: string | null, id: string, correct: boolean) {
+  const { lift } = useAnswerLiftValues(picked, id, correct);
+  return useAnimatedStyle(() => ({ transform: [{ translateY: -10 * lift.value }] }));
+}
+// ─────────────────────────────────────────────────────────────────────────────
+// THE REACTION, AVAILABLE TO A SCENE THAT CANNOT PUT ITS ART INSIDE A TARGET.
+//
+// Two shapes need lifting and only one of them can be a child. Where the art
+// exists ONLY while the question is up, it belongs inside the Target and the
+// component animates it (epistemology19). Where the art lives for the whole
+// lesson and the Target is mounted just for the graded beat — political7 draws
+// its stone and its charter from the first beat and asks about them at the
+// seventh — moving the art inside would delete it from every other beat.
+//
+// So the curve is exported. The scene keeps its own art wrapper, which is already
+// a positioned box, and applies this to it: the transform then scales about that
+// box's own centre and repaints only its own area, which is what §17 rule 7 asks
+// for. One curve, two call sites, and they cannot drift apart.
+export function useAnswerLift(picked: string | null, id: string, correct: boolean) {
+  const answered = picked !== null;
+  const mine = picked === id;
+  const react = useSharedValue(0);
+  const lift = useSharedValue(0);
+  useEffect(() => {
+    if (!answered) { react.value = 0; lift.value = 0; return; }
+    react.value = withDelay(60, withTiming(1, { duration: REACT_MS, easing: Easing.out(Easing.cubic) }));
+    if (correct) {
+      lift.value = withDelay(60, withSequence(
+        withTiming(1.14, { duration: 250, easing: Easing.out(Easing.cubic) }),
+        withSpring(1, { damping: 13, stiffness: 190 }),
+      ));
+    }
+  }, [answered, correct, react, lift]);
+  return useAnimatedStyle(() => {
+    const t = react.value;
+    if (!answered) return { opacity: 1, transform: [{ translateY: 0 }, { scale: 1 }] };
+    if (correct) {
+      const u = lift.value;
+      return { opacity: 1, transform: [{ translateY: -10 * u }, { scale: 1 + 0.06 * u }] };
+    }
+    if (mine) return { opacity: 1 - 0.5 * t, transform: [{ translateY: 0 }, { scale: 1 - 0.06 * t }] };
+    return { opacity: 1 - 0.3 * t, transform: [{ translateY: 0 }, { scale: 1 }] };
+  });
+}
+
 interface Registry {
   add: (key: string) => void;
   remove: (key: string) => void;
@@ -139,6 +222,16 @@ export default function Target({
   children,
   /** Match the target's own corner, so the ring does not square off a round thing. */
   radius = 4,
+  /**
+   * WHICH CORNER THE TICK LANDS ON, because there is no corner that is always free.
+   *
+   * Default 'br'. A stage target usually carries its label as a title row INSIDE
+   * it — epistemology19's doors print NUTRITION across the top — so a top-right
+   * badge covers the answer's own name. But where the label sits BELOW the art,
+   * as metaphysics23 hangs REASSEMBLED under its hull, bottom-right covers that
+   * instead. The scene knows which; nothing else does.
+   */
+  sealAt = 'br',
   ...rest
 }: {
   id: string;
@@ -147,6 +240,8 @@ export default function Target({
   picked: string | null;
   onPick: (id: string, correct: boolean) => void;
   radius?: number;
+  /** Which corner the tick lands on — see the prop comment above. */
+  sealAt?: 'br' | 'tr';
 } & Omit<PressableProps, 'onPress' | 'children'> & { children?: React.ReactNode }) {
   const answered = picked !== null;
   const reg = useContext(TargetCtx);
@@ -201,13 +296,31 @@ export default function Target({
     react.value = withDelay(60, withTiming(1, { duration: REACT_MS, easing: Easing.out(Easing.cubic) }));
   }, [answered, react]);
 
+  // THE LIFT OVERSHOOTS; THE DIMMING MUST NOT. They are two drivers because one
+  // cannot do both: a value that rises past 1 and settles reads as a thing being
+  // lifted and set down, which is what makes the reply feel like a reply — but the
+  // same value multiplied into `1 - 0.5 * t` would take a fading target BELOW its
+  // resting opacity and bring it back, which is a flicker. So `react` stays the
+  // plain ramp everything else reads, and only the correct branch reads `lift`.
+  const lift = useSharedValue(0);
+  useEffect(() => {
+    if (!(answered && correct)) { lift.value = 0; return; }
+    lift.value = withDelay(60, withSequence(
+      withTiming(1.14, { duration: 250, easing: Easing.out(Easing.cubic) }),
+      withSpring(1, { damping: 13, stiffness: 190 }),
+    ));
+  }, [answered, correct, lift]);
+
   const reaction = useAnimatedStyle(() => {
     const t = react.value;
     if (!answered) return { opacity: 1, transform: [{ translateY: 0 }, { scale: 1 }] };
     if (correct) {
       // Taken or merely revealed, the true one lifts. The reader must end the beat
-      // knowing which it was.
-      return { opacity: 1, transform: [{ translateY: -5 * t }, { scale: 1 + 0.05 * t }] };
+      // knowing which it was. Ten units and six percent are the DECK's numbers
+      // (./ChoiceCards): a stage question and a deck question are the same question
+      // to a reader, so they may not reply by different amounts.
+      const u = lift.value;
+      return { opacity: 1, transform: [{ translateY: -10 * u }, { scale: 1 + 0.06 * u }] };
     }
     if (mine) return { opacity: 1 - 0.5 * t, transform: [{ translateY: 0 }, { scale: 1 - 0.06 * t }] };
     // Neither picked nor right: it simply stops competing for attention.
@@ -277,7 +390,7 @@ export default function Target({
           question to a reader. */}
       {answered && mine ? (
         <Animated.View
-          style={[styles.seal, correct ? styles.sealTrue : styles.sealMiss, sealStyle]}
+          style={[styles.seal, sealAt === 'tr' ? styles.sealTop : styles.sealBottom, correct ? styles.sealTrue : styles.sealMiss, sealStyle]}
           pointerEvents="none"
         >
           <Text style={styles.sealMark}>{correct ? '✓' : '✕'}</Text>
@@ -349,15 +462,25 @@ export function TargetRing({ answered, radius = 4 }: { answered: boolean; radius
 export const TARGET_RING_INSET = RING_INSET;
 
 const styles = StyleSheet.create({
-  // Same mark, same corner, same size as the deck's (./ChoiceCards). A second tick
-  // drawn slightly differently would read as a different app congratulating you.
+  // Same mark, same size and same colours as the deck's (./ChoiceCards) — a second
+  // tick drawn differently would read as a different app congratulating you — but
+  // the OPPOSITE corner, and that is not drift.
+  //
+  // A deck card is furniture: 52 tall with 12 units of horizontal padding, so a
+  // badge on its top-right sits over padding. A stage target is ART, and its label
+  // is a title row that fills it — epistemology19's doors are 62 wide and carry
+  // NUTRITION across nearly all of it, so the top-right badge printed 'NUTRITI●'
+  // over the answer's own name. Bottom-right is where stage art is emptiest,
+  // because a caption is a heading and headings go on top.
   seal: {
     position: 'absolute',
-    right: -8, top: -10,
+    right: -8,
     width: 28, height: 28, borderRadius: 14,
     borderWidth: 2,
     alignItems: 'center', justifyContent: 'center',
   },
+  sealBottom: { bottom: -10 },
+  sealTop: { top: -10 },
   sealTrue: { borderColor: RIGHT, backgroundColor: RIGHT },
   sealMiss: { borderColor: WRONG, backgroundColor: WRONG },
   sealMark: { fontFamily: 'Inter_700Bold', fontSize: 14, color: PAPER, marginTop: -1 },

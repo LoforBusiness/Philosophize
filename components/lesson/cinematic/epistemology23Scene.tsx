@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -124,6 +124,9 @@ export default function Epistemology23Scene({ clock, bt, bi, i, picked, onPick, 
   const drops: number[] = [];
   for (let k = 0; k < DROPS; k += 1) drops.push(k);
 
+  // THE MESH IS THE ANSWER, so the bars and their caption rise together (E1).
+  const meshRise = useAnswerRise(picked, 'mesh', true);
+
   return (
     <View style={styles.scene}>
       <Animated.View style={[StyleSheet.absoluteFill, allStyle]} pointerEvents="none">
@@ -144,8 +147,10 @@ export default function Epistemology23Scene({ clock, bt, bi, i, picked, onPick, 
         <Animated.View style={[styles.shutterR, rShut]} />
         <Text style={[styles.partCap, { top: MOUTH_Y - 7 }]}>THE MOUTH</Text>
 
-        {bars.map((k) => <MeshBar key={k} S={SCENE} index={k} />)}
-        <Text style={[styles.partCap, { top: MESH_Y + 18 }]}>THE MESH</Text>
+        <Animated.View style={meshRise} pointerEvents="none">
+          {bars.map((k) => <MeshBar key={k} S={SCENE} index={k} />)}
+          <Text style={[styles.partCap, { top: MESH_Y + 18 }]}>THE MESH</Text>
+        </Animated.View>
       </Animated.View>
 
       <Target

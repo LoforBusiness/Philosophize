@@ -120,20 +120,14 @@ export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick }
   return (
     <View style={styles.scene}>
       <Animated.View style={[StyleSheet.absoluteFill, doorsStyle]}>
-        {DOOR_X.map((dx, k) => (
-          <View key={`d${dx}`} pointerEvents="none">
-            <View style={[styles.door, { left: dx }]} />
-            <Text style={[styles.doorCap, { left: dx }]} numberOfLines={1}>{DOOR_CAP[k]}</Text>
-            <View style={[styles.standing, { left: dx + 8, width: (DOOR_W - 16) * STANDING[k] }]} />
-          </View>
-        ))}
-
-        {/* THE SAME DOOR HOLDING TWO ANSWERS — the last beats' hard case. */}
-        <Animated.View style={[StyleSheet.absoluteFill, splitStyle]} pointerEvents="none">
-          <View style={[styles.claimMark, { left: DOOR_X[2] + 10, top: 302 }]} />
-          <View style={[styles.claimMark, { left: DOOR_X[2] + 10, top: 320 }]} />
-        </Animated.View>
-
+        {/* THE DOOR IS THE TARGET, not a hit-box laid over one.
+            These were two loops — the art and its caption drawn here, an empty
+            bordered rectangle placed on top there — and Target animates its own
+            CHILDREN, so answering lifted the rectangle off the word it belonged
+            to and left NUTRITION sitting where it was. The whole door rises now:
+            face, caption, its years of standing, and the two marks that say this
+            one holds a second answer. One loop, and the thing that moves is the
+            thing that was chosen (E1). */}
         {DOOR_X.map((dx, k) => (
           <Target
             key={DOOR_ID[k]}
@@ -142,16 +136,27 @@ export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick }
             picked={picked}
             onPick={onPick}
             disabled={!live || answered}
+            radius={3}
             style={[styles.hit, { left: dx }]}
           >
             <View
               style={[
-                styles.hitBox,
+                styles.doorFace,
                 answered && DOOR_ID[k] === 'nutrition' && styles.hitRight,
                 answered && picked === DOOR_ID[k] && DOOR_ID[k] !== 'nutrition' && styles.hitWrong,
               ]}
               pointerEvents="none"
             />
+            <Text style={styles.doorCap} numberOfLines={1}>{DOOR_CAP[k]}</Text>
+            <View style={[styles.standing, { width: (DOOR_W - 16) * STANDING[k] }]} />
+            {k === 2 ? (
+              /* THE SAME DOOR HOLDING TWO ANSWERS — the last beats' hard case.
+                 It lives inside the door now so it travels with it. */
+              <Animated.View style={[StyleSheet.absoluteFill, splitStyle]} pointerEvents="none">
+                <View style={[styles.claimMark, { top: 20 }]} />
+                <View style={[styles.claimMark, { top: 38 }]} />
+              </Animated.View>
+            ) : null}
           </Target>
         ))}
 
@@ -177,16 +182,19 @@ const styles = StyleSheet.create({
   // political7 and political8 both stand their subject on a filled mass.
   floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
-  door: {
-    position: 'absolute', top: DOOR_Y, width: DOOR_W, height: DOOR_H,
+  // EVERY DOOR PART IS POSITIONED INSIDE THE TARGET, not in scene space, because
+  // the Target IS the door now and its box is exactly `hit`. Relative coordinates
+  // are what let the whole thing be lifted as one object.
+  doorFace: {
+    position: 'absolute', left: 0, top: 0, width: DOOR_W, height: DOOR_H,
     borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   doorCap: {
-    position: 'absolute', top: DOOR_Y + 8, width: DOOR_W, textAlign: 'center',
+    position: 'absolute', left: 0, top: 8, width: DOOR_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
-  standing: { position: 'absolute', top: DOOR_Y + DOOR_H - 14, height: 4, backgroundColor: SOFT, borderRadius: 2 },
-  claimMark: { position: 'absolute', width: DOOR_W - 20, height: 3, backgroundColor: INK, borderRadius: 1 },
+  standing: { position: 'absolute', left: 8, top: DOOR_H - 14, height: 4, backgroundColor: SOFT, borderRadius: 2 },
+  claimMark: { position: 'absolute', left: 10, width: DOOR_W - 20, height: 3, backgroundColor: INK, borderRadius: 1 },
 
   chip: {
     position: 'absolute', left: CHIP_X, top: CHIP_Y, width: CHIP_W, height: CHIP_H,
@@ -203,9 +211,10 @@ const styles = StyleSheet.create({
   },
 
   hit: { position: 'absolute', top: DOOR_Y, width: DOOR_W, height: DOOR_H },
-  hitBox: { width: DOOR_W, height: DOOR_H, borderRadius: 3 },
   hitRight: { borderWidth: 3, borderColor: INK },
-  hitWrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+  // No opacity here any more: Target's own reaction already recedes a wrong pick,
+  // and two dimmings multiply to a quarter, which is a door nobody can see.
+  hitWrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });
 
 export function Epistemology19Lesson({ lesson }: { lesson: Lesson }) {

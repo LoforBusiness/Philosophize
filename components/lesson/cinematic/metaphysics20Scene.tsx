@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -123,12 +123,19 @@ export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick, d
   const cells: number[] = [];
   for (let c = 0; c < COLS * ROWS; c++) cells.push(c);
 
+  const simRise = useAnswerRise(picked, 'sim', true);
+
   return (
     <View style={styles.scene}>
       <Animated.View style={[StyleSheet.absoluteFill, outStyle]}>
         <View style={styles.outer} pointerEvents="none" />
         <Text style={styles.outCap}>BASE REALITY</Text>
-        {cells.map((c) => <Cell key={c} S={SCENE} index={c} />)}
+        {/* THE GRID IS THE ANSWER, so the grid rises (E1). A pure translate, because
+            the cells are placed individually in scene space: scaling each about its
+            own centre would pull the grid apart. */}
+        <Animated.View style={simRise} pointerEvents="none">
+          {cells.map((c) => <Cell key={c} S={SCENE} index={c} />)}
+        </Animated.View>
 
         {/* The outer frame is a target too, and it is the one most readers reach
             for. Its hit box is the MARGIN of the frame, not its whole area, or it

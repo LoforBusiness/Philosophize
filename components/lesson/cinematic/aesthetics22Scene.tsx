@@ -138,11 +138,6 @@ export default function Aesthetics22Scene({
       <Animated.View style={[StyleSheet.absoluteFill, mStyle]} pointerEvents="none">
         <Text style={[styles.mLabel, { top: HEART_Y - 12 }]}>HEART RATE</Text>
         <View style={[styles.track, { top: HEART_Y }]} />
-        <Text style={[styles.mLabel, { top: BELIEF_Y - 12 }]}>BELIEF IT IS REAL</Text>
-        <View style={[styles.track, { top: BELIEF_Y }]} />
-        {/* Drawn at zero rather than left out: a reading of nothing is still a
-            reading, and an absent instrument would be a different claim (A1). */}
-        <View style={[styles.fill, { top: BELIEF_Y + 4, width: 3 }]} />
       </Animated.View>
       <Animated.View style={[styles.fill, { top: HEART_Y + 4 }, heartStyle]} pointerEvents="none" />
 
@@ -165,6 +160,17 @@ export default function Aesthetics22Scene({
         disabled={!live || answered}
         style={[styles.hit, { left: M_X, top: BELIEF_Y, width: M_W, height: M_H }]}
       >
+        {/* THE BELIEF METER IS THE ANSWER, so the whole meter lifts (E1) — its
+            label, its track and the reading of nothing that is the point of it.
+            These were siblings and the Target held an empty box, so answering
+            slid an outline up off the words. */}
+        <Animated.View style={[StyleSheet.absoluteFill, mStyle]} pointerEvents="none">
+          <Text style={styles.mLabelIn}>BELIEF IT IS REAL</Text>
+          <View style={styles.trackIn} />
+          {/* Drawn at zero rather than left out: a reading of nothing is still a
+              reading, and an absent instrument would be a different claim (A1). */}
+          <View style={[styles.fillIn, { width: 3 }]} />
+        </Animated.View>
         <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: M_W, height: M_H }, answered && styles.right]} pointerEvents="none" />
       </Target>
 
@@ -210,6 +216,20 @@ const styles = StyleSheet.create({
   },
   fill: {
     position: 'absolute', left: M_X + 4, height: M_H - 8, backgroundColor: INK, borderRadius: 2,
+  },
+
+  // POSITIONED INSIDE THE BELIEF TARGET, whose box is exactly the track: the
+  // label rides 12 above it, the reading 4 in from its left edge.
+  mLabelIn: {
+    position: 'absolute', left: 0, top: -12, width: M_W,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
+  },
+  trackIn: {
+    position: 'absolute', left: 0, top: 0, width: M_W, height: M_H,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+  },
+  fillIn: {
+    position: 'absolute', left: 4, top: 4, height: M_H - 8, backgroundColor: INK, borderRadius: 2,
   },
 
   hit: { position: 'absolute' },

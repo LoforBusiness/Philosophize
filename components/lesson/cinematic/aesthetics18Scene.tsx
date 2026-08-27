@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -124,10 +124,14 @@ export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick, dr
 
   const steps = FALL.map((_, k) => k);
 
+  // THE MUSIC IS THE ANSWER, and this wrapper holds exactly it — caption, panel
+  // and its nine bars, which must rise together or the panel leaves them behind (E1).
+  const musRise = useAnswerRise(picked, 'shape', true);
+
   return (
     <View style={styles.scene}>
       {/* THE MUSIC. Nine bars, one per value. */}
-      <Animated.View style={[StyleSheet.absoluteFill, curveStyle]} pointerEvents="none">
+      <Animated.View style={[StyleSheet.absoluteFill, curveStyle, musRise]} pointerEvents="none">
         <Text style={[styles.cap, { left: MUS_X, width: MUS_W }]}>THE MUSIC</Text>
         <View style={[styles.panel, { left: MUS_X, width: MUS_W }]} />
         {steps.map((k) => (

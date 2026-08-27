@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -142,6 +142,10 @@ export default function Political22Scene({
     width: (T_X[2] + T_W - T_X[0]) * SCENE.value.flip,
   }));
 
+  // HIS REACH IS THE SWITCH ITSELF — housing, states and slot, which is exactly
+  // what this wrapper holds (E1). The lever is a different answer and stays put.
+  const swRise = useAnswerRise(picked, 'reach', true);
+
   return (
     <View style={styles.scene}>
       <Animated.View style={[StyleSheet.absoluteFill, tileStyle]} pointerEvents="none">
@@ -155,7 +159,7 @@ export default function Political22Scene({
       </Animated.View>
       <Animated.View style={[styles.strike, strikeStyle]} pointerEvents="none" />
 
-      <Animated.View style={[StyleSheet.absoluteFill, swStyle]} pointerEvents="none">
+      <Animated.View style={[StyleSheet.absoluteFill, swStyle, swRise]} pointerEvents="none">
         <View style={styles.housing} />
         <Text style={[styles.state, { top: LV_UP }]} numberOfLines={2}>LEAVES YOU BE</Text>
         <Text style={[styles.state, { top: LV_DN }]} numberOfLines={2}>INTERFERES</Text>

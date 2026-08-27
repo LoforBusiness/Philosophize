@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -123,6 +123,8 @@ export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick, 
 
   const rungs = [0, 1, 2];
 
+  const handRise = useAnswerRise(picked, 'hand', true);
+
   return (
     <View style={styles.scene}>
       <Animated.View style={[StyleSheet.absoluteFill, ladStyle]} pointerEvents="none">
@@ -142,7 +144,9 @@ export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick, 
       {/* THE PREMISE THAT HAS TO MOVE — marked, not named. */}
       <Animated.View style={[styles.give, giveStyle]} pointerEvents="none" />
 
-      <Animated.View style={[StyleSheet.absoluteFill, handStyle]} pointerEvents="none">
+      {/* THE HAND IS THE ANSWER, so the hand rises (E1). Its Target held an empty
+          box, so answering lifted an outline off HERE IS ONE HAND. */}
+      <Animated.View style={[StyleSheet.absoluteFill, handStyle, handRise]} pointerEvents="none">
         <View style={styles.hand} />
         <Text style={styles.handText}>HERE IS ONE HAND</Text>
         <Bar S={SCENE} top={HAND_Y + HAND_H - 16} len={HAND_BAR} left={HAND_X + 8} />

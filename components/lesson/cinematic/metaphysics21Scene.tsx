@@ -141,11 +141,6 @@ export default function Metaphysics21Scene({
         {FUT_X.map((bx) => <View key={`ff${bx}`} style={[styles.fill, { left: bx + 4 }]} />)}
       </Animated.View>
 
-      <Animated.View style={[StyleSheet.absoluteFill, lineStyle]} pointerEvents="none">
-        <View style={styles.now} />
-        <Text style={styles.nowText}>NOW</Text>
-      </Animated.View>
-
       <Target
         id="past" correct={false} picked={picked} onPick={onPick}
         disabled={!live || answered}
@@ -158,6 +153,13 @@ export default function Metaphysics21Scene({
         disabled={!live || answered}
         style={[styles.hit, { left: NOW_X - 2, top: NOW_Y, width: NOW_W + 4, height: NOW_H }]}
       >
+        {/* THE ANSWER IS THE MOMENT, so the moment is what lifts (E1). This art was
+            a sibling in an absoluteFill wrapper and the Target held an empty box, so
+            answering slid an outline up off the word NOW. */}
+        <Animated.View style={[StyleSheet.absoluteFill, lineStyle]} pointerEvents="none">
+          <View style={styles.nowIn} />
+          <Text style={styles.nowTextIn}>NOW</Text>
+        </Animated.View>
         <View style={[styles.hitBox, { width: NOW_W + 4, height: NOW_H }, answered && styles.right]} pointerEvents="none" />
       </Target>
       <Target
@@ -201,12 +203,15 @@ const styles = StyleSheet.create({
     backgroundColor: INK, borderRadius: 1.5,
   },
 
-  now: {
-    position: 'absolute', left: NOW_X, top: NOW_Y, width: NOW_W, height: NOW_H,
+  // POSITIONED INSIDE THE TARGET, not in scene space. The Target's box is
+  // NOW_X - 2 wide by NOW_W + 4, so the moment sits 2 in from its left edge and
+  // flush with its top — and the whole thing can then be lifted as one object.
+  nowIn: {
+    position: 'absolute', left: 2, top: 0, width: NOW_W, height: NOW_H,
     borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
   },
-  nowText: {
-    position: 'absolute', left: NOW_X, top: NOW_Y + 23, width: NOW_W, textAlign: 'center',
+  nowTextIn: {
+    position: 'absolute', left: 2, top: 23, width: NOW_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },
 

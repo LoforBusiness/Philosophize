@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -122,11 +122,16 @@ export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick, d
     opacity: SCENE.value.track * (1 - 0.45 * SCENE.value.open),
   }));
 
+  // EVERYTHING BEFORE IS THE ANSWER — the run-up and its name (E1).
+  const beforeRise = useAnswerRise(picked, 'before', true);
+
   return (
     <View style={styles.scene}>
       <Animated.View style={[StyleSheet.absoluteFill, trackStyle]} pointerEvents="none">
-        <View style={styles.runup} />
-        <Text style={styles.before}>EVERYTHING BEFORE</Text>
+        <Animated.View style={beforeRise} pointerEvents="none">
+          <View style={styles.runup} />
+          <Text style={styles.before}>EVERYTHING BEFORE</Text>
+        </Animated.View>
 
         <View style={[styles.riser, { top: UP_Y, height: RAIL_Y - UP_Y }]} />
         <View style={[styles.branch, { top: UP_Y }]} />

@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -119,14 +119,19 @@ export default function Epistemology22Scene({ clock, bt, bi, i, picked, onPick, 
   const stones: number[] = [];
   for (let k = 0; k < STONE_N; k += 1) stones.push(k);
 
+  // THE ROAD IS THE ANSWER — the lane and the name of how it was got (E1).
+  const roadRise = useAnswerRise(picked, 'road', true);
+
   return (
     <View style={styles.scene}>
       <Animated.View style={[StyleSheet.absoluteFill, allStyle]} pointerEvents="none">
         <Text style={styles.destCap}>THE ADDRESS</Text>
         <View style={styles.dest} />
 
-        <Text style={[styles.lane, { top: ROAD_Y - 16 }]}>ASKED SOMEBODY WHO KNEW</Text>
-        <View style={styles.road} />
+        <Animated.View style={roadRise} pointerEvents="none">
+          <Text style={[styles.lane, { top: ROAD_Y - 16 }]}>ASKED SOMEBODY WHO KNEW</Text>
+          <View style={styles.road} />
+        </Animated.View>
 
         <Text style={[styles.lane, { top: STONE_Y - 16 }]}>GUESSED</Text>
         {stones.map((k) => (

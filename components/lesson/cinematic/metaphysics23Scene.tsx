@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -110,6 +110,9 @@ export default function Metaphysics23Scene({ clock, bt, bi, i, picked, onPick }:
 
   const planks = [0, 1, 2, 3, 4];
 
+  // THE REASSEMBLED SHIP IS THE ANSWER, and this wrapper holds exactly it (E1).
+  const builtRise = useAnswerRise(picked, 'reassembled', true);
+
   return (
     <View style={styles.scene}>
       <Animated.View style={[StyleSheet.absoluteFill, shipStyle]} pointerEvents="none">
@@ -119,7 +122,7 @@ export default function Metaphysics23Scene({ clock, bt, bi, i, picked, onPick }:
         <Text style={[styles.label, { left: L_HULL }]}>REPAIRED</Text>
       </Animated.View>
 
-      <Animated.View style={[StyleSheet.absoluteFill, builtStyle]} pointerEvents="none">
+      <Animated.View style={[StyleSheet.absoluteFill, builtStyle, builtRise]} pointerEvents="none">
         <View style={[styles.mast, { left: R_MAST }]} />
         <View style={[styles.sail, { left: R_MAST - SAIL_W - 5 }]} />
         <View style={[styles.hull, { left: R_HULL }]} />
@@ -145,7 +148,7 @@ export default function Metaphysics23Scene({ clock, bt, bi, i, picked, onPick }:
         <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: 48 }, answered && picked === 'gap' && styles.wrong]} pointerEvents="none" />
       </Target>
       <Target
-        id="reassembled" correct picked={picked} onPick={onPick}
+        id="reassembled" sealAt="tr" correct picked={picked} onPick={onPick}
         disabled={!live || answered}
         style={[styles.hit, { left: R_HULL, width: HULL_W }]}
       >

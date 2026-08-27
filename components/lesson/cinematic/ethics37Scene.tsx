@@ -10,7 +10,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -119,6 +119,11 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
   }));
   const curtainStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.unseenOn }));
 
+  // THE PLANS ARE THE ANSWER, so all four rise together (E1). A pure translate:
+  // each is placed individually, so scaling them about their own centres would
+  // spread them apart.
+  const planRise = useAnswerRise(picked, 'plans', true);
+
   return (
     <View style={styles.scene}>
       <Text style={styles.cap}>AN ORDINARY TUESDAY</Text>
@@ -129,7 +134,9 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
 
         <Animated.View style={[styles.cord, cordStyle]} pointerEvents="none" />
 
-        {PLAN_X.map((qx, k) => <Plan key={qx} S={SCENE} left={qx} index={k} />)}
+        <Animated.View style={planRise} pointerEvents="none">
+          {PLAN_X.map((qx, k) => <Plan key={qx} S={SCENE} left={qx} index={k} />)}
+        </Animated.View>
 
         <Target
           id="plans"
