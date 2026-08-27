@@ -153,7 +153,7 @@ export default function Metaphysics21Scene({
         disabled={!live || answered}
         style={[styles.hit, { left: NOW_X - 2, top: NOW_Y, width: NOW_W + 4, height: NOW_H }]}
       >
-        {/* THE ANSWER IS THE MOMENT, so the moment is what lifts (E1). This art was
+        {/* THE ANSWER IS THE MOMENT, so the moment is what lifts (E39). This art was
             a sibling in an absoluteFill wrapper and the Target held an empty box, so
             answering slid an outline up off the word NOW. */}
         <Animated.View style={[StyleSheet.absoluteFill, lineStyle]} pointerEvents="none">

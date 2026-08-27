@@ -122,7 +122,7 @@ export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick, d
     opacity: SCENE.value.track * (1 - 0.45 * SCENE.value.open),
   }));
 
-  // EVERYTHING BEFORE IS THE ANSWER — the run-up and its name (E1).
+  // EVERYTHING BEFORE IS THE ANSWER — the run-up and its name (E39).
   const beforeRise = useAnswerRise(picked, 'before', true);
 
   return (

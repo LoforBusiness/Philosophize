@@ -143,7 +143,7 @@ export default function Political22Scene({
   }));
 
   // HIS REACH IS THE SWITCH ITSELF — housing, states and slot, which is exactly
-  // what this wrapper holds (E1). The lever is a different answer and stays put.
+  // what this wrapper holds (E39). The lever is a different answer and stays put.
   const swRise = useAnswerRise(picked, 'reach', true);
 
   return (

@@ -3445,7 +3445,10 @@ crop generally pushes it into something else.
 
 ---
 
-### T4 · The ring has to match the shape, and the count has to match the answers
+### E38 · The ring has to match the shape, and the count has to match the answers
+
+*(Written as T4 until the tone group claimed that letter. Renumbered under U4 —
+an id is an address, and two rules at one address means neither can be cited.)*
 
 `Target` draws a breathing ink ring on its own bounds — that is what tells a
 reader which parts of the picture are the buttons. Two things about it are easy
@@ -4399,3 +4402,205 @@ is a trap for the next author, who will believe the source and not the screen �
 and the source is where the wrong number gets written down. `epistemology8`'s
 comment claiming `BECAUSE` was 35.3dp when it is 46.1 is the same failure in a
 different measurement.
+
+---
+
+## Group U — the rule book is part of the product
+
+The reader asked for this group directly, and it is the only group that is about
+the other groups:
+
+> *"I want more rules to be made based on a lot of the things I'm trying to do in
+> lessons to try and improve the lessons … I want rules to be created often so
+> that when I do make improvements and I like them, that they can be made into
+> rules and less problems will show up then because there'll be rules to follow."*
+
+Groups A–T all exist because something shipped wrong and somebody noticed. That
+is a slow and expensive way to find rules, and it only ever finds the faults a
+person happened to look at. Group U is about making the loop cheaper.
+
+### U1 · A liked change becomes a rule in the same commit
+
+The moment a change is approved — by the reader, or by looking at it and
+agreeing — write down what made it right, as a rule, before moving on. Not after
+the batch, not "when there is time". The reasoning is at its clearest while the
+before-and-after is still on screen, and it is gone a day later.
+
+What goes in the rule is the **general form**, not the instance. "epistemology19's
+NUTRITION door should lift" is a bug report. "The thing that moves must be the
+thing that was chosen" is a rule, and it found 63 more.
+
+### U2 · A rule without a checker is a wish
+
+Every rule in this file that has held did so because something re-derives it. The
+ones that quietly rotted were the ones a person had to remember: §11 records a
+budget that was in no npm script for months and therefore could not ratchet, and
+§21 records a preview-route rule that was "enforced" by remembering it until two
+stray routes were found by hand in one afternoon.
+
+So a new rule ships with one of three things:
+
+1. a **check** that fails the build (`npm run check`), or
+2. a **high-water budget** that may only move one way — `CARD_BUDGET`,
+   `SOLID_FLOOR`, `FLAT_BUDGET`, `BARE_BUDGET`, `HARD_BUDGET`, or
+3. an honest note in the rule saying **it cannot be checked and why**, so the next
+   reader knows not to trust silence.
+
+Anything else is a paragraph nobody will run.
+
+### U3 · A new checker is counter-tested before it is believed
+
+Put the defect back and watch it go red; then take it out and watch it go green.
+Both directions, every time. This file records five detectors that were wrong
+rather than the code:
+
+- the orphan-line rule in `check:quips` flagged the mascot's own punchline,
+- the Cyrillic counter-test proved nothing because Caveat ships Cyrillic,
+- `check:smooth` printed "148 scenes carry every track" and was wrong about 38,
+- a "labelled diagram" metric ranked `political7` — the reader's own good example
+  — at the median,
+- `check:lift` called `ethics31`'s DUTY lamp an empty hit-box, because it matched
+  `<Text` and the lamp uses `<Animated.Text>`.
+
+The first four were caught. The cost of not catching one is worse than having no
+rule: a green checker is read as evidence.
+
+### U4 · A rule may not contradict a rule that already exists
+
+Before adding one, read the group it belongs to and grep its id. Two live examples
+of what goes wrong:
+
+- **T4 was used twice** — once for tap-target rings and once for tone — because
+  the tone group was written months after the tap rule borrowed its letter. The
+  ring rule is `E38` now; it was always a question rule wearing a tone number.
+- **`check:lift` shipped calling its rule "E1"**, which collides with nothing in
+  code and everything in this file, where group E already runs E33–E37c.
+
+An id is an address. Two rules at one address means neither can be cited.
+
+### U5 · The rule states the SHAPE of the failure, not just the fix
+
+A rule that says "do X" is obeyed once. A rule that says "here is the shape this
+failure has, and here is why it is invisible" is recognised again somewhere else.
+The three that have earned the most:
+
+- **the current house idiom can be the defect** (L8, and the walk-speed bug): the
+  newest lesson in every branch was the wrong exemplar, so copying the best recent
+  work propagated the fault, and it looked like craft while it did it.
+- **a checker that measures nothing must not look clean** (§21): a dead probe, an
+  eaten backslash and a short sweep all read exactly like a clean corpus.
+- **a coarse control hides a continuous defect** (S7): three changes per gesture
+  and thirty are not the same test.
+
+---
+
+## E39 · What moves when an answer lands must be the thing that was chosen
+
+`Target` animates its own **children**: the right answer rises, a wrong pick
+recedes. So a scene that draws its art and its label as siblings and lays an empty
+bordered rectangle on top gets the reaction applied to the rectangle. The reader
+described the result exactly:
+
+> *"only the outline of the correct box goes out, not the entire box … and then
+> the rest of the words are staying there. It usually does not look good."*
+
+44 scenes did this and 12 of them did it to the **right answer**. At its purest the
+Target was self-closing — `political7`, the lesson held up as the standard, moved
+nothing at all when you answered it.
+
+**Two mechanisms, and which one to use is decided by WHEN THE ART EXISTS.**
+
+- The art exists only while the question is up → **put it inside the Target**,
+  positioned relative to the Target's own box. This is the default, and it
+  simplifies the scene: `epistemology19` went from two loops to one.
+- The art is drawn on every beat while the Target mounts for the graded one →
+  **`useAnswerLift` / `useAnswerLiftValues` / `useAnswerRise`**. Moving it inside
+  would delete it from every other beat.
+
+**`useAnswerLiftValues` exists because two animated styles do not compose.** The
+later `transform` replaces the earlier one, and `political7`'s stone is already
+sliding in on one of its own, so the lift is folded into it rather than fighting
+it.
+
+**`useAnswerRise` is a translate with no scale, and that is not laziness.** Where
+an answer's pieces are placed individually in scene space — `metaphysics20`'s
+24-cell grid, `aesthetics18`'s panel and its nine bars — scaling each about its
+own centre pulls the group apart, and scaling their shared full-stage wrapper
+scales the whole picture. A pure translate is identical for every piece, so the
+answer rises as one thing.
+
+**The lift overshoots and the dimming does not.** They are two drivers because one
+cannot do both: a value that rises past 1 and settles reads as a thing being
+lifted and set down, but that same value multiplied into `1 - 0.5 * t` would take
+a fading target *below* its resting opacity and bring it back, which is a flicker.
+
+**The distances are the deck's** — 10 units and 6% (`./ChoiceCards`). A stage
+question and a deck question are the same question to a reader, so they may not
+reply by different amounts.
+
+**`check:lift` is the ratchet**, and it counts correct targets separately from
+wrong ones. A wrong pick already replies with the ✕ and the scene's own marking,
+so a bare wrong target costs the reader nothing they can name; folding the two
+together hid 12 real defects inside 63 mixed ones and made the work impossible to
+prioritise. A target with genuinely nothing to lift takes a
+`// LIFT-EXEMPT: <id> — <reason>` comment, because a ratchet with a permanent
+floor nobody can explain stops being read.
+
+## E40 · The tick goes where the words are not, and no corner is always free
+
+The ✓/✕ seal is the same mark, size and colours as the deck's, but not the same
+corner, and that is not drift.
+
+A deck card is **furniture**: 52 tall with 12 units of horizontal padding, so a
+badge on its top-right sits over padding. A stage target is **art**, and its label
+is usually a title row that fills it — `epistemology19`'s doors are 62 wide and
+print NUTRITION across nearly all of it, so a top-right badge rendered
+**"NUTRITI●"** over the answer's own name.
+
+Bottom-right is the default because a caption is a heading and headings go on top.
+But `metaphysics23` hangs REASSEMBLED **under** its hull, where bottom-right covers
+it instead. So the scene declares it: `sealAt="tr"`. There is no corner that is
+always free, and a component cannot know which one this scene left empty.
+
+---
+
+## J11 · A word the lesson is not teaching must be one the reader already has
+
+The reader drew the distinction themselves, and it is the whole rule:
+
+> *"This does not just mean shorten the amount of words, but it means to make the
+> words that are shown easier to grasp and simpler."*
+
+A long sentence and a hard word fail differently. A long sentence loses the
+thread; a hard word stops the reader dead on one token, and there is nothing in
+the sentence to recover from it. J1–J4 measure length and were green while the
+reader was still telling us the lessons read as difficult.
+
+**Three things `check:plainwords` deliberately does not flag**, because getting
+any of them wrong makes the rule worse than nothing:
+
+1. **A quotation.** Bentham wrote *imprescriptible*; Plato wrote *indissoluble*;
+   Augustine wrote *manifoldness*. §13 says the primary source is what makes a
+   lesson feel worth paying for, and rewriting a philosopher is the one edit this
+   app must never make. Every `quote:` block is stripped before a word is judged —
+   and once they were, the corpus went from ~1,100 "hard" words to **seven**.
+2. **A term the curriculum exists to teach.** `logic6` says "P is the antecedent —
+   the condition"; `strong4` says "a strong argument that also has true premises
+   has its own name: cogent." That is the pattern working. The bar for the exempt
+   list is that the lesson **names and glosses it in the same breath** — if it does
+   not, the fix is to introduce it, not to exempt it (and that is J5).
+3. **Syllable count on its own.** The first draft of this ranked by syllables and
+   put *everything*, *everybody* and *beautiful* at the top of the corpus — three
+   words every six-year-old owns. Length is not difficulty, and a checker that
+   says it is trains people to ignore it.
+
+So the list is **curated, and every entry carries the plain word to use instead**.
+That is what makes a finding actionable rather than a scolding.
+
+**What the measurement actually showed is worth keeping.** Rare vocabulary was
+*not* what made these lessons hard: seven words in 49,000. The hard spots were
+compressed, elliptical sentences — *"It never claims the last sliver"*, *"being
+correctable is the method working, not a confession"* — and one clause that was
+simply not English: `political9` had *"steering a ship takes a pilot, not a show
+of hands, and govern by popularity and flattery beats wisdom."* **Look for the
+sentence that cannot be read aloud, not the long word.**

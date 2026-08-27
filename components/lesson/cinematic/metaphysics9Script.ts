@@ -49,7 +49,7 @@ export const BEATS: M9Beat[] = [
   },
   {
     p: 13, x: 160, panels: 1, cross: 1, puzzle: true,
-    text: 'Then decide to lift your arm. Something with no size and no position has to shove a physical limb. Descartes guessed the pineal gland; his critics answered that an unextended mind has nothing to push with.',
+    text: 'Then decide to lift your arm. Something with no size and no position has to shove a physical limb. Descartes guessed the pineal gland; his critics answered that a mind with no size has nothing to push with.',
     cite: 'The interaction problem',
     dur: 5.0,
   },

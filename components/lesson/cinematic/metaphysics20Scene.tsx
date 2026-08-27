@@ -130,7 +130,7 @@ export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick, d
       <Animated.View style={[StyleSheet.absoluteFill, outStyle]}>
         <View style={styles.outer} pointerEvents="none" />
         <Text style={styles.outCap}>BASE REALITY</Text>
-        {/* THE GRID IS THE ANSWER, so the grid rises (E1). A pure translate, because
+        {/* THE GRID IS THE ANSWER, so the grid rises (E39). A pure translate, because
             the cells are placed individually in scene space: scaling each about its
             own centre would pull the grid apart. */}
         <Animated.View style={simRise} pointerEvents="none">

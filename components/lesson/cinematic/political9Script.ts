@@ -34,7 +34,7 @@ export const BEATS: P9Beat[] = [
   },
   {
     vote: 1, tally: true, one: 22,
-    text: 'So they vote, and the count is honest, and the count is seven to one. Plato distrusted exactly this: steering a ship takes a pilot, not a show of hands, and govern by popularity and flattery beats wisdom.',
+    text: 'So they vote, and the count is honest, and the count is seven to one. Plato distrusted exactly this: steering a ship takes a trained pilot, not a show of hands. Let the crew vote and they follow whoever flatters them best.',
     cite: 'Plato’s doubt',
     dur: 5.2,
   },

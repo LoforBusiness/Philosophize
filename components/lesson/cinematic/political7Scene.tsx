@@ -104,7 +104,7 @@ export default function Political7Scene({ clock, bt, bi, i, picked, onPick }: Sc
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
 
-  // THE STONE IS THE ANSWER, SO THE STONE IS WHAT MOVES (E1).
+  // THE STONE IS THE ANSWER, SO THE STONE IS WHAT MOVES (E39).
   // Its Target is mounted only for the graded beat while the slab is drawn from
   // the first, so the art cannot live inside the Target — the lift is folded into
   // the transform this wrapper already carries instead. Answering used to move
@@ -185,7 +185,7 @@ export default function Political7Scene({ clock, bt, bi, i, picked, onPick }: Sc
       />
           {/* LIFT-EXEMPT: paper — the charter is already dimmed by charterDim, and
               charterWrap is the full stage, so scaling it would slide the whole
-              picture rather than the answer (E1). */}
+              picture rather than the answer (E39). */}
           <Target id={'paper'} correct={false} picked={picked} onPick={onPick}
         style={styles.paperHit}
             disabled={answered}

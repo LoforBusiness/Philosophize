@@ -160,7 +160,7 @@ export default function Aesthetics22Scene({
         disabled={!live || answered}
         style={[styles.hit, { left: M_X, top: BELIEF_Y, width: M_W, height: M_H }]}
       >
-        {/* THE BELIEF METER IS THE ANSWER, so the whole meter lifts (E1) — its
+        {/* THE BELIEF METER IS THE ANSWER, so the whole meter lifts (E39) — its
             label, its track and the reading of nothing that is the point of it.
             These were siblings and the Target held an empty box, so answering
             slid an outline up off the words. */}

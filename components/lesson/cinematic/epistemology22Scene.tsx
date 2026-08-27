@@ -119,7 +119,7 @@ export default function Epistemology22Scene({ clock, bt, bi, i, picked, onPick, 
   const stones: number[] = [];
   for (let k = 0; k < STONE_N; k += 1) stones.push(k);
 
-  // THE ROAD IS THE ANSWER — the lane and the name of how it was got (E1).
+  // THE ROAD IS THE ANSWER — the lane and the name of how it was got (E39).
   const roadRise = useAnswerRise(picked, 'road', true);
 
   return (

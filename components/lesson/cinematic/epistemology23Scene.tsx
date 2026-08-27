@@ -124,7 +124,7 @@ export default function Epistemology23Scene({ clock, bt, bi, i, picked, onPick, 
   const drops: number[] = [];
   for (let k = 0; k < DROPS; k += 1) drops.push(k);
 
-  // THE MESH IS THE ANSWER, so the bars and their caption rise together (E1).
+  // THE MESH IS THE ANSWER, so the bars and their caption rise together (E39).
   const meshRise = useAnswerRise(picked, 'mesh', true);
 
   return (

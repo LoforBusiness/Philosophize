@@ -119,7 +119,7 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
   }));
   const curtainStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.unseenOn }));
 
-  // THE PLANS ARE THE ANSWER, so all four rise together (E1). A pure translate:
+  // THE PLANS ARE THE ANSWER, so all four rise together (E39). A pure translate:
   // each is placed individually, so scaling them about their own centres would
   // spread them apart.
   const planRise = useAnswerRise(picked, 'plans', true);

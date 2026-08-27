@@ -66,7 +66,7 @@ export const BEATS: Pol17Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap what creates the newcomer\'s duty.',
-      explain: 'The water he drank. Fair play needs no signature and no vote — it needs him to have taken the benefit of something other people are carrying. That is why the empty row is damning rather than exculpating: he is on the rota already, by drinking.',
+      explain: 'The water he drank. Fair play needs no signature and no vote — it needs him to have taken the benefit of something other people are carrying. That is why the empty row is damning rather than an excuse: he is on the rota already, by drinking.',
       xp: 5,
     },
   },

@@ -110,7 +110,7 @@ export default function Metaphysics23Scene({ clock, bt, bi, i, picked, onPick }:
 
   const planks = [0, 1, 2, 3, 4];
 
-  // THE REASSEMBLED SHIP IS THE ANSWER, and this wrapper holds exactly it (E1).
+  // THE REASSEMBLED SHIP IS THE ANSWER, and this wrapper holds exactly it (E39).
   const builtRise = useAnswerRise(picked, 'reassembled', true);
 
   return (

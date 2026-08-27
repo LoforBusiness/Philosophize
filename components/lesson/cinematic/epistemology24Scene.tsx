@@ -144,7 +144,7 @@ export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick, 
       {/* THE PREMISE THAT HAS TO MOVE — marked, not named. */}
       <Animated.View style={[styles.give, giveStyle]} pointerEvents="none" />
 
-      {/* THE HAND IS THE ANSWER, so the hand rises (E1). Its Target held an empty
+      {/* THE HAND IS THE ANSWER, so the hand rises (E39). Its Target held an empty
           box, so answering lifted an outline off HERE IS ONE HAND. */}
       <Animated.View style={[StyleSheet.absoluteFill, handStyle, handRise]} pointerEvents="none">
         <View style={styles.hand} />

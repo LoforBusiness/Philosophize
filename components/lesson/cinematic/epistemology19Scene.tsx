@@ -127,7 +127,7 @@ export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick }
             to and left NUTRITION sitting where it was. The whole door rises now:
             face, caption, its years of standing, and the two marks that say this
             one holds a second answer. One loop, and the thing that moves is the
-            thing that was chosen (E1). */}
+            thing that was chosen (E39). */}
         {DOOR_X.map((dx, k) => (
           <Target
             key={DOOR_ID[k]}

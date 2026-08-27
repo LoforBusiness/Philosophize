@@ -85,7 +85,7 @@ export const BEATS: Epi16Beat[] = [
           { id: 'wild', upto: 1, reads: 'rules out so much it is already refuted' },
         ],
       },
-      explain: 'The other card is what almost everyone says first, and it is why bad theories survive so long. Being unrefutable sounds like being unbeaten. It is closer to never having entered: a claim that rules out no result tells you nothing about which result you will get.',
+      explain: 'The other card is what almost everyone says first, and it is why bad theories survive so long. A claim nothing could ever prove wrong sounds unbeaten. It is closer to never having entered: a claim that rules out no result tells you nothing about which result you will get.',
       xp: 5,
     },
   },

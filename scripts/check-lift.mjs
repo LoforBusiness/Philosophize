@@ -1,8 +1,8 @@
-// GROUP E — WHAT MOVES WHEN AN ANSWER LANDS.
+// E39 — WHAT MOVES WHEN AN ANSWER LANDS.
 //
 //   npm run check:lift
 //
-// E1: THE THING THAT MOVES MUST BE THE THING THAT WAS CHOSEN.
+// E39: THE THING THAT MOVES MUST BE THE THING THAT WAS CHOSEN.
 //
 // `Target` animates its own CHILDREN — the right answer rises, a wrong pick
 // recedes. So a scene that draws its art and its label as siblings and then lays
@@ -129,7 +129,7 @@ const bare = rows.reduce((a, r) => a + r.bare, 0);
 const other = rows.reduce((a, r) => a + r.other, 0);
 const withBare = rows.filter((r) => r.bare);
 
-console.log('\nGROUP E — WHAT MOVES WHEN AN ANSWER LANDS\n');
+console.log('\nE39 — WHAT MOVES WHEN AN ANSWER LANDS\n');
 if (withBare.length) {
   console.log('  scenes where the RIGHT answer lifts an outline off its own words:');
   for (const r of withBare.slice(0, 14)) {
@@ -146,7 +146,7 @@ console.log('  ' + (over ? 'FAIL' : 'ok  ') + '  bare CORRECT targets are a high
 console.log('        ' + other + ' wrong-answer target(s) are also bare — they reply with the ✕ and the');
 console.log('        scene\'s own marking, so they are tracked, not gated.');
 if (over) {
-  console.log('\n  a new target arrived with no art in it, or a converted one slipped back (E1).');
+  console.log('\n  a new target arrived with no art in it, or a converted one slipped back (E39).');
 } else if (bare < BARE_BUDGET) {
   console.log('\n  lower BARE_BUDGET to ' + bare + ' in scripts/check-lift.mjs — a budget that');
   console.log('  still says the old number is a debt.');

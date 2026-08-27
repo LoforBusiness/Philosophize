@@ -115,7 +115,7 @@ const RECALL_BUDGET = 1;
 // is a high-water mark that may only ever go DOWN, exactly like CARD_BUDGET and
 // MC_BUDGET. Writing a new over-long sentence raises it and fails the build.
 // The other three are zeroes: they were nearly clean already.
-const LONG_SENTENCE_BUDGET = 30;
+const LONG_SENTENCE_BUDGET = 29;
 
 let fails = 0;
 const ok = (label, pass, detail) => {

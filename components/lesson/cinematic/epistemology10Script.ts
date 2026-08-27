@@ -56,7 +56,7 @@ export const BEATS: E10Beat[] = [
   },
   {
     p: 5, x: 160, gauge: 1, band: 2, needle: 0.78, revise: true,
-    text: 'Watch what science does with that. It never claims the last sliver, and it plainly knows a great deal. Evidence arrives, the needle moves, and nothing has gone wrong — being correctable is the method working, not a confession.',
+    text: 'Watch what science does with doubt. Science never claims certainty, and it plainly knows a great deal. Evidence arrives and the needle moves. Changing its mind is how the method works, not a sign of failure.',
     cite: 'Why it is a strength',
     dur: 5.2,
   },

@@ -125,7 +125,7 @@ export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick, dr
   const steps = FALL.map((_, k) => k);
 
   // THE MUSIC IS THE ANSWER, and this wrapper holds exactly it — caption, panel
-  // and its nine bars, which must rise together or the panel leaves them behind (E1).
+  // and its nine bars, which must rise together or the panel leaves them behind (E39).
   const musRise = useAnswerRise(picked, 'shape', true);
 
   return (
