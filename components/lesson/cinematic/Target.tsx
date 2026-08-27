@@ -156,6 +156,29 @@ export function useAnswerLift(picked: string | null, id: string, correct: boolea
   });
 }
 
+// THE SAME REACTION AS A WRAPPER, for art that is drawn in a MAP beside its Target.
+//
+// The commonest shape in this corpus is a row of things drawn by one map and a row
+// of Targets laid over them by another — logic19 draws four <Card>s and then four
+// bare hit-boxes. The art cannot move into the Target without unpicking the map,
+// and a hook cannot be called per item. A component can.
+//
+// TRANSLATE ONLY, deliberately. This wraps whatever it is given, including a child
+// that positions itself absolutely in scene space, so the wrapper has no meaningful
+// box of its own and a scale would grow about the wrong origin. A translate is the
+// same for every child wherever it sits.
+export function AnswerLift({
+  id, picked, correct, children,
+}: {
+  id: string;
+  picked: string | null;
+  correct: boolean;
+  children?: React.ReactNode;
+}) {
+  const style = useAnswerRise(picked, id, correct);
+  return <Animated.View style={style} pointerEvents="box-none">{children}</Animated.View>;
+}
+
 interface Registry {
   add: (key: string) => void;
   remove: (key: string) => void;

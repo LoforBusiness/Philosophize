@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -114,7 +114,12 @@ export default function Logic20Scene({ clock, bt, bi, i, picked, onPick, dragPos
     <View style={styles.scene}>
       <Text style={styles.cap} pointerEvents="none">ONE CLAIM, THREE TELLINGS</Text>
 
-      {BOARD_X.map((bx, k) => <Board key={BOARD_ID[k]} S={SCENE} index={k} />)}
+      {/* EACH BOARD RIDES WITH ITS OWN TARGET (E39). */}
+      {BOARD_X.map((bx, k) => (
+        <AnswerLift key={BOARD_ID[k]} id={BOARD_ID[k]} picked={picked} correct={BOARD_ID[k] === 'weak'}>
+          <Board S={SCENE} index={k} />
+        </AnswerLift>
+      ))}
 
       <Animated.View style={[styles.hammer, hammerStyle]} pointerEvents="none" />
 

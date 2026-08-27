@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -105,16 +105,21 @@ export default function Aesthetics21Scene({ clock, bt, bi, i, picked, onPick }: 
         <Text key={`c${k}`} style={[styles.cap, { left: cx }]} numberOfLines={1}>{COL_CAP[k]}</Text>
       ))}
 
-      {COL_X.map((cx, k) => <Column key={COL_ID[k]} S={SCENE} col={k} />)}
+      {/* EACH COLUMN RIDES WITH ITS OWN TARGET (E39). */}
+      {COL_X.map((cx, k) => (
+        <AnswerLift key={COL_ID[k]} id={COL_ID[k]} picked={picked} correct={COL_ID[k] === 'painting'}>
+          <Column S={SCENE} col={k} />
+        </AnswerLift>
+      ))}
 
       <Animated.View style={[StyleSheet.absoluteFill, goneStyle]} pointerEvents="none">
         {COL_X.map((cx, k) => (
-          <View key={`v${k}`}>
+          <AnswerLift key={`v${k}`} id={COL_ID[k]} picked={picked} correct={COL_ID[k] === 'painting'}>
             <View style={[styles.plate, { left: cx }, k === 2 && styles.plateGone]} />
             <Text style={[styles.plateText, { left: cx }, k === 2 && styles.plateTextGone]}>
               {COL_VERDICT[k]}
             </Text>
-          </View>
+          </AnswerLift>
         ))}
       </Animated.View>
 

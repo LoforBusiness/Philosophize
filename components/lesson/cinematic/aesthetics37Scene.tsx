@@ -10,7 +10,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -110,13 +110,14 @@ export default function Aesthetics37Scene({ clock, bt, bi, i, picked, onPick, dr
       <Text style={[styles.rowCap, { top: 352 }]}>MADE UP TONIGHT</Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, stavesStyle]}>
+        {/* EACH STAVE RIDES WITH ITS OWN TARGET (E39). */}
         {[0, 1].map((r) => (
-          <View key={r} pointerEvents="none">
+          <AnswerLift key={r} id={r === 0 ? 'written' : 'solo'} picked={picked} correct={r === 1}>
             {[0, 1, 2, 3, 4].map((l) => (
               <View key={l} style={[styles.staveLine, { top: STAVE_Y[r] + l * 6 }]} />
             ))}
             <View style={[styles.perfLine, { top: PERF_Y[r] }]} />
-          </View>
+          </AnswerLift>
         ))}
 
         <Animated.View style={[StyleSheet.absoluteFill, scoreStyle]} pointerEvents="none">
@@ -129,7 +130,10 @@ export default function Aesthetics37Scene({ clock, bt, bi, i, picked, onPick, dr
           ))}
         </Animated.View>
 
-        {NOTE_X.map((nx, k) => <Solo key={nx} S={SCENE} left={nx} index={k} />)}
+        {/* The solo notes ride with the SOLO answer (E39). */}
+        <AnswerLift id={'solo'} picked={picked} correct={true}>
+          {NOTE_X.map((nx, k) => <Solo key={nx} S={SCENE} left={nx} index={k} />)}
+        </AnswerLift>
 
         {[0, 1].map((r) => (
           <Target

@@ -127,11 +127,14 @@ export default function Metaphysics23Scene({ clock, bt, bi, i, picked, onPick }:
         <View style={[styles.sail, { left: R_MAST - SAIL_W - 5 }]} />
         <View style={[styles.hull, { left: R_HULL }]} />
         <Text style={[styles.label, { left: R_HULL }]}>REASSEMBLED</Text>
+        {/* THE PLANKS RIDE WITH THE HULL THEY ARE IN (E39). They were drawn outside
+            this wrapper, so answering lifted the hull off its own cargo — measured
+            in the render as five things standing still while two rose. */}
+        {planks.map((k) => <Plank key={`r${k}`} S={SCENE} k={k} left={R_HULL + 6} old={false} />)}
       </Animated.View>
 
       {/* One number, two hulls: what empties on the left fills on the right. */}
       {planks.map((k) => <Plank key={`l${k}`} S={SCENE} k={k} left={L_HULL + 6} old />)}
-      {planks.map((k) => <Plank key={`r${k}`} S={SCENE} k={k} left={R_HULL + 6} old={false} />)}
 
       <Target
         id="repaired" correct={false} picked={picked} onPick={onPick}

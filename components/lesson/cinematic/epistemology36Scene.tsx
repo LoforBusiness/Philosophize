@@ -11,7 +11,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -117,12 +117,15 @@ export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick, 
         <View style={styles.counter} pointerEvents="none" />
         <View style={styles.apron} pointerEvents="none" />
 
+        {/* EACH PAIR RIDES WITH ITS OWN TARGET (E39). */}
         {PAIR_X.map((px, k) => (
-          <View key={px} style={[styles.pair, { left: px }]} pointerEvents="none">
-            <View style={styles.pairBox} />
-            <View style={[styles.seam, { top: 16 }]} />
-            <View style={[styles.seam, { top: 34 }]} />
-          </View>
+          <AnswerLift key={px} id={PAIR_ID[k]} picked={picked} correct={k === 3}>
+            <View style={[styles.pair, { left: px }]} pointerEvents="none">
+              <View style={styles.pairBox} />
+              <View style={[styles.seam, { top: 16 }]} />
+              <View style={[styles.seam, { top: 34 }]} />
+            </View>
+          </AnswerLift>
         ))}
 
         {PAIR_X.map((px, k) => (

@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -104,7 +104,12 @@ export default function Aesthetics20Scene({ clock, bt, bi, i, picked, onPick }: 
       <Text style={[styles.cap, { left: CLAIM_X, width: CLAIM_W }]} pointerEvents="none">WHAT IT IS FOR</Text>
       <Text style={[styles.cap, { left: SUB_X, width: SUB_W }]} pointerEvents="none">WHAT ELSE DOES IT</Text>
 
-      {ROWS.map((r, k) => <Row key={r.id} S={SCENE} index={k} />)}
+      {/* Each answer rides with its own target (E39). */}
+      {ROWS.map((r, k) => (
+        <AnswerLift key={r.id} id={r.id} picked={picked} correct={r.sub === null}>
+          <Row S={SCENE} index={k} />
+        </AnswerLift>
+      ))}
 
       {ROWS.map((r, k) => (
         <Target

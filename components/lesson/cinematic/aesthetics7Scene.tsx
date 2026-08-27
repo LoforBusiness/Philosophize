@@ -15,7 +15,7 @@ import {
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 
 // A small gallery. Two framed works hang side by side on a picture rail — a
 // three-second scribble on the left, a thirty-year composition on the right — each
@@ -233,7 +233,11 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dra
         const rightOn = (live && answered && f.correct) || (settled && f.correct);
         const wrongOn = (live && answered && chosen && !f.correct) || (settled && !f.correct);
         return (
-          <View key={f.id} style={[styles.col, { left: f.left }, wrongOn && styles.dim]} pointerEvents="none">
+          // EACH FRAMED WORK RIDES WITH ITS OWN TARGET (E39). The Targets mount only
+          // on the question beat while the frames hang from the first, so the art
+          // cannot live inside them — it takes the same reaction as a wrapper.
+          <AnswerLift key={f.id} id={f.id} picked={picked} correct={f.correct}>
+          <View style={[styles.col, { left: f.left }, wrongOn && styles.dim]} pointerEvents="none">
             <View style={styles.frameBox} />
             <View style={styles.mat} />
             <Animated.View style={[styles.art, artStyle]}>
@@ -259,6 +263,7 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dra
               </Animated.View>
             ) : null}
           </View>
+          </AnswerLift>
         );
       })}
 

@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -124,7 +124,12 @@ export default function Political24Scene({
         <Text style={styles.caption}>SPEAKERS, BY GENERATION</Text>
       </Animated.View>
 
-      {plates.map((k) => <Words key={`w${k}`} S={SCENE} k={k} />)}
+      {/* Each place rides with its own target (E39). */}
+      {plates.map((k) => (
+        <AnswerLift key={`w${k}`} id={`place${k}`} picked={picked} correct={k === 2}>
+          <Words S={SCENE} k={k} />
+        </AnswerLift>
+      ))}
       {bars.map((k) => <Bar key={`b${k}`} S={SCENE} k={k} />)}
 
       {plates.map((k) => (

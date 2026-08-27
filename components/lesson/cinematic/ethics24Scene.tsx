@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -126,7 +126,12 @@ export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick, dragPo
         <Text style={styles.slabText}>FOUR YEARS</Text>
       </Animated.View>
 
-      {PIL_X.map((px, k) => <Pillar key={PIL_ID[k]} S={SCENE} index={k} />)}
+      {/* EACH PILLAR RIDES WITH ITS OWN TARGET (E39). */}
+      {PIL_X.map((px, k) => (
+        <AnswerLift key={PIL_ID[k]} id={PIL_ID[k]} picked={picked} correct={PIL_ID[k] === 'desert'}>
+          <Pillar S={SCENE} index={k} />
+        </AnswerLift>
+      ))}
 
       <Animated.View style={[StyleSheet.absoluteFill, nameStyle]} pointerEvents="none">
         {PIL_X.map((px, k) => (

@@ -164,8 +164,10 @@ export default function Political22Scene({
         <Text style={[styles.state, { top: LV_UP }]} numberOfLines={2}>LEAVES YOU BE</Text>
         <Text style={[styles.state, { top: LV_DN }]} numberOfLines={2}>INTERFERES</Text>
         <View style={styles.slot} />
+        {/* THE LEVER IS IN THE SWITCH, so it rises with it (E39). Drawn outside this
+            wrapper it stayed behind while the housing lifted off it. */}
+        <Animated.View style={[styles.lever, levStyle]} pointerEvents="none" />
       </Animated.View>
-      <Animated.View style={[styles.lever, levStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, capStyle]} pointerEvents="none">
         <Text style={styles.caption}>HIS REACH</Text>

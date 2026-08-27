@@ -122,8 +122,6 @@ export default function Metaphysics19Scene({ clock, bt, bi, i, picked, onPick, d
       <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap} pointerEvents="none">EVERYTHING TRUE OF ONE APPLE</Text>
 
-      <Animated.View style={[styles.peg, pegStyle]} pointerEvents="none" />
-
       {cards.map((k) => <Prop key={k} S={SCENE} index={k} />)}
 
       {/* THE TWIN — the same stack again, and the reason bundles struggle. */}
@@ -150,6 +148,10 @@ export default function Metaphysics19Scene({ clock, bt, bi, i, picked, onPick, d
         id="peg" correct picked={picked} onPick={onPick}
         disabled={!live || answered} style={styles.pegHit}
       >
+        {/* THE PEG ITSELF, inside its own target (E39). It was drawn as a sibling,
+            so answering lifted the outline and the caption and left the peg — the
+            thing the question is about — standing where it was. */}
+        <Animated.View style={[styles.pegIn, pegStyle]} pointerEvents="none" />
         <View
           style={[styles.pegHitBox, live && !answered && styles.hitLive,
             answered && picked === 'peg' && styles.right]}
@@ -222,7 +224,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
   },
 
-  peg: { position: 'absolute', left: PEG_X, top: PEG_Y, width: 6, height: PEG_H, backgroundColor: INK, borderRadius: 2 },
+  // Inside pegHit, whose left is PEG_X - 28, so the peg sits 28 in from its edge.
+  pegIn: { position: 'absolute', left: 28, top: 0, width: 6, height: PEG_H, backgroundColor: INK, borderRadius: 2 },
 
   card: {
     position: 'absolute', left: CARD_X, width: CARD_W, height: CARD_H,

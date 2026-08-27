@@ -11,7 +11,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -113,11 +113,14 @@ export default function Logic21Scene({ clock, bt, bi, i, picked, onPick }: Scene
   return (
     <View style={styles.scene}>
       <Animated.View style={[StyleSheet.absoluteFill, chipStyle]}>
+        {/* EACH CHIP RIDES WITH ITS OWN TARGET (E39). The chips were one map and
+            the hit-boxes another, so answering lifted an empty outline off the
+            chip and the words on it. */}
         {CHIP_X.map((cx, k) => (
-          <View key={`c${k}`} pointerEvents="none">
+          <AnswerLift key={`c${k}`} id={CHIP_ID[k]} picked={picked} correct={CHIP_ID[k] === 'oxygen'}>
             <View style={[styles.chip, { left: cx }]} />
             <Text style={[styles.chipText, { left: cx }]} numberOfLines={2}>{CHIP_TEXT[k]}</Text>
-          </View>
+          </AnswerLift>
         ))}
 
         {CHIP_X.map((cx, k) => (

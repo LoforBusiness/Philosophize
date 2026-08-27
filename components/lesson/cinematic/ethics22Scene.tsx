@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -123,7 +123,12 @@ export default function Ethics22Scene({ clock, bt, bi, i, picked, onPick, dragPo
         <View style={styles.cDrop} />
       </Animated.View>
 
-      {COL_X.map((cx, k) => <Want key={COL_ID[k]} S={SCENE} index={k} />)}
+      {/* Each answer rides with its own target (E39). */}
+      {COL_X.map((cx, k) => (
+        <AnswerLift key={COL_ID[k]} id={COL_ID[k]} picked={picked} correct={COL_ID[k] === 'pleasure'}>
+          <Want S={SCENE} index={k} />
+        </AnswerLift>
+      ))}
 
       {COL_X.map((cx, k) => (
         <Target

@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -111,7 +111,13 @@ export default function Logic19Scene({ clock, bt, bi, i, picked, onPick }: Scene
         <Text style={styles.plateText}>A VOWEL ON THE FRONT MEANS AN EVEN NUMBER ON THE BACK</Text>
       </Animated.View>
 
-      {CARD_X.map((cx, k) => <Card key={CARD_ID[k]} S={SCENE} index={k} showBack={i >= TURN_BEAT} />)}
+      {/* EACH CARD RIDES WITH ITS OWN TARGET (E39). The cards were one map and the
+          hit-boxes another, so answering lifted an empty outline off the card. */}
+      {CARD_X.map((cx, k) => (
+        <AnswerLift key={CARD_ID[k]} id={CARD_ID[k]} picked={picked} correct={CARD_ID[k] === 'odd'}>
+          <Card S={SCENE} index={k} showBack={i >= TURN_BEAT} />
+        </AnswerLift>
+      ))}
 
       {CARD_X.map((cx, k) => (
         <Target

@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -122,8 +122,11 @@ export default function Ethics19Scene({ clock, bt, bi, i, picked, onPick, dragPo
         <Text style={[styles.head, { left: COL_AFF, width: 48, textAlign: 'center' }]}>AFFECTS</Text>
         <Text style={[styles.head, { left: COL_SIG, width: 58, textAlign: 'center' }]}>SIGNED BY</Text>
 
+        {/* Each row rides with its own target (E39). */}
         {ROWS.map((r, k) => (
-          <Row key={r.id} S={SCENE} index={k} />
+          <AnswerLift key={r.id} id={r.id} picked={picked} correct={r.others}>
+            <Row S={SCENE} index={k} />
+          </AnswerLift>
         ))}
 
         {ROWS.map((r, k) => (

@@ -125,6 +125,7 @@
     "check:cover": "node scripts/check-cover.mjs",
     "check:hold": "node scripts/check-hold.mjs",
     "check:readable": "node scripts/check-readable.mjs",
+    "check:reveal": "node scripts/check-reveal.mjs",
     "measure:must": "node scripts/measure-must.mjs",
     "check:launch": "node scripts/check-launch.mjs && node scripts/check-words.mjs",
     "sheet:launch": "node scripts/sheet-launch.mjs",

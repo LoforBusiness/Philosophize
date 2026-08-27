@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -125,11 +125,14 @@ export default function Metaphysics18Scene({ clock, bt, bi, i, picked, onPick, d
       <Text style={styles.cap} pointerEvents="none">POINT AT IT</Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, shelfStyle]}>
+        {/* EACH PLINTH RIDES WITH ITS OWN TARGET (E39). The plinths were one map
+            and the hit-boxes another, so answering lifted an empty outline off the
+            plinth and its caption. */}
         {PL_X.map((px, k) => (
-          <View key={`p${px}`} pointerEvents="none">
+          <AnswerLift key={`p${px}`} id={PL_ID[k]} picked={picked} correct={PL_ID[k] === 'three'}>
             <View style={[styles.plinth, { left: px }]} />
             <Text style={[styles.plinthCap, { left: px }]} numberOfLines={2}>{PL_CAP[k]}</Text>
-          </View>
+          </AnswerLift>
         ))}
 
         {PL_X.map((px, k) => <Aim key={`a${px}`} S={SCENE} index={k} />)}

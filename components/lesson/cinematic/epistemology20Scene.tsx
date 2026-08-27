@@ -11,7 +11,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -121,7 +121,12 @@ export default function Epistemology20Scene({ clock, bt, bi, i, picked, onPick, 
 
   return (
     <View style={styles.scene}>
-      {BOX_X.map((bx, k) => <Source key={BOX_ID[k]} S={SCENE} index={k} />)}
+      {/* Each answer rides with its own target (E39). */}
+      {BOX_X.map((bx, k) => (
+        <AnswerLift key={BOX_ID[k]} id={BOX_ID[k]} picked={picked} correct={FROM_OWN[k] === 1}>
+          <Source S={SCENE} index={k} />
+        </AnswerLift>
+      ))}
 
       {/* THE WIRING, and the two places it goes. */}
       <Animated.View style={[StyleSheet.absoluteFill, wireStyle]} pointerEvents="none">

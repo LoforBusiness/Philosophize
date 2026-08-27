@@ -4517,6 +4517,13 @@ nothing at all when you answered it.
   **`useAnswerLift` / `useAnswerLiftValues` / `useAnswerRise`**. Moving it inside
   would delete it from every other beat.
 
+**Prefer the first, and treat the second as the place this rule leaks.** A wrapper
+is only as good as its contents, and nothing about the hook makes anyone check
+that it holds ALL of the answer. Two of the three defects E39b later found were
+exactly that: `metaphysics23`'s hull rose off its own planks, and `political22`'s
+switch housing rose off the lever sitting inside it. **A Target cannot leave behind
+what it contains** — the hook can, every time.
+
 **`useAnswerLiftValues` exists because two animated styles do not compose.** The
 later `transform` replaces the earlier one, and `political7`'s stone is already
 sliding in on one of its own, so the lift is folded into it rather than fighting
@@ -4697,3 +4704,127 @@ four turned up the moment the plates were shaded, and T3 is the fix: type on a
 tone is INK. Worse, an overlap that was invisible white-on-white becomes an opaque
 plate sitting on somebody else's word. **Shading is not only a paint change; it is
 a reveal.** Render the batch and look at it (U3).
+
+---
+
+## E39b · Nothing of the answer may be left standing in its own box
+
+The reader reported the outline-only reveal three times. The first fix put art
+inside the Target and the second lifted art that could not go inside. Both were
+right and both were incomplete, and the third report is why this rule exists:
+
+> *"I know that was fixed for, like, a couple lessons, but I've noticed that it
+> has not been fixed for all lessons … I need every single lesson to be fixed."*
+
+**E39 was checked by a PROXY, and a proxy has blind spots by construction.**
+`check:lift` asked whether a Target has art *inside* it. That catches the empty
+hit-overlay, it reported **zero**, and the defect was still on screen — because a
+Target holding a caption passes the test even when the thing the question is ABOUT
+is drawn as a sibling. `metaphysics19` held the words **THE PEG** and left the peg
+itself behind: the outline rose, the label rose, and the ink bar the reader was
+asked to choose stayed exactly where it was.
+
+**So the rule is about the BOX, not about the JSX.** Resolve the correct Target's
+rectangle. Every drawn thing whose own rectangle sits inside it must rise with it —
+either because it is rendered inside the Target, or because it is inside the
+wrapper a `useAnswerRise` lifts for that same answer. Anything else is left
+standing, and `check:lift`'s E39b section is a ratchet at zero.
+
+**Three found this way, and none was visible to the old rule:**
+
+- `metaphysics19` — the peg, drawn as a sibling of its own target.
+- `metaphysics23` — the reassembled hull rose off its own **planks**, which were
+  drawn outside the wrapper that lifts the ship.
+- `political22` — the switch housing rose off the **lever sitting inside it**.
+
+**The last two are the escape hatch failing, and that is the lesson.** A wrapper
+lifted by `useAnswerRise` is only as good as its contents, and nothing about the
+hook makes anyone check that it holds *all* of the answer. Where the art can live
+inside the Target, put it there — the Target cannot leave behind what it contains.
+Reach for the hook only when the art must be drawn on beats where the Target is
+not mounted, and when you do, the wrapper is the whole answer or the rule is broken
+again.
+
+**And a render harness is the only thing that can settle it.** `check:reveal`
+plays each lesson to its graded beat, taps the correct target, and measures which
+painted things inside the answer moved and which did not. It costs a browser, so
+E39b is the offline half — but the harness is what proved the offline half was
+lying, and it is what will prove the next one.
+
+Two flaws in that harness cost a run each, and both are the shape §21 keeps
+recording. Reusing a tab between lessons made every lesson after the first report
+*never rendered a stage* — the same ids failed whichever lane they landed on,
+which is a poisoned tab, not three broken scenes. And where the correct answer is
+not the first candidate the page is reloaded and replayed, so a "before" snapshot
+taken once at the top describes a DOM that no longer exists: it would invent
+findings in exactly the lessons that took the most work to reach.
+
+---
+
+## E39c · A gate that recognises one spelling of the thing it gates is not a gate
+
+This is the third time the reader reported the outline-only reveal, and the reason
+it survived two fixes is worth more than either fix.
+
+`check:lift` decided which Targets it was allowed to fail like this:
+
+```js
+const isCorrect = (t) => /\bcorrect(\s*=\s*\{?\s*true|\s|>|\/)/.test(t.open) && …
+```
+
+It wanted a literal `true`. **Eleven targets in the whole corpus say that.** Ninety
+say `correct={CARD_ID[k] === 'odd'}`, or `correct={c.correct}`, or `correct={k === 2}`
+— and every one of them was quietly filed as a WRONG answer and left ungated. The
+file printed **`0 of 0`** for two rounds while the reader could sit and watch an
+empty outline slide off a card in `logic19`.
+
+**Nothing failed, and nothing could.** The gate was green because it was looking at
+eleven per cent of what it claimed to cover, and the number it printed was the
+number of defects among those eleven. Widening it to *anything not literally
+`{false}`* took the count from 0 to 26 in one line.
+
+**Two more of the same shape were found on the way**, and they are the same
+mistake in different clothes:
+
+- `isBare` matched `<Text` and not `<Animated.Text>`, so a lamp holding two
+  cross-fading words read as an empty box.
+- `isBare` counted tags, so `{body}` — political2 building its whole ledger row
+  into a variable and rendering it inside the Target — read as empty too. **A
+  rendered identifier is content the checker cannot see through; it is not
+  evidence of absence.**
+
+**So the rule is general: when a checker decides what it is allowed to look at,
+count what it excluded.** Print the population, not only the findings. A ratchet at
+zero over eleven per cent of the corpus is worse than no ratchet, because it is
+read as proof.
+
+## E39d · `AnswerLift` — the reaction as a wrapper, for art drawn in a map
+
+The commonest shape here is a row of answers drawn by ONE map and a row of Targets
+laid over it by ANOTHER: `logic19` draws four `<Card>`s and then four bare
+hit-boxes. The art cannot move inside the Target without unpicking the map, and a
+hook cannot be called per item — so `AnswerLift` is a component, and wrapping the
+art map is a two-line change per scene.
+
+**It translates and does not scale.** It wraps whatever it is given, including a
+child that positions itself absolutely in scene space, so the wrapper has no
+meaningful box of its own and a scale would grow about the wrong origin. A
+translate is the same for every child wherever it sits.
+
+**Twenty-six scenes were converted this way, and a codemod did five of them
+wrong.** Rewriting a `<View>` group into an `<AnswerLift>` group means finding the
+matching close tag by walking text, and the group's own children are Views — all
+five files it touched came back with mismatched tags. It was reverted whole and the
+group shape is a hand edit. **A codemod that half-applies is worse than none: the
+half it did is the half nobody re-reads.**
+
+## E39e · The render harness may not judge the figure
+
+`check:reveal` measures which painted things inside the answer's box moved. On
+`political2` it reported four that did not — and they were the stickman's head and
+ankles, standing exactly where the staging put him, inside the ledger row that IS
+the answer. The row and both its lines had plainly risen.
+
+He carries `testID="figure"` for precisely this sort of question, and the harness
+skips anything inside it. **A geometric rule needs to know what is scenery, what is
+an answer, and what is a person** — and the person is never part of an answer.

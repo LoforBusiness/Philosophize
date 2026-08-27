@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -116,10 +116,10 @@ export default function Aesthetics24Scene({ clock, bt, bi, i, picked, onPick }: 
 
       <Animated.View style={[StyleSheet.absoluteFill, plStyle]} pointerEvents="none">
         {PL_X.map((px, k) => (
-          <View key={px}>
+          <AnswerLift key={px} id={`c${k}`} picked={picked} correct={k === 2}>
             <View style={[styles.plate, { left: px }]} />
             <Text style={[styles.plateText, { left: px }]} numberOfLines={2}>{PL_TEXT[k]}</Text>
-          </View>
+          </AnswerLift>
         ))}
       </Animated.View>
 

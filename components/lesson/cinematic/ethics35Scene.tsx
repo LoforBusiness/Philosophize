@@ -10,7 +10,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -151,7 +151,12 @@ function Tags({
   const wrong = (id: string) => answered && picked === id;
   return (
     <>
-      {TAG_Y.map((ty, k) => <Tag key={ty} S={S} k={k} top={ty} />)}
+      {/* Each tag rides with its own target (E39). */}
+      {TAG_Y.map((ty, k) => (
+        <AnswerLift key={ty} id={TAG_ID[k]} picked={picked} correct={k === 3}>
+          <Tag S={S} k={k} top={ty} />
+        </AnswerLift>
+      ))}
       {TAG_Y.map((ty, k) => (
         <Target
           key={`t${ty}`}

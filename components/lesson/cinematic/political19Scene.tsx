@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -108,19 +108,27 @@ export default function Political19Scene({ clock, bt, bi, i, picked, onPick }: S
   return (
     <View style={styles.scene}>
       <Animated.View style={[StyleSheet.absoluteFill, axisStyle]} pointerEvents="none">
+        {/* EACH PANEL RIDES WITH ITS OWN TARGET (E39). */}
         {PAN_TOP.map((ty, k) => (
-          <View key={`p${k}`}>
+          <AnswerLift key={`p${k}`} id={PAN_ID[k]} picked={picked} correct={PAN_ID[k] === 'pull'}>
             <Text style={[styles.cap, { top: ty - 12 }]}>{PAN_CAP[k]}</Text>
             <View style={[styles.panel, { top: ty }]} />
-          </View>
+          </AnswerLift>
         ))}
         <View style={styles.axis} />
         <Text style={[styles.axisLab, { left: PAN_X }]}>AT YOUR FEET</Text>
         <Text style={[styles.axisLab, { left: 260, textAlign: 'right', width: 100 }]}>8,000 MILES</Text>
       </Animated.View>
 
-      <Plot S={SCENE} row={0} values={COST} field="cost" />
-      <Plot S={SCENE} row={1} values={PULL} field="pull" />
+      {/* THE LINE IS THE PANEL'S OWN DATA, so it rides with it (E39b). Wrapping
+          the panel and leaving its plot behind is the exact leak E39b is about:
+          seven plotted segments stayed while the frame rose off them. */}
+      <AnswerLift id={PAN_ID[0]} picked={picked} correct={false}>
+        <Plot S={SCENE} row={0} values={COST} field="cost" />
+      </AnswerLift>
+      <AnswerLift id={PAN_ID[1]} picked={picked} correct>
+        <Plot S={SCENE} row={1} values={PULL} field="pull" />
+      </AnswerLift>
 
       {/* ONE MARK THROUGH BOTH PANELS — the reader stands at one distance. */}
       <Animated.View style={[StyleSheet.absoluteFill, markStyle]} pointerEvents="none">

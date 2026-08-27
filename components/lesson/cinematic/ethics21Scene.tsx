@@ -11,7 +11,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -133,15 +133,18 @@ export default function Ethics21Scene({ clock, bt, bi, i, picked, onPick, dragPo
         ))}
       </Animated.View>
 
+      {/* EACH OUTCOME RIDES WITH ITS OWN TARGET (E39). */}
       {OUT_X.map((ox, k) => (
-        <View key={`o${ox}`} pointerEvents="none">
+        <AnswerLift key={`o${ox}`} id={OUT_ID[k]} picked={picked} correct={OUT_ID[k] === 'relief'}>
           <Animated.View style={[styles.out, { left: ox }, armStyle]} />
           <Animated.Text style={[styles.outText, { left: ox }, armStyle]}>{OUT_TEXT[k]}</Animated.Text>
-        </View>
+        </AnswerLift>
       ))}
 
       {/* THE SIGHT-MARK. The one asymmetry, and the answer to the first question. */}
-      <Animated.View style={[styles.sight, aimStyle]} pointerEvents="none" />
+      <AnswerLift id={OUT_ID[0]} picked={picked} correct>
+        <Animated.View style={[styles.sight, aimStyle]} pointerEvents="none" />
+      </AnswerLift>
 
       {/* THE HARM AS THE MEANS: the right arm now runs through the death and on
           into the relief, so the path visibly passes through it. */}

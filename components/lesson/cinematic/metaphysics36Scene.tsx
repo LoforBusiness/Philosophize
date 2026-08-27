@@ -10,7 +10,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -127,7 +127,12 @@ export default function Metaphysics36Scene({ clock, bt, bi, i, picked, onPick, d
             </View>
           );
         })}
-        {rooms.map((r) => <Guest key={`g${r}`} S={SCENE} room={r} />)}
+        {/* Each guest rides with its own room target (E39). */}
+        {rooms.map((r) => (
+          <AnswerLift key={`g${r}`} id={`r${r}`} picked={picked} correct={r % 2 === 1}>
+            <Guest S={SCENE} room={r} />
+          </AnswerLift>
+        ))}
         <Text style={styles.more}>…</Text>
 
         <View style={styles.desk} pointerEvents="none" />

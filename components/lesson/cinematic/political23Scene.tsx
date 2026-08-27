@@ -11,7 +11,7 @@ import {
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -122,7 +122,12 @@ export default function Political23Scene({ clock, bt, bi, i, picked, onPick, dra
       </Animated.View>
 
       {/* Tags come off one at a time, right to left, rather than all at once. */}
-      {tags.map((k) => <Tag key={k} S={SCENE} k={k} />)}
+      {/* Each tag rides with its own target (E39). */}
+      {tags.map((k) => (
+        <AnswerLift key={k} id={`tag${k}`} picked={picked} correct={k === 0}>
+          <Tag S={SCENE} k={k} />
+        </AnswerLift>
+      ))}
 
       <Animated.View style={[StyleSheet.absoluteFill, boxStyle]} pointerEvents="none">
         <Text style={styles.boxCap}>WHAT IS LEFT</Text>

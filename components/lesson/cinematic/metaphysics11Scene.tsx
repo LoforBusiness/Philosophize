@@ -13,7 +13,7 @@ import { BEATS } from './metaphysics11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // Two men on two low stands, each stand carrying a name, and a plate reading
@@ -231,7 +231,8 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick, d
       {SIDES.map((s) => (
         // box-none so the wrapper never eats a tap meant for the stand under it,
         // and never eats one meant for the body Pressable behind it (E36).
-        <View key={s.id} style={[styles.slot, { left: s.cx - PLINTH_W / 2 }]} pointerEvents="box-none">
+        <AnswerLift key={s.id} id={s.id} picked={picked} correct={s.correct}>
+        <View style={[styles.slot, { left: s.cx - PLINTH_W / 2 }]} pointerEvents="box-none">
           <Target id={s.id} correct={s.correct} picked={picked} onPick={onPick}
               style={styles.slotFill} hitSlop={SLOP_BOX} disabled={!live || answered}>
             <View
@@ -243,6 +244,7 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick, d
             />
           </Target>
         </View>
+        </AnswerLift>
       ))}
 
       {/* the two names, which are what actually move at the end */}
