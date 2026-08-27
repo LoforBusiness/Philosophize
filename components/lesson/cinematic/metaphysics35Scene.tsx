@@ -210,6 +210,7 @@ function Knot({
         picked={picked}
         onPick={onPick}
         disabled={!live || answered}
+        radius={KNOT_R}
         style={[styles.link, { left: KNOT_SHOT - KNOT_R }]}
       >
         <View style={[styles.ring, wrong('shot') && styles.ringWrong]} pointerEvents="none" />
@@ -222,6 +223,7 @@ function Knot({
         picked={picked}
         onPick={onPick}
         disabled={!live || answered}
+        radius={KNOT_R}
         style={[styles.link, { left: KNOT_BORN - KNOT_R }]}
       >
         <View style={styles.ring} pointerEvents="none" />

@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics31Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, STONE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -124,6 +124,7 @@ export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick, dr
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* the instrument */}
       <Target id={'hard'} correct={false} picked={picked} onPick={onPick}
               style={styles.inst} disabled={!live || answered}>
@@ -218,10 +219,14 @@ function Bar({
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule alone leaves the figure
+  // standing on bare page; a filled band under it is what the two lessons
+  // the reader holds up both do, and it costs one View.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   inst: { position: 'absolute', ...INST },
   instInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', paddingTop: 8,
   },
   instText: {

@@ -120,14 +120,19 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, 
           <View style={styles.canopy} pointerEvents="none" />
         </View>
       </Target>
-      <Target id={'screen'} correct={true} picked={picked} onPick={onPick}
-              style={[styles.label, { left: SCR_L, width: SCR_W }]} disabled={!live || answered}>
+      {/* A CAPTION, NOT A SECOND BUTTON. The question panel counts the mounted
+          targets and prints the number — "tap one of the N marked parts above" —
+          so offering this answer through both its picture AND its label told the
+          reader there were five choices when there are three, two pairs of which
+          did the same thing. The picture stays the control: tapping the thing
+          itself is the whole reason this format won (E33). */}
+      <View style={[styles.label, { left: SCR_L, width: SCR_W }]} pointerEvents="none">
         <View style={[styles.labelInner, answered && styles.pickRight]}>
           <Text style={[styles.labelText, answered && styles.onInk]} numberOfLines={1}>
             WHAT YOU SEE
           </Text>
         </View>
-      </Target>
+      </View>
 
       {/* the world, whatever it turns out to be */}
       <Target id={'world'} correct={false} picked={picked} onPick={onPick}
@@ -146,12 +151,11 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, 
           </Animated.View>
         </View>
       </Target>
-      <Target id={'world'} correct={false} picked={picked} onPick={onPick}
-              style={[styles.label, { left: WOR_L, width: WOR_W }]} disabled={!live || answered}>
+      <View style={[styles.label, { left: WOR_L, width: WOR_W }]} pointerEvents="none">
         <View style={[styles.labelInner, wrong('world') && styles.pickWrong]}>
           <Text style={styles.labelText} numberOfLines={1}>THE WORLD</Text>
         </View>
-      </Target>
+      </View>
 
       {/* the step from one to the other */}
       <Animated.View style={[styles.bridge, leapStyle]} pointerEvents="none" />

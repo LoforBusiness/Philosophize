@@ -58,7 +58,7 @@ const TOO_DARK_FOR_SOFT = ['STONE', 'SHADE', 'SOFT', 'INK'];
  * took it to 112.
  */
 const MIN_MASSES = 3;
-const FLAT_BUDGET = 112;
+const FLAT_BUDGET = 104;
 
 const files = fs.readdirSync(DIR).filter((f) => f.endsWith('Scene.tsx')).sort();
 

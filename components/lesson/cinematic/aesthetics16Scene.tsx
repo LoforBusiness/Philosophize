@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics16Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, STONE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -120,6 +120,7 @@ export default function Aesthetics16Scene({ clock, bt, bi, i, picked, onPick }: 
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* ── the work: hung once, never edited again ─────────────────────────── */}
       <Animated.View style={[styles.canvas, canvasStyle]} pointerEvents="none">
         {BARS.map((w, k) => (
@@ -190,10 +191,14 @@ function FactCard({
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 24, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule alone leaves the figure
+  // standing on bare page; a filled band under it is what the two lessons
+  // the reader holds up both do, and it costs one View.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   canvas: {
     position: 'absolute', left: CANVAS_L, top: CANVAS_T, width: CANVAS_W, height: CANVAS_H,
-    borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center', gap: 10,
   },
   bar: { height: 8, backgroundColor: INK, borderRadius: 1 },

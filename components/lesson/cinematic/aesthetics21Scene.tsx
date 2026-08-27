@@ -7,7 +7,7 @@ import { clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from '
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics21Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, STONE, PAPER,
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -100,6 +100,7 @@ export default function Aesthetics21Scene({ clock, bt, bi, i, picked, onPick }: 
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {COL_X.map((cx, k) => (
         <Text key={`c${k}`} style={[styles.cap, { left: cx }]} numberOfLines={1}>{COL_CAP[k]}</Text>
       ))}
@@ -176,6 +177,10 @@ function Slab({
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule alone leaves the figure
+  // standing on bare page; a filled band under it is what the two lessons
+  // the reader holds up both do, and it costs one View.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   cap: {
     position: 'absolute', top: 234, width: COL_W, textAlign: 'center',
@@ -183,7 +188,7 @@ const styles = StyleSheet.create({
   },
   slab: {
     position: 'absolute', width: COL_W,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
   },
 
   plate: {

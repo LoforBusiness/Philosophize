@@ -7,7 +7,7 @@ import { clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from '
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics20Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, STONE, PAPER,
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -100,6 +100,7 @@ export default function Aesthetics20Scene({ clock, bt, bi, i, picked, onPick }: 
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={[styles.cap, { left: CLAIM_X, width: CLAIM_W }]} pointerEvents="none">WHAT IT IS FOR</Text>
       <Text style={[styles.cap, { left: SUB_X, width: SUB_W }]} pointerEvents="none">WHAT ELSE DOES IT</Text>
 
@@ -167,6 +168,10 @@ function Row({ S, index }: { S: { value: { uses: number; swaps: number; struck: 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule alone leaves the figure
+  // standing on bare page; a filled band under it is what the two lessons
+  // the reader holds up both do, and it costs one View.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   cap: {
     position: 'absolute', top: 232,
@@ -175,7 +180,7 @@ const styles = StyleSheet.create({
 
   claim: {
     position: 'absolute', left: CLAIM_X, width: CLAIM_W, height: ROW_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
     justifyContent: 'center', paddingHorizontal: 7,
   },
   claimText: {

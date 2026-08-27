@@ -7,7 +7,7 @@ import { clamp01, ease01, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics15Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, STONE, PAPER,
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -113,6 +113,7 @@ export default function Aesthetics15Scene({ clock, bt, bi, i, picked, onPick, dr
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* ── THE ROSE ─────────────────────────────────────────────────────── */}
       <Animated.View style={[styles.plant, rose]} pointerEvents="none">
         <View style={styles.plinth} />
@@ -203,13 +204,17 @@ function Tag({
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
+  // THE FLOOR THE GROUND LINE SITS ON. A rule alone leaves the figure
+  // standing on bare page; a filled band under it is what the two lessons
+  // the reader holds up both do, and it costs one View.
+  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
   fill: { flex: 1 },
 
   plant: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   plinth: {
     position: 'absolute', left: PLINTH_L, top: PLINTH_T, width: PLINTH_W, height: 500 - PLINTH_T,
     borderWidth: 2, borderColor: INK, borderTopLeftRadius: 3, borderTopRightRadius: 3,
-    backgroundColor: PAPER,
+    backgroundColor: STONE,
   },
   stem: { position: 'absolute', left: STEM_X, top: STEM_T, width: 4, height: PLINTH_T - STEM_T, backgroundColor: INK },
   leafL: {
