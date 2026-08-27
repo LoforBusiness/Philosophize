@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
-  useSharedValue, useAnimatedStyle, useAnimatedProps,
-  withTiming, withDelay, withSpring, Easing,
+  useSharedValue, useAnimatedStyle, useAnimatedProps, useDerivedValue,
+  runOnJS, withTiming, withDelay, withSpring, Easing,
 } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { touch } from '@/lib/feedback';
 import { bounceTo } from '@/components/stats/InsightBoard';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Circle, Line as SvgLine, Defs, LinearGradient as SvgGrad, Stop } from 'react-native-svg';
@@ -196,11 +198,21 @@ function LegendLine({ row: r, index, count, total, on, pop, playToken, animate, 
 
 // ── the line chart ───────────────────────────────────────────────────────────
 
+/** The scrubber's dot. Big enough to see over the 2px line, small enough not to
+ *  cover the day either side of it. */
+const DOT = 11;
+
 export interface SparkProps {
   /** One value per day, oldest first. */
   series: number[];
   /** Days per x-axis label, for the two end captions. */
   spanLabel: string;
+  /**
+   * One short label per day, oldest first — what the scrubber names when a
+   * finger lands on a point. From `dayLabels()` in the same module as the
+   * series, so the window's arithmetic is not done twice (see its note).
+   */
+  labels?: string[];
   width: number;
   height?: number;
   playToken: number;
@@ -217,7 +229,9 @@ export interface SparkProps {
  * a good Tuesday. The high day is marked, because on a thirty-point series the
  * peak is the one point anybody looks for.
  */
-export function SparkLine({ series, spanLabel, width, height = 108, playToken, animate, entrance }: SparkProps) {
+export function SparkLine({
+  series, spanLabel, labels, width, height = 108, playToken, animate, entrance,
+}: SparkProps) {
   const gold = METAL.GOLD;
   const n = series.length;
   const padT = 12;
@@ -260,6 +274,95 @@ export function SparkLine({ series, spanLabel, width, height = 108, playToken, a
 
     return { line, area, meanPath: smooth(mean), peak, px: x(peak), py: y(series[peak] ?? 0), y0: padT + plotH };
   }, [series, n, width, plotH, max]);
+
+  // ── PUT A FINGER ON THE LINE AND IT TELLS YOU THE DAY ─────────────────────
+  //
+  //   "if the user puts their finger and scrolls or puts their finger on
+  //    somewhere on the line, it will show how much XP the user made for whatever
+  //    place the user's fingers at. And then if they scroll, the number will
+  //    change based on whichever day they are on."
+  //
+  // Three decisions, and each of them is a rule this app has already paid for:
+  //
+  // · NOT ONE SVG PROPERTY MOVES. §17 rule 7 — an animated full-screen <Svg>
+  //   costs about ten frames a second on a real phone. The chart stays the inert
+  //   drawing it already was and the two things that move are native Views on
+  //   top of it, which is the same arrangement every cinematic scene uses.
+  //
+  // · THE VALUE GOES WHERE THE FINGER IS, not how far it has travelled (S5).
+  //   Touch the middle of the line and you are on the middle day; there is no
+  //   gain to tune and a tap works as well as a drag.
+  //
+  // · THE READOUT IS AN ACounter, WHICH IS WHAT ACounter IS FOR. `ControlRead`'s
+  //   header sets out why a lesson's READING had to stop being one — it is a
+  //   sentence, and a TextInput cannot wrap. These two are a number and a short
+  //   date that never wrap, they change under a moving thumb, and writing them
+  //   from the UI thread means a scrub costs zero React renders. That is the
+  //   case ACounter was built for.
+  const days = useMemo(() => {
+    const x = (i: number) => (n <= 1 ? 0 : (i / (n - 1)) * width);
+    const y = (v: number) => padT + plotH - (v / max) * plotH;
+    // Flat arrays of primitives: a worklet may capture those and not much else
+    // (§17 rule 6). One entry per day, so the worklet only ever indexes.
+    return {
+      xs: series.map((_, i) => x(i)),
+      ys: series.map((v) => y(v)),
+      vs: series.slice(),
+      ls: labels && labels.length === n ? labels.slice() : series.map(() => ''),
+    };
+  }, [series, labels, n, width, plotH, max, padT]);
+
+  /** Which day the finger is on, and whether there is a finger at all. */
+  const pick = useSharedValue(Math.max(0, n - 1));
+  const held = useSharedValue(0);
+  const shown = useSharedValue(0);
+
+  const setAt = useCallback((px: number) => {
+    'worklet';
+    if (n <= 1) return;
+    const u = px / Math.max(1, width);
+    let i = Math.round(u * (n - 1));
+    if (i < 0) i = 0; if (i > n - 1) i = n - 1;
+    if (i !== pick.value) { pick.value = i; runOnJS(touch)(); }
+  }, [n, width, pick]);
+
+  // `activeOffsetX` is what lets this live inside a ScrollView: a sideways drag
+  // scrubs, a downward one still scrolls the tab. Without it the chart would eat
+  // every vertical swipe that began on it.
+  const scrub = useMemo(() => {
+    const pan = Gesture.Pan()
+      .activeOffsetX([-6, 6])
+      .failOffsetY([-12, 12])
+      .onBegin((e) => { held.value = withTiming(1, { duration: 120 }); shown.value = 1; setAt(e.x); })
+      .onUpdate((e) => { setAt(e.x); })
+      .onEnd(() => { held.value = withTiming(0, { duration: 220 }); });
+    // A TAP IS A PICK TOO. The reader said "puts their finger on somewhere on the
+    // line" before they said "scrolls", and a pan that needs 6px of travel does
+    // not answer a stationary finger.
+    const tap = Gesture.Tap()
+      .maxDuration(600)
+      .onEnd((e) => { shown.value = 1; setAt(e.x); held.value = withTiming(1, { duration: 90 }); });
+    return Gesture.Exclusive(pan, tap);
+  }, [held, shown, setAt]);
+
+  const ruleStyle = useAnimatedStyle(() => ({
+    opacity: shown.value * (0.35 + 0.4 * held.value),
+    transform: [{ translateX: days.xs[Math.round(pick.value)] ?? 0 }],
+  }));
+  const dotStyle = useAnimatedStyle(() => ({
+    opacity: shown.value,
+    transform: [
+      { translateX: (days.xs[Math.round(pick.value)] ?? 0) - DOT / 2 },
+      { translateY: (days.ys[Math.round(pick.value)] ?? 0) - DOT / 2 },
+      { scale: 1 + 0.18 * held.value },
+    ],
+  }));
+  const readStyle = useAnimatedStyle(() => ({ opacity: shown.value }));
+  const endStyle = useAnimatedStyle(() => ({ opacity: 1 - shown.value }));
+  const valProps = useAnimatedProps(() => (
+    { text: `${days.vs[Math.round(pick.value)] ?? 0} XP` } as never));
+  const dayProps = useAnimatedProps(() => (
+    { text: days.ls[Math.round(pick.value)] ?? '' } as never));
 
   // The curtain: a flat block of the panel's own ground, slid off to the right.
   const reveal = useSharedValue(animate && entrance ? 0 : 1);
@@ -312,12 +415,51 @@ export function SparkLine({ series, spanLabel, width, height = 108, playToken, a
         ) : null}
       </Svg>
 
+      {/* The scrubber's two moving parts, both native Views over the inert
+          drawing. Under the curtain, so the entrance still reveals a clean chart
+          if a finger arrives during it. */}
+      <Animated.View
+        style={[s.scrubRule, { top: padT, height: plotH }, ruleStyle]}
+        pointerEvents="none"
+      />
+      <Animated.View style={[s.scrubDot, dotStyle]} pointerEvents="none" />
+
       <Animated.View style={[s.curtain, { width, height }, curtain]} pointerEvents="none" />
 
+      {/* The foot does double duty: the two end captions while nothing is picked,
+          the day and its XP when something is. One fixed row either way, so
+          nothing below the chart moves when a finger lands on it (L6's rule about
+          a box that resizes under a thumb, in a smaller key). */}
       <View style={s.axis} pointerEvents="none">
-        <Text style={s.axisLabel}>{spanLabel}</Text>
-        <Text style={s.axisLabel}>TODAY</Text>
+        <Animated.View style={[s.axisEnds, endStyle]}>
+          <Text style={s.axisLabel}>{spanLabel}</Text>
+          <Text style={s.axisLabel}>TODAY</Text>
+        </Animated.View>
+        <Animated.View style={[s.axisEnds, s.readRow, readStyle]}>
+          <ACounter
+            style={[s.readDay, counterStyle]}
+            animatedProps={dayProps}
+            defaultValue=""
+            editable={false}
+            pointerEvents="none"
+            accessibilityLabel="the day you are on"
+          />
+          <ACounter
+            style={[s.readVal, counterStyle]}
+            animatedProps={valProps}
+            defaultValue=""
+            editable={false}
+            pointerEvents="none"
+            accessibilityLabel="XP earned that day"
+          />
+        </Animated.View>
       </View>
+
+      {/* Last, and over everything, so the whole plot is the target rather than
+          the two-pixel line itself. */}
+      <GestureDetector gesture={scrub}>
+        <View style={[s.scrubPad, { width, height: height - 6 }]} nativeID="xp-scrub" />
+      </GestureDetector>
     </View>
   );
 }
@@ -447,9 +589,38 @@ const s = StyleSheet.create({
   curtain: { position: 'absolute', top: 0, left: 0, backgroundColor: PANEL_BASE },
   axis: {
     position: 'absolute', left: 0, right: 0, bottom: 0,
-    flexDirection: 'row', justifyContent: 'space-between',
+    // A fixed height, because the two states are stacked in it rather than
+    // swapped in and out — see the note at the markup.
+    height: 12, justifyContent: 'center',
   },
+  axisEnds: {
+    position: 'absolute', left: 0, right: 0,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+  },
+  readRow: { justifyContent: 'flex-start', gap: 8 },
   axisLabel: { fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2, color: C.dim },
+  // WIDTHS ARE EXPLICIT, because an ACounter is a TextInput and an unstyled
+  // <input> claims about twenty characters of intrinsic width — the trap its own
+  // header records eating a flex row on this very tab.
+  readDay: {
+    width: 108, fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.2,
+    color: C.paperSoft,
+  },
+  readVal: {
+    width: 84, fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.8,
+    color: METAL.GOLD.lit,
+  },
+  /** The hairline down the day the finger is on. */
+  scrubRule: {
+    position: 'absolute', left: 0, width: 1, backgroundColor: C.paperSoft,
+  },
+  /** The point itself, ringed in gold like the peak marker it may land on. */
+  scrubDot: {
+    position: 'absolute', left: 0, top: 0, width: DOT, height: DOT,
+    borderRadius: DOT / 2, borderWidth: 2, borderColor: METAL.GOLD.lit,
+    backgroundColor: PANEL_BASE,
+  },
+  scrubPad: { position: 'absolute', left: 0, top: 0 },
 
   // ── metrics ──
   metrics: { flexDirection: 'row', marginTop: 2, alignItems: 'stretch' },

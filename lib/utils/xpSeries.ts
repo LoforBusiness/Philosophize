@@ -57,3 +57,31 @@ export function dailyXP(events: XpEvent[] | undefined, days: number, nowMs: numb
 export function activeDays(series: number[]): number {
   return series.filter((v) => v > 0).length;
 }
+
+/**
+ * ONE SHORT LABEL PER DAY IN THE SAME WINDOW, OLDEST FIRST.
+ *
+ * The scrubber on the chart has to say WHICH day the finger is on, and it is the
+ * series' own business to know that: `dailyXP` decides where the window starts
+ * and which bucket a timestamp falls in, and a caller working the dates out
+ * separately is a second copy of that arithmetic waiting to drift by a day.
+ *
+ * Deliberately short — "TODAY", "SUN 24 AUG" — because it is drawn into a fixed
+ * strip next to a number, and a label that outgrows its box is the defect group S
+ * of the rule book exists for. `toLocaleDateString` with an explicit list of
+ * parts rather than a format string: the reader's locale decides the order.
+ */
+export function dayLabels(days: number, nowMs: number): string[] {
+  const today = dayStart(nowMs);
+  const out: string[] = [];
+  for (let i = 0; i < days; i += 1) {
+    const ms = today - (days - 1 - i) * DAY;
+    if (i === days - 1) { out.push('TODAY'); continue; }
+    if (i === days - 2) { out.push('YESTERDAY'); continue; }
+    const d = new Date(ms);
+    out.push(d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })
+      .replace(/,/g, '')
+      .toUpperCase());
+  }
+  return out;
+}

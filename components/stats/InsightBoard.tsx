@@ -12,6 +12,7 @@ import { MotiView } from 'moti';
 import { LinearGradient } from 'expo-linear-gradient';
 import ACounter, { counterStyle } from '@/components/shared/ACounter';
 import { StruckBar, StruckTile, StruckPanel, EMBOSS } from '@/components/profile/Struck';
+import PlaceMark from '@/components/stats/PlaceMark';
 import {
   INK, PAPER_LIT, MID, PANEL_BASE, ramp, mix, glow, METAL,
 } from '@/components/shared/tone';
@@ -610,8 +611,6 @@ export function ThinkerLeague({
   );
 }
 
-const PLACE_METAL = [METAL.GOLD, METAL.SILVER, METAL.BRONZE];
-
 function LeagueLine({
   row, place, count, max, grow, animate, entrance, playToken, pop, selected, onPress,
 }: {
@@ -620,7 +619,6 @@ function LeagueLine({
   pop: boolean; selected: boolean; onPress: () => void;
 }) {
   const r = ramp(row.hue);
-  const metal = PLACE_METAL[place];
 
   // See BarLine: a grown row squeezes from its current length, never from zero.
   const solo = useSharedValue(1);
@@ -649,22 +647,11 @@ function LeagueLine({
       accessibilityLabel={`${row.name}, number ${place + 1} of ${count}`}
       style={({ pressed }) => [s.leagueRow, pressed && { opacity: 0.75 }]}
     >
-      {/* First three places are struck in a metal; the rest get a plain paper
-          disc, so the podium reads without a caption saying "podium". */}
-      {metal ? (
-        <LinearGradient
-          colors={[metal.lit, metal.base, metal.shade]}
-          start={{ x: 0.15, y: 0 }}
-          end={{ x: 0.85, y: 1 }}
-          style={[s.place, { borderColor: metal.rim }]}
-        >
-          <Text style={[s.placeNum, { color: metal.on }]}>{place + 1}</Text>
-        </LinearGradient>
-      ) : (
-        <View style={[s.place, s.placePlain]}>
-          <Text style={[s.placeNum, { color: MID }]}>{place + 1}</Text>
-        </View>
-      )}
+      {/* The disc, and however much furniture the place has earned — five rungs,
+          each adding one thing to the one below, all of it OUTSIDE the rim. See
+          ./PlaceMark for the ladder and for why the numeral needed a measured
+          lift rather than more flexbox. */}
+      <PlaceMark place={place} />
 
       <View style={s.leagueBody}>
         <View style={s.leagueTop}>
@@ -748,31 +735,6 @@ const s = StyleSheet.create({
 
   // ── league ──
   leagueRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
-  place: {
-    width: 30, height: 30, borderRadius: 15, borderWidth: 1.5,
-    alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-  },
-  placePlain: { backgroundColor: PAPER_LIT, borderColor: C.hairline },
-  // THE NUMERAL SITS IN THE MIDDLE OF THE DISC, and getting there took two
-  // properties rather than the flexbox centring that was already here.
-  //
-  // Horizontally: a Text is centred as a BOX, so where the glyph lands inside
-  // that box is the font's business. `width: '100%'` plus `textAlign: 'center'`
-  // hands the centring to the type engine instead, which is the only thing that
-  // knows the digit's side bearings.
-  //
-  // Vertically: `includeFontPadding` is the one that was actually wrong.
-  // Android's default adds the font's own top/bottom padding to the line box,
-  // and Playfair Display's is deep AND asymmetric — a tall ascent over a short
-  // descent — so flex centred the padded box while the reader saw the digit
-  // sitting low in the circle. Turning it off makes the line box the glyph's
-  // real ascent and descent, which is what flex should have been centring all
-  // along. No magic offset: an offset would only be right at this one size.
-  placeNum: {
-    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 14,
-    width: '100%', textAlign: 'center',
-    includeFontPadding: false, textAlignVertical: 'center',
-  },
   leagueBody: { flex: 1, minWidth: 0 },
   leagueTop: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   leagueName: { flex: 1, fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: INK },

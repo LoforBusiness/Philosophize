@@ -21,7 +21,7 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { statsFingerprint, grownKeys } from '@/lib/utils/statsMilestone';
 import { discoverIn, discoverFact, type Candidate } from '@/lib/utils/statsDiscovery';
-import { dailyXP, activeDays as countActive } from '@/lib/utils/xpSeries';
+import { dailyXP, dayLabels, activeDays as countActive } from '@/lib/utils/xpSeries';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -193,6 +193,9 @@ export default function StatsScreen() {
   // records earning, so bucketing by index would draw four busy days in a row
   // where there were four busy days spread over a fortnight.
   const series = useMemo(() => dailyXP(xpEvents, WINDOW, Date.now()), [xpEvents]);
+  // Built once beside the series, from the same window — see dayLabels' note on
+  // why the caller must not work the dates out for itself.
+  const spanDays = useMemo(() => dayLabels(WINDOW, Date.now()), []);
   const monthXP = series.reduce((a, b) => a + b, 0);
   const bestDay = series.reduce((a, b) => (b > a ? b : a), 0);
   const activeInWindow = countActive(series);
@@ -423,6 +426,7 @@ export default function StatsScreen() {
             <View style={{ marginTop: 8 }}>
               <SparkLine
                 series={series}
+                labels={spanDays}
                 spanLabel={`${WINDOW} DAYS AGO`}
                 width={panelW}
                 playToken={playToken}
