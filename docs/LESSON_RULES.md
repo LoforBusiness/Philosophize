@@ -5087,3 +5087,57 @@ INK the reveal fills the same box with, and SOFT is wrong on both. So **the lamp
 carries lit and unlit itself** — an inner ring on its face — and the word is one
 colour that is legible throughout. That also stops the lit state colliding with
 the answer state, which fills that very box INK.
+
+---
+
+## S10 · A collapsed label is invisible TWICE — on the stage, and to the checker
+
+`ethics13` puts five named plates on a rail: COWARD · TIMID · COURAGE · RASH ·
+RECKLESS. Every one of them rendered **zero units wide**.
+
+`Target` puts its children inside a wrapper that carries the answer reaction. That
+wrapper is an ordinary flex child, so `alignItems: 'center'` on the hit box made it
+shrink to its content — and its content is a `plate` sized with `left: 0, right: 0`
+rather than a width. Against a collapsed parent that resolves to nothing.
+
+### The part worth carrying is the SECOND failure
+
+`mustprobe` drops anything under 1.5 units, which is right — a sub-pixel box is
+noise. So those five words were never recorded as WORDS on any beat: eight beats
+of `mustBoxes.ts.json` for this lesson, and one text item in the whole table,
+`"HOW MUCH FEAR?"`.
+
+The tour generator refuses a station only when **it can see a word being sliced**
+(`slicesWithin`). It saw none. So it framed a 214-wide strip of the rail at the
+1.72× ceiling, which pushed COWARD **73% off the left of the screen** and RECKLESS
+16% off the right — and `check:tour` printed *"no more than 0 stations cut a word
+in half (D) 0 of 144"* the whole time.
+
+**A layout fault made a camera fault invisible to the check that exists to prevent
+it.** Neither check was wrong about what it measured. The word was not sliced,
+because there was no word; the station was legal, because nothing forbade it.
+
+### Two consequences
+
+- **Removing one line fixed both.** Stretch is the flex default, so deleting
+  `alignItems` gives the labels their 68–79px, `mustprobe` records them, and
+  `make-tours` drops that station of its own accord on the next run. The camera
+  fault had no separate fix at all.
+- **When a measurement comes back EMPTY, that is a finding.** One text item across
+  eight beats of a lesson whose stage is a row of five labelled plates should have
+  read as broken instrumentation, not as a quiet lesson. `check:tour` reports a
+  station count and a slice count; it did not report that the beat it was framing
+  had no words in it to protect.
+
+### The rule
+
+**A child of a `Target` may not be sized by `left`/`right`** — give it a width.
+The wrapper between them is not guaranteed to stretch, and when it does not, the
+failure is silent in the source, silent in `tsc`, and silent in every check that
+reads the corpus rather than the screen.
+
+And the general form, which is the third time this file has recorded it: **when a
+checker's input is produced by another instrument, ask what happens when that
+instrument returns nothing.** `muststamp` already hashes the probe so a changed
+probe invalidates the table (§21). It cannot tell you the probe found nothing to
+record.

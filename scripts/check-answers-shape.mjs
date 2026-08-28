@@ -33,6 +33,7 @@
 // COUNT the panel prints stops matching the choices, which is every time.
 import fs from 'node:fs';
 import path from 'node:path';
+import { collapsedTargetChildren } from './lib/tonenest.mjs';
 
 const CIN = path.join(process.cwd(), 'components', 'lesson', 'cinematic');
 const ALL = !!process.env.SHAPE_ALL;
@@ -148,6 +149,31 @@ else {
       d.dupes.map(([id, n]) => `${id}×${n}`).join(' '));
   }
   if (!ALL && doubled.length > show.length) console.log(`          …and ${doubled.length - show.length} more (SHAPE_ALL=1)`);
+}
+
+// S10 — A CHILD OF A TARGET SIZED BY left/right RENDERS AT ZERO WIDTH.
+//
+// Target puts its children in a wrapper that carries the answer reaction, and
+// that wrapper is an ordinary flex child: `alignItems` on the box handed to the
+// Target makes it shrink to its content, so a child positioned with left:0
+// right:0 resolves to nothing. ethics13's five rail labels rendered at 0 units.
+//
+// It belongs in THIS file because the failure is a tap target that does not look
+// like what it is — but the reason it is checked at all is the second failure it
+// caused. mustprobe drops anything under 1.5 units, so those five words were
+// never recorded, the tour generator had no word to protect, and it framed a shot
+// that pushed COWARD 73% off the screen while check:tour reported no station
+// cutting any word. A layout fault made a camera fault invisible to the check
+// that exists to prevent it.
+const collapsed = [];
+for (const f of fs.readdirSync(CIN).filter((x) => x.endsWith('Scene.tsx')).sort()) {
+  collapsed.push(...collapsedTargetChildren(fs.readFileSync(path.join(CIN, f), 'utf8'), f));
+}
+if (!collapsed.length) ok('no child of a target is sized by left/right');
+else {
+  no(`${collapsed.length} target child(ren) sized by left/right instead of a width`,
+    'the wrapper between them does not stretch — give it a width (S10)');
+  for (const c of collapsed) console.log(`          ${c}`);
 }
 
 console.log(bad ? `\n${bad} failing.\n` : '\nall clear.\n');

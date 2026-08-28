@@ -52,6 +52,61 @@ export function softOnToneByNest(src, file) {
   return out;
 }
 
+/**
+ * S10 — a child of a Target sized by left/right instead of a width.
+ *
+ * Target puts its children inside a wrapper that carries the answer reaction, and
+ * that wrapper is an ordinary flex child. So `alignItems` on the style handed to
+ * the Target makes it shrink to its content, and a child positioned with
+ * `left: 0, right: 0` then resolves to ZERO width. ethics13's five rail labels
+ * rendered at 0 units for as long as the lesson existed.
+ *
+ * That is invisible twice: the label is not on the stage, and `mustprobe` drops
+ * anything under 1.5 units, so the WORD is never recorded — which left the tour
+ * generator with nothing to protect and let it frame a shot that pushed COWARD 73%
+ * off the screen, while check:tour reported no station cutting any word.
+ *
+ * Only fires when both halves are present, and only for a style actually nested
+ * inside the Target in the JSX — the first version listed every left/right-sized
+ * style in the file and named a dozen scenes' `ground` and `floor`, which are
+ * scene backdrops and nowhere near a target.
+ */
+export function collapsedTargetChildren(src, file) {
+  const bodies = styleBodies(src);
+  const stretchless = (n) => {
+    const b = bodies.get(n);
+    return !!b && /alignItems/.test(b);
+  };
+  const unsized = (n) => {
+    const b = bodies.get(n);
+    if (!b) return false;
+    if (!/position:\s*'absolute'/.test(b)) return false;
+    if (/\bwidth:/.test(b)) return false;
+    return /\bleft:/.test(b) && /\bright:/.test(b);
+  };
+  const out = [];
+  const tag = /<(\/?)([A-Z][\w.]*)([^>]*?)(\/?)>/g;
+  const stack = [];
+  let m;
+  while ((m = tag.exec(src))) {
+    const closing = m[1] === '/';
+    const name = m[2];
+    const attrs = m[3] || '';
+    const selfClose = m[4] === '/';
+    if (closing) { stack.pop(); continue; }
+    const styleNames = [...attrs.matchAll(/styles\.([A-Za-z_$][\w$]*)/g)].map((x) => x[1]);
+    const inTarget = stack.some(Boolean);
+    if (inTarget) {
+      for (const n of styleNames) {
+        if (unsized(n)) out.push(`${file}  ${n} is sized by left/right inside a Target whose box sets alignItems`);
+      }
+    }
+    const opensTarget = name === 'Target' && styleNames.some(stretchless);
+    if (!selfClose) stack.push(opensTarget || (stack.length ? stack[stack.length - 1] : false));
+  }
+  return [...new Set(out)];
+}
+
 /** Grab `name: { … }` bodies out of a StyleSheet.create block. */
 export function styleBodies(src) {
   const out = new Map();
