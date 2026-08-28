@@ -231,7 +231,11 @@ const styles = StyleSheet.create({
   },
   state: {
     position: 'absolute', left: 230, width: 66, lineHeight: 9,
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: SOFT, includeFontPadding: false,
+    // INK, NOT SOFT. The whole switch rides an opacity track that rests at 0.8 on
+    // the closing beats, and SOFT composited at 0.8 reaches the eye at 2.7:1 —
+    // D35's smear in the shape of a word. Ink survives the fade; the fade is the
+    // switch settling, not the label going away.
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,
   },
   caption: {
     position: 'absolute', left: H_X, top: CAP_Y, width: H_W, textAlign: 'center',

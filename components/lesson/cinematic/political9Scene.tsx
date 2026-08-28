@@ -45,8 +45,12 @@ const ONE_X = 330;
 const RIGHTS_X = 282;
 const RIGHTS_T = 330;
 
-const TALLY_L = 120;
-const TALLY_W = 160;
+// RIGHT OF THE CARD COLUMN. The Q2 cards run x 30…250 and the tally ran 120…280,
+// so on the beat that shows both, the first card was drawn across THE VOTE. Both
+// are on their own opacity tracks and both are meant to be up at once — the count
+// is the context for the question — so the tally moves out of the column instead.
+const TALLY_L = 256;
+const TALLY_W = 140;
 const TALLY_T = 210;
 
 const CARD_L = 30;

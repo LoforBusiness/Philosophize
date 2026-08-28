@@ -35,8 +35,11 @@ import { followMoves, kindOf, seedOf } from './camera';
 // · the FIGURE walks x 200 → 132 → 268 on GROUND 500; crown ≈ 397, the panels end
 //   at 342, so 55 units stay clear.
 //
-// Ink runs y 236 (the panel captions) … y 500. BAND 230…512 = 282, with the
-// 103-unit figure at 37%.
+// Ink runs y 236 (the panel captions) … y 500 — but the MUSIC group is the answer,
+// so `musRise` lifts caption, panel and bars TEN units together when it is picked,
+// and THE MUSIC then sits at 226. The band has to hold the lifted position or the
+// stage clip shaves the caption the moment the reader gets it right: measured, 3.1
+// units of it were gone. BAND 222…512 = 290, with the 103-unit figure at 36%.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
@@ -248,5 +251,5 @@ const styles = StyleSheet.create({
 });
 
 export function Aesthetics18Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Aesthetics18Scene} band={[230, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Aesthetics18Scene} band={[222, 512]} camera={CAM} />;
 }
