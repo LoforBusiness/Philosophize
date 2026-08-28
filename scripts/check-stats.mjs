@@ -382,7 +382,7 @@ function offenders(src) {
 const TAB_FILES = [
   'components/stats/InsightBoard.tsx',
   'components/stats/Instrument.tsx',
-  'components/stats/Donut.tsx',
+  'components/stats/Dial.tsx',
   'app/(app)/stats/index.tsx',
 ];
 
