@@ -1799,7 +1799,38 @@ Three things worth carrying:
    400×560 design space to the slice its art occupies and scales that up. Adding
    art outside the band clips it. Re-measure when you add anything.
 6. **A plain JS closure cannot cross into a worklet.** Pass numbers, not
-   functions. This crashed the launch screen in production (§19).
+   functions. This crashed the launch screen in production (§19) — **and then it
+   crashed the whole app in an OTA, which is why it now has a checker.**
+
+   > **THE HELPER IS THE CLOSURE, AND A ONE-LINE HELPER IS THE EASIEST THING IN
+   > THE WORLD TO WRITE.** `Dial.tsx` had `const rad = (deg) => deg * Math.PI /
+   > 180` at module scope and called it from `useAnimatedStyle`. Reanimated packs
+   > a non-worklet function found in a worklet's closure as a **RemoteFunction**,
+   > and the only thing a RemoteFunction does on the UI thread is throw
+   > (`react-native-worklets/memory/valueUnpacker.native.js` — read it rather than
+   > arguing about it). The transformed bundle says so out loud:
+   > `__closure={rad,w,lift,out,TILT,dimmed}`.
+   >
+   > An uncaught throw in a style worklet is fatal in release, the Insights tab is
+   > one of the five WARMED at startup (§19), and so the app died a few seconds
+   > after every launch without the reader going anywhere near the chart.
+   >
+   > **AND IT IS INVISIBLE IN A BROWSER, WHICH IS WHERE THIS PROJECT LOOKS.**
+   > react-native-web has no second thread: every worklet runs on the JS thread
+   > with a real closure, so the plain function is simply CALLED and the screen is
+   > perfect. It passed tsc, `check:ui`, `sheet:dial`'s four mounted-and-measured
+   > cases and a contact sheet. §21's whole method is structurally blind here, the
+   > same way it is blind to `measureInWindow` on a detached view — so the check
+   > has to be static, and `npm run check:worklets` is now it. Its first run found
+   > **two** sites: the one that had just shipped, and `logic33Scene`'s `gridY`,
+   > sitting ten lines above a `fit` that got the directive right and live since
+   > 13 Aug.
+   >
+   > One false positive is worth knowing about because it will recur: **an alias
+   > is the same function.** `import { walk as rigWalk }` reads as a plain call to
+   > anything that only looks at the call site, and the first run duly reported
+   > one of the most-used worklets in the app. Resolve the local name back to the
+   > exported one before judging it.
 7. **An animated full-screen `<Svg>` costs ~10fps on an S24.** Any animated art
    is inert SVG with native Views moving on top of it.
    **Putting the `<Svg>` under an animated parent does NOT buy the exemption** —

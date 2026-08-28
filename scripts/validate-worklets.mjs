@@ -259,12 +259,153 @@ for (const file of files) {
   }
 }
 
+// ── 3. a worklet that calls a PLAIN function ─────────────────────────────────
+//
+// The rule is four words in CLAUDE.md §17 — "a plain JS closure cannot cross
+// into a worklet" — and until now nothing enforced it. It is not a slow path or
+// a style nit. `react-native-worklets` packs a non-worklet function found in a
+// worklet's closure as a `RemoteFunction`, and the ONLY thing a RemoteFunction
+// does on the UI thread is throw:
+//
+//     [Worklets] Tried to synchronously call a non-worklet function `rad`
+//     on the UI thread.
+//
+// (memory/valueUnpacker.native.js — read it before doubting this.) An uncaught
+// throw inside a style worklet is fatal in a release build, so the cost of one
+// missing directive is the whole app.
+//
+// ── AND IT IS INVISIBLE IN A BROWSER, WHICH IS WHERE THIS PROJECT LOOKS ──────
+//
+// react-native-web has no second thread. Every worklet runs on the JS thread
+// with an ordinary closure, so the plain function is simply CALLED and the
+// screen is perfect. §21's whole method — mount the real screen, measure it,
+// screenshot it — is structurally blind here, in the same way it is blind to
+// `measureInWindow` returning the window origin for a detached view.
+//
+// That is not hypothetical either. `Dial.tsx` shipped an OTA with `rad()` inside
+// `useAnimatedStyle`, having passed tsc, `check:ui`, a mounted-and-measured
+// browser sweep and a four-case contact sheet, and it crashed every phone a few
+// seconds after launch — the Insights tab is one of the five warmed at startup,
+// so the reader never even had to go there. The same defect was already sitting
+// in `logic33Scene`'s `gridY`, ten lines above a `fit` that got the directive
+// right, shipped and unreported since 13 Aug.
+//
+// So the check has to be static, and this is it. A name counts as SAFE when it
+// is a worklet anywhere in the repo; a call is a fault only when the callee is
+// declared in this file or imported from inside it (`@/…`, `./…`), which is what
+// keeps `withSpring`, `interpolate` and every other library import out of it.
+{
+  const HOOKS = ['useAnimatedStyle', 'useDerivedValue', 'useAnimatedProps',
+    'useAnimatedReaction', 'useAnimatedScrollHandler', 'useFrameCallback', 'runOnUI'];
+
+  const srcOf = new Map();
+  for (const file of files) srcOf.set(file, strip(fs.readFileSync(file, 'utf8')));
+
+  // Every name the repo declares as a worklet. A directive is by definition the
+  // first statement of a body, so walk back from it to the declaration it opens.
+  const isWorklet = new Set();
+  for (const src of srcOf.values()) {
+    let i = 0;
+    while ((i = src.indexOf("'worklet'", i)) !== -1) {
+      const head = src.slice(Math.max(0, i - 800), i);
+      const decls = [...head.matchAll(/(?:const|let|function)\s+([A-Za-z_$][\w$]*)/g)];
+      if (decls.length) isWorklet.add(decls[decls.length - 1][1]);
+      i += 9;
+    }
+  }
+
+  /** The module a name is imported from, or null. Handles multi-line clauses. */
+  const importedFrom = (src, name) => {
+    for (const m of src.matchAll(/import\s+([\s\S]*?)\s*from\s*['"]([^'"]+)['"]/g)) {
+      if (new RegExp('\\b' + name + '\\b').test(m[1])) return m[2];
+    }
+    return null;
+  };
+  const declaredIn = (src, name) =>
+    new RegExp('(?:^|[^.\\w$])(?:const|let|var|function)\\s+' + name + '\\b').test(src);
+
+  // AN ALIAS IS THE SAME FUNCTION. `isWorklet` holds the name a directive was
+  // declared under, so `import { walk as rigWalk }` looks like a plain call to a
+  // checker that only reads the call site — which is what the first run reported,
+  // about `rig.walk`, one of the most-called worklets in the app. Resolve the
+  // local name back to the exported one before judging it.
+  const exportedAs = (src, name) => {
+    for (const m of src.matchAll(/import\s+([\s\S]*?)\s*from\s*['"][^'"]+['"]/g)) {
+      const a = new RegExp('([A-Za-z_$][\\w$]*)\\s+as\\s+' + name + '\\b').exec(m[1]);
+      if (a) return a[1];
+    }
+    return name;
+  };
+
+  /** Every worklet body in a file: the hooks' arguments, and each directive's block. */
+  function workletBodies(src) {
+    const out = [];
+    for (const hook of HOOKS) {
+      let i = 0;
+      while ((i = src.indexOf(hook, i)) !== -1) {
+        const before = src[i - 1];
+        if (before && /[.\w$]/.test(before)) { i += hook.length; continue; }
+        const call = callAt(src, i + hook.length);
+        i += hook.length;
+        if (call) out.push({ at: i, body: call, what: hook });
+      }
+    }
+    let j = 0;
+    while ((j = src.indexOf("'worklet'", j)) !== -1) {
+      const open = src.lastIndexOf('{', j);
+      let depth = 0, close = -1;
+      for (let k = open; k >= 0 && k < src.length; k++) {
+        if (src[k] === '{') depth++;
+        else if (src[k] === '}' && --depth === 0) { close = k; break; }
+      }
+      if (close > open) out.push({ at: j, body: src.slice(open, close + 1), what: 'a worklet' });
+      j += 9;
+    }
+    return out;
+  }
+
+  for (const file of files) {
+    const src = srcOf.get(file);
+    if (!HOOKS.some((h) => src.includes(h)) && !src.includes("'worklet'")) continue;
+    const seen = new Set();
+
+    for (const { at, body, what } of workletBodies(src)) {
+      const local = new Set();
+      for (const m of body.matchAll(/(?:const|let|var|function)\s+([A-Za-z_$][\w$]*)/g)) local.add(m[1]);
+
+      for (const m of body.matchAll(/([A-Za-z_$][\w$]*)\s*\(/g)) {
+        const name = m[1];
+        const prev = body[m.index - 1];
+        if (prev && /[.?\w$]/.test(prev)) continue;                 // a method, not a free name
+        if (local.has(name) || isWorklet.has(name) || isWorklet.has(exportedAs(src, name))) continue;
+        if (/^(if|for|while|switch|return|typeof|catch|function|new|await|do|else)$/.test(name)) continue;
+
+        const from = importedFrom(src, name);
+        const mine = from ? /^[.@]/.test(from) : declaredIn(src, name);
+        if (!mine) continue;                                        // a library call, or a parameter
+
+        const line = src.slice(0, at).split('\n').length;
+        const key = `${name}@${line}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        errs.push(
+          `${rel(file)}: ${what} near line ${line} calls \`${name}()\`, which is not a ` +
+          `worklet${from ? ` (imported from ${from})` : ''} — it is packed as a RemoteFunction ` +
+          `and THROWS on the UI thread, fatally, while a browser runs it fine. ` +
+          `Give \`${name}\` a 'worklet' directive (it stays callable from JS).`
+        );
+      }
+    }
+  }
+}
+
 console.log('');
 for (const e of errs) console.log(`✗ ${e}`);
 if (errs.length) {
-  console.log(`\n${errs.length} initialisation-order problem${errs.length === 1 ? '' : 's'}.`);
+  console.log(`\n${errs.length} worklet problem${errs.length === 1 ? '' : 's'}.`);
   process.exit(1);
 }
 console.log(
-  `${workletFiles} worklet files and ${hookFiles} animated components: nothing read before it exists.`
+  `${workletFiles} worklet files and ${hookFiles} animated components: nothing read before it ` +
+  `exists, and nothing a worklet calls is a plain function.`
 );

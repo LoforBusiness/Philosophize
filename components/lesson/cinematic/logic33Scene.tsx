@@ -47,7 +47,11 @@ const DOTS: readonly (readonly [number, number])[] = [
 /** The eighth, which arrives later and is not fitted. */
 const NEXT: readonly [number, number] = [1.12, 0.74];
 
-const gridY = (up: number) => GRID_B - up * (GRID_B - GRID_T);
+// A WORKLET, like `fit` ten lines below it: `Seg`'s `useAnimatedStyle` calls both,
+// and a plain function in a worklet's closure throws on the UI thread rather than
+// running slowly (§17 rule 6). It is still called from render at the dots, which
+// costs a worklet nothing.
+const gridY = (up: number) => { 'worklet'; return GRID_B - up * (GRID_B - GRID_T); };
 
 /**
  * The fitted value at `u` across the grid, for a curve with `b` bend, 0…1.

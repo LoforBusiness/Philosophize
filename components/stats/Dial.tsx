@@ -95,7 +95,18 @@ const LIFT = 0.10;
 /** Degrees per sampled point along an arc. Fine enough that no edge shows facets. */
 const STEP = 2;
 
-const rad = (deg: number) => (deg * Math.PI) / 180;
+// A WORKLET, because `Wedge`'s `useAnimatedStyle` calls it — and a plain function
+// reaching a worklet's closure is not a slow path, it is a THROW. Reanimated packs
+// it as a `RemoteFunction` whose only behaviour on the UI thread is
+// `Tried to synchronously call a non-worklet function \`rad\` on the UI thread`
+// (react-native-worklets/memory/valueUnpacker.native.js). §17's rule 6.
+//
+// IT IS INVISIBLE IN A BROWSER AND ONLY IN A BROWSER. react-native-web runs every
+// worklet on the JS thread with a real closure, so `rad` is simply called and the
+// chart is perfect — which is how this shipped past a mounted-and-measured sweep,
+// a contact sheet and `check:ui`. It is still an ordinary function to JS callers,
+// so `arcPoints` below needs no change.
+const rad = (deg: number) => { 'worklet'; return (deg * Math.PI) / 180; };
 
 /** Points along the ellipse between two angles, inclusive of both ends. */
 function arcPoints(cx: number, cy: number, rx: number, ry: number, a0: number, a1: number) {
