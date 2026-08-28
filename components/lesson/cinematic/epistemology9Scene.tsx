@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   boardLabel: {
     position: 'absolute', left: 0, right: 0, top: 9, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1.6, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1.6, color: INK,
     includeFontPadding: false,
   },
   mapArea: { position: 'absolute', left: 9, top: 30, width: 110, height: 90 },
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     justifyContent: 'center', paddingHorizontal: 9,
   },
-  placardHead: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1.4, color: SOFT,
+  placardHead: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1.4, color: INK,
     includeFontPadding: false,
   },
   placardBody: { fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, marginTop: 2,

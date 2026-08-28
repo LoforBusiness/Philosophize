@@ -238,7 +238,11 @@ export default function QuotePlate({
             <Text style={[styles.author, { fontSize: S.author }]} numberOfLines={1}>{author}</Text>
             <View style={styles.eraRow}>
               <View style={[styles.pip, { backgroundColor: P.spine.base }]} />
-              <Text style={[styles.era, { color: P.label }]} numberOfLines={1}>
+              {/* TWO LINES, because the LESSON deck passes a work as well as a date.
+                  A profile's meta is a lifespan and never needs the second one; a
+                  lesson cites "Famine, Affluence, and Morality, 1972", which ran 78px
+                  past a one-line row and truncated the year off the citation. */}
+              <Text style={[styles.era, { color: P.label }]} numberOfLines={2}>
                 {group ?? 'QUOTED'}{meta ? `  ·  ${meta}` : ''}
               </Text>
             </View>

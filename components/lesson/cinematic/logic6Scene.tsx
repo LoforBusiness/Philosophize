@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   boxRight: { borderColor: INK, backgroundColor: INK },
   boxWrong: { borderColor: SOFT, opacity: 0.45 },
   wet: { position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: SOFT, opacity: 0.3 },
-  boxTag: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT, includeFontPadding: false },
+  boxTag: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: INK, includeFontPadding: false },
   boxLine: { flexDirection: 'row', alignItems: 'center', marginTop: 5 },
   boxKw: { fontFamily: 'Inter_700Bold', fontSize: 18, letterSpacing: 1.2, color: INK, includeFontPadding: false },
   boxVal: { fontFamily: 'Inter_400Regular', fontSize: 16, color: INK, marginLeft: 8, includeFontPadding: false },
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   trBroken: { backgroundColor: INK },
   cell: { alignItems: 'center', justifyContent: 'center' },
   cellDiv: { borderRightWidth: 1.5, borderRightColor: RULE },
-  th: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false },
+  th: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK, includeFontPadding: false },
   td: { fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.6, color: INK, includeFontPadding: false },
 });
 

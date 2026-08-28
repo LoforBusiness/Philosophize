@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
   },
   skyCap: {
     position: 'absolute', left: 10, top: 5,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.4, color: INK, includeFontPadding: false,
   },
   voidDisc: { position: 'absolute', left: 86, top: 8, width: 180, height: 78, borderRadius: 39, backgroundColor: INK },
   star: { position: 'absolute', backgroundColor: INK },
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   },
   ruleCap: {
     position: 'absolute', left: 12, top: 7,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.3, color: INK, includeFontPadding: false,
   },
   ruleLine: {
     position: 'absolute', left: 12,
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   },
   nothCap: {
     position: 'absolute', left: 12, top: 7,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.3, color: INK, includeFontPadding: false,
   },
   nothWordWrap: {
     position: 'absolute', left: 0, right: 0, top: 24, height: 30,

@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
   hRule: { position: 'absolute', left: 0, right: 0, top: LED_HEAD_H, height: 1, backgroundColor: RULE },
   colHead: {
     position: 'absolute', top: 6, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.3, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.3, color: INK,
     includeFontPadding: false,
   },
   row: { position: 'absolute', left: 0, right: 0, height: LED_ROW_H, justifyContent: 'center' },

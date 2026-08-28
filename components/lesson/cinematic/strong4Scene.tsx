@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   // at (23 − 1.5 − 17) / 2 = 2.25 — the reversed copy must sit exactly on the base.
   cardHeadTOn: { position: 'absolute', left: 10, top: 2.25, color: PAPER },
   cardLine: {
-    fontFamily: 'Inter_500Medium', fontSize: 11.5, lineHeight: 17.5, color: SOFT, paddingHorizontal: 10, includeFontPadding: false,
+    fontFamily: 'Inter_500Medium', fontSize: 11.5, lineHeight: 17.5, color: INK, paddingHorizontal: 10, includeFontPadding: false,
   },
 
   // ── ballot ────────────────────────────────────────────────────────────────

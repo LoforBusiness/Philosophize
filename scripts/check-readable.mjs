@@ -212,6 +212,100 @@ const PROBE = `(() => {
   // must be, and because the next component to reach for one should not be able to
   // disappear from this sweep by doing so.
   for (const root of roots) for (const el of root.querySelectorAll('div,span,input')) nodes.push(el);
+
+  // ── EVERY PAINTED THING ON THE STAGE, IN PAINT ORDER ────────────────────────
+  //
+  // elementsFromPoint was used for this and it CANNOT SEE MOST OF THE SCENE:
+  // hit-testing skips anything with pointer-events none, and nearly every
+  // decorative element in these scenes sets it — the marker line that struck a
+  // caption in political19 is pointerEvents none, and so is the panel whose
+  // edge sliced the caption below it. The UNDER rule had been structurally blind
+  // to almost all scene art since it was written, and reported those beats clean.
+  //
+  // So the geometry is read directly instead. Document order stands in for paint
+  // order, which is what React Native Web gives absolutely-positioned siblings
+  // without a z-index — the whole corpus.
+  // ONE PASS, ONE ORDER COUNTER — painted boxes AND words together.
+  //
+  // These were two loops with the word pass numbered 1e6, which made every word
+  // the last thing drawn: the word under test then had a higher order than every
+  // box, the 'drawn after me' filter excluded all of them, and STRIKE fell
+  // straight back to zero. A paint-order comparison needs ONE sequence.
+  const painted = [];
+  const CR = clipEl.getBoundingClientRect();
+  {
+    let order = 0;
+    for (const el of clipEl.querySelectorAll('*')) {
+      order += 1;
+      const cs = getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+      const rr = el.getBoundingClientRect();
+      if (rr.width < 1 || rr.height < 1) continue;
+      const leafText = el.children.length === 0 && (el.textContent || '').trim().length >= 2;
+      // OPACITY COUNTS FOR WORDS TOO. Scenes cross-fade constantly, so a caption on
+      // its way out is still in the DOM at opacity 0 — and counting it as something
+      // that covers its neighbour invents a collision on every transition.
+      let vis = 1, n5 = el;
+      while (n5 && n5 !== document.body) { vis *= parseFloat(getComputedStyle(n5).opacity); n5 = n5.parentElement; }
+      if (vis < 0.6) continue;
+      // AN OUTLINE IS NOT A SLAB, AND THE OLD ARITHMETIC SAID IT WAS.
+      //
+      //   solid = ea * ((c && c.a) || 1)
+      //
+      // A transparent background parses to alpha 0, so that middle term is 0,
+      // which is falsy, so the OR promoted it to FULLY OPAQUE.
+      // (No back-ticks in this comment: the whole probe is a template literal,
+      //  so a quoted snippet here becomes an interpolation and throws.) Every outlined box
+      // in every scene counted as a filled rectangle covering everything it
+      // enclosed or crossed — including the deck's own 390-wide frame, which is
+      // what put narration lines on the strike list. An unfilled bordered box
+      // paints its FRAME and nothing else, so it is carried with its border bands
+      // and only those bands can strike a word.
+      let solid = false, frame = 0;
+      let ea = 1, n4 = el;
+      while (n4 && n4 !== document.body) { ea *= parseFloat(getComputedStyle(n4).opacity); n4 = n4.parentElement; }
+      if (!leafText) {
+        const c = rgb(cs.backgroundColor);
+        const fill = c ? c.a : 0;
+        solid = ea * fill >= 0.6;   // a thin scrim is legitimate
+        if (!solid) {
+          frame = Math.max(
+            parseFloat(cs.borderTopWidth || '0'), parseFloat(cs.borderRightWidth || '0'),
+            parseFloat(cs.borderBottomWidth || '0'), parseFloat(cs.borderLeftWidth || '0'),
+          );
+          if (ea < 0.6) frame = 0;
+        }
+      }
+      if (!leafText && !solid && !frame) continue;
+      // A BOX IS ONLY WHERE IT IS ACTUALLY PAINTED, AND A RECT DOES NOT KNOW THAT.
+      // getBoundingClientRect ignores an ancestor's overflow:hidden, so the floor
+      // every scene now lays down (top: GROUND, bottom: 0) reports a rect running
+      // far below the stage crop and out into the deck. Clipped to the crop it is
+      // the strip the reader sees; unclipped it was striking narration.
+      // EVERY CLIPPING ANCESTOR, NOT JUST THE CROP. The first version of this
+      // intersected with the stage crop alone and a rung immediately proved that
+      // is not enough: ethics31 scrolls its ladder inside its own overflow:hidden
+      // window, and the rung parked one space ABOVE that window reported a rect
+      // sitting across THE SHELF's label. Visually it is not there at all. Walk up
+      // to the crop and clip against each ancestor that hides its overflow.
+      let cx0 = rr.left, cy0 = rr.top, cx1 = rr.right, cy1 = rr.bottom;
+      for (let a = el.parentElement; a; a = a.parentElement) {
+        const acs = getComputedStyle(a);
+        if (acs.overflowX !== 'visible' || acs.overflowY !== 'visible') {
+          const ar = a.getBoundingClientRect();
+          cx0 = Math.max(cx0, ar.left); cy0 = Math.max(cy0, ar.top);
+          cx1 = Math.min(cx1, ar.right); cy1 = Math.min(cy1, ar.bottom);
+        }
+        if (a === clipEl) break;
+      }
+      cx0 = Math.max(cx0, CR.left); cy0 = Math.max(cy0, CR.top);
+      cx1 = Math.min(cx1, CR.right); cy1 = Math.min(cy1, CR.bottom);
+      if (cx1 - cx0 < 1 || cy1 - cy0 < 1) continue;
+      painted.push({ el, order, x: cx0, y: cy0, w: cx1 - cx0, h: cy1 - cy0, frame });
+    }
+  }
+  const orderOf = (el) => { let i = 0; for (const p of painted) { if (p.el === el) return p.order; i += 1; } return -1; };
+
   for (const d of nodes) {
     if (d.children.length !== 0) continue;
     const txt = (d.tagName === 'INPUT' ? (d.value || '') : (d.textContent || '')).trim();
@@ -440,28 +534,78 @@ const PROBE = `(() => {
     // Ancestors are excluded, and they are most of the stack: an ancestor with a
     // background paints BEHIND its own text, never over it. What is left is a
     // sibling or a cousin drawn later, which is exactly the defect.
+    // A GRID, NOT THE CENTRE POINT.
+    //
+    // This sampled one point — the word's exact middle — and so could only ever
+    // see something that buried the word. The reader walked "Do We Owe Strangers
+    // Anything?" and found three things crossing words on one beat, and this rule
+    // reported the lesson clean, because none of the three happened to pass
+    // through the centre: a 2px marker line struck WHAT YOU|FEEL a third of the
+    // way along, and a panel's bottom EDGE sliced the caption below it in half.
+    //
+    // Fifteen points across the word's own box catch both, and they also tell the
+    // two apart: covered at the centre is a word BURIED (UNDER), covered only at
+    // the edges is a word STRUCK THROUGH (STRIKE). They want different fixes —
+    // one moves the word, the other breaks the line around it.
+    // WHAT IS DRAWN OVER THIS WORD, BY GEOMETRY.
+    //
+    //   covered at its CENTRE  -> UNDER, the word is buried
+    //   covered only at an EDGE -> STRIKE, the word is sliced or ruled through
+    //
+    // They want different fixes: one moves the word off the thing, the other
+    // breaks the thing around the word. political19 had both on one beat.
     let coveredBy = '';
+    let struckBy = '';
     try {
-      const stack = document.elementsFromPoint(cx, cy) || [];
-      const me = stack.indexOf(d);
-      for (let q = 0; q < (me < 0 ? 0 : me); q += 1) {
-        const el = stack[q];
-        if (el.contains(d)) continue;
-        const cs = getComputedStyle(el);
-        const c = rgb(cs.backgroundColor);
-        if (!c) continue;
-        let ea = 1, n3 = el;
-        while (n3 && n3 !== document.body) { ea *= parseFloat(getComputedStyle(n3).opacity); n3 = n3.parentElement; }
-        // Half-covered is covered: a wash at 0.6 over a word is a word nobody
-        // reads, and everything thinner than that is legitimate scrim.
-        if (ea * (c.a ?? 1) >= 0.6) { coveredBy = (el.className || el.tagName || '').toString().slice(0, 20) || 'a panel'; break; }
-      }
-    } catch (e) { coveredBy = ''; }
+      // NOTHING INSIDE THE STAGE CROP CAN BE OVER A WORD OUTSIDE IT. orderOf
+      // returns -1 for a deck word, and the paint-order filter below is written
+      // 'mine >= 0 &&' — so a deck word skipped the filter and every stage box
+      // counted as drawn after it.
+      const mine = orderOf(d);
+      if (mine < 0) throw new Error('outside the crop');
+      const hits = painted.filter((p) => {
+        if (p.el === d || p.el.contains(d) || d.contains(p.el)) return false;
+        // only things drawn AFTER this word can be over it
+        if (mine >= 0 && p.order < mine) return false;
+        const ox = Math.min(r.left + r.width, p.x + p.w) - Math.max(r.left, p.x);
+        const oy = Math.min(r.top + r.height, p.y + p.h) - Math.max(r.top, p.y);
+        // TWO LINES OF ONE PARAGRAPH ARE NOT A COLLISION. Wrapped narration lines
+        // are siblings whose boxes graze by a pixel or two because every face sets
+        // a lineHeight tighter than its natural one — the same slack D-group notes
+        // for vertical overflow. Require a real overlap, and for word-on-word
+        // require they are not lines of the same block.
+        const bothWords = (p.el.textContent || '').trim().length >= 2 && p.el.children.length === 0;
+        if (bothWords && p.el.parentElement === d.parentElement) return false;
+        // A TWO-STATE LABEL IS ONE LABEL. react-native-web renders the dim copy
+        // and the lit copy of the same caption at the same box with the same
+        // text; whichever is on top is not covering anything the reader wanted.
+        if (bothWords && (p.el.textContent || '').trim() === txt
+            && Math.abs(p.x - r.left) < 2 && Math.abs(p.y - r.top) < 2) return false;
+        if (ox <= 1 || oy <= (bothWords ? 4 : 1)) return false;
+        // A frame paints its bands. The interior is open paper.
+        if (p.frame) {
+          const band = p.frame + 1;
+          const insideX = r.left >= p.x + band && r.left + r.width <= p.x + p.w - band;
+          const insideY = r.top >= p.y + band && r.top + r.height <= p.y + p.h - band;
+          if (insideX && insideY) return false;
+        }
+        return true;
+      });
+      const name = (p) => {
+        const t = (p.el.textContent || '').trim();
+        if (t) return 'the words ' + JSON.stringify(t.slice(0, 24));
+        return Math.round(p.w) + 'x' + Math.round(p.h) + ' ' + (p.el.tagName || 'box').toLowerCase();
+      };
+      const atCentre = hits.find((p) => cx >= p.x && cx <= p.x + p.w && cy >= p.y && cy <= p.y + p.h);
+      if (atCentre) coveredBy = name(atCentre);
+      else if (hits.length) struckBy = name(hits[0]);
+    } catch (e) { coveredBy = ''; struckBy = ''; }
 
     const why = [];
     if (size < FLOOR) why.push('TINY');
     if (spill) why.push('SPILL');
     if (coveredBy) why.push('UNDER');
+    if (struckBy) why.push('STRIKE');
     // A word entirely outside its clip is a prop waiting in the wings; a word
     // PARTLY cut is a word being sliced. Same distinction check-frame draws.
     if (keep < KEEP) why.push("CUT");
@@ -472,7 +616,7 @@ const PROBE = `(() => {
     out.push({ why: why.join('+'), t: txt.slice(0, 34), full: txt,
       box: [r.left, r.top, r.right, r.bottom], size: +size.toFixed(1),
       keep: +keep.toFixed(2), con: +con.toFixed(1), a: +alpha.toFixed(2),
-      spill: Math.round(spill), sx: Math.round(spillX), sy: Math.round(spillY), coveredBy,
+      spill: Math.round(spill), sx: Math.round(spillX), sy: Math.round(spillY), coveredBy, struckBy,
       r: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)],
       over: overhang.map((v) => Math.round(v * 10) / 10) });
   }
@@ -1014,7 +1158,7 @@ function allIds() {
   }
   const count = (k) => report.reduce((a, r) => a + r.beats.reduce((b, x) => b + x.hits.filter((h) => h.why.includes(k)).length, 0), 0);
   const lessons = (k) => report.filter((r) => r.beats.some((x) => x.hits.some((h) => h.why.includes(k)))).length;
-  for (const k of ['TINY', 'CUT', 'FAINT', 'SPILL', 'UNDER', 'BLANK']) {
+  for (const k of ['TINY', 'CUT', 'FAINT', 'SPILL', 'UNDER', 'STRIKE', 'BLANK']) {
     console.log(`    ${k.padEnd(6)} ${String(count(k)).padStart(4)} words  (${lessons(k)} lessons)`);
   }
   const worst = [];
@@ -1031,7 +1175,7 @@ function allIds() {
   // other things … look at all other cinematic lessons for this too". A ranking by
   // size answers "which is worst"; this answers "which lesson do I open", which is
   // the question an author actually has.
-  for (const k of ['SPILL', 'UNDER']) {
+  for (const k of ['SPILL', 'UNDER', 'STRIKE']) {
     const rows = worst.filter((w) => w.why.includes(k));
     if (!rows.length) continue;
     const by = new Map();
@@ -1039,7 +1183,9 @@ function allIds() {
     console.log(`\n  ${k} — ${rows.length} words across ${by.size} lessons:`);
     for (const [id, list] of [...by.entries()].sort((x, y) => y[1].length - x[1].length).slice(0, 14)) {
       const ex = list[0];
-      const how = k === 'SPILL' ? `${ex.spill}px past its box` : `under ${ex.coveredBy}`;
+      const how = k === 'SPILL' ? `${ex.spill}px past its box`
+        : k === 'STRIKE' ? `struck by ${ex.struckBy}`
+        : `under ${ex.coveredBy}`;
       console.log(`      ${id.padEnd(30)} ${String(list.length).padStart(3)}  b${ex.beat} ${how}  "${ex.t}"`);
     }
     if (by.size > 14) console.log(`      … and ${by.size - 14} more lessons`);

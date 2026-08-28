@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   allTextOn: { color: PAPER },
-  allSub: { fontFamily: 'Inter_400Regular', fontSize: 10.3, letterSpacing: 0.4, color: SOFT, marginTop: 2,
+  allSub: { fontFamily: 'Inter_400Regular', fontSize: 10.3, letterSpacing: 0.4, color: INK, marginTop: 2,
     includeFontPadding: false,
   },
   allSubOn: { color: RULE },

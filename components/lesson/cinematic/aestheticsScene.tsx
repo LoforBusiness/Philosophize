@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   },
   critCap: {
     position: 'absolute', left: 12, top: 7,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.2, color: INK, includeFontPadding: false,
   },
   // Verdict marks stand ON the axis, so their spread reads as disagreement and
   // their huddle reads as a verdict.
@@ -442,11 +442,11 @@ const styles = StyleSheet.create({
   },
   panelCap: {
     position: 'absolute', left: 12, top: 8,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.3, color: INK, includeFontPadding: false,
   },
   panelFoot: {
     position: 'absolute', left: 12, top: 82,
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.1, color: INK, includeFontPadding: false,
   },
   barLabel: {
     width: 50, fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.4, color: INK, includeFontPadding: false,
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
   trackFill: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: INK },
   trackNote: {
     textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2,
-    color: SOFT, includeFontPadding: false,
+    color: INK, includeFontPadding: false,
   },
   rowLabel: {
     position: 'absolute', left: 12,

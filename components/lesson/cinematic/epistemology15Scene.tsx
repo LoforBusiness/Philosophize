@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   note: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.8, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
   sum: {

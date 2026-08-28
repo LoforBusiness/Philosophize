@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
   },
   candTopOn: { color: PAPER },
   candSub: {
-    fontFamily: 'Inter_400Regular', fontSize: 8.6, lineHeight: 11, color: SOFT,
+    fontFamily: 'Inter_400Regular', fontSize: 8.6, lineHeight: 11, color: INK,
     textAlign: 'center', marginTop: 5, includeFontPadding: false,
   },
   candSubOn: { color: PAPER },

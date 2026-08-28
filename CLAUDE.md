@@ -1138,6 +1138,35 @@ they belong to, so the rule book has them and this file did not:
 > 3.36:1, so a rule that always answers "use INK" would have painted three labels
 > invisibly onto a night sky.
 
+> **AND THE BOX RULE HAD A HOLE TOO, WHICH IS WHY THERE ARE NOW THREE (T6).**
+> Pairing by NAME needs somebody to follow the convention; pairing by BOX needs
+> both styles to resolve to coordinates. `ethics31`'s DUTY lamp has neither — the
+> fill is `lampBox`, the word is `lampOff`, and `lampOff` is `position:'absolute'`
+> with no left, top, width or height at all, because its parent centres it. So it
+> shipped **3.26:1 unanswered and 3.27:1 once the reveal fills the box INK — under
+> the floor in both of its states** — while `check:shade` printed *"no SOFT type
+> sits on a tone it cannot be read against"*. Two blind spots met on one style.
+>
+> The third pairing is the JSX TREE (`scripts/lib/tonenest.mjs`): a word is on
+> whatever its nearest painted ANCESTOR paints, which needs no naming convention
+> and no resolvable box, and is what the other two were approximating all along.
+> It found **62 captions in 45 scenes**, every one left behind by the tonal pass
+> that gave those boxes their fill — `node scripts/tone-soft-to-ink.mjs` did them.
+>
+> **It is narrow ON PURPOSE, and the wide version is why.** Paired against every
+> colour it returned **247** findings, nearly all `onInk` overrides measured
+> against the tone they exist to replace — PAPER on STONE at 1.57:1, which would
+> be a catastrophe in forty lessons if it were real. It could not tell a STATE
+> from a defect, which is exactly what got the boxiness metric deleted. So: only
+> SOFT (the one colour with no second reading — it clears nothing below RULE and
+> is never the lit half of anything), and only styles applied UNCONDITIONALLY,
+> because `[styles.word, answered && styles.onInk]` means the override arrives
+> *with* its own change of ground.
+>
+> **And a two-state label cannot carry its state in the word's colour on a mid
+> tone**, because one of the two states always loses. The lamp carries lit and
+> unlit itself now, with a ring on its face.
+
 > **One metric was built, checked, and thrown away, and that is the cheapest thing
 > that happened all day.** Counting how many of a scene's drawn elements are plain
 > rectangles looked like a way to find "labelled diagram" scenes — until it ranked
@@ -2957,6 +2986,31 @@ browser at it; the first transform can take longer than a navigation timeout.
   built the same way on purpose. Shooting each suspect's rectangle and measuring
   its real contrast took UNDER from **94 words in 17 lessons to 6 in 2**. Same
   instrument, same argument, one more class — see FAINT above.
+
+  **AND UNDER HAD BEEN STRUCTURALLY BLIND SINCE IT WAS WRITTEN, WHICH IS WHY THE
+  READER HAD TO REPORT IT.** It found what covers a word with `elementsFromPoint`,
+  and **hit-testing skips anything with `pointer-events: none`** — which is nearly
+  every decorative element in these scenes. It had been reporting zero honestly and
+  seeing almost nothing. It reads real DOM geometry in one paint-order pass now,
+  and splits the answer in two, because the two want different fixes: **UNDER** is
+  covered at the CENTRE (the word is buried — move the word) and **STRIKE** is
+  covered only at an EDGE (the word is sliced or ruled through — break the thing
+  around it). `political19` had both on one beat.
+
+  **Its first corpus run then returned 316 findings across 77 lessons, and that is
+  the same failure upside down.** A list naming 42% of the corpus is a broken
+  instrument with a confident tone, and it costs a day before anybody says so. Four
+  false-positive classes, the last two structural and both worth expecting again:
+  a cross-fading caption still in the DOM at opacity 0 (gate WORDS on opacity, not
+  just painted boxes); two wrapped lines of one paragraph grazing; **an unfilled
+  bordered box counted as a solid slab**, through `ea * ((c && c.a) || 1)` — a
+  transparent background parses to alpha 0, which is falsy, so `|| 1` promoted it
+  to fully opaque; and **`getBoundingClientRect()` does not know about
+  `overflow: hidden`**, so the floor every scene now lays down reported a rect
+  running out into the deck, and a rung parked outside its own scrolling window
+  reported one lying across a label. Intersect every box with EVERY clipping
+  ancestor. After all four: 0 on the sample, and the political19 defect still
+  reproduces 6-to-0 when put back.
 
   **And the vertical threshold has to be loose while the horizontal one is tight.**
   Content wider than its box is always a cut letter, so 2px of slack. Content

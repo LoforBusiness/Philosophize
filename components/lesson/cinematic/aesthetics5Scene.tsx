@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   egoText: {
-    fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 17, letterSpacing: 0.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 17, letterSpacing: 0.8, color: INK,
     includeFontPadding: false,
   },
   egoTail1: {
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   // lineHeight 14, not 15: the caption is two lines in this width, so every unit
   // of leading is doubled. 17 (title) + 28 (caption) = 45 in a 54-unit box leaves
   // 4.5 units — about 4dp — clear of the rule top and bottom.
-  cardSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 14, color: SOFT, includeFontPadding: false },
+  cardSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 14, color: INK, includeFontPadding: false },
   cardSubOn: { color: RULE },
 });
 

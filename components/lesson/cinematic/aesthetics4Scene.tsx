@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   },
   askSub: {
     marginTop: 6,
-    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12.5, letterSpacing: 0.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12.5, letterSpacing: 0.8, color: INK,
     includeFontPadding: false,
   },
   tack: {

@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   ckMark: {
-    position: 'absolute', fontFamily: 'Inter_700Bold', fontSize: 17, lineHeight: 22, color: SOFT, includeFontPadding: false,
+    position: 'absolute', fontFamily: 'Inter_700Bold', fontSize: 17, lineHeight: 22, color: INK, includeFontPadding: false,
   },
   ckOn: { color: INK },
   ckLab: {
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
   balWrong: { borderColor: SOFT, opacity: 0.45 },
   balTitle: { fontFamily: 'Inter_700Bold', fontSize: 14.5, lineHeight: 17, letterSpacing: 0.4, color: INK, includeFontPadding: false },
   balTitleOn: { color: PAPER },
-  balSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 15, color: SOFT, includeFontPadding: false },
+  balSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 15, color: INK, includeFontPadding: false },
   balSubOn: { color: RULE },
 });
 

@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, gap: 8,
   },
   stepNum: {
-    fontFamily: 'Inter_700Bold', fontSize: 9, color: SOFT, width: 8,
+    fontFamily: 'Inter_700Bold', fontSize: 9, color: INK, width: 8,
     includeFontPadding: false,
   },
   stepText: {
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   boxEmpty: {
-    fontFamily: 'Inter_500Medium', fontSize: 9, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_500Medium', fontSize: 9, letterSpacing: 1.4, color: INK,
     includeFontPadding: false,
   },
   boxFill: {

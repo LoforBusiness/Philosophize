@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   boxSmall: {
-    fontFamily: 'Inter_400Regular', fontSize: 8.7, letterSpacing: 0.6, color: SOFT,
+    fontFamily: 'Inter_400Regular', fontSize: 8.7, letterSpacing: 0.6, color: INK,
     marginTop: 3, includeFontPadding: false,
   },
 

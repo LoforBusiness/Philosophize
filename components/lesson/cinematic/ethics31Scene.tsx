@@ -135,7 +135,6 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick, dragPo
   const rungStyle = useAnimatedStyle(() => ({ transform: [{ translateY: SCENE.value.scroll }] }));
   const ladderStyle = useAnimatedStyle(() => ({ opacity: Math.min(1, SCENE.value.ladder) }));
   const lampStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.duty }));
-  const darkStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.duty }));
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -182,18 +181,19 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick, dragPo
             disappears into its own background — the correct-state fill and the
             text colour are a matched pair everywhere in the app (H61). */}
         <View style={[styles.lampBox, ...state(true, 'duty')]}>
-          <Animated.Text
-            style={[styles.lampOn, answered && styles.onInk, lampStyle]}
+          {/* LIT IS THE LAMP, NOT THE WORD. The face carries on/off with an inner
+              ring; the word stays one colour, so neither state and no point of the
+              crossfade is a grey on a grey (T3). */}
+          <Animated.View
+            style={[styles.lampRing, answered && styles.ringInk, lampStyle]}
+            pointerEvents="none"
+          />
+          <Text
+            style={[styles.lampWord, answered && styles.onInk]}
             numberOfLines={1}
           >
             DUTY
-          </Animated.Text>
-          <Animated.Text
-            style={[styles.lampOff, answered && styles.offInk, darkStyle]}
-            numberOfLines={1}
-          >
-            DUTY
-          </Animated.Text>
+          </Text>
         </View>
       </Target>
 
@@ -247,19 +247,17 @@ const styles = StyleSheet.create({
     height: LAMP_H, borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
-  lampOn: {
-    position: 'absolute',
+  lampWord: {
     fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 3, color: INK,
     includeFontPadding: false,
   },
-  lampOff: {
-    position: 'absolute',
-    fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 3, color: SOFT,
-    includeFontPadding: false,
+  lampRing: {
+    position: 'absolute', left: 3, top: 3, right: 3, bottom: 3,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2,
   },
 
   onInk: { color: PAPER },
-  offInk: { color: SOFT },
+  ringInk: { borderColor: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT, opacity: 0.45 },
 });

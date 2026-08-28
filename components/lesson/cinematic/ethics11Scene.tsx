@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   },
   tokenSub: {
     fontFamily: 'Inter_400Regular', fontSize: 8.6, lineHeight: 10, marginTop: 2,
-    color: SOFT, includeFontPadding: false,
+    color: INK, includeFontPadding: false,
   },
   tokenOn: { color: PAPER },
 

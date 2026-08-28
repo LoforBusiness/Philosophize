@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   },
   rowClaim: { backgroundColor: INK, borderColor: INK },
   rowGhost: { borderColor: SOFT, backgroundColor: STONE },
-  rowLab: { fontFamily: 'Inter_700Bold', fontSize: 9.8, letterSpacing: 1.3, color: SOFT, marginBottom: 2, includeFontPadding: false },
+  rowLab: { fontFamily: 'Inter_700Bold', fontSize: 9.8, letterSpacing: 1.3, color: INK, marginBottom: 2, includeFontPadding: false },
   rowLabOn: { color: PAPER, opacity: 0.75 },
   rowTxt: { fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 14, color: INK, includeFontPadding: false },
   rowTxtOn: { color: PAPER },

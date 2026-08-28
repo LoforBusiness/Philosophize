@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
   flowTextOff: {
-    fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
   flowTextOn: {
     fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.8, color: PAPER, includeFontPadding: false,

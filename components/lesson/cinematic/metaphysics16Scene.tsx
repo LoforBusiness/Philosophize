@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   },
   tag: {
     position: 'absolute', left: 0, right: 0, top: 88,
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
     textAlign: 'center', includeFontPadding: false,
   },
 

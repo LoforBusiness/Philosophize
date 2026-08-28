@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   chipA: { left: CH_L, width: 130 },
   chipB: { left: CH_L + 150, width: 138 },
   chipHead: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.4, color: INK, includeFontPadding: false },
-  chipSub: { fontFamily: 'Inter_500Medium', fontSize: 9, letterSpacing: 0.8, color: SOFT, marginTop: 2, includeFontPadding: false },
+  chipSub: { fontFamily: 'Inter_500Medium', fontSize: 9, letterSpacing: 0.8, color: INK, marginTop: 2, includeFontPadding: false },
   arrowWrap: {
     position: 'absolute', left: CH_L + 130, top: PRIN_T, width: 20, height: PRIN_H,
     alignItems: 'center', justifyContent: 'center',

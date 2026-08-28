@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   },
   kicker: {
     position: 'absolute', left: 10, top: 4,
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: INK,
     includeFontPadding: false,
   },
   bar: {

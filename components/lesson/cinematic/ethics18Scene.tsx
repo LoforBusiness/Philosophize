@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   testKicker: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: INK,
     includeFontPadding: false,
   },
   testText: {

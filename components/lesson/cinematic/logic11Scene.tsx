@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   },
   stepNum: {
     width: 18, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 12, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, includeFontPadding: false,
   },
   stepText: {
     flex: 1, fontFamily: 'Inter_500Medium', fontSize: 10.5, lineHeight: 14, color: INK, includeFontPadding: false,

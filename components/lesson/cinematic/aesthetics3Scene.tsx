@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   },
   toBoxOn: { borderWidth: 2.5, borderColor: INK },
   toText: {
-    fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 0.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
   toTextOn: { color: INK, fontSize: 13.5, letterSpacing: 0.8 },

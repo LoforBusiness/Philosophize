@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   tabHead: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 10, paddingTop: 6 },
-  tabName: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
+  tabName: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: INK,
     includeFontPadding: false,
   },
   tabRule: { marginTop: 5, marginHorizontal: 8, height: 1, backgroundColor: RULE },

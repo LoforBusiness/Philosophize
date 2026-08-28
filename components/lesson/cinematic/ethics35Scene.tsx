@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   armIn: { left: PANEL_W / 2, transform: [{ rotate: '150deg' }] },
   panelCap: {
     position: 'absolute', left: 0, top: PANEL_H - 20, width: PANEL_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK, includeFontPadding: false,
   },
 
   tag: { position: 'absolute', left: TAG_X, width: 190, height: 18 },

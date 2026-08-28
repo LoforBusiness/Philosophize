@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   flagSub: {
-    fontFamily: 'Inter_400Regular', fontSize: 8.6, lineHeight: 11.5, color: SOFT,
+    fontFamily: 'Inter_400Regular', fontSize: 8.6, lineHeight: 11.5, color: INK,
     textAlign: 'center', marginTop: 2, includeFontPadding: false,
   },
   flagOn: { color: PAPER },

@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
   },
   vpTallyText: {
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.1, color: INK,
     marginRight: 4, includeFontPadding: false,
   },
   pip: {

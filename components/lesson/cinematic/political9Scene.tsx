@@ -219,14 +219,14 @@ const styles = StyleSheet.create({
     alignItems: 'center', paddingVertical: 7,
   },
   tallyTag: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.8, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.8, color: INK,
     includeFontPadding: false,
   },
   tallyRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 2 },
   tallyBig: {
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: INK, includeFontPadding: false,
   },
-  tallyDash: { fontFamily: 'Inter_400Regular', fontSize: 15, color: SOFT, includeFontPadding: false },
+  tallyDash: { fontFamily: 'Inter_400Regular', fontSize: 15, color: INK, includeFontPadding: false },
 
   // A single heavy vertical rule. It is the only vertical line on the stage, so it
   // reads as a boundary rather than as another prop.

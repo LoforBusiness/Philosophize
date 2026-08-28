@@ -4891,3 +4891,199 @@ cannot support.
 typechecks, still renders, and still looks like a plate — just a plate that says
 nothing about who wrote it, on the one surface where the reader is most likely to
 be meeting that person for the first time.
+
+---
+
+## S9 · Nothing may be drawn ACROSS a word, and the checker could not see any of it
+
+The reader walked "Do We Owe Strangers Anything?" and found letters cut off above
+the figure. **Three separate things were crossing words on the same beat**, and the
+whole suite reported the lesson clean:
+
+- the marker's own label **YOU** printed straight through the panel caption **WHAT
+  IT COSTS YOU** — both at y 228, one spanning x 82…112 and the other x 40…360;
+- the lower panel's caption **straddling the upper panel's bottom edge**, so half
+  of it was SOFT on STONE and half on paper. That is exactly what a sliced word
+  looks like;
+- the marker's 2px line running down through **WHAT YOU|FEEL** like a strikethrough.
+
+### Why nothing caught them, which is the useful half
+
+- **`check:fits` (S8) asks whether a word fits ITS OWN box.** All three fitted. S8
+  is about the box a word is given; this is about everything else on the stage.
+- **`check:shade` pairs a fill with a caption by box** — but only where both
+  resolve from the stylesheet. These captions are positioned from a map variable
+  (`{ top: ty - 12 }`), so neither had a box to pair.
+- **`check:readable`'s UNDER rule used `elementsFromPoint`, and hit-testing skips
+  anything with `pointer-events: none`.** Nearly every decorative element in these
+  scenes sets it — the marker line does, and so does the panel whose edge did the
+  slicing. **UNDER had been structurally blind to almost all scene art since it was
+  written**, and had been reporting zero all along.
+- And it sampled **one point, the word's centre**. Even seeing the line, a 2px rule
+  crossing a third of the way along would have missed.
+
+**The second half of the tonal pass is here too.** These overlaps are old; T5's
+note that "shading is a REVEAL, not just a paint change" is exactly this, arriving
+a second time. White-on-white the same collision showed nothing.
+
+### The rule
+
+**Nothing drawn after a word may overlap its box unless it CONTAINS it.**
+Containing is the normal case — a caption sits on its plate. Partial overlap is
+the defect, and it has two shapes worth telling apart, because they want different
+fixes:
+
+- **UNDER** — covered at the centre. The word is buried; move the word.
+- **STRIKE** — covered only at an edge. The word is sliced or ruled through; break
+  the thing around it.
+
+`check:readable` measures both from real DOM geometry now, in one paint-order pass
+over the stage rather than by hit-testing. Counter-tested in both directions on
+political19: six STRIKEs with the defects in place, zero with them fixed.
+
+### What the fixes look like
+
+- **A line that must pass a caption is drawn in two segments.** political19's
+  marker runs down the first panel and down the second, and stops in the gap where
+  the lower caption lives. The mark marks the *panels*; the gap between them was
+  never part of the claim.
+- **A caption needs a gap it fits inside.** Two panels 52 tall with 8 units between
+  them cannot host an 11-unit caption between them. 44 leaves 16, which can.
+- **When two things want one text row, the panel's own name wins.** There was
+  exactly one row above the panels and both the caption and the marker's label
+  claimed it, so YOU moved *inside* the panel, beside its own line and above the
+  curve.
+
+### And two instrument notes worth carrying
+
+**A geometric rule written offline could not do this job.** One was written first —
+resolving boxes from constants — and it failed its own counter-test: these
+captions are positioned from a `.map` variable, so the elements at issue were the
+exact ones it could not resolve. It reported 81 findings elsewhere, all unverified,
+and none of the three it was built for. It was deleted rather than tuned. **When a
+detector misses the case that prompted it, the finding list it does produce is not
+evidence of anything.**
+
+**Paint order needs ONE sequence.** The first render version collected painted
+boxes and words in two passes and numbered the words `1e6`, which made every word
+the last thing drawn — the word under test then out-ranked every box, the
+"drawn after me" filter excluded all of them, and STRIKE fell straight back to
+zero. It looked exactly like a clean corpus.
+
+### And then it reported 316 findings, which is the same failure upside down
+
+The rule above was written the moment STRIKE stopped returning zero. Its first
+corpus sweep came back **CUT 5 · FAINT 12 · SPILL 0 · UNDER 41 · STRIKE 316 across
+77 lessons**, and none of it was actionable: a list that names 42% of the corpus
+is not a finding list, it is a broken instrument with a confident tone. **A checker
+that over-reports is not safer than one that under-reports** — both end with
+somebody deciding it cannot be trusted, and the over-reporting one costs a day
+first.
+
+Four false-positive classes, in the order they were peeled off. Each was found by
+printing what the detector was actually looking at rather than by reasoning about
+the rule, and each is a thing any future geometric check will meet again:
+
+- **A cross-fading caption is still in the DOM.** These scenes fade almost
+  everything, so a label on its way out sits at opacity 0 with a full-size box.
+  Painted boxes were opacity-gated and words were not, so every transition
+  invented a collision. Gate the words too.
+- **Two lines of one paragraph graze.** Every face here sets a lineHeight tighter
+  than its natural one, so wrapped narration lines overlap by a pixel or two — the
+  same slack group D already allows for vertical overflow. Word-on-word wants a
+  real overlap (4px) and must not fire between lines of the same block.
+- **An outline was counted as a slab, through an arithmetic slip that reads
+  correctly.** The solidity test was `ea * ((c && c.a) || 1)`. A transparent
+  background parses to alpha 0; `(c && c.a)` is therefore `0`, which is **falsy**,
+  so `|| 1` promoted it to fully opaque. Every outlined box in every scene counted
+  as a filled rectangle covering everything it enclosed. An unfilled bordered box
+  paints its FRAME — carry the border widths and let only those bands strike.
+- **`getBoundingClientRect()` does not know about `overflow: hidden`.** This is the
+  one worth carrying furthest. Every scene now lays down a floor (`top: GROUND,
+  bottom: 0`) as its first View; clipped by the stage crop it is the strip the
+  reader sees, but its *rect* runs the full height of its parent and out into the
+  deck below. Paired with `orderOf()` returning `-1` for any word outside the crop
+  — and a paint-order filter written `if (mine >= 0 && …)`, so `-1` **skipped the
+  filter entirely** — that one invisible fill was striking narration in half the
+  corpus. Intersect every painted box with the crop, and let nothing inside the
+  crop be over a word outside it.
+
+After all four: **4 findings across 1 lesson**, and the survivor is real — a 23×4
+ink bar drawn across the top 4px of its own 10px label box.
+
+**The counter-test had to be run again from scratch, and that is the rule.** S9's
+original proof — six STRIKEs with political19's defects in, zero with them out —
+was taken against a detector that no longer exists. Re-proved against the current
+one by restoring `PAN_H = 52`: the caption comes back as *struck by 312x51 div* on
+four beats, and goes away when it is 44 again. **A detector that has been retuned
+has not been counter-tested; only the version you are about to believe has.**
+
+**Two twins that are not collisions, kept as exemptions:** react-native-web draws
+a two-state label as the dim copy and the lit copy at the *same box with the same
+text*, and `political-7` tears a charter by drawing one sheet in two clipped
+windows. Both are the design. Same box plus same string is one label.
+
+---
+
+## T6 · A word is on whatever its nearest painted ANCESTOR paints
+
+T3 has said "type on a tone is INK" since the greys were added, and `check:shade`
+has enforced it two ways. Both ways are approximations of the same thing and they
+have a blind spot each, and one style found the gap where the two overlap:
+
+- **by NAME** — `slab` with `slabText`. That is the house convention, so it is
+  invisible exactly when somebody does not follow it. `epistemology23` calls its
+  hopper's caption `hopText`; ethics31 calls its lamp's word `lampOff`.
+- **by BOX** — overlap, added after the name rule missed the hopper. It needs both
+  styles to resolve to coordinates. `lampOff` is `position: 'absolute'` with no
+  left, top, width or height at all: it is centred by its parent's `alignItems`,
+  so there is no box to compare and it was skipped in silence.
+
+So ethics31's DUTY lamp shipped a SOFT word on a STONE face — **3.26:1 unanswered
+and 3.27:1 once the box fills INK, under the floor in both of its states** — while
+`check:shade` printed *"no SOFT type sits on a tone it cannot be read against"*.
+The browser found it as a FAINT at 2.4:1 mid-crossfade; nothing offline could.
+
+**The tree has neither blind spot.** A word sits on the ground painted by its
+nearest filled ANCESTOR, which needs no naming convention and no resolvable box —
+and it is what the other two were estimating all along.
+`scripts/lib/tonenest.mjs` walks the JSX and `check:shade` now pairs a third time.
+
+### The two things that make it usable rather than noisy
+
+**Only SOFT, and only on STONE, SHADE or INK.** Paired against every colour it
+returned **247** findings, nearly all of them `onInk`-style overrides measured
+against the tone they exist to replace — PAPER on STONE at 1.57:1, which would be
+a catastrophe in forty lessons if it were real. SOFT is the one colour with no
+second reading: it clears nothing below RULE, and it is never the LIT half of a
+two-state label, because a lit word is paper or ink. RULE is excluded because the
+house already accepts SOFT on it at 4.08:1 — this rule extends T3, it does not
+move it.
+
+**Only styles applied UNCONDITIONALLY.** `[styles.word, answered && styles.onInk]`
+means the override arrives *with* a change of ground. A conditional style belongs
+to whatever turns up with it; only an unconditional one is on the tone below it.
+
+Counter-tested eight ways — the real defect, the same word made INK, SOFT on a
+PAPER box, a PAPER wrapper nested inside a STONE one, a state override, a
+conditional ground, a self-closing element, and ethics31's actual source.
+
+### What it found, and the shape of the fix
+
+**62 captions in 45 scenes**, every one of them left behind by the tonal pass that
+gave those boxes their fill: on paper SOFT is a legitimate 5.1:1 secondary grey, so
+none of it failed when it was written and nothing caught it after. They are INK
+now (`node scripts/tone-soft-to-ink.mjs`).
+
+**The hierarchy those captions were reaching for is carried by size and weight,
+which they already differ in.** It was never carried by the grey — at 3.26:1 the
+grey was not being read.
+
+### And the lamp needed more than a colour
+
+A two-state label cannot carry its state in the word's colour on a mid tone,
+because one of the two states always loses: INK is right on STONE and wrong on the
+INK the reveal fills the same box with, and SOFT is wrong on both. So **the lamp
+carries lit and unlit itself** — an inner ring on its face — and the word is one
+colour that is legible throughout. That also stops the lit state colliding with
+the answer state, which fills that very box INK.

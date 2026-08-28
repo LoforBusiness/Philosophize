@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   pipeOut: { backgroundColor: INK },
-  pipeTag: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT, includeFontPadding: false },
+  pipeTag: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: INK, includeFontPadding: false },
   pipeVal: { fontFamily: 'Inter_700Bold', fontSize: 16, letterSpacing: 0.6, color: INK, marginTop: 1, includeFontPadding: false },
 
   shaft: { position: 'absolute', left: MID - 3, width: 6, height: 8, backgroundColor: INK },
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: GEAR_L, top: GEAR_T, width: GEAR_W, height: GEAR_H,
     borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, alignItems: 'center', paddingTop: 5,
   },
-  gearLabel: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: SOFT, includeFontPadding: false },
+  gearLabel: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: INK, includeFontPadding: false },
   gear: {
     position: 'absolute', top: GEAR_CY - 23, width: 46, height: 46,
     alignItems: 'center', justifyContent: 'center', transformOrigin: '50% 50%',
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
     borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
     alignItems: 'center', justifyContent: 'center',
   },
-  proofTag: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: SOFT, includeFontPadding: false },
+  proofTag: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: INK, includeFontPadding: false },
   proofT: { fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 0.4, color: INK, marginTop: 1, includeFontPadding: false },
 });
 

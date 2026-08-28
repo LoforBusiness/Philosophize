@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 12, top: (ROW_H - 26) / 2, width: 26, height: 26, borderRadius: 13,
     borderWidth: 1.5, borderColor: SOFT, alignItems: 'center', justifyContent: 'center',
   },
-  badgeText: { fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 16, color: SOFT, includeFontPadding: false },
+  badgeText: { fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 16, color: INK, includeFontPadding: false },
   badgeOn: {
     position: 'absolute', left: 12, top: (ROW_H - 26) / 2, width: 26, height: 26, borderRadius: 13,
     backgroundColor: INK, alignItems: 'center', justifyContent: 'center',
@@ -215,12 +215,12 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   lensWho: {
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1, color: INK,
     includeFontPadding: false,
   },
   lensQ: {
     position: 'absolute', left: 152, top: 8, width: 116,
-    fontFamily: 'Inter_500Medium', fontSize: 11.5, lineHeight: 14.5, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_500Medium', fontSize: 11.5, lineHeight: 14.5, color: INK, includeFontPadding: false,
   },
 
   slot: {
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: RULE, borderStyle: 'dashed', borderRadius: 4,
     alignItems: 'center', justifyContent: 'center',
   },
-  slotText: { fontFamily: 'Inter_700Bold', fontSize: 16, lineHeight: 20, color: SOFT, includeFontPadding: false },
+  slotText: { fontFamily: 'Inter_700Bold', fontSize: 16, lineHeight: 20, color: INK, includeFontPadding: false },
   stamp: {
     position: 'absolute', left: 274, top: 7, width: 92, height: 30,
     backgroundColor: INK, borderRadius: 4, alignItems: 'center', justifyContent: 'center',

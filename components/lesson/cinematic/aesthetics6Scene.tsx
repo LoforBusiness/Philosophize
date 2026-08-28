@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   // which also threw the centred text 2.5 units right of true centre.
   mindWho: {
     position: 'absolute', left: 0, top: 7, width: 143, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: SOFT, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: INK, includeFontPadding: false,
   },
   ring: { position: 'absolute', top: 19, width: 34, height: 34, borderRadius: 17, borderWidth: 2.5, borderColor: INK },
   mindT: {

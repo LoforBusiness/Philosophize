@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   panRight: { backgroundColor: INK, borderColor: INK },
   panWrong: { borderColor: SOFT, opacity: 0.45 },
   panT: { fontFamily: 'Inter_700Bold', fontSize: 14.5, letterSpacing: 0.5, color: INK, includeFontPadding: false },
-  panSub: { fontFamily: 'Inter_400Regular', fontSize: 10.5, color: SOFT, marginTop: 3, includeFontPadding: false },
+  panSub: { fontFamily: 'Inter_400Regular', fontSize: 10.5, color: INK, marginTop: 3, includeFontPadding: false },
 });
 
 // The band, measured with the camera GONE (design coordinates are final coordinates):

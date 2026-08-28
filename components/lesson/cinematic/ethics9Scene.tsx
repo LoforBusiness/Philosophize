@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   noteKicker: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, marginBottom: 4,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: INK, marginBottom: 4,
     includeFontPadding: false,
   },
   // Hand-broken to one short word a line (D32b): the inner width is 78 − 4 border

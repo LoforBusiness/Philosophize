@@ -33,6 +33,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { softOnToneByBox } from './lib/tonefit.mjs';
+import { softOnToneByNest } from './lib/tonenest.mjs';
 
 const DIR = 'components/lesson/cinematic';
 
@@ -101,6 +102,21 @@ for (const f of files) {
   // called clean. Overlap is what is actually true.
   for (const hit of softOnToneByBox(fs.readFileSync(path.join(DIR, f), 'utf8'), f)) {
     if (!softOnTone.some((x) => x.startsWith(hit.split('  ')[0]) && x.includes(hit.split(' is ')[0].split('  ').pop()))) softOnTone.push(hit);
+  }
+
+  // AND A THIRD TIME BY THE TREE, because the two above met on one style and
+  // both missed it. ethics31's lamp is `lampBox` filled STONE with `lampOff`
+  // inside it: the name rule wants `lampBoxText`, and the box rule needs
+  // coordinates, which `lampOff` has none of — it is position:'absolute' and
+  // centred by its parent. It shipped at 3.26:1 in one state and 3.27:1 in the
+  // other while this file printed that no SOFT type sits on a tone.
+  //
+  // A word is on whatever its nearest painted ANCESTOR paints. That is what the
+  // other two were approximating, and it is the one of the three with no blind
+  // spot — it needs neither a naming convention nor a resolvable box.
+  for (const hit of softOnToneByNest(fs.readFileSync(path.join(DIR, f), 'utf8'), f)) {
+    const who = hit.split('  ')[1].split(' is ')[0];
+    if (!softOnTone.some((x) => x.startsWith(f) && x.includes(who))) softOnTone.push(hit);
   }
 }
 

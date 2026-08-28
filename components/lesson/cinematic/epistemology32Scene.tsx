@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
 
   labels: { position: 'absolute', left: PAD, right: PAD, top: 60, alignItems: 'center' },
   scaleText: {
-    fontFamily: 'Inter_500Medium', fontSize: 8.6, letterSpacing: 0.8, color: SOFT,
+    fontFamily: 'Inter_500Medium', fontSize: 8.6, letterSpacing: 0.8, color: INK,
     includeFontPadding: false,
   },
   nameText: {

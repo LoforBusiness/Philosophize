@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   },
   boxSub: {
     position: 'absolute', left: 8, top: 29, width: BOX_W - 20, textAlign: 'center',
-    fontFamily: 'Inter_400Regular', fontSize: 10, lineHeight: 13, letterSpacing: 0.2, color: SOFT,
+    fontFamily: 'Inter_400Regular', fontSize: 10, lineHeight: 13, letterSpacing: 0.2, color: INK,
     includeFontPadding: false,
   },
   divider: { position: 'absolute', left: 199.25, top: 250, width: 1.5, height: 62, backgroundColor: RULE },

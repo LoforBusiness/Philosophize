@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   },
   pickNote: {
     fontFamily: 'Inter_500Medium', fontSize: 8.6, lineHeight: 12, letterSpacing: 0.6,
-    color: SOFT, marginTop: 2, includeFontPadding: false,
+    color: INK, marginTop: 2, includeFontPadding: false,
   },
   pickTextOn: { color: PAPER },
 });

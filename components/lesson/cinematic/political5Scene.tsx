@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   cardTitleOn: { color: PAPER },
-  cardSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 15, color: SOFT, includeFontPadding: false },
+  cardSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 15, color: INK, includeFontPadding: false },
   cardSubOn: { color: RULE },
 });
 

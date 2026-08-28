@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   cardFill: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: INK, transformOrigin: '0% 50%' },
   cardText: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
   cardTitle: { fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 0.6, color: INK, includeFontPadding: false },
-  cardSub: { fontFamily: 'Inter_400Regular', fontSize: 11.5, color: SOFT, marginTop: 4, includeFontPadding: false },
+  cardSub: { fontFamily: 'Inter_400Regular', fontSize: 11.5, color: INK, marginTop: 4, includeFontPadding: false },
   onPaper: { color: PAPER },
 
   // ── the measure ────────────────────────────────────────────────────────────

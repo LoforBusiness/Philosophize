@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   tagWord: { fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 2, color: INK, includeFontPadding: false },
-  tagSub: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1, color: SOFT, marginTop: 3, includeFontPadding: false },
+  tagSub: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1, color: INK, marginTop: 3, includeFontPadding: false },
 
   // Derived from the figure, not hand-placed: the head's centre sits (standH 34 +
   // 49) rig units above the ground and its radius is 20, both scaled by K_FIG. The

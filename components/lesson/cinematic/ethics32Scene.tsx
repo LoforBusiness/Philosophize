@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   newCaseKicker: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: INK,
     includeFontPadding: false,
   },
   newCaseText: {

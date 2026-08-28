@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   },
   claimSub: {
     marginTop: 4,
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: INK,
     includeFontPadding: false, lineHeight: 12,
   },
   crackA: { position: 'absolute', left: 52, top: -1, width: 2, height: 26, backgroundColor: INK, transform: [{ rotate: '20deg' }] },

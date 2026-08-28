@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   ledWrong: { borderColor: SOFT, opacity: 0.45 },
   ledTitle: { fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 17, color: INK, letterSpacing: 0.3, includeFontPadding: false },
   ledTitleOn: { color: PAPER },
-  ledSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 15, color: SOFT, includeFontPadding: false },
+  ledSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 15, color: INK, includeFontPadding: false },
   ledSubOn: { color: RULE },
 });
 

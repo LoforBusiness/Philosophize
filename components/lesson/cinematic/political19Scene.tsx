@@ -45,7 +45,7 @@ const BASE_TR = 0.85;
 
 const PAN_X = 40;
 const PAN_W = 320;
-const PAN_H = 52;
+const PAN_H = 44;
 const PAN_TOP = [240, 300];
 const PAN_CAP = ['WHAT IT COSTS YOU', 'WHAT YOU FEEL YOU MUST DO'];
 const PAN_ID = ['cost', 'pull'];
@@ -132,7 +132,12 @@ export default function Political19Scene({ clock, bt, bi, i, picked, onPick }: S
 
       {/* ONE MARK THROUGH BOTH PANELS — the reader stands at one distance. */}
       <Animated.View style={[StyleSheet.absoluteFill, markStyle]} pointerEvents="none">
+        {/* TWO SEGMENTS, NOT ONE. A single line from the first panel to the axis
+            crossed the gap between them — which is where the lower panel's caption
+            lives — and struck straight through WHAT YOU|FEEL. The mark marks the
+            PANELS; the gap between them is not part of the claim (D31). */}
         <View style={styles.markLine} />
+        <View style={styles.markLineB} />
         <Text style={styles.markCap}>YOU</Text>
       </Animated.View>
 
@@ -229,11 +234,15 @@ const styles = StyleSheet.create({
   },
 
   markLine: {
-    position: 'absolute', left: MARK_X, top: PAN_TOP[0], width: 2, height: AXIS_Y - PAN_TOP[0],
+    position: 'absolute', left: MARK_X, top: PAN_TOP[0], width: 2, height: PAN_H,
+    backgroundColor: INK,
+  },
+  markLineB: {
+    position: 'absolute', left: MARK_X, top: PAN_TOP[1], width: 2, height: AXIS_Y - PAN_TOP[1],
     backgroundColor: INK,
   },
   markCap: {
-    position: 'absolute', left: MARK_X - 14, top: PAN_TOP[0] - 12, width: 30, textAlign: 'center',
+    position: 'absolute', left: MARK_X + 4, top: PAN_TOP[0] + 4, width: 30, textAlign: 'left',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
 
