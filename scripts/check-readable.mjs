@@ -234,6 +234,15 @@ const PROBE = `(() => {
   // straight back to zero. A paint-order comparison needs ONE sequence.
   const painted = [];
   const CR = clipEl.getBoundingClientRect();
+  // SCENE UNITS, so a finding can be matched back to a style without a browser.
+  // #stage-cam carries the camera transform with transformOrigin 0% 0%, so its own
+  // rect's top-left is the image of scene (0,0) and its width is STAGE_W x the
+  // total scale — one division recovers both, exactly as mustprobe does it.
+  const CAMEL = document.querySelector('#stage-cam');
+  const CAMR = CAMEL ? CAMEL.getBoundingClientRect() : null;
+  const K = CAMR && CAMR.width ? CAMR.width / 400 : 0;
+  const toScene = (x, y, w, h) => (!K ? '' : ' scene ' + Math.round(w / K) + 'x' + Math.round(h / K)
+    + ' @' + Math.round((x - CAMR.x) / K) + ',' + Math.round((y - CAMR.y) / K));
   {
     let order = 0;
     for (const el of clipEl.querySelectorAll('*')) {
@@ -583,6 +592,21 @@ const PROBE = `(() => {
         if (bothWords && (p.el.textContent || '').trim() === txt
             && Math.abs(p.x - r.left) < 2 && Math.abs(p.y - r.top) < 2) return false;
         if (ox <= 1 || oy <= (bothWords ? 4 : 1)) return false;
+        // A GRAZE ALONG A BOX EDGE IS NOT A STRIKE, BECAUSE A TEXT BOX IS NOT ITS
+        // INK. Every label here carries leading above and below the glyphs, so a
+        // marker resting on a caption's box overlaps it by a unit or two and
+        // touches no letter. Measured across the corpus that was most of the list:
+        // political36's flag grazed its title by 1 unit of 8, metaphysics37's rule
+        // by 1 of 8, aesthetics4's hanging ring by 1 of 10 — none of them visible
+        // in a screenshot, all of them findings.
+        //
+        // What separates those from the real ones is not a fixed number of pixels
+        // but how much of the WORD is crossed. A thin vertical rule through a
+        // caption covers little width and its whole height; a panel edge slicing a
+        // label covers its whole width and a third of its height. Either counts;
+        // clipping a corner does not.
+        const frac = Math.max(ox / Math.max(1, r.width), oy / Math.max(1, r.height));
+        if (frac < 0.35) return false;
         // A frame paints its bands. The interior is open paper.
         if (p.frame) {
           const band = p.frame + 1;
@@ -609,7 +633,10 @@ const PROBE = `(() => {
       const name = (p) => {
         const t = (p.el.textContent || '').trim();
         if (t) return 'the words ' + JSON.stringify(t.slice(0, 24));
-        return Math.round(p.w) + 'x' + Math.round(p.h) + ' ' + (p.el.tagName || 'box').toLowerCase();
+        // WHERE, not just how big. A dimension alone cannot be matched back to a
+        // style, so every remaining finding needed its own browser run to place.
+        return Math.round(p.w) + 'x' + Math.round(p.h) + ' ' + (p.el.tagName || 'box').toLowerCase()
+          + toScene(p.x, p.y, p.w, p.h);
       };
       const atCentre = hits.find((p) => cx >= p.x && cx <= p.x + p.w && cy >= p.y && cy <= p.y + p.h);
       if (atCentre) coveredBy = name(atCentre);
@@ -633,6 +660,9 @@ const PROBE = `(() => {
       keep: +keep.toFixed(2), con: +con.toFixed(1), a: +alpha.toFixed(2),
       spill: Math.round(spill), sx: Math.round(spillX), sy: Math.round(spillY), coveredBy, struckBy,
       r: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)],
+      // The same rect in SCENE units, so a finding names a place in the source.
+      rs: K ? [Math.round((r.left - CAMR.x) / K), Math.round((r.top - CAMR.y) / K),
+               Math.round(r.width / K), Math.round(r.height / K)] : null,
       over: overhang.map((v) => Math.round(v * 10) / 10) });
   }
 
@@ -944,6 +974,27 @@ function allIds() {
     'ethics-ethics-12': ['PROMISE'],
   };
 
+  // AND TWO SCENES CROSS A WORD ON PURPOSE.
+  //
+  // STRIKE cannot be settled by pixels the way FAINT and UNDER can. FAINT asks
+  // "can this be read", which is a number. STRIKE asks "was this meant", and no
+  // measurement answers that: aesthetics20 draws a 320x2 bar through IT TEACHES
+  // YOU THINGS and its style is called `strike`, because the whole lesson is each
+  // claim about art being struck out by something that does it better. Two hundred
+  // units away, political19 drew a 2px marker line through WHAT YOU|FEEL and that
+  // is the defect the reader reported. Identical geometry, opposite meanings.
+  //
+  // Named rather than budgeted, for the reason the fades above are: a NEW word
+  // crossed in the same lesson still shows.
+  const STRUCK_ON_PURPOSE = {
+    // Each claim is struck out as the thing that does it better arrives.
+    'aesthetics-aesthetics-20': ['*'],
+    // The charter TEARS: one sheet drawn in two clipped windows, so every word
+    // across the seam sits under its own twin. §21 records this as the shape that
+    // made the pixel confirmation necessary in the first place.
+    'political-political-7': ['*'],
+  };
+
   const nBeatsOf = (() => {
     const src = fs.readFileSync('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx', 'utf8');
     const comps = new Map([...src.matchAll(/^\s*'([a-z0-9-]+)':\s*(\w+),/gm)].map((m) => [m[1], m[2]]));
@@ -1093,6 +1144,15 @@ function allIds() {
         hits = hits.map((h) => {
           if (!h.why.includes('FAINT') || !spared.includes(h.t)) return h;
           const rest = h.why.split('+').filter((w) => w !== 'FAINT').join('+');
+          return rest ? { ...h, why: rest } : null;
+        }).filter(Boolean);
+      }
+      const crossed = STRUCK_ON_PURPOSE[id];
+      if (crossed) {
+        hits = hits.map((h) => {
+          if (!h.why.includes('STRIKE')) return h;
+          if (!crossed.includes('*') && !crossed.includes(h.t)) return h;
+          const rest = h.why.split('+').filter((w) => w !== 'STRIKE').join('+');
           return rest ? { ...h, why: rest } : null;
         }).filter(Boolean);
       }

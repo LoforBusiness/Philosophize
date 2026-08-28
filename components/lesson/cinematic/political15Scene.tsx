@@ -207,7 +207,12 @@ const styles = StyleSheet.create({
     transformOrigin: '50% 0%',
   },
   nightLab: {
-    position: 'absolute', left: ST_L - 8, top: STG_T + 3 * STG_PITCH - 6, width: 90,
+    // UNDER THE STAIR, not beside it. At the rail's own end this label sat on the
+    // fourth stage's row and 90 units of it ran straight through 4 · ACCEPT THE
+    // PENALTY. Neither side of that row is free: the stair owns x >= 216 and the
+    // figure's span reaches 204.5, so the only clear ground is below y 394 where
+    // the stair stops — and at x >= 208 it is clear of the crown at 397 too.
+    position: 'absolute', left: ST_L - 8, top: STG_T + 3 * STG_PITCH + STG_H + 6, width: 90,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     includeFontPadding: false,
   },

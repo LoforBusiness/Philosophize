@@ -177,7 +177,12 @@ export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick, dr
 
       {/* THE PANEL THAT STAYS EMPTY. */}
       <Animated.View style={[StyleSheet.absoluteFill, emptyStyle]}>
-        <Text style={[styles.cap, { left: ASK_X, width: ASK_W }]}>WHO IS SAD</Text>
+        {/* THE ONE CAPTION WIDER THAN ITS PANEL. The other two take their panel's
+            130 units and fit easily; this panel is 58 and WHO IS SAD measures
+            59.6, so it wrapped by a hair and the second line printed across the
+            panel's own top edge. Centred on the panel and 72 wide it clears the
+            second panel (which ends at 302) and stays on one line. */}
+        <Text style={[styles.cap, { left: ASK_X + ASK_W / 2 - 36, width: 72 }]}>WHO IS SAD</Text>
         <View style={[styles.panel, { left: ASK_X, width: ASK_W }]} pointerEvents="none" />
         <Text style={styles.askMark}>?</Text>
       </Animated.View>

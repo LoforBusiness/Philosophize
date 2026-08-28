@@ -28,8 +28,10 @@ import { followMoves, kindOf, seedOf } from './camera';
 //   "40,000 PEOPLE", each with "FOUND NOTHING" beneath. Identical result, and the
 //   cards are drawn identically apart from the number, because the number is the
 //   only difference that matters.
-// · the figure stands at x 58 and walks to 130; crown ~397. The grid starts at
-//   x 128, so he is beside the room rather than inside it.
+// · the figure stands at x 58 and walks to 104; crown ~397. The grid starts at
+//   x 128, so he is beside the room rather than inside it — and beside the CASE
+//   CARDS too, which is why he stops at 104 and not 130. At 130 his head spans
+//   x 109…149 and the first card starts at 128, so he stood on FOUND NOTHING.
 //
 // Ink runs y 240 (caption) … y 500 (ground). BAND 234…512 = 278 (H59).
 //

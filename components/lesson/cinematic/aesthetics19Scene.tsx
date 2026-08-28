@@ -202,8 +202,11 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   frame: {
+    // NO FILL. Its own comment says "it points, and that is all it does" — and it
+    // was drawn after the items with a STONE fill, so it painted over the very
+    // tile it was pointing at and buried DRAIN and MARSH underneath. A frame is
+    // its edge; the 3-wide ink border is the whole of what makes it read as one.
     position: 'absolute', top: ITEM_T - 5, width: ITEM_W + 10, height: ITEM_H + 10,
-    backgroundColor: STONE,
     borderWidth: 3, borderColor: INK, borderRadius: 3,
   },
 

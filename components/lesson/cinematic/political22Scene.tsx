@@ -25,8 +25,11 @@ import { followMoves, kindOf, seedOf } from './camera';
 //   from y 268 (up, leaving her be) to y 330 (down, interfering). The lever is
 //   UP on seven of the nine beats, which is the whole argument: what she lives
 //   under is the slot, not the lever.
-// · TWO STATE LABELS sit left of the slot at x 244…298, tops 268 and 328, so
-//   each end of the travel says what it means without narration (A1).
+// · TWO STATE LABELS sit left of the slot at x 230…296, tops 268 and 328, so
+//   each end of the travel says what it means without narration (A1). The width
+//   is what the header always said and the style did not: LEAVES YOU BE is 74
+//   units and wraps to LEAVES YOU at 59.5, so a box starting at 244 needed 66 and
+//   ran to 310 — under the lever, which spans 298…338. Shifted left instead.
 // · HER DAY is three 60×40 tiles at x 24 · 88 · 152, y 272…312, reading WORK ·
 //   SPEAK · GO, with a 2-thick strike drawn through all three at y 291 when the
 //   lever goes down.
@@ -227,7 +230,7 @@ const styles = StyleSheet.create({
     backgroundColor: INK, borderRadius: 4,
   },
   state: {
-    position: 'absolute', left: 244, width: 66, lineHeight: 9,
+    position: 'absolute', left: 230, width: 66, lineHeight: 9,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: SOFT, includeFontPadding: false,
   },
   caption: {

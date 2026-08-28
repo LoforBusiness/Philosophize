@@ -5141,3 +5141,22 @@ checker's input is produced by another instrument, ask what happens when that
 instrument returns nothing.** `muststamp` already hashes the probe so a changed
 probe invalidates the table (§21). It cannot tell you the probe found nothing to
 record.
+
+### And the fifth class was the threshold itself
+
+After the four above, the corpus still reported 31 overlaps and about half of them
+could not be seen in a screenshot. They shared a shape: the coverer crossed the
+label's box by **one unit**. political36's marker flag grazed its title by 1 of 8,
+metaphysics37's rule by 1 of 8, aesthetics4's hanging ring by 1 of 10.
+
+**A text box is not its ink.** Every label carries leading above and below the
+glyphs, so anything resting against a caption overlaps its box and touches no
+letter. A rule counted in pixels cannot tell that from a slice, and the pixel
+count that would exclude these also excludes a 2-unit marker line drawn straight
+down through a word — which is the defect this whole group exists for.
+
+What separates them is not a distance but **how much of the WORD is crossed**. A
+thin vertical rule covers little width and the label's whole height; a panel edge
+slicing a caption covers its whole width and a third of its height. Either is a
+finding at 35% of one dimension; clipping a corner is not. Re-counter-tested on
+political19 at the new threshold: still 6 with the defect in, 0 with it out.

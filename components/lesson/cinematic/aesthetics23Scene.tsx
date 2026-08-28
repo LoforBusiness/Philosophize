@@ -27,8 +27,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 //   tops 268 · 262 · 274 · 266 · 270 · 262 · 276, each with a 2×22 stem rising
 //   from its right edge. The line rises and falls rather than climbing, so it
 //   reads as a tune and not a scale.
-// · the CAPTION sits at y 300 and the THREE PLATES at y 314…356 — 102 wide at
-//   x 28 · 150 · 272, centres 79 · 201 · 323.
+// · the THREE PLATES sit at y 314…356 — 102 wide at
+//   x 28 · 150 · 272, centres 79 · 201 · 323 — with the CAPTION under them at
+//   y 364, clear of the arrow that sweeps between the stave and the plates.
 // · the ARROW is a 3-wide riser from y 288 to y 306 plus a head of three bars
 //   (12 · 8 · 4 wide) at y 306 · 309 · 312, and its x is carried, so moving the
 //   claim moves the arrow across the stage rather than cutting to it (L1).
@@ -52,7 +53,13 @@ const NOTE_W = 13;
 const NOTE_H = 9;
 const STEM_H = 22;
 
-const CAP_Y = 300;
+// BELOW THE PLATES, because the arrow's row belongs to the arrow. The caption
+// used to sit at 300 and the riser runs 288 to 306 at whichever plate is being
+// pointed at — so at plate one (centre 79) it came straight down through IT
+// POINTS AT. There is no x that escapes it: the three centres are 79, 201 and
+// 323 and the caption is 71 wide wherever it starts. The band's top has 6 units
+// spare, which is not a caption, so it goes under the plates instead.
+const CAP_Y = 364;
 const PL_Y = 314;
 const PL_H = 42;
 const PL_W = 102;

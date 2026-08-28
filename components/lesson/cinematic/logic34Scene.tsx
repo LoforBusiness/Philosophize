@@ -147,7 +147,12 @@ const styles = StyleSheet.create({
     borderLeftWidth: 2, borderRightWidth: 2, borderTopWidth: 2, borderBottomWidth: 2,
     borderColor: INK, backgroundColor: STONE, borderRadius: 3, opacity: 0.55,
   },
-  est: { position: 'absolute', top: BAND_T - 10, width: 3, height: BAND_H + 20, backgroundColor: INK },
+  // IT STOPS ABOVE THE LABEL ROW. At BAND_H + 20 this line reached y 452 and the
+  // TRUE label starts at 448, so wherever the reader parked their estimate near
+  // the true value the marker ruled straight through the word naming it. The
+  // overhang is what makes it read as a marker rather than a wall; four units of
+  // clearance keeps that and stops it reaching the caption.
+  est: { position: 'absolute', top: BAND_T - 10, width: 3, height: BAND_H + 12, backgroundColor: INK },
   estLabel: {
     position: 'absolute', top: BAND_T - 24, width: 80,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK,

@@ -73,8 +73,12 @@ const MARKS = ['PRACTICE', 'COMPARISON', 'NO GRUDGES', 'GOOD SENSE'];
 const CH_L = 24;
 const CH_LABEL_W = 92;
 const CH_TRACK_L = 122;
-const CH_TRACK_W = 200;
-const CH_NOTE_L = 328;
+const CH_TRACK_W = 190;
+// WIDE ENOUGH FOR ITS OWN LONGEST WORD PAIR. At 68 units NEARLY ALL measures
+// 75.3 and wrapped, and the second line landed on the picture rail at y 166 —
+// a hairline straight through ALL. Eighty units holds it on one line with room
+// to spare, and the track gives up the ten it needs.
+const CH_NOTE_L = 316;
 const CH_ROW_T = 128;
 const CH_ROW_GAP = 18;
 const VISITORS = [
@@ -356,7 +360,7 @@ const styles = StyleSheet.create({
   },
   chFill: { height: 7, marginLeft: 1.5, backgroundColor: INK, borderRadius: 1, transformOrigin: '0% 50%' },
   chNote: {
-    position: 'absolute', left: CH_NOTE_L, width: 68,
+    position: 'absolute', left: CH_NOTE_L, width: 80,
     fontFamily: 'Inter_700Bold', fontSize: 11.3, letterSpacing: 0.6, color: SOFT,
     includeFontPadding: false, lineHeight: 14.2,
   },

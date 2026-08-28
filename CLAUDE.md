@@ -3068,6 +3068,33 @@ browser at it; the first transform can take longer than a navigation timeout.
   ancestor. After all four: 0 on the sample, and the political19 defect still
   reproduces 6-to-0 when put back.
 
+  **AND THE CORPUS SWEEP FOUND ITS BEST DEFECT IN THE PLACE NOBODY LOOKS: A
+  MEASUREMENT THAT CAME BACK EMPTY.** `ethics13` puts five named plates on a rail
+  — COWARD · TIMID · COURAGE · RASH · RECKLESS — and every one of them rendered
+  **zero units wide**. `Target` puts its children in a wrapper carrying the answer
+  reaction, and that wrapper is an ordinary flex child: `alignItems` on the hit box
+  made it shrink to its content, and its content is a plate sized with
+  `left: 0, right: 0`, which against a collapsed parent is nothing.
+  
+  The second failure is the one worth carrying. `mustprobe` drops anything under
+  1.5 units, so those five words were never recorded as WORDS on any beat —
+  **eight beats, one text item, "HOW MUCH FEAR?"** — and `make-tours` refuses a
+  station only when it can SEE a word being sliced. It saw none, framed a 214-wide
+  strip of the rail at the 1.72× ceiling, and pushed COWARD **73% off the left of
+  the screen**, while `check:tour` printed "0 stations cut a word in half"
+  throughout. **A layout fault made a camera fault invisible to the check that
+  exists to prevent it**, and neither check was wrong about what it measured.
+  
+  Deleting one line fixed both: the labels measure 68–79px, the probe records them,
+  and the next `make-tours` drops that station of its own accord. The camera fault
+  needed no separate fix. `check:shape` holds the layout half (S10), and the
+  general form is the third time this file has recorded it — **when a checker's
+  input comes from another instrument, ask what happens when that instrument
+  returns nothing.** `muststamp` already invalidates the table when the probe
+  CHANGES; nothing was watching for the probe finding nothing to record.
+  
+  Across the corpus that pass took **CUT from 19 words in 5 lessons to zero**.
+
   **And the vertical threshold has to be loose while the horizontal one is tight.**
   Content wider than its box is always a cut letter, so 2px of slack. Content
   TALLER is not: every scene sets a lineHeight tighter than its face's natural

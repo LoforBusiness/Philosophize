@@ -84,12 +84,12 @@ export const BEATS: Logic36Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 130, room: 1, done: 1, cases: 1,
+    p: 35, x: 104, room: 1, done: 1, cases: 1,
     text: 'This is why the famous line is only half true. "Absence of evidence is not evidence of absence" describes a bad search and nothing else.',
     dur: 4.8,
   },
   {
-    p: 45, x: 130, room: 1, done: 1,
+    p: 45, x: 104, room: 1, done: 1,
     text: 'Used on a careful one, it is a way of ignoring a result. Say the words out loud and then ask how hard anybody looked.',
     dur: 4.4,
   },

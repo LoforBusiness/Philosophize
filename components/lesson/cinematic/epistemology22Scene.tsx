@@ -129,11 +129,11 @@ export default function Epistemology22Scene({ clock, bt, bi, i, picked, onPick, 
         <View style={styles.dest} />
 
         <Animated.View style={roadRise} pointerEvents="none">
-          <Text style={[styles.lane, { top: ROAD_Y - 16 }]}>ASKED SOMEBODY WHO KNEW</Text>
+          <Text style={[styles.lane, { top: ROAD_Y - 20 }]}>ASKED SOMEBODY WHO KNEW</Text>
           <View style={styles.road} />
         </Animated.View>
 
-        <Text style={[styles.lane, { top: STONE_Y - 16 }]}>GUESSED</Text>
+        <Text style={[styles.lane, { top: STONE_Y - 20 }]}>GUESSED</Text>
         {stones.map((k) => (
           <View key={k} style={[styles.stone, { left: START_X + k * STONE_STEP }]} />
         ))}
@@ -177,7 +177,11 @@ const styles = StyleSheet.create({
   floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   destCap: {
-    position: 'absolute', left: DEST_X, top: 252, width: DEST_W, textAlign: 'center',
+    // WIDER THAN THE BOX IT NAMES, centred on it. THE ADDRESS measures 68.4 units
+    // and the box is 56, so it wrapped and the second line printed across the
+    // box's own top edge. Eighty units holds it on one line, and the caption sits
+    // clear above the box rather than inside it.
+    position: 'absolute', left: DEST_X + DEST_W / 2 - 40, top: 252, width: 80, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
   },
   dest: {

@@ -171,6 +171,7 @@ export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPic
 
       <Animated.View style={[StyleSheet.absoluteFill, branchStyle]} pointerEvents="none">
         <View style={styles.branchDrop} />
+        <View style={styles.branchDropB} />
         <View style={styles.branchRun} />
         <Text style={styles.branchLabel}>A SECOND HISTORY</Text>
       </Animated.View>
@@ -270,7 +271,13 @@ const styles = StyleSheet.create({
 
   tieHalf: { position: 'absolute', top: KNOT_Y - 1, width: 66, height: 2, backgroundColor: INK },
 
-  branchDrop: { position: 'absolute', left: 200, top: LINE_Y, width: 2, height: 44, backgroundColor: SOFT },
+  // TWO SEGMENTS, with 1950 in the gap. A single 44-unit drop from the timeline
+  // to the branch run passed straight through the year label sitting under its own
+  // tick — a rule through the middle of a word (S9, and the same shape as
+  // political19's marker). The drop marks the LINE and the RUN; the label's row
+  // was never part of the claim.
+  branchDrop: { position: 'absolute', left: 200, top: LINE_Y, width: 2, height: 10, backgroundColor: SOFT },
+  branchDropB: { position: 'absolute', left: 200, top: LINE_Y + 26, width: 2, height: 18, backgroundColor: SOFT },
   branchRun: { position: 'absolute', left: 200, top: 344, width: 160, height: 2, backgroundColor: SOFT },
   branchLabel: {
     position: 'absolute', left: 206, top: 350, width: 160,

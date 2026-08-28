@@ -61,7 +61,10 @@ const CAND_ID = ['lessons', 'heat', 'pay'];
 const THIRD_X = 190;
 const THIRD_Y = 430;
 
-const CAP_T = 240;
+// AT THE TOP OF THE BAND, not in the arrow's air. At 240 the caption sat
+// between CAUSES? and the arrow bar, and the cut stroke — which spans 26 units
+// from ARROW_Y - 12 — ran straight down through MEASURED ALL SUMMER.
+const CAP_T = 226;
 const FIG_X = 62;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
@@ -225,11 +228,13 @@ const styles = StyleSheet.create({
     borderRightWidth: 2, borderTopWidth: 2, borderColor: INK, transform: [{ rotate: '45deg' }],
   },
   arrowLabel: {
-    position: 'absolute', left: 178, top: ARROW_Y - 18, width: 108, textAlign: 'center',
+    position: 'absolute', left: 178, top: ARROW_Y - 14, width: 108, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
   // The one mark in the scene that means "no": a stroke, never a colour.
-  cutMark: { position: 'absolute', left: 231, top: ARROW_Y - 12, width: 3, height: 26, backgroundColor: INK, borderRadius: 2 },
+  // Short enough to cut the BAR and nothing else. At 26 units it reached from
+  // 238 to 264 and crossed both labels on its way past the thing it negates.
+  cutMark: { position: 'absolute', left: 231, top: ARROW_Y - 6, width: 3, height: 14, backgroundColor: INK, borderRadius: 2 },
 
   cand: { position: 'absolute', left: CAND_X, width: 100, height: 26 },
   candBox: {
