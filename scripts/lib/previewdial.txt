@@ -1,0 +1,64 @@
+// TEMPORARY — DELETE BEFORE COMMITTING. Any file in app/ is a real route (§21).
+// Written and removed by scripts/sheet-dial.mjs; check-routes.mjs blocks a build
+// if one is left behind.
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import StatsTab from '@/app/(app)/stats';
+import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { ALL_BRANCHES } from '@/data';
+
+const q = (k: string) =>
+  typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(k);
+
+export default function PreviewDial() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    // `even` gives every branch a similar share (the hardest case for a ring —
+    // six near-identical arcs); `skew` gives one branch most of the reading,
+    // which is what a real mid-journey reader looks like.
+    const shape = q('shape') ?? 'skew';
+    const byUnit: Record<string, number> = {};
+    const byBranch: Record<string, number> = {};
+    const WEIGHT = shape === 'even' ? [5, 5, 4, 5, 4, 5] : [14, 9, 6, 4, 2, 1];
+    ALL_BRANCHES.forEach((b, bi) => {
+      let left = q('empty') === '1' ? 0 : WEIGHT[bi] ?? 1;
+      let n = 0;
+      b.paths.forEach((u) => {
+        const take = Math.min(u.lessons.length, left);
+        byUnit[u.id] = take;
+        left -= take;
+        n += take;
+      });
+      byBranch[b.slug] = n;
+    });
+
+    useUserDataStore.setState({
+      _hasHydrated: true,
+      displayName: 'Landy',
+      totalXP: 1240,
+      rankIndex: 6,
+      streak: 12,
+      lastLessonDate: new Date().toISOString().slice(0, 10),
+      lessonsByUnit: byUnit,
+      lessonsByBranch: byBranch,
+      savedQuotes: [],
+      philosopherViews: {},
+    } as never);
+    useUIStore.setState({ launchDone: true } as never);
+    useSubscriptionStore.setState({
+      ready: true, available: false, isPro: false, monthly: null, refresh: async () => {},
+    } as never);
+    setReady(true);
+  }, []);
+
+  if (!ready) return <View style={{ flex: 1 }} nativeID="dial-boot" />;
+
+  return (
+    <View nativeID="dial-root" style={{ flex: 1, backgroundColor: '#FAFAF7' }}>
+      <StatsTab />
+    </View>
+  );
+}

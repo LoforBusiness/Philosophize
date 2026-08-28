@@ -9,7 +9,7 @@ import {
   Ledger, RankedBars, ThinkerLeague, DiscoveryCard, bounceTo,
   type LedgerItem, type BarRow, type LeagueRow,
 } from '@/components/stats/InsightBoard';
-import Donut from '@/components/stats/Donut';
+import Dial from '@/components/stats/Dial';
 import {
   Instrument, PanelHead, PanelRule, Legend, SparkLine, MetricStrip, type Metric,
 } from '@/components/stats/Instrument';
@@ -388,7 +388,7 @@ export default function StatsScreen() {
           <Instrument>
             <PanelHead kicker="WHERE YOUR READING GOES" right="BY BRANCH" />
             <View style={styles.dialRow}>
-              <Donut
+              <Dial
                 segments={areaRows}
                 total={lessonsDone}
                 totalLabel="LESSONS"

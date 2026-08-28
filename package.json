@@ -132,6 +132,7 @@
     "sheet:ranks": "node scripts/sheet-ranks.mjs",
     "sheet:badges": "node scripts/sheet-badges.mjs",
     "sheet:streak": "node scripts/sheet-streak.mjs",
+    "sheet:dial": "node scripts/sheet-dial.mjs",
     "camera:wins": "node scripts/camera-wins.mjs",
     "sound:cut": "node scripts/cut-sounds.mjs",
     "check:ui": "node scripts/check-ui.mjs",

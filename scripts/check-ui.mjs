@@ -30,6 +30,10 @@ const T = await import(emit('components/shared/tone.ts', 'tone.mjs'));
 const I = await import(emit('constants/insignia.ts', 'insignia.mjs'));
 // rankShapes.ts is zero-import for the same reason — the frames are plain data.
 const R = await import(emit('components/shared/rankShapes.ts', 'rankShapes.mjs'));
+// dialHit.ts is zero-import for the same reason — and it has to be, because the
+// bug it exists to prevent is a platform field that only web gets wrong, which
+// no browser harness could ever reproduce (§21, `measureInWindow`).
+const H = await import(emit('lib/utils/dialHit.ts', 'dialHit.mjs'));
 
 let bad = 0;
 const ok = (cond, label, detail = '') => {
@@ -1040,6 +1044,150 @@ function stripJs(src) {
   ok(total > 0 && settle > total,
     'and starts only after the last frame of that screen has been painted',
     `SETTLE_MS ${settle} against an outro of ${total}ms`);
+}
+
+// -- 11 . the dial: a solid, its palette, and the press that reaches it -------
+//
+// The chart at the top of Insights has been rebuilt twice on the same reader's
+// say-so. The second note is the one worth writing down, because it rules out
+// the obvious fix: "it looks a little bit doo kiddish ... Looks very flat."
+//
+// Two things came out of it and neither could fail before.
+{
+  const disc = T.disc;
+  const BR = Object.values(D.BRANCH);
+
+  // -- THE PALETTE -----------------------------------------------------------
+  //
+  // `glow` exists to make a FOURTEEN-PIXEL ARC visible on near-black and does it
+  // by forcing every hue to one lightness and pushing saturation. For a filament
+  // that is right. For a SOLID it is why the chart read as crayons: design.ts's
+  // branches are aubergine, petrol, slate blue, pine, dusty rose and burnt
+  // sienna at L 31-46, and glow flattened all six to L 47-71. Pine came out mint.
+  //
+  // `disc` lifts the source by a constant 0.08 and touches nothing else, so the
+  // set keeps its own internal contrast. These are the floors that pins it there.
+  const faces = BR.map((h) => disc(h).face);
+  const rims = BR.map((h) => disc(h).rim);
+
+  let worstPair = Infinity, pairAt = '';
+  for (let i = 0; i < faces.length; i++) {
+    for (let j = i + 1; j < faces.length; j++) {
+      const d = dE(faces[i], faces[j]);
+      if (d < worstPair) { worstPair = d; pairAt = `${faces[i]}/${faces[j]}`; }
+    }
+  }
+  // 24 is design.ts's own floor between two branches. THE SOURCE SET SITS AT
+  // 25.1, so the lift has almost nothing to spend -- 0.10 is already under. The
+  // lift is not a taste, it is the largest one the palette can afford.
+  ok(worstPair >= 24, 'no two branches collapse into each other on the disc',
+    `worst pair dE ${worstPair.toFixed(1)}, floor 24 — ${pairAt}`);
+
+  // WHAT CARRIES THE SILHOUETTE IS THE RIM, NOT THE FACE, and that is the right
+  // way round for a struck object: the face may be as quiet as it likes because
+  // it is bounded by an edge that catches the light.
+  const worstRim = Math.min(...rims.map((r) => ratio(lum(r), lum(T.PANEL_BASE))));
+  ok(worstRim >= 3, 'the disc\'s edge is visible against the panel',
+    `${worstRim.toFixed(2)}:1, floor 3`);
+
+  // AND THE FLOOR ABOVE IS ALMOST NOT A FLOOR, which a counter-test found: with
+  // the rim set equal to its own face the panel check still passed, at 3.02:1.
+  // It would only ever fire for a rim DARKER than the surface it bounds. What
+  // makes an edge read as an edge is that it is brighter than that surface, so
+  // that is the thing asserted.
+  let worstEdge = Infinity;
+  for (const h of BR) {
+    const d = disc(h);
+    worstEdge = Math.min(worstEdge, ratio(lum(d.rim), lum(d.face)));
+  }
+  ok(worstEdge >= 1.35, 'and it is a step above its own face, not the same tone',
+    `${worstEdge.toFixed(2)}x, floor 1.35`);
+
+  // THE DEPTH IS REAL. A wall that is not a step darker than its own lid is a
+  // flat pie with a grey band under it.
+  let worstStep = Infinity;
+  for (const h of BR) {
+    const d = disc(h);
+    worstStep = Math.min(worstStep, ratio(lum(d.face), lum(d.wall)));
+  }
+  ok(worstStep >= 1.4, 'and every wall is a real step below its own lid',
+    `${worstStep.toFixed(2)}x, floor 1.4`);
+
+  // AND THE SET KEEPS ITS VARIETY, which is the whole point. Six colours that
+  // differ only in hue read as a crayon set however carefully they are chosen;
+  // what makes a palette look designed is that its members differ in LIGHTNESS
+  // too. glow's spread was about 2 L. The source's is 15, and disc keeps it.
+  const Ls = faces.map((f) => lab(f)[0]);
+  const lRange = Math.max(...Ls) - Math.min(...Ls);
+  ok(lRange >= 12, 'and the six still differ in lightness, not only in hue',
+    `${lRange.toFixed(0)} L apart, floor 12 — this is what glow flattened`);
+
+  // -- THE PRESS -------------------------------------------------------------
+  //
+  // `locationX` IS A REACT NATIVE FIELD AND REACT-NATIVE-WEB DOES NOT SET IT, so
+  // the hit test the old chart used produced NaN on web -- and every guard
+  // written against it passed, because every comparison with NaN is false. The
+  // tap was received, computed and discarded. Four dispatches were tried against
+  // it, including a native CDP mouse press, before the search moved off the
+  // event and onto the arithmetic.
+  //
+  // Fed the exact points here, in plain Node, because that is what
+  // lib/utils/dialHit.ts was pulled out of the component to allow.
+  const G = { cx: 66, cy: 38.7, rx: 62, ry: 34.7, depth: 11.8 };
+  // Six wedges of sixty degrees, starting at 12 o'clock and running clockwise.
+  const W = Array.from({ length: 6 }, (_, i) => ({ key: `w${i}`, a0: -90 + i * 60, a1: -90 + (i + 1) * 60 }));
+  const at = (deg, frac) => [
+    G.cx + G.rx * frac * Math.cos((deg * Math.PI) / 180),
+    G.cy + G.ry * frac * Math.sin((deg * Math.PI) / 180),
+  ];
+
+  let right = 0;
+  for (const w of W) {
+    const [x, y] = at((w.a0 + w.a1) / 2, 0.6);
+    if (H.wedgeAt(x, y, G, W) === w.key) right++;
+  }
+  ok(right === 6, 'a press in the middle of a wedge picks that wedge', `${right} of 6`);
+
+  // THE ANGLE IS MEASURED IN THE ELLIPSE'S OWN SPACE. A version that compared
+  // screen angles would pick the wrong wedge for every press above or below the
+  // middle and look almost right doing it -- so it is counter-tested here with
+  // the tilt deliberately ignored.
+  //
+  // THE FIRST STAGING OF THIS COUNTER-TEST PROVED NOTHING. It pressed the MIDDLE
+  // of each wedge -- the most forgiving point there is, thirty degrees from
+  // either edge -- and reported 0 of 6 misread, which reads as "the tilt does not
+  // matter". §21 records the same trap: a counter-test that stages the wrong
+  // defect is evidence in neither direction. Sampled right round the disc
+  // instead, at the radius a thumb actually lands on.
+  const flatLid = { ...G, ry: G.rx };
+  let wrong = 0, tested = 0;
+  for (let deg = 0; deg < 360; deg += 5) {
+    const [x, y] = at(deg, 0.8);
+    const truth = H.wedgeAt(x, y, G, W);
+    if (!truth) continue;
+    tested++;
+    if (H.wedgeAt(x, y, flatLid, W) !== truth) wrong++;
+  }
+  ok(wrong > 0, 'and it would be wrong if the tilt were ignored',
+    `${wrong} of ${tested} points misread when the lid is treated as a circle`);
+
+  ok(H.wedgeAt(G.cx + G.rx * 1.4, G.cy, G, W) === null,
+    'a press outside the lid selects nothing');
+  ok(H.wedgeAt(G.cx, G.cy + G.ry + G.depth * 0.5, G, W) !== null,
+    'but the WALL belongs to the wedge above it',
+    'it is the part nearest the thumb; refusing it makes the obvious place inert');
+  ok(H.wedgeAt(NaN, 10, G, W) === null,
+    'and a point that is not a number selects nothing rather than everything',
+    'NaN passed every bounds check the old version had');
+
+  // THE COORDINATE ITSELF. `locationX` on native, `offsetX` on web, and NEITHER
+  // is a reason to fall back to zero: zero is a real point, the top-left corner,
+  // so defaulting to it turns "no coordinates" into a press on whichever wedge
+  // reaches that corner.
+  ok(H.pressPoint({ locationX: 5, locationY: 6 })?.x === 5, 'a press reads locationX where React Native sets it');
+  ok(H.pressPoint({ offsetX: 7, offsetY: 8 })?.x === 7, 'and offsetX where react-native-web does');
+  ok(H.pressPoint({ pageX: 30, pageY: 40 }, 10, 10)?.y === 30, 'and falls back to the page point less the origin');
+  ok(H.pressPoint({}) === null, 'and a press with no point at all is not a press');
 }
 
 console.log(bad === 0 ? '\nui system: all clear.' : `\n${bad} ui check(s) failed.`);

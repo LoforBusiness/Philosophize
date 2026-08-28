@@ -395,3 +395,57 @@ export function glow(hue: string): Glow {
     wash: mix(PANEL_BASE, mark, 0.16),
   };
 }
+
+export interface Disc { lit: string; face: string; wall: string; rim: string; }
+
+/**
+ * A branch hue cut for a SOLID on the dark panel — a lid, a wall and an edge.
+ *
+ * ── WHY `glow` IS THE WRONG CUT FOR AN AREA ────────────────────────────
+ *
+ * `glow` exists to make a FOURTEEN-PIXEL ARC visible on near-black, and it does
+ * that by forcing every hue to one lightness (0.5) and pushing saturation to
+ * 0.52. For a thin filament that is correct. For a solid it is the reason a
+ * reader called the chart "kiddish": the branch palette in design.ts is
+ * aubergine, petrol, slate blue, pine, dusty rose and burnt sienna — L 31 to 46,
+ * chroma 24 to 46, a considered set — and `glow` flattens all six to L 47–71 at
+ * chroma 31–50. Pine comes out mint. Aubergine comes out orchid. Six colours
+ * that differed in lightness now differ only in hue, all of them bright, which
+ * is the definition of a crayon set.
+ *
+ * A solid does not need brightening: it has AREA. So this lifts the source hue
+ * by a constant 0.08 of lightness and touches nothing else — the palette keeps
+ * its own internal contrast, which is the whole of why it looked designed in the
+ * first place.
+ *
+ * ── THE NUMBERS, AND WHY 0.08 AND NOT MORE ──────────────────────────
+ *
+ * The branch set's own tightest pair is epistemology against logic at ΔE 25.1,
+ * barely over the 24 that design.ts holds the branches to. LIFTING COMPRESSES
+ * TOWARD WHITE, so every extra point of lift spends that margin: 0.08 lands at
+ * 24.1 and 0.10 is already under the floor. The lift is therefore not a taste,
+ * it is the largest one the palette can afford.
+ *
+ * What carries the disc's silhouette against the panel is the RIM, not the face
+ * — 6.85:1 at worst, against a face that sits at 2.89. That is the right way
+ * round for a struck object and it is why the face can stay as quiet as it does.
+ *
+ * `npm run check:ui` re-derives all four values for all six branches.
+ */
+export function disc(hue: string): Disc {
+  const [h, s, l] = toHsl(hue);
+  const face = fromHsl(h, s, l + 0.08);
+  return {
+    // The lit corner of the lid. The one light, top left, as everywhere else.
+    lit: fromHsl(h, s, Math.min(0.9, l + 0.19)),
+    face,
+    // A vertical surface under a light from above catches almost none of it.
+    wall: fromHsl(h, s * 0.95, Math.max(0.05, l - 0.05)),
+    // The edge where lid meets wall, and the only part of the disc that has to
+    // be seen against the panel on its own.
+    // 0.30, not 0.40: at 0.40 the edge came out near-white all the way round and
+    // read as an OUTLINE drawn on the chart rather than as light catching a
+    // turned edge. It still carries the silhouette at 5.4:1 on the panel.
+    rim: mix(face, PAPER, 0.3),
+  };
+}

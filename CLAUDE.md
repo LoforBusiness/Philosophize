@@ -2562,6 +2562,62 @@ Two things measured rather than judged:
   intrinsic width, which silently eats a flex row. It squeezed a label with
   plenty of room into "EPISTEMOL…" — invisible on a device, obvious in a browser.
 
+> **AND THE DIAL WAS STILL FLAT, WHICH IS A DIFFERENT COMPLAINT FROM CHEAP.**
+> The ring above fixed AREA and GROUND — six saturated fills on paper became a
+> 14px arc on near-black — and the reader came back: *"it looks a little bit doo
+> kiddish, and a little bit too not very premium looking. Looks very flat … I
+> wanted to have depth."* They supplied a reference: solid pies seen at an angle,
+> with an extruded side, one slice pulled out, in a muted palette.
+>
+> **A RING CANNOT HAVE A LIT SIDE, BECAUSE A RING IS A LINE.** Everything else
+> premium in this app is a struck solid — the pins, the badges, the certificates,
+> the streak calendar — so the chart is a solid now: a tipped disc whose every
+> wedge is three surfaces, a lid running lit→base along the one light, an
+> extruded WALL drawn only where its arc faces the viewer, and a rim where the
+> two meet. `components/stats/Dial.tsx`, one `<Svg>` per wedge so the chosen one
+> can slide out along its own bisector on a transform (§17's rule 7 forbids
+> animating an SVG's properties; moving the View that holds it costs nothing).
+>
+> **THE PALETTE WAS ALREADY RIGHT AND `glow` WAS THROWING IT AWAY.** `BRANCH` in
+> design.ts is aubergine, petrol, slate blue, pine, dusty rose and burnt sienna
+> — L 31–46, chroma 24–46, exactly the register the reference is in. `glow`
+> exists to make a fourteen-pixel arc visible on near-black and does it by
+> forcing every hue to L 0.5 and pushing saturation, so all six came out at
+> L 47–71: pine as mint, aubergine as orchid. Six colours that differed in
+> LIGHTNESS now differed only in hue, all of them bright, which is the definition
+> of a crayon set. `tone.disc()` lifts the source by a constant 0.08 and touches
+> nothing else.
+>
+> **0.08 IS NOT A TASTE, IT IS THE MOST THE PALETTE CAN AFFORD.** The branch set's
+> own tightest pair is epistemology against logic at ΔE 25.1, barely over the 24
+> design.ts holds them to — and lifting compresses toward white, so 0.10 is
+> already under the floor. Two searches came back wrong first, both the obvious
+> move: maximising distance from the panel returned neon, and matching the
+> ember's chroma returned emerald, because equal chroma is not equal loudness
+> across hues.
+>
+> **AND THE CHART'S TAP HAD NEVER WORKED IN A BROWSER.** `locationX` is a React
+> Native field and **react-native-web does not set it**, so the hit test computed
+> `NaN` — and every guard written against it passed, because every comparison
+> with NaN is false. The bounds check let it through, no wedge matched, nothing
+> was selected. A native CDP mouse press, a CDP touch and two synthetic sequences
+> carrying real coordinates all reported the same nothing before the search moved
+> off the event and onto the arithmetic. The old ring read `locationX` too.
+>
+> The maths is `lib/utils/dialHit.ts` now — zero imports, so `check:ui` §11 feeds
+> it the exact points rather than anyone reasoning about a screenshot — and
+> `pressPoint` reads `locationX`, then `offsetX`, and returns **null** rather than
+> falling back to zero, because zero is a real point (the top-left corner) and
+> defaulting to it turns "no coordinates" into a press on whichever wedge reaches
+> that corner.
+>
+> **`npm run sheet:dial` is what the numbers cannot do** — it loads the tab for
+> real at four shapes (skewed, even, empty, and one with a wedge tapped), counts
+> the surfaces the chart is actually made of, and asserts that the chosen wedge
+> MOVED. That last one is why the tap bug was found at all: the first run
+> reported "clicked" and two screenshots the eye could not tell apart.
+
+
 > The lesson deck's quote card (`cinematicKit.tsx`) is the one surface not yet
 > converted — see §17; it is the highest-traffic file in the repo and was being
 > refactored across ninety scenes at the time. It is a drop-in when that settles.

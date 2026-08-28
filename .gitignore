@@ -60,6 +60,7 @@ scripts/.preview-*.lock
 # sheet-pass.mjs writes its screenshots here to be looked at, not kept
 scripts/.pass-shots/
 scripts/.streak-shots/
+scripts/.dial-shots/
 scripts/.lesson-shots/
 
 # the reveal harness writes a scratch measurement here
