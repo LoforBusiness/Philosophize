@@ -993,6 +993,9 @@ function allIds() {
     // across the seam sits under its own twin. §21 records this as the shape that
     // made the pixel confirmation necessary in the first place.
     'political-political-7': ['*'],
+    // The scene's own header: "the headline WAR OF ALL AGAINST ALL, struck through
+    // as authority arrives". The war ENDING is the lesson.
+    'political-political-1': ['WAR OF ALL AGAINST ALL'],
   };
 
   const nBeatsOf = (() => {

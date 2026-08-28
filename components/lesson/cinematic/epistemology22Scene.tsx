@@ -181,7 +181,11 @@ const styles = StyleSheet.create({
     // and the box is 56, so it wrapped and the second line printed across the
     // box's own top edge. Eighty units holds it on one line, and the caption sits
     // clear above the box rather than inside it.
-    position: 'absolute', left: DEST_X + DEST_W / 2 - 40, top: 252, width: 80, textAlign: 'center',
+    // AND HIGH ENOUGH TO CLEAR THE LANE. Widening it to 80 pushed its left edge
+    // from 306 back to 294, which put it over the road lane's tap box (x 34…312,
+    // y 258…298) — the fix for one overlap making another. The band starts at 240,
+    // so 242 is the highest it can sit, and that clears the lane by six.
+    position: 'absolute', left: DEST_X + DEST_W / 2 - 40, top: 242, width: 80, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
   },
   dest: {
