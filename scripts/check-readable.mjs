@@ -48,6 +48,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import { claimRoute } from './lib/previewroute.mjs';
+import { sweepStaleTabs } from './lib/cdptab.mjs';
 import { ANSWER_CONTROL } from './lib/answerctl.mjs';
 
 // ── the second stage: PIXELS ─────────────────────────────────────────────────
@@ -588,6 +589,20 @@ const PROBE = `(() => {
           const insideX = r.left >= p.x + band && r.left + r.width <= p.x + p.w - band;
           const insideY = r.top >= p.y + band && r.top + r.height <= p.y + p.h - band;
           if (insideX && insideY) return false;
+          // A RING ROUND ONE WORD OF A LINE IS AN ANNOTATION, NOT A SLICE.
+          // Boxes here are per ELEMENT, and a <Text> holding a whole premise is
+          // one element — so logic14's ring, which circles the word NOTHING at
+          // the end of the first row exactly as its header says, has its left
+          // border falling in the middle of that element's box and looked like
+          // ten struck words. Its border lands in the SPACE before the word;
+          // there is no way to see that from element geometry.
+          //
+          // The tell is size. An annotation is smaller than the thing it marks;
+          // a panel edge that really does slice a caption is larger. Note this
+          // needs the frame test too — political19's 2px marker line is also
+          // narrower than the caption it ruled through, and it is a filled View,
+          // so it still fails as it should.
+          if (p.w < r.width || p.h < r.height) return false;
         }
         return true;
       });
@@ -777,6 +792,14 @@ function allIds() {
   const outPath = process.argv[3] ?? null;
   const { release: cleanup } = claimRoute({ route: ROUTE, src: ROUTE_SRC, owner: 'check-readable' });
 
+  // WHAT EARLIER RUNS LEFT BEHIND, BEFORE OPENING ANYTHING NEW. Closing at the
+  // end is not enough on its own: a sweep of 186 lessons is long enough to get
+  // interrupted, and a killed run never reaches its teardown. See cdptab.mjs —
+  // sixty-four leaked pages is the difference between 1613 beats audited and
+  // 1386 with 29 lessons NOT AUDITED, on identical source.
+  const swept = await sweepStaleTabs(PORT, `http://localhost:${WEB}`);
+  if (swept) console.log(`check-readable: closed ${swept} page(s) left by earlier runs`);
+
   const makeTab = async () => {
     const tab = await put('/json/new?about:blank');
     const ws = new WebSocket(tab.webSocketDebuggerUrl);
@@ -883,7 +906,19 @@ function allIds() {
         return await Jimp.read(Buffer.from(r.data, 'base64'));
       } catch { return null; }
     };
-    return { evaluate, send, tap, answerScene, answerDeck, answerControl, stamp, settle, shoot, close: () => { try { ws.close(); } catch {} } };
+    // CLOSE THE TAB, NOT JUST THE SOCKET.
+    //
+    // This used to close only the WebSocket, so every run left LANES tabs alive in
+    // the headless Chrome. After ten runs there were SIXTY-FOUR, and a browser
+    // carrying sixty-four live React trees is slow enough that lessons stop
+    // reaching their second beat: the same sweep went from 1613 beats audited to
+    // 1386 with 29 lessons reported NOT AUDITED, on identical source. It reads as
+    // the app getting worse. It is the instrument leaking.
+    const close = async () => {
+      try { ws.close(); } catch { /* already gone */ }
+      try { await put('/json/close/' + tab.id); } catch { /* the tab may have died with the socket */ }
+    };
+    return { evaluate, send, tap, answerScene, answerDeck, answerControl, stamp, settle, shoot, close };
   };
 
   // ── A WORD THE LESSON IS ABOUT FADING ─────────────────────────────────────
@@ -1120,11 +1155,22 @@ function allIds() {
       stepped += 1;
     }
     report.push({ id, beats, stepped, ...(dead ? { dead: true } : {}) });
+    // WRITTEN AS IT GOES, because a sweep of 186 lessons takes long enough to be
+    // interrupted and one that died at 170 lost every measurement it had made.
+    if (outPath) { try { fs.writeFileSync(outPath, JSON.stringify(report, null, 1)); } catch { /* a partial sheet is still worth having */ } }
     done += 1;
     const n = (k) => beats.reduce((a, x) => a + x.hits.filter((h) => h.why.includes(k)).length, 0);
+    // EVERY CLASS GOES IN THE LINE, NOT JUST THE THREE IT WAS BORN WITH.
+    // SPILL, UNDER and STRIKE were added later and never added here, so a lesson
+    // with eleven words struck through printed "readable" — and when a run died
+    // at 170 of 186 the progress log, the only surviving record, said the corpus
+    // was clean. A per-item line that omits a class is worse than no line.
+    const parts = [];
+    for (const k of ['TINY', 'CUT', 'FAINT', 'SPILL', 'UNDER', 'STRIKE', 'BLANK']) {
+      if (n(k)) parts.push(`${n(k)} ${k.toLowerCase()}`);
+    }
     const note = stepped < 2 ? `ONLY ${stepped + 1} BEAT REACHED`
-      : (n('TINY') + n('CUT') + n('FAINT'))
-        ? `${n('TINY') ? `${n('TINY')} tiny · ` : ''}${n('CUT') ? `${n('CUT')} cut · ` : ''}${n('FAINT') ? `${n('FAINT')} faint` : ''}`.replace(/ · $/, '')
+      : parts.length ? parts.join(' · ')
         : 'readable';
     console.log(`  ${String(done).padStart(3)}/${ids.length}  ${id.padEnd(34)} ${note}`);
   };
@@ -1144,7 +1190,7 @@ function allIds() {
   for (let i = 0; i < Math.min(LANES, ids.length); i += 1) lanes.push(await makeTab());
   console.log(`reading ${ids.length} lessons across ${lanes.length} tabs`);
   await Promise.all(lanes.map((T) => runLane(T)));
-  for (const T of lanes) T.close();
+  await Promise.all(lanes.map((T) => T.close()));
 
   console.log('\nWHAT THE READER CANNOT READ\n');
   // A SWEEP THAT DID NOT MOVE IS NOT A PASS — said before the result, for the
@@ -1181,14 +1227,14 @@ function allIds() {
     const by = new Map();
     for (const w of rows) { if (!by.has(w.id)) by.set(w.id, []); by.get(w.id).push(w); }
     console.log(`\n  ${k} — ${rows.length} words across ${by.size} lessons:`);
-    for (const [id, list] of [...by.entries()].sort((x, y) => y[1].length - x[1].length).slice(0, 14)) {
+    for (const [id, list] of [...by.entries()].sort((x, y) => y[1].length - x[1].length).slice(0, +(process.env.READ_LIST || 14))) {
       const ex = list[0];
       const how = k === 'SPILL' ? `${ex.spill}px past its box`
         : k === 'STRIKE' ? `struck by ${ex.struckBy}`
         : `under ${ex.coveredBy}`;
       console.log(`      ${id.padEnd(30)} ${String(list.length).padStart(3)}  b${ex.beat} ${how}  "${ex.t}"`);
     }
-    if (by.size > 14) console.log(`      … and ${by.size - 14} more lessons`);
+    if (by.size > +(process.env.READ_LIST || 14)) console.log(`      … and ${by.size - +(process.env.READ_LIST || 14)} more lessons`);
   }
 
   const dead = report.filter((r) => r.dead);
