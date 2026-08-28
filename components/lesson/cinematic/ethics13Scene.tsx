@@ -176,8 +176,25 @@ const styles = StyleSheet.create({
     backgroundColor: INK,
   },
 
-  hit: { position: 'absolute', top: HIT_T, width: HIT_W, height: HIT_H, alignItems: 'center' },
-  tick: { position: 'absolute', top: 20, width: 3, height: 20, backgroundColor: INK },
+  // NO alignItems HERE, AND THAT IS THE WHOLE OF WHY THE RAIL HAD NO WORDS ON IT.
+  //
+  // Target puts its children inside a wrapper that carries the answer reaction.
+  // That wrapper is an ordinary flex child, so `alignItems: 'center'` on this box
+  // made it shrink to its content — and its content is `plate`, which is
+  // positioned with left/right rather than sized. left:0 right:0 against a
+  // collapsed parent is a width of ZERO, so all five labels rendered 0 units wide.
+  //
+  // It is worse than an invisible label. mustprobe drops anything under 1.5 units,
+  // so COWARD…RECKLESS were never recorded as WORDS on any beat — and the tour
+  // generator only refuses a station when it can see a word being sliced. It saw
+  // none, framed a 214-wide strip of the rail at 1.72x, and pushed COWARD 73% off
+  // the left of the screen. The layout fault is what made the camera fault
+  // invisible to the checker that exists to prevent it.
+  //
+  // Stretch is the default, so removing one line fixes it; `tick` centred itself
+  // on that alignItems and now says where it goes.
+  hit: { position: 'absolute', top: HIT_T, width: HIT_W, height: HIT_H },
+  tick: { position: 'absolute', top: 20, left: HIT_W / 2 - 1.5, width: 3, height: 20, backgroundColor: INK },
   plate: {
     position: 'absolute', left: 0, right: 0, top: 46, height: 32,
     borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,

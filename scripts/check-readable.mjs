@@ -48,7 +48,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import { claimRoute } from './lib/previewroute.mjs';
-import { sweepStaleTabs } from './lib/cdptab.mjs';
+import { sweepStaleTabs, closeTab } from './lib/cdptab.mjs';
 import { ANSWER_CONTROL } from './lib/answerctl.mjs';
 
 // ── the second stage: PIXELS ─────────────────────────────────────────────────
@@ -914,9 +914,13 @@ function allIds() {
     // reaching their second beat: the same sweep went from 1613 beats audited to
     // 1386 with 29 lessons reported NOT AUDITED, on identical source. It reads as
     // the app getting worse. It is the instrument leaking.
+    // NOT through `put`, which JSON.parses every reply: /json/close answers with
+    // the bare string "Target is closing", so parsing it throws — and it threw
+    // AFTER all 186 lessons had been measured, killing the process before it
+    // printed a single finding. closeTab in cdptab.mjs reads the reply raw.
     const close = async () => {
       try { ws.close(); } catch { /* already gone */ }
-      try { await put('/json/close/' + tab.id); } catch { /* the tab may have died with the socket */ }
+      await closeTab(PORT, tab.id);
     };
     return { evaluate, send, tap, answerScene, answerDeck, answerControl, stamp, settle, shoot, close };
   };

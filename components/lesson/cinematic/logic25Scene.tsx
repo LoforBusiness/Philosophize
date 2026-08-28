@@ -190,7 +190,9 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   resultText: {
-    fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.6, color: PAPER,
+    // PAPER on the STONE face of its own plate is 1.57:1 — the word was there on
+    // five beats and could not be seen on any of them. Type on a tone is INK (T3).
+    fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.6, color: INK,
     includeFontPadding: false,
   },
 
