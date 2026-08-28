@@ -33,8 +33,9 @@ import Target from './Target';
 //       – the crate pile is x = 6 … 46          (left of the band)
 //       – the fence, crates, onlookers, badges and eye line are x = 232 … 396
 //         (right of the band)
-//       – the goal, the Q1 label and the three answer cards sit at y = 62 … 326,
-//         entirely above y = 350 (a walking crown rides to y ≈ 357).
+//       – the goal, the Q1 label and the three answer cards sit at y = 62 … 336,
+//         entirely above y = 350 (a walking crown rides to y ≈ 357), and above the
+//         onlookers' badges, the highest of which starts at y = 350.
 //   · nothing is drawn between x = 46 and x = 232 except the figure and the crate
 //     he is carrying, which is meant to be on top of him.
 //
@@ -64,8 +65,12 @@ const CARD_W = 300;
 // 22dp on a 27dp pitch: the smallest touch target in the app, less than half the
 // 48dp minimum. The stack now runs 208 → 348, clear of the crown at 397.
 const CARD_H = 48;
-const CARD_T = 208;
-const CARD_GAP = 70;
+// THE HEADER ALWAYS SAID 'entirely above y = 350'. The code did not: at 208 on a
+// 70 pitch the third card ran 348…396, straight over the onlookers' badges — SEES
+// straddled two rows and BLIND was sliced at the frame edge. Three 48-tall cards
+// on a 54 pitch from 180 end at 336, which is what the composition claims.
+const CARD_T = 172;
+const CARD_GAP = 54;
 /** Half the gap — more would overlap the neighbour, and the topmost would win. */
 const CARD_SLOP = (CARD_GAP - CARD_H) / 2;
 
@@ -458,7 +463,7 @@ const styles = StyleSheet.create({
   folkLeg: { position: 'absolute', width: 3, height: 26, backgroundColor: INK, borderRadius: 1.5 },
 
   // ── Q1 cards ────────────────────────────────────────────────────────────────
-  pickLabelWrap: { position: 'absolute', left: 0, top: 184, width: STAGE_W },
+  pickLabelWrap: { position: 'absolute', left: 0, top: 144, width: STAGE_W },
   pickLabel: {
     textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 2, color: SOFT,
     includeFontPadding: false,

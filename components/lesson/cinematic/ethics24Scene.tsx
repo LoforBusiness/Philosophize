@@ -19,22 +19,22 @@ import { followMoves, kindOf, seedOf } from './camera';
 //
 // THE COMPOSITION, IN NUMBERS (H56).
 //
-// · the SENTENCE is a 300×34 slab at x 50…350, y 240…274, 2.5 thick — the
+// · the SENTENCE is a 300×34 slab at x 50…350, y 250…284, 2.5 thick — the
 //   heaviest line on the stage, because it is the thing everything else is
 //   holding up.
-// · FOUR PILLARS, 46 wide, from y 274 down to y 340, at lefts 62 · 142 · 222 ·
+// · FOUR PILLARS, 46 wide, from y 284 down to y 350, at lefts 62 · 142 · 222 ·
 //   302 — the run ends at x 348, two inside the slab at either end so it visibly
 //   rests ON them rather than beside them.
-// · the NAMES sit under each pillar at y 344…358: STOP HIM · DETER OTHERS ·
+// · the NAMES sit under each pillar at y 354…368: STOP HIM · DETER OTHERS ·
 //   REFORM HIM · DESERVED.
 // · the TEST CASE shortens pillars 0, 1 and 2 to nothing over `gone` and tilts
 //   the slab 3° about its right end, which is the one still supported. It is a
 //   tilt and not a fall: the sentence is still standing, and noticing that it
 //   still feels right is the entire lesson.
 // · the FIGURE walks x 200 → 132 → 268 on GROUND 500; crown ≈ 397, and the names
-//   end at y 358, so 39 units stay clear at every stop.
+//   end at y 368, so 29 units stay clear at every stop.
 //
-// Ink runs y 226 (the caption) … y 500. BAND 220…512 = 292, with the 103-unit
+// Ink runs y 220 (the caption) … y 500. BAND 220…512 = 292, with the 103-unit
 // figure at 35%.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -42,7 +42,13 @@ import { followMoves, kindOf, seedOf } from './camera';
 const BASE_TR = 0.85;
 
 const SLAB_X = 50;
-const SLAB_Y = 240;
+// TEN LOWER THAN THE CAPTION NEEDS, because the slab TILTS. Rotating a 300-wide
+// slab three degrees about its supported end lifts the free end by 300 sin 3 =
+// 15.7 units, so at 240 its raised corner reached y 224 and the caption above it
+// sat inside the slab's own rect — measured in the browser as a 294x48 stone box
+// starting one pixel above WHAT IS IT FOR?. Everything below derives from this,
+// so the pillars and their names move with it.
+const SLAB_Y = 250;
 const SLAB_W = 300;
 const SLAB_H = 34;
 
@@ -191,7 +197,7 @@ const styles = StyleSheet.create({
   floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
   cap: {
-    position: 'absolute', left: SLAB_X, top: 226, width: 200,
+    position: 'absolute', left: SLAB_X, top: 220, width: 200,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
 
@@ -209,7 +215,9 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
   },
   pilCap: {
-    position: 'absolute', top: 344, width: PIL_W + 24, textAlign: 'center', lineHeight: 10,
+    // DERIVED, like the pillars it labels. This was a hardcoded 344 while PIL_TOP
+    // reads SLAB_Y + SLAB_H, so lowering the slab left the names inside the legs.
+    position: 'absolute', top: PIL_TOP + PIL_H + 4, width: PIL_W + 24, textAlign: 'center', lineHeight: 10,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.1, color: SOFT, includeFontPadding: false,
   },
 

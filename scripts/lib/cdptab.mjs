@@ -50,7 +50,16 @@ export async function newTab(cdpPort) {
   return JSON.parse(await req(cdpPort, '/json/new?about:blank', 'PUT'));
 }
 
-/** Close one page by id. Safe to call twice. */
+/**
+ * Close one page by id — unless it is the LAST one, because Chrome exits with its
+ * final page and the next harness then meets ECONNREFUSED and reports every
+ * lesson as NEVER RENDERED A STAGE. Leaving one about:blank behind costs nothing
+ * and keeps the browser alive between runs.
+ */
 export async function closeTab(cdpPort, id) {
+  try {
+    const list = JSON.parse(await req(cdpPort, '/json/list'));
+    if (list.filter((t) => t.type === 'page').length <= 1) return;
+  } catch { return; }
   try { await req(cdpPort, '/json/close/' + id); } catch { /* already gone */ }
 }

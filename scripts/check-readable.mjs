@@ -298,7 +298,41 @@ const PROBE = `(() => {
       // window, and the rung parked one space ABOVE that window reported a rect
       // sitting across THE SHELF's label. Visually it is not there at all. Walk up
       // to the crop and clip against each ancestor that hides its overflow.
-      let cx0 = rr.left, cy0 = rr.top, cx1 = rr.right, cy1 = rr.bottom;
+      // A TILTED BOX'S RECT IS NOT ITS INK, AND THE DIFFERENCE IS ALL AT THE EDGES.
+      //
+      // getBoundingClientRect is axis-aligned, so a wide slab rotated three degrees
+      // reports a rect several units taller than the slab — entirely in the corners,
+      // where there is nothing. ethics24 settles a 280-wide lintel by 3 degrees and
+      // its rect reached up into the caption above it while no part of the slab did.
+      //
+      // Recoverable exactly: for an unrotated W x H at angle t the rect measures
+      //   Aw = W|cos t| + H|sin t|,  Ah = W|sin t| + H|cos t|
+      // so W and H come back by solving the pair, and half the difference is the
+      // corner overhang to deflate on each side. The angle is accumulated up to the
+      // crop because the transform is usually on a parent, not on the fill itself.
+      let rot = 0;
+      for (let a = el; a && a !== document.body; a = a.parentElement) {
+        const t = getComputedStyle(a).transform;
+        if (t && t !== 'none') {
+          const m = t.match(/matrix\(([^)]+)\)/);
+          if (m) {
+            const v = m[1].split(',').map(Number);
+            if (v.length >= 4) rot += Math.atan2(v[1], v[0]);
+          }
+        }
+        if (a === clipEl) break;
+      }
+      let dx = 0, dy = 0;
+      const cA = Math.abs(Math.cos(rot)), sA = Math.abs(Math.sin(rot));
+      if (sA > 0.004 && Math.abs(cA * cA - sA * sA) > 1e-6) {
+        const den = cA * cA - sA * sA;
+        const W = (rr.width * cA - rr.height * sA) / den;
+        const H = (rr.height * cA - rr.width * sA) / den;
+        if (W > 0 && H > 0 && W <= rr.width + 0.5 && H <= rr.height + 0.5) {
+          dx = (rr.width - W) / 2; dy = (rr.height - H) / 2;
+        }
+      }
+      let cx0 = rr.left + dx, cy0 = rr.top + dy, cx1 = rr.right - dx, cy1 = rr.bottom - dy;
       for (let a = el.parentElement; a; a = a.parentElement) {
         const acs = getComputedStyle(a);
         if (acs.overflowX !== 'visible' || acs.overflowY !== 'visible') {
@@ -996,6 +1030,10 @@ function allIds() {
     // The scene's own header: "the headline WAR OF ALL AGAINST ALL, struck through
     // as authority arrives". The war ENDING is the lesson.
     'political-political-1': ['WAR OF ALL AGAINST ALL'],
+    // Its own header: "the boast NOTHING IS KNOWN cracks, and the question that
+    // breaks it is printed inside the same box". The three crackA/B/C rules are
+    // drawn ACROSS the boast on purpose — a claim that refutes itself, breaking.
+    'epistemology-knowledge-6': ['NOTHING IS KNOWN', '…INCLUDING THAT?'],
   };
 
   const nBeatsOf = (() => {

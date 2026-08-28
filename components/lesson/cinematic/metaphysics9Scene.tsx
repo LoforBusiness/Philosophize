@@ -29,7 +29,8 @@ import Target from './Target';
 //     The GAP is the 32 units between them, centred on x 200. On the fused beats
 //     MIND slides right by 32 so the two meet, and the gap is simply not there.
 //   · the thought crossing it is a 14-unit disc travelling x 176 → 200 at y 242.
-//   · the three claim cards live x 20–178, y 306–408.
+//   · the three claim cards live x 20–178, y 292–476 — below the panels, which
+//     stop at 286, and clear of the figure, whose widest pose starts at x 199.
 //   · HIS LAST MARK IS SET BY THOSE CARDS. On the tap beat he holds gesture 47,
 //     which sizes something with both hands and is the widest pose in the lesson:
 //     measured off the rig he spans x 199…265 there, not the ±36 a resting figure
@@ -54,7 +55,13 @@ const CARD_W = 158;
 // SIZED FOR A FINGER: 30 tall on a 36 pitch is a 27dp card every 32dp, well under
 // the ~45dp a fingertip covers. The old stack also ran to 408, eleven units PAST
 // the figure's crown at 397. It now runs 205 → 389 and stops clear of him.
-const CARD_T = 205;
+// BELOW THE PANELS, which is where the header always said they were. At 205 the
+// first card ran 205…249 and the MIND panel's sub sits at 245…273, so the card's
+// bottom edge crossed 'thinks / takes up no space' — the question drawn on top of
+// the thing it is asking about. The panels stop at 286 and the cards share no x
+// with the figure (they end at 178, his widest pose starts at 199), so they can
+// run down past his crown without touching him.
+const CARD_T = 292;
 const CARD_H = 44;
 const CARD_GAP = 70;
 /** Half the gap — any more and neighbouring targets overlap, and the topmost wins. */

@@ -18,8 +18,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 //
 // THE COMPOSITION, IN NUMBERS (H56).
 //
-// · the CHAIN of three plates runs across the top: each 96×34 at y 244…278, at
-//   x 88, 192, 296, with a 2-thick link between them along y 261 (x 184…192 and
+// · the CHAIN of three plates runs across the top: each 96×34 at y 252…286, at
+//   x 88, 192, 296, with a 2-thick link between them along y 269 (x 184…192 and
 //   x 288…296), ending at 392 — level with the fence. It is the argument, drawn as
 //   an argument.
 // · the two PENS sit at y 330…434: rails at x 116…236 and x 260…380, each a
@@ -44,7 +44,11 @@ const BASE_TR = 0.85;
 
 const PLATE_W = 96;
 const PLATE_H = 34;
-const PLATE_Y = 244;
+// EIGHT BELOW THE CAPTION, not level with it. At 244 the chain's top edge cut
+// the bottom of THE SAME LOOK, TWICE, which sits at 238…248 — and the band
+// starts at 238, so the caption has nowhere to go. The pens are at 330, so the
+// chain has all the room it needs.
+const PLATE_Y = 252;
 // 88 · 192 · 296, NOT 116 · 220 · 324. The chain is 3 x 96 plus two 8-unit links
 // = 304 wide, and from x 116 its last plate ended at 420 — twenty units past the
 // 400 the stage HAS, so NOT A PAINTED MULE was drawn with its right-hand third

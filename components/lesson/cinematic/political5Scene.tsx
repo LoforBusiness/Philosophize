@@ -70,14 +70,26 @@ const TIERS = [
 
 // ── the veil of ignorance ────────────────────────────────────────────────────
 const VEIL_L = 14, VEIL_T = 312, VEIL_W = 128, VEIL_H = 136;   // 312 … 448
-const VEIL_DROP = 50;                  // how far above its home it starts
+// TWENTY, NOT FIFTY — SO IT NEVER PARKS ON THE TIMELINE. The veil's home is
+// y 312 and the timeline's question row runs 276…290, so at a fifty-unit drop it
+// waited at 262 and sat squarely on LOCKE's 'legitimate?'. Its fade is doubled
+// (see veilStyle), which means a beat resting the track at 0.3 has the veil 60%
+// opaque and still 35 units high — visible, and over a word. At twenty it never
+// rises above 292 and the row stays clear at every value of the track.
+const VEIL_DROP = 20;                  // how far above its home it starts
 const HIDDEN = ['CLASS', 'TALENT', 'WEALTH', 'LUCK'];
 const HID_T = 62, HID_STEP = 16;       // veil-local: rows at 374 · 390 · 406 · 422
 
 // ── the four definitions (the scene-answered question) ───────────────────────
 // 236 × 42 stage units per target, two lines of 14 / 12 px — far over the readable
 // minimum once the band scales the stage by ~2.28×.
-const CARD_L = 150, CARD_W = 236, CARD_H = 42, CARD_STEP = 45, CARD_T = 300;
+// THE STEP HAS TO CLEAR THE ANSWER LIFT, and at 45 against a 42-tall card it left
+// a three-unit gap. The reaction raises the chosen card 10 units and scales it 6%
+// (about 1.3 more at the top), so the card the reader picks rode up over the one
+// above it — EACH ITS OWN WORK sat across 'the same share for everyone'. Twelve
+// units of gap clears it. The four cards then need 4x38 + 3x12 = 188, and the
+// timeline above ends at 302, so they run 302…490 above the ground line.
+const CARD_L = 150, CARD_W = 236, CARD_H = 38, CARD_STEP = 50, CARD_T = 302;
 const CARD_LAB_T = 282;
 const DEFS = [
   { id: 'a', title: 'EQUAL WEALTH', sub: 'the same share for everyone', correct: false },

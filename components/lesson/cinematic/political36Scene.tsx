@@ -32,7 +32,7 @@ import { followMoves, kindOf, seedOf } from './camera';
 // · the figure stands at x 52 and walks to 126; crown ~397. The block begins at
 //   x 118, so he stands to its left throughout.
 //
-// Ink runs y 232 (caption) … y 500 (ground). BAND 226…512 = 286 (H59).
+// Ink runs y 226 (caption) … y 500 (ground). BAND 226…512 = 286 (H59).
 //
 // THE BAND WAS 268 AND THAT IS EXACTLY H58's LINE. A 103-unit figure is 38% of
 // 268, which the check counts as over — so the lamp and the guard box moved up 12
@@ -54,6 +54,10 @@ const COLS = 6;
 const ROWS = 4;
 const WINDOWS = COLS * ROWS;
 
+// · HE STOPS AT x 84, NOT 126. The pick chips start at x 118 and gesture 35 puts
+//   his hand about seventeen units past his own x, so at 126 he stood on A NEW
+//   LAW. Same fault as logic36: a figure walking over to look at the cards ends
+//   up in front of them.
 const LAMP_X = 210;
 const LAMP_Y = 240;
 
@@ -63,7 +67,10 @@ const PICK = [
   { id: 'unsure', text: 'NOT KNOWING', left: 118, top: 456 },
 ];
 
-const CAP_T = 232;
+// AT THE BAND'S TOP. The guard box is 44x30 at (188, 238) and the caption ran
+// 232…242, so the box's top three units crossed the bottom of EVERY LIT WINDOW
+// IS SOMETHING LEGAL. The band starts at 226 and nothing else is up there.
+const CAP_T = 226;
 const FIG_X = 52;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);

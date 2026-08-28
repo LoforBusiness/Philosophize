@@ -183,7 +183,13 @@ export default function Logic10Scene({ clock, bt, bi, i, picked, onPick, dragPos
   const dashStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.sol }));
   const solidStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.sol }));
   // Faint while it is only implied, full ink once it has been said out loud.
-  const hidTextStyle = useAnimatedStyle(() => ({ opacity: 0.45 + 0.55 * SCENE.value.sol }));
+  // 0.62 IS THE FLOOR, NOT 0.45. Ink on paper is 16.6:1 at full strength and
+  // 2.6:1 composited at 0.45 — a smear in the shape of a word, which is exactly
+  // what D35 forbids: a caption is legible or absent, never dim. The state this
+  // fade was carrying is already carried by the FRAME, which is dashed while the
+  // premise is unsaid and solid once it is hauled up, so the word only has to be
+  // lighter than solid rather than unreadable. 0.62 composites to 4.5:1.
+  const hidTextStyle = useAnimatedStyle(() => ({ opacity: 0.62 + 0.38 * SCENE.value.sol }));
   const pickStyle = useAnimatedStyle(() => ({
     opacity: pickOn ? (pickFade ? ease01(bt.value / 0.6) : 1) : 0,
   }));

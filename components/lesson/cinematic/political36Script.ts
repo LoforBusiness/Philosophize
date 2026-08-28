@@ -89,12 +89,12 @@ export const BEATS: Political36Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 126, street: 1, watch: 0.6, lamp: 1, picks: 1,
+    p: 35, x: 84, street: 1, watch: 0.6, lamp: 1, picks: 1,
     text: 'Nothing here shows up in a statistic. No case was brought. What shrank was the range of things people were willing to try.',
     dur: 4.6,
   },
   {
-    p: 45, x: 126, street: 1, watch: 0.6, lamp: 1,
+    p: 45, x: 84, street: 1, watch: 0.6, lamp: 1,
     text: 'So privacy is not really about secrets. Privacy is how much room a person has when nobody is judging them.',
     dur: 4.8,
   },

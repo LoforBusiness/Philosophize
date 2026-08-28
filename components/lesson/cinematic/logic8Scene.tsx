@@ -230,12 +230,19 @@ export default function Logic8Scene({ clock, bt, bi, i, picked, onPick, dragPos 
         <View style={styles.head} />
         <View style={styles.nozzle} />
       </Animated.View>
-      <Animated.View style={[styles.layer, gardenLabelStyle]} pointerEvents="none">
-        <Text style={styles.gardenLabel}>SPRINKLER</Text>
-      </Animated.View>
 
       {/* ── the spray: droplets riding the arc, fading as they disperse ───────── */}
       {DASHES.map((k) => <Dash key={k} S={SCENE} k={k} />)}
+
+      {/* THE LABEL PAINTS LAST, over the spray rather than under it. The arc
+          launches from the nozzle at (326, 396) going up and left, so near the
+          nozzle a droplet sits at y 370 — straight through SPRINKLER, which
+          spans 368…379. The header reasoned about the arc clearing the FIGURE's
+          crown and not about its own caption. Nothing moves: the word is the
+          message and the message goes on top. */}
+      <Animated.View style={[styles.layer, gardenLabelStyle]} pointerEvents="none">
+        <Text style={styles.gardenLabel}>SPRINKLER</Text>
+      </Animated.View>
 
       {/* ── the rule, pinned above the street ─────────────────────────────────── */}
       <Animated.View style={[styles.ruleBox, ruleStyle]} pointerEvents="none">

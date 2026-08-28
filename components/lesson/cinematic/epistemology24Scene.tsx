@@ -20,7 +20,7 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE COMPOSITION, IN NUMBERS (H56).
 //
 // · the CONCLUSION is a 176×30 plate at x 30…206, y 222…252, 2.5 thick.
-// · THREE RUNGS, 176×26, at x 30…206, tops 268 · 302 · 336 — the ladder reads
+// · THREE RUNGS, 176×34, at x 30…206, tops 268 · 308 · 348 — the ladder reads
 //   downward from its conclusion, which is the direction an argument is usually
 //   drawn and the direction Moore reverses.
 // · the SURE BARS sit inside each row at its foot: 4 thick, from x 36, lengths
@@ -46,8 +46,13 @@ const L_X = 30;
 const L_W = 176;
 const CONC_Y = 222;
 const CONC_H = 30;
-const RUNG_TOP = [268, 302, 336];
-const RUNG_H = 26;
+// TALLER, AND RE-PITCHED. The first premise is the only one that wraps, and at
+// 26 tall its second line ran 282.8…293.6 while the SURE BAR sat at 288…292 —
+// a 4-thick rule straight through 'not know'. At 34 the two lines finish at
+// 293.6 and the bar drops to 296. The figure's crown reaches 397, so the block
+// can end at 382 and still leave fifteen clear.
+const RUNG_TOP = [268, 308, 348];
+const RUNG_H = 34;
 const RUNG_TEXT = [
   'If you cannot rule out a dream, you do not know',
   'You cannot rule out a dream',
