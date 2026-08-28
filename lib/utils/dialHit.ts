@@ -32,12 +32,24 @@
 export interface DiscGeom {
   cx: number;
   cy: number;
-  /** The long (horizontal) radius of the lid. */
+  /** The horizontal radius of the face. */
   rx: number;
-  /** The short one — the lid is an ellipse because the disc is tipped. */
+  /**
+   * The vertical one. EQUAL TO `rx` for the dial as it ships — it is drawn
+   * straight on, because a tipped circle puts the wedges at different distances
+   * and foreshortens the far ones, and a reader compares areas whether they mean
+   * to or not. The two radii are kept apart anyway: the maths below is written in
+   * the FACE'S OWN SPACE rather than the screen's, which is the only version that
+   * stays correct if anything ever tips it again, and costs one divide.
+   */
   ry: number;
-  /** How far the wall drops below the lid's front edge. */
-  depth: number;
+  /**
+   * How far OUTSIDE the face still counts as a press on it — the socket ring the
+   * rosette is set into. A press on the ring belongs to the piece it hugs: the
+   * ring is part of the object as far as a thumb is concerned, and refusing it
+   * makes a 4px border of the target inert for no reason a reader could guess.
+   */
+  slop: number;
 }
 
 /** A wedge's angular range in degrees, measured clockwise from 3 o'clock. */
@@ -75,15 +87,16 @@ export function pressPoint(
 /**
  * The wedge a press lands in, or null for anywhere that is not the disc.
  *
- * THE TEST IS DONE IN THE ELLIPSE'S OWN SPACE. Dividing the vertical offset by
- * the tilt turns the squashed lid back into a circle, so an angle means what it
- * means; comparing screen angles against wedge angles would pick the wrong wedge
- * for every press above or below the middle, and would look almost right doing
- * it — which is the worst kind of wrong for a control.
+ * THE TEST IS DONE IN THE FACE'S OWN SPACE. Dividing each offset by its own
+ * radius turns the face back into a unit circle, so an angle means what it means
+ * whatever the two radii are; comparing screen angles against wedge angles would
+ * pick the wrong wedge for every press above or below the middle of a tipped
+ * face, and would look almost right doing it — which is the worst kind of wrong
+ * for a control.
  *
- * The WALL counts as part of the wedge above it. A wall is the front of the
- * disc, it is the part nearest the reader's thumb, and refusing it would make
- * the most obvious place to press the one place that does nothing.
+ * The GROOVES between the pieces are not holes. They are two units wide and they
+ * belong to whichever piece the angle lands in, because a reader aiming at a
+ * wedge is aiming at the wedge, not at the space beside it.
  */
 export function wedgeAt(
   px: number,
@@ -96,11 +109,9 @@ export function wedgeAt(
   const dy = py - g.cy;
   if (!Number.isFinite(dx) || !Number.isFinite(dy)) return null;
 
-  // On the wall: below the lid's centre line, within the wall's drop. Clamped to
-  // the lid's own edge so the angle is the one the wedge above it occupies.
-  const onWall = dy > 0 && dy <= g.ry + g.depth;
-  const u = dx / g.rx;
-  const v = (onWall ? Math.min(dy, g.ry) : dy) / g.ry;
+  const slop = Number.isFinite(g.slop) ? g.slop : 0;
+  const u = dx / (g.rx + slop);
+  const v = dy / (g.ry + slop);
   if (u * u + v * v > 1) return null;
 
   const deg = (((Math.atan2(v, u) * 180) / Math.PI) + 360) % 360;

@@ -2648,6 +2648,44 @@ Two things measured rather than judged:
 > MOVED. That last one is why the tap bug was found at all: the first run
 > reported "clicked" and two screenshots the eye could not tell apart.
 
+> **AND THE TILT WAS THE WRONG HALF OF WHAT THE SOLID BOUGHT.** The reader again:
+> *"I don't like how it looks further away on one end and closer on the other.
+> This is not what I meant when I want a depth … right now, it looks sideways or
+> like it's fallen over."*
+>
+> **PERSPECTIVE IS NOT THE ONLY KIND OF DEPTH, AND FOR A CHART OF SHARES IT IS THE
+> WRONG ONE.** A tipped circle foreshortens its far side, so the same share covers
+> about half the area at 12 o'clock that it covers at 6 — and a reader compares
+> areas whether they mean to or not. It also gives an extruded wall to two wedges
+> and none to the other four, so a third of the object is drawn in a vocabulary
+> the rest of it does not have. **Every other struck thing in this app is seen
+> STRAIGHT ON** — the pins, the badges, the certificates, the streak calendar —
+> and they are solid because of how they are LIT, not where the camera is.
+>
+> So it is a rosette now: six chamfered pieces, parted by a groove of constant
+> width, set around a spindle in a socket they cast a shadow into. **The palette
+> needed no change at all** — `rim` and `wall` were the lid's edge and its wall,
+> and they are the lit and shaded ends of the chamfer, which is the same two jobs.
+>
+> **THE TWO THINGS THAT COST A RENDER EACH ARE BOTH ABOUT WHAT A GRADIENT CAN AND
+> CANNOT SAY.** A linear gradient lights a surface by WHERE IT IS. On the outer arc
+> that is exact, because on a circle the outward normal is the position. On the two
+> RADIAL CUTS it is exactly wrong: both walls of one groove are in the same place
+> and face opposite ways, so they came out the same tone and every groove read as a
+> black slot cut through the disc. They are flat quads lit from their own normals
+> now (`LAMP`, stated as a number), and that one change is the difference between a
+> pie with gaps in it and six pieces of metal. And the first chamfer was
+> INVISIBLE on four of the six pieces, because `rim` was `mix(face, PAPER, 0.30)`
+> — a value chosen when it was a STROKE, where 0.40 read as an outline drawn round
+> the chart. A chamfer is not a stroke: it only reaches its lit value on the
+> lamp's side, so it can afford far more, and at 0.30 it sat within a few percent
+> of the face it was supposed to be turning off.
+>
+> One smaller trap, and it is the kind that survives review: `mix(PANEL_BASE,
+> C.ink, …)` **lightens**. Ink is `#1A1A1A` and the panel is `#0E0E0E`, so the
+> socket's shaded end shipped its first draft paler than the surface it was
+> supposed to be cut into. Mix toward black when you mean darker.
+
 
 > The lesson deck's quote card (`cinematicKit.tsx`) is the one surface not yet
 > converted — see §17; it is the highest-traffic file in the repo and was being

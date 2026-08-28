@@ -1048,11 +1048,25 @@ function stripJs(src) {
 
 // -- 11 . the dial: a solid, its palette, and the press that reaches it -------
 //
-// The chart at the top of Insights has been rebuilt twice on the same reader's
-// say-so. The second note is the one worth writing down, because it rules out
-// the obvious fix: "it looks a little bit doo kiddish ... Looks very flat."
+// The chart at the top of Insights has been rebuilt three times on the same
+// reader's say-so, and each note ruled out the obvious answer to the last one:
+// "too kidesh" (six saturated fills on paper), then "Looks very flat ... I
+// wanted to have depth" (a ring is a line and cannot have a lit side), then --
+// about the tipped solid that fixed the second --
 //
-// Two things came out of it and neither could fail before.
+//   "I don't like how it looks further away on one end and closer on the other
+//    ... right now, it looks sideways or like it's fallen over."
+//
+// PERSPECTIVE IS NOT THE ONLY KIND OF DEPTH AND HERE IT WAS THE WRONG ONE: a
+// tipped circle foreshortens its far side, so the same share covers about half
+// the area at 12 o'clock that it covers at 6, and it gives a wall to two wedges
+// and none to the other four. It is drawn straight on now and the depth is a
+// CHAMFER -- which is what every other struck thing in this app already does,
+// none of which is tipped. The palette needed no change at all when the tilt
+// went: `rim` and `wall` were the lid's edge and its wall, and they are the lit
+// and shaded ends of the chamfer, which is the same two jobs.
+//
+// Two things are held here and neither could fail before.
 {
   const disc = T.disc;
   const BR = Object.values(D.BRANCH);
@@ -1103,15 +1117,18 @@ function stripJs(src) {
   ok(worstEdge >= 1.35, 'and it is a step above its own face, not the same tone',
     `${worstEdge.toFixed(2)}x, floor 1.35`);
 
-  // THE DEPTH IS REAL. A wall that is not a step darker than its own lid is a
-  // flat pie with a grey band under it.
+  // THE DEPTH IS REAL, and this is the assertion that carries it now that there
+  // is no wall: the chamfer runs `rim` at the lamp's side to `wall` away from
+  // it, and if those two ends are not a real step apart the bevel is a band of
+  // flat colour round the edge -- which is an OUTLINE, the thing the first two
+  // rounds of this chart were rejected for.
   let worstStep = Infinity;
   for (const h of BR) {
     const d = disc(h);
-    worstStep = Math.min(worstStep, ratio(lum(d.face), lum(d.wall)));
+    worstStep = Math.min(worstStep, ratio(lum(d.rim), lum(d.wall)));
   }
-  ok(worstStep >= 1.4, 'and every wall is a real step below its own lid',
-    `${worstStep.toFixed(2)}x, floor 1.4`);
+  ok(worstStep >= 1.4, 'and every chamfer turns through a real step of light',
+    `${worstStep.toFixed(2)}x lit end over shaded, floor 1.4`);
 
   // AND THE SET KEEPS ITS VARIETY, which is the whole point. Six colours that
   // differ only in hue read as a crayon set however carefully they are chosen;
@@ -1133,49 +1150,69 @@ function stripJs(src) {
   //
   // Fed the exact points here, in plain Node, because that is what
   // lib/utils/dialHit.ts was pulled out of the component to allow.
-  const G = { cx: 66, cy: 38.7, rx: 62, ry: 34.7, depth: 11.8 };
+  // The geometry the dial actually ships: a 132pt box, drawn STRAIGHT ON, set in
+  // a socket ring six units wide.
+  const G = { cx: 66, cy: 66, rx: 60, ry: 60, slop: 6 };
   // Six wedges of sixty degrees, starting at 12 o'clock and running clockwise.
   const W = Array.from({ length: 6 }, (_, i) => ({ key: `w${i}`, a0: -90 + i * 60, a1: -90 + (i + 1) * 60 }));
-  const at = (deg, frac) => [
-    G.cx + G.rx * frac * Math.cos((deg * Math.PI) / 180),
-    G.cy + G.ry * frac * Math.sin((deg * Math.PI) / 180),
+  const on = (g, deg, frac) => [
+    g.cx + g.rx * frac * Math.cos((deg * Math.PI) / 180),
+    g.cy + g.ry * frac * Math.sin((deg * Math.PI) / 180),
   ];
 
   let right = 0;
   for (const w of W) {
-    const [x, y] = at((w.a0 + w.a1) / 2, 0.6);
+    const [x, y] = on(G, (w.a0 + w.a1) / 2, 0.6);
     if (H.wedgeAt(x, y, G, W) === w.key) right++;
   }
   ok(right === 6, 'a press in the middle of a wedge picks that wedge', `${right} of 6`);
 
-  // THE ANGLE IS MEASURED IN THE ELLIPSE'S OWN SPACE. A version that compared
-  // screen angles would pick the wrong wedge for every press above or below the
-  // middle and look almost right doing it -- so it is counter-tested here with
-  // the tilt deliberately ignored.
-  //
-  // THE FIRST STAGING OF THIS COUNTER-TEST PROVED NOTHING. It pressed the MIDDLE
-  // of each wedge -- the most forgiving point there is, thirty degrees from
-  // either edge -- and reported 0 of 6 misread, which reads as "the tilt does not
-  // matter". §21 records the same trap: a counter-test that stages the wrong
-  // defect is evidence in neither direction. Sampled right round the disc
-  // instead, at the radius a thumb actually lands on.
-  const flatLid = { ...G, ry: G.rx };
+  // AND RIGHT ROUND THE RIM, not only at the six most forgiving points on the
+  // whole disc. The first staging of the counter-test below pressed wedge
+  // MIDDLES -- thirty degrees from either edge -- and proved nothing in either
+  // direction, which is the trap §21 keeps recording.
+  let edgeRight = 0, edgeSeen = 0;
+  for (let deg = 0; deg < 360; deg += 3) {
+    const [x, y] = on(G, deg, 0.85);
+    const want = W.find((w) => {
+      const rel = ((deg - w.a0) % 360 + 360) % 360;
+      return rel < w.a1 - w.a0;
+    });
+    if (!want) continue;
+    edgeSeen++;
+    if (H.wedgeAt(x, y, G, W) === want.key) edgeRight++;
+  }
+  ok(edgeRight === edgeSeen, 'and so does one anywhere round the rim',
+    `${edgeRight} of ${edgeSeen} points at 0.85 r`);
+
+  // THE ANGLE IS MEASURED IN THE FACE'S OWN SPACE, and it stays that way even
+  // though the shipped face is a circle and the divide is currently a no-op.
+  // That is deliberate: it is one divide, and it is the only version that
+  // survives anyone tipping this again -- a version comparing SCREEN angles
+  // picks the wrong wedge for every press above or below the middle of a tipped
+  // face and looks almost right doing it. Counter-tested against a tipped
+  // geometry, because a circle cannot show the difference.
+  const TIP = { ...G, ry: 34 };
+  const flatLid = { ...TIP, ry: TIP.rx };
   let wrong = 0, tested = 0;
   for (let deg = 0; deg < 360; deg += 5) {
-    const [x, y] = at(deg, 0.8);
-    const truth = H.wedgeAt(x, y, G, W);
+    const [x, y] = on(TIP, deg, 0.8);
+    const truth = H.wedgeAt(x, y, TIP, W);
     if (!truth) continue;
     tested++;
     if (H.wedgeAt(x, y, flatLid, W) !== truth) wrong++;
   }
-  ok(wrong > 0, 'and it would be wrong if the tilt were ignored',
-    `${wrong} of ${tested} points misread when the lid is treated as a circle`);
+  ok(wrong > 0, 'and it would be wrong if the two radii were treated as one',
+    `${wrong} of ${tested} points misread on a tipped face — the divide is load-bearing`);
 
-  ok(H.wedgeAt(G.cx + G.rx * 1.4, G.cy, G, W) === null,
-    'a press outside the lid selects nothing');
-  ok(H.wedgeAt(G.cx, G.cy + G.ry + G.depth * 0.5, G, W) !== null,
-    'but the WALL belongs to the wedge above it',
-    'it is the part nearest the thumb; refusing it makes the obvious place inert');
+  ok(H.wedgeAt(G.cx + (G.rx + G.slop) * 1.15, G.cy, G, W) === null,
+    'a press outside the socket selects nothing');
+  // THE SOCKET RING BELONGS TO THE PIECE IT HUGS. It is the four units of groove
+  // the rosette is set into, it is inside the object as far as a thumb is
+  // concerned, and refusing it makes a visible border of the target inert for no
+  // reason a reader could guess at.
+  ok(H.wedgeAt(G.cx + G.rx + G.slop * 0.5, G.cy, G, W) !== null,
+    'but the socket ring around it belongs to the piece it hugs');
   ok(H.wedgeAt(NaN, 10, G, W) === null,
     'and a point that is not a number selects nothing rather than everything',
     'NaN passed every bounds check the old version had');

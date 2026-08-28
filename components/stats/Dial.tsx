@@ -3,62 +3,79 @@ import { View, Text, Pressable, StyleSheet, type GestureResponderEvent } from 'r
 import Animated, {
   useAnimatedStyle, useDerivedValue, withSpring, type SharedValue,
 } from 'react-native-reanimated';
-import Svg, { Path, Ellipse, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Path, Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { PANEL_BASE, disc, mix } from '@/components/shared/tone';
 import { C } from '@/constants/design';
 import { pressPoint, wedgeAt } from '@/lib/utils/dialHit';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE DIAL — a struck disc, seen at an angle.
+// THE DIAL — a struck rosette, seen straight on.
 //
-// ── WHAT WAS HERE BEFORE, AND WHY IT WENT ───────────────────────────────────
+// ── THREE ROUNDS, AND EACH NOTE RULED OUT THE OBVIOUS FIX FOR THE LAST ──────
 //
-// Two rounds of this chart have now been rejected by the same reader, and the
-// second rejection is the useful one because it rules out the obvious fix.
+//   1. > "the graph is too kidesh … not just a bunch of colors that make the app
+//      > feel cheep."
 //
-//   > "the graph is too kidesh … not just a bunch of colors that make the app
-//   > feel cheep."
+//      A flat pie of six saturated fills on paper. The answer was AREA and
+//      GROUND: the same six branches at 14px on near-black, cut to jewel tones.
 //
-// That was a flat pie of six saturated fills on paper, and the answer was AREA
-// and GROUND: the same six branches at 14px on near-black, cut to jewel tones.
-// It is a better object and it is still FLAT — a stroked circle with one linear
-// gradient run across the whole ring, which is the same drawing the first one
-// was, done quieter.
+//   2. > "it looks a little bit doo kiddish … Looks very flat … I wanted to have
+//      > depth."
 //
-//   > "it looks a little bit doo kiddish, and a little bit too not very premium
-//   > looking. Looks very flat … I wanted to have depth."
+//      A ring is a LINE, and a line cannot have a lit side and a shaded one. So
+//      it became a solid — and, following a reference of 3D pie charts, a solid
+//      seen at an ANGLE, with an extruded wall along its front.
 //
-// ── SO IT IS A SOLID, AND IT HAS A SIDE ─────────────────────────────────────
+//   3. > "I don't like how it looks further away on one end and closer on the
+//      > other. This is not what I meant when I want a depth … right now, it
+//      > looks sideways or like it's fallen over."
 //
-// A disc lying at an angle with its wall showing. That is the reference the
-// reader supplied and it is also, conveniently, the only kind of depth this app
-// has ever drawn: the rank pins, the badges, the certificates and now the
-// streak calendar are all struck things lit from ONE point at the top left
-// (tone.ts). A ring cannot have a lit side and a shaded one, because a ring is
-// a line. A solid can.
+// ── PERSPECTIVE IS NOT THE ONLY KIND OF DEPTH, AND HERE IT IS THE WRONG ONE ──
 //
-// Every segment is therefore three surfaces, not one fill:
-//   · the TOP FACE, running the branch's jewel tone from lit to base along the
-//     one light — so a wedge on the left of the disc is brighter than the same
-//     wedge would be on the right, which is what makes it a lid and not a
-//     coloured area;
-//   · the WALL, the extruded side, drawn only where the segment's arc is on the
-//     FRONT of the ellipse. Two steps darker than the face, because a vertical
-//     surface under a light from above catches almost none of it;
-//   · the RIM, a hairline where the two meet.
+// The tilt was doing two things at once and only one of them was wanted. It made
+// the disc a solid — good — and it also put the wedges at DIFFERENT DISTANCES,
+// which a chart of shares must not do: a tipped circle foreshortens the far side,
+// so the same share drawn at 12 o'clock covers barely half the area it covers at
+// 6 o'clock, and the reader compares areas whether they mean to or not. It also
+// gives a wall to two wedges and none to the other four, so a third of the object
+// is drawn in a vocabulary the rest of it does not have.
 //
-// ── ONE SVG PER SEGMENT, WHICH IS NOT WASTE ─────────────────────────────────
+// Everything else premium in this app is a struck solid seen STRAIGHT ON — the
+// rank pins, the badges, the certificates, the streak calendar — and none of them
+// is tipped. They are solid because of how they are LIT, not because of where the
+// camera is. That is the depth to use, and the whole of it is:
 //
-// The selected wedge slides OUT along its own bisector, which is the reference's
-// exploded slice and the one gesture that makes a chart feel like an object
-// rather than a picture of one. §17's rule 7 forbids animating an SVG's
-// properties; a transform on the View that CONTAINS the SVG is free, composites
-// on the GPU, and re-rasterises nothing. So each segment gets its own surface
-// and the selection is a spring on a translate.
+//   · every piece is CHAMFERED — a bevel band around its edge, running from `rim`
+//     at the top left to `wall` at the bottom right across the whole disc, so the
+//     pieces on the lamp's side catch their edge and the ones opposite lose it.
+//     A gradient is exact for that, because on a circle the outward normal IS the
+//     position;
+//   · the two RADIAL CUTS are lit from their own normals instead, one per flat,
+//     because a gradient lights a surface by where it is and both walls of a
+//     groove are in the same place while facing opposite ways. Lit by position
+//     they came out identical and every groove read as a black slot;
+//   · the pieces are SEPARATE, parted by a groove of constant width, so they read
+//     as six struck pieces set in a ring rather than slices of one painted circle;
+//   · they sit in a SOCKET, whose gradient runs the opposite way — dark where a
+//     dome is light — because that is what a cut in a surface does (the rule
+//     StruckNiche already states), which also puts the disc's bright edge on the
+//     socket's dark side and its dark edge on the socket's bright one;
+//   · they cast a SHADOW down and right onto that socket, which is the one cue
+//     that says they stand proud of it rather than being painted on it;
+//   · and the whole thing sits on a pool of light, because on near-black a drop
+//     shadow against the panel is invisible and grounding has to be done the
+//     other way round.
 //
-// Six small surfaces at 132px is nothing — the badge case draws fifty — and it
-// buys the one thing a single `<Svg>` could not: painter's order that can put
-// the lifted wedge in front of its neighbours.
+// Nothing is further away than anything else. Every wedge of the same size is the
+// same shape, wherever it sits, and a chosen one slides out along its own
+// bisector by exactly the distance every other one would.
+//
+// ── ONE SVG PER PIECE, WHICH IS NOT WASTE ───────────────────────────────────
+//
+// §17's rule 7 forbids animating an SVG's properties; a transform on the View
+// that CONTAINS the SVG is free, composites on the GPU, and re-rasterises
+// nothing. So each piece gets its own surface and the selection is a spring on a
+// translate — and painter's order can put the lifted piece over its neighbours.
 //
 // ── AND NO ARC COMMANDS ─────────────────────────────────────────────────────
 //
@@ -79,23 +96,35 @@ interface Props {
   pop: SharedValue<number>;
 }
 
+/** The socket the rosette is set into, drawn outside it. */
+const RING = 3.5;
+/** The chamfer at the outer edge, and the narrower one at the spindle. */
+const BEVEL = 5.5;
+const IN_BEVEL = 1.5;
+/** The chamfer on the two radial CUTS. */
+const CUT = 3;
+/** The groove between two pieces. Half of it comes off each neighbour. */
+const GAP = 1.2;
 /**
- * HOW FAR THE DISC IS TIPPED, as the ratio of its short axis to its long one.
+ * WHERE THE LIGHT IS, in the same screen degrees everything else here uses: the
+ * top left, as it is for every struck thing in this app (tone.ts).
  *
- * 0.56 is a deliberate middle. Nearer 1 and the wall disappears, which is the
- * flat chart again; under about 0.45 the back segments squash into slivers and
- * the shares stop being comparable, which is the one thing a chart of shares
- * must not lose. The reference sits at roughly this angle.
+ * It has to be stated as a NUMBER, not left implicit in a gradient, because a
+ * gradient can only light a surface by WHERE IT IS. That is exact for the outer
+ * arc — on a circle the outward normal is the position — and exactly wrong for
+ * the two radial cuts, whose faces point in opposite directions from the same
+ * place. Lit by position they came out the same tone, so a groove had no lit
+ * side and no shaded side and read as a black slot cut through the disc.
  */
-const TILT = 0.56;
-/** The wall's height, as a fraction of the long radius. */
-const DEPTH = 0.19;
-/** How far a chosen wedge slides out, same units. */
-const LIFT = 0.10;
+const LAMP = -135;
+/** The spindle the pieces are set around, so six points never meet at one. */
+const HOLE = 8;
+/** How far a chosen piece slides out, as a fraction of the radius. */
+const LIFT = 0.085;
 /** Degrees per sampled point along an arc. Fine enough that no edge shows facets. */
 const STEP = 2;
 
-// A WORKLET, because `Wedge`'s `useAnimatedStyle` calls it — and a plain function
+// A WORKLET, because `Piece`'s `useAnimatedStyle` calls it — and a plain function
 // reaching a worklet's closure is not a slow path, it is a THROW. Reanimated packs
 // it as a `RemoteFunction` whose only behaviour on the UI thread is
 // `Tried to synchronously call a non-worklet function \`rad\` on the UI thread`
@@ -107,14 +136,18 @@ const STEP = 2;
 // a contact sheet and `check:ui`. It is still an ordinary function to JS callers,
 // so `arcPoints` below needs no change.
 const rad = (deg: number) => { 'worklet'; return (deg * Math.PI) / 180; };
+const deg = (r: number) => (r * 180) / Math.PI;
 
-/** Points along the ellipse between two angles, inclusive of both ends. */
-function arcPoints(cx: number, cy: number, rx: number, ry: number, a0: number, a1: number) {
+/** A real black. `C.ink` is #1A1A1A and the panel is #0E0E0E — see the socket. */
+const BLACK = '#000000';
+
+/** Points along a circle between two angles, inclusive of both ends. */
+function arcPoints(cx: number, cy: number, r: number, a0: number, a1: number) {
   const out: [number, number][] = [];
   const n = Math.max(2, Math.ceil(Math.abs(a1 - a0) / STEP));
   for (let i = 0; i <= n; i++) {
     const a = a0 + ((a1 - a0) * i) / n;
-    out.push([cx + rx * Math.cos(rad(a)), cy + ry * Math.sin(rad(a))]);
+    out.push([cx + r * Math.cos(rad(a)), cy + r * Math.sin(rad(a))]);
   }
   return out;
 }
@@ -123,25 +156,56 @@ const poly = (pts: [number, number][]) =>
   pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(2)} ${y.toFixed(2)}`).join(' ');
 
 /**
- * The stretches of a segment's arc that face the VIEWER — the only parts whose
- * wall can be seen.
+ * One piece of the rosette: an outer arc, an inner arc, and the two cuts between.
  *
- * On a tipped ellipse that is where sin(angle) > 0, the bottom half. It has to be
- * computed as runs rather than as one range because a segment large enough to
- * span the whole back of the disc leaves TWO visible pieces, one at each side,
- * and a version that assumed a single contiguous piece would drop one of them —
- * silently, and only for a reader whose reading is concentrated in one branch.
+ * `inset` is a WIDTH, not an angle, and it is converted separately at each radius
+ * — which is the whole point. A groove of constant width is what an inlay looks
+ * like; one angular inset used at both radii gives a groove that is four times
+ * wider at the rim than at the spindle, which reads as six petals rather than six
+ * pieces of one disc.
+ *
+ * It is clamped to leave a third of the piece standing, because the smallest
+ * branch on a real reader's chart is one lesson in thirty-six — ten degrees — and
+ * an inset allowed to eat more than the piece inverts the polygon rather than
+ * merely looking thin.
  */
-function frontRuns(a0: number, a1: number): [number, number][] {
-  const runs: [number, number][] = [];
-  let start: number | null = null;
-  for (let a = a0; a <= a1 + 1e-6; a += STEP / 2) {
-    const on = Math.sin(rad(a)) > 0;
-    if (on && start === null) start = a;
-    if (!on && start !== null) { runs.push([start, a]); start = null; }
-  }
-  if (start !== null) runs.push([start, a1]);
-  return runs.filter(([s, e]) => e - s > 0.4);
+function pads(rOut: number, rIn: number, a0: number, a1: number, inset: number) {
+  const cap = (a1 - a0) * 0.33;
+  return [Math.min(deg(inset / rOut), cap), Math.min(deg(inset / rIn), cap)];
+}
+
+function pieceAt(cx: number, cy: number, rOut: number, rIn: number, a0: number, a1: number, inset: number) {
+  const [pO, pI] = pads(rOut, rIn, a0, a1, inset);
+  const outer = arcPoints(cx, cy, rOut, a0 + pO, a1 - pO);
+  const inner = arcPoints(cx, cy, rIn, a1 - pI, a0 + pI);
+  return poly([...outer, ...inner]) + ' Z';
+}
+
+/**
+ * How much light a flat face whose outward normal points along `n` catches:
+ * 0 turned fully away from the lamp, 1 facing it square on.
+ */
+const litness = (n: number) => (Math.cos(rad(n - LAMP)) + 1) / 2;
+
+/**
+ * One of a piece's two cut faces: the quad between where the bevel's edge starts
+ * and where the face's edge starts, at both radii. `end` picks the `a1` side.
+ */
+function cutFace(
+  cx: number, cy: number, rOut: number, rIn: number, a0: number, a1: number, end: boolean,
+) {
+  const [bO, bI] = pads(rOut, rIn, a0, a1, GAP / 2);
+  const [fO, fI] = pads(rOut - BEVEL, rIn + IN_BEVEL, a0, a1, GAP / 2 + CUT);
+  const s = end ? -1 : 1;
+  const base = end ? a1 : a0;
+  const at = (rr: number, aa: number): [number, number] =>
+    [cx + rr * Math.cos(rad(aa)), cy + rr * Math.sin(rad(aa))];
+  return poly([
+    at(rOut, base + s * bO),
+    at(rOut - BEVEL, base + s * fO),
+    at(rIn + IN_BEVEL, base + s * fI),
+    at(rIn, base + s * bI),
+  ]) + ' Z';
 }
 
 export default function Dial({
@@ -149,13 +213,10 @@ export default function Dial({
 }: Props) {
   const sum = segments.reduce((a, x) => a + x.value, 0);
 
-  const rx = size / 2 - 4;
-  const ry = rx * TILT;
-  const depth = rx * DEPTH;
   const cx = size / 2;
-  // The box holds the lid, the wall under it, and a little air for the sheen.
-  const height = Math.round(ry * 2 + depth + 14);
-  const cy = ry + 4;
+  const cy = size / 2;
+  const r = size / 2 - RING - 2;
+  const height = size;
 
   const wedges = useMemo(() => {
     if (sum <= 0) return [];
@@ -166,25 +227,31 @@ export default function Dial({
       const a0 = acc;
       const a1 = acc + span;
       acc = a1;
-      const mid = (a0 + a1) / 2;
       const d = disc(x.hue);
       return {
         ...x,
         a0,
         a1,
-        mid,
+        mid: (a0 + a1) / 2,
         frac: x.value / sum,
-        face: poly([[cx, cy], ...arcPoints(cx, cy, rx, ry, a0, a1)]) + ' Z',
-        // THE OUTER ARC ON ITS OWN. Stroking the whole wedge put a bright line
-        // down both radial cuts as well, and a radial cut is not an edge — it is
-        // where two parts of one lid meet, and on a real object nothing catches
-        // the light there. Only the rim where the lid turns into the wall does.
-        edge: poly(arcPoints(cx, cy, rx, ry, a0, a1)),
-        walls: frontRuns(a0, a1).map(([s, e]) => {
-          const top = arcPoints(cx, cy, rx, ry, s, e);
-          const bottom = [...top].reverse().map(([px, py]) => [px, py + depth] as [number, number]);
-          return poly([...top, ...bottom]) + ' Z';
-        }),
+        // THE WHOLE PIECE, in the bevel's material. What shows of it after the
+        // face is laid on top is the chamfer — a band of constant width at the
+        // rim, tapering along the cuts, exactly as a struck edge does.
+        bevel: pieceAt(cx, cy, r, HOLE, a0, a1, GAP / 2),
+        face: pieceAt(cx, cy, r - BEVEL, HOLE + IN_BEVEL, a0, a1, GAP / 2 + CUT),
+        // THE TWO CUT FACES, each a flat quad with its own tone. The `a0` edge
+        // faces a quarter turn back from where the piece begins and the `a1` edge
+        // a quarter turn on from where it ends, so on any one groove one wall
+        // catches the lamp and the other loses it — which is what a groove looks
+        // like, and what the gradient could not say.
+        cuts: [
+          cutFace(cx, cy, r, HOLE, a0, a1, false),
+          cutFace(cx, cy, r, HOLE, a0, a1, true),
+        ] as const,
+        cutTone: [
+          mix(d.wall, d.rim, litness(a0 - 90)),
+          mix(d.wall, d.rim, litness(a1 + 90)),
+        ] as const,
         // THE MATERIAL, and it is `disc` rather than `glow` — see the note on
         // both in tone.ts. `glow` is cut for a fourteen-pixel arc and forces
         // every branch to one lightness to get there; a solid has area and does
@@ -192,14 +259,18 @@ export default function Dial({
         // which is the whole of what made a reader call the old one kiddish.
         lit: d.lit,
         base: d.face,
-        wall: d.wall,
-        rim: d.rim,
+        deep: mix(d.face, PANEL_BASE, 0.22),
+        // The two ends of the chamfer: `rim` where it faces the lamp, `wall`
+        // where it turns away from it. Same two roles the extruded wall used,
+        // which is why the palette needed no changing when the tilt went.
+        edgeLit: d.rim,
+        edgeDim: d.wall,
       };
     });
-  }, [segments, sum, cx, cy, rx, ry, depth]);
+  }, [segments, sum, cx, cy, r]);
 
-  // The share worth printing on the disc, the way the reference prints one
-  // figure on one slice: whichever wedge is chosen, or the biggest if none is.
+  // The share worth printing under the disc, the way the reference prints one
+  // figure on one slice: whichever piece is chosen, or the biggest if none is.
   const shown = useMemo(() => {
     if (wedges.length === 0) return null;
     return wedges.find((w) => w.key === selected)
@@ -208,7 +279,7 @@ export default function Dial({
 
   const popStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
 
-  // A thumb outside the lid means "none of them", not "the nearest one". The
+  // A thumb outside the socket means "none of them", not "the nearest one". The
   // arithmetic is in lib/utils/dialHit.ts, zero-import and checked offline —
   // because the version that lived here read `locationX`, which react-native-web
   // does not set, and every guard written against the resulting NaN passed. The
@@ -217,7 +288,7 @@ export default function Dial({
     if (!onSelect || wedges.length === 0) return;
     const p = pressPoint(e.nativeEvent as never);
     if (!p) return;
-    const found = wedgeAt(p.x, p.y, { cx, cy, rx, ry, depth }, wedges);
+    const found = wedgeAt(p.x, p.y, { cx, cy, rx: r, ry: r, slop: RING + 2 }, wedges);
     if (found) onSelect(found);
   };
 
@@ -225,50 +296,74 @@ export default function Dial({
     <View style={styles.wrap}>
       <Pressable onPress={hit} accessibilityRole="none">
         {/* A STABLE ID SO A HARNESS CAN FIND IT (§21, the same reasoning as
-            `#beat-progress` and `#drag-strip`) — `document.querySelector('svg')`
-            stopped being good enough the moment this panel had more than one. */}
+            `#beat-progress` and `#drag-strip`) — document.querySelector on the
+            tag stopped being good enough the moment this panel had more than
+            one surface. */}
         <Animated.View nativeID="dial" style={[{ width: size, height }, popStyle]}>
-          {/* THE SHEEN, under the disc. The reference sets its pies on a pale
-              ground and gets a reflection for free; on near-black a shadow is
-              invisible, so the grounding has to be the other way round — a
-              faint pool of light the disc sits in. Without it the disc floats
-              off the panel, which is exactly what a flat chart does. */}
           <Svg width={size} height={height} style={StyleSheet.absoluteFill} pointerEvents="none">
             <Defs>
+              {/* THE POOL OF LIGHT the disc sits on. The reference sets its pies
+                  on a pale ground and gets a reflection for free; on near-black a
+                  shadow is invisible, so the grounding has to be the other way
+                  round. Without it the disc floats off the panel, which is
+                  exactly what a flat chart does. */}
               <LinearGradient id="dial-sheen" x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0%" stopColor={mix(PANEL_BASE, C.paper, 0.16)} stopOpacity={1} />
+                <Stop offset="0%" stopColor={mix(PANEL_BASE, C.paper, 0.15)} stopOpacity={1} />
                 <Stop offset="100%" stopColor={PANEL_BASE} stopOpacity={0} />
               </LinearGradient>
+              {/* THE SOCKET, and its gradient runs the OPPOSITE way to every
+                  piece in it: a groove is dark where a dome is light, because
+                  the near wall of a cut shades the side the light comes from.
+                  Reverse this and the rosette reads as sitting on a coaster.
+                  BOTH STOPS ARE MIXED TOWARD BLACK, NOT TOWARD `C.ink` — ink is
+                  #1A1A1A and the panel is #0E0E0E, so mixing toward it LIGHTENS,
+                  and the first draft of this groove had its shaded end paler than
+                  the surface it was supposed to be cut into. */}
+              <LinearGradient
+                id="dial-socket"
+                gradientUnits="userSpaceOnUse"
+                x1={size * 0.12} y1={0} x2={size * 0.88} y2={height}
+              >
+                <Stop offset="0%" stopColor={mix(PANEL_BASE, BLACK, 0.85)} />
+                <Stop offset="100%" stopColor={mix(PANEL_BASE, C.paper, 0.20)} />
+              </LinearGradient>
+              {/* The spindle: quiet, and lit the same way everything else is. */}
+              <LinearGradient
+                id="dial-pin"
+                gradientUnits="userSpaceOnUse"
+                x1={cx - HOLE} y1={cy - HOLE} x2={cx + HOLE} y2={cy + HOLE}
+              >
+                <Stop offset="0%" stopColor={mix(PANEL_BASE, C.paper, 0.22)} />
+                <Stop offset="100%" stopColor={mix(PANEL_BASE, BLACK, 0.45)} />
+              </LinearGradient>
             </Defs>
-            <Ellipse
-              cx={cx}
-              cy={cy + depth + 2}
-              rx={rx * 0.96}
-              ry={ry * 0.50}
-              fill="url(#dial-sheen)"
-            />
-          </Svg>
-
-          {/* The groove the disc sits in, so a reader on day one still sees the
-              shape of the thing they are about to fill. */}
-          {wedges.length === 0 ? (
-            <Svg width={size} height={height} style={StyleSheet.absoluteFill}>
+            <Circle cx={cx} cy={cy + 4} r={r + RING + 1} fill="url(#dial-sheen)" />
+            <Circle cx={cx} cy={cy} r={r + RING} fill="url(#dial-socket)" />
+            {/* THE CAST SHADOW. The rosette's own silhouette, dropped down-right
+                onto the socket — the one cue that says the pieces stand PROUD of
+                what they are set in rather than being painted on it. It shows
+                only in the grooves and as a crescent on the ring, because the
+                pieces cover the rest of it. */}
+            <Circle cx={cx + 1.6} cy={cy + 2.4} r={r} fill={mix(PANEL_BASE, BLACK, 0.9)} />
+            <Circle cx={cx} cy={cy} r={HOLE - 1.6} fill="url(#dial-pin)" />
+            {/* Day one: the shape of the thing the reader is about to fill. */}
+            {wedges.length === 0 ? (
               <Path
-                d={poly(arcPoints(cx, cy, rx, ry, 0, 360)) + ' Z'}
+                d={pieceAt(cx, cy, r, HOLE, 0, 360, 0)}
                 fill={mix(PANEL_BASE, C.paper, 0.07)}
               />
-            </Svg>
-          ) : null}
+            ) : null}
+          </Svg>
 
           {wedges.map((w) => (
-            <Wedge
+            <Piece
               key={w.key}
               w={w}
               size={size}
               height={height}
               chosen={selected === w.key}
               dimmed={!!selected && selected !== w.key}
-              lift={rx * LIFT}
+              lift={r * LIFT}
             />
           ))}
         </Animated.View>
@@ -294,12 +389,13 @@ export default function Dial({
   );
 }
 
-function Wedge({
+function Piece({
   w, size, height, chosen, dimmed, lift,
 }: {
   w: {
-    key: string; mid: number; face: string; edge: string; walls: string[];
-    lit: string; base: string; wall: string; rim: string;
+    key: string; mid: number; face: string; bevel: string;
+    cuts: readonly string[]; cutTone: readonly string[];
+    lit: string; base: string; deep: string; edgeLit: string; edgeDim: string;
   };
   size: number; height: number; chosen: boolean; dimmed: boolean; lift: number;
 }) {
@@ -310,11 +406,15 @@ function Wedge({
     damping: 15, stiffness: 190, mass: 0.7,
   }), [chosen]);
   const slide = useAnimatedStyle(() => ({
+    // STRAIGHT OUT ALONG ITS OWN BISECTOR, and the y is not scaled by anything.
+    // That is the whole difference from the tipped version: every piece travels
+    // the same distance, so being chosen means the same thing at 12 o'clock as
+    // at 6, and nothing is nearer the reader than anything else.
     transform: [
       { translateX: Math.cos(rad(w.mid)) * lift * out.value },
-      { translateY: Math.sin(rad(w.mid)) * lift * TILT * out.value },
+      { translateY: Math.sin(rad(w.mid)) * lift * out.value },
     ],
-    // Dimmed, not drained: below about 0.6 the unchosen wedges lose their hue
+    // Dimmed, not drained: below about 0.6 the unchosen pieces lose their hue
     // and the disc reads grey the moment anything is picked, which is the
     // dullness this was rebuilt to fix.
     opacity: dimmed ? 0.66 : 1,
@@ -327,28 +427,44 @@ function Wedge({
     >
       <Svg width={size} height={height}>
         <Defs>
+          {/* Both gradients run the same way, across the WHOLE box rather than
+              across each piece — one light for the whole object, so a piece on
+              the left is brighter than the same piece would be on the right and
+              the six read as one struck thing rather than six coloured shapes. */}
+          {/* THREE STOPS, and the third is what makes a piece read as a domed
+              surface rather than a coloured area. The branch's own tone has to
+              hold most of the face — it is what the legend beside it is matched
+              against — so the fall into shade is kept to the last third, where
+              the light genuinely would not reach. Two stops over an 11% swing is
+              the "7% tonal range is invisible" note in tone.ts, one size up. */}
           <LinearGradient
             id={`face-${w.key}`}
             gradientUnits="userSpaceOnUse"
             x1={size * 0.12} y1={0} x2={size * 0.88} y2={height}
           >
             <Stop offset="0%" stopColor={w.lit} />
-            <Stop offset="100%" stopColor={w.base} />
+            <Stop offset="62%" stopColor={w.base} />
+            <Stop offset="100%" stopColor={w.deep} />
+          </LinearGradient>
+          <LinearGradient
+            id={`bev-${w.key}`}
+            gradientUnits="userSpaceOnUse"
+            x1={size * 0.12} y1={0} x2={size * 0.88} y2={height}
+          >
+            <Stop offset="0%" stopColor={w.edgeLit} />
+            <Stop offset="100%" stopColor={w.edgeDim} />
           </LinearGradient>
         </Defs>
 
-        {/* The wall first: it hangs BELOW the lid's edge and can never cover it,
-            so no z-order arithmetic is needed between the two. */}
-        {w.walls.map((d, i) => (
-          <Path key={`w${i}`} d={d} fill={w.wall} />
+        {/* The chamfer first, at full size; the two cut walls over it; the face
+            last, covering everything but the band. No stroke anywhere: a stroke
+            is a line drawn ON a shape, and these are surfaces the shape TURNS
+            into. */}
+        <Path d={w.bevel} fill={`url(#bev-${w.key})`} />
+        {w.cuts.map((d, i) => (
+          <Path key={`c${i}`} d={d} fill={w.cutTone[i]} />
         ))}
-        {/* The lid, unstroked. */}
         <Path d={w.face} fill={`url(#face-${w.key})`} />
-        {/* And the rim, on the OUTER arc only — see `edge`. A struck edge is
-            brighter than either surface it separates, and it is the one part of
-            the disc that has to be seen against the panel on its own (6.85:1 at
-            worst; the face sits at 2.89 and does not need to). */}
-        <Path d={w.edge} fill="none" stroke={w.rim} strokeWidth={0.8} strokeLinejoin="round" />
       </Svg>
     </Animated.View>
   );
@@ -356,9 +472,9 @@ function Wedge({
 
 const styles = StyleSheet.create({
   wrap: { alignItems: 'center' },
-  // A chosen wedge is drawn over its neighbours, which is what "lifted" means.
+  // A chosen piece is drawn over its neighbours, which is what "lifted" means.
   front: { zIndex: 2 },
-  share: { marginTop: 4, textAlign: 'center', includeFontPadding: false },
+  share: { marginTop: 2, textAlign: 'center', includeFontPadding: false },
   sharePct: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: C.paper },
   shareOf: { fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1.4, color: C.dim },
 });

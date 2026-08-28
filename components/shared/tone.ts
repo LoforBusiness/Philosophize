@@ -439,13 +439,23 @@ export function disc(hue: string): Disc {
     // The lit corner of the lid. The one light, top left, as everywhere else.
     lit: fromHsl(h, s, Math.min(0.9, l + 0.19)),
     face,
-    // A vertical surface under a light from above catches almost none of it.
-    wall: fromHsl(h, s * 0.95, Math.max(0.05, l - 0.05)),
-    // The edge where lid meets wall, and the only part of the disc that has to
-    // be seen against the panel on its own.
-    // 0.30, not 0.40: at 0.40 the edge came out near-white all the way round and
-    // read as an OUTLINE drawn on the chart rather than as light catching a
-    // turned edge. It still carries the silhouette at 5.4:1 on the panel.
-    rim: mix(face, PAPER, 0.3),
+    // ── THE TWO ENDS OF THE CHAMFER ─────────────────────────────────────────
+    //
+    // These were the extruded wall and the lid's front edge when the disc was
+    // tipped. It is drawn straight on now (a tipped circle puts the wedges at
+    // different distances, which a chart of shares must not do) and the depth is
+    // a bevel instead — so they are the same two jobs under different names: the
+    // edge where it faces the lamp, and the edge where it turns away.
+    //
+    // THEY WERE FAR TOO TIMID AT FIRST, and the reason is worth keeping. `rim`
+    // was mix(face, PAPER, 0.30) because as a STROKE at 0.40 it came out
+    // near-white the whole way round and read as an OUTLINE. A chamfer is not a
+    // stroke: it only reaches its lit value on the lamp's side and its dark one
+    // opposite, so it can afford — and needs — much more. At 0.30 against a face
+    // whose own lit end is l+0.19 the band was within a few percent of the
+    // surface it was supposed to be turning off, and rendered invisible on four
+    // of the six pieces.
+    wall: mix(face, PANEL_BASE, 0.58),
+    rim: mix(face, PAPER, 0.52),
   };
 }
