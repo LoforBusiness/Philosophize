@@ -48,9 +48,9 @@ for (const lesson of report) {
   for (const b of lesson.beats) {
     for (const h of b.hits || []) {
       if (!String(h.why || '').includes(KIND)) continue;
-      if (seen.has(b.i)) continue;
-      seen.add(b.i);
-      want.push({ id: lesson.id, beat: b.i, word: h.text || '', by: h.struckBy || h.coveredBy || '' });
+      if (seen.has(b.beat)) continue;
+      seen.add(b.beat);
+      want.push({ id: lesson.id, beat: b.beat, word: h.t || '', by: h.struckBy || h.coveredBy || '' });
       break;
     }
   }
