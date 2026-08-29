@@ -3,11 +3,11 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
+import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics36Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -65,6 +65,10 @@ const CAP_T = 240;
 const FIG_X = 54;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+// WHICH WAY HE IS POINTING, read off the same x track he walks along:
+// +1 where it rises, -1 where it falls, and HOLD while he stands still, so a
+// figure who walks left to something keeps facing it while he talks about it.
+const DIR = dirsFrom(X, 1);
 const P = BEATS.map((b) => b.p ?? 0);
 const SQUARE = BEATS.map((b) => (b.square ? 1 : 0));
 const CROP = BEATS.map((b) => b.crop ?? 0.5);
@@ -92,7 +96,7 @@ export default function Aesthetics36Scene({ clock, bt, bi, dragPos }: SceneApi) 
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       t,
       squareOn: carry(cv, 1, n, SQUARE[p], SQUARE[n], tr),
       // The reader's thumb on the drag beat, the script's track everywhere else.

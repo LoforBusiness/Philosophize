@@ -3,11 +3,11 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
+import { dirsFrom, clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic19Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -57,6 +57,10 @@ const REACHED = [1, 0, 1, 0];
 const FIG_X = 200;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+// WHICH WAY HE IS POINTING, read off the same x track he walks along:
+// +1 where it rises, -1 where it falls, and HOLD while he stands still, so a
+// figure who walks left to something keeps facing it while he talks about it.
+const DIR = dirsFrom(X, 1);
 const P = BEATS.map((b) => b.p ?? 0);
 const RULEV = BEATS.map((b) => b.rule ?? 0);
 const CARDS = BEATS.map((b) => b.cards ?? 0);
@@ -89,7 +93,7 @@ export default function Logic19Scene({ clock, bt, bi, i, picked, onPick }: Scene
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       rule: carry(cv, 1, n, RULEV[p], RULEV[n], tr),
       cards: carry(cv, 2, n, CARDS[p], CARDS[n], tr),
       reach: carry(cv, 3, n, REACH[p], REACH[n], tr),

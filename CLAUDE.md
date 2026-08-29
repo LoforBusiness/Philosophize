@@ -799,7 +799,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **forty-two** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **forty-three** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -809,7 +809,7 @@ followed:
 `check-plainwords` · `check-streak` · `check-quips` ·
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
-`check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-react` · `check-smooth` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
+`check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-react` · `check-smooth` · `check-turn` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
 figures and 6 hand-built ones, and `check-moves` 6 head-clearance defects. A budget
 line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 222 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
@@ -1732,6 +1732,46 @@ and watching it fail.**
 > lesson gains a new way to move, the checker gains one too, in the same commit.**
 > A checker that models only the figure will stay green through anything that is
 > not a figure, and say so confidently.
+
+### And 55 of them walked BACKWARDS, which is the same blind spot again (C18)
+
+> *"the stickman will walk backwards while its legs are moving the wrong way. The
+> stickman won't actually turn to walk a different way."*
+
+`pose()` takes the facing as its fifth argument, and **55 scenes handed it a
+literal `1`** — so the figure faced right all lesson and moonwalked every beat
+whose `x` went down. `epistemology-knowledge-22` is the worked example: 200 → 132
+→ 268, so he slides backwards through the middle of the journey and walks the last
+leg normally, which is why it reads as a fault in that lesson rather than a style.
+
+**The gait was never wrong.** `strideStance` drives the feet from distance and is
+symmetric, so in the figure's own frame the legs do exactly the right thing. It is
+the FRAME that is never flipped, and nothing in the rig can notice, because the rig
+is handed the direction rather than deriving it. Two lines fix it, and the 47
+scenes that already turn all write them identically:
+
+```ts
+const DIR = dirsFrom(X, 1);          // +1 rising, −1 falling, HOLD while still
+…K_FIG, facing(DIR[p], DIR[n], bt.value), 1)
+```
+
+**`check:smooth` could never have caught it**: it replays every lesson at 60fps and
+measures joints against the pelvis **at a fixed x = 200**, so the one thing it
+cannot see is which way the whole man points. That is L5's blind spot arriving a
+second time — and both halves of this one are static, so `npm run check:turn` reads
+the source instead. It must find the TRAVELLING `pose()` — the call whose x comes
+from `X` — because a scene may pin a second, static figure on purpose; picking the
+first `pose()` in the file reported 101 lessons, most of them wrongly.
+
+> **The codemod wrote to the wrong line first, and that is the part to remember.**
+> `addImport` matched `import\s*\{([\s\S]*?)\}\s*from './rig'` — non-greedy but
+> UNBOUNDED, so it ran from the first `import {` in the file through every import
+> in between, and all 55 got `facing, dirsFrom` inserted into their **react-native**
+> import. `tsc` caught it instantly; the point is that a codemod which writes to the
+> wrong line is exactly the kind that gets believed when it doesn't fail. The group
+> must not cross a brace. And **reverting it re-materialised all 55 as CRLF**, which
+> is the §21 trap that makes `validate-cinematic` see zero beats and call a file
+> clean — normalise to LF after any `git restore` here, and check with `file`.
 
 ### The walk was too fast in 54 scenes, and the footsteps were the tell
 

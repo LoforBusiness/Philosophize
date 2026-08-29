@@ -3,11 +3,11 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
+import { dirsFrom, clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics20Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -54,6 +54,10 @@ const CAP_Y = 236;
 const FIG_X = 200;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+// WHICH WAY HE IS POINTING, read off the same x track he walks along:
+// +1 where it rises, -1 where it falls, and HOLD while he stands still, so a
+// figure who walks left to something keeps facing it while he talks about it.
+const DIR = dirsFrom(X, 1);
 const P = BEATS.map((b) => b.p ?? 0);
 const BLOCKS = BEATS.map((b) => b.blocks ?? 0);
 const RATE = BEATS.map((b) => b.rate ?? 0);
@@ -82,7 +86,7 @@ export default function Ethics20Scene({ clock, bt, bi, dragPos }: SceneApi) {
 
     const scripted = carry(cv, 1, n, RATE[p], RATE[n], tr);
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       blocks: carry(cv, 2, n, BLOCKS[p], BLOCKS[n], tr),
       // One value, two sources, and the picture never disagrees with whichever
       // is in charge: the reader's thumb on its own beat, the script's track

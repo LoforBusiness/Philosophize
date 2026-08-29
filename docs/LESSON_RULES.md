@@ -5160,3 +5160,71 @@ thin vertical rule covers little width and the label's whole height; a panel edg
 slicing a caption covers its whole width and a third of its height. Either is a
 finding at 35% of one dimension; clipping a corner is not. Re-counter-tested on
 political19 at the new threshold: still 6 with the defect in, 0 with it out.
+
+---
+
+## C18 · A figure that walks left has to turn and face left
+
+> *"the stickman will walk backwards while its legs are moving the wrong way.
+> The stickman won't actually turn to walk a different way."*
+
+`pose()` takes the facing as its fifth argument. Fifty-five scenes handed it a
+literal `1`, so the figure faced right for the whole lesson — and on any beat
+whose `x` DECREASES he slid backwards across the stage with his legs cycling
+forwards. `epistemology-knowledge-22` is the worked example: its x track runs
+200 → 132 → 268, so he moonwalks the middle leg of the journey and then walks
+the last one normally, which is why it reads as a fault in that lesson rather
+than a style.
+
+**The gait was never wrong.** `strideStance` drives the feet from distance and is
+symmetric, so in the figure's OWN frame the legs do exactly the right thing. It is
+the frame that is never flipped, and nothing in the rig can notice, because the
+rig is HANDED the direction rather than deriving it.
+
+### The two lines, and why both
+
+```ts
+const DIR = dirsFrom(X, 1);
+…K_FIG, facing(DIR[p], DIR[n], bt.value), 1)
+```
+
+`dirsFrom` reads the same x track he walks along, once, on the JS thread: +1 where
+it rises, −1 where it falls, and **HOLD while he stands still** — so a figure who
+walks left to a chart keeps facing the chart while he talks about it instead of
+snapping back to face right on the next beat.
+
+`facing` then eases the sign through zero over 0.36s. A raw ±1 flip mirrors the
+whole man between two frames — 31 units, at any tap rate, which is the pop group L
+exists for. Easing it turns him through a profile, which is what a body does.
+
+### Why this needed its own check
+
+`check:smooth` replays every lesson at 60fps and measures joints against the
+pelvis **at a fixed x = 200**. The one thing it can never see is which way the
+whole man is pointing — the same blind spot that let L5 through, arriving a second
+time. And both halves of this one are static: the x track is a literal per beat,
+the facing is an argument at one call site. So `npm run check:turn` reads the
+source, resolves each scene's x track through its `?? FIG_X` fallback, and reports
+any TRAVELLING `pose()` — the call whose x argument is built from `X` — whose
+fifth argument is pinned.
+
+**It has to be the travelling call specifically.** A scene may pose a second,
+static figure on purpose — a companion who always faces the narrator — and pinning
+that one is correct. Picking the first `pose()` in the file instead reported 101
+lessons, most of them wrongly.
+
+### And the codemod that fixed all 55 wrote to the wrong line first
+
+`scripts/turn-facing.mjs` adds the two imports, the `DIR` line and the argument.
+Its `addImport` matched `import\s*\{([\s\S]*?)\}\s*from '\.\/rig'` — non-greedy,
+but **unbounded**, so from the first `import {` in the file it ran through every
+import in between to reach the rig one, and the insertion landed in whichever came
+first. All 55 files got `import { facing, dirsFrom, View, Text, StyleSheet } from
+'react-native'`. `tsc` caught it at once; the point is that a codemod which writes
+to the wrong line is exactly the kind that gets believed when it doesn't. The
+group must not cross a brace: `([^}]*?)`.
+
+**Reverting it re-materialised all 55 as CRLF** (`core.autocrlf=true`), which is
+the §21 trap that makes `validate-cinematic` see ZERO beats in a file and report
+it clean. Normalise back to LF after any `git restore` in this repo, and check
+with `file` rather than assuming.

@@ -3,11 +3,11 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
+import { dirsFrom, clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic18Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
   useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
@@ -84,6 +84,10 @@ const G_TRACK_Y = 340;
 const FIG_X = 200;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+// WHICH WAY HE IS POINTING, read off the same x track he walks along:
+// +1 where it rises, -1 where it falls, and HOLD while he stands still, so a
+// figure who walks left to something keeps facing it while he talks about it.
+const DIR = dirsFrom(X, 1);
 const P = BEATS.map((b) => b.p ?? 0);
 const CROWD = BEATS.map((b) => b.crowd ?? 0);
 const GAP = BEATS.map((b) => b.gap ?? 0);
@@ -117,7 +121,7 @@ export default function Logic18Scene({ clock, bt, bi, dragPos }: SceneApi) {
     const turn = LIVE_D[n] === 1 ? clamp01(dragPos.value) : crowd;
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       crowd,
       turn,
       gap: carry(cv, 2, n, GAP[p], GAP[n], tr),

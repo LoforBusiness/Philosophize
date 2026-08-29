@@ -4,11 +4,11 @@ import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'r
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
+import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology36Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -55,6 +55,10 @@ const CAP_T = 240;
 const FIG_X = 56;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
+// WHICH WAY HE IS POINTING, read off the same x track he walks along:
+// +1 where it rises, -1 where it falls, and HOLD while he stands still, so a
+// figure who walks left to something keeps facing it while he talks about it.
+const DIR = dirsFrom(X, 1);
 const P = BEATS.map((b) => b.p ?? 0);
 const SHELF = BEATS.map((b) => (b.shelf ? 1 : 0));
 const GIVEN = BEATS.map((b) => (b.given ? 1 : 0));
@@ -89,7 +93,7 @@ export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick, 
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
+      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       t,
       shelfOn: carry(cv, 1, n, SHELF[p], SHELF[n], tr),
       givenOn: carry(cv, 2, n, GIVEN[p], GIVEN[n], tr),

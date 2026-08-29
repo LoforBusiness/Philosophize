@@ -7,11 +7,11 @@ import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import { BEATS } from './metaphysics2Script';
 import {
-  WALK, ease01, lerp, mixStance, moveTr, pose, strideStance, type Bundle, } from './rig';
+  dirsFrom, WALK, ease01, lerp, mixStance, moveTr, pose, strideStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useCarry, carry,
+import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useCarry, carry,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -62,6 +62,10 @@ import type { SceneApi } from './CinematicPlayer';
 
 const E = BEATS.map((b) => b.e ?? 0);
 const X = BEATS.map((b) => b.x ?? 214);
+// WHICH WAY HE IS POINTING, read off the same x track he walks along:
+// +1 where it rises, -1 where it falls, and HOLD while he stands still, so a
+// figure who walks left to something keeps facing it while he talks about it.
+const DIR = dirsFrom(X, 1);
 // The camera, from the staging: it follows the figure this track describes,
 // pulls back on every graded beat so a tap lands where it is aimed, and leans in
 // on the quote. See followMoves in ./camera.ts.
@@ -113,7 +117,7 @@ export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick }: 
       : mixStance(emoteHold(E[p], t), emoteLive(E[n], t, bt.value), tr);
 
     return {
-      trav: pose(travS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, 1, 1),
+      trav: pose(travS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       gone: carry(cv, 1, n, GONE[p], GONE[n], tr),
       pr: carry(cv, 2, n, PR[p], PR[n], tr),
       t,
