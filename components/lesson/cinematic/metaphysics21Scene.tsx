@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: BOX_Y, height: BOX_H },
   hitBox: { height: BOX_H, borderRadius: 3 },
   right: { borderWidth: 3, borderColor: INK },
-  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });
 
 export function Metaphysics21Lesson({ lesson }: { lesson: Lesson }) {

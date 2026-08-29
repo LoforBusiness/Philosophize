@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   vRight: { backgroundColor: INK, borderColor: INK },
-  vWrong: { borderColor: SOFT, opacity: 0.45 },
+  vWrong: { borderColor: SOFT },
   vText: {
     fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 0.3, color: INK,
     textAlign: 'center', lineHeight: 16,

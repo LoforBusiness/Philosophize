@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
   },
   candRight: { backgroundColor: INK },
-  candWrong: { borderColor: SOFT, opacity: 0.45 },
+  candWrong: { borderColor: SOFT },
   candText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },

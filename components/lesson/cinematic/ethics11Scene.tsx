@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 1,
   },
   tokenRight: { backgroundColor: INK, borderColor: INK },
-  tokenWrong: { borderColor: SOFT, opacity: 0.45 },
+  tokenWrong: { borderColor: SOFT },
   // D30 — an eight-character word must not break. Content width here is
   // 64 − 2×2 border − 2×1 padding = 58, and "SYMPHONY" measures 51.4, leaving 11.4%
   // for whatever Android's metrics do to it.

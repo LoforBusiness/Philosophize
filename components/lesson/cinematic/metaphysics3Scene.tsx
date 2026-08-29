@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },
-  cardWrong: { borderColor: SOFT, opacity: 0.45 },
+  cardWrong: { borderColor: SOFT },
   cardT: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.3, color: INK, includeFontPadding: false },
   cardTOn: { color: PAPER },
 });

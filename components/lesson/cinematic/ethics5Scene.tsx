@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
     backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
   },
   signRight: { backgroundColor: INK, borderColor: INK },
-  signWrong: { borderColor: SOFT, opacity: 0.45 },
+  signWrong: { borderColor: SOFT },
   signT: { fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 0.4, color: INK, includeFontPadding: false },
   postWrap: { position: 'absolute', top: POST_T, width: SIGN_W, alignItems: 'center' },
   post: { width: 5, height: 22, backgroundColor: INK, borderRadius: 2 },
@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
     backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
   },
   panRight: { backgroundColor: INK, borderColor: INK },
-  panWrong: { borderColor: SOFT, opacity: 0.45 },
+  panWrong: { borderColor: SOFT },
   panT: { fontFamily: 'Inter_700Bold', fontSize: 14.5, letterSpacing: 0.5, color: INK, includeFontPadding: false },
   panSub: { fontFamily: 'Inter_400Regular', fontSize: 10.5, color: INK, marginTop: 3, includeFontPadding: false },
 });

@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', height: RUNG_H },
   hitBox: { height: RUNG_H, borderRadius: 3 },
   right: { borderWidth: 3, borderColor: INK },
-  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });
 
 export function Epistemology24Lesson({ lesson }: { lesson: Lesson }) {

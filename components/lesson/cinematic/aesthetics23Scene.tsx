@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PL_Y, width: PL_W, height: PL_H },
   hitBox: { width: PL_W, height: PL_H, borderRadius: 4 },
   right: { borderWidth: 3, borderColor: INK },
-  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });
 
 export function Aesthetics23Lesson({ lesson }: { lesson: Lesson }) {

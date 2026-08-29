@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   },
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
 });
 
 // Ink runs from the stuck tag (272) and the YOU token (230) down to the ground line

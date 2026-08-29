@@ -34,6 +34,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { collapsedTargetChildren } from './lib/tonenest.mjs';
+import { scanAnsweredOpacities } from './lib/answerdim.mjs';
 
 const CIN = path.join(process.cwd(), 'components', 'lesson', 'cinematic');
 const ALL = !!process.env.SHAPE_ALL;
@@ -174,6 +175,30 @@ else {
   no(`${collapsed.length} target child(ren) sized by left/right instead of a width`,
     'the wrapper between them does not stretch — give it a width (S10)');
   for (const c of collapsed) console.log(`          ${c}`);
+}
+
+// S11 — A SCENE'S ANSWERED STYLE MAY NOT SET AN OPACITY.
+//
+// Target owns the opacity and the scale of the reply; the scene marks by form.
+// A scene that also dims MULTIPLIES with it, and the branch it hits is the one
+// under the reader's own finger — 0.5 x 0.45 = 0.225, measured on aesthetics14
+// through a real answer while the untouched loser sat at the intended 0.7. It
+// was the idiom in 113 places, because Target's own header used to say the
+// component did not style the answered state at all.
+//
+// Same file as S10 for the same reason: it is a tap target that does not look
+// like what it is. This one only shows up AFTER the tap.
+const dimmed = scanAnsweredOpacities(CIN);
+if (!dimmed.length) ok("no answered style dims on top of Target's own reaction");
+else {
+  no(`${dimmed.length} answered style(s) set an opacity Target has already set`,
+    'mark by border, fill or dash — Target owns the fade (S11)');
+  const shownDim = ALL ? dimmed : dimmed.slice(0, 12);
+  for (const d of shownDim) {
+    console.log(`          ${d.file.replace('Scene.tsx', '').padEnd(16)} ${d.name.padEnd(12)}`
+      + `opacity ${d.opacity} -> lands at ${(d.opacity * 0.5).toFixed(2)} on the reader's own pick`);
+  }
+  if (!ALL && dimmed.length > shownDim.length) console.log(`          …and ${dimmed.length - shownDim.length} more (SHAPE_ALL=1)`);
 }
 
 console.log(bad ? `\n${bad} failing.\n` : '\nall clear.\n');

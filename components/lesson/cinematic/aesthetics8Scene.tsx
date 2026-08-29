@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, gap: 12,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
   pickTextWrap: { flex: 1 },
   pickText: {
     fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 0.4, lineHeight: 16,

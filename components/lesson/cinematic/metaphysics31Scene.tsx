@@ -176,6 +176,8 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
           inside the other. It is the PICTURE of the distinction; the tabs below
           are how the reader answers it. */}
       <Animated.View style={[styles.bigWrap, bigStyle]} pointerEvents="none">
+        {/* This one STAYS. The cavity is the thing the wrong answer names and it
+            is drawn outside every Target, so no reaction reaches it. */}
         <View style={[styles.gapCavity, wrong('gap') && styles.dim]}>
           <View style={[styles.cavityLit, { borderRadius: GAP_R }]} />
         </View>
@@ -200,7 +202,9 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
           style={styles.fill}
           disabled={!live || answered}
         >
-          <View style={[styles.tabInner, wrong('cheese') && styles.dim]}>
+          {/* No dim here: this tab is INSIDE a Target, which already fades the
+              reader's own miss to 0.5 and stamps it. A second 0.4 lands it at 0.20. */}
+          <View style={styles.tabInner}>
             <Text style={styles.tabText} numberOfLines={1}>THE CHEESE</Text>
           </View>
         </Target>
@@ -222,7 +226,9 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
           style={styles.fill}
           disabled={!live || answered}
         >
-          <View style={[styles.tabInner, wrong('gap') && styles.dim]}>
+          {/* No dim here: this tab is INSIDE a Target, which already fades the
+              reader's own miss to 0.5 and stamps it. A second 0.4 lands it at 0.20. */}
+          <View style={styles.tabInner}>
             <Text style={styles.tabText} numberOfLines={1}>THE GAP</Text>
           </View>
         </Target>

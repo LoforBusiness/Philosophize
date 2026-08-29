@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   labelRight: { backgroundColor: INK, borderColor: INK },
-  labelWrong: { borderColor: SOFT, opacity: 0.45 },
+  labelWrong: { borderColor: SOFT },
   labelText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.7, letterSpacing: 0.3, color: INK,
     includeFontPadding: false,

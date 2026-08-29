@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     width: COL_W, height: CARD_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6,
     backgroundColor: STONE, overflow: 'hidden',
   },
-  cardWrong: { borderColor: SOFT, opacity: 0.45 },
+  cardWrong: { borderColor: SOFT },
   cardFill: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: INK },
   cardText: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
   cardT: { fontFamily: 'Inter_700Bold', fontSize: 16, letterSpacing: 0.6, color: INK, includeFontPadding: false },
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
     backgroundColor: RULE, alignItems: 'center', justifyContent: 'center',
   },
   binRight: { backgroundColor: INK, borderColor: INK },
-  binWrong: { borderColor: SOFT, opacity: 0.45 },
+  binWrong: { borderColor: SOFT },
   binT: { fontFamily: 'Inter_700Bold', fontSize: 17, letterSpacing: 1, color: INK, includeFontPadding: false },
 
   proof: {

@@ -37,11 +37,32 @@ import { INK, PAPER, RIGHT, WRONG } from './cinematicKit';
 // problem being fixed. See the note on RING_INSET for why it sits ON the bounds
 // rather than outside them.
 //
-// The moment an answer lands, every ring is cancelled and removed. The scene's
-// own right/wrong styling then has the stage to itself — this component
-// deliberately does NOT style the answered state, because each scene already
-// does that in its own vocabulary and two systems fighting over it would be
-// worse than none.
+// The moment an answer lands, every ring is cancelled and removed, and the
+// component replies: what was right lifts, what the reader took is stamped, and
+// a wrong pick dims and shrinks slightly. See THE REACTION below.
+//
+// ── WHO OWNS WHAT, once an answer lands ─────────────────────────────────────
+//
+// THIS COMPONENT OWNS THE OPACITY AND THE SCALE. THE SCENE MARKS BY FORM.
+//
+// That division is younger than most of the corpus, and the paragraph that used
+// to stand here is why. It said this component "deliberately does NOT style the
+// answered state, because each scene already does that in its own vocabulary" —
+// true when it was written, and every scene duly wrote its own reply, almost
+// always as an opacity. Then the reaction was added and nothing went back to the
+// scenes. The two multiply, and it is the card the reader ACTUALLY CHOSE that
+// pays for it, because that is the branch this component dims:
+//
+//     0.5 (here)  x  0.45 (the scene)  =  0.225
+//
+// Measured on aesthetics14 through a real answer: the untouched loser sat at the
+// intended 0.7, and the one under the reader's own finger — the one carrying the
+// X, the one they most need to read — sat at 0.225. It was the same 113 times
+// across the corpus, because it was the house idiom.
+//
+// So: a scene's answered style may change a border, a fill, a colour or a dash.
+// It may not set an opacity on anything inside a Target, or on the Target's own
+// style prop. `check:blank` holds it.
 //
 // ── WHY IT ALSO COUNTS ITSELF ───────────────────────────────────────────────
 //
@@ -401,7 +422,7 @@ export default function Target({
       {/* The reaction transforms the ART, not the Pressable: `measureLayout` reads
           layout and is unaffected by transforms, so the box this target reports to
           the camera stays exactly where it was (H60c). */}
-      <Animated.View pointerEvents="box-none" style={reaction}>
+      <Animated.View pointerEvents="box-none" style={[styles.art, reaction]}>
         {children}
       </Animated.View>
       {/* THE MARK ON THE READER'S OWN ANSWER, right or wrong.
@@ -419,7 +440,17 @@ export default function Target({
           <Text style={styles.sealMark}>{correct ? '✓' : '✕'}</Text>
         </Animated.View>
       ) : null}
-      {!answered ? (
+      {/* THE RING IS A PROMISE, SO IT MAY ONLY SHOW WHERE THE PROMISE HOLDS.
+          It used to consult `answered` alone. 132 of the corpus's targets are
+          written `disabled={!live || answered}` — mounted for the whole lesson
+          and pressable only on their own graded beat — so for six beats out of
+          eight the reader watched two or three outlines breathe at them and
+          nothing happened when they touched one. Measured on aesthetics14:
+          aria-disabled="true" on beats 0-3 with the rings at 0.35-0.88 and
+          still pulsing. An affordance that lies about being one is worse than
+          no affordance, because it teaches the reader to distrust the real
+          ones. */}
+      {!answered && !rest.disabled ? (
         <Animated.View
           pointerEvents="none"
           // Named so the lesson audit can find rings exactly. Detecting them by
@@ -485,6 +516,31 @@ export function TargetRing({ answered, radius = 4 }: { answered: boolean; radius
 export const TARGET_RING_INSET = RING_INSET;
 
 const styles = StyleSheet.create({
+  // THE WRAPPER MUST BE AS TALL AS THE TARGET, OR THE RING FRAMES BARE PAPER.
+  //
+  // This View exists to carry the reaction transform, and it used to carry
+  // nothing else — so it was an ordinary flex child with an AUTO main size, and
+  // it shrank to its content. Every child that sized itself against the target
+  // (`flex: 1`, or top/bottom against the wrapper) therefore resolved against
+  // nothing: `flex: 1` is `flexBasis: 0%`, which against an indefinite main size
+  // contributes zero, so the child came out exactly as tall as its own words.
+  //
+  // The ring does not shrink with it. It is `StyleSheet.absoluteFill` on the
+  // PRESSABLE, so it stayed the target's full height — and aesthetics14's three
+  // verdicts shipped as a 15pt strip of words with 32pt of empty page under it,
+  // all inside one breathing outline. Measured: press 146x47, ring 146x47,
+  // card 146x15. The reader is asked to tap a box, and two thirds of the box is
+  // blank. It is S10's fault on the other axis: that one collapsed the CROSS
+  // axis under `alignItems`, this one collapses the MAIN axis under `flex`.
+  //
+  // `flexGrow` and NOT `flex`. `flex: 1` would also set `flexBasis: 0`, which
+  // collapses this wrapper to nothing wherever the Pressable is sized BY its
+  // child rather than the other way round — and most of the 193 targets in the
+  // corpus are that shape. `flexGrow: 1` leaves the basis at `auto`: a target
+  // with a definite height hands its spare height to the art, and a target with
+  // no height of its own still takes the art's.
+  art: { flexGrow: 1 },
+
   // Same mark, same size and same colours as the deck's (./ChoiceCards) — a second
   // tick drawn differently would read as a different app congratulating you — but
   // the OPPOSITE corner, and that is not drift.

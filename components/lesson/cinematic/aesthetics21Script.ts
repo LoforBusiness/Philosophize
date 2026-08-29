@@ -25,7 +25,13 @@ export interface Aes21Beat extends BaseBeat {
   /** Figure gesture code. */ p?: number;
   /** The three works and their stock, 0…1. */ works?: number;
   /** How far the destruction has run, 0…1. */ burn?: number;
-  /** The verdict plates under each column, 0…1. */ gone?: number;
+  /**
+   * The verdict plates under each column, 0…1 — and they are the REVEAL, so the
+   * scene holds them at 0 until the stage question has been answered however high
+   * this goes. They used to be up two beats before that question, which printed
+   * GONE under its own answer.
+   */
+  gone?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
 }
 
@@ -42,12 +48,12 @@ export const BEATS: Aes21Beat[] = [
     dur: 4.4,
   },
   {
-    p: 2, x: 132, works: 1, burn: 1, gone: 1,
+    p: 2, x: 132, works: 1, burn: 1,
     text: 'Two of those three works survived that. You could print the novel again tomorrow from the text.',
     dur: 4.2,
   },
   {
-    p: 13, x: 132, works: 1, burn: 1, gone: 1,
+    p: 13, x: 132, works: 1, burn: 1,
     text: 'The painting cannot come back. There was never a text of it. The object was the work.',
     cite: 'One of a kind',
     dur: 4.2,

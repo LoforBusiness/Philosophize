@@ -122,6 +122,7 @@
     "sheet:widget": "node scripts/sheet-widget.mjs",
     "check:quickstart": "node scripts/check-quickstart-contrast.mjs",
     "check:frame": "node scripts/check-frame.mjs",
+    "check:blank": "node scripts/check-blank.mjs",
     "check:spoiler": "node scripts/check-spoiler.mjs",
     "check:cover": "node scripts/check-cover.mjs",
     "check:hold": "node scripts/check-hold.mjs",

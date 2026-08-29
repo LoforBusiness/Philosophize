@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', left: TAG_X, width: TAG_W, height: TAG_H },
   hitBox: { width: TAG_W, height: TAG_H, borderRadius: 3 },
   right: { borderWidth: 3, borderColor: INK },
-  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });
 
 export function Political23Lesson({ lesson }: { lesson: Lesson }) {

@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   replyRight: { backgroundColor: INK, borderColor: INK },
-  replyWrong: { borderColor: SOFT, opacity: 0.45 },
+  replyWrong: { borderColor: SOFT },
   replyText: {
     fontFamily: 'Inter_500Medium', fontSize: 11.5, color: INK, includeFontPadding: false,
   },

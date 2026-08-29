@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER, overflow: 'hidden',
   },
   cardRight: { backgroundColor: INK, borderColor: INK },
-  cardWrong: { borderColor: SOFT, opacity: 0.45 },
+  cardWrong: { borderColor: SOFT },
   cardLabel: {
     position: 'absolute', left: 0, right: 0, top: 8, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 1.4, color: INK,

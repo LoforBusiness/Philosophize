@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   vRight: { backgroundColor: INK, borderColor: INK },
-  vWrong: { borderColor: SOFT, opacity: 0.45 },
+  vWrong: { borderColor: SOFT },
   vText: { fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 0.3, color: INK, includeFontPadding: false },
   vTextOn: { color: PAPER },
 });

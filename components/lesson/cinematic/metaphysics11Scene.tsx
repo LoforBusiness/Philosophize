@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
   },
   faceRight: { backgroundColor: INK, borderColor: INK },
-  faceWrong: { borderColor: SOFT, opacity: 0.45 },
+  faceWrong: { borderColor: SOFT },
 
   namePad: {
     position: 'absolute', left: 0, top: 0, width: PLINTH_W, height: NAME_H,

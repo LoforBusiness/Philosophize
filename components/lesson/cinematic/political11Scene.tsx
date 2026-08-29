@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },
-  plateWrong: { borderColor: SOFT, opacity: 0.45 },
+  plateWrong: { borderColor: SOFT },
   // D30 — letterSpacing 0. "SOVEREIGN" is the longest word on any plate and the inner
   // width is 52 (PLOT_W 64, less two 2-unit borders and two 4 of padding); at 0.2 of
   // tracking it measured 48.2, a 7.3% margin. These labels are deliberately two words

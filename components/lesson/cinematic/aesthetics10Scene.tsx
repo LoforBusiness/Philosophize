@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   boardRight: { backgroundColor: INK, borderColor: INK },
-  boardWrong: { borderColor: SOFT, opacity: 0.45 },
+  boardWrong: { borderColor: SOFT },
   boardText: {
     fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 1.1, color: INK,
     includeFontPadding: false,

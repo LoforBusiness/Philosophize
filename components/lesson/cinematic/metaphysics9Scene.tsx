@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },
-  cardWrong: { borderColor: SOFT, opacity: 0.45 },
+  cardWrong: { borderColor: SOFT },
   cardText: {
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.3, color: INK,
     textAlign: 'center', includeFontPadding: false,

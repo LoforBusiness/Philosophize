@@ -5163,6 +5163,194 @@ political19 at the new threshold: still 6 with the defect in, 0 with it out.
 
 ---
 
+## S11 · A box the reader is asked to tap must have the thing in it
+
+> *"there are three boxes on the right, and they're just blank boxes, and you're
+>  supposed to click on one of them. And then … either it's right or wrong, and
+>  it goes out. It's just a blank box that really, really looks bad, and it's
+>  really confusing about what you're actually answering."*
+
+`aesthetics14` asks the reader to tap one of three verdicts. Measured in the
+rendered page, each one came out as:
+
+| | |
+|---|---|
+| the Pressable | 146 × **47** |
+| `Target`'s ring | 146 × **47** |
+| the card, and its words | 146 × **15** |
+
+A strip of type with thirty-two units of bare paper under it, all inside one
+breathing outline. Three of them, side by side, at the moment the lesson asks its
+question. Nothing in the corpus was checking that a ring had anything in it.
+
+### It is a layout collapse, not a missing label
+
+The words were always there — `mustBoxes` records all three, and the source has
+`<Text>` inside each `Target`. What was missing was HEIGHT.
+
+`Target` puts its children in a wrapper that carries the answer reaction, and
+until now that wrapper carried nothing else. It was therefore an ordinary flex
+child with an **auto main size**, so a child sizing itself against the target got
+nothing to size against: `flex: 1` is `flexBasis: 0%`, and a percentage basis
+resolved against an indefinite main size contributes zero. The card came out
+exactly as tall as its own words.
+
+The ring does not collapse with it. It is `StyleSheet.absoluteFill` on the
+**Pressable**, so it stays the target's full height whatever the art does.
+
+The wrapper now carries `flexGrow: 1`, and **not `flex: 1`** — that would also set
+`flexBasis: 0` and collapse the wrapper to nothing everywhere the Pressable is
+sized BY its child rather than the other way round, which is most of the 193
+targets in the corpus. `flexGrow` leaves the basis at `auto`: a target with a
+definite height hands its spare height to the art, and a target with no height of
+its own still takes the art's.
+
+**This is S10 on the other axis.** That one collapses the CROSS axis under
+`alignItems` and produces a zero-WIDTH label; this one collapses the MAIN axis
+under `flex` and produces a short one. Same wrapper, same cause, two directions,
+and neither is visible in the source.
+
+### And the ring was promising things it could not keep
+
+The ring consulted `answered` alone, never `disabled`. **132 targets in the corpus
+are written `disabled={!live || answered}`** — mounted for the whole lesson and
+pressable only on their own graded beat — so for six beats out of eight the reader
+watched two or three outlines breathe at them and nothing happened when they
+touched one. Measured on aesthetics14: `aria-disabled="true"` on beats 0–3 with
+the rings at 0.35–0.88 and still pulsing.
+
+An affordance that lies about being one is worse than no affordance, because it
+teaches the reader to distrust the real ones. The ring is now gated on
+`!answered && !disabled`.
+
+### The reply was dimmed twice, and it was the reader's own card that paid
+
+`Target` used to do NOTHING when a question was answered, and its header said so
+in as many words: *"this component deliberately does NOT style the answered
+state, because each scene already does that in its own vocabulary."* So every
+scene wrote its own reply, and almost all of them reached for opacity. Then the
+reaction was added — a lift for the true one, a dim and a shrink for the reader's
+own miss, a mark on what they took — and nothing went back to the scenes.
+
+The two multiply, and the branch it hits hardest is the one branch this component
+dims: the card under the reader's finger.
+
+    0.5 (Target)  ×  0.45 (the scene)  =  0.225
+
+Measured on aesthetics14 through a real answer: the untouched loser sat at the
+intended 0.7, and the one carrying the ✕ — the one they most need to read — sat
+at **0.225**. It was the same in **113 places**, because it was the house idiom.
+
+**So: `Target` owns the opacity and the scale. A scene marks by form** — a
+border, a fill, a colour, a dash. Two of the 113 had opacity as their only mark
+and were given one; the rest already had a border and simply lost the fade.
+
+One case is deliberately allowed and is worth knowing, because a checker that
+missed it would be wrong rather than strict: a scene may dim something the wrong
+answer NAMES. `metaphysics31` fades the cheese cavity when the reader picks the
+gap, and that cavity is drawn outside every `Target`, so no reaction reaches it
+and nothing else would mark it. The rule is scoped to what is INSIDE a target.
+
+### How it is checked
+
+Two halves, because the two failures are visible in different places.
+
+**`npm run check:shape` holds the dimming**, which is entirely static: any style
+used *only* when answered, inside a Target, that sets an opacity. Counter-tested
+both ways — the defect put back in aesthetics14 fails it, and metaphysics31's
+legitimate cavity dim stays silent.
+
+**`npm run check:blank` holds the emptiness**, and that one has to render: whether
+a ring has anything in it depends on what the whole scene draws under it, not on
+what the target's own subtree contains. Per beat, for every target that is visible
+AND pressable, it measures how much of the ring's box anything paints, on a 24×24
+grid rather than as a union box — two thin strips at opposite ends of a tall box
+have a union of the whole box and cover almost none of it.
+
+Four things it deliberately does not report, each of which cost a false-positive
+class on the first run:
+
+- **A hit box over art drawn elsewhere in the scene.** That is the commonest shape
+  in the corpus and it is correct — the ring frames the card, the plate, the chip.
+  Paint is counted from anywhere in the document, never from the subtree alone.
+- **A big tinted panel the target sits on.** A ground the size of the stage labels
+  nothing, so anything past six times the target's own area is scenery.
+- **A target at opacity 0.** aesthetics14 mounts all three verdicts from beat 0
+  and fades two in later.
+- **A target that is disabled.** After the ring fix it draws no outline, so it is
+  not a box anyone is being asked to tap.
+
+And two guards on the sweep itself, because **a short sweep is indistinguishable
+from a clean one**: a lesson that stops before its last beat is reported as partly
+audited, and a lesson whose scene imports `Target` but where the sweep never saw a
+live one is reported as NOT audited. Both were real — under three lanes on a busy
+machine `logic19` stopped before its graded beat and printed *"no scene targets"*,
+which reads exactly like a lesson that has none.
+
+### The guards then earned their keep three times over
+
+The first full sweep came back with **16 lessons NOT audited**, and every one of
+them was the harness rather than the lesson. Each fix looked obviously right and
+two of them were wrong.
+
+- **A ring is a target whether or not it came with a Pressable.** `TargetRing` is
+  the ring on its own, for a scene whose target is already a Pressable it cannot
+  give up. It has no `accessibilityRole`, so a probe selecting `[role="button"]`
+  cannot see it, and two lessons reported no scene targets while drawing three
+  rings each. This is the rule the other four harnesses each learned separately:
+  **when a lesson gains a new way to be answered, the checker gains one too.**
+- **A probe that reads once loses a race it does not know it is in.** `settle()`
+  waits for the CAMERA, and the camera is not what mounts a target — the beat
+  index reaches the scene through React. Under four lanes the probe fired first,
+  saw three disabled boxes and reported nothing live. It re-reads now, but only
+  on a beat that is asking something, so a lesson whose questions are all in the
+  deck costs nothing.
+- **Keying that wait on the beat index made it worse, and the second attempt was
+  worse again.** The loop counter drifts from the real beat the moment an advance
+  is missed, so the wait fired on the wrong beat. Reading the true index off the
+  progress bar looked like the fix and is not: **the bar fills continuously
+  through a beat**, so `stamp()` is routinely mid-fill and one short — and
+  *settling* on it is worse still, because a thing that never stops moving makes
+  `settle` burn its whole four-second budget on every beat of every lesson. Two
+  lessons that had just started passing went back to failing.
+
+  What works needs no index at all: **ask the page whether it is waiting for an
+  answer.** That is a fact about the frame in front of you rather than a count of
+  how many times you have tapped.
+- **And a blank is confirmed a second later before it is believed.** One read can
+  land inside an entrance: ethics19's four rows grow in, and the sweep caught one
+  of them 9 units tall and 11% painted — a perfectly drawn row, measured while it
+  was arriving. Hollow is advisory so a transient there costs nothing, but BLANK
+  fails the build, and a checker that goes red on a frame nobody sees is one
+  people learn to rerun until it passes.
+
+### And a band measured against the resting pose can be short of its own reaction
+
+Found while gating aesthetics21's verdict plates to the reveal, and it is general.
+A column and its heading rise ten units together when the reader picks one (E39),
+so the topmost ink that lesson can draw is its heading at y 234 **minus 10** — and
+its band started at 228. Six units of headroom, four short of the lift. The word
+A PAINTING lost its top to the crop at the exact moment the reader got it right,
+which is the worst possible frame for it to happen on.
+
+§17's rule 5 says the band must contain every pixel a beat can draw. **The answer
+reaction is a pixel a beat can draw**, and a band measured against the still
+picture has never seen it. Anything sitting within ten units of a band edge and
+riding an `AnswerLift` or `useAnswerRise` wants re-measuring against the lifted
+pose, not the resting one.
+
+The first fix was to leave the caption out of the lift, and it was wrong twice
+over: the column then rose into its own heading instead, and moving the heading
+into the lift merely traded the frame for the crop. What settles it is that a
+thing and the word for it are ONE thing — they ride together and the band holds
+both.
+
+With all of that, the corpus reads **186 lessons · 509 target-beats · 0 BLANK**,
+with no lesson left unaudited. The nine hollow readings that remain are all either
+sparse-but-complete art — a rubble heap, an ash heap, a provenance rail — or a card
+caught mid-lift, which is why hollow reports and does not fail.
+---
+
 ## C18 · A figure that walks left has to turn and face left
 
 > *"the stickman will walk backwards while its legs are moving the wrong way.

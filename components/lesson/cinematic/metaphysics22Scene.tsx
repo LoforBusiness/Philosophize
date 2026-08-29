@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
    */
   hitLive: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
   right: { borderWidth: 3, borderColor: INK },
-  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });
 
 export function Metaphysics22Lesson({ lesson }: { lesson: Lesson }) {

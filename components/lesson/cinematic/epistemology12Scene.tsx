@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   plateRight: { backgroundColor: INK, borderColor: INK },
-  plateWrong: { borderColor: SOFT, opacity: 0.45 },
+  plateWrong: { borderColor: SOFT },
   plateText: {
     fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.8, color: INK,
     includeFontPadding: false,

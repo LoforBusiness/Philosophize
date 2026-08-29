@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
 
   onInkSoft: { color: RULE },
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
 });
 
 // Ink runs from the sum boxes (314) to the ground line (500). Band 308…512 = 204 (H59).

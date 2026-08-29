@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
     backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
   },
   plateRight: { backgroundColor: INK, borderColor: INK },
-  plateWrong: { borderColor: SOFT, opacity: 0.45 },
+  plateWrong: { borderColor: SOFT },
   plateT: { fontFamily: 'Inter_700Bold', fontSize: 20, letterSpacing: 3, color: INK, includeFontPadding: false },
   plateTOn: { color: PAPER },
 });

@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   knob: { position: 'absolute', right: 7, top: DOOR_H / 2 - 12, width: 7, height: 7, borderRadius: 4, backgroundColor: INK },
 
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
 });
 
 // Ink runs from the kicker (314) to the ground line (500). Band 308…512 = 204 (H59).

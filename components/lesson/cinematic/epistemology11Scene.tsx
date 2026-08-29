@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
   pickTime: {
     fontFamily: 'Inter_700Bold', fontSize: 15, lineHeight: 18, letterSpacing: 0.4,
     color: INK, includeFontPadding: false,

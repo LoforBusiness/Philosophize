@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   hitCapTop: { bottom: undefined, top: 3 },
 
   right: { borderWidth: 3, borderColor: INK },
-  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });
 
 export function Metaphysics19Lesson({ lesson }: { lesson: Lesson }) {

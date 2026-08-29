@@ -141,9 +141,16 @@ export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick, d
           {cells.map((c) => <Cell key={c} S={SCENE} index={c} />)}
         </Animated.View>
 
-        {/* The outer frame is a target too, and it is the one most readers reach
-            for. Its hit box is the MARGIN of the frame, not its whole area, or it
-            would sit on top of the grid and swallow the other answer. */}
+        {/* THE OUTER FRAME IS A TARGET TOO, and it is the one most readers reach
+            for — so its ring has to trace the frame. It used to be a 14-tall
+            strip across the top, on the reasoning that a hit box covering the
+            whole frame would sit on the grid and swallow the other answer. The
+            hit test does not need that: `sim` is mounted after this one, so it
+            wins wherever the two overlap. What the strip cost was the AFFORDANCE
+            — the question says "tap the frame your token is inside" and offered a
+            sliver of the frame's top edge as one of two choices, with nothing
+            drawn in it (S11). The two rings are nested now, which is also what
+            the lesson is about. */}
         <Target
           id="real" correct={false} picked={picked} onPick={onPick}
           disabled={!live || answered} style={styles.realHit}
@@ -212,13 +219,13 @@ const styles = StyleSheet.create({
     borderRadius: TOKEN_D / 2, borderWidth: 2.5, borderColor: INK,
   },
 
-  realHit: { position: 'absolute', left: OUT_X, top: OUT_Y, width: OUT_W, height: 14 },
-  realHitBox: { width: OUT_W, height: 14, borderRadius: 3 },
+  realHit: { position: 'absolute', left: OUT_X, top: OUT_Y, width: OUT_W, height: OUT_H },
+  realHitBox: { width: OUT_W, height: OUT_H, borderRadius: 4 },
   simHit: { position: 'absolute', left: GRID_X, top: GRID_Y, width: 294, height: 84 },
   simHitBox: { width: 294, height: 84, borderRadius: 3 },
 
   right: { borderWidth: 3, borderColor: INK },
-  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });
 
 export function Metaphysics20Lesson({ lesson }: { lesson: Lesson }) {

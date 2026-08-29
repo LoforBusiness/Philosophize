@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5, paddingHorizontal: 4, alignItems: 'center',
   },
   flagRight: { backgroundColor: INK, borderColor: INK },
-  flagWrong: { borderColor: SOFT, opacity: 0.45 },
+  flagWrong: { borderColor: SOFT },
   flagHead: {
     fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.2, color: INK,
     includeFontPadding: false,

@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   claimRight: { backgroundColor: INK, borderColor: INK },
-  claimWrong: { borderColor: SOFT, opacity: 0.45 },
+  claimWrong: { borderColor: SOFT },
   claimText: {
     fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 15, letterSpacing: 0.3, color: INK,
     includeFontPadding: false, textAlign: 'center',

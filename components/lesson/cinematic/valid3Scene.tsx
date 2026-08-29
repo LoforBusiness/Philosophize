@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     backgroundColor: STONE, justifyContent: 'center', paddingHorizontal: 12,
   },
   balRight: { backgroundColor: INK, borderColor: INK },
-  balWrong: { borderColor: SOFT, opacity: 0.45 },
+  balWrong: { borderColor: SOFT },
   balTitle: { fontFamily: 'Inter_700Bold', fontSize: 14.5, lineHeight: 17, letterSpacing: 0.4, color: INK, includeFontPadding: false },
   balTitleOn: { color: PAPER },
   balSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 15, color: INK, includeFontPadding: false },

@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', left: FORM_X, width: FORM_W, height: ROW_H },
   hitBox: { width: FORM_W, height: ROW_H, borderRadius: 3 },
   hitRight: { borderWidth: 2.5, borderColor: INK },
-  hitWrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+  hitWrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });
 
 export function Ethics19Lesson({ lesson }: { lesson: Lesson }) {

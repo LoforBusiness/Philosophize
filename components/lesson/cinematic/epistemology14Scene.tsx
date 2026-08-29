@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   },
 
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
 });
 
 // Ink runs from the chip (292) to the ground line (500). Band 286…512 = 226 (H59).

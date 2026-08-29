@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12,
   },
   chipRight: { backgroundColor: INK, borderColor: INK },
-  chipWrong: { borderColor: SOFT, opacity: 0.45 },
+  chipWrong: { borderColor: SOFT },
   chipT: { fontFamily: 'Inter_700Bold', fontSize: 16, lineHeight: 21, letterSpacing: 2.2, color: INK, includeFontPadding: false },
   chipTOn: { color: PAPER },
 });

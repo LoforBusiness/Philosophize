@@ -1530,6 +1530,90 @@ The flag is derived from the beat itself (`b.interact?.lever ? 1 : 0`) rather th
 declared as a channel, so it cannot fall out of step with the control and it costs
 `check:echo` nothing.
 
+> **AND THE BOX THE READER WAS ASKED TO TAP WAS TWO THIRDS EMPTY (S11).**
+>
+> > *"there are three boxes on the right, and they're just blank boxes, and
+> >  you're supposed to click on one of them … it's just a blank box that really,
+> >  really looks bad, and it's really confusing about what you're actually
+> >  answering."*
+>
+> `aesthetics14`, measured in the rendered page: the Pressable 146×47, `Target`'s
+> ring 146×47, and the card carrying the words **146×15**. A strip of type with
+> thirty-two units of bare paper under it, all inside one breathing outline, three
+> of them side by side at the moment the lesson asks its question.
+>
+> **The words were never missing** — `mustBoxes` records all three and the source
+> has a `<Text>` in every target. What was missing was HEIGHT. `Target` puts its
+> children in a wrapper that carries the answer reaction and, until now, carried
+> nothing else; it was an ordinary flex child with an auto main size, so a child
+> sizing itself with `flex: 1` had nothing to size against — `flex: 1` is
+> `flexBasis: 0%`, and a percentage basis against an indefinite main size
+> contributes zero. The ring does not collapse with it, because it is
+> `absoluteFill` on the PRESSABLE. **This is S10 on the other axis**: that one
+> collapses the CROSS axis under `alignItems` and gives a zero-WIDTH label, this
+> one collapses the MAIN axis under `flex` and gives a short one.
+>
+> `flexGrow: 1` and **not** `flex: 1` — the latter would also set the basis to 0
+> and collapse the wrapper to nothing wherever the Pressable is sized BY its
+> child, which is most of the 193 targets in the corpus.
+>
+> **Two more came out of the same tap, and both are the component lying.** The
+> ring consulted `answered` and never `disabled`, and **132 targets are written
+> `disabled={!live || answered}`** — so for six beats out of eight the reader
+> watched outlines breathe at them and nothing happened when they touched one
+> (measured: `aria-disabled="true"` on beats 0–3 with the rings at 0.35–0.88 and
+> still pulsing). And the reply was dimmed twice: `Target`'s header said the
+> component "deliberately does NOT style the answered state", every scene
+> therefore wrote its own — almost always an opacity — and then the reaction was
+> added and nothing went back to the scenes. **0.5 × 0.45 = 0.225**, on the one
+> card the reader chose, in **113 places**, while the untouched loser sat at the
+> intended 0.7. Target owns the opacity and the scale now; a scene marks by form.
+>
+> **`npm run check:shape` holds the dimming and `npm run check:blank` holds the
+> emptiness**, and the split is not arbitrary: whether a style dims is in the
+> source, whether a ring has anything in it depends on what the whole scene draws
+> underneath and can only be answered by rendering. The second measures coverage
+> on a 24×24 grid rather than as a union box — two thin strips at opposite ends of
+> a tall box have a union of the whole box and cover almost none of it — and it
+> ignores four things that each cost a false-positive class: a hit box over art
+> drawn elsewhere (the commonest correct shape in the corpus), a stage-sized panel
+> the target merely sits on, a target at opacity 0, and a target that is disabled.
+>
+> **Its two guards matter more than its findings.** A lesson that stops before its
+> last beat is reported as partly audited, and a lesson whose scene imports
+> `Target` but where no live one was ever seen is reported as NOT audited — because
+> under three lanes on a busy machine `logic19` stopped before its graded beat and
+> printed *"no scene targets"*, which reads exactly like a lesson that has none.
+> **They then caught 16 lessons on the first full sweep, none of which was a
+> lesson defect**, and the three fixes are worth knowing because two looked right
+> and were not. `TargetRing` draws a ring with no Pressable and so no
+> `accessibilityRole` — invisible to a probe selecting on role, which is the
+> when-a-lesson-gains-a-way-to-be-answered rule arriving a fifth time. The probe
+> reads once and `settle()` waits for the CAMERA, which is not what mounts a
+> target, so under lanes it saw three disabled boxes and called them nothing. And
+> **the beat index is not a safe key for the retry**: the loop counter drifts, and
+> reading the real one off the progress bar is worse, because the bar fills
+> CONTINUOUSLY through a beat — so `stamp()` is routinely one short, and settling
+> on it makes `settle` burn its whole budget every beat, which put two
+> just-fixed lessons straight back into the failing list. Asking the page whether
+> it is waiting for an answer needs no index and cannot drift. And a BLANK is
+> **confirmed a second later** before it is believed, because one read can land
+> inside an entrance — ethics19's rows grow in, and the sweep caught one 9 units
+> tall and 11% painted, which is a perfectly drawn row measured while arriving.
+>
+> **The corpus reads 186 lessons · 509 target-beats · 0 BLANK**, nothing
+> unaudited. The nine hollow readings left are sparse-but-complete art — a rubble
+> heap, an ash heap, a provenance rail — or a card caught mid-lift, which is why
+> hollow reports and does not fail.
+>
+> **And the must-box stamp could not see any of it.** `muststamp` hashes the scene,
+> the script and the probe, so changing `Target` resized the art in 146 scenes with
+> every stamp still matching — the apparatus rule from §21 arriving one level out.
+> A shared component that decides how big a scene's art is now goes in the hash, for
+> the scenes that actually import it. `cinematicKit.tsx` would be more correct still
+> and is deliberately left out: it is the highest-traffic file in the repo, and a
+> ratchet that goes red on most working days is a ratchet nobody runs.
+
 > **THE READER COULD NOT MOVE THE LEVER FAR ENOUGH, AND THE CAUSE WAS THE GAIN.**
 > `DragScale`, `SplitBar` and `LeverPick` all integrated `translationX / width`,
 > so the full range cost a full WIDTH of finger travel — and the reader reported
@@ -3076,6 +3160,13 @@ browser at it; the first transform can take longer than a navigation timeout.
   about most of them. It runs on its own ports (8861/9391) so it never contends
   with the other four. All three want Metro on 8847 and a headless Chrome
   on 9382 — the header of each script has the exact commands.
+  **`npm run check:blank` is the sixth, and it asks the OTHER blank question**
+  (S11, §17): `check:readable` measures a word that is drawn, this measures a box
+  that has no word in it — how much of every tap target's ring anything actually
+  paints, per beat, counted on a 24×24 grid rather than as a union box. It has to
+  render for the same reason `check:spoiler` does: whether a ring is empty depends
+  on what the whole scene draws underneath it, and the source cannot say. Its own
+  ports are 8869/9399.
 
   **`check:spoiler` exists because reading the source said the app was clean and
   the reader could see that it was not.** Every shared component gates its reveal

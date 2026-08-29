@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
 
   hidden: {
     position: 'absolute', left: (STAGE_W - HID_W) / 2, top: HID_T, width: HID_W, height: HID_H,

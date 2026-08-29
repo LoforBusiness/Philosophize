@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },
-  cardWrong: { borderColor: SOFT, opacity: 0.45 },
+  cardWrong: { borderColor: SOFT },
   cardText: {
     fontFamily: 'Inter_500Medium', fontSize: 12, color: INK, includeFontPadding: false,
   },

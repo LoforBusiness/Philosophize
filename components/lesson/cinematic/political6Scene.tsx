@@ -147,9 +147,11 @@ export default function Political6Scene({ clock, bt, bi, i, picked, onPick, drag
         </View>
       </>
     );
+    // NO `lost && styles.faded` ON THE TARGET. It already dims the reader's own
+    // miss to 0.5 and marks it; a further 0.45 lands the panel they chose at 0.23.
     return showPick ? (
       <Target id={id} correct={isAnswer} picked={picked} onPick={onPick}
-              key={id} style={[styles.panelHit, { left: soc.left }, lost && styles.faded]} disabled={answered}>
+              key={id} style={[styles.panelHit, { left: soc.left }]} disabled={answered}>
         {inner}
       </Target>
     ) : (

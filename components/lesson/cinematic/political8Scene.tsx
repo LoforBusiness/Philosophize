@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
   pickBar: { position: 'absolute', left: 18, bottom: 5, width: 6, backgroundColor: INK, borderRadius: 1 },
   pickBarOn: { backgroundColor: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
   pickText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },

@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', width: CELL_W, height: CELL_H },
   hitBox: { width: CELL_W, height: CELL_H, borderRadius: 2 },
   right: { borderWidth: 3, borderColor: INK },
-  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });
 
 export function Political21Lesson({ lesson }: { lesson: Lesson }) {

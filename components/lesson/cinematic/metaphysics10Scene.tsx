@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   slotRight: { backgroundColor: INK, borderColor: INK },
-  slotWrong: { borderColor: SOFT, opacity: 0.45 },
+  slotWrong: { borderColor: SOFT },
   slotText: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.3, color: INK, includeFontPadding: false },
   slotTextOn: { color: PAPER },
 });

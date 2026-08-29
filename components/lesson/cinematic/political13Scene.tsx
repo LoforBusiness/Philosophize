@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   },
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
 
   tag: {
     position: 'absolute', left: AR_L, top: TAG_T, width: AR_W, height: TAG_H,

@@ -1,5 +1,8 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing,
+} from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -34,8 +37,17 @@ import { followMoves, kindOf, seedOf } from './camera';
 // · the FIGURE walks x 200 → 132 → 268 on GROUND 500; crown ≈ 397, plates end at
 //   374, so 23 units stay clear — tight, and the reason the plates are two words.
 //
-// Ink runs y 234 (the headings) … y 500. BAND 228…512 = 284, with the 103-unit
-// figure at 36%.
+// THE BAND HAS TO HOLD THE ANSWER LIFT, NOT JUST THE RESTING POSE. A column and
+// its heading rise ten units together when the reader picks it (E39), so the
+// topmost ink a beat can draw is the heading at 234 MINUS 10 = 224, not 234. The
+// band was measured against the resting picture and was four units short of its
+// own reaction: the word A PAINTING lost its top to the crop at the exact moment
+// the reader got it right. 216 leaves eight units of headroom and takes the
+// figure's share from 36% to 35%, which is further inside H58's line rather than
+// nearer it.
+//
+// Ink runs y 224 (the headings, lifted) … y 500. BAND 216…512 = 296, with the 103-unit
+// figure at 35%.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
@@ -66,6 +78,8 @@ const WORKS = BEATS.map((b) => b.works ?? 0);
 const BURN = BEATS.map((b) => b.burn ?? 0);
 const GONE = BEATS.map((b) => b.gone ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+/** The beat that asks on the stage — the one the verdict plates must wait for. */
+const ASK_BEAT = LIVE.findIndex((v) => v === 1);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics21'));
 
@@ -100,19 +114,36 @@ export default function Aesthetics21Scene({ clock, bt, bi, i, picked, onPick }: 
   const answered = picked !== null;
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.cards && LIVE[i] === 1;
 
-  const goneStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.gone }));
+  // THE VERDICTS ARE THE REVEAL, NOT THE LABEL (group O).
+  //
+  // They used to be up from the beat after the burn, so the question — "tap the
+  // work that is actually gone" — was asked with GONE already printed under the
+  // right answer and STILL EXISTS under the other two. Nothing failed: the plates
+  // are the scene's own content, not the deck's explanation, so check:spoiler had
+  // no reason to look at them.
+  //
+  // They are held back to the moment the reader commits now, which also makes them
+  // a better beat: the picture agrees with you instead of telling you.
+  const revealed = useSharedValue(0);
+  useEffect(() => {
+    const on = i > ASK_BEAT || (i === ASK_BEAT && picked !== null);
+    revealed.value = withTiming(on ? 1 : 0, { duration: 320, easing: Easing.out(Easing.cubic) });
+  }, [i, picked, revealed]);
+  const goneStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.gone * revealed.value }));
 
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-      {COL_X.map((cx, k) => (
-        <Text key={`c${k}`} style={[styles.cap, { left: cx }]} numberOfLines={1}>{COL_CAP[k]}</Text>
-      ))}
-
-      {/* EACH COLUMN RIDES WITH ITS OWN TARGET (E39). */}
+      {/* EACH COLUMN RIDES WITH ITS OWN TARGET (E39) — AND SO DOES ITS NAME.
+          The caption used to be drawn outside the lift, so the ten units the
+          answer rises took the painting's frame up into the words A PAINTING and
+          printed its own top edge through them. Inside the lift, the gap between
+          a column and the word for it cannot change, whatever the reaction does. */}
       {COL_X.map((cx, k) => (
         <AnswerLift key={COL_ID[k]} id={COL_ID[k]} picked={picked} correct={COL_ID[k] === 'painting'}>
+          <Text style={[styles.cap, { left: cx }]} numberOfLines={1}>{COL_CAP[k]}</Text>
           <Column S={SCENE} col={k} />
+          {k === 2 ? <Ash S={SCENE} col={k} /> : null}
         </AnswerLift>
       ))}
 
@@ -183,6 +214,37 @@ function Slab({
   return <Animated.View style={[styles.slab, { left, top }, st]} />;
 }
 
+// WHAT THE FIRE LEFT (S11).
+//
+// The novel and the symphony end the burn as a stack of six and four hairlines —
+// their editions, emptied but still countable. The painting is ONE canvas, so at
+// burn 1 its column held nothing whatever, and the reader was asked to tap the
+// work that is gone while looking at three outlines of which one was bare paper.
+//
+// A burned painting is not an absent painting. It is ash, and drawing the ash is
+// the same rule the cheese was rebuilt for (§13): the picture has to BE the thing
+// it names. It also says out loud what the column means — the novel's stock can
+// be reprinted from what survives; this heap cannot.
+const ASH = [
+  { dx: 8, w: 30, h: 9 },
+  { dx: 36, w: 22, h: 13 },
+  { dx: 56, w: 34, h: 8 },
+];
+function Ash({ S, col }: { S: { value: { works: number; burn: number } }; col: number }) {
+  const left = COL_X[col];
+  const base = STOCK_TOP + 92;
+  const st = useAnimatedStyle(() => ({
+    opacity: clamp01(S.value.works * 3 - col) * clamp01(S.value.burn * 1.4 - 0.4),
+  }));
+  return (
+    <Animated.View pointerEvents="none" style={st}>
+      {ASH.map((a, k) => (
+        <View key={k} style={[styles.ash, { left: left + a.dx, width: a.w, height: a.h, top: base - a.h }]} />
+      ))}
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
@@ -194,6 +256,10 @@ const styles = StyleSheet.create({
   cap: {
     position: 'absolute', top: 234, width: COL_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
+  },
+  ash: {
+    position: 'absolute',
+    borderWidth: 1.5, borderColor: INK, borderRadius: 1.5, backgroundColor: STONE,
   },
   slab: {
     position: 'absolute', width: COL_W,
@@ -218,5 +284,5 @@ const styles = StyleSheet.create({
 });
 
 export function Aesthetics21Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Aesthetics21Scene} band={[228, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={Aesthetics21Scene} band={[216, 512]} camera={CAM} />;
 }

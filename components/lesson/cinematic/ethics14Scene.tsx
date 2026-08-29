@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
 
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
 });
 
 // Ink runs from the top answer board (236) to the ground line (500). Band 230…512.

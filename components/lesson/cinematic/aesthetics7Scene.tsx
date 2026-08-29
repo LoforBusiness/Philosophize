@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: RULE, borderStyle: 'dashed', borderRadius: 7,
   },
   ringRight: { borderColor: INK, borderStyle: 'solid' },
-  ringWrong: { borderColor: SOFT, opacity: 0.45 },
+  ringWrong: { borderColor: SOFT },
 });
 
 // Art runs from the top strip's header (y 112, lifted 6 as the marks slide in) down

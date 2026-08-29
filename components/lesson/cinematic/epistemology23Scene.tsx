@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', left: SIEVE_X - 4, width: SIEVE_W + 8 },
   hitBox: { width: SIEVE_W + 8, borderRadius: 4 },
   right: { borderWidth: 3, borderColor: INK },
-  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });
 
 export function Epistemology23Lesson({ lesson }: { lesson: Lesson }) {

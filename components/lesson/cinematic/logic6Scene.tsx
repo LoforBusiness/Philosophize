@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
   boxRight: { borderColor: INK, backgroundColor: INK },
-  boxWrong: { borderColor: SOFT, opacity: 0.45 },
+  boxWrong: { borderColor: SOFT },
   wet: { position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: SOFT, opacity: 0.3 },
   boxTag: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.8, color: INK, includeFontPadding: false },
   boxLine: { flexDirection: 'row', alignItems: 'center', marginTop: 5 },

@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   },
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
 });
 
 // Ink runs from the FALSE tag (213) to the ground line (500). Band 208…512 = 304 (H59).

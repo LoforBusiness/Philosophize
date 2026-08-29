@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },
-  plateWrong: { borderColor: SOFT, opacity: 0.45 },
+  plateWrong: { borderColor: SOFT },
   plateT: { fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 0.4, color: INK, includeFontPadding: false },
   plateTOn: { color: PAPER },
 });

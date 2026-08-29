@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute' },
   hitBox: { borderRadius: 4 },
   right: { borderWidth: 3, borderColor: INK },
-  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });
 
 export function Political22Lesson({ lesson }: { lesson: Lesson }) {

@@ -136,10 +136,12 @@ export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick, dragPo
         <Text style={styles.slabText}>FOUR YEARS</Text>
       </Animated.View>
 
-      {/* EACH PILLAR RIDES WITH ITS OWN TARGET (E39). */}
+      {/* EACH PILLAR RIDES WITH ITS OWN TARGET (E39), and so does what is left
+          of it — a fallen reason is a heap, not a gap (S11). */}
       {PIL_X.map((px, k) => (
         <AnswerLift key={PIL_ID[k]} id={PIL_ID[k]} picked={picked} correct={PIL_ID[k] === 'desert'}>
           <Pillar S={SCENE} index={k} />
+          <Rubble S={SCENE} index={k} />
         </AnswerLift>
       ))}
 
@@ -192,6 +194,39 @@ function Pillar({ S, index }: { S: { value: { slab: number; gone: number } }; in
   return <Animated.View pointerEvents="none" style={[styles.pillar, { left }, st]} />;
 }
 
+// WHAT A KNOCKED-OUT REASON LEAVES BEHIND (S11).
+//
+// The three removed pillars used to shrink to nothing and fade to 0.18, so at the
+// question the reader was offered four identical outlines of which three held bare
+// paper and one held a pillar. "Tap the pillar still holding the slab up" with
+// three empty boxes in the row is the blank-box complaint exactly.
+//
+// A fallen pillar is not an ABSENT pillar, it is a heap — which is also §13's rule
+// about the picture being the thing it names, the one the cheese was rebuilt for.
+// Three chunks of the same STONE the slab is cut from, low enough that the one
+// still standing is never in doubt.
+const RUBBLE = [
+  { dx: -2, w: 20, h: 11 },
+  { dx: 17, w: 15, h: 8 },
+  { dx: 31, w: 17, h: 13 },
+];
+function Rubble({ S, index }: { S: { value: { slab: number; gone: number } }; index: number }) {
+  const left = PIL_X[index];
+  const st = useAnimatedStyle(() => ({ opacity: S.value.slab * (REMOVED[index] ? S.value.gone : 0) }));
+  return (
+    <Animated.View pointerEvents="none" style={st}>
+      {RUBBLE.map((r, k) => (
+        <View
+          key={k}
+          style={[styles.rubble, {
+            left: left + r.dx, width: r.w, height: r.h, top: PIL_TOP + PIL_H - r.h,
+          }]}
+        />
+      ))}
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
@@ -217,6 +252,10 @@ const styles = StyleSheet.create({
   pillar: {
     position: 'absolute', width: PIL_W,
     borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
+  },
+  rubble: {
+    position: 'absolute',
+    borderWidth: 2, borderColor: INK, borderRadius: 1.5, backgroundColor: STONE,
   },
   pilCap: {
     // DERIVED, like the pillars it labels. This was a hardcoded 344 while PIL_TOP

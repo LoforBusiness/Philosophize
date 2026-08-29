@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   },
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
 
   bench: {
     position: 'absolute', left: BENCH_L, top: BENCH_T, width: BENCH_W, height: 6,

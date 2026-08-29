@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   barFill: { height: BAR_H - 8, backgroundColor: INK, borderRadius: 1 },
 
   rightBox: { borderColor: INK, borderWidth: 3 },
-  wrong: { borderColor: SOFT, opacity: 0.45 },
+  wrong: { borderColor: SOFT },
 });
 
 export function Ethics17Lesson({ lesson }: { lesson: Lesson }) {

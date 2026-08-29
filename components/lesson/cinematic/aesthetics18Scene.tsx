@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PAN_Y, height: PAN_H },
   hitBox: { height: PAN_H, borderRadius: 3 },
   right: { borderWidth: 3, borderColor: INK },
-  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+  wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });
 
 export function Aesthetics18Lesson({ lesson }: { lesson: Lesson }) {

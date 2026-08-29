@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   pickRight: { backgroundColor: INK, borderColor: INK, borderStyle: 'solid' },
-  pickWrong: { borderColor: RULE, opacity: 0.45 },
+  pickWrong: { borderColor: RULE },
   pickText: {
     fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 0.3,
     color: INK, textAlign: 'center', includeFontPadding: false,

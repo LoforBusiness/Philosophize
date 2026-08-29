@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
 
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
 });
 
 // Ink runs from the canvases (304) to the strip's tab (496). Band 298…512 = 214 (H59).

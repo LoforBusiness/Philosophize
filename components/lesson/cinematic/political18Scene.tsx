@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
 
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT, opacity: 0.45 },
+  pickWrong: { borderColor: SOFT },
 });
 
 // Ink runs from the label (228) to the lower lane (464). Band 222…512 = 290.
