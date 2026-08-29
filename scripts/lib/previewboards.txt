@@ -1,0 +1,99 @@
+// TEMPORARY — DELETE BEFORE COMMITTING. Any file in app/ is a real route (§21).
+// Written and removed by scripts/sheet-boards.mjs; check-routes.mjs blocks a
+// build if one is left behind.
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import StatsTab from '@/app/(app)/stats';
+import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { ALL_BRANCHES } from '@/data';
+import { ALL_PHILOSOPHERS, ERA_GROUPS, eraGroupOf } from '@/data/philosophers';
+
+const q = (k: string) =>
+  typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(k);
+
+export default function PreviewBoards() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    // `full` is a reader well into the app: five names in the league with a
+    // clear leader, every era met, quotes kept from three of them. `thin` is
+    // someone two days in — one name, two eras — which is the case a ranking
+    // is most likely to look silly in.
+    const shape = q('shape') ?? 'full';
+    const thin = shape === 'thin';
+
+    // One philosopher from each era group, in a stable order, so the five rows
+    // carry five different era tones rather than whatever the data file happens
+    // to sort first.
+    // ERA_GROUPS is a tuple of STRINGS, not objects — `g.key` was undefined here
+    // and every era matched nothing, which seeded an empty league and rendered a
+    // blank page with no exception anywhere but Metro's log.
+    const picked = ERA_GROUPS
+      .map((g) => ALL_PHILOSOPHERS.find((x) => eraGroupOf(x) === g))
+      .filter(Boolean) as { id: string; name: string; branchSlugs: string[] }[];
+    const pick = picked.map((p) => p.id);
+    const extra = ALL_PHILOSOPHERS.filter((x) => !pick.includes(x.id)).slice(0, 3);
+
+    const lessons: Record<string, number> = {};
+    const views: Record<string, number> = {};
+    const scores = thin ? [4] : [17, 11, 8, 5, 3];
+    pick.slice(0, scores.length).forEach((id, i) => { lessons[id] = scores[i]; views[id] = 1; });
+    if (!thin) extra.forEach((p, i) => { views[p.id] = 1; lessons[p.id] = 2 - i; });
+
+    // EVERY FIELD OF SavedQuote, including `branchSlugs` — the branch rows read
+    // it without a guard, so a quote missing it takes the whole screen down.
+    const quote = (n: number, who: number) => ({
+      id: `q${n}`,
+      text: 'a saved line',
+      author: picked[who].name,
+      philosopherId: picked[who].id,
+      branchSlugs: picked[who].branchSlugs ?? [],
+      savedAt: Date.now() - n * 86400000,
+    });
+    const quotes = thin ? [] : [quote(1, 0), quote(2, 0), quote(3, 1)];
+
+    const byUnit: Record<string, number> = {};
+    const byBranch: Record<string, number> = {};
+    const WEIGHT = thin ? [2, 1, 0, 0, 0, 0] : [14, 9, 6, 4, 2, 1];
+    ALL_BRANCHES.forEach((b, bi) => {
+      let left = WEIGHT[bi] ?? 1;
+      let n = 0;
+      b.paths.forEach((u) => {
+        const take = Math.min(u.lessons.length, left);
+        byUnit[u.id] = take;
+        left -= take;
+        n += take;
+      });
+      byBranch[b.slug] = n;
+    });
+
+    useUserDataStore.setState({
+      _hasHydrated: true,
+      displayName: 'Landy',
+      totalXP: thin ? 90 : 1240,
+      rankIndex: thin ? 1 : 6,
+      streak: thin ? 2 : 12,
+      lastLessonDate: new Date().toISOString().slice(0, 10),
+      lessonsByUnit: byUnit,
+      lessonsByBranch: byBranch,
+      philosopherLessons: lessons,
+      philosopherViews: views,
+      savedQuotes: quotes,
+    } as never);
+    useUIStore.setState({ launchDone: true } as never);
+    useSubscriptionStore.setState({
+      ready: true, available: false, isPro: false, monthly: null, refresh: async () => {},
+    } as never);
+    setReady(true);
+  }, []);
+
+  if (!ready) return <View style={{ flex: 1 }} nativeID="boards-boot" />;
+
+  return (
+    <View nativeID="boards-root" style={{ flex: 1, backgroundColor: '#FAFAF7' }}>
+      <StatsTab />
+    </View>
+  );
+}

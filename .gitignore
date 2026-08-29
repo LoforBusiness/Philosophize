@@ -61,6 +61,7 @@ scripts/.preview-*.lock
 scripts/.pass-shots/
 scripts/.streak-shots/
 scripts/.dial-shots/
+scripts/.board-shots/
 scripts/.lesson-shots/
 
 # the reveal harness writes a scratch measurement here

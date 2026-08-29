@@ -2726,6 +2726,53 @@ Two things measured rather than judged:
 > socket's shaded end shipped its first draft paler than the surface it was
 > supposed to be cut into. Mix toward black when you mean darker.
 
+> **AND THE TWO PAPER PANELS UNDER IT WENT THE OTHER WAY: LESS, NOT MORE.**
+> *"who you read most and the thinkers by era … I don't want it to be really
+> complicated … more clean and not as AI looking. Right now the who you read
+> most looks pretty AI, especially the one, two, three, four, five circles and
+> the designs on them. They look really bad."*
+>
+> **THE SAME READER ASKED FOR THOSE CIRCLES**, a fortnight earlier and in the
+> opposite direction: *"the numbers on the left side … look very boring and not
+> very premium looking … one two three four will have a more and more complex
+> design as the numbers go up."* That was answered with a five-rung ladder of
+> furniture — ticks, then arcs, then laurel sprigs, then rays and a second rim —
+> every mark outside the disc, every rule from the badge case obeyed. It was
+> still wrong, and both notes are true at once.
+>
+> **A NUMERAL AT LABEL SIZE IS A LABEL; A NUMERAL AT DISPLAY SIZE IS THE
+> ORNAMENT.** At 14pt inside a 30px disc it needed decoration to stop being
+> boring. At 25pt in a gutter of its own it is the largest thing in the row and
+> needs nothing round it — which is how a printed ranking has always done it.
+> `PlaceMark.tsx` is deleted; the rows are type, rules and hairlines.
+>
+> Three things measured rather than judged:
+>
+> - **Only FIRST place can take a metal.** On paper the three run gold 5.66:1,
+>   bronze 8.36:1 and **silver 3.86:1** — under the 4.5 a word needs, which is
+>   §19's "a tone fitted for METAL is invisible on PAPER" for the fourth time. A
+>   podium with one unreadable place is not a podium, so the leader is gold and
+>   the rest are ink.
+> - **The leader's measure has to stop short.** At 100% a coloured line runs from
+>   margin to margin under a name, which is an UNDERLINE — it stops saying
+>   "furthest ahead" and says nothing. It takes the same 30% headroom the era
+>   bars already use, and lands at 77%.
+> - **A 9px chip with a 1.5px border beside a label is a CHECKBOX.** Five of them
+>   unticked down the left of a panel was the single most dashboard-like thing on
+>   the page. The row's colour is carried by its figure and its rule, both of
+>   which were already coloured.
+>
+> `StruckBar` was left alone — it is right at the 9–10px Profile and the Pass
+> draw it at, and it has three other callers; five of them on one panel is what
+> read as a row of glossy capsules. These two use a flat 3–4px rule instead.
+>
+> **`npm run sheet:boards` is the instrument**, and its ratchet is the one that
+> matters: **zero `<svg>` inside either panel**. Both are set rather than drawn
+> now, so an svg back in a league row means the furniture has returned. It also
+> holds that every row figure shares one right edge — the whole reason a bare
+> numeral can carry a ranking without a disc round it — counter-tested by taking
+> the width off the gutter and by removing the headroom, and both went red.
+
 
 > The lesson deck's quote card (`cinematicKit.tsx`) is the one surface not yet
 > converted — see §17; it is the highest-traffic file in the repo and was being

@@ -12,7 +12,6 @@ import { MotiView } from 'moti';
 import { LinearGradient } from 'expo-linear-gradient';
 import ACounter, { counterStyle } from '@/components/shared/ACounter';
 import { StruckBar, StruckTile, StruckPanel, EMBOSS } from '@/components/profile/Struck';
-import PlaceMark from '@/components/stats/PlaceMark';
 import {
   INK, PAPER_LIT, MID, PANEL_BASE, ramp, mix, glow, METAL,
 } from '@/components/shared/tone';
@@ -414,22 +413,37 @@ function BarLine({
       accessibilityRole="button"
       accessibilityLabel={`${row.label}, ${row.value}`}
       accessibilityHint={hintText}
-      style={({ pressed }) => [s.barRow, pressed && { opacity: 0.75 }]}
+      style={({ pressed }) => [
+        s.barRow,
+        index < count - 1 && s.barRuled,
+        pressed && { opacity: 0.75 },
+      ]}
     >
       <View style={s.barTop}>
-        <View style={[s.barChip, { backgroundColor: r.track, borderColor: r.base }]} />
+        {/* NO CHIP. A 9px square with a 1.5px border beside a label is a
+            CHECKBOX everywhere else a reader has ever seen one, and five of them
+            unticked down the left of a panel is the single most dashboard-like
+            thing that was on this page. The row's colour is carried by its
+            figure and its rule, both of which are already coloured. */}
         <Text style={[s.barLabel, selected && { color: r.shade }]} numberOfLines={1}>{row.label}</Text>
         <Text style={[s.barValue, EMBOSS, { color: r.base }]}>{row.value}</Text>
       </View>
 
-      {/* The track is always full width; only the FILL grows, so the groove is
-          there from the first frame and the bar fills into it. */}
+      {/* The track is always full width and only the FILL grows, so the groove is
+          there from the first frame and the measure fills into it.
+          FLAT, AND FOUR UNITS TALL. `StruckBar` is a struck pill — a gradient, a
+          lit rim, a groove lip top and bottom — which is right at the 9–10px
+          Profile and the Pass draw it at, and at five rows on one panel reads as
+          a row of glossy capsules. Left alone for its other three callers. */}
       <View style={s.barTrack}>
-        {/* nativeID so check-bounce can measure THIS row rather than guessing
-            which transformed div is a bar — see Donut.tsx. */}
-        <Animated.View nativeID={`barfill-${row.key}`} style={[s.barFill, fillStyle]}>
-          <StruckBar pct={pct} fill={r} height={9} />
-        </Animated.View>
+        {/* nativeID so a bounce harness can measure THIS row rather than guessing
+            which transformed div is a bar. */}
+        <View style={[s.barGroove, { backgroundColor: r.track }]}>
+          <Animated.View
+            nativeID={`barfill-${row.key}`}
+            style={[s.barMeasure, { backgroundColor: r.base, width: `${Math.max(3, pct * 100)}%` }, fillStyle]}
+          />
+        </View>
         {ghost > 0 ? (
           <MotiView
             pointerEvents="none"
@@ -645,23 +659,40 @@ function LeagueLine({
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`${row.name}, number ${place + 1} of ${count}`}
-      style={({ pressed }) => [s.leagueRow, pressed && { opacity: 0.75 }]}
+      style={({ pressed }) => [
+        s.leagueRow,
+        place < count - 1 && s.leagueRuled,
+        pressed && { opacity: 0.75 },
+      ]}
     >
-      {/* The disc, and however much furniture the place has earned — five rungs,
-          each adding one thing to the one below, all of it OUTSIDE the rim. See
-          ./PlaceMark for the ladder and for why the numeral needed a measured
-          lift rather than more flexbox. */}
-      <PlaceMark place={place} />
-
-      <View style={s.leagueBody}>
-        <View style={s.leagueTop}>
-          <Text style={[s.leagueName, EMBOSS, selected && { color: r.shade }]} numberOfLines={1}>{row.name}</Text>
-          <Text style={[s.leagueEra, { color: r.shade }]} numberOfLines={1}>{row.era}</Text>
-        </View>
-        <View style={s.leagueTrack}>
-          <Animated.View nativeID={`barfill-${row.id}`} style={[s.barFill, fillStyle]}>
-            <StruckBar pct={row.score / max} fill={r} height={7} />
-          </Animated.View>
+      <View style={s.leagueTop}>
+        {/* THE PLACE, AND IT IS TYPE RATHER THAN AN OBJECT. See the note above
+            the styles: at 14pt inside a 30px disc a numeral is a label and had
+            to be decorated to stop being boring; at 25pt in its own gutter it is
+            the ornament, and needs nothing round it. */}
+        <Text style={[s.placeNum, EMBOSS, { color: place === 0 ? METAL.GOLD.shade : C.inkSoft }]}>
+          {place + 1}
+        </Text>
+        <Text style={[s.leagueName, EMBOSS, selected && { color: r.shade }]} numberOfLines={1}>
+          {row.name}
+        </Text>
+        <Text style={[s.leagueEra, { color: r.shade }]} numberOfLines={1}>{row.era}</Text>
+      </View>
+      {/* THE MEASURE IS A HAIRLINE UNDER THE NAME, not a bar beside it. A ranked
+          list already says the order; what a length adds is HOW FAR AHEAD, and
+          two units of rule says that without putting a second glossy pill on the
+          page. It is inset to the name's own left edge so the gutter stays a
+          clean column of numerals. */}
+      <View style={s.leagueUnder}>
+        {/* THE SAME 30% HEADROOM THE ERA BARS USE. Without it the leader's rule
+            runs the full width of the row every time, and a coloured line that
+            reaches both margins under a name is an UNDERLINE, not a measure —
+            it stops saying "furthest ahead" and starts saying nothing. */}
+        <View style={[s.leagueRule, { backgroundColor: r.track }]}>
+          <Animated.View
+            nativeID={`barfill-${row.id}`}
+            style={[s.leagueFill, { backgroundColor: r.base, width: `${Math.max(4, (row.score / (max * HEADROOM)) * 100)}%` }, fillStyle]}
+          />
         </View>
         {parts.length ? <Text style={s.leagueParts}>{parts.join('  ·  ')}</Text> : null}
       </View>
@@ -689,24 +720,32 @@ const s = StyleSheet.create({
   },
 
   // ── bars ──
-  barRow: { marginBottom: 14 },
-  barTop: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
-  barChip: { width: 9, height: 9, borderRadius: 2, borderWidth: 1.5 },
-  barLabel: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 13, color: INK },
-  barValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15 },
-  barTrack: { position: 'relative', justifyContent: 'center' },
+  //
+  // ONE VOCABULARY WITH THE LEAGUE ABOVE IT: a serif name on the left, a serif
+  // figure on the right, a flat measure under them, a hairline between rows.
+  // The two boxes answer different questions — one is an ORDER, one is a
+  // DISTRIBUTION — so only this one keeps a length, but neither should look like
+  // a different product from the other.
+  barRow: { paddingVertical: 9 },
+  barRuled: { borderBottomWidth: 1, borderBottomColor: C.hairline },
+  barTop: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },
+  barLabel: { flex: 1, fontFamily: 'PlayfairDisplay_700Bold', fontSize: 16, color: INK },
+  barValue: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 18 },
+  barTrack: { position: 'relative', marginTop: 7 },
+  barGroove: { height: 4, borderRadius: 2, overflow: 'hidden' },
   // The FILL is what grows, anchored at the left edge. RN scales about the
   // centre by default, which would grow a bar out of both ends of its groove.
-  barFill: { transformOrigin: 'left' },
+  barMeasure: { height: 4, borderRadius: 2, transformOrigin: 'left' },
   ghost: {
-    position: 'absolute', top: 0, bottom: 0,
-    borderWidth: 1.5, borderStyle: 'dashed', borderRadius: 6,
+    position: 'absolute', top: 0, height: 4,
+    borderWidth: 1, borderStyle: 'dashed', borderRadius: 2,
     backgroundColor: 'transparent',
     transformOrigin: 'left',
-    alignItems: 'flex-end', justifyContent: 'center',
-    paddingRight: 4,
   },
-  ghostNum: { fontFamily: 'Inter_700Bold', fontSize: 9 },
+  // BELOW THE RULE, NOT INSIDE IT. The measure is four units tall now and a
+  // 9.5pt numeral does not go in four units; it used to be centred inside a
+  // 9px pill.
+  ghostNum: { position: 'absolute', right: 0, top: 7, fontFamily: 'Inter_700Bold', fontSize: 9.5 },
 
   hint: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
@@ -734,11 +773,41 @@ const s = StyleSheet.create({
   cardCtaText: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.6 },
 
   // ── league ──
-  leagueRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
-  leagueBody: { flex: 1, minWidth: 0 },
-  leagueTop: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  leagueName: { flex: 1, fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: INK },
+  //
+  // A LEAGUE TABLE, NOT FIVE BADGES. The place used to be a numeral inside a
+  // 30px disc wearing however much furniture its rank had earned — ticks, then
+  // arcs, then laurel sprigs, then rays and a second rim. That answered a real
+  // note ("the numbers … look very boring and not very premium looking") in the
+  // wrong currency, and the same reader threw it back: *"the one, two, three,
+  // four, five circles and the designs on them … look really bad"*, and asked
+  // for clean rather than complicated.
+  //
+  // Both notes are true at once, and the way through them is that A NUMERAL AT
+  // LABEL SIZE IS A LABEL AND A NUMERAL AT DISPLAY SIZE IS THE ORNAMENT. At
+  // 14pt in a disc it needed decoration to stop being boring; at 25pt in a
+  // gutter of its own it is the largest thing in the row and needs nothing round
+  // it. That is how a printed ranking has always done it.
+  //
+  // ONLY FIRST PLACE TAKES A METAL, and only because it is the only one that
+  // CAN. Measured on paper the three metals run gold 5.66:1, bronze 8.36:1 and
+  // silver 3.86:1 — silver is under the 4.5 a word needs, which is §19's "a tone
+  // fitted for METAL is invisible on PAPER" for the fourth time. A podium where
+  // one of the three places is unreadable is not a podium, so the leader is gold
+  // and the rest are ink.
+  leagueRow: { paddingVertical: 8 },
+  leagueRuled: { borderBottomWidth: 1, borderBottomColor: C.hairline },
+  leagueTop: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },
+  placeNum: {
+    width: 26, textAlign: 'right',
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 25,
+    includeFontPadding: false,
+  },
+  leagueName: { flex: 1, fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15.5, color: INK },
   leagueEra: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.1 },
-  leagueTrack: { marginTop: 5 },
+  // Inset by the gutter and its gap, so the rule and the breakdown both hang off
+  // the name rather than off the numeral.
+  leagueUnder: { marginLeft: 36, marginTop: 5 },
+  leagueRule: { height: 3, borderRadius: 1.5, overflow: 'hidden' },
+  leagueFill: { height: 3, borderRadius: 1.5, transformOrigin: 'left' },
   leagueParts: { fontFamily: 'Inter_400Regular', fontSize: 10.5, color: C.inkSoft, marginTop: 4 },
 });
