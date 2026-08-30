@@ -593,6 +593,33 @@ costs milliseconds rather than a Metro and a browser. What it holds:
 > islands, its geometry fixed arithmetic rather than a measured pitch — seven
 > equal columns of a known width, so no `onLayout` and no state.
 >
+> **AND THE STAMP HAS A LEGEND ON IT, WHICH IS WHAT MAKES IT A STAMP.** A blank
+> disc is a token; a disc with words on it is an impression, and the reader asked
+> for exactly that — *"a couple words that are crooked on the stamp"*. It reads
+> DAY DONE, set in the typewriter face the app already loads and never used, tilted
+> 8 degrees, showing 60ms AFTER the die is down rather than riding in with it: a
+> legend that fades in during the fall is painted on the object, one that appears
+> once it has landed was left behind by it.
+>
+> **THE LENGTH OF THE LEGEND IS THE BOX, NOT A PREFERENCE.** It sits in a 44 ring
+> inside a 54 face, so the room for a line is the CHORD at that line's height,
+> less the stroke, less a breath, less what the tilt costs — 35.5 units. Measured
+> against the real `.ttf` in plain Node, that is the difference between a legend
+> a reader can read and one they cannot: DAY DONE sets at 12px, DAY SEALED at
+> 8.75, DAY COUNTED at 7.25. `check:streak` re-measures it, so a longer legend
+> fails the build rather than the phone — and holds one more rule the arithmetic
+> cannot see: the stamp may not echo the heading directly above it, which is why
+> DAY KEPT was dropped despite setting larger than the one that shipped.
+>
+> Two things the render corrected that no measurement would have. Type on a 135°
+> gradient has no single contrast — INK reads 6.62:1 at the lit corner and 3.62:1
+> at the middle stop the legend sits on — so the words carry a PAPER-coloured
+> shadow down-right, the app's own emboss read backwards, and that is what carries
+> them across the shaded half. And `justifyContent` centres the two line BOXES on
+> the ring exactly while the INK still sits high, because a typewriter face keeps
+> its caps near the top of the em box and reserves the rest for descenders an
+> all-caps legend never uses.
+>
 > **The flame went with the fire.** `StreakCelebration` drew a literal one, right
 > while the streak was an ember and a metaphor arguing with itself once it was
 > not. It is the calendar's own struck token now, held up large, wearing the

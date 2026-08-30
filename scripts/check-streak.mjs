@@ -15,6 +15,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { loadTs } from './lib/loadts.mjs';
+import { loadFont } from './lib/ttfwidth.mjs';
 
 let fails = 0;
 const ok = (msg, detail) => console.log(`  ok    ${msg}${detail ? `  ${detail}` : ''}`);
@@ -170,6 +171,66 @@ head('THE GILT, MEASURED');
     if (rMid >= 3) ok(`a struck day's mark clears its face ${name}`,
       `${rMid.toFixed(2)}:1 at the centre (the lit corner is ${rLit.toFixed(2)}:1 — keep the mark centred)`);
     else bad(`a struck day's mark cannot be seen ${name}`, `${rMid.toFixed(2)}:1, needs 3`);
+  }
+}
+
+head('THE STAMP, AND WHETHER ITS LEGEND FITS');
+{
+  // A LEGEND IS THE ONE THING ON THIS SCREEN THAT CANNOT WRAP. It sits inside a
+  // ring inside the seal's face, and the box is a CIRCLE — so the room for a
+  // line is the chord at that line's height, not the ring's diameter. Nothing
+  // catches an overrun: RN would silently shrink or clip it, on a 54-unit object
+  // most readers see for two seconds, and the whole point of the words is that
+  // they can be read.
+  //
+  // Measured against the real `.ttf` in plain Node, the same reader `check:fits`
+  // uses — because a character count is not a width (see lib/ttfwidth.mjs), and
+  // because this has to cost milliseconds rather than a Metro and a browser.
+  const src = fs.readFileSync(path.join('components', 'gamification', 'StreakCelebration.tsx'), 'utf8');
+  const words = (/const STAMP = \[([^\]]*)\] as const;/.exec(src) ?? [])[1];
+  const size = +((/const STAMP_SIZE = ([\d.]+);/.exec(src) ?? [])[1]);
+  const tilt = Math.abs(+((/const STAMP_TILT = '(-?[\d.]+)deg';/.exec(src) ?? [])[1]));
+  const ring = +((/stampRing: \{\s*\n\s*position: 'absolute', width: (\d+)/.exec(src) ?? [])[1]);
+  const stroke = +((/stampRing:[\s\S]*?borderWidth: ([\d.]+)/.exec(src) ?? [])[1]);
+  const ls = +((/stampWord:[\s\S]*?letterSpacing: ([\d.]+)/.exec(src) ?? [])[1]);
+  const lh = +((/lineHeight: STAMP_SIZE \* ([\d.]+)/.exec(src) ?? [])[1]);
+
+  if (!words || !size || !ring) {
+    bad('the stamp declares its legend and its box', 'one of STAMP / STAMP_SIZE / stampRing is gone — this check has stopped tracking it');
+  } else {
+    const list = words.split(',').map((w) => w.trim().replace(/^'|'$/g, '')).filter(Boolean);
+    const FONT = 'node_modules/@expo-google-fonts/special-elite/400Regular/SpecialElite_400Regular.ttf';
+    if (!fs.existsSync(FONT)) {
+      bad('the stamp face is installed', FONT);
+    } else {
+      const se = loadFont(FONT);
+      const BREATH = 1.8;                       // ink must not touch the ring
+      const R = ring / 2 - stroke - BREATH;
+      // Two stacked lines straddle the centre, so the worst line sits half a
+      // line-height out — where the chord is narrowest.
+      const dy = list.length > 1 ? (size * lh) / 2 : 0;
+      const room = 2 * Math.sqrt(Math.max(0, R * R - dy * dy)) * Math.cos((tilt * Math.PI) / 180);
+      let worst = null;
+      for (const w of list) {
+        const px = se.width(w, size) + ls * Math.max(0, w.length - 1);
+        if (!worst || px > worst.px) worst = { w, px };
+      }
+      const head = room - worst.px;
+      if (head >= 2) ok(`the stamp's legend fits inside its ring`,
+        `"${list.join(' ')}" at ${size}px — widest "${worst.w}" is ${worst.px.toFixed(1)} in ${room.toFixed(1)} of chord, ${head.toFixed(1)} spare`);
+      else bad(`the stamp's legend does not fit its ring`,
+        `"${worst.w}" is ${worst.px.toFixed(1)} and the chord is only ${room.toFixed(1)} — shorten it or drop STAMP_SIZE`);
+
+      // AND IT MUST NOT REPEAT THE HEADLINE. The heading above the seal says
+      // STREAK KEPT whenever a rest day is spent; a stamp echoing it says the
+      // same thing twice on one screen, which is why "DAY KEPT" was dropped
+      // despite setting larger.
+      const HEADINGS = ['STREAK KEPT', 'STREAK STARTED', 'STREAK EXTENDED'];
+      const legend = list.join(' ');
+      const echo = HEADINGS.find((h) => h.split(' ').some((t) => list.includes(t) && t !== 'STREAK'));
+      if (!echo) ok('and it does not echo the headline above it', `"${legend}" against ${HEADINGS.length} headings`);
+      else bad('the stamp repeats the headline directly above it', `"${legend}" vs "${echo}"`);
+    }
   }
 }
 

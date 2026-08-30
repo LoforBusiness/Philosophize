@@ -92,6 +92,32 @@ const GROOVE: [string, string, string] = [
 const LIGHT_START = { x: 0.15, y: 0 } as const;
 const LIGHT_END = { x: 0.85, y: 1 } as const;
 
+// ── WHAT THE STAMP SAYS, AND WHY IT IS TWO SHORT WORDS ──────────────────────
+//
+// A blank disc is a token; a disc with a legend on it is a STAMP, and the
+// difference is most of what makes the strike land. The words are set crooked
+// on purpose — a hand-held stamp never comes down square, and a legend at a
+// perfect zero degrees reads as a logo rather than as an impression.
+//
+// THE LENGTH IS NOT A STYLE CHOICE, IT IS THE BOX. The legend sits inside a 44
+// ring inside a 54 face, so the room for a line is the CHORD at that line's
+// height, less the ring's stroke, less the breath, less what the tilt costs —
+// about 35.5 units. Measured against the real `.ttf` in plain Node (the same
+// `ttfwidth` reader `check:fits` uses, for the same reason: a character count is
+// not a width), that is what each candidate could be set at:
+//
+//   DAY DONE      12.00px      DAY SEALED     8.75px
+//   DAY KEPT      12.75px      DAY COUNTED    7.25px
+//
+// So the choice was between a legend a reader can actually read and one they
+// cannot. "DAY KEPT" sets marginally larger and was dropped anyway: the heading
+// directly above this says STREAK KEPT whenever a rest day is spent, and a stamp
+// that echoes the headline is saying nothing twice. `check:streak` re-measures
+// the fit, so a longer legend fails the build rather than the phone.
+const STAMP = ['DAY', 'DONE'] as const;
+const STAMP_SIZE = 12;
+const STAMP_TILT = '-8deg';
+
 // THE WEEK'S GEOMETRY IS FIXED, NOT MEASURED, and that is deliberate. A rail
 // runs from the centre of one token to the centre of another, and a centre is
 // not knowable inside a `space-between` row — which is the whole reason the
@@ -104,6 +130,7 @@ const FALL_AT = 220;     // ms — the die starts down
 const FALL_MS = 240;
 const LAND_AT = FALL_AT + FALL_MS;        // 460 — contact, and everything keys off it
 const COUNT_MS = 700;
+const INK_AT = LAND_AT + 60;              // 520 — the ink shows once it is down
 const RAIL_AT = LAND_AT + 460;            // 920
 const RAIL_MS = 430;
 const DAY_AT = RAIL_AT + RAIL_MS - 90;    // 1260 — the day lands as the chain reaches it
@@ -132,6 +159,7 @@ export default function StreakCelebration({
   const sealDrop = useSharedValue(-18);
   const sealIn = useSharedValue(0);
   const press = useSharedValue(0);
+  const stampIn = useSharedValue(0);
   const chain = useSharedValue(0);
   const dayScale = useSharedValue(1.55);
   const dayIn = useSharedValue(0);
@@ -152,6 +180,10 @@ export default function StreakCelebration({
       withTiming(0, { duration: 380, easing: Easing.out(Easing.quad) }),
     ));
     press.value = withDelay(LAND_AT, withTiming(1, { duration: 540, easing: Easing.out(Easing.quad) }));
+    // THE INK SHOWS AFTER THE DIE IS DOWN, never with it. A legend that fades in
+    // during the fall is painted on the object; one that appears once it has
+    // landed was left behind by it.
+    stampIn.value = withDelay(INK_AT, withTiming(1, { duration: 190, easing: Easing.out(Easing.quad) }));
     chain.value = withDelay(RAIL_AT, withTiming(1, { duration: RAIL_MS, easing: Easing.out(Easing.cubic) }));
     dayIn.value = withDelay(DAY_AT, withTiming(1, { duration: 90 }));
     dayScale.value = withDelay(DAY_AT, withSequence(
@@ -160,7 +192,7 @@ export default function StreakCelebration({
       withTiming(1, { duration: 220, easing: Easing.out(Easing.quad) }),
     ));
     dayPress.value = withDelay(DAY_AT + 170, withTiming(1, { duration: 460, easing: Easing.out(Easing.quad) }));
-  }, [sealScale, sealDrop, sealIn, press, chain, dayScale, dayIn, dayPress]);
+  }, [sealScale, sealDrop, sealIn, press, stampIn, chain, dayScale, dayIn, dayPress]);
 
   // THE COUNT STARTS ON CONTACT. See note 3 above — this used to run off its own
   // delay, which meant that on a slow frame the number could start moving before
@@ -191,6 +223,12 @@ export default function StreakCelebration({
   const pressStyle = useAnimatedStyle(() => ({
     opacity: (1 - press.value) * 0.5,
     transform: [{ scale: 1 + press.value * 0.9 }],
+  }));
+  // The legend settles the last few percent rather than arriving at size, so the
+  // ink reads as spreading into the paper for an instant.
+  const stampStyle = useAnimatedStyle(() => ({
+    opacity: stampIn.value,
+    transform: [{ rotate: STAMP_TILT }, { scale: 1 + (1 - stampIn.value) * 0.06 }],
   }));
   const dayStyle = useAnimatedStyle(() => ({
     opacity: dayIn.value,
@@ -259,11 +297,20 @@ export default function StreakCelebration({
             end={LIGHT_END}
             style={styles.sealFace}
           >
-            {/* THE IMPRESSION. A struck thing has a mark pressed INTO it, and
-                without one a 54px disc is a gradient rather than an object. It
-                is the metal's own shade at a whisper, so it can never compete
-                with the number beside it. */}
-            <View pointerEvents="none" style={styles.sealMark} />
+            {/* THE IMPRESSION — a ruled ring and a crooked legend inside it.
+                The words are INK with a PAPER-coloured shadow down-right, which
+                is the app's own emboss read backwards: light below a dark mark
+                is what a shape pressed INTO a surface does. It matters here more
+                than it does on paper, because type on a 135° gradient has no one
+                contrast — INK measures 6.62:1 at the lit corner and 3.62:1 at
+                the middle stop the legend actually sits on, and the shadow is
+                what carries it across the shaded half. */}
+            <Animated.View pointerEvents="none" style={[styles.stamp, stampStyle]}>
+              <View style={styles.stampRing} />
+              {STAMP.map((word) => (
+                <Text key={word} style={styles.stampWord}>{word}</Text>
+              ))}
+            </Animated.View>
           </LinearGradient>
         </Animated.View>
         <Text style={styles.count}>{shown}</Text>
@@ -366,9 +413,35 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: METAL.rim,
     alignItems: 'center', justifyContent: 'center',
   },
-  sealMark: {
-    width: 34, height: 34, borderRadius: 17,
-    borderWidth: 1.5, borderColor: METAL.shade, opacity: 0.5,
+  stamp: {
+    position: 'absolute', width: 44, height: 44,
+    alignItems: 'center', justifyContent: 'center',
+    // OPTICALLY CENTRED, NOT BOX-CENTRED. flex centres the two line boxes on the
+    // ring exactly; the INK still sits high, because Special Elite carries its
+    // caps near the top of the em box and reserves the rest for descenders that
+    // an all-caps legend never uses. Measured off the render, the block reads
+    // about 1.5 units above the ring centre, so it is pushed back down.
+    paddingTop: 3,
+  },
+  stampRing: {
+    position: 'absolute', width: 44, height: 44, borderRadius: 22,
+    borderWidth: 1.2, borderColor: METAL.rim, opacity: 0.55,
+  },
+  stampWord: {
+    fontFamily: 'SpecialElite_400Regular',
+    fontSize: STAMP_SIZE,
+    lineHeight: STAMP_SIZE * 1.06,
+    letterSpacing: 0.6,
+    color: INK,
+    // includeFontPadding is what put the league numeral low in its disc (§19).
+    // A typewriter face carries deep, asymmetric padding, so two stacked lines
+    // inside a 44 ring are centred on the box rather than on the glyphs without
+    // it — and there is no room in here to absorb that.
+    includeFontPadding: false,
+    textAlign: 'center',
+    textShadowColor: 'rgba(255, 252, 245, 0.5)',
+    textShadowOffset: { width: 0.5, height: 0.8 },
+    textShadowRadius: 0.6,
   },
   sealCollar: {
     position: 'absolute', width: 62, height: 62, borderRadius: 31,
