@@ -1,9 +1,11 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
+import { ramp, rampFace } from '@/components/shared/tone';
 import StreakBook from './StreakBook';
 import { weekDays } from '@/lib/utils/week';
 import {
-  PATINA, PATINA_LIT, SLATE, SLATE_LIT, nextTier, tierFor,
+  GILT, GILT_LIT, SLATE, SLATE_LIT, nextTier, tierFor,
 } from '@/constants/streak';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -18,7 +20,7 @@ import {
 // Nothing here is invented. Everything this panel now shows already existed in
 // the codebase and had never reached the two screens a reader actually looks at:
 //
-//   THE PATINA      constants/streak.ts carries a measured orange whose entire
+//   THE GILT      constants/streak.ts carries a measured orange whose entire
 //                  stated job is to say ALIVE or ABOUT TO DIE at a glance — and
 //                  Home's panel and Profile's both drew the streak in flat ink.
 //                  The one licensed colour in the app existed for this object
@@ -48,7 +50,7 @@ import {
 // "POLITICS" ends up on one screen and "Political Philosophy" on the other, so
 // this takes `onInk` and swaps the six values, exactly as StreakWeek already
 // does for `tint`/`ground`. The ember has its OWN pair for the dark ground —
-// see PATINA_LIT: a colour measured on paper reads 3.50:1 on ink, under the floor
+// see GILT_LIT: a colour measured on paper reads 3.50:1 on ink, under the floor
 // for the number it is colouring.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -109,7 +111,15 @@ export default function StreakPanel({
   daySize = 28,
 }: StreakPanelProps) {
   const alive = streak > 0;
-  const mark = onInk ? (alive ? PATINA_LIT : SLATE_LIT) : alive ? PATINA : SLATE;
+  const mark = onInk ? (alive ? GILT_LIT : SLATE_LIT) : alive ? GILT : SLATE;
+  // A DONE DAY IS STRUCK, NOT FILLED. It was a flat disc of `mark` with a check
+  // cut out of it — the same flat-dot fault the reward screen was pulled up on
+  // ("just a blue dot"), on the two screens a reader sees most. `ramp()` is the
+  // one light every pin, badge and certificate in the app is cut to, and it
+  // takes whichever `mark` this printing resolved to, so the panel still
+  // inverts correctly and a lapsed run is struck in slate rather than in gilt.
+  const metal = ramp(mark);
+  const face = rampFace(metal);
   const text = onInk ? CREAM : INK;
   const soft = onInk ? ON_INK_SOFT : PAPER_SOFT;
   const dim = onInk ? ON_INK_DIM : PAPER_SOFT;
@@ -188,19 +198,30 @@ export default function StreakPanel({
                 {linkR ? (
                   <View style={[styles.link, { left: '50%', right: 0, top: daySize / 2 - 2, backgroundColor: mark }]} />
                 ) : null}
-                <View
-                  style={[
-                    styles.dot,
-                    { width: daySize, height: daySize, borderRadius: daySize / 2 },
-                    { backgroundColor: ground, borderColor: faint },
-                    done && { backgroundColor: mark, borderColor: mark },
-                    today && { borderColor: mark, borderWidth: 2.5 },
-                  ]}
-                >
-                  {done ? (
+                {done ? (
+                  <LinearGradient
+                    colors={[face[0][1], face[1][1], face[2][1]]}
+                    locations={[0, 0.52, 1]}
+                    start={{ x: 0.15, y: 0 }}
+                    end={{ x: 0.85, y: 1 }}
+                    style={[
+                      styles.dot,
+                      { width: daySize, height: daySize, borderRadius: daySize / 2 },
+                      { borderColor: metal.rim },
+                    ]}
+                  >
                     <SketchIcon name="check" size={Math.round(daySize * 0.62)} color={ground} />
-                  ) : null}
-                </View>
+                  </LinearGradient>
+                ) : (
+                  <View
+                    style={[
+                      styles.dot,
+                      { width: daySize, height: daySize, borderRadius: daySize / 2 },
+                      { backgroundColor: ground, borderColor: faint },
+                      today && { borderColor: mark, borderWidth: 2.5 },
+                    ]}
+                  />
+                )}
               </View>
             </View>
           );

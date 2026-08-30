@@ -234,7 +234,7 @@ export const EVENING_HOUR = 18;
 export const LATE_HOUR = 21;
 
 /** The floor the ember decays to while a streak is alive but unfed. */
-export const PATINA_FLOOR = 0.34;
+export const GILT_FLOOR = 0.34;
 
 export function moodFor(input: MoodInput): MoodState {
   const { alive, fedToday, hour, restSpent, dayKey } = input;
@@ -263,5 +263,5 @@ export function glowFor({ alive, fedToday, hour, restSpent }: MoodInput): number
   if (fedToday || restSpent > 0) return 1;
   if (hour < EVENING_HOUR) return 1;
   const through = (hour - EVENING_HOUR) / (24 - EVENING_HOUR);
-  return 1 - (1 - PATINA_FLOOR) * Math.min(1, Math.max(0, through));
+  return 1 - (1 - GILT_FLOOR) * Math.min(1, Math.max(0, through));
 }

@@ -38,7 +38,7 @@ export function restDaysHeld(earned: number, used: number): number {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// THE PATINA — the one colour in a black-and-white app, and where it may go.
+// THE GILT — the one colour in a black-and-white app, and where it may go.
 //
 // §19 bends the strict B&W identity exactly once, for desaturated photographs,
 // and says why: nothing may take its contrast from artwork. This is the second
@@ -61,50 +61,81 @@ export function restDaysHeld(earned: number, used: number): number {
 // other counter. One colour used in one place is a signal. The same colour used
 // in six places is a theme, and then it signals nothing.
 //
-// ── IT WAS AN EMBER, AND AN EMBER IS A SEASON ─────────────────────────
+// ── TWICE NOW THE HUE HAS BEEN THE COMPLAINT, AND THE THIRD ONE IS RESEARCHED ─
 //
-// `#B4541E` with a `#F0DCCB` wash under it, on cream. Every contrast floor in
-// this file was cleared and the reader still said what a burnt orange on cream
+// FIRST IT WAS AN EMBER, AND AN EMBER IS A SEASON. `#B4541E` on cream, every
+// contrast floor cleared, and the reader said what a burnt orange on cream
 // actually looks like: *"it just looks like it is fall or it's Halloween … the
-// orange just looks like a festive colour."* They are right, and no amount of
-// measuring answers it — the ratios were never the problem. A palette can be
-// correct and still be about October.
+// orange just looks like a festive colour."* Measured afterwards, they were
+// describing something real: L* 47 C* 59 h 53 is the LOUDEST warm value in the
+// whole app — above CRIMSON, above AURUM — sitting at the most autumnal hue
+// there is.
 //
-// So the streak is VERDIGRIS now: the green a bronze takes from being left out
-// in the weather. It is the right object for the idea. An ember is something you
-// are about to lose; a patina is proof of time already served, and a streak is
-// the second thing rather than the first. It is also the only kind of colour a
-// black-and-white app can afford — a metal's own oxide rather than a paint.
+// THEN IT WAS A VERDIGRIS, AND A VERDIGRIS READS AS BLUE. `#068177`, chosen
+// because a gilt is proof of time served where an ember is something you are
+// about to lose. The metaphor was right and the colour was not: *"the blue look
+// kidish, and not very good. The color just looks to strange."* Its on-ink twin
+// was the real offender — `#2BACB0` sits at **hue 200**, which is not teal any
+// more, and it was the brightest thing on Home's dark panel. It also collided:
+// ΔE 9 from the EASTERN era's jade, in an app that already owns four blue-greens.
 //
-// ── THE VALUES WERE SEARCHED, AND THE FIRST TWO SEARCHES WERE WRONG ───────
+// ── WHAT THE CATEGORY ACTUALLY DOES, LOOKED UP RATHER THAN GUESSED ──────────
 //
-// Both failures are worth keeping, because both are the obvious thing to do.
+// Every streak worth copying is WARM, and a dead one is grey. Duolingo's flame
+// is `#FF9600` and its whole documented mechanism is that a lost streak turns
+// grey — the colour IS the state. Brilliant's brand refresh puts streaks on a
+// warm "pear" spectrum. Snapchat's is a fire. Not one of them is cool, and the
+// one this app shipped was the outlier.
 //
-// MAXIMISING DISTANCE FROM SLATE returned `#11BE84` and `#64F2C2` — electric
-// mint. Separation is a FLOOR, not an objective, and design.ts records its own
-// colour search falling into exactly that corner ("#41DCA5 neon mint").
+// So the third answer goes back to warm, and the interesting part is which warm.
 //
-// MATCHING THE EMBER'S CHROMA returned `#048544`, a vivid emerald. Equal chroma
-// is not equal loudness across hues: the eye peaks in the green-yellow band, so
-// an orange at chroma 59 reads as warm where a green at 53 reads as a
-// highlighter. The honest anchor is what this app already ships IN THIS HUE —
-// JADE's base sits at chroma 32 and LAPIS at 37, and both read as materials.
+// ── THE HIGH-CHROMA WARM BAND *IS* THE REJECTED EMBER ───────────────────────
 //
-// So: chroma 32, hue 185, which is C.HUE's own neighbourhood worked up to a
-// value that can carry a number. `npm run check:streak` re-derives every ratio
-// and both CIELAB separations, so none of this can drift into fiction.
-export const PATINA = '#068177';       // 4.55:1 on paper — safe for the number
-export const PATINA_DEEP = '#036054';  // 7.16:1 on paper, carries cream at 6.64:1
-export const PATINA_SOFT = '#CBE8E9';  // wash only; ink on it is 13.47:1
-/** The patina on a DARK ground — Home's habit panel. 6.32:1 on ink. */
-export const PATINA_LIT = '#2BACB0';
+// This is the finding that decided it, and it is not obvious. Searching the gold
+// band the way the last two searches were run — maximise chroma at the contrast
+// floor — returns h60 C54, which measures **ΔE 8 from `#B4541E`**. That is not a
+// new answer, it is the Halloween colour with a different name. Anything at
+// h50–65 above C* 48 is the same trap.
+//
+// The escape is the axis neither previous search moved: **chroma DOWN**. Every
+// committed colour in this app sits at C* 33–59, so C* 36 in the gold band is
+// genuinely unoccupied ground — and low chroma is what "premium" has meant on
+// every other surface here (the certificates, the quote plates, the rank pins
+// all carry their colour in edges and shading, never in a flood).
+//
+// ── SO IT IS GILT: TARNISHED GILDING, NOT A PAINT ───────────────────────────
+//
+// L* 48, C* 38, hue 76. The warmth the category asks for, at the loudness this
+// app's own materials are cut to, and it lands where the app already knows how
+// to draw: a struck disc with a lit corner and a shaded one is a COIN, and a run
+// of days you have earned is a row of them. That is why the object survives at
+// 26px on a calendar where a flat dot did not.
+//
+// It is also the only candidate that works on BOTH grounds, which turned out to
+// be the binding constraint rather than a nicety. Home's panel is near-black and
+// Profile's is cream, so the pair has to be legible on each — and a red walked
+// bright enough for 4.5:1 on ink becomes PINK (measured: every candidate at
+// h16–h42 did), while a teal walked bright enough becomes CYAN, which is exactly
+// what shipped. Gold is the one hue that is rich on cream and still gold on
+// black. Gold leaf on a dark ground is not a coincidence.
+//
+// SEPARATIONS, all re-derived by `npm run check:streak`:
+//   ΔE 28.5 from the rejected ember   — a different answer, not a re-run
+//   ΔE 33.7 from SLATE                — alive vs lapsed, floor 20
+//   ΔE 15.2 from AURUM, 15.9 from BRONZE — the two rank metals it could meet on
+//                                        Profile, at design.ts's own ΔE 15 floor
+export const GILT = '#926B33';       // 4.59:1 on paper — safe for the number
+export const GILT_DEEP = '#7C5820';  // 6.13:1 on paper, carries cream at 5.69:1
+export const GILT_SOFT = '#E9E3D8';  // wash only; ink on it is 13.63:1
+/** The gilt on a DARK ground — Home's habit panel. 5.85:1 on ink. */
+export const GILT_LIT = '#B98E54';
 
 /**
- * A lapsed streak is not a duller patina, it is bare SLATE — cool, flat, dead.
+ * A lapsed streak is not a duller gilt, it is bare SLATE — cool, flat, dead.
  *
  * The value is unchanged from when this was called ASH, and it still passes: a
  * warm grey is what an unkept bronze looks like as much as what a cold fire
- * does. The name moved with the metaphor, because a file carrying `PATINA` and
+ * does. The name moved with the metaphor, because a file carrying `GILT` and
  * `ASH` side by side is two stories about one pair, and design.ts already
  * records what that costs ("two names for one grey, so nothing could tell you
  * whether a difference was meant").
@@ -117,7 +148,7 @@ export const PATINA_LIT = '#2BACB0';
  */
 export const SLATE = '#6E6C64';       // 5.03:1 on paper
 /**
- * And slate on a dark ground. 5.60:1 on ink, and ΔE 35.7 from `PATINA_LIT` — the
+ * And slate on a dark ground. 5.60:1 on ink, and ΔE 35.7 from `GILT_LIT` — the
  * pair has to stay tellable apart in BOTH printings or the panel that inverts
  * loses the only state it exists to report.
  *

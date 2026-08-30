@@ -44,21 +44,21 @@ const INK = '#1A1A1A';
 const streak = await loadTs(path.join('constants', 'streak.ts'));
 const mood = await loadTs(path.join('lib', 'utils', 'streakMood.ts'));
 
-head('THE PATINA, MEASURED');
+head('THE GILT, MEASURED');
 {
   // The numbers written into constants/streak.ts's comments, re-derived. A comment
   // that states a ratio is a claim; this is the check that it is still true.
   const claims = [
-    ['PATINA on paper', streak.PATINA, PAPER, 4.5],
-    ['PATINA_DEEP on paper', streak.PATINA_DEEP, PAPER, 4.5],
-    ['PATINA_DEEP carrying cream', streak.PATINA_DEEP, CREAM, 4.5],
-    ['ink on PATINA_SOFT', INK, streak.PATINA_SOFT, 4.5],
+    ['GILT on paper', streak.GILT, PAPER, 4.5],
+    ['GILT_DEEP on paper', streak.GILT_DEEP, PAPER, 4.5],
+    ['GILT_DEEP carrying cream', streak.GILT_DEEP, CREAM, 4.5],
+    ['ink on GILT_SOFT', INK, streak.GILT_SOFT, 4.5],
     ['SLATE on paper', streak.SLATE, PAPER, 4.5],
     // THE OTHER PRINTING. Home's habit panel is on ink, and the paper values do
-    // not survive the move: PATINA reads 3.50:1 there and SLATE 3.31:1, both under
+    // not survive the move: GILT reads 3.50:1 there and SLATE 3.31:1, both under
     // the floor for the number they colour. These two exist for that ground and
     // are checked against it, never against paper.
-    ['PATINA_LIT on ink', streak.PATINA_LIT, INK, 4.5],
+    ['GILT_LIT on ink', streak.GILT_LIT, INK, 4.5],
     ['SLATE_LIT on ink', streak.SLATE_LIT, INK, 4.5],
   ];
   for (const [name, fg, bg, floor] of claims) {
@@ -89,21 +89,21 @@ head('THE PATINA, MEASURED');
     const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
     return [116 * f(Y) - 16, 500 * (f(X) - f(Y)), 200 * (f(Y) - f(Z))];
   };
-  const [L1, a1, b1] = lab(streak.PATINA);
+  const [L1, a1, b1] = lab(streak.GILT);
   const [L2, a2, b2] = lab(streak.SLATE);
   const dE = Math.hypot(L1 - L2, a1 - a2, b1 - b2);
-  if (dE > 20) ok('patina and slate are different colours, not two brightnesses',
+  if (dE > 20) ok('gilt and slate are different colours, not two brightnesses',
     `ΔE ${dE.toFixed(1)}, and only ${Math.abs(L1 - L2).toFixed(1)} of it is lightness`);
-  else bad('patina and slate are too close to tell apart', `ΔE ${dE.toFixed(1)}`);
+  else bad('gilt and slate are too close to tell apart', `ΔE ${dE.toFixed(1)}`);
 
   // AND THE SAME MUST HOLD IN THE OTHER PRINTING. The habit panel inverts — ink
   // on Home, paper on Profile — and a pair that separates on one ground and not
   // the other means the panel silently stops reporting its own state on one of
   // the two screens it lives on.
-  const [L3, a3, b3] = lab(streak.PATINA_LIT);
+  const [L3, a3, b3] = lab(streak.GILT_LIT);
   const [L4, a4, b4] = lab(streak.SLATE_LIT);
   const dLit = Math.hypot(L3 - L4, a3 - a4, b3 - b4);
-  if (dLit > 20) ok('patina and slate stay different on a dark ground too',
+  if (dLit > 20) ok('gilt and slate stay different on a dark ground too',
     `ΔE ${dLit.toFixed(1)}`);
   else bad('the on-ink pair is too close to tell apart', `ΔE ${dLit.toFixed(1)}`);
 
@@ -115,6 +115,61 @@ head('THE PATINA, MEASURED');
   if (Math.abs(L1 - L2) < 8) {
     ok('lightness alone does not carry the state, so the screen must not rely on it',
       `only ${Math.abs(L1 - L2).toFixed(1)} L apart — the mascot and the copy carry it too`);
+  }
+
+  // ── AND IT MUST NOT BE A COLOUR THE READER HAS ALREADY THROWN OUT ──────────
+  //
+  // Two hues have now been rejected by name, and the second search nearly
+  // re-shipped the first: maximising chroma in the gold band returns h60 C54,
+  // which is ΔE 8 from the ember. That is the whole reason GILT is a LOW-chroma
+  // value, and it is the kind of fact that gets tuned away by somebody making
+  // the streak "pop" six months from now. So it is a floor, not a comment.
+  const EMBER = '#B4541E';   // the burnt orange: "it looks like Halloween"
+  const dEmber = (() => { const [a, b, c] = lab(EMBER); return Math.hypot(L1 - a, a1 - b, b1 - c); })();
+  if (dEmber > 20) ok('the gilt is a different answer from the rejected ember, not a re-run',
+    `ΔE ${dEmber.toFixed(1)}, floor 20`);
+  else bad('the streak colour has drifted back into the rejected ember', `ΔE ${dEmber.toFixed(1)}`);
+
+  // ── AND IT SHARES A SCREEN WITH TWO RANK METALS ────────────────────────────
+  //
+  // Profile draws the habit panel and a rank pin, and the reward screen draws
+  // the celebration and a rank-up. design.ts's own reasoning applies: a floor is
+  // only owed where two colours can be seen together, and these two can. 15 is
+  // the lowest separation design.ts accepts anywhere (the ERA scale's).
+  const METALS = { AURUM: '#916D0F', BRONZE: '#874B21' };
+  for (const [name, hex] of Object.entries(METALS)) {
+    const [ml, ma, mb] = lab(hex);
+    const d = Math.hypot(L1 - ml, a1 - ma, b1 - mb);
+    if (d >= 15) ok(`the gilt is tellable from ${name}, which it meets on Profile`, `ΔE ${d.toFixed(1)}, floor 15`);
+    else bad(`the gilt reads as ${name}`, `ΔE ${d.toFixed(1)}, needs 15`);
+  }
+
+  // ── THE MARK ON A STRUCK DAY, IN BOTH PRINTINGS ────────────────────────────
+  //
+  // A done day is a gradient now on the calendar AND on the habit panel, and the
+  // thing drawn on it — a numeral there, a check here — is the GROUND colour.
+  // §19 records this trap four times ("a tone fitted for METAL is invisible on
+  // PAPER"), and the reason it is survivable is geometry: both marks are CENTRED,
+  // so they sit on the face's middle stop rather than on its lit corner. That is
+  // load-bearing and invisible in the source, so it is measured — and the lit
+  // corner is reported alongside, because a mark that grows or moves off centre
+  // walks straight into it.
+  const mixh = (a, b, k) => {
+    const p2 = (h) => [0, 2, 4].map((i) => parseInt(h.replace('#', '').slice(i, i + 2), 16));
+    const [A, B] = [p2(a), p2(b)];
+    return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, '0').toUpperCase()).join('');
+  };
+  for (const [name, base, ground] of [
+    ['on paper', streak.GILT, PAPER],
+    ['on ink', streak.GILT_LIT, INK],
+  ]) {
+    const mid = base;                          // rampFace's 52% stop IS the base
+    const lit = mixh(base, PAPER, 0.34);       // ramp()'s lit corner
+    const rMid = ratio(ground, mid);
+    const rLit = ratio(ground, lit);
+    if (rMid >= 3) ok(`a struck day's mark clears its face ${name}`,
+      `${rMid.toFixed(2)}:1 at the centre (the lit corner is ${rLit.toFixed(2)}:1 — keep the mark centred)`);
+    else bad(`a struck day's mark cannot be seen ${name}`, `${rMid.toFixed(2)}:1, needs 3`);
   }
 }
 
@@ -158,7 +213,7 @@ head('THE MONTH GRID');
 // two of the three faults were things no check could have seen. This is the one
 // that could, and the one that came back.
 //
-// THE RAIL WAS DRAWN IN `PATINA_SOFT` AND COULD NOT BE SEEN. That tone measures
+// THE RAIL WAS DRAWN IN `GILT_SOFT` AND COULD NOT BE SEEN. That tone measures
 // 1.24:1 on paper -- the floor for a faint FILL, and design.ts records what
 // living at that floor costs (`HUE_SOFT` at 1.04:1, and six mastery bars with no
 // visible remainder at all). It is the wrong floor for this object: a progress
@@ -167,7 +222,7 @@ head('THE MONTH GRID');
 // showed as nothing.
 {
   const cal = fs.readFileSync(path.join('components', 'gamification', 'StreakCalendar.tsx'), 'utf8');
-  const t = /const RAIL = mix\(PATINA, PAPER, ([\d.]+)\);/.exec(cal);
+  const t = /const RAIL = mix\(GILT, PAPER, ([\d.]+)\);/.exec(cal);
   if (!t) {
     bad('the rail derives its tone from the material', 'RAIL not found -- this check has stopped tracking it');
   } else {
@@ -178,13 +233,13 @@ head('THE MONTH GRID');
       const [A, B] = [px(a), px(b)];
       return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, '0').toUpperCase()).join('');
     };
-    const rail = mix(streak.PATINA, PAPER, +t[1]);
+    const rail = mix(streak.GILT, PAPER, +t[1]);
     const r = ratio(rail, PAPER);
-    if (r >= 1.5) ok(`the run's rail is a band on paper, not a rumour`, `${r.toFixed(2)}:1, floor 1.5 — PATINA_SOFT was 1.24`);
+    if (r >= 1.5) ok(`the run's rail is a band on paper, not a rumour`, `${r.toFixed(2)}:1, floor 1.5 — GILT_SOFT was 1.24`);
     else bad(`the run's rail is only ${r.toFixed(2)}:1 on paper`, 'needs 1.5 — it will read as nothing');
     // ...and it must stay UNDER the lit token, or the chain competes with the
     // days it is joining.
-    const vsToken = ratio(rail, streak.PATINA);
+    const vsToken = ratio(rail, streak.GILT);
     if (vsToken >= 2) ok('and the tokens still out-rank it', `${vsToken.toFixed(2)}x`);
     else bad('the rail is as loud as the days it joins', `${vsToken.toFixed(2)}x`);
   }
@@ -299,7 +354,7 @@ head('THE MASCOT');
   if (distinct.size >= 5) ok('the ladder looks different at each rung');
   else bad(`only ${distinct.size} distinct poses across ${named.size} moods`);
 
-  // THE PATINA DECAYS, AND NEVER TO NOTHING WHILE THE STREAK LIVES. A flame that
+  // THE GILT DECAYS, AND NEVER TO NOTHING WHILE THE STREAK LIVES. A flame that
   // looks dead while it is still savable costs the reader the streak it was meant
   // to protect.
   const at = (hour) => mood.glowFor({ streak: 5, alive: true, fedToday: false, hour, restSpent: 0, dayKey: 'x' });
@@ -308,7 +363,7 @@ head('THE MASCOT');
   if (falling && at(23) < at(mood.EVENING_HOUR)) ok('the glow sinks across the evening',
     `${at(mood.EVENING_HOUR).toFixed(2)} at ${mood.EVENING_HOUR}:00 → ${at(23).toFixed(2)} at 23:00`);
   else bad('the glow does not decay across the evening');
-  if (at(23) >= mood.PATINA_FLOOR - 1e-9) ok('and never below the floor while alive', `floor ${mood.PATINA_FLOOR}`);
+  if (at(23) >= mood.GILT_FLOOR - 1e-9) ok('and never below the floor while alive', `floor ${mood.GILT_FLOOR}`);
   else bad('the glow falls below its floor while the streak is still alive');
   const dead = mood.glowFor({ streak: 5, alive: false, fedToday: false, hour: 12, restSpent: 0, dayKey: 'x' });
   if (dead === 0) ok('a lapsed streak is out, not dim'); else bad('a lapsed streak still glows', String(dead));

@@ -521,38 +521,88 @@ costs milliseconds rather than a Metro and a browser. What it holds:
 
 **Streak:** Maintained by completing at least one lesson per calendar day. Alive if the last activity is today or yesterday (`lib/utils/streak.ts`). Stored in `userDataStore`.
 
-> **THE ONE COLOUR WAS AN ORANGE, AND AN ORANGE IS A SEASON.** `constants/streak.ts`
-> licensed a single hue for the whole app on the grounds that a streak has to say
-> ALIVE or ABOUT TO DIE from across a room, and every contrast floor in it was
-> measured and cleared. The reader looked at it: *"it just looks like it is fall
-> or it's Halloween … the orange just looks like a festive colour."* They were
-> right, and the ratios were never the thing — a palette can be entirely correct
-> and still be about October.
+> **THREE HUES NOW, AND THE THIRD ONE WAS RESEARCHED RATHER THAN FELT.**
+> `constants/streak.ts` licenses a single colour for the whole app on the grounds
+> that a streak has to say ALIVE or ABOUT TO DIE from across a room. Two attempts
+> cleared every contrast floor in the file and were rejected on sight anyway.
 >
-> It is **verdigris** now, `PATINA #068177`, the green a bronze takes from being
-> left out in the weather, against `SLATE` for a run that has gone out. The
-> object is better than the ember was: an ember is something you are about to
-> lose, a patina is proof of time already served, and a streak is the second one.
+> **AN ORANGE IS A SEASON.** `#B4541E`: *"it just looks like it is fall or it's
+> Halloween … the orange just looks like a festive colour."* Measured afterwards
+> they were describing something real — L\* 47 C\* 59 h 53 is the **loudest warm
+> value in the app**, above CRIMSON and above AURUM, at the most autumnal hue
+> there is.
 >
-> **TWO SEARCHES CAME BACK WRONG BEFORE THE THIRD, and both are the obvious
-> thing to do.** Maximising CIELAB distance from slate returned `#11BE84` and
-> `#64F2C2` — electric mint, the exact corner `design.ts` records its own colour
-> search falling into. Then matching the ember's own chroma returned `#048544`, a
-> vivid emerald: **equal chroma is not equal loudness across hues**, because the
-> eye peaks in the green-yellow band, so an orange at chroma 59 reads as warm
-> where a green at 53 reads as a highlighter. The anchor that works is what this
-> app already ships in that hue — JADE's base at 32, LAPIS at 37.
+> **AND A VERDIGRIS READS AS BLUE.** `#068177`, chosen because a patina is proof
+> of time served where an ember is something you are about to lose. The metaphor
+> was right and the colour was not: *"the blue look kidish, and not very good.
+> The color just looks to strange."* The on-ink twin was the real offender —
+> `#2BACB0` sits at **hue 200**, which is not teal any more, and it was the
+> brightest thing on Home's dark panel. It collided too: ΔE 9 from the EASTERN
+> era's jade, in an app that already owns four blue-greens.
 >
-> The separation from slate falls 56.2 → 32.1 ΔE and that is arithmetic rather
-> than a regression: a teal and a warm grey are genuinely nearer in Lab than an
-> orange and a warm grey. The floor is 20, and the state is still carried by HUE
-> — 2.8 L apart — which is the property that matters and the one checked.
+> **THE CATEGORY WAS LOOKED UP INSTEAD OF GUESSED, AND IT IS UNANIMOUS.** Every
+> streak worth copying is WARM and every dead one is grey — Duolingo's flame is
+> `#FF9600` and its documented mechanism is that a lapsed one turns grey, so the
+> colour *is* the state; Brilliant's refresh puts streaks on a warm pear
+> spectrum; Snapchat's is a fire. The one this app shipped was the outlier.
 >
-> **The flame went with it.** `StreakCelebration` drew a literal one, right while
-> the streak was an ember and a metaphor arguing with itself once it was not. It
-> is the calendar's own struck token now, held up large, wearing the milestone
-> collar on a landmark day — so the reward screen and the grid agree about which
-> days were the big ones instead of each having a private opinion.
+> **BUT THE HIGH-CHROMA WARM BAND *IS* THE REJECTED EMBER, and that is the
+> finding.** Searching the gold band the way the previous two searches were run —
+> maximise chroma at the contrast floor — returns h60 C\* 54, which measures
+> **ΔE 8 from `#B4541E`**. That is not a new answer, it is Halloween under a new
+> name, and anything at h50–65 above C\* 48 is the same trap. The escape is the
+> axis neither search moved: **chroma DOWN**. Every committed colour in this app
+> sits at C\* 33–59, so C\* 38 in the gold band is genuinely unoccupied ground —
+> and low chroma is what "premium" has meant on every other surface here, where
+> the colour lives in edges and shading rather than in a flood.
+>
+> So it is **GILT**, `#926B33` — tarnished gilding, L\* 48 C\* 38 h 76 — against
+> `SLATE` for a run that has gone out. **The two-ground test is what actually
+> selected it**, and that was not expected: Home's panel is near-black and
+> Profile's is cream, so the pair must be legible on both — and a red walked
+> bright enough for 4.5:1 on ink becomes PINK (measured, every candidate h16–h42),
+> while a teal walked bright enough becomes CYAN, which is precisely what shipped.
+> Gold is the one hue that is rich on cream and still gold on black.
+>
+> ΔE 28.5 from the ember, 33.7 from slate, and 15.2/15.9 from AURUM and BRONZE —
+> the two rank metals it can actually meet, on Profile and on the reward screen.
+> `check:streak` holds all five as floors, counter-tested by putting each colour
+> back and watching it go red.
+>
+> **AND THE READER'S SECOND SENTENCE WAS ABOUT THE ANIMATION:** *"the animation
+> for the day streak is just a blue dot and it isnt a clean cool animation."*
+> Two faults, not one.
+>
+> **IT WAS A DOT.** Today's day was a flat 22px circle of one flat colour. Every
+> other reward in this app is STRUCK — a lit corner, a shaded one, a rim, one
+> light from the top left — and the one that decides whether somebody comes back
+> tomorrow was the last flat fill in the app. **IT ALSO POPPED RATHER THAN
+> LANDING**: a spring from 0.4 up to 1 is a thing inflating, and nothing in the
+> metaphor inflates.
+>
+> A seal is a DIE coming down onto paper, so the sequence is now a strike, and
+> the order is the design: the die falls **accelerating** (`Easing.in` — the half
+> everyone gets backwards; `Easing.out` decelerates into the paper, which is
+> exactly what made the old one read as a pop), squashes to 0.94 on contact,
+> recoils to 1.05, settles. A **press ring** leaves the seal's edge on the frame
+> it lands — one View, and the whole difference between a stamp and a fade-in.
+> The count then starts **on contact** rather than on its own delay, which is
+> what Brilliant's own write-up names as making a streak animation feel caused by
+> the reader; then the chain draws through the week and today's token is struck
+> last, the same fall in miniature. The week is a RUN now rather than seven
+> islands, its geometry fixed arithmetic rather than a measured pitch — seven
+> equal columns of a known width, so no `onLayout` and no state.
+>
+> **The flame went with the fire.** `StreakCelebration` drew a literal one, right
+> while the streak was an ember and a metaphor arguing with itself once it was
+> not. It is the calendar's own struck token now, held up large, wearing the
+> milestone collar on a landmark day — so the reward screen and the grid agree
+> about which days were the big ones instead of each having a private opinion.
+> Home's and Profile's day tokens are struck off the same `ramp()` for the same
+> reason, and `check:streak` measures the mark on them: it survives only because
+> it is CENTRED, on the face's middle stop at 4.59:1, where the lit corner is
+> 2.52:1 — §19's "a tone fitted for METAL is invisible on PAPER" for the fifth
+> time.
 
 > **AND THE MONTH GRID WAS "A HALF HARD DESIGN", WHICH IT WAS.** Three faults,
 > and the first is what made it read as unfinished:

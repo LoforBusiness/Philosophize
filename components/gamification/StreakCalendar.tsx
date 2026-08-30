@@ -3,7 +3,7 @@ import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react
 import { MotiView } from 'moti';
 import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
-import { PATINA, PATINA_DEEP, PATINA_SOFT, SLATE, STREAK_MILESTONES } from '@/constants/streak';
+import { GILT, GILT_DEEP, GILT_SOFT, SLATE, STREAK_MILESTONES } from '@/constants/streak';
 import { ramp, rampFace, mix, PAPER_LIT, PAPER_SHADE } from '@/components/shared/tone';
 import {
   buildMonth,
@@ -84,13 +84,13 @@ const FAINT = '#E4E1D8';
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** The struck material every lit day is cut from. One light, top-left, always. */
-const METAL = ramp(PATINA);
+const METAL = ramp(GILT);
 const FACE = rampFace(METAL);
 /**
- * THE RAIL, AND WHY IT IS NOT `PATINA_SOFT`.
+ * THE RAIL, AND WHY IT IS NOT `GILT_SOFT`.
  *
  * The obvious tone for a band behind the tokens is the material's own wash, and
- * the first build used it: `PATINA_SOFT` measures 1.24:1 on paper, which is the
+ * the first build used it: `GILT_SOFT` measures 1.24:1 on paper, which is the
  * FLOOR for a faint fill (design.ts records `HUE_SOFT` failing at 1.04 and the
  * six mastery bars having no visible remainder at all). Rendered, the rail was
  * technically present and could not be seen — the run measured correctly across
@@ -105,7 +105,7 @@ const FACE = rampFace(METAL);
  * than at PAPER_LIT — running a three-stop gradient out to white put half the
  * rail's length at 1.0:1 and was most of why it disappeared.
  */
-const RAIL = mix(PATINA, PAPER, 0.62);        // 1.69:1 on paper
+const RAIL = mix(GILT, PAPER, 0.62);        // 1.69:1 on paper
 const GROOVE: [string, string, string] = [
   mix(RAIL, INK, 0.16), RAIL, mix(RAIL, PAPER_LIT, 0.5),
 ];
@@ -331,7 +331,7 @@ export default function StreakCalendar({ activeDays, restDays, today, since, siz
           rest days at all. */}
       <View style={styles.key}>
         <Legend fill={METAL.base} label="STUDIED" />
-        <Legend fill={PATINA_SOFT} rim={PATINA} label="RESTED" />
+        <Legend fill={GILT_SOFT} rim={GILT} label="RESTED" />
         <Legend fill={PAPER} rim={FAINT} label="MISSED" />
       </View>
     </View>
@@ -391,7 +391,7 @@ function Cell({
             height: size + 7,
             borderRadius: (size + 7) / 2,
             borderWidth: 1.5,
-            borderColor: PATINA_DEEP,
+            borderColor: GILT_DEEP,
           }}
         />
       ) : null}
@@ -410,7 +410,7 @@ function Cell({
             height: size,
             borderRadius: size / 2,
             borderWidth: 2,
-            borderColor: PATINA,
+            borderColor: GILT,
           }}
         />
       ) : null}
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
   },
   fill: { height: 6, borderRadius: 3 },
   tally: { includeFontPadding: false },
-  tallyBig: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: PATINA },
+  tallyBig: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: GILT },
   tallyOf: { fontFamily: 'Inter_500Medium', fontSize: 12, color: INK_SOFT },
 
   labels: { flexDirection: 'row', marginTop: 16, marginBottom: 5 },
@@ -506,13 +506,13 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: 'transparent',
   },
-  rest: { backgroundColor: PATINA_SOFT, borderColor: PATINA },
+  rest: { backgroundColor: GILT_SOFT, borderColor: GILT },
   // Quiet on purpose: a hollow ring, not an accusation.
   missed: { borderColor: FAINT },
   today: { borderWidth: 2, borderColor: INK, backgroundColor: PAPER },
 
   num: { fontFamily: 'Inter_500Medium', color: INK_SOFT },
-  // Paper on PATINA measures 4.55:1, and the number sits on the face's MIDDLE
+  // Paper on GILT measures 4.55:1, and the number sits on the face's MIDDLE
   // stop rather than on its lit corner — which is the trap §19 records for the
   // quote plate's byline, and check:streak measures it rather than assuming.
   numLit: { color: PAPER, fontFamily: 'Inter_700Bold' },

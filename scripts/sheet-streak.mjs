@@ -55,7 +55,7 @@ const SCREENS = [
   { key: 'panel', q: 's=panel', want: ['DAYS RUNNING', 'NEXT', 'REST DAY HELD'] },
   { key: 'calendar', q: 's=cal', want: ['STUDIED', 'RESTED', 'MISSED'], rail: true },
   { key: 'celebration', q: 's=celebrate&run=7', want: ['STREAK EXTENDED', 'DAYS'] },
-  // A streak that has gone out: everything that was patina must be slate.
+  // A streak that has gone out: everything that was gilt must be slate.
   { key: 'lapsed', q: 's=tab&lapsed=1&run=0', want: ['STREAK LAPSED'] },
 ];
 
