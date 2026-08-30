@@ -32,9 +32,9 @@
 // Every order runs the same six-STEP build — core, rule, studs, underplate,
 // facets, collar — but each step is drawn in that order's own vocabulary, and
 // the vocabulary gets richer as the ladder climbs. Clay's rung 6 is a plain disc
-// with a square behind it. Aurum's rung 6 is a sixteen-lobe rosette on a
-// counter-rotated sixteen-point star, cut into sixteen facets and ringed twice.
-// Same six steps; nothing whatever in common to look at.
+// with a square behind it. Aurum's rung 6 is a flared cross patée standing on a
+// twenty-four ray sunburst, cut into facets and ringed twice. Same six steps;
+// nothing whatever in common to look at.
 //
 // ── WHAT MAKES ONE LOOK GOOD, WHICH IS THE OTHER HALF OF THE NOTE ───────────
 //
@@ -147,9 +147,92 @@ function cusped(r: number, inner: number, lobes: number, rot = 0): string {
   return `${d} Z`;
 }
 
+/**
+ * A CROSS PATÉE — `arms` arms with concave flanks and wide, flat ends.
+ *
+ * ── WHY THE TOP HALF OF THE LADDER NEEDED A SHAPE THAT IS NOT RADIAL ────────
+ *
+ * The four orders above jade were a scallop, a notched star, a twelve-lobe
+ * coronet and an eight-lobe rosette, and the reader threw all four out at once:
+ * *"every rank icon starting with the blue and then to the grand philosopher …
+ * I really do not like their design."* Drawn side by side the reason is plain
+ * and it is one reason: **they are all flowers.** Lobes spaced evenly round a
+ * circle read as a daisy or a bottle cap however finely they are cut, and four
+ * daisies in four paints are not four vocabularies.
+ *
+ * So the references were looked at rather than guessed. Two families, and they
+ * agree with each other:
+ *
+ *   · A REAL BREAST STAR (the Order of the Bath, photographed) is a bundle of
+ *     rays whose LENGTH VARIES WITH ANGLE — long on four axes, short between —
+ *     so the silhouette is a lozenge or a cross, never a circle. Over the rays
+ *     sits a cross in a second metal, and over that a medallion. Layers in
+ *     different materials, not more edges in one.
+ *   · A GAME RANK LADDER (Valorant's nine tiers, pulled from their own CDN and
+ *     laid out in one sheet) changes the SILHOUETTE at every tier — oval, kite,
+ *     diamond, pentagon, hexagon, star — and reserves the sharpest, most
+ *     vertical shape for the top. Not one of the nine is a rosette.
+ *
+ * Both say the same thing: grouped, unequal rays make an award; evenly spaced
+ * round lobes make a sticker. `patee` and `radiant` below are those two findings
+ * as geometry, and they are what the top four orders are drawn from now.
+ *
+ * THE FLANK IS SOLVED, NOT NUDGED, the same way `cusped`'s control radius is. A
+ * symmetric cubic's midpoint is (P0 + 3·C1 + 3·C2 + P3)/8; projecting that onto
+ * the flank's own axis and setting it equal to the waist gives where the controls
+ * sit. A quadratic cannot do it — at four arms it wants a control BEHIND the
+ * centre — which is why this is a cubic.
+ */
+function patee(r: number, arms: number, waist: number, rot: number, wide = 0.28): string {
+  const step = (2 * Math.PI) / arms;
+  // HOW WIDE AN ARM'S END IS, as a fraction of the step. The first draft fixed
+  // this at 0.18 with a waist of 0.44 and the pin came out a D-PAD: four thin
+  // sticks with a hole between them. A cross patée is broad — its arms are most
+  // of the shape and the waist only nips them — so the two move together, and
+  // both are read from the vocabulary rather than baked in here.
+  const half = step * wide;
+  const gap = step / 2 - half;                  // half the flank's angular span
+  const cd = gap / 2;
+  const rc = (8 * waist * r - 2 * r * Math.cos(gap)) / (6 * Math.cos(cd));
+  const at = (rad: number, a: number) => pt(CX + rad * Math.cos(a), CY + rad * Math.sin(a));
+  let d = `M${at(r, rot - half)}`;
+  for (let i = 0; i < arms; i++) {
+    const a = rot + i * step;
+    d += ` L${at(r, a + half)}`;
+    const mid = a + step / 2;
+    d += ` C${at(rc, mid - cd)} ${at(rc, mid + cd)} ${at(r, a + step - half)}`;
+  }
+  return `${d} Z`;
+}
+
+/**
+ * A RADIANT STAR — `points` long tips with a SHORTER one between each pair, and
+ * a valley between every tip.
+ *
+ * The alternation is the whole point and it is what a notched polygon cannot do.
+ * Equal tips at equal spacing give a circle with teeth; long-short-long-short
+ * gives a silhouette with four (or six, or eight) axes, which is what every
+ * struck star of an order has and what makes one read as light rather than as a
+ * cog. `points` is the number of LONG tips, so the outline has 4 × points
+ * vertices.
+ */
+function radiant(r: number, mid: number, inner: number, points: number, rot: number): string {
+  const n = points * 2;
+  const step = (2 * Math.PI) / n;
+  const p: string[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = rot + i * step;
+    const tip = i % 2 === 0 ? r : r * mid;
+    p.push(pt(CX + tip * Math.cos(a), CY + tip * Math.sin(a)));
+    const v = a + step / 2;
+    p.push(pt(CX + r * inner * Math.cos(v), CY + r * inner * Math.sin(v)));
+  }
+  return `M${p.join(' L')} Z`;
+}
+
 // ── the eight vocabularies ──────────────────────────────────────────────────
 
-export type Edge = 'round' | 'flat' | 'notch' | 'cusp';
+export type Edge = 'round' | 'flat' | 'notch' | 'cusp' | 'patee' | 'radiant';
 
 export interface Vocab {
   /** The order's own name for its shape — for the contact sheet and the checks. */
@@ -157,12 +240,38 @@ export interface Vocab {
   /** Outer feature count. 0 means a circle. */
   points: number;
   edge: Edge;
-  /** How far the valleys cut back, as a fraction of the radius. */
+  /**
+   * How far the valleys cut back, as a fraction of the radius — and for a
+   * `patee` it is the WAIST, the flank's closest approach to the centre.
+   */
   valley: number;
+  /** `radiant` only: the short tip's length, as a fraction of the long one. */
+  mid?: number;
+  /** `patee` only: an arm's half-width, as a fraction of the step between arms. */
+  wide?: number;
   /** How far the core reaches. */
   outer: number;
+  /**
+   * Where the frame is clocked, in radians. Left out, a polygon gets a flat at
+   * the top (see `pinFor`) and everything else starts at three o'clock. The two
+   * radiant orders set it explicitly so they are not clocked alike — the same
+   * burst turned half a step is a different object at a glance, and turning one
+   * of them costs nothing.
+   */
+  spin?: number;
   /** The counter-rotated plate behind it. */
-  under: { points: number; edge: Edge; reach: number; valley: number };
+  under: {
+    points: number; edge: Edge; reach: number; valley: number;
+    mid?: number; wide?: number;
+    /**
+     * Where the plate is clocked, INSTEAD of the default half-step. A radiant
+     * plate needs it: the default puts a long ray where the core's own arm is,
+     * so sixteen rays were drawn and four showed. What a burst behind a cross is
+     * for is filling the quarters the arms leave empty, and that is an angle you
+     * have to state rather than derive from a point count.
+     */
+    spin?: number;
+  };
   /** How many wedges the face is cut into. */
   facets: number;
   /** The mark's room, as a fraction of the box. */
@@ -204,34 +313,61 @@ export const VOCAB: Vocab[] = [
     label: 'gem', points: 6, edge: 'notch', valley: 0.79, outer: 38,
     under: { points: 6, edge: 'notch', reach: 45, valley: 0.60 }, facets: 6, mark: 0.37,
   },
-  { // LAPIS — ground stone. Bowed lobes over an eight-point star.
-    label: 'scallop', points: 8, edge: 'cusp', valley: 0.84, outer: 38,
-    under: { points: 8, edge: 'notch', reach: 46, valley: 0.64 }, facets: 8, mark: 0.38,
+  // ── AND ABOVE JADE THE LADDER STOPS BEING RADIAL ──────────────────────────
+  //
+  // The four below were a scallop, a notched star, a coronet and a rosette, and
+  // all four were rejected in one sentence. See the note over `patee`: they were
+  // four flowers, and lobes spaced evenly round a circle cannot be anything
+  // else. These four are drawn from the two references instead — a struck breast
+  // star and a nine-tier game ladder — and the escalation is now in the
+  // STRUCTURE rather than in the edge count:
+  //
+  //   lapis      a cross, on a star            two layers
+  //   crimson    a star, on a plate            the rays arrive
+  //   amethyst   a finer star, on a star       both layers radiate
+  //   aurum      a cross, on the widest star   both, and the two combined
+  //
+  // The top pin is deliberately the two shapes below it stacked, which is
+  // exactly what the star of an order is: a cross laid over a burst of rays.
+  { // LAPIS — the first pin that is not a ring of anything. A plain cross patée
+    //   with a hidden eight-point star behind it, whose tips show in the four
+    //   quarters the arms leave empty.
+    label: 'cross', points: 4, edge: 'patee', valley: 0.60, wide: 0.30, outer: 39,
+    under: { points: 8, edge: 'notch', reach: 46, valley: 0.60 }, facets: 4, mark: 0.36,
   },
-  { // CRIMSON — the dye a city went bankrupt over. Ten points over five.
-    label: 'star', points: 10, edge: 'notch', valley: 0.78, outer: 39,
-    under: { points: 5, edge: 'notch', reach: 47, valley: 0.50 }, facets: 10, mark: 0.36,
+  { // CRIMSON — the rays arrive: eight tips, four long on the axes and four
+    //   short between, over a plate turned to show its corners on the diagonals.
+    label: 'mariner', points: 4, edge: 'radiant', valley: 0.46, mid: 0.72, outer: 41,
+    under: { points: 4, edge: 'notch', reach: 47, valley: 0.45 }, facets: 8, mark: 0.35,
   },
-  { // AMETHYST — a twelve-point star with twelve lobes flaring behind it.
-    label: 'coronet', points: 12, edge: 'notch', valley: 0.80, outer: 39,
-    under: { points: 12, edge: 'cusp', reach: 47, valley: 0.80 }, facets: 12, mark: 0.36,
+  { // AMETHYST — the same star, finer and turned: twelve tips over a six-point
+    //   star, so both layers radiate and the pin reads as light rather than as
+    //   an edge. `spin` clocks it half a tip off crimson's.
+    label: 'burst', points: 6, edge: 'radiant', valley: 0.60, mid: 0.66, outer: 42,
+    spin: Math.PI / 12,
+    under: { points: 12, edge: 'notch', reach: 47.5, valley: 0.72, spin: Math.PI / 12 },
+    facets: 12, mark: 0.35,
   },
-  { // AURUM — a jewel in a sunburst. There is nothing above it and it should
-    //   look like it: a compact eight-lobe rosette sitting inside a
-    //   sixteen-point burst, which is the most LAYERED object on the ladder
-    //   rather than the one with the most edges. Sixteen lobes on the core was
-    //   tried first and read as a bottle cap — past about twelve, more edges
-    //   stop adding grandeur and start subtracting legibility.
-    label: 'sunburst', points: 8, edge: 'cusp', valley: 0.82, outer: 36,
-    under: { points: 16, edge: 'notch', reach: 47.5, valley: 0.68 }, facets: 8, mark: 0.37,
+  { // AURUM — there is nothing above it and it should look like it. A compact
+    //   eight-arm cross sitting on a sixteen-tip burst: the most LAYERED object
+    //   on the ladder rather than the one with the most edges, and structurally
+    //   the two orders below it at once. Sixteen lobes on the CORE was tried in
+    //   an earlier round and read as a bottle cap — past about twelve, more
+    //   edges stop adding grandeur and start subtracting legibility, which is
+    //   why the count went into the layer behind instead.
+    label: 'grand', points: 4, edge: 'patee', valley: 0.34, wide: 0.34, outer: 36,
+    under: { points: 12, edge: 'radiant', reach: 48.5, valley: 0.74, mid: 0.80, spin: Math.PI / 12 },
+    facets: 8, mark: 0.34,
   },
 ];
 
 /** One shape from an edge style. `m` pulls it in; a negative `m` grows it. */
-function shape(edge: Edge, points: number, r: number, valley: number, rot: number): string {
+function shape(edge: Edge, points: number, r: number, valley: number, rot: number, mid = 0.7, wide = 0.28): string {
   if (edge === 'round' || points < 3) return circle(r);
   if (edge === 'flat') return poly(r, points, rot);
   if (edge === 'notch') return notched(r, r * valley, points, rot);
+  if (edge === 'patee') return patee(r, points, valley, rot, wide);
+  if (edge === 'radiant') return radiant(r, mid, valley, points, rot);
   return cusped(r, r * valley, points, rot);
 }
 
@@ -331,6 +467,12 @@ function wedge(a0: number, a1: number, rEdge: number, rTip: number): string {
   return `M${pt(CX, CY)} L${P(rEdge, a0)} L${P(rTip, (a0 + a1) / 2)} L${P(rEdge, a1)} Z`;
 }
 
+/** The same, with its two flanks measured separately — see `followed`. */
+function wedge2(a0: number, a1: number, rA: number, rB: number, rTip: number): string {
+  const P = (r: number, a: number) => pt(CX + r * Math.cos(a), CY + r * Math.sin(a));
+  return `M${pt(CX, CY)} L${P(rA, a0)} L${P(rTip, (a0 + a1) / 2)} L${P(rB, a1)} Z`;
+}
+
 const CACHE = new Map<string, Pin>();
 
 export function pinFor(orderIndex: number, degree: number): Pin {
@@ -344,15 +486,15 @@ export function pinFor(orderIndex: number, degree: number): Pin {
   const build = buildFor(dg);
   // A FLAT AT THE TOP on the polygons: a vertex straight up puts a point exactly
   // where the progress arc opens, and the arc then appears to start off-centre.
-  const rot = v.edge === 'flat' && v.points >= 3 ? Math.PI / v.points : 0;
-  const core = (m: number) => shape(v.edge, v.points, v.outer - m, v.valley, rot);
+  const rot = v.spin ?? (v.edge === 'flat' && v.points >= 3 ? Math.PI / v.points : 0);
+  const core = (m: number) => shape(v.edge, v.points, v.outer - m, v.valley, rot, v.mid, v.wide);
 
   // THE UNDERPLATE IS COUNTER-ROTATED BY HALF A STEP, which is the whole trick:
   // its points land in the core's valleys, so it reads as a ring of tips showing
   // through the gaps rather than as a second shape parked behind a first.
-  const uStep = v.under.points >= 3 ? Math.PI / v.under.points : 0;
+  const uStep = v.under.spin ?? (v.under.points >= 3 ? Math.PI / v.under.points : 0);
   const under = build.under
-    ? shape(v.under.edge, v.under.points, v.under.reach, v.under.valley, rot + uStep)
+    ? shape(v.under.edge, v.under.points, v.under.reach, v.under.valley, rot + uStep, v.under.mid, v.under.wide)
     : null;
 
   const ring = flatten(core(0));
@@ -373,6 +515,13 @@ export function pinFor(orderIndex: number, degree: number): Pin {
   // to −1, and that IS the lift: the wedge pointing up-left is brightest, the one
   // opposite is deepest, everything between shades smoothly. Nothing is
   // hand-tuned, so a sixteen-facet pin lights identically to a six-facet one.
+  // A FACET MUST NOT REACH PAST THE SILHOUETTE IT IS CUT INTO, and on the two
+  // new edges a single radius cannot promise that. A cross has a waist: a wedge
+  // aimed between two arms and given the arm's own length pokes out of the pin.
+  // So `patee` and `radiant` take their reach from the OUTLINE at that exact
+  // angle. The four older orders keep the constant they were measured at, so
+  // nothing below jade moves by a hair.
+  const followed = v.edge === 'patee' || v.edge === 'radiant';
   const facets: Facet[] = [];
   if (build.facets && v.facets >= 3) {
     const step = (2 * Math.PI) / v.facets;
@@ -380,9 +529,12 @@ export function pinFor(orderIndex: number, degree: number): Pin {
     for (let i = 0; i < v.facets; i++) {
       const a0 = rot + i * step - step / 2;
       const a1 = a0 + step;
+      const mid = (a0 + a1) / 2;
       facets.push({
-        d: wedge(a0, a1, rEdge, v.outer * 0.97),
-        lift: Math.cos((a0 + a1) / 2 - LIGHT_ANGLE),
+        d: followed
+          ? wedge2(a0, a1, rayHit(rotated, a0) * 0.9, rayHit(rotated, a1) * 0.9, rayHit(rotated, mid) * 0.95)
+          : wedge(a0, a1, rEdge, v.outer * 0.97),
+        lift: Math.cos(mid - LIGHT_ANGLE),
       });
     }
   }

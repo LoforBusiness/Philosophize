@@ -635,16 +635,48 @@ costs milliseconds rather than a Metro and a browser. What it holds:
   forty-eight draw the same thing, and `check:ui` measures that on the paths
   rather than on the numbers.
   - the **VOCABULARY** is per order and never repeats: disc · hex · plate · gem ·
-    scallop · star · coronet · sunburst. Each is a core shape, a counter-rotated
+    cross · mariner · burst · grand. Each is a core shape, a counter-rotated
     UNDERPLATE behind it, and a facet count (`VOCAB` in
     `components/shared/rankShapes.ts`).
   - the **BUILD** is the same six steps in every order, and it RESETS at each new
     colour: core → inner rule → facets → underplate → studs → collar. Five
     additions for five rungs, one each.
   - so complexity is a **sawtooth that climbs**. Clay's capstone is a disc on a
-    square plate; aurum's is an eight-lobe rosette inside a sixteen-point burst,
+    square plate; aurum's is a flared cross patée on a twenty-four ray sunburst,
     cut into facets and ringed twice. Same six steps, nothing in common to look
-    at, and the capstone reach climbs 39 → 47.5 across the ladder.
+    at, and the capstone reach climbs 39 → 48.5 across the ladder.
+
+  > **AND THE TOP HALF WERE ALL FLOWERS, WHICH IS WHY THEY WENT.** The four
+  > orders above jade were a scallop, a notched star, a twelve-lobe coronet and
+  > an eight-lobe rosette, and the reader threw all four out in one sentence:
+  > *"every rank icon starting with the blue and then to the grand philosopher,
+  > all of those rank icons I really do not like their design."* Laid out side by
+  > side the reason is one reason — **lobes spaced evenly round a circle read as
+  > a daisy or a bottle cap however finely they are cut**, and four daisies in
+  > four paints are not four vocabularies.
+  >
+  > **The references were fetched rather than guessed**, which is what the reader
+  > asked for, and the two families agree with each other. A real breast star
+  > (the Order of the Bath, photographed) is a bundle of rays whose LENGTH VARIES
+  > WITH ANGLE — long on four axes, short between — so the silhouette is a cross
+  > or a lozenge and never a circle, with a cross over the rays and a medallion
+  > over that. A modern game ladder (Valorant's nine tiers, pulled from their own
+  > CDN into one sheet) changes the SILHOUETTE at every tier — oval, kite,
+  > diamond, pentagon, hexagon, star — and not one of the nine is a rosette.
+  >
+  > So the top four are `patee` and `radiant` now, two new primitives, and the
+  > escalation is in the STRUCTURE rather than the edge count: a cross on a star,
+  > a star on a star, a finer star on a finer star, and then a cross on a burst —
+  > the top pin being the two orders below it at once, which is exactly what the
+  > star of an order is.
+  >
+  > **Three drafts, and each was named by looking at the sheet.** A waist of 0.44
+  > under 0.18-wide arms is a **D-PAD**, not a cross — a patée's arms are most of
+  > the shape and the waist only nips them. Eight broad arms at a shallow waist
+  > is a **COG**; eight narrow ones at a deep waist is a **SNOWFLAKE**; four
+  > flared ones is a cross. And an underplate of rays needs its clocking STATED —
+  > the default half-step put a long ray behind every arm, so sixteen were drawn
+  > and four showed.
 
   > **This is the third attempt and the first two each fixed half of it.** The
   > shape used to escalate ONCE across all forty-eight ranks, one silhouette per
@@ -685,7 +717,7 @@ costs milliseconds rather than a Metro and a browser. What it holds:
   are painted in the material. Every one was confirmed by putting the defect back
   and watching it fail.
 
-  The mark's room stays flat at 0.36–0.40 across all eight while the drawn area
+  The mark's room stays flat at 0.34–0.40 across all eight while the drawn area
   grows by half again, so everything a rung gains it gains OUTSIDE the glyph.
   That discipline is the whole reason it survives being drawn at 44px.
 

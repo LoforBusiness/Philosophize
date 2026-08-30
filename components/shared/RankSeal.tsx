@@ -43,8 +43,8 @@ import {
 // So BOTH axes move. `degree` decides how far through the build a pin is -- core,
 // rule, facets, underplate, studs, collar -- and `order` decides the MATERIAL
 // *and the vocabulary every one of those steps is drawn in*. Clay's capstone is a
-// disc on a square. Aurum's is an eight-lobe rosette inside a sixteen-point
-// burst, cut into facets and ringed twice. Same six steps, no two of the
+// disc on a square. Aurum's is a flared cross patée on a twenty-four ray
+// sunburst, cut into facets and ringed twice. Same six steps, no two of the
 // forty-eight alike. rankShapes.ts holds the geometry and the reasoning;
 // scripts/sheet-ranks.mjs draws all forty-eight in plain Node so they can be
 // LOOKED at (§21), which is where the wings died and where the facets were
@@ -94,7 +94,7 @@ interface Props {
    * HOW FAR THROUGH ITS ORDER THE RANK IS, 0–5 — and this is the SHAPE.
    *
    * Six frames, plainest first, run again in every order: disc, hexagon, plate,
-   * scallop, gem, rosette. The finish rides the same number — the inner rule,
+   * gem, cross, star. The finish rides the same number — the inner rule,
    * then two, four and six studs, then the capstone's collar — and every step of
    * it lands on the frame's own edge, never inside the mark.
    */
