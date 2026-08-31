@@ -177,6 +177,31 @@ export function useAnswerLift(picked: string | null, id: string, correct: boolea
   });
 }
 
+// AN INSTRUCTION THAT HAS BEEN OBEYED (S11).
+//
+// A stage question usually prints its own instruction above the options — TAP THE
+// VERDICT, TAP A PAIR TO LOOK THROUGH IT. The moment an answer lands that line is
+// spent: the deck below is showing the verdict and the explanation, and the words
+// on the stage are telling the reader to do a thing they have just done.
+//
+// It is also, measurably, what the answer LIFT runs into. These stacks are packed
+// — logic3's cards sit on a 50 step at 44 tall, so six units of gap against a rise
+// of ten plus a swell — and the winner, filled ink, rises straight through the line
+// above it. Two lessons were photographed doing it, both slicing the instruction in
+// half at its middle.
+//
+// Fading it costs nothing the reader wanted and removes the collision at its cause.
+// Same 460ms as the reply, so the line leaves as the card arrives rather than
+// blinking out under it.
+export function useAnswerSpent(picked: string | null) {
+  const answered = picked !== null;
+  const gone = useSharedValue(0);
+  useEffect(() => {
+    gone.value = withTiming(answered ? 1 : 0, { duration: REACT_MS, easing: Easing.out(Easing.cubic) });
+  }, [answered, gone]);
+  return useAnimatedStyle(() => ({ opacity: 1 - gone.value }));
+}
+
 // THE SAME REACTION AS A WRAPPER, for art that is drawn in a MAP beside its Target.
 //
 // The commonest shape in this corpus is a row of things drawn by one map and a row

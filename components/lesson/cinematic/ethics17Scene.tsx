@@ -157,8 +157,12 @@ export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPo
       </Target>
 
       {/* THE STOCK. The bar and its caption are one target: it is a single thing
-          on the stage and splitting the hit box would be a puzzle about tapping. */}
-      <Text style={styles.barCap} pointerEvents="none">BEING BELIEVED</Text>
+          on the stage and splitting the hit box would be a puzzle about tapping.
+          THE CAPTION IS THEREFORE INSIDE IT (S11). It used to be drawn alongside,
+          twelve units above a bar that rises ten and swells six percent when the
+          reader picks it — so the bar's PAPER face came up over BEING BELIEVED and
+          wiped it, on the beat the reader got it right. A thing and the word for
+          it ride together or the gap between them is not a gap. */}
       <Target
         id="trust"
         correct
@@ -167,6 +171,7 @@ export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPo
         disabled={!live || answered}
         style={styles.barHit}
       >
+        <Text style={styles.barCap} pointerEvents="none">BEING BELIEVED</Text>
         <View
           style={[styles.barBox, answered && picked === 'trust' && styles.rightBox]}
           pointerEvents="none"
@@ -223,8 +228,10 @@ const styles = StyleSheet.create({
   copyHit: { position: 'absolute', top: COPY_Y, width: COPY_W, height: COPY_H },
   copyHitBox: { width: COPY_W, height: COPY_H, borderRadius: 2 },
 
+  // Positioned against the TARGET now, not the stage, so it rides the answer lift
+  // with the bar it names.
   barCap: {
-    position: 'absolute', left: BAR_X, top: BAR_Y - 12, width: 200,
+    position: 'absolute', left: 0, top: -12, width: 200,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
   barHit: { position: 'absolute', left: BAR_X, top: BAR_Y, width: BAR_W, height: BAR_H },

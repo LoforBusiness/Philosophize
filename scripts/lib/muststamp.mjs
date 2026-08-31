@@ -46,6 +46,32 @@ import crypto from 'node:crypto';
 /** Shared components that decide the SIZE of what a scene draws. */
 const SHARED = ['Target.tsx'];
 
+/**
+ * ONLY THE PART OF A SHARED COMPONENT THAT DECIDES LAYOUT.
+ *
+ * Hashing all of `Target.tsx` is correct and unaffordable: it made all 186 lessons
+ * stale the moment the file gained an exported hook that moves nothing, and a
+ * two-hour re-measure for a change that cannot alter a single box is how a ratchet
+ * stops being run — the same argument that keeps `cinematicKit.tsx` out entirely.
+ *
+ * What actually resized the art in 146 scenes was one line inside StyleSheet.create
+ * (`art: { flexGrow: 1 }`), so that block is what goes in the hash. A new hook, a
+ * comment, or a change to which conditions draw the ring cannot move a child's box
+ * and does not invalidate anything.
+ */
+function layoutOf(file) {
+  const src = fs.readFileSync(file, 'utf8');
+  const at = src.indexOf('StyleSheet.create(');
+  if (at < 0) return src;                       // no styles — hash the lot
+  const open = src.indexOf('{', at);
+  let depth = 0;
+  for (let i = open; i < src.length; i += 1) {
+    if (src[i] === '{') depth += 1;
+    else if (src[i] === '}') { depth -= 1; if (!depth) return src.slice(open, i + 1); }
+  }
+  return src.slice(open);
+}
+
 /** Files that decide what a lesson draws, in a stable order. */
 export function stampFiles(dir, comp) {
   const base = comp.replace(/Lesson$/, '');
@@ -61,6 +87,13 @@ export function stampFiles(dir, comp) {
   return [...own, ...shared].sort();
 }
 
+/** The bytes each stamped file contributes: whole for a lesson, layout for a shared one. */
+function bytesOf(dir, file) {
+  return SHARED.some((f) => file === path.join(dir, f))
+    ? Buffer.from(layoutOf(file))
+    : fs.readFileSync(file);
+}
+
 /**
  * @param dir     components/lesson/cinematic
  * @param comp    the component name the route maps the lesson id to
@@ -70,7 +103,7 @@ export function mustStamp(dir, comp, probe) {
   const files = stampFiles(dir, comp);
   if (!files.length) return null;
   const h = crypto.createHash('sha1');
-  for (const p of files) h.update(fs.readFileSync(p));
+  for (const p of files) h.update(bytesOf(dir, p));
   h.update(crypto.createHash('sha1').update(String(probe)).digest('hex').slice(0, 8));
   return h.digest('hex').slice(0, 12);
 }

@@ -12,7 +12,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { useAnswerSpent } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // The argument pinned up as a FORM the inspector reads, stage right.
@@ -121,6 +121,8 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, dragPos,
   const showPick = !!cur.interact;
   const leaving = !!prev?.interact && !cur.interact;
   const answered = picked !== null;
+  // The stage's own instruction, spent the moment the answer lands (S11).
+  const spent = useAnswerSpent(picked);
 
   // The words only re-animate on the beat that CHANGES them, so the form does not
   // flicker every time the reader taps forward.
@@ -259,7 +261,7 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, dragPos,
           <View style={styles.given} pointerEvents="none">
             <Text style={styles.givenT}>VALID FORM ✓   PREMISES TRUE ✓</Text>
           </View>
-          <Text style={styles.ballotHdr}>TAP THE VERDICT</Text>
+          <Animated.Text style={[styles.ballotHdr, spent]}>TAP THE VERDICT</Animated.Text>
 
           {CARDS.map((c, k) => {
             const chosen = picked === c.id;

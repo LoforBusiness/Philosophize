@@ -16,7 +16,7 @@ import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { useAnswerSpent } from './Target';
 
 // A gallery wall. Stage right hangs a big framed CANVAS on a picture wire; stage
 // left, a RACK holding two pairs of glasses — square lenses for shapes, round
@@ -104,6 +104,8 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick }: S
   const cv = useCarry(1);
   const cur = BEATS[i];
   const answered = picked !== null;
+  // The stage's own instruction, spent the moment the answer lands (S11).
+  const spent = useAnswerSpent(picked);
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
 
   // What the canvas is showing right now. Normally the beat says; on Q1 the pair
@@ -278,9 +280,9 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick }: S
       {/* ── Q1: tap a pair — the canvas redraws itself under your finger ────── */}
       {showPick ? (
         <>
-          <View style={styles.pickLabelWrap} pointerEvents="none">
+          <Animated.View style={[styles.pickLabelWrap, spent]} pointerEvents="none">
             <Text style={styles.pickLabel}>{'TAP A PAIR TO\nLOOK THROUGH IT'}</Text>
-          </View>
+          </Animated.View>
           {CARDS.map((c, k) => {
             const chosen = picked === c.id;
             const on = answered && c.correct;

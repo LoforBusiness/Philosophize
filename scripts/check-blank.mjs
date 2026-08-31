@@ -213,6 +213,81 @@ const PROBE = `(() => {
   return JSON.stringify({ out, n: out.length, asking });
 })()`;
 
+// ── the second measurement: what the ANSWER cuts ─────────────────────────────
+//
+// S11's band rule was written from one lesson and had no instrument. A column and
+// its heading rise ten units together when the reader picks one, and a scale of
+// 1.06 grows a box about its own centre — so the topmost ink a beat can draw is
+// not the ink in its resting pose, and a band measured against the still picture
+// has never seen its own reaction. aesthetics21 had six units of headroom against
+// a ten-unit lift, and the word A PAINTING lost its top to the crop at the exact
+// moment the reader got it right.
+//
+// check:frame cannot see this: it probes at the START of each beat and answers
+// only to advance, so the one frame where the reaction is on screen is never
+// measured. This reads every word twice — before the answer and after it — and
+// reports only what the ANSWER took away, which makes it immune to whatever
+// framing debt the lesson already carries.
+const CUT_PROBE = `(() => {
+  const clip = document.getElementById('stage-clip');
+  if (!clip) return '[]';
+  const c = clip.getBoundingClientRect();
+  const out = [];
+  for (const el of document.querySelectorAll('div,span')) {
+    if (el.children.length) continue;
+    const t = (el.textContent || '').trim();
+    if (!t) continue;
+    const r = el.getBoundingClientRect();
+    if (r.width < 1 || r.height < 1) continue;
+    if (r.bottom < c.top || r.top > c.bottom) continue;      // not on the stage
+    let o = 1;
+    for (let n = el; n && n !== document.body; n = n.parentElement) {
+      const v = parseFloat(getComputedStyle(n).opacity);
+      if (!Number.isNaN(v)) o *= v;
+    }
+    if (o < 0.2) continue;                                    // mid-fade, not a word yet
+    const vis = (Math.min(r.bottom, c.bottom) - Math.max(r.top, c.top)) / r.height;
+
+    // AND WHAT IS SITTING ON IT. A reaction can bury a word instead of pushing it
+    // out of frame — that was the same lesson's FIRST defect, the column rising
+    // into its own heading. check:readable owns "nothing may be drawn across a
+    // word", but it reads at the START of a beat, before anything is answered, so
+    // it is blind to a word that only gets covered by the reply.
+    //
+    // Counting opaque boxes over a word's centre is normally hopeless — it returns
+    // the word's own grounds and every panel it sits on. Taking the reading TWICE
+    // and diffing kills that class outright: every ancestor ground is in both
+    // readings, so only what the ANSWER added survives.
+    const cx = (r.left + r.right) / 2, cy = (r.top + r.bottom) / 2;
+    let cov = 0;
+    for (const b of document.querySelectorAll('div')) {
+      if (b === el || b.contains(el)) continue;
+      // PAINT ORDER, OR THE COUNT IS MEANINGLESS. A lifted card overlaps whatever
+      // was under it, and those boxes are still UNDER it — logic3's winning card
+      // rises across two premise plates, and its own title reported two coverers
+      // while being white on black and perfectly legible. React Native stacks by
+      // document order and these scenes use no z-index, so a box that PRECEDES the
+      // word paints behind it and buries nothing.
+      if (!(el.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)) continue;
+      // A WORD'S OWN PLATE IS NOT BURYING IT. The house builds a two-state label as
+      // a plate and a Text that are SIBLINGS, not parent and child — the plate fills
+      // ink on answer and the word turns to paper in the same frame. Ancestry cannot
+      // see that relationship, so metaphysics7's NOW and aesthetics8's SHAPES both
+      // reported themselves buried while being white on black and perfectly legible.
+      // If the covering box's own text contains the word, it is the word's plate.
+      if ((b.textContent || '').includes(t)) continue;
+      const s = getComputedStyle(b);
+      const m = /rgba?\\(([^)]+)\\)/.exec(s.backgroundColor || '');
+      const a = m ? (m[1].split(',').length > 3 ? parseFloat(m[1].split(',')[3]) : 1) : 0;
+      if (a < 0.5) continue;
+      const q = b.getBoundingClientRect();
+      if (cx >= q.left && cx <= q.right && cy >= q.top && cy <= q.bottom) cov += 1;
+    }
+    out.push([t.slice(0, 30), +vis.toFixed(3), cov]);
+  }
+  return JSON.stringify(out);
+})()`;
+
 const ROUTE = `app/${ROUTE_NAME}.tsx`;
 const ROUTE_SRC = `// WRITTEN BY scripts/check-blank.mjs — deleted again when it finishes.
 import { useEffect, useState } from 'react';
@@ -340,6 +415,7 @@ function allIds() {
     await wait(1200);
 
     const hits = [];
+    const cuts = [];
     let stepped = 0;
     let last = -1;
     let threw = null;
@@ -404,14 +480,23 @@ function allIds() {
       // rerun until it passes. Only re-read when there is something to confirm.
       let out = got.out || [];
       if (out.some((t) => !t.words.length && t.cover < BLANK)) {
-        await wait(900);
+        await wait(1200);
         const again = await evaluate(PROBE);
         if (again && !again.THREW) {
           try {
             const g2 = JSON.parse(again);
             if (!g2.none && g2.out) {
               const by = new Map(g2.out.map((t) => [t.box.join(','), t]));
-              out = out.map((t) => by.get(t.box.join(',')) ?? t);
+              // BOTH READINGS HAVE TO AGREE, and taking the later one is not the
+              // same thing. A scene still arriving at both reads gives two low
+              // numbers and the second was simply believed — which is how a busy
+              // machine turned a corpus of 0 BLANK into 12, none of them real,
+              // purely because a second measurement had been added to the same
+              // sweep and slowed it down. The better of the two readings wins.
+              out = out.map((t) => {
+                const t2 = by.get(t.box.join(','));
+                return t2 && t2.cover > t.cover ? t2 : t;
+              });
             }
           } catch { /* keep the first reading */ }
         }
@@ -424,6 +509,29 @@ function allIds() {
           cover: t.cover, box: t.box, words: t.words.slice(0, 3),
         });
       }
+      // WHAT THE ANSWER CUTS. Only where there is a live scene target to answer.
+      if (got.n) {
+        const before = await evaluate(CUT_PROBE);
+        await answerScene();
+        await wait(1300);                        // the lift overshoots and settles
+        const after = await evaluate(CUT_PROBE);
+        if (before && after && !before.THREW && !after.THREW) {
+          try {
+            const b = new Map(JSON.parse(before).map(([t, vis, cov]) => [t, { vis, cov }]));
+            for (const [t, vis, cov] of JSON.parse(after)) {
+              const was = b.get(t);
+              if (!was) continue;                 // arrived with the reveal
+              if (was.vis > 0.98 && vis < 0.95) {
+                cuts.push({ beat: beatNo, kind: 'CUT', text: t, was: +was.vis.toFixed(2), now: +vis.toFixed(2) });
+              }
+              if (cov > was.cov) {
+                cuts.push({ beat: beatNo, kind: 'BURIED', text: t, was: was.cov, now: cov });
+              }
+            }
+          } catch { /* unparseable reading — say nothing rather than guess */ }
+        }
+      }
+
       let moved = false;
       for (let attempt = 0; attempt < 4 && !moved; attempt++) {
         if (attempt === 1) { await answerScene(); await wait(700); }
@@ -441,15 +549,21 @@ function allIds() {
       if (!moved) break;
       stepped++;
     }
-    report.push({ id, hits, stepped, seen, threw, nBeats });
+    report.push({ id, hits, cuts, stepped, seen, threw, nBeats });
     done++;
     const nB = hits.filter((h) => h.kind === 'BLANK').length;
     const nH = hits.filter((h) => h.kind === 'HOLLOW').length;
+    const nCutHere = cuts.filter((c) => c.kind === 'CUT').length;
+    const nBuryHere = cuts.length - nCutHere;
+    const cutNote = cuts.length
+      ? ` · ${[nCutHere && `${nCutHere} CUT`, nBuryHere && `${nBuryHere} BURIED`].filter(Boolean).join(' · ')} BY THE ANSWER`
+      : '';
     const note = threw ? `PROBE THREW: ${threw}`
       : stepped < 2 ? `ONLY ${stepped + 1} BEAT REACHED`
       : !seen ? 'no scene targets'
       : (nB || nH) ? `${nB ? `${nB} BLANK · ` : ''}${nH ? `${nH} hollow` : ''}`.replace(/ · $/, '')
       : `${seen} targets, all drawn`;
+    if (cutNote && !threw) console.log(`  ${String(done).padStart(3)}/${ids.length}  ${id.padEnd(34)} ${note}${cutNote}`);
     console.log(`  ${String(done).padStart(3)}/${ids.length}  ${id.padEnd(34)} ${note}`);
   };
 
@@ -534,6 +648,11 @@ function allIds() {
   await Promise.all(lanes.map((T) => runLane(T)));
   for (const T of lanes) T.close();
 
+  // THE DATA GOES TO DISK BEFORE ANY OF IT IS PRINTED. A summary that throws — one
+  // undefined field on the one lesson that never rendered a stage was enough — takes
+  // the whole sweep's findings with it, and by then the run has done all the work.
+  if (outPath) fs.writeFileSync(outPath, JSON.stringify(report, null, 2));
+
   console.log('\nBLANK-TARGET AUDIT — is the thing the reader taps actually drawn?\n');
   // SAID BEFORE THE RESULT. A sweep that never moved, or whose probe died, is not
   // a pass — and reads exactly like one.
@@ -563,8 +682,23 @@ function allIds() {
     console.log(`      ${silent.map((r) => r.id).join(', ')}`);
   }
   const dirty = report.filter((r) => r.hits.length);
-  const nB = report.reduce((a, r) => a + r.hits.filter((h) => h.kind === 'BLANK').length, 0);
+  const nB = report.reduce((a, r) => a + (r.hits || []).filter((h) => h.kind === 'BLANK').length, 0);
   const nH = report.reduce((a, r) => a + r.hits.filter((h) => h.kind === 'HOLLOW').length, 0);
+  // WHAT THE ANSWER ITSELF CUT. Reported separately from the emptiness, because it
+  // is a different rule (S11's band clause) and a different moment — the one frame
+  // check:frame structurally cannot see.
+  const cutRows = report.filter((r) => (r.cuts || []).length);
+  const nCut = report.reduce((a, r) => a + (r.cuts || []).filter((c) => c.kind === 'CUT').length, 0);
+  const nBury = report.reduce((a, r) => a + (r.cuts || []).filter((c) => c.kind === 'BURIED').length, 0);
+  console.log(`  ${nCut} word(s) whole before the answer and CUT by the crop after it`
+    + ' — the band has to hold the reaction, not just the resting pose');
+  console.log(`  ${nBury} word(s) clear before the answer and BURIED by it`
+    + ' — the reply may move the picture, not print over the words');
+  for (const r of cutRows) {
+    for (const c of r.cuts.slice(0, 4)) {
+      console.log(`      ${r.id.padEnd(30)} beat ${c.beat}  ${c.kind}  "${c.text}"  ${c.was} → ${c.now}`);
+    }
+  }
   console.log(`  ${nB} BLANK  (an outline round bare paper — nothing drawn in it at all)`);
   console.log(`  ${nH} hollow (drawn, but filling under ${Math.round(HOLLOW * 100)}% of the ring the reader sees)`);
   for (const r of dirty) {
@@ -580,7 +714,6 @@ function allIds() {
         + (h.words.length ? `  "${h.words.join(' / ')}"` : '  (no word in it)'));
     }
   }
-  if (outPath) fs.writeFileSync(outPath, JSON.stringify(report, null, 2));
   cleanup();
   const failed = dead.length || short.length || silent.length || nB;
   process.exit(failed ? 1 : 0);

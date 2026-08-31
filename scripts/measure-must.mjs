@@ -539,6 +539,39 @@ const STAGE_NEXT = +(process.env.STAGE_TRIES || 60);
       const prev = JSON.parse(fs.readFileSync(side, 'utf8'));
       allWords = { ...(prev.words ?? {}), ...words };
       allStamps = { ...(prev.stamps ?? {}), ...stamps };
+
+      // A SHORT READING MAY NOT OVERWRITE A LONGER ONE AT THE SAME STAMP.
+      //
+      // The run above already SAYS when it reached fewer beats than a lesson has
+      // — and then wrote the short row anyway, which is the half that bites. The
+      // stamp is a hash of the scene, the script and the probe, so if none of
+      // those moved the stamp still matches, `check:cinematic` reports "every
+      // stamp matches the scene it was measured from", and eight beats of boxes
+      // have quietly become seven with nothing downstream able to notice.
+      //
+      // It is not hypothetical: re-measuring one untouched lesson while another
+      // browser sweep held the machine returned 7 of its 8 beats and replaced the
+      // good row with it. A lesson loses a must-box that way, and a lesson with no
+      // box for a beat is framed by luck (§17 rule 5).
+      //
+      // Only where the stamp is UNCHANGED. A scene that really did lose a beat is
+      // a different stamp, and its shorter reading is the truth.
+      const kept = [];
+      for (const id of Object.keys(words)) {
+        const before = prev.words?.[id];
+        if (!before) continue;
+        if ((prev.stamps ?? {})[id] !== stamps[id]) continue;      // the scene moved
+        if (before.length > words[id].length) {
+          allWords[id] = before;
+          kept.push(`${id} ${words[id].length}→${before.length}`);
+        }
+      }
+      if (kept.length) {
+        console.log(`\n! kept ${kept.length} previous reading(s): this run measured FEWER beats`);
+        console.log(`  than the table already held, and the scene had not changed. Re-run these`);
+        console.log(`  ids on a quiet machine if you meant to remeasure them:\n  ${kept.join(', ')}`);
+      }
+
       const carried = Object.keys(allWords).length - Object.keys(words).length;
       if (carried > 0) console.log(`carried ${carried} lesson(s) forward from the previous measurement`);
     } catch { /* unreadable sidecar — this run's measurements stand alone */ }

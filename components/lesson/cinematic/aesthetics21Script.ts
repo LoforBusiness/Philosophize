@@ -93,9 +93,9 @@ export const BEATS: Aes21Beat[] = [
         left: 'LIKE A NOVEL', right: 'LIKE A PAINTING',
         start: 0.04,
         zones: [
-          { id: 'paint', upto: 0.3, reads: 'like a painting: the print on the wall is the work' },
+          { id: 'paint', upto: 0.3, reads: 'like a painting, the print is the work' },
           { id: 'both', upto: 0.66, reads: 'both at once, and that is the trouble', correct: true },
-          { id: 'novel', upto: 1, reads: 'like a novel: the negative is the work and prints are copies' },
+          { id: 'novel', upto: 1, reads: 'like a novel, the negative is the work' },
         ],
       },
       explain: 'The middle, uncomfortably. The negative works like a text, so any print carries the image and burning one destroys nothing. And yet the market treats an early signed print as the object, which is how we treat paintings. The rule is real and photography sits across it.',

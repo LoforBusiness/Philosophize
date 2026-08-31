@@ -2695,6 +2695,31 @@ for the flip. What must stay hidden on a drag beat is the same three things as
 everywhere else: the verdict, the `explain`, and the mark showing where the right
 answer was.
 
+### O5 · The reveal includes the SCENE's own verdict, not just the deck's panel
+
+`aesthetics21` drew three plates under its three columns — STILL EXISTS · STILL
+EXISTS · **GONE** — from two beats before it asked *"tap the work that is actually
+gone"*. The answer was printed under the answer, and nothing failed, because the
+plates are the scene's own content: `check:spoiler` compares the page against the
+beat's `explain` and against the verdict wording, and GONE is neither.
+
+So the rule O1 states about the reveal covers the scene too. **A per-option label
+that states the option's verdict is a reveal**, whatever component draws it, and it
+waits for the pick like everything else. The fix is one gate — the plates ride a
+shared value that only reaches 1 once the stage question is answered — and it makes
+a better beat than it replaced: the picture agrees with the reader instead of
+telling them.
+
+**THIS ONE HAS NO CHECKER ON PURPOSE.** The shape looks mechanical — a per-option
+string array whose odd one out sits at the correct index — and a detector for
+exactly that finds three scenes in the corpus, of which **two are not defects**:
+`ethics21`'s PAIN GONE / LIFE SHORTENED and `logic17`'s two supporting reasons are
+the options' own substance, which is precisely what a question is supposed to show.
+One true positive in three is noise, and the thing that separates a verdict from a
+claim is what the sentence MEANS, not how it is built. So this is an authoring rule
+that a person applies, and the detector was deleted rather than shipped — the same
+call `design.ts` records for the boxiness metric.
+
 ### Verifying it
 
 `npm run check:spoiler` steps every wired lesson in a browser, and at each graded beat
@@ -3621,21 +3646,31 @@ npm run check:cinematic
 npm run check:tour     # group K, offline, against each lesson's own band
 ```
 
-> **`measure-must` does not currently reproduce its own table, and that is unsettled.**
-> Re-measuring `aesthetics-aesthetics-4` — a lesson nobody had touched, whose source
-> stamp in `mustBoxes.ts` matches byte for byte — returns `[34, 222, 342, 288]` where
-> the committed table holds `[12, 222, 376, 288]`: 22 units narrower on each side, on
-> the same viewport, through the same route, with tours off. Something about the
-> environment the table was made in is not captured by the script.
+> **The table reproduces now, and re-measuring one lesson is safe again.** This note
+> used to say the opposite: `aesthetics-aesthetics-4` returned `[34, 222, 342, 288]`
+> where the committed table held `[12, 222, 376, 288]`, on the same viewport through
+> the same route, and the conclusion drawn was regenerate-everything-or-nothing. A
+> full 186-lesson regeneration has since produced a table where every stamp matches
+> its scene, `[34, 222, 342, 288]` is what is committed, and an isolated re-measure
+> of that same lesson returns it again. The two lessons this note named as carrying
+> stale stamps no longer do.
 >
-> The consequence is practical: a lesson whose scene changes cannot have its box
-> re-measured in isolation, because splicing one fresh reading into a table of stale
-> ones mixes two environments — and a must-box is what stops the camera cropping the
-> very words this group is about. Until it reproduces, treat the table as
-> regenerate-everything-or-nothing, and do not hand-edit it to silence the stamp
-> check. Two lessons carry a stale stamp today for exactly this reason
-> (`aesthetics-aesthetics-3`, `logic-arguments-3`); the boxes are the ones that were
-> measured, and the scenes have moved a caption and a strike bar since.
+> **What was really wrong is smaller and now guarded.** A run says out loud when it
+> reached fewer beats than a lesson has — and then wrote the short row anyway. The
+> stamp hashes the scene, the script and the probe, so if none of those moved the
+> stamp still matches, `check:cinematic` reports "every stamp matches the scene it
+> was measured from", and eight beats of boxes have quietly become seven with
+> nothing able to notice. Re-measuring one untouched lesson while another browser
+> sweep held the machine did exactly that: 7 of 8, written over the good row.
+>
+> `measure-must` now refuses to replace a longer reading with a shorter one **where
+> the stamp is unchanged** — a scene that really did lose a beat has a different
+> stamp, and its shorter reading is the truth. Counter-tested by reproducing the
+> contended run and watching the table survive it (`kept 1 previous reading: 7→8`,
+> file hash unchanged).
+>
+> The practical advice that survives: **re-measure on a quiet machine**, and read the
+> line the run prints rather than the last four lines of it.
 
 **Then the two browser sweeps, which answer questions arithmetic cannot.** They want
 Metro and a headless Chrome — the header of each script has the exact commands, and
@@ -3645,8 +3680,18 @@ they default to different ports so both can run at once.
 npm run check:frame    # what the CAMERA cuts in half   (edge of the frame)
 npm run check:cover    # what is painted ON a word      (D33, element vs element)
 npm run check:hold     # objects that ride the figure   (group P, grip and pop)
+npm run check:blank    # is the box the reader taps actually drawn, and what the
+                       #   ANSWER does to the words around it (S11)
 SELFTEST=1 npm run check:cover   # prove the cover check can still see a defect
 ```
+
+**`check:blank` is the only one that measures the ANSWERED frame**, and that is the
+gap it was built for. Every other sweep here probes at the start of a beat and
+answers only to advance, so the single frame where the reply is on screen — the lift,
+the swell, the dimming — is never looked at. It reads every word twice, before the
+answer and after it, and reports only what the answer took away: a word the crop now
+cuts (the band was measured against the resting pose), or a word the reaction now
+covers. Both halves are counter-tested by putting a defect back.
 
 `scripts/validate-cinematic.mjs` enforces the group-H rules that are arithmetic — beat
 count, exactly two graded questions, one quote placed legally, the summary last, a
@@ -5323,6 +5368,43 @@ two of them were wrong.
   was arriving. Hollow is advisory so a transient there costs nothing, but BLANK
   fails the build, and a checker that goes red on a frame nobody sees is one
   people learn to rerun until it passes.
+
+### The reaction is a frame nobody was measuring, and it has two failure modes
+
+`check:frame`, `check:readable` and `check:spoiler` all probe at the START of a beat
+and answer only to advance, so the single frame where the reply is on screen — the
+ten-unit rise, the six-percent swell, the dimming — has never been looked at by
+anything. `check:blank` reads every word twice, before the answer and after it, and
+reports only the DIFFERENCE. That differencing is what makes it usable: every ground
+the word already sat on appears in both readings, so only what the answer added
+survives, and the false-positive class that sinks every naive overlap probe is gone
+before it starts.
+
+**CUT — a word whole before the answer that the crop cuts after it.** Exact, and the
+band rule below is what it enforces. Counter-tested by restoring aesthetics21's old
+band and watching A PAINTING go 1 → 0.57.
+
+**BURIED — a word clear before the answer that the reaction covers.** This one is a
+ranking, not a gate, and the reason is worth stating because it took three passes to
+find out. The first version counted every opaque box over a word's centre and flagged
+logic3's own winning card title, which is white on black and perfectly legible: the
+boxes "covering" it were premise plates the lifted card had risen ACROSS, still
+underneath it. React Native stacks by document order and these scenes use no z-index,
+so a coverer only counts if it PAINTS AFTER the word. That took 20 findings to 9.
+What is left is still not clean — `metaphysics-being-7` draws a second copy of a word
+behind the card that fills on answer, and the rendered page is correct — so it runs
+about four true in five. Good enough to point at, not good enough to fail a build.
+
+**Three real defects came out of it**, all the same shape: a stack of answer cards
+packed tighter than the lift, whose winner rises into the line above it. logic3's
+cards are 44 tall on a 50 step and slice **TAP THE VERDICT** in half; aesthetics8
+slices **TAP A PAIR TO LOOK THROUGH IT**. Both were photographed doing it.
+
+Where the buried line is an INSTRUCTION, the fix is `useAnswerSpent` — it has been
+obeyed, the deck below is already showing the verdict, and a line telling the reader
+to do a thing they have just done is not worth a collision. Where it is a LABEL, the
+fix is the same one aesthetics21 needed: **a thing and the word for it ride together**,
+so the caption goes inside the Target rather than twelve units above it.
 
 ### And a band measured against the resting pose can be short of its own reaction
 

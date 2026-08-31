@@ -1710,6 +1710,39 @@ declared as a channel, so it cannot fall out of step with the control and it cos
 > inside an entrance — ethics19's rows grow in, and the sweep caught one 9 units
 > tall and 11% painted, which is a perfectly drawn row measured while arriving.
 >
+> **AND IT MEASURES THE ANSWERED FRAME, WHICH NOTHING ELSE DOES.** `check:frame`,
+> `check:readable` and `check:spoiler` all probe at the START of a beat and answer
+> only to advance, so the one frame carrying the reply — the ten-unit rise, the six
+> percent swell, the dimming — had no instrument at all. It reads every word twice,
+> before and after, and reports only the DIFFERENCE, which is what kills the
+> false-positive class that sinks a naive overlap probe: every ground the word
+> already sat on is in both readings. **CUT** is a word the crop now cuts (the band
+> was measured against the resting pose); **BURIED** is a word the reaction now
+> covers.
+>
+> **BURIED was wrong twice before it was right, and the RENDER caught it both
+> times.** It ignored paint order, so logic3's own winning card title reported two
+> coverers while being white on black (20 findings → 9); and it could not see a
+> two-state label built as a SIBLING plate rather than a parent, so metaphysics7's
+> NOW reported itself buried (9 → 3 real). It stays advisory for that reason. The
+> three real ones are one shape — **a stack packed tighter than the lift, whose
+> winner rises into the line above it**; logic3's cards are 44 tall on a 50 step and
+> slice TAP THE VERDICT in half. `useAnswerSpent` retires a spent instruction; a
+> caption that is a LABEL goes inside the Target, because a thing and the word for
+> it ride together.
+>
+> **Adding that second measurement then made the first one lie**: BLANK went 0 → 12
+> purely from load, all twelve gone on a quiet machine. Two readings are taken and
+> the BETTER one wins, not the later one.
+>
+> **And `measure-must` was overwriting good data.** It says when it reached fewer
+> beats than a lesson has — and wrote the short row anyway, at a stamp that still
+> matched, so `check:cinematic` reported every stamp clean while eight beats of
+> boxes had become seven. It refuses now. The stamp also hashes only a shared
+> component's **StyleSheet block**, not the whole file: hashing all of `Target.tsx`
+> made 186 lessons stale for a new hook that moves nothing, and a two-hour
+> re-measure for a no-op is how a ratchet stops being run.
+>
 > **The corpus reads 186 lessons · 509 target-beats · 0 BLANK**, nothing
 > unaudited. The nine hollow readings left are sparse-but-complete art — a rubble
 > heap, an ash heap, a provenance rail — or a card caught mid-lift, which is why

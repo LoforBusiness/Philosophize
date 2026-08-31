@@ -12,7 +12,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { useAnswerSpent } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // An instrument panel the presenter reads from.
@@ -96,6 +96,8 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, dragPos
   const showPick = !!cur.interact;
   const leaving = !!prev?.interact && !cur.interact;
   const answered = picked !== null;
+  // The stage's own instruction, spent the moment the answer lands (S11).
+  const spent = useAnswerSpent(picked);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -220,7 +222,7 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, dragPos
       {/* ── the verdict chips: the question is answered here ────────────────── */}
       {showPick ? (
         <Animated.View style={[styles.ballot, ballotStyle]} pointerEvents="box-none">
-          <Text style={styles.ballotHdr}>TAP THE RIGHT VERDICT</Text>
+          <Animated.Text style={[styles.ballotHdr, spent]}>TAP THE RIGHT VERDICT</Animated.Text>
           {CHIPS.map((c, k) => {
             const chosen = picked === c.id;
             return (
