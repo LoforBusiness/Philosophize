@@ -60,6 +60,22 @@ const HOLLOW = 0.40;
 const BLANK = 0.12;
 /** Anything this many times the target's area is scenery, not the target. */
 const LARGE_MULT = 6;
+/**
+ * HOW MANY WORDS THE ANSWER IS STILL ALLOWED TO BURY. A high-water mark, like
+ * CARD_BUDGET — it may only go DOWN.
+ *
+ * Eleven, in ten lessons, and they are all one shape: a stack of answer targets
+ * packed tighter than the reaction, whose winner rises ten units and swells six
+ * percent into whatever is above it. Three of that class were fixed on sight
+ * because the buried thing was a whole instruction sliced in half; these eleven
+ * are smaller — a chevron, a percentage, a numeral — and each one needs a person
+ * to decide, because the metric cannot tell a covered label from a card the
+ * lesson MEANT to slide over it (logic5 posts the proof into the chute the reader
+ * chose, and covering that chute's name is arguably the mechanic).
+ *
+ * So this does not fail the build. It stops the number growing.
+ */
+const BURY_BUDGET = 11;
 
 const put = (p) => new Promise((res, rej) => {
   const r = http.request({ host: '127.0.0.1', port: PORT, path: p, method: 'PUT' }, (x) => {
@@ -528,6 +544,17 @@ function allIds() {
                 cuts.push({ beat: beatNo, kind: 'BURIED', text: t, was: was.cov, now: cov });
               }
             }
+            // BLANK_SHOT=1 photographs the answered frame wherever this beat found
+            // something, because a finding here has to be judged by LOOKING and
+            // reproducing one beat by hand is fiddly — a harness that taps on the
+            // stage instead of the deck lands on a different beat entirely.
+            if (process.env.BLANK_SHOT && cuts.some((c) => c.beat === beatNo)) {
+              try {
+                fs.mkdirSync('scripts/.blank-shots', { recursive: true });
+                const png = await send('Page.captureScreenshot', { format: 'png' });
+                fs.writeFileSync(`scripts/.blank-shots/${id}-b${beatNo}.png`, Buffer.from(png.data, 'base64'));
+              } catch { /* a shot is evidence, never a reason to fail the sweep */ }
+            }
           } catch { /* unparseable reading — say nothing rather than guess */ }
         }
       }
@@ -693,9 +720,14 @@ function allIds() {
   console.log(`  ${nCut} word(s) whole before the answer and CUT by the crop after it`
     + ' — the band has to hold the reaction, not just the resting pose');
   console.log(`  ${nBury} word(s) clear before the answer and BURIED by it`
-    + ' — the reply may move the picture, not print over the words');
+    + ` — the reply may move the picture, not print over the words (budget ${BURY_BUDGET})`);
+  if (nBury > BURY_BUDGET) {
+    console.log(`  ⚠ that is ${nBury - BURY_BUDGET} MORE than the budget — a stack has been packed`);
+    console.log('    tighter than the answer lift. Give it that much gap, or retire the line');
+    console.log('    above it with useAnswerSpent if it is an instruction (S11).');
+  }
   for (const r of cutRows) {
-    for (const c of r.cuts.slice(0, 4)) {
+    for (const c of (r.cuts || []).slice(0, 4)) {
       console.log(`      ${r.id.padEnd(30)} beat ${c.beat}  ${c.kind}  "${c.text}"  ${c.was} → ${c.now}`);
     }
   }
@@ -715,6 +747,6 @@ function allIds() {
     }
   }
   cleanup();
-  const failed = dead.length || short.length || silent.length || nB;
+  const failed = dead.length || short.length || silent.length || nB || nBury > BURY_BUDGET;
   process.exit(failed ? 1 : 0);
 })();

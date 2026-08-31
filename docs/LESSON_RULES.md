@@ -5427,6 +5427,25 @@ into the lift merely traded the frame for the crop. What settles it is that a
 thing and the word for it are ONE thing — they ride together and the band holds
 both.
 
+### What the full sweep found, and what is left as a budget
+
+Across the whole corpus with every class fixed: **186 lessons · 516 target-beats ·
+0 CUT · 0 BLANK**, nothing unaudited. Seven hollow readings remain and are all
+sparse-but-complete art.
+
+**Eleven BURIED remain, in ten lessons, and they are one shape** — the same stack
+packed tighter than the reaction. They are held at eleven by `BURY_BUDGET`, a
+high-water mark like `CARD_BUDGET`: it may only go down, and a twelfth fails the
+sweep. They are a budget rather than a fix list because each one needs a person.
+The three that were fixed on sight buried a whole instruction, sliced in half and
+obvious in a screenshot; these eleven bury a chevron, a percentage, a numeral —
+and at least one of them is arguably the mechanic rather than a defect, because
+`logic5` posts the proof INTO the chute the reader chose and covering that chute's
+name is what "sending it down the chute" looks like. A metric cannot tell those
+apart. `BLANK_SHOT=1` photographs the answered frame at every finding, which is
+how to decide: reproducing one beat by hand is fiddly, because a harness that taps
+on the stage instead of the deck lands on a different beat entirely.
+
 With all of that, the corpus reads **186 lessons · 509 target-beats · 0 BLANK**,
 with no lesson left unaudited. The nine hollow readings that remain are all either
 sparse-but-complete art — a rubble heap, an ash heap, a provenance rail — or a card
