@@ -137,13 +137,33 @@ const st = StyleSheet.create({
 
   bubbleWrap: {
     flex: 1, minWidth: 0,
-    // Sits at his head rather than at his feet: the bubble's bottom edge lands
-    // just under the crown, which for a 103-unit figure at K 0.98 is about 40pt
-    // off the ground line.
-    marginBottom: 34,
+    // ── THE TAIL HAS TO REACH HIS HEAD, AND THAT IS WHAT SETS THIS NUMBER ──
+    //
+    // A reader: the pointer should be "higher up so it looks like it's actually
+    // the stick man saying" it. It was at 34, which put the tail's centre 52.5
+    // above the band's bottom — and the head, measured off the rig rather than
+    // guessed, sits at 87.1..92.3 with its chin at 67.5..72.7. So the bubble was
+    // level with his chest and the tail pointed at his waist.
+    //
+    // MOVING THE TAIL ALONE CANNOT FIX IT, which is the part worth writing down.
+    // The bubble's corners are 12 and a one-row bubble is only 40 tall, so the
+    // straight edge a tail can sit against is the middle 16 — the tail is pinned
+    // to within ±8 of the bubble's own centre whatever else happens. To put the
+    // tail at his chin the BUBBLE has to be at his chin.
+    //
+    // 50 puts the tail's centre at 68.5, inside the chin's range at every pose
+    // and every phase of the breath, and still on the straight part of the edge
+    // for a one-, two- or three-row bubble. `check:quips` re-derives all of it
+    // from the rig, so a change to the figure's scale or the bubble's radius
+    // fails the build rather than quietly pointing at his knees again.
+    marginBottom: 50,
     marginLeft: -6,
   },
   tail: {
+    // BOTTOM-ANCHORED, never top-anchored. The bubble grows UPWARD as a line
+    // wraps, so a tail measured from the top would climb with it and end up
+    // above his head on a three-row day; measured from the bottom it stays put
+    // relative to the ground, exactly as the figure does.
     position: 'absolute', left: -4, bottom: 13,
     width: 11, height: 11,
     backgroundColor: PAPER_LIT,

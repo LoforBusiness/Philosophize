@@ -45,6 +45,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { loadFont, wrap } from './lib/ttfwidth.mjs';
+import { loadTs } from './lib/loadts.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.slice(1)), '..');
 const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
@@ -390,6 +391,84 @@ console.log('\nthe herald (Pass tab)\n');
   const unused = codes.map(([n]) => n).filter((n) => !used.has(n));
   if (!unused.length) ok(`all ${codes.length} poses are actually used by a line`);
   else bad(`${unused.length} pose(s) declared and never used`, unused.join(' '));
+
+  // ── AND THE TAIL HAS TO POINT AT HIS HEAD ─────────────────────────────────
+  //
+  // A reader: the pointer should be "higher up so it looks like it's actually
+  // the stick man saying" it. It was not — the tail sat 52.5 above the band's
+  // bottom while his chin is at 67.5 and his head's centre at 87.1, so the
+  // bubble was level with his chest and the tail aimed at his waist.
+  //
+  // NOTHING COULD HAVE CAUGHT THAT. It is a relationship between a margin in a
+  // stylesheet and a joint the RIG computes, and neither file mentions the
+  // other. So the rig is evaluated here — it is pure maths with zero imports,
+  // which is exactly what that rule is for — and the tail is measured against
+  // the head it is supposed to be coming out of.
+  //
+  // THE HEAD MOVES: `emoteLive` breathes, and `shrug` lifts the shoulders, so
+  // the target is a RANGE sampled across every pose and several seconds rather
+  // than one number read off one frame.
+  const rigMod = await loadTs('components/lesson/cinematic/rig.ts');
+  const quipMod = await loadTs('lib/utils/passQuips.ts');
+
+  const numIn = (block, name) => {
+    const m = new RegExp(`${name}:\\s*(-?[\\d.]+)`).exec(block);
+    return m ? +m[1] : NaN;
+  };
+  const H = numIn(herald, 'const H =') || +(/const H = ([\d.]+)/.exec(herald) ?? [])[1];
+  const GROUND = +(/const GROUND = ([\d.]+)/.exec(herald) ?? [])[1];
+  const K = +(/const K = ([\d.]+)/.exec(herald) ?? [])[1];
+  const FIG_X = +(/const FIG_X = ([\d.]+)/.exec(herald) ?? [])[1];
+  const wrapBlock = herald.slice(herald.indexOf('bubbleWrap: {'));
+  const marginBottom = numIn(wrapBlock, 'marginBottom');
+  const tailBlock = herald.slice(herald.indexOf('tail: {'));
+  const tailBottom = numIn(tailBlock, 'bottom');
+  const tailH = numIn(tailBlock, 'height');
+  const radius = numIn(bubble, 'borderRadius');
+  const padY = num(bubble, 'paddingVertical', 'the herald bubble');
+  const lineH = num(said, 'lineHeight', 'the herald bubble');
+
+  if ([H, GROUND, K, FIG_X, marginBottom, tailBottom, tailH, radius].some((v) => !Number.isFinite(v))) {
+    bad('the herald still declares its geometry', 'one of H / GROUND / K / FIG_X / marginBottom / tail is gone');
+  } else {
+    const headY = (D) => D.head.find((t) => 'translateY' in t).translateY;
+    let lo = Infinity, hi = -Infinity;
+    for (const code of Object.values(quipMod.POSE)) {
+      for (let t = 0; t < 6; t += 0.1) {
+        const y = headY(rigMod.pose(rigMod.emoteLive(code, t, t), FIG_X, GROUND, K, 1, 1));
+        lo = Math.min(lo, H - y); hi = Math.max(hi, H - y);
+      }
+    }
+    const headR = rigMod.STR.headR * K;
+    const chinLo = lo - headR, chinHi = hi - headR;      // above the band's bottom
+    const tail = marginBottom + tailBottom + tailH / 2;
+
+    // It must land on the HEAD — anywhere from the chin to the crown reads as
+    // speech; below the chin is a man with a bubble at his chest.
+    if (tail >= chinLo && tail <= hi + headR) {
+      ok('the bubble tail points at his head',
+        `tail ${tail.toFixed(1)} above the band bottom, chin ${chinLo.toFixed(1)}..${chinHi.toFixed(1)}, head centre ${lo.toFixed(1)}..${hi.toFixed(1)}`);
+    } else {
+      bad('the bubble tail does not come out of his head',
+        `tail ${tail.toFixed(1)}, but the chin is ${chinLo.toFixed(1)} and the crown ${(hi + headR).toFixed(1)} — move bubbleWrap's marginBottom`);
+    }
+
+    // AND IT HAS TO SIT ON THE STRAIGHT PART OF THE EDGE. The corners are round,
+    // so a tail within `borderRadius` of either end floats off the bubble — which
+    // is the constraint that stops the tail being raised on its own, and the
+    // reason the whole bubble had to move. Worst case is the SHORTEST bubble.
+    const oneRow = lineH + padY * 2 + numIn(bubble, 'borderWidth') * 2;
+    const top = marginBottom + oneRow;
+    const straightLo = marginBottom + radius + tailH / 2;
+    const straightHi = top - radius - tailH / 2;
+    if (tail >= straightLo && tail <= straightHi) {
+      ok('and it sits on the straight part of the edge, even on a one-row bubble',
+        `${tail.toFixed(1)} within ${straightLo.toFixed(1)}..${straightHi.toFixed(1)}`);
+    } else {
+      bad('the tail floats off the bubble\'s rounded corner on a one-row line',
+        `${tail.toFixed(1)} outside ${straightLo.toFixed(1)}..${straightHi.toFixed(1)}`);
+    }
+  }
 }
 
 // ═════════════════════════════════════════════════════════════════════════════

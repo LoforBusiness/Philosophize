@@ -127,6 +127,33 @@ export const FREE_QUIPS: readonly Quip[] = [
   { line: 'A philosopher would ask what you are really waiting for.', pose: 'weigh' },
   { line: 'Fine. Stay. But do not complain to me about the pace.', pose: 'shrug' },
   { line: 'I polished that certificate twice. Do read it.', pose: 'sweep' },
+
+  // ── A SECOND ROUND, because a pool a reader meets DAILY runs out ────────
+  //
+  // Fifty is a fortnight and a half before he starts repeating himself, which
+  // is fine for a tab nobody visits twice — and this is not that tab. Same
+  // voice, same rule: he is rude about the fence and about attendance, never
+  // about whether the reader is any good at this.
+  { line: 'You have opened this tab before. I remember.', pose: 'wave' },
+  { line: 'The fence is the only thing here that is not already written.', pose: 'point' },
+  { line: 'Marcus Aurelius wrote at night, after work. You have a phone.', pose: 'present' },
+  { line: 'It costs less than a coffee you would finish without noticing.', pose: 'weigh' },
+  { line: 'I did not write the certificate. I only stand near it.', pose: 'sweep' },
+  { line: 'You could be reading. You are watching a man made of lines.', pose: 'wide' },
+  { line: 'Nothing in there expires. The evening does, though.', pose: 'point' },
+  { line: 'Two taps and I stop selling. That is the entire offer.', pose: 'reach' },
+  { line: 'The lock is not a puzzle to solve. It is just a lock.', pose: 'shrug' },
+  { line: 'You have scrolled past this before. I keep a tally.', pose: 'wave' },
+  { line: 'Say no. I will be standing here again tomorrow.', pose: 'open' },
+  { line: 'The pace is set by the fence, not by you. Odd, that.', pose: 'weigh' },
+  { line: 'Hume would want evidence. It is ruled and printed below.', pose: 'point' },
+  { line: 'One lesson, then the door shuts. Every single evening.', pose: 'point' },
+  { line: 'I would sulk, but I am a stick figure. This is my sulking.', pose: 'shrug' },
+  { line: 'Somewhere behind that is the unit you actually wanted.', pose: 'sweep' },
+  { line: 'Free is a perfectly good price. It is also the slowest.', pose: 'weigh' },
+  { line: 'You keep coming back to look at the fence. Interesting.', pose: 'wide' },
+  { line: 'Nothing I say will move you. The card underneath might.', pose: 'present' },
+  { line: 'Spinoza paid for his evenings in lens dust. Yours cost less.', pose: 'weigh' },
 ];
 
 /**
@@ -153,6 +180,32 @@ export const PRO_QUIPS: readonly Quip[] = [
   { line: 'You are on the good side of the certificate. Well done.', pose: 'proclaim' },
   { line: 'I used to have a whole speech for you. It is wasted now.', pose: 'shrug' },
   { line: 'Nothing is locked now. The only thing stopping you is you.', pose: 'wide' },
+
+  // ── AND THE POOL THAT MATTERS MOST WAS THE SMALLEST ─────────────────────
+  //
+  // CLAUDE.md's own rule: the pool size that counts is the one a reader
+  // actually draws from. A subscriber never sees a single FREE line, so their
+  // whole experience of this character was sixteen lines against the free
+  // tier's fifty — the people who have paid were the ones hearing him repeat
+  // himself inside a fortnight.
+  { line: 'Still here. Still paid up. Still not reading anything.', pose: 'wide' },
+  { line: 'The gate is open. It has been open for some time now.', pose: 'sweep' },
+  { line: 'You have all of it. Nothing left to threaten you with.', pose: 'open' },
+  { line: 'A Scholar, admiring the paperwork. Very on brand.', pose: 'point' },
+  { line: 'I could recommend a branch. You would not take it.', pose: 'shrug' },
+  { line: 'No fences, no adverts, no excuses. Especially the last one.', pose: 'weigh' },
+  { line: 'You are paying me to stand here. Sit with that a moment.', pose: 'wave' },
+  { line: 'Every unit unlocked and waiting. Waiting rather a long time.', pose: 'sweep' },
+  { line: 'I have been demoted from salesman to decoration. I cope.', pose: 'open' },
+  { line: 'The certificate is settled. The reading list is not.', pose: 'weigh' },
+  { line: 'Your name is on it. Now go and earn the rest of it.', pose: 'present' },
+  { line: 'You could open any lesson in the library. Right now. Any one.', pose: 'point' },
+  { line: 'Rest days in the bank and nowhere you need to spend them.', pose: 'wide' },
+  { line: 'Subscribed and idle is an expensive way to be idle.', pose: 'shrug' },
+  { line: 'Aristotle had a patron too. His did the reading, mind you.', pose: 'weigh' },
+  { line: 'The hard part was never the payment. Sorry to be the one.', pose: 'weigh' },
+  { line: 'Good. Now do the thing you bought it for.', pose: 'proclaim' },
+  { line: 'You are inside the fence now. It is quieter in here.', pose: 'sweep' },
 ];
 
 /**
