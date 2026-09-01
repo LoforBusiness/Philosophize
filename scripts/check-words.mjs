@@ -51,6 +51,41 @@ const MAX_SENTENCE = 20;
 // J2  ONE BEAT OF NARRATION: 45 words. The median is 22 and the longest honest
 //     beat is 44, so this bites only on something genuinely overstuffed.
 const MAX_BEAT = 45;
+// J12 HOW MANY SENTENCES A BEAT PUTS IN FRONT OF THE READER AT ONCE.
+//
+//     A beat's whole text is rendered as one block — CinematicPlayer draws
+//     `<Text style={styles.narr}>{beat.text}</Text>` — so a beat IS a segment in
+//     Mayer's sense: the unit the reader receives before pressing to continue.
+//
+//     The segmenting principle is one of the better-evidenced results in the
+//     field: people learn more from a message delivered in user-paced segments
+//     than from the same message delivered whole, supported in 10 of 10
+//     experimental tests at a median effect size of 0.79. Mayer's own worked
+//     example splits a two-and-a-half minute explanation into sixteen segments of
+//     ONE OR TWO SENTENCES each, with a continue button between them — which is
+//     almost exactly the shape of a cinematic beat.
+//
+//     Measured here: 466 of 872 narration beats — 53% — hold three or more. That is the corpus's real density problem, and
+//     it is invisible to every other rule in this group, because J1 caps a
+//     SENTENCE and J2 caps a beat's WORDS and a beat of three tight sentences
+//     passes both comfortably.
+//
+//     A high-water mark, not a gate: bringing all of them inside two would need
+//     roughly 289 more beats across the corpus, which is a change to how long a
+//     lesson is and not a thing a checker gets to decide. It may only go DOWN.
+const MAX_BEAT_SENTENCES = 2;
+// LEFT AT THE PRE-SPLIT FIGURE ON PURPOSE, and it should be lowered to 70.
+//
+// A budget is a ceiling, so this passes at 466 and passes at 70. It is committed
+// high because the 396 beat splits live in the *Script.ts files, and those are
+// entangled in the working tree with another session's uncommitted copy edits —
+// so this checker may reach HEAD before the content does, and a budget of 70
+// against an unsplit tree would fail a checkout that is not actually broken.
+//
+// The moment the split lands, run `npm run check:words` and lower this to what it
+// reports. `node scripts/split-beats.mjs` reproduces the split exactly and is
+// idempotent — a beat of two sentences is never touched twice.
+const BEAT_SENTENCE_BUDGET = 466;
 // J3  AN EXPLANATION AFTER AN ANSWER: 50 words. It is the longest thing anybody
 //     reads (median 34, p90 44) and it arrives at the moment attention is lowest,
 //     right after the reader has already committed to a choice.
@@ -115,7 +150,7 @@ const RECALL_BUDGET = 1;
 // is a high-water mark that may only ever go DOWN, exactly like CARD_BUDGET and
 // MC_BUDGET. Writing a new over-long sentence raises it and fails the build.
 // The other three are zeroes: they were nearly clean already.
-const LONG_SENTENCE_BUDGET = 29;
+const LONG_SENTENCE_BUDGET = 28;
 
 let fails = 0;
 const ok = (label, pass, detail) => {
@@ -199,6 +234,7 @@ const isRecall = (p) => !/\bTap\b/i.test(p) && RECALL.some((r) => r.test(p));
 const OPTION_LETTER = /(?:^|[^A-Za-z])([ABCD])(?=\s+(?:is|tempts|over-|fails|explains|goes|cannot|was|and|of)|[,:.]\s)/;
 
 const longSent = [], fatBeat = [], fatExplain = [], dense = [], nameStuffed = [], recalls = [], staleLetter = [];
+const packed = [];
 let beats = 0, texts = 0, explains = 0, prompts = 0;
 
 for (const f of fs.readdirSync(CIN).filter((n) => n.endsWith('Script.ts')).sort()) {
@@ -219,6 +255,9 @@ for (const f of fs.readdirSync(CIN).filter((n) => n.endsWith('Script.ts')).sort(
         if (n > MAX_SENTENCE) longSent.push({ name, n, s });
       }
       if (w.length > MAX_BEAT) fatBeat.push({ name, n: w.length, s: text });
+      // J12 — how many sentences land on the reader at once. See MAX_BEAT_SENTENCES.
+      const nSent = sentencesOf(text).length;
+      if (nSent > MAX_BEAT_SENTENCES) packed.push({ name, n: nSent, s: text });
       const hard = w.filter((x) => SYL(x) >= 3).length / Math.max(1, w.length) * 100;
       if (hard > MAX_HARD_PCT && w.length >= 12) dense.push({ name, pct: hard, s: text });
       const names = namesMidSentence(text);
@@ -244,6 +283,15 @@ for (const f of fs.readdirSync(CIN).filter((n) => n.endsWith('Script.ts')).sort(
 
 console.log('\nTHE WORDS THE READER READS\n');
 console.log(`  ${beats} beats · ${texts} pieces of narration · ${explains} explanations\n`);
+
+ok(`no MORE than ${BEAT_SENTENCE_BUDGET} beats put over ${MAX_BEAT_SENTENCES} sentences on screen at once (J12)`,
+  packed.length <= BEAT_SENTENCE_BUDGET,
+  packed.length
+    ? `${packed.length} of ${texts} beats, budget ${BEAT_SENTENCE_BUDGET}` +
+      (packed.length < BEAT_SENTENCE_BUDGET ? ` — lower it to ${packed.length}` : '') +
+      ` · worst ${Math.max(...packed.map((x) => x.n))} sentences in ${packed.slice().sort((a, b) => b.n - a.n)[0].name}` +
+      ' · Mayer segmenting: one or two a segment, 10/10 tests, median effect 0.79'
+    : 'no beat asks the reader to take more than two sentences at a time');
 
 ok(`no MORE than ${LONG_SENTENCE_BUDGET} sentences past ${MAX_SENTENCE} words (J1)`,
   longSent.length <= LONG_SENTENCE_BUDGET,

@@ -1318,6 +1318,41 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
   and left behind when the two-card answer replaced them. The reader sees two
   unlabelled cards, so every one of those letters named nothing. Nothing failed and
   nothing could: a stale letter still typechecks and still renders. Say *which card*.
+
+  **AND THE WORDS WERE NEVER THE PROBLEM — THE PACKING WAS.** Checked against the
+  published measures rather than against taste: Flesch's own bands put 60–69 at
+  *standard* (plain English, 8th–9th grade), the federal plain-language guideline
+  is an average of 15–20 words a sentence, and this corpus measures **83.2 mean
+  reading ease and 10.2 words a sentence**. 86% of it reads *fairly easy* or
+  better. Every published test says these lessons already read easily.
+  
+  What was wrong was the RULE: J10's floor sat at 55, which is inside the
+  *fairly difficult* band — two bands below anything shipped, cleared by 96% of the
+  corpus by more than twenty points. **A floor that permits worse than everything
+  you have written protects nobody.** It is 60 now, the standard's own line, with
+  the 68 stragglers as a ratchet.
+
+  **The density is what no rule could see (J12).** `CinematicPlayer` draws the whole
+  of `beat.text` as one block, so a beat is not a paragraph to skim — it is
+  everything the reader receives before pressing to continue. **A beat is a
+  segment**, and the segmenting principle (10 of 10 experimental tests, median
+  effect size 0.79; Mayer's own example uses one or two sentences a segment) says
+  what belongs in one. **466 of 872 narration beats — 53% — held three or more**,
+  and J1 caps a SENTENCE while J2 caps a beat's WORDS, so three tight sentences
+  passed both while still being three things at once.
+  
+  `scripts/split-beats.mjs` cut them, and the load-bearing detail is what it
+  copies: **every channel value goes to each piece verbatim, so the picture holds
+  still and only the words advance.** The scene is not re-cut; the reader is handed
+  it in pieces they can hold. 872 beats → 1,291; 53% packed → **5.4%**; H52's range
+  7–11 → 7–13.
+  
+  **The cap is the point, and the first plan was wrong without it.** Splitting
+  everything reaches a mean of 11.4 beats with 23 lessons past 13, some at 18–20,
+  which is not a micro-lesson any more. Most-packed-first, stopping at thirteen,
+  lands 396 of 466 — 85% of the benefit at a mean of 11.0. The 70 left are named
+  in the rule book, because lowering them further needs either a higher ceiling or
+  shorter beats and both are product decisions rather than a checker's.
 - **Productive struggle.** Every lesson earns its payoff with a real question or dilemma. A good "trick" answer is tempting for a *nameable* reason — so the explanation should **name the bias/fallacy and say why the tempting choice fails.**
 - **Ground it in a real thinker.** Pair the concept with a primary-source `quote` card. Authenticity ("here is the sentence Descartes actually wrote") is what makes it feel valuable, not gamified trivia.
 - **Give it an arc.** Hook (provocation) → build → struggle → a "what you now know" payoff on the summary.

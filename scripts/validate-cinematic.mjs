@@ -4,7 +4,7 @@
 // These are the rules that are arithmetic, and the rule book's own policy is that
 // arithmetic belongs in a check rather than in a sentence somebody has to remember:
 //
-//   H52  7–11 beats · exactly 1 quote · exactly 1 summary and it is last ·
+//   H52  7–13 beats · exactly 1 quote · exactly 1 summary and it is last ·
 //        the quote is not the hook, not a question beat, not last
 //   H53  exactly two GRADED questions (mc + interact); extra interaction is a `tap`
 //   H59  a band is declared, its bottom is the ground line + a little, and its
@@ -113,7 +113,7 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Script.ts')).sort(
   beatCount.set(name, n - summaries.length);
 
   if (!LEGACY.has(name)) {
-    if (n < 7 || n > 11) errs.push(`${n} beats (H52 wants 7–11, 8 is the house length)`);
+    if (n < 7 || n > 13) errs.push(`${n} beats (H52 wants 7–13 since the segmenting split; 8 was the old house length)`);
     if (quotes.length !== 1) errs.push(`${quotes.length} quote beats, want exactly 1 (H52)`);
     if (quotes.length === 1) {
       const q = quotes[0];

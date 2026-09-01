@@ -3282,6 +3282,82 @@ check:plain` measures both, and both are arithmetic rather than taste.
 
 ---
 
+### J11 · The floor is the published band, not one we picked
+
+J10 asked for reading ease 55 and the corpus measures **83.2 mean, 84 median**.
+Flesch's own bands put 60–69 at *standard* — plain English, the 8th–9th grade level
+the average adult reads at — and below 60 at *fairly difficult*. So the floor sat
+INSIDE the fairly-difficult band, two bands below anything actually shipped, and
+96% of the corpus cleared it by more than twenty points. **A floor that permits
+worse than everything you have written protects nobody.**
+
+It is 60 now, which is the standard's own line, with 68 pieces below it as a
+high-water mark that may only go down. None of the 68 is badly written — they sit
+at 55–59 and mostly carry a proper noun (Heidegger, Relativity, Catharsis).
+
+The measured shape of the corpus, for anyone retuning this:
+
+| | |
+|---|---|
+| reading ease | mean 83.2 · median 84 · p10 67 |
+| bands | 62% easy or very easy · 86% fairly easy or better · 3.8% below 60 |
+| sentence length | mean **10.2 words**, median 9, p90 18 |
+| federal plain-language guidance | average 15–20 words |
+
+**The words were never the problem.** Every published measure says this corpus
+reads easily, and it has done all along. What was wrong is the next rule.
+
+---
+
+### J12 · One or two sentences a beat, because a beat is a segment
+
+`CinematicPlayer` draws `<Text style={styles.narr}>{beat.text}</Text>` — the whole
+of a beat's text, as one block. So a beat is not a paragraph in an essay the reader
+can skim: it is everything they receive before pressing to continue. **A beat is a
+segment.**
+
+The segmenting principle is among the better-evidenced results in instructional
+design: people learn more from a message delivered in user-paced segments than from
+the same message delivered whole — supported in **10 of 10 experimental tests, at a
+median effect size of 0.79**. Mayer's own worked example splits a two-and-a-half
+minute explanation into sixteen segments of **one or two sentences** each, with a
+continue button between them, which is almost exactly the shape of a beat.
+
+**466 of 872 narration beats — 53% — held three or more.** That was the corpus's
+real density problem, and no other rule in this group could see it: J1 caps a
+SENTENCE, J2 caps a beat's WORDS, and a beat of three tight sentences passes both
+comfortably while still being three things to take in at once.
+
+`node scripts/split-beats.mjs` cut them. The load-bearing detail is what it copies:
+**every channel value goes to each piece verbatim — the same x, the same gesture,
+the same tracks — so the picture holds still and only the words advance.** That is
+the segmenting principle exactly. The scene is not re-cut; the reader is given it in
+pieces they can hold. `cite` stays on the first piece, because a kicker heads a
+passage and does not repeat down it, and `dur` divides in proportion to the words.
+
+It refuses a beat carrying `interact`, `quote` or `summary`. Those are not
+narration, and splitting one would duplicate a question, put a quotation on a beat
+that is not a rest, or move the summary off the end.
+
+**The cap is the point, and the first plan was wrong without it.** Splitting
+everything takes the corpus to a mean of 11.4 beats with 23 lessons past 13, some
+at 18–20, which is not a micro-lesson any more. Splitting most-packed-first and
+stopping at thirteen lands 396 of the 466 — 85% of the benefit — at a mean of 11.0:
+
+| | before | after |
+|---|---|---|
+| narration beats | 872 | 1,291 |
+| holding 3+ sentences | 466 (53%) | **70 (5.4%)** |
+| beats per lesson | mean 8.7 | mean 11.0 |
+| H52's range | 7–11 | **7–13** |
+
+The 70 left are the ones the split refused because their lesson would have passed
+thirteen — `aesthetics8`, `epistemology8` and `ethics8` are the worst. Lowering
+`BEAT_SENTENCE_BUDGET` further means either a higher ceiling or shorter beats, and
+both are decisions about the product rather than things a checker gets to make.
+
+---
+
 ### D34 · No word on the stage may be too small to read
 
 The stage fits a 400-wide design space into the box the player gives it:

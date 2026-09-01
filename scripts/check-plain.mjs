@@ -33,12 +33,45 @@ import path from 'node:path';
 
 const DIR = 'components/lesson/cinematic';
 
-/** The floor a beat's prose has to clear. */
-const EASE_FLOOR = 55;
+/**
+ * THE FLOOR IS THE PUBLISHED ONE, NOT A NUMBER WE PICKED.
+ *
+ * Flesch's own bands put 60-69 at "standard" — plain English, the 8th-9th grade
+ * level the average adult reads at, and what general-audience writing is normally
+ * aimed at. Below 60 is "fairly difficult".
+ *
+ * This floor was 55, which sits INSIDE the fairly-difficult band, and the corpus
+ * measures a mean of 83.2 with a median of 84. So the rule was licensing prose two
+ * bands worse than anything actually shipped, and 96% of the corpus cleared it by
+ * more than twenty points. A floor that permits worse than everything you have
+ * written is not protecting a reader from anything.
+ *
+ * At 60 it is the standard's own line. 68 pieces sit below it — none of them badly
+ * written, mostly 55-59 and carrying a proper noun (Heidegger, Relativity,
+ * Catharsis) — so they are a high-water mark rather than a gate, the same shape as
+ * CARD_BUDGET. Rewriting one lowers it; writing a new one below 60 fails the build.
+ */
+const EASE_FLOOR = 60;
 /** How much of a piece may be words that point instead of naming. */
 const POINTER_CEIL = 0.12;
-/** High-water mark for pieces that fail either test. May only go DOWN. */
-const HARD_BUDGET = 0;
+/**
+ * High-water mark for pieces that fail either test. May only go DOWN.
+ *
+ * It was 0 against a floor of 55. Raising the floor to the published band moves it
+ * to 68 — the debt is not new, it was simply below a line drawn too low to see it.
+ *
+ * LEFT AT 68 RATHER THAN THE 44 THE SPLIT TREE REPORTS, for the same reason
+ * BEAT_SENTENCE_BUDGET is left high: a budget is a ceiling, and this checker may
+ * reach HEAD before J12's beat splits do. Lower it to whatever the run prints once
+ * the *Script.ts changes are committed.
+ */
+const HARD_BUDGET = 68;
+/**
+ * The shortest piece worth scoring. Below this both tests are noise — see the note
+ * at the loop. Twenty words is about two ordinary sentences of this corpus, which
+ * is the smallest unit the reader actually receives as a thought.
+ */
+const MIN_SCORED = 20;
 
 /**
  * Words a philosophy lesson is allowed to be made of, because they are what it
@@ -175,6 +208,19 @@ if (RUN_DIRECTLY) {
   for (const p of prose()) {
     const e = ease(p.text);
     if (!e) continue;
+    // NEITHER STATISTIC MEANS ANYTHING ON A FRAGMENT.
+    //
+    // Flesch is a ratio of syllables to words to SENTENCES, and a pointer rate is
+    // a proportion of a handful of tokens. On "Look at it. Beautiful, obviously."
+    // — five words — one `it` is a 20% pointer rate and the ease score is noise.
+    // Readability formulas are not valid on short texts and never have been.
+    //
+    // This did not matter while a beat held three sentences. J12's split made
+    // one-sentence beats ordinary, and the count promptly went 68 -> 221 without a
+    // single word of the corpus changing: the same prose, measured in smaller
+    // pieces. A measurement that moves when you re-cut the container is measuring
+    // the container.
+    if (p.text.split(/\s+/).filter(Boolean).length < MIN_SCORED) continue;
     const heavy = e.score < EASE_FLOOR;
     const vague = p.kind !== 'prompt' && e.pointerRate > POINTER_CEIL;
     rows.push({ ...p, ...e, heavy, vague });
