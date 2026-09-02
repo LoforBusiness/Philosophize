@@ -34,15 +34,25 @@ export const BEATS: Logic32Beat[] = [
   },
   {
     a: 28, b: 4, q: 1, tried: 1,
-    dur: 4.4,
-    text: 'Try yes. Yes, you stopped, which means you were cheating before. The accusation now stands on the record, and nobody ever made the accusation.',
+    dur: 2,
+    text: 'Try yes. Yes, you stopped, which means you were cheating before.',
     cite: 'Answer: yes',
   },
   {
+    a: 28, b: 4, q: 1, tried: 1,
+    dur: 2.4,
+    text: 'The accusation now stands on the record, and nobody ever made the accusation.',
+  },
+  {
     a: 28, b: 46, q: 1, tried: 2,
-    dur: 4.4,
-    text: 'Try no, which feels like the safe one. No, you have not stopped — so you are cheating right now. It is worse.',
+    dur: 3.8,
+    text: 'Try no, which feels like the safe one. No, you have not stopped — so you are cheating right now.',
     cite: 'Answer: no',
+  },
+  {
+    a: 28, b: 46, q: 1, tried: 2,
+    dur: 1.8,
+    text: 'It is worse.',
   },
   {
     a: 44, b: 46, q: 1, tried: 2,
@@ -75,7 +85,7 @@ export const BEATS: Logic32Beat[] = [
         start: 0,
         stops: [
           { id: 'yes', reads: 'answer yes, and admit the whole thing' },
-          { id: 'no', reads: 'answer no, which still says you were doing it' },
+          { id: 'no', reads: 'say no, and you still admit the act' },
           { id: 'split', reads: 'refuse the package and take the hidden claim first', correct: true },
         ],
       },

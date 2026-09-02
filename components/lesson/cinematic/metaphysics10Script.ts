@@ -29,14 +29,24 @@ export interface Metaphysics10Beat extends BaseBeat {
 export const BEATS: Metaphysics10Beat[] = [
   {
     p: 13, x: 64,
-    text: 'A rose, a ruby, a flag. Nothing else about them matches — yet all three are red. So where is that redness?',
-    dur: 3.8,
+    text: 'A rose, a ruby, a flag. Nothing else about them matches — yet all three are red.',
+    dur: 2.9,
+  },
+  {
+    p: 13, x: 64,
+    text: 'So where is that redness?',
+    dur: 1.8,
   },
   {
     p: 47, x: 124, card: 1,
-    text: 'Whatever the three things share, give the shared part a card of its own: REDNESS. Now the awkward question. Where does the card go?',
+    text: 'Whatever the three things share, give the shared part a card of its own: REDNESS. Now the awkward question.',
     cite: 'The one in the many',
-    dur: 4.4,
+    dur: 3.5,
+  },
+  {
+    p: 47, x: 124, card: 1,
+    text: 'Where does the card go?',
+    dur: 1.8,
   },
   {
     p: 25, x: 124, frame: 1, card: 2,
@@ -46,9 +56,14 @@ export const BEATS: Metaphysics10Beat[] = [
   },
   {
     p: 5, x: 124, tags: 1,
-    text: 'Aristotle took it straight back down. Redness is real, he agreed — but it lives pinned in the things themselves. No red object, no redness.',
+    text: 'Aristotle took it straight back down. Redness is real, he agreed — but it lives pinned in the things themselves.',
     cite: 'Aristotle · in the things',
-    dur: 5.0,
+    dur: 4,
+  },
+  {
+    p: 5, x: 124, tags: 1,
+    text: 'No red object, no redness.',
+    dur: 1.8,
   },
   {
     p: 129, x: 124, tags: 1,
@@ -65,9 +80,14 @@ export const BEATS: Metaphysics10Beat[] = [
   },
   {
     p: 8, x: 124, str: 1, card: 3,
-    text: 'A third camp shrugs. Nothing is shared at all — “red” is a word we hang beside things that happen to look alike. It touches none of them.',
+    text: 'A third camp shrugs. Nothing is shared at all — “red” is a word we hang beside things that happen to look alike.',
     cite: 'The nominalist',
-    dur: 4.8,
+    dur: 3.9,
+  },
+  {
+    p: 8, x: 124, str: 1, card: 3,
+    text: 'It touches none of them.',
+    dur: 1.8,
   },
   {
     p: 4, x: 124, frame: 1, str: 1,
@@ -75,12 +95,12 @@ export const BEATS: Metaphysics10Beat[] = [
       prompt: 'Drag to where Aristotle puts redness.',
       drag: {
         lo: 'ONLY A WORD WE USE',
-        hi: 'IN A REALM OF ITS OWN',
+        hi: 'IN ITS OWN REALM',
         start: 1,
         zones: [
-          { id: 'word', upto: 0.28, reads: 'nothing shared out there; just a handy label' },
+          { id: 'word', upto: 0.28, reads: 'nothing shared, just a label' },
           { id: 'things', upto: 0.72, reads: 'fully real, and only ever inside a red thing', correct: true },
-          { id: 'realm', upto: 1, reads: 'in a realm of its own, above every red thing' },
+          { id: 'realm', upto: 1, reads: 'in its own realm, above red things' },
         ],
       },
       explain: 'The middle, and the two ends are the views he is between. Aristotle keeps universals real, so the first zone is not his. But he takes redness off the wall and pins it to the things: fully real, never free of some red object.',

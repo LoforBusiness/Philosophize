@@ -33,15 +33,25 @@ export const BEATS: Logic33Beat[] = [
   },
   {
     p: 19, x: 52, bend: 1,
-    text: 'Keep going and you can thread every single dot exactly. Perfect fit. Nothing left over, and no measurement unexplained.',
+    text: 'Keep going and you can thread every single dot exactly. Perfect fit.',
     cite: 'A perfect fit',
-    dur: 4.2,
+    dur: 2.7,
+  },
+  {
+    p: 19, x: 52, bend: 1,
+    text: 'Nothing left over, and no measurement unexplained.',
+    dur: 1.8,
   },
   {
     p: 4, x: 52, bend: 1, nextDot: 1,
-    text: 'Then a new measurement comes in, and the perfect curve is nowhere near it. It was never learning the pattern. It was learning your seven dots, errors and all.',
+    text: 'Then a new measurement comes in, and the perfect curve is nowhere near it. It was never learning the pattern.',
     cite: 'The eighth measurement',
-    dur: 4.8,
+    dur: 3.3,
+  },
+  {
+    p: 4, x: 52, bend: 1, nextDot: 1,
+    text: 'It was learning your seven dots, errors and all.',
+    dur: 1.8,
   },
   {
     p: 137, x: 52, bend: 1, nextDot: 1,
@@ -76,9 +86,14 @@ export const BEATS: Logic33Beat[] = [
   },
   {
     p: 35, x: 52, bend: 0.5, nextDot: 1,
-    text: 'That is what the razor is really for. Between two accounts that fit the evidence equally, take the one with fewer parts. Every extra part is another thing that can be wrong.',
+    text: 'That is what the razor is really for. Between two accounts that fit the evidence equally, take the one with fewer parts.',
     cite: 'Occam’s razor',
-    dur: 5.0,
+    dur: 3.4,
+  },
+  {
+    p: 35, x: 52, bend: 0.5, nextDot: 1,
+    text: 'Every extra part is another thing that can be wrong.',
+    dur: 1.8,
   },
   {
     p: 45, x: 52, bend: 0.5, nextDot: 1,

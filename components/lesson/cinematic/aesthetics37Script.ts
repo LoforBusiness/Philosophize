@@ -82,7 +82,7 @@ export const BEATS: Aesthetics37Beat[] = [
         start: 0,
         zones: [
           { id: 'live', upto: 0.3, reads: 'nothing to get wrong' },
-          { id: 'mid', upto: 0.66, reads: 'a version people know' },
+          { id: 'mid', upto: 0.66, reads: 'a tune people know' },
           { id: 'text', upto: 1, reads: 'a piece to get right', correct: true },
         ],
       },
@@ -93,8 +93,13 @@ export const BEATS: Aesthetics37Beat[] = [
   },
   {
     p: 35, x: 126, staves: 1, score: 1, lift: 1,
-    text: 'So the same sounds become a different kind of thing depending on what stood behind them. Not how the sounds strike the ear. What the sounds are.',
-    dur: 4.8,
+    text: 'So the same sounds become a different kind of thing depending on what stood behind them. Not how the sounds strike the ear.',
+    dur: 4.1,
+  },
+  {
+    p: 35, x: 126, staves: 1, score: 1, lift: 1,
+    text: 'What the sounds are.',
+    dur: 1.8,
   },
   {
     summary: {

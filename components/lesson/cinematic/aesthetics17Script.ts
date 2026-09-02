@@ -56,9 +56,14 @@ export const BEATS: Aes17Beat[] = [
   },
   {
     g: 5, x: 160, shape: 1, fear: 0.86, frame: 1,
-    dur: 5.0,
-    text: 'Three answers have been offered. The fear is worked through and released. The fear is converted by the telling. The fear is the fee you pay to find out.',
+    dur: 2.1,
+    text: 'Three answers have been offered. The fear is worked through and released.',
     cite: 'What people have said',
+  },
+  {
+    g: 5, x: 160, shape: 1, fear: 0.86, frame: 1,
+    dur: 2.9,
+    text: 'The fear is converted by the telling. The fear is the fee you pay to find out.',
   },
   {
     g: 4, x: 160, shape: 1, fear: 0.86, frame: 1, pick: 1,
@@ -78,7 +83,7 @@ export const BEATS: Aes17Beat[] = [
         start: 0,
         stops: [
           { id: 'nofear', reads: 'the fear is faked' },
-          { id: 'nofun', reads: 'the enjoyment is faked' },
+          { id: 'nofun', reads: 'the fun is faked' },
           { id: 'real', reads: 'the fear is real, with the consequences taken out', correct: true },
         ],
       },

@@ -30,20 +30,40 @@ export interface Aes4Beat extends BaseBeat {
 export const BEATS: Aes4Beat[] = [
   {
     a: 2, v: 0, ask: 1, test: 0, verdict: 0, signed: 0, art: 0,
-    text: 'In 1917, a plain urinal was entered as art. No carving, no painting — just a choice. So what makes something art?',
-    dur: 3.6,
+    text: 'In 1917, a plain urinal was entered as art. No carving, no painting — just a choice.',
+    dur: 2.8,
+  },
+  {
+    a: 2, v: 0, ask: 1, test: 0, verdict: 0, signed: 0, art: 0,
+    text: 'So what makes something art?',
+    dur: 1.8,
   },
   {
     a: 1, v: 10, test: 2,
-    text: 'For ages there were two answers. Plato’s: art copies the world skilfully, and the Greek word for that is mimesis. Tolstoy’s: art puts a feeling into a form somebody else can pick up. Both assume a person made it.',
+    text: 'For ages there were two answers. Plato’s: art copies the world skilfully, and the Greek word for that is mimesis.',
     cite: 'Two old answers',
-    dur: 5.0,
+    dur: 2.6,
+  },
+  {
+    a: 1, v: 10, test: 2,
+    text: 'Tolstoy’s: art puts a feeling into a form somebody else can pick up. Both assume a person made it.',
+    dur: 2.4,
   },
   {
     a: 36, v: 15, test: 2, signed: 1,
-    text: 'Duchamp laid a urinal on its back, signed it R. Mutt 1917, and sent the thing in. The committee hid the piece. An unsigned defence replied that the maker did not matter. He chose the object, and choosing was the work.',
+    text: 'Duchamp laid a urinal on its back, signed it R. Mutt 1917, and sent the thing in.',
     cite: 'The Richard Mutt Case, 1917',
-    dur: 5.2,
+    dur: 2.2,
+  },
+  {
+    a: 36, v: 15, test: 2, signed: 1,
+    text: 'The committee hid the piece. An unsigned defence replied that the maker did not matter.',
+    dur: 1.9,
+  },
+  {
+    a: 36, v: 15, test: 2, signed: 1,
+    text: 'Duchamp chose the object, and choosing was the work.',
+    dur: 1.8,
   },
   {
     a: 0, v: 4, test: 2, signed: 1,
@@ -59,9 +79,14 @@ export const BEATS: Aes4Beat[] = [
   },
   {
     a: 13, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
-    text: 'Fountain fits neither answer. It copies nothing and expresses nothing, and it still will not go away. Asking "but is that art?" is already philosophy, because it makes you say what you secretly think art is.',
+    text: 'Fountain fits neither answer. It copies nothing and expresses nothing, and it still will not go away.',
     cite: 'The artworld confers',
-    dur: 5.0,
+    dur: 2.4,
+  },
+  {
+    a: 13, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
+    text: 'Asking "but is that art? is already philosophy, because it makes you say what you secretly think art is.',
+    dur: 2.6,
   },
   {
     a: 21, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
@@ -83,9 +108,9 @@ export const BEATS: Aes4Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'label', reads: 'anything at all, so long as you say the word' },
+          { id: 'label', reads: 'anything, if you say the word' },
           { id: 'skill', reads: 'only what took real skill to make' },
-          { id: 'world', reads: 'a tradition and an artworld taking it up', correct: true },
+          { id: 'world', reads: 'the art world taking it up', correct: true },
         ],
       },
       explain: 'The far setting. The first is the anything goes reading and it is not what Dickie or Danto said. It took theory, history and an artworld for the choice to register at all — which is why the identical urinal in a plumbing shop stayed plumbing.',

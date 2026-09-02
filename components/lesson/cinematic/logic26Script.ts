@@ -21,20 +21,35 @@ export interface Logic26Beat extends BaseBeat {
 export const BEATS: Logic26Beat[] = [
   {
     p: 25, x: 70,
-    text: 'Here is a strange way to prove something is true. Begin by assuming it is false. Then be as reasonable as you possibly can.',
-    dur: 4.2,
+    text: 'Here is a strange way to prove something is true. Begin by assuming it is false.',
+    dur: 2.8,
+  },
+  {
+    p: 25, x: 70,
+    text: 'Then be as reasonable as you possibly can.',
+    dur: 1.8,
   },
   {
     p: 41, x: 168, links: 1,
-    text: 'Suppose there is a largest number. Call it N. Nothing wrong with supposing it — that is the whole move, and you are allowed to suppose anything at all.',
+    text: 'Suppose there is a largest number. Call it N.',
     cite: 'The assumption',
-    dur: 4.8,
+    dur: 1.8,
+  },
+  {
+    p: 41, x: 168, links: 1,
+    text: 'Nothing wrong with supposing it — that is the whole move, and you are allowed to suppose anything at all.',
+    dur: 3.3,
   },
   {
     p: 40, x: 168, links: 3,
-    text: 'Now just follow it. N plus one is a number, and it is bigger than N. So N is not the largest after all — and that is flatly at odds with what we assumed.',
+    text: 'Now just follow it. N plus one is a number, and it is bigger than N.',
     cite: 'Follow it honestly',
-    dur: 5.0,
+    dur: 2.3,
+  },
+  {
+    p: 40, x: 168, links: 3,
+    text: 'So N is not the largest after all — and that is flatly at odds with what we assumed.',
+    dur: 2.7,
   },
   {
     p: 147, x: 124, links: 3,
@@ -50,9 +65,14 @@ export const BEATS: Logic26Beat[] = [
   },
   {
     p: 35, x: 168, links: 4, snap: 1,
-    text: 'Something in that chain has to give. Every step after the first was valid, so the break lands where it started. The assumption was false. There is no largest number.',
+    text: 'Something in that chain has to give. Every step after the first was valid, so the break lands where it started.',
     cite: 'Where it breaks',
-    dur: 5.0,
+    dur: 3.5,
+  },
+  {
+    p: 35, x: 168, links: 4, snap: 1,
+    text: 'The assumption was false. There is no largest number.',
+    dur: 1.8,
   },
   {
     p: 4, x: 124, links: 4, snap: 1,
@@ -61,9 +81,9 @@ export const BEATS: Logic26Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'nothing', reads: 'nothing; the argument has fallen apart' },
+          { id: 'nothing', reads: 'nothing, the argument collapsed' },
           { id: 'step', reads: 'one of the steps along the way was wrong' },
-          { id: 'assume', reads: 'the assumption you started from was false', correct: true },
+          { id: 'assume', reads: 'what you started from was false', correct: true },
         ],
       },
       explain: 'The far setting, and the contradiction is the goal rather than the wreckage. If every step from your assumption was valid, the assumption is the only thing left to blame. The first setting is the instinct this whole method is built to overturn.',

@@ -58,9 +58,14 @@ export const BEATS: Met23Beat[] = [
   },
   {
     p: 21, x: 132, ships: 1, swap: 1, built: 1,
-    text: 'Two tests that normally agree. Unbroken use points left. Original wood points right. Nothing on the stage decides between the two.',
+    text: 'Two tests that normally agree. Unbroken use points left.',
     cite: 'Two readings of same',
-    dur: 4.4,
+    dur: 1.9,
+  },
+  {
+    p: 21, x: 132, ships: 1, swap: 1, built: 1,
+    text: 'Original wood points right. Nothing on the stage decides between the two.',
+    dur: 2.5,
   },
   {
     p: 137, x: 268, ships: 1, swap: 1, built: 1,
@@ -76,8 +81,13 @@ export const BEATS: Met23Beat[] = [
   },
   {
     p: 13, x: 268, ships: 1, swap: 1, built: 1,
-    text: 'Under it sits a harder question. When do parts make one thing at all? A pile of planks is not a ship.',
-    dur: 4.6,
+    text: 'Under it sits a harder question. When do parts make one thing at all?',
+    dur: 2.9,
+  },
+  {
+    p: 13, x: 268, ships: 1, swap: 1, built: 1,
+    text: 'A pile of planks is not a ship.',
+    dur: 1.8,
   },
   {
     p: 41, x: 268, ships: 1, swap: 1, built: 1,

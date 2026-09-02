@@ -26,8 +26,13 @@ export interface E10Beat extends BaseBeat {
 export const BEATS: E10Beat[] = [
   {
     p: 25, x: 92, gauge: 0, needle: 0.62,
-    text: 'You are not certain the sun will rise tomorrow. You would still bet everything you own on it. So do you know, or don’t you?',
-    dur: 3.8,
+    text: 'You are not certain the sun will rise tomorrow. You would still bet everything you own on it.',
+    dur: 2.7,
+  },
+  {
+    p: 25, x: 92, gauge: 0, needle: 0.62,
+    text: 'So do you know, or don’t you?',
+    dur: 1.8,
   },
   {
     p: 1, x: 92, gauge: 1, band: 1, needle: 0.62,
@@ -37,9 +42,14 @@ export const BEATS: E10Beat[] = [
   },
   {
     p: 33, x: 92, gauge: 1, band: 2, needle: 0.62,
-    text: 'Fallibilism moves the line. You can genuinely know something and still admit you could, in principle, be mistaken. Knowing and doubting are allowed in the room together.',
+    text: 'Fallibilism moves the line. You can genuinely know something and still admit you could, in principle, be mistaken.',
     cite: 'Fallibilism',
-    dur: 4.6,
+    dur: 3.1,
+  },
+  {
+    p: 33, x: 92, gauge: 1, band: 2, needle: 0.62,
+    text: 'Knowing and doubting are allowed in the room together.',
+    dur: 1.8,
   },
   {
     p: 128, x: 160, gauge: 1, band: 2, needle: 0.62,
@@ -56,9 +66,14 @@ export const BEATS: E10Beat[] = [
   },
   {
     p: 5, x: 160, gauge: 1, band: 2, needle: 0.78, revise: true,
-    text: 'Watch what science does with doubt. Science never claims certainty, and it plainly knows a great deal. Evidence arrives and the needle moves. Changing its mind is how the method works, not a sign of failure.',
+    text: 'Watch what science does with doubt. Science never claims certainty, and it plainly knows a great deal.',
     cite: 'Why it is a strength',
-    dur: 5.2,
+    dur: 2.5,
+  },
+  {
+    p: 5, x: 160, gauge: 1, band: 2, needle: 0.78, revise: true,
+    text: 'Evidence arrives and the needle moves. Changing its mind is how the method works, not a sign of failure.',
+    dur: 2.7,
   },
   {
     p: 4, x: 228, gauge: 1, band: 2, needle: 0.78, flags: true,
@@ -78,9 +93,9 @@ export const BEATS: E10Beat[] = [
         hi: 'BEYOND ANY QUESTION',
         start: 0,
         zones: [
-          { id: 'hedge', upto: 0.28, reads: 'barely; it is a hedge rather than a belief' },
+          { id: 'hedge', upto: 0.28, reads: 'barely, more a hedge than a belief' },
           { id: 'firm', upto: 0.74, reads: 'fully, and still open to being shown wrong', correct: true },
-          { id: 'closed', upto: 1, reads: 'so firmly that no evidence could ever touch it' },
+          { id: 'closed', upto: 1, reads: 'so firmly nothing could shake it' },
         ],
       },
       explain: 'The middle, and the near end is the misreading. I might be wrong sounds like hedging and is not: it is a standing invitation to evidence. You can commit completely, act on it, and leave the door open at the same time.',

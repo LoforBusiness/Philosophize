@@ -79,9 +79,14 @@ export const BEATS: Political34Beat[] = [
   },
   {
     p: 35, x: 50, level: 0.72, reach: 0.72,
-    text: 'That is subsidiarity, and it has two halves. As small as possible is only the first one. The second is: and no smaller than the problem.',
+    text: 'That is subsidiarity, and it has two halves. As small as possible is only the first one.',
     cite: 'Subsidiarity',
-    dur: 4.8,
+    dur: 3.1,
+  },
+  {
+    p: 35, x: 50, level: 0.72, reach: 0.72,
+    text: 'The second is: and no smaller than the problem.',
+    dur: 1.8,
   },
   {
     p: 45, x: 50, level: 0.72, reach: 0.72,

@@ -32,9 +32,14 @@ export const BEATS: Aes12Beat[] = [
   },
   {
     p: 9, r: 1, rx: 224, ticks: 1, box: 0,
-    text: 'A reader comes away from the board certain: this is grief. The lamp, the waiting, the going out. Nothing on the page hints at a joke.',
+    text: 'A reader comes away from the board certain: this is grief. The lamp, the waiting, the going out.',
     cite: 'The first reading',
-    dur: 4.6,
+    dur: 3.2,
+  },
+  {
+    p: 9, r: 1, rx: 224, ticks: 1, box: 0,
+    text: 'Nothing on the page hints at a joke.',
+    dur: 1.8,
   },
   {
     p: 22, r: 21, rx: 224, ticks: 3, box: 1,
@@ -56,9 +61,14 @@ export const BEATS: Aes12Beat[] = [
   },
   {
     p: 26, r: 45, rx: 224, ticks: 5, box: 1,
-    text: 'Now the poet insists the last line was a joke. Two more readers stop, read, and add the same mark. The box still will not open.',
+    text: 'Now the poet insists the last line was a joke. Two more readers stop, read, and add the same mark.',
     cite: 'The claim',
-    dur: 4.6,
+    dur: 3.5,
+  },
+  {
+    p: 26, r: 45, rx: 224, ticks: 5, box: 1,
+    text: 'The box still will not open.',
+    dur: 1.8,
   },
   {
     p: 20, r: 4, rx: 224, ticks: 5, box: 1,
@@ -68,7 +78,7 @@ export const BEATS: Aes12Beat[] = [
         left: 'IN THE POEM', right: 'IN THE POET',
         start: 0.04,
         zones: [
-          { id: 'poet', upto: 0.3, reads: 'in the poet; he says what he meant and that settles it' },
+          { id: 'poet', upto: 0.3, reads: 'in the poet, he decides' },
           { id: 'both', upto: 0.66, reads: 'half the poem, half the poet' },
           { id: 'poem', upto: 1, reads: 'in the poem, which every reader can examine', correct: true },
         ],

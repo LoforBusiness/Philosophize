@@ -45,9 +45,14 @@ export const BEATS: Log18Beat[] = [
   },
   {
     p: 45, x: 128, crowd: 1, gap: 1, needle: 0.5,
-    text: 'Here is the machinery. The handle is what they turn. The needle is whether the water is safe.',
+    text: 'Here is the machinery. The handle is what they turn.',
     cite: 'Look at the middle',
-    dur: 4.4,
+    dur: 2.4,
+  },
+  {
+    p: 45, x: 128, crowd: 1, gap: 1, needle: 0.5,
+    text: 'The needle is whether the water is safe.',
+    dur: 2,
   },
   {
     p: 13, x: 128, crowd: 1, gap: 1, needle: 0.5,

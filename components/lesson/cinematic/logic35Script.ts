@@ -37,13 +37,23 @@ export const BEATS: Logic35Beat[] = [
   },
   {
     p: 2, x: 62, rise: 1,
-    text: 'Ice cream sales climb. Drownings climb with them, week for week. The shape is real and it is not a coincidence.',
-    dur: 4.2,
+    text: 'Ice cream sales climb. Drownings climb with them, week for week.',
+    dur: 2.2,
+  },
+  {
+    p: 2, x: 62, rise: 1,
+    text: 'The shape is real and it is not a coincidence.',
+    dur: 2,
   },
   {
     p: 13, x: 62, rise: 1, arrow: 1,
-    text: 'So here is the arrow everybody draws. Cones cause drownings. Nobody believes it, and the data does not care what you believe.',
-    dur: 4.6,
+    text: 'So here is the arrow everybody draws. Cones cause drownings.',
+    dur: 2.1,
+  },
+  {
+    p: 13, x: 62, rise: 1, arrow: 1,
+    text: 'Nobody believes it, and the data does not care what you believe.',
+    dur: 2.5,
   },
   {
     p: 4, x: 62, rise: 1, arrow: 1, picks: 1, live: 1,
@@ -56,8 +66,13 @@ export const BEATS: Logic35Beat[] = [
   },
   {
     p: 21, x: 62, rise: 1, picks: 1, under: 1,
-    text: 'A cause under both is called a confounder. Take the summer out and the link between cone and drowning vanishes. It was never there.',
-    dur: 4.6,
+    text: 'A cause under both is called a confounder. Take the summer out and the link between cone and drowning vanishes.',
+    dur: 3.8,
+  },
+  {
+    p: 21, x: 62, rise: 1, picks: 1, under: 1,
+    text: 'It was never there.',
+    dur: 1.8,
   },
   {
     p: 47, x: 62, rise: 1, under: 1,
@@ -73,8 +88,13 @@ export const BEATS: Logic35Beat[] = [
   },
   {
     p: 35, x: 130, rise: 1, under: 1, cut: 1,
-    text: 'The link is rarely this obvious. Children with bigger feet read better, and the whole cause is age. Coffee looked deadly for years because smokers drank coffee.',
-    dur: 4.8,
+    text: 'The link is rarely this obvious. Children with bigger feet read better, and the whole cause is age.',
+    dur: 3.2,
+  },
+  {
+    p: 35, x: 130, rise: 1, under: 1, cut: 1,
+    text: 'Coffee looked deadly for years because smokers drank coffee.',
+    dur: 1.8,
   },
   {
     p: 45, x: 130, rise: 1, under: 1, cut: 1,
@@ -82,11 +102,11 @@ export const BEATS: Logic35Beat[] = [
       prompt: 'Drag to what actually cuts the hidden causes.',
       drag: {
         lo: 'MAKE THE STUDY BIGGER',
-        hi: 'LET A COIN DECIDE WHO IS TREATED',
+        hi: 'LET A COIN DECIDE',
         start: 0,
         zones: [
-          { id: 'big', upto: 0.3, reads: 'more people, with the same hidden hand under all of them' },
-          { id: 'list', upto: 0.66, reads: 'list the causes you can think of and adjust for them' },
+          { id: 'big', upto: 0.3, reads: 'more people, same hidden cause' },
+          { id: 'list', upto: 0.66, reads: 'adjust for the causes you thought of' },
           { id: 'coin', upto: 1, reads: 'a coin decides, so nothing else can be deciding', correct: true },
         ],
       },

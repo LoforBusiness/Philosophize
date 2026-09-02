@@ -25,8 +25,13 @@ export interface Metaphysics11Beat extends BaseBeat {
 export const BEATS: Metaphysics11Beat[] = [
   {
     p: 28, c: 42, cx: 440, tok: 0,
-    text: 'Nearly every scrap of matter this man was born with has been replaced. The name under him has not moved once. What is it holding on to?',
-    dur: 3.6,
+    text: 'Nearly every scrap of matter this man was born with has been replaced. The name under him has not moved once.',
+    dur: 2.8,
+  },
+  {
+    p: 28, c: 42, cx: 440, tok: 0,
+    text: 'What is it holding on to?',
+    dur: 1.8,
   },
   {
     p: 45, c: 42, cx: 290, tok: 0,
@@ -42,9 +47,14 @@ export const BEATS: Metaphysics11Beat[] = [
   },
   {
     p: 46, c: 15, tok: 1,
-    text: 'Overnight the whole thread leaves the prince and settles above the cobbler. Neither man has taken a step. Only the memories have moved.',
+    text: 'Overnight the whole thread leaves the prince and settles above the cobbler. Neither man has taken a step.',
     cite: 'One night',
-    dur: 4.4,
+    dur: 3.4,
+  },
+  {
+    p: 46, c: 15, tok: 1,
+    text: 'Only the memories have moved.',
+    dur: 1.8,
   },
   {
     p: 11, c: 4, tok: 1,
@@ -67,9 +77,9 @@ export const BEATS: Metaphysics11Beat[] = [
         left: 'MEMORY REACHING BACK', right: 'THE SAME BODY',
         start: 0.04,
         zones: [
-          { id: 'body', upto: 0.32, reads: 'the body carries you, which is what a court would say' },
+          { id: 'body', upto: 0.32, reads: 'the body carries you' },
           { id: 'both', upto: 0.64, reads: 'both together, and neither one on its own' },
-          { id: 'mind', upto: 1, reads: 'the thread of consciousness, wherever it wakes up', correct: true },
+          { id: 'mind', upto: 1, reads: 'your memories, wherever they wake up', correct: true },
         ],
       },
       explain: 'Almost all of it goes to memory. The bodily answer feels safest and a court wants it, but a body swaps nearly all its matter over a lifetime — the Ship of Theseus wearing your face. Locke hangs the person on the thread instead.',
@@ -88,9 +98,14 @@ export const BEATS: Metaphysics11Beat[] = [
   },
   {
     p: 33, c: 35, tok: 1, swap: 1,
-    text: 'Now watch the ground. Nobody moves, and yet the two names cross the floor and trade stands. The name goes where the memories went.',
+    text: 'Now watch the ground. Nobody moves, and yet the two names cross the floor and trade stands.',
     cite: 'The names follow',
-    dur: 4.2,
+    dur: 3,
+  },
+  {
+    p: 33, c: 35, tok: 1, swap: 1,
+    text: 'The name goes where the memories went.',
+    dur: 1.8,
   },
   {
     p: 17, c: 33, tok: 1, swap: 1,

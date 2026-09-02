@@ -65,8 +65,13 @@ export const BEATS: Eth21Beat[] = [
   },
   {
     p: 13, x: 268, act: 1, arms: 1, means: 1,
-    text: 'The doctrine says that one is different. You may accept a harm alongside your aim. You may not walk through it.',
-    dur: 4.8,
+    text: 'The doctrine says that one is different. You may accept a harm alongside your aim.',
+    dur: 3.4,
+  },
+  {
+    p: 13, x: 268, act: 1, arms: 1, means: 1,
+    text: 'You may not walk through it.',
+    dur: 1.8,
   },
   {
     p: 137, x: 268, act: 1, arms: 1, means: 1,

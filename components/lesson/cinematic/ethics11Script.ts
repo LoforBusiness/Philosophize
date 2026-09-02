@@ -31,21 +31,31 @@ export const BEATS: Ethics11Beat[] = [
   },
   {
     p: 3, x: 60, tok: 1,
-    text: 'Jeremy Bentham built that table. A bar game, a helping of dessert, a symphony. Three pleasures, drawn the same size, because to him they are the same stuff.',
+    text: 'Jeremy Bentham built that table. A bar game, a helping of dessert, a symphony.',
     cite: 'The counting table',
-    dur: 5.0,
+    dur: 2.5,
+  },
+  {
+    p: 3, x: 60, tok: 1,
+    text: 'Three pleasures, drawn the same size, because to him they are the same stuff.',
+    dur: 2.5,
   },
   {
     p: 21, x: 60, tok: 1, led: 1,
-    text: 'His felicific calculus scored each one for intensity, duration, certainty and reach, then added the column up. Push-pin ranks with poetry, he said, if the totals come out level.',
+    text: 'Bentham\'s felicific calculus scored each one for intensity, duration, certainty and reach. Then it added the column up. Push-pin ranks with poetry, he said, if the totals come out level.',
     cite: 'The felicific calculus',
     dur: 5.4,
   },
   {
     p: 6, x: 126, tok: 1, led: 1, shelf: 1,
-    text: 'Then his own student refused the arithmetic. Watch a second shelf go up above the table. John Stuart Mill would not leave a bar game and a symphony on one level.',
+    text: 'Then his own student refused the arithmetic. Watch a second shelf go up above the table.',
     cite: 'Mill puts up a shelf',
-    dur: 5.4,
+    dur: 2.8,
+  },
+  {
+    p: 6, x: 126, tok: 1, led: 1, shelf: 1,
+    text: 'John Stuart Mill would not leave a bar game and a symphony on one level.',
+    dur: 2.6,
   },
   {
     p: 139, x: 126, tok: 1, led: 1, shelf: 1,

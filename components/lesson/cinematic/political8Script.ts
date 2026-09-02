@@ -25,26 +25,51 @@ export interface Political8Beat extends BaseBeat {
 export const BEATS: Political8Beat[] = [
   {
     p: 25, x: 100, pile: 1,
-    text: 'Three people. One fence. A match on the far side that all three want to watch. Everybody agrees they should get to. Now watch how fast agreeing falls apart.',
-    dur: 4.4,
+    text: 'Three people. One fence.',
+    dur: 1.8,
+  },
+  {
+    p: 25, x: 100, pile: 1,
+    text: 'A match on the far side that all three want to watch. Everybody agrees they should get to.',
+    dur: 2.7,
+  },
+  {
+    p: 25, x: 100, pile: 1,
+    text: 'Now watch how fast agreeing falls apart.',
+    dur: 1.8,
   },
   {
     p: 13, x: 170, pile: 1, marks: 1,
-    text: 'Nobody here cheated anybody. They were simply born different heights. The tall one sees the whole pitch. The short one sees a plank of wood.',
+    text: 'Nobody here cheated anybody. They were simply born different heights.',
     cite: 'Same fence, different eyes',
-    dur: 4.4,
+    dur: 1.8,
+  },
+  {
+    p: 13, x: 170, pile: 1, marks: 1,
+    text: 'The tall one sees the whole pitch. The short one sees a plank of wood.',
+    dur: 2.6,
   },
   {
     p: 42, x: 100, carry: 1, pile: 1, marks: 1,
-    text: 'Luckily somebody left three crates by the gate. Three crates, three people. One each — you cannot get fairer than that. Can you?',
+    text: 'Luckily somebody left three crates by the gate. Three crates, three people.',
     cite: 'Three spare crates',
-    dur: 4.2,
+    dur: 2.2,
+  },
+  {
+    p: 42, x: 100, carry: 1, pile: 1, marks: 1,
+    text: 'One each — you cannot get fairer than that. Can you?',
+    dur: 2,
   },
   {
     p: 43, x: 170, pile: 1, mode: 1, marks: 1,
-    text: 'One crate each. Same size, same share, nobody favoured, nobody skipped. And the shortest one is still looking at wood.',
+    text: 'One crate each. Same size, same share, nobody favoured, nobody skipped.',
     cite: 'Perfectly equal shares',
-    dur: 4.6,
+    dur: 2.5,
+  },
+  {
+    p: 43, x: 170, pile: 1, mode: 1, marks: 1,
+    text: 'And the shortest one is still looking at wood.',
+    dur: 2.1,
   },
   {
     p: 45, x: 170, mode: 1, marks: 1, pick: 1,
@@ -57,9 +82,14 @@ export const BEATS: Political8Beat[] = [
   },
   {
     p: 47, x: 170, mode: 2, marks: 1, eyeline: 1,
-    text: 'Nothing was added and nothing was thrown away. The same three crates, moved to where they actually do something. Look at the eye line now — dead level.',
+    text: 'Nothing was added and nothing was thrown away. The same three crates, moved to where they actually do something.',
     cite: 'Same crates, new places',
-    dur: 4.6,
+    dur: 3.1,
+  },
+  {
+    p: 47, x: 170, mode: 2, marks: 1, eyeline: 1,
+    text: 'Look at the eye line now — dead level.',
+    dur: 1.8,
   },
   {
     p: 4, x: 100, mode: 2, marks: 1, eyeline: 1,
@@ -83,9 +113,19 @@ export const BEATS: Political8Beat[] = [
   },
   {
     p: 3, x: 170, mode: 2, marks: 1, eyeline: 1,
-    text: 'So equality is a blank waiting to be filled in. Equal resources? Equal chances? Equal happiness? Amartya Sen and Martha Nussbaum answer differently: equal capabilities — what a person is actually able to do and be.',
+    text: 'So equality is a blank waiting to be filled in. Equal resources?',
     cite: 'Equality of what?',
-    dur: 5.4,
+    dur: 1.8,
+  },
+  {
+    p: 3, x: 170, mode: 2, marks: 1, eyeline: 1,
+    text: 'Equal chances? Equal happiness?',
+    dur: 1.8,
+  },
+  {
+    p: 3, x: 170, mode: 2, marks: 1, eyeline: 1,
+    text: 'Amartya Sen and Martha Nussbaum answer differently. Make capabilities equal: what a person can really do and be.',
+    dur: 3,
   },
   {
     p: 129, x: 100, mode: 2, marks: 1, eyeline: 1,

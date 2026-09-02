@@ -37,9 +37,14 @@ export const BEATS: Eth24Beat[] = [
   },
   {
     p: 2, x: 200, slab: 1, names: 1,
-    text: 'Stop him doing it again. Stop others copying him. Make him better. Give him what he has coming.',
+    text: 'Stop him doing it again. Stop others copying him.',
     cite: 'The four',
-    dur: 4.4,
+    dur: 2.2,
+  },
+  {
+    p: 2, x: 200, slab: 1, names: 1,
+    text: 'Make him better. Give him what he has coming.',
+    dur: 2.2,
   },
   {
     p: 45, x: 132, slab: 1, names: 1, gone: 1,

@@ -24,15 +24,25 @@ export const BEATS: Epis32Beat[] = [
   },
   {
     g: 1, maps: 1,
-    dur: 4.2,
-    text: 'The first is the whole country in one stroke. Nothing on it is false. There is simply almost nothing on it.',
+    dur: 2.8,
+    text: 'The first is the whole country in one stroke. Nothing on it is false.',
     cite: 'One line',
   },
   {
+    g: 1, maps: 1,
+    dur: 1.8,
+    text: 'There is simply almost nothing on it.',
+  },
+  {
     g: 3, maps: 3,
-    dur: 4.8,
-    text: 'The second gives you the shape and its bays. The third gives you every rock. It is also the sort of map you would still be reading when the tide came in.',
+    dur: 2.3,
+    text: 'The second gives you the shape and its bays. The third gives you every rock.',
     cite: 'More and more',
+  },
+  {
+    g: 3, maps: 3,
+    dur: 2.6,
+    text: 'It is also the sort of map you would still be reading when the tide came in.',
   },
   {
     g: 129, maps: 3,
@@ -48,9 +58,14 @@ export const BEATS: Epis32Beat[] = [
   },
   {
     g: 45, maps: 4,
-    dur: 4.6,
-    text: 'And here is the perfect one. One to one, nothing omitted, no error anywhere in it. At that scale the frame holds a single rock.',
+    dur: 2.9,
+    text: 'And here is the perfect one. One to one, nothing omitted, no error anywhere in it.',
     cite: 'The perfect map',
+  },
+  {
+    g: 45, maps: 4,
+    dur: 1.8,
+    text: 'At that scale the frame holds a single rock.',
   },
   {
     g: 2, maps: 4, pick: 1,
@@ -73,7 +88,7 @@ export const BEATS: Epis32Beat[] = [
         zones: [
           { id: 'bare', upto: 0.24, reads: 'almost nothing, so it explains almost nothing' },
           { id: 'chosen', upto: 0.72, reads: 'the few things the question needs, and no more', correct: true },
-          { id: 'all', upto: 1, reads: 'everything, at which point it is the thing itself' },
+          { id: 'all', upto: 1, reads: 'everything, so it becomes the thing itself' },
         ],
       },
       explain: 'The middle, and the far end is what the fourth map showed. Add detail without limit and you get the coastline back at coastline size, which is no use to anybody. Leaving things out is the job, not the shortfall.',

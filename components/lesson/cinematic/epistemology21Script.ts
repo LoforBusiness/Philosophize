@@ -23,20 +23,40 @@ export interface Epi21Beat extends BaseBeat {
 export const BEATS: Epi21Beat[] = [
   {
     p: 25, x: 70,
-    text: 'Right now, believe that rain is falling outside. Not picture rain, not say the words. Believe. Take a moment and genuinely try.',
-    dur: 4.0,
+    text: 'Right now, believe that rain is falling outside. Not picture rain, not say the words.',
+    dur: 2.9,
+  },
+  {
+    p: 25, x: 70,
+    text: 'Take a moment and genuinely try.',
+    dur: 1.8,
   },
   {
     p: 41, x: 168, dial: 1,
-    text: 'Here is the needle. It sits where your belief actually is, and at the moment it is parked hard against DOUBT. Two trays feed it.',
+    text: 'Here is the needle. It sits where your belief actually is, and at the moment it is parked hard against DOUBT.',
     cite: 'The gauge',
-    dur: 4.6,
+    dur: 3.9,
+  },
+  {
+    p: 41, x: 168, dial: 1,
+    text: 'Two trays feed it.',
+    dur: 1.8,
   },
   {
     p: 29, x: 124, dial: 1, will: 1,
-    text: 'Load the first tray with everything you have. Wanting rain. Deciding on rain. Saying the words again. A fortune riding on the answer. The tray fills and the needle does not move.',
+    text: 'Load the first tray with everything you have. Wanting rain.',
     cite: 'Effort',
-    dur: 5.0,
+    dur: 1.8,
+  },
+  {
+    p: 29, x: 124, dial: 1, will: 1,
+    text: 'Deciding on rain. Saying the words again.',
+    dur: 1.8,
+  },
+  {
+    p: 29, x: 124, dial: 1, will: 1,
+    text: 'A fortune riding on the answer. The tray fills and the needle does not move.',
+    dur: 2.3,
   },
   {
     p: 141, x: 124, dial: 1, will: 1,
@@ -74,12 +94,12 @@ export const BEATS: Epi21Beat[] = [
         hi: 'YOU SIMPLY DECIDE',
         start: 0,
         zones: [
-          { id: 'none', upto: 0.28, reads: 'none; belief happens to you and that is that' },
-          { id: 'inputs', upto: 0.74, reads: 'you cannot will a belief, but you choose what reaches you', correct: true },
-          { id: 'will', upto: 1, reads: 'you pick beliefs the way you pick what to wear' },
+          { id: 'none', upto: 0.28, reads: 'you cannot choose at all' },
+          { id: 'inputs', upto: 0.74, reads: 'you choose what you look at', correct: true },
+          { id: 'will', upto: 1, reads: 'you choose beliefs like clothes' },
         ],
       },
-      explain: 'The middle. The near end slides from involuntary to not my responsibility, and Pascal saw the way past it: you cannot will yourself into believing, but you do choose the company, the habits and the reading that decide what ever reaches the tray.',
+      explain: 'The middle. The near end slides from involuntary to not my responsibility, and Pascal saw the way past it. You cannot will yourself into believing. But you do choose the company, the habits and the reading that decide what ever reaches the tray.',
       xp: 5,
     },
     dur: 1.0,

@@ -40,9 +40,14 @@ export const BEATS: Log20Beat[] = [
   },
   {
     p: 2, x: 200, boards: 1, struts: 1,
-    text: 'What differs is the support underneath. One version kept all of it. One kept some. One is standing on a single leg.',
+    text: 'What differs is the support underneath. One version kept all of it.',
     cite: 'Same claim, three states',
-    dur: 4.8,
+    dur: 2.6,
+  },
+  {
+    p: 2, x: 200, boards: 1, struts: 1,
+    text: 'One kept some. One is standing on a single leg.',
+    dur: 2.2,
   },
   {
     p: 45, x: 132, boards: 1, struts: 1,
@@ -90,7 +95,7 @@ export const BEATS: Log20Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'weak', reads: 'you beat a version nobody holds' },
+          { id: 'weak', reads: 'you beat a view nobody holds' },
           { id: 'said', reads: 'you answer what they actually said' },
           { id: 'strong', reads: 'you take on the best case there is', correct: true },
         ],

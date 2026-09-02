@@ -39,15 +39,25 @@ export const BEATS: Metaphysics33Beat[] = [
   },
   {
     p: 19, x: 62, fall: 1, rev: 1,
-    text: 'So run the film backwards. A heap of blocks gathers itself and stands up. You knew that was wrong before you finished reading this sentence.',
+    text: 'So run the film backwards. A heap of blocks gathers itself and stands up.',
     cite: 'The film, reversed',
-    dur: 4.4,
+    dur: 2.5,
+  },
+  {
+    p: 19, x: 62, fall: 1, rev: 1,
+    text: 'You knew that was wrong before you finished reading this sentence.',
+    dur: 1.9,
   },
   {
     p: 4, x: 62, fall: 1, rev: 1,
-    text: 'Here is the strange part. Every single collision in that reversed film is legal. Take any two blocks knocking together and the reverse obeys the same laws exactly.',
+    text: 'Here is the strange part. Every single collision in that reversed film is legal.',
     cite: 'Nothing forbids it',
-    dur: 4.8,
+    dur: 2.4,
+  },
+  {
+    p: 4, x: 62, fall: 1, rev: 1,
+    text: 'Take any two blocks knocking together and the reverse obeys the same laws exactly.',
+    dur: 2.4,
   },
   {
     p: 137, x: 62, fall: 1,
@@ -85,9 +95,14 @@ export const BEATS: Metaphysics33Beat[] = [
   },
   {
     p: 35, x: 62, fall: 0.82,
-    text: 'That is the whole answer. Order is rare and mess is common. Anything wandering at random wanders into the mess and never happens to wander back.',
+    text: 'That is the whole answer. Order is rare and mess is common.',
     cite: 'Rare and common',
-    dur: 4.6,
+    dur: 2.1,
+  },
+  {
+    p: 35, x: 62, fall: 0.82,
+    text: 'Anything wandering at random wanders into the mess and never happens to wander back.',
+    dur: 2.5,
   },
   {
     p: 45, x: 62, fall: 0.82,

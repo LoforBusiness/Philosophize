@@ -38,8 +38,13 @@ export const BEATS: Logic37Beat[] = [
   },
   {
     p: 2, x: 56, boxes: 1, sorted: 1,
-    text: 'It sorts the whole village without an argument. Shave yourself and he leaves you alone. Do not, and he shaves you.',
-    dur: 4.2,
+    text: 'It sorts the whole village without an argument. Shave yourself and he leaves you alone.',
+    dur: 3,
+  },
+  {
+    p: 2, x: 56, boxes: 1, sorted: 1,
+    text: 'Do not, and he shaves you.',
+    dur: 1.8,
   },
   {
     p: 4, x: 56, boxes: 1, sorted: 1, barber: 1, live: 1,
@@ -57,8 +62,13 @@ export const BEATS: Logic37Beat[] = [
   },
   {
     p: 13, x: 56, boxes: 1, sorted: 1, barber: 1, sets: 1,
-    text: 'Russell found the real one in 1901. Take the collection of all collections that do not contain themselves. Ask whether it contains itself.',
-    dur: 4.8,
+    text: 'Russell found the real one in 1901. Take the collection of all collections that do not contain themselves.',
+    dur: 3.8,
+  },
+  {
+    p: 13, x: 56, boxes: 1, sorted: 1, barber: 1, sets: 1,
+    text: 'Ask whether it contains itself.',
+    dur: 1.8,
   },
   {
     p: 47, x: 56, boxes: 1, barber: 1, sets: 1,
@@ -81,8 +91,8 @@ export const BEATS: Logic37Beat[] = [
         start: 0,
         stops: [
           { id: 'hard', reads: 'sets are simply harder to think about than barbers' },
-          { id: 'words', reads: 'it is a trick of language, exactly like the barber' },
-          { id: 'axioms', reads: 'the rules of the day said this set had to exist', correct: true },
+          { id: 'words', reads: 'just a trick of language' },
+          { id: 'axioms', reads: 'the rules said this set must exist', correct: true },
         ],
       },
       explain: 'The far setting. With the barber you say there is no such man and walk away. The axioms of the day said any condition you can state determines a set, so this one was a legal object — and it was sitting inside the foundation of arithmetic.',
@@ -104,7 +114,7 @@ export const BEATS: Logic37Beat[] = [
         'Well formed is not the same as possible',
         'The set version made that move legal, and cost a foundation',
       ],
-      closing: 'Modern set theory is largely the machinery for stopping you writing that sentence. Every axiom is a door held shut against a barber.',
+      closing: 'Modern set theory is mostly machinery for stopping you writing that sentence. Every axiom is a door held shut against a barber.',
     },
     dur: 3.2,
   },

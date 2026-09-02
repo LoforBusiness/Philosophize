@@ -3398,6 +3398,58 @@ where they are.
 
 ---
 
+### J14 · A reading rule that is only in the rule book has not been implemented
+
+J11 raised the floor to the published plain-English band and recorded the pieces
+below it as a budget. That is a rule, not a change: the lessons read exactly as
+they did the day before, and a budget is a promise to fix something later.
+
+So the 42 pieces below the band were **rewritten**, and the corpus now reads:
+
+| | before | after |
+|---|---|---|
+| mean reading ease | 83.2 | **80.8** |
+| pieces below the plain-English band | 42 | **16** |
+| pieces over the pointer ceiling | 8 | **2** |
+
+The mean going DOWN is not a regression — J12 cut long beats into short ones, and
+Flesch scores a short piece harder than a long one carrying the same words. What
+matters is the tail, and the tail halved.
+
+**THREE MOVES, IN ORDER OF HOW MUCH THEY CAN BREAK.**
+
+1. **Split a sentence. This changes no word at all**, so the picture is still doing
+   exactly what the text says and A1 cannot be touched. Flesch is syllables per
+   word and words per SENTENCE, so a full stop where an em-dash was is often the
+   whole fix — J1 already prescribes it ("the fix is a full stop, not a rewrite").
+   Eight of the 42 cleared the band on this alone, mechanically.
+2. **Say the noun.** Eight more failed on pointer rate rather than hardness, and
+   every one was the same shape as J13: a pronoun whose referent the segmenting
+   split had moved to the previous screen. `Arthur Danto stood in front of them` →
+   `in front of the two boxes`. No claim changes, because the noun is the thing the
+   pronoun already meant.
+3. **Reword, and only then.** Eighteen needed a word changed. Every claim and every
+   NAMED TERM was kept — `capabilities`, `speciesism`, `ren`, `catharsis` are what
+   the lesson teaches and are never what gets simplified. What went was ordinary
+   long words doing ordinary work: `actually able to` → `can really`,
+   `documenting` → `for`, `certify itself` → `vouch for itself`.
+
+**WHAT MAY NOT BE SIMPLIFIED, and this is the line that matters.** A word the scene
+DRAWS is not available. §13 records `metaphysics5` narrating "his Principle of
+Sufficient Reason" over a stage already reading **EVERY FACT NEEDS A REASON**; the
+inverse is just as bad — rewriting the narration away from a word the picture is
+showing breaks A1 in the direction nobody checks. Read the stage before touching a
+term, and if the scene draws it, the term stays.
+
+**And the score is not the goal.** Sixteen pieces still sit at 55–59, and they are
+not badly written — they carry two philosophers' full names, or a term the lesson
+exists to teach. Flesch counts syllables; it cannot tell `Amartya Sen and Martha
+Nussbaum` from clutter. The budget is a ratchet on the tail, not a target to drive
+to zero, and rewriting a good sentence to gain three points would be fitting the
+measure rather than serving the reader.
+
+---
+
 ### D34 · No word on the stage may be too small to read
 
 The stage fits a 400-wide design space into the box the player gives it:

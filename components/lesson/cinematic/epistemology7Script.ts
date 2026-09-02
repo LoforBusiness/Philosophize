@@ -15,20 +15,35 @@ export interface Epi7Beat extends BaseBeat {
 export const BEATS: Epi7Beat[] = [
   {
     p: 6, days: 1, twist: 0,
-    text: 'The sun rose today. Will it rise tomorrow? You feel sure — but Hume asks what gives you the right to be.',
-    dur: 3.6,
+    text: 'The sun rose today. Will it rise tomorrow?',
+    dur: 1.8,
+  },
+  {
+    p: 6, days: 1, twist: 0,
+    text: 'You feel sure — but Hume asks what gives you the right to be.',
+    dur: 2.3,
   },
   {
     p: 1, days: 3,
-    text: 'Induction goes from the cases you have seen to the ones you have not. Every swan so far was white, so all swans are white. Science runs on that leap constantly.',
+    text: 'Induction goes from the cases you have seen to the ones you have not. Every swan so far was white, so all swans are white.',
     cite: 'Induction',
-    dur: 5.0,
+    dur: 4,
+  },
+  {
+    p: 1, days: 3,
+    text: 'Science runs on that leap constantly.',
+    dur: 1.8,
   },
   {
     p: 4, days: 4, circle: 1,
-    text: 'Why expect the future to match the past? Only because it always has. But that uses the past to vouch for the past. The circle closes, and logic never gets a grip on it.',
+    text: 'Why expect the future to match the past? Only because it always has.',
     cite: 'Hume’s problem',
-    dur: 5.0,
+    dur: 1.9,
+  },
+  {
+    p: 4, days: 4, circle: 1,
+    text: 'But that uses the past to vouch for the past. The circle closes, and logic never gets a grip on it.',
+    dur: 3.1,
   },
   {
     p: 139, days: 4, circle: 1,
@@ -45,9 +60,14 @@ export const BEATS: Epi7Beat[] = [
   },
   {
     p: 13, days: 4, twist: 1,
-    text: 'A chicken is fed every morning and grows sure the farmer is its friend. Each feeding confirms the rule — until the day the farmer wrings its neck. More of the same is no guarantee of the same.',
+    text: 'A chicken is fed every morning and grows sure the farmer is its friend. Each feeding confirms the rule — until the day the farmer wrings its neck.',
     cite: 'Russell’s chicken',
-    dur: 5.2,
+    dur: 3.8,
+  },
+  {
+    p: 13, days: 4, twist: 1,
+    text: 'More of the same is no guarantee of the same.',
+    dur: 1.8,
   },
   {
     p: 4, days: 4, twist: 1,
@@ -71,9 +91,9 @@ export const BEATS: Epi7Beat[] = [
         hi: 'CALL IT PROVED',
         start: 0,
         zones: [
-          { id: 'stop', upto: 0.28, reads: 'drop it; with no proof behind it, it is worthless' },
-          { id: 'habit', upto: 0.74, reads: 'keep using it, because habit leaves you no choice', correct: true },
-          { id: 'proved', upto: 1, reads: 'keep it, and say it has been proved after all' },
+          { id: 'stop', upto: 0.28, reads: 'stop using it, it proves nothing' },
+          { id: 'habit', upto: 0.74, reads: 'keep using it, habit gives no choice', correct: true },
+          { id: 'proved', upto: 1, reads: 'keep it, and call it proved' },
         ],
       },
       explain: 'The middle, and it is the odd part of Hume. He shows there is no logical proof and then says we will go on anyway, because custom is stronger than argument. Neither end is his: he does not drop it and he does not rescue it.',

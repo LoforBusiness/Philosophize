@@ -41,9 +41,14 @@ export const BEATS: Aesthetics33Beat[] = [
   },
   {
     p: 4, x: 52, clean: 0.85, layers: 1,
-    text: 'Keep going and the argument starts. When the Sistine ceiling was cleaned, startling pinks came out. Some scholars said a deliberate final glaze had just been scrubbed off for ever.',
+    text: 'Keep going and the argument starts. When the Sistine ceiling was cleaned, startling pinks came out.',
     cite: 'The Sistine ceiling',
-    dur: 5.2,
+    dur: 2.8,
+  },
+  {
+    p: 4, x: 52, clean: 0.85, layers: 1,
+    text: 'Some scholars said a deliberate final glaze had just been scrubbed off for ever.',
+    dur: 2.4,
   },
   {
     p: 137, x: 52, clean: 0.85,

@@ -60,8 +60,8 @@ export const BEATS: Eth20Beat[] = [
     interact: {
       prompt: 'Set the rate. How much less does a harm count for being late?',
       drag: {
-        lo: 'A LIFE IS A LIFE, WHENEVER',
-        hi: 'IN TWO CENTURIES, NOBODY COUNTS',
+        lo: 'A LIFE IS A LIFE',
+        hi: 'NOBODY LATER COUNTS',
         start: 0.72,
         zones: [
           { id: 'none', upto: 0.22, reads: 'nothing shrinks', correct: true },

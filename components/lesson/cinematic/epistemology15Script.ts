@@ -27,20 +27,35 @@ export interface Epi15Beat extends BaseBeat {
 export const BEATS: Epi15Beat[] = [
   {
     g: 25, cells: 4,
-    dur: 4.6,
-    text: 'Two questions about anything you know. Did you need to look? And does it tell you something, or only unpack a word?',
+    dur: 2.3,
+    text: 'Two questions about anything you know. Did you need to look?',
+  },
+  {
+    g: 25, cells: 4,
+    dur: 2.3,
+    text: 'And does it tell you something, or only unpack a word?',
   },
   {
     g: 45, cells: 4, dealt: 3,
-    dur: 5.0,
-    text: 'Three of the boxes fill straight away. Bachelors are unmarried. The chair is over there. And the fourth box is supposed to be empty.',
+    dur: 2.1,
+    text: 'Three of the boxes fill straight away. Bachelors are unmarried.',
     cite: 'Three easy ones',
   },
   {
+    g: 45, cells: 4, dealt: 3,
+    dur: 2.9,
+    text: 'The chair is over there. And the fourth box is supposed to be empty.',
+  },
+  {
     g: 13, cells: 4, dealt: 3,
-    dur: 4.8,
-    text: 'Empty because of an old rule. If you did not have to look, you learned nothing new. If you learned something new, you had to look.',
+    dur: 3.1,
+    text: 'Empty because of an old rule. If you did not have to look, you learned nothing new.',
     cite: 'The rule',
+  },
+  {
+    g: 13, cells: 4, dealt: 3,
+    dur: 1.8,
+    text: 'If you learned something new, you had to look.',
   },
   {
     g: 137, cells: 4, dealt: 3,
@@ -57,9 +72,14 @@ export const BEATS: Epi15Beat[] = [
   },
   {
     g: 21, cells: 4, dealt: 3, sum: 1,
-    dur: 4.8,
-    text: 'Kant drops one card into the empty box. Seven plus five is twelve. You ran no experiment, and twelve was not sitting inside seven and five.',
+    dur: 2.4,
+    text: 'Kant drops one card into the empty box. Seven plus five is twelve.',
     cite: 'Into the fourth box',
+  },
+  {
+    g: 21, cells: 4, dealt: 3, sum: 1,
+    dur: 2.4,
+    text: 'You ran no experiment, and twelve was not sitting inside seven and five.',
   },
   {
     g: 4, cells: 4, dealt: 3, sum: 1, pick: 1,
@@ -79,9 +99,9 @@ export const BEATS: Epi15Beat[] = [
         left: 'ALREADY INSIDE SEVEN AND FIVE', right: 'SOMETHING GENUINELY NEW',
         start: 1,
         zones: [
-          { id: 'new', upto: 0.32, reads: 'twelve is not in them; the sum adds it', correct: true },
+          { id: 'new', upto: 0.32, reads: 'twelve is not in them', correct: true },
           { id: 'half', upto: 0.66, reads: 'half unpacking, half adding' },
-          { id: 'inside', upto: 1, reads: 'twelve was in there all along, waiting to be unpacked' },
+          { id: 'inside', upto: 1, reads: 'twelve was in there all along' },
         ],
       },
       explain: 'Almost all of it is new, which is why the sum is not an empty definition. Turn seven, five and plus over as long as you like and twelve is not in any of them. Nor did you learn it by looking: nobody calls counting an experiment.',

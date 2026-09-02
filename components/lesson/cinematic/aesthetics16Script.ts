@@ -27,9 +27,14 @@ export const BEATS: Aes16Beat[] = [
   },
   {
     p: 41, x: 168, canvas: 1,
-    text: 'There it is. Finished in 1911, and not one mark on it has moved since. Whatever happens next happens to you, not to the canvas.',
+    text: 'There it is. Finished in 1911, and not one mark on it has moved since.',
     cite: 'The work',
-    dur: 4.6,
+    dur: 2.8,
+  },
+  {
+    p: 41, x: 168, canvas: 1,
+    text: 'Whatever happens next happens to you, not to the canvas.',
+    dur: 1.8,
   },
   {
     p: 36, x: 124, canvas: 1, facts: 1,
@@ -64,9 +69,9 @@ export const BEATS: Aes16Beat[] = [
         hi: 'IT CHANGES NOTHING AT ALL',
         start: 0,
         zones: [
-          { id: 'ruin', upto: 0.3, reads: 'the work is spoiled; you cannot look at it now' },
-          { id: 'you', upto: 0.74, reads: 'the painting is untouched; your experience of it is not', correct: true },
-          { id: 'none', upto: 1, reads: 'nothing; the label is simply irrelevant' },
+          { id: 'ruin', upto: 0.3, reads: 'the painting is spoiled now' },
+          { id: 'you', upto: 0.74, reads: 'the painting is the same, you are not', correct: true },
+          { id: 'none', upto: 1, reads: 'nothing changed at all' },
         ],
       },
       explain: 'The middle, and both ends feel principled, which is what makes them tempting. The paint has not moved. Nothing in the picture is different from yesterday. What changed is you, standing in front of it, knowing something you did not know before.',

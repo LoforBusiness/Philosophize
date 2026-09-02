@@ -21,8 +21,13 @@ export interface Meta32Beat extends BaseBeat {
 export const BEATS: Meta32Beat[] = [
   {
     g: 5, orbs: 1, tether: 0, tag: 0,
-    dur: 4.0,
-    text: 'A universe containing two iron spheres and absolutely nothing else. No stars, no observer, no floor. Just these.',
+    dur: 3.6,
+    text: 'A universe containing two iron spheres and absolutely nothing else. No stars, no observer, no floor.',
+  },
+  {
+    g: 5, orbs: 1, tether: 0, tag: 0,
+    dur: 1.8,
+    text: 'Just these.',
   },
   {
     g: 2, orbs: 1, tether: 0, tag: 0,
@@ -32,9 +37,14 @@ export const BEATS: Meta32Beat[] = [
   },
   {
     g: 3, orbs: 1, tether: 1, tag: 0,
-    dur: 4.8,
-    text: 'Even the relations match. Each is two miles from a sphere just like itself. Every description you write of one is a true description of the other.',
+    dur: 2.5,
+    text: 'Even the relations match. Each is two miles from a sphere just like itself.',
     cite: 'Even the relations',
+  },
+  {
+    g: 3, orbs: 1, tether: 1, tag: 0,
+    dur: 2.3,
+    text: 'Every description you write of one is a true description of the other.',
   },
   {
     g: 137, orbs: 1, tether: 1, tag: 0,
@@ -51,9 +61,14 @@ export const BEATS: Meta32Beat[] = [
   },
   {
     g: 1, orbs: 1, tether: 1, tag: 1,
-    dur: 4.6,
-    text: 'We can point at one sphere and call it A. But the label came from outside, carried in by us. Take the label away again and the universe is exactly as before.',
+    dur: 2.9,
+    text: 'We can point at one sphere and call it A. But the label came from outside, carried in by us.',
     cite: 'The label is ours',
+  },
+  {
+    g: 1, orbs: 1, tether: 1, tag: 1,
+    dur: 1.8,
+    text: 'Take the label away again and the universe is exactly as before.',
   },
   {
     g: 4, orbs: 1, tether: 1, tag: 0, pick: 1,
@@ -74,10 +89,10 @@ export const BEATS: Meta32Beat[] = [
         yLo: 'THE SAME PLACE', yHi: 'DIFFERENT PLACES',
         start: [0.24, 0.24],
         quads: [
-          { id: 'one', x: 1, y: 0, reads: 'same properties, same place: one sphere counted twice' },
-          { id: 'two', x: 1, y: 1, reads: 'same properties, different places: two spheres', correct: true },
-          { id: 'easy', x: 0, y: 1, reads: 'they differ, and they are apart: an ordinary pair' },
-          { id: 'odd', x: 0, y: 0, reads: 'they differ but share a place: not a case at all' },
+          { id: 'one', x: 1, y: 0, reads: 'the same, sharing one place' },
+          { id: 'two', x: 1, y: 1, reads: 'the same, in different places', correct: true },
+          { id: 'easy', x: 0, y: 1, reads: 'different, and in different places' },
+          { id: 'odd', x: 0, y: 0, reads: 'different, sharing one place' },
         ],
       },
       explain: 'Top right, and the pad is the argument. They are plainly two, so the bottom row is ruled out by the setup. The only thing holding them apart is the axis going up: where each one is. If space is real, being here is a second fact about a sphere.',

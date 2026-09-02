@@ -27,15 +27,25 @@ export const BEATS: Meta31Beat[] = [
   },
   {
     g: 45, holes: 1, ticks: 0, chips: 0,
-    dur: 4.2,
-    text: 'Now three holes. Nothing was added to the cheese. Something was taken away. And yet there are three more things here than before.',
+    dur: 1.8,
+    text: 'Now three holes. Nothing was added to the cheese.',
     cite: 'Three more things',
   },
   {
+    g: 45, holes: 1, ticks: 0, chips: 0,
+    dur: 2.6,
+    text: 'Something was taken away. And yet there are three more things here than before.',
+  },
+  {
     g: 3, holes: 1, ticks: 3, chips: 0,
-    dur: 4.6,
-    text: 'You can count holes. You can measure one, call it deeper than the next, and be right. Everything we do with objects, we do with holes.',
+    dur: 3,
+    text: 'You can count holes. You can measure one, call it deeper than the next, and be right.',
     cite: 'One, two, three',
+  },
+  {
+    g: 3, holes: 1, ticks: 3, chips: 0,
+    dur: 1.8,
+    text: 'Everything we do with objects, we do with holes.',
   },
   {
     g: 129, holes: 1, ticks: 3, chips: 0,
@@ -52,9 +62,14 @@ export const BEATS: Meta31Beat[] = [
   },
   {
     g: 4, holes: 1, ticks: 3, chips: 1,
-    dur: 4.8,
-    text: 'So what did you count? There are only three things it could be. The cheese, the ring of cheese around each gap, or the empty gap itself.',
+    dur: 2.3,
+    text: 'So what did you count? There are only three things it could be.',
     cite: 'Three candidates',
+  },
+  {
+    g: 4, holes: 1, ticks: 3, chips: 1,
+    dur: 2.5,
+    text: 'The cheese, the ring of cheese around each gap, or the empty gap itself.',
   },
   {
     g: 2, holes: 1, ticks: 3, chips: 1, pick: 1,
@@ -71,13 +86,13 @@ export const BEATS: Meta31Beat[] = [
     interact: {
       prompt: 'Drag to how often rewording can make a hole go away.',
       drag: {
-        lo: 'ALWAYS, TRIVIALLY',
-        hi: 'NEVER, NOT ONCE',
+        lo: 'ALWAYS',
+        hi: 'NEVER',
         start: 0,
         zones: [
-          { id: 'easy', upto: 0.3, reads: 'always — call the cheese holey, and the puzzle is gone' },
-          { id: 'mostly', upto: 0.74, reads: 'usually — but it gets stuck the moment you count them', correct: true },
-          { id: 'never', upto: 1, reads: 'never — nothing about holes can be put another way' },
+          { id: 'easy', upto: 0.3, reads: 'rewording always works' },
+          { id: 'mostly', upto: 0.74, reads: 'rewording works until you count them', correct: true },
+          { id: 'never', upto: 1, reads: 'rewording never works' },
         ],
       },
       explain: 'Usually — and the failures are why this is still argued about. Rewording is a fair move, but it has to work every time. Try it on "there are as many holes as pegs" and it breaks. Counting is the one thing "holey" cannot do.',

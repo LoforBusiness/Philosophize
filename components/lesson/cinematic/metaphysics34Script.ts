@@ -23,20 +23,35 @@ export interface Metaphysics34Beat extends BaseBeat {
 export const BEATS: Metaphysics34Beat[] = [
   {
     p: 25, x: 58, depth: 0,
-    text: 'A table. Solid, obvious, and not in any doubt. Ask the awkward question about it anyway.',
-    dur: 3.4,
+    text: 'A table. Solid, obvious, and not in any doubt.',
+    dur: 1.9,
+  },
+  {
+    p: 25, x: 58, depth: 0,
+    text: 'Ask the awkward question about it anyway.',
+    dur: 1.8,
   },
   {
     p: 4, x: 58, depth: 0, ask: 1,
-    text: 'Not what made the table, and not who owns the table. What holds a table up? Not the legs. What makes the thing a table at all.',
+    text: 'Not what made the table, and not who owns the table. What holds a table up?',
     cite: 'What holds this up?',
-    dur: 4.2,
+    dur: 2.5,
+  },
+  {
+    p: 4, x: 58, depth: 0, ask: 1,
+    text: 'Not the legs. What makes the thing a table at all.',
+    dur: 1.8,
   },
   {
     p: 47, x: 58, depth: 0.25, ask: 1,
-    text: 'The wood does. The table is real because the grain is arranged as it is, and philosophers call that grounding rather than causing. The wood is not earlier than the table. It is underneath it.',
+    text: 'The wood does. The table is real because the grain is arranged as it is, and philosophers call that grounding rather than causing.',
     cite: 'Grounding, not causing',
-    dur: 5.0,
+    dur: 3.3,
+  },
+  {
+    p: 47, x: 58, depth: 0.25, ask: 1,
+    text: 'The wood is not earlier than the table. It is underneath it.',
+    dur: 1.8,
   },
   {
     p: 19, x: 58, depth: 0.55, ask: 1,
@@ -77,9 +92,14 @@ export const BEATS: Metaphysics34Beat[] = [
   },
   {
     p: 35, x: 58, depth: 1,
-    text: 'A level that rests on nothing is what fundamental means. Notice it is not the same as smallest, and not the same as earliest. It is about what holds what up.',
+    text: 'A level that rests on nothing is what fundamental means. Notice it is not the same as smallest, and not the same as earliest.',
     cite: 'What fundamental means',
-    dur: 4.8,
+    dur: 3.7,
+  },
+  {
+    p: 35, x: 58, depth: 1,
+    text: 'It is about what holds what up.',
+    dur: 1.8,
   },
   {
     p: 45, x: 58, depth: 1,

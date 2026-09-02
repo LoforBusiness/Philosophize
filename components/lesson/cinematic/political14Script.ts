@@ -25,9 +25,14 @@ export const BEATS: Pol14Beat[] = [
   },
   {
     g: 2, rows: 2,
-    dur: 4.4,
-    text: 'Now a basketball star offers to play, and asks a dollar from anyone who wants to watch. A million people happily pay. Every single transfer is free.',
+    dur: 3.6,
+    text: 'Now a basketball star offers to play, and asks a dollar from anyone who wants to watch. A million people happily pay.',
     cite: 'A dollar each',
+  },
+  {
+    g: 2, rows: 2,
+    dur: 1.8,
+    text: 'Every single transfer is free.',
   },
   {
     g: 45, rows: 3,
@@ -72,7 +77,7 @@ export const BEATS: Pol14Beat[] = [
         start: 0,
         stops: [
           { id: 'pay', reads: 'that sportsmen are paid far too much' },
-          { id: 'equal', reads: 'that only equal distributions are fair' },
+          { id: 'equal', reads: 'that only equal shares are fair' },
           { id: 'pattern', reads: 'that holding any pattern means stopping free exchanges', correct: true },
         ],
       },

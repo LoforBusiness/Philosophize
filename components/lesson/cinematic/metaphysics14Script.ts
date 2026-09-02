@@ -31,15 +31,25 @@ export const BEATS: Met14Beat[] = [
   },
   {
     g: 45, rows: 4, marks: 1,
-    dur: 4.8,
-    text: 'Now mark each claim in every world it survives. Two of the rows fill completely. Two of them come out patchy.',
+    dur: 3.4,
+    text: 'Now mark each claim in every world it survives. Two of the rows fill completely.',
     cite: 'Fill in the rows',
   },
   {
+    g: 45, rows: 4, marks: 1,
+    dur: 1.8,
+    text: 'Two of them come out patchy.',
+  },
+  {
     g: 13, rows: 4, marks: 1,
-    dur: 4.8,
-    text: 'A full row is a necessary truth. It could not have been otherwise, however you rearrange things. A patchy row just happens to be true here.',
+    dur: 3.1,
+    text: 'A full row is a necessary truth. It could not have been otherwise, however you rearrange things.',
     cite: 'Necessary and contingent',
+  },
+  {
+    g: 13, rows: 4, marks: 1,
+    dur: 1.8,
+    text: 'A patchy row just happens to be true here.',
   },
   {
     g: 137, rows: 4, marks: 1,
@@ -56,9 +66,14 @@ export const BEATS: Met14Beat[] = [
   },
   {
     g: 5, rows: 4, marks: 1,
-    dur: 5.0,
-    text: 'The two full rows are not the same kind of thing. One of them you could have filled in without leaving your chair. The other took a laboratory.',
+    dur: 4.1,
+    text: 'The two full rows are not the same kind of thing. One of them you could have filled in without leaving your chair.',
     cite: 'Two full rows',
+  },
+  {
+    g: 5, rows: 4, marks: 1,
+    dur: 1.8,
+    text: 'The other took a laboratory.',
   },
   {
     g: 4, rows: 4, marks: 1, pick: 1,
@@ -81,7 +96,7 @@ export const BEATS: Met14Beat[] = [
         quads: [
           { id: 'water', x: 0, y: 1, reads: 'doubted for centuries, and true in every world', correct: true },
           { id: 'obvious', x: 1, y: 1, reads: 'nobody doubts it, and true in every world' },
-          { id: 'sure', x: 1, y: 0, reads: 'nobody doubts it, and it could have gone otherwise' },
+          { id: 'sure', x: 1, y: 0, reads: 'nobody doubts the fact, and it could have differed' },
           { id: 'open', x: 0, y: 0, reads: 'doubtable, and it could have gone otherwise' },
         ],
       },

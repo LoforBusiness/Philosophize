@@ -31,14 +31,19 @@ export const BEATS: Pol18Beat[] = [
   },
   {
     g: 45, lanes: 2, bikes: 1, ride: 1,
-    dur: 4.8,
-    text: 'Now let them go. One crosses the city. The other cannot use their legs and gets almost nowhere at all.',
+    dur: 1.9,
+    text: 'Now let them go. One crosses the city.',
     cite: 'Same bicycle',
+  },
+  {
+    g: 45, lanes: 2, bikes: 1, ride: 1,
+    dur: 2.9,
+    text: 'The other cannot use their legs and gets almost nowhere at all.',
   },
   {
     g: 13, lanes: 2, bikes: 1, ride: 1,
     dur: 4.8,
-    text: 'Nothing unfair happened at the start. The resource was equal and it converted into wildly different amounts of getting about.',
+    text: 'Nothing unfair happened at the start. The resource was equal. It turned into wildly different amounts of getting about.',
     cite: 'Equal input',
   },
   {
@@ -79,7 +84,7 @@ export const BEATS: Pol18Beat[] = [
         hi: 'INCOME SAYS NOTHING AT ALL',
         start: 0,
         zones: [
-          { id: 'equal', upto: 0.3, reads: 'equal now; money is what equality means' },
+          { id: 'equal', upto: 0.3, reads: 'equal now, money is what counts' },
           { id: 'means', upto: 0.74, reads: 'equal means, and freedom still deeply unequal', correct: true },
           { id: 'nothing', upto: 1, reads: 'income has nothing to do with it whatever' },
         ],

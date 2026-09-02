@@ -37,14 +37,24 @@ export const BEATS: Ethics37Beat[] = [
   },
   {
     p: 2, x: 54, posts: 1, cord: 1,
-    text: 'Now one speaker says four words. I promise I will. Watch the cord appear between the two.',
-    dur: 4.0,
+    text: 'Now one speaker says four words. I promise I will.',
+    dur: 2.4,
+  },
+  {
+    p: 2, x: 54, posts: 1, cord: 1,
+    text: 'Watch the cord appear between the two.',
+    dur: 1.8,
   },
   {
     p: 13, x: 54, posts: 1, cord: 1,
-    text: 'Nothing else changed. No money moved, no law was passed. A sound was made and a duty exists that did not exist a second earlier.',
+    text: 'Nothing else changed. No money moved, no law was passed.',
     cite: 'Hume, 1740',
-    dur: 4.8,
+    dur: 1.9,
+  },
+  {
+    p: 13, x: 54, posts: 1, cord: 1,
+    text: 'A sound was made and a duty exists that did not exist a second earlier.',
+    dur: 2.9,
   },
   {
     p: 4, x: 54, posts: 1, cord: 1, lean: 1,
@@ -54,9 +64,9 @@ export const BEATS: Ethics37Beat[] = [
         left: 'ON YOUR FRIEND', right: 'ON THE PRACTICE',
         start: 0.04,
         zones: [
-          { id: 'practice', upto: 0.3, reads: 'on the practice: one more crack in a shared thing' },
+          { id: 'practice', upto: 0.3, reads: 'on the practice of promising' },
           { id: 'both', upto: 0.66, reads: 'half on her, half on the practice' },
-          { id: 'friend', upto: 1, reads: 'on her; she arranged her week around your word', correct: true },
+          { id: 'friend', upto: 1, reads: 'on her, she planned around your word', correct: true },
         ],
       },
       explain: 'Nearly all of it on your friend. The practice does matter and it is the other main answer, but that answer makes the person you let down an afterthought. Scanlon puts her first: she relied on you, and the reliance is what you broke.',
@@ -66,8 +76,13 @@ export const BEATS: Ethics37Beat[] = [
   },
   {
     p: 21, x: 54, posts: 1, cord: 1, lean: 1,
-    text: 'Look what is leaning on the cord now. The other person cancelled a plan. Told a friend. Stopped hunting for another way.',
-    dur: 4.6,
+    text: 'Look what is leaning on the cord now. The other person cancelled a plan.',
+    dur: 2.9,
+  },
+  {
+    p: 21, x: 54, posts: 1, cord: 1, lean: 1,
+    text: 'Told a friend. Stopped hunting for another way.',
+    dur: 1.8,
   },
   {
     p: 47, x: 54, posts: 1, cord: 1, lean: 1,

@@ -46,8 +46,13 @@ export const BEATS: Eth19Beat[] = [
   },
   {
     p: 13, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
-    text: 'Mill thought there was one honest test, and it is the middle column. Not how risky the choice is. Who else is in it.',
-    dur: 4.8,
+    text: 'Mill thought there was one honest test, and it is the middle column. Not how risky the choice is.',
+    dur: 3.8,
+  },
+  {
+    p: 13, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
+    text: 'Who else is in it.',
+    dur: 1.8,
   },
   {
     p: 137, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
@@ -92,8 +97,8 @@ export const BEATS: Eth19Beat[] = [
         start: 1,
         zones: [
           { id: 'stands', upto: 0.3, reads: 'their refusal stands, however bad the choice looks', correct: true },
-          { id: 'delay', upto: 0.66, reads: 'treat them now, and ask again once they are well' },
-          { id: 'save', upto: 1, reads: 'save them; nobody in their right mind refuses this' },
+          { id: 'delay', upto: 0.66, reads: 'treat them now, ask again later' },
+          { id: 'save', upto: 1, reads: 'save them whatever they say' },
         ],
       },
       explain: 'The near end, and this is the hardest case for the harm principle. Mill takes it anyway: a competent adult may make a choice that is plainly terrible for them and for nobody else. Overriding it treats a person as a thing to be managed.',

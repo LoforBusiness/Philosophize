@@ -25,41 +25,66 @@ export interface Ethics7Beat extends BaseBeat {
 export const BEATS: Ethics7Beat[] = [
   {
     p: 45, x: 90, carB: -70,
-    text: 'Two drivers glance at their phone for exactly two seconds. One gets home, eats dinner, forgets it. The other is in a courtroom by Friday. Same two seconds.',
-    dur: 4.4,
+    text: 'Two drivers glance at their phone for exactly two seconds. One gets home, eats dinner, forgets it.',
+    dur: 2.7,
+  },
+  {
+    p: 45, x: 90, carB: -70,
+    text: 'The other is in a courtroom by Friday. Same two seconds.',
+    dur: 1.8,
   },
   {
     p: 2, x: 170, laneA: 1, carB: -70,
-    text: 'Here is the first driver. Empty road, nothing ahead. She looks down, looks up, and the road is exactly as she left it. She parks and never thinks about it again.',
+    text: 'Here is the first driver. Empty road, nothing ahead.',
     cite: 'Road A',
-    dur: 4.6,
+    dur: 1.8,
+  },
+  {
+    p: 2, x: 170, laneA: 1, carB: -70,
+    text: 'The driver looks down, looks up, and the road is exactly as she left it. She parks and never thinks about it again.',
+    dur: 3.3,
   },
   {
     p: 6, x: 300, laneA: 1, laneB: 1, kid: 1, carB: 60,
-    text: 'Here is the second driver. Same phone, same road, same two seconds. The only difference: on his stretch of road, a child is already stepping out.',
+    text: 'Here is the second driver. Same phone, same road, same two seconds.',
     cite: 'Road B',
-    dur: 4.4,
+    dur: 2,
+  },
+  {
+    p: 6, x: 300, laneA: 1, laneB: 1, kid: 1, carB: 60,
+    text: 'The only difference: on his stretch of road, a child is already stepping out.',
+    dur: 2.4,
   },
   {
     p: 47, x: 300, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 150,
-    text: 'Freeze both cars and compare the two seconds. Same phone, same speed, same shrug about the risk. Nothing inside the drivers is different at all. Only the road is.',
+    text: 'Freeze both cars and compare the two seconds. Same phone, same speed, same shrug about the risk.',
     cite: 'The same two seconds',
-    dur: 4.8,
+    dur: 2.8,
+  },
+  {
+    p: 47, x: 300, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 150,
+    text: 'Nothing inside the drivers is different at all. Only the road is.',
+    dur: 2,
   },
   {
     p: 21, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 150, pick: 1,
     interact: {
       prompt: 'Both drivers made the same two-second choice. Judging that choice alone, tap your verdict.',
-      explain: 'Identical risk, identical carelessness. The child was already stepping out before either driver reached for a phone — so nothing either of them chose was different. Only the road they happened to be on.',
+      explain: 'Identical risk, identical carelessness. The child was already stepping out before either driver reached for a phone. So nothing either of them chose was different. Only the road they happened to be on.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 15, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
-    text: 'Now let luck in. On road B the child is there. That driver will stand trial for a death. The other drives home and never even learns she took a risk.',
+    text: 'Now let luck in. On road B the child is there.',
     cite: 'What luck did',
-    dur: 4.6,
+    dur: 1.8,
+  },
+  {
+    p: 15, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
+    text: 'That driver will stand trial for a death. The other drives home and never even learns she took a risk.',
+    dur: 3,
   },
   {
     p: 4, x: 90, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
@@ -83,9 +108,14 @@ export const BEATS: Ethics7Beat[] = [
   },
   {
     p: 1, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
-    text: 'In 1976 Bernard Williams and Thomas Nagel named this clash: moral luck. Whether you end up a decent person or a criminal depends partly on which road you happened to drive down. Nagel stated the intuition we keep breaking.',
+    text: 'In 1976 Bernard Williams and Thomas Nagel named this clash: moral luck. Whether you end up a decent person or a criminal depends partly on which road you happened to drive down.',
     cite: 'Williams & Nagel · 1976',
-    dur: 5.0,
+    dur: 4.1,
+  },
+  {
+    p: 1, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
+    text: 'Nagel stated the intuition we keep breaking.',
+    dur: 1.8,
   },
   {
     p: 129, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,

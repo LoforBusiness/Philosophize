@@ -27,25 +27,55 @@ export interface Epi8Beat extends BaseBeat {
 export const BEATS: Epi8Beat[] = [
   {
     p: 25, x: 196, tower: 1, pile: 3,
-    text: 'Your friend swears the bus comes at eight. You ask why. He answers. You ask why again. How many times can he do that before he runs out?',
-    dur: 4.0,
+    text: 'Your friend swears the bus comes at eight. You ask why.',
+    dur: 1.8,
+  },
+  {
+    p: 25, x: 196, tower: 1, pile: 3,
+    text: 'Your friend answers. You ask why again.',
+    dur: 1.8,
+  },
+  {
+    p: 25, x: 196, tower: 1, pile: 3,
+    text: 'How many times can he do that before he runs out?',
+    dur: 1.8,
   },
   {
     p: 42, x: 98, tower: 1, pile: 2, hold: 1,
-    text: 'Every answer he gives is just another belief. And a belief holds nothing up unless something holds it up first. So off he goes to fetch one.',
+    text: 'Every answer he gives is just another belief. And a belief holds nothing up unless something holds it up first.',
     cite: 'Every reason needs a reason',
-    dur: 4.4,
+    dur: 3.3,
+  },
+  {
+    p: 42, x: 98, tower: 1, pile: 2, hold: 1,
+    text: 'So off he goes to fetch one.',
+    dur: 1.8,
   },
   {
     p: 43, x: 196, tower: 2, pile: 2,
-    text: 'He wedges it underneath: the timetable says so. Support goes under, never on top, so this tower grows downward. And now the timetable is a belief that needs propping up too.',
+    text: 'Your friend wedges it underneath: the timetable says so. Support goes under, never on top, so this tower grows downward.',
     cite: 'It grows downward',
-    dur: 5.0,
+    dur: 3.1,
+  },
+  {
+    p: 43, x: 196, tower: 2, pile: 2,
+    text: 'And now the timetable is a belief that needs propping up too.',
+    dur: 1.9,
   },
   {
     p: 31, x: 98, tower: 2, pile: 1, hold: 1,
-    text: 'Back to the pile. Why trust the timetable? The city printed it. Why trust the city? You can already hear the next why coming.',
-    dur: 4.2,
+    text: 'Back to the pile. Why trust the timetable?',
+    dur: 1.8,
+  },
+  {
+    p: 31, x: 98, tower: 2, pile: 1, hold: 1,
+    text: 'The city printed it. Why trust the city?',
+    dur: 1.8,
+  },
+  {
+    p: 31, x: 98, tower: 2, pile: 1, hold: 1,
+    text: 'You can already hear the next why coming.',
+    dur: 1.8,
   },
   {
     p: 27, x: 196, tower: 4, pile: 1,
@@ -55,9 +85,14 @@ export const BEATS: Epi8Beat[] = [
   },
   {
     p: 47, x: 98, tower: 0, pile: 1, esc: 1,
-    text: 'The chain of reasons can end in only three ways. The chain runs on for ever. The chain curls into a circle, each block leaning on the next. Or the chain lands on something that needs nothing beneath.',
+    text: 'The chain of reasons can end in only three ways. The chain runs on for ever.',
     cite: 'Three ways out',
-    dur: 5.0,
+    dur: 2.1,
+  },
+  {
+    p: 47, x: 98, tower: 0, pile: 1, esc: 1,
+    text: 'The chain curls into a circle, each block leaning on the next. Or the chain lands on something that needs nothing beneath.',
+    dur: 2.9,
   },
   {
     p: 21, x: 98, esc: 1, pick: 1,
@@ -71,9 +106,14 @@ export const BEATS: Epi8Beat[] = [
   },
   {
     p: 26, x: 176, esc: 1, land: 3,
-    text: 'So the digging stops. Foundationalists say a handful of basic beliefs hold themselves up, and the entire tower rests on those. Hit bedrock, and "why?" finally has nowhere left to go.',
+    text: 'So the digging stops. Foundationalists say a handful of basic beliefs hold themselves up, and the entire tower rests on those.',
     cite: 'Foundationalism',
-    dur: 4.8,
+    dur: 3.3,
+  },
+  {
+    p: 26, x: 176, esc: 1, land: 3,
+    text: 'Hit bedrock, and "why? finally has nowhere left to go.',
+    dur: 1.8,
   },
   {
     p: 4, x: 176, esc: 1, land: 2,

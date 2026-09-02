@@ -54,15 +54,20 @@ export const BEATS: Aes21Beat[] = [
   },
   {
     p: 13, x: 132, works: 1, burn: 1,
-    text: 'The painting cannot come back. There was never a text of it. The object was the work.',
+    text: 'The painting cannot come back. There was never a text of it.',
     cite: 'One of a kind',
-    dur: 4.2,
+    dur: 3,
+  },
+  {
+    p: 13, x: 132, works: 1, burn: 1,
+    text: 'The object was the work.',
+    dur: 1.8,
   },
   {
     p: 4, x: 132, works: 1, burn: 1, gone: 1, live: 1,
     interact: {
       prompt: 'Tap the work that is actually gone.',
-      explain: 'The painting. A novel is a pattern that copies carry, so losing every copy loses the copies. A painting has no notation behind it: there is nothing to print from, and a perfect forgery would be a different object made later by somebody else.',
+      explain: 'The painting. A novel is a pattern that copies carry, so losing every copy loses the copies. A painting has no notation behind it: there is nothing to print from. And a perfect forgery would be a different object made later by somebody else.',
       xp: 5,
     },
     dur: 1.0,

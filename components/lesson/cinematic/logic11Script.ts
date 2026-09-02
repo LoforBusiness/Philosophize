@@ -29,9 +29,14 @@ export const BEATS: Logic11Beat[] = [
   },
   {
     p: 21, x: 48, steps: 2,
-    text: 'Two claims go up. The book is God’s word; whatever God says is true. Innocent so far — nothing has been smuggled in yet.',
+    text: 'Two claims go up. The book is God’s word; whatever God says is true.',
     cite: 'The two premises',
-    dur: 4.4,
+    dur: 2.6,
+  },
+  {
+    p: 21, x: 48, steps: 2,
+    text: 'Innocent so far — nothing has been smuggled in yet.',
+    dur: 1.8,
   },
   {
     p: 13, x: 116, steps: 4, base: 1,
@@ -54,9 +59,14 @@ export const BEATS: Logic11Beat[] = [
   },
   {
     p: 9, x: 116, steps: 4, base: 1, spine: 1,
-    text: 'Now test the chain. Every link holds, step after step, nothing missing and nothing limping. A chain that sound is exactly what makes the trap dangerous.',
+    text: 'Now test the chain. Every link holds, step after step, nothing missing and nothing limping.',
     cite: 'Every link holds',
-    dur: 5.0,
+    dur: 2.9,
+  },
+  {
+    p: 9, x: 116, steps: 4, base: 1, spine: 1,
+    text: 'A chain that sound is exactly what makes the trap dangerous.',
+    dur: 2.1,
   },
   {
     p: 4, x: 116, steps: 4, base: 1, spine: 1,
@@ -67,9 +77,9 @@ export const BEATS: Logic11Beat[] = [
         hi: 'IT PROVES THE CONCLUSION',
         start: 1,
         zones: [
-          { id: 'none', upto: 0.3, reads: 'none; it helped itself to the answer', correct: true },
+          { id: 'none', upto: 0.3, reads: 'none, it assumed the answer', correct: true },
           { id: 'some', upto: 0.7, reads: 'a little, by making the claim explicit' },
-          { id: 'proof', upto: 1, reads: 'it proves it, and the steps really are valid' },
+          { id: 'proof', upto: 1, reads: 'it proves the conclusion outright' },
         ],
       },
       explain: 'None, and the knob starts on the trap. Validity feels like proof and is not. All it promises is that true premises could not give a false conclusion, and a circle clears that bar by putting the conclusion in the premises. It never fails and never tells you anything.',

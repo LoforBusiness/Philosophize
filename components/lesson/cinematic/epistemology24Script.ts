@@ -40,9 +40,14 @@ export const BEATS: Epi24Beat[] = [
   },
   {
     p: 2, x: 200, ladder: 1, sure: 1,
-    text: 'Beside each one, how sure you actually are of it. Not how clever it sounds. How sure.',
+    text: 'Beside each one, how sure you actually are of it. Not how clever it sounds.',
     cite: 'Measured, not argued',
-    dur: 4.2,
+    dur: 3.7,
+  },
+  {
+    p: 2, x: 200, ladder: 1, sure: 1,
+    text: 'How sure.',
+    dur: 1.8,
   },
   {
     p: 45, x: 132, ladder: 1, sure: 1, hand: 1,

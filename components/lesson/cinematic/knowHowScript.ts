@@ -25,20 +25,35 @@ export interface KnowHowBeat extends BaseBeat {
 export const BEATS: KnowHowBeat[] = [
   {
     p: 25, x: 70,
-    text: 'You have read every word ever written about swimming. The physics, the technique, the breathing. Now get in the water.',
-    dur: 4.0,
+    text: 'You have read every word ever written about swimming. The physics, the technique, the breathing.',
+    dur: 3,
+  },
+  {
+    p: 25, x: 70,
+    text: 'Now get in the water.',
+    dur: 1.8,
   },
   {
     p: 41, x: 168, steps: 1,
-    text: 'Start with one instruction, and make it a good one. Precise, true, and easy to check. Below it, the thing the instruction is for.',
+    text: 'Start with one instruction, and make it a good one. Precise, true, and easy to check.',
     cite: 'One step',
-    dur: 4.4,
+    dur: 2.9,
+  },
+  {
+    p: 41, x: 168, steps: 1,
+    text: 'Below it, the thing the instruction is for.',
+    dur: 1.8,
   },
   {
     p: 40, x: 168, steps: 3,
-    text: 'Add the rest. Every line is accurate and you have memorised all of them. Look at the box underneath: nothing has arrived in it.',
+    text: 'Add the rest. Every line is accurate and you have memorised all of them.',
     cite: 'The whole method',
-    dur: 4.6,
+    dur: 2.7,
+  },
+  {
+    p: 40, x: 168, steps: 3,
+    text: 'Look at the box underneath: nothing has arrived in it.',
+    dur: 1.9,
   },
   {
     p: 147, x: 124, steps: 3,
@@ -69,7 +84,7 @@ export const BEATS: KnowHowBeat[] = [
         zones: [
           { id: 'skill', upto: 0.32, reads: 'the doing itself, now in the hands' },
           { id: 'both', upto: 0.66, reads: 'half the facts, half the doing' },
-          { id: 'facts', upto: 1, reads: 'the facts about the steps, and none of the doing', correct: true },
+          { id: 'facts', upto: 1, reads: 'the facts, and none of the doing', correct: true },
         ],
       },
       explain: 'Nearly all facts. The rival is a serious view — intellectualists argue a skill just is knowing enough facts about how — so the middle is not silly. Ryle answers with the expert who cannot state most of what they do and does it perfectly anyway.',
@@ -81,7 +96,7 @@ export const BEATS: KnowHowBeat[] = [
     p: 6, x: 124, steps: 3, done: 1, pick: 1,
     interact: {
       prompt: 'The column is complete and correct. Tap what it still cannot hand you.',
-      explain: 'Instructions carry rules and reasons perfectly well. What they cannot transfer is the capacity — which is why coaching happens in a pool rather than in a library.',
+      explain: 'Instructions carry rules and reasons perfectly well. What they cannot hand over is the skill. That is why coaching happens in a pool, not a library.',
       xp: 5,
     },
     dur: 1.0,

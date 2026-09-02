@@ -34,9 +34,14 @@ export const BEATS: Pol32Beat[] = [
   },
   {
     g: 1, fill: 1, result: 1, mark: 1, labels: 0,
-    dur: 4.6,
-    text: 'Including yours. The odds of a single vote deciding a national election are worse than most lotteries. You knew that on the way to the hall.',
+    dur: 3,
+    text: 'Including yours. The odds of a single vote deciding a national election are worse than most lotteries.',
     cite: 'Yours',
+  },
+  {
+    g: 1, fill: 1, result: 1, mark: 1, labels: 0,
+    dur: 1.8,
+    text: 'You knew that on the way to the hall.',
   },
   {
     g: 139, fill: 1, result: 1, mark: 1, labels: 0,
@@ -62,7 +67,7 @@ export const BEATS: Pol32Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap the one thing your single mark reliably changes.',
-      explain: 'The margin. Your mark will almost never decide who wins, but it moves the gap by exactly one, every time — and margins decide mandates, funding, which seats get fought next, and whether a party changes course.',
+      explain: 'The margin. Your vote will almost never decide who wins. It does move the gap by one, every time. And margins decide a great deal: how strong a mandate looks, where the money goes, which seats get fought next.',
       xp: 5,
     },
   },
@@ -76,10 +81,10 @@ export const BEATS: Pol32Beat[] = [
         yLo: 'A MARK DOES NOTHING ELSE', yHi: 'A MARK DOES OTHER THINGS',
         start: [0.76, 0.24],
         quads: [
-          { id: 'yes', x: 0, y: 1, reads: 'it will not decide, and the mark still does something', correct: true },
-          { id: 'no', x: 0, y: 0, reads: 'it will not decide, and that is all a mark is' },
-          { id: 'lucky', x: 1, y: 1, reads: 'it might decide, and it does other things too' },
-          { id: 'thin', x: 1, y: 0, reads: 'it might decide, and nothing besides' },
+          { id: 'yes', x: 0, y: 1, reads: 'never decides, still worth doing', correct: true },
+          { id: 'no', x: 0, y: 0, reads: 'never decides, and worth nothing' },
+          { id: 'lucky', x: 1, y: 1, reads: 'might decide, and worth doing anyway' },
+          { id: 'thin', x: 1, y: 0, reads: 'might decide, and nothing more' },
         ],
       },
       explain: 'Top left. The classic slip is but what if nobody voted: what everyone else does is already fixed, so that was never the choice in front of you. Deciding the result is one thing a mark can do, and it was never the only one.',

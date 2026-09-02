@@ -26,14 +26,24 @@ export interface Eth14Beat extends BaseBeat {
 export const BEATS: Eth14Beat[] = [
   {
     g: 25, built: 0,
-    dur: 4.4,
-    text: 'No laws, no police, nothing above you at all. Every liberty you have is yours to keep. So is everybody else\'s.',
+    dur: 3.6,
+    text: 'No laws, no police, nothing above you at all. Every liberty you have is yours to keep.',
+  },
+  {
+    g: 25, built: 0,
+    dur: 1.8,
+    text: 'So is everybody else\'s.',
   },
   {
     g: 13, built: 0,
-    dur: 4.8,
-    text: 'That last sentence is the whole problem. The case for leaving is not that freedom is bad. The case is that everyone else has freedom too.',
+    dur: 3.1,
+    text: 'That last sentence is the whole problem. The case for leaving is not that freedom is bad.',
     cite: 'The state of nature',
+  },
+  {
+    g: 13, built: 0,
+    dur: 1.8,
+    text: 'The case is that everyone else has freedom too.',
   },
   {
     g: 45, built: 5,
@@ -79,7 +89,7 @@ export const BEATS: Eth14Beat[] = [
         start: 0.04,
         zones: [
           { id: 'build', upto: 0.3, reads: 'whether to have a state in the first place' },
-          { id: 'both', upto: 0.66, reads: 'half about building it, half about resisting it' },
+          { id: 'both', upto: 0.66, reads: 'half about building the state, half about resisting' },
           { id: 'resist', upto: 1, reads: 'whether you may ever resist the one you built', correct: true },
         ],
       },

@@ -39,8 +39,13 @@ export const BEATS: Epi18Beat[] = [
   },
   {
     p: 2, x: 200, rails: 1, grip: 1, ev: 0,
-    text: 'Look at what is holding each marker. The round earth is tied to almost everything else you know. The keys are tied to a memory of putting them down.',
-    dur: 5.0,
+    text: 'Look at what is holding each marker. The round earth is tied to almost everything else you know.',
+    dur: 3.1,
+  },
+  {
+    p: 2, x: 200, rails: 1, grip: 1, ev: 0,
+    text: 'The keys are tied to a memory of putting them down.',
+    dur: 1.9,
   },
   {
     p: 45, x: 132, rails: 1, grip: 1, ev: 0.3,

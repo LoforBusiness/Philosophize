@@ -29,9 +29,14 @@ export const BEATS: Logic34Beat[] = [
   },
   {
     p: 47, x: 50, n: 0.08,
-    text: 'So you pull a handful. Your estimate is the solid line and the bracket around it is how wrong you might be. With a handful, very wrong.',
+    text: 'So you pull a handful. Your estimate is the solid line and the bracket around it is how wrong you might be.',
     cite: 'A handful',
-    dur: 4.4,
+    dur: 3.6,
+  },
+  {
+    p: 47, x: 50, n: 0.08,
+    text: 'With a handful, very wrong.',
+    dur: 1.8,
   },
   {
     p: 19, x: 50, n: 0.45,
@@ -41,9 +46,14 @@ export const BEATS: Logic34Beat[] = [
   },
   {
     p: 4, x: 50, n: 1,
-    text: 'Then it stops paying. Four times the marbles only halves the bracket. Error falls with the square root of the count, not in step with it.',
+    text: 'Then it stops paying. Four times the marbles only halves the bracket.',
     cite: 'Four times, half the error',
-    dur: 4.8,
+    dur: 2.2,
+  },
+  {
+    p: 4, x: 50, n: 1,
+    text: 'Error falls with the square root of the count, not in step with it.',
+    dur: 2.6,
   },
   {
     p: 137, x: 50, n: 1,
@@ -78,9 +88,14 @@ export const BEATS: Logic34Beat[] = [
   },
   {
     p: 35, x: 50, n: 0.9, biased: 1,
-    text: 'Now the awkward one. Here is a huge sample, drawn only from people who answered the phone. The bracket is tight around the wrong number.',
+    text: 'Now the awkward one. Here is a huge sample, drawn only from people who answered the phone.',
     cite: 'Tight, and wrong',
-    dur: 4.8,
+    dur: 3.3,
+  },
+  {
+    p: 35, x: 50, n: 0.9, biased: 1,
+    text: 'The bracket is tight around the wrong number.',
+    dur: 1.8,
   },
   {
     p: 45, x: 50, n: 0.9, biased: 1,

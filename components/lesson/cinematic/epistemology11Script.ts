@@ -34,20 +34,40 @@ export interface Epistemology11Beat extends BaseBeat {
 export const BEATS: Epistemology11Beat[] = [
   {
     p: 25, x: 80, real: 180, link: 1,
-    text: 'You glance up at the hallway clock. Three o’clock — and it really is three o’clock. You have never been more right, or for a worse reason.',
-    dur: 4.0,
+    text: 'You glance up at the hallway clock. Three o’clock — and it really is three o’clock.',
+    dur: 2.4,
+  },
+  {
+    p: 25, x: 80, real: 180, link: 1,
+    text: 'You have never been more right, or for a worse reason.',
+    dur: 1.8,
   },
   {
     p: 45, x: 154, real: 195,
-    text: 'You step across for a second look. The other dial has moved on; the hallway clock has not. It stopped twelve hours ago, at exactly three.',
+    text: 'You step across for a second look. The other dial has moved on; the hallway clock has not.',
     cite: 'The stopped clock',
-    dur: 4.6,
+    dur: 3.2,
+  },
+  {
+    p: 45, x: 154, real: 195,
+    text: 'It stopped twelve hours ago, at exactly three.',
+    dur: 1.8,
   },
   {
     p: 3, x: 154, real: 220,
-    text: 'Still, count what you had. You believed it. It was true. And a clock on a wall is an ordinary reason to trust one. Belief, truth, justification — all three.',
+    text: 'Still, count what you had. You believed it.',
     cite: 'Justified true belief',
-    dur: 5.0,
+    dur: 1.8,
+  },
+  {
+    p: 3, x: 154, real: 220,
+    text: 'It was true. And a clock on a wall is an ordinary reason to trust one.',
+    dur: 2.7,
+  },
+  {
+    p: 3, x: 154, real: 220,
+    text: 'Belief, truth, justification — all three.',
+    dur: 1.8,
   },
   {
     p: 129, x: 154, real: 255,
@@ -63,9 +83,14 @@ export const BEATS: Epistemology11Beat[] = [
   },
   {
     p: 5, x: 226, real: 300,
-    text: 'Walk on, and watch the pair. They agreed for one instant and never will again. Nothing ever joined your reason to the fact — the match was an accident.',
+    text: 'Walk on, and watch the pair. They agreed for one instant and never will again.',
     cite: 'Epistemic luck',
-    dur: 5.0,
+    dur: 2.6,
+  },
+  {
+    p: 5, x: 226, real: 300,
+    text: 'Nothing ever joined your reason to the fact — the match was an accident.',
+    dur: 2.4,
   },
   {
     p: 4, x: 226, real: 350,
@@ -77,7 +102,7 @@ export const BEATS: Epistemology11Beat[] = [
           { id: 'belief', reads: 'belief: you did not really believe it' },
           { id: 'truth', reads: 'truth: the time on the wall was wrong' },
           { id: 'reason', reads: 'justification: a broken clock is no reason' },
-          { id: 'none', reads: 'none of them; all three are met', correct: true },
+          { id: 'none', reads: 'none of them, all three are met', correct: true },
         ],
       },
       explain: 'None of them, and that is the whole of Gettier. A broken clock feels like a broken condition and it is not. You believed it, it was true, and a clock on a wall is an ordinary reason to trust. All three met, and still not knowledge.',

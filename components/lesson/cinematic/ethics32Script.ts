@@ -71,13 +71,13 @@ export const BEATS: Ethics32Beat[] = [
     interact: {
       prompt: 'Drag to how much weight another person can carry here.',
       drag: {
-        lo: 'NONE; WORK IT OUT ALONE',
-        hi: 'TAKE THEIR WORD FOR IT',
+        lo: 'WORK IT OUT ALONE',
+        hi: 'JUST TAKE THEIR WORD',
         start: 0,
         zones: [
-          { id: 'never', upto: 0.3, reads: 'none; every moral question is yours to solve alone' },
-          { id: 'signal', upto: 0.74, reads: 'a sign you have missed something, then go and look', correct: true },
-          { id: 'take', upto: 1, reads: 'take the verdict and adopt it as your own' },
+          { id: 'never', upto: 0.3, reads: 'no help at all' },
+          { id: 'signal', upto: 0.74, reads: 'a hint to go and look again', correct: true },
+          { id: 'take', upto: 1, reads: 'their answer, taken as your own' },
         ],
       },
       explain: 'The middle. The near end flatters us and nobody lives that way. Testimony is excellent evidence that you have overlooked something, and a poor replacement for going and seeing what it was.',

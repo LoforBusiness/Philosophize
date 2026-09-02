@@ -39,20 +39,35 @@ export interface Pol3Beat extends BaseBeat {
 export const BEATS: Pol3Beat[] = [
   {
     sub: 2, r: 28, scroll: 0, pair: 1, force: 1, flow: 0, seal: 0,
-    text: 'A gun makes you obey. What makes you owe obedience? Power compels. Legitimacy is the other thing, and the gap between them is the whole subject.',
-    dur: 3.8,
+    text: 'A gun makes you obey. What makes you owe obedience?',
+    dur: 1.8,
+  },
+  {
+    sub: 2, r: 28, scroll: 0, pair: 1, force: 1, flow: 0, seal: 0,
+    text: 'Power compels. Legitimacy is the other thing, and the gap between them is the whole subject.',
+    dur: 2.3,
   },
   {
     sub: 30, r: 31, scroll: 1, pair: 0, flow: 1, seal: 0,
-    text: 'Imagine no state at all — people free and unruled. Hobbes warned that with no common judge, this "state of nature" slides into war. So people covenant to set up a ruler who keeps the peace.',
+    text: 'Imagine no state at all — people free and unruled. Hobbes warned that with no common judge, this "state of nature" slides into war.',
     cite: 'The social contract',
-    dur: 5.2,
+    dur: 3.5,
+  },
+  {
+    sub: 30, r: 31, scroll: 1, pair: 0, flow: 1, seal: 0,
+    text: 'So people covenant to set up a ruler who keeps the peace.',
+    dur: 1.8,
   },
   {
     sub: 0, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
-    text: 'Locke said we set up a government to guard our rights, and it holds power only in trust. Break the trust and the government forfeits its right to rule. The American founders leaned on Locke in 1776.',
+    text: 'Locke said we set up a government to guard our rights, and it holds power only in trust. Break the trust and the government forfeits its right to rule.',
     cite: 'Locke, 1689',
-    dur: 5.0,
+    dur: 3.9,
+  },
+  {
+    sub: 0, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
+    text: 'The American founders leaned on Locke in 1776.',
+    dur: 1.8,
   },
   {
     sub: 0, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1,
@@ -69,9 +84,14 @@ export const BEATS: Pol3Beat[] = [
   },
   {
     sub: 38, r: 38, scroll: 1, pair: 2, flow: 1, seal: 1,
-    text: 'Rousseau pushed further. Legitimacy flows from the "general will" — what truly serves the whole people, not the sum of private wants. Real freedom is living under rules you give yourself.',
+    text: 'Rousseau pushed further. Legitimacy flows from the "general will" — what truly serves the whole people, not the sum of private wants.',
     cite: 'Rousseau — the general will',
-    dur: 5.0,
+    dur: 3.5,
+  },
+  {
+    sub: 38, r: 38, scroll: 1, pair: 2, flow: 1, seal: 1,
+    text: 'Real freedom is living under rules you give yourself.',
+    dur: 1.8,
   },
   {
     sub: 21, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1,

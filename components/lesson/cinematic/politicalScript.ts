@@ -22,19 +22,34 @@ export interface PoliticalBeat extends BaseBeat {
 export const BEATS: PoliticalBeat[] = [
   {
     auth: 0,
-    text: 'Why obey rules you never agreed to? Every state claims authority over you. Where does that power come from?',
-    dur: 3.6,
+    text: 'Why obey rules you never agreed to? Every state claims authority over you.',
+    dur: 2.5,
   },
   {
     auth: 0,
-    text: 'Hobbes ran a thought experiment. Strip away every law, every court and every ruler. With nobody left to judge between us, fear and rivalry collide, and life turns "nasty, brutish, and short."',
+    text: 'Where does that power come from?',
+    dur: 1.8,
+  },
+  {
+    auth: 0,
+    text: 'Hobbes ran a thought experiment. Strip away every law, every court and every ruler.',
     cite: 'Thomas Hobbes, Leviathan, 1651',
-    dur: 4.8,
+    dur: 2.1,
   },
   {
     auth: 0,
-    text: 'Even the weakest can kill the strongest — so each strikes first, from fear. The result is "a war of every man against every man." The only exit: authorize one sovereign to keep the peace.',
-    dur: 4.6,
+    text: 'With nobody left to judge between us, fear and rivalry collide, and life turns "nasty, brutish, and short."',
+    dur: 2.7,
+  },
+  {
+    auth: 0,
+    text: 'Even the weakest can kill the strongest — so each strikes first, from fear. The result is "a war of every man against every man.',
+    dur: 3.3,
+  },
+  {
+    auth: 0,
+    text: 'The only exit: authorize one sovereign to keep the peace.',
+    dur: 1.8,
   },
   {
     auth: 0,
@@ -65,8 +80,13 @@ export const BEATS: PoliticalBeat[] = [
   },
   {
     auth: 1,
-    text: 'No one literally signed it. The contract is a test of legitimacy, not a document. For Hobbes the covenant binds subjects, so there is no right to revolt. Locke disagreed: betray our rights, and the people may resist.',
-    dur: 4.8,
+    text: 'No one literally signed it. The contract is a test of legitimacy, not a document.',
+    dur: 1.9,
+  },
+  {
+    auth: 1,
+    text: 'For Hobbes the covenant binds subjects, so there is no right to revolt. Locke disagreed: betray our rights, and the people may resist.',
+    dur: 2.9,
   },
   {
     auth: 1,
@@ -78,7 +98,7 @@ export const BEATS: PoliticalBeat[] = [
         hi: 'WHENEVER HE RULES BADLY',
         start: 1,
         zones: [
-          { id: 'never', upto: 0.3, reads: 'none; even a harsh sovereign beats the war', correct: true },
+          { id: 'never', upto: 0.3, reads: 'none, even a harsh ruler beats war', correct: true },
           { id: 'life', upto: 0.66, reads: 'only when he comes for your life directly' },
           { id: 'bad', upto: 1, reads: 'whenever the ruler governs badly' },
         ],

@@ -23,34 +23,61 @@ export interface Epi5Beat extends BaseBeat {
 export const BEATS: Epi5Beat[] = [
   {
     p: 25, star: 0.4, power: 0, rungs: 2,
-    text: '"All men by nature desire to know." Aristotle opens his largest book with that line, and it is a claim about you. Nobody taught you to want to know things.',
-    dur: 3.6,
+    text: '"All men by nature desire to know. Aristotle opens his largest book with that line, and it is a claim about you.',
+    dur: 2.6,
+  },
+  {
+    p: 25, star: 0.4, power: 0, rungs: 2,
+    text: 'Nobody taught you to want to know things.',
+    dur: 1.8,
   },
   {
     p: 24, star: 0.8, rungs: 5,
-    text: 'The best kind of knowing, he says, is not the useful kind. It is the kind you want for no reason beyond wanting it. He calls that the only free knowledge, because it is in service of nothing.',
+    text: 'The best kind of knowing, he says, is not the useful kind. It is the kind you want for no reason beyond wanting it.',
     cite: 'Aristotle, Metaphysics I',
-    dur: 5.0,
+    dur: 3.2,
+  },
+  {
+    p: 24, star: 0.8, rungs: 5,
+    text: 'Aristotle calls that the only free knowledge, because it is in service of nothing.',
+    dur: 1.8,
   },
   {
     p: 19, star: 1, rungs: 5,
-    text: 'His evidence is small and hard to argue with. You like looking at things. Not in order to get anything out of it — you just do, and that plain pleasure is where the whole ladder starts.',
+    text: 'Aristotle\'s evidence is small and hard to argue with. You like looking at things.',
     cite: 'The joy of sight',
-    dur: 4.8,
+    dur: 1.8,
+  },
+  {
+    p: 19, star: 1, rungs: 5,
+    text: 'Not in order to get anything out of it — you just do, and that plain pleasure is where the whole ladder starts.',
+    dur: 3,
   },
   {
     p: 4, star: 1, rungs: 5,
     // The cite plate carries `thaumazein`; the narration says what it means. A term
     // the reader can SEE spelled out does not also need spelling out in the prose (J7).
-    text: 'Both Plato and Aristotle say philosophy begins in wonder. Not the pleasant kind. Their word is closer to being knocked off balance by something you cannot account for.',
+    text: 'Both Plato and Aristotle say philosophy begins in wonder. Not the pleasant kind.',
     cite: 'Thaumazein — wonder',
-    dur: 4.8,
+    dur: 2.2,
+  },
+  {
+    p: 4, star: 1, rungs: 5,
+    // The cite plate carries `thaumazein`; the narration says what it means. A term
+    // the reader can SEE spelled out does not also need spelling out in the prose (J7).
+    text: 'Their word is closer to being knocked off balance by something you cannot account for.',
+    dur: 2.6,
   },
   {
     p: 37, star: 1, power: 1, rungs: 5,
-    text: 'Centuries later Francis Bacon points the whole ladder somewhere else. Knowledge is for getting things done, and for making nature do what you want. Aristotle wanted to understand it. Bacon wanted to use it.',
+    text: 'Centuries later Francis Bacon points the whole ladder somewhere else. Knowledge is for getting things done, and for making nature do what you want.',
     cite: 'Knowledge as power',
-    dur: 4.8,
+    dur: 3.4,
+  },
+  {
+    p: 37, star: 1, power: 1, rungs: 5,
+    text: 'Aristotle wanted to understand it. Bacon wanted to use it.',
+    dur: 1.8,
   },
   {
     p: 129, star: 1, power: 1, rungs: 5,

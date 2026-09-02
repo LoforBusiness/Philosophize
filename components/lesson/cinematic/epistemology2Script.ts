@@ -24,15 +24,25 @@ export const BEATS: Epi2Beat[] = [
   },
   {
     d: 4, m: 7, doubt: 0.2,
-    text: 'First he separates two things we run together. Feeling certain is something happening in you. Truth is how the world is. Those two can come apart, so he goes hunting for beliefs that survive every possible doubt.',
+    text: 'First he separates two things we run together. Feeling certain is something happening in you.',
     cite: 'Certainty vs truth',
-    dur: 4.8,
+    dur: 1.9,
+  },
+  {
+    d: 4, m: 7, doubt: 0.2,
+    text: 'Truth is how the world is. Those two can come apart, so he goes hunting for beliefs that survive every possible doubt.',
+    dur: 2.9,
   },
   {
     d: 15, m: 13, doubt: 0.62,
-    text: 'So he imagines a demon of utmost power rigging his whole reality. Every sight, every memory, even that two plus three make five — all could be a planted lie. Doubt at maximum.',
+    text: 'So he imagines a demon of utmost power rigging his whole reality. Every sight, every memory, even that two plus three make five — all could be a planted lie.',
     cite: 'Descartes, Meditations I, 1641',
-    dur: 4.8,
+    dur: 4.4,
+  },
+  {
+    d: 15, m: 13, doubt: 0.62,
+    text: 'Doubt at maximum.',
+    dur: 1.8,
   },
   {
     d: 22, m: 1, doubt: 0.9, glow: true,
@@ -49,9 +59,19 @@ export const BEATS: Epi2Beat[] = [
   },
   {
     d: 13, m: 6, doubt: 0.85, glow: true,
-    text: 'The demon is a tool, not a real fear. Of each idea Descartes asks: could the demon fake this? Most beliefs crack. One refuses. Used this way, doubt rebuilds rather than ruins.',
+    text: 'The demon is a tool, not a real fear. Of each idea Descartes asks: could the demon fake this?',
     cite: 'Methodological doubt',
-    dur: 4.6,
+    dur: 2.7,
+  },
+  {
+    d: 13, m: 6, doubt: 0.85, glow: true,
+    text: 'Most beliefs crack. One refuses.',
+    dur: 1.8,
+  },
+  {
+    d: 13, m: 6, doubt: 0.85, glow: true,
+    text: 'Used this way, doubt rebuilds rather than ruins.',
+    dur: 1.8,
   },
   {
     d: 9, m: 3, doubt: 0.85, glow: true,
@@ -73,9 +93,9 @@ export const BEATS: Epi2Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'all', reads: 'nothing is out of reach; it can fake this too' },
-          { id: 'sums', reads: 'it can fake the world, but not arithmetic' },
-          { id: 'doubter', reads: 'it needs somebody there to be fooled', correct: true },
+          { id: 'all', reads: 'nothing at all is safe' },
+          { id: 'sums', reads: 'arithmetic is safe' },
+          { id: 'doubter', reads: 'the one being fooled is safe', correct: true },
         ],
       },
       explain: 'The far setting. To be fooled you have to exist to be fooled, so the harder the demon works the more certain the doubter becomes. Arithmetic is not safe — Descartes lets the demon have the sums. Only the doubter survives.',

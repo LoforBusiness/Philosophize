@@ -28,26 +28,46 @@ export interface Political10Beat extends BaseBeat {
 export const BEATS: Political10Beat[] = [
   {
     p: 25, x: 44,
-    text: 'Three people, three piles — and the tallest is three times the shortest. Is that unjust? Stare at it as long as you like: the picture on its own will not tell you.',
-    dur: 3.8,
+    text: 'Three people, three piles — and the tallest is three times the shortest. Is that unjust?',
+    dur: 1.8,
+  },
+  {
+    p: 25, x: 44,
+    text: 'Stare at it as long as you like: the picture on its own will not tell you.',
+    dur: 2,
   },
   {
     p: 37, x: 44,
-    text: 'Locke starts before the piles exist. The world lies there unowned; you work a patch of it, and because the work is yours the patch becomes yours. But he bolts a brake onto that: leave enough, and as good, for everyone else.',
+    text: 'Locke starts before the piles exist. The world lies there unowned.',
     cite: 'Locke · labour',
-    dur: 5.0,
+    dur: 1.8,
+  },
+  {
+    p: 37, x: 44,
+    text: 'You work a patch, the work is yours, so the patch is yours too. But he bolts a brake onto that: leave enough, and as good, for everyone else.',
+    dur: 3.6,
   },
   {
     p: 13, x: 108, tape: 1,
-    text: 'So a pile is never only a pile. Under every one runs a record of how it got there. Taken from the common, traded, traded again, handed on as a gift.',
+    text: 'So a pile is never only a pile. Under every one runs a record of how it got there.',
     cite: 'The record',
-    dur: 4.4,
+    dur: 2.7,
+  },
+  {
+    p: 13, x: 108, tape: 1,
+    text: 'Taken from the common, traded, traded again, handed on as a gift.',
+    dur: 1.8,
   },
   {
     p: 3, x: 108, tape: 1, ptr: 4,
-    text: 'Nozick reads only that strip. Was every step clean — a fair taking, then free trades, then a gift nobody was forced to give? Then the pile at the end is hers, however tall it stands.',
+    text: 'Nozick reads only that strip. Was every step clean — a fair taking, then free trades, then a gift nobody was forced to give?',
     cite: 'Nozick · the entitlement view',
-    dur: 4.8,
+    dur: 3.2,
+  },
+  {
+    p: 3, x: 108, tape: 1, ptr: 4,
+    text: 'Then the pile at the end is hers, however tall it stands.',
+    dur: 1.8,
   },
   {
     p: 137, x: 108, tape: 1, ptr: 4,
@@ -64,9 +84,14 @@ export const BEATS: Political10Beat[] = [
   },
   {
     p: 47, x: 108, tape: 1, ptr: 4, ruler: 1,
-    text: 'Rawls never looks at the strip at all. Lay a level across the tops and read one number — how high is the shortest pile? Inequality is fine by him, but only if it lifts whoever ends up at the bottom.',
+    text: 'Rawls never looks at the strip at all. Lay a level across the tops and read one number — how high is the shortest pile?',
     cite: 'Rawls · the floor',
-    dur: 5.0,
+    dur: 3,
+  },
+  {
+    p: 47, x: 108, tape: 1, ptr: 4, ruler: 1,
+    text: 'Inequality is fine by him, but only if it lifts whoever ends up at the bottom.',
+    dur: 2,
   },
   {
     p: 21, x: 108, tape: 1, ptr: 4, ruler: 1,
@@ -77,8 +102,8 @@ export const BEATS: Political10Beat[] = [
         hi: 'ALL YOU CAN REACH',
         start: 1,
         zones: [
-          { id: 'none', upto: 0.26, reads: 'nothing; the common land stays common' },
-          { id: 'enough', upto: 0.74, reads: 'as much as leaves enough, and as good, for others', correct: true },
+          { id: 'none', upto: 0.26, reads: 'nothing, the land stays common' },
+          { id: 'enough', upto: 0.74, reads: 'as much as leaves enough for others', correct: true },
           { id: 'all', upto: 1, reads: 'everything you can get your hands on' },
         ],
       },

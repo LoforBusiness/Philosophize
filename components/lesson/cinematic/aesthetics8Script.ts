@@ -26,32 +26,62 @@ export interface Aes8Beat extends BaseBeat {
 export const BEATS: Aes8Beat[] = [
   {
     p: 25, x: 148, mode: 0, lens: 0,
-    text: 'Two people stare at the same painting. One says it works because of the shapes. The other says it works because it aches. Same canvas. Two completely different reasons.',
-    dur: 4.2,
+    text: 'Two people stare at the same painting. One says it works because of the shapes.',
+    dur: 2.2,
+  },
+  {
+    p: 25, x: 148, mode: 0, lens: 0,
+    text: 'The other says it works because it aches. Same canvas.',
+    dur: 1.8,
+  },
+  {
+    p: 25, x: 148, mode: 0, lens: 0,
+    text: 'Two completely different reasons.',
+    dur: 1.8,
   },
   {
     p: 24, x: 68, mode: 0, lens: 1,
-    text: 'Luckily there is a pair of glasses on the wall for each of them. Take the first pair down. Nothing mystical — they just change what you notice.',
+    text: 'Luckily there is a pair of glasses on the wall for each of them. Take the first pair down.',
     cite: 'The first pair',
-    dur: 3.6,
+    dur: 2.4,
+  },
+  {
+    p: 24, x: 68, mode: 0, lens: 1,
+    text: 'Nothing mystical — they just change what you notice.',
+    dur: 1.8,
   },
   {
     p: 47, x: 148, mode: 1, lens: 1,
-    text: 'Through these, the painting is pure arrangement. A block here, an edge there, one shape leaning on another. Whatever it is a picture OF has gone completely quiet.',
+    text: 'Through these, the painting is pure arrangement. A block here, an edge there, one shape leaning on another.',
     cite: 'Through the first pair',
-    dur: 4.8,
+    dur: 3.1,
+  },
+  {
+    p: 47, x: 148, mode: 1, lens: 1,
+    text: 'Whatever it is a picture OF has gone completely quiet.',
+    dur: 1.8,
   },
   {
     p: 31, x: 68, mode: 0, lens: 2,
-    text: 'Hang those up. There is a second pair on the same wall. It is about to show you a different painting, on exactly the same canvas.',
+    text: 'Hang those up. There is a second pair on the same wall.',
     cite: 'The second pair',
-    dur: 4.0,
+    dur: 1.8,
+  },
+  {
+    p: 31, x: 68, mode: 0, lens: 2,
+    text: 'It is about to show you a different painting, on exactly the same canvas.',
+    dur: 2.2,
   },
   {
     p: 32, x: 148, mode: 2, lens: 2,
-    text: 'Now the blocks dissolve into strokes. You are not measuring anything. You are catching a mood, as if the painter handed you what they were feeling that afternoon.',
+    text: 'Now the blocks dissolve into strokes. You are not measuring anything.',
     cite: 'Through the second pair',
-    dur: 4.6,
+    dur: 1.8,
+  },
+  {
+    p: 32, x: 148, mode: 2, lens: 2,
+    text: 'You are catching a mood, as if the painter handed you what they were feeling that afternoon.',
+    dur: 2.8,
   },
   {
     p: 4, x: 68, mode: 0, lens: 0, pick: 1,
@@ -64,9 +94,14 @@ export const BEATS: Aes8Beat[] = [
   },
   {
     p: 35, x: 148, mode: 1, lens: 1,
-    text: 'That way of looking has a name: formalism. Clive Bell claimed every real work of visual art shares one thing. He called it significant form: an arrangement of line and colour that moves you. The subject is beside the point.',
+    text: 'That way of looking has a name: formalism. Clive Bell claimed every real work of visual art shares one thing.',
     cite: 'Formalism · Clive Bell',
-    dur: 5.2,
+    dur: 2.6,
+  },
+  {
+    p: 35, x: 148, mode: 1, lens: 1,
+    text: 'Bell called it significant form: an arrangement of line and colour that moves you. The subject is beside the point.',
+    dur: 2.6,
   },
   {
     p: 137, x: 148, mode: 1, lens: 1,
@@ -82,9 +117,14 @@ export const BEATS: Aes8Beat[] = [
   },
   {
     p: 37, x: 68, mode: 2, lens: 2,
-    text: 'The second pair has a name too. Tolstoy said art is one person handing a feeling to another. Collingwood added that the painter often only finds the feeling by painting it.',
+    text: 'The second pair has a name too. Tolstoy said art is one person handing a feeling to another.',
     cite: 'Expression theory · Tolstoy',
-    dur: 5.0,
+    dur: 2.9,
+  },
+  {
+    p: 37, x: 68, mode: 2, lens: 2,
+    text: 'Collingwood added that the painter often only finds the feeling by painting it.',
+    dur: 2.1,
   },
   {
     p: 45, x: 148, mode: 2, lens: 2, modeAns: 3,

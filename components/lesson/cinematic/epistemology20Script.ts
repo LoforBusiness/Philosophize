@@ -36,9 +36,14 @@ export const BEATS: Epi20Beat[] = [
   },
   {
     p: 2, x: 200, voices: 1, agree: 0.9,
-    text: 'Then three more say it. A paper, a friend, a podcast. The bar climbs, and it is right to climb.',
+    text: 'Then three more say it. A paper, a friend, a podcast.',
     cite: 'Four confirmations',
-    dur: 4.6,
+    dur: 2.5,
+  },
+  {
+    p: 2, x: 200, voices: 1, agree: 0.9,
+    text: 'The bar climbs, and it is right to climb.',
+    dur: 2.1,
   },
   {
     p: 45, x: 132, voices: 1, agree: 0.9, wires: 1,
@@ -47,9 +52,14 @@ export const BEATS: Epi20Beat[] = [
   },
   {
     p: 13, x: 132, voices: 1, agree: 0.32, wires: 1,
-    text: 'Nobody retracted anything. All four still say the same thing. The count was never really four.',
+    text: 'Nobody retracted anything. All four still say the same thing.',
     cite: 'One source, echoed',
-    dur: 4.0,
+    dur: 2.5,
+  },
+  {
+    p: 13, x: 132, voices: 1, agree: 0.32, wires: 1,
+    text: 'The count was never really four.',
+    dur: 1.8,
   },
   {
     p: 4, x: 132, voices: 1, agree: 0.32, wires: 1, live: 1,
@@ -87,10 +97,10 @@ export const BEATS: Epi20Beat[] = [
         yLo: 'NOBODY HAS HEARD OF THEM', yHi: 'A VERY BIG NAME',
         start: [0.24, 0.76],
         quads: [
-          { id: 'real', x: 1, y: 0, reads: 'checked it themselves, and unknown: this is evidence', correct: true },
-          { id: 'reach', x: 0, y: 1, reads: 'a big name passing on the first report: reach, not evidence' },
-          { id: 'both', x: 1, y: 1, reads: 'a big name who checked it themselves: evidence, plus reach' },
-          { id: 'noise', x: 0, y: 0, reads: 'an unknown account passing it on: nothing added at all' },
+          { id: 'real', x: 1, y: 0, reads: 'checked it themselves, and unknown', correct: true },
+          { id: 'reach', x: 0, y: 1, reads: 'a big name, just passing it on' },
+          { id: 'both', x: 1, y: 1, reads: 'a big name, and checked it themselves' },
+          { id: 'noise', x: 0, y: 0, reads: 'unknown, and just passing it on' },
         ],
       },
       explain: 'The bottom right, and the point is that the axis going up does nothing. What makes a second report count is that it had its own way of checking and might have come out differently. A big name repeating a post adds reach, and reach is what feels like evidence.',

@@ -60,12 +60,12 @@ const POINTER_CEIL = 0.12;
  * It was 0 against a floor of 55. Raising the floor to the published band moves it
  * to 68 — the debt is not new, it was simply below a line drawn too low to see it.
  *
- * LEFT AT 68 RATHER THAN THE 44 THE SPLIT TREE REPORTS, for the same reason
- * BEAT_SENTENCE_BUDGET is left high: a budget is a ceiling, and this checker may
- * reach HEAD before J12's beat splits do. Lower it to whatever the run prints once
- * the *Script.ts changes are committed.
+ * IT IS 18 NOW, and the difference is 42 pieces actually rewritten rather than a
+ * line moved — see J14. Eight cleared the band on a sentence split alone, which
+ * changes no word; eight were pronouns given their noun back; the rest were
+ * reworded with every claim and every named term kept.
  */
-const HARD_BUDGET = 68;
+const HARD_BUDGET = 18;
 /**
  * The shortest piece worth scoring. Below this both tests are noise — see the note
  * at the loop. Twenty words is about two ordinary sentences of this corpus, which

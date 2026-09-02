@@ -28,9 +28,14 @@ export const BEATS: Epi4Beat[] = [
   },
   {
     e: 2, r: 0, fill: 0.35,
-    text: 'Locke pictured the newborn mind as a sheet of blank paper. Nothing is on it before you live it, and everything that arrives got there by being seen, felt or thought over. That camp is the empiricists.',
+    text: 'Locke pictured the newborn mind as a sheet of blank paper. Nothing is on it before you live it, and everything that arrives got there by being seen, felt or thought over.',
     cite: 'Empiricism — from experience',
-    dur: 4.8,
+    dur: 4.2,
+  },
+  {
+    e: 2, r: 0, fill: 0.35,
+    text: 'That camp is the empiricists.',
+    dur: 1.8,
   },
   {
     e: 31, r: 0, fill: 0.85,
@@ -53,15 +58,25 @@ export const BEATS: Epi4Beat[] = [
   },
   {
     e: 0, r: 11, fill: 0.85, glow: 1,
-    text: 'The other camp fires back. Some things you never had to be shown. Descartes and Leibniz thought maths and logic get worked out by reason alone, before experience gets a say. That is what a priori means.',
+    text: 'The other camp fires back. Some things you never had to be shown.',
     cite: 'Rationalism — from reason',
-    dur: 5.0,
+    dur: 1.8,
+  },
+  {
+    e: 0, r: 11, fill: 0.85, glow: 1,
+    text: 'Descartes and Leibniz thought maths and logic get worked out by reason alone, before experience gets a say. That is what a priori means.',
+    dur: 3.2,
   },
   {
     e: 0, r: 19, glow: 1,
-    text: 'Plato has Socrates walk an untaught boy through doubling a square, using nothing but questions. Nobody teaches him any geometry. So learning, Plato says, is remembering what was in there already.',
+    text: 'Plato has Socrates walk an untaught boy through doubling a square, using nothing but questions. Nobody teaches him any geometry.',
     cite: 'Plato, Meno',
-    dur: 5.0,
+    dur: 3.2,
+  },
+  {
+    e: 0, r: 19, glow: 1,
+    text: 'So learning, Plato says, is remembering what was in there already.',
+    dur: 1.8,
   },
   {
     e: 2, r: 11, fill: 0.85, glow: 1,
@@ -75,9 +90,14 @@ export const BEATS: Epi4Beat[] = [
   },
   {
     e: 39, r: 39, fill: 0.85, glow: 1, bridge: 1,
-    text: 'Then Kant brokered a truce, and said both were half right. The raw material does pour in through the senses. But the mind has shapes of its own — space, time, cause — and pours it into those. Neither works alone.',
+    text: 'Then Kant brokered a truce, and said both were half right. The raw material does pour in through the senses.',
     cite: 'Kant’s bridge',
-    dur: 5.0,
+    dur: 2.4,
+  },
+  {
+    e: 39, r: 39, fill: 0.85, glow: 1, bridge: 1,
+    text: 'But the mind has shapes of its own — space, time, cause — and pours the raw material into them. Neither sense nor mind works alone.',
+    dur: 2.6,
   },
   {
     e: 0, r: 4, glow: 1, bridge: 1,
@@ -88,9 +108,9 @@ export const BEATS: Epi4Beat[] = [
         hi: 'ALL OF IT',
         start: 1,
         zones: [
-          { id: 'none', upto: 0.28, reads: 'nothing; every last thing is learned by looking' },
-          { id: 'some', upto: 0.72, reads: 'some of it, and the rest still comes from looking', correct: true },
-          { id: 'all', upto: 1, reads: 'all of it; experience teaches nothing' },
+          { id: 'none', upto: 0.28, reads: 'nothing, all of it is learned' },
+          { id: 'some', upto: 0.72, reads: 'some of it, the rest is learned', correct: true },
+          { id: 'all', upto: 1, reads: 'all of it, nothing is learned' },
         ],
       },
       explain: 'The middle. Rationalists say SOME truths come before experience, not that experience is worthless. The far end is the overshoot, and no rationalist ever made it. The near end is the empiricist standing on the other side of the room.',

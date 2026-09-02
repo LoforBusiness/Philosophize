@@ -27,15 +27,25 @@ export const BEATS: Ethics18Beat[] = [
   },
   {
     p: 41, x: 168, line: 1, test: 1,
-    text: 'For most of history the line ran here. The reason given was reason itself. They cannot argue, cannot promise, cannot be held to anything — so they were furniture.',
+    text: 'For most of history the line ran here. The reason given was reason itself.',
     cite: 'Where the line ran',
-    dur: 5.0,
+    dur: 2.4,
+  },
+  {
+    p: 41, x: 168, line: 1, test: 1,
+    text: 'They cannot argue, cannot promise, cannot be held to anything — so they were furniture.',
+    dur: 2.6,
   },
   {
     p: 13, x: 124, line: 1, test: 1,
-    text: 'But look at what that test actually catches. Infants cannot reason. Nor can someone deeply cognitively impaired. Nobody thinks they are outside — so the test is not the one we use.',
+    text: 'But look at what that test actually catches. Infants cannot reason.',
     cite: 'The test misfires',
-    dur: 5.2,
+    dur: 1.8,
+  },
+  {
+    p: 13, x: 124, line: 1, test: 1,
+    text: 'Nor can someone deeply cognitively impaired. Nobody thinks they are outside — so the test is not the one we use.',
+    dur: 3.4,
   },
   {
     p: 139, x: 124, line: 1, test: 1,
@@ -60,7 +70,7 @@ export const BEATS: Ethics18Beat[] = [
     p: 6, x: 124, line: 1, test: 2, wide: 1, pick: 1,
     interact: {
       prompt: 'Excluding a being just for the group it belongs to has a name. Tap the right label.',
-      explain: 'Speciesism, by analogy with racism and sexism: giving less weight to identical suffering because of the body it happens in. Naming it is the point — an unnamed bias just feels like common sense.',
+      explain: 'Speciesism, named after racism and sexism. It gives less weight to the same suffering because of the body it happens in. Naming it is the point. An unnamed bias just feels like common sense.',
       xp: 5,
     },
     dur: 1.0,

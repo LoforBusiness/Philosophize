@@ -20,20 +20,35 @@ export interface Epis31Beat extends BaseBeat {
 export const BEATS: Epis31Beat[] = [
   {
     g: 4, open: 0,
-    dur: 4.0,
-    text: 'You are already down the road when it hits you: did you lock the door? You can picture doing it. That picture is the only evidence you have.',
+    dur: 2.9,
+    text: 'You are already down the road when it hits you: did you lock the door? You can picture doing it.',
+  },
+  {
+    g: 4, open: 0,
+    dur: 1.8,
+    text: 'That picture is the only evidence you have.',
   },
   {
     g: 1, open: 1,
-    dur: 4.4,
-    text: 'So you check. You open the memory and there it is — the key, the turn, the pull on the handle. Clear as anything.',
+    dur: 3.9,
+    text: 'So you check. You open the memory and there it is — the key, the turn, the pull on the handle.',
     cite: 'The first drawer',
   },
   {
+    g: 1, open: 1,
+    dur: 1.8,
+    text: 'Clear as anything.',
+  },
+  {
     g: 3, open: 2,
-    dur: 4.6,
-    text: 'But how do you know that memory is any good? You remember checking it. That is a second drawer, in the same cabinet, made of the same stuff as the first.',
+    dur: 2.1,
+    text: 'But how do you know that memory is any good? You remember checking it.',
     cite: 'The second drawer',
+  },
+  {
+    g: 3, open: 2,
+    dur: 2.5,
+    text: 'That is a second drawer, in the same cabinet, made of the same stuff as the first.',
   },
   {
     g: 128, open: 2,
@@ -50,16 +65,21 @@ export const BEATS: Epis31Beat[] = [
   },
   {
     g: 8, open: 3,
-    dur: 4.4,
-    text: 'And a third. Every certificate memory can issue is signed by memory. Meanwhile the door itself has been standing over there the whole time.',
+    dur: 2.2,
+    text: 'And a third. Every certificate memory can issue is signed by memory.',
     cite: 'And a third',
+  },
+  {
+    g: 8, open: 3,
+    dur: 2.2,
+    text: 'Meanwhile the door itself has been standing over there the whole time.',
   },
   {
     g: 2, open: 3, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap the card that could check a memory from outside memory.',
-      explain: 'The door. Every drawer in that cabinet is another memory, and a memory cannot certify itself. Only the world breaks the circle — and a minute after you look, that too is a memory.',
+      explain: 'The door. Every drawer in that cabinet is another memory, and a memory cannot vouch for itself. Only the world breaks the circle. A minute after you look, that too is a memory.',
       xp: 5,
     },
   },
@@ -72,7 +92,7 @@ export const BEATS: Epis31Beat[] = [
         start: 0,
         stops: [
           { id: 'prove', reads: 'prove it first, against something outside memory' },
-          { id: 'trust', reads: 'trust it until something gives you a reason not to', correct: true },
+          { id: 'trust', reads: 'trust it until you get a reason not to', correct: true },
           { id: 'doubt', reads: 'treat every memory as suspect until it is confirmed' },
         ],
       },

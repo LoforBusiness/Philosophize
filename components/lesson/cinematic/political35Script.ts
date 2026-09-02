@@ -34,8 +34,13 @@ export interface Political35Beat extends BaseBeat {
 export const BEATS: Political35Beat[] = [
   {
     p: 25, x: 52, chairs: 1,
-    text: 'A room where a decision gets made. Three people are in it. Nine of the chairs belong to people who are not born yet.',
-    dur: 4.2,
+    text: 'A room where a decision gets made. Three people are in it.',
+    dur: 2.1,
+  },
+  {
+    p: 25, x: 52, chairs: 1,
+    text: 'Nine of the chairs belong to people who are not born yet.',
+    dur: 2.1,
   },
   {
     p: 4, x: 52, chairs: 1, live_w: 1, live: 1,
@@ -63,13 +68,23 @@ export const BEATS: Political35Beat[] = [
   },
   {
     p: 2, x: 52, chairs: 1, weight: 0.5,
-    text: 'Pick the reckless policy and the world runs another way. Other jobs, other journeys, other couples meeting. Other children.',
-    dur: 4.6,
+    text: 'Pick the reckless policy and the world runs another way. Other jobs, other journeys, other couples meeting.',
+    dur: 4.1,
+  },
+  {
+    p: 2, x: 52, chairs: 1, weight: 0.5,
+    text: 'Other children.',
+    dur: 1.8,
   },
   {
     p: 21, x: 52, chairs: 1, weight: 0.5, swap: 1,
-    text: 'Watch who is in the room now. Not the same three. Under the careful policy these people were never born at all.',
-    dur: 4.4,
+    text: 'Watch who is in the room now. Not the same three.',
+    dur: 2.2,
+  },
+  {
+    p: 21, x: 52, chairs: 1, weight: 0.5, swap: 1,
+    text: 'Under the careful policy these people were never born at all.',
+    dur: 2.2,
   },
   {
     p: 4, x: 52, chairs: 1, weight: 0.5, swap: 1, live: 1,

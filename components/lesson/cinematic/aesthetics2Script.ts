@@ -25,9 +25,14 @@ export const BEATS: Aes2Beat[] = [
   },
   {
     a: 7, v: 0, wave: true, felt: true, chain: 3,
-    text: 'Forget beauty and forget skill. Tolstoy calls art an infection. The maker feels something, puts the feeling into the work, and you catch the feeling off the work. Collingwood adds that makers often do not know the feeling until the work is finished.',
+    text: 'Forget beauty and forget skill. Tolstoy calls art an infection.',
     cite: 'Expression theory',
-    dur: 5.0,
+    dur: 1.8,
+  },
+  {
+    a: 7, v: 0, wave: true, felt: true, chain: 3,
+    text: 'The maker feels something, puts the feeling into the work, and you catch the feeling off the work. Collingwood adds that makers often do not know the feeling until the work is finished.',
+    dur: 3.8,
   },
   {
     a: 15, v: 15, wave: true, felt: true, chain: 3,
@@ -62,9 +67,14 @@ export const BEATS: Aes2Beat[] = [
   },
   {
     a: 20, v: 17, wave: true, felt: true, chain: 3,
-    text: 'If they are right, a feeling can be packed into lines and sounds and words. It then outlives the person, the language and the century. Almost nothing else we build does that.',
+    text: 'If they are right, a feeling can be packed into lines and sounds and words. It then outlives the person, the language and the century.',
     cite: 'Feeling made portable',
-    dur: 4.4,
+    dur: 3.4,
+  },
+  {
+    a: 20, v: 17, wave: true, felt: true, chain: 3,
+    text: 'Almost nothing else we build does that.',
+    dur: 1.8,
   },
   {
     a: 0, v: 22, felt: true, chain: 3,
@@ -75,10 +85,10 @@ export const BEATS: Aes2Beat[] = [
         yLo: 'THE TEARS ARE PRETEND', yHi: 'THE TEARS ARE REAL',
         start: [0.24, 0.24],
         quads: [
-          { id: 'puzzle', x: 1, y: 1, reads: 'no such people, and the crying is real: the puzzle', correct: true },
-          { id: 'tidy', x: 1, y: 0, reads: 'no such people, and the crying is pretend too' },
-          { id: 'plain', x: 0, y: 1, reads: 'real people, real tears: nothing puzzling at all' },
-          { id: 'odd', x: 0, y: 0, reads: 'real people, pretend tears: a different problem' },
+          { id: 'puzzle', x: 1, y: 1, reads: 'made-up people, and real tears', correct: true },
+          { id: 'tidy', x: 1, y: 0, reads: 'made-up people, and pretend tears' },
+          { id: 'plain', x: 0, y: 1, reads: 'real people, and real tears' },
+          { id: 'odd', x: 0, y: 0, reads: 'real people, and pretend tears' },
         ],
       },
       explain: 'Top right, and nothing sits comfortably there. Fake people, so fake tears is the tidy corner and it is simply untrue: the tears are real, which is exactly the difficulty. Radford called it the paradox of fiction and nobody has settled it since.',

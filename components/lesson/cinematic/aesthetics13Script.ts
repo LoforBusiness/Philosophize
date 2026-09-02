@@ -22,8 +22,13 @@ export interface Aes13Beat extends BaseBeat {
 export const BEATS: Aes13Beat[] = [
   {
     g: 5, art: 1, chain: 0,
-    dur: 4.0,
-    text: 'Two canvases. One is a Vermeer. The other was painted last year by a man called van Meegeren, and no expert in Europe could separate them.',
+    dur: 1.8,
+    text: 'Two canvases. One is a Vermeer.',
+  },
+  {
+    g: 5, art: 1, chain: 0,
+    dur: 3.1,
+    text: 'The other was painted last year by a man called van Meegeren, and no expert in Europe could separate them.',
   },
   {
     g: 4, art: 1, chain: 0,
@@ -33,9 +38,14 @@ export const BEATS: Aes13Beat[] = [
   },
   {
     g: 1, art: 1, chain: 1,
-    dur: 4.8,
-    text: 'So draw what you cannot see: where each canvas has been. One line runs back through three and a half centuries of hands. The other starts last year and stops.',
+    dur: 3.7,
+    text: 'So draw what you cannot see: where each canvas has been. One line runs back through three and a half centuries of hands.',
     cite: 'Where they have been',
+  },
+  {
+    g: 1, art: 1, chain: 1,
+    dur: 1.8,
+    text: 'The other starts last year and stops.',
   },
   {
     g: 144, art: 1, chain: 1,
@@ -75,10 +85,10 @@ export const BEATS: Aes13Beat[] = [
         yLo: 'THE SAME HAND', yHi: 'DIFFERENT HANDS',
         start: [0.24, 0.24],
         quads: [
-          { id: 'forge', x: 1, y: 1, reads: 'same to look at, different painters — equal, if only the surface counts', correct: true },
-          { id: 'twin', x: 1, y: 0, reads: 'identical, and by the same hand: plainly equal' },
-          { id: 'pair', x: 0, y: 1, reads: 'different to look at, different hands: an ordinary pair' },
-          { id: 'two', x: 0, y: 0, reads: 'different to look at, one hand: two works by one painter' },
+          { id: 'forge', x: 1, y: 1, reads: 'same to look at, different painters', correct: true },
+          { id: 'twin', x: 1, y: 0, reads: 'same to look at, same painter' },
+          { id: 'pair', x: 0, y: 1, reads: 'different to look at, different painters' },
+          { id: 'two', x: 0, y: 0, reads: 'different to look at, same painter' },
         ],
       },
       explain: 'Top right, and the formalist refuses to let the axis going up matter. Judging a work by where it came from is the genetic fallacy, and the refusal cuts both ways: if the visible form is identical, so is the value. Most people find they cannot go along with it.',

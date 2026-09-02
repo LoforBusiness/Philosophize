@@ -55,14 +55,24 @@ export const BEATS: Metaphysics37Beat[] = [
   },
   {
     p: 21, x: 56, shelf: 1, hammer: 1, swing: 1,
-    text: 'So try the obvious definition. Fragile means: if it is struck, it breaks. Watch the hammer come down.',
-    dur: 4.2,
+    text: 'So try the obvious definition. Fragile means: if it is struck, it breaks.',
+    dur: 3,
+  },
+  {
+    p: 21, x: 56, shelf: 1, hammer: 1, swing: 1,
+    text: 'Watch the hammer come down.',
+    dur: 1.8,
   },
   {
     p: 2, x: 56, shelf: 1, hammer: 1, swing: 1, ward: 1,
-    text: 'And a sorcerer is watching, ready to toughen it the instant anyone swings. The glass does not break. It is still exactly as fragile as it was.',
+    text: 'And a sorcerer is watching, ready to toughen it the instant anyone swings. The glass does not break.',
     cite: 'Martin\'s fink, 1994',
-    dur: 4.8,
+    dur: 3.2,
+  },
+  {
+    p: 2, x: 56, shelf: 1, hammer: 1, swing: 1, ward: 1,
+    text: 'It is still exactly as fragile as it was.',
+    dur: 1.8,
   },
   {
     p: 4, x: 56, shelf: 1, live_d: 1, live: 1,

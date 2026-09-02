@@ -36,8 +36,13 @@ export interface Epistemology12Beat extends BaseBeat {
 export const BEATS: Epistemology12Beat[] = [
   {
     p: 2, x: 56, pipes: 0,
-    text: 'You have never seen an atom, and you were not there for your own birth. You would still bet money on both. So how did they get in?',
-    dur: 4.2,
+    text: 'You have never seen an atom, and you were not there for your own birth. You would still bet money on both.',
+    dur: 3.3,
+  },
+  {
+    p: 2, x: 56, pipes: 0,
+    text: 'So how did they get in?',
+    dur: 1.8,
   },
   {
     p: 31, x: 56, pipes: 1,
@@ -47,9 +52,14 @@ export const BEATS: Epistemology12Beat[] = [
   },
   {
     p: 4, x: 124, pipes: 2,
-    text: 'You know what you ate this morning, but the toast is long gone. What you are reading is a copy your mind kept. That pipe is longer, and it bends.',
+    text: 'You know what you ate this morning, but the toast is long gone. What you are reading is a copy your mind kept.',
     cite: 'Pipe two · memory',
-    dur: 5.0,
+    dur: 3.8,
+  },
+  {
+    p: 4, x: 124, pipes: 2,
+    text: 'That pipe is longer, and it bends.',
+    dur: 1.8,
   },
   {
     p: 137, x: 124, pipes: 2,
@@ -66,9 +76,14 @@ export const BEATS: Epistemology12Beat[] = [
   },
   {
     p: 45, x: 124, pipes: 3,
-    text: 'The third pipe does not begin near you at all. It runs in from strangers — teachers, books, mapmakers, people long dead. Now watch what it does to the level.',
+    text: 'The third pipe does not begin near you at all. It runs in from strangers — teachers, books, mapmakers, people long dead.',
     cite: 'Pipe three · testimony',
-    dur: 5.2,
+    dur: 3.8,
+  },
+  {
+    p: 45, x: 124, pipes: 3,
+    text: 'Now watch what it does to the level.',
+    dur: 1.8,
   },
   {
     p: 21, x: 124, pipes: 3,

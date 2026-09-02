@@ -38,9 +38,14 @@ export const BEATS: Pol20Beat[] = [
   },
   {
     p: 45, x: 200, stacks: 1,
-    text: 'They overlap almost nowhere, and neither is going to talk the other round. This is not a failure. Rawls thought it was the normal result of free thinking.',
+    text: 'They overlap almost nowhere, and neither is going to talk the other round. This is not a failure.',
     cite: 'Reasonable pluralism',
-    dur: 5.0,
+    dur: 3.2,
+  },
+  {
+    p: 45, x: 200, stacks: 1,
+    text: 'Rawls thought it was the normal result of free thinking.',
+    dur: 1.8,
   },
   {
     p: 2, x: 132, stacks: 1, shelf: 1, cands: 1,
@@ -88,7 +93,7 @@ export const BEATS: Pol20Beat[] = [
         start: 2,
         stops: [
           { id: 'power', reads: 'do not reach for the law against it', correct: true },
-          { id: 'quiet', reads: 'keep your objection to yourself' },
+          { id: 'quiet', reads: 'say nothing against it' },
           { id: 'agree', reads: 'allow that the view might be right' },
         ],
       },

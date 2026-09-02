@@ -60,8 +60,18 @@ export const BEATS: Epistemology35Beat[] = [
   },
   {
     p: 13, x: 58, pens: 1, plaques: 1, chain: 1,
-    text: 'Here is the rule that makes the puzzle awkward. Know a thing. Know what the thing rules out. You should know the second thing as well. Philosophers call the rule closure.',
-    dur: 4.4,
+    text: 'Here is the rule that makes the puzzle awkward. Know a thing.',
+    dur: 1.8,
+  },
+  {
+    p: 13, x: 58, pens: 1, plaques: 1, chain: 1,
+    text: 'Know what the thing rules out. You should know the second thing as well.',
+    dur: 2,
+  },
+  {
+    p: 13, x: 58, pens: 1, plaques: 1, chain: 1,
+    text: 'Philosophers call the rule closure.',
+    dur: 1.8,
   },
   {
     p: 21, x: 58, pens: 1, plaques: 1, chain: 1,
@@ -86,8 +96,13 @@ export const BEATS: Epistemology35Beat[] = [
   },
   {
     p: 35, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1,
-    text: 'Notice what did not happen. You never checked for paint. You would think it strange to be asked, and you would still say you knew.',
-    dur: 4.4,
+    text: 'Notice what did not happen. You never checked for paint.',
+    dur: 1.8,
+  },
+  {
+    p: 35, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1,
+    text: 'You would think it strange to be asked, and you would still say you knew.',
+    dur: 2.6,
   },
   {
     p: 47, x: 130, pens: 1, plaques: 1, chain: 1,

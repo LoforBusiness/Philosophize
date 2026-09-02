@@ -25,15 +25,25 @@ export const BEATS: Epi6Beat[] = [
   },
   {
     p: 21, bal: 1, route: 1,
-    text: 'Skepticism asks whether knowledge is possible at all. For every reason to believe something, the skeptic finds an equal reason to doubt it. If the reasons cancel out, how can any belief be secure?',
+    text: 'Skepticism asks whether knowledge is possible at all. For every reason to believe, the skeptic finds an equal reason to doubt.',
     cite: 'The skeptic’s challenge',
-    dur: 5.2,
+    dur: 3.5,
+  },
+  {
+    p: 21, bal: 1, route: 1,
+    text: 'If the reasons cancel out, how can any belief be secure?',
+    dur: 1.8,
   },
   {
     p: 0, bal: 1, route: 3,
-    text: 'Pyrrho met each claim with its opposite, found them equally strong, and simply refused to decide. His word for that is epoche. What he got out of it was not despair but calm — ataraxia.',
+    text: 'Pyrrho met each claim with its opposite, found both equally strong, and simply refused to decide. He called the refusal epoche.',
     cite: 'Pyrrho suspends judgment',
-    dur: 5.0,
+    dur: 3.1,
+  },
+  {
+    p: 0, bal: 1, route: 3,
+    text: 'What he got out of it was not despair but calm — ataraxia.',
+    dur: 1.9,
   },
   {
     p: 137, bal: 1, route: 3,
@@ -63,9 +73,14 @@ export const BEATS: Epi6Beat[] = [
   },
   {
     p: 12, bal: 0.3, crack: 1, route: 3,
-    text: 'But total doubt eats itself. If nothing can be known, is THAT known? So most sceptics doubt softly. They go after your confidence, not after the possibility of ever finding anything out.',
+    text: 'But total doubt eats itself. If nothing can be known, is THAT known?',
     cite: 'Doubt that eats itself',
-    dur: 5.0,
+    dur: 2,
+  },
+  {
+    p: 12, bal: 0.3, crack: 1, route: 3,
+    text: 'So most sceptics doubt softly. They go after your confidence, not after the possibility of ever finding anything out.',
+    dur: 3,
   },
   {
     p: 4, crack: 1, route: 3,
@@ -74,8 +89,8 @@ export const BEATS: Epi6Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'fine', reads: 'nothing; the claim is perfectly consistent' },
-          { id: 'bold', reads: 'it is too strong, but it is not self-defeating' },
+          { id: 'fine', reads: 'nothing, the claim is fine' },
+          { id: 'bold', reads: 'too strong to be true' },
           { id: 'eats', reads: 'it asserts the very thing it denies', correct: true },
         ],
       },

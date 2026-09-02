@@ -26,9 +26,14 @@ export const BEATS: Aes32Beat[] = [
   },
   {
     g: 2, rows: 2, mean: 0,
-    dur: 4.4,
-    text: 'Here is the same life run backwards. Exactly the same nine years, in the opposite order. Nothing has been added and nothing taken away.',
+    dur: 2.9,
+    text: 'Here is the same life run backwards. Exactly the same nine years, in the opposite order.',
     cite: 'The same years, reversed',
+  },
+  {
+    g: 2, rows: 2, mean: 0,
+    dur: 1.8,
+    text: 'Nothing has been added and nothing taken away.',
   },
   {
     g: 3, rows: 3, mean: 0,
@@ -50,9 +55,14 @@ export const BEATS: Aes32Beat[] = [
   },
   {
     g: 1, rows: 3, mean: 1,
-    dur: 4.6,
-    text: 'The line sits at the same height in all three, because all three hold the same amount of good. A ledger cannot tell them apart. You can, instantly.',
+    dur: 4.1,
+    text: 'The line sits at the same height in all three, because all three hold the same amount of good. A ledger cannot tell them apart.',
     cite: 'Identical totals',
+  },
+  {
+    g: 1, rows: 3, mean: 1,
+    dur: 1.8,
+    text: 'You can, instantly.',
   },
   {
     g: 4, rows: 3, mean: 1, pick: 1,

@@ -28,15 +28,26 @@ export interface MetaBeat extends BaseBeat {
 export const BEATS: MetaBeat[] = [
   {
     hpose: 6,
-    text: 'Why is there something rather than nothing? Metaphysics’ most famous question. Brace yourself.',
-    dur: 3.4,
+    text: 'Why is there something rather than nothing? Metaphysics’ most famous question.',
+    dur: 2.9,
+  },
+  {
+    hpose: 6,
+    text: 'Brace yourself.',
+    dur: 1.8,
   },
   {
     hpose: 2,
     rule: true,
-    text: 'Leibniz said nothing is ever just true for no reason. Point that at everything at once. Why this crowded universe rather than an empty one? Nothing would have been simpler, he said, and easier.',
+    text: 'Leibniz said nothing is ever just true for no reason. Point that at everything at once.',
     cite: 'Leibniz, Principles of Nature and Grace §7',
-    dur: 4.8,
+    dur: 2.3,
+  },
+  {
+    hpose: 2,
+    rule: true,
+    text: 'Why this crowded universe rather than an empty one? Nothing would have been simpler, he said, and easier.',
+    dur: 2.5,
   },
   {
     hpose: 0,
@@ -55,15 +66,27 @@ export const BEATS: MetaBeat[] = [
   {
     hpose: 1,
     erase: 0.86,
-    text: 'Try to reach it. Parmenides did. Strip away objects, space, time, physics — and a dark empty void is still something. You cannot even think about what is not, because thinking about it makes it a thing.',
+    text: 'Try to reach it. Parmenides did.',
     cite: 'Parmenides, On Nature, early 5th c. BCE',
-    dur: 5.0,
+    dur: 1.8,
+  },
+  {
+    hpose: 1,
+    erase: 0.86,
+    text: 'Strip away objects, space, time, physics — and a dark empty void is still something. You cannot even think about what is not, because thinking about it makes it a thing.',
+    dur: 4.2,
   },
   {
     hpose: 2,
     chain: true,
-    text: 'Science never even tries. It starts mid-game, explaining one state of the world by an earlier one. It has to assume there are states and laws to begin with.',
-    dur: 4.4,
+    text: 'Science never even tries. It starts mid-game, explaining one state of the world by an earlier one.',
+    dur: 2.6,
+  },
+  {
+    hpose: 2,
+    chain: true,
+    text: 'It has to assume there are states and laws to begin with.',
+    dur: 1.8,
   },
   {
     hpose: 2,
@@ -92,7 +115,7 @@ export const BEATS: MetaBeat[] = [
         start: 0,
         zones: [
           { id: 'stars', upto: 0.32, reads: 'how the galaxies and the stars formed' },
-          { id: 'early', upto: 0.72, reads: 'back to one hot dense beginning, and it stops there', correct: true },
+          { id: 'early', upto: 0.72, reads: 'back to one hot dense beginning', correct: true },
           { id: 'why', upto: 1, reads: 'why there is anything here to begin with' },
         ],
       },

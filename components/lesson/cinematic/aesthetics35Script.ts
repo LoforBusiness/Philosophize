@@ -37,8 +37,13 @@ export const BEATS: Aesthetics35Beat[] = [
   },
   {
     p: 2, x: 56, track: 1, split: 1,
-    text: 'Here is the setup. I told my doctor I broke my arm in two places. You are in a surgery now, waiting for the diagnosis.',
-    dur: 4.4,
+    text: 'Here is the setup. I told my doctor I broke my arm in two places.',
+    dur: 2.6,
+  },
+  {
+    p: 2, x: 56, track: 1, split: 1,
+    text: 'You are in a surgery now, waiting for the diagnosis.',
+    dur: 1.8,
   },
   {
     p: 4, x: 56, track: 1, split: 1, live: 1,
@@ -51,8 +56,13 @@ export const BEATS: Aesthetics35Beat[] = [
   },
   {
     p: 21, x: 56, track: 1, split: 1, run: 1,
-    text: 'Both readings had to fit. That is the part people miss. A punchline that does not fit the setup is not surprising, it is wrong.',
-    dur: 4.6,
+    text: 'Both readings had to fit. That is the part people miss.',
+    dur: 2,
+  },
+  {
+    p: 21, x: 56, track: 1, split: 1, run: 1,
+    text: 'A punchline that does not fit the setup is not surprising, it is wrong.',
+    dur: 2.6,
   },
   {
     p: 47, x: 56, track: 1, split: 1, run: 1,
@@ -69,13 +79,23 @@ export const BEATS: Aesthetics35Beat[] = [
   },
   {
     p: 12, x: 56, track: 1, split: 1, run: 1, spoil: 1,
-    text: 'Now watch it with the second line drawn in first. Same words, same swap, and nothing happens. That is what explaining a joke does to it.',
-    dur: 4.8,
+    text: 'Now watch it with the second line drawn in first. Same words, same swap, and nothing happens.',
+    dur: 3.1,
+  },
+  {
+    p: 12, x: 56, track: 1, split: 1, run: 1, spoil: 1,
+    text: 'That is what explaining a joke does to it.',
+    dur: 1.8,
   },
   {
     p: 35, x: 128, track: 1, split: 1, spoil: 1,
-    text: 'Which is why the old theories only half work. Hobbes said we laugh at someone beneath us. Freud said we let out pressure.',
-    dur: 4.4,
+    text: 'Which is why the old theories only half work. Hobbes said we laugh at someone beneath us.',
+    dur: 3.3,
+  },
+  {
+    p: 35, x: 128, track: 1, split: 1, spoil: 1,
+    text: 'Freud said we let out pressure.',
+    dur: 1.8,
   },
   {
     p: 45, x: 128, track: 1, split: 1, spoil: 1,
@@ -103,7 +123,7 @@ export const BEATS: Aesthetics35Beat[] = [
         'Explaining hands over the second in advance',
         'Superiority and relief cover only some cases',
       ],
-      closing: 'It is the one art whose success is measured by an involuntary noise. No wonder it resists being explained by people writing carefully.',
+      closing: 'Comedy is the one art whose success is measured by a noise you cannot help. No wonder it resists being explained by people writing carefully.',
     },
     dur: 3.0,
   },

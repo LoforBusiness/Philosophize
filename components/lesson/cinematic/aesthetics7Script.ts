@@ -25,20 +25,35 @@ export interface Aesthetics7Beat extends BaseBeat {
 export const BEATS: Aesthetics7Beat[] = [
   {
     p: 25, x: 90, q: 8, art: 1, capt: 0,
-    text: 'Someone glances at the scribble, then at the painting, and says the scribble is better. You want to say that is wrong. On what grounds?',
-    dur: 4.0,
+    text: 'Someone glances at the scribble, then at the painting, and says the scribble is better. You want to say that is wrong.',
+    dur: 3.5,
+  },
+  {
+    p: 25, x: 90, q: 8, art: 1, capt: 0,
+    text: 'On what grounds?',
+    dur: 1.8,
   },
   {
     p: 47, x: 250, q: 9, art: 1, capt: 1,
-    text: 'Three seconds made one of these. Thirty years made the other. Nearly everyone who walks in here feels the gap — but a feeling is not yet a reason.',
+    text: 'Three seconds made one of these. Thirty years made the other.',
     cite: 'Three seconds · thirty years',
-    dur: 4.6,
+    dur: 1.8,
+  },
+  {
+    p: 47, x: 250, q: 9, art: 1, capt: 1,
+    text: 'Nearly everyone who walks in here feels the gap — but a feeling is not yet a reason.',
+    dur: 2.9,
   },
   {
     p: 7, x: 160, q: 10, art: 1, capt: 1,
-    text: 'Hume went looking for the beauty in the paint and came back empty. Scrape the canvas, weigh it, measure it: no beauty comes off. It happens in the mind doing the looking.',
+    text: 'Hume went looking for the beauty in the paint and came back empty. Scrape the canvas, weigh it, measure it: no beauty comes off.',
     cite: 'Nobody can find the beauty',
-    dur: 4.8,
+    dur: 3.6,
+  },
+  {
+    p: 7, x: 160, q: 10, art: 1, capt: 1,
+    text: 'It happens in the mind doing the looking.',
+    dur: 1.8,
   },
   {
     p: 44, x: 160, q: 22, art: 1, capt: 1,
@@ -55,9 +70,14 @@ export const BEATS: Aesthetics7Beat[] = [
   },
   {
     p: 12, x: 90, q: 7, art: 1, capt: 1,
-    text: 'If beauty only happens in minds, your friend’s mind is as full of it as anyone’s. So the scribble ties with the masterwork. Something in you refuses that. Hume refused it too.',
+    text: 'If beauty only happens in minds, your friend’s mind is as full of it as anyone’s. So the scribble ties with the masterwork.',
     cite: 'So the scribble wins?',
-    dur: 4.8,
+    dur: 3.5,
+  },
+  {
+    p: 12, x: 90, q: 7, art: 1, capt: 1,
+    text: 'Something in you refuses that. Hume refused it too.',
+    dur: 1.8,
   },
   {
     p: 21, x: 170, q: 4, art: 0.22, capt: 2, pick: 1,
@@ -70,15 +90,25 @@ export const BEATS: Aesthetics7Beat[] = [
   },
   {
     p: 3, x: 170, q: 45, art: 1, capt: 3, marks: 1,
-    text: 'So Hume set a bar. A verdict counts when it comes from long practice, wide comparison, no personal grudges, and plain good sense. Where people like that agree, you have a standard.',
+    text: 'So Hume set a bar. A verdict counts when it comes from long practice, wide comparison, no personal grudges, and plain good sense.',
     cite: 'Hume · the true critic',
-    dur: 5.0,
+    dur: 3.6,
+  },
+  {
+    p: 3, x: 170, q: 45, art: 1, capt: 3, marks: 1,
+    text: 'Where people like that agree, you have a standard.',
+    dur: 1.8,
   },
   {
     p: 24, x: 250, q: 25, art: 1, capt: 3, marks: 1,
-    text: 'This is not snobbery. A wine taster really does taste notes you cannot; practice reshapes perception itself. Stand here again after a hundred galleries and this canvas will show you more than it does today.',
+    text: 'This is not snobbery. A wine taster really does taste notes you cannot; practice reshapes perception itself.',
     cite: 'Practice changes what you see',
-    dur: 5.0,
+    dur: 2.4,
+  },
+  {
+    p: 24, x: 250, q: 25, art: 1, capt: 3, marks: 1,
+    text: 'Stand here again after a hundred galleries and this canvas will show you more than it does today.',
+    dur: 2.6,
   },
   {
     p: 4, x: 160, q: 39, art: 1, capt: 3, marks: 1,
@@ -88,7 +118,7 @@ export const BEATS: Aesthetics7Beat[] = [
         left: 'IN THE RESPONSE', right: 'IN THE PAINT',
         start: 0.04,
         zones: [
-          { id: 'paint', upto: 0.3, reads: 'in the object; a standard measures a real property' },
+          { id: 'paint', upto: 0.3, reads: 'in the paint itself' },
           { id: 'both', upto: 0.66, reads: 'half in the paint, half in the viewer' },
           { id: 'resp', upto: 1, reads: 'in the response, which can still be trained', correct: true },
         ],

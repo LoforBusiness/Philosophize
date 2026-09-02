@@ -33,15 +33,25 @@ export const BEATS: Epi17Beat[] = [
   },
   {
     g: 45, facts: 1, frame: 1, odd: 3,
-    dur: 4.8,
-    text: 'Then the awkward results pile up outside the frame. Nobody throws the frame away. They patch the frame, add a circle, and patch it again.',
+    dur: 2.7,
+    text: 'Then the awkward results pile up outside the frame. Nobody throws the frame away.',
     cite: 'Anomalies',
   },
   {
+    g: 45, facts: 1, frame: 1, odd: 3,
+    dur: 2.1,
+    text: 'They patch the frame, add a circle, and patch it again.',
+  },
+  {
     g: 13, facts: 1, frame: 1, odd: 3,
-    dur: 4.6,
-    text: 'Kuhn looked at what actually happened in history. Most of science is not testing the frame. It is working comfortably inside one. He called that frame a paradigm.',
+    dur: 2.6,
+    text: 'Kuhn looked at what actually happened in history. Most of science is not testing the frame.',
     cite: 'Normal science',
+  },
+  {
+    g: 13, facts: 1, frame: 1, odd: 3,
+    dur: 2,
+    text: 'It is working comfortably inside one. He called that frame a paradigm.',
   },
   {
     g: 137, facts: 1, frame: 1, odd: 3,
@@ -81,9 +91,9 @@ export const BEATS: Epi17Beat[] = [
         hi: 'YEARS OF THEM PILING UP',
         start: 0,
         zones: [
-          { id: 'one', upto: 0.3, reads: 'a single experiment settles it and the theory falls' },
+          { id: 'one', upto: 0.3, reads: 'one result, and the theory falls' },
           { id: 'few', upto: 0.6, reads: 'a handful, and each gets explained away' },
-          { id: 'crisis', upto: 1, reads: 'enough of them, for long enough, to become a crisis', correct: true },
+          { id: 'crisis', upto: 1, reads: 'enough of them to become a crisis', correct: true },
         ],
       },
       explain: 'The far end. The near end is the version everybody is taught, and Kuhn wrote a book against it. Single results get absorbed, explained away, or set aside for later. What ends a paradigm is the accumulated weight of everything it could not explain.',

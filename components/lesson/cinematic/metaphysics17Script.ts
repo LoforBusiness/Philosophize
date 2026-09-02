@@ -28,8 +28,13 @@ export interface Met17Beat extends BaseBeat {
 export const BEATS: Met17Beat[] = [
   {
     g: 25, wall: 1,
-    dur: 4.8,
-    text: 'Mary knows every physical fact about colour. Wavelengths, cones, which neurons fire and in what order. The wall is complete.',
+    dur: 3.8,
+    text: 'Mary knows every physical fact about colour. Wavelengths, cones, which neurons fire and in what order.',
+  },
+  {
+    g: 25, wall: 1,
+    dur: 1.8,
+    text: 'The wall is complete.',
   },
   {
     g: 45, wall: 1,
@@ -80,9 +85,9 @@ export const BEATS: Met17Beat[] = [
         left: 'THE PHYSICAL FACTS', right: 'WHAT IT IS LIKE',
         start: 1,
         zones: [
-          { id: 'mind', upto: 0.3, reads: 'physics barely touches it; nearly all of it is left over' },
-          { id: 'most', upto: 0.74, reads: 'physics covers nearly all of it, and a sliver is left over', correct: true },
-          { id: 'all', upto: 1, reads: 'physics covers every last bit; she learns nothing at the door' },
+          { id: 'mind', upto: 0.3, reads: 'physics barely touches it' },
+          { id: 'most', upto: 0.74, reads: 'physics covers nearly all of it', correct: true },
+          { id: 'all', upto: 1, reads: 'physics covers every last bit' },
         ],
       },
       explain: 'Nearly all of it, and the sliver on the right is the whole argument. The far end treats every physical fact and everything as the same list, which is exactly what is in question. She had the first list complete and she still learns something the day the door opens.',

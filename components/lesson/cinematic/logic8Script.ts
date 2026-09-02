@@ -25,20 +25,35 @@ export interface Logic8Beat extends BaseBeat {
 export const BEATS: Logic8Beat[] = [
   {
     p: 12, x: 230, wet: 1,
-    text: 'You are almost home when the pavement registers a beat late. Behind you the street is dark and soaking, and your head has already answered why. It rained.',
-    dur: 4.4,
+    text: 'You are almost home when the pavement registers a beat late. Behind you the street is dark and soaking, and your head has already answered why.',
+    dur: 4.1,
+  },
+  {
+    p: 12, x: 230, wet: 1,
+    text: 'It rained.',
+    dur: 1.8,
   },
   {
     p: 38, x: 152, wet: 1, rule: 1,
-    text: 'You walk back to the wet patch. The rule is one you would bet money on: if it rains, the streets get wet. And tonight these streets are definitely wet.',
+    text: 'You walk back to the wet patch. The rule is one you would bet money on: if it rains, the streets get wet.',
     cite: 'The wet patch',
-    dur: 4.4,
+    dur: 3.4,
+  },
+  {
+    p: 38, x: 152, wet: 1, rule: 1,
+    text: 'And tonight these streets are definitely wet.',
+    dur: 1.8,
   },
   {
     p: 5, x: 152, wet: 1, rule: 1, trap: 1,
-    text: 'So you run the rule backwards. Streets wet, therefore rain. It feels like the same reliable move you used yesterday, only read from the other end.',
+    text: 'So you run the rule backwards. Streets wet, therefore rain.',
     cite: 'Running it backwards',
-    dur: 4.6,
+    dur: 1.8,
+  },
+  {
+    p: 5, x: 152, wet: 1, rule: 1, trap: 1,
+    text: 'It feels like the same reliable move you used yesterday, only read from the other end.',
+    dur: 2.8,
   },
   {
     p: 4, x: 152, wet: 1, rule: 1, trap: 1, pick: 1,
@@ -51,15 +66,25 @@ export const BEATS: Logic8Beat[] = [
   },
   {
     p: 45, x: 248, wet: 1, rule: 1, trap: 1, spr: 1,
-    text: 'Twenty steps on, you hear it. A sprinkler, sweeping the pavement from next door’s lawn, and it has been going all evening. It was standing there the whole time.',
+    text: 'Twenty steps on, you hear it. A sprinkler, sweeping the pavement from next door’s lawn, and it has been going all evening.',
     cite: 'The other cause',
-    dur: 5.0,
+    dur: 3.8,
+  },
+  {
+    p: 45, x: 248, wet: 1, rule: 1, trap: 1, spr: 1,
+    text: 'It was standing there the whole time.',
+    dur: 1.8,
   },
   {
     p: 11, x: 248, wet: 1, rule: 1, trap: 1, cross: 1, spr: 1,
-    text: 'This trap has a name: affirming the consequent. You spot the result, then claim the cause. It breaks the instant anything else could have produced the same result.',
+    text: 'This trap has a name: affirming the consequent. You spot the result, then claim the cause.',
     cite: 'Trap one · affirming the consequent',
-    dur: 5.2,
+    dur: 3,
+  },
+  {
+    p: 11, x: 248, wet: 1, rule: 1, trap: 1, cross: 1, spr: 1,
+    text: 'It breaks the instant anything else could have produced the same result.',
+    dur: 2.2,
   },
   {
     p: 8, x: 152, wet: 1, rule: 1, trap: 2, spr: 1,
@@ -72,13 +97,13 @@ export const BEATS: Logic8Beat[] = [
     interact: {
       prompt: 'Drag to what no rain actually tells you about the streets.',
       drag: {
-        lo: 'THEY MUST BE DRY',
-        hi: 'THEY MUST BE WET',
+        lo: 'STREETS MUST BE DRY',
+        hi: 'STREETS MUST BE WET',
         start: 0,
         zones: [
-          { id: 'dry', upto: 0.28, reads: 'dry, certainly; nothing else could have wet them' },
-          { id: 'open', upto: 0.74, reads: 'no telling; the rule never ran in this direction', correct: true },
-          { id: 'wet', upto: 1, reads: 'wet, certainly; something else must have done it' },
+          { id: 'dry', upto: 0.28, reads: 'the streets must be dry' },
+          { id: 'open', upto: 0.74, reads: 'the streets could be either', correct: true },
+          { id: 'wet', upto: 1, reads: 'the streets must be wet' },
         ],
       },
       explain: 'The middle, and the knob starts on the trap. Switching off the cause feels like switching off the effect. The rule only ran one way, rain to wet, and said nothing about a dry night. The sprinkler does not check the forecast.',

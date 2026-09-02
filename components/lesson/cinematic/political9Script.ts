@@ -34,15 +34,25 @@ export const BEATS: P9Beat[] = [
   },
   {
     vote: 1, tally: true, one: 22,
-    text: 'So they vote, and the count is honest, and the count is seven to one. Plato distrusted exactly this: steering a ship takes a trained pilot, not a show of hands. Let the crew vote and they follow whoever flatters them best.',
+    text: 'So they vote, and the count is honest, and the count is seven to one. Plato distrusted exactly this: steering a ship takes a trained pilot, not a show of hands.',
     cite: 'Plato’s doubt',
-    dur: 5.2,
+    dur: 3.8,
+  },
+  {
+    vote: 1, tally: true, one: 22,
+    text: 'Let the crew vote and they follow whoever flatters them best.',
+    dur: 1.8,
   },
   {
     vote: 0, tally: true, advance: true, one: 18,
-    text: 'Nothing has gone wrong with the procedure. Everyone got a vote, the larger number won, and now the larger number is walking toward the smaller one. This is democracy working, not democracy failing.',
+    text: 'Nothing has gone wrong with the procedure. Everyone got a vote, the larger number won, and now the larger number is walking toward the smaller one.',
     cite: 'Tyranny of the majority',
-    dur: 5.2,
+    dur: 4.1,
+  },
+  {
+    vote: 0, tally: true, advance: true, one: 18,
+    text: 'This is democracy working, not democracy failing.',
+    dur: 1.8,
   },
   {
     vote: 0, tally: true, advance: true, rights: true, one: 137,

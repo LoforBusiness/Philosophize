@@ -39,15 +39,25 @@ export const BEATS: Aes22Beat[] = [
   },
   {
     p: 2, x: 200, screen: 1, slime: 1, meters: 1, heart: 1,
-    text: 'Take the readings. The heart goes up. The belief that any of it is real never leaves the floor.',
+    text: 'Take the readings. The heart goes up.',
     cite: 'Two instruments',
-    dur: 4.6,
+    dur: 1.8,
+  },
+  {
+    p: 2, x: 200, screen: 1, slime: 1, meters: 1, heart: 1,
+    text: 'The belief that any of it is real never leaves the floor.',
+    dur: 2.9,
   },
   {
     p: 45, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
-    text: 'Three claims all seem true. You feel real fear. Feeling needs belief. You believe none of the film.',
+    text: 'Three claims all seem true. You feel real fear.',
     cite: 'The paradox of fiction',
-    dur: 4.4,
+    dur: 2.2,
+  },
+  {
+    p: 45, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
+    text: 'Feeling needs belief. You believe none of the film.',
+    dur: 2.2,
   },
   {
     p: 4, x: 132, screen: 1, slime: 1, meters: 1, heart: 1, live: 1,

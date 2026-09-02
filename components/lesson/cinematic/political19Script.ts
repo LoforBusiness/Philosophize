@@ -94,10 +94,10 @@ export const BEATS: Pol19Beat[] = [
         shapes: [
           { id: 'flat', profile: [0.95, 0.93, 0.9, 0.86], reads: 'it keeps asking, however much you have given', correct: true },
           { id: 'fall', profile: [0.9, 0.6, 0.3, 0.05], reads: 'it lets go once you have done your share' },
-          { id: 'stop', profile: [0.9, 0.9, 0.1, 0.04], reads: 'there is a line, and past it you are finished' },
+          { id: 'stop', profile: [0.9, 0.9, 0.1, 0.04], reads: 'there is a line you can cross' },
         ],
       },
-      explain: 'Nearly flat, and that is the strongest objection — not selfishness. A rule that demands everything down to your last spare pound may be perfectly true and still unlivable, and a morality nobody can follow gets ignored instead of argued with. Singer knows, and takes the demand anyway.',
+      explain: 'Nearly flat, and that is the strongest objection — not selfishness. A rule that demands everything down to your last spare pound may be perfectly true and still unlivable. And a morality nobody can follow gets ignored instead of argued with. Singer knows, and takes the demand anyway.',
       xp: 5,
     },
     dur: 1.0,

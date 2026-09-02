@@ -29,8 +29,13 @@ export interface Aes10Beat extends BaseBeat {
 export const BEATS: Aes10Beat[] = [
   {
     p: 25, x: 44, film: 1, panel: 1, shut: 0,
-    text: 'Two hours of the finest film-making you have ever sat through. Every frame placed by a master. And all of that skill is working to make cruelty look glorious.',
-    dur: 4.4,
+    text: 'Two hours of the finest film-making you have ever sat through. Every frame placed by a master.',
+    dur: 2.6,
+  },
+  {
+    p: 25, x: 44, film: 1, panel: 1, shut: 0,
+    text: 'And all of that skill is working to make cruelty look glorious.',
+    dur: 1.8,
   },
   {
     p: 5, x: 44, film: 1, panel: 1, shut: 0, verdict: 1,
@@ -86,7 +91,7 @@ export const BEATS: Aes10Beat[] = [
         hi: 'THE CITY ABOVE ALL',
         start: 0,
         zones: [
-          { id: 'beauty', upto: 0.3, reads: 'beauty first; the city can look after itself' },
+          { id: 'beauty', upto: 0.3, reads: 'beauty first, whatever it costs' },
           { id: 'even', upto: 0.62, reads: 'the two weighed against each other' },
           { id: 'city', upto: 1, reads: 'the city first, and beautiful art frightened him most', correct: true },
         ],

@@ -30,39 +30,70 @@ export interface Metaphysics8Beat extends BaseBeat {
 export const BEATS: Metaphysics8Beat[] = [
   {
     p: 25, x: 300, chain: 1, front: 13,
-    text: 'Think of the last thing you chose. Now picture it already on its way a thousand years before you were born. Every event gets pushed over by the one before it.',
-    dur: 4.4,
+    text: 'Think of the last thing you chose. Now picture it already on its way a thousand years before you were born.',
+    dur: 3,
+  },
+  {
+    p: 25, x: 300, chain: 1, front: 13,
+    text: 'Every event gets pushed over by the one before it.',
+    dur: 1.8,
   },
   {
     p: 45, x: 232, chain: 1, front: 9, tags: 1, mark: 1,
-    text: 'The first domino went over long before you existed — your genes, your parents, the street you grew up on. That push has been travelling ever since. Here it comes.',
+    text: 'The first domino went over long before you existed — your genes, your parents, the street you grew up on. That push has been travelling ever since.',
     cite: 'The first push',
-    dur: 4.8,
+    dur: 4.3,
+  },
+  {
+    p: 45, x: 232, chain: 1, front: 9, tags: 1, mark: 1,
+    text: 'Here it comes.',
+    dur: 1.8,
   },
   {
     p: 46, x: 232, chain: 1, front: 5, tags: 1, mark: 1,
-    text: 'Hard determinists take this on the chin. Given everything that came before, they say, you could not have done otherwise. Not once. Not in your entire life.',
+    text: 'Hard determinists take the conclusion on the chin. Given everything that came before, they say, you could not have done otherwise.',
     cite: 'Hard determinism',
-    dur: 4.8,
+    dur: 3.6,
+  },
+  {
+    p: 46, x: 232, chain: 1, front: 5, tags: 1, mark: 1,
+    text: 'Not once. Not in your entire life.',
+    dur: 1.8,
   },
   {
     p: 15, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'And there is the one with your name on it. It goes over right on schedule. The choice you are proudest of was a sentence physics started centuries ago.',
+    text: 'And there is the one with your name on it. It goes over right on schedule.',
     cite: 'Your domino',
-    dur: 5.0,
+    dur: 2.8,
+  },
+  {
+    p: 15, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
+    text: 'The choice you are proudest of was a sentence physics started centuries ago.',
+    dur: 2.2,
   },
   {
     p: 33, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'One camp simply refuses. A real choice snaps the chain, they say — you begin a brand-new line that nothing before you set going. That is libertarian free will.',
+    text: 'One camp simply refuses. A real choice snaps the chain, they say — you begin a brand-new line that nothing before you set going.',
     cite: 'The refusal',
-    dur: 4.8,
+    dur: 4,
+  },
+  {
+    p: 33, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
+    text: 'That is libertarian free will.',
+    dur: 1.8,
   },
   {
     // 8 (shrug), not 4 (think): the line opens "A third camp shrugs".
     p: 8, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'A third camp shrugs at the whole fight. Both sides picked the wrong test, they think. Freedom was never about escaping causes. So what else could a free choice be?',
+    text: 'A third camp shrugs at the whole fight. Both sides picked the wrong test, they think.',
     cite: 'A third way',
-    dur: 4.8,
+    dur: 2.6,
+  },
+  {
+    // 8 (shrug), not 4 (think): the line opens "A third camp shrugs".
+    p: 8, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
+    text: 'Freedom was never about escaping causes. So what else could a free choice be?',
+    dur: 2.2,
   },
   {
     p: 21, x: 200, chain: 1, front: 3, tags: 0, mark: 0, pick: 1,
@@ -95,9 +126,14 @@ export const BEATS: Metaphysics8Beat[] = [
   },
   {
     p: 29, x: 140, chain: 1, front: 2, tags: 1, mark: 1,
-    text: 'That camp has a name: compatibilism. David Hume, and later Harry Frankfurt, keep every cause and change the test. You act freely when the push comes from your own wants — not from a hand on your arm.',
+    text: 'That camp has a name: compatibilism. David Hume, and later Harry Frankfurt, keep every cause and change the test.',
     cite: 'Compatibilism · Hume, Frankfurt',
-    dur: 5.4,
+    dur: 2.7,
+  },
+  {
+    p: 29, x: 140, chain: 1, front: 2, tags: 1, mark: 1,
+    text: 'You act freely when the push comes from your own wants — not from a hand on your arm.',
+    dur: 2.7,
   },
   {
     p: 141, x: 140, chain: 1, front: 2, tags: 1, mark: 1,

@@ -33,8 +33,13 @@ export interface Epi22Beat extends BaseBeat {
 export const BEATS: Epi22Beat[] = [
   {
     p: 25, x: 200, routes: 1,
-    text: 'Two people want the same address. One asks somebody who knows it. One guesses.',
-    dur: 4.0,
+    text: 'Two people want the same address. One asks somebody who knows it.',
+    dur: 3.4,
+  },
+  {
+    p: 25, x: 200, routes: 1,
+    text: 'One guesses.',
+    dur: 1.8,
   },
   {
     p: 2, x: 200, routes: 1, run: 1,
@@ -44,8 +49,13 @@ export const BEATS: Epi22Beat[] = [
   },
   {
     p: 45, x: 132, routes: 1, run: 1, gaps: 1,
-    text: 'Look underneath. One route is a road. The other is a line of stepping stones with nothing between them.',
-    dur: 4.6,
+    text: 'Look underneath. One route is a road.',
+    dur: 1.8,
+  },
+  {
+    p: 45, x: 132, routes: 1, run: 1, gaps: 1,
+    text: 'The other is a line of stepping stones with nothing between them.',
+    dur: 2.9,
   },
   {
     p: 4, x: 132, routes: 1, run: 1, gaps: 1, live: 1,

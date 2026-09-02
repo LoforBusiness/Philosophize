@@ -38,9 +38,14 @@ export const BEATS: Met22Beat[] = [
   },
   {
     p: 2, x: 200, track: 1, runs: 1,
-    text: 'Rewind and run it again. Same world, same laws, same you. Three times, and it goes the same way each time.',
+    text: 'Rewind and run it again. Same world, same laws, same you.',
     cite: 'The replay',
-    dur: 4.8,
+    dur: 2.5,
+  },
+  {
+    p: 2, x: 200, track: 1, runs: 1,
+    text: 'Three times, and it goes the same way each time.',
+    dur: 2.3,
   },
   {
     p: 45, x: 132, track: 1, runs: 1, open: 1,
@@ -88,7 +93,7 @@ export const BEATS: Met22Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'never', reads: 'could not have, and that is the end of it' },
+          { id: 'never', reads: 'could not have done otherwise' },
           { id: 'wanted', reads: 'would have, had you wanted to', correct: true },
           { id: 'full', reads: 'could have, with the past exactly the same' },
         ],

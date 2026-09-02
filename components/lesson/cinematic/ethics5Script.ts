@@ -46,21 +46,38 @@ export const BEATS: Ethics5Beat[] = [
     x: 217, soc: 2, chart: 1,
     // The chart overhead already draws the window and its dates. Saying them again
     // in the narration is the reader reading a number they can see (J6).
-    text: 'Karl Jaspers gave that window a name: the Axial Age. Three places, no contact between them, all starting to ask the same kind of question. Nobody has ever agreed on why.',
+    text: 'Karl Jaspers gave that window a name: the Axial Age. Three places, no contact between them, all starting to ask the same kind of question.',
     cite: 'The Axial Age',
-    dur: 5.4,
+    dur: 4.4,
+  },
+  {
+    x: 217, soc: 2, chart: 1,
+    // The chart overhead already draws the window and its dates. Saying them again
+    // in the narration is the reader reading a number they can see (J6).
+    text: 'Nobody has ever agreed on why.',
+    dur: 1.8,
   },
   {
     x: 217, soc: 13, chart: 2,
-    text: 'Socrates never wrote a word down. Everything we have, a student wrote later. He walked up to people in Athens and asked them what virtue was. The city put him on trial and killed him for it.',
+    text: 'Socrates never wrote a word down. Everything we have, a student wrote later.',
     cite: 'Greece — Socrates',
-    dur: 5.4,
+    dur: 1.9,
+  },
+  {
+    x: 217, soc: 13, chart: 2,
+    text: 'He walked up to people in Athens and asked them what virtue was. The city put him on trial and killed him for it.',
+    dur: 3.5,
   },
   {
     x: 265, soc: 5, chart: 3,
-    text: 'The same thing is stirring elsewhere. India’s word is dharma: doing what your place in life actually asks of you. China’s is ren, which means something like humaneness, and Confucius says it only ever grows between people.',
+    text: 'The same thing is stirring elsewhere. India’s word is dharma: doing what your place in life actually asks of you.',
     cite: 'India — China',
-    dur: 5.2,
+    dur: 2.8,
+  },
+  {
+    x: 265, soc: 5, chart: 3,
+    text: 'China’s is ren, which means something like humaneness, and Confucius says it only ever grows between people.',
+    dur: 2.4,
   },
   {
     x: 265, soc: 147, chart: 3,
@@ -79,7 +96,7 @@ export const BEATS: Ethics5Beat[] = [
     x: 265, soc: 4, fork: 1,
     interact: {
       prompt: 'Ren has to grow somewhere. Take the path Confucius would send you down.',
-      explain: 'Ren is shaped in real relationships — family, friends, ruler and citizen. Confucius has no interest in a virtue you could practise alone in a room.',
+      explain: 'Ren is shaped in real relationships: family, friends, ruler and citizen. Confucius has no interest in a virtue you could practise alone in a room.',
       xp: 5,
     },
     dur: 1.0,

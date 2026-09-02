@@ -39,7 +39,7 @@ export const BEATS: Eth16Beat[] = [
   {
     g: 13, causes: 1, knife: 0, money: 1, repaid: 1,
     dur: 4.8,
-    text: 'The hard determinist has to call both of those unfree. The rail above has not changed, so nothing below it can have.',
+    text: 'A hard determinist says neither one was free. The chain above your head is the same both times, so nothing under it can be different.',
     cite: 'One answer, and its cost',
   },
   {
@@ -58,15 +58,15 @@ export const BEATS: Eth16Beat[] = [
   {
     g: 5, causes: 1, knife: 0, money: 1, repaid: 1,
     dur: 5.0,
-    text: 'Hume offers a smaller freedom that survives. To act freely is to act from your own wants, with nobody holding your arm.',
-    cite: 'A freedom that fits',
+    text: 'Hume keeps a smaller kind of freedom. You act freely when you do what you want and nobody is holding your arm.',
+    cite: 'A smaller freedom',
   },
   {
     g: 4, causes: 1, knife: 0, money: 1, repaid: 1, pick: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Tap the only thing that differed between the two hand-overs.',
-      explain: 'The knife. The causal rail is drawn identically both times because it IS identical, and so is the act. If freedom meant escaping causes there would be nothing on this stage to point at, and the difference everybody can see would have nowhere to live.',
+      prompt: 'Both hand-overs are drawn the same. Tap the one thing missing from the second.',
+      explain: 'The knife. The chain of causes is drawn the same both times because it IS the same, and your hand does the same thing both times. If being free meant escaping causes, there would be nothing here to point at.',
       xp: 5,
     },
   },
@@ -74,18 +74,18 @@ export const BEATS: Eth16Beat[] = [
     g: 41, causes: 1, knife: 0, money: 1, repaid: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Drag to what a settled future does to blame.',
+      prompt: 'Suppose every choice you make was already fixed by earlier causes. Drag to how much blame survives.',
       drag: {
-        lo: 'NOBODY IS EVER TO BLAME',
-        hi: 'BLAME IS UNTOUCHED',
+        lo: 'NO BLAME LEFT',
+        hi: 'BLAME STILL HOLDS',
         start: 0,
         zones: [
-          { id: 'none', upto: 0.3, reads: 'the causes settle it; blame is a leftover superstition' },
-          { id: 'weak', upto: 0.62, reads: 'blame survives, but only as a useful fiction' },
-          { id: 'keep', upto: 1, reads: 'the causes stand, and the blame stands with them', correct: true },
+          { id: 'none', upto: 0.3, reads: 'nobody is really to blame' },
+          { id: 'weak', upto: 0.62, reads: 'blame is just a useful story' },
+          { id: 'keep', upto: 1, reads: 'the causes are real and the blame is too', correct: true },
         ],
       },
-      explain: 'The far end. The near end is hard determinism under a borrowed name. Compatibilists accept every cause and keep the blame, because they have moved what freedom means: from uncaused to uncoerced. Whether that is a solution or a change of subject is the live fight.',
+      explain: 'The far end. Compatibilists accept every cause and still blame people, because they changed what free means. Free stopped meaning uncaused. It came to mean unforced: no knife, nobody holding your arm. Critics say that changes the subject rather than answering it.',
       xp: 5,
     },
   },
@@ -93,12 +93,12 @@ export const BEATS: Eth16Beat[] = [
     summary: {
       title: 'Free Enough to Be Blamed',
       points: [
-        'Hard determinism drops responsibility to keep causation',
-        'Libertarians drop full causation to keep responsibility',
-        'Compatibilists redefine freedom as acting uncoerced',
-        'The prisoner is unfree; the walker is free, and both are caused',
+        'Hard determinists keep the causes and drop the blame',
+        'Libertarians keep the blame and deny some of the causes',
+        'Compatibilists say free means unforced, not uncaused',
+        'Both hand-overs were caused, and only one was forced',
       ],
-      closing: 'Freedom was never the absence of causes. Only the absence of the knife.',
+      closing: 'Freedom was never about escaping causes. It was about the knife.',
     },
     dur: 3.0,
   },

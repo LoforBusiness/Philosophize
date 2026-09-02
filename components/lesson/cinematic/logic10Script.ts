@@ -38,9 +38,14 @@ export const BEATS: Logic10Beat[] = [
   },
   {
     p: 38, x: 96, arg: 1, slot: 1, hid: 1,
-    text: 'Logic has a name for an argument like this. An enthymeme: one that runs on a premise nobody says out loud. There it is, sitting under the line.',
+    text: 'Logic has a name for an argument like this. An enthymeme: one that runs on a premise nobody says out loud.',
     cite: 'Enthymeme',
-    dur: 4.8,
+    dur: 3.6,
+  },
+  {
+    p: 38, x: 96, arg: 1, slot: 1, hid: 1,
+    text: 'There it is, sitting under the line.',
+    dur: 1.8,
   },
   {
     p: 141, x: 96, arg: 1, slot: 1, hid: 1,
@@ -57,9 +62,14 @@ export const BEATS: Logic10Beat[] = [
   },
   {
     p: 30, x: 158, arg: 1, slot: 1, hid: 2,
-    text: 'So say the claim out loud. All rich people are happy. Up it comes through the line, and once you can read the words you can see they are rubbish.',
+    text: 'So say the claim out loud. All rich people are happy.',
     cite: 'Into the light',
-    dur: 4.8,
+    dur: 1.8,
+  },
+  {
+    p: 30, x: 158, arg: 1, slot: 1, hid: 2,
+    text: 'Up it comes through the line, and once you can read the words you can see they are rubbish.',
+    dur: 3,
   },
   {
     p: 21, x: 158, arg: 1, slot: 1, hid: 2,
@@ -68,9 +78,9 @@ export const BEATS: Logic10Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'always', reads: 'always; leaving anything unsaid is deceptive' },
+          { id: 'always', reads: 'always, whatever is left unsaid' },
           { id: 'false', reads: 'only when the unsaid premise is false', correct: true },
-          { id: 'never', reads: 'never; everybody leaves something out' },
+          { id: 'never', reads: 'never, everybody leaves things out' },
         ],
       },
       explain: 'The middle. Hidden sounds like dishonest and usually is not: almost every real argument leaves something out, and nobody says all men are mortal out loud. It only fails when the thing left unsaid would not survive being said.',

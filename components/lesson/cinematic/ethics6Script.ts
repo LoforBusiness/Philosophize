@@ -26,8 +26,13 @@ export interface Ethics6Beat extends BaseBeat {
 export const BEATS: Ethics6Beat[] = [
   {
     d: 2, str: 0, tx: 70, card: 0,
-    text: 'Five lives saved. So why does this one feel wrong? Same numbers, different hands — your gut splits where the math does not.',
-    dur: 3.6,
+    text: 'Five lives saved. So why does this one feel wrong?',
+    dur: 1.8,
+  },
+  {
+    d: 2, str: 0, tx: 70, card: 0,
+    text: 'Same numbers, different hands — your gut splits where the math does not.',
+    dur: 2,
   },
   {
     d: 1, str: 0, tx: 110, card: 1,
@@ -37,15 +42,25 @@ export const BEATS: Ethics6Beat[] = [
   },
   {
     d: 13, str: 15, tx: 150, shove: 1, card: 2,
-    text: 'Thomson’s 1985 twist: you stand on a bridge beside a large stranger. Shove him onto the track and his body stops the trolley, saving five. Most who would pull the lever refuse to push.',
+    text: 'Thomson’s 1985 twist: you stand on a bridge beside a large stranger. Shove him onto the track and his body stops the trolley, saving five.',
     cite: 'The footbridge twist',
-    dur: 5.2,
+    dur: 3.8,
+  },
+  {
+    d: 13, str: 15, tx: 150, shove: 1, card: 2,
+    text: 'Most who would pull the lever refuse to push.',
+    dur: 1.8,
   },
   {
     d: 22, str: 18, tx: 180, card: 2, stamp: 1,
-    text: 'The arithmetic is identical — five lives for one, which is all a utilitarian counts. Yet the switch and the shove split us. Foot: diverting redirects a threat; shoving makes a person your instrument.',
+    text: 'The arithmetic is identical — five lives for one, which is all a utilitarian counts. Yet the switch and the shove split us.',
     cite: 'Doing vs using',
-    dur: 4.8,
+    dur: 3.2,
+  },
+  {
+    d: 22, str: 18, tx: 180, card: 2, stamp: 1,
+    text: 'Foot: diverting redirects a threat; shoving makes a person your instrument.',
+    dur: 1.8,
   },
   {
     d: 0, str: 0, tx: 180, card: 2, stamp: 1,
@@ -70,7 +85,7 @@ export const BEATS: Ethics6Beat[] = [
         zones: [
           { id: 'count', upto: 0.3, reads: 'the numbers changed, and that is what moved you' },
           { id: 'both', upto: 0.66, reads: 'half the numbers, half the using' },
-          { id: 'tool', upto: 1, reads: 'the numbers are identical; the using is what moved you', correct: true },
+          { id: 'tool', upto: 1, reads: 'same numbers, you used him as a tool', correct: true },
         ],
       },
       explain: 'All of it on the using, because the numbers never moved: one life for five, in both. What changes is that the man on the bridge becomes the instrument — the thing the doctrine of double effect flags, and what Foot built the case to isolate.',

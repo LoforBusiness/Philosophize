@@ -38,14 +38,29 @@ export const BEATS: Aes15Beat[] = [
   },
   {
     g: 45, rose: 1, tags: 5,
-    dur: 4.6,
-    text: 'His test is odd and very simple. Strip away every stake you have in the rose. If the delight is still there, that was beauty.',
+    dur: 2.9,
+    text: 'Kant\'s test is odd and very simple. Strip away every stake you have in the rose.',
     cite: 'The test',
   },
   {
+    g: 45, rose: 1, tags: 5,
+    dur: 1.8,
+    text: 'If the delight is still there, that was beauty.',
+  },
+  {
     g: 3, rose: 1, tags: 5,
-    dur: 4.6,
-    text: 'A stake is anything you want from the painting. To own the painting. To sell it. To furnish a room. To be seen standing beside it.',
+    dur: 2.3,
+    text: 'A stake is anything you want from the painting. To own the painting.',
+  },
+  {
+    g: 3, rose: 1, tags: 5,
+    dur: 1.8,
+    text: 'To sell it. To furnish a room.',
+  },
+  {
+    g: 3, rose: 1, tags: 5,
+    dur: 1.8,
+    text: 'To be seen standing beside it.',
   },
   {
     g: 137, rose: 1, tags: 5,
@@ -71,9 +86,14 @@ export const BEATS: Aes15Beat[] = [
   },
   {
     g: 21, rose: 1, tags: 5, cut: 1,
-    dur: 4.8,
-    text: 'Cut the other four and the rose does not change. Notice what survived is not even "I like it". It is aimed at you.',
+    dur: 3.8,
+    text: 'Cut the other four and the rose does not change. Notice what survived is not even "I like it".',
     cite: 'What is left',
+  },
+  {
+    g: 21, rose: 1, tags: 5, cut: 1,
+    dur: 1.8,
+    text: 'It is aimed at you.',
   },
   {
     g: 41, rose: 1, tags: 5, cut: 1,
@@ -86,7 +106,7 @@ export const BEATS: Aes15Beat[] = [
         zones: [
           { id: 'none', upto: 0.3, reads: 'both go, and beauty leaves you cold' },
           { id: 'half', upto: 0.66, reads: 'some of the pleasure survives, thinned out' },
-          { id: 'keep', upto: 1, reads: 'the delight stays; only your stake is removed', correct: true },
+          { id: 'keep', upto: 1, reads: 'the delight stays, your stake goes', correct: true },
         ],
       },
       explain: 'All the delight stays. Disinterested and uninterested are two different words, and hearing the first as the second is what makes Kant sound cold. He removes your stake and keeps the pleasure. The pleasure is the whole point; it simply is not about you.',

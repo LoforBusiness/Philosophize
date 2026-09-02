@@ -29,15 +29,25 @@ export const BEATS: Pol4Beat[] = [
   },
   {
     p: 7, walls: 0.25, harm: 0, panel: 1,
-    text: 'Berlin called this negative liberty: the area where others leave you alone. The walls pull back. Mill drew the line — power may be used against you only to prevent harm to others.',
+    text: 'Berlin called this negative liberty: the area where others leave you alone. The walls pull back.',
     cite: 'Negative liberty — freedom from',
-    dur: 5.0,
+    dur: 2.4,
+  },
+  {
+    p: 7, walls: 0.25, harm: 0, panel: 1,
+    text: 'Mill drew the line — power may be used against you only to prevent harm to others.',
+    dur: 2.6,
   },
   {
     p: 13, walls: 0.25, harm: 1, panel: 1, test: 1,
-    text: 'Eat badly, take wild risks, preach unpopular views? Mill says that is your business. But poison a well, defraud a buyer, throw a punch? Now you harm others — and only then may power step in.',
+    text: 'Eat badly, take wild risks, preach unpopular views? Mill says that is your business.',
     cite: 'Mill’s harm principle',
-    dur: 5.2,
+    dur: 2,
+  },
+  {
+    p: 13, walls: 0.25, harm: 1, panel: 1, test: 1,
+    text: 'But poison a well, defraud a buyer, throw a punch? Now you harm others — and only then may power step in.',
+    dur: 3.2,
   },
   {
     p: 141, walls: 0.25, harm: 1, panel: 1, test: 1,
@@ -54,9 +64,14 @@ export const BEATS: Pol4Beat[] = [
   },
   {
     p: 28, walls: 0, harm: 0, panel: 2,
-    text: 'Berlin named a rival ideal: positive liberty — being your own master. You might face no interference yet still be too poor, sick, or untaught to act. Should the state empower people, not merely leave them alone?',
+    text: 'Berlin named a rival ideal: positive liberty — being your own master. You might face no interference yet still be too poor, sick, or untaught to act.',
     cite: 'Positive liberty — freedom to',
-    dur: 5.2,
+    dur: 3.8,
+  },
+  {
+    p: 28, walls: 0, harm: 0, panel: 2,
+    text: 'Should the state empower people, not merely leave them alone?',
+    dur: 1.8,
   },
   {
     // Both cards sit neutral here — lighting one would hand the reader the answer.
@@ -80,9 +95,9 @@ export const BEATS: Pol4Beat[] = [
         left: 'A CORE OF NEGATIVE LIBERTY', right: 'POSITIVE LIBERTY',
         start: 0.04,
         zones: [
-          { id: 'pos', upto: 0.3, reads: 'positive first; the state should free your real self' },
+          { id: 'pos', upto: 0.3, reads: 'the state frees your real self' },
           { id: 'both', upto: 0.66, reads: 'both valued, and neither one protected' },
-          { id: 'neg', upto: 1, reads: 'a core of being left alone, guarded against the other', correct: true },
+          { id: 'neg', upto: 1, reads: 'a core of being left alone', correct: true },
         ],
       },
       explain: 'Nearly all of it. Berlin valued positive liberty and spent his essay warning what happens when it is handed to a state: rulers get to coerce you in the name of your real self. So he fences off a core that nobody may enter for your own good.',

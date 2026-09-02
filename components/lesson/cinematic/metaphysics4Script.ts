@@ -29,15 +29,25 @@ export const BEATS: Meta4Beat[] = [
   },
   {
     p: 24, tokens: 1,
-    text: 'Try to deny non-being. The moment you think of nothing, you make it the object of a thought — and a thought needs something to be about. Each grab at nothing turns it into a thing.',
+    text: 'Try to deny non-being. The moment you think of nothing, you make it the object of a thought — and a thought needs something to be about.',
     cite: 'A self-defeating paradox',
-    dur: 5.0,
+    dur: 3.8,
+  },
+  {
+    p: 24, tokens: 1,
+    text: 'Each grab at nothing turns it into a thing.',
+    dur: 1.8,
   },
   {
     p: 35, tokens: 2, barred: 1,
-    text: 'At Elea he set out two ways. That it is, and that it is not. He throws out the second, because what is not can be neither known nor said. So only what is counts as real, and change is a trick of the senses.',
+    text: 'At Elea he set out two ways. That it is, and that it is not.',
     cite: 'Parmenides, On Nature',
-    dur: 5.2,
+    dur: 1.8,
+  },
+  {
+    p: 35, tokens: 2, barred: 1,
+    text: 'Parmenides throws out the second, because what is not can be neither known nor said. So only what is counts as real, and change is a trick of the senses.',
+    dur: 3.5,
   },
   {
     p: 128, tokens: 2, barred: 1,
@@ -54,9 +64,14 @@ export const BEATS: Meta4Beat[] = [
   },
   {
     p: 15, tokens: 3, barred: 1, frozen: 1,
-    text: 'Follow it and the world freezes. To change, a thing would have to pass into or out of not-being, and that road is closed. So motion itself becomes an illusion. Aristotle later loosened the knot.',
+    text: 'Follow it and the world freezes. To change, a thing would have to pass into or out of not-being, and that road is closed.',
     cite: 'Change becomes impossible',
-    dur: 5.0,
+    dur: 3.4,
+  },
+  {
+    p: 15, tokens: 3, barred: 1, frozen: 1,
+    text: 'So motion itself becomes an illusion. Aristotle later loosened the knot.',
+    dur: 1.8,
   },
   {
     p: 4, tokens: 3, barred: 1, frozen: 1,
@@ -80,9 +95,9 @@ export const BEATS: Meta4Beat[] = [
         hi: 'ABSOLUTELY NOTHING',
         start: 0,
         zones: [
-          { id: 'air', upto: 0.3, reads: 'air, dust, light — plainly something' },
-          { id: 'vacuum', upto: 0.74, reads: 'no matter left, but still space and still fields', correct: true },
-          { id: 'none', upto: 1, reads: 'no space, no fields, no anything — never once seen' },
+          { id: 'air', upto: 0.3, reads: 'air, dust and light' },
+          { id: 'vacuum', upto: 0.74, reads: 'still space and fields, no matter', correct: true },
+          { id: 'none', upto: 1, reads: 'nothing at all, never once seen' },
         ],
       },
       explain: 'A vacuum lands short of the far end, and the gap is the point. Empty space still has dimensions and quantum fields, so it is a something with very little in it. The nothing Parmenides means is the far end of the rail, and no experiment has gone there.',

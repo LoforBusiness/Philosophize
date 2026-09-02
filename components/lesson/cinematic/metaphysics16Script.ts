@@ -32,15 +32,25 @@ export const BEATS: Met16Beat[] = [
   },
   {
     g: 45, panels: 2, crave: 1, second: 1,
-    dur: 5.0,
-    text: 'Now add what each of them thinks about his own wanting. One is behind it. The other is dragged along by a craving he hates.',
+    dur: 3,
+    text: 'Now add what each of them thinks about his own wanting. One is behind it.',
     cite: 'The second arrow',
   },
   {
+    g: 45, panels: 2, crave: 1, second: 1,
+    dur: 2,
+    text: 'The other is dragged along by a craving he hates.',
+  },
+  {
     g: 13, panels: 2, crave: 1, second: 1,
-    dur: 4.8,
-    text: 'Frankfurt calls that second arrow a desire about a desire. You do not only want things. You have views about what you want.',
+    dur: 3.3,
+    text: 'Frankfurt calls that second arrow a desire about a desire. You do not only want things.',
     cite: 'Wanting to want',
+  },
+  {
+    g: 13, panels: 2, crave: 1, second: 1,
+    dur: 1.8,
+    text: 'You have views about what you want.',
   },
   {
     g: 137, panels: 2, crave: 1, second: 1,
@@ -80,7 +90,7 @@ export const BEATS: Met16Beat[] = [
         stops: [
           { id: 'uncaused', reads: 'free means the choice had no cause at all' },
           { id: 'unforced', reads: 'free means nobody held a gun to your head' },
-          { id: 'endorsed', reads: 'free means you want to be moved by that desire', correct: true },
+          { id: 'endorsed', reads: 'free means wanting your own desire', correct: true },
         ],
       },
       explain: 'The far setting. The first swaps Frankfurt for an easier opponent: he is a compatibilist, so every desire here can be fully caused and he does not mind. What he adds is a second question — not where a desire came from, but whether you stand behind it.',

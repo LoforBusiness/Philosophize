@@ -66,23 +66,49 @@ export const BEATS: Meta2Beat[] = [
     // 167 = TALKING WITH THE HANDS, the narration loop (N2). The hook is somebody
     // talking to you, and this is what that looks like from the neck down.
     e: 167, x: 92, gone: 0.3,
-    text: 'There is a universe. There did not have to be one. That is the whole question, and it has outlasted everyone who has picked it up.',
-    dur: 3.6,
+    text: 'There is a universe. There did not have to be one.',
+    dur: 1.8,
+  },
+  {
+    // 167 = TALKING WITH THE HANDS, the narration loop (N2). The hook is somebody
+    // talking to you, and this is what that looks like from the neck down.
+    e: 167, x: 92, gone: 0.3,
+    text: 'That is the whole question, and it has outlasted everyone who has picked it up.',
+    dur: 2.1,
   },
   {
     // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
     e: 168, x: 150, gone: 0.3, pr: 1,
-    text: 'Leibniz had a rule. Nothing is ever simply the case — there is always a reason for it. Then he aimed the rule at existence itself. Why is there anything? Nothing would have been simpler. He was right about that much.',
+    text: 'Leibniz had a rule. Nothing is ever simply the case — there is always a reason for it.',
     cite: 'Leibniz, sufficient reason',
-    dur: 4.8,
+    dur: 2.1,
+  },
+  {
+    // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
+    e: 168, x: 150, gone: 0.3, pr: 1,
+    text: 'Then he aimed the rule at existence itself. Why is there anything?',
+    dur: 1.8,
+  },
+  {
+    // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
+    e: 168, x: 150, gone: 0.3, pr: 1,
+    text: 'Nothing would have been simpler. He was right about that much.',
+    dur: 1.8,
   },
   {
     // 379 = THE IDEA, PLAYED (N2) — it arrives and the finger goes up, once, as he
     // reaches the fork. Held (179) it would just be a man standing with a finger up.
     e: 379, x: 214, gone: 0.35, pr: 1,
-    text: 'Parmenides got there first and went the other way. Forget reasons for a moment. Ask whether nothing was ever an option at all. Here is the fork he left: one way says it is, the other says it is not.',
+    text: 'Parmenides got there first and went the other way. Forget reasons for a moment.',
     cite: 'Parmenides, On Nature',
-    dur: 4.8,
+    dur: 1.8,
+  },
+  {
+    // 379 = THE IDEA, PLAYED (N2) — it arrives and the finger goes up, once, as he
+    // reaches the fork. Held (179) it would just be a man standing with a finger up.
+    e: 379, x: 214, gone: 0.35, pr: 1,
+    text: 'Ask whether nothing was ever an option at all. Here is the fork he left: one way says it is, the other says it is not.',
+    dur: 3.1,
   },
   {
     // 161 = ARMS FOLDED, a LIVING hold — it loops and re-settles, so he has small
@@ -105,9 +131,17 @@ export const BEATS: Meta2Beat[] = [
     // fix — the sentence says he steps onto the second way and finds nothing, so
     // he walks out past the fork and recoils, once, on arrival.
     e: 318, x: 292, gone: 0.95, pr: 1,
-    text: 'So he tries it. He steps onto the second way — and there is nothing there to step onto. What is not cannot be walked on, pointed at, or thought about. It does not have the decency to be an option.',
+    text: 'So he tries it. He steps onto the second way — and there is nothing there to step onto.',
     cite: 'The second way',
-    dur: 5.0,
+    dur: 2.3,
+  },
+  {
+    // 318 = STARTLE, PLAYED: a sharp recoil and a step back. This beat is the A1
+    // fix — the sentence says he steps onto the second way and finds nothing, so
+    // he walks out past the fork and recoils, once, on arrival.
+    e: 318, x: 292, gone: 0.95, pr: 1,
+    text: 'What is not cannot be walked on, pointed at, or thought about. It does not have the decency to be an option.',
+    dur: 2.7,
   },
   {
     // 178 = SHRUG, held. M6: a shrug is the right pose for a question beat — the
@@ -128,9 +162,9 @@ export const BEATS: Meta2Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'never', reads: 'nothing was never possible, so there is nothing to explain' },
+          { id: 'never', reads: 'nothing was never possible' },
           { id: 'lost', reads: 'nothing was possible, and something won anyway', correct: true },
-          { id: 'must', reads: 'something had to exist; there was never a contest' },
+          { id: 'must', reads: 'something had to exist' },
         ],
       },
       explain: 'The middle setting. Leibniz asks why something won, so nothing had to be a real option for it to beat. Parmenides sits at the first setting: nothing was never on the table, so being never had a rival and the question never opens.',

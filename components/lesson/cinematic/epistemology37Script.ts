@@ -58,8 +58,13 @@ export const BEATS: Epistemology37Beat[] = [
   },
   {
     p: 13, x: 54, hull: 1, quiet: 1,
-    text: 'Watch what he actually did. He did not inspect her. He put the doubts down, one at a time, until they stopped bothering him.',
-    dur: 4.6,
+    text: 'Watch what he actually did. He did not inspect her.',
+    dur: 1.9,
+  },
+  {
+    p: 13, x: 54, hull: 1, quiet: 1,
+    text: 'The owner put the doubts down, one at a time, until they stopped bothering him.',
+    dur: 2.7,
   },
   {
     p: 21, x: 54, hull: 1, quiet: 1, sailed: 1, verdict: 1,
@@ -80,8 +85,13 @@ export const BEATS: Epistemology37Beat[] = [
   },
   {
     p: 2, x: 54, hull: 1, quiet: 1, sailed: 1, verdict: 1, safe: 1,
-    text: 'Now run it again and let her arrive. Same hull, same cracks, same owner. Look at the verdict card. It has not moved.',
-    dur: 4.6,
+    text: 'Now run it again and let her arrive. Same hull, same cracks, same owner.',
+    dur: 2.8,
+  },
+  {
+    p: 2, x: 54, hull: 1, quiet: 1, sailed: 1, verdict: 1, safe: 1,
+    text: 'Look at the verdict card. It has not moved.',
+    dur: 1.8,
   },
   {
     p: 35, x: 126, hull: 1, quiet: 1, verdict: 1, safe: 1,

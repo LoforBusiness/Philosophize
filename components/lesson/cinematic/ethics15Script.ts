@@ -28,20 +28,35 @@ export interface Eth15Beat extends BaseBeat {
 export const BEATS: Eth15Beat[] = [
   {
     g: 25, plain: 1, tilt: 0,
-    dur: 4.2,
-    text: 'Here is a plain report of something that happened. You stole that money. Anyone can hold the sentence up against the world and check.',
+    dur: 2.3,
+    text: 'Here is a plain report of something that happened. You stole that money.',
+  },
+  {
+    g: 25, plain: 1, tilt: 0,
+    dur: 1.9,
+    text: 'Anyone can hold the sentence up against the world and check.',
   },
   {
     g: 45, plain: 1, moral: 1, tilt: 0,
-    dur: 4.8,
-    text: 'Now the same report with a moral word in it. You acted wrongly in stealing that money. The beam does not move.',
+    dur: 3.7,
+    text: 'Now the same report with a moral word in it. You acted wrongly in stealing that money.',
     cite: 'Same weight',
   },
   {
+    g: 45, plain: 1, moral: 1, tilt: 0,
+    dur: 1.8,
+    text: 'The beam does not move.',
+  },
+  {
     g: 13, plain: 1, moral: 1, tilt: 0,
-    dur: 4.6,
-    text: 'That is emotivism. The extra word carries no extra fact. It is a tone of voice, a wince set down in ink.',
+    dur: 2.1,
+    text: 'That is emotivism. The extra word carries no extra fact.',
     cite: 'Ayer\'s claim',
+  },
+  {
+    g: 13, plain: 1, moral: 1, tilt: 0,
+    dur: 2.5,
+    text: 'It is a tone of voice, a wince set down in ink.',
   },
   {
     g: 137, plain: 1, moral: 1, tilt: 0,
@@ -58,9 +73,14 @@ export const BEATS: Eth15Beat[] = [
   },
   {
     g: 5, plain: 1, moral: 1, tilt: 0, doubt: 1,
-    dur: 5.0,
-    text: 'The other camp says the instrument is the problem. If cruelty really is wrong, that is a fact about cruelty. A scale that cannot weigh it is a poor scale.',
+    dur: 3.3,
+    text: 'The other camp says the instrument is the problem. If cruelty really is wrong, that is a fact about cruelty.',
     cite: 'The realist answers',
+  },
+  {
+    g: 5, plain: 1, moral: 1, tilt: 0, doubt: 1,
+    dur: 1.8,
+    text: 'A scale that cannot weigh it is a poor scale.',
   },
   {
     g: 4, plain: 1, moral: 1, tilt: 0, doubt: 1, pick: 1,

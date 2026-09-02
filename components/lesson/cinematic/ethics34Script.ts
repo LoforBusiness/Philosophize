@@ -30,9 +30,14 @@ export const BEATS: Ethics34Beat[] = [
   },
   {
     p: 47, x: 46, pop: 0.45,
-    text: 'Now add more, and make each life a little less good to pay for them. Watch the bar. It goes up, because there is more of it.',
+    text: 'Now add more, and make each life a little less good to pay for them. Watch the bar.',
     cite: 'More people, smaller lives',
-    dur: 4.4,
+    dur: 2.9,
+  },
+  {
+    p: 47, x: 46, pop: 0.45,
+    text: 'It goes up, because there is more of it.',
+    dur: 1.8,
   },
   {
     p: 19, x: 46, pop: 1,
@@ -64,8 +69,8 @@ export const BEATS: Ethics34Beat[] = [
     interact: {
       prompt: 'Drag the trade. Stop where the totalling gives an answer you cannot accept.',
       drag: {
-        lo: 'A FEW, FLOURISHING',
-        hi: 'A MULTITUDE, SCRAPING',
+        lo: 'A FEW FLOURISHING',
+        hi: 'A MULTITUDE SCRAPING',
         start: 0,
         zones: [
           { id: 'fine', upto: 0.34, reads: 'a better world' },

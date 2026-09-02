@@ -28,8 +28,13 @@ export interface Log15Beat extends BaseBeat {
 export const BEATS: Log15Beat[] = [
   {
     g: 25, crowd: 1, sample: 1,
-    dur: 4.4,
-    text: 'Two tourists were rude to you last week. Both of them were from the same country. Both of those things are true.',
+    dur: 3.2,
+    text: 'Two tourists were rude to you last week. Both of them were from the same country.',
+  },
+  {
+    g: 25, crowd: 1, sample: 1,
+    dur: 1.8,
+    text: 'Both of those things are true.',
   },
   {
     g: 45, crowd: 1, sample: 1, leap: 1, claim: 1,
@@ -78,12 +83,12 @@ export const BEATS: Log15Beat[] = [
       prompt: 'Drag to what would actually fix this argument.',
       drag: {
         lo: 'BE SURER ABOUT THE TWO',
-        hi: 'ASK MANY MORE, CHOSEN FAIRLY',
+        hi: 'ASK MANY CHOSEN FAIRLY',
         start: 0,
         zones: [
           { id: 'sure', upto: 0.3, reads: 'be very sure indeed about the two you met' },
           { id: 'more', upto: 0.66, reads: 'meet a few more of exactly the same sort' },
-          { id: 'fair', upto: 1, reads: 'many more, chosen so that they could disagree', correct: true },
+          { id: 'fair', upto: 1, reads: 'many more, chosen so they could disagree', correct: true },
         ],
       },
       explain: 'The far end. The near end offers more confidence about the same two people, and confidence was never what was short. You could be provably right about both tourists and still know nothing whatever about the country they came from.',

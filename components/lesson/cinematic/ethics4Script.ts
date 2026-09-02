@@ -24,14 +24,29 @@ export interface Ethics4Beat extends BaseBeat {
 export const BEATS: Ethics4Beat[] = [
   {
     a: 1, b: 8, floor: 0, rows: 1,
-    text: 'Cultures disagree about right and wrong. That much is just a fact. Saying there is no right answer underneath the disagreement is a much bigger claim, and a separate one.',
-    dur: 3.8,
+    text: 'Cultures disagree about right and wrong. That much is just a fact.',
+    dur: 1.8,
+  },
+  {
+    a: 1, b: 8, floor: 0, rows: 1,
+    text: 'Saying there is no right answer underneath the disagreement is a much bigger claim, and a separate one.',
+    dur: 2.3,
   },
   {
     a: 2, b: 10, rows: 2,
-    text: 'First the harmless fact. Societies really do hold different codes. The bold claim — moral relativism — goes further. Whether something is right depends on the group asking, and there is no answer underneath. Sliding from the first to the second is the classic mistake.',
+    text: 'First the harmless fact. Societies really do hold different codes.',
     cite: 'Two kinds of relativism',
-    dur: 5.4,
+    dur: 1.8,
+  },
+  {
+    a: 2, b: 10, rows: 2,
+    text: 'The bold claim — moral relativism — goes further. Whether something is right depends on the group asking, and there is no answer underneath.',
+    dur: 2.9,
+  },
+  {
+    a: 2, b: 10, rows: 2,
+    text: 'Sliding from the first to the second is the classic mistake.',
+    dur: 1.8,
   },
   {
     a: 4, b: 35, rows: 3,
@@ -53,15 +68,30 @@ export const BEATS: Ethics4Beat[] = [
   },
   {
     a: 13, b: 15, rows: 3,
-    text: 'The objectivist fires back: some truths hold whatever a culture says. Torturing a child for fun is wrong — full stop. Cultures differing does not make every code equally true.',
+    text: 'The objectivist fires back: some truths hold whatever a culture says. Torturing a child for fun is wrong — full stop.',
     cite: 'Moral objectivism',
-    dur: 4.8,
+    dur: 3.4,
+  },
+  {
+    a: 13, b: 15, rows: 3,
+    text: 'Cultures differing does not make every code equally true.',
+    dur: 1.8,
   },
   {
     a: 38, b: 38, floor: 1, rows: 3,
-    text: 'And look down. Donald Brown went through every society on record and found the same handful of things in all of them. Fairness. Returning a favour. Bans on murder and incest. A shared floor, under feet that thought they stood apart.',
+    text: 'And look down. Donald Brown went through every society on record and found the same handful of things in all of them.',
     cite: 'Donald Brown, Human Universals, 1991',
-    dur: 5.0,
+    dur: 2.8,
+  },
+  {
+    a: 38, b: 38, floor: 1, rows: 3,
+    text: 'Returning a favour. Bans on murder and incest.',
+    dur: 1.8,
+  },
+  {
+    a: 38, b: 38, floor: 1, rows: 3,
+    text: 'A shared floor, under feet that thought they stood apart.',
+    dur: 1.8,
   },
   {
     a: 21, b: 0, floor: 1, rows: 3,
@@ -72,8 +102,8 @@ export const BEATS: Ethics4Beat[] = [
         hi: 'NOTHING IS RIGHT OR WRONG',
         start: 0,
         zones: [
-          { id: 'differ', upto: 0.3, reads: 'cultures disagree, and one of them may still be right' },
-          { id: 'relative', upto: 0.74, reads: 'true for a group, with no view standing above them', correct: true },
+          { id: 'differ', upto: 0.3, reads: 'cultures disagree, one may still be right' },
+          { id: 'relative', upto: 0.74, reads: 'true for a group, and no higher view', correct: true },
           { id: 'none', upto: 1, reads: 'nothing is right or wrong, even inside a group' },
         ],
       },

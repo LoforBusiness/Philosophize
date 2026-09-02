@@ -22,9 +22,14 @@ export const BEATS: Pol5Beat[] = [
   },
   {
     p: 13, city: 1,
-    text: 'Plato asks what a perfectly just city would look like. His answer: everyone does the work they are suited to, and nobody meddles. Ruling goes to philosopher-kings, the only people he thinks actually know what good is.',
+    text: 'Plato asks what a perfectly just city would look like. His answer: everyone does the work they are suited to, and nobody meddles.',
     cite: 'Plato’s just city',
-    dur: 5.2,
+    dur: 3.2,
+  },
+  {
+    p: 13, city: 1,
+    text: 'Ruling goes to philosopher-kings, the only people he thinks actually know what good is.',
+    dur: 2,
   },
   {
     p: 144, city: 1,
@@ -41,9 +46,14 @@ export const BEATS: Pol5Beat[] = [
   },
   {
     p: 4, city: 0, veil: 1,
-    text: 'Rawls asks it another way. What rules would you pick if you did not know who you were going to be? Hide your class, your talents and your luck behind a veil, and watch how fair your choices get.',
+    text: 'Rawls asks it another way. What rules would you pick if you did not know who you were going to be?',
     cite: 'Rawls’ veil of ignorance',
-    dur: 5.4,
+    dur: 2.9,
+  },
+  {
+    p: 4, city: 0, veil: 1,
+    text: 'Hide your class, your talents and your luck behind a veil, and watch how fair your choices get.',
+    dur: 2.5,
   },
   {
     p: 4, veil: 1,
@@ -54,7 +64,7 @@ export const BEATS: Pol5Beat[] = [
         stops: [
           { id: 'equal', reads: 'to make everybody come out equal' },
           { id: 'rich', reads: 'to make the society as a whole richer' },
-          { id: 'fair', reads: 'to keep the rules fair by hiding who you are', correct: true },
+          { id: 'fair', reads: 'to keep the rules fair', correct: true },
         ],
       },
       explain: 'The far setting. The veil hides your race, your class and your talents, so you cannot write the rules to suit the person you turn out to be. Equal liberties for everyone, and a gap in wealth only where the gap helps the worst off.',
@@ -64,9 +74,19 @@ export const BEATS: Pol5Beat[] = [
   },
   {
     p: 5, veil: 0.3, city: 0.6, link: 1,
-    text: 'Watch the big questions link up. Hobbes asks why we build societies. Locke and Rousseau ask what makes them legitimate. Mill asks how far they may bind you. Plato and Rawls ask what justice demands.',
+    text: 'Watch the big questions link up. Hobbes asks why we build societies.',
     cite: 'One long conversation',
-    dur: 5.0,
+    dur: 1.8,
+  },
+  {
+    p: 5, veil: 0.3, city: 0.6, link: 1,
+    text: 'Locke and Rousseau ask what makes them legitimate. Mill asks how far they may bind you.',
+    dur: 2.3,
+  },
+  {
+    p: 5, veil: 0.3, city: 0.6, link: 1,
+    text: 'Plato and Rawls ask what justice demands.',
+    dur: 1.8,
   },
   {
     p: 4, city: 1,

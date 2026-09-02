@@ -23,14 +23,24 @@ export interface Aes11Beat extends BaseBeat {
 export const BEATS: Aes11Beat[] = [
   {
     p: 25, x: 70,
-    text: 'A gallery hangs two pictures. One was painted by a person over four months. One was generated in about nine seconds.',
-    dur: 4.0,
+    text: 'A gallery hangs two pictures. One was painted by a person over four months.',
+    dur: 2.7,
+  },
+  {
+    p: 25, x: 70,
+    text: 'One was generated in about nine seconds.',
+    dur: 1.8,
   },
   {
     p: 41, x: 168, frames: 1,
-    text: 'Here they are. Not similar — identical. The same marks in the same places, the same size, the same everything you could photograph.',
+    text: 'Here they are. Not similar — identical.',
     cite: 'Both canvases',
-    dur: 4.6,
+    dur: 1.8,
+  },
+  {
+    p: 41, x: 168, frames: 1,
+    text: 'The same marks in the same places, the same size, the same everything you could photograph.',
+    dur: 3.2,
   },
   {
     p: 47, x: 124, frames: 1, plaques: 1,
@@ -72,7 +82,7 @@ export const BEATS: Aes11Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'nothing', reads: 'nothing; identical surfaces, identical works' },
+          { id: 'nothing', reads: 'nothing, the surfaces are identical' },
           { id: 'toil', reads: 'the hours it took out of a life' },
           { id: 'feeling', reads: 'a feeling that was had, and then passed on', correct: true },
         ],

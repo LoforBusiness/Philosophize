@@ -21,20 +21,35 @@ export interface Meta12Beat extends BaseBeat {
 export const BEATS: Meta12Beat[] = [
   {
     g: 4, owner: 0, none: 0,
-    dur: 4.0,
-    text: 'Look inward right now. There is a warmth, a sound, a thought about tomorrow, another thought about this sentence. The stream is easy to find.',
+    dur: 3,
+    text: 'Look inward right now. There is a warmth, a sound, a thought about tomorrow, another thought about this sentence.',
+  },
+  {
+    g: 4, owner: 0, none: 0,
+    dur: 1.8,
+    text: 'The stream is easy to find.',
   },
   {
     g: 2, owner: 1, none: 0,
-    dur: 4.4,
-    text: 'Descartes says something is having them. Doubt everything you like — somebody is doing the doubting, and that thinker is one continuing thing. So: a box for the owner.',
+    dur: 3.5,
+    text: 'Descartes says something is having them. Doubt everything you like: somebody is doing the doubting. That thinker is one continuing thing.',
     cite: 'A box for the owner',
   },
   {
+    g: 2, owner: 1, none: 0,
+    dur: 1.8,
+    text: 'So: a box for the owner.',
+  },
+  {
     g: 45, owner: 1, none: 0,
-    dur: 4.6,
-    text: 'Hume went looking and reported back that he could never catch it. Every time he tried, he found another perception instead. The box stays empty.',
+    dur: 3.9,
+    text: 'Hume went looking and reported back that he could never catch it. Every time he tried, he found another perception instead.',
     cite: 'Hume looked',
+  },
+  {
+    g: 45, owner: 1, none: 0,
+    dur: 1.8,
+    text: 'The box stays empty.',
   },
   {
     g: 139, owner: 1, none: 0,
@@ -74,7 +89,7 @@ export const BEATS: Meta12Beat[] = [
         hi: 'ONE UNCHANGING SOUL',
         start: 1,
         zones: [
-          { id: 'none', upto: 0.28, reads: 'nothing; the word names no one' },
+          { id: 'none', upto: 0.28, reads: 'nothing, the word names nobody' },
           { id: 'stream', upto: 0.74, reads: 'no owner, and a real stream of experience', correct: true },
           { id: 'soul', upto: 1, reads: 'one unchanging owner sitting behind it all' },
         ],

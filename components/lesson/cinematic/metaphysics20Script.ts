@@ -38,8 +38,13 @@ export const BEATS: Met20Beat[] = [
   },
   {
     p: 2, x: 200, outer: 1, nest: 0.3, tally: 1,
-    text: 'Now suppose a civilisation like ours learns to run a world on a computer. Not one. Thousands, for research.',
-    dur: 4.6,
+    text: 'Now suppose a civilisation like ours learns to run a world on a computer. Not one.',
+    dur: 3.9,
+  },
+  {
+    p: 2, x: 200, outer: 1, nest: 0.3, tally: 1,
+    text: 'Thousands, for research.',
+    dur: 1.8,
   },
   {
     p: 45, x: 132, outer: 1, nest: 1, tally: 1,
@@ -49,8 +54,13 @@ export const BEATS: Met20Beat[] = [
   },
   {
     p: 13, x: 132, outer: 1, nest: 1, tally: 1, token: 1,
-    text: 'Here is your token. Nobody aimed the token. It landed where most of the minds are.',
-    dur: 3.8,
+    text: 'Here is your token. Nobody aimed the token.',
+    dur: 1.9,
+  },
+  {
+    p: 13, x: 132, outer: 1, nest: 1, tally: 1, token: 1,
+    text: 'It landed where most of the minds are.',
+    dur: 1.9,
   },
   {
     p: 4, x: 132, outer: 1, nest: 1, tally: 1, token: 1, live: 1,
@@ -75,8 +85,13 @@ export const BEATS: Met20Beat[] = [
   },
   {
     p: 21, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
-    text: 'Two of those three say the grid never gets built. Extinction, or nobody bothering. Watch it shrink.',
-    dur: 4.2,
+    text: 'Two of those three say the grid never gets built. Extinction, or nobody bothering.',
+    dur: 3.5,
+  },
+  {
+    p: 21, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
+    text: 'Watch it shrink.',
+    dur: 1.8,
   },
   {
     p: 41, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
@@ -87,7 +102,7 @@ export const BEATS: Met20Beat[] = [
         hi: 'BILLIONS OF THEM RUN',
         start: 1,
         zones: [
-          { id: 'none', upto: 0.3, reads: 'none, so there is no proportion and no conclusion', correct: true },
+          { id: 'none', upto: 0.3, reads: 'none at all, so nothing follows', correct: true },
           { id: 'few', upto: 0.72, reads: 'a handful, still far fewer than the real one' },
           { id: 'many', upto: 1, reads: 'billions, and you are almost certainly inside one' },
         ],

@@ -30,14 +30,24 @@ export interface Ethics3Beat extends BaseBeat {
 export const BEATS: Ethics3Beat[] = [
   {
     d: 2, tx: 118, pull: 0, lens: 0,
-    text: 'One choice. Three philosophers. Three verdicts. Same dilemma, same goal — yet they split. Why?',
-    dur: 3.4,
+    text: 'One choice. Three philosophers.',
+    dur: 1.8,
+  },
+  {
+    d: 2, tx: 118, pull: 0, lens: 0,
+    text: 'Three verdicts. Same dilemma, same goal — yet they split.',
+    dur: 2.4,
   },
   {
     d: 13, tx: 158, lens: 0,
-    text: 'A runaway trolley hurtles toward five people on the track. Your hand rests on a lever. Pull it, and the trolley swerves onto a side track — where one person stands instead.',
+    text: 'A runaway trolley hurtles toward five people on the track. Your hand rests on a lever.',
     cite: 'Philippa Foot, 1967',
-    dur: 5.0,
+    dur: 2.5,
+  },
+  {
+    d: 13, tx: 158, lens: 0,
+    text: 'Pull it, and the trolley swerves onto a side track — where one person stands instead.',
+    dur: 2.5,
   },
   {
     d: 27, tx: 196, lens: 0,
@@ -46,21 +56,36 @@ export const BEATS: Ethics3Beat[] = [
   },
   {
     d: 13, tx: 196, pull: 1, lens: 1,
-    text: 'John Stuart Mill would pull. The right act promotes the most happiness, counting each person equally. Five lives saved outweigh one lost. People who judge an act this way are called utilitarians.',
+    text: 'John Stuart Mill would pull. The right act promotes the most happiness, counting each person equally.',
     cite: 'Consequentialism — the outcome',
-    dur: 4.6,
+    dur: 2.3,
+  },
+  {
+    d: 13, tx: 196, pull: 1, lens: 1,
+    text: 'Five lives saved outweigh one lost. People who judge an act this way are called utilitarians.',
+    dur: 2.3,
   },
   {
     d: 10, tx: 196, pull: 0, lens: 2,
-    text: 'Immanuel Kant would not. He will not trade lives like sums, because the one person has a worth no arithmetic can outweigh. Duty binds whatever follows from it.',
+    text: 'Immanuel Kant would not. He will not trade lives like sums, because the one person has a worth no arithmetic can outweigh.',
     cite: 'Deontology — the duty',
-    dur: 4.8,
+    dur: 3.8,
+  },
+  {
+    d: 10, tx: 196, pull: 0, lens: 2,
+    text: 'Duty binds whatever follows from it.',
+    dur: 1.8,
   },
   {
     d: 22, tx: 196, lens: 3,
-    text: 'Aristotle asks a different question: not "what do I do?" but "who do I become?" What would a person of practical wisdom do here?',
+    text: 'Aristotle asks a different question: not "what do I do? but "who do I become?',
     cite: 'Virtue ethics — the character',
-    dur: 4.6,
+    dur: 2.9,
+  },
+  {
+    d: 22, tx: 196, lens: 3,
+    text: 'What would a person of practical wisdom do here?',
+    dur: 1.8,
   },
   {
     d: 141, tx: 196, lens: 0,
@@ -83,7 +108,7 @@ export const BEATS: Ethics3Beat[] = [
         left: 'WHAT HAPPENS NEXT', right: 'THE RULE YOU FOLLOWED',
         start: 0.04,
         zones: [
-          { id: 'rule', upto: 0.3, reads: 'the rule counts; how it turns out is not your business' },
+          { id: 'rule', upto: 0.3, reads: 'the rule counts, not the outcome' },
           { id: 'both', upto: 0.66, reads: 'the rule and the outcome, weighed against each other' },
           { id: 'out', upto: 1, reads: 'the outcome alone, and nothing else whatever', correct: true },
         ],

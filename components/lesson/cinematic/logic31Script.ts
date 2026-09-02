@@ -26,15 +26,25 @@ export const BEATS: Logic31Beat[] = [
   },
   {
     p: 1, flips: 3, scale: 1,
-    dur: 4.2,
-    text: 'Three heads. Mildly interesting. The needle underneath is the actual chance of heads on the next flip, and it has not moved.',
+    dur: 1.8,
+    text: 'Three heads. Mildly interesting.',
     cite: 'Three in a row',
   },
   {
+    p: 1, flips: 3, scale: 1,
+    dur: 3.4,
+    text: 'The needle underneath is the actual chance of heads on the next flip, and it has not moved.',
+  },
+  {
     p: 2, flips: 7, scale: 1,
-    dur: 4.6,
-    text: 'Seven. Now the feeling is loud: tails is DUE. Every part of you is certain the coin owes you one. Look at the needle.',
+    dur: 3.8,
+    text: 'Now the feeling is loud: tails is DUE. Every part of you is certain the coin owes you one.',
     cite: 'Seven in a row',
+  },
+  {
+    p: 2, flips: 7, scale: 1,
+    dur: 1.8,
+    text: 'Look at the needle.',
   },
   {
     p: 3, flips: 7, scale: 1,
@@ -50,9 +60,14 @@ export const BEATS: Logic31Beat[] = [
   },
   {
     p: 1, flips: 7, scale: 1,
-    dur: 4.8,
-    text: 'In 1913 a Monte Carlo wheel came up black twenty-six times running. Players lost fortunes betting on red, each one certain it was overdue. The wheel had no idea what it had been doing.',
+    dur: 3.4,
+    text: 'In 1913 a Monte Carlo wheel came up black twenty-six times running. Players lost fortunes betting on red, each one certain it was overdue.',
     cite: 'Monte Carlo, 1913',
+  },
+  {
+    p: 1, flips: 7, scale: 1,
+    dur: 1.8,
+    text: 'The wheel had no idea what it had been doing.',
   },
   {
     p: 2, flips: 7, scale: 1, pick: 1,

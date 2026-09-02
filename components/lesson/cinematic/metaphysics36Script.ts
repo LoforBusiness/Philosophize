@@ -58,8 +58,13 @@ export const BEATS: Metaphysics36Beat[] = [
   },
   {
     p: 13, x: 54, hotel: 1, shift: 1,
-    text: 'That is the whole proof. Room 1 goes to room 2, room 2 to room 3, on forever. Nobody is homeless and room 1 is empty.',
-    dur: 4.4,
+    text: 'That is the whole proof. Room 1 goes to room 2, room 2 to room 3, on forever.',
+    dur: 3,
+  },
+  {
+    p: 13, x: 54, hotel: 1, shift: 1,
+    text: 'Nobody is homeless and room 1 is empty.',
+    dur: 1.8,
   },
   {
     p: 21, x: 54, hotel: 1, shift: 1,
@@ -94,9 +99,14 @@ export const BEATS: Metaphysics36Beat[] = [
   },
   {
     p: 45, x: 128, hotel: 1, dbl: 1,
-    text: 'Which is why some argue no real thing could work like this. The maths is fine. Whether anything buildable behaves this way is a different question.',
+    text: 'Which is why some argue no real thing could work like this. The maths is fine.',
     cite: 'Craig, on the impossibility of an actual infinite',
-    dur: 4.8,
+    dur: 3,
+  },
+  {
+    p: 45, x: 128, hotel: 1, dbl: 1,
+    text: 'Whether anything buildable behaves this way is a different question.',
+    dur: 1.8,
   },
   {
     summary: {

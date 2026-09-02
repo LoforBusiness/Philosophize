@@ -33,15 +33,25 @@ export const BEATS: Logic5Beat[] = [
   },
   {
     p: 27, machine: 1, run: 1,
-    text: 'An argument moves from premises — claims you grant — to a conclusion they force. Each move is an inference. Feed the premises in; the conclusion comes out the other end.',
+    text: 'An argument moves from premises — claims you grant — to a conclusion they force. Each move is an inference.',
     cite: 'Premises → conclusion',
-    dur: 5.0,
+    dur: 3.2,
+  },
+  {
+    p: 27, machine: 1, run: 1,
+    text: 'Feed the premises in; the conclusion comes out the other end.',
+    dur: 1.8,
   },
   {
     p: 1, machine: 1, run: 1,
-    text: 'Euclid drew a circle around A through B, another around B through A; they cross at C. AB equals AC, AB equals BC — so AC equals BC. A triangle, proved link by link.',
+    text: 'Euclid drew a circle around A through B, another around B through A; they cross at C. AB equals AC, AB equals BC — so AC equals BC.',
     cite: 'Euclid, Elements I.1',
-    dur: 5.0,
+    dur: 4.1,
+  },
+  {
+    p: 1, machine: 1, run: 1,
+    text: 'A triangle, proved link by link.',
+    dur: 1.8,
   },
   {
     p: 147, machine: 1,

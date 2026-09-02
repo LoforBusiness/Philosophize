@@ -35,8 +35,13 @@ export interface EthicsBeat extends BaseBeat {
 export const BEATS: EthicsBeat[] = [
   {
     hpose: 1,                                        // act — a deed is done
-    text: 'You act. A moment later a question arrives on its own. Was the act right?',
-    dur: 3.0,
+    text: 'You act. A moment later a question arrives on its own.',
+    dur: 2.2,
+  },
+  {
+    hpose: 1,                                        // act — a deed is done
+    text: 'Was the act right?',
+    dur: 1.8,
   },
   {
     hpose: 2,
@@ -47,22 +52,45 @@ export const BEATS: EthicsBeat[] = [
   {
     hpose: 4,
     judge: true,
-    text: 'What you add is this: you stop and weigh the deed. You ask "was that right?" — and you answer in reasons, on a balance no animal sets up.',
-    dur: 4.0,
+    text: 'What you add is this: you stop and weigh the deed. You ask "was that right?',
+    dur: 2.2,
+  },
+  {
+    hpose: 4,
+    judge: true,
+    text: '— and you answer in reasons, on a balance no animal sets up.',
+    dur: 1.8,
   },
   {
     hpose: 4,
     judge: true,
     origins: true,
-    text: 'That inward weighing is your conscience. It is the sense that something is wrong even when nobody is watching. Where it comes from is disputed — instinct, says Darwin; society turned inward, says Freud; reason itself, says Kant.',
+    text: 'That inward weighing is your conscience. It is the sense that something is wrong even when nobody is watching.',
     cite: 'Darwin · Freud · Kant',
-    dur: 4.6,
+    dur: 2.3,
+  },
+  {
+    hpose: 4,
+    judge: true,
+    origins: true,
+    text: 'Where it comes from is disputed — instinct, says Darwin; society turned inward, says Freud; reason itself, says Kant.',
+    dur: 2.3,
   },
   {
     hpose: 2,
-    text: 'Aristotle asked a different question. Not "which rules?" but "what is a good life?" What sets us apart is that we can reason. So living well means doing that well, over a whole life.',
+    text: 'Aristotle asked a different question. Not "which rules?',
     cite: 'Aristotle, Nicomachean Ethics, c. 350 BCE',
-    dur: 4.8,
+    dur: 1.8,
+  },
+  {
+    hpose: 2,
+    text: 'but "what is a good life? What sets us apart is that we can reason.',
+    dur: 2.1,
+  },
+  {
+    hpose: 2,
+    text: 'So living well means doing that well, over a whole life.',
+    dur: 1.8,
   },
   {
     hpose: 0,
@@ -103,9 +131,9 @@ export const BEATS: EthicsBeat[] = [
         hi: 'THE WHOLE THING',
         start: 1,
         zones: [
-          { id: 'none', upto: 0.26, reads: 'none at all; they feel nothing like it' },
+          { id: 'none', upto: 0.26, reads: 'none at all' },
           { id: 'parts', upto: 0.72, reads: 'the feelings, and not the stepping back', correct: true },
-          { id: 'all', upto: 1, reads: 'the whole thing, judgement included' },
+          { id: 'all', upto: 1, reads: 'the whole thing, judging included' },
         ],
       },
       explain: 'Most of the way, and the last stretch is the difference. Apes have the building blocks — empathy, a keen sense of fairness, distress at cruelty. What is missing is the step out: putting it in words and asking yourself whether that was right.',
@@ -116,8 +144,14 @@ export const BEATS: EthicsBeat[] = [
   {
     hpose: 2,
     plant: true,
-    text: 'Aristotle’s word for the goal is eudaimonia. It usually gets translated as happiness, which is wrong. Flourishing is closer — living and acting well, with a strong character, over a whole life.',
-    dur: 4.4,
+    text: 'Aristotle’s word for the goal is eudaimonia. It usually gets translated as happiness, which is wrong.',
+    dur: 2.2,
+  },
+  {
+    hpose: 2,
+    plant: true,
+    text: 'Flourishing is closer — living and acting well, with a strong character, over a whole life.',
+    dur: 2.2,
   },
   {
     summary: {

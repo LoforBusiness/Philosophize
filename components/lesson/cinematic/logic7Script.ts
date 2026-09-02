@@ -25,15 +25,25 @@ export const BEATS: Logic7Beat[] = [
   },
   {
     p: 41, x: 168, rule: 1,
-    text: 'Start with a rule you already believe. If it rains, the streets get wet. Nothing clever yet — just a promise: whenever the first thing happens, so does the second.',
+    text: 'Start with a rule you already believe. If it rains, the streets get wet.',
     cite: 'The rule',
-    dur: 5.0,
+    dur: 2.3,
+  },
+  {
+    p: 41, x: 168, rule: 1,
+    text: 'Nothing clever yet — just a promise: whenever the first thing happens, so does the second.',
+    dur: 2.7,
   },
   {
     p: 40, x: 168, rule: 1, fact: 1,
-    text: 'Now add one fact. You glance outside and rain is falling. Watch what that single fact unlocks.',
+    text: 'Now add one fact. You glance outside and rain is falling.',
     cite: 'The fact',
-    dur: 4.0,
+    dur: 2.6,
+  },
+  {
+    p: 40, x: 168, rule: 1, fact: 1,
+    text: 'Watch what that single fact unlocks.',
+    dur: 1.8,
   },
   {
     p: 13, x: 124, rule: 1, fact: 1, pick: 1,
@@ -46,15 +56,25 @@ export const BEATS: Logic7Beat[] = [
   },
   {
     p: 2, x: 124, rule: 1, fact: 1, concl: 1,
-    text: 'That is the first move, and it has a name: modus ponens. Say the "if" part is true, and the "then" part comes free. You proved something about the street without looking at it.',
+    text: 'That is the first move, and it has a name: modus ponens. Say the "if" part is true, and the "then" part comes free.',
     cite: 'Move one · modus ponens',
-    dur: 5.2,
+    dur: 3.7,
+  },
+  {
+    p: 2, x: 124, rule: 1, fact: 1, concl: 1,
+    text: 'You proved something about the street without looking at it.',
+    dur: 1.8,
   },
   {
     p: 40, x: 168, rule: 1, fact: 2,
-    text: 'Same rule, new day. This time you do not check the sky at all — you check the street. Bone dry.',
+    text: 'Same rule, new day. This time you do not check the sky at all — you check the street.',
     cite: 'Working backwards',
-    dur: 4.2,
+    dur: 3.8,
+  },
+  {
+    p: 40, x: 168, rule: 1, fact: 2,
+    text: 'Bone dry.',
+    dur: 1.8,
   },
   {
     p: 4, x: 124, rule: 1, fact: 2,
@@ -63,9 +83,9 @@ export const BEATS: Logic7Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'nothing', reads: 'nothing yet; you would have to look at the sky' },
-          { id: 'likely', reads: 'it probably did not rain' },
-          { id: 'certain', reads: 'it did not rain, and that is certain', correct: true },
+          { id: 'nothing', reads: 'nothing yet, look at the sky' },
+          { id: 'likely', reads: 'the rain probably never came' },
+          { id: 'certain', reads: 'the rain never came, for certain', correct: true },
         ],
       },
       explain: 'The far setting, and no sky needed. The rule promised that rain ALWAYS brings wet streets. So a dry street is not weak evidence about the rain — it rules it out completely, because a rainy night with dry streets would break the rule.',
@@ -75,9 +95,14 @@ export const BEATS: Logic7Beat[] = [
   },
   {
     p: 35, x: 168, rule: 1, fact: 2, concl: 2,
-    text: 'That is the second move: modus tollens. Knock out the "then" part, and the "if" part falls with it. You just read the sky by looking at the pavement.',
+    text: 'That is the second move: modus tollens. Knock out the "then" part, and the "if" part falls with it.',
     cite: 'Move two · modus tollens',
-    dur: 5.0,
+    dur: 3.3,
+  },
+  {
+    p: 35, x: 168, rule: 1, fact: 2, concl: 2,
+    text: 'You just read the sky by looking at the pavement.',
+    dur: 1.8,
   },
   {
     p: 129, x: 124, rule: 1,

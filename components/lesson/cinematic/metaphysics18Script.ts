@@ -45,9 +45,14 @@ export const BEATS: Met18Beat[] = [
   },
   {
     p: 45, x: 132, shelf: 1, aim: 1, hang: 1,
-    text: 'Now point at the number three. Not three apples. Not the mark chalked on a board. The number.',
+    text: 'Now point at the number three. Not three apples.',
     cite: 'The arrow hangs',
-    dur: 4.6,
+    dur: 2.3,
+  },
+  {
+    p: 45, x: 132, shelf: 1, aim: 1, hang: 1,
+    text: 'Not the mark chalked on a board. The number.',
+    dur: 2.3,
   },
   {
     p: 13, x: 132, shelf: 1, aim: 1, hang: 1,
@@ -88,12 +93,12 @@ export const BEATS: Met18Beat[] = [
       prompt: 'Drag to how much contact a number outside space can make with you.',
       drag: {
         lo: 'NONE AT ALL',
-        hi: 'AS MUCH AS A STONE DOES',
+        hi: 'AS MUCH AS A STONE',
         start: 1,
         zones: [
-          { id: 'none', upto: 0.3, reads: 'none; it sits outside space and can send nothing', correct: true },
-          { id: 'faint', upto: 0.72, reads: 'something faint, which we call intuition and cannot describe' },
-          { id: 'full', upto: 1, reads: 'as much as a stone makes with your hand' },
+          { id: 'none', upto: 0.3, reads: 'no contact at all', correct: true },
+          { id: 'faint', upto: 0.72, reads: 'something faint we cannot describe' },
+          { id: 'full', upto: 1, reads: 'as much as a stone does' },
         ],
       },
       explain: 'None, and that is the strongest objection Platonism faces. Knowing a thing normally means it reached you somehow — light, sound, pressure. An object with no place and no time can do none of that. The middle zone is the usual reply, and it names the problem.',

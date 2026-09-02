@@ -42,14 +42,24 @@ export const BEATS: Log17Beat[] = [
   },
   {
     p: 2, x: 200, pair: 1, marks: 1,
-    text: 'Look at what sits under each column. The left claim prints its reasons. The right claim rests on nothing but the speaker\'s word.',
+    text: 'Look at what sits under each column. The left claim prints its reasons.',
     cite: 'Two different objects',
-    dur: 4.6,
+    dur: 2.6,
+  },
+  {
+    p: 2, x: 200, pair: 1, marks: 1,
+    text: 'The right claim rests on nothing but the speaker\'s word.',
+    dur: 2,
   },
   {
     p: 45, x: 132, pair: 1, marks: 1, slur: 1,
-    text: 'So you go after the man. He lies, he has form, why would anyone listen. It feels like winning.',
-    dur: 4.4,
+    text: 'So you go after the man. He lies, he has form, why would anyone listen.',
+    dur: 3.5,
+  },
+  {
+    p: 45, x: 132, pair: 1, marks: 1, slur: 1,
+    text: 'It feels like winning.',
+    dur: 1.8,
   },
   {
     p: 13, x: 132, pair: 1, marks: 1, slur: 1,
@@ -94,7 +104,7 @@ export const BEATS: Log17Beat[] = [
         zones: [
           { id: 'reasons', upto: 0.3, reads: 'the reasons, which you could check yourself' },
           { id: 'both', upto: 0.66, reads: 'half the reasons, half the person' },
-          { id: 'who', upto: 1, reads: 'the person, because no reasons were offered', correct: true },
+          { id: 'who', upto: 1, reads: 'the person, not the argument', correct: true },
         ],
       },
       explain: 'All of it on the speaker, because they handed you nothing else. Bare testimony is worth exactly what the speaker is worth, so weighing the speaker is the rational thing to do. The mistake is weighing the speaker when reasons are sitting there to be read.',

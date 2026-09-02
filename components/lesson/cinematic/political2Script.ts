@@ -26,20 +26,35 @@ export interface Pol2Beat extends BaseBeat {
 export const BEATS: Pol2Beat[] = [
   {
     r: 10, sub: 8, podium: false, chart: 1,
-    text: 'Force can make you obey. Can it make you agree? Power bends bodies; authority wins minds. They are not the same thing.',
-    dur: 3.6,
+    text: 'Force can make you obey. Can it make you agree?',
+    dur: 1.8,
+  },
+  {
+    r: 10, sub: 8, podium: false, chart: 1,
+    text: 'Power bends bodies; authority wins minds. They are not the same thing.',
+    dur: 2,
   },
   {
     r: 13, sub: 18, podium: false, chart: 2,
-    text: 'Weber split two ideas we blur together. Power gets its way despite resistance, by threat or force, and a mugger has it. Authority is being obeyed because people think you are entitled to be.',
+    text: 'Weber split two ideas we blur together. Power gets its way despite resistance, by threat or force, and a mugger has it.',
     cite: 'Weber: power vs authority',
-    dur: 4.8,
+    dur: 3.1,
+  },
+  {
+    r: 13, sub: 18, podium: false, chart: 2,
+    text: 'Authority is being obeyed because people think you are entitled to be.',
+    dur: 1.8,
   },
   {
     r: 7, sub: 4, podium: true, chart: 2,
-    text: 'Augustine sharpened it. A captured pirate told Alexander: with one ship I am a robber; you with a fleet are an emperor. Both take by threat — only legitimacy tells them apart.',
+    text: 'Augustine sharpened it. A captured pirate told Alexander: with one ship I am a robber; you with a fleet are an emperor.',
     cite: 'Augustine, City of God, IV.4',
-    dur: 4.8,
+    dur: 3.3,
+  },
+  {
+    r: 7, sub: 4, podium: true, chart: 2,
+    text: 'Both take by threat — only legitimacy tells them apart.',
+    dur: 1.8,
   },
   {
     r: 1, sub: 17, podium: true, chart: 2,
@@ -55,9 +70,14 @@ export const BEATS: Pol2Beat[] = [
   },
   {
     r: 3, sub: 0, podium: true, chart: 2, ledger: true,
-    text: 'Weber sorted legitimacy into three sources. Tradition leans on custom and bloodline. Charisma runs on devotion to one person. The third kind rests on rules and offices, where power sits in the job rather than the holder.',
+    text: 'Weber sorted legitimacy into three sources. Tradition leans on custom and bloodline.',
     cite: 'Weber’s three types',
-    dur: 4.8,
+    dur: 1.8,
+  },
+  {
+    r: 3, sub: 0, podium: true, chart: 2, ledger: true,
+    text: 'Charisma runs on devotion to one person. The third kind rests on rules and offices, where power sits in the job rather than the holder.',
+    dur: 3.2,
   },
   {
     r: 20, sub: 9, podium: true, chart: 2, ledger: true,

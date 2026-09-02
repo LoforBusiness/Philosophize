@@ -22,20 +22,40 @@ export interface Political7Beat extends BaseBeat {
 export const BEATS: Political7Beat[] = [
   {
     p: 8, x: 264,
-    text: 'You are allowed to say what you think. So who actually handed you that? A government? A piece of paper? Or was it yours before anyone voted on anything?',
-    dur: 4.2,
+    text: 'You are allowed to say what you think. So who actually handed you that?',
+    dur: 2,
+  },
+  {
+    p: 8, x: 264,
+    text: 'A government? A piece of paper?',
+    dur: 1.8,
+  },
+  {
+    p: 8, x: 264,
+    text: 'Or was it yours before anyone voted on anything?',
+    dur: 1.8,
   },
   {
     p: 38, x: 190, stone: 1,
-    text: 'John Locke pointed at the ground. Some things are yours the moment you exist — your life, your freedom, your stuff. Nobody grants them. A government exists to guard them, not to hand them out.',
+    text: 'John Locke pointed at the ground. Some things are yours the moment you exist — your life, your freedom, your stuff.',
     cite: 'The first answer',
-    dur: 5.0,
+    dur: 3,
+  },
+  {
+    p: 38, x: 190, stone: 1,
+    text: 'Nobody grants them. A government exists to guard them, not to hand them out.',
+    dur: 2,
   },
   {
     p: 41, x: 330, stone: 1, charter: 1,
-    text: 'Others pointed up here instead. A right is something people wrote down, signed, and agreed to enforce. No signature, no right — just a wish said loudly.',
+    text: 'Others pointed up here instead. A right is something people wrote down, signed, and agreed to enforce.',
     cite: 'The second answer',
-    dur: 4.4,
+    dur: 2.8,
+  },
+  {
+    p: 41, x: 330, stone: 1, charter: 1,
+    text: 'No signature, no right — just a wish said loudly.',
+    dur: 1.8,
   },
   {
     p: 128, x: 262, stone: 1, charter: 1,
@@ -52,9 +72,14 @@ export const BEATS: Political7Beat[] = [
   },
   {
     p: 21, x: 190, stone: 1, charter: 1,
-    text: 'Here is how to tell the two apart. Tomorrow a government passes a law: from now on, you may not say what you think. The law is real, and it is enforced.',
+    text: 'Here is how to tell the two apart. Tomorrow a government passes a law: from now on, you may not say what you think.',
     cite: 'The test',
-    dur: 4.6,
+    dur: 3.5,
+  },
+  {
+    p: 21, x: 190, stone: 1, charter: 1,
+    text: 'The law is real, and it is enforced.',
+    dur: 1.8,
   },
   {
     p: 44, x: 190, stone: 1, charter: 1, pick: 1,
@@ -67,9 +92,19 @@ export const BEATS: Political7Beat[] = [
   },
   {
     p: 24, x: 330, stone: 1, charter: 1, tear: 1,
-    text: 'Watch what the law can actually reach. It tears the paper in half — and the stone does not move. That is the claim: rights you have just for being human. A government can break one. It cannot un-give it.',
+    text: 'Watch what the law can actually reach. It tears the paper in half — and the stone does not move.',
     cite: 'Natural rights',
-    dur: 5.4,
+    dur: 2.7,
+  },
+  {
+    p: 24, x: 330, stone: 1, charter: 1, tear: 1,
+    text: 'That is the claim: rights you have just for being human. A government can break one.',
+    dur: 2.2,
+  },
+  {
+    p: 24, x: 330, stone: 1, charter: 1, tear: 1,
+    text: 'It cannot un-give it.',
+    dur: 1.8,
   },
   {
     p: 4, x: 262, stone: 1, charter: 1, tear: 1,
@@ -78,21 +113,26 @@ export const BEATS: Political7Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'clean', reads: 'nothing awkward; the law is simply the whole story' },
+          { id: 'clean', reads: 'nothing awkward, the law is everything' },
           { id: 'custom', reads: 'custom can still correct the law from outside' },
           { id: 'nothing', reads: 'then no law could ever be called unjust', correct: true },
         ],
       },
-      explain: 'The far setting, and it is the whole natural-rights reply. No law, no right sounds hard-headed, and it is what Bentham argued. But if a right is only whatever the law grants, a law that strips one breaks no standard, because there is none left above it.',
+      explain: 'The far setting, and it is the whole natural-rights reply. No law, no right sounds hard-headed, and Bentham argued exactly that. But if a right is only what the law grants, then a law that takes one away breaks no standard. There is none left above it.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 39, x: 190, stone: 1, charter: 1, tear: 1,
-    text: 'And the claim has teeth. Thinkers announced the rights of man, then quietly stopped at men. Mary Wollstonecraft pressed the logic: if rights come from being a reasoning human, women are that too.',
+    text: 'And the claim has teeth. Thinkers announced the rights of man, then quietly stopped at men.',
     cite: 'Who counts',
-    dur: 5.0,
+    dur: 2.4,
+  },
+  {
+    p: 39, x: 190, stone: 1, charter: 1, tear: 1,
+    text: 'Mary Wollstonecraft pressed the logic: if rights come from being a reasoning human, women are that too.',
+    dur: 2.6,
   },
   {
     p: 0, x: 190,

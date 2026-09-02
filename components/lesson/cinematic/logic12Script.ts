@@ -30,9 +30,14 @@ export const BEATS: Logic12Beat[] = [
   },
   {
     g: 2, lit: 0,
-    dur: 4.6,
-    text: 'The trick is the claim that only two doors exist. Nobody argued for that claim. You were simply put in a room with two doors.',
+    dur: 2.8,
+    text: 'The trick is the claim that only two doors exist. Nobody argued for that claim.',
     cite: 'The claim about the room',
+  },
+  {
+    g: 2, lit: 0,
+    dur: 1.8,
+    text: 'You were simply put in a room with two doors.',
   },
   {
     g: 147, lit: 0,

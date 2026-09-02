@@ -35,9 +35,14 @@ export const BEATS: Ethics12Beat[] = [
   },
   {
     p: 26, x: 124, n: 3, word: 0.55,
-    text: 'Kant never asks what the act costs you. He asks whether your rule could be a law that everyone follows. So hand the rule to the whole world and run it.',
+    text: 'Kant never asks what the act costs you. He asks whether your rule could be a law that everyone follows.',
     cite: 'The test',
-    dur: 4.8,
+    dur: 3.1,
+  },
+  {
+    p: 26, x: 124, n: 3, word: 0.55,
+    text: 'So hand the rule to the whole world and run it.',
+    dur: 1.8,
   },
   {
     p: 141, x: 124, n: 3, word: 0.55,
@@ -54,9 +59,14 @@ export const BEATS: Ethics12Beat[] = [
   },
   {
     p: 45, x: 124, n: 12, word: 1,
-    text: 'Now everyone breaks a promise the moment it suits them. Nobody believes one any more, so the word goes blank on every card. There is no promising left to break.',
+    text: 'Now everyone breaks a promise the moment it suits them. Nobody believes one any more, so the word goes blank on every card.',
     cite: 'What the law does',
-    dur: 5.2,
+    dur: 4,
+  },
+  {
+    p: 45, x: 124, n: 12, word: 1,
+    text: 'There is no promising left to break.',
+    dur: 1.8,
   },
   {
     p: 4, x: 124, n: 12, word: 1,

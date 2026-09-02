@@ -34,13 +34,23 @@ export interface Eth17Beat extends BaseBeat {
 export const BEATS: Eth17Beat[] = [
   {
     p: 25, x: 200, maxim: 1, trust: 1,
-    text: 'A man at your door asks where your friend is hiding. He means to kill him. Kant says do not lie.',
-    dur: 4.4,
+    text: 'A man at your door asks where your friend is hiding. He means to kill him.',
+    dur: 3.4,
+  },
+  {
+    p: 25, x: 200, maxim: 1, trust: 1,
+    text: 'Kant says do not lie.',
+    dur: 1.8,
   },
   {
     p: 45, x: 200, maxim: 1, trust: 1,
-    text: 'That looks monstrous, and Kant knew so. His reason is not that lying is ugly. His reason is that lying cannot be made a rule for all.',
-    dur: 4.8,
+    text: 'That looks monstrous, and Kant knew so. His reason is not that lying is ugly.',
+    dur: 2.7,
+  },
+  {
+    p: 45, x: 200, maxim: 1, trust: 1,
+    text: 'Kant\'s reason is that lying cannot be made a rule for all.',
+    dur: 2.1,
   },
   {
     p: 2, x: 132, maxim: 1, copies: 1, trust: 1,
@@ -91,7 +101,7 @@ export const BEATS: Eth17Beat[] = [
         zones: [
           { id: 'you', upto: 0.3, reads: 'on you, for handing him the address' },
           { id: 'both', upto: 0.66, reads: 'shared between the two of you' },
-          { id: 'him', upto: 1, reads: 'on him entirely; you answer for your own act', correct: true },
+          { id: 'him', upto: 1, reads: 'on him, you answer for your own act', correct: true },
         ],
       },
       explain: 'All the way to the murderer. Kant does not deny the death is terrible, which is the caricature and why people call him heartless. He denies that it lands on your account. You answer for the lie; he answers for the killing.',

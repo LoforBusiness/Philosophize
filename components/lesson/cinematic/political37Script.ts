@@ -39,8 +39,13 @@ export const BEATS: Political37Beat[] = [
   },
   {
     p: 2, x: 54, pair: 1, horns: 1, labels: 1,
-    text: 'Now look above the ballots. One of them can be heard across the country. The other can be heard across a room.',
-    dur: 4.4,
+    text: 'Now look above the ballots. One of them can be heard across the country.',
+    dur: 2.8,
+  },
+  {
+    p: 2, x: 54, pair: 1, horns: 1, labels: 1,
+    text: 'The other can be heard across a room.',
+    dur: 1.8,
   },
   {
     p: 4, x: 54, pair: 1, horns: 1, labels: 1, live_d: 1, live: 1,
@@ -63,8 +68,13 @@ export const BEATS: Political37Beat[] = [
   },
   {
     p: 13, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
-    text: 'Rawls put it as a distinction. Having a liberty is one thing. Being able to use it is another, and only one of those is equal here.',
-    dur: 4.8,
+    text: 'Rawls put it as a distinction. Having a liberty is one thing.',
+    dur: 2.1,
+  },
+  {
+    p: 13, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
+    text: 'Being able to use it is another, and only one of those is equal here.',
+    dur: 2.7,
   },
   {
     p: 47, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
@@ -90,8 +100,13 @@ export const BEATS: Political37Beat[] = [
   },
   {
     p: 35, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
-    text: 'So the argument never settles. One side defends the right to be heard. So does the other. The two sides disagree about whose right it is.',
-    dur: 4.6,
+    text: 'So the argument never settles. One side defends the right to be heard.',
+    dur: 2.3,
+  },
+  {
+    p: 35, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
+    text: 'So does the other. The two sides disagree about whose right it is.',
+    dur: 2.3,
   },
   {
     p: 45, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,

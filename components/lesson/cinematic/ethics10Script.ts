@@ -31,9 +31,14 @@ export const BEATS: Et10Beat[] = [
   },
   {
     p: 14, x: 168,
-    text: 'Nobody deliberates. You do not price the shoes against the child. There is no comparison to make. Peter Singer’s whole argument starts from the fact that you already know this.',
+    text: 'Nobody deliberates. You do not price the shoes against the child.',
     cite: 'Singer’s drowning child',
-    dur: 4.8,
+    dur: 1.8,
+  },
+  {
+    p: 14, x: 168,
+    text: 'There is no comparison to make. Peter Singer’s whole argument starts from the fact that you already know this.',
+    dur: 3,
   },
   {
     p: 30, x: 268, wading: true,
@@ -55,9 +60,14 @@ export const BEATS: Et10Beat[] = [
   },
   {
     p: 21, x: 268, wading: true, far: true,
-    text: 'There is another child. Same danger, same small cost to you, nine thousand kilometres further off. The argument that got you into this pond does not obviously stop at the bank. That thought is where effective altruism came from.',
+    text: 'There is another child. Same danger, same small cost to you, nine thousand kilometres further off.',
     cite: 'Famine, Affluence, and Morality',
-    dur: 5.2,
+    dur: 2.1,
+  },
+  {
+    p: 21, x: 268, wading: true, far: true,
+    text: 'The argument that got you into the pond does not obviously stop at the bank. Effective altruism started right there.',
+    dur: 3.1,
   },
   {
     p: 47, x: 268, wading: true, far: true, factors: true,

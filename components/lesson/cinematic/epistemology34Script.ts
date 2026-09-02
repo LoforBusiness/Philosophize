@@ -20,26 +20,46 @@ export interface Epistemology34Beat extends BaseBeat {
 export const BEATS: Epistemology34Beat[] = [
   {
     p: 25, x: 54, claim: 0,
-    text: 'Two bars. The left one is what you say. The right one is how often what you say turns out to hold.',
-    dur: 3.8,
+    text: 'Two bars. The left one is what you say.',
+    dur: 1.8,
+  },
+  {
+    p: 25, x: 54, claim: 0,
+    text: 'The right one is how often what you say turns out to hold.',
+    dur: 2.2,
   },
   {
     p: 47, x: 54, claim: 0.3,
-    text: 'Down here the two lines agree. Call a thing a coin flip and it lands heads about half the time. Nobody goes badly wrong there.',
+    text: 'Down here the two lines agree. Call a thing a coin flip and it lands heads about half the time.',
     cite: 'Low down, they agree',
-    dur: 4.4,
+    dur: 3.5,
+  },
+  {
+    p: 47, x: 54, claim: 0.3,
+    text: 'Nobody goes badly wrong there.',
+    dur: 1.8,
   },
   {
     p: 19, x: 54, claim: 0.95, gap: 1,
-    text: 'Now say you are certain. The left bar goes to the top. The right one does not follow, and the space between them is the whole subject.',
+    text: 'Now say you are certain. The left bar goes to the top.',
     cite: 'The gap opens',
-    dur: 4.6,
+    dur: 2,
+  },
+  {
+    p: 19, x: 54, claim: 0.95, gap: 1,
+    text: 'The right one does not follow, and the space between them is the whole subject.',
+    dur: 2.6,
   },
   {
     p: 4, x: 54, claim: 0.95, gap: 1,
-    text: 'Being well calibrated means those two bars match. Notice that is not the same as being right often. Someone right half the time who says so has them level.',
+    text: 'Being well calibrated means those two bars match. Notice that is not the same as being right often.',
     cite: 'Calibration',
-    dur: 4.8,
+    dur: 3,
+  },
+  {
+    p: 4, x: 54, claim: 0.95, gap: 1,
+    text: 'Someone right half the time who says so has them level.',
+    dur: 1.8,
   },
   {
     p: 137, x: 54, claim: 0.95,

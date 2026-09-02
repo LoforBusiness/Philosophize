@@ -100,8 +100,18 @@ export const BEATS: Beat[] = [
     build: { p1: '', p2: '', key: '' },
     gest: 5,                                        // sweep the keystone into place
     say: [{ who: 'master', text: 'There. It stands.' }],
-    text: 'Two stones below. One resting on top. That shape is every argument you will ever meet.',
-    dur: 3.2,
+    text: 'Two stones below. One resting on top.',
+    dur: 1.8,
+  },
+
+  // ── ACT 2 — NAME THE PARTS ───────────────────────────────────────────────────
+  {
+    act: 1,
+    build: { p1: '', p2: '', key: '' },
+    gest: 5,                                        // sweep the keystone into place
+    say: [{ who: 'master', text: 'There. It stands.' }],
+    text: 'That shape is every argument you will ever meet.',
+    dur: 1.8,
   },
 
   // ── ACT 2 — NAME THE PARTS ───────────────────────────────────────────────────
@@ -116,9 +126,16 @@ export const BEATS: Beat[] = [
     act: 2,
     build: { p1: '', p2: '', key: '', tags: true },
     gest: 6,                                        // point up at the keystone
-    text: 'The stone on top is the conclusion. Aristotle called it the claim that must follow. The words therefore, so and thus all flag one.',
+    text: 'The stone on top is the conclusion. Aristotle called it the claim that must follow.',
     cite: 'Aristotle, Prior Analytics',
-    dur: 4.4,
+    dur: 2.8,
+  },
+  {
+    act: 2,
+    build: { p1: '', p2: '', key: '', tags: true },
+    gest: 6,                                        // point up at the keystone
+    text: 'The words therefore, so and thus all flag one.',
+    dur: 1.8,
   },
   {
     act: 2,

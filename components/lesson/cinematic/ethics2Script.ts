@@ -21,23 +21,49 @@ export interface Ethics2Beat extends BaseBeat {
 export const BEATS: Ethics2Beat[] = [
   {
     p: 12, x: 258, g: -1,
-    text: 'You find a wallet on the pavement. Now what? One small choice is about to get three different verdicts.',
-    dur: 3.4,
+    text: 'You find a wallet on the pavement. Now what?',
+    dur: 1.8,
+  },
+  {
+    p: 12, x: 258, g: -1,
+    text: 'One small choice is about to get three different verdicts.',
+    dur: 1.8,
   },
   {
     p: 7, x: 262, g: -1, gx: 48, named: 1,
     // Nothing on this stage is labelled "Deontology", and the next three beats show
     // each lens by working the wallet through it. Naming all three first was a
     // vocabulary tax paid before any of them meant anything (J6).
-    text: 'Ethics hands you three lenses, not three religions. One asks what happens next. One asks what your duty is. One asks who the act turns you into. Most of us quietly use all three.',
+    text: 'Ethics hands you three lenses, not three religions. One asks what happens next.',
     cite: 'Three lenses',
-    dur: 5.0,
+    dur: 1.9,
+  },
+  {
+    p: 7, x: 262, g: -1, gx: 48, named: 1,
+    // Nothing on this stage is labelled "Deontology", and the next three beats show
+    // each lens by working the wallet through it. Naming all three first was a
+    // vocabulary tax paid before any of them meant anything (J6).
+    text: 'One asks what your duty is. One asks who the act turns you into.',
+    dur: 2.1,
+  },
+  {
+    p: 7, x: 262, g: -1, gx: 48, named: 1,
+    // Nothing on this stage is labelled "Deontology", and the next three beats show
+    // each lens by working the wallet through it. Naming all three first was a
+    // vocabulary tax paid before any of them meant anything (J6).
+    text: 'Most of us quietly use all three.',
+    dur: 1.8,
   },
   {
     p: 4, x: 262, g: 21, gx: 108, named: 1, lens: 1,
-    text: 'Mill points the first lens at the wallet. Did handing it in make anyone’s life go better? For him that is the whole question, and everybody’s happiness counts the same.',
+    text: 'Mill points the first lens at the wallet. Did handing it in make anyone’s life go better?',
     cite: 'J.S. Mill, Utilitarianism, 1863',
-    dur: 4.8,
+    dur: 2.7,
+  },
+  {
+    p: 4, x: 262, g: 21, gx: 108, named: 1, lens: 1,
+    text: 'For him that is the whole question, and everybody’s happiness counts the same.',
+    dur: 2.1,
   },
   {
     p: 0, x: 262, g: 1, gx: 108, named: 1, lens: 1,
@@ -54,15 +80,25 @@ export const BEATS: Ethics2Beat[] = [
   },
   {
     p: 14, x: 262, g: 6, gx: 108, named: 1, lens: 2,
-    text: 'Kant ignores the happy ending. Only act on a rule you could want everyone to follow. Try that with "keep wallets you find" and it eats itself, because nobody would hand anything in.',
+    text: 'Kant ignores the happy ending. Only act on a rule you could want everyone to follow.',
     cite: 'Kant, Groundwork, 1785',
-    dur: 4.8,
+    dur: 2.3,
+  },
+  {
+    p: 14, x: 262, g: 6, gx: 108, named: 1, lens: 2,
+    text: 'Try that with "keep wallets you find" and it eats itself, because nobody would hand anything in.',
+    dur: 2.5,
   },
   {
     p: 13, x: 262, g: 22, gx: 108, named: 1, lens: 3,
-    text: 'Aristotle asks a third question. Not "what do I do?" but "who am I becoming?" Every honest act makes the next one easier, and that is what he means by a good life.',
+    text: 'Aristotle asks a third question. Not "what do I do?',
     cite: 'Aristotle, Nicomachean Ethics',
-    dur: 4.8,
+    dur: 1.8,
+  },
+  {
+    p: 13, x: 262, g: 22, gx: 108, named: 1, lens: 3,
+    text: 'but "who am I becoming? Every honest act makes the next one easier, and that is what he means by a good life.',
+    dur: 3.3,
   },
   {
     p: 21, x: 262, g: -1, named: 1, lens: 3,
@@ -85,8 +121,8 @@ export const BEATS: Ethics2Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'common', reads: 'most people do it, so it must be fine' },
-          { id: 'legal', reads: 'nobody is arrested for it, so it must be fine' },
+          { id: 'common', reads: 'common, so it must be fine' },
+          { id: 'legal', reads: 'legal, so it must be fine' },
           { id: 'neither', reads: 'neither one settles whether it is right', correct: true },
         ],
       },

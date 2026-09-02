@@ -50,9 +50,14 @@ export const BEATS: Epis14Beat[] = [
   },
   {
     g: 45, vat: 1, leap: 1,
-    dur: 4.8,
-    text: 'Now swap the world for a tank and a very good computer. Watch the screen while it happens. Nothing on it moved — and nothing on it ever would.',
+    dur: 3,
+    text: 'Now swap the world for a tank and a very good computer. Watch the screen while it happens.',
     cite: 'Swap the world',
+  },
+  {
+    g: 45, vat: 1, leap: 1,
+    dur: 1.8,
+    text: 'Nothing on it moved — and nothing on it ever would.',
   },
   {
     g: 4, vat: 1, leap: 1, pick: 1,

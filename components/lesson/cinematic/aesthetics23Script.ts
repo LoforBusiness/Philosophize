@@ -35,8 +35,13 @@ export interface Aes23Beat extends BaseBeat {
 export const BEATS: Aes23Beat[] = [
   {
     p: 25, x: 200, stave: 1,
-    text: 'Seven notes, no words. It can move you to tears. Now try to say what it was about.',
-    dur: 4.4,
+    text: 'Seven notes, no words. It can move you to tears.',
+    dur: 2.4,
+  },
+  {
+    p: 25, x: 200, stave: 1,
+    text: 'Now try to say what it was about.',
+    dur: 2,
   },
   {
     p: 2, x: 200, stave: 1, plates: 1, point: 1, aim: 0,
@@ -61,9 +66,14 @@ export const BEATS: Aes23Beat[] = [
   },
   {
     p: 21, x: 132, stave: 1, plates: 1, point: 1, aim: 2,
-    text: 'Most instrumental music works this way. The music is not about anything. The music is a shape made of tones.',
+    text: 'Most instrumental music works this way. The music is not about anything.',
     cite: 'Absolute music',
-    dur: 4.4,
+    dur: 2.6,
+  },
+  {
+    p: 21, x: 132, stave: 1, plates: 1, point: 1, aim: 2,
+    text: 'The music is a shape made of tones.',
+    dur: 1.8,
   },
   {
     p: 137, x: 268, stave: 1, plates: 1, point: 1, aim: 2,

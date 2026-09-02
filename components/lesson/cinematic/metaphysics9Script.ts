@@ -30,9 +30,14 @@ export const BEATS: M9Beat[] = [
   },
   {
     p: 1, x: 96, panels: 1,
-    text: 'Descartes doubted everything he could, and could not doubt that he was thinking. So mind is a thing that thinks and takes up no space; body is a thing that takes up space and does not think. Two separate substances.',
+    text: 'Descartes doubted everything he could, and could not doubt that he was thinking. So mind is a thing that thinks and takes up no space; body is a thing that takes up space and does not think.',
     cite: 'Cartesian dualism',
-    dur: 5.0,
+    dur: 4.6,
+  },
+  {
+    p: 1, x: 96, panels: 1,
+    text: 'Two separate substances.',
+    dur: 1.8,
   },
   {
     p: 144, x: 160, panels: 1,
@@ -49,15 +54,25 @@ export const BEATS: M9Beat[] = [
   },
   {
     p: 13, x: 160, panels: 1, cross: 1, puzzle: true,
-    text: 'Then decide to lift your arm. Something with no size and no position has to shove a physical limb. Descartes guessed the pineal gland; his critics answered that a mind with no size has nothing to push with.',
+    text: 'Then decide to lift your arm. Something with no size and no position has to shove a physical limb.',
     cite: 'The interaction problem',
-    dur: 5.0,
+    dur: 2.5,
+  },
+  {
+    p: 13, x: 160, panels: 1, cross: 1, puzzle: true,
+    text: 'Descartes guessed the pineal gland; his critics answered that a mind with no size has nothing to push with.',
+    dur: 2.5,
   },
   {
     p: 33, x: 232, panels: 2,
-    text: 'So many philosophers close the gap instead. Damage a brain and the memory, the mood, even the character change with it. That suggests the mind is not another substance. It is something the brain does, the way digestion is something the gut does.',
+    text: 'So many philosophers close the gap instead. Damage a brain and the memory, the mood, even the character change with it.',
     cite: 'The physicalist reply',
-    dur: 5.2,
+    dur: 2.5,
+  },
+  {
+    p: 33, x: 232, panels: 2,
+    text: 'That suggests the mind is not another substance. It is something the brain does, the way digestion is something the gut does.',
+    dur: 2.7,
   },
   {
     p: 4, x: 232, panels: 2,

@@ -48,8 +48,13 @@ export const BEATS: Aes20Beat[] = [
   },
   {
     p: 2, x: 132, uses: 1, swaps: 1, struck: 1,
-    text: 'Art records how the world looked. A camera does the same. Art decorates a room, and wallpaper is cheaper.',
-    dur: 4.4,
+    text: 'Art records how the world looked. A camera does the same.',
+    dur: 2.5,
+  },
+  {
+    p: 2, x: 132, uses: 1, swaps: 1, struck: 1,
+    text: 'Art decorates a room, and wallpaper is cheaper.',
+    dur: 1.9,
   },
   {
     p: 13, x: 132, uses: 1, swaps: 1, struck: 1,
@@ -91,8 +96,8 @@ export const BEATS: Aes20Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'proved', reads: 'the survivor is proved; only one reason is left standing' },
-          { id: 'nothing', reads: 'nothing at all; crossing out never tells you anything' },
+          { id: 'proved', reads: 'the last one is proved' },
+          { id: 'nothing', reads: 'nothing at all' },
           { id: 'narrow', reads: 'the field is narrower, and nothing is proved', correct: true },
         ],
       },

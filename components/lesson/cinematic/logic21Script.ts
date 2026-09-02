@@ -40,9 +40,14 @@ export const BEATS: Log21Beat[] = [
   },
   {
     p: 2, x: 200, chips: 1, bench: 1, under: 0,
-    text: 'Two tests, and they ask different questions. Take the lamp away and see. Then switch that lamp on alone and see.',
+    text: 'Two tests, and they ask different questions. Take the lamp away and see.',
     cite: 'The bench',
-    dur: 4.8,
+    dur: 3,
+  },
+  {
+    p: 2, x: 200, chips: 1, bench: 1, under: 0,
+    text: 'Then switch that lamp on alone and see.',
+    dur: 1.8,
   },
   {
     p: 45, x: 132, chips: 1, bench: 1, under: 1,

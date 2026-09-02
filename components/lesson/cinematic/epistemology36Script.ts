@@ -32,8 +32,13 @@ export interface Epistemology36Beat extends BaseBeat {
 export const BEATS: Epistemology36Beat[] = [
   {
     p: 25, x: 56, shelf: 1,
-    text: 'A counter with four pairs of stockings laid out. All four pairs are identical. Nobody buying is told so.',
-    dur: 3.8,
+    text: 'A counter with four pairs of stockings laid out. All four pairs are identical.',
+    dur: 2.8,
+  },
+  {
+    p: 25, x: 56, shelf: 1,
+    text: 'Nobody buying is told so.',
+    dur: 1.8,
   },
   {
     p: 4, x: 56, shelf: 1, live: 1,
@@ -46,13 +51,28 @@ export const BEATS: Epistemology36Beat[] = [
   },
   {
     p: 13, x: 56, shelf: 1, given: 1,
-    text: 'Now the interesting part. Every shopper had a reason ready. Better knit. Finer weave. Nicer feel.',
-    dur: 4.0,
+    text: 'Now the interesting part. Every shopper had a reason ready.',
+    dur: 2.5,
+  },
+  {
+    p: 13, x: 56, shelf: 1, given: 1,
+    text: 'Better knit. Finer weave.',
+    dur: 1.8,
+  },
+  {
+    p: 13, x: 56, shelf: 1, given: 1,
+    text: 'Nicer feel.',
+    dur: 1.8,
   },
   {
     p: 21, x: 56, shelf: 1, given: 1, real: 1,
-    text: 'The cause was position on the counter. Told as much, the shoppers said no. Not defensively, not caught out. The reason was simply invisible from the inside.',
-    dur: 4.6,
+    text: 'The cause was position on the counter. Told as much, the shoppers said no.',
+    dur: 2.4,
+  },
+  {
+    p: 21, x: 56, shelf: 1, given: 1, real: 1,
+    text: 'Not defensively, not caught out. The reason was simply invisible from the inside.',
+    dur: 2.2,
   },
   {
     p: 47, x: 56, shelf: 1, given: 1, real: 1, clash: 1,
@@ -68,8 +88,13 @@ export const BEATS: Epistemology36Beat[] = [
   },
   {
     p: 35, x: 56, shelf: 1, given: 1, real: 1, clash: 1,
-    text: 'The shoppers were not lying and were not confused. Each one knew which pair she preferred. The reason for the preference was the part nobody could see.',
-    dur: 4.4,
+    text: 'The shoppers were not lying and were not confused. Each one knew which pair she preferred.',
+    dur: 2.6,
+  },
+  {
+    p: 35, x: 56, shelf: 1, given: 1, real: 1, clash: 1,
+    text: 'The reason for the preference was the part nobody could see.',
+    dur: 1.8,
   },
   {
     p: 12, x: 128, shelf: 1, clash: 1,

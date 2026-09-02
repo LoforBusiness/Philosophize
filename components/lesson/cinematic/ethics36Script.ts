@@ -34,8 +34,13 @@ export const BEATS: Ethics36Beat[] = [
   },
   {
     p: 13, x: 56, book: 1,
-    text: 'Now you say you forgive them. Nothing about yesterday has changed. So what did the sentence do?',
-    dur: 4.0,
+    text: 'Now you say you forgive them. Nothing about yesterday has changed.',
+    dur: 2.6,
+  },
+  {
+    p: 13, x: 56, book: 1,
+    text: 'So what did the sentence do?',
+    dur: 1.8,
   },
   {
     p: 4, x: 56, book: 1, live: 1,
@@ -48,8 +53,13 @@ export const BEATS: Ethics36Beat[] = [
   },
   {
     p: 21, x: 56, book: 1, struck: 1, excuse: 1,
-    text: 'That line runs between forgiving and excusing, and people slide across the line constantly. Excusing says the person could not help it. Forgiving says the person could.',
-    dur: 4.8,
+    text: 'That line runs between forgiving and excusing, and people slide across the line constantly. Excusing says the person could not help it.',
+    dur: 3.9,
+  },
+  {
+    p: 21, x: 56, book: 1, struck: 1, excuse: 1,
+    text: 'Forgiving says the person could.',
+    dur: 1.8,
   },
   {
     p: 47, x: 56, book: 1, struck: 1,
@@ -65,8 +75,13 @@ export const BEATS: Ethics36Beat[] = [
   },
   {
     p: 35, x: 130, book: 1, struck: 1, gift: 1,
-    text: 'Forgiveness is a gift, and a gift has an owner. The resentment was yours by right. Giving the resentment up is yours to do.',
-    dur: 4.4,
+    text: 'Forgiveness is a gift, and a gift has an owner. The resentment was yours by right.',
+    dur: 2.9,
+  },
+  {
+    p: 35, x: 130, book: 1, struck: 1, gift: 1,
+    text: 'Giving the resentment up is yours to do.',
+    dur: 1.8,
   },
   {
     p: 4, x: 130, book: 1, struck: 1, gift: 1,

@@ -31,9 +31,14 @@ export const BEATS: Meta6Beat[] = [
   },
   {
     p: 36, swap: 1, orig: 0.06,
-    text: 'Athens kept Theseus’s ship for centuries, replacing each rotted plank with a fresh one. In the end, not one original board remained. Plutarch reports the quarrel it started.',
+    text: 'Athens kept Theseus’s ship for centuries, replacing each rotted plank with a fresh one. In the end, not one original board remained.',
     cite: 'The Ship of Theseus',
-    dur: 5.0,
+    dur: 3.9,
+  },
+  {
+    p: 36, swap: 1, orig: 0.06,
+    text: 'Plutarch reports the quarrel it started.',
+    dur: 1.8,
   },
   {
     p: 137, swap: 1, orig: 0,
@@ -50,15 +55,25 @@ export const BEATS: Meta6Beat[] = [
   },
   {
     p: 1, swap: 1, orig: 0,
-    text: 'Philosophers split the word "same" in two. Qualitative sameness is sharing every feature, like two new coins. Numerical sameness is being the one thing you were yesterday. The ship keeps the second and loses the first.',
+    text: 'Philosophers split the word "same" in two. Qualitative sameness is sharing every feature, like two new coins.',
     cite: 'Two senses of sameness',
-    dur: 5.2,
+    dur: 2.5,
+  },
+  {
+    p: 1, swap: 1, orig: 0,
+    text: 'Numerical sameness is being the one thing you were yesterday. The ship keeps the second and loses the first.',
+    dur: 2.7,
   },
   {
     p: 22, swap: 1, orig: 0, you: 1,
-    text: 'And you are the living proof. Almost every cell in your body has been replaced since childhood — the toddler in old photos shares barely any matter with you. Yet you call that child yourself.',
+    text: 'And you are the living proof. Almost every cell in your body has been replaced since childhood — the toddler in old photos shares barely any matter with you.',
     cite: 'Your own riddle',
-    dur: 5.0,
+    dur: 4.1,
+  },
+  {
+    p: 22, swap: 1, orig: 0, you: 1,
+    text: 'Yet you call that child yourself.',
+    dur: 1.8,
   },
   {
     p: 4, swap: 1, orig: 0,
@@ -81,9 +96,9 @@ export const BEATS: Meta6Beat[] = [
         left: 'UNBROKEN USE', right: 'THE ORIGINAL PLANKS',
         start: 0.04,
         zones: [
-          { id: 'wood', upto: 0.3, reads: 'the rebuilt one; it is made of the very same wood' },
-          { id: 'both', upto: 0.7, reads: 'neither test wins, and the answer follows the test you pick', correct: true },
-          { id: 'use', upto: 1, reads: 'the one still sailing; it never stopped being the ship' },
+          { id: 'wood', upto: 0.3, reads: 'the rebuilt one, same wood' },
+          { id: 'both', upto: 0.7, reads: 'neither wins, it depends on your test', correct: true },
+          { id: 'use', upto: 1, reads: 'the one still sailing, never stopped' },
         ],
       },
       explain: 'The seam belongs in the middle. Each ship holds one half of what we mean by the same ship: one keeps the wood, the other keeps the unbroken use. Push it to either end and you have not found the answer, you have chosen which test counts.',

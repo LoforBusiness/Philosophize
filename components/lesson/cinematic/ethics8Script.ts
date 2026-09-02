@@ -24,28 +24,50 @@ export interface Ethics8Beat extends BaseBeat {
 export const BEATS: Ethics8Beat[] = [
   {
     p: 12, x: 80,
-    text: 'A friend goes quiet for two weeks. You could work out what you owe them, fairly and impartially. Or you could just go and sit with them. For a long time, only the first one counted as ethics.',
-    dur: 4.6,
+    text: 'A friend goes quiet for two weeks. You could work out what you owe them, fairly and impartially.',
+    dur: 2.2,
+  },
+  {
+    p: 12, x: 80,
+    text: 'Or you could just go and sit with them. For a long time, only the first one counted as ethics.',
+    dur: 2.4,
   },
   {
     p: 47, x: 80, grid: 1,
-    text: 'Most big theories start the same way. Step back, be impartial, and find the rule or the total that covers everyone equally. Tidy boxes — and nobody’s name in any of them.',
+    text: 'Most big theories start the same way. Step back, be impartial, and find the rule or the total that covers everyone equally.',
     cite: 'The usual method',
-    dur: 4.8,
+    dur: 3.3,
+  },
+  {
+    p: 47, x: 80, grid: 1,
+    text: 'Tidy boxes — and nobody’s name in any of them.',
+    dur: 1.8,
   },
   {
     p: 45, x: 146, grid: 1, oth: 1,
-    text: 'Then you look up. Someone is on the floor by their bed, and no box fits them. Not a case, not a number. The one you know.',
+    text: 'Then you look up. Someone is on the floor by their bed, and no box fits them.',
     cite: 'Someone actually there',
-    dur: 4.4,
+    dur: 2.8,
+  },
+  {
+    p: 45, x: 146, grid: 1, oth: 1,
+    text: 'Not a case, not a number. The one you know.',
+    dur: 1.8,
   },
   {
     // 49 (down on one knee), not 43 (setting a load down while standing): the line
     // is "get down beside them", so the figure has to actually get down.
     p: 49, x: 182, grid: 1, oth: 1,
-    text: 'You cross the room and get down beside them. No theory has said a word yet. Something else is already telling you what to do.',
+    text: 'You cross the room and get down beside them. No theory has said a word yet.',
     cite: 'Getting closer',
-    dur: 4.2,
+    dur: 2.7,
+  },
+  {
+    // 49 (down on one knee), not 43 (setting a load down while standing): the line
+    // is "get down beside them", so the figure has to actually get down.
+    p: 49, x: 182, grid: 1, oth: 1,
+    text: 'Something else is already telling you what to do.',
+    dur: 1.8,
   },
   {
     // Stays 49: the prompt says "You are down on the floor beside them", so the
@@ -61,9 +83,14 @@ export const BEATS: Ethics8Beat[] = [
   },
   {
     p: 39, x: 182, grid: 0.5, oth: 1, thread: 1,
-    text: 'That move has a name. Carol Gilligan kept hearing people reason through bonds and care, and the textbooks had no word for it. She called the pattern a different voice.',
+    text: 'That move has a name. Carol Gilligan kept hearing people reason through bonds and care, and the textbooks had no word for it.',
     cite: 'Carol Gilligan · 1982',
-    dur: 5.2,
+    dur: 4,
+  },
+  {
+    p: 39, x: 182, grid: 0.5, oth: 1, thread: 1,
+    text: 'Gilligan called the pattern a different voice.',
+    dur: 1.8,
   },
   {
     p: 137, x: 182, grid: 0.4, oth: 1, thread: 1,
@@ -99,15 +126,25 @@ export const BEATS: Ethics8Beat[] = [
   },
   {
     p: 38, x: 112, grid: 0.3, oth: 1, thread: 1,
-    text: 'Nel Noddings built that into a full ethics. Morality, she argued, grows out of the bond between the one caring and the one cared for. You learned right and wrong on a kitchen floor, long before any rulebook.',
+    text: 'Nel Noddings built that into a full ethics. Morality, she argued, grows out of the bond between the one caring and the one cared for.',
     cite: 'Nel Noddings · 1984',
-    dur: 5.0,
+    dur: 3.3,
+  },
+  {
+    p: 38, x: 112, grid: 0.3, oth: 1, thread: 1,
+    text: 'You learned right and wrong on a kitchen floor, long before any rulebook.',
+    dur: 1.8,
   },
   {
     p: 21, x: 172, grid: 0.28, oth: 1, thread: 1,
-    text: 'Critics feared care would trap people in endless self-sacrifice. Gilligan’s answer: care and justice are two lenses, not rivals. Rules stop you being cruel. Care notices the person the rules never mention.',
+    text: 'Critics feared care would trap people in endless self-sacrifice. Gilligan’s answer: care and justice are two lenses, not rivals.',
     cite: 'Two voices, not rivals',
-    dur: 4.8,
+    dur: 2.9,
+  },
+  {
+    p: 21, x: 172, grid: 0.28, oth: 1, thread: 1,
+    text: 'Rules stop you being cruel. Care notices the person the rules never mention.',
+    dur: 2,
   },
   {
     p: 0, x: 172, grid: 0.28, oth: 1, thread: 1,

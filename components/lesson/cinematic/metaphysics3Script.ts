@@ -27,15 +27,30 @@ export const BEATS: Meta3Beat[] = [
   },
   {
     p: 1, shadow: 0.9, form: 0.15, apple: 1,
-    text: 'Heraclitus said everything flows, like a river you cannot step in twice. That troubled Plato. You cannot know a thing that will not hold still, so he split the world in two. Being holds still and can be known. Becoming never does.',
+    text: 'Heraclitus said everything flows, like a river you cannot step in twice. That troubled Plato.',
     cite: 'Being vs Becoming',
-    dur: 5.2,
+    dur: 1.9,
+  },
+  {
+    p: 1, shadow: 0.9, form: 0.15, apple: 1,
+    text: 'You cannot know a thing that will not hold still, so he split the world in two. Being holds still and can be known.',
+    dur: 3,
+  },
+  {
+    p: 1, shadow: 0.9, form: 0.15, apple: 1,
+    text: 'Becoming never does.',
+    dur: 1.8,
   },
   {
     p: 34, shadow: 0.5, form: 0.7, apple: 1,
-    text: 'Prisoners chained since birth take flickering shadows for the real world. One gets free, climbs into daylight, and sees the things themselves. Plato says the wall is where we live, and the Forms are what is casting the shadows.',
+    text: 'Prisoners chained since birth take flickering shadows for the real world. One gets free, climbs into daylight, and sees the things themselves.',
     cite: 'The Republic, Book VII',
-    dur: 5.2,
+    dur: 2.9,
+  },
+  {
+    p: 34, shadow: 0.5, form: 0.7, apple: 1,
+    text: 'Plato says the wall is where we live, and the Forms are what is casting the shadows.',
+    dur: 2.3,
   },
   {
     p: 147, shadow: 0.3, form: 0.9, apple: 1,
@@ -52,9 +67,14 @@ export const BEATS: Meta3Beat[] = [
   },
   {
     p: 24, shadow: 0.15, form: 1, apple: 1,
-    text: 'Everything you can touch is a rough copy of something perfect. Two sticks are never exactly equal; the idea of Equality always is. And you can know the thing that never changes, where the copy is only ever a good guess.',
+    text: 'Everything you can touch is a rough copy of something perfect. Two sticks are never exactly equal. The idea of Equality always is.',
     cite: 'The theory of Forms',
-    dur: 5.2,
+    dur: 2.9,
+  },
+  {
+    p: 24, shadow: 0.15, form: 1, apple: 1,
+    text: 'And you can know the thing that never changes, where the copy is only ever a good guess.',
+    dur: 2.3,
   },
   {
     p: 6, shadow: 0.15, form: 1, apple: 1,
@@ -76,7 +96,7 @@ export const BEATS: Meta3Beat[] = [
         zones: [
           { id: 'apple', upto: 0.34, reads: 'the thing you can hold is the real one' },
           { id: 'even', upto: 0.62, reads: 'equally real, each in its own way' },
-          { id: 'form', upto: 1, reads: 'the Form is the real one; the apple only borrows it', correct: true },
+          { id: 'form', upto: 1, reads: 'the Form is real, the apple borrows', correct: true },
         ],
       },
       explain: 'Nearly all of it goes to the Form, and that is what feels backwards. Plato ranks the invisible above the touchable. Apples bruise and rot and stop being apples, so for him they hold less being than the one thing that never changes.',

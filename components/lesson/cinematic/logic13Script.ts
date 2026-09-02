@@ -31,9 +31,14 @@ export const BEATS: Log13Beat[] = [
   },
   {
     g: 45, steps: 4,
-    dur: 5.0,
-    text: 'Then it arrives with company. They will want to retake every test. Grades will stop meaning anything. So we cannot allow the retake.',
+    dur: 2.6,
+    text: 'Then it arrives with company. They will want to retake every test.',
     cite: 'And then, and then',
+  },
+  {
+    g: 45, steps: 4,
+    dur: 2.4,
+    text: 'Grades will stop meaning anything. So we cannot allow the retake.',
   },
   {
     g: 13, steps: 4, joins: 1,

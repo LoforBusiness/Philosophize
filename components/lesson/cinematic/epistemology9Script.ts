@@ -25,20 +25,35 @@ export interface Epistemology9Beat extends BaseBeat {
 export const BEATS: Epistemology9Beat[] = [
   {
     p: 25, x: 208,
-    text: 'Everyone says they want the truth. Almost nobody can say what the word means. Try it: when you call something true, what exactly are you claiming?',
-    dur: 4.0,
+    text: 'Everyone says they want the truth. Almost nobody can say what the word means.',
+    dur: 2.2,
+  },
+  {
+    p: 25, x: 208,
+    text: 'Try it: when you call something true, what exactly are you claiming?',
+    dur: 1.8,
   },
   {
     p: 34, x: 268, land: 1,
-    text: 'Start with the world. Two hills and one lonely tree, sitting there being exactly what they are. Whether or not anybody ever looks, draws, or argues about them.',
+    text: 'Start with the world. Two hills and one lonely tree, sitting there being exactly what they are.',
     cite: 'Out there',
-    dur: 4.4,
+    dur: 2.7,
+  },
+  {
+    p: 34, x: 268, land: 1,
+    text: 'Whether or not anybody ever looks, draws, or argues about them.',
+    dur: 1.8,
   },
   {
     p: 40, x: 148, land: 1, map: 1,
-    text: 'Back at the easel you sketch what you saw: two hills, one tree. That sketch is a claim about the land. Now — what would make it a good one?',
+    text: 'Back at the easel you sketch what you saw: two hills, one tree. That sketch is a claim about the land.',
     cite: 'In here',
-    dur: 4.6,
+    dur: 3.2,
+  },
+  {
+    p: 40, x: 148, land: 1, map: 1,
+    text: 'Now — what would make it a good one?',
+    dur: 1.8,
   },
   {
     p: 47, x: 148, land: 1, map: 1, cards: 1,
@@ -51,9 +66,14 @@ export const BEATS: Epistemology9Beat[] = [
   },
   {
     p: 2, x: 148, land: 1, map: 1,
-    text: 'You just used the oldest theory of truth. A belief is true when it matches how things actually are. Words on one side, world on the other, and truth is the fit. Philosophers call it correspondence.',
+    text: 'You just used the oldest theory of truth. A belief is true when it matches how things actually are.',
     cite: 'Correspondence',
-    dur: 5.2,
+    dur: 2.7,
+  },
+  {
+    p: 2, x: 148, land: 1, map: 1,
+    text: 'Words on one side, world on the other, and truth is the fit. Philosophers call it correspondence.',
+    dur: 2.5,
   },
   {
     p: 144, x: 208, land: 1, map: 1,
@@ -70,9 +90,14 @@ export const BEATS: Epistemology9Beat[] = [
   },
   {
     p: 45, x: 148, land: 1, map: 1, link: 1,
-    text: 'Fine — go and check. Hold the sketch up, look at the land, compare the two. Easy. Until somebody asks a rude little question: what exactly are you comparing the sketch against?',
+    text: 'Fine — go and check. Hold the sketch up, look at the land, compare the two.',
     cite: 'The awkward bit',
-    dur: 4.8,
+    dur: 2.5,
+  },
+  {
+    p: 45, x: 148, land: 1, map: 1, link: 1,
+    text: 'Until somebody asks a rude little question: what exactly are you comparing the sketch against?',
+    dur: 2.3,
   },
   {
     p: 4, x: 148, land: 1, map: 1, link: 1,
@@ -93,15 +118,25 @@ export const BEATS: Epistemology9Beat[] = [
   },
   {
     p: 1, x: 268, land: 1, map: 1, theory: 1,
-    text: 'One answer: stop hunting for a magic exit. A belief is true when it locks into everything else you hold — no contradictions, nothing left dangling. Truth is fitting the whole web.',
+    text: 'One answer: stop hunting for a magic exit. A belief is true when it locks into everything else you hold — no contradictions, nothing left dangling.',
     cite: 'Coherence',
-    dur: 4.8,
+    dur: 3.9,
+  },
+  {
+    p: 1, x: 268, land: 1, map: 1, theory: 1,
+    text: 'Truth is fitting the whole web.',
+    dur: 1.8,
   },
   {
     p: 13, x: 268, land: 1, map: 1, theory: 2,
-    text: 'The other answer is blunter. A belief is true if it keeps working. If it walks you across those real hills, year after year, and never once strands you. Comfort is not enough; only what survives the walk counts.',
+    text: 'The other answer is blunter. A belief is true if it keeps working.',
     cite: 'Pragmatism',
-    dur: 5.2,
+    dur: 1.8,
+  },
+  {
+    p: 13, x: 268, land: 1, map: 1, theory: 2,
+    text: 'If it walks you across those real hills, year after year, and never once strands you. Comfort is not enough; only what survives the walk counts.',
+    dur: 3.5,
   },
   {
     p: 28, x: 268,

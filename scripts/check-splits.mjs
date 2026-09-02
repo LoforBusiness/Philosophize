@@ -44,21 +44,13 @@ const NAMES = /(?!^)\b[A-Z][a-z]{2,}\b/;
  * 17 took the corpus to 7, which is BETTER than it was before anything was split,
  * because several of the names put back were owed already.
  *
- * LEFT AT THE PRE-FIX FIGURE OF 12 ON PURPOSE, and it should be lowered to 7. A
- * budget is a ceiling, so this passes at 12 and passes at 7. It is committed high
- * because both the split and the seventeen names live in the *Script.ts files, and
- * those are entangled in the working tree with another session's uncommitted copy
- * edits — so this checker may reach HEAD before the content does, and a budget of
- * 7 against an unfixed tree would fail a checkout that is not actually broken.
- * 12 is what HEAD measures today. Lower it to what the run prints once they land.
- *
  * TWO OF THE SEVEN MUST NOT BE "FIXED". `epistemology20` and `logic20` open on
  * "He who knows only his own side of the case knows little of that" — that is
  * Mill, quoted, and the pronoun is the quotation's own first word. Rewriting a
  * primary source to satisfy a checker is F42, and this rule stops at 7 partly to
  * leave them alone.
  */
-const STRANDED_BUDGET = 12;
+const STRANDED_BUDGET = 6;
 
 const stranded = [];
 let beats = 0;

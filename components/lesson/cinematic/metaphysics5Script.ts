@@ -21,18 +21,31 @@ export const BEATS: Meta5Beat[] = [
   },
   {
     p: 24, stars: 1, q: 1,
-    text: 'Heidegger called this the fundamental question of metaphysics. Not why this thing or that thing exists. Why there is anything at all to ask about.',
+    text: 'Heidegger called this the fundamental question of metaphysics. Not why this thing or that thing exists.',
     cite: 'The fundamental question',
-    dur: 5.2,
+    dur: 3.3,
+  },
+  {
+    p: 24, stars: 1, q: 1,
+    text: 'Why there is anything at all to ask about.',
+    dur: 1.9,
   },
   {
     p: 19, stars: 1, q: 1, psr: 1,
     // The rule is drawn on stage in plain words — EVERY FACT NEEDS A REASON. Naming
     // it "the Principle of Sufficient Reason" over the top of that adds a term and
     // no meaning, and undoes the choice the scene already made (J7).
-    text: 'Leibniz pressed it hardest. Nothing is just true for no reason, he said. Every fact has one somewhere — so what is the reason for there being anything?',
+    text: 'Leibniz pressed it hardest. Nothing is just true for no reason, he said.',
     cite: 'Leibniz, 1714',
-    dur: 4.8,
+    dur: 2.2,
+  },
+  {
+    p: 19, stars: 1, q: 1, psr: 1,
+    // The rule is drawn on stage in plain words — EVERY FACT NEEDS A REASON. Naming
+    // it "the Principle of Sufficient Reason" over the top of that adds a term and
+    // no meaning, and undoes the choice the scene already made (J7).
+    text: 'Every fact has one somewhere — so what is the reason for there being anything?',
+    dur: 2.6,
   },
   {
     p: 129, stars: 1, q: 1, psr: 1,
@@ -49,9 +62,14 @@ export const BEATS: Meta5Beat[] = [
   },
   {
     p: 20, stars: 1, q: 0.4, psr: 1, dasein: 1,
-    text: 'And here is the strange part. You are a thing that wonders what it is. Heidegger’s name for that is Dasein, and through you the universe turns round and asks about itself.',
+    text: 'And here is the strange part. You are a thing that wonders what it is.',
     cite: 'Dasein — being-there',
-    dur: 5.0,
+    dur: 2.3,
+  },
+  {
+    p: 20, stars: 1, q: 0.4, psr: 1, dasein: 1,
+    text: 'Heidegger’s name for that is Dasein, and through you the universe turns round and asks about itself.',
+    dur: 2.7,
   },
   {
     p: 4, stars: 1, q: 0.4, psr: 1, dasein: 1,
@@ -62,7 +80,7 @@ export const BEATS: Meta5Beat[] = [
         stops: [
           { id: 'doubt', reads: 'doubt: can I trust anything I see?' },
           { id: 'wonder', reads: 'wonder: why is any of this here at all?', correct: true },
-          { id: 'measure', reads: 'measurement: what is here, and how much of it?' },
+          { id: 'measure', reads: 'how much is here?' },
         ],
       },
       // Was "the leap is Kierkegaard's, the absurd is Camus's" — a leftover list of

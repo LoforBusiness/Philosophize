@@ -49,8 +49,13 @@ export const BEATS: Epi19Beat[] = [
   },
   {
     p: 13, x: 132, doors: 1, chip: 1, stray: 1,
-    text: 'Nobody lied. The credentials are real. They are simply for a different door.',
-    dur: 3.6,
+    text: 'Nobody lied. The credentials are real.',
+    dur: 1.8,
+  },
+  {
+    p: 13, x: 132, doors: 1, chip: 1, stray: 1,
+    text: 'They are simply for a different door.',
+    dur: 1.9,
   },
   {
     p: 137, x: 132, doors: 1, chip: 1, stray: 1,
@@ -87,9 +92,9 @@ export const BEATS: Epi19Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'guess', reads: 'nobody knows anything; pick whichever you prefer' },
+          { id: 'guess', reads: 'nobody knows, pick either' },
           { id: 'loud', reads: 'follow whichever one sounds the most certain' },
-          { id: 'weight', reads: 'look at how many are on each side, and why', correct: true },
+          { id: 'weight', reads: 'count who is on each side, and why', correct: true },
         ],
       },
       explain: 'The far setting. Disagreement at the edge of a field is normal and does not touch its settled middle. The first setting is how a real debate gets used to sell a false one: hold up one dissenter, call the whole subject unsettled.',

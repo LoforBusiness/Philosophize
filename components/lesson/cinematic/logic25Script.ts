@@ -22,8 +22,13 @@ export interface Logic25Beat extends BaseBeat {
 export const BEATS: Logic25Beat[] = [
   {
     p: 25, x: 70,
-    text: 'A test that is 99% accurate comes back positive for a disease. Almost everyone reads that as "almost certainly ill". Almost everyone is wrong.',
-    dur: 4.4,
+    text: 'A test that is 99% accurate comes back positive for a disease. Almost everyone reads that as "almost certainly ill".',
+    dur: 3.7,
+  },
+  {
+    p: 25, x: 70,
+    text: 'Almost everyone is wrong.',
+    dur: 1.8,
   },
   {
     p: 41, x: 168, result: 1,
@@ -73,9 +78,9 @@ export const BEATS: Logic25Beat[] = [
         left: 'FARMERS', right: 'LIBRARIANS',
         start: 0.04,
         zones: [
-          { id: 'lib', upto: 0.34, reads: 'mostly librarians; he fits the description' },
+          { id: 'lib', upto: 0.34, reads: 'mostly librarians, he fits the type' },
           { id: 'even', upto: 0.62, reads: 'about evenly split between the two' },
-          { id: 'farm', upto: 1, reads: 'mostly farmers; there are far more of them', correct: true },
+          { id: 'farm', upto: 1, reads: 'mostly farmers, there are far more', correct: true },
         ],
       },
       explain: 'Nearly all farmers, and the description does not save you. Farmers outnumber librarians many times over, so even a small share of shy, tidy farmers outweighs every librarian alive. That is the case Kahneman and Tversky made, and the seam is where the arithmetic lands.',

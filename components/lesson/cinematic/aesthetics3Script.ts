@@ -33,20 +33,37 @@ export const BEATS: Aes3Beat[] = [
     // Both halves alive at once: a story arc beginning to climb while the modes
     // play — "song or story", drawn rather than asserted.
     p: 32, arc: 0.3, modes: 1,
-    text: 'No culture has ever lived without song or story. Not one, anywhere. That is strange enough to want an explanation.',
-    dur: 3.6,
+    text: 'No culture has ever lived without song or story. Not one, anywhere.',
+    dur: 2.2,
+  },
+  {
+    // Both halves alive at once: a story arc beginning to climb while the modes
+    // play — "song or story", drawn rather than asserted.
+    p: 32, arc: 0.3, modes: 1,
+    text: 'That is strange enough to want an explanation.',
+    dur: 1.8,
   },
   {
     p: 22, arc: 0.5, mask: 1,
-    text: 'Tragedy hurts, and we go anyway. Aristotle says it raises pity and fear in you, then works them back out of you. He called that katharsis, and he never quite says what it is.',
+    text: 'Tragedy hurts, and we go anyway. Aristotle says it raises pity and fear in you, then works them back out of you.',
     cite: 'Catharsis',
-    dur: 4.8,
+    dur: 3.1,
+  },
+  {
+    p: 22, arc: 0.5, mask: 1,
+    text: 'Aristotle called that katharsis, and he never quite says what it is.',
+    dur: 1.8,
   },
   {
     p: 15, arc: 1, mask: 1,
-    text: 'Athens watches Oedipus work out that he killed his own father. Nobody looks away. Aristotle thinks we can bear to look at painful things drawn well, because looking at them teaches us something.',
+    text: 'Athens watches Oedipus work out that he killed his own father. Nobody looks away.',
     cite: 'Aristotle at the theatre',
-    dur: 5.0,
+    dur: 2.1,
+  },
+  {
+    p: 15, arc: 1, mask: 1,
+    text: 'Aristotle thinks we can bear to look at painful things drawn well, because looking at them teaches us something.',
+    dur: 2.9,
   },
   {
     p: 4, arc: 1, mask: 1,
@@ -58,16 +75,21 @@ export const BEATS: Aes3Beat[] = [
       ],
       // Was a list of FOUR Greek terms, three of them glossing options that stopped
       // existing when the A/B/C/D cards went. Only one is on screen now.
-      explain: 'Catharsis. It is the one word Aristotle never pins down, and people have argued about what he meant ever since. Mimesis, the other card, means imitation — a different idea altogether.',
+      explain: 'Catharsis. It is the one word Aristotle never pins down, and people have argued ever since. Mimesis, the other card, means imitation. That is a different idea altogether.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 33, modes: 1, will: 1,
-    text: 'A minor key floods you with sadness and never argues for it. Schopenhauer thought music reaches something underneath all the arguing — the restless wanting that drives you. Plato thought exactly that made it dangerous.',
+    text: 'A minor key floods you with sadness and never argues for it. Schopenhauer thought music reaches something underneath all the arguing — the restless wanting that drives you.',
     cite: 'Music slips past reason',
-    dur: 5.0,
+    dur: 4,
+  },
+  {
+    p: 33, modes: 1, will: 1,
+    text: 'Plato thought exactly that made it dangerous.',
+    dur: 1.8,
   },
   {
     p: 141, modes: 1, will: 1,
@@ -91,7 +113,7 @@ export const BEATS: Aes3Beat[] = [
         hi: 'BANNED EVERY NOTE',
         start: 1,
         zones: [
-          { id: 'free', upto: 0.28, reads: 'left it alone; music is only decoration' },
+          { id: 'free', upto: 0.28, reads: 'left it alone entirely' },
           { id: 'modes', upto: 0.74, reads: 'kept the steadfast modes and removed the soft ones', correct: true },
           { id: 'ban', upto: 1, reads: 'banned every note of it from the city' },
         ],

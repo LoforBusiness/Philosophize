@@ -45,15 +45,25 @@ export const BEATS: Log16Beat[] = [
   },
   {
     p: 45, x: 132, dawns: 5, arrow: 1,
-    text: 'So the crow makes the sun rise. Nobody believes that. Everybody makes the same move about something else.',
+    text: 'So the crow makes the sun rise. Nobody believes that.',
     cite: 'And therefore',
-    dur: 4.6,
+    dur: 2.6,
+  },
+  {
+    p: 45, x: 132, dawns: 5, arrow: 1,
+    text: 'Everybody makes the same move about something else.',
+    dur: 2,
   },
   {
     p: 13, x: 132, dawns: 5, arrow: 1,
-    text: 'Order in time is free. Every cause comes before its effect. So does every coincidence.',
+    text: 'Order in time is free. Every cause comes before its effect.',
     cite: 'Post hoc ergo propter hoc',
-    dur: 4.2,
+    dur: 3.1,
+  },
+  {
+    p: 13, x: 132, dawns: 5, arrow: 1,
+    text: 'So does every coincidence.',
+    dur: 1.8,
   },
   {
     p: 4, x: 132, dawns: 5, arrow: 1, cands: 1, live: 1,

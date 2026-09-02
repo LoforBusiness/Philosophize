@@ -44,9 +44,14 @@ export const BEATS: Pol6Beat[] = [
   },
   {
     p: 13, bars: 1, prin: 1,
-    text: 'A surgeon earns far more than a clerk. Unfair? Not necessarily. If the higher pay draws talent that makes even the worst-off better than under equal pay, the gap is just. The test is the bottom, not the top.',
+    text: 'A surgeon earns far more than a clerk. Not necessarily.',
     cite: 'The difference principle',
-    dur: 5.2,
+    dur: 1.8,
+  },
+  {
+    p: 13, bars: 1, prin: 1,
+    text: 'If the higher pay draws talent that makes even the worst-off better than under equal pay, the gap is just. The test is the bottom, not the top.',
+    dur: 3.8,
   },
   {
     p: 13, bars: 1, prin: 1, pick: 1,

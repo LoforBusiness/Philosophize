@@ -58,8 +58,13 @@ export const BEATS: Eth22Beat[] = [
   },
   {
     p: 21, x: 132, wants: 1, machine: 1, cable: 1,
-    text: 'One cable, into one column. The other four are not switched off. They were never plugged in.',
-    dur: 4.4,
+    text: 'One cable, into one column. The other four are not switched off.',
+    dur: 3.1,
+  },
+  {
+    p: 21, x: 132, wants: 1, machine: 1, cable: 1,
+    text: 'They were never plugged in.',
+    dur: 1.8,
   },
   {
     p: 137, x: 268, wants: 1, machine: 1, cable: 1,
@@ -90,7 +95,7 @@ export const BEATS: Eth22Beat[] = [
         start: [0.5, 0.5, 0.5, 0.5, 0.5],
         shapes: [
           { id: 'all', profile: [0.92, 0.9, 0.9, 0.9, 0.9], reads: 'everything you asked for' },
-          { id: 'feel', profile: [0.94, 0.08, 0.08, 0.06, 0.05], reads: 'the feeling of all of it, and none of it', correct: true },
+          { id: 'feel', profile: [0.94, 0.08, 0.08, 0.06, 0.05], reads: 'all the feeling, none of the doing', correct: true },
           { id: 'none', profile: [0.1, 0.1, 0.08, 0.08, 0.06], reads: 'nothing at all' },
         ],
       },

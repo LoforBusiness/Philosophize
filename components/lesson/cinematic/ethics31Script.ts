@@ -29,15 +29,25 @@ export const BEATS: Ethics31Beat[] = [
   },
   {
     p: 0, rungs: 4, ladder: 1, duty: 1,
-    dur: 4.6,
-    text: 'A ladder appears, so you climb. Four rungs, and the shelf is closer. Nothing about the duty has changed because nothing needed to.',
+    dur: 2.6,
+    text: 'A ladder appears, so you climb. Four rungs, and the shelf is closer.',
     cite: 'Climbing',
   },
   {
+    p: 0, rungs: 4, ladder: 1, duty: 1,
+    dur: 2,
+    text: 'Nothing about the duty has changed because nothing needed to.',
+  },
+  {
     p: 1, rungs: 7, ladder: 1, duty: 0,
-    dur: 4.8,
-    text: 'The ladder ends. You stretch, and the shelf is still above your hand — genuinely, not lazily. Watch the lamp.',
+    dur: 4.1,
+    text: 'The ladder ends. You stretch, and the shelf is still above your hand — genuinely, not lazily.',
     cite: 'The ladder ends',
+  },
+  {
+    p: 1, rungs: 7, ladder: 1, duty: 0,
+    dur: 1.8,
+    text: 'Watch the lamp.',
   },
   {
     p: 2, rungs: 7, ladder: 1, duty: 0,
@@ -54,9 +64,14 @@ export const BEATS: Ethics31Beat[] = [
   },
   {
     p: 0, rungs: 11, ladder: 2, duty: 1,
-    dur: 4.6,
-    text: 'Now extend the ladder. The lamp comes straight back on, and you did not become a better person in between. The duty was tracking the reach the whole time.',
+    dur: 3.2,
+    text: 'Now extend the ladder. The lamp comes straight back on, and you did not become a better person in between.',
     cite: 'Give it the reach',
+  },
+  {
+    p: 0, rungs: 11, ladder: 2, duty: 1,
+    dur: 1.8,
+    text: 'The duty was tracking the reach the whole time.',
   },
   {
     p: 1, rungs: 11, ladder: 1, duty: 0, pick: 1,
@@ -77,13 +92,13 @@ export const BEATS: Ethics31Beat[] = [
         yLo: 'IT SIMPLY HAPPENED', yHi: 'YOU BROUGHT IT ON YOURSELF',
         start: [0.76, 0.24],
         quads: [
-          { id: 'own', x: 1, y: 1, reads: 'you could not, and you made sure you could not', correct: true },
+          { id: 'own', x: 1, y: 1, reads: 'you could not, and you arranged that', correct: true },
           { id: 'excused', x: 1, y: 0, reads: 'you could not, through nothing you did: excused' },
           { id: 'plain', x: 0, y: 0, reads: 'you could have, and simply did not: answerable' },
           { id: 'odd', x: 0, y: 1, reads: 'you could have, and undermined yourself anyway' },
         ],
       },
-      explain: 'Top right. Read as a blanket excuse the principle would clear anybody who arranges their own helplessness. A driver who cannot brake because they chose to drink is still answerable: the inability is entirely real, and they are its author.',
+      explain: 'Top right. Read as a blanket excuse the principle would clear anybody who arranges their own helplessness. A driver who cannot brake because they chose to drink is still answerable: the inability is entirely real. And they are its author.',
       xp: 5,
     },
   },

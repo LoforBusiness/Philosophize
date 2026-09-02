@@ -41,13 +41,23 @@ export const BEATS: Metaphysics35Beat[] = [
   },
   {
     p: 13, x: 322, line: 1, arc: 1,
-    text: 'Now walk back to 1925. Nothing in the idea of a visit is broken yet. You are a tourist with an unusual travel agent.',
-    dur: 4.2,
+    text: 'Now walk back to 1925. Nothing in the idea of a visit is broken yet.',
+    dur: 2.6,
+  },
+  {
+    p: 13, x: 322, line: 1, arc: 1,
+    text: 'You are a tourist with an unusual travel agent.',
+    dur: 1.8,
   },
   {
     p: 4, x: 120, line: 1, arc: 1, knot: 1,
-    text: 'So you arrive, and you stop your grandparents meeting. Then you are never born. Then nobody arrives. Then they meet, and you are born, and you arrive.',
-    dur: 4.8,
+    text: 'So you arrive, and you stop your grandparents meeting. Then you are never born.',
+    dur: 2.5,
+  },
+  {
+    p: 4, x: 120, line: 1, arc: 1, knot: 1,
+    text: 'Then nobody arrives. Then they meet, and you are born, and you arrive.',
+    dur: 2.3,
   },
   {
     p: 21, x: 120, line: 1, arc: 1, knot: 1, live: 1,
@@ -85,8 +95,13 @@ export const BEATS: Metaphysics35Beat[] = [
   },
   {
     p: 47, x: 120, line: 1, branch: 1,
-    text: 'One answer keeps the line whole. You were always at 1925, and whatever you did there is already how it went. The gun jams. It always jammed.',
-    dur: 4.6,
+    text: 'One answer keeps the line whole. You were always at 1925, and whatever you did there is already how it went.',
+    dur: 3.6,
+  },
+  {
+    p: 47, x: 120, line: 1, branch: 1,
+    text: 'The gun jams. It always jammed.',
+    dur: 1.8,
   },
   {
     p: 35, x: 210, line: 1, branch: 1,
@@ -97,7 +112,7 @@ export const BEATS: Metaphysics35Beat[] = [
         hi: 'SOMETHING PUSHES BACK',
         start: 1,
         zones: [
-          { id: 'never', upto: 0.32, reads: 'nothing pushes; it simply never happened', correct: true },
+          { id: 'never', upto: 0.32, reads: 'nothing pushes, it never happened', correct: true },
           { id: 'luck', upto: 0.72, reads: 'a run of bad luck, oddly reliable' },
           { id: 'guard', upto: 1, reads: 'time itself steps in and stops you' },
         ],

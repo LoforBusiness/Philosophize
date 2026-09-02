@@ -24,20 +24,35 @@ export interface A9Beat extends BaseBeat {
 export const BEATS: A9Beat[] = [
   {
     p: 25, x: 80, boxes: true, crown: true,
-    text: 'For most of the history of art, one word did the deciding. Beautiful things were art. Everything else was something else.',
-    dur: 3.8,
+    text: 'For most of the history of art, one word did the deciding. Beautiful things were art.',
+    dur: 2.9,
+  },
+  {
+    p: 25, x: 80, boxes: true, crown: true,
+    text: 'Everything else was something else.',
+    dur: 1.8,
   },
   {
     p: 1, x: 80, boxes: true, stands: true,
-    text: 'Then in 1964 Andy Warhol stacked plywood boxes painted to look exactly like Brillo cartons. Not a copy of a beautiful thing. A copy of a box.',
+    text: 'Then in 1964 Andy Warhol stacked plywood boxes painted to look exactly like Brillo cartons. Not a copy of a beautiful thing.',
     cite: 'Warhol, Brillo Box, 1964',
-    dur: 4.4,
+    dur: 3.6,
+  },
+  {
+    p: 1, x: 80, boxes: true, stands: true,
+    text: 'A copy of a box.',
+    dur: 1.8,
   },
   {
     p: 47, x: 144, boxes: true, stands: true,
-    text: 'Arthur Danto stood in front of them and asked the question that broke the old rule. These two are identical. One is in a supermarket and one is in a gallery. Nothing you can SEE tells you which is the art.',
+    text: 'Arthur Danto stood in front of the two boxes and asked the question that broke the old rule. The boxes are identical.',
     cite: 'The indiscernible pair',
-    dur: 5.2,
+    dur: 2.5,
+  },
+  {
+    p: 47, x: 144, boxes: true, stands: true,
+    text: 'One is in a supermarket and one is in a gallery. Nothing you can SEE tells you which is the art.',
+    dur: 2.7,
   },
   {
     p: 139, x: 144, boxes: true, stands: true,
@@ -54,9 +69,14 @@ export const BEATS: A9Beat[] = [
   },
   {
     p: 5, x: 208, boxes: true, stands: true,
-    text: 'So the difference is not in the object. The difference is in what the object does: the argument the work makes, the moment it lands in, the history it answers. Beauty came off the throne and became one option among many.',
+    text: 'So the difference is not in the object. The difference is in what the object does: the argument the work makes, the moment it lands in, the history it answers.',
     cite: 'Beauty dethroned',
-    dur: 5.0,
+    dur: 3.7,
+  },
+  {
+    p: 5, x: 208, boxes: true, stands: true,
+    text: 'Beauty came off the throne and became one option among many.',
+    dur: 1.8,
   },
   {
     p: 3, x: 208, boxes: true, stands: true,

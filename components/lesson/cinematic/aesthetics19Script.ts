@@ -29,15 +29,25 @@ export const BEATS: Aes19Beat[] = [
   },
   {
     p: 41, x: 168, row: 1, frame: 1,
-    text: 'A drainpipe. Nobody hung it and nobody signed it, and still the pipe has a shape, a rhythm and a set of stains. Put a frame round the pipe and you will look at it properly for the first time.',
+    text: 'A drainpipe. Nobody hung it and nobody signed it, and still the pipe has a shape, a rhythm and a set of stains.',
     cite: 'A drainpipe',
-    dur: 5.2,
+    dur: 3,
+  },
+  {
+    p: 41, x: 168, row: 1, frame: 1,
+    text: 'Put a frame round the pipe and you will look at it properly for the first time.',
+    dur: 2.2,
   },
   {
     p: 13, x: 124, row: 1, frame: 3, verdict: 1,
-    text: 'Now a marsh. Flat, buggy, no view. A passerby glances and files it under ugly, and the glance is the whole of their appreciation.',
+    text: 'Now a marsh. Flat, buggy, no view.',
     cite: 'A marsh',
-    dur: 4.6,
+    dur: 1.8,
+  },
+  {
+    p: 13, x: 124, row: 1, frame: 3, verdict: 1,
+    text: 'A passerby glances and files it under ugly, and the glance is the whole of their appreciation.',
+    dur: 3.3,
   },
   {
     p: 141, x: 124, row: 1, frame: 3, verdict: 1,
@@ -53,9 +63,14 @@ export const BEATS: Aes19Beat[] = [
   },
   {
     p: 36, x: 168, row: 1, frame: 3, verdict: 2, know: 1,
-    text: 'So bring the natural history. Nursery, filter, flood defence, one of the densest habitats there is. The frame has not moved and the marsh has not moved. The verdict has.',
+    text: 'So bring the natural history. Nursery, filter, flood defence, one of the densest habitats there is.',
     cite: 'Knowing it',
-    dur: 5.2,
+    dur: 2.8,
+  },
+  {
+    p: 36, x: 168, row: 1, frame: 3, verdict: 2, know: 1,
+    text: 'The frame has not moved and the marsh has not moved. The verdict has.',
+    dur: 2.4,
   },
   {
     p: 4, x: 124, row: 1, frame: 3, verdict: 2, know: 1,
@@ -66,9 +81,9 @@ export const BEATS: Aes19Beat[] = [
         hi: 'KNOWING WHAT IT IS',
         start: 0,
         zones: [
-          { id: 'glance', upto: 0.3, reads: 'a pretty glance; it is only scenery after all' },
+          { id: 'glance', upto: 0.3, reads: 'just a pretty glance' },
           { id: 'some', upto: 0.62, reads: 'a glance, helped along by a name or two' },
-          { id: 'know', upto: 1, reads: 'knowing what you are looking at, as with a painting', correct: true },
+          { id: 'know', upto: 1, reads: 'knowing what you are looking at', correct: true },
         ],
       },
       explain: 'The far end. The scenery picture treats not knowing as not needing to know. A marsh breaks it: a wasteland, until somebody tells you what is going on in it. Natural history does for a marsh what art history does for a painting.',

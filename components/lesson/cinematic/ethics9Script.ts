@@ -24,14 +24,24 @@ export interface Ethics9Beat extends BaseBeat {
 export const BEATS: Ethics9Beat[] = [
   {
     p: 25, x: 70,
-    text: 'Most hard choices have a right answer buried in them somewhere. Some do not. Some leave a mark on you whichever way you go.',
-    dur: 3.8,
+    text: 'Most hard choices have a right answer buried in them somewhere. Some do not.',
+    dur: 2.2,
+  },
+  {
+    p: 25, x: 70,
+    text: 'Some leave a mark on you whichever way you go.',
+    dur: 1.8,
   },
   {
     p: 41, x: 168, notes: 1,
-    text: 'In 1940 a student came to Sartre. His brother had been killed by the Germans and he wanted to fight. His mother lived for him alone, and his leaving would break her.',
+    text: 'In 1940 a student came to Sartre. His brother had been killed by the Germans and he wanted to fight.',
     cite: 'Two claims',
-    dur: 5.0,
+    dur: 3.1,
+  },
+  {
+    p: 41, x: 168, notes: 1,
+    text: 'The student\'s mother lived for him alone, and his leaving would break her.',
+    dur: 1.9,
   },
   {
     p: 13, x: 124, notes: 1,
@@ -54,9 +64,14 @@ export const BEATS: Ethics9Beat[] = [
   },
   {
     p: 35, x: 168, notes: 1, taken: 2,
-    text: 'He goes. Say he was right to — most people think he was. Now look at the board: the other claim has not moved. Nothing about his choice removed it.',
+    text: 'The student goes. Say he was right to — most people think he was.',
     cite: 'He chooses',
-    dur: 4.8,
+    dur: 2.1,
+  },
+  {
+    p: 35, x: 168, notes: 1, taken: 2,
+    text: 'Now look at the board: the other claim has not moved. Nothing about his choice removed it.',
+    dur: 2.7,
   },
   {
     p: 6, x: 124, notes: 1, taken: 2, pick: 1,
@@ -74,9 +89,9 @@ export const BEATS: Ethics9Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'nothing', reads: 'nothing; he chose rightly, so nothing is left over' },
+          { id: 'nothing', reads: 'nothing, he chose rightly' },
           { id: 'third', reads: 'a third way out that he never looked for' },
-          { id: 'duty', reads: 'a real duty went unmet, and it does not vanish', correct: true },
+          { id: 'duty', reads: 'a real duty went unmet', correct: true },
         ],
       },
       explain: 'The far setting. If choosing rightly cancelled the loss, regret would be irrational — and yet we distrust anyone who walks away untroubled. Something real was owed and was not paid. Williams called what is left over moral residue.',

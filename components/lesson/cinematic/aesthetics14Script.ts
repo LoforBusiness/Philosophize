@@ -27,20 +27,35 @@ export interface Aes14Beat extends BaseBeat {
 export const BEATS: Aes14Beat[] = [
   {
     g: 25, board: 1, level: 1,
-    dur: 4.2,
-    text: 'One cask, tasted by a whole room. The verdict comes back unanimous. There is nothing wrong with this wine.',
+    dur: 2.7,
+    text: 'One cask, tasted by a whole room. The verdict comes back unanimous.',
+  },
+  {
+    g: 25, board: 1, level: 1,
+    dur: 1.8,
+    text: 'There is nothing wrong with this wine.',
   },
   {
     g: 45, board: 3, level: 1,
-    dur: 4.6,
-    text: 'Then two people disagree. One of them tastes iron. The other just finds it too sweet, which is not the same kind of complaint at all.',
+    dur: 1.8,
+    text: 'Then two people disagree. One of them tastes iron.',
     cite: 'Two hold out',
   },
   {
+    g: 45, board: 3, level: 1,
+    dur: 3,
+    text: 'The other just finds it too sweet, which is not the same kind of complaint at all.',
+  },
+  {
     g: 13, board: 3, level: 1,
-    dur: 4.8,
-    text: 'Hume begins where most people stop. Taste really does differ, he agrees. He simply will not go on to say that every verdict is therefore as good as the next.',
+    dur: 1.9,
+    text: 'Hume begins where most people stop. Taste really does differ, he agrees.',
     cite: 'Hume grants the variety',
+  },
+  {
+    g: 13, board: 3, level: 1,
+    dur: 2.9,
+    text: 'Hume simply will not go on to say that every verdict is therefore as good as the next.',
   },
   {
     g: 137, board: 3, level: 1,

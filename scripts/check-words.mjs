@@ -74,18 +74,15 @@ const MAX_BEAT = 45;
 //     roughly 289 more beats across the corpus, which is a change to how long a
 //     lesson is and not a thing a checker gets to decide. It may only go DOWN.
 const MAX_BEAT_SENTENCES = 2;
-// LEFT AT THE PRE-SPLIT FIGURE ON PURPOSE, and it should be lowered to 70.
+// IT IS 7 NOW, down from 466. 464 beats were split, in two rounds: the first
+// stopped at a 13-beat ceiling and left 70 packed, and measuring what the rest
+// would cost showed the cap was not worth keeping — those 70 sat in about twenty
+// lessons already at 13, so clearing every one of them cost +73 beats across the
+// whole corpus and moved the mean from 11.0 to 11.4. H52's range went to 7-19.
 //
-// A budget is a ceiling, so this passes at 466 and passes at 70. It is committed
-// high because the 396 beat splits live in the *Script.ts files, and those are
-// entangled in the working tree with another session's uncommitted copy edits —
-// so this checker may reach HEAD before the content does, and a budget of 70
-// against an unsplit tree would fail a checkout that is not actually broken.
-//
-// The moment the split lands, run `npm run check:words` and lower this to what it
-// reports. `node scripts/split-beats.mjs` reproduces the split exactly and is
-// idempotent — a beat of two sentences is never touched twice.
-const BEAT_SENTENCE_BUDGET = 466;
+// `node scripts/split-beats.mjs` reproduces it exactly and is idempotent: a beat of
+// two sentences is never touched twice. SPLIT_CEILING sets how long a lesson may get.
+const BEAT_SENTENCE_BUDGET = 7;
 // J3  AN EXPLANATION AFTER AN ANSWER: 50 words. It is the longest thing anybody
 //     reads (median 34, p90 44) and it arrives at the moment attention is lowest,
 //     right after the reader has already committed to a choice.

@@ -33,8 +33,13 @@ export interface Ethics35Beat extends BaseBeat {
 export const BEATS: Ethics35Beat[] = [
   {
     p: 25, x: 54, pair: 1,
-    text: 'Two men, one afternoon, one drowning child. The first reaches in and holds him under. The second sees the boy slip under and puts his hands in his pockets.',
-    dur: 4.6,
+    text: 'Two men, one afternoon, one drowning child. The first reaches in and holds him under.',
+    dur: 2.4,
+  },
+  {
+    p: 25, x: 54, pair: 1,
+    text: 'The second sees the boy slip under and puts his hands in his pockets.',
+    dur: 2.2,
   },
   {
     p: 13, x: 54, pair: 1, live: 1,
@@ -50,8 +55,13 @@ export const BEATS: Ethics35Beat[] = [
   },
   {
     p: 4, x: 54, pair: 1, tags: 2,
-    text: 'Now match them. Same motive: both want the inheritance. Same result: the boy dies either way.',
-    dur: 4.2,
+    text: 'Now match them. Same motive: both want the inheritance.',
+    dur: 2.4,
+  },
+  {
+    p: 4, x: 54, pair: 1, tags: 2,
+    text: 'Same result: the boy dies either way.',
+    dur: 1.8,
   },
   {
     p: 21, x: 54, pair: 1, tags: 4, beam: 1, tip: 1, live: 1,
@@ -63,7 +73,7 @@ export const BEATS: Ethics35Beat[] = [
         start: 0.5,
         zones: [
           { id: 'same', upto: 0.28, reads: 'no difference at all' },
-          { id: 'some', upto: 0.66, reads: 'worse, but not by much', correct: true },
+          { id: 'some', upto: 0.66, reads: 'a little worse', correct: true },
           { id: 'far', upto: 1, reads: 'a killer and a bystander' },
         ],
       },

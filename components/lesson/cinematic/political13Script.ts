@@ -22,20 +22,35 @@ export interface Pol13Beat extends BaseBeat {
 export const BEATS: Pol13Beat[] = [
   {
     p: 25, x: 70,
-    text: 'Mill gives exactly one reason for using power over a person against their will. To stop them harming somebody else. Not for their own good, and not because you dislike the choice.',
-    dur: 5.2,
+    text: 'Mill gives exactly one reason for using power over a person against their will. To stop them harming somebody else.',
+    dur: 3.3,
+  },
+  {
+    p: 25, x: 70,
+    text: 'Not for their own good, and not because you dislike the choice.',
+    dur: 2,
   },
   {
     p: 41, x: 168, steps: 1,
-    text: 'A speaker says something most of the town finds repellent. Nobody is assaulted, nothing is stolen, no threat is made. The town wants them stopped, and here is the argument.',
+    text: 'A speaker says something most of the town finds repellent. Nobody is assaulted, nothing is stolen, no threat is made.',
     cite: 'The argument',
-    dur: 5.2,
+    dur: 3.5,
+  },
+  {
+    p: 41, x: 168, steps: 1,
+    text: 'The town wants them stopped, and here is the argument.',
+    dur: 1.8,
   },
   {
     p: 40, x: 168, steps: 3,
-    text: 'Three steps. Read them in order and it feels like a proof. Each one seems to follow from the one before. And the conclusion is exactly what the town wanted.',
+    text: 'Three steps. Read them in order and it feels like a proof.',
     cite: 'All three',
-    dur: 4.8,
+    dur: 1.9,
+  },
+  {
+    p: 40, x: 168, steps: 3,
+    text: 'Each one seems to follow from the one before. And the conclusion is exactly what the town wanted.',
+    dur: 2.9,
   },
   {
     p: 144, x: 124, steps: 3,
@@ -52,9 +67,14 @@ export const BEATS: Pol13Beat[] = [
   },
   {
     p: 13, x: 124, steps: 3,
-    text: 'Mill grants the first: they are certainly offended. He grants the third — it is his own principle. So the whole weight of the town\'s case is resting on the middle one.',
+    text: 'Mill grants the first: they are certainly offended. He grants the third — it is his own principle.',
     cite: 'One of these is smuggled',
-    dur: 5.0,
+    dur: 2.8,
+  },
+  {
+    p: 13, x: 124, steps: 3,
+    text: 'So the whole weight of the town\'s case is resting on the middle one.',
+    dur: 2.2,
   },
   {
     p: 6, x: 124, steps: 3, pick: 1,

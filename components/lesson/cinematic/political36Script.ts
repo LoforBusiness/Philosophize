@@ -63,8 +63,13 @@ export const BEATS: Political36Beat[] = [
   },
   {
     p: 21, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
-    text: 'Bentham drew a prison where one guard could see every cell and no prisoner could tell if he was looking. Look at the box. Nobody is in it.',
-    dur: 4.8,
+    text: 'Bentham drew a prison where one guard could see every cell and no prisoner could tell if he was looking. Look at the box.',
+    dur: 4.1,
+  },
+  {
+    p: 21, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
+    text: 'Nobody is in it.',
+    dur: 1.8,
   },
   {
     p: 47, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
@@ -90,8 +95,13 @@ export const BEATS: Political36Beat[] = [
   },
   {
     p: 35, x: 84, street: 1, watch: 0.6, lamp: 1, picks: 1,
-    text: 'Nothing here shows up in a statistic. No case was brought. What shrank was the range of things people were willing to try.',
-    dur: 4.6,
+    text: 'Nothing here shows up in a statistic. No case was brought.',
+    dur: 2.2,
+  },
+  {
+    p: 35, x: 84, street: 1, watch: 0.6, lamp: 1, picks: 1,
+    text: 'What shrank was the range of things people were willing to try.',
+    dur: 2.4,
   },
   {
     p: 45, x: 84, street: 1, watch: 0.6, lamp: 1,
@@ -107,7 +117,7 @@ export const BEATS: Political36Beat[] = [
         'It works with nobody behind the glass',
         'What shrinks is what people are willing to try',
       ],
-      closing: 'A society can be free on paper and quietly narrower in daily life. The narrowing shows up in nobody\'s figures.',
+      closing: 'A society can be free on paper and quietly narrower in daily life. The narrowing shows up in nobody\'s numbers.',
     },
     dur: 3.2,
   },

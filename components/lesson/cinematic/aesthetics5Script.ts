@@ -23,15 +23,25 @@ export const BEATS: Aes5Beat[] = [
   },
   {
     p: 11, bird: 0, ego: 1, self: 0.88,
-    text: 'Murdoch took the idea from Simone Weil. Attention is a just and loving look at one real thing. In the way of it sits what she calls the fat, relentless ego — and attention is what quiets it.',
+    text: 'Murdoch took the idea from Simone Weil. Attention is a just and loving look at one real thing.',
     cite: 'Attention as a skill',
-    dur: 5.2,
+    dur: 2.5,
+  },
+  {
+    p: 11, bird: 0, ego: 1, self: 0.88,
+    text: 'In the way of it sits what she calls the fat, relentless ego — and attention is what quiets it.',
+    dur: 2.7,
   },
   {
     p: 25, bird: 1, ego: 0, self: 0.06,
-    text: 'She is at a window, brooding over a bruise to her pride, when she sees a hovering kestrel. In a moment the brooding is gone. Nothing left but kestrel. She called that unselfing.',
+    text: 'A woman is at a window, brooding over a bruise to her pride, when she sees a hovering kestrel. In a moment the brooding is gone.',
     cite: 'Murdoch and the kestrel',
-    dur: 5.0,
+    dur: 3.8,
+  },
+  {
+    p: 25, bird: 1, ego: 0, self: 0.06,
+    text: 'Nothing left but kestrel. She called that unselfing.',
+    dur: 1.8,
   },
   {
     p: 147, bird: 1, ego: 0, self: 0.06,
@@ -55,8 +65,8 @@ export const BEATS: Aes5Beat[] = [
         start: 0.04,
         zones: [
           { id: 'do', upto: 0.3, reads: 'a technique you practise and then perform' },
-          { id: 'both', upto: 0.66, reads: 'you set it up, and then it takes over' },
-          { id: 'happens', upto: 1, reads: 'it takes hold of you; there is no method', correct: true },
+          { id: 'both', upto: 0.66, reads: 'you begin, the work takes over' },
+          { id: 'happens', upto: 1, reads: 'it takes hold of you', correct: true },
         ],
       },
       explain: 'Almost all of it happens to you. Unselfing is not a technique. It arrives when a kestrel or a painting takes hold so completely that no room is left over for brooding. You can put yourself where unselfing might happen. You cannot perform it.',
@@ -66,9 +76,14 @@ export const BEATS: Aes5Beat[] = [
   },
   {
     p: 13, bird: 0, ego: 0, leaf: 1, self: 0.12,
-    text: 'Ruskin taught that drawing recovers "the innocence of the eye". You see patches of colour as they truly are, before the mind swaps in its idea. His students studied one leaf before any tree.',
+    text: 'Ruskin taught that drawing recovers "the innocence of the eye". You see patches of colour as they truly are, before the mind swaps in its idea.',
     cite: 'Ruskin’s drawing lessons',
-    dur: 5.0,
+    dur: 3.8,
+  },
+  {
+    p: 13, bird: 0, ego: 0, leaf: 1, self: 0.12,
+    text: 'Ruskin\'s students studied one leaf before any tree.',
+    dur: 1.8,
   },
   {
     p: 4, bird: 0, leaf: 1, self: 0.12,

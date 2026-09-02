@@ -35,15 +35,25 @@ export const BEATS: Political33Beat[] = [
   },
   {
     p: 19, x: 52, open: 1, threat: 1,
-    text: 'Then something walks through that intends to shut the doors behind it. Karl Popper noticed the trap in 1945. Unlimited tolerance can be used to end tolerance.',
+    text: 'Then something walks through that intends to shut the doors behind it. Karl Popper noticed the trap in 1945.',
     cite: 'Popper, 1945',
-    dur: 5.0,
+    dur: 3.5,
+  },
+  {
+    p: 19, x: 52, open: 1, threat: 1,
+    text: 'Unlimited tolerance can be used to end tolerance.',
+    dur: 1.8,
   },
   {
     p: 4, x: 52, open: 0.1, threat: 1,
-    text: 'So shut the doors. Now look at what you have built. A society that decides in advance which arguments may be heard. That is the very thing you were trying not to become.',
+    text: 'So shut the doors. Now look at what you have built.',
     cite: 'The other horn',
-    dur: 5.0,
+    dur: 1.8,
+  },
+  {
+    p: 4, x: 52, open: 0.1, threat: 1,
+    text: 'A society that decides in advance which arguments may be heard. That society is the very thing you were trying not to become.',
+    dur: 3.3,
   },
   {
     p: 137, x: 52, open: 0.1,
@@ -91,7 +101,7 @@ export const BEATS: Political33Beat[] = [
         { text: 'Someone decides who counts', correct: true },
         { text: 'Nothing, it limits itself', correct: false },
       ],
-      explain: 'The rule sounds self-limiting and is not. Somebody has to decide who counts as intolerant, and whoever decides now holds real power. Every government that has silenced its critics called them a danger to public order.',
+      explain: 'The rule sounds self-limiting and is not. Somebody has to decide who counts as intolerant. Whoever decides now holds real power. Every government that has silenced its critics called them a danger to public order.',
       xp: 5,
     },
     dur: 1.0,

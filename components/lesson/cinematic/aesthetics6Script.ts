@@ -21,15 +21,25 @@ export const BEATS: Aes6Beat[] = [
   },
   {
     p: 34, vast: 1, flower: 1, split: 3,
-    text: 'Burke split our reactions in two. A flower is beautiful: small, smooth, pleasing. A storm, or a vast mountain, is sublime — it overwhelms, mixing terror with a strange delight.',
+    text: 'Burke split our reactions in two. A flower is beautiful: small, smooth, pleasing.',
     cite: 'Beyond beauty',
-    dur: 5.0,
+    dur: 2.2,
+  },
+  {
+    p: 34, vast: 1, flower: 1, split: 3,
+    text: 'A storm, or a vast mountain, is sublime — it overwhelms, mixing terror with a strange delight.',
+    dur: 2.8,
   },
   {
     p: 15, vast: 1, flower: 0, split: 3,
-    text: 'Stand on a cliff in a gale. The drop could kill you, and you are perfectly safe. Real danger held at a distance is a pleasure of its own, and nothing gentle feels like it.',
+    text: 'Stand on a cliff in a gale. The drop could kill you, and you are perfectly safe.',
     cite: 'Terror at a safe distance',
-    dur: 5.0,
+    dur: 2.4,
+  },
+  {
+    p: 15, vast: 1, flower: 0, split: 3,
+    text: 'Real danger held at a distance is a pleasure of its own, and nothing gentle feels like it.',
+    dur: 2.6,
   },
   {
     p: 128, vast: 1, split: 3,
@@ -59,9 +69,19 @@ export const BEATS: Aes6Beat[] = [
   },
   {
     p: 4, vast: 1, split: 3, mind: 1,
-    text: 'Kant moved the awe inward. The mountain does overwhelm your senses. But the real jolt, he says, is your mind finding that it can hold something that big. The mountain is not the sublime thing. You are.',
+    text: 'Kant moved the awe inward. The mountain does overwhelm your senses.',
     cite: 'Kant — awe in the mind',
-    dur: 5.0,
+    dur: 1.8,
+  },
+  {
+    p: 4, vast: 1, split: 3, mind: 1,
+    text: 'But the real jolt, Kant says, is your mind finding that it can hold something that big. The mountain is not the sublime thing.',
+    dur: 3.2,
+  },
+  {
+    p: 4, vast: 1, split: 3, mind: 1,
+    text: 'You are.',
+    dur: 1.8,
   },
   {
     p: 15, vast: 1, split: 3, mind: 1,

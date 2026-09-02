@@ -27,9 +27,14 @@ export const BEATS: Pol31Beat[] = [
   },
   {
     g: 2, grass: 0.66, herd: 2, sums: 0,
-    dur: 4.4,
-    text: 'You put on one more. The whole of what it eats is yours; the wear on the grass falls on all four of you. It is a good trade, and you would be daft not to make it.',
+    dur: 2.8,
+    text: 'You put on one more. The whole of what it eats is yours; the wear on the grass falls on all four of you.',
     cite: 'One more',
+  },
+  {
+    g: 2, grass: 0.66, herd: 2, sums: 0,
+    dur: 1.8,
+    text: 'It is a good trade, and you would be daft not to make it.',
   },
   {
     g: 15, grass: 0.22, herd: 4, sums: 0,
@@ -52,9 +57,14 @@ export const BEATS: Pol31Beat[] = [
   },
   {
     g: 1, grass: 0.22, herd: 4, sums: 1,
-    dur: 4.8,
-    text: 'Here is the sum each of them did. One whole unit of gain, kept entirely. One whole unit of damage, cut into four. Nothing else was required.',
+    dur: 2.7,
+    text: 'Here is the sum each of them did. One whole unit of gain, kept entirely.',
     cite: 'The sum they did',
+  },
+  {
+    g: 1, grass: 0.22, herd: 4, sums: 1,
+    dur: 2.1,
+    text: 'One whole unit of damage, cut into four. Nothing else was required.',
   },
   {
     g: 4, grass: 0.22, herd: 4, sums: 1, pick: 1,
@@ -78,7 +88,7 @@ export const BEATS: Pol31Beat[] = [
           { id: 'rules', reads: 'change what taking too much costs', correct: true },
         ],
       },
-      explain: 'The other card fails on its own terms, because whoever complies simply loses and the field dies anyway. Despair was Hardin\'s own pessimism — Elinor Ostrom won a Nobel documenting commons that never collapsed, each binding its users to a limit they helped set.',
+      explain: 'The other card fails on its own terms. Whoever complies simply loses, and the field dies anyway. Despair was Hardin\'s own guess. Elinor Ostrom won a Nobel for commons that never collapsed, each binding its users to a limit they helped set.',
       xp: 5,
     },
   },

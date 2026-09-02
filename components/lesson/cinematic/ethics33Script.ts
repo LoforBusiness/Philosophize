@@ -37,9 +37,14 @@ export const BEATS: Ethics33Beat[] = [
   },
   {
     p: 19, x: 48, give: 0.15, more: 1,
-    text: 'Then comes the awkward question. There is still another life over there you could reach with a bit more. What exactly says you may stop?',
+    text: 'Then comes the awkward question. There is still another life over there you could reach with a bit more.',
     cite: 'And another one',
-    dur: 4.6,
+    dur: 3.5,
+  },
+  {
+    p: 19, x: 48, give: 0.15, more: 1,
+    text: 'What exactly says you may stop?',
+    dur: 1.8,
   },
   {
     p: 4, x: 48, give: 0.9, more: 1,
@@ -80,9 +85,14 @@ export const BEATS: Ethics33Beat[] = [
   },
   {
     p: 35, x: 48, give: 0.45,
-    text: 'Susan Wolf pushed back from the other side. A life given over entirely to duty is not the best human life, she argued. It is a narrowed one.',
+    text: 'Susan Wolf pushed back from the other side. A life given over entirely to duty is not the best human life, she argued.',
     cite: 'Wolf, on moral saints',
-    dur: 4.8,
+    dur: 3.9,
+  },
+  {
+    p: 35, x: 48, give: 0.45,
+    text: 'It is a narrowed one.',
+    dur: 1.8,
   },
   {
     p: 45, x: 48, give: 0.45,

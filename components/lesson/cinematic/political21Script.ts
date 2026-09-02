@@ -44,8 +44,13 @@ export const BEATS: Pol21Beat[] = [
   },
   {
     p: 2, x: 132, map: 1, claimed: 1, exit: 1,
-    text: 'So try leaving. Hop to the next square and somebody already governs it. And the next.',
-    dur: 4.0,
+    text: 'So try leaving. Hop to the next square and somebody already governs it.',
+    dur: 3.3,
+  },
+  {
+    p: 2, x: 132, map: 1, claimed: 1, exit: 1,
+    text: 'And the next.',
+    dur: 1.8,
   },
   {
     p: 13, x: 132, map: 1, claimed: 1, exit: 1,
@@ -77,9 +82,14 @@ export const BEATS: Pol21Beat[] = [
   },
   {
     p: 21, x: 268, map: 1, claimed: 1, exit: 1,
-    text: 'Philosophical anarchism stops right there. The view does not call for a riot. The view says the state never earned the authority it claims.',
+    text: 'Philosophical anarchism stops right there. The view does not call for a riot.',
     cite: 'The modest conclusion',
-    dur: 4.8,
+    dur: 2.6,
+  },
+  {
+    p: 21, x: 268, map: 1, claimed: 1, exit: 1,
+    text: 'The view says the state never earned the authority it claims.',
+    dur: 2.2,
   },
   {
     p: 41, x: 268, map: 1, claimed: 1, exit: 1,

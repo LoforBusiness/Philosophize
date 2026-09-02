@@ -46,24 +46,66 @@ export const BEATS: AestheticsBeat[] = [
   {
     hpose: 2,
     glow: true,
-    text: 'Look at it. Beautiful, obviously. You settled that in a heartbeat, with no training at all. Philosophy has been working on why for three hundred years. No rush.',
-    dur: 3.8,
+    text: 'Look at it. Beautiful, obviously.',
+    dur: 1.8,
+  },
+  {
+    hpose: 2,
+    glow: true,
+    text: 'You settled that in a heartbeat, with no training at all. Philosophy has been working on why for three hundred years.',
+    dur: 2.8,
+  },
+  {
+    hpose: 2,
+    glow: true,
+    text: 'No rush.',
+    dur: 1.8,
   },
   {
     hpose: 7,
     glow: true,
     apple: true,
-    text: 'Kant noticed something. Hungry, your hand goes out and takes the apple. The sunset feeds nothing. You want nothing from it. You just look. He needed a whole book to say that.',
-    dur: 4.8,
+    text: 'Kant noticed something. Hungry, your hand goes out and takes the apple.',
+    dur: 1.8,
+  },
+  {
+    hpose: 7,
+    glow: true,
+    apple: true,
+    text: 'The sunset feeds nothing. You want nothing from it.',
+    dur: 1.8,
+  },
+  {
+    hpose: 7,
+    glow: true,
+    apple: true,
+    text: 'You just look. He needed a whole book to say that.',
+    dur: 1.8,
   },
   {
     // Arms folded, watching his own chart prove his point. The pose is the tone.
     hpose: 10,
     glow: true,
     critics: true,
-    text: 'Hume admitted beauty lives only in the mind. Then he ranked masters over hacks anyway. His fix was a panel of trained critics. Watch their verdicts slide together. Convenient, isn’t it.',
+    text: 'Hume admitted beauty lives only in the mind. Then he ranked masters over hacks anyway.',
     cite: 'Hume, Of the Standard of Taste, 1757',
-    dur: 4.6,
+    dur: 2.2,
+  },
+  {
+    // Arms folded, watching his own chart prove his point. The pose is the tone.
+    hpose: 10,
+    glow: true,
+    critics: true,
+    text: 'Hume\'s fix was a panel of trained critics. Watch their verdicts slide together.',
+    dur: 1.9,
+  },
+  {
+    // Arms folded, watching his own chart prove his point. The pose is the tone.
+    hpose: 10,
+    glow: true,
+    critics: true,
+    text: 'Convenient, isn’t it.',
+    dur: 1.8,
   },
   {
     // STANDS STILL, and that is a decision. The manner belongs to the app's own
@@ -113,8 +155,22 @@ export const BEATS: AestheticsBeat[] = [
     hpose: 1,
     crowd: true,
     critics: true,
-    text: 'Now the part where you come in. You rarely stop at "I like this." You say "this is beautiful", as though it were a fact. One private feeling, eight people summoned to agree. No pressure.',
-    dur: 4.4,
+    text: 'Now the part where you come in. You rarely stop at "I like this.',
+    dur: 1.8,
+  },
+  {
+    hpose: 1,
+    crowd: true,
+    critics: true,
+    text: 'You say "this is beautiful", as though it were a fact. One private feeling, eight people summoned to agree.',
+    dur: 2.4,
+  },
+  {
+    hpose: 1,
+    crowd: true,
+    critics: true,
+    text: 'No pressure.',
+    dur: 1.8,
   },
   {
     // The shrug: "well, that is what the man said." It is also the right pose for a
@@ -129,8 +185,8 @@ export const BEATS: AestheticsBeat[] = [
         left: 'EVERYBODY', right: 'ONLY YOURSELF',
         start: 0.04,
         zones: [
-          { id: 'you', upto: 0.3, reads: 'it speaks for you, and asks nothing of anyone else' },
-          { id: 'both', upto: 0.66, reads: 'half a report about you, half a demand on others' },
+          { id: 'you', upto: 0.3, reads: 'it speaks for you alone' },
+          { id: 'both', upto: 0.66, reads: 'half about you, half about everyone' },
           { id: 'all', upto: 1, reads: 'felt by you, and it summons everybody else', correct: true },
         ],
       },

@@ -22,14 +22,24 @@ export interface Meta15Beat extends BaseBeat {
 export const BEATS: Meta15Beat[] = [
   {
     p: 25, x: 70,
-    text: 'One ball rolls up and strikes another, and the second rolls away. You have watched that ten thousand times. Hume asks what exactly you saw.',
-    dur: 4.6,
+    text: 'One ball rolls up and strikes another, and the second rolls away. You have watched that ten thousand times.',
+    dur: 3.5,
+  },
+  {
+    p: 25, x: 70,
+    text: 'Hume asks what exactly you saw.',
+    dur: 1.8,
   },
   {
     p: 41, x: 168, balls: 1,
-    text: 'You saw the first ball move. You saw it touch. You saw the second move. Three things, all of them plain, none of them the thing we actually care about.',
+    text: 'You saw the first ball move. You saw it touch.',
     cite: 'What you saw',
-    dur: 4.8,
+    dur: 1.8,
+  },
+  {
+    p: 41, x: 168, balls: 1,
+    text: 'You saw the second move. Three things, all of them plain, none of them the thing we actually care about.',
+    dur: 3.2,
   },
   {
     p: 13, x: 124, balls: 1, gap: 1,
@@ -61,13 +71,13 @@ export const BEATS: Meta15Beat[] = [
     interact: {
       prompt: 'Drag to how much of the cause you actually see.',
       drag: {
-        lo: 'ONE THING, THEN ANOTHER',
-        hi: 'THE PUSH ITSELF, PLAINLY',
+        lo: 'ONE THING THEN ANOTHER',
+        hi: 'THE PUSH ITSELF',
         start: 1,
         zones: [
-          { id: 'events', upto: 0.3, reads: 'nothing but one event, and then the other' },
-          { id: 'habit', upto: 0.74, reads: 'the two events, and your own habit of expecting the second', correct: true },
-          { id: 'force', upto: 1, reads: 'the force between them, there on the surface to be seen' },
+          { id: 'events', upto: 0.3, reads: 'one thing, then the other' },
+          { id: 'habit', upto: 0.74, reads: 'both things, plus your habit of expecting', correct: true },
+          { id: 'force', upto: 1, reads: 'the push itself, plainly visible' },
         ],
       },
       explain: 'The middle, and the extra part is inside you. Hume keeps the events and the pattern. What he denies is the far end: nobody has ever seen the push. Pair two things often enough, build a habit of expecting the second, and call that tug necessity.',
@@ -79,7 +89,7 @@ export const BEATS: Meta15Beat[] = [
     p: 6, x: 124, balls: 1, gap: 1, found: 2, pick: 1,
     interact: {
       prompt: 'The search found it on the second pass. Tap where.',
-      explain: 'In the observer. Constant conjunction trains an expectation, and the felt push of that expectation is what we then report as seeing one thing make another happen.',
+      explain: 'In the observer. Constant conjunction trains an expectation. And the felt push of that expectation is what we then report as seeing one thing make another happen.',
       xp: 5,
     },
     dur: 1.0,

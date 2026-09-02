@@ -25,9 +25,14 @@ export const BEATS: Pol15Beat[] = [
   },
   {
     p: 41, x: 168, stages: 2,
-    text: 'Name the injustice, and try the lawful routes first. Petitions, courts, elections. Skipping this is where most claims to civil disobedience fall over.',
+    text: 'Name the injustice, and try the lawful routes first. Petitions, courts, elections.',
     cite: 'The first two',
-    dur: 4.8,
+    dur: 2.5,
+  },
+  {
+    p: 41, x: 168, stages: 2,
+    text: 'Skipping this is where most claims to civil disobedience fall over.',
+    dur: 2.3,
   },
   {
     p: 40, x: 168, stages: 4,
@@ -66,7 +71,7 @@ export const BEATS: Pol15Beat[] = [
           { id: 'crime', x: 0, y: 0, reads: 'hidden, and no penalty taken: a crime' },
           { id: 'open', x: 1, y: 0, reads: 'open, and the penalty accepted', correct: true },
           { id: 'riot', x: 0, y: 1, reads: 'hidden, and running: still just a crime' },
-          { id: 'stunt', x: 1, y: 1, reads: 'open, but running from the cost' },
+          { id: 'stunt', x: 1, y: 1, reads: 'open, yet dodging the cost' },
         ],
       },
       explain: 'The trap is the other card, which is how the phrase is usually used. King and Rawls set a much narrower bar: public, nonviolent, penalty-accepting. Strip those and what is left is ordinary crime with a motive.',

@@ -34,14 +34,24 @@ export interface Met21Beat extends BaseBeat {
 export const BEATS: Met21Beat[] = [
   {
     p: 25, x: 200, line: 1, past: 1, future: 1,
-    text: 'A line, with you standing on the middle of it. The question is not whether time passes. It is what is there.',
-    dur: 4.8,
+    text: 'A line, with you standing on the middle of it. The question is not whether time passes.',
+    dur: 3.7,
+  },
+  {
+    p: 25, x: 200, line: 1, past: 1, future: 1,
+    text: 'It is what is there.',
+    dur: 1.8,
   },
   {
     p: 2, x: 200, line: 1, past: 0.08, future: 0.08,
-    text: 'Presentism says only this instant exists. Yesterday is not kept in some other place. Yesterday is nowhere at all, because yesterday is over.',
+    text: 'Presentism says only this instant exists. Yesterday is not kept in some other place.',
     cite: 'Presentism',
-    dur: 4.6,
+    dur: 2.8,
+  },
+  {
+    p: 2, x: 200, line: 1, past: 0.08, future: 0.08,
+    text: 'Yesterday is nowhere at all, because yesterday is over.',
+    dur: 1.8,
   },
   {
     p: 45, x: 132, line: 1, past: 1, future: 0.08,
@@ -78,7 +88,7 @@ export const BEATS: Met21Beat[] = [
   },
   {
     p: 13, x: 268, line: 1, past: 1, future: 1,
-    text: 'Relativity leans this way. Two observers can disagree about what is happening now, and that is awkward if only now exists.',
+    text: 'Relativity leans this way. Two observers can disagree about what is happening now. That is awkward if only now exists.',
     dur: 4.8,
   },
   {

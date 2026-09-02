@@ -38,9 +38,14 @@ export const BEATS: Epi16Beat[] = [
   },
   {
     g: 13, results: 5, bars: 3,
-    dur: 4.8,
-    text: 'The third allows everything. Whatever came back, it would have fitted. That is usually said as a boast.',
+    dur: 2.9,
+    text: 'The third allows everything. Whatever came back, it would have fitted.',
     cite: 'And one that allows everything',
+  },
+  {
+    g: 13, results: 5, bars: 3,
+    dur: 1.9,
+    text: 'That is usually said as a boast.',
   },
   {
     g: 137, results: 5, bars: 3,

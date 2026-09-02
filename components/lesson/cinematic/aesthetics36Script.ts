@@ -32,8 +32,13 @@ export interface Aesthetics36Beat extends BaseBeat {
 export const BEATS: Aesthetics36Beat[] = [
   {
     p: 25, x: 54, square: 1,
-    text: 'One square, one afternoon. Busy at this end, empty at that one. Everything you can see is really there.',
-    dur: 3.8,
+    text: 'One square, one afternoon. Busy at this end, empty at that one.',
+    dur: 2.4,
+  },
+  {
+    p: 25, x: 54, square: 1,
+    text: 'Everything you can see is really there.',
+    dur: 1.8,
   },
   {
     p: 4, x: 54, square: 1, live_d: 1,
@@ -56,13 +61,23 @@ export const BEATS: Aesthetics36Beat[] = [
   },
   {
     p: 13, x: 54, square: 1, crop: 0.5, prints: 1,
-    text: 'Nothing was altered. No pixel was moved. Both prints are accurate and they disagree about what happened.',
-    dur: 4.4,
+    text: 'Nothing was altered. No pixel was moved.',
+    dur: 1.8,
+  },
+  {
+    p: 13, x: 54, square: 1, crop: 0.5, prints: 1,
+    text: 'Both prints are accurate and they disagree about what happened.',
+    dur: 2.6,
   },
   {
     p: 21, x: 54, square: 1, crop: 0.5, prints: 1,
-    text: 'Photographs get this power from feeling transparent. Light came off the thing and landed here. So we say we are seeing the square, not a record of it.',
-    dur: 4.8,
+    text: 'Photographs get this power from feeling transparent. Light came off the thing and landed here.',
+    dur: 2.6,
+  },
+  {
+    p: 21, x: 54, square: 1, crop: 0.5, prints: 1,
+    text: 'So we say we are seeing the square, not a record of it.',
+    dur: 2.2,
   },
   {
     p: 47, x: 54, square: 1, crop: 0.5, prints: 1,
@@ -92,8 +107,13 @@ export const BEATS: Aesthetics36Beat[] = [
   },
   {
     p: 12, x: 128, square: 1, crop: 0.14, prints: 1,
-    text: 'A painting nobody suspects of neutrality does less damage here. We know a painter chose. We forget that a photographer did.',
-    dur: 4.6,
+    text: 'A painting nobody suspects of neutrality does less damage here. We know a painter chose.',
+    dur: 3.3,
+  },
+  {
+    p: 12, x: 128, square: 1, crop: 0.14, prints: 1,
+    text: 'We forget that a photographer did.',
+    dur: 1.8,
   },
   {
     summary: {

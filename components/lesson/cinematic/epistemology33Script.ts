@@ -38,9 +38,14 @@ export const BEATS: Epistemology33Beat[] = [
   },
   {
     p: 4, x: 56, ev: 1, bar: 0.85,
-    text: 'And you get out of the car and check. Look at the column while you do it — not one brick has moved. You have exactly what you had a minute ago.',
+    text: 'And you get out of the car and check. Look at the column while you do it — not one brick has moved.',
     cite: 'The evidence did not move',
-    dur: 4.8,
+    dur: 3.5,
+  },
+  {
+    p: 4, x: 56, ev: 1, bar: 0.85,
+    text: 'You have exactly what you had a minute ago.',
+    dur: 1.8,
   },
   {
     p: 137, x: 56, ev: 1, bar: 0.85,

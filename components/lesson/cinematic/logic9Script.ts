@@ -33,15 +33,25 @@ export const BEATS: L9Beat[] = [
   },
   {
     a: 14, d: 13, dx: 264, claim: true, smear: true,
-    text: 'The first dodge aims at the arguer. "He failed maths at school, so ignore his budget." But a claim does not get its truth from the mouth it came out of — the insult has answered nothing on the board.',
+    text: 'The first dodge aims at the arguer. "He failed maths at school, so ignore his budget.',
     cite: 'Ad hominem',
-    dur: 5.0,
+    dur: 2,
+  },
+  {
+    a: 14, d: 13, dx: 264, claim: true, smear: true,
+    text: 'But a claim does not get its truth from the mouth it came out of — the insult has answered nothing on the board.',
+    dur: 3,
   },
   {
     a: 15, d: 29, dx: 264, claim: true, straw: 2,
-    text: 'The second dodge builds a flimsy copy first. Swap their real position for a weaker one nobody holds, knock that down, and take the bow. You beat a scarecrow you put up yourself.',
+    text: 'The second dodge builds a flimsy copy first. Swap their real position for a weaker one nobody holds, knock that down, and take the bow.',
     cite: 'The straw man',
-    dur: 5.0,
+    dur: 3.8,
+  },
+  {
+    a: 15, d: 29, dx: 264, claim: true, straw: 2,
+    text: 'You beat a scarecrow you put up yourself.',
+    dur: 1.8,
   },
   {
     a: 9, d: 8, dx: 264, claim: true, straw: 2, untouched: true,

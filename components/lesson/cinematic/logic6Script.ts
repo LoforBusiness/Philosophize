@@ -26,15 +26,27 @@ export const BEATS: Logic6Beat[] = [
     // The arrow and the promise table arrive together: the whole diagram assembles
     // on the beat that explains what a conditional actually claims.
     p: 1, link: 1, table: 1,
-    text: 'A conditional says "if P, then Q." P is the antecedent — the condition. Q is the consequent — what follows. It promises nothing about P alone, only the link between them.',
+    text: 'A conditional says "if P, then Q. P is the antecedent — the condition.',
     cite: 'Antecedent → consequent',
-    dur: 5.0,
+    dur: 2.2,
+  },
+  {
+    // The arrow and the promise table arrive together: the whole diagram assembles
+    // on the beat that explains what a conditional actually claims.
+    p: 1, link: 1, table: 1,
+    text: 'Q is the consequent — what follows. It promises nothing about P alone, only the link between them.',
+    dur: 2.8,
   },
   {
     p: 13, link: 1, rain: 1, table: 1,
-    text: '"If it rains, the streets get wet." The sentence does not say rain IS falling. The sentence claims only a link: if rain comes, wet streets follow. A sunny day leaves the promise unbroken.',
+    text: '"If it rains, the streets get wet. The sentence does not say rain IS falling.',
     cite: 'A promise, not a fact',
-    dur: 5.0,
+    dur: 2.2,
+  },
+  {
+    p: 13, link: 1, rain: 1, table: 1,
+    text: 'The sentence claims only a link: if rain comes, wet streets follow. A sunny day leaves the promise unbroken.',
+    dur: 2.8,
   },
   {
     p: 128, link: 1, table: 1,
@@ -67,7 +79,7 @@ export const BEATS: Logic6Beat[] = [
         start: 0.04,
         zones: [
           { id: 'both', upto: 0.32, reads: 'accepting it means signing up for flying pigs' },
-          { id: 'half', upto: 0.66, reads: 'the link, and some commitment to the if' },
+          { id: 'half', upto: 0.66, reads: 'the link, and belief in the if' },
           { id: 'link', upto: 1, reads: 'the link, and nothing whatever about the if', correct: true },
         ],
       },

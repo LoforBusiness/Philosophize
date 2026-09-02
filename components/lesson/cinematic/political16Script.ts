@@ -25,14 +25,24 @@ export interface Pol16Beat extends BaseBeat {
 export const BEATS: Pol16Beat[] = [
   {
     g: 25, cords: 4,
-    dur: 4.8,
-    text: 'You fit the same bolt all day. Four things are wired to that work. The thing you make, the doing of it, what you could be, everyone beside you.',
+    dur: 2.3,
+    text: 'You fit the same bolt all day. Four things are wired to that work.',
+  },
+  {
+    g: 25, cords: 4,
+    dur: 2.5,
+    text: 'The thing you make, the doing of it, what you could be, everyone beside you.',
   },
   {
     g: 45, cords: 4, cut: 2,
-    dur: 4.8,
-    text: 'The car goes to the company and you could not afford one. The line sets the pace and you cannot stop it. Two cords gone.',
+    dur: 4.2,
+    text: 'The car goes to the company and you could not afford one. The line sets the pace and you cannot stop it.',
     cite: 'Product and process',
+  },
+  {
+    g: 45, cords: 4, cut: 2,
+    dur: 1.8,
+    text: 'Two cords gone.',
   },
   {
     g: 13, cords: 4, cut: 4,
@@ -77,9 +87,9 @@ export const BEATS: Pol16Beat[] = [
         left: 'OWNERSHIP AND CONTROL', right: 'THE SIZE OF THE WAGE',
         start: 0.04,
         zones: [
-          { id: 'pay', upto: 0.3, reads: 'a pay problem; a raise would settle it' },
+          { id: 'pay', upto: 0.3, reads: 'just a pay problem' },
           { id: 'both', upto: 0.66, reads: 'half the wage, half the ownership' },
-          { id: 'own', upto: 1, reads: 'ownership; a raise reconnects none of the cords', correct: true },
+          { id: 'own', upto: 1, reads: 'a problem of ownership', correct: true },
         ],
       },
       explain: 'Almost all of it on ownership. Calling it low pay collapses four severings into the one that is easiest to picture. Look at what a raise would reconnect: a better-paid worker still does not own the car, still cannot stop the line, and still competes with the man beside him.',

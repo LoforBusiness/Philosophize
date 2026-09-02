@@ -23,8 +23,13 @@ export interface Pol12Beat extends BaseBeat {
 export const BEATS: Pol12Beat[] = [
   {
     p: 25, x: 70,
-    text: 'Rousseau wrote that a people can be forced to be free. The phrase sounds like nonsense. Isaiah Berlin spent an essay explaining why the phrase makes sense, and why that is worse.',
-    dur: 5.0,
+    text: 'Rousseau wrote that a people can be forced to be free. The phrase sounds like nonsense.',
+    dur: 2.5,
+  },
+  {
+    p: 25, x: 70,
+    text: 'Isaiah Berlin spent an essay explaining why the phrase makes sense, and why that is worse.',
+    dur: 2.5,
   },
   {
     p: 41, x: 168, door: 1, open: 0,
@@ -34,9 +39,14 @@ export const BEATS: Pol12Beat[] = [
   },
   {
     p: 13, x: 124, door: 1, open: 1, neg: 1,
-    text: 'Open the door and the first lamp lights. Nothing is blocking you. Notice that this says nothing whatever about whether you can actually walk through it.',
+    text: 'Open the door and the first lamp lights. Nothing is blocking you.',
     cite: 'Nobody blocking',
-    dur: 4.8,
+    dur: 2.2,
+  },
+  {
+    p: 13, x: 124, door: 1, open: 1, neg: 1,
+    text: 'Notice that this says nothing whatever about whether you can actually walk through it.',
+    dur: 2.6,
   },
   {
     p: 147, x: 124, door: 1, open: 1, neg: 1,
@@ -53,9 +63,14 @@ export const BEATS: Pol12Beat[] = [
   },
   {
     p: 29, x: 168, door: 1, open: 1, neg: 1, posi: 1,
-    text: 'Here is Berlin\'s worry. A regime announces that your real self wants the regime\'s plan. The regime lights the second lamp on your behalf, shuts the door, and calls the result freedom.',
+    text: 'Here is Berlin\'s worry. A regime announces that your real self wants the regime\'s plan.',
     cite: 'The second lamp',
-    dur: 5.2,
+    dur: 2.4,
+  },
+  {
+    p: 29, x: 168, door: 1, open: 1, neg: 1, posi: 1,
+    text: 'The regime lights the second lamp on your behalf, shuts the door, and calls the result freedom.',
+    dur: 2.8,
   },
   {
     p: 4, x: 124, door: 1, open: 1, neg: 1, posi: 1,
@@ -65,7 +80,7 @@ export const BEATS: Pol12Beat[] = [
         start: 0,
         stops: [
           { id: 'neg', reads: 'negative liberty: nobody standing in your way' },
-          { id: 'none', reads: 'no kind of freedom at all; it is bare force' },
+          { id: 'none', reads: 'no freedom at all, just force' },
           { id: 'pos', reads: 'positive liberty: being your own master', correct: true },
         ],
       },
@@ -78,7 +93,7 @@ export const BEATS: Pol12Beat[] = [
     p: 6, x: 124, door: 1, open: 1, neg: 1, posi: 1, pick: 1,
     interact: {
       prompt: 'The door is wide open and you still cannot choose. Tap the lamp that is lying.',
-      explain: 'The second lamp. Negative liberty is honestly satisfied, because nobody stands in the doorway. But self-mastery cannot be switched on for you by somebody else, and that is the whole force of Berlin\'s warning.',
+      explain: 'The second lamp. Negative liberty is honestly met: nobody stands in the doorway. But nobody else can switch on your self-mastery for you. That is the whole force of Berlin\'s warning.',
       xp: 5,
     },
     dur: 1.0,

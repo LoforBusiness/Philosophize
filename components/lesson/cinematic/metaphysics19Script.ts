@@ -40,9 +40,14 @@ export const BEATS: Met19Beat[] = [
   },
   {
     p: 2, x: 200, props: 1, peg: 0.16, strip: 0.4,
-    text: 'Take the colour away. It is still an apple. Take the roundness, take the weight.',
+    text: 'Take the colour away. It is still an apple.',
     cite: 'Keep going',
-    dur: 4.0,
+    dur: 2.4,
+  },
+  {
+    p: 2, x: 200, props: 1, peg: 0.16, strip: 0.4,
+    text: 'Take the roundness, take the weight.',
+    dur: 1.8,
   },
   {
     p: 45, x: 132, props: 1, peg: 0.16, strip: 1,
@@ -90,9 +95,9 @@ export const BEATS: Met19Beat[] = [
       lever: {
         start: 0,
         stops: [
-          { id: 'one', reads: 'one thing; the same properties means the same thing' },
-          { id: 'two', reads: 'two things, and the bundle cannot say what makes them two', correct: true },
-          { id: 'never', reads: 'the case cannot arise, so there is nothing to answer' },
+          { id: 'one', reads: 'one thing, counted twice' },
+          { id: 'two', reads: 'two things, with nothing telling them apart', correct: true },
+          { id: 'never', reads: 'no such case could happen' },
         ],
       },
       explain: 'Two, plainly, and that is the bill bundle theory has to pay. If a thing simply is its properties, two with all the same properties are one thing. Saying they are two means something beyond the properties is counting — the peg the theory threw away.',

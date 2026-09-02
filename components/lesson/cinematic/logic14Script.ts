@@ -24,8 +24,13 @@ export interface Log14Beat extends BaseBeat {
 export const BEATS: Log14Beat[] = [
   {
     g: 25, lines: 2,
-    dur: 4.4,
-    text: 'Nothing is better than eternal happiness. A ham sandwich is better than nothing. Both lines are ones you would nod at.',
+    dur: 2.7,
+    text: 'Nothing is better than eternal happiness. A ham sandwich is better than nothing.',
+  },
+  {
+    g: 25, lines: 2,
+    dur: 1.8,
+    text: 'Both lines are ones you would nod at.',
   },
   {
     g: 45, lines: 3,
@@ -63,9 +68,14 @@ export const BEATS: Log14Beat[] = [
   },
   {
     g: 21, lines: 3, mark: 1, gloss: 1,
-    dur: 5.0,
-    text: 'In the first line it means no thing is better. In the second it means better than having nothing at all. The middle never joined.',
+    dur: 4.2,
+    text: 'In the first line it means no thing is better. In the second it means better than having nothing at all.',
     cite: 'Two words in one costume',
+  },
+  {
+    g: 21, lines: 3, mark: 1, gloss: 1,
+    dur: 1.8,
+    text: 'The middle never joined.',
   },
   {
     g: 41, lines: 3, mark: 1, gloss: 1,
@@ -76,7 +86,7 @@ export const BEATS: Log14Beat[] = [
         left: 'THE FORM', right: 'THE WORDS',
         start: 1,
         zones: [
-          { id: 'words', upto: 0.3, reads: 'the words moved; the shape was innocent', correct: true },
+          { id: 'words', upto: 0.3, reads: 'the words moved, not the shape', correct: true },
           { id: 'both', upto: 0.66, reads: 'half the shape, half the words' },
           { id: 'form', upto: 1, reads: 'the shape was invalid from the start' },
         ],
