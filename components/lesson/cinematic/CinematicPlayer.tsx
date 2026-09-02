@@ -21,7 +21,7 @@ import { TOURS } from './tours';
 import { toursOff } from './tourFlag';
 import { cue, touch } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
-import ChoiceCards from './ChoiceCards';
+import ChoiceCards, { seedFor } from './ChoiceCards';
 import DragScale from './DragScale';
 import LeverPick from './LeverPick';
 import ShapePlot from './ShapePlot';
@@ -901,9 +901,10 @@ export default function CinematicPlayer({
               cards={beat.interact.cards}
               picked={picked}
               onPick={(id, ok) => choose(id, ok, true)}
-              // Beat identity: stable for this question forever, different from every
-              // other question's, and it costs nothing to compute.
-              seed={`${lesson.id}#${i}`}
+              // QUESTION identity, not beat identity — see seedFor. Seeding on the
+              // beat index meant re-cutting narration re-rolled every shuffle in
+              // the app at once.
+              seed={seedFor(lesson.id, beat.interact.cards)}
             />
           ) : null}
 

@@ -36,6 +36,19 @@ if (!body) {
 // eslint-disable-next-line no-new-func
 const swapFor = new Function('seed', body[1]);
 
+// THE SEED FORMAT COMES FROM THE COMPONENT TOO. This file used to build
+// `${id}#${k}` itself, which is one rule written in two places — and on the day the
+// player stopped seeding on the beat index, this would have gone on measuring a
+// shuffle the app no longer performs and reported it as fine.
+const seedBody = src.match(/export function seedFor\([^)]*\): string \{([\s\S]*?)\n\}/);
+if (!seedBody) {
+  console.log('\nANSWER BALANCE\n');
+  bad('seedFor is not in ChoiceCards.tsx — the seed format has been renamed or removed');
+  process.exit(1);
+}
+// eslint-disable-next-line no-new-func
+const seedFor = new Function('lessonId', 'cards', seedBody[1]);
+
 const route = fs.readFileSync(ROUTE, 'utf8');
 const comps = new Map();
 for (const m of route.matchAll(/'([a-z0-9-]+)':\s*([A-Za-z0-9_]+)/g)) comps.set(m[1], m[2]);
@@ -74,7 +87,10 @@ for (const [id, comp] of comps) {
     total++;
     lessonTotal++;
     if (correct[0]) authoredFirst++;
-    const trueIsLeft = swapFor(`${id}#${k}`) ? correct[1] : correct[0];
+    // Seeded exactly as the player seeds it — on the question's own first card,
+    // not on where the beat happens to sit.
+    const texts = [...m[1].matchAll(/text:\s*'((?:[^'\\]|\\.)*)'/g)].map((x) => ({ text: x[1] }));
+    const trueIsLeft = swapFor(seedFor(id, texts)) ? correct[1] : correct[0];
     if (trueIsLeft) { shownLeft++; lessonLeft++; }
 
     // NO EXPLANATION MAY NAME A SIDE. It was safe to say "the left card" while the

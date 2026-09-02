@@ -81,9 +81,43 @@ interface Props {
  * being readable here is worth more than being uniform. `check-cards` measures the
  * real split across the app rather than trusting the arithmetic.
  */
+/**
+ * THE SEED IS THE QUESTION'S OWN WORDS, NOT WHERE IT SITS.
+ *
+ * It used to be `${lesson.id}#${beatIndex}`, and that is stable only while nobody
+ * re-cuts the narration. J12's segmenting split inserted 492 beats, every later
+ * index shifted, all 36 shuffles re-rolled at once, and the corpus landed at 67%
+ * left — a reader could guess by position, for no reason anyone intended.
+ *
+ * A question's identity is what it ASKS. Seeding on the first card's text means
+ * splitting a paragraph three beats earlier cannot move which side an answer
+ * lands on, and two questions can only collide by being word-for-word identical.
+ *
+ * Exported so `check:answers` seeds exactly as the player does. It used to build
+ * the string itself, in its own file, which is two copies of one rule.
+ */
+export function seedFor(lessonId: string, cards: readonly { text: string }[]): string {
+  return `${lessonId}#${cards[0]?.text ?? ''}`;
+}
+
 export function swapFor(seed: string): boolean {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  // A FINALISER, BECAUSE THE LOW BIT OF h*31 + c IS NOT A COIN.
+  //
+  // The comment above used to say a better-distributed hash would buy nothing.
+  // That was measured and it is false: seeds sharing most of their characters —
+  // and every seed here starts with the same lesson id — leave the low bits
+  // dominated by what they have in common, so the split came out 67/33 and a
+  // reader could guess by position. This repo has diagnosed the identical fault
+  // once before, in the reward cloud's quip picker, and for the identical reason.
+  //
+  // Murmur3's finaliser costs four operations and makes the low bit depend on
+  // every byte of the seed. check:answers measures the real split rather than
+  // trusting that claim.
+  h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b) >>> 0;
+  h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35) >>> 0;
+  h ^= h >>> 16;
   return (h & 1) === 1;
 }
 

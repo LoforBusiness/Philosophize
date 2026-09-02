@@ -1069,7 +1069,17 @@ function allIds() {
     let stepped = 0;
     let last = -1;
     let dead = false;
-    for (let b = 0; b < 14; b += 1) {
+    // THE BOUND IS A SAFETY STOP, NOT A SCHEDULE — and it used to be 14.
+    //
+    // Every loop here exits the moment the lesson says it is done, so a high bound
+    // costs nothing; a low one silently truncates. J12's segmenting split took the
+    // longest lessons from 11 beats to 19, and this fixed 14 promptly reported
+    // THIRTEEN lessons as "measured fewer beats than they have" — all of them at
+    // exactly 14, which is the tell. The content was fine; the instrument had a
+    // ceiling the content had outgrown.
+    //
+    // 28 clears the longest lesson in the repo (argument, 26) with room to spare.
+    for (let b = 0; b < 28; b += 1) {
       await settle();
       // TWO READINGS, AND ONLY WHAT SURVIVES BOTH.
       //

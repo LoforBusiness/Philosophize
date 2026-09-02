@@ -29,17 +29,28 @@
 // that is not a rest, or move the summary off the end — all three of which
 // validate-cinematic would rightly reject.
 //
-// THE CAP IS THE POINT. Splitting everything takes the corpus to a mean of 11.4
-// beats and 23 lessons past 13, some at 18-20, which stops being a micro-lesson.
-// Splitting most-packed-first and stopping at CEILING lands 395 of the 460 — 86%
-// of the benefit — at a mean of 11.0 with two lessons over, both of which were
-// already long before this ran.
+// THE CAP, AND WHY IT MOVED. The first pass stopped at 13 to keep a micro-lesson
+// micro, which left 70 beats packed. Measuring the rest changed the answer: those
+// 70 sit in about twenty lessons that had already reached 13, so clearing ALL of
+// them costs +75 beats across the whole corpus and moves the mean from 11.0 to
+// 11.4. Twenty lessons go to 18 or 19 beats and nothing else moves. At that price
+// the evidence wins — a reader takes the same words either way, and takes them in
+// pieces they can hold. Beats are split most-packed-first, so a lower ceiling
+// still spends its room where it buys the most.
 import fs from 'node:fs';
 import path from 'node:path';
 
 const DIR = 'components/lesson/cinematic';
 const DRY = process.argv.includes('--dry');
-const CEILING = 13;
+// How long a lesson is allowed to get. SPLIT_CEILING overrides it.
+//
+// 13 was the first pass, chosen to keep a micro-lesson micro. Measuring what the
+// rest would cost changed the answer: the 70 beats it refused are concentrated in
+// about twenty lessons that had already reached 13, so clearing ALL of them costs
+// +75 beats corpus-wide and moves the mean from 11.0 to 11.4. Those twenty go to
+// 18 or 19 beats; nothing else moves at all. At that price the segmenting evidence
+// wins, and H52's range follows.
+const CEILING = +(process.env.SPLIT_CEILING || 19);
 const MAX_SENTENCES = 2;
 /** No piece of a split beat gets less than this on the clock. */
 const MIN_DUR = 1.8;
