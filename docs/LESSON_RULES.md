@@ -3358,6 +3358,46 @@ both are decisions about the product rather than things a checker gets to make.
 
 ---
 
+### J13 · A beat may not open on a name the reader no longer has
+
+J12 cut 396 beats at sentence boundaries. A sentence boundary is the right place to
+cut and not always a good place to STOP: a piece can be grammatically whole and
+still read as the back half of something, because the word it hangs on is now on
+the previous tap.
+
+**The obvious detector is worthless, and measuring it is what showed that.** Flag a
+beat opening on a connective and you get 259 — one beat in six. HEAD carried 171 of
+them *before* anything was split (16.2%), and the split moved that to 17.5%.
+Opening on "So", "That", "But" or "Then" is this corpus's own voice and always has
+been; nobody needs the previous screen to parse *"So what makes something art?"*.
+
+What genuinely strands a reader is narrower: **a bare personal pronoun in a beat
+that names nobody.** *"He simply will not go on to say…"* needs Hume, and after the
+split Hume is on the tap before. That is the antecedent going off-screen — not a
+hard word, a missing referent, which is exactly what J10 and J11 cannot see because
+the sentence scores perfectly well on its own.
+
+| | |
+|---|---|
+| before the split | 12 |
+| after the split | 29 |
+| after naming them | **7** |
+
+Better than it started, because several of the names put back were owed before J12
+ever ran. **The fix is always to say who** — `Hume simply will not go on`,
+`The owner put the doubts down`, `Your friend answers` — and never to cut the
+sentence, which would lose the teaching to save the referent.
+
+**Two of the seven must not be touched.** `epistemology20` and `logic20` open on
+*"He who knows only his own side of the case knows little of that"* — that is Mill,
+quoted, and the pronoun is the quotation's own first word. Rewriting a primary
+source to satisfy a checker is F42, and the budget stops at 7 partly to leave them
+where they are.
+
+`npm run check:splits` holds it, offline, in milliseconds.
+
+---
+
 ### D34 · No word on the stage may be too small to read
 
 The stage fits a 400-wide design space into the box the player gives it:
