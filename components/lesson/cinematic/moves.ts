@@ -2837,7 +2837,17 @@ export function actStance(code: number, t: number, u: number): Stance {
       // in the MIDDLE of the travel, with both endpoints perfectly clear. Sending
       // x ahead of y takes the hand out behind the shoulder before it rises, so
       // the arm swings under the head rather than through it.
-      fistR: { x: lerp(5, -29, ease01(clamp01(e * 1.7))) - jerk * 6, y: lerp(6, -36, e * e) },
+      // AND IT MUST NEVER CROSS THE ARM'S OWN REACH. At (-29, -36) the hand sits
+      // 35.2 from a shoulder on a 33-unit arm, so the path went from BENT (32.1
+      // at rest) out THROUGH straight and into clamped -- and a two-bone solver
+      // has no stable elbow side at the crossing. It swings across, and
+      // `check-smooth` measured the elbow and forearm jumping 29.5 units in ONE
+      // frame at bt 0.283, in the four lessons that played this. Nothing else in
+      // the shelf did it, which is what found it.
+      //
+      // Held at 26-32 from the shoulder the whole way, the elbow keeps one side
+      // and the gesture is the same: an arm thrown back at whoever he means.
+      fistR: { x: lerp(5, -22, e) - jerk * 3, y: lerp(6, -10, e) },
     };
   }
   if (code === 120) {                            // TEETER — windmilling on the edge of a fall
