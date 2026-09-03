@@ -22,12 +22,12 @@ export interface Epi13Beat extends BaseBeat {
 
 export const BEATS: Epi13Beat[] = [
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'A fair lottery, a million tickets, one winner. You hold ticket 400,001.',
     dur: 2.1,
   },
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Will it win? You would say that flatly, and you would be right.',
     dur: 2.3,
   },
@@ -38,7 +38,7 @@ export const BEATS: Epi13Beat[] = [
     dur: 4.0,
   },
   {
-    p: 40, x: 168, grid: 1, off: 1,
+    p: 394, x: 168, grid: 1, off: 1,
     text: 'Strike the first one out. You are 99.9999% sure — better odds than most things you happily claim to know, including who your neighbours are.',
     cite: 'One verdict',
     dur: 4.8,

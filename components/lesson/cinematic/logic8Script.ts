@@ -65,13 +65,13 @@ export const BEATS: Logic8Beat[] = [
     dur: 1.0,
   },
   {
-    p: 45, x: 248, wet: 1, rule: 1, trap: 1, spr: 1,
+    p: 159, x: 248, wet: 1, rule: 1, trap: 1, spr: 1,
     text: 'Twenty steps on, you hear it. A sprinkler, sweeping the pavement from next door’s lawn, and it has been going all evening.',
     cite: 'The other cause',
     dur: 3.8,
   },
   {
-    p: 45, x: 248, wet: 1, rule: 1, trap: 1, spr: 1,
+    p: 159, x: 248, wet: 1, rule: 1, trap: 1, spr: 1,
     text: 'It was standing there the whole time.',
     dur: 1.8,
   },
@@ -112,7 +112,7 @@ export const BEATS: Logic8Beat[] = [
     dur: 1.0,
   },
   {
-    p: 13, x: 248, wet: 1, rule: 1, trap: 2, cross: 1, spr: 1,
+    p: 383, x: 248, wet: 1, rule: 1, trap: 2, cross: 1, spr: 1,
     text: 'That is trap two: denying the antecedent. Removing one cause does not remove the result, because the result had other doors it could come through.',
     cite: 'Trap two · denying the antecedent',
     dur: 4.8,

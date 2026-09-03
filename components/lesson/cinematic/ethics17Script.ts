@@ -33,22 +33,22 @@ export interface Eth17Beat extends BaseBeat {
 
 export const BEATS: Eth17Beat[] = [
   {
-    p: 25, x: 200, maxim: 1, trust: 1,
+    p: 164, x: 200, maxim: 1, trust: 1,
     text: 'A man at your door asks where your friend is hiding. He means to kill him.',
     dur: 3.4,
   },
   {
-    p: 25, x: 200, maxim: 1, trust: 1,
+    p: 164, x: 200, maxim: 1, trust: 1,
     text: 'Kant says do not lie.',
     dur: 1.8,
   },
   {
-    p: 45, x: 200, maxim: 1, trust: 1,
+    p: 159, x: 200, maxim: 1, trust: 1,
     text: 'That looks monstrous, and Kant knew so. His reason is not that lying is ugly.',
     dur: 2.7,
   },
   {
-    p: 45, x: 200, maxim: 1, trust: 1,
+    p: 159, x: 200, maxim: 1, trust: 1,
     text: 'Kant\'s reason is that lying cannot be made a rule for all.',
     dur: 2.1,
   },
@@ -59,7 +59,7 @@ export const BEATS: Eth17Beat[] = [
     dur: 4.2,
   },
   {
-    p: 13, x: 132, maxim: 1, copies: 1, trust: 0.06,
+    p: 383, x: 132, maxim: 1, copies: 1, trust: 0.06,
     text: 'Watch the bar. A lie only works on somebody expecting the truth, and now nobody is.',
     dur: 4.0,
   },

@@ -31,7 +31,7 @@ export const BEATS: Logic10Beat[] = [
     dur: 3.8,
   },
   {
-    p: 13, x: 96, arg: 1, slot: 1,
+    p: 416, x: 96, arg: 1, slot: 1,
     text: 'Nothing actually joins them. Being rich and being happy are different things, and the sentence that would tie one to the other was never said.',
     cite: 'The gap',
     dur: 4.6,
@@ -98,7 +98,7 @@ export const BEATS: Logic10Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, x: 158, arg: 2, slot: 1,
+    p: 160, x: 158, arg: 2, slot: 1,
     summary: {
       title: 'The Premise Nobody Said',
       points: [

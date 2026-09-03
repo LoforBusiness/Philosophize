@@ -53,7 +53,7 @@ export const BEATS: Eth24Beat[] = [
     dur: 4.8,
   },
   {
-    p: 13, x: 132, slab: 1, names: 1, gone: 1,
+    p: 383, x: 132, slab: 1, names: 1, gone: 1,
     text: 'Three of the four pillars have nothing left to hold. The sentence has not stopped feeling right.',
     dur: 4.2,
   },
@@ -80,7 +80,7 @@ export const BEATS: Eth24Beat[] = [
     dur: 4.0,
   },
   {
-    p: 21, x: 268, slab: 1, names: 1, gone: 1,
+    p: 399, x: 268, slab: 1, names: 1, gone: 1,
     text: 'The other side runs the same trick backwards, and that reply is why nobody holds deterrence on its own.',
     cite: 'The other direction',
     dur: 4.6,

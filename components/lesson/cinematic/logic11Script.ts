@@ -28,18 +28,18 @@ export const BEATS: Logic11Beat[] = [
     dur: 3.8,
   },
   {
-    p: 21, x: 48, steps: 2,
+    p: 176, x: 48, steps: 2,
     text: 'Two claims go up. The book is God’s word; whatever God says is true.',
     cite: 'The two premises',
     dur: 2.6,
   },
   {
-    p: 21, x: 48, steps: 2,
+    p: 176, x: 48, steps: 2,
     text: 'Innocent so far — nothing has been smuggled in yet.',
     dur: 1.8,
   },
   {
-    p: 13, x: 116, steps: 4, base: 1,
+    p: 402, x: 116, steps: 4, base: 1,
     text: 'Step three answers the obvious objection, and step four draws the conclusion. The whole structure now stands on that line: evidence from outside the argument.',
     cite: 'The proof, complete',
     dur: 5.2,
@@ -58,13 +58,13 @@ export const BEATS: Logic11Beat[] = [
     dur: 3.6,
   },
   {
-    p: 9, x: 116, steps: 4, base: 1, spine: 1,
+    p: 163, x: 116, steps: 4, base: 1, spine: 1,
     text: 'Now test the chain. Every link holds, step after step, nothing missing and nothing limping.',
     cite: 'Every link holds',
     dur: 2.9,
   },
   {
-    p: 9, x: 116, steps: 4, base: 1, spine: 1,
+    p: 163, x: 116, steps: 4, base: 1, spine: 1,
     text: 'A chain that sound is exactly what makes the trap dangerous.',
     dur: 2.1,
   },

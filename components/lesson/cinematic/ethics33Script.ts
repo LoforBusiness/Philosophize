@@ -47,7 +47,7 @@ export const BEATS: Ethics33Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 48, give: 0.9, more: 1,
+    p: 380, x: 48, give: 0.9, more: 1,
     text: 'Follow the rule honestly and the giving does not stop until the two columns are level. Peter Singer thought that was the right answer and that we had simply been looking away.',
     cite: 'Singer bites the bullet',
     dur: 5.0,
@@ -65,7 +65,7 @@ export const BEATS: Ethics33Beat[] = [
     dur: 3.8,
   },
   {
-    p: 4, x: 48, give: 0, live: 1,
+    p: 160, x: 48, give: 0, live: 1,
     interact: {
       prompt: 'Drag your column across. Stop where giving stops being required and starts being heroic.',
       drag: {
@@ -84,13 +84,13 @@ export const BEATS: Ethics33Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 48, give: 0.45,
+    p: 167, x: 48, give: 0.45,
     text: 'Susan Wolf pushed back from the other side. A life given over entirely to duty is not the best human life, she argued.',
     cite: 'Wolf, on moral saints',
     dur: 3.9,
   },
   {
-    p: 35, x: 48, give: 0.45,
+    p: 167, x: 48, give: 0.45,
     text: 'It is a narrowed one.',
     dur: 1.8,
   },

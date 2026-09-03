@@ -46,7 +46,7 @@ export const BEATS: Ethics34Beat[] = [
     dur: 4.2,
   },
   {
-    p: 4, x: 46, pop: 1,
+    p: 380, x: 46, pop: 1,
     text: 'Derek Parfit called the ending repugnant. He could not accept it, and spent the rest of his life failing to refute it.',
     cite: 'Parfit',
     dur: 4.4,
@@ -65,7 +65,7 @@ export const BEATS: Ethics34Beat[] = [
     dur: 4.6,
   },
   {
-    p: 4, x: 46, pop: 0, live: 1,
+    p: 160, x: 46, pop: 0, live: 1,
     interact: {
       prompt: 'Drag the trade. Stop where the totalling gives an answer you cannot accept.',
       drag: {
@@ -84,7 +84,7 @@ export const BEATS: Ethics34Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 46, pop: 0.2, avg: 1,
+    p: 402, x: 46, pop: 0.2, avg: 1,
     text: 'The obvious repair is to judge by the average life instead of the total. Try it and a new monster walks in.',
     cite: 'Judge by the average',
     dur: 4.4,

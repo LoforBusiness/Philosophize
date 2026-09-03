@@ -60,7 +60,7 @@ export const BEATS: Log19Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, rule: 1, cards: 1, turned: 1,
+    p: 380, x: 132, rule: 1, cards: 1, turned: 1,
     text: 'There it is. A vowel behind the seven and the rule is dead on the table.',
     cite: 'The one that matters',
     dur: 4.0,

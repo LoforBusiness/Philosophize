@@ -25,12 +25,12 @@ export interface Eth14Beat extends BaseBeat {
 
 export const BEATS: Eth14Beat[] = [
   {
-    g: 25, built: 0,
+    g: 164, built: 0,
     dur: 3.6,
     text: 'No laws, no police, nothing above you at all. Every liberty you have is yours to keep.',
   },
   {
-    g: 25, built: 0,
+    g: 164, built: 0,
     dur: 1.8,
     text: 'So is everybody else\'s.',
   },
@@ -52,7 +52,7 @@ export const BEATS: Eth14Beat[] = [
     cite: 'The bargain',
   },
   {
-    g: 21, built: 5, door: 1,
+    g: 399, built: 5, door: 1,
     dur: 4.8,
     text: 'Locke leaves a door in it. If the thing behind the wall turns on you, the deal is void and you may walk out.',
     cite: 'Locke cuts a door',

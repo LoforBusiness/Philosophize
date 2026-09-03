@@ -30,13 +30,13 @@ export const BEATS: Aes17Beat[] = [
     text: 'A shape in the dark. Your heart goes, your skin goes cold, and every part of you wants to be somewhere else.',
   },
   {
-    g: 25, x: 160, shape: 1, fear: 0.86, frame: 1,
+    g: 325, x: 160, shape: 1, fear: 0.86, frame: 1,
     dur: 4.8,
     text: 'On Friday night you pay money for that. The same heart, the same cold skin, and you chose it off a menu.',
     cite: 'And yet you buy a ticket',
   },
   {
-    g: 13, x: 160, shape: 1, fear: 0.86, frame: 1,
+    g: 383, x: 160, shape: 1, fear: 0.86, frame: 1,
     dur: 4.6,
     text: 'Nothing has been turned down. The meter does not care that this sound arrived inside a frame.',
     cite: 'The fear is the same fear',

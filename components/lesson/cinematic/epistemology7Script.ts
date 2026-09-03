@@ -24,24 +24,24 @@ export const BEATS: Epi7Beat[] = [
     dur: 2.3,
   },
   {
-    p: 1, days: 3,
+    p: 167, days: 3,
     text: 'Induction goes from the cases you have seen to the ones you have not. Every swan so far was white, so all swans are white.',
     cite: 'Induction',
     dur: 4,
   },
   {
-    p: 1, days: 3,
+    p: 167, days: 3,
     text: 'Science runs on that leap constantly.',
     dur: 1.8,
   },
   {
-    p: 4, days: 4, circle: 1,
+    p: 160, days: 4, circle: 1,
     text: 'Why expect the future to match the past? Only because it always has.',
     cite: 'Hume’s problem',
     dur: 1.9,
   },
   {
-    p: 4, days: 4, circle: 1,
+    p: 396, days: 4, circle: 1,
     text: 'But that uses the past to vouch for the past. The circle closes, and logic never gets a grip on it.',
     dur: 3.1,
   },

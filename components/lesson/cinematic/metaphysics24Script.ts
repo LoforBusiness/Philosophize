@@ -20,12 +20,12 @@ export interface Meta24Beat extends BaseBeat {
 
 export const BEATS: Meta24Beat[] = [
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Here is a heap of sand. Take one grain away.',
     dur: 1.8,
   },
   {
-    p: 25, x: 70,
+    p: 402, x: 70,
     text: 'Still a heap — obviously, because one grain has never been the difference between a heap and no heap.',
     dur: 3,
   },
@@ -36,7 +36,7 @@ export const BEATS: Meta24Beat[] = [
     dur: 4.8,
   },
   {
-    p: 40, x: 168, grains: 9, lamp: 1,
+    p: 383, x: 168, grains: 9, lamp: 1,
     text: 'Keep applying it. Half of them gone and the lamp has not flickered, because at no point did one grain do anything.',
     cite: 'Halfway',
     dur: 4.2,

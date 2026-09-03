@@ -23,13 +23,13 @@ export const BEATS: Epi2Beat[] = [
     dur: 3.8,
   },
   {
-    d: 4, m: 7, doubt: 0.2,
+    d: 160, m: 7, doubt: 0.2,
     text: 'First he separates two things we run together. Feeling certain is something happening in you.',
     cite: 'Certainty vs truth',
     dur: 1.9,
   },
   {
-    d: 4, m: 7, doubt: 0.2,
+    d: 160, m: 7, doubt: 0.2,
     text: 'Truth is how the world is. Those two can come apart, so he goes hunting for beliefs that survive every possible doubt.',
     dur: 2.9,
   },

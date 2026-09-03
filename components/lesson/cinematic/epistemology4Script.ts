@@ -57,29 +57,29 @@ export const BEATS: Epi4Beat[] = [
     dur: 3.4,
   },
   {
-    e: 0, r: 11, fill: 0.85, glow: 1,
+    e: 158, r: 11, fill: 0.85, glow: 1,
     text: 'The other camp fires back. Some things you never had to be shown.',
     cite: 'Rationalism — from reason',
     dur: 1.8,
   },
   {
-    e: 0, r: 11, fill: 0.85, glow: 1,
+    e: 158, r: 11, fill: 0.85, glow: 1,
     text: 'Descartes and Leibniz thought maths and logic get worked out by reason alone, before experience gets a say. That is what a priori means.',
     dur: 3.2,
   },
   {
-    e: 0, r: 19, glow: 1,
+    e: 158, r: 19, glow: 1,
     text: 'Plato has Socrates walk an untaught boy through doubling a square, using nothing but questions. Nobody teaches him any geometry.',
     cite: 'Plato, Meno',
     dur: 3.2,
   },
   {
-    e: 0, r: 19, glow: 1,
+    e: 418, r: 19, glow: 1,
     text: 'So learning, Plato says, is remembering what was in there already.',
     dur: 1.8,
   },
   {
-    e: 2, r: 11, fill: 0.85, glow: 1,
+    e: 384, r: 11, fill: 0.85, glow: 1,
     interact: {
       prompt: 'One of these says you arrive with nothing written on you yet. Tap them.',
       explain:

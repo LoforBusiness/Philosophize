@@ -18,7 +18,7 @@ export const BEATS: Pol6Beat[] = [
     dur: 3.6,
   },
   {
-    p: 1, bars: 1,
+    p: 418, bars: 1,
     text: 'Back behind the veil of ignorance — choose the rules not knowing who you will be. From that fair start, Rawls says, two principles fall out, in strict order.',
     cite: 'The two principles',
     dur: 4.8,
@@ -54,7 +54,7 @@ export const BEATS: Pol6Beat[] = [
     dur: 3.8,
   },
   {
-    p: 13, bars: 1, prin: 1, pick: 1,
+    p: 383, bars: 1, prin: 1, pick: 1,
     interact: {
       prompt: 'Rawls judges a society by its worst-off — the dark bar. Tap the one he would choose.',
       explain: 'Under the unequal rules the worst-off finish ABOVE the equality line, so that gap earns its keep. Rawls allows a difference only when it lifts the least advantaged — the yardstick is the bottom, never the top.',

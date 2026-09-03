@@ -27,12 +27,12 @@ export interface Log15Beat extends BaseBeat {
 
 export const BEATS: Log15Beat[] = [
   {
-    g: 25, crowd: 1, sample: 1,
+    g: 164, crowd: 1, sample: 1,
     dur: 3.2,
     text: 'Two tourists were rude to you last week. Both of them were from the same country.',
   },
   {
-    g: 25, crowd: 1, sample: 1,
+    g: 164, crowd: 1, sample: 1,
     dur: 1.8,
     text: 'Both of those things are true.',
   },
@@ -43,7 +43,7 @@ export const BEATS: Log15Beat[] = [
     cite: 'Two, and then everyone',
   },
   {
-    g: 13, crowd: 1, sample: 1, leap: 1, claim: 1,
+    g: 383, crowd: 1, sample: 1, leap: 1, claim: 1,
     dur: 4.8,
     text: 'Firsthand evidence feels like strong evidence. You were there, you saw it, and none of that makes two people into a pattern.',
     cite: 'Why it feels solid',
@@ -62,7 +62,7 @@ export const BEATS: Log15Beat[] = [
     },
   },
   {
-    g: 5, crowd: 1, sample: 1, leap: 1, claim: 1,
+    g: 412, crowd: 1, sample: 1, leap: 1, claim: 1,
     dur: 4.8,
     text: 'A sample can carry a conclusion when it is big enough and chosen fairly. Two people you happened to meet is neither.',
     cite: 'When the bet is good',

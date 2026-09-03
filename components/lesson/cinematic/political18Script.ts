@@ -30,18 +30,18 @@ export const BEATS: Pol18Beat[] = [
     text: 'Two people, one bicycle each, and the bicycles are identical. So far this is as equal as anything gets.',
   },
   {
-    g: 45, lanes: 2, bikes: 1, ride: 1,
+    g: 159, lanes: 2, bikes: 1, ride: 1,
     dur: 1.9,
     text: 'Now let them go. One crosses the city.',
     cite: 'Same bicycle',
   },
   {
-    g: 45, lanes: 2, bikes: 1, ride: 1,
+    g: 159, lanes: 2, bikes: 1, ride: 1,
     dur: 2.9,
     text: 'The other cannot use their legs and gets almost nowhere at all.',
   },
   {
-    g: 13, lanes: 2, bikes: 1, ride: 1,
+    g: 412, lanes: 2, bikes: 1, ride: 1,
     dur: 4.8,
     text: 'Nothing unfair happened at the start. The resource was equal. It turned into wildly different amounts of getting about.',
     cite: 'Equal input',
@@ -60,7 +60,7 @@ export const BEATS: Pol18Beat[] = [
     },
   },
   {
-    g: 5, lanes: 2, bikes: 1, ride: 1,
+    g: 384, lanes: 2, bikes: 1, ride: 1,
     dur: 4.8,
     text: 'So Sen moves the question. Stop measuring what people hold and measure what their lives actually let them do.',
     cite: 'Capabilities',

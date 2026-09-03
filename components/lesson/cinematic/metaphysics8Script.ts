@@ -29,34 +29,34 @@ export interface Metaphysics8Beat extends BaseBeat {
 
 export const BEATS: Metaphysics8Beat[] = [
   {
-    p: 25, x: 300, chain: 1, front: 13,
+    p: 164, x: 300, chain: 1, front: 13,
     text: 'Think of the last thing you chose. Now picture it already on its way a thousand years before you were born.',
     dur: 3,
   },
   {
-    p: 25, x: 300, chain: 1, front: 13,
+    p: 164, x: 300, chain: 1, front: 13,
     text: 'Every event gets pushed over by the one before it.',
     dur: 1.8,
   },
   {
-    p: 45, x: 232, chain: 1, front: 9, tags: 1, mark: 1,
+    p: 159, x: 232, chain: 1, front: 9, tags: 1, mark: 1,
     text: 'The first domino went over long before you existed — your genes, your parents, the street you grew up on. That push has been travelling ever since.',
     cite: 'The first push',
     dur: 4.3,
   },
   {
-    p: 45, x: 232, chain: 1, front: 9, tags: 1, mark: 1,
+    p: 159, x: 232, chain: 1, front: 9, tags: 1, mark: 1,
     text: 'Here it comes.',
     dur: 1.8,
   },
   {
-    p: 46, x: 232, chain: 1, front: 5, tags: 1, mark: 1,
+    p: 173, x: 232, chain: 1, front: 5, tags: 1, mark: 1,
     text: 'Hard determinists take the conclusion on the chin. Given everything that came before, they say, you could not have done otherwise.',
     cite: 'Hard determinism',
     dur: 3.6,
   },
   {
-    p: 46, x: 232, chain: 1, front: 5, tags: 1, mark: 1,
+    p: 173, x: 232, chain: 1, front: 5, tags: 1, mark: 1,
     text: 'Not once. Not in your entire life.',
     dur: 1.8,
   },
@@ -91,7 +91,7 @@ export const BEATS: Metaphysics8Beat[] = [
   },
   {
     // 8 (shrug), not 4 (think): the line opens "A third camp shrugs".
-    p: 8, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
+    p: 416, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
     text: 'Freedom was never about escaping causes. So what else could a free choice be?',
     dur: 2.2,
   },

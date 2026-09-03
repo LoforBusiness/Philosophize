@@ -33,39 +33,39 @@ export interface Epistemology11Beat extends BaseBeat {
 
 export const BEATS: Epistemology11Beat[] = [
   {
-    p: 25, x: 80, real: 180, link: 1,
+    p: 164, x: 80, real: 180, link: 1,
     text: 'You glance up at the hallway clock. Three o’clock — and it really is three o’clock.',
     dur: 2.4,
   },
   {
-    p: 25, x: 80, real: 180, link: 1,
+    p: 164, x: 80, real: 180, link: 1,
     text: 'You have never been more right, or for a worse reason.',
     dur: 1.8,
   },
   {
-    p: 45, x: 154, real: 195,
+    p: 159, x: 154, real: 195,
     text: 'You step across for a second look. The other dial has moved on; the hallway clock has not.',
     cite: 'The stopped clock',
     dur: 3.2,
   },
   {
-    p: 45, x: 154, real: 195,
+    p: 159, x: 154, real: 195,
     text: 'It stopped twelve hours ago, at exactly three.',
     dur: 1.8,
   },
   {
-    p: 3, x: 154, real: 220,
+    p: 168, x: 154, real: 220,
     text: 'Still, count what you had. You believed it.',
     cite: 'Justified true belief',
     dur: 1.8,
   },
   {
-    p: 3, x: 154, real: 220,
+    p: 168, x: 154, real: 220,
     text: 'It was true. And a clock on a wall is an ordinary reason to trust one.',
     dur: 2.7,
   },
   {
-    p: 3, x: 154, real: 220,
+    p: 168, x: 154, real: 220,
     text: 'Belief, truth, justification — all three.',
     dur: 1.8,
   },

@@ -36,7 +36,7 @@ export const BEATS: Aes32Beat[] = [
     text: 'Nothing has been added and nothing taken away.',
   },
   {
-    g: 3, rows: 3, mean: 0,
+    g: 383, rows: 3, mean: 0,
     dur: 4.4,
     text: 'And a third, level throughout — never bad, never remarkable. Nine identical years that come to the same amount as the other two.',
     cite: 'And a flat one',
@@ -54,13 +54,13 @@ export const BEATS: Aes32Beat[] = [
     },
   },
   {
-    g: 1, rows: 3, mean: 1,
+    g: 167, rows: 3, mean: 1,
     dur: 4.1,
     text: 'The line sits at the same height in all three, because all three hold the same amount of good. A ledger cannot tell them apart.',
     cite: 'Identical totals',
   },
   {
-    g: 1, rows: 3, mean: 1,
+    g: 167, rows: 3, mean: 1,
     dur: 1.8,
     text: 'You can, instantly.',
   },

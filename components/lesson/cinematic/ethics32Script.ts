@@ -33,7 +33,7 @@ export const BEATS: Ethics32Beat[] = [
     cite: 'What is behind it',
   },
   {
-    a: 30, b: 31, reasons: 3, card: 2,
+    a: 384, b: 31, reasons: 3, card: 2,
     dur: 4.4,
     text: 'The card hands across perfectly. Both people now hold the same true verdict, and the reasons behind the verdict stay where they were.',
     cite: 'Handed over',
@@ -51,13 +51,13 @@ export const BEATS: Ethics32Beat[] = [
     },
   },
   {
-    a: 13, b: 12, reasons: 3, card: 2, fresh: 1,
+    a: 413, b: 12, reasons: 3, card: 2, fresh: 1,
     dur: 4.6,
     text: 'Now a new case turns up — close to the first, but not the same. This is the moment the difference between the two of them stops being philosophical.',
     cite: 'A new case',
   },
   {
-    a: 13, b: 12, reasons: 3, card: 2, fresh: 1, pick: 1,
+    a: 6, b: 12, reasons: 3, card: 2, fresh: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap whichever of them can actually answer the new case.',

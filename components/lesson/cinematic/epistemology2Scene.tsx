@@ -6,7 +6,9 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './epistemology2Script';
 import {
-  clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, pose, type Bundle, } from './rig';
+  clamp01, ease01, lerp, mixStance, pose, type Bundle, } from './rig';
+// See ethics2Scene: identity for codes under 100, and it opens the catalogue.
+import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';

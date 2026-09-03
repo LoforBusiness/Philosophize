@@ -42,7 +42,7 @@ export const BEATS: Aesthetics34Beat[] = [
     dur: 4.6,
   },
   {
-    p: 4, x: 50, strip: 1,
+    p: 380, x: 50, strip: 1,
     text: 'And the final plate is a handful of lines that is still unmistakably a bull. Nobody can say which plate would have been the first one that was not.',
     cite: 'The eleventh plate',
     dur: 4.8,
@@ -61,7 +61,7 @@ export const BEATS: Aesthetics34Beat[] = [
     dur: 3.6,
   },
   {
-    p: 4, x: 50, strip: 0, live: 1,
+    p: 160, x: 50, strip: 0, live: 1,
     interact: {
       prompt: 'Take strokes away. Stop at the first picture that is no longer of a bull.',
       drag: {

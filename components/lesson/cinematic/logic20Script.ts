@@ -64,13 +64,13 @@ export const BEATS: Log20Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, boards: 1, struts: 1, strike: 1,
+    p: 380, x: 132, boards: 1, struts: 1, strike: 1,
     text: 'Down it goes, and the argument you were actually in has not moved an inch.',
     cite: 'A win worth nothing',
     dur: 4.0,
   },
   {
-    p: 13, x: 268, boards: 1, struts: 1, strike: 1,
+    p: 414, x: 268, boards: 1, struts: 1, strike: 1,
     text: 'The repair has a name. Build the strongest version they could have meant, and take that one on instead.',
     cite: 'Steelmanning',
     dur: 4.4,

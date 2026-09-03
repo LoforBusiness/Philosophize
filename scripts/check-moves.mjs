@@ -189,6 +189,9 @@ const FACE_OK = new Set([
   'act 18',          // LOOK AROUND — the hand is shading the eyes
   'act 49',          // SCRATCH THE HEAD — the hand goes to the skull by definition
   'act 19',          // STARTLE — hands fly to the face, which is the gesture
+  'act 107',         // CHEF'S KISS — fingers go to the lips, which is the gesture
+  'act 112',         // BOTH HANDS TO THE HEAD — the head is where they are going
+  'act 118',         // FAN THE AIR — the hand wafts in front of the face
   'posture 9',       // the thinker — chin in hand
   'carry hurry/5',   // something long over the shoulder passes the head by design
 ]);
@@ -325,7 +328,12 @@ const MOTIONS = [
   // `lands` is what makes a transition honest: 92 must arrive EXACTLY on posture
   // 1, because the scene holds that posture on the far side of the beat and any
   // gap between the two is a pop the reader sees on the tap.
-  ...Array.from({ length: 96 }, (_, i) => ({
+  // 120, not 96: the comic shelf (97–120) is enumerated here in the same commit
+  // that adds it. A count left at 96 is not a smaller check, it is twenty-four
+  // motions nothing has ever looked at — the shape of blindness §21 records the
+  // must-box probe, `check-moves` itself and `validate-cinematic` each falling
+  // into, where the suite gets QUIETER and that reads as progress.
+  ...Array.from({ length: 120 }, (_, i) => ({
     name: `act ${i + 1}`, kind: 'oneShot', at: (u) => M.actStance(i + 1, T, u),
     ...(i + 1 === 92 ? { lands: () => M.postureHold(1, T) } : {}),
   })),

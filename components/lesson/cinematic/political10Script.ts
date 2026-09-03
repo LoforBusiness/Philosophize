@@ -27,12 +27,12 @@ export interface Political10Beat extends BaseBeat {
 
 export const BEATS: Political10Beat[] = [
   {
-    p: 25, x: 44,
+    p: 164, x: 44,
     text: 'Three people, three piles — and the tallest is three times the shortest. Is that unjust?',
     dur: 1.8,
   },
   {
-    p: 25, x: 44,
+    p: 164, x: 44,
     text: 'Stare at it as long as you like: the picture on its own will not tell you.',
     dur: 2,
   },
@@ -59,13 +59,13 @@ export const BEATS: Political10Beat[] = [
     dur: 1.8,
   },
   {
-    p: 3, x: 108, tape: 1, ptr: 4,
+    p: 168, x: 108, tape: 1, ptr: 4,
     text: 'Nozick reads only that strip. Was every step clean — a fair taking, then free trades, then a gift nobody was forced to give?',
     cite: 'Nozick · the entitlement view',
     dur: 3.2,
   },
   {
-    p: 3, x: 108, tape: 1, ptr: 4,
+    p: 168, x: 108, tape: 1, ptr: 4,
     text: 'Then the pile at the end is hers, however tall it stands.',
     dur: 1.8,
   },

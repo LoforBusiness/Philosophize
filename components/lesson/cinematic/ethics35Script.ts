@@ -32,12 +32,12 @@ export interface Ethics35Beat extends BaseBeat {
 
 export const BEATS: Ethics35Beat[] = [
   {
-    p: 25, x: 54, pair: 1,
+    p: 164, x: 54, pair: 1,
     text: 'Two men, one afternoon, one drowning child. The first reaches in and holds him under.',
     dur: 2.4,
   },
   {
-    p: 25, x: 54, pair: 1,
+    p: 164, x: 54, pair: 1,
     text: 'The second sees the boy slip under and puts his hands in his pockets.',
     dur: 2.2,
   },
@@ -54,12 +54,12 @@ export const BEATS: Ethics35Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, x: 54, pair: 1, tags: 2,
+    p: 160, x: 54, pair: 1, tags: 2,
     text: 'Now match them. Same motive: both want the inheritance.',
     dur: 2.4,
   },
   {
-    p: 4, x: 54, pair: 1, tags: 2,
+    p: 160, x: 54, pair: 1, tags: 2,
     text: 'Same result: the boy dies either way.',
     dur: 1.8,
   },
@@ -95,7 +95,7 @@ export const BEATS: Ethics35Beat[] = [
     dur: 3.6,
   },
   {
-    p: 35, x: 132, pair: 1, tags: 4, beam: 1,
+    p: 383, x: 132, pair: 1, tags: 4, beam: 1,
     text: 'The defenders have a good reply, and it is not stubbornness. Real cases are never matched like this.',
     dur: 4.0,
   },

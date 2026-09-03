@@ -21,12 +21,12 @@ export interface Metaphysics7Beat extends BaseBeat {
 
 export const BEATS: Metaphysics7Beat[] = [
   {
-    p: 25, x: 200,
+    p: 164, x: 200,
     text: 'You have never once been anywhere but right now. Not yesterday, not tomorrow — always now.',
     dur: 2.9,
   },
   {
-    p: 25, x: 200,
+    p: 164, x: 200,
     text: 'So where is yesterday keeping itself?',
     dur: 1.8,
   },
@@ -64,13 +64,13 @@ export const BEATS: Metaphysics7Beat[] = [
     dur: 2.3,
   },
   {
-    p: 28, x: 200, line: 1, spot: 1,
+    p: 163, x: 200, line: 1, spot: 1,
     text: 'Only the middle frame is filled in — the one you are standing in. That view has a name: presentism.',
     cite: 'Presentism',
     dur: 3.4,
   },
   {
-    p: 28, x: 200, line: 1, spot: 1,
+    p: 163, x: 200, line: 1, spot: 1,
     text: 'Reality is one lit slice, and it keeps moving.',
     dur: 1.8,
   },

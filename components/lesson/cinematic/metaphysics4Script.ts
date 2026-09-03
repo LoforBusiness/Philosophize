@@ -39,13 +39,13 @@ export const BEATS: Meta4Beat[] = [
     dur: 1.8,
   },
   {
-    p: 35, tokens: 2, barred: 1,
+    p: 167, tokens: 2, barred: 1,
     text: 'At Elea he set out two ways. That it is, and that it is not.',
     cite: 'Parmenides, On Nature',
     dur: 1.8,
   },
   {
-    p: 35, tokens: 2, barred: 1,
+    p: 167, tokens: 2, barred: 1,
     text: 'Parmenides throws out the second, because what is not can be neither known nor said. So only what is counts as real, and change is a trick of the senses.',
     dur: 3.5,
   },

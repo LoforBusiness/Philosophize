@@ -43,7 +43,7 @@ export const BEATS: Met23Beat[] = [
     dur: 4.6,
   },
   {
-    p: 45, x: 132, ships: 1, swap: 1, built: 1,
+    p: 379, x: 132, ships: 1, swap: 1, built: 1,
     text: 'Then a collector admits he kept every plank they threw away, and has built a second ship out of them.',
     dur: 4.6,
   },
@@ -57,13 +57,13 @@ export const BEATS: Met23Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, ships: 1, swap: 1, built: 1,
+    p: 176, x: 132, ships: 1, swap: 1, built: 1,
     text: 'Two tests that normally agree. Unbroken use points left.',
     cite: 'Two readings of same',
     dur: 1.9,
   },
   {
-    p: 21, x: 132, ships: 1, swap: 1, built: 1,
+    p: 176, x: 132, ships: 1, swap: 1, built: 1,
     text: 'Original wood points right. Nothing on the stage decides between the two.',
     dur: 2.5,
   },

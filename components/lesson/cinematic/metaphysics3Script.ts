@@ -26,18 +26,18 @@ export const BEATS: Meta3Beat[] = [
     dur: 3.4,
   },
   {
-    p: 1, shadow: 0.9, form: 0.15, apple: 1,
+    p: 167, shadow: 0.9, form: 0.15, apple: 1,
     text: 'Heraclitus said everything flows, like a river you cannot step in twice. That troubled Plato.',
     cite: 'Being vs Becoming',
     dur: 1.9,
   },
   {
-    p: 1, shadow: 0.9, form: 0.15, apple: 1,
+    p: 167, shadow: 0.9, form: 0.15, apple: 1,
     text: 'You cannot know a thing that will not hold still, so he split the world in two. Being holds still and can be known.',
     dur: 3,
   },
   {
-    p: 1, shadow: 0.9, form: 0.15, apple: 1,
+    p: 167, shadow: 0.9, form: 0.15, apple: 1,
     text: 'Becoming never does.',
     dur: 1.8,
   },
@@ -48,7 +48,7 @@ export const BEATS: Meta3Beat[] = [
     dur: 2.9,
   },
   {
-    p: 34, shadow: 0.5, form: 0.7, apple: 1,
+    p: 418, shadow: 0.5, form: 0.7, apple: 1,
     text: 'Plato says the wall is where we live, and the Forms are what is casting the shadows.',
     dur: 2.3,
   },

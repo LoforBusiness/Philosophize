@@ -31,12 +31,12 @@ export interface Aesthetics36Beat extends BaseBeat {
 
 export const BEATS: Aesthetics36Beat[] = [
   {
-    p: 25, x: 54, square: 1,
+    p: 164, x: 54, square: 1,
     text: 'One square, one afternoon. Busy at this end, empty at that one.',
     dur: 2.4,
   },
   {
-    p: 25, x: 54, square: 1,
+    p: 164, x: 54, square: 1,
     text: 'Everything you can see is really there.',
     dur: 1.8,
   },
@@ -70,12 +70,12 @@ export const BEATS: Aesthetics36Beat[] = [
     dur: 2.6,
   },
   {
-    p: 21, x: 54, square: 1, crop: 0.5, prints: 1,
+    p: 176, x: 54, square: 1, crop: 0.5, prints: 1,
     text: 'Photographs get this power from feeling transparent. Light came off the thing and landed here.',
     dur: 2.6,
   },
   {
-    p: 21, x: 54, square: 1, crop: 0.5, prints: 1,
+    p: 176, x: 54, square: 1, crop: 0.5, prints: 1,
     text: 'So we say we are seeing the square, not a record of it.',
     dur: 2.2,
   },

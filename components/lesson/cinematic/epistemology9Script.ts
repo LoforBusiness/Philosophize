@@ -24,12 +24,12 @@ export interface Epistemology9Beat extends BaseBeat {
 
 export const BEATS: Epistemology9Beat[] = [
   {
-    p: 25, x: 208,
+    p: 164, x: 208,
     text: 'Everyone says they want the truth. Almost nobody can say what the word means.',
     dur: 2.2,
   },
   {
-    p: 25, x: 208,
+    p: 164, x: 208,
     text: 'Try it: when you call something true, what exactly are you claiming?',
     dur: 1.8,
   },
@@ -89,13 +89,13 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 3.6,
   },
   {
-    p: 45, x: 148, land: 1, map: 1, link: 1,
+    p: 159, x: 148, land: 1, map: 1, link: 1,
     text: 'Fine — go and check. Hold the sketch up, look at the land, compare the two.',
     cite: 'The awkward bit',
     dur: 2.5,
   },
   {
-    p: 45, x: 148, land: 1, map: 1, link: 1,
+    p: 404, x: 148, land: 1, map: 1, link: 1,
     text: 'Until somebody asks a rude little question: what exactly are you comparing the sketch against?',
     dur: 2.3,
   },
@@ -117,13 +117,13 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 1.0,
   },
   {
-    p: 1, x: 268, land: 1, map: 1, theory: 1,
+    p: 167, x: 268, land: 1, map: 1, theory: 1,
     text: 'One answer: stop hunting for a magic exit. A belief is true when it locks into everything else you hold — no contradictions, nothing left dangling.',
     cite: 'Coherence',
     dur: 3.9,
   },
   {
-    p: 1, x: 268, land: 1, map: 1, theory: 1,
+    p: 167, x: 268, land: 1, map: 1, theory: 1,
     text: 'Truth is fitting the whole web.',
     dur: 1.8,
   },

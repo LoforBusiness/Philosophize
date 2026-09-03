@@ -48,7 +48,7 @@ export const BEATS: Aes18Beat[] = [
     dur: 4.4,
   },
   {
-    p: 13, x: 132, curve: 1, body: 1, match: 1, empty: 1,
+    p: 395, x: 132, curve: 1, body: 1, match: 1, empty: 1,
     text: 'Now the awkward panel. A shape is not a mood, and there is nobody inside the notes to be having one.',
     cite: 'So who is sad?',
     dur: 4.8,

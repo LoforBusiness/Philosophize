@@ -65,12 +65,12 @@ export const BEATS: Logic35Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 62, rise: 1, picks: 1, under: 1,
+    p: 176, x: 62, rise: 1, picks: 1, under: 1,
     text: 'A cause under both is called a confounder. Take the summer out and the link between cone and drowning vanishes.',
     dur: 3.8,
   },
   {
-    p: 21, x: 62, rise: 1, picks: 1, under: 1,
+    p: 176, x: 62, rise: 1, picks: 1, under: 1,
     text: 'It was never there.',
     dur: 1.8,
   },
@@ -87,12 +87,12 @@ export const BEATS: Logic35Beat[] = [
     dur: 3.4,
   },
   {
-    p: 35, x: 130, rise: 1, under: 1, cut: 1,
+    p: 167, x: 130, rise: 1, under: 1, cut: 1,
     text: 'The link is rarely this obvious. Children with bigger feet read better, and the whole cause is age.',
     dur: 3.2,
   },
   {
-    p: 35, x: 130, rise: 1, under: 1, cut: 1,
+    p: 167, x: 130, rise: 1, under: 1, cut: 1,
     text: 'Coffee looked deadly for years because smokers drank coffee.',
     dur: 1.8,
   },

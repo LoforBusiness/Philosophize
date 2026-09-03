@@ -48,7 +48,7 @@ export const BEATS: Aes21Beat[] = [
     dur: 4.4,
   },
   {
-    p: 2, x: 132, works: 1, burn: 1,
+    p: 384, x: 132, works: 1, burn: 1,
     text: 'Two of those three works survived that. You could print the novel again tomorrow from the text.',
     dur: 4.2,
   },

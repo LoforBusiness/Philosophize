@@ -24,23 +24,23 @@ export interface Pol16Beat extends BaseBeat {
 
 export const BEATS: Pol16Beat[] = [
   {
-    g: 25, cords: 4,
+    g: 164, cords: 4,
     dur: 2.3,
     text: 'You fit the same bolt all day. Four things are wired to that work.',
   },
   {
-    g: 25, cords: 4,
+    g: 164, cords: 4,
     dur: 2.5,
     text: 'The thing you make, the doing of it, what you could be, everyone beside you.',
   },
   {
-    g: 45, cords: 4, cut: 2,
+    g: 159, cords: 4, cut: 2,
     dur: 4.2,
     text: 'The car goes to the company and you could not afford one. The line sets the pace and you cannot stop it.',
     cite: 'Product and process',
   },
   {
-    g: 45, cords: 4, cut: 2,
+    g: 159, cords: 4, cut: 2,
     dur: 1.8,
     text: 'Two cords gone.',
   },
@@ -64,7 +64,7 @@ export const BEATS: Pol16Beat[] = [
     },
   },
   {
-    g: 5, cords: 4, cut: 4,
+    g: 418, cords: 4, cut: 4,
     dur: 4.8,
     text: 'Marx says none of that is about the wage. It follows from who owns the machines and who decides what happens on the floor.',
     cite: 'Where it comes from',

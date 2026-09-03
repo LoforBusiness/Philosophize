@@ -23,12 +23,12 @@ export interface Ethics4Beat extends BaseBeat {
 
 export const BEATS: Ethics4Beat[] = [
   {
-    a: 1, b: 8, floor: 0, rows: 1,
+    a: 167, b: 8, floor: 0, rows: 1,
     text: 'Cultures disagree about right and wrong. That much is just a fact.',
     dur: 1.8,
   },
   {
-    a: 1, b: 8, floor: 0, rows: 1,
+    a: 167, b: 8, floor: 0, rows: 1,
     text: 'Saying there is no right answer underneath the disagreement is a much bigger claim, and a separate one.',
     dur: 2.3,
   },
@@ -49,13 +49,13 @@ export const BEATS: Ethics4Beat[] = [
     dur: 1.8,
   },
   {
-    a: 4, b: 35, rows: 3,
+    a: 380, b: 35, rows: 3,
     text: 'Ruth Benedict pressed the bold claim: what a society calls "good" simply tracks what it has come to approve. Morality, she held, is a name for socially approved habits.',
     cite: 'Ruth Benedict, 1934',
     dur: 4.6,
   },
   {
-    a: 4, b: 0, rows: 3,
+    a: 160, b: 0, rows: 3,
     quote: {
       id: 'lq-ethics-ethics-4-1',
       text: 'Morality differs in every society, and is a convenient term for socially approved habits.',

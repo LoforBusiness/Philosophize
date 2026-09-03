@@ -43,13 +43,13 @@ export const BEATS: Logic5Beat[] = [
     dur: 1.8,
   },
   {
-    p: 1, machine: 1, run: 1,
+    p: 167, machine: 1, run: 1,
     text: 'Euclid drew a circle around A through B, another around B through A; they cross at C. AB equals AC, AB equals BC — so AC equals BC.',
     cite: 'Euclid, Elements I.1',
     dur: 4.1,
   },
   {
-    p: 1, machine: 1, run: 1,
+    p: 167, machine: 1, run: 1,
     text: 'A triangle, proved link by link.',
     dur: 1.8,
   },

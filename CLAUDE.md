@@ -908,7 +908,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **forty-three** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **forty-four** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -918,7 +918,7 @@ followed:
 `check-plainwords` · `check-streak` · `check-quips` ·
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
-`check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-react` · `check-smooth` · `check-turn` · `check-moves`. It exits 0 today, so anything any of them prints is yours. (Several
+`check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-react` · `check-smooth` · `check-turn` · `check-moves` · `check-life`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
 figures and 6 hand-built ones, and `check-moves` 6 head-clearance defects. A budget
 line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 222 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
@@ -2143,6 +2143,69 @@ Three things worth carrying:
    The same arithmetic applies to plain Views: **hundreds of them under one
    transform is the same bill.** 320 rectangles drawing a hillside is one path's
    worth of picture and three hundred views' worth of cost.
+
+### The figure was accurate and never once alive
+
+> *"the stickman's movements are usually pretty boring, and a lot of times
+>  they'll just repeat movements over and over again in lessons … I want
+>  something that will make the user smile, like the stick man is actually alive."*
+
+Measured, all three complaints were true, and **none of them was visible to any
+check in the suite**: `check-moves` verifies that each MOTION is geometrically
+sound and says nothing about which motions the lessons use, and `check-echo`
+compares neighbours on channels, prompt words and theme nouns — gestures are none
+of those. So the corpus could converge on ten poses indefinitely, and had.
+
+| | before | after |
+|---|---|---|
+| distinct poses used across 1,944 beats | 63 | **102** |
+| the ten commonest, as a share of all gesture calls | 68% | **53%** |
+| lessons that ever PERFORM an action rather than hold a pose | **4** | **144** |
+| beats holding the pose the beat before them held | 499 | 386, all continuous |
+
+**THE DOOR HAD BEEN BUILT AND NOBODY WALKED THROUGH IT.** `moves.ts` already held
+96 actions, 21 postures and 24 travel modes, and group N of the rule book already
+documented the 300 band that plays one once. A fortnight later the lessons still
+reached eight codes above 99 between them. A catalogue is not a vocabulary until
+something puts it into the scripts.
+
+**AND MOST OF THE REPETITION WAS SELF-INFLICTED (N7).** J12 cut 466 over-packed
+beats into pieces and copied every channel verbatim so the picture would hold
+still while the words advanced — and **445 of the 499 repeated poses are those
+pieces.** Holding still was right for the SCENE and wrong for the FIGURE: rig's
+`emoteLive` reads `bt`, which resets every beat, so a pose carrying a `lift`
+re-raises its arm on every piece of one sentence. Four pieces, four identical arm
+lifts. A living hold (acts 59–78) fixes it exactly, because it reads `t` and
+ignores `bt` — the figure keeps moving straight through the beat changes, and
+`carryFrom` blends two identical values so there is not even a seam.
+
+**The comic shelf is 97–120**, twenty-four actions built on TIMING rather than on
+pose: every one has at least two events and a gap. A single arc — rise, hold,
+fall, which is every action above it in the file — cannot be a joke.
+
+Three things that cost a render each, all in group N:
+
+- **A head move is not a move (N12).** `U.head` is 16, so the neck pivots the head
+  centre 5.3 units at the angle these were written at, against a head 40 across.
+  Three of four "looking" actions drew a figure standing perfectly still. Write
+  attention on the SPINE (`U.spine` 33, and it carries the torso), then the neck,
+  then give it a limb. And LEFT and RIGHT do not exist inside a pose at all — the
+  facing is a scene-level argument to `pose()`.
+- **A joke must be about something the beat says (N9).** Placed by POSITION, the
+  first file got a pratfall on *"They drained the cask, and a key was lying at the
+  bottom on a leather thong."* Every gag now carries the cues that make it apt and
+  **43 lessons get none**, which is the rule working rather than a shortfall.
+- **Nothing funny goes near a grave lesson (N11)**, applied to the whole lesson and
+  not just the sentence. 39 of 174 are excluded; ethics and political philosophy
+  lose most of theirs, and that is the right answer.
+
+`npm run check:life` holds all of it and `node scripts/countertest-life.mjs` puts
+each defect back — including the direction that must stay SILENT, since a played
+action on a run's tail is legal and the joke pass depends on it. **Its first run
+caught a bug that would have shipped:** `VARIANTS` reached for the comic shelf for
+six of its rows, so the variant pass was placing gags without checking fit,
+gravity or rotation — ten about nothing, three in grave lessons, six told twice
+within three lessons. `liveliness.mjs` now throws on that at import.
 
 ### The branch road — the same rig, outside a lesson
 

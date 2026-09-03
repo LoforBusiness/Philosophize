@@ -41,7 +41,7 @@ export const BEATS: Aes20Beat[] = [
     // the reader complained about (D35). It was also half an argument: this
     // sentence names one substitution, the textbook, and the picture should show
     // exactly that (A1).
-    p: 45, x: 200, uses: 1, swaps: 0.34, struck: 0.34,
+    p: 398, x: 200, uses: 1, swaps: 0.34, struck: 0.34,
     text: 'Art teaches you things. So does a textbook, faster and with fewer mistakes.',
     cite: 'Instruction',
     dur: 4.2,
@@ -57,7 +57,7 @@ export const BEATS: Aes20Beat[] = [
     dur: 1.9,
   },
   {
-    p: 13, x: 132, uses: 1, swaps: 1, struck: 1,
+    p: 383, x: 132, uses: 1, swaps: 1, struck: 1,
     text: 'Three struck out, and nothing came for the fourth.',
     cite: 'The one left',
     dur: 3.2,

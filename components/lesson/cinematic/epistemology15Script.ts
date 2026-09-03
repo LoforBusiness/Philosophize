@@ -26,23 +26,23 @@ export interface Epi15Beat extends BaseBeat {
 
 export const BEATS: Epi15Beat[] = [
   {
-    g: 25, cells: 4,
+    g: 164, cells: 4,
     dur: 2.3,
     text: 'Two questions about anything you know. Did you need to look?',
   },
   {
-    g: 25, cells: 4,
+    g: 164, cells: 4,
     dur: 2.3,
     text: 'And does it tell you something, or only unpack a word?',
   },
   {
-    g: 45, cells: 4, dealt: 3,
+    g: 159, cells: 4, dealt: 3,
     dur: 2.1,
     text: 'Three of the boxes fill straight away. Bachelors are unmarried.',
     cite: 'Three easy ones',
   },
   {
-    g: 45, cells: 4, dealt: 3,
+    g: 159, cells: 4, dealt: 3,
     dur: 2.9,
     text: 'The chair is over there. And the fourth box is supposed to be empty.',
   },
@@ -71,13 +71,13 @@ export const BEATS: Epi15Beat[] = [
     },
   },
   {
-    g: 21, cells: 4, dealt: 3, sum: 1,
+    g: 176, cells: 4, dealt: 3, sum: 1,
     dur: 2.4,
     text: 'Kant drops one card into the empty box. Seven plus five is twelve.',
     cite: 'Into the fourth box',
   },
   {
-    g: 21, cells: 4, dealt: 3, sum: 1,
+    g: 176, cells: 4, dealt: 3, sum: 1,
     dur: 2.4,
     text: 'You ran no experiment, and twelve was not sitting inside seven and five.',
   },

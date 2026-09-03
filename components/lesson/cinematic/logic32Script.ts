@@ -27,30 +27,30 @@ export const BEATS: Logic32Beat[] = [
     text: 'Two people, one question, and no way out of it. Watch what happens to the second person whichever way they answer.',
   },
   {
-    a: 13, b: 45, q: 1,
+    a: 383, b: 45, q: 1,
     dur: 4.2,
     text: '"Have you stopped cheating at cards?" The question sounds like an ordinary yes-or-no, and is not one.',
     cite: 'The question',
   },
   {
-    a: 28, b: 4, q: 1, tried: 1,
+    a: 163, b: 4, q: 1, tried: 1,
     dur: 2,
     text: 'Try yes. Yes, you stopped, which means you were cheating before.',
     cite: 'Answer: yes',
   },
   {
-    a: 28, b: 4, q: 1, tried: 1,
+    a: 163, b: 4, q: 1, tried: 1,
     dur: 2.4,
     text: 'The accusation now stands on the record, and nobody ever made the accusation.',
   },
   {
-    a: 28, b: 46, q: 1, tried: 2,
+    a: 163, b: 46, q: 1, tried: 2,
     dur: 3.8,
     text: 'Try no, which feels like the safe one. No, you have not stopped — so you are cheating right now.',
     cite: 'Answer: no',
   },
   {
-    a: 28, b: 46, q: 1, tried: 2,
+    a: 163, b: 46, q: 1, tried: 2,
     dur: 1.8,
     text: 'It is worse.',
   },
@@ -68,7 +68,7 @@ export const BEATS: Logic32Beat[] = [
     },
   },
   {
-    a: 13, b: 12, q: 1, hidden: 1, pick: 1,
+    a: 6, b: 12, q: 1, hidden: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'One word smuggled the accusation in. Tap it.',

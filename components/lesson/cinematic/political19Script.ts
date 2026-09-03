@@ -51,7 +51,7 @@ export const BEATS: Pol19Beat[] = [
     dur: 4.0,
   },
   {
-    p: 13, x: 132, axis: 1, cost: 1, pull: 1, mark: 1,
+    p: 383, x: 132, axis: 1, cost: 1, pull: 1, mark: 1,
     text: 'Same child, same money, same certainty that the money helps. The only thing that changed is where you are standing.',
     dur: 4.6,
   },

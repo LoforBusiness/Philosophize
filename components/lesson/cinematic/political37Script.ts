@@ -72,7 +72,7 @@ export const BEATS: Political37Beat[] = [
     dur: 2.1,
   },
   {
-    p: 13, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
+    p: 414, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
     text: 'Being able to use it is another, and only one of those is equal here.',
     dur: 2.7,
   },
@@ -90,7 +90,7 @@ export const BEATS: Political37Beat[] = [
     dur: 4.0,
   },
   {
-    p: 4, x: 54, pair: 1, horns: 1, cap: 1, labels: 1, live: 1,
+    p: 160, x: 54, pair: 1, horns: 1, cap: 1, labels: 1, live: 1,
     interact: {
       prompt: 'Tap what the cap you set is actually restricting.',
       explain: 'Speech. Spending to spread a message is a way of saying it, so a cap is a limit on political speech — the thing a free society guards most fiercely. That is why this argument does not resolve: it is liberty against liberty, not liberty against equality.',
@@ -99,17 +99,17 @@ export const BEATS: Political37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
+    p: 167, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
     text: 'So the argument never settles. One side defends the right to be heard.',
     dur: 2.3,
   },
   {
-    p: 35, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
+    p: 167, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
     text: 'So does the other. The two sides disagree about whose right it is.',
     dur: 2.3,
   },
   {
-    p: 45, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
+    p: 379, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
     text: 'Every democracy draws the line somewhere, usually without announcing it. Where the line lands tells you what a country thinks a vote is for.',
     dur: 4.8,
   },

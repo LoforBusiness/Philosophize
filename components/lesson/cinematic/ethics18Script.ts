@@ -61,7 +61,7 @@ export const BEATS: Ethics18Beat[] = [
     dur: 3.8,
   },
   {
-    p: 35, x: 168, line: 1, test: 2, wide: 1,
+    p: 383, x: 168, line: 1, test: 2, wide: 1,
     text: 'Change the test to the one we actually use, and nobody has to argue about where the line goes. It moves by itself, and it takes the pig with it.',
     cite: 'The line follows',
     dur: 4.6,

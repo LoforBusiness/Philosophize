@@ -30,13 +30,13 @@ export const BEATS: Met14Beat[] = [
     text: 'Four claims, all of them true. And five columns, one for each of the ways the world could consistently have gone.',
   },
   {
-    g: 45, rows: 4, marks: 1,
+    g: 159, rows: 4, marks: 1,
     dur: 3.4,
     text: 'Now mark each claim in every world it survives. Two of the rows fill completely.',
     cite: 'Fill in the rows',
   },
   {
-    g: 45, rows: 4, marks: 1,
+    g: 159, rows: 4, marks: 1,
     dur: 1.8,
     text: 'Two of them come out patchy.',
   },

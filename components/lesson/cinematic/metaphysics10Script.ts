@@ -49,7 +49,7 @@ export const BEATS: Metaphysics10Beat[] = [
     dur: 1.8,
   },
   {
-    p: 25, x: 124, frame: 1, card: 2,
+    p: 406, x: 124, frame: 1, card: 2,
     text: 'Plato hung it up here, in a slot of its own. The perfect Red sits above every red thing and needs none of them to exist.',
     cite: 'Plato · a realm of Forms',
     dur: 4.8,

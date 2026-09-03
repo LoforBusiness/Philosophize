@@ -2627,6 +2627,156 @@ them the same way, under the name `hold N`.
 
 ---
 
+### The door was opened and nobody walked through it
+
+N1–N5 built the handle. Measured a fortnight later, the corpus had not moved: **63
+distinct codes across 1,944 beats, ten of them 68% of every gesture call, `think`
+alone 208 times, and FOUR calls in the whole app in the played band.** Everything the
+figure did was a held pose with a small overlay.
+
+A reader put it plainly — the movements are "usually pretty boring", the figure
+"will just repeat movements over and over again", and what was wanted was somebody
+"actually alive looking around or interacting in fun ways or in funny ways". N6–N12
+are that, made countable. `npm run check:life` holds all of them.
+
+### N6 · A lesson may not strike the same pose twice
+
+The first time a lesson uses a pose it keeps the one the author wrote. Every LATER
+use becomes **another body for the same meaning** — `VARIANTS` in
+`scripts/lib/liveliness.mjs` lists them, and every row is one idea with three or four
+bodies: `think` is a hand at the chin, and `160` is a hand at the chin that shifts
+its weight, `176` is the same consideration weighed slowly, `159` is listening, `165`
+is fidgeting with it.
+
+**This is what makes the rule safe to apply in bulk.** A1 is about the text agreeing
+with the picture; a variant does not change what is being claimed, so there is no
+sentence anywhere that a swap can falsify. A rule that needed a judgement per beat
+could not have been applied to 174 lessons at all.
+
+### N7 · A split run is ONE movement, and it has to be a living hold
+
+**Most of the repetition in this app was self-inflicted, and this is where.** J12 cut
+466 over-packed beats into pieces and copied every channel verbatim so the picture
+would hold still while the words advanced. Measured afterwards, **445 of the 499
+repeated poses in the corpus are those pieces.**
+
+Holding still was right for the SCENE and wrong for the FIGURE, and rig's own accents
+are why: `emoteLive` reads `bt`, which resets at every beat, so a pose carrying a
+`lift` — 2, 3, 5, 6, 15, 16, 18, 19, 20, 23, 24, 25, 26, 33, 35, 47 — **re-raises its
+arm on every piece of the sentence.** Four pieces, four identical arm lifts, one
+sentence. That is not a picture holding still, it is a tic.
+
+A living hold fixes it exactly, because it reads `t` — absolute scene time — and
+ignores `bt`. Put one across a whole run and the figure keeps moving smoothly through
+the beat changes without restarting; `carryFrom` blends two identical values, so
+there is not even a seam. Use `LIVING_RUN`, which lists only EXACT restatements —
+`point forward` has no living twin and is deliberately absent rather than
+approximated, because a run is several beats long and a wrong pose is wrong for all
+of them.
+
+Two corollaries. A run is rewritten **all or nothing**: half a run converted is a
+figure that changes what it is doing in the middle of one sentence. And **a played
+action may never go in a run's middle**, because it would replay once per piece — its
+only legal home there is the LAST piece, where it reads as hold, hold, hold, *react*.
+
+### N8 · Every lesson performs something
+
+A lesson that never leaves the 0–99 band is a lesson of photographs. Four of 174 had
+anything in the played band. At least one beat must carry an action that is actually
+performed — the reader has to see the figure *do* something, not adopt something.
+
+### N9 · A joke must be about something the beat says
+
+The first pass at this placed a gag at the middle eligible beat of every lesson, and
+the first file it touched put a pratfall on *"They drained the cask, and a key was
+lying at the bottom on a leather thong."* The action was right, the timing was right,
+and it was about nothing.
+
+A1 is not literally broken by that — the sentence does not say he stays upright — but
+it is the same failure one level down: the picture is doing something the words have
+no idea about, and a reader reads that as the app being broken rather than as a joke.
+So every entry in `COMIC` carries the cues that make it apt, and **a lesson with
+nothing for a gag to be about gets no gag.** 43 of them do not, and that is the rule
+working. A joke that does not land is not neutral; it is worse than the held pose it
+replaced.
+
+Beware two-sense words when writing a cue. `works` matched *artworks*, `sorted`
+matched *sorted them apart*, `simply` matched *simply will not*, and `off` matched
+*off the street*. Read the beats a cue actually selects before trusting it.
+
+### N10 · No branch tells the same joke twice
+
+*"Do not keep reusing the exact same funny things because then it will no longer be
+funny."* The scope that is actually felt is the BRANCH, because that is what a reader
+works through. The shelf holds 32 gags against a busiest branch of 30 lessons, so
+once each is always achievable; a second outing is allowed only after every gag has
+had a first, and never within eight lessons of itself.
+
+Assign **most-constrained-first**, not best-score-first. Straight greedy lowers
+coverage: a high-scoring pair consumes the one gag that was the only thing fitting
+some other lesson, and that lesson then gets nothing.
+
+### N11 · Nothing funny goes anywhere near a grave lesson
+
+This is the rule that keeps the whole exercise from being a disaster. Philosophy
+spends a great deal of its time on death, harm, slavery and tyranny, so the collision
+is not hypothetical, and a stickman doing a little shimmy over a line about slavery
+is not a lively app — it is one nobody will forgive.
+
+Applied at **two** levels. A grave word anywhere in a lesson takes the whole lesson
+out of the comic rotation, because tone is a property of the piece rather than of the
+sentence: a lesson about the trolley problem has light beats in it, and a pratfall on
+one of them is worse for being well timed. A grave word in the beat takes that beat
+out even in a lesson that is otherwise cheerful. 39 of 174 lessons are excluded
+entirely, and ethics and political philosophy lose most of theirs — which is the
+right answer, not a shortfall.
+
+### N12 · A head move is not a move
+
+Four comic actions were first written as things the head does — nodding off, looking
+both ways, glancing between two things, the double take — and three of them rendered
+as a figure standing perfectly still.
+
+The arithmetic says why, and it is not a tuning problem. `U.head` is 16, so the neck
+pivots the head centre by at most 16 units at a right angle and **5.3 at the 0.34 rad
+these were written at — against a head 40 units ACROSS.** Thirteen per cent of its own
+diameter is a jitter, not a movement. `tilt` has twice the leverage (`U.spine` is 33)
+and carries the whole torso with it, so anything that must read as ATTENTION is
+written on the spine first and the neck second. Where even that is not enough, give
+it a limb: a moving arm beats a moving head at every size this app draws.
+
+The related trap: the figure is drawn in PROFILE with a featureless round head, so
+**LEFT and RIGHT do not exist inside a pose at all** — the facing is a scene-level
+argument to `pose()`. "Look left, then right" is not something an action can express,
+however carefully it is written. Forward and back it can.
+
+### N13 · A gag needs two events and a gap
+
+What makes one of these funny is TIMING, not the pose. Every action in `moves.ts`
+before the comic shelf is a single arc — rise, hold, fall — and a single arc cannot
+be a joke, because a joke needs at least two events with a gap between them. The
+shelf (97–120) is built out of three shapes, and a new one should be too:
+
+- **The beat** — do a thing, PAUSE, then react to it. The pause is the gag (`99`
+  scuffs at the floor that tripped him; `115` flexes, then looks at the arm and is
+  not impressed). The pause has to be *still*: comic timing is silence, and a figure
+  fidgeting through its own pause has no pause.
+- **The repeat with a change** — the same move two or three times and the last one
+  different (`106`'s third nod does not catch itself; `114`'s third look overshoots).
+  Two identical events are a habit; three where the last breaks are a punchline.
+- **The failed dignity** — a big gesture that does not come off, followed by
+  composure (`102` shimmies and stops dead; `110` leans on nothing and falls through
+  it). This reads best at this scale, because a stickman has no face and recovery is
+  legible in the spine.
+
+**An abrupt stop is not an instantaneous one.** `102`'s first draft ended its dance
+in a single frame and `check-moves` called it: 6.2 units of hand, jumped, and still
+6.2 when sampled sixteen times finer — the test that tells a snap from a teleport
+(group L). "The abruptness is the gag" is true and is not a licence. Over 0.04 of `u`
+it is about four frames: still a snap, and now something the eye can follow.
+
+---
+
 ## Group O — the reader answers first, and only then is told
 
 Reported by a reader, in their own words: on a two-answer question *"even before you

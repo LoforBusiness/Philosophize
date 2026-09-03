@@ -51,13 +51,13 @@ export const BEATS: Epistemology12Beat[] = [
     dur: 5.0,
   },
   {
-    p: 4, x: 124, pipes: 2,
+    p: 160, x: 124, pipes: 2,
     text: 'You know what you ate this morning, but the toast is long gone. What you are reading is a copy your mind kept.',
     cite: 'Pipe two · memory',
     dur: 3.8,
   },
   {
-    p: 4, x: 124, pipes: 2,
+    p: 160, x: 124, pipes: 2,
     text: 'That pipe is longer, and it bends.',
     dur: 1.8,
   },
@@ -75,13 +75,13 @@ export const BEATS: Epistemology12Beat[] = [
     dur: 4.0,
   },
   {
-    p: 45, x: 124, pipes: 3,
+    p: 159, x: 124, pipes: 3,
     text: 'The third pipe does not begin near you at all. It runs in from strangers — teachers, books, mapmakers, people long dead.',
     cite: 'Pipe three · testimony',
     dur: 3.8,
   },
   {
-    p: 45, x: 124, pipes: 3,
+    p: 159, x: 124, pipes: 3,
     text: 'Now watch what it does to the level.',
     dur: 1.8,
   },

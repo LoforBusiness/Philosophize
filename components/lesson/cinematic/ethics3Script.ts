@@ -50,7 +50,7 @@ export const BEATS: Ethics3Beat[] = [
     dur: 2.5,
   },
   {
-    d: 27, tx: 196, lens: 0,
+    d: 404, tx: 196, lens: 0,
     text: 'Pull the lever, do nothing, or search for another way? Three great theories answer the same question — what makes an action good?',
     dur: 4.2,
   },
@@ -66,13 +66,13 @@ export const BEATS: Ethics3Beat[] = [
     dur: 2.3,
   },
   {
-    d: 10, tx: 196, pull: 0, lens: 2,
+    d: 161, tx: 196, pull: 0, lens: 2,
     text: 'Immanuel Kant would not. He will not trade lives like sums, because the one person has a worth no arithmetic can outweigh.',
     cite: 'Deontology — the duty',
     dur: 3.8,
   },
   {
-    d: 10, tx: 196, pull: 0, lens: 2,
+    d: 161, tx: 196, pull: 0, lens: 2,
     text: 'Duty binds whatever follows from it.',
     dur: 1.8,
   },

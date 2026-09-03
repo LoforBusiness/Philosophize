@@ -30,7 +30,7 @@ export const BEATS: Epis14Beat[] = [
     cite: 'What you can check',
   },
   {
-    g: 1, vat: 0, leap: 1,
+    g: 383, vat: 0, leap: 1,
     dur: 4.4,
     text: 'So the world is not something you observe. It is something you infer, across this gap, from what shows up on the screen.',
     cite: 'The leap',
@@ -49,13 +49,13 @@ export const BEATS: Epis14Beat[] = [
     },
   },
   {
-    g: 45, vat: 1, leap: 1,
+    g: 159, vat: 1, leap: 1,
     dur: 3,
     text: 'Now swap the world for a tank and a very good computer. Watch the screen while it happens.',
     cite: 'Swap the world',
   },
   {
-    g: 45, vat: 1, leap: 1,
+    g: 159, vat: 1, leap: 1,
     dur: 1.8,
     text: 'Nothing on it moved — and nothing on it ever would.',
   },

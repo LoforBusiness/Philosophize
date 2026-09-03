@@ -60,7 +60,7 @@ export const BEATS: Aes24Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, panel: 1, copies: 1, plates: 1,
+    p: 380, x: 132, panel: 1, copies: 1, plates: 1,
     text: 'An altarpiece sat in one church and pilgrims travelled to it. A film has no original print to travel to.',
     dur: 4.6,
   },

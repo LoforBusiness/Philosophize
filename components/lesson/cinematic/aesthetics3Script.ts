@@ -32,14 +32,14 @@ export const BEATS: Aes3Beat[] = [
   {
     // Both halves alive at once: a story arc beginning to climb while the modes
     // play — "song or story", drawn rather than asserted.
-    p: 32, arc: 0.3, modes: 1,
+    p: 130, arc: 0.3, modes: 1,
     text: 'No culture has ever lived without song or story. Not one, anywhere.',
     dur: 2.2,
   },
   {
     // Both halves alive at once: a story arc beginning to climb while the modes
     // play — "song or story", drawn rather than asserted.
-    p: 32, arc: 0.3, modes: 1,
+    p: 130, arc: 0.3, modes: 1,
     text: 'That is strange enough to want an explanation.',
     dur: 1.8,
   },

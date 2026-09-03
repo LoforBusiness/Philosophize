@@ -22,12 +22,12 @@ export interface Epi21Beat extends BaseBeat {
 
 export const BEATS: Epi21Beat[] = [
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Right now, believe that rain is falling outside. Not picture rain, not say the words.',
     dur: 2.9,
   },
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Take a moment and genuinely try.',
     dur: 1.8,
   },
@@ -71,7 +71,7 @@ export const BEATS: Epi21Beat[] = [
     dur: 3.6,
   },
   {
-    p: 30, x: 168, dial: 1, will: 1, ev: 1,
+    p: 384, x: 168, dial: 1, will: 1, ev: 1,
     text: 'Now one thing in the other tray: rain on the window. You did nothing, wanted nothing, decided nothing — and the needle goes all the way across.',
     cite: 'Evidence',
     dur: 4.8,

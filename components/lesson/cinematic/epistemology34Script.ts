@@ -19,12 +19,12 @@ export interface Epistemology34Beat extends BaseBeat {
 
 export const BEATS: Epistemology34Beat[] = [
   {
-    p: 25, x: 54, claim: 0,
+    p: 164, x: 54, claim: 0,
     text: 'Two bars. The left one is what you say.',
     dur: 1.8,
   },
   {
-    p: 25, x: 54, claim: 0,
+    p: 164, x: 54, claim: 0,
     text: 'The right one is how often what you say turns out to hold.',
     dur: 2.2,
   },
@@ -51,13 +51,13 @@ export const BEATS: Epistemology34Beat[] = [
     dur: 2.6,
   },
   {
-    p: 4, x: 54, claim: 0.95, gap: 1,
+    p: 160, x: 54, claim: 0.95, gap: 1,
     text: 'Being well calibrated means those two bars match. Notice that is not the same as being right often.',
     cite: 'Calibration',
     dur: 3,
   },
   {
-    p: 4, x: 54, claim: 0.95, gap: 1,
+    p: 160, x: 54, claim: 0.95, gap: 1,
     text: 'Someone right half the time who says so has them level.',
     dur: 1.8,
   },
@@ -94,7 +94,7 @@ export const BEATS: Epistemology34Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 54, claim: 0.72, gap: 1,
+    p: 383, x: 54, claim: 0.72, gap: 1,
     text: 'Here is the useful part. A match can be fixed from either end, and the end you control today is the left one.',
     cite: 'Fix it from the left',
     dur: 4.4,

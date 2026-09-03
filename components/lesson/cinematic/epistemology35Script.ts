@@ -86,7 +86,7 @@ export const BEATS: Epistemology35Beat[] = [
     dur: 3.4,
   },
   {
-    p: 4, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1, live: 1,
+    p: 160, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1, live: 1,
     interact: {
       prompt: 'Tap the plate your evidence does not actually reach.',
       explain: 'The last one. You looked at an animal and got "zebra" for free. Nothing you did looks any harder at the paint, so the chain that should carry you along it gives way at the end.',
@@ -95,12 +95,12 @@ export const BEATS: Epistemology35Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1,
+    p: 167, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1,
     text: 'Notice what did not happen. You never checked for paint.',
     dur: 1.8,
   },
   {
-    p: 35, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1,
+    p: 167, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1,
     text: 'You would think it strange to be asked, and you would still say you knew.',
     dur: 2.6,
   },
@@ -110,7 +110,7 @@ export const BEATS: Epistemology35Beat[] = [
     dur: 4.6,
   },
   {
-    p: 45, x: 130, pens: 1, plaques: 1, chain: 1,
+    p: 379, x: 130, pens: 1, plaques: 1, chain: 1,
     // UNGRADED (H53). This lesson already asks two graded questions — the drag on
     // beat 2 and the chain on beat 5 — and a third would quietly pay 70 XP where
     // every sibling pays 60. It stays as a tap because the point is worth making

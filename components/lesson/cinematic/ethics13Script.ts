@@ -31,7 +31,7 @@ export const BEATS: Ethics13Beat[] = [
     cite: 'Too little',
   },
   {
-    g: 15, pos: 4, habit: 0,
+    g: 387, pos: 4, habit: 0,
     dur: 4.4,
     text: 'Too much and you are reckless: you charge at things that should be walked away from. Same trait, other end, and it is a vice too.',
     cite: 'Too much',
@@ -50,7 +50,7 @@ export const BEATS: Ethics13Beat[] = [
     },
   },
   {
-    g: 4, pos: 4, habit: 0,
+    g: 396, pos: 4, habit: 0,
     dur: 4.6,
     text: 'So courage is somewhere along here — and notice what kind of answer that is. Not a rule you could write down, but an amount, judged against what is actually in front of you.',
     cite: 'Somewhere along here',

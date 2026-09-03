@@ -50,12 +50,12 @@ export const BEATS: Met19Beat[] = [
     dur: 1.8,
   },
   {
-    p: 45, x: 132, props: 1, peg: 0.16, strip: 1,
+    p: 413, x: 132, props: 1, peg: 0.16, strip: 1,
     text: 'That was the last plank. Either something stands there or nothing does, and philosophers have never agreed which.',
     dur: 4.6,
   },
   {
-    p: 13, x: 132, props: 1, peg: 0.4, strip: 1,
+    p: 383, x: 132, props: 1, peg: 0.4, strip: 1,
     text: 'Locke thought there had to be something underneath holding the properties together. He also admitted he could say nothing at all about it.',
     cite: 'Substance',
     dur: 4.8,

@@ -22,12 +22,12 @@ export interface Epi5Beat extends BaseBeat {
 
 export const BEATS: Epi5Beat[] = [
   {
-    p: 25, star: 0.4, power: 0, rungs: 2,
+    p: 164, star: 0.4, power: 0, rungs: 2,
     text: '"All men by nature desire to know. Aristotle opens his largest book with that line, and it is a claim about you.',
     dur: 2.6,
   },
   {
-    p: 25, star: 0.4, power: 0, rungs: 2,
+    p: 164, star: 0.4, power: 0, rungs: 2,
     text: 'Nobody taught you to want to know things.',
     dur: 1.8,
   },
@@ -54,7 +54,7 @@ export const BEATS: Epi5Beat[] = [
     dur: 3,
   },
   {
-    p: 4, star: 1, rungs: 5,
+    p: 160, star: 1, rungs: 5,
     // The cite plate carries `thaumazein`; the narration says what it means. A term
     // the reader can SEE spelled out does not also need spelling out in the prose (J7).
     text: 'Both Plato and Aristotle say philosophy begins in wonder. Not the pleasant kind.',
@@ -62,7 +62,7 @@ export const BEATS: Epi5Beat[] = [
     dur: 2.2,
   },
   {
-    p: 4, star: 1, rungs: 5,
+    p: 160, star: 1, rungs: 5,
     // The cite plate carries `thaumazein`; the narration says what it means. A term
     // the reader can SEE spelled out does not also need spelling out in the prose (J7).
     text: 'Their word is closer to being knocked off balance by something you cannot account for.',

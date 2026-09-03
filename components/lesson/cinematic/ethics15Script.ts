@@ -27,23 +27,23 @@ export interface Eth15Beat extends BaseBeat {
 
 export const BEATS: Eth15Beat[] = [
   {
-    g: 25, plain: 1, tilt: 0,
+    g: 164, plain: 1, tilt: 0,
     dur: 2.3,
     text: 'Here is a plain report of something that happened. You stole that money.',
   },
   {
-    g: 25, plain: 1, tilt: 0,
+    g: 164, plain: 1, tilt: 0,
     dur: 1.9,
     text: 'Anyone can hold the sentence up against the world and check.',
   },
   {
-    g: 45, plain: 1, moral: 1, tilt: 0,
+    g: 159, plain: 1, moral: 1, tilt: 0,
     dur: 3.7,
     text: 'Now the same report with a moral word in it. You acted wrongly in stealing that money.',
     cite: 'Same weight',
   },
   {
-    g: 45, plain: 1, moral: 1, tilt: 0,
+    g: 159, plain: 1, moral: 1, tilt: 0,
     dur: 1.8,
     text: 'The beam does not move.',
   },

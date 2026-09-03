@@ -37,13 +37,13 @@ export const BEATS: Aes13Beat[] = [
     cite: 'Nothing to find',
   },
   {
-    g: 1, art: 1, chain: 1,
+    g: 167, art: 1, chain: 1,
     dur: 3.7,
     text: 'So draw what you cannot see: where each canvas has been. One line runs back through three and a half centuries of hands.',
     cite: 'Where they have been',
   },
   {
-    g: 1, art: 1, chain: 1,
+    g: 167, art: 1, chain: 1,
     dur: 1.8,
     text: 'The other starts last year and stops.',
   },
@@ -61,13 +61,13 @@ export const BEATS: Aes13Beat[] = [
     },
   },
   {
-    g: 2, art: 1, chain: 1,
+    g: 406, art: 1, chain: 1,
     dur: 4.6,
     text: 'When van Meegeren confessed in 1947, not a single canvas changed. The same paintings that had been called lost masterpieces became cheap imitations overnight.',
     cite: 'Nothing changed',
   },
   {
-    g: 4, art: 1, chain: 1, pick: 1,
+    g: 160, art: 1, chain: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'One is the Vermeer. Tap the only thing here that could tell you which.',

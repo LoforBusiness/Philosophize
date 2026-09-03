@@ -40,13 +40,13 @@ export const BEATS: Strong4Beat[] = [
     dur: 2.1,
   },
   {
-    p: 1, fill: 0.55, verdict: 0, lens: 0,
+    p: 167, fill: 0.55, verdict: 0, lens: 0,
     text: 'A deductive argument promises its conclusion. Grade that one valid or sound.',
     cite: 'Two families of argument',
     dur: 1.8,
   },
   {
-    p: 1, fill: 0.55, verdict: 0, lens: 0,
+    p: 167, fill: 0.55, verdict: 0, lens: 0,
     text: 'An inductive argument only makes its conclusion likely, so grade it strong or weak. Use the wrong ruler and you get the wrong verdict.',
     dur: 3.5,
   },
@@ -68,7 +68,7 @@ export const BEATS: Strong4Beat[] = [
     dur: 3.1,
   },
   {
-    p: 8, fill: 0.78, lock: 0, dice: 1, verdict: 1, lens: 2,
+    p: 398, fill: 0.78, lock: 0, dice: 1, verdict: 1, lens: 2,
     text: 'The needle slips off certainty and the dice come out.',
     dur: 1.8,
   },

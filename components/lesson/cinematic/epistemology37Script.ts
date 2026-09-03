@@ -107,7 +107,7 @@ export const BEATS: Epistemology37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 45, x: 126, hull: 1, quiet: 1, verdict: 1, safe: 1,
+    p: 419, x: 126, hull: 1, quiet: 1, verdict: 1, safe: 1,
     text: 'Both are right about different cases. What survives is the shipowner: when other people carry the risk, the checking is not optional.',
     dur: 4.8,
   },

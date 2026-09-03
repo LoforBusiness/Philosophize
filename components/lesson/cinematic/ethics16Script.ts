@@ -37,7 +37,7 @@ export const BEATS: Eth16Beat[] = [
     cite: 'And again, without the knife',
   },
   {
-    g: 13, causes: 1, knife: 0, money: 1, repaid: 1,
+    g: 383, causes: 1, knife: 0, money: 1, repaid: 1,
     dur: 4.8,
     text: 'A hard determinist says neither one was free. The chain above your head is the same both times, so nothing under it can be different.',
     cite: 'One answer, and its cost',
@@ -56,7 +56,7 @@ export const BEATS: Eth16Beat[] = [
     },
   },
   {
-    g: 5, causes: 1, knife: 0, money: 1, repaid: 1,
+    g: 412, causes: 1, knife: 0, money: 1, repaid: 1,
     dur: 5.0,
     text: 'Hume keeps a smaller kind of freedom. You act freely when you do what you want and nobody is holding your arm.',
     cite: 'A smaller freedom',

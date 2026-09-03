@@ -24,35 +24,35 @@ export interface Metaphysics11Beat extends BaseBeat {
 
 export const BEATS: Metaphysics11Beat[] = [
   {
-    p: 28, c: 42, cx: 440, tok: 0,
+    p: 163, c: 42, cx: 440, tok: 0,
     text: 'Nearly every scrap of matter this man was born with has been replaced. The name under him has not moved once.',
     dur: 2.8,
   },
   {
-    p: 28, c: 42, cx: 440, tok: 0,
+    p: 163, c: 42, cx: 440, tok: 0,
     text: 'What is it holding on to?',
     dur: 1.8,
   },
   {
-    p: 45, c: 42, cx: 290, tok: 0,
+    p: 412, c: 42, cx: 290, tok: 0,
     text: 'Locke asks you to picture two of them. A prince — and a cobbler, who walks in off the street having never once seen a palace.',
     cite: 'The two men',
     dur: 4.4,
   },
   {
-    p: 30, c: 44, tok: 0,
+    p: 384, c: 44, tok: 0,
     text: 'The plate above the prince holds all he can remember doing. Every room, every promise, the whole thread running back to his childhood.',
     cite: 'What hangs above him',
     dur: 4.2,
   },
   {
-    p: 46, c: 15, tok: 1,
+    p: 173, c: 15, tok: 1,
     text: 'Overnight the whole thread leaves the prince and settles above the cobbler. Neither man has taken a step.',
     cite: 'One night',
     dur: 3.4,
   },
   {
-    p: 46, c: 15, tok: 1,
+    p: 173, c: 15, tok: 1,
     text: 'Only the memories have moved.',
     dur: 1.8,
   },

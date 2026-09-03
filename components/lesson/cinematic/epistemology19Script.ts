@@ -43,7 +43,7 @@ export const BEATS: Epi19Beat[] = [
     dur: 4.8,
   },
   {
-    p: 45, x: 132, doors: 1, chip: 1, stray: 1,
+    p: 379, x: 132, doors: 1, chip: 1, stray: 1,
     text: 'Here is the everyday failure. A famous heart doctor is asked about diet on television, and answers.',
     dur: 4.2,
   },
@@ -80,7 +80,7 @@ export const BEATS: Epi19Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 268, doors: 1, split: 1,
+    p: 412, x: 268, doors: 1, split: 1,
     text: 'Then the hard case. Two people behind the right door, both qualified, saying opposite things.',
     cite: 'When they disagree',
     dur: 4.2,

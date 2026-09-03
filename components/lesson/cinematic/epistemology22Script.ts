@@ -32,12 +32,12 @@ export interface Epi22Beat extends BaseBeat {
 
 export const BEATS: Epi22Beat[] = [
   {
-    p: 25, x: 200, routes: 1,
+    p: 164, x: 200, routes: 1,
     text: 'Two people want the same address. One asks somebody who knows it.',
     dur: 3.4,
   },
   {
-    p: 25, x: 200, routes: 1,
+    p: 164, x: 200, routes: 1,
     text: 'One guesses.',
     dur: 1.8,
   },
@@ -48,12 +48,12 @@ export const BEATS: Epi22Beat[] = [
     dur: 4.4,
   },
   {
-    p: 45, x: 132, routes: 1, run: 1, gaps: 1,
+    p: 159, x: 132, routes: 1, run: 1, gaps: 1,
     text: 'Look underneath. One route is a road.',
     dur: 1.8,
   },
   {
-    p: 45, x: 132, routes: 1, run: 1, gaps: 1,
+    p: 159, x: 132, routes: 1, run: 1, gaps: 1,
     text: 'The other is a line of stepping stones with nothing between them.',
     dur: 2.9,
   },
@@ -67,7 +67,7 @@ export const BEATS: Epi22Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, routes: 1, run: 1, gaps: 1,
+    p: 380, x: 132, routes: 1, run: 1, gaps: 1,
     text: 'Plato asked the same about statues that run away unless you tie them down. A tethered opinion stays put.',
     cite: 'The Meno',
     dur: 4.8,

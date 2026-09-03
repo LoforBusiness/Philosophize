@@ -71,13 +71,13 @@ export const BEATS: Political7Beat[] = [
     dur: 3.6,
   },
   {
-    p: 21, x: 190, stone: 1, charter: 1,
+    p: 176, x: 190, stone: 1, charter: 1,
     text: 'Here is how to tell the two apart. Tomorrow a government passes a law: from now on, you may not say what you think.',
     cite: 'The test',
     dur: 3.5,
   },
   {
-    p: 21, x: 190, stone: 1, charter: 1,
+    p: 176, x: 190, stone: 1, charter: 1,
     text: 'The law is real, and it is enforced.',
     dur: 1.8,
   },

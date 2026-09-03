@@ -40,7 +40,7 @@ export const BEATS: Metaphysics37Beat[] = [
     dur: 3.6,
   },
   {
-    p: 13, x: 56, shelf: 1,
+    p: 419, x: 56, shelf: 1,
     text: 'Ask whether it was fragile and everyone says yes without pausing. Now say what that yes was about.',
     dur: 4.0,
   },
@@ -54,12 +54,12 @@ export const BEATS: Metaphysics37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 56, shelf: 1, hammer: 1, swing: 1,
+    p: 176, x: 56, shelf: 1, hammer: 1, swing: 1,
     text: 'So try the obvious definition. Fragile means: if it is struck, it breaks.',
     dur: 3,
   },
   {
-    p: 21, x: 56, shelf: 1, hammer: 1, swing: 1,
+    p: 176, x: 56, shelf: 1, hammer: 1, swing: 1,
     text: 'Watch the hammer come down.',
     dur: 1.8,
   },
@@ -75,7 +75,7 @@ export const BEATS: Metaphysics37Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 56, shelf: 1, live_d: 1, live: 1,
+    p: 160, x: 56, shelf: 1, live_d: 1, live: 1,
     interact: {
       prompt: 'The sorcerer is gone and nobody has touched it. How fragile is it right now?',
       drag: {
@@ -106,7 +106,7 @@ export const BEATS: Metaphysics37Beat[] = [
     dur: 3.6,
   },
   {
-    p: 35, x: 128, shelf: 1,
+    p: 383, x: 128, shelf: 1,
     text: 'Which is a strange thing for a fact to be. Something true of the glass is true because of an event that never happened and now never will.',
     dur: 4.8,
   },

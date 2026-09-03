@@ -25,17 +25,17 @@ export interface E10Beat extends BaseBeat {
 
 export const BEATS: E10Beat[] = [
   {
-    p: 25, x: 92, gauge: 0, needle: 0.62,
+    p: 164, x: 92, gauge: 0, needle: 0.62,
     text: 'You are not certain the sun will rise tomorrow. You would still bet everything you own on it.',
     dur: 2.7,
   },
   {
-    p: 25, x: 92, gauge: 0, needle: 0.62,
+    p: 164, x: 92, gauge: 0, needle: 0.62,
     text: 'So do you know, or don’t you?',
     dur: 1.8,
   },
   {
-    p: 1, x: 92, gauge: 1, band: 1, needle: 0.62,
+    p: 383, x: 92, gauge: 1, band: 1, needle: 0.62,
     text: 'One old answer draws the line at the very end of the scale: know it only if you could not possibly be wrong. Held strictly, that leaves almost nothing on the shelf — not the sunrise, not your own name.',
     cite: 'The demand for certainty',
     dur: 5.0,

@@ -84,7 +84,7 @@ export const BEATS: Epi20Beat[] = [
     dur: 3.4,
   },
   {
-    p: 21, x: 268, voices: 1, agree: 0.32, wires: 1,
+    p: 380, x: 268, voices: 1, agree: 0.32, wires: 1,
     text: 'A feed is built to show you what people like you already share. It manufactures this picture by default.',
     dur: 4.4,
   },

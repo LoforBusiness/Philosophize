@@ -57,7 +57,7 @@ export const BEATS: Pol24Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, signs: 1, pub: 0,
+    p: 380, x: 132, signs: 1, pub: 0,
     text: 'Being mirrored back as lesser, or not at all, can trap people inside a picture of themselves they never made.',
     cite: 'Misrecognition',
     dur: 4.8,

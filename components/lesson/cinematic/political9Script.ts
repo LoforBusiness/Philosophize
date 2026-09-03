@@ -68,13 +68,13 @@ export const BEATS: P9Beat[] = [
     dur: 4.0,
   },
   {
-    vote: 0, tally: true, advance: true, rights: true, one: 9,
+    vote: 0, tally: true, advance: true, rights: true, one: 378,
     text: 'Mill and Tocqueville both named the danger and both put the same thing in the way of it. A line the vote does not reach across — which is why a court can strike down a law the majority genuinely wanted.',
     cite: 'Mill, Tocqueville',
     dur: 5.0,
   },
   {
-    vote: 0, tally: true, advance: true, rights: true, one: 9,
+    vote: 0, tally: true, advance: true, rights: true, one: 163,
     interact: {
       prompt: 'Set the lever to who the tyrant is here.',
       lever: {
@@ -90,7 +90,7 @@ export const BEATS: P9Beat[] = [
     dur: 4.6,
   },
   {
-    vote: 0, tally: true, advance: true, rights: true, one: 9, cards: true,
+    vote: 0, tally: true, advance: true, rights: true, one: 173, cards: true,
     interact: {
       prompt: 'The four voted fairly and they still cannot pass this line. Tap what is actually holding them.',
       explain:

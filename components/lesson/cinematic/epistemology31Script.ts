@@ -19,34 +19,34 @@ export interface Epis31Beat extends BaseBeat {
 
 export const BEATS: Epis31Beat[] = [
   {
-    g: 4, open: 0,
+    g: 160, open: 0,
     dur: 2.9,
     text: 'You are already down the road when it hits you: did you lock the door? You can picture doing it.',
   },
   {
-    g: 4, open: 0,
+    g: 160, open: 0,
     dur: 1.8,
     text: 'That picture is the only evidence you have.',
   },
   {
-    g: 1, open: 1,
+    g: 167, open: 1,
     dur: 3.9,
     text: 'So you check. You open the memory and there it is — the key, the turn, the pull on the handle.',
     cite: 'The first drawer',
   },
   {
-    g: 1, open: 1,
+    g: 167, open: 1,
     dur: 1.8,
     text: 'Clear as anything.',
   },
   {
-    g: 3, open: 2,
+    g: 168, open: 2,
     dur: 2.1,
     text: 'But how do you know that memory is any good? You remember checking it.',
     cite: 'The second drawer',
   },
   {
-    g: 3, open: 2,
+    g: 168, open: 2,
     dur: 2.5,
     text: 'That is a second drawer, in the same cabinet, made of the same stuff as the first.',
   },

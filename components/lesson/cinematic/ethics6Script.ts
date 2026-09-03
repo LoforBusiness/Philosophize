@@ -35,7 +35,7 @@ export const BEATS: Ethics6Beat[] = [
     dur: 2,
   },
   {
-    d: 1, str: 0, tx: 110, card: 1,
+    d: 383, str: 0, tx: 110, card: 1,
     text: 'Earlier you met the lever: divert the trolley, one dies instead of five. Philosophers then twisted it — each version keeps the five-for-one math but changes how the one dies.',
     cite: 'One dilemma, many versions',
     dur: 5.0,

@@ -27,7 +27,7 @@ export const BEATS: Aes31Beat[] = [
     text: 'Nine notes on four strings. A good phrase, played well, and the room is pleased with it.',
   },
   {
-    g: 40, strings: 4, playing: 1, clapA: 1, clapB: 0,
+    g: 400, strings: 4, playing: 1, clapA: 1, clapB: 0,
     dur: 3.8,
     text: 'The applause is polite. Nobody stands up.',
     cite: 'The first time',

@@ -41,7 +41,7 @@ export const BEATS: Aesthetics35Beat[] = [
     dur: 2.6,
   },
   {
-    p: 2, x: 56, track: 1, split: 1,
+    p: 394, x: 56, track: 1, split: 1,
     text: 'You are in a surgery now, waiting for the diagnosis.',
     dur: 1.8,
   },
@@ -55,12 +55,12 @@ export const BEATS: Aesthetics35Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 56, track: 1, split: 1, run: 1,
+    p: 176, x: 56, track: 1, split: 1, run: 1,
     text: 'Both readings had to fit. That is the part people miss.',
     dur: 2,
   },
   {
-    p: 21, x: 56, track: 1, split: 1, run: 1,
+    p: 176, x: 56, track: 1, split: 1, run: 1,
     text: 'A punchline that does not fit the setup is not surprising, it is wrong.',
     dur: 2.6,
   },
@@ -88,12 +88,12 @@ export const BEATS: Aesthetics35Beat[] = [
     dur: 1.8,
   },
   {
-    p: 35, x: 128, track: 1, split: 1, spoil: 1,
+    p: 167, x: 128, track: 1, split: 1, spoil: 1,
     text: 'Which is why the old theories only half work. Hobbes said we laugh at someone beneath us.',
     dur: 3.3,
   },
   {
-    p: 35, x: 128, track: 1, split: 1, spoil: 1,
+    p: 167, x: 128, track: 1, split: 1, spoil: 1,
     text: 'Freud said we let out pressure.',
     dur: 1.8,
   },

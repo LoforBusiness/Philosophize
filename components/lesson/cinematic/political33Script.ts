@@ -45,13 +45,13 @@ export const BEATS: Political33Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 52, open: 0.1, threat: 1,
+    p: 160, x: 52, open: 0.1, threat: 1,
     text: 'So shut the doors. Now look at what you have built.',
     cite: 'The other horn',
     dur: 1.8,
   },
   {
-    p: 4, x: 52, open: 0.1, threat: 1,
+    p: 160, x: 52, open: 0.1, threat: 1,
     text: 'A society that decides in advance which arguments may be heard. That society is the very thing you were trying not to become.',
     dur: 3.3,
   },
@@ -88,7 +88,7 @@ export const BEATS: Political33Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 52, open: 0.5,
+    p: 396, x: 52, open: 0.5,
     text: 'Notice what the test turns on. Not what a movement believes, which anyone can label, but whether it will meet you in an argument at all.',
     cite: 'The test is refusal',
     dur: 4.8,

@@ -24,17 +24,17 @@ export interface Political8Beat extends BaseBeat {
 
 export const BEATS: Political8Beat[] = [
   {
-    p: 25, x: 100, pile: 1,
+    p: 164, x: 100, pile: 1,
     text: 'Three people. One fence.',
     dur: 1.8,
   },
   {
-    p: 25, x: 100, pile: 1,
+    p: 164, x: 100, pile: 1,
     text: 'A match on the far side that all three want to watch. Everybody agrees they should get to.',
     dur: 2.7,
   },
   {
-    p: 25, x: 100, pile: 1,
+    p: 164, x: 100, pile: 1,
     text: 'Now watch how fast agreeing falls apart.',
     dur: 1.8,
   },
@@ -112,18 +112,18 @@ export const BEATS: Political8Beat[] = [
     dur: 1.0,
   },
   {
-    p: 3, x: 170, mode: 2, marks: 1, eyeline: 1,
+    p: 168, x: 170, mode: 2, marks: 1, eyeline: 1,
     text: 'So equality is a blank waiting to be filled in. Equal resources?',
     cite: 'Equality of what?',
     dur: 1.8,
   },
   {
-    p: 3, x: 170, mode: 2, marks: 1, eyeline: 1,
+    p: 168, x: 170, mode: 2, marks: 1, eyeline: 1,
     text: 'Equal chances? Equal happiness?',
     dur: 1.8,
   },
   {
-    p: 3, x: 170, mode: 2, marks: 1, eyeline: 1,
+    p: 168, x: 170, mode: 2, marks: 1, eyeline: 1,
     text: 'Amartya Sen and Martha Nussbaum answer differently. Make capabilities equal: what a person can really do and be.',
     dur: 3,
   },

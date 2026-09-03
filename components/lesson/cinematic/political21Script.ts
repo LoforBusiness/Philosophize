@@ -53,7 +53,7 @@ export const BEATS: Pol21Beat[] = [
     dur: 1.8,
   },
   {
-    p: 13, x: 132, map: 1, claimed: 1, exit: 1,
+    p: 400, x: 132, map: 1, claimed: 1, exit: 1,
     text: 'There is exactly one square nobody has claimed, and you cannot live on it.',
     cite: 'The open sea',
     dur: 3.8,
@@ -81,13 +81,13 @@ export const BEATS: Pol21Beat[] = [
     dur: 4.2,
   },
   {
-    p: 21, x: 268, map: 1, claimed: 1, exit: 1,
+    p: 176, x: 268, map: 1, claimed: 1, exit: 1,
     text: 'Philosophical anarchism stops right there. The view does not call for a riot.',
     cite: 'The modest conclusion',
     dur: 2.6,
   },
   {
-    p: 21, x: 268, map: 1, claimed: 1, exit: 1,
+    p: 176, x: 268, map: 1, claimed: 1, exit: 1,
     text: 'The view says the state never earned the authority it claims.',
     dur: 2.2,
   },

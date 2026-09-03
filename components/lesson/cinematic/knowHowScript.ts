@@ -24,12 +24,12 @@ export interface KnowHowBeat extends BaseBeat {
 
 export const BEATS: KnowHowBeat[] = [
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'You have read every word ever written about swimming. The physics, the technique, the breathing.',
     dur: 3,
   },
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Now get in the water.',
     dur: 1.8,
   },
@@ -51,7 +51,7 @@ export const BEATS: KnowHowBeat[] = [
     dur: 2.7,
   },
   {
-    p: 40, x: 168, steps: 3,
+    p: 399, x: 168, steps: 3,
     text: 'Look at the box underneath: nothing has arrived in it.',
     dur: 1.9,
   },
@@ -69,7 +69,7 @@ export const BEATS: KnowHowBeat[] = [
     dur: 3.8,
   },
   {
-    p: 36, x: 168, steps: 3, done: 1,
+    p: 383, x: 168, steps: 3, done: 1,
     text: 'Then the reading stops and the hands move, and the box fills. Ryle\'s point: not one line of that column is what filled it.',
     cite: 'The doing',
     dur: 4.6,

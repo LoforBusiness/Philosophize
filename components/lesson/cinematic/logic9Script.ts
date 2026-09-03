@@ -49,12 +49,12 @@ export const BEATS: L9Beat[] = [
     dur: 3.8,
   },
   {
-    a: 15, d: 29, dx: 264, claim: true, straw: 2,
+    a: 403, d: 29, dx: 264, claim: true, straw: 2,
     text: 'You beat a scarecrow you put up yourself.',
     dur: 1.8,
   },
   {
-    a: 9, d: 8, dx: 264, claim: true, straw: 2, untouched: true,
+    a: 378, d: 8, dx: 264, claim: true, straw: 2, untouched: true,
     text: 'Now look at what has actually happened. Two replies, a lot of noise, and the claim is standing exactly where it was — unread and unanswered.',
     dur: 4.2,
   },

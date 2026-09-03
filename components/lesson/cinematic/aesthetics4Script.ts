@@ -39,13 +39,13 @@ export const BEATS: Aes4Beat[] = [
     dur: 1.8,
   },
   {
-    a: 1, v: 10, test: 2,
+    a: 167, v: 10, test: 2,
     text: 'For ages there were two answers. Plato’s: art copies the world skilfully, and the Greek word for that is mimesis.',
     cite: 'Two old answers',
     dur: 2.6,
   },
   {
-    a: 1, v: 10, test: 2,
+    a: 167, v: 10, test: 2,
     text: 'Tolstoy’s: art puts a feeling into a form somebody else can pick up. Both assume a person made it.',
     dur: 2.4,
   },
@@ -84,7 +84,7 @@ export const BEATS: Aes4Beat[] = [
     dur: 2.4,
   },
   {
-    a: 13, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
+    a: 400, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
     text: 'Asking "but is that art? is already philosophy, because it makes you say what you secretly think art is.',
     dur: 2.6,
   },

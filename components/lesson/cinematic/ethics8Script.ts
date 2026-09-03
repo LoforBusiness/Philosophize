@@ -44,13 +44,13 @@ export const BEATS: Ethics8Beat[] = [
     dur: 1.8,
   },
   {
-    p: 45, x: 146, grid: 1, oth: 1,
+    p: 159, x: 146, grid: 1, oth: 1,
     text: 'Then you look up. Someone is on the floor by their bed, and no box fits them.',
     cite: 'Someone actually there',
     dur: 2.8,
   },
   {
-    p: 45, x: 146, grid: 1, oth: 1,
+    p: 159, x: 146, grid: 1, oth: 1,
     text: 'Not a case, not a number. The one you know.',
     dur: 1.8,
   },
@@ -136,13 +136,13 @@ export const BEATS: Ethics8Beat[] = [
     dur: 1.8,
   },
   {
-    p: 21, x: 172, grid: 0.28, oth: 1, thread: 1,
+    p: 176, x: 172, grid: 0.28, oth: 1, thread: 1,
     text: 'Critics feared care would trap people in endless self-sacrifice. Gilligan’s answer: care and justice are two lenses, not rivals.',
     cite: 'Two voices, not rivals',
     dur: 2.9,
   },
   {
-    p: 21, x: 172, grid: 0.28, oth: 1, thread: 1,
+    p: 176, x: 172, grid: 0.28, oth: 1, thread: 1,
     text: 'Rules stop you being cruel. Care notices the person the rules never mention.',
     dur: 2,
   },

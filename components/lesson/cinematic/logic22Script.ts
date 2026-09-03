@@ -27,13 +27,13 @@ export const BEATS: Logic22Beat[] = [
     dur: 4.4,
   },
   {
-    p: 41, x: 168, claim: 1, field: 1,
+    p: 399, x: 168, claim: 1, field: 1,
     text: 'Aristotle boiled talk about groups down to four shapes: all, none, some, and some-not. Here is the first one, with the group it is about underneath.',
     cite: 'A universal claim',
     dur: 4.8,
   },
   {
-    p: 13, x: 124, claim: 1, field: 1,
+    p: 383, x: 124, claim: 1, field: 1,
     text: 'A universal claim is a promise about every single member. The promise is worth a lot and breaks easily, because one exception breaks all of it.',
     cite: 'What "all" costs',
     dur: 4.6,

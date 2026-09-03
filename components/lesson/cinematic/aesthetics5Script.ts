@@ -33,13 +33,13 @@ export const BEATS: Aes5Beat[] = [
     dur: 2.7,
   },
   {
-    p: 25, bird: 1, ego: 0, self: 0.06,
+    p: 164, bird: 1, ego: 0, self: 0.06,
     text: 'A woman is at a window, brooding over a bruise to her pride, when she sees a hovering kestrel. In a moment the brooding is gone.',
     cite: 'Murdoch and the kestrel',
     dur: 3.8,
   },
   {
-    p: 25, bird: 1, ego: 0, self: 0.06,
+    p: 415, bird: 1, ego: 0, self: 0.06,
     text: 'Nothing left but kestrel. She called that unselfing.',
     dur: 1.8,
   },
@@ -86,7 +86,7 @@ export const BEATS: Aes5Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, bird: 0, leaf: 1, self: 0.12,
+    p: 160, bird: 0, leaf: 1, self: 0.12,
     // Answered ON the stage: the three GOAL cards inside the frame are the options,
     // so the reader picks an aim for the exercise instead of reading a list.
     interact: {

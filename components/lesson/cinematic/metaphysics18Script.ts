@@ -44,18 +44,18 @@ export const BEATS: Met18Beat[] = [
     dur: 4.4,
   },
   {
-    p: 45, x: 132, shelf: 1, aim: 1, hang: 1,
+    p: 159, x: 132, shelf: 1, aim: 1, hang: 1,
     text: 'Now point at the number three. Not three apples.',
     cite: 'The arrow hangs',
     dur: 2.3,
   },
   {
-    p: 45, x: 132, shelf: 1, aim: 1, hang: 1,
+    p: 159, x: 132, shelf: 1, aim: 1, hang: 1,
     text: 'Not the mark chalked on a board. The number.',
     dur: 2.3,
   },
   {
-    p: 13, x: 132, shelf: 1, aim: 1, hang: 1,
+    p: 383, x: 132, shelf: 1, aim: 1, hang: 1,
     text: 'And yet three is a prime number, and three was prime before anybody counted anything.',
     dur: 4.2,
   },
@@ -69,7 +69,7 @@ export const BEATS: Met18Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, shelf: 1, aim: 1, hang: 1, beyond: 1,
+    p: 402, x: 132, shelf: 1, aim: 1, hang: 1, beyond: 1,
     text: 'Plato takes the obvious way out. The number exists, and the number does not live here.',
     cite: 'Platonism',
     dur: 4.0,

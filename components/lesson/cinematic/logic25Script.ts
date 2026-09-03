@@ -21,12 +21,12 @@ export interface Logic25Beat extends BaseBeat {
 
 export const BEATS: Logic25Beat[] = [
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'A test that is 99% accurate comes back positive for a disease. Almost everyone reads that as "almost certainly ill".',
     dur: 3.7,
   },
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Almost everyone is wrong.',
     dur: 1.8,
   },
@@ -37,7 +37,7 @@ export const BEATS: Logic25Beat[] = [
     dur: 4.4,
   },
   {
-    p: 40, x: 168, result: 1, real: 1,
+    p: 383, x: 168, result: 1, real: 1,
     text: 'One person in the crowd really is ill, and the test almost certainly catches them. There they are, a bar one unit wide.',
     cite: 'The one real case',
     dur: 4.0,

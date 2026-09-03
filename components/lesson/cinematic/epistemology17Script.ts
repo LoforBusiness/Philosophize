@@ -32,13 +32,13 @@ export const BEATS: Epi17Beat[] = [
     text: 'A field of facts, and a frame drawn round the ones a theory accounts for. Inside the frame, everything behaves.',
   },
   {
-    g: 45, facts: 1, frame: 1, odd: 3,
+    g: 159, facts: 1, frame: 1, odd: 3,
     dur: 2.7,
     text: 'Then the awkward results pile up outside the frame. Nobody throws the frame away.',
     cite: 'Anomalies',
   },
   {
-    g: 45, facts: 1, frame: 1, odd: 3,
+    g: 159, facts: 1, frame: 1, odd: 3,
     dur: 2.1,
     text: 'They patch the frame, add a circle, and patch it again.',
   },
@@ -67,7 +67,7 @@ export const BEATS: Epi17Beat[] = [
     },
   },
   {
-    g: 21, facts: 1, frame: 1, odd: 3, shift: 1,
+    g: 412, facts: 1, frame: 1, odd: 3, shift: 1,
     dur: 5.0,
     text: 'Then the whole thing goes at once. Copernicus moved the sun to the middle, and every fact on the board reorganised without one of them moving.',
     cite: 'The revolution',

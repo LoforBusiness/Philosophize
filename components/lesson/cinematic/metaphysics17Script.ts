@@ -27,12 +27,12 @@ export interface Met17Beat extends BaseBeat {
 
 export const BEATS: Met17Beat[] = [
   {
-    g: 25, wall: 1,
+    g: 164, wall: 1,
     dur: 3.8,
     text: 'Mary knows every physical fact about colour. Wavelengths, cones, which neurons fire and in what order.',
   },
   {
-    g: 25, wall: 1,
+    g: 164, wall: 1,
     dur: 1.8,
     text: 'The wall is complete.',
   },
@@ -43,7 +43,7 @@ export const BEATS: Met17Beat[] = [
     cite: 'And she has never seen it',
   },
   {
-    g: 13, wall: 1, door: 1, card: 1,
+    g: 383, wall: 1, door: 1, card: 1,
     dur: 4.8,
     text: 'Today she opens the door and looks at a red rose. Something arrives that was not on the wall.',
     cite: 'She steps outside',

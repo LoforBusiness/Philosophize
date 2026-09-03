@@ -59,13 +59,13 @@ export const BEATS: Pol3Beat[] = [
     dur: 1.8,
   },
   {
-    sub: 0, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
+    sub: 158, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
     text: 'Locke said we set up a government to guard our rights, and it holds power only in trust. Break the trust and the government forfeits its right to rule.',
     cite: 'Locke, 1689',
     dur: 3.9,
   },
   {
-    sub: 0, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
+    sub: 158, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
     text: 'The American founders leaned on Locke in 1776.',
     dur: 1.8,
   },

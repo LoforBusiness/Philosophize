@@ -22,17 +22,17 @@ export interface Pol12Beat extends BaseBeat {
 
 export const BEATS: Pol12Beat[] = [
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Rousseau wrote that a people can be forced to be free. The phrase sounds like nonsense.',
     dur: 2.5,
   },
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Isaiah Berlin spent an essay explaining why the phrase makes sense, and why that is worse.',
     dur: 2.5,
   },
   {
-    p: 41, x: 168, door: 1, open: 0,
+    p: 412, x: 168, door: 1, open: 0,
     text: 'Freedom question one: how many doors are open to you, with nobody standing in them? That is negative liberty, and it is entirely about what other people are doing.',
     cite: 'Negative liberty',
     dur: 5.0,

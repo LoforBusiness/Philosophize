@@ -55,13 +55,13 @@ export const BEATS: Ethics2Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 262, g: 21, gx: 108, named: 1, lens: 1,
+    p: 160, x: 262, g: 21, gx: 108, named: 1, lens: 1,
     text: 'Mill points the first lens at the wallet. Did handing it in make anyone’s life go better?',
     cite: 'J.S. Mill, Utilitarianism, 1863',
     dur: 2.7,
   },
   {
-    p: 4, x: 262, g: 21, gx: 108, named: 1, lens: 1,
+    p: 416, x: 262, g: 21, gx: 108, named: 1, lens: 1,
     text: 'For him that is the whole question, and everybody’s happiness counts the same.',
     dur: 2.1,
   },

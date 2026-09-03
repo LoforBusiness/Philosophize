@@ -31,19 +31,19 @@ export const BEATS: Epistemology33Beat[] = [
     dur: 4.0,
   },
   {
-    p: 19, x: 56, ev: 1, bar: 0.85,
+    p: 415, x: 56, ev: 1, bar: 0.85,
     text: 'Now the same afternoon with one thing added. A cheque has to clear by Monday or you lose the house.',
     cite: 'The stakes go up',
     dur: 4.0,
   },
   {
-    p: 4, x: 56, ev: 1, bar: 0.85,
+    p: 160, x: 56, ev: 1, bar: 0.85,
     text: 'And you get out of the car and check. Look at the column while you do it — not one brick has moved.',
     cite: 'The evidence did not move',
     dur: 3.5,
   },
   {
-    p: 4, x: 56, ev: 1, bar: 0.85,
+    p: 160, x: 56, ev: 1, bar: 0.85,
     text: 'You have exactly what you had a minute ago.',
     dur: 1.8,
   },

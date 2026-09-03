@@ -23,12 +23,12 @@ export interface Ethics9Beat extends BaseBeat {
 
 export const BEATS: Ethics9Beat[] = [
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Most hard choices have a right answer buried in them somewhere. Some do not.',
     dur: 2.2,
   },
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Some leave a mark on you whichever way you go.',
     dur: 1.8,
   },
@@ -44,7 +44,7 @@ export const BEATS: Ethics9Beat[] = [
     dur: 1.9,
   },
   {
-    p: 13, x: 124, notes: 1,
+    p: 383, x: 124, notes: 1,
     text: 'Neither claim outranks the other. That is what makes this a dilemma rather than a hard sum — there is no scale both of them fit on.',
     cite: 'Not a hard sum',
     dur: 4.4,
@@ -63,13 +63,13 @@ export const BEATS: Ethics9Beat[] = [
     dur: 3.6,
   },
   {
-    p: 35, x: 168, notes: 1, taken: 2,
+    p: 167, x: 168, notes: 1, taken: 2,
     text: 'The student goes. Say he was right to — most people think he was.',
     cite: 'He chooses',
     dur: 2.1,
   },
   {
-    p: 35, x: 168, notes: 1, taken: 2,
+    p: 167, x: 168, notes: 1, taken: 2,
     text: 'Now look at the board: the other claim has not moved. Nothing about his choice removed it.',
     dur: 2.7,
   },

@@ -21,12 +21,12 @@ export interface Ethics23Beat extends BaseBeat {
 
 export const BEATS: Ethics23Beat[] = [
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'You pass a shallow pond and a small child is drowning in it. Wading in ruins an expensive pair of shoes.',
     dur: 3.5,
   },
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Nobody thinks this is a hard question.',
     dur: 1.8,
   },
@@ -37,7 +37,7 @@ export const BEATS: Ethics23Beat[] = [
     dur: 4.2,
   },
   {
-    p: 13, x: 124, gauges: 1, near: 1,
+    p: 383, x: 124, gauges: 1, near: 1,
     text: 'Now the second child, dying of something preventable, eight thousand miles off. The same money, the same certainty, the same small cost to you.',
     cite: 'The child far away',
     dur: 4.6,
@@ -56,13 +56,13 @@ export const BEATS: Ethics23Beat[] = [
     dur: 4.0,
   },
   {
-    p: 35, x: 168, gauges: 1, near: 1, far: 1,
+    p: 167, x: 168, gauges: 1, near: 1, far: 1,
     text: 'Singer asks what could hold the second gauge down. Not the cost, which is the same.',
     cite: 'Nothing holds it down',
     dur: 2.2,
   },
   {
-    p: 35, x: 168, gauges: 1, near: 1, far: 1,
+    p: 167, x: 168, gauges: 1, near: 1, far: 1,
     text: 'Not your power to help, which is the same. Only how far away it is — and distance is not a moral property.',
     dur: 3.2,
   },

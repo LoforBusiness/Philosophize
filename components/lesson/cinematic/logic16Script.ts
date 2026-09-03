@@ -39,18 +39,18 @@ export const BEATS: Log16Beat[] = [
     dur: 4.0,
   },
   {
-    p: 2, x: 60, dawns: 5,
+    p: 312, x: 60, dawns: 5,
     text: 'Five mornings running. Five crows, five sunrises, and not once has the sun beaten him to it.',
     dur: 4.4,
   },
   {
-    p: 45, x: 132, dawns: 5, arrow: 1,
+    p: 159, x: 132, dawns: 5, arrow: 1,
     text: 'So the crow makes the sun rise. Nobody believes that.',
     cite: 'And therefore',
     dur: 2.6,
   },
   {
-    p: 45, x: 132, dawns: 5, arrow: 1,
+    p: 159, x: 132, dawns: 5, arrow: 1,
     text: 'Everybody makes the same move about something else.',
     dur: 2,
   },
@@ -75,7 +75,7 @@ export const BEATS: Log16Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, dawns: 6, arrow: 1, silent: 1,
+    p: 380, x: 132, dawns: 6, arrow: 1, silent: 1,
     text: 'The cockerel is ill and says nothing. The sun comes up at the usual minute.',
     cite: 'The sixth morning',
     dur: 4.4,

@@ -93,18 +93,18 @@ export const BEATS: Metaphysics36Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 128, hotel: 1, dbl: 1,
+    p: 405, x: 128, hotel: 1, dbl: 1,
     text: 'Nothing here is an error. A part can be paired off one to one with the whole, and only an endless collection can do that.',
     dur: 4.4,
   },
   {
-    p: 45, x: 128, hotel: 1, dbl: 1,
+    p: 159, x: 128, hotel: 1, dbl: 1,
     text: 'Which is why some argue no real thing could work like this. The maths is fine.',
     cite: 'Craig, on the impossibility of an actual infinite',
     dur: 3,
   },
   {
-    p: 45, x: 128, hotel: 1, dbl: 1,
+    p: 159, x: 128, hotel: 1, dbl: 1,
     text: 'Whether anything buildable behaves this way is a different question.',
     dur: 1.8,
   },

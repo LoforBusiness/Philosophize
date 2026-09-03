@@ -75,12 +75,12 @@ export const BEATS: Ethics37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 54, posts: 1, cord: 1, lean: 1,
+    p: 176, x: 54, posts: 1, cord: 1, lean: 1,
     text: 'Look what is leaning on the cord now. The other person cancelled a plan.',
     dur: 2.9,
   },
   {
-    p: 21, x: 54, posts: 1, cord: 1, lean: 1,
+    p: 176, x: 54, posts: 1, cord: 1, lean: 1,
     text: 'Told a friend. Stopped hunting for another way.',
     dur: 1.8,
   },
@@ -107,7 +107,7 @@ export const BEATS: Ethics37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 126, posts: 1, lean: 1, cut: 1,
+    p: 400, x: 126, posts: 1, lean: 1, cut: 1,
     text: 'Which is the test that separates the two accounts. If the wrong were only to the practice, a breach nobody hears of costs almost nothing.',
     dur: 4.8,
   },

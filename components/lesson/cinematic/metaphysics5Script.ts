@@ -40,7 +40,7 @@ export const BEATS: Meta5Beat[] = [
     dur: 2.2,
   },
   {
-    p: 19, stars: 1, q: 1, psr: 1,
+    p: 404, stars: 1, q: 1, psr: 1,
     // The rule is drawn on stage in plain words — EVERY FACT NEEDS A REASON. Naming
     // it "the Principle of Sufficient Reason" over the top of that adds a term and
     // no meaning, and undoes the choice the scene already made (J7).
@@ -91,7 +91,7 @@ export const BEATS: Meta5Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, stars: 1, q: 0.4, psr: 1, dasein: 1,
+    p: 160, stars: 1, q: 0.4, psr: 1, dasein: 1,
     interact: {
       prompt: 'Heidegger picked that word deliberately. Tap what it says about you.',
       cards: [

@@ -22,12 +22,12 @@ export interface Aes11Beat extends BaseBeat {
 
 export const BEATS: Aes11Beat[] = [
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'A gallery hangs two pictures. One was painted by a person over four months.',
     dur: 2.7,
   },
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'One was generated in about nine seconds.',
     dur: 1.8,
   },
@@ -43,7 +43,7 @@ export const BEATS: Aes11Beat[] = [
     dur: 3.2,
   },
   {
-    p: 47, x: 124, frames: 1, plaques: 1,
+    p: 396, x: 124, frames: 1, plaques: 1,
     text: 'Only the plaques tell the two apart. Cover the plaques and no visitor, curator or critic has ever sorted them reliably.',
     cite: 'The plaques',
     dur: 4.4,
@@ -61,7 +61,7 @@ export const BEATS: Aes11Beat[] = [
     dur: 3.8,
   },
   {
-    p: 29, x: 168, frames: 1, plaques: 1, same: 1,
+    p: 389, x: 168, frames: 1, plaques: 1, same: 1,
     text: 'So every visible property is shared. Whatever separates these two is therefore not in the object at all — it is in how the object came to be here.',
     cite: 'Nothing visible left',
     dur: 4.8,

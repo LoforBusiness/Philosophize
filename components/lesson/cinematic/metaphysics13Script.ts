@@ -27,7 +27,7 @@ export const BEATS: Meta13Beat[] = [
     dur: 4.4,
   },
   {
-    p: 41, x: 168, track: 1,
+    p: 401, x: 168, track: 1,
     text: 'Say yes, and say it works. What travels is not a body — it is the chain: your memories, your intentions, your half-finished thought about lunch, all continuous.',
     cite: 'What travels',
     dur: 5.0,

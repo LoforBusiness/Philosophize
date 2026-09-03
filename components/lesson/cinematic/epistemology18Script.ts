@@ -54,7 +54,7 @@ export const BEATS: Epi18Beat[] = [
     dur: 4.4,
   },
   {
-    p: 13, x: 132, rails: 1, grip: 1, ev: 0.3,
+    p: 383, x: 132, rails: 1, grip: 1, ev: 0.3,
     text: 'The same report should not move both people the same distance. The evidence alone cannot decide how far.',
     dur: 3.8,
   },

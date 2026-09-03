@@ -39,23 +39,23 @@ export const BEATS: Log18Beat[] = [
     dur: 3.8,
   },
   {
-    p: 2, x: 200, crowd: 1, needle: 0.5,
+    p: 405, x: 200, crowd: 1, needle: 0.5,
     text: 'Now the whole town says the same thing. Every voice, loudly, and a few are upset with you for asking.',
     dur: 4.6,
   },
   {
-    p: 45, x: 128, crowd: 1, gap: 1, needle: 0.5,
+    p: 159, x: 128, crowd: 1, gap: 1, needle: 0.5,
     text: 'Here is the machinery. The handle is what they turn.',
     cite: 'Look at the middle',
     dur: 2.4,
   },
   {
-    p: 45, x: 128, crowd: 1, gap: 1, needle: 0.5,
+    p: 159, x: 128, crowd: 1, gap: 1, needle: 0.5,
     text: 'The needle is whether the water is safe.',
     dur: 2,
   },
   {
-    p: 13, x: 128, crowd: 1, gap: 1, needle: 0.5,
+    p: 383, x: 128, crowd: 1, gap: 1, needle: 0.5,
     text: 'There is a hole in the shaft. Nothing that happens on the left reaches the right.',
     dur: 3.8,
   },

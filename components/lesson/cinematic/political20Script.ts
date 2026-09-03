@@ -37,13 +37,13 @@ export const BEATS: Pol20Beat[] = [
     dur: 4.2,
   },
   {
-    p: 45, x: 200, stacks: 1,
+    p: 159, x: 200, stacks: 1,
     text: 'They overlap almost nowhere, and neither is going to talk the other round. This is not a failure.',
     cite: 'Reasonable pluralism',
     dur: 3.2,
   },
   {
-    p: 45, x: 200, stacks: 1,
+    p: 416, x: 200, stacks: 1,
     text: 'Rawls thought it was the normal result of free thinking.',
     dur: 1.8,
   },
@@ -53,7 +53,7 @@ export const BEATS: Pol20Beat[] = [
     dur: 4.2,
   },
   {
-    p: 13, x: 132, stacks: 1, shelf: 1, cands: 1,
+    p: 383, x: 132, stacks: 1, shelf: 1, cands: 1,
     text: 'So the shelf. A reason for the law has to be one the other person could weigh without first joining you.',
     cite: 'Public reason',
     dur: 4.6,

@@ -45,7 +45,7 @@ export const BEATS: Log21Beat[] = [
     dur: 3,
   },
   {
-    p: 2, x: 200, chips: 1, bench: 1, under: 0,
+    p: 400, x: 200, chips: 1, bench: 1, under: 0,
     text: 'Then switch that lamp on alone and see.',
     dur: 1.8,
   },
@@ -64,7 +64,7 @@ export const BEATS: Log21Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, chips: 1, bench: 1, under: 2,
+    p: 380, x: 132, chips: 1, bench: 1, under: 2,
     text: 'It being Tuesday fails both tests. Fuel and heat and oxygen together pass both.',
     cite: 'The other two corners',
     dur: 4.0,

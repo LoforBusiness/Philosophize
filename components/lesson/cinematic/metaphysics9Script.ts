@@ -29,13 +29,13 @@ export const BEATS: M9Beat[] = [
     dur: 3.6,
   },
   {
-    p: 1, x: 96, panels: 1,
+    p: 167, x: 96, panels: 1,
     text: 'Descartes doubted everything he could, and could not doubt that he was thinking. So mind is a thing that thinks and takes up no space; body is a thing that takes up space and does not think.',
     cite: 'Cartesian dualism',
     dur: 4.6,
   },
   {
-    p: 1, x: 96, panels: 1,
+    p: 167, x: 96, panels: 1,
     text: 'Two separate substances.',
     dur: 1.8,
   },

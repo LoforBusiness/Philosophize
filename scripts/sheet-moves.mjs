@@ -35,9 +35,26 @@ const R = await import(pathToFileURL(path.join(TMP, 'rig.mjs')).href);
 const M = await import(pathToFileURL(path.join(TMP, 'moves.mjs')).href);
 const I = await import(emit('components/lesson/cinematic/interact.ts', 'interact.mjs'));
 
-const N = 20, CELL = 150, H = 260, GROUND = 210;
+// FIG_K DRAWS BIGGER, AND IT IS NOT A CONVENIENCE.
+//
+// At K = 1 a figure is about 90px tall in a 150px cell, and at that size a
+// correct pose and a broken one look equally like a black blob — which is the
+// state this sheet exists to prevent. §19 records the same thing about the era
+// numerals: a glyph that looked sliced at 2× was whole at 4×, and the reading of
+// the smaller picture was simply wrong. So: measure with `check:moves`, then come
+// here and LOOK BIGGER. `FIG_K=3 node scripts/sheet-moves.mjs act:110`.
+//
+// The cell, the canvas and the ground line all scale with it, so the figure keeps
+// the same room and the same headroom at every size.
+const K = +(process.env.FIG_K || 1);
+// FIG_N IS THE OTHER HALF, AND WITHOUT IT FIG_K BUYS NOTHING. Twenty frames at
+// K = 3 is a 9000px strip, and anything looking at it scales the whole strip back
+// down to fit — so every pixel gained by drawing bigger is given straight back.
+// Fewer, larger frames is what actually shows the pose. Six is a good read of a
+// three-act action; twenty is right for checking continuity.
+const N = +(process.env.FIG_N || 20);
+const CELL = Math.round(150 * K), H = Math.round(260 * K), GROUND = Math.round(210 * K);
 const INK = 0x1a1a1aff, PAPER = 0xfafaf7ff, RULE = 0xd8d5ccff;
-const K = 1.0;
 
 // TRUE STROKE WEIGHTS, taken from how Stickman.tsx actually draws.
 // `boneBase(thick)` sets the bone's full HEIGHT, so its half-width is thick/2;

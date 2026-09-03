@@ -34,12 +34,12 @@ export interface Aes23Beat extends BaseBeat {
 
 export const BEATS: Aes23Beat[] = [
   {
-    p: 25, x: 200, stave: 1,
+    p: 164, x: 200, stave: 1,
     text: 'Seven notes, no words. It can move you to tears.',
     dur: 2.4,
   },
   {
-    p: 25, x: 200, stave: 1,
+    p: 164, x: 200, stave: 1,
     text: 'Now try to say what it was about.',
     dur: 2,
   },
@@ -50,7 +50,7 @@ export const BEATS: Aes23Beat[] = [
     dur: 4.4,
   },
   {
-    p: 45, x: 132, stave: 1, plates: 1, point: 1, aim: 1,
+    p: 379, x: 132, stave: 1, plates: 1, point: 1, aim: 1,
     text: 'A bird, sometimes. Trilling violins can imitate birdsong, though the printed title is doing most of the pointing.',
     cite: 'Representation',
     dur: 4.8,
@@ -65,13 +65,13 @@ export const BEATS: Aes23Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, stave: 1, plates: 1, point: 1, aim: 2,
+    p: 176, x: 132, stave: 1, plates: 1, point: 1, aim: 2,
     text: 'Most instrumental music works this way. The music is not about anything.',
     cite: 'Absolute music',
     dur: 2.6,
   },
   {
-    p: 21, x: 132, stave: 1, plates: 1, point: 1, aim: 2,
+    p: 176, x: 132, stave: 1, plates: 1, point: 1, aim: 2,
     text: 'The music is a shape made of tones.',
     dur: 1.8,
   },
@@ -89,7 +89,7 @@ export const BEATS: Aes23Beat[] = [
     dur: 4.2,
   },
   {
-    p: 13, x: 268, stave: 1, plates: 1, point: 1, aim: 2,
+    p: 399, x: 268, stave: 1, plates: 1, point: 1, aim: 2,
     text: 'That is the grand objection. Music points at nothing you can see because it copies the wanting underneath everything.',
     dur: 4.6,
   },

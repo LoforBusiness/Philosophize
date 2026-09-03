@@ -34,12 +34,12 @@ export interface Pol22Beat extends BaseBeat {
 
 export const BEATS: Pol22Beat[] = [
   {
-    p: 25, x: 200, switchOn: 1, tiles: 1,
+    p: 164, x: 200, switchOn: 1, tiles: 1,
     text: 'A servant with a kind employer. He has never once ordered her about.',
     dur: 3.2,
   },
   {
-    p: 25, x: 200, switchOn: 1, tiles: 1,
+    p: 164, x: 200, switchOn: 1, tiles: 1,
     text: 'The servant\'s day is her own.',
     dur: 1.8,
   },
@@ -64,7 +64,7 @@ export const BEATS: Pol22Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, switchOn: 1, tiles: 1, reach: 1,
+    p: 380, x: 132, switchOn: 1, tiles: 1, reach: 1,
     text: 'One question asks whether anyone is interfering now. The other asks whether anyone could, whenever they liked.',
     cite: 'Two questions',
     dur: 4.4,

@@ -24,24 +24,24 @@ export const BEATS: Epi6Beat[] = [
     dur: 3.4,
   },
   {
-    p: 21, bal: 1, route: 1,
+    p: 176, bal: 1, route: 1,
     text: 'Skepticism asks whether knowledge is possible at all. For every reason to believe, the skeptic finds an equal reason to doubt.',
     cite: 'The skeptic’s challenge',
     dur: 3.5,
   },
   {
-    p: 21, bal: 1, route: 1,
+    p: 176, bal: 1, route: 1,
     text: 'If the reasons cancel out, how can any belief be secure?',
     dur: 1.8,
   },
   {
-    p: 0, bal: 1, route: 3,
+    p: 158, bal: 1, route: 3,
     text: 'Pyrrho met each claim with its opposite, found both equally strong, and simply refused to decide. He called the refusal epoche.',
     cite: 'Pyrrho suspends judgment',
     dur: 3.1,
   },
   {
-    p: 0, bal: 1, route: 3,
+    p: 158, bal: 1, route: 3,
     text: 'What he got out of it was not despair but calm — ataraxia.',
     dur: 1.9,
   },

@@ -50,7 +50,7 @@ export const BEATS: Eth20Beat[] = [
     dur: 4.4,
   },
   {
-    p: 2, x: 132, blocks: 1, rate: 0.72,
+    p: 384, x: 132, blocks: 1, rate: 0.72,
     text: 'But strip those reasons out and something is left. A rate applied to the date itself.',
     cite: 'Pure time preference',
     dur: 4.0,
@@ -75,7 +75,7 @@ export const BEATS: Eth20Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, blocks: 1, rate: 0, truth: 1,
+    p: 394, x: 132, blocks: 1, rate: 0, truth: 1,
     text: 'Here is what was under it the whole time. Seven people, none of whom chose which century to be born in.',
     dur: 4.6,
   },

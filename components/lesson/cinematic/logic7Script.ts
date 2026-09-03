@@ -94,13 +94,13 @@ export const BEATS: Logic7Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 168, rule: 1, fact: 2, concl: 2,
+    p: 167, x: 168, rule: 1, fact: 2, concl: 2,
     text: 'That is the second move: modus tollens. Knock out the "then" part, and the "if" part falls with it.',
     cite: 'Move two · modus tollens',
     dur: 3.3,
   },
   {
-    p: 35, x: 168, rule: 1, fact: 2, concl: 2,
+    p: 167, x: 168, rule: 1, fact: 2, concl: 2,
     text: 'You just read the sky by looking at the pavement.',
     dur: 1.8,
   },

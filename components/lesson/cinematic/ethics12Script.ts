@@ -28,7 +28,7 @@ export const BEATS: Ethics12Beat[] = [
     dur: 3.8,
   },
   {
-    p: 20, x: 124, n: 1, word: 0,
+    p: 418, x: 124, n: 1, word: 0,
     text: 'You need money, so you say “I promise to repay” — knowing perfectly well that you cannot. That private reason for acting is what Kant calls your maxim.',
     cite: 'The maxim',
     dur: 4.8,
@@ -58,13 +58,13 @@ export const BEATS: Ethics12Beat[] = [
     dur: 3.6,
   },
   {
-    p: 45, x: 124, n: 12, word: 1,
+    p: 159, x: 124, n: 12, word: 1,
     text: 'Now everyone breaks a promise the moment it suits them. Nobody believes one any more, so the word goes blank on every card.',
     cite: 'What the law does',
     dur: 4,
   },
   {
-    p: 45, x: 124, n: 12, word: 1,
+    p: 159, x: 124, n: 12, word: 1,
     text: 'There is no promising left to break.',
     dur: 1.8,
   },

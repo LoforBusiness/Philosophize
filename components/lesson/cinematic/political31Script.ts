@@ -37,7 +37,7 @@ export const BEATS: Pol31Beat[] = [
     text: 'It is a good trade, and you would be daft not to make it.',
   },
   {
-    g: 15, grass: 0.22, herd: 4, sums: 0,
+    g: 387, grass: 0.22, herd: 4, sums: 0,
     dur: 4.6,
     text: 'So does everyone else, for exactly the same reason. Now the field is bare, every herder is worse off than they started, and nobody has done a single unreasonable thing.',
     cite: 'And everyone else',
@@ -56,13 +56,13 @@ export const BEATS: Pol31Beat[] = [
     },
   },
   {
-    g: 1, grass: 0.22, herd: 4, sums: 1,
+    g: 167, grass: 0.22, herd: 4, sums: 1,
     dur: 2.7,
     text: 'Here is the sum each of them did. One whole unit of gain, kept entirely.',
     cite: 'The sum they did',
   },
   {
-    g: 1, grass: 0.22, herd: 4, sums: 1,
+    g: 167, grass: 0.22, herd: 4, sums: 1,
     dur: 2.1,
     text: 'One whole unit of damage, cut into four. Nothing else was required.',
   },

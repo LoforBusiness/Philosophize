@@ -20,12 +20,12 @@ export interface Logic26Beat extends BaseBeat {
 
 export const BEATS: Logic26Beat[] = [
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Here is a strange way to prove something is true. Begin by assuming it is false.',
     dur: 2.8,
   },
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Then be as reasonable as you possibly can.',
     dur: 1.8,
   },
@@ -47,7 +47,7 @@ export const BEATS: Logic26Beat[] = [
     dur: 2.3,
   },
   {
-    p: 40, x: 168, links: 3,
+    p: 409, x: 168, links: 3,
     text: 'So N is not the largest after all — and that is flatly at odds with what we assumed.',
     dur: 2.7,
   },
@@ -64,13 +64,13 @@ export const BEATS: Logic26Beat[] = [
     dur: 3.6,
   },
   {
-    p: 35, x: 168, links: 4, snap: 1,
+    p: 167, x: 168, links: 4, snap: 1,
     text: 'Something in that chain has to give. Every step after the first was valid, so the break lands where it started.',
     cite: 'Where it breaks',
     dur: 3.5,
   },
   {
-    p: 35, x: 168, links: 4, snap: 1,
+    p: 167, x: 168, links: 4, snap: 1,
     text: 'The assumption was false. There is no largest number.',
     dur: 1.8,
   },

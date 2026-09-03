@@ -23,12 +23,12 @@ export interface Log14Beat extends BaseBeat {
 
 export const BEATS: Log14Beat[] = [
   {
-    g: 25, lines: 2,
+    g: 164, lines: 2,
     dur: 2.7,
     text: 'Nothing is better than eternal happiness. A ham sandwich is better than nothing.',
   },
   {
-    g: 25, lines: 2,
+    g: 164, lines: 2,
     dur: 1.8,
     text: 'Both lines are ones you would nod at.',
   },
@@ -39,7 +39,7 @@ export const BEATS: Log14Beat[] = [
     cite: 'And therefore',
   },
   {
-    g: 13, lines: 3, mark: 1,
+    g: 407, lines: 3, mark: 1,
     dur: 4.8,
     text: 'Something is smuggling false certainty through a form you trust every day. The form is not what went wrong.',
     cite: 'So look inside a line',
@@ -67,13 +67,13 @@ export const BEATS: Log14Beat[] = [
     },
   },
   {
-    g: 21, lines: 3, mark: 1, gloss: 1,
+    g: 176, lines: 3, mark: 1, gloss: 1,
     dur: 4.2,
     text: 'In the first line it means no thing is better. In the second it means better than having nothing at all.',
     cite: 'Two words in one costume',
   },
   {
-    g: 21, lines: 3, mark: 1, gloss: 1,
+    g: 176, lines: 3, mark: 1, gloss: 1,
     dur: 1.8,
     text: 'The middle never joined.',
   },

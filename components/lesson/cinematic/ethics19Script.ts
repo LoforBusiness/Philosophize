@@ -68,7 +68,7 @@ export const BEATS: Eth19Beat[] = [
     dur: 3.8,
   },
   {
-    p: 2, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
+    p: 384, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
     text: 'Three of these signatures were not written freely. The fourth one was.',
     dur: 4.0,
   },

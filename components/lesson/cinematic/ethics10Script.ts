@@ -41,7 +41,7 @@ export const BEATS: Et10Beat[] = [
     dur: 3,
   },
   {
-    p: 30, x: 268, wading: true,
+    p: 395, x: 268, wading: true,
     text: 'So you are in the water, shoes and all. Now Singer asks the awkward question: which part of that reasoning was about the child being NEAR you?',
     dur: 4.4,
   },
@@ -59,13 +59,13 @@ export const BEATS: Et10Beat[] = [
     dur: 3.8,
   },
   {
-    p: 21, x: 268, wading: true, far: true,
+    p: 176, x: 268, wading: true, far: true,
     text: 'There is another child. Same danger, same small cost to you, nine thousand kilometres further off.',
     cite: 'Famine, Affluence, and Morality',
     dur: 2.1,
   },
   {
-    p: 21, x: 268, wading: true, far: true,
+    p: 176, x: 268, wading: true, far: true,
     text: 'The argument that got you into the pond does not obviously stop at the bank. Effective altruism started right there.',
     dur: 3.1,
   },

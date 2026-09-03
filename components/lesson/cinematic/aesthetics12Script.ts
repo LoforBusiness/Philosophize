@@ -31,13 +31,13 @@ export const BEATS: Aes12Beat[] = [
     dur: 4.2,
   },
   {
-    p: 9, r: 1, rx: 224, ticks: 1, box: 0,
+    p: 163, r: 1, rx: 224, ticks: 1, box: 0,
     text: 'A reader comes away from the board certain: this is grief. The lamp, the waiting, the going out.',
     cite: 'The first reading',
     dur: 3.2,
   },
   {
-    p: 9, r: 1, rx: 224, ticks: 1, box: 0,
+    p: 163, r: 1, rx: 224, ticks: 1, box: 0,
     text: 'Nothing on the page hints at a joke.',
     dur: 1.8,
   },

@@ -30,13 +30,13 @@ export const BEATS: Log13Beat[] = [
     text: 'Let one student retake one quiz. That is the whole proposal, and nobody in the room objects to it.',
   },
   {
-    g: 45, steps: 4,
+    g: 159, steps: 4,
     dur: 2.6,
     text: 'Then it arrives with company. They will want to retake every test.',
     cite: 'And then, and then',
   },
   {
-    g: 45, steps: 4,
+    g: 159, steps: 4,
     dur: 2.4,
     text: 'Grades will stop meaning anything. So we cannot allow the retake.',
   },
@@ -59,7 +59,7 @@ export const BEATS: Log13Beat[] = [
     },
   },
   {
-    g: 5, steps: 4, joins: 1, honest: 1,
+    g: 419, steps: 4, joins: 1, honest: 1,
     dur: 5.0,
     text: 'A slope can be honest. One drink slows your reactions, slower reactions raise crash risk, and both of those have been measured.',
     cite: 'A slope that holds',

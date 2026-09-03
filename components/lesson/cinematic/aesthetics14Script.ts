@@ -26,23 +26,23 @@ export interface Aes14Beat extends BaseBeat {
 
 export const BEATS: Aes14Beat[] = [
   {
-    g: 25, board: 1, level: 1,
+    g: 164, board: 1, level: 1,
     dur: 2.7,
     text: 'One cask, tasted by a whole room. The verdict comes back unanimous.',
   },
   {
-    g: 25, board: 1, level: 1,
+    g: 164, board: 1, level: 1,
     dur: 1.8,
     text: 'There is nothing wrong with this wine.',
   },
   {
-    g: 45, board: 3, level: 1,
+    g: 159, board: 3, level: 1,
     dur: 1.8,
     text: 'Then two people disagree. One of them tastes iron.',
     cite: 'Two hold out',
   },
   {
-    g: 45, board: 3, level: 1,
+    g: 159, board: 3, level: 1,
     dur: 3,
     text: 'The other just finds it too sweet, which is not the same kind of complaint at all.',
   },
@@ -71,7 +71,7 @@ export const BEATS: Aes14Beat[] = [
     },
   },
   {
-    g: 21, board: 3, level: 0, key: 1,
+    g: 380, board: 3, level: 0, key: 1,
     dur: 4.8,
     text: 'Cervantes got there first. They drained the cask, and a key was lying at the bottom on a leather thong.',
     cite: 'The bottom of the cask',

@@ -25,7 +25,7 @@ export const BEATS: Logic6Beat[] = [
   {
     // The arrow and the promise table arrive together: the whole diagram assembles
     // on the beat that explains what a conditional actually claims.
-    p: 1, link: 1, table: 1,
+    p: 167, link: 1, table: 1,
     text: 'A conditional says "if P, then Q. P is the antecedent — the condition.',
     cite: 'Antecedent → consequent',
     dur: 2.2,
@@ -33,7 +33,7 @@ export const BEATS: Logic6Beat[] = [
   {
     // The arrow and the promise table arrive together: the whole diagram assembles
     // on the beat that explains what a conditional actually claims.
-    p: 1, link: 1, table: 1,
+    p: 167, link: 1, table: 1,
     text: 'Q is the consequent — what follows. It promises nothing about P alone, only the link between them.',
     dur: 2.8,
   },
@@ -61,7 +61,7 @@ export const BEATS: Logic6Beat[] = [
     dur: 3.4,
   },
   {
-    p: 13, link: 1, table: 1, tapBoxes: 1,
+    p: 383, link: 1, table: 1, tapBoxes: 1,
     interact: {
       prompt: 'One of these two boxes is the antecedent — the condition "if" introduces. Tap it.',
       explain:

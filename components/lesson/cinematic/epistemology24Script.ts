@@ -50,7 +50,7 @@ export const BEATS: Epi24Beat[] = [
     dur: 1.8,
   },
   {
-    p: 45, x: 132, ladder: 1, sure: 1, hand: 1,
+    p: 418, x: 132, ladder: 1, sure: 1, hand: 1,
     text: 'Moore holds up his hand and says he knows this. That claim has a longer bar than anything on the ladder.',
     dur: 4.6,
   },
@@ -77,7 +77,7 @@ export const BEATS: Epi24Beat[] = [
     dur: 4.2,
   },
   {
-    p: 21, x: 268, ladder: 1, sure: 1, hand: 1, give: 1,
+    p: 380, x: 268, ladder: 1, sure: 1, hand: 1, give: 1,
     text: 'An argument runs both ways. Doubt the conclusion harder than the premises, and it is the premises that have to move.',
     cite: 'The Moorean shift',
     dur: 4.8,

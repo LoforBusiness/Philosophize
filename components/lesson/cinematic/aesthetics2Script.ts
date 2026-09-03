@@ -35,7 +35,7 @@ export const BEATS: Aes2Beat[] = [
     dur: 3.8,
   },
   {
-    a: 15, v: 15, wave: true, felt: true, chain: 3,
+    a: 387, v: 15, wave: true, felt: true, chain: 3,
     text: 'A boy who once met a wolf tells the story so well that the room is frightened too. Tolstoy calls that art, and says the telling only works if the boy means every word.',
     cite: 'Tolstoy, What Is Art?, 1897',
     dur: 4.8,

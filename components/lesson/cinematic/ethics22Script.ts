@@ -43,7 +43,7 @@ export const BEATS: Eth22Beat[] = [
     dur: 4.6,
   },
   {
-    p: 45, x: 132, wants: 1, machine: 1,
+    p: 379, x: 132, wants: 1, machine: 1,
     text: 'Almost everybody says no, and most cannot say why. The picture is where the reason is.',
     dur: 4.0,
   },
@@ -57,12 +57,12 @@ export const BEATS: Eth22Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, wants: 1, machine: 1, cable: 1,
+    p: 176, x: 132, wants: 1, machine: 1, cable: 1,
     text: 'One cable, into one column. The other four are not switched off.',
     dur: 3.1,
   },
   {
-    p: 21, x: 132, wants: 1, machine: 1, cable: 1,
+    p: 176, x: 132, wants: 1, machine: 1, cable: 1,
     text: 'They were never plugged in.',
     dur: 1.8,
   },
@@ -80,7 +80,7 @@ export const BEATS: Eth22Beat[] = [
     dur: 3.6,
   },
   {
-    p: 13, x: 268, wants: 1, machine: 1, cable: 1,
+    p: 407, x: 268, wants: 1, machine: 1, cable: 1,
     text: 'That refusal is evidence about you. If pleasure were all that mattered, the tank would be an easy yes.',
     cite: 'Against hedonism',
     dur: 4.6,

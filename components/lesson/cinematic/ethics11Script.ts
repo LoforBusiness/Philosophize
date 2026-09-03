@@ -30,18 +30,18 @@ export const BEATS: Ethics11Beat[] = [
     dur: 4.0,
   },
   {
-    p: 3, x: 60, tok: 1,
+    p: 168, x: 60, tok: 1,
     text: 'Jeremy Bentham built that table. A bar game, a helping of dessert, a symphony.',
     cite: 'The counting table',
     dur: 2.5,
   },
   {
-    p: 3, x: 60, tok: 1,
+    p: 168, x: 60, tok: 1,
     text: 'Three pleasures, drawn the same size, because to him they are the same stuff.',
     dur: 2.5,
   },
   {
-    p: 21, x: 60, tok: 1, led: 1,
+    p: 380, x: 60, tok: 1, led: 1,
     text: 'Bentham\'s felicific calculus scored each one for intensity, duration, certainty and reach. Then it added the column up. Push-pin ranks with poetry, he said, if the totals come out level.',
     cite: 'The felicific calculus',
     dur: 5.4,
@@ -98,13 +98,13 @@ export const BEATS: Ethics11Beat[] = [
     dur: 1.0,
   },
   {
-    p: 28, x: 126, tok: 1, led: 2, shelf: 1, up: 1,
+    p: 163, x: 126, tok: 1, led: 2, shelf: 1, up: 1,
     text: 'Two levels now, and the column below can no longer settle it. Mill\'s test is not the size of the total but the verdict of people who have honestly tasted both.',
     cite: 'Competent judges',
     dur: 5.0,
   },
   {
-    p: 28, x: 126, tok: 1, led: 2, shelf: 1, up: 1,
+    p: 163, x: 126, tok: 1, led: 2, shelf: 1, up: 1,
     summary: {
       title: 'Counting, and Ranking',
       points: [

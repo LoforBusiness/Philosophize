@@ -55,7 +55,7 @@ export const BEATS: Aes6Beat[] = [
     dur: 3.6,
   },
   {
-    p: 25, vast: 1, split: 3,
+    p: 164, vast: 1, split: 3,
     interact: {
       prompt: 'Tap the feeling that makes something sublime rather than just beautiful.',
       cards: [
@@ -68,23 +68,23 @@ export const BEATS: Aes6Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, vast: 1, split: 3, mind: 1,
+    p: 160, vast: 1, split: 3, mind: 1,
     text: 'Kant moved the awe inward. The mountain does overwhelm your senses.',
     cite: 'Kant — awe in the mind',
     dur: 1.8,
   },
   {
-    p: 4, vast: 1, split: 3, mind: 1,
+    p: 160, vast: 1, split: 3, mind: 1,
     text: 'But the real jolt, Kant says, is your mind finding that it can hold something that big. The mountain is not the sublime thing.',
     dur: 3.2,
   },
   {
-    p: 4, vast: 1, split: 3, mind: 1,
+    p: 160, vast: 1, split: 3, mind: 1,
     text: 'You are.',
     dur: 1.8,
   },
   {
-    p: 15, vast: 1, split: 3, mind: 1,
+    p: 388, vast: 1, split: 3, mind: 1,
     interact: {
       prompt: 'Place the token on the sublime.',
       field: {

@@ -49,13 +49,13 @@ export const BEATS: Aes22Beat[] = [
     dur: 2.9,
   },
   {
-    p: 45, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
+    p: 159, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
     text: 'Three claims all seem true. You feel real fear.',
     cite: 'The paradox of fiction',
     dur: 2.2,
   },
   {
-    p: 45, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
+    p: 159, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
     text: 'Feeling needs belief. You believe none of the film.',
     dur: 2.2,
   },
@@ -87,7 +87,7 @@ export const BEATS: Aes22Beat[] = [
     dur: 4.2,
   },
   {
-    p: 13, x: 268, screen: 1, slime: 1, meters: 1, heart: 1,
+    p: 383, x: 268, screen: 1, slime: 1, meters: 1, heart: 1,
     text: 'The rival answer keeps the feeling and drops the middle claim. Vividly imagining a thing is enough to move you.',
     dur: 4.6,
   },

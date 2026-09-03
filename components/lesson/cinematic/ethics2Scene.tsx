@@ -6,7 +6,11 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './ethics2Script';
 import {
-  BLANK, WALK, clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, moveTr, pose, strideStance, type Bundle, } from './rig';
+  BLANK, WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, strideStance, type Bundle, } from './rig';
+// The catalogue, not just rig's 49. `emoteAny` delegates to `emoteHold` for every
+// code under 100, so this import is identity for the beats as written — it only
+// means the script CAN now reach the 120 actions and the living holds (group N).
+import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';

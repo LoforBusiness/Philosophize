@@ -54,13 +54,13 @@ export const BEATS: Meta6Beat[] = [
     dur: 3.6,
   },
   {
-    p: 1, swap: 1, orig: 0,
+    p: 167, swap: 1, orig: 0,
     text: 'Philosophers split the word "same" in two. Qualitative sameness is sharing every feature, like two new coins.',
     cite: 'Two senses of sameness',
     dur: 2.5,
   },
   {
-    p: 1, swap: 1, orig: 0,
+    p: 167, swap: 1, orig: 0,
     text: 'Numerical sameness is being the one thing you were yesterday. The ship keeps the second and loses the first.',
     dur: 2.7,
   },
@@ -71,7 +71,7 @@ export const BEATS: Meta6Beat[] = [
     dur: 4.1,
   },
   {
-    p: 22, swap: 1, orig: 0, you: 1,
+    p: 403, swap: 1, orig: 0, you: 1,
     text: 'Yet you call that child yourself.',
     dur: 1.8,
   },

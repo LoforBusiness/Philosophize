@@ -33,12 +33,12 @@ export interface Political35Beat extends BaseBeat {
 
 export const BEATS: Political35Beat[] = [
   {
-    p: 25, x: 52, chairs: 1,
+    p: 164, x: 52, chairs: 1,
     text: 'A room where a decision gets made. Three people are in it.',
     dur: 2.1,
   },
   {
-    p: 25, x: 52, chairs: 1,
+    p: 164, x: 52, chairs: 1,
     text: 'Nine of the chairs belong to people who are not born yet.',
     dur: 2.1,
   },
@@ -77,17 +77,17 @@ export const BEATS: Political35Beat[] = [
     dur: 1.8,
   },
   {
-    p: 21, x: 52, chairs: 1, weight: 0.5, swap: 1,
+    p: 176, x: 52, chairs: 1, weight: 0.5, swap: 1,
     text: 'Watch who is in the room now. Not the same three.',
     dur: 2.2,
   },
   {
-    p: 21, x: 52, chairs: 1, weight: 0.5, swap: 1,
+    p: 176, x: 52, chairs: 1, weight: 0.5, swap: 1,
     text: 'Under the careful policy these people were never born at all.',
     dur: 2.2,
   },
   {
-    p: 4, x: 52, chairs: 1, weight: 0.5, swap: 1, live: 1,
+    p: 160, x: 52, chairs: 1, weight: 0.5, swap: 1, live: 1,
     interact: {
       prompt: 'The future is worse. Tap the person we made worse off.',
       explain: 'There is nobody to tap, and the absence is the lesson. Everyone in the worse world owes their existence to the reckless choice, so no one there can say they would have been better off. The wrong is obvious and the victim is missing.',
@@ -109,7 +109,7 @@ export const BEATS: Political35Beat[] = [
     dur: 3.6,
   },
   {
-    p: 35, x: 126, chairs: 1, weight: 0.8, swap: 1,
+    p: 383, x: 126, chairs: 1, weight: 0.8, swap: 1,
     text: 'One reply drops the search for a victim. Some choices simply make the world go worse, and that is a reason not to make them.',
     cite: 'Parfit, Reasons and Persons, 1984',
     dur: 4.6,

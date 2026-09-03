@@ -62,12 +62,12 @@ export const BEATS: Political36Beat[] = [
     dur: 4.6,
   },
   {
-    p: 21, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
+    p: 176, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
     text: 'Bentham drew a prison where one guard could see every cell and no prisoner could tell if he was looking. Look at the box.',
     dur: 4.1,
   },
   {
-    p: 21, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
+    p: 176, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
     text: 'Nobody is in it.',
     dur: 1.8,
   },
@@ -85,7 +85,7 @@ export const BEATS: Political36Beat[] = [
     dur: 3.4,
   },
   {
-    p: 4, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1, picks: 1, live: 1,
+    p: 160, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1, picks: 1, live: 1,
     interact: {
       prompt: 'Tap what actually turned the windows off.',
       explain: 'Not knowing. A law is arguable and an arrest is news. Uncertainty needs neither. If you cannot tell whether anyone is looking, the safe assumption is that they are — and that costs the watcher nothing.',
@@ -94,17 +94,17 @@ export const BEATS: Political36Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 84, street: 1, watch: 0.6, lamp: 1, picks: 1,
+    p: 167, x: 84, street: 1, watch: 0.6, lamp: 1, picks: 1,
     text: 'Nothing here shows up in a statistic. No case was brought.',
     dur: 2.2,
   },
   {
-    p: 35, x: 84, street: 1, watch: 0.6, lamp: 1, picks: 1,
+    p: 167, x: 84, street: 1, watch: 0.6, lamp: 1, picks: 1,
     text: 'What shrank was the range of things people were willing to try.',
     dur: 2.4,
   },
   {
-    p: 45, x: 84, street: 1, watch: 0.6, lamp: 1,
+    p: 379, x: 84, street: 1, watch: 0.6, lamp: 1,
     text: 'So privacy is not really about secrets. Privacy is how much room a person has when nobody is judging them.',
     dur: 4.8,
   },

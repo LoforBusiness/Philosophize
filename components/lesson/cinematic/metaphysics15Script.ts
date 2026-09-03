@@ -21,12 +21,12 @@ export interface Meta15Beat extends BaseBeat {
 
 export const BEATS: Meta15Beat[] = [
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'One ball rolls up and strikes another, and the second rolls away. You have watched that ten thousand times.',
     dur: 3.5,
   },
   {
-    p: 25, x: 70,
+    p: 164, x: 70,
     text: 'Hume asks what exactly you saw.',
     dur: 1.8,
   },
@@ -42,7 +42,7 @@ export const BEATS: Meta15Beat[] = [
     dur: 3.2,
   },
   {
-    p: 13, x: 124, balls: 1, gap: 1,
+    p: 383, x: 124, balls: 1, gap: 1,
     text: 'Between the touch and the movement is where the causing is supposed to live. Slow the film to a single frame and look straight at it.',
     cite: 'The gap',
     dur: 4.4,

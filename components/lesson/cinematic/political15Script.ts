@@ -54,7 +54,7 @@ export const BEATS: Pol15Beat[] = [
     dur: 4.0,
   },
   {
-    p: 13, x: 124, stages: 4, night: 1,
+    p: 383, x: 124, stages: 4, night: 1,
     text: 'Now a protest that named the injustice, tried the courts, and broke the law — then went home by a back route. Lay it against the stair and count.',
     cite: 'A protest, measured',
     dur: 4.8,

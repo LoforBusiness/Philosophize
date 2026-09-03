@@ -30,19 +30,19 @@ export const BEATS: Meta32Beat[] = [
     text: 'Just these.',
   },
   {
-    g: 2, orbs: 1, tether: 0, tag: 0,
+    g: 384, orbs: 1, tether: 0, tag: 0,
     dur: 4.4,
     text: 'They are exactly alike. Same size, same metal, same age, same temperature — and there was never a moment when one existed and the other did not.',
     cite: 'Alike in every way',
   },
   {
-    g: 3, orbs: 1, tether: 1, tag: 0,
+    g: 168, orbs: 1, tether: 1, tag: 0,
     dur: 2.5,
     text: 'Even the relations match. Each is two miles from a sphere just like itself.',
     cite: 'Even the relations',
   },
   {
-    g: 3, orbs: 1, tether: 1, tag: 0,
+    g: 168, orbs: 1, tether: 1, tag: 0,
     dur: 2.3,
     text: 'Every description you write of one is a true description of the other.',
   },
@@ -60,13 +60,13 @@ export const BEATS: Meta32Beat[] = [
     },
   },
   {
-    g: 1, orbs: 1, tether: 1, tag: 1,
+    g: 167, orbs: 1, tether: 1, tag: 1,
     dur: 2.9,
     text: 'We can point at one sphere and call it A. But the label came from outside, carried in by us.',
     cite: 'The label is ours',
   },
   {
-    g: 1, orbs: 1, tether: 1, tag: 1,
+    g: 167, orbs: 1, tether: 1, tag: 1,
     dur: 1.8,
     text: 'Take the label away again and the universe is exactly as before.',
   },

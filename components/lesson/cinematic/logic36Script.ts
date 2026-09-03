@@ -58,7 +58,7 @@ export const BEATS: Logic36Beat[] = [
     dur: 4.4,
   },
   {
-    p: 21, x: 58, room: 1, done: 0.15,
+    p: 415, x: 58, room: 1, done: 0.15,
     text: 'Look in two squares of a forest for one beetle and the empty result tells you almost nothing. The forest is large and the beetle is small.',
     dur: 4.6,
   },
@@ -75,7 +75,7 @@ export const BEATS: Logic36Beat[] = [
     dur: 3.6,
   },
   {
-    p: 4, x: 58, room: 1, done: 0.15, cases: 1, live: 1,
+    p: 160, x: 58, room: 1, done: 0.15, cases: 1, live: 1,
     interact: {
       prompt: 'Two real searches, both found nothing. Tap the one whose silence is worth something.',
       explain: 'The forty-person trial cannot see a one-in-a-thousand effect whether or not it is there, so its silence sounds the same either way. Forty thousand people would have shown it, so their silence is a result.',
@@ -84,7 +84,7 @@ export const BEATS: Logic36Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 104, room: 1, done: 1, cases: 1,
+    p: 383, x: 104, room: 1, done: 1, cases: 1,
     text: 'This is why the famous line is only half true. "Absence of evidence is not evidence of absence" describes a bad search and nothing else.',
     dur: 4.8,
   },

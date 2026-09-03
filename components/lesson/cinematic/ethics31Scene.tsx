@@ -5,7 +5,9 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  climb, ease01, emoteHold, lerp, mixStance, pose, type Bundle, } from './rig';
+  climb, ease01, lerp, mixStance, pose, type Bundle, } from './rig';
+// See ethics2Scene: identity for codes under 100, and it opens the catalogue.
+import { emoteAny as emoteHold } from './moves';
 import { BEATS } from './ethics31Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
 } from './cinematicKit';

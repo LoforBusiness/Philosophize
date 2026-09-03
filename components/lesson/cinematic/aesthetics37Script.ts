@@ -51,7 +51,7 @@ export const BEATS: Aesthetics37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 54, staves: 1, score: 1, played: 1,
+    p: 380, x: 54, staves: 1, score: 1, played: 1,
     text: 'Which is why you can burn every copy of a symphony and it survives. Do that to an improvisation and there is nothing left to recover.',
     dur: 4.8,
   },
@@ -68,12 +68,12 @@ export const BEATS: Aesthetics37Beat[] = [
     dur: 3.6,
   },
   {
-    p: 13, x: 54, staves: 1, score: 1, played: 1,
+    p: 309, x: 54, staves: 1, score: 1, played: 1,
     text: 'Then recording arrived, and players started learning famous solos note for note. Something meant to happen once acquired a correct version.',
     dur: 4.8,
   },
   {
-    p: 4, x: 54, staves: 1, score: 1, played: 1, live_d: 1, live: 1,
+    p: 160, x: 54, staves: 1, score: 1, played: 1, live_d: 1, live: 1,
     interact: {
       prompt: 'Transcribe it. Slide the solo up onto the stave.',
       drag: {
@@ -92,12 +92,12 @@ export const BEATS: Aesthetics37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 126, staves: 1, score: 1, lift: 1,
+    p: 167, x: 126, staves: 1, score: 1, lift: 1,
     text: 'So the same sounds become a different kind of thing depending on what stood behind them. Not how the sounds strike the ear.',
     dur: 4.1,
   },
   {
-    p: 35, x: 126, staves: 1, score: 1, lift: 1,
+    p: 167, x: 126, staves: 1, score: 1, lift: 1,
     text: 'What the sounds are.',
     dur: 1.8,
   },

@@ -60,7 +60,7 @@ export const BEATS: Epi23Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, sieve: 1, mouth: 0.14, mesh: 0.9, fall: 1,
+    p: 380, x: 132, sieve: 1, mouth: 0.14, mesh: 0.9, fall: 1,
     text: 'Close the mouth and the mesh has nothing to do. That is a person who is never wrong and never learns anything.',
     cite: 'The other failure',
     dur: 4.8,

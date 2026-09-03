@@ -59,7 +59,7 @@ export const BEATS: Logic12Beat[] = [
     cite: 'The rest of the wall',
   },
   {
-    g: 2, lit: 1, pick: 1,
+    g: 384, lit: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap the door the offer had to keep dark to work.',

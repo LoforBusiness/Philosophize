@@ -45,13 +45,13 @@ export const BEATS: Pol5Beat[] = [
     dur: 3.0,
   },
   {
-    p: 4, city: 0, veil: 1,
+    p: 160, city: 0, veil: 1,
     text: 'Rawls asks it another way. What rules would you pick if you did not know who you were going to be?',
     cite: 'Rawls’ veil of ignorance',
     dur: 2.9,
   },
   {
-    p: 4, city: 0, veil: 1,
+    p: 399, city: 0, veil: 1,
     text: 'Hide your class, your talents and your luck behind a veil, and watch how fair your choices get.',
     dur: 2.5,
   },
@@ -89,7 +89,7 @@ export const BEATS: Pol5Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, city: 1,
+    p: 160, city: 1,
     // Answered ON the stage: the four cards are Plato's candidate definitions, so the
     // reader picks what "justice" meant instead of reading four sentences.
     interact: {

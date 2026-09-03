@@ -23,23 +23,23 @@ export interface A9Beat extends BaseBeat {
 
 export const BEATS: A9Beat[] = [
   {
-    p: 25, x: 80, boxes: true, crown: true,
+    p: 164, x: 80, boxes: true, crown: true,
     text: 'For most of the history of art, one word did the deciding. Beautiful things were art.',
     dur: 2.9,
   },
   {
-    p: 25, x: 80, boxes: true, crown: true,
+    p: 164, x: 80, boxes: true, crown: true,
     text: 'Everything else was something else.',
     dur: 1.8,
   },
   {
-    p: 1, x: 80, boxes: true, stands: true,
+    p: 167, x: 80, boxes: true, stands: true,
     text: 'Then in 1964 Andy Warhol stacked plywood boxes painted to look exactly like Brillo cartons. Not a copy of a beautiful thing.',
     cite: 'Warhol, Brillo Box, 1964',
     dur: 3.6,
   },
   {
-    p: 1, x: 80, boxes: true, stands: true,
+    p: 167, x: 80, boxes: true, stands: true,
     text: 'A copy of a box.',
     dur: 1.8,
   },

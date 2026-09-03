@@ -28,24 +28,24 @@ export const BEATS: Ethics31Beat[] = [
     text: 'Something is on a shelf and you have been told to fetch it. The duty is lit, and at this point nobody has asked whether you can.',
   },
   {
-    p: 0, rungs: 4, ladder: 1, duty: 1,
+    p: 158, rungs: 4, ladder: 1, duty: 1,
     dur: 2.6,
     text: 'A ladder appears, so you climb. Four rungs, and the shelf is closer.',
     cite: 'Climbing',
   },
   {
-    p: 0, rungs: 4, ladder: 1, duty: 1,
+    p: 158, rungs: 4, ladder: 1, duty: 1,
     dur: 2,
     text: 'Nothing about the duty has changed because nothing needed to.',
   },
   {
-    p: 1, rungs: 7, ladder: 1, duty: 0,
+    p: 167, rungs: 7, ladder: 1, duty: 0,
     dur: 4.1,
     text: 'The ladder ends. You stretch, and the shelf is still above your hand — genuinely, not lazily.',
     cite: 'The ladder ends',
   },
   {
-    p: 1, rungs: 7, ladder: 1, duty: 0,
+    p: 167, rungs: 7, ladder: 1, duty: 0,
     dur: 1.8,
     text: 'Watch the lamp.',
   },
@@ -63,13 +63,13 @@ export const BEATS: Ethics31Beat[] = [
     },
   },
   {
-    p: 0, rungs: 11, ladder: 2, duty: 1,
+    p: 158, rungs: 11, ladder: 2, duty: 1,
     dur: 3.2,
     text: 'Now extend the ladder. The lamp comes straight back on, and you did not become a better person in between.',
     cite: 'Give it the reach',
   },
   {
-    p: 0, rungs: 11, ladder: 2, duty: 1,
+    p: 158, rungs: 11, ladder: 2, duty: 1,
     dur: 1.8,
     text: 'The duty was tracking the reach the whole time.',
   },
@@ -83,7 +83,7 @@ export const BEATS: Ethics31Beat[] = [
     },
   },
   {
-    p: 3, rungs: 11, ladder: 1, duty: 0,
+    p: 168, rungs: 11, ladder: 1, duty: 0,
     dur: 1.0,
     interact: {
       prompt: 'Place the token where ought implies can stops excusing you.',

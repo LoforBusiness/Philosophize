@@ -55,7 +55,7 @@ export const BEATS: Aes16Beat[] = [
     dur: 3.8,
   },
   {
-    p: 40, x: 168, canvas: 1, facts: 3,
+    p: 383, x: 168, canvas: 1, facts: 3,
     text: 'The gallery keeps adding. Now the card is longer than the painting is wide, and you notice you have been reading it instead of looking.',
     cite: 'The rail fills',
     dur: 4.8,

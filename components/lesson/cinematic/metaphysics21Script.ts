@@ -33,12 +33,12 @@ export interface Met21Beat extends BaseBeat {
 
 export const BEATS: Met21Beat[] = [
   {
-    p: 25, x: 200, line: 1, past: 1, future: 1,
+    p: 164, x: 200, line: 1, past: 1, future: 1,
     text: 'A line, with you standing on the middle of it. The question is not whether time passes.',
     dur: 3.7,
   },
   {
-    p: 25, x: 200, line: 1, past: 1, future: 1,
+    p: 164, x: 200, line: 1, past: 1, future: 1,
     text: 'It is what is there.',
     dur: 1.8,
   },
@@ -69,7 +69,7 @@ export const BEATS: Met21Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, line: 1, past: 1, future: 1,
+    p: 380, x: 132, line: 1, past: 1, future: 1,
     text: 'Eternalism keeps the lot. Every moment is out there, and now is just where you happen to be, like here is where you stand.',
     cite: 'Eternalism',
     dur: 4.8,
@@ -87,7 +87,7 @@ export const BEATS: Met21Beat[] = [
     dur: 3.8,
   },
   {
-    p: 13, x: 268, line: 1, past: 1, future: 1,
+    p: 395, x: 268, line: 1, past: 1, future: 1,
     text: 'Relativity leans this way. Two observers can disagree about what is happening now. That is awkward if only now exists.',
     dur: 4.8,
   },

@@ -25,12 +25,12 @@ export interface Pol2Beat extends BaseBeat {
 
 export const BEATS: Pol2Beat[] = [
   {
-    r: 10, sub: 8, podium: false, chart: 1,
+    r: 161, sub: 8, podium: false, chart: 1,
     text: 'Force can make you obey. Can it make you agree?',
     dur: 1.8,
   },
   {
-    r: 10, sub: 8, podium: false, chart: 1,
+    r: 161, sub: 8, podium: false, chart: 1,
     text: 'Power bends bodies; authority wins minds. They are not the same thing.',
     dur: 2,
   },
@@ -69,13 +69,13 @@ export const BEATS: Pol2Beat[] = [
     dur: 3.4,
   },
   {
-    r: 3, sub: 0, podium: true, chart: 2, ledger: true,
+    r: 168, sub: 0, podium: true, chart: 2, ledger: true,
     text: 'Weber sorted legitimacy into three sources. Tradition leans on custom and bloodline.',
     cite: 'Weber’s three types',
     dur: 1.8,
   },
   {
-    r: 3, sub: 0, podium: true, chart: 2, ledger: true,
+    r: 409, sub: 0, podium: true, chart: 2, ledger: true,
     text: 'Charisma runs on devotion to one person. The third kind rests on rules and offices, where power sits in the job rather than the holder.',
     dur: 3.2,
   },

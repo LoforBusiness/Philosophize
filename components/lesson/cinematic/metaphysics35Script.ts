@@ -50,17 +50,17 @@ export const BEATS: Metaphysics35Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 120, line: 1, arc: 1, knot: 1,
+    p: 160, x: 120, line: 1, arc: 1, knot: 1,
     text: 'So you arrive, and you stop your grandparents meeting. Then you are never born.',
     dur: 2.5,
   },
   {
-    p: 4, x: 120, line: 1, arc: 1, knot: 1,
+    p: 160, x: 120, line: 1, arc: 1, knot: 1,
     text: 'Then nobody arrives. Then they meet, and you are born, and you arrive.',
     dur: 2.3,
   },
   {
-    p: 21, x: 120, line: 1, arc: 1, knot: 1, live: 1,
+    p: 394, x: 120, line: 1, arc: 1, knot: 1, live: 1,
     tap: {
       prompt: 'Two marks hold the story up. Tap the one your trip needs in order to happen at all.',
       options: [
@@ -85,7 +85,7 @@ export const BEATS: Metaphysics35Beat[] = [
     dur: 3.4,
   },
   {
-    p: 13, x: 120, line: 1, knot: 1, snap: 1, live: 1,
+    p: 383, x: 120, line: 1, knot: 1, snap: 1, live: 1,
     interact: {
       prompt: 'Tap the link the story actually breaks.',
       explain: 'The break is at your birth, and only because the trip is meant to make the past come out differently. A visit that was always part of what happened breaks nothing. Changing the past is the contradiction — going there is not.',

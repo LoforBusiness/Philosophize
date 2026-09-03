@@ -47,7 +47,7 @@ export const BEATS: Met20Beat[] = [
     dur: 1.8,
   },
   {
-    p: 45, x: 132, outer: 1, nest: 1, tally: 1,
+    p: 379, x: 132, outer: 1, nest: 1, tally: 1,
     text: 'Count the minds. Almost all the minds now sit inside a machine, and every mind believes otherwise.',
     cite: 'Bostrom, 2003',
     dur: 4.8,
@@ -84,12 +84,12 @@ export const BEATS: Met20Beat[] = [
     dur: 4.2,
   },
   {
-    p: 21, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
+    p: 176, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
     text: 'Two of those three say the grid never gets built. Extinction, or nobody bothering.',
     dur: 3.5,
   },
   {
-    p: 21, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
+    p: 176, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
     text: 'Watch it shrink.',
     dur: 1.8,
   },

@@ -31,13 +31,13 @@ export const BEATS: Met16Beat[] = [
     text: 'Two addicts, and everything about them is the same. Same craving, same dose, same chemistry doing the same thing.',
   },
   {
-    g: 45, panels: 2, crave: 1, second: 1,
+    g: 159, panels: 2, crave: 1, second: 1,
     dur: 3,
     text: 'Now add what each of them thinks about his own wanting. One is behind it.',
     cite: 'The second arrow',
   },
   {
-    g: 45, panels: 2, crave: 1, second: 1,
+    g: 159, panels: 2, crave: 1, second: 1,
     dur: 2,
     text: 'The other is dragged along by a craving he hates.',
   },
@@ -66,7 +66,7 @@ export const BEATS: Met16Beat[] = [
     },
   },
   {
-    g: 5, panels: 2, crave: 1, second: 1,
+    g: 399, panels: 2, crave: 1, second: 1,
     dur: 4.8,
     text: 'So freedom is not about where the craving came from. It is about whether the man is standing behind it or being pulled by it.',
     cite: 'Where the freedom is',

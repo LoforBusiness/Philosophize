@@ -28,13 +28,13 @@ export const BEATS: Political34Beat[] = [
     dur: 3.8,
   },
   {
-    p: 47, x: 50, level: 0, reach: 0.1,
+    p: 407, x: 50, level: 0, reach: 0.1,
     text: 'Some are easy. What you eat for breakfast affects you, so the ring that decides it is the small one, and nobody argues.',
     cite: 'Small effects, small room',
     dur: 4.4,
   },
   {
-    p: 19, x: 50, level: 0.15, reach: 0.85,
+    p: 384, x: 50, level: 0.15, reach: 0.85,
     text: 'Now a village decides to put its waste in the river. That is a very local decision about something that is not local at all.',
     cite: 'A river runs through forty towns',
     dur: 4.6,
@@ -59,7 +59,7 @@ export const BEATS: Political34Beat[] = [
     dur: 4.0,
   },
   {
-    p: 4, x: 50, level: 0, reach: 0.72, live: 1,
+    p: 160, x: 50, level: 0, reach: 0.72, live: 1,
     interact: {
       prompt: 'The dashed ring is how far the effects reach. Drag the deciding ring to match it.',
       drag: {
@@ -78,13 +78,13 @@ export const BEATS: Political34Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 50, level: 0.72, reach: 0.72,
+    p: 167, x: 50, level: 0.72, reach: 0.72,
     text: 'That is subsidiarity, and it has two halves. As small as possible is only the first one.',
     cite: 'Subsidiarity',
     dur: 3.1,
   },
   {
-    p: 35, x: 50, level: 0.72, reach: 0.72,
+    p: 167, x: 50, level: 0.72, reach: 0.72,
     text: 'The second is: and no smaller than the problem.',
     dur: 1.8,
   },

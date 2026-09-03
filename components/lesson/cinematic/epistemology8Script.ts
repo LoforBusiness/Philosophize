@@ -26,17 +26,17 @@ export interface Epi8Beat extends BaseBeat {
 
 export const BEATS: Epi8Beat[] = [
   {
-    p: 25, x: 196, tower: 1, pile: 3,
+    p: 164, x: 196, tower: 1, pile: 3,
     text: 'Your friend swears the bus comes at eight. You ask why.',
     dur: 1.8,
   },
   {
-    p: 25, x: 196, tower: 1, pile: 3,
+    p: 164, x: 196, tower: 1, pile: 3,
     text: 'Your friend answers. You ask why again.',
     dur: 1.8,
   },
   {
-    p: 25, x: 196, tower: 1, pile: 3,
+    p: 164, x: 196, tower: 1, pile: 3,
     text: 'How many times can he do that before he runs out?',
     dur: 1.8,
   },
@@ -111,7 +111,7 @@ export const BEATS: Epi8Beat[] = [
     dur: 3.3,
   },
   {
-    p: 26, x: 176, esc: 1, land: 3,
+    p: 416, x: 176, esc: 1, land: 3,
     text: 'Hit bedrock, and "why? finally has nowhere left to go.',
     dur: 1.8,
   },

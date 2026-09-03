@@ -25,17 +25,17 @@ export interface Aes8Beat extends BaseBeat {
 
 export const BEATS: Aes8Beat[] = [
   {
-    p: 25, x: 148, mode: 0, lens: 0,
+    p: 164, x: 148, mode: 0, lens: 0,
     text: 'Two people stare at the same painting. One says it works because of the shapes.',
     dur: 2.2,
   },
   {
-    p: 25, x: 148, mode: 0, lens: 0,
+    p: 164, x: 148, mode: 0, lens: 0,
     text: 'The other says it works because it aches. Same canvas.',
     dur: 1.8,
   },
   {
-    p: 25, x: 148, mode: 0, lens: 0,
+    p: 164, x: 148, mode: 0, lens: 0,
     text: 'Two completely different reasons.',
     dur: 1.8,
   },
@@ -73,13 +73,13 @@ export const BEATS: Aes8Beat[] = [
     dur: 2.2,
   },
   {
-    p: 32, x: 148, mode: 2, lens: 2,
+    p: 130, x: 148, mode: 2, lens: 2,
     text: 'Now the blocks dissolve into strokes. You are not measuring anything.',
     cite: 'Through the second pair',
     dur: 1.8,
   },
   {
-    p: 32, x: 148, mode: 2, lens: 2,
+    p: 130, x: 148, mode: 2, lens: 2,
     text: 'You are catching a mood, as if the painter handed you what they were feeling that afternoon.',
     dur: 2.8,
   },
@@ -93,13 +93,13 @@ export const BEATS: Aes8Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 148, mode: 1, lens: 1,
+    p: 167, x: 148, mode: 1, lens: 1,
     text: 'That way of looking has a name: formalism. Clive Bell claimed every real work of visual art shares one thing.',
     cite: 'Formalism · Clive Bell',
     dur: 2.6,
   },
   {
-    p: 35, x: 148, mode: 1, lens: 1,
+    p: 418, x: 148, mode: 1, lens: 1,
     text: 'Bell called it significant form: an arrangement of line and colour that moves you. The subject is beside the point.',
     dur: 2.6,
   },

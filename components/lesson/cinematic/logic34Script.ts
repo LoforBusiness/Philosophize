@@ -39,19 +39,19 @@ export const BEATS: Logic34Beat[] = [
     dur: 1.8,
   },
   {
-    p: 19, x: 50, n: 0.45,
+    p: 418, x: 50, n: 0.45,
     text: 'Pull more and the bracket closes fast. This part feels like progress, and it is the part everybody remembers about sample size.',
     cite: 'The bracket closes',
     dur: 4.2,
   },
   {
-    p: 4, x: 50, n: 1,
+    p: 160, x: 50, n: 1,
     text: 'Then it stops paying. Four times the marbles only halves the bracket.',
     cite: 'Four times, half the error',
     dur: 2.2,
   },
   {
-    p: 4, x: 50, n: 1,
+    p: 160, x: 50, n: 1,
     text: 'Error falls with the square root of the count, not in step with it.',
     dur: 2.6,
   },
@@ -87,13 +87,13 @@ export const BEATS: Logic34Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 50, n: 0.9, biased: 1,
+    p: 167, x: 50, n: 0.9, biased: 1,
     text: 'Now the awkward one. Here is a huge sample, drawn only from people who answered the phone.',
     cite: 'Tight, and wrong',
     dur: 3.3,
   },
   {
-    p: 35, x: 50, n: 0.9, biased: 1,
+    p: 167, x: 50, n: 0.9, biased: 1,
     text: 'The bracket is tight around the wrong number.',
     dur: 1.8,
   },

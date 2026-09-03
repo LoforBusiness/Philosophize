@@ -28,29 +28,29 @@ export interface Political11Beat extends BaseBeat {
 
 export const BEATS: Political11Beat[] = [
   {
-    p: 25, x: 56,
+    p: 164, x: 56,
     text: 'Switch off every government tonight — no courts, no police, nobody in charge. By morning, what is left of us?',
     dur: 2.5,
   },
   {
-    p: 25, x: 56,
+    p: 164, x: 56,
     text: 'Answer that and you have already decided what state you can justify.',
     dur: 1.8,
   },
   {
-    p: 13, x: 56, dial: 1,
+    p: 383, x: 56, dial: 1,
     text: 'Nobody thinks this really happened. It is an instrument: set it to a reading of human nature, and see what has to be built on top.',
     cite: 'The state of nature · a tool, not a history',
     dur: 4.2,
   },
   {
-    p: 35, x: 120, dial: 1, set: 1, built: 1,
+    p: 167, x: 120, dial: 1, set: 1, built: 1,
     text: 'Hobbes turns the dial to FEARFUL. Everyone is roughly equal, so everyone can kill everyone, so everyone strikes first.',
     cite: 'Hobbes · the war of all against all',
     dur: 2.4,
   },
   {
-    p: 35, x: 120, dial: 1, set: 1, built: 1,
+    p: 167, x: 120, dial: 1, set: 1, built: 1,
     text: 'Only a power standing above the quarrel can stop it, and that power must be too tall to reach over.',
     dur: 2.6,
   },
@@ -68,13 +68,13 @@ export const BEATS: Political11Beat[] = [
     dur: 3.6,
   },
   {
-    p: 21, x: 120, dial: 1, set: 2, built: 2,
+    p: 176, x: 120, dial: 1, set: 2, built: 2,
     text: 'Locke turns it to RATIONAL. We already owe each other things out here; what is missing is only a neutral judge.',
     cite: 'Locke · a limited government',
     dur: 2.7,
   },
   {
-    p: 21, x: 120, dial: 1, set: 2, built: 2,
+    p: 176, x: 120, dial: 1, set: 2, built: 2,
     text: 'So he builds small, and the people stay outside it holding the rights they walked in with.',
     dur: 2.1,
   },

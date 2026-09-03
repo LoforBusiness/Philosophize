@@ -24,12 +24,12 @@ export interface Ethics7Beat extends BaseBeat {
 
 export const BEATS: Ethics7Beat[] = [
   {
-    p: 45, x: 90, carB: -70,
+    p: 159, x: 90, carB: -70,
     text: 'Two drivers glance at their phone for exactly two seconds. One gets home, eats dinner, forgets it.',
     dur: 2.7,
   },
   {
-    p: 45, x: 90, carB: -70,
+    p: 159, x: 90, carB: -70,
     text: 'The other is in a courtroom by Friday. Same two seconds.',
     dur: 1.8,
   },
@@ -107,13 +107,13 @@ export const BEATS: Ethics7Beat[] = [
     dur: 1.0,
   },
   {
-    p: 1, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
+    p: 167, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
     text: 'In 1976 Bernard Williams and Thomas Nagel named this clash: moral luck. Whether you end up a decent person or a criminal depends partly on which road you happened to drive down.',
     cite: 'Williams & Nagel · 1976',
     dur: 4.1,
   },
   {
-    p: 1, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
+    p: 167, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
     text: 'Nagel stated the intuition we keep breaking.',
     dur: 1.8,
   },

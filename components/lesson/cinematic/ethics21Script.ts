@@ -44,7 +44,7 @@ export const BEATS: Eth21Beat[] = [
     dur: 4.2,
   },
   {
-    p: 45, x: 132, act: 1, arms: 1, aim: 1,
+    p: 379, x: 132, act: 1, arms: 1, aim: 1,
     text: 'Aquinas saw that we judge the two arrows in different ways. We do so everywhere, not just in hospitals.',
     dur: 4.4,
   },

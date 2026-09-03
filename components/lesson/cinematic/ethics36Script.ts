@@ -38,7 +38,7 @@ export const BEATS: Ethics36Beat[] = [
     dur: 2.6,
   },
   {
-    p: 13, x: 56, book: 1,
+    p: 404, x: 56, book: 1,
     text: 'So what did the sentence do?',
     dur: 1.8,
   },
@@ -52,12 +52,12 @@ export const BEATS: Ethics36Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 56, book: 1, struck: 1, excuse: 1,
+    p: 176, x: 56, book: 1, struck: 1, excuse: 1,
     text: 'That line runs between forgiving and excusing, and people slide across the line constantly. Excusing says the person could not help it.',
     dur: 3.9,
   },
   {
-    p: 21, x: 56, book: 1, struck: 1, excuse: 1,
+    p: 176, x: 56, book: 1, struck: 1, excuse: 1,
     text: 'Forgiving says the person could.',
     dur: 1.8,
   },
@@ -74,17 +74,17 @@ export const BEATS: Ethics36Beat[] = [
     dur: 3.6,
   },
   {
-    p: 35, x: 130, book: 1, struck: 1, gift: 1,
+    p: 167, x: 130, book: 1, struck: 1, gift: 1,
     text: 'Forgiveness is a gift, and a gift has an owner. The resentment was yours by right.',
     dur: 2.9,
   },
   {
-    p: 35, x: 130, book: 1, struck: 1, gift: 1,
+    p: 167, x: 130, book: 1, struck: 1, gift: 1,
     text: 'Giving the resentment up is yours to do.',
     dur: 1.8,
   },
   {
-    p: 4, x: 130, book: 1, struck: 1, gift: 1,
+    p: 160, x: 130, book: 1, struck: 1, gift: 1,
     interact: {
       prompt: 'Set the lever to why there can be no duty to forgive.',
       lever: {
@@ -101,7 +101,7 @@ export const BEATS: Ethics36Beat[] = [
     dur: 1.0,
   },
   {
-    p: 45, x: 130, book: 1, struck: 1, gift: 1,
+    p: 379, x: 130, book: 1, struck: 1, gift: 1,
     text: 'None of that makes forgiveness easy, or owed, or always right. Forgiveness is simply one of the few things a wronged person still holds.',
     dur: 4.4,
   },

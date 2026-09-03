@@ -63,13 +63,13 @@ export const BEATS: Pol4Beat[] = [
     dur: 3.4,
   },
   {
-    p: 28, walls: 0, harm: 0, panel: 2,
+    p: 163, walls: 0, harm: 0, panel: 2,
     text: 'Berlin named a rival ideal: positive liberty — being your own master. You might face no interference yet still be too poor, sick, or untaught to act.',
     cite: 'Positive liberty — freedom to',
     dur: 3.8,
   },
   {
-    p: 28, walls: 0, harm: 0, panel: 2,
+    p: 163, walls: 0, harm: 0, panel: 2,
     text: 'Should the state empower people, not merely leave them alone?',
     dur: 1.8,
   },

@@ -26,7 +26,7 @@ export const BEATS: Logic33Beat[] = [
     dur: 3.8,
   },
   {
-    p: 47, x: 52, bend: 0.5,
+    p: 386, x: 52, bend: 0.5,
     text: 'Give the line a couple of bends and the line starts to behave. Now the line runs near every dot, and still looks like a finding.',
     cite: 'A couple of bends',
     dur: 4.4,
@@ -43,13 +43,13 @@ export const BEATS: Logic33Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 52, bend: 1, nextDot: 1,
+    p: 160, x: 52, bend: 1, nextDot: 1,
     text: 'Then a new measurement comes in, and the perfect curve is nowhere near it. It was never learning the pattern.',
     cite: 'The eighth measurement',
     dur: 3.3,
   },
   {
-    p: 4, x: 52, bend: 1, nextDot: 1,
+    p: 160, x: 52, bend: 1, nextDot: 1,
     text: 'It was learning your seven dots, errors and all.',
     dur: 1.8,
   },
@@ -85,13 +85,13 @@ export const BEATS: Logic33Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 52, bend: 0.5, nextDot: 1,
+    p: 167, x: 52, bend: 0.5, nextDot: 1,
     text: 'That is what the razor is really for. Between two accounts that fit the evidence equally, take the one with fewer parts.',
     cite: 'Occam’s razor',
     dur: 3.4,
   },
   {
-    p: 35, x: 52, bend: 0.5, nextDot: 1,
+    p: 167, x: 52, bend: 0.5, nextDot: 1,
     text: 'Every extra part is another thing that can be wrong.',
     dur: 1.8,
   },

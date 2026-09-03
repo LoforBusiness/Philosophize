@@ -54,7 +54,7 @@ export const BEATS: Pol14Beat[] = [
     },
   },
   {
-    g: 1, rows: 3,
+    g: 383, rows: 3,
     dur: 4.8,
     text: 'So if you want the top row back, you have to reach into this picture and stop something. Nozick\'s question is only which row you were planning to reach into.',
     cite: 'Reach in and stop something',

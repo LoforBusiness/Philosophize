@@ -101,7 +101,7 @@ export const BEATS: Logic37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 45, x: 128, boxes: 1, sets: 1,
+    p: 379, x: 128, boxes: 1, sets: 1,
     text: 'Frege had a volume at the printer. He added an appendix saying the ground had gone, and published it anyway.',
     dur: 4.4,
   },

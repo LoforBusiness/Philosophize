@@ -28,12 +28,12 @@ export interface Aes10Beat extends BaseBeat {
 
 export const BEATS: Aes10Beat[] = [
   {
-    p: 25, x: 44, film: 1, panel: 1, shut: 0,
+    p: 164, x: 44, film: 1, panel: 1, shut: 0,
     text: 'Two hours of the finest film-making you have ever sat through. Every frame placed by a master.',
     dur: 2.6,
   },
   {
-    p: 25, x: 44, film: 1, panel: 1, shut: 0,
+    p: 164, x: 44, film: 1, panel: 1, shut: 0,
     text: 'And all of that skill is working to make cruelty look glorious.',
     dur: 1.8,
   },
@@ -62,7 +62,7 @@ export const BEATS: Aes10Beat[] = [
     dur: 3.8,
   },
   {
-    p: 29, x: 110, film: 1, panel: 1, shut: 0, verdict: 1,
+    p: 389, x: 110, film: 1, panel: 1, shut: 0, verdict: 1,
     text: 'The moralist shoves the shutter back. What a work invites you to feel is not a footnote about it — it is part of what the work already is.',
     cite: 'The moralist opens it',
     dur: 4.6,

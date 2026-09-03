@@ -33,13 +33,13 @@ export const BEATS: Pol32Beat[] = [
     cite: 'Declared',
   },
   {
-    g: 1, fill: 1, result: 1, mark: 1, labels: 0,
+    g: 167, fill: 1, result: 1, mark: 1, labels: 0,
     dur: 3,
     text: 'Including yours. The odds of a single vote deciding a national election are worse than most lotteries.',
     cite: 'Yours',
   },
   {
-    g: 1, fill: 1, result: 1, mark: 1, labels: 0,
+    g: 167, fill: 1, result: 1, mark: 1, labels: 0,
     dur: 1.8,
     text: 'You knew that on the way to the hall.',
   },
@@ -57,7 +57,7 @@ export const BEATS: Pol32Beat[] = [
     },
   },
   {
-    g: 3, fill: 1, result: 1, mark: 1, labels: 1,
+    g: 383, fill: 1, result: 1, mark: 1, labels: 1,
     dur: 4.8,
     text: 'But deciding the winner is not the only thing a mark can do. Look at the gap between the two piles — the bit of the top row that has nothing under it.',
     cite: 'The gap',

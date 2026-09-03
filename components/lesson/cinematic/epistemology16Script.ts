@@ -61,7 +61,7 @@ export const BEATS: Epi16Beat[] = [
     },
   },
   {
-    g: 21, results: 5, bars: 3, found: 1,
+    g: 380, results: 5, bars: 3, found: 1,
     dur: 4.8,
     text: 'The eclipse came back at one and three-quarter seconds of arc. One narrow bar survived and one narrow bar died.',
     cite: 'May 1919',

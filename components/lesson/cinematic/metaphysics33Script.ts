@@ -32,7 +32,7 @@ export const BEATS: Metaphysics33Beat[] = [
     dur: 3.6,
   },
   {
-    p: 47, x: 62, fall: 1,
+    p: 400, x: 62, fall: 1,
     text: 'Now the cup falls. You have watched a cup fall a thousand times and it needs no explaining.',
     cite: 'The tower goes over',
     dur: 3.4,
@@ -49,13 +49,13 @@ export const BEATS: Metaphysics33Beat[] = [
     dur: 1.9,
   },
   {
-    p: 4, x: 62, fall: 1, rev: 1,
+    p: 160, x: 62, fall: 1, rev: 1,
     text: 'Here is the strange part. Every single collision in that reversed film is legal.',
     cite: 'Nothing forbids it',
     dur: 2.4,
   },
   {
-    p: 4, x: 62, fall: 1, rev: 1,
+    p: 160, x: 62, fall: 1, rev: 1,
     text: 'Take any two blocks knocking together and the reverse obeys the same laws exactly.',
     dur: 2.4,
   },
@@ -94,13 +94,13 @@ export const BEATS: Metaphysics33Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 62, fall: 0.82,
+    p: 167, x: 62, fall: 0.82,
     text: 'That is the whole answer. Order is rare and mess is common.',
     cite: 'Rare and common',
     dur: 2.1,
   },
   {
-    p: 35, x: 62, fall: 0.82,
+    p: 167, x: 62, fall: 0.82,
     text: 'Anything wandering at random wanders into the mess and never happens to wander back.',
     dur: 2.5,
   },

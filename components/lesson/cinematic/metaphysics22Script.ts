@@ -62,7 +62,7 @@ export const BEATS: Met22Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, track: 1, runs: 1, open: 1,
+    p: 418, x: 132, track: 1, runs: 1, open: 1,
     text: 'Compatibilism says the phrase was never about the replay. It asks whether you would have gone the other way had you wanted to.',
     cite: 'Compatibilism',
     dur: 4.8,

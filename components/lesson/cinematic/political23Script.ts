@@ -34,12 +34,12 @@ export interface Pol23Beat extends BaseBeat {
 
 export const BEATS: Pol23Beat[] = [
   {
-    p: 25, x: 200, tags: 1,
+    p: 164, x: 200, tags: 1,
     text: 'Three things you are. Two of them you signed up for.',
     dur: 2.7,
   },
   {
-    p: 25, x: 200, tags: 1,
+    p: 164, x: 200, tags: 1,
     text: 'One was true before you could speak.',
     dur: 1.8,
   },
@@ -65,7 +65,7 @@ export const BEATS: Pol23Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, tags: 1, strip: 1, box: 1,
+    p: 399, x: 132, tags: 1, strip: 1, box: 1,
     text: 'Take the ties away, says the other side, and nothing neutral is left underneath to do the choosing.',
     cite: 'The situated self',
     dur: 4.6,

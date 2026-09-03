@@ -52,17 +52,17 @@ export const BEATS: Log17Beat[] = [
     dur: 2,
   },
   {
-    p: 45, x: 132, pair: 1, marks: 1, slur: 1,
+    p: 159, x: 132, pair: 1, marks: 1, slur: 1,
     text: 'So you go after the man. He lies, he has form, why would anyone listen.',
     dur: 3.5,
   },
   {
-    p: 45, x: 132, pair: 1, marks: 1, slur: 1,
+    p: 159, x: 132, pair: 1, marks: 1, slur: 1,
     text: 'It feels like winning.',
     dur: 1.8,
   },
   {
-    p: 13, x: 132, pair: 1, marks: 1, slur: 1,
+    p: 396, x: 132, pair: 1, marks: 1, slur: 1,
     text: 'The insult landed on both columns equally. Notice how the insult never touched a single reason.',
     cite: 'Ad hominem',
     dur: 4.0,
@@ -90,7 +90,7 @@ export const BEATS: Log17Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 268, pair: 1, marks: 1, lift: 1, falls: 1,
+    p: 380, x: 268, pair: 1, marks: 1, lift: 1, falls: 1,
     text: 'One is a machine with parts you can inspect. The other is tipping over, because there was nothing under it.',
     dur: 4.6,
   },

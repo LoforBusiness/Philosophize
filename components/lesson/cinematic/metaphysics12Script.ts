@@ -20,12 +20,12 @@ export interface Meta12Beat extends BaseBeat {
 
 export const BEATS: Meta12Beat[] = [
   {
-    g: 4, owner: 0, none: 0,
+    g: 160, owner: 0, none: 0,
     dur: 3,
     text: 'Look inward right now. There is a warmth, a sound, a thought about tomorrow, another thought about this sentence.',
   },
   {
-    g: 4, owner: 0, none: 0,
+    g: 160, owner: 0, none: 0,
     dur: 1.8,
     text: 'The stream is easy to find.',
   },
@@ -41,13 +41,13 @@ export const BEATS: Meta12Beat[] = [
     text: 'So: a box for the owner.',
   },
   {
-    g: 45, owner: 1, none: 0,
+    g: 159, owner: 1, none: 0,
     dur: 3.9,
     text: 'Hume went looking and reported back that he could never catch it. Every time he tried, he found another perception instead.',
     cite: 'Hume looked',
   },
   {
-    g: 45, owner: 1, none: 0,
+    g: 415, owner: 1, none: 0,
     dur: 1.8,
     text: 'The box stays empty.',
   },
@@ -71,7 +71,7 @@ export const BEATS: Meta12Beat[] = [
     cite: 'The overreach',
   },
   {
-    g: 2, owner: 1, none: 1, pick: 1,
+    g: 384, owner: 1, none: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap what is having these experiences.',
