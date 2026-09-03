@@ -195,8 +195,27 @@ ok(noBranch.length === 0, 'and at least one branch to chart',
   const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
   const TENS = { twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
   const introSrc = readFileSync(path.join(REPO, 'components/welcome/rig.ts'), 'utf8');
-  const m = introSrc.match(/'([A-Za-z -]+) thinkers\.'/);
-  const spoken = m ? m[1] : null;
+  // FIND THE FIGURE, NOT THE SENTENCE. This used to match /'(...) thinkers\.'/ —
+  // it required the line to END in " thinkers.", so the check was a hostage to
+  // the wording. Reword the line and it reports "(line not found)" rather than
+  // measuring anything, which is the failure this file exists to prevent wearing
+  // the opposite disguise. It reads the spelled figure wherever it appears in
+  // the script, and fails if there is not exactly one.
+  const scriptBlock = introSrc.slice(introSrc.indexOf('const SCRIPT'), introSrc.indexOf('const SPEAK_END'));
+  const NUMWORD = '(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|'
+    + 'thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|'
+    + 'twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|and)';
+  const RUN = new RegExp(`\\b${NUMWORD}(?:[ -]${NUMWORD}){2,}`, 'gi');
+  // Only the SPOKEN lines — a beat time or a comment must never be mistaken for
+  // the figure. Line strings are the second element of each tuple.
+  const spokenLines = [...scriptBlock.matchAll(/\[\s*[\d.]+,\s*(['"])((?:\\.|(?!\1).)*)\1/g)]
+    .map((mm) => mm[2].replace(/\\'/g, "'").replace(/\\"/g, '"'));
+  const found = spokenLines.flatMap((l) => l.match(RUN) ?? []);
+  const spoken = found.length === 1 ? found[0] : null;
+  if (found.length !== 1) {
+    ok(false, 'exactly one line of the intro carries the thinker count',
+      `${found.length} found${found.length ? ': ' + found.join(' | ') : ''}`);
+  }
   let n = 0;
   if (spoken) {
     // "Three hundred and twenty-two" -> 322. Enough grammar for any figure this

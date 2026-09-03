@@ -81,8 +81,14 @@ export default function GrowthChart({ p }: { p: SharedValue<number> }) {
         <SvgText x={150} y={26} fill={SOFT} fontFamily="Inter_700Bold" fontSize={15} letterSpacing={2.2} textAnchor="middle">
           ONE A DAY
         </SvgText>
+        {/* NOT "It compounds." — that was the same platitude the spoken line was
+            rewritten to get rid of, and with the host now saying "One lesson a
+            day" over the top of the ONE A DAY kicker the board was echoing him
+            twice. This names the x-axis in human terms instead, which is what
+            the eight bars underneath actually are. Measured at 240 of the 290
+            the 300-wide chart allows. */}
         <SvgText x={150} y={54} fill={INK} fontFamily="PlayfairDisplay_700Bold" fontSize={26} textAnchor="middle">
-          It compounds.
+          Two months of that.
         </SvgText>
       </AG>
 

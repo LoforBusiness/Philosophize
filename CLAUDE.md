@@ -3139,6 +3139,65 @@ counter-tested from both sides.
 > plausible places to go looking.
 
 
+### And then the words themselves were the problem
+
+> *"the words were very AI sounding and not very good ... this is the first thing
+> a user sees."*
+
+They were, and the fault has a shape worth recognising: **the old script
+EXPLAINED THE PRODUCT.** "Philosophy has six branches." "Three hundred and
+twenty-two thinkers." "A little every day, and it adds up." "Ready to think
+differently?" — a feature, a spec, a platitude and an advert. It also opened by
+telling the reader what they think ("Think philosophy is boring, or too
+difficult?"), which is the one thing a stranger cannot know.
+
+**THE RESEARCH IS UNANIMOUS AND SAYS THE OPPOSITE OF ALL OF IT.** Loewenstein's
+information-gap account — the effect a first screen is trying to produce — is
+that a gap motivates in proportion to how SPECIFIC and REACHABLE it is; a stated
+fact opens nothing, while "Is it ever right to lie?" is a gap the reader can feel
+the edges of and already half-answers. Activation research on this category
+lands in the same place from the other end: onboarding that works is not an
+explanation, it is the product happening — Duolingo's is a lesson before an
+account, and the measure is whether somebody thinks *"I have started"*, not
+whether they absorbed a feature list.
+
+So the demo is the spine now. The opener makes a claim about the WORLD and
+leaves a gap; the answer is framed as an argument you are having rather than a
+fact you are given ("Then Kant argues back"); the branches arrive as where that
+one question LIVES; the count arrives as company; and the close hands over
+instead of asking permission. "Ready to think differently?" is a slogan.
+"Your turn." is a door.
+
+> **AND THE BOARD WAS STILL SAYING THE PLATITUDE.** GrowthChart's own headline
+> read "It compounds." — the same register the spoken line had just been
+> rewritten to lose, and with the host now saying "One lesson a day" over the
+> board's own ONE A DAY kicker he was echoing it twice. It names the x-axis in
+> human terms now ("Two months of that."), which is what the eight bars are.
+
+> **A LINE IS FOUR CONSTRAINTS AT ONCE, AND THE OFFLINE MODEL LIED ABOUT ONE.**
+> Two rows of bubble, 0.9s standing complete, no tail under five characters, no
+> faster than 230ms a word. Three are arithmetic, so candidates were scored in
+> plain Node — and the wrap was scored against `BUB.maxTextW`, which is 322 and
+> is NOT where the browser breaks. Two lines the model called two rows came back
+> three. Bracketed from the real render's own breaks the true budget is 288, and
+> **an offline model is calibrated against the instrument it stands in for, not
+> against the constant it reads.**
+
+> **THE GESTURE WAS PICKED OFF A RENDER, WHICH IS streakMood's RULE ARRIVING
+> HERE.** `point` was the obvious choice for "Everyone has opinions" — he points
+> at the reader, which is the joke — and shot at the beat's own peak it looked
+> like no gesture at all: `GP.point` puts the near hand at 0.58 of reach and
+> barely up, which on a nearly face-on figure is hard to tell from standing
+> still. `shrug` throws both hands wide and low, is symmetric, and survives being
+> drawn 100px tall. `emphasize` had been declared and never used for the life of
+> the file — the same defect `check:quips` holds over the herald's poses — and it
+> is the offering pose, so "Here." is the offer.
+>
+> A stronger gesture blend (0.6 → 0.88) was tried and REVERTED: frame capture on
+> this screen drifts a second between runs because the launch animation varies,
+> so it could not be confirmed, and an unverified change to a tuned animation
+> constant is not worth keeping.
+
 ### The words were too fast, and the line broke in the wrong place
 
 > *"slow down the words being spoken a little bit … when it shows different

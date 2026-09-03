@@ -106,25 +106,86 @@ export const T_BOLT = 0.46; // and gone
 //
 // and `check-thinkers` re-derives exactly that and holds the 0.9. Widen a line
 // and the arithmetic is what tells you, not the screen.
+// ── WHAT THE HOST ACTUALLY SAYS, AND WHY IT WAS ALL REWRITTEN ───────────────
+//
+// A reader, about the first thing anybody ever sees: *"the words were very AI
+// sounding and not very good."* They were, and the shape of the fault is worth
+// keeping, because it is the shape every first-run script drifts into.
+//
+// THE OLD SCRIPT EXPLAINED THE PRODUCT. "Philosophy has six branches." "Three
+// hundred and twenty-two thinkers." "A little every day, and it adds up."
+// "Ready to think differently?" — a feature, a spec, a platitude and an advert.
+// It also opened by telling the reader what they think ("Think philosophy is
+// boring, or too difficult?"), which is the one thing a stranger cannot know.
+//
+// WHAT THE RESEARCH SAYS, LOOKED UP RATHER THAN GUESSED, and it is unanimous:
+//
+//   · Loewenstein's information-gap account of curiosity — the effect a first
+//     screen is trying to produce — says a gap motivates in proportion to how
+//     SPECIFIC and REACHABLE it is. "Philosophy has six branches" states a fact
+//     and opens nothing. "Is it ever right to lie?" is a gap the reader can feel
+//     the edges of, and they already have half an answer.
+//   · Activation research on this category says the same thing from the other
+//     end: onboarding that works is not an explanation, it is the product
+//     happening. Duolingo's own is a lesson before an account — value first, the
+//     lock afterwards. The measure is whether somebody thinks "I have started",
+//     not whether they have understood the feature list.
+//
+// So the demo is the spine now and everything else serves it. The opener makes a
+// claim about the WORLD rather than about the reader and leaves a gap; the
+// question lands; the answer is framed as an argument you are having rather than
+// a fact you are given ("Then Kant argues back"); the branches arrive as where
+// that one question LIVES rather than as a taxonomy; the count arrives as
+// company rather than inventory; and the close hands over instead of asking
+// permission. "Ready to think differently?" is a slogan. "Your turn." is a door.
+//
+// EVERY LINE IS MEASURED, and the constraints are tighter than they look. A line
+// must fit TWO rows of a 322-unit bubble at 27px Playfair, must stand complete
+// for at least 0.9s after its last word arrives, must not strand a tail under
+// five characters, and must not be rushed below 230ms a word. `check-intro`
+// holds the first three in a browser and `check-thinkers` the fourth in plain
+// Node. Beats 6-10 moved 0.3s later so beat 5 could afford five words; the
+// total is unchanged, the slack came out of beat 10, which had 3.15s of it.
 const SCRIPT: Array<[number, string, Visual | null, Gesture | null, number[]?]> = [
-  [0.0, 'Think philosophy is boring, or too difficult?', null, 'point'],
-  [3.4, "Watch. Here's a real one.", null, 'shrug'],
+  // SHRUG, AND IT WAS CHOSEN OFF A RENDER RATHER THAN BY NAME — streakMood's
+  // finding, which this file gets to make for itself. `point` was the obvious
+  // pick (he points at the reader on "Everyone", which is the joke) and it does
+  // not read: GP.point puts the near hand at 0.58 of reach and only slightly
+  // up, which on a figure drawn nearly face-on is hard to tell from standing
+  // still. Shot at the beat's own peak it looked like no gesture at all.
+  // `shrug` throws both hands wide and low, is symmetric, and survives being
+  // drawn 100px tall — and "Nobody tests them" is a shrug in the first place.
+  //
+  // That leaves `point` unused by the table, which is fine and worth saying:
+  // the TEACHER point in handTargets covers the pointing idiom on every board
+  // beat, aimed at the real board rather than at a preset.
+  [0.0, 'Everyone has opinions. Nobody tests them.', null, 'shrug'],
+  // `emphasize` was declared and never used for as long as this file has
+  // existed — the same defect `check:quips` holds over the herald's poses. It is
+  // the offering pose, and "Here." is the offer.
+  [3.4, 'Here. Test one.', null, 'emphasize'],
   [6.25, 'Is it ever right to lie?', 'lesson', null],
-  [9.35, 'You answer. Then Kant tells you why.', 'lesson', null],
-  [12.7, 'Philosophy has six branches.', 'map', null],
+  // "Then Kant tells you why" made it a lecture with a delay on it. The whole
+  // pitch of the app is that you answer FIRST and are then argued with, which is
+  // also what the lesson runner actually does.
+  [9.35, 'You answer first. Then Kant argues back.', 'lesson', null],
+  // The branches arrive as the place that question came from, not as a taxonomy.
+  [12.7, 'That was one of six.', 'map', null],
   // Three names per line, in the order the board draws them (A1: what the text
   // says, the picture must do). The cues are the words each name lands on.
-  [15.3, 'What is real. How you know. What follows.', 'map', null, [2, 5, 7]],
-  [18.9, 'How to live. What is beautiful. Who rules.', 'map', null, [2, 5, 7]],
+  [15.6, 'What is real. How you know. What follows.', 'map', null, [2, 5, 7]],
+  [19.2, 'How to live. What is beautiful. Who rules.', 'map', null, [2, 5, 7]],
   // THE EXACT FIGURE, because it is more impressive than the round one — and it
   // has to be the RIGHT exact figure. This said "two hundred and twenty-three"
-  // for as long as the intro has existed; there are 322. A wrong number is worse
+  // for as long as the intro existed; there are 322. A wrong number is worse
   // than a round one in the first thirty seconds of an app about thinking
   // clearly, and it is the one line here that can rot on its own.
   //
-  // `check-thinkers` now compares this line and the board's "AND n MORE" against
-  // ALL_PHILOSOPHERS.length, so the next person to add a thinker is told.
-  [22.7, 'Three hundred and twenty-two thinkers.', 'thinkers', null],
+  // `check-thinkers` finds the spelled figure ANYWHERE in this script and
+  // compares it to ALL_PHILOSOPHERS.length. It used to insist the line ended in
+  // " thinkers.", which made the check a hostage to the wording — reword the
+  // line and the count silently stopped being checked.
+  [23.0, 'Three hundred and twenty-two had a go.', 'thinkers', null],
   // ── FOUR SURNAMES, AND THE FOURTH ONE USED TO FALL OFF THE LINE ───────────
   //
   // A reader: "the simone de beauvoir, his last name goes too far under it,
@@ -139,17 +200,18 @@ const SCRIPT: Array<[number, string, Visual | null, Gesture | null, number[]?]> 
   // So the line says what the BOARD says. ThinkersChart draws BEAUVOIR — it has
   // to, the full form overruns 300 units — and the host was saying something
   // else over the top of it, which is rule A1 read backwards. Naming all four by
-  // surname is also the only reading in which the four are treated alike: the
-  // other three were surnames already.
-  [25.9, 'Socrates. Kant. Nietzsche. Beauvoir.', 'thinkers', null],
-  // The bars and the rank line. This beat exists because the intro said what
-  // philosophy IS and never what a habit of it adds up to — and the board column
-  // sat empty through both closing lines anyway.
-  // "It adds up." broke as "…It adds / up." — a phrasal verb cut in half, which
-  // is the same defect as the surname above and reads worse for being a joinable
-  // pair. The comma gives the wrap somewhere sensible to fall.
-  [29.1, 'A little every day, and it adds up.', 'growth', null],
-  [34.7, 'Ready to think differently?', null, 'open'],
+  // surname is also the only reading in which the four are treated alike.
+  [26.2, 'Socrates. Kant. Nietzsche. Beauvoir.', 'thinkers', null],
+  // The bars and the rank line. "A little every day, and it adds up." was the
+  // most generic sentence in the app — it would sit unaltered on a fitness app,
+  // a language app or a savings account, which is precisely what "AI sounding"
+  // means. This says what the accumulation actually BUYS, and it is a joke the
+  // rest of the app already makes.
+  [29.4, 'One lesson a day. Then you win arguments.', 'growth', null],
+  // He hands over rather than asking permission. A question here ("Ready to
+  // think differently?") invites an answer nobody can give, and the Begin button
+  // one beat later is the only answer available anyway.
+  [34.7, 'Enough from me. Your turn.', null, 'open'],
 ];
 
 const SPEAK_END = 37.5; // relative — he stops talking here
