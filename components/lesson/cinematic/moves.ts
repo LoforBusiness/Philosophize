@@ -2389,17 +2389,26 @@ export function actStance(code: number, t: number, u: number): Stance {
   if (code === 97) {                             // DOUBLE TAKE — away, SNAP back, lean in
     // The snap is 6% of the action. Spread it over even a fifth and it stops
     // being a double take and becomes a head turn, which is not the same joke.
+    //
+    // AND IT WAS FIRST WRITTEN ON THE NECK, WHICH IS N12 BROKEN BY THE RULE'S OWN
+    // AUTHOR. `neck` 0.52 and `tilt` 0.02 is about 13 units of head travel against
+    // a head 40 across, and the contact sheet came back as six frames of a figure
+    // standing still. A double take is a whole BODY: the torso goes with the
+    // glance, RECOILS on the snap, then leans in to look properly. All three of
+    // those are the spine, and the recoil is what makes the snap two events
+    // rather than one turn.
     const away = ease01(clamp01(p / 0.26));
     const snap = ease01(clamp01((p - 0.30) / 0.06));
     const lean = ease01(clamp01((p - 0.42) / 0.30)) * (1 - ease01(clamp01((p - 0.84) / 0.16)));
     return {
       ...s,
-      neck: s.neck + away * 0.30 - snap * 0.52 - lean * 0.12,
-      tilt: s.tilt + away * 0.02 - lean * 0.16,
-      bob: s.bob - lean * 1.5,
-      fistL: { x: -5 - lean * 3, y: 6 },
-      fistR: { x: 5 + lean * 15, y: 6 - lean * 20 },
-      adv: lean * 4,
+      neck: s.neck + away * 0.34 - snap * 0.56 - lean * 0.16,
+      tilt: s.tilt + away * 0.10 + snap * 0.20 - lean * 0.34,
+      bob: s.bob - snap * 3 - lean * 3.5,
+      footL: { x: -5 - lean * 4, y: 0 }, footR: { x: 5 + lean * 9, y: 0 },
+      fistL: { x: -6 - lean * 5, y: 6 - lean * 4 },
+      fistR: { x: 6 + snap * 6 + lean * 22, y: 6 - lean * 26 },
+      adv: -snap * 4 + lean * 7,
     };
   }
   if (code === 98) {                             // JAW DROP — head back, arms go slack
@@ -2457,12 +2466,18 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       // Feet come up WITH the pelvis (header rule 4) — a heel raise is the feet
       // rising, and the body riding them.
-      bob: s.bob + up * 5,
-      footL: { x: -4, y: -up * 5 }, footR: { x: 4, y: -up * 5 },
-      neck: s.neck - crane * 0.22,
-      tilt: s.tilt - up * 0.08,
-      fistL: { x: -5 - up * 2, y: 6 - up * 3 },
-      fistR: { x: 5 + up * 3, y: 6 - up * 4 },
+      // FIVE UNITS OF RISE IS NOT A RISE. The first version lifted the pelvis 5
+      // and the heels 5, which on a figure ~150 tall is invisible: the sheet came
+      // back as six identical frames. Peering over something is a STRETCH -- the
+      // heels come right up, the spine lengthens and leans over the top of
+      // whatever is in the way, and the hands come up to steady on its edge.
+      bob: s.bob + up * 11,
+      footL: { x: -4, y: -up * 11 }, footR: { x: 4, y: -up * 11 },
+      neck: s.neck - crane * 0.26,
+      tilt: s.tilt - up * 0.22,
+      fistL: { x: -6 + up * 22, y: 6 - up * 24 },
+      fistR: { x: 6 + up * 20, y: 6 - up * 28 },
+      adv: up * 5,
     };
   }
   if (code === 101) {                            // CHECK THE COAST — crane out, pull back, proceed
