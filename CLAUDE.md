@@ -1589,10 +1589,44 @@ skins, and **group R of the rule book is how to tell which one a claim wants**:
 | The claim is… | Control | It reads |
 |---|---|---|
 | one quantity on a scale | `drag` | a knob on a rail (`DragScale`) |
-| one of a few NAMED settings on a ladder | `lever` | an arm with detents (`LeverPick`) |
+| what CATEGORY a named thing belongs to | `sort` | a chip and labelled bins (`SortBins`) |
+| which POSITION you would defend | `poll` | a ballot, then who held each (`PollBallot`) |
 | what happens to a thing AS another changes | `plot` | a curve you draw (`ShapePlot`) |
 | how one thing DIVIDES between two | `split` | a seam in one bar (`SplitBar`) |
-| two INDEPENDENT yes/no questions | `field` | a token on a pad (`FieldPick`) |
+
+> **THE LEVER AND THE PAD ARE GONE, AND THE READER WAS RIGHT ABOUT BOTH.** The
+> four-box pad was *"always really difficult … it makes a long time to understand
+> what is actually being said"*, and the lever *"isn't that different from the
+> line you drag back and forth."*
+>
+> That last clause is the diagnosis, and reading all fifty lever questions
+> confirms it: **not one was a quantity.** Every one names a subject and offers
+> three or four candidate claims — "the fear is faked · the fun is faked · the
+> fear is real, with the consequences taken out". A pick wearing a slider is
+> indistinguishable from a slider, because a slider is what the thumb is doing.
+> The pad is the same fault in two dimensions: its corners ARE named positions,
+> but the reader has to rebuild them from two axis labels before they can read
+> the question.
+>
+> **Not one `reads` string changed in either conversion**, which is the test for
+> whether the control was wrong rather than the question. `sort` asks "where does
+> this belong"; `poll` lists the positions and then shows **who actually held
+> each** — the reader's own idea, and the thing that turns a right answer into a
+> place you stand relative to the tradition.
+>
+> **AND BOTH HAD A POSITIONAL TELL NOTHING WAS MEASURING.** `check-answers` has
+> existed since all 130 two-card questions put the true card on the left, and it
+> only ever looked at the deck. Measured on the day they were retired: the
+> lever's answer was its LAST stop in **35 of 50 (70%)** and the pad's its FIRST
+> quadrant in **15 of 22 (68%)**. On an arc and a pad that is half hidden by
+> geometry; in a ballot it is "always tap the top row". Both new controls permute
+> through `ChoiceCards.orderFor`, and `check:answers` now measures every control
+> with slots — poll 56%, sort 61%.
+>
+> **The prompts were the other half.** 132 of 368 named the control instead of
+> asking anything ("Drag to what Plato put first", "Set the lever to…"). All 132
+> are questions now, and `check:controls` measures the new controls' labels — it
+> found 41 of the author's own chips too long for their box on the first run.
 
 The distinctions are load-bearing rather than decorative. Three answers that are
 ORDERED lose the order the moment they become cards. "How the aura goes as the
@@ -3110,6 +3144,59 @@ found. Two CDP traps cost an hour: `Page.captureScreenshot` with
 `captureBeyondViewport` + `clip` **hangs** in `--headless=new`, and attaching to
 `/json/list[0]` rather than a tab made by `PUT /json/new` makes `Page.navigate` a
 silent no-op — use `scripts/peek.mjs`'s pattern.
+
+### Two of the six launch poses could not be read, and it is one rule
+
+> *"the one where the stickman is laying down, supposedly reading a book. And
+> then the other one … where it's sitting down and its arm is, like, crossed into
+> his head. These two really do not look good."* — and, of the two that work,
+> *"the one that the stickman is slowly walking or the one where it's sitting
+> down and has a cup of coffee."*
+
+**THE FIGURE IS SEVENTY PIXELS TALL HERE** — eight per cent of the panel — so
+nothing survives but the SILHOUETTE. The rig already writes the rule down twice:
+`seated()` says *"a fist near the body buries the whole forearm inside the torso
+silhouette at this stroke weight and the figure loses an arm"*, and `sipStance`
+says *"held OUT in front of the chin, not against it."* The coffee scene obeys
+both, which is exactly why it is one of the two a reader likes.
+
+- **READ** folded the legs flat along the ground and leaned the torso over them,
+  so leg, torso and both arms merged into one horizontal mass. That is how a
+  SEATED pose came to be described as lying down.
+- **THINKER** put the fist under the jaw, which welds the forearm to the head
+  disc and leaves a lozenge with a bump on it.
+
+Both are rebuilt on `seated()` — the primitive the coffee scene already uses —
+with the working limb kept clear and a motion big enough to see. The first
+attempt gave the thinker a more distinctive SEAT (one knee up, the far arm
+propped behind); rendered, that was worse, because a propping arm and splayed
+legs widen the base into a low mound and **the base is what is on screen for most
+of the cycle**. `seated()`'s own legs and resting hands are already tuned against
+exactly that, so only the working arm moves — which is all `sipStance` changes
+either.
+
+> **AND NEITHER OF THEM MOVED, WHICH NO CHECK COULD SEE.** Everything
+> `check:launch` asked was whether the motion was SMOOTH, and a pose that never
+> changes passes all of it perfectly — a still image has no jumps and no wrap.
+> Sampled across a whole period, `read` travelled 0.2 units (its page-turn window
+> was 0.8s of a 5.6s cycle) and the thinker was damped to nothing on purpose.
+>
+> The range-of-motion check that closes that hole found **a third one nobody had
+> reported**: `stargazer` moved not one of its four tracked points by a single
+> unit — all its life was in `postureLive`'s settle, so it was, in the terms that
+> matter, a photograph. Its free hand drifts toward the sky it is looking at now.
+
+> **AND A SECOND CHECK WAS BUILT, FAILED THREE WAYS, AND DELETED.** The
+> silhouette rule looks measurable and is not. "A hand gets clear of the torso
+> axis" is satisfied by the RESTING hand, which `seated()` parks on the knee, so
+> a gesture folding back under the jaw passed. Re-aimed at the head, same defect,
+> same reason. Following the hand that actually GESTURES finally discriminated —
+> and immediately flagged `lookout`, whose whole gesture is raising a hand to
+> SHADE THE EYES, and which reads perfectly. **A metric that disagrees with an
+> example whose answer you already know is a broken metric, not a finding**, so
+> it is not in the file; only the reasoning is. The silhouette rule is held by
+> `node scripts/sheet-launch.mjs <scene>`, which draws the figure at the size it
+> ships at and is the only instrument that ever saw the fault.
 
 ### The first four seconds, and the two cuts hiding in them
 

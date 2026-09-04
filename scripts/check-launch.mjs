@@ -523,9 +523,9 @@ for (const act of ['walk', 'sip', 'read', 'thinker', 'stargazer', 'lookout']) {
   // gesture) can never set its own tolerance the way `ordinary` used to.
   const sorted = [...steps].sort((a, b) => a - b);
   const p95 = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))];
-  // +6, not +0.5: `thinker`/`stargazer` deliberately retrigger `postureLive`'s
-  // settle every cycle ("re-takes the settle each cycle rather than settling
-  // once forever" — launchMotion.ts), and that settle's steepest instant sits
+  // +6, not +0.5: `stargazer` deliberately retriggers `postureLive`'s settle
+  // every cycle ("re-takes the settle each cycle rather than settling once
+  // forever" — launchMotion.ts), and that settle's steepest instant sits
   // exactly at bt = 0, which is exactly where the fold lands — by construction,
   // not by which period is chosen. Its worst-case 2-frame contribution is
   // bounded by the settle's own known amplitude: `db = -settle × 1.2` for any
@@ -533,6 +533,84 @@ for (const act of ['walk', 'sip', 'read', 'thinker', 'stargazer', 'lookout']) {
   // one 2-frame (1/30s) slice moves it at most ≈ 1.2 × 2π / 30 ≈ 0.25 raw units,
   // ×20 for the bob scale ≈ 5. 6 covers that with a small margin, while staying
   // well under the 8-unit absolute ceiling above for anything actually wrong.
+  //
+  // `thinker` USED to need this allowance too and no longer does: it is built on
+  // `seated()` now rather than on postureLive(9), and its wrap measures 0.28
+  // against a p95 of 0.45 — inside the tolerance even with the allowance taken
+  // away. Only stargazer still leans on it.
+  // ── AND IT HAS TO ACTUALLY DO SOMETHING ─────────────────────────────────
+  //
+  // Every check above asks whether the motion is SMOOTH. None of them asks
+  // whether there is any, and a pose that never changes passes all of them
+  // perfectly — a still image has no jumps and no wrap.
+  //
+  // A reader found both of the ones that did not: *"these two really do not
+  // look good … it's kinda difficult to understand what's going on."* Sampled
+  // across a whole period, `read` moved a hand 0.2 units (its page-turn window
+  // was 0.8s of a 5.6s cycle) and `thinker` was damped to almost nothing on
+  // purpose. That is defensible for a sculpture and wrong for the only moving
+  // thing on a loading screen.
+  //
+  // The floor is the TRAVEL of the busiest tracked point across the cycle, not
+  // the per-frame step: a slow gesture and a still figure look identical frame
+  // to frame and are not the same thing at all.
+  {
+    let far = 0, which = '';
+    for (const k of PTS) {
+      let lo = { x: 1e9, y: 1e9 }, hi = { x: -1e9, y: -1e9 };
+      for (let t = 0; t < T; t += 1 / 30) {
+        const s2 = LM.launchStance(act, t)[k];
+        lo = { x: Math.min(lo.x, s2.x), y: Math.min(lo.y, s2.y) };
+        hi = { x: Math.max(hi.x, s2.x), y: Math.max(hi.y, s2.y) };
+      }
+      const span = Math.hypot(hi.x - lo.x, hi.y - lo.y);
+      if (span > far) { far = span; which = k; }
+    }
+    ok(far >= 9, `${act}: something visibly moves`,
+      `${which} travels ${far.toFixed(1)} units across the cycle, floor 9`);
+  }
+
+  // ── AND THE WORKING LIMB HAS TO CLEAR THE BODY ──────────────────────────
+  //
+  // The rule the rig already states and the two bad poses both broke:
+  // `seated()` — *"a fist near the body buries the whole forearm inside the
+  // torso silhouette at this stroke weight and the figure loses an arm"* — and
+  // `sipStance` — *"held OUT in front of the chin, not against it."* The figure
+  // is about seventy pixels tall here, so a forearm laid along the torso or a
+  // fist tucked under the jaw is not subtle, it is invisible, and what is left
+  // is a lozenge with a bump on it.
+  //
+  // Measured as the furthest any fist gets from the pelvis→head axis at its most
+  // extended moment. The axis is x = 0 in stance space (the rig builds the body
+  // on a pelvis origin with +x facing), so this is simply how far forward or
+  // back the hand reaches.
+  // ── AND A SECOND RULE THAT WAS TRIED AND DELETED ────────────────────────
+  //
+  // The other half of what made those two poses unreadable is a SILHOUETTE
+  // rule the rig already states — `seated()`: *"a fist near the body buries the
+  // whole forearm inside the torso silhouette at this stroke weight and the
+  // figure loses an arm"* — and three attempts to measure it all failed, in a
+  // way worth writing down because the next person will try the same three.
+  //
+  //   · "a hand gets clear of the torso axis" — satisfied by the RESTING hand,
+  //     which `seated()` parks 16 units out on the knee. A gesture that folded
+  //     the other hand under the jaw passed.
+  //   · the same, aimed at the head instead — same defect, same reason: the
+  //     resting hand is 50 units from the head whatever the gesture does.
+  //   · the closest approach of the hand that actually GESTURES. This one
+  //     discriminated — and immediately flagged `lookout`, which raises a hand
+  //     to SHADE THE EYES. A hand at the head is the whole gesture there, and
+  //     it reads perfectly.
+  //
+  // A metric that disagrees with an example whose answer you already know is a
+  // broken metric, not a finding, so it is not here. The range-of-motion check
+  // above agreed with every known case — it passes walk, sip and lookout and
+  // failed read, thinker and stargazer — which is why that one stayed.
+  //
+  // What is left holding the silhouette rule is the contact sheet:
+  // `node scripts/sheet-launch.mjs <scene>` draws the figure at the size it
+  // actually ships at, which is the only instrument that ever saw the fault.
+
   ok(atWrap <= p95 * 3 + 6, `${act}: no jump across the wrap`,
     `wrap ${atWrap.toFixed(2)} vs p95 ${p95.toFixed(2)}`);
 }
