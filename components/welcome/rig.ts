@@ -53,7 +53,7 @@ export const SPEAK_T0 = T_MARCH + T_STOP + T_TURN;
 // traction for half a second, and then leaves at a speed the walk never had.
 export const T_BEAT = 0.42; // the line lands. he stands in it.
 export const T_WINDUP = 0.55; // legs spinning, going nowhere
-export const T_BOLT = 0.46; // and gone
+export const T_BOLT = 0.75; // and gone — see X_AWAY in hostFigure for why it grew
 
 // Beat times below are relative to SPEAK_T0 and shifted onto the absolute clock
 // when BEATS is built. `speak` is derived from the word count but CAPPED by the

@@ -908,7 +908,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **forty-four** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **forty-five** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -918,7 +918,7 @@ followed:
 `check-plainwords` · `check-streak` · `check-quips` ·
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
-`check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-react` · `check-smooth` · `check-turn` · `check-moves` · `check-life`. It exits 0 today, so anything any of them prints is yours. (Several
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-react` · `check-smooth` · `check-turn` · `check-moves` · `check-life`. It exits 0 today, so anything any of them prints is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
 figures and 6 hand-built ones, and `check-moves` 6 head-clearance defects. A budget
 line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 222 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
@@ -3202,6 +3202,69 @@ counter-tested from both sides.
 > plausible places to go looking.
 
 
+### And then it was clunky, and every word of that was measurable
+
+> *"it kinda seems a little clunky and not very smooth … especially at the very
+> end when the stick man kinda runs off. hit bronze off in a kinda weird way,
+> not in a very cool, funny animated way."*
+
+`hostAtRig` is a pure function of `t` built out of the lesson rig, so the whole
+performance can be stepped at 60fps in plain Node — no Metro, no browser, the
+same property that lets `check:smooth` replay 130 lessons. `npm run check:host`
+is that replay, and it found four things, none of them visible in the source.
+
+**HALF THE EXIT HAPPENED OFF SCREEN.** The stage is 400 wide and `X_AWAY` was
+560, so of the 244 units he travelled, **more than half were past the edge** —
+and the whole distance still had to fit in `T_BOLT`. That is what forced 530
+stage units a second against the march's 89: six times faster leaving than
+arriving, with the ankle moving 23 units between frames. Not a sprint, a smear.
+470 clears the stage by a figure-width and hands the time back to the part a
+reader can watch.
+
+**AND THE LAUNCH WAS A TELEPORT.** `x` advanced linearly from the frame the bolt
+began, so the body went from a dead stop to full speed in one frame — 19,096
+u/s². It accelerates now, on a curve whose first coefficient is *solved* rather
+than chosen: `f(u) = c·u + (1−c)·u²` with `c` set so `f′(0)` reproduces the
+wind-up's own cycle rate. The legs never change speed at the seam; the body
+gathers pace under them.
+
+**THE EXIT BROKE THE CONTRACT `strideStance` STATES ABOUT ITSELF** — *"the stride
+follows the body"*. It handed the stride `carried` (0.35→1) of a journey while
+putting the body at `tr` (0→1) of the same one: two different fractions, so a
+foot the pose called PLANTED slid **10.9 units in a frame**. The fix is to solve
+for the journey that makes them agree — `lerp(X_LAUNCH, X_AWAY, WIND_TR) ===
+X_MARK` — so the wind-up's 0.35 is spent exactly where he stands and the bolt's
+0.65 covers the real distance. Derived, so moving the mark cannot put it back.
+
+**AND HE STOPPED DEAD FOR 0.36s, WHICH IS THE ONE NOTHING ELSE COULD SEE.** `tr`
+is clamped, so through `T_STOP` `strideStance` returns one fixed arrival pose:
+**0.00 units of movement per frame for twenty-two frames**, sitting between the
+walk and the turn. Perfect stillness is not a discontinuity — it is the absence
+of one — so every instrument in the suite that hunts for jumps was blind to it by
+construction. `withSpeechLife`, the overlay the talking phase already uses, at a
+third strength.
+
+| | before | after |
+|---|---|---|
+| worst on-screen frame | 23.4u | 12.9u |
+| bolt peak speed | 530 u/s | 258 u/s |
+| launch acceleration | 19,096 u/s² | 3,752 u/s² |
+| planted-foot slide | 10.90u | 2.60u |
+| the settle | 0.00u — frozen | 0.44u |
+| of the bolt, on screen | 47% | 84% |
+
+Every figure is a high-water mark in `check:host`, counter-tested by putting each
+of the five defects back.
+
+> **AND `rig.ts` HAS A WHOLE DEAD GESTURE SYSTEM.** `handTargets`, `GP` and
+> `GESTURES` are a complete hand-target solver that nothing imports — left behind
+> when the host was rebuilt onto the lesson rig, which drives gestures by move
+> CODE through `hostFigure`'s own `GESTURE` map instead. A note added here a day
+> earlier reasoned about `GP.point`'s reach to explain why a gesture did not
+> read; that reasoning was about code the screen does not run. The gesture change
+> itself was real — `point` and `shrug` are move codes 183 and 178 — but check
+> which of two systems is live before explaining a render with one of them.
+
 ### And then the words themselves were the problem
 
 > *"the words were very AI sounding and not very good ... this is the first thing
@@ -3249,9 +3312,9 @@ instead of asking permission. "Ready to think differently?" is a slogan.
 > **THE GESTURE WAS PICKED OFF A RENDER, WHICH IS streakMood's RULE ARRIVING
 > HERE.** `point` was the obvious choice for "Everyone has opinions" — he points
 > at the reader, which is the joke — and shot at the beat's own peak it looked
-> like no gesture at all: `GP.point` puts the near hand at 0.58 of reach and
-> barely up, which on a nearly face-on figure is hard to tell from standing
-> still. `shrug` throws both hands wide and low, is symmetric, and survives being
+> like no gesture at all. (The first explanation written here blamed `GP.point`'s
+> reach; `GP` is dead code, see the section above. The move actually played is
+> library code 183.) `shrug` throws both hands wide and low, is symmetric, and survives being
 > drawn 100px tall. `emphasize` had been declared and never used for the life of
 > the file — the same defect `check:quips` holds over the herald's poses — and it
 > is the offering pose, so "Here." is the offer.

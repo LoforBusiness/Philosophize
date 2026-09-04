@@ -118,9 +118,23 @@ const stageToRig = (x: number) => {
 export const X_OFF = 520;
 /** The mark he talks from — the column the layout keeps clear for him. */
 export const X_MARK = CX;
-/** Off-stage right again. He leaves the way he came, because the other way is
- *  through the board. */
-export const X_AWAY = 560;
+/**
+ * Off-stage right again. He leaves the way he came, because the other way is
+ * through the board.
+ *
+ * 470, NOT 560, AND THE OLD NUMBER IS MOST OF WHY THE EXIT READ AS A BLUR.
+ * The stage is 400 wide. He is invisible somewhere past x 430, so of the 244
+ * units the old exit travelled, **more than half happened where nobody could see
+ * it** — and the whole distance still had to fit inside T_BOLT, which is what
+ * forced the speed to 530 stage units a second against the march's 89. Six times
+ * faster leaving than arriving, and the ankle moved 23 units between frames at
+ * 60fps: not a sprint, a smear.
+ *
+ * Clearing the stage is the entire requirement. 470 puts his pelvis 70 units past
+ * the edge, which is a whole figure-width of margin, and hands the time back to
+ * the part of the run a reader can actually watch.
+ */
+export const X_AWAY = 470;
 
 /**
  * THE GESTURE FOR EACH BEAT, as codes into the lesson move library.
@@ -247,6 +261,50 @@ const T_WIND_END = T_EXIT + T_BEAT + T_WINDUP;
  *  wind-up. The bolt picks the cycle up here, so the feet never restart. */
 const WIND_TR = 0.35;
 
+/**
+ * WHERE THE EXIT JOURNEY NOTIONALLY STARTS, and it is not where he is standing.
+ *
+ * `strideStance`'s own docstring states the contract in one line — *"the stride
+ * follows the body"* — and it is exact: over one stance the foot's local x
+ * travels −S while the body advances +S, so a planted foot holds still ONLY if
+ * the body is at `lerp(x0, x1, tr)` for the same `tr` the stride was handed.
+ *
+ * The bolt broke that. It passed `carried` (0.35 → 1) to a journey
+ * X_MARK → X_AWAY while putting the body at `lerp(X_MARK, X_AWAY, tr)` for a
+ * `tr` running 0 → 1 — two different fractions of the same journey. Measured at
+ * 60fps, a foot the pose called PLANTED slid **10.9 stage units in a single
+ * frame**, which is the skate the rig's docstring promises cannot happen.
+ *
+ * The fix is to pick the journey so that the two agree. Solving
+ * `lerp(X_LAUNCH, X_AWAY, WIND_TR) === X_MARK` for the start point means the
+ * wind-up's 0.35 is spent exactly where he is standing, and the bolt's remaining
+ * 0.65 covers the real distance to the wing. Derived rather than typed, so
+ * moving the mark or the exit cannot put the slide back.
+ */
+const X_LAUNCH = (X_MARK - WIND_TR * X_AWAY) / (1 - WIND_TR);
+
+/**
+ * THE LAUNCH CURVE, and its first coefficient is not a taste.
+ *
+ * The bolt used to advance `carried` linearly, so the legs left the wind-up at
+ * one rate and the body went from a dead stop to full speed between two frames:
+ * 19,096 stage units per second squared, which is a teleport with a run cycle
+ * playing over it.
+ *
+ * Easing both together keeps the contract above (they share one `carried`, so
+ * there is still no slide) and gives him a real acceleration — but an ease that
+ * starts at zero would STALL the legs at the handover, because the wind-up's
+ * cycle is already turning at `WIND_TR / T_WINDUP` journey-fractions a second.
+ *
+ * So the curve starts at exactly that rate and accelerates from there:
+ *
+ *     f(u) = c·u + (1 − c)·u²      f(0)=0, f(1)=1, f′(0)=c, f′ rising
+ *
+ * with `c` solved so `f′(0)` reproduces the wind-up's rate. The legs never
+ * change speed at the seam; the body gathers pace under them.
+ */
+const LAUNCH_C = ((WIND_TR / T_WINDUP) * T_BOLT) / (1 - WIND_TR);
+
 export function hostAtRig(t: number): HostFrame {
   'worklet';
   // ── 1 · the march on ──────────────────────────────────────────────────────
@@ -261,9 +319,25 @@ export function hostAtRig(t: number): HostFrame {
     // "the weight arrives" phase after the walk had stopped.
     const tr = ease01(clamp01(t / T_MARCH));
     const stood = emoteAny(0, t);
+    const walked = strideStance(stageToRig(X_OFF), stageToRig(X_MARK), stood, tr, WALK);
+    // ── AND THEN HE STOPPED DEAD, WHICH NOTHING ALIVE DOES ──────────────────
+    //
+    // `tr` is clamped, so for the whole of T_STOP it sits at 1 and
+    // `strideStance` returns one fixed arrival pose. Replayed at 60fps that is
+    // **0.00 units of movement per frame for twenty-two frames** — the only
+    // completely still stretch in the intro, landing between the walk and the
+    // turn, which is exactly where a reader reports it feeling stiff.
+    //
+    // The walk is a pure function of distance and the distance has run out, so
+    // there is nothing left in it to move him. The breath has to come from
+    // somewhere else: `withSpeechLife` is the overlay the talking phase already
+    // uses, at a third strength here because he is standing rather than
+    // speaking. It costs no new machinery and keeps him the same person.
+    if (t <= T_MARCH) return { stance: walked, x: lerp(X_OFF, X_MARK, tr), dir: -1, vis: 1 };
+    const settled = clamp01((t - T_MARCH) / T_STOP);
     return {
-      stance: strideStance(stageToRig(X_OFF), stageToRig(X_MARK), stood, tr, WALK),
-      x: lerp(X_OFF, X_MARK, tr),
+      stance: mixStance(walked, withSpeechLife(walked, t), 0.34 * ease01(settled)),
+      x: X_MARK,
       dir: -1,
       vis: 1,
     };
@@ -323,7 +397,7 @@ export function hostAtRig(t: number): HostFrame {
     // stride length, different bob, different arm swing. Handing over between
     // them moved a joint 50 units in one frame. Same journey, same habit, and the
     // handover is a continuation rather than a cut.
-    const spun = strideStance(stageToRig(X_MARK), stageToRig(X_AWAY), emoteAny(0, t), spin * WIND_TR, WALK);
+    const spun = strideStance(stageToRig(X_LAUNCH), stageToRig(X_AWAY), emoteAny(0, t), spin * WIND_TR, WALK);
     return {
       // And the cycle FADES IN over the first third of the wind-up rather than
       // switching on: `strideStance` at tr 0 is a loaded push-off pose, not a
@@ -343,10 +417,12 @@ export function hostAtRig(t: number): HostFrame {
   // ground a stride apart in a single frame, which is the departure skate
   // `strideStance`'s own `fromStand` note describes.
   const tr = clamp01((t - T_WIND_END) / T_BOLT);
-  const carried = WIND_TR + tr * (1 - WIND_TR);
+  // f(u) = c·u + (1 − c)·u² — see LAUNCH_C. One value drives BOTH the stride and
+  // the body, which is the whole of why the planted foot no longer slides.
+  const carried = WIND_TR + (1 - WIND_TR) * (LAUNCH_C * tr + (1 - LAUNCH_C) * tr * tr);
   return {
-    stance: strideStance(stageToRig(X_MARK), stageToRig(X_AWAY), emoteAny(0, t), carried, WALK),
-    x: lerp(X_MARK, X_AWAY, tr),
+    stance: strideStance(stageToRig(X_LAUNCH), stageToRig(X_AWAY), emoteAny(0, t), carried, WALK),
+    x: lerp(X_LAUNCH, X_AWAY, carried),
     dir: 1,
     vis: t >= T_GONE ? 0 : 1,
   };
