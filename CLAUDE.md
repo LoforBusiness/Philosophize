@@ -1628,6 +1628,50 @@ skins, and **group R of the rule book is how to tell which one a claim wants**:
 > are questions now, and `check:controls` measures the new controls' labels — it
 > found 41 of the author's own chips too long for their box on the first run.
 
+> **AND THEN THEY WERE "PRETTY BORING AND NOT VERY COOL. NOT VERY GAMIFIED",
+> WHICH THEY WERE.** Both controls shipped as bordered rectangles, on a screen
+> where the rank pins, the badges, the certificates, the streak calendar and the
+> profile's tiles are all STRUCK — lit from the top left, shaded corner, rim,
+> shadow. §19 records the quote plate as *"the one object in the app still drawn
+> as an outline while every button, card and rank pin sat on a lip"*. The answer
+> controls were the next ones.
+>
+> **A thing you press is a raised face; a thing you press it INTO is a recess.**
+> A poll row sinks and stops casting when you take it and the correct one gets a
+> gold rail; a sort chip lifts, grows and casts further while held, and its bins
+> are sockets whose floors run the same gradient BACKWARDS. That inversion is the
+> only thing that says cut-in rather than raised.
+>
+> **A WIDE SURFACE BARELY SHADES, AND §19 HAD ALREADY MEASURED THAT.** The first
+> pass ran `StruckTile`'s full ramp across a 350dp poll row and it came back as a
+> **tan stain down the right-hand half** — word for word what §19 says happened
+> to the profile's panels. A third of the fall-off, running mostly DOWN rather
+> than across, plus a lit top rim. The depth of a big flat thing is in its EDGES.
+>
+> And the first socket pass dimmed every un-hovered bin to 0.35, which made the
+> labels *harder* to read than before — the exact opposite of the other half of
+> the same request. **Emphasis goes on the live one; it is never taken from the
+> others.**
+
+> **AND A TAPPABLE THING NEEDS A MARK, NOT ANOTHER OUTLINE (R15).** The same
+> reader: *"it is difficult to know exactly which box or which thing to tap."*
+> `Target` had drawn a breathing 2px ink ring since the affordance was added, and
+> it still did not read — for a structural reason worth stating plainly: **a
+> cinematic scene IS ink outlines on paper**, so one more ink outline is
+> camouflage however slowly it breathes.
+>
+> Three things fix it and the middle one does most of the work: a soft HALO
+> outside the hard ring (a shape the art never makes), a **PIP** — one small
+> filled disc in the top-right of every live target, ringed in paper so it
+> survives landing on dark art — and an **opening sweep**, where every target
+> flares once in mount order. A sweep reads as "these are your choices"; the same
+> flare on all of them at once reads as a dropped frame.
+>
+> **Changing `Target` re-measures the corpus.** Its StyleSheet is in `muststamp`'s
+> SHARED list, so one style added here marked **148 lessons stale at once** — by
+> design, since this component decides how big a scene's art is. Budget the sweep
+> before starting.
+
 The distinctions are load-bearing rather than decorative. Three answers that are
 ORDERED lose the order the moment they become cards. "How the aura goes as the
 copies multiply" is a curve, and a rail cannot hold one. Presentism, the growing
@@ -2494,6 +2538,45 @@ Hard-won specifics:
 - Source images are only ~330–500px wide, so they upscale softly on a full-width
   card. Replacing them with higher-resolution files needs no code change — same
   filenames in `assets/images/branches/` and `assets/images/quickstart/`.
+
+### And the overscroll at the top, where the clipping never reached
+
+> *"when you're already at the top … when you try scroll up even more … it's
+> really lag[gy]. And if you scroll down, it's fine. For all the other tabs, it
+> is smooth when you do this."*
+
+**PROFILE IS A GENUINE OUTLIER, AND IT IS WORTH HAVING THE NUMBERS.** Measured in
+the real page at 390×844: 2770 units of content — 3.3 screens — against Home's
+1316 and Insights' 1399, and **716 nodes and 50 SVGs** against 164/8 and 208/2.
+Android 12+ does not scroll past the end, it applies a `StretchEffect`, which is
+a RenderEffect over the scrolling subtree; §17's rule 7 already records what a
+moving parent over SVG content costs here.
+
+**AND THE OPTIMISATION MEANT TO CONTAIN THAT HAS NEVER ONCE RUN.**
+`removeClippedSubviews` works per DIRECT CHILD, and this ScrollView has exactly
+**two**: the header, and one body View 2471 units tall. The body spans the
+viewport at every scroll position, so neither child is ever fully off screen —
+**at the top the pass could detach 0 of 716 nodes.** The comment claimed it
+"keeps the fling cheap on Android". It was never true of this content shape, and
+nothing had ever measured it.
+
+One level down is where it works: `styles.body` has **nineteen** children, and
+twelve of them — 1411 units, **525 of the page's 716 nodes and 44 of its 50
+SVGs** — start below the fold when the reader is at the top. React Native only
+recurses into nested clipping groups from a ScrollView that carries the flag
+itself, so the ScrollView keeps it as the ROOT of the pass and the body carries
+the one that can reach something.
+
+> **AND THE INSTRUMENT COULD NOT SETTLE THE MECHANISM, WHICH IS WORTH ADMITTING.**
+> A browser cannot reproduce Android's stretch, so the nearest proxy is animating
+> a transform on the scroll content and counting frame gaps. It gave Profile 33ms
+> a frame against 16.7 for the other two — and then, on a third run of the same
+> code, 16.7 for everything. **Two of three runs agreed and the third did not**,
+> which by this file's own standard (§19: "an instrument that cannot repeat itself
+> cannot judge a refactor") makes it evidence of a difference and not a
+> measurement of one. The structural finding above needed no such proxy: it is
+> counted, not timed. What is still unverified is whether detaching 73% of the
+> page at the top is enough on a real device, and that needs `adb`.
 
 ### On a page this long, a `setState` is not a small thing
 

@@ -386,10 +386,25 @@ export default function ProfileScreen() {
         // again at the moments the reader has definitely stopped moving.
         onScrollEndDrag={climb.check}
         onMomentumScrollEnd={climb.check}
-        // Fifty-one badges plus the ranks strip make this the longest fixed page in
-        // the app. It is not worth virtualising — the content is a handful of
-        // distinct sections rather than one repeating cell — but detaching the parts
-        // that are scrolled off keeps the fling cheap on Android.
+        // ── THIS IS THE CLIPPING ROOT, AND ON ITS OWN IT CLIPS NOTHING ────────
+        //
+        // Fifty-one badges plus the ranks strip make this the longest fixed page
+        // in the app — 2770 units against Home's 1316 — so detaching what is
+        // scrolled off is worth having. It has never happened.
+        //
+        // `removeClippedSubviews` works per DIRECT CHILD, and measured in the
+        // real page this ScrollView has exactly TWO: the header, and one body
+        // View 2471 units tall. The body spans the viewport at every scroll
+        // position, so neither child is ever fully off screen and the pass
+        // detaches nothing, ever — at the top it could reach 0 of 716 nodes. The
+        // note that used to sit here claimed it "keeps the fling cheap"; that
+        // was never true of this content shape, and nothing measured it.
+        //
+        // It stays because it is the ROOT of the clipping pass: React Native only
+        // recurses into nested clipping groups from a ScrollView that has the
+        // flag itself. The View that can actually use it is `styles.body` below,
+        // which has nineteen children — twelve of them, 525 of the page's 716
+        // nodes, start below the fold.
         removeClippedSubviews={Platform.OS === 'android'}
       >
         {/* The header wears the user's chosen artwork. Every colour in it comes
@@ -459,7 +474,12 @@ export default function ProfileScreen() {
         ), [insets.top, palette, displayName, nameFont, descriptor, joinedLabel, cur, profileQuote, openRanksBadges, openSavedQuotes, openPhilosopher])}
 
         {/* Body */}
-        <View style={styles.body}>
+        {/* THE CLIPPING ACTUALLY HAPPENS HERE — see the note on the ScrollView.
+            Nineteen children, twelve of them below the fold when the reader is at
+            the top, which is 525 of the page's 716 nodes and 44 of its 50 SVGs.
+            Layout-neutral by definition: the flag only detaches views that are
+            already outside the visible rect. */}
+        <View style={styles.body} removeClippedSubviews={Platform.OS === 'android'}>
           {/* THE CABINET, FIRST. The pin you hold and the three medals you chose
               to be seen holding — see components/profile/Showcase. It is above
               everything because it is the only part of this page that is a
